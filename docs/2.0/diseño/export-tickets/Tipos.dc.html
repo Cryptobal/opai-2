@@ -83,7 +83,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tipos de ticket" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TK-503-0A7E" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 <sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes configurar tickets" description="Solo owner y admin cambian los tipos de ticket. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes configurar tickets" description="Solo owner y admin cambian los tipos de ticket. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 </x-import>
 </x-import>
@@ -96,8 +96,8 @@ class Component extends DCLogic {
     this.state = {
       sel: null,
       types: [
-        { id: "man", name: "Mantención", owner: "Carlos Irigoyen", aprob: false, approver: "", sla: "24", creators: all },
-        { id: "ins", name: "Insumos", owner: "Carlos Irigoyen", aprob: false, approver: "", sla: "48", creators: ["sup", "adm"] },
+        { id: "man", name: "Mantención", owner: "Andrés Molina", aprob: false, approver: "", sla: "24", creators: all },
+        { id: "ins", name: "Insumos", owner: "Andrés Molina", aprob: false, approver: "", sla: "48", creators: ["sup", "adm"] },
         { id: "adm", name: "Administración", owner: "Paula Contreras", aprob: false, approver: "", sla: "", creators: ["adm"] },
         { id: "rrhh", name: "Consulta RR. HH.", owner: "Paula Contreras", aprob: false, approver: "", sla: "", creators: all },
         { id: "leg", name: "Asesoría legal", owner: "", aprob: false, approver: "", sla: "", creators: ["adm"] },
@@ -119,11 +119,11 @@ class Component extends DCLogic {
     const upd = (patch) => this.setState({ types: this.state.types.map((x) => (x.id === t.id ? { ...x, ...patch } : x)) });
     const ok = estado === "contenido";
     const blocked = !t.owner;
-    const people = ["Carlos Irigoyen", "Paula Contreras", "Jorge Muñoz", "Supervisor directo del solicitante"];
+    const people = ["Andrés Molina", "Paula Contreras", "Jorge Muñoz", "Supervisor directo del solicitante"];
     const CR = [["todos", "Todas las personas con cuenta", "Incluye trabajadores desde su portal."], ["sup", "Supervisores", "Desde el portal Supervisor."], ["adm", "Administración", "owner y admin."]];
     return {
       device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone,
-      user: estado === "sin_permiso" ? { name: "Paula Contreras", initials: "PC", role: "Jefa de operaciones" } : { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" },
+      user: estado === "sin_permiso" ? { name: "Paula Contreras", initials: "PC", role: "Jefa de operaciones" } : { name: "Andrés Molina", initials: "AM", role: "Administrador" },
       shellTitle: isPhone ? "" : "Configuración", shellSub: "Módulos › Tickets", activeNav: isPhone ? "mas" : "cfg",
       pageTitle: isPhone && ok ? t.name : "Tipos de ticket", headerSize: isPhone && ok ? "heading" : "title",
       showNewType: ok && !isPhone, listW: device === "tablet" ? "260px" : "320px",
@@ -131,7 +131,7 @@ class Component extends DCLogic {
       list: this.state.types.map((x) => ({ name: x.name, sub: x.aprob ? "Aprueba: " + (x.approver === "Supervisor directo del solicitante" ? "supervisor directo" : x.approver) : x.owner ? "Dueño: " + x.owner : "Sin dueño", meta: x.sla ? "SLA " + x.sla + " h" : "Sin SLA", selected: x.id === t.id, pick: () => this.setState({ sel: x.id }) })),
       t,
       setName: (v) => upd({ name: v }), setOwner: (v) => upd({ owner: v }), setAprob: (v) => upd({ aprob: v, approver: v ? t.approver || "Supervisor directo del solicitante" : "" }), setApprover: (v) => upd({ approver: v }),
-      ownerOptions: people, approverOptions: people.slice(1).concat(["Carlos Irigoyen"]).filter((v, i, a) => a.indexOf(v) === i),
+      ownerOptions: people, approverOptions: people.slice(1).concat(["Andrés Molina"]).filter((v, i, a) => a.indexOf(v) === i),
       ownerHint: blocked ? "" : "Recibe cada ticket nuevo de este tipo. Se puede cambiar en cada ticket con motivo.",
       ownerError: blocked ? "Sin dueño no se puede guardar. Elige quién recibe estos tickets." : "",
       slaOptions: [{ value: "off", label: "Apagado" }, { value: "on", label: "Con plazo" }],

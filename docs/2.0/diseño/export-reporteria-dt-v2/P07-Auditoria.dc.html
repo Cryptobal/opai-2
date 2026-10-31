@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" overlay="{{ dialog }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia" title="Auditoría de accesos del fiscalizador" subtitle="Cada ingreso al portal de fiscalización queda registrado y no se puede borrar." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Exportar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="200px,40px">Generar clave temporal</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" style="margin-bottom:16px" hint-size="100%,44px"></x-import>
+<div class="chip-row" style="margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Período" valor="Últimos 90 días" on-quitar="{{ noop }}" hint-size="190px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px">Funcionario o RUT</x-import>
+</div>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:52px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="18%" hint-size="18%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="24%" hint-size="24%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="14%" hint-size="14%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="12%" hint-size="12%,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="eye" title="Ningún fiscalizador ha ingresado en este período" description="Cuando un funcionario @dt.gob.cl consulte tu empresa, lo verás aquí." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la auditoría" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-AUD-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a la auditoría" description="La ven el dueño, administración y el rol Inspector DT. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" hint-size="100%,400px"></x-import>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;claves&quot;,&quot;dialog&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isDatos: false };
+    const b = A.base(this.props, "aud", "Auditoría fiscalizador");
+    const h = A.h;
+    const NS = A.NS();
+    const cl = b.v_claves || b.v_dialog && false;
+    const rowsA = [
+      { id: 1, f: "30-10-2026 14:32:08", mail: "mlopez@dt.gob.cl", rut: "76.111.222-3", ip: "200.6.115.42", vio: "Reporte de asistencia · Camila Herrera Soto · todo el historial", via: "Correo" },
+      { id: 2, f: "30-10-2026 14:29:51", mail: "mlopez@dt.gob.cl", rut: "76.111.222-3", ip: "200.6.115.42", vio: "Ingreso al portal · búsqueda por RUT", via: "Correo" },
+      { id: 3, f: "18-09-2026 10:04:17", mail: "rcontreras@dt.gob.cl", rut: "76.111.222-3", ip: "190.98.214.7", vio: "Jornada diaria · Planta Quilicura · 08-2026", via: "Clave temporal" },
+      { id: 4, f: "18-09-2026 10:02:40", mail: "rcontreras@dt.gob.cl", rut: "76.111.222-3", ip: "190.98.214.7", vio: "Ingreso con clave temporal", via: "Clave temporal" },
+      { id: 5, f: "02-08-2026 16:45:03", mail: "pvaldes@dt.gob.cl", rut: "76.111.222-3", ip: "200.6.115.40", vio: "Incidentes técnicos · 07-2026", via: "Correo" },
+    ];
+    const rowsC = [
+      { id: 1, mail: "mlopez@dt.gob.cl", gen: "28-10-2026 09:10 · Marcela Rojas", vig: "Hasta 02-11-2026 09:10", usos: "2 usos", est: ["success", "Vigente"] },
+      { id: 2, mail: "rcontreras@dt.gob.cl", gen: "15-09-2026 12:00 · Marcela Rojas", vig: "Venció 20-09-2026 12:00", usos: "2 usos", est: ["neutral", "Vencida"] },
+      { id: 3, mail: "jsoto@dt.gob.cl", gen: "01-09-2026 08:30 · Marcela Rojas", vig: "Revocada 02-09-2026 10:00", usos: "Sin usos", est: ["danger", "Revocada"] },
+    ];
+    const rows = cl ? rowsC : rowsA;
+    const cols = cl ? [
+      { key: "mail", label: "Funcionario", strong: true },
+      { key: "gen", label: "Generada por", muted: true },
+      { key: "vig", label: "Vigencia", render: (r) => h("span", { className: "t-numeric" }, r.vig) },
+      { key: "usos", label: "Usos", muted: true },
+      { key: "est", label: "Estado", render: (r) => A.badge(r.est[0], r.est[1]) },
+      { key: "acc", label: "", align: "right", render: (r) => r.est[1] === "Vigente" ? A.btn("Revocar", { variant: "ghost" }) : null },
+    ] : [
+      { key: "f", label: "Fecha y hora", render: (r) => h("span", { className: "t-numeric", style: { whiteSpace: "nowrap" } }, r.f) },
+      { key: "mail", label: "Funcionario", strong: true },
+      { key: "via", label: "Ingreso", muted: true },
+      { key: "rut", label: "RUT consultado", mono: true, muted: true },
+      { key: "ip", label: "IP de origen", mono: true, muted: true },
+      { key: "vio", label: "Qué vio", muted: true },
+    ];
+    let dialog = null;
+    if (b.v_dialog && NS.Dialog) {
+      const B = NS.Button, sz = b.isPhone ? "lg" : "md";
+      dialog = h(NS.Dialog, { contained: true, title: "Generar clave temporal", description: "La clave se muestra una sola vez y se envía al correo del funcionario.", onClose: () => {},
+        actions: b.isPhone ? [h(B, { key: 2, size: sz }, "Generar clave"), h(B, { key: 1, variant: "secondary", size: sz }, "Cancelar")] : [h(B, { key: 1, variant: "secondary" }, "Cancelar"), h(B, { key: 2 }, "Generar clave")] },
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 16 } },
+          h(NS.Input, { label: "Correo @dt.gob.cl del funcionario", type: "email", value: "mlopez@dt.gob.cl" }),
+          h(NS.Select, { label: "Vigencia (definida por la empresa)", value: "5", options: [{ value: "1", label: "1 día" }, { value: "5", label: "5 días" }, { value: "15", label: "15 días" }] }),
+          h(NS.Alerta, { tono: "info", titulo: "Cada uso queda en la auditoría" }, "Puedes revocarla desde la lista de claves.")));
+    }
+    return {
+      ...b, rows, cols, dialog,
+      tab: cl ? "cla" : "acc",
+      tabItems: [{ id: "acc", label: "Accesos registrados" }, { id: "cla", label: "Claves temporales", count: 1 }],
+      toCard: (r) => cl ? ({ icon: "user", title: r.mail, subtitle: r.vig, meta: r.gen + " · " + r.usos, badge: { tone: r.est[0], label: r.est[1] } }) : ({ title: r.mail, subtitle: r.vio, meta: r.f + " · " + r.ip + " · " + r.via }),
+      emptyAction: A.btn("Cambiar período", { size: "lg" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
