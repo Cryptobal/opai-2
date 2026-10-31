@@ -98,6 +98,14 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
   "rondas:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
   "personas:read": { owner: true, admin: true, gerente: true, supervisor: true, viewer: true },
   "personas:write": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
+  // Marca P1 "No recontratar" (Personas y Cargos PR 1): solo owner y admin por defecto.
+  "core:personas.no_recontratar.manage": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
   "finanzas:read": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   "finanzas:dte.emit": {
     owner: true,
@@ -160,6 +168,10 @@ describe("comodines", () => {
     expect(coincide("*:read", "comercial:negocio.read")).toBe(false);
     expect(coincide("*:*.read", "comercial:negocio.read")).toBe(true);
     expect(coincide("core:tenant.read", "core:tenantxread")).toBe(false);
+  });
+
+  it("un rol personalizado con core:* hereda la marca P1 sin listarla aparte (no bloqueante del Revisor)", () => {
+    expect(coincide("core:*", "core:personas.no_recontratar.manage")).toBe(true);
   });
 });
 
