@@ -33,7 +33,7 @@ Las instalaciones del tenant, más «Administración / Oficina central».
 
 ## Pendientes menores para la próxima vuelta
 
-- Quitar «Carlos Irigoyen» de los datos de ejemplo (textos de sin-permiso, la alerta de correo y el correo de ejemplo en 10) y del bundle `_ds`.
+- (resuelto 30-oct-2026) Se reemplazó el nombre real de los datos de ejemplo (textos de sin-permiso, la alerta de correo y el correo de ejemplo en 10) y del bundle `_ds` por uno ficticio.
 - Reemplazar los hex sueltos (`#4a3fd8`) por tokens del DS.
 - Rotular el Índice como v2.
 - En iPad, quitar la pestaña «Ajustes» de las tabs.

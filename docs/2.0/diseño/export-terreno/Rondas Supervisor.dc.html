@@ -207,7 +207,7 @@ class Component extends DCLogic{
     const noun={s8:'las rondas',s9:'la ronda',s10:'la anomalía',s11:'el punto'}[scr];
     const msgs={vacio:{t:scr==='s8'?'Sin rondas con alerta':'Aún no hay marcas',d:scr==='s8'?'Ninguna ronda de tus instalaciones tiene anomalías abiertas ni atrasos.':'La ronda no ha registrado puntos todavía.',a:'Ver todas',aic:'route',ic:'inbox'},
       error:{t:'No pudimos cargar '+noun,d:'Revisa tu conexión. Si el problema sigue, avísale a soporte con el código RND-503.',a:'Reintentar',aic:'refresh',ic:'alert'},
-      permisos:{t:'No tienes acceso a estas rondas',d:'Solo ves rondas de tus instalaciones asignadas. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.',a:'Pedir acceso',aic:'lock',ic:'lock'}};
+      permisos:{t:'No tienes acceso a estas rondas',d:'Solo ves rondas de tus instalaciones asignadas. Pídele acceso a un administrador de Atlas Seguridad SpA.',a:'Pedir acceso',aic:'lock',ic:'lock'}};
     const sel=(r)=>Object.assign(r,{bg:r.sel?'var(--ds-accent-muted)':'transparent',ad:r.an?'inline-flex':'none'});
     const conclSel=p.conclusion??'Justificada';
     return {theme:p.theme??'light',device:dev,label:'Supervisor · '+scr,isTab,isPhone,nonOk:!ok,isLoad:st==='cargando',isMsg:!ok&&st!=='cargando',msg:msgs[st]||msgs.error,S,

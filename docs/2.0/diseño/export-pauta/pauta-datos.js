@@ -48,10 +48,10 @@ const badge=k=>k.st==='OK'?['badge b-success','Cubierto']:k.st==='X'?['badge b-d
 const ini=n=>n?n.split(' ').slice(0,2).map(x=>x[0]).join(''):'—';
 const pct=x=>(x*100).toFixed(1).replace('.',',')+' %';
 const ASIS={q3:{m:'08:14',at:14},l3:{m:'07:52'}};
-const MK0={l1:{e:{h:'08:02',by:'Marcos Leiva',mot:'El guardia no tiene celular'}},t1:{e:{h:'08:24',by:'Carlos Irigoyen',mot:'Falla del equipo'}}};
+const MK0={l1:{e:{h:'08:02',by:'Marcos Leiva',mot:'El guardia no tiene celular'}},t1:{e:{h:'08:24',by:'Andrés Molina',mot:'Falla del equipo'}}};
 const REFS0=[{id:'r1',inst:'q',fn:'Control de acceso evento',d:31,h:'20:00–02:00',n:2,cubre:['Cristián Bravo Leiva',''],mot:'Pedido del cliente',sol:'SOL-0142'},{id:'r2',inst:'l',fn:'Refuerzo de ronda',d:30,h:'18:00–23:00',n:1,cubre:['Andrea Fuentes Vidal'],mot:'Contingencia',sol:''}];
-const CONF0={q3:'08:20 · Marcos Leiva',l3:'08:05 · Marcos Leiva',t1:'08:40 · Carlos Irigoyen'};
-const USERS={owner:{n:'Carlos Irigoyen',r:'Dueño',ini:'CI'},admin:{n:'Carlos Irigoyen',r:'Administrador',ini:'CI'},gerente:{n:'Paula Sepúlveda',r:'Gerente de operaciones',ini:'PS'},supervisor:{n:'Marcos Leiva',r:'Supervisor',ini:'ML'},viewer:{n:'Daniela Paz',r:'Solo lectura',ini:'DP'}};
+const CONF0={q3:'08:20 · Marcos Leiva',l3:'08:05 · Marcos Leiva',t1:'08:40 · Andrés Molina'};
+const USERS={owner:{n:'Andrés Molina',r:'Dueño',ini:'AM'},admin:{n:'Andrés Molina',r:'Administrador',ini:'AM'},gerente:{n:'Paula Sepúlveda',r:'Gerente de operaciones',ini:'PS'},supervisor:{n:'Marcos Leiva',r:'Supervisor',ini:'ML'},viewer:{n:'Daniela Paz',r:'Solo lectura',ini:'DP'}};
 const CANDS=[
  {id:'c1',n:'Cristián Bravo Leiva',rut:'17.902.334-6',why:['Libre hoy','A 3 km','Conoce la instalación']},
  {id:'c2',n:'Jorge Díaz Ortiz',rut:'16.554.210-3',why:['Libre hoy','A 6 km','Conoce la instalación'],warn:'horas'},
@@ -65,7 +65,7 @@ const HIST=[
  {dot:'tl-dot person',ini:'ML',t:'Marcos Leiva cargó un reemplazo',d:'Pedro Rojas Díaz cubre Portería principal · Noche el 29-10-2026. Quedó como turno extra por aprobar.',when:'29-10-2026 17:42'},
  {dot:'tl-dot person',ini:'ML',t:'Marcos Leiva registró una licencia médica',d:'Luis Muñoz Vera, del 26-10-2026 al 31-10-2026. Sus turnos quedaron como PPC con motivo «Licencia médica».',when:'26-10-2026 09:15'},
  {dot:'tl-dot agent',ini:'OP',t:'Sala de monitoreo quedó sin titular',d:'Andrés Soto Pinto dejó el puesto. Desde el 20-10-2026 los turnos son PPC con motivo «Sin titular».',when:'20-10-2026 08:00'},
- {dot:'tl-dot person',ini:'CI',t:'Carlos Irigoyen cambió la serie de Control de camiones',d:'De 4x4 a 5x2 desde el 05-10-2026. Los días anteriores no cambiaron.',when:'02-10-2026 11:30'},
+ {dot:'tl-dot person',ini:'AM',t:'Andrés Molina cambió la serie de Control de camiones',d:'De 4x4 a 5x2 desde el 05-10-2026. Los días anteriores no cambiaron.',when:'02-10-2026 11:30'},
  {dot:'tl-dot agent',ini:'OP',t:'La pauta de octubre se replicó sola',d:'8 puestos, según el ciclo de cada serie.',when:'01-10-2026 00:00'}];
 window.PD={MK0,REFS0,DOW,DOWL,DL,FER,HOY,AHORA,pad,dow,fch,fl,DAYS,PATS,PAT_HINT,INST,PU,ALL,instOf,puesto,works,base,cell,titOf,code,badge,ini,pct,ASIS,CONF0,USERS,CANDS,NODISP,HIST};
 })();
