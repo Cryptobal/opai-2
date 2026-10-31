@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia · Res. Ex. N.º 38 DT" title="Checklist de certificación" subtitle="Sin certificar · requiere tercero certificador y luego autorización de la DT." badge="{{ statusBadge }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="170px,40px">Exportar checklist</x-import>
+</x-import>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 56 }}" radius="10px" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 22 }}" hint-size="40%,22px"></x-import>
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:56px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40px" hint-size="40px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" hint-size="40%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="{{ 22 }}" radius="999px" hint-size="90px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clipboard" title="No hay requisitos con este filtro" description="Ningún requisito está en «No cumple». Quita el filtro para ver los 33." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el checklist" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-CER-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo el dueño ve el checklist de certificación" description="Contiene brechas técnicas del sistema. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Texto legal por verificar" hint-size="100%,56px">Los requisitos son un resumen de trabajo, no la redacción oficial.</x-import>
+<x-import component-from-global-scope="ADT.Titular" hint-size="100%,120px"></x-import>
+</div>
+<x-import component-from-global-scope="ADT.SyncHora" hint-size="100%,260px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ filtros }}" value="{{ filtro }}" on-change="{{ setFiltro }}" label="Filtrar por estado" hint-size="340px,40px"></x-import>
+<span class="t-body-sm muted t-numeric">{{ resumen }}</span>
+</div>
+<sc-for list="{{ grupos }}" as="g" hint-placeholder-count="7">
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">{{ g.tema }} <span class="t-caption muted">{{ g.count }}</span></h2>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ g.rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,200px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ g.rows }}" hint-size="100%,200px"></x-import>
+</sc-if>
+</section>
+</sc-for>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { filtro: "todos" };
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isDatos: false };
+    const b = A.base(this.props, "cer", "Certificación");
+    const h = A.h;
+    const T = { c: ["success", "Cumple"], p: ["warning", "Parcial"], n: ["danger", "No cumple"] };
+    const R = (n, req, est, ev, scr) => ({ id: n, n, req, est, ev, scr });
+    const G = [
+      ["Registro de la marca", [R("R-01", "Marca de entrada y salida con fecha y hora del servidor", "c", "Sello de servidor en cada marca", "03 Verificar por hash"), R("R-02", "Comprobante de marca enviado al trabajador", "c", "Correo con hash y QR", "03 Verificar por hash"), R("R-03", "Lugar y método de cada marca", "c", "GPS como evidencia, método registrado", "02 Reporte de asistencia"), R("R-04", "Identificación del trabajador con prueba de vida", "n", "Pendiente en Terreno", "—"), R("R-05", "Bloqueo tras intentos fallidos", "n", "Pendiente en Terreno", "—"), R("R-06", "Marca de contingencia con autor y motivo", "c", "Carga manual con evidencia", "05 Contingencia e incidentes")]],
+      ["Inalterabilidad y respaldos", [R("R-07", "Registros que no se editan ni borran", "p", "Bitácora encadenada en diseño", "09 Respaldos y retención"), R("R-08", "Corrección como hecho nuevo con el original visible", "c", "Corrección con 48 h de oposición", "04 Correcciones y oposición"), R("R-09", "Hash de cada marca y de sus correcciones", "p", "Marcas con SHA-256", "03 Verificar por hash"), R("R-10", "Verificación periódica de la cadena", "c", "Diaria a las 03:00", "09 Respaldos y retención"), R("R-11", "Retención de 5 años y respaldos con manifiesto", "p", "Respaldo semanal", "09 Respaldos y retención")]],
+      ["Trabajador", [R("R-12", "Acceso del trabajador a sus registros", "c", "Portal Trabajador · Mis registros", "04 Correcciones y oposición"), R("R-13", "Aceptar u objetar una corrección en 48 h", "c", "Vista del trabajador", "04 Correcciones y oposición"), R("R-14", "Descarga de su reporte", "c", "PDF, Excel y Word", "02 Reporte de asistencia"), R("R-15", "Aviso por correo de cada corrección", "p", "Aviso al portal; correo en pruebas", "04 Correcciones y oposición")]],
+      ["Empleador y mandante", [R("R-16", "Reportes del empleador por instalación", "c", "Reportes DT", "01 Reportes DT"), R("R-17", "Acceso de solo lectura del mandante", "c", "Ver y descargar", "08 Accesos de mandante y EST"), R("R-18", "Acceso de la EST limitado a lo suyo", "c", "Mismo patrón del mandante", "08 Accesos de mandante y EST"), R("R-19", "Historial de accesos otorgados y revocados", "c", "Historial por acceso", "08 Accesos de mandante y EST"), R("R-20", "Listado de clientes del prestador (Art. 26)", "p", "Reporte generado, sin cruce con contratos", "01 Reportes DT")]],
+      ["Fiscalización", [R("R-21", "Portal propio para el fiscalizador, solo lectura", "c", "Ruta propia", "06 Portal de fiscalización"), R("R-22", "Ingreso con correo @dt.gob.cl o clave temporal", "c", "Dos formas de ingreso", "06 Portal de fiscalización"), R("R-23", "Consulta sin restricción de rango de fechas", "c", "Todo el historial", "06 Portal de fiscalización"), R("R-24", "Auditoría de cada acceso con IP de origen", "c", "Fecha, correo, RUT e IP", "07 Auditoría fiscalizador"), R("R-25", "Generar y revocar claves temporales", "c", "Con historial de uso", "07 Auditoría fiscalizador")]],
+      ["Reportes", [R("R-26", "Cabecera con razón social, RUT y lugar", "c", "Cabecera oficial", "02 Reporte de asistencia"), R("R-27", "Siglas oficiales con su glosa", "c", "Leyenda y tooltip", "02 Reporte de asistencia"), R("R-28", "Reporte de jornada y de horas extraordinarias", "c", "Jornada diaria", "01 Reportes DT"), R("R-29", "Domingos, festivos y turnos modificados", "p", "Falta cruce con feriados", "01 Reportes DT"), R("R-30", "Verificación de marca por hash", "c", "Pública y en el ERP", "03 Verificar por hash")]],
+      ["Hora y disponibilidad", [R("R-31", "Hora oficial de Chile (SHOA)", "c", "Comparación cada hora", "09 Respaldos y retención"), R("R-32", "Registro de incidentes técnicos con inicio y fin", "c", "Con severidad", "05 Contingencia e incidentes"), R("R-33", "Marcación sin conexión en el dispositivo", "n", "Pendiente en Terreno", "05 Contingencia e incidentes")]],
+    ];
+    const f = this.state.filtro;
+    const grupos = G.map((g, i) => { const rows = g[1].filter((r) => f === "todos" || r.est === f); return { key: i, tema: g[0], count: rows.length, rows }; }).filter((g) => g.rows.length);
+    const all = G.flatMap((g) => g[1]);
+    const cnt = (k) => all.filter((r) => r.est === k).length;
+    return {
+      ...b, grupos,
+      resumen: all.length + " requisitos · " + cnt("c") + " cumple · " + cnt("p") + " parcial · " + cnt("n") + " no cumple",
+      statusBadge: A.badge("warning", "Sin certificar"),
+      filtros: [{ value: "todos", label: "Todos" }, { value: "c", label: "Cumple" }, { value: "p", label: "Parcial" }, { value: "n", label: "No cumple" }],
+      filtro: f, setFiltro: (v) => this.setState({ filtro: v }),
+      cols: [
+        { key: "n", label: "N.º", mono: true, muted: true, width: 64 },
+        { key: "req", label: "Requisito", strong: true },
+        { key: "est", label: "Estado", render: (r) => A.badge(T[r.est][0], T[r.est][1]) },
+        { key: "ev", label: "Evidencia", muted: true },
+        { key: "scr", label: "Pantalla", render: (r) => r.scr === "—" ? h("span", { className: "muted" }, "—") : h("a", { href: r.scr.replace(/ Auditoría/, " Auditoria").replace("Correcciones y oposición", "Correcciones y oposicion").replace("Contingencia e incidentes", "Contingencia e incidentes").replace("Portal de fiscalización", "Portal de fiscalizacion").replace("Respaldos y retención", "Respaldos y retencion").replace("Checklist de certificación", "Checklist certificacion").replace("Auditoría fiscalizador", "Auditoria fiscalizador") + ".dc.html" }, r.scr) },
+      ],
+      toCard: (r) => ({ title: r.req, subtitle: r.ev + " · " + r.scr, meta: r.n, badge: { tone: T[r.est][0], label: T[r.est][1] } }),
+      emptyAction: A.btn("Quitar filtro", { size: "lg" }),
+    };
+  }
+}
+</script>
+</body>
+</html>

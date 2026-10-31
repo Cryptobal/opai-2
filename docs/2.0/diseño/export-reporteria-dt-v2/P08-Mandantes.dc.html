@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}.screen .sheet{max-height:90%}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" overlay="{{ sheet }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia" title="Accesos de mandante y EST" subtitle="Acceso voluntario de tus clientes y de las empresas de servicios transitorios. Solo pueden ver y descargar lo que les corresponde." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="130px,40px">Dar acceso</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" style="margin-bottom:16px" hint-size="100%,44px"></x-import>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:56px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="28%" hint-size="28%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" hint-size="30%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80px" height="{{ 22 }}" radius="999px" hint-size="80px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="briefcase" title="Ningún mandante tiene acceso" description="Es voluntario. Si un cliente lo pide, dale acceso a sus instalaciones para ver y descargar los registros." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los accesos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-MAN-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes administrar accesos de mandante" description="Lo hacen el dueño, administración y RRHH. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;align-items:start">
+<div style="min-width:0">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,300px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" hint-size="100%,300px"></x-import>
+</sc-if>
+</div>
+<section style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span class="t-subheading">Historial</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ hist }}" hint-size="100%,300px"></x-import>
+</section>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;est&quot;,&quot;sheet&quot;,&quot;detalle&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isDatos: false };
+    const b = A.base(this.props, "man", "Accesos de mandante y EST");
+    const h = A.h, NS = A.NS();
+    const est = !!b.v_est;
+    const rows = est ? [
+      { id: 1, nom: "Trabajo Temporal Andes EST SpA", rut: "76.555.666-7", inst: "Bodega Lampa · 6 trabajadores", por: "Marcela Rojas · 12-10-2026", est: ["success", "Activo"] },
+    ] : [
+      { id: 1, nom: "Inmobiliaria Apoquindo S.A.", rut: "76.222.333-4", inst: "Torre Apoquindo", por: "Marcela Rojas · 03-09-2026", est: ["success", "Activo"] },
+      { id: 2, nom: "Alimentos del Norte Ltda.", rut: "78.455.900-6", inst: "Planta Quilicura", por: "Marcela Rojas · 15-07-2026", est: ["success", "Activo"] },
+      { id: 3, nom: "Logística Lampa SpA", rut: "76.990.112-4", inst: "Bodega Lampa", por: "Revocado por Marcela Rojas · 30-09-2026", est: ["neutral", "Revocado"] },
+    ];
+    let sheet = null;
+    if (b.v_detalle && NS.Sheet) {
+      const sz = b.isPhone ? "lg" : "md";
+      sheet = h(NS.Sheet, { contained: true, side: b.isPhone ? "bottom" : "right", title: "Inmobiliaria Apoquindo S.A.", description: "76.222.333-4 · Activo", onClose: () => {}, actions: [h(NS.Button, { key: 1, variant: "secondary", size: sz }, "Revocar acceso")] },
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 16 } },
+          h(NS.DetailSection, { title: "Acceso", rows: [{ label: "Permiso", value: "Ver y descargar" }, { label: "Instalaciones", value: "Torre Apoquindo" }, { label: "Correo de acceso", value: "control.contratistas@apoquindo.cl" }, { label: "Otorgado", value: "03-09-2026 por Marcela Rojas", numeric: true }] }),
+          h(NS.Timeline, { items: [{ who: "Marcela Rojas", initials: "MR", action: "dio acceso a Inmobiliaria Apoquindo S.A.", when: "03-09-2026 11:47" }, { who: "control.contratistas@apoquindo.cl", initials: "IA", action: "descargó «Asistencia · 08-2026»", when: "05-09-2026 09:12" }] })));
+    }
+    if (b.v_sheet && NS.Sheet) {
+      const B = NS.Button, sz = b.isPhone ? "lg" : "md";
+      sheet = h(NS.Sheet, { contained: true, side: b.isPhone ? "bottom" : "right", title: "Dar acceso a un mandante", onClose: () => {},
+        actions: [h(B, { key: 1, variant: "secondary", size: sz }, "Cancelar"), h(B, { key: 2, size: sz }, "Dar acceso")] },
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 16 } },
+          h(NS.Select, { label: "Mandante", value: "ia", options: [{ value: "ia", label: "Inmobiliaria Apoquindo S.A. · 96.812.330-1" }] }),
+          h(NS.Campo, { etiqueta: "Instalaciones" }, h("div", { style: { display: "flex", flexDirection: "column" } },
+            h(NS.Checkbox, { label: "Torre Apoquindo", checked: true }), h(NS.Checkbox, { label: "Planta Quilicura", checked: false }), h(NS.Checkbox, { label: "Bodega Lampa", checked: false }))),
+          h(NS.Input, { label: "Correo de quien accede", value: "control.contratistas@apoquindo.cl" }),
+          h(NS.Alerta, { tono: "info", titulo: "Solo ver y descargar" }, "El mandante verá los registros de asistencia de sus instalaciones. No puede corregir ni exportar otros datos. Puedes revocarlo cuando quieras.")));
+    }
+    return {
+      ...b, rows, sheet,
+      gridCols: b.isPhone ? "minmax(0,1fr)" : b.isTablet ? "minmax(0,1fr)" : "minmax(0,1fr) 340px",
+      tab: est ? "est" : "man",
+      tabItems: [{ id: "man", label: "Mandantes", count: 2 }, { id: "est", label: "Empresas de servicios transitorios (EST)", count: 1 }],
+      cols: [
+        { key: "nom", label: est ? "EST" : "Mandante", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.nom), h("span", { className: "t-mono t-caption subtle" }, r.rut)) },
+        { key: "inst", label: est ? "Instalaciones y trabajadores" : "Instalaciones" },
+        { key: "perm", label: "Permiso", render: () => h("span", { className: "muted" }, "Ver y descargar") },
+        { key: "por", label: "Otorgado", muted: true },
+        { key: "est", label: "Estado", render: (r) => A.badge(r.est[0], r.est[1]) },
+        { key: "acc", label: "", align: "right", render: (r) => r.est[1] === "Activo" ? A.btn("Revocar", { variant: "ghost" }) : null },
+      ],
+      toCard: (r) => ({ icon: "briefcase", title: r.nom, subtitle: r.inst + " · Ver y descargar", meta: r.rut, badge: { tone: r.est[0], label: r.est[1] } }),
+      hist: [
+        { who: "Marcela Rojas", initials: "CI", action: "revocó el acceso de Logística Lampa SpA", when: "30-09-2026 17:20" },
+        { who: "control.contratistas@apoquindo.cl", initials: "IA", action: "descargó «Asistencia · 08-2026»", when: "05-09-2026 09:12" },
+        { who: "Marcela Rojas", initials: "CI", action: "dio acceso a Inmobiliaria Apoquindo S.A.", changes: [{ field: "Instalaciones", from: "—", to: "Torre Apoquindo" }], when: "03-09-2026 11:47" },
+      ],
+      emptyAction: A.prim("Dar acceso", { size: "lg", icon: "plus" }),
+    };
+  }
+}
+</script>
+</body>
+</html>

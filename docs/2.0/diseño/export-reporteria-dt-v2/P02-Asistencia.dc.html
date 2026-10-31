@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Reportes DT" title="Reporte de asistencia" subtitle="Camila Herrera Soto · 01-10-2026 – 31-10-2026" hint-size="100%,80px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ formatos }}" value="{{ formato }}" on-change="{{ setFormato }}" label="Formato" hint-size="200px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="120px,40px">Exportar</x-import>
+</sc-if>
+</x-import>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 120 }}" radius="10px" hint-size="100%,120px"></x-import>
+<div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:48px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="22%" hint-size="22%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="14%" hint-size="14%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="14%" hint-size="14%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="10%" hint-size="10%,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clock" title="Camila no tiene marcas en este período" description="Puede estar con licencia, vacaciones o sin turnos asignados. Cambia el período para ver otro mes." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el reporte" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-AST-504 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver los registros de esta persona" description="Los supervisores ven solo a las personas de sus instalaciones. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="ADT.CabeceraOficial" cols="{{ cabCols }}" periodo="01-10-2026 – 31-10-2026" hint-size="100%,130px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="1 corrección pendiente de aceptación" hint-size="100%,56px">Mientras el trabajador no responda, este reporte usa el valor original del 14/10/26 (08:14:00). Vence el 16-10-2026 a las 10:22.</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,600px"></x-import>
+</div>
+<div class="pg-kv"><span class="l">Total del período</span><span class="v t-numeric">198:40 h · H.E. 2:12</span></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" footer="{{ footer }}" hint-size="100%,560px"></x-import>
+</sc-if>
+<x-import component-from-global-scope="ADT.LeyendaSiglas" solo="{{ siglasUsadas }}" hint-size="100%,40px"></x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px;padding-top:8px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ formatos }}" value="{{ formato }}" on-change="{{ setFormato }}" label="Formato" style="width:100%" hint-size="100%,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" size="lg" block="{{ true }}" hint-size="100%,48px">Exportar reporte</x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { formato: "pdf" };
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isDatos: false };
+    const b = A.base(this.props, "rep", "Reportes DT");
+    const h = A.h;
+    const R = (id, dia, fecha, turno, ent, sal, col, hrs, he, sig, extra) => ({ id, dia, fecha, turno, ent, sal, col, hrs, he, sig, ...(extra || {}) });
+    const rows = [
+      R(1, "Mié", "01-10-2026", "D 08:00–20:00", "07:58", "20:02", "60 min", "11:04", "0:04", "J.O."),
+      R(2, "Jue", "02-10-2026", "D 08:00–20:00", "07:55", "20:00", "60 min", "11:05", "0:05", "J.O."),
+      R(3, "Vie", "03-10-2026", "D 08:00–20:00", "—", "—", "—", "0:00", "—", "L.M."),
+      R(4, "Sáb", "04-10-2026", "D 08:00–20:00", "08:05", "20:00", "60 min", "10:55", "—", "J.O.", { corr: "08:21" }),
+      R(5, "Dom", "05-10-2026", "D 08:00–20:00", "07:59", "20:01", "60 min", "11:02", "0:02", "J.O."),
+      R(6, "Lun", "06-10-2026", "Libre", "—", "—", "—", "—", "—", "—"),
+      R(7, "Mar", "07-10-2026", "N 20:00–08:00", "19:52", "08:03", "60 min", "11:11", "0:11", "J.O.", { cont: true }),
+      R(8, "Mié", "08-10-2026", "N 20:00–08:00", "20:14", "08:00", "60 min", "10:46", "—", "AT"),
+      R(9, "Jue", "09-10-2026", "N 20:00–08:00", "19:58", "06:30", "60 min", "9:32", "—", "S.A."),
+      R(14, "Mar", "14-10-2026", "D 08:00–20:00", "08:14", "20:00", "60 min", "10:46", "—", "AT", { pend: "07:58" }),
+    ];
+rows.forEach((r) => { r.fecha = r.fecha.slice(0, 6) + r.fecha.slice(8); r.fecha = r.fecha.replace(/-/g, "/"); ["ent", "sal", "hrs", "he"].forEach((k) => { if (/^\d+:\d\d$/.test(r[k])) r[k] += ":00"; }); if (r.corr) r.corr += ":00"; if (r.pend) r.pend += ":00"; });
+    const ent = (r) => h("span", { style: { display: "inline-flex", gap: 8, alignItems: "center", flexWrap: "wrap" } },
+      h("span", { className: "t-numeric" }, r.ent),
+      r.corr ? A.badge("info", "Corregida") : null, r.corr ? h("a", { href: "#", className: "t-caption", style: { color: "var(--ds-fg-muted)" } }, "Original " + r.corr) : null,
+      r.pend ? A.badge("warning", "Pendiente → " + r.pend) : null,
+      r.cont ? A.badge("neutral", "Contingencia") : null);
+    return {
+      ...b,
+      cabCols: b.isPhone ? 1 : b.isTablet ? 2 : 3,
+      formatos: [{ value: "xlsx", label: "Excel" }, { value: "pdf", label: "PDF" }, { value: "docx", label: "Word" }],
+      formato: this.state.formato, setFormato: (v) => this.setState({ formato: v }),
+      rows, siglasUsadas: ["J.O.", "AT", "L.M.", "S.A.", "H.E."],
+      cols: [
+        { key: "fecha", label: "Fecha", render: (r) => h("span", { className: "t-numeric", style: { whiteSpace: "nowrap" } }, r.dia + " " + r.fecha) },
+        { key: "turno", label: "Turno", muted: true },
+        { key: "ent", label: "Entrada", render: ent },
+        { key: "sal", label: "Salida" }, { key: "col", label: "Colación", muted: true },
+        { key: "hrs", label: "Horas trab.", align: "right" }, { key: "he", label: "H.E.", align: "right" },
+        { key: "sig", label: "Sigla", render: (r) => (r.sig === "—" ? "—" : A.sigla(r.sig)) },
+      ],
+      footer: h("div", { style: { display: "flex", justifyContent: "space-between", padding: "12px 16px", font: "500 14px/20px var(--font-sans)" } }, h("span", null, "Total del período"), h("span", { className: "t-numeric" }, "198:40 h · H.E. 2:12")),
+      toCard: (r) => ({
+        title: r.dia + " " + r.fecha + (r.ent !== "—" ? " · " + r.ent + "–" + r.sal : ""),
+        subtitle: r.turno + " · " + (r.sig === "—" ? "Sin marca" : r.sig) + (r.corr ? " · original " + r.corr : "") + (r.hrs !== "—" ? " · " + r.hrs + " h" : ""),
+        badge: r.corr ? { tone: "info", label: "Corregida" } : r.pend ? { tone: "warning", label: "Pendiente" } : r.cont ? { tone: "neutral", label: "Contingencia" } : null,
+      }),
+      emptyAction: A.btn("Cambiar período", { size: "lg" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
