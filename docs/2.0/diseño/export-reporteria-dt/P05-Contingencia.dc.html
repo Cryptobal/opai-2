@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}.screen .sheet{max-height:90%}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" overlay="{{ sheet }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia" title="Contingencia e incidentes" subtitle="Marcas cargadas a mano cuando el sistema no estuvo disponible, y fallas técnicas del sistema." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="220px,40px">{{ primaryLabel }}</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" style="margin-bottom:16px" hint-size="100%,44px"></x-import>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:56px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="26%" hint-size="26%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="16%" hint-size="16%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="24%" hint-size="24%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="{{ 22 }}" radius="999px" hint-size="90px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="No hay marcas de contingencia" description="Úsalas solo si el sistema de marcación no estuvo disponible. Quedan con autor, motivo y 48 h para que el trabajador acepte." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la contingencia" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-CTG-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes registrar contingencias" description="Lo hacen administración y RRHH. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ showCont }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cCols }}" rows="{{ cRows }}" cards="{{ true }}" to-card="{{ cCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cCols }}" rows="{{ cRows }}" hint-size="100%,360px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ showInc }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Incidente abierto · total" hint-size="100%,56px">Servicio de marcación sin respuesta desde las 13:58. Detectado por el monitoreo. Registra las marcas del período como contingencia.</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ iCols }}" rows="{{ iRows }}" cards="{{ true }}" to-card="{{ iCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ iCols }}" rows="{{ iRows }}" hint-size="100%,300px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;incidentes&quot;,&quot;sheet&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { showCont: false, showInc: false };
+    const b = A.base(this.props, "con", "Contingencia e incidentes");
+    const h = A.h, NS = A.NS();
+    const inc = b.v_incidentes;
+    const cRows = [
+      { id: 1, nombre: "Camila Herrera Soto", rut: "12.345.678-9", marca: "Entrada · 30-10-2026 14:05", inst: "Planta Quilicura", autor: "Jorge Muñoz", motivo: "Incidente total desde 13:58", ev: "libro_novedades_30-10.jpg", est: "pendiente", hh: 47, mm: 20 },
+      { id: 2, nombre: "Diego Silva Muñoz", rut: "13.456.789-0", marca: "Entrada · 30-10-2026 14:10", inst: "Planta Quilicura", autor: "Jorge Muñoz", motivo: "Incidente total desde 13:58", ev: "libro_novedades_30-10.jpg", est: "pendiente", hh: 47, mm: 25 },
+      { id: 3, nombre: "Luis Pérez Rojas", rut: "9.876.543-2", marca: "Salida · 22-10-2026 20:00", inst: "Bodega Lampa", autor: "Carlos Irigoyen", motivo: "Corte de energía en la bodega", ev: "acta_corte_energia.pdf", est: "aceptada" },
+      { id: 4, nombre: "Héctor Araya Lillo", rut: "15.009.332-7", marca: "Entrada · 22-10-2026 08:00", inst: "Bodega Lampa", autor: "Carlos Irigoyen", motivo: "Corte de energía en la bodega", ev: "acta_corte_energia.pdf", est: "vencida" },
+    ];
+    const iRows = [
+      { id: 1, ini: "30-10-2026 13:58", fin: "En curso", sev: ["danger", "Total"], origen: "Monitoreo automático", desc: "Servicio de marcación sin respuesta", est: ["danger", "Abierto"] },
+      { id: 2, ini: "22-10-2026 07:40", fin: "22-10-2026 21:15", sev: ["warning", "Parcial"], origen: "Registrado por Carlos Irigoyen", desc: "Corte de energía en Bodega Lampa", est: ["neutral", "Cerrado"] },
+      { id: 3, ini: "15-10-2026 02:10", fin: "15-10-2026 02:34", sev: ["warning", "Parcial"], origen: "Monitoreo automático", desc: "Validación de GPS lenta (sin bloqueo)", est: ["neutral", "Cerrado"] },
+    ];
+    let sheet = null;
+    if (b.v_sheet && NS.Sheet) {
+      const B = NS.Button, sz = b.isPhone ? "lg" : "md";
+      sheet = h(NS.Sheet, { contained: true, side: b.isPhone ? "bottom" : "right", title: "Registrar marca de contingencia", description: "Úsala solo si el sistema no estuvo disponible.", onClose: () => {},
+        actions: [h(B, { key: 1, variant: "secondary", size: sz }, "Cancelar"), h(B, { key: 2, size: sz }, "Registrar marca")] },
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 16 } },
+          h(NS.Select, { label: "Trabajador", value: "ch", options: [{ value: "ch", label: "Camila Herrera Soto · 12.345.678-9" }] }),
+          h(NS.Campo, { etiqueta: "Tipo" }, h(NS.Segmentado, { options: ["Entrada", "Salida"], value: "Entrada", label: "Tipo de marca" })),
+          h(NS.Input, { label: "Fecha y hora declaradas", value: "30-10-2026 14:05", hint: "El servidor registra además la hora en que la cargas." }),
+          h(NS.Textarea, { label: "Motivo", hint: "Obligatorio.", value: "Incidente total del servicio de marcación desde las 13:58.", rows: 3 }),
+          h(NS.Campo, { etiqueta: "Evidencia" }, h(NS.Uploader, { compacto: b.isPhone, archivosIniciales: [{ nombre: "libro_novedades_30-10.jpg", size: 1300000, estado: "listo" }] })),
+          h("div", { className: "pg-kv" }, h("span", { className: "l" }, "Autor"), h("span", { className: "v" }, "Carlos Irigoyen (tú)")),
+          h(NS.Alerta, { tono: "info" }, "Se distinguirá como contingencia en reportes y listados. El trabajador tiene 48 h para aceptar u objetar.")));
+    }
+    return {
+      ...b, sheet,
+      showCont: b.isDatos && !inc, showInc: b.isDatos && inc,
+      tab: inc ? "inc" : "con",
+      primaryLabel: inc ? "Registrar incidente" : "Registrar marca de contingencia",
+      tabItems: [{ id: "con", label: "Marcas de contingencia", count: 2 }, { id: "inc", label: "Incidentes técnicos", count: 1 }],
+      cRows, iRows,
+      cCols: [
+        { key: "nombre", label: "Trabajador", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.nombre), h("span", { className: "t-mono subtle", style: { fontSize: 12 } }, r.rut)) },
+        { key: "marca", label: "Marca", render: (r) => h("span", { style: { display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" } }, h("span", { className: "t-numeric" }, r.marca), A.badge("neutral", "Contingencia")) },
+        { key: "autor", label: "Autor", muted: true },
+        { key: "motivo", label: "Motivo", muted: true },
+        { key: "ev", label: "Evidencia", render: (r) => h("span", { style: { display: "inline-flex", gap: 6, alignItems: "center", color: "var(--ds-fg-muted)" } }, h("span", { className: "ic sm i-paperclip" }), r.ev) },
+        { key: "est", label: "Aceptación", render: (r) => h(A.CuentaRegresiva, { estado: r.est, horas: r.hh, minutos: r.mm }) },
+      ],
+      cCard: (r) => ({ title: r.nombre, subtitle: r.marca + " · " + r.autor, meta: r.motivo, badge: { tone: r.est === "pendiente" ? "warning" : r.est === "aceptada" ? "success" : "neutral", label: r.est === "pendiente" ? "Pendiente " + r.hh + " h" : r.est === "aceptada" ? "Aceptada" : "Vencida" } }),
+      iCols: [
+        { key: "ini", label: "Inicio", render: (r) => h("span", { className: "t-numeric" }, r.ini) },
+        { key: "fin", label: "Fin", render: (r) => h("span", { className: "t-numeric" }, r.fin) },
+        { key: "sev", label: "Severidad", render: (r) => A.badge(r.sev[0], r.sev[1]) },
+        { key: "desc", label: "Descripción" },
+        { key: "origen", label: "Origen", render: (r) => h("span", { style: { display: "inline-flex", gap: 6, alignItems: "center", color: "var(--ds-fg-muted)" } }, h("span", { className: "ic sm " + (r.origen.startsWith("Monitoreo") ? "i-bot" : "i-user") }), r.origen) },
+        { key: "est", label: "Estado", render: (r) => A.badge(r.est[0], r.est[1]) },
+      ],
+      iCard: (r) => ({ icon: r.origen.startsWith("Monitoreo") ? "bot" : "user", title: r.desc, subtitle: r.ini + " → " + r.fin, meta: r.origen, badge: { tone: r.sev[0], label: r.sev[1] } }),
+      emptyAction: A.prim("Registrar marca de contingencia", { size: "lg", icon: "plus" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
