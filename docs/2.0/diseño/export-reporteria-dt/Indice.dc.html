@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<script src="adt.js"></script>
+<style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-fg);text-decoration:none}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<main class="ds" style="max-width:960px;margin:0 auto;padding:48px 24px 64px;display:flex;flex-direction:column;gap:32px;color:var(--ds-fg);font-family:var(--font-sans)">
+<header style="display:flex;flex-direction:column;gap:6px">
+<span class="t-overline" style="color:var(--ds-fg-muted)">CAR-89 · Briefs 18–19</span>
+<h1 class="t-display m0">OPAI 2.0 · Asistencia DT v1</h1>
+<span class="t-body muted" style="text-wrap:pretty">Reportería DT y portal de fiscalización según la Res. Ex. N.º 38 de la Dirección del Trabajo. Cada pantalla trae 1280, 1024 y 375 en claro y oscuro, con sus estados vacío, cargando, error y sin permiso. Titular: OPAI (razón social por confirmar). OPAI no está certificado.</span>
+</header>
+<section style="display:flex;flex-direction:column">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="10">
+<a href="{{ s.href }}" style="display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:16px;align-items:center;min-height:64px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<span class="t-mono" style="font-size:13px;color:var(--ds-fg-subtle)">{{ s.n }}</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-subheading">{{ s.title }}</span><span class="t-body-sm muted">{{ s.roles }}</span></span>
+<span class="t-caption">{{ s.extra }}</span>
+</a>
+</sc-for>
+<a href="Hoja de componentes.dc.html" style="display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:16px;align-items:center;min-height:64px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<span class="t-mono" style="font-size:13px;color:var(--ds-fg-subtle)">DS</span>
+<span style="display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Hoja de componentes</span><span class="t-body-sm muted">Componentes usados, variantes y estados, claro y oscuro. Marca las 5 piezas nuevas.</span></span>
+<span class="t-caption"></span>
+</a>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label m0">Fuera de alcance</h2>
+<span class="t-body-sm muted">Marcación del guardia, PIN y Face ID (Terreno). LRE, contratos y finiquito en Mi DT (Nómina). Trámite con el tercero certificador.</span>
+</section>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { screens: [] };
+    return { screens: A.screens.map((s) => ({ n: s.n, title: s.title, roles: s.roles, href: s.file + ".dc.html", extra: s.rows.some((r) => r.variante === "B") ? "Incluye variante B" : "" })) };
+  }
+}
+</script>
+</body>
+</html>
