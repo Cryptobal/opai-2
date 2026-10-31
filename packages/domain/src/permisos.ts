@@ -53,6 +53,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       "comercial:config.manage",
       // Canales de entrada de Leads (BRIEF-07-leads): configurarlos es de owner y admin.
       "comercial:canales.manage",
+      // Catálogo de etiquetas (alcance-crm §2): configurarlo es de owner y admin.
+      PERMISOS_CORE.etiquetasConfig,
+      PERMISOS_CORE.actividadesAdmin,
       PERMISOS_CORE.marcaManage,
       PERMISOS_CORE.integracionesManage,
       PERMISOS_CORE.comunicacionesManage,

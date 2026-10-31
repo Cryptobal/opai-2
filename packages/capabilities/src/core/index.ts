@@ -27,6 +27,7 @@ import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
+import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesPermisos } from "./permisos";
@@ -101,6 +102,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesCrm,
   ...capacidadesCalendario,
   ...capacidadesAnexos,
   ...capacidadesPanel,
