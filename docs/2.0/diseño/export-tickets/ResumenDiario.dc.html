@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<sc-if value="{{ isAjustes }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ activeNav }}" title="{{ shellTitle }}" subtitle="Módulos › Tickets" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración › Módulos › Tickets" title="Notificaciones" badge="{{ propBadge }}" hint-size="100%,72px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px;max-width:720px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Respuestas al solicitante" description="Decidido: cada cambio de estado y cada respuesta llegan a quien pidió el ticket en su portal y por correo." hint-size="100%,100px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Resumen diario al dueño" description="Un correo por dueño con sus tickets pendientes: por vencer, por aprobar y sin respuesta." hint-size="100%,320px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Enviar resumen diario" description="Solo a quienes tienen tickets pendientes." checked="{{ on }}" on-change="{{ setOn }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ on }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="max-width:200px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Hora de envío" value="{{ hora }}" options="{{ horas }}" on-change="{{ setHora }}" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Días" options="{{ diasOptions }}" value="{{ dias }}" on-change="{{ setDias }}" style="max-width:360px" hint-size="360px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Cada dueño puede apagarlo en su perfil" checked="{{ optOut }}" on-change="{{ setOptOut }}" hint-size="100%,44px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="100px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="150px,40px">Guardar cambios</x-import>
+</x-import>
+</div>
+</x-import>
+</x-import>
+</sc-if>
+<sc-if value="{{ isCorreo }}" hint-placeholder-val="{{ false }}">
+<div class="ds" data-theme="{{ theme }}" style="width:100%;min-height:100%;background:var(--ds-bg);color:var(--ds-fg);padding:24px 16px;box-sizing:border-box">
+<div style="max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px;padding-bottom:12px;border-bottom:1px solid var(--ds-border)">
+<span class="t-body-sm muted">De: OPAI · Atlas Seguridad SpA</span>
+<span class="t-body-sm muted">Para: Carlos Irigoyen</span>
+<span class="t-label">Tus tickets pendientes · 31-10-2026</span>
+</div>
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:24px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:8px"><span class="t-label" style="font-weight:700">OPAI</span><span class="t-body-sm muted">· Atlas Seguridad SpA</span></div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<h1 class="t-title" style="margin:0">Hola, Carlos</h1>
+<p class="t-body muted" style="margin:0">Tienes 4 tickets pendientes a las 08:00.</p>
+</div>
+<sc-for list="{{ grupos }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column">
+<span class="t-label" style="padding-bottom:8px">{{ g.title }}</span>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="1">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 12px;align-items:baseline">
+<span class="t-body" style="font-weight:500">{{ it.asunto }}</span>
+<span class="t-body-sm t-numeric" style="color:{{ it.color }};white-space:nowrap">{{ it.dato }}</span>
+</div>
+<span class="t-body-sm muted"><span class="t-mono">{{ it.folio }}</span> · {{ it.meta }}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" hint-size="180px,48px">Abrir mi bandeja</x-import>
+</div>
+</div>
+<p class="t-caption muted" style="margin:0">Recibes este correo porque eres dueño de tickets en Atlas Seguridad SpA. Puedes apagarlo en Tu perfil › Notificaciones.</p>
+</div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ajustes&quot;,&quot;correo&quot;],&quot;default&quot;:&quot;ajustes&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { on: true, hora: "08:00", dias: "habiles", optOut: true };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const vista = this.props.vista ?? "ajustes";
+    const s = this.state;
+    return {
+      device, theme: this.props.theme ?? "light",
+      isAjustes: vista === "ajustes", isCorreo: vista === "correo",
+      shellTitle: device === "phone" ? "" : "Configuración", activeNav: device === "phone" ? "mas" : "cfg",
+      propBadge: NS.Badge ? h(NS.Badge, { tone: "warning" }, "Propuesta, a confirmar por Carlos") : null,
+      on: s.on, setOn: (v) => this.setState({ on: v }),
+      hora: s.hora, setHora: (v) => this.setState({ hora: v }), horas: ["07:00", "08:00", "09:00", "18:00"],
+      dias: s.dias, setDias: (v) => this.setState({ dias: v }), diasOptions: [{ value: "habiles", label: "Lunes a viernes" }, { value: "todos", label: "Todos los días" }],
+      optOut: s.optOut, setOptOut: (v) => this.setState({ optOut: v }),
+      grupos: [
+        { title: "Por vencer o vencidos", items: [
+          { folio: "TK-1049", asunto: "Faltan chalecos reflectantes", meta: "Insumos · Héctor Araya", dato: "Vencido hace 11 h", color: "var(--ds-danger-fg)" },
+          { folio: "TK-1052", asunto: "Cámara del andén norte sin señal", meta: "Mantención · Paula Contreras", dato: "Vence hoy 22:14", color: "var(--ds-warning-fg)" },
+        ] },
+        { title: "Por aprobar", items: [{ folio: "TK-1051", asunto: "Permiso administrativo 06-11-2026", meta: "Permiso · Camila Herrera", dato: "Desde ayer 07:42", color: "var(--ds-fg-muted)" }] },
+        { title: "Sin respuesta tuya", items: [{ folio: "TK-1053", asunto: "Reponer libro de novedades", meta: "Insumos · Luis Pérez", dato: "Desde ayer 18:30", color: "var(--ds-fg-muted)" }] },
+      ],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+        { title: "Empresa", items: [{ id: "fin", label: "Finanzas", icon: "chart" }, { id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
