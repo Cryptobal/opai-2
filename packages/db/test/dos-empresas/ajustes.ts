@@ -9,6 +9,8 @@ export type Contexto = {
 
 type Ajuste = {
   dependencias?: string[];
+  /** Columnas de un índice único que `copia` no debe regenerar (tienen un CHECK de rango). */
+  fijas?: string[];
   valores: (ctx: Contexto) => Record<string, unknown>;
 };
 
@@ -45,6 +47,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
+  // Nómina (Brief 25): los CHECK de unidad por tipo y de tipo/estado rechazan el texto genérico.
+  "nomina.novedades": { valores: () => ({ tipo: "ausencia", cantidad: 1, monto_clp: null }) },
+  "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
+  "nomina.periodos": { fijas: ["mes"], valores: () => ({ mes: 1 }) },
+  "nomina.obligaciones": { fijas: ["mes", "tipo"], valores: () => ({ tipo: "lre", mes: 1 }) },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },

@@ -1,6 +1,6 @@
 import {
   expandirMes,
-  diasDelMes,
+  fechasDelMesPauta,
   type CeldaPauta,
   type ExcepcionPauta,
   type PatronPauta,
@@ -78,7 +78,7 @@ export async function cargarMes(
   anio: number,
   mes: number,
 ): Promise<MesCargado> {
-  const dias = diasDelMes(anio, mes);
+  const dias = fechasDelMesPauta(anio, mes);
   const primero = aFechaDb(dias[0]!);
   const ultimo = aFechaDb(dias[dias.length - 1]!);
   const ids = puestos.map((p) => p.id);

@@ -1,7 +1,7 @@
 import {
   feriadosLegalesComoEntradas,
   resolverFeriados,
-  diasDelMes,
+  fechasDelMesPauta,
   type DiaCalendarioEntrada,
 } from "@opai/domain";
 
@@ -17,7 +17,7 @@ export async function feriadosDelMes(
   mes: number,
   instalaciones: readonly InstalacionBase[],
 ): Promise<Map<string, Map<string, string>>> {
-  const dias = diasDelMes(anio, mes);
+  const dias = fechasDelMesPauta(anio, mes);
   const filas = await ctx.db.diaCalendario.findMany({
     where: {
       archivadaEn: null,
