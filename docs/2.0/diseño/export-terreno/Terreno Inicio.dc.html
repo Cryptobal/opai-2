@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}button{transition:background-color 150ms cubic-bezier(.2,0,0,1),border-color 150ms cubic-bezier(.2,0,0,1)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%">
+  <div class="safe-top"></div>
+  <div class="topbar" style="gap:10px;padding-left:16px;padding-right:12px;height:60px">
+    <span class="tenant">AS</span>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Planta Quilicura</span><span class="t-caption t-numeric" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sub }}</span></span>
+    <button class="badge b-{{ cx.tone }}" style="height:44px;padding:0 14px;border:0;cursor:pointer;font:500 13px/18px var(--font-sans)" aria-label="{{ cx.aria }}">{{ cx.t }}</button>
+  </div>
+  <sc-if value="{{ cx.banner }}" hint-placeholder-val="{{ false }}">
+    <button class="banner" style="border:0;border-bottom:1px solid var(--ds-border);width:100%;cursor:pointer;min-height:44px;text-align:left"><span class="ic sm i-wifi-off" aria-hidden="true"></span><span style="flex:1">{{ cx.banner }}</span><span>Ver cola</span><span class="ic sm i-chevron-right" aria-hidden="true"></span></button>
+  </sc-if>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:20px 16px 24px;display:flex;flex-direction:column;gap:20px;max-width:1040px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="avatar xl">{{ who.av }}</span>
+        <span style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">{{ who.hola }}</h1><span class="t-body-sm muted t-numeric">{{ who.sub }}</span></span>
+        <sc-if value="{{ isDisp }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" style="height:56px;padding:0 16px"><span class="ic sm i-swap" aria-hidden="true"></span>Cambiar guardia</button></sc-if>
+        <sc-if value="{{ isSesion }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" style="height:56px;padding:0 16px;color:var(--ds-fg-muted)">Cerrar sesión</button></sc-if>
+      </div>
+      <sc-if value="{{ showModo }}" hint-placeholder-val="{{ false }}">
+        <div class="seg" role="radiogroup" aria-label="Modo" style="display:flex;max-width:420px"><button class="{{ modoG }}" role="radio" style="height:52px;font-size:15px">Guardia</button><button class="{{ modoS }}" role="radio" style="height:52px;font-size:15px">Supervisor</button></div>
+      </sc-if>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,156px),1fr));gap:12px">
+        <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="4">
+          <button class="card" style="min-height:148px;padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:12px;text-align:left;cursor:pointer;font:inherit;color:var(--ds-fg)">
+            <span style="display:flex;width:100%;justify-content:space-between;align-items:flex-start;gap:8px"><span class="state-tile" style="width:48px;height:48px;border-radius:12px;background:var(--ds-fill)"><span class="ic lg i-{{ t.ic }}" aria-hidden="true"></span></span><sc-if value="{{ t.badge }}"><span class="badge b-{{ t.tone }}">{{ t.badge }}</span></sc-if></span>
+            <span style="display:flex;flex-direction:column;gap:2px;margin-top:auto"><span class="t-subheading">{{ t.t }}</span><span class="t-body-sm muted t-numeric" style="text-wrap:pretty">{{ t.d }}</span></span>
+          </button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ portalNote }}" hint-placeholder-val="{{ false }}">
+        <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px"><span class="ic i-user-check muted" aria-hidden="true"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Marca tu entrada y salida en tu Portal Trabajador</span><span class="t-caption">Esta instalación no marca asistencia en Terreno.</span></span></div>
+      </sc-if>
+      <button class="btn" style="height:64px;width:100%;border-color:var(--ds-danger);color:var(--ds-danger-fg);background:var(--ds-danger-muted);font-size:17px;font-weight:600" aria-haspopup="dialog"><span class="ic lg i-alert" aria-hidden="true"></span>Emergencia</button>
+      <span class="t-caption" style="display:flex;gap:6px;align-items:flex-start;text-wrap:pretty"><span class="ic sm i-lock" aria-hidden="true" style="flex:none;margin-top:1px"></span>{{ priv }}</span>
+    </div>
+  </div>
+  <sc-if value="{{ isEmg }}" hint-placeholder-val="{{ false }}">
+    <div class="scrim"></div>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div class="overlay dialog" role="alertdialog" aria-labelledby="emg-t">
+        <div class="dh"><span class="state-tile" style="width:44px;height:44px;background:var(--ds-danger-muted);color:var(--ds-danger-fg);border-radius:12px"><span class="ic lg i-alert" aria-hidden="true"></span></span><span id="emg-t" class="t-subheading" style="padding-top:8px">¿Enviar alerta de emergencia?</span><span class="t-body-sm muted">Avisaremos a la central y a tu supervisor con tu ubicación actual. Si no hay conexión, se enviará por SMS.</span></div>
+        <div class="actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 20px 20px"><button class="btn btn-secondary" style="height:56px">Cancelar</button><button class="btn btn-destructive" style="height:56px"><span class="ic sm i-alert" aria-hidden="true"></span>Enviar alerta</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;inicio&quot;,&quot;options&quot;:[&quot;inicio&quot;,&quot;emergencia&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;identidad&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;dispositivo&quot;,&quot;options&quot;:[&quot;dispositivo&quot;,&quot;sesion&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Decide Carlos&quot;},&quot;marcacion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;terreno&quot;,&quot;options&quot;:[&quot;terreno&quot;,&quot;portal&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Decide Carlos&quot;},&quot;modo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;guardia&quot;,&quot;options&quot;:[&quot;guardia&quot;,&quot;supervisor&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Decide Carlos&quot;},&quot;conexion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;linea&quot;,&quot;options&quot;:[&quot;linea&quot;,&quot;sin&quot;,&quot;sinc&quot;,&quot;desact&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;phone&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+const CX={
+  linea:{t:'En línea',tone:'success',banner:''},
+  sin:{t:'Sin conexión · 3',tone:'warning',banner:'Sin conexión · 3 registros por enviar'},
+  sinc:{t:'Sincronizando',tone:'info',banner:''},
+  desact:{t:'Listas de hace 26 h',tone:'warning',banner:'Listas de acceso desactualizadas · última descarga 28-10-2026 08:12'}
+};
+class Component extends DCLogic{
+  renderVals(){
+    const p=this.props;const id=p.identidad??'dispositivo';const marc=p.marcacion??'terreno';const modo=p.modo??'guardia';const sup=modo==='supervisor';
+    const cx=CX[p.conexion??'linea']||CX.linea;
+    const G=[
+      {ic:'route',t:'Rondas',d:'Próxima 10:00 · Ronda perimetral',badge:'1 de 5',tone:'neutral'},
+      {ic:'lock',t:'Portería',d:'12 en sitio · 3 esperados',badge:'',tone:'neutral'},
+      {ic:'flag',t:'Libro de novedades',d:'3 en tu turno',badge:'1 en atención',tone:'warning'},
+      marc==='terreno'?{ic:'user-check',t:'Marcar',d:'Entrada 07:56 · salida 20:00',badge:'',tone:'neutral'}:null
+    ].filter(Boolean);
+    const S=[
+      {ic:'route',t:'Rondas de hoy',d:'3 instalaciones · 14 rondas',badge:'1 atrasada',tone:'warning'},
+      {ic:'alert',t:'Anomalías por revisar',d:'Bodega A · Andén norte',badge:'2',tone:'danger'},
+      {ic:'clipboard',t:'Visita y acta',d:'Planta Quilicura · firma en el lugar',badge:'',tone:'neutral'},
+      {ic:'flag',t:'Libro de novedades',d:'7 en la instalación',badge:'',tone:'neutral'}
+    ];
+    return {
+      theme:p.theme??'light',device:p.device??'phone',isEmg:(p.screen??'inicio')==='emergencia',
+      label:'Terreno · Inicio'+(sup?' · supervisor':''),
+      sub:id==='dispositivo'?'Portería principal · dispositivo de la instalación':'Portería principal · tu sesión',
+      cx:Object.assign({aria:'Conexión: '+cx.t+'. Ver cola'},cx),
+      isDisp:id==='dispositivo'&&!sup,isSesion:id==='sesion'||sup,showModo:sup,modoG:sup?'':'on',modoS:sup?'on':'',
+      who:sup?{av:'RT',hola:'Hola, Rodrigo',sub:'Supervisor · Zona Norte · Miércoles 29-10-2026'}:{av:'MS',hola:'Hola, María Fernanda',sub:'Guardia · turno día 08:00–20:00 · Miércoles 29-10-2026'},
+      tiles:sup?S:G,portalNote:!sup&&marc==='portal',
+      priv:'Tu ubicación se usa solo durante tu turno y mientras haces una tarea: una ronda, una marcación o una emergencia.'
+    };
+  }
+}
+</script>
+</body>
+</html>

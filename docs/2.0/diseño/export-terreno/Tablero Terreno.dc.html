@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="padding:48px 64px 96px;background:var(--ds-bg);color:var(--ds-fg);min-width:1400px">
+  <header style="display:flex;flex-direction:column;gap:8px;padding-bottom:32px;max-width:820px">
+    <span class="t-overline">Terreno v1 · OPAI 2.0</span>
+    <h1 class="t-display m0">Tablero de Terreno</h1>
+    <span class="t-body muted" style="text-wrap:pretty">App del guardia y del supervisor en la instalación. Teléfono 375 primero; 1024 horizontal y 1280 para revisar que nada se rompa; claro y oscuro. Cada pantalla dice si es nueva o importada de export-rondas. <a href="Indice Terreno.dc.html">Ver el índice</a></span>
+    <nav style="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px"><a class="chip plain" href="#d1">Decide Carlos</a><a class="chip plain" href="#inicio">1 · Inicio</a><a class="chip plain" href="#rondas">2 · Rondas</a><a class="chip plain" href="#porteria">3 · Portería</a><a class="chip plain" href="#libro">4 · Libro</a><a class="chip plain" href="#marcacion">5 · Marcación</a><a class="chip plain" href="#emparejar">6 · Emparejar</a></nav>
+  </header>
+<section id="d1" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">D1 · ¿Dispositivo emparejado de la instalación o sesión de cada guardia?</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">A · Dispositivo emparejado</span><span class="badge b-warning">Decide Carlos</span><span class="badge b-warning">D1 · A</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" identidad="dispositivo" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">A · ¿Quién eres? (g1)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="badge b-warning">D1 · A</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g1" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">B · Sesión del guardia</span><span class="badge b-warning">Decide Carlos</span><span class="badge b-warning">D1 · B</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" identidad="sesion" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="d2" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">D2 · ¿La marcación vive en Terreno, en el portal o en ambos?</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">A · En Terreno (y en el portal)</span><span class="badge b-warning">Decide Carlos</span><span class="badge b-warning">D2 · A</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" marcacion="terreno" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">B · Solo en el Portal Trabajador</span><span class="badge b-warning">Decide Carlos</span><span class="badge b-warning">D2 · B</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" marcacion="portal" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="d3" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">D3 · ¿GPS con traza continua durante la ronda o solo una posición al marcar cada punto?</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">A · Traza continua</span><span class="badge b-warning">Decide Carlos</span><span class="badge b-warning">D3 · A</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Ubicacion Ronda" theme="light" gps="traza" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">B · Posición al marcar</span><span class="badge b-warning">Decide Carlos</span><span class="badge b-warning">D3 · B</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Ubicacion Ronda" theme="light" gps="marca" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="d4" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">D4 · ¿El supervisor usa Terreno con su modo o la app Supervisor aparte?</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">A · Terreno en modo supervisor</span><span class="badge b-warning">Decide Carlos</span><span class="badge b-warning">D4 · A</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" modo="supervisor" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">B · App Supervisor · Rondas de hoy (s8)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="badge b-warning">D4 · B</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Supervisor" theme="light" screen="s8" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="inicio" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">1 · Inicio de Terreno</h2><span class="t-body-sm muted" style="text-wrap:pretty">Parte de g0. Tarea única, sin menú: instalación, turno, guardia, IndicadorConexion, accesos a Rondas, Portería, Libro de novedades y Marcar, y Emergencia.</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Inicio</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Inicio</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="dark" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Sin conexión</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" conexion="sin" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Listas desactualizadas</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="dark" conexion="desact" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Emergencia</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" screen="emergencia" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Inicio de Terreno original (g0)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g0" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Inicio</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · claro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" device="tablet" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Inicio</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · oscuro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="dark" device="tablet" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1280px"><span class="t-label">Inicio</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1280 · claro</span></div>
+  <div style="width:1280px;height:800px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Terreno Inicio" theme="light" device="desktop" hint-size="1280px,800px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="rondas" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">2 · Rondas</h2><span class="t-body-sm muted" style="text-wrap:pretty">g2–g7 importadas sin cambios, con QR, GPS y mapa.</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Mis rondas de hoy (g2)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g2" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Ronda en curso (g3)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g3" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Marcar por QR (g4qr)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g4qr" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Marcar por GPS (g4gps)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g4gps" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Resultado de la marca (g4res)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g4res" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Cierre de ronda (g5)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g5" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Cola sin conexión (g6)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g6" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Permisos (g7)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g7" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Ronda en curso (g3)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="dark" screen="g3" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="porteria" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">3 · Control de accesos (Portería)</h2><span class="t-body-sm muted" style="text-wrap:pretty">Según DESIGN-PROMPT-control-acceso-y-firma.md: EscanerDocumento, ResultadoAcceso, IndicadorConexion y FilaEnSitio. Funciona sin conexión.</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Portería</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Portería</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="dark" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Portería sin conexión</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" conexion="sin" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Registrar entrada · tipo</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="tipo" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">EscanerDocumento · buscando</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="escaner" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">EscanerDocumento · leído</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="escaner" escaneo="leido" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">EscanerDocumento · patente</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="escaner" modo-lectura="patente" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">EscanerDocumento · no se pudo leer</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="escaner" escaneo="fallo" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">EscanerDocumento · sin permiso</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="escaner" escaneo="permiso" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">ResultadoAcceso · Autorizado</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="resultado" resultado="autorizado" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">ResultadoAcceso · Sin lista</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="resultado" resultado="sinlista" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">ResultadoAcceso · Fuera de lista, permitido</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="resultado" resultado="fuera" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">ResultadoAcceso · No autorizado</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="resultado" resultado="noautorizado" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">ResultadoAcceso · Fuera de horario</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="resultado" resultado="horario" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">ResultadoAcceso · Sin validar con la lista actual</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" conexion="sin" screen="resultado" resultado="sinvalidar" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">ResultadoAcceso · Autorizado</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="dark" screen="resultado" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Acceso no autorizado · bloqueado</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="noautorizado" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">No autorizado · pedir excepción</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="noautorizado" no-autorizado="noaut" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Esperando autorización</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="dark" screen="noautorizado" no-autorizado="esperando" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">En sitio y salida</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="ensitio" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">En sitio y salida</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="dark" screen="ensitio" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Autorizados (solo lectura)</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="autorizados" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Cola sin conexión</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="cola" conexion="sin" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Resumen para la entrega</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" screen="resumen" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Portería</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · claro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" device="tablet" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Portería</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · oscuro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="dark" device="tablet" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">ResultadoAcceso</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · oscuro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="dark" device="tablet" screen="resultado" resultado="fuera" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">En sitio</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · claro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" device="tablet" screen="ensitio" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1280px"><span class="t-label">Portería</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1280 · claro</span></div>
+  <div style="width:1280px;height:800px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Porteria" theme="light" device="desktop" hint-size="1280px,800px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="libro" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">4 · Libro de novedades</h2><span class="t-body-sm muted" style="text-wrap:pretty">Lista del turno y de la instalación, novedad nueva y entrega de turno. Reutiliza g10 y la hoja de novedad de g3.</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Libro · mi turno</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Libro Novedades" theme="light" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Libro · instalación</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Libro Novedades" theme="dark" alcance="instalacion" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Nueva novedad (g9)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g9" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Novedad enviada (g10)</span><span class="badge b-neutral">Importada de export-rondas</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Rondas Guardia" theme="light" screen="g10" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Entrega de turno</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Libro Novedades" theme="light" screen="entrega" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Turno entregado</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Libro Novedades" theme="dark" screen="entregado" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Libro</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · claro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Libro Novedades" theme="light" device="tablet" alcance="instalacion" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Entrega de turno</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · oscuro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Libro Novedades" theme="dark" device="tablet" screen="entrega" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="marcacion" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">5 · Marcación</h2><span class="t-body-sm muted" style="text-wrap:pretty">Entrada y salida con el radio de la instalación y foto. La prueba de vida queda dibujada como fase posterior (Briefs 18–19).</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Marcar entrada</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="light" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Marcar entrada</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="dark" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Fuera del radio</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="light" screen="fuera" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Entrada marcada</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="light" screen="listo" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Marcar salida</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="dark" tipo="salida" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Salida sin conexión</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="light" screen="listo" tipo="salida" conexion="sin" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Prueba de vida · fase posterior</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="light" screen="vida" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Marcar entrada</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · claro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Marcacion" theme="light" device="tablet" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+<section id="emparejar" style="display:flex;flex-direction:column;gap:20px;padding:40px 0;border-top:1px solid var(--ds-border)">
+  <div style="display:flex;flex-direction:column;gap:4px;max-width:760px"><h2 class="t-heading m0">6 · Emparejar el dispositivo</h2><span class="t-body-sm muted" style="text-wrap:pretty">Código de 6 caracteres o QR generado en el ERP, y el estado del emparejamiento.</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Código</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Emparejar" theme="light" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Código</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Emparejar" theme="dark" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Emparejando</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Emparejar" theme="light" screen="conectando" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Código incorrecto</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Emparejar" theme="light" screen="error" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Emparejado</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · claro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Emparejar" theme="light" screen="emparejado" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:375px"><span class="t-label">Revocado</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">375 · oscuro</span></div>
+  <div style="width:375px;height:812px;border:1px solid var(--ds-border);border-radius:28px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Emparejar" theme="dark" screen="revocado" hint-size="375px,812px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;flex:none">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:1024px"><span class="t-label">Código</span><span class="badge b-info">Nueva</span><span class="t-caption t-numeric">1024 horizontal · claro</span></div>
+  <div style="width:1024px;height:768px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;position:relative;background:var(--ds-bg)"><dc-import name="Emparejar" theme="light" device="tablet" hint-size="1024px,768px" style="display:block;width:100%;height:100%"></dc-import></div>
+</div></div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic{renderVals(){return {};}}
+</script>
+</body>
+</html>
