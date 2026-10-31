@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="lis" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Operaciones › Accesos" title="Listas" subtitle="Autorizadas y bloqueadas por empresa, cuenta, instalación o grupo" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="upload" hint-size="120px,40px">Importar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="120px,40px">Agregar</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ lista }}" on-change="{{ setLista }}" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:16px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ scopes }}" value="{{ scope }}" on-change="{{ setScope }}" label="Alcance" hint-size="360px,40px"></x-import>
+<div style="width:{{ searchW }};max-width:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre, RUN o patente" style="width:100%" hint-size="100%,44px"></x-import>
+</div>
+</div>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ sk }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="14" hint-size="45%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="25%" height="12" hint-size="25%,12px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="users" title="Esta lista está vacía" description="Agrega personas o patentes, o importa una planilla." action="{{ addBtn }}" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la lista" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="LST-503" on-retry="{{ noop }}" retry-label="Reintentar" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes permiso para ver las listas" description="Pídele acceso a un administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="margin:{{ tableMargin }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ isPhone }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showHoja }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" open="{{ true }}" contained="{{ true }}" side="{{ sheetSide }}" title="{{ hojaTitulo }}" on-close="{{ noop }}" actions="{{ hojaActions }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Nombre" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="Camila Herrera Soto" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="RUN, pasaporte o patente" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="16.234.567-8" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Vigencia" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="30-10-2026 al 30-11-2026" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Uso único" hint-size="100%,44px"></x-import>
+<sc-if value="{{ isBloq }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Motivo (obligatorio)" error="Escribe el motivo para bloquear." hint-size="100%,120px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" style="width:100%" hint-size="100%,88px"></x-import></x-import>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+</x-import>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;hoja&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;lista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;aut&quot;,&quot;blo&quot;],&quot;default&quot;:&quot;aut&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { lista: null, scope: "Empresa" };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone";
+    const lista = this.state.lista ?? this.props.lista ?? "aut";
+    const bloq = lista === "blo";
+    const badge = (t, l) => NS.Badge ? h(NS.Badge, { tone: t }, l) : l;
+    const aut = [
+      { nombre: "Camila Herrera Soto", doc: "16.2••.•••-8", tipos: "Visita", vig: "30-10 al 30-11-2026", dias: "Lun–Vie 08:00–18:00", uso: "Permanente", autor: "Marcela Rojas" },
+      { nombre: "Diego Fuentes", doc: "ABCD·12", tipos: "Proveedor, Vehículo", vig: "Sin vencimiento", dias: "Todos los días", uso: "Permanente", autor: "Marcela Rojas" },
+      { nombre: "Luis Pérez", doc: "9.8••.•••-2", tipos: "Contratista", vig: "01-11 al 15-11-2026", dias: "Lun–Sáb 07:00–19:00", uso: "Uso único", autor: "Jorge Muñoz" },
+    ];
+    const blo = [
+      { nombre: "Héctor Araya", doc: "15.0••.•••-7", tipos: "Todos", vig: "Sin vencimiento", dias: "—", uso: "Vence en: nunca", autor: "Marcela Rojas", motivo: "Reservado" },
+      { nombre: "Camión WXYZ·34", doc: "WXYZ·34", tipos: "Vehículo", vig: "Hasta 30-11-2026", dias: "—", uso: "Vence en: 31 días", autor: "Jorge Muñoz", motivo: "Reservado" },
+    ];
+    const rows = bloq ? blo : aut;
+    const cols = [
+      { key: "nombre", label: "Nombre", render: (r) => h("span", { style: { fontWeight: 500 } }, r.nombre) },
+      { key: "doc", label: "Documento / patente", mono: true },
+      { key: "tipos", label: "Tipos" },
+      { key: "vig", label: "Vigencia" },
+      { key: "dias", label: "Días y horario" },
+      bloq ? { key: "uso", label: "Vence en" } : { key: "uso", label: "Uso", render: (r) => badge(r.uso === "Uso único" ? "warning" : "neutral", r.uso) },
+      { key: "autor", label: "Autor" },
+    ];
+    const colsT = device === "desktop" ? cols : cols.filter((c) => ["nombre", "doc", "vig", "uso"].includes(c.key));
+    const hoja = estado === "hoja";
+    const mk = (l, v) => NS.Button ? h(NS.Button, { variant: v }, l) : null;
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, shellTitle: isPhone ? "" : "Listas",
+      lista, isBloq: bloq,
+      tabItems: [{ id: "aut", label: "Autorizadas", count: 3 }, { id: "blo", label: "Bloqueadas", count: 2 }],
+      scopes: ["Empresa", "Cuenta", "Instalación", "Grupo"], scope: this.state.scope,
+      setLista: (v) => this.setState({ lista: v }), setScope: (v) => this.setState({ scope: v }),
+      searchW: isPhone ? "100%" : "288px", tableMargin: isPhone ? "0 -16px" : "0",
+      isNormal: estado === "normal" || hoja, isCargando: estado === "cargando", isVacio: estado === "vacio", isError: estado === "error", isForbidden: estado === "sinpermiso",
+      showHoja: hoja, sheetSide: isPhone ? "bottom" : "right",
+      hojaTitulo: bloq ? "Agregar a bloqueados" : "Agregar a autorizados",
+      hojaActions: h(React.Fragment, null, mk("Cancelar", "secondary"), mk(bloq ? "Bloquear" : "Agregar", bloq ? "danger" : "primary")),
+      sk: [1, 2, 3, 4, 5], noop: () => {},
+      addBtn: NS.Button ? h(NS.Button, { icon: "plus" }, "Agregar") : null,
+      cols: colsT, rows,
+      toCard: (r) => ({ initials: r.nombre.slice(0, 2).toUpperCase(), title: r.nombre, subtitle: r.tipos + " · " + r.doc, meta: r.vig, badge: { tone: bloq ? "danger" : r.uso === "Uso único" ? "warning" : "success", label: bloq ? "Bloqueado" : r.uso } }),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "lis", label: "Accesos", icon: "user-check" }, { id: "per", label: "Personas", icon: "users" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "acc", label: "Accesos", icon: "user-check" }, { id: "lis", label: "Listas", icon: "lock" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
