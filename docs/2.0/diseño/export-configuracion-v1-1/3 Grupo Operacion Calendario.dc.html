@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:var(--ds-fill)}</style>
+</helmet>
+<dc-import name="Lamina" prefijo="3" titulo="3 · Subpágina de grupo · Operación › Calendario" nota="Ruta /configuracion/grupo/operacion. Migas «Configuración › Operación». A 1024 y 1280, las entradas del grupo a la izquierda y la entrada abierta a la derecha. A 375, primero la lista («‹ Configuración») y después la entrada («‹ Operación»). La Alerta «Decide Carlos · Propuesta B1» enlaza a la variante B1." secciones="{{ secciones }}" hint-size="100%,100%"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const g = { vista: "grupo", grupo: "operacion" };
+    return { secciones: [
+      { id: "calendario", titulo: "Calendario abierto", nota: "1024 y 1280: lista y detalle.", bases: [
+        { n: "Operacion_Calendario", s: "Calendario abierto", o: { ...g, entrada: "calendario" } },
+        { n: "Operacion_Calendario", s: "Calendario abierto", o: { ...g, entrada: "calendario", device: "tablet" } },
+        { n: "Operacion_lista", s: "Lista del grupo", o: { ...g, device: "phone" } },
+        { n: "Calendario", s: "Entrada con «‹ Operación»", o: { vista: "entrada", grupo: "operacion", entrada: "calendario", device: "phone" } },
+      ] },
+    ] };
+  }
+}
+</script>
+</body>
+</html>

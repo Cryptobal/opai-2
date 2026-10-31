@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:var(--ds-fill)}</style>
+</helmet>
+<dc-import name="Lamina" prefijo="8" titulo="8 · Menú de usuario y Preferencias" nota="El menú tiene Mi cuenta, Preferencias (claro, oscuro o sistema) y Cerrar sesión. Preferencias se abre como página propia de la cuenta, sin las migas de Configuración. No aparece en la portada, en ningún grupo ni en el buscador." secciones="{{ secciones }}" hint-size="100%,100%"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { secciones: [
+      { id: "menu", titulo: "Menú abierto", nota: "En escritorio y iPad se abre desde el usuario al pie de la barra lateral; en teléfono, desde el avatar de la barra superior.", bases: [{ n: "Menu_usuario", s: "Abierto", x3: true, o: { menu: true } }] },
+      { id: "preferencias", titulo: "Mi cuenta › Preferencias", nota: "Tema, avisos por correo y avisos en OPAI.", bases: [{ n: "Preferencias", s: "Página de cuenta", x3: true, o: { vista: "preferencias" } }] },
+    ] };
+  }
+}
+</script>
+</body>
+</html>
