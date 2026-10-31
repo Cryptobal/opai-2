@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+
+<sc-if value="{{ v_preview }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Reportes DT" title="Reporte de asistencia" subtitle="01-10-2026 – 31-10-2026 · Planta Quilicura" hint-size="100%,80px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="ADT.CabeceraOficial" cols="{{ 1 }}" hint-size="100%,260px"></x-import>
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,300px"></x-import>
+</div>
+<x-import component-from-global-scope="ADT.LeyendaSiglas" solo="{{ siglasUsadas }}" hint-size="100%,40px"></x-import>
+<div style="display:flex;flex-direction:column;gap:8px;padding-top:8px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ formatos }}" value="{{ formato }}" on-change="{{ setFormato }}" label="Formato" style="width:100%" hint-size="100%,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" size="lg" block="{{ true }}" hint-size="100%,48px">Exportar reporte</x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ v_main }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia · Res. Ex. N.º 38 DT" title="Reportes DT" subtitle="Titular: OPAI (razón social por confirmar)" hint-size="100%,80px">
+<sc-if value="{{ showActs }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ formatos }}" value="{{ formato }}" on-change="{{ setFormato }}" label="Formato" hint-size="200px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="120px,40px">Exportar</x-import>
+</sc-if>
+</x-import>
+<div class="chip-row" style="margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Período" valor="Octubre 2026" on-quitar="{{ noop }}" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Instalación" valor="Planta Quilicura" on-quitar="{{ noop }}" hint-size="210px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Empleador" valor="Atlas Seguridad SpA" on-quitar="{{ noop }}" hint-size="230px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px">Trabajador o mandante</x-import>
+</div>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px">
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:12px;align-items:center;min-height:44px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 20 }}" hint-size="20px,20px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" hint-size="70%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 12 }}" hint-size="40%,12px"></x-import></div>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 20 }}" hint-size="40%,20px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 120 }}" radius="10px" hint-size="100%,120px"></x-import>
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 28 }}" hint-size="100%,28px"></x-import></sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clock" title="Aún no hay marcas en este período" description="Los reportes se generan desde las marcas registradas. Cambia el período o la instalación." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos generar los reportes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-REP-502 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a los reportes DT" description="Los ven administración, RRHH y supervisores de sus instalaciones. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:24px">
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label m0">Reportes obligatorios</h2>
+<div class="rows" style="margin:0 -16px">
+<sc-for list="{{ reportes }}" as="r" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icon }}" title="{{ r.title }}" subtitle="{{ r.sub }}" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label m0">Documentación laboral y previsional</h2>
+<span class="t-caption">Se genera en Nómina. Aquí ves su estado y comprobante.</span>
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ docCols }}" rows="{{ docs }}" cards="{{ true }}" to-card="{{ docCard }}" hint-size="100%,240px"></x-import>
+</div>
+</section>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;align-items:start">
+<nav aria-label="Reportes" style="display:flex;flex-direction:column;gap:4px;padding:8px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span class="t-caption" style="padding:8px 8px 4px">Reportes obligatorios</span>
+<sc-for list="{{ reportesOblig }}" as="r" hint-placeholder-count="6">
+<button type="button" style="{{ r.style }}">
+<span class="ic sm {{ r.iconCls }}" style="color:var(--ds-fg-muted);flex:none"></span>
+<span style="display:flex;flex-direction:column;min-width:0;text-align:left"><span class="t-body-sm" style="font-weight:500">{{ r.title }}</span><span class="t-caption">{{ r.sub }}</span></span>
+</button>
+</sc-for>
+<span class="t-caption" style="padding:12px 8px 4px;border-top:1px solid var(--ds-border);margin-top:4px">Otros</span>
+<sc-for list="{{ reportesOtros }}" as="r" hint-placeholder-count="2">
+<button type="button" style="{{ r.style }}">
+<span class="ic sm {{ r.iconCls }}" style="color:var(--ds-fg-muted);flex:none"></span>
+<span style="display:flex;flex-direction:column;min-width:0;text-align:left"><span class="t-body-sm" style="font-weight:500">{{ r.title }}</span><span class="t-caption">{{ r.sub }}</span></span>
+</button>
+</sc-for>
+</nav>
+<section style="display:flex;flex-direction:column;gap:16px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);min-width:0">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Reporte de asistencia</span><span class="t-body-sm muted">Vista previa · 01-10-2026 – 31-10-2026 · generado desde las marcas registradas</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="120px,22px">31 días · 1 trabajador</x-import>
+</div>
+<x-import component-from-global-scope="ADT.CabeceraOficial" cols="{{ cabCols }}" hint-size="100%,130px"></x-import>
+<div style="overflow:auto;border:1px solid var(--ds-border);border-radius:var(--radius-md)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" bare="{{ true }}" compact="{{ true }}" hint-size="100%,280px"></x-import>
+</div>
+<x-import component-from-global-scope="ADT.LeyendaSiglas" solo="{{ siglasUsadas }}" hint-size="100%,40px"></x-import>
+<span class="t-caption">Las marcas corregidas muestran el valor aceptado. El original sigue en «Modificaciones y alteraciones de turnos».</span>
+</section>
+</div>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-subheading m0">Documentación laboral y previsional</h2><span class="t-body-sm muted">Se genera en Nómina. Aquí ves su estado y comprobante por período, igual que el fiscalizador.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ docCols }}" rows="{{ docs }}" hint-size="100%,240px"></x-import>
+</section>
+</div>
+</sc-if>
+</sc-if>
+</sc-if>
+
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;preview&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { formato: "xlsx" };
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { v_main: false, v_preview: false };
+    const b = A.base(this.props, "rep", "Reportes DT");
+    const h = A.h;
+    const item = (icon, title, sub, sel) => ({ icon, iconCls: "i-" + icon, title, sub,
+      style: { display: "flex", gap: 12, alignItems: "center", minHeight: 52, padding: "6px 10px", border: 0, borderRadius: "var(--radius-md)", background: sel ? "var(--ds-fill)" : "transparent", color: "var(--ds-fg)", cursor: "pointer", font: "inherit", width: "100%" } });
+    const oblig = [
+      item("users", "Asistencia", "Entradas, salidas y colación por día", true),
+      item("clock", "Jornada diaria", "Horas ordinarias y extraordinarias"),
+      item("calendar", "Domingos y festivos", "Días trabajados y descansos"),
+      item("swap", "Modificaciones y alteraciones de turnos", "Correcciones con su original"),
+      item("file", "Reporte diario", "Marcas del día por instalación"),
+      item("alert", "Incidentes técnicos", "Inicio, fin y severidad"),
+    ];
+    const otros = [item("briefcase", "Clientes del prestador (Art. 26)", "Mandantes e instalaciones"), item("scan", "Verificar marcación por hash", "Busca una marca por su comprobante")];
+    const S = A.sigla;
+    const rows = [
+      { id: 1, fecha: "01-10-2026", dia: "Mié", ent: "07:58", sal: "20:02", col: "60 min", hrs: "11:04", he: "0:04", sig: "J.O." },
+      { id: 2, fecha: "02-10-2026", dia: "Jue", ent: "07:55", sal: "20:00", col: "60 min", hrs: "11:05", he: "0:05", sig: "J.O." },
+      { id: 3, fecha: "03-10-2026", dia: "Vie", ent: "—", sal: "—", col: "—", hrs: "0:00", he: "—", sig: "L.M." },
+      { id: 4, fecha: "04-10-2026", dia: "Sáb", ent: "08:14", sal: "20:00", col: "60 min", hrs: "10:46", he: "—", sig: "AT", corr: true },
+      { id: 5, fecha: "05-10-2026", dia: "Dom", ent: "07:59", sal: "20:01", col: "60 min", hrs: "11:02", he: "0:02", sig: "J.O." },
+      { id: 6, fecha: "06-10-2026", dia: "Lun", ent: "—", sal: "—", col: "—", hrs: "—", he: "—", sig: "VAC." },
+    ];
+    const docs = [
+      { id: 1, doc: "Libro de Remuneraciones Electrónico (LRE)", per: "Septiembre 2026", est: ["success", "Cargado"], comp: "LRE_76543210_202609.csv" },
+      { id: 2, doc: "Comprobante Previred", per: "Septiembre 2026", est: ["success", "Pagado"], comp: "Previred_202609_folio_88412.pdf" },
+      { id: 3, doc: "Libro de remuneraciones", per: "Septiembre 2026", est: ["warning", "Formato por verificar"], comp: "—" },
+      { id: 4, doc: "Contratos registrados en Mi DT", per: "Al 30-10-2026", est: ["warning", "2 sin registrar"], comp: "42 de 44" },
+    ];
+    return {
+      ...b,
+      showActs: b.notPhone,
+      gridCols: b.isTablet ? "280px minmax(0,1fr)" : "320px minmax(0,1fr)",
+      cabCols: b.isTablet ? 2 : 3,
+      formatos: [{ value: "xlsx", label: "Excel" }, { value: "pdf", label: "PDF" }, { value: "docx", label: "Word" }],
+      formato: this.state.formato, setFormato: (v) => this.setState({ formato: v }),
+      reportes: [...oblig, ...otros], reportesOblig: oblig, reportesOtros: otros,
+      rows, siglasUsadas: ["J.O.", "AT", "L.M.", "VAC.", "H.E."],
+      cols: [
+        { key: "fecha", label: "Fecha", render: (r) => h("span", { className: "t-numeric" }, r.dia + " " + r.fecha) },
+        { key: "ent", label: "Entrada", render: (r) => h("span", { style: { display: "inline-flex", gap: 6, alignItems: "center" } }, h("span", { className: "t-numeric" }, r.ent), r.corr ? A.badge("info", "Corregida") : null) },
+        { key: "sal", label: "Salida" }, { key: "col", label: "Colación" },
+        { key: "hrs", label: "Horas", align: "right" }, { key: "he", label: "H.E.", align: "right" },
+        { key: "sig", label: "Sigla", render: (r) => S(r.sig) },
+      ],
+      toCard: (r) => ({ title: r.dia + " " + r.fecha + (r.ent !== "—" ? " · " + r.ent + "–" + r.sal : ""), subtitle: "Horas " + r.hrs + " · H.E. " + r.he + " · " + r.sig, badge: r.corr ? { tone: "info", label: "Corregida" } : null }),
+      docs,
+      docCols: [
+        { key: "doc", label: "Documento", strong: true }, { key: "per", label: "Período", muted: true },
+        { key: "est", label: "Estado", render: (r) => A.badge(r.est[0], r.est[1]) },
+        { key: "comp", label: "Comprobante", mono: true, muted: true },
+        { key: "acc", label: "", align: "right", render: () => A.btn("Abrir en Nómina", { variant: "ghost", iconRight: "chevron-right" }) },
+      ],
+      docCard: (r) => ({ icon: "file", title: r.doc, subtitle: r.per + " · " + r.comp, badge: { tone: r.est[0], label: r.est[1] } }),
+      emptyAction: A.btn("Cambiar período", { size: "lg" }),
+    };
+  }
+}
+</script>
+</body>
+</html>

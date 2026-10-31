@@ -94,6 +94,8 @@ model Negocio {
   contactos     NegocioContacto[]
   historial     HistorialEtapa[]
   solicitudes   Solicitud[]
+  actividadVinculos ActividadVinculo[]
+  etiquetaAsignaciones EtiquetaAsignacion[]
 
   @@index([tenantId, estado])
   @@index([tenantId, etapaId])

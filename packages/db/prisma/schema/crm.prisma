@@ -1,0 +1,149 @@
+// Núcleo — contacto en varias cuentas, actividad unificada y etiquetas (CRM PR 2a, CAR-26,
+// ADR-040 §5). Schema `core`. Toda tabla con tenant_id, RLS `tenant_isolation` (FORCE), IDs uuid(7) y
+// columnas snake_case por @map. Como en Comercial, el tenant_id NO lleva @relation a Tenant: la FK a
+// core.tenants va en el SQL, igual que los triggers de mismo tenant.
+
+/// Vínculo contacto–cuenta (N–N). `core.contactos.cuenta_id` se conserva como vínculo inicial: un
+/// trigger crea el vínculo al insertar el contacto y lo mantiene al editar cargo, roles o principal.
+model ContactoCuenta {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  contactoId  String   @map("contacto_id") @db.Uuid
+  cuentaId    String   @map("cuenta_id") @db.Uuid
+  /// Cargo de la persona en esa cuenta.
+  cargo       String?
+  /// "comercial" | "operacional" | "facturacion" | "cobranza" | "cesion"
+  roles       String[] @default([])
+  /// Un solo principal por cuenta (índice parcial único).
+  esPrincipal Boolean  @default(false) @map("es_principal")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  contacto Contacto @relation(fields: [contactoId], references: [id], onDelete: Cascade)
+  cuenta   Cuenta   @relation(fields: [cuentaId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, contactoId, cuentaId])
+  @@index([tenantId, cuentaId])
+  @@map("contacto_cuentas")
+  @@schema("core")
+}
+
+/// Nota, llamada, correo, WhatsApp, reunión, visita o tarea. Se liga a negocio, cuenta, contacto e
+/// instalación por `actividad_vinculos`. Las tareas llevan prioridad, estado y responsables.
+model Actividad {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  /// "nota" | "llamada" | "correo" | "whatsapp" | "reunion" | "visita" | "tarea"
+  tipo            String
+  titulo          String
+  detalle         String?
+  /// Cuándo ocurrió (puede ser pasada); distinto de created_at.
+  ocurrioEn       DateTime  @default(now()) @map("ocurrio_en") @db.Timestamptz(6)
+  /// Solo tareas.
+  vencimiento     DateTime? @db.Timestamptz(6)
+  todoElDia       Boolean   @default(false) @map("todo_el_dia")
+  /// "alta" | "media" | "baja". Solo tareas.
+  prioridad       String?
+  /// "pendiente" | "hecha" | "cancelada". Solo tareas.
+  estado          String?
+  /// Reuniones: asistentes (texto libre), acuerdos y próximo paso.
+  asistentes      String[]  @default([])
+  acuerdos        String?
+  proximoPaso     String?   @map("proximo_paso")
+  completadaEn    DateTime? @map("completada_en") @db.Timestamptz(6)
+  completadaPorId String?   @map("completada_por_id") @db.Uuid
+  creadaPorId     String?   @map("creada_por_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  vinculos     ActividadVinculo[]
+  responsables ActividadResponsable[]
+
+  @@index([tenantId, tipo, estado, vencimiento])
+  @@index([tenantId, ocurrioEn])
+  @@map("actividades")
+  @@schema("core")
+}
+
+/// A qué entidad se liga una actividad: exactamente una de las cuatro columnas (CHECK).
+model ActividadVinculo {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  actividadId   String   @map("actividad_id") @db.Uuid
+  negocioId     String?  @map("negocio_id") @db.Uuid
+  cuentaId      String?  @map("cuenta_id") @db.Uuid
+  contactoId    String?  @map("contacto_id") @db.Uuid
+  instalacionId String?  @map("instalacion_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actividad   Actividad    @relation(fields: [actividadId], references: [id], onDelete: Cascade)
+  negocio     Negocio?     @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  cuenta      Cuenta?      @relation(fields: [cuentaId], references: [id], onDelete: Cascade)
+  contacto    Contacto?    @relation(fields: [contactoId], references: [id], onDelete: Cascade)
+  instalacion Instalacion? @relation(fields: [instalacionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, actividadId])
+  @@index([tenantId, negocioId])
+  @@index([tenantId, cuentaId])
+  @@index([tenantId, contactoId])
+  @@index([tenantId, instalacionId])
+  @@map("actividad_vinculos")
+  @@schema("core")
+}
+
+/// Responsables de una tarea (al menos uno lo exige la capacidad). Usuarios miembros de la empresa.
+model ActividadResponsable {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  actividadId String   @map("actividad_id") @db.Uuid
+  usuarioId   String   @map("usuario_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actividad Actividad @relation(fields: [actividadId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, actividadId, usuarioId])
+  @@index([tenantId, usuarioId])
+  @@map("actividad_responsables")
+  @@schema("core")
+}
+
+/// Catálogo de etiquetas del tenant.
+model Etiqueta {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  nombre    String
+  /// Tono del DS: "neutral" | "info" | "success" | "warning" | "danger".
+  tono      String   @default("neutral")
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  asignaciones EtiquetaAsignacion[]
+
+  @@unique([tenantId, nombre])
+  @@map("etiquetas")
+  @@schema("core")
+}
+
+/// Etiqueta asignada a un negocio, una cuenta o un contacto: exactamente una columna (CHECK).
+model EtiquetaAsignacion {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  etiquetaId String   @map("etiqueta_id") @db.Uuid
+  negocioId  String?  @map("negocio_id") @db.Uuid
+  cuentaId   String?  @map("cuenta_id") @db.Uuid
+  contactoId String?  @map("contacto_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  etiqueta Etiqueta  @relation(fields: [etiquetaId], references: [id], onDelete: Cascade)
+  negocio  Negocio?  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  cuenta   Cuenta?   @relation(fields: [cuentaId], references: [id], onDelete: Cascade)
+  contacto Contacto? @relation(fields: [contactoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, etiquetaId])
+  @@index([tenantId, negocioId])
+  @@index([tenantId, cuentaId])
+  @@index([tenantId, contactoId])
+  @@map("etiqueta_asignaciones")
+  @@schema("core")
+}

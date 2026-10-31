@@ -1,6 +1,8 @@
 import { forTenant, forUser, tenantPorSlug, usuarioPorId } from "@opai/db";
 import type { Excepcion } from "@opai/domain";
 
+import { instalacionesDeContactoCliente } from "./fuentes-cliente";
+
 /** Membresía con su tenant, tal como se lista para elegir empresa. */
 export type MembresiaConTenant = {
   id: string;
@@ -104,6 +106,7 @@ async function accesoConModulos(tenantId: string, userId: string) {
   const rol = m?.rolTenant;
   // Alcance por filas (ADR-022 · §16.4): hoy solo el rol base supervisor acota. Una consulta extra
   // por contexto y solo para supervisores (ADR-045); el resto ve todo (null).
+  // El contacto de un cliente también acota por filas: solo las instalaciones de su acceso (CAR-88).
   const instalaciones =
     m?.rol === "supervisor"
       ? (
@@ -112,7 +115,9 @@ async function accesoConModulos(tenantId: string, userId: string) {
             select: { instalacionId: true },
           })
         ).map((s) => s.instalacionId)
-      : null;
+      : m
+        ? await instalacionesDeContactoCliente(tenantId, m)
+        : null;
   const acceso: AccesoFila = {
     // Sin rol personalizado (roleId null) manda el rol base. Con un rol personalizado archivado se
     // deniega por defecto (lista vacía): nunca se vuelve al rol base, que daría más acceso (§16.2).

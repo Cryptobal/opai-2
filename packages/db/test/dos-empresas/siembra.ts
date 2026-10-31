@@ -69,6 +69,15 @@ export async function insertar(pg: Client, tabla: string, fila: Fila): Promise<F
   return nueva;
 }
 
+/** Lee la fila que ya creó un trigger (ajuste `existente`). */
+async function leer(pg: Client, tabla: string, donde: Fila): Promise<Fila> {
+  const cols = Object.keys(donde);
+  const sql = `SELECT * FROM ${tabla} WHERE ${cols.map((c, i) => `"${c}" = $${i + 1}`).join(" AND ")}`;
+  const fila = (await pg.query<Fila>(sql, Object.values(donde))).rows[0];
+  if (!fila) throw new Error(`${tabla}: no existe la fila que debía crear el trigger`);
+  return fila;
+}
+
 /**
  * Dependencias de siembra: referencias no nulas a otras tablas con tenant y las de los ajustes. Una
  * referencia a `core.users` espera la membresía del usuario de prueba en su empresa (desde CAR-46 el
@@ -125,7 +134,13 @@ export async function sembrar(pg: Client, tenants: { a: string; b: string }): Pr
         for (const lado of ["a", "b"] as const) {
           const ctx = { tenant: tenants[lado], usuario: usuarios[lado], filas: filas[lado] };
           await pg.query("SELECT set_config('app.tenant_id', $1, false)", [ctx.tenant]);
-          filas[lado].set(n, await insertar(pg, n, valores(t, ctx)));
+          const ajuste = AJUSTES[n];
+          filas[lado].set(
+            n,
+            ajuste?.existente
+              ? await leer(pg, n, ajuste.existente(ctx))
+              : await insertar(pg, n, valores(t, ctx)),
+          );
         }
       } catch (error) {
         errores.set(n, error instanceof Error ? error.message : String(error));
