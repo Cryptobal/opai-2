@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:var(--ds-fill)}</style>
+</helmet>
+<dc-import name="Lamina" prefijo="9" titulo="9 · Estados especiales" nota="Cada estado a 375, 1024 y 1280, en claro y oscuro, con el shell completo." secciones="{{ secciones }}" hint-size="100%,100%"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const S = (id, titulo, nota, n, o) => ({ id, titulo, nota, bases: [{ n, s: titulo, x3: true, o }] });
+    return { secciones: [
+      S("portada-carga", "Portada cargando", "Esqueleto del buscador y de las tarjetas.", "Portada_cargando", { estado: "carga" }),
+      S("grupo-carga", "Grupo cargando", "Esqueleto de la lista y del detalle.", "Grupo_cargando", { estado: "grupocarga", vista: "grupo", grupo: "operacion" }),
+      S("error", "Error de carga", "«No pudimos cargar la configuración» con «Reintentar» y el código para soporte.", "Error", { estado: "error" }),
+      S("sin-permiso", "Grupo sin entradas para el rol", "Forbidden con «Pídele acceso a un administrador».", "Sin_permiso", { estado: "sinpermiso", rol: "supervisor" }),
+      S("404", "Entrada que no existe", "«Este ajuste no existe» con «Volver a Configuración».", "404", { estado: "404" }),
+      S("buscador-vacio", "Buscador sin resultados", "«No encontramos “xyz”. Prueba con otra palabra».", "Buscador_vacio", { q: "xyz" }),
+      S("modulos-vacio", "Sin módulos", "«Aún no tienes módulos con ajustes» con «Ver catálogo».", "Modulos_sin_activos", { vista: "grupo", grupo: "modulos", entrada: "vacio", sinModulos: true }),
+    ] };
+  }
+}
+</script>
+</body>
+</html>
