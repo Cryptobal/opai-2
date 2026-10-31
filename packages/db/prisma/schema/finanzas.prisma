@@ -1,0 +1,217 @@
+// Módulo Finanzas · Flujo de caja (CAR-91, Brief 20, ADR-026). Schema propio `finanzas`.
+// Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. Como en
+// Tickets, tenant_id no lleva @relation a Tenant (no se toca core.prisma): la FK a core.tenants va en
+// el SQL de la migración. Montos en CLP enteros. Aquí solo viven la capa Plan editable, los cierres y
+// los ajustes; las capas Real y Comprometido se derivan de hechos (DTE, banco, nómina) cuando esos
+// módulos existan, nunca se copian (ADR-026).
+
+/// Fila de la planilla (ingreso o egreso). `vinculo` es el texto con el origen de la cifra (cuenta,
+/// instalación o centro de costo); `arrastre` activa el arrastre en cadena al reprogramar.
+model FlujoFila {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  /// "ingreso" | "egreso".
+  seccion   String
+  etiqueta  String
+  vinculo   String?
+  arrastre  Boolean  @default(false)
+  orden     Int      @default(0)
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  celdas FlujoCelda[]
+
+  @@unique([tenantId, etiqueta])
+  @@index([tenantId, seccion, orden])
+  @@map("flujo_filas")
+  @@schema("finanzas")
+}
+
+/// Cifra de una fila en una semana (lunes ISO). `capa`: "plan" (editable), "comprometido" o "real"
+/// ("real" = dada por cumplida a mano, con su fecha). Una celda por (fila, semana).
+model FlujoCelda {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  filaId      String    @map("fila_id") @db.Uuid
+  semana      DateTime  @db.Date
+  capa        String    @default("plan")
+  monto       Int
+  nota        String?
+  cumplidaEn  DateTime? @map("cumplida_en") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fila FlujoFila @relation(fields: [filaId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, filaId, semana])
+  @@index([tenantId, semana])
+  @@map("flujo_celdas")
+  @@schema("finanzas")
+}
+
+/// Cierre semanal: saldo sugerido contra el saldo del banco, motivo y sello. Una semana sellada no
+/// admite cambios en sus celdas; reabrirla exige motivo (queda en la auditoría).
+model FlujoCierre {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  semana         DateTime  @db.Date
+  saldoSugerido  Int       @map("saldo_sugerido")
+  saldoBanco     Int       @map("saldo_banco")
+  motivo         String?
+  sellada        Boolean   @default(true)
+  selladaEn      DateTime? @map("sellada_en") @db.Timestamptz(6)
+  selladaPorId   String?   @map("sellada_por_id") @db.Uuid
+  motivoReapertura String?  @map("motivo_reapertura")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, semana])
+  @@map("flujo_cierres")
+  @@schema("finanzas")
+}
+
+/// Ajustes del flujo por empresa (una fila por tenant): saldo inicial del horizonte y umbral de alerta.
+model FlujoAjustes {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @unique @map("tenant_id") @db.Uuid
+  saldoInicial Int      @default(0) @map("saldo_inicial")
+  /// Saldo bajo el cual la planilla marca la semana (0 = solo alerta bajo cero).
+  umbral       Int      @default(0)
+  /// Semana (lunes) desde la que parte el saldo inicial.
+  desde        DateTime @db.Date
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("flujo_ajustes")
+  @@schema("finanzas")
+}
+
+// Módulo Finanzas · Compras (Brief 23 · PR 1): plan de cuentas por tenant, centros de costo
+// (instalaciones + el general «Administración / Oficina central»), proveedores y libro de compras.
+// Schema propio `finanzas`. Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas
+// snake_case por @map. El tenant_id y la instalación NO llevan @relation (no se tocan core.prisma ni
+// maestros.prisma): sus FK van en el SQL de la migración. Dinero en CLP entero (`Int`, tope
+// 2.000.000.000 validado en el borde).
+
+/// Cuenta del plan de cuentas del tenant (finanzas-compras.md §3). Se carga desde la plantilla
+/// chilena base y se edita libremente; el grupo de las cuentas con `claveSistema` se valida.
+model CuentaContable {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  codigo           String
+  nombre           String
+  /// "activo" | "pasivo" | "patrimonio" | "ingreso" | "costo" | "gasto"
+  tipo             String
+  /// "deudora" | "acreedora"
+  naturaleza       String
+  /// "corriente" | "no_corriente"; solo activos y pasivos.
+  grupo            String?
+  exigeCentroCosto Boolean  @default(false) @map("exige_centro_costo")
+  /// Los títulos agrupan; solo las cuentas de movimiento reciben asientos (PR 2).
+  aceptaAsientos   Boolean  @default(true) @map("acepta_asientos")
+  padreId          String?  @map("padre_id") @db.Uuid
+  /// Rol contable estable (deudores_por_venta, iva_credito…), independiente del nombre y el código.
+  claveSistema     String?  @map("clave_sistema")
+  activa           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  padre            CuentaContable?  @relation("JerarquiaCuentas", fields: [padreId], references: [id], onDelete: Restrict)
+  hijas            CuentaContable[] @relation("JerarquiaCuentas")
+  proveedoresGasto Proveedor[]      @relation("CuentaGastoProveedor")
+  proveedoresPagar Proveedor[]      @relation("CuentaPagarProveedor")
+
+  @@unique([tenantId, codigo])
+  @@unique([tenantId, claveSistema])
+  @@index([tenantId, padreId])
+  @@map("cuentas_contables")
+  @@schema("finanzas")
+}
+
+/// Centro de costo: una instalación o el general. Se crea al usarse por primera vez (la lista de
+/// centros se arma con las instalaciones del tenant, así que una instalación nueva ya es un centro).
+model CentroCosto {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  /// "instalacion" | "general"
+  tipo          String
+  instalacionId String?  @map("instalacion_id") @db.Uuid
+  nombre        String
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  proveedores Proveedor[]
+  documentos  DocumentoRecibido[]
+
+  @@unique([tenantId, instalacionId])
+  @@map("centros_costo")
+  @@schema("finanzas")
+}
+
+/// Proveedor del tenant (finanzas-compras.md §5.2): plazo de pago y cuenta y centro por defecto.
+model Proveedor {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  /// RUT canónico "76543210-3".
+  rut              String
+  razonSocial      String   @map("razon_social")
+  giro             String?
+  email            String?
+  telefono         String?
+  plazoPagoDias    Int      @default(30) @map("plazo_pago_dias")
+  cuentaGastoId    String?  @map("cuenta_gasto_id") @db.Uuid
+  cuentaPorPagarId String?  @map("cuenta_por_pagar_id") @db.Uuid
+  centroCostoId    String?  @map("centro_costo_id") @db.Uuid
+  notas            String?
+  activo           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cuentaGasto    CuentaContable?     @relation("CuentaGastoProveedor", fields: [cuentaGastoId], references: [id], onDelete: Restrict)
+  cuentaPorPagar CuentaContable?     @relation("CuentaPagarProveedor", fields: [cuentaPorPagarId], references: [id], onDelete: Restrict)
+  centroCosto    CentroCosto?        @relation(fields: [centroCostoId], references: [id], onDelete: Restrict)
+  documentos     DocumentoRecibido[]
+
+  @@unique([tenantId, rut])
+  @@index([tenantId, razonSocial])
+  @@map("proveedores")
+  @@schema("finanzas")
+}
+
+/// Documento recibido del libro de compras (DTE 33, 34, 56 o 61). Registro manual o importación;
+/// la recepción automática por RCV llega con el adaptador del SII (requiere credenciales del tenant).
+/// El estado de pago NO vive aquí: saldrá de la conciliación bancaria (PR 2).
+model DocumentoRecibido {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  proveedorId     String   @map("proveedor_id") @db.Uuid
+  tipoDte         Int      @map("tipo_dte")
+  folio           Int
+  fechaEmision    DateTime @map("fecha_emision") @db.Date
+  fechaRecepcion  DateTime @map("fecha_recepcion") @db.Date
+  montoNeto       Int      @default(0) @map("monto_neto")
+  montoExento     Int      @default(0) @map("monto_exento")
+  montoIva        Int      @default(0) @map("monto_iva")
+  montoOtros      Int      @default(0) @map("monto_otros")
+  montoTotal      Int      @map("monto_total")
+  /// "pendiente_revision" | "aceptado" | "reclamado". Cambiarlo ante el SII llega con el adaptador RCV.
+  estadoRecepcion String   @default("pendiente_revision") @map("estado_recepcion")
+  centroCostoId   String?  @map("centro_costo_id") @db.Uuid
+  /// "manual" | "importacion" (luego "rcv").
+  origen          String   @default("manual")
+  glosa           String?
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  proveedor   Proveedor    @relation(fields: [proveedorId], references: [id], onDelete: Restrict)
+  centroCosto CentroCosto? @relation(fields: [centroCostoId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, proveedorId, tipoDte, folio])
+  @@index([tenantId, fechaRecepcion])
+  @@index([tenantId, proveedorId, fechaEmision])
+  @@index([tenantId, centroCostoId])
+  @@map("documentos_recibidos")
+  @@schema("finanzas")
+}
