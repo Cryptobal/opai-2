@@ -19,6 +19,8 @@ export const ticketsCambiarEstado = defineCapability({
   input: z.object({ id: uuidSchema, estado: z.enum(["en_curso", "resuelto", "cerrado"]) }),
   output: z.object({ id: uuidSchema, estado: z.string() }),
   efecto: "escritura",
+  // Cerrar es terminal (R6): un agente lo deja en la cola de aprobación humana.
+  exigeAprobacion: (input) => input.estado === "cerrado",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const t = await ticketDe(ctx, input.id);

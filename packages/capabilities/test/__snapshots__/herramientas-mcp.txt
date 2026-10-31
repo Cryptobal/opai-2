@@ -412,6 +412,7 @@ preview_tickets_tickets_comentar
 preview_tickets_tickets_crear
 preview_tickets_tickets_reasignar
 preview_tickets_tickets_rechazar
+preview_tickets_tipos_actualizar
 preview_tickets_tipos_crear
 rondas_etiquetas_pdf
 rondas_incidentes_tipo_actualizar
@@ -436,5 +437,6 @@ tickets_tickets_listar
 tickets_tickets_obtener
 tickets_tickets_reasignar
 tickets_tickets_rechazar
+tickets_tipos_actualizar
 tickets_tipos_crear
 tickets_tipos_listar

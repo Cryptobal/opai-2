@@ -44,6 +44,7 @@ export const manifest = defineModule({
   configuracion: z.object({}),
   eventos: [
     { id: "tickets.tipo.creado", descripcion: "Se creó un tipo de ticket." },
+    { id: "tickets.tipo.actualizado", descripcion: "Se modificó un tipo de ticket." },
     { id: "tickets.ticket.creado", descripcion: "Se creó un ticket o una solicitud." },
     { id: "tickets.ticket.comentado", descripcion: "Se agregó un comentario a un ticket." },
     { id: "tickets.ticket.estado_cambiado", descripcion: "Un ticket cambió de estado." },
