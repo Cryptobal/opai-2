@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<style>body{margin:0;background:var(--ds-fill);color:var(--ds-fg);font-family:var(--font-sans)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:48px;min-width:max-content">
+<header style="display:flex;flex-direction:column;gap:12px;max-width:960px">
+<span class="t-overline" style="color:var(--ds-fg-muted)">v1.1 · OPAI 2.0 · DS 2.0 · 30-10-2026</span>
+<h1 class="t-display" style="margin:0">Hoja de componentes · v1.1</h1>
+<p class="t-body" style="margin:0;color:var(--ds-fg-muted);text-wrap:pretty">Dos piezas nuevas para el DS: TarjetaGrupo (tarjeta desde 768, fila en teléfono) y ResultadoAjuste (resultado del buscador de ajustes). Hover: borde border-strong en la tarjeta y fondo fill en el resultado. Foco: contorno 2 px focus con separación 2 px. Presionado: fondo fill. Deshabilitado: opacidad 45 %. «Activo» es el resultado marcado con el teclado.</p>
+<a href="Indice.dc.html" class="t-label">Índice</a>
+</header>
+<sc-for list="{{ temas }}" as="t" hint-placeholder-count="2">
+<div data-theme="{{ t.id }}" style="background:var(--ds-bg);color:var(--ds-fg);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:32px">
+<span class="t-overline">{{ t.label }}</span>
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">TarjetaGrupo · tarjeta <span class="t-caption" style="color:var(--ds-accent)">Nuevo para el DS</span></span>
+<div style="display:flex;flex-wrap:wrap;gap:24px">
+<sc-for list="{{ estados }}" as="e" hint-placeholder-count="5">
+<div style="width:300px;display:flex;flex-direction:column;gap:8px"><span class="t-caption">{{ e.label }}</span><dc-import name="TarjetaGrupo" estado="{{ e.id }}" icono="clipboard" nombre="Operación" linea="Feriados, patrones y documentos" vista="Patrones y funciones · Calendario · Documentos" hint-size="300px,176px"></dc-import></div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">TarjetaGrupo · fila (teléfono) <span class="t-caption" style="color:var(--ds-accent)">Nuevo para el DS</span></span>
+<div style="display:flex;flex-wrap:wrap;gap:24px">
+<sc-for list="{{ estados }}" as="e" hint-placeholder-count="5">
+<div style="width:300px;display:flex;flex-direction:column;gap:8px"><span class="t-caption">{{ e.label }}</span><div style="border:1px solid var(--ds-border);border-bottom:0;border-radius:16px;overflow:hidden"><dc-import name="TarjetaGrupo" variante="fila" estado="{{ e.id }}" icono="clipboard" nombre="Operación" linea="Feriados, patrones y documentos" hint-size="300px,64px"></dc-import></div></div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">ResultadoAjuste · buscador de ajustes <span class="t-caption" style="color:var(--ds-accent)">Nuevo para el DS</span></span>
+<div style="display:flex;flex-wrap:wrap;gap:24px">
+<sc-for list="{{ estadosRes }}" as="e" hint-placeholder-count="6">
+<div style="width:260px;display:flex;flex-direction:column;gap:8px"><span class="t-caption">{{ e.label }}</span><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:8px"><dc-import name="ResultadoAjuste" estado="{{ e.id }}" q="cal" icono="clipboard" nombre="Calendario" ruta="Operación › Calendario" campo="Palabra clave: feriados" hint-size="100%,72px"></dc-import></div></div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const E = (id, label) => ({ id, label });
+    return {
+      temas: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      estados: [E("reposo", "Reposo"), E("hover", "Hover"), E("foco", "Foco"), E("presionado", "Presionado"), E("deshabilitado", "Deshabilitado")],
+      estadosRes: [E("reposo", "Reposo"), E("activo", "Activo (teclado)"), E("hover", "Hover"), E("foco", "Foco"), E("presionado", "Presionado"), E("deshabilitado", "Deshabilitado")],
+    };
+  }
+}
+</script>
+</body>
+</html>
