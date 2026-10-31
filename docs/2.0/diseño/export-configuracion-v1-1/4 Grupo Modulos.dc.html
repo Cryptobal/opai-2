@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:var(--ds-fill)}</style>
+</helmet>
+<dc-import name="Lamina" prefijo="4" titulo="4 · Grupo Módulos" nota="Rutas /configuracion/grupo/modulos y /configuracion/modulo/‹id›. Primero «Catálogo de módulos» y después cada módulo activo o en prueba. Como pasan de 7, la lista lleva su propio buscador y no se divide. Al abrir un módulo, la lista queda a la izquierda con el módulo seleccionado y a la derecha sus pestañas. A 375, primero la lista y después la entrada, que vuelve con «‹ Módulos»." secciones="{{ secciones }}" hint-size="100%,100%"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const g = { vista: "grupo", grupo: "modulos" };
+    return { secciones: [
+      { id: "rondas", titulo: "Rondas › Tipos de incidente", nota: "Migas «Configuración › Módulos» y lista de 9 entradas con buscador.", bases: [
+        { n: "Modulos_Rondas", s: "Tipos de incidente", o: { ...g, entrada: "rondas" } },
+        { n: "Modulos_Rondas", s: "Tipos de incidente", o: { ...g, entrada: "rondas", device: "tablet" } },
+        { n: "Modulos_lista", s: "Lista de módulos", o: { ...g, device: "phone" } },
+        { n: "Modulo_Rondas", s: "Entrada con «‹ Módulos»", o: { vista: "entrada", grupo: "modulos", entrada: "rondas", device: "phone" } },
+      ] },
+      { id: "catalogo", titulo: "Catálogo de módulos", nota: "Contratados, en trial y disponibles.", bases: [{ n: "Modulos_Catalogo", s: "Catálogo", x3: true, o: { ...g, entrada: "catalogo" } }] },
+      { id: "sin-modulos", titulo: "Sin módulos", nota: "«Aún no tienes módulos con ajustes» con «Ver catálogo».", bases: [{ n: "Modulos_sin_activos", s: "Solo catálogo", x3: true, o: { ...g, entrada: "vacio", sinModulos: true } }] },
+    ] };
+  }
+}
+</script>
+</body>
+</html>
