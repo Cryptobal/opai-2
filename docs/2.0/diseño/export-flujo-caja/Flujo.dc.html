@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./flujo.js"></script>
+<style>body{margin:0} a{color:var(--ds-accent)} a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="flujo" title="Finanzas" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" style="max-width:none" hint-size="100%,600px">
+
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Flujo de caja" subtitle="{{ headerSub }}" hint-size="100%,80px">
+<sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="display:inline-flex;align-items:center;gap:6px;color:var(--ds-fg-muted)"><span class="ic sm i-refresh"></span>Guardando…</span></sc-if>
+<sc-if value="{{ headerActions }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ periodOpts }}" value="sem" label="Periodo" hint-size="160px,36px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="lock" hint-size="130px,40px">Cerrar S43</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ pageOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+
+<sc-if value="{{ phoneSaving }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="display:inline-flex;align-items:center;gap:6px;color:var(--ds-fg-muted)"><span class="ic sm i-refresh"></span>Guardando Proveedores S47…</span></sc-if>
+
+<sc-if value="{{ bankMissing }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" icono="landmark" titulo="Sin banco conectado" accion="{{ bankAction }}" hint-size="100%,64px">La capa real y el saldo de hoy quedan vacíos hasta que conectes tu banco. El plan y lo comprometido siguen al día.</x-import>
+</sc-if>
+
+<sc-if value="{{ bandaCompact }}" hint-placeholder-val="{{ true }}">
+<div role="status" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:16px;background:var(--ds-danger-muted);color:var(--ds-danger-fg)">
+<span class="ic i-alert"></span>
+<div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px"><span class="t-label">S51 queda en $ −2.820.000</span><span class="t-body-sm">Bajo 0 entre el 14-12 y el 20-12-2026. S46 también queda bajo el umbral de $ 15.000.000.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon-right="chevron-right" hint-size="120px,40px">Ver salidas</x-import>
+<sc-if value="{{ mailNote }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="flex-basis:100%;display:flex;align-items:center;gap:6px;padding-left:32px"><span class="ic sm i-bell"></span>Avisamos por correo a Paula Rojas y Andrés Molina el 30-10-2026 a las 08:00.</span></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ bandaFull }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
+<div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--ds-danger-muted);color:var(--ds-danger-fg)">
+<span class="ic i-alert"></span>
+<div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">S51 queda en $ −2.820.000</span><span class="t-body-sm">Bajo 0 entre el 14-12 y el 20-12-2026. S46 también queda bajo el umbral de $ 15.000.000 ($ 12.780.000). Estas salidas lo resuelven:</span><sc-if value="{{ mailNote }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="display:flex;align-items:center;gap:6px;padding-top:4px"><span class="ic sm i-bell"></span>Avisamos por correo a Paula Rojas y Andrés Molina el 30-10-2026 a las 08:00.</span></sc-if></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+<sc-for list="{{ salidas }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-top:1px solid var(--ds-border);border-left:1px solid var(--ds-border);margin-left:-1px">
+<span style="display:flex;align-items:center;gap:8px" class="t-label"><span class="{{ s.icon }}"></span>{{ s.title }}</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">{{ s.desc }}</span>
+<span class="t-label-sm t-numeric" style="display:flex;align-items:center;gap:6px"><span class="ic sm i-up"></span>{{ s.effect }}</span>
+<div style="margin-top:auto;padding-top:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="140px,40px">{{ s.cta }}</x-import></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showGrid }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PatternGrid" cols="{{ 3 }}" phone="{{ 1 }}" gap="{{ 12 }}" hint-size="100%,104px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="{{ kBancoL }}" value="{{ kBanco }}" hint-size="100%,104px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Saldo mínimo proyectado" value="{{ kMin }}" delta="S51 · 14-12-2026 · bajo 0" direction="down" tone="danger" hint-size="100%,104px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Saldo al cierre de S52" value="{{ kEnd }}" delta="Bajo el umbral de $ 15.000.000" direction="down" tone="warning" hint-size="100%,104px"></x-import>
+</x-import>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Cada celda muestra el efectivo y, debajo, la capa que lo forma. Toca una celda para ver su traza.</span>
+<div class="t-caption" style="display:flex;gap:12px;flex-wrap:wrap;color:var(--ds-fg-muted)">
+<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--ds-fill);border:1px solid var(--ds-border-strong)"></span>Hoy</span>
+<span style="display:inline-flex;align-items:center;gap:6px"><span class="ic sm i-lock"></span>Sellada</span>
+<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--ds-warning-muted);border:1px solid var(--ds-warning)"></span>Bajo el umbral</span>
+<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--ds-danger-muted);border:1px solid var(--ds-danger)"></span>Bajo 0</span>
+</div>
+</div>
+
+<div ref="{{ gridRef }}" role="grid" aria-label="Planilla del flujo de caja por semana" style="border:1px solid var(--ds-border);border-radius:16px;overflow:auto;max-height:500px;background:var(--ds-surface)">
+<div style="width:max-content;min-width:100%">
+<div style="display:flex;position:sticky;top:0;z-index:3;background:var(--ds-surface);border-bottom:1px solid var(--ds-border)">
+<div class="t-label-sm" style="width:216px;flex:none;position:sticky;left:0;z-index:4;background:var(--ds-surface);padding:10px 16px;border-right:1px solid var(--ds-border);color:var(--ds-fg-muted);display:flex;align-items:flex-end">Fila</div>
+<sc-for list="{{ g.weeks }}" as="w" hint-placeholder-count="8">
+<div style="width:136px;flex:none;padding:8px 12px;background:{{ w.bg }};border-left:1px solid var(--ds-border);display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+<span class="t-label" style="display:inline-flex;align-items:center;gap:6px"><sc-if value="{{ w.sealed }}"><span class="ic sm i-lock" style="color:var(--ds-fg-muted)" aria-label="Sellada"></span></sc-if><sc-if value="{{ w.today }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" dot="{{ false }}" hint-size="40px,20px">Hoy</x-import></sc-if>{{ w.id }}</span>
+<span class="t-caption t-numeric" style="color:var(--ds-fg-muted)">{{ w.range }}</span>
+</div>
+</sc-for>
+</div>
+
+<sc-for list="{{ g.secs }}" as="s" hint-placeholder-count="2">
+<div style="display:flex;border-bottom:1px solid var(--ds-border);background:var(--ds-bg)">
+<div class="t-label" style="width:216px;flex:none;position:sticky;left:0;z-index:2;background:var(--ds-bg);padding:8px 16px;border-right:1px solid var(--ds-border)">{{ s.label }}</div>
+<sc-for list="{{ s.total }}" as="t" hint-placeholder-count="8">
+<div class="t-label-sm t-numeric" style="width:136px;flex:none;padding:8px 12px;text-align:right;border-left:1px solid var(--ds-border);color:var(--ds-fg-muted)">{{ t.t }}</div>
+</sc-for>
+</div>
+<sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="5">
+<div role="row" style="display:flex;border-bottom:1px solid var(--ds-border)">
+<div style="width:216px;flex:none;position:sticky;left:0;z-index:2;background:var(--ds-surface);padding:6px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column;justify-content:center;min-width:0">
+<span class="t-body-sm" style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</span>
+<span class="t-caption" style="color:var(--ds-fg-subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.sub }}</span>
+</div>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="8">
+<div role="gridcell" style="width:136px;flex:none;min-height:48px;padding:6px 12px;border-left:1px solid var(--ds-border);display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:{{ c.bg }};box-shadow:{{ c.ring }};cursor:pointer">
+<span class="t-mono" style="font-size:13px;line-height:18px;color:{{ c.fg }}">{{ c.t }}</span>
+<span class="t-caption" style="color:{{ c.lc }}">{{ c.l }}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</sc-for>
+
+<div style="position:sticky;bottom:0;z-index:3;background:var(--ds-surface);border-top:1px solid var(--ds-border-strong)">
+<div style="display:flex;border-bottom:1px solid var(--ds-border)">
+<div class="t-body-sm" style="width:216px;flex:none;position:sticky;left:0;z-index:4;background:var(--ds-surface);padding:8px 16px;border-right:1px solid var(--ds-border);color:var(--ds-fg-muted)">Saldo inicial</div>
+<sc-for list="{{ g.saldoIni }}" as="c" hint-placeholder-count="8"><div class="t-mono" style="width:136px;flex:none;padding:8px 12px;text-align:right;font-size:13px;line-height:18px;border-left:1px solid var(--ds-border);background:{{ c.bg }};color:var(--ds-fg-muted)">{{ c.t }}</div></sc-for>
+</div>
+<div style="display:flex;border-bottom:1px solid var(--ds-border)">
+<div class="t-body-sm" style="width:216px;flex:none;position:sticky;left:0;z-index:4;background:var(--ds-surface);padding:8px 16px;border-right:1px solid var(--ds-border);color:var(--ds-fg-muted)">Flujo neto</div>
+<sc-for list="{{ g.saldoNeto }}" as="c" hint-placeholder-count="8"><div class="t-mono" style="width:136px;flex:none;padding:8px 12px;text-align:right;font-size:13px;line-height:18px;border-left:1px solid var(--ds-border);background:{{ c.bg }};color:var(--ds-fg-muted)">{{ c.t }}</div></sc-for>
+</div>
+<div style="display:flex">
+<div class="t-label" style="width:216px;flex:none;position:sticky;left:0;z-index:4;background:var(--ds-surface);padding:8px 16px;border-right:1px solid var(--ds-border);display:flex;align-items:center">Saldo final</div>
+<sc-for list="{{ g.saldoFin }}" as="c" hint-placeholder-count="8"><div style="width:136px;flex:none;min-height:48px;padding:6px 12px;border-left:1px solid var(--ds-border);display:flex;flex-direction:column;align-items:flex-end;justify-content:center;background:{{ c.bg }};color:{{ c.fg }}"><span class="t-mono" style="font-size:13px;line-height:18px;font-weight:600">{{ c.t }}</span><span class="t-caption">{{ c.l }}</span></div></sc-for>
+</div>
+</div>
+</div>
+</div>
+<sc-if value="{{ qa }}" hint-placeholder-val="{{ false }}">
+<div role="status" aria-label="Metas de rendimiento" style="display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;padding:10px 16px;border:1px dashed var(--ds-border-strong);border-radius:10px">
+<span class="t-label-sm" style="display:inline-flex;align-items:center;gap:6px"><span class="ic sm i-clock"></span>Metas de rendimiento · QA</span>
+<sc-for list="{{ metas }}" as="m" hint-placeholder-count="3"><span class="t-caption" style="display:inline-flex;align-items:center;gap:6px;color:var(--ds-fg-muted)">{{ m.k }} <span class="t-mono" style="color:var(--ds-fg)">{{ m.v }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ m.tone }}" dot="{{ false }}" hint-size="60px,20px">{{ m.s }}</x-import></span></sc-for>
+<span class="t-caption" style="margin-left:auto;color:var(--ds-fg-subtle)">52 semanas × 60 filas</span>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPhoneWeeks }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:4px;padding:16px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ bancoLabel }}</span>
+<span class="t-title t-numeric">{{ kBanco }}</span>
+<span class="t-body-sm" style="color:var(--ds-danger-fg);display:flex;align-items:center;gap:6px"><span class="ic sm i-down"></span>Mínimo $ −2.820.000 · S51 · 14-12-2026</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" hint-size="100%,32px">Próximas 4 semanas</x-import>
+<sc-for list="{{ w4 }}" as="w" hint-placeholder-count="4">
+<button type="button" style="all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);cursor:pointer;min-height:44px">
+<span style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+<span class="t-label">{{ w.id }} <span class="t-numeric" style="font-weight:400;color:var(--ds-fg-muted)">· {{ w.range }}</span></span>
+<span style="display:flex;align-items:center;gap:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ w.tone }}" hint-size="90px,22px">{{ w.toneLabel }}</x-import><span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span></span>
+</span>
+<span class="t-body-sm" style="display:grid;grid-template-columns:1fr auto;gap:2px 12px">
+<span style="color:var(--ds-fg-muted)">Ingresos</span><span class="t-numeric" style="text-align:right">{{ w.ing }}</span>
+<span style="color:var(--ds-fg-muted)">Egresos</span><span class="t-numeric" style="text-align:right">{{ w.egr }}</span>
+<span style="font-weight:500">Saldo final</span><span class="t-numeric" style="text-align:right;font-weight:600">{{ w.fin }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ qaPhone }}" hint-placeholder-val="{{ false }}">
+<div role="status" aria-label="Metas de rendimiento" style="display:flex;flex-direction:column;gap:6px;padding:12px 16px;border:1px dashed var(--ds-border-strong);border-radius:10px">
+<span class="t-label-sm" style="display:inline-flex;align-items:center;gap:6px"><span class="ic sm i-clock"></span>Metas de rendimiento · QA</span>
+<sc-for list="{{ metas }}" as="m" hint-placeholder-count="3"><span class="t-caption" style="display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--ds-fg-muted)"><span>{{ m.k }}</span><span style="display:inline-flex;align-items:center;gap:6px"><span class="t-mono" style="color:var(--ds-fg)">{{ m.v }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ m.tone }}" dot="{{ false }}" hint-size="60px,20px">{{ m.s }}</x-import></span></span></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPhoneWeek }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="100px,24px">← Semanas</x-import>
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-heading">S46 · 09-11 – 15-11-2026</span>
+<span style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="110px,22px">Bajo el umbral</x-import></span>
+</div>
+<div class="t-body-sm" style="display:grid;grid-template-columns:1fr auto;gap:8px 12px;padding:16px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<span style="color:var(--ds-fg-muted)">Saldo inicial</span><span class="t-numeric" style="text-align:right">$ 38.550.000</span>
+<span style="color:var(--ds-fg-muted)">Ingresos</span><span class="t-numeric" style="text-align:right">$ 3.200.000</span>
+<span style="color:var(--ds-fg-muted)">Egresos</span><span class="t-numeric" style="text-align:right">$ 28.970.000</span>
+<span style="font-weight:500">Saldo final</span><span class="t-numeric" style="text-align:right;font-weight:600;color:var(--ds-warning-fg)">$ 12.780.000</span>
+</div>
+<sc-for list="{{ wd }}" as="s" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0"><span class="t-label">{{ s.label }}</span><span class="t-label-sm t-numeric" style="color:var(--ds-fg-muted)">{{ s.total }}</span></div>
+<div style="border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
+<sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" title="{{ r.title }}" subtitle="{{ r.subtitle }}" trailing="{{ r.amount }}" chevron="{{ true }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</sc-if>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando el flujo de caja" style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ notPhone }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="kpis" count="{{ 3 }}" hint-size="100%,104px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
+<sc-for list="{{ skRows }}" as="sr" hint-placeholder-count="9">
+<div style="display:flex;gap:24px;align-items:center;padding:0 16px;height:48px;border-bottom:1px solid var(--ds-border)">
+<div style="width:184px;flex:none;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ sr.w }}" height="{{ 12 }}" hint-size="120px,12px"></x-import></div>
+<sc-for list="{{ skCols }}" as="sc" hint-placeholder-count="6"><div style="width:112px;flex:none;display:flex;justify-content:flex-end"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 88 }}" height="{{ 12 }}" hint-size="88px,12px"></x-import></div></sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isPhone }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 108 }}" radius="{{ 16 }}" hint-size="100%,108px"></x-import>
+<sc-for list="{{ skPhone }}" as="sp" hint-placeholder-count="4"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 124 }}" radius="{{ 16 }}" hint-size="100%,124px"></x-import></sc-for>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="chart" title="Aún no hay filas en el flujo" description="Crea las filas de ingresos y egresos, o importa una planilla, para proyectar tu caja." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el flujo de caja" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FLJ-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finanzas" description="El flujo de caja lo ven solo owner y admin. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+
+</x-import>
+</x-import>
+
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" open="{{ true }}" side="{{ sheetSide }}" contained="{{ true }}" title="{{ sheetTitle }}" description="{{ sheetDesc }}" on-close="{{ noop }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:8px">
+
+<sc-if value="{{ ovOk }}">
+<sc-if value="{{ isTrace }}">
+<div class="t-body-sm" style="display:grid;grid-template-columns:1fr auto;gap:8px 12px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<sc-for list="{{ trace.layers }}" as="p" hint-placeholder-count="4"><span style="color:var(--ds-fg-muted)">{{ p.k }}</span><span class="t-mono" style="text-align:right;font-size:13px">{{ p.v }}</span></sc-for>
+<span class="t-label">Efectivo</span><span class="t-mono" style="text-align:right;font-weight:600">{{ trace.total }}</span>
+</div>
+<sc-if value="{{ sealedTrace }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" icono="lock" titulo="S42 está sellada" hint-size="100%,56px">La selló Paula Rojas el 19-10-2026. Para mover o editar sus celdas, reábrela.</x-import>
+</sc-if>
+<div style="display:flex;flex-direction:column">
+<span class="t-label" style="padding-bottom:4px">Hechos que forman la cifra</span>
+<sc-for list="{{ trace.items }}" as="it" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<span style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ it.tone }}" dot="{{ false }}" hint-size="96px,20px">{{ it.layer }}</x-import></span><span class="t-body-sm" style="font-weight:500">{{ it.title }}</span></span>
+<span class="t-mono" style="font-size:13px;white-space:nowrap;color:{{ it.fg }}">{{ it.amount }}</span>
+</div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ it.meta }}</span>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:32px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="120px,20px">{{ it.link }}</x-import>
+<sc-if value="{{ it.canMove }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" hint-size="90px,40px">Mover</x-import></sc-if>
+<sc-if value="{{ it.locked }}"><span class="t-caption" style="display:inline-flex;align-items:center;gap:4px;color:var(--ds-fg-muted)"><span class="ic sm i-lock"></span>{{ it.reason }}</span></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-label">Nota</span>
+<span class="t-body-sm" style="white-space:pre-wrap">{{ trace.note }}</span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ trace.noteMeta }}</span>
+</div>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="message" hint-size="90px,40px">Nota</x-import>
+<sc-if value="{{ openTrace }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="check" hint-size="160px,40px">Dar por cumplida</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="swap" hint-size="160px,40px">Mover lo programado</x-import>
+</sc-if>
+<sc-if value="{{ sealedTrace }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="refresh" hint-size="160px,40px">Reabrir semana</x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRepro }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Mover" ayuda="Lo que vence en la semana de destino queda en ella." hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ shiftOpts }}" value="+2" label="Semanas a mover" hint-size="100%,36px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Toda la fila" description="Proveedores · S44 a S52, solo lo no facturado" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column">
+<span class="t-label" style="padding-bottom:8px">Vista previa del saldo</span>
+<div class="t-body-sm" style="display:grid;grid-template-columns:auto 1fr 1fr;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden">
+<span class="t-label-sm" style="padding:8px 12px;color:var(--ds-fg-muted);border-bottom:1px solid var(--ds-border)">Semana</span>
+<span class="t-label-sm" style="padding:8px 12px;color:var(--ds-fg-muted);border-bottom:1px solid var(--ds-border);text-align:right">Saldo actual</span>
+<span class="t-label-sm" style="padding:8px 12px;color:var(--ds-fg-muted);border-bottom:1px solid var(--ds-border);text-align:right">Con el cambio</span>
+<sc-for list="{{ preview }}" as="p" hint-placeholder-count="6">
+<span class="t-numeric" style="padding:8px 12px;border-bottom:1px solid var(--ds-border)">{{ p.id }}</span>
+<span class="t-mono" style="padding:8px 12px;border-bottom:1px solid var(--ds-border);text-align:right;font-size:13px;color:{{ p.fgA }}">{{ p.a }}</span>
+<span class="t-mono" style="padding:8px 12px;border-bottom:1px solid var(--ds-border);text-align:right;font-size:13px;font-weight:600;background:{{ p.bgB }};color:{{ p.fgB }}">{{ p.b }}</span>
+</sc-for>
+</div>
+<span class="t-caption" style="color:var(--ds-fg-muted);padding-top:8px">S46 sale del umbral: pasa de $ 12.780.000 a $ 15.980.000.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" icono="lock" titulo="Lo facturado o cedido no se mueve" hint-size="100%,56px">La factura manda: si la selección incluye facturas o cesiones, quedan en su semana.</x-import>
+<div style="display:flex;flex-direction:column;gap:4px;padding-top:4px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Arrastre en Proveedores" description="Al vencer la semana, lo programado y no facturado pasa solo a la siguiente. Queda en la bitácora y se puede deshacer." hint-size="100%,64px"></x-import>
+</div>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="swap" hint-size="160px,40px">Mover 2 semanas</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCierre }}">
+<div class="t-body-sm" style="display:grid;grid-template-columns:1fr auto;gap:8px 12px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<span style="color:var(--ds-fg-muted)">Saldo inicial</span><span class="t-mono" style="text-align:right;font-size:13px">$ 38.600.000</span>
+<span style="color:var(--ds-fg-muted)">Real de la semana</span><span class="t-mono" style="text-align:right;font-size:13px">$ 18.950.000</span>
+<span class="t-label">Saldo sugerido</span><span class="t-mono" style="text-align:right;font-weight:600">$ 57.550.000</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Saldo en banco al 25-10-2026" prefix="$" value="57.366.000" mono="{{ true }}" input-mode="numeric" hint="Cartola de Banco de Chile · cuenta 00-123-45678-09" hint-size="100%,88px"></x-import>
+<div style="display:flex;justify-content:space-between;align-items:baseline" class="t-body-sm"><span style="color:var(--ds-fg-muted)">Diferencia</span><span class="t-mono" style="font-size:13px;font-weight:600;color:var(--ds-warning-fg)">$ −184.000</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Supera la tolerancia de $ 50.000" hint-size="100%,56px">Indica el motivo para sellar. Queda en la bitácora junto con el saldo del banco.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo de la diferencia" value="Comisiones bancarias de octubre sin registrar." rows="{{ 3 }}" hint-size="100%,120px"></x-import>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="lock" hint-size="150px,40px">Sellar semana</x-import>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ ovLoading }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="sheet" count="{{ 7 }}" hint-size="100%,280px"></x-import></sc-if>
+<sc-if value="{{ ovEmpty }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="{{ ovEmptyIcon }}" size="sm" title="{{ ovEmptyTitle }}" description="{{ ovEmptyDesc }}" action="{{ ovEmptyAction }}" hint-size="100%,280px"></x-import></sc-if>
+<sc-if value="{{ ovError }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="{{ ovErrorTitle }}" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FLJ-504" on-retry="{{ noop }}" hint-size="100%,280px"></x-import></sc-if>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ reabrirOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" open="{{ true }}" contained="{{ true }}" size="sm" title="¿Reabrir S42?" description="12-10 – 18-10-2026 · sellada el 19-10-2026 por Paula Rojas con saldo $ 38.600.000." on-close="{{ noop }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<span class="t-body-sm" style="text-wrap:pretty">Sus celdas vuelven a ser editables y los saldos de las semanas siguientes se recalculan. El cambio queda en la bitácora y puedes volver a sellarla.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" value="Falta registrar la devolución de Proveedor Seguridad Total." rows="{{ 2 }}" hint-size="100%,100px"></x-import>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="refresh" hint-size="150px,40px">Reabrir semana</x-import>
+</div>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ toastError }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;z-index:40;right:24px;bottom:24px;left:24px;display:flex;justify-content:flex-end;pointer-events:none">
+<div style="pointer-events:auto;max-width:400px;width:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="alert" tone="danger" message="No pudimos mover Proveedores S46. Volvimos la celda y los saldos a su valor: Paula Rojas selló la semana a las 10:42." action="Reintentar" duration="{{ 0 }}" style="width:100%" hint-size="100%,72px"></x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:860},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;planilla&quot;,&quot;traza&quot;,&quot;reprogramar&quot;,&quot;alerta&quot;,&quot;cierre&quot;,&quot;reabrir&quot;,&quot;semana&quot;,&quot;guardando&quot;,&quot;error-guardado&quot;,&quot;sin-banco&quot;,&quot;sellada&quot;],&quot;default&quot;:&quot;planilla&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  gridRef = (el) => { if (el && !el.__s) { el.__s = 1; const go = () => { el.scrollLeft = 272; }; go(); requestAnimationFrame(go); setTimeout(go, 300); } };
+  componentDidMount() {
+    if (!window.Flujo) this.t = setInterval(() => { if (window.Flujo) { clearInterval(this.t); this.forceUpdate(); } }, 40);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const F = window.Flujo;
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const vista = this.props.vista ?? "planilla";
+    const estado = this.props.estado ?? "ok";
+    const varB = (this.props.variante ?? "A") === "B";
+    const isPhone = device === "phone";
+    const noop = () => {};
+    if (!F) return { device, theme, isPhone, notPhone: !isPhone, noop };
+    const overlayV = ["traza", "reprogramar", "cierre", "sellada"].includes(vista);
+    const pageOk = estado === "ok" || (overlayV && estado !== "sinpermiso");
+    const ovState = overlayV ? estado : "ok";
+    const phoneDetail = isPhone && vista === "semana";
+    const btn = (label, icon, variant) => (NS.Button ? h(NS.Button, { icon, variant }, label) : null);
+
+    const gridOpts = {
+      traza: { trace: [["qui", 6]] }, sellada: { trace: [["ant", 1]] },
+      reprogramar: { sel: [["pro", 5], ["pro", 6], ["pro", 7]] },
+      guardando: { shift: { rowId: "pro", weeks: [5], by: 1 }, saving: [["pro", 6]] },
+      "error-guardado": { reverted: [["pro", 5]] },
+      "sin-banco": { noBank: true },
+    }[vista] || {};
+    const g = F.grid(gridOpts);
+    const k = gridOpts.shift ? F.compute(gridOpts.shift) : F.base;
+    const shifted = F.compute({ rowId: "pro", weeks: [5, 6, 7], by: 2 });
+    const toneCol = (v, kind) => { const t = F.tone(v); return t ? "var(--ds-" + t + (kind === "bg" ? "-muted)" : "-fg)") : kind === "bg" ? "transparent" : "var(--ds-fg)"; };
+
+    const traceData = vista === "sellada" ? {
+      layers: [{ k: "Real", v: "$ 9.600.000" }, { k: "Comprometido", v: "—" }, { k: "Plan", v: "$ 9.600.000" }], total: "$ 9.600.000",
+      items: [
+        { tone: "success", layer: "Real", title: "Movimiento bancario «TRANSF ANTICIPOS OCT»", meta: "Banco de Chile · 15-10-2026 · 142 personas", amount: "$ 9.600.000", fg: "var(--ds-fg)", link: "Ver movimiento", locked: true, reason: "Semana sellada" },
+        { tone: "neutral", layer: "Plan", title: "Plan de anticipos de octubre", meta: "Cumplido por lo real; no suma.", amount: "$ 9.600.000", fg: "var(--ds-fg-muted)", link: "Ver plan", locked: true, reason: "Semana sellada" },
+      ],
+      note: "«Anticipos pagados completos, sin rechazos.»", noteMeta: "Paula Rojas · 16-10-2026 09:12",
+    } : {
+      layers: [{ k: "Real", v: "—" }, { k: "Comprometido", v: "$ 25.950.000" }, { k: "Plan", v: "$ 26.000.000" }], total: "$ 25.950.000",
+      items: [
+        { tone: "info", layer: "Comprometido", title: "Factura F-20452 · Inmobiliaria Quilicura SpA", meta: "Emitida 19-10-2026 · vence 18-11-2026", amount: "$ 16.200.000", fg: "var(--ds-fg)", link: "Ver factura F-20452", locked: true, reason: "Facturada · la factura manda" },
+        { tone: "info", layer: "Comprometido", title: "Servicio mensual Planta Quilicura", meta: "Programación recurrente · semana esperada S47", amount: "$ 8.600.000", fg: "var(--ds-fg)", link: "Ver plantilla", canMove: true },
+        { tone: "info", layer: "Comprometido", title: "Excedente de cesión F-20409 · Factoring Andes SpA", meta: "Cedida 02-10-2026 · excedente esperado 20-11-2026", amount: "$ 1.150.000", fg: "var(--ds-fg)", link: "Ver cesión", locked: true, reason: "Cedida · no se mueve" },
+        { tone: "neutral", layer: "Plan", title: "Plan de cobranza de noviembre", meta: "Cubierto por lo comprometido; no suma.", amount: "$ 26.000.000", fg: "var(--ds-fg-muted)", link: "Ver plan" },
+      ],
+      note: "«Cliente confirmó pago para el 18-11 por correo.»", noteMeta: "Paula Rojas · 28-10-2026 16:40",
+    };
+    const sheet = {
+      traza: ["Planta Quilicura · S47", "16-11 – 22-11-2026 · Ingresos"],
+      sellada: ["Anticipos · S42", "12-10 – 18-10-2026 · Egresos · sellada"],
+      reprogramar: ["Reprogramar 3 celdas", "Proveedores · S46, S47 y S48 · $ 8.500.000 en plan"],
+      cierre: ["Cerrar S43", "19-10 – 25-10-2026 · al sellar, la semana queda fija"],
+    }[vista] || ["", ""];
+    const ovEmpty = {
+      traza: ["inbox", "Esta celda no tiene hechos", "Agrega un plan para Planta Quilicura en S47.", "Agregar plan"],
+      sellada: ["inbox", "Esta celda no tiene hechos", "S42 está sellada; reábrela para agregar un plan.", "Reabrir semana"],
+      reprogramar: ["lock", "No hay nada que mover", "Lo seleccionado está facturado o cedido, y la factura manda.", "Cambiar selección"],
+      cierre: ["landmark", "S43 no tiene movimientos", "Conecta tu banco o ingresa el saldo a mano para sellarla.", "Conecta tu banco"],
+    }[vista] || ["inbox", "", "", ""];
+
+    return {
+      device, theme, isPhone, notPhone: !isPhone, noop,
+      tabs: isPhone ? F.tabs : F.tabletTabs, groups: F.groups,
+      showHeader: !phoneDetail && estado !== "sinpermiso" && estado !== "error",
+      headerSub: isPhone ? "Banco al 30-10-2026 09:15" : "Atlas Seguridad SpA · banco al 30-10-2026 09:15 · 12 de 52 semanas",
+      headerActions: !isPhone && pageOk,
+      saving: vista === "guardando" && !isPhone,
+      phoneSaving: vista === "guardando" && isPhone,
+      periodOpts: [{ value: "sem", label: "Semana" }, { value: "mes", label: "Mes" }],
+      pageOk, stLoading: !pageOk && estado === "cargando", stEmpty: !pageOk && estado === "vacio", stError: !pageOk && estado === "error", stForbidden: estado === "sinpermiso",
+      bankMissing: vista === "sin-banco",
+      bankAction: vista === "sin-banco" ? btn("Conecta tu banco", "landmark", "secondary") : null,
+      bandaCompact: !phoneDetail && vista !== "alerta",
+      bandaFull: vista === "alerta",
+      salidas: [
+        { icon: "ic i-wallet", title: "Ceder facturas elegibles", desc: "F-20452 Planta Quilicura y F-20447 Bodega Lampa (S47). Giro estimado $ 37.700.000 en S45, costo $ 2.850.000.", effect: "S46 sube a $ 50.480.000", cta: "Ver facturas" },
+        { icon: "ic i-swap", title: "Mover egresos de plan", desc: "Gratificaciones y bonos de S51 a S52: $ 46.500.000 en plan, sin facturar.", effect: "S51 sube a $ 43.680.000", cta: "Reprogramar" },
+        { icon: "ic i-clock", title: "Acelerar cobranza", desc: "4 facturas vencidas de Otros clientes por $ 6.480.000.", effect: "S51 sube a $ 3.660.000", cta: "Ver cobranza" },
+      ],
+      showGrid: pageOk && !isPhone,
+      gridRef: this.gridRef, g,
+      kBanco: vista === "sin-banco" ? "—" : F.fmt(F.banco),
+      kBancoL: vista === "sin-banco" ? "Saldo banco hoy · sin banco" : "Saldo banco hoy · 09:15",
+      kMin: F.fmt(F.min), kEnd: F.fmt(k.fin[11]),
+      bancoLabel: vista === "sin-banco" ? "Saldo banco hoy · sin banco conectado" : "Saldo banco hoy · 30-10-2026 09:15",
+      showPhoneWeeks: pageOk && isPhone && !phoneDetail,
+      showPhoneWeek: pageOk && phoneDetail,
+      w4: [3, 4, 5, 6].map((i) => F.weekSummary(i, k)).map((w) => ({ ...w, toneLabel: w.today ? "Hoy" : w.toneLabel, tone: w.today && w.tone === "neutral" ? "accent" : w.tone })),
+      wd: F.weekDetail(5),
+      skRows: [140, 96, 120, 150, 110, 90, 130, 100, 124].map((w) => ({ w })),
+      skCols: [1, 2, 3, 4, 5, 6], skPhone: [1, 2, 3, 4],
+      emptyAction: btn("Configurar filas", "plus"),
+      sheetOpen: overlayV && pageOk, sheetSide: isPhone ? "bottom" : "right", sheetTitle: sheet[0], sheetDesc: sheet[1],
+      ovOk: ovState === "ok", ovLoading: ovState === "cargando", ovEmpty: ovState === "vacio", ovError: ovState === "error",
+      ovEmptyIcon: ovEmpty[0], ovEmptyTitle: ovEmpty[1], ovEmptyDesc: ovEmpty[2], ovEmptyAction: btn(ovEmpty[3], null, "secondary"),
+      ovErrorTitle: vista === "cierre" ? "No pudimos calcular el saldo sugerido" : vista === "reprogramar" ? "No pudimos calcular la vista previa" : "No pudimos cargar la traza",
+      isTrace: vista === "traza" || vista === "sellada", sealedTrace: vista === "sellada", openTrace: vista === "traza", trace: traceData,
+      isRepro: vista === "reprogramar", isCierre: vista === "cierre",
+      shiftOpts: ["−2", "−1", "+1", "+2", "+3", "+4"],
+      preview: [4, 5, 6, 7, 8, 9].map((i) => ({ id: F.weeks[i].id, a: F.fmt(F.base.fin[i]), b: F.fmt(shifted.fin[i]), fgA: toneCol(F.base.fin[i]), fgB: toneCol(shifted.fin[i]), bgB: toneCol(shifted.fin[i], "bg") })),
+      reabrirOpen: vista === "reabrir" && pageOk,
+      toastError: vista === "error-guardado" && pageOk,
+      qa: varB && pageOk && !isPhone, qaPhone: varB && pageOk && isPhone && vista !== "semana",
+      mailNote: varB,
+      metas: [
+        { k: "Celda y saldo < 100 ms", v: vista === "guardando" ? "38 ms" : "42 ms", s: "Cumple", tone: "success" },
+        { k: "Guardado < 1 s p95", v: vista === "guardando" ? "Midiendo…" : "640 ms", s: vista === "guardando" ? "En curso" : "Cumple", tone: vista === "guardando" ? "neutral" : "success" },
+        { k: "Carga inicial", v: "1,8 s", s: "Sin meta", tone: "neutral" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

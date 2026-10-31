@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="phone" theme="{{ theme }}" portal="Supervisor" tabs="{{ tabs }}" active="tic" user="{{ user }}" notifications="{{ 3 }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ true }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Tu equipo" title="Solicitudes" subtitle="Planta Quilicura · Bodega Lampa" hint-size="100%,80px"></x-import>
+<sc-if value="{{ showSeg }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Vista" options="{{ segOptions }}" value="{{ vista }}" on-change="{{ setVista }}" style="margin-bottom:16px" hint-size="100%,40px"></x-import>
+</sc-if>
+<sc-if value="{{ showRows }}" hint-placeholder-val="{{ true }}">
+<div style="margin:0 -16px;display:flex;flex-direction:column">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" initials="{{ r.ini }}" title="{{ r.title }}" subtitle="{{ r.sub }}" meta="{{ r.meta }}" badge="{{ r.badge }}" chevron="{{ true }}" align="start" on-click="{{ noop }}" hint-size="100%,88px"></x-import>
+</sc-for>
+</div>
+<p class="t-body-sm muted" style="margin:16px 0 0">{{ foot }}</p>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="No hay solicitudes por aprobar" description="Cuando alguien de tu equipo pida un permiso, vacaciones, un certificado o un cambio de turno, te llegará aquí." action="{{ emptyAction }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="rows" count="{{ 4 }}" label="Cargando solicitudes" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las solicitudes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TK-503-4D19" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No apruebas solicitudes" description="Tu cuenta no es aprobadora de ningún tipo de solicitud. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin_permiso&quot;],&quot;default&quot;:&quot;contenido&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pendientes&quot;,&quot;historial&quot;],&quot;default&quot;:&quot;pendientes&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { vista: null };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const estado = this.props.estado ?? "contenido";
+    const vista = this.state.vista ?? (this.props.vista ?? "pendientes");
+    const pend = [
+      { ini: "CH", title: "Camila Herrera", sub: "Permiso administrativo · 06-11-2026 · turno de día", meta: "Planta Quilicura · hoy 07:42", badge: { tone: "info", label: "Abierto" } },
+      { ini: "MS", title: "María F. Soto", sub: "Cambio de turno · 08-11-2026 · con Luis Pérez", meta: "Planta Quilicura · ayer 19:30", badge: { tone: "info", label: "Abierto" } },
+      { ini: "DS", title: "Diego Silva", sub: "Vacaciones · 18-11 al 29-11-2026 · 10 días hábiles", meta: "Bodega Lampa · ayer 11:02", badge: { tone: "accent", label: "En curso" } },
+    ];
+    const hist = [
+      { ini: "HA", title: "Héctor Araya", sub: "Certificado de antigüedad", meta: "Aprobaste · 28-10-2026 10:15", badge: { tone: "success", label: "Resuelto" } },
+      { ini: "MS", title: "María F. Soto", sub: "Cambio de turno · 01-11-2026", meta: "Rechazaste · 27-10-2026 18:02", badge: { tone: "danger", label: "Rechazado" } },
+      { ini: "LP", title: "Luis Pérez", sub: "Permiso administrativo · 23-10-2026", meta: "Aprobaste · 21-10-2026 09:40", badge: { tone: "neutral", label: "Cerrado" } },
+      { ini: "CH", title: "Camila Herrera", sub: "Vacaciones · 06-10 al 10-10-2026", meta: "Aprobaste · 22-09-2026 16:20", badge: { tone: "neutral", label: "Cerrado" } },
+    ];
+    const ok = estado === "contenido";
+    return {
+      theme: this.props.theme ?? "light",
+      user: { name: "Jorge Muñoz", initials: "JM", role: "Supervisor" },
+      vista, setVista: (v) => this.setState({ vista: v }),
+      segOptions: [{ value: "pendientes", label: "Por aprobar" }, { value: "historial", label: "Historial" }],
+      showSeg: estado !== "sin_permiso" && estado !== "error",
+      rows: vista === "pendientes" ? pend : hist,
+      showRows: ok,
+      foot: vista === "pendientes" ? "Al aprobar o rechazar, la persona recibe la respuesta en su portal y por correo." : "Últimos 90 días.",
+      isEmpty: estado === "vacio", isLoading: estado === "cargando", isError: estado === "error", isForbidden: estado === "sin_permiso",
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", onClick: () => this.setState({ vista: "historial" }) }, "Ver historial") : null,
+      noop: () => {},
+      tabs: [{ id: "hoy", label: "Hoy", icon: "home" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "menu" }],
+    };
+  }
+}
+</script>
+</body>
+</html>

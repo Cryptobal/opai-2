@@ -395,7 +395,7 @@ class Component extends DCLogic {
       { title: "Administración", items: [{ id: "cfg", label: "Configuración", icon: "clipboard" }] },
     ];
     const activeMap = { mis: "ren", compra: "ren", km: "ren", detalle: "ren", bandeja: "apr", lotes: "lot", reporte: "rep", config: isPhone ? "mas" : "cfg" };
-    const user = trab ? { name: "Camila Herrera", initials: "CH", role: "Guardia" } : screen === "bandeja" ? { name: "Paula Rojas", initials: "PR", role: "Jefa de operaciones" } : { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" };
+    const user = trab ? { name: "Camila Herrera", initials: "CH", role: "Guardia" } : screen === "bandeja" ? { name: "Paula Rojas", initials: "PR", role: "Jefa de operaciones" } : { name: "Andrés Molina", initials: "AM", role: "Administrador" };
 
     // Mis rendiciones
     const mias = [
@@ -497,14 +497,14 @@ class Component extends DCLogic {
 
     // Estados
     const C = {
-      mis: { e: ["wallet", "Aún no tienes rendiciones", "Rinde una compra o un viaje y síguela hasta que te paguen.", "Nueva rendición"], err: "No pudimos cargar tus rendiciones", f: ["No tienes rendiciones habilitadas", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "rows" },
-      compra: { err: "No pudimos cargar el formulario", f: ["No puedes crear rendiciones", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "form" },
-      km: { err: "No pudimos cargar la tarifa por km", f: ["No puedes crear rendiciones", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "form" },
-      bandeja: { e: ["check-circle", "No tienes rendiciones por aprobar", "Te avisaremos cuando alguien te envíe una.", "Ver aprobadas"], err: "No pudimos cargar las rendiciones por aprobar", f: ["No apruebas rendiciones", "Solo las jefaturas y quienes tienen permiso de aprobación ven esta bandeja. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "rows" },
-      detalle: { e: ["file", "Esta rendición ya no está disponible", "Puede que la hayan eliminado como borrador.", "Volver a Mis rendiciones"], err: "No pudimos cargar la rendición", f: ["Esta rendición no es tuya", "Solo ves tus rendiciones y las que te toca aprobar. Si necesitas verla, pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "detail" },
-      lotes: { e: ["landmark", "No hay rendiciones por pagar", "Cuando se aprueben, aparecerán aquí agrupadas por persona.", "Ver lotes anteriores"], err: "No pudimos cargar las rendiciones por pagar", f: ["No tienes acceso a los lotes de pago", "Solo owner, admin y finanzas crean lotes. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "rows" },
-      reporte: { e: ["chart", "Sin rendiciones en octubre 2026", "Cambia el período para ver otros meses.", "Cambiar período"], err: "No pudimos cargar el reporte", f: ["No tienes acceso al reporte", "Solo owner, admin y finanzas ven el gasto de todo el equipo. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "report" },
-      config: { e: null, err: "No pudimos cargar la configuración", f: ["No puedes cambiar la configuración", "Solo owner, admin y finanzas configuran rendiciones. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "form" },
+      mis: { e: ["wallet", "Aún no tienes rendiciones", "Rinde una compra o un viaje y síguela hasta que te paguen.", "Nueva rendición"], err: "No pudimos cargar tus rendiciones", f: ["No tienes rendiciones habilitadas", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "rows" },
+      compra: { err: "No pudimos cargar el formulario", f: ["No puedes crear rendiciones", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "form" },
+      km: { err: "No pudimos cargar la tarifa por km", f: ["No puedes crear rendiciones", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "form" },
+      bandeja: { e: ["check-circle", "No tienes rendiciones por aprobar", "Te avisaremos cuando alguien te envíe una.", "Ver aprobadas"], err: "No pudimos cargar las rendiciones por aprobar", f: ["No apruebas rendiciones", "Solo las jefaturas y quienes tienen permiso de aprobación ven esta bandeja. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "rows" },
+      detalle: { e: ["file", "Esta rendición ya no está disponible", "Puede que la hayan eliminado como borrador.", "Volver a Mis rendiciones"], err: "No pudimos cargar la rendición", f: ["Esta rendición no es tuya", "Solo ves tus rendiciones y las que te toca aprobar. Si necesitas verla, pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "detail" },
+      lotes: { e: ["landmark", "No hay rendiciones por pagar", "Cuando se aprueben, aparecerán aquí agrupadas por persona.", "Ver lotes anteriores"], err: "No pudimos cargar las rendiciones por pagar", f: ["No tienes acceso a los lotes de pago", "Solo owner, admin y finanzas crean lotes. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "rows" },
+      reporte: { e: ["chart", "Sin rendiciones en octubre 2026", "Cambia el período para ver otros meses.", "Cambiar período"], err: "No pudimos cargar el reporte", f: ["No tienes acceso al reporte", "Solo owner, admin y finanzas ven el gasto de todo el equipo. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "report" },
+      config: { e: null, err: "No pudimos cargar la configuración", f: ["No puedes cambiar la configuración", "Solo owner, admin y finanzas configuran rendiciones. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA."], l: "form" },
     }[screen];
     const emptyActLabel = screen === "config" ? "Agregar categoría" : C.e ? C.e[3] : "";
     const emptyAction = NS.Button ? h(NS.Button, { icon: screen === "mis" || screen === "config" ? "plus" : undefined, variant: screen === "mis" || screen === "config" ? "primary" : "secondary" }, emptyActLabel) : null;
@@ -582,8 +582,8 @@ class Component extends DCLogic {
       modulos: [["Asistencia", "clock"], ["Pauta y turnos", "calendar"], ["Rondas", "route"], ["Tickets", "ticket"], ["Cotizaciones", "file"], ["Rendiciones", "wallet"]].map(([label, icon]) => ({ label, icon, selected: label === "Rendiciones" })),
       niveles: [{ value: "monto", label: "Según el monto" }, { value: "n2", label: "Siempre 2.º nivel" }],
       catCfg: [["Combustible", "monto"], ["Alimentación", "monto"], ["Estacionamiento", "monto"], ["Herramientas", "monto"], ["Materiales de aseo", "monto"], ["Equipamiento", "n2"]].map(([label, nivel]) => ({ label, nivel, quitar: "Quitar " + label })),
-      aprobadores: [{ cc: "Planta Quilicura", tipo: "Instalación", val: "pr" }, { cc: "Bodega Lampa", tipo: "Instalación", val: "jm" }, { cc: "Torre Apoquindo", tipo: "Instalación", val: "pr" }, { cc: "Administración / Oficina central", tipo: "Centro fijo · gastos que no son de una instalación", val: "ci" }],
-      personas: [{ value: "pr", label: "Paula Rojas", description: "Jefa de operaciones" }, { value: "jm", label: "Jorge Muñoz", description: "Supervisor" }, { value: "ci", label: "Carlos Irigoyen", description: "Administrador" }],
+      aprobadores: [{ cc: "Planta Quilicura", tipo: "Instalación", val: "pr" }, { cc: "Bodega Lampa", tipo: "Instalación", val: "jm" }, { cc: "Torre Apoquindo", tipo: "Instalación", val: "pr" }, { cc: "Administración / Oficina central", tipo: "Centro fijo · gastos que no son de una instalación", val: "am" }],
+      personas: [{ value: "pr", label: "Paula Rojas", description: "Jefa de operaciones" }, { value: "jm", label: "Jorge Muñoz", description: "Supervisor" }, { value: "am", label: "Andrés Molina", description: "Administrador" }],
       fotoObl: this.state.fotoObl, toggleFoto: () => this.setState((s2) => ({ fotoObl: !s2.fotoObl })),
     };
   }

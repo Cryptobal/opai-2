@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="position:relative;width:100%;height:100%" data-theme="{{ theme }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="tic" portal="{{ portal }}" title="{{ shellTitle }}" user="{{ user }}" notifications="{{ 3 }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ false }}">
+<div style="width:320px;flex:none;border-right:1px solid var(--ds-border);background:var(--ds-surface);overflow:auto">
+<sc-for list="{{ list }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ r.selected }}" title="{{ r.title }}" subtitle="{{ r.sub }}" meta="{{ r.meta }}" badge="{{ r.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:-8px 0 8px -8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="110px,44px">Tickets</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ d.eyebrow }}" title="{{ d.title }}" badge="{{ headerBadge }}" hint-size="100%,72px">
+<sc-if value="{{ headerActions }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-if value="{{ hasSecondary }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ onSecondary }}" hint-size="100px,40px">{{ secondaryLabel }}</x-import>
+</sc-if>
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="{{ primaryIcon }}" hint-size="140px,40px">{{ primaryLabel }}</x-import>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+<sc-if value="{{ hasAlerta }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="{{ alerta.tono }}" titulo="{{ alerta.titulo }}" style="margin-bottom:24px" hint-size="100%,88px">{{ alerta.body }}</x-import>
+</sc-if>
+<div style="display:flex;flex-direction:row-reverse;flex-wrap:wrap;gap:32px;align-items:flex-start">
+<div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="{{ d.pairsTitle }}" rows="{{ pairs }}" hint-size="100%,240px"></x-import>
+<sc-if value="{{ canChangeOwner }}" hint-placeholder-val="{{ true }}">
+<div style="margin-left:-8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" on-click="{{ openOwner }}" hint-size="150px,44px">Cambiar dueño</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ hasEffect }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Si apruebas" hint-size="100%,120px">{{ d.effect }}</x-import>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Adjuntos</span>
+<sc-for list="{{ d.files }}" as="f" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;min-height:44px;border-bottom:1px solid var(--ds-border)">
+<span class="ic i-paperclip subtle" aria-hidden="true"></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column">
+<span class="t-body-sm" style="overflow-wrap:anywhere">{{ f.name }}</span>
+<span class="t-caption muted t-numeric">{{ f.size }}</span>
+</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="download" label="{{ f.dl }}" hint-size="44px,44px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:999 1 440px;min-width:0;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">{{ d.descTitle }}</span>
+<p class="t-body" style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">{{ d.desc }}</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Historial</span>
+<ol class="tl" style="list-style:none;margin:0;padding:0">
+<sc-for list="{{ tl }}" as="it" hint-placeholder-count="3">
+<li class="tl-item">
+<sc-if value="{{ it.agent }}" hint-placeholder-val="{{ false }}"><span class="tl-dot agent" aria-hidden="true"><span class="ic sm i-bot" style="width:14px;height:14px"></span></span></sc-if>
+<sc-if value="{{ it.person }}" hint-placeholder-val="{{ true }}"><span class="tl-dot person" aria-hidden="true">{{ it.ini }}</span></sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px">
+<span class="t-body-sm"><span style="font-weight:500">{{ it.who }}</span> {{ it.action }}</span>
+<sc-for list="{{ it.changes }}" as="c" hint-placeholder-count="0">
+<span class="t-body-sm" style="display:flex;flex-wrap:wrap;gap:6px;align-items:baseline"><span class="muted">{{ c.field }}</span><span class="tl-was">{{ c.from }}</span><span class="subtle">→</span><span>{{ c.to }}</span></span>
+</sc-for>
+<sc-if value="{{ it.hasNota }}" hint-placeholder-val="{{ false }}">
+<p class="t-body" style="margin:4px 0 0;padding:12px;background:var(--ds-fill);border-radius:var(--radius-md);white-space:pre-wrap;overflow-wrap:anywhere">{{ it.nota }}</p>
+</sc-if>
+<span class="t-caption t-numeric muted">{{ it.when }}</span>
+</div>
+</li>
+</sc-for>
+</ol>
+<sc-if value="{{ noReplies }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="message" title="Aún no hay respuestas" description="{{ d.emptyReplies }}" action="{{ emptyAction }}" hint-size="100%,200px"></x-import>
+</sc-if>
+</div>
+<sc-if value="{{ canReply }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Responder" placeholder="{{ d.replyPh }}" hint="{{ d.replyHint }}" rows="{{ 3 }}" value="{{ reply }}" on-change="{{ setReply }}" hint-size="100%,140px"></x-import>
+<div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="paperclip" hint-size="110px,40px">Adjuntar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ replyEmpty }}" hint-size="150px,40px">Enviar respuesta</x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true" aria-label="Cargando ticket">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="120px" height="16px" hint-size="120px,16px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="28px" hint-size="70%,28px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="88px" height="24px" radius="{{ 999 }}" hint-size="88px,24px"></x-import>
+<div style="height:8px"></div>
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="24px" height="24px" hint-size="24px,24px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ k.w }}" height="14px" hint-size="60%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="12px" hint-size="90px,12px"></x-import>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="{{ d.errorTitle }}" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TK-503-91C0" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ d.forbiddenTitle }}" description="Lo ven quien lo pidió, su dueño, el aprobador del tipo y la administración. Si lo necesitas, pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ phoneBar }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;bottom:0;margin-top:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,72px">
+<sc-if value="{{ hasSecondary }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" on-click="{{ onSecondary }}" style="flex:1" hint-size="50%,48px">{{ secondaryLabel }}</x-import>
+</sc-if>
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="{{ primaryIcon }}" style="flex:1" hint-size="50%,48px">{{ primaryLabel }}</x-import>
+</sc-if>
+</x-import>
+</div>
+</sc-if>
+</div>
+</div>
+</x-import>
+<sc-if value="{{ dlgOwner }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Cambiar dueño" description="El nuevo dueño recibe el ticket en su bandeja. El cambio y su motivo quedan en el historial." on-close="{{ closeDlg }}" actions="{{ ownerActions }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Nuevo dueño" value="{{ newOwner }}" on-change="{{ setNewOwner }}" options="{{ ownerOptions }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" hint="Obligatorio. Lo ven el solicitante y ambos dueños." rows="{{ 3 }}" value="{{ motivo }}" on-change="{{ setMotivo }}" hint-size="100%,140px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ dlgReject }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Rechazar solicitud" description="Camila verá el motivo en su portal y por correo. No se registra nada en Asistencia." on-close="{{ closeDlg }}" actions="{{ rejectActions }}" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" hint="Obligatorio." rows="{{ 4 }}" value="{{ motivo }}" on-change="{{ setMotivo }}" hint-size="100%,160px"></x-import>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin_permiso&quot;],&quot;default&quot;:&quot;contenido&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ticket&quot;,&quot;solicitud&quot;],&quot;default&quot;:&quot;ticket&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;caso&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;rechazado&quot;,&quot;resuelto_espera&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dialogo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ninguno&quot;,&quot;cambiar_dueno&quot;,&quot;rechazar&quot;],&quot;default&quot;:&quot;ninguno&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { dlg: null, reply: "", motivo: null, newOwner: "Jorge Muñoz" };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "contenido";
+    const variante = this.props.variante ?? "ticket";
+    const caso = this.props.caso ?? "normal";
+    const isPhone = device === "phone";
+    const sol = variante === "solicitud";
+    const ok = estado === "contenido" || estado === "vacio";
+    const vacio = estado === "vacio";
+    const dlg = this.state.dlg ?? (this.props.dialogo && this.props.dialogo !== "ninguno" ? this.props.dialogo : null);
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    const P = (ini, who, action, when, extra) => ({ ini, who, action, when, person: true, agent: false, changes: [], hasNota: false, nota: "", ...extra });
+    const A = (action, when, extra) => ({ ...P("", "OPAI", action, when, extra), person: false, agent: true });
+    let d, est, alerta = null, prim = null, sec = null, user = { name: "Andrés Molina", initials: "AM", role: "Administrador" };
+    if (!sol) {
+      d = {
+        eyebrow: "TK-1052 · Mantención", title: "Cámara del andén norte sin señal", pairsTitle: "Datos",
+        descTitle: "Descripción de Paula",
+        desc: "Desde anoche a las 21:50 la cámara 4 del andén norte no muestra imagen en la central. El guardia de noche lo anotó en el libro de novedades.\nNecesitamos que vuelva antes del cambio de turno de las 20:00.",
+        files: [{ name: "anden-norte-cam4.jpg", size: "1,2 MB", dl: "Descargar anden-norte-cam4.jpg" }, { name: "libro-novedades-29-10.pdf", size: "340 KB", dl: "Descargar libro-novedades-29-10.pdf" }],
+        replyPh: "Escribe una respuesta para Paula", replyHint: "Paula la recibe en su portal y por correo.",
+        emptyReplies: "Responde para que Paula sepa en qué va su ticket.",
+        errorTitle: "No pudimos cargar el ticket TK-1052", forbiddenTitle: "No puedes ver este ticket",
+      };
+      const base = [
+        P("PC", "Paula Contreras", "creó el ticket", "29-10-2026 22:14"),
+        A("asignó el dueño por defecto del tipo Mantención", "29-10-2026 22:14", { changes: [{ field: "Dueño", from: "Sin dueño", to: "Andrés Molina" }] }),
+      ];
+      const work = [
+        P("AM", "Andrés Molina", "tomó el ticket", "30-10-2026 08:05", { changes: [{ field: "Estado", from: "Abierto", to: "En curso" }] }),
+        P("AM", "Andrés Molina", "respondió", "30-10-2026 08:12", { hasNota: true, nota: "Coordiné con el técnico para hoy entre 14:00 y 16:00. Mientras, el guardia del andén hace ronda cada 30 min." }),
+        P("PC", "Paula Contreras", "respondió", "30-10-2026 08:30", { hasNota: true, nota: "Ok. El técnico debe registrarse en portería con su RUT." }),
+      ];
+      let tl = vacio ? base : base.concat(work);
+      est = vacio ? ["info", "Abierto"] : ["accent", "En curso"];
+      prim = vacio ? ["Tomar ticket", "user-check"] : ["Marcar resuelto", "check"];
+      if (caso === "resuelto_espera") {
+        user = { name: "Paula Contreras", initials: "PC", role: "Jefa de operaciones" };
+        est = ["success", "Resuelto"];
+        tl = base.concat(work, [P("AM", "Andrés Molina", "lo marcó como resuelto", "30-10-2026 16:20", { changes: [{ field: "Estado", from: "En curso", to: "Resuelto" }], hasNota: true, nota: "El técnico cambió la fuente de poder de la cámara 4. Quedó grabando desde las 16:05; lo revisamos en la central." }), A("te avisó la resolución en tu portal y por correo", "30-10-2026 16:20")]);
+        alerta = { tono: "success", titulo: "Resuelto · esperando que lo cierres", body: "Revisa la respuesta de Andrés. Si quedó bien, ciérralo; si no, reábrelo y cuéntale qué falta." };
+        prim = ["Cerrar ticket", "check"]; sec = ["Reabrir", null];
+      }
+      if (caso === "rechazado") {
+        est = ["danger", "Rechazado"];
+        tl = base.concat([P("AM", "Andrés Molina", "rechazó el ticket", "30-10-2026 09:12", { changes: [{ field: "Estado", from: "Abierto", to: "Rechazado" }], hasNota: true, nota: "La cámara 4 está en garantía y la cambia el proveedor. Ya está agendado para el lunes 03-11-2026." }), A("avisó el rechazo a Paula en su portal y por correo", "30-10-2026 09:12")]);
+        alerta = { tono: "danger", titulo: "Rechazado por Andrés Molina · 30-10-2026 09:12", body: "Motivo: «La cámara 4 está en garantía y la cambia el proveedor. Ya está agendado para el lunes 03-11-2026.» Paula lo recibió en su portal y por correo." };
+        prim = null;
+      }
+      d.tl = tl;
+      d.pairs = [
+        { label: "Estado", value: badge(est[0], est[1]) },
+        { label: "Solicitante", value: "Paula Contreras · Jefa de operaciones" },
+        { label: "Tipo", value: "Mantención" },
+        { label: "Dueño", value: "Andrés Molina" },
+        { label: "Creado", value: "29-10-2026 22:14", numeric: true },
+        { label: "SLA", value: caso === "normal" ? badge("warning", "Vence en 2 h 10 min") : "24 h · " + (caso === "rechazado" ? "detenido" : "cumplido") },
+      ];
+    } else {
+      d = {
+        eyebrow: "TK-1051 · Solicitud de permiso", title: "Permiso administrativo 06-11-2026", pairsTitle: "Solicitud",
+        descTitle: "Motivo de Camila",
+        desc: "Tengo hora en el Registro Civil para renovar mi carnet y solo dan horas en la mañana.",
+        files: [{ name: "comprobante-hora-registro-civil.pdf", size: "88 KB", dl: "Descargar comprobante-hora-registro-civil.pdf" }],
+        effect: "Se registra el permiso en Asistencia para el 06-11-2026 y el turno de día queda por cubrir en la Pauta de Planta Quilicura. Camila recibe la respuesta en su portal y por correo.",
+        replyPh: "Pregúntale algo a Camila antes de decidir", replyHint: "Camila la recibe en su portal y por correo.",
+        emptyReplies: "Si necesitas más datos, pregúntale a Camila antes de decidir.",
+        errorTitle: "No pudimos cargar la solicitud TK-1051", forbiddenTitle: "No puedes ver esta solicitud",
+      };
+      const base = [
+        P("CH", "Camila Herrera", "pidió el permiso desde su portal", "30-10-2026 07:42"),
+        A("la asignó al aprobador del tipo Permiso: el supervisor de Camila", "30-10-2026 07:42", { changes: [{ field: "Aprobador", from: "Sin dueño", to: "Jorge Muñoz" }] }),
+      ];
+      est = ["info", "Abierto"];
+      user = { name: "Jorge Muñoz", initials: "JM", role: "Supervisor" };
+      let tl = vacio ? base : base.concat([P("JM", "Jorge Muñoz", "respondió", "30-10-2026 08:40", { hasNota: true, nota: "¿Alguien te puede cubrir la mañana o lo vemos con la pauta?" }), P("CH", "Camila Herrera", "respondió", "30-10-2026 08:52", { hasNota: true, nota: "Lo hablé con Diego Silva, él puede tomar mi turno." })]);
+      prim = ["Aprobar", "check"]; sec = ["Rechazar", "reject"];
+      if (caso === "rechazado") {
+        est = ["danger", "Rechazado"];
+        tl = tl.concat([P("JM", "Jorge Muñoz", "rechazó la solicitud", "30-10-2026 10:02", { changes: [{ field: "Estado", from: "Abierto", to: "Rechazado" }], hasNota: true, nota: "Ese día hay auditoría del cliente en Planta Quilicura. Propón otra fecha de la próxima semana." }), A("avisó el rechazo a Camila en su portal y por correo", "30-10-2026 10:02")]);
+        alerta = { tono: "danger", titulo: "Rechazaste esta solicitud · 30-10-2026 10:02", body: "Motivo: «Ese día hay auditoría del cliente en Planta Quilicura. Propón otra fecha de la próxima semana.» Camila lo recibió en su portal y por correo. No se registró nada en Asistencia." };
+        prim = null; sec = null;
+      }
+      d.tl = tl;
+      d.pairs = [
+        { label: "Estado", value: badge(est[0], est[1]) },
+        { label: "Tipo de permiso", value: "Administrativo con goce de sueldo" },
+        { label: "Fecha", value: "06-11-2026 · jueves", numeric: true },
+        { label: "Turno afectado", value: "Día · 08:00–20:00 · Planta Quilicura", numeric: true },
+        { label: "Días administrativos", value: "2 de 6 usados en 2026", numeric: true },
+        { label: "Solicitante", value: "Camila Herrera · Guardia" },
+        { label: "RUT", value: "12.345.678-9", mono: true },
+        { label: "Aprobador", value: "Jorge Muñoz · tú" },
+      ];
+    }
+    if (estado === "sin_permiso") user = { name: "Héctor Araya", initials: "HA", role: "Guardia" };
+    const closeDlg = () => this.setState({ dlg: "none" });
+    const motivo = this.state.motivo ?? (dlg === "rechazar" ? "Ese día hay auditoría del cliente en Planta Quilicura. Propón otra fecha" : "Jorge supervisa Planta Quilicura y coordina al técnico en terreno.");
+    const B = NS.Button;
+    const EST = { abierto: "info", en_curso: "accent", resuelto: "success", rechazado: "danger" };
+    const listRows = [
+      ["TK-1052", "Cámara del andén norte sin señal", "Mantención · Paula Contreras", "Hoy 08:05", "accent", "En curso"],
+      ["TK-1051", "Permiso administrativo 06-11-2026", "Permiso · Camila Herrera", "Hoy 07:42", "info", "Abierto"],
+      ["TK-1049", "Faltan chalecos reflectantes", "Insumos · Héctor Araya", "Ayer 21:10", "info", "Abierto"],
+      ["TK-1047", "Certificado de antigüedad", "Certificado · Diego Silva", "Ayer 17:40", "success", "Resuelto"],
+      ["TK-1044", "Cambio de turno 08-11-2026", "Cambio de turno · María F. Soto", "28-10-2026", "danger", "Rechazado"],
+    ];
+    const selFolio = sol ? "TK-1051" : "TK-1052";
+    if (sol) listRows.splice(0, 5, ["TK-1051", "Camila Herrera", "Permiso · 06-11-2026", "Hoy 07:42", "info", "Abierto"], ["TK-1050", "María F. Soto", "Cambio de turno · 08-11-2026", "Ayer 19:30", "info", "Abierto"], ["TK-1046", "Diego Silva", "Vacaciones · 18-11 al 29-11-2026", "Ayer 11:02", "info", "Abierto"], ["TK-1041", "Héctor Araya", "Certificado de antigüedad", "28-10-2026", "success", "Resuelto"]);
+    return {
+      device, theme: this.props.theme ?? "light", user, isPhone,
+      portal: sol && estado !== "sin_permiso" ? "Supervisor" : "ERP",
+      shellTitle: isPhone ? "" : "Tickets",
+      showList: device === "tablet",
+      list: listRows.map((r) => ({ title: r[1], sub: r[0] + " · " + r[2], meta: r[3], badge: r[0] === selFolio ? { tone: est[0], label: est[1] } : { tone: r[4], label: r[5] }, selected: r[0] === selFolio })),
+      d, pairs: d.pairs, tl: d.tl,
+      showDetail: ok,
+      headerBadge: badge(est[0], est[1]),
+      headerActions: !isPhone && (!!prim || !!sec),
+      phoneBar: isPhone && ok && (!!prim || !!sec),
+      hasPrimary: !!prim, primaryLabel: prim ? prim[0] : "", primaryIcon: prim ? prim[1] : "",
+      hasSecondary: !!sec, secondaryLabel: sec ? sec[0] : "",
+      onSecondary: () => { if (sec && sec[1] === "reject") this.setState({ dlg: "rechazar" }); },
+      hasAlerta: !!alerta, alerta: alerta || { tono: "info", titulo: "", body: "" },
+      hasEffect: sol && caso === "normal",
+      canChangeOwner: caso === "normal",
+      openOwner: () => this.setState({ dlg: "cambiar_dueno" }),
+      noReplies: vacio,
+      emptyAction: null,
+      canReply: caso === "normal",
+      reply: this.state.reply, setReply: (v) => this.setState({ reply: v }), replyEmpty: !this.state.reply.trim(),
+      isLoading: estado === "cargando", isError: estado === "error", isForbidden: estado === "sin_permiso",
+      skel: [{ w: "70%" }, { w: "55%" }, { w: "80%" }, { w: "40%" }, { w: "65%" }],
+      noop: () => {},
+      dlgOwner: dlg === "cambiar_dueno", dlgReject: dlg === "rechazar", closeDlg,
+      motivo, setMotivo: (v) => this.setState({ motivo: v }),
+      newOwner: this.state.newOwner, setNewOwner: (v) => this.setState({ newOwner: v }),
+      ownerOptions: [{ value: "Jorge Muñoz", label: "Jorge Muñoz", description: "Supervisor · Planta Quilicura" }, { value: "Paula Contreras", label: "Paula Contreras", description: "Jefa de operaciones" }, { value: "Andrés Molina", label: "Andrés Molina", description: "Administrador · dueño actual" }],
+      ownerActions: B ? h(React.Fragment, null, h(B, { variant: "ghost", onClick: closeDlg }, "Cancelar"), h(B, { disabled: !motivo.trim(), onClick: closeDlg }, "Cambiar dueño")) : null,
+      rejectActions: B ? h(React.Fragment, null, h(B, { variant: "ghost", onClick: closeDlg }, "Cancelar"), h(B, { variant: "destructive", disabled: !motivo.trim(), onClick: closeDlg }, "Rechazar")) : null,
+      tabs: sol ? [{ id: "hoy", label: "Hoy", icon: "home" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "menu" }] : [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: sol ? [{ items: [{ id: "hoy", label: "Hoy", icon: "home" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }, { id: "tic", label: "Solicitudes", icon: "ticket" }] }] : [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+        { title: "Empresa", items: [{ id: "fin", label: "Finanzas", icon: "chart" }, { id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
