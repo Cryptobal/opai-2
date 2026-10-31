@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:#d4d4d8}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:32px;padding:56px;width:max-content">
+<div class="ds" data-theme="light" style="display:flex;flex-direction:column;gap:12px;background:var(--ds-bg);color:var(--ds-fg);padding:32px;border-radius:var(--radius-lg)">
+<a class="t-body-sm" href="Indice.dc.html">← Índice · OPAI 2.0 Tickets v1</a>
+<h1 class="t-display" style="margin:0">Hoja de componentes · Tickets</h1>
+<p class="t-body muted" style="margin:0;max-width:880px">Todo lo que usan las pantallas, en claro y oscuro. Hover y foco se muestran forzados con las reglas del DS. Marcados «Nuevo para el DS»: Timeline con nota, Fila de adjunto y AjustesForm. ListScreen, SplitScreen y DetailScreen del pedido se arman con Page, PageHeader, SelectableRow y DetailSection; Pares = DetailSection.</p>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+<div class="ds" data-theme="{{ th.id }}" style="width:880px;display:flex;flex-direction:column;gap:0;background:var(--ds-bg);color:var(--ds-fg);padding:32px;border-radius:var(--radius-lg)">
+<span class="t-overline muted" style="padding-bottom:16px">{{ th.label }}</span>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Button</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<div style="display:grid;grid-template-columns:96px repeat(5,minmax(0,1fr));gap:12px;align-items:center">
+<span></span><span class="t-caption muted">Reposo</span><span class="t-caption muted">Hover</span><span class="t-caption muted">Foco</span><span class="t-caption muted">Deshabilitado</span><span class="t-caption muted">Cargando</span>
+<span class="t-body-sm muted">Primary</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="100px,40px">Aprobar</x-import>
+<button type="button" class="btn btn-primary" style="justify-self:start;background:color-mix(in srgb,var(--ds-accent) 90%,var(--ds-fg))">Aprobar</button>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="100px,40px">Aprobar</x-import></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="100px,40px">Crear ticket</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ true }}" hint-size="100px,40px">Aprobar</x-import>
+<span class="t-body-sm muted">Secondary</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Rechazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Rechazar</x-import>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Rechazar</x-import></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ true }}" hint-size="100px,40px">Enviar respuesta</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" loading="{{ true }}" hint-size="100px,40px">Rechazar</x-import>
+<span class="t-body-sm muted">Ghost</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" hint-size="100px,40px">Cambiar dueño</x-import>
+<button type="button" class="btn btn-ghost" style="justify-self:start;background:var(--ds-fill)"><span class="ic i-swap" aria-hidden="true"></span>Cambiar dueño</button>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" hint-size="100px,40px">Cambiar dueño</x-import></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="paperclip" disabled="{{ true }}" hint-size="100px,40px">Adjuntar</x-import>
+<span></span>
+<span class="t-body-sm muted">Destructive</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="100px,40px">Rechazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="100px,40px">Rechazar</x-import>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="100px,40px">Rechazar</x-import></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" disabled="{{ true }}" hint-size="100px,40px">Rechazar</x-import>
+<span></span>
+</div>
+<span class="t-caption muted">Secondary y destructive no cambian en hover (reglas del DS). Una sola primary por pantalla.</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">IconButton</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<div style="display:flex;gap:16px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="download" label="Descargar" hint-size="44px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="bell" label="Notificaciones" count="{{ 3 }}" hint-size="44px,44px"></x-import>
+<button type="button" class="icon-btn" aria-label="Cerrar" style="background:var(--ds-fill);border-radius:var(--radius-md)"><span class="ic i-x" aria-hidden="true"></span></button>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Cerrar" hint-size="44px,44px"></x-import></span>
+<span class="t-caption muted">Reposo · con contador · hover · foco</span>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Badge · estado y SLA</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="70px,24px">Abierto</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="70px,24px">En curso</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="70px,24px">Resuelto</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="70px,24px">Cerrado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="70px,24px">Rechazado</x-import>
+<span style="width:16px"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="130px,24px">Vence en 2 h 10 min</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="130px,24px">Vencido hace 25 min</x-import>
+</div>
+<span class="t-caption muted">Estados de ADR-025: abierto → en_curso → resuelto → cerrado, y rechazado. El Badge de SLA solo aparece si el tipo tiene SLA.</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Tabs · Chip · ChipAgregar · Segmentado</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="asignados" fade-color="var(--ds-bg)" hint-size="100%,44px"></x-import>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Tipo" valor="Mantención" on-quitar="{{ noop }}" hint-size="160px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="90px,32px">Estado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" disabled="{{ true }}" hint-size="90px,32px">Dueño</x-import>
+</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Vista" options="{{ segVista }}" value="pendientes" style="width:300px" hint-size="300px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="SLA" options="{{ segSla }}" value="off" style="width:260px" hint-size="260px,40px"></x-import>
+</div>
+<span class="t-caption muted">Tabs: la pestaña sin permiso va deshabilitada con candado. Chip aplicado con ×; punteado para agregar un filtro.</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Input · Select · Textarea</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Asunto · reposo" value="Cámara del andén norte sin señal" hint-size="100%,72px"></x-import>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-label">Asunto · foco</span><div class="input focus"><span class="t-body" style="flex:1">Cámara del andén norte|</span></div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Dueño · error" value="" placeholder="Elige un dueño" options="{{ owners }}" error="Asesoría legal no tiene dueño por defecto. Elige uno para poder crear el ticket." hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Dueño · deshabilitado" value="Carlos Irigoyen" options="{{ owners }}" disabled="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" hint="Obligatorio. Lo ven el solicitante y ambos dueños." rows="{{ 2 }}" value="Jorge supervisa Planta Quilicura." hint-size="100%,120px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Responder · deshabilitado" rows="{{ 2 }}" disabled="{{ true }}" placeholder="El ticket está cerrado" hint-size="100%,120px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Switch · Checkbox · Uploader</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Requiere aprobación" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Supervisores" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Requiere aprobación" checked="{{ false }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Administración" checked="{{ false }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Deshabilitado" checked="{{ true }}" disabled="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Deshabilitado" checked="{{ true }}" disabled="{{ true }}" hint-size="100%,44px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" compacto="{{ true }}" archivos-iniciales="{{ files }}" tipos="JPG, PNG o PDF" tamano-maximo-mb="{{ 10 }}" hint-size="100%,180px"></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Table · RowCard · SelectableRow · DetailSection</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" row-key="folio" hint-size="100%,140px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" title="Cámara del andén norte sin señal" subtitle="TK-1052 · Mantención · Carlos Irigoyen" meta="Vence en 2 h 10 min" badge="{{ bEnCurso }}" hint-size="100%,80px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" initials="CH" title="Camila Herrera" subtitle="Permiso administrativo · 06-11-2026" meta="Planta Quilicura · hoy 07:42" badge="{{ bAbierto }}" chevron="{{ true }}" align="start" hint-size="100%,88px"></x-import>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ true }}" title="Permiso" subtitle="Aprueba: supervisor directo" meta="Sin SLA" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ false }}" title="Mantención" subtitle="Dueño: Carlos Irigoyen" meta="SLA 24 h" hint-size="100%,64px"></x-import>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Solicitud" rows="{{ pairs }}" hint-size="100%,160px"></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Alerta</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Si apruebas" hint-size="100%,72px">Se registra el permiso en Asistencia para el 06-11-2026.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Resuelto · esperando que lo cierres" hint-size="100%,72px">Si quedó bien, ciérralo; si no, reábrelo.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Rechazado por Carlos Irigoyen · 30-10-2026 09:12" hint-size="100%,72px">Motivo: «La cámara 4 está en garantía y la cambia el proveedor.»</x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Empty · Loading · ErrorState · Forbidden</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="ticket" title="No tienes tickets asignados" description="Cuando seas dueño de un ticket aparecerá aquí." hint-size="100%,200px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="rows" count="{{ 3 }}" label="Cargando tickets" hint-size="100%,200px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tickets" description="Revisa tu conexión." code="TK-503-7F2A" on-retry="{{ noop }}" hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver todos los tickets" description="Pídele acceso a Carlos Irigoyen." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Dialog · Sheet · ActionBar</span><span class="badge b-neutral nodot">DS 2.0</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="position:relative;height:400px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Rechazar solicitud" description="Camila verá el motivo en su portal y por correo." actions="{{ dlgActions }}" on-close="{{ noop }}" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" rows="{{ 2 }}" value="Ese día hay auditoría del cliente." hint-size="100%,100px"></x-import>
+</x-import>
+</div>
+<div style="position:relative;height:400px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" title="Nuevo ticket" on-close="{{ noop }}" actions="{{ sheetActions }}" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="Mantención" options="{{ tipos }}" hint-size="100%,72px"></x-import>
+</x-import>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Rechazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="100px,40px">Aprobar</x-import>
+</x-import>
+<span class="t-caption muted">Sheet lateral de 420 desde iPad; en 375 «Nuevo ticket» va a pantalla completa con la acción fija abajo.</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Timeline con nota</span><span class="badge b-accent">Nuevo para el DS</span></div>
+<span class="t-body-sm muted">Extiende Timeline con «nota»: el texto de una respuesta o motivo, en texto plano sobre fill, radio md, padding 12. Sin enlaces ni botones dentro.</span>
+<ol class="tl" style="list-style:none;margin:0;padding:0">
+<li class="tl-item"><span class="tl-dot agent" aria-hidden="true"><span class="ic sm i-bot" style="width:14px;height:14px"></span></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px"><span class="t-body-sm"><span style="font-weight:500">OPAI</span> asignó el dueño por defecto del tipo Mantención</span><span class="t-body-sm" style="display:flex;flex-wrap:wrap;gap:6px;align-items:baseline"><span class="muted">Dueño</span><span class="tl-was">Sin dueño</span><span class="subtle">→</span><span>Carlos Irigoyen</span></span><span class="t-caption t-numeric muted">29-10-2026 22:14</span></div></li>
+<li class="tl-item"><span class="tl-dot person" aria-hidden="true">CI</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px"><span class="t-body-sm"><span style="font-weight:500">Carlos Irigoyen</span> respondió</span><p class="t-body" style="margin:4px 0 0;padding:12px;background:var(--ds-fill);border-radius:var(--radius-md);white-space:pre-wrap">Coordiné con el técnico para hoy entre 14:00 y 16:00.</p><span class="t-caption t-numeric muted">30-10-2026 08:12</span></div></li>
+</ol>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Fila de adjunto</span><span class="badge b-accent">Nuevo para el DS</span></div>
+<span class="t-body-sm muted">Nombre del archivo como texto plano (viene de afuera); la descarga es un IconButton de 44 con etiqueta accesible. Alto mínimo 44, separador border.</span>
+<div style="display:flex;align-items:center;gap:12px;min-height:44px;border-bottom:1px solid var(--ds-border)">
+<span class="ic i-paperclip subtle" aria-hidden="true"></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-body-sm">anden-norte-cam4.jpg</span><span class="t-caption muted t-numeric">1,2 MB</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="download" label="Descargar anden-norte-cam4.jpg" hint-size="44px,44px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">AjustesForm</span><span class="badge b-accent">Nuevo para el DS</span></div>
+<span class="t-body-sm muted">Patrón de Configuración › Módulos: lista de registros (SelectableRow, 320 en desktop · 260 en iPad, oculta en 375) + FormSection apiladas con gap 16 + ActionBar. Sin guardar si falta un campo obligatorio (p. ej. dueño).</span>
+<div style="display:flex;gap:16px;align-items:flex-start">
+<div style="width:220px;flex:none;border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ true }}" title="Asesoría legal" subtitle="Sin dueño" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ false }}" title="Permiso" subtitle="Aprueba: supervisor" hint-size="100%,64px"></x-import>
+</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="General" hint-size="100%,120px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Dueño por defecto" value="" placeholder="Elige un dueño" options="{{ owners }}" error="Sin dueño no se puede guardar." hint-size="100%,96px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="100px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="140px,40px">Guardar cambios</x-import>
+</x-import>
+</div>
+</div>
+</div>
+
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = NS.Button;
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    return {
+      themes: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      noop: () => {},
+      tabItems: [{ id: "mios", label: "Míos" }, { id: "asignados", label: "Asignados a mí" }, { id: "todos", label: "Todos", disabled: true }],
+      segVista: [{ value: "pendientes", label: "Por aprobar" }, { value: "historial", label: "Historial" }],
+      segSla: [{ value: "off", label: "Apagado" }, { value: "on", label: "Con plazo" }],
+      owners: ["Carlos Irigoyen", "Paula Contreras", "Jorge Muñoz"],
+      tipos: ["Mantención", "Insumos", "Permiso"],
+      files: [{ nombre: "anden-norte-cam4.jpg", size: 1240000, estado: "listo" }, { nombre: "libro-novedades.pdf", size: 340000, estado: "subiendo", subido: 150000 }, { nombre: "video-andén.mov", size: 48000000, estado: "error", mensaje: "Supera 10 MB." }],
+      cols: [
+        { key: "folio", label: "Folio", mono: true, muted: true, width: 96 },
+        { key: "asunto", label: "Asunto", strong: true },
+        { key: "dueno", label: "Dueño" },
+        { key: "est", label: "Estado", render: (r) => badge(r.t, r.l) },
+        { key: "sla", label: "SLA", render: (r) => (r.sla ? badge(r.sla[0], r.sla[1]) : null) },
+      ],
+      rows: [
+        { folio: "TK-1052", asunto: "Cámara del andén norte sin señal", dueno: "Carlos Irigoyen", t: "accent", l: "En curso", sla: ["warning", "Vence en 2 h 10 min"] },
+        { folio: "TK-1051", asunto: "Permiso administrativo 06-11-2026", dueno: "Jorge Muñoz", t: "info", l: "Abierto" },
+      ],
+      bEnCurso: { tone: "accent", label: "En curso" }, bAbierto: { tone: "info", label: "Abierto" },
+      pairs: [{ label: "Tipo de permiso", value: "Administrativo con goce de sueldo" }, { label: "Fecha", value: "06-11-2026 · jueves", numeric: true }, { label: "RUT", value: "12.345.678-9", mono: true }],
+      dlgActions: B ? h(React.Fragment, null, h(B, { variant: "ghost" }, "Cancelar"), h(B, { variant: "destructive" }, "Rechazar")) : null,
+      sheetActions: B ? h(React.Fragment, null, h(B, { variant: "ghost" }, "Cancelar"), h(B, null, "Crear ticket")) : null,
+    };
+  }
+}
+</script>
+</body>
+</html>

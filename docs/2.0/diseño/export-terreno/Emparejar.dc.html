@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}button{transition:background-color 150ms cubic-bezier(.2,0,0,1),border-color 150ms cubic-bezier(.2,0,0,1)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%">
+  <div class="safe-top"></div>
+  <div class="topbar" style="height:60px;padding-left:16px"><span class="wordmark">OPAI</span><span style="flex:1"></span><span class="t-caption" style="padding-right:8px">Terreno</span></div>
+
+  <sc-if value="{{ isCodigo }}" hint-placeholder-val="{{ true }}">
+    <div class="scroll" style="overflow:auto">
+      <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:24px;max-width:480px;margin:0 auto">
+        <div style="display:flex;flex-direction:column;gap:4px"><h1 class="t-title m0">Emparejar este dispositivo</h1><span class="t-body-sm muted" style="text-wrap:pretty">En el ERP, abre la instalación → Dispositivos → «Emparejar dispositivo». Escribe el código de 6 caracteres o escanea el QR.</span></div>
+        <div class="field">
+          <span class="lbl">Código</span>
+          <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px" role="group" aria-label="Código de 6 caracteres">
+            <sc-for list="{{ boxes }}" as="b" hint-placeholder-count="6"><span class="input t-mono" style="height:64px;padding:0;justify-content:center;font-size:24px;font-weight:600;{{ b.st }}">{{ b.c }}</span></sc-for>
+          </div>
+          <sc-if value="{{ err }}"><span class="err"><span class="ic sm i-alert" aria-hidden="true"></span>El código no existe o venció. Pide uno nuevo en el ERP · quedan 3 intentos.</span></sc-if>
+          <sc-if value="{{ noErr }}"><span class="hint">El código vence 10 minutos después de generarlo.</span></sc-if>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px"><span class="divider" style="flex:1"></span><span class="t-caption">o</span><span class="divider" style="flex:1"></span></div>
+        <button class="btn btn-secondary block" style="height:56px"><span class="ic i-scan" aria-hidden="true"></span>Escanear el QR del ERP</button>
+      </div>
+    </div>
+    <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:480px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px" aria-busy="{{ busy }}"><sc-if value="{{ busy }}"><span class="btn-spin" aria-hidden="true"></span></sc-if><span>Emparejar</span></button></div></div>
+  </sc-if>
+
+  <sc-if value="{{ isOk }}" hint-placeholder-val="{{ false }}">
+    <div class="scroll" style="overflow:auto">
+      <div style="padding:24px 16px;display:flex;flex-direction:column;gap:20px;max-width:480px;margin:0 auto">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding-top:16px">
+          <span class="state-tile" style="width:72px;height:72px;border-radius:20px;background:var(--ds-success-muted);color:var(--ds-success-fg)"><span class="ic lg i-check" aria-hidden="true"></span></span>
+          <span class="t-title">Dispositivo emparejado</span>
+          <span class="t-body-sm muted" style="text-wrap:pretty">Desde ahora abre Terreno de Planta Quilicura. Cada guardia elige su nombre al empezar.</span>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><span class="t-body-sm muted">{{ r.k }}</span><span class="t-label t-numeric" style="text-align:right">{{ r.v }}</span></div></sc-for>
+          <div style="display:flex;justify-content:space-between;gap:12px;padding:14px 16px"><span class="t-body-sm muted">Identificador</span><span class="t-label t-mono">DSP-0042</span></div>
+        </div>
+        <span class="t-caption" style="display:flex;gap:6px;align-items:flex-start;text-wrap:pretty"><span class="ic sm i-lock" aria-hidden="true" style="flex:none;margin-top:1px"></span>Si el dispositivo se pierde, el administrador lo revoca desde el ERP y deja de mostrar datos al instante.</span>
+      </div>
+    </div>
+    <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:480px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px">Continuar</button></div></div>
+  </sc-if>
+
+  <sc-if value="{{ isRev }}" hint-placeholder-val="{{ false }}">
+    <div class="state" role="status" style="max-width:420px;margin:0 auto">
+      <span class="state-tile" style="width:72px;height:72px;border-radius:20px;background:var(--ds-danger-muted);color:var(--ds-danger-fg)"><span class="ic lg i-lock" aria-hidden="true"></span></span>
+      <div style="display:flex;flex-direction:column;gap:6px"><span class="t-heading">Este dispositivo ya no está emparejado</span><span class="t-body-sm muted" style="text-wrap:pretty">Carlos Irigoyen lo revocó el 29-10-2026 a las 21:14. Borramos los datos de la instalación. Si fue un error, pide un código nuevo.</span></div>
+      <button class="btn btn-primary" style="height:56px;padding:0 24px">Emparejar de nuevo</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;codigo&quot;,&quot;options&quot;:[&quot;codigo&quot;,&quot;conectando&quot;,&quot;error&quot;,&quot;emparejado&quot;,&quot;revocado&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;phone&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic{
+  renderVals(){
+    const p=this.props;const scr=p.screen??'codigo';const err=scr==='error';const busy=scr==='conectando';
+    const code=scr==='codigo'?'K7M4':'K7M4QX';
+    const boxes=[0,1,2,3,4,5].map(i=>({c:code[i]||'',st:err?'border-color:var(--ds-danger-fg);box-shadow:0 0 0 3px var(--ds-danger-muted)':i===code.length&&scr==='codigo'?'border-color:var(--ds-accent);box-shadow:0 0 0 3px var(--ds-accent-muted)':''}));
+    return {theme:p.theme??'light',device:p.device??'phone',label:'Emparejar · '+scr,
+      isCodigo:['codigo','conectando','error'].includes(scr),isOk:scr==='emparejado',isRev:scr==='revocado',boxes,err,noErr:!err,busy,
+      rows:[{k:'Instalación',v:'Planta Quilicura'},{k:'Punto',v:'Portería principal'},{k:'Empresa',v:'Atlas Seguridad SpA'},{k:'Emparejado',v:'29-10-2026 07:41'}]};
+  }
+}
+</script>
+</body>
+</html>

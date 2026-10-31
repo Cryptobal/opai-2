@@ -4,8 +4,8 @@ import { normalizarRut } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { aFecha, hoy, textoOpcional } from "../core/maestros/comun";
-import { reglaDeNegocio } from "../errores";
-import { PERMISO_COMPRAS, montoSchema, plazoPagoDefecto, tipoDteSchema } from "./comun";
+import { prohibido, reglaDeNegocio } from "../errores";
+import { PERMISO_COMPRAS, PERMISO_PROVEEDORES, montoSchema, plazoPagoDefecto, tipoDteSchema } from "./comun";
 import { camposDocumento, totalYError } from "./compras-escritura";
 
 const MAX_FILAS = 200;
@@ -75,6 +75,10 @@ export const comprasImportar = defineCapability({
           falla("El proveedor no existe: pide crearlo e indica su razón social.");
           continue;
         }
+        // Crear proveedores es de `finanzas:proveedores.manage`: quien solo importa compras no lo hereda
+        // (también en la vista previa, para que no prometa lo que el real rechazaría).
+        if (!ctx.autorizar(PERMISO_PROVEEDORES))
+          throw prohibido("Crear proveedores exige el permiso finanzas:proveedores.manage.");
         proveedoresCreados += 1;
         if (!dryRun)
           proveedor = await ctx.db.proveedor.create({

@@ -13,7 +13,7 @@ datasource db {
   // tablas de comercial viven en packages/db/prisma/schema/comercial.prisma; "rondas" es el módulo
   // de rondas (CAR-72). "core_firma" es la firma electrónica del núcleo (firma.md, PR 1); sus tablas
   // viven en schema/firma.prisma.
-  schemas  = ["core", "comercial", "rondas", "core_firma", "finanzas"]
+  schemas  = ["core", "comercial", "rondas", "core_firma", "tickets", "finanzas"]
 }
 
 /// Empresa cliente de OPAI. No lleva tenant_id: es el tenant. Se protege por permisos de aplicación.
