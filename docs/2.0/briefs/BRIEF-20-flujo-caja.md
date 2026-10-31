@@ -20,3 +20,19 @@ Encargo CAR-91 (Ola 5), «ENCARGO DE CONSTRUCCIÓN · flujo-caja» del 31-oct-20
 ## Pendiente para el PR 2
 
 Pantallas de escritura del diseño (traza de celda, reprogramar con vista previa, cierre semanal, filas y ajustes en Configuración › Módulos), vista móvil de 4 semanas, metas de rendimiento y correo de saldo negativo (pantalla 10), y las capas derivadas de DTE, banco y nómina.
+
+## Autorrevisión del merge de #186 (CAR-91)
+
+Encargo limitado a unir main y regenerar derivados: no autoriza cambiar lógica ni
+migraciones. La revisión detectó una carrera pendiente entre el cierre de una semana
+y la modificación de sus celdas: la transacción común no añade bloqueo ni CAS.
+La migración es aditiva y transaccional, con RLS, pero su SQL no se puede reejecutar
+sin errores de objetos existentes. Mantiene fecha posterior a las migraciones de main.
+
+Las decisiones de código de la sección anterior siguen por revisar; no hay atribución
+verificada ni se presume aprobación de Carlos. No se tomó una nueva decisión de negocio.
+
+Aceptación del PR 1: datos, dominio, capacidades, planilla de lectura y pruebas de
+aislamiento están implementados; su validación depende del gate. El alcance completo
+sigue parcial: pantallas de escritura, móvil, metas, aviso y capas derivadas continúan
+en PR 2. Este merge conserva esa separación y no completa esos criterios.

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isModulos }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-caption">Configuración</span>
+<span class="t-heading">Módulos</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ modulos }}" as="m" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ m.sel }}" title="{{ m.nombre }}" hint-size="100%,56px"></x-import>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ notModulos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ outerCols }};gap:20px;align-items:start">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<span class="t-label" style="display:block;padding:12px 16px">Módulos</span>
+<sc-for list="{{ modulos }}" as="m" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ m.sel }}" title="{{ m.nombre }}" hint-size="100%,56px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="min-width:0">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin-left:-8px;margin-bottom:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="110px,44px">Módulos</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes cambiar los tipos de documento" description="Solo owner y admin configuran Documentos. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración › Módulos › Documentos" title="Tipos de documento" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="130px,40px">Nuevo tipo</x-import>
+</x-import>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ tipos }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,400px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:20px;align-items:start">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ tipos }}" as="t" hint-placeholder-count="8">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ t.sel }}" title="{{ t.nombre }}" subtitle="{{ t.sub }}" badge="{{ t.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Póliza" description="Se usa en cuentas e instalaciones." hint-size="100%,460px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="Póliza" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Exige vigencia" description="Pide la fecha de vencimiento al subir el archivo." hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Días de aviso antes del vencimiento" value="30, 60" trailing="días" style="max-width:240px" hint-size="240px,72px"></x-import>
+<span class="t-caption">Por defecto se avisa a los 30 y 60 días. Cámbialos en cada tipo.</span>
+<div style="display:flex;flex-direction:column">
+<span class="t-label" style="margin-bottom:4px">Quién lo ve</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Ficha" description="Pestaña Documentos de la cuenta o instalación" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Portal Trabajador" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Portal Cliente" description="Documentos y facturas" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Dato sensible" description="Solo quien tiene lectura sensible lo abre; el resto ve «Documento restringido»." hint-size="100%,56px"></x-import>
+</div>
+</x-import>
+<div style="display:flex;justify-content:flex-end;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="100px,40px">Guardar</x-import>
+</div>
+</div>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="7">
+<div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="{{ 14 }}" hint-size="40%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 12 }}" hint-size="60%,12px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay tipos de documento" description="Crea el primero para ordenar los archivos y avisar sus vencimientos." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tipos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CFG-DOC-503 · 30-10-2026 12:57" hint-size="100%,320px"></x-import>
+</sc-if>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;,&quot;modulos&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const raw = [
+      ["Póliza", true, "30 y 60", "Ficha · Portal Cliente", false],
+      ["Plan de seguridad OS-10", true, "30 y 60", "Ficha", false],
+      ["Contrato comercial", true, "30 y 60", "Ficha · Portal Cliente", false],
+      ["Contrato de trabajo", false, 0, "Ficha · Portal Trabajador", true],
+      ["Anexo de contrato", false, 0, "Ficha · Portal Trabajador", true],
+      ["Licencia médica", true, 0, "Ficha", true],
+      ["Credencial OS-10", true, "60", "Ficha · Portal Trabajador", false],
+      ["Recepción de uniforme y EPP", false, 0, "Ficha · Portal Trabajador", false],
+    ];
+    const tipos = raw.map((r, i) => ({ id: i, nombre: r[0], sel: i === 0, sub: (r[1] ? (r[2] ? "Vigencia · aviso " + r[2] + " días" : "Vigencia · sin aviso") : "Sin vigencia") + " · " + r[3], badge: r[4] ? { tone: "neutral", label: "Sensible" } : null }));
+    return {
+      theme: this.props.theme ?? "light",
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "cfg",
+      isPhone, notPhone: !isPhone,
+      isModulos: estado === "modulos", notModulos: estado !== "modulos",
+      outerCols: isPhone ? "minmax(0,1fr)" : "200px minmax(0,1fr)",
+      modulos: ["Personas", "Instalaciones", "Pauta", "Rondas", "Documentos", "Finanzas"].map((n) => ({ nombre: n, sel: n === "Documentos" })),
+      gridCols: isTablet ? "220px minmax(0,1fr)" : "300px minmax(0,1fr)",
+      tipos, cols: [{ key: "nombre", label: "Tipo" }],
+      toCard: (t) => ({ title: t.nombre, subtitle: t.sub, badge: t.badge, chevron: true }),
+      isNormal: estado === "normal", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      isForbidden: estado === "sinpermiso", notForbidden: estado !== "sinpermiso",
+      emptyAction: NS.Button ? h(NS.Button, { icon: "plus", size: "lg" }, "Nuevo tipo") : null,
+      skel: [{ w: "40%" }, { w: "52%" }, { w: "46%" }, { w: "36%" }, { w: "44%" }, { w: "30%" }, { w: "48%" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] }, { title: "Personas", items: [] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

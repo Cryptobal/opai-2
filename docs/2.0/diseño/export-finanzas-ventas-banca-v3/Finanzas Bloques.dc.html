@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start;min-width:0">
+<sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
+<div style="grid-column:{{ b.span }};min-width:0">
+
+<sc-if value="{{ b.isAlert }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="{{ b.tono }}" titulo="{{ b.titulo }}" hint-size="100%,64px">{{ b.texto }}</x-import>
+</sc-if>
+
+<sc-if value="{{ b.isTabs }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ b.items }}" value="{{ b.value }}" hint-size="100%,44px"></x-import>
+</sc-if>
+
+<sc-if value="{{ b.isKpis }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:{{ kpiCols }};gap:12px">
+<sc-for list="{{ b.items }}" as="k" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,80px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ k.k }}</span>
+<span class="t-numeric" style="font:600 22px/28px var(--font-sans);color:var(--ds-fg)">{{ k.v }}</span>
+</div>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ b.isList }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,200px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:16px 16px 12px">
+<span class="t-subheading">{{ b.title }}</span>
+<span class="t-numeric" style="font:600 14px/20px var(--font-sans);color:var(--ds-fg-muted)">{{ b.count }}</span>
+</div>
+<sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--ds-border)">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ r.title }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ r.sub }}</span>
+<sc-if value="{{ r.hasLink }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="240px,44px">{{ r.link }}</x-import></sc-if>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px">
+<sc-if value="{{ r.hasMonto }}" hint-placeholder-val="{{ false }}"><span class="t-numeric" style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ r.monto }}</span></sc-if>
+<sc-for list="{{ r.badges }}" as="g" hint-placeholder-count="1"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ g.tone }}" hint-size="64px,22px">{{ g.label }}</x-import></sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none"><sc-if value="{{ r.hasToggle }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px"><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Arrastrar</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ r.toggle }}" hint-size="48px,44px"></x-import></div></sc-if><sc-if value="{{ r.hasAction }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="96px,40px">{{ r.action }}</x-import></sc-if></div>
+</div>
+</sc-for>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ b.isPairs }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,200px">
+<div style="padding:16px 16px 8px"><span class="t-subheading">{{ b.title }}</span></div>
+<sc-for list="{{ b.pairs }}" as="p" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 16px;border-top:1px solid var(--ds-border)">
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ p.k }}</span>
+<span class="t-numeric" style="font:500 14px/20px {{ p.font }};color:var(--ds-fg);text-align:right">{{ p.v }}</span>
+</div>
+</sc-for>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ b.isField }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ b.label }}" defaultValue="{{ b.value }}" mono="{{ b.mono }}" readOnly="{{ b.readonly }}" hint-size="100%,72px"></x-import>
+</sc-if>
+
+<sc-if value="{{ b.isSelect }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="{{ b.label }}" value="{{ b.value }}" options="{{ b.options }}" hint="{{ b.hint }}" hint-size="100%,88px"></x-import>
+</sc-if>
+
+<sc-if value="{{ b.isSwitch }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ b.checked }}" label="{{ b.label }}" description="{{ b.description }}" hint-size="100%,56px"></x-import></x-import>
+</sc-if>
+
+<sc-if value="{{ b.isTextarea }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="{{ b.label }}" defaultValue="{{ b.value }}" rows="{{ 3 }}" hint-size="100%,110px"></x-import>
+</sc-if>
+
+<sc-if value="{{ b.isSeg }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg)">{{ b.label }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ b.items }}" value="{{ b.value }}" label="{{ b.label }}" hint-size="100%,44px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ b.isPreview }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:12px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<span style="font:600 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ b.head }}</span>
+<sc-for list="{{ b.lines }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;justify-content:space-between;gap:16px;font:400 14px/20px var(--font-sans);color:var(--ds-fg)"><span>{{ l.d }}</span><span class="t-numeric">{{ l.m }}</span></div>
+</sc-for>
+<sc-if value="{{ b.hasTotal }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;border-top:1px solid var(--ds-border);padding-top:12px;font:600 16px/24px var(--font-sans);color:var(--ds-fg)"><span>Total</span><span class="t-numeric">{{ b.total }}</span></div></sc-if>
+<sc-if value="{{ b.hasNote }}" hint-placeholder-val="{{ false }}"><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ b.note }}</span></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ b.isBtns }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+<sc-for list="{{ b.items }}" as="n" hint-placeholder-count="2"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ n.variant }}" size="lg" hint-size="140px,48px">{{ n.label }}</x-import></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ b.isText }}" hint-placeholder-val="{{ false }}">
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ b.text }}</span>
+</sc-if>
+
+<sc-if value="{{ b.isTimeline }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<span class="t-subheading">{{ b.title }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ b.items }}" hint-size="100%,160px"></x-import>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ b.isBrand }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="AS" hint-size="40px,40px"></x-import>
+<div style="display:flex;flex-direction:column"><span style="font:600 15px/22px var(--font-sans);color:var(--ds-fg)">{{ b.tenant }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ b.text }}</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,120px">
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+<span class="t-subheading">{{ b.title }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ b.text }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon-right="chevron-right" hint-size="200px,40px">{{ b.label }}</x-import>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ b.isConn }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,320px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-subheading">{{ b.title }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ b.provider }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ b.tone }}" hint-size="80px,22px">{{ b.estado }}</x-import>
+</div>
+<sc-if value="{{ b.hasAlert }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="{{ b.alertTono }}" titulo="{{ b.alertTitulo }}" hint-size="100%,56px">{{ b.alertTexto }}</x-import></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ b.secretLabel }}" defaultValue="{{ b.secret }}" mono="{{ true }}" readOnly="{{ true }}" hint="{{ b.hint }}" hint-size="100%,88px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="140px,40px">{{ b.primary }}</x-import>
+<sc-if value="{{ b.hasSecondary }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="120px,40px">{{ b.secondary }}</x-import></sc-if>
+</div>
+</div>
+</x-import>
+</sc-if>
+
+</div>
+</sc-for>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;blocks&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any[]&quot;},&quot;cols&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const flat = [];
+    const add = (b) => { if (b.t === 'stack') b.blocks.forEach(x => add(Object.assign({}, x, { wide: x.wide === true }))); else flat.push(b); };
+    (this.props.blocks || []).forEach(add);
+    const cols = this.props.cols ?? 1;
+    const blocks = flat.map(b => {
+      const o = Object.assign({}, b);
+      ['alert','tabs','kpis','list','pairs','field','textarea','seg','preview','btns','text','timeline','brand','link','conn','select','switch'].forEach(t => { o['is' + t[0].toUpperCase() + t.slice(1)] = b.t === t; });
+      o.span = b.wide && cols > 1 ? '1 / -1' : 'auto';
+      if (b.rows) o.rows = b.rows.map(r => Object.assign({}, r, { hasMonto: !!r.monto, hasAction: !!r.action, hasLink: !!r.link, hasToggle: r.toggle !== undefined }));
+      if (b.pairs) o.pairs = b.pairs.map(p => Object.assign({}, p, { font: p.mono ? 'var(--font-mono)' : 'var(--font-sans)' }));
+      o.hasTotal = !!b.total; o.hasNote = !!b.note;
+      o.mono = !!b.mono; o.readonly = !!b.readonly;
+      if (b.t === 'conn') { o.hasAlert = !!b.alert; o.alertTono = b.alert ? b.alert[0] : ''; o.alertTitulo = b.alert ? b.alert[1] : ''; o.alertTexto = b.alert ? b.alert[2] : ''; o.hasSecondary = !!b.secondary; }
+      return o;
+    });
+    return { blocks, cols: 'repeat(' + cols + ',minmax(0,1fr))', kpiCols: cols > 1 ? 'repeat(3,minmax(0,1fr))' : 'minmax(0,1fr)' };
+  }
+}
+</script>
+</body>
+</html>

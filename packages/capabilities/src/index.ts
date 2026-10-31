@@ -1,6 +1,8 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { ajustesComercial, capacidadesComercial } from "./comercial";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
+export { ajustesNomina, capacidadesNomina } from "./nomina";
+export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { ajustesFinanzas, capacidadesFinanzas } from "./finanzas";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {

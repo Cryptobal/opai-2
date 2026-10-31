@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<div style="margin-bottom:4px;margin-left:-8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="160px,40px">Camila Herrera</x-import>
+</div>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes generar documentos laborales" description="Necesitas permiso de lectura sensible. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Personas · Camila Herrera · Documentos" title="Generar documento" hint-size="100%,64px"></x-import>
+<sc-if value="{{ isLote }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:{{ gridCols }};gap:24px;align-items:start"><div style="display:flex;flex-direction:column;gap:16px;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plantilla" value="ind" options="{{ plantillas }}" hint-size="100%,72px"></x-import><span class="t-label">Personas · 3 elegidas de 5</span><div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);padding:0 16px"><sc-for list="{{ personas }}" as="p" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ p.sel }}" disabled="{{ p.dis }}" label="{{ p.nombre }}" description="{{ p.desc }}" hint-size="100%,56px"></x-import></sc-for></div></div><div style="display:flex;flex-direction:column;gap:12px;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Se generarán 3 documentos" hint-size="100%,60px">Cada persona recibe su contrato con sus propios datos. Revisa la vista previa antes de generar.</x-import><span class="t-label">Vista previa del lote</span><div style="background:var(--ds-fill);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><div style="background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);border-radius:var(--radius-sm);padding:16px;display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="text-align:center">Contrato de trabajo indefinido · 1 de 3</span><span class="t-body-sm" style="text-wrap:pretty">En Santiago, a 30-10-2026, entre Atlas Seguridad SpA y doña Camila Herrera Soto, RUT 12.345.678-9, se conviene el siguiente contrato…</span></div></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Avance del lote" rows="{{ avance }}" hint-size="100%,160px"></x-import><div style="display:flex;flex-direction:column;gap:6px"><span class="t-body-sm">Generando 2 de 3</span><div class="upl-bar"><span style="width:66%"></span></div></div></div></div><div style="margin-top:20px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ summaryLote }}" hint-size="100%,64px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Cancelar</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="210px,40px">Generar 3 documentos</x-import></x-import></div></sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos preparar el documento" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="DOC-GEN-500 · 30-10-2026 12:57" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay plantillas laborales" description="Pídele a un administrador que cree o importe una en Documentos → Plantillas." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:24px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plantilla" value="anexo" options="{{ plantillas }}" hint-size="100%,72px"></x-import>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;justify-content:space-between;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="34%" height="{{ 14 }}" hint-size="34%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="{{ 14 }}" hint-size="40%,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Falta la dirección de la persona" accion="{{ fixAction }}" hint-size="100%,60px">Complétala en la ficha para generar el documento.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Datos que se rellenan" rows="{{ pares }}" hint-size="100%,320px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Firma" rows="{{ firma }}" hint-size="100%,140px"></x-import>
+</sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+<span class="t-label">Vista previa</span>
+<div style="background:var(--ds-fill);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:{{ viewerPad }};height:{{ viewerH }};overflow:hidden;display:flex;justify-content:center">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="100%" radius="{{ 6 }}" hint-size="100%,100%"></x-import>
+</sc-if>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="width:100%;max-width:520px;background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);border-radius:var(--radius-sm);padding:{{ paperPad }};display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+<span class="t-label" style="text-align:center">Anexo de contrato de trabajo</span>
+<span class="t-body-sm" style="text-wrap:pretty;line-height:24px">En Santiago, a 30-10-2026, entre Atlas Seguridad SpA y doña Camila Herrera Soto, RUT 12.345.678-9, domiciliada en <span class="t-overline t-mono" style="padding:1px 4px;border-radius:var(--radius-sm);background:var(--ds-warning-muted);color:var(--ds-warning-fg)">{persona.direccion}</span>, se acuerda:</span>
+<span class="t-body-sm" style="text-wrap:pretty;line-height:24px">Primero: desde el 01-11-2026 la trabajadora se desempeñará como Guardia en Av. Lo Echevers 550, Quilicura, en jornada 4×4 de 08:00 a 20:00.</span>
+<span class="t-body-sm" style="text-wrap:pretty;line-height:24px">Segundo: la remuneración base se mantiene en $ 620.000 mensuales.</span>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+<div style="margin-top:20px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ summary }}" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="210px,40px">Generar y enviar a firma</x-import>
+</x-import>
+</div>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const warn = (t) => h("span", { style: { color: "var(--ds-warning-fg)", fontWeight: 500 } }, t);
+    return {
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      theme: this.props.theme ?? "light",
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "per",
+      gridCols: isPhone || isTablet ? "minmax(0,1fr)" : "minmax(0,1fr) minmax(0,1fr)",
+      viewerPad: isPhone ? "12px" : "20px",
+      viewerH: isPhone ? "300px" : isTablet ? "300px" : "520px",
+      paperPad: isPhone ? "16px" : "28px 32px",
+      isLote: estado === "lote", isNormal: estado === "normal", isEmpty: estado === "vacio", isLoading: estado === "cargando", isError: estado === "error",
+      showForm: estado === "normal" || estado === "cargando",
+      isForbidden: estado === "sinpermiso", notForbidden: estado !== "sinpermiso",
+      fixAction: NS.Button ? h(NS.Button, { variant: "ghost", size: "sm" }, "Completar") : null,
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Volver a la ficha") : null,
+      skel: [{ w: "45%" }, { w: "38%" }, { w: "30%" }, { w: "42%" }, { w: "50%" }, { w: "36%" }],
+      summaryLote: [{ label: "Se generarán", value: "3 documentos" }],
+      personas: [{ nombre: "Camila Herrera Soto", desc: "Guardia · Planta Quilicura", sel: true }, { nombre: "Héctor Araya Núñez", desc: "Guardia · Bodega Lampa", sel: true }, { nombre: "Valentina Pino Rivas", desc: "Guardia · Torre Apoquindo", sel: true }, { nombre: "Luis Pérez Mora", desc: "Guardia · Bodega Lampa", sel: false }, { nombre: "Diego Fuentes", desc: "Falta la dirección en la ficha", sel: false, dis: true }],
+      avance: [{ label: "Camila Herrera Soto", value: "Listo" }, { label: "Héctor Araya Núñez", value: "Listo" }, { label: "Valentina Pino Rivas", value: "Generando…" }],
+      summary: estado === "normal" ? [{ label: "Falta", value: "1 dato" }] : [],
+      plantillas: [{ value: "anexo", label: "Anexo de contrato", description: "Laborales · v3 · N2" }, { value: "ind", label: "Contrato indefinido", description: "Laborales · v4 · N2" }, { value: "amo", label: "Carta de amonestación", description: "Laborales · v1 · N1" }, { value: "epp", label: "Recepción de uniforme y EPP", description: "Laborales · v5 · N1" }],
+      pares: [
+        { label: "{persona.nombre}", value: "Camila Herrera Soto" },
+        { label: "{persona.rut}", value: "12.345.678-9", mono: true },
+        { label: "{persona.direccion}", value: warn("Falta la dirección de la persona") },
+        { label: "{vinculo.cargo}", value: "Guardia" },
+        { label: "{vinculo.inicio}", value: "01-11-2026", numeric: true },
+        { label: "{instalacion.direccion}", value: "Av. Lo Echevers 550, Quilicura" },
+        { label: "{sueldo.base}", value: "$ 620.000", numeric: true },
+      ],
+      firma: [
+        { label: "Nivel", value: "N2 · OTP y prueba de vida" },
+        { label: "Firman", value: "Trabajadora y empleador" },
+        { label: "Medio electrónico", value: "Aceptado el 12-03-2026" },
+        { label: "Se envía a", value: "Correo personal · c.herrera@correo.cl" },
+      ],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "cys", label: "Cargos y sueldos", icon: "briefcase" }] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
