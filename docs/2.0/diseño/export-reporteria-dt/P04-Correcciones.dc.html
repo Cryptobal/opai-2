@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}.screen .sheet{max-height:90%}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<sc-if value="{{ isWorker }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="phone" theme="{{ theme }}" portal="Trabajador" tabs="{{ wTabs }}" active="reg" user="{{ wUser }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Mis registros" title="Corrección de tu marca" subtitle="Entrada del mar 14-10-2026 · Planta Quilicura" hint-size="100%,80px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="ADT.CuentaRegresiva" horas="{{ 31 }}" minutos="{{ 12 }}" estado="pendiente" hint-size="200px,32px"></x-import>
+<section style="display:flex;flex-direction:column;gap:4px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<div class="pg-kv"><span class="l">Hora registrada</span><span class="v t-numeric" style="text-decoration:line-through;color:var(--ds-fg-muted)">08:14</span></div>
+<div class="pg-kv"><span class="l">Hora propuesta</span><span class="v t-numeric" style="font-weight:600">07:58</span></div>
+<div class="pg-kv"><span class="l">Propuesta por</span><span class="v">Jorge Muñoz · supervisor</span></div>
+<div style="display:flex;flex-direction:column;gap:4px;padding:8px 0"><span class="t-body-sm muted">Motivo</span><span class="t-body-sm">El reloj del acceso norte quedó sin conexión. Llegaste 07:58 según el libro de novedades del turno.</span></div>
+</section>
+<span class="t-body-sm muted">Tienes hasta el 16-10-2026 a las 10:22 para responder. Si no respondes, la corrección se tiene por aceptada. Tu marca original sigue visible siempre.</span>
+<sc-if value="{{ v_objetar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="¿Por qué objetas la corrección?" hint="Lo verá RRHH y queda en tu registro." value="Llegué 08:14 porque el bus se atrasó. La hora registrada es correcta." rows="{{ 4 }}" hint-size="100%,140px"></x-import>
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" size="lg" block="{{ true }}" hint-size="100%,48px">Enviar objeción</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" size="lg" block="{{ true }}" hint-size="100%,48px">Volver</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ v_trabajador }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" hint-size="100%,48px">Aceptar corrección</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" block="{{ true }}" hint-size="100%,48px">Objetar</x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" overlay="{{ sheet }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia" title="Correcciones" subtitle="Cada corrección es una marca nueva. El original sigue visible y el trabajador tiene 48 h para aceptar u objetar." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="150px,40px">Corregir marca</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="pen" style="margin-bottom:16px" hint-size="100%,44px"></x-import>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:56px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="32px" height="{{ 32 }}" hint-size="32px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" hint-size="30%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="18%" hint-size="18%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100px" height="{{ 22 }}" radius="999px" hint-size="100px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="No hay correcciones pendientes" description="Cuando corrijas una marca, aparecerá aquí con su plazo de 48 h." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las correcciones" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-COR-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes corregir marcas" description="Corrigen administración y RRHH; los supervisores proponen. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="rows" style="margin:0 -16px">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+<div class="rowcard" style="flex-direction:column;align-items:stretch;gap:8px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-body-sm" style="font-weight:500">{{ r.nombre }}</span><span class="t-caption">{{ r.fecha }}</span></div>
+<span class="t-body-sm"><span class="muted">{{ r.tipo }} </span><span style="text-decoration:line-through;color:var(--ds-fg-muted)">{{ r.de }}</span> → {{ r.a }}</span>
+<span class="t-caption">{{ r.motivo }}</span>
+<x-import component-from-global-scope="ADT.CuentaRegresiva" horas="{{ r.h }}" minutos="{{ r.m }}" estado="{{ r.est }}" hint-size="200px,32px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,420px"></x-import>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;sheet&quot;,&quot;trabajador&quot;,&quot;objetar&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isAdmin: false, isWorker: false };
+    const b = A.base(this.props, "cor", "Correcciones");
+    const h = A.h, NS = A.NS();
+    const isWorker = b.v_trabajador || b.v_objetar;
+    const rows = [
+      { id: 1, nombre: "Camila Herrera Soto", rut: "12.345.678-9", fecha: "14-10-2026", tipo: "Entrada", de: "08:14", a: "07:58", motivo: "Reloj del acceso norte sin conexión", por: "Jorge Muñoz", est: "pendiente", h: 31, m: 12 },
+      { id: 2, nombre: "Luis Pérez Rojas", rut: "9.876.543-2", fecha: "13-10-2026", tipo: "Salida", de: "—", a: "20:00", motivo: "Olvidó marcar la salida", por: "Carlos Irigoyen", est: "pendiente", h: 6, m: 40 },
+      { id: 3, nombre: "Diego Silva Muñoz", rut: "13.456.789-0", fecha: "11-10-2026", tipo: "Entrada", de: "19:41", a: "20:00", motivo: "Llegó antes por cambio de turno", por: "Jorge Muñoz", est: "objetada", h: 0, m: 0 },
+      { id: 4, nombre: "María F. Soto Vera", rut: "16.234.567-8", fecha: "09-10-2026", tipo: "Salida", de: "06:30", a: "08:00", motivo: "Salida registrada por error en ronda", por: "Carlos Irigoyen", est: "aceptada", h: 0, m: 0 },
+      { id: 5, nombre: "Héctor Araya Lillo", rut: "15.009.332-7", fecha: "06-10-2026", tipo: "Entrada", de: "08:22", a: "08:00", motivo: "Corte de energía en Bodega Lampa", por: "Jorge Muñoz", est: "vencida", h: 0, m: 0 },
+    ];
+    const C = A.CuentaRegresiva;
+    let sheet = null;
+    if (b.v_sheet && NS.Sheet) {
+      const B = NS.Button;
+      sheet = h(NS.Sheet, { contained: true, side: b.isPhone ? "bottom" : "right", title: "Corregir marca", description: "Camila Herrera Soto · 12.345.678-9", onClose: () => {},
+        actions: [h(B, { key: 1, variant: "secondary", size: b.isPhone ? "lg" : "md" }, "Cancelar"), h(B, { key: 2, size: b.isPhone ? "lg" : "md" }, "Guardar corrección")] },
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 16 } },
+          h("div", { style: { padding: 12, borderRadius: "var(--radius-md)", background: "var(--ds-fill)", display: "flex", flexDirection: "column", gap: 2 } },
+            h("span", { className: "t-caption" }, "Marca original · no se edita"),
+            h("span", { className: "t-body-sm", style: { fontWeight: 500 } }, "Entrada · mar 14-10-2026 · 08:14:07"),
+            h("span", { className: "t-caption" }, "Planta Quilicura · App Terreno · hash 9f2c4e71a0…e2b4c873")),
+          h(NS.Input, { label: "Nueva hora", value: "07:58", inputStyle: { fontVariantNumeric: "tabular-nums" } }),
+          h(NS.Textarea, { label: "Motivo", hint: "Obligatorio. Lo verá el trabajador y la DT.", value: "El reloj del acceso norte quedó sin conexión. Llegó 07:58 según el libro de novedades.", rows: 3 }),
+          h(NS.Alerta, { tono: "info", titulo: "Queda pendiente 48 h" }, "Le enviaremos la corrección al trabajador. Mientras no responda, reportes y nómina usan el valor original.")));
+    }
+    return {
+      ...b, isWorker, isAdmin: !isWorker, sheet,
+      wTabs: [{ id: "hoy", label: "Hoy", icon: "home" }, { id: "reg", label: "Registros", icon: "clock" }, { id: "doc", label: "Documentos", icon: "file" }, { id: "per", label: "Perfil", icon: "user" }],
+      wUser: { name: "Camila Herrera Soto", initials: "CH", role: "Guardia" },
+      tabItems: [{ id: "pen", label: "Pendientes", count: 2 }, { id: "obj", label: "Objetadas", count: 1 }, { id: "ace", label: "Aceptadas" }, { id: "ven", label: "Vencidas" }, { id: "tod", label: "Todas" }],
+      rows,
+      cols: [
+        { key: "nombre", label: "Trabajador", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.nombre), h("span", { className: "t-mono subtle", style: { fontSize: 12 } }, r.rut)) },
+        { key: "fecha", label: "Marca", render: (r) => h("span", { className: "t-numeric" }, r.tipo + " · " + r.fecha) },
+        { key: "cambio", label: "Original → nueva", render: (r) => h("span", { className: "t-numeric", style: { whiteSpace: "nowrap" } }, h("span", { style: { textDecoration: "line-through", color: "var(--ds-fg-muted)" } }, r.de), " → ", h("span", { style: { fontWeight: 500 } }, r.a)) },
+        { key: "motivo", label: "Motivo", muted: true },
+        { key: "por", label: "Propuesta por", muted: true },
+        { key: "est", label: "Estado", render: (r) => h(C, { estado: r.est, horas: r.h, minutos: r.m }) },
+      ],
+      emptyAction: A.prim("Corregir marca", { size: "lg", icon: "plus" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
