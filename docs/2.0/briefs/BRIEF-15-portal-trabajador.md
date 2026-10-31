@@ -2,7 +2,7 @@
 
 **Estado:** PR 1 en construcción (rama `feat/portal-trabajador-pr1`, Refs CAR-87). · **Spec:** [`modulos/portal-trabajador.md`](../modulos/portal-trabajador.md) · **Diseño aprobado:** [`diseño/export-portal-trabajador/`](../diseño/export-portal-trabajador/README.md) (v3, 30-oct-2026 11:56 CLT) · **Autor:** Claude
 
-> Numeración: el número 15 es el del encargo; `CONTEXTO-agentes.md` cita un «Brief 15» para la Central de monitoreo. Carlos decide cuál lo conserva (pregunta 3 de la spec).
+> Numeración (decidido por Carlos, 30-oct-2026): el Brief 15 es de este portal; el Portal Supervisor pasa a 15b. `ROADMAP.md` y `PLAN-desarrollo.md` ya llaman 15b a la Central de monitoreo (CAR-70): queda por asignar el sufijo definitivo del Supervisor.
 
 ## 1. Objetivo
 
@@ -74,7 +74,7 @@ CA1–CA6 de la spec §13. Además: CI verde (`typecheck · lint · test · test
 - **Módulo sin activar:** un tenant sin el módulo `portal_trabajador` activo recibe «Módulo inactivo»; las pantallas lo muestran como estado, no como error.
 - **Hoja de alcance sin contraste con 1.0** (ver nota en §3).
 - **Dirección:** depende de que el servicio de geolocalización del tenant esté configurado; sin él, se escribe la dirección a mano. Para que el trabajador la busque, `core.geo.autocompletar` y `core.geo.detalle` se abren también al portal `trabajador` (una línea cada una).
-- **Activación del módulo:** `portal_trabajador` es un módulo del registro y se activa por empresa (hoy en el seed de dev). Las decisiones de Carlos dicen que los portales van incluidos en la licencia (ADR de precios §4): falta decidir si se activa solo al contratar cualquier módulo o desde Plataforma → Módulos.
+- **Activación del módulo (decidido por Carlos, 30-oct-2026):** el portal se activa por empresa desde **Plataforma → Módulos** (el seed de dev lo activa para `gard`). Hasta que se active, un tenant recibe «Módulo inactivo» y la pantalla lo muestra como estado.
 - **Sin solicitud ARCO desde el portal:** `core.cumplimiento.solicitud_crear` es del ERP y `soloPersonas`; Privacidad solo informa y muestra las solicitudes (propuesta de PR 2 en la spec §14).
 
 ## Historial

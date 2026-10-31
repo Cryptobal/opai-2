@@ -1,7 +1,11 @@
 // Dominio puro del Portal Trabajador: sin Next, React ni base de datos. Todo cálculo tiene test.
 
-/** Categorías de aviso que el trabajador puede configurar (Notificaciones, diseño 12). */
-export const CATEGORIAS_AVISO = ["pauta", "documentos", "solicitudes", "central"] as const;
+/**
+ * Categorías de aviso que el trabajador puede apagar (decisión de Carlos, 30-oct-2026): pauta y turnos;
+ * liquidaciones y documentos; solicitudes y tickets; avisos de la empresa. Los avisos legales no son
+ * una categoría: no se pueden apagar y siempre llegan.
+ */
+export const CATEGORIAS_AVISO = ["pauta", "documentos", "solicitudes", "empresa"] as const;
 export type CategoriaAviso = (typeof CATEGORIAS_AVISO)[number];
 
 /** Canales externos. El aviso dentro de la app (campana) siempre llega: no se configura. */

@@ -41,7 +41,7 @@ Barra inferior (NAVEGACION §4): **Inicio · Mis datos · Avisos · Más**. «Ma
 - **Teléfono:** chileno o internacional, normalizado a E.164; opcional; se puede quitar.
 - **Correo personal:** correo válido (≤ 254); opcional. El **correo laboral no se edita** aquí.
 - **Dirección:** texto formateado obligatorio si hay dirección; calle, comuna, región y `place_id` opcionales; latitud y longitud **juntas o ninguna**, dentro de rango. Se obtiene del servicio de geolocalización del Núcleo (`core.geo.*`); **sin claves de Google en el repositorio ni en el navegador** (REGLAS-codigo).
-- **Preferencias:** categorías cerradas (pauta, documentos, solicitudes, central) × canales (push, correo); horario de silencio `HH:mm`–`HH:mm` (puede cruzar la medianoche), ambas horas o ninguna.
+- **Preferencias:** categorías cerradas (pauta y turnos; liquidaciones y documentos; solicitudes y tickets; avisos de la empresa) × canales (push, correo); horario de silencio `HH:mm`–`HH:mm` (puede cruzar la medianoche), ambas horas o ninguna.
 
 ## 5. Reglas de negocio
 
@@ -49,7 +49,7 @@ Barra inferior (NAVEGACION §4): **Inicio · Mis datos · Avisos · Más**. «Ma
 - **R2.** Editables por el trabajador: teléfono, correo personal y dirección. **No** editables: nombres, apellidos, RUT, fecha de nacimiento, sexo, nacionalidad, correo laboral, estado, bloqueo (los gestiona RR.HH.).
 - **R3.** Datos bancarios y previsión: Carlos decidió que el trabajador los edita; pasan al Núcleo con Personas (#165). **[Pendiente]** hasta que existan; no se crean tablas paralelas.
 - **R4.** Toda escritura acepta vista previa (`preview_…` en MCP) y clave de idempotencia, y queda en la auditoría. Toda lectura de la ficha queda auditada por id (NÚCLEO-H).
-- **R5.** Silencio por defecto (ADR-020): sin elección, el trabajador solo recibe el aviso dentro de la app. El aviso de la app no se puede apagar.
+- **R5.** Silencio por defecto (ADR-020): sin elección, el trabajador solo recibe el aviso dentro de la app. El aviso de la app y los **avisos legales** no se pueden apagar; las cuatro categorías sí (decisión de Carlos, 30-oct-2026).
 - **R6.** Sin chat libre (decisión 2 de Carlos): la comunicación con la central es por mensajes tipificados y avisos con acuse. **[Pendiente]**
 - **R7.** Rondas: traza GPS continua durante toda la ronda; cada punto se marca según su configuración (QR, GPS o ambos); **si el punto exige QR y no se puede leer, no se marca solo por GPS**; la barra inferior se oculta durante la ronda; se puede ejecutar desde el teléfono compartido de la instalación o desde el portal. Rondas y accesos solo en **instalaciones asignadas y durante su turno**; los accesos, desde el celular personal. **[PR 2]**
 - **R8.** «Mi pauta» vive en este portal cuando exista Pauta. **[Pendiente]**
@@ -104,9 +104,9 @@ Usuario sin persona vinculada; persona archivada o anonimizada; dos dispositivos
 
 0. **Solicitudes ARCO desde el portal.** Hoy `core.cumplimiento.solicitud_crear` es del ERP y solo personas (`soloPersonas`). «Privacidad» muestra las solicitudes de la persona y a quién escribir, pero **no crea solicitudes**: hacerlo exige una capacidad de titular en 07d (origen `portal`, hoy previsto pero sin construir). Se propone en el PR 2.
 
-1. ¿Qué categorías de aviso quiere Carlos en Notificaciones? El PR 1 usa pauta, documentos, solicitudes y central (las que habrá); se ajusta con el diseño aprobado.
+1. ~~Categorías de aviso~~ **Decidido (Carlos, 30-oct-2026):** pauta y turnos; liquidaciones y documentos; solicitudes y tickets; avisos de la empresa. Cada una se puede apagar, salvo los avisos legales.
 2. ¿El correo personal es el canal de los avisos por correo, o RR.HH. define uno? El PR 1 no envía correos.
-3. Numeración: este brief usa el 15 por encargo; `CONTEXTO-agentes.md` ya cita un «Brief 15» para la Central de monitoreo. Carlos decide cuál conserva el número.
+3. ~~Numeración~~ **Decidido (Carlos, 30-oct-2026):** el Brief 15 se queda con el Portal Trabajador; el Portal Supervisor pasa a 15b. (`ROADMAP.md` y `PLAN-desarrollo.md` ya usan 15b para la Central de monitoreo: Carlos o el bot de Paridad asignan el sufijo definitivo del Supervisor.)
 
 ## Historial
 

@@ -184,12 +184,12 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
   });
 
   it("las preferencias de un compañero y de otra empresa no se ven ni se mezclan", async () => {
-    await dato(t.a, u.a1, "portal_trabajador.preferencias_notificacion.actualizar", { preferencias: { central: { push: true } } });
+    await dato(t.a, u.a1, "portal_trabajador.preferencias_notificacion.actualizar", { preferencias: { empresa: { push: true } } });
     const delCompanero = await correr(t.a, u.a2, "portal_trabajador.preferencias_notificacion.obtener");
     expect(delCompanero.ok ? "OK" : delCompanero.error.code).toBe("NOT_FOUND"); // a2 está archivada: no hay ficha
     const deB = await dato<Preferencias>(t.b, u.b1, "portal_trabajador.preferencias_notificacion.obtener");
     expect(deB.personalizadas).toBe(false);
-    expect(deB.preferencias["central"]?.push).toBe(false);
+    expect(deB.preferencias["empresa"]?.push).toBe(false);
     // Tampoco con el rol de aplicación directo: sin tenant fijado, la RLS no devuelve filas.
     expect(await e.appSinTenant.preferenciaNotificacion.count().catch(() => 0)).toBe(0);
     const propias = await e.forTenant(t.b).preferenciaNotificacion.findMany();

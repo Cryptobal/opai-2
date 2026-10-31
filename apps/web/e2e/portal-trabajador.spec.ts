@@ -18,7 +18,7 @@ test("Más lista solo lo que existe y cada entrada abre su pantalla", async ({ p
   await page.goto("/trabajador/mas");
   for (const { ruta } of PANTALLAS)
     await expect(page.locator(`a[href="${ruta}"]`).first()).toBeVisible();
-  // Lo pendiente (central, rondas, accesos, pauta) no se dibuja como entrada falsa.
+  // Lo pendiente (Central, rondas, accesos, pauta) no se dibuja como entrada falsa.
   for (const pendiente of ["Central", "Rondas", "Accesos", "Mi pauta"])
     await expect(page.getByRole("link", { name: pendiente })).toHaveCount(0);
 });

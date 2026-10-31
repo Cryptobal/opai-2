@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="tic" title="{{ shellTitle }}" user="{{ user }}" notifications="{{ 3 }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Atlas Seguridad SpA" title="Tickets" hint-size="100%,72px">
+<sc-if value="{{ showHeaderAction }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" on-click="{{ noop }}" hint-size="150px,40px">Nuevo ticket</x-import>
+</sc-if>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ showFilters }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:16px 0">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="width:288px;max-width:100%;flex:none">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por folio o asunto" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import>
+</div>
+</sc-if>
+<div class="chip-row">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="3">
+<sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="{{ c.label }}" valor="{{ c.valor }}" on-quitar="{{ c.clear }}" hint-size="160px,32px"></x-import>
+</sc-if>
+<sc-if value="{{ c.off }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" on-click="{{ c.set }}" hint-size="90px,32px">{{ c.label }}</x-import>
+</sc-if>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ showGap }}" hint-placeholder-val="{{ false }}"><div style="height:16px"></div></sc-if>
+<sc-if value="{{ showPhoneList }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" rowKey="folio" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showTable }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" row-key="folio" on-row-click="{{ noop }}" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="ticket" title="{{ emptyTitle }}" description="{{ emptyDesc }}" action="{{ emptyAction }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="{{ loadingVariant }}" count="{{ 5 }}" label="Cargando tickets" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tickets" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TK-503-7F2A" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver todos los tickets" description="Solo owner y admin ven los tickets de toda la empresa. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin_permiso&quot;],&quot;default&quot;:&quot;contenido&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mios&quot;,&quot;asignados&quot;,&quot;todos&quot;],&quot;default&quot;:&quot;todos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null, q: "", fTipo: null, fEstado: null, fDueno: null };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "contenido";
+    const isPhone = device === "phone";
+    const forbidden = estado === "sin_permiso";
+    const tab = this.state.tab ?? (forbidden ? "todos" : (this.props.tab ?? "todos"));
+    const ME = forbidden ? "Héctor Araya" : "Andrés Molina";
+    const EST = { abierto: ["info", "Abierto"], en_curso: ["accent", "En curso"], resuelto: ["success", "Resuelto"], cerrado: ["neutral", "Cerrado"], rechazado: ["danger", "Rechazado"] };
+    const all = [
+      { folio: "TK-1052", asunto: "Cámara del andén norte sin señal", tipo: "Mantención", sol: "Paula Contreras", dueno: "Andrés Molina", est: "en_curso", sla: ["warning", "Vence en 2 h 10 min"], act: "Hoy 08:05" },
+      { folio: "TK-1051", asunto: "Permiso administrativo 06-11-2026", tipo: "Permiso", sol: "Camila Herrera", dueno: "Andrés Molina", est: "abierto", act: "Hoy 07:42" },
+      { folio: "TK-1049", asunto: "Faltan chalecos reflectantes", tipo: "Insumos", sol: "Héctor Araya", dueno: "Andrés Molina", est: "abierto", sla: ["danger", "Vencido hace 25 min"], act: "Ayer 21:10" },
+      { folio: "TK-1047", asunto: "Certificado de antigüedad", tipo: "Certificado", sol: "Diego Silva", dueno: "Paula Contreras", est: "resuelto", act: "Ayer 17:40" },
+      { folio: "TK-1045", asunto: "Actualizar contacto de Bodega Lampa", tipo: "Administración", sol: "Andrés Molina", dueno: "Paula Contreras", est: "en_curso", act: "Ayer 12:15" },
+      { folio: "TK-1044", asunto: "Cambio de turno 08-11-2026 con Luis Pérez", tipo: "Cambio de turno", sol: "María F. Soto", dueno: "Jorge Muñoz", est: "rechazado", act: "28-10-2026" },
+      { folio: "TK-1040", asunto: "Descuento duplicado en liquidación de septiembre", tipo: "Consulta RR. HH.", sol: "Andrés Molina", dueno: "Paula Contreras", est: "cerrado", act: "24-10-2026" },
+    ];
+    const s = this.state;
+    const q = s.q.toLowerCase();
+    let rows = all.filter((r) => tab === "todos" || (tab === "mios" ? r.sol === ME : r.dueno === ME))
+      .filter((r) => !q || r.folio.toLowerCase().includes(q) || r.asunto.toLowerCase().includes(q))
+      .filter((r) => (!s.fTipo || r.tipo === s.fTipo) && (!s.fEstado || r.est === s.fEstado) && (!s.fDueno || r.dueno === s.fDueno));
+    if (estado !== "contenido") rows = [];
+    const badge = (t) => (NS.Badge ? h(NS.Badge, { tone: t[0] }, t[1]) : t[1]);
+    const chip = (key, label, valor, raw) => ({ label, on: !!s[key], off: !s[key], valor: s[key] ? valor(s[key]) : "", clear: () => this.setState({ [key]: null }), set: () => this.setState({ [key]: raw }) });
+    const emptyByTab = { mios: ["No has creado tickets", "Cuando necesites algo de otra área, crea un ticket y sigue aquí su respuesta."], asignados: ["No tienes tickets asignados", "Cuando seas dueño de un ticket aparecerá aquí."], todos: ["Aún no hay tickets en Atlas Seguridad SpA", "Crea el primero para pedirle algo a otra área."] };
+    const ok = estado === "contenido";
+    return {
+      device, theme: this.props.theme ?? "light",
+      user: forbidden ? { name: "Héctor Araya", initials: "HA", role: "Guardia" } : { name: "Andrés Molina", initials: "AM", role: "Administrador" },
+      notPhone: !isPhone, shellTitle: isPhone ? "" : "Tickets",
+      showHeaderAction: estado !== "vacio",
+      tab, setTab: (t) => this.setState({ tab: t }),
+      tabItems: [{ id: "mios", label: "Míos" }, { id: "asignados", label: "Asignados a mí" }, { id: "todos", label: "Todos" }],
+      q: s.q, setQ: (v) => this.setState({ q: v }), noop: () => {},
+      showFilters: ok || estado === "cargando",
+      showGap: !(ok || estado === "cargando"),
+      chips: [
+        chip("fTipo", "Tipo", (v) => v, "Mantención"),
+        chip("fEstado", "Estado", (v) => EST[v][1], "abierto"),
+        chip("fDueno", "Dueño", (v) => v, "Andrés Molina"),
+      ],
+      rows,
+      showPhoneList: ok && isPhone && rows.length > 0,
+      showTable: ok && !isPhone && rows.length > 0,
+      isEmpty: estado === "vacio" || (ok && rows.length === 0),
+      emptyTitle: estado === "vacio" ? emptyByTab[tab][0] : "Sin resultados con estos filtros",
+      emptyDesc: estado === "vacio" ? emptyByTab[tab][1] : "Quita un filtro o cambia la búsqueda.",
+      emptyAction: NS.Button ? (estado === "vacio" ? h(NS.Button, { icon: "plus" }, "Nuevo ticket") : h(NS.Button, { variant: "secondary", onClick: () => this.setState({ q: "", fTipo: null, fEstado: null, fDueno: null }) }, "Limpiar filtros")) : null,
+      isLoading: estado === "cargando", loadingVariant: isPhone ? "rows" : "table",
+      isError: estado === "error", isForbidden: forbidden,
+      cols: [
+        { key: "folio", label: "Folio", mono: true, muted: true, width: 96 },
+        { key: "asunto", label: "Asunto", strong: true },
+        { key: "tipo", label: "Tipo" },
+        { key: "sol", label: "Solicitante" },
+        { key: "dueno", label: "Dueño" },
+        { key: "est", label: "Estado", render: (r) => badge(EST[r.est]) },
+        { key: "sla", label: "SLA", render: (r) => (r.sla ? badge(r.sla) : null) },
+        { key: "act", label: "Actualizado", muted: true, align: "right" },
+      ],
+      toCard: (r) => ({ title: r.asunto, subtitle: r.folio + " · " + r.tipo + " · " + r.dueno, meta: r.sla ? h("span", { style: { color: r.sla[0] === "danger" ? "var(--ds-danger-fg)" : "var(--ds-warning-fg)" } }, r.sla[1]) : r.act, badge: { tone: EST[r.est][0], label: EST[r.est][1] } }),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+        { title: "Empresa", items: [{ id: "fin", label: "Finanzas", icon: "chart" }, { id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

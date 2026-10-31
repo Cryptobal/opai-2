@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}button{transition:background-color 150ms cubic-bezier(.2,0,0,1),border-color 150ms cubic-bezier(.2,0,0,1)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%">
+<div class="safe-top"></div>
+
+<sc-if value="{{ notScan }}" hint-placeholder-val="{{ true }}">
+  <div class="topbar" style="gap:8px;padding-left:4px;padding-right:12px;height:60px">
+    <sc-if value="{{ S.inicio }}" hint-placeholder-val="{{ true }}"><span class="tenant" style="margin-left:12px">AS</span></sc-if>
+    <sc-if value="{{ notInicio }}" hint-placeholder-val="{{ false }}"><button class="icon-btn" style="width:56px;height:56px" aria-label="Volver"><span class="ic i-chevron-left" aria-hidden="true"></span></button></sc-if>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ meta.t }}</span><span class="t-caption t-numeric" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ meta.s }}</span></span>
+    <button class="badge b-{{ cx.tone }}" style="height:44px;padding:0 14px;border:0;cursor:pointer;font:500 13px/18px var(--font-sans)" aria-label="Conexión: {{ cx.t }}. Ver cola">{{ cx.t }}</button>
+  </div>
+  <sc-if value="{{ cx.banner }}" hint-placeholder-val="{{ false }}">
+    <button class="banner" style="border:0;border-bottom:1px solid var(--ds-border);width:100%;cursor:pointer;min-height:44px;text-align:left"><span class="ic sm i-wifi-off" aria-hidden="true"></span><span style="flex:1">{{ cx.banner }}</span><span>Ver cola</span><span class="ic sm i-chevron-right" aria-hidden="true"></span></button>
+  </sc-if>
+</sc-if>
+
+<sc-if value="{{ S.inicio }}" hint-placeholder-val="{{ true }}">
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:20px 16px 24px;display:flex;flex-direction:column;gap:20px;max-width:1040px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Portería</h1><span class="t-body-sm muted t-numeric">María Fernanda Soto · turno día 08:00–20:00</span></span>
+        <button class="btn btn-ghost" style="height:56px;padding:0 12px"><span class="ic sm i-swap" aria-hidden="true"></span>Cambiar guardia</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <div class="kpi" style="padding:12px 14px"><span class="k">En sitio</span><span class="v">12</span></div>
+        <div class="kpi" style="padding:12px 14px"><span class="k">Esperados hoy</span><span class="v">5</span></div>
+        <div class="kpi" style="padding:12px 14px"><span class="k">Denegados hoy</span><span class="v">1</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:8px">
+        <button class="btn btn-primary" style="height:72px;font-size:17px;font-weight:600"><span class="ic lg" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/log-in.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/log-in.svg) center/contain no-repeat;background-color:currentColor"></span>Registrar entrada</button>
+        <button class="btn btn-secondary" style="height:72px;font-size:17px;font-weight:600"><span class="ic lg" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/log-out.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/log-out.svg) center/contain no-repeat;background-color:currentColor"></span>Registrar salida</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:20px 24px;align-items:start">
+        <section style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="t-overline">Esperados ahora</span><span class="t-caption">Prerregistros de Bodegas del Sur S.A.</span></div>
+          <div class="card" style="overflow:hidden">
+            <sc-for list="{{ esperados }}" as="e" hint-placeholder-count="2">
+              <button class="rowcard" style="align-items:center;min-height:64px;border-left:0;border-right:0;border-top:0;cursor:pointer">
+                <span class="t-subheading t-numeric" style="width:56px;flex:none">{{ e.h }}</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ e.n }}</span><span class="t-caption">{{ e.d }}</span></span>
+                <span class="ic i-chevron-right subtle" aria-hidden="true"></span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+        <section style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="t-overline">En sitio</span><a href="#" class="t-label-sm">Ver los 12</a></div>
+          <div class="card" style="overflow:hidden">
+            <sc-for list="{{ enSitio5 }}" as="f" hint-placeholder-count="4">
+              <div class="rowcard" style="align-items:center;gap:12px;padding:10px 10px 10px 16px">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                  <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="t-label">{{ f.n }}</span><span class="badge b-neutral nodot">{{ f.tipo }}</span></span>
+                  <span class="t-caption t-numeric">{{ f.emp }} · desde {{ f.h }}<sc-if value="{{ f.pat }}"> · <span class="t-mono">{{ f.pat }}</span></sc-if></span>
+                  <sc-if value="{{ f.perm }}"><span class="badge b-{{ f.pt }}" style="align-self:flex-start">{{ f.perm }}</span></sc-if>
+                </span>
+                <button class="btn btn-secondary" style="height:56px;min-width:88px">Salida</button>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:8px">
+        <button class="btn btn-ghost" style="height:56px;justify-content:flex-start;padding:0 12px"><span class="ic i-check-circle" aria-hidden="true"></span><span style="flex:1;text-align:left">Autorizados</span><span class="t-caption">Solo lectura</span></button>
+        <button class="btn btn-ghost" style="height:56px;justify-content:flex-start;padding:0 12px"><span class="ic i-clipboard" aria-hidden="true"></span><span style="flex:1;text-align:left">Resumen para entregar el turno</span><span class="ic sm i-chevron-right subtle" aria-hidden="true"></span></button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.tipo }}" hint-placeholder-val="{{ false }}">
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:20px;max-width:720px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:4px"><span class="t-caption t-numeric">Paso 1 de 3</span><h1 class="t-title m0">¿Quién entra?</h1></div>
+      <div role="radiogroup" aria-label="Tipo de registro" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px">
+        <sc-for list="{{ tipos }}" as="t" hint-placeholder-count="5">
+          <button class="card" role="radio" aria-checked="{{ t.p }}" style="min-height:96px;padding:14px 16px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;cursor:pointer;font:inherit;color:var(--ds-fg);text-align:left;border-color:{{ t.bd }};background:{{ t.bg }}">
+            <span class="ic lg" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/{{ t.ic }}.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/{{ t.ic }}.svg) center/contain no-repeat;background-color:currentColor;color:{{ t.fg }}"></span>
+            <span style="display:flex;flex-direction:column"><span class="t-subheading" style="color:{{ t.fg }}">{{ t.n }}</span><span class="t-caption">{{ t.d }}</span></span>
+          </button>
+        </sc-for>
+      </div>
+      <span class="t-caption">Los tipos y sus campos los define Atlas Seguridad SpA para esta instalación.</span>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:720px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px"><span class="ic i-scan" aria-hidden="true"></span>Escanear documento</button></div></div>
+</sc-if>
+
+<sc-if value="{{ S.escaner }}" hint-placeholder-val="{{ false }}">
+  <div data-theme="dark" class="ds" style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--ds-n-950);color:var(--ds-fg)">
+    <div style="height:44px;flex:none"></div>
+    <div class="topbar" style="background:transparent;height:60px">
+      <button class="icon-btn" style="width:56px;height:56px" aria-label="Cerrar"><span class="ic i-x" aria-hidden="true"></span></button>
+      <span style="flex:1;display:flex;flex-direction:column;align-items:center"><span class="t-label">Contratista · paso 2 de 3</span><span class="t-caption">{{ sc.mode }}</span></span>
+      <button class="icon-btn" style="width:56px;height:56px" aria-label="Encender linterna" aria-pressed="false"><span class="ic i-sun" aria-hidden="true"></span></button>
+    </div>
+    <div style="padding:4px 16px 0;display:flex;justify-content:center"><div class="seg" role="radiogroup" aria-label="Qué vas a leer" style="display:flex;width:100%;max-width:480px"><sc-for list="{{ sc.modes }}" as="m" hint-placeholder-count="4"><button class="{{ m.on }}" role="radio" aria-checked="{{ m.p }}" style="height:48px;font-size:14px">{{ m.n }}</button></sc-for></div></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:24px">
+      <sc-if value="{{ sc.frame }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;width:min(300px,100%);aspect-ratio:{{ sc.ratio }}" aria-label="Visor de cámara">
+          <span style="position:absolute;left:0;top:0;width:40px;height:40px;border-left:3px solid {{ sc.c }};border-top:3px solid {{ sc.c }};border-radius:14px 0 0 0"></span>
+          <span style="position:absolute;right:0;top:0;width:40px;height:40px;border-right:3px solid {{ sc.c }};border-top:3px solid {{ sc.c }};border-radius:0 14px 0 0"></span>
+          <span style="position:absolute;left:0;bottom:0;width:40px;height:40px;border-left:3px solid {{ sc.c }};border-bottom:3px solid {{ sc.c }};border-radius:0 0 0 14px"></span>
+          <span style="position:absolute;right:0;bottom:0;width:40px;height:40px;border-right:3px solid {{ sc.c }};border-bottom:3px solid {{ sc.c }};border-radius:0 0 14px 0"></span>
+          <sc-if value="{{ sc.line }}"><span style="position:absolute;left:20px;right:20px;top:50%;height:2px;background:var(--ds-accent);border-radius:2px"></span></sc-if>
+          <sc-if value="{{ sc.ok }}"><span class="state-tile" style="position:absolute;inset:0;margin:auto;background:var(--ds-success-muted);color:var(--ds-success-fg)"><span class="ic lg i-check" aria-hidden="true"></span></span></sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sc.noPerm }}" hint-placeholder-val="{{ false }}"><span class="state-tile" style="background:var(--ds-fill)"><span class="ic lg i-camera" aria-hidden="true"></span></span></sc-if>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;max-width:300px">
+        <sc-if value="{{ sc.badge }}"><span class="badge b-{{ sc.tone }}">{{ sc.badge }}</span></sc-if>
+        <span class="t-subheading">{{ sc.t }}</span>
+        <span class="t-body-sm muted" style="text-wrap:pretty">{{ sc.d }}</span>
+      </div>
+    </div>
+    <div style="flex:none;padding:16px 16px 50px;display:flex;flex-direction:column;align-items:stretch;gap:8px;max-width:480px;width:100%;margin:0 auto;box-sizing:border-box">
+      <sc-if value="{{ sc.cta }}"><button class="btn btn-primary block" style="height:56px;font-size:16px">{{ sc.cta }}</button></sc-if>
+      <button class="btn btn-ghost" style="height:56px;color:var(--ds-fg)">Escribir los datos</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.resultado }}" hint-placeholder-val="{{ false }}">
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px 16px 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:20px 32px;max-width:1040px;margin:0 auto;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <span class="t-caption t-numeric">Paso 3 de 3 · Contratista</span>
+        <section role="status" style="border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px;background:{{ ra.bg }};color:{{ ra.fg }};border:1px solid {{ ra.bd }}">
+          <span style="display:flex;align-items:center;gap:12px"><span class="state-tile" style="width:48px;height:48px;border-radius:12px;background:var(--ds-surface);color:{{ ra.fg }}"><span class="ic lg i-{{ ra.ic }}" aria-hidden="true"></span></span><span class="t-heading" style="color:{{ ra.fg }}">{{ ra.t }}</span></span>
+          <span class="t-body" style="text-wrap:pretty;color:{{ ra.fg }}">{{ ra.d }}</span>
+        </section>
+        <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px">
+          <span class="t-caption" style="display:flex;align-items:center;gap:6px"><span class="ic sm i-lock" aria-hidden="true"></span>Leído de la cédula</span>
+          <span class="t-heading">Matías Contreras Vidal</span>
+          <span class="t-body t-mono">17.845.223-4</span>
+        </div>
+        <sc-if value="{{ ra.offline }}"><div style="display:flex;gap:10px;padding:12px 16px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-wifi-off" aria-hidden="true" style="flex:none"></span><span class="t-body-sm">Se enviará al volver la señal. La hora oficial será la del servidor.</span></div></sc-if>
+      </div>
+      <sc-if value="{{ ra.form }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="field"><label class="lbl" for="pe">Empresa</label><input id="pe" class="input" style="height:56px" value="Frío Sur Ltda."></div>
+          <div class="field"><label class="lbl" for="pm">Motivo</label><input id="pm" class="input" style="height:56px" value="Mantención cámara de frío"></div>
+          <div class="field"><span class="lbl">Anfitrión</span><button class="input" style="height:56px;text-align:left"><span class="grow">Paula Rojas · Jefa de bodega</span><span class="trail ic i-chevron-down" aria-hidden="true"></span></button></div>
+          <div class="field"><label class="lbl" for="pp">Patente <span class="subtle" style="font-weight:400">· opcional</span></label><input id="pp" class="input t-mono" style="height:56px" value="KRTS·41"></div>
+          <div class="field"><label class="lbl" for="pn">Nota <span class="subtle" style="font-weight:400">· opcional</span></label><textarea id="pn" class="input" style="min-height:80px" placeholder="Algo que deba saber el siguiente guardia"></textarea></div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <div style="flex:none;padding:10px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)">
+    <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:8px">
+      <span class="t-caption" style="text-align:center">Tus datos se usan para la seguridad del recinto · <a href="#">Más información</a></span>
+      <button class="btn {{ ra.btnCls }} block" style="height:56px;font-size:16px"><span class="ic i-{{ ra.btnIc }}" aria-hidden="true"></span>{{ ra.btn }}</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.noautorizado }}" hint-placeholder-val="{{ false }}">
+  <div class="scroll" style="overflow:auto">
+    <div style="min-height:100%;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;max-width:480px;margin:0 auto;box-sizing:border-box">
+      <span class="state-tile" style="width:88px;height:88px;border-radius:24px;background:{{ na.bg }};color:{{ na.fg }}"><span class="ic" aria-hidden="true" style="width:40px;height:40px;-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/{{ na.ic }}.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/{{ na.ic }}.svg) center/contain no-repeat;background-color:currentColor"></span></span>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+        <span class="badge b-{{ na.tone }}">{{ na.badge }}</span>
+        <h1 class="t-title m0">{{ na.t }}</h1>
+        <span class="t-body-sm muted">Leído: <span style="color:var(--ds-fg);font-weight:500">Matías Contreras Vidal</span> · <span class="t-mono">17.845.223-4</span></span>
+        <span class="t-body muted" style="text-wrap:pretty">{{ na.d }}</span>
+      </div>
+      <sc-if value="{{ na.wait }}"><div class="card" style="width:100%;padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left"><span class="skel" style="width:20px;height:20px;border-radius:999px;flex:none"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Esperando autorización de Rodrigo Tapia</span><span class="t-caption t-numeric">Pedida a las 19:42 · supervisor</span></span></div></sc-if>
+      <sc-if value="{{ na.off }}"><div style="width:100%;display:flex;gap:10px;padding:12px 16px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);text-align:left"><span class="ic i-wifi-off" aria-hidden="true" style="flex:none"></span><span class="t-body-sm">Sin conexión. El aviso sale por SMS y la decisión se tomó con la lista descargada a las 08:12.</span></div></sc-if>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)">
+    <div style="max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary block" style="height:56px;font-size:16px"><span class="ic i-phone" aria-hidden="true"></span>Avisar a mi supervisor</button>
+      <sc-if value="{{ na.exc }}"><button class="btn btn-secondary block" style="height:56px">Pedir excepción</button></sc-if>
+      <button class="btn btn-ghost block" style="height:56px">Volver a Portería</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.ensitio }}" hint-placeholder-val="{{ false }}">
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:16px;max-width:1040px;margin:0 auto">
+      <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <span style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">En sitio</h1><span class="t-body-sm muted t-numeric">{{ es.sub }}</span></span>
+        <button class="btn btn-secondary" style="height:56px"><span class="ic sm i-download" aria-hidden="true"></span>Evacuación</button>
+      </div>
+      <div class="input" style="height:56px"><span class="ic i-search muted" aria-hidden="true"></span><input class="bare" placeholder="Nombre, empresa o patente" aria-label="Buscar en sitio"></div>
+      <div class="chip-row" role="group" aria-label="Filtrar por tipo" style="flex-wrap:nowrap;overflow:auto;margin:0 -16px;padding:0 16px">
+        <sc-for list="{{ filtros }}" as="c" hint-placeholder-count="5"><button class="chip toggle {{ c.on }}" aria-pressed="{{ c.p }}" style="height:48px;flex:none">{{ c.n }}</button></sc-for>
+      </div>
+      <div class="card" style="overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr))">
+        <sc-for list="{{ enSitio }}" as="f" hint-placeholder-count="6">
+          <div class="rowcard" style="align-items:center;gap:12px;padding:10px 10px 10px 16px;border-bottom:1px solid var(--ds-border)">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="t-label">{{ f.n }}</span><span class="badge b-neutral nodot">{{ f.tipo }}</span></span>
+              <span class="t-caption t-numeric">{{ f.emp }} · desde {{ f.h }}<sc-if value="{{ f.pat }}"> · <span class="t-mono">{{ f.pat }}</span></sc-if></span>
+              <sc-if value="{{ f.perm }}"><span class="badge b-{{ f.pt }}" style="align-self:flex-start">{{ f.perm }}</span></sc-if>
+            </span>
+            <button class="btn btn-secondary" style="height:56px;min-width:88px">Salida</button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:720px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px"><span class="ic i-scan" aria-hidden="true"></span>Escanear para salir</button></div></div>
+</sc-if>
+
+<sc-if value="{{ S.autorizados }}" hint-placeholder-val="{{ false }}">
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:16px;max-width:1040px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Autorizados</h1><span class="t-body-sm muted">Lista de Bodegas del Sur S.A. · descargada hoy <span class="t-numeric">08:12</span></span></div>
+      <div style="display:flex;gap:10px;padding:12px 16px;border-radius:10px;background:var(--ds-fill)"><span class="ic i-eye muted" aria-hidden="true" style="flex:none"></span><span class="t-body-sm" style="text-wrap:pretty">Solo lectura. Si alguien falta, pídele al anfitrión que lo prerregistre o avísale a tu supervisor.</span></div>
+      <div class="input" style="height:56px"><span class="ic i-search muted" aria-hidden="true"></span><input class="bare" placeholder="Nombre, RUN o patente" aria-label="Buscar autorizado"></div>
+      <div class="card" style="overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr))">
+        <sc-for list="{{ autorizados }}" as="a" hint-placeholder-count="5">
+          <div class="rowcard" style="align-items:flex-start;min-height:64px;border-bottom:1px solid var(--ds-border)">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <span class="t-label">{{ a.n }}</span>
+              <span class="t-caption"><span class="t-mono">{{ a.doc }}</span> · {{ a.tipo }}</span>
+              <span class="t-caption t-numeric">{{ a.hor }}</span>
+            </span>
+            <span class="badge b-{{ a.vt }}">{{ a.vig }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.resumen }}" hint-placeholder-val="{{ false }}">
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:20px;max-width:1040px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Resumen de portería</h1><span class="t-body-sm muted t-numeric">Turno día 08:00–20:00 · 29-10-2026 · hasta las 19:48</span></div>
+      <div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">
+        <sc-for list="{{ resumenKpi }}" as="k" hint-placeholder-count="5"><div style="padding:14px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">{{ k.k }}</span><span class="t-heading t-numeric">{{ k.v }}</span></div></sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:20px 24px;align-items:start">
+        <section style="display:flex;flex-direction:column;gap:8px">
+          <span class="t-overline">Quedan en sitio · 3</span>
+          <div class="card" style="overflow:hidden">
+            <sc-for list="{{ quedan }}" as="f" hint-placeholder-count="3">
+              <div class="rowcard" style="align-items:center"><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ f.n }}</span><span class="t-caption t-numeric">{{ f.emp }} · desde {{ f.h }}</span></span><sc-if value="{{ f.perm }}"><span class="badge b-{{ f.pt }}">{{ f.perm }}</span></sc-if></div>
+            </sc-for>
+          </div>
+        </section>
+        <section style="display:flex;flex-direction:column;gap:8px">
+          <span class="t-overline">Para revisar</span>
+          <div class="card" style="overflow:hidden">
+            <div class="rowcard" style="align-items:flex-start"><span class="ic i-x muted" aria-hidden="true" style="margin-top:2px"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">1 intento denegado</span><span class="t-caption t-numeric">16:05 · persona en lista bloqueada · supervisor avisado</span></span></div>
+            <div class="rowcard" style="align-items:flex-start"><span class="ic i-wifi-off muted" aria-hidden="true" style="margin-top:2px"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">3 registros diferidos</span><span class="t-caption t-numeric">Hechos sin conexión entre 13:10 y 13:40 · ya enviados</span></span></div>
+            <div class="rowcard" style="align-items:flex-start"><span class="ic i-clock muted" aria-hidden="true" style="margin-top:2px"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">1 permanencia excedida</span><span class="t-caption t-numeric">Transportes Andes · máximo 2 h · lleva 3 h 12 min</span></span></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:720px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px"><span class="ic i-clipboard" aria-hidden="true"></span>Agregar a la entrega de turno</button></div></div>
+</sc-if>
+
+<sc-if value="{{ S.cola }}" hint-placeholder-val="{{ false }}">
+  <div class="scroll" style="overflow:hidden;padding:20px 16px"><h1 class="t-title m0" style="max-width:1040px;margin:0 auto">Portería</h1></div>
+  <div class="scrim"></div>
+  <div class="sheet" role="dialog" aria-labelledby="cola-t" style="max-width:640px;margin:0 auto;max-height:86%">
+    <div style="width:36px;height:5px;border-radius:999px;background:var(--ds-border-strong);margin:8px auto 0"></div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:2px"><span id="cola-t" class="t-subheading">Cola sin conexión</span><span class="t-body-sm muted">4 registros · último intento <span class="t-numeric">13:38</span></span></div>
+      <div class="card" style="overflow:hidden">
+        <sc-for list="{{ cola }}" as="c" hint-placeholder-count="4">
+          <div class="rowcard" style="align-items:center;padding:12px 16px">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ c.t }}</span><span class="t-caption t-numeric">{{ c.d }}</span></span>
+            <span class="badge b-{{ c.tone }}">{{ c.e }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start" class="t-body-sm muted"><span class="ic sm i-info" aria-hidden="true" style="margin-top:2px;flex:none"></span><span style="text-wrap:pretty">La hora que ves es la de este dispositivo. Al enviarse, la hora oficial del registro será la del servidor.</span></div>
+    </div>
+    <div class="sheet-actions" style="padding-bottom:46px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><button class="btn btn-secondary" style="height:56px">Cerrar</button><button class="btn btn-primary" style="height:56px"><span class="ic sm i-refresh" aria-hidden="true"></span>Reintentar</button></div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;inicio&quot;,&quot;options&quot;:[&quot;inicio&quot;,&quot;tipo&quot;,&quot;escaner&quot;,&quot;resultado&quot;,&quot;noautorizado&quot;,&quot;ensitio&quot;,&quot;autorizados&quot;,&quot;resumen&quot;,&quot;cola&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;resultado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;autorizado&quot;,&quot;options&quot;:[&quot;autorizado&quot;,&quot;sinlista&quot;,&quot;fuera&quot;,&quot;noautorizado&quot;,&quot;horario&quot;,&quot;sinvalidar&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;ResultadoAcceso&quot;},&quot;escaneo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;buscando&quot;,&quot;options&quot;:[&quot;buscando&quot;,&quot;leido&quot;,&quot;fallo&quot;,&quot;permiso&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;EscanerDocumento&quot;},&quot;modoLectura&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;cedula&quot;,&quot;options&quot;:[&quot;cedula&quot;,&quot;pasaporte&quot;,&quot;patente&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;EscanerDocumento&quot;},&quot;noAutorizado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;bloqueado&quot;,&quot;options&quot;:[&quot;bloqueado&quot;,&quot;noaut&quot;,&quot;esperando&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;conexion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;linea&quot;,&quot;options&quot;:[&quot;linea&quot;,&quot;sin&quot;,&quot;sinc&quot;,&quot;desact&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;phone&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+const CX={linea:{t:'En línea',tone:'success',banner:''},sin:{t:'Sin conexión · 4',tone:'warning',banner:'Sin conexión · 4 registros por enviar'},sinc:{t:'Sincronizando',tone:'info',banner:''},desact:{t:'Listas de hace 26 h',tone:'warning',banner:'Listas desactualizadas · última descarga 28-10-2026 08:12'}};
+const META={inicio:{t:'Planta Quilicura',s:'Portería principal · dispositivo de la instalación'},tipo:{t:'Registrar entrada',s:'Portería principal'},resultado:{t:'Registrar entrada',s:'Portería principal'},noautorizado:{t:'Registrar entrada',s:'Portería principal'},ensitio:{t:'Registrar salida',s:'Portería principal'},autorizados:{t:'Autorizados',s:'Portería principal'},resumen:{t:'Entrega de turno',s:'Portería principal'},cola:{t:'Planta Quilicura',s:'Portería principal'},escaner:{t:'',s:''}};
+const RA={
+  autorizado:{tone:'success',ic:'check',t:'Autorizado',d:'Prerregistrado por Paula Rojas, de Bodegas del Sur S.A. Válido hoy 09:00–13:00.'},
+  sinlista:{tone:'neutral',ic:'info',t:'Sin lista para este tipo',d:'La instalación no tiene lista de contratistas. Completa el registro.'},
+  fuera:{tone:'info',ic:'info',t:'Fuera de lista, permitido',d:'No está en la lista de Bodegas del Sur S.A. La instalación admite ingresos fuera de lista: el registro queda marcado.'},
+  noautorizado:{tone:'danger',ic:'x',t:'No autorizado',d:'La instalación solo admite personas de la lista o prerregistradas.',form:false},
+  horario:{tone:'warning',ic:'clock',t:'Fuera de horario',d:'Autorizado de lunes a viernes 08:00–18:00. Ahora son las 19:42.'},
+  sinvalidar:{tone:'warning',ic:'wifi-off',t:'Sin validar con la lista actual',d:'Sin conexión. Revisamos con la lista descargada a las 08:12; se validará de nuevo al volver la señal.',offline:true}
+};
+const F=[
+  {n:'Matías Contreras Vidal',tipo:'Contratista',emp:'Frío Sur Ltda.',h:'09:12',pat:'KRTS·41',perm:'',pt:''},
+  {n:'Transportes Andes',tipo:'Despacho',emp:'Camión 3/4',h:'16:36',pat:'HJPL·27',perm:'Excedida · 3 h 12 min',pt:'danger'},
+  {n:'Javiera Muñoz Pérez',tipo:'Visita',emp:'Auditoría Kramer',h:'11:05',pat:'',perm:'Por vencer · 15 min',pt:'warning'},
+  {n:'Cristián Olave',tipo:'Proveedor',emp:'Aseo Integral SpA',h:'08:20',pat:'',perm:'',pt:''},
+  {n:'Felipe Araya Soto',tipo:'Contratista',emp:'Eléctrica Norte',h:'10:40',pat:'',perm:'',pt:''},
+  {n:'Constanza Ibáñez',tipo:'Visita',emp:'Bodegas del Sur S.A.',h:'12:15',pat:'GZXW·88',perm:'',pt:''}
+];
+const T=(n,ic,d)=>({n,ic,d});
+class Component extends DCLogic{
+  renderVals(){
+    const p=this.props;const scr=p.screen??'inicio';const S={};Object.keys(META).forEach(k=>S[k]=scr===k);
+    const cx=CX[p.conexion??'linea']||CX.linea;
+    const r=RA[p.resultado??'autorizado']||RA.autorizado;const tn=r.tone;
+    const ra={...r,form:r.form!==false,offline:!!r.offline,
+      bg:tn==='neutral'?'var(--ds-fill)':'var(--ds-'+tn+'-muted)',fg:tn==='neutral'?'var(--ds-fg)':'var(--ds-'+tn+'-fg)',bd:tn==='neutral'?'var(--ds-border)':'transparent',
+      btn:tn==='danger'?'Avisar a mi supervisor':'Registrar entrada',btnIc:tn==='danger'?'phone':'check',btnCls:'btn-primary'};
+    const scs=p.escaneo??'buscando';const mode=p.modoLectura??'cedula';
+    const MODES=[['cedula','Cédula'],['pasaporte','Pasaporte'],['patente','Patente'],['escribir','Escribir']];
+    const help={cedula:'Apunta al código QR del reverso de la cédula.',pasaporte:'Apunta a las dos líneas de abajo de la página con foto.',patente:'Encuadra la patente completa del vehículo.'}[mode]||'';
+    const SC={
+      buscando:{t:'Buscando…',d:help,badge:'',tone:'',c:'var(--ds-fg)',line:true,ok:false,cta:''},
+      leido:{t:'Cédula leída',d:'Matías Contreras Vidal · 17.845.223-4',badge:'Leído',tone:'success',c:'var(--ds-success)',line:false,ok:true,cta:'Continuar'},
+      fallo:{t:'No pudimos leer el documento',d:'Limpia el lente, acerca la cédula o escribe los datos a mano.',badge:'Sin lectura',tone:'warning',c:'var(--ds-warning)',line:false,ok:false,cta:'Volver a intentar'},
+      permiso:{t:'Permite el uso de la cámara',d:'Terreno usa la cámara solo para leer documentos y patentes. No guarda fotos.',badge:'',tone:'',c:'',line:false,ok:false,cta:'Permitir cámara'}
+    }[scs];
+    const sc={...SC,frame:scs!=='permiso',noPerm:scs==='permiso',mode:MODES.find(m=>m[0]===mode)[1],ratio:mode==='patente'?'3 / 1':mode==='pasaporte'?'1.42 / 1':'1.58 / 1',
+      modes:MODES.map(([k,n])=>({n,on:k===mode?'on':'',p:String(k===mode)}))};
+    const nav=p.noAutorizado??'bloqueado';
+    const NA={
+      bloqueado:{tone:'danger',badge:'Bloqueado',ic:'shield-x',t:'Acceso no autorizado',d:'Esta persona no puede ingresar a la instalación. No hay excepción posible.',exc:false,wait:false},
+      noaut:{tone:'warning',badge:'No está en la lista',ic:'shield-alert',t:'No autorizado',d:'La instalación solo admite personas de la lista o prerregistradas. Puedes pedir una excepción a tu supervisor.',exc:true,wait:false},
+      esperando:{tone:'warning',badge:'No está en la lista',ic:'shield-alert',t:'No autorizado',d:'Pediste una excepción. Mientras esperas, la persona sigue afuera.',exc:false,wait:true}
+    }[nav]||{};
+    const na={...NA,bg:'var(--ds-'+NA.tone+'-muted)',fg:'var(--ds-'+NA.tone+'-fg)',off:(p.conexion??'linea')==='sin'};
+    const sel=p.tipo??'contratista';
+    const TIPOS=[T('Visita','user','Persona que viene a ver a alguien'),T('Contratista','hard-hat','Trabajo en la instalación'),T('Proveedor','package','Entrega o servicio'),T('Vehículo','car','Auto o camioneta'),T('Despacho','truck','Camión de carga o retiro')];
+    return {
+      theme:p.theme??'light',device:p.device??'phone',S,notScan:scr!=='escaner',notInicio:scr!=='inicio',label:'Portería · '+scr,
+      meta:META[scr]||META.inicio,cx,ra,sc,na,
+      tipos:TIPOS.map(t=>{const on=t.n.toLowerCase()===sel;return {...t,p:String(on),bd:on?'var(--ds-accent)':'var(--ds-border)',bg:on?'var(--ds-accent-muted)':'var(--ds-surface)',fg:on?'var(--ds-accent)':'var(--ds-fg)'};}),
+      esperados:[{h:'14:00',n:'Ignacio Fuentes',d:'Visita · anfitrión Paula Rojas'},{h:'14:30',n:'Refrigeración Polar',d:'Contratista · 2 personas · KRTP·19'}],
+      enSitio5:F.slice(0,4),enSitio:F,
+      es:{sub:'12 personas · 4 vehículos · datos de las 19:48'},
+      filtros:[['Todos · 12',1],['Visitas · 5'],['Contratistas · 4'],['Vehículos · 2'],['Despachos · 1']].map(([n,on])=>({n,on:on?'on':'',p:String(!!on)})),
+      autorizados:[
+        {n:'Paula Rojas',doc:'15.402.118-K',tipo:'Visita frecuente',hor:'Lunes a viernes · 08:00–18:00',vig:'Vigente',vt:'success'},
+        {n:'Frío Sur Ltda.',doc:'76.334.120-5',tipo:'Contratista · 4 personas',hor:'Lunes a sábado · 08:00–18:00',vig:'Vigente',vt:'success'},
+        {n:'Camión Transportes Andes',doc:'HJPL·27',tipo:'Despacho',hor:'Todos los días · 06:00–22:00',vig:'Vence 31-10-2026',vt:'warning'},
+        {n:'Eléctrica Norte',doc:'77.910.442-1',tipo:'Contratista · 2 personas',hor:'Solo 29-10-2026 · 10:00–16:00',vig:'Uso único',vt:'neutral'},
+        {n:'Rodrigo Valdés',doc:'12.887.301-6',tipo:'Proveedor',hor:'Lunes y jueves · 09:00–12:00',vig:'Vigente',vt:'success'}],
+      resumenKpi:[{k:'Entradas',v:'42'},{k:'Salidas',v:'39'},{k:'En sitio',v:'3'},{k:'Denegados',v:'1'},{k:'Diferidos',v:'3'}],
+      quedan:[F[1],F[0],F[5]],
+      cola:[{t:'Entrada · Matías Contreras Vidal',d:'Contratista · 13:10:22',e:'Enviando',tone:'info'},{t:'Entrada · Refrigeración Polar',d:'Contratista · 2 personas · 13:24:05',e:'Pendiente',tone:'neutral'},{t:'Salida · Cristián Olave',d:'Proveedor · 13:31:48',e:'Pendiente',tone:'neutral'},{t:'Entrada · Javiera Muñoz Pérez',d:'Visita · 13:38:10 · no coincide con la lista actual',e:'Revisar',tone:'warning'}]
+    };
+  }
+}
+</script>
+</body>
+</html>

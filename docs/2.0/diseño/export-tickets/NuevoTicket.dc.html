@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div class="ds" data-theme="{{ theme }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<dc-import name="Bandeja" device="{{ device }}" theme="{{ theme }}" hint-size="100%,100%"></dc-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="right" title="Nuevo ticket" description="Ves todos los tipos que puedes crear." on-close="{{ noop }}" actions="{{ actions }}" hint-size="420px,100%">
+<sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="{{ tipo }}" options="{{ tipoOptions }}" on-change="{{ setTipo }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Asunto" value="{{ asunto }}" on-change="{{ setAsunto }}" placeholder="Qué necesitas, en una línea" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Descripción" value="{{ desc }}" on-change="{{ setDesc }}" rows="{{ 4 }}" placeholder="Cuenta qué pasó, dónde y desde cuándo" hint-size="100%,140px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Adjuntos" ayuda="Fotos o PDF de hasta 10 MB." hint-size="100%,120px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" compacto="{{ true }}" multiple="{{ true }}" tipos="JPG, PNG o PDF" tamano-maximo-mb="{{ 10 }}" archivos-iniciales="{{ files }}" hint-size="100%,96px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="{{ ownerLabel }}" value="{{ dueno }}" placeholder="Elige un dueño" options="{{ ownerOptions }}" hint="{{ ownerHint }}" error="{{ ownerError }}" on-change="{{ setDueno }}" hint-size="100%,72px"></x-import>
+<p class="t-body-sm muted" style="margin:0">{{ footNote }}</p>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="ticket" title="Aún no hay tipos de ticket" description="Un administrador debe crear el primero en Configuración › Módulos › Tickets › Tipos." action="{{ emptyAction }}" hint-size="100%,240px"></x-import>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="form" count="{{ 5 }}" label="Cargando tipos de ticket" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tipos de ticket" description="Revisa tu conexión. Lo que escribiste no se pierde." code="TK-503-22B1" on-retry="{{ noop }}" hint-size="100%,240px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes crear tickets" description="Tu cuenta no tiene tipos de ticket permitidos. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import>
+</sc-if>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="phone" theme="{{ theme }}" hide-top-bar="{{ true }}" hide-tab-bar="{{ true }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;flex:1;min-height:0">
+<div style="display:flex;align-items:center;gap:4px;height:52px;padding:0 8px;border-bottom:1px solid var(--ds-border);flex:none">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Cerrar" on-click="{{ noop }}" hint-size="44px,44px"></x-import>
+<span class="t-subheading">Nuevo ticket</span>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:16px">
+<sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="{{ tipo }}" options="{{ tipoOptions }}" on-change="{{ setTipo }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Asunto" value="{{ asunto }}" on-change="{{ setAsunto }}" placeholder="Qué necesitas, en una línea" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Descripción" value="{{ desc }}" on-change="{{ setDesc }}" rows="{{ 4 }}" placeholder="Cuenta qué pasó, dónde y desde cuándo" hint-size="100%,140px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Adjuntos" ayuda="Fotos o PDF de hasta 10 MB." hint-size="100%,120px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" compacto="{{ true }}" multiple="{{ true }}" tipos="JPG, PNG o PDF" tamano-maximo-mb="{{ 10 }}" archivos-iniciales="{{ files }}" hint-size="100%,96px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="{{ ownerLabel }}" value="{{ dueno }}" placeholder="Elige un dueño" options="{{ ownerOptions }}" hint="{{ ownerHint }}" error="{{ ownerError }}" on-change="{{ setDueno }}" hint-size="100%,72px"></x-import>
+<p class="t-body-sm muted" style="margin:0">{{ footNote }}</p>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="ticket" title="Aún no hay tipos de ticket" description="Un administrador debe crear el primero en Configuración › Módulos › Tickets › Tipos." action="{{ emptyAction }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="form" count="{{ 5 }}" label="Cargando tipos de ticket" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tipos de ticket" description="Revisa tu conexión. Lo que escribiste no se pierde." code="TK-503-22B1" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes crear tickets" description="Tu cuenta no tiene tipos de ticket permitidos. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+</div>
+<sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" disabled="{{ blocked }}" hint-size="100%,48px">Crear ticket</x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin_permiso&quot;],&quot;default&quot;:&quot;contenido&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;caso&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;sin_dueno&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "contenido";
+    const sinDueno = (this.props.caso ?? "normal") === "sin_dueno";
+    const T = {
+      "Mantención": { owner: "Andrés Molina", sla: 24 },
+      "Insumos": { owner: "Andrés Molina", sla: 48 },
+      "Administración": { owner: "Paula Contreras" },
+      "Consulta RR. HH.": { owner: "Paula Contreras" },
+      "Asesoría legal": { owner: null },
+      "Permiso": { owner: "Jorge Muñoz", aprob: true },
+      "Vacaciones": { owner: "Paula Contreras", aprob: true },
+      "Certificado": { owner: "Paula Contreras", aprob: true },
+      "Cambio de turno": { owner: "Jorge Muñoz", aprob: true },
+    };
+    const tipo = this.state.tipo ?? (sinDueno ? "Asesoría legal" : "Mantención");
+    const t = T[tipo];
+    const dueno = this.state.dueno !== undefined ? this.state.dueno : (t.owner || "");
+    const blocked = !dueno;
+    const B = NS.Button;
+    const s = this.state;
+    return {
+      device, theme: this.props.theme ?? "light",
+      isPhone: device === "phone", notPhone: device !== "phone",
+      showForm: estado === "contenido", isEmpty: estado === "vacio", isLoading: estado === "cargando", isError: estado === "error", isForbidden: estado === "sin_permiso",
+      tipo, setTipo: (v) => this.setState({ tipo: v, dueno: undefined }),
+      tipoOptions: Object.keys(T).map((k) => ({ value: k, label: k, description: T[k].aprob ? "Requiere aprobación · " + T[k].owner : T[k].owner ? "Dueño: " + T[k].owner + (T[k].sla ? " · SLA " + T[k].sla + " h" : "") : "Sin dueño por defecto" })),
+      asunto: s.asunto ?? (sinDueno ? "Revisar cláusula de horas extra del contrato" : "Cámara del andén norte sin señal"), setAsunto: (v) => this.setState({ asunto: v }),
+      desc: s.desc ?? (sinDueno ? "" : "Desde anoche a las 21:50 la cámara 4 del andén norte no muestra imagen en la central."), setDesc: (v) => this.setState({ desc: v }),
+      files: sinDueno ? [] : [{ nombre: "anden-norte-cam4.jpg", size: 1240000, estado: "listo" }],
+      ownerLabel: t.aprob ? "Aprobador" : "Dueño",
+      dueno, setDueno: (v) => this.setState({ dueno: v }),
+      ownerOptions: ["Andrés Molina", "Paula Contreras", "Jorge Muñoz"],
+      ownerHint: blocked ? "" : t.aprob ? "Lo define el tipo " + tipo + ". Aprueba o rechaza en un paso." : "Sugerido por el tipo " + tipo + ". Puedes cambiarlo.",
+      ownerError: blocked ? tipo + " no tiene dueño por defecto. Elige uno para poder crear el ticket." : "",
+      footNote: (t.sla ? "Este tipo tiene SLA de " + t.sla + " h. " : "") + "La respuesta te llega en tu portal y por correo.",
+      blocked,
+      noop: () => {},
+      emptyAction: B ? h(B, { variant: "secondary" }, "Ir a Configuración") : null,
+      actions: B && estado === "contenido" ? h(React.Fragment, null, h(B, { variant: "ghost" }, "Cancelar"), h(B, { disabled: blocked }, "Crear ticket")) : null,
+    };
+  }
+}
+</script>
+</body>
+</html>

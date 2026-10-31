@@ -10,10 +10,10 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { Preferencias } from "./tipos";
 
 const CATEGORIA: Record<CategoriaAviso, { titulo: string; detalle: string }> = {
-  pauta: { titulo: "Cambios de pauta", detalle: "Cuando cambia un turno tuyo." },
-  documentos: { titulo: "Documentos", detalle: "Documentos por firmar o nuevos." },
-  solicitudes: { titulo: "Solicitudes", detalle: "Cuando se resuelve algo que pediste." },
-  central: { titulo: "Central", detalle: "Avisos de la central que piden tu acuse." },
+  pauta: { titulo: "Pauta y turnos", detalle: "Cuando cambia o se asigna un turno tuyo." },
+  documentos: { titulo: "Liquidaciones y documentos", detalle: "Liquidaciones nuevas y documentos por firmar." },
+  solicitudes: { titulo: "Solicitudes y tickets", detalle: "Cuando se resuelve algo que pediste." },
+  empresa: { titulo: "Avisos de la empresa", detalle: "Comunicados generales de tu empresa." },
 };
 
 /** Pantalla 12 · Notificaciones: por categoría, push y correo; y un horario de silencio. */
@@ -42,7 +42,7 @@ export function FormularioAvisos({ inicial }: { inicial: Preferencias }) {
     <FormScreen
       state="ready"
       titulo="Notificaciones"
-      subtitulo="Los avisos dentro de la app siempre te llegan. Aquí eliges cuáles más recibes por celular y por correo."
+      subtitulo="Los avisos dentro de la app y los avisos legales (por ejemplo, cambios de contrato) siempre te llegan. Aquí eliges cuáles más recibes por celular y por correo."
       formProps={{ onSubmit: guardar, noValidate: true }}
       secciones={[
         ...CATEGORIAS_AVISO.map((c) => ({

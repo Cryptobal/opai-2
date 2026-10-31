@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}button{transition:background-color 150ms cubic-bezier(.2,0,0,1),border-color 150ms cubic-bezier(.2,0,0,1)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="phone" data-screen-label="{{ label }}" style="width:100%;height:100%">
+<div class="safe-top"></div>
+
+<sc-if value="{{ nonOk }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar">
+    <button class="icon-btn" aria-label="Volver"><span class="ic i-chevron-left" aria-hidden="true"></span></button>
+    <span class="t-label" style="flex:1">{{ meta.t }}</span>
+  </div>
+  <sc-if value="{{ isLoad }}">
+    <div aria-busy="true" aria-label="Cargando" style="padding:8px 16px;display:flex;flex-direction:column;gap:16px;max-width:720px;width:100%;margin:0 auto">
+      <div class="skel" style="height:28px;width:60%"></div>
+      <div class="skel" style="height:16px;width:40%"></div>
+      <div class="skel" style="height:120px;border-radius:16px"></div>
+      <sc-for list="{{ skelRows }}" as="r" hint-placeholder-count="4">
+        <div style="display:flex;gap:12px;align-items:center"><div class="skel" style="width:40px;height:40px;border-radius:999px"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:12px;width:45%"></div></div></div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ isMsg }}">
+    <div class="state" role="status">
+      <span class="state-ic" style="background:var(--ds-fill)"><span class="ic lg i-{{ msg.ic }}" aria-hidden="true"></span></span>
+      <div class="txt"><span class="t-subheading">{{ msg.t }}</span><span class="t-body-sm muted" style="text-wrap:pretty">{{ msg.d }}</span></div>
+      <button class="btn btn-primary lg"><span class="ic sm i-{{ msg.aic }}" aria-hidden="true"></span>{{ msg.a }}</button>
+    </div>
+  </sc-if>
+</sc-if>
+
+<sc-if value="{{ S.g0 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar" style="gap:10px;padding-left:12px">
+    <span class="tenant">AS</span>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Terreno · {{ hd.inst }}</span><span class="t-caption t-numeric" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ hd.sub }}</span></span>
+    <span class="avatar sm" aria-label="{{ hd.g }}">{{ hd.av }}</span>
+  </div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px;max-width:720px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Hola, María Fernanda</h1><span class="t-body-sm muted t-numeric">Miércoles 29-10-2026 · Portería principal</span></div>
+      <section class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px" aria-labelledby="pr-t">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="t-overline">Próxima ronda</span><span class="badge b-neutral">Por iniciar</span></div>
+        <span id="pr-t" class="t-heading">Ronda perimetral</span>
+        <span class="t-body-sm muted t-numeric">10:00 ± 15 min · 6 puntos · límite 40 min</span>
+        <button class="btn btn-primary lg block" style="margin-top:4px"><span class="ic i-route" aria-hidden="true"></span>Iniciar ronda</button>
+      </section>
+      <section class="card" style="overflow:hidden" aria-labelledby="ia-t">
+        <div class="card-h"><span class="txt"><span id="ia-t" class="t-label">Incidentes abiertos de tu instalación</span><span class="t-caption">2 abiertos al recibir el turno</span></span></div>
+        <sc-for list="{{ abiertos }}" as="a" hint-placeholder-count="2">
+          <div class="rowcard" style="align-items:flex-start;border-left:0;border-right:0;border-bottom:0">
+            <span class="ic i-{{ a.ic }} muted" aria-hidden="true" style="margin-top:2px"></span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span class="t-label"><span class="t-mono">{{ a.id }}</span> · {{ a.t }}</span><span class="t-caption">{{ a.d }}</span><span class="badge b-{{ a.tone }}" style="align-self:flex-start">{{ a.est }}</span></span>
+            <span class="ic i-chevron-right subtle" aria-hidden="true" style="align-self:center"></span>
+          </div>
+        </sc-for>
+      </section>
+      <div class="card" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div style="padding:12px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Rondas hoy</span><span class="t-subheading t-numeric">1 de 5</span></div>
+        <div style="padding:12px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Novedades</span><span class="t-subheading t-numeric">3</span></div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column"><span class="t-caption">Accesos</span><span class="t-subheading t-numeric">42</span></div>
+      </div>
+      <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px"><span class="ic i-clock muted" aria-hidden="true"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Entrada marcada · <span class="t-numeric">07:56</span></span><span class="t-caption">Salida prevista <span class="t-numeric">20:00</span></span></span><a href="#" class="t-label-sm">Asistencia</a></div>
+    </div>
+  </div>
+  <nav class="tabbar" aria-label="Navegación de Terreno">
+    <a class="{{ tb.ini }}" href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+    <a class="{{ tb.ron }}" href="#"><span class="ic i-route" aria-hidden="true"></span>Rondas</a>
+    <a class="{{ tb.acc }}" href="#" aria-label="Control de acceso"><span class="ic i-lock" aria-hidden="true"></span>Acceso</a>
+    <a class="{{ tb.nov }}" href="#"><span class="ic i-flag" aria-hidden="true"></span>Novedades</a>
+    <a class="{{ tb.asi }}" href="#"><span class="ic i-user-check" aria-hidden="true"></span>Asistencia</a>
+  </nav>
+</sc-if>
+
+<sc-if value="{{ S.g1 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar"><span class="wordmark" style="padding-left:4px">OPAI</span><span style="flex:1"></span><span class="t-caption">Terreno</span></div>
+  <div class="scroll" style="padding:8px 16px 24px;display:flex;flex-direction:column;gap:20px;max-width:560px;width:100%;margin:0 auto">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <h1 class="t-title m0">¿Quién eres?</h1>
+      <span class="t-body-sm muted">Este teléfono está asignado a Planta Quilicura · turno día <span class="t-numeric">08:00–20:00</span>. Elige tu nombre para ver tus rondas.</span>
+    </div>
+    <div class="card" role="list" style="overflow:hidden">
+      <sc-for list="{{ guardias }}" as="g" hint-placeholder-count="3">
+        <button class="rowcard" role="listitem" style="align-items:center;min-height:64px;border-left:0;border-right:0;border-top:0;cursor:pointer">
+          <span class="avatar lg">{{ g.ini }}</span>
+          <span style="flex:1;display:flex;flex-direction:column;min-width:0"><span class="t-label">{{ g.n }}</span><span class="t-caption">{{ g.r }}</span></span>
+          <span class="ic i-chevron-right subtle" aria-hidden="true"></span>
+        </button>
+      </sc-for>
+    </div>
+    <span class="t-caption" style="text-align:center">¿No estás en la lista? Avísale a tu supervisor, Rodrigo Tapia.</span>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.g2 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar" style="gap:10px;padding-left:12px">
+    <span class="tenant">AS</span>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Terreno · {{ hd.inst }}</span><span class="t-caption t-numeric" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ hd.sub }}</span></span>
+    <span class="avatar sm" aria-label="{{ hd.g }}">{{ hd.av }}</span>
+  </div>
+  <button class="banner" style="border:0;border-bottom:1px solid var(--ds-border);width:100%;cursor:pointer;min-height:44px;text-align:left"><span class="ic sm i-wifi-off" aria-hidden="true"></span><span style="flex:1">Sin conexión · 3 marcas por enviar</span><span>Ver cola</span><span class="ic sm i-chevron-right" aria-hidden="true"></span></button>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px;max-width:720px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Mis rondas de hoy</h1><span class="t-body-sm muted t-numeric">{{ g2sub }}</span></div>
+      <sc-if value="{{ relevo }}">
+        <section class="card" style="overflow:hidden" aria-labelledby="rel-t">
+          <div class="card-h"><span class="txt"><span id="rel-t" class="t-label">Incidentes abiertos de tu instalación</span><span class="t-caption">Recibes el turno con 2 abiertos. Revísalos antes de tu primera ronda.</span></span></div>
+          <sc-for list="{{ abiertos }}" as="a" hint-placeholder-count="2">
+            <div class="rowcard" style="align-items:flex-start;border-left:0;border-right:0;border-bottom:0">
+              <span class="ic i-{{ a.ic }} muted" aria-hidden="true" style="margin-top:2px"></span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span class="t-label"><span class="t-mono">{{ a.id }}</span> · {{ a.t }}</span><span class="t-caption">{{ a.d }}</span><span class="badge b-{{ a.tone }}" style="align-self:flex-start">{{ a.est }}</span></span>
+              <span class="ic i-chevron-right subtle" aria-hidden="true" style="align-self:center"></span>
+            </div>
+          </sc-for>
+        </section>
+      </sc-if>
+      <div class="card" style="overflow:hidden">
+        <sc-for list="{{ misRondas }}" as="r" hint-placeholder-count="5">
+          <div class="rowcard" style="align-items:flex-start;background:{{ r.bg }}">
+            <span class="t-subheading t-numeric" style="width:56px;flex:none">{{ r.h }}</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <span class="badge b-{{ r.tone }}" style="align-self:flex-start">{{ r.est }}</span>
+              <span class="t-label">{{ r.pl }}</span>
+              <span class="t-caption">{{ r.inst }} · {{ r.pts }} puntos · <span class="t-numeric">{{ r.win }}</span></span>
+            </span>
+            <span class="ic i-chevron-right subtle" aria-hidden="true" style="align-self:center"></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px;border-top:1px solid var(--ds-border);background:var(--ds-bg)">
+    <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:4px"><button class="btn btn-primary lg block"><span class="ic i-route" aria-hidden="true"></span>Iniciar ronda</button><span class="t-caption t-numeric" style="text-align:center">{{ nextR }}</span></div>
+  </div>
+  <nav class="tabbar" aria-label="Navegación de Terreno">
+    <a class="{{ tb.ini }}" href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+    <a class="{{ tb.ron }}" href="#"><span class="ic i-route" aria-hidden="true"></span>Rondas</a>
+    <a class="{{ tb.acc }}" href="#" aria-label="Control de acceso"><span class="ic i-lock" aria-hidden="true"></span>Acceso</a>
+    <a class="{{ tb.nov }}" href="#"><span class="ic i-flag" aria-hidden="true"></span>Novedades</a>
+    <a class="{{ tb.asi }}" href="#"><span class="ic i-user-check" aria-hidden="true"></span>Asistencia</a>
+  </nav>
+</sc-if>
+
+<sc-if value="{{ S.g3 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar" style="padding-left:4px">
+    <button class="icon-btn" aria-label="Volver a mis rondas"><span class="ic i-chevron-left" aria-hidden="true"></span></button>
+    <span style="flex:1"></span>
+    <button class="btn btn-secondary" style="height:44px;padding:0 12px;border-radius:999px"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/timer.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/timer.svg) center/contain no-repeat;background-color:currentColor"></span>Zona de riesgo</button>
+    <button class="btn" style="height:44px;padding:0 14px;border-color:var(--ds-danger);color:var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:999px" aria-haspopup="dialog"><span class="ic sm i-alert" aria-hidden="true"></span>Emergencia</button>
+  </div>
+  <div class="banner" style="min-height:36px"><span class="ic sm i-wifi-off" aria-hidden="true"></span><span style="flex:1">Sin conexión · 1 marca por enviar</span><span class="t-caption" style="color:inherit">Ver cola</span></div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:12px 16px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px 32px;max-width:1024px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span class="badge b-accent" style="align-self:flex-start">En curso</span>
+          <h1 class="t-title m0">Ronda perimetral</h1>
+          <span class="t-body-sm muted">Planta Quilicura · iniciada <span class="t-numeric">10:02</span></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="t-label-sm" style="display:flex;justify-content:space-between"><span class="t-numeric">3 de 6 puntos</span><span class="t-numeric muted">18 min · límite 40 min</span></div>
+          <div class="progress" role="progressbar" aria-valuenow="3" aria-valuemin="0" aria-valuemax="6" aria-label="Avance de la ronda"><span style="width:50%"></span></div>
+        </div>
+        <section class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px;border-color:var(--ds-accent);box-shadow:0 0 0 3px var(--ds-accent-muted)">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="t-overline">Siguiente · punto 4</span><span class="chip plain" style="height:24px;padding:0 10px"><span class="ic sm i-scan" aria-hidden="true"></span>QR + GPS</span></div>
+          <span class="t-heading">Andén norte</span>
+          <span class="t-body-sm muted">Etiqueta junto a la cortina 3. Revisa candado y sello de la cortina.</span>
+          <span class="t-label-sm" style="display:flex;align-items:center;gap:6px"><span class="ic sm i-pin" aria-hidden="true"></span><span class="t-numeric">a 60 m · precisión 8 m</span></span>
+          <button class="btn btn-ghost" style="align-self:flex-start;padding:0 8px;margin-left:-8px;color:var(--ds-fg-muted)"><span class="ic sm i-flag" aria-hidden="true"></span>Reportar novedad</button>
+        </section>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="t-caption" style="display:flex;align-items:center;gap:6px"><span class="ic sm i-sun" aria-hidden="true"></span>Mantén la pantalla encendida durante la ronda</span>
+          <span class="t-caption" style="display:flex;align-items:center;gap:6px;color:var(--ds-warning-fg)"><span class="ic sm i-alert" aria-hidden="true"></span>Batería 14 % · conecta el cargador si puedes</span>
+        </div>
+        <section class="card" style="overflow:hidden;width:100%;flex:none" aria-label="Mapa de la ronda">
+          <div style="display:flex;align-items:center;gap:4px;padding:4px 4px 4px 16px;min-height:52px">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">Mapa</span><span class="t-caption t-numeric" style="color:{{ mp.sc }}">{{ mp.sub }}</span></span>
+            <sc-if value="{{ mp.open }}"><button class="btn btn-ghost" disabled="{{ mp.dis }}" style="padding:0 10px"><span class="ic sm i-pin" aria-hidden="true"></span>Centrar en mí</button></sc-if>
+            <button class="icon-btn" aria-expanded="{{ mp.exp }}" aria-label="{{ mp.tl }}" onClick="{{ toggleMap }}"><span class="ic i-chevron-down" aria-hidden="true" style="transform:{{ mp.rot }};transition:transform 150ms cubic-bezier(.2,0,0,1)"></span></button>
+          </div>
+          <sc-if value="{{ mp.open }}">
+            <div style="position:relative;height:184px;border-top:1px solid var(--ds-border)">
+              <dc-import name="Mapa Rondas" variant="guardia" next="{{ mp.next }}" far="{{ mp.far }}" gps="{{ mp.gps }}" acc="{{ mp.acc }}" dist="{{ mp.dist }}" hint-size="100%,184px" style="display:block;width:100%;height:100%"></dc-import>
+              <sc-if value="{{ mp.sinGps }}"><div role="status" style="position:absolute;top:8px;left:8px;right:8px;display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic sm i-alert" aria-hidden="true"></span><span class="t-body-sm" style="flex:1">Sin señal GPS · ves los puntos, no tu posición</span></div></sc-if>
+            </div>
+          </sc-if>
+        </section>
+      </div>
+      <div class="tl" aria-label="Puntos de la ronda" style="padding-top:4px">
+        <sc-for list="{{ puntos }}" as="p" hint-placeholder-count="6">
+          <div class="tl-item" style="padding-bottom:18px">
+            <span class="tl-dot" style="border:2px solid {{ p.bd }};background:{{ p.bg }};color:{{ p.fg }};box-shadow:{{ p.sh }};font-weight:600"><span class="ic sm i-check" style="width:12px;height:12px;display:{{ p.chk }}" aria-hidden="true"></span><span class="t-caption" style="color:inherit;font-weight:600;display:{{ p.num }}">{{ p.n }}</span></span>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="t-label" style="color:{{ p.tc }}">{{ p.nom }}</span><span style="display:flex;align-items:center;gap:8px"><span class="badge b-{{ p.ct }}" style="display:{{ p.cd }}">{{ p.conf }}</span><span class="t-caption t-numeric">{{ p.h }}</span></span></div>
+              <span class="t-caption" style="display:{{ p.nd }};align-items:center;gap:6px;color:var(--ds-warning-fg)"><span class="ic sm i-flag" aria-hidden="true"></span>{{ p.nov }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--ds-bg);border-top:1px solid var(--ds-border)">
+    <div style="max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+      <button class="btn btn-secondary"><span class="ic sm i-flag" aria-hidden="true"></span>Reportar novedad</button>
+      <button class="btn btn-ghost">Terminar ronda</button>
+      <button class="btn btn-primary lg" style="grid-column:1 / -1"><span class="ic i-scan" aria-hidden="true"></span>Marcar punto</button>
+    </div>
+  </div>
+  <div style="height:34px;flex:none;background:var(--ds-bg)"></div>
+  <sc-if value="{{ S.emg }}">
+    <div class="scrim"></div>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div class="overlay dialog" role="alertdialog" aria-labelledby="emg-t">
+        <div class="dh"><span class="state-tile" style="width:44px;height:44px;background:var(--ds-danger-muted);color:var(--ds-danger-fg);border-radius:12px"><span class="ic lg i-alert" aria-hidden="true"></span></span><span id="emg-t" class="t-subheading" style="padding-top:8px">¿Enviar alerta de emergencia?</span><span class="t-body-sm muted">Avisaremos a la central y a tu supervisor con tu ubicación actual. Si no hay conexión, se enviará por SMS.</span></div>
+        <div class="actions"><button class="btn btn-secondary">Cancelar</button><button class="btn btn-destructive"><span class="ic sm i-alert" aria-hidden="true"></span>Enviar alerta</button></div>
+      </div>
+    </div>
+  </sc-if>
+</sc-if>
+
+<sc-if value="{{ S.g4qr }}" hint-placeholder-val="{{ false }}">
+  <div data-theme="dark" class="ds" style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--ds-n-950);color:var(--ds-fg)">
+    <div style="height:44px;flex:none"></div>
+    <div class="topbar" style="background:transparent">
+      <button class="icon-btn" aria-label="Cerrar"><span class="ic i-x" aria-hidden="true"></span></button>
+      <span style="flex:1;display:flex;flex-direction:column;align-items:center"><span class="t-label">Punto 4 · Andén norte</span><span class="t-caption">QR + GPS</span></span>
+      <button class="icon-btn" aria-label="Encender linterna" aria-pressed="false"><span class="ic i-sun" aria-hidden="true"></span></button>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:24px">
+      <div style="position:relative;width:248px;height:248px" aria-label="Visor de cámara">
+        <span style="position:absolute;left:0;top:0;width:44px;height:44px;border-left:3px solid var(--ds-fg);border-top:3px solid var(--ds-fg);border-radius:16px 0 0 0"></span>
+        <span style="position:absolute;right:0;top:0;width:44px;height:44px;border-right:3px solid var(--ds-fg);border-top:3px solid var(--ds-fg);border-radius:0 16px 0 0"></span>
+        <span style="position:absolute;left:0;bottom:0;width:44px;height:44px;border-left:3px solid var(--ds-fg);border-bottom:3px solid var(--ds-fg);border-radius:0 0 0 16px"></span>
+        <span style="position:absolute;right:0;bottom:0;width:44px;height:44px;border-right:3px solid var(--ds-fg);border-bottom:3px solid var(--ds-fg);border-radius:0 0 16px 0"></span>
+        <span style="position:absolute;left:20px;right:20px;top:50%;height:2px;background:var(--ds-accent);border-radius:2px"></span>
+      </div>
+      <span class="t-body" style="text-align:center;max-width:280px;text-wrap:pretty">Apunta a la etiqueta impresa del punto. La lectura es automática.</span>
+      <span class="badge b-success">GPS listo · precisión 8 m</span>
+    </div>
+    <div style="flex:none;padding:16px 16px 50px;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <button class="btn btn-ghost" style="color:var(--ds-fg)"><span class="ic sm i-flag" aria-hidden="true"></span>La etiqueta está dañada o no está</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.g4gps }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar">
+    <button class="icon-btn" aria-label="Cerrar"><span class="ic i-x" aria-hidden="true"></span></button>
+    <span style="flex:1;display:flex;flex-direction:column;align-items:center"><span class="t-label">Punto 5 · Cerco poniente</span><span class="t-caption">GPS · radio 15 m · permanencia 15 s</span></span>
+    <span style="width:44px"></span>
+  </div>
+  <div class="scroll" style="overflow:auto;padding:16px;display:flex;flex-direction:column;align-items:center;gap:24px;max-width:560px;width:100%;margin:0 auto">
+    <div style="position:relative;width:200px;height:200px" role="timer" aria-live="polite" aria-label="{{ gps.t }}">
+      <svg viewBox="0 0 200 200" width="200" height="200" aria-hidden="true"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--ds-fill)" stroke-width="12"></circle><circle cx="100" cy="100" r="88" fill="none" stroke="{{ gps.stroke }}" stroke-width="12" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="{{ gps.off }}" transform="rotate(-90 100 100)"></circle></svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span class="t-display t-numeric">{{ gps.big }}</span><span class="t-caption">{{ gps.unit }}</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+      <span class="badge b-{{ gps.tone }}">{{ gps.badge }}</span>
+      <span class="t-heading">{{ gps.t }}</span>
+      <span class="t-body-sm muted" style="max-width:300px;text-wrap:pretty">{{ gps.d }}</span>
+    </div>
+    <section class="card" style="overflow:hidden;width:100%;flex:none" aria-label="Mapa de la ronda">
+          <div style="display:flex;align-items:center;gap:4px;padding:4px 4px 4px 16px;min-height:52px">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">Mapa</span><span class="t-caption t-numeric" style="color:{{ mp.sc }}">{{ mp.sub }}</span></span>
+            <sc-if value="{{ mp.open }}"><button class="btn btn-ghost" disabled="{{ mp.dis }}" style="padding:0 10px"><span class="ic sm i-pin" aria-hidden="true"></span>Centrar en mí</button></sc-if>
+            <button class="icon-btn" aria-expanded="{{ mp.exp }}" aria-label="{{ mp.tl }}" onClick="{{ toggleMap }}"><span class="ic i-chevron-down" aria-hidden="true" style="transform:{{ mp.rot }};transition:transform 150ms cubic-bezier(.2,0,0,1)"></span></button>
+          </div>
+          <sc-if value="{{ mp.open }}">
+            <div style="position:relative;height:184px;border-top:1px solid var(--ds-border)">
+              <dc-import name="Mapa Rondas" variant="guardia" next="{{ mp.next }}" far="{{ mp.far }}" gps="{{ mp.gps }}" acc="{{ mp.acc }}" dist="{{ mp.dist }}" hint-size="100%,184px" style="display:block;width:100%;height:100%"></dc-import>
+              <sc-if value="{{ mp.sinGps }}"><div role="status" style="position:absolute;top:8px;left:8px;right:8px;display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic sm i-alert" aria-hidden="true"></span><span class="t-body-sm" style="flex:1">Sin señal GPS · ves los puntos, no tu posición</span></div></sc-if>
+            </div>
+          </sc-if>
+        </section>
+    <div class="card" style="width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))">
+      <div style="padding:12px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Distancia al punto</span><span class="t-subheading t-numeric">{{ gps.dist }}</span></div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column"><span class="t-caption">Precisión</span><span class="t-subheading t-numeric" style="color:{{ gps.pc }}">{{ gps.prec }}</span></div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border)"><div style="max-width:560px;margin:0 auto"><button class="btn btn-secondary lg block">Cancelar</button></div></div>
+</sc-if>
+
+<sc-if value="{{ S.g4res }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x" aria-hidden="true"></span></button><span class="t-label" style="flex:1;text-align:center">Punto 4 · Andén norte</span><span style="width:44px"></span></div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px;max-width:560px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding-top:8px">
+        <span class="state-tile" style="background:var(--ds-success-muted);color:var(--ds-success-fg)"><span class="ic lg i-check" aria-hidden="true"></span></span>
+        <span class="t-heading">Lectura correcta</span>
+        <span class="t-body-sm muted"><span class="t-numeric">10:21:34</span> · QR + GPS · a 6 m · precisión 8 m</span>
+        <span class="badge b-success">Confianza alta</span>
+      </div>
+      <section style="display:flex;flex-direction:column;gap:8px">
+        <span class="t-overline">Tarea del punto</span>
+        <span class="t-body-sm" style="text-wrap:pretty">Etiqueta junto a la cortina 3. Revisa candado y sello de la cortina.</span>
+        <div class="card" style="overflow:hidden">
+          <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:6px 6px 6px 16px;border-bottom:1px solid var(--ds-border)">
+              <span class="t-body" style="flex:1;min-width:0">{{ c.t }}</span>
+              <div class="seg" role="radiogroup" aria-label="{{ c.t }}"><button class="{{ c.si }}" role="radio" aria-checked="{{ c.sip }}" style="height:44px;min-width:56px">Sí</button><button class="{{ c.no }}" role="radio" aria-checked="{{ c.nop }}" style="height:44px;min-width:56px">No</button></div>
+            </div>
+          </sc-for>
+        </div>
+        <span class="t-caption">Responde los 3 ítems para confirmar el punto.</span>
+      </section>
+      <div class="field">
+        <span class="lbl">Foto del punto <span class="subtle" style="font-weight:400">· obligatoria</span></span>
+        <div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border-control);border-radius:10px;background:var(--ds-surface)">
+          <span style="width:64px;height:64px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center;flex:none" aria-label="Miniatura de la foto"><span class="ic i-camera subtle" aria-hidden="true"></span></span>
+          <span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Foto tomada · <span class="t-numeric">10:21</span></span><span class="t-caption">Cortina 3 · 0,9 MB</span></span>
+          <button class="btn btn-ghost">Repetir</button>
+        </div>
+        <span class="hint">Este punto pide foto antes de confirmar la marca.</span>
+      </div>
+      <button class="btn btn-ghost" style="align-self:flex-start;padding:0 8px;color:var(--ds-fg-muted)"><span class="ic sm i-flag" aria-hidden="true"></span>Reportar novedad de este punto</button>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border)"><div style="max-width:560px;margin:0 auto"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><button class="btn btn-secondary lg"><span class="ic i-flag" aria-hidden="true"></span>Hay un problema</button><button class="btn btn-primary lg"><span class="ic i-check" aria-hidden="true"></span>Realizado</button></div></div></div>
+
+</sc-if>
+
+<sc-if value="{{ S.g5 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar"><span style="width:44px"></span><span class="t-label" style="flex:1;text-align:center">Cierre de ronda</span><span style="width:44px"></span></div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:16px;max-width:560px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:4px"><span class="badge b-warning" style="align-self:flex-start">Incompleta</span><h1 class="t-title m0">Ronda perimetral</h1><span class="t-body-sm muted">Planta Quilicura · <span class="t-numeric">10:02–10:36</span></span></div>
+      <div class="card" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr))">
+        <div style="padding:14px 16px;border-right:1px solid var(--ds-border);border-bottom:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Marcados</span><span class="t-heading t-numeric">5 de 6</span></div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Duración</span><span class="t-heading t-numeric">34 min</span></div>
+        <div style="padding:14px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column;gap:4px"><span class="t-caption">Confianza de la ronda</span><span class="badge b-success" style="align-self:flex-start">Alta · 88</span></div>
+        <div style="padding:14px 16px;display:flex;flex-direction:column"><span class="t-caption">Novedades</span><span class="t-heading t-numeric">2</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span class="t-overline">Omitidos</span>
+        <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px"><span class="ic i-x subtle" aria-hidden="true"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Sala de bombas</span><span class="t-caption">Opcional · acceso cerrado por mantención</span></span></div>
+      </div>
+      <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;background:var(--ds-warning-muted);border-color:transparent;color:var(--ds-warning-fg)" role="status"><span class="ic i-wifi-off" aria-hidden="true"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Se enviará al recuperar conexión</span><span class="t-body-sm">3 hechos quedan en este teléfono</span></span><button class="btn btn-ghost" style="color:inherit">Ver cola</button></div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border)"><div style="max-width:560px;margin:0 auto"><button class="btn btn-primary lg block">Volver a mis rondas</button></div></div>
+</sc-if>
+
+<sc-if value="{{ S.g6 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar"><span class="wordmark" style="padding-left:4px">OPAI</span></div>
+  <div style="padding:16px;max-width:720px;width:100%;margin:0 auto"><h1 class="t-title m0">Mis rondas de hoy</h1></div>
+  <div class="scrim"></div>
+  <div class="sheet" role="dialog" aria-labelledby="cola-t" style="max-width:640px;margin:0 auto;max-height:86%">
+    <div style="width:36px;height:5px;border-radius:999px;background:var(--ds-border-strong);margin:8px auto 0"></div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:2px"><span id="cola-t" class="t-subheading">Cola sin conexión</span><span class="t-body-sm muted">4 hechos por enviar · último intento <span class="t-numeric">10:34</span></span></div>
+      <div class="card" style="overflow:hidden">
+        <sc-for list="{{ cola }}" as="c" hint-placeholder-count="4">
+          <div class="rowcard" style="align-items:center;padding:12px 16px">
+            <span class="ic i-{{ c.ic }} muted" aria-hidden="true"></span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ c.t }}</span><span class="t-caption">{{ c.d }}</span></span>
+            <span class="t-caption t-numeric">{{ c.h }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start" class="t-body-sm muted"><span class="ic sm i-info" aria-hidden="true" style="margin-top:2px;flex:none"></span><span style="text-wrap:pretty">La hora es la de tu teléfono al momento de marcar. Si cierras sesión, los hechos quedan guardados en este teléfono y se envían cuando vuelvas a entrar; te pediremos confirmar antes de salir.</span></div>
+    </div>
+    <div class="sheet-actions" style="padding-bottom:46px"><button class="btn btn-secondary">Cerrar</button><button class="btn btn-primary"><span class="ic sm i-refresh" aria-hidden="true"></span>Reintentar ahora</button></div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.g7 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar"><span class="wordmark" style="padding-left:4px">OPAI</span></div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px;max-width:560px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:4px"><h1 class="t-title m0">Antes de tu primera ronda</h1><span class="t-body-sm muted">OPAI necesita tres permisos para registrar que pasaste por cada punto.</span></div>
+      <div class="card" style="overflow:hidden">
+        <sc-for list="{{ permisos }}" as="p" hint-placeholder-count="3">
+          <div class="rowcard" style="align-items:center">
+            <span class="state-tile" style="width:40px;height:40px;border-radius:10px;background:var(--ds-fill)"><span class="ic i-{{ p.ic }}" aria-hidden="true"></span></span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ p.t }}</span><span class="t-caption" style="text-wrap:pretty">{{ p.d }}</span></span>
+            <span class="badge b-success" style="display:{{ p.okd }}">Permitido</span>
+            <button class="btn btn-secondary" style="display:{{ p.btd }}">Permitir</button>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px 16px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-lock" aria-hidden="true" style="flex:none"></span><span style="display:flex;flex-direction:column;gap:2px"><span class="t-label">Tu ubicación se registra solo mientras haces la ronda.</span><span class="t-body-sm">Fuera de la ronda no se guarda nada. Atlas Seguridad SpA usa estos datos para verificar el servicio. <a href="#" style="color:inherit;text-decoration:underline">Cómo tratamos tus datos</a></span></span></div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border)"><div style="max-width:560px;margin:0 auto"><button class="btn btn-primary lg block">Continuar</button></div></div>
+</sc-if>
+<sc-if value="{{ S.g10 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x" aria-hidden="true"></span></button><span class="t-label" style="flex:1;text-align:center">Novedad</span><span style="width:44px"></span></div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px;max-width:560px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span class="t-caption t-mono">NOV-0418</span>
+        <h1 class="t-title m0">Intrusión</h1>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge b-danger">Alta · incidente</span><span class="badge b-{{ envBadge.tone }}">{{ envBadge.t }}</span></div>
+        <span class="t-body-sm muted">Bodega A · Ronda perimetral · Planta Quilicura · <span class="t-numeric">10:15</span></span>
+      </div>
+      <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+        <p class="t-body m0" style="text-wrap:pretty">Puerta lateral de Bodega A forzada, candado en el suelo. No se ve a nadie adentro. Me quedo afuera mirando el acceso.</p>
+        <div style="display:flex;gap:8px;align-items:center"><span style="width:48px;height:48px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center"><span class="ic sm i-camera subtle" aria-hidden="true"></span></span><span style="width:48px;height:48px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center"><span class="ic sm i-camera subtle" aria-hidden="true"></span></span><span style="width:48px;height:48px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center"><span class="ic sm i-camera subtle" aria-hidden="true"></span></span><span class="t-caption" style="display:flex;align-items:center;gap:6px;padding-left:4px"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/mic.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/mic.svg) center/contain no-repeat;background-color:currentColor"></span>Nota de voz · 0:18</span></div>
+      </div>
+      <section style="display:flex;flex-direction:column;gap:10px">
+        <span class="t-overline">Estado de envío</span>
+        <div class="tl" aria-live="polite">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+            <div class="tl-item" style="padding-bottom:16px">
+              <span class="tl-dot" style="border:2px solid {{ s.bd }};background:{{ s.bg }};color:{{ s.fg }};box-shadow:{{ s.sh }}"><span class="ic sm i-check" style="width:12px;height:12px;display:{{ s.chk }}" aria-hidden="true"></span></span>
+              <div style="flex:1;display:flex;flex-direction:column"><span class="t-label" style="color:{{ s.tc }}">{{ s.t }}</span><span class="t-caption t-numeric">{{ s.d }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <span class="t-caption" style="display:flex;gap:6px;align-items:flex-start;text-wrap:pretty"><span class="ic sm i-lock" aria-hidden="true" style="flex:none;margin-top:1px"></span>Tu marca de Bodega A (10:15:02) quedó guardada aparte. La novedad enviada no se edita; si necesitas agregar algo, escribe un comentario.</span>
+      <button class="btn btn-secondary" style="align-self:flex-start"><span class="ic sm i-message" aria-hidden="true"></span>Agregar comentario</button>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border)"><div style="max-width:560px;margin:0 auto"><button class="btn btn-primary lg block">Volver a la ronda</button></div></div>
+</sc-if>
+
+<sc-if value="{{ S.g11 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar" style="gap:10px;padding-left:12px">
+    <span class="tenant">AS</span>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Terreno · {{ hd.inst }}</span><span class="t-caption t-numeric" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ hd.sub }}</span></span>
+    <span class="avatar sm" aria-label="{{ hd.g }}">{{ hd.av }}</span>
+  </div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px;max-width:720px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Libro de novedades</h1><span class="t-body-sm muted">Planta Quilicura · turno día · <span class="t-numeric">29-10-2026</span></span></div>
+      <div class="seg" role="radiogroup" aria-label="Alcance" style="align-self:flex-start"><button class="on" role="radio" aria-checked="true" style="height:40px">Mi turno · 3</button><button role="radio" aria-checked="false" style="height:40px">Instalación · 7</button></div>
+      <div class="card" style="overflow:hidden">
+        <sc-for list="{{ libro }}" as="n" hint-placeholder-count="3">
+          <div class="rowcard" style="align-items:flex-start">
+            <span class="ic i-{{ n.ic }} muted" aria-hidden="true" style="margin-top:2px"></span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <span class="t-caption"><span class="t-mono">{{ n.id }}</span> · <span class="t-numeric">{{ n.h }}</span></span>
+              <span class="t-label">{{ n.t }}</span>
+              <span class="t-caption">{{ n.d }}</span>
+              <span style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge b-{{ n.gt }} nodot">{{ n.g }}</span><span class="badge b-{{ n.et }}">{{ n.e }}</span></span>
+            </span>
+            <span class="ic i-chevron-right subtle" aria-hidden="true" style="align-self:center"></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:720px;margin:0 auto"><button class="btn btn-primary lg block"><span class="ic i-flag" aria-hidden="true"></span>Reportar novedad</button></div></div>
+  <nav class="tabbar" aria-label="Navegación de Terreno">
+    <a class="{{ tb.ini }}" href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+    <a class="{{ tb.ron }}" href="#"><span class="ic i-route" aria-hidden="true"></span>Rondas</a>
+    <a class="{{ tb.acc }}" href="#" aria-label="Control de acceso"><span class="ic i-lock" aria-hidden="true"></span>Acceso</a>
+    <a class="{{ tb.nov }}" href="#"><span class="ic i-flag" aria-hidden="true"></span>Novedades</a>
+    <a class="{{ tb.asi }}" href="#"><span class="ic i-user-check" aria-hidden="true"></span>Asistencia</a>
+  </nav>
+</sc-if>
+
+<sc-if value="{{ S.g13 }}" hint-placeholder-val="{{ false }}">
+  <div class="topbar" style="padding-left:4px">
+    <button class="icon-btn" aria-label="Volver a la ronda"><span class="ic i-chevron-left" aria-hidden="true"></span></button>
+    <span class="t-label" style="flex:1">Zona de riesgo</span>
+    <button class="btn" style="height:44px;padding:0 14px;border-color:var(--ds-danger);color:var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:999px" aria-haspopup="dialog"><span class="ic sm i-alert" aria-hidden="true"></span>Emergencia</button>
+  </div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:8px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:20px;max-width:560px;margin:0 auto">
+      <sc-if value="{{ zElegir }}">
+        <div style="width:100%;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:4px"><h1 class="t-title m0">Zona de riesgo</h1><span class="t-body-sm muted" style="text-wrap:pretty">Actívala antes de entrar a un lugar aislado o de riesgo. Si no confirmas «Estoy bien» a tiempo, avisaremos a la central con tu ubicación.</span></div>
+          <div class="field"><span class="lbl">¿Cuántos minutos?</span>
+            <div class="chip-row" role="radiogroup" aria-label="Minutos" style="flex-wrap:wrap"><button class="chip toggle" role="radio" aria-checked="false" style="height:44px">5 min</button><button class="chip toggle" role="radio" aria-checked="false" style="height:44px">10 min</button><button class="chip toggle on" role="radio" aria-checked="true" style="height:44px">15 min</button><button class="chip toggle" role="radio" aria-checked="false" style="height:44px">30 min</button><button class="chip toggle" role="radio" aria-checked="false" style="height:44px">45 min</button></div>
+            <span class="hint">Te avisaremos 1 minuto antes de que venza.</span>
+          </div>
+          <div class="field"><label class="lbl" for="zr-l">Lugar <span class="subtle" style="font-weight:400">· opcional</span></label><input id="zr-l" class="input" value="Sala de bombas · subterráneo"></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ zTimer }}">
+        <div style="position:relative;width:200px;height:200px" role="timer" aria-live="polite" aria-label="{{ zv.t }}">
+      <svg viewBox="0 0 200 200" width="200" height="200" aria-hidden="true"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--ds-fill)" stroke-width="12"></circle><circle cx="100" cy="100" r="88" fill="none" stroke="{{ zv.stroke }}" stroke-width="12" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="{{ zv.off }}" transform="rotate(-90 100 100)"></circle></svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span class="t-display t-numeric">{{ zv.big }}</span><span class="t-caption">{{ zv.unit }}</span></div>
+    </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+          <span class="badge b-{{ zv.tone }}">{{ zv.badge }}</span>
+          <span class="t-heading">{{ zv.t }}</span>
+          <span class="t-body-sm muted" style="max-width:320px;text-wrap:pretty">{{ zv.d }}</span>
+        </div>
+        <div class="card" style="width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div style="padding:12px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Lugar</span><span class="t-label">Sala de bombas</span></div>
+          <div style="padding:12px 16px;display:flex;flex-direction:column"><span class="t-caption">Vence</span><span class="t-label t-numeric">10:58 · 15 min</span></div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border)">
+    <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:8px">
+      <sc-if value="{{ zElegir }}"><button class="btn btn-primary lg block"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/timer.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/timer.svg) center/contain no-repeat;background-color:currentColor"></span>Activar · 15 min</button></sc-if>
+      <sc-if value="{{ zTimer }}">
+        <button class="btn btn-primary lg block"><span class="ic i-check" aria-hidden="true"></span>Estoy bien</button>
+        <sc-if value="{{ zNotFired }}"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><button class="btn btn-secondary">Sumar 10 min</button><button class="btn btn-ghost">Salir de la zona</button></div></sc-if>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ S.nov }}" hint-placeholder-val="{{ false }}">
+  <div class="scrim"></div>
+  <div class="sheet" role="dialog" aria-labelledby="nv-t" style="max-width:640px;margin:0 auto;max-height:94%;display:flex;flex-direction:column">
+    <div style="width:36px;height:5px;border-radius:999px;background:var(--ds-border-strong);margin:8px auto 0;flex:none"></div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px;overflow:auto;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span id="nv-t" class="t-subheading">Reportar novedad</span>
+        <span class="chip plain" style="align-self:flex-start;height:28px"><span class="ic sm i-pin" aria-hidden="true"></span>{{ nv.link }}</span>
+        <sc-if value="{{ nv.pre }}"><span class="t-caption" style="color:var(--ds-warning-fg)">{{ nv.pre }}</span></sc-if>
+      </div>
+      <div class="field"><span class="lbl">Tipo</span>
+        <div class="chip-row" role="radiogroup" aria-label="Tipo de novedad" style="flex-wrap:wrap">
+          <sc-for list="{{ nvTipos }}" as="t" hint-placeholder-count="6"><button class="chip toggle {{ t.on }}" role="radio" aria-checked="{{ t.p }}" style="height:40px"><span class="ic sm i-{{ t.ic }}" aria-hidden="true"></span>{{ t.n }}</button></sc-for>
+        </div>
+        <span class="hint">Lista definida por Atlas Seguridad SpA</span>
+      </div>
+      <div class="field"><span class="lbl">Gravedad</span>
+        <div class="seg" role="radiogroup" aria-label="Gravedad" style="display:flex"><button class="{{ nv.lv }}" role="radio" style="height:44px">Leve</button><button class="{{ nv.al }}" role="radio" style="height:44px">Alta · incidente</button></div>
+        <span class="hint">{{ nv.gh }}</span>
+      </div>
+      <div class="field"><label class="lbl" for="nv-d">Qué pasó</label>
+        <div style="position:relative"><textarea id="nv-d" class="input" style="min-height:104px;width:100%;padding-right:52px" defaultValue="{{ nv.txt }}"></textarea><button class="icon-btn" aria-label="Dictar por voz" style="position:absolute;right:2px;bottom:2px"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/mic.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/mic.svg) center/contain no-repeat;background-color:currentColor"></span></button></div>
+      </div>
+      <div class="field"><span class="lbl">Adjuntos</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ nv.fotos }}" as="f" hint-placeholder-count="2"><span style="width:64px;height:64px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center" aria-label="Foto {{ f }}"><span class="ic i-camera subtle" aria-hidden="true"></span></span></sc-for>
+          <button style="width:64px;height:64px;border-radius:6px;border:1px dashed var(--ds-border-control);background:transparent;color:var(--ds-fg-muted);display:flex;align-items:center;justify-content:center;cursor:pointer" aria-label="Agregar foto"><span class="ic i-plus" aria-hidden="true"></span></button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">
+          <button class="btn btn-secondary"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/video.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/video.svg) center/contain no-repeat;background-color:currentColor"></span>Video corto · 30 s</button>
+          <sc-if value="{{ nv.voz }}"><span style="display:flex;align-items:center;gap:4px;height:44px;padding:0 4px;border:1px solid var(--ds-border-strong);border-radius:999px"><button class="icon-btn" aria-label="Reproducir nota de voz"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/play.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/play.svg) center/contain no-repeat;background-color:currentColor"></span></button><span class="t-label-sm t-numeric">Nota de voz · 0:18</span><button class="icon-btn" aria-label="Quitar nota de voz"><span class="ic sm i-x" aria-hidden="true"></span></button></span></sc-if>
+          <sc-if value="{{ nv.noVoz }}"><button class="btn btn-secondary"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/mic.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/mic.svg) center/contain no-repeat;background-color:currentColor"></span>Nota de voz</button></sc-if>
+        </div>
+      </div>
+      <span class="t-caption" style="display:flex;gap:6px;align-items:flex-start"><span class="ic sm i-lock" aria-hidden="true" style="flex:none;margin-top:1px"></span>{{ nv.marca }}</span>
+    </div>
+    <div class="sheet-actions" style="padding-bottom:46px;flex:none"><button class="btn btn-secondary">Cancelar</button><button class="btn btn-primary">Enviar novedad</button></div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;g3&quot;,&quot;options&quot;:[&quot;g0&quot;,&quot;g1&quot;,&quot;g2&quot;,&quot;g3&quot;,&quot;g3e&quot;,&quot;g4qr&quot;,&quot;g4gps&quot;,&quot;g4gpsP&quot;,&quot;g4gpsF&quot;,&quot;g4res&quot;,&quot;g4nov&quot;,&quot;g5&quot;,&quot;g6&quot;,&quot;g7&quot;,&quot;g9&quot;,&quot;g10&quot;,&quot;g11&quot;,&quot;g12&quot;,&quot;g13&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;contenido&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;permisos&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;mapa&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;abierto&quot;,&quot;options&quot;:[&quot;abierto&quot;,&quot;plegado&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Mapa&quot;},&quot;gpsMapa&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;ok&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;sin&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Mapa&quot;}}">
+const META={
+  g0:{t:'Inicio',noun:'tu inicio',e:['Sin turno asignado hoy','No tienes turno en esta instalación. Si crees que es un error, avísale a tu supervisor.','Actualizar','refresh']},
+  g1:{t:'¿Quién eres?',noun:'los guardias del turno',e:['No hay guardias asignados','Este teléfono no tiene guardias en el turno actual. Pídele a tu supervisor que te asigne.','Actualizar','refresh']},
+  g2:{t:'Mis rondas de hoy',noun:'tus rondas',e:['No tienes rondas hoy','Si esperabas una, puedes iniciar una ronda ad hoc o avisar a tu supervisor.','Iniciar ronda ad hoc','plus']},
+  g3:{t:'Ronda en curso',noun:'la ronda',e:['Esta ronda no tiene puntos','Avísale a tu supervisor para que revise la plantilla.','Volver a mis rondas','chevron-left']},
+  g4qr:{t:'Marcar punto',noun:'la cámara',e:['No encontramos la cámara','Revisa que ninguna otra app la esté usando.','Marcar por GPS','pin']},
+  g4gps:{t:'Marcar punto',noun:'tu ubicación',e:['Sin señal GPS','Sal a un lugar abierto y espera unos segundos.','Volver a medir','refresh']},
+  g4res:{t:'Marcar punto',noun:'el resultado',e:['Sin lectura','No recibimos datos del punto. Vuelve a intentarlo.','Volver a marcar','scan']},
+  g5:{t:'Cierre de ronda',noun:'el resumen',e:['Sin marcas en esta ronda','No registraste puntos. Puedes volver y marcar o cerrarla como omitida.','Volver a la ronda','chevron-left']},
+  g6:{t:'Cola sin conexión',noun:'la cola',e:['Todo enviado','No hay marcas, fotos ni novedades pendientes en este teléfono.','Cerrar','x']},
+  g7:{t:'Permisos',noun:'los permisos',e:['Permisos listos','Ya diste los permisos necesarios.','Ir a mis rondas','route']},
+  g10:{t:'Novedad',noun:'la novedad',e:['Esta novedad ya no está','Puede que se haya enviado desde otro teléfono. Revisa el libro de novedades.','Ir al libro','inbox']},
+  g11:{t:'Libro de novedades',noun:'el libro de novedades',e:['Sin novedades en tu turno','Si ves algo, repórtalo desde aquí o desde la ronda.','Reportar novedad','flag']},
+  g13:{t:'Zona de riesgo',noun:'la zona de riesgo',e:['Zona de riesgo no disponible','Tu instalación no tiene la central activa. Usa Emergencia si lo necesitas.','Volver a la ronda','chevron-left']}
+};
+const TIPOS=[{n:'Robo',ic:'briefcase',act:1},{n:'Intrusión',ic:'lock',act:1},{n:'Daño',ic:'alert',act:1},{n:'Persona sospechosa',ic:'eye',act:1},{n:'Falla técnica',ic:'refresh',act:1},{n:'Fuga de agua',ic:'info',act:1},{n:'Otro',ic:'more',act:1}];
+const NV={
+  ronda:{link:'Ronda perimetral · punto 3 · Bodega A',pre:'',tipo:'Intrusión',lv:'',al:'on',gh:'Alta crea un incidente y avisa a la central al enviar.',txt:'Puerta lateral de Bodega A forzada, candado en el suelo. No se ve a nadie adentro. Me quedo afuera mirando el acceso.',fotos:[1,2,3],voz:true,noVoz:false,marca:'Tu marca de Bodega A (10:15:02) ya está guardada. Enviar la novedad no la retrasa.'},
+  pre:{link:'Ronda perimetral · punto 4 · Andén norte',pre:'Desde «Hay un problema» · Sello de la cortina intacto: No',tipo:'Daño',lv:'on',al:'',gh:'Leve queda en el libro de novedades sin avisar a la central.',txt:'Sello de la cortina 3 roto. Candado puesto y cerrado.',fotos:[1],voz:false,noVoz:true,marca:'Tu marca de Andén norte (10:21:34) ya está guardada. Enviar la novedad no la retrasa.'}
+};
+const NIGHT=[{h:'20:30',est:'Por iniciar',tone:'neutral',pl:'Recepción de turno',inst:'Planta Quilicura',pts:4,win:'20:30 ± 15 min',bg:'transparent'},{h:'22:00',est:'Por iniciar',tone:'neutral',pl:'Ronda perimetral',inst:'Planta Quilicura',pts:6,win:'22:00 ± 15 min',bg:'var(--ds-accent-muted)'},{h:'00:00',est:'Por iniciar',tone:'neutral',pl:'Andenes y patio',inst:'Planta Quilicura',pts:5,win:'00:00 ± 15 min',bg:'transparent'},{h:'03:00',est:'Por iniciar',tone:'neutral',pl:'Ronda perimetral',inst:'Planta Quilicura',pts:6,win:'03:00 ± 15 min',bg:'transparent'}];
+const ALIAS={g3e:'g3',g9:'g3',g12:'g2',g4gpsP:'g4gps',g4gpsF:'g4gps',g4nov:'g4res'};
+class Component extends DCLogic{
+  state={};
+  renderVals(){
+    const p=this.props;const scr=p.screen??'g3';const base=ALIAS[scr]||scr;const st=p.state??'contenido';const ok=st==='contenido';
+    const meta=META[base]||META.g3;
+    const S={};Object.keys(META).forEach(k=>S[k]=ok&&base===k);S.emg=ok&&scr==='g3e';S.nov=ok&&(scr==='g4nov'||scr==='g9');
+    const msgs={vacio:{t:meta.e[0],d:meta.e[1],a:meta.e[2],aic:meta.e[3],ic:'inbox'},
+      error:{t:'No pudimos cargar '+meta.noun,d:'Revisa tu conexión. Si el problema sigue, avísale a soporte con el código RND-503.',a:'Reintentar',aic:'refresh',ic:'alert'},
+      permisos:{t:'No tienes acceso a Rondas',d:'Tu perfil no incluye rondas en Planta Quilicura. Pídele acceso a un administrador de Atlas Seguridad SpA.',a:'Pedir acceso',aic:'lock',ic:'lock'}};
+    const gv={
+      g4gps:{tone:'success',badge:'Dentro del punto',t:'Mantente 12 s',d:'Quédate quieto cerca del cerco. Marcaremos solos al terminar la cuenta.',big:'12',unit:'segundos',off:'184',stroke:'var(--ds-success)',dist:'6 m',prec:'8 m',pc:'var(--ds-fg)'},
+      g4gpsP:{tone:'warning',badge:'Precisión insuficiente',t:'Acércate a un lugar abierto',d:'La precisión es de 42 m y este punto pide 15 m o menos. Aléjate de muros y techos.',big:'42',unit:'m de precisión',off:'553',stroke:'var(--ds-warning)',dist:'—',prec:'42 m',pc:'var(--ds-warning-fg)'},
+      g4gpsF:{tone:'danger',badge:'Fuera del punto',t:'Estás a 60 m del punto',d:'Camina hacia el cerco poniente. La cuenta empieza cuando entres al radio de 15 m.',big:'60',unit:'metros',off:'553',stroke:'var(--ds-danger)',dist:'60 m',prec:'7 m',pc:'var(--ds-fg)'}
+    };
+    const mk=(n,nom,h,conf,state,nov)=>{const done=state==='done',next=state==='next';const ct={Alta:'success',Media:'warning',Baja:'danger'}[conf];
+      return {n,nom,h,conf:conf||'',ct,cd:conf?'inline-flex':'none',nov,nd:nov?'flex':'none',chk:done?'inline-block':'none',num:done?'none':'inline',
+        bd:done?'var(--ds-fg)':next?'var(--ds-accent)':'var(--ds-border-strong)',bg:done?'var(--ds-fg)':'var(--ds-surface)',fg:done?'var(--ds-bg)':next?'var(--ds-accent)':'var(--ds-fg-subtle)',sh:next?'0 0 0 4px var(--ds-accent-muted)':'none',tc:state==='pend'?'var(--ds-fg-muted)':'var(--ds-fg)'};};
+    return {
+      theme:p.theme??'light',label:'Guardia · '+meta.t,nonOk:!ok,isLoad:st==='cargando',isMsg:!ok&&st!=='cargando',msg:msgs[st]||msgs.error,meta,S,
+      gps:gv[scr]||gv.g4gps,skelRows:[1,2,3,4],
+      ...(()=>{const open=this.state.mapOpen??((p.mapa??'abierto')==='abierto');const sin=(p.gpsMapa??'ok')==='sin';const isG4=base==='g4gps';const gg=gv[scr]||gv.g4gps;
+        const sub=sin?'Sin GPS · última posición 10:19':!isG4?'Tú · precisión 8 m · Andén norte a 60 m':gg.dist==='—'?'Tú · precisión '+gg.prec+' · ubicación imprecisa':'Tú · precisión '+gg.prec+' · Cerco poniente a '+gg.dist;
+        const n12=scr==='g12';
+        return {mp:{open,exp:String(open),rot:open?'rotate(180deg)':'none',tl:open?'Plegar mapa':'Desplegar mapa',gps:sin?'sin':'ok',sinGps:sin,dis:sin,sc:sin?'var(--ds-warning-fg)':'var(--ds-fg-muted)',sub,
+            next:isG4?5:4,far:scr==='g4gpsF',acc:scr==='g4gpsP'?60:isG4?14:20,dist:isG4?(gg.dist==='—'?'':gg.dist):'60 m'},
+          toggleMap:()=>this.setState({mapOpen:!open}),
+          hd:{inst:'Planta Quilicura',sub:n12?'Turno noche 20:00–08:00 · Jorge Pizarro':'Turno día 08:00–20:00 · María Fernanda Soto',av:n12?'JP':'MS',g:n12?'Jorge Pizarro':'María Fernanda Soto'},
+          tb:{ini:base==='g0'?'on':'',ron:base==='g2'?'on':'',acc:'',nov:base==='g11'?'on':'',asi:''}};})(),
+      ...(()=>{
+        const nvk=scr==='g4nov'?'pre':'ronda';const nv=NV[nvk];
+        const ENV=['cola','enviada','recibida','atencion'];const ei=Math.max(0,ENV.indexOf(p.envio??'atencion'));
+        const SD=[['En cola (sin conexión)','Guardada en este teléfono · 10:15:40'],['Enviada','10:15:58'],['Recibida por la central','10:16:02 · Andrés Molina, operador'],['En atención por Rodrigo Tapia','10:18 · supervisor · va en camino']];
+        const steps=SD.map(([t,d],i)=>{const done=i<ei,cur=i===ei;return {t,d:i>ei?'Pendiente':(i===0&&ei===0?'Se enviará al recuperar conexión':d),bd:done?'var(--ds-fg)':cur?'var(--ds-accent)':'var(--ds-border-strong)',bg:done?'var(--ds-fg)':'var(--ds-surface)',fg:done?'var(--ds-bg)':'var(--ds-accent)',chk:done||(cur&&ei===3)?'inline-block':'none',sh:cur?'0 0 0 4px var(--ds-accent-muted)':'none',tc:i>ei?'var(--ds-fg-muted)':'var(--ds-fg)'};});
+        const EB=[['En cola (sin conexión)','warning'],['Enviada','info'],['Recibida por la central','info'],['En atención · Rodrigo Tapia','warning']][ei];
+        const z=p.zona??'activo';
+        const ZV={activo:{tone:'accent',badge:'Activa · vence 10:58',t:'Estás en zona de riesgo',d:'Confirma «Estoy bien» antes de que venza. Si no, avisaremos a la central con tu ubicación.',big:'11:24',unit:'restantes',stroke:'var(--ds-accent)',off:'133'},
+          porvencer:{tone:'warning',badge:'Por vencer',t:'Confirma que estás bien',d:'En 48 s avisaremos a la central con tu ubicación.',big:'0:48',unit:'segundos',stroke:'var(--ds-warning)',off:'524'},
+          disparado:{tone:'danger',badge:'Alerta enviada · 10:58',t:'Avisamos a la central',d:'Andrés Molina, operador de la central, ya recibió tu ubicación. La seguimos compartiendo hasta que confirmes «Estoy bien».',big:'0:00',unit:'vencido',stroke:'var(--ds-danger)',off:'0'}};
+        const CK=['Candado puesto y cerrado','Sello de la cortina intacto','Sin bultos frente al andén'];
+        return {relevo:scr==='g12',g2av:scr==='g12'?'JP':'MS',
+          g2sub:scr==='g12'?'Jorge Pizarro · turno noche 20:00–08:00':'Miércoles 29-10-2026 · Planta Quilicura',
+          nextR:scr==='g12'?'Siguiente: Ronda perimetral · 22:00 ± 15 min':'Siguiente: Ronda perimetral · 10:00 ± 15 min',
+          abiertos:[{id:'NOV-0418',ic:'lock',t:'Intrusión · alta',d:'Bodega A · hoy 10:15 · María Fernanda Soto',est:'En atención · Rodrigo Tapia',tone:'warning'},{id:'NOV-0397',ic:'alert',t:'Daño · leve',d:'Cámara 4 sin imagen · 27-10-2026',est:'Derivado a ticket TCK-2281',tone:'info'}],
+          checklist:CK.map((t,i)=>{const no=scr==='g4nov'&&i===1;return {t,si:no?'':'on',no:no?'on':'',sip:String(!no),nop:String(no)};}),
+          nv,nvTipos:TIPOS.filter(t=>t.act).map(t=>({n:t.n,ic:t.ic,on:t.n===nv.tipo?'on':'',p:String(t.n===nv.tipo)})),
+          steps,envBadge:{t:EB[0],tone:EB[1]},
+          libro:[{id:'NOV-0419',ic:'alert',h:'10:23',t:'Daño · Andén norte',d:'Sello de la cortina 3 roto. Candado puesto y cerrado.',g:'Leve',gt:'neutral',e:'Enviada',et:'info'},
+            {id:'NOV-0418',ic:'lock',h:'10:15',t:'Intrusión · Bodega A',d:'Puerta lateral de Bodega A forzada, candado en el suelo.',g:'Alta · incidente',gt:'danger',e:'En atención · Rodrigo Tapia',et:'warning'},
+            {id:'NOV-0412',ic:'refresh',h:'08:41',t:'Falla técnica · Portería principal',d:'Barrera vehicular no baja sola.',g:'Leve',gt:'neutral',e:'Resuelto',et:'success'}],
+          zv:ZV[z]||ZV.activo,zElegir:z==='elegir',zTimer:z!=='elegir',zNotFired:z!=='disparado'};
+      })(),
+      guardias:[{ini:'MS',n:'María Fernanda Soto',r:'Guardia · Portería principal'},{ini:'JP',n:'Jorge Pizarro',r:'Guardia · Andenes'},{ini:'CH',n:'Camila Herrera',r:'Guardia · Bodegas'}],
+      misRondas:scr==='g12'?NIGHT:[
+        {h:'08:00',est:'Completa',tone:'success',pl:'Apertura de bodegas',inst:'Planta Quilicura',pts:4,win:'08:00 ± 15 min',bg:'transparent'},
+        {h:'10:00',est:'Por iniciar',tone:'neutral',pl:'Ronda perimetral',inst:'Planta Quilicura',pts:6,win:'10:00 ± 15 min',bg:'var(--ds-accent-muted)'},
+        {h:'12:00',est:'Por iniciar',tone:'neutral',pl:'Andenes y patio',inst:'Planta Quilicura',pts:5,win:'12:00 ± 15 min',bg:'transparent'},
+        {h:'14:00',est:'Por iniciar',tone:'neutral',pl:'Ronda perimetral',inst:'Planta Quilicura',pts:6,win:'14:00 ± 15 min',bg:'transparent'},
+        {h:'18:00',est:'Por iniciar',tone:'neutral',pl:'Cierre de bodegas',inst:'Planta Quilicura',pts:4,win:'18:00 ± 20 min',bg:'transparent'}],
+      puntos:[mk(1,'Portería principal','10:02','Alta','done'),mk(2,'Estacionamiento visitas','10:09','Media','done'),mk(3,'Bodega A','10:15','Alta','done','NOV-0418 · Intrusión · alta · enviada'),mk(4,'Andén norte','','', 'next'),mk(5,'Cerco poniente','','','pend'),mk(6,'Sala de bombas','','','pend')],
+      cola:[{ic:'scan',t:'Marca · Bodega A',d:'QR + GPS',h:'10:15:02'},{ic:'flag',t:'Novedad NOV-0418 · Bodega A',d:'Intrusión · alta · 3 fotos · nota de voz',h:'10:15:40'},{ic:'camera',t:'Foto · Andén norte',d:'0,9 MB',h:'10:21:30'},{ic:'scan',t:'Marca · Andén norte',d:'QR + GPS',h:'10:21:34'}],
+      permisos:[{ic:'pin',t:'Ubicación',d:'Para saber que estás dentro de cada punto.',okd:'inline-flex',btd:'none'},{ic:'camera',t:'Cámara',d:'Para leer la etiqueta QR y tomar fotos.',okd:'none',btd:'inline-flex'},{ic:'swap',t:'Movimiento (iOS)',d:'Para confirmar que caminaste entre puntos.',okd:'none',btd:'inline-flex'}]
+    };
+  }
+}
+</script>
+</body>
+</html>

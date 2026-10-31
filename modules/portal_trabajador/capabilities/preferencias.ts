@@ -36,7 +36,7 @@ function vista(f: Fila | null, preferencias?: Preferencias): z.input<typeof pref
 export const preferenciasObtener = defineCapability({
   id: "portal_trabajador.preferencias_notificacion.obtener",
   descripcion:
-    "Devuelve las preferencias de aviso de la propia persona del trabajador: por categoría (pauta, documentos, solicitudes, central) si quiere push o correo, y su horario de silencio. Sin elección previa, ningún canal externo está activo.",
+    "Devuelve las preferencias de aviso de la propia persona del trabajador: por categoría (pauta y turnos, liquidaciones y documentos, solicitudes y tickets, avisos de la empresa) si quiere push o correo, y su horario de silencio. Sin elección previa, ningún canal externo está activo.",
   permiso: null,
   portales: PORTALES,
   // Perfil sin ids en la salida (NÚCLEO-H): queda el evento con tenant, actor y capacidad, sin contenido.

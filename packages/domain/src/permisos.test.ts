@@ -13,6 +13,28 @@ import {
 
 // Tabla rol × permiso esperada (ADR-016). true = tiene el permiso.
 const TABLA: Record<string, Record<Rol, boolean>> = {
+  // Leads (BRIEF-07-leads): solicitudes para owner/admin/gerente; canales solo owner/admin.
+  "comercial:solicitudes.read": {
+    owner: true,
+    admin: true,
+    gerente: true,
+    supervisor: false,
+    viewer: false,
+  },
+  "comercial:solicitudes.manage": {
+    owner: true,
+    admin: true,
+    gerente: true,
+    supervisor: false,
+    viewer: false,
+  },
+  "comercial:canales.manage": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
   "core:tenant.read": { owner: true, admin: true, gerente: true, supervisor: true, viewer: true },
   "core:tenant.manage": {
     owner: true,
@@ -50,14 +72,40 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
     supervisor: false,
     viewer: false,
   },
-  "comercial:negocios.read": { owner: true, admin: true, gerente: true, supervisor: false, viewer: true },
-  "comercial:negocios.manage": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
+  "comercial:negocios.read": {
+    owner: true,
+    admin: true,
+    gerente: true,
+    supervisor: false,
+    viewer: true,
+  },
+  "comercial:negocios.manage": {
+    owner: true,
+    admin: true,
+    gerente: true,
+    supervisor: false,
+    viewer: false,
+  },
   // Embudo y catálogos: solo owner y admin (BRIEF-07, comercial.md §7).
-  "comercial:config.manage": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
+  "comercial:config.manage": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
   "ops:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
   "rondas:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
   "personas:read": { owner: true, admin: true, gerente: true, supervisor: true, viewer: true },
   "personas:write": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
+  // Marca P1 "No recontratar" (Personas y Cargos PR 1): solo owner y admin por defecto.
+  "core:personas.no_recontratar.manage": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
   "finanzas:read": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   "finanzas:dte.emit": {
     owner: true,
@@ -120,6 +168,10 @@ describe("comodines", () => {
     expect(coincide("*:read", "comercial:negocio.read")).toBe(false);
     expect(coincide("*:*.read", "comercial:negocio.read")).toBe(true);
     expect(coincide("core:tenant.read", "core:tenantxread")).toBe(false);
+  });
+
+  it("un rol personalizado con core:* hereda la marca P1 sin listarla aparte (no bloqueante del Revisor)", () => {
+    expect(coincide("core:*", "core:personas.no_recontratar.manage")).toBe(true);
   });
 });
 

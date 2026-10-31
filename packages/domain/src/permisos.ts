@@ -39,6 +39,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.vinculosManage,
       PERMISOS_CORE.estructurasManage,
       PERMISOS_CORE.estructurasReadSensible,
+      // P1 "No recontratar": solo owner y admin (RRHH la obtiene si se la agregan a su rol).
+      PERMISOS_CORE.personasNoRecontratarManage,
       // Anexo de contrato (Brief 07b PR 4, D8): sus snapshots traen datos de sueldo.
       PERMISOS_CORE.anexosRead,
       PERMISOS_CORE.anexosManage,
@@ -49,6 +51,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.finiquitosManage,
       // Embudo y catálogos de Comercial (comercial.md §7): owner y admin.
       "comercial:config.manage",
+      // Canales de entrada de Leads (BRIEF-07-leads): configurarlos es de owner y admin.
+      "comercial:canales.manage",
       PERMISOS_CORE.marcaManage,
       PERMISOS_CORE.integracionesManage,
       PERMISOS_CORE.comunicacionesManage,
@@ -60,6 +64,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.cumplimientoDpaAceptar,
       // Calendario (CAR-79): gestionar los feriados del tenant es de owner y admin; gerente solo ve.
       PERMISOS_CORE.calendarioManage,
+      // Tickets (CAR-84): configurar los tipos del tenant es de owner y admin, igual que los
+      // catálogos de Comercial y Rondas.
+      "tickets:tipos.manage",
     ],
   },
   supervisor: {
@@ -67,6 +74,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       "ops:*",
       "rondas:*",
       "asistencia:*",
+      // Tickets (CAR-84): el supervisor gestiona tickets y aprueba las solicitudes de los tipos que
+      // lo nombran aprobador, en su portal; el alcance por fila lo aplica cada capacidad, no este permiso.
+      "tickets:*",
       "personas:read",
       "personas:*.read",
       PERMISOS_CORE.tenantRead,
@@ -87,10 +97,17 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       // Calendario (CAR-79): el supervisor ve los feriados para planificar, pero no los gestiona.
       PERMISOS_CORE.calendarioRead,
     ],
-    denegar: [...FINANCIERO, "comercial:*", "cpq:*"],
+    denegar: [...FINANCIERO, "comercial:*", "cpq:*", "tickets:tipos.manage"],
   },
   viewer: {
-    permitir: ["*:read", "*:*.read"],
+    permitir: [
+      "*:read",
+      "*:*.read",
+      // Tickets (CAR-84): «cualquier persona con cuenta crea y ve sus tickets» (modulos/tickets.md
+      // §2). El alcance (propios, asignados) lo aplica cada capacidad, no este permiso.
+      "tickets:tickets.ver",
+      "tickets:tickets.gestionar",
+    ],
     // Cumplimiento (Ley 21.719): consentimientos, solicitudes ARCO, incidentes/brechas y la
     // exportación del titular traen datos personales sensibles (RUT, domicilio, contacto). No son
     // para el rol de solo lectura más amplio: leerlos exige `cumplimiento.read`, que viewer no tiene.
@@ -101,6 +118,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.cumplimientoRead,
       // Anexo de contrato (Brief 07b PR 4): sus snapshots traen datos de sueldo (bloqueo financiero).
       PERMISOS_CORE.anexosRead,
+      // Solicitudes de Leads (BRIEF-07-leads): traen datos de contacto de terceros; viewer no accede.
+      "comercial:solicitudes.read",
     ],
   },
 };

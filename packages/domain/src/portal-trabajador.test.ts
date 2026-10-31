@@ -23,7 +23,7 @@ describe("portal_trabajador · preferencias", () => {
   });
 
   it("solo true cuenta como activo (un texto no activa un canal)", () => {
-    expect(normalizarPreferencias({ central: { push: "true", correo: 1 } }).central).toEqual({
+    expect(normalizarPreferencias({ empresa: { push: "true", correo: 1 } }).empresa).toEqual({
       push: false,
       correo: false,
     });
