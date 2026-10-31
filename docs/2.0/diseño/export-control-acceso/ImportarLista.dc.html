@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="lis" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Operaciones › Accesos › Listas" title="Importar lista" subtitle="Lista Autorizadas · Planta Quilicura" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="190px,40px">Reemplazar lista completa</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Vaciar</x-import>
+</x-import>
+<sc-if value="{{ isSubir }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" hint-size="100%,220px"></x-import>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<dc-import name="EstadoPanel" estado="cargando" hint-size="100%,260px"></dc-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<dc-import name="EstadoPanel" estado="error" hint-size="100%,260px"></dc-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<dc-import name="EstadoPanel" estado="sinpermiso" hint-size="100%,260px"></dc-import>
+</sc-if>
+<sc-if value="{{ isVista }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Vista previa obligatoria" hint-size="100%,72px">Revisa los cambios de «autorizados-quilicura.xlsx» antes de confirmar. Nada se guarda hasta que lo confirmes.</x-import>
+<div style="display:grid;grid-template-columns:{{ kpiCols }};gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Se agregan" value="12" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Cambian" value="3" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Se quitan" value="1" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Con error" value="2" hint-size="100%,88px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Filas con error" description="Revísalas una por una. Las filas con error no se importan." padding="{{ 0 }}" hint-size="100%,260px">
+<div style="margin:{{ tableMargin }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ isPhone }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,200px"></x-import>
+</div>
+</x-import>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,44px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="260px,44px">Confirmar 16 cambios</x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isDialog }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" open="{{ true }}" contained="{{ true }}" title="Reemplazar lista completa" description="Se quitarán las 41 personas actuales y se cargarán las del archivo. Escribe «Autorizadas · Planta Quilicura» para confirmar." on-close="{{ noop }}" actions="{{ dlgActions }}" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Nombre de la lista" error="{{ dlgErr }}" hint-size="100%,80px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ dlgVal }}" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+</x-import>
+</sc-if>
+</x-import>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;subir&quot;,&quot;vista&quot;,&quot;dialogo&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;vista&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement; const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop"; const e = this.props.estado ?? "vista"; const ph = device === "phone";
+    const rows = [{ fila: "14", doc: "16.234.5", err: "RUN con dígito verificador inválido" }, { fila: "27", doc: "—", err: "Falta el nombre" }];
+    return {
+      device, theme: this.props.theme ?? "light", isPhone: ph, shellTitle: ph ? "" : "Importar lista",
+      isSubir: e === "subir", isVista: e === "vista" || e === "dialogo", isDialog: e === "dialogo", isCargando: e === "cargando", isError: e === "error", isForbidden: e === "sinpermiso",
+      kpiCols: ph ? "repeat(2,minmax(0,1fr))" : "repeat(4,minmax(0,1fr))", tableMargin: ph ? "0" : "0", noop: () => {},
+      cols: [{ key: "fila", label: "Fila", mono: true }, { key: "doc", label: "Documento", mono: true }, { key: "err", label: "Error", render: (r) => NS.Badge ? h(NS.Badge, { tone: "danger" }, r.err) : r.err }],
+      rows, toCard: (r) => ({ initials: r.fila, title: "Fila " + r.fila, subtitle: r.doc, meta: r.err, badge: { tone: "danger", label: "Error" } }),
+      dlgVal: "Autorizadas · Planta", dlgErr: "El nombre no coincide.",
+      dlgActions: h(React.Fragment, null, NS.Button ? h(NS.Button, { variant: "secondary" }, "Cancelar") : null, NS.Button ? h(NS.Button, { variant: "danger", disabled: true }, "Reemplazar lista") : null),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "lis", label: "Accesos", icon: "user-check" }, { id: "per", label: "Personas", icon: "users" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }] }, { title: "Operaciones", items: [{ id: "acc", label: "Accesos", icon: "user-check" }, { id: "lis", label: "Listas", icon: "lock" }] }],
+    };
+  }
+}
+</script>
+</body>
+</html>
