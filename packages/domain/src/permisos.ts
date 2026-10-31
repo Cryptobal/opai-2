@@ -51,6 +51,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.finiquitosManage,
       // Embudo y catálogos de Comercial (comercial.md §7): owner y admin.
       "comercial:config.manage",
+      // Canales de entrada de Leads (BRIEF-07-leads): configurarlos es de owner y admin.
+      "comercial:canales.manage",
       PERMISOS_CORE.marcaManage,
       PERMISOS_CORE.integracionesManage,
       PERMISOS_CORE.comunicacionesManage,
@@ -120,6 +122,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.cumplimientoRead,
       // Anexo de contrato (Brief 07b PR 4): sus snapshots traen datos de sueldo (bloqueo financiero).
       PERMISOS_CORE.anexosRead,
+      // Solicitudes de Leads (BRIEF-07-leads): traen datos de contacto de terceros; viewer no accede.
+      "comercial:solicitudes.read",
     ],
   },
 };
