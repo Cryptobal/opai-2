@@ -39,7 +39,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tipos de ticket" description="Revisa tu conexión. Lo que escribiste no se pierde." code="TK-503-22B1" on-retry="{{ noop }}" hint-size="100%,240px"></x-import>
 </sc-if>
 <sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes crear tickets" description="Tu cuenta no tiene tipos de ticket permitidos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes crear tickets" description="Tu cuenta no tiene tipos de ticket permitidos. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import>
 </sc-if>
 </x-import>
 </div>
@@ -74,7 +74,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tipos de ticket" description="Revisa tu conexión. Lo que escribiste no se pierde." code="TK-503-22B1" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 <sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes crear tickets" description="Tu cuenta no tiene tipos de ticket permitidos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes crear tickets" description="Tu cuenta no tiene tipos de ticket permitidos. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 </div>
 <sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
@@ -96,8 +96,8 @@ class Component extends DCLogic {
     const estado = this.props.estado ?? "contenido";
     const sinDueno = (this.props.caso ?? "normal") === "sin_dueno";
     const T = {
-      "Mantención": { owner: "Carlos Irigoyen", sla: 24 },
-      "Insumos": { owner: "Carlos Irigoyen", sla: 48 },
+      "Mantención": { owner: "Andrés Molina", sla: 24 },
+      "Insumos": { owner: "Andrés Molina", sla: 48 },
       "Administración": { owner: "Paula Contreras" },
       "Consulta RR. HH.": { owner: "Paula Contreras" },
       "Asesoría legal": { owner: null },
@@ -123,7 +123,7 @@ class Component extends DCLogic {
       files: sinDueno ? [] : [{ nombre: "anden-norte-cam4.jpg", size: 1240000, estado: "listo" }],
       ownerLabel: t.aprob ? "Aprobador" : "Dueño",
       dueno, setDueno: (v) => this.setState({ dueno: v }),
-      ownerOptions: ["Carlos Irigoyen", "Paula Contreras", "Jorge Muñoz"],
+      ownerOptions: ["Andrés Molina", "Paula Contreras", "Jorge Muñoz"],
       ownerHint: blocked ? "" : t.aprob ? "Lo define el tipo " + tipo + ". Aprueba o rechaza en un paso." : "Sugerido por el tipo " + tipo + ". Puedes cambiarlo.",
       ownerError: blocked ? tipo + " no tiene dueño por defecto. Elige uno para poder crear el ticket." : "",
       footNote: (t.sla ? "Este tipo tiene SLA de " + t.sla + " h. " : "") + "La respuesta te llega en tu portal y por correo.",
