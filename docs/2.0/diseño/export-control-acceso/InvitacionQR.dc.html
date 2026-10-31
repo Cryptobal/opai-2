@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<div data-theme="{{ theme }}" style="min-height:100%;background:var(--ds-bg);display:flex;justify-content:center;padding:24px 16px;box-sizing:border-box">
+<div style="width:100%;max-width:420px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:20px;align-items:center;text-align:center;box-sizing:border-box">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="AS" hint-size="40px,40px"></x-import>
+<div>
+<div style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-muted)">Atlas Seguridad SpA</div>
+<div style="font:600 22px/28px var(--font-sans);color:var(--ds-fg);margin-top:4px">Invitación de acceso</div>
+<div style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted);margin-top:4px">Camila Herrera Soto</div>
+</div>
+<div style="width:220px;height:220px;border-radius:16px;border:1px dashed var(--ds-border-strong);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Código QR</div>
+<div style="width:100%;display:flex;flex-direction:column;gap:0;text-align:left">
+<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--ds-border);font:400 14px/20px var(--font-sans)"><span style="color:var(--ds-fg-muted)">Día</span><span style="color:var(--ds-fg)">30-10-2026 · 09:00 – 13:00</span></div>
+<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--ds-border);font:400 14px/20px var(--font-sans)"><span style="color:var(--ds-fg-muted)">Instalación</span><span style="color:var(--ds-fg)">Planta Quilicura</span></div>
+<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--ds-border);font:400 14px/20px var(--font-sans)"><span style="color:var(--ds-fg-muted)">Anfitrión</span><span style="color:var(--ds-fg)">Marcela Rojas</span></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Cómo ingresar" style="width:100%;text-align:left" hint-size="100%,96px">Muestra este código al guardia en la portería y lleva tu cédula o pasaporte. Es válido solo el día indicado.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="100%,44px">Guardar en el teléfono</x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() { return { theme: this.props.theme ?? "light" }; }
+}
+</script>
+</body>
+</html>
