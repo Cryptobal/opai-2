@@ -27,8 +27,14 @@ describe("mapa estático: estado de carga", () => {
     expect(h).not.toContain("ds-shimmer");
   });
 
-  it("sin coordenadas dice «Sin ubicación»", () => {
-    expect(html({ lat: null, lng: null, fuente: urlMapaOpai })).toContain("Sin ubicación");
+  it("sin coordenadas muestra el estado vacío del DS «Sin ubicación», no una caja gris", () => {
+    const h = html({ lat: null, lng: null, fuente: urlMapaOpai });
+    expect(h).toContain("Sin ubicación");
+    expect(h).toContain('role="status"');
+    expect(h).toContain("border-dashed");
+    expect(h).toContain("lucide-map-pin");
+    expect(h).not.toContain("bg-fill");
+    expect(h).not.toContain("/api/geo/mapa?");
   });
 
   it("mientras se resuelve la dirección elegida (cargando) no dice «Sin ubicación»", () => {

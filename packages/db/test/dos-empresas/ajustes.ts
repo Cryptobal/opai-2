@@ -51,9 +51,18 @@ export const AJUSTES: Record<string, Ajuste> = {
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
   "nomina.periodos": { fijas: ["mes"], valores: () => ({ mes: 1 }) },
   "nomina.obligaciones": { fijas: ["mes", "tipo"], valores: () => ({ tipo: "lre", mes: 1 }) },
+  // Finanzas · Flujo de caja (CAR-91): sección válida y semanas en lunes (CHECK de cada tabla).
+  "finanzas.flujo_filas": { valores: () => ({ seccion: "ingreso" }) },
+  "finanzas.flujo_celdas": { valores: () => ({ semana: "2026-01-05", monto: 1 }) },
+  "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
+  "finanzas.flujo_ajustes": { valores: () => ({ desde: "2026-01-05" }) },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
+  // Finanzas · Compras: vocabularios cerrados y total = suma de los montos (CHECK de la migración).
+  "finanzas.cuentas_contables": { valores: () => ({ tipo: "activo", naturaleza: "deudora" }) },
+  "finanzas.centros_costo": { valores: () => ({ tipo: "general" }) },
+  "finanzas.documentos_recibidos": { valores: () => ({ tipo_dte: 33, monto_total: 0 }) },
   // CRM PR 2a: el trigger de core.contactos crea el vínculo inicial contacto–cuenta.
   "core.contacto_cuentas": {
     dependencias: ["core.contactos", "core.cuentas"],
