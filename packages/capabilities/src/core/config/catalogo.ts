@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { listarModulos } from "../../module";
 import { AJUSTES_NUCLEO } from "./nucleo";
+import { AJUSTES_PERSONAS } from "./nucleo-personas";
 import { AJUSTES_RETENCION } from "./nucleo-retencion";
 import { type CampoAjuste, defineAjustes } from "./registro";
 
@@ -12,7 +13,7 @@ export function listarAjustes(): CampoAjuste[] {
       ? defineAjustes(m.id, m.configuracion)
       : [],
   );
-  return [...AJUSTES_NUCLEO, ...AJUSTES_RETENCION, ...modulos];
+  return [...AJUSTES_NUCLEO, ...AJUSTES_RETENCION, ...AJUSTES_PERSONAS, ...modulos];
 }
 
 export function campoAjuste(modulo: string, clave: string): CampoAjuste | undefined {
