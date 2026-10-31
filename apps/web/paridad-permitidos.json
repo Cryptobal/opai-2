@@ -46,6 +46,10 @@
       "motivo": "Borde de ejecución: construye el contexto de capacidades (base por tenant, auditoría, eventos); es el cableado, no una pantalla."
     },
     {
+      "archivo": "lib/fuentes-cliente.ts",
+      "motivo": "Borde de ejecución: resuelve el alcance por filas del contacto de un cliente (instalaciones de su acceso) para el contexto de capacidades; es el cableado de fuentes.ts, no una pantalla."
+    },
+    {
       "archivo": "lib/cron.ts",
       "motivo": "Autenticación y despacho de los crons de Vercel (ADR-029)."
     },
