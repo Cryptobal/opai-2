@@ -17,7 +17,7 @@ export const modulos: readonly ModuleManifest[] = [
   agente,
   Comercial,
   Rondas,
-  Tickets,
   Finanzas,
+  Tickets,
   // scaffold:module — las entradas se agregan sobre esta línea
 ];

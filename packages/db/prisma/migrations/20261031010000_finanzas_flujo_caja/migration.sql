@@ -132,8 +132,12 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "finanzas"."flujo_celdas"
 
 COMMIT;
 
--- Reversión (manual, con el rol propietario, en una transacción): el schema es nuevo y sin datos de
--- negocio que migrar, basta con:
---   DROP SCHEMA "finanzas" CASCADE;
--- Elimina las 4 tablas, sus índices, FKs, triggers y la política tenant_isolation de cada una. Exige
--- haber revertido antes el código del módulo (manifest y capacidades `finanzas.*`).
+-- Reversión (manual, con el rol propietario, en una transacción). NO usar DROP SCHEMA ... CASCADE: el
+-- schema `finanzas` es compartido con Compras (cuentas, proveedores, documentos recibidos) y se
+-- perderían sus datos. Se borran solo las 4 tablas de este módulo, la de celdas primero (FK a filas):
+--   DROP TABLE "finanzas"."flujo_celdas";
+--   DROP TABLE "finanzas"."flujo_cierres";
+--   DROP TABLE "finanzas"."flujo_ajustes";
+--   DROP TABLE "finanzas"."flujo_filas";
+-- Cada DROP TABLE elimina también sus índices, triggers y la política tenant_isolation. Exige haber
+-- revertido antes el código del flujo de caja (capacidades `finanzas.flujo_*`).

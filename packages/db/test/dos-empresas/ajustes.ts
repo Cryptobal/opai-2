@@ -50,4 +50,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
+  // Finanzas · Compras: vocabularios cerrados y total = suma de los montos (CHECK de la migración).
+  "finanzas.cuentas_contables": { valores: () => ({ tipo: "activo", naturaleza: "deudora" }) },
+  "finanzas.centros_costo": { valores: () => ({ tipo: "general" }) },
+  "finanzas.documentos_recibidos": { valores: () => ({ tipo_dte: 33, monto_total: 0 }) },
 };
