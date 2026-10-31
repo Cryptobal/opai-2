@@ -76,7 +76,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Aviso por correo" description="Cuando una semana futura queda con saldo negativo, enviamos un correo con la semana, el monto y las salidas propuestas." hint-size="100%,260px">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Avisar si una semana queda bajo 0" description="Revisamos la proyección cada día a las 08:00, después de cargar el banco." hint-size="100%,64px"></x-import>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Destinatarios" value="paula.rojas@atlasseguridad.cl, carlos.irigoyen@atlasseguridad.cl" hint="Separa los correos con coma. Solo owner y admin." hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Destinatarios" value="paula.rojas@atlasseguridad.cl, andres.molina@atlasseguridad.cl" hint="Separa los correos con coma. Solo owner y admin." hint-size="100%,88px"></x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Frecuencia" value="semana" options="{{ frecuencia }}" hint="Evita repetir el aviso por la misma semana." hint-size="100%,88px"></x-import>
 </div>
 <span class="t-caption" style="display:flex;align-items:center;gap:6px;color:var(--ds-fg-muted)"><span class="ic sm i-bell"></span>Último aviso: S51 · 30-10-2026 08:00 · enviado a 2 destinatarios</span>
@@ -117,7 +117,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los ajustes de Finanzas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FLJ-521" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
 </sc-if>
 <sc-if value="{{ stForbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finanzas" description="Los ajustes del flujo de caja los cambian solo owner y admin. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finanzas" description="Los ajustes del flujo de caja los cambian solo owner y admin. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
 </sc-if>
 
 </x-import>

@@ -37,7 +37,7 @@
     },
     forbidden: {
       title: "No tienes acceso a Finanzas",
-      description: "Tu rol no permite ver compras, conciliación ni contabilidad. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.",
+      description: "Tu rol no permite ver compras, conciliación ni contabilidad. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA.",
     },
   };
 })();
