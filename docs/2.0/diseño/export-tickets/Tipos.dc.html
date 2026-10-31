@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ activeNav }}" title="{{ shellTitle }}" subtitle="{{ shellSub }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:-8px 0 8px -8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="100px,44px">Tipos</x-import>
+</div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración › Módulos › Tickets" title="{{ pageTitle }}" size="{{ headerSize }}" hint-size="100%,72px">
+<sc-if value="{{ showNewType }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="120px,40px">Nuevo tipo</x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:24px;align-items:flex-start">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="width:{{ listW }};flex:none;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ list }}" as="r" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ r.selected }}" title="{{ r.name }}" subtitle="{{ r.sub }}" meta="{{ r.meta }}" on-click="{{ r.pick }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="General" hint-size="100%,200px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="{{ t.name }}" on-change="{{ setName }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Dueño por defecto" value="{{ t.owner }}" placeholder="Elige un dueño" options="{{ ownerOptions }}" on-change="{{ setOwner }}" hint="{{ ownerHint }}" error="{{ ownerError }}" hint-size="100%,72px"></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Aprobación" hint-size="100%,140px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Requiere aprobación" description="Un paso: aprobar, o rechazar con motivo." checked="{{ t.aprob }}" on-change="{{ setAprob }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ t.aprob }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Quién aprueba" value="{{ t.approver }}" options="{{ approverOptions }}" on-change="{{ setApprover }}" hint-size="100%,72px"></x-import>
+</sc-if>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="SLA" description="Apagado por defecto. Con plazo, la bandeja muestra cuánto falta o cuánto se venció." hint-size="100%,140px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="SLA" options="{{ slaOptions }}" value="{{ slaMode }}" on-change="{{ setSlaMode }}" style="max-width:320px" hint-size="320px,40px"></x-import>
+<sc-if value="{{ slaOn }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:200px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Plazo en horas" type="number" input-mode="numeric" value="{{ t.sla }}" on-change="{{ setSla }}" hint="Desde que se crea." hint-size="100%,72px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Quién puede crearlo" description="Quien puede crearlo ve este tipo al crear un ticket. No hay tipos ocultos." hint-size="100%,180px">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ creators }}" as="c" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="{{ c.label }}" description="{{ c.desc }}" checked="{{ c.on }}" on-change="{{ c.toggle }}" hint-size="100%,44px"></x-import>
+</sc-for>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="100px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ blocked }}" hint-size="150px,40px">Guardar cambios</x-import>
+</x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="ticket" title="Aún no hay tipos de ticket" description="Crea el primero para que tu equipo pueda pedir cosas con dueño y respuesta registrada." action="{{ emptyAction }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="form" count="{{ 6 }}" label="Cargando tipos" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tipos de ticket" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TK-503-0A7E" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes configurar tickets" description="Solo owner y admin cambian los tipos de ticket. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin_permiso&quot;],&quot;default&quot;:&quot;contenido&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tipo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;man&quot;,&quot;ins&quot;,&quot;adm&quot;,&quot;rrhh&quot;,&quot;leg&quot;,&quot;per&quot;,&quot;vac&quot;,&quot;cer&quot;,&quot;cam&quot;],&quot;default&quot;:&quot;per&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const all = ["todos", "sup", "adm"];
+    this.state = {
+      sel: null,
+      types: [
+        { id: "man", name: "Mantención", owner: "Carlos Irigoyen", aprob: false, approver: "", sla: "24", creators: all },
+        { id: "ins", name: "Insumos", owner: "Carlos Irigoyen", aprob: false, approver: "", sla: "48", creators: ["sup", "adm"] },
+        { id: "adm", name: "Administración", owner: "Paula Contreras", aprob: false, approver: "", sla: "", creators: ["adm"] },
+        { id: "rrhh", name: "Consulta RR. HH.", owner: "Paula Contreras", aprob: false, approver: "", sla: "", creators: all },
+        { id: "leg", name: "Asesoría legal", owner: "", aprob: false, approver: "", sla: "", creators: ["adm"] },
+        { id: "per", name: "Permiso", owner: "Supervisor directo del solicitante", aprob: true, approver: "Supervisor directo del solicitante", sla: "", creators: all },
+        { id: "vac", name: "Vacaciones", owner: "Paula Contreras", aprob: true, approver: "Paula Contreras", sla: "", creators: all },
+        { id: "cer", name: "Certificado", owner: "Paula Contreras", aprob: true, approver: "Paula Contreras", sla: "", creators: all },
+        { id: "cam", name: "Cambio de turno", owner: "Supervisor directo del solicitante", aprob: true, approver: "Supervisor directo del solicitante", sla: "", creators: all },
+      ],
+    };
+  }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "contenido";
+    const isPhone = device === "phone";
+    const sel = this.state.sel ?? (this.props.tipo ?? "per");
+    const t = this.state.types.find((x) => x.id === sel) || this.state.types[0];
+    const upd = (patch) => this.setState({ types: this.state.types.map((x) => (x.id === t.id ? { ...x, ...patch } : x)) });
+    const ok = estado === "contenido";
+    const blocked = !t.owner;
+    const people = ["Carlos Irigoyen", "Paula Contreras", "Jorge Muñoz", "Supervisor directo del solicitante"];
+    const CR = [["todos", "Todas las personas con cuenta", "Incluye trabajadores desde su portal."], ["sup", "Supervisores", "Desde el portal Supervisor."], ["adm", "Administración", "owner y admin."]];
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone,
+      user: estado === "sin_permiso" ? { name: "Paula Contreras", initials: "PC", role: "Jefa de operaciones" } : { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" },
+      shellTitle: isPhone ? "" : "Configuración", shellSub: "Módulos › Tickets", activeNav: isPhone ? "mas" : "cfg",
+      pageTitle: isPhone && ok ? t.name : "Tipos de ticket", headerSize: isPhone && ok ? "heading" : "title",
+      showNewType: ok && !isPhone, listW: device === "tablet" ? "260px" : "320px",
+      showForm: ok,
+      list: this.state.types.map((x) => ({ name: x.name, sub: x.aprob ? "Aprueba: " + (x.approver === "Supervisor directo del solicitante" ? "supervisor directo" : x.approver) : x.owner ? "Dueño: " + x.owner : "Sin dueño", meta: x.sla ? "SLA " + x.sla + " h" : "Sin SLA", selected: x.id === t.id, pick: () => this.setState({ sel: x.id }) })),
+      t,
+      setName: (v) => upd({ name: v }), setOwner: (v) => upd({ owner: v }), setAprob: (v) => upd({ aprob: v, approver: v ? t.approver || "Supervisor directo del solicitante" : "" }), setApprover: (v) => upd({ approver: v }),
+      ownerOptions: people, approverOptions: people.slice(1).concat(["Carlos Irigoyen"]).filter((v, i, a) => a.indexOf(v) === i),
+      ownerHint: blocked ? "" : "Recibe cada ticket nuevo de este tipo. Se puede cambiar en cada ticket con motivo.",
+      ownerError: blocked ? "Sin dueño no se puede guardar. Elige quién recibe estos tickets." : "",
+      slaOptions: [{ value: "off", label: "Apagado" }, { value: "on", label: "Con plazo" }],
+      slaMode: t.sla ? "on" : "off", slaOn: !!t.sla,
+      setSlaMode: (v) => upd({ sla: v === "on" ? "24" : "" }), setSla: (v) => upd({ sla: v || "1" }),
+      creators: CR.map(([id, label, desc]) => ({ label, desc, on: t.creators.includes(id), toggle: (c) => upd({ creators: c ? t.creators.concat([id]) : t.creators.filter((z) => z !== id) }) })),
+      blocked,
+      isEmpty: estado === "vacio", isLoading: estado === "cargando", isError: estado === "error", isForbidden: estado === "sin_permiso",
+      emptyAction: NS.Button ? h(NS.Button, { icon: "plus" }, "Nuevo tipo") : null,
+      noop: () => {},
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+        { title: "Empresa", items: [{ id: "fin", label: "Finanzas", icon: "chart" }, { id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
