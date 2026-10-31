@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./flujo.js"></script>
+<style>body{margin:0} a{color:var(--ds-accent)} a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cfg" title="Configuración" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" style="max-width:960px" hint-size="100%,600px">
+
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración › Módulos" title="Finanzas" subtitle="Filas del flujo de caja y reglas del módulo. Los cambios quedan en la bitácora." hint-size="100%,80px"></x-import>
+</sc-if>
+
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:{{ padBottom }}">
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Filas" description="Cada fila suma lo que llega de su cuenta, instalación o centro de costo. El arrastre pasa lo programado y no facturado a la semana siguiente." hint-size="100%,400px">
+<sc-for list="{{ secs }}" as="s" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+<span class="t-label">{{ s.label }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="plus" hint-size="120px,40px">Agregar fila</x-import>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
+<sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+<div class="t-label-sm" style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.6fr) 96px 44px;gap:12px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--ds-border);color:var(--ds-fg-muted)"><span>Fila</span><span>Vínculo</span><span>Arrastre</span><span></span></div>
+</sc-if>
+<sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:4px 12px;align-items:center;padding:8px 16px;min-height:56px;border-bottom:1px solid var(--ds-border)">
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-body-sm" style="font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap">{{ r.label }}<sc-if value="{{ r.isNew }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" dot="{{ false }}" hint-size="50px,20px">Nueva</x-import></sc-if></span><sc-if value="{{ narrow }}"><span class="t-caption" style="color:var(--ds-fg-muted)">{{ r.vinculo }}</span></sc-if></span>
+<sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm" style="color:var(--ds-fg-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.vinculo }}</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ r.arrastre }}" hint-size="44px,44px" style="justify-self:start"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="{{ r.menu }}" hint-size="44px,44px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Calendario de pagos" description="Día del mes en que cada egreso sale del banco. Si cae en fin de semana o feriado, pasa al día hábil anterior." hint-size="100%,200px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Remuneraciones" value="5" input-mode="numeric" hint="Día del mes" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Imposiciones" value="10" input-mode="numeric" hint="Día del mes" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Anticipos" value="15" input-mode="numeric" hint="Día del mes" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="IVA" value="12" input-mode="numeric" hint="Día del mes" hint-size="100%,88px"></x-import>
+</div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Alertas y cierre" hint-size="100%,200px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Umbral de saldo" prefix="$" value="15.000.000" mono="{{ true }}" input-mode="numeric" hint="Bajo este saldo, la semana se marca en ámbar." hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Tolerancia del residual" prefix="$" value="50.000" mono="{{ true }}" input-mode="numeric" hint="Sobre esta diferencia con el banco, sellar pide motivo." hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Horizonte" value="52" options="{{ horizonte }}" hint="Semanas proyectadas desde hoy." hint-size="100%,88px"></x-import>
+</div>
+</x-import>
+
+<sc-if value="{{ varB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Aviso por correo" description="Cuando una semana futura queda con saldo negativo, enviamos un correo con la semana, el monto y las salidas propuestas." hint-size="100%,260px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Avisar si una semana queda bajo 0" description="Revisamos la proyección cada día a las 08:00, después de cargar el banco." hint-size="100%,64px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Destinatarios" value="paula.rojas@atlasseguridad.cl, carlos.irigoyen@atlasseguridad.cl" hint="Separa los correos con coma. Solo owner y admin." hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Frecuencia" value="semana" options="{{ frecuencia }}" hint="Evita repetir el aviso por la misma semana." hint-size="100%,88px"></x-import>
+</div>
+<span class="t-caption" style="display:flex;align-items:center;gap:6px;color:var(--ds-fg-muted)"><span class="ic sm i-bell"></span>Último aviso: S51 · 30-10-2026 08:00 · enviado a 2 destinatarios</span>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Metas de rendimiento" description="Medidas con 52 semanas y 60 filas. Se muestran bajo la planilla para que QA las verifique." hint-size="100%,220px">
+<div style="border:1px solid var(--ds-border);border-radius:16px;overflow:hidden">
+<sc-for list="{{ metas }}" as="m" hint-placeholder-count="2">
+<div style="display:grid;grid-template-columns:{{ metaCols }};gap:4px 12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-body-sm" style="font-weight:500">{{ m.k }}</span><span class="t-caption" style="color:var(--ds-fg-muted)">{{ m.d }}</span></span>
+<span class="t-mono" style="font-size:13px;text-align:right">{{ m.meta }}</span>
+<span class="t-mono" style="font-size:13px;text-align:right">{{ m.v }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" dot="{{ false }}" hint-size="60px,20px">Cumple</x-import>
+</div>
+</sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Mostrar metas en la planilla" description="Visible solo para owner y admin. Apágalo al terminar las pruebas." hint-size="100%,64px"></x-import>
+</x-import>
+</sc-if>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Regla de arrastre" hint-size="100%,120px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Arrastre activo en el tenant" description="Al vencer la semana, lo programado y no facturado pasa solo a la siguiente. Se aplica en las filas que lo tengan activo; queda en la bitácora y se puede deshacer. Lo facturado o cedido no se mueve." hint-size="100%,72px"></x-import>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ summary }}" style="{{ barStyle }}" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="100px,40px">Guardar</x-import>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="form" count="{{ 6 }}" hint-size="100%,480px"></x-import>
+</sc-if>
+<sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="chart" title="Aún no hay filas en el flujo" description="Agrega la primera fila de ingresos o egresos, o créalas desde tu plan de cuentas." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los ajustes de Finanzas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FLJ-521" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finanzas" description="Los ajustes del flujo de caja los cambian solo owner y admin. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:980},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    if (!window.Flujo) this.t = setInterval(() => { if (window.Flujo) { clearInterval(this.t); this.forceUpdate(); } }, 40);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const F = window.Flujo;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const estado = this.props.estado ?? "ok";
+    const varB = (this.props.variante ?? "A") === "B";
+    const isPhone = device === "phone";
+    const noop = () => {};
+    const base = { device, theme, noop, wide: !isPhone, narrow: isPhone };
+    if (!F) return base;
+    return {
+      ...base,
+      tabs: isPhone ? F.tabs : F.tabletTabs, groups: F.groups,
+      showHeader: estado !== "sinpermiso" && estado !== "error",
+      ok: estado === "ok", stLoading: estado === "cargando", stEmpty: estado === "vacio", stError: estado === "error", stForbidden: estado === "sinpermiso",
+      cols: isPhone ? "minmax(0,1fr) 44px 44px" : "minmax(0,1.1fr) minmax(0,1.6fr) 96px 44px",
+      secs: F.sections.map((s) => ({ label: s.label, rows: s.rows.map((r) => ({ label: r.label, vinculo: r.vinculo, isNew: !!r.cc, arrastre: r.arrastre, aria: "Arrastre en " + r.label, menu: "Opciones de " + r.label })) })),
+      varB,
+      frecuencia: [{ value: "semana", label: "Una vez por semana afectada" }, { value: "dia", label: "Cada día mientras siga bajo 0" }],
+      metaCols: isPhone ? "minmax(0,1fr) auto auto" : "minmax(0,1fr) 96px 96px 72px",
+      metas: [
+        { k: "Celda y saldo", d: "Desde que editas una celda hasta ver los saldos", meta: "< 100 ms", v: "42 ms" },
+        { k: "Guardado", d: "p95 hasta confirmar en el servidor", meta: "< 1 s", v: "640 ms" },
+      ],
+      horizonte: [{ value: "13", label: "13 semanas" }, { value: "26", label: "26 semanas" }, { value: "52", label: "52 semanas" }],
+      summary: isPhone ? [] : [{ label: "Cambios sin guardar", value: "1" }],
+      barStyle: isPhone ? { position: "sticky", bottom: 0 } : undefined,
+      padBottom: isPhone ? "8px" : "0",
+      emptyAction: NS.Button ? React.createElement(NS.Button, { icon: "plus" }, "Agregar fila") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
