@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+</helmet>
+<div class="ds-mapa" role="img" aria-label="{{ aria }}" style="position:relative;width:100%;height:100%;border-radius:inherit;overflow:hidden;background-color:var(--ds-bg)">
+  <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%">
+    <sc-if value="{{ isRadios }}">
+      <g fill="var(--ds-accent-muted)" stroke="var(--ds-accent)" stroke-width="1.5">
+        <circle cx="90" cy="270" r="34"></circle><circle cx="185" cy="200" r="26"></circle><circle cx="275" cy="255" r="40"></circle><circle cx="370" cy="140" r="30"></circle><circle cx="480" cy="105" r="26"></circle><circle cx="520" cy="250" r="48" stroke-dasharray="5 4"></circle>
+      </g>
+    </sc-if>
+    <sc-if value="{{ isCalor }}">
+      <g stroke="none">
+        <circle cx="90" cy="270" r="22" fill="var(--ds-success-muted)"></circle><circle cx="185" cy="200" r="30" fill="var(--ds-warning-muted)"></circle><circle cx="275" cy="255" r="22" fill="var(--ds-success-muted)"></circle><circle cx="370" cy="140" r="44" fill="var(--ds-danger-muted)"></circle><circle cx="370" cy="140" r="26" fill="var(--ds-danger-muted)"></circle><circle cx="480" cy="105" r="34" fill="var(--ds-warning-muted)"></circle><circle cx="520" cy="250" r="52" fill="var(--ds-danger-muted)"></circle><circle cx="520" cy="250" r="30" fill="var(--ds-danger-muted)"></circle>
+      </g>
+    </sc-if>
+    <sc-if value="{{ isRecorrido }}">
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+        <path d="M90 270 L185 200 L275 255" stroke="var(--ds-accent)"></path>
+        <path d="M275 255 L370 140" stroke="var(--ds-fg-subtle)" stroke-dasharray="2 9"></path><sc-if value="{{ done }}"><path d="M370 140 L480 105 L520 250" stroke="var(--ds-accent)"></path></sc-if>
+
+      </g>
+    </sc-if>
+    <sc-if value="{{ isGuardia }}"><path d="{{ gPath }}" fill="none" stroke="var(--ds-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></sc-if>
+    <g font-family="Inter, sans-serif" font-size="12" font-weight="600" text-anchor="middle">
+      <circle cx="90" cy="270" r="12" fill="var(--ds-fg)"></circle><text x="90" y="274" fill="var(--ds-bg)">1</text>
+      <circle cx="185" cy="200" r="12" fill="var(--ds-fg)"></circle><text x="185" y="204" fill="var(--ds-bg)">2</text>
+      <circle cx="275" cy="255" r="12" fill="var(--ds-fg)"></circle><text x="275" y="259" fill="var(--ds-bg)">3</text>
+      <circle cx="370" cy="140" r="12" fill="{{ p4f }}" stroke="{{ p4s }}" stroke-width="2"></circle><text x="370" y="144" fill="{{ p4t }}">4</text>
+      <circle cx="480" cy="105" r="12" fill="{{ p5f }}" stroke="{{ p5s }}" stroke-width="2"></circle><text x="480" y="109" fill="{{ p5t }}">5</text>
+      <circle cx="520" cy="250" r="12" fill="var(--ds-surface)" stroke="var(--ds-border-strong)" stroke-width="2"></circle><text x="520" y="254" fill="var(--ds-fg-subtle)">6</text>
+    </g>
+    <sc-if value="{{ showMe }}"><g aria-label="Tu posición">
+      <line x1="{{ me.x }}" y1="{{ me.y }}" x2="{{ me.nx }}" y2="{{ me.ny }}" stroke="var(--ds-accent)" stroke-width="2" stroke-dasharray="4 5"></line>
+      <circle cx="{{ me.x }}" cy="{{ me.y }}" r="{{ me.acc }}" fill="var(--ds-info-muted)" stroke="var(--ds-info)" stroke-width="1"></circle>
+      <circle cx="{{ me.x }}" cy="{{ me.y }}" r="8" fill="var(--ds-info)" stroke="var(--ds-surface)" stroke-width="3"></circle>
+      <text x="{{ me.lx }}" y="{{ me.ly }}" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--ds-fg)" stroke="var(--ds-bg)" stroke-width="4" paint-order="stroke">{{ me.lbl }}</text>
+    </g></sc-if>
+    <sc-if value="{{ inc }}"><g aria-label="Incidente NOV-0418"><rect x="290" y="222" width="24" height="24" rx="6" fill="var(--ds-danger)" stroke="var(--ds-bg)" stroke-width="2"></rect><text x="302" y="239" font-family="Inter, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ds-bg)">!</text></g></sc-if>
+  </svg>
+  <sc-if value="{{ legend }}">
+    <div class="t-caption" style="position:absolute;left:8px;bottom:8px;display:flex;flex-wrap:wrap;gap:4px 12px;padding:6px 10px;border-radius:6px;background:var(--ds-surface);border:1px solid var(--ds-border);color:var(--ds-fg-muted)">
+      <sc-if value="{{ isRecorrido }}"><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;border-radius:2px;background:var(--ds-accent)"></span>Rastro</span><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;border-top:3px dotted var(--ds-fg-subtle)"></span>Sin rastro</span></sc-if>
+      <sc-if value="{{ inc }}"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--ds-danger)"></span>Incidente NOV-0418</span></sc-if><sc-if value="{{ isGuardia }}"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:999px;background:var(--ds-info)"></span>Tú</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:999px;background:var(--ds-fg)"></span>Hecho</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:999px;border:2px solid var(--ds-accent)"></span>Siguiente</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:999px;border:2px solid var(--ds-border-strong)"></span>Pendiente</span></sc-if><sc-if value="{{ isRadios }}"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:999px;background:var(--ds-accent-muted);border:1.5px solid var(--ds-accent)"></span>Radio del punto</span><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:999px;border:1.5px dashed var(--ds-accent)"></span>Hereda radio</span></sc-if>
+      <sc-if value="{{ isCalor }}"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:999px;background:var(--ds-danger-muted)"></span>Más omitido</span><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:999px;background:var(--ds-success-muted)"></span>Sin omisiones</span></sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:600,&quot;height&quot;:360},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;recorrido&quot;,&quot;options&quot;:[&quot;recorrido&quot;,&quot;radios&quot;,&quot;calor&quot;,&quot;guardia&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;progress&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;parcial&quot;,&quot;options&quot;:[&quot;parcial&quot;,&quot;completa&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;legend&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic{
+  renderVals(){
+    const v=this.props.variant??'recorrido';const prog=this.props.progress??'parcial';
+    const done=prog==='completa';
+    const G=v==='guardia';const nx=Number(this.props.next??4);const far=this.props.far??false;
+    const D={f:'var(--ds-fg)',s:'var(--ds-fg)',t:'var(--ds-bg)'},NX={f:'var(--ds-surface)',s:'var(--ds-accent)',t:'var(--ds-accent)'},PD={f:'var(--ds-surface)',s:'var(--ds-border-strong)',t:'var(--ds-fg-subtle)'};
+    const pst=n=>n<nx?D:n===nx?NX:PD;const p4=G?pst(4):D;const p5=G?pst(5):((done||v!=='recorrido')?D:NX);
+    const pos=nx===4?{x:300,y:215,nx:370,ny:140,lx:345,ly:186}:far?{x:405,y:170,nx:480,ny:105,lx:448,ly:150}:{x:462,y:118,nx:480,ny:105,lx:430,ly:98};
+    const me=Object.assign(pos,{acc:Number(this.props.acc??22),lbl:this.props.dist??'60 m'});
+    const gPath=(nx===4?'M90 270 L185 200 L275 255':'M90 270 L185 200 L275 255 L370 140')+' L'+pos.x+' '+pos.y;
+    return {isGuardia:G,showMe:G&&(this.props.gps??'ok')!=='sin',me,gPath,p4f:p4.f,p4s:p4.s,p4t:p4.t,inc:this.props.incidente??false,done,isRecorrido:v==='recorrido',isRadios:v==='radios',isCalor:v==='calor',legend:this.props.legend??true,
+      aria:{recorrido:'Mapa del recorrido con puntos y tramos sin rastro',radios:'Mapa de los puntos con sus radios',calor:'Mapa de calor de puntos omitidos',guardia:'Mapa de la ronda con tu posición, puntos hechos y pendientes'}[v],
+
+      p5f:p5.f,p5s:p5.s,p5t:p5.t};
+  }
+}
+</script>
+</body>
+</html>

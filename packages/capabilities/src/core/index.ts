@@ -27,7 +27,7 @@ import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
-import { capacidadesMaestros } from "./maestros";
+import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
@@ -129,4 +129,5 @@ export const trabajosDelNucleo = [
   ...trabajosDocumentos,
   ...trabajosAgentes,
   ...trabajosCumplimiento,
+  ...trabajosMaestros,
 ];

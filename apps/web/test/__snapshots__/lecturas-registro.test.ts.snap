@@ -64,5 +64,6 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "rondas.plantillas.listar",
   "rondas.programaciones.listar",
   "rondas.puntos.listar",
+  "tickets.tipos.listar",
 ]
 `;
