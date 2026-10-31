@@ -48,7 +48,7 @@
 <span class="ic i-alert"></span>
 <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px"><span class="t-label">S51 queda en $ −2.820.000</span><span class="t-body-sm">Bajo 0 entre el 14-12 y el 20-12-2026. S46 también queda bajo el umbral de $ 15.000.000.</span></div>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon-right="chevron-right" hint-size="120px,40px">Ver salidas</x-import>
-<sc-if value="{{ mailNote }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="flex-basis:100%;display:flex;align-items:center;gap:6px;padding-left:32px"><span class="ic sm i-bell"></span>Avisamos por correo a Paula Rojas y Carlos Irigoyen el 30-10-2026 a las 08:00.</span></sc-if>
+<sc-if value="{{ mailNote }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="flex-basis:100%;display:flex;align-items:center;gap:6px;padding-left:32px"><span class="ic sm i-bell"></span>Avisamos por correo a Paula Rojas y Andrés Molina el 30-10-2026 a las 08:00.</span></sc-if>
 </div>
 </sc-if>
 
@@ -56,7 +56,7 @@
 <div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
 <div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--ds-danger-muted);color:var(--ds-danger-fg)">
 <span class="ic i-alert"></span>
-<div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">S51 queda en $ −2.820.000</span><span class="t-body-sm">Bajo 0 entre el 14-12 y el 20-12-2026. S46 también queda bajo el umbral de $ 15.000.000 ($ 12.780.000). Estas salidas lo resuelven:</span><sc-if value="{{ mailNote }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="display:flex;align-items:center;gap:6px;padding-top:4px"><span class="ic sm i-bell"></span>Avisamos por correo a Paula Rojas y Carlos Irigoyen el 30-10-2026 a las 08:00.</span></sc-if></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">S51 queda en $ −2.820.000</span><span class="t-body-sm">Bajo 0 entre el 14-12 y el 20-12-2026. S46 también queda bajo el umbral de $ 15.000.000 ($ 12.780.000). Estas salidas lo resuelven:</span><sc-if value="{{ mailNote }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="display:flex;align-items:center;gap:6px;padding-top:4px"><span class="ic sm i-bell"></span>Avisamos por correo a Paula Rojas y Andrés Molina el 30-10-2026 a las 08:00.</span></sc-if></div>
 </div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
 <sc-for list="{{ salidas }}" as="s" hint-placeholder-count="3">
@@ -235,7 +235,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el flujo de caja" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FLJ-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
 </sc-if>
 <sc-if value="{{ stForbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finanzas" description="El flujo de caja lo ven solo owner y admin. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finanzas" description="El flujo de caja lo ven solo owner y admin. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
 </sc-if>
 
 </x-import>

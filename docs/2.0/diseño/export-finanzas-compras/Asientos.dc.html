@@ -104,7 +104,7 @@ class Component extends DCLogic {
     const tab = this.state.tab ?? (this.props.variante === "periodos" ? "per" : "asi");
     const open = this.state.sheet ?? !!this.props.abierto;
     const asientos = [
-      { id: 1, n: "2026-1041", fecha: "27-10-2026", glosa: "Ajuste provisión vacaciones", origen: ["Manual", "ajuste · C. Irigoyen"], monto: "$ 1.212.000", est: ["danger", "Descuadrado $ 12.000"] },
+      { id: 1, n: "2026-1041", fecha: "27-10-2026", glosa: "Ajuste provisión vacaciones", origen: ["Manual", "ajuste · A. Molina"], monto: "$ 1.212.000", est: ["danger", "Descuadrado $ 12.000"] },
       { id: 2, n: "2026-1040", fecha: "24-10-2026", glosa: "Abono Inmobiliaria Apoquindo", origen: ["Automático", "movimiento · regla «Clientes por RUT»"], monto: "$ 6.940.000", est: ["success", "Contabilizado"] },
       { id: 3, n: "2026-1039", fecha: "21-10-2026", glosa: "Pago Seguridad Total Ltda", origen: ["Automático", "movimiento conciliado"], monto: "$ 8.920.000", est: ["success", "Contabilizado"] },
       { id: 4, n: "2026-1038", fecha: "14-10-2026", glosa: "Compra Uniformes Pacífico Ltda", origen: ["Automático", "factura 33 · 18452"], monto: "$ 2.380.000", est: ["success", "Contabilizado"] },
@@ -142,12 +142,12 @@ class Component extends DCLogic {
         { icon: "alert", color: "var(--ds-danger-fg)", titulo: "1 asiento descuadrado", detalle: "2026-1041 · diferencia $ 12.000", link: "Ver" },
         { icon: "alert", color: "var(--ds-danger-fg)", titulo: "3 documentos sin asiento", detalle: "Facturas recibidas sin centro de costo; se contabilizan al asignarlo", link: "Ver" },
         { icon: "alert", color: "var(--ds-danger-fg)", titulo: "2 cuentas en grupo incorrecto", detalle: "Deudores por venta e IVA débito fiscal", link: "Ver" },
-        { icon: "check-circle", color: "var(--ds-success-fg)", titulo: "Asiento de apertura cargado", detalle: "Corte al 01-07-2026, revisado por C. Irigoyen", link: "" },
+        { icon: "check-circle", color: "var(--ds-success-fg)", titulo: "Asiento de apertura cargado", detalle: "Corte al 01-07-2026, revisado por A. Molina", link: "" },
       ],
       periodos: [
         { mes: "Octubre 2026", det: "Abierto", estado: "Abierto", tone: "info" },
-        { mes: "Septiembre 2026", det: "Cerrado el 06-10-2026 por C. Irigoyen", estado: "Cerrado", tone: "neutral" },
-        { mes: "Agosto 2026", det: "Cerrado el 04-09-2026 por C. Irigoyen", estado: "Cerrado", tone: "neutral" },
+        { mes: "Septiembre 2026", det: "Cerrado el 06-10-2026 por A. Molina", estado: "Cerrado", tone: "neutral" },
+        { mes: "Agosto 2026", det: "Cerrado el 04-09-2026 por A. Molina", estado: "Cerrado", tone: "neutral" },
         { mes: "Julio 2026", det: "Cerrado el 05-08-2026 por M. Soto", estado: "Cerrado", tone: "neutral" },
       ],
       asRows: [
