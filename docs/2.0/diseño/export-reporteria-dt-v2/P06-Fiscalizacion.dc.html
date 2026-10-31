@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds screen" data-device="{{ device }}" data-theme="{{ theme }}" style="width:100%;height:100%">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div class="safe-top"></div></sc-if>
+<header style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:0 {{ gutter }};border-bottom:1px solid var(--ds-border);flex:none">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Wordmark" suffix="Fiscalización" hint-size="180px,24px"></x-import>
+<sc-if value="{{ loggedIn }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:8px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm muted">mlopez@dt.gob.cl</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="70px,40px">Salir</x-import>
+</div>
+</sc-if>
+</header>
+<div style="flex:1;min-height:0;overflow:auto">
+
+<sc-if value="{{ showIngreso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px {{ gutter }};box-sizing:border-box">
+<div style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+<h1 class="t-title m0">Portal de fiscalización</h1>
+<span class="t-body-sm muted">Acceso permanente para funcionarios de la Dirección del Trabajo, presencial o remoto. Solo lectura.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ accesos }}" value="{{ acceso }}" label="Forma de ingreso" style="width:100%" hint-size="100%,44px"></x-import>
+<sc-if value="{{ isCorreo }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo institucional" type="email" value="mlopez@dt.gob.cl" hint="Solo correos @dt.gob.cl." hint-size="100%,96px"></x-import>
+</sc-if>
+<sc-if value="{{ isClave }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo institucional" type="email" value="mlopez@dt.gob.cl" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Clave temporal" hint="Te la envió la empresa al correo. Se usa una vez por sesión." mono="{{ true }}" value="K7Q4-M2XD-9PTR" hint-size="100%,96px"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" hint-size="100%,48px">{{ loginLabel }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Tu acceso queda registrado" hint-size="100%,72px">Guardamos fecha y hora, tu correo, el RUT de la empresa que consultas y la IP de origen.</x-import>
+<x-import component-from-global-scope="ADT.Titular" hint-size="100%,120px"></x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ loggedIn }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:1280px;margin:0 auto;padding:20px {{ gutter }} 32px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" icono="eye" hint-size="100%,44px">Este acceso queda registrado · 30-10-2026 14:32 · IP 200.6.115.42</x-import>
+<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+<div style="flex:1;min-width:220px;max-width:360px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT del empleador" mono="{{ true }}" icon="search" value="{{ rutBuscado }}" hint-size="100%,72px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="{{ btnSize }}" hint-size="100px,44px">Buscar</x-import>
+</div>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 28 }}" hint-size="50%,28px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" hint-size="100%,44px"></x-import>
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 52 }}" radius="10px" hint-size="100%,52px"></x-import></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:360px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="search" title="Sin resultados para «76.000.000-0»" description="No hay un empleador con ese RUT en OPAI. Revisa el dígito verificador." action="{{ clearAction }}" hint-size="100%,300px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:360px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la empresa" description="Revisa tu conexión. Si el problema sigue, escribe a soporte@opai.cl con el código." code="ASI-FIS-503 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,300px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:360px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Este portal es solo para la Dirección del Trabajo" description="Ingresaste con «mlopez@gmail.com». Vuelve a entrar con tu correo @dt.gob.cl." action-label="Ingresar con otro correo" hint-size="100%,300px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-heading">Atlas Seguridad SpA</span>
+<span class="t-body-sm muted"><span class="t-mono">76.111.222-3</span> · 44 trabajadores · 3 instalaciones</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ v_main }}" hint-placeholder-val="{{ true }}">
+<div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--ds-surface)">
+<sc-for list="{{ reportes }}" as="r" hint-placeholder-count="8">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="file" title="{{ r.t }}" subtitle="{{ r.s }}" trailing="{{ r.dl }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ v_registros }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Trabajador" valor="Camila Herrera Soto" on-quitar="{{ noop }}" hint-size="240px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Rango" valor="Todo el historial · desde 01-03-2021" on-quitar="{{ noop }}" hint-size="300px,32px"></x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ mCols }}" rows="{{ marcas }}" cards="{{ true }}" to-card="{{ mCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ mCols }}" rows="{{ marcas }}" hint-size="100%,400px"></x-import>
+</sc-if>
+</sc-if>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;ingreso&quot;,&quot;clave&quot;,&quot;registros&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { loggedIn: false, showIngreso: false };
+    const b = A.base(this.props, "", "");
+    const h = A.h;
+    const dl = () => A.btn("Descargar", { variant: "ghost", icon: "download" });
+    const rep = (t, s) => ({ t, s, dl: dl() });
+    const marcas = [
+      { id: 1, f: "30-10-2026", tipo: "Entrada", hora: "07:57:41", lugar: "Planta Quilicura", met: "App Terreno", hash: "4be1…a90c", est: "" },
+      { id: 2, f: "29-10-2026", tipo: "Salida", hora: "20:01:12", lugar: "Planta Quilicura", met: "App Terreno", hash: "77d0…1e3f", est: "" },
+      { id: 3, f: "14-10-2026", tipo: "Entrada", hora: "08:14:07", lugar: "Planta Quilicura", met: "App Terreno", hash: "9f2c…c873", est: "corr" },
+      { id: 4, f: "07-10-2026", tipo: "Entrada", hora: "19:52:00", lugar: "Planta Quilicura", met: "Contingencia", hash: "c1a8…5d02", est: "cont" },
+      { id: 5, f: "12-03-2024", tipo: "Entrada", hora: "08:01:33", lugar: "Torre Apoquindo", met: "Reloj biométrico", hash: "0e5b…77a1", est: "" },
+    ];
+    return {
+      ...b,
+      showIngreso: b.v_ingreso || b.v_clave, loggedIn: !(b.v_ingreso || b.v_clave), isClave: !!b.v_clave, isCorreo: !b.v_clave, acceso: b.v_clave ? 'clave' : 'correo', accesos: [{ value: 'correo', label: 'Correo @dt.gob.cl' }, { value: 'clave', label: 'Clave temporal' }],
+      gutter: b.isPhone ? "16px" : b.isTablet ? "24px" : "32px",
+      btnSize: b.isPhone ? "lg" : "md",
+      loginLabel: b.v_clave ? "Ingresar" : "Enviar código a mi correo",
+      rutBuscado: b.isVacio ? "76.000.000-0" : "76.111.222-3",
+      tab: b.v_registros ? "tra" : "rep",
+      tabItems: [{ id: "rep", label: "Reportes" }, { id: "tra", label: "Registros por trabajador" }, { id: "doc", label: "Documentación laboral y previsional" }],
+      reportes: [
+        rep("Asistencia", "Sin restricción de rango · Excel, PDF o Word"), rep("Jornada diaria", "Horas ordinarias y extraordinarias"),
+        rep("Domingos y festivos", "Días trabajados y descansos"), rep("Modificaciones y alteraciones de turnos", "Con el valor original de cada corrección"),
+        rep("Reporte diario", "Marcas del día por instalación"), rep("Incidentes técnicos", "Inicio, fin y severidad"),
+        rep("Clientes del prestador (Art. 26)", "Mandantes e instalaciones"), rep("Verificar marcación por hash", "Comprueba un comprobante"),
+      ],
+      marcas,
+      mCols: [
+        { key: "f", label: "Fecha", render: (r) => h("span", { className: "t-numeric" }, r.f) },
+        { key: "tipo", label: "Tipo" },
+        { key: "hora", label: "Hora servidor", render: (r) => h("span", { className: "t-numeric" }, r.hora) },
+        { key: "lugar", label: "Lugar", muted: true },
+        { key: "met", label: "Método", render: (r) => r.est === "cont" ? A.badge("neutral", "Contingencia") : h("span", { className: "muted" }, r.met) },
+        { key: "hash", label: "Hash", mono: true, muted: true },
+        { key: "est", label: "", render: (r) => r.est === "corr" ? A.badge("info", "Corregida · ver original") : null },
+      ],
+      mCard: (r) => ({ title: r.tipo + " · " + r.f + " " + r.hora, subtitle: r.lugar + " · " + r.met, meta: r.hash, badge: r.est === "corr" ? { tone: "info", label: "Corregida" } : r.est === "cont" ? { tone: "neutral", label: "Contingencia" } : null }),
+      clearAction: A.btn("Limpiar búsqueda", { size: "lg" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
