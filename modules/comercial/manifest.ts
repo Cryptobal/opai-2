@@ -20,10 +20,32 @@ export const manifest = defineModule({
       id: "comercial:config.manage",
       descripcion: "Configurar el embudo y los catálogos del módulo",
     },
+    {
+      id: "comercial:solicitudes.read",
+      descripcion: "Ver la bandeja de solicitudes (leads) y su detalle",
+    },
+    {
+      id: "comercial:solicitudes.manage",
+      descripcion: "Registrar, derivar, descartar y convertir solicitudes en negocios",
+    },
+    {
+      id: "comercial:canales.manage",
+      descripcion: "Configurar los canales de entrada de solicitudes",
+    },
   ],
   navegacion: [
     // Áreas de NAVEGACION.md §2: Negocios en Comercial; Contactos en Clientes, entre Cuentas (1) e
     // Instalaciones (2).
+    // Solicitudes (Leads): la bandeja va antes de Negocios en el área Comercial.
+    {
+      portal: "erp",
+      area: "comercial",
+      href: "/solicitudes",
+      etiqueta: "Solicitudes",
+      icono: "Inbox",
+      orden: 1,
+      permiso: "comercial:solicitudes.read",
+    },
     {
       portal: "erp",
       area: "comercial",
@@ -55,6 +77,16 @@ export const manifest = defineModule({
     { id: "comercial.negocio.ganado", descripcion: "Un negocio se marcó como ganado." },
     { id: "comercial.negocio.perdido", descripcion: "Un negocio se marcó como perdido." },
     { id: "comercial.negocio.archivado", descripcion: "Un negocio se archivó o se desarchivó." },
+    { id: "comercial.solicitud.creada", descripcion: "Entró una solicitud a la bandeja." },
+    { id: "comercial.solicitud.derivada", descripcion: "Una solicitud pasó a revisión." },
+    { id: "comercial.solicitud.descartada", descripcion: "Se descartó una solicitud." },
+    { id: "comercial.solicitud.reabierta", descripcion: "Se reabrió una solicitud descartada." },
+    { id: "comercial.solicitud.duplicada", descripcion: "Se marcó una solicitud como duplicada." },
+    { id: "comercial.solicitud.convertida", descripcion: "Una solicitud se convirtió en negocio." },
+    {
+      id: "comercial.canal.actualizado",
+      descripcion: "Cambió la configuración de un canal de entrada.",
+    },
     {
       id: "comercial.embudo.actualizado",
       descripcion: "Se agregó o reordenó una etapa del embudo de ventas.",
