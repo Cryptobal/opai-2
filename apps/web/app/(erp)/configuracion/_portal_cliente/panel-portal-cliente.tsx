@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { Alerta, Campo, Loading, Select } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { TarjetaAccesos } from "./tarjeta-accesos";
 import { TarjetasConfiguracion } from "./tarjetas-config";
 import type {
   AccesoFila,
@@ -16,6 +15,9 @@ import type {
   InstalacionOpcion,
   TipoDocumentoOpcion,
 } from "./tipos";
+
+// La tarjeta de accesos se descarga aparte: el tope de JS de la ruta es ajustado (ADR-037).
+const TarjetaAccesos = lazy(() => import("./tarjeta-accesos").then((m) => ({ default: m.TarjetaAccesos })));
 
 export type DatosPortal = { config: ConfigCuenta; accesos: AccesoFila[]; candidatos: Candidato[]; instalaciones: InstalacionOpcion[] };
 
@@ -73,13 +75,15 @@ export function PanelPortalCliente({
       {datos ? (
         <div className="grid items-start gap-4 lg:grid-cols-2" key={cuentaId}>
           <TarjetasConfiguracion config={datos.config} tiposDocumento={tiposDocumento} />
-          <TarjetaAccesos
-            cuentaId={cuentaId}
-            accesos={datos.accesos}
-            candidatos={datos.candidatos}
-            instalaciones={datos.instalaciones}
-            recargar={() => cargar(cuentaId)}
-          />
+          <Suspense fallback={<Loading variante="formulario" />}>
+            <TarjetaAccesos
+              cuentaId={cuentaId}
+              accesos={datos.accesos}
+              candidatos={datos.candidatos}
+              instalaciones={datos.instalaciones}
+              recargar={() => cargar(cuentaId)}
+            />
+          </Suspense>
         </div>
       ) : error ? null : (
         <Loading variante="formulario" />
