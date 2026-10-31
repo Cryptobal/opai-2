@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<div style="margin-bottom:4px;margin-left:-8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="140px,40px">Documentos</x-import>
+</div>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Documento restringido" description="Contiene datos sensibles. Pídele permiso de lectura sensible a un administrador." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Camila Herrera · Persona" title="Anexo de contrato · jornada 4×4" badge="{{ headBadge }}" hint-size="100%,72px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" hint-size="120px,40px">Reemplazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="trash" hint-size="110px,40px">Archivar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Descargar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="140px,40px">Enviar a firma</x-import>
+</div>
+</sc-if>
+</x-import>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos abrir el documento" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="DOC-VER-500 · 30-10-2026 12:57" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ notError }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:24px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="t-caption">Anexo_jornada_4x4_v2.pdf · 184 KB</span>
+<span class="t-caption t-numeric">Página 1 de 2</span>
+</div>
+<div style="background:var(--ds-fill);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:{{ viewerPad }};height:{{ viewerH }};overflow:hidden;display:flex;justify-content:center">
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="width:100%;max-width:560px;background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);border-radius:var(--radius-sm);padding:{{ paperPad }};display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+<span class="t-label" style="text-align:center">Anexo de contrato de trabajo</span>
+<span class="t-caption" style="color:var(--ds-paper-fg);text-align:center">Atlas Seguridad SpA · RUT 76.111.222-3</span>
+<span class="t-body-sm" style="text-wrap:pretty">En Santiago, a 28-10-2026, entre Atlas Seguridad SpA, RUT 76.111.222-3, en adelante «el empleador», y doña Camila Herrera Soto, RUT 12.345.678-9, en adelante «la trabajadora», se acuerda modificar el contrato de trabajo de fecha 01-03-2025 en los siguientes términos:</span>
+<span class="t-body-sm" style="text-wrap:pretty">Primero: a contar del 01-11-2026 la trabajadora cumplirá una jornada en sistema 4×4, en turnos de 12 horas, de 08:00 a 20:00, en la instalación Planta Quilicura, Av. Lo Echevers 550, Quilicura.</span>
+<span class="t-body-sm" style="text-wrap:pretty">Segundo: la remuneración base se mantiene en $ 620.000 mensuales.</span>
+<div style="height:1px;background:var(--ds-paper-rule-subtle)"></div>
+<span class="t-body-sm" style="text-wrap:pretty">Tercero: en todo lo no modificado rige el contrato original.</span>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Este archivo no tiene vista previa" description="Es una planilla de Excel. Descárgala para abrirla." action="{{ emptyAction }}" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="100%" radius="{{ 6 }}" style="max-width:560px" hint-size="100%,100%"></x-import>
+</sc-if>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;justify-content:space-between;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 14 }}" hint-size="30%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="{{ 14 }}" hint-size="40%,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Datos" rows="{{ pares }}" hint-size="100%,300px"></x-import>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label m0">Firma</h2>
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-body-sm" style="font-weight:500">Versión 2</span>{{ firmaBadge }}</span>
+<span class="t-body-sm muted">La versión 1 se firmó el 14-03-2026 (N2 · empleador y trabajadora).</span>
+<div style="margin-left:-6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="170px,44px">Ver solicitud de firma</x-import>
+</div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+<h2 class="t-label m0">Versiones</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="sm" icon="upload" hint-size="170px,32px">Subir nueva versión</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ versiones }}" hint-size="100%,220px"></x-import>
+</section>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" hint-size="100%,48px">Enviar a firma</x-import>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" block="{{ true }}" hint-size="100%,44px">Bajar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="swap" block="{{ true }}" hint-size="100%,44px">Cambiar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="trash" block="{{ true }}" hint-size="100%,44px">Archivar</x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const B = (tone, t) => (NS.Badge ? h(NS.Badge, { tone }, t) : t);
+    return {
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      theme: this.props.theme ?? "light",
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "doc",
+      isPhone, notPhone: !isPhone,
+      gridCols: isPhone ? "minmax(0,1fr)" : isTablet ? "minmax(0,1fr) 300px" : "minmax(0,1fr) 360px",
+      viewerPad: isPhone ? "12px" : "24px",
+      viewerH: isPhone ? "300px" : "560px",
+      paperPad: isPhone ? "16px" : "40px 44px",
+      isNormal: estado === "normal", isEmpty: estado === "vacio", isLoading: estado === "cargando", notLoading: estado !== "cargando",
+      isError: estado === "error", notError: estado !== "error",
+      isForbidden: estado === "sinpermiso", notForbidden: estado !== "sinpermiso",
+      headBadge: B("neutral", "Sin firma"),
+      firmaBadge: B("neutral", "Sin firma"),
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", icon: "download", size: "lg" }, "Descargar") : null,
+      skel: [{ w: "45%" }, { w: "38%" }, { w: "30%" }, { w: "42%" }, { w: "50%" }, { w: "36%" }],
+      pares: [
+        { label: "Tipo", value: "Anexo de contrato" },
+        { label: "Vinculado a", value: NS.Enlace ? h(NS.Enlace, { variante: "fila", href: "#", style: { minHeight: 0 } }, "Camila Herrera") : "Camila Herrera" },
+        { label: "Vigencia", value: "Sin vigencia" },
+        { label: "Versión", value: "2 de 2", numeric: true },
+        { label: "Subido por", value: "Paula Ibáñez · 28-10-2026 16:40" },
+        { label: "Nivel de firma", value: "N2 · ambos" },
+        { label: "Medio electrónico", value: B("success", "Aceptado el 12-03-2026") },
+        { label: "Se envía a", value: "Correo personal" },
+      ],
+      versiones: [
+        { who: "Paula Ibáñez", initials: "PI", action: "subió la versión 2 · Anexo_jornada_4x4_v2.pdf", when: "28-10-2026 16:40" },
+        { who: "OPAI", agent: true, action: "registró la firma de ambas partes de la versión 1", when: "14-03-2026 10:12" },
+        { who: "Paula Ibáñez", initials: "PI", action: "generó la versión 1 desde «Anexo de contrato» v3", when: "12-03-2026 09:30" },
+      ],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] }, { title: "Personas", items: [] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
