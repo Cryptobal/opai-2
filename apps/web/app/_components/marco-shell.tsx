@@ -117,7 +117,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const navInferiorResuelto = useMemo(
     () =>
       navInferiorBase?.map((n) =>
-        n.href === "/" ? { ...n, punto: true, alerta: bandejaPendiente } : n,
+        n.href === "/" ? { ...n, punto: true, alerta: bandejaPendiente } : n.href === "/cotizaciones" ? { ...n, corta: "Cotiz." } : n,
       ),
     [navInferiorBase, bandejaPendiente],
   );

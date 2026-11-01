@@ -22,7 +22,7 @@ export function Diaria({ mes, fecha, sinCubrir }: { mes: MesPauta | null; fecha:
         <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
           {filas.map(({ puesto, celda }) => (
             <li key={puesto.id}>
-              <Link href={`?inst=${mes.instalacionId}&vista=diaria&fecha=${fecha}&mes=${claveMes(mes.anio, mes.mes)}&dia=${puesto.id}_${fecha}`} scroll={false} className="flex min-h-14 items-center justify-between gap-3 px-4 py-3 outline-none focus-visible:outline-2 focus-visible:outline-focus">
+              <Link href={`?inst=${mes.instalacionId}&vista=diaria&fecha=${fecha}&mes=${claveMes(mes.anio, mes.mes)}&dia=${puesto.id}_${fecha}${sinCubrir ? "&ver=ppc" : ""}`} scroll={false} className="flex min-h-14 items-center justify-between gap-3 px-4 py-3 outline-none focus-visible:outline-2 focus-visible:outline-focus">
                 <span className="min-w-0"><span className="block font-medium">{puesto.nombre}</span><span className="block text-xs text-fg-muted">{puesto.horario} · {mes.personas.find((p) => p.id === celda.titularId)?.nombre ?? "Sin titular"}</span></span>
                 <Badge tono={celda.estado === "ppc" ? "danger" : "success"}>{descripcionCelda(celda)}</Badge>
               </Link>

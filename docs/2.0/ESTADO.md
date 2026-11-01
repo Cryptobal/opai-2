@@ -57,7 +57,7 @@
 
 ## Decisiones y riesgos vigentes
 
-- **Pauta PR 2 (CAR-86), avance parcial:** la Diaria consulta una fecha e instalación con la capacidad mensual existente y permite filtrar turnos sin cubrir. Faltan las acciones operativas, reemplazos, refuerzos, alertas, exportaciones y validación completa de pantalla. Pendientes de Carlos: umbral de aviso legal, tratamiento de la confirmación cuando se active Asistencia y criterios finos de sugerencia de reemplazos; no se ha tomado una decisión nueva de negocio.
+- **Pauta PR 2 (CAR-86), avance parcial:** la Diaria consulta una fecha e instalación con la capacidad mensual existente y permite filtrar turnos sin cubrir. La hoja usa el titular de la fecha y conserva el filtro diario al abrir una fila; la anulación anota la instalación validada bajo bloqueo. La etiqueta móvil de Cotizaciones tiene una forma abreviada (P-06, pendiente de validación visual). Faltan las acciones operativas, reemplazos, refuerzos, alertas, exportaciones y validación completa de pantalla. Pendientes de Carlos: umbral de aviso legal, tratamiento de la confirmación cuando se active Asistencia y criterios finos de sugerencia de reemplazos; no se ha tomado una decisión nueva de negocio.
 
 Contrastados con `main` el 30-oct-2026; el detalle sigue en el archivo.
 

@@ -69,7 +69,10 @@ test.describe("pauta · mensual", () => {
     await registrar.click();
     await expect(page.getByText(/Excepción registrada/)).toBeVisible();
 
-    await page.goto(`/pauta?inst=${INST}&dia=${PUESTO_DIA}_${HOY}`);
+    await page.goto(`/pauta?inst=${INST}&vista=diaria&fecha=${HOY}&ver=ppc`);
+    await page.getByRole("link", { name: /Portería Día/ }).click();
+    await expect(page).toHaveURL(/ver=ppc/);
+    await expect(page.getByRole("button", { name: "Anular excepción" })).toBeVisible();
     await page.getByRole("button", { name: "Anular excepción" }).click();
     const confirmacion = page.getByRole("dialog", { name: "Anular excepción" });
     await expect(confirmacion).toBeVisible();

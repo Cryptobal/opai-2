@@ -51,12 +51,12 @@ function Formulario({
   const [motivo, setMotivo] = useState("");
   const [confirmarAnulacion, setConfirmarAnulacion] = useState(false);
   const trabaja = celda.estado === "cubierto" || celda.estado === "ppc";
-  const titular = puesto.serie?.titular ?? null;
+  const titular = mes.personas.find((p) => p.id === celda.titularId)?.nombre ?? null;
 
   async function registrar() {
     const r = await ejecutar("pauta.excepciones.crear", { puestoId, tipo, motivo: motivo.trim(), desde: fecha, hasta });
     if (r) {
-      avisar.exito(titular ? `Excepción registrada · se avisará a ${titular}` : "Excepción registrada");
+      avisar.exito("Excepción registrada");
       onCerrar();
     }
   }
