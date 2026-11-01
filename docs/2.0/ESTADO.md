@@ -2,6 +2,26 @@
 
 - **Configuración v1.1 · PR-A (navegación), implementación en `feat/config-v11-navegacion`:** secciones planas del sidebar, Bandeja con contador real, rol Administrador e iniciales del nombre; búsqueda global compacta en Configuración; menú de usuario y contraseña dentro de Mi cuenta; tarjetas que abren grupos; encabezado de grupo compartido, 404 propio y navegación jerárquica móvil. Agente interno pasa a Agentes con redirección y conserva formulario/capacidades. Barra móvil fija según destinos permitidos y Más sin duplicados ni cuenta. Fuente: encargo de Carlos del 1-nov-2026, aprobación indicada 18:59 CLT; detalle y CA en [brief PR-A](briefs/CONFIGURACION-v11-PR-A.md). **Parcial MC-04:** no hay páginas globales de Rondas ni Resumen de Finanzas; se conservan los destinos reales. No se muestra alerta B1 sin destino integrado. **Fuera:** parte B completa, riel colapsado y decisiones pendientes de Carlos sobre Portal de inicio, Idioma, Fijados y ubicación definitiva de Comercial/Clientes/Firmas. Adaptaciones técnicas de Codex, sin nuevas decisiones de negocio: padre desde URL confirmada; preferencia de área conservada sin sustituir la barra móvil. Sin migraciones/RLS/permisos ni aumento de presupuesto. La validación local y la evidencia se registran al cierre en el cuerpo preparado para el PR; no se presume CI ni despliegue.
 
+- **En construcción · Motor de sueldos 07e M1 (Refs CAR-71; consumidores CAR-133/CAR-134).**
+  Dominio puro y contrato `ContratoCostoEmpleador` exportado desde `@opai/domain`: costo empresa,
+  turno, horas extra, jornada parcial/IMM, indicadores por vigencia, huella SHA-256, capa/juego
+  congelables y traza. Sin migración, capacidades ni pantallas. GC-A…F y CR salariales comparados
+  al peso con oráculo 1.0: diferencias por provisiones contables, redondeo e impuesto con UTM vigente.
+  Addendum de Carlos t1243s4984 (1-nov): SIS incluido en 3,5 %, SANNA separado, CPQ solo en servidor;
+  el adaptador CPQ se hará tras M1 en main, sin ingreso manual del costo empleador.
+  Plan revisado: M2 plataforma/captura/seed, M3 valores tenant y pantalla, M4 simulador auditado,
+  M5 fuentes/avisos/cierre. **TODO(decisión Carlos):** validación contable de días corridos/progresivo,
+  bases y probabilidad; fuentes oficiales pendientes para seed M2 (Diario Oficial IMM, normas IPS/
+  indemnización/básica 16.744 y resolución adicional mutual). Hipótesis técnicas de Codex, sin
+  atribuirlas a Carlos: fixtures con 21 corridos, vacaciones sin gratificación, indemnización imponible
+  al 100 %; adicional 0,27 % para reproducir mutual total 1,20 %. Sin valores por defecto de producción.
+  Contrato, fuentes consultadas el 1-nov y CA parciales en [Brief 07e](briefs/BRIEF-07e-motor-sueldos.md).
+  Retoma de Codex: aviso de jornada excepcional también en el contrato por persona, conforme
+  a la decisión 8 de la spec; regresión para 4×4 de 12 horas sin exceder 42 horas semanales.
+  Merge normal de `origin/main` (Portal Trabajador #189) el 1-nov-2026; fuentes IMM (Ley 21.830 BCN),
+  topes SP, básica 16.744 SUSESO, SIS 1,78 % SP e indemnización 90 UF (CT art. 172) verificadas en
+  fixtures; pendiente seed M2: norma IPS 60 UF y resolución adicional mutual por tenant.
+
 - **Configuración 2.0 · PR 1 (portada por tarjetas) en construcción** (rama `brief/configuracion-pr1-portada`). El centro `/configuracion` pasa de un índice largo a 6 grupos cerrados con tarjetas, buscador y subpágina `/configuracion/grupo/<id>`; Preferencias sale al menú de usuario. Sin migraciones ni cambios de permisos, capacidades o base (CA-9). Regla aprobada en principio por Carlos el 30-oct-2026 00:53 CLT (decisiones 00:55 CLT) y mockup «OPAI 2.0 Configuración v1» aprobado el 30-oct-2026 08:18 CLT («Apruébalo con los 3 ajustes y sin contadores en las tarjetas»); regla, brief y Design Prompt en `docs/2.0`. **Addendum de Carlos, 30-oct-2026 09:33 CLT** (chat con OPAI 2.0, mismo PR): (1) la fila «Aprobaciones pendientes» del grupo Agentes muestra el número de pendientes en un `Badge` del DS 2.0 (oculto si hay 0, sin lecturas nuevas; las tarjetas de la portada siguen sin contadores); (2) Preferencias pasa a tener URL propia, `/mi-cuenta/preferencias`, y `/configuracion/preferencias` queda como redirect permanente en el servidor; (3) los grupos quedan en `/configuracion/grupo/<id>`, sin cambio. Detalle en `docs/2.0/briefs/BRIEF-configuracion-centro.md` §6 bis. **Hallazgo de Claude, 30-oct-2026** (retoma del PR 1, ver §10 del brief): el 404 de un grupo inexistente respondía HTTP 200 en el build de producción porque `cacheComponents` envía el `Suspense` estático del shell del portal (`PortalLayout`) en 200 antes de que el `notFound()` de la página se resuelva, y un `NextResponse.rewrite()` del proxy no cambia ese estado (lo decide el render de destino). Esto es general a todo 404 reescrito del proxy (ficha, evento, integración o grupo), no solo a Configuración. Se corrigió en `apps/web/proxy.ts`: para una carga completa de documento, el proxy pide la página de destino con un `fetch` interno (misma sesión) y reenvía su cuerpo con el estado forzado a 404; una navegación RSC sigue con el `rewrite` simple. PR 2 pulirá el interior de cada entrada contra el mockup.
 - **CAR-130 / encargo CAR-129 · Actividad y kanban móvil (rama `fix/car130-actividad-kanban`):**
   traductor único en servidor con respaldo español, Inicio filtra lecturas por el efecto del registro
@@ -15,7 +35,7 @@
   devuelve 0 en mediciones separadas. No se afirma verificado el tope de consultas con esas muestras
   ni se modifica esa instrumentación en este encargo.
 
-**Foto de código verificada en `origin/main`: `45f19cf58d576a2f03c3d074aac7017ce7462793`** (30-oct-2026). Un PR citado acredita su integración en el historial de esa referencia, no el estado de despliegues ni de migraciones en Neon. `main` puede avanzar: actualizar esta foto en cada PR (ADR-054). Linear es referencia de tareas. El plan está en [ROADMAP](ROADMAP.md), las decisiones en [ADR](01-decisiones.md) y el flujo en [OPERACION-agentes](OPERACION-agentes.md).
+**Foto de la base de este PR verificada en `origin/main`: `b06c5d7503ba5dc0daf157b3bd6996219ca2534c`** (1-nov-2026). Un PR citado acredita su integración en el historial de esa referencia, no el estado de despliegues ni de migraciones en Neon. `main` puede avanzar: actualizar esta foto en cada PR (ADR-054). Linear es referencia de tareas. El plan está en [ROADMAP](ROADMAP.md), las decisiones en [ADR](01-decisiones.md) y el flujo en [OPERACION-agentes](OPERACION-agentes.md).
 
 ## Integrado y pendiente
 

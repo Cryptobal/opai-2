@@ -1,6 +1,4 @@
-import { ChevronRight } from "lucide-react";
-
-import { Badge, cn } from "@opai/ds";
+import { Badge, cn, FilaSeleccionable } from "@opai/ds";
 
 import { LinkIndice } from "@/app/_components/link-indice";
 
@@ -32,11 +30,22 @@ export function ListaGrupo({ etiqueta, entradas, aprobaciones, seleccionada }: P
       id: s.id,
       texto: `${s.titulo} ${s.descripcion}`,
       nodo: (
+        <>
+        <FilaSeleccionable
+          className="border-0 md:hidden"
+          Link={LinkIndice}
+          href={s.href}
+          titulo={s.titulo}
+          secundario={s.descripcion}
+          seleccionada={activa}
+          inicio={<s.icono aria-hidden className="size-[18px] flex-none text-fg-muted" />}
+          fin={n ? <Badge tono="warning">{n}</Badge> : null}
+        />
         <LinkIndice
           href={s.href}
           aria-current={activa ? "page" : undefined}
           className={cn(
-            "relative flex min-h-11 items-center gap-3 px-4 py-2 text-fg outline-none transition-colors duration-150 hover:bg-fill dark:hover:bg-bg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
+            "relative hidden min-h-11 items-center gap-3 px-4 py-2 text-fg outline-none transition-colors duration-150 hover:bg-fill dark:hover:bg-bg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus md:flex",
             activa &&
               "bg-accent-muted hover:bg-accent-muted before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-[3px] before:bg-accent before:content-['']",
           )}
@@ -49,8 +58,8 @@ export function ListaGrupo({ etiqueta, entradas, aprobaciones, seleccionada }: P
             <span className="t-caption truncate">{s.descripcion}</span>
           </span>
           {n ? <Badge tono="warning">{n}</Badge> : null}
-          <ChevronRight aria-hidden className="size-4 flex-none text-fg-muted md:hidden" />
         </LinkIndice>
+        </>
       ),
     };
   });

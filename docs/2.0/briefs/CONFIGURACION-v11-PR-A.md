@@ -19,6 +19,7 @@ Fuente: encargo de Carlos recibido el 1-nov-2026, basado en `/workspace/qa/menus
 
 ## Adaptaciones técnicas de Codex
 
+- El menú plano no guarda automáticamente la apertura del acordeón al navegar: esa escritura heredada invalidaba el layout durante el cambio de ruta. Se conservan las preferencias ya guardadas; la regresión e2e comprueba que navegar no escribe `navegacion_area_abierta`. Adaptación técnica de Codex al menú plano, sin nuevas decisiones de negocio.
 - El padre móvil se resuelve con la URL confirmada, para que el enlace no cambie mientras su propia navegación está pendiente.
 - Bandeja tiene una ruta de lectura que monta el componente ya existente de Inicio; no agrega consultas ni capacidades de negocio nuevas.
 - La ruta del agente se mueve conservando el filtro actual por licencia/esquema/permisos y el formulario actual. No se implementa su formulario de cuatro tarjetas.

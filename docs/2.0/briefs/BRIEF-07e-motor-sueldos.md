@@ -1,6 +1,6 @@
 # BRIEF DE IMPLEMENTACIÓN — 07e MOTOR DE SUELDOS (Núcleo)
 
-**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/07e-motor-sueldos` (desde `main` actualizado; sucesora de este PR #126, que es solo de documentación) · **Fecha:** 29-oct-2026 · **Estado:** **propuesto**, pendiente de verificar las fuentes oficiales (pregunta 13 de la especificación) antes de abrir la primera PR de construcción · **Tarea de Linear:** CAR-71 (`Fixes CAR-71` en cada PR) · **ADR:** ADR-056 (completa ADR-036 y ADR-048; modifica ADR-042 punto 4 y la fase 6 de `ROADMAP.md`).
+**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/07e-motor-sueldos` (desde `main` actualizado; sucesora de este PR #126, que es solo de documentación) · **Fecha:** 29-oct-2026 · **Estado:** **M1 autorizado para construcción en el encargo del 1-nov-2026**; fuentes y pendientes abajo · **Tarea de Linear:** CAR-71 (`Refs CAR-71` en M1, sin cerrar la tarea) · **ADR:** ADR-056 (completa ADR-036 y ADR-048; modifica ADR-042 punto 4 y la fase 6 de `ROADMAP.md`).
 
 > **Especificación:** [`modulos/motor-sueldos.md`](../modulos/motor-sueldos.md), **aprobada por Carlos el 29-oct-2026** (las 18 decisiones de su §16). **Diseño:** [`design/DESIGN-PROMPT-motor-sueldos.md`](../design/DESIGN-PROMPT-motor-sueldos.md), con el mockup **v2 aprobado** (Decisión de Carlos, 29-oct-2026 16:23 CLT, chat con OPAI 2.0, registrada por el bot OPAI 2.0), export copiado en [`diseño/export-motor-sueldos/`](../diseño/export-motor-sueldos/README.md). El Design Prompt original queda vigente en su contenido (una sola página de valores, sin segunda firma, ya la refleja); los 6 ajustes que el mockup v2 todavía no corrige quedan como criterios de aceptación de este brief (§6). **Reglas:** `AGENTS.md`, `REGLAS-codigo.md`, ADR-004/ADR-034/ADR-055 (paridad UI↔MCP, gobierno de agentes, agent-first sin excepciones), ADR-014/ADR-017 (DS 2.0), ADR-016 (bloqueo financiero de montos), ADR-021 (configuración versionada), ADR-022 (alcance en la consulta), ADR-029 (eventos y trabajos por outbox), ADR-031 (consumos medidos), ADR-036 y ADR-048 (capas de sueldo, módulos vendibles), ADR-037/ADR-045 (presupuesto de JS y rendimiento).
 
@@ -100,9 +100,159 @@ Mapa pantalla → ruta (Design Prompt §2 y §4):
 
 Componentes nuevos del DS (§3 del Design Prompt): `TrazaMonto`, `EstadoFuente`, `CambioValor`, `AvisoRecalculo`; cada uno aparece en `/ds` con sus estados, claro y oscuro, antes de usarse en pantalla (ADR-017). Ninguno se crea si un componente existente ya sirve.
 
-## 5. Plan por bloques y división en PRs
+## Plan de construcción revisado (1-nov-2026)
 
-**Cinco PR**, en el orden de dependencia interna del propio motor (indicadores antes de variables, variables antes de simulador, simulador antes de plataforma/avisos). Cada uno con `Fixes CAR-71` y un commit por bloque.
+El encargo de Carlos del 1-nov-2026 adelanta el cálculo puro porque bloquea la ficha CPQ
+(CAR-134) y el motor CPQ (CAR-133): el costo empleador sale exclusivamente del Núcleo.
+El addendum t1243s4984 exige cálculo CPQ solo en servidor, sin enviar costos, costo empleador
+ni márgenes al navegador; no cambia la portabilidad del dominio puro.
+Este plan reemplaza la distribución histórica de §5. M1 lleva `Refs CAR-71`, nunca cierre.
+
+| PR | Entrega |
+|---|---|
+| **M1 (este PR)** | Dominio puro de indicadores/vigencias/huella, costo empresa, turno, extra, parcial y contrato CPQ. Sin migración, capacidades ni pantalla. |
+| **M2** | Indicadores de plataforma: migración IndicadorLegal/ValorPublicado/Captura sin tenant_id, solo lectura para opai_app; seed verificado, captura diaria, capacidades listar/historial con MCP. |
+| **M3** | Valores/variables del tenant con RLS y pantalla de configuración. |
+| **M4** | Simulador: `core.remuneraciones.costo.simular`, `read_sensible` y `auditarLecturaSensible` al usar capa, pantalla `/cargos/simular`. |
+| **M5** | Plataforma, avisos, paridad, documentación y cierre. |
+| Cableado CPQ | Adaptador del puerto después de M1 en main; se construye en CPQ. Nómina PR 2 consume el mismo dominio; liquidaciones/finiquitos siguen en BRIEF-25. |
+
+### Contrato entregado y adaptación a CPQ
+
+`@opai/domain` exporta `ContratoCostoEmpleador`, `EntradaCostoEmpleador`,
+`ResultadoCostoEmpleador` y `costoEmpleadorPorPersona(entrada, juego)` síncrono y puro.
+Recibe sueldo explícito o capa ya resuelta por `resolverCapasSueldo`/`resolverEstructura`,
+sin mezclar niveles; haberes, contrato, AFP, salud, jornada en minutos, adicional mutual,
+supuestos contables explícitos y horario/patrón opcional. El resultado entrega costo mensual,
+líquido estimado, desglose, traza por monto con indicadores/vigencia, advertencias,
+`juegoDeValores`, `huellaJuegoDeValores`, `capaUsada` y `entradaUsada`, copiados y congelados.
+`juegoDeValores(fecha, publicaciones)` es async solo por Web Crypto SHA-256; no hace I/O.
+
+El puerto inspeccionado en la rama `feat/cpq-motor-brief08`,
+`modules/cpq/domain/motor/tipos.ts`, es **síncrono**:
+`obtener({ lineaId, fecha }) → { costoMensualClp, origen } | null`.
+El adaptador CPQ resolverá datos autorizados y preparará un mapa de snapshots en servidor:
+`costoMensualClp = resultado.costoEmpresaMensualClp`, `origen = resultado.huellaJuegoDeValores`.
+Validará fecha/línea y conservará el resultado completo con capa/juego para congelarlo al enviar.
+Sin entrada o juego completo devuelve pendiente, nunca costo manual ni cero inventado.
+No se importa CPQ ni Nómina desde el Núcleo y no se mergea su rama: es alineación de tipos,
+no dependencia de construcción (ADR-048). Sus permisos/auditoría quedan en el adaptador/capacidad.
+
+### Reglas y supuestos de M1
+
+- Los 11 indicadores agrupan AFP/salud, topes (incluido IPS 60 UF como dato, sin cálculo IPS),
+  mutual básica/SANNA y tabla de impuesto. Gratificación 25 % / 4,75 IMM reutiliza
+  `estructuras.ts`; jornada e IMM entran con vigencia. No hay montos legales de producción.
+- Gratificación incluye bonos imponibles mensuales, confirmado por DT (R17); el comportamiento
+  de `haberes`/`gratificacionLegal` existente se reutiliza sin alterar otros consumidores.
+- SIS 1,78 % se muestra separado y se resta de la reforma total 3,5 % que ya lo incluye.
+  El calendario anterior también admite reforma sin SIS incluido. SANNA 0,03 % se muestra explícito.
+- CLP enteros; tasas PCT_ESCALA, cantidades UF/UTM UF_ESCALA, UF diaria en centavos.
+  `redondearRazonCLP` centraliza el cociente exacto BigInt en `dinero.ts`, misma mitad arriba
+  en valor absoluto; redondeo por concepto. El oráculo 1.0 mantiene float/floor solo en tests.
+- **Hipótesis de prueba de Codex, no decisión de Carlos:** 21 días corridos de vacaciones/año,
+  base vacaciones sin gratificación, base indemnización imponible y probabilidad 100 %.
+  No hay defecto en producción: el consumidor debe pasar estos supuestos. Provisiones excluyen
+  colación, movilización y aportes; indemnización tope 90 UF y se detiene a 132 meses.
+- GC conserva mutual total 1,20 % de la spec: básica 0,90 + SANNA 0,03 + adicional **0,27**.
+  Esa adicional es hipótesis `por_verificar`, no tasa de Gard confirmada. Si se ingresa adicional
+  0,30, el total es 1,23 % y cambia el costo; hay test que lo distingue.
+- Isapre descuenta el plan completo en el líquido; para impuesto deduce hasta el 7 % del
+  **tope previsional**, incluyendo adicional (SII Oficio 2406/2016). El estimado usa la UF del
+  juego: Nómina debe resolver la UF de cierre legal y datos reales para impuesto definitivo.
+- Turnos usan promedio díasMes/ciclo (30 en casos), no redondean personas; cobertura completa
+  o días del patrón es explícita. Feriados del modelo comercial los agrega CPQ.
+  El contrato por persona también avisa de jornadas excepcionales sobre 10 horas diarias,
+  aunque el promedio semanal no supere la jornada legal (decisión 8 de la spec).
+
+### CA9: comparación al peso y diferencia por regla
+
+Todos los valores son CLP; solo etiquetas/números anonimizados. Fixture del 29-oct-2026,
+UF 41.237,01, UTM 72.151, IMM 553.553. El oráculo de prueba reproduce al peso costo y líquido 1.0.
+
+| Caso / base | Costo 1.0 | Costo 2.0 | Líquido 1.0 | Líquido 2.0 | Diferencia explicada |
+|---|---:|---:|---:|---:|---|
+| GC-A / 553.553 | 878.671 | 871.022 | 606.148 | 606.146 | R17: provisiones contables; redondeo por concepto. |
+| GC-B / 553.553 | 833.673 | 831.022 | 566.148 | 566.146 | R17 y redondeo. |
+| GC-C / 553.553 | 1.328.655 | 1.271.022 | 1.006.148 | 1.006.146 | R17: colación/movilización fuera de provisiones; redondeo. |
+| GC-D / 237.237 | 447.285 | 436.153 | 322.635 | 322.634 | R17, parcial 18/42 y redondeo. |
+| GC-E / 900.000 | 1.348.345 | 1.344.332 | 915.661 | 915.660 | R17, gratificación topada y redondeo. |
+| GC-F / 1.000.000 | 1.468.829 | 1.465.598 | 995.172 | 996.542 | R17 y redondeo; impuesto vigente 938 frente a 2.309. |
+| CR-A / 700.000 | 1.054.228 | 1.050.875 | 715.925 | 715.925 | R17: cambia la provisión; líquido igual. |
+| CR-A / 750.000 | 1.129.530 | 1.125.938 | 767.063 | 767.062 | R17 y redondeo. |
+| CR-A / 950.000 | 1.408.587 | 1.404.965 | 955.898 | 956.570 | R17, impuesto vigente y redondeo. |
+| CR-B / 1.200.000 | 1.709.795 | 1.708.132 | 1.152.266 | 1.153.637 | R17, impuesto vigente y redondeo. |
+| CR-C / 650.000 | 978.926 | 975.813 | 664.788 | 664.787 | R17 y redondeo. |
+| CR-D | N/A | N/A | N/A | N/A | No contiene puestos/sueldos; solo ítems, fuera del motor salarial. |
+| CR-E / 650.000 | 978.926 | 975.813 | 664.788 | 664.787 | R17 y redondeo. |
+| CR-COMB | A + C | A + C | A + C | A + C | Reutiliza los salarios de A/C; márgenes por sección 10 %/13 % son de CPQ (addendum t1243s4984), fuera de M1. |
+
+El cambio de costo no es solo quitar no imponibles: también sustituye las provisiones 1.0
+8,33 %/4,166 % sobre directo por vacaciones base/30×21/12 e indemnización base/12.
+Los tests fijan cada total nuevo y cada diferencia GC, y verifican CA10 al variar no imponibles/aportes.
+Costo turno GC-A 2.0 sin ajuste CPQ de feriados: 4x4 24 h = 4 personas / 3.484.088;
+4x4 12 h = 2 personas / 1.742.044; 5x2 50 h = 1 persona y advertencia >42 h.
+La comparación 1.0 de §13 incluye feriados y omite colación/movilización: se explica esa diferencia,
+no se atribuye al motor de turno. Horas extra 42 h: base/120; parcial 18/42 = 237.237.
+
+### Fuentes abiertas el 1-nov-2026 y verificación pendiente
+
+Solo datos de pruebas, sin seed. Cada publicación de fixture incluye fuente, fecha de consulta,
+vigencia y estado `verificado`/`por_verificar`. Una publicación verificada sin fecha se rechaza.
+
+| Dato / regla | Fuente leída y evidencia | Estado |
+|---|---|---|
+| UF 29-oct 41.237,01; 31-oct 41.247,63 | [SII UF 2026](https://www.sii.cl/valores_y_fechas/uf/uf2026.htm) | Verificado; casos fijos del 29, test adicional del 31. |
+| UTM oct 72.151; tramos IUSC en UTM | [SII UTM](https://www.sii.cl/valores_y_fechas/utm/utm2026.htm), [SII impuesto 2026](https://www.sii.cl/valores_y_fechas/impuesto_2da_categoria/impuesto2026.htm) | Verificados. |
+| IMM 553.553 desde 1-may-2026 | [Ley 21.830 BCN](https://www.bcn.cl/leychile/Navegar?idNorma=1225354), [DT ingreso mínimo](https://www.dt.gob.cl/portal/1628/w3-article-60141.html) | Verificado (art. 1, DO 22-jun-2026). |
+| Topes AFP/salud/16.744 90 UF y AFC 135,2 UF desde febrero | [SP comunicado definitivo](https://www71.spensiones.cl/portal/institucional/594/articles-16921_recurso_1.pdf), [SP octubre](https://www.spensiones.cl/inf_estadistica/cotprev/cotprev.html) | Verificados. IPS 60 UF en tabla SP/Previred; norma IPS propia `por_verificar` para seed M2. |
+| Tope indemnización provisiones 90 UF | [Código del Trabajo art. 172 BCN](https://www.bcn.cl/leychile/navegar?idNorma=207436) | Verificado (base máxima 90 UF). Límite 11 años en art. 163 inc. 2 (330 días). |
+| AFP 10 % + comisión por administradora; SIS 1,78 % desde agosto; reforma total 3,5 % que incluye SIS | [SP Sistema de Pensiones](https://www.spensiones.cl/portal/institucional/594/w3-propertyvalue-9893.html) | Verificados. Reforma 0,10 individual +0,90 RP +2,50 SIS/EV. |
+| Desglose reforma 0,72 EV +1,78 SIS; IPS 60 UF; asignación familiar A 22.601 ≤649.039, B 13.870 ≤947.990, C 4.382 ≤1.478.539 | [Previred octubre](https://www.previred.com/indicadores-previsionales/) | Contraste del addendum; sin cálculo de asignación familiar ni régimen IPS en M1. |
+| AFC indefinido 2,4/0,6 y plazo fijo 3,0/0 | [DT cesantía](https://dt.gob.cl/portal/1628/w3-article-95306.html) | Verificado para los tipos del encargo. |
+| Ley 16.744 básica 0,90 + SANNA 0,03 | [SUSESO financiamiento](https://www.suseso.gob.cl/606/w3-article-18613.html), [ISL SANNA](https://www.isl.gob.cl/ley-sanna/) | Básica y SANNA verificadas; tasa adicional mutual por resolución `por_verificar` (default tenant recomendado 0 % hasta resolución). |
+| Gratificación 25 % / 4,75 IMM y bonos mensuales | [DT gratificación](https://www.dt.gob.cl/portal/1626/w3-article-99034.html) | Verificado. |
+| Jornada 42 h desde 26-abr-2026 | [Mintrab 40 horas](https://www.mintrab.gob.cl/40horas-implementacion/) | Verificado. |
+| Deducción salud para IUSC | [SII Oficio 2406/2016](https://www.sii.cl/pagina/jurisprudencia/adminis/2016/renta/ja2406.htm) | Verificado: límite 7 % del tope, también para adicional. |
+
+### Decisiones abiertas y límites de aceptación
+
+**TODO(decisión Carlos) — validar con contabilidad** (M1 no fija defectos de producción):
+
+- Días de vacaciones: ¿21 corridos o hábiles? ¿Progresivo por antigüedad?
+- Base provisión vacaciones: ¿incluye gratificación legal?
+- Base y probabilidad provisión indemnización (hoy hipótesis de prueba: imponible al 100 %).
+- Tasa adicional mutual Ley 16.744: hoy hipótesis 0,27 % en GC para total 1,20 % de la spec;
+  recomendación de trabajo: default tenant 0 % hasta leer la resolución del organismo.
+
+Cada hipótesis vive en `entradaReferencia` / `SupuestosProvisiones` y en tests; cambiarla es una línea.
+
+- **TODO(decisión Carlos): verificación de fuentes oficiales (bloquea seed M2):** norma SP directa del
+  tope IPS 60 UF y resolución adicional mutual del tenant. Sin valores fijos de respaldo en producción.
+- Nómina PR 2 debe completar cálculo real por período, UF de cierre, excepciones previsionales,
+  descuentos personales y contadores; M1 entrega estimado y provisiones, no liquidaciones reales.
+
+| CA de la spec/brief | Estado en M1 |
+|---|---|
+| CA1 | Parcial: resolución diaria/mensual pura probada; captura e Historial M2/M3. |
+| CA2 | Parcial: último valor/aviso probado; caída de fuente y Bandeja M2/M5. |
+| CA3 | Parcial: excluye retenidos/propuestos y valida rangos; confirmar con permiso M3. |
+| CA3b | Pendiente M3: editar propio y auditoría. |
+| CA4 | Pendiente M3 + adaptador CPQ: impacto y aviso de vigencia. |
+| CA5 | Pendiente M3/M5: MCP, autonomía y aprobaciones. |
+| CA6 | Parcial: snapshot congelado y reproducible; persistencia/envío son CPQ. |
+| CA7 | Cumplido en dominio: GC-A…F y CR salariales, diferencia documentada; pantalla M4. |
+| CA8 | Pendiente M2–M5: exposición por capacidad/API/MCP/auditoría. |
+| CA9 | Cumplido: tabla 2.0/1.0 y oráculo aislado en tests. |
+| CA10 | Cumplido: no imponibles/aportes no alteran provisiones. |
+| CA-v2 | Parcial: IMM, UTM, umbrales e impuesto en dominio; superficies visuales M3–M5. |
+| CA-paridad | Gate vigente sin nuevas entradas; tools/list del motor en M2–M5. |
+| CA-DS | N/A en M1 sin pantalla; pendiente M3–M5. |
+
+## 5. Plan por bloques y división en PRs (histórico, reemplazado por M1–M5)
+
+
+**Cinco PR**, en el orden de dependencia interna del propio motor (indicadores antes de variables, variables antes de simulador, simulador antes de plataforma/avisos). Cada uno con referencia a `CAR-71` (M1 usa `Refs CAR-71`) y un commit por bloque.
 
 **PR 1 — Indicadores legales y captura (sin pantallas).**
 - Bloque 1: este brief.
@@ -160,10 +310,10 @@ El mockup v2 quedó **aprobado tal cual** (Decisión de Carlos, 29-oct-2026 16:2
 | **Núcleo 02 (maestros, capacidades base)** | **En `main`.** | `defineCapability`, `ctx.transaccion`, `ctx.eventos`, `ctx.medidor`, `auditarLectura`, `core.documentos.*`, `core.aprobaciones.*`, registro de consumidores/trabajos. | Nada: ya disponible. |
 | **ADR-048** (módulos vendibles por separado) | **Vigente** (`01-decisiones.md`), sin código propio. | Regla de diseño: el motor no lee tablas de CPQ; CPQ consume su evento (R13, R22–R25, fuera de este brief). | Nada: es una regla, no una dependencia de código. |
 | **Brief 07c** (roles personalizados, B2) | **En `main`** (CAR-38 y anteriores lo dan por integrado). | Mecanismo de rol personalizado para delegar `core:remuneraciones.manage` sin ser owner/admin (decisión 4). No es obligatorio: owner y admin ya pueden hacer todo sin delegación. | Nada: el motor funciona con owner/admin aunque no se delegue. |
-| **Verificación de fuentes oficiales** (pregunta 13 y 17 de la especificación: SIS desde agosto de 2026, reforma, IMM, topes) | **Pendiente.** La sesión que escribió la especificación no pudo abrir sii.cl, bcentral.cl, spensiones.cl, previred.com ni dt.gob.cl (red restringida). | Valores reales que carga el seed de indicadores (PR 1, bloque 3) y los casos dorados. | **Bloquea abrir la primera PR de construcción** hasta que alguien con acceso a esos dominios confirme los valores citados en §14.2 de la especificación (Carlos habilita los dominios, decisión 17). |
+| **Verificación de fuentes oficiales** (pregunta 13 y 17 de la especificación: SIS desde agosto de 2026, reforma, IMM, topes) | **Pendiente.** La sesión que escribió la especificación no pudo abrir sii.cl, bcentral.cl, spensiones.cl, previred.com ni dt.gob.cl (red restringida). | Valores reales que carga el seed de indicadores (PR 1, bloque 3) y los casos dorados. | **Bloquea el PR M2 con seed** hasta que alguien con acceso a esos dominios confirme los valores citados en §14.2 de la especificación (Carlos habilita los dominios, decisión 17). |
 | **Cuenta y token del Banco Central (BDE)** (decisión 3) | **Pendiente**, la crea Carlos. | Fuente automática de UF/UTM (R1, PR 1 bloque 4). | No bloquea: mientras no exista, el trabajo usa el SII como primaria (R9), sin degradar el resto del brief. |
 
-**Conclusión:** ninguna dependencia de **código** bloquea; la única dependencia que bloquea abrir la primera PR es la **verificación de las fuentes oficiales**, que no requiere código y que Carlos puede resolver habilitando los dominios (decisión 17) antes de empezar el PR 1.
+**Conclusión:** ninguna dependencia de **código** bloquea; la dependencia que bloquea el seed de M2 es la **verificación de las fuentes oficiales**, que no requiere código y que Carlos puede resolver habilitando los dominios (decisión 17) antes de empezar el PR 1.
 
 ## 8. Tests
 

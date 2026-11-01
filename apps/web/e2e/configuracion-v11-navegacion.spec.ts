@@ -107,7 +107,7 @@ test("evidencia de navegación clara y oscura", async ({ page }, info) => {
         ).toBeVisible();
         await expect(
           page.getByText(
-            "Revisa la dirección «/configuracion/grupo/noexiste» o vuelve a Configuración.",
+            "Revisa la dirección /configuracion/grupo/noexiste o vuelve a Configuración.",
           ),
         ).toBeVisible();
         await page.locator("main").getByRole("link", { name: "Volver a Configuración", exact: true }).click();

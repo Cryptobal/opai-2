@@ -18,6 +18,8 @@ test("secciones planas consistentes entre Inicio y Configuración", async ({ pag
 test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }, info) => {
   await ocultarIndicadorDev(page);
   const errores: string[] = [];
+  let aperturasGuardadas = 0;
+  page.on("request", (r) => { if (r.method() === "POST" && r.postData()?.includes("core.config.set") && r.postData()?.includes("navegacion_area_abierta")) aperturasGuardadas++; });
   page.on("pageerror", (e) => { errores.push(e.message); });
   await page.emulateMedia({ reducedMotion: "reduce" });
   if (!E2E_PASSWORD) throw new Error("Falta contraseña E2E");
@@ -117,6 +119,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   await page.locator("header").getByRole("button", { name: /Notificaciones/ }).click();
   await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible(); await page.keyboard.press("Escape");
+  expect(aperturasGuardadas).toBe(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const tema of ["light", "dark"]) {
     await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), tema);
