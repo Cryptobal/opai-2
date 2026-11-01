@@ -11,11 +11,18 @@ export function margenDeSeccion(v: VersionCalculo, seccion: string): number {
   return margen.margenPct;
 }
 
+/** Valida márgenes por sección antes de calcular líneas (orden de errores estable). */
+export function validarMargenesSeccion(v: VersionCalculo): void {
+  if (!v.margenesSeccion) return;
+  const configurados = v.margenesSeccion.map((s) => s.seccion);
+  if (new Set(configurados).size !== configurados.length) throw new Error("Margen de sección duplicado");
+  if (configurados.some((s) => !v.lineas.some((l) => l.habilitada && l.seccion === s)))
+    throw new Error("Sección de margen inexistente");
+  for (const seccion of new Set(v.lineas.filter((l) => l.habilitada).map((l) => l.seccion))) margenDeSeccion(v, seccion);
+}
+
 /** Se suman bases con su margen sin redondear; instrumentos una vez por cotización. */
 export function calcularBaseConMargen(v: VersionCalculo, lineas: readonly LineaCalculada[], adicionales: ReadonlySet<string>, traza: Traza[]): Numero {
-  const configurados = v.margenesSeccion?.map((s) => s.seccion);
-  if (configurados && new Set(configurados).size !== configurados.length) throw new Error("Margen de sección duplicado");
-  if (configurados?.some((s) => !v.lineas.some((l) => l.seccion === s))) throw new Error("Sección de margen inexistente");
   const secciones = v.margenesSeccion ? [...new Set(v.lineas.filter((l) => l.habilitada).map((l) => l.seccion))] : [null];
   return sumar(secciones.map((seccion) => {
     const margenPct = seccion === null ? v.margenPct : margenDeSeccion(v, seccion);

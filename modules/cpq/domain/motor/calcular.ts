@@ -2,7 +2,7 @@ import { PCT_ESCALA } from "@opai/domain/dinero";
 import { personasPorPosicion } from "./dotacion";
 import { validarModelo } from "./formulas";
 import { calcularInstrumentos } from "./instrumentos";
-import { calcularBaseConMargen, margenDeSeccion } from "./margenes";
+import { calcularBaseConMargen, margenDeSeccion, validarMargenesSeccion } from "./margenes";
 import { calcularItem } from "./lineas";
 import { CERO, N, sumar } from "./numero";
 import { calcularPuesto } from "./puestos";
@@ -17,6 +17,7 @@ export function calcular(v: VersionCalculo, modelo: ModeloCosteo, parametros: Pa
   const activas = v.lineas.filter((l) => l.habilitada), traza: Traza[] = [], advertencias: string[] = [];
   if (new Set(v.lineas.map((l) => l.id)).size !== v.lineas.length) throw new Error("Línea duplicada");
   if (v.lineas.some((l) => l.id.endsWith(":feriados"))) throw new Error("Identificador reservado para ajuste de feriados");
+  validarMargenesSeccion(v);
   const puestos = activas.filter((l): l is Puesto => l.tipo === "puesto");
   const posiciones = puestos.reduce((s, l) => s + l.posiciones, 0);
   const personas = sumar(puestos.map((l) => personasPorPosicion(l).por(N(l.posiciones))));
