@@ -45,7 +45,7 @@ Un portal pequeño y propio para cada trabajador: datos de contacto y dirección
 ### PR 1 — Núcleo del portal (este PR)
 
 1. **Bloque A — Docs:** spec, este brief, línea en `ESTADO.md`.
-2. **Bloque B — Datos y capacidades:** `portal_trabajador.prisma`, migración `20261030212000_portal_trabajador` (aditiva, con reversa, FORCE RLS, trigger de mismo tenant), dominio puro (preferencias, silencio, campos faltantes), capacidades `mis_datos.{obtener,actualizar}`, `preferencias_notificacion.{obtener,actualizar}` y `privacidad.obtener`; manifest y registro; snapshot MCP e inventario de paridad.
+2. **Bloque B — Datos y capacidades:** `portal_trabajador.prisma`, migración `20261101090000_portal_trabajador` (aditiva, con reversa, FORCE RLS, trigger de mismo tenant), dominio puro (preferencias, silencio, campos faltantes), capacidades `mis_datos.{obtener,actualizar}`, `preferencias_notificacion.{obtener,actualizar}` y `privacidad.obtener`; manifest y registro; snapshot MCP e inventario de paridad.
 3. **Bloque C — Pantallas** (01 Inicio, 06 Más, 10 Mis datos, 11 Privacidad, 12 Notificaciones) con `PaginaPortal` y los patrones del DS.
 4. **Bloque D — Tests:** dominio, `test:db` (RLS entre tenants y entre trabajadores), snapshot MCP + paridad, e2e de las pantallas nuevas (1 worker).
 
@@ -76,6 +76,7 @@ CA1–CA6 de la spec §13. Además: CI verde (`typecheck · lint · test · test
 - **Dirección:** depende de que el servicio de geolocalización del tenant esté configurado; sin él, se escribe la dirección a mano. Para que el trabajador la busque, `core.geo.autocompletar` y `core.geo.detalle` se abren también al portal `trabajador` (una línea cada una).
 - **Activación del módulo (decidido por Carlos, 30-oct-2026):** el portal se activa por empresa desde **Plataforma → Módulos** (el seed de dev lo activa para `gard`). Hasta que se active, un tenant recibe «Módulo inactivo» y la pantalla lo muestra como estado.
 - **Sin solicitud ARCO desde el portal:** `core.cumplimiento.solicitud_crear` es del ERP y `soloPersonas`; Privacidad solo informa y muestra las solicitudes (propuesta de PR 2 en la spec §14).
+- **Corrección CAR-87, PR #189:** migración renombrada para ordenarla después de main, conservando el SQL. El SQL no es idempotente ante ejecución manual repetida: Prisma registra su aplicación; no volver a ejecutarlo directamente. No se modifican los topes de JS; la validación visual completa del CA6 y el presupuesto por ruta quedan sujetos a la evidencia del gate.
 
 ## Historial
 
