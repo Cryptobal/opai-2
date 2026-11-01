@@ -19,6 +19,7 @@ export const arcoSolicitar = defineCapability({
   }),
   output: arcoSolicitudSchema,
   efecto: "escritura",
+  sensibles: ["detalle", "campos"],
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     return crearSolicitudArcoPortal(ctx, input, dryRun);
