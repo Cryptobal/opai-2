@@ -29,6 +29,9 @@ model Cuenta {
 
   tenant         Tenant                @relation(fields: [tenantId], references: [id])
   contactos      Contacto[]
+  contactoVinculos ContactoCuenta[]
+  actividadVinculos ActividadVinculo[]
+  etiquetaAsignaciones EtiquetaAsignacion[]
   instalaciones  Instalacion[]
   representantes CuentaRepresentante[]
   // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocios.
@@ -84,6 +87,10 @@ model Contacto {
   cuenta Cuenta @relation(fields: [cuentaId], references: [id])
   // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocio_contactos.
   negocioContactos NegocioContacto[]
+  // CRM PR 2a (CAR-26): vínculos N–N con cuentas, actividad y etiquetas. FK en core.*.
+  cuentaVinculos ContactoCuenta[]
+  actividadVinculos ActividadVinculo[]
+  etiquetaAsignaciones EtiquetaAsignacion[]
 
   @@index([tenantId, cuentaId])
   @@map("contactos")
@@ -91,6 +98,7 @@ model Contacto {
 }
 
 model Instalacion {
+  actividadVinculos ActividadVinculo[]
   vinculos VinculoLaboral[]
   id                  String    @id @default(uuid(7)) @db.Uuid
   tenantId            String    @map("tenant_id") @db.Uuid

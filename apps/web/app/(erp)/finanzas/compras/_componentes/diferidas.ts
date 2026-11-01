@@ -1,0 +1,11 @@
+"use client";
+
+import { hojaDiferida } from "@/app/_components/hoja-diferida";
+
+// Hojas del libro de compras: se descargan al abrirse (ADR-037).
+export const HojaCompra = hojaDiferida(["nuevo"], () =>
+  import("./hoja-compra").then((m) => m.HojaCompra),
+);
+export const HojaLote = hojaDiferida(["lote"], () =>
+  import("./hoja-lote").then((m) => m.HojaLote),
+);

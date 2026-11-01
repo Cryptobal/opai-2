@@ -2,6 +2,9 @@ import type { ModuleManifest } from "@opai/capabilities";
 
 import { manifest as Cpq } from "@opai/mod-cpq";
 
+import { manifest as Nomina } from "@opai/mod-nomina";
+import { manifest as PortalCliente } from "@opai/mod-portal_cliente";
+import { manifest as Finanzas } from "@opai/mod-finanzas";
 import { manifest as Tickets } from "@opai/mod-tickets";
 
 import { manifest as Rondas } from "@opai/mod-rondas";
@@ -18,6 +21,9 @@ export const modulos: readonly ModuleManifest[] = [
   agente,
   Comercial,
   Rondas,
+  Nomina,
+  PortalCliente,
+  Finanzas,
   Tickets,
   Cpq,
   // scaffold:module — las entradas se agregan sobre esta línea

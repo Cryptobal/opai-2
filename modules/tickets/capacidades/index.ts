@@ -6,10 +6,12 @@ import { ticketsCrear, ticketsComentar } from "./escritura";
 import { ticketsCambiarEstado, ticketsReasignar } from "./estado";
 import { ticketsListar, ticketsObtener } from "./lectura";
 import { tiposCrear, tiposListar } from "./tipos";
+import { tiposActualizar } from "./tipos-actualizar";
 
 export const capacidades: readonly Capacidad[] = [
   tiposListar,
   tiposCrear,
+  tiposActualizar,
   ticketsListar,
   ticketsObtener,
   ticketsCrear,

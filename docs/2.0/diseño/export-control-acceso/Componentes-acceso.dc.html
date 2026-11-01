@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<div style="display:flex;flex-direction:column;background:var(--ds-bg)">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div data-theme="{{ t.id }}" style="background:var(--ds-bg);padding:24px 16px;box-sizing:border-box;border-bottom:1px solid var(--ds-border)">
+<div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:32px">
+<div><div style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-muted)">Control de acceso v1 · Piezas nuevas del DS · {{ t.label }}</div>
+<div style="font:600 28px/34px var(--font-sans);color:var(--ds-fg)">Hoja de componentes</div></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font:600 18px/26px var(--font-sans);color:var(--ds-fg)">EscanerDocumento <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,24px">Nuevo</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ modosScan }}" value="Cédula" hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+<sc-for list="{{ scans }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="height:140px;border-radius:16px;border:2px dashed {{ s.borde }};background:var(--ds-fill);display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;box-sizing:border-box;font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ s.texto }}</div>
+<div style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ s.estado }}</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="zap" hint-size="140px,56px">Linterna</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ true }}" hint-size="140px,56px">Deshabilitado</x-import>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font:600 18px/26px var(--font-sans);color:var(--ds-fg)">ResultadoAcceso <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,24px">Nuevo</x-import></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+<sc-for list="{{ resultados }}" as="r" hint-placeholder-count="7">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="{{ r.tono }}" titulo="{{ r.titulo }}" icono="{{ r.icono }}" hint-size="100%,96px">{{ r.texto }}</x-import>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font:600 18px/26px var(--font-sans);color:var(--ds-fg)">IndicadorConexion <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,24px">Nuevo</x-import></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ conexiones }}" as="c" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tono }}" hint-size="200px,28px">{{ c.texto }}</x-import>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font:600 18px/26px var(--font-sans);color:var(--ds-fg)">FilaEnSitio <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,24px">Nuevo</x-import></div>
+<div style="display:flex;flex-direction:column;gap:8px;max-width:560px">
+<sc-for list="{{ filas }}" as="f" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;min-height:72px;padding:8px 12px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<div style="flex:1;min-width:0">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font:600 16px/24px var(--font-sans);color:var(--ds-fg)">{{ f.nombre }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="90px,24px">{{ f.tipo }}</x-import></div>
+<div style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">{{ f.empresa }} · desde {{ f.desde }} · <span style="font-family:var(--font-mono)">{{ f.patente }}</span></div>
+<div style="margin-top:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ f.tono }}" hint-size="140px,24px">{{ f.perm }}</x-import></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="96px,56px" style="min-height:56px">Salida</x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      themes: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      modosScan: ["Cédula", "Pasaporte", "Patente", "Escribir"],
+      scans: [
+        { estado: "Buscando", texto: "Alinea la cédula dentro del marco", borde: "var(--ds-border-strong)" },
+        { estado: "Leído", texto: "Leído · 16.234.567-8", borde: "var(--ds-success-fg)" },
+        { estado: "No se pudo leer", texto: "No se pudo leer. Pasa a «Escribir».", borde: "var(--ds-danger-fg)" },
+        { estado: "Sin permiso de cámara", texto: "Permite la cámara en los ajustes del equipo", borde: "var(--ds-warning-fg)" },
+      ],
+      resultados: [
+        { tono: "success", icono: "check", titulo: "Autorizado", texto: "Prerregistrado por Marcela Rojas." },
+        { tono: "neutral", icono: "info", titulo: "Sin lista", texto: "No hay lista cargada. Registro manual." },
+        { tono: "info", icono: "info", titulo: "Fuera de lista, permitido", texto: "La excepción está activa y queda auditada." },
+        { tono: "warning", icono: "alert-triangle", titulo: "No autorizado", texto: "No está en la lista ni prerregistrado. Puedes pedir una excepción." },
+        { tono: "danger", icono: "lock", titulo: "Acceso no autorizado", texto: "Avisa a tu supervisor." },
+        { tono: "warning", icono: "clock", titulo: "Fuera de horario", texto: "Su horario permitido es 08:00–18:00." },
+        { tono: "warning", icono: "alert-triangle", titulo: "Sin validar con la lista actual", texto: "Sin conexión. Se validará al sincronizar." },
+      ],
+      conexiones: [{ tono: "success", texto: "En línea" }, { tono: "warning", texto: "Sin conexión (3 pendientes)" }, { tono: "info", texto: "Sincronizando" }, { tono: "warning", texto: "Listas desactualizadas (más de 24 h)" }],
+      filas: [
+        { nombre: "Diego Fuentes", tipo: "Proveedor", empresa: "Distribuidora Andes Ltda.", desde: "08:42", patente: "ABCD·12", perm: "Permanencia normal", tono: "success" },
+        { nombre: "Luis Pérez", tipo: "Contratista", empresa: "Mantención Norte SpA", desde: "07:50", patente: "—", perm: "Por vencer · 40 min", tono: "warning" },
+        { nombre: "Camila Herrera Soto", tipo: "Visita", empresa: "Bodegas del Sur S.A.", desde: "01:10", patente: "WXYZ·34", perm: "Excedida · +2 h", tono: "danger" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -299,7 +299,7 @@ describe("core.users.*", () => {
     });
   });
   it("permite suspender una membresía histórica incoherente sin conceder acceso", async () => {
-    const semilla = semillaTenant("viewer");
+    const semilla = semillaTenant("supervisor");
     semilla.membership[1]!.portales = ["cliente"];
     const { ctx } = contextoDePrueba({ rol: "owner", semilla });
     expect(

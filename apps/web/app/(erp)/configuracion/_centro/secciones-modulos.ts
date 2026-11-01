@@ -2,8 +2,13 @@ import type { ReactNode } from "react";
 
 import { SeccionCatalogos } from "@/app/(erp)/negocios/_configuracion/seccion-catalogos";
 import { SeccionEmbudo } from "@/app/(erp)/negocios/_configuracion/seccion-embudo";
+import { SeccionTiposTicket } from "@/app/(erp)/configuracion/_tickets/seccion-tipos";
+import { SeccionConceptos } from "@/app/(erp)/configuracion/_nomina/seccion-conceptos";
+import { SeccionPortalCliente } from "@/app/(erp)/configuracion/_portal_cliente/seccion-portal-cliente";
 import { SeccionCanales } from "@/app/(erp)/configuracion/_leads/seccion-canales";
 import { SeccionTiposIncidente } from "@/app/(erp)/configuracion/_rondas/seccion-tipos-incidente";
+import { SeccionCentrosCosto } from "@/app/(erp)/configuracion/_finanzas/seccion-centros-costo";
+import { SeccionPlanCuentas } from "@/app/(erp)/configuracion/_finanzas/seccion-plan-cuentas";
 
 /**
  * Pestaña que un módulo aporta a su página de Configuración → Módulos → <módulo> (ADR-018): el
@@ -43,6 +48,23 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       Contenido: SeccionCanales,
     },
   ],
+  nomina: [
+    {
+      id: "conceptos",
+      etiqueta: "Conceptos",
+      permiso: "nomina:config.manage",
+      Contenido: SeccionConceptos,
+    },
+  ],
+  portal_cliente: [
+    {
+      id: "portal",
+      etiqueta: "Portal Cliente",
+      // Permiso copiado del manifest de Portal Cliente (CAR-88): qué ve cada cliente y quién entra.
+      permiso: "portal_cliente:config.read",
+      Contenido: SeccionPortalCliente,
+    },
+  ],
   rondas: [
     {
       id: "incidentes",
@@ -50,6 +72,28 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       // Permiso copiado del manifest de Rondas (#137): rondas:configurar gestiona el catálogo.
       permiso: "rondas:configurar",
       Contenido: SeccionTiposIncidente,
+    },
+  ],
+  tickets: [
+    {
+      id: "tipos",
+      etiqueta: "Tipos",
+      permiso: "tickets:tipos.manage",
+      Contenido: SeccionTiposTicket,
+    },
+  ],
+  finanzas: [
+    {
+      id: "plan-cuentas",
+      etiqueta: "Plan de cuentas",
+      permiso: "finanzas:plan.manage",
+      Contenido: SeccionPlanCuentas,
+    },
+    {
+      id: "centros-costo",
+      etiqueta: "Centros de costo",
+      permiso: "finanzas:read",
+      Contenido: SeccionCentrosCosto,
     },
   ],
 };

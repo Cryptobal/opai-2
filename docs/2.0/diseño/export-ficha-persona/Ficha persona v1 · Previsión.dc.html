@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="per" title="Personas" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Diego Fuentes Araya · Laboral" title="Previsión" subtitle="Base de contratos, anexos, liquidaciones y finiquitos" badge="{{ verifBadge }}" hint-size="100%,80px"></x-import>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a la previsión" description="Pídele acceso a un administrador." hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Decide Carlos · Propuesta B1: validar cambios de cuenta" hint-size="100%,56px">Aplica a Pago, no a Previsión.</x-import>
+<sc-if value="{{ masked }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" icono="lock" titulo="Datos sensibles ocultos" hint-size="100%,56px">Tu rol no tiene permiso de lectura sensible. Pídelo a un administrador.</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Sistema previsional" hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="AFP" value="{{ afp }}" options="{{ afps }}" disabled="{{ masked }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Régimen previsional" value="afp" options="{{ regimenes }}" disabled="{{ masked }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo de pensión" value="no" options="{{ pensiones }}" disabled="{{ masked }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Jubilado" checked="{{ false }}" disabled="{{ masked }}" hint-size="100%,44px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Salud" hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Sistema de salud" value="isapre" options="{{ saludes }}" disabled="{{ masked }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Isapre y plan" value="{{ isapre }}" disabled="{{ masked }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="% adicional" value="{{ adicional }}" disabled="{{ masked }}" hint-size="100%,72px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Cotiza" hint-size="100%,180px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="AFP" checked="{{ true }}" disabled="{{ masked }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="AFC" checked="{{ true }}" disabled="{{ masked }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Salud" checked="{{ true }}" disabled="{{ masked }}" hint-size="100%,44px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="APV, cargas y discapacidad" description="Campo por verificar contra LRE / Previred" hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="APV · institución, régimen A o B y monto" value="{{ apv }}" disabled="{{ masked }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Cargas familiares" rows="{{ cargas }}" hint-size="100%,120px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Discapacidad o pensión de invalidez" checked="{{ false }}" disabled="{{ masked }}" hint-size="100%,44px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Usado en" rows="{{ usado }}" hint-size="100%,100px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ masked }}" hint-size="100px,40px">Guardar</x-import>
+</x-import>
+</div>
+</sc-if>
+</x-import>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;masked&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const masked = estado === "masked";
+    const m = (v) => (masked ? "••••" : v);
+    const o = (a) => a.map(([value, label]) => ({ value, label }));
+    return {
+      device, masked,
+      theme: this.props.theme ?? "light",
+      isForbidden: estado === "forbidden",
+      notForbidden: estado !== "forbidden",
+      verifBadge: NS.Badge ? h(NS.Badge, { tone: "neutral" }, "Campo por verificar contra LRE / Previred") : null,
+      afp: "habitat",
+      afps: o([["habitat", "Habitat"], ["capital", "Capital"], ["cuprum", "Cuprum"], ["modelo", "Modelo"], ["planvital", "PlanVital"], ["provida", "ProVida"], ["uno", "Uno"]]),
+      regimenes: o([["afp", "AFP"], ["ips", "IPS (ex INP)"]]),
+      pensiones: o([["no", "Sin pensión"], ["vejez", "Vejez"], ["invalidez", "Invalidez"]]),
+      saludes: o([["fonasa", "Fonasa"], ["isapre", "Isapre"]]),
+      isapre: m("Colmena · Plan Esencial"),
+      adicional: m("2,1 %"),
+      apv: m("Sin APV"),
+      cargas: [{ label: "Camila Fuentes · hija", value: m("Tramo B") }, { label: "Tomás Fuentes · hijo", value: m("Tramo B") }],
+      usado: [{ label: "Contrato vigente", value: "Indefinido · 01-03-2025", numeric: true }, { label: "Última liquidación", value: "Octubre 2026" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+// Módulo Nómina (Brief 25 · PR 1): períodos de remuneraciones, novedades del período, préstamos con
+// plan de cuotas (B3), reglas de anticipo quincenal (B2), conceptos de haberes y descuentos, y el
+// calendario de obligaciones. Sin cálculo de liquidaciones: el motor de sueldos aún no existe (PR 2).
+// Schema propio `nomina`. Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas
+// snake_case por @map. Como en Rondas, `tenant_id` y las referencias a tablas del núcleo
+// (personas, documentos) NO llevan @relation: sus FK y el trigger de mismo tenant van en el SQL de
+// la migración, para no tocar los modelos de core ni de maestros.
+
+/// Período de remuneraciones: un mes calendario por empresa (nomina.md §4, §6).
+model NominaPeriodo {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  anio             Int
+  mes              Int
+  /// "abierto" | "en_revision" | "cerrado" | "pagado". Transiciones en @opai/domain (nomina/periodo).
+  estado           String    @default("abierto")
+  inicio           DateTime  @db.Date
+  fin              DateTime  @db.Date
+  /// Fecha de cierre prevista: el día de cierre configurado, acotado al último día del mes.
+  cierrePrevisto   DateTime  @map("cierre_previsto") @db.Date
+  enRevisionEn     DateTime? @map("en_revision_en") @db.Timestamptz(6)
+  cerradoEn        DateTime? @map("cerrado_en") @db.Timestamptz(6)
+  pagadoEn         DateTime? @map("pagado_en") @db.Timestamptz(6)
+  /// Usuario que cerró el período (auditoría; sin FK, el usuario es global).
+  cerradoPor       String?   @map("cerrado_por") @db.Uuid
+  /// Motivo de la última devolución a una etapa anterior (reabrir).
+  motivoReapertura String?   @map("motivo_reapertura")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  novedades    NominaNovedad[]
+  obligaciones NominaObligacion[]
+
+  @@unique([tenantId, anio, mes])
+  @@index([tenantId, estado])
+  @@map("periodos")
+  @@schema("nomina")
+}
+
+/// Novedad del período: licencia, ausencia, horas extra, anticipo, préstamo (cuota) o descuento.
+/// Licencias, ausencias y horas extra se miden en `cantidad` (días u horas); anticipos, préstamos y
+/// descuentos en `monto_clp` (entero). El respaldo es un documento del núcleo (`documento_id`).
+model NominaNovedad {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  periodoId       String    @map("periodo_id") @db.Uuid
+  /// FK a core.personas en el SQL (sin @relation: no se tocan los modelos de maestros).
+  personaId       String    @map("persona_id") @db.Uuid
+  /// "licencia" | "ausencia" | "horas_extra" | "anticipo" | "prestamo" | "descuento".
+  tipo            String
+  /// "manual" | "carga_masiva" | "anticipo_quincenal" | "prestamo_cuota".
+  origen          String    @default("manual")
+  /// "vigente" | "anulada" (una novedad no se borra: se anula con motivo).
+  estado          String    @default("vigente")
+  fechaDesde      DateTime  @map("fecha_desde") @db.Date
+  fechaHasta      DateTime? @map("fecha_hasta") @db.Date
+  /// Días (licencia, ausencia) u horas (horas extra), con hasta 2 decimales.
+  cantidad        Decimal?  @db.Decimal(8, 2)
+  /// Pesos enteros (anticipo, préstamo, descuento). Nunca float.
+  montoClp        Int?      @map("monto_clp")
+  conceptoId      String?   @map("concepto_id") @db.Uuid
+  prestamoCuotaId String?   @map("prestamo_cuota_id") @db.Uuid
+  /// Respaldo en core.documentos (licencia, autorización de descuento). Referencia validada por la
+  /// capacidad y por el trigger de mismo tenant.
+  documentoId     String?   @map("documento_id") @db.Uuid
+  nota            String?
+  anuladaEn       DateTime? @map("anulada_en") @db.Timestamptz(6)
+  motivoAnulacion String?   @map("motivo_anulacion")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  periodo       NominaPeriodo   @relation(fields: [periodoId], references: [id], onDelete: Restrict)
+  concepto      NominaConcepto? @relation(fields: [conceptoId], references: [id], onDelete: Restrict)
+  prestamoCuota NominaCuota?    @relation(fields: [prestamoCuotaId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, periodoId, tipo])
+  @@index([tenantId, personaId])
+  @@map("novedades")
+  @@schema("nomina")
+}
+
+/// Préstamo a una persona, descontado en cuotas mensuales sin interés (B3, decisión de Carlos 30-oct).
+model NominaPrestamo {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  personaId        String    @map("persona_id") @db.Uuid
+  /// Monto total en pesos enteros.
+  montoTotal       Int       @map("monto_total")
+  cuotas           Int
+  primeraCuotaAnio Int       @map("primera_cuota_anio")
+  primeraCuotaMes  Int       @map("primera_cuota_mes")
+  /// "activo" | "pagado" | "cancelado".
+  estado           String    @default("activo")
+  motivo           String?
+  /// Autorización escrita del trabajador, en core.documentos.
+  documentoId      String?   @map("documento_id") @db.Uuid
+  canceladoEn      DateTime? @map("cancelado_en") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  plan NominaCuota[]
+
+  @@index([tenantId, personaId, estado])
+  @@map("prestamos")
+  @@schema("nomina")
+}
+
+/// Cuota del plan de un préstamo. Al abrirse el período de su mes se vuelve novedad `prestamo`.
+model NominaCuota {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  prestamoId String   @map("prestamo_id") @db.Uuid
+  numero     Int
+  anio       Int
+  mes        Int
+  monto      Int
+  /// "pendiente" | "descontada" | "condonada".
+  estado     String   @default("pendiente")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  prestamo  NominaPrestamo  @relation(fields: [prestamoId], references: [id], onDelete: Restrict)
+  novedades NominaNovedad[]
+
+  @@unique([prestamoId, numero])
+  @@index([tenantId, anio, mes, estado])
+  @@map("prestamo_cuotas")
+  @@schema("nomina")
+}
+
+/// Regla de anticipo quincenal de una persona (B2): dato que la ficha de Personas (#165) absorberá.
+model NominaReglaAnticipo {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  personaId String   @map("persona_id") @db.Uuid
+  activa    Boolean  @default(true)
+  /// "monto_fijo" (CLP) | "porcentaje_base" (puntos base del sueldo base; requiere el motor, PR 2).
+  modo      String   @default("monto_fijo")
+  valor     Int
+  /// Día del mes en que se paga (1–31); el último día si el mes es más corto.
+  diaMes    Int      @default(15) @map("dia_mes")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, personaId])
+  @@map("reglas_anticipo")
+  @@schema("nomina")
+}
+
+/// Concepto de haber o descuento con su tratamiento (imponible, tributable) y su código LRE. Los
+/// códigos LRE nunca se dan por oficiales: `lre_verificado` parte en false (decisión de Carlos 4).
+model NominaConcepto {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  codigo        String
+  nombre        String
+  /// "haber" | "descuento".
+  tipo          String
+  imponible     Boolean  @default(false)
+  tributable    Boolean  @default(false)
+  codigoLre     String?  @map("codigo_lre")
+  lreVerificado Boolean  @default(false) @map("lre_verificado")
+  orden         Int      @default(0)
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  novedades NominaNovedad[]
+
+  @@unique([tenantId, codigo])
+  @@map("conceptos")
+  @@schema("nomina")
+}
+
+/// Obligación del calendario: LRE, Previred y retención F29 por mes; DJ y certificados por año. El
+/// plazo se muestra solo si `plazo_verificado` (formatos y plazos oficiales por verificar). La unicidad
+/// (tenant, tipo, año, mes) vive en dos índices parciales del SQL (mes nulo en las anuales).
+model NominaObligacion {
+  id                     String    @id @default(uuid(7)) @db.Uuid
+  tenantId               String    @map("tenant_id") @db.Uuid
+  periodoId              String?   @map("periodo_id") @db.Uuid
+  /// "lre" | "previred" | "f29_retencion" | "dj_sueldos" | "certificado_sueldos".
+  tipo                   String
+  anio                   Int
+  mes                    Int?
+  /// "por_generar" | "generado" | "con_errores" | "cargado" | "pagado".
+  estado                 String    @default("por_generar")
+  fechaLimite            DateTime? @map("fecha_limite") @db.Date
+  plazoVerificado        Boolean   @default(false) @map("plazo_verificado")
+  /// Comprobante que sube el usuario (carga en Mi DT, pago en Previred), en core.documentos.
+  comprobanteDocumentoId String?   @map("comprobante_documento_id") @db.Uuid
+  nota                   String?
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  periodo NominaPeriodo? @relation(fields: [periodoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, anio, mes])
+  @@map("obligaciones")
+  @@schema("nomina")
+}

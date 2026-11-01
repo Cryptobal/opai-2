@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia" title="Auditoría de accesos del fiscalizador" subtitle="Cada ingreso al portal de fiscalización queda registrado y no se puede borrar." badge="{{ propBadge }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="120px,40px">Exportar</x-import>
+</x-import>
+<div class="chip-row" style="margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Período" valor="Últimos 90 días" on-quitar="{{ noop }}" hint-size="190px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px">Funcionario o RUT</x-import>
+</div>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:52px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="18%" hint-size="18%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="24%" hint-size="24%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="14%" hint-size="14%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="12%" hint-size="12%,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="eye" title="Ningún fiscalizador ha ingresado en este período" description="Cuando un funcionario @dt.gob.cl consulte tu empresa, lo verás aquí." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la auditoría" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-AUD-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a la auditoría" description="La ven el dueño, administración y el rol Inspector DT. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Señal: red de la DT" style="margin-bottom:16px" hint-size="100%,56px">Marcamos los accesos cuya IP pertenece a rangos conocidos de la DT. Es una señal, no una validación: el acceso sigue siendo por correo.</x-import>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" hint-size="100%,400px"></x-import>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isDatos: false };
+    const b = A.base(this.props, "aud", "Auditoría fiscalizador");
+    const h = A.h;
+    const rows = [
+      { id: 1, f: "30-10-2026 14:32:08", mail: "mlopez@dt.gob.cl", rut: "76.543.210-K", ip: "200.6.115.42", vio: "Reporte de asistencia · Camila Herrera Soto · todo el historial", red: true },
+      { id: 2, f: "30-10-2026 14:29:51", mail: "mlopez@dt.gob.cl", rut: "76.543.210-K", ip: "200.6.115.42", vio: "Ingreso al portal · búsqueda por RUT", red: true },
+      { id: 3, f: "18-09-2026 10:04:17", mail: "rcontreras@dt.gob.cl", rut: "76.543.210-K", ip: "190.98.214.7", vio: "Jornada diaria · Planta Quilicura · 08-2026", red: false },
+      { id: 4, f: "18-09-2026 10:02:40", mail: "rcontreras@dt.gob.cl", rut: "76.543.210-K", ip: "190.98.214.7", vio: "Documentación · LRE 08-2026", red: false },
+      { id: 5, f: "02-08-2026 16:45:03", mail: "pvaldes@dt.gob.cl", rut: "76.543.210-K", ip: "200.6.115.40", vio: "Incidentes técnicos · 07-2026", red: true },
+    ];
+    const cols = [
+      { key: "f", label: "Fecha y hora", render: (r) => h("span", { className: "t-numeric", style: { whiteSpace: "nowrap" } }, r.f) },
+      { key: "mail", label: "Funcionario", strong: true },
+      { key: "rut", label: "RUT consultado", mono: true, muted: true },
+      { key: "ip", label: "IP de origen", render: (r) => h("span", { style: { display: "inline-flex", gap: 8, alignItems: "center", flexWrap: "wrap" } }, h("span", { className: "t-mono muted" }, r.ip), b.isB && r.red ? A.badge("info", "Red DT") : null) },
+      { key: "vio", label: "Qué vio", muted: true },
+    ];
+    return {
+      ...b, rows, cols,
+      propBadge: b.isB ? h(A.Propuesta, {}) : null,
+      toCard: (r) => ({ title: r.mail, subtitle: r.vio, meta: r.f + " · " + r.ip, badge: b.isB && r.red ? { tone: "info", label: "Red DT" } : null }),
+      emptyAction: A.btn("Cambiar período", { size: "lg" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
