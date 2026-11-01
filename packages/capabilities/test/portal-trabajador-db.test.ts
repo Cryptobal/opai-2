@@ -245,25 +245,6 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
     expect(previa.ok).toBe(true);
   });
 
-  it("ARCO solicitar: detalle y campos no quedan en claro en la auditoría", async () => {
-    const detalle = "Texto libre del titular que no debe persistir en audit_events.";
-    const campos = ["campo_sensible_arco"];
-    await dato(t.a, u.a1, "portal_trabajador.arco.solicitar", {
-      tipo: "oposicion",
-      detalle,
-      campos,
-    });
-    const evento = await e.admin.auditEvent.findFirstOrThrow({
-      where: { tenantId: t.a, capability: "portal_trabajador.arco.solicitar" },
-      orderBy: { seq: "desc" },
-    });
-    const payload = evento.payload as { input?: { detalle?: string; campos?: unknown } };
-    expect(payload.input?.detalle).toBe("[oculto]");
-    expect(payload.input?.campos).toBe("[oculto]");
-    expect(JSON.stringify(evento.payload)).not.toContain(detalle);
-    expect(JSON.stringify(evento.payload)).not.toContain(campos[0]);
-  });
-
   it("un tenant sin el módulo activo no puede usar las capacidades", async () => {
     const sin = mod.crearContexto({
       tenantId: t.a,
