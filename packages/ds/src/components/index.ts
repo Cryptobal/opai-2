@@ -27,7 +27,7 @@ export { CerrarPopover, Tooltip } from "./tooltip";
 export { BarraSeleccion, Kbd, type OpcionSegmentada, Segmentado } from "./segmentado";
 export { type OpcionSelect, Select } from "./select";
 export { Skeleton } from "./skeleton";
-export { Switch } from "./switch";
+export { Switch, type SwitchProps } from "./switch";
 export { Table, Td, Th, Tr } from "./table";
 export { ContadorTab, estiloTab, Tabs, type Tab } from "./tabs";
 export { TabsEstado } from "./tabs-estado";

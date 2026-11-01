@@ -30,6 +30,7 @@ export const geoAutocompletar = defineCapability({
   descripcion:
     "Sugerencias de direcciones en Chile para un texto (autocompletado). Devuelve placeId para pedir el detalle con core.geo.detalle.",
   permiso: null,
+  portales: ["erp", "trabajador"], // «Mis datos» del trabajador busca su dirección (Brief 15).
   input: z.object({
     texto: z.string().trim().min(3).max(200),
     sesion: z.string().max(100).optional(),
@@ -51,6 +52,7 @@ export const geoDetalle = defineCapability({
   descripcion:
     "Dirección normalizada (calle, comuna, región, coordenadas) de una sugerencia de autocompletado.",
   permiso: null,
+  portales: ["erp", "trabajador"], // «Mis datos» del trabajador busca su dirección (Brief 15).
   input: z.object({ placeId: z.string().min(3).max(300), sesion: z.string().max(100).optional() }),
   output: direccionSchema.nullable(),
   efecto: "lectura",
