@@ -56,7 +56,7 @@ export function TableroNegocios(p: {
           <ArrastreTablero etapas={etapas}>
             <div
               id="columnas-tablero"
-              className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:px-0"
+              className="-mx-4 flex min-w-0 max-w-[calc(100%+2rem)] items-start snap-x snap-mandatory data-[arrastrando]:snap-none gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:max-w-full md:items-stretch md:px-0"
             >
               {p.etapas.map((e) => (
                 <ColumnaEtapa

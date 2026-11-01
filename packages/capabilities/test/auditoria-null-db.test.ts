@@ -31,7 +31,7 @@ describe.skipIf(!urlPropietario)("lecturas durante expansión de auditoría", ()
     try {
       await e.admin.$executeRaw`INSERT INTO core.audit_events
         (id, tenant_id, actor_type, capability, payload) VALUES
-        (${id}::uuid, ${tenant.id}::uuid, 'system', 'core.prueba', '{"input":{}}'::jsonb)`;
+        (${id}::uuid, ${tenant.id}::uuid, 'system', 'core.cuentas.create', '{"input":{}}'::jsonb)`;
       const ctx = (tenantId: string, rol: "owner" | "viewer", alcance = false) =>
         mod.crearContexto({
           tenantId,
@@ -43,10 +43,11 @@ describe.skipIf(!urlPropietario)("lecturas durante expansión de auditoría", ()
         ["core.actividad.list", "items"],
         ["core.audit.list", "eventos"],
       ]) {
-        // La propia lectura ahora agrega un evento: filtrar la fila histórica bajo expansión.
+        // La fila histórica representa una escritura registrada. Filtrarla separa el evento
+        // nullable de los eventos que agregan las propias lecturas auditadas.
         expect(
           await mod.executeCapability(ctx(tenant.id, "owner"), capacidad!, {
-            capability: "core.prueba",
+            capability: "core.cuentas.create",
           }),
         ).toMatchObject({
           ok: true,
@@ -54,7 +55,7 @@ describe.skipIf(!urlPropietario)("lecturas durante expansión de auditoría", ()
         });
         expect(
           await mod.executeCapability(ctx(otro.id, "owner"), capacidad!, {
-            capability: "core.prueba",
+            capability: "core.cuentas.create",
           }),
         ).toMatchObject({
           ok: true,

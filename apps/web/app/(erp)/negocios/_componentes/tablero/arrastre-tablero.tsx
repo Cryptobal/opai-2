@@ -2,6 +2,8 @@
 
 import { type DragEvent, type ReactNode, useRef } from "react";
 
+import { useArrastreTactil } from "./use-arrastre-tactil";
+
 import { type EtapaTablero, useMover } from "./use-mover";
 
 const de = (e: DragEvent, sel: string) =>
@@ -10,7 +12,7 @@ const de = (e: DragEvent, sel: string) =>
 /**
  * Arrastre entre columnas con la API nativa de HTML (sin librerías, ADR-037), por delegación sobre
  * las columnas y tarjetas que renderiza el servidor (`data-etapa`, `data-negocio`). La alternativa
- * accesible es «Mover a…» en cada tarjeta; en táctil (iOS no arrastra) también. Anuncia el resultado
+ * accesible es «Mover a…» en cada tarjeta; en táctil se activa con una pulsación sostenida. Anuncia el resultado
  * en una región viva para lectores de pantalla.
  */
 export function ArrastreTablero({
@@ -21,6 +23,7 @@ export function ArrastreTablero({
   children: ReactNode;
 }) {
   const { mover, anuncio } = useMover();
+  const tactil = useArrastreTactil(etapas, mover);
   const origen = useRef<{ negocio: string; etapa: string } | null>(null);
   const marcar = (col: HTMLElement | null) => {
     document.querySelectorAll("[data-sobre]").forEach((c) => {
@@ -30,7 +33,8 @@ export function ArrastreTablero({
   };
   return (
     <div
-      className="contents"
+      ref={tactil}
+      className="min-w-0"
       onDragStart={(e) => {
         const card = de(e, "[data-negocio]");
         const col = de(e, "[data-etapa]");
