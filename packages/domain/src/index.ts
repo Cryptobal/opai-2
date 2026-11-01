@@ -37,6 +37,7 @@ export * from "./capas-sueldo";
 export * from "./rondas";
 
 export * from "./portal-trabajador";
+export * from "./portal-trabajador-arco";
 export * from "./nomina";
 
 // Nómina conserva el contador público; Pauta expone su lista de fechas con nombre propio.

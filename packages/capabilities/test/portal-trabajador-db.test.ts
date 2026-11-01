@@ -158,6 +158,7 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
     await e.admin.persona.update({ where: { id: p.a2 }, data: { archivadaEn: new Date() } });
     const r = await correr(t.a, u.a2, "portal_trabajador.mis_datos.obtener");
     expect(r.ok ? "OK" : r.error.code).toBe("NOT_FOUND");
+    await e.admin.persona.update({ where: { id: p.a2 }, data: { archivadaEn: null } });
   });
 
   it("sin elección, las preferencias son el silencio por defecto; luego se guardan por persona", async () => {
@@ -185,15 +186,63 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
 
   it("las preferencias de un compañero y de otra empresa no se ven ni se mezclan", async () => {
     await dato(t.a, u.a1, "portal_trabajador.preferencias_notificacion.actualizar", { preferencias: { empresa: { push: true } } });
-    const delCompanero = await correr(t.a, u.a2, "portal_trabajador.preferencias_notificacion.obtener");
-    expect(delCompanero.ok ? "OK" : delCompanero.error.code).toBe("NOT_FOUND"); // a2 está archivada: no hay ficha
+    const delCompanero = await dato<Preferencias>(t.a, u.a2, "portal_trabajador.preferencias_notificacion.obtener");
+    expect(delCompanero.personalizadas).toBe(false);
+    expect(delCompanero.preferencias.empresa?.push).toBe(false);
     const deB = await dato<Preferencias>(t.b, u.b1, "portal_trabajador.preferencias_notificacion.obtener");
     expect(deB.personalizadas).toBe(false);
     expect(deB.preferencias["empresa"]?.push).toBe(false);
-    // Tampoco con el rol de aplicación directo: sin tenant fijado, la RLS no devuelve filas.
-    expect(await e.appSinTenant.preferenciaNotificacion.count().catch(() => 0)).toBe(0);
+    expect(await e.appSinTenant.preferenciaNotificacion.count()).toBe(0);
     const propias = await e.forTenant(t.b).preferenciaNotificacion.findMany();
     expect(propias).toHaveLength(0);
+  });
+
+  it("ARCO: el trabajador crea solicitudes propias y no ve las de un compañero", async () => {
+    const detalleTexto = "Necesito corregir mi dirección registrada en la ficha.";
+    const creada = await dato<{ id: string; mensaje: string }>(t.a, u.a1, "portal_trabajador.arco.solicitar", {
+      tipo: "rectificacion",
+      detalle: detalleTexto,
+      campos: ["dirección"],
+    });
+    expect(creada.mensaje).toContain("30 días");
+    const audit = await e.admin.auditEvent.findFirst({
+      where: { tenantId: t.a, capability: "portal_trabajador.arco.solicitar" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(audit).not.toBeNull();
+    const payload = audit?.payload as { input?: { detalle?: string; campos?: unknown } };
+    expect(payload?.input?.detalle).toBe("[oculto]");
+    expect(payload?.input?.campos).toBe("[oculto]");
+    expect(JSON.stringify(audit)).not.toContain(detalleTexto);
+    expect(JSON.stringify(audit)).not.toContain("dirección");
+    const lista = await dato<{ items: { id: string; tipo: string }[] }>(t.a, u.a1, "portal_trabajador.arco.listar");
+    expect(lista.items.some((s) => s.id === creada.id)).toBe(true);
+    const listaA2 = await dato<{ items: { id: string }[] }>(t.a, u.a2, "portal_trabajador.arco.listar");
+    expect(listaA2.items.some((s) => s.id === creada.id)).toBe(false);
+    const exportacion = await dato<{ nombreArchivo: string; contenido: { titular: { rut: string } } }>(
+      t.a,
+      u.a1,
+      "portal_trabajador.mis_datos.exportar",
+    );
+    expect(exportacion.nombreArchivo).toMatch(/^mis-datos-opai-/);
+    expect(exportacion.contenido.titular.rut).toBe("11111111-1");
+    const agente = mod.crearContexto({
+      tenantId: t.a,
+      actor: { tipo: "agent", id: "k-pt", viaUserId: u.a1 },
+      portal: "trabajador",
+      portalesMembresia: ["trabajador"],
+      modulosActivos: ["portal_trabajador"],
+      scopes: ["*"],
+      rol: "owner",
+      medidor: { registrar: async () => undefined },
+    });
+    const previa = await mod.executeCapability(
+      agente,
+      "portal_trabajador.arco.solicitar",
+      { tipo: "bloqueo", detalle: "Quiero bloquear el uso de mis datos para marketing." },
+      { dryRun: true },
+    );
+    expect(previa.ok).toBe(true);
   });
 
   it("un tenant sin el módulo activo no puede usar las capacidades", async () => {

@@ -6,27 +6,13 @@ import { tituloPagina } from "@/app/_components/portales";
 import { fechaCorta } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { estadoTrabajador, SIN_FICHA } from "../_componentes/estado";
+import { AccionesPrivacidadDiferidas } from "../_componentes/acciones-privacidad-diferida";
+import { estadoTrabajador, textosEstadoTrabajador } from "../_componentes/estado";
 import type { Privacidad } from "../_componentes/tipos";
 
 export const metadata = { title: tituloPagina("trabajador", "Privacidad") };
 
-const TIPO: Record<string, string> = {
-  acceso: "Acceso a mis datos",
-  rectificacion: "Corregir mis datos",
-  cancelacion: "Eliminar mis datos",
-  oposicion: "Oponerme a un uso",
-  portabilidad: "Llevarme mis datos",
-  bloqueo: "Bloquear el uso",
-};
-const ESTADO: Record<string, string> = {
-  recibida: "Recibida",
-  en_proceso: "En proceso",
-  resuelta: "Resuelta",
-  rechazada: "Rechazada",
-};
-
-/** Pantalla 11 · Privacidad (Ley 21.719): quién atiende mis derechos, qué datos hay y qué pedí. */
+/** Pantalla 11 · Privacidad (Ley 21.719): DPO, tratamiento, solicitudes ARCO y portabilidad. */
 export default function Pagina() {
   return (
     <PaginaPortal
@@ -41,7 +27,11 @@ export default function Pagina() {
       }}
     >
       {({ state, p }) => (
-        <Estado state={state} variante="detalle" textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}>
+        <Estado
+          state={state}
+          variante="detalle"
+          textos={{ ...textosEstadoTrabajador(), error: { accion: <BotonReintentar /> } }}
+        >
           {p ? (
             <div className="flex flex-col gap-4">
               <h2 className="t-title text-fg md:hidden">Privacidad</h2>
@@ -55,10 +45,6 @@ export default function Pagina() {
                       <span className="font-medium">{p.dpo.nombre ?? "Delegado de protección de datos"}</span>
                       {p.dpo.correo ? <span>{p.dpo.correo}</span> : null}
                       {p.dpo.telefono ? <span className="t-mono">{p.dpo.telefono}</span> : null}
-                      <p className="t-caption mt-2">
-                        Escríbele para pedir acceso, corrección, eliminación, oposición, portabilidad o bloqueo de tus datos
-                        {p.empresa ? ` en ${p.empresa}` : ""}.
-                      </p>
                     </>
                   ) : (
                     <p className="text-fg-muted">
@@ -102,22 +88,10 @@ export default function Pagina() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Tus solicitudes</CardTitle>
+                  <CardTitle>Tus derechos</CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                  {p.solicitudes.length ? (
-                    p.solicitudes.map((s) => (
-                      <div key={s.id} className="flex items-baseline justify-between gap-3 text-base text-fg">
-                        <span>{TIPO[s.tipo] ?? s.tipo}</span>
-                        <span className="t-caption">
-                          {ESTADO[s.estado] ?? s.estado} · {fechaCorta(s.recibidaEn)}
-                          {s.plazoEn ? ` · plazo ${fechaCorta(s.plazoEn)}` : ""}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-fg-muted">No tienes solicitudes abiertas.</p>
-                  )}
+                <CardContent className="flex flex-col gap-4">
+                  <AccionesPrivacidadDiferidas solicitudesIniciales={p.solicitudes} />
                 </CardContent>
               </Card>
             </div>
