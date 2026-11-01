@@ -15,7 +15,7 @@ export const metadata = { title: "Entrar" };
 async function Contenido() {
   const identidad = await requerirIdentidad("/entrar");
   const plataforma = identidad.usuario.platformRole !== null;
-  const portales = portalesVisibles(identidad.actual?.portales ?? [], plataforma);
+  const portales = portalesVisibles(identidad.actual?.portales ?? [], plataforma, identidad.modulosActivos);
   // Sin portal (sin empresa activa y sin plataforma): el Inicio del ERP explica qué falta.
   if (portales.length === 0) redirect("/");
   const preferido = (await cookies()).get(COOKIE_PORTAL)?.value;

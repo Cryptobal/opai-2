@@ -137,6 +137,7 @@ export function navegacionPortal(
   href: string,
   portal: string,
   puede: (permiso: string) => boolean,
+  modulosActivos: readonly string[] = [],
 ): ItemNav[] {
   if (portal === "platform") return puede(PERMISOS_PLATAFORMA.tenantsRead) ? NAV_PLATAFORMA : [];
   if (portal === "supervisor")
@@ -150,12 +151,20 @@ export function navegacionPortal(
         ? [{ href: "/supervisor/instalaciones", etiqueta: "Instalaciones", icono: "MapPin" }]
         : []),
     ];
-  if (portal === "trabajador")
+  if (portal === "trabajador") {
+    const mas = { href: `${href}/mas`, etiqueta: "Más", icono: "Ellipsis", activoEn: `${href}/privacidad` };
+    if (!modulosActivos.includes("portal_trabajador")) {
+      return [
+        { href, etiqueta: "Inicio", icono: "Home", exacta: true },
+        mas,
+      ];
+    }
     return [
       { href, etiqueta: "Inicio", icono: "Home", exacta: true },
       { href: `${href}/mis-datos`, etiqueta: "Mis datos", icono: "UserRound" },
-      { href: `${href}/notificaciones`, etiqueta: "Avisos", icono: "Bell" },
-      { href: `${href}/mas`, etiqueta: "Más", icono: "Ellipsis", activoEn: `${href}/privacidad` },
+      { href: `${href}/notificaciones`, etiqueta: "Notificaciones", icono: "Bell" },
+      mas,
     ];
+  }
   return [{ href, etiqueta: "Inicio", icono: "Home" }];
 }
