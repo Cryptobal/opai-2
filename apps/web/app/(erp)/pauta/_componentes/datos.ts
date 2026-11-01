@@ -19,7 +19,15 @@ export function mesDeParametros(p: Parametros): { anio: number; mes: number } {
  * (P06) y `?historial=1` el historial de cambios (P04). Consultas por navegación: ≤ 4.
  */
 export async function cargarPauta(p: Parametros) {
-  const { anio, mes } = mesDeParametros(p);
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
+  const fechaPedida = p["fecha"] ?? "";
+  const fechaValida = /^\d{4}-\d{2}-\d{2}$/.test(fechaPedida) &&
+    Number(fechaPedida.slice(0, 4)) >= 2000 && Number(fechaPedida.slice(0, 4)) <= 2100 &&
+    !Number.isNaN(Date.parse(`${fechaPedida}T00:00:00Z`)) &&
+    new Date(`${fechaPedida}T00:00:00Z`).toISOString().slice(0, 10) === fechaPedida;
+  const fecha = fechaValida ? fechaPedida : hoy;
+  const diaria = p["vista"] === "diaria";
+  const { anio, mes } = mesDeParametros(diaria ? { ...p, mes: fecha.slice(0, 7) } : p);
   const inst = p["inst"] && p["inst"] !== "todas" ? requerirUuid(p["inst"]) : null;
   const filtroInst = inst ? { instalacionId: inst } : {};
   const [lista, vista, ppc, historial] = await Promise.all([
@@ -27,7 +35,7 @@ export async function cargarPauta(p: Parametros) {
     inst
       ? ejecutarComoUsuario<MesPauta>("erp", "pauta.mes.leer", { instalacionId: inst, anio, mes })
       : ejecutarComoUsuario<ResumenTodas>("erp", "pauta.resumen.leer", { anio, mes }),
-    p["ver"] === "ppc"
+    p["ver"] === "ppc" && !diaria
       ? ejecutarComoUsuario<Ppc[]>("erp", "pauta.ppc.listar", { anio, mes, ...filtroInst })
       : null,
     p["historial"] === "1"
@@ -48,6 +56,8 @@ export async function cargarPauta(p: Parametros) {
     ppc: ppc?.ok ? ppc.data : null,
     historial: historial?.ok ? historial.data.items : null,
     verPpc: p["ver"] === "ppc",
+    diaria,
+    fecha,
     dia: p["dia"] ?? null,
     serie: p["serie"] ?? null,
   };

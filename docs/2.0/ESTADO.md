@@ -57,6 +57,8 @@
 
 ## Decisiones y riesgos vigentes
 
+- **Pauta PR 2 (CAR-86), avance parcial:** la Diaria consulta una fecha e instalación con la capacidad mensual existente y permite filtrar turnos sin cubrir. Faltan las acciones operativas, reemplazos, refuerzos, alertas, exportaciones y validación completa de pantalla. Pendientes de Carlos: umbral de aviso legal, tratamiento de la confirmación cuando se active Asistencia y criterios finos de sugerencia de reemplazos; no se ha tomado una decisión nueva de negocio.
+
 Contrastados con `main` el 30-oct-2026; el detalle sigue en el archivo.
 
 - **BYPASSRLS de `neondb_owner`:** el dueño de las tablas en Neon (y rol de `prisma migrate deploy`) tiene BYPASSRLS, así que FORCE no le afecta; la garantía es `opai_app` sin BYPASSRLS con `tenant_isolation`. La consulta de roles del 27-oct consta en ADR-002 ([01-decisiones](01-decisiones.md)) y el criterio en [NUCLEO-G2](briefs/NUCLEO-G2-force-rls.md); no se volvió a consultar Neon. Por eso toda migración de datos debe verificar las filas afectadas o correr con un rol BYPASSRLS confirmado ([REGLAS-codigo](REGLAS-codigo.md)). [archivo :820](ESTADO-archivo.md?plain=1#L820).

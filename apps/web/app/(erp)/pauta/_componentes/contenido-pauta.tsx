@@ -3,6 +3,7 @@ import { Empty, Estado, KpiTile } from "@opai/ds";
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 
 import { BarraPauta } from "./barra-pauta";
+import { Diaria } from "./diaria";
 import type { DatosPauta } from "./datos";
 import { pct } from "./etiquetas";
 import { GrillaMes } from "./grilla-mes";
@@ -32,14 +33,14 @@ export function ContenidoPauta({ d, puedeEditar }: { d: DatosPauta; puedeEditar:
   const sinDatos = d.mensual ? d.mensual.puestos.length === 0 : (d.todas?.instalaciones.length ?? 0) === 0;
   return (
     <div className="flex flex-col gap-4">
-      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} />
+      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} diaria={d.diaria} fecha={d.fecha} />
       <Estado
         state={d.state}
         variante="planilla"
         textos={{ error: { accion: <BotonReintentar /> } }}
       >
-        {resumen ? <Resumen r={resumen} /> : null}
-        {sinDatos ? (
+        {!d.diaria && resumen ? <Resumen r={resumen} /> : null}
+        {d.diaria ? <Diaria mes={d.mensual} fecha={d.fecha} sinCubrir={d.verPpc} /> : sinDatos ? (
           <Empty
             titulo={d.mensual ? "Esta instalación no tiene puestos" : "Aún no hay puestos con pauta"}
             descripcion="Crea los puestos de la instalación y fija su serie para ver la cobertura."

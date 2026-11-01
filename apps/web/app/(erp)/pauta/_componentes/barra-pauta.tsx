@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, History } from "lucide-react";
 
-import { Button, ChipToggle, Select } from "@opai/ds";
+import { Button, ChipToggle, InputFecha, Select } from "@opai/ds";
 
 import { useParametros } from "@/app/_components/maestros/use-url";
 
@@ -15,10 +15,12 @@ type Props = {
   anio: number;
   mes: number;
   verPpc: boolean;
+  diaria: boolean;
+  fecha: string;
 };
 
 /** Selector de instalación y de mes, filtro «Sin cubrir» y acceso al historial (todo en la URL). */
-export function BarraPauta({ instalaciones, inst, anio, mes, verPpc }: Props) {
+export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha }: Props) {
   const { fijar } = useParametros();
   const irA = (delta: number) => {
     const m = mesVecino(anio, mes, delta);
@@ -26,6 +28,10 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc }: Props) {
   };
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <nav aria-label="Vistas de pauta" className="flex w-full gap-2">
+        <Button variant={diaria ? "secondary" : "primary"} aria-current={!diaria ? "page" : undefined} onClick={() => fijar({ vista: null, ver: null, dia: null })}>Mensual</Button>
+        <Button variant={diaria ? "primary" : "secondary"} aria-current={diaria ? "page" : undefined} onClick={() => fijar({ vista: "diaria", ver: null, dia: null })}>Diaria</Button>
+      </nav>
       <Select
         aria-label="Instalación"
         className="w-full sm:w-64"
@@ -36,7 +42,7 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc }: Props) {
           ...instalaciones.map((i) => ({ valor: i.id, etiqueta: i.nombre })),
         ]}
       />
-      <div className="flex items-center gap-1">
+      {diaria ? <InputFecha aria-label="Fecha de la pauta" className="w-48" valor={fecha} onCambiar={(v) => { if (v) fijar({ fecha: v, dia: null }); }} /> : <div className="flex items-center gap-1">
         <Button variant="ghost" size="iconSm" aria-label="Mes anterior" onClick={() => irA(-1)}>
           <ChevronLeft className="size-4" />
         </Button>
@@ -46,7 +52,7 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc }: Props) {
         <Button variant="ghost" size="iconSm" aria-label="Mes siguiente" onClick={() => irA(1)}>
           <ChevronRight className="size-4" />
         </Button>
-      </div>
+      </div>}
       <ChipToggle
         etiqueta="Sin cubrir"
         activo={verPpc}

@@ -38,6 +38,17 @@ test.describe("pauta · mensual", () => {
     await captura(page, "pauta-instalacion", info.project.name);
   });
 
+  test("diaria: selecciona fecha y filtra sin cubrir", async ({ page }) => {
+    await entrar(page);
+    await page.goto(`/pauta?inst=${INST}&vista=diaria&fecha=${HOY}`);
+    await expect(page.getByLabel("Fecha de la pauta")).toBeVisible();
+    await expect(page.getByText("Asistencia no activada: sin marcas para cruzar.")).toBeVisible();
+    await page.getByRole("button", { name: "Sin cubrir" }).click();
+    await expect(page).toHaveURL(/ver=ppc/);
+    await page.getByRole("button", { name: "Mensual" }).click();
+    await expect(page.getByRole("button", { name: "Mes siguiente" })).toBeVisible();
+  });
+
   test("fija la serie, registra una excepción, ve el PPC y el historial", async ({ page }, info) => {
     test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
     await entrar(page);
