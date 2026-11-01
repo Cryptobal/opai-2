@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="desktop" style="background:var(--ds-bg);color:var(--ds-fg);padding:32px;display:flex;flex-direction:column;gap:32px;font-family:var(--font-sans)">
+<span class="t-heading">{{ themeLabel }}</span>
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Nuevos para el DS</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span style="display:flex;gap:8px;align-items:center"><span class="t-subheading">ChipVariable</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="60px,22px">Nuevo</x-import></span>
+<span class="t-caption">Variable dentro del texto de una plantilla. t-overline + t-mono (13/20), radio sm.</span>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<span style="display:flex;flex-direction:column;gap:4px"><span class="t-overline t-mono" style="padding:1px 4px;border-radius:var(--radius-sm);background:var(--ds-accent-muted);color:var(--ds-accent)">{persona.rut}</span><span class="t-caption">Insertada</span></span>
+<span style="display:flex;flex-direction:column;gap:4px"><span class="t-overline t-mono" style="padding:1px 4px;border-radius:var(--radius-sm);border:1px dashed var(--ds-accent);color:var(--ds-accent)">{sueldo.base}</span><span class="t-caption">Propuesta</span></span>
+<span style="display:flex;flex-direction:column;gap:4px"><span class="t-overline t-mono" style="padding:1px 4px;border-radius:var(--radius-sm);background:var(--ds-warning-muted);color:var(--ds-warning-fg)">{persona.direccion}</span><span class="t-caption">Dato faltante</span></span>
+<span style="display:flex;flex-direction:column;gap:4px"><span class="t-overline t-mono" style="padding:1px 4px;border-radius:var(--radius-sm);background:var(--ds-danger-muted);color:var(--ds-danger-fg);text-decoration:underline wavy">{persona.comuna}</span><span class="t-caption">No existe</span></span>
+<span style="display:flex;flex-direction:column;gap:4px"><span class="t-overline t-mono" style="padding:1px 4px;border-radius:var(--radius-sm);background:var(--ds-accent-muted);color:var(--ds-accent);outline:2px solid var(--ds-focus);outline-offset:2px">{persona.nombre}</span><span class="t-caption">Foco</span></span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Pasos</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="60px,22px">Nuevo</x-import></span>
+<span class="t-caption">Asistente de varios pasos. Círculo 24: actual accent, hecho fill, pendiente borde.</span>
+<ol style="list-style:none;margin:0;padding:0;display:flex;gap:20px;flex-wrap:wrap">
+<li style="display:flex;gap:8px;align-items:center"><span class="t-label-sm" style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-fill)">1</span><span class="t-body-sm muted">Subir archivo</span></li>
+<li style="display:flex;gap:8px;align-items:center"><span class="t-label-sm" style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-accent);color:var(--ds-accent-fg)">2</span><span class="t-label-sm">Revisar conversión</span></li>
+<li style="display:flex;gap:8px;align-items:center"><span class="t-label-sm" style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ds-border-strong);color:var(--ds-fg-muted)">3</span><span class="t-body-sm muted">Guardar</span></li>
+</ol>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span style="display:flex;gap:8px;align-items:center"><span class="t-subheading">VisorDocumento</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="60px,22px">Nuevo</x-import></span>
+<span class="t-caption">Hoja en tokens --ds-paper* (fijos, no cambian con el tema) sobre fondo fill, radio lg.</span>
+<div style="background:var(--ds-fill);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px">
+<div style="background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);border-radius:var(--radius-sm);padding:16px;display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm" style="text-align:center">Anexo de contrato de trabajo</span>
+<div style="height:6px;border-radius:3px;background:var(--ds-paper-rule)"></div>
+<div style="height:6px;width:80%;border-radius:3px;background:var(--ds-paper-rule)"></div>
+<div style="height:6px;width:60%;border-radius:3px;background:var(--ds-paper-rule-subtle)"></div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Fila restringida</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="60px,22px">Nuevo</x-import></span>
+<span class="t-caption">Celda de Table para documentos sensibles sin permiso: candado + «Documento restringido» en fg-muted.</span>
+<span style="display:flex;gap:10px;align-items:center;color:var(--ds-fg-muted);min-height:48px"><span class="ic sm i-lock"></span><span class="t-body-sm" style="font-weight:500">Documento restringido</span></span>
+</div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Button · primary, secondary, ghost · hover, foco, deshabilitado, cargando</span>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="140px,40px">Enviar a firma</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Descargar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" hint-size="120px,40px">Reemplazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" style="background:var(--ds-fill)" hint-size="120px,40px">Hover</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" style="outline:2px solid var(--ds-focus);outline-offset:2px" hint-size="80px,40px">Foco</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="200px,40px">Generar y enviar a firma</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ true }}" loading-label="Subiendo" hint-size="80px,40px">Subir</x-import>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Badge · vigencia, firma y nivel</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ badges }}" as="b" hint-placeholder-count="9">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ b.tone }}" dot="{{ b.dot }}" hint-size="90px,22px">{{ b.label }}</x-import>
+</sc-for>
+</div>
+</section>
+<section style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Buscar" icon="search" placeholder="Nombre, RUT o texto" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Vence el" value="" error="Este tipo exige fecha de vencimiento" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="pol" options="{{ tipoOpts }}" disabled="{{ true }}" hint-size="100%,72px"></x-import>
+</section>
+<section style="display:flex;flex-wrap:wrap;gap:24px;align-items:center">
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Estado" valor="Por vencer" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Instalaciones" activo="{{ true }}" hint-size="130px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Importada de PDF" hint-size="150px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="80px,32px">Firma</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Nivel" options="{{ niveles }}" value="N2" hint-size="240px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Exige vigencia" hint-size="200px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Portal Cliente" hint-size="160px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" disabled="{{ true }}" label="Deshabilitado" hint-size="160px,44px"></x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ docTabs }}" value="exp" hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Conversión parcial" hint-size="100%,60px">No se pudo leer la tabla de la página 2.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="La variable no existe" hint-size="100%,60px">Cámbiala o quítala antes de publicar.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Edita en un computador" hint-size="100%,60px">En el teléfono es solo lectura.</x-import>
+</div>
+</section>
+<section style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ versiones }}" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" tipos="Word (.docx) o PDF" tamano-maximo-mb="{{ 25 }}" archivos-iniciales="{{ archivos }}" hint-size="100%,200px"></x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<span class="t-caption">También se usan: AppShell, Page, PageHeader, Table (+ RowCard en 375), RowGroupHeader, SelectableRow, DetailSection (Pares), FormSection, ActionBar, Sheet, Campo, Combobox, Textarea, RadioGroup, Enlace, IconButton, Skeleton, Empty, ErrorState, Forbidden. Sin cambios respecto del DS 2.0.</span>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:1600},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const theme = this.props.theme ?? "light";
+    return {
+      theme, themeLabel: theme === "dark" ? "Oscuro" : "Claro",
+      badges: [
+        { tone: "success", label: "Vigente", dot: true }, { tone: "warning", label: "Por vencer", dot: true }, { tone: "danger", label: "Vencido", dot: true }, { tone: "neutral", label: "Sin vigencia", dot: true },
+        { tone: "neutral", label: "Sin firma", dot: true }, { tone: "info", label: "Pendiente", dot: true }, { tone: "success", label: "Firmado", dot: true },
+        { tone: "neutral", label: "N1", dot: false }, { tone: "accent", label: "N2", dot: false },
+      ],
+      tipoOpts: [{ value: "pol", label: "Póliza" }],
+      niveles: [{ value: "N1", label: "N1" }, { value: "N2", label: "N2" }, { value: "N3", label: "N3 · FEA", disabled: true }],
+      docTabs: [{ id: "exp", label: "Explorador" }, { id: "ven", label: "Vencimientos" }, { id: "pla", label: "Plantillas" }, { id: "fir", label: "Firmas pendientes" }],
+      versiones: [
+        { who: "Paula Ibáñez", initials: "PI", action: "subió la versión 2", when: "28-10-2026 16:40" },
+        { who: "OPAI", agent: true, action: "registró la firma de la versión 1", when: "14-03-2026 10:12" },
+      ],
+      archivos: [
+        { nombre: "Contrato_indefinido_2026.docx", size: 220000, estado: "listo" },
+        { nombre: "Contrato_firmado.pdf", size: 410000, estado: "error", mensaje: "Está protegido con contraseña." },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+import { Empty } from "@opai/ds";
+
 import { pesos } from "@/lib/fechas";
 
 import type { NegocioFila } from "../datos";
@@ -43,12 +45,20 @@ export function ColumnaEtapa({ etapa, negocios, etapas }: Props) {
           {cerrada ? "" : ` · ${etapa.probabilidad} %`}
         </span>
       </header>
-      <div className="flex min-h-24 flex-col gap-2 overflow-y-auto overscroll-contain p-2">
+      <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-y-contain p-2 md:min-h-24">
         {negocios.map((n) => (
           <TarjetaNegocio key={n.id} n={n} etapas={etapas} />
         ))}
         {!negocios.length ? (
-          <p className="t-caption px-1 py-4 text-center">Sin negocios en esta etapa.</p>
+          <>
+            <Empty
+              titulo="Sin negocios"
+              className="gap-1 border-0 px-2 py-3 md:hidden [&>div]:hidden"
+            />
+            <p className="t-caption hidden px-1 py-4 text-center md:block">
+              Sin negocios en esta etapa.
+            </p>
+          </>
         ) : null}
       </div>
     </section>

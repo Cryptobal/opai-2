@@ -17,7 +17,9 @@ jobs:
   gate:
     name: typecheck · lint · test · test:db
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    env:
+      TURBO_CACHE_DIR: .turbo
     services:
       postgres:
         image: postgres:16
@@ -38,6 +40,13 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      - name: Restaurar caché de Turborepo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
@@ -149,6 +158,10 @@ jobs:
           pnpm --filter @opai/db seed:e2e
           pnpm --filter @opai/db seed:maestros-demo
           pnpm --filter @opai/db exec tsx scripts/fixture-vencimientos-e2e.ts
+          # Fixture de Pauta (CAR-81): instalación ficticia, dos puestos y dos personas; activa el módulo.
+          # `DATABASE_URL` se exporta a GITHUB_ENV y no rige dentro de este mismo paso: la fixture escribe
+          # con el rol de la app (RLS) y la pasa explícita.
+          DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/db seed:pauta-e2e
           # Usuario con dos empresas para selector-riel.spec.ts (selector de portal y empresa en iPad).
           pnpm --filter @opai/auth seed:multiempresa-e2e
           # Admin y owner también requieren MFA; conservar los mismos roles de los fixtures.

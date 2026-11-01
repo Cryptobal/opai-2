@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="finanzas-data.js"></script>
+</helmet>
+<div style="position:relative;width:100%;height:100%;overflow:hidden">
+<sc-if value="{{ bare }}" hint-placeholder-val="{{ false }}">
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" style="width:100%;height:100%;overflow:auto;background:var(--ds-bg)">
+<div style="max-width:{{ bareMax }};margin:0 auto;padding-top:24px">
+<dc-import name="Finanzas Cuerpo" pantalla="{{ pantalla }}" vista="{{ vista }}" estado="{{ estado }}" device="phone" hint-size="100%,600px"></dc-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ hasShell }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="Finanzas" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<dc-import name="Finanzas Cuerpo" pantalla="{{ pantalla }}" vista="{{ vista }}" estado="{{ estado }}" device="{{ device }}" hint-size="100%,600px"></dc-import>
+</x-import>
+</sc-if>
+<sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+<dc-import name="Finanzas Sheet" pantalla="{{ pantalla }}" sheet="{{ sheet }}" device="{{ device }}" theme="{{ theme }}" hint-size="100%,100%"></dc-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;pantalla&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ventas&quot;,&quot;programacion&quot;,&quot;cobro&quot;,&quot;cobranza&quot;,&quot;banca&quot;,&quot;factoring&quot;,&quot;integraciones&quot;,&quot;configdte&quot;],&quot;default&quot;:&quot;ventas&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sheet&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin-permiso&quot;,&quot;vencido&quot;,&quot;respondido&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;phone&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  fallback() { return { blocks: [], groups: [], tabs: [], user: {}, skel: [], theme: "light", device: "phone", cls: "sheet", isData: false, isBottom: false, hasShell: false, hasSheet: false, bare: false }; }
+  renderVals() {
+    const p = this.props, FIN = window.FIN;
+    if (!FIN) { this._t = this._t || setTimeout(() => this.forceUpdate(), 50); return this.fallback(); }
+    const pantalla = p.pantalla || 'ventas';
+    const pan = FIN.pantallas[pantalla];
+    const device = p.device || 'phone';
+    const estado = p.estado || 'datos';
+    const bare = !!pan.bare;
+    return {
+      pantalla, vista: p.vista || '', estado, device, theme: p.theme || 'light', sheet: p.sheet || '',
+      bare, hasShell: !bare, bareMax: device === 'phone' ? '100%' : '560px',
+      hasSheet: !!p.sheet && estado === 'datos',
+      active: device === 'phone' ? (pan.tab || 'fin') : (pan.nav || 'ven'),
+      groups: FIN.groups,
+      user: estado === 'sin-permiso' ? { name: 'Paula Rojas', initials: 'PR', role: 'Supervisor' } : { name: 'Andrés Valdivia', initials: 'AV', role: 'Administrador' },
+      tabs: device === 'phone'
+        ? [{ id: 'ini', label: 'Inicio', icon: 'home' }, { id: 'per', label: 'Personas', icon: 'users' }, { id: 'pau', label: 'Pauta', icon: 'calendar' }, { id: 'fin', label: 'Finanzas', icon: 'wallet' }, { id: 'mas', label: 'Más', icon: 'more' }]
+        : FIN.groups.reduce((a, g) => a.concat(g.items), []),
+    };
+  }
+}
+</script>
+</body>
+</html>

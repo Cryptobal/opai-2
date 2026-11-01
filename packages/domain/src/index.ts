@@ -35,3 +35,12 @@ export * from "./no-recontratar";
 export * from "./capas-sueldo";
 
 export * from "./rondas";
+export * from "./nomina";
+
+// Nómina conserva el contador público; Pauta expone su lista de fechas con nombre propio.
+export { diasDelMes } from "./nomina";
+export { diasDelMes as fechasDelMesPauta } from "./pauta";
+export * from "./pauta";
+export * from "./portal-cliente";
+
+export * from "./finanzas";

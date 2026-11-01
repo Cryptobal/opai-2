@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="finanzas-data.js"></script>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<div style="flex:1;min-width:220px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="{{ eyebrow }}" title="{{ title }}" subtitle="{{ sub }}" hint-size="100%,80px"></x-import>
+</div>
+<sc-if value="{{ showPrimary }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="{{ icon }}" size="lg" hint-size="160px,48px">{{ primary }}</x-import>
+</sc-if>
+</div>
+
+<sc-if value="{{ isData }}" hint-placeholder-val="{{ true }}">
+<dc-import name="Finanzas Bloques" blocks="{{ blocks }}" cols="{{ cols }}" hint-size="100%,500px"></dc-import>
+</sc-if>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat({{ cols }},minmax(0,1fr));gap:16px" aria-busy="true" aria-label="Cargando">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,200px">
+<div style="padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 16 }}" hint-size="45%,16px"></x-import></div>
+<sc-for list="{{ s }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--ds-border)">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 14 }}" hint-size="70%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 12 }}" hint-size="50%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 14 }}" hint-size="30%,14px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="88px" height="{{ 40 }}" radius="{{ 10 }}" hint-size="88px,40px"></x-import>
+</div>
+</sc-for>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="{{ emptyIcon }}" title="{{ emptyTitle }}" description="{{ emptyDesc }}" hint-size="100%,200px"></x-import>
+<sc-if value="{{ hasEmptyAction }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:center;padding-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" hint-size="160px,48px">{{ emptyAction }}</x-import></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar esta pantalla" description="Revisa tu conexión y vuelve a intentar. Si sigue igual, avísale a soporte con el código." code="{{ code }}" hint-size="100%,260px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ forbTitle }}" description="{{ forbDesc }}" action-label="{{ forbAction }}" hint-size="100%,240px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ isVencido }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clock" title="Este enlace venció" description="Pídele a Atlas Seguridad SpA que te envíe uno nuevo." hint-size="100%,200px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ isRespondido }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="Ya respondiste este cobro" description="Registramos tu aprobación el 30-10-2026 a las 08:12. No necesitas hacer nada más." hint-size="100%,200px"></x-import></div>
+</sc-if>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pantalla&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;ventas&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin-permiso&quot;,&quot;vencido&quot;,&quot;respondido&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;phone&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  fallback() { return { blocks: [], groups: [], tabs: [], user: {}, skel: [], theme: "light", device: "phone", cls: "sheet", isData: false, isBottom: false, hasShell: false, hasSheet: false, bare: false }; }
+  renderVals() {
+    const p = this.props, FIN = window.FIN;
+    if (!FIN) { this._t = this._t || setTimeout(() => this.forceUpdate(), 50); return this.fallback(); }
+    const pan = FIN.pantallas[p.pantalla || 'ventas'];
+    const v = pan.vistas[p.vista] || Object.values(pan.vistas)[0];
+    const device = p.device || 'phone', estado = p.estado || 'datos';
+    const di = device === 'phone' ? 0 : device === 'tablet' ? 1 : 2;
+    const cols = (v.cols || [1, 1, 1])[di];
+    const sk = [[1, 2, 3], [1, 2]];
+    const e = pan.empty;
+    const bare = !!pan.bare;
+    return {
+      eyebrow: bare ? '' : (v.eyebrow || 'Finanzas'), title: v.title, sub: v.sub, primary: v.primary, icon: v.icon || 'plus',
+      showPrimary: !!v.primary && estado === 'datos',
+      blocks: v.blocks, cols,
+      isData: estado === 'datos', isLoading: estado === 'cargando', isEmpty: estado === 'vacio', isError: estado === 'error', isForbidden: estado === 'sin-permiso', isVencido: estado === 'vencido', isRespondido: estado === 'respondido',
+      skel: cols > 1 ? sk : [sk[0]],
+      emptyIcon: e[0], emptyTitle: e[1], emptyDesc: e[2], emptyAction: e[3], hasEmptyAction: !!e[3],
+      code: pan.code + ' · 30-10-2026 08:42',
+      forbTitle: bare ? 'Este enlace no es válido' : 'No tienes acceso a esta pantalla',
+      forbDesc: bare ? 'Revisa que copiaste el enlace completo o pide uno nuevo a Atlas Seguridad SpA.' : 'Finanzas está disponible para owner y admin. Pídele acceso a Andrés Valdivia, administrador de Atlas Seguridad SpA.',
+      forbAction: bare ? '' : 'Pedir acceso',
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -21,6 +21,21 @@ export type Ticket = {
   createdAt: string;
 };
 
+export type TipoTicket = {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  responsableDefectoTipo: "rol" | "usuario";
+  responsableDefectoRol: string | null;
+  responsableDefectoUsuarioId: string | null;
+  requiereAprobacion: boolean;
+  aprobadorRol: string | null;
+  slaHoras: number | null;
+  rolesPermitidos: string[];
+  activo: boolean;
+  orden: number;
+};
+
 export type EventoTicket = {
   id: string;
   tipo: string;
@@ -84,4 +99,8 @@ export async function cargarTicket(id: string) {
     "tickets.tickets.obtener",
     { id },
   );
+}
+
+export async function cargarTipos() {
+  return ejecutarComoUsuario<TipoTicket[]>("erp", "tickets.tipos.listar", {});
 }

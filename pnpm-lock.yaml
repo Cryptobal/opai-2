@@ -180,6 +180,161 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  modules/cpq:
+    dependencies:
+      '@opai/capabilities':
+        specifier: workspace:*
+        version: link:../../packages/capabilities
+      '@opai/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@opai/ds':
+        specifier: workspace:*
+        version: link:../../packages/ds
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  modules/finanzas:
+    dependencies:
+      '@opai/capabilities':
+        specifier: workspace:*
+        version: link:../../packages/capabilities
+      '@opai/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@opai/ds':
+        specifier: workspace:*
+        version: link:../../packages/ds
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  modules/nomina:
+    dependencies:
+      '@opai/capabilities':
+        specifier: workspace:*
+        version: link:../../packages/capabilities
+      '@opai/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@opai/ds':
+        specifier: workspace:*
+        version: link:../../packages/ds
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  modules/pauta:
+    dependencies:
+      '@opai/capabilities':
+        specifier: workspace:*
+        version: link:../../packages/capabilities
+      '@opai/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@opai/ds':
+        specifier: workspace:*
+        version: link:../../packages/ds
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  modules/portal_cliente:
+    dependencies:
+      '@opai/capabilities':
+        specifier: workspace:*
+        version: link:../../packages/capabilities
+      '@opai/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@opai/ds':
+        specifier: workspace:*
+        version: link:../../packages/ds
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/react':
+        specifier: ^19
+        version: 19.3.0
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
   modules/registry:
     dependencies:
       '@opai/capabilities':
@@ -191,6 +346,21 @@ importers:
       '@opai/mod-comercial':
         specifier: workspace:*
         version: link:../comercial
+      '@opai/mod-cpq':
+        specifier: workspace:*
+        version: link:../cpq
+      '@opai/mod-finanzas':
+        specifier: workspace:*
+        version: link:../finanzas
+      '@opai/mod-nomina':
+        specifier: workspace:*
+        version: link:../nomina
+      '@opai/mod-pauta':
+        specifier: workspace:*
+        version: link:../pauta
+      '@opai/mod-portal_cliente':
+        specifier: workspace:*
+        version: link:../portal_cliente
       '@opai/mod-rondas':
         specifier: workspace:*
         version: link:../rondas

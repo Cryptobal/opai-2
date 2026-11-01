@@ -6,6 +6,8 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
   const fecha = (v: unknown) => (v instanceof Date ? v.getTime() : new Date(String(v)).getTime());
   return async (sql: TemplateStringsArray, ...valores: unknown[]) => {
     const texto = sql.join("?");
+    // Nómina: los bloqueos de período y préstamo se prueban en Postgres real (nomina-db.test.ts).
+    if (texto.includes("/* nomina:bloqueo-periodo */") || texto.includes("/* nomina:bloqueo-prestamo */")) return [];
     if (texto.includes("/* 07b:bloqueo-vinculo */") || texto.includes("/* 07b:bloqueo-destino */")) return [];
     // 07d (§21): el lock serializa con la anonimización solo en Postgres; aquí basta la marca.
     if (texto.includes("/* 07d:bloqueo-anonimizar */") || texto.includes("/* 07d:bloqueo-dek */")) return [];

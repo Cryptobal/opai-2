@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div data-theme="{{ theme }}" style="background:var(--ds-bg);color:var(--ds-fg);min-height:100%;padding:32px;display:flex;flex-direction:column;gap:24px">
+<div><div class="t-caption" style="color:var(--ds-fg-muted)">Ficha persona v1</div><div class="t-title">Hoja de componentes</div><div class="t-body-sm" style="color:var(--ds-fg-muted)">Todo sale del DS OPAI 2.0 V2. No se propone ninguna pieza nueva.</div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Badge de estado" hint-size="100%,160px"><div style="display:flex;flex-wrap:wrap;gap:8px">{{ badges }}</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Botón: reposo, deshabilitado" hint-size="100%,160px"><div style="display:flex;flex-wrap:wrap;gap:8px">{{ botones }}</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Alerta" hint-size="100%,260px"><div style="display:flex;flex-direction:column;gap:8px">{{ alertas }}</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Controles: normal, error, deshabilitado" hint-size="100%,360px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Normal" value="Valor" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Error" value="" error="Campo obligatorio" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Deshabilitado" value="••••" disabled="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Switch" checked="{{ true }}" hint-size="100%,44px"></x-import>
+</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Cargando" hint-size="100%,260px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="form" hint-size="100%,200px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Vacío" hint-size="100%,260px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" title="Aún no hay cuentas" description="Agrega la primera cuenta." hint-size="100%,200px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Error" hint-size="100%,260px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la ficha" description="Revisa tu conexión." hint-size="100%,200px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Sin permiso" hint-size="100%,260px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso" description="Pídele acceso a un administrador." hint-size="100%,200px"></x-import></x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const tones = ["success", "warning", "danger", "info", "neutral"];
+    return {
+      theme: this.props.theme ?? "light",
+      badges: tones.map((t) => h(NS.Badge, { key: t, tone: t }, t)),
+      botones: [h(NS.Button, { key: 1 }, "Primario"), h(NS.Button, { key: 2, variant: "secondary" }, "Secundario"), h(NS.Button, { key: 3, disabled: true }, "Deshabilitado")],
+      alertas: tones.slice(0, 4).map((t) => h(NS.Alerta, { key: t, tono: t, titulo: t }, "Mensaje de ejemplo")),
+    };
+  }
+}
+</script>
+</body>
+</html>

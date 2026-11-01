@@ -1,0 +1,58 @@
+import type { Contexto } from "@opai/capabilities";
+import { noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+
+import { lunesDe, type Capa, type CeldaFlujo, type FilaFlujo, type Seccion } from "../domain";
+
+/** Id de relleno de las vistas previas (dry_run): no existe fila, pero cumple el esquema de salida. */
+export const ID_VISTA_PREVIA = "00000000-0000-0000-0000-000000000000";
+
+export const aIso = (d: Date | string): string =>
+  (typeof d === "string" ? d : d.toISOString()).slice(0, 10);
+export const aFecha = (iso: string): Date => new Date(`${iso}T00:00:00Z`);
+
+/** Ajustes del tenant; si aún no hay, los de partida (saldo 0, umbral 0, desde la semana actual). */
+export async function ajustesDe(ctx: Contexto) {
+  const a = await ctx.db.flujoAjustes.findFirst({});
+  if (a) return { saldoInicial: a.saldoInicial, umbral: a.umbral, desde: aIso(a.desde) };
+  return { saldoInicial: 0, umbral: 0, desde: lunesDe(new Date().toISOString().slice(0, 10)) };
+}
+
+/** Semanas selladas del tenant, para impedir cambios en ellas. */
+export async function selladasDe(ctx: Contexto): Promise<Set<string>> {
+  const cierres = await ctx.db.flujoCierre.findMany({ where: { sellada: true } });
+  return new Set(cierres.map((c) => aIso(c.semana)));
+}
+
+export async function exigirSemanaAbierta(ctx: Contexto, semana: string): Promise<void> {
+  if ((await selladasDe(ctx)).has(semana))
+    throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
+}
+
+export async function filaDe(ctx: Contexto, id: string) {
+  const f = await ctx.db.flujoFila.findFirst({ where: { id } });
+  if (!f) throw noEncontrado("La fila del flujo");
+  return f;
+}
+
+/** Filas activas y celdas de un rango, ya en la forma del dominio. */
+export async function cargarFlujo(ctx: Contexto, desde: string, hasta: string) {
+  const filas = await ctx.db.flujoFila.findMany({
+    where: { activa: true },
+    orderBy: [{ orden: "asc" }, { etiqueta: "asc" }],
+  });
+  const celdas = await ctx.db.flujoCelda.findMany({
+    where: { semana: { gte: aFecha(desde), lte: aFecha(hasta) } },
+  });
+  const dominio: FilaFlujo[] = filas.map((f) => ({
+    id: f.id,
+    seccion: f.seccion as Seccion,
+    arrastre: f.arrastre,
+  }));
+  const celdasDom: CeldaFlujo[] = celdas.map((c) => ({
+    filaId: c.filaId,
+    semana: aIso(c.semana),
+    capa: c.capa as Capa,
+    monto: c.monto,
+  }));
+  return { filas, celdas, dominio, celdasDom };
+}
