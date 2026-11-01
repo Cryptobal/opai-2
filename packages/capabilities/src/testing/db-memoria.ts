@@ -21,6 +21,16 @@ const idOrdenado = () => {
   return uuid7(ultimoMs);
 };
 
+/** Aplica `data` a la fila resolviendo `{ increment: n }` como Prisma (contadores atómicos). */
+function aplicar(fila: Fila, data: Fila | undefined): Fila {
+  const resuelto: Fila = {};
+  for (const [k, v] of Object.entries(data ?? {})) {
+    const inc = v && typeof v === "object" ? (v as { increment?: unknown }).increment : undefined;
+    resuelto[k] = typeof inc === "number" ? Number(fila[k] ?? 0) + inc : v;
+  }
+  return Object.assign(fila, resuelto, { updatedAt: new Date() });
+}
+
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   const tablas = new Map<string, Fila[]>(Object.entries(semilla).map(([k, v]) => [k, [...v]]));
   const tabla = (n: string) => tablas.get(n) ?? (tablas.set(n, []), tablas.get(n) as Fila[]);
@@ -91,16 +101,16 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
       update: async (a: Args) => {
         const f = filas().find((x) => cumple(x, a.where));
         if (!f) throw new Error(`${modelo} no encontrado`);
-        return Object.assign(f, a.data, { updatedAt: new Date() });
+        return aplicar(f, a.data);
       },
       updateMany: async (a: Args) => {
         const lista = filas().filter((x) => cumple(x, a.where));
-        lista.forEach((f) => Object.assign(f, a.data, { updatedAt: new Date() }));
+        lista.forEach((f) => aplicar(f, a.data));
         return { count: lista.length };
       },
       upsert: async (a: Args & { create: Fila; update: Fila }) => {
         const f = filas().find((x) => cumple(x, a.where));
-        return f ? Object.assign(f, a.update, { updatedAt: new Date() }) : crear(a.create);
+        return f ? aplicar(f, a.update) : crear(a.create);
       },
       delete: async (a: Args) => {
         const i = filas().findIndex((x) => cumple(x, a.where));

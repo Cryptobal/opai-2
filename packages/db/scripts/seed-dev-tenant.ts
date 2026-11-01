@@ -19,7 +19,7 @@ async function main(): Promise<void> {
   await sembrarFuncionesBase(db.$extends({}), tenant.id, tenant.vertical);
   await sembrarComercial(db.$extends({}), tenant.id);
   // Activa los módulos del tenant de desarrollo (navegación, configuración y capacidades).
-  for (const moduloId of ["comercial", "rondas", "tickets", "portal_cliente", "nomina", "finanzas"]) {
+  for (const moduloId of ["comercial", "rondas", "tickets", "portal_cliente", "nomina", "finanzas", "cpq"]) {
     await db.tenantModule.upsert({
       where: { tenantId_moduloId: { tenantId: tenant.id, moduloId } },
       update: {},
