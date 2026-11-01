@@ -204,24 +204,31 @@ vigencia y estado `verificado`/`por_verificar`. Una publicación verificada sin 
 |---|---|---|
 | UF 29-oct 41.237,01; 31-oct 41.247,63 | [SII UF 2026](https://www.sii.cl/valores_y_fechas/uf/uf2026.htm) | Verificado; casos fijos del 29, test adicional del 31. |
 | UTM oct 72.151; tramos IUSC en UTM | [SII UTM](https://www.sii.cl/valores_y_fechas/utm/utm2026.htm), [SII impuesto 2026](https://www.sii.cl/valores_y_fechas/impuesto_2da_categoria/impuesto2026.htm) | Verificados. |
-| IMM 553.553 desde 1-may-2026 | [DT ingreso mínimo](https://www.dt.gob.cl/portal/1628/w3-article-60141.html) lo confirma y remite a Ley 21.830 | Monto/vigencia leídos en DT; texto directo del Diario Oficial `por_verificar`. |
-| Topes AFP/salud/16.744 90 UF y AFC 135,2 UF desde febrero | [SP comunicado definitivo](https://www71.spensiones.cl/portal/institucional/594/articles-16921_recurso_1.pdf), [SP octubre](https://www.spensiones.cl/inf_estadistica/cotprev/cotprev.html) | Verificados. IPS 60 UF contrastado con Previred; norma directa y tope indemnización aún por verificar para seed. |
+| IMM 553.553 desde 1-may-2026 | [Ley 21.830 BCN](https://www.bcn.cl/leychile/Navegar?idNorma=1225354), [DT ingreso mínimo](https://www.dt.gob.cl/portal/1628/w3-article-60141.html) | Verificado (art. 1, DO 22-jun-2026). |
+| Topes AFP/salud/16.744 90 UF y AFC 135,2 UF desde febrero | [SP comunicado definitivo](https://www71.spensiones.cl/portal/institucional/594/articles-16921_recurso_1.pdf), [SP octubre](https://www.spensiones.cl/inf_estadistica/cotprev/cotprev.html) | Verificados. IPS 60 UF en tabla SP/Previred; norma IPS propia `por_verificar` para seed M2. |
+| Tope indemnización provisiones 90 UF | [Código del Trabajo art. 172 BCN](https://www.bcn.cl/leychile/navegar?idNorma=207436) | Verificado (base máxima 90 UF). Límite 11 años en art. 163 inc. 2 (330 días). |
 | AFP 10 % + comisión por administradora; SIS 1,78 % desde agosto; reforma total 3,5 % que incluye SIS | [SP Sistema de Pensiones](https://www.spensiones.cl/portal/institucional/594/w3-propertyvalue-9893.html) | Verificados. Reforma 0,10 individual +0,90 RP +2,50 SIS/EV. |
 | Desglose reforma 0,72 EV +1,78 SIS; IPS 60 UF; asignación familiar A 22.601 ≤649.039, B 13.870 ≤947.990, C 4.382 ≤1.478.539 | [Previred octubre](https://www.previred.com/indicadores-previsionales/) | Contraste del addendum; sin cálculo de asignación familiar ni régimen IPS en M1. |
 | AFC indefinido 2,4/0,6 y plazo fijo 3,0/0 | [DT cesantía](https://dt.gob.cl/portal/1628/w3-article-95306.html) | Verificado para los tipos del encargo. |
-| Ley 16.744 básica 0,90 + SANNA 0,03 | [ISL SANNA](https://www.isl.gob.cl/ley-sanna/), [SUSESO fondo](https://www.suseso.gob.cl/622/w3-article-749903.html) | ISL confirma SANNA; SUSESO no devolvió texto legible. Básica y resolución adicional `por_verificar`. |
+| Ley 16.744 básica 0,90 + SANNA 0,03 | [SUSESO financiamiento](https://www.suseso.gob.cl/606/w3-article-18613.html), [ISL SANNA](https://www.isl.gob.cl/ley-sanna/) | Básica y SANNA verificadas; tasa adicional mutual por resolución `por_verificar` (default tenant recomendado 0 % hasta resolución). |
 | Gratificación 25 % / 4,75 IMM y bonos mensuales | [DT gratificación](https://www.dt.gob.cl/portal/1626/w3-article-99034.html) | Verificado. |
 | Jornada 42 h desde 26-abr-2026 | [Mintrab 40 horas](https://www.mintrab.gob.cl/40horas-implementacion/) | Verificado. |
 | Deducción salud para IUSC | [SII Oficio 2406/2016](https://www.sii.cl/pagina/jurisprudencia/adminis/2016/renta/ja2406.htm) | Verificado: límite 7 % del tope, también para adicional. |
 
 ### Decisiones abiertas y límites de aceptación
 
-- **TODO(decisión Carlos):** validar con contabilidad conversión de feriado hábil a corrido,
-  progresivo, bases contables y probabilidad/rotación. M1 no elige un defecto; 21 corridos es
-  hipótesis de prueba de Codex. No se declara validación contable concluida.
-- **TODO(decisión Carlos): verificación de fuentes oficiales (bloquea PR de indicadores con seed,
-  ahora M2):** texto de vigencia IMM en Diario Oficial, norma de topes IPS/indemnización,
-  básica 16.744 y resolución adicional mutual. Sin valores fijos de respaldo en producción.
+**TODO(decisión Carlos) — validar con contabilidad** (M1 no fija defectos de producción):
+
+- Días de vacaciones: ¿21 corridos o hábiles? ¿Progresivo por antigüedad?
+- Base provisión vacaciones: ¿incluye gratificación legal?
+- Base y probabilidad provisión indemnización (hoy hipótesis de prueba: imponible al 100 %).
+- Tasa adicional mutual Ley 16.744: hoy hipótesis 0,27 % en GC para total 1,20 % de la spec;
+  recomendación de trabajo: default tenant 0 % hasta leer la resolución del organismo.
+
+Cada hipótesis vive en `entradaReferencia` / `SupuestosProvisiones` y en tests; cambiarla es una línea.
+
+- **TODO(decisión Carlos): verificación de fuentes oficiales (bloquea seed M2):** norma SP directa del
+  tope IPS 60 UF y resolución adicional mutual del tenant. Sin valores fijos de respaldo en producción.
 - Nómina PR 2 debe completar cálculo real por período, UF de cierre, excepciones previsionales,
   descuentos personales y contadores; M1 entrega estimado y provisiones, no liquidaciones reales.
 
