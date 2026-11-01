@@ -10,6 +10,7 @@ export type AlertaPautaFila = {
   personaId: string;
   nombre: string;
   tipo: "semanal" | "mensual" | "descanso";
+  severidad: "advertencia" | "critica";
   mensaje: string;
   horas?: number;
   limite?: number;
@@ -49,7 +50,7 @@ export function AlertasPauta({
           <ul className="flex flex-col gap-2">
             {lista.map((a) => (
               <li key={`${a.personaId}-${a.tipo}-${a.mensaje}`}>
-                <Alerta tono="warning" titulo={a.nombre}>
+                <Alerta tono={a.severidad === "critica" ? "danger" : "warning"} titulo={a.nombre}>
                   {a.mensaje}
                 </Alerta>
               </li>

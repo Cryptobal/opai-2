@@ -14,6 +14,7 @@ const alertaSchema = z.object({
   personaId: z.string(),
   nombre: z.string(),
   tipo: z.enum(["semanal", "mensual", "descanso"]),
+  severidad: z.enum(["advertencia", "critica"]),
   mensaje: z.string(),
   horas: z.number().optional(),
   limite: z.number().optional(),

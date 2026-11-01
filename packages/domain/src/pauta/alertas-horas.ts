@@ -1,13 +1,21 @@
 import { diaNumero, minutosDeHora } from "./fechas";
 
-export const LIMITE_SEMANAL_HORAS = 45;
+/** Ley 21.561: jornada ordinaria máxima 42 h semanales; vigente desde 2026-04-26 (BCN). */
+export const LIMITE_SEMANAL_HORAS = 42;
+export const LIMITE_SEMANAL_FUENTE = "Ley 21.561";
+export const LIMITE_SEMANAL_VIGENTE_DESDE = "2026-04-26";
+// TODO: hacer configurable por empresa con vigencias (PR posterior).
+
+/** Como 1.0: alerta amarilla por encima de esta carga semanal; roja al superar LIMITE_SEMANAL_HORAS. */
+export const UMBRAL_AVISO_AMARILLO_SEMANAL_H = 40;
+
 export const LIMITE_MENSUAL = 180;
 export const LIMITE_MENSUAL_HORAS = LIMITE_MENSUAL;
-/** TODO (Carlos): umbral de aviso antes del límite legal; 0 = alertar solo al superar el límite. */
-export const UMBRAL_AVISO_HORAS = 0;
 
 const MIN_DESCANSO_HORAS = 12;
 const MS_DIA = 86_400_000;
+
+export type SeveridadAlertaHoras = "advertencia" | "critica";
 
 export type TurnoAlerta = {
   personaId: string;
@@ -19,6 +27,7 @@ export type TurnoAlerta = {
 export type AlertaHoras = {
   personaId: string;
   tipo: "semanal" | "mensual" | "descanso";
+  severidad: SeveridadAlertaHoras;
   mensaje: string;
   horas?: number;
   limite?: number;
@@ -87,32 +96,29 @@ export function calcularAlertasHoras(
 
   for (const personaId of personas) {
     const sem = sumarHorasSemana(turnos, personaId, anchor);
-    const limSem = LIMITE_SEMANAL_HORAS - UMBRAL_AVISO_HORAS;
-    if (sem > limSem) {
+    if (sem > UMBRAL_AVISO_AMARILLO_SEMANAL_H) {
+      const supera = sem > LIMITE_SEMANAL_HORAS;
       alertas.push({
         personaId,
         tipo: "semanal",
+        severidad: supera ? "critica" : "advertencia",
         horas: Math.round(sem * 10) / 10,
         limite: LIMITE_SEMANAL_HORAS,
-        mensaje:
-          sem > LIMITE_SEMANAL_HORAS
-            ? `Supera el límite semanal de ${LIMITE_SEMANAL_HORAS} h (${Math.round(sem * 10) / 10} h).`
-            : `Cerca del límite semanal de ${LIMITE_SEMANAL_HORAS} h (${Math.round(sem * 10) / 10} h).`,
+        mensaje: supera
+          ? `Supera el límite semanal de ${LIMITE_SEMANAL_HORAS} h (${Math.round(sem * 10) / 10} h).`
+          : `Cerca del límite semanal de ${LIMITE_SEMANAL_HORAS} h (${Math.round(sem * 10) / 10} h).`,
       });
     }
 
     const mes = sumarHorasMes(turnos, personaId, anchor);
-    const limMes = LIMITE_MENSUAL_HORAS - UMBRAL_AVISO_HORAS;
-    if (mes > limMes) {
+    if (mes > LIMITE_MENSUAL_HORAS) {
       alertas.push({
         personaId,
         tipo: "mensual",
+        severidad: "critica",
         horas: Math.round(mes * 10) / 10,
         limite: LIMITE_MENSUAL_HORAS,
-        mensaje:
-          mes > LIMITE_MENSUAL_HORAS
-            ? `Supera el límite mensual de ${LIMITE_MENSUAL_HORAS} h (${Math.round(mes * 10) / 10} h).`
-            : `Cerca del límite mensual de ${LIMITE_MENSUAL_HORAS} h (${Math.round(mes * 10) / 10} h).`,
+        mensaje: `Supera el límite mensual de ${LIMITE_MENSUAL_HORAS} h (${Math.round(mes * 10) / 10} h).`,
       });
     }
 
@@ -138,6 +144,7 @@ export function calcularAlertasHoras(
         alertas.push({
           personaId,
           tipo: "descanso",
+          severidad: "critica",
           mensaje: `Menos de ${MIN_DESCANSO_HORAS} h de descanso entre turnos (${Math.round(descanso * 10) / 10} h entre ${prev.fecha} y ${cur.fecha}).`,
         });
         break;
