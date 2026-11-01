@@ -2,6 +2,7 @@
 
 import { Button, ChipToggle, InputFecha, Select } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useParametros } from "@/app/_components/maestros/use-url";
 
 import { claveMes, mesVecino, nombreMes } from "./etiquetas";
@@ -78,18 +79,12 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
         />
         {inst ? (
           <>
-            <a
-              className="inline-flex min-h-11 items-center rounded-md border border-border bg-surface px-3 text-sm hover:bg-fill"
-              href={urlExportar(inst, "excel", anio, mes, fecha, diaria, verPpc)}
-            >
+            <EnlaceBoton variante="secondary" href={urlExportar(inst, "excel", anio, mes, fecha, diaria, verPpc)}>
               CSV
-            </a>
-            <a
-              className="inline-flex min-h-11 items-center rounded-md border border-border bg-surface px-3 text-sm hover:bg-fill"
-              href={urlExportar(inst, "pdf", anio, mes, fecha, diaria, verPpc)}
-            >
+            </EnlaceBoton>
+            <EnlaceBoton variante="secondary" href={urlExportar(inst, "pdf", anio, mes, fecha, diaria, verPpc)}>
               PDF
-            </a>
+            </EnlaceBoton>
             <Button variant="secondary" onClick={() => fijar({ alertas: "1" })}>
               Alertas
             </Button>
