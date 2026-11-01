@@ -1,5 +1,6 @@
 import type { ModuleManifest } from "@opai/capabilities";
 
+import { manifest as PortalTrabajador } from "@opai/mod-portal_trabajador";
 import { manifest as Cpq } from "@opai/mod-cpq";
 
 import { manifest as Nomina } from "@opai/mod-nomina";
@@ -22,6 +23,7 @@ export const modulos: readonly ModuleManifest[] = [
   agente,
   Comercial,
   Rondas,
+  PortalTrabajador,
   Nomina,
   Pauta,
   PortalCliente,

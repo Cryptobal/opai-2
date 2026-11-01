@@ -5,7 +5,7 @@ import { useId } from "react";
 
 import { cn } from "../cn";
 
-type SwitchProps = {
+export type SwitchProps = {
   activo: boolean;
   onCambiar: (activo: boolean) => void;
   etiqueta: string;

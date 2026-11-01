@@ -13,7 +13,9 @@ type Sugerencia = { placeId: string; texto: string; secundario: string | null };
 const SIN_SERVICIO = "El mapa no responde. Escribe la dirección a mano y avisa a un administrador.";
 
 /** `CampoDireccion` conectado al servicio de geolocalización del núcleo (`core.geo.*`). */
-export function DireccionOpai(props: {
+export function DireccionOpai({ portal = "erp", ...props }: {
+  /** Portal desde el que se llama a `core.geo.*` (el trabajador no tiene el ERP). */
+  portal?: string;
   id?: string;
   valor: Direccion | null;
   onCambiar: (d: Direccion | null) => void;
@@ -41,22 +43,22 @@ export function DireccionOpai(props: {
       }
       const d = corto
         ? null
-        : await llamar(() => ejecutarCapacidad("erp", "core.geo.autocompletar", { texto }));
+        : await llamar(() => ejecutarCapacidad(portal, "core.geo.autocompletar", { texto }));
       return ((d as Sugerencia[] | null) ?? []).map((s) => ({
         valor: s.placeId,
         etiqueta: s.texto,
         ...(s.secundario ? { detalle: s.secundario } : {}),
       }));
     },
-    [llamar],
+    [llamar, portal],
   );
   const resolver = useCallback(
     async (placeId: string): Promise<Direccion | null> => {
-      const d = (await llamar(() => ejecutarCapacidad("erp", "core.geo.detalle", { placeId }))) as
+      const d = (await llamar(() => ejecutarCapacidad(portal, "core.geo.detalle", { placeId }))) as
         (Direccion & { direccionFormateada: string }) | null;
       return d ? { ...d, calle: d.calle ?? d.direccionFormateada } : null;
     },
-    [llamar],
+    [llamar, portal],
   );
   return (
     <CampoDireccion
