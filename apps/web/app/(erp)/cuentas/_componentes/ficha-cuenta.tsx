@@ -99,7 +99,6 @@ export function FichaCuenta(p: {
           {
             id: "contactos",
             etiqueta: "Contactos",
-            contador: c?.contactos.length ?? 0,
             href: `${base}/contactos`,
           },
           {
