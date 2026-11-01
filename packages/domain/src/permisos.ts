@@ -80,6 +80,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
     permitir: [
       "ops:*",
       "rondas:*",
+      "pauta:*",
       "asistencia:*",
       // Tickets (CAR-84): el supervisor gestiona tickets y aprueba las solicitudes de los tipos que
       // lo nombran aprobador, en su portal; el alcance por fila lo aplica cada capacidad, no este permiso.
