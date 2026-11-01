@@ -1,4 +1,4 @@
-import { Estado } from "@opai/ds";
+import { Cabecera, Estado } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -33,7 +33,17 @@ export default function Pagina() {
           variante="formulario"
           textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}
         >
-          {datos ? <FormularioAvisos inicial={datos} /> : null}
+          {datos ? (
+            <FormularioAvisos
+              inicial={datos}
+              cabecera={
+                <Cabecera
+                  titulo="Notificaciones"
+                  subtitulo="Los avisos dentro de la app y los avisos legales (por ejemplo, cambios de contrato) siempre te llegan. Aquí eliges cuáles más recibes por celular y por correo."
+                />
+              }
+            />
+          ) : null}
         </Estado>
       )}
     </PaginaPortal>

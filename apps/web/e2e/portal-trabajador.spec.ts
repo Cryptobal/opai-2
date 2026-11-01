@@ -17,7 +17,7 @@ test("Más lista solo lo que existe y cada entrada abre su pantalla", async ({ p
   await entrar(page);
   await page.goto("/trabajador/mas");
   for (const { ruta } of PANTALLAS)
-    await expect(page.locator(`a[href="${ruta}"]`).first()).toBeVisible();
+    await expect(page.locator(`main a[href="${ruta}"]`).first()).toBeVisible();
   // Lo pendiente (Central, rondas, accesos, pauta) no se dibuja como entrada falsa.
   for (const pendiente of ["Central", "Rondas", "Accesos", "Mi pauta"])
     await expect(page.getByRole("link", { name: pendiente })).toHaveCount(0);
@@ -46,6 +46,6 @@ test("Inicio saluda sin errores y navega a Mis datos desde la barra", async ({ p
   await page.goto("/trabajador");
   await expect(page).toHaveTitle(/Inicio · Portal Trabajador/);
   await expect(page.getByText("No pudimos cargar esta información")).toHaveCount(0);
-  await page.locator('a[href="/trabajador/mis-datos"]').first().click();
+  await page.locator('a[href="/trabajador/mis-datos"]:visible').first().click();
   await page.waitForURL((u) => u.pathname === "/trabajador/mis-datos");
 });

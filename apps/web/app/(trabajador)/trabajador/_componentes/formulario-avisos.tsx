@@ -1,9 +1,11 @@
 "use client";
 
-import { type FormEvent, lazy, Suspense, useState } from "react";
+import { type FormEvent, type ReactNode, lazy, Suspense, useState } from "react";
 
-import { avisar, Button, Campo, FormScreen, Input, Skeleton, type SwitchProps } from "@opai/ds";
+import { avisar, Button, Campo, Input, Skeleton, type SwitchProps } from "@opai/ds";
 import { CATEGORIAS_AVISO, type CategoriaAviso } from "@opai/domain";
+
+import { FormScreenListo } from "@opai/ds/form-screen-listo";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -24,13 +26,22 @@ function Switch(props: SwitchProps) {
 
 const CATEGORIA: Record<CategoriaAviso, { titulo: string; detalle: string }> = {
   pauta: { titulo: "Pauta y turnos", detalle: "Cuando cambia o se asigna un turno tuyo." },
-  documentos: { titulo: "Liquidaciones y documentos", detalle: "Liquidaciones nuevas y documentos por firmar." },
+  documentos: {
+    titulo: "Liquidaciones y documentos",
+    detalle: "Liquidaciones nuevas y documentos por firmar.",
+  },
   solicitudes: { titulo: "Solicitudes y tickets", detalle: "Cuando se resuelve algo que pediste." },
   empresa: { titulo: "Avisos de la empresa", detalle: "Comunicados generales de tu empresa." },
 };
 
 /** Pantalla 12 · Notificaciones: por categoría, push y correo; y un horario de silencio. */
-export function FormularioAvisos({ inicial }: { inicial: Preferencias }) {
+export function FormularioAvisos({
+  inicial,
+  cabecera,
+}: {
+  inicial: Preferencias;
+  cabecera: ReactNode;
+}) {
   const { ejecutar, pendiente, error } = useCapacidad("trabajador");
   const [prefs, setPrefs] = useState(inicial.preferencias);
   const [conSilencio, setConSilencio] = useState(inicial.silencio !== null);
@@ -43,19 +54,20 @@ export function FormularioAvisos({ inicial }: { inicial: Preferencias }) {
 
   async function guardar(e: FormEvent) {
     e.preventDefault();
-    const r = await ejecutar<Preferencias>("portal_trabajador.preferencias_notificacion.actualizar", {
-      preferencias: prefs,
-      silencio: conSilencio ? { desde, hasta } : null,
-    });
+    const r = await ejecutar<Preferencias>(
+      "portal_trabajador.preferencias_notificacion.actualizar",
+      {
+        preferencias: prefs,
+        silencio: conSilencio ? { desde, hasta } : null,
+      },
+    );
     if (r) avisar.exito("Tus avisos quedaron guardados");
     else avisar.error("No se pudo guardar. Inténtalo de nuevo.");
   }
 
   return (
-    <FormScreen
-      state="ready"
-      titulo="Notificaciones"
-      subtitulo="Los avisos dentro de la app y los avisos legales (por ejemplo, cambios de contrato) siempre te llegan. Aquí eliges cuáles más recibes por celular y por correo."
+    <FormScreenListo
+      cabecera={cabecera}
       formProps={{ onSubmit: guardar, noValidate: true }}
       secciones={[
         ...CATEGORIAS_AVISO.map((c) => ({
@@ -83,14 +95,28 @@ export function FormularioAvisos({ inicial }: { inicial: Preferencias }) {
           descripcion: "Sin avisos por celular ni correo en estas horas (hora de Chile).",
           contenido: (
             <>
-              <Switch etiqueta="Activar horario de silencio" activo={conSilencio} onCambiar={setConSilencio} />
+              <Switch
+                etiqueta="Activar horario de silencio"
+                activo={conSilencio}
+                onCambiar={setConSilencio}
+              />
               {conSilencio ? (
                 <div className="grid grid-cols-2 gap-3">
                   <Campo etiqueta="Desde" htmlFor="silencio-desde">
-                    <Input id="silencio-desde" type="time" value={desde} onChange={(e) => setDesde(e.target.value)} />
+                    <Input
+                      id="silencio-desde"
+                      type="time"
+                      value={desde}
+                      onChange={(e) => setDesde(e.target.value)}
+                    />
                   </Campo>
                   <Campo etiqueta="Hasta" htmlFor="silencio-hasta">
-                    <Input id="silencio-hasta" type="time" value={hasta} onChange={(e) => setHasta(e.target.value)} />
+                    <Input
+                      id="silencio-hasta"
+                      type="time"
+                      value={hasta}
+                      onChange={(e) => setHasta(e.target.value)}
+                    />
                   </Campo>
                 </div>
               ) : null}

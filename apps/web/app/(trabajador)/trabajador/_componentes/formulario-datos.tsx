@@ -1,8 +1,10 @@
 "use client";
 
-import { lazy, type FormEvent, Suspense, useState } from "react";
+import { lazy, type FormEvent, type ReactNode, Suspense, useState } from "react";
 
-import { avisar, Button, Campo, type Direccion, FormScreen, Input, Skeleton } from "@opai/ds";
+import { avisar, Button, Campo, type Direccion, Input, Skeleton } from "@opai/ds";
+
+import { FormScreenListo } from "@opai/ds/form-screen-listo";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -43,7 +45,7 @@ function aEntrada(d: Direccion) {
 }
 
 /** Pantalla 10 · Mis datos: contacto y dirección editables; nombre, RUT y correo laboral solo se ven. */
-export function FormularioDatos({ inicial }: { inicial: MisDatos }) {
+export function FormularioDatos({ inicial, cabecera }: { inicial: MisDatos; cabecera: ReactNode }) {
   const { ejecutar, pendiente, error } = useCapacidad("trabajador");
   const [telefono, setTelefono] = useState(inicial.telefono ?? "");
   const [email, setEmail] = useState(inicial.emailPersonal ?? "");
@@ -61,10 +63,8 @@ export function FormularioDatos({ inicial }: { inicial: MisDatos }) {
   }
 
   return (
-    <FormScreen
-      state="ready"
-      titulo="Mis datos"
-      subtitulo="Mantén tu contacto y tu dirección al día."
+    <FormScreenListo
+      cabecera={cabecera}
       formProps={{ onSubmit: guardar, noValidate: true }}
       secciones={[
         {
@@ -84,7 +84,11 @@ export function FormularioDatos({ inicial }: { inicial: MisDatos }) {
           titulo: "Contacto",
           contenido: (
             <>
-              <Campo etiqueta="Teléfono" htmlFor="mis-datos-telefono" ayuda="Con código de país si no es chileno.">
+              <Campo
+                etiqueta="Teléfono"
+                htmlFor="mis-datos-telefono"
+                ayuda="Con código de país si no es chileno."
+              >
                 <Input
                   id="mis-datos-telefono"
                   type="tel"

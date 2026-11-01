@@ -1,4 +1,4 @@
-import { Estado } from "@opai/ds";
+import { Cabecera, Estado } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -20,7 +20,10 @@ export default function Pagina() {
       volver={{ href: "/trabajador/mas", etiqueta: "Más" }}
       volverSoloTelefono
       cargar={async () => {
-        const r = await ejecutarComoUsuario<MisDatos>("trabajador", "portal_trabajador.mis_datos.obtener");
+        const r = await ejecutarComoUsuario<MisDatos>(
+          "trabajador",
+          "portal_trabajador.mis_datos.obtener",
+        );
         return { state: estadoTrabajador(r), datos: r.ok ? r.data : null };
       }}
     >
@@ -30,7 +33,17 @@ export default function Pagina() {
           variante="formulario"
           textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}
         >
-          {datos ? <FormularioDatos inicial={datos} /> : null}
+          {datos ? (
+            <FormularioDatos
+              inicial={datos}
+              cabecera={
+                <Cabecera
+                  titulo="Mis datos"
+                  subtitulo="Mantén tu contacto y tu dirección al día."
+                />
+              }
+            />
+          ) : null}
         </Estado>
       )}
     </PaginaPortal>
