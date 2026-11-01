@@ -95,3 +95,96 @@ Detalles menores que el export v3 dejó para resolver al implementar, con el DS 
 ## 11. Entregables de documentación por PR
 
 Cada PR actualiza `docs/2.0/ESTADO.md` (qué entró, qué quedó pendiente, qué se decidió), deja `ROADMAP.md`/`PLAN-desarrollo.md` al día si cambia el plan, y trae el resumen ejecutivo para Carlos. El escenario del agente va en `docs/2.0/agentes/operar-cpq.md` con su prueba en `pnpm test` (ADR-034).
+
+
+## 12. Cierre 10.2a (CAR-132, Refs CAR-119)
+
+El encargo de cierre del 1-nov-2026 limita este PR a la entrada «Cotizaciones»,
+la lista y la creación desde el Negocio y desde la lista, sobre #187 ya integrado.
+Se retoma el trabajo sin commitear y se conserva el merge normal de main.
+El corte lo aplica Codex conforme al encargo, sin nuevas decisiones de negocio.
+El resto de 10.2 (planilla y resumen de costos) queda pendiente del motor.
+
+**Decisión de Carlos del 1-nov-2026 00:57 CLT, citada en el encargo:**
+«Construye ya las pantallas de CRM y CPQ con Codex, con el design system de 2.0, y revisamos el diseño después en vivo».
+**Diseño no aprobado: se revisa en vivo.** Esta excepción específica prevalece
+sobre la referencia general al export aprobado de las secciones 1 y 7.
+
+- Entrada `/cotizaciones`, lista paginada y pestaña del Negocio con permisos efectivos.
+- Alta CLP sobre negocio abierto: título y validez, vista previa sin escribir,
+  confirmación con clave de idempotencia y navegación de regreso a la lista.
+- Lista: código, título, negocio, estado, versión, validez, vigente/alternativa y venta;
+  si falta cálculo se muestra «Pendiente del motor de costeo». No presenta costos ni margen.
+- El enlace de una fila abre las cotizaciones del negocio; la ficha individual y la planilla
+  no forman parte de este corte. No se modifica el backend de creación.
+- Sin migraciones, permisos nuevos ni cambios en topes. No se incluyen pantallas de CRM.
+
+**Pendientes heredados de #187:** carrera en `modules/cpq/capabilities/crear.ts`
+al validar negocio abierto y elegir vigente antes de escribir: cierre/archivo concurrente
+u otra primera cotización pueden invalidar lo leído; la restricción de vigente puede
+responder `CONFLICT`. Se anota y no se corrige en CAR-132 por instrucción expresa.
+La clave de idempotencia del formulario evita duplicados del mismo envío, pero no resuelve
+esa carrera de backend. El filtro de estado de la lista conserva la semántica de #187
+(cualquier versión coincidente); revisar al implementar el ciclo de versiones.
+
+**Ajuste de presupuesto (CAR-132):** Codex difirió la carga de las tarjetas de configuración del Portal Cliente para mantener la ruta de configuración de módulos bajo su tope de 180 KB, sin cambiar permisos ni decisiones de negocio.
+
+Recorrido de los CA de la especificación: **entrega parcial**, no cierre del Brief 10.
+
+| CA | Estado en 10.2a |
+|---|---|
+| CA1 | Fuera de este corte: plantilla y configuración. |
+| CA2 | Pendiente: motor y casos dorados; sin cálculo visible. |
+| CA3 | Pendiente: secciones, líneas, subtotales y condiciones. |
+| CA4 | Fuera de este corte: copias del catálogo. |
+| CA5 | Pendiente: validación del modelo y ver impacto. |
+| CA6 | Pendiente: traza y explicación de montos. |
+| CA7 | Pendiente: estados y aprobación por margen. |
+| CA8 | Pendiente: precio subvalorado y aprobación. |
+| CA9 | Pendiente: envío y nuevas versiones. |
+| CA10 | Pendiente: vencimiento y renovación. |
+| CA11 | Pendiente: ganar y ofrecer puestos a RRHH. |
+| CA12 | Parcial: alta desde negocio existente; sin cotización rápida ni negocio nuevo. |
+| CA13 | Parcial: lista y formulario con DS adaptable; sin planilla, comparar ni aprobar. Evidencia visual pendiente. |
+| CA14 | Parcial: create/list/get usan capacidades MCP existentes con vista previa; sin ajustes, guardias ni envío. |
+| CA15 | Parcial: no se serializan costos ni margen para la lista; regresiones unitarias de UI y capacidades. API/MCP en vivo pendiente. |
+| CA16 | Heredado de #187, sin cambios de schema; prueba real de dos empresas pendiente fuera de Codex. |
+| CA17 | Acciones sobre capacidades existentes; gate de paridad incluido en pnpm test. |
+| CA18 | Pendiente: costos por categoría y motor. |
+| CA19 | Pendiente: catálogo y rateo. |
+| CA20 | Pendiente: instrumentos, confirmación del corredor y fórmulas. |
+| CA21 | Pendiente: las tres pestañas de configuración. |
+| CA22 | Pendiente: valores por defecto y sobrescrituras de pólizas. |
+| CA23 | Pendiente: edición de categorías. |
+| CA24 | Pendiente: aceptación y línea base inmutable. |
+| CA25 | Parcial: el alta usa CLP por defecto; selector UF, condiciones y reajustes pendientes. |
+| CA26 | Pendiente: renombre e historial. |
+
+Validación del cierre: se ejecutan typecheck y lint con `--concurrency=1`,
+unitarios, build y presupuesto; los resultados efectivos se consignan en el PR.
+**test:db: se corre fuera de Codex** (no se ejecuta por instrucción expresa).
+El spec `apps/web/e2e/cpq-cotizaciones.spec.ts` cubre ambas entradas, vista previa,
+validez, permisos y capturas a 375/1024/1280; su fixture exige `opai_e2e` local
+para ambas URLs de base y no aplica migraciones. Ejecución y capturas pendientes
+si ese entorno no está completo. Rendimiento por navegación (≤8) y revisión visual
+de foco, contraste y estados quedan pendientes de medición en navegador.
+
+
+Resultados observados en Codex para este cierre:
+
+- `pnpm typecheck --concurrency=1`: 18 tareas correctas.
+- `pnpm lint --concurrency=1`: 18 tareas correctas, sin errores (advertencias existentes).
+- `pnpm test`: 266 archivos y 1.722 pruebas correctas en la corrida final.
+  Se regeneró el inventario de paridad tras la primera corrida; 359 pares, 0 faltantes.
+
+- Build de producción: correcto, tras corregir el tipo del área en el test de navegación.
+- Presupuesto CPQ: lista 158,6 KB, nueva 164,2 KB y pestaña del negocio 163,8 KB
+  (tope 165 KB en las tres). El gate global falla en `/(erp)/configuracion/modulo/[id]`:
+  180,9 KB frente a 180 KB. No se suben topes ni se modifica esa pantalla fuera de alcance.
+  No se ha medido esa ruta sobre una compilación separada de main para atribuir el origen.
+- E2e intentado con `--workers=1 --max-failures=1`: 1 fallo de preparación y 8 sin ejecutar;
+  la fixture no pudo prepararse. `DATABASE_URL_MIGRATE` no está cargada y la guardia local
+  exige esa URL junto con `DATABASE_URL`. Sin capturas ni validación visual efectiva.
+- Autorrevisión con subagente completada: sin bloqueos nuevos de seguridad/migraciones/datos;
+  corregidos el test de creación desde la lista, la aserción del título del negocio y el
+  comentario del buscador. La carrera heredada de #187 sigue pendiente.

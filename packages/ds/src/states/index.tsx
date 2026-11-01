@@ -32,9 +32,9 @@ function Marco({
   );
 }
 
-/** Vacío: una línea de texto y una acción. */
-export function Empty(props: EstadoProps) {
-  return <Marco icono={<Inbox className="size-6" />} {...props} />;
+/** Vacío: una línea de texto y una acción. `icono` cambia la bandeja por uno del contexto (p. ej. el mapa). */
+export function Empty({ icono, ...props }: EstadoProps & { icono?: ReactNode }) {
+  return <Marco icono={icono ?? <Inbox className="size-6" />} {...props} />;
 }
 
 /** Error: qué pasó, qué hacer, reintentar. */

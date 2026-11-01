@@ -1,13 +1,13 @@
-import { Check, RotateCcw, X } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
+import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos } from "@/lib/fechas";
 
+import { acciones, Cierre } from "./acciones-negocio";
 import type { NegocioDetalle } from "./datos";
 import { CambiarEtapa } from "./tablero/cambiar-etapa";
 import type { EtapaTablero } from "./tablero/use-mover";
@@ -17,71 +17,6 @@ const ESTADO = { abierto: "Abierto", ganado: "Ganado", perdido: "Perdido" } as c
 
 export type TabNegocio = "resumen" | "cotizaciones" | "documentos" | "actividad";
 
-// «Más acciones»: Editar, instalaciones, contactos y Archivar (export); Ganar/Perder o Reabrir van
-// como botones en la cabecera. Cada acción abre su hoja por la URL o ejecuta su capacidad.
-function acciones(n: NegocioDetalle): AccionEntidad[] {
-  const hoja = (id: string, etiqueta: string): AccionEntidad => ({
-    id,
-    etiqueta,
-    parametro: { clave: id, valor: "1" },
-  });
-  if (n.archivadoEn) {
-    return [
-      {
-        id: "desarchivar",
-        etiqueta: "Desarchivar",
-        capacidad: {
-          id: "comercial.negocios.archivar",
-          input: { id: n.id, archivar: false },
-          exito: "Negocio desarchivado",
-        },
-      },
-    ];
-  }
-  return [
-    hoja("editar", "Editar"),
-    hoja("instalaciones", "Instalaciones"),
-    hoja("contactos", "Contactos"),
-    {
-      id: "archivar",
-      etiqueta: "Archivar",
-      peligro: true,
-      capacidad: {
-        id: "comercial.negocios.archivar",
-        input: { id: n.id, archivar: true },
-        exito: "Negocio archivado",
-      },
-      confirmar: {
-        titulo: `Archivar ${n.titulo}`,
-        descripcion: "Deja de aparecer en las listas por defecto; se conserva el historial.",
-        boton: "Archivar",
-        peligro: true,
-      },
-    },
-  ];
-}
-
-/** Botones de cierre de la cabecera: Ganar y Perder (abierto) o Reabrir (perdido). */
-function Cierre({ n, base }: { n: NegocioDetalle; base: string }) {
-  if (n.archivadoEn || n.estado === "ganado") return null;
-  if (n.estado === "perdido")
-    return (
-      <EnlaceBoton href={`${base}?reabrir=1`} icono={RotateCcw}>
-        Reabrir
-      </EnlaceBoton>
-    );
-  return (
-    <>
-      <EnlaceBoton href={`${base}?perder=1`} variante="secondary" icono={X}>
-        Perder
-      </EnlaceBoton>
-      <EnlaceBoton href={`${base}?ganar=1`} icono={Check}>
-        Ganar
-      </EnlaceBoton>
-    </>
-  );
-}
-
 /** Ficha de un negocio: estado sobre el título, cuenta y etapa; pestañas por ruta (ADR-041). */
 export function FichaNegocio(p: {
   state: EstadoPantalla;
@@ -89,6 +24,7 @@ export function FichaNegocio(p: {
   tab: TabNegocio;
   /** Con `comercial:negocios.manage`: Ganar/Perder/Reabrir y «Más acciones». */
   gestiona?: boolean;
+  cpq?: { leer: boolean; crear: boolean };
   /** Etapas para «Cambiar etapa» (solo si gestiona y el negocio está abierto). */
   etapas?: EtapaTablero[] | null;
   children: ReactNode;
@@ -134,21 +70,31 @@ export function FichaNegocio(p: {
                   ) : null}
                 </>
               ),
-              acciones: p.gestiona ? (
-                <>
-                  <span className="flex gap-2 max-md:hidden lg:max-xl:hidden">
-                    <Cierre n={n} base={base} />
-                  </span>
-                  <AccionesEntidad etiqueta="Más acciones" acciones={acciones(n)} />
-                </>
-              ) : undefined,
+              acciones:
+                p.gestiona || p.cpq?.crear ? (
+                  <>
+                    {p.cpq?.crear && n.estado === "abierto" && !n.archivadoEn ? (
+                      <EnlaceBoton href={`/cotizaciones/nueva?negocio=${n.id}`}>
+                        Nueva cotización
+                      </EnlaceBoton>
+                    ) : null}
+                    <span className="flex gap-2 max-md:hidden lg:max-xl:hidden">
+                      {p.gestiona ? <Cierre n={n} base={base} /> : null}
+                    </span>
+                    {p.gestiona ? (
+                      <AccionesEntidad etiqueta="Más acciones" acciones={acciones(n)} />
+                    ) : null}
+                  </>
+                ) : undefined,
             }
           : {})}
         tabActiva={p.tab}
         Link={LinkNext}
         tabs={[
           { id: "resumen", etiqueta: "Resumen", href: base },
-          { id: "cotizaciones", etiqueta: "Cotizaciones", href: `${base}/cotizaciones` },
+          ...(p.cpq?.leer
+            ? [{ id: "cotizaciones", etiqueta: "Cotizaciones", href: `${base}/cotizaciones` }]
+            : []),
           { id: "documentos", etiqueta: "Documentos", href: `${base}/documentos` },
           { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
         ]}

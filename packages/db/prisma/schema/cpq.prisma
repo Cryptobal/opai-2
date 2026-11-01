@@ -1,0 +1,148 @@
+// Módulo CPQ (CAR-119, Brief 10 · PR 10.1, ADR-042): cotizador que cuelga de un negocio de Comercial.
+// Schema propio `cpq`. Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas
+// snake_case por @map. El tenant_id NO lleva @relation a Tenant (no se toca core.prisma): las FK a
+// core.tenants, comercial.negocios y core.instalaciones van en el SQL de la migración, con el trigger
+// `core.verificar_mismo_tenant`. Aún sin cálculo: venta, costos y líneas con precio llegan con el
+// motor (Brief 08); la línea base (R68), los instrumentos y la configuración, en los PR 10.3 a 10.7.
+
+/// Cotización: oferta a un cliente con código `CPQ-AAAA-NNN` (R54) que cuelga de un negocio (R18).
+/// Las versiones guardan el estado; aquí vive lo que no cambia entre versiones.
+model CpqCotizacion {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  codigo         String
+  negocioId      String   @map("negocio_id") @db.Uuid
+  titulo         String
+  /// Otra cotización del mismo negocio de la que esta es alternativa (Opción A/B, R23).
+  alternativaDeId String? @map("alternativa_de_id") @db.Uuid
+  /// Una sola vigente por negocio (índice parcial en el SQL, R46).
+  vigente        Boolean  @default(false)
+  creadoPorId    String   @map("creado_por_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  versiones CpqVersion[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, negocioId])
+  @@map("cotizaciones")
+  @@schema("cpq")
+}
+
+/// Versión de una cotización (R43). Una sola editable por cotización (índice parcial en el SQL);
+/// enviar la congela. `estado` sigue R40: borrador, en_aprobacion, lista, enviada, aceptada,
+/// rechazada, vencida, reemplazada, archivada.
+model CpqVersion {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  cotizacionId      String    @map("cotizacion_id") @db.Uuid
+  numero            Int
+  estado            String    @default("borrador")
+  /// "CLP" | "UF": solo presentación; el cálculo es siempre en CLP enteros (R25, R62).
+  moneda            String    @default("CLP")
+  validaHasta       DateTime? @map("valida_hasta") @db.Date
+  /// "margen_sobre_venta" | "markup" | "margen_sobre_mano_de_obra". Solo con `cpq:costos.ver` (R59).
+  margenModo        String    @default("margen_sobre_venta") @map("margen_modo")
+  /// Porcentaje escalado (PCT_ESCALA). Nulo hasta que exista el motor. Solo con `cpq:costos.ver`.
+  margenObjetivoPct Int?      @map("margen_objetivo_pct")
+  /// CLP entero por mes. Lo escribe el motor (Brief 08); nulo mientras no exista.
+  ventaMensualClp   Int?      @map("venta_mensual_clp")
+  /// Control optimista de la edición concurrente (gana la primera, la segunda recarga).
+  revision          Int       @default(1)
+  enviadaEn         DateTime? @map("enviada_en") @db.Timestamptz(6)
+  creadoPorId       String    @map("creado_por_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cotizacion  CpqCotizacion  @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  secciones   CpqSeccion[]
+  aprobaciones CpqAprobacion[]
+
+  @@unique([cotizacionId, numero])
+  @@index([tenantId, cotizacionId])
+  @@index([tenantId, estado])
+  @@map("versiones")
+  @@schema("cpq")
+}
+
+/// Agrupación de líneas por instalación del negocio; `instalacionId` nulo = sección «Común» (R18).
+model CpqSeccion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  versionId     String   @map("version_id") @db.Uuid
+  instalacionId String?  @map("instalacion_id") @db.Uuid
+  nombre        String
+  orden         Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  version CpqVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  lineas  CpqLinea[]
+
+  @@index([tenantId, versionId])
+  @@map("secciones")
+  @@schema("cpq")
+}
+
+/// Lo cotizado dentro de una sección: puesto, ítem o adicional. Sin precios hasta el motor.
+model CpqLinea {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  seccionId      String   @map("seccion_id") @db.Uuid
+  /// "puesto" | "item" | "adicional"
+  tipo           String
+  grupo          String?
+  nombre         String
+  posiciones     Int      @default(1)
+  /// "mensual" | "unico"
+  recurrencia    String   @default("mensual")
+  habilitada     Boolean  @default(true)
+  visibleCliente Boolean  @default(true) @map("visible_cliente")
+  orden          Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  seccion CpqSeccion @relation(fields: [seccionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, seccionId])
+  @@map("lineas")
+  @@schema("cpq")
+}
+
+/// Pedido y decisión de aprobación de margen sobre una versión (R41, R42).
+model CpqAprobacion {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  versionId      String    @map("version_id") @db.Uuid
+  /// "pendiente" | "aprobada" | "rechazada" | "retirada"
+  estado         String    @default("pendiente")
+  solicitadaPorId String   @map("solicitada_por_id") @db.Uuid
+  comentario     String?
+  decididaPorId  String?   @map("decidida_por_id") @db.Uuid
+  motivo         String?
+  decididaEn     DateTime? @map("decidida_en") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  version CpqVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, versionId])
+  @@map("aprobaciones")
+  @@schema("cpq")
+}
+
+/// Último número usado por tenant y año para el código `CPQ-AAAA-NNN` (R54). Se incrementa con un
+/// upsert atómico dentro de la transacción de crear: dos cotizaciones simultáneas no repiten número.
+/// El importador de 1.0 fija `ultimo` al último número de 1.0 para que 2.0 continúe desde ahí.
+model CpqCorrelativo {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  anio      Int
+  ultimo    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, anio])
+  @@map("correlativos")
+  @@schema("cpq")
+}

@@ -1,4 +1,5 @@
 import { listarModulos, type EventoDeDominio } from "../module";
+import { EVENTOS_CRM } from "./catalogo-crm";
 
 /**
  * Eventos que emite el núcleo (ADR-029). Con los `eventos` de los manifests forman el catálogo al
@@ -15,6 +16,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.cuenta.archivada", descripcion: "Se archivó una cuenta." },
   { id: "core.contacto.creado", descripcion: "Se agregó un contacto a una cuenta." },
   { id: "core.contacto.actualizado", descripcion: "Cambiaron los datos de un contacto." },
+  ...EVENTOS_CRM,
   { id: "core.instalacion.creada", descripcion: "Se creó una instalación de una cuenta." },
   { id: "core.instalacion.actualizada", descripcion: "Cambiaron los datos de una instalación." },
   { id: "core.instalacion.estado_cambiado", descripcion: "Una instalación cambió de estado." },
@@ -137,16 +139,9 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
     id: "core.cumplimiento.brecha_notificada",
     descripcion: "Se dejó constancia del aviso de una brecha a la Agencia o a los titulares.",
   },
-  {
-    id: "core.cumplimiento.retencion_aplicada",
-    descripcion:
-      "El trabajo de retención anonimizó o eliminó datos vencidos según la política activa.",
-  },
+  { id: "core.cumplimiento.retencion_aplicada", descripcion: "El trabajo de retención anonimizó o eliminó datos vencidos según la política activa." },
   { id: "core.cumplimiento.dek_rotada", descripcion: "Se rotó la clave de datos del tenant y se recifraron sus secretos." },
-  {
-    id: "core.cumplimiento.titular_anonimizado",
-    descripcion: "Se anonimizó a un titular (persona o contacto) a pedido, conservando los hechos regulados.",
-  },
+  { id: "core.cumplimiento.titular_anonimizado", descripcion: "Se anonimizó a un titular (persona o contacto) a pedido, conservando los hechos regulados." },
 ];
 
 /** Catálogo completo: núcleo más los módulos registrados. */

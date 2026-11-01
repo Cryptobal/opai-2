@@ -51,9 +51,9 @@ PR 1 entrega Bandeja y Ficha (con comentar, cambiar estado, reasignar, aprobar/r
 | Desde | Hacia | Quién | Condición | Reversible |
 |---|---|---|---|---|
 | abierto | en_curso | responsable / ver_todos | — | no (hecho nuevo) |
-| abierto, en_curso | resuelto | responsable / ver_todos / aprobador (si es solicitud) | — | sí: resuelto → en_curso |
+| abierto, en_curso | resuelto | responsable / ver_todos; en una solicitud, aprobar lo hace solo el rol aprobador del tipo (R-TCK-006) | — | sí: resuelto → en_curso |
 | resuelto | cerrado | responsable / ver_todos | — | no |
-| abierto, en_curso | rechazado | aprobador del tipo / ver_todos (solo solicitudes con aprobación) | motivo obligatorio | no |
+| abierto, en_curso | rechazado | solo el rol aprobador del tipo (R-TCK-006; solo solicitudes con aprobación) | motivo obligatorio | no |
 
 ## 7. Permisos por rol y portal
 

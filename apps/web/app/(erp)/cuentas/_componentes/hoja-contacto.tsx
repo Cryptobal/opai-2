@@ -13,13 +13,23 @@ import { CamposContacto, correoMalo, type DatosContacto } from "./campos-contact
 export { ROL_CONTACTO } from "./campos-contacto";
 
 /** Nuevo o editar contacto (03): nombres, correo con validación, principal y roles. */
-export function HojaContacto({ cuentaId, contactos }: { cuentaId: string; contactos: Contacto[] }) {
+export function HojaContacto({
+  cuentaId,
+  contactos,
+  soloDatos = false,
+}: {
+  cuentaId: string;
+  contactos: Contacto[];
+  soloDatos?: boolean;
+}) {
   const hoja = useHojaUrl("contacto");
   const actual = contactos.find((k) => k.id === hoja.valor) ?? null;
+  if (soloDatos && !actual) return null;
   return hoja.abierta ? (
     <Formulario
       key={hoja.valor ?? "x"}
       cuentaId={cuentaId}
+      soloDatos={soloDatos}
       actual={actual}
       principal={contactos.find((k) => k.esPrincipal && k.id !== actual?.id) ?? null}
       onCerrar={hoja.cerrar}
@@ -29,11 +39,13 @@ export function HojaContacto({ cuentaId, contactos }: { cuentaId: string; contac
 
 function Formulario({
   cuentaId,
+  soloDatos,
   actual,
   principal,
   onCerrar,
 }: {
   cuentaId: string;
+  soloDatos: boolean;
   actual: Contacto | null;
   principal: Contacto | null;
   onCerrar: () => void;
@@ -52,10 +64,10 @@ function Formulario({
     setD((x) => ({ ...x, [k]: v }));
   async function guardar() {
     const campos = {
-      ...d,
+      ...(soloDatos ? { nombres: d.nombres, apellidos: d.apellidos } : d),
       email: d.email.trim() || null,
       telefono: d.telefono.trim() || null,
-      cargo: d.cargo.trim() || null,
+      ...(!soloDatos ? { cargo: d.cargo.trim() || null } : {}),
     };
     const r = await ejecutar(
       actual ? "core.contactos.update" : "core.contactos.create",
@@ -86,7 +98,7 @@ function Formulario({
         </>
       }
     >
-      <CamposContacto d={d} set={set} error={error} principal={principal} />
+      <CamposContacto soloDatos={soloDatos} d={d} set={set} error={error} principal={principal} />
     </Sheet>
   );
 }

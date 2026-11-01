@@ -53,6 +53,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       "comercial:config.manage",
       // Canales de entrada de Leads (BRIEF-07-leads): configurarlos es de owner y admin.
       "comercial:canales.manage",
+      // Catálogo de etiquetas (alcance-crm §2): configurarlo es de owner y admin.
+      PERMISOS_CORE.etiquetasConfig,
+      PERMISOS_CORE.actividadesAdmin,
       PERMISOS_CORE.marcaManage,
       PERMISOS_CORE.integracionesManage,
       PERMISOS_CORE.comunicacionesManage,
@@ -67,12 +70,17 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       // Tickets (CAR-84): configurar los tipos del tenant es de owner y admin, igual que los
       // catálogos de Comercial y Rondas.
       "tickets:tipos.manage",
+      // CPQ (CAR-119, ADR-042 (5) y (8)): aprobar márgenes y configurar el modelo de costeo son de
+      // owner y admin. `cpq:costos.ver` sí lo conserva (cpq.md §7) y no abre estructuras sensibles.
+      "cpq:aprobar",
+      "cpq:modelo.manage",
     ],
   },
   supervisor: {
     permitir: [
       "ops:*",
       "rondas:*",
+      "pauta:*",
       "asistencia:*",
       // Tickets (CAR-84): el supervisor gestiona tickets y aprueba las solicitudes de los tipos que
       // lo nombran aprobador, en su portal; el alcance por fila lo aplica cada capacidad, no este permiso.

@@ -1,5 +1,4 @@
 import type { ClienteApp } from "./client";
-import { notificarConsulta } from "./metricas";
 
 /**
  * Lecturas de la sesión de Better Auth fuera de transacción (B1 · causa raíz). Antes cada lectura de
@@ -77,9 +76,12 @@ function usuario(f: FilaSesion) {
   };
 }
 
-/** Sesión por token (con el usuario unido cuando la consulta lo pide), como sentencia autocommit. */
+/**
+ * Sesión por token (con el usuario unido cuando la consulta lo pide), como sentencia autocommit.
+ * No avisa al contador de consultas: se invoca desde el hook de modelos de `clienteAuth()`, que ya
+ * contó esta operación (`Session.findFirst`); avisar aquí la contaría dos veces (CAR-50).
+ */
 export async function leerSesionPorToken(base: ClienteApp, token: string, incluirUser: boolean) {
-  notificarConsulta();
   const filas = await base.$queryRaw<FilaSesion[]>`
     SELECT * FROM core.auth_sesion_por_token(${token})`;
   const f = filas[0];
@@ -106,10 +108,10 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * global (sin tenant_id ni RLS): no se filtra por membresía porque el id viene de la sesión ya
  * validada y al leerla no hay tenant activo (igual que `globales.usuarioPorId`). Un id que no sea uuid
  * no corresponde a ningún usuario: devuelve null sin consultar, en vez de fallar con el cast `::uuid`.
+ * No avisa al contador de consultas: ya lo hizo el hook de modelos (`User.findFirst`), ver arriba.
  */
 export async function leerUsuarioPorId(base: ClienteApp, id: string) {
   if (!UUID_RE.test(id)) return null;
-  notificarConsulta();
   const filas = await base.$queryRaw<FilaUsuario[]>`
     SELECT * FROM core.auth_usuario_por_id(${id}::uuid)`;
   const f = filas[0];

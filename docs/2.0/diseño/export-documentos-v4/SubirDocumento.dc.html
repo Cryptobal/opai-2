@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Documentos" hint-size="100%,56px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="upload" hint-size="170px,40px">Subir documento</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ docTabs }}" value="exp" hint-size="100%,44px"></x-import>
+<div style="height:16px"></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ isPhone }}" to-card="{{ toCard }}" hint-size="100%,300px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Subir documento" description="{{ sheetDesc }}" on-close="{{ noop }}" actions="{{ sheetActions }}" hint-size="420px,100%">
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes subir documentos" description="Tu rol es de solo lectura. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Archivo</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" icon="camera" block="{{ true }}" hint-size="100%,48px">Tomar foto</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" icon="paperclip" block="{{ true }}" hint-size="100%,48px">Elegir archivo</x-import>
+</div>
+<span class="t-caption">PDF, Word, Excel, JPG o PNG hasta 25 MB</span>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" tipos="PDF, Word, Excel, JPG o PNG" tamano-maximo-mb="{{ 25 }}" hint-size="100%,120px"></x-import>
+</sc-if>
+<sc-for list="{{ files }}" as="f" hint-placeholder-count="1">
+<div class="{{ f.cls }}">
+<span class="fic" aria-hidden="true"><span class="{{ f.ic }}"></span></span>
+<div class="body">
+<span class="nm">{{ f.nombre }}</span>
+<span class="st">{{ f.st }}</span>
+<sc-if value="{{ f.prog }}" hint-placeholder-val="{{ false }}"><div class="upl-bar"><span style="width:62%"></span></div></sc-if>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon-only="{{ true }}" icon="x" aria-label="Quitar archivo" hint-size="40px,40px"></x-import>
+</div>
+</sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="{{ tipo }}" placeholder="Elige el tipo de documento" hint="{{ tipoHint }}" options="{{ tipos }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Vincular a" value="{{ vinc }}" placeholder="Busca una persona, cuenta, instalación, negocio o puesto" options="{{ entidades }}" hint-size="100%,72px"></x-import>
+<sc-if value="{{ showVig }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Vence el" value="{{ vence }}" error="{{ vigError }}" hint="Obligatoria para pólizas. Te avisaremos 30 días antes." hint-size="100%,72px"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Nota (opcional)" rows="{{ 3 }}" placeholder="Ej.: renovación anual, cubre bodega y patio" hint-size="100%,110px"></x-import>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone";
+    const B = (tone, t) => (NS.Badge ? h(NS.Badge, { tone }, t) : t);
+    const row = "upl-row", err = "upl-row error";
+    const files = {
+      normal: [{ cls: row, ic: "ic i-file", nombre: "Poliza_RC_Bodega_Lampa_2027.pdf", st: "Listo · 1,2 MB", prog: false }],
+      vacio: [],
+      cargando: [{ cls: row, ic: "ic i-file", nombre: "Poliza_RC_Bodega_Lampa_2027.pdf", st: "Subiendo · 0,7 MB de 1,2 MB", prog: true }],
+      error: [
+        { cls: err, ic: "ic i-alert", nombre: "planilla_turnos.numbers", st: "Formato no admitido. Sube PDF, Word, Excel, JPG o PNG.", prog: false },
+        { cls: err, ic: "ic i-alert", nombre: "video_ronda_noche.mp4", st: "Pesa 84,3 MB. El máximo es 25 MB.", prog: false },
+        { cls: err, ic: "ic i-alert", nombre: "poliza_firmada.pdf", st: "Está protegido con contraseña. Quita la clave y vuelve a subirlo.", prog: false },
+      ],
+      sinpermiso: [],
+    }[estado] || [];
+    const forb = estado === "sinpermiso";
+    const empty = estado === "vacio";
+    const Btn = (p, t) => (NS.Button ? h(NS.Button, p, t) : null);
+    return {
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      theme: this.props.theme ?? "light",
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "doc",
+      isPhone, notPhone: !isPhone,
+      sheetSide: isPhone ? "bottom" : "right",
+      sheetDesc: forb ? "" : "Queda en el espacio de Atlas Seguridad SpA, vinculado a una ficha.",
+      isForbidden: forb, notForbidden: !forb,
+      files,
+      tipo: empty ? undefined : "pol",
+      tipoHint: empty ? "El tipo define si pide vigencia y quién lo ve." : "Exige vigencia · se muestra en la ficha de la instalación",
+      showVig: !empty,
+      vinc: empty ? undefined : "bl",
+      vence: estado === "error" ? "" : "12-10-2027",
+      vigError: estado === "error" ? "Este tipo exige fecha de vencimiento" : undefined,
+      tipos: [{ value: "pol", label: "Póliza", description: "Exige vigencia" }, { value: "os10", label: "Plan de seguridad OS-10", description: "Exige vigencia" }, { value: "cc", label: "Contrato comercial", description: "Exige vigencia" }, { value: "cert", label: "Certificado" }, { value: "otro", label: "Otro documento" }],
+      entidades: [{ value: "bl", label: "Bodega Lampa", description: "Instalación · Logística Andina SpA" }, { value: "pq", label: "Planta Quilicura", description: "Instalación · Logística Andina SpA" }, { value: "ta", label: "Torre Apoquindo", description: "Instalación · Inmobiliaria Apoquindo" }],
+      sheetActions: forb ? Btn({ variant: "secondary" }, "Cerrar") : [Btn({ key: "c", variant: "secondary" }, "Cancelar"), Btn({ key: "s", disabled: estado !== "normal", loading: estado === "cargando", loadingLabel: "Subiendo" }, "Subir")],
+      noop: () => {},
+      rows: [
+        { id: 1, nombre: "Plan de seguridad OS-10", vinc: "Planta Quilicura", v: B("warning", "Por vencer") },
+        { id: 2, nombre: "Contrato de servicios", vinc: "Torre Apoquindo", v: B("warning", "Por vencer") },
+        { id: 3, nombre: "Credencial OS-10", vinc: "Héctor Araya", v: B("success", "Vigente") },
+      ],
+      cols: [{ key: "nombre", label: "Documento", strong: true }, { key: "vinc", label: "Vinculado a" }, { key: "v", label: "Vigencia" }],
+      toCard: (r) => ({ icon: "file", title: r.nombre, subtitle: r.vinc }),
+      docTabs: [{ id: "exp", label: "Explorador" }, { id: "ven", label: "Vencimientos" }, { id: "pla", label: "Plantillas" }, { id: "fir", label: "Firmas pendientes" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] }, { title: "Personas", items: [] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

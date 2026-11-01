@@ -23,12 +23,20 @@ export function useCapacidad(portal: string) {
     input: unknown,
     dryRun = false,
     revalidar: Revalidacion = "layout",
+    idempotencyKey?: string,
   ): Promise<T | null> {
     setError(null);
     setCodigo(null);
     setPendiente(true);
     try {
-      const r: Resultado = await ejecutarCapacidad(portal, id, input, dryRun, revalidar);
+      const r: Resultado = await ejecutarCapacidad(
+        portal,
+        id,
+        input,
+        dryRun,
+        revalidar,
+        idempotencyKey,
+      );
       if (!r.ok) {
         setError(r.error.message);
         setCodigo(r.error.code);

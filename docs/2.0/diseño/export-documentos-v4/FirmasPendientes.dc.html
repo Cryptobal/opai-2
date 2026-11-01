@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a las firmas" description="Tu rol no puede ver solicitudes de firma. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Documentos" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ docTabs }}" value="fir" hint-size="100%,44px"></x-import>
+<div style="height:16px"></div>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-height:{{ boxH }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg);text-align:center">
+<span class="ic i-inbox muted"></span>
+<span class="t-subheading">Bandeja de firmas</span>
+<span class="t-body-sm muted" style="max-width:420px;text-wrap:pretty">Aquí se monta la Bandeja de firmas aprobada en «Control de acceso y firma» (29-oct), sin cambios. Desde cada fila se abre Estado, Enviar a firma y Verificar.</span>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="32px" height="{{ 32 }}" hint-size="32px,32px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="{{ 14 }}" hint-size="40%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="26%" height="{{ 12 }}" hint-size="26%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="72px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="No hay documentos esperando firma" description="Cuando envíes un documento a firma, lo verás aquí hasta que firmen todos." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las firmas pendientes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="DOC-FIR-503 · 30-10-2026 12:57" hint-size="100%,320px"></x-import>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone";
+    return {
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      theme: this.props.theme ?? "light",
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "doc",
+      boxH: isPhone ? "420px" : "460px",
+      isNormal: estado === "normal", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      isForbidden: estado === "sinpermiso", notForbidden: estado !== "sinpermiso",
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver explorador") : null,
+      skel: [{ w: "46%" }, { w: "38%" }, { w: "52%" }, { w: "34%" }, { w: "44%" }],
+      docTabs: [{ id: "exp", label: "Explorador" }, { id: "ven", label: "Vencimientos" }, { id: "pla", label: "Plantillas" }, { id: "fir", label: "Firmas pendientes" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] }, { title: "Personas", items: [] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+import { listarCapacidades, obtenerCapacidad } from "../../registry";
+
 // Frases de la actividad de una ficha a partir de la auditoría (capacidad + input saneado).
 
 const SUSTANTIVO: Record<string, string> = {
@@ -10,11 +12,18 @@ const SUSTANTIVO: Record<string, string> = {
   cargos: "el cargo",
   estructuras: "una estructura de sueldo",
   documentos: "el documento",
+  negocios: "el negocio",
+  tenants: "la empresa",
+  agentes: "el agente",
+  config: "la configuración",
 };
 
 const VERBO: Record<string, string> = {
   create: "creó",
   update: "actualizó",
+  delete: "eliminó",
+  mover: "movió",
+  set_modules: "cambió los módulos activos",
   archive: "archivó",
   set_estado: "cambió el estado de",
   set_activo: "cambió la vigencia de",
@@ -65,12 +74,22 @@ function objeto(input: Input): string | null {
 
 /** "creó la cuenta Logística Andina", "cambió el estado de la cuenta a Cliente activo". */
 export function frase(capability: string, input: Input): string {
-  const [, entidad = "", verbo = ""] = capability.split(".");
-  const v = VERBO[verbo] ?? verbo.replace(/_/g, " ");
-  const s = SUSTANTIVO[entidad] ?? entidad;
+  const partes = capability.split(".");
+  const verbo = partes.at(-1) ?? "";
+  const entidad = partes.at(-2) ?? "";
+  if (capability === "platform.modules.set" || verbo === "set_modules")
+    return "cambió los módulos activos";
+  const v = VERBO[verbo];
+  const s = SUSTANTIVO[entidad];
+  // El registro no tiene una etiqueta breve en pasado; solo descripciones de herramienta.
+  // Un id histórico o un verbo nuevo jamás se presenta como texto al usuario.
+  if (!v || !s) {
+    return obtenerCapacidad(capability)?.efecto === "lectura"
+      ? "consultó información"
+      : "realizó un cambio";
+  }
   const o = objeto(input);
-  const estado = typeof input.estado === "string" ? ` a ${input.estado.replace(/_/g, " ")}` : "";
-  return `${v} ${s}${o ? ` ${o}` : ""}${verbo === "set_estado" ? estado : ""}`;
+  return `${v} ${s}${o ? ` ${o}` : ""}`;
 }
 
 /** Campos cambiados (sin ids ni claves técnicas), hasta 4. */
@@ -79,4 +98,11 @@ export function cambios(input: Input): { campo: string; valor: string }[] {
     .filter(([k, v]) => ETIQUETA[k] && v !== undefined && v !== null && typeof v !== "object")
     .slice(0, 4)
     .map(([k, v]) => ({ campo: ETIQUETA[k] as string, valor: String(v) }));
+}
+
+/** Cambios conocidos por el registro; las lecturas se excluyen antes de paginar, sin más SQL. */
+export function capacidadesDeCambios(prefijo = ""): string[] {
+  return listarCapacidades()
+    .filter((c) => c.efecto !== "lectura" && c.id.startsWith(prefijo))
+    .map((c) => c.id);
 }

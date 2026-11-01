@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="per" title="Personas" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Diego Fuentes Araya · Sueldo" title="Cuentas bancarias" subtitle="Datos de pago para liquidaciones y finiquitos" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="140px,40px">Agregar cuenta</x-import>
+</x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Decide Carlos · Propuesta B1: validar cambios de cuenta" accion="{{ b1Link }}" hint-size="100%,56px">RRHH validaría las cuentas nuevas que vengan del Portal Trabajador.</x-import>
+<sc-for list="{{ cuentas }}" as="c" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="{{ c.banco }}" actions="{{ c.badge }}" hint-size="100%,260px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ c.rows }}" hint-size="100%,180px"></x-import>
+<sc-if value="{{ c.puedeDefecto }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="200px,44px">Marcar por defecto</x-import></div>
+</sc-if>
+</x-import>
+</sc-for>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Anticipo" hint-size="100%,160px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Recibe anticipo" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto" value="$ 150.000" hint-size="100%,72px"></x-import>
+</x-import>
+</div>
+</x-import>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l) => NS.Badge ? h(NS.Badge, { tone }, l) : null;
+    return {
+      device: this.props.device ?? "desktop",
+      theme: this.props.theme ?? "light",
+      b1Link: NS.Enlace ? h(NS.Enlace, { href: "Ficha persona v1 · Láminas.dc.html" }, "Ver propuesta") : null,
+      cuentas: [
+        { banco: "Banco Estado", badge: B("accent", "Por defecto"), puedeDefecto: false, rows: [
+          { label: "Tipo", value: "Cuenta RUT" }, { label: "Número", value: "•••• •••• 4821", numeric: true }, { label: "Titular", value: "Diego Fuentes Araya" }, { label: "RUT del titular", value: "15.234.567-4", mono: true }] },
+        { banco: "Banco de Chile", badge: null, puedeDefecto: true, rows: [
+          { label: "Tipo", value: "Cuenta corriente" }, { label: "Número", value: "•••• •••• 0937", numeric: true }, { label: "Titular", value: "Diego Fuentes Araya" }, { label: "RUT del titular", value: "15.234.567-4", mono: true }] },
+      ],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
