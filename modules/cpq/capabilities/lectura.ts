@@ -13,7 +13,10 @@ import {
 import { PERMISO_READ } from "./permisos";
 import { cotizacionDe, vistaCotizacion, vistaVersion } from "./util";
 
-const itemSchema = cotizacionSchema.extend({ version: versionSchema.nullable() });
+const itemSchema = cotizacionSchema.extend({
+  negocioTitulo: z.string().nullable(),
+  version: versionSchema.nullable(),
+});
 
 export const cotizacionesList = defineCapability({
   auditarLectura: (s) => s.items.flatMap((c) => [c.id, c.negocioId]),
@@ -32,13 +35,9 @@ export const cotizacionesList = defineCapability({
   async handler(ctx, input) {
     const filtro: Record<string, unknown> = {};
     if (input.negocioId) filtro["negocioId"] = input.negocioId;
-    if (input.estado) {
-      const vs = await ctx.db.cpqVersion.findMany({ where: { estado: input.estado } });
-      filtro["id"] = { in: [...new Set(vs.map((v) => v.cotizacionId))] };
-    } else if (!input.incluirArchivadas) {
-      const vs = await ctx.db.cpqVersion.findMany({ where: { estado: "archivada" } });
-      filtro["id"] = { notIn: [...new Set(vs.map((v) => v.cotizacionId))] };
-    }
+    // Filtro relacional: no carga todas las versiones del tenant solo para filtrar la página.
+    if (input.estado) filtro["versiones"] = { some: { estado: input.estado } };
+    else if (!input.incluirArchivadas) filtro["versiones"] = { none: { estado: "archivada" } };
     const filas = await ctx.db.cpqCotizacion.findMany({
       where: filtro,
       orderBy: [{ id: "desc" }],
@@ -50,10 +49,19 @@ export const cotizacionesList = defineCapability({
       where: { cotizacionId: { in: items.map((c) => c.id) } },
       orderBy: [{ numero: "desc" }],
     });
+    const negocios = await ctx.db.negocio.findMany({
+      where: { tenantId: ctx.tenantId, id: { in: [...new Set(items.map((c) => c.negocioId))] } },
+      select: { id: true, titulo: true },
+    });
+    const titulos = new Map(negocios.map((n) => [n.id, n.titulo]));
     return {
       items: items.map((c) => {
         const ultima = versiones.find((v) => v.cotizacionId === c.id);
-        return { ...vistaCotizacion(c), version: ultima ? vistaVersion(ctx, ultima) : null };
+        return {
+          ...vistaCotizacion(c),
+          negocioTitulo: titulos.get(c.negocioId) ?? null,
+          version: ultima ? vistaVersion(ctx, ultima) : null,
+        };
       }),
       siguiente: filas.length > input.limite ? (items.at(-1)?.id ?? null) : null,
     };

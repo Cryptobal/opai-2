@@ -35,11 +35,12 @@ export async function ejecutarCapacidad(
   input: unknown,
   dryRun = false,
   revalidar: Revalidacion = "layout",
+  idempotencyKey?: string,
 ): Promise<Resultado> {
   let r: Resultado;
   let escritura: boolean;
   try {
-    ({ r, escritura = false } = await ejecutar(portal, id, input, dryRun));
+    ({ r, escritura = false } = await ejecutar(portal, id, input, dryRun, idempotencyKey));
   } catch (e) {
     unstable_rethrow(e); // redirect/notFound y señales internas de Next no son errores.
     const ref = crypto.randomUUID();
@@ -77,6 +78,7 @@ async function ejecutar(
   id: string,
   input: unknown,
   dryRun: boolean,
+  idempotencyKey?: string,
 ): Promise<{ r: Resultado; escritura?: boolean }> {
   // La UI solo puede invocar capacidades del portal al que el usuario tiene acceso en la empresa
   // actual (ADR-016): sin acceso, ni la búsqueda (⌘K) ni la campana ni nada del shell devuelven
@@ -98,7 +100,7 @@ async function ejecutar(
     const message = `Capacidad "${id}" no existe.`;
     return { r: { ok: false, error: { code: "NOT_FOUND", message } } };
   }
-  const r = await ejecutarComoUsuario(portal, id, input, dryRun);
+  const r = await ejecutarComoUsuario(portal, id, input, dryRun, idempotencyKey);
   return { r, escritura: r.ok && !dryRun && capacidad.efecto !== "lectura" };
 }
 

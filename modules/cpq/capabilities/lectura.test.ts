@@ -35,7 +35,9 @@ describe("cpq.cotizaciones.list / get", () => {
     });
     expect(porNegocio).toMatchObject({
       ok: true,
-      data: { items: [{ id: a, version: { numero: 1 } }] },
+      data: {
+        items: [{ id: a, negocioTitulo: "Negocio de prueba", version: { numero: 1 } }],
+      },
     });
     const lista = await executeCapability(h.ctx, "cpq.cotizaciones.list", { estado: "enviada" });
     expect(lista).toMatchObject({ ok: true, data: { items: [] } });

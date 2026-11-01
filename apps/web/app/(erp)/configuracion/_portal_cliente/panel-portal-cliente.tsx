@@ -6,7 +6,6 @@ import { Alerta, Campo, Loading, Select } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { TarjetasConfiguracion } from "./tarjetas-config";
 import type {
   AccesoFila,
   Candidato,
@@ -18,6 +17,7 @@ import type {
 
 // La tarjeta de accesos se descarga aparte: el tope de JS de la ruta es ajustado (ADR-037).
 const TarjetaAccesos = lazy(() => import("./tarjeta-accesos").then((m) => ({ default: m.TarjetaAccesos })));
+const TarjetasConfiguracion = lazy(() => import("./tarjetas-config").then((m) => ({ default: m.TarjetasConfiguracion })));
 
 export type DatosPortal = { config: ConfigCuenta; accesos: AccesoFila[]; candidatos: Candidato[]; instalaciones: InstalacionOpcion[] };
 
@@ -74,7 +74,9 @@ export function PanelPortalCliente({
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       {datos ? (
         <div className="grid items-start gap-4 lg:grid-cols-2" key={cuentaId}>
-          <TarjetasConfiguracion config={datos.config} tiposDocumento={tiposDocumento} />
+          <Suspense fallback={<Loading variante="formulario" />}>
+            <TarjetasConfiguracion config={datos.config} tiposDocumento={tiposDocumento} />
+          </Suspense>
           <Suspense fallback={<Loading variante="formulario" />}>
             <TarjetaAccesos
               cuentaId={cuentaId}
