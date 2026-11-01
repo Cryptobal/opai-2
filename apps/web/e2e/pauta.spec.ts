@@ -38,11 +38,16 @@ test.describe("pauta · mensual", () => {
     await captura(page, "pauta-instalacion", info.project.name);
   });
 
-  test("diaria: selecciona fecha y filtra sin cubrir", async ({ page }) => {
+  test("diaria: selecciona fecha, abre hoja del turno y filtra sin cubrir", async ({ page }) => {
     await entrar(page);
     await page.goto(`/pauta?inst=${INST}&vista=diaria&fecha=${HOY}`);
     await expect(page.getByLabel("Fecha de la pauta")).toBeVisible();
     await expect(page.getByText("Asistencia no activada: sin marcas para cruzar.")).toBeVisible();
+    const fila = page.getByRole("link", { name: /Portería Día:/ }).first();
+    if (await fila.isVisible()) {
+      await fila.click();
+      await expect(page).toHaveURL(/dia=/);
+    }
     await page.getByRole("button", { name: "Sin cubrir" }).click();
     await expect(page).toHaveURL(/ver=ppc/);
     await page.getByRole("button", { name: "Mensual" }).click();
@@ -69,9 +74,9 @@ test.describe("pauta · mensual", () => {
     await registrar.click();
     await expect(page.getByText(/Excepción registrada/)).toBeVisible();
 
-    await page.goto(`/pauta?inst=${INST}&vista=diaria&fecha=${HOY}&ver=ppc`);
-    await page.getByRole("link", { name: /Portería Día/ }).click();
-    await expect(page).toHaveURL(/ver=ppc/);
+    await page.getByRole("link", { name: /Portería Día:/ }).first().click();
+    await expect(page).toHaveURL(/dia=/);
+    await expect(page.getByRole("heading", { name: /Portería Día/ })).toBeVisible();
     await expect(page.getByRole("button", { name: "Anular excepción" })).toBeVisible();
     await page.getByRole("button", { name: "Anular excepción" }).click();
     const confirmacion = page.getByRole("dialog", { name: "Anular excepción" });

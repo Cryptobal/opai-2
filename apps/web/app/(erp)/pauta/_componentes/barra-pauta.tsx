@@ -1,11 +1,12 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, History } from "lucide-react";
+import { Bell, ChevronLeft, ChevronRight, History } from "lucide-react";
 
 import { Button, ChipToggle, InputFecha, Select } from "@opai/ds";
 
 import { useParametros } from "@/app/_components/maestros/use-url";
 
+import { ExportarPauta } from "./exportar-pauta";
 import { claveMes, mesVecino, nombreMes } from "./etiquetas";
 import type { OpcionInstalacion } from "./tipos";
 
@@ -53,14 +54,31 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fec
           <ChevronRight className="size-4" />
         </Button>
       </div>}
-      <ChipToggle
-        etiqueta="Sin cubrir"
-        activo={verPpc}
-        onCambiar={(a) => fijar({ ver: a ? "ppc" : null })}
-      />
+      <div className="flex flex-wrap items-center gap-2">
+        <ChipToggle
+          etiqueta="Sin cubrir"
+          activo={verPpc}
+          onCambiar={(a) => fijar({ ver: a ? "ppc" : null })}
+        />
+        {inst ? (
+          <>
+            <ExportarPauta
+              instalacionId={inst}
+              anio={anio}
+              mes={mes}
+              fecha={fecha}
+              diaria={diaria}
+              sinCubrir={verPpc}
+            />
+            <Button variant="secondary" onClick={() => fijar({ alertas: "1" })}>
+              <Bell className="size-4" aria-hidden /> Alertas
+            </Button>
+          </>
+        ) : null}
+      </div>
       <Button
         variant="secondary"
-        className="ml-auto"
+        className="ml-auto w-full sm:ml-auto sm:w-auto"
         onClick={() => fijar({ historial: "1" })}
       >
         <History className="size-4" aria-hidden /> Historial

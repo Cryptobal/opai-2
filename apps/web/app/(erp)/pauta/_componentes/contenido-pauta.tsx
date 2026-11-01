@@ -3,12 +3,15 @@ import { Empty, Estado, KpiTile } from "@opai/ds";
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 
 import { BarraPauta } from "./barra-pauta";
+import { AlertasPauta } from "./alertas-pauta";
 import { Diaria } from "./diaria";
 import type { DatosPauta } from "./datos";
 import { pct } from "./etiquetas";
 import { GrillaMes } from "./grilla-mes";
 import { HojaExcepcion } from "./hoja-excepcion";
 import { HojaHistorial } from "./hoja-historial";
+import { HojaReemplazo } from "./hoja-reemplazo";
+import { HojaRefuerzo } from "./hoja-refuerzo";
 import { HojaSerie } from "./hoja-serie";
 import { ListaDias } from "./lista-dias";
 import { PpcLista } from "./ppc-lista";
@@ -58,7 +61,10 @@ export function ContenidoPauta({ d, puedeEditar }: { d: DatosPauta; puedeEditar:
         {d.mensual ? (
           <>
             <HojaSerie mes={d.mensual} puedeEditar={puedeEditar} />
-            <HojaExcepcion mes={d.mensual} puedeEditar={puedeEditar} />
+            <HojaExcepcion mes={d.mensual} puedeEditar={puedeEditar} diaria={d.diaria} />
+            <HojaReemplazo mes={d.mensual} puedeEditar={puedeEditar} />
+            <HojaRefuerzo mes={d.mensual} puedeEditar={puedeEditar} />
+            <AlertasPauta instalacionId={d.mensual.instalacionId} semana={d.diaria ? d.fecha : d.mensual.hoy} />
           </>
         ) : null}
       </Estado>

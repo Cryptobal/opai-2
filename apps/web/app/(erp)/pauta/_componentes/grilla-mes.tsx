@@ -14,7 +14,7 @@ export function GrillaMes({ mes, puedeEditar }: { mes: MesPauta; puedeEditar: bo
       <table className="w-full border-separate border-spacing-0 text-sm">
         <thead>
           <tr>
-            <th className="sticky top-0 left-0 z-20 min-w-52 border-r border-b border-border bg-surface px-3 py-2 text-left text-xs font-medium text-fg-subtle">
+            <th className="sticky top-0 left-0 z-20 min-w-44 border-r border-b border-border bg-surface px-3 py-2 text-left text-xs font-medium text-fg-subtle">
               Puesto
             </th>
             {dias.map((d) => (
