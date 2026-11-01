@@ -28,7 +28,17 @@ export const manifest = defineModule({
     { id: "cpq:aprobar", descripcion: "Aprobar o rechazar cotizaciones bajo el margen mínimo" },
     { id: "cpq:modelo.manage", descripcion: "Configurar el modelo de costeo y el catálogo de CPQ" },
   ],
-  navegacion: [],
+  navegacion: [
+    {
+      portal: "erp",
+      area: "comercial",
+      href: "/cotizaciones",
+      etiqueta: "Cotizaciones",
+      icono: "FileText",
+      orden: 3,
+      permiso: "cpq:cotizaciones.read",
+    },
+  ],
   configuracion: z.object({}),
   eventos: [{ id: "cpq.cotizacion.creada", descripcion: "Se creó una cotización en borrador." }],
   capacidades,

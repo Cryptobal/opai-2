@@ -6,6 +6,7 @@ type Rel = { tabla: string; clave: string; muchos?: boolean };
 
 /** Relaciones por modelo: `clave` es la columna FK (local en «uno», del hijo en «muchos»). */
 export const RELACIONES: Record<string, Record<string, Rel>> = {
+  cpqCotizacion: { versiones: { tabla: "cpqVersion", clave: "cotizacionId", muchos: true } },
   membership: {
     user: { tabla: "user", clave: "userId" },
     tenant: { tabla: "tenant", clave: "tenantId" },
@@ -15,7 +16,10 @@ export const RELACIONES: Record<string, Record<string, Rel>> = {
   apiKey: { user: { tabla: "user", clave: "userId" } },
   permisoExcepcion: { creadoPorUsuario: { tabla: "user", clave: "creadoPor" } },
   persona: { vinculos: { tabla: "vinculoLaboral", clave: "personaId", muchos: true } },
-  vinculoLaboral: { persona: { tabla: "persona", clave: "personaId" }, cargo: { tabla: "cargo", clave: "cargoId" } },
+  vinculoLaboral: {
+    persona: { tabla: "persona", clave: "personaId" },
+    cargo: { tabla: "cargo", clave: "cargoId" },
+  },
   cuenta: {
     instalaciones: { tabla: "instalacion", clave: "cuentaId", muchos: true },
     contactos: { tabla: "contacto", clave: "cuentaId", muchos: true },
