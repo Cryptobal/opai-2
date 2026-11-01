@@ -3,7 +3,6 @@ import {
   fechasDelMesPauta,
   type CeldaPauta,
   type ExcepcionPauta,
-  type OverlayRegistro,
   type PatronPauta,
   type SeriePauta,
 } from "@opai/domain";
@@ -11,6 +10,9 @@ import {
 import type { Contexto } from "../types";
 import { aFechaDb, fechaIso } from "./comun";
 import { feriadosDelMes, type InstalacionBase } from "./feriados";
+import { cargarRegistros } from "./registros-cargar";
+
+export { celdaDelDia } from "./celda-dia";
 
 
 /** Serie de dominio con el patrón identificado, para la vista y para validar cambios. */
@@ -63,54 +65,6 @@ async function armarSeries(ctx: Contexto, filas: readonly FilaSerie[]): Promise<
     porPuesto.set(s.puestoId, lista);
   }
   return porPuesto;
-}
-
-function overlayDesdeRegistros(
-  filas: readonly { fecha: Date; tipo: string; personaId: string | null }[],
-): Map<string, OverlayRegistro> {
-  const map = new Map<string, OverlayRegistro>();
-  for (const r of filas) {
-    const f = fechaIso(r.fecha);
-    const prev = map.get(f) ?? {};
-    if (r.tipo === "cobertura_confirmada") map.set(f, { ...prev, confirmado: true });
-    else if (r.tipo === "marca_presencia") {
-      map.set(f, { ...prev, marcaManual: true, ...(r.personaId ? { personaId: r.personaId } : {}) });
-    }
-  }
-  return map;
-}
-
-/** Registros operativos activos de un puesto en un rango de fechas. */
-export async function cargarRegistros(
-  ctx: Contexto,
-  puestoIds: readonly string[],
-  primero: Date,
-  ultimo: Date,
-): Promise<Map<string, Map<string, OverlayRegistro>>> {
-  const porPuesto = new Map<string, Map<string, OverlayRegistro>>();
-  if (!puestoIds.length) return porPuesto;
-  const filas = await ctx.db.registroOperativoPauta.findMany({
-    where: {
-      puestoId: { in: [...puestoIds] },
-      estado: "activa",
-      fecha: { gte: primero, lte: ultimo },
-    },
-  });
-  for (const id of puestoIds) {
-    porPuesto.set(id, overlayDesdeRegistros(filas.filter((x) => x.puestoId === id)));
-  }
-  return porPuesto;
-}
-
-/** Celda de un puesto en una fecha (serie + excepciones + registros del mes). */
-export async function celdaDelDia(ctx: Contexto, puestoId: string, fecha: string): Promise<CeldaPauta> {
-  const anio = Number(fecha.slice(0, 4));
-  const mes = Number(fecha.slice(5, 7));
-  const puesto = await ctx.db.puesto.findFirst({ where: { id: puestoId }, select: { id: true, instalacionId: true } });
-  if (!puesto) throw new Error("puesto");
-  const inst = await ctx.db.instalacion.findUnique({ where: { id: puesto.instalacionId }, select: { id: true, region: true } });
-  const m = await cargarMes(ctx, [puesto], inst ? [inst] : [], anio, mes);
-  return m.celdas.get(puestoId)?.find((c) => c.fecha === fecha) ?? { fecha, estado: "sin_serie", motivo: null, excepcion: false, feriado: null, titularId: null };
 }
 
 /** Todas las series de un puesto (pasadas, vigente y futuras), en orden de vigencia. */

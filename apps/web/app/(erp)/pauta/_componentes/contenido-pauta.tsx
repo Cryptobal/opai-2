@@ -1,22 +1,25 @@
+import dynamic from "next/dynamic";
+
 import { Empty, Estado, KpiTile } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 
 import { BarraPauta } from "./barra-pauta";
-import { AlertasPauta } from "./alertas-pauta";
 import { Diaria } from "./diaria";
 import type { DatosPauta } from "./datos";
 import { pct } from "./etiquetas";
 import { GrillaMes } from "./grilla-mes";
-import { HojaExcepcion } from "./hoja-excepcion";
-import { HojaHistorial } from "./hoja-historial";
-import { HojaReemplazo } from "./hoja-reemplazo";
-import { HojaRefuerzo } from "./hoja-refuerzo";
-import { HojaSerie } from "./hoja-serie";
 import { ListaDias } from "./lista-dias";
 import { PpcLista } from "./ppc-lista";
 import { TodasInstalaciones } from "./todas-instalaciones";
 import type { ResumenCobertura } from "./tipos";
+
+const HojaExcepcion = dynamic(() => import("./hoja-excepcion").then((m) => ({ default: m.HojaExcepcion })));
+const HojaSerie = dynamic(() => import("./hoja-serie").then((m) => ({ default: m.HojaSerie })));
+const HojaHistorial = dynamic(() => import("./hoja-historial").then((m) => ({ default: m.HojaHistorial })));
+const HojaReemplazo = dynamic(() => import("./hoja-reemplazo").then((m) => ({ default: m.HojaReemplazo })));
+const HojaRefuerzo = dynamic(() => import("./hoja-refuerzo").then((m) => ({ default: m.HojaRefuerzo })));
+const AlertasPauta = dynamic(() => import("./alertas-pauta").then((m) => ({ default: m.AlertasPauta })));
 
 function Resumen({ r }: { r: ResumenCobertura }) {
   return (
@@ -64,7 +67,10 @@ export function ContenidoPauta({ d, puedeEditar }: { d: DatosPauta; puedeEditar:
             <HojaExcepcion mes={d.mensual} puedeEditar={puedeEditar} diaria={d.diaria} />
             <HojaReemplazo mes={d.mensual} puedeEditar={puedeEditar} />
             <HojaRefuerzo mes={d.mensual} puedeEditar={puedeEditar} />
-            <AlertasPauta instalacionId={d.mensual.instalacionId} semana={d.diaria ? d.fecha : d.mensual.hoy} />
+            <AlertasPauta
+              semanaDesde={d.alertas?.semanaDesde ?? null}
+              alertas={d.alertas === undefined ? null : (d.alertas?.alertas ?? [])}
+            />
           </>
         ) : null}
       </Estado>

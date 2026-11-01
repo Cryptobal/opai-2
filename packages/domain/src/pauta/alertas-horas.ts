@@ -25,7 +25,7 @@ export type AlertaHoras = {
 };
 
 function horasTurno(horaInicio: string, horaFin: string): number {
-  let ini = minutosDeHora(horaInicio);
+  const ini = minutosDeHora(horaInicio);
   let fin = minutosDeHora(horaFin);
   if (fin <= ini) fin += 1440;
   return (fin - ini) / 60;

@@ -5,6 +5,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { InstalacionFila, Pagina } from "@/lib/tipos-maestros";
 
 import type { LineaHistorial, MesPauta, OpcionInstalacion, Ppc, ResumenTodas } from "./tipos";
+import type { AlertaPautaFila } from "./alertas-pauta";
 
 /** Mes de hoy en la zona del negocio, o el pedido por `?mes=aaaa-mm`. */
 export function mesDeParametros(p: Parametros): { anio: number; mes: number } {
@@ -30,7 +31,7 @@ export async function cargarPauta(p: Parametros) {
   const { anio, mes } = mesDeParametros(diaria ? { ...p, mes: fecha.slice(0, 7) } : p);
   const inst = p["inst"] && p["inst"] !== "todas" ? requerirUuid(p["inst"]) : null;
   const filtroInst = inst ? { instalacionId: inst } : {};
-  const [lista, vista, ppc, historial] = await Promise.all([
+  const [lista, vista, ppc, historial, alertas] = await Promise.all([
     ejecutarComoUsuario<Pagina<InstalacionFila>>("erp", "core.instalaciones.list", { limite: 100 }),
     inst
       ? ejecutarComoUsuario<MesPauta>("erp", "pauta.mes.leer", { instalacionId: inst, anio, mes })
@@ -40,6 +41,12 @@ export async function cargarPauta(p: Parametros) {
       : null,
     p["historial"] === "1"
       ? ejecutarComoUsuario<{ items: LineaHistorial[] }>("erp", "pauta.historial.listar", { ...filtroInst })
+      : null,
+    p["alertas"] === "1" && inst
+      ? ejecutarComoUsuario<{ semanaDesde: string; alertas: AlertaPautaFila[] }>("erp", "pauta.alertas.listar", {
+          instalacionId: inst,
+          semana: diaria ? fecha : undefined,
+        })
       : null,
   ]);
   const instalaciones: OpcionInstalacion[] = lista.ok
@@ -55,6 +62,7 @@ export async function cargarPauta(p: Parametros) {
     todas: !inst && vista.ok ? (vista.data as ResumenTodas) : null,
     ppc: ppc?.ok ? ppc.data : null,
     historial: historial?.ok ? historial.data.items : null,
+    alertas: alertas?.ok ? alertas.data : alertas && !alertas.ok ? null : undefined,
     verPpc: p["ver"] === "ppc",
     diaria,
     fecha,

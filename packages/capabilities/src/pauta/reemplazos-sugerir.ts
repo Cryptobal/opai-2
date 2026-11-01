@@ -20,7 +20,7 @@ const sugerenciaSchema = z.object({
 const salidaSchema = z.object({ puestoId: z.string(), fecha: z.string(), sugerencias: z.array(sugerenciaSchema) });
 
 function horasTurno(horaInicio: string, horaFin: string): number {
-  let ini = minutosDeHora(horaInicio);
+  const ini = minutosDeHora(horaInicio);
   let fin = minutosDeHora(horaFin);
   if (fin <= ini) fin += 1440;
   return (fin - ini) / 60;
