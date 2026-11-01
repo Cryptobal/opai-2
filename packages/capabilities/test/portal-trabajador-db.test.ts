@@ -185,15 +185,51 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
 
   it("las preferencias de un compañero y de otra empresa no se ven ni se mezclan", async () => {
     await dato(t.a, u.a1, "portal_trabajador.preferencias_notificacion.actualizar", { preferencias: { empresa: { push: true } } });
-    const delCompanero = await correr(t.a, u.a2, "portal_trabajador.preferencias_notificacion.obtener");
-    expect(delCompanero.ok ? "OK" : delCompanero.error.code).toBe("NOT_FOUND"); // a2 está archivada: no hay ficha
+    const delCompanero = await dato<Preferencias>(t.a, u.a2, "portal_trabajador.preferencias_notificacion.obtener");
+    expect(delCompanero.personalizadas).toBe(false);
+    expect(delCompanero.preferencias.empresa?.push).toBe(false);
     const deB = await dato<Preferencias>(t.b, u.b1, "portal_trabajador.preferencias_notificacion.obtener");
     expect(deB.personalizadas).toBe(false);
     expect(deB.preferencias["empresa"]?.push).toBe(false);
-    // Tampoco con el rol de aplicación directo: sin tenant fijado, la RLS no devuelve filas.
-    expect(await e.appSinTenant.preferenciaNotificacion.count().catch(() => 0)).toBe(0);
+    expect(await e.appSinTenant.preferenciaNotificacion.count()).toBe(0);
     const propias = await e.forTenant(t.b).preferenciaNotificacion.findMany();
     expect(propias).toHaveLength(0);
+  });
+
+  it("ARCO: el trabajador crea solicitudes propias y no ve las de un compañero", async () => {
+    const creada = await dato<{ id: string; mensaje: string }>(t.a, u.a1, "portal_trabajador.arco.solicitar", {
+      tipo: "rectificacion",
+      detalle: "Necesito corregir mi dirección registrada en la ficha.",
+      campos: ["dirección"],
+    });
+    expect(creada.mensaje).toContain("30 días");
+    const lista = await dato<{ items: { id: string; tipo: string }[] }>(t.a, u.a1, "portal_trabajador.arco.listar");
+    expect(lista.items.some((s) => s.id === creada.id)).toBe(true);
+    const listaA2 = await dato<{ items: { id: string }[] }>(t.a, u.a2, "portal_trabajador.arco.listar");
+    expect(listaA2.items.some((s) => s.id === creada.id)).toBe(false);
+    const exportacion = await dato<{ nombreArchivo: string; contenido: { titular: { rut: string } } }>(
+      t.a,
+      u.a1,
+      "portal_trabajador.mis_datos.exportar",
+    );
+    expect(exportacion.nombreArchivo).toMatch(/^mis-datos-opai-/);
+    expect(exportacion.contenido.titular.rut).toBe("11111111-1");
+    const agente = mod.crearContexto({
+      tenantId: t.a,
+      actor: { tipo: "agent", id: "k-pt", viaUserId: u.a1 },
+      portal: "trabajador",
+      portalesMembresia: ["trabajador"],
+      modulosActivos: ["portal_trabajador"],
+      scopes: ["*"],
+      rol: "owner",
+    });
+    const previa = await mod.executeCapability(
+      agente,
+      "portal_trabajador.arco.solicitar",
+      { tipo: "bloqueo", detalle: "Quiero bloquear el uso de mis datos para marketing." },
+      { dryRun: true },
+    );
+    expect(previa.ok).toBe(true);
   });
 
   it("un tenant sin el módulo activo no puede usar las capacidades", async () => {

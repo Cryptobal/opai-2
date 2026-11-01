@@ -22,10 +22,15 @@ export const ETIQUETA_ROL: Record<string, string> = {
 export function portalesVisibles(
   portalesMembresia: readonly string[],
   plataforma: boolean,
+  modulosActivos: readonly string[] = [],
 ): Portal[] {
-  return PORTALES.filter((p) =>
-    p.id === "platform" ? plataforma : portalesMembresia.includes(p.id),
-  );
+  return PORTALES.filter((p) => {
+    if (p.id === "platform") return plataforma;
+    if (p.id === "trabajador") {
+      return portalesMembresia.includes(p.id) && modulosActivos.includes("portal_trabajador");
+    }
+    return portalesMembresia.includes(p.id);
+  });
 }
 
 /**
