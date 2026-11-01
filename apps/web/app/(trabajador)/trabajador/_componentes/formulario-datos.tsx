@@ -1,13 +1,18 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { lazy, type FormEvent, Suspense, useState } from "react";
 
-import { avisar, Button, Campo, type Direccion, FormScreen, Input } from "@opai/ds";
+import { avisar, Button, Campo, type Direccion, FormScreen, Input, Skeleton } from "@opai/ds";
 
-import { DireccionOpai } from "@/app/_components/maestros/direccion";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { MisDatos } from "./tipos";
+
+// Aparte (React.lazy, ADR-037): el buscador de direcciones (mapa, combobox) no pesa en el JS
+// inicial de la ruta; esta pantalla solo lo necesita si el trabajador edita su dirección.
+const DireccionOpai = lazy(() =>
+  import("@/app/_components/maestros/direccion").then((m) => ({ default: m.DireccionOpai })),
+);
 
 function direccionInicial(d: MisDatos): Direccion | null {
   const texto = d.direccionFormateada ?? d.calle;
@@ -109,12 +114,14 @@ export function FormularioDatos({ inicial }: { inicial: MisDatos }) {
           titulo: "Dirección",
           contenido: (
             <Campo etiqueta="Dónde vives" htmlFor="mis-datos-direccion">
-              <DireccionOpai
-                portal="trabajador"
-                id="mis-datos-direccion"
-                valor={direccion}
-                onCambiar={setDireccion}
-              />
+              <Suspense fallback={<Skeleton className="h-11 w-full" />}>
+                <DireccionOpai
+                  portal="trabajador"
+                  id="mis-datos-direccion"
+                  valor={direccion}
+                  onCambiar={setDireccion}
+                />
+              </Suspense>
             </Campo>
           ),
         },

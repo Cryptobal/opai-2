@@ -1,13 +1,26 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, lazy, Suspense, useState } from "react";
 
-import { avisar, Button, Campo, FormScreen, Input, Switch } from "@opai/ds";
+import { avisar, Button, Campo, FormScreen, Input, Skeleton, type SwitchProps } from "@opai/ds";
 import { CATEGORIAS_AVISO, type CategoriaAviso } from "@opai/domain";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { Preferencias } from "./tipos";
+
+// Aparte (React.lazy, ADR-037): el interruptor sobre Radix no pesa en el JS inicial de la ruta;
+// esta pantalla es la única del portal trabajador que lo usa. Se importa por su propio subpath
+// (no el barrel de `@opai/ds`) para que el split no se mezcle con el resto del paquete.
+const SwitchDiferido = lazy(() => import("@opai/ds/switch").then((m) => ({ default: m.Switch })));
+
+function Switch(props: SwitchProps) {
+  return (
+    <Suspense fallback={<Skeleton className="h-11 w-full" />}>
+      <SwitchDiferido {...props} />
+    </Suspense>
+  );
+}
 
 const CATEGORIA: Record<CategoriaAviso, { titulo: string; detalle: string }> = {
   pauta: { titulo: "Pauta y turnos", detalle: "Cuando cambia o se asigna un turno tuyo." },

@@ -76,7 +76,7 @@ CA1–CA6 de la spec §13. Además: CI verde (`typecheck · lint · test · test
 - **Dirección:** depende de que el servicio de geolocalización del tenant esté configurado; sin él, se escribe la dirección a mano. Para que el trabajador la busque, `core.geo.autocompletar` y `core.geo.detalle` se abren también al portal `trabajador` (una línea cada una).
 - **Activación del módulo (decidido por Carlos, 30-oct-2026):** el portal se activa por empresa desde **Plataforma → Módulos** (el seed de dev lo activa para `gard`). Hasta que se active, un tenant recibe «Módulo inactivo» y la pantalla lo muestra como estado.
 - **Sin solicitud ARCO desde el portal:** `core.cumplimiento.solicitud_crear` es del ERP y `soloPersonas`; Privacidad solo informa y muestra las solicitudes (propuesta de PR 2 en la spec §14).
-- **Corrección CAR-87, PR #189:** migración renombrada para ordenarla después de main, conservando el SQL. El SQL no es idempotente ante ejecución manual repetida: Prisma registra su aplicación; no volver a ejecutarlo directamente. No se modifican los topes de JS; la validación visual completa del CA6 y el presupuesto por ruta quedan sujetos a la evidencia del gate.
+- **Corrección CAR-87, PR #189:** migración renombrada para ordenarla después de main, conservando el SQL. El SQL no es idempotente ante ejecución manual repetida: Prisma registra su aplicación; no volver a ejecutarlo directamente. No se modifican los topes de JS; Mis datos mide 166,5 KB y Notificaciones 168,2 KB frente al tope de 162 KB; la reducción del presupuesto sigue pendiente. CA6 queda parcial: falta comprobar visualmente todos los estados, temas y resoluciones.
 
 ## Historial
 
