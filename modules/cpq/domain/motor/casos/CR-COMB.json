@@ -1,0 +1,13 @@
+{
+  "caso": "CR-COMB",
+  "componentes": [
+    "CR-A",
+    "CR-C"
+  ],
+  "referencia": {
+    "costsBase": 20819122.46895425,
+    "monthlyTotal": 21373158.579453096,
+    "salePriceMonthly": 23847906,
+    "totalGuards": 15
+  }
+}

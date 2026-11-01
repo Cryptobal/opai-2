@@ -1,0 +1,197 @@
+{
+  "caso": "CR-A",
+  "puestos": [
+    {
+      "etiqueta": "Puesto 1",
+      "patron": "4x4",
+      "inicio": "08:00",
+      "fin": "20:00",
+      "diasCobertura": 7,
+      "personas": 2,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1054228,
+      "seccion": 1
+    },
+    {
+      "etiqueta": "Puesto 2",
+      "patron": "4x4",
+      "inicio": "20:00",
+      "fin": "08:00",
+      "diasCobertura": 7,
+      "personas": 2,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1054228,
+      "seccion": 1
+    },
+    {
+      "etiqueta": "Puesto 3",
+      "patron": "4x4",
+      "inicio": "08:00",
+      "fin": "20:00",
+      "diasCobertura": 7,
+      "personas": 2,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1054228,
+      "seccion": 2
+    },
+    {
+      "etiqueta": "Puesto 4",
+      "patron": "4x4",
+      "inicio": "20:00",
+      "fin": "08:00",
+      "diasCobertura": 7,
+      "personas": 2,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1129530,
+      "seccion": 3
+    },
+    {
+      "etiqueta": "Puesto 5",
+      "patron": "4x4",
+      "inicio": "20:00",
+      "fin": "08:00",
+      "diasCobertura": 7,
+      "personas": 2,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1054228,
+      "seccion": 2
+    },
+    {
+      "etiqueta": "Puesto 6",
+      "patron": "5x2",
+      "inicio": "08:00",
+      "fin": "17:00",
+      "diasCobertura": 5,
+      "personas": 1,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1408587,
+      "seccion": 4
+    }
+  ],
+  "secciones": [
+    "Sección 1",
+    "Sección 2",
+    "Sección 3",
+    "Sección 4"
+  ],
+  "uniformes": [
+    {
+      "precio": 15000
+    },
+    {
+      "precio": 35000
+    },
+    {
+      "precio": 22000
+    },
+    {
+      "precio": 32000
+    },
+    {
+      "precio": 25000
+    },
+    {
+      "precio": 9990
+    }
+  ],
+  "examenes": [],
+  "costos": [
+    {
+      "quantity": 1,
+      "unitPrice": 100000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 4062710,
+      "recurring": false,
+      "enabled": true,
+      "isAmortizable": true,
+      "investmentAmount": 4062710,
+      "amortizationMonths": 17
+    },
+    {
+      "quantity": 10,
+      "unitPrice": 100000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 20000,
+      "recurring": true,
+      "enabled": false,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 300000,
+      "recurring": true,
+      "enabled": false,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 2000,
+      "recurring": true,
+      "enabled": false,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 5000,
+      "recurring": true,
+      "enabled": false,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    }
+  ],
+  "colaciones": [
+    {
+      "mealsPerDay": 5,
+      "daysOfService": 30,
+      "priceOverride": 4500
+    }
+  ],
+  "vehiculos": [
+    {
+      "vehiclesCount": 1,
+      "rentMonthly": 1645238,
+      "kmPerDay": 60,
+      "daysPerMonth": 30,
+      "kmPerLiter": 9,
+      "fuelPrice": 1260,
+      "maintenanceMonthly": 0
+    }
+  ],
+  "adicionales": [],
+  "margenPct": 10,
+  "referencia": {
+    "costsBase": 16603658.913398692,
+    "monthlyTotal": 17033455.01341845,
+    "salePriceMonthly": 18878306,
+    "totalGuards": 11,
+    "grupos": {
+      "monthlyHolidayAdjustment": 336151.9722222222,
+      "monthlyUniforms": 254815,
+      "monthlyExams": 238982.9411764706,
+      "monthlyCostItems": 1100000,
+      "monthlyFinancial": 377566.12007592164,
+      "monthlyPolicy": 50342.14934345622
+    }
+  }
+}

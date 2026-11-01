@@ -206,6 +206,7 @@ core_vinculos_update
 cpq_cotizaciones_create
 cpq_cotizaciones_get
 cpq_cotizaciones_list
+cpq_motor_simular
 finanzas_ajustes_actualizar
 finanzas_ajustes_obtener
 finanzas_celdas_cumplir

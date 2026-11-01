@@ -1,5 +1,7 @@
 # ESTADO — OPAI 2.0
 
+- **En construcción · CPQ motor PR A (CAR-133, Refs CAR-119; rama `feat/cpq-motor-brief08`).** [Brief 08](briefs/BRIEF-08-cpq-motor.md): motor puro racional entero (solo servidor: export `@opai/mod-cpq/motor` con `browser: null`), parser acotado, plantilla seguridad versionada, traza, dotación por patrón/sección, márgenes por sección (CR-COMB 10 %/13 %), instrumentos históricos y `cpq.motor.simular` por API/MCP con proyección R59. Sin migración ni pantallas. Costo empleador solo vía `ProveedorCostoEmpleador` (stub alineado a 07e/CAR-71; cableado real en PR posterior). CD-1/CD-2, financieros y CR-A…CR-E/CR-COMB probados con proveedor de referencia 1.0 solo en tests. **Pendiente de Carlos:** aceptar diferencias R25 ±$1 en A/B/D/E, parámetros financieros/feriados/catálogo no recuperados, únicos B y RC común en combinadas. PR B CAR-134: ficha y ensamblado.
+
 - **En construcción · Motor de sueldos 07e M1 (Refs CAR-71; consumidores CAR-133/CAR-134).**
   Dominio puro y contrato `ContratoCostoEmpleador` exportado desde `@opai/domain`: costo empresa,
   turno, horas extra, jornada parcial/IMM, indicadores por vigencia, huella SHA-256, capa/juego
