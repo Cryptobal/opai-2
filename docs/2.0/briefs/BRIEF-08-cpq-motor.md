@@ -29,7 +29,7 @@ Fixtures `modules/cpq/domain/motor/casos/`: selección positiva de números/estr
 | CR-C | 4.215.464 → 4.215.463 | 4.339.704 → 4.339.703 | 4.969.600 → 4.969.600 | Feriados redondeados en 3 líneas suman 108.769 vs global 108.769,5556; venta sigue exacta. |
 | CR-D | 52.000 → 52.000 | 52.000 → 52.000 | 1.021.629 → 1.021.630 | Adicionales mensuales: sumar ventas enteras de línea da 961.860 vs 961.858,8235. Únicos aparte: 959.147 vs 959.145,8824 (959.146 redondeado). R25/R32. |
 | CR-E | 4.215.464 → 4.215.464 | 4.215.464 → 4.215.464 | 4.845.360 → 4.845.361 | Feriados: 108.769,5556 →108.770; base entera antes de margen lleva +$1 de venta (R25). |
-| CR-COMB | 20.819.122 → 20.819.121 | 21.373.159 → 21.358.037 | 23.847.906 → 23.671.273 | Escenario explícito: margen único 10%, financiación 2% y garantía normalizada de A sobre toda la cotización, una vez. Delta −176.633; ver límites abajo. |
+| CR-COMB | 20.819.122 → 20.819.121 | 21.373.159 → 21.358.037 | 23.847.906 → 23.836.547 | Decisión Carlos 1-nov: margen por sección 10 %/13 %; instrumentos comunes una vez (financiero 2 % de A sobre total). Delta −11.359 explicado por financiación/garantía sobre base combinada vs suma de cotizaciones 1.0. |
 
 Estas diferencias de redondeo **no se declaran aceptadas por Carlos**: pregunta 12 exige documentarlas y su aceptación; CA2/R39 quedan parciales en A/B/D/E. No se agregan ajustes compensatorios al motor. Son redondeos por línea R25, no errores de float demostrados de 1.0.
 
@@ -42,7 +42,7 @@ Estas diferencias de redondeo **no se declaran aceptadas por Carlos**: pregunta 
 - Financiero: A 2%; B/C 2,5%; D/E apagado. B contiene «Costo financiero» unitPrice 2,5; `compute-quote-costs.ts` excluye tipos `financial`/`policy` de `monthlyCostItems`: en 2.0 es instrumento 2,5%, nunca una línea de $2,5 ni un costo duplicado.
 - A: póliza/S = `1/375`; residuo `(monthlyTotal − costsBase − financiero − póliza)/S =1/10.000`. Normalización algebraica del test: pG=10%, rG=2%, Mg=16, eG=0,1%, RC=0, que reproduce los coeficientes. **No prueba que esos parámetros fueran los originales**: el residuo podría contener RC. TODO(decisión Carlos): recuperar Mg/pG/rG/eG/RC y duración contractual; sin ellos la reproducción A es condicional. Los meses 12 del resto son neutrales con póliza/RC apagadas, no una decisión comercial recuperada. No se usó la UF implícita redondeada de propuestas como UF exacta; instrumentos de referencia no necesitan UF.
 - CR-B pagos únicos: la extracción solo trae las ventas de presentación 543.112 y 666.192 (total 1.209.304), sin costos de entrada ni márgenes. TODO(decisión Carlos): obtener esos supuestos; el test mensual no afirma reconstruir esos pagos únicos.
-- CR-COMB: no se han identificado montos fijos RC/póliza para restarlos de forma fiable; el escenario usa garantía porcentual/administración normalizada, sin inventar RC. No se duplican instrumentos por sección, y el financiero se calcula sobre el total (2% en vez de 2%/2,5%). TODO(decisión Carlos): margen por sección 10%/13% o margen único y condiciones financieras comunes. El valor 23.671.273 es un escenario trazado, no precio aprobado.
+- CR-COMB: margen por sección 10 %/13 % (decisión Carlos 1-nov-2026); instrumentos comunes una vez; financiero 2 % de A sobre el total combinado. Delta venta −11.359 vs suma 1.0 documentado en la tabla. TODO(decisión Carlos): condiciones RC/póliza comunes si difieren al combinar cotizaciones reales.
 
 ## Criterios de aceptación del PR A
 
