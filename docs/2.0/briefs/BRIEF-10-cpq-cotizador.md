@@ -127,6 +127,8 @@ La clave de idempotencia del formulario evita duplicados del mismo envío, pero 
 esa carrera de backend. El filtro de estado de la lista conserva la semántica de #187
 (cualquier versión coincidente); revisar al implementar el ciclo de versiones.
 
+**Ajuste de presupuesto (CAR-132):** Codex difirió la carga de las tarjetas de configuración del Portal Cliente para mantener la ruta de configuración de módulos bajo su tope de 180 KB, sin cambiar permisos ni decisiones de negocio.
+
 Recorrido de los CA de la especificación: **entrega parcial**, no cierre del Brief 10.
 
 | CA | Estado en 10.2a |
