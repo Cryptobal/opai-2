@@ -1,12 +1,19 @@
-// Capacidades del módulo Pauta (Operaciones, Brief 11b · PR 1). Se exponen igual en UI, API /api/v1
-// y MCP (ADR-004, ADR-055). El manifest de modules/pauta las lista; el registro las da de alta al
-// arrancar. La Diaria, los reemplazos, los refuerzos y el cruce con marcas llegan en el PR 2.
+// Capacidades del módulo Pauta (Operaciones, Brief 11b). Se exponen igual en UI, API /api/v1
+// y MCP (ADR-004, ADR-055).
 import type { Capacidad } from "../types";
+import { alertasListar } from "./alertas-listar";
+import { coberturaConfirmar } from "./cobertura-confirmar";
+import { coberturaDeshacer } from "./cobertura-deshacer";
 import { excepcionesAnular } from "./excepciones-anular";
 import { excepcionesCrear } from "./excepciones-crear";
+import { exportarPauta } from "./exportar";
 import { historialListar } from "./historial";
 import { mesLeer } from "./lectura-mes";
 import { ppcListar, resumenLeer } from "./lectura-resumen";
+import { marcaManual } from "./marca-manual";
+import { reemplazosAsignar } from "./reemplazos-asignar";
+import { reemplazosSugerir } from "./reemplazos-sugerir";
+import { refuerzosAgregar } from "./refuerzos-agregar";
 import { seriesFijar } from "./series";
 
 export const capacidadesPauta: readonly Capacidad[] = [
@@ -17,4 +24,12 @@ export const capacidadesPauta: readonly Capacidad[] = [
   seriesFijar,
   excepcionesCrear,
   excepcionesAnular,
+  coberturaConfirmar,
+  coberturaDeshacer,
+  marcaManual,
+  reemplazosSugerir,
+  reemplazosAsignar,
+  refuerzosAgregar,
+  alertasListar,
+  exportarPauta,
 ];

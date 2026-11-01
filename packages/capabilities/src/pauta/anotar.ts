@@ -6,7 +6,15 @@ import { aFechaDb } from "./comun";
 export type Anotacion = {
   instalacionId: string;
   puestoId: string;
-  accion: "serie_fijada" | "excepcion_creada" | "excepcion_anulada";
+  accion:
+    | "serie_fijada"
+    | "excepcion_creada"
+    | "excepcion_anulada"
+    | "cobertura_confirmada"
+    | "cobertura_deshacer"
+    | "marca_registrada"
+    | "reemplazo_asignado"
+    | "refuerzo_agregado";
   desde: string;
   hasta: string;
   /** Datos estructurados del cambio (tipo, patrón, ids). Sin RUT ni sueldos. */

@@ -585,6 +585,14 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.crear`
 - `finanzas.filas.listar`
 - `nomina.novedades.cargar`
+- `pauta.alertas.listar`
+- `pauta.cobertura.confirmar`
+- `pauta.cobertura.deshacer`
+- `pauta.exportar`
+- `pauta.marca.registrar`
+- `pauta.reemplazos.asignar`
+- `pauta.reemplazos.sugerir`
+- `pauta.refuerzos.agregar`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`

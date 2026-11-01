@@ -116,6 +116,28 @@ describe("expandirMes", () => {
     expect(c[14]).toMatchObject({ fecha: "2026-10-15", estado: "cubierto", titularId: "ana" });
     expect(c[16]).toMatchObject({ fecha: "2026-10-17", estado: "libre" });
   });
+
+  it("reemplazo cubre con persona y refuerzo cubre día libre", () => {
+    const c = expandirMes({
+      ...base,
+      excepciones: [
+        { puestoId: "p1", fecha: "2026-10-02", tipo: "reemplazo", motivo: "Cubre Ana", personaId: "ana" },
+        { puestoId: "p1", fecha: "2026-10-06", tipo: "refuerzo", motivo: "Refuerzo fin de semana", personaId: "pedro" },
+      ],
+    });
+    expect(c[1]).toMatchObject({ estado: "cubierto", variante: "reemplazo", cubiertoPorId: "ana", excepcion: true });
+    expect(c[5]).toMatchObject({ estado: "cubierto", variante: "refuerzo", cubiertoPorId: "pedro" });
+  });
+
+  it("aplica overlay de registros operativos", () => {
+    const registros = new Map([
+      ["2026-10-01", { confirmado: true }],
+      ["2026-10-02", { marcaManual: true, personaId: "manual" }],
+    ]);
+    const c = expandirMes({ ...base, registros });
+    expect(c[0]?.confirmado).toBe(true);
+    expect(c[1]).toMatchObject({ marcaManual: true, cubiertoPorId: "manual" });
+  });
 });
 
 describe("resumirCobertura", () => {

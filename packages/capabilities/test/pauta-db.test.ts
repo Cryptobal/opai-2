@@ -262,5 +262,68 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect((await ejecutar(viewer, "pauta.mes.leer", { instalacionId: instA, anio, mes })).ok).toBe(true);
     expect(await ejecutar(viewer, "pauta.excepciones.crear", { puestoId: puestoDia, tipo: "ausencia", motivo: "Ausencia", desde: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(await ejecutar(viewer, "pauta.excepciones.anular", { puestoId: puestoDia, desde: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await ejecutar(viewer, "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("PR2: dry_run no escribe confirmación ni reemplazo", async () => {
+    const dia = sumar(20);
+    const prevConf = await ejecutar(ctxOwner(tenantA), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: dia }, { dryRun: true });
+    expect(prevConf.ok).toBe(true);
+    expect(await e.admin.registroOperativoPauta.count({ where: { puestoId: puestoDia, fecha: new Date(`${dia}T00:00:00.000Z`) } })).toBe(0);
+    await fijar(puestoExtra, { titularPersonaId: null, desde: dia, inicioCiclo: dia });
+    const prevReemp = await ejecutar(
+      ctxOwner(tenantA),
+      "pauta.reemplazos.asignar",
+      { puestoId: puestoExtra, fecha: dia, personaId: ana, motivo: "Cubre turno" },
+      { dryRun: true },
+    );
+    expect(prevReemp.ok).toBe(true);
+    expect(await e.admin.excepcionPauta.count({ where: { puestoId: puestoExtra, tipo: "reemplazo", fecha: new Date(`${dia}T00:00:00.000Z`) } })).toBe(0);
+  });
+
+  it("PR2: confirma cobertura en día cubierto y deshace", async () => {
+    const dia = sumar(21);
+    const conf = await ejecutar(ctxOwner(tenantA), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: dia });
+    expect(conf.ok).toBe(true);
+    expect(
+      await e.admin.registroOperativoPauta.count({
+        where: { puestoId: puestoDia, tipo: "cobertura_confirmada", estado: "activa", fecha: new Date(`${dia}T00:00:00.000Z`) },
+      }),
+    ).toBe(1);
+    const mesConf = Number(dia.slice(5, 7));
+    const anioConf = Number(dia.slice(0, 4));
+    const mesR = await ejecutar(ctxOwner(tenantA), "pauta.mes.leer", { instalacionId: instA, anio: anioConf, mes: mesConf });
+    const celda = (mesR as { data: { puestos: { id: string; celdas: { fecha: string; confirmado?: boolean }[] }[] } }).data.puestos
+      .find((p) => p.id === puestoDia)
+      ?.celdas.find((c) => c.fecha === dia);
+    expect(celda?.confirmado).toBe(true);
+    expect((await ejecutar(ctxOwner(tenantA), "pauta.cobertura.deshacer", { puestoId: puestoDia, fecha: dia })).ok).toBe(true);
+  });
+
+  it("PR2: reemplazo emite evento y exporta filas", async () => {
+    const dia = sumar(22);
+    const puestoPpc = puestoX3;
+    await fijar(puestoPpc, { titularPersonaId: null, desde: dia, inicioCiclo: dia });
+    const asignar = await ejecutar(ctxOwner(tenantA), "pauta.reemplazos.asignar", {
+      puestoId: puestoPpc,
+      fecha: dia,
+      personaId: luis,
+      motivo: "Reemplazo de prueba",
+    });
+    expect(asignar.ok).toBe(true);
+    const eventos = await e.admin.evento.findMany({ where: { tenantId: tenantA, tipo: "pauta.excepcion.creada" }, orderBy: { createdAt: "desc" }, take: 1 });
+    expect((eventos[0]?.payload as { tipo?: string })?.tipo).toBe("reemplazo");
+    const mesExp = Number(dia.slice(5, 7));
+    const anioExp = Number(dia.slice(0, 4));
+    const exp = await ejecutar(ctxOwner(tenantA), "pauta.exportar", { instalacionId: instA, anio: anioExp, mes: mesExp, formato: "excel", sinCubrir: true });
+    expect(exp.ok).toBe(true);
+    const csv = Buffer.from((exp as { data: { base64: string } }).data.base64, "base64").toString("utf8");
+    expect(csv.toLowerCase()).toContain("ppc");
+  });
+
+  it("PR2: tenant B no confirma cobertura en puesto de A", async () => {
+    expect(
+      await ejecutar(ctxOwner(tenantB), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: sumar(23) }),
+    ).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 });
