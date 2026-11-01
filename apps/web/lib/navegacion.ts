@@ -150,5 +150,12 @@ export function navegacionPortal(
         ? [{ href: "/supervisor/instalaciones", etiqueta: "Instalaciones", icono: "MapPin" }]
         : []),
     ];
+  if (portal === "trabajador")
+    return [
+      { href, etiqueta: "Inicio", icono: "Home", exacta: true },
+      { href: `${href}/mis-datos`, etiqueta: "Mis datos", icono: "UserRound" },
+      { href: `${href}/notificaciones`, etiqueta: "Avisos", icono: "Bell" },
+      { href: `${href}/mas`, etiqueta: "Más", icono: "Ellipsis", activoEn: `${href}/privacidad` },
+    ];
   return [{ href, etiqueta: "Inicio", icono: "Home" }];
 }

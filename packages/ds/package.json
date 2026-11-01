@@ -8,6 +8,8 @@
   ],
   "exports": {
     ".": "./src/index.ts",
+    "./form-screen-listo": "./src/patterns/form-screen-listo.tsx",
+    "./switch": "./src/components/switch.tsx",
     "./tokens.css": "./src/tokens.css",
     "./styles.css": "./src/styles.css"
   },

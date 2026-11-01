@@ -18,6 +18,7 @@
     "@opai/mod-nomina": "workspace:*",
     "@opai/mod-pauta": "workspace:*",
     "@opai/mod-portal_cliente": "workspace:*",
+    "@opai/mod-portal_trabajador": "workspace:*",
     "@opai/mod-finanzas": "workspace:*",
     "@opai/mod-rondas": "workspace:*",
     "@opai/mod-tickets": "workspace:*"
