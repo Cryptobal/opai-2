@@ -6,7 +6,7 @@ import { tituloPagina } from "@/app/_components/portales";
 import { fechaCorta } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { AccionesPrivacidad } from "../_componentes/formulario-privacidad";
+import { AccionesPrivacidadDiferidas } from "../_componentes/acciones-privacidad-diferida";
 import { estadoTrabajador, textosEstadoTrabajador } from "../_componentes/estado";
 import type { Privacidad } from "../_componentes/tipos";
 
@@ -91,7 +91,7 @@ export default function Pagina() {
                   <CardTitle>Tus derechos</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                  <AccionesPrivacidad solicitudesIniciales={p.solicitudes} />
+                  <AccionesPrivacidadDiferidas solicitudesIniciales={p.solicitudes} />
                 </CardContent>
               </Card>
             </div>

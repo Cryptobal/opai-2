@@ -27,7 +27,10 @@ export function normalizarCamposArco(campos: readonly string[] | undefined): str
   for (const c of campos) {
     const t = c.trim();
     if (!t || t.length > CAMPO_ARCO_MAX) continue;
-    const k = t.toLowerCase();
+    const k = t
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
+      .toLowerCase();
     if (vistos.has(k)) continue;
     vistos.add(k);
     out.push(t);

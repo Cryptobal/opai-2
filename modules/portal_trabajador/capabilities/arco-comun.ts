@@ -23,7 +23,7 @@ export const arcoSolicitudSchema = z.object({
 
 export async function crearSolicitudArcoPortal(
   ctx: Contexto,
-  input: { tipo: TipoArcoPortal; detalle: string; campos?: string[] },
+  input: { tipo: TipoArcoPortal; detalle: string; campos?: string[] | undefined },
   dryRun: boolean,
 ): Promise<z.input<typeof arcoSolicitudSchema>> {
   const detalleErr = validarDetalleArco(input.detalle);

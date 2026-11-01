@@ -11,7 +11,8 @@ import {
 describe("portal trabajador · ARCO (dominio)", () => {
   it("valida el detalle obligatorio", () => {
     expect(validarDetalleArco("   corto  ")).toMatch(/10 caracteres/);
-    expect(validarDetalleArco(" ".repeat(2001))).toMatch(/2000/);
+    expect(validarDetalleArco(" ".repeat(2001))).toMatch(/10 caracteres/);
+    expect(validarDetalleArco("x".repeat(2001))).toMatch(/2000/);
     expect(validarDetalleArco("Quiero corregir mi dirección registrada.")).toBeNull();
   });
 

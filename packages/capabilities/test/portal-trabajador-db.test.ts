@@ -158,6 +158,7 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
     await e.admin.persona.update({ where: { id: p.a2 }, data: { archivadaEn: new Date() } });
     const r = await correr(t.a, u.a2, "portal_trabajador.mis_datos.obtener");
     expect(r.ok ? "OK" : r.error.code).toBe("NOT_FOUND");
+    await e.admin.persona.update({ where: { id: p.a2 }, data: { archivadaEn: null } });
   });
 
   it("sin elección, las preferencias son el silencio por defecto; luego se guardan por persona", async () => {
@@ -222,6 +223,7 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
       modulosActivos: ["portal_trabajador"],
       scopes: ["*"],
       rol: "owner",
+      medidor: { registrar: async () => undefined },
     });
     const previa = await mod.executeCapability(
       agente,
