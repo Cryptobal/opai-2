@@ -14,7 +14,7 @@ import { indicadorUsado } from "./valores";
 export const costoEmpleadorPorPersona: ContratoCostoEmpleador = (entrada, juego) => {
   const e = JSON.parse(jsonCanonico(entrada)) as typeof entrada;
   const j = JSON.parse(jsonCanonico(juego)) as typeof juego;
-  if (e.horario) validarHorario(e.horario);
+  const horario = e.horario ? validarHorario(e.horario) : null;
   const { haberes: h, capa, minimo, atada } = resolverSueldo(e, j);
   const traza: TrazaRemuneracion[] = [];
   const registrar = (concepto: string, paso: number, formula: string, valorClp: CLP,
@@ -96,6 +96,8 @@ export const costoEmpleadorPorPersona: ContratoCostoEmpleador = (entrada, juego)
       "TODO(decisión Carlos): validar bases contables y días corridos de vacaciones con contabilidad",
       ...(e.horario && horasSemanalesSugeridas(e.horario) > indicadorUsado(j, "jornada").valor
         ? [`Horario excede ${indicadorUsado(j, "jornada").valor} h semanales: ajustar horario u horas extra`] : []),
+      ...(horario?.duraciones.some((m) => m > 10 * 60)
+        ? ["Jornada excepcional: verificar autorización DT en Asistencia"] : []),
       ...(h.sueldoBase < minimo ? ["danger: sueldo base bajo el IMM proporcional vigente"] : []),
     ],
   });

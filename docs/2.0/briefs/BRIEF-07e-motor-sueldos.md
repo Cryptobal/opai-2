@@ -162,6 +162,8 @@ no dependencia de construcción (ADR-048). Sus permisos/auditoría quedan en el 
   juego: Nómina debe resolver la UF de cierre legal y datos reales para impuesto definitivo.
 - Turnos usan promedio díasMes/ciclo (30 en casos), no redondean personas; cobertura completa
   o días del patrón es explícita. Feriados del modelo comercial los agrega CPQ.
+  El contrato por persona también avisa de jornadas excepcionales sobre 10 horas diarias,
+  aunque el promedio semanal no supere la jornada legal (decisión 8 de la spec).
 
 ### CA9: comparación al peso y diferencia por regla
 

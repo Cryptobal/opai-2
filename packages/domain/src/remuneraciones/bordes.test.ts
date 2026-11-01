@@ -43,7 +43,11 @@ describe("bordes del contrato y evidencia de indicadores", async () => {
       colacionMin: 0, colacionFuera: true };
     expect(() => costoEmpleadorPorPersona(e, juego)).toThrow("Hora inválida");
     e.horario.tramos = [{ horaInicio: "08:00", horaFin: "20:00" }];
-    expect(costoEmpleadorPorPersona(e, juego).advertencias.join()).not.toContain("excede");
+    const avisos = costoEmpleadorPorPersona(e, juego).advertencias.join();
+    expect(avisos).not.toContain("excede");
+    expect(avisos).toContain("Jornada excepcional");
+    e.horario.tramos = [{ horaInicio: "08:00", horaFin: "18:00" }];
+    expect(costoEmpleadorPorPersona(e, juego).advertencias.join()).not.toContain("Jornada excepcional");
   });
   it("UF diaria 31-oct confirmada: los casos dorados conservan su UF del 29-oct", async () => {
     const publicaciones = publicacionesReferencia();
