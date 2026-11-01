@@ -9,7 +9,7 @@ test.setTimeout(300_000);
 async function crearCuenta(page: Page, nombre: string) {
   await page.goto("/cuentas?nueva=1");
   const hoja = page.getByRole("dialog", { name: "Nueva cuenta" });
-  await hoja.getByLabel("Nombre", { exact: true }).fill(nombre);
+  await hoja.getByRole("group", { name: "Identificación" }).getByLabel("Nombre").fill(nombre);
   await hoja.getByRole("button", { name: "Crear cuenta", exact: true }).click();
   await page.waitForURL(/\/cuentas\/[0-9a-f-]{36}$/);
   return new URL(page.url()).pathname;
@@ -50,7 +50,7 @@ test("CRM: segunda cuenta, roles por vínculo y principal", async ({ page }, inf
   const segunda = cuentas.getByRole("listitem").filter({ hasText: nombreB });
   await segunda.getByRole("button", { name: `Editar vínculo con ${nombreB}`, exact: true }).click();
   const editar = page.getByRole("dialog", { name: "Editar vínculo", exact: true });
-  await editar.getByRole("switch", { name: "Principal en esta cuenta", exact: true }).check();
+  await editar.getByRole("switch", { name: /^Principal en esta cuenta/ }).check();
   await editar.getByRole("button", { name: "Guardar vínculo", exact: true }).click();
   await expect(editar).toHaveCount(0);
   await expect(segunda.getByText("Principal en esta cuenta", { exact: true })).toBeVisible();
