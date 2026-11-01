@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react";
+
 import { Badge, cn } from "@opai/ds";
 
 import { LinkIndice } from "@/app/_components/link-indice";
@@ -44,12 +46,10 @@ export function ListaGrupo({ etiqueta, entradas, aprobaciones, seleccionada }: P
             <span className={cn("truncate text-base", activa ? "font-semibold" : "font-medium")}>
               {s.titulo}
             </span>
-            <span className="t-caption truncate">
-              <span className="md:hidden">{s.corta}</span>
-              <span className="max-md:hidden">{s.descripcion}</span>
-            </span>
+            <span className="t-caption truncate">{s.descripcion}</span>
           </span>
           {n ? <Badge tono="warning">{n}</Badge> : null}
+          <ChevronRight aria-hidden className="size-4 flex-none text-fg-muted md:hidden" />
         </LinkIndice>
       ),
     };
@@ -60,7 +60,7 @@ export function ListaGrupo({ etiqueta, entradas, aprobaciones, seleccionada }: P
       {conBuscador ? (
         <FiltroLista filas={filas} placeholder="Buscar un módulo" />
       ) : (
-        <ul className="max-md:-mx-4 max-md:bg-surface">
+        <ul className="max-md:overflow-hidden max-md:rounded-lg max-md:border max-md:border-border max-md:bg-surface">
           {filas.map((f) => (
             <li key={f.id} className="max-md:border-b max-md:border-border">
               {f.nodo}

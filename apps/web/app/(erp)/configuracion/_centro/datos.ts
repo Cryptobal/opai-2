@@ -28,6 +28,7 @@ export function agruparVisibles(secciones: readonly Seccion[]): GrupoConEntradas
  * teléfono de cada entrada). Los módulos con ajustes (`modulo-<id>`) viven en el grupo `modulos`.
  */
 export function grupoDeSeccion(id: string): Grupo | undefined {
+  if (id === "modulo-agente") return grupoPorId("agentes");
   if (id.startsWith("modulo-")) return grupoPorId("modulos");
   const s = SECCIONES.find((x) => x.id === id);
   return s ? grupoPorId(s.grupo) : undefined;
@@ -49,7 +50,17 @@ export async function cargarIndice() {
   const conAjustes = new Set(datosSiHayPermiso(esquema, []).map((c) => c.modulo));
   const modulos = datosSiHayPermiso(mods, [])
     .filter((m) => (m.estado === "activo" || m.estado === "trial") && conAjustes.has(m.id))
-    .map((m) => seccionModulo(m.id, m.nombre));
+    .map((m) =>
+      m.id === "agente"
+        ? {
+            ...seccionModulo(m.id, m.nombre),
+            grupo: "agentes" as const,
+            titulo: "Agente interno",
+            descripcion: "El asistente de OPAI dentro del ERP: modelo, límites y sugerencias",
+            href: "/configuracion/grupo/agentes/agente-interno",
+          }
+        : seccionModulo(m.id, m.nombre),
+    );
   const secciones: Seccion[] = [...SECCIONES, ...modulos].filter((x) => puede(x.permiso));
   return {
     secciones,

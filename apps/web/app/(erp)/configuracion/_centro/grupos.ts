@@ -6,17 +6,12 @@ import { Blocks, Bot, Building2, CalendarClock, Gauge, Users, type LucideIcon } 
  * buscador lo leen de aquí. La lista es cerrada (máx. 6); crear o dividir un grupo lo decide Carlos.
  */
 export type GrupoId =
-  | "empresa"
-  | "operacion"
-  | "personas-acceso"
-  | "agentes"
-  | "modulos"
-  | "uso-registros";
+  "empresa" | "operacion" | "personas-acceso" | "agentes" | "modulos" | "uso-registros";
 
 export type Grupo = {
   id: GrupoId;
   etiqueta: string;
-  /** Línea corta de la tarjeta («Patrones, feriados y documentos»). */
+  /** Línea corta de la tarjeta («Feriados, patrones y documentos»). */
   corta: string;
   icono: LucideIcon;
 };
@@ -25,31 +20,31 @@ export const GRUPOS: readonly Grupo[] = [
   {
     id: "empresa",
     etiqueta: "Empresa",
-    corta: "Datos, marca, personas y avisos",
+    corta: "Datos, marca, privacidad y comunicaciones",
     icono: Building2,
   },
   {
     id: "operacion",
     etiqueta: "Operación",
-    corta: "Patrones, feriados y documentos",
+    corta: "Feriados, patrones y documentos",
     icono: CalendarClock,
   },
   {
     id: "personas-acceso",
     etiqueta: "Personas y acceso",
-    corta: "Usuarios, roles y portales",
+    corta: "Usuarios, roles y permisos",
     icono: Users,
   },
   {
     id: "agentes",
     etiqueta: "Agentes",
-    corta: "Keys, autonomía y aprobaciones",
+    corta: "Tu IA conectada, API keys y aprobaciones",
     icono: Bot,
   },
   {
     id: "modulos",
     etiqueta: "Módulos",
-    corta: "Catálogo y ajustes por módulo",
+    corta: "Catálogo y ajustes de cada módulo",
     icono: Blocks,
   },
   {
