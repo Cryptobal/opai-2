@@ -22,6 +22,7 @@ export type DatosContacto = {
 };
 
 type Props = {
+  soloDatos?: boolean;
   d: DatosContacto;
   set: <K extends keyof DatosContacto>(k: K, v: DatosContacto[K]) => void;
   error: string | null;
@@ -29,7 +30,7 @@ type Props = {
 };
 
 /** Campos del contacto: nombres, correo, teléfono, cargo, principal y roles (03). */
-export function CamposContacto({ d, set, error, principal }: Props) {
+export function CamposContacto({ d, set, error, principal, soloDatos = false }: Props) {
   return (
     <div className="flex flex-col gap-3.5">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
@@ -75,35 +76,41 @@ export function CamposContacto({ d, set, error, principal }: Props) {
             onChange={(e) => set("telefono", e.target.value)}
           />
         </Campo>
-        <Campo etiqueta="Cargo" htmlFor="k-cargo">
-          <Input id="k-cargo" value={d.cargo} onChange={(e) => set("cargo", e.target.value)} />
-        </Campo>
+        {!soloDatos ? (
+          <Campo etiqueta="Cargo" htmlFor="k-cargo">
+            <Input id="k-cargo" value={d.cargo} onChange={(e) => set("cargo", e.target.value)} />
+          </Campo>
+        ) : null}
       </div>
-      <div className="border-y border-border">
-        <Switch
-          etiqueta="Contacto principal"
-          {...(principal
-            ? {
-                descripcion: `Ya existe uno: ${principal.nombres} ${principal.apellidos} pasará a secundario`,
-              }
-            : {})}
-          activo={d.esPrincipal}
-          onCambiar={(v) => set("esPrincipal", v)}
-        />
-      </div>
-      <fieldset>
-        <legend className="t-label text-fg">Roles</legend>
-        {Object.entries(ROL_CONTACTO).map(([id, etiqueta]) => (
-          <Checkbox
-            key={id}
-            etiqueta={etiqueta}
-            marcado={d.roles.includes(id)}
-            onCambiar={(on) =>
-              set("roles", on ? [...d.roles, id] : d.roles.filter((r) => r !== id))
-            }
-          />
-        ))}
-      </fieldset>
+      {!soloDatos ? (
+        <>
+          <div className="border-y border-border">
+            <Switch
+              etiqueta="Contacto principal"
+              {...(principal
+                ? {
+                    descripcion: `Ya existe uno: ${principal.nombres} ${principal.apellidos} pasará a secundario`,
+                  }
+                : {})}
+              activo={d.esPrincipal}
+              onCambiar={(v) => set("esPrincipal", v)}
+            />
+          </div>
+          <fieldset>
+            <legend className="t-label text-fg">Roles</legend>
+            {Object.entries(ROL_CONTACTO).map(([id, etiqueta]) => (
+              <Checkbox
+                key={id}
+                etiqueta={etiqueta}
+                marcado={d.roles.includes(id)}
+                onCambiar={(on) =>
+                  set("roles", on ? [...d.roles, id] : d.roles.filter((r) => r !== id))
+                }
+              />
+            ))}
+          </fieldset>
+        </>
+      ) : null}
     </div>
   );
 }
