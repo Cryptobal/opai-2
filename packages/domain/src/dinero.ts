@@ -77,3 +77,13 @@ export function formatearCLP(monto: CLP): string {
     .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   return monto < 0 ? `-$ ${abs}` : `$ ${abs}`;
 }
+
+/** Razón exacta: mitad hacia arriba en valor absoluto, sin productos float. */
+export function redondearRazonCLP(numerador: bigint, denominador: bigint): CLP {
+  if (denominador <= 0n) throw new RangeError("Denominador inválido");
+  const signo = numerador < 0n ? -1 : 1;
+  const absoluto = numerador < 0n ? -numerador : numerador;
+  const resultado = signo * Number((2n * absoluto + denominador) / (2n * denominador));
+  if (!Number.isSafeInteger(resultado)) throw new RangeError("Resultado CLP fuera de rango");
+  return clp(resultado);
+}
