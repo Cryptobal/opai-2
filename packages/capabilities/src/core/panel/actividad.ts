@@ -9,7 +9,7 @@ import { nombres } from "./actividad-actores";
 import { visibleSinAnexos } from "./actividad-anexos";
 import { visibleSinNoRecontratar } from "./actividad-no-recontratar";
 import { auditarHistorialSensible, redactarSensibles } from "./actividad-sensible";
-import { cambios, frase } from "./actividad-texto";
+import { capacidadesDeCambios, cambios, frase } from "./actividad-texto";
 import { auditoriaSelect } from "./auditoria-select";
 import { sinPlataformaAjena } from "../../agentes/plataforma";
 
@@ -80,7 +80,11 @@ export const actividadList = defineCapability({
             }
           : {}),
         ...(input.actor ? { actorType: input.actor === "agente" ? "agent" : "user" } : {}),
-        ...(input.capability ? { capability: { startsWith: input.capability } } : {}),
+        ...(e
+          ? input.capability
+            ? { capability: { startsWith: input.capability } }
+            : {}
+          : { capability: { in: capacidadesDeCambios(input.capability) } }),
         ...(input.desde || input.hasta
           ? {
               createdAt: {

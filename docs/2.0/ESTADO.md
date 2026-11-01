@@ -1,5 +1,17 @@
 # ESTADO — OPAI 2.0
 
+- **CAR-130 / encargo CAR-129 · Actividad y kanban móvil (rama `fix/car130-actividad-kanban`):**
+  traductor único en servidor con respaldo español, Inicio filtra lecturas por el efecto del registro
+  antes de paginar; kanban con scroll horizontal, pulsación sostenida para arrastrar y vacío compacto
+  del DS solo en móvil. Sin permisos, migraciones, endpoints ni cambios de topes.
+  Decisiones técnicas de Codex (registro sin etiqueta breve, exclusión de ids históricos desconocidos,
+  omisión del enum de estado, gesto táctil 400 ms/8 px y listeners estables ante cambios de URL), alcance y CA en
+  [CAR-130](briefs/CAR-130-actividad-kanban.md). Gate y evidencia final en el cuerpo de PR preparado;
+  pendiente integración y revisión del bot según el flujo vigente. La medición adicional del
+  protocolo ADR-045 falla en Cargos por contador 0 (instrumentación desconectada); Inicio también
+  devuelve 0 en mediciones separadas. No se afirma verificado el tope de consultas con esas muestras
+  ni se modifica esa instrumentación en este encargo.
+
 **Foto de código verificada en `origin/main`: `45f19cf58d576a2f03c3d074aac7017ce7462793`** (30-oct-2026). Un PR citado acredita su integración en el historial de esa referencia, no el estado de despliegues ni de migraciones en Neon. `main` puede avanzar: actualizar esta foto en cada PR (ADR-054). Linear es referencia de tareas. El plan está en [ROADMAP](ROADMAP.md), las decisiones en [ADR](01-decisiones.md) y el flujo en [OPERACION-agentes](OPERACION-agentes.md).
 
 ## Integrado y pendiente
