@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { SeccionCatalogos } from "@/app/(erp)/negocios/_configuracion/seccion-catalogos";
 import { SeccionEmbudo } from "@/app/(erp)/negocios/_configuracion/seccion-embudo";
+import { SeccionTiposTicket } from "@/app/(erp)/configuracion/_tickets/seccion-tipos";
 import { SeccionConceptos } from "@/app/(erp)/configuracion/_nomina/seccion-conceptos";
 import { SeccionPortalCliente } from "@/app/(erp)/configuracion/_portal_cliente/seccion-portal-cliente";
 import { SeccionCanales } from "@/app/(erp)/configuracion/_leads/seccion-canales";
@@ -71,6 +72,14 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       // Permiso copiado del manifest de Rondas (#137): rondas:configurar gestiona el catálogo.
       permiso: "rondas:configurar",
       Contenido: SeccionTiposIncidente,
+    },
+  ],
+  tickets: [
+    {
+      id: "tipos",
+      etiqueta: "Tipos",
+      permiso: "tickets:tipos.manage",
+      Contenido: SeccionTiposTicket,
     },
   ],
   finanzas: [

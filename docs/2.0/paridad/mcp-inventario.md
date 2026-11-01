@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 358 pares pantalla→capacidad · 318 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 363 pares pantalla→capacidad · 323 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -96,6 +96,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.actualizar` | `rondas_incidentes_tipo_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.crear` | `rondas_incidentes_tipo_crear` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.listar` | `rondas_incidentes_tipo_listar` | existe |
+| compartido | `app/(erp)/configuracion/_tickets` | `tickets.tipos.actualizar` | `tickets_tipos_actualizar` | existe |
+| compartido | `app/(erp)/configuracion/_tickets` | `tickets.tipos.crear` | `tickets_tipos_crear` | existe |
+| compartido | `app/(erp)/configuracion/_tickets` | `tickets.tipos.listar` | `tickets_tipos_listar` | existe |
 | compartido | `app/(erp)/configuracion/auditoria/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/configuracion/comunicaciones/_componentes` | `core.notificacion_reglas.set` | `core_notificacion_reglas_set` | existe |
 | compartido | `app/(erp)/configuracion/comunicaciones/_componentes` | `core.plantillas.enviar_prueba` | `core_plantillas_enviar_prueba` | existe |
@@ -253,8 +256,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.marcar_duplicada` | `comercial_solicitudes_marcar_duplicada` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.reabrir` | `comercial_solicitudes_reabrir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `core.users.list` | `core_users_list` | existe |
+| compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.crear` | `tickets_tickets_crear` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.listar` | `tickets_tickets_listar` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.obtener` | `tickets_tickets_obtener` | existe |
+| compartido | `app/(erp)/tickets/_componentes` | `tickets.tipos.listar` | `tickets_tipos_listar` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.aprobar` | `tickets_tickets_aprobar` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.cambiar_estado` | `tickets_tickets_cambiar_estado` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.comentar` | `tickets_tickets_comentar` | existe |
@@ -579,7 +584,4 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.users.set_role`
 - `portal_cliente.mi_acceso`
 - `rondas.puntos.reemplazar_etiqueta`
-- `tickets.tickets.crear`
 - `tickets.tickets.reasignar`
-- `tickets.tipos.crear`
-- `tickets.tipos.listar`

@@ -6,8 +6,10 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
+import { NuevoTicket } from "./_componentes/nuevo-ticket";
 import {
   cargarTickets,
+  cargarTipos,
   ETIQUETA_ESTADO,
   ETIQUETA_PRIORIDAD,
   filtrosDe,
@@ -35,15 +37,17 @@ export default function Tickets({ searchParams }: Props) {
       completo
       cargar={async () => {
         const p = await filtrosDe(searchParams);
-        return { p, r: await cargarTickets(p) };
+        const [r, tipos] = await Promise.all([cargarTickets(p), cargarTipos()]);
+        return { p, r, tipos: tipos.ok ? tipos.data : [] };
       }}
     >
-      {({ r }) => {
+      {({ r, tipos }) => {
         const items = r.ok ? r.data.items : [];
         return (
           <ListScreen<Ticket>
             state={estadoPantalla(r)}
             titulo="Tickets"
+            accionPrincipal={<NuevoTicket tipos={tipos} />}
             filtros={<ChipsFiltro filtros={[{ param: "vista", etiqueta: "Vista", opciones: OPCIONES_VISTA }]} />}
             items={items}
             clave={(t) => t.id}
