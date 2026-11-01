@@ -4,31 +4,16 @@ import { comprobarContrasteNavegacion } from "./contraste-navegacion";
 import { ocultarIndicadorDev } from "./indicador-dev";
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
-test("recuerda el área abierta en Inicio y Configuración", async ({ page }, info) => {
-  test.skip(info.project.name === "telefono", "El acordeón lateral se muestra desde 1024 px");
-  await ocultarIndicadorDev(page);
+test("secciones planas consistentes entre Inicio y Configuración", async ({ page }, info) => {
+  test.skip(info.project.name === "telefono", "Sidebar desde 1024 px");
   await entrar(page);
-  await page.goto("/configuracion");
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
-  const personas = nav.getByRole("button", { name: "Personas", exact: true });
-  const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
-  if (await clientes.getAttribute("aria-expanded") !== "true") await clientes.click();
-  await expect(nav.locator('a[href="/cuentas"]').last().locator("..").locator('button[aria-label="Fijar"], button[aria-label="Desfijar"]')).toBeAttached();
-  // Con la isla instalada, intercalar otra área garantiza una transición real a Personas.
-  const estabaAbierto = await clientes.getAttribute("aria-expanded") === "true";
-  await clientes.click();
-  await expect(clientes).toHaveAttribute("aria-expanded", String(!estabaAbierto));
-  const guardado = page.waitForResponse((r) => r.request().method() === "POST" &&
-    !!r.request().postData()?.includes("navegacion_area_abierta") &&
-    !!r.request().postData()?.includes('"personas"'));
-  await personas.click(); expect((await guardado).ok()).toBe(true);
-  await expect(personas).toHaveAttribute("aria-expanded", "true");
-  await page.reload();
-  await expect(personas).toHaveAttribute("aria-expanded", "true");
-  await page.goto("/");
-  await expect(personas).toHaveAttribute("aria-expanded", "true");
-  await page.reload();
-  await expect(personas).toHaveAttribute("aria-expanded", "true");
+  for (const ruta of ["/", "/configuracion", "/configuracion/grupo/operacion", "/configuracion/grupo/agentes"]) {
+    await page.goto(ruta);
+    await expect(nav.locator("button[aria-expanded][aria-controls]")).toHaveCount(0);
+    await expect(nav.getByRole("link", { name: "Bandeja", exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Personas", exact: true }).last()).toBeVisible();
+  }
 });
 test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }, info) => {
   await ocultarIndicadorDev(page);
@@ -48,16 +33,15 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     .getByRole("navigation", { name: "Principal", exact: true })
     .filter({ visible: true });
   if (info.project.name === "telefono") {
-    await expect(nav.getByRole("link", { name: "Cuentas", exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Bandeja", exact: true })).toBeVisible();
     await expect(nav.getByRole("link", { name: "Personas", exact: true })).toBeVisible();
     await nav.getByRole("button", { name: "Más opciones" }).click();
     const mas = page.getByRole("dialog", { name: "Más", exact: true });
     await expect(mas.getByText("Fijados", { exact: true })).toBeVisible();
-    await mas.getByRole("button", { name: "Clientes", exact: true }).click();
     await expect(mas.getByRole("button", { name: "Instalaciones", exact: true })).toBeVisible();
     await expect(mas.getByRole("button", { name: "Configuración", exact: true })).toBeVisible();
-    await expect(mas.getByText("Cuenta", { exact: true })).toBeVisible();
-    await expect(mas.getByRole("button", { name: "Cerrar sesión" })).toHaveClass(/text-danger/);
+    await expect(mas.getByText("Cuenta", { exact: true })).toHaveCount(0);
+    await expect(mas.getByRole("button", { name: "Cerrar sesión" })).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
     // Segunda apertura con teclado: conserva el Sheet diferido y devuelve el foco al disparador.
@@ -68,14 +52,6 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await page.keyboard.press("Escape");
     await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
   } else {
-    const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
-    if (await clientes.getAttribute("aria-expanded") !== "true") await clientes.click();
-    await expect(clientes).toHaveAttribute("aria-expanded", "true");
-    const personas = nav.getByRole("button", { name: "Personas", exact: true });
-    await personas.click();
-    await expect(personas).toHaveAttribute("aria-expanded", "true");
-    await expect(clientes).toHaveAttribute("aria-expanded", "false");
-    await clientes.click();
     const fila = nav.getByRole("link", { name: "Cuentas", exact: true }).last().locator("..");
     await fila.hover();
     const pin = fila.getByRole("button");
@@ -112,13 +88,12 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   }
   // Los enlaces cliente conservan el mismo nodo del shell, incluso al aplicar preferencias diferidas.
   await nav.evaluate((el) => el.setAttribute("data-prueba-persistencia", "mismo-shell"));
-  await nav.getByRole("link", { name: "Cuentas", exact: true }).filter({ visible: true }).first().click();
+  if (info.project.name === "telefono") {
+    await nav.getByRole("button", { name: "Más opciones" }).click();
+    await page.getByRole("dialog", { name: "Más", exact: true }).getByRole("button", { name: "Cuentas", exact: true }).click();
+  } else await nav.getByRole("link", { name: "Cuentas", exact: true }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/cuentas$/);
   await expect(nav).toHaveAttribute("data-prueba-persistencia", "mismo-shell");
-  if (info.project.name !== "telefono") {
-    const personas = nav.getByRole("button", { name: "Personas", exact: true });
-    if (await personas.getAttribute("aria-expanded") !== "true") await personas.click();
-  }
   await nav.getByRole("link", { name: "Personas", exact: true }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/personas$/);
   await expect(nav).toHaveAttribute("data-prueba-persistencia", "mismo-shell");
@@ -135,7 +110,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await page.getByRole("radio", { name: /^Personas/ }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
   if (info.project.name === "telefono")
-    await expect(nav.getByRole("link", { name: "Cargos", exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Bandeja", exact: true })).toBeVisible();
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   await page.goto("/");

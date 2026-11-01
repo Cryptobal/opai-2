@@ -7,6 +7,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { mfaObligatoriaPara } from "@/lib/mfa";
 import { requerirIdentidad } from "@/lib/servidor";
 
+import { PasswordCuenta } from "./cambiar-password";
 import { DesactivarMfa } from "./desactivar-mfa";
 
 export const metadata = { title: "Mi cuenta" };
@@ -28,6 +29,7 @@ export default function MiCuenta() {
     >
       {({ activa, obligatoria }) => (
         <div className="flex max-w-xl flex-col gap-4">
+          <PasswordCuenta />
           <section className="flex flex-col gap-3">
             <h2 className="t-heading text-fg">Segundo factor</h2>
             {activa ? (

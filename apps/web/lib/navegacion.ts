@@ -6,17 +6,10 @@ import {
   type Vocabulario,
 } from "@opai/domain";
 
-import {
-  armarNavegacion,
-  entradaInicio,
-  entradasAreaPrincipal,
-  type EntradaArea,
-  type GrupoArea,
-} from "./navegacion-areas";
+import { armarNavegacion, type EntradaArea, type GrupoArea } from "./navegacion-areas";
 import {
   accionesErp,
   type AccionCmdK,
-  areaPrincipalPorRol,
   entradasModulos,
   entradasNucleo,
 } from "./navegacion-entradas";
@@ -63,10 +56,18 @@ export type NavegacionErp = {
   acciones: AccionCmdK[];
 };
 
+const ICONOS_RUTA: Record<string, string> = {
+  "/cargos": "IdCard",
+  "/solicitudes": "NotebookPen",
+  "/contactos": "ContactRound",
+  "/cotizaciones": "ReceiptText",
+  "/finanzas/plan-de-cuentas": "BookOpen",
+};
+
 const esDesarrollo = process.env.NODE_ENV !== "production";
 
 function itemDe(e: EntradaArea, extra: Partial<ItemNav> = {}): ItemNav {
-  return { href: e.href, etiqueta: e.etiqueta, icono: e.icono, ...extra };
+  return { href: e.href, etiqueta: e.etiqueta, icono: ICONOS_RUTA[e.href] ?? e.icono, ...extra };
 }
 
 /**
@@ -81,7 +82,7 @@ export function navegacionErp(
   puede: (permiso: string) => boolean,
   modulosActivos: readonly string[],
   voc: Vocabulario,
-  areaPrincipal: AreaNav | null = null,
+  _areaPrincipal: AreaNav | null = null,
 ): NavegacionErp {
   if (!rol) {
     const inicio = itemDe({
@@ -96,11 +97,22 @@ export function navegacionErp(
   const items = [...entradasNucleo(voc), ...entradasModulos()];
   const grupos = armarNavegacion(items, { puede, modulosActivos });
   const nav: ItemNav[] = [];
-  for (const g of grupos) {
+  const orden = [
+    "inicio",
+    "operaciones",
+    "personas",
+    "finanzas",
+    "comercial",
+    "clientes",
+    "documentos",
+  ];
+  for (const g of [...grupos].sort((a, b) => orden.indexOf(a.area) - orden.indexOf(b.area))) {
     for (const e of g.entradas) {
       nav.push(
         itemDe(e, {
-          ...(g.area === "inicio" ? {} : { grupo: g.etiqueta }),
+          ...(g.area === "inicio"
+            ? {}
+            : { grupo: g.area === "documentos" ? "Firmas" : g.etiqueta }),
           ...(g.area !== "inicio" ? { area: g.area, fijable: true } : {}),
         }),
       );
@@ -108,11 +120,11 @@ export function navegacionErp(
   }
   if (esDesarrollo) nav.push({ href: "/ds", etiqueta: "Diseño", icono: "Palette" });
   nav.push({ href: "/configuracion", etiqueta: "Configuración", icono: "Settings", pie: true });
-  const inicio = entradaInicio(grupos);
-  const resto = entradasAreaPrincipal(grupos, areaPrincipal ?? areaPrincipalPorRol(rol));
-  const navInferior = [inicio, ...resto]
-    .filter((e): e is EntradaArea => e != null)
-    .map((e) => itemDe(e));
+  const bandeja: ItemNav = { href: "/bandeja", etiqueta: "Bandeja", icono: "Inbox" };
+  nav.splice(1, 0, bandeja);
+  const navInferior = ["/", "/pauta", "/personas", "/bandeja"].flatMap((href) =>
+    nav.filter((n) => n.href === href),
+  );
   const acciones = accionesErp(voc.persona.singular, puede, modulosActivos);
   return { nav, grupos, navInferior, acciones };
 }

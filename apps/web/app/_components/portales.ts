@@ -11,7 +11,7 @@ export const PORTALES: readonly Portal[] = [
 ];
 
 export const ETIQUETA_ROL: Record<string, string> = {
-  owner: "Owner",
+  owner: "Administrador",
   admin: "Administrador",
   gerente: "Gerente",
   supervisor: "Supervisor",
