@@ -10,7 +10,7 @@ import { ocultarIndicadorDev } from "./indicador-dev";
 async function irAPreferencias(page: Page) {
   await ocultarIndicadorDev(page);
   await entrar(page);
-  await page.goto("/configuracion/preferencias");
+  await page.goto("/mi-cuenta/preferencias");
   const tema = page.getByRole("radiogroup", { name: "Tema" });
   // Hidratado: los radios del tema dejan de estar deshabilitados.
   await expect(tema.getByRole("radio", { name: "Claro", exact: true })).toBeEnabled();

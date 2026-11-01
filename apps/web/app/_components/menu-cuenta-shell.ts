@@ -10,7 +10,7 @@ export function menuCuentaShell(enErp: boolean, navegar: (href: string) => void,
   const LogOut = iconoShell("LogOut", iconos);
   return [
     ...(portalInicio ? [{ id: "portal-inicio", etiqueta: "Portal de inicio", icono: Settings2, onSelect: portalInicio }] : []),
-    ...(enErp ? [{ id: "pref", grupo: "Cuenta", etiqueta: "Preferencias", icono: Settings2, onSelect: () => navegar("/configuracion/preferencias") }] : []),
+    ...(enErp ? [{ id: "pref", grupo: "Cuenta", etiqueta: "Preferencias", icono: Settings2, onSelect: () => navegar("/mi-cuenta/preferencias") }] : []),
     ...(conCuenta ? [{ id: "mi-cuenta", etiqueta: "Mi cuenta", icono: UserRound, onSelect: () => navegar("/mi-cuenta") }] : []),
     { id: "password", ...(enErp ? {} : { grupo: "Cuenta" }), etiqueta: "Cambiar contraseña", icono: UserRound, onSelect: password },
     { id: "salir", etiqueta: "Cerrar sesión", icono: LogOut, peligro: true, onSelect: () => trasLimpiarCaches(accionSalir) },

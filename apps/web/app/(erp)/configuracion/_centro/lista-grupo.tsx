@@ -2,26 +2,32 @@ import { Badge, cn } from "@opai/ds";
 
 import { LinkIndice } from "@/app/_components/link-indice";
 
-import type { Indice } from "./datos";
-import { FiltroIndice } from "./filtro-indice";
+import { FiltroLista } from "./filtro-lista";
+import type { Seccion } from "./secciones";
+
+/** Más de 7 entradas solo las tiene el grupo Módulos (REGLA §1.3); ahí aparece el buscador propio. */
+const MAX_SIN_BUSCADOR = 7;
 
 type Props = {
-  indice: Indice;
+  /** Etiqueta del grupo (para el nombre accesible de la lista). */
+  etiqueta: string;
+  entradas: readonly Seccion[];
+  aprobaciones: number;
+  /** Id de la entrada activa (se resalta con `aria-current`). */
   seleccionada?: string;
-  q?: string | undefined;
 };
 
 /**
- * Índice del centro de Configuración (19/20): "Buscar un ajuste", grupos, icono, título y
- * descripción; aprobaciones con contador. Igual en `/configuracion` y en cada sección.
+ * Lista de las entradas visibles de un grupo (columna izquierda del `SplitScreen` en iPad/escritorio
+ * y pantalla única en teléfono). Solo pinta las entradas del grupo, nunca el índice completo (REGLA
+ * §1, brief §4.2). El grupo Módulos puede pasar de 7 entradas y entonces trae su propio buscador.
  */
-export function IndiceConfig({ indice, seleccionada, q }: Props) {
-  const filas = indice.secciones.map((s) => {
+export function ListaGrupo({ etiqueta, entradas, aprobaciones, seleccionada }: Props) {
+  const filas = entradas.map((s) => {
     const activa = s.id === seleccionada;
-    const n = s.id === "aprobaciones" ? indice.aprobaciones : 0;
+    const n = s.id === "aprobaciones" ? aprobaciones : 0;
     return {
       id: s.id,
-      grupo: s.grupo,
       texto: `${s.titulo} ${s.descripcion}`,
       nodo: (
         <LinkIndice
@@ -48,5 +54,20 @@ export function IndiceConfig({ indice, seleccionada, q }: Props) {
       ),
     };
   });
-  return <FiltroIndice filas={filas} inicial={q} {...(seleccionada ? {} : { atajo: "/" })} />;
+  const conBuscador = entradas.length > MAX_SIN_BUSCADOR;
+  return (
+    <nav aria-label={`Entradas de ${etiqueta}`} className="flex flex-col pb-4">
+      {conBuscador ? (
+        <FiltroLista filas={filas} placeholder="Buscar un módulo" />
+      ) : (
+        <ul className="max-md:-mx-4 max-md:bg-surface">
+          {filas.map((f) => (
+            <li key={f.id} className="max-md:border-b max-md:border-border">
+              {f.nodo}
+            </li>
+          ))}
+        </ul>
+      )}
+    </nav>
+  );
 }

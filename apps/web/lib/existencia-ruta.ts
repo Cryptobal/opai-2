@@ -32,7 +32,8 @@ export function fichaDe(pathname: string): { coleccion: Coleccion; id: string } 
 export type Consulta =
   | { tipo: "ficha"; coleccion: Coleccion; id: string }
   | { tipo: "evento"; evento: string }
-  | { tipo: "integracion"; proveedor: string };
+  | { tipo: "integracion"; proveedor: string }
+  | { tipo: "grupo"; grupo: string };
 
 /**
  * Páginas cuyo 404 depende de la base: ficha con UUID válido (`/personas/<uuid>/laboral`), plantilla
@@ -53,5 +54,7 @@ export function consultaDeRuta(pathname: string): Consulta | null {
   }
   if (b === "comunicaciones") return { tipo: "evento", evento: slug };
   if (b === "integraciones") return { tipo: "integracion", proveedor: slug };
+  // `/configuracion/grupo/<id>`: un id de grupo fuera de la lista cerrada da 404 (brief §4.2, §5).
+  if (b === "grupo") return { tipo: "grupo", grupo: slug };
   return null;
 }

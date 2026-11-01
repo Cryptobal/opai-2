@@ -24,7 +24,7 @@
 | **Personas** | Personas (con la vista Vencimientos dentro) · Asistencia · Nómina · Cargos y sueldos | Núcleo, Asistencia, Nómina | 1 (Asistencia: 4, Nómina: 6) |
 | **Finanzas** | Flujo de caja · Banca y conciliación · Ventas (DTE) · Compras · Rendiciones · Contabilidad · Informes | Finanzas (sub-módulos activables) | 5 |
 | **Documentos** | Documentos (explorador, plantillas, firmas pendientes) | Documentos | 2 |
-| *(pie)* **Configuración** | Una sola entrada; dentro, el centro por ámbitos (ADR-018/038): empresa, marca, usuarios y permisos, agentes, aprobaciones, módulos, integraciones, comunicaciones, catálogos (embudo, etiquetas), consumos, auditoría | Núcleo | 1 |
+| *(pie)* **Configuración** | Una sola entrada; dentro, el centro por **tarjetas de grupo** (6 grupos cerrados, máx. 7 entradas por grupo salvo Módulos; ver `REGLA-configuracion.md`): **Empresa** (datos, marca, datos personales, comunicaciones) · **Operación** (patrones y funciones, calendario, documentos) · **Personas y acceso** (usuarios y permisos) · **Agentes** (agentes y API keys, aprobaciones) · **Módulos** (catálogo + un ajuste por módulo activo) · **Uso y registros** (integraciones, consumos, auditoría). Preferencias sale al menú de usuario, página propia de la cuenta en `/mi-cuenta/preferencias` (REGLA §3b; decisión de Carlos, 30-oct-2026 09:33 CLT, chat con OPAI 2.0; `/configuracion/preferencias` redirige) | Núcleo | 1 |
 
 Notas:
 

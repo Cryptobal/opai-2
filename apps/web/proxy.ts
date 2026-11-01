@@ -5,13 +5,15 @@ import { consultaDeRuta } from "./lib/existencia-ruta";
 import { destino404, esIdInvalido } from "./lib/rutas-invalidas";
 import { cabecerasConNonce } from "./lib/nonce";
 
+/** Carga completa del documento (no una navegación RSC del cliente, que no lee el estado HTTP). */
+function esDocumento(request: NextRequest): boolean {
+  return Boolean(request.headers.get("accept")?.includes("text/html")) && !request.headers.has("rsc");
+}
+
 /** Pregunta a `/api/existe` si la ficha o el slug existen; ante cualquier falla, que decida la página. */
 async function noExiste(request: NextRequest): Promise<boolean> {
   const { pathname, origin } = request.nextUrl;
-  // Solo la carga completa del documento: la navegación del cliente (RSC) no lee el estado HTTP.
-  const documento =
-    request.headers.get("accept")?.includes("text/html") && !request.headers.has("rsc");
-  if (!documento || !consultaDeRuta(pathname)) return false;
+  if (!esDocumento(request) || !consultaDeRuta(pathname)) return false;
   try {
     const r = await fetch(`${origin}/api/existe?ruta=${encodeURIComponent(pathname)}`, {
       // Se reenvía la cookie para que `/api/existe` resuelva la sesión: el rate limit de esa ruta cuenta
@@ -24,6 +26,37 @@ async function noExiste(request: NextRequest): Promise<boolean> {
     return d.existe === false;
   } catch {
     return false;
+  }
+}
+
+const CABECERAS_SIN_REENVIAR = ["content-length", "content-encoding", "transfer-encoding", "connection"];
+
+/**
+ * 404 real de una ficha/slug/grupo inexistente. Un `NextResponse.rewrite()` no cambia el estado HTTP
+ * que ve el navegador: lo decide el render de la página de destino, y con `cacheComponents` esa
+ * página cuelga del shell del portal (`PortalLayout`), que envía su `Suspense` estático en 200 antes
+ * de que el `notFound()` del contenido se resuelva — sin esto, cualquier 404 del ERP queda en 200
+ * (ver brief de Configuración §10 y `ESTADO.md`: no hay forma de desactivar esa franja estática
+ * solo para el 404 sin tocar el shell de todas las páginas). Por eso para una carga completa de
+ * documento se pide la página de destino con un `fetch` interno (misma sesión, vía cookie) y se
+ * reenvía su cuerpo con el estado forzado a 404; una navegación RSC del cliente sigue con el
+ * `rewrite` simple, que ya le basta (no lee el estado HTTP).
+ */
+async function respuesta404(request: NextRequest, headers: Headers): Promise<NextResponse> {
+  const destino = new URL(destino404(request.nextUrl.pathname), request.url);
+  if (!esDocumento(request)) return NextResponse.rewrite(destino, { request: { headers } });
+  try {
+    const r = await fetch(destino, {
+      headers: { cookie: request.headers.get("cookie") ?? "" },
+      signal: AbortSignal.timeout(4000),
+    });
+    const cuerpo = await r.arrayBuffer();
+    const salida = new NextResponse(cuerpo, { status: 404 });
+    for (const [clave, valor] of r.headers)
+      if (!CABECERAS_SIN_REENVIAR.includes(clave)) salida.headers.set(clave, valor);
+    return salida;
+  } catch {
+    return NextResponse.rewrite(destino, { request: { headers } });
   }
 }
 
@@ -59,16 +92,9 @@ export async function proxy(request: NextRequest) {
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
     // La cabecera se fija en el servidor y sobrescribe cualquier `x-opai-t0` del cliente: en ninguna
     // rama (ni en el 404) se deja pasar la que mande el navegador.
-    // Ficha que no existe: se reescribe a la página de 404 del portal (catch-all con `notFound()` sin
-    // leer `params`, que ya responde HTTP 404 y con el shell). No se fuerza `status` aquí: un 404
-    // puesto por el proxy puede terminar en la página genérica de Next, sin menú y en inglés.
-    if (esIdInvalido(request.nextUrl.pathname) || (await noExiste(request))) {
-      return responder(
-        NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url), {
-          request: { headers },
-        }),
-      );
-    }
+    // Ficha, grupo, evento o integración inexistente: 404 real con el shell del portal (`respuesta404`).
+    if (esIdInvalido(request.nextUrl.pathname) || (await noExiste(request)))
+      return responder(await respuesta404(request, headers));
     return responder(NextResponse.next({ request: { headers } }));
   }
   const login = new URL("/login", request.url);

@@ -1,17 +1,22 @@
-import { Settings, UserCheck } from "lucide-react";
+import { UserCheck } from "lucide-react";
 
-import { Alerta, SplitScreen } from "@opai/ds";
+import { Alerta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
-import { cargarIndice } from "./_centro/datos";
-import { IndiceConfig } from "./_centro/indice-config";
+import { BuscadorConfig, type EntradaBuscador } from "./_centro/buscador-config";
+import { agruparVisibles, cargarIndice } from "./_centro/datos";
+import { TarjetaGrupo } from "./_centro/tarjeta-grupo";
 
 export const metadata = { title: "Configuración" };
 
-/** Centro de Configuración (19/20): índice por ámbitos; en md+, "Elige un ajuste" a la derecha. */
+/**
+ * Portada del centro de Configuración (brief §4.1): buscador de ajustes, aviso de aprobaciones y una
+ * grilla de tarjetas de grupo sin contadores. Cada tarjeta lleva a la primera entrada visible del
+ * grupo (iPad/escritorio) o a la lista del grupo (teléfono).
+ */
 export default function Configuracion({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal
@@ -24,42 +29,49 @@ export default function Configuracion({ searchParams }: { searchParams: SearchPa
         return { indice, q: p["q"] };
       }}
     >
-      {({ indice, q }) => (
-        <SplitScreen
-          telefono="lista"
-          etiquetaLista="Índice de configuración"
-          lista={
-            <>
-              <h2 className="t-title mb-3 text-fg md:hidden">Configuración</h2>
-              <IndiceConfig indice={indice} q={q} />
-            </>
-          }
-          detalle={
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-              <span className="flex size-12 items-center justify-center rounded-lg border border-border bg-surface text-fg-muted">
-                <Settings className="size-5" aria-hidden />
-              </span>
-              <p className="text-md font-semibold text-fg">Elige un ajuste</p>
-              <p className="max-w-80 text-base text-fg-muted">
-                Selecciona una sección del índice o búscala con ⌘K.
-              </p>
-              {indice.aprobaciones ? (
-                <Alerta
-                  tono="warning"
-                  icono={UserCheck}
-                  titulo={`${indice.aprobaciones} ${indice.aprobaciones === 1 ? "aprobación de agente espera" : "aprobaciones de agentes esperan"} tu revisión`}
-                  accion={
-                    <EnlaceBoton href="/configuracion/aprobaciones" variante="ghost">
-                      Revisar
-                    </EnlaceBoton>
-                  }
-                  className="mt-4"
-                />
-              ) : null}
-            </div>
-          }
-        />
-      )}
+      {({ indice, q }) => {
+        const grupos = agruparVisibles(indice.secciones);
+        const entradas: EntradaBuscador[] = grupos.flatMap((g) =>
+          g.entradas.map((e) => ({
+            id: e.id,
+            titulo: e.titulo,
+            descripcion: e.descripcion,
+            grupoId: g.grupo.id,
+            grupoEtiqueta: g.grupo.etiqueta,
+            href: e.href,
+          })),
+        );
+        const veAprobaciones = indice.secciones.some((s) => s.id === "aprobaciones");
+        const n = indice.aprobaciones;
+        return (
+          <div className="flex flex-col gap-5">
+            <h2 className="t-title text-fg md:hidden">Configuración</h2>
+            {veAprobaciones && n > 0 ? (
+              <Alerta
+                tono="warning"
+                icono={UserCheck}
+                titulo={`${n} ${n === 1 ? "aprobación de agente espera" : "aprobaciones de agentes esperan"} tu revisión`}
+                accion={
+                  <EnlaceBoton href="/configuracion/aprobaciones" variante="ghost">
+                    Revisar
+                  </EnlaceBoton>
+                }
+              />
+            ) : null}
+            <BuscadorConfig
+              entradas={entradas}
+              grupos={grupos.map((g) => ({ id: g.grupo.id, etiqueta: g.grupo.etiqueta }))}
+              inicial={q}
+            >
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {grupos.map((g) => (
+                  <TarjetaGrupo key={g.grupo.id} grupo={g.grupo} entradas={g.entradas} />
+                ))}
+              </div>
+            </BuscadorConfig>
+          </div>
+        );
+      }}
     </PaginaPortal>
   );
 }

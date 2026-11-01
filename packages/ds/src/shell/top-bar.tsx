@@ -54,6 +54,7 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
         {volver ? (
           <Link
             href={volver.href}
+            aria-label={`Volver a ${volver.etiqueta}`}
             className="flex min-h-11 min-w-0 items-center gap-1 rounded-md pr-2 text-md font-medium text-fg"
           >
             <ChevronLeft className="size-5 flex-none" aria-hidden />
