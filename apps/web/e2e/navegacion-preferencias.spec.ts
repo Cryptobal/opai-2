@@ -13,13 +13,13 @@ test("preferencias de navegación: una carga fallida permite reintentar sin escr
     const peticion = ruta.request();
     const cuerpo = peticion.postData() ?? "";
     if (peticion.method() === "POST" && cuerpo.includes("core.config.set")) escrituras++;
-    if (fallar && new URL(peticion.url()).pathname === "/configuracion/preferencias" && peticion.method() === "POST" && cuerpo.includes("core.config.get")) {
+    if (fallar && new URL(peticion.url()).pathname === "/mi-cuenta/preferencias" && peticion.method() === "POST" && cuerpo.includes("core.config.get")) {
       await ruta.abort("failed");
       return;
     }
     await ruta.continue();
   });
-  await page.goto("/configuracion/preferencias");
+  await page.goto("/mi-cuenta/preferencias");
   const error = page.getByRole("region", { name: "Preferencias", exact: true }).getByRole("alert");
   await expect(error).toContainText("No se pudieron cargar tus preferencias");
   await expect(page.getByRole("radio", { name: /^Personas/ })).toBeDisabled();

@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
+import type { GrupoId } from "./grupos";
+
 export type Seccion = {
   id: string;
   href: string;
@@ -8,9 +10,10 @@ export type Seccion = {
   descripcion: string;
   corta: string;
   icono: LucideIcon;
-  grupo: "Empresa" | "Operaciones" | "Acceso" | "Plataforma" | "Módulos activos";
-  /** Permiso para ver la sección (sin permiso no aparece en el índice). */
-  permiso: string | null;
+  /** Grupo cerrado al que pertenece la entrada (REGLA §1.2). */
+  grupo: GrupoId;
+  /** Permiso para ver la sección (nunca `null`; sin permiso no aparece, REGLA §3.7). */
+  permiso: string;
 };
 
 /** Sección con su ruta por defecto (`/configuracion/<id>`). */

@@ -31,7 +31,7 @@ async function comprobarPalabras(nav: Locator) {
 test("etiquetas completas en riel y barra", async ({ page }, info) => {
   test.skip(info.project.name !== "telefono", "Los dos anchos se prueban en este proyecto");
   await entrar(page);
-  await page.goto("/configuracion/preferencias");
+  await page.goto("/mi-cuenta/preferencias");
   await page.getByRole("radio", { name: /^Personas/ }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });

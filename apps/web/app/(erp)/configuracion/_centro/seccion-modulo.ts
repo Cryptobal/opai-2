@@ -12,6 +12,6 @@ export const seccionModulo = (id: string, nombre: string): Seccion => ({
   descripcion: "Ajustes del módulo",
   corta: "Ajustes del módulo",
   icono: SlidersHorizontal,
-  grupo: "Módulos activos",
+  grupo: "modulos",
   permiso: PERMISOS_CORE.configRead,
 });

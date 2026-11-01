@@ -1,3 +1,5 @@
+import { GRUPOS_IDS } from "@/app/(erp)/configuracion/_centro/grupos";
+
 import { ejecutarComoUsuario } from "./servidor";
 import { type Coleccion, type Consulta, consultaDeRuta } from "./existencia-ruta";
 
@@ -35,6 +37,8 @@ export async function existeRuta(pathname: string): Promise<boolean> {
     const r = await ejecutarComoUsuario<Evento[]>("erp", "core.comunicaciones.eventos", {});
     return !r.ok || r.data.some((x) => x.evento === q.evento);
   }
+  // Grupo de Configuración: lista cerrada y estática, sin tocar la base (brief §4.2).
+  if (q.tipo === "grupo") return (GRUPOS_IDS as readonly string[]).includes(q.grupo);
   if (q.proveedor === "ia") return true;
   const r = await ejecutarComoUsuario<Integracion>("erp", "core.integraciones.get", {
     proveedor: q.proveedor,

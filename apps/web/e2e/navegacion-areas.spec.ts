@@ -38,7 +38,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   if (!E2E_PASSWORD) throw new Error("Falta contraseña E2E");
   await entrar(page);
   // Estado inicial determinista incluso si una ejecución anterior se interrumpió antes de limpiar.
-  await page.goto("/configuracion/preferencias");
+  await page.goto("/mi-cuenta/preferencias");
   const segunRol = page.getByRole("radio", { name: /^Según mi rol/ });
   await segunRol.click();
   await expect(segunRol).toHaveAttribute("data-state", "checked");
@@ -130,7 +130,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await expect(paleta.getByText("Recientes", { exact: true })).toBeVisible();
   await expect(paleta.getByText("Acciones", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
-  await page.goto("/configuracion/preferencias");
+  await page.goto("/mi-cuenta/preferencias");
   expect(errores).toEqual([]);
   await page.getByRole("radio", { name: /^Personas/ }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
