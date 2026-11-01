@@ -8,6 +8,7 @@ import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { descripcionCelda } from "./celda-turno";
+import { ConfirmarAnulacion } from "./confirmar-anulacion";
 import { diaSemana, fechaCl, MOTIVO } from "./etiquetas";
 import type { MesPauta } from "./tipos";
 
@@ -48,6 +49,7 @@ function Formulario({
   const [tipo, setTipo] = useState<string>("ausencia");
   const [hasta, setHasta] = useState(fecha);
   const [motivo, setMotivo] = useState("");
+  const [confirmarAnulacion, setConfirmarAnulacion] = useState(false);
   const trabaja = celda.estado === "cubierto" || celda.estado === "ppc";
   const titular = puesto.serie?.titular ?? null;
 
@@ -66,6 +68,7 @@ function Formulario({
   }
 
   return (
+    <>
     <Sheet
       abierto
       onCerrar={onCerrar}
@@ -77,7 +80,7 @@ function Formulario({
             Cerrar
           </Button>
           {puedeEditar && celda.excepcion ? (
-            <Button variant="destructive" onClick={anular} cargando={pendiente}>
+            <Button variant="destructive" onClick={() => setConfirmarAnulacion(true)} cargando={pendiente}>
               Anular excepción
             </Button>
           ) : null}
@@ -117,5 +120,10 @@ function Formulario({
         {!puedeEditar ? <p className="t-caption">Solo lectura: tu rol no edita la pauta.</p> : null}
       </div>
     </Sheet>
+    {confirmarAnulacion ? (
+      <ConfirmarAnulacion puesto={puesto.nombre} fecha={fecha} pendiente={pendiente} error={error}
+        onCerrar={() => setConfirmarAnulacion(false)} onConfirmar={() => void anular()} />
+    ) : null}
+    </>
   );
 }

@@ -33,6 +33,8 @@ test.describe("pauta · mensual", () => {
     await page.goto(`/pauta?inst=${INST}`);
     await expect(page.getByText("Portería Día").filter({ visible: true }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: "Mes siguiente" })).toBeVisible();
+    const enlaceSerie = page.getByRole("link", { name: /Portería Día/ }).filter({ visible: true }).first();
+    await expect(enlaceSerie).toHaveAttribute("href", new RegExp(`inst=${INST}&mes=\\d{4}-\\d{2}&serie=${PUESTO_DIA}`));
     await captura(page, "pauta-instalacion", info.project.name);
   });
 
@@ -55,6 +57,13 @@ test.describe("pauta · mensual", () => {
     await page.getByLabel("Motivo").fill("Licencia médica de prueba");
     await registrar.click();
     await expect(page.getByText(/Excepción registrada/)).toBeVisible();
+
+    await page.goto(`/pauta?inst=${INST}&dia=${PUESTO_DIA}_${HOY}`);
+    await page.getByRole("button", { name: "Anular excepción" }).click();
+    const confirmacion = page.getByRole("dialog", { name: "Anular excepción" });
+    await expect(confirmacion).toBeVisible();
+    await confirmacion.getByRole("button", { name: "Cancelar" }).click();
+    await expect(page.getByRole("button", { name: "Anular excepción" })).toBeVisible();
 
     await page.goto(`/pauta?inst=${INST}`);
     await expect(page.getByText("Ana Pauta E2E").first()).toBeVisible();

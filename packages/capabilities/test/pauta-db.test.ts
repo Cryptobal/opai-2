@@ -212,6 +212,17 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect(await crear(sumar(6), sumar(13))).toMatchObject({ ok: true, data: { dias: 4 } });
   });
 
+  it("anulaciones concurrentes no registran dos veces la misma excepción", async () => {
+    expect((await fijar(puestoExtra, { titularPersonaId: null })).ok).toBe(true);
+    expect((await ejecutar(ctxOwner(tenantA), "pauta.excepciones.crear", { puestoId: puestoExtra, tipo: "ausencia", motivo: "Prueba", desde: manana })).ok).toBe(true);
+    const antes = await e.admin.historialPauta.count({ where: { puestoId: puestoExtra, accion: "excepcion_anulada" } });
+    const anular = () => ejecutar(ctxOwner(tenantA), "pauta.excepciones.anular", { puestoId: puestoExtra, desde: manana });
+    const resultados = await Promise.all([anular(), anular()]);
+    expect(resultados.filter((r) => r.ok)).toHaveLength(1);
+    expect(resultados.filter((r) => !r.ok)).toHaveLength(1);
+    expect(await e.admin.historialPauta.count({ where: { puestoId: puestoExtra, accion: "excepcion_anulada" } })).toBe(antes + 1);
+  });
+
   it("el historial lista los cambios y es append-only para la app", async () => {
     const h = await ejecutar(ctxOwner(tenantA), "pauta.historial.listar", { instalacionId: instA });
     expect(h.ok && (h.data as { items: unknown[] }).items.length).toBeGreaterThan(2);
@@ -227,6 +238,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect(fijarB).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const exc = await ejecutar(ctxOwner(tenantA), "pauta.excepciones.crear", { puestoId: puestoB, tipo: "ausencia", motivo: "Ausencia", desde: manana });
     expect(exc).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await ejecutar(ctxOwner(tenantA), "pauta.excepciones.anular", { puestoId: puestoB, desde: manana })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await e.forTenant(tenantA).seriePauta.count({ where: { puestoId: puestoB } })).toBe(0);
     expect(await e.forTenant(tenantB).seriePauta.count()).toBe(0);
   });
@@ -236,6 +248,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect((await ejecutar(dentro, "pauta.mes.leer", { instalacionId: instA, anio, mes })).ok).toBe(true);
     expect(await ejecutar(dentro, "pauta.mes.leer", { instalacionId: instA2, anio, mes })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await ejecutar(dentro, "pauta.excepciones.crear", { puestoId: puestoOtraInst, tipo: "permiso", motivo: "Permiso", desde: manana })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await ejecutar(dentro, "pauta.excepciones.anular", { puestoId: puestoOtraInst, desde: manana })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const resumen = await ejecutar(dentro, "pauta.resumen.leer", { anio, mes });
     expect((resumen as { data: { instalaciones: { instalacionId: string }[] } }).data.instalaciones.every((i) => i.instalacionId === instA)).toBe(true);
     const sinNada = await ejecutar(ctxSup({ instalaciones: [] }), "pauta.resumen.leer", { anio, mes });
@@ -248,5 +261,6 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     const viewer = mod.crearContexto({ tenantId: tenantA, actor: { tipo: "user", id: randomUUID() }, portal: "erp", portalesMembresia: ["erp"], rol: "viewer", modulosActivos: ["pauta"], medidor });
     expect((await ejecutar(viewer, "pauta.mes.leer", { instalacionId: instA, anio, mes })).ok).toBe(true);
     expect(await ejecutar(viewer, "pauta.excepciones.crear", { puestoId: puestoDia, tipo: "ausencia", motivo: "Ausencia", desde: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await ejecutar(viewer, "pauta.excepciones.anular", { puestoId: puestoDia, desde: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 });

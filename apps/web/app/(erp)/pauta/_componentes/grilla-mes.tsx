@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn } from "@opai/ds";
 
 import { CLASE_EXCEPCION, codigoCelda, descripcionCelda } from "./celda-turno";
-import { diaSemana, esNoche } from "./etiquetas";
+import { claveMes, diaSemana, esNoche } from "./etiquetas";
 import type { MesPauta } from "./tipos";
 
 /** P01 en 1024/1280: puestos × días con la primera columna fija; cada celda abre el día. */
@@ -11,7 +11,7 @@ export function GrillaMes({ mes, puedeEditar }: { mes: MesPauta; puedeEditar: bo
   const dias = mes.puestos[0]?.celdas ?? [];
   return (
     <div className="hidden max-h-[70dvh] overflow-auto rounded-lg border border-border bg-surface lg:block">
-      <table className="border-separate border-spacing-0 text-sm">
+      <table className="w-full border-separate border-spacing-0 text-sm">
         <thead>
           <tr>
             <th className="sticky top-0 left-0 z-20 min-w-52 border-r border-b border-border bg-surface px-3 py-2 text-left text-xs font-medium text-fg-subtle">
@@ -38,7 +38,7 @@ export function GrillaMes({ mes, puedeEditar }: { mes: MesPauta; puedeEditar: bo
             <tr key={p.id}>
               <th className="sticky left-0 z-10 border-r border-b border-border bg-surface px-3 py-1.5 text-left">
                 <Link
-                  href={`?serie=${p.id}`}
+                  href={`?inst=${mes.instalacionId}&mes=${claveMes(mes.anio, mes.mes)}&serie=${p.id}`}
                   scroll={false}
                   className="block rounded-sm text-base font-medium text-fg outline-none focus-visible:outline-2 focus-visible:outline-focus"
                 >
@@ -53,7 +53,7 @@ export function GrillaMes({ mes, puedeEditar }: { mes: MesPauta; puedeEditar: bo
                 return (
                   <td key={c.fecha} className="border-b border-border p-0.5">
                     <Link
-                      href={`?dia=${p.id}_${c.fecha}`}
+                      href={`?inst=${mes.instalacionId}&mes=${claveMes(mes.anio, mes.mes)}&dia=${p.id}_${c.fecha}`}
                       scroll={false}
                       aria-label={`${p.nombre}, ${c.fecha}: ${descripcionCelda(c)}`}
                       className={cn(

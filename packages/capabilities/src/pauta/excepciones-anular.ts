@@ -26,21 +26,23 @@ export const excepcionesAnular = defineCapability({
       estado: "activa",
       fecha: { gte: aFechaDb(dias[0]!), lte: aFechaDb(dias[dias.length - 1]!) },
     };
-    const activas = await ctx.db.excepcionPauta.count({ where: donde });
-    if (dryRun) return { puestoId: puesto.id, anuladas: activas };
-    if (activas === 0) throw reglaDeNegocio("No hay excepciones activas en esas fechas.");
-    await ctx.transaccion(async (tx) => {
-      await tx.excepcionPauta.updateMany({
+    if (dryRun)
+      return { puestoId: puesto.id, anuladas: await ctx.db.excepcionPauta.count({ where: donde }) };
+    return ctx.transaccion(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${input.puestoId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+      await puestoParaPauta({ ...ctx, db: tx }, input.puestoId);
+      const resultado = await tx.excepcionPauta.updateMany({
         where: donde,
         data: { estado: "anulada", anuladaEn: new Date(), anuladaPor: ctx.usuario?.id ?? null },
       });
+      if (resultado.count === 0) throw reglaDeNegocio("No hay excepciones activas en esas fechas.");
       await anotar(tx, ctx, {
         instalacionId: puesto.instalacionId,
         puestoId: puesto.id,
         accion: "excepcion_anulada",
         desde: input.desde,
         hasta: input.hasta ?? input.desde,
-        detalle: { anuladas: activas },
+        detalle: { anuladas: resultado.count },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "pauta.excepcion.anulada",
@@ -48,7 +50,7 @@ export const excepcionesAnular = defineCapability({
         entidadId: puesto.id,
         payload: { puestoId: puesto.id, desde: input.desde, hasta: input.hasta ?? input.desde },
       });
+      return { puestoId: puesto.id, anuladas: resultado.count };
     });
-    return { puestoId: puesto.id, anuladas: activas };
   },
 });

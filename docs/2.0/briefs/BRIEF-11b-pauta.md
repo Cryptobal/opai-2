@@ -32,6 +32,8 @@ Este brief es el PR 2 del Brief 11 (el PR 1, Puestos, ya está en `main`).
 4. Pantallas P01–P05 y la vista de PPC (P06 como filtro) en `/pauta`.
 5. Pruebas: dominio, `test:db`, paridad y snapshot MCP, e2e.
 
+**Avance PR 2 (CAR-86):** enlaces de la mensual con instalación y mes, confirmación y aviso al anular y serialización de anulaciones concurrentes, pendientes de validación. La diaria, cobertura, marca manual, reemplazos, refuerzos, alertas y exportación siguen pendientes; Asistencia (CAR-89), Turnos extra (CAR-96) y Portal Supervisor no se construyen en este PR.
+
 **PR 2 (CAR-86):** Diaria, reemplazos, refuerzos, marcas, alertas, exportación y notificación al guardia, cuando existan Asistencia (CAR-89), Turnos extra (CAR-96) y Portal Supervisor.
 
 ## Reglas y decisiones aplicadas
