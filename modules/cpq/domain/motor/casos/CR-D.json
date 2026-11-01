@@ -1,0 +1,131 @@
+{
+  "caso": "CR-D",
+  "puestos": [],
+  "secciones": [],
+  "uniformes": [
+    {
+      "precio": 32000
+    },
+    {
+      "precio": 35000
+    },
+    {
+      "precio": 22000
+    },
+    {
+      "precio": 25000
+    },
+    {
+      "precio": 15000
+    },
+    {
+      "precio": 9990
+    }
+  ],
+  "examenes": [],
+  "costos": [
+    {
+      "quantity": 1,
+      "unitPrice": 20000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 300000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 2000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 5000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    }
+  ],
+  "colaciones": [],
+  "vehiculos": [],
+  "adicionales": [
+    {
+      "precio": 286153,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "mensual"
+    },
+    {
+      "precio": 245274,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "mensual"
+    },
+    {
+      "precio": 350000,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "unico"
+    },
+    {
+      "precio": 286153,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "mensual"
+    },
+    {
+      "precio": 81758,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "unico"
+    },
+    {
+      "precio": 81758,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "unico"
+    },
+    {
+      "precio": 81758,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "unico"
+    },
+    {
+      "precio": 220000,
+      "cantidad": 1,
+      "margenPct": 15,
+      "recurrencia": "unico"
+    }
+  ],
+  "margenPct": 13,
+  "referencia": {
+    "costsBase": 52000,
+    "monthlyTotal": 52000,
+    "salePriceMonthly": 1021629,
+    "totalGuards": 0,
+    "grupos": {
+      "monthlyHolidayAdjustment": 0,
+      "monthlyUniforms": 0,
+      "monthlyExams": 0,
+      "monthlyCostItems": 52000,
+      "monthlyFinancial": 0,
+      "monthlyPolicy": 0
+    }
+  }
+}

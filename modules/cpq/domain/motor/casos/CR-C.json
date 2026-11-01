@@ -1,0 +1,119 @@
+{
+  "caso": "CR-C",
+  "puestos": [
+    {
+      "etiqueta": "Puesto 1",
+      "patron": "4x4",
+      "inicio": "19:30",
+      "fin": "07:30",
+      "diasCobertura": 7,
+      "personas": 2,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 978926,
+      "seccion": 1
+    },
+    {
+      "etiqueta": "Puesto 2",
+      "patron": "5x2",
+      "inicio": "17:30",
+      "fin": "05:30",
+      "diasCobertura": 5,
+      "personas": 1,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 978926,
+      "seccion": 2
+    },
+    {
+      "etiqueta": "Puesto 3",
+      "patron": "2x5",
+      "inicio": "07:30",
+      "fin": "19:30",
+      "diasCobertura": 2,
+      "personas": 1,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 978926,
+      "seccion": 2
+    }
+  ],
+  "secciones": [
+    "Sección 1",
+    "Sección 2"
+  ],
+  "uniformes": [
+    {
+      "precio": 15000
+    },
+    {
+      "precio": 35000
+    },
+    {
+      "precio": 25000
+    },
+    {
+      "precio": 9990
+    },
+    {
+      "precio": 22000
+    },
+    {
+      "precio": 32000
+    }
+  ],
+  "examenes": [],
+  "costos": [
+    {
+      "quantity": 1,
+      "unitPrice": 20000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 25000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 2000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 5000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    }
+  ],
+  "colaciones": [],
+  "vehiculos": [],
+  "adicionales": [],
+  "margenPct": 13,
+  "referencia": {
+    "costsBase": 4215463.555555556,
+    "monthlyTotal": 4339703.566034647,
+    "salePriceMonthly": 4969600,
+    "totalGuards": 4,
+    "grupos": {
+      "monthlyHolidayAdjustment": 108769.55555555555,
+      "monthlyUniforms": 138990,
+      "monthlyExams": 0,
+      "monthlyCostItems": 52000,
+      "monthlyFinancial": 124240.01047909095,
+      "monthlyPolicy": 0
+    }
+  }
+}

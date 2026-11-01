@@ -565,6 +565,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.puestos.get`
 - `core.usage.summary`
 - `cpq.cotizaciones.get`
+- `cpq.motor.simular`
 - `finanzas.ajustes.actualizar`
 - `finanzas.ajustes.obtener`
 - `finanzas.celdas.cumplir`
