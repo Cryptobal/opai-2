@@ -45,6 +45,7 @@ export async function ejecutarComoUsuario<T = unknown>(
   id: string,
   input: unknown = {},
   dryRun = false,
+  idempotencyKey?: string,
 ): Promise<Resultado<T>> {
   const identidad = await identidadActual();
   if (!identidad)
@@ -55,6 +56,9 @@ export async function ejecutarComoUsuario<T = unknown>(
     return { ok: false, error: { code: "FORBIDDEN", message: "Completa el segundo factor." } };
   const ctx = contextoServidor(identidad, portal);
   ctx.mfa = await estadoMfaDe(identidad);
-  const r = await executeCapability(ctx, id, input, { dryRun });
+  const r = await executeCapability(ctx, id, input, {
+    dryRun,
+    ...(idempotencyKey ? { idempotencyKey } : {}),
+  });
   return r as Resultado<T>;
 }
