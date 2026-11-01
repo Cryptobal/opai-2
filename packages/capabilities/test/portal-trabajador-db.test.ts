@@ -198,12 +198,23 @@ describe.skipIf(!urlPropietario)("portal trabajador en base real: persona propia
   });
 
   it("ARCO: el trabajador crea solicitudes propias y no ve las de un compañero", async () => {
+    const detalleTexto = "Necesito corregir mi dirección registrada en la ficha.";
     const creada = await dato<{ id: string; mensaje: string }>(t.a, u.a1, "portal_trabajador.arco.solicitar", {
       tipo: "rectificacion",
-      detalle: "Necesito corregir mi dirección registrada en la ficha.",
+      detalle: detalleTexto,
       campos: ["dirección"],
     });
     expect(creada.mensaje).toContain("30 días");
+    const audit = await e.admin.auditEvent.findFirst({
+      where: { tenantId: t.a, capability: "portal_trabajador.arco.solicitar" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(audit).not.toBeNull();
+    const payload = audit?.payload as { input?: { detalle?: string; campos?: unknown } };
+    expect(payload?.input?.detalle).toBe("[oculto]");
+    expect(payload?.input?.campos).toBe("[oculto]");
+    expect(JSON.stringify(audit)).not.toContain(detalleTexto);
+    expect(JSON.stringify(audit)).not.toContain("dirección");
     const lista = await dato<{ items: { id: string; tipo: string }[] }>(t.a, u.a1, "portal_trabajador.arco.listar");
     expect(lista.items.some((s) => s.id === creada.id)).toBe(true);
     const listaA2 = await dato<{ items: { id: string }[] }>(t.a, u.a2, "portal_trabajador.arco.listar");
