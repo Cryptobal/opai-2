@@ -13,6 +13,7 @@ export type DatosFicha = {
   state: EstadoPantalla;
   gestionar: boolean;
   aprobar: boolean;
+  aprobarEnvios: boolean;
   ficha: (FichaRespuesta & { meta?: Record<string, unknown> }) | null;
 };
 
@@ -27,11 +28,11 @@ type FichaRespuesta = {
 
 async function cargarFicha(id: string): Promise<DatosFicha> {
   const acceso = accesoCpq(await identidadActual());
-  if (!acceso.leer) return { state: "forbidden", gestionar: false, aprobar: false, ficha: null };
+  if (!acceso.leer) return { state: "forbidden", gestionar: false, aprobar: false, aprobarEnvios: false, ficha: null };
   const r = await ejecutarComoUsuario<FichaRespuesta>("erp", "cpq.cotizaciones.ficha", { id });
   if (!r.ok) {
     if (r.error.code === "NOT_FOUND") notFound();
-    return { state: estadoPantalla(r), gestionar: false, aprobar: false, ficha: null };
+    return { state: estadoPantalla(r), gestionar: false, aprobar: false, aprobarEnvios: false, ficha: null };
   }
   let ficha = r.data;
   if (acceso.crear && ficha.version.editable) {
@@ -39,7 +40,7 @@ async function cargarFicha(id: string): Promise<DatosFicha> {
     const r2 = await ejecutarComoUsuario<FichaRespuesta>("erp", "cpq.cotizaciones.ficha", { id });
     if (r2.ok) ficha = r2.data;
   }
-  return { state: "ready", gestionar: acceso.crear, aprobar: acceso.aprobar, ficha };
+  return { state: "ready", gestionar: acceso.crear, aprobar: acceso.aprobar, aprobarEnvios: acceso.aprobarEnvios, ficha };
 }
 
 export default async function CotizacionFicha({ params }: { params: Promise<{ id: string }> }) {

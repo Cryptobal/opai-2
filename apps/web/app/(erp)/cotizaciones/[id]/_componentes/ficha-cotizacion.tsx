@@ -13,6 +13,7 @@ import type { DatosFicha } from "../page";
 import { AccionesCotizacion } from "./acciones-cotizacion";
 import { LineaCotizacion } from "./linea-cotizacion";
 import { ResumenCotizacion } from "./resumen-cotizacion";
+import { PropuestaTecnicaFicha } from "./propuesta-tecnica-ficha";
 
 export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
   const router = useRouter();
@@ -26,6 +27,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
       </Estado>
     );
   }
+  const aprobarEnvios = datos.aprobarEnvios;
   const editable = datos.gestionar && d.version.editable;
   const c = d.calculo as Parameters<typeof ResumenCotizacion>[0]["calculo"];
   const meta = d.meta as Parameters<typeof ResumenCotizacion>[0]["meta"];
@@ -116,7 +118,17 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
             </details>
           ))}
         </div>
-        <aside className="hidden lg:block">{resumen}</aside>
+        <aside className="hidden lg:block space-y-4">
+          {resumen}
+          <PropuestaTecnicaFicha
+            cotizacionId={d.cotizacion.id}
+            gestionar={datos.gestionar}
+            aprobarEnvios={datos.aprobarEnvios}
+            puedeEnviar={Boolean(
+              (meta as { puedeEnviar?: boolean } | undefined)?.puedeEnviar ?? d.version.estado === "lista",
+            )}
+          />
+        </aside>
       </div>
     </Estado>
   );
