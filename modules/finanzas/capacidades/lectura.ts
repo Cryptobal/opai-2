@@ -10,6 +10,9 @@ import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
 import { aIso, ajustesDe, cargarFlujo } from "./util";
 
+/** Etiqueta de lectura para planes en semana pasada (no entran al saldo real de cartola). */
+export const PLAN_SIN_RESPALDO_CARTOLA = "Plan sin respaldo en cartola";
+
 const semanaCalculadaSchema = z.object({
   semana: semanaSchema,
   ingresos: saldoSchema,
@@ -133,11 +136,21 @@ export const planillaObtener = defineCapability({
         monto: aNumeroSeguro(c.monto),
         nota: c.nota,
       }));
+    const planesPasadaVista = celdas
+      .filter((c) => pasadas.has(aIso(c.semana)) && c.capa === "plan")
+      .map((c) => ({
+        id: c.id,
+        filaId: c.filaId,
+        semana: aIso(c.semana),
+        capa: "plan" as CapaOut,
+        monto: aNumeroSeguro(c.monto),
+        nota: c.nota ? `${c.nota} · ${PLAN_SIN_RESPALDO_CARTOLA}` : PLAN_SIN_RESPALDO_CARTOLA,
+      }));
 
     return {
       ajustes,
       filas: filas.map(vistaFila),
-      celdas: [...celdasDbVista, ...extraVista],
+      celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,
       aviso: { activo: ajustes.avisoActivo, umbral: ajustes.avisoUmbral, semanas: avisoSemanas },
       columnaHoy: lista.includes(hoy) ? hoy : null,

@@ -6,6 +6,7 @@ import { tituloPagina } from "@/app/_components/portales";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { FormularioDatos } from "../_componentes/formulario-datos";
+import { FichaIdentidadTrabajador } from "../_componentes/ficha-identidad";
 import { estadoTrabajador, SIN_FICHA } from "../_componentes/estado";
 import type { MisDatos } from "../_componentes/tipos";
 
@@ -34,15 +35,18 @@ export default function Pagina() {
           textos={{ vacio: SIN_FICHA, error: { accion: <BotonReintentar /> } }}
         >
           {datos ? (
-            <FormularioDatos
-              inicial={datos}
-              cabecera={
-                <Cabecera
-                  titulo="Mis datos"
-                  subtitulo="Mantén tu contacto y tu dirección al día."
-                />
-              }
-            />
+            <div className="flex flex-col gap-4">
+              <FichaIdentidadTrabajador datos={datos} />
+              <FormularioDatos
+                inicial={datos}
+                cabecera={
+                  <Cabecera
+                    titulo="Mis datos"
+                    subtitulo="Mantén tu contacto y tu dirección al día."
+                  />
+                }
+              />
+            </div>
           ) : null}
         </Estado>
       )}

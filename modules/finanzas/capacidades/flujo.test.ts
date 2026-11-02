@@ -91,10 +91,18 @@ describe("finanzas.flujo.celdas", () => {
     );
   });
 
-  it("mover a semana pasada exige confirmarSemanaPasada", async () => {
+  it("mover a semana pasada: dry_run avisa; escritura exige confirmarSemanaPasada", async () => {
     vi.setSystemTime(new Date("2026-11-09T12:00:00Z"));
     const { ctx } = nuevo();
-    const entrada = { filaId: FILA_EGR, semanas: [S2], por: -1 };
+    const semFutura = "2026-11-16";
+    await executeCapability(ctx, "finanzas.celdas.fijar", {
+      filaId: FILA_ING,
+      semana: semFutura,
+      monto: 100_000,
+    });
+    const entrada = { filaId: FILA_ING, semanas: [semFutura], por: -2 };
+    const previa = await executeCapability(ctx, "finanzas.celdas.mover", entrada, { dryRun: true });
+    expect(previa).toMatchObject({ ok: true, data: { avisoSemanaPasada: true } });
     const sinConfirmar = await executeCapability(ctx, "finanzas.celdas.mover", entrada);
     expect(sinConfirmar).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     const ok = await executeCapability(ctx, "finanzas.celdas.mover", {

@@ -28,6 +28,10 @@ export const celdasMover = defineCapability({
       z.object({ desde: semanaSchema, hasta: semanaSchema, monto: z.number().int() }),
     ),
     saldos: z.array(z.object({ semana: semanaSchema, saldoFinal: saldoSchema })),
+    avisoSemanaPasada: z
+      .boolean()
+      .optional()
+      .describe("true en dry_run cuando el movimiento toca una semana pasada (requiere confirmación al aplicar)."),
   }),
   efecto: "escritura",
   dryRun: true,
@@ -47,7 +51,7 @@ export const celdasMover = defineCapability({
     });
     if (!plan.ok) throw reglaDeNegocio(plan.motivo);
     const tocaPasada = plan.movimientos.some((m) => m.desde < hoy || m.hasta < hoy);
-    if (tocaPasada && !input.confirmarSemanaPasada)
+    if (tocaPasada && !dryRun && !input.confirmarSemanaPasada)
       throw reglaDeNegocio(
         "El movimiento afecta una semana pasada: confirma con confirmarSemanaPasada antes de aplicar.",
       );
@@ -74,7 +78,11 @@ export const celdasMover = defineCapability({
       .filter((s) => s.semana >= (todas[0] as string))
       .slice(0, 26)
       .map((s) => ({ semana: s.semana, saldoFinal: s.saldoFinal }));
-    const resultado = { movimientos: plan.movimientos, saldos };
+    const resultado = {
+      movimientos: plan.movimientos,
+      saldos,
+      ...(tocaPasada && dryRun ? { avisoSemanaPasada: true as const } : {}),
+    };
     if (dryRun) return resultado;
     await ctx.transaccion(async (tx) => {
       const semanasLock = new Set([
