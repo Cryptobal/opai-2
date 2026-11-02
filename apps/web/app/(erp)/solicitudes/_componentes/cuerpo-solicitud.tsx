@@ -4,13 +4,47 @@ import { LinkNext } from "@/app/_components/link-next";
 import { telefono } from "@/lib/fechas";
 
 import { nombreDe } from "./acciones-solicitud";
-import type { SolicitudDato } from "./datos";
+import type { AccionAgenteDato, SolicitudDato } from "./datos";
 import { ESTADO } from "./etiquetas";
+import {
+  esCampoAgente,
+  MarcaCampoAgente,
+  PanelAgenteSolicitud,
+  tituloDatosAgente,
+} from "./panel-agente-solicitud";
+
+function fila(
+  etiqueta: string,
+  valor: string | null | undefined,
+  s: SolicitudDato,
+  campo: string,
+) {
+  const v = valor ?? null;
+  return {
+    etiqueta,
+    valor: v ? (
+      <span className="inline-flex items-center gap-1.5">
+        {v}
+        <MarcaCampoAgente visible={esCampoAgente(s, campo)} />
+      </span>
+    ) : null,
+  };
+}
 
 /** Cuerpo del detalle: mensaje original (contenido externo), datos detectados, resultado y duplicadas. */
-export function CuerpoSolicitud({ s, posibles }: { s: SolicitudDato; posibles: SolicitudDato[] }) {
+export function CuerpoSolicitud({
+  s,
+  posibles,
+  accionesAgente = [],
+}: {
+  s: SolicitudDato;
+  posibles: SolicitudDato[];
+  accionesAgente?: AccionAgenteDato[];
+}) {
+  const datos = tituloDatosAgente(s);
   return (
     <>
+      <PanelAgenteSolicitud s={s} acciones={accionesAgente} />
       {s.estado === "descartada" ? (
         <Alerta tono="warning" titulo="Solicitud descartada">
           {s.motivoDescarte}
@@ -28,16 +62,29 @@ export function CuerpoSolicitud({ s, posibles }: { s: SolicitudDato; posibles: S
         {s.asunto ? <p className="mb-2 font-medium">{s.asunto}</p> : null}
         <p className="whitespace-pre-wrap break-words">{s.textoOriginal}</p>
       </SeccionTarjeta>
-      <SeccionTarjeta titulo="Datos detectados">
+      <SeccionTarjeta titulo={datos.titulo}>
+        {datos.desc ? <p className="t-caption mb-3">{datos.desc}</p> : null}
         <ParesGrid
           items={[
-            { etiqueta: "Nombre", valor: s.nombre },
-            { etiqueta: "Empresa", valor: s.empresa },
-            { etiqueta: "Correo", valor: s.email },
-            { etiqueta: "Teléfono", valor: s.telefono ? telefono(s.telefono) : null },
-            { etiqueta: "RUT", valor: s.rut },
-            { etiqueta: "Comuna", valor: s.comuna },
-            { etiqueta: "Servicio", valor: s.servicio, ancho: true },
+            fila("Nombre", s.nombre, s, "nombre"),
+            fila("Empresa", s.empresa, s, "empresa"),
+            fila("Correo", s.email, s, "email"),
+            {
+              etiqueta: "Teléfono",
+              valor: s.telefono ? (
+                <span className="inline-flex items-center gap-1.5">
+                  {telefono(s.telefono)}
+                  <MarcaCampoAgente visible={esCampoAgente(s, "telefono")} />
+                </span>
+              ) : null,
+            },
+            fila("RUT", s.rut, s, "rut"),
+            fila("Comuna", s.comuna, s, "comuna"),
+            fila("Servicio", s.servicio, s, "servicio"),
+            fila("Fuente", s.fuente, s, "fuente"),
+            ...(s.notasAgente
+              ? [{ etiqueta: "Notas del agente", valor: s.notasAgente, ancho: true as const }]
+              : []),
             {
               etiqueta: "Registrada por",
               valor: s.registradaPorTipo === "agente" ? "OPAI (agente)" : "Una persona",

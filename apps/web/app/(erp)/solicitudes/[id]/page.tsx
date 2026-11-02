@@ -6,7 +6,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
 import { puedeGestionarSolicitudes } from "@/lib/pestanas-modulos";
 
-import { cargarSolicitud, cargarSolicitudes, filtrosDe } from "../_componentes/datos";
+import { cargarAccionesAgente, cargarSolicitud, cargarSolicitudes, filtrosDe } from "../_componentes/datos";
 import { DetalleSolicitud } from "../_componentes/detalle-solicitud";
 import { consultaLista, ListaSolicitudes } from "../_componentes/lista-solicitudes";
 
@@ -30,15 +30,17 @@ export default function Solicitud({ params, searchParams }: Props) {
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
         const datos = cargarSolicitud(id);
+        const accionesAgente = cargarAccionesAgente(id);
         datos.catch(() => undefined);
+        accionesAgente.catch(() => undefined);
         const [lista, gestiona] = await Promise.all([
           cargarSolicitudes(p),
           puedeGestionarSolicitudes(),
         ]);
-        return { id, p, datos, lista, gestiona };
+        return { id, p, datos, accionesAgente, lista, gestiona };
       }}
     >
-      {({ id, p, datos, lista, gestiona }) => (
+      {({ id, p, datos, accionesAgente, lista, gestiona }) => (
         <SplitScreen
           telefono="detalle"
           unPanelHastaLg
@@ -48,7 +50,7 @@ export default function Solicitud({ params, searchParams }: Props) {
           }
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>
-              <DetalleSolicitud datos={datos} gestiona={gestiona} />
+              <DetalleSolicitud datos={datos} accionesAgente={accionesAgente} gestiona={gestiona} />
             </Suspense>
           }
         />
