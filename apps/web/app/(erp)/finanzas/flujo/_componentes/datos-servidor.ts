@@ -20,7 +20,6 @@ export async function cargarPlanilla(sp?: SearchParams) {
     state: estadoPantalla(r),
     planilla: r.ok ? r.data : null,
     gestiona: puede("finanzas:flujo.gestionar"),
-    cierra: puede("finanzas:flujo.cerrar"),
     configura: puede("finanzas:flujo.configurar"),
     movil,
   };

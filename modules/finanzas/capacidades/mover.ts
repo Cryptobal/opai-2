@@ -2,22 +2,26 @@ import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
 
-import { calcularPlanilla, planificarMovimiento, semanasDesde, sumarSemanas } from "../domain";
+import { calcularPlanilla, lunesDe, planificarMovimiento, semanasDesde, sumarSemanas } from "../domain";
 import { saldoSchema, semanaSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR } from "./permisos";
-import { aFecha, ajustesDe, aIso, bloquearSemanaFlujo, cargarFlujo, filaDe, selladasDe, semanaSelladaEnTx } from "./util";
+import { aFecha, ajustesDe, aIso, bloquearSemanaFlujo, cargarFlujo, filaDe } from "./util";
 import { sincronizarAvisosEnTx } from "./aviso";
 import { reglaDeNegocio } from "@opai/capabilities";
 
 export const celdasMover = defineCapability({
   id: "finanzas.celdas.mover",
   descripcion:
-    "Reprograma las cifras planificadas de una fila ± N semanas (con arrastre de las siguientes si la fila lo pide) y devuelve el saldo resultante; no mueve lo comprometido, lo real ni semanas selladas.",
+    "Reprograma las cifras planificadas de una fila ± N semanas (con arrastre de las siguientes si la fila lo pide) y devuelve el saldo resultante; no mueve lo comprometido ni lo real. Mover a una semana pasada exige confirmarSemanaPasada.",
   permiso: PERMISO_GESTIONAR,
   input: z.object({
     filaId: uuidSchema,
     semanas: z.array(semanaSchema).min(1).max(52),
     por: z.number().int().min(-26).max(26).describe("Semanas a mover; negativo adelanta."),
+    confirmarSemanaPasada: z
+      .boolean()
+      .optional()
+      .describe("Obligatorio true si el movimiento toca una semana anterior al lunes actual."),
   }),
   output: z.object({
     movimientos: z.array(
@@ -34,14 +38,19 @@ export const celdasMover = defineCapability({
     const hasta = sumarSemanas(todas.at(-1) as string, Math.max(input.por, 0) + 52);
     const base = ajustes.desde < (todas[0] as string) ? ajustes.desde : (todas[0] as string);
     const { celdas, dominio, celdasDom } = await cargarFlujo(ctx, base, hasta);
+    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
     const plan = planificarMovimiento({
       fila: { id: fila.id, seccion: fila.seccion as "ingreso", arrastre: fila.arrastre },
       celdas: celdasDom,
       semanas: input.semanas,
       por: input.por,
-      selladas: await selladasDe(ctx),
     });
     if (!plan.ok) throw reglaDeNegocio(plan.motivo);
+    const tocaPasada = plan.movimientos.some((m) => m.desde < hoy || m.hasta < hoy);
+    if (tocaPasada && !input.confirmarSemanaPasada)
+      throw reglaDeNegocio(
+        "El movimiento afecta una semana pasada: confirma con confirmarSemanaPasada antes de aplicar.",
+      );
     const origen = new Set(plan.movimientos.map((m) => m.desde));
     const tras = celdasDom.filter((c) => !(c.filaId === fila.id && origen.has(c.semana)));
     for (const m of plan.movimientos) {
@@ -74,8 +83,6 @@ export const celdasMover = defineCapability({
       ]);
       for (const s of semanasLock) {
         await bloquearSemanaFlujo(tx, ctx, s);
-        if (await semanaSelladaEnTx(tx, s))
-          throw reglaDeNegocio("Una de las semanas está sellada: reábrela antes de mover.");
       }
       const filas = celdas.filter((c) => c.filaId === fila.id);
       const poSemana = new Map(filas.map((c) => [aIso(c.semana), c]));

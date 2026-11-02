@@ -7,7 +7,7 @@ import { lunesDe } from "../domain";
 import { semanaSchema, sinDuplicado } from "./esquemas";
 import { filaImportSchema, filaDesdeRegistroCsv, MAX_FILAS_IMPORT, parsearCsv } from "./importar-parse";
 import { PERMISO_CONFIGURAR } from "./permisos";
-import { aFecha, ajustesDe, bloquearSemanaFlujo, semanaSelladaEnTx } from "./util";
+import { aFecha, ajustesDe, bloquearSemanaFlujo } from "./util";
 import { sincronizarAvisosEnTx } from "./aviso";
 
 const resultadoFila = z.object({
@@ -48,7 +48,7 @@ export const flujoImportar = defineCapability({
     let aplicadas = 0;
     let omitidas = 0;
     let errores = 0;
-    const hoy = new Date().toISOString().slice(0, 10);
+    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
 
     for (const [indice, reg] of registros.entries()) {
       const parsed = filaDesdeRegistroCsv(reg, indice);
@@ -64,9 +64,9 @@ export const flujoImportar = defineCapability({
         continue;
       }
       const row = v.data;
-      if (await ctx.db.flujoCierre.findFirst({ where: { semana: aFecha(row.semana), sellada: true } })) {
+      if (row.semana < hoy) {
         omitidas += 1;
-        filas.push({ indice, estado: "omitida", mensaje: "Semana sellada." });
+        filas.push({ indice, estado: "omitida", mensaje: "Semana pasada (cartola)." });
         continue;
       }
       const fila = porEtiqueta.get(row.etiqueta.toLowerCase());
@@ -86,7 +86,6 @@ export const flujoImportar = defineCapability({
       try {
         await ctx.transaccion(async (tx) => {
           await bloquearSemanaFlujo(tx, ctx, row.semana);
-          if (await semanaSelladaEnTx(tx, row.semana)) throw reglaDeNegocio("Semana sellada.");
           let f = porEtiqueta.get(row.etiqueta.toLowerCase());
           if (!f) {
             f = await sinDuplicado(
