@@ -13,6 +13,7 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "finanzas:proveedores.manage",
       "finanzas:plan.manage",
       "finanzas:ventas.manage",
+      "finanzas:ventas.configure",
       "finanzas:flujo.ver",
       "finanzas:flujo.gestionar",
       "finanzas:flujo.cerrar",

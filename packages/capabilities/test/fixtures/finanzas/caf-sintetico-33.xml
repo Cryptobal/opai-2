@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<AUTORIZACION>
+  <CAF version="1.0">
+    <DA>
+      <RE>76111222-8</RE>
+      <RS>Emisor ficticio SpA</RS>
+      <TD>33</TD>
+      <RNG><D>5000</D><H>5020</H></RNG>
+      <FA>2026-06-15</FA>
+      <IDK>CERT-SINTETICO-OPAI2-TEST</IDK>
+    </DA>
+    <FRMA algoritmo="SHA1withRSA">c2luZ3R1cmE=</FRMA>
+  </CAF>
+</AUTORIZACION>

@@ -13,6 +13,8 @@ type Ajuste = {
   existente?: (ctx: Contexto) => Record<string, unknown>;
   /** Columnas de un índice único que `copia` no debe regenerar (tienen un CHECK de rango). */
   fijas?: string[];
+  /** Columnas que el trigger de la tabla rellena: no van en INSERT ni en copias. */
+  omitir?: string[];
   valores: (ctx: Contexto) => Record<string, unknown>;
 };
 
@@ -153,6 +155,7 @@ export const AJUSTES: Record<string, Ajuste> = {
     }),
   },
   "finanzas.dte_folios": {
+    omitir: ["folio_rango"],
     valores: () => ({ tipo_dte: 33, folio_desde: 1, folio_hasta: 100, folio_actual: 1 }),
   },
   "finanzas.documentos_emitidos": {
