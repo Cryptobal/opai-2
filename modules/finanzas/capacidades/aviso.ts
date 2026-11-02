@@ -81,25 +81,43 @@ export async function sincronizarAvisosEnTx(
   const semanas = await semanasProyectadas(ctx, ajustes, tx);
   const hoy = lunesDe(new Date().toISOString().slice(0, 10));
   const umbral = ajustes.avisoUmbral;
-  for (const s of semanas.filter((x) => x.semana >= hoy && x.saldoFinal < umbral)) {
-    try {
-      const r = await tx.flujoAvisoEmitido.create({
-        data: {
-          id: randomUUID(),
-          tenantId: ctx.tenantId,
-          semana: aFecha(s.semana),
-          saldoProyectado: BigInt(s.saldoFinal),
-        },
-      });
-      await ctx.eventos.emitir(tx, {
-        tipo: "finanzas.flujo.saldo_negativo_avisado",
-        entidadTipo: "flujoAvisoEmitido",
-        entidadId: r.id,
-        payload: { semana: s.semana, saldo: s.saldoFinal },
-      });
-    } catch (e) {
-      if ((e as { code?: string }).code === "P2002") continue;
-      throw e;
-    }
+  const candidatas = semanas.filter((x) => x.semana >= hoy && x.saldoFinal < umbral);
+  if (!candidatas.length) return;
+
+  const fechas = candidatas.map((c) => aFecha(c.semana));
+  const ya = new Set(
+    (
+      await tx.flujoAvisoEmitido.findMany({
+        where: { semana: { in: fechas } },
+        select: { semana: true },
+      })
+    ).map((e) => aIso(e.semana)),
+  );
+  const nuevas = candidatas.filter((c) => !ya.has(c.semana));
+  if (!nuevas.length) return;
+
+  const data = nuevas.map((s) => ({
+    id: randomUUID(),
+    tenantId: ctx.tenantId,
+    semana: aFecha(s.semana),
+    saldoProyectado: BigInt(s.saldoFinal),
+  }));
+
+  const { count } = await tx.flujoAvisoEmitido.createMany({ data, skipDuplicates: true });
+  if (!count) return;
+
+  const insertados = await tx.flujoAvisoEmitido.findMany({
+    where: { id: { in: data.map((d) => d.id) } },
+  });
+  for (const r of insertados) {
+    const semana = aIso(r.semana);
+    const s = nuevas.find((n) => n.semana === semana);
+    if (!s) continue;
+    await ctx.eventos.emitir(tx, {
+      tipo: "finanzas.flujo.saldo_negativo_avisado",
+      entidadTipo: "flujoAvisoEmitido",
+      entidadId: r.id,
+      payload: { semana: s.semana, saldo: s.saldoFinal },
+    });
   }
 }
