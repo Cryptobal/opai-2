@@ -92,4 +92,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
   "core.anexos.rechazar":
     "Solo personas: rechazar el anexo de contrato es una decisión humana responsable (Brief 07b PR 4, ADR-032).",
+  "core.remuneraciones.confirmar":
+    "Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034).",
+  "core.remuneraciones.confirmar_mutual":
+    "Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034).",
 };

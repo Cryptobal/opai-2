@@ -131,7 +131,6 @@ export function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
 
 export function celdaEditable(p: Planilla, filaId: string, semana: string) {
   if (!celdaEditablePlan(p, filaId, semana)) return null;
-  const s = p.semanas.find((x) => x.semana === semana)!;
   const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);
   const fila = p.filas.find((f) => f.id === filaId)!;
   return { fila, semana, celda: c ?? null };

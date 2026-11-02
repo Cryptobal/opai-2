@@ -1,53 +1,84 @@
 import { costoEmpleadorPorPersona, juegoDeValores, type EntradaCostoEmpleador, type JuegoDeValores } from "@opai/domain";
-import type { Contexto } from "@opai/capabilities";
 
 import type { ProveedorCostoEmpleador } from "../domain/motor/tipos";
-import { valoresLegalesTenant } from "./valores-legales";
+import { juegoParaFecha, valoresLegalesTenant, mutualAdicionalTenant } from "./valores-legales";
 
-type LineaPuesto = { id: string; sueldoBaseClp: number | null; patron: string | null; horaInicio: string | null; horaFin: string | null };
+export type LineaPuesto = {
+  id: string;
+  sueldoBaseClp: number | null;
+  patron: string | null;
+  horaInicio: string | null;
+  horaFin: string | null;
+  colacionClp?: number;
+  movilizacionClp?: number;
+  tipoContrato?: "indefinido" | "plazo_fijo";
+};
 
-/** Juego legal congelado; null si faltan publicaciones (sin fixtures M1). */
-export async function juegoParaFecha(ctx: Contexto, fecha: string): Promise<JuegoDeValores | null> {
-  const valores = await valoresLegalesTenant(ctx, fecha);
-  if (valores.length === 0) return null;
-  try {
-    return await juegoDeValores(fecha, valores);
-  } catch {
-    return null;
-  }
-}
+export { juegoParaFecha, mutualAdicionalTenant, valoresLegalesTenant };
 
-/** Supuestos mínimos de cotización por línea de puesto (no exporta fixtures de prueba M1). */
-export function entradaCostoDesdeSueldo(sueldoBaseClp: number): EntradaCostoEmpleador {
+/** Entrada de cotización con supuestos M1/D2/D3 (21 días, indemnización imponible, indefinido por defecto). */
+export function entradaCostoDesdeLinea(
+  sueldoBaseClp: number,
+  opts: {
+    colacionClp?: number;
+    movilizacionClp?: number;
+    tipoContrato?: "indefinido" | "plazo_fijo";
+    mutualAdicional?: number;
+  } = {},
+): EntradaCostoEmpleador {
   return {
-    sueldo: { sueldoBaseClp, gratificacion: "legal_25", colacionClp: 0, movilizacionClp: 0, haberes: [] },
-    contrato: "indefinido",
+    sueldo: {
+      sueldoBaseClp,
+      gratificacion: "legal_25",
+      colacionClp: opts.colacionClp ?? 0,
+      movilizacionClp: opts.movilizacionClp ?? 0,
+      haberes: [],
+    },
+    contrato: opts.tipoContrato ?? "indefinido",
     afp: "modelo",
     salud: { tipo: "fonasa" },
     jornadaMinutosSemanales: 42 * 60,
-    mutualAdicional: 0,
+    mutualAdicional: opts.mutualAdicional ?? 0,
     provisiones: {
-      diasVacacionesCorridosAnuales: 15,
-      baseVacaciones: "imponible",
+      diasVacacionesCorridosAnuales: 21,
+      baseVacaciones: "sin_gratificacion",
       baseIndemnizacion: "imponible",
       mesesAntiguedad: 0,
-      probabilidadIndemnizacion: 0,
+      probabilidadIndemnizacion: 1_000_000,
     },
   };
+}
+
+/** @deprecated Usar entradaCostoDesdeLinea */
+export function entradaCostoDesdeSueldo(sueldoBaseClp: number): EntradaCostoEmpleador {
+  return entradaCostoDesdeLinea(sueldoBaseClp);
 }
 
 export function proveedorDesdeLineas(
   lineas: readonly LineaPuesto[],
   juego: JuegoDeValores | null,
+  mutualAdicional: number | null,
 ): ProveedorCostoEmpleador {
   const porId = new Map(lineas.map((l) => [l.id, l]));
   return {
     obtener: ({ lineaId }) => {
-      if (!juego) return null;
+      if (!juego || mutualAdicional == null) return null;
       const l = porId.get(lineaId);
       if (!l?.sueldoBaseClp) return null;
-      const r = costoEmpleadorPorPersona(entradaCostoDesdeSueldo(l.sueldoBaseClp), juego);
+      const r = costoEmpleadorPorPersona(
+        entradaCostoDesdeLinea(l.sueldoBaseClp, {
+          colacionClp: l.colacionClp ?? 0,
+          movilizacionClp: l.movilizacionClp ?? 0,
+          tipoContrato: l.tipoContrato ?? "indefinido",
+          mutualAdicional,
+        }),
+        juego,
+      );
       return { costoMensualClp: r.costoEmpresaMensualClp, origen: `07e:${r.huellaJuegoDeValores}` };
     },
   };
+}
+
+export async function juegoDesdePublicaciones(fecha: string, valores: Parameters<typeof juegoDeValores>[1]) {
+  return juegoDeValores(fecha, valores);
 }
