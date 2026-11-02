@@ -13,6 +13,7 @@ import {
   consumirFolio,
   cuentaDe,
   documentoEmitidoIdSchema,
+  marcarBorradorEmitido,
   rutEmisorDe,
 } from "./ventas-comun";
 import { ventaSchema } from "./vistas-venta";
@@ -34,6 +35,7 @@ export const ventasEmitir = defineCapability({
     });
     if (!doc) throw noEncontrado("El documento");
     if (doc.estadoDte !== "borrador") throw reglaDeNegocio("Solo se emiten borradores.");
+    if (doc.folio != null) throw reglaDeNegocio("El borrador ya tiene folio asignado.");
     if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
     const cuenta = await cuentaDe(ctx, doc.cuentaId);
     if (!cuenta.rut) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");
@@ -49,27 +51,10 @@ export const ventasEmitir = defineCapability({
     const ambiente = await ambienteDe(ctx);
     const rutEmisor = await rutEmisorDe(ctx);
     const emision = doc.fechaEmision?.toISOString().slice(0, 10) ?? hoy();
-    const folio = await consumirFolio(ctx, tipo, dryRun);
     const adaptador = adaptadorSiiDesdeEntorno();
     if (!adaptador.disponible) throw reglaDeNegocio("El adaptador SII no está disponible.");
-    const payload = {
-      ambiente,
-      tipoDte: tipo,
-      folio,
-      fechaEmision: emision,
-      rutEmisor,
-      rutReceptor: cuenta.rut,
-      razonSocialReceptor: cuenta.nombre,
-      montos: {
-        neto: doc.montoNeto,
-        exento: doc.montoExento,
-        iva: doc.montoIva,
-        total: doc.montoTotal,
-      },
-      ...(doc.glosa != null && doc.glosa !== "" ? { glosa: doc.glosa } : {}),
-    };
-    const firmado = dryRun ? { xml: "<DTE/>", timbrePdf417: "DRY-RUN" } : await adaptador.firmar(payload);
     if (dryRun) {
+      const folio = await consumirFolio(ctx, tipo, true);
       const { vistaVenta } = await import("./vistas-venta");
       return vistaVenta({ ...doc, folio, estadoDte: "enviado" }, cuenta, doc.lineas.map((l) => ({
         id: l.id,
@@ -78,23 +63,40 @@ export const ventasEmitir = defineCapability({
         monto: l.monto,
       })));
     }
+    let folioEmitido = 0;
     await escribirConEvento(
       ctx,
       {
         tipo: "finanzas.venta.emitida",
         entidadTipo: "documento_emitido",
-        payload: () => ({ folio, tipoDte: doc.tipoDte }),
+        payload: () => ({ folio: folioEmitido, tipoDte: doc.tipoDte }),
       },
-      (tx) =>
-        tx.documentoEmitido.update({
-          where: { id: doc.id },
-          data: {
-            folio,
-            fechaEmision: aFecha(emision),
-            estadoDte: "enviado",
-            timbrePdf417: firmado.timbrePdf417,
+      async (tx) => {
+        folioEmitido = await consumirFolio(ctx, tipo, false, tx);
+        const payload = {
+          ambiente,
+          tipoDte: tipo,
+          folio: folioEmitido,
+          fechaEmision: emision,
+          rutEmisor,
+          rutReceptor: cuenta.rut!,
+          razonSocialReceptor: cuenta.nombre,
+          montos: {
+            neto: doc.montoNeto,
+            exento: doc.montoExento,
+            iva: doc.montoIva,
+            total: doc.montoTotal,
           },
-        }),
+          ...(doc.glosa != null && doc.glosa !== "" ? { glosa: doc.glosa } : {}),
+        };
+        const firmado = await adaptador.firmar(payload);
+        await marcarBorradorEmitido(tx, doc.id, {
+          folio: folioEmitido,
+          fechaEmision: aFecha(emision),
+          timbrePdf417: firmado.timbrePdf417,
+        });
+        return { id: doc.id };
+      },
     );
     return vistaDeDocumento(ctx, doc.id);
   },

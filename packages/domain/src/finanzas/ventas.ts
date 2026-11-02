@@ -76,16 +76,47 @@ export function puedeTransicionDte(de: EstadoDteEmitido, a: EstadoDteEmitido): b
   }
 }
 
-/** Umbral por defecto para avisar folios por agotarse. */
-export const UMBRAL_FOLIOS_BAJOS_DEFECTO = 10;
+/** Porcentaje del rango CAF bajo el cual avisar folios por agotarse (R-FIN-038). */
+export const UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO = 20;
+
+/** Días de anticipación por defecto para avisar vencimiento del CAF vigente. */
+export const AVISO_CAF_DIAS_DEFECTO = 30;
 
 /** Folios restantes en un rango autorizado (inclusive). */
 export function foliosRestantes(folioActual: number, folioHasta: number): number {
   return Math.max(0, folioHasta - folioActual + 1);
 }
 
+/** Cantidad de folios que corresponde al umbral porcentual del rango (mínimo 1 si el rango tiene folios). */
+export function umbralFoliosDesdePct(folioDesde: number, folioHasta: number, pct: number): number {
+  const total = Math.max(0, folioHasta - folioDesde + 1);
+  if (total === 0) return 0;
+  const p = Math.min(100, Math.max(1, pct));
+  return Math.max(1, Math.ceil((total * p) / 100));
+}
+
 export function foliosPorAgotarse(restantes: number, umbral: number): boolean {
   return restantes > 0 && restantes <= umbral;
+}
+
+/** true si la fecha de vencimiento del CAF (YYYY-MM-DD) es anterior a hoy. */
+export function cafVencido(cafVenceEn: string | null | undefined, hoyIso: string): boolean {
+  if (!cafVenceEn) return false;
+  return cafVenceEn < hoyIso;
+}
+
+/** true si el CAF vence dentro de `diasAntes` días (inclusive), contando desde hoy. */
+export function cafPorVencer(cafVenceEn: string | null | undefined, hoyIso: string, diasAntes: number): boolean {
+  if (!cafVenceEn || diasAntes < 1) return false;
+  if (cafVenceEn < hoyIso) return false;
+  const limite = sumarDiasIso(hoyIso, diasAntes);
+  return cafVenceEn <= limite;
+}
+
+function sumarDiasIso(iso: string, dias: number): string {
+  const d = new Date(`${iso}T12:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
 }
 
 /** Estados de cesión (factoring/AEC) reservados para PR 2; sin lógica en PR 1. */

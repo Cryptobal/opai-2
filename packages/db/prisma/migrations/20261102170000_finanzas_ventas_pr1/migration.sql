@@ -13,7 +13,7 @@ CREATE TABLE "finanzas"."dte_folios" (
     "folio_actual" INTEGER NOT NULL,
     "caf_secreto_id" UUID,
     "caf_vence_en" DATE,
-    "umbral_aviso" INTEGER NOT NULL DEFAULT 10,
+    "umbral_aviso" INTEGER NOT NULL DEFAULT 20,
     "activo" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
@@ -84,6 +84,8 @@ CREATE TABLE "finanzas"."dte_config" (
     "tenant_id" UUID NOT NULL,
     "ambiente" TEXT NOT NULL DEFAULT 'certificacion',
     "rut_emisor" TEXT,
+    "umbral_folios_pct" INTEGER NOT NULL DEFAULT 20,
+    "aviso_caf_dias" INTEGER NOT NULL DEFAULT 30,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
@@ -122,6 +124,14 @@ ALTER TABLE "finanzas"."documentos_emitidos" ADD CONSTRAINT "documentos_emitidos
     AND "monto_total" = "monto_neto" + "monto_exento" + "monto_iva" + "monto_otros");
 ALTER TABLE "finanzas"."dte_config" ADD CONSTRAINT "dte_config_ambiente_chk"
   CHECK ("ambiente" IN ('certificacion', 'produccion'));
+ALTER TABLE "finanzas"."dte_config" ADD CONSTRAINT "dte_config_umbral_folios_pct_chk"
+  CHECK ("umbral_folios_pct" BETWEEN 1 AND 100);
+ALTER TABLE "finanzas"."dte_config" ADD CONSTRAINT "dte_config_aviso_caf_dias_chk"
+  CHECK ("aviso_caf_dias" BETWEEN 1 AND 365);
+
+ALTER TABLE "finanzas"."dte_folios" ADD CONSTRAINT "dte_folios_caf_secreto_id_fkey" FOREIGN KEY ("caf_secreto_id") REFERENCES "core"."secretos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "finanzas"."dte_folios"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('caf_secreto_id', 'core.secretos');
 
 ALTER TABLE "finanzas"."dte_folios" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "finanzas"."dte_folios" FORCE ROW LEVEL SECURITY;

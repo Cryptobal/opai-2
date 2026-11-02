@@ -5,14 +5,19 @@ import {
   type AmbienteSii,
   ivaDesdeNeto,
   type MontosDteVenta,
-  type TipoDteVenta,
-  foliosRestantes,
 } from "@opai/domain";
-import type { TenantTx } from "@opai/db";
 
 import { uuidSchema } from "../core/esquemas";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+
+export {
+  avisosDteDe,
+  consumirFolio,
+  folioVista,
+  marcarBorradorEmitido,
+  type OpcionesFolioVista,
+} from "./ventas-folios-logica";
 
 export const PERMISO_VENTAS = "finanzas:ventas.manage";
 
@@ -57,9 +62,14 @@ export async function instalacionDe(ctx: Contexto, id: string, cuentaId: string)
   return i;
 }
 
-export async function cotizacionDe(ctx: Contexto, id: string) {
-  const c = await ctx.db.cpqCotizacion.findFirst({ where: { id }, select: { id: true } });
+export async function cotizacionDe(ctx: Contexto, id: string, cuentaId: string) {
+  const c = await ctx.db.cpqCotizacion.findFirst({ where: { id }, select: { id: true, negocioId: true } });
   if (!c) throw noEncontrado("La cotización");
+  const negocio = await ctx.db.negocio.findFirst({
+    where: { id: c.negocioId, cuentaId },
+    select: { id: true },
+  });
+  if (!negocio) throw reglaDeNegocio("La cotización no pertenece a la cuenta indicada.");
   return c;
 }
 
@@ -76,63 +86,6 @@ export async function rutEmisorDe(ctx: Contexto): Promise<string> {
     throw reglaDeNegocio("Configure el RUT emisor en la configuración DTE antes de emitir.");
   }
   return cfg.rutEmisor;
-}
-
-type TxLike = Pick<Contexto, "db" | "transaccion" | "tenantId">;
-
-/**
- * Reserva el siguiente folio del rango activo (optimista con updateMany, sin FOR UPDATE).
- * Devuelve el folio asignado o lanza si no quedan folios.
- */
-export async function consumirFolio(
-  ctx: TxLike,
-  tipoDte: TipoDteVenta,
-  dryRun: boolean,
-): Promise<number> {
-  const reservar = async (tx: TenantTx) => {
-    const rango = await tx.dteFolio.findFirst({
-      where: { tipoDte, activo: true },
-      orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
-    });
-    if (!rango || rango.folioActual > rango.folioHasta) {
-      throw reglaDeNegocio(`No hay folios disponibles para el DTE ${tipoDte}. Cargue un CAF.`);
-    }
-    const folio = rango.folioActual;
-    if (dryRun) return folio;
-    const { count } = await tx.dteFolio.updateMany({
-      where: { id: rango.id, folioActual: folio, activo: true },
-      data: { folioActual: folio + 1 },
-    });
-    if (count !== 1) {
-      throw reglaDeNegocio("No se pudo reservar el folio; reintente la emisión.");
-    }
-    return folio;
-  };
-  return ctx.transaccion(reservar);
-}
-
-export function folioVista(r: {
-  id: string;
-  tipoDte: number;
-  folioDesde: number;
-  folioHasta: number;
-  folioActual: number;
-  cafVenceEn: Date | null;
-  umbralAviso: number;
-  activo: boolean;
-}) {
-  const restantes = foliosRestantes(r.folioActual, r.folioHasta);
-  return {
-    id: r.id,
-    tipoDte: r.tipoDte,
-    folioDesde: r.folioDesde,
-    folioHasta: r.folioHasta,
-    folioActual: r.folioActual,
-    restantes,
-    alerta: restantes > 0 && restantes <= r.umbralAviso,
-    cafVenceEn: r.cafVenceEn?.toISOString().slice(0, 10) ?? null,
-    activo: r.activo,
-  };
 }
 
 export const lineaInputSchema = z.object({

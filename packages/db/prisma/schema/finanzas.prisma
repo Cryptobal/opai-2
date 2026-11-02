@@ -229,7 +229,7 @@ model DteFolio {
   folioActual   Int       @map("folio_actual")
   cafSecretoId  String?   @map("caf_secreto_id") @db.Uuid
   cafVenceEn    DateTime? @map("caf_vence_en") @db.Date
-  umbralAviso   Int       @default(10) @map("umbral_aviso")
+  umbralAviso   Int       @default(20) @map("umbral_aviso")
   activo        Boolean   @default(true)
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -322,8 +322,12 @@ model DteConfig {
   tenantId  String   @unique @map("tenant_id") @db.Uuid
   /// certificacion | produccion
   ambiente  String   @default("certificacion")
-  rutEmisor String?  @map("rut_emisor")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  rutEmisor         String?  @map("rut_emisor")
+  /// Porcentaje del rango CAF bajo el cual avisar folios bajos (R-FIN-038).
+  umbralFoliosPct   Int      @default(20) @map("umbral_folios_pct")
+  /// Días antes del vencimiento del CAF para avisar (R-FIN-038).
+  avisoCafDias     Int      @default(30) @map("aviso_caf_dias")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("dte_config")

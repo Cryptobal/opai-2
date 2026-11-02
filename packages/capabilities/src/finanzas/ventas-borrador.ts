@@ -40,7 +40,7 @@ export const ventasCrearBorrador = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const cuenta = await cuentaDe(ctx, input.cuentaId);
     if (input.instalacionId) await instalacionDe(ctx, input.instalacionId, cuenta.id);
-    if (input.cotizacionId) await cotizacionDe(ctx, input.cotizacionId);
+    if (input.cotizacionId) await cotizacionDe(ctx, input.cotizacionId, cuenta.id);
     const montos = montosDesdeLineas(input.tipoDte, input.lineas);
     const error = validarMontosVenta(input.tipoDte, montos);
     if (error) throw reglaDeNegocio(error);

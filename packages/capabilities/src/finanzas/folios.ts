@@ -1,10 +1,16 @@
 import { z } from "zod";
 
 import { defineCapability } from "../define";
-import { diaSchema, escribirConEvento } from "../core/maestros/comun";
+import { diaSchema, escribirConEvento, hoy } from "../core/maestros/comun";
 import { uuidSchema } from "../core/esquemas";
 import { reglaDeNegocio } from "../errores";
-import { PERMISO_VENTAS, folioVista, tipoDteVentaSchema } from "./ventas-comun";
+import { foliosRestantes } from "@opai/domain";
+import {
+  PERMISO_VENTAS,
+  avisosDteDe,
+  folioVista,
+  tipoDteVentaSchema,
+} from "./ventas-comun";
 
 const folioVistaSchema = z.object({
   id: z.string(),
@@ -13,6 +19,8 @@ const folioVistaSchema = z.object({
   folioHasta: z.number().int(),
   folioActual: z.number().int(),
   restantes: z.number().int(),
+  alertaFoliosBajos: z.boolean(),
+  alertaCafPorVencer: z.boolean(),
   alerta: z.boolean(),
   cafVenceEn: z.string().nullable(),
   activo: z.boolean(),
@@ -21,7 +29,7 @@ const folioVistaSchema = z.object({
 export const foliosListar = defineCapability({
   id: "finanzas.folios.listar",
   descripcion:
-    "Lista los rangos de folios autorizados por CAF: folio actual, restantes y aviso cuando quedan pocos según el umbral del tenant.",
+    "Lista los rangos de folios autorizados por CAF: folio actual, restantes y avisos por folios bajos (porcentaje del rango) o CAF por vencer.",
   permiso: PERMISO_VENTAS,
   input: z.object({
     tipoDte: tipoDteVentaSchema.optional(),
@@ -31,6 +39,8 @@ export const foliosListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    const avisos = await avisosDteDe(ctx);
+    const hoyIso = hoy();
     const filas = await ctx.db.dteFolio.findMany({
       where: {
         ...(input.tipoDte ? { tipoDte: input.tipoDte } : {}),
@@ -38,14 +48,16 @@ export const foliosListar = defineCapability({
       },
       orderBy: [{ tipoDte: "asc" }, { folioDesde: "asc" }],
     });
-    return { items: filas.map(folioVista) };
+    return {
+      items: filas.map((f) => folioVista(f, { ...avisos, hoyIso })),
+    };
   },
 });
 
 export const foliosCargarCaf = defineCapability({
   id: "finanzas.folios.cargar_caf",
   descripcion:
-    "Registra un rango de folios autorizados por CAF (referencia al secreto cifrado, sin subir el XML aquí). Desactiva rangos anteriores del mismo tipo de DTE.",
+    "Registra un rango de folios autorizados por CAF (referencia al secreto cifrado, sin subir el XML aquí). No desactiva un rango vigente que aún tenga folios disponibles.",
   permiso: PERMISO_VENTAS,
   input: z.object({
     tipoDte: tipoDteVentaSchema,
@@ -61,6 +73,7 @@ export const foliosCargarCaf = defineCapability({
     if (input.folioHasta < input.folioDesde) {
       throw reglaDeNegocio("folioHasta debe ser mayor o igual a folioDesde.");
     }
+    const avisos = await avisosDteDe(ctx);
     const data = {
       tenantId: ctx.tenantId,
       tipoDte: input.tipoDte,
@@ -72,25 +85,33 @@ export const foliosCargarCaf = defineCapability({
       activo: true,
     };
     if (dryRun) {
-      return folioVista({
-        ...data,
-        id: "",
-        umbralAviso: 10,
-        cafVenceEn: data.cafVenceEn,
-      });
+      return folioVista(
+        { ...data, id: "", umbralAviso: avisos.umbralFoliosPct, cafVenceEn: data.cafVenceEn },
+        { ...avisos, hoyIso: hoy() },
+      );
     }
-    const fila = await escribirConEvento(ctx, {
-      tipo: "finanzas.folios.caf_cargado",
-      entidadTipo: "dte_folio",
-      payload: () => ({
-        tipoDte: input.tipoDte,
-        folioDesde: input.folioDesde,
-        folioHasta: input.folioHasta,
-      }),
-    }, async (tx) => {
-      await tx.dteFolio.updateMany({ where: { tipoDte: input.tipoDte, activo: true }, data: { activo: false } });
-      return tx.dteFolio.create({ data });
-    });
-    return folioVista(fila as Parameters<typeof folioVista>[0]);
+    const fila = await escribirConEvento(
+      ctx,
+      {
+        tipo: "finanzas.folios.caf_cargado",
+        entidadTipo: "dte_folio",
+        payload: () => ({
+          tipoDte: input.tipoDte,
+          folioDesde: input.folioDesde,
+          folioHasta: input.folioHasta,
+        }),
+      },
+      async (tx) => {
+        const vigentes = await tx.dteFolio.findMany({
+          where: { tipoDte: input.tipoDte, activo: true },
+        });
+        for (const v of vigentes) {
+          if (foliosRestantes(v.folioActual, v.folioHasta) > 0) continue;
+          await tx.dteFolio.update({ where: { id: v.id }, data: { activo: false } });
+        }
+        return tx.dteFolio.create({ data });
+      },
+    );
+    return folioVista(fila as Parameters<typeof folioVista>[0], { ...avisos, hoyIso: hoy() });
   },
 });

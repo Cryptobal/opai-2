@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  cafPorVencer,
+  cafVencido,
   foliosPorAgotarse,
   foliosRestantes,
+  umbralFoliosDesdePct,
   validarMontosVenta,
   ivaDesdeNeto,
 } from "./ventas";
@@ -24,8 +27,15 @@ describe("finanzas ventas dominio", () => {
     ).toMatch(/exenta/);
   });
 
-  it("detecta folios por agotarse", () => {
-    expect(foliosPorAgotarse(foliosRestantes(95, 100), 10)).toBe(true);
-    expect(foliosPorAgotarse(foliosRestantes(50, 100), 10)).toBe(false);
+  it("umbral de folios bajos desde porcentaje del rango", () => {
+    expect(umbralFoliosDesdePct(1, 100, 20)).toBe(20);
+    expect(foliosPorAgotarse(foliosRestantes(81, 100), umbralFoliosDesdePct(1, 100, 20))).toBe(true);
+    expect(foliosPorAgotarse(foliosRestantes(50, 100), umbralFoliosDesdePct(1, 100, 20))).toBe(false);
+  });
+
+  it("detecta CAF vencido y por vencer", () => {
+    expect(cafVencido("2026-01-01", "2026-02-01")).toBe(true);
+    expect(cafPorVencer("2026-02-15", "2026-01-01", 30)).toBe(true);
+    expect(cafPorVencer("2026-03-15", "2026-01-01", 30)).toBe(false);
   });
 });

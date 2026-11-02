@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import { validarMontosVenta, ivaDesdeNeto } from "@opai/domain";
 
-import { consumirFolio, montosDesdeLineas } from "../src/finanzas/ventas-comun";
+import {
+  consumirFolio,
+  folioVista,
+  marcarBorradorEmitido,
+  montosDesdeLineas,
+} from "../src/finanzas/ventas-comun";
 import type { Contexto } from "../src/types";
 
 describe("Finanzas ventas · montos", () => {
@@ -89,5 +94,90 @@ describe("consumirFolio", () => {
       transaccion: async <T>(fn: (t: typeof tx) => Promise<T>) => fn(tx),
     } as unknown as Contexto;
     await expect(consumirFolio(ctx, 33, false)).rejects.toMatchObject({ code: "UNPROCESSABLE" });
+  });
+
+  it("rechaza CAF vencido", async () => {
+    const tx = {
+      dteFolio: {
+        findFirst: vi.fn().mockResolvedValue({
+          id: "f1",
+          folioActual: 5,
+          folioHasta: 10,
+          activo: true,
+          cafVenceEn: new Date("2020-01-01T00:00:00.000Z"),
+        }),
+        updateMany: vi.fn(),
+      },
+    };
+    const ctx = {
+      transaccion: async <T>(fn: (t: typeof tx) => Promise<T>) => fn(tx),
+    } as unknown as Contexto;
+    await expect(consumirFolio(ctx, 33, false)).rejects.toMatchObject({ code: "UNPROCESSABLE" });
+  });
+});
+
+describe("folioVista · avisos R-FIN-038", () => {
+  it("marca folios bajos y CAF por vencer", () => {
+    const v = folioVista(
+      {
+        id: "x",
+        tipoDte: 33,
+        folioDesde: 1,
+        folioHasta: 100,
+        folioActual: 85,
+        cafVenceEn: new Date("2026-01-20T00:00:00.000Z"),
+        umbralAviso: 20,
+        activo: true,
+      },
+      { umbralFoliosPct: 20, avisoCafDias: 30, hoyIso: "2026-01-01" },
+    );
+    expect(v.alertaFoliosBajos).toBe(true);
+    expect(v.alertaCafPorVencer).toBe(true);
+    expect(v.alerta).toBe(true);
+  });
+});
+
+describe("marcarBorradorEmitido · concurrencia", () => {
+  it("exige borrador sin folio (count 1)", async () => {
+    const updateMany = vi
+      .fn()
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 0 });
+    const tx = { documentoEmitido: { updateMany } };
+    await marcarBorradorEmitido(tx as never, "doc-1", {
+      folio: 10,
+      fechaEmision: new Date("2026-01-01"),
+      timbrePdf417: "t",
+    });
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: "doc-1", estadoDte: "borrador", folio: null },
+      data: expect.objectContaining({ folio: 10, estadoDte: "enviado" }),
+    });
+    await expect(
+      marcarBorradorEmitido(tx as never, "doc-1", {
+        folio: 11,
+        fechaEmision: new Date("2026-01-01"),
+        timbrePdf417: "t",
+      }),
+    ).rejects.toMatchObject({ code: "UNPROCESSABLE" });
+  });
+
+  it("simula dos emisiones simultáneas: solo una gana", async () => {
+    let emitidos = 0;
+    const updateMany = vi.fn(async () => {
+      if (emitidos === 0) {
+        emitidos += 1;
+        return { count: 1 };
+      }
+      return { count: 0 };
+    });
+    const tx = { documentoEmitido: { updateMany } };
+    const data = { folio: 1, fechaEmision: new Date(), timbrePdf417: "x" };
+    const r = await Promise.allSettled([
+      marcarBorradorEmitido(tx as never, "doc", data),
+      marcarBorradorEmitido(tx as never, "doc", data),
+    ]);
+    expect(r.filter((x) => x.status === "fulfilled")).toHaveLength(1);
+    expect(r.filter((x) => x.status === "rejected")).toHaveLength(1);
   });
 });
