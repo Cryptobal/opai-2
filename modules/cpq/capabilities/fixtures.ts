@@ -28,3 +28,4 @@ export function semilla() {
 export const SOLO_LECTURA = ["cpq:cotizaciones.read"];
 export const CON_COSTOS = ["cpq:cotizaciones.read", "cpq:costos.ver"];
 export const GESTOR = ["cpq:cotizaciones.read", "cpq:cotizaciones.manage"];
+export const GESTOR_COSTOS = [...GESTOR, ...CON_COSTOS];

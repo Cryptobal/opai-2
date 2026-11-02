@@ -1,0 +1,85 @@
+import type { Contexto } from "@opai/capabilities";
+
+import { calcular, PLANTILLA_SEGURIDAD, resultadoSinCostos, type ResultadoCalculo } from "../domain/motor";
+import { cotizacionDe } from "../capabilities/util";
+import { mapearVersionCalculo } from "./mapear";
+import { juegoParaFecha, proveedorDesdeLineas } from "./proveedor";
+import { sincronizarSecciones } from "./secciones-sync";
+import { mesesContrato, versionParaFicha } from "./version";
+
+export const AVISO_FALTA_UF = "Falta valor UF del día o del período.";
+
+const MINIMO = 100_000;
+const ALERTA = 30_000;
+
+function puedeEscribirVersion(version: { estado: string }, escribir: boolean) {
+  return escribir && version.estado === "borrador";
+}
+
+export async function cargarFilasVersion(
+  ctx: Contexto,
+  cotizacionId: string,
+  numero?: number,
+  escribir = true,
+) {
+  const cot = await cotizacionDe(ctx, cotizacionId);
+  const version = await versionParaFicha(ctx, cotizacionId, numero);
+  if (!version) return null;
+  if (puedeEscribirVersion(version, escribir)) await sincronizarSecciones(ctx, version.id, cot.negocioId);
+  const secciones = await ctx.db.cpqSeccion.findMany({ where: { versionId: version.id }, orderBy: [{ orden: "asc" }] });
+  const lineas = await ctx.db.cpqLinea.findMany({
+    where: { seccionId: { in: secciones.map((s) => s.id) } },
+    orderBy: [{ orden: "asc" }, { id: "asc" }],
+  });
+  return { cot, version, secciones, lineas };
+}
+
+export async function recalcularVersion(
+  ctx: Contexto,
+  cotizacionId: string,
+  numero?: number,
+  escribir = true,
+): Promise<ResultadoCalculo | null> {
+  const pack = await cargarFilasVersion(ctx, cotizacionId, numero, escribir);
+  if (!pack) return null;
+  const { version, secciones, lineas } = pack;
+  const consulta = (version.validaHasta ?? new Date()).toISOString().slice(0, 10);
+  const juego = await juegoParaFecha(ctx, consulta);
+  const fecha = juego?.fecha ?? consulta;
+  const ufInd = juego?.valores.find((v) => v.indicador === "uf");
+  const uf = ufInd ? { valorClpEscalado: Math.round((ufInd.valor as number) * 100), fecha } : null;
+  const proveedor = proveedorDesdeLineas(
+    lineas.filter((l) => l.tipo === "puesto").map((l) => ({
+      id: l.id,
+      sueldoBaseClp: l.sueldoBaseClp,
+      patron: l.patron,
+      horaInicio: l.horaInicio,
+      horaFin: l.horaFin,
+    })),
+    juego,
+  );
+  const entrada = mapearVersionCalculo(version, secciones, lineas);
+  const modelo = structuredClone(PLANTILLA_SEGURIDAD);
+  const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
+  if (!uf && juego) {
+    resultado.advertencias = [...new Set([...resultado.advertencias, AVISO_FALTA_UF])];
+    resultado.noEnviable = true;
+  }
+  if (puedeEscribirVersion(version, escribir)) {
+    await ctx.db.cpqVersion.update({
+      where: { id: version.id },
+      data: { ventaMensualClp: resultado.ventaMensual },
+    });
+    for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
+      const d = proveedor.obtener({ lineaId: l.id, fecha });
+      if (d) await ctx.db.cpqLinea.update({ where: { id: l.id }, data: { huellaJuegoValores: d.origen } });
+    }
+  }
+  return resultado;
+}
+
+export function proyectarCalculo(ctx: Contexto, r: ResultadoCalculo) {
+  return ctx.autorizar("cpq:costos.ver") ? r : resultadoSinCostos(r);
+}
+
+export { mesesContrato };

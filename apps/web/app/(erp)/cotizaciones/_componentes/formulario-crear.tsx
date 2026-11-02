@@ -42,7 +42,7 @@ export function FormularioCrear({ inicial }: { inicial: NegocioOpcion | null }) 
         return;
       }
       avisar.exito(`Cotización ${r.codigo} creada`);
-      router.push("/cotizaciones");
+      router.push(`/cotizaciones/${r.id}`);
     } finally {
       ocupado.current = false;
     }
