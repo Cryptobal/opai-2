@@ -7,7 +7,7 @@ import { PlanillaFlujo } from "./_componentes/planilla-flujo";
 
 export const metadata = { title: "Flujo de caja" };
 
-/** Planilla del flujo de caja (Brief 20 PR 2, CAR-136): lectura, escritura, móvil, metas y aviso in-app. */
+/** Planilla del flujo de caja (Brief 20 PR 2 / flujo v2 PR A): lectura con cartola en semanas pasadas, escritura y aviso in-app. */
 export default function FlujoDeCaja({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal portal="erp" titulo="Flujo de caja" ruta="/finanzas/flujo" completo cargar={() => cargarPlanilla(searchParams)}>
@@ -16,7 +16,6 @@ export default function FlujoDeCaja({ searchParams }: { searchParams: SearchPara
           state={d.state}
           planilla={d.planilla}
           gestiona={d.gestiona}
-          cierra={d.cierra}
           configura={d.configura}
           movil={d.movil}
         />

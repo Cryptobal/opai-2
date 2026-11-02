@@ -1,5 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
-import { noEncontrado, reglaDeNegocio } from "@opai/capabilities";
+import { noEncontrado } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 
 import { lunesDe, type Capa, type CeldaFlujo, type FilaFlujo, type Seccion } from "../domain";
@@ -69,33 +69,17 @@ export async function ajustesDe(ctx: Contexto) {
     metaCeldaMs: 100,
     metaGuardadoP95Ms: 1000,
     metaCargaInicialS: 2,
-    metasVisibles: true,
+    metasVisibles: false,
   });
 }
 
-/** Serializa sellado y cambios de celdas de la misma semana (CAR-136). */
+/** Serializa cambios de celdas de la misma semana (CAR-136). */
 export async function bloquearSemanaFlujo(tx: TenantTx, ctx: Contexto, semana: string): Promise<void> {
   try {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${ctx.tenantId}:${semana}`}, 0))`;
   } catch {
     // Memoria de prueba (sin Postgres): no hay advisory lock; el mock serializa por transacción.
   }
-}
-
-/** Semanas selladas del tenant, para impedir cambios en ellas. */
-export async function selladasDe(ctx: Contexto): Promise<Set<string>> {
-  const cierres = await ctx.db.flujoCierre.findMany({ where: { sellada: true } });
-  return new Set(cierres.map((c) => aIso(c.semana)));
-}
-
-export async function semanaSelladaEnTx(tx: TenantTx, semana: string): Promise<boolean> {
-  const c = await tx.flujoCierre.findFirst({ where: { semana: aFecha(semana), sellada: true } });
-  return !!c;
-}
-
-export async function exigirSemanaAbierta(ctx: Contexto, semana: string): Promise<void> {
-  if ((await selladasDe(ctx)).has(semana))
-    throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
 }
 
 export async function filaDe(ctx: Contexto, id: string) {
