@@ -62,7 +62,14 @@ const CAPA: Record<CeldaFlujo["capa"], { tono: NonNullable<Celda["tono"]>; detal
 };
 
 export const clp = (n: number) => `${n < 0 ? "$ −" : "$ "}${Math.abs(n).toLocaleString("es-CL")}`;
-const corta = (iso: string) => `${iso.slice(8, 10)}-${iso.slice(5, 7)}`;
+
+/** ISO `aaaa-mm-dd` → `dd-mm-aaaa` para UI es-CL. */
+export function fechaDdMmAaaa(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
+}
+
+const corta = (iso: string) => fechaDdMmAaaa(iso).slice(0, 5);
 
 /** Columnas, filas y celdas para `PlanillaScreen`: filas del flujo, totales y saldo con su tono. */
 export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {

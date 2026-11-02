@@ -6,6 +6,13 @@ import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Textarea } from "@
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import {
+  ayudaProcedenciaSaldo,
+  etiquetaSemanaCierre,
+  puedeVistaPreviaCierre,
+  saldoInicialDesdeSugerido,
+  type SaldoSugeridoCierre,
+} from "./cierre-ui";
 import { clp, type SemanaFlujo } from "./datos";
 
 export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
@@ -15,15 +22,27 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
   const [semana, setSemana] = useState(abiertas[0]?.semana ?? "");
   const [banco, setBanco] = useState("");
   const [motivo, setMotivo] = useState("");
+  const [metaSaldo, setMetaSaldo] = useState<SaldoSugeridoCierre | null>(null);
   const [vista, setVista] = useState<{ diferencia: number; exigeMotivo?: boolean } | null>(null);
 
   useEffect(() => {
     if (!abierta || !semana) return;
-    void ejecutar<{ saldo: number | null }>("finanzas.bancos.saldo_sugerido", { semana }).then((r) => {
-      if (r?.saldo != null) setBanco(String(r.saldo));
-      else setBanco("");
+    setBanco("");
+    setVista(null);
+    setMetaSaldo(null);
+    let cancelado = false;
+    void ejecutar<SaldoSugeridoCierre>("finanzas.bancos.saldo_sugerido", { semana }).then((r) => {
+      if (cancelado || !r) return;
+      setMetaSaldo(r);
+      const inicial = saldoInicialDesdeSugerido(r.saldo);
+      if (inicial !== undefined) setBanco(inicial);
     });
-  }, [abierta, semana, ejecutar]);
+    return () => {
+      cancelado = true;
+    };
+    // Solo al abrir la hoja o cambiar de semana; `ejecutar` cambia cada render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- V211-01
+  }, [abierta, semana]);
 
   const entrada = () => ({
     semana,
@@ -56,6 +75,7 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
   }
 
   const sel = semanas.find((s) => s.semana === semana);
+  const ayudaSaldo = ayudaProcedenciaSaldo(metaSaldo);
 
   return (
     <>
@@ -69,15 +89,22 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
         descripcion="Compara el saldo sugerido con el banco y sella la semana."
         acciones={
           <>
-            <Button variant="secondary" onClick={() => setAbierta(false)}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => setAbierta(false)}>
+              Cancelar
+            </Button>
             {sel?.sellada ? (
               <Button disabled={pendiente || motivo.trim().length < 3} onClick={() => void reabrir()}>
                 Reabrir
               </Button>
             ) : vista ? (
-              <Button disabled={pendiente} onClick={() => void sellar()}>Sellar</Button>
+              <Button disabled={pendiente} onClick={() => void sellar()}>
+                Sellar
+              </Button>
             ) : (
-              <Button disabled={pendiente || !semana} onClick={() => void previsualizar()}>
+              <Button
+                disabled={!puedeVistaPreviaCierre({ semana, banco, pendiente })}
+                onClick={() => void previsualizar()}
+              >
                 Vista previa
               </Button>
             )}
@@ -96,15 +123,28 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
               }}
               opciones={semanas.map((s) => ({
                 valor: s.semana,
-                etiqueta: `${s.semana}${s.sellada ? " · sellada" : ""} · ${clp(s.saldoFinal)}`,
+                etiqueta: etiquetaSemanaCierre(s),
               }))}
             />
           </Campo>
           {!sel?.sellada ? (
-            <Campo etiqueta="Saldo banco (CLP)" htmlFor="ci-ban">
-              <Input id="ci-ban" value={banco} onChange={(e) => setBanco(e.target.value)} inputMode="numeric" />
+            <Campo
+              etiqueta="Saldo banco (CLP)"
+              htmlFor="ci-ban"
+              {...(ayudaSaldo ? { ayuda: ayudaSaldo } : {})}
+            >
+              <Input
+                id="ci-ban"
+                value={banco}
+                onChange={(e) => {
+                  setBanco(e.target.value);
+                  setVista(null);
+                }}
+                inputMode="numeric"
+              />
             </Campo>
           ) : null}
+          {metaSaldo?.aviso ? <Alerta tono="warning" titulo={metaSaldo.aviso} /> : null}
           <Campo etiqueta="Motivo" htmlFor="ci-mot">
             <Textarea id="ci-mot" value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />
           </Campo>

@@ -53,6 +53,13 @@ export const bancosSaldoSugerido = defineCapability({
     aviso: z.string().nullable(),
     cuentasSinSaldo: z.array(z.object({ cuentaId: z.string(), banco: z.string() })),
     cuentaIds: z.array(z.string()),
+    origenes: z.array(
+      z.object({
+        banco: z.string(),
+        numeroVisible: z.string(),
+        cartolaFecha: z.string().nullable(),
+      }),
+    ),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -71,6 +78,7 @@ export const bancosSaldoSugerido = defineCapability({
         aviso: null,
         cuentasSinSaldo: [],
         cuentaIds: [],
+        origenes: [],
       };
     }
 
@@ -79,7 +87,13 @@ export const bancosSaldoSugerido = defineCapability({
         cuentaId: { in: cuentas.map((c) => c.id) },
         fecha: { lte: aFecha(finSemana) },
       },
-      select: { id: true, cuentaId: true, fecha: true, saldoDespues: true },
+      select: {
+        id: true,
+        cuentaId: true,
+        fecha: true,
+        saldoDespues: true,
+        cartola: { select: { fechaHasta: true } },
+      },
     });
 
     const { saldo, fechaCorte, cuentasSinSaldoIds } = calcularSaldoSugeridoSemana(
@@ -93,16 +107,46 @@ export const bancosSaldoSugerido = defineCapability({
       finSemana,
     );
 
-    const cuentaPorId = new Map(cuentas.map((c) => [c.id, c.banco]));
+    const cuentaPorId = new Map(cuentas.map((c) => [c.id, c]));
     const cuentasSinSaldo = cuentasSinSaldoIds.map((id) => ({
       cuentaId: id,
-      banco: cuentaPorId.get(id) ?? "",
+      banco: cuentaPorId.get(id)?.banco ?? "",
     }));
     const aviso =
       cuentasSinSaldo.length > 0
         ? `Sin saldo en cartola para: ${cuentasSinSaldo.map((c) => c.banco).join(", ")}.`
         : null;
 
-    return { saldo, fechaCorte, semana: input.semana ?? null, aviso, cuentasSinSaldo, cuentaIds: cuentas.map((c) => c.id) };
+    const sinSaldoSet = new Set(cuentasSinSaldoIds);
+    const origenes: { banco: string; numeroVisible: string; cartolaFecha: string | null }[] = [];
+
+    for (const cuentaId of cuentas.map((c) => c.id)) {
+      if (sinSaldoSet.has(cuentaId)) continue;
+      const ultimo = movs
+        .filter((m) => m.cuentaId === cuentaId)
+        .sort((a, b) => {
+          const fa = aIso(a.fecha);
+          const fb = aIso(b.fecha);
+          if (fa !== fb) return fa > fb ? -1 : 1;
+          return a.id > b.id ? -1 : a.id < b.id ? 1 : 0;
+        })[0];
+      if (!ultimo || ultimo.saldoDespues == null) continue;
+      const c = cuentaPorId.get(cuentaId);
+      if (!c) continue;
+      const cartolaFecha = ultimo.cartola?.fechaHasta
+        ? aIso(ultimo.cartola.fechaHasta)
+        : aIso(ultimo.fecha);
+      origenes.push({ banco: c.banco, numeroVisible: c.numeroVisible, cartolaFecha });
+    }
+
+    return {
+      saldo,
+      fechaCorte,
+      semana: input.semana ?? null,
+      aviso,
+      cuentasSinSaldo,
+      cuentaIds: cuentas.map((c) => c.id),
+      origenes,
+    };
   },
 });

@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 427 pares pantalla→capacidad · 386 con herramienta · 41 excepciones justificadas · 0 faltantes.
+**Resumen:** 428 pares pantalla→capacidad · 387 con herramienta · 41 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -165,6 +165,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/firmas/_componentes` | `core.firmas.list` | `core_firmas_list` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.cancelar` | `core_firmas_cancelar` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.recordar` | `core_firmas_recordar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.guardar` | `finanzas_bancos_guardar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.cartolas.importar` | `finanzas_cartolas_importar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.confirmar` | `finanzas_conciliaciones_confirmar` | existe |
@@ -641,7 +642,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
-- `finanzas.bancos.guardar`
 - `finanzas.cierres.listar`
 - `finanzas.cobros.manual`
 - `finanzas.compras.importar`

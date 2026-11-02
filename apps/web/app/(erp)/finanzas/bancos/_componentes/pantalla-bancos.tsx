@@ -11,10 +11,13 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
 import { PESTANAS_ESTADO_BANCO } from "./bancos-tipos";
-import { clp } from "../../flujo/_componentes/datos";
+import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/datos";
 
 const HojaReconocer = dynamic(() => import("./hoja-reconocer").then((m) => ({ default: m.HojaReconocer })));
 const HojaSubirCartola = dynamic(() => import("./hoja-subir-cartola").then((m) => ({ default: m.HojaSubirCartola })));
+const HojaAgregarCuenta = dynamic(() =>
+  import("./hoja-agregar-cuenta").then((m) => ({ default: m.HojaAgregarCuenta })),
+);
 
 type Props = {
   state: EstadoPantalla;
@@ -39,6 +42,7 @@ export function PantallaBancos({
 }: Props) {
   const router = useRouter();
   const [subirAbierta, setSubirAbierta] = useState(false);
+  const [crearAbierta, setCrearAbierta] = useState(false);
 
   if (!ver) {
     return <Empty titulo="Sin permiso" descripcion="No tienes acceso a Bancos en esta empresa." />;
@@ -76,6 +80,13 @@ export function PantallaBancos({
           <Empty
             titulo="Sin cuentas bancarias"
             descripcion="Crea una cuenta para importar movimientos desde cartola Santander o CSV genérico."
+            accion={
+              gestiona ? (
+                <Button variant="primary" onClick={() => setCrearAbierta(true)}>
+                  Agregar cuenta
+                </Button>
+              ) : undefined
+            }
           />
         ) : (
           <>
@@ -93,7 +104,7 @@ export function PantallaBancos({
                     <div className="min-w-0 flex-1">
                       <p className="t-body-sm font-medium">{m.glosa}</p>
                       <p className="t-caption text-muted">
-                        {m.fecha}
+                        {fechaDdMmAaaa(m.fecha)}
                         {m.referencia ? ` · ${m.referencia}` : ""}
                       </p>
                     </div>
@@ -112,12 +123,15 @@ export function PantallaBancos({
         )}
       </div>
       {gestiona ? (
-        <HojaSubirCartola
-          cuentas={cuentas}
-          cuentaId={cuenta?.id ?? null}
-          abierta={subirAbierta}
-          onAbiertaChange={setSubirAbierta}
-        />
+        <>
+          <HojaAgregarCuenta abierta={crearAbierta} onAbiertaChange={setCrearAbierta} />
+          <HojaSubirCartola
+            cuentas={cuentas}
+            cuentaId={cuenta?.id ?? null}
+            abierta={subirAbierta}
+            onAbiertaChange={setSubirAbierta}
+          />
+        </>
       ) : null}
       {gestiona && movSeleccionado ? (
         <HojaReconocer movimiento={movSeleccionado} abierta onCerrar={cerrarReconocer} />
