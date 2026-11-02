@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 433 pares pantalla→capacidad · 390 con herramienta · 43 excepciones justificadas · 0 faltantes.
+**Resumen:** 451 pares pantalla→capacidad · 408 con herramienta · 43 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -71,6 +71,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
+| compartido | `app/(erp)/cargos/_componentes` | `core.cargos.montos_por_instalacion` | `core_cargos_montos_por_instalacion` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.update` | `core_cargos_update` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.estructuras.list` | `core_estructuras_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
@@ -84,6 +85,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.update` | `cpq_marca_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.get` | `cpq_plantillas_documento_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.update` | `cpq_plantillas_documento_update` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_propuesta.get` | `cpq_plantillas_propuesta_get` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_propuesta.update` | `cpq_plantillas_propuesta_update` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.actualizar` | `finanzas_ajustes_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.obtener` | `finanzas_ajustes_obtener` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
@@ -149,15 +152,25 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.explicar` | `cpq_cotizaciones_explicar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.marcar_lista` | `cpq_cotizaciones_marcar_lista` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.solicitar_aprobacion` | `cpq_cotizaciones_solicitar_aprobacion` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.aprobar` | `cpq_envios_propuesta_aprobar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.cancelar` | `cpq_envios_propuesta_cancelar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.solicitar` | `cpq_envios_propuesta_solicitar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.quitar` | `cpq_lineas_quitar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.sync_servicio` | `cpq_propuestas_tecnica_sync_servicio` | existe |
+| compartido | `app/(erp)/cpq/biblioteca/_componentes` | `cpq.biblioteca_bloques.list` | `cpq_biblioteca_bloques_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.create` | `core_contactos_create` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.update` | `core_contactos_update` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.archive` | `core_cuentas_archive` | existe |
@@ -286,9 +299,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.create` | `core_personas_create` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.desbloquear` | `core_personas_desbloquear` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.laboral_ver` | `core_personas_laboral_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.marcar_no_recontratar` | `core_personas_marcar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.no_recontratar_ver` | `core_personas_no_recontratar_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_aprobar_cambio` | `core_personas_pago_aprobar_cambio` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_rechazar_cambio` | `core_personas_pago_rechazar_cambio` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_ver` | `core_personas_pago_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
@@ -536,6 +554,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
 | `cpq.cotizaciones.aprobar` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
+| `cpq.cotizaciones.enviar` | Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad. |
 | `cpq.cotizaciones.rechazar_aprobacion` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
 | `finanzas.folios.cargar_caf` | Solo personas: el XML del CAF incluye la llave privada; un agente no lo encola en aprobaciones (CAR-143). |
 | `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
@@ -632,10 +651,14 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.invitations.revoke`
 - `core.patrones.get`
+- `core.personas.laboral_actualizar`
+- `core.personas.pago_solicitar_cambio`
+- `core.personas.prevision_actualizar`
 - `core.ping`
 - `core.puestos.get`
 - `core.remuneraciones.historial`
 - `core.usage.summary`
+- `cpq.biblioteca_bloques.publicar`
 - `cpq.catalogo_categorias.create`
 - `cpq.catalogo_categorias.desactivar`
 - `cpq.catalogo_categorias.list`
@@ -645,12 +668,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.catalogo_items.update`
 - `cpq.correlativos.fijar`
 - `cpq.cotizaciones.clonar`
-- `cpq.cotizaciones.enviar`
 - `cpq.cotizaciones.get`
 - `cpq.cotizaciones.preview_pdf`
 - `cpq.cotizaciones.retirar_aprobacion`
+- `cpq.envios_propuesta.list`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
+- `cpq.propuestas_tecnica.update`
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`

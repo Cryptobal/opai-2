@@ -64,6 +64,59 @@ export const AJUSTES: Record<string, Ajuste> = {
       bloques_json: "[]",
     }),
   },
+  // CPQ (CAR-144): vocabularios cerrados en biblioteca, propuesta y envío.
+  "cpq.biblioteca_bloques": {
+    valores: () => ({
+      clave: "bloque-prueba",
+      tipo: "texto_libre",
+      titulo: "Bloque prueba",
+      estado: "borrador",
+      contenido_json: "{}",
+    }),
+  },
+  "cpq.biblioteca_bloque_revisiones": {
+    dependencias: ["cpq.biblioteca_bloques"],
+    valores: (ctx) => ({
+      bloque_id: id(ctx, "cpq.biblioteca_bloques"),
+      version: 1,
+      contenido_json: "{}",
+    }),
+  },
+  "cpq.cotizaciones": {
+    dependencias: ["comercial.negocios"],
+    valores: (ctx) => ({
+      negocio_id: id(ctx, "comercial.negocios"),
+      codigo: "CPQ-TEST-001",
+      titulo: "Cotización prueba dos empresas",
+    }),
+  },
+  "cpq.versiones": {
+    dependencias: ["cpq.cotizaciones"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      numero: 1,
+    }),
+  },
+  "cpq.propuestas_tecnicas": {
+    dependencias: ["cpq.cotizaciones", "cpq.versiones"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      version_id: id(ctx, "cpq.versiones"),
+      base: "clasica",
+      estado: "borrador",
+      bloques_json: "[]",
+    }),
+  },
+  "cpq.propuesta_envios": {
+    dependencias: ["cpq.cotizaciones", "cpq.versiones"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      version_id: id(ctx, "cpq.versiones"),
+      estado: "pendiente_aprobacion",
+      destinatarios_json: '[{"email":"envio@test.qa"}]',
+      snapshot_json: "{}",
+    }),
+  },
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },

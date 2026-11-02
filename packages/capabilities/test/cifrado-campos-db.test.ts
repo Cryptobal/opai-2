@@ -129,8 +129,6 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     expect(r.ok ? null : r.error).toBeNull();
     const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } })).integracionId;
     const g = await crearCifradoDeCampos(ctx(tA), INVENTARIO).cifrar("fichas_salud", "diagnostico", "dato a rotar");
-    // El inventario real no declara campos sensibles: un recifrador extra no se usa; la guarda exige
-    // uno por cada campo declarado (hoy ninguno).
     const rot = await rotarDek(ctx(tA));
     expect(rot.secretos).toBe(1);
     expect(rot.kidAnterior).not.toBe(rot.kidNuevo);
@@ -144,6 +142,73 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     expect(kidDe(nueva)).toBe(rot.kidNuevo);
     // Sin la DEK vieja ya no se puede recifrar: por eso la rotación recifra dentro de su transacción.
     expect(() => recifrarValor({ tenantId: tA, tabla: "fichas_salud", campo: "diagnostico" }, g, nueva, generarDekPrueba())).toThrow();
+  }, 60_000);
+
+  it("rotar DEK recifra plan ISAPRE y cuentas bancarias del núcleo (PR2)", async () => {
+    const { kidDe } = await import("../src/core/cumplimiento/cifrado-campos");
+    const usuario = await e.admin.user.create({
+      data: { name: "Rot DEK", email: `rot-dek-${randomUUID().slice(0, 8)}@example.test` },
+    });
+    await e.admin.membership.create({
+      data: { tenantId: tA, userId: usuario.id, rol: "owner", portales: ["erp"] },
+    });
+    const persona = await e.admin.persona.create({
+      data: { tenantId: tA, rut: "88888888-8", nombres: "Rot", apellidos: "DEK" },
+    });
+    const ctxP = mod.crearContexto({
+      tenantId: tA,
+      actor: { tipo: "user", id: usuario.id },
+      usuario: { id: usuario.id, nombre: "Rot DEK", email: usuario.email, platformRole: null },
+      rol: "owner",
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      medidor: { registrar: async () => undefined },
+    });
+    const prevAct = await mod.executeCapability(
+      ctxP,
+      "core.personas.prevision_actualizar",
+      { id: persona.id, planIsapre: "plan sensible rotar dek", afp: "modelo" },
+      { dryRun: false },
+    );
+    expect(prevAct.ok, `core.personas.prevision_actualizar: ${JSON.stringify(prevAct)}`).toBe(true);
+    const pagoSol = await mod.executeCapability(
+      ctxP,
+      "core.personas.pago_solicitar_cambio",
+      {
+        id: persona.id,
+        bancoCodigo: "001",
+        tipoCuenta: "corriente",
+        numeroCuenta: "123456789012",
+      },
+      { dryRun: false },
+    );
+    expect(pagoSol.ok, `core.personas.pago_solicitar_cambio: ${JSON.stringify(pagoSol)}`).toBe(true);
+    const prev = await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } });
+    const kidViejo = prev.planIsapre?.match(/^enc:v2:([\w-]+):/)?.[1];
+    expect(kidViejo).toBeTruthy();
+    const { rotarDek } = await import("../src/core/cumplimiento/rotar-dek");
+    const rot = await rotarDek(ctx(tA));
+    expect(rot.campos).toBeGreaterThanOrEqual(2);
+    const c = mod.cifradoDeCampos(ctxP);
+    expect(await c.descifrar("personas_prevision", "plan_isapre", (await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } })).planIsapre!)).toBe(
+      "plan sensible rotar dek",
+    );
+    const solicitud = await e.admin.personaPagoSolicitud.findFirstOrThrow({ where: { personaId: persona.id } });
+    expect(await c.descifrar("personas_pago_solicitudes", "numero_cuenta", solicitud.numeroCuenta!)).toBe(
+      "123456789012",
+    );
+    const fila = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
+    const dek = descifrar(Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64"), {
+      cifrado: fila.dekCifrada,
+      iv: fila.iv,
+      tag: fila.tag,
+    });
+    expect(kidDe(dek)).toBe(rot.kidNuevo);
+    expect(kidViejo).not.toBe(rot.kidNuevo);
+    const planNuevo = (await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } }))
+      .planIsapre!;
+    expect(planNuevo).toContain(`enc:v2:${rot.kidNuevo}:`);
+    expect(planNuevo).not.toContain(`enc:v2:${kidViejo}:`);
   }, 60_000);
 
   it("rotar la KEK y rotar la DEK cruzadas no guardan la DEK vieja (rev. 5689206639)", async () => {

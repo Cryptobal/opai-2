@@ -19,6 +19,8 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
   "cpq:costos.ver": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
   "cpq:aprobar": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   "cpq:modelo.manage": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
+  "cpq:biblioteca.manage": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
+  "cpq:envios.aprobar": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   // Leads (BRIEF-07-leads): solicitudes para owner/admin/gerente; canales solo owner/admin.
   "comercial:solicitudes.read": {
     owner: true,
@@ -106,6 +108,55 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
   "personas:write": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
   // Marca P1 "No recontratar" (Personas y Cargos PR 1): solo owner y admin por defecto.
   "core:personas.no_recontratar.manage": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
+  "core:personas.prevision.read": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: true,
+    viewer: false,
+  },
+  "core:personas.prevision.manage": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
+  "core:personas.pago.read": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: true,
+    viewer: false,
+  },
+  "core:personas.pago.manage": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
+  "core:personas.pago.aprobar": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
+  "core:personas.laboral.read": {
+    owner: true,
+    admin: true,
+    gerente: true,
+    supervisor: true,
+    viewer: false,
+  },
+  "core:personas.laboral.manage": {
     owner: true,
     admin: true,
     gerente: false,

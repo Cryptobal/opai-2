@@ -28,7 +28,7 @@ const dias = Object.fromEntries(
   ]),
 );
 
-// Las 7 categorías pendientes de decisión legal (CAR-39): configurables y APAGADAS (0). El plazo
+// Las categorías pendientes de decisión legal (CAR-39): configurables y APAGADAS (0). El plazo
 // queda registrado si se fija, pero el trabajo diario no lo aplica hasta que Carlos defina con el
 // abogado el plazo y la acción; Claude no los fija.
 const pendientes = Object.fromEntries(
