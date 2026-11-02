@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado } from "@opai/capabilities";
+import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 import { BASES_PLANTILLA } from "../domain/documento/bloques";
 import {
@@ -10,7 +10,7 @@ import {
 } from "../domain/documento/propuesta-tecnica";
 import { vistaMarcaDocumento } from "../persistencia/marca-documento";
 import { renderPdfPropuestaTecnica } from "../persistencia/pdf-propuesta-tecnica";
-import { plantillaActivaPropuesta, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
+import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
 import {
   actualizarPropuestaArmador,
   obtenerOCrearPropuestaTecnica,
@@ -25,6 +25,7 @@ import { uuidSchema } from "./esquemas";
 import { cotizacionDe } from "./util";
 
 export const propuestaTecnicaGet = defineCapability({
+  auditarLectura: (s) => [s.id, s.cotizacionId],
   id: "cpq.propuestas_tecnica.get",
   descripcion: "Obtiene o crea el armador de propuesta técnica de la cotización.",
   permiso: PERMISO_READ,
@@ -110,6 +111,7 @@ export const propuestaTecnicaSyncServicio = defineCapability({
 });
 
 export const propuestaTecnicaPreviewPdf = defineCapability({
+  auditarLectura: (_s, input) => [input.id, input.cotizacionId],
   id: "cpq.propuestas_tecnica.preview_pdf",
   descripcion: "Genera PDF de propuesta técnica (marca de agua BORRADOR si no está enviada).",
   permiso: PERMISO_READ,
@@ -121,12 +123,17 @@ export const propuestaTecnicaPreviewPdf = defineCapability({
     const c = await cotizacionDe(ctx, input.cotizacionId);
     const prop = await ctx.db.cpqPropuestaTecnica.findFirst({ where: { id: input.id } });
     if (!prop) throw noEncontrado("La propuesta técnica");
+    if (prop.cotizacionId !== input.cotizacionId) {
+      throw reglaDeNegocio("La propuesta técnica no pertenece a esta cotización.");
+    }
     const pack = await cargarFilasVersion(ctx, input.cotizacionId, undefined, false);
     if (!pack) throw noEncontrado("La versión");
     const resultado = await recalcularVersion(ctx, input.cotizacionId, undefined, false);
     if (!resultado) throw noEncontrado("La versión");
     const calculo = proyectarCalculo(ctx, resultado);
-    const plantilla = vistaPlantillaPropuesta(await plantillaActivaPropuesta(ctx));
+    const plantillaRow = await plantillaActivaPropuestaLectura(ctx);
+    if (!plantillaRow) throw reglaDeNegocio("No hay plantilla activa de propuesta técnica.");
+    const plantilla = vistaPlantillaPropuesta(plantillaRow);
     const marca = await vistaMarcaDocumento(ctx);
     const servicio = servicioDesdeFilas(packServicioCotizacion(c, pack));
     const bytes = renderPdfPropuestaTecnica({

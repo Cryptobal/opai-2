@@ -34,7 +34,20 @@ describe("propuesta técnica dominio (CAR-144)", () => {
       gastosGeneralesYUtilidadClp: 12_000,
     });
     expect(r.gastosGeneralesYUtilidadClp).toBe(12_000);
-    expect(r.totalClp).toBe(100_000 + 19_000 + 12_000);
+    expect(r.ivaClp).toBe(21_280);
+    expect(r.totalClp).toBe(133_280);
+  });
+
+  it("aplica tasa IVA del tenant distinta de 19 %", () => {
+    const r = proyectarResumenEconomico({
+      apertura: "por_item",
+      secciones: [{ nombre: "Torre A", netoMensualClp: 100_000 }],
+      netoTotalClp: 100_000,
+      gastosGeneralesYUtilidadClp: 10_000,
+      tasaIvaPct: 180_000,
+    });
+    expect(r.ivaClp).toBe(19_800);
+    expect(r.totalClp).toBe(129_800);
   });
 
   it("no expone línea GG+utilidad con apertura por instalación", () => {
@@ -63,7 +76,7 @@ describe("propuesta técnica dominio (CAR-144)", () => {
       versionNumero: 2,
       secciones: [
         {
-          nombre: "Planta TEST QA",
+          nombre: "Planta demo",
           puestos: [
             {
               nombre: "Guardia",

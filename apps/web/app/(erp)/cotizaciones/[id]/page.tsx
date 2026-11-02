@@ -20,6 +20,7 @@ export type DatosFicha = {
 type FichaRespuesta = {
   cotizacion: { id: string; codigo: string; titulo: string; negocioId: string; vigente: boolean };
   negocioTitulo: string | null;
+  cuentaId: string | null;
   meta?: Record<string, unknown>;
   calculo: Record<string, unknown>;
   version: { editable: boolean; estado: string; validaHasta: string | null; numero: number };

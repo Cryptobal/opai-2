@@ -11,11 +11,13 @@ import { EnvioPropuestaCotizacion } from "./envio-propuesta-cotizacion";
 
 export function PropuestaTecnicaFicha({
   cotizacionId,
+  cuentaId,
   gestionar,
   aprobarEnvios,
   puedeEnviar,
 }: {
   cotizacionId: string;
+  cuentaId: string | null;
   gestionar: boolean;
   aprobarEnvios: boolean;
   puedeEnviar: boolean;
@@ -40,6 +42,7 @@ export function PropuestaTecnicaFicha({
       ) : null}
       <EnvioPropuestaCotizacion
         cotizacionId={cotizacionId}
+        cuentaId={cuentaId}
         propuestaId={propuestaId}
         gestionar={gestionar}
         aprobarEnvios={aprobarEnvios}

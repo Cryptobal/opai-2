@@ -40,6 +40,7 @@ import {
   bibliotecaBloquesList,
   bibliotecaBloquesPublicar,
   enviosPropuestaAprobar,
+  enviosPropuestaCancelar,
   enviosPropuestaList,
   enviosPropuestaSolicitar,
   plantillasPropuestaGet,
@@ -98,4 +99,5 @@ export const capacidades: readonly Capacidad[] = [
   enviosPropuestaList,
   enviosPropuestaSolicitar,
   enviosPropuestaAprobar,
+  enviosPropuestaCancelar,
 ];

@@ -4,10 +4,12 @@ import { defineCapability } from "@opai/capabilities";
 
 import { BASES_PLANTILLA } from "../domain/documento/bloques";
 import { TIPOS_BLOQUE_PROPUESTA, type BloquePlantillaPropuesta } from "../domain/documento/propuesta-tecnica";
-import { publicarBloqueBiblioteca, sembrarBibliotecaEjemplo } from "../persistencia/biblioteca-bloques";
+import { publicarBloqueBiblioteca } from "../persistencia/biblioteca-bloques";
+import { reglaDeNegocio } from "@opai/capabilities";
 import {
   actualizarPlantillaPropuesta,
   plantillaActivaPropuesta,
+  plantillaActivaPropuestaLectura,
   vistaPlantillaPropuesta,
 } from "../persistencia/plantilla-propuesta";
 import { PERMISO_BIBLIOTECA, PERMISO_READ } from "./permisos";
@@ -15,6 +17,7 @@ import { bloquePlantillaSchema } from "./propuesta-tecnica-esquemas";
 import { uuidSchema } from "./esquemas";
 
 export const bibliotecaBloquesList = defineCapability({
+  auditarLectura: (s) => s.bloques.map((b) => b.id),
   id: "cpq.biblioteca_bloques.list",
   descripcion: "Lista la biblioteca de bloques de propuesta técnica del tenant.",
   permiso: PERMISO_READ,
@@ -36,7 +39,6 @@ export const bibliotecaBloquesList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    if (ctx.actor.id) await sembrarBibliotecaEjemplo(ctx, ctx.actor.id);
     const bloques = await ctx.db.cpqBibliotecaBloque.findMany({
       where: { tenantId: ctx.tenantId, ...(input.tipo ? { tipo: input.tipo } : {}) },
       orderBy: { titulo: "asc" },
@@ -71,6 +73,7 @@ export const bibliotecaBloquesPublicar = defineCapability({
 });
 
 export const plantillasPropuestaGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "cpq.plantillas_propuesta.get",
   descripcion: "Devuelve la plantilla activa de propuesta técnica del tenant (base, bloques y apertura).",
   permiso: PERMISO_READ,
@@ -87,7 +90,11 @@ export const plantillasPropuestaGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
-    const v = vistaPlantillaPropuesta(await plantillaActivaPropuesta(ctx));
+    const row = await plantillaActivaPropuestaLectura(ctx);
+    if (!row) {
+      throw reglaDeNegocio("No hay plantilla activa de propuesta técnica; créala en Configuración CPQ.");
+    }
+    const v = vistaPlantillaPropuesta(row);
     return { ...v, basesDisponibles: [...BASES_PLANTILLA] };
   },
 });

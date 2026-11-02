@@ -122,6 +122,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
           {resumen}
           <PropuestaTecnicaFicha
             cotizacionId={d.cotizacion.id}
+            cuentaId={(d as { cuentaId?: string | null }).cuentaId ?? null}
             gestionar={datos.gestionar}
             aprobarEnvios={datos.aprobarEnvios}
             puedeEnviar={Boolean(

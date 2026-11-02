@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 442 pares pantalla→capacidad · 399 con herramienta · 43 excepciones justificadas · 0 faltantes.
+**Resumen:** 444 pares pantalla→capacidad · 401 con herramienta · 43 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -151,6 +151,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.explicar` | `cpq_cotizaciones_explicar` | existe |
@@ -158,6 +159,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.solicitar_aprobacion` | `cpq_cotizaciones_solicitar_aprobacion` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.aprobar` | `cpq_envios_propuesta_aprobar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.cancelar` | `cpq_envios_propuesta_cancelar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.solicitar` | `cpq_envios_propuesta_solicitar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |

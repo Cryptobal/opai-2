@@ -14,6 +14,7 @@ export function renderPdfPropuestaTecnica(input: {
   netoTotalClp: number;
   apertura: AperturaPropuesta;
   gastosGeneralesYUtilidadClp?: number | null;
+  tasaIvaPct?: number;
 }): Uint8Array {
   const bloques = parseArmador(input.bloquesJson).filter((b) => b.activo);
   const resumen = proyectarResumenEconomico({
@@ -26,10 +27,11 @@ export function renderPdfPropuestaTecnica(input: {
     ...(input.gastosGeneralesYUtilidadClp !== undefined
       ? { gastosGeneralesYUtilidadClp: input.gastosGeneralesYUtilidadClp }
       : {}),
+    ...(input.tasaIvaPct !== undefined ? { tasaIvaPct: input.tasaIvaPct } : {}),
   });
   const lineas: string[] = [];
   if (input.borrador) lineas.push("*** BORRADOR ***", "");
-  lineas.push(input.marca.nombreComercial ?? "Empresa TEST QA", `Propuesta técnica ${input.codigo}`, input.titulo, "");
+  lineas.push(input.marca.nombreComercial ?? "—", `Propuesta técnica ${input.codigo}`, input.titulo, "");
   let pagina = 1;
   for (const b of bloques) {
     lineas.push(`— ${b.tipo.replaceAll("_", " ")} —`);
@@ -68,7 +70,7 @@ export function renderPdfPropuestaTecnica(input: {
     lineas.push(`— pág. ${pagina} —`, "");
     pagina += 1;
   }
-  lineas.push(input.marca.piePagina ?? "Documento TEST QA · OPAI");
+  lineas.push(input.marca.piePagina ?? "");
   return pdfPropuestaSimple(lineas.join("\n"), input.marca.tipografia === "times" ? "Times-Roman" : "Helvetica");
 }
 

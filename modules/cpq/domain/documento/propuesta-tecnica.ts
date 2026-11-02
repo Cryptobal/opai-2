@@ -1,3 +1,5 @@
+import { clp, ivaCLP, IVA_PCT } from "@opai/domain/dinero";
+
 import type { BasePlantilla } from "./bloques";
 import type { AperturaPropuesta, DestinatarioEnvio, ServicioDesdeCotizacion } from "./propuesta-tecnica-tipos";
 
@@ -60,15 +62,25 @@ export function proyectarResumenEconomico(input: {
   secciones: readonly { nombre: string; netoMensualClp: number }[];
   netoTotalClp: number;
   gastosGeneralesYUtilidadClp?: number | null;
+  /** Tasa IVA del tenant en unidades `PCT_ESCALA` (19 % = 190_000). */
+  tasaIvaPct?: number;
 }): ResumenEconomicoPublico {
   const lineas = input.secciones.map((s) => ({
     instalacion: s.nombre,
     netoMensualClp: s.netoMensualClp,
   }));
   const neto = input.netoTotalClp;
-  const iva = Math.round(neto * 0.19);
   const gg = input.apertura === "por_item" ? (input.gastosGeneralesYUtilidadClp ?? null) : null;
-  return { lineas, gastosGeneralesYUtilidadClp: gg, netoTotalClp: neto, ivaClp: iva, totalClp: neto + iva + (gg ?? 0) };
+  const baseIva = neto + (gg ?? 0);
+  const tasa = input.tasaIvaPct ?? IVA_PCT;
+  const iva = ivaCLP(clp(baseIva), tasa);
+  return {
+    lineas,
+    gastosGeneralesYUtilidadClp: gg,
+    netoTotalClp: neto,
+    ivaClp: iva,
+    totalClp: baseIva + iva,
+  };
 }
 
 export function huellaServicioCotizacion(servicio: ServicioDesdeCotizacion): string {

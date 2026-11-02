@@ -18,10 +18,14 @@ export type PlantillaPropuestaVista = {
   bloques: BloquePlantillaPropuesta[];
 };
 
-export async function plantillaActivaPropuesta(ctx: Contexto) {
-  let row = await ctx.db.cpqPlantillaDocumento.findFirst({
+export async function plantillaActivaPropuestaLectura(ctx: Contexto) {
+  return ctx.db.cpqPlantillaDocumento.findFirst({
     where: { tenantId: ctx.tenantId, tipo: "propuesta_tecnica", activa: true },
   });
+}
+
+export async function plantillaActivaPropuesta(ctx: Contexto) {
+  let row = await plantillaActivaPropuestaLectura(ctx);
   if (!row) {
     row = await ctx.db.cpqPlantillaDocumento.create({
       data: {

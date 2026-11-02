@@ -168,9 +168,56 @@ CREATE TRIGGER mismo_tenant_propuesta_plantilla BEFORE INSERT OR UPDATE ON "cpq"
 CREATE TRIGGER mismo_tenant_envio_propuesta BEFORE INSERT OR UPDATE ON "cpq"."propuesta_envios"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('propuesta_tecnica_id', 'cpq.propuestas_tecnicas');
 
+ALTER TABLE "cpq"."propuesta_envios" ADD CONSTRAINT "propuesta_envios_cotizacion_id_fkey"
+  FOREIGN KEY ("cotizacion_id") REFERENCES "cpq"."cotizaciones"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "cpq"."propuesta_envios" ADD CONSTRAINT "propuesta_envios_version_id_fkey"
+  FOREIGN KEY ("version_id") REFERENCES "cpq"."versiones"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "cpq"."propuesta_envios" ADD CONSTRAINT "propuesta_envios_documento_cotizacion_id_fkey"
+  FOREIGN KEY ("documento_cotizacion_id") REFERENCES "core"."documentos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cpq"."propuesta_envios" ADD CONSTRAINT "propuesta_envios_documento_propuesta_id_fkey"
+  FOREIGN KEY ("documento_propuesta_id") REFERENCES "core"."documentos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+CREATE TRIGGER mismo_tenant_envio_cotizacion BEFORE INSERT OR UPDATE ON "cpq"."propuesta_envios"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('cotizacion_id', 'cpq.cotizaciones');
+CREATE TRIGGER mismo_tenant_envio_version BEFORE INSERT OR UPDATE ON "cpq"."propuesta_envios"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('version_id', 'cpq.versiones');
+CREATE TRIGGER mismo_tenant_envio_doc_cotizacion BEFORE INSERT OR UPDATE ON "cpq"."propuesta_envios"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('documento_cotizacion_id', 'core.documentos');
+CREATE TRIGGER mismo_tenant_envio_doc_propuesta BEFORE INSERT OR UPDATE ON "cpq"."propuesta_envios"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('documento_propuesta_id', 'core.documentos');
+
+CREATE OR REPLACE FUNCTION "cpq"."verificar_envio_version_cotizacion"() RETURNS trigger
+  LANGUAGE plpgsql AS $$
+DECLARE v_cot uuid;
+BEGIN
+  IF NEW.version_id IS NULL THEN RETURN NEW; END IF;
+  SELECT cotizacion_id INTO v_cot
+  FROM cpq.versiones
+  WHERE id = NEW.version_id AND tenant_id = NEW.tenant_id;
+  IF NOT FOUND THEN RETURN NEW; END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM cpq.cotizaciones WHERE id = NEW.cotizacion_id AND tenant_id = NEW.tenant_id
+  ) THEN
+    RETURN NEW;
+  END IF;
+  IF v_cot <> NEW.cotizacion_id THEN
+    RAISE EXCEPTION 'La versión no pertenece a la cotización del envío';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER zzz_verificar_envio_version_cotizacion BEFORE INSERT OR UPDATE ON "cpq"."propuesta_envios"
+  FOR EACH ROW EXECUTE FUNCTION "cpq"."verificar_envio_version_cotizacion"();
+
 COMMIT;
 
 -- Reversión manual (rol propietario; restaurar desde snapshot Neon si hay datos):
+-- DROP TRIGGER IF EXISTS zzz_verificar_envio_version_cotizacion ON "cpq"."propuesta_envios";
+-- DROP FUNCTION IF EXISTS "cpq"."verificar_envio_version_cotizacion"();
+-- DROP TRIGGER IF EXISTS mismo_tenant_envio_doc_propuesta ON "cpq"."propuesta_envios";
+-- DROP TRIGGER IF EXISTS mismo_tenant_envio_doc_cotizacion ON "cpq"."propuesta_envios";
+-- DROP TRIGGER IF EXISTS mismo_tenant_envio_version ON "cpq"."propuesta_envios";
+-- DROP TRIGGER IF EXISTS mismo_tenant_envio_cotizacion ON "cpq"."propuesta_envios";
 -- DROP TRIGGER IF EXISTS mismo_tenant_envio_propuesta ON "cpq"."propuesta_envios";
 -- DROP TRIGGER IF EXISTS mismo_tenant_propuesta_plantilla ON "cpq"."propuestas_tecnicas";
 -- DROP TRIGGER IF EXISTS mismo_tenant_propuesta_version ON "cpq"."propuestas_tecnicas";
