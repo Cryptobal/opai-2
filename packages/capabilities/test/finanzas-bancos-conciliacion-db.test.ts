@@ -73,7 +73,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
   beforeAll(async () => {
     process.env.SII_ADAPTADOR = "simulado";
     process.env.OPAI_SECRETS_KEY = randomBytes(32).toString("base64");
-    process.env.OPAI_SECRETS_KEY_VERSION = "1";
+    process.env.OPAI_SECRETS_KEY_VERSION = "99";
     delete process.env.OPAI_SECRETS_KEY_ANTERIOR;
     e = await prepararEntorno();
     mod = await import("../src");
@@ -107,6 +107,11 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
   });
 
   afterAll(async () => {
+    if (tenantId) {
+      const where = { tenantId: { in: [tenantId, tenantB].filter(Boolean) } };
+      await e?.admin.secreto.deleteMany({ where }).catch(() => undefined);
+      await e?.admin.claveTenant.deleteMany({ where }).catch(() => undefined);
+    }
     await e?.cerrar();
   });
 

@@ -72,6 +72,8 @@ export const foliosListar = defineCapability({
 
 export const foliosCargarCaf = defineCapability({
   id: "finanzas.folios.cargar_caf",
+  // El XML trae la llave privada del CAF: solo personas lo cargan; un agente no encola el XML en aprobaciones.
+  soloPersonas: true,
   descripcion:
     "Registra un rango de folios a partir del XML del CAF: valida RUT, tipo, solape y vencimiento; cifra el XML en core.secretos (ADR-027). dryRun devuelve la lectura sin guardar.",
   permiso: PERMISO_VENTAS_CONFIGURE,

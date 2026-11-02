@@ -20,7 +20,8 @@ SET "folio_rango" = int4range("folio_desde", "folio_hasta", '[]')
 WHERE "folio_rango" IS NULL;
 
 ALTER TABLE "finanzas"."dte_folios"
-  ALTER COLUMN "folio_rango" SET NOT NULL;
+  ADD CONSTRAINT "dte_folios_folio_rango_coherente"
+  CHECK ("folio_rango" IS NOT DISTINCT FROM int4range("folio_desde", "folio_hasta", '[]'));
 
 CREATE OR REPLACE FUNCTION "finanzas"."dte_folios_sync_folio_rango"()
 RETURNS trigger
@@ -85,6 +86,7 @@ COMMIT;
 
 -- Reversión (manual, rol propietario):
 --   ALTER TABLE "finanzas"."dte_folios" DROP CONSTRAINT IF EXISTS "dte_folios_rango_sin_solape";
+--   ALTER TABLE "finanzas"."dte_folios" DROP CONSTRAINT IF EXISTS "dte_folios_folio_rango_coherente";
 --   DROP TRIGGER IF EXISTS "dte_folios_sync_folio_rango" ON "finanzas"."dte_folios";
 --   DROP FUNCTION IF EXISTS "finanzas"."dte_folios_sync_folio_rango"();
 --   ALTER TABLE "finanzas"."dte_folios" DROP COLUMN IF EXISTS "folio_rango";

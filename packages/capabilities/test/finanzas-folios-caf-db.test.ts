@@ -15,6 +15,11 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
   });
 
   afterAll(async () => {
+    if (s?.tenantId) {
+      const where = { tenantId: { in: [s.tenantId, s.tenantB] } };
+      await s.e.admin.secreto.deleteMany({ where }).catch(() => undefined);
+      await s.e.admin.claveTenant.deleteMany({ where }).catch(() => undefined);
+    }
     await s?.e.cerrar();
   });
 
@@ -89,15 +94,18 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
   });
 
   it("tenant QA rechaza CAF no sintético", async () => {
-    const qaId = (
-      await s.e.admin.tenant.create({
-        data: {
-          slug: SLUG_TENANT_QA_FINANZAS,
-          nombre: "Vigía Austral SpA",
-          vertical: "seguridad",
-        },
-      })
-    ).id;
+    const existente = await s.e.admin.tenant.findUnique({ where: { slug: SLUG_TENANT_QA_FINANZAS } });
+    const qaId =
+      existente?.id ??
+      (
+        await s.e.admin.tenant.create({
+          data: {
+            slug: SLUG_TENANT_QA_FINANZAS,
+            nombre: "Vigía Austral SpA",
+            vertical: "seguridad",
+          },
+        })
+      ).id;
     await s.mod.executeCapability(s.ctx(qaId), "finanzas.dte_config.actualizar", {
       ambiente: "certificacion",
       rutEmisor: "12345678-5",
@@ -110,7 +118,6 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
       cafXml: cafXmlSintetico({ idk: "EVIL-SINTETICO-FAKE", rut: "12345678-5" }),
     });
     expect(trampa).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-    await s.e.admin.tenant.delete({ where: { id: qaId } }).catch(() => undefined);
   });
 
   it("rechaza recargar un rango ya cargado aunque esté inactivo (A1)", async () => {
@@ -190,6 +197,38 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
     expect(mal).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     if (mal.ok) throw new Error("esperaba error");
     expect(mal.error.message).toMatch(/fuera del rango del CAF/i);
+  });
+
+  it("folio_rango incoherente con folio_desde/hasta no evade el EXCLUDE (CHECK en base)", async () => {
+    const fila = await s.e.admin.dteFolio.create({
+      data: {
+        tenantId: s.tenantId,
+        tipoDte: 33,
+        folioDesde: 8300,
+        folioHasta: 8350,
+        folioActual: 8300,
+        activo: true,
+      },
+    });
+    await expect(
+      s.e.admin.$executeRawUnsafe(
+        `UPDATE finanzas.dte_folios SET folio_rango = int4range(1, 3, '[]') WHERE id = $1::uuid`,
+        fila.id,
+      ),
+    ).rejects.toThrow(/dte_folios_folio_rango_coherente|check constraint/i);
+    await expect(
+      s.e.admin.dteFolio.create({
+        data: {
+          tenantId: s.tenantId,
+          tipoDte: 33,
+          folioDesde: 8340,
+          folioHasta: 8400,
+          folioActual: 8340,
+          activo: true,
+        },
+      }),
+    ).rejects.toThrow(/dte_folios_rango_sin_solape|exclusion constraint/i);
+    await s.e.admin.dteFolio.delete({ where: { id: fila.id } }).catch(() => undefined);
   });
 
   it("listar avisa folios que vencerán sin usar", async () => {

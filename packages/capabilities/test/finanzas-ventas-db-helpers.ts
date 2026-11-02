@@ -22,7 +22,8 @@ export type VentasDbSuite = {
 export async function prepararVentasDb(): Promise<VentasDbSuite> {
   process.env.SII_ADAPTADOR = "simulado";
   process.env.OPAI_SECRETS_KEY = randomBytes(32).toString("base64");
-  process.env.OPAI_SECRETS_KEY_VERSION = "1";
+  // Versión alta: `secretos-db.test.ts` rota la KEK 1→2 sobre todas las DEK con versión menor.
+  process.env.OPAI_SECRETS_KEY_VERSION = "99";
   delete process.env.OPAI_SECRETS_KEY_ANTERIOR;
   const e = await prepararEntorno();
   const mod = await import("../src");
