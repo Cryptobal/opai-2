@@ -5,7 +5,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type { AjustesFlujo, FilaFlujo } from "@/app/(erp)/finanzas/flujo/_componentes/datos";
 
-import { EditorFlujoCaja } from "./editor-flujo-caja";
+import { EditorFlujoCajaDiferido } from "./editor-flujo-caja-diferido";
 
 /** Configuración › Módulos › Finanzas › Flujo de caja (diseño v3 pantalla 07). */
 export async function SeccionFlujoCaja() {
@@ -17,7 +17,7 @@ export async function SeccionFlujoCaja() {
   const state = ok ? "ready" : estadoPantalla(filasR.ok ? ajustesR : filasR);
   return (
     <Estado state={state} variante="formulario">
-      {ok ? <EditorFlujoCaja filas={filasR.data} ajustes={ajustesR.data} /> : null}
+      {ok ? <EditorFlujoCajaDiferido filas={filasR.data} ajustes={ajustesR.data} /> : null}
     </Estado>
   );
 }
