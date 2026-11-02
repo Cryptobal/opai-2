@@ -6,8 +6,8 @@ export type DefinicionTrabajo<P> = {
   tipo: string;
   descripcion: string;
   payload: z.ZodType<P>;
-  /** "diaria": el programador lo encola una vez al día por tenant. */
-  periodicidad?: "diaria";
+  /** "diaria": el programador lo encola una vez al día por tenant. "horaria": una vez por hora. */
+  periodicidad?: "diaria" | "horaria";
   handler(ctx: Contexto, payload: P, signal: AbortSignal): Promise<unknown>;
 };
 
@@ -15,7 +15,7 @@ export type DefinicionTrabajo<P> = {
 export type Trabajo = {
   tipo: string;
   descripcion: string;
-  periodicidad?: "diaria";
+  periodicidad?: "diaria" | "horaria";
   ejecutar(ctx: Contexto, payload: unknown, signal?: AbortSignal): Promise<unknown>;
 };
 

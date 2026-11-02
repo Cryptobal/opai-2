@@ -1,6 +1,7 @@
 import { noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 import type { Contexto } from "@opai/capabilities";
 
+import { esEditable, type EstadoCotizacion } from "../domain";
 import { cotizacionDe } from "../capabilities/util";
 
 type FilaVersion = Awaited<ReturnType<typeof versionDeCotizacion>>;
@@ -29,6 +30,19 @@ export async function versionDeCotizacion(ctx: Contexto, versionId: string) {
 export function exigirBorrador(v: { estado: string }) {
   if (v.estado !== "borrador")
     throw reglaDeNegocio("Solo se editan versiones en borrador; esta ya fue enviada o aprobada.");
+}
+
+export function exigirEditable(v: { estado: string }) {
+  if (!esEditable(v.estado as EstadoCotizacion))
+    throw reglaDeNegocio("Esta versión ya no se puede editar.");
+}
+
+/** Enviar desde borrador (margen ok) o lista (aprobada). */
+export function exigirEnviable(v: { estado: string }) {
+  if (v.estado === "en_aprobacion")
+    throw reglaDeNegocio("La cotización está en aprobación: espera la decisión o retira el pedido.");
+  if (v.estado !== "borrador" && v.estado !== "lista")
+    throw reglaDeNegocio("Solo se envían versiones en borrador o en lista.");
 }
 
 export function mesesContrato(validaHasta: Date | null, fecha = new Date()): number {

@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { urlPropietario } from "../../db/test/entorno";
 
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
+import { cafXmlSintetico } from "./finanzas-caf-fixture";
 
 describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", () => {
   let s: VentasDbSuite;
@@ -36,10 +37,7 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", 
 
   it("C4 · dos NC parciales concurrentes: juntas superan el tope, solo una pasa", async () => {
     await s.dato("finanzas.folios.cargar_caf", {
-      tipoDte: 61,
-      folioDesde: 9000,
-      folioHasta: 9010,
-      cafVenceEn: "2027-12-31",
+      cafXml: cafXmlSintetico({ tipoDte: 61, folioDesde: 9000, folioHasta: 9010 }),
     });
     const borrador = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
       cuentaId: s.cuentaId,
@@ -85,10 +83,7 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", 
       },
     });
     await s.dato("finanzas.folios.cargar_caf", {
-      tipoDte: 33,
-      folioDesde: 8000,
-      folioHasta: 8002,
-      cafVenceEn: "2027-12-31",
+      cafXml: cafXmlSintetico({ folioDesde: 8000, folioHasta: 8002 }),
     });
     const borrador = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
       cuentaId: s.cuentaId,
@@ -97,5 +92,40 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", 
     });
     const emitida = await s.dato<{ folio: number }>("finanzas.ventas.emitir", { documentoId: borrador.id });
     expect(emitida.folio).toBe(8000);
+  });
+
+  it("C2 · dos cesiones concurrentes del mismo documento: solo una reserva", async () => {
+    process.env.CESION_ADAPTADOR = "simulado";
+    const borrador = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
+      cuentaId: s.cuentaId,
+      tipoDte: 33,
+      lineas: [{ glosa: "Base cesión", monto: 40_000 }],
+    });
+    await s.dato("finanzas.ventas.emitir", { documentoId: borrador.id });
+    await s.dato("finanzas.ventas.enviar_sii", { documentoId: borrador.id });
+    const envio = await s.e.admin.dteEnvio.findFirstOrThrow({ where: { documentoId: borrador.id } });
+    const consulta = s.mod.obtenerTrabajo("finanzas.dte.consultar_sii");
+    if (!consulta) throw new Error("trabajo consultar_sii");
+    await consulta.ejecutar(s.ctx(), { envioId: envio.id });
+    await s.e.admin.documentoEmitido.update({
+      where: { id: borrador.id },
+      data: { xmlStorageKey: `dte/${borrador.id}.xml` },
+    });
+    const ceder = () =>
+      s.mod.executeCapability(s.ctx(), "finanzas.ventas.cesion_ceder", {
+        documentoId: borrador.id,
+        factorRut: "76000000-0",
+      });
+    const r = await Promise.allSettled([ceder(), ceder()]);
+    const ok = r.filter((x) => x.status === "fulfilled" && x.value.ok);
+    const mal = r.filter((x) => x.status === "fulfilled" && !x.value.ok);
+    expect(ok).toHaveLength(1);
+    expect(mal).toHaveLength(1);
+    expect(mal[0]?.status === "fulfilled" && mal[0].value).toMatchObject({
+      ok: false,
+      error: { code: "CONFLICT" },
+    });
+    const doc = await s.e.admin.documentoEmitido.findFirstOrThrow({ where: { id: borrador.id } });
+    expect(doc).toMatchObject({ cesionEstado: "cedido", estadoCobro: "cedida" });
   });
 });

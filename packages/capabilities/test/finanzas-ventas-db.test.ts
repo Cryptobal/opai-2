@@ -32,7 +32,12 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE (PR 1)", () => {
       documentoId: borrador.id,
     });
     expect(enviada.trackIdSii).toMatch(/^SIM-/);
-    expect(enviada.estadoDte).toBe("aceptado");
+    const envio = await s.e.admin.dteEnvio.findFirstOrThrow({ where: { documentoId: borrador.id } });
+    const consulta = s.mod.obtenerTrabajo("finanzas.dte.consultar_sii");
+    if (!consulta) throw new Error("trabajo consultar_sii");
+    await consulta.ejecutar(s.ctx(), { envioId: envio.id });
+    const finalDoc = await s.dato<{ estadoDte: string }>("finanzas.ventas.obtener", { documentoId: borrador.id });
+    expect(finalDoc.estadoDte).toBe("aceptado");
     const pdf = await s.dato<{ mime: string; base64: string }>("finanzas.ventas.pdf", { documentoId: borrador.id });
     expect(pdf.mime).toBe("application/pdf");
     expect(pdf.base64.length).toBeGreaterThan(100);

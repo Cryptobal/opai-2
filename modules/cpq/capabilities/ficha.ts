@@ -2,36 +2,37 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
-import { motorOutputSchema } from "./motor-esquemas";
-import { PERMISO_MANAGE, PERMISO_READ } from "./permisos";
+import { PERMISO_COSTOS, PERMISO_READ } from "./permisos";
 import { cotizacionDe } from "./util";
 import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
 import { calculoCongelado } from "../persistencia/calculo-congelado";
+import { metaFicha } from "../persistencia/ficha-meta";
 import { versionParaFicha } from "../persistencia/version";
+import { motorOutputSchema } from "./motor-esquemas";
 import { uuidSchema } from "./esquemas";
 
-export const cotizacionesCalcular = defineCapability({
-  id: "cpq.cotizaciones.calcular",
-  descripcion:
-    "Recalcula en servidor la versión editable (o la indicada) de una cotización con el motor CPQ y costo empleador legal; persiste venta y huellas solo en borrador y con dry_run desactivado.",
-  permiso: PERMISO_MANAGE,
-  input: z.object({ id: uuidSchema, version: z.number().int().min(1).optional() }),
-  output: motorOutputSchema,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    await cotizacionDe(ctx, input.id);
-    const r = await recalcularVersion(ctx, input.id, input.version, !dryRun);
-    if (!r) throw noEncontrado("La versión");
-    return proyectarCalculo(ctx, r);
-  },
+const metaSchema = z.object({
+  fechaCalculo: z.string(),
+  validaHastaContrato: z.string().nullable(),
+  editable: z.boolean(),
+  avisoRecalculo: z
+    .object({ mensaje: z.string(), huellaActual: z.string().nullable() })
+    .nullable(),
+  aprobacion: z
+    .object({ id: uuidSchema, estado: z.string(), solicitadaPorId: uuidSchema })
+    .nullable(),
+  puedeEnviar: z.boolean(),
+  puedeAprobarMargen: z.boolean(),
+  motivoNoAprobarMargen: z.string().nullable(),
+  requiereConfirmacionValoresViejos: z.boolean(),
+  costosLinea: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const cotizacionesFicha = defineCapability({
   auditarLectura: (s) => [s.cotizacion.id],
   id: "cpq.cotizaciones.ficha",
   descripcion:
-    "Ensambla la ficha de cotización con secciones, líneas y cálculo en servidor; no persiste venta (use calcular en borrador).",
+    "Ensambla la ficha de cotización con secciones, líneas, cálculo en servidor y metadatos de aprobación.",
   permiso: PERMISO_READ,
   input: z.object({ id: uuidSchema, version: z.number().int().min(1).optional() }),
   output: z.object({
@@ -51,6 +52,7 @@ export const cotizacionesFicha = defineCapability({
       validaHasta: z.string().nullable(),
       editable: z.boolean(),
     }),
+    meta: metaSchema,
     secciones: z.array(
       z.object({
         id: uuidSchema,
@@ -75,10 +77,12 @@ export const cotizacionesFicha = defineCapability({
       select: { titulo: true, cuentaId: true },
     });
     const r =
-      version.estado === "borrador"
+      version.estado === "borrador" || version.estado === "en_aprobacion" || version.estado === "lista"
         ? await recalcularVersion(ctx, input.id, input.version, false)
         : calculoCongelado(ctx, version, lineas);
     if (!r) throw noEncontrado("La versión");
+    const meta = await metaFicha(ctx, c.creadoPorId, version, lineas, r);
+    const verCostos = ctx.autorizar(PERMISO_COSTOS);
     return {
       cotizacion: {
         id: c.id,
@@ -94,8 +98,9 @@ export const cotizacionesFicha = defineCapability({
         numero: version.numero,
         estado: version.estado,
         validaHasta: version.validaHasta?.toISOString().slice(0, 10) ?? null,
-        editable: version.estado === "borrador",
+        editable: meta.editable,
       },
+      meta,
       secciones: secciones.map((s) => ({
         id: s.id,
         nombre: s.nombre,
@@ -113,10 +118,12 @@ export const cotizacionesFicha = defineCapability({
             horaInicio: l.horaInicio,
             horaFin: l.horaFin,
             diasCobertura: l.diasCobertura,
-            sueldoBaseClp: ctx.autorizar("cpq:costos.ver") ? l.sueldoBaseClp : undefined,
+            sueldoBaseClp: verCostos ? l.sueldoBaseClp : undefined,
             itemCodigo: l.itemCodigo,
             cantidadEscalada: l.cantidadEscalada,
-            precioUnitarioClp: ctx.autorizar("cpq:costos.ver") ? l.precioUnitarioClp : undefined,
+            precioUnitarioClp: verCostos ? l.precioUnitarioClp : undefined,
+            huellaJuegoValores: verCostos ? l.huellaJuegoValores : undefined,
+            costo: verCostos ? meta.costosLinea?.[l.id] : undefined,
           })),
       })),
       calculo: proyectarCalculo(ctx, r),

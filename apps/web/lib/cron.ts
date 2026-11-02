@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
+import type { Contexto } from "@opai/capabilities";
 import { tenantsOperables } from "@opai/db";
 
 /**
@@ -27,6 +28,20 @@ export function hoyEn(zona: string, ahora = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: zona, dateStyle: "short" }).format(ahora);
 }
 
+/** «aaaa-mm-ddTHH» (hora calendario del tenant, UTC+0 etiqueta) para trabajos horarios. */
+export function horaEn(zona: string, ahora = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: zona,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(ahora);
+  const g = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  return `${g("year")}-${g("month")}-${g("day")}T${g("hour")}`;
+}
+
 /** Ejecuta `fn` por cada tenant operable; un tenant que falla no detiene a los demás. */
 export async function porTenant<T>(
   fn: (t: { id: string; slug: string; timezone: string }) => Promise<T>,
@@ -41,4 +56,16 @@ export async function porTenant<T>(
     }
   }
   return resultados;
+}
+
+/** Encola la captura diaria UF/UTM del SII (una corrida global; ancla timezone en el primer tenant operable). */
+export async function encolarCapturaSiiDesdeCron(
+  programarCapturaSii: (ctx: Contexto, hoy: string) => Promise<boolean>,
+  contextoSistema: (tenantId: string) => Contexto,
+): Promise<boolean | null> {
+  const operables = await tenantsOperables();
+  const ancla = operables[0];
+  if (!ancla) return null;
+  const hoy = hoyEn(ancla.timezone);
+  return programarCapturaSii(contextoSistema(ancla.id), hoy);
 }

@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-import { puedeTransicionDte, validarMontosVenta, type TipoDteVenta } from "@opai/domain";
-import { adaptadorSiiDesdeEntorno } from "@opai/integrations";
+import { validarMontosVenta, type TipoDteVenta } from "@opai/domain";
+import { adaptadorSiiDe } from "./adaptador-sii";
+import { guardarXmlFirmadoDte } from "./ventas-xml";
 
 import { defineCapability } from "../define";
 import { aFecha, escribirConEvento, hoy } from "../core/maestros/comun";
@@ -51,7 +52,7 @@ export const ventasEmitir = defineCapability({
     const ambiente = await ambienteDe(ctx);
     const rutEmisor = await rutEmisorDe(ctx);
     const emision = doc.fechaEmision?.toISOString().slice(0, 10) ?? hoy();
-    const adaptador = adaptadorSiiDesdeEntorno();
+    const adaptador = await adaptadorSiiDe(ctx);
     if (!adaptador.disponible) throw reglaDeNegocio("El adaptador SII no está disponible.");
     if (dryRun) {
       const folio = await consumirFolio(ctx, tipo, true);
@@ -90,6 +91,9 @@ export const ventasEmitir = defineCapability({
           ...(doc.glosa != null && doc.glosa !== "" ? { glosa: doc.glosa } : {}),
         };
         const firmado = await adaptador.firmar(payload);
+        if (adaptador.nombre !== "simulado") {
+          await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml);
+        }
         await marcarBorradorEmitido(tx, doc.id, {
           folio: folioEmitido,
           fechaEmision: aFecha(emision),
@@ -98,47 +102,6 @@ export const ventasEmitir = defineCapability({
         return { id: doc.id };
       },
     );
-    return vistaDeDocumento(ctx, doc.id);
-  },
-});
-
-export const ventasEnviarSii = defineCapability({
-  id: "finanzas.ventas.enviar_sii",
-  descripcion:
-    "Envía al SII un documento ya firmado en estado enviado, guardando el track ID de seguimiento. Usa el adaptador configurado (simulado en pruebas).",
-  permiso: PERMISO_VENTAS,
-  input: z.object({ documentoId: documentoEmitidoIdSchema }),
-  output: ventaSchema,
-  efecto: "irreversible",
-  dryRun: true,
-  exigeAprobacion: () => true,
-  async handler(ctx, input, { dryRun }) {
-    const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
-    if (!doc) throw noEncontrado("El documento");
-    if (doc.estadoDte !== "enviado") throw reglaDeNegocio("Solo se envía al SII un documento en estado enviado.");
-    if (doc.folio == null) throw reglaDeNegocio("El documento no tiene folio.");
-    const ambiente = await ambienteDe(ctx);
-    const adaptador = adaptadorSiiDesdeEntorno();
-    const xml = `<DTE folio="${doc.folio}"/>`;
-    if (dryRun) return vistaDeDocumento(ctx, doc.id);
-    const envio = await adaptador.enviar(xml, ambiente);
-    await escribirConEvento(
-      ctx,
-      {
-        tipo: "finanzas.venta.enviada_sii",
-        entidadTipo: "documento_emitido",
-        payload: () => ({ trackId: envio.trackId }),
-      },
-      (tx) =>
-        tx.documentoEmitido.update({
-          where: { id: doc.id },
-          data: { trackIdSii: envio.trackId },
-        }),
-    );
-    const consulta = await adaptador.consultar(envio.trackId, ambiente);
-    if (consulta.estado === "aceptado" && puedeTransicionDte("enviado", "aceptado")) {
-      await ctx.db.documentoEmitido.update({ where: { id: doc.id }, data: { estadoDte: "aceptado" } });
-    }
     return vistaDeDocumento(ctx, doc.id);
   },
 });

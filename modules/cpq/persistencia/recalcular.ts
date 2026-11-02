@@ -4,6 +4,7 @@ import { calcular, resultadoSinCostos, type ResultadoCalculo } from "../domain/m
 import { cotizacionDe } from "../capabilities/util";
 import { modeloDesdeCatalogo } from "./catalogo-modelo";
 import { mapearVersionCalculo } from "./mapear";
+import { fechaCalculoHoy } from "./fecha-calculo";
 import { juegoParaFecha, mutualAdicionalTenant, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
@@ -44,7 +45,7 @@ export async function recalcularVersion(
   const pack = await cargarFilasVersion(ctx, cotizacionId, numero, escribir);
   if (!pack) return null;
   const { version, secciones, lineas } = pack;
-  const consulta = (version.validaHasta ?? new Date()).toISOString().slice(0, 10);
+  const consulta = fechaCalculoHoy();
   const resuelto = await juegoParaFecha(ctx, consulta);
   const juego = resuelto.juego;
   const fecha = juego?.fecha ?? consulta;
@@ -91,6 +92,43 @@ export async function recalcularVersion(
 
 export function proyectarCalculo(ctx: Contexto, r: ResultadoCalculo) {
   return ctx.autorizar("cpq:costos.ver") ? r : resultadoSinCostos(r);
+}
+
+export function packServicioCotizacion(
+  c: { codigo: string },
+  pack: {
+    version: { numero: number };
+    secciones: { id: string; nombre: string }[];
+    lineas: {
+      seccionId: string;
+      nombre: string;
+      tipo: string;
+      posiciones: number;
+      patron: string | null;
+      horaInicio: string | null;
+      horaFin: string | null;
+      diasCobertura: number | null;
+    }[];
+  },
+) {
+  return {
+    codigo: c.codigo,
+    versionNumero: pack.version.numero,
+    secciones: pack.secciones.map((s) => ({
+      nombre: s.nombre,
+      lineas: pack.lineas
+        .filter((l) => l.seccionId === s.id)
+        .map((l) => ({
+          nombre: l.nombre,
+          tipo: l.tipo,
+          posiciones: l.posiciones,
+          patron: l.patron,
+          horaInicio: l.horaInicio,
+          horaFin: l.horaFin,
+          diasCobertura: l.diasCobertura,
+        })),
+    })),
+  };
 }
 
 export { mesesContrato };

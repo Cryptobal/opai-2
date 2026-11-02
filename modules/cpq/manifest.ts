@@ -27,6 +27,11 @@ export const manifest = defineModule({
     },
     { id: "cpq:aprobar", descripcion: "Aprobar o rechazar cotizaciones bajo el margen mínimo" },
     { id: "cpq:modelo.manage", descripcion: "Configurar el modelo de costeo y el catálogo de CPQ" },
+    {
+      id: "cpq:biblioteca.manage",
+      descripcion: "Editar biblioteca de bloques y plantilla de propuesta técnica",
+    },
+    { id: "cpq:envios.aprobar", descripcion: "Aprobar envíos conjuntos cotización/propuesta técnica" },
   ],
   navegacion: [
     {
@@ -42,7 +47,12 @@ export const manifest = defineModule({
   configuracion: z.object({}),
   eventos: [
     { id: "cpq.cotizacion.creada", descripcion: "Se creó una cotización en borrador." },
+    { id: "cpq.cotizacion.aprobacion_solicitada", descripcion: "Una cotización pasó a aprobación por margen." },
+    { id: "cpq.cotizacion.aprobada", descripcion: "Se aprobó el margen de una cotización." },
+    { id: "cpq.cotizacion.aprobacion_rechazada", descripcion: "Se rechazó la aprobación de margen." },
     { id: "cpq.cotizacion.enviada", descripcion: "Se envió una cotización al cliente." },
+    { id: "cpq.envio_propuesta.solicitado", descripcion: "Se solicitó un envío conjunto cotización/propuesta." },
+    { id: "cpq.envio_propuesta.aprobado", descripcion: "Se aprobó y registró un envío conjunto." },
   ],
   capacidades,
 });

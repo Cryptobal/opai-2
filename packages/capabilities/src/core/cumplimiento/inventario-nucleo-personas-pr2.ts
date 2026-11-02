@@ -1,0 +1,88 @@
+import { defineDatosPersonales } from "@opai/domain";
+
+/** Personas y Cargos PR 2: previsión, pago bancario y contacto laboral ampliado. */
+export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
+  {
+    tabla: "personas_prevision",
+    finalidad: "Previsión social de la persona trabajadora (AFP, régimen, salud e ISAPRE).",
+    categorias: ["laboral", "sensible"],
+    campos: [
+      "afp",
+      "regimen",
+      "sistema_salud",
+      "isapre_nombre",
+      "plan_isapre",
+      "plan_uf",
+      "cotizacion_uf_pct",
+    ],
+    camposSensibles: ["plan_isapre"],
+    baseLicitud: "obligacion_legal",
+    reguladoNoBorrable: true,
+  },
+  {
+    tabla: "personas_pago",
+    finalidad: "Cuenta bancaria para el pago de remuneraciones de la persona.",
+    categorias: ["economica", "sensible"],
+    campos: ["banco_codigo", "tipo_cuenta", "numero_cuenta", "rut_titular"],
+    camposSensibles: ["numero_cuenta"],
+    baseLicitud: "obligacion_legal",
+    reguladoNoBorrable: true,
+  },
+  {
+    tabla: "personas_pago_solicitudes",
+    finalidad: "Solicitudes de cambio de cuenta bancaria pendientes de aprobación de RRHH.",
+    categorias: ["economica", "sensible"],
+    campos: [
+      "banco_codigo",
+      "tipo_cuenta",
+      "numero_cuenta",
+      "rut_titular",
+      "solicitado_por_id",
+      "motivo_rechazo",
+    ],
+    camposSensibles: ["numero_cuenta"],
+    baseLicitud: "obligacion_legal",
+  },
+  {
+    tabla: "personas_uniforme",
+    finalidad: "Tallas de uniforme de la persona trabajadora.",
+    categorias: ["laboral"],
+    campos: ["talla_camisa", "talla_pantalon", "talla_chaqueta", "talla_zapato", "notas"],
+    baseLicitud: "relacion_laboral",
+  },
+  {
+    tabla: "personas_jornada_dt",
+    finalidad: "Jornada y resoluciones DT registradas para la persona.",
+    categorias: ["laboral"],
+    campos: [
+      "resolucion",
+      "resolucion_vigente_desde",
+      "horas_semanales",
+      "distribucion",
+      "termino_plazo_fijo",
+      "aviso_termino_dias",
+    ],
+    baseLicitud: "obligacion_legal",
+    reguladoNoBorrable: true,
+  },
+  {
+    tabla: "personas_os10",
+    finalidad: "Credencial OS-10 y su vencimiento para la persona.",
+    categorias: ["laboral"],
+    campos: ["credencial", "vence_en"],
+    baseLicitud: "obligacion_legal",
+  },
+  {
+    tabla: "personas_contacto_laboral",
+    finalidad: "Contacto laboral ampliado y contacto de emergencia de la persona.",
+    categorias: ["contacto", "laboral"],
+    campos: [
+      "estado_civil",
+      "telefono_secundario",
+      "emergencia_nombre",
+      "emergencia_relacion",
+      "emergencia_telefono",
+    ],
+    baseLicitud: "relacion_laboral",
+  },
+]);

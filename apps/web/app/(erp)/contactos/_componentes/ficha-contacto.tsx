@@ -9,8 +9,8 @@ import { HojaContacto } from "../../cuentas/_componentes/diferidas";
 
 import { telefono } from "@/lib/fechas";
 
-import type { ContactoDetalle } from "./datos";
 import { CuentasContacto } from "./cuentas-contacto";
+import type { ContactoDetalle } from "./datos";
 
 /**
  * Ficha de un contacto (persona): datos de contacto, cuenta y roles; debajo, su privacidad

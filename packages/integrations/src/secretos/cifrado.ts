@@ -47,6 +47,17 @@ export function kekDelEntorno(env: Record<string, string | undefined> = process.
   };
 }
 
-/** "re_AbCd…wxyz" → "••••••••wxyz". Lo único que una capacidad devuelve de un secreto. */
-export const enmascarar = (sufijo: string): string => `••••••••${sufijo}`;
+/** Secretos tipo contraseña: no se persiste sufijo ni se filtra por MCP/API. */
+export function secretoOcultaSufijo(nombre: string): boolean {
+  return nombre === "certificado_clave" || nombre === "clave";
+}
+
+/** "re_AbCd…wxyz" → "••••••••wxyz"; sin sufijo → "••••••••". Lo único que una capacidad devuelve de un secreto. */
+export const enmascarar = (sufijo: string): string =>
+  sufijo ? `••••••••${sufijo}` : "••••••••";
+
 export const sufijoDe = (valor: string): string => valor.slice(-4);
+
+export function sufijoParaGuardar(nombre: string, valor: string): string {
+  return secretoOcultaSufijo(nombre) ? "" : sufijoDe(valor);
+}

@@ -13,6 +13,8 @@ type Ajuste = {
   existente?: (ctx: Contexto) => Record<string, unknown>;
   /** Columnas de un índice único que `copia` no debe regenerar (tienen un CHECK de rango). */
   fijas?: string[];
+  /** Columnas que el trigger de la tabla rellena: no van en INSERT ni en copias. */
+  omitir?: string[];
   valores: (ctx: Contexto) => Record<string, unknown>;
 };
 
@@ -62,6 +64,59 @@ export const AJUSTES: Record<string, Ajuste> = {
       bloques_json: "[]",
     }),
   },
+  // CPQ (CAR-144): vocabularios cerrados en biblioteca, propuesta y envío.
+  "cpq.biblioteca_bloques": {
+    valores: () => ({
+      clave: "bloque-prueba",
+      tipo: "texto_libre",
+      titulo: "Bloque prueba",
+      estado: "borrador",
+      contenido_json: "{}",
+    }),
+  },
+  "cpq.biblioteca_bloque_revisiones": {
+    dependencias: ["cpq.biblioteca_bloques"],
+    valores: (ctx) => ({
+      bloque_id: id(ctx, "cpq.biblioteca_bloques"),
+      version: 1,
+      contenido_json: "{}",
+    }),
+  },
+  "cpq.cotizaciones": {
+    dependencias: ["comercial.negocios"],
+    valores: (ctx) => ({
+      negocio_id: id(ctx, "comercial.negocios"),
+      codigo: "CPQ-TEST-001",
+      titulo: "Cotización prueba dos empresas",
+    }),
+  },
+  "cpq.versiones": {
+    dependencias: ["cpq.cotizaciones"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      numero: 1,
+    }),
+  },
+  "cpq.propuestas_tecnicas": {
+    dependencias: ["cpq.cotizaciones", "cpq.versiones"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      version_id: id(ctx, "cpq.versiones"),
+      base: "clasica",
+      estado: "borrador",
+      bloques_json: "[]",
+    }),
+  },
+  "cpq.propuesta_envios": {
+    dependencias: ["cpq.cotizaciones", "cpq.versiones"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      version_id: id(ctx, "cpq.versiones"),
+      estado: "pendiente_aprobacion",
+      destinatarios_json: '[{"email":"envio@test.qa"}]',
+      snapshot_json: "{}",
+    }),
+  },
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
@@ -83,8 +138,24 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.cuentas_contables": { valores: () => ({ tipo: "activo", naturaleza: "deudora" }) },
   "finanzas.centros_costo": { valores: () => ({ tipo: "general" }) },
   "finanzas.documentos_recibidos": { valores: () => ({ tipo_dte: 33, monto_total: 0 }) },
-  "finanzas.dte_config": { valores: () => ({ ambiente: "certificacion" }) },
+  "finanzas.dte_config": { valores: () => ({ ambiente: "certificacion", emision_proveedor: "simulado" }) },
+  "finanzas.dte_envios": {
+    dependencias: ["finanzas.documentos_emitidos"],
+    valores: () => ({ track_id: "SIM-1", estado: "pendiente", intentos: 0, max_intentos: 7 }),
+  },
+  "finanzas.cesiones": {
+    dependencias: ["finanzas.documentos_emitidos"],
+    valores: () => ({
+      factor_rut: "76000000-0",
+      anticipo: 1000,
+      merma: 0,
+      saldo_factor: 0,
+      estado: "simulada",
+      proveedor: "octava",
+    }),
+  },
   "finanzas.dte_folios": {
+    omitir: ["folio_rango"],
     valores: () => ({ tipo_dte: 33, folio_desde: 1, folio_hasta: 100, folio_actual: 1 }),
   },
   "finanzas.documentos_emitidos": {

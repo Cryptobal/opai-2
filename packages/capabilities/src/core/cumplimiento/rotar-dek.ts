@@ -7,6 +7,7 @@ import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { kidDe, recifrarValor } from "./cifrado-campos";
 import { listarInventario } from "./inventario";
+import { recifradoresInventarioNucleo } from "./recifradores-inventario";
 
 // Rotación de la DEK de un tenant (Ley 21.719, Brief 07d §21/§22, ADR-027). A diferencia de
 // `rotar-kek` (que solo reenvuelve la DEK), esto cambia la clave que cifra los datos: recifra los
@@ -26,7 +27,7 @@ const b = (x: Uint8Array) => Uint8Array.from(x);
 
 export async function rotarDek(
   ctx: Contexto,
-  recifradores: Readonly<Record<string, Recifrador>> = {},
+  recifradores: Readonly<Record<string, Recifrador>> = recifradoresInventarioNucleo,
 ): Promise<{ secretos: number; campos: number; kidAnterior: string; kidNuevo: string }> {
   const k = kekDelEntorno();
   if (!k.actual)

@@ -68,18 +68,6 @@ export function FormularioDatos({ inicial, cabecera }: { inicial: MisDatos; cabe
       formProps={{ onSubmit: guardar, noValidate: true }}
       secciones={[
         {
-          id: "identidad",
-          titulo: "Tu ficha",
-          descripcion: "Estos datos los gestiona Recursos Humanos. Si algo está mal, avísales.",
-          contenido: (
-            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Dato etiqueta="Nombre" valor={`${inicial.nombres} ${inicial.apellidos}`} />
-              <Dato etiqueta="RUT" valor={inicial.rut} mono />
-              <Dato etiqueta="Correo laboral" valor={inicial.emailLaboral ?? "—"} />
-            </dl>
-          ),
-        },
-        {
           id: "contacto",
           titulo: "Contacto",
           contenido: (
@@ -137,14 +125,5 @@ export function FormularioDatos({ inicial, cabecera }: { inicial: MisDatos; cabe
         </Button>
       }
     />
-  );
-}
-
-function Dato({ etiqueta, valor, mono }: { etiqueta: string; valor: string; mono?: boolean }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <dt className="t-caption">{etiqueta}</dt>
-      <dd className={mono ? "t-mono text-base text-fg" : "text-base text-fg"}>{valor}</dd>
-    </div>
   );
 }
