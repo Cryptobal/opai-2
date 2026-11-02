@@ -1,4 +1,4 @@
--- CAR-148 · Ventana UF/UTM fijada a America/Santiago, sin días futuros y variación diaria acotada.
+-- CAR-148 · Ventana UF/UTM fijada a America/Santiago, sin días futuros y variación diaria acumulada.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
@@ -18,6 +18,7 @@ DECLARE
   v_anterior bigint;
   v_max_ratio numeric;
   v_ref_desde date;
+  v_dias integer;
   v_id uuid;
 BEGIN
   IF p_clave NOT IN ('uf', 'utm') THEN
@@ -91,10 +92,28 @@ BEGIN
       AND vigente_desde = v_ref_desde
     LIMIT 1;
 
+  IF v_referencia.id IS NULL THEN
+    IF p_clave = 'utm' THEN
+      RAISE EXCEPTION 'remuneraciones_publicar_sii: referencia mes anterior faltante'
+        USING ERRCODE = 'check_violation';
+    END IF;
+    SELECT * INTO v_referencia
+      FROM "core"."valores_publicados"
+      WHERE indicador_id = v_indicador_id
+        AND estado = 'vigente'
+        AND vigente_desde < p_vigente_desde
+      ORDER BY vigente_desde DESC
+      LIMIT 1;
+  END IF;
+
   IF v_referencia.id IS NOT NULL THEN
     v_anterior := (v_referencia.valor_json::text)::bigint;
-    IF v_anterior IS NOT NULL AND v_anterior > 0 AND p_valor <> v_anterior THEN
-      v_max_ratio := CASE WHEN p_clave = 'uf' THEN 0.005 ELSE 0.05 END;
+    v_dias := p_vigente_desde - v_referencia.vigente_desde;
+    IF v_anterior IS NOT NULL AND v_anterior > 0 AND p_valor <> v_anterior AND v_dias > 0 THEN
+      v_max_ratio := CASE
+        WHEN p_clave = 'uf' THEN v_dias * 0.005
+        ELSE (v_dias::numeric / 30.0) * 0.05
+      END;
       IF abs(p_valor - v_anterior)::numeric / v_anterior::numeric > v_max_ratio THEN
         RAISE EXCEPTION 'remuneraciones_publicar_sii: variación excesiva'
           USING ERRCODE = 'check_violation';
@@ -125,3 +144,10 @@ END;
 $$;
 
 COMMIT;
+
+-- Reversión: restaurar el cuerpo de `remuneraciones_publicar_sii` de `20261103010000_remuneraciones_sii_publicar`
+-- (variación solo con referencia exacta D-1 / 1.º mes anterior). Mismo ACL que esa migración.
+-- BEGIN;
+-- SET LOCAL lock_timeout = '5s';
+-- CREATE OR REPLACE FUNCTION "core"."remuneraciones_publicar_sii"( ... cuerpo 20261103010000 ... );
+-- COMMIT;

@@ -17,6 +17,10 @@ vi.mock("@/app/_components/maestros/enlace-boton-hoja", () => ({
 vi.mock("@/app/(erp)/cuentas/_componentes/diferidas", () => ({
   HojaContacto: () => "Formulario nuevo",
 }));
+vi.mock("@/app/(erp)/contactos/_componentes/diferidas", async () => {
+  const { ListaVinculos } = await import("@/app/(erp)/contactos/_componentes/lista-vinculos");
+  return { ListaVinculosDiferida: ListaVinculos };
+});
 import { CuentasContacto } from "@/app/(erp)/contactos/_componentes/cuentas-contacto";
 import { ListaVinculos } from "@/app/(erp)/contactos/_componentes/lista-vinculos";
 import { ContactosCuenta } from "@/app/(erp)/cuentas/_componentes/contactos-cuenta";

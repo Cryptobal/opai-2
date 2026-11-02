@@ -195,4 +195,88 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       ),
     ).rejects.toThrow(/variación/i);
   });
+
+  it("rechaza UF con hueco sin referencia exacta D-1 (tope acumulado por días)", async () => {
+    await e.admin.valorPublicado.deleteMany({ where: { indicadorId: ufId } });
+    const fuente = `https://www.sii.cl/valores_y_fechas/uf/uf${anio}.htm`;
+    const base = 4_125_826;
+    const hace3 = restarDias(hoy, 3);
+    await e.admin.valorPublicado.create({
+      data: {
+        indicadorId: ufId,
+        valorJson: base,
+        vigenteDesde: new Date(`${hace3}T12:00:00.000Z`),
+        estado: "vigente",
+        fuente,
+        verificacion: "verificado",
+      },
+    });
+    await expect(
+      enTransaccion(tenantId, (tx) =>
+        remuneracionesPublicarSii(tx, {
+          clave: "uf",
+          valor: 19_999_999,
+          vigenteDesde: hoy,
+          fuente,
+          consultadaEn: new Date(),
+        }),
+      ),
+    ).rejects.toThrow(/variación/i);
+  });
+
+  it("acepta UF tras hueco si el valor respeta el tope acumulado", async () => {
+    await e.admin.valorPublicado.deleteMany({ where: { indicadorId: ufId } });
+    const fuente = `https://www.sii.cl/valores_y_fechas/uf/uf${anio}.htm`;
+    const base = 4_125_826;
+    const hace3 = restarDias(hoy, 3);
+    await e.admin.valorPublicado.create({
+      data: {
+        indicadorId: ufId,
+        valorJson: base,
+        vigenteDesde: new Date(`${hace3}T12:00:00.000Z`),
+        estado: "vigente",
+        fuente,
+        verificacion: "verificado",
+      },
+    });
+    const tope = Math.round(base * (1 + 3 * 0.005));
+    const id = await enTransaccion(tenantId, (tx) =>
+      remuneracionesPublicarSii(tx, {
+        clave: "uf",
+        valor: tope,
+        vigenteDesde: hoy,
+        fuente,
+        consultadaEn: new Date(),
+      }),
+    );
+    expect(id).toBeTruthy();
+  });
+
+  it("rechaza UTM del mes sin valor el día 1 del mes anterior (first-mover)", async () => {
+    const mesActual = primerDiaMes(hoy);
+    const dosMesesAtras = `${restarDias(mesActual, 40).slice(0, 7)}-01`;
+    const fuente = `https://www.sii.cl/valores_y_fechas/utm/utm${anio}.htm`;
+    await e.admin.valorPublicado.deleteMany({ where: { indicadorId: utmId } });
+    await e.admin.valorPublicado.create({
+      data: {
+        indicadorId: utmId,
+        valorJson: 70_000,
+        vigenteDesde: new Date(dosMesesAtras),
+        estado: "vigente",
+        fuente,
+        verificacion: "verificado",
+      },
+    });
+    await expect(
+      enTransaccion(tenantId, (tx) =>
+        remuneracionesPublicarSii(tx, {
+          clave: "utm",
+          valor: Math.round(70_000 * 1.05),
+          vigenteDesde: mesActual,
+          fuente,
+          consultadaEn: new Date(),
+        }),
+      ),
+    ).rejects.toThrow(/referencia mes anterior/i);
+  });
 });

@@ -12,7 +12,7 @@ import {
   ufCentavosDelDia,
   utmClpDelMes,
 } from "./sii-parse";
-import { fuenteEsSii, valorEnRango, variacionPermitida } from "./sii-validacion";
+import { fuenteEsSii, valorEnRango, variacionPermitidaAcumulada, diasEntreCivil } from "./sii-validacion";
 import { fechaCivil } from "./comun";
 
 type IndicadorCaptura = { id: string; clave: string };
@@ -29,22 +29,46 @@ async function ultimoValorVigente(
   return { valor: Number(row.valorJson), vigenteDesde: fechaCivil(row.vigenteDesde) };
 }
 
-async function valorReferenciaVariacion(
+type RefVariacion =
+  | { ok: true; valor: number; vigenteDesde: string }
+  | { ok: false; motivo: "referencia" }
+  | { ok: true; sinReferencia: true };
+
+async function referenciaVariacion(
   tx: TenantTx,
   indicadorId: string,
   clave: "uf" | "utm",
   vigenteDesde: string,
-): Promise<number | null> {
-  const refDesde =
+): Promise<RefVariacion> {
+  const refDesdeExacto =
     clave === "uf" ? restarDiasCivil(vigenteDesde, 1) : primerDiaMesAnterior(vigenteDesde);
-  const row = await tx.valorPublicado.findFirst({
+  const exacta = await tx.valorPublicado.findFirst({
     where: {
       indicadorId,
       estado: "vigente",
-      vigenteDesde: new Date(`${refDesde}T12:00:00.000Z`),
+      vigenteDesde: new Date(`${refDesdeExacto}T12:00:00.000Z`),
     },
   });
-  return row ? Number(row.valorJson) : null;
+  if (exacta) {
+    return { ok: true, valor: Number(exacta.valorJson), vigenteDesde: refDesdeExacto };
+  }
+  if (clave === "utm") {
+    return { ok: false, motivo: "referencia" };
+  }
+  const ultima = await tx.valorPublicado.findFirst({
+    where: {
+      indicadorId,
+      estado: "vigente",
+      vigenteDesde: { lt: new Date(`${vigenteDesde}T12:00:00.000Z`) },
+    },
+    orderBy: { vigenteDesde: "desc" },
+  });
+  if (!ultima) return { ok: true, sinReferencia: true };
+  return {
+    ok: true,
+    valor: Number(ultima.valorJson),
+    vigenteDesde: fechaCivil(ultima.vigenteDesde),
+  };
 }
 
 export async function registrarCapturasOmitidasPorLock(
@@ -91,7 +115,7 @@ export async function registrarCapturasSiiEnTx(
     let motivoFallo: string | undefined;
 
     const vigente = await ultimoValorVigente(tx, ind.id);
-    const valorRef = await valorReferenciaVariacion(tx, ind.id, clave, vigenteDesde);
+    const ref = await referenciaVariacion(tx, ind.id, clave, vigenteDesde);
 
     await tx.$executeRawUnsafe(`SAVEPOINT captura_sii_${clave}`);
     try {
@@ -104,13 +128,24 @@ export async function registrarCapturasSiiEnTx(
 
       if (valorLeido == null) {
         motivoFallo = "sin_valor_dia";
+      } else if (!ref.ok) {
+        motivoFallo = ref.motivo;
       } else if (!fuenteEsSii(fuente)) {
         motivoFallo = "fuente";
       } else if (!valorEnRango(clave, valorLeido)) {
         motivoFallo = "rango";
       } else if (vigente.vigenteDesde != null && vigenteDesde < vigente.vigenteDesde) {
         motivoFallo = "vigencia_anterior";
-      } else if (valorRef != null && !variacionPermitida(clave, valorLeido, valorRef)) {
+      } else if (
+        ref.ok &&
+        !("sinReferencia" in ref) &&
+        !variacionPermitidaAcumulada(
+          clave,
+          valorLeido,
+          ref.valor,
+          diasEntreCivil(ref.vigenteDesde, vigenteDesde),
+        )
+      ) {
         motivoFallo = "variacion";
       } else {
         publicadoId = await publicarValorPlataformaEnTx(ctx, tx, {
@@ -119,7 +154,8 @@ export async function registrarCapturasSiiEnTx(
           vigenteDesde,
           fuente,
           consultadaEn,
-          valorAnterior: valorRef,
+          valorAnterior: ref.ok && !("sinReferencia" in ref) ? ref.valor : null,
+          valorAnteriorDesde: ref.ok && !("sinReferencia" in ref) ? ref.vigenteDesde : null,
         });
         resultado = "ok";
       }

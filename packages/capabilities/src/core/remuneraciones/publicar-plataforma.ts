@@ -3,7 +3,7 @@ import type { TenantTx } from "@opai/db";
 
 import type { Contexto } from "../../types";
 
-import { fuenteEsSii, valorEnRango, variacionPermitida } from "./sii-validacion";
+import { fuenteEsSii, valorEnRango, variacionPermitidaAcumulada, diasEntreCivil } from "./sii-validacion";
 import type { ClaveSiiPublicable } from "./sii-validacion";
 
 export type PublicarInput = {
@@ -13,6 +13,7 @@ export type PublicarInput = {
   fuente: string;
   consultadaEn: Date;
   valorAnterior: number | null;
+  valorAnteriorDesde: string | null;
 };
 
 async function publicarValorPlataformaEnTx(
@@ -28,7 +29,13 @@ async function publicarValorPlataformaEnTx(
   }
   if (
     input.valorAnterior != null &&
-    !variacionPermitida(input.clave, input.valorJson, input.valorAnterior)
+    input.valorAnteriorDesde != null &&
+    !variacionPermitidaAcumulada(
+      input.clave,
+      input.valorJson,
+      input.valorAnterior,
+      diasEntreCivil(input.valorAnteriorDesde, input.vigenteDesde),
+    )
   ) {
     throw new Error("Variación excesiva");
   }

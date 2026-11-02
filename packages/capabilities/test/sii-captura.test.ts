@@ -13,6 +13,8 @@ import {
   fuenteEsSii,
   valorEnRango,
   variacionPermitida,
+  variacionPermitidaAcumulada,
+  topeVariacionAcumulada,
 } from "../src/core/remuneraciones/sii-validacion";
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
@@ -55,5 +57,8 @@ describe("validación SII", () => {
     expect(valorEnRango("uf", 0)).toBe(false);
     expect(variacionPermitida("uf", 4125826, 4123701)).toBe(true);
     expect(variacionPermitida("uf", 5000000, 4123701)).toBe(false);
+    expect(topeVariacionAcumulada("uf", 3)).toBeCloseTo(0.015);
+    expect(variacionPermitidaAcumulada("uf", 4_125_826, 4_125_826, 3)).toBe(true);
+    expect(variacionPermitidaAcumulada("uf", 19_999_999, 4_125_826, 3)).toBe(false);
   });
 });
