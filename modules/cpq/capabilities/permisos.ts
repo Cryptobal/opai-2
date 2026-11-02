@@ -5,3 +5,7 @@ export const PERMISO_MANAGE = "cpq:cotizaciones.manage";
 export const PERMISO_COSTOS = "cpq:costos.ver";
 export const PERMISO_APROBAR = "cpq:aprobar";
 export const PERMISO_MODELO = "cpq:modelo.manage";
+/** Editar/publicar bloques de biblioteca y plantilla de propuesta técnica (CAR-144). */
+export const PERMISO_BIBLIOTECA = "cpq:biblioteca.manage";
+/** Aprobar envíos conjuntos cotización/propuesta (CAR-144). */
+export const PERMISO_ENVIOS_APROBAR = "cpq:envios.aprobar";

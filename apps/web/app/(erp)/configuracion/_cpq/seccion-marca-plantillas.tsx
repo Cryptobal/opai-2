@@ -5,6 +5,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { FormMarcaDocumentoDiferido } from "./form-marca-documento-diferido";
 import { FormPlantillaDocumentoDiferido } from "./form-plantilla-documento-diferido";
+import { FormPlantillaPropuestaDiferido } from "./form-plantilla-propuesta-diferido";
 
 async function cargarMarca() {
   const r = await ejecutarComoUsuario<{
@@ -26,13 +27,29 @@ async function cargarPlantilla() {
   return r.ok ? r.data : null;
 }
 
+async function cargarPlantillaPropuesta() {
+  const r = await ejecutarComoUsuario<{
+    version: number;
+    base: string;
+    nombreVisible: string;
+    aperturaMaxima: string;
+    bloques: { id: string; activo: boolean; fijo: boolean; opcional: boolean }[];
+    basesDisponibles: string[];
+  }>("erp", "cpq.plantillas_propuesta.get", {});
+  return r.ok ? r.data : null;
+}
+
 /** Marca documental CPQ y plantilla de cotización (CAR-135 addendum). Logos/colores en /configuracion/marca. */
 export async function SeccionMarcaPlantillasCpq() {
-  const [marca, plantilla] = await Promise.all([cargarMarca(), cargarPlantilla()]);
-  const state = marca && plantilla ? ("ready" as const) : ("error" as const);
+  const [marca, plantilla, plantillaPropuesta] = await Promise.all([
+    cargarMarca(),
+    cargarPlantilla(),
+    cargarPlantillaPropuesta(),
+  ]);
+  const state = marca && plantilla && plantillaPropuesta ? ("ready" as const) : ("error" as const);
   return (
     <Estado state={state} variante="formulario">
-      {marca && plantilla ? (
+      {marca && plantilla && plantillaPropuesta ? (
         <div className="flex flex-col gap-6">
           <div className="space-y-2">
             <p className="t-label">Marca en documentos</p>
@@ -55,6 +72,14 @@ export async function SeccionMarcaPlantillasCpq() {
             <Badge tono="info">Versión plantilla v{plantilla.version}</Badge>
           </div>
           <FormPlantillaDocumentoDiferido plantilla={plantilla} />
+          <div className="space-y-2 border-t border-border pt-6">
+            <p className="t-label">Plantilla de propuesta técnica</p>
+            <p className="t-caption text-fg-muted">
+              Base por defecto, apertura máxima del resumen económico y bloques fijos/opcionales del armador.
+            </p>
+            <Badge tono="info">Versión plantilla v{plantillaPropuesta.version}</Badge>
+          </div>
+          <FormPlantillaPropuestaDiferido plantilla={plantillaPropuesta} />
         </div>
       ) : null}
     </Estado>

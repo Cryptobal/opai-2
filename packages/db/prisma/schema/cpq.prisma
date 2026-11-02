@@ -21,7 +21,8 @@ model CpqCotizacion {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  versiones CpqVersion[]
+  versiones          CpqVersion[]
+  propuestasTecnicas CpqPropuestaTecnica[]
 
   @@unique([tenantId, codigo])
   @@index([tenantId, negocioId])
@@ -60,9 +61,10 @@ model CpqVersion {
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  cotizacion  CpqCotizacion  @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
-  secciones   CpqSeccion[]
-  aprobaciones CpqAprobacion[]
+  cotizacion       CpqCotizacion        @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  secciones        CpqSeccion[]
+  aprobaciones     CpqAprobacion[]
+  propuestaTecnica CpqPropuestaTecnica?
 
   @@unique([cotizacionId, numero])
   @@index([tenantId, cotizacionId])
@@ -258,11 +260,15 @@ model CpqMarcaDocumentoRevision {
 model CpqPlantillaDocumento {
   id          String   @id @default(uuid(7)) @db.Uuid
   tenantId    String   @map("tenant_id") @db.Uuid
-  /// "cotizacion" (propuesta técnica y factura después).
+  /// "cotizacion" | "propuesta_tecnica"
   tipo        String   @default("cotizacion")
   /// "clasica" | "ejecutiva" | "compacta"
   base        String   @default("clasica")
   bloquesJson String   @map("bloques_json")
+  /// Nombre visible en UI (propuesta técnica).
+  nombreVisible String? @map("nombre_visible")
+  /// "por_instalacion" | "por_categoria" | "por_item" (propuesta técnica).
+  aperturaMaxima String? @map("apertura_maxima")
   version     Int      @default(1)
   activa      Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -288,5 +294,109 @@ model CpqPlantillaDocumentoRevision {
 
   @@unique([plantillaDocumentoId, version])
   @@map("plantillas_documento_revisiones")
+  @@schema("cpq")
+}
+
+/// Bloque reutilizable de la biblioteca de propuesta técnica (CAR-144).
+model CpqBibliotecaBloque {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  clave            String
+  /// Uno de los 14 tipos del design prompt (CHECK en migración).
+  tipo             String
+  titulo           String
+  /// "borrador" | "publicado"
+  estado           String    @default("borrador")
+  versionPublicada Int       @default(0) @map("version_publicada")
+  contenidoJson    String    @map("contenido_json")
+  fijo             Boolean   @default(false)
+  opcional         Boolean   @default(true)
+  creadoPorId      String    @map("creado_por_id") @db.Uuid
+  publicadoPorId   String?   @map("publicado_por_id") @db.Uuid
+  publicadoEn      DateTime? @map("publicado_en") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  revisiones CpqBibliotecaBloqueRevision[]
+
+  @@unique([tenantId, clave])
+  @@index([tenantId, tipo])
+  @@map("biblioteca_bloques")
+  @@schema("cpq")
+}
+
+model CpqBibliotecaBloqueRevision {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  bloqueId      String   @map("bloque_id") @db.Uuid
+  version       Int
+  contenidoJson String   @map("contenido_json")
+  creadoPorId   String   @map("creado_por_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  bloque CpqBibliotecaBloque @relation(fields: [bloqueId], references: [id], onDelete: Cascade)
+
+  @@unique([bloqueId, version])
+  @@map("biblioteca_bloque_revisiones")
+  @@schema("cpq")
+}
+
+/// Armador de propuesta técnica atado a una versión de cotización (CAR-144).
+model CpqPropuestaTecnica {
+  id                        String   @id @default(uuid(7)) @db.Uuid
+  tenantId                  String   @map("tenant_id") @db.Uuid
+  cotizacionId              String   @map("cotizacion_id") @db.Uuid
+  versionId                 String   @unique @map("version_id") @db.Uuid
+  base                      String   @default("clasica")
+  plantillaDocumentoId      String?  @map("plantilla_documento_id") @db.Uuid
+  plantillaDocumentoVersion Int?     @map("plantilla_documento_version")
+  marcaDocumentoVersion     Int?     @map("marca_documento_version")
+  /// "borrador" | "congelada"
+  estado                    String   @default("borrador")
+  bloquesJson               String   @map("bloques_json")
+  /// Huella del detalle de servicio derivado de la cotización (detectar cambios).
+  servicioHuellaJson        String?  @map("servicio_huella_json")
+  servicioEditadoJson       String?  @map("servicio_editado_json")
+  editadoParaCliente        Boolean  @default(false) @map("editado_para_cliente")
+  creadoPorId               String   @map("creado_por_id") @db.Uuid
+  createdAt                 DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cotizacion CpqCotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  version    CpqVersion    @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  envios     CpqPropuestaEnvio[]
+
+  @@index([tenantId, cotizacionId])
+  @@map("propuestas_tecnicas")
+  @@schema("cpq")
+}
+
+/// Envío conjunto cotización + propuesta técnica con snapshot congelado (CAR-144).
+model CpqPropuestaEnvio {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  cotizacionId          String    @map("cotizacion_id") @db.Uuid
+  versionId             String    @map("version_id") @db.Uuid
+  propuestaTecnicaId    String?   @map("propuesta_tecnica_id") @db.Uuid
+  /// "pendiente_aprobacion" | "enviado" | "cancelado"
+  estado                String    @default("pendiente_aprobacion")
+  incluyeCotizacion     Boolean   @default(true) @map("incluye_cotizacion")
+  incluyePropuesta      Boolean   @default(false) @map("incluye_propuesta")
+  destinatariosJson     String    @map("destinatarios_json")
+  snapshotJson          String    @map("snapshot_json")
+  mensaje               String?
+  solicitadoPorId       String    @map("solicitado_por_id") @db.Uuid
+  aprobadoPorId         String?   @map("aprobado_por_id") @db.Uuid
+  enviadoEn             DateTime? @map("enviado_en") @db.Timestamptz(6)
+  documentoCotizacionId String?   @map("documento_cotizacion_id") @db.Uuid
+  documentoPropuestaId  String?   @map("documento_propuesta_id") @db.Uuid
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  propuestaTecnica CpqPropuestaTecnica? @relation(fields: [propuestaTecnicaId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, cotizacionId])
+  @@index([tenantId, estado])
+  @@map("propuesta_envios")
   @@schema("cpq")
 }
