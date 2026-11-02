@@ -81,7 +81,7 @@ describe("cpq.cotizaciones.list / get", () => {
       data: {
         cotizacion: { id: a },
         versiones: [{ numero: 1, estado: "borrador" }],
-        secciones: [],
+        secciones: [{ nombre: "Común", lineas: [] }],
       },
     });
     expect(

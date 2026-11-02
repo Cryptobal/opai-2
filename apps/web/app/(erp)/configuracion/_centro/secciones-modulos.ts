@@ -9,6 +9,8 @@ import { SeccionCanales } from "@/app/(erp)/configuracion/_leads/seccion-canales
 import { SeccionTiposIncidente } from "@/app/(erp)/configuracion/_rondas/seccion-tipos-incidente";
 import { SeccionCentrosCosto } from "@/app/(erp)/configuracion/_finanzas/seccion-centros-costo";
 import { SeccionPlanCuentas } from "@/app/(erp)/configuracion/_finanzas/seccion-plan-cuentas";
+import { SeccionCatalogoCpq } from "@/app/(erp)/configuracion/_cpq/seccion-catalogo";
+import { SeccionMarcaPlantillasCpq } from "@/app/(erp)/configuracion/_cpq/seccion-marca-plantillas";
 
 /**
  * Pestaña que un módulo aporta a su página de Configuración → Módulos → <módulo> (ADR-018): el
@@ -94,6 +96,20 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       etiqueta: "Centros de costo",
       permiso: "finanzas:read",
       Contenido: SeccionCentrosCosto,
+    },
+  ],
+  cpq: [
+    {
+      id: "marca-plantillas",
+      etiqueta: "Marca y plantillas",
+      permiso: "cpq:modelo.manage",
+      Contenido: SeccionMarcaPlantillasCpq,
+    },
+    {
+      id: "catalogo",
+      etiqueta: "Catálogo",
+      permiso: "cpq:modelo.manage",
+      Contenido: SeccionCatalogoCpq,
     },
   ],
 };

@@ -25,7 +25,7 @@ export interface Almacenamiento {
    * Sube bytes desde el servidor (un archivo generado, p. ej. la exportación del titular de la Ley
    * 21.719), con la huella SHA-256 declarada: R2 rechaza el contenido si no coincide (ADR-039).
    */
-  subir(clave: string, cuerpo: string, mime: string, sha256: string): Promise<void>;
+  subir(clave: string, cuerpo: string | Uint8Array | Buffer, mime: string, sha256: string): Promise<void>;
   urlDescarga(clave: string, nombre: string, segundos?: number): Promise<string>;
   head(clave: string): Promise<ObjetoAlmacenado | null>;
   eliminar(clave: string): Promise<void>;
@@ -47,6 +47,11 @@ export const hexABase64 = (hex: string) => Buffer.from(hex, "hex").toString("bas
 export const base64AHex = (b64: string) => Buffer.from(b64, "base64").toString("hex");
 
 const codificar = (clave: string) => clave.split("/").map(encodeURIComponent).join("/");
+
+function cuerpoSubidaFetch(cuerpo: string | Uint8Array | Buffer): string | Blob {
+  if (typeof cuerpo === "string") return cuerpo;
+  return new Blob([Buffer.from(cuerpo)]);
+}
 
 export function almacenamientoR2(config: ConfigR2): Almacenamiento {
   const cliente = new AwsClient({
@@ -74,7 +79,7 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
       const r = await cliente.fetch(`${base}/${codificar(clave)}`, {
         method: "PUT",
         headers: { "content-type": mime, "x-amz-checksum-sha256": hexABase64(sha256) },
-        body: cuerpo,
+        body: cuerpoSubidaFetch(cuerpo),
       });
       if (!r.ok) throw new Error(`R2 respondió ${r.status} al subir el archivo.`);
     },
