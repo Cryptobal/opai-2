@@ -86,6 +86,14 @@ model Tenant {
 
   // Brief 07b · PR 4 (anexo de contrato en borrador).
   anexosContrato AnexoContrato[]
+  personasPrevision PersonaPrevision[]
+  personasPago PersonaPago[]
+  personasPagoSolicitudes PersonaPagoSolicitud[]
+  personasUniforme PersonaUniforme[]
+  personasUniformeEntregas PersonaUniformeEntrega[]
+  personasJornadaDt PersonaJornadaDt[]
+  personasOs10 PersonaOs10[]
+  personasContactoLaboral PersonaContactoLaboral[]
 
   @@map("tenants")
   @@schema("core")

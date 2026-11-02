@@ -181,7 +181,17 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     const rat = await dato<Rat>(ctx, "core.cumplimiento.rat", {});
     const personal = rat.actividades.find((a) => a.actividad === "Gestión de personal de seguridad");
     expect(personal).toBeDefined();
-    expect(personal?.tablas).toEqual(["personas", "vinculos_laborales"]);
+    expect(personal?.tablas).toEqual([
+      "personas",
+      "vinculos_laborales",
+      "personas_prevision",
+      "personas_pago",
+      "personas_pago_solicitudes",
+      "personas_uniforme",
+      "personas_jornada_dt",
+      "personas_os10",
+      "personas_contacto_laboral",
+    ]);
     // Datos legibles, nunca nombres de columna.
     expect(personal?.datos).toContain("RUT");
     expect(personal?.datos.some((d) => d.includes("_"))).toBe(false);
