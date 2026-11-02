@@ -24,7 +24,7 @@ export async function auditarSiPlataforma(
   const escrituraNueva = r.resultado.ok && !r.resultado.dryRun && !r.resultado.repetida;
   if (!escrituraNueva || r.entrada === undefined) return;
   const objetivo = c.tenantObjetivo(r.entrada, r.salida) ?? null;
-  const evento = eventoAuditoria(c, ctx.actor, objetivo ?? "", r.entrada, r.salida, opciones);
+  const evento = eventoAuditoria(ctx, c, objetivo ?? "", r.entrada, r.salida, opciones);
   const cambio = cambioDe(c, r.entrada, r.salida);
   const hecho = hechoPlataforma(ctx, { ...evento, ...cambio, tenantObjetivoId: objetivo });
   if (!objetivo) return auditarEnPlataforma(ctx, hecho);
@@ -75,7 +75,7 @@ export function eventoDeEscritura(
   salida: unknown,
   opciones: OpcionesEjecucion,
 ): EventoPropio {
-  const evento = eventoAuditoria(c, ctx.actor, ctx.tenantId, entrada, salida, opciones);
+  const evento = eventoAuditoria(ctx, c, ctx.tenantId, entrada, salida, opciones);
   return c.modulo === "platform"
     ? { global: hechoPlataforma(ctx, { ...evento, ...cambioDe(c, entrada, salida) }) }
     : { empresa: evento };

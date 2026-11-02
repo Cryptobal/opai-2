@@ -32,6 +32,7 @@ export const ventasCesionSimular = defineCapability({
   output: simulacionCesionSchema,
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => [s.documentoId],
   async handler(ctx, input) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");

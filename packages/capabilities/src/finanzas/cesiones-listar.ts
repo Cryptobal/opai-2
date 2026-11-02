@@ -25,6 +25,7 @@ export const ventasCesionListar = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => s.items.map((i) => i.id),
   async handler(ctx, input) {
     const filas = await ctx.db.cesion.findMany({
       take: input.limite,

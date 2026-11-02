@@ -104,3 +104,17 @@ CREATE POLICY tenant_isolation ON "finanzas"."cesiones" AS PERMISSIVE FOR ALL TO
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 COMMIT;
+
+-- Reversión (manual, con respaldo previo): DROP en orden inverso de dependencias:
+--   DROP TABLE "finanzas"."cesiones";
+--   DROP TABLE "finanzas"."dte_envios";
+--   DROP TRIGGER mismo_tenant ON "finanzas"."dte_config";
+--   ALTER TABLE "finanzas"."dte_config" DROP CONSTRAINT IF EXISTS "dte_config_emision_api_key_secreto_id_fkey";
+--   ALTER TABLE "finanzas"."dte_config" DROP CONSTRAINT IF EXISTS "dte_config_certificado_secreto_id_fkey";
+--   ALTER TABLE "finanzas"."dte_config" DROP CONSTRAINT IF EXISTS "dte_config_cesion_proveedor_chk";
+--   ALTER TABLE "finanzas"."dte_config" DROP CONSTRAINT IF EXISTS "dte_config_emision_proveedor_chk";
+--   ALTER TABLE "finanzas"."dte_config" DROP COLUMN IF EXISTS "emision_api_key_secreto_id", DROP COLUMN IF EXISTS "certificado_secreto_id", DROP COLUMN IF EXISTS "cesion_proveedor", DROP COLUMN IF EXISTS "emision_proveedor";
+--   ALTER TABLE "finanzas"."documentos_emitidos" DROP CONSTRAINT IF EXISTS "documentos_emitidos_estado_cobro_chk";
+--   ALTER TABLE "finanzas"."documentos_emitidos" ADD CONSTRAINT "documentos_emitidos_estado_cobro_chk"
+--     CHECK ("estado_cobro" IN ('pendiente', 'pagada_parcial', 'pagada'));
+--   (Migrar filas con estado_cobro 'cedida' antes de restaurar el CHECK anterior.)
