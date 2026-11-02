@@ -5,6 +5,7 @@ import { ROLES, tienePermiso } from "../permisos";
 const PERMISOS_FINANZAS = [
   "finanzas:read",
   "finanzas:compras.manage",
+  "finanzas:ventas.manage",
   "finanzas:proveedores.manage",
   "finanzas:plan.manage",
 ] as const;

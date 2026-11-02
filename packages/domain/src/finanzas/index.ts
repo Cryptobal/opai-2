@@ -3,3 +3,6 @@ export * from "./plan-plantilla";
 export * from "./plan-validacion";
 export * from "./centro-costo";
 export * from "./compras";
+export * from "./ventas";
+export * from "./ventas-nc";
+export * from "./proyeccion-flujo";
