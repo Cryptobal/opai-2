@@ -15,6 +15,8 @@ export type CeldaRealBanco = {
   nota: string;
 };
 
+type CobroFacturaReal = { filaEtiqueta: string; monto: number };
+
 type MovimientoReal = {
   id: string;
   fecha: string;
@@ -22,6 +24,7 @@ type MovimientoReal = {
   glosa: string;
   conciliado: boolean;
   filaCliente?: string | null;
+  cobrosFactura?: CobroFacturaReal[];
   esFactoringMerma?: boolean;
   esRemuneracion?: boolean;
 };
@@ -58,6 +61,19 @@ export function celdasRealesDesdeMovimientos(movs: MovimientoReal[]): CeldaRealB
         movimientoId: m.id,
         nota: m.glosa,
       });
+      continue;
+    }
+    if (m.cobrosFactura?.length) {
+      for (const c of m.cobrosFactura) {
+        if (!c.filaEtiqueta) continue;
+        out.push({
+          semana: lunesIso(m.fecha),
+          filaEtiqueta: c.filaEtiqueta,
+          monto: c.monto,
+          movimientoId: m.id,
+          nota: m.glosa,
+        });
+      }
       continue;
     }
     if (m.filaCliente) {

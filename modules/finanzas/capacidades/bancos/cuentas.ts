@@ -1,9 +1,11 @@
 import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
+import { calcularSaldoSugeridoSemana, finSemanaIso } from "@opai/domain";
 
 import { cuentaSchema, montoDe } from "./esquemas";
 import { PERMISO_BANCOS_VER } from "./permisos";
+import { aFecha, aIso } from "./util";
 
 export const bancosCuentasListar = defineCapability({
   id: "finanzas.bancos.listar",
@@ -34,30 +36,51 @@ export const bancosCuentasListar = defineCapability({
 export const bancosSaldoSugerido = defineCapability({
   id: "finanzas.bancos.saldo_sugerido",
   descripcion:
-    "Devuelve el saldo final de la última cartola importada para una cuenta (sugerencia al sellar la semana del flujo).",
+    "Suma el saldo posterior del último movimiento por cuenta activa hasta el cierre de la semana del flujo (sugerencia al sellar).",
   permiso: PERMISO_BANCOS_VER,
-  input: z.object({ cuentaId: z.uuid().optional() }),
+  input: z.object({
+    cuentaId: z.uuid().optional(),
+    semana: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+  }),
   output: z.object({
     saldo: z.number().int().nullable(),
-    fechaCartola: z.string().nullable(),
-    cuentaId: z.string().nullable(),
+    fechaCorte: z.string().nullable(),
+    semana: z.string().nullable(),
   }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const cuenta = input.cuentaId
-      ? await ctx.db.cuentaBancaria.findFirst({ where: { id: input.cuentaId } })
-      : await ctx.db.cuentaBancaria.findFirst({ where: { activa: true }, orderBy: { createdAt: "asc" } });
-    if (!cuenta) return { saldo: null, fechaCartola: null, cuentaId: null };
-    const cartola = await ctx.db.cartolaImportada.findFirst({
-      where: { cuentaId: cuenta.id },
-      orderBy: { createdAt: "desc" },
+    const finSemana = input.semana ? finSemanaIso(input.semana) : aIso(new Date());
+    const cuentas = await ctx.db.cuentaBancaria.findMany({
+      where: input.cuentaId ? { id: input.cuentaId } : { activa: true },
+      orderBy: { createdAt: "asc" },
     });
-    if (!cartola) return { saldo: null, fechaCartola: null, cuentaId: cuenta.id };
-    return {
-      saldo: montoDe(cartola.saldoFinal),
-      fechaCartola: cartola.fechaHasta ? cartola.fechaHasta.toISOString().slice(0, 10) : null,
-      cuentaId: cuenta.id,
-    };
+    if (!cuentas.length) {
+      return { saldo: null, fechaCorte: null, semana: input.semana ?? null };
+    }
+
+    const movs = await ctx.db.movimientoBancario.findMany({
+      where: {
+        cuentaId: { in: cuentas.map((c) => c.id) },
+        fecha: { lte: aFecha(finSemana) },
+      },
+      select: { id: true, cuentaId: true, fecha: true, saldoDespues: true },
+    });
+
+    const { saldo, fechaCorte } = calcularSaldoSugeridoSemana(
+      cuentas.map((c) => c.id),
+      movs.map((m) => ({
+        id: m.id,
+        cuentaId: m.cuentaId,
+        fecha: aIso(m.fecha),
+        saldoDespues: m.saldoDespues == null ? null : montoDe(m.saldoDespues),
+      })),
+      finSemana,
+    );
+
+    return { saldo, fechaCorte, semana: input.semana ?? null };
   },
 });

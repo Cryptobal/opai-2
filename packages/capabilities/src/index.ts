@@ -5,7 +5,7 @@ export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { ajustesFinanzas, capacidadesFinanzas } from "./finanzas";
-export { calcularEstadoCobro, registrarCobroDocumento } from "./finanzas/cobros";
+export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco } from "./finanzas/cobros";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,

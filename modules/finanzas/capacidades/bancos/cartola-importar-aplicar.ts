@@ -1,4 +1,3 @@
-import { claveDedupe } from "@opai/domain";
 import type { FilaCartolaParseada } from "@opai/domain";
 
 import type { Contexto } from "@opai/capabilities";
@@ -57,12 +56,7 @@ export async function aplicarImportacionCartola(
           referencia: f.referencia,
           sucursal: f.sucursal,
           saldoDespues: f.saldoDespues != null ? BigInt(f.saldoDespues) : null,
-          claveDedupe: claveDedupe({
-            fecha: f.fecha,
-            monto: f.monto,
-            glosa: f.glosa,
-            referencia: f.referencia,
-          }),
+          claveDedupe: f.claveDedupe,
           estado,
           origen: "cartola",
         },

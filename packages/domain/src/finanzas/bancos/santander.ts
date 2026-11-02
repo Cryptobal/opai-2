@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 import { claveDedupe } from "./dedupe";
 import { fechaDesdeDdMmAaaa } from "./fechas";
@@ -27,14 +27,19 @@ export type ResultadoCartola = {
 const MAX_BYTES = 5 * 1024 * 1024;
 
 /** Parser cartola Santander XLSX (columnas MONTO, DESCRIPCIÓN, FECHA, N° DOC, SUCURSAL). */
-export function parsearCartolaSantander(contenido: Buffer): ResultadoCartola {
+export async function parsearCartolaSantander(contenido: Buffer): Promise<ResultadoCartola> {
   if (contenido.byteLength > MAX_BYTES) {
     throw new Error("La cartola supera el máximo de 5 MB.");
   }
-  const wb = XLSX.read(contenido, { type: "buffer", cellDates: false });
-  const hoja = wb.Sheets[wb.SheetNames[0] ?? ""];
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(contenido as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
+  const hoja = workbook.worksheets[0];
   if (!hoja) return { fechaDesde: null, fechaHasta: null, saldoFinal: null, filas: [], rechazadas: [] };
-  const rows = XLSX.utils.sheet_to_json<(string | number | null)[]>(hoja, { header: 1, defval: null });
+  const rows: (string | number | null)[][] = [];
+  hoja.eachRow((row) => {
+    const vals = row.values as (string | number | null | undefined)[];
+    rows.push(vals.slice(1).map((c) => (c === undefined ? null : c)));
+  });
   return parsearFilasSantander(rows);
 }
 

@@ -31,6 +31,7 @@ export async function cargarBancos(sp: SearchParams) {
   const gestiona = puede("finanzas:bancos.gestionar");
   const cuentaId = p["cuenta"] ?? null;
   const estado = p["estado"] ?? "pendiente";
+  const movId = p["mov"] ?? null;
 
   const cuentas = ver
     ? await ejecutarComoUsuario<{ items: CuentaBanco[] }>("erp", "finanzas.bancos.listar", {})
@@ -53,6 +54,7 @@ export async function cargarBancos(sp: SearchParams) {
     cuentaId: activa,
     estado,
     movimientos: movs?.ok ? movs.data.items : [],
+    movId,
     gestiona,
     ver,
   };

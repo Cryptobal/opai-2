@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 import {
-  mismoSaldoDespues,
+  planificarDedupeCartola,
   parsearCartolaSantander,
   parsearCsvGenerico,
   type FilaCartolaParseada,
@@ -64,7 +64,7 @@ export const bancosCartolaImportar = defineCapability({
     let fechaHasta: string | null;
 
     if (input.formato === "santander") {
-      const r = parsearCartolaSantander(buf);
+      const r = await parsearCartolaSantander(buf);
       parsedFilas = r.filas;
       rechazadas = r.rechazadas;
       saldoFinal = r.saldoFinal;
@@ -85,33 +85,42 @@ export const bancosCartolaImportar = defineCapability({
       where: { cuentaId: cuenta.id },
       select: { claveDedupe: true, saldoDespues: true },
     });
-    const porClave = new Map(existentes.map((e) => [e.claveDedupe, e.saldoDespues]));
+    const porIndice = new Map(parsedFilas.map((f) => [f.indice, f]));
+    const plan = planificarDedupeCartola(
+      parsedFilas.map((f) => ({
+        indice: f.indice,
+        base: f.claveDedupe,
+        saldoDespues: f.saldoDespues,
+      })),
+      existentes,
+    );
     const previews: z.infer<typeof filaPreviewSchema>[] = [];
     let duplicados = 0;
     const nuevos: FilaCartolaParseada[] = [];
 
-    for (const f of parsedFilas) {
-      const dup = porClave.has(f.claveDedupe);
-      if (dup && mismoSaldoDespues(porClave.get(f.claveDedupe), f.saldoDespues)) {
+    for (const p of plan) {
+      const orig = porIndice.get(p.indice);
+      if (!orig) continue;
+      if (p.estado === "duplicada") {
         duplicados += 1;
         previews.push({
-          indice: f.indice,
+          indice: orig.indice,
           estado: "duplicada",
           motivo: "Ya existe con la misma huella.",
-          fecha: f.fecha,
-          monto: f.monto,
-          glosa: f.glosa,
+          fecha: orig.fecha,
+          monto: orig.monto,
+          glosa: orig.glosa,
         });
         continue;
       }
-      nuevos.push(f);
+      nuevos.push({ ...orig, claveDedupe: p.claveDedupe });
       previews.push({
-        indice: f.indice,
+        indice: orig.indice,
         estado: "leida",
         motivo: null,
-        fecha: f.fecha,
-        monto: f.monto,
-        glosa: f.glosa,
+        fecha: orig.fecha,
+        monto: orig.monto,
+        glosa: orig.glosa,
       });
     }
     for (const r of rechazadas) {
@@ -131,7 +140,7 @@ export const bancosCartolaImportar = defineCapability({
     await aplicarImportacionCartola(ctx, {
       cuenta,
       formato: input.formato,
-      nombreArchivo: input.nombreArchivo,
+      ...(input.nombreArchivo ? { nombreArchivo: input.nombreArchivo } : {}),
       idempotencyKey: input.idempotencyKey,
       nuevos,
       duplicados,

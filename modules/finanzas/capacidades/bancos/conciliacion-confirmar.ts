@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-import { defineCapability, reglaDeNegocio, registrarCobroDocumento } from "@opai/capabilities";
+import {
+  defineCapability,
+  conflicto,
+  reglaDeNegocio,
+  sincronizarCobroDocumento,
+  validarDocumentoCobroBanco,
+} from "@opai/capabilities";
 import type { Prisma } from "@opai/db";
 
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_AUTORIZAR } from "./permisos";
@@ -39,8 +45,22 @@ export const bancosConciliacionConfirmar = defineCapability({
     if (dryRun) return { conciliado: true, estadoCobro: null };
 
     let estadoCobro: string | null = null;
+    const signoMov = montoDe(mov.monto);
     await ctx.transaccion(async (tx) => {
+      const reserva = await tx.movimientoBancario.updateMany({
+        where: { id: mov.id, estado: { not: "conciliado" } },
+        data: { estado: "conciliado" },
+      });
+      if (reserva.count !== 1) throw conflicto("El movimiento ya está conciliado.");
+
+      const docsSync = new Set<string>();
       for (const e of input.enlaces) {
+        if (e.tipo === "documento_emitido") {
+          const doc = await tx.documentoEmitido.findFirst({ where: { id: e.id } });
+          if (!doc) throw reglaDeNegocio("El documento emitido no existe.");
+          validarDocumentoCobroBanco(doc, signoMov);
+          docsSync.add(e.id);
+        }
         await tx.conciliacionBanco.create({
           data: {
             tenantId: ctx.tenantId,
@@ -55,12 +75,11 @@ export const bancosConciliacionConfirmar = defineCapability({
             createdById: ctx.usuario?.id ?? null,
           },
         });
-        if (e.tipo === "documento_emitido") {
-          const r = await registrarCobroDocumento(tx, { documentoId: e.id, monto: e.monto });
-          estadoCobro = r.estadoCobro;
-        }
       }
-      await tx.movimientoBancario.update({ where: { id: mov.id }, data: { estado: "conciliado" } });
+      for (const docId of docsSync) {
+        const r = await sincronizarCobroDocumento(tx, docId);
+        estadoCobro = r.estadoCobro;
+      }
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.banco.conciliacion_confirmada",
         entidadTipo: "movimientoBancario",
@@ -83,10 +102,19 @@ export const bancosConciliacionDeshacer = defineCapability({
     await movimientoDe(ctx, input.movimientoId);
     if (dryRun) return { deshecho: true };
     await ctx.transaccion(async (tx) => {
+      const activas = await tx.conciliacionBanco.findMany({
+        where: { movimientoId: input.movimientoId, activa: true, confirmada: true },
+      });
+      const docsSync = new Set(
+        activas.filter((c) => c.tipoEnlace === "documento_emitido").map((c) => c.enlaceId),
+      );
       await tx.conciliacionBanco.updateMany({
         where: { movimientoId: input.movimientoId, activa: true },
         data: { activa: false },
       });
+      for (const docId of docsSync) {
+        await sincronizarCobroDocumento(tx, docId);
+      }
       await tx.movimientoBancario.update({
         where: { id: input.movimientoId },
         data: { estado: "pendiente" },
