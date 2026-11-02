@@ -78,9 +78,19 @@ export async function recalcularVersion(
     if (resuelto.pendiente || !uf) resultado.noEnviable = true;
   }
   if (puedeEscribirVersion(version, escribir)) {
+    const proyectado = proyectarCalculo(ctx, resultado);
+    const cacheJson =
+      version.estado === "borrador" ||
+      version.estado === "en_aprobacion" ||
+      version.estado === "lista"
+        ? JSON.stringify(proyectado)
+        : undefined;
     await ctx.db.cpqVersion.update({
       where: { id: version.id },
-      data: { ventaMensualClp: resultado.ventaMensual },
+      data: {
+        ventaMensualClp: resultado.ventaMensual,
+        ...(cacheJson ? { calculoCongeladoJson: cacheJson } : {}),
+      },
     });
     for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
       const d = proveedor.obtener({ lineaId: l.id, fecha });

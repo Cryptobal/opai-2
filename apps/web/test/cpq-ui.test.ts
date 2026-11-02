@@ -21,6 +21,7 @@ describe("CPQ CAR-132: entrada y acciones con permisos efectivos", () => {
         leer: rol !== "supervisor",
         crear: !["supervisor", "viewer"].includes(rol),
         aprobar: rol !== "supervisor" && ["owner", "admin"].includes(rol),
+        costos: rol !== "supervisor" && ["owner", "admin", "gerente"].includes(rol),
       };
       expect(accesoCpq(i)).toEqual(esperado);
       const nav = armarNavegacion(entradas, {
@@ -34,16 +35,16 @@ describe("CPQ CAR-132: entrada y acciones con permisos efectivos", () => {
     });
   it("módulo apagado o sesión ausente: no muestra entrada ni acciones", () => {
     const i = { ...identidadCpq(), modulosActivos: ["comercial"] };
-    expect(accesoCpq(i)).toEqual({ leer: false, crear: false, aprobar: false });
-    expect(accesoCpq(null)).toEqual({ leer: false, crear: false, aprobar: false });
+    expect(accesoCpq(i)).toEqual({ leer: false, crear: false, aprobar: false, costos: false });
+    expect(accesoCpq(null)).toEqual({ leer: false, crear: false, aprobar: false, costos: false });
     expect(armarNavegacion(entradas, { puede: () => true, modulosActivos: [] })).toEqual([]);
   });
   it("un rol personalizado y una denegación prevalecen sobre owner", () => {
     const i = identidadCpq();
     i.acceso.permisosRol = ["cpq:cotizaciones.manage"];
-    expect(accesoCpq(i)).toEqual({ leer: false, crear: false, aprobar: false });
+    expect(accesoCpq(i)).toEqual({ leer: false, crear: false, aprobar: false, costos: false });
     i.acceso.permisosRol = null;
     i.acceso.excepciones = [{ permiso: "cpq:cotizaciones.read", conceder: false }];
-    expect(accesoCpq(i)).toEqual({ leer: false, crear: false, aprobar: false });
+    expect(accesoCpq(i)).toEqual({ leer: false, crear: false, aprobar: false, costos: false });
   });
 });

@@ -39,9 +39,7 @@ test("crea desde negocio abierto con vista previa y aparece en ambas listas", as
   await expect(
     page.getByRole("link").filter({ hasText: titulo }).filter({ visible: true }).first(),
   ).toBeVisible();
-  await expect(
-    page.getByText("Pendiente del motor de costeo").filter({ visible: true }).first(),
-  ).toBeVisible();
+  await expect(page.getByText("Pendiente").filter({ visible: true }).first()).toBeVisible();
   await sinDesborde(page);
   await page.screenshot({ path: info.outputPath("cpq-lista.png"), fullPage: true });
   await page.goto(`/negocios/${negocio}/cotizaciones`);

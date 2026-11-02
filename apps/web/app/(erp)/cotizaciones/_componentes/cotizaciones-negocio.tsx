@@ -1,5 +1,5 @@
 import { cargarCotizaciones } from "./datos";
-import { ListaCotizaciones } from "./lista-cotizaciones";
+import { ListaCotizacionesPantalla } from "./lista-cotizaciones-pantalla";
 
 /** La ficha ya autorizó el negocio; la lista CPQ vuelve a verificar módulo y permiso. */
 export async function CotizacionesNegocio({
@@ -13,7 +13,7 @@ export async function CotizacionesNegocio({
 }) {
   const datos = await cargarCotizaciones(cursor, id);
   return (
-    <ListaCotizaciones
+    <ListaCotizacionesPantalla
       datos={datos}
       negocioId={id}
       abierto={abierto}
