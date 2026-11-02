@@ -6,6 +6,7 @@ import type { cargarCargo } from "./datos";
 import { CLASES } from "./datos";
 import { Versiones } from "./estructura-cargo";
 import { HojaCargo, SwitchSensible } from "./diferidas";
+import { SeccionMontosPorInstalacion } from "./seccion-montos-instalacion";
 import { NotaRetiroCargo } from "./nota-retiro-cargo";
 
 type Props = {
@@ -75,6 +76,7 @@ export async function DetalleCargo({ datos, puedeGestionar, puedeVerSensible }: 
             </div>
             <Versiones versiones={versiones} />
           </div>
+          <SeccionMontosPorInstalacion cargoId={c.id} />
           {puedeGestionar ? <HojaCargo cargo={c} puedeVerSensible={puedeVerSensible} /> : null}
         </div>
       ) : null}

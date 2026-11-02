@@ -268,6 +268,14 @@ model Persona {
   vinculos    VinculoLaboral[]
   estructuras EstructuraSueldo[]
   anexos      AnexoContrato[]
+  prevision   PersonaPrevision?
+  pago        PersonaPago?
+  pagoSolicitudes PersonaPagoSolicitud[]
+  uniforme    PersonaUniforme?
+  uniformeEntregas PersonaUniformeEntrega[]
+  jornadaDt   PersonaJornadaDt?
+  os10        PersonaOs10?
+  contactoLaboral PersonaContactoLaboral?
 
   @@unique([tenantId, rut])
   @@index([tenantId, estado])
@@ -371,6 +379,177 @@ model EstructuraItem {
 
   @@index([tenantId, estructuraId])
   @@map("estructuras_items")
+  @@schema("core")
+}
+
+/// Previsión social de la persona (Personas y Cargos PR 2). Plan ISAPRE cifrado en aplicación.
+model PersonaPrevision {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  personaId       String   @unique @map("persona_id") @db.Uuid
+  afp             String?
+  regimen         String?
+  sistemaSalud    String?  @map("sistema_salud")
+  isapreNombre    String?  @map("isapre_nombre")
+  planIsapre      String?  @map("plan_isapre")
+  planUf          Decimal? @map("plan_uf") @db.Decimal(10, 4)
+  cotizacionUfPct Decimal? @map("cotizacion_uf_pct") @db.Decimal(10, 4)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, personaId])
+  @@map("personas_prevision")
+  @@schema("core")
+}
+
+/// Cuenta bancaria vigente de la persona (número cifrado en aplicación).
+model PersonaPago {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  personaId    String   @unique @map("persona_id") @db.Uuid
+  bancoCodigo  String?  @map("banco_codigo")
+  tipoCuenta   String?  @map("tipo_cuenta")
+  numeroCuenta String?  @map("numero_cuenta")
+  rutTitular   String?  @map("rut_titular")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, personaId])
+  @@map("personas_pago")
+  @@schema("core")
+}
+
+/// Solicitud de cambio de cuenta bancaria (RRHH aprueba o rechaza; una pendiente por persona).
+model PersonaPagoSolicitud {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  personaId        String    @map("persona_id") @db.Uuid
+  bancoCodigo      String?   @map("banco_codigo")
+  tipoCuenta       String?   @map("tipo_cuenta")
+  numeroCuenta     String?   @map("numero_cuenta")
+  rutTitular       String?   @map("rut_titular")
+  /// "pendiente" | "aprobada" | "rechazada"
+  estado           String    @default("pendiente")
+  solicitadoPorId  String    @map("solicitado_por_id") @db.Uuid
+  resueltoPorId    String?   @map("resuelto_por_id") @db.Uuid
+  motivoRechazo    String?   @map("motivo_rechazo")
+  resueltaEn       DateTime? @map("resuelta_en") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, personaId, estado])
+  @@map("personas_pago_solicitudes")
+  @@schema("core")
+}
+
+model PersonaUniforme {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  personaId    String   @unique @map("persona_id") @db.Uuid
+  tallaCamisa  String?  @map("talla_camisa")
+  tallaPantalon String? @map("talla_pantalon")
+  tallaChaqueta String? @map("talla_chaqueta")
+  tallaZapato  String?  @map("talla_zapato")
+  notas        String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant   Tenant                  @relation(fields: [tenantId], references: [id])
+  persona  Persona                 @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  entregas PersonaUniformeEntrega[]
+
+  @@index([tenantId, personaId])
+  @@map("personas_uniforme")
+  @@schema("core")
+}
+
+model PersonaUniformeEntrega {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  uniformeId  String   @map("uniforme_id") @db.Uuid
+  personaId   String   @map("persona_id") @db.Uuid
+  entregadaEn DateTime @map("entregada_en") @db.Date
+  articulo    String
+  talla       String?
+  cantidad    Int      @default(1)
+  notas       String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id])
+  uniforme PersonaUniforme @relation(fields: [uniformeId], references: [id], onDelete: Cascade)
+  persona  Persona         @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, personaId, entregadaEn])
+  @@map("personas_uniforme_entregas")
+  @@schema("core")
+}
+
+model PersonaJornadaDt {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  personaId          String    @unique @map("persona_id") @db.Uuid
+  resolucion         String?
+  resolucionVigenteDesde DateTime? @map("resolucion_vigente_desde") @db.Date
+  horasSemanales     Decimal?  @map("horas_semanales") @db.Decimal(5, 2)
+  distribucion       String?
+  articulo22         Boolean   @default(false) @map("articulo_22")
+  plazoFijoPeriodo   Int?      @map("plazo_fijo_periodo")
+  terminoPlazoFijo   DateTime? @map("termino_plazo_fijo") @db.Date
+  avisoTerminoDias   Int?      @map("aviso_termino_dias")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, personaId])
+  @@map("personas_jornada_dt")
+  @@schema("core")
+}
+
+model PersonaOs10 {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  personaId  String    @unique @map("persona_id") @db.Uuid
+  credencial String?
+  venceEn    DateTime? @map("vence_en") @db.Date
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, personaId])
+  @@map("personas_os10")
+  @@schema("core")
+}
+
+model PersonaContactoLaboral {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  personaId           String   @unique @map("persona_id") @db.Uuid
+  estadoCivil         String?  @map("estado_civil")
+  telefonoSecundario  String?  @map("telefono_secundario")
+  emergenciaNombre    String?  @map("emergencia_nombre")
+  emergenciaRelacion  String?  @map("emergencia_relacion")
+  emergenciaTelefono  String?  @map("emergencia_telefono")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, personaId])
+  @@map("personas_contacto_laboral")
   @@schema("core")
 }
 
