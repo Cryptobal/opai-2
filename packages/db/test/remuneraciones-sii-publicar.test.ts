@@ -63,4 +63,43 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       ),
     ).rejects.toThrow();
   });
+
+  it("rechaza encadenamiento mismo día con otro valor", async () => {
+    const fuente = "https://www.sii.cl/valores_y_fechas/uf/uf2026.htm";
+    const vigenteDesde = "2026-11-02";
+    await enTransaccion(tenantId, (tx) =>
+      remuneracionesPublicarSii(tx, {
+        clave: "uf",
+        valor: 4_125_826,
+        vigenteDesde,
+        fuente,
+        consultadaEn: new Date("2026-11-02T12:00:00.000Z"),
+      }),
+    );
+    await expect(
+      enTransaccion(tenantId, (tx) =>
+        remuneracionesPublicarSii(tx, {
+          clave: "uf",
+          valor: Math.round(4_125_826 * 1.05),
+          vigenteDesde,
+          fuente,
+          consultadaEn: new Date("2026-11-02T13:00:00.000Z"),
+        }),
+      ),
+    ).rejects.toThrow(/mismo día|variación/i);
+  });
+
+  it("rechaza vigente_desde futuro para UTM", async () => {
+    await expect(
+      enTransaccion(tenantId, (tx) =>
+        remuneracionesPublicarSii(tx, {
+          clave: "utm",
+          valor: 72_440,
+          vigenteDesde: "2099-01-01",
+          fuente: "https://www.sii.cl/valores_y_fechas/utm/utm2099.htm",
+          consultadaEn: new Date(),
+        }),
+      ),
+    ).rejects.toThrow(/ventana/i);
+  });
 });

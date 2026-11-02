@@ -10,16 +10,11 @@ export type PublicarSiiInput = {
   consultadaEn: Date;
 };
 
-/** Lock de sesión para una sola corrida global de captura SII. */
-export async function lockCapturaSiiGlobal(tx: TenantTx): Promise<boolean> {
+/** Lock transaccional para serializar la escritura de una corrida global de captura SII. */
+export async function tryLockCapturaSiiXact(tx: TenantTx): Promise<boolean> {
   const [fila] = await tx.$queryRaw<{ ok: boolean }[]>`
-    SELECT pg_try_advisory_lock(hashtextextended('core:remuneraciones:captura_sii', 0)) AS ok`;
+    SELECT pg_try_advisory_xact_lock(hashtextextended('core:remuneraciones:captura_sii', 0)) AS ok`;
   return !!fila?.ok;
-}
-
-export async function unlockCapturaSiiGlobal(tx: TenantTx): Promise<void> {
-  await tx.$executeRaw`
-    SELECT pg_advisory_unlock(hashtextextended('core:remuneraciones:captura_sii', 0))`;
 }
 
 /** Publica UF/UTM del SII en valores_publicados (SECURITY DEFINER). */

@@ -17,6 +17,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
   v_indicador_id uuid;
   v_actual "core"."valores_publicados"%ROWTYPE;
+  v_referencia "core"."valores_publicados"%ROWTYPE;
   v_anterior bigint;
   v_max_ratio numeric;
   v_id uuid;
@@ -24,8 +25,25 @@ BEGIN
   IF p_clave NOT IN ('uf', 'utm') THEN
     RAISE EXCEPTION 'remuneraciones_publicar_sii: clave inválida %', p_clave USING ERRCODE = 'check_violation';
   END IF;
-  IF p_fuente IS NULL OR p_fuente !~ '^https://(www\.)?sii\.cl/' THEN
+  IF p_clave = 'uf' AND (
+    p_fuente IS NULL
+    OR p_fuente !~ '^https://www\.sii\.cl/valores_y_fechas/uf/uf[0-9]{4}\.htm$'
+  ) THEN
     RAISE EXCEPTION 'remuneraciones_publicar_sii: fuente SII inválida' USING ERRCODE = 'check_violation';
+  END IF;
+  IF p_clave = 'utm' AND (
+    p_fuente IS NULL
+    OR p_fuente !~ '^https://www\.sii\.cl/valores_y_fechas/utm/utm[0-9]{4}\.htm$'
+  ) THEN
+    RAISE EXCEPTION 'remuneraciones_publicar_sii: fuente SII inválida' USING ERRCODE = 'check_violation';
+  END IF;
+  IF p_clave = 'uf' AND (p_vigente_desde < CURRENT_DATE - 1 OR p_vigente_desde > CURRENT_DATE + 1) THEN
+    RAISE EXCEPTION 'remuneraciones_publicar_sii: vigente_desde UF fuera de ventana'
+      USING ERRCODE = 'check_violation';
+  END IF;
+  IF p_clave = 'utm' AND p_vigente_desde <> date_trunc('month', CURRENT_DATE)::date THEN
+    RAISE EXCEPTION 'remuneraciones_publicar_sii: vigente_desde UTM fuera de ventana'
+      USING ERRCODE = 'check_violation';
   END IF;
   IF p_valor IS NULL OR p_valor < 1 THEN
     RAISE EXCEPTION 'remuneraciones_publicar_sii: valor inválido' USING ERRCODE = 'check_violation';
@@ -56,8 +74,23 @@ BEGIN
       USING ERRCODE = 'check_violation';
   END IF;
 
-  IF v_actual.id IS NOT NULL THEN
-    v_anterior := (v_actual.valor_json::text)::bigint;
+  IF v_actual.id IS NOT NULL
+     AND v_actual.vigente_desde = p_vigente_desde
+     AND (v_actual.valor_json::text)::bigint <> p_valor THEN
+    RAISE EXCEPTION 'remuneraciones_publicar_sii: mismo día con otro valor'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  SELECT * INTO v_referencia
+    FROM "core"."valores_publicados"
+    WHERE indicador_id = v_indicador_id
+      AND estado = 'vigente'
+      AND vigente_desde < p_vigente_desde
+    ORDER BY vigente_desde DESC
+    LIMIT 1;
+
+  IF v_referencia.id IS NOT NULL THEN
+    v_anterior := (v_referencia.valor_json::text)::bigint;
     IF v_anterior IS NOT NULL AND v_anterior > 0 AND p_valor <> v_anterior THEN
       v_max_ratio := CASE WHEN p_clave = 'uf' THEN 0.05 ELSE 0.25 END;
       IF abs(p_valor - v_anterior)::numeric / v_anterior::numeric > v_max_ratio THEN
@@ -70,17 +103,6 @@ BEGIN
   IF v_actual.id IS NOT NULL
      AND v_actual.vigente_desde = p_vigente_desde
      AND (v_actual.valor_json::text)::bigint = p_valor THEN
-    RETURN v_actual.id;
-  END IF;
-
-  IF v_actual.id IS NOT NULL AND v_actual.vigente_desde = p_vigente_desde THEN
-    UPDATE "core"."valores_publicados"
-      SET valor_json = to_jsonb(p_valor),
-          fuente = p_fuente,
-          consultada_el = p_consultada_en::date,
-          verificacion = 'verificado',
-          vigente_hasta = NULL
-      WHERE id = v_actual.id;
     RETURN v_actual.id;
   END IF;
 
@@ -99,6 +121,8 @@ BEGIN
   RETURN v_id;
 END;
 $$;
+
+REVOKE INSERT, UPDATE ON "core"."valores_publicados" FROM opai_app;
 
 REVOKE ALL ON FUNCTION "core"."remuneraciones_publicar_sii"(text, bigint, date, text, timestamptz) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION "core"."remuneraciones_publicar_sii"(text, bigint, date, text, timestamptz) TO opai_app;

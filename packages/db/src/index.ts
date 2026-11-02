@@ -63,8 +63,7 @@ export { Prisma } from "./generated/prisma/client";
 
 export { registrarConsumoSesion } from "./consumo-sesion";
 export {
-  lockCapturaSiiGlobal,
   remuneracionesPublicarSii,
-  unlockCapturaSiiGlobal,
+  tryLockCapturaSiiXact,
   type PublicarSiiInput,
 } from "./remuneraciones-sii";
