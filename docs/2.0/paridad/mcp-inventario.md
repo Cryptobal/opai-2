@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 444 pares pantalla→capacidad · 401 con herramienta · 43 excepciones justificadas · 0 faltantes.
+**Resumen:** 451 pares pantalla→capacidad · 408 con herramienta · 43 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -167,6 +167,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.quitar` | `cpq_lineas_quitar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.sync_servicio` | `cpq_propuestas_tecnica_sync_servicio` | existe |
 | compartido | `app/(erp)/cpq/biblioteca/_componentes` | `cpq.biblioteca_bloques.list` | `cpq_biblioteca_bloques_list` | existe |
@@ -553,6 +554,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
 | `cpq.cotizaciones.aprobar` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
+| `cpq.cotizaciones.enviar` | Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad. |
 | `cpq.cotizaciones.rechazar_aprobacion` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
 | `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
 | `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
@@ -664,7 +666,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.catalogo_items.update`
 - `cpq.correlativos.fijar`
 - `cpq.cotizaciones.clonar`
-- `cpq.cotizaciones.enviar`
 - `cpq.cotizaciones.get`
 - `cpq.cotizaciones.preview_pdf`
 - `cpq.cotizaciones.retirar_aprobacion`
