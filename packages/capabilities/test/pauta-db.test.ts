@@ -32,6 +32,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
   let puestoX3 = "";
   let luis = "";
   let rosa = "";
+  let martin = "";
   const userSup = randomUUID();
   const medidor = { registrar: async () => undefined };
   const manana = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
@@ -105,6 +106,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     personaB = await persona(tenantB, b.cargo, instB, "Persona", "22.222.222-2");
     luis = await persona(tenantA, a.cargo, instA, "Luis", "13.131.313-1");
     rosa = await persona(tenantA, a.cargo, instA, "Rosa", "14.141.414-1");
+    martin = await persona(tenantA, a.cargo, instA, "Martín", "15.151.515-1");
   });
 
   afterAll(async () => {
@@ -274,7 +276,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     const prevReemp = await ejecutar(
       ctxOwner(tenantA),
       "pauta.reemplazos.asignar",
-      { puestoId: puestoExtra, fecha: dia, personaId: ana, motivo: "Cubre turno" },
+      { puestoId: puestoExtra, fecha: dia, personaId: martin, motivo: "Cubre turno" },
       { dryRun: true },
     );
     expect(prevReemp.ok).toBe(true);
@@ -307,7 +309,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     const asignar = await ejecutar(ctxOwner(tenantA), "pauta.reemplazos.asignar", {
       puestoId: puestoPpc,
       fecha: dia,
-      personaId: luis,
+      personaId: martin,
       motivo: "Reemplazo de prueba",
     });
     expect(asignar.ok).toBe(true);
