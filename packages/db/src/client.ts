@@ -27,14 +27,17 @@ function conContador(cliente: PrismaClient) {
 
 export type ClienteApp = ReturnType<typeof conContador>;
 
+type DbUrlVar = "DATABASE_URL" | "DATABASE_URL_MIGRATE" | "DATABASE_URL_CRON_SII";
+
 type Registro = {
   __opaiDbApp?: ClienteApp;
   __opaiDbAdmin?: PrismaClient;
+  __opaiDbCronSii?: ClienteApp;
 };
 
 const registro = globalThis as unknown as Registro;
 
-function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): PrismaClient {
+function crearCliente(variable: DbUrlVar): PrismaClient {
   const url = process.env[variable];
   if (!url) {
     throw new Error(`Falta la variable de entorno ${variable}.`);
@@ -46,11 +49,11 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
   // Un pool por instancia serverless (este cliente se guarda en globalThis); en Vercel se avisa si
   // falta -pooler. El adaptador lo cierra en `$disconnect` (`disposeExternalPool`). Better Auth usa
   // este mismo cliente (`clienteAuth()`), así que comparte el pool, su configuración y su reintento.
-  const app = variable === "DATABASE_URL";
+  const app = variable === "DATABASE_URL" || variable === "DATABASE_URL_CRON_SII";
   const pool = crearPool(
     {
       ...configPool(process.env, url, app),
-      ...(app ? {} : { options: "-c row_security=off" }),
+      ...(variable === "DATABASE_URL_MIGRATE" ? { options: "-c row_security=off" } : {}),
     },
     app,
   );
@@ -74,6 +77,12 @@ export function clienteApp(): ClienteApp {
   return registro.__opaiDbApp;
 }
 
+/** Cliente del cron de captura SII (`opai_cron_sii`, DATABASE_URL_CRON_SII). Solo captura UF/UTM. */
+export function clienteCronSii(): ClienteApp {
+  registro.__opaiDbCronSii ??= conContador(crearCliente("DATABASE_URL_CRON_SII"));
+  return registro.__opaiDbCronSii;
+}
+
 /**
  * Cliente de scripts (DATABASE_URL_MIGRATE). Con FORCE el dueño ya no salta RLS:
  * requiere un rol de mantenimiento BYPASSRLS explícito para datos cross-tenant.
@@ -87,7 +96,12 @@ export function dbAdmin(): PrismaClient {
 
 /** Cierra los clientes abiertos (scripts y tests). */
 export async function cerrarClientes(): Promise<void> {
-  await Promise.all([registro.__opaiDbApp?.$disconnect(), registro.__opaiDbAdmin?.$disconnect()]);
+  await Promise.all([
+    registro.__opaiDbApp?.$disconnect(),
+    registro.__opaiDbAdmin?.$disconnect(),
+    registro.__opaiDbCronSii?.$disconnect(),
+  ]);
   delete registro.__opaiDbApp;
   delete registro.__opaiDbAdmin;
+  delete registro.__opaiDbCronSii;
 }

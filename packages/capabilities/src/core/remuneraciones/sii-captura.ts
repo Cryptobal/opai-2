@@ -1,4 +1,4 @@
-import { tryLockCapturaSiiXact } from "@opai/db";
+import { tryLockCapturaSiiXact, enTransaccionCapturaSii } from "@opai/db";
 
 import type { Contexto } from "../../types";
 
@@ -79,7 +79,7 @@ export async function capturarUfUtmSii(ctx: Contexto, opciones: OpcionesCaptura 
     htmlUtm = null;
   }
 
-  await ctx.transaccion(async (tx) => {
+  await enTransaccionCapturaSii(ctx.tenantId, async (tx) => {
     const locked = await tryLockCapturaSiiXact(tx);
     if (!locked) {
       await registrarCapturasOmitidasPorLock(tx, indicadores, anio);

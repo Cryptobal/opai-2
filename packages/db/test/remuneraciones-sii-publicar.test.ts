@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
-import { enTransaccion } from "../src/transaccion";
+import { enTransaccionCapturaSii } from "../src/transaccion-captura-sii";
 import { remuneracionesPublicarSii } from "../src/remuneraciones-sii";
 import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
 import { aislarValoresPlataformaUfUtm } from "./aislar-valores-plataforma";
@@ -69,7 +69,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
   });
 
   it("publica UF vía función con fuente SII", async () => {
-    const id = await enTransaccion(tenantId, (tx) =>
+    const id = await enTransaccionCapturaSii(tenantId, (tx) =>
       remuneracionesPublicarSii(tx, {
         clave: "uf",
         valor: 4_125_826,
@@ -84,7 +84,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
 
   it("rechaza fuente fuera del SII", async () => {
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "uf",
           valor: 4_125_826,
@@ -98,7 +98,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
 
   it("rechaza encadenamiento mismo día con otro valor", async () => {
     const fuente = `https://www.sii.cl/valores_y_fechas/uf/uf${anio}.htm`;
-    await enTransaccion(tenantId, (tx) =>
+    await enTransaccionCapturaSii(tenantId, (tx) =>
       remuneracionesPublicarSii(tx, {
         clave: "uf",
         valor: 4_125_826,
@@ -108,7 +108,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       }),
     );
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "uf",
           valor: Math.round(4_125_826 * 1.05),
@@ -122,7 +122,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
 
   it("rechaza vigente_desde futuro para UTM", async () => {
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "utm",
           valor: 72_440,
@@ -137,7 +137,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
   it("rechaza UF futura aunque la sesión adelante CURRENT_DATE (America/Santiago)", async () => {
     const manana = restarDias(hoy, -1);
     await expect(
-      enTransaccion(tenantId, async (tx) => {
+      enTransaccionCapturaSii(tenantId, async (tx) => {
         await tx.$executeRawUnsafe(`SET LOCAL TIME ZONE 'Etc/GMT-14'`);
         return remuneracionesPublicarSii(tx, {
           clave: "uf",
@@ -154,7 +154,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
     await e.admin.valorPublicado.deleteMany({ where: { indicadorId: ufId } });
     const fuente = `https://www.sii.cl/valores_y_fechas/uf/uf${anio}.htm`;
     const base = 4_000_000;
-    await enTransaccion(tenantId, (tx) =>
+    await enTransaccionCapturaSii(tenantId, (tx) =>
       remuneracionesPublicarSii(tx, {
         clave: "uf",
         valor: base,
@@ -164,7 +164,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       }),
     );
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "uf",
           valor: Math.round(base * 1.05),
@@ -194,7 +194,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       },
     });
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "utm",
           valor: Math.round(70_000 * 1.25),
@@ -222,7 +222,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       },
     });
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "uf",
           valor: 19_999_999,
@@ -250,7 +250,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       },
     });
     const tope = Math.round(base * (1 + Math.min(3 * 0.0005, 0.03)));
-    const id = await enTransaccion(tenantId, (tx) =>
+    const id = await enTransaccionCapturaSii(tenantId, (tx) =>
       remuneracionesPublicarSii(tx, {
         clave: "uf",
         valor: tope,
@@ -278,7 +278,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       },
     });
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "uf",
           valor: Math.round(base * 1.04),
@@ -305,7 +305,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
         verificacion: "verificado",
       },
     });
-    const id = await enTransaccion(tenantId, (tx) =>
+    const id = await enTransaccionCapturaSii(tenantId, (tx) =>
       remuneracionesPublicarSii(tx, {
         clave: "utm",
         valor: 70_350,
@@ -333,7 +333,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       },
     });
     await expect(
-      enTransaccion(tenantId, (tx) =>
+      enTransaccionCapturaSii(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "utm",
           valor: Math.round(70_000 * 1.25),

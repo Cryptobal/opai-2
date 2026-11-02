@@ -40,10 +40,15 @@ export async function prepararEntorno() {
   await pg.query(
     `CREATE ROLE ${rol} LOGIN NOBYPASSRLS NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT IN ROLE opai_app PASSWORD ${pg.escapeLiteral(password)}`,
   );
+  const cronPassword = randomBytes(24).toString("base64url");
+  await pg.query(
+    `ALTER ROLE opai_cron_sii WITH LOGIN PASSWORD ${pg.escapeLiteral(cronPassword)}`,
+  );
   await pg.end();
 
   process.env["DATABASE_URL"] = urlParaRol(url, rol, password);
   process.env["DATABASE_URL_MIGRATE"] = url;
+  process.env["DATABASE_URL_CRON_SII"] = urlParaRol(url, "opai_cron_sii", cronPassword);
   const { forTenant } = await import("../src/for-tenant");
   const { forUser } = await import("../src/for-user");
   const { cerrarClientes } = await import("../src/client");
