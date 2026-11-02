@@ -42,6 +42,9 @@ export const manifest = defineModule({
   configuracion: z.object({}),
   eventos: [
     { id: "cpq.cotizacion.creada", descripcion: "Se creó una cotización en borrador." },
+    { id: "cpq.cotizacion.aprobacion_solicitada", descripcion: "Una cotización pasó a aprobación por margen." },
+    { id: "cpq.cotizacion.aprobada", descripcion: "Se aprobó el margen de una cotización." },
+    { id: "cpq.cotizacion.aprobacion_rechazada", descripcion: "Se rechazó la aprobación de margen." },
     { id: "cpq.cotizacion.enviada", descripcion: "Se envió una cotización al cliente." },
   ],
   capacidades,

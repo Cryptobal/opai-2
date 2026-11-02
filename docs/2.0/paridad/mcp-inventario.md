@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 418 pares pantalla→capacidad · 378 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 424 pares pantalla→capacidad · 382 con herramienta · 42 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -149,6 +149,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.explicar` | `cpq_cotizaciones_explicar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.marcar_lista` | `cpq_cotizaciones_marcar_lista` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.solicitar_aprobacion` | `cpq_cotizaciones_solicitar_aprobacion` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.quitar` | `cpq_lineas_quitar` | existe |
@@ -518,6 +524,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
+| `cpq.cotizaciones.aprobar` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
+| `cpq.cotizaciones.rechazar_aprobacion` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
 | `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
 | `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
 | `platform.usuarios.borrar` | Solo personas: borrar una identidad es irreversible y lo decide Plataforma con sesión (CAR-45). |
@@ -567,6 +575,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
+| `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes` | no | reservada a personas |
+| `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes` | no | reservada a personas |
 | `platform.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `platform.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `platform.usuarios.borrar` | sin pantalla todavía · CAR-45 · desde 2026-10-29 | no | reservada a personas |
@@ -622,6 +632,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.cotizaciones.enviar`
 - `cpq.cotizaciones.get`
 - `cpq.cotizaciones.preview_pdf`
+- `cpq.cotizaciones.retirar_aprobacion`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
 - `cpq.secciones.margen`

@@ -15,6 +15,7 @@ import {
   semilla,
 } from "./fixtures";
 import { capacidades } from "./index";
+import { prepararEnvio } from "./preparar-envio.test-helper";
 
 beforeAll(() => {
   registrarCapacidades(capacidades);
@@ -24,7 +25,7 @@ function ctxGestor(conCostos = false) {
   return contextoDePrueba({
     semilla: semilla(),
     modulosActivos: ACTIVOS,
-    permisos: conCostos ? [...GESTOR, ...CON_COSTOS] : GESTOR,
+    permisos: conCostos ? [...GESTOR, ...CON_COSTOS, "cpq:aprobar"] : GESTOR,
   });
 }
 
@@ -67,7 +68,7 @@ describe("CAR-135 pr103", () => {
       nombre: "Turno",
       sueldoBaseClp: 650_000,
     });
-    await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    await prepararEnvio(ctx, id);
     const sinContacto = await executeCapability(ctx, "cpq.cotizaciones.enviar", { id } as { id: string });
     expect(sinContacto.ok).toBe(false);
     const env = await executeCapability(ctx, "cpq.cotizaciones.enviar", {
@@ -99,7 +100,7 @@ describe("CAR-135 pr103", () => {
       nombre: "Turno",
       sueldoBaseClp: 650_000,
     });
-    await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    await prepararEnvio(ctx, id);
     const env = await executeCapability(ctx, "cpq.cotizaciones.enviar", {
       id,
       contactoId: CONTACTO_1,
@@ -224,6 +225,8 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
       (await executeCapability(ctx, "cpq.cotizaciones.calcular", { id }, { dryRun: true })).ok,
     ).toBe(true);
     expect(await ctx.db.cpqCatalogoItem.count()).toBe(0);
+    await prepararEnvio(ctx, id);
+    const itemsTrasPreparar = await ctx.db.cpqCatalogoItem.count();
     expect(
       (
         await executeCapability(
@@ -234,7 +237,7 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
         )
       ).ok,
     ).toBe(true);
-    expect(await ctx.db.cpqCatalogoItem.count()).toBe(0);
+    expect(await ctx.db.cpqCatalogoItem.count()).toBe(itemsTrasPreparar);
   });
 
   it("catalogo_items.list oculta costoUnitarioClp sin cpq:costos.ver", async () => {
@@ -270,7 +273,7 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
       nombre: "Turno",
       sueldoBaseClp: 650_000,
     });
-    await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    await prepararEnvio(ctx, id);
     const prev = await executeCapability(
       ctx,
       "cpq.cotizaciones.enviar",
@@ -279,7 +282,7 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
     );
     expect(prev.ok).toBe(true);
     const v = await ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id } });
-    expect(v?.estado).toBe("borrador");
+    expect(v?.estado).toBe("lista");
     expect(await ctx.db.documentoVinculo.count({ where: { entidadId: id } })).toBe(0);
   });
 

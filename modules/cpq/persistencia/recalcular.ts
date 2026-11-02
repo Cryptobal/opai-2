@@ -4,6 +4,7 @@ import { calcular, resultadoSinCostos, type ResultadoCalculo } from "../domain/m
 import { cotizacionDe } from "../capabilities/util";
 import { modeloDesdeCatalogo } from "./catalogo-modelo";
 import { mapearVersionCalculo } from "./mapear";
+import { fechaCalculoHoy } from "./fecha-calculo";
 import { juegoParaFecha, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
@@ -44,7 +45,7 @@ export async function recalcularVersion(
   const pack = await cargarFilasVersion(ctx, cotizacionId, numero, escribir);
   if (!pack) return null;
   const { version, secciones, lineas } = pack;
-  const consulta = (version.validaHasta ?? new Date()).toISOString().slice(0, 10);
+  const consulta = fechaCalculoHoy();
   const juego = await juegoParaFecha(ctx, consulta);
   const fecha = juego?.fecha ?? consulta;
   const ufInd = juego?.valores.find((v) => v.indicador === "uf");
