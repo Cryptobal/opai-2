@@ -28,7 +28,5 @@ export async function CuentasContacto({ contactoId }: { contactoId: string }) {
       </SeccionTarjeta>
     );
   const gestionar = identidad ? puedeDeIdentidad(identidad)(PERMISOS_CORE.cuentasManage) : false;
-  return (
-    <ListaVinculosDiferida contactoId={contactoId} vinculos={r.data} gestionar={gestionar} />
-  );
+  return <ListaVinculosDiferida contactoId={contactoId} vinculos={r.data} gestionar={gestionar} />;
 }
