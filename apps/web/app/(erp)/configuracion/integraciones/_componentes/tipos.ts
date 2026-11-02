@@ -1,16 +1,4 @@
-import {
-  Bot,
-  FileText,
-  Landmark,
-  type LucideIcon,
-  Mail,
-  MapPin,
-  MessageCircle,
-  MessageSquare,
-  ScanFace,
-  Wallet,
-  Workflow,
-} from "lucide-react";
+import { Bot, FileText, Landmark, type LucideIcon, Mail, MapPin, MessageCircle, MessageSquare, ScanFace, Wallet, Workflow } from "lucide-react";
 
 /** Salida de core.integraciones.list/get (nunca trae credenciales: solo máscaras). */
 export type Integracion = {
@@ -45,12 +33,19 @@ export const SUBTITULO: Record<string, string> = {
   resend: "Resend",
   google_maps: "Google Maps",
   whatsapp: "API de WhatsApp Business",
-  dte: "DTE · SII",
+  dte_emision: "Emisión · SII",
+  dte_cesion: "Octava",
   fintoc: "Fintoc",
   factoring: "Cesión de facturas",
   biometria: "Marcación con rostro",
   slack: "Avisos en canales",
   webhooks: "Eventos hacia tus sistemas",
+};
+
+/** Título visible en la tarjeta cuando no debe usarse solo el de la categoría. */
+export const TITULO_TARJETA: Record<string, string> = {
+  dte_cesion: "Cesión de facturas (Octava)",
+  dte_emision: "Emisión DTE (SII)",
 };
 
 export const ESTADO: Record<
@@ -62,6 +57,11 @@ export const ESTADO: Record<
   no_configurada: { texto: "No configurada", tono: "neutro" },
   no_disponible: { texto: "Sin credencial", tono: "warning" },
   proximamente: { texto: "Próximamente", tono: "neutro" },
+};
+
+/** Icono en grilla; la cesión Octava se muestra junto al bloque DTE. */
+export const ICONO_TARJETA: Record<string, LucideIcon> = {
+  dte_cesion: FileText,
 };
 
 export const MODALIDAD: Record<string, string> = { plataforma: "De plataforma", propia: "Propia" };
