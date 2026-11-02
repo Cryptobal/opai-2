@@ -1,4 +1,5 @@
-import { cifrar, descifrar, generarDek, kekDelEntorno, sufijoDe } from "@opai/integrations";
+/* eslint-disable max-lines -- CAF (CAR-143) + guardarSecretoTx certificado DTE (CAR-149) en el mismo módulo */
+import { cifrar, descifrar, generarDek, kekDelEntorno, sufijoDe, sufijoParaGuardar } from "@opai/integrations";
 
 import type { TenantTx } from "@opai/db";
 
@@ -40,6 +41,19 @@ export async function dekDe(ctx: Contexto): Promise<Buffer> {
     },
   });
   return dek;
+}
+
+/** Guarda un secreto dentro de una transacción ya abierta (certificado DTE + clave atómicos). */
+export async function guardarSecretoTx(
+  tx: TenantTx,
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+): Promise<void> {
+  await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
+  const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+  await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
 }
 
 export async function guardarSecreto(
@@ -127,7 +141,7 @@ async function guardarCifrado(
     cifrado: bytes(c.cifrado),
     iv: bytes(c.iv),
     tag: bytes(c.tag),
-    sufijo: sufijoDe(valor),
+    sufijo: sufijoParaGuardar(nombre, valor),
   };
   const row = await db.secreto.upsert({
     where: { tenantId_integracionId_nombre: { tenantId: ctx.tenantId, integracionId, nombre } },

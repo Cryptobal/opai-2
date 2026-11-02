@@ -10,6 +10,7 @@
     ".": "./src/index.ts",
     "./form-screen-listo": "./src/patterns/form-screen-listo.tsx",
     "./switch": "./src/components/switch.tsx",
+    "./uploader": "./src/components/uploader.tsx",
     "./tokens.css": "./src/tokens.css",
     "./styles.css": "./src/styles.css"
   },

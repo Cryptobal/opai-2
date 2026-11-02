@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 451 pares pantalla→capacidad · 408 con herramienta · 43 excepciones justificadas · 0 faltantes.
+**Resumen:** 452 pares pantalla→capacidad · 408 con herramienta · 44 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -138,6 +138,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.titular_anonimizar` | — | excepción |
 | compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.documentos.url_descarga` | `core_documentos_url_descarga` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.configurar` | — | excepción |
+| compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.guardar_certificado_dte` | — | excepción |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.probar` | `core_integraciones_probar` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.set_secreto` | — | excepción |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.permisos.catalogo` | `core_permisos_catalogo` | existe |
@@ -541,6 +542,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.firmas.ver_firmante` | Interna: se mira antes de existir sesión con el enlace personal como credencial, igual que core.invitations.peek (firma.md §5). |
 | `core.geo.mapa` | Interna: entrega la imagen del mapa al proxy `/api/geo/mapa` con la clave del tenant; una imagen no sirve a un agente y la clave nunca sale. |
 | `core.integraciones.configurar` | Solo personas: credenciales del tenant; nunca salen ni se cambian por API ni MCP (ADR-027). |
+| `core.integraciones.guardar_certificado_dte` | Solo personas: certificado .pfx cifrado del tenant; nunca sale ni se cambia por API ni MCP (ADR-027, CAR-149). |
 | `core.integraciones.set_secreto` | Solo personas: secretos cifrados del tenant; nunca salen ni se cambian por API ni MCP (ADR-027). |
 | `core.invitations.accept` | Interna: crea la membresía de quien acepta el enlace; un agente no acepta invitaciones por nadie. |
 | `core.invitations.peek` | Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial). |
@@ -599,6 +601,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.firmas.firmar` | `/firmar/[slug]/[token]` | no | reservada a personas |
 | `core.firmas.rechazar` | `/firmar/[slug]/[token]` | no | reservada a personas |
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
+| `core.integraciones.guardar_certificado_dte` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
 | `core.remuneraciones.confirmar_mutual` | `/configuracion/remuneraciones` | no | reservada a personas |
