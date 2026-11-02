@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 396 pares pantalla→capacidad · 356 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 397 pares pantalla→capacidad · 357 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -359,6 +359,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios` | `core.users.remove` | `core_users_remove` | existe |
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
+| erp | `/cotizaciones/[id]` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
@@ -588,8 +589,15 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
+- `cpq.cotizaciones.calcular`
 - `cpq.cotizaciones.get`
+- `cpq.lineas.actualizar`
+- `cpq.lineas.crear`
+- `cpq.lineas.quitar`
+- `cpq.lineas.reordenar`
 - `cpq.motor.simular`
+- `cpq.secciones.margen`
+- `cpq.versiones.margen`
 - `finanzas.ajustes.actualizar`
 - `finanzas.ajustes.obtener`
 - `finanzas.celdas.cumplir`

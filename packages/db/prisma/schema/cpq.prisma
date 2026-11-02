@@ -72,6 +72,8 @@ model CpqSeccion {
   versionId     String   @map("version_id") @db.Uuid
   instalacionId String?  @map("instalacion_id") @db.Uuid
   nombre        String
+  /// Margen de la sección escalado (PCT_ESCALA); nulo hereda el objetivo de la versión.
+  margenPct     Int?     @map("margen_pct")
   orden         Int      @default(0)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -99,6 +101,23 @@ model CpqLinea {
   habilitada     Boolean  @default(true)
   visibleCliente Boolean  @default(true) @map("visible_cliente")
   orden          Int      @default(0)
+  /// Patrón de turno (p. ej. 4x4); solo líneas tipo puesto.
+  patron         String?
+  horaInicio     String?  @map("hora_inicio")
+  horaFin        String?  @map("hora_fin")
+  diasCobertura  Int?     @map("dias_cobertura")
+  /// Personas por posición sobrescritas (escala 10_000); exige `personasMotivo`.
+  personasPorPosicionEscaladas Int? @map("personas_por_posicion_escaladas")
+  personasMotivo String?  @map("personas_motivo")
+  /// Sueldo base mensual CLP para el motor 07e; sin ingreso manual de costo empleador.
+  sueldoBaseClp  Int?     @map("sueldo_base_clp")
+  itemCodigo     String?  @map("item_codigo")
+  cantidadEscalada Int?   @map("cantidad_escalada")
+  rateoJson      String?  @map("rateo_json")
+  precioUnitarioClp Int?  @map("precio_unitario_clp")
+  margenPropioPct Int?    @map("margen_propio_pct")
+  alcanceDotacion String? @map("alcance_dotacion")
+  huellaJuegoValores String? @map("huella_juego_valores")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

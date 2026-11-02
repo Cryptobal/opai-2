@@ -27,9 +27,7 @@ const vigencia = (c: CotizacionFila) => (c.vigente ? "Vigente" : "Alternativa");
 const fecha = (c: CotizacionFila) =>
   c.version?.validaHasta?.split("-").reverse().join("-") ?? "Sin fecha";
 const venta = (c: CotizacionFila) =>
-  c.version?.ventaMensualClp == null
-    ? "Pendiente del motor de costeo"
-    : pesos(c.version.ventaMensualClp);
+  c.version?.ventaMensualClp == null ? "Sin calcular" : pesos(c.version.ventaMensualClp);
 
 /** Lista móvil y tabla desde md; el código abre las cotizaciones de su negocio. */
 export function ListaCotizaciones({
@@ -57,7 +55,7 @@ export function ListaCotizaciones({
       clave={(c) => c.id}
       accionPrincipal={nueva}
       Link={LinkNext}
-      href={(c) => `/negocios/${c.negocioId}/cotizaciones`}
+      href={(c) => `/cotizaciones/${c.id}`}
       textos={{
         vacio: {
           titulo: "Aún no hay cotizaciones",
@@ -101,16 +99,11 @@ export function ListaCotizaciones({
         { id: "venta", etiqueta: "Venta mensual", render: venta },
       ]}
       paginacion={
-        <>
-          <EnlaceBoton href={base} variante="ghost">
-            Primera página
+        d.siguiente ? (
+          <EnlaceBoton href={`${base}?cursor=${d.siguiente}`} variante="secondary">
+            Siguiente
           </EnlaceBoton>
-          {d.siguiente ? (
-            <EnlaceBoton href={`${base}?cursor=${d.siguiente}`} variante="secondary">
-              Siguiente
-            </EnlaceBoton>
-          ) : null}
-        </>
+        ) : null
       }
     />
   );

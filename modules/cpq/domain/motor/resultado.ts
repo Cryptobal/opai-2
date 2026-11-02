@@ -17,6 +17,12 @@ export type ResultadoCalculo = {
 export function resultadoSinCostos(r: ResultadoCalculo) {
   return { ventaMensual: r.ventaMensual, pagosUnicos: r.pagosUnicos, dotacion: { ...r.dotacion },
     uf: r.uf ? { ...r.uf } : null, fecha: r.fecha, estado: r.estado,
-    advertencias: r.advertencias.filter((a) => a === "costo laboral pendiente: motor de sueldos" || a === "falta valor UF" || a === "rateo mayor que plazo del contrato"),
+    advertencias: r.advertencias.filter(
+      (a) =>
+        a === "costo laboral pendiente: motor de sueldos" ||
+        a === "falta valor UF" ||
+        a === "Falta valor UF del día o del período." ||
+        a === "rateo mayor que plazo del contrato",
+    ),
     noEnviable: r.noEnviable };
 }
