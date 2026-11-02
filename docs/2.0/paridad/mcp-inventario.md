@@ -627,6 +627,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
+- `finanzas.cesiones.listar`
 - `finanzas.cierres.listar`
 - `finanzas.compras.importar`
 - `finanzas.derivadas.listar`
@@ -635,6 +636,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.actualizar`
 - `finanzas.folios.cargar_caf`
 - `finanzas.folios.listar`
+- `finanzas.ventas.cesion_ceder`
+- `finanzas.ventas.cesion_simular`
 - `finanzas.ventas.emitir_nota_credito`
 - `finanzas.ventas.enviar_sii`
 - `finanzas.ventas.pdf`
