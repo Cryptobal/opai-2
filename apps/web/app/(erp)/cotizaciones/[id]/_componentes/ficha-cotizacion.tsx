@@ -10,6 +10,8 @@ import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { DatosFicha } from "../page";
+import { AccionesCotizacion } from "./acciones-cotizacion";
+import { LineaCotizacion } from "./linea-cotizacion";
 import { ResumenCotizacion } from "./resumen-cotizacion";
 
 export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
@@ -26,34 +28,17 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
   }
   const editable = datos.gestionar && d.version.editable;
   const c = d.calculo as Parameters<typeof ResumenCotizacion>[0]["calculo"];
+  const meta = d.meta as Parameters<typeof ResumenCotizacion>[0]["meta"];
   const recargar = () => router.refresh();
+  const propsMeta = meta !== undefined ? { meta } : {};
 
-  async function agregarLinea(seccionId: string) {
-    const r = await ejecutar("cpq.lineas.crear", {
-      seccionId,
-      tipo: "puesto",
-      nombre: nombreNueva.trim() || "Puesto",
-    });
-    if (r != null) recargar();
-  }
-
-  async function quitarLinea(id: string) {
-    const r = await ejecutar("cpq.lineas.quitar", { id });
-    if (r != null) recargar();
-  }
-
-  async function renombrarLinea(id: string, nombre: string) {
-    const r = await ejecutar("cpq.lineas.actualizar", { id, nombre: nombre.trim() });
-    if (r != null) recargar();
-  }
-
-  const resumen = <ResumenCotizacion version={d.version} calculo={c} />;
+  const resumen = <ResumenCotizacion version={d.version} calculo={c} {...propsMeta} />;
 
   return (
     <Estado state={datos.state} variante="detalle" textos={{ error: { accion: <BotonReintentar /> } }}>
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
-          <header className="space-y-1">
+          <header className="space-y-2">
             <h1 className="t-h2">
               {d.cotizacion.codigo} · {d.cotizacion.titulo}
             </h1>
@@ -63,6 +48,15 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
                 Abrir negocio
               </LinkNext>
             </p>
+            <AccionesCotizacion
+              cotizacionId={d.cotizacion.id}
+              version={d.version}
+              calculo={c}
+              {...propsMeta}
+              gestionar={datos.gestionar}
+              aprobar={datos.aprobar}
+              onHecho={recargar}
+            />
           </header>
           {error ? <p className="t-caption text-danger">{error}</p> : null}
           <div className="lg:hidden">{resumen}</div>
@@ -79,7 +73,17 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
                       className="max-w-xs"
                     />
                   </Campo>
-                  <Button type="button" disabled={pendiente} onClick={() => agregarLinea(s.id)}>
+                  <Button
+                    type="button"
+                    disabled={pendiente}
+                    onClick={() =>
+                      void ejecutar("cpq.lineas.crear", {
+                        seccionId: s.id,
+                        tipo: "puesto",
+                        nombre: nombreNueva.trim() || "Puesto",
+                      }).then((r) => r != null && recargar())
+                    }
+                  >
                     Agregar puesto
                   </Button>
                 </div>
@@ -89,34 +93,23 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
                   <li className="t-caption text-fg-muted">Sin líneas</li>
                 ) : (
                   s.lineas.map((l) => (
-                    <li key={l.id} className="flex flex-wrap items-center gap-2 t-body-sm">
-                      <span>
-                        {l.nombre} · {l.tipo}
-                      </span>
-                      {editable ? (
-                        <>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            disabled={pendiente}
-                            onClick={() => {
-                              const n = window.prompt("Nombre de la línea", l.nombre);
-                              if (n) void renombrarLinea(l.id, n);
-                            }}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            disabled={pendiente}
-                            onClick={() => quitarLinea(l.id)}
-                          >
-                            Quitar
-                          </Button>
-                        </>
-                      ) : null}
-                    </li>
+                    <LineaCotizacion
+                      key={l.id}
+                      linea={l}
+                      editable={Boolean(editable)}
+                      pendiente={pendiente}
+                      onRenombrar={(id, nombre) =>
+                        void ejecutar("cpq.lineas.actualizar", { id, nombre }).then((r) => r != null && recargar())
+                      }
+                      onQuitar={(id) => void ejecutar("cpq.lineas.quitar", { id }).then((r) => r != null && recargar())}
+                      onTraza={(lineaId) =>
+                        void ejecutar("cpq.cotizaciones.explicar", { id: d.cotizacion.id, lineaId }).then((r) => {
+                          if (r && typeof r === "object" && "traza" in r) {
+                            window.alert(JSON.stringify((r as { traza: unknown[] }).traza.slice(0, 8), null, 2));
+                          }
+                        })
+                      }
+                    />
                   ))
                 )}
               </ul>

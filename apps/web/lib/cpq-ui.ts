@@ -5,5 +5,5 @@ import { puedeDeIdentidad } from "./permisos-ui";
 export function accesoCpq(identidad: Identidad | null) {
   const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
   const leer = Boolean(identidad?.modulosActivos.includes("cpq")) && puede("cpq:cotizaciones.read");
-  return { leer, crear: leer && puede("cpq:cotizaciones.manage") };
+  return { leer, crear: leer && puede("cpq:cotizaciones.manage"), aprobar: leer && puede("cpq:aprobar") };
 }
