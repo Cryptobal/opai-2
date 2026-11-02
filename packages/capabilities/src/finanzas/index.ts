@@ -12,7 +12,11 @@ import { planInicializar } from "./plan-escritura";
 import { planListar } from "./plan-lectura";
 import { proveedoresActualizar, proveedoresCrear } from "./proveedores-escritura";
 import { proveedoresListar, proveedoresObtener } from "./proveedores-lectura";
-import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
+import { ventasCesionCeder } from "./ventas-cesion-ceder";
+import { ventasCesionSimular } from "./ventas-cesion-simular";
+import { ventasCesionListar } from "./cesiones-listar";
+import { trabajosCesion } from "./trabajos-cesion";
+import { trabajosDte } from "./trabajos-dte";
 import {
   ventasCrearBorrador,
   ventasEmitir,
@@ -21,8 +25,11 @@ import {
 } from "./ventas-escritura";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
 import { ventasPdf } from "./ventas-pdf";
+import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
 
 export { ajustesFinanzas } from "./ajustes";
+
+export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion];
 
 export const capacidadesFinanzas: readonly Capacidad[] = [
   planListar,
@@ -46,6 +53,9 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasEnviarSii,
   ventasEmitirNotaCredito,
   ventasProyeccionFlujo,
+  ventasCesionSimular,
+  ventasCesionCeder,
+  ventasCesionListar,
   ventasPdf,
   foliosListar,
   foliosCargarCaf,
