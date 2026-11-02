@@ -40,6 +40,9 @@ export const manifest = defineModule({
     },
   ],
   configuracion: z.object({}),
-  eventos: [{ id: "cpq.cotizacion.creada", descripcion: "Se creó una cotización en borrador." }],
+  eventos: [
+    { id: "cpq.cotizacion.creada", descripcion: "Se creó una cotización en borrador." },
+    { id: "cpq.cotizacion.enviada", descripcion: "Se envió una cotización al cliente." },
+  ],
   capacidades,
 });

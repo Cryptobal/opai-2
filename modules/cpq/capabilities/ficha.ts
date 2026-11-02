@@ -3,10 +3,11 @@ import { z } from "zod";
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { motorOutputSchema } from "./motor-esquemas";
-import { PERMISO_MANAGE } from "./permisos";
+import { PERMISO_MANAGE, PERMISO_READ } from "./permisos";
 import { cotizacionDe } from "./util";
 import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
 import { calculoCongelado } from "../persistencia/calculo-congelado";
+import { versionParaFicha } from "../persistencia/version";
 import { uuidSchema } from "./esquemas";
 
 export const cotizacionesCalcular = defineCapability({
@@ -27,10 +28,11 @@ export const cotizacionesCalcular = defineCapability({
 });
 
 export const cotizacionesFicha = defineCapability({
+  auditarLectura: (s) => [s.cotizacion.id],
   id: "cpq.cotizaciones.ficha",
   descripcion:
-    "Ensambla la ficha de cotización con secciones, líneas y cálculo en servidor; sincroniza secciones y persiste venta solo en borrador y sin dry_run.",
-  permiso: PERMISO_MANAGE,
+    "Ensambla la ficha de cotización con secciones, líneas y cálculo en servidor; no persiste venta (use calcular en borrador).",
+  permiso: PERMISO_READ,
   input: z.object({ id: uuidSchema, version: z.number().int().min(1).optional() }),
   output: z.object({
     cotizacion: z.object({
@@ -59,12 +61,13 @@ export const cotizacionesFicha = defineCapability({
     ),
     calculo: motorOutputSchema,
   }),
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
+  efecto: "lectura",
+  dryRun: false,
+  async handler(ctx, input) {
     const c = await cotizacionDe(ctx, input.id);
-    const escribir = !dryRun;
-    const pack = await cargarFilasVersion(ctx, input.id, input.version, escribir);
+    const versionPre = await versionParaFicha(ctx, input.id, input.version);
+    if (!versionPre) throw noEncontrado("La versión");
+    const pack = await cargarFilasVersion(ctx, input.id, input.version, false);
     if (!pack) throw noEncontrado("La versión");
     const { version, secciones, lineas } = pack;
     const neg = await ctx.db.negocio.findFirst({
@@ -73,8 +76,8 @@ export const cotizacionesFicha = defineCapability({
     });
     const r =
       version.estado === "borrador"
-        ? await recalcularVersion(ctx, input.id, input.version, escribir)
-        : calculoCongelado(version, lineas);
+        ? await recalcularVersion(ctx, input.id, input.version, false)
+        : calculoCongelado(ctx, version, lineas);
     if (!r) throw noEncontrado("La versión");
     return {
       cotizacion: {
@@ -104,6 +107,7 @@ export const cotizacionesFicha = defineCapability({
             tipo: l.tipo,
             nombre: l.nombre,
             posiciones: l.posiciones,
+            recurrencia: l.recurrencia,
             habilitada: l.habilitada,
             patron: l.patron,
             horaInicio: l.horaInicio,

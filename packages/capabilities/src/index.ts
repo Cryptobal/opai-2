@@ -25,6 +25,9 @@ export {
 } from "./contexto";
 export { defineCapability } from "./define";
 export { conflicto, ErrorCapacidad, noEncontrado, prohibido, reglaDeNegocio } from "./errores";
+export { aplicarEtapa } from "./comercial/transiciones-util";
+export { sha256 } from "./core/comun";
+export { uuid7 } from "./core/documentos/uuid7";
 export { executeCapability } from "./execute";
 export {
   limpiarRegistro,

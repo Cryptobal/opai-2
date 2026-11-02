@@ -1,10 +1,13 @@
+import type { Contexto } from "@opai/capabilities";
+
 import type { ResultadoCalculo } from "../domain/motor";
 import type { VersionCtx } from "./version";
 
 type FilaLinea = { tipo: string; habilitada: boolean; posiciones: number };
 
-/** R-CPQ-010: montos guardados al enviar; sin recalcular con indicadores vigentes. */
-export function calculoCongelado(
+export const AVISO_SIN_CALCULO = "sin cálculo congelado completo";
+
+function fallbackCongelado(
   version: Pick<VersionCtx, "ventaMensualClp" | "validaHasta">,
   lineas: readonly FilaLinea[],
 ): ResultadoCalculo {
@@ -23,8 +26,8 @@ export function calculoCongelado(
     costoUnico: 0,
     ventaMensual: version.ventaMensualClp,
     pagosUnicos: 0,
-    margenEfectivoPct: 0,
-    semaforo: "verde",
+    margenEfectivoPct: -1,
+    semaforo: "rojo",
     instrumentos: {
       financiero: 0,
       garantia: 0,
@@ -41,9 +44,26 @@ export function calculoCongelado(
     uf: null,
     fecha,
     estado: "borrador",
-    advertencias: [],
-    noEnviable: false,
+    advertencias: [AVISO_SIN_CALCULO],
+    noEnviable: true,
     requiereAprobacion: false,
     traza: [],
   };
+}
+
+/** R-CPQ-010: lee el JSON congelado al enviar o reconstruye venta sin inventar margen ni semáforo verde. */
+export function calculoCongelado(
+  _ctx: Contexto,
+  version: Pick<VersionCtx, "ventaMensualClp" | "validaHasta" | "calculoCongeladoJson">,
+  lineas: readonly FilaLinea[],
+): ResultadoCalculo {
+  if (version.calculoCongeladoJson) {
+    try {
+      const parsed = JSON.parse(version.calculoCongeladoJson) as ResultadoCalculo;
+      return parsed;
+    } catch {
+      /* JSON inválido: cae al fallback */
+    }
+  }
+  return fallbackCongelado(version, lineas);
 }

@@ -50,6 +50,12 @@ model CpqVersion {
   /// Control optimista de la edición concurrente (gana la primera, la segunda recarga).
   revision          Int       @default(1)
   enviadaEn         DateTime? @map("enviada_en") @db.Timestamptz(6)
+  /// Resultado completo del motor al enviar (R-CPQ-010); JSON de `ResultadoCalculo` proyectado.
+  calculoCongeladoJson String? @map("calculo_congelado_json")
+  /// Marca y plantilla documental congeladas al enviar (CAR-135 addendum).
+  marcaDocumentoVersion Int? @map("marca_documento_version")
+  plantillaDocumentoId String? @map("plantilla_documento_id") @db.Uuid
+  plantillaDocumentoVersion Int? @map("plantilla_documento_version")
   creadoPorId       String    @map("creado_por_id") @db.Uuid
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -163,5 +169,124 @@ model CpqCorrelativo {
 
   @@unique([tenantId, anio])
   @@map("correlativos")
+  @@schema("cpq")
+}
+
+/// Categoría del catálogo CPQ por tenant (R55, R61): clase directo o indirecto.
+model CpqCatalogoCategoria {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  clave     String
+  nombre    String
+  clase     String   @default("directo")
+  activa    Boolean  @default(true)
+  orden     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  items CpqCatalogoItem[]
+
+  @@unique([tenantId, clave])
+  @@map("catalogo_categorias")
+  @@schema("cpq")
+}
+
+/// Ítem del catálogo CPQ (R15–R16, R56): costo unitario y rateo por defecto; la línea guarda copia.
+model CpqCatalogoItem {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  codigo           String
+  nombre           String
+  categoriaId      String   @map("categoria_id") @db.Uuid
+  /// Referencia de tipo: item | cargo | uniforme | insumo (R-CPQ-013…019).
+  grupo            String   @default("item")
+  unidad           String   @default("unidad")
+  modoCalculo      String   @default("mensual_fijo") @map("modo_calculo")
+  rateoJson        String   @default("{\"tipo\":\"contrato\"}") @map("rateo_json")
+  costoUnitarioClp Int      @default(0) @map("costo_unitario_clp")
+  recurrencia      String   @default("mensual")
+  visibleCliente   Boolean  @default(true) @map("visible_cliente")
+  porDefecto       Boolean  @default(false) @map("por_defecto")
+  activo           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  categoria CpqCatalogoCategoria @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, categoriaId])
+  @@map("catalogo_items")
+  @@schema("cpq")
+}
+
+/// Marca documental CPQ por tenant (tipografía acotada, pie y condiciones); logos/colores en `core.perfil_empresa`.
+model CpqMarcaDocumento {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @unique @map("tenant_id") @db.Uuid
+  version             Int      @default(1)
+  /// "inter" | "helvetica" | "times"
+  tipografia          String   @default("inter")
+  piePagina           String?  @map("pie_pagina")
+  condicionesDefault  String?  @map("condiciones_default")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  revisiones CpqMarcaDocumentoRevision[]
+
+  @@map("marca_documento")
+  @@schema("cpq")
+}
+
+model CpqMarcaDocumentoRevision {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  marcaDocumentoId   String   @map("marca_documento_id") @db.Uuid
+  version            Int
+  tipografia         String
+  piePagina          String?  @map("pie_pagina")
+  condicionesDefault String?  @map("condiciones_default")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  marca CpqMarcaDocumento @relation(fields: [marcaDocumentoId], references: [id], onDelete: Cascade)
+
+  @@unique([marcaDocumentoId, version])
+  @@map("marca_documento_revisiones")
+  @@schema("cpq")
+}
+
+/// Plantilla de documento CPQ (cotización v1); bloques ordenables sin HTML libre.
+model CpqPlantillaDocumento {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  /// "cotizacion" (propuesta técnica y factura después).
+  tipo        String   @default("cotizacion")
+  /// "clasica" | "ejecutiva" | "compacta"
+  base        String   @default("clasica")
+  bloquesJson String   @map("bloques_json")
+  version     Int      @default(1)
+  activa      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  revisiones CpqPlantillaDocumentoRevision[]
+
+  @@index([tenantId, tipo])
+  @@map("plantillas_documento")
+  @@schema("cpq")
+}
+
+model CpqPlantillaDocumentoRevision {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  plantillaDocumentoId String  @map("plantilla_documento_id") @db.Uuid
+  version             Int
+  base                String
+  bloquesJson         String   @map("bloques_json")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  plantilla CpqPlantillaDocumento @relation(fields: [plantillaDocumentoId], references: [id], onDelete: Cascade)
+
+  @@unique([plantillaDocumentoId, version])
+  @@map("plantillas_documento_revisiones")
   @@schema("cpq")
 }
