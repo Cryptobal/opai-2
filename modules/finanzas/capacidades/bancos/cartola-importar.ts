@@ -140,7 +140,7 @@ export const bancosCartolaImportar = defineCapability({
     await aplicarImportacionCartola(ctx, {
       cuenta,
       formato: input.formato,
-      ...(input.nombreArchivo ? { nombreArchivo: input.nombreArchivo } : {}),
+      ...(input.nombreArchivo !== undefined ? { nombreArchivo: input.nombreArchivo } : {}),
       idempotencyKey: input.idempotencyKey,
       nuevos,
       duplicados,
