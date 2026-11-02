@@ -1,4 +1,10 @@
-import { cifrar, descifrar, generarDek, kekDelEntorno, sufijoDe } from "@opai/integrations";
+import {
+  cifrar,
+  descifrar,
+  generarDek,
+  kekDelEntorno,
+  sufijoParaGuardar,
+} from "@opai/integrations";
 
 import type { TenantTx } from "@opai/db";
 
@@ -66,7 +72,7 @@ export async function guardarSecreto(
   await ctx.transaccion(async (tx) => {
     await guardarSecretoTx(tx, ctx, integracionId, nombre, valor);
   });
-  return { sufijo: sufijoDe(valor) };
+  return { sufijo: sufijoParaGuardar(nombre, valor) };
 }
 
 async function guardarCifrado(
@@ -81,7 +87,7 @@ async function guardarCifrado(
     cifrado: bytes(c.cifrado),
     iv: bytes(c.iv),
     tag: bytes(c.tag),
-    sufijo: sufijoDe(valor),
+    sufijo: sufijoParaGuardar(nombre, valor),
   };
   await db.secreto.upsert({
     where: { tenantId_integracionId_nombre: { tenantId: ctx.tenantId, integracionId, nombre } },

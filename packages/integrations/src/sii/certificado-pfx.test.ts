@@ -3,49 +3,177 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import forge from "node-forge";
 import { describe, expect, it } from "vitest";
 
-import { validarCertificadoPfx } from "./certificado-pfx";
+import {
+  MSG_CERTIFICADO_NO_VIGENTE,
+  MSG_CERTIFICADO_VENCIDO,
+  MSG_LLAVE_NO_CORRESPONDE,
+  MSG_SIN_LLAVE_PRIVADA,
+  validarCertificadoPfx,
+} from "./certificado-pfx";
 
-function pfxDePrueba(): { base64: string; clave: string } {
+function pfxDePrueba(opts?: {
+  subject?: string;
+  clave?: string;
+  startdate?: string;
+  enddate?: string;
+  days?: number;
+  certfile?: string;
+  inkey?: string;
+  in?: string;
+}): { base64: string; clave: string; dir: string } {
   const dir = mkdtempSync(join(tmpdir(), "opai-pfx-"));
-  try {
-    const key = join(dir, "key.pem");
-    const cert = join(dir, "cert.pem");
-    const pfx = join(dir, "test.pfx");
-    const clave = "clave-demo-123";
+  const key = opts?.inkey ?? join(dir, "key.pem");
+  const cert = opts?.in ?? join(dir, "cert.pem");
+  const pfx = join(dir, "test.pfx");
+  const clave = opts?.clave ?? "clave-demo-123";
+  if (!opts?.inkey) {
+    const dayArgs =
+      opts?.startdate && opts?.enddate
+        ? `-startdate ${opts.startdate} -enddate ${opts.enddate}`
+        : `-days ${opts?.days ?? 30}`;
     execSync(
-      `openssl req -x509 -newkey rsa:2048 -keyout "${key}" -out "${cert}" -days 30 -nodes -subj "/CN=Empresa Demo/O=Demo/serialNumber=12345678-9/C=CL"`,
+      `openssl req -x509 -newkey rsa:2048 -keyout "${key}" -out "${cert}" -nodes ${dayArgs} -subj "${opts?.subject ?? "/CN=Empresa Demo/O=Demo/serialNumber=12345678-9/C=CL"}"`,
       { stdio: "ignore" },
     );
-    execSync(
-      `openssl pkcs12 -export -out "${pfx}" -inkey "${key}" -in "${cert}" -passout pass:${clave}`,
-      { stdio: "ignore" },
-    );
-    return { base64: readFileSync(pfx).toString("base64"), clave };
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
   }
+  const certfileArg = opts?.certfile ? `-certfile "${opts.certfile}"` : "";
+  execSync(
+    `openssl pkcs12 -export -out "${pfx}" -inkey "${key}" -in "${cert}" ${certfileArg} -passout pass:${clave}`,
+    { stdio: "ignore" },
+  );
+  return { base64: readFileSync(pfx).toString("base64"), clave, dir };
 }
 
 describe("validarCertificadoPfx", () => {
   it("acepta un .pfx con clave correcta y extrae metadatos", () => {
-    const { base64, clave } = pfxDePrueba();
-    const r = validarCertificadoPfx(base64, clave);
-    expect(r.meta.titular).toContain("Empresa Demo");
-    expect(r.meta.rutTitular).toBe("12345678-9");
-    expect(r.meta.venceEn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(r.base64).toBe(base64);
+    const { base64, clave, dir } = pfxDePrueba();
+    try {
+      const r = validarCertificadoPfx(base64, clave);
+      expect(r.meta.titular).toContain("Empresa Demo");
+      expect(r.meta.rutTitular).toBe("12345678-9");
+      expect(r.meta.venceEn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(r.base64).toBe(base64);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("rechaza clave incorrecta con mensaje claro", () => {
-    const { base64, clave } = pfxDePrueba();
-    expect(() => validarCertificadoPfx(base64, `${clave}-x`)).toThrow(
-      /clave del certificado no coincide/i,
-    );
+    const { base64, clave, dir } = pfxDePrueba();
+    try {
+      expect(() => validarCertificadoPfx(base64, `${clave}-x`)).toThrow(
+        /clave del certificado no coincide/i,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("rechaza base64 inválido", () => {
     expect(() => validarCertificadoPfx("%%%", "x")).toThrow(/no es un certificado/i);
+  });
+
+  it("rechaza certificado vencido", () => {
+    const { base64, clave, dir } = pfxDePrueba({ days: 30 });
+    try {
+      const vence = validarCertificadoPfx(base64, clave).meta.venceEn;
+      const despues = new Date(`${vence}T23:59:59.999Z`);
+      despues.setUTCDate(despues.getUTCDate() + 1);
+      expect(() => validarCertificadoPfx(base64, clave, despues)).toThrow(MSG_CERTIFICADO_VENCIDO);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rechaza certificado aún no vigente", () => {
+    const { base64, clave, dir } = pfxDePrueba({ days: 30 });
+    try {
+      expect(() => validarCertificadoPfx(base64, clave, new Date("2000-01-01T00:00:00Z"))).toThrow(
+        MSG_CERTIFICADO_NO_VIGENTE,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rechaza .pfx sin llave privada", () => {
+    const dir = mkdtempSync(join(tmpdir(), "opai-pfx-"));
+    try {
+      const cert = join(dir, "cert.pem");
+      const pfx = join(dir, "solo-cert.pfx");
+      const clave = "clave-solo-cert";
+      execSync(
+        `openssl req -x509 -newkey rsa:2048 -keyout "${join(dir, "key.pem")}" -out "${cert}" -days 30 -nodes -subj "/CN=Solo Cert/C=CL"`,
+        { stdio: "ignore" },
+      );
+      execSync(
+        `openssl pkcs12 -export -out "${pfx}" -in "${cert}" -nokeys -passout pass:${clave}`,
+        { stdio: "ignore" },
+      );
+      const base64 = readFileSync(pfx).toString("base64");
+      expect(() => validarCertificadoPfx(base64, clave)).toThrow(MSG_SIN_LLAVE_PRIVADA);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rechaza llave que no corresponde al certificado", () => {
+    const keys = forge.pki.rsa.generateKeyPair(512);
+    const keysOtra = forge.pki.rsa.generateKeyPair(512);
+    const cert = forge.pki.createCertificate();
+    cert.publicKey = keys.publicKey;
+    cert.serialNumber = "01";
+    cert.validity.notBefore = new Date();
+    cert.validity.notAfter = new Date();
+    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
+    const attrs = [{ name: "commonName", value: "Cert Forge" }];
+    cert.setSubject(attrs);
+    cert.setIssuer(attrs);
+    cert.sign(keys.privateKey, forge.md.sha256.create());
+    const p12Asn1 = forge.pkcs12.toPkcs12Asn1(keysOtra.privateKey, [cert], "clave-forge", {
+      generateLocalKeyId: true,
+    });
+    const der = forge.asn1.toDer(p12Asn1).getBytes();
+    const base64 = Buffer.from(der, "binary").toString("base64");
+    expect(() => validarCertificadoPfx(base64, "clave-forge")).toThrow(MSG_LLAVE_NO_CORRESPONDE);
+  });
+
+  it("elige la hoja de la cadena (no la CA) para titular y RUT", () => {
+    const dir = mkdtempSync(join(tmpdir(), "opai-pfx-"));
+    try {
+      const caKey = join(dir, "ca.key");
+      const caCert = join(dir, "ca.crt");
+      const leafKey = join(dir, "leaf.key");
+      const leafCsr = join(dir, "leaf.csr");
+      const leafCert = join(dir, "leaf.crt");
+      const pfx = join(dir, "chain.pfx");
+      const clave = "clave-cadena";
+      execSync(
+        `openssl req -x509 -newkey rsa:2048 -keyout "${caKey}" -out "${caCert}" -days 365 -nodes -subj "/CN=CA Intermedia Demo/C=CL"`,
+        { stdio: "ignore" },
+      );
+      execSync(
+        `openssl req -newkey rsa:2048 -keyout "${leafKey}" -out "${leafCsr}" -nodes -subj "/CN=Hoja Empresa/serialNumber=11111111-1/C=CL"`,
+        { stdio: "ignore" },
+      );
+      execSync(
+        `openssl x509 -req -in "${leafCsr}" -CA "${caCert}" -CAkey "${caKey}" -CAcreateserial -out "${leafCert}" -days 30`,
+        { stdio: "ignore" },
+      );
+      execSync(
+        `openssl pkcs12 -export -out "${pfx}" -inkey "${leafKey}" -in "${leafCert}" -certfile "${caCert}" -passout pass:${clave}`,
+        { stdio: "ignore" },
+      );
+      const base64 = readFileSync(pfx).toString("base64");
+      const r = validarCertificadoPfx(base64, clave);
+      expect(r.meta.titular).toContain("Hoja Empresa");
+      expect(r.meta.rutTitular).toBe("11111111-1");
+      expect(r.meta.titular).not.toMatch(/CA Intermedia/i);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

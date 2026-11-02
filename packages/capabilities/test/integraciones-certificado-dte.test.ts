@@ -67,6 +67,14 @@ describe("core.integraciones.guardar_certificado_dte (CAR-149)", () => {
     expect(lista.ok ? JSON.stringify(lista.data) : "").not.toContain(base64);
     expect(lista.ok ? JSON.stringify(lista.data) : "").not.toContain(clave);
     expect(lista.ok ? JSON.stringify(lista.data) : "").toMatch(/certificadoMeta/);
+    const secretos = lista.ok
+      ? (lista.data as { secretos: { nombre: string; mascara: string | null }[] }).secretos
+      : [];
+    const mascaraClave = secretos.find((s) => s.nombre === "certificado_clave")?.mascara;
+    expect(mascaraClave).toBe("••••••••");
+    for (const ch of clave) {
+      expect(mascaraClave).not.toContain(ch);
+    }
   });
 
   it("dryRun valida clave sin persistir", async () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,7 +12,6 @@ import {
   CampoSecreto,
   Input,
   SeccionTarjeta,
-  Uploader,
 } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -24,6 +24,8 @@ import {
   tonoVencimiento,
 } from "./credenciales-dte-util";
 import type { Integracion } from "./tipos";
+
+const Uploader = dynamic(() => import("@opai/ds").then((m) => m.Uploader), { ssr: false });
 
 /** Certificado .pfx/.p12 de emisión DTE (CAR-149): carga de archivo + clave, metadatos sin secretos. */
 export function CredencialesDteEmision({ item }: { item: Integracion }) {

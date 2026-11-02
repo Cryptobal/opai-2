@@ -44,6 +44,27 @@ describe("integraciones y secretos (ADR-027)", () => {
     expect(resend).toMatchObject({ estado: "configurada" });
   });
 
+  it("no revela sufijo de secretos tipo clave (Octava)", async () => {
+    const valor = "octava-clave-secreta-99";
+    const { ctx } = contextoDePrueba();
+    const r = await executeCapability(ctx, "core.integraciones.set_secreto", {
+      proveedor: "dte_cesion",
+      nombre: "clave",
+      valor: `${valor}xxxxxxxx`,
+    });
+    expect(r).toMatchObject({ ok: true, data: { mascara: "••••••••" } });
+    const get = await executeCapability(ctx, "core.integraciones.get", { proveedor: "dte_cesion" });
+    const mascara = get.ok
+      ? (get.data as { secretos: { nombre: string; mascara: string | null }[] }).secretos.find(
+          (s) => s.nombre === "clave",
+        )?.mascara
+      : null;
+    expect(mascara).toBe("••••••••");
+    for (const ch of valor) {
+      expect(mascara).not.toContain(ch);
+    }
+  });
+
   it("valida modalidad, disponibilidad y configuración", async () => {
     const { ctx } = contextoDePrueba();
     const malo = await executeCapability(ctx, "core.integraciones.configurar", {
