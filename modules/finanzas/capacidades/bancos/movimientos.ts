@@ -20,6 +20,7 @@ export const bancosMovimientosListar = defineCapability({
   output: z.object({ items: z.array(movimientoSchema) }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => s.items.map((i) => i.id),
   async handler(ctx, input) {
     const items = await ctx.db.movimientoBancario.findMany({
       where: { cuentaId: input.cuentaId, ...(input.estado ? { estado: input.estado } : {}) },

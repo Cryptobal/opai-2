@@ -22,6 +22,7 @@ export const bancosReglasListar = defineCapability({
   output: z.object({ items: z.array(reglaSchema) }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => s.items.map((i) => i.id),
   async handler(ctx) {
     const items = await ctx.db.reglaConciliacion.findMany({ orderBy: [{ prioridad: "desc" }, { nombre: "asc" }] });
     return {

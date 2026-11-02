@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { capacidades } from "../../../modules/finanzas/capacidades";
 import { claveDedupeCartola } from "@opai/domain";
-import { type Entorno, omitirSuiteDb, prepararEntorno, urlPropietario } from "../../db/test/entorno";
+import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
 

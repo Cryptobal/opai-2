@@ -15,6 +15,7 @@ export const bancosCuentasListar = defineCapability({
   output: z.object({ items: z.array(cuentaSchema) }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => s.items.map((i) => i.id),
   async handler(ctx, input) {
     const items = await ctx.db.cuentaBancaria.findMany({
       where: input.activas === undefined ? {} : { activa: input.activas },
@@ -51,9 +52,11 @@ export const bancosSaldoSugerido = defineCapability({
     semana: z.string().nullable(),
     aviso: z.string().nullable(),
     cuentasSinSaldo: z.array(z.object({ cuentaId: z.string(), banco: z.string() })),
+    cuentaIds: z.array(z.string()),
   }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => s.cuentaIds,
   async handler(ctx, input) {
     const finSemana = input.semana ? finSemanaIso(input.semana) : aIso(new Date());
     const cuentas = await ctx.db.cuentaBancaria.findMany({
@@ -61,7 +64,14 @@ export const bancosSaldoSugerido = defineCapability({
       orderBy: { createdAt: "asc" },
     });
     if (!cuentas.length) {
-      return { saldo: null, fechaCorte: null, semana: input.semana ?? null, aviso: null, cuentasSinSaldo: [] };
+      return {
+        saldo: null,
+        fechaCorte: null,
+        semana: input.semana ?? null,
+        aviso: null,
+        cuentasSinSaldo: [],
+        cuentaIds: [],
+      };
     }
 
     const movs = await ctx.db.movimientoBancario.findMany({
@@ -93,6 +103,6 @@ export const bancosSaldoSugerido = defineCapability({
         ? `Sin saldo en cartola para: ${cuentasSinSaldo.map((c) => c.banco).join(", ")}.`
         : null;
 
-    return { saldo, fechaCorte, semana: input.semana ?? null, aviso, cuentasSinSaldo };
+    return { saldo, fechaCorte, semana: input.semana ?? null, aviso, cuentasSinSaldo, cuentaIds: cuentas.map((c) => c.id) };
   },
 });

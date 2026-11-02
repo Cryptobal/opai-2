@@ -27,6 +27,7 @@ export const bancosConciliacionSugerir = defineCapability({
   output: z.object({ sugerencias: z.array(sugerenciaSchema) }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s, input) => [input.movimientoId, ...s.sugerencias.map((x) => x.documentoId)],
   async handler(ctx, input) {
     const mov = await movimientoDe(ctx, input.movimientoId);
     if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [] };
