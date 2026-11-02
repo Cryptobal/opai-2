@@ -142,38 +142,41 @@ describe("validarCertificadoPfx", () => {
   });
 
   it("elige la hoja de la cadena (no la CA) para titular y RUT", () => {
-    const dir = mkdtempSync(join(tmpdir(), "opai-pfx-"));
-    try {
-      const caKey = join(dir, "ca.key");
-      const caCert = join(dir, "ca.crt");
-      const leafKey = join(dir, "leaf.key");
-      const leafCsr = join(dir, "leaf.csr");
-      const leafCert = join(dir, "leaf.crt");
-      const pfx = join(dir, "chain.pfx");
-      const clave = "clave-cadena";
-      execSync(
-        `openssl req -x509 -newkey rsa:2048 -keyout "${caKey}" -out "${caCert}" -days 365 -nodes -subj "/CN=CA Intermedia Demo/C=CL"`,
-        { stdio: "ignore" },
-      );
-      execSync(
-        `openssl req -newkey rsa:2048 -keyout "${leafKey}" -out "${leafCsr}" -nodes -subj "/CN=Hoja Empresa/serialNumber=11111111-1/C=CL"`,
-        { stdio: "ignore" },
-      );
-      execSync(
-        `openssl x509 -req -in "${leafCsr}" -CA "${caCert}" -CAkey "${caKey}" -CAcreateserial -out "${leafCert}" -days 30`,
-        { stdio: "ignore" },
-      );
-      execSync(
-        `openssl pkcs12 -export -out "${pfx}" -inkey "${leafKey}" -in "${leafCert}" -certfile "${caCert}" -passout pass:${clave}`,
-        { stdio: "ignore" },
-      );
-      const base64 = readFileSync(pfx).toString("base64");
-      const r = validarCertificadoPfx(base64, clave);
-      expect(r.meta.titular).toContain("Hoja Empresa");
-      expect(r.meta.rutTitular).toBe("11111111-1");
-      expect(r.meta.titular).not.toMatch(/CA Intermedia/i);
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
+    const caKeys = forge.pki.rsa.generateKeyPair(2048);
+    const leafKeys = forge.pki.rsa.generateKeyPair(2048);
+    const ahora = new Date();
+    const caCert = forge.pki.createCertificate();
+    caCert.publicKey = caKeys.publicKey;
+    caCert.serialNumber = "01";
+    caCert.validity.notBefore = ahora;
+    caCert.validity.notAfter = new Date(ahora);
+    caCert.validity.notAfter.setFullYear(caCert.validity.notBefore.getFullYear() + 1);
+    const caAttrs = [{ name: "commonName", value: "CA Intermedia Demo" }];
+    caCert.setSubject(caAttrs);
+    caCert.setIssuer(caAttrs);
+    caCert.sign(caKeys.privateKey, forge.md.sha256.create());
+
+    const leafCert = forge.pki.createCertificate();
+    leafCert.publicKey = leafKeys.publicKey;
+    leafCert.serialNumber = "02";
+    leafCert.validity.notBefore = ahora;
+    leafCert.validity.notAfter = new Date(ahora);
+    leafCert.validity.notAfter.setUTCDate(leafCert.validity.notBefore.getUTCDate() + 30);
+    const leafAttrs = [
+      { name: "commonName", value: "Hoja Empresa" },
+      { shortName: "serialNumber", type: "2.5.4.5", value: "11111111-1" },
+    ];
+    leafCert.setSubject(leafAttrs);
+    leafCert.setIssuer(caAttrs);
+    leafCert.sign(caKeys.privateKey, forge.md.sha256.create());
+
+    const clave = "clave-cadena";
+    const p12Asn1 = forge.pkcs12.toPkcs12Asn1(leafKeys.privateKey, [caCert, leafCert], clave);
+    const der = forge.asn1.toDer(p12Asn1).getBytes();
+    const base64 = Buffer.from(der, "binary").toString("base64");
+    const r = validarCertificadoPfx(base64, clave);
+    expect(r.meta.titular).toContain("Hoja Empresa");
+    expect(r.meta.rutTitular).toBe("11111111-1");
+    expect(r.meta.titular).not.toMatch(/CA Intermedia/i);
   });
 });
