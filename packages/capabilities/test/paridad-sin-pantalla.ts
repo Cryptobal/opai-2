@@ -44,4 +44,10 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Borrar la cuenta de un usuario sin empresas desde Plataforma: los usuarios de plataforma aún no tienen pantalla con diseño aprobado.",
   },
+  "core.remuneraciones.confirmar": {
+    encargo: "CAR-142",
+    desde: "2026-11-02",
+    motivo:
+      "Confirmar un valor propuesto o retenido en Configuración › Remuneraciones: la acción por fila entra con el diseño aprobado del brief 07e M2.",
+  },
 };

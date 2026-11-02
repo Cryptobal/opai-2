@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 421 pares pantalla→capacidad · 381 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 427 pares pantalla→capacidad · 386 con herramienta · 41 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -166,6 +166,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.cancelar` | `core_firmas_cancelar` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.recordar` | `core_firmas_recordar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.cartolas.importar` | `finanzas_cartolas_importar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.confirmar` | `finanzas_conciliaciones_confirmar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.deshacer` | `finanzas_conciliaciones_deshacer` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.sugerir` | `finanzas_conciliaciones_sugerir` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.movimientos_bancarios.listar` | `finanzas_movimientos_bancarios_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.asignar_centro` | `finanzas_compras_asignar_centro` | existe |
@@ -367,6 +371,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/operaciones` | `core.patrones.list` | `core_patrones_list` | existe |
 | erp | `/configuracion/operaciones` | `core.patrones.set_activo` | `core_patrones_set_activo` | existe |
 | erp | `/configuracion/operaciones` | `core.patrones.update` | `core_patrones_update` | existe |
+| erp | `/configuracion/remuneraciones` | `core.remuneraciones.confirmar_mutual` | — | excepción |
+| erp | `/configuracion/remuneraciones` | `core.remuneraciones.listar` | `core_remuneraciones_listar` | existe |
 | erp | `/configuracion/usuarios/roles` | `core.roles.archive` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.create` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.update` | — | excepción |
@@ -515,6 +521,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.invitations.accept` | Interna: crea la membresía de quien acepta el enlace; un agente no acepta invitaciones por nadie. |
 | `core.invitations.peek` | Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial). |
 | `core.invitations.request_new` | Interna: la pide quien aún no tiene sesión (token vencido o usado). |
+| `core.remuneraciones.confirmar` | Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034). |
+| `core.remuneraciones.confirmar_mutual` | Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034). |
 | `core.roles.archive` | Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034). |
 | `core.roles.assign` | Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034). |
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
@@ -564,6 +572,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.firmas.rechazar` | `/firmar/[slug]/[token]` | no | reservada a personas |
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
+| `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
+| `core.remuneraciones.confirmar_mutual` | `/configuracion/remuneraciones` | no | reservada a personas |
 | `core.roles.archive` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.assign` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
@@ -612,6 +622,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`
+- `core.remuneraciones.historial`
 - `core.usage.summary`
 - `cpq.catalogo_categorias.create`
 - `cpq.catalogo_categorias.desactivar`
@@ -631,13 +642,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
 - `finanzas.bancos.guardar`
-- `finanzas.cartolas.importar`
 - `finanzas.cierres.listar`
 - `finanzas.cobros.manual`
 - `finanzas.compras.importar`
-- `finanzas.conciliaciones.confirmar`
-- `finanzas.conciliaciones.deshacer`
-- `finanzas.conciliaciones.sugerir`
 - `finanzas.derivadas.listar`
 - `finanzas.dte_config.actualizar`
 - `finanzas.dte_config.obtener`

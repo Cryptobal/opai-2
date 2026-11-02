@@ -21,6 +21,7 @@ import {
 } from "./integraciones";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
+import { capacidadesRemuneraciones, trabajoCapturaIndicadoresSii } from "./remuneraciones";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
@@ -104,6 +105,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesMaestros,
   ...capacidadesCrm,
   ...capacidadesCalendario,
+  ...capacidadesRemuneraciones,
   ...capacidadesAnexos,
   ...capacidadesPanel,
   ...capacidadesPermisos,
@@ -132,4 +134,5 @@ export const trabajosDelNucleo = [
   ...trabajosAgentes,
   ...trabajosCumplimiento,
   ...trabajosMaestros,
+  trabajoCapturaIndicadoresSii,
 ];

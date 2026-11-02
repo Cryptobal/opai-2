@@ -187,6 +187,8 @@ core_puestos_get
 core_puestos_list
 core_puestos_set_estado
 core_puestos_update
+core_remuneraciones_historial
+core_remuneraciones_listar
 core_resumen_contadores
 core_roles_list
 core_supervisores_asignar

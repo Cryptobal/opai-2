@@ -1,0 +1,97 @@
+// Motor de sueldos · M2 plataforma + M3 tenant (CAR-142, ADR-056). Indicadores legales globales y
+// valores del tenant con RLS. Gratificación es derivada del IMM en dominio, no fila propia.
+
+model IndicadorLegal {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  clave              String   @unique
+  nombre             String
+  unidad             String
+  periodicidad       String
+  fuentePrimaria     String   @map("fuente_primaria")
+  fuenteContraste    String?  @map("fuente_contraste")
+  reglaValidacion    Json?    @map("regla_validacion")
+  lecturaAutomatica  Boolean  @default(true) @map("lectura_automatica")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  publicados ValorPublicado[]
+  capturas   CapturaIndicador[]
+  tenant     ValorTenant[]
+
+  @@map("indicadores_legales")
+  @@schema("core")
+}
+
+model ValorPublicado {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  indicadorId   String    @map("indicador_id") @db.Uuid
+  valorJson     Json      @map("valor_json")
+  vigenteDesde  DateTime  @map("vigente_desde") @db.Date
+  vigenteHasta  DateTime? @map("vigente_hasta") @db.Date
+  evidencia     String?
+  estado        String    @default("vigente")
+  fuente        String
+  consultadaEl  DateTime? @map("consultada_el") @db.Date
+  verificacion  String    @default("verificado")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  indicador IndicadorLegal @relation(fields: [indicadorId], references: [id], onDelete: Restrict)
+
+  @@index([indicadorId, vigenteDesde])
+  @@map("valores_publicados")
+  @@schema("core")
+}
+
+model CapturaIndicador {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  indicadorId      String   @map("indicador_id") @db.Uuid
+  capturadoEn      DateTime @default(now()) @map("capturado_en") @db.Timestamptz(6)
+  fuenteConsultada String   @map("fuente_consultada")
+  valorLeidoJson   Json?    @map("valor_leido_json")
+  valorVigenteId   String?  @map("valor_vigente_id") @db.Uuid
+  diferencia       String?
+  resultado        String
+  alertaEmitida    Boolean  @default(false) @map("alerta_emitida")
+
+  indicador IndicadorLegal @relation(fields: [indicadorId], references: [id], onDelete: Restrict)
+
+  @@index([indicadorId, capturadoEn])
+  @@map("capturas_indicador")
+  @@schema("core")
+}
+
+model ValorTenant {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  indicadorId     String    @map("indicador_id") @db.Uuid
+  valorJson       Json      @map("valor_json")
+  vigenteDesde    DateTime  @map("vigente_desde") @db.Date
+  vigenteHasta    DateTime? @map("vigente_hasta") @db.Date
+  motivo          String?
+  evidencia       String?
+  origen          String    @default("sigue_fuente")
+  estado          String    @default("propuesto")
+  confirmadoPorId String?   @map("confirmado_por_id") @db.Uuid
+  confirmadoEn    DateTime? @map("confirmado_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  indicador IndicadorLegal @relation(fields: [indicadorId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, indicadorId, vigenteDesde])
+  @@map("valores_tenant")
+  @@schema("core")
+}
+
+/// Tasa adicional de mutual del tenant (decisión D1 CAR-142). Sin valor vigente, CPQ queda pendiente.
+model RemuneracionesPerfil {
+  tenantId                 String    @id @map("tenant_id") @db.Uuid
+  mutualAdicionalEscalada  Int?      @map("mutual_adicional_escalada")
+  mutualAdicionalEstado    String    @default("pendiente") @map("mutual_adicional_estado")
+  mutualConfirmadoPorId    String?   @map("mutual_confirmado_por_id") @db.Uuid
+  mutualConfirmadoEn       DateTime? @map("mutual_confirmado_en") @db.Timestamptz(6)
+  updatedAt                DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("remuneraciones_perfil")
+  @@schema("core")
+}
