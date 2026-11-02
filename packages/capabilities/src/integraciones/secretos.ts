@@ -1,4 +1,11 @@
-import { cifrar, descifrar, generarDek, kekDelEntorno, sufijoDe } from "@opai/integrations";
+/* eslint-disable max-lines -- CAF (CAR-143) + guardarSecretoTx certificado DTE (CAR-149) en el mismo módulo */
+import {
+  cifrar,
+  descifrar,
+  generarDek,
+  kekDelEntorno,
+  sufijoParaGuardar,
+} from "@opai/integrations";
 
 import type { TenantTx } from "@opai/db";
 
@@ -42,20 +49,90 @@ export async function dekDe(ctx: Contexto): Promise<Buffer> {
   return dek;
 }
 
+/** Guarda un secreto dentro de una transacción ya abierta (certificado DTE + clave atómicos). */
+export async function guardarSecretoTx(
+  tx: TenantTx,
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+): Promise<void> {
+  await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
+  const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+  await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
+}
+
 export async function guardarSecreto(
   ctx: Contexto,
   integracionId: string,
   nombre: string,
   valor: string,
 ): Promise<{ sufijo: string }> {
-  // Lee la DEK y escribe en la misma transacción, con `FOR SHARE` sobre la fila de la DEK: una rotación
-  // (`rotarDek`, `FOR UPDATE`) no puede reemplazarla entre medio y dejar el secreto con la DEK vieja.
-  await ctx.transaccion(async (tx) => {
-    await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
-    const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
-    await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
+  const r = await guardarSecretoConId(ctx, integracionId, nombre, valor);
+  return { sufijo: r.sufijo };
+}
+
+/** Guarda un secreto cifrado dentro de una transacción ya abierta (sin anidar otra). */
+export async function guardarSecretoConIdTx(
+  tx: TenantTx,
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+): Promise<{ id: string; sufijo: string }> {
+  await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
+  const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+  const row = await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
+  return { id: row.id, sufijo: sufijoParaGuardar(nombre, valor) };
+}
+
+/** Inserta un secreto cifrado; falla si el nombre ya existe (nunca sobrescribe). */
+export async function insertarSecretoConIdTx(
+  tx: TenantTx,
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+): Promise<{ id: string; sufijo: string }> {
+  await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
+  const previo = await tx.secreto.findUnique({
+    where: { tenantId_integracionId_nombre: { tenantId: ctx.tenantId, integracionId, nombre } },
+    select: { id: true },
   });
-  return { sufijo: sufijoDe(valor) };
+  if (previo) {
+    throw reglaDeNegocio("Ya existe un secreto registrado para este rango de folios.");
+  }
+  const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+  const datos = {
+    cifrado: bytes(c.cifrado),
+    iv: bytes(c.iv),
+    tag: bytes(c.tag),
+    sufijo: sufijoParaGuardar(nombre, valor),
+  };
+  const row = await tx.secreto.create({
+    data: {
+      tenantId: ctx.tenantId,
+      integracionId,
+      nombre,
+      ...datos,
+      creadoPor: ctx.usuario?.id ?? null,
+    },
+  });
+  return { id: row.id, sufijo: sufijoParaGuardar(nombre, valor) };
+}
+
+/** Guarda un secreto cifrado y devuelve su id (p. ej. CAF en finanzas.dte_folios). */
+export async function guardarSecretoConId(
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+): Promise<{ id: string; sufijo: string }> {
+  let out = { id: "", sufijo: "" };
+  await ctx.transaccion(async (tx) => {
+    out = await guardarSecretoConIdTx(tx, ctx, integracionId, nombre, valor);
+  });
+  return out;
 }
 
 async function guardarCifrado(
@@ -65,14 +142,14 @@ async function guardarCifrado(
   nombre: string,
   valor: string,
   c: ReturnType<typeof cifrar>,
-): Promise<void> {
+): Promise<{ id: string }> {
   const datos = {
     cifrado: bytes(c.cifrado),
     iv: bytes(c.iv),
     tag: bytes(c.tag),
-    sufijo: sufijoDe(valor),
+    sufijo: sufijoParaGuardar(nombre, valor),
   };
-  await db.secreto.upsert({
+  const row = await db.secreto.upsert({
     where: { tenantId_integracionId_nombre: { tenantId: ctx.tenantId, integracionId, nombre } },
     create: {
       tenantId: ctx.tenantId,
@@ -83,6 +160,7 @@ async function guardarCifrado(
     },
     update: datos,
   });
+  return { id: row.id };
 }
 
 /** Solo para adaptadores del servidor. Nunca se devuelve por capacidad, API ni MCP. */

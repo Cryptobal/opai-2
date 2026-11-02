@@ -1,11 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
 import { FichaCotizacionLineas } from "./ficha-cotizacion-lineas";
 import type { ModalesFichaCotizacion } from "./ficha-cotizacion-modales";
 import { HistorialVersionesCpq, PanelDocumentoPdf } from "./historial-versiones";
+
+const PropuestaTecnicaFicha = dynamic(
+  () => import("./propuesta-tecnica-ficha").then((m) => m.PropuestaTecnicaFicha),
+  { ssr: false, loading: () => null },
+);
 
 type Ficha = NonNullable<DatosFichaCotizacion["ficha"]>;
 
@@ -30,6 +36,9 @@ export function FichaCotizacionCuerpo({
   recargar: () => void;
   modales: ModalesFichaCotizacion;
 }) {
+  const meta = d.meta as { puedeEnviar?: boolean } | undefined;
+  const puedeEnviar = Boolean(meta?.puedeEnviar ?? d.version.estado === "lista");
+
   return (
     <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-4 min-w-0">
@@ -63,7 +72,16 @@ export function FichaCotizacionCuerpo({
         />
         <HistorialVersionesCpq versiones={datos.versiones} codigo={d.cotizacion.codigo} />
       </div>
-      <aside className="hidden xl:block space-y-4">{resumen}</aside>
+      <aside className="hidden xl:block space-y-4">
+        {resumen}
+        <PropuestaTecnicaFicha
+          cotizacionId={d.cotizacion.id}
+          cuentaId={d.cuentaId}
+          gestionar={datos.gestionar}
+          aprobarEnvios={datos.aprobarEnvios}
+          puedeEnviar={puedeEnviar}
+        />
+      </aside>
     </div>
   );
 }

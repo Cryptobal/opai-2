@@ -28,6 +28,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: credenciales del tenant; nunca salen ni se cambian por API ni MCP (ADR-027).",
   "core.integraciones.set_secreto":
     "Solo personas: secretos cifrados del tenant; nunca salen ni se cambian por API ni MCP (ADR-027).",
+  "finanzas.folios.cargar_caf":
+    "Solo personas: el XML del CAF incluye la llave privada; un agente no lo encola en aprobaciones (CAR-143).",
+  "core.integraciones.guardar_certificado_dte":
+    "Solo personas: certificado .pfx cifrado del tenant; nunca sale ni se cambia por API ni MCP (ADR-027, CAR-149).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
@@ -96,6 +100,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: es el control humano sobre lo que propone un agente (margen CPQ).",
   "cpq.cotizaciones.rechazar_aprobacion":
     "Solo personas: es el control humano sobre lo que propone un agente (margen CPQ).",
+  "cpq.cotizaciones.enviar":
+    "Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad.",
   "core.remuneraciones.confirmar":
     "Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034).",
   "core.remuneraciones.confirmar_mutual":

@@ -42,9 +42,10 @@ function generico(c: Columna): unknown {
 }
 
 export function valores(t: Tabla, ctx: Contexto): Fila {
+  const omitir = new Set(AJUSTES[t.nombre]?.omitir ?? []);
   const fila: Fila = {};
   for (const c of t.columnas) {
-    if (c.generada) continue;
+    if (c.generada || omitir.has(c.nombre)) continue;
     if (c.nombre === "tenant_id") fila[c.nombre] = ctx.tenant;
     const ref = t.referencias.find((r) => r.columna === c.nombre);
     if (c.nombre === "tenant_id" || !c.noNula || c.conDefecto) continue;

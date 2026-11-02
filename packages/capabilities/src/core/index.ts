@@ -19,6 +19,7 @@ import {
   integracionesList,
   integracionesSetSecreto,
 } from "./integraciones";
+import { integracionesGuardarCertificadoDte } from "./integraciones-certificado-dte";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
 import { capacidadesRemuneraciones, trabajoCapturaIndicadoresSii } from "./remuneraciones";
@@ -95,6 +96,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   integracionesGet,
   integracionesConfigurar,
   integracionesSetSecreto,
+  integracionesGuardarCertificadoDte,
   integracionesProbar,
   geoAutocompletar,
   geoDetalle,
