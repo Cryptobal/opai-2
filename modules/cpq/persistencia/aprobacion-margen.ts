@@ -2,12 +2,8 @@ import { conflicto, noEncontrado, reglaDeNegocio, type Contexto } from "@opai/ca
 
 import { puedeTransicionar, type EstadoCotizacion } from "../domain";
 import type { ResultadoCalculo } from "../domain/motor";
-import { exigirDecisorAprobacionMargen, usuarioReal } from "./aprobacion-reglas";
+import { exigirDecisorAprobacionMargen, creadoPorIdDeVersion, usuarioReal } from "./aprobacion-reglas";
 import { versionDeCotizacion } from "./version";
-
-function actorUsuario(ctx: Contexto) {
-  return usuarioReal(ctx);
-}
 
 async function aprobacionPendiente(ctx: Contexto, versionId: string) {
   return ctx.db.cpqAprobacion.findFirst({
@@ -45,7 +41,7 @@ export async function solicitarAprobacionMargen(
   const desde = v.estado as EstadoCotizacion;
   if (!puedeTransicionar(desde, "en_aprobacion"))
     throw reglaDeNegocio(`No se puede pasar de ${v.estado} a en_aprobacion.`);
-  const actorId = actorUsuario(ctx);
+  const actorId = usuarioReal(ctx);
   const fila = await ctx.transaccion(async (tx) => {
     const vr = await tx.cpqVersion.updateMany({
       where: { id: versionId, estado: desde },
@@ -86,7 +82,7 @@ export async function retirarAprobacion(ctx: Contexto, versionId: string) {
   if (v.estado !== "en_aprobacion") throw reglaDeNegocio("No hay un pedido de aprobación activo.");
   const pend = await aprobacionPendiente(ctx, versionId);
   if (!pend) throw noEncontrado("La aprobación");
-  const actorId = actorUsuario(ctx);
+  const actorId = usuarioReal(ctx);
   if (pend.solicitadaPorId !== actorId && !ctx.autorizar("cpq:aprobar"))
     throw reglaDeNegocio("Solo quien pidió la aprobación o un aprobador puede retirarla.");
   const ahora = new Date();
@@ -117,7 +113,7 @@ export async function resolverAprobacionMargen(
   if (!pend) throw noEncontrado("La aprobación");
   if (!aprobar && !motivo?.trim()) throw reglaDeNegocio("Indica el motivo del rechazo.");
   const ahora = new Date();
-  const actorId = actorUsuario(ctx);
+  const actorId = usuarioReal(ctx);
   const nuevo = aprobar ? ("lista" as const) : ("borrador" as const);
   let autoaprobacion = false;
   await ctx.transaccion(async (tx) => {
@@ -125,7 +121,10 @@ export async function resolverAprobacionMargen(
       where: { id: pend.id, versionId, estado: "pendiente" },
     });
     if (!pendViva) throw conflicto("La aprobación ya fue decidida; vuelve a cargar la ficha.");
-    ({ autoaprobacion } = exigirDecisorAprobacionMargen(ctx, pendViva.solicitadaPorId));
+    ({ autoaprobacion } = exigirDecisorAprobacionMargen(
+      ctx,
+      await creadoPorIdDeVersion(tx, versionId),
+    ));
     const ar = await tx.cpqAprobacion.updateMany({
       where: { id: pendViva.id, estado: "pendiente" },
       data: {

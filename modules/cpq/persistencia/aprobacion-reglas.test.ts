@@ -10,8 +10,10 @@ const USUARIO_ADMIN = {
   platformRole: null,
 };
 
+const CREADOR_AJENO = USUARIO_ADMIN.id;
+
 describe("reglas N6 de aprobación de margen", () => {
-  it("owner autoaprueba la propia; admin la de otro; admin no la propia", () => {
+  it("owner autoaprueba la propia (creador); admin la ajena; admin no la propia", () => {
     const owner = contextoDePrueba({ rol: "owner" }).ctx;
     const admin = contextoDePrueba({ rol: "admin", usuario: USUARIO_ADMIN }).ctx;
     const propiaOwner = evaluarAprobacionMargen(owner, USUARIO_DE_PRUEBA.id);
@@ -23,16 +25,20 @@ describe("reglas N6 de aprobación de margen", () => {
     expect(propiaAdmin.motivoNoDecidir).toMatch(/admin no puede aprobar su propia/i);
   });
 
-  it("owner no aprueba la cotización de otro", () => {
+  it("owner aprueba cotización creada por otro con autoaprobacion false", () => {
     const owner = contextoDePrueba({ rol: "owner" }).ctx;
-    const ajena = evaluarAprobacionMargen(owner, USUARIO_ADMIN.id);
-    expect(ajena.puedeDecidir).toBe(false);
-    expect(ajena.motivoNoDecidir).toMatch(/admin puede aprobar/i);
+    const ajena = evaluarAprobacionMargen(owner, CREADOR_AJENO);
+    expect(ajena).toMatchObject({ puedeDecidir: true, autoaprobacion: false });
   });
 
-  it("gerente no decide aunque tenga otros permisos CPQ", () => {
-    const gerente = contextoDePrueba({ rol: "gerente", modulosActivos: ["comercial", "cpq"] }).ctx;
+  it("gerente con excepción cpq:aprobar no decide", () => {
+    const gerente = contextoDePrueba({
+      rol: "gerente",
+      modulosActivos: ["comercial", "cpq"],
+      excepciones: [{ permiso: "cpq:aprobar", conceder: true }],
+    }).ctx;
     const r = evaluarAprobacionMargen(gerente, USUARIO_DE_PRUEBA.id);
     expect(r.puedeDecidir).toBe(false);
+    expect(r.motivoNoDecidir).toMatch(/owner o un admin/i);
   });
 });

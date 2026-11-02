@@ -20,6 +20,7 @@ type FilaLinea = {
 
 export async function metaFicha(
   ctx: Contexto,
+  creadoPorId: string,
   version: { id: string; estado: string; validaHasta: Date | null },
   lineas: readonly FilaLinea[],
   calculo: ResultadoCalculo,
@@ -30,8 +31,7 @@ export async function metaFicha(
   const huella = huellaJuego(juego);
   const desactualizado = juegoDesactualizado(huella, lineas);
   const pend = version.estado === "en_aprobacion" ? await aprobacionPendiente(ctx, version.id) : null;
-  const decision =
-    pend != null ? evaluarAprobacionMargen(ctx, pend.solicitadaPorId) : null;
+  const decision = pend != null ? evaluarAprobacionMargen(ctx, creadoPorId) : null;
   const verCostos = ctx.autorizar("cpq:costos.ver");
   const costosLinea = verCostos
     ? Object.fromEntries(

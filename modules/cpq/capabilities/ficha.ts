@@ -81,7 +81,7 @@ export const cotizacionesFicha = defineCapability({
         ? await recalcularVersion(ctx, input.id, input.version, false)
         : calculoCongelado(ctx, version, lineas);
     if (!r) throw noEncontrado("La versión");
-    const meta = await metaFicha(ctx, version, lineas, r);
+    const meta = await metaFicha(ctx, c.creadoPorId, version, lineas, r);
     const verCostos = ctx.autorizar(PERMISO_COSTOS);
     return {
       cotizacion: {

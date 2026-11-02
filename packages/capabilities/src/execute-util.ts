@@ -1,7 +1,6 @@
 import { falla } from "./autorizacion";
 import { type ReservaIdempotencia, SALIDA_INVALIDA } from "./idempotencia";
 import type {
-  Actor,
   Capacidad,
   Contexto,
   EventoAuditoria,

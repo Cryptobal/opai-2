@@ -43,7 +43,7 @@ export const cotizacionesAprobarMargen = defineCapability({
     salida.autoaprobacion ? { autoaprobacion: true as const } : {},
   async handler(ctx, input, { dryRun }) {
     if (ctx.actor.tipo !== "user") throw prohibido("Solo una persona puede aprobar el margen.");
-    await cotizacionDe(ctx, input.id);
+    const cot = await cotizacionDe(ctx, input.id);
     const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
     if (!pack) throw noEncontrado("La versión");
     if (dryRun) {
@@ -52,7 +52,7 @@ export const cotizacionesAprobarMargen = defineCapability({
         orderBy: { createdAt: "desc" },
       });
       if (!pend) throw noEncontrado("La aprobación");
-      const { autoaprobacion } = exigirDecisorAprobacionMargen(ctx, pend.solicitadaPorId);
+      const { autoaprobacion } = exigirDecisorAprobacionMargen(ctx, cot.creadoPorId);
       return { estado: "lista" as const, aprobacionId: pend.id, autoaprobacion };
     }
     const r = await resolverAprobacionMargen(ctx, pack.version.id, true);

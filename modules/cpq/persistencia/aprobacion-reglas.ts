@@ -15,10 +15,18 @@ export type EvaluacionAprobacionMargen = {
   motivoNoDecidir: string | null;
 };
 
-/** Reglas N6 (Carlos, 2-nov-2026): owner autoaprueba la suya; admin la de otros; nadie más. */
+const MSG_SOLO_OWNER_ADMIN =
+  "Solo un owner o un admin puede decidir la aprobación de margen.";
+const MSG_ADMIN_PROPIA =
+  "Un admin no puede aprobar su propia cotización; pide revisión a otro admin o al owner.";
+
+/**
+ * Reglas N6 (Carlos, 2-nov-2026): «propia» = cotización que creó el actor (`creadoPorId`).
+ * Owner autoaprueba la suya; owner y admin aprueban las ajenas; admin nunca la propia.
+ */
 export function evaluarAprobacionMargen(
   ctx: Contexto,
-  solicitadaPorId: string,
+  creadoPorId: string,
 ): EvaluacionAprobacionMargen {
   if (ctx.actor.tipo === "agent") {
     return { puedeDecidir: false, autoaprobacion: false, motivoNoDecidir: null };
@@ -31,42 +39,42 @@ export function evaluarAprobacionMargen(
     return {
       puedeDecidir: false,
       autoaprobacion: false,
-      motivoNoDecidir: "Solo un owner o un admin puede decidir la aprobación de margen.",
+      motivoNoDecidir: MSG_SOLO_OWNER_ADMIN,
     };
   }
   const actorId = usuarioReal(ctx);
-  const propia = solicitadaPorId === actorId;
+  const propia = actorId === creadoPorId;
   if (propia) {
     if (rol !== "owner") {
       return {
         puedeDecidir: false,
         autoaprobacion: false,
-        motivoNoDecidir:
-          "Un admin no puede aprobar su propia cotización; pide revisión a otro admin o al owner.",
+        motivoNoDecidir: MSG_ADMIN_PROPIA,
       };
     }
     return { puedeDecidir: true, autoaprobacion: true, motivoNoDecidir: null };
   }
-  if (rol !== "admin") {
-    return {
-      puedeDecidir: false,
-      autoaprobacion: false,
-      motivoNoDecidir: "Solo un admin puede aprobar la cotización de otra persona.",
-    };
-  }
   return { puedeDecidir: true, autoaprobacion: false, motivoNoDecidir: null };
 }
 
-export function exigirDecisorAprobacionMargen(ctx: Contexto, solicitadaPorId: string) {
+/** Lee `creadoPorId` de la cotización en la misma transacción que decide la aprobación. */
+export async function creadoPorIdDeVersion(tx: Contexto["db"], versionId: string) {
+  const v = await tx.cpqVersion.findFirst({ where: { id: versionId }, select: { cotizacionId: true } });
+  const c = await tx.cpqCotizacion.findFirst({
+    where: { id: v!.cotizacionId },
+    select: { creadoPorId: true },
+  });
+  return c!.creadoPorId;
+}
+
+export function exigirDecisorAprobacionMargen(ctx: Contexto, creadoPorId: string) {
   if (ctx.actor.tipo === "agent") {
     throw prohibido("Un agente no puede decidir la aprobación de margen.");
   }
-  const e = evaluarAprobacionMargen(ctx, solicitadaPorId);
+  const e = evaluarAprobacionMargen(ctx, creadoPorId);
   if (!e.puedeDecidir) {
     const msg = e.motivoNoDecidir ?? "No puedes decidir esta aprobación de margen.";
-    const actorId = usuarioReal(ctx);
-    if (ctx.rol === "admin" && solicitadaPorId === actorId) throw prohibido(msg);
-    throw reglaDeNegocio(msg);
+    throw prohibido(msg);
   }
   return e;
 }

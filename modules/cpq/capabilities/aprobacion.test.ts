@@ -49,6 +49,16 @@ function comoAdmin(ctx: Contexto): Contexto {
   };
 }
 
+function comoOwner(ctx: Contexto): Contexto {
+  return {
+    ...ctx,
+    rol: "owner",
+    usuario: USUARIO_DE_PRUEBA,
+    actor: { tipo: "user", id: USUARIO_DE_PRUEBA.id },
+    autorizar: autorizador({ rol: "owner", permisosRol: null, excepciones: null }, USUARIO_DE_PRUEBA, null),
+  };
+}
+
 function comoGerente(ctx: Contexto): Contexto {
   return {
     ...ctx,
@@ -121,6 +131,56 @@ describe("cpq aprobación y envío (CAR-141)", () => {
     const apr = await executeCapability(comoAdmin(owner.ctx), "cpq.cotizaciones.aprobar", { id });
     expect(apr.ok).toBe(true);
     if (apr.ok) expect(apr.data).toMatchObject({ autoaprobacion: false });
+  });
+
+  it("admin creó la cotización, otro pidió aprobación y el admin decide: FORBIDDEN", async () => {
+    const { ctx } = ctxAdmin();
+    const id = await cotizacionConPuesto(ctx);
+    await executeCapability(comoOwner(ctx), "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const apr = await executeCapability(ctx, "cpq.cotizaciones.aprobar", { id });
+    expect(apr).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(apr.ok ? "" : apr.error.message).toMatch(/admin no puede aprobar su propia/i);
+  });
+
+  it("owner creó, otro pidió aprobación y el owner aprueba con autoaprobacion true", async () => {
+    const owner = ctxOwner();
+    const id = await cotizacionConPuesto(owner.ctx);
+    await executeCapability(comoAdmin(owner.ctx), "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const apr = await executeCapability(owner.ctx, "cpq.cotizaciones.aprobar", { id });
+    expect(apr.ok).toBe(true);
+    if (apr.ok) expect(apr.data).toMatchObject({ autoaprobacion: true });
+  });
+
+  it("owner aprueba cotización creada por otro con autoaprobacion false", async () => {
+    const { ctx } = ctxAdmin();
+    const id = await cotizacionConPuesto(ctx);
+    await executeCapability(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const apr = await executeCapability(comoOwner(ctx), "cpq.cotizaciones.aprobar", { id });
+    expect(apr.ok).toBe(true);
+    if (apr.ok) expect(apr.data).toMatchObject({ autoaprobacion: false });
+  });
+
+  it("gerente con excepción cpq:aprobar no puede aprobar margen", async () => {
+    const owner = ctxOwner();
+    const id = await cotizacionConPuesto(owner.ctx);
+    await executeCapability(owner.ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const gerenteEx = {
+      ...owner.ctx,
+      rol: "gerente" as const,
+      autorizar: autorizador(
+        {
+          rol: "gerente",
+          permisosRol: null,
+          excepciones: [{ permiso: "cpq:aprobar", conceder: true }],
+        },
+        owner.ctx.usuario!,
+        null,
+      ),
+    };
+    expect(await executeCapability(gerenteEx, "cpq.cotizaciones.aprobar", { id })).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
   });
 
   it("admin no puede aprobar su propia cotización", async () => {
