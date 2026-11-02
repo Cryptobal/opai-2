@@ -33,10 +33,10 @@ export const ajustesActualizar = defineCapability({
     if (dryRun) return nuevo;
     await ctx.transaccion(async (tx) => {
       const data = {
-        saldoInicial: nuevo.saldoInicial,
-        umbral: nuevo.umbral,
+        saldoInicial: BigInt(nuevo.saldoInicial),
+        umbral: BigInt(nuevo.umbral),
         desde: aFecha(nuevo.desde),
-        toleranciaCierre: nuevo.toleranciaCierre,
+        toleranciaCierre: BigInt(nuevo.toleranciaCierre),
         horizonteSemanas: nuevo.horizonteSemanas,
         calendarioPagos: nuevo.calendarioPagos,
         avisoActivo: nuevo.avisoActivo,

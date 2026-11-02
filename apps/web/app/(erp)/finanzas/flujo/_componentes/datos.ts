@@ -65,7 +65,7 @@ export const clp = (n: number) => `${n < 0 ? "$ −" : "$ "}${Math.abs(n).toLoca
 const corta = (iso: string) => `${iso.slice(8, 10)}-${iso.slice(5, 7)}`;
 
 /** Columnas, filas y celdas para `PlanillaScreen`: filas del flujo, totales y saldo con su tono. */
-export function armarPlanilla(p: Planilla) {
+export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
   const columnas: ColumnaPlanilla[] = p.semanas.map((s) => ({
     id: s.semana,
     etiqueta: corta(s.semana),
@@ -81,6 +81,8 @@ export function armarPlanilla(p: Planilla) {
     { id: TOTALES.egresos, etiqueta: "Total egresos" },
     { id: TOTALES.saldo, etiqueta: "Saldo final" },
   ];
+  const esFilaMonto = (filaId: string) =>
+    filaId !== TOTALES.ingresos && filaId !== TOTALES.egresos && filaId !== TOTALES.saldo;
   const celda = (filaId: string, semana: string): Celda | null => {
     const s = p.semanas.find((x) => x.semana === semana);
     if (!s) return null;
@@ -99,23 +101,38 @@ export function armarPlanilla(p: Planilla) {
               : "Proyectado",
       };
     const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);
-    if (!c) return null;
+    if (!c) {
+      if (opts?.gestiona && esFilaMonto(filaId) && !s.sellada) {
+        return { texto: "—", tono: "neutro", detalle: "Planificar" };
+      }
+      return null;
+    }
     return {
       texto: clp(c.monto),
       tono: CAPA[c.capa].tono,
       detalle: c.nota ? `${CAPA[c.capa].detalle} · ${c.nota}` : CAPA[c.capa].detalle,
     };
   };
-  return { columnas, filas, celda, totales: TOTALES };
+  const celdaEditable = (filaId: string, semana: string) =>
+    Boolean(opts?.gestiona && celdaEditablePlan(p, filaId, semana));
+  return { columnas, filas, celda, celdaEditable, totales: TOTALES };
+}
+
+export type ArmadoPlanilla = ReturnType<typeof armarPlanilla>;
+
+export function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
+  if (filaId.startsWith("total") || filaId === TOTALES.saldo) return false;
+  const s = p.semanas.find((x) => x.semana === semana);
+  if (!s || s.sellada) return false;
+  const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);
+  if (c && c.capa !== "plan") return false;
+  return Boolean(p.filas.find((f) => f.id === filaId));
 }
 
 export function celdaEditable(p: Planilla, filaId: string, semana: string) {
-  if (filaId.startsWith("total") || filaId === TOTALES.saldo) return null;
-  const s = p.semanas.find((x) => x.semana === semana);
-  if (!s || s.sellada) return null;
+  if (!celdaEditablePlan(p, filaId, semana)) return null;
+  const s = p.semanas.find((x) => x.semana === semana)!;
   const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);
-  if (c && c.capa !== "plan") return null;
-  const fila = p.filas.find((f) => f.id === filaId);
-  if (!fila) return null;
+  const fila = p.filas.find((f) => f.id === filaId)!;
   return { fila, semana, celda: c ?? null };
 }

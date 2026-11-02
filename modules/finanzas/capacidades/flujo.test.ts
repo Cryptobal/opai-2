@@ -71,7 +71,7 @@ describe("finanzas.flujo.celdas", () => {
     const r = await executeCapability(ctx, "finanzas.celdas.mover", entrada);
     expect(r).toMatchObject({ ok: true });
     const celdas = await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_ING } });
-    expect(celdas.some((c) => c.semana.toISOString().startsWith(S2) && c.monto === 1000)).toBe(
+    expect(celdas.some((c) => c.semana.toISOString().startsWith(S2) && Number(c.monto) === 1000)).toBe(
       true,
     );
   });
@@ -201,5 +201,17 @@ describe("finanzas.flujo.aviso", () => {
     ]);
     expect(a).toMatchObject({ ok: true });
     expect(b).toMatchObject({ ok: true });
+  });
+});
+
+describe("finanzas.filas.archivar", () => {
+  it("dry_run y escritura desactivan la fila", async () => {
+    const { ctx } = nuevo();
+    const vp = await executeCapability(ctx, "finanzas.filas.archivar", { id: FILA_EGR, archivar: true }, {
+      dryRun: true,
+    });
+    expect(vp).toMatchObject({ ok: true, data: { activa: false } });
+    const r = await executeCapability(ctx, "finanzas.filas.archivar", { id: FILA_EGR, archivar: true });
+    expect(r).toMatchObject({ ok: true, data: { activa: false } });
   });
 });

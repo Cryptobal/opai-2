@@ -5,7 +5,7 @@ import { ajustesActualizar, ajustesObtener } from "./ajustes";
 import { celdasCumplir, celdasFijar } from "./celdas";
 import { cierreReabrir, cierresListar, cierreSellar } from "./cierre";
 import { flujoDerivadasListar } from "./derivadas";
-import { filasActualizar, filasCrear } from "./filas";
+import { filasActualizar, filasArchivar, filasCrear } from "./filas";
 import { flujoImportar } from "./importar";
 import { filasListar, planillaObtener } from "./lectura";
 import { celdasMover } from "./mover";
@@ -15,6 +15,7 @@ export const capacidades: readonly Capacidad[] = [
   filasListar,
   filasCrear,
   filasActualizar,
+  filasArchivar,
   celdasFijar,
   celdasMover,
   celdasCumplir,

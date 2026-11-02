@@ -3,6 +3,7 @@ import type { TenantTx } from "@opai/db";
 import { randomUUID } from "node:crypto";
 
 import { calcularPlanilla, lunesDe, semanasDesde } from "../domain";
+import { aNumeroSeguro } from "./esquemas";
 import { aFecha, aIso, cargarFlujo, vistaAjustes } from "./util";
 import type { ajustesDe } from "./util";
 
@@ -33,7 +34,7 @@ export async function semanasProyectadas(
       : [];
   const saldoPrevio = previas.reduce((s, c) => {
     const f = dominio.find((x) => x.id === c.filaId);
-    return f ? s + (f.seccion === "ingreso" ? c.monto : -c.monto) : s;
+    return f ? s + (f.seccion === "ingreso" ? aNumeroSeguro(c.monto) : -aNumeroSeguro(c.monto)) : s;
   }, ajustes.saldoInicial);
   return calcularPlanilla({
     saldoInicial: saldoPrevio,

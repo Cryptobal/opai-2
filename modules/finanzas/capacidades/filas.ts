@@ -95,3 +95,30 @@ export const filasActualizar = defineCapability({
     return vistaFila(f);
   },
 });
+
+export const filasArchivar = defineCapability({
+  id: "finanzas.filas.archivar",
+  descripcion:
+    "Archiva o restaura una fila del flujo de caja: deja de mostrarse en la planilla sin borrar sus celdas.",
+  permiso: PERMISO_CONFIGURAR,
+  input: z.object({ id: uuidSchema, archivar: z.boolean().default(true) }),
+  output: filaSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
+    const actual = await filaDe(ctx, input.id);
+    const activa = !input.archivar;
+    if (dryRun) return vistaFila({ ...actual, activa });
+    const f = await ctx.transaccion(async (tx) => {
+      const r = await tx.flujoFila.update({ where: { id: input.id }, data: { activa } });
+      await ctx.eventos.emitir(tx, {
+        tipo: "finanzas.flujo.fila_archivada",
+        entidadTipo: "flujoFila",
+        entidadId: input.id,
+        payload: { archivada: input.archivar },
+      });
+      return r;
+    });
+    return vistaFila(f);
+  },
+});

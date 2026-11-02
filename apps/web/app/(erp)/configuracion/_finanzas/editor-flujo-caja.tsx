@@ -27,6 +27,14 @@ export function EditorFlujoCaja({
     setEtiqueta("");
   }
 
+  async function archivarFila(id: string) {
+    const r = await ejecutar("finanzas.filas.archivar", { id, archivar: true }, true);
+    if (!r) return;
+    const ok = await ejecutar("finanzas.filas.archivar", { id, archivar: true });
+    if (!ok) return;
+    avisar.exito("Fila archivada");
+  }
+
   async function guardarAjustes() {
     const r = await ejecutar("finanzas.ajustes.actualizar", aj);
     if (!r) return;
@@ -40,8 +48,15 @@ export function EditorFlujoCaja({
         <h2 className="text-lg font-medium text-fg">Filas</h2>
         <ul className="text-sm text-fg-muted">
           {filas.map((f) => (
-            <li key={f.id}>
-              {f.etiqueta} · {f.seccion} {f.activa ? "" : "· inactiva"}
+            <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-1">
+              <span>
+                {f.etiqueta} · {f.seccion} {f.activa ? "" : "· inactiva"}
+              </span>
+              {f.activa ? (
+                <Button variant="ghost" disabled={pendiente} onClick={() => void archivarFila(f.id)}>
+                  Archivar
+                </Button>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -92,7 +107,7 @@ export function EditorFlujoCaja({
           marcado={aj.avisoActivo}
           onCambiar={(m) => setAj({ ...aj, avisoActivo: m })}
           etiqueta="Campanita in-app (saldo bajo umbral)"
-          descripcion="Banner en la planilla y notificación interna. Solo campanita: quienes tienen permiso de ver el flujo. La alerta banco vs proyectado queda para cuando exista banco (CAR-97)."
+          descripcion="Banner en la planilla y notificación interna. Solo campanita: quienes tienen permiso de ver el flujo."
         />
         <Campo etiqueta="Umbral del aviso (CLP)" htmlFor="aj-au">
           <Input
@@ -114,8 +129,8 @@ export function EditorFlujoCaja({
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-medium text-fg">Calendario de pagos</h2>
         <p className="text-sm text-fg-muted">
-          Días del mes para proyecciones automáticas cuando existan adaptadores de nómina e IVA.{" "}
-          TODO(decisión Carlos): UI completa según diseño v3.
+          Días del mes para proyecciones automáticas cuando existan adaptadores de nómina e IVA. Edición JSON
+          provisional hasta el diseño completo del calendario.
         </p>
         <Textarea
           value={JSON.stringify(aj.calendarioPagos, null, 2)}

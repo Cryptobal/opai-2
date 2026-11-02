@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCapability } from "@opai/capabilities";
 
 import { calcularPlanilla, lunesDe, semanasDesde, sumarSemanas } from "../domain";
-import { ajustesSchema, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
+import { ajustesSchema, aNumeroSeguro, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
 import type { capaSchema } from "./esquemas";
 import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
@@ -90,7 +90,7 @@ export const planillaObtener = defineCapability({
         : [];
     const saldoPrevio = previas.reduce((s, c) => {
       const f = dominio.find((x) => x.id === c.filaId);
-      return f ? s + (f.seccion === "ingreso" ? c.monto : -c.monto) : s;
+      return f ? s + (f.seccion === "ingreso" ? aNumeroSeguro(c.monto) : -aNumeroSeguro(c.monto)) : s;
     }, ajustes.saldoInicial);
     const calculo = calcularPlanilla({
       saldoInicial: saldoPrevio,
@@ -111,7 +111,7 @@ export const planillaObtener = defineCapability({
         filaId: c.filaId,
         semana: aIso(c.semana),
         capa: c.capa as CapaOut,
-        monto: c.monto,
+        monto: aNumeroSeguro(c.monto),
         nota: c.nota,
       })),
       semanas: semanasOut,
