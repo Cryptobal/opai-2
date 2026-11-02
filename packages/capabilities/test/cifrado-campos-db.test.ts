@@ -164,13 +164,14 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
       portalesMembresia: ["erp"],
       medidor: { registrar: async () => undefined },
     });
-    await mod.executeCapability(
+    const prevAct = await mod.executeCapability(
       ctxP,
       "core.personas.prevision_actualizar",
       { id: persona.id, planIsapre: "plan sensible rotar dek", afp: "modelo" },
       { dryRun: false },
     );
-    await mod.executeCapability(
+    expect(prevAct.ok, `core.personas.prevision_actualizar: ${JSON.stringify(prevAct)}`).toBe(true);
+    const pagoSol = await mod.executeCapability(
       ctxP,
       "core.personas.pago_solicitar_cambio",
       {
@@ -181,6 +182,7 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
       },
       { dryRun: false },
     );
+    expect(pagoSol.ok, `core.personas.pago_solicitar_cambio: ${JSON.stringify(pagoSol)}`).toBe(true);
     const prev = await e.admin.personaPrevision.findUniqueOrThrow({ where: { personaId: persona.id } });
     const kidViejo = prev.planIsapre?.match(/^enc:v2:([\w-]+):/)?.[1];
     expect(kidViejo).toBeTruthy();

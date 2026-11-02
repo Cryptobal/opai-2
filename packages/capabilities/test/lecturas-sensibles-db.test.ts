@@ -9,9 +9,10 @@ describe.skipIf(!urlPropietario)("inventario NÚCLEO-H: accesos sensibles en Pos
   let e: Entorno, mod: typeof Mod, a: FixtureLecturas, b: FixtureLecturas;
   beforeAll(async () => {
     e = await prepararEntorno();
+    // Versión alta: `rotar-kek` en secretos-db.test.ts recorre todos los tenants con KEK v1→v2.
     Object.assign(process.env, {
       OPAI_SECRETS_KEY: randomBytes(32).toString("base64"),
-      OPAI_SECRETS_KEY_VERSION: "1",
+      OPAI_SECRETS_KEY_VERSION: "98",
     });
     mod = await import("../src");
     mod.limpiarRegistro();
