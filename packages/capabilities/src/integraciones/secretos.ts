@@ -1,4 +1,10 @@
-import { cifrar, descifrar, generarDek, kekDelEntorno, sufijoDe } from "@opai/integrations";
+import {
+  cifrar,
+  descifrar,
+  generarDek,
+  kekDelEntorno,
+  sufijoParaGuardar,
+} from "@opai/integrations";
 
 import type { TenantTx } from "@opai/db";
 
@@ -42,6 +48,19 @@ export async function dekDe(ctx: Contexto): Promise<Buffer> {
   return dek;
 }
 
+/** Guarda un secreto dentro de una transacción ya abierta (certificado DTE + clave atómicos). */
+export async function guardarSecretoTx(
+  tx: TenantTx,
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+): Promise<void> {
+  await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
+  const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+  await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
+}
+
 export async function guardarSecreto(
   ctx: Contexto,
   integracionId: string,
@@ -51,11 +70,9 @@ export async function guardarSecreto(
   // Lee la DEK y escribe en la misma transacción, con `FOR SHARE` sobre la fila de la DEK: una rotación
   // (`rotarDek`, `FOR UPDATE`) no puede reemplazarla entre medio y dejar el secreto con la DEK vieja.
   await ctx.transaccion(async (tx) => {
-    await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
-    const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
-    await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
+    await guardarSecretoTx(tx, ctx, integracionId, nombre, valor);
   });
-  return { sufijo: sufijoDe(valor) };
+  return { sufijo: sufijoParaGuardar(nombre, valor) };
 }
 
 async function guardarCifrado(
@@ -70,7 +87,7 @@ async function guardarCifrado(
     cifrado: bytes(c.cifrado),
     iv: bytes(c.iv),
     tag: bytes(c.tag),
-    sufijo: sufijoDe(valor),
+    sufijo: sufijoParaGuardar(nombre, valor),
   };
   await db.secreto.upsert({
     where: { tenantId_integracionId_nombre: { tenantId: ctx.tenantId, integracionId, nombre } },

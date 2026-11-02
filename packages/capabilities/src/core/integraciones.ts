@@ -4,6 +4,8 @@ import {
   CATALOGO_INTEGRACIONES,
   credencialDePlataforma,
   definicionIntegracion,
+  enmascarar,
+  sufijoParaGuardar,
 } from "@opai/integrations";
 import { PERMISOS_CORE } from "@opai/domain";
 
@@ -116,7 +118,7 @@ export const integracionesSetSecreto = defineCapability({
     if (!def.secretos.some((s) => s.nombre === input.nombre)) {
       throw reglaDeNegocio(`${def.nombre} no usa el secreto "${input.nombre}".`);
     }
-    const mascara = `••••••••${input.valor.slice(-4)}`;
+    const mascara = enmascarar(sufijoParaGuardar(input.nombre, input.valor));
     if (dryRun) return { proveedor: def.id, nombre: input.nombre, mascara };
     const fila = await ctx.db.integracion.upsert({
       where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: def.id } },
