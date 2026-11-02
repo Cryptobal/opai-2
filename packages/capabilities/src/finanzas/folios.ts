@@ -1,16 +1,20 @@
 import { z } from "zod";
 
+import { mensajeAvisoFoliosSinUsarPorVencer } from "@opai/domain";
+
 import { defineCapability } from "../define";
-import { diaSchema, escribirConEvento, hoy } from "../core/maestros/comun";
-import { uuidSchema } from "../core/esquemas";
+import { escribirConEvento, hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
-import { foliosRestantes } from "@opai/domain";
 import {
   PERMISO_VENTAS,
   avisosDteDe,
   folioVista,
-  tipoDteVentaSchema,
 } from "./ventas-comun";
+import {
+  persistirCafCargado,
+  validarCafParaTenant,
+  vistaPreviaCafCargado,
+} from "./folios-caf-logica";
 
 const folioVistaSchema = z.object({
   id: z.string(),
@@ -24,18 +28,22 @@ const folioVistaSchema = z.object({
   alerta: z.boolean(),
   cafVenceEn: z.string().nullable(),
   activo: z.boolean(),
+  lectura: z.string(),
 });
 
 export const foliosListar = defineCapability({
   id: "finanzas.folios.listar",
   descripcion:
-    "Lista los rangos de folios autorizados por CAF: folio actual, restantes y avisos por folios bajos (porcentaje del rango) o CAF por vencer.",
+    "Lista los rangos de folios autorizados por CAF: folio actual, restantes, avisos por folios bajos o CAF por vencer, y resumen de folios que vencerán sin usar.",
   permiso: PERMISO_VENTAS,
   input: z.object({
-    tipoDte: tipoDteVentaSchema.optional(),
+    tipoDte: z.union([z.literal(33), z.literal(34), z.literal(56), z.literal(61)]).optional(),
     soloActivos: z.boolean().default(true),
   }),
-  output: z.object({ items: z.array(folioVistaSchema) }),
+  output: z.object({
+    items: z.array(folioVistaSchema),
+    avisoFoliosSinUsarPorVencer: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -48,8 +56,15 @@ export const foliosListar = defineCapability({
       },
       orderBy: [{ tipoDte: "asc" }, { folioDesde: "asc" }],
     });
+    let foliosSinUsar = 0;
+    const items = filas.map((f) => {
+      const v = folioVista(f, { ...avisos, hoyIso });
+      if (v.alertaCafPorVencer && v.restantes > 0) foliosSinUsar += v.restantes;
+      return { ...v, lectura: `CAF ${v.tipoDte} · ${v.folioDesde}–${v.folioHasta} · restantes ${v.restantes}` };
+    });
     return {
-      items: filas.map((f) => folioVista(f, { ...avisos, hoyIso })),
+      items,
+      avisoFoliosSinUsarPorVencer: mensajeAvisoFoliosSinUsarPorVencer(foliosSinUsar),
     };
   },
 });
@@ -57,61 +72,43 @@ export const foliosListar = defineCapability({
 export const foliosCargarCaf = defineCapability({
   id: "finanzas.folios.cargar_caf",
   descripcion:
-    "Registra un rango de folios autorizados por CAF (referencia al secreto cifrado, sin subir el XML aquí). No desactiva un rango vigente que aún tenga folios disponibles.",
+    "Registra un rango de folios a partir del XML del CAF: valida RUT, tipo, solape y vencimiento; cifra el XML en core.secretos (ADR-027). dryRun devuelve la lectura sin guardar.",
   permiso: PERMISO_VENTAS,
   input: z.object({
-    tipoDte: tipoDteVentaSchema,
-    folioDesde: z.number().int().min(1).max(2_000_000_000),
-    folioHasta: z.number().int().min(1).max(2_000_000_000),
-    cafVenceEn: diaSchema,
-    secretoId: uuidSchema.optional().describe("Id del secreto donde quedó cifrado el CAF (ADR-027)."),
+    cafXml: z
+      .string()
+      .min(20)
+      .max(500_000)
+      .describe("Contenido XML del CAF emitido por el SII (texto UTF-8)."),
   }),
   output: folioVistaSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    if (input.folioHasta < input.folioDesde) {
-      throw reglaDeNegocio("folioHasta debe ser mayor o igual a folioDesde.");
+    const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
+    if (!cfg?.rutEmisor) {
+      throw reglaDeNegocio("Configure el RUT emisor en la configuración DTE antes de cargar un CAF.");
     }
     const avisos = await avisosDteDe(ctx);
-    const data = {
-      tenantId: ctx.tenantId,
-      tipoDte: input.tipoDte,
-      folioDesde: input.folioDesde,
-      folioHasta: input.folioHasta,
-      folioActual: input.folioDesde,
-      cafSecretoId: input.secretoId ?? null,
-      cafVenceEn: new Date(`${input.cafVenceEn}T00:00:00.000Z`),
-      activo: true,
-    };
-    if (dryRun) {
-      return folioVista(
-        { ...data, id: "", umbralAviso: avisos.umbralFoliosPct, cafVenceEn: data.cafVenceEn },
-        { ...avisos, hoyIso: hoy() },
-      );
-    }
+    const { lectura, hoyIso, vigentes } = await validarCafParaTenant(ctx, input.cafXml, cfg.rutEmisor);
+    const preview = vistaPreviaCafCargado(lectura, avisos, hoyIso);
+    if (dryRun) return preview;
     const fila = await escribirConEvento(
       ctx,
       {
         tipo: "finanzas.folios.caf_cargado",
         entidadTipo: "dte_folio",
         payload: () => ({
-          tipoDte: input.tipoDte,
-          folioDesde: input.folioDesde,
-          folioHasta: input.folioHasta,
+          tipoDte: lectura.tipoDte,
+          folioDesde: lectura.folioDesde,
+          folioHasta: lectura.folioHasta,
         }),
       },
-      async (tx) => {
-        const vigentes = await tx.dteFolio.findMany({
-          where: { tipoDte: input.tipoDte, activo: true },
-        });
-        for (const v of vigentes) {
-          if (foliosRestantes(v.folioActual, v.folioHasta) > 0) continue;
-          await tx.dteFolio.update({ where: { id: v.id }, data: { activo: false } });
-        }
-        return tx.dteFolio.create({ data });
-      },
+      (tx) => persistirCafCargado(ctx, tx, input.cafXml, lectura, vigentes, avisos),
     );
-    return folioVista(fila as Parameters<typeof folioVista>[0], { ...avisos, hoyIso: hoy() });
+    return {
+      ...folioVista(fila as Parameters<typeof folioVista>[0], { ...avisos, hoyIso }),
+      lectura: preview.lectura,
+    };
   },
 });

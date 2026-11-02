@@ -3,7 +3,7 @@ import { z } from "zod";
 import { AMBIENTES_SII, AVISO_CAF_DIAS_DEFECTO, UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { rutSchema } from "../core/maestros/comun";
+import { dia, diaSchema, rutSchema } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import { PERMISO_READ, PERMISO_VENTAS } from "./comun";
 
@@ -12,6 +12,7 @@ const configSchema = z.object({
   rutEmisor: z.string().nullable(),
   umbralFoliosPct: z.number().int().min(1).max(100),
   avisoCafDias: z.number().int().min(1).max(365),
+  fechaCorte1_0: z.string().nullable(),
 });
 
 export const dteConfigObtener = defineCapability({
@@ -30,6 +31,7 @@ export const dteConfigObtener = defineCapability({
       rutEmisor: cfg?.rutEmisor ?? null,
       umbralFoliosPct: cfg?.umbralFoliosPct ?? UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
       avisoCafDias: cfg?.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
+      fechaCorte1_0: dia(cfg?.fechaCorte1_0),
     };
   },
 });
@@ -44,6 +46,7 @@ export const dteConfigActualizar = defineCapability({
     rutEmisor: rutSchema.optional(),
     umbralFoliosPct: z.number().int().min(1).max(100).optional(),
     avisoCafDias: z.number().int().min(1).max(365).optional(),
+    fechaCorte1_0: diaSchema.nullable().optional(),
   }),
   output: configSchema,
   efecto: "escritura",
@@ -59,8 +62,16 @@ export const dteConfigActualizar = defineCapability({
         rutEmisor: rut ?? null,
         umbralFoliosPct: input.umbralFoliosPct ?? UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
         avisoCafDias: input.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
+        fechaCorte1_0:
+          input.fechaCorte1_0 === undefined ? null : input.fechaCorte1_0,
       };
     }
+    const fechaCorte =
+      input.fechaCorte1_0 === undefined
+        ? undefined
+        : input.fechaCorte1_0
+          ? new Date(`${input.fechaCorte1_0}T00:00:00.000Z`)
+          : null;
     const cfg = await ctx.db.dteConfig.upsert({
       where: { tenantId: ctx.tenantId },
       create: {
@@ -69,12 +80,14 @@ export const dteConfigActualizar = defineCapability({
         rutEmisor: rut ?? null,
         umbralFoliosPct: input.umbralFoliosPct ?? UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
         avisoCafDias: input.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
+        ...(fechaCorte !== undefined ? { fechaCorte1_0: fechaCorte } : {}),
       },
       update: {
         ambiente: input.ambiente,
         ...(rut !== undefined ? { rutEmisor: rut } : {}),
         ...(input.umbralFoliosPct !== undefined ? { umbralFoliosPct: input.umbralFoliosPct } : {}),
         ...(input.avisoCafDias !== undefined ? { avisoCafDias: input.avisoCafDias } : {}),
+        ...(fechaCorte !== undefined ? { fechaCorte1_0: fechaCorte } : {}),
       },
     });
     if (input.ambiente === "produccion" && !cfg.rutEmisor) {
@@ -85,6 +98,7 @@ export const dteConfigActualizar = defineCapability({
       rutEmisor: cfg.rutEmisor,
       umbralFoliosPct: cfg.umbralFoliosPct,
       avisoCafDias: cfg.avisoCafDias,
+      fechaCorte1_0: dia(cfg.fechaCorte1_0),
     };
   },
 });

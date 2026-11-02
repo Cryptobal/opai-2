@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { urlPropietario } from "../../db/test/entorno";
 
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
+import { cafXmlSintetico } from "./finanzas-caf-fixture";
 
 describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", () => {
   let s: VentasDbSuite;
@@ -36,10 +37,7 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", 
 
   it("C4 · dos NC parciales concurrentes: juntas superan el tope, solo una pasa", async () => {
     await s.dato("finanzas.folios.cargar_caf", {
-      tipoDte: 61,
-      folioDesde: 9000,
-      folioHasta: 9010,
-      cafVenceEn: "2027-12-31",
+      cafXml: cafXmlSintetico({ tipoDte: 61, folioDesde: 9000, folioHasta: 9010 }),
     });
     const borrador = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
       cuentaId: s.cuentaId,
@@ -85,10 +83,7 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", 
       },
     });
     await s.dato("finanzas.folios.cargar_caf", {
-      tipoDte: 33,
-      folioDesde: 8000,
-      folioHasta: 8002,
-      cafVenceEn: "2027-12-31",
+      cafXml: cafXmlSintetico({ folioDesde: 8000, folioHasta: 8002 }),
     });
     const borrador = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
       cuentaId: s.cuentaId,

@@ -1,7 +1,8 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 
 import { type Entorno, prepararEntorno } from "../../db/test/entorno";
 
+import { cafXmlSintetico } from "./finanzas-caf-fixture";
 import type * as ModuloCapacidades from "../src";
 import type { Contexto } from "../src/types";
 
@@ -20,6 +21,9 @@ export type VentasDbSuite = {
 
 export async function prepararVentasDb(): Promise<VentasDbSuite> {
   process.env.SII_ADAPTADOR = "simulado";
+  process.env.OPAI_SECRETS_KEY = randomBytes(32).toString("base64");
+  process.env.OPAI_SECRETS_KEY_VERSION = "1";
+  delete process.env.OPAI_SECRETS_KEY_ANTERIOR;
   const e = await prepararEntorno();
   const mod = await import("../src");
   mod.limpiarRegistro();
@@ -62,10 +66,7 @@ export async function prepararVentasDb(): Promise<VentasDbSuite> {
     rutEmisor: "76111222-8",
   });
   await dato("finanzas.folios.cargar_caf", {
-    tipoDte: 33,
-    folioDesde: 5000,
-    folioHasta: 5020,
-    cafVenceEn: "2027-12-31",
+    cafXml: cafXmlSintetico({ folioDesde: 5000, folioHasta: 5020 }),
   });
   const cuentaB = (await e.admin.cuenta.create({ data: { tenantId: tenantB, nombre: "Cliente B", rut: "77999999-9" } }))
     .id;
