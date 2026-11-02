@@ -9,8 +9,8 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
  * `core.resumen.contadores` después de montar, sin sumar consultas por navegación (ADR-045). Lo
  * usan el punto de Inicio en la barra inferior y el de la campana (misma Bandeja, D6).
  */
-export function useBandejaPendiente(portal: string, activo: boolean): boolean {
-  const [pendiente, setPendiente] = useState(false);
+export function useBandejaPendiente(portal: string, activo: boolean): number {
+  const [pendiente, setPendiente] = useState(0);
   useEffect(() => {
     if (!activo) return;
     let vigente = true;
@@ -23,7 +23,7 @@ export function useBandejaPendiente(portal: string, activo: boolean): boolean {
           notificacionesNoLeidas: number | null;
           aprobacionesPendientes: number | null;
         };
-        setPendiente((d.notificacionesNoLeidas ?? 0) > 0 || (d.aprobacionesPendientes ?? 0) > 0);
+        setPendiente((d.notificacionesNoLeidas ?? 0) + (d.aprobacionesPendientes ?? 0));
       });
     cargar();
     window.addEventListener("opai-bandeja", cargar);

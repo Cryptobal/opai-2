@@ -2,7 +2,7 @@ import type { Contexto } from "@opai/capabilities";
 
 import type { Item, ModeloCosteo, Rateo } from "../domain/motor/tipos";
 import { PLANTILLA_SEGURIDAD } from "../domain/motor/plantilla";
-import { ensurePlantillaCatalogo } from "./catalogo-seed";
+import { ensurePlantillaCatalogo, modeloCatalogoDefectoEnMemoria } from "./catalogo-seed";
 
 function parseRateo(raw: string | null): Rateo | undefined {
   if (!raw) return undefined;
@@ -73,8 +73,17 @@ function itemMotorDesdeFila(
 }
 
 /** R-CPQ-013–019: modelo del tenant (catálogo + fórmulas de la plantilla de referencia). */
-export async function modeloDesdeCatalogo(ctx: Contexto): Promise<ModeloCosteo> {
-  await ensurePlantillaCatalogo(ctx);
+export async function modeloDesdeCatalogo(
+  ctx: Contexto,
+  opts: { persistirCatalogo?: boolean } = {},
+): Promise<ModeloCosteo> {
+  if (opts.persistirCatalogo) {
+    await ensurePlantillaCatalogo(ctx);
+  }
+  const categoriasCount = await ctx.db.cpqCatalogoCategoria.count();
+  if (categoriasCount === 0) {
+    return modeloCatalogoDefectoEnMemoria();
+  }
   const categorias = await ctx.db.cpqCatalogoCategoria.findMany({
     orderBy: [{ orden: "asc" }, { id: "asc" }],
   });

@@ -25,7 +25,7 @@ export interface Almacenamiento {
    * Sube bytes desde el servidor (un archivo generado, p. ej. la exportación del titular de la Ley
    * 21.719), con la huella SHA-256 declarada: R2 rechaza el contenido si no coincide (ADR-039).
    */
-  subir(clave: string, cuerpo: string, mime: string, sha256: string): Promise<void>;
+  subir(clave: string, cuerpo: string | Uint8Array | Buffer, mime: string, sha256: string): Promise<void>;
   urlDescarga(clave: string, nombre: string, segundos?: number): Promise<string>;
   head(clave: string): Promise<ObjetoAlmacenado | null>;
   eliminar(clave: string): Promise<void>;

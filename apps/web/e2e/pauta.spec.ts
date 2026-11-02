@@ -33,7 +33,25 @@ test.describe("pauta · mensual", () => {
     await page.goto(`/pauta?inst=${INST}`);
     await expect(page.getByText("Portería Día").filter({ visible: true }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: "Mes siguiente" })).toBeVisible();
+    const enlaceSerie = page.getByRole("link", { name: /Portería Día/ }).filter({ visible: true }).first();
+    await expect(enlaceSerie).toHaveAttribute("href", new RegExp(`inst=${INST}&mes=\\d{4}-\\d{2}&serie=${PUESTO_DIA}`));
     await captura(page, "pauta-instalacion", info.project.name);
+  });
+
+  test("diaria: selecciona fecha, abre hoja del turno y filtra sin cubrir", async ({ page }) => {
+    await entrar(page);
+    await page.goto(`/pauta?inst=${INST}&vista=diaria&fecha=${HOY}`);
+    await expect(page.getByLabel("Fecha de la pauta")).toBeVisible();
+    await expect(page.getByText("Asistencia no activada: sin marcas para cruzar.")).toBeVisible();
+    const fila = page.getByRole("link", { name: /Portería Día:/ }).first();
+    if (await fila.isVisible()) {
+      await fila.click();
+      await expect(page).toHaveURL(/dia=/);
+    }
+    await page.getByRole("button", { name: "Sin cubrir" }).click();
+    await expect(page).toHaveURL(/ver=ppc/);
+    await page.getByRole("button", { name: "Mensual" }).click();
+    await expect(page.getByRole("button", { name: "Mes siguiente" })).toBeVisible();
   });
 
   test("fija la serie, registra una excepción, ve el PPC y el historial", async ({ page }, info) => {
@@ -55,6 +73,16 @@ test.describe("pauta · mensual", () => {
     await page.getByLabel("Motivo").fill("Licencia médica de prueba");
     await registrar.click();
     await expect(page.getByText(/Excepción registrada/)).toBeVisible();
+
+    await page.getByRole("link", { name: /Portería Día:/ }).first().click();
+    await expect(page).toHaveURL(/dia=/);
+    await expect(page.getByRole("heading", { name: /Portería Día/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anular excepción" })).toBeVisible();
+    await page.getByRole("button", { name: "Anular excepción" }).click();
+    const confirmacion = page.getByRole("dialog", { name: "Anular excepción" });
+    await expect(confirmacion).toBeVisible();
+    await confirmacion.getByRole("button", { name: "Cancelar" }).click();
+    await expect(page.getByRole("button", { name: "Anular excepción" })).toBeVisible();
 
     await page.goto(`/pauta?inst=${INST}`);
     await expect(page.getByText("Ana Pauta E2E").first()).toBeVisible();

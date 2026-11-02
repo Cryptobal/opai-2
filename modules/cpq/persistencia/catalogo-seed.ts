@@ -1,5 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
 
+import type { ModeloCosteo, Rateo } from "../domain/motor/tipos";
 import { PLANTILLA_SEGURIDAD } from "../domain/motor/plantilla";
 
 type ItemSeed = {
@@ -94,6 +95,34 @@ const ITEMS_DEFECTO: readonly ItemSeed[] = [
     porDefecto: false,
   },
 ];
+
+function itemMotorDesdeSeed(item: ItemSeed) {
+  const plantilla = PLANTILLA_SEGURIDAD.items.find((i) => i.id === item.codigo);
+  const rateo = JSON.parse(item.rateoJson) as Rateo;
+  const modoCalculo = item.modoCalculo;
+  const base = {
+    id: item.codigo,
+    categoria: item.categoriaClave,
+    costoUnitario: item.costoUnitarioClp,
+    moneda: "CLP" as const,
+    rateo: rateo as Rateo,
+  };
+  if (modoCalculo.startsWith("formula.")) {
+    return { ...base, modo: "formula" as const, formula: modoCalculo };
+  }
+  if (modoCalculo === "por_puesto_mes") return { ...base, modo: "por_puesto_mes" as const };
+  if (modoCalculo === "por_persona_mes") return { ...base, modo: "por_persona_mes" as const };
+  if (modoCalculo === "inversion") return { ...base, modo: "inversion" as const };
+  return { ...base, modo: "mensual_fijo" as const };
+}
+
+/** Catálogo por defecto 1.0 solo en memoria (lecturas sin siembra en base). */
+export function modeloCatalogoDefectoEnMemoria(): ModeloCosteo {
+  const base = structuredClone(PLANTILLA_SEGURIDAD);
+  base.categorias = PLANTILLA_SEGURIDAD.categorias.map((c) => ({ ...c }));
+  base.items = ITEMS_DEFECTO.map((item) => itemMotorDesdeSeed(item));
+  return base;
+}
 
 /** R55/R61: si el tenant no tiene catálogo, copia categorías de la plantilla e ítems con fórmulas 1.0. */
 export async function ensurePlantillaCatalogo(ctx: Contexto) {

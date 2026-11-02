@@ -1,4 +1,4 @@
-import type { Motivo } from "./tipos";
+import type { MesPauta, Motivo, VarianteCelda } from "./tipos";
 
 export const MOTIVO: Record<Motivo, string> = {
   sin_titular: "Sin titular",
@@ -7,6 +7,25 @@ export const MOTIVO: Record<Motivo, string> = {
   vacaciones: "Vacaciones",
   permiso: "Permiso",
 };
+
+const VARIANTE: Record<Exclude<VarianteCelda, null>, string> = {
+  reemplazo: "Reemplazo",
+  refuerzo: "Refuerzo",
+  refuerzo_extra: "Turno extra por aprobar",
+};
+
+/** Etiqueta corta de la variante operativa de la celda (reemplazo, refuerzo…). */
+export function etiquetaVariante(v: VarianteCelda | undefined): string | null {
+  if (!v) return null;
+  return VARIANTE[v];
+}
+
+/** Nombre de la persona que cubre el turno (reemplazo/refuerzo o titular). */
+export function personaEnTurno(mes: MesPauta, titularId: string | null, cubiertoPorId?: string | null) {
+  const id = cubiertoPorId ?? titularId;
+  if (!id) return "Sin titular";
+  return mes.personas.find((p) => p.id === id)?.nombre ?? "Sin titular";
+}
 
 const MESES = [
   "enero", "febrero", "marzo", "abril", "mayo", "junio",

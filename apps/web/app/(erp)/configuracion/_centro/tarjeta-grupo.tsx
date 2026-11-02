@@ -31,10 +31,10 @@ export function TarjetaGrupo({ grupo, entradas }: GrupoConEntradas) {
         titulo={grupo.etiqueta}
         secundario={grupo.corta}
       />
-      {/* iPad/escritorio: la tarjeta entera es un enlace a la primera entrada visible. */}
+      {/* iPad/escritorio: la tarjeta entera es un enlace a la lista del grupo. */}
       {primera ? (
         <LinkIndice
-          href={primera.href}
+          href={`/configuracion/grupo/${grupo.id}`}
           aria-label={`${grupo.etiqueta}: ${grupo.corta}`}
           className="hidden min-h-[132px] flex-col rounded-lg border border-border bg-surface p-4 text-fg outline-none transition-colors duration-150 hover:border-fg-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus md:flex"
         >

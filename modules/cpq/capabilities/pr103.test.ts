@@ -190,6 +190,53 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
     expect(await ctx.db.cpqCatalogoItem.count()).toBe(itemsAntes);
   });
 
+  it("ficha, preview_pdf, calcular dry_run y enviar dry_run no siembran catálogo", async () => {
+    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    const { ctx } = ctxGestor(true);
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
+      negocioId: NEGOCIO_1,
+      titulo: "Lectura catálogo",
+    });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const f0 = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    if (!f0.ok) throw new Error("ficha");
+    const sec = (f0.data as { secciones: { id: string }[] }).secciones[0]!;
+    await executeCapability(ctx, "cpq.lineas.crear", {
+      seccionId: sec.id,
+      tipo: "puesto",
+      nombre: "Turno",
+      sueldoBaseClp: 650_000,
+    });
+    await ctx.db.cpqCatalogoItem.deleteMany({});
+    await ctx.db.cpqCatalogoCategoria.deleteMany({});
+    expect(await ctx.db.cpqCatalogoItem.count()).toBe(0);
+
+    const soloLectura = {
+      ...ctx,
+      autorizar: (p: string) => p === "cpq:cotizaciones.read",
+    };
+    expect((await executeCapability(soloLectura, "cpq.cotizaciones.ficha", { id })).ok).toBe(true);
+    expect(await ctx.db.cpqCatalogoItem.count()).toBe(0);
+    expect((await executeCapability(soloLectura, "cpq.cotizaciones.preview_pdf", { id })).ok).toBe(true);
+    expect(await ctx.db.cpqCatalogoItem.count()).toBe(0);
+    expect(
+      (await executeCapability(ctx, "cpq.cotizaciones.calcular", { id }, { dryRun: true })).ok,
+    ).toBe(true);
+    expect(await ctx.db.cpqCatalogoItem.count()).toBe(0);
+    expect(
+      (
+        await executeCapability(
+          ctx,
+          "cpq.cotizaciones.enviar",
+          { id, contactoId: CONTACTO_1 },
+          { dryRun: true },
+        )
+      ).ok,
+    ).toBe(true);
+    expect(await ctx.db.cpqCatalogoItem.count()).toBe(0);
+  });
+
   it("catalogo_items.list oculta costoUnitarioClp sin cpq:costos.ver", async () => {
     const { ctx } = ctxGestor(true);
     await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Cat seed" });

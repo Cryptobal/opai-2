@@ -1,6 +1,7 @@
 // Tipos de lo que devuelven las capacidades de Pauta (las pantallas no importan los esquemas Zod).
 export type Motivo = "sin_titular" | "ausencia" | "licencia" | "vacaciones" | "permiso";
 export type EstadoCelda = "cubierto" | "libre" | "ppc" | "sin_serie";
+export type VarianteCelda = null | "reemplazo" | "refuerzo" | "refuerzo_extra";
 
 export type CeldaDia = {
   fecha: string;
@@ -9,6 +10,10 @@ export type CeldaDia = {
   excepcion: boolean;
   feriado: string | null;
   titularId: string | null;
+  confirmado?: boolean;
+  marcaManual?: boolean;
+  cubiertoPorId?: string | null;
+  variante?: VarianteCelda;
 };
 
 export type ResumenCobertura = {

@@ -59,7 +59,7 @@ export async function recalcularVersion(
     })),
     juego,
   );
-  const modelo = await modeloDesdeCatalogo(ctx);
+  const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
   const entrada = mapearVersionCalculo(version, secciones, lineas, modelo);
   const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
   if (!uf && juego) {

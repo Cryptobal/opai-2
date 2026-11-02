@@ -40,5 +40,6 @@ describe("a qué página se reescribe un 404", () => {
     expect(destino404("/terreno/algo")).toBe("/terreno/no-encontrado");
     expect(destino404("/personas/abc")).toBe("/no-encontrado");
     expect(destino404("/configuracion/agentes/xyz")).toBe("/no-encontrado");
+    expect(destino404("/configuracion/grupo/noexiste")).toBe("/configuracion/no-encontrado?ruta=%2Fconfiguracion%2Fgrupo%2Fnoexiste");
   });
 });

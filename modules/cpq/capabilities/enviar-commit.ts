@@ -2,7 +2,11 @@ import type { Contexto } from "@opai/capabilities";
 import { enviarCorreo } from "@opai/capabilities";
 
 import { moverNegocioPropuestaEnviada } from "../persistencia/enviar-negocio";
-import { registrarPdfPropuesta } from "../persistencia/registrar-pdf-propuesta";
+import {
+  eliminarPdfPropuestaAlmacenamiento,
+  registrarPdfPropuestaMetadatos,
+  subirPdfPropuestaAlmacenamiento,
+} from "../persistencia/registrar-pdf-propuesta";
 import type { ResultadoCalculo } from "../domain/motor";
 
 type PackEnviar = {
@@ -28,45 +32,54 @@ type PackEnviar = {
 export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
   const ahora = new Date();
   const congelado = JSON.stringify(pack.resultado);
-  let documentoId = "";
-  await ctx.transaccion(async (tx) => {
-    documentoId = await registrarPdfPropuesta(ctx, tx, {
-      cotizacionId: pack.cotizacionId,
-      codigo: pack.codigo,
-      pdf: pack.pdf,
-    });
-    await tx.cpqVersion.update({
-      where: { id: pack.versionId },
-      data: {
-        estado: "enviada",
-        enviadaEn: ahora,
-        ventaMensualClp: pack.resultado.ventaMensual,
-        calculoCongeladoJson: congelado,
-        marcaDocumentoVersion: pack.pdfPack.marcaVersion,
-        plantillaDocumentoId: pack.pdfPack.plantillaId,
-        plantillaDocumentoVersion: pack.pdfPack.plantillaVersion,
-      },
-    });
-    if (pack.resultado.ventaMensual != null) {
-      await tx.negocio.update({
-        where: { id: pack.negocioId },
-        data: { valorMensual: pack.resultado.ventaMensual, cotizacionEnviadaEn: ahora },
-      });
-    }
-    await moverNegocioPropuestaEnviada(ctx, tx, pack.neg, ahora);
-    await ctx.eventos.emitir(tx, {
-      tipo: "cpq.cotizacion.enviada",
-      entidadTipo: "cotizacion",
-      entidadId: pack.cotizacionId,
-      payload: {
-        codigo: pack.codigo,
-        version: pack.versionNumero,
-        ventaMensual: pack.resultado.ventaMensual,
-        contactoId: pack.contactoId,
-        documentoId,
-      },
-    });
+  const subido = await subirPdfPropuestaAlmacenamiento(ctx, {
+    codigo: pack.codigo,
+    pdf: pack.pdf,
   });
+  let documentoId = "";
+  try {
+    await ctx.transaccion(async (tx) => {
+      documentoId = await registrarPdfPropuestaMetadatos(ctx, tx, {
+        ...subido,
+        cotizacionId: pack.cotizacionId,
+        codigo: pack.codigo,
+      });
+      await tx.cpqVersion.update({
+        where: { id: pack.versionId },
+        data: {
+          estado: "enviada",
+          enviadaEn: ahora,
+          ventaMensualClp: pack.resultado.ventaMensual,
+          calculoCongeladoJson: congelado,
+          marcaDocumentoVersion: pack.pdfPack.marcaVersion,
+          plantillaDocumentoId: pack.pdfPack.plantillaId,
+          plantillaDocumentoVersion: pack.pdfPack.plantillaVersion,
+        },
+      });
+      if (pack.resultado.ventaMensual != null) {
+        await tx.negocio.update({
+          where: { id: pack.negocioId },
+          data: { valorMensual: pack.resultado.ventaMensual, cotizacionEnviadaEn: ahora },
+        });
+      }
+      await moverNegocioPropuestaEnviada(ctx, tx, pack.neg, ahora);
+      await ctx.eventos.emitir(tx, {
+        tipo: "cpq.cotizacion.enviada",
+        entidadTipo: "cotizacion",
+        entidadId: pack.cotizacionId,
+        payload: {
+          codigo: pack.codigo,
+          version: pack.versionNumero,
+          ventaMensual: pack.resultado.ventaMensual,
+          contactoId: pack.contactoId,
+          documentoId,
+        },
+      });
+    });
+  } catch (e) {
+    await eliminarPdfPropuestaAlmacenamiento(ctx, subido.storageKey);
+    throw e;
+  }
   const para = pack.correoPreview.para;
   if (ctx.actor.tipo !== "agent" && para) {
     try {

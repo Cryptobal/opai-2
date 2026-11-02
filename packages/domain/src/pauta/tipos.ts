@@ -24,8 +24,20 @@ export type SeriePauta = {
   hasta: string | null;
 };
 
-export const TIPOS_EXCEPCION = ["ausencia", "licencia", "vacaciones", "permiso"] as const;
+export const TIPOS_EXCEPCION = [
+  "ausencia",
+  "licencia",
+  "vacaciones",
+  "permiso",
+  "reemplazo",
+  "refuerzo",
+] as const;
 export type TipoExcepcion = (typeof TIPOS_EXCEPCION)[number];
+
+export const TIPOS_EXCEPCION_AUSENCIA = ["ausencia", "licencia", "vacaciones", "permiso"] as const;
+export type TipoExcepcionAusencia = (typeof TIPOS_EXCEPCION_AUSENCIA)[number];
+
+export type VarianteCelda = null | "reemplazo" | "refuerzo" | "refuerzo_extra";
 
 export type ExcepcionPauta = {
   puestoId: string;
@@ -35,8 +47,8 @@ export type ExcepcionPauta = {
   personaId: string | null;
 };
 
-/** Motivo de un puesto por cubrir (R6): sin titular, o el tipo de la excepción del día. */
-export type MotivoPpc = "sin_titular" | TipoExcepcion;
+/** Motivo de un puesto por cubrir (R6): sin titular, o el tipo de ausencia del día. */
+export type MotivoPpc = "sin_titular" | TipoExcepcionAusencia;
 
 export type EstadoCelda = "cubierto" | "libre" | "ppc" | "sin_serie";
 
@@ -49,4 +61,11 @@ export type CeldaPauta = {
   /** Nombre del feriado si lo es; los feriados se marcan, no cambian el patrón. */
   feriado: string | null;
   titularId: string | null;
+  /** Cobertura confirmada en la Diaria (registro operativo, no marca legal DT). */
+  confirmado?: boolean;
+  /** Marca manual de presencia cuando no hay Asistencia. */
+  marcaManual?: boolean;
+  /** Quién cubre el turno (reemplazo/refuerzo o titular efectivo). */
+  cubiertoPorId?: string | null;
+  variante?: VarianteCelda;
 };

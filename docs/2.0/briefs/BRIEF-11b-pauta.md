@@ -32,6 +32,8 @@ Este brief es el PR 2 del Brief 11 (el PR 1, Puestos, ya está en `main`).
 4. Pantallas P01–P05 y la vista de PPC (P06 como filtro) en `/pauta`.
 5. Pruebas: dominio, `test:db`, paridad y snapshot MCP, e2e.
 
+**Avance PR 2 (CAR-86), UI (`feat/pauta-pr2-diaria`):** tipos de celda con `confirmado`, `marcaManual`, `cubiertoPorId` y `variante`; vista Diaria con todos los turnos del día; hoja `?dia=` con acciones diarias (confirmar/deshacer cobertura, marca manual, enlaces a reemplazo/refuerzo) y registro de excepciones en PPC; hojas `?reemplazo=` y `?refuerzo=`; alertas legales `?alertas=1`; menú Exportar (CSV/PDF) y botón Alertas en la barra cuando hay instalación; e2e ajustado (click en fila diaria). Backend del PR 2 ya integrado en la rama. Migración `20261102130000_pauta_diaria_pr2` (aditiva, **no aplicada**; orden después de `20261102103000` del Portal Trabajador PR 2, #199). Pendiente: CI, capturas y validación en `test.opai.cl`; CAR-89/CAR-96/Comunicaciones fuera de alcance.
+
 **PR 2 (CAR-86):** Diaria, reemplazos, refuerzos, marcas, alertas, exportación y notificación al guardia, cuando existan Asistencia (CAR-89), Turnos extra (CAR-96) y Portal Supervisor.
 
 ## Reglas y decisiones aplicadas

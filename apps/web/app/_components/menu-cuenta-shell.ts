@@ -4,15 +4,57 @@ import { accionSalir } from "@/app/_acciones/auth";
 import { trasLimpiarCaches } from "./limpiar-cache-diferido";
 import { iconoShell } from "./icono-shell";
 
-export function menuCuentaShell(enErp: boolean, navegar: (href: string) => void, password: () => void, conCuenta = enErp, iconos?: Record<string, ReactNode>, portalInicio?: () => void): ItemMenu[] {
+export function menuCuentaShell(
+  enErp: boolean,
+  navegar: (href: string) => void,
+  password: () => void,
+  conCuenta = enErp,
+  iconos?: Record<string, ReactNode>,
+  portalInicio?: () => void,
+): ItemMenu[] {
   const Settings2 = iconoShell("Settings2", iconos);
   const UserRound = iconoShell("UserRound", iconos);
-  const LogOut = iconoShell("LogOut", iconos);
+  const Sun = iconoShell("Sun", iconos);
   return [
-    ...(portalInicio ? [{ id: "portal-inicio", etiqueta: "Portal de inicio", icono: Settings2, onSelect: portalInicio }] : []),
-    ...(enErp ? [{ id: "pref", grupo: "Cuenta", etiqueta: "Preferencias", icono: Settings2, onSelect: () => navegar("/mi-cuenta/preferencias") }] : []),
-    ...(conCuenta ? [{ id: "mi-cuenta", etiqueta: "Mi cuenta", icono: UserRound, onSelect: () => navegar("/mi-cuenta") }] : []),
-    { id: "password", ...(enErp ? {} : { grupo: "Cuenta" }), etiqueta: "Cambiar contraseña", icono: UserRound, onSelect: password },
-    { id: "salir", etiqueta: "Cerrar sesión", icono: LogOut, peligro: true, onSelect: () => trasLimpiarCaches(accionSalir) },
+    ...(conCuenta
+      ? [
+          {
+            id: "mi-cuenta",
+            etiqueta: "Mi cuenta",
+            icono: UserRound,
+            onSelect: () => navegar("/mi-cuenta"),
+          },
+        ]
+      : []),
+    ...(enErp
+      ? [
+          {
+            id: "pref",
+            etiqueta: "Preferencias",
+            descripcion: "Claro, oscuro o sistema",
+            icono: Sun,
+            onSelect: () => navegar("/mi-cuenta/preferencias"),
+          },
+        ]
+      : []),
+    ...(portalInicio
+      ? [
+          {
+            id: "portal-inicio",
+            etiqueta: "Portal de inicio",
+            icono: Settings2,
+            onSelect: portalInicio,
+          },
+        ]
+      : []),
+    ...(!conCuenta
+      ? [{ id: "password", etiqueta: "Cambiar contraseña", icono: UserRound, onSelect: password }]
+      : []),
+    {
+      id: "salir",
+      etiqueta: "Cerrar sesión",
+      separador: true,
+      onSelect: () => trasLimpiarCaches(accionSalir),
+    },
   ];
 }
