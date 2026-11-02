@@ -14,6 +14,7 @@ import { negociosGanar, negociosMover } from "./negocios-mover";
 import { negociosSetContactos } from "./negocios-contactos";
 import { canalesGet, canalesUpdate } from "./solicitudes-canales";
 import { solicitudesConvertir } from "./solicitudes-convertir";
+import { solicitudesPasarACotizacion } from "./solicitudes-pasar-cotizacion";
 import { solicitudesCreate } from "./solicitudes-crear";
 import {
   solicitudesDerivar,
@@ -54,6 +55,7 @@ export const capacidadesComercial: readonly Capacidad[] = [
   solicitudesReabrir,
   solicitudesMarcarDuplicada,
   solicitudesConvertir,
+  solicitudesPasarACotizacion,
   canalesGet,
   canalesUpdate,
 ];

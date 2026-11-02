@@ -155,4 +155,24 @@ describe.skipIf(!urlPropietario)("CPQ (Brief 10 · PR 10.1)", () => {
     expect(numeros).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
     expect((await alta(idB)).ultimo).toBe(1);
   });
+
+  it("RLS: marca y plantillas documentales aisladas por tenant", async () => {
+    await e.admin.cpqMarcaDocumento.create({
+      data: { tenantId: idA, tipografia: "inter", version: 1 },
+    });
+    await e.admin.cpqPlantillaDocumento.create({
+      data: {
+        tenantId: idA,
+        tipo: "cotizacion",
+        base: "clasica",
+        bloquesJson: "[]",
+        version: 1,
+        activa: true,
+      },
+    });
+    expect(await e.forTenant(idA).cpqMarcaDocumento.count()).toBe(1);
+    expect(await e.forTenant(idA).cpqPlantillaDocumento.count()).toBe(1);
+    expect(await e.forTenant(idB).cpqMarcaDocumento.count()).toBe(0);
+    expect(await e.forTenant(idB).cpqPlantillaDocumento.count()).toBe(0);
+  });
 });

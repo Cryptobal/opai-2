@@ -1,10 +1,11 @@
+import type { Contexto } from "@opai/capabilities";
+
 import type { ResultadoCalculo } from "../domain/motor";
 import type { VersionCtx } from "./version";
 
 type FilaLinea = { tipo: string; habilitada: boolean; posiciones: number };
 
-/** R-CPQ-010: montos guardados al enviar; sin recalcular con indicadores vigentes. */
-export function calculoCongelado(
+function fallbackCongelado(
   version: Pick<VersionCtx, "ventaMensualClp" | "validaHasta">,
   lineas: readonly FilaLinea[],
 ): ResultadoCalculo {
@@ -46,4 +47,22 @@ export function calculoCongelado(
     requiereAprobacion: false,
     traza: [],
   };
+}
+
+/** R-CPQ-010: lee el JSON congelado al enviar o reconstruye solo venta si falta. */
+export function calculoCongelado(
+  ctx: Contexto,
+  version: Pick<VersionCtx, "ventaMensualClp" | "validaHasta" | "calculoCongeladoJson">,
+  lineas: readonly FilaLinea[],
+): ResultadoCalculo {
+  if (version.calculoCongeladoJson) {
+    try {
+      const parsed = JSON.parse(version.calculoCongeladoJson) as ResultadoCalculo;
+      return parsed;
+    } catch {
+      /* JSON inválido: cae al fallback */
+    }
+  }
+  const base = fallbackCongelado(version, lineas);
+  return base;
 }

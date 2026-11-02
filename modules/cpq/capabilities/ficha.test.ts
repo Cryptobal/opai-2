@@ -130,7 +130,7 @@ describe("cpq ficha y líneas (CAR-134)", () => {
     expect((calc.data as { noEnviable?: boolean }).noEnviable).not.toBe(true);
   });
 
-  it("dry_run de ficha no persiste venta recalculada", async () => {
+  it("ficha no persiste venta en borrador (use calcular)", async () => {
     vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
     const { ctx } = contextoDePrueba({
       semilla: semilla(),
@@ -140,10 +140,13 @@ describe("cpq ficha y líneas (CAR-134)", () => {
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Dry ficha" });
     if (!c.ok) throw new Error("fixture");
     const id = (c.data as { id: string }).id;
-    const prev = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id }, { dryRun: true });
-    expect(prev.ok).toBe(true);
+    const f0 = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    expect(f0.ok).toBe(true);
     const v = await ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id } });
     expect(v?.ventaMensualClp).toBeNull();
+    await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    const v2 = await ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id } });
+    expect(v2?.ventaMensualClp).not.toBeNull();
   });
 });
 
@@ -187,9 +190,10 @@ describe("paridad CPQ (CAR-134)", () => {
       sueldoBaseClp: 650_000,
     });
     const congelada = 3_333_333;
+    const json = JSON.stringify({ ventaMensual: congelada, pagosUnicos: 0, dotacion: { posiciones: 1, personasEscaladas: 0 }, uf: null, fecha: "2026-12-01", estado: "borrador", advertencias: [], noEnviable: false });
     await ctx.db.cpqVersion.updateMany({
       where: { cotizacionId: id },
-      data: { estado: "enviada", ventaMensualClp: congelada },
+      data: { estado: "enviada", ventaMensualClp: congelada, calculoCongeladoJson: json },
     });
     await ctx.db.cpqLinea.updateMany({ data: { sueldoBaseClp: 9_999_999 } });
     vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue([]);

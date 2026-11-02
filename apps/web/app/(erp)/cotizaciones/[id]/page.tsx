@@ -31,7 +31,13 @@ async function cargarFicha(id: string): Promise<DatosFicha> {
     if (r.error.code === "NOT_FOUND") notFound();
     return { state: estadoPantalla(r), gestionar: false, ficha: null };
   }
-  return { state: "ready", gestionar: acceso.crear, ficha: r.data };
+  let ficha = r.data;
+  if (acceso.crear && ficha.version.editable) {
+    await ejecutarComoUsuario("erp", "cpq.cotizaciones.calcular", { id }, false);
+    const r2 = await ejecutarComoUsuario<FichaRespuesta>("erp", "cpq.cotizaciones.ficha", { id });
+    if (r2.ok) ficha = r2.data;
+  }
+  return { state: "ready", gestionar: acceso.crear, ficha };
 }
 
 export default async function CotizacionFicha({ params }: { params: Promise<{ id: string }> }) {

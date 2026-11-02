@@ -13,7 +13,7 @@ import { PlanConversion, type Plan } from "./plan-conversion";
 
 type Resultado = { plan: Plan; negocioId: string | null };
 
-/** Procesar y convertir (diseño 04): datos revisados, qué se reutiliza y qué se crea, y «Pasar a negocio». */
+/** Procesar y convertir (diseño 04): datos revisados, qué se reutiliza y qué se crea; negocio o cotización CPQ. */
 export function HojaConvertir({ s }: { s: SolicitudDato }) {
   const hoja = useHojaUrl("convertir");
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -28,6 +28,7 @@ export function HojaConvertir({ s }: { s: SolicitudDato }) {
   const [vista, setVista] = useState<Resultado | null>(null);
   const [fallo, setFallo] = useState<string | null>(null);
   const [hecho, setHecho] = useState<Resultado | null>(null);
+  const [cotizacionId, setCotizacionId] = useState<string | null>(null);
   const entrada = () => ({
     id: s.id,
     ...Object.fromEntries(
@@ -60,6 +61,18 @@ export function HojaConvertir({ s }: { s: SolicitudDato }) {
     avisar.exito("Solicitud convertida");
     setHecho(r);
   }
+  async function pasarACotizacion() {
+    const conv = await ejecutar<Resultado>("comercial.solicitudes.convertir", entrada());
+    if (!conv) return;
+    const cot = await ejecutar<{ cotizacionId: string; codigo: string }>(
+      "comercial.solicitudes.pasar_a_cotizacion",
+      { id: s.id },
+    );
+    if (!cot) return;
+    avisar.exito("Cotización creada");
+    setHecho(conv);
+    setCotizacionId(cot.cotizacionId);
+  }
   const campo = (k: keyof typeof d) => ({
     value: d[k],
     onChange: (e: { target: { value: string } }) => setD((x) => ({ ...x, [k]: e.target.value })),
@@ -78,8 +91,11 @@ export function HojaConvertir({ s }: { s: SolicitudDato }) {
             <Button variant="secondary" onClick={hoja.cerrar}>
               Cancelar
             </Button>
-            <Button disabled={pendiente || !vista} onClick={() => void convertir()}>
+            <Button variant="secondary" disabled={pendiente || !vista} onClick={() => void convertir()}>
               {pendiente ? "Guardando…" : "Pasar a negocio"}
+            </Button>
+            <Button disabled={pendiente || !vista} onClick={() => void pasarACotizacion()}>
+              Pasar a cotización
             </Button>
           </>
         )
@@ -88,14 +104,20 @@ export function HojaConvertir({ s }: { s: SolicitudDato }) {
       <div className="flex flex-col gap-4">
         {error || fallo ? <Alerta tono="danger" titulo={error ?? fallo ?? ""} /> : null}
         {hecho ? (
-          <Alerta tono="success" titulo="Solicitud convertida">
-            <Enlace
-              Link={LinkNext}
-              href={`/negocios/${hecho.negocioId ?? ""}`}
-              className="underline"
-            >
-              Abrir el negocio {hecho.plan.negocio.titulo}
-            </Enlace>
+          <Alerta tono="success" titulo={cotizacionId ? "Cotización creada" : "Solicitud convertida"}>
+            {cotizacionId ? (
+              <Enlace Link={LinkNext} href={`/cotizaciones/${cotizacionId}`} className="underline">
+                Abrir la cotización
+              </Enlace>
+            ) : (
+              <Enlace
+                Link={LinkNext}
+                href={`/negocios/${hecho.negocioId ?? ""}`}
+                className="underline"
+              >
+                Abrir el negocio {hecho.plan.negocio.titulo}
+              </Enlace>
+            )}
           </Alerta>
         ) : (
           <>

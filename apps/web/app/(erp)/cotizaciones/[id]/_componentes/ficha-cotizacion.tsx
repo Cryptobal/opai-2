@@ -1,9 +1,13 @@
 "use client";
 
-import { Badge, Estado } from "@opai/ds";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { Badge, Button, Estado, Input, Label } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
+import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
 import type { DatosFicha } from "../page";
@@ -11,6 +15,10 @@ import type { DatosFicha } from "../page";
 const ESTADOS: Record<string, string> = { borrador: "Borrador", enviada: "Enviada", lista: "Lista" };
 
 export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
+  const router = useRouter();
+  const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const [nombreNueva, setNombreNueva] = useState("Guardia");
+  const [seccionActiva, setSeccionActiva] = useState<string | null>(null);
   const d = datos.ficha;
   if (!d) {
     return (
@@ -19,6 +27,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
       </Estado>
     );
   }
+  const editable = datos.gestionar && d.version.editable;
   const c = d.calculo as {
     ventaMensual?: number | null;
     categorias?: { id: string; costoMensual: number }[];
@@ -30,6 +39,27 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
   };
   const venta =
     c.ventaMensual == null ? "Costo pendiente" : pesos(c.ventaMensual);
+  const recargar = () => router.refresh();
+
+  async function agregarLinea(seccionId: string) {
+    const r = await ejecutar("cpq.lineas.crear", {
+      seccionId,
+      tipo: "puesto",
+      nombre: nombreNueva.trim() || "Puesto",
+    });
+    if (r.ok) recargar();
+  }
+
+  async function quitarLinea(id: string) {
+    const r = await ejecutar("cpq.lineas.quitar", { id });
+    if (r.ok) recargar();
+  }
+
+  async function renombrarLinea(id: string, nombre: string) {
+    const r = await ejecutar("cpq.lineas.actualizar", { id, nombre: nombre.trim() });
+    if (r.ok) recargar();
+  }
+
   const resumen = (
     <div className="space-y-2 rounded-lg border border-border bg-surface p-4">
       <p className="t-label">Resumen</p>
@@ -72,17 +102,71 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
             </LinkNext>
           </p>
         </header>
+        {error ? (
+          <p className="t-caption text-danger">{error.message}</p>
+        ) : null}
         <div className="lg:hidden">{resumen}</div>
         {d.secciones.map((s) => (
           <details key={s.id} className="rounded-lg border border-border bg-surface p-3" open>
             <summary className="t-label cursor-pointer">{s.nombre}</summary>
-            <ul className="mt-2 space-y-1">
+            {editable ? (
+              <div className="mt-2 flex flex-wrap items-end gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor={`linea-${s.id}`}>Nueva línea</Label>
+                  <Input
+                    id={`linea-${s.id}`}
+                    value={seccionActiva === s.id ? nombreNueva : nombreNueva}
+                    onChange={(e) => {
+                      setSeccionActiva(s.id);
+                      setNombreNueva(e.target.value);
+                    }}
+                    className="max-w-xs"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={pendiente}
+                  onClick={() => agregarLinea(s.id)}
+                >
+                  Agregar puesto
+                </Button>
+              </div>
+            ) : null}
+            <ul className="mt-2 space-y-2">
               {s.lineas.length === 0 ? (
                 <li className="t-caption text-fg-muted">Sin líneas</li>
               ) : (
                 s.lineas.map((l) => (
-                  <li key={l.id} className="t-body-sm">
-                    {l.nombre} · {l.tipo}
+                  <li key={l.id} className="flex flex-wrap items-center gap-2 t-body-sm">
+                    <span>
+                      {l.nombre} · {l.tipo}
+                    </span>
+                    {editable ? (
+                      <>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={pendiente}
+                          onClick={() => {
+                            const n = window.prompt("Nombre de la línea", l.nombre);
+                            if (n) void renombrarLinea(l.id, n);
+                          }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={pendiente}
+                          onClick={() => quitarLinea(l.id)}
+                        >
+                          Quitar
+                        </Button>
+                      </>
+                    ) : null}
                   </li>
                 ))
               )}
