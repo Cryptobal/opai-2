@@ -25,9 +25,11 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
     semaforo?: string;
     margenEfectivoPct?: number;
     noEnviable?: boolean;
+    advertencias?: string[];
+    uf?: { valorClpEscalado: number; fecha: string } | null;
   };
   const venta =
-    c.ventaMensual == null ? "Pendiente: motor de sueldos" : pesos(c.ventaMensual);
+    c.ventaMensual == null ? "Costo pendiente" : pesos(c.ventaMensual);
   const resumen = (
     <div className="space-y-2 rounded-lg border border-border bg-surface p-4">
       <p className="t-label">Resumen</p>
@@ -39,6 +41,11 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
         <Badge tono={c.semaforo === "verde" ? "success" : "warning"}>{c.semaforo}</Badge>
       ) : null}
       {c.noEnviable ? <Badge tono="warning">No enviable</Badge> : null}
+      {c.advertencias?.map((a) => (
+        <p key={a} className="t-caption text-fg-muted">
+          {a}
+        </p>
+      ))}
       <p className="t-caption">
         v{d.version.numero} · {ESTADOS[d.version.estado] ?? d.version.estado} · Vence{" "}
         {d.version.validaHasta?.split("-").reverse().join("-") ?? "—"}

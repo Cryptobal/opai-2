@@ -7,14 +7,25 @@ import { juegoParaFecha, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
 
+export const AVISO_FALTA_UF = "Falta valor UF del día o del período.";
+
 const MINIMO = 100_000;
 const ALERTA = 30_000;
 
-export async function cargarFilasVersion(ctx: Contexto, cotizacionId: string, numero?: number) {
+function puedeEscribirVersion(version: { estado: string }, escribir: boolean) {
+  return escribir && version.estado === "borrador";
+}
+
+export async function cargarFilasVersion(
+  ctx: Contexto,
+  cotizacionId: string,
+  numero?: number,
+  escribir = true,
+) {
   const cot = await cotizacionDe(ctx, cotizacionId);
   const version = await versionParaFicha(ctx, cotizacionId, numero);
   if (!version) return null;
-  await sincronizarSecciones(ctx, version.id, cot.negocioId);
+  if (puedeEscribirVersion(version, escribir)) await sincronizarSecciones(ctx, version.id, cot.negocioId);
   const secciones = await ctx.db.cpqSeccion.findMany({ where: { versionId: version.id }, orderBy: [{ orden: "asc" }] });
   const lineas = await ctx.db.cpqLinea.findMany({
     where: { seccionId: { in: secciones.map((s) => s.id) } },
@@ -27,18 +38,16 @@ export async function recalcularVersion(
   ctx: Contexto,
   cotizacionId: string,
   numero?: number,
-  persistir = true,
+  escribir = true,
 ): Promise<ResultadoCalculo | null> {
-  const pack = await cargarFilasVersion(ctx, cotizacionId, numero);
+  const pack = await cargarFilasVersion(ctx, cotizacionId, numero, escribir);
   if (!pack) return null;
   const { version, secciones, lineas } = pack;
   const consulta = (version.validaHasta ?? new Date()).toISOString().slice(0, 10);
-  const juego = await juegoParaFecha(consulta);
-  const fecha = juego.fecha;
-  const ufInd = juego.valores.find((v) => v.indicador === "uf");
-  const uf = ufInd
-    ? { valorClpEscalado: Math.round((ufInd.valor as number) * 100), fecha }
-    : null;
+  const juego = await juegoParaFecha(ctx, consulta);
+  const fecha = juego?.fecha ?? consulta;
+  const ufInd = juego?.valores.find((v) => v.indicador === "uf");
+  const uf = ufInd ? { valorClpEscalado: Math.round((ufInd.valor as number) * 100), fecha } : null;
   const proveedor = proveedorDesdeLineas(
     lineas.filter((l) => l.tipo === "puesto").map((l) => ({
       id: l.id,
@@ -52,7 +61,11 @@ export async function recalcularVersion(
   const entrada = mapearVersionCalculo(version, secciones, lineas);
   const modelo = structuredClone(PLANTILLA_SEGURIDAD);
   const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
-  if (persistir && version.estado === "borrador") {
+  if (!uf && juego) {
+    resultado.advertencias = [...new Set([...resultado.advertencias, AVISO_FALTA_UF])];
+    resultado.noEnviable = true;
+  }
+  if (puedeEscribirVersion(version, escribir)) {
     await ctx.db.cpqVersion.update({
       where: { id: version.id },
       data: { ventaMensualClp: resultado.ventaMensual },

@@ -6,7 +6,7 @@ import { exigirBorrador, versionDeCotizacion } from "../persistencia/version";
 import { recalcularVersion } from "../persistencia/recalcular";
 import { cotizacionDe } from "./util";
 import { PERMISO_MANAGE } from "./permisos";
-import { seccionDe, vistaPrevia } from "./lineas-util";
+import { seccionDe, vistaPrevia, rechazarCostosSinPermiso, CAMPOS_COSTO_CREAR, CAMPOS_COSTO_ACTUALIZAR } from "./lineas-util";
 import { uuidSchema } from "./esquemas";
 
 const hora = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
@@ -33,6 +33,7 @@ export const lineasCrear = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    rechazarCostosSinPermiso(ctx, input, CAMPOS_COSTO_CREAR);
     const sec = await seccionDe(ctx, input.seccionId);
     const version = await versionDeCotizacion(ctx, sec.versionId);
     exigirBorrador(version);
@@ -47,6 +48,7 @@ export const lineasCrear = defineCapability({
         tipo: input.tipo,
         nombre: input.nombre,
         posiciones: input.posiciones,
+        habilitada: true,
         patron: input.patron ?? (input.tipo === "puesto" ? "4x4" : null),
         horaInicio: input.horaInicio ?? (input.tipo === "puesto" ? "08:00" : null),
         horaFin: input.horaFin ?? (input.tipo === "puesto" ? "20:00" : null),
@@ -89,6 +91,7 @@ export const lineasActualizar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    rechazarCostosSinPermiso(ctx, input, CAMPOS_COSTO_ACTUALIZAR);
     const actual = await ctx.db.cpqLinea.findFirst({ where: { id: input.id } });
     if (!actual) throw noEncontrado("La línea");
     const sec = await seccionDe(ctx, actual.seccionId);

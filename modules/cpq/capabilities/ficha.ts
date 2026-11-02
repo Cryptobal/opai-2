@@ -3,24 +3,24 @@ import { z } from "zod";
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { motorOutputSchema } from "./motor-esquemas";
-import { PERMISO_READ } from "./permisos";
+import { PERMISO_MANAGE } from "./permisos";
 import { cotizacionDe } from "./util";
 import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
+import { calculoCongelado } from "../persistencia/calculo-congelado";
 import { uuidSchema } from "./esquemas";
 
 export const cotizacionesCalcular = defineCapability({
   id: "cpq.cotizaciones.calcular",
   descripcion:
-    "Recalcula la versión editable (o la pedida) de una cotización en servidor con el motor CPQ y el costo empleador del Núcleo; costos y traza solo con permiso de costos.",
-  permiso: PERMISO_READ,
-  auditarLectura: (_s, input) => [input.id],
+    "Recalcula en servidor la versión editable (o la indicada) de una cotización con el motor CPQ y costo empleador legal; persiste venta y huellas solo en borrador y con dry_run desactivado.",
+  permiso: PERMISO_MANAGE,
   input: z.object({ id: uuidSchema, version: z.number().int().min(1).optional() }),
   output: motorOutputSchema,
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx, input) {
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
     await cotizacionDe(ctx, input.id);
-    const r = await recalcularVersion(ctx, input.id, input.version, true);
+    const r = await recalcularVersion(ctx, input.id, input.version, !dryRun);
     if (!r) throw noEncontrado("La versión");
     return proyectarCalculo(ctx, r);
   },
@@ -29,9 +29,8 @@ export const cotizacionesCalcular = defineCapability({
 export const cotizacionesFicha = defineCapability({
   id: "cpq.cotizaciones.ficha",
   descripcion:
-    "Cabecera de la ficha con cálculo reciente, secciones y líneas; montos sensibles filtrados por permiso.",
-  permiso: PERMISO_READ,
-  auditarLectura: (s) => [s.cotizacion.id, s.cotizacion.negocioId],
+    "Ensambla la ficha de cotización con secciones, líneas y cálculo en servidor; sincroniza secciones y persiste venta solo en borrador y sin dry_run.",
+  permiso: PERMISO_MANAGE,
   input: z.object({ id: uuidSchema, version: z.number().int().min(1).optional() }),
   output: z.object({
     cotizacion: z.object({
@@ -60,18 +59,22 @@ export const cotizacionesFicha = defineCapability({
     ),
     calculo: motorOutputSchema,
   }),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx, input) {
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
     const c = await cotizacionDe(ctx, input.id);
-    const pack = await cargarFilasVersion(ctx, input.id, input.version);
+    const escribir = !dryRun;
+    const pack = await cargarFilasVersion(ctx, input.id, input.version, escribir);
     if (!pack) throw noEncontrado("La versión");
     const { version, secciones, lineas } = pack;
     const neg = await ctx.db.negocio.findFirst({
       where: { id: c.negocioId },
       select: { titulo: true, cuentaId: true },
     });
-    const r = await recalcularVersion(ctx, input.id, input.version, true);
+    const r =
+      version.estado === "borrador"
+        ? await recalcularVersion(ctx, input.id, input.version, escribir)
+        : calculoCongelado(version, lineas);
     if (!r) throw noEncontrado("La versión");
     return {
       cotizacion: {

@@ -1,17 +1,33 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
-import { beforeAll, describe, expect, it } from "vitest";
+import { publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ACTIVOS, CON_COSTOS, GESTOR, NEGOCIO_1, semilla, SOLO_LECTURA } from "./fixtures";
+import * as proveedor from "../persistencia/proveedor";
+import * as valoresLegales from "../persistencia/valores-legales";
+import { AVISO_FALTA_UF } from "../persistencia/recalcular";
+import { ACTIVOS, CON_COSTOS, GESTOR, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 
 beforeAll(() => {
   registrarCapacidades(capacidades);
 });
 
+function ctxGestor(conCostos = false) {
+  return contextoDePrueba({
+    semilla: semilla(),
+    modulosActivos: ACTIVOS,
+    permisos: conCostos ? [...GESTOR, ...CON_COSTOS] : GESTOR,
+  });
+}
+
 describe("cpq ficha y líneas (CAR-134)", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("dry_run de línea no escribe; borrador sí; enviada no", async () => {
-    const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS, permisos: GESTOR });
+    const { ctx } = ctxGestor(true);
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,
       titulo: "Ficha prueba",
@@ -31,6 +47,7 @@ describe("cpq ficha y líneas (CAR-134)", () => {
     );
     expect(prev.ok).toBe(true);
     expect(await ctx.db.cpqLinea.count()).toBe(0);
+    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
     const real = await executeCapability(ctx, "cpq.lineas.crear", {
       seccionId: sec!.id,
       tipo: "puesto",
@@ -48,22 +65,52 @@ describe("cpq ficha y líneas (CAR-134)", () => {
   });
 
   it("sin cpq:costos.ver el cálculo no trae costos ni margen", async () => {
-    const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS, permisos: GESTOR });
+    const { ctx } = ctxGestor();
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,
       titulo: "Permisos",
     });
     if (!c.ok) throw new Error("fixture");
     const id = (c.data as { id: string }).id;
-    const sin = { ...ctx, autorizar: (p: string) => SOLO_LECTURA.includes(p) };
+    const sin = {
+      ...ctx,
+      autorizar: (p: string) => p === "cpq:cotizaciones.read" || p === "cpq:cotizaciones.manage",
+    };
     const r = await executeCapability(sin, "cpq.cotizaciones.calcular", { id });
     const txt = JSON.stringify(r);
     expect(txt).not.toMatch(/costoMensual|margenEfectivo|semaforo|traza/);
     expect(txt).toContain("ventaMensual");
   });
 
-  it("con costos trae categorías y margen", async () => {
-    const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS, permisos: [...GESTOR, ...CON_COSTOS] });
+  it("sin valores legales publicados queda no enviable (costo pendiente)", async () => {
+    const { ctx } = ctxGestor(true);
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Legal" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    expect(f.ok).toBe(true);
+    if (!f.ok) throw new Error("ficha");
+    const sec = (f.data as { secciones: { id: string }[] }).secciones[0];
+    await executeCapability(ctx, "cpq.lineas.crear", {
+      seccionId: sec!.id,
+      tipo: "puesto",
+      nombre: "Turno",
+      sueldoBaseClp: 650_000,
+    });
+    const calc = await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    expect(calc.ok).toBe(true);
+    if (!calc.ok) throw new Error("calc");
+    expect((calc.data as { noEnviable?: boolean }).noEnviable).toBe(true);
+    expect((calc.data as { ventaMensual: number | null }).ventaMensual).toBeNull();
+  });
+
+  it("con costos y valores legales trae margen", async () => {
+    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    const { ctx } = contextoDePrueba({
+      semilla: semilla(),
+      modulosActivos: ACTIVOS,
+      permisos: [...GESTOR, ...CON_COSTOS],
+    });
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Costos" });
     if (!c.ok) throw new Error("fixture");
     const id = (c.data as { id: string }).id;
@@ -78,6 +125,106 @@ describe("cpq ficha y líneas (CAR-134)", () => {
     });
     const calc = await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
     expect(calc.ok).toBe(true);
+    if (!calc.ok) throw new Error("calc");
     expect(JSON.stringify(calc)).toContain("margenEfectivoPct");
+    expect((calc.data as { noEnviable?: boolean }).noEnviable).not.toBe(true);
+  });
+
+  it("dry_run de ficha no persiste venta recalculada", async () => {
+    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    const { ctx } = contextoDePrueba({
+      semilla: semilla(),
+      modulosActivos: ACTIVOS,
+      permisos: [...GESTOR, ...CON_COSTOS],
+    });
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Dry ficha" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const prev = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id }, { dryRun: true });
+    expect(prev.ok).toBe(true);
+    const v = await ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id } });
+    expect(v?.ventaMensualClp).toBeNull();
+  });
+});
+
+describe("cpq lineas costos (CAR-134 C5)", () => {
+  it("rechaza sueldo o precio sin cpq:costos.ver", async () => {
+    const { ctx } = ctxGestor();
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Linea" });
+    if (!c.ok) throw new Error("fixture");
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id: (c.data as { id: string }).id });
+    if (!f.ok) throw new Error("ficha");
+    const sec = (f.data as { secciones: { id: string }[] }).secciones[0]!;
+    const sinCostos = { ...ctx, autorizar: (p: string) => GESTOR.includes(p) };
+    const bloqueo = await executeCapability(sinCostos, "cpq.lineas.crear", {
+      seccionId: sec.id,
+      tipo: "puesto",
+      nombre: "X",
+      sueldoBaseClp: 500_000,
+    });
+    expect(bloqueo).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+});
+
+describe("paridad CPQ (CAR-134)", () => {
+  it("R-CPQ-010: versión enviada muestra venta congelada sin recalcular", async () => {
+    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    const { ctx } = contextoDePrueba({
+      semilla: semilla(),
+      modulosActivos: ACTIVOS,
+      permisos: [...GESTOR, ...CON_COSTOS],
+    });
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Congelada" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const f0 = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    if (!f0.ok) throw new Error("ficha");
+    const sec = (f0.data as { secciones: { id: string }[] }).secciones[0]!;
+    await executeCapability(ctx, "cpq.lineas.crear", {
+      seccionId: sec.id,
+      tipo: "puesto",
+      nombre: "Turno",
+      sueldoBaseClp: 650_000,
+    });
+    const congelada = 3_333_333;
+    await ctx.db.cpqVersion.updateMany({
+      where: { cotizacionId: id },
+      data: { estado: "enviada", ventaMensualClp: congelada },
+    });
+    await ctx.db.cpqLinea.updateMany({ data: { sueldoBaseClp: 9_999_999 } });
+    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue([]);
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    expect(f.ok).toBe(true);
+    if (!f.ok) throw new Error("ficha");
+    expect((f.data as { calculo: { ventaMensual: number | null } }).calculo.ventaMensual).toBe(congelada);
+  });
+
+  it("R-CPQ-028: sin UF del período avisa explícito y no inventa valor", async () => {
+    vi.spyOn(proveedor, "juegoParaFecha").mockImplementation(async (_ctx, fecha) => ({
+      fecha,
+      huella: "test-sin-uf",
+      valores: publicacionesReferencia().filter((v) => v.indicador !== "uf"),
+      advertencias: [],
+    }));
+    const { ctx } = ctxGestor(true);
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Sin UF" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const f0 = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    if (!f0.ok) throw new Error("ficha");
+    const sec = (f0.data as { secciones: { id: string }[] }).secciones[0]!;
+    await executeCapability(ctx, "cpq.lineas.crear", {
+      seccionId: sec.id,
+      tipo: "puesto",
+      nombre: "Turno",
+      sueldoBaseClp: 650_000,
+    });
+    const calc = await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    expect(calc.ok).toBe(true);
+    if (!calc.ok) throw new Error("calc");
+    const data = calc.data as { advertencias?: string[]; uf?: unknown; noEnviable?: boolean };
+    expect(data.advertencias).toContain(AVISO_FALTA_UF);
+    expect(data.uf).toBeNull();
+    expect(data.noEnviable).toBe(true);
   });
 });
