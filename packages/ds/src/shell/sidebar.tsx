@@ -1,14 +1,12 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 
 import type { ItemMenu } from "../components/menu";
 import type { ItemFijado } from "./fijados";
 import { PortalSwitcher } from "./portal-switcher";
-import { SidebarAreas } from "./sidebar-areas";
 import { agrupar, Item, Pie } from "./sidebar-item";
 import {
-  esActivo,
   LinkPorDefecto,
   type LinkComponent,
   type NavItem,
@@ -38,23 +36,14 @@ type SidebarProps = {
   onAreaAbierta?: ((area: string) => void) | undefined;
 };
 
-/** Desktop (ShellDesktop): fijados, portal, acordeón por área (D1) y usuario al pie. */
+/** Desktop: acordeón D1 en ERP; secciones planas si no hay `onAreaAbierta`. */
 export function Sidebar(props: SidebarProps) {
   const { items, rutaActual, Link = LinkPorDefecto } = props;
   const grupos = agrupar(items.filter((i) => !i.pie));
-  const grupoActivo = grupos.find(([, lista]) =>
-    lista.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn)),
-  );
-  const [abiertoLocal, setAbiertoLocal] = useState<string | null>(
-    grupoActivo?.[1][0]?.area ?? grupoActivo?.[0] ?? null,
-  );
-  const abierto = props.areaAbierta !== undefined ? props.areaAbierta : abiertoLocal;
+  const abierto = props.areaAbierta ?? null;
+  const acordeon = !!props.onAreaAbierta;
+  const tituloGrupo = "t-overline px-2 py-2 text-fg-muted";
   const fijadosHrefs = new Set((props.fijados ?? []).map((f) => f.href));
-  const alternar = (grupo: string, area: string | undefined) => {
-    const clave = area ?? grupo;
-    if (props.onAreaAbierta) props.onAreaAbierta(clave);
-    else setAbiertoLocal((a) => (a === clave ? null : clave));
-  };
   const pinDe = (item: NavItem) =>
     item.fijable && props.onFijar
       ? { onFijar: () => props.onFijar?.(item), fijado: fijadosHrefs.has(item.href) }
@@ -90,14 +79,59 @@ export function Sidebar(props: SidebarProps) {
           />
         </Suspense>
       ) : null}
-      <SidebarAreas
-        items={items}
-        rutaActual={rutaActual}
-        Link={Link}
-        abierto={abierto}
-        alternar={alternar}
-        pinDe={pinDe}
-      />
+      <div className="flex-1 overflow-y-auto pt-2 pb-6">
+        {grupos
+          .filter((i) => !i[1].some((x) => x.soloCompacto))
+          .map(([grupo, lista]) => {
+            if (!grupo) {
+              return (
+                <div key="suelto" className="flex flex-col gap-px px-3">
+                  {lista.map((item) => (
+                    <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} {...pinDe(item)} />
+                  ))}
+                </div>
+              );
+            }
+            const area = lista[0]?.area;
+            const clave = area ?? grupo;
+            if (lista.length === 1) {
+              return (
+                <div key={clave} className="flex flex-col gap-px px-3">
+                  <Item item={lista[0]!} rutaActual={rutaActual} Link={Link} {...pinDe(lista[0]!)} />
+                </div>
+              );
+            }
+            const colapsable = acordeon;
+            const expandido = !colapsable || abierto === clave;
+            return (
+              <section key={clave} className="mt-3 px-3" aria-label={grupo}>
+                {colapsable ? (
+                  <button
+                    type="button"
+                    aria-expanded={expandido}
+                    className={tituloGrupo}
+                    onClick={() => props.onAreaAbierta!(area ?? grupo)}
+                  >
+                    {grupo}
+                  </button>
+                ) : (
+                  <h2 className={tituloGrupo}>{grupo}</h2>
+                )}
+                {expandido
+                  ? lista.map((item) => (
+                      <Item
+                        key={item.href}
+                        item={item}
+                        rutaActual={rutaActual}
+                        Link={Link}
+                        {...pinDe(item)}
+                      />
+                    ))
+                  : null}
+              </section>
+            );
+          })}
+      </div>
       <div className="flex flex-col gap-px px-3 py-2">
         {items
           .filter((i) => i.pie)

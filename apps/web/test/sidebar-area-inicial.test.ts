@@ -19,9 +19,13 @@ it("abre el área de la ruta actual desde el primer render", () => {
         },
       ],
       rutaActual: "/cuentas",
+      areaAbierta: "clientes",
+      onAreaAbierta: () => undefined,
       portales: [],
       portalActual: "erp",
     }),
   );
-  expect(html).toMatch(/aria-expanded="true"[^>]*>.*Clientes/);
+  expect(html).toContain('aria-expanded="true"');
+  expect(html).toContain("Clientes");
+  expect(html).toContain("/cuentas");
 });
