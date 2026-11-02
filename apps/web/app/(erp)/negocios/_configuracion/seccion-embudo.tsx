@@ -1,7 +1,7 @@
 import { Estado, ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { cargarConfigComercial } from "./datos";
-import { EditorEmbudo } from "./editor-embudo";
+import { EditorEmbudoDiferido } from "./editor-embudo-diferido";
 
 const REGLAS = [
   { etiqueta: "Ganada y perdida", valor: "Fijas al final: no se desactivan ni cambian de tipo" },
@@ -18,7 +18,7 @@ export async function SeccionEmbudo() {
     <Estado state={config ? state : state === "ready" ? "error" : state} variante="formulario">
       {config ? (
         <div className="flex flex-col gap-4">
-          <EditorEmbudo etapas={config.embudo.etapas} />
+          <EditorEmbudoDiferido etapas={config.embudo.etapas} />
           <SeccionTarjeta titulo="Reglas del embudo">
             <ParesGrid items={REGLAS} />
           </SeccionTarjeta>

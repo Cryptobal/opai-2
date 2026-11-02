@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 407 pares pantalla→capacidad · 367 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 417 pares pantalla→capacidad · 377 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -84,7 +84,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.update` | `cpq_marca_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.get` | `cpq_plantillas_documento_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.update` | `cpq_plantillas_documento_update` | existe |
+| compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.actualizar` | `finanzas_ajustes_actualizar` | existe |
+| compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.obtener` | `finanzas_ajustes_obtener` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
+| compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.filas.crear` | `finanzas_filas_crear` | existe |
+| compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.get` | `comercial_canales_get` | existe |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.update` | `comercial_canales_update` | existe |
@@ -171,6 +175,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.crear` | `finanzas_proveedores_crear` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.obtener` | `finanzas_proveedores_obtener` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.cumplir` | `finanzas_celdas_cumplir` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.fijar` | `finanzas_celdas_fijar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.mover` | `finanzas_celdas_mover` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.cierres.reabrir` | `finanzas_cierres_reabrir` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.cierres.sellar` | `finanzas_cierres_sellar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.actualizar` | `finanzas_plan_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.crear` | `finanzas_plan_crear` | existe |
@@ -616,20 +626,12 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
-- `finanzas.ajustes.actualizar`
-- `finanzas.ajustes.obtener`
-- `finanzas.celdas.cumplir`
-- `finanzas.celdas.fijar`
-- `finanzas.celdas.mover`
 - `finanzas.cierres.listar`
-- `finanzas.cierres.reabrir`
-- `finanzas.cierres.sellar`
 - `finanzas.compras.importar`
+- `finanzas.derivadas.listar`
 - `finanzas.dte_config.actualizar`
 - `finanzas.dte_config.obtener`
 - `finanzas.filas.actualizar`
-- `finanzas.filas.crear`
-- `finanzas.filas.listar`
 - `finanzas.folios.cargar_caf`
 - `finanzas.folios.listar`
 - `finanzas.ventas.emitir_nota_credito`

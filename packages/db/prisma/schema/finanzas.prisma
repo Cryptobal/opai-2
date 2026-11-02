@@ -80,10 +80,32 @@ model FlujoAjustes {
   umbral       Int      @default(0)
   /// Semana (lunes) desde la que parte el saldo inicial.
   desde        DateTime @db.Date
+  toleranciaCierre     Int      @default(1000) @map("tolerancia_cierre")
+  horizonteSemanas     Int      @default(12) @map("horizonte_semanas")
+  calendarioPagos      Json     @default("{}") @map("calendario_pagos")
+  avisoActivo          Boolean  @default(false) @map("aviso_activo")
+  avisoUmbral          BigInt   @default(0) @map("aviso_umbral")
+  metaCeldaMs          Int      @default(100) @map("meta_celda_ms")
+  metaGuardadoP95Ms    Int      @default(1000) @map("meta_guardado_p95_ms")
+  metaCargaInicialS    Int      @default(2) @map("meta_carga_inicial_s")
+  metasVisibles        Boolean  @default(true) @map("metas_visibles")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("flujo_ajustes")
+  @@schema("finanzas")
+}
+
+/// Registro de avisos in-app por semana (CAR-136: sin correo externo en PR 2).
+model FlujoAvisoEmitido {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  semana          DateTime @db.Date
+  saldoProyectado BigInt   @map("saldo_proyectado")
+  emitidoEn       DateTime @default(now()) @map("emitido_en") @db.Timestamptz(6)
+
+  @@unique([tenantId, semana])
+  @@map("flujo_avisos_emitidos")
   @@schema("finanzas")
 }
 

@@ -10,12 +10,13 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
     expect(new Set(permisos).size).toBe(permisos.length);
     expect(manifest.navegacion.map((n) => n.href)).toContain("/finanzas/ventas");
     expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(manifest.eventos.length);
+    expect(manifest.eventos).toHaveLength(23);
     expect(manifest.configuracion).toBe(ajustesFinanzas);
   });
 
   it("tiene capacidades con ids únicos", () => {
     const ids = manifest.capacidades.map((c) => c.id);
-    expect(ids.length).toBeGreaterThanOrEqual(38);
-    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toHaveLength(40);
+    expect(new Set(ids).size).toBe(40);
   });
 });

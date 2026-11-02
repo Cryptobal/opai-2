@@ -3,8 +3,8 @@ import { Badge, Estado } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { FormMarcaDocumento } from "./form-marca-documento";
-import { FormPlantillaDocumento } from "./form-plantilla-documento";
+import { FormMarcaDocumentoDiferido } from "./form-marca-documento-diferido";
+import { FormPlantillaDocumentoDiferido } from "./form-plantilla-documento-diferido";
 
 async function cargarMarca() {
   const r = await ejecutarComoUsuario<{
@@ -45,7 +45,7 @@ export async function SeccionMarcaPlantillasCpq() {
             </p>
             <Badge tono="info">Versión marca v{marca.version}</Badge>
           </div>
-          <FormMarcaDocumento marca={marca} />
+          <FormMarcaDocumentoDiferido marca={marca} />
           <div className="space-y-2 border-t border-border pt-6">
             <p className="t-label">Plantilla de cotización</p>
             <p className="t-caption text-fg-muted">
@@ -54,7 +54,7 @@ export async function SeccionMarcaPlantillasCpq() {
             </p>
             <Badge tono="info">Versión plantilla v{plantilla.version}</Badge>
           </div>
-          <FormPlantillaDocumento plantilla={plantilla} />
+          <FormPlantillaDocumentoDiferido plantilla={plantilla} />
         </div>
       ) : null}
     </Estado>

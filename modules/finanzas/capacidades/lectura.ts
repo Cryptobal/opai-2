@@ -2,10 +2,12 @@ import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
 
-import { calcularPlanilla, semanasDesde, sumarSemanas } from "../domain";
-import { celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
+import { calcularPlanilla, lunesDe, semanasDesde, sumarSemanas } from "../domain";
+import { ajustesSchema, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
+import type { capaSchema } from "./esquemas";
+import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
-import { ajustesDe, aIso, cargarFlujo, selladasDe } from "./util";
+import { aIso, ajustesDe, cargarFlujo, selladasDe } from "./util";
 
 const semanaCalculadaSchema = z.object({
   semana: semanaSchema,
@@ -16,6 +18,14 @@ const semanaCalculadaSchema = z.object({
   saldoFinal: saldoSchema,
   tono: z.enum(["peligro", "alerta"]).nullable(),
   sellada: z.boolean(),
+});
+
+const avisoSchema = z.object({
+  activo: z.boolean(),
+  umbral: saldoSchema,
+  semanas: z.array(
+    z.object({ semana: semanaSchema, saldoFinal: saldoSchema, emitido: z.boolean() }),
+  ),
 });
 
 export const filasListar = defineCapability({
@@ -39,32 +49,34 @@ export const filasListar = defineCapability({
 export const planillaObtener = defineCapability({
   id: "finanzas.planilla.obtener",
   descripcion:
-    "Entrega la planilla del flujo de caja por semana: filas y celdas por capa (plan, comprometido, real), ingresos, egresos, saldo acumulado, semanas selladas y semanas bajo el umbral o bajo cero.",
+    "Entrega la planilla del flujo de caja por semana: filas y celdas por capa, saldos, semanas selladas, metas y aviso in-app de saldo bajo umbral.",
   permiso: PERMISO_VER,
   input: z.object({
-    desde: semanaSchema
-      .optional()
-      .describe("Lunes de la primera semana; por defecto el de los ajustes."),
-    semanas: z.number().int().min(1).max(52).default(12),
+    desde: semanaSchema.optional(),
+    semanas: z.number().int().min(1).max(52).optional(),
+    movil: z.boolean().default(false),
   }),
   output: z.object({
-    umbral: saldoSchema,
+    ajustes: ajustesSchema,
     filas: z.array(filaSchema),
     celdas: z.array(celdaSchema),
     semanas: z.array(semanaCalculadaSchema),
+    aviso: avisoSchema,
+    columnaHoy: semanaSchema.nullable(),
   }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const ajustes = await ajustesDe(ctx);
-    const desde = input.desde ?? ajustes.desde;
-    const lista = semanasDesde(desde, input.semanas);
+    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+    const cantidad = input.movil ? 4 : (input.semanas ?? ajustes.horizonteSemanas);
+    const desde = input.desde ?? (input.movil ? hoy : ajustes.desde);
+    const lista = semanasDesde(desde, cantidad);
     const { filas, celdas, dominio, celdasDom } = await cargarFlujo(
       ctx,
       desde,
-      sumarSemanas(desde, input.semanas - 1),
+      sumarSemanas(desde, cantidad - 1),
     );
-    // El saldo de las semanas anteriores al rango arrastra las celdas previas desde los ajustes.
     const previas =
       ajustes.desde < desde
         ? await ctx.db.flujoCelda.findMany({
@@ -88,18 +100,23 @@ export const planillaObtener = defineCapability({
       celdas: celdasDom,
     });
     const selladas = await selladasDe(ctx);
+    const semanasOut = calculo.map((s) => ({ ...s, tono: s.tono, sellada: selladas.has(s.semana) }));
+    const avisoSemanas = await avisoLeido(ctx, ajustes, semanasOut);
+    type CapaOut = z.infer<typeof capaSchema>;
     return {
-      umbral: ajustes.umbral,
+      ajustes,
       filas: filas.map(vistaFila),
       celdas: celdas.map((c) => ({
         id: c.id,
         filaId: c.filaId,
         semana: aIso(c.semana),
-        capa: c.capa as "plan",
+        capa: c.capa as CapaOut,
         monto: c.monto,
         nota: c.nota,
       })),
-      semanas: calculo.map((s) => ({ ...s, tono: s.tono, sellada: selladas.has(s.semana) })),
+      semanas: semanasOut,
+      aviso: { activo: ajustes.avisoActivo, umbral: ajustes.avisoUmbral, semanas: avisoSemanas },
+      columnaHoy: lista.includes(hoy) ? hoy : null,
     };
   },
 });

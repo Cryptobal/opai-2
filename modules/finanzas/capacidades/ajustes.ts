@@ -9,7 +9,7 @@ import { aFecha, ajustesDe } from "./util";
 export const ajustesObtener = defineCapability({
   id: "finanzas.ajustes.obtener",
   descripcion:
-    "Entrega los ajustes del flujo de caja: saldo inicial del horizonte, semana desde la que parte y umbral bajo el cual la planilla marca la semana.",
+    "Entrega los ajustes del flujo de caja: saldo inicial, umbral, tolerancia de cierre, calendario de pagos, aviso de saldo y metas de rendimiento.",
   permiso: PERMISO_VER,
   input: z.object({}),
   output: ajustesSchema,
@@ -21,23 +21,30 @@ export const ajustesObtener = defineCapability({
 export const ajustesActualizar = defineCapability({
   id: "finanzas.ajustes.actualizar",
   descripcion:
-    "Fija el saldo inicial, la semana de partida y el umbral de alerta del flujo de caja de la empresa; la planilla recalcula todos los saldos con ellos.",
+    "Fija saldo inicial, umbral, tolerancia de cierre, calendario de pagos, aviso de saldo y metas del flujo de caja; la planilla recalcula con ellos.",
   permiso: PERMISO_CONFIGURAR,
   input: ajustesSchema.partial(),
   output: ajustesSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const nuevo = {
-      ...(await ajustesDe(ctx)),
-      ...Object.fromEntries(Object.entries(input).filter(([, v]) => v !== undefined)),
-    };
+    const actual = await ajustesDe(ctx);
+    const nuevo = { ...actual, ...Object.fromEntries(Object.entries(input).filter(([, v]) => v !== undefined)) };
     if (dryRun) return nuevo;
     await ctx.transaccion(async (tx) => {
       const data = {
         saldoInicial: nuevo.saldoInicial,
         umbral: nuevo.umbral,
         desde: aFecha(nuevo.desde),
+        toleranciaCierre: nuevo.toleranciaCierre,
+        horizonteSemanas: nuevo.horizonteSemanas,
+        calendarioPagos: nuevo.calendarioPagos,
+        avisoActivo: nuevo.avisoActivo,
+        avisoUmbral: BigInt(nuevo.avisoUmbral),
+        metaCeldaMs: nuevo.metaCeldaMs,
+        metaGuardadoP95Ms: nuevo.metaGuardadoP95Ms,
+        metaCargaInicialS: nuevo.metaCargaInicialS,
+        metasVisibles: nuevo.metasVisibles,
       };
       const existe = await tx.flujoAjustes.findFirst({});
       const a = existe

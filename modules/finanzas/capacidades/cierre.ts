@@ -5,7 +5,7 @@ import { conflicto, defineCapability, prohibido, reglaDeNegocio } from "@opai/ca
 import { calcularPlanilla, evaluarCierre, semanasDesde } from "../domain";
 import { saldoSchema, semanaSchema } from "./esquemas";
 import { PERMISO_CERRAR, PERMISO_VER } from "./permisos";
-import { aFecha, ajustesDe, aIso, cargarFlujo } from "./util";
+import { aFecha, ajustesDe, aIso, bloquearSemanaFlujo, cargarFlujo, semanaSelladaEnTx } from "./util";
 
 const cierreSchema = z.object({
   semana: semanaSchema,
@@ -79,7 +79,7 @@ export const cierreSellar = defineCapability({
         filas: dominio,
         celdas: celdasDom,
       }).at(-1)?.saldoFinal ?? ajustes.saldoInicial;
-    const { exigeMotivo } = evaluarCierre(sugerido, input.saldoBanco);
+    const { exigeMotivo } = evaluarCierre(sugerido, input.saldoBanco, ajustes.toleranciaCierre);
     if (exigeMotivo && !input.motivo)
       throw reglaDeNegocio("La diferencia con el banco supera la tolerancia: indica el motivo.");
     const data = {
@@ -90,6 +90,8 @@ export const cierreSellar = defineCapability({
     };
     if (dryRun) return vista({ semana: input.semana, ...data });
     const c = await ctx.transaccion(async (tx) => {
+      await bloquearSemanaFlujo(tx, ctx, input.semana);
+      if (await semanaSelladaEnTx(tx, input.semana)) throw conflicto("La semana ya está sellada.");
       const sello = {
         ...data,
         selladaEn: new Date(),
@@ -126,6 +128,7 @@ export const cierreReabrir = defineCapability({
     if (!c?.sellada) throw reglaDeNegocio("La semana no está sellada.");
     if (dryRun) return vista({ ...c, sellada: false });
     const r = await ctx.transaccion(async (tx) => {
+      await bloquearSemanaFlujo(tx, ctx, input.semana);
       const u = await tx.flujoCierre.update({
         where: { id: c.id },
         data: { sellada: false, motivoReapertura: input.motivo },

@@ -19,8 +19,9 @@ export const uuidSchema = z.uuid();
 export const semanaSchema = z
   .string()
   .refine(esLunes, "La semana se indica con su lunes (YYYY-MM-DD).");
-/** Monto en CLP entero, sin negativos (el signo lo da la sección de la fila). */
+/** Monto en CLP entero, sin negativos (el signo lo da la sección de la fila). Int en Postgres; tope validado aquí. */
 export const montoSchema = z.number().int().min(0).max(2_000_000_000);
+/** Saldo y umbral de aviso: API en number; `aviso_umbral` y `saldo_proyectado` en BIGINT en base. */
 export const saldoSchema = z.number().int().min(-2_000_000_000).max(2_000_000_000);
 export const seccionSchema = z.enum(["ingreso", "egreso"]);
 export const capaSchema = z.enum(["plan", "comprometido", "real"]);
@@ -48,6 +49,22 @@ export const ajustesSchema = z.object({
   saldoInicial: saldoSchema,
   umbral: saldoSchema,
   desde: semanaSchema,
+  toleranciaCierre: montoSchema.default(1000),
+  horizonteSemanas: z.number().int().min(1).max(52).default(12),
+  calendarioPagos: z
+    .object({
+      remuneraciones: z.number().int().min(1).max(28).optional(),
+      imposiciones: z.number().int().min(1).max(28).optional(),
+      anticipos: z.number().int().min(1).max(28).optional(),
+      iva: z.number().int().min(1).max(28).optional(),
+    })
+    .default({}),
+  avisoActivo: z.boolean().default(false),
+  avisoUmbral: saldoSchema.default(0),
+  metaCeldaMs: z.number().int().min(1).max(10_000).default(100),
+  metaGuardadoP95Ms: z.number().int().min(1).max(60_000).default(1000),
+  metaCargaInicialS: z.number().int().min(1).max(120).default(2),
+  metasVisibles: z.boolean().default(true),
 });
 
 type FilaDb = {
