@@ -151,15 +151,15 @@ ALTER TABLE "core"."valores_tenant" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core"."valores_tenant" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_isolation ON "core"."valores_tenant";
 CREATE POLICY tenant_isolation ON "core"."valores_tenant" AS PERMISSIVE FOR ALL TO opai_app
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core"."remuneraciones_perfil" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core"."remuneraciones_perfil" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_isolation ON "core"."remuneraciones_perfil";
 CREATE POLICY tenant_isolation ON "core"."remuneraciones_perfil" AS PERMISSIVE FOR ALL TO opai_app
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 REVOKE ALL ON "core"."indicadores_legales" FROM opai_app;
 GRANT SELECT ON "core"."indicadores_legales" TO opai_app;
