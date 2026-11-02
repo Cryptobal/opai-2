@@ -10,6 +10,9 @@ import {
 import type { Contexto } from "../types";
 import { aFechaDb, fechaIso } from "./comun";
 import { feriadosDelMes, type InstalacionBase } from "./feriados";
+import { cargarRegistros } from "./registros-cargar";
+
+export { celdaDelDia } from "./celda-dia";
 
 
 /** Serie de dominio con el patrón identificado, para la vista y para validar cambios. */
@@ -82,7 +85,7 @@ export async function cargarMes(
   const primero = aFechaDb(dias[0]!);
   const ultimo = aFechaDb(dias[dias.length - 1]!);
   const ids = puestos.map((p) => p.id);
-  const [filasSerie, filasExc, feriados] = await Promise.all([
+  const [filasSerie, filasExc, feriados, registrosPorPuesto] = await Promise.all([
     ids.length
       ? ctx.db.seriePauta.findMany({
           where: {
@@ -99,6 +102,7 @@ export async function cargarMes(
         })
       : [],
     feriadosDelMes(ctx, anio, mes, instalaciones),
+    cargarRegistros(ctx, ids, primero, ultimo),
   ]);
   const seriesPorPuesto = await armarSeries(ctx, filasSerie);
   const excPorPuesto = new Map<string, ExcepcionPauta[]>();
@@ -119,6 +123,7 @@ export async function cargarMes(
     const lista = seriesPorPuesto.get(p.id) ?? [];
     const ultima = lista[lista.length - 1];
     if (ultima) series.set(p.id, ultima);
+    const reg = registrosPorPuesto.get(p.id);
     celdas.set(
       p.id,
       expandirMes({
@@ -127,6 +132,7 @@ export async function cargarMes(
         series: lista,
         excepciones: excPorPuesto.get(p.id) ?? [],
         feriados: feriados.get(p.instalacionId) ?? new Map(),
+        ...(reg ? { registros: reg } : {}),
       }),
     );
   }

@@ -32,7 +32,11 @@ export const manifest = defineModule({
   configuracion: z.object({}),
   eventos: [
     { id: "pauta.serie.fijada", descripcion: "Se fijó o cambió la serie de un puesto." },
-    { id: "pauta.excepcion.creada", descripcion: "Se registró una ausencia, licencia, vacaciones o permiso en la pauta." },
+    {
+      id: "pauta.excepcion.creada",
+      descripcion:
+        "Se registró una excepción en la pauta (ausencia, licencia, vacaciones, permiso, reemplazo o refuerzo).",
+    },
     { id: "pauta.excepcion.anulada", descripcion: "Se anularon excepciones de la pauta de un puesto." },
   ],
   capacidades: capacidadesPauta,

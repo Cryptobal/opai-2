@@ -36,7 +36,7 @@ model ExcepcionPauta {
   tenantId   String    @map("tenant_id") @db.Uuid
   puestoId   String    @map("puesto_id") @db.Uuid
   fecha      DateTime  @db.Date
-  /// "ausencia" | "licencia" | "vacaciones" | "permiso" (CHECK en la migración).
+  /// "ausencia" | "licencia" | "vacaciones" | "permiso" | "reemplazo" | "refuerzo" (CHECK en la migración).
   tipo       String
   motivo     String
   /// Titular que faltó ese día (para alertas y trazabilidad); no cambia aunque cambie la serie.
@@ -61,7 +61,7 @@ model HistorialPauta {
   tenantId      String   @map("tenant_id") @db.Uuid
   instalacionId String   @map("instalacion_id") @db.Uuid
   puestoId      String   @map("puesto_id") @db.Uuid
-  /// "serie_fijada" | "excepcion_creada" | "excepcion_anulada".
+  /// Acciones del historial (CHECK en la migración; ampliado en PR 2).
   accion        String
   /// "user" | "agent" | "system".
   actorTipo     String   @map("actor_tipo")
@@ -76,5 +76,27 @@ model HistorialPauta {
   @@index([tenantId, instalacionId, createdAt(sort: Desc)])
   @@index([tenantId, puestoId, createdAt(sort: Desc)])
   @@map("historial")
+  @@schema("pauta")
+}
+
+/// Registro operativo de la Diaria: cobertura confirmada (no es marca legal DT) o marca manual.
+model RegistroOperativoPauta {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  puestoId   String    @map("puesto_id") @db.Uuid
+  fecha      DateTime  @db.Date
+  /// "cobertura_confirmada" | "marca_presencia".
+  tipo       String
+  motivo     String    @default("")
+  personaId  String?   @map("persona_id") @db.Uuid
+  estado     String    @default("activa")
+  creadaPor  String?   @map("creada_por") @db.Uuid
+  anuladaPor String?   @map("anulada_por") @db.Uuid
+  anuladaEn  DateTime? @map("anulada_en") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, puestoId, fecha])
+  @@map("registros_operativos")
   @@schema("pauta")
 }

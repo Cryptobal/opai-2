@@ -7,6 +7,10 @@ export const celdaSchema = z.object({
   excepcion: z.boolean(),
   feriado: z.string().nullable(),
   titularId: z.string().nullable(),
+  confirmado: z.boolean().optional(),
+  marcaManual: z.boolean().optional(),
+  cubiertoPorId: z.string().nullable().optional(),
+  variante: z.enum(["reemplazo", "refuerzo", "refuerzo_extra"]).nullable().optional(),
 });
 
 export const resumenSchema = z.object({

@@ -1,13 +1,31 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, History } from "lucide-react";
+import { Button, ChipToggle, InputFecha, Select } from "@opai/ds";
 
-import { Button, ChipToggle, Select } from "@opai/ds";
-
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useParametros } from "@/app/_components/maestros/use-url";
 
 import { claveMes, mesVecino, nombreMes } from "./etiquetas";
 import type { OpcionInstalacion } from "./tipos";
+
+function urlExportar(
+  inst: string,
+  formato: "excel" | "pdf",
+  anio: number,
+  mes: number,
+  fecha: string,
+  diaria: boolean,
+  sinCubrir: boolean,
+) {
+  const p = new URLSearchParams({ inst, formato });
+  if (sinCubrir) p.set("sinCubrir", "1");
+  if (diaria) p.set("fecha", fecha);
+  else {
+    p.set("anio", String(anio));
+    p.set("mes", String(mes));
+  }
+  return `/api/pauta/export?${p}`;
+}
 
 type Props = {
   instalaciones: readonly OpcionInstalacion[];
@@ -15,10 +33,12 @@ type Props = {
   anio: number;
   mes: number;
   verPpc: boolean;
+  diaria: boolean;
+  fecha: string;
 };
 
 /** Selector de instalación y de mes, filtro «Sin cubrir» y acceso al historial (todo en la URL). */
-export function BarraPauta({ instalaciones, inst, anio, mes, verPpc }: Props) {
+export function BarraPauta({ instalaciones, inst, anio, mes, verPpc, diaria, fecha }: Props) {
   const { fijar } = useParametros();
   const irA = (delta: number) => {
     const m = mesVecino(anio, mes, delta);
@@ -26,6 +46,10 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc }: Props) {
   };
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <nav aria-label="Vistas de pauta" className="flex w-full gap-2">
+        <Button variant={diaria ? "secondary" : "primary"} aria-current={!diaria ? "page" : undefined} onClick={() => fijar({ vista: null, ver: null, dia: null })}>Mensual</Button>
+        <Button variant={diaria ? "primary" : "secondary"} aria-current={diaria ? "page" : undefined} onClick={() => fijar({ vista: "diaria", ver: null, dia: null })}>Diaria</Button>
+      </nav>
       <Select
         aria-label="Instalación"
         className="w-full sm:w-64"
@@ -36,28 +60,43 @@ export function BarraPauta({ instalaciones, inst, anio, mes, verPpc }: Props) {
           ...instalaciones.map((i) => ({ valor: i.id, etiqueta: i.nombre })),
         ]}
       />
-      <div className="flex items-center gap-1">
+      {diaria ? <InputFecha aria-label="Fecha de la pauta" className="w-48" valor={fecha} onCambiar={(v) => { if (v) fijar({ fecha: v, dia: null }); }} /> : <div className="flex items-center gap-1">
         <Button variant="ghost" size="iconSm" aria-label="Mes anterior" onClick={() => irA(-1)}>
-          <ChevronLeft className="size-4" />
+          ‹
         </Button>
         <span className="t-label min-w-36 text-center first-letter:uppercase" aria-live="polite">
           {nombreMes(anio, mes)}
         </span>
         <Button variant="ghost" size="iconSm" aria-label="Mes siguiente" onClick={() => irA(1)}>
-          <ChevronRight className="size-4" />
+          ›
         </Button>
+      </div>}
+      <div className="flex flex-wrap items-center gap-2">
+        <ChipToggle
+          etiqueta="Sin cubrir"
+          activo={verPpc}
+          onCambiar={(a) => fijar({ ver: a ? "ppc" : null })}
+        />
+        {inst ? (
+          <>
+            <EnlaceBoton variante="secondary" href={urlExportar(inst, "excel", anio, mes, fecha, diaria, verPpc)}>
+              CSV
+            </EnlaceBoton>
+            <EnlaceBoton variante="secondary" href={urlExportar(inst, "pdf", anio, mes, fecha, diaria, verPpc)}>
+              PDF
+            </EnlaceBoton>
+            <Button variant="secondary" onClick={() => fijar({ alertas: "1" })}>
+              Alertas
+            </Button>
+          </>
+        ) : null}
       </div>
-      <ChipToggle
-        etiqueta="Sin cubrir"
-        activo={verPpc}
-        onCambiar={(a) => fijar({ ver: a ? "ppc" : null })}
-      />
       <Button
         variant="secondary"
-        className="ml-auto"
+        className="ml-auto w-full sm:ml-auto sm:w-auto"
         onClick={() => fijar({ historial: "1" })}
       >
-        <History className="size-4" aria-hidden /> Historial
+        Historial
       </Button>
     </div>
   );
