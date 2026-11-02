@@ -113,10 +113,13 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "cpq"."marca_documento_re
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('marca_documento_id', 'cpq.marca_documento');
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "cpq"."plantillas_documento_revisiones"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('plantilla_documento_id', 'cpq.plantillas_documento');
+CREATE TRIGGER mismo_tenant_plantilla BEFORE INSERT OR UPDATE ON "cpq"."versiones"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('plantilla_documento_id', 'cpq.plantillas_documento');
 
 COMMIT;
 
 -- Reversión manual (rol propietario):
+-- DROP TRIGGER IF EXISTS mismo_tenant_plantilla ON "cpq"."versiones";
 -- ALTER TABLE "cpq"."versiones" DROP CONSTRAINT IF EXISTS "versiones_plantilla_documento_id_fkey";
 -- ALTER TABLE "cpq"."versiones" DROP COLUMN IF EXISTS "marca_documento_version", DROP COLUMN IF EXISTS "plantilla_documento_id", DROP COLUMN IF EXISTS "plantilla_documento_version";
 -- DROP TABLE IF EXISTS "cpq"."plantillas_documento_revisiones";

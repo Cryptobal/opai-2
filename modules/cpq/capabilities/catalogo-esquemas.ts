@@ -19,7 +19,7 @@ export const itemSchema = z.object({
   grupo: z.string(),
   unidad: z.string(),
   modoCalculo: z.string(),
-  costoUnitarioClp: z.number().int(),
+  costoUnitarioClp: z.number().int().optional(),
   recurrencia: z.enum(["mensual", "unico"]),
   visibleCliente: z.boolean(),
   porDefecto: z.boolean(),

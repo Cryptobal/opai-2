@@ -9,6 +9,8 @@ import {
   parseBloquesJson,
 } from "../domain/documento/bloques";
 
+const ID_PLANTILLA_LECTURA = "00000000-0000-0000-0000-000000000000";
+
 export type PlantillaDocumentoVista = {
   id: string;
   tipo: "cotizacion";
@@ -35,6 +37,22 @@ export async function plantillaActivaCotizacion(ctx: Contexto) {
     });
   }
   return row;
+}
+
+/** Vista de plantilla activa sin persistir (lecturas y vista previa PDF). */
+export async function plantillaActivaCotizacionLectura(ctx: Contexto): Promise<PlantillaDocumentoVista> {
+  const row = await ctx.db.cpqPlantillaDocumento.findFirst({
+    where: { tenantId: ctx.tenantId, tipo: "cotizacion", activa: true },
+  });
+  if (row) return vistaPlantilla(row);
+  return {
+    id: ID_PLANTILLA_LECTURA,
+    tipo: "cotizacion",
+    base: "clasica",
+    version: 0,
+    activa: true,
+    bloques: BLOQUES_POR_BASE.clasica,
+  };
 }
 
 export function vistaPlantilla(row: {

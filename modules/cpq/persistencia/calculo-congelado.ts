@@ -5,6 +5,8 @@ import type { VersionCtx } from "./version";
 
 type FilaLinea = { tipo: string; habilitada: boolean; posiciones: number };
 
+export const AVISO_SIN_CALCULO = "sin cálculo congelado completo";
+
 function fallbackCongelado(
   version: Pick<VersionCtx, "ventaMensualClp" | "validaHasta">,
   lineas: readonly FilaLinea[],
@@ -24,8 +26,8 @@ function fallbackCongelado(
     costoUnico: 0,
     ventaMensual: version.ventaMensualClp,
     pagosUnicos: 0,
-    margenEfectivoPct: 0,
-    semaforo: "verde",
+    margenEfectivoPct: -1,
+    semaforo: "rojo",
     instrumentos: {
       financiero: 0,
       garantia: 0,
@@ -42,16 +44,16 @@ function fallbackCongelado(
     uf: null,
     fecha,
     estado: "borrador",
-    advertencias: [],
-    noEnviable: false,
+    advertencias: [AVISO_SIN_CALCULO],
+    noEnviable: true,
     requiereAprobacion: false,
     traza: [],
   };
 }
 
-/** R-CPQ-010: lee el JSON congelado al enviar o reconstruye solo venta si falta. */
+/** R-CPQ-010: lee el JSON congelado al enviar o reconstruye venta sin inventar margen ni semáforo verde. */
 export function calculoCongelado(
-  ctx: Contexto,
+  _ctx: Contexto,
   version: Pick<VersionCtx, "ventaMensualClp" | "validaHasta" | "calculoCongeladoJson">,
   lineas: readonly FilaLinea[],
 ): ResultadoCalculo {
@@ -63,6 +65,5 @@ export function calculoCongelado(
       /* JSON inválido: cae al fallback */
     }
   }
-  const base = fallbackCongelado(version, lineas);
-  return base;
+  return fallbackCongelado(version, lineas);
 }

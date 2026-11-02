@@ -8,7 +8,7 @@ import {
   reglaDeNegocio,
 } from "@opai/capabilities";
 
-import { anioEnZona, esEditable, formatearCodigo, validaHastaPorDefecto, type EstadoCotizacion } from "../domain";
+import { anioEnZona, formatearCodigo, validaHastaPorDefecto } from "../domain";
 import { copiarSeccionesYLineas, datosVersionDesde } from "../persistencia/version-copiar";
 import { versionParaFicha } from "../persistencia/version";
 import { uuidSchema } from "./esquemas";
@@ -18,7 +18,7 @@ import { cotizacionDe, ID_VISTA_PREVIA } from "./util";
 export const cotizacionesClonar = defineCapability({
   id: "cpq.cotizaciones.clonar",
   descripcion:
-    "Duplica una cotización en borrador (nuevo código CPQ) copiando secciones y líneas de la versión editable de la fuente.",
+    "Duplica una cotización en borrador (nuevo código CPQ) copiando secciones y líneas de la versión de referencia (editable o la última enviada).",
   permiso: PERMISO_MANAGE,
   input: z.object({
     id: uuidSchema,
@@ -32,8 +32,6 @@ export const cotizacionesClonar = defineCapability({
     const origen = await cotizacionDe(ctx, input.id);
     const versionOrigen = await versionParaFicha(ctx, origen.id);
     if (!versionOrigen) throw noEncontrado("La versión");
-    if (!esEditable(versionOrigen.estado as EstadoCotizacion))
-      throw reglaDeNegocio("Solo se clona desde una versión aún editable.");
     const negocio = await ctx.db.negocio.findFirst({ where: { id: origen.negocioId } });
     if (!negocio || negocio.estado !== "abierto" || negocio.archivadoEn)
       throw reglaDeNegocio("El negocio debe estar abierto.");

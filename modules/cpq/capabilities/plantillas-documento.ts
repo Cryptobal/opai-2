@@ -9,6 +9,7 @@ import { calculoCongelado } from "../persistencia/calculo-congelado";
 import {
   actualizarPlantillaCotizacion,
   plantillaActivaCotizacion,
+  plantillaActivaCotizacionLectura,
   vistaPlantilla,
 } from "../persistencia/plantilla-documento";
 import { PERMISO_MODELO, PERMISO_READ } from "./permisos";
@@ -40,7 +41,7 @@ export const plantillasDocumentoGet = defineCapability({
   dryRun: false,
   async handler(ctx) {
     return {
-      ...vistaPlantilla(await plantillaActivaCotizacion(ctx)),
+      ...(await plantillaActivaCotizacionLectura(ctx)),
       basesDisponibles: [...BASES_PLANTILLA],
     };
   },
@@ -128,6 +129,7 @@ export const cotizacionesPreviewPdf = defineCapability({
             plantillaDocumentoVersion: version.plantillaDocumentoVersion,
           }
         : undefined,
+      { siembraDocumento: false },
     );
     return {
       pdfBase64: Buffer.from(pdf.bytes).toString("base64"),

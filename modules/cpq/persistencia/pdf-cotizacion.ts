@@ -4,6 +4,7 @@ import { renderPdfCotizacion, type EntradaPdfCotizacion } from "./documento-pdf"
 import { marcaDocumentoEnVersion, vistaMarcaDocumento } from "./marca-documento";
 import {
   plantillaActivaCotizacion,
+  plantillaActivaCotizacionLectura,
   plantillaEnVersion,
   vistaPlantilla,
 } from "./plantilla-documento";
@@ -16,12 +17,16 @@ export async function pdfCotizacionConMarca(
     plantillaDocumentoId?: string | null;
     plantillaDocumentoVersion?: number | null;
   },
+  opciones?: { siembraDocumento?: boolean },
 ) {
+  const siembra = opciones?.siembraDocumento ?? false;
   const marca =
     refs?.marcaDocumentoVersion != null
       ? (await marcaDocumentoEnVersion(ctx, refs.marcaDocumentoVersion)) ?? (await vistaMarcaDocumento(ctx))
       : await vistaMarcaDocumento(ctx);
-  let plantilla = vistaPlantilla(await plantillaActivaCotizacion(ctx));
+  let plantilla = siembra
+    ? vistaPlantilla(await plantillaActivaCotizacion(ctx))
+    : await plantillaActivaCotizacionLectura(ctx);
   if (refs?.plantillaDocumentoId && refs.plantillaDocumentoVersion != null) {
     const hist = await plantillaEnVersion(ctx, refs.plantillaDocumentoId, refs.plantillaDocumentoVersion);
     if (hist) plantilla = hist;

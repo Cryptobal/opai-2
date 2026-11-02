@@ -5,7 +5,7 @@ import { defineCapability, noEncontrado } from "@opai/capabilities";
 import { ensurePlantillaCatalogo } from "../persistencia/catalogo-seed";
 import { itemSchema } from "./catalogo-esquemas";
 import { uuidSchema } from "./esquemas";
-import { PERMISO_MODELO, PERMISO_READ } from "./permisos";
+import { PERMISO_COSTOS, PERMISO_MODELO, PERMISO_READ } from "./permisos";
 import { ID_VISTA_PREVIA } from "./util";
 
 export const catalogoItemsList = defineCapability({
@@ -17,16 +17,21 @@ export const catalogoItemsList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    await ensurePlantillaCatalogo(ctx);
     const items = await ctx.db.cpqCatalogoItem.findMany({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ codigo: "asc" }],
     });
+    const verCosto = ctx.autorizar(PERMISO_COSTOS);
     return {
-      items: items.map((i) => ({
-        ...i,
-        recurrencia: i.recurrencia as "mensual" | "unico",
-      })),
+      items: items.map((i) => {
+        const base = {
+          ...i,
+          recurrencia: i.recurrencia as "mensual" | "unico",
+        };
+        if (verCosto) return base;
+        const { costoUnitarioClp: _omit, ...sinCosto } = base;
+        return sinCosto;
+      }),
     };
   },
 });
@@ -52,6 +57,7 @@ export const catalogoItemsCreate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    if (!dryRun) await ensurePlantillaCatalogo(ctx);
     const cat = await ctx.db.cpqCatalogoCategoria.findFirst({ where: { id: input.categoriaId } });
     if (!cat) throw noEncontrado("La categoría");
     if (dryRun) {

@@ -6,6 +6,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import * as proveedor from "../persistencia/proveedor";
 import * as valoresLegales from "../persistencia/valores-legales";
 import { AVISO_FALTA_UF } from "../persistencia/recalcular";
+import { AVISO_SIN_CALCULO } from "../persistencia/calculo-congelado";
 import { ACTIVOS, CON_COSTOS, GESTOR, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 
@@ -201,6 +202,29 @@ describe("paridad CPQ (CAR-134)", () => {
     expect(f.ok).toBe(true);
     if (!f.ok) throw new Error("ficha");
     expect((f.data as { calculo: { ventaMensual: number | null } }).calculo.ventaMensual).toBe(congelada);
+  });
+
+  it("versión enviada sin JSON congelado no inventa margen verde", async () => {
+    const { ctx } = contextoDePrueba({
+      semilla: semilla(),
+      modulosActivos: ACTIVOS,
+      permisos: [...GESTOR, ...CON_COSTOS],
+    });
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Sin JSON" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    await ctx.db.cpqVersion.updateMany({
+      where: { cotizacionId: id },
+      data: { estado: "enviada", ventaMensualClp: 1_000_000, calculoCongeladoJson: null },
+    });
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    expect(f.ok).toBe(true);
+    if (!f.ok) throw new Error("ficha");
+    const calc = (f.data as { calculo: { semaforo?: string; margenEfectivoPct?: number; advertencias?: string[] } })
+      .calculo;
+    expect(calc.advertencias).toContain(AVISO_SIN_CALCULO);
+    expect(calc.semaforo).not.toBe("verde");
+    expect(calc.margenEfectivoPct).not.toBe(0);
   });
 
   it("R-CPQ-028: sin UF del período avisa explícito y no inventa valor", async () => {

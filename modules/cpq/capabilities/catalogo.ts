@@ -17,7 +17,6 @@ export const catalogoCategoriasList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    await ensurePlantillaCatalogo(ctx);
     const items = await ctx.db.cpqCatalogoCategoria.findMany({
       where: input.incluirInactivas ? {} : { activa: true },
       orderBy: [{ orden: "asc" }, { clave: "asc" }],
@@ -40,6 +39,7 @@ export const catalogoCategoriasCreate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    if (!dryRun) await ensurePlantillaCatalogo(ctx);
     if (dryRun) {
       return {
         id: ID_VISTA_PREVIA,

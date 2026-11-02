@@ -1,7 +1,8 @@
 import type { Contexto } from "@opai/capabilities";
 
-import { calcular, PLANTILLA_SEGURIDAD, resultadoSinCostos, type ResultadoCalculo } from "../domain/motor";
+import { calcular, resultadoSinCostos, type ResultadoCalculo } from "../domain/motor";
 import { cotizacionDe } from "../capabilities/util";
+import { modeloDesdeCatalogo } from "./catalogo-modelo";
 import { mapearVersionCalculo } from "./mapear";
 import { juegoParaFecha, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
@@ -58,8 +59,8 @@ export async function recalcularVersion(
     })),
     juego,
   );
-  const entrada = mapearVersionCalculo(version, secciones, lineas);
-  const modelo = structuredClone(PLANTILLA_SEGURIDAD);
+  const modelo = await modeloDesdeCatalogo(ctx);
+  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo);
   const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
   if (!uf && juego) {
     resultado.advertencias = [...new Set([...resultado.advertencias, AVISO_FALTA_UF])];

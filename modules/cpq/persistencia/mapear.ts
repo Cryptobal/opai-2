@@ -1,5 +1,4 @@
-import { PLANTILLA_SEGURIDAD } from "../domain/motor/plantilla";
-import type { LineaItem, Puesto, Rateo, VersionCalculo } from "../domain/motor/tipos";
+import type { Item, LineaItem, ModeloCosteo, Puesto, Rateo, VersionCalculo } from "../domain/motor/tipos";
 import { mesesContrato, type VersionCtx } from "./version";
 
 type FilaSeccion = { id: string; nombre: string; margenPct: number | null; instalacionId: string | null };
@@ -21,16 +20,23 @@ function parseRateo(raw: string | null): Rateo | undefined {
   return r;
 }
 
-function itemDeCodigo(codigo: string) {
-  const item = PLANTILLA_SEGURIDAD.items.find((i) => i.id === codigo);
+function itemDeCodigo(modelo: ModeloCosteo, codigo: string): Item {
+  const item = modelo.items.find((i) => i.id === codigo);
   if (!item) throw new Error(`Ítem de catálogo desconocido: ${codigo}`);
   return structuredClone(item);
+}
+
+function aplicarRecurrencia(item: Item, recurrencia: string) {
+  if (recurrencia !== "unico") return;
+  item.modo = "inversion";
+  item.rateo = { tipo: "unico" };
 }
 
 export function mapearVersionCalculo(
   version: VersionCtx,
   secciones: FilaSeccion[],
   lineas: FilaLinea[],
+  modelo: ModeloCosteo,
 ): VersionCalculo {
   const porSeccion = new Map(secciones.map((s) => [s.id, s]));
   const margenesSeccion = secciones
@@ -60,8 +66,9 @@ export function mapearVersionCalculo(
         };
         return p;
       }
-      const item = itemDeCodigo(l.itemCodigo ?? "equipo");
+      const item = itemDeCodigo(modelo, l.itemCodigo ?? "equipo");
       if (l.precioUnitarioClp != null) item.costoUnitario = l.precioUnitarioClp;
+      aplicarRecurrencia(item, l.recurrencia);
       const rateo = parseRateo(l.rateoJson);
       if (rateo) item.rateo = rateo;
       const li: LineaItem = {

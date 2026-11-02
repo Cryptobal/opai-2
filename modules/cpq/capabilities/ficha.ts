@@ -7,7 +7,6 @@ import { PERMISO_MANAGE, PERMISO_READ } from "./permisos";
 import { cotizacionDe } from "./util";
 import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
 import { calculoCongelado } from "../persistencia/calculo-congelado";
-import { sincronizarSecciones } from "../persistencia/secciones-sync";
 import { versionParaFicha } from "../persistencia/version";
 import { uuidSchema } from "./esquemas";
 
@@ -68,7 +67,6 @@ export const cotizacionesFicha = defineCapability({
     const c = await cotizacionDe(ctx, input.id);
     const versionPre = await versionParaFicha(ctx, input.id, input.version);
     if (!versionPre) throw noEncontrado("La versión");
-    if (versionPre.estado === "borrador") await sincronizarSecciones(ctx, versionPre.id, c.negocioId);
     const pack = await cargarFilasVersion(ctx, input.id, input.version, false);
     if (!pack) throw noEncontrado("La versión");
     const { version, secciones, lineas } = pack;

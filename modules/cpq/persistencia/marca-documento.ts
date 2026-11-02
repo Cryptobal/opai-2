@@ -47,8 +47,17 @@ export async function asegurarMarcaDocumento(ctx: Contexto) {
 }
 
 export async function vistaMarcaDocumento(ctx: Contexto): Promise<MarcaDocumentoVista> {
-  const row = await asegurarMarcaDocumento(ctx);
+  const row = await ctx.db.cpqMarcaDocumento.findUnique({ where: { tenantId: ctx.tenantId } });
   const perfil = await perfilMarca(ctx);
+  if (!row) {
+    return {
+      version: 0,
+      tipografia: "inter",
+      piePagina: null,
+      condicionesDefault: null,
+      ...perfil,
+    };
+  }
   return {
     version: row.version,
     tipografia: row.tipografia as TipografiaDocumento,

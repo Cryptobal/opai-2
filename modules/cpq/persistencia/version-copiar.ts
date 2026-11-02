@@ -51,7 +51,7 @@ export async function copiarSeccionesYLineas(
           itemCodigo: l.itemCodigo,
           cantidadEscalada: l.cantidadEscalada,
           rateoJson: l.rateoJson,
-          precioUnitarioClp: l.precioUnitarioClp,
+          precioUnitarioClp: null,
           margenPropioPct: l.margenPropioPct,
           alcanceDotacion: l.alcanceDotacion,
           huellaJuegoValores: l.huellaJuegoValores,

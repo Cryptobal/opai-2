@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability } from "@opai/capabilities";
+import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { formatearCodigo } from "../domain";
 import { PERMISO_MODELO } from "./permisos";
@@ -18,6 +18,10 @@ export const correlativosFijar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    const prev = await ctx.db.cpqCorrelativo.findFirst({ where: { anio: input.anio } });
+    if (prev && input.ultimo < prev.ultimo) {
+      throw reglaDeNegocio("El correlativo solo puede subir; no se puede fijar un número menor al actual.");
+    }
     const codigoEjemplo = formatearCodigo(input.anio, input.ultimo + 1);
     if (dryRun) return { anio: input.anio, ultimo: input.ultimo, codigoEjemplo };
     const fila = await ctx.db.cpqCorrelativo.upsert({

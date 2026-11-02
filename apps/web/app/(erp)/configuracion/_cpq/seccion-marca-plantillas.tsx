@@ -1,4 +1,4 @@
-import { Badge, Button, Campo, Estado, Select } from "@opai/ds";
+import { Badge, Estado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -6,16 +6,23 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { FormMarcaDocumento } from "./form-marca-documento";
 import { FormPlantillaDocumento } from "./form-plantilla-documento";
 
-type Marca = Awaited<ReturnType<typeof cargarMarca>>;
-type Plantilla = Awaited<ReturnType<typeof cargarPlantilla>>;
-
 async function cargarMarca() {
-  const r = await ejecutarComoUsuario("erp", "cpq.marca_documento.get", {});
+  const r = await ejecutarComoUsuario<{
+    version: number;
+    tipografia: string;
+    piePagina: string | null;
+    condicionesDefault: string | null;
+  }>("erp", "cpq.marca_documento.get", {});
   return r.ok ? r.data : null;
 }
 
 async function cargarPlantilla() {
-  const r = await ejecutarComoUsuario("erp", "cpq.plantillas_documento.get", {});
+  const r = await ejecutarComoUsuario<{
+    version: number;
+    base: string;
+    bloques: { id: string; activo: boolean }[];
+    basesDisponibles: string[];
+  }>("erp", "cpq.plantillas_documento.get", {});
   return r.ok ? r.data : null;
 }
 

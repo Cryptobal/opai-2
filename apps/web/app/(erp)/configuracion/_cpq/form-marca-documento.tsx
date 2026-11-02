@@ -4,12 +4,12 @@ import { Button, Campo, Select, Textarea } from "@opai/ds";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ejecutar } from "@/lib/capacidades-cliente";
+import { useCapacidad } from "@/app/_components/use-capacidad";
 
 const TIPOGRAFIAS = [
-  { value: "inter", label: "Inter (sans)" },
-  { value: "helvetica", label: "Helvetica (sans)" },
-  { value: "times", label: "Times (serif)" },
+  { valor: "inter", etiqueta: "Inter (sans)" },
+  { valor: "helvetica", etiqueta: "Helvetica (sans)" },
+  { valor: "times", etiqueta: "Times (serif)" },
 ];
 
 export function FormMarcaDocumento({
@@ -22,20 +22,17 @@ export function FormMarcaDocumento({
   };
 }) {
   const router = useRouter();
+  const { ejecutar, pendiente: capPendiente } = useCapacidad("erp");
   const [tipografia, setTipografia] = useState(marca.tipografia);
   const [pie, setPie] = useState(marca.piePagina ?? "");
   const [condiciones, setCondiciones] = useState(marca.condicionesDefault ?? "");
-  const [cargando, setCargando] = useState(false);
-
   async function guardar() {
-    setCargando(true);
     const r = await ejecutar("cpq.marca_documento.update", {
       tipografia,
       piePagina: pie.trim() || null,
       condicionesDefault: condiciones.trim() || null,
     });
-    setCargando(false);
-    if (r.ok) router.refresh();
+    if (r != null) router.refresh();
   }
 
   return (
@@ -49,8 +46,8 @@ export function FormMarcaDocumento({
       <Campo etiqueta="Tipografía del PDF" htmlFor="cpq-doc-tipografia">
         <Select
           id="cpq-doc-tipografia"
-          value={tipografia}
-          onValueChange={setTipografia}
+          valor={tipografia}
+          onCambiar={setTipografia}
           opciones={TIPOGRAFIAS}
         />
       </Campo>
@@ -65,7 +62,7 @@ export function FormMarcaDocumento({
           rows={4}
         />
       </Campo>
-      <Button type="submit" disabled={cargando}>
+      <Button type="submit" disabled={capPendiente}>
         Guardar marca documental
       </Button>
     </form>
