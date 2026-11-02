@@ -120,6 +120,7 @@ export const cotizacionesPreviewPdf = defineCapability({
           ventaMensual: calculo.ventaMensual ?? null,
           fecha: calculo.fecha ?? "",
           pagosUnicos: "pagosUnicos" in calculo ? calculo.pagosUnicos : 0,
+          borradorSinPrecio: calculo.ventaMensual == null,
         },
       },
       version.estado !== "borrador"

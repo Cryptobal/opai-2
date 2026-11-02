@@ -1,7 +1,6 @@
 import { falla } from "./autorizacion";
 import { type ReservaIdempotencia, SALIDA_INVALIDA } from "./idempotencia";
 import type {
-  Actor,
   Capacidad,
   Contexto,
   EventoAuditoria,
@@ -79,22 +78,28 @@ export function entidadAuditada(
 
 /** Evento de auditoría completo (ADR-052): lo arma `executeCapability` para los dos caminos. */
 export function eventoAuditoria(
+  ctx: Contexto,
   c: Capacidad,
-  actor: Actor,
   tenantId: string,
   entrada: unknown,
   salida: unknown,
   opciones: OpcionesEjecucion,
 ): EventoAuditoria {
+  const parsed = salida !== undefined ? c.output.safeParse(salida) : null;
+  const extra =
+    parsed?.success && c.auditoriaPayload
+      ? c.auditoriaPayload(ctx, entrada as never, parsed.data as never)
+      : {};
   return {
     tenantId,
     capability: c.id,
-    actor,
+    actor: ctx.actor,
     ...entidadAuditada(c.id, entrada, salida),
     payload: {
       input: sinSensibles(entrada, c.sensibles),
       idempotencyKey: opciones.idempotencyKey ?? null,
       ...opciones.auditoriaExtra,
+      ...extra,
     },
   };
 }
