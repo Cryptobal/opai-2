@@ -24,7 +24,7 @@ test("ficha CPQ muestra resumen en español y patrón lista+ficha", async ({ pag
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL("/cotizaciones/*");
+  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
   await expect(page.getByRole("heading", { name: /CPQ-/ }).first()).toBeVisible();
   await expect(page.getByText("Resumen", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Mano de obra").first()).toBeVisible();
@@ -46,7 +46,7 @@ test("muestra el error del servidor al dejar lista con costos pendientes", async
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL("/cotizaciones/*");
+  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
   await page.getByRole("button", { name: "Agregar puesto" }).first().click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
   await expect(page.getByRole("button", { name: "Dejar lista" })).toBeVisible({ timeout: 15_000 });

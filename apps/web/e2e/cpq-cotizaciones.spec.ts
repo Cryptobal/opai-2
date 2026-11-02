@@ -35,7 +35,8 @@ test("crea desde negocio abierto con vista previa y aparece en ambas listas", as
   await sinDesborde(page);
   await page.screenshot({ path: info.outputPath("cpq-preview.png"), fullPage: true });
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL("/cotizaciones");
+  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.goto("/cotizaciones");
   await expect(
     page.getByRole("link").filter({ hasText: titulo }).filter({ visible: true }).first(),
   ).toBeVisible();
@@ -72,7 +73,8 @@ test("desde lista elige un negocio abierto; editar invalida la vista previa", as
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL("/cotizaciones");
+  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.goto("/cotizaciones");
   await expect(page.getByText(titulo, { exact: true }).filter({ visible: true })).toBeVisible();
 });
 

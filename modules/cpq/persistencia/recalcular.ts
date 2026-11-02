@@ -7,6 +7,7 @@ import { mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { juegoParaFecha, mutualAdicionalTenant, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
+import { resumenCalculoCongeladoParaLista } from "./resumen-lista-cache";
 import { mesesContrato, versionParaFicha } from "./version";
 
 export const AVISO_FALTA_UF = "Falta valor UF del día o del período.";
@@ -78,18 +79,11 @@ export async function recalcularVersion(
     if (resuelto.pendiente || !uf) resultado.noEnviable = true;
   }
   if (puedeEscribirVersion(version, escribir)) {
-    const proyectado = proyectarCalculo(ctx, resultado);
-    const cacheJson =
-      version.estado === "borrador" ||
-      version.estado === "en_aprobacion" ||
-      version.estado === "lista"
-        ? JSON.stringify(proyectado)
-        : undefined;
     await ctx.db.cpqVersion.update({
       where: { id: version.id },
       data: {
         ventaMensualClp: resultado.ventaMensual,
-        ...(cacheJson ? { calculoCongeladoJson: cacheJson } : {}),
+        calculoCongeladoJson: JSON.stringify(resumenCalculoCongeladoParaLista(resultado)),
       },
     });
     for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
