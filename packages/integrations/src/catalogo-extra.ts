@@ -39,6 +39,13 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
         proveedor: z.enum(["simpleapi", "simulado"]).default("simulado"),
         ambiente: z.enum(["certificacion", "produccion"]).default("certificacion"),
         rutEmisor: z.string().min(3).optional(),
+        certificadoMeta: z
+          .object({
+            titular: z.string(),
+            rutTitular: z.string().nullable(),
+            venceEn: z.string(),
+          })
+          .optional(),
       })
       .strict(),
     disponible: true,

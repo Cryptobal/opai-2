@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
@@ -7,7 +8,16 @@ import { FichaCotizacionLineas } from "./ficha-cotizacion-lineas";
 import type { ModalesFichaCotizacion } from "./ficha-cotizacion-modales";
 import { HistorialVersionesCpq, PanelDocumentoPdf } from "./historial-versiones";
 
+const PropuestaTecnicaFicha = dynamic(
+  () => import("./propuesta-tecnica-ficha").then((m) => m.PropuestaTecnicaFicha),
+  { ssr: false, loading: () => null },
+);
+
 type Ficha = NonNullable<DatosFichaCotizacion["ficha"]>;
+
+type MetaFicha = {
+  puedeEnviar?: boolean;
+};
 
 export function FichaCotizacionCuerpo({
   d,
@@ -19,6 +29,7 @@ export function FichaCotizacionCuerpo({
   limpiarError,
   recargar,
   modales,
+  meta,
 }: {
   d: Ficha;
   datos: DatosFichaCotizacion;
@@ -29,6 +40,7 @@ export function FichaCotizacionCuerpo({
   limpiarError: () => void;
   recargar: () => void;
   modales: ModalesFichaCotizacion;
+  meta?: MetaFicha;
 }) {
   return (
     <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -63,7 +75,16 @@ export function FichaCotizacionCuerpo({
         />
         <HistorialVersionesCpq versiones={datos.versiones} codigo={d.cotizacion.codigo} />
       </div>
-      <aside className="hidden xl:block space-y-4">{resumen}</aside>
+      <aside className="hidden xl:block space-y-4">
+        {resumen}
+        <PropuestaTecnicaFicha
+          cotizacionId={d.cotizacion.id}
+          cuentaId={d.cuentaId}
+          gestionar={datos.gestionar}
+          aprobarEnvios={datos.aprobarEnvios}
+          puedeEnviar={Boolean(meta?.puedeEnviar ?? d.version.estado === "lista")}
+        />
+      </aside>
     </div>
   );
 }

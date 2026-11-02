@@ -3,19 +3,19 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 import { pdfCotizacionConMarca } from "../persistencia/pdf-cotizacion";
-import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
-import { exigirEnviable } from "../persistencia/version";
-import { commitEnviarCotizacion } from "./enviar-commit";
-import { validarEnvioCpq } from "./enviar-validar";
+import { exigirGatesEnvioCpq } from "../persistencia/propuesta-envio-aprobacion";
+import { registrarOEnviarSolicitudEnvioPropuesta } from "../persistencia/propuesta-envio-solicitar";
+import { proyectarCalculo } from "../persistencia/recalcular";
 import { manifestEnviarSchema, previewCorreoEnviarSchema } from "./enviar-esquemas";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE } from "./permisos";
 import { cotizacionDe } from "./util";
 
 export const cotizacionesEnviar = defineCapability({
+  interna: true,
   id: "cpq.cotizaciones.enviar",
   descripcion:
-    "Congela la versión editable, guarda el cálculo, actualiza el valor mensual del negocio, mueve a «Propuesta enviada», registra el PDF y envía correo al contacto.",
+    "Legacy: delega en el envío conjunto (cpq.envios_propuesta.solicitar). No expuesto en MCP; usar envíos desde la ficha.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     id: uuidSchema,
@@ -35,27 +35,14 @@ export const cotizacionesEnviar = defineCapability({
   exigeAprobacion: () => true,
   async handler(ctx, input, { dryRun }) {
     const c = await cotizacionDe(ctx, input.id);
-    const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
-    if (!pack) throw noEncontrado("La versión");
-    const { version, secciones, lineas } = pack;
-    exigirEnviable(version);
     const neg = await ctx.db.negocio.findFirst({
       where: { id: c.negocioId },
-      select: {
-        id: true,
-        titulo: true,
-        valorMensual: true,
-        cuentaId: true,
-        embudoId: true,
-        etapaId: true,
-        estado: true,
-        createdAt: true,
-      },
+      select: { cuentaId: true, titulo: true },
     });
     if (!neg?.cuentaId) throw reglaDeNegocio("El negocio no tiene cuenta asociada.");
     const contacto = await ctx.db.contacto.findFirst({
       where: { id: input.contactoId },
-      select: { email: true, cuentaId: true, tenantId: true },
+      select: { email: true, cuentaId: true, tenantId: true, nombres: true, apellidos: true },
     });
     if (!contacto) throw noEncontrado("El contacto");
     if (contacto.tenantId !== ctx.tenantId) {
@@ -67,9 +54,13 @@ export const cotizacionesEnviar = defineCapability({
     if (!contacto.email?.trim()) {
       throw reglaDeNegocio("El contacto debe tener correo para enviar la propuesta.");
     }
-    const resultado = await recalcularVersion(ctx, input.id, undefined, false);
-    if (!resultado) throw noEncontrado("La versión");
-    await validarEnvioCpq(ctx, input, version, lineas, resultado, dryRun, c.id);
+    const { pack, resultado } = await exigirGatesEnvioCpq(
+      ctx,
+      input.id,
+      input.confirmarValoresViejos,
+      dryRun,
+    );
+    const { version, secciones, lineas } = pack;
     const calculoPublico = proyectarCalculo(ctx, resultado);
     const seccionesVista = secciones.map((s) => ({
       nombre: s.nombre,
@@ -77,6 +68,34 @@ export const cotizacionesEnviar = defineCapability({
         .filter((l) => l.seccionId === s.id)
         .map((l) => ({ nombre: l.nombre, tipo: l.tipo })),
     }));
+    const nombreContacto = `${contacto.nombres} ${contacto.apellidos}`.trim();
+    const destinatarios = [
+      {
+        email: contacto.email.trim(),
+        contactoId: input.contactoId,
+        ...(nombreContacto ? { nombre: nombreContacto } : {}),
+      },
+    ];
+    const solicitud = await registrarOEnviarSolicitudEnvioPropuesta(
+      ctx,
+      {
+        cotizacionId: c.id,
+        versionId: version.id,
+        propuestaTecnicaId: null,
+        incluyeCotizacion: true,
+        incluyePropuesta: false,
+        destinatarios,
+        creadoPorId: c.creadoPorId,
+        resultado,
+        ...(input.mensaje !== undefined ? { mensaje: input.mensaje } : {}),
+      },
+      dryRun,
+    );
+    if (solicitud.estado === "pendiente_aprobacion") {
+      throw reglaDeNegocio(
+        "Fuera de márgenes: el envío queda pendiente de aprobación. Usa cpq.envios_propuesta.solicitar desde la ficha.",
+      );
+    }
     const pdfPack = await pdfCotizacionConMarca(
       ctx,
       {
@@ -92,7 +111,7 @@ export const cotizacionesEnviar = defineCapability({
         },
       },
       undefined,
-      { siembraDocumento: !dryRun },
+      { siembraDocumento: false },
     );
     const correoPreview = {
       evento: "cpq.cotizacion.enviada" as const,
@@ -114,28 +133,15 @@ export const cotizacionesEnviar = defineCapability({
       calculo: calculoPublico,
       pdfBytes: pdfPack.bytes.byteLength,
     };
-    if (dryRun) {
-      return {
-        versionId: version.id,
-        estado: "enviada" as const,
-        documentoId: c.id,
-        manifest,
-        correo: correoPreview,
-      };
+    let documentoId = c.id;
+    if (!dryRun) {
+      const vinculo = await ctx.db.documentoVinculo.findFirst({
+        where: { entidadId: c.id, entidadTipo: "cotizacion" },
+        orderBy: { createdAt: "desc" },
+        select: { documentoId: true },
+      });
+      documentoId = vinculo?.documentoId ?? c.id;
     }
-    const documentoId = await commitEnviarCotizacion(ctx, {
-      cotizacionId: c.id,
-      codigo: c.codigo,
-      negocioId: c.negocioId,
-      versionId: version.id,
-      versionNumero: version.numero,
-      contactoId: input.contactoId,
-      pdf: pdfPack.bytes,
-      pdfPack,
-      resultado,
-      neg,
-      correoPreview,
-    });
     return {
       versionId: version.id,
       estado: "enviada" as const,

@@ -97,6 +97,22 @@ export async function programarPeriodicos(ctx: Contexto, hoy: string): Promise<s
   return encolados;
 }
 
+const TIPO_CAPTURA_SII = "core.remuneraciones.captura_sii";
+
+/** Encola una sola corrida diaria de captura SII (plataforma; no por cada tenant). */
+export async function programarCapturaSii(ctx: Contexto, hoy: string): Promise<boolean> {
+  const def = obtenerTrabajo(TIPO_CAPTURA_SII);
+  if (!def) return false;
+  const nuevo = await ctx.transaccion((tx) =>
+    ctx.trabajos.encolar(tx, {
+      tipo: TIPO_CAPTURA_SII,
+      payload: { dia: hoy },
+      claveUnica: `${TIPO_CAPTURA_SII}:${hoy}`,
+    }),
+  );
+  return !!nuevo;
+}
+
 /** Encola trabajos horarios (`hora` = «aaaa-mm-ddTHH» en UTC). */
 export async function programarHorarios(ctx: Contexto, hora: string): Promise<string[]> {
   const encolados: string[] = [];

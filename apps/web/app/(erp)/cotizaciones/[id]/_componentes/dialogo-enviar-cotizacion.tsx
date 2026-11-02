@@ -59,14 +59,26 @@ export function DialogoEnviarCotizacion({
       }
       return;
     }
-    if (!contactoId) return;
-    const r = await ejecutar("cpq.cotizaciones.enviar", {
-      id: cotizacionId,
-      contactoId,
+    if (!contacto?.email) return;
+    const r = await ejecutar("cpq.envios_propuesta.solicitar", {
+      cotizacionId,
+      incluyeCotizacion: true,
+      incluyePropuesta: false,
+      destinatarios: [
+        {
+          email: contacto.email.trim(),
+          contactoId,
+          nombre: `${contacto.nombres} ${contacto.apellidos}`.trim(),
+        },
+      ],
       mensaje,
     });
     if (r != null) {
-      avisar.exito("Cotización enviada");
+      const estadoEnvio =
+        r && typeof r === "object" && "estado" in r ? String((r as { estado: string }).estado) : null;
+      avisar.exito(
+        estadoEnvio === "pendiente_aprobacion" ? "Envío pendiente de aprobación" : "Cotización enviada",
+      );
       onEnviado();
       onCerrar();
     }

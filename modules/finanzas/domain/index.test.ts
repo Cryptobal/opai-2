@@ -62,7 +62,7 @@ describe("calcularPlanilla", () => {
 
 describe("planificarMovimiento", () => {
   const [s0, s1, s2, s3] = semanasDesde("2026-10-26", 4) as [string, string, string, string];
-  const base = { fila: ING, selladas: new Set<string>() };
+  const base = { fila: ING };
   it("mueve celdas plan y respeta el destino plan sumando", () => {
     const r = planificarMovimiento({
       ...base,
@@ -75,7 +75,6 @@ describe("planificarMovimiento", () => {
   it("con arrastre mueve también las celdas plan posteriores", () => {
     const r = planificarMovimiento({
       fila: EGR,
-      selladas: new Set(),
       celdas: [c("e", s0, 1), c("e", s2, 2), c("e", s3, 3)],
       semanas: [s2],
       por: 1,
@@ -86,7 +85,6 @@ describe("planificarMovimiento", () => {
   it("el arrastre deja quietas las celdas posteriores que no son plan", () => {
     const r = planificarMovimiento({
       fila: EGR,
-      selladas: new Set(),
       celdas: [c("e", s0, 1), c("e", s2, 2, "comprometido"), c("e", s3, 3)],
       semanas: [s0],
       por: 1,
@@ -94,12 +92,10 @@ describe("planificarMovimiento", () => {
     if (!r.ok) throw new Error(r.motivo);
     expect(r.movimientos.map((m) => m.desde)).toEqual([s0, s3]);
   });
-  it("rechaza lo no planificado, lo sellado, el destino con real y la selección vacía", () => {
+  it("rechaza lo no planificado, el destino con real y la selección vacía", () => {
     const m = (extra: Partial<Parameters<typeof planificarMovimiento>[0]>) =>
       planificarMovimiento({ ...base, celdas: [c("i", s0, 10)], semanas: [s0], por: 1, ...extra });
     expect(m({ celdas: [c("i", s0, 10, "real")] })).toMatchObject({ ok: false });
-    expect(m({ selladas: new Set([s1]) })).toMatchObject({ ok: false });
-    expect(m({ selladas: new Set([s0]) })).toMatchObject({ ok: false });
     expect(m({ celdas: [c("i", s0, 10), c("i", s1, 4, "comprometido")] })).toMatchObject({
       ok: false,
     });

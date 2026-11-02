@@ -46,6 +46,7 @@ export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";
 export { consumirRateLimit, purgarVentanasRateLimit, type ResultadoRateLimit } from "./rate-limit";
 export { enTransaccion, type OpcionesTransaccion, type TenantTx } from "./transaccion";
+export { enTransaccionCapturaSii } from "./transaccion-captura-sii";
 export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
 export type {
   ApiKey,
@@ -62,3 +63,8 @@ export type {
 export { Prisma } from "./generated/prisma/client";
 
 export { registrarConsumoSesion } from "./consumo-sesion";
+export {
+  remuneracionesPublicarSii,
+  tryLockCapturaSiiXact,
+  type PublicarSiiInput,
+} from "./remuneraciones-sii";

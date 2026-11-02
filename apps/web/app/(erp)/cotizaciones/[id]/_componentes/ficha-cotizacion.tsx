@@ -112,6 +112,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           limpiarError={limpiarError}
           recargar={recargar}
           modales={modales}
+          {...(meta !== undefined ? { meta } : {})}
         />
         {editable ? (
           <AccionFijaTelefono>

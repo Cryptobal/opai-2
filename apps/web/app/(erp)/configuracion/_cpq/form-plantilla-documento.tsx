@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { etiquetaBasePlantillaCpq } from "@/lib/cpq-plantilla-presentacion";
 
 const ETIQUETAS_BLOQUE: Record<string, string> = {
   encabezado: "Encabezado y código",
@@ -51,7 +52,7 @@ export function FormPlantillaDocumento({
           onCambiar={setBase}
           opciones={plantilla.basesDisponibles.map((b) => ({
             valor: b,
-            etiqueta: b.charAt(0).toUpperCase() + b.slice(1),
+            etiqueta: etiquetaBasePlantillaCpq(b),
           }))}
         />
       </Campo>
