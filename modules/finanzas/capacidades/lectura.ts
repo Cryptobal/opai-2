@@ -3,10 +3,11 @@ import { z } from "zod";
 import { defineCapability } from "@opai/capabilities";
 
 import { calcularPlanilla, lunesDe, semanasDesde, sumarSemanas } from "../domain";
-import { ajustesSchema, capaSchema, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
-import { sincronizarAvisos } from "./aviso";
+import { ajustesSchema, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
+import type { capaSchema } from "./esquemas";
+import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
-import { aFecha, aIso, ajustesDe, cargarFlujo, selladasDe } from "./util";
+import { aIso, ajustesDe, cargarFlujo, selladasDe } from "./util";
 
 const semanaCalculadaSchema = z.object({
   semana: semanaSchema,
@@ -100,7 +101,7 @@ export const planillaObtener = defineCapability({
     });
     const selladas = await selladasDe(ctx);
     const semanasOut = calculo.map((s) => ({ ...s, tono: s.tono, sellada: selladas.has(s.semana) }));
-    const avisoSemanas = await sincronizarAvisos(ctx, ajustes, semanasOut);
+    const avisoSemanas = await avisoLeido(ctx, ajustes, semanasOut);
     type CapaOut = z.infer<typeof capaSchema>;
     return {
       ajustes,

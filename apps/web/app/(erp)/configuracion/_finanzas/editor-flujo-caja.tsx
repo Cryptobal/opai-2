@@ -91,8 +91,8 @@ export function EditorFlujoCaja({
         <Checkbox
           marcado={aj.avisoActivo}
           onCambiar={(m) => setAj({ ...aj, avisoActivo: m })}
-          etiqueta="Aviso in-app de saldo bajo umbral"
-          descripcion="Emite evento y banner; sin correo externo (CAR-136)."
+          etiqueta="Campanita in-app (saldo bajo umbral)"
+          descripcion="Banner en la planilla y notificación interna. Solo campanita: quienes tienen permiso de ver el flujo. La alerta banco vs proyectado queda para cuando exista banco (CAR-97)."
         />
         <Campo etiqueta="Umbral del aviso (CLP)" htmlFor="aj-au">
           <Input

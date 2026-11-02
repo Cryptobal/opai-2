@@ -2,7 +2,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
-import { cargarPlanilla } from "./_componentes/datos";
+import { cargarPlanilla } from "./_componentes/datos-servidor";
 import { PlanillaFlujo } from "./_componentes/planilla-flujo";
 
 export const metadata = { title: "Flujo de caja" };

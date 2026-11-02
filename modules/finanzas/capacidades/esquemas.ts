@@ -19,8 +19,9 @@ export const uuidSchema = z.uuid();
 export const semanaSchema = z
   .string()
   .refine(esLunes, "La semana se indica con su lunes (YYYY-MM-DD).");
-/** Monto en CLP entero, sin negativos (el signo lo da la sección de la fila). */
+/** Monto en CLP entero, sin negativos (el signo lo da la sección de la fila). Int en Postgres; tope validado aquí. */
 export const montoSchema = z.number().int().min(0).max(2_000_000_000);
+/** Saldo y umbral de aviso: API en number; `aviso_umbral` y `saldo_proyectado` en BIGINT en base. */
 export const saldoSchema = z.number().int().min(-2_000_000_000).max(2_000_000_000);
 export const seccionSchema = z.enum(["ingreso", "egreso"]);
 export const capaSchema = z.enum(["plan", "comprometido", "real"]);

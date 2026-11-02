@@ -1,10 +1,5 @@
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
 
-import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
-import { estadoPantalla } from "@/lib/formato";
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
-
 export type FilaFlujo = {
   id: string;
   seccion: "ingreso" | "egreso";
@@ -68,25 +63,6 @@ const CAPA: Record<CeldaFlujo["capa"], { tono: NonNullable<Celda["tono"]>; detal
 
 export const clp = (n: number) => `${n < 0 ? "$ −" : "$ "}${Math.abs(n).toLocaleString("es-CL")}`;
 const corta = (iso: string) => `${iso.slice(8, 10)}-${iso.slice(5, 7)}`;
-
-export async function cargarPlanilla(sp?: SearchParams) {
-  const p = sp ? await leerParametros(sp) : {};
-  const identidad = await requerirIdentidad("/finanzas/flujo");
-  const puede = puedeDeIdentidad(identidad);
-  const movil = p.vista === "movil";
-  const r = await ejecutarComoUsuario<Planilla>("erp", "finanzas.planilla.obtener", {
-    semanas: movil ? 4 : undefined,
-    movil,
-  });
-  return {
-    state: estadoPantalla(r),
-    planilla: r.ok ? r.data : null,
-    gestiona: puede("finanzas:flujo.gestionar"),
-    cierra: puede("finanzas:flujo.cerrar"),
-    configura: puede("finanzas:flujo.configurar"),
-    movil,
-  };
-}
 
 /** Columnas, filas y celdas para `PlanillaScreen`: filas del flujo, totales y saldo con su tono. */
 export function armarPlanilla(p: Planilla) {

@@ -6,6 +6,7 @@ import { calcularPlanilla, planificarMovimiento, semanasDesde, sumarSemanas } fr
 import { saldoSchema, semanaSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR } from "./permisos";
 import { aFecha, ajustesDe, aIso, bloquearSemanaFlujo, cargarFlujo, filaDe, selladasDe, semanaSelladaEnTx } from "./util";
+import { sincronizarAvisosEnTx } from "./aviso";
 import { reglaDeNegocio } from "@opai/capabilities";
 
 export const celdasMover = defineCapability({
@@ -106,6 +107,7 @@ export const celdasMover = defineCapability({
         entidadId: fila.id,
         payload: { por: input.por, celdas: plan.movimientos.length },
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     });
     return resultado;
   },

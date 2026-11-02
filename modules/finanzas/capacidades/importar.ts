@@ -5,14 +5,16 @@ import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { lunesDe } from "../domain";
 import { semanaSchema, sinDuplicado } from "./esquemas";
-import { filaImportSchema, filasDesdeCsv, MAX_FILAS_IMPORT } from "./importar-parse";
+import { filaImportSchema, filaDesdeRegistroCsv, MAX_FILAS_IMPORT, parsearCsv } from "./importar-parse";
 import { PERMISO_CONFIGURAR } from "./permisos";
 import { aFecha, ajustesDe, bloquearSemanaFlujo, semanaSelladaEnTx } from "./util";
+import { sincronizarAvisosEnTx } from "./aviso";
 
 const resultadoFila = z.object({
   indice: z.number().int(),
   estado: z.enum(["ok", "error", "omitida"]),
   mensaje: z.string().nullable(),
+  montoInterpretado: z.number().int().nullable().optional(),
 });
 
 /** Importa movimientos planificados desde CSV (separador , o ;). Vista previa obligatoria. */
@@ -38,8 +40,8 @@ export const flujoImportar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     if (input.formato !== "csv") throw reglaDeNegocio("Solo CSV en este PR; XLSX: TODO(decisión Carlos).");
-    const parsed = filasDesdeCsv(input.contenido);
-    if (parsed.length > MAX_FILAS_IMPORT) throw reglaDeNegocio(`Máximo ${MAX_FILAS_IMPORT} filas por importación.`);
+    const registros = parsearCsv(input.contenido);
+    if (registros.length > MAX_FILAS_IMPORT) throw reglaDeNegocio(`Máximo ${MAX_FILAS_IMPORT} filas por importación.`);
     const filasDb = await ctx.db.flujoFila.findMany({});
     const porEtiqueta = new Map(filasDb.map((f) => [f.etiqueta.toLowerCase(), f]));
     const filas: z.infer<typeof resultadoFila>[] = [];
@@ -48,8 +50,14 @@ export const flujoImportar = defineCapability({
     let errores = 0;
     const hoy = new Date().toISOString().slice(0, 10);
 
-    for (const [indice, raw] of parsed.entries()) {
-      const v = filaImportSchema.safeParse(raw);
+    for (const [indice, reg] of registros.entries()) {
+      const parsed = filaDesdeRegistroCsv(reg, indice);
+      if (!parsed.ok) {
+        errores += 1;
+        filas.push({ indice, estado: "error", mensaje: parsed.motivo });
+        continue;
+      }
+      const v = filaImportSchema.safeParse(parsed.fila);
       if (!v.success) {
         errores += 1;
         filas.push({ indice, estado: "error", mensaje: "Datos inválidos en la fila." });
@@ -72,7 +80,7 @@ export const flujoImportar = defineCapability({
       }
       if (dryRun) {
         aplicadas += 1;
-        filas.push({ indice, estado: "ok", mensaje: null });
+        filas.push({ indice, estado: "ok", mensaje: null, montoInterpretado: row.monto });
         continue;
       }
       try {
@@ -126,6 +134,7 @@ export const flujoImportar = defineCapability({
             entidadTipo: "flujoCelda",
             entidadId: guardada.id,
           });
+          await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
         });
         aplicadas += 1;
         filas.push({ indice, estado: "ok", mensaje: null });

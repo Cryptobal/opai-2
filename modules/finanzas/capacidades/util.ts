@@ -19,7 +19,7 @@ type AjustesDb = {
   horizonteSemanas: number;
   calendarioPagos: unknown;
   avisoActivo: boolean;
-  avisoUmbral: number;
+  avisoUmbral: number | bigint;
   metaCeldaMs: number;
   metaGuardadoP95Ms: number;
   metaCargaInicialS: number;
@@ -43,7 +43,7 @@ export function vistaAjustes(a: AjustesDb) {
       ...(cal.iva != null ? { iva: cal.iva } : {}),
     },
     avisoActivo: a.avisoActivo,
-    avisoUmbral: a.avisoUmbral,
+    avisoUmbral: Number(a.avisoUmbral),
     metaCeldaMs: a.metaCeldaMs,
     metaGuardadoP95Ms: a.metaGuardadoP95Ms,
     metaCargaInicialS: a.metaCargaInicialS,
@@ -103,12 +103,13 @@ export async function filaDe(ctx: Contexto, id: string) {
 }
 
 /** Filas activas y celdas de un rango, ya en la forma del dominio. */
-export async function cargarFlujo(ctx: Contexto, desde: string, hasta: string) {
-  const filas = await ctx.db.flujoFila.findMany({
+export async function cargarFlujo(ctx: Contexto, desde: string, hasta: string, tx?: TenantTx) {
+  const db = tx ?? ctx.db;
+  const filas = await db.flujoFila.findMany({
     where: { activa: true },
     orderBy: [{ orden: "asc" }, { etiqueta: "asc" }],
   });
-  const celdas = await ctx.db.flujoCelda.findMany({
+  const celdas = await db.flujoCelda.findMany({
     where: { semana: { gte: aFecha(desde), lte: aFecha(hasta) } },
   });
   const dominio: FilaFlujo[] = filas.map((f) => ({

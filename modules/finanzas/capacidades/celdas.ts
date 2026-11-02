@@ -5,6 +5,7 @@ import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabiliti
 import { celdaSchema, montoSchema, semanaSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR } from "./permisos";
 import { aFecha, aIso, bloquearSemanaFlujo, filaDe, ID_VISTA_PREVIA, semanaSelladaEnTx, selladasDe } from "./util";
+import { sincronizarAvisosEnTx } from "./aviso";
 
 const vista = (c: {
   id: string;
@@ -83,6 +84,7 @@ export const celdasFijar = defineCapability({
         entidadTipo: "flujoCelda",
         entidadId: r.id,
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
       return r;
     });
     return vista(c);
@@ -120,6 +122,7 @@ export const celdasCumplir = defineCapability({
         entidadTipo: "flujoCelda",
         entidadId: c.id,
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
       return u;
     });
     return vista(r);

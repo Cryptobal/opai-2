@@ -40,7 +40,7 @@ export const ajustesActualizar = defineCapability({
         horizonteSemanas: nuevo.horizonteSemanas,
         calendarioPagos: nuevo.calendarioPagos,
         avisoActivo: nuevo.avisoActivo,
-        avisoUmbral: nuevo.avisoUmbral,
+        avisoUmbral: BigInt(nuevo.avisoUmbral),
         metaCeldaMs: nuevo.metaCeldaMs,
         metaGuardadoP95Ms: nuevo.metaGuardadoP95Ms,
         metaCargaInicialS: nuevo.metaCargaInicialS,

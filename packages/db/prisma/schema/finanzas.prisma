@@ -84,7 +84,7 @@ model FlujoAjustes {
   horizonteSemanas     Int      @default(12) @map("horizonte_semanas")
   calendarioPagos      Json     @default("{}") @map("calendario_pagos")
   avisoActivo          Boolean  @default(false) @map("aviso_activo")
-  avisoUmbral          Int      @default(0) @map("aviso_umbral")
+  avisoUmbral          BigInt   @default(0) @map("aviso_umbral")
   metaCeldaMs          Int      @default(100) @map("meta_celda_ms")
   metaGuardadoP95Ms    Int      @default(1000) @map("meta_guardado_p95_ms")
   metaCargaInicialS    Int      @default(2) @map("meta_carga_inicial_s")
@@ -101,7 +101,7 @@ model FlujoAvisoEmitido {
   id              String   @id @default(uuid(7)) @db.Uuid
   tenantId        String   @map("tenant_id") @db.Uuid
   semana          DateTime @db.Date
-  saldoProyectado Int      @map("saldo_proyectado")
+  saldoProyectado BigInt   @map("saldo_proyectado")
   emitidoEn       DateTime @default(now()) @map("emitido_en") @db.Timestamptz(6)
 
   @@unique([tenantId, semana])

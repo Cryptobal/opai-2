@@ -8,7 +8,7 @@ ALTER TABLE "finanzas"."flujo_ajustes"
   ADD COLUMN IF NOT EXISTS "horizonte_semanas" INTEGER NOT NULL DEFAULT 12,
   ADD COLUMN IF NOT EXISTS "calendario_pagos" JSONB NOT NULL DEFAULT '{}'::jsonb,
   ADD COLUMN IF NOT EXISTS "aviso_activo" BOOLEAN NOT NULL DEFAULT false,
-  ADD COLUMN IF NOT EXISTS "aviso_umbral" INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS "aviso_umbral" BIGINT NOT NULL DEFAULT 0,
   ADD COLUMN IF NOT EXISTS "meta_celda_ms" INTEGER NOT NULL DEFAULT 100,
   ADD COLUMN IF NOT EXISTS "meta_guardado_p95_ms" INTEGER NOT NULL DEFAULT 1000,
   ADD COLUMN IF NOT EXISTS "meta_carga_inicial_s" INTEGER NOT NULL DEFAULT 2,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS "finanzas"."flujo_avisos_emitidos" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "semana" DATE NOT NULL,
-    "saldo_proyectado" INTEGER NOT NULL,
+    "saldo_proyectado" BIGINT NOT NULL,
     "emitido_en" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "flujo_avisos_emitidos_pkey" PRIMARY KEY ("id"),
