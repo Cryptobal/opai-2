@@ -5,7 +5,12 @@ import { Button } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 type Calculo = { requiereAprobacion?: boolean; noEnviable?: boolean };
-type Meta = { avisoRecalculo?: unknown; puedeEnviar?: boolean };
+type Meta = {
+  avisoRecalculo?: unknown;
+  puedeEnviar?: boolean;
+  puedeAprobarMargen?: boolean;
+  motivoNoAprobarMargen?: string | null;
+};
 
 export function AccionesCotizacion({
   cotizacionId,
@@ -28,6 +33,9 @@ export function AccionesCotizacion({
   if (!gestionar && !aprobar) return null;
   const req = calculo.requiereAprobacion;
   const bloqueada = version.estado === "en_aprobacion";
+  const puedeDecidir = Boolean(meta?.puedeAprobarMargen);
+  const motivoBloqueo = meta?.motivoNoAprobarMargen ?? null;
+  const muestraAprobacion = aprobar && bloqueada && (puedeDecidir || motivoBloqueo);
   const despues = (r: unknown) => {
     if (r != null) onHecho();
   };
@@ -52,19 +60,24 @@ export function AccionesCotizacion({
           Dejar lista
         </Button>
       ) : null}
-      {aprobar && bloqueada ? (
+      {muestraAprobacion ? (
         <>
           <Button
             type="button"
-            disabled={pendiente}
+            disabled={pendiente || !puedeDecidir}
+            title={!puedeDecidir ? (motivoBloqueo ?? undefined) : undefined}
             onClick={() => void ejecutar("cpq.cotizaciones.aprobar", { id: cotizacionId }).then(despues)}
           >
             Aprobar margen
           </Button>
+          {!puedeDecidir && motivoBloqueo ? (
+            <p className="t-caption text-fg-muted w-full">{motivoBloqueo}</p>
+          ) : null}
           <Button
             type="button"
             variant="ghost"
-            disabled={pendiente}
+            disabled={pendiente || !puedeDecidir}
+            title={!puedeDecidir ? (motivoBloqueo ?? undefined) : undefined}
             onClick={() => {
               const motivo = window.prompt("Motivo del rechazo");
               if (motivo) {

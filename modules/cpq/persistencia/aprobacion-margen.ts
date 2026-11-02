@@ -2,12 +2,11 @@ import { conflicto, noEncontrado, reglaDeNegocio, type Contexto } from "@opai/ca
 
 import { puedeTransicionar, type EstadoCotizacion } from "../domain";
 import type { ResultadoCalculo } from "../domain/motor";
+import { exigirDecisorAprobacionMargen, usuarioReal } from "./aprobacion-reglas";
 import { versionDeCotizacion } from "./version";
 
 function actorUsuario(ctx: Contexto) {
-  if (ctx.actor.tipo === "user") return ctx.actor.id;
-  if (ctx.actor.tipo === "agent") return ctx.actor.viaUserId;
-  throw reglaDeNegocio("Falta identidad del actor.");
+  return usuarioReal(ctx);
 }
 
 async function aprobacionPendiente(ctx: Contexto, versionId: string) {
@@ -120,9 +119,15 @@ export async function resolverAprobacionMargen(
   const ahora = new Date();
   const actorId = actorUsuario(ctx);
   const nuevo = aprobar ? ("lista" as const) : ("borrador" as const);
+  let autoaprobacion = false;
   await ctx.transaccion(async (tx) => {
+    const pendViva = await tx.cpqAprobacion.findFirst({
+      where: { id: pend.id, versionId, estado: "pendiente" },
+    });
+    if (!pendViva) throw conflicto("La aprobación ya fue decidida; vuelve a cargar la ficha.");
+    ({ autoaprobacion } = exigirDecisorAprobacionMargen(ctx, pendViva.solicitadaPorId));
     const ar = await tx.cpqAprobacion.updateMany({
-      where: { id: pend.id, estado: "pendiente" },
+      where: { id: pendViva.id, estado: "pendiente" },
       data: {
         estado: aprobar ? "aprobada" : "rechazada",
         decididaPorId: actorId,
@@ -140,11 +145,15 @@ export async function resolverAprobacionMargen(
       tipo: aprobar ? "cpq.cotizacion.aprobada" : "cpq.cotizacion.aprobacion_rechazada",
       entidadTipo: "cotizacion_version",
       entidadId: versionId,
-      payload: { aprobacionId: pend.id, motivo: motivo ?? null },
+      payload: {
+        aprobacionId: pendViva.id,
+        motivo: motivo ?? null,
+        ...(aprobar ? { autoaprobacion } : {}),
+      },
     });
   });
   ctx.despacharEventos();
-  return { estado: nuevo, aprobacionId: pend.id };
+  return { estado: nuevo, aprobacionId: pend.id, autoaprobacion: aprobar ? autoaprobacion : false };
 }
 
 export { aprobacionPendiente };

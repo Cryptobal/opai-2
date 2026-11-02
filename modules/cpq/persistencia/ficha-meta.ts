@@ -7,6 +7,7 @@ import { fechaCalculoHoy } from "./fecha-calculo";
 import { huellaJuego, juegoDesactualizado } from "./juego-vigente";
 import { juegoParaFecha } from "./proveedor";
 import { aprobacionPendiente } from "./aprobacion-margen";
+import { evaluarAprobacionMargen } from "./aprobacion-reglas";
 
 type FilaLinea = {
   id: string;
@@ -29,6 +30,8 @@ export async function metaFicha(
   const huella = huellaJuego(juego);
   const desactualizado = juegoDesactualizado(huella, lineas);
   const pend = version.estado === "en_aprobacion" ? await aprobacionPendiente(ctx, version.id) : null;
+  const decision =
+    pend != null ? evaluarAprobacionMargen(ctx, pend.solicitadaPorId) : null;
   const verCostos = ctx.autorizar("cpq:costos.ver");
   const costosLinea = verCostos
     ? Object.fromEntries(
@@ -50,6 +53,8 @@ export async function metaFicha(
     aprobacion: pend
       ? { id: pend.id, estado: pend.estado, solicitadaPorId: pend.solicitadaPorId }
       : null,
+    puedeAprobarMargen: decision?.puedeDecidir ?? false,
+    motivoNoAprobarMargen: decision?.motivoNoDecidir ?? null,
     puedeEnviar:
       !calculo.noEnviable &&
       version.estado !== "en_aprobacion" &&

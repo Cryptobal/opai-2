@@ -22,6 +22,8 @@ const metaSchema = z.object({
     .object({ id: uuidSchema, estado: z.string(), solicitadaPorId: uuidSchema })
     .nullable(),
   puedeEnviar: z.boolean(),
+  puedeAprobarMargen: z.boolean(),
+  motivoNoAprobarMargen: z.string().nullable(),
   requiereConfirmacionValoresViejos: z.boolean(),
   costosLinea: z.record(z.string(), z.unknown()).optional(),
 });

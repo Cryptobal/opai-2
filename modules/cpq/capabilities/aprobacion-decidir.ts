@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, prohibido } from "@opai/capabilities";
 
 import { resolverAprobacionMargen, retirarAprobacion } from "../persistencia/aprobacion-margen";
+import { exigirDecisorAprobacionMargen } from "../persistencia/aprobacion-reglas";
 import { cargarFilasVersion } from "../persistencia/recalcular";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_APROBAR, PERMISO_MANAGE } from "./permisos";
@@ -30,18 +31,36 @@ export const cotizacionesAprobarMargen = defineCapability({
   descripcion: "Aprueba una cotización en aprobación por margen bajo o subvaloración; solo personas.",
   permiso: PERMISO_APROBAR,
   input: z.object({ id: uuidSchema }),
-  output: z.object({ estado: z.literal("lista"), aprobacionId: uuidSchema }),
+  output: z.object({
+    estado: z.literal("lista"),
+    aprobacionId: uuidSchema,
+    autoaprobacion: z.boolean(),
+  }),
   efecto: "escritura",
   dryRun: true,
   soloPersonas: true,
+  auditoriaPayload: (_ctx, _entrada, salida) =>
+    salida.autoaprobacion ? { autoaprobacion: true as const } : {},
   async handler(ctx, input, { dryRun }) {
     if (ctx.actor.tipo !== "user") throw prohibido("Solo una persona puede aprobar el margen.");
     await cotizacionDe(ctx, input.id);
     const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
     if (!pack) throw noEncontrado("La versión");
-    if (dryRun) return { estado: "lista" as const, aprobacionId: pack.version.id };
+    if (dryRun) {
+      const pend = await ctx.db.cpqAprobacion.findFirst({
+        where: { versionId: pack.version.id, estado: "pendiente" },
+        orderBy: { createdAt: "desc" },
+      });
+      if (!pend) throw noEncontrado("La aprobación");
+      const { autoaprobacion } = exigirDecisorAprobacionMargen(ctx, pend.solicitadaPorId);
+      return { estado: "lista" as const, aprobacionId: pend.id, autoaprobacion };
+    }
     const r = await resolverAprobacionMargen(ctx, pack.version.id, true);
-    return { estado: "lista" as const, aprobacionId: r.aprobacionId };
+    return {
+      estado: "lista" as const,
+      aprobacionId: r.aprobacionId,
+      autoaprobacion: r.autoaprobacion,
+    };
   },
 });
 

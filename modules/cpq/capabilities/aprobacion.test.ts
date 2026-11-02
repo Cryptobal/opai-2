@@ -1,10 +1,18 @@
-import { executeCapability, registrarCapacidades } from "@opai/capabilities";
+import { autorizador, executeCapability, registrarCapacidades } from "@opai/capabilities";
+import type { Contexto } from "@opai/capabilities";
 import { contextoDePrueba, USUARIO_DE_PRUEBA } from "@opai/capabilities/testing";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { mockMotorLegal } from "../persistencia/mock-motor-legal";
 import { ACTIVOS, CON_COSTOS, CONTACTO_1, GESTOR, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
+
+const USUARIO_ADMIN = {
+  id: "0192f3a0-0000-7000-8000-0000000000b2",
+  nombre: "Beto Admin",
+  email: "admin@prueba.cl",
+  platformRole: null,
+};
 
 beforeAll(() => {
   registrarCapacidades(capacidades);
@@ -14,8 +22,43 @@ function ctxOwner() {
   return contextoDePrueba({
     semilla: semilla(),
     modulosActivos: ACTIVOS,
-    permisos: [...GESTOR, ...CON_COSTOS, "cpq:aprobar"],
+    rol: "owner",
   });
+}
+
+function ctxAdmin() {
+  return contextoDePrueba({
+    semilla: semilla(),
+    modulosActivos: ACTIVOS,
+    rol: "admin",
+    usuario: USUARIO_ADMIN,
+  });
+}
+
+function comoAdmin(ctx: Contexto): Contexto {
+  return {
+    ...ctx,
+    rol: "admin",
+    usuario: USUARIO_ADMIN,
+    actor: { tipo: "user", id: USUARIO_ADMIN.id },
+    autorizar: autorizador(
+      { rol: "admin", permisosRol: null, excepciones: null },
+      USUARIO_ADMIN,
+      null,
+    ),
+  };
+}
+
+function comoGerente(ctx: Contexto): Contexto {
+  return {
+    ...ctx,
+    rol: "gerente",
+    autorizar: autorizador(
+      { rol: "gerente", permisosRol: null, excepciones: null },
+      ctx.usuario!,
+      null,
+    ),
+  };
 }
 
 async function cotizacionConPuesto(ctx: ReturnType<typeof ctxOwner>["ctx"]) {
@@ -53,12 +96,15 @@ describe("cpq aprobación y envío (CAR-141)", () => {
   });
 
   it("solicitar aprobación y aprobar deja lista y permite enviar dry_run", async () => {
-    const { ctx } = ctxOwner();
+    const { ctx, eventos } = ctxOwner();
     const id = await cotizacionConPuesto(ctx);
     const pedido = await executeCapability(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
     expect(pedido.ok).toBe(true);
+    const n = eventos.length;
     const apr = await executeCapability(ctx, "cpq.cotizaciones.aprobar", { id });
     expect(apr.ok).toBe(true);
+    if (apr.ok) expect(apr.data).toMatchObject({ autoaprobacion: true });
+    expect(eventos.slice(n)[0]?.payload).toMatchObject({ autoaprobacion: true });
     const env = await executeCapability(
       ctx,
       "cpq.cotizaciones.enviar",
@@ -66,6 +112,43 @@ describe("cpq aprobación y envío (CAR-141)", () => {
       { dryRun: true },
     );
     expect(env.ok).toBe(true);
+  });
+
+  it("admin aprueba la cotización pedida por el owner", async () => {
+    const owner = ctxOwner();
+    const id = await cotizacionConPuesto(owner.ctx);
+    await executeCapability(owner.ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const apr = await executeCapability(comoAdmin(owner.ctx), "cpq.cotizaciones.aprobar", { id });
+    expect(apr.ok).toBe(true);
+    if (apr.ok) expect(apr.data).toMatchObject({ autoaprobacion: false });
+  });
+
+  it("admin no puede aprobar su propia cotización", async () => {
+    const { ctx } = ctxAdmin();
+    const id = await cotizacionConPuesto(ctx);
+    await executeCapability(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const apr = await executeCapability(ctx, "cpq.cotizaciones.aprobar", { id });
+    expect(apr).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(apr.ok ? "" : apr.error.message).toMatch(/admin no puede aprobar su propia/i);
+  });
+
+  it("gerente no puede aprobar margen", async () => {
+    const owner = ctxOwner();
+    const id = await cotizacionConPuesto(owner.ctx);
+    await executeCapability(owner.ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    expect(await executeCapability(comoGerente(owner.ctx), "cpq.cotizaciones.aprobar", { id })).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
+  });
+
+  it("cotización ajena al tenant devuelve NOT_FOUND al aprobar (RLS en packages/db/test/cpq.test.ts)", async () => {
+    const { ctx } = ctxOwner();
+    const fake = "0192f3a0-0000-7000-8000-000000000099";
+    expect(await executeCapability(ctx, "cpq.cotizaciones.aprobar", { id: fake })).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
   });
 
   it("solicitar aprobación con actor agente guarda viaUserId en solicitadaPorId", async () => {
@@ -84,7 +167,7 @@ describe("cpq aprobación y envío (CAR-141)", () => {
     expect(fila?.solicitadaPorId).not.toBe("key-cpq-aprob");
   });
 
-  it("un agente no puede aprobar ni rechazar_aprobacion", async () => {
+  it("un agente no aprueba margen, ni vía owner con la misma identidad", async () => {
     const { ctx } = ctxOwner();
     const id = await cotizacionConPuesto(ctx);
     await executeCapability(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
@@ -127,7 +210,7 @@ describe("cpq aprobación y envío (CAR-141)", () => {
     const { ctx, eventos } = contextoDePrueba({
       semilla: semilla(),
       modulosActivos: ACTIVOS,
-      permisos: [...GESTOR, ...CON_COSTOS, "cpq:aprobar"],
+      rol: "owner",
     });
     const id = await cotizacionConPuesto(ctx);
     const n = eventos.length;
