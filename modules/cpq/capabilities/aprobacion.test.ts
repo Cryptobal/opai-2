@@ -124,6 +124,24 @@ describe("cpq aprobación y envío (CAR-141)", () => {
     });
   });
 
+  it("explicar registra auditoría de lectura con el id de la cotización", async () => {
+    const { ctx, eventos } = contextoDePrueba({
+      semilla: semilla(),
+      modulosActivos: ACTIVOS,
+      permisos: [...GESTOR, ...CON_COSTOS, "cpq:aprobar"],
+    });
+    const id = await cotizacionConPuesto(ctx);
+    const n = eventos.length;
+    const r = await executeCapability(ctx, "cpq.cotizaciones.explicar", { id });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error("explicar");
+    expect((r.data as { cotizacionId: string }).cotizacionId).toBe(id);
+    expect(eventos.slice(n)).toEqual([
+      expect.objectContaining({ capability: "cpq.cotizaciones.explicar", payload: { ids: [id] } }),
+    ]);
+    expect((r.data as { traza: unknown[] }).traza.length).toBeGreaterThan(0);
+  });
+
   it("ficha trae meta de fecha de cálculo y semáforo con costos", async () => {
     const { ctx } = ctxOwner();
     const id = await cotizacionConPuesto(ctx);
