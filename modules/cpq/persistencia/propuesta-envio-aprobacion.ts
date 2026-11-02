@@ -4,36 +4,40 @@ import { PERMISO_ENVIOS_APROBAR } from "../capabilities/permisos";
 import {
   evaluarAprobacionEnvioPropuesta,
   type EvaluacionAprobacionEnvioPropuesta,
+  fueraDeMargenesEnvioConjunto,
 } from "../domain/documento/propuesta-envio-reglas";
 import { usuarioReal } from "./aprobacion-reglas";
 
 export type EvaluacionAprobacionEnvio = EvaluacionAprobacionEnvioPropuesta;
 
-/** Cuatro ojos fuera de márgenes + reglas owner/admin dentro de márgenes (dominio). */
-export function evaluarAprobacionEnvio(
-  ctx: Contexto,
-  solicitadoPorId: string,
-  fueraDeMargenes: boolean,
-): EvaluacionAprobacionEnvio {
+export async function aprobacionMargenAprobada(ctx: Contexto, versionId: string) {
+  return ctx.db.cpqAprobacion.findFirst({
+    where: { versionId, estado: "aprobada" },
+    select: { id: true },
+  });
+}
+
+export async function fueraDeMargenesEnvio(ctx: Contexto, versionId: string) {
+  const row = await aprobacionMargenAprobada(ctx, versionId);
+  return fueraDeMargenesEnvioConjunto(row != null);
+}
+
+/** Decisor para envío pendiente (solo aplica fuera de márgenes). */
+export function evaluarAprobacionEnvio(ctx: Contexto, solicitadoPorId: string): EvaluacionAprobacionEnvio {
   return evaluarAprobacionEnvioPropuesta({
     actorTipo: ctx.actor.tipo,
     actorId: usuarioReal(ctx),
     rol: ctx.rol,
     autorizaEnviosAprobar: ctx.autorizar(PERMISO_ENVIOS_APROBAR),
     solicitadoPorId,
-    fueraDeMargenes,
   });
 }
 
-export function exigirDecisorEnvioPropuesta(
-  ctx: Contexto,
-  solicitadoPorId: string,
-  fueraDeMargenes: boolean,
-) {
+export function exigirDecisorEnvioPropuesta(ctx: Contexto, solicitadoPorId: string) {
   if (ctx.actor.tipo === "agent") {
     throw prohibido("Un agente no puede aprobar envíos conjuntos.");
   }
-  const e = evaluarAprobacionEnvio(ctx, solicitadoPorId, fueraDeMargenes);
+  const e = evaluarAprobacionEnvio(ctx, solicitadoPorId);
   if (!e.puedeDecidir) {
     throw prohibido(e.motivoNoDecidir ?? "No puedes aprobar este envío.");
   }

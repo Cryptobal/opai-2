@@ -51,6 +51,7 @@ export async function marcarEnvioPropuestaEnviado(
     documentoPropuestaId: string | null;
     destinatarios: number;
     snapshotJson: string;
+    envioDirectoDentroMargen: boolean;
   },
 ) {
   await ctx.transaccion(async (tx) => {
@@ -82,6 +83,7 @@ export async function marcarEnvioPropuestaEnviado(
       payload: {
         envioId: input.envioId,
         autoaprobacion: input.autoaprobacion,
+        envioDirectoDentroMargen: input.envioDirectoDentroMargen,
         incluyeCotizacion: input.incluyeCotizacion,
         incluyePropuesta: input.incluyePropuesta,
         destinatarios: input.destinatarios,

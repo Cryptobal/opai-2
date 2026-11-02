@@ -36,7 +36,12 @@ type FilaEnvio = {
 export async function ejecutarEnvioPropuestaAprobado(
   ctx: Contexto,
   row: FilaEnvio,
-  input: { actorId: string; autoaprobacion: boolean; resultado: ResultadoCalculo },
+  input: {
+    actorId: string;
+    autoaprobacion: boolean;
+    envioDirectoDentroMargen?: boolean;
+    resultado: ResultadoCalculo;
+  },
 ) {
   const destinatarios = normalizarDestinatariosEnvio(JSON.parse(row.destinatariosJson));
   if (!destinatarios.length) throw reglaDeNegocio("El envío no tiene destinatarios.");
@@ -114,6 +119,7 @@ export async function ejecutarEnvioPropuestaAprobado(
       documentoPropuestaId,
       destinatarios: destinatarios.length,
       snapshotJson,
+      envioDirectoDentroMargen: input.envioDirectoDentroMargen ?? false,
     });
   } catch (e) {
     await liberarReclamoEnvioPropuesta(ctx, row.id, input.actorId);

@@ -67,22 +67,13 @@ export const enviosPropuestaAprobar = defineCapability({
     const row = await ctx.db.cpqPropuestaEnvio.findFirst({ where: { id: input.envioId } });
     if (!row) throw noEncontrado("El envío");
     if (row.estado !== "pendiente_aprobacion") throw reglaDeNegocio("El envío no está pendiente.");
-    const { pack, resultado } = await exigirGatesEnvioCpq(
+    const { resultado } = await exigirGatesEnvioCpq(
       ctx,
       row.cotizacionId,
       input.confirmarValoresViejos,
       dryRun,
     );
-    const aprobacionMargen = await ctx.db.cpqAprobacion.findFirst({
-      where: { versionId: pack.version.id, estado: "aprobada" },
-      select: { id: true },
-    });
-    const fueraDeMargenes = aprobacionMargen != null;
-    const evaluacion = exigirDecisorEnvioPropuesta(
-      ctx,
-      row.solicitadoPorId,
-      fueraDeMargenes,
-    );
+    const evaluacion = exigirDecisorEnvioPropuesta(ctx, row.solicitadoPorId);
     if (dryRun) {
       return { envioId: row.id, estado: "enviado" as const, autoaprobacion: evaluacion.autoaprobacion };
     }
@@ -91,6 +82,7 @@ export const enviosPropuestaAprobar = defineCapability({
     await ejecutarEnvioPropuestaAprobado(ctx, row, {
       actorId,
       autoaprobacion: evaluacion.autoaprobacion,
+      envioDirectoDentroMargen: false,
       resultado,
     });
     return { envioId: row.id, estado: "enviado" as const, autoaprobacion: evaluacion.autoaprobacion };

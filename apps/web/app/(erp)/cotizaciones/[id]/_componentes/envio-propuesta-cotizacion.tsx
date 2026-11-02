@@ -75,7 +75,12 @@ export function EnvioPropuestaCotizacion({
       destinatarios,
     });
     if (r && typeof r === "object" && "envioId" in r) {
-      setEnvioPendienteId(String((r as { envioId: string }).envioId));
+      const data = r as { envioId: string; estado?: string };
+      if (data.estado === "pendiente_aprobacion") {
+        setEnvioPendienteId(String(data.envioId));
+      } else {
+        setEnvioPendienteId(null);
+      }
     }
   }
 
@@ -122,7 +127,7 @@ export function EnvioPropuestaCotizacion({
       </Campo>
       <div className="flex flex-wrap gap-2">
         <Button type="button" disabled={pendiente || !puedeEnviar || !destinatarios.length} onClick={() => void solicitar()}>
-          Solicitar envío
+          Enviar
         </Button>
         {aprobarEnvios && envioPendienteId ? (
           <>
@@ -135,7 +140,10 @@ export function EnvioPropuestaCotizacion({
           </>
         ) : null}
       </div>
-      <p className="t-caption text-fg-muted">Ningún correo sale sin aprobación humana con permiso Aprobar envíos.</p>
+      <p className="t-caption text-fg-muted">
+        Dentro de márgenes el envío sale al confirmar. Fuera de márgenes queda pendiente hasta que otra persona con
+        «Aprobar envíos» lo apruebe (owner y admin pueden enviar siempre).
+      </p>
     </div>
   );
 }

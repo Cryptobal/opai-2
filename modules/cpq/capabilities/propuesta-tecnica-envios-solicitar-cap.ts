@@ -3,13 +3,12 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 import { exigirDestinatariosEnvio } from "../domain/documento/propuesta-tecnica";
-import { registrarEnvioPropuesta } from "../persistencia/propuesta-envio";
 import { exigirGatesEnvioCpq } from "../persistencia/propuesta-envio-aprobacion";
 import {
   exigirVersionDeCotizacion,
   validarDestinatariosEnvioCuenta,
 } from "../persistencia/propuesta-envio-destinatarios";
-import { snapshotEnvioPendiente } from "../persistencia/propuesta-envio-snapshot";
+import { registrarOEnviarSolicitudEnvioPropuesta } from "../persistencia/propuesta-envio-solicitar";
 import { PERMISO_MANAGE } from "./permisos";
 import { destinatarioSchema } from "./propuesta-tecnica-esquemas";
 import { uuidSchema } from "./esquemas";
@@ -17,7 +16,8 @@ import { cotizacionDe } from "./util";
 
 export const enviosPropuestaSolicitar = defineCapability({
   id: "cpq.envios_propuesta.solicitar",
-  descripcion: "Prepara envío conjunto; deja pendiente de aprobación (sin congelar propuesta).",
+  descripcion:
+    "Envía o prepara envío conjunto: dentro de márgenes sale en un paso; fuera queda pendiente salvo owner/admin.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     cotizacionId: uuidSchema,
@@ -59,33 +59,27 @@ export const enviosPropuestaSolicitar = defineCapability({
       });
       if (!prop) throw noEncontrado("La propuesta técnica");
     }
-    const { pack } = await exigirGatesEnvioCpq(
+    const { pack, resultado } = await exigirGatesEnvioCpq(
       ctx,
       input.cotizacionId,
       input.confirmarValoresViejos,
       dryRun,
     );
     exigirVersionDeCotizacion(pack.version, c.id);
-    const snapshot = snapshotEnvioPendiente(destinatarios);
-    if (dryRun) {
-      return {
-        envioId: "00000000-0000-0000-0000-000000000000",
-        estado: "pendiente_aprobacion" as const,
+    return registrarOEnviarSolicitudEnvioPropuesta(
+      ctx,
+      {
+        cotizacionId: c.id,
+        versionId: pack.version.id,
+        propuestaTecnicaId: input.propuestaTecnicaId ?? null,
+        incluyeCotizacion: input.incluyeCotizacion,
+        incluyePropuesta: input.incluyePropuesta,
         destinatarios,
-      };
-    }
-    const envio = await registrarEnvioPropuesta(ctx, {
-      cotizacionId: c.id,
-      versionId: pack.version.id,
-      propuestaTecnicaId: input.propuestaTecnicaId ?? null,
-      incluyeCotizacion: input.incluyeCotizacion,
-      incluyePropuesta: input.incluyePropuesta,
-      destinatariosJson: JSON.stringify(destinatarios),
-      snapshot,
-      ...(input.mensaje !== undefined ? { mensaje: input.mensaje } : {}),
-      solicitadoPorId: ctx.actor.id ?? c.creadoPorId,
-      enviado: false,
-    });
-    return { envioId: envio.id, estado: "pendiente_aprobacion" as const, destinatarios };
+        creadoPorId: c.creadoPorId,
+        resultado,
+        ...(input.mensaje !== undefined ? { mensaje: input.mensaje } : {}),
+      },
+      dryRun,
+    );
   },
 });
