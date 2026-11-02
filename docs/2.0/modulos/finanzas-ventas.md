@@ -10,7 +10,7 @@ Refs CAR-137, CAR-102, Brief 22 (encargo Linear), diseño `docs/2.0/diseño/expo
 | 2 | Folios (CAF) por tenant y tipo: carga, consumo atómico sin repetir; aviso si quedan ≤ umbral % del rango (20 % por defecto, `dte_config.umbral_folios_pct`) o si el CAF vigente vence dentro de N días (30 por defecto, `dte_config.aviso_caf_dias`); no emitir con CAF vencido |
 | 3 | Adaptador SII detrás de interfaz; firma con certificado del tenant (secreto cifrado); envío y consulta; certificación por defecto; SII simulado en tests |
 | 4 | Libro de ventas, estados DTE (borrador, enviado, aceptado, rechazado, anulado_nc) y cobro básico (pendiente, pagada_parcial, pagada) |
-| 5 | PDF del DTE con timbre PDF417 (representación en PDF mínimo PR 1) y DS 2.0 en pantallas |
+| 5 | PDF del DTE con timbre PDF417 (representación en PDF mínimo PR 1) y DS 2.0 en pantallas (lista, ficha y **Emitir** en `/finanzas/ventas/nuevo`: borrador y emisión con vista previa `dryRun`, enlace a cola de aprobaciones) |
 | 6 | Contrato `IngresoProyectadoDesdeDte` para flujo de caja (CAR-136 consume) |
 | 7 | Modelo cesión (AEC) reservado en columnas, sin construir factoring |
 

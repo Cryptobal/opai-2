@@ -30,6 +30,7 @@ export type AmbienteSii = (typeof AMBIENTES_SII)[number];
 
 /** Códigos de referencia habituales para nota de crédito (SII). */
 export const CODIGOS_REFERENCIA_NC = [1, 2, 3] as const;
+export type CodigoReferenciaNc = (typeof CODIGOS_REFERENCIA_NC)[number];
 
 export type MontosDteVenta = {
   neto: number;
@@ -118,7 +119,3 @@ function sumarDiasIso(iso: string, dias: number): string {
   d.setUTCDate(d.getUTCDate() + dias);
   return d.toISOString().slice(0, 10);
 }
-
-/** Estados de cesión (factoring/AEC) reservados para PR 2; sin lógica en PR 1. */
-export const ESTADOS_CESION = ["pendiente", "cedida", "cobrada"] as const;
-export type EstadoCesion = (typeof ESTADOS_CESION)[number];

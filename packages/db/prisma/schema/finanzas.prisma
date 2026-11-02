@@ -267,7 +267,7 @@ model DocumentoEmitido {
   documentoReferenciaId String?   @map("documento_referencia_id") @db.Uuid
   codigoReferencia      Int?      @map("codigo_referencia")
   motivoNc              String?   @map("motivo_nc")
-  /// Reservado PR 2 cesión (AEC): pendiente | cedida | cobrada
+  /// emitido | cedido | no_cedido (paridad 1.0 / Cobranzas)
   cesionEstado          String?   @map("cesion_estado")
   cesionProveedor       String?   @map("cesion_proveedor")
   cesionOperacionId     String?   @map("cesion_operacion_id")

@@ -119,6 +119,8 @@ ALTER TABLE "finanzas"."documentos_emitidos" ADD CONSTRAINT "documentos_emitidos
   CHECK ("estado_dte" IN ('borrador', 'enviado', 'aceptado', 'rechazado', 'anulado_nc'));
 ALTER TABLE "finanzas"."documentos_emitidos" ADD CONSTRAINT "documentos_emitidos_estado_cobro_chk"
   CHECK ("estado_cobro" IN ('pendiente', 'pagada_parcial', 'pagada'));
+ALTER TABLE "finanzas"."documentos_emitidos" ADD CONSTRAINT "documentos_emitidos_cesion_estado_chk"
+  CHECK ("cesion_estado" IS NULL OR "cesion_estado" IN ('emitido', 'cedido', 'no_cedido'));
 ALTER TABLE "finanzas"."documentos_emitidos" ADD CONSTRAINT "documentos_emitidos_montos_chk"
   CHECK ("monto_neto" >= 0 AND "monto_exento" >= 0 AND "monto_iva" >= 0 AND "monto_otros" >= 0
     AND "monto_total" = "monto_neto" + "monto_exento" + "monto_iva" + "monto_otros");
