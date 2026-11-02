@@ -24,12 +24,14 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
   const [motivo, setMotivo] = useState("");
   const [metaSaldo, setMetaSaldo] = useState<SaldoSugeridoCierre | null>(null);
   const [vista, setVista] = useState<{ diferencia: number; exigeMotivo?: boolean } | null>(null);
+  const limpiarSaldo = () => {
+    setVista(null);
+    setMetaSaldo(null);
+    setBanco("");
+  };
 
   useEffect(() => {
     if (!abierta || !semana) return;
-    setBanco("");
-    setVista(null);
-    setMetaSaldo(null);
     let cancelado = false;
     void ejecutar<SaldoSugeridoCierre>("finanzas.bancos.saldo_sugerido", { semana }).then((r) => {
       if (cancelado || !r) return;
@@ -40,8 +42,7 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
     return () => {
       cancelado = true;
     };
-    // Solo al abrir la hoja o cambiar de semana; `ejecutar` cambia cada render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- V211-01
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- V211-01: solo abierta/semana; ejecutar inestable
   }, [abierta, semana]);
 
   const entrada = () => ({
@@ -79,7 +80,7 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setAbierta(true)}>
+      <Button variant="secondary" onClick={() => { limpiarSaldo(); setAbierta(true); }}>
         Cierre semanal…
       </Button>
       <Sheet
@@ -118,8 +119,8 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
               id="ci-sem"
               valor={semana}
               onCambiar={(v) => {
+                if (v !== semana) limpiarSaldo();
                 setSemana(v);
-                setVista(null);
               }}
               opciones={semanas.map((s) => ({
                 valor: s.semana,
@@ -128,11 +129,7 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
             />
           </Campo>
           {!sel?.sellada ? (
-            <Campo
-              etiqueta="Saldo banco (CLP)"
-              htmlFor="ci-ban"
-              {...(ayudaSaldo ? { ayuda: ayudaSaldo } : {})}
-            >
+            <Campo etiqueta="Saldo banco (CLP)" htmlFor="ci-ban" {...(ayudaSaldo ? { ayuda: ayudaSaldo } : {})}>
               <Input
                 id="ci-ban"
                 value={banco}
