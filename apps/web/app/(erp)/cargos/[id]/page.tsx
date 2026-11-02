@@ -9,6 +9,7 @@ import { requerirIdentidad } from "@/lib/servidor";
 
 import { cargarCargo, CLASES } from "../_componentes/datos";
 import { Versiones } from "../_componentes/estructura-cargo";
+import { SeccionMontosPorInstalacion } from "../_componentes/seccion-montos-instalacion";
 import { HojaCargo, SwitchSensible } from "../_componentes/diferidas";
 
 export const metadata = { title: "Cargo" };
@@ -94,7 +95,8 @@ export default function CargoDetalle({ params }: Props) {
                     titulo="Las estructuras antiguas de cargo están retiradas y son de solo lectura."
                   />
                 </div>
-                <Versiones versiones={versiones} />
+                  <Versiones versiones={versiones} />
+                  <SeccionMontosPorInstalacion cargoId={c.id} />
                 {puedeGestionar ? (
                   <>
                     <HojaCargo cargo={c} puedeVerSensible={puedeVerSensible} />

@@ -37,7 +37,7 @@ export async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): P
   );
 }
 
-/** D7: montos solo con read_sensible; cada revelación queda auditada. */
+/** D7: montos solo con read_sensible; cada revelación queda auditada salvo lecturas en lote (`auditar=false`). */
 export async function ocultarMontos(
   ctx: Contexto,
   e: RefEstructura,

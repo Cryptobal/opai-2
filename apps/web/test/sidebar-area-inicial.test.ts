@@ -5,17 +5,11 @@ import { expect, it } from "vitest";
 
 import { Sidebar } from "../../../packages/ds/src/shell/sidebar";
 
-it("muestra todas las entradas sin acordeones desde el primer render", () => {
+it("abre el área de la ruta actual desde el primer render", () => {
   const html = renderToStaticMarkup(
     createElement(Sidebar, {
       items: [
-        {
-          href: "/cuentas",
-          etiqueta: "Cuentas",
-          grupo: "Clientes",
-          area: "clientes",
-          icono: Users,
-        },
+        { href: "/cuentas", etiqueta: "Cuentas", grupo: "Clientes", area: "clientes", icono: Users },
         {
           href: "/instalaciones",
           etiqueta: "Instalaciones",
@@ -25,12 +19,13 @@ it("muestra todas las entradas sin acordeones desde el primer render", () => {
         },
       ],
       rutaActual: "/cuentas",
+      areaAbierta: "clientes",
+      onAreaAbierta: () => undefined,
       portales: [],
       portalActual: "erp",
     }),
   );
-  expect(html).toContain("Clientes</h2>");
+  expect(html).toContain('aria-expanded="true"');
+  expect(html).toContain("Clientes");
   expect(html).toContain("/cuentas");
-  expect(html).toContain("/instalaciones");
-  expect(html).not.toContain("aria-controls");
 });

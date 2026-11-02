@@ -71,6 +71,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
+| compartido | `app/(erp)/cargos/_componentes` | `core.cargos.montos_por_instalacion` | `core_cargos_montos_por_instalacion` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.update` | `core_cargos_update` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.estructuras.list` | `core_estructuras_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
@@ -297,9 +298,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.create` | `core_personas_create` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.desbloquear` | `core_personas_desbloquear` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.laboral_ver` | `core_personas_laboral_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.marcar_no_recontratar` | `core_personas_marcar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.no_recontratar_ver` | `core_personas_no_recontratar_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_aprobar_cambio` | `core_personas_pago_aprobar_cambio` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_rechazar_cambio` | `core_personas_pago_rechazar_cambio` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_ver` | `core_personas_pago_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.vincular_usuario` | `core_personas_vincular_usuario` | existe |
@@ -641,6 +647,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.invitations.revoke`
 - `core.patrones.get`
+- `core.personas.laboral_actualizar`
+- `core.personas.pago_solicitar_cambio`
+- `core.personas.prevision_actualizar`
 - `core.ping`
 - `core.puestos.get`
 - `core.remuneraciones.historial`
