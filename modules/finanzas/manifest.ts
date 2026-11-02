@@ -125,6 +125,8 @@ export const manifest = defineModule({
     { id: "finanzas.venta.emitida", descripcion: "Se emitió un DTE con folio y firma." },
     { id: "finanzas.venta.enviada_sii", descripcion: "Se envió un DTE al SII." },
     { id: "finanzas.venta.nota_credito_emitida", descripcion: "Se emitió una nota de crédito con referencia." },
+    { id: "finanzas.venta.cedida", descripcion: "Se registró una cesión de factoring sobre una factura." },
+    { id: "finanzas.dte_config.actualizada", descripcion: "Cambió la configuración DTE (ambiente o conectores)." },
     { id: "finanzas.folios.caf_cargado", descripcion: "Se cargó un rango de folios autorizados (CAF)." },
   ],
   capacidades: [...capacidadesFinanzas, ...capacidadesFlujo],
