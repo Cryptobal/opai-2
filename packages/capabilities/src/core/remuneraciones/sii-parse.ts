@@ -43,11 +43,8 @@ export function ufTextoACentavos(texto: string): number | null {
   if (!m) return null;
   const n = Number(m[0].replace(/\./g, "").replace(",", "."));
   if (!Number.isFinite(n)) return null;
-  return Math.round(n * 100);
-}
-
-function diasEnMes(anio: number, mes: number): number {
-  return new Date(Date.UTC(anio, mes, 0)).getUTCDate();
+  const centavos = Math.round(n * 100);
+  return centavos >= 1 ? centavos : null;
 }
 
 function seccionMesUf(html: string, mes: number): string | null {
@@ -70,34 +67,16 @@ function ufCentavosEnDia(section: string, dia: number): number | null {
   return ufTextoACentavos(m[1].trim());
 }
 
-/** UF del SII para `fecha` (aaaa-mm-dd): el día indicado o el último día anterior con valor en la tabla. */
+/** UF del SII solo para el día exacto de `fecha` (aaaa-mm-dd); sin retroceder días. */
 export function ufCentavosDelDia(html: string, fecha: string): number | null {
   const partes = fecha.split("-").map(Number);
-  const y0 = partes[0];
-  const m0 = partes[1];
-  const d0 = partes[2];
-  if (!y0 || !m0 || !d0) return null;
-  let y = y0;
-  let m = m0;
-  let d = d0;
-  for (let i = 0; i < 400; i += 1) {
-    const section = seccionMesUf(html, m);
-    if (section) {
-      const v = ufCentavosEnDia(section, d);
-      if (v != null) return v;
-    }
-    d -= 1;
-    if (d < 1) {
-      m -= 1;
-      if (m < 1) {
-        y -= 1;
-        m = 12;
-      }
-      d = diasEnMes(y, m);
-    }
-    if (y < 2000) return null;
-  }
-  return null;
+  const y = partes[0];
+  const m = partes[1];
+  const d = partes[2];
+  if (!y || !m || !d) return null;
+  const section = seccionMesUf(html, m);
+  if (!section) return null;
+  return ufCentavosEnDia(section, d);
 }
 
 /** UTM en pesos del mes calendario (`mes` 1–12) según la tabla anual del SII. */
@@ -108,7 +87,7 @@ export function utmClpDelMes(html: string, mes: number): number | null {
   const m = html.match(re);
   if (!m?.[1]) return null;
   const n = Number(m[1].replace(/\./g, ""));
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) && n >= 1 ? n : null;
 }
 
 export function primerDiaMes(fecha: string): string {

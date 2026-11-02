@@ -1,7 +1,7 @@
 import { purgarIntentosLogin } from "@opai/auth";
-import { programarPeriodicos, programarHorarios } from "@opai/capabilities";
+import { programarCapturaSii, programarHorarios, programarPeriodicos } from "@opai/capabilities";
 
-import { autorizarCron, hoyEn, horaEn, porTenant } from "@/lib/cron";
+import { autorizarCron, encolarCapturaSiiDesdeCron, horaEn, hoyEn, porTenant } from "@/lib/cron";
 import { contextoSistema } from "@/lib/medidor";
 import { purgarVentanas } from "@/lib/rate-limit";
 
@@ -43,9 +43,15 @@ export async function GET(req: Request): Promise<Response> {
   } catch {
     console.error("[cron programador] falló la purga de ventanas de rate limit");
   }
+  let capturaSiiEncolada: boolean | null = null;
+  try {
+    capturaSiiEncolada = await encolarCapturaSiiDesdeCron(programarCapturaSii, contextoSistema);
+  } catch {
+    console.error("[cron programador] falló la programación de captura SII");
+  }
   const ok = !errorTenants && intentosLoginPurgados !== null && ventanasRatePurgadas !== null;
   return Response.json(
-    { ok, resultados, intentosLoginPurgados, ventanasRatePurgadas },
+    { ok, resultados, capturaSiiEncolada, intentosLoginPurgados, ventanasRatePurgadas },
     { status: ok ? 200 : 500 },
   );
 }

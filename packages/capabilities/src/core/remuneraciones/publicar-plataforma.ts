@@ -1,71 +1,68 @@
+import { agregarAAuditoria, lockCapturaSiiGlobal, remuneracionesPublicarSii, unlockCapturaSiiGlobal } from "@opai/db";
+
 import type { Contexto } from "../../types";
 
-import { fechaCivil } from "./comun";
+import { fuenteEsSii, valorEnRango, variacionPermitida } from "./sii-validacion";
+import type { ClaveSiiPublicable } from "./sii-validacion";
 
-type PublicarInput = {
-  indicadorId: string;
+export type PublicarInput = {
+  clave: ClaveSiiPublicable;
   valorJson: number;
   vigenteDesde: string;
   fuente: string;
-  consultadaEl: string;
+  consultadaEn: Date;
+  valorAnterior: number | null;
 };
 
-function diaAnterior(iso: string): string {
-  const d = new Date(`${iso}T12:00:00.000Z`);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
-}
-
-/** Publica un valor de plataforma en `core.valores_publicados` si cambió respecto al vigente. */
+/** Publica UF/UTM del SII en plataforma vía función SECURITY DEFINER (una transacción). */
 export async function publicarValorPlataforma(
   ctx: Contexto,
   input: PublicarInput,
-): Promise<{ publicadoId: string | null; cambio: boolean }> {
-  const vigenteDesde = new Date(`${input.vigenteDesde}T12:00:00.000Z`);
-  const consultadaEl = new Date(`${input.consultadaEl}T12:00:00.000Z`);
-  const actual = await ctx.db.valorPublicado.findFirst({
-    where: { indicadorId: input.indicadorId, estado: "vigente" },
-    orderBy: { vigenteDesde: "desc" },
-  });
+): Promise<{ publicadoId: string; cambio: boolean }> {
+  if (!fuenteEsSii(input.fuente)) {
+    throw new Error("Fuente SII inválida");
+  }
+  if (!valorEnRango(input.clave, input.valorJson)) {
+    throw new Error("Valor fuera de rango");
+  }
   if (
-    actual &&
-    Number(actual.valorJson) === input.valorJson &&
-    fechaCivil(actual.vigenteDesde) === input.vigenteDesde
+    input.valorAnterior != null &&
+    !variacionPermitida(input.clave, input.valorJson, input.valorAnterior)
   ) {
-    return { publicadoId: actual.id, cambio: false };
+    throw new Error("Variación excesiva");
   }
 
-  const id = await ctx.transaccion(async (tx) => {
-    if (actual && fechaCivil(actual.vigenteDesde) < input.vigenteDesde) {
-      await tx.valorPublicado.update({
-        where: { id: actual.id },
-        data: { vigenteHasta: new Date(`${diaAnterior(input.vigenteDesde)}T12:00:00.000Z`) },
-      });
-    } else if (actual && fechaCivil(actual.vigenteDesde) === input.vigenteDesde) {
-      await tx.valorPublicado.update({
-        where: { id: actual.id },
-        data: {
-          valorJson: input.valorJson,
-          fuente: input.fuente,
-          consultadaEl,
-          verificacion: "verificado",
-          vigenteHasta: null,
-        },
-      });
-      return actual.id;
-    }
-    const creado = await tx.valorPublicado.create({
-      data: {
-        indicadorId: input.indicadorId,
-        valorJson: input.valorJson,
-        vigenteDesde,
-        estado: "vigente",
+  const publicadoId = await ctx.transaccion(async (tx) => {
+    const id = await remuneracionesPublicarSii(tx, {
+      clave: input.clave,
+      valor: input.valorJson,
+      vigenteDesde: input.vigenteDesde,
+      fuente: input.fuente,
+      consultadaEn: input.consultadaEn,
+    });
+    await agregarAAuditoria(tx, ctx.tenantId, {
+      actorTipo: "system",
+      actorId: null,
+      viaUserId: null,
+      capability: "core.remuneraciones.captura_sii",
+      entityType: "valor_publicado",
+      entityId: id,
+      payload: {
+        clave: input.clave,
+        vigenteDesde: input.vigenteDesde,
+        valor: input.valorJson,
         fuente: input.fuente,
-        consultadaEl,
-        verificacion: "verificado",
       },
     });
-    return creado.id;
+    return id;
   });
-  return { publicadoId: id, cambio: true };
+  return { publicadoId, cambio: true };
+}
+
+export async function intentarLockCapturaGlobal(ctx: Contexto): Promise<boolean> {
+  return ctx.transaccion((tx) => lockCapturaSiiGlobal(tx));
+}
+
+export async function liberarLockCapturaGlobal(ctx: Contexto): Promise<void> {
+  await ctx.transaccion((tx) => unlockCapturaSiiGlobal(tx));
 }
