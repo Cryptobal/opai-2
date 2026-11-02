@@ -216,6 +216,8 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   cambio?: (salida: z.output<O>, entrada: z.output<I>) => { antes: unknown; despues: unknown };
   /** Tenant donde auditar y medir (plataforma: el tenant objetivo). Por defecto, el actual. */
   tenantObjetivo?: (input: z.output<I>, output: z.output<O> | undefined) => string | undefined;
+  /** Campos extra en el payload de auditoría de escrituras (sin revelar la salida completa). */
+  auditoriaPayload?: (ctx: Contexto, entrada: z.output<I>, salida: z.output<O>) => Record<string, unknown>;
   handler: (ctx: Contexto, input: z.output<I>, modo: ModoEjecucion) => Promise<z.input<O>>;
 }
 

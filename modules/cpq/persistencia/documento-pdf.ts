@@ -7,7 +7,7 @@ export type EntradaPdfCotizacion = {
   titulo: string;
   negocio: string;
   secciones: readonly { nombre: string; lineas: readonly { nombre: string }[] }[];
-  calculo: { ventaMensual: number | null; fecha: string; pagosUnicos?: number };
+  calculo: { ventaMensual: number | null; fecha: string; pagosUnicos?: number; borradorSinPrecio?: boolean };
   condiciones?: string | null;
 };
 
@@ -47,7 +47,9 @@ function bloqueTexto(
     case "resumen_comercial": {
       const venta =
         e.calculo.ventaMensual == null
-          ? "Venta mensual: costo pendiente"
+          ? e.calculo.borradorSinPrecio
+            ? "Venta mensual: Borrador sin precio"
+            : "Venta mensual: costo pendiente"
           : `Venta mensual: $ ${e.calculo.ventaMensual.toLocaleString("es-CL")} CLP`;
       const unicos =
         e.calculo.pagosUnicos && e.calculo.pagosUnicos > 0

@@ -4,8 +4,9 @@ import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabiliti
 
 import { pdfCotizacionConMarca } from "../persistencia/pdf-cotizacion";
 import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
-import { exigirBorrador } from "../persistencia/version";
+import { exigirEnviable } from "../persistencia/version";
 import { commitEnviarCotizacion } from "./enviar-commit";
+import { validarEnvioCpq } from "./enviar-validar";
 import { manifestEnviarSchema, previewCorreoEnviarSchema } from "./enviar-esquemas";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE } from "./permisos";
@@ -20,6 +21,7 @@ export const cotizacionesEnviar = defineCapability({
     id: uuidSchema,
     contactoId: uuidSchema,
     mensaje: z.string().trim().max(2000).optional(),
+    confirmarValoresViejos: z.boolean().optional(),
   }),
   output: z.object({
     versionId: uuidSchema,
@@ -36,7 +38,7 @@ export const cotizacionesEnviar = defineCapability({
     const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
     if (!pack) throw noEncontrado("La versión");
     const { version, secciones, lineas } = pack;
-    exigirBorrador(version);
+    exigirEnviable(version);
     const neg = await ctx.db.negocio.findFirst({
       where: { id: c.negocioId },
       select: {
@@ -67,8 +69,7 @@ export const cotizacionesEnviar = defineCapability({
     }
     const resultado = await recalcularVersion(ctx, input.id, undefined, false);
     if (!resultado) throw noEncontrado("La versión");
-    if (resultado.noEnviable)
-      throw reglaDeNegocio("La cotización no se puede enviar: revisa advertencias y costos pendientes.");
+    await validarEnvioCpq(ctx, input, version, lineas, resultado, dryRun, c.id);
     const calculoPublico = proyectarCalculo(ctx, resultado);
     const seccionesVista = secciones.map((s) => ({
       nombre: s.nombre,
@@ -87,6 +88,7 @@ export const cotizacionesEnviar = defineCapability({
           ventaMensual: calculoPublico.ventaMensual ?? null,
           fecha: calculoPublico.fecha ?? "",
           pagosUnicos: "pagosUnicos" in calculoPublico ? calculoPublico.pagosUnicos : 0,
+          borradorSinPrecio: calculoPublico.ventaMensual == null,
         },
       },
       undefined,
