@@ -4,11 +4,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { capacidades } from "../../../modules/finanzas/capacidades";
 import { claveDedupeCartola } from "@opai/domain";
-import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
+import { type Entorno, omitirSuiteDb, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
 
-describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
+describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
   let tenantId = "";
@@ -57,6 +57,18 @@ describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
     });
   }
 
+  async function emitirFactura(lineaMonto: number, glosa: string) {
+    const borrador = await dato<{ id: string }>("finanzas.ventas.crear_borrador", {
+      cuentaId: clienteId,
+      tipoDte: 33,
+      lineas: [{ glosa, monto: lineaMonto }],
+    });
+    await dato("finanzas.ventas.emitir", { documentoId: borrador.id });
+    const doc = await e.admin.documentoEmitido.findFirst({ where: { id: borrador.id } });
+    if (!doc) throw new Error("documento no emitido");
+    return { id: doc.id, montoTotal: doc.montoTotal };
+  }
+
   beforeAll(async () => {
     process.env.SII_ADAPTADOR = "simulado";
     e = await prepararEntorno();
@@ -98,8 +110,9 @@ describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
   });
 
   it("C2 · la segunda confirmación del mismo movimiento responde CONFLICT", async () => {
-    const mov = await movimiento(100_000, `c2-${randomUUID()}`);
-    const enlace = { tipo: "documento_emitido" as const, id: documentoId, monto: 100_000 };
+    const docC2 = await emitirFactura(100_000, "Factura C2");
+    const mov = await movimiento(docC2.montoTotal, `c2-${randomUUID()}`);
+    const enlace = { tipo: "documento_emitido" as const, id: docC2.id, monto: docC2.montoTotal };
     await dato("finanzas.conciliaciones.confirmar", { movimientoId: mov.id, enlaces: [enlace] });
     const dup = await mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", {
       movimientoId: mov.id,
@@ -109,15 +122,16 @@ describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
   });
 
   it("C3 · deshacer recalcula montoCobrado desde conciliaciones activas", async () => {
-    const mov = await movimiento(100_000, `c3-${randomUUID()}`);
+    const docC3 = await emitirFactura(88_000, "Factura C3");
+    const mov = await movimiento(docC3.montoTotal, `c3-${randomUUID()}`);
     await dato("finanzas.conciliaciones.confirmar", {
       movimientoId: mov.id,
-      enlaces: [{ tipo: "documento_emitido", id: documentoId, monto: 100_000 }],
+      enlaces: [{ tipo: "documento_emitido", id: docC3.id, monto: docC3.montoTotal }],
     });
-    let doc = await e.admin.documentoEmitido.findFirst({ where: { id: documentoId } });
-    expect(doc?.montoCobrado).toBe(100_000);
+    let doc = await e.admin.documentoEmitido.findFirst({ where: { id: docC3.id } });
+    expect(doc?.montoCobrado).toBe(docC3.montoTotal);
     await dato("finanzas.conciliaciones.deshacer", { movimientoId: mov.id, motivo: "Prueba de reversión" });
-    doc = await e.admin.documentoEmitido.findFirst({ where: { id: documentoId } });
+    doc = await e.admin.documentoEmitido.findFirst({ where: { id: docC3.id } });
     expect(doc?.montoCobrado).toBe(0);
     expect(doc?.estadoCobro).toBe("pendiente");
   });
@@ -320,11 +334,12 @@ describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
     });
     expect(sug56.sugerencias.some((s) => s.documentoId === doc56)).toBe(false);
 
-    const movOk = await movimiento(100_000, `p2-ok-${randomUUID()}`);
+    const docOk = await emitirFactura(77_000, "Factura P2 sugerir");
+    const movOk = await movimiento(docOk.montoTotal, `p2-ok-${randomUUID()}`);
     const sugOk = await dato<{ sugerencias: { documentoId: string }[] }>("finanzas.conciliaciones.sugerir", {
       movimientoId: movOk.id,
     });
-    expect(sugOk.sugerencias.some((s) => s.documentoId === documentoId)).toBe(true);
+    expect(sugOk.sugerencias.some((s) => s.documentoId === docOk.id)).toBe(true);
   });
 
   it("Paridad 3 · confirmar compra exige movimiento negativo", async () => {
@@ -438,20 +453,27 @@ describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
   });
 
   it("Paridad 5 · saldo sugerido avisa cuentas sin saldo en cartola", async () => {
-    const cuenta2 = (
+    const semana = "2026-11-03";
+    const cuentaSaldo = (
       await dato<{ id: string }>("finanzas.bancos.guardar", {
-        banco: "BCI",
-        numeroVisible: "9876543210",
+        banco: "Saldo P5",
+        numeroVisible: "1111111111",
+      })
+    ).id;
+    const cuentaSinSaldo = (
+      await dato<{ id: string }>("finanzas.bancos.guardar", {
+        banco: "Sin saldo P5",
+        numeroVisible: "2222222222",
       })
     ).id;
     await e.admin.movimientoBancario.create({
       data: {
         tenantId,
-        cuentaId,
-        fecha: new Date("2026-10-28T00:00:00Z"),
+        cuentaId: cuentaSaldo,
+        fecha: new Date("2026-11-05T00:00:00Z"),
         monto: BigInt(1),
-        glosa: "Saldo A",
-        claveDedupe: `saldo-a-${randomUUID()}`,
+        glosa: "Cierre saldo P5",
+        claveDedupe: `p5-saldo-${randomUUID()}`,
         saldoDespues: BigInt(1_000_000),
         estado: "pendiente",
         origen: "cartola",
@@ -460,11 +482,11 @@ describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
     await e.admin.movimientoBancario.create({
       data: {
         tenantId,
-        cuentaId: cuenta2,
-        fecha: new Date("2026-10-29T00:00:00Z"),
+        cuentaId: cuentaSinSaldo,
+        fecha: new Date("2026-11-05T00:00:00Z"),
         monto: BigInt(1),
-        glosa: "Mov sin saldo",
-        claveDedupe: `saldo-b-${randomUUID()}`,
+        glosa: "Mov sin saldo P5",
+        claveDedupe: `p5-nosaldo-${randomUUID()}`,
         saldoDespues: null,
         estado: "pendiente",
         origen: "cartola",
@@ -474,9 +496,66 @@ describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
       saldo: number | null;
       aviso: string | null;
       cuentasSinSaldo: { cuentaId: string; banco: string }[];
-    }>("finanzas.bancos.saldo_sugerido", { semana: "2026-10-26" });
+    }>("finanzas.bancos.saldo_sugerido", { semana });
     expect(sugerido.saldo).toBe(1_000_000);
-    expect(sugerido.cuentasSinSaldo.some((c) => c.cuentaId === cuenta2)).toBe(true);
+    expect(sugerido.cuentasSinSaldo.some((c) => c.cuentaId === cuentaSinSaldo)).toBe(true);
     expect(sugerido.aviso).toMatch(/Sin saldo en cartola/);
+  });
+
+  it("Paridad · capa real crea fila Cobros si no existe en el flujo", async () => {
+    await e.admin.flujoFila.deleteMany({ where: { tenantId, etiqueta: "Cobros" } });
+    const cuentaSinNombre = (await e.admin.cuenta.create({ data: { tenantId, nombre: "", rut: "77000002-0" } })).id;
+    const doc = (
+      await e.admin.documentoEmitido.create({
+        data: {
+          tenantId,
+          cuentaId: cuentaSinNombre,
+          tipoDte: 33,
+          folio: 9010,
+          fechaEmision: new Date("2026-10-29"),
+          montoTotal: 12_345,
+          montoNeto: 10_000,
+          montoIva: 2345,
+          montoCobrado: 0,
+          estadoDte: "aceptado",
+        },
+      })
+    ).id;
+    const mov = await movimiento(12_345, `cobros-fila-${randomUUID()}`);
+    await dato("finanzas.conciliaciones.confirmar", {
+      movimientoId: mov.id,
+      enlaces: [{ tipo: "documento_emitido", id: doc, monto: 12_345 }],
+    });
+    expect(await e.admin.flujoFila.count({ where: { tenantId, etiqueta: "Cobros" } })).toBe(0);
+    const derivadas = await dato<{
+      fuentes: { id: string; celdas: { filaId: string; id: string }[] }[];
+    }>("finanzas.derivadas.listar", { semana: "2026-10-26" });
+    const celda = derivadas.fuentes.find((f) => f.id === "banco")?.celdas.find((c) => c.id === mov.id);
+    const filaCobros = await e.admin.flujoFila.findFirst({ where: { tenantId, etiqueta: "Cobros" } });
+    expect(filaCobros?.id).toBeTruthy();
+    expect(celda?.filaId).toBe(filaCobros?.id);
+    expect(celda?.filaId).toMatch(/^[0-9a-f-]{36}$/i);
+  });
+
+  it("C7b · no confirma un movimiento ignorado tras deshacer cobro manual", async () => {
+    const docC7 = await emitirFactura(45_000, "Factura C7b");
+    const manual = await dato<{ movimientoId: string }>("finanzas.cobros.manual", {
+      documentoId: docC7.id,
+      cuentaId,
+      monto: docC7.montoTotal,
+    });
+    await dato("finanzas.conciliaciones.deshacer", {
+      movimientoId: manual.movimientoId,
+      motivo: "Revertir para C7b",
+    });
+    const r = await mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", {
+      movimientoId: manual.movimientoId,
+      enlaces: [{ tipo: "documento_emitido", id: docC7.id, monto: docC7.montoTotal }],
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const doc = await e.admin.documentoEmitido.findFirst({ where: { id: docC7.id } });
+    expect(doc?.montoCobrado).toBe(0);
+    const mov = await e.admin.movimientoBancario.findFirst({ where: { id: manual.movimientoId } });
+    expect(mov?.estado).toBe("ignorado");
   });
 });

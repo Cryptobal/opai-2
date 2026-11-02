@@ -1,4 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
+import { reglaDeNegocio } from "@opai/capabilities";
 import { celdasRealesDesdeMovimientos, ETIQUETAS_FLUJO, finSemanaIso } from "@opai/domain";
 
 import { aNumeroSeguro } from "../esquemas";
@@ -7,6 +8,27 @@ import { aFecha, aIso } from "../util";
 import type { z } from "zod";
 
 import { montoDe } from "../bancos/esquemas";
+
+async function idFilaCobros(ctx: Contexto, porEtiqueta: Map<string, string>): Promise<string> {
+  const key = ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase();
+  const existente = porEtiqueta.get(key);
+  if (existente) return existente;
+
+  const agg = await ctx.db.flujoFila.aggregate({ _max: { orden: true } });
+  const creada = await ctx.db.flujoFila.create({
+    data: {
+      tenantId: ctx.tenantId,
+      seccion: "ingreso",
+      etiqueta: ETIQUETAS_FLUJO.cobrosSinFila,
+      vinculo: null,
+      arrastre: true,
+      orden: (agg._max.orden ?? 0) + 1,
+      activa: true,
+    },
+  });
+  porEtiqueta.set(key, creada.id);
+  return creada.id;
+}
 
 /** Capa real del flujo desde movimientos bancarios conciliados (CAR-97). */
 export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.infer<typeof celdaSchema>[]> {
@@ -48,9 +70,6 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
   const filas = await ctx.db.flujoFila.findMany({ select: { id: true, etiqueta: true } });
   const porEtiqueta = new Map(filas.map((f) => [f.etiqueta.toLowerCase(), f.id]));
   const porId = new Map(filas.map((f) => [f.id, f.etiqueta]));
-  if (!porEtiqueta.has(ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase())) {
-    porEtiqueta.set(ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase(), ETIQUETAS_FLUJO.cobrosSinFila);
-  }
 
   const mapped = movs.map((m) => {
     const conciliado = true;
@@ -79,23 +98,31 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
   });
 
   const celdas = celdasRealesDesdeMovimientos(mapped);
+  const cobrosKey = ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase();
+  const out: z.infer<typeof celdaSchema>[] = [];
 
-  return celdas.flatMap((c) => {
-    let filaId = porEtiqueta.get(c.filaEtiqueta.toLowerCase());
-    if (!filaId && c.filaEtiqueta === ETIQUETAS_FLUJO.cobrosSinFila) {
-      const gen = filas.find((f) => f.etiqueta.toLowerCase() === ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase());
-      filaId = gen?.id;
+  for (const c of celdas) {
+    const etiquetaKey = c.filaEtiqueta.toLowerCase();
+    let filaId = porEtiqueta.get(etiquetaKey);
+    if (!filaId && etiquetaKey === cobrosKey) {
+      filaId = await idFilaCobros(ctx, porEtiqueta);
     }
-    if (!filaId) return [];
-    return [
-      {
-        id: c.movimientoId,
-        filaId,
-        semana: c.semana,
-        capa: "real" as const,
-        monto: c.monto,
-        nota: c.nota,
-      },
-    ];
-  });
+    if (!filaId) {
+      if (etiquetaKey === cobrosKey) {
+        throw reglaDeNegocio(
+          `Falta la fila «${ETIQUETAS_FLUJO.cobrosSinFila}» en el flujo de caja para cobros sin fila de cliente.`,
+        );
+      }
+      continue;
+    }
+    out.push({
+      id: c.movimientoId,
+      filaId,
+      semana: c.semana,
+      capa: "real" as const,
+      monto: c.monto,
+      nota: c.nota,
+    });
+  }
+  return out;
 }

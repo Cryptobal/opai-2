@@ -14,6 +14,15 @@ import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_AUTORIZAR } from "./permisos";
 import { montoDe } from "./esquemas";
 import { movimientoDe } from "./util";
 
+const ESTADOS_CONFIRMABLE = ["pendiente", "sugerido", "por_autorizar"] as const;
+
+function asegurarMovimientoConfirmable(estado: string): void {
+  if ((ESTADOS_CONFIRMABLE as readonly string[]).includes(estado)) return;
+  if (estado === "conciliado") throw conflicto("El movimiento ya está conciliado.");
+  if (estado === "ignorado") throw reglaDeNegocio("No se puede conciliar un movimiento ignorado.");
+  throw reglaDeNegocio("Solo se pueden conciliar movimientos pendientes, sugeridos o por autorizar.");
+}
+
 const enlaceSchema = z.object({
   tipo: z.enum(["documento_emitido", "documento_recibido", "flujo_fila"]),
   id: z.uuid(),
@@ -35,6 +44,7 @@ export const bancosConciliacionConfirmar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const mov = await movimientoDe(ctx, input.movimientoId);
+    asegurarMovimientoConfirmable(mov.estado);
     if (mov.estado === "por_autorizar") {
       const puede = ctx.autorizar(PERMISO_BANCOS_AUTORIZAR);
       if (!puede) throw reglaDeNegocio("El movimiento requiere autorización.");
@@ -49,7 +59,7 @@ export const bancosConciliacionConfirmar = defineCapability({
     const signoMov = montoDe(mov.monto);
     await ctx.transaccion(async (tx) => {
       const reserva = await tx.movimientoBancario.updateMany({
-        where: { id: mov.id, estado: { not: "conciliado" } },
+        where: { id: mov.id, estado: { in: [...ESTADOS_CONFIRMABLE] } },
         data: { estado: "conciliado" },
       });
       if (reserva.count !== 1) throw conflicto("El movimiento ya está conciliado.");

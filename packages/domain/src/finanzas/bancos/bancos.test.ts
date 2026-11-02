@@ -33,12 +33,12 @@ describe("bancos dedupe", () => {
     const leidas = plan.filter((p) => p.estado === "leida");
     expect(leidas).toHaveLength(2);
     expect(leidas[0]?.estado === "leida" && leidas[0].claveDedupe).toBe(base);
-    expect(leidas[1]?.estado === "leida" && leidas[1].claveDedupe).toBe(`${base}#2`);
+    expect(leidas[1]?.estado === "leida" && leidas[1].claveDedupe).toBe(`${base}~2`);
   });
 
   it("C4 · reimportar el mismo archivo no duplica movimientos", () => {
     const base = claveDedupeCartola({ fecha: "2026-10-29", monto: 5000, glosa: "Transferencia" });
-    const existentes = [{ claveDedupe: base }, { claveDedupe: `${base}#2` }];
+    const existentes = [{ claveDedupe: base }, { claveDedupe: `${base}~2` }];
     const plan = planificarDedupeCartola(
       [
         { indice: 0, base, saldoDespues: null },
@@ -64,12 +64,18 @@ describe("bancos dedupe", () => {
         { indice: 1, base, saldoDespues: null },
         { indice: 2, base, saldoDespues: null },
       ],
-      [{ claveDedupe: base }, { claveDedupe: `${base}#2` }],
+      [{ claveDedupe: base }, { claveDedupe: `${base}~2` }],
     );
     expect(plan.filter((p) => p.estado === "duplicada")).toHaveLength(2);
     expect(plan.filter((p) => p.estado === "leida")).toHaveLength(1);
     const leida = plan.find((p) => p.estado === "leida");
-    expect(leida?.estado === "leida" && leida.claveDedupe).toBe(`${base}#3`);
+    expect(leida?.estado === "leida" && leida.claveDedupe).toBe(`${base}~3`);
+  });
+
+  it("C6 · glosa terminada en #N no confunde el conteo de duplicados", () => {
+    const base = claveDedupeCartola({ fecha: "2026-10-29", monto: 7000, glosa: "PAGO #2" });
+    const plan = planificarDedupeCartola([{ indice: 0, base, saldoDespues: null }], [{ claveDedupe: base }]);
+    expect(plan.filter((p) => p.estado === "duplicada")).toHaveLength(1);
   });
 });
 

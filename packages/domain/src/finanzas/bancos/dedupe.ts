@@ -22,13 +22,13 @@ export function normalizarGlosa(glosa: string): string {
   return glosa.trim().replace(/\s+/g, " ").toUpperCase();
 }
 
-/** Ordinal ≥2 se guarda como `base#N` para no confundirlo con la referencia bancaria. */
+/** Ordinal ≥2 se guarda como `base~N` para no confundirlo con glosas que terminan en «#N». */
 export function claveDedupeConOrdinal(base: string, ordinal: number): string {
-  return ordinal <= 1 ? base : `${base}#${ordinal}`;
+  return ordinal <= 1 ? base : `${base}~${ordinal}`;
 }
 
 export function descomponerClaveDedupe(clave: string): { base: string; ordinal: number } {
-  const sep = clave.lastIndexOf("#");
+  const sep = clave.lastIndexOf("~");
   if (sep > 0) {
     const tail = clave.slice(sep + 1);
     if (/^\d+$/.test(tail) && Number(tail) >= 2) {

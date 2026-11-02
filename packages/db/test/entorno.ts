@@ -11,6 +11,12 @@ import { PrismaClient } from "../src/generated/prisma/client";
 
 export const urlPropietario = process.env["DATABASE_URL_TEST"];
 
+/** En local sin Postgres se omiten suites db; en CI deben fallar si falta la URL. */
+export function omitirSuiteDb(): boolean {
+  if (urlPropietario?.trim()) return false;
+  return !process.env.CI;
+}
+
 function urlParaRol(url: string, usuario: string, password: string): string {
   const u = new URL(url);
   u.username = usuario;
