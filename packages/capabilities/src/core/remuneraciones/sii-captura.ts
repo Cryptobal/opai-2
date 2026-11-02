@@ -1,19 +1,12 @@
+import { tryLockCapturaSiiXact } from "@opai/db";
+
 import type { Contexto } from "../../types";
 
 import {
-  intentarLockCapturaGlobal,
-  liberarLockCapturaGlobal,
-  publicarValorPlataforma,
-} from "./publicar-plataforma";
-import {
-  primerDiaMes,
-  ufCentavosDelDia,
-  urlSiiUf,
-  urlSiiUtm,
-  utmClpDelMes,
-} from "./sii-parse";
-import { fuenteEsSii, valorEnRango, variacionPermitida } from "./sii-validacion";
-import { fechaCivil } from "./comun";
+  registrarCapturasOmitidasPorLock,
+  registrarCapturasSiiEnTx,
+} from "./sii-captura-persistir";
+import { urlSiiUf, urlSiiUtm } from "./sii-parse";
 
 export type ConsultaSii = (url: string, signal?: AbortSignal) => Promise<string>;
 
@@ -51,18 +44,6 @@ async function leerSii(url: string, signal?: AbortSignal): Promise<string> {
 
 export const consultaSiiPorDefecto: ConsultaSii = leerSii;
 
-async function valorVigenteAnterior(
-  ctx: Contexto,
-  indicadorId: string,
-): Promise<{ valor: number | null; vigenteDesde: string | null }> {
-  const row = await ctx.db.valorPublicado.findFirst({
-    where: { indicadorId, estado: "vigente" },
-    orderBy: { vigenteDesde: "desc" },
-  });
-  if (!row) return { valor: null, vigenteDesde: null };
-  return { valor: Number(row.valorJson), vigenteDesde: fechaCivil(row.vigenteDesde) };
-}
-
 type OpcionesCaptura = {
   dia?: string;
   consulta?: ConsultaSii;
@@ -70,97 +51,41 @@ type OpcionesCaptura = {
 };
 
 /**
- * Lee UF y UTM solo desde el SII, valida y publica en plataforma (corrida global con lock).
+ * Lee UF y UTM solo desde el SII, valida y publica en plataforma (escritura serializada con lock transaccional).
  */
 export async function capturarUfUtmSii(ctx: Contexto, opciones: OpcionesCaptura = {}): Promise<void> {
-  const locked = await intentarLockCapturaGlobal(ctx);
-  if (!locked) return;
-
   const consultadaEn = new Date();
+  const dia = opciones.dia ?? consultadaEn.toISOString().slice(0, 10);
+  const consulta = opciones.consulta ?? consultaSiiPorDefecto;
+  const anio = Number(dia.slice(0, 4));
+  const mes = Number(dia.slice(5, 7));
+  const indicadores = await ctx.db.indicadorLegal.findMany({
+    where: { clave: { in: ["uf", "utm"] } },
+  });
+
+  let htmlUf: string | null = null;
+  let htmlUtm: string | null = null;
   try {
-    const dia = opciones.dia ?? consultadaEn.toISOString().slice(0, 10);
-    const consulta = opciones.consulta ?? consultaSiiPorDefecto;
-    const anio = Number(dia.slice(0, 4));
-    const mes = Number(dia.slice(5, 7));
-    const indicadores = await ctx.db.indicadorLegal.findMany({
-      where: { clave: { in: ["uf", "utm"] } },
-    });
-
-    let htmlUf: string | null = null;
-    let htmlUtm: string | null = null;
-    try {
-      htmlUf = await consulta(urlSiiUf(anio), opciones.signal);
-      htmlUtm = await consulta(urlSiiUtm(anio), opciones.signal);
-    } catch {
-      htmlUf = null;
-      htmlUtm = null;
-    }
-
-    for (const ind of indicadores) {
-      const clave = ind.clave as "uf" | "utm";
-      const fuente = clave === "uf" ? urlSiiUf(anio) : urlSiiUtm(anio);
-      let resultado = "fallido";
-      let valorLeido: number | null = null;
-      let vigenteDesde = dia;
-      let publicadoId: string | null = null;
-      let motivoFallo: string | undefined;
-
-      const anterior = await valorVigenteAnterior(ctx, ind.id);
-
-      try {
-        if (clave === "uf" && htmlUf) {
-          valorLeido = ufCentavosDelDia(htmlUf, dia);
-        } else if (clave === "utm" && htmlUtm) {
-          valorLeido = utmClpDelMes(htmlUtm, mes);
-          vigenteDesde = primerDiaMes(dia);
-        }
-
-        if (valorLeido == null) {
-          motivoFallo = "sin_valor_dia";
-        } else if (!fuenteEsSii(fuente)) {
-          motivoFallo = "fuente";
-        } else if (!valorEnRango(clave, valorLeido)) {
-          motivoFallo = "rango";
-        } else if (
-          anterior.vigenteDesde != null &&
-          vigenteDesde < anterior.vigenteDesde
-        ) {
-          motivoFallo = "vigencia_anterior";
-        } else if (
-          anterior.valor != null &&
-          !variacionPermitida(clave, valorLeido, anterior.valor)
-        ) {
-          motivoFallo = "variacion";
-        } else {
-          const pub = await publicarValorPlataforma(ctx, {
-            clave,
-            valorJson: valorLeido,
-            vigenteDesde,
-            fuente,
-            consultadaEn,
-            valorAnterior: anterior.valor,
-          });
-          publicadoId = pub.publicadoId;
-          resultado = "ok";
-        }
-      } catch {
-        motivoFallo = motivoFallo ?? "publicacion";
-        resultado = "fallido";
-      }
-
-      await ctx.db.capturaIndicador.create({
-        data: {
-          indicadorId: ind.id,
-          fuenteConsultada: fuente,
-          ...(valorLeido != null ? { valorLeidoJson: valorLeido } : {}),
-          ...(publicadoId ? { valorVigenteId: publicadoId } : {}),
-          ...(motivoFallo ? { diferencia: motivoFallo } : {}),
-          resultado,
-          alertaEmitida: resultado !== "ok",
-        },
-      });
-    }
-  } finally {
-    await liberarLockCapturaGlobal(ctx);
+    htmlUf = await consulta(urlSiiUf(anio), opciones.signal);
+    htmlUtm = await consulta(urlSiiUtm(anio), opciones.signal);
+  } catch {
+    htmlUf = null;
+    htmlUtm = null;
   }
+
+  await ctx.transaccion(async (tx) => {
+    const locked = await tryLockCapturaSiiXact(tx);
+    if (!locked) {
+      await registrarCapturasOmitidasPorLock(tx, indicadores, anio);
+      return;
+    }
+    await registrarCapturasSiiEnTx(ctx, tx, indicadores, {
+      dia,
+      anio,
+      mes,
+      htmlUf,
+      htmlUtm,
+      consultadaEn,
+    });
+  });
 }

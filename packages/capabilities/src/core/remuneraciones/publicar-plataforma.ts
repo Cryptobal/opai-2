@@ -1,4 +1,5 @@
-import { agregarAAuditoria, lockCapturaSiiGlobal, remuneracionesPublicarSii, unlockCapturaSiiGlobal } from "@opai/db";
+import { agregarAAuditoria, remuneracionesPublicarSii } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 
 import type { Contexto } from "../../types";
 
@@ -14,11 +15,11 @@ export type PublicarInput = {
   valorAnterior: number | null;
 };
 
-/** Publica UF/UTM del SII en plataforma vía función SECURITY DEFINER (una transacción). */
-export async function publicarValorPlataforma(
+async function publicarValorPlataformaEnTx(
   ctx: Contexto,
+  tx: TenantTx,
   input: PublicarInput,
-): Promise<{ publicadoId: string; cambio: boolean }> {
+): Promise<string> {
   if (!fuenteEsSii(input.fuente)) {
     throw new Error("Fuente SII inválida");
   }
@@ -32,37 +33,37 @@ export async function publicarValorPlataforma(
     throw new Error("Variación excesiva");
   }
 
-  const publicadoId = await ctx.transaccion(async (tx) => {
-    const id = await remuneracionesPublicarSii(tx, {
-      clave: input.clave,
-      valor: input.valorJson,
-      vigenteDesde: input.vigenteDesde,
-      fuente: input.fuente,
-      consultadaEn: input.consultadaEn,
-    });
-    await agregarAAuditoria(tx, ctx.tenantId, {
-      actorTipo: "system",
-      actorId: null,
-      viaUserId: null,
-      capability: "core.remuneraciones.captura_sii",
-      entityType: "valor_publicado",
-      entityId: id,
-      payload: {
-        clave: input.clave,
-        vigenteDesde: input.vigenteDesde,
-        valor: input.valorJson,
-        fuente: input.fuente,
-      },
-    });
-    return id;
+  const id = await remuneracionesPublicarSii(tx, {
+    clave: input.clave,
+    valor: input.valorJson,
+    vigenteDesde: input.vigenteDesde,
+    fuente: input.fuente,
+    consultadaEn: input.consultadaEn,
   });
+  await agregarAAuditoria(tx, ctx.tenantId, {
+    actorTipo: "system",
+    actorId: null,
+    viaUserId: null,
+    capability: "core.remuneraciones.captura_sii",
+    entityType: "valor_publicado",
+    entityId: id,
+    payload: {
+      clave: input.clave,
+      vigenteDesde: input.vigenteDesde,
+      valor: input.valorJson,
+      fuente: input.fuente,
+    },
+  });
+  return id;
+}
+
+/** Publica UF/UTM del SII en plataforma vía función SECURITY DEFINER (una transacción). */
+export async function publicarValorPlataforma(
+  ctx: Contexto,
+  input: PublicarInput,
+): Promise<{ publicadoId: string; cambio: boolean }> {
+  const publicadoId = await ctx.transaccion((tx) => publicarValorPlataformaEnTx(ctx, tx, input));
   return { publicadoId, cambio: true };
 }
 
-export async function intentarLockCapturaGlobal(ctx: Contexto): Promise<boolean> {
-  return ctx.transaccion((tx) => lockCapturaSiiGlobal(tx));
-}
-
-export async function liberarLockCapturaGlobal(ctx: Contexto): Promise<void> {
-  await ctx.transaccion((tx) => unlockCapturaSiiGlobal(tx));
-}
+export { publicarValorPlataformaEnTx };
