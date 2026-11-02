@@ -32,6 +32,13 @@ export const saldoSchema = z
   .int()
   .min(-Number.MAX_SAFE_INTEGER)
   .max(Number.MAX_SAFE_INTEGER);
+/** Rango de columnas INTEGER en Postgres (saldo_banco, saldo_sugerido, saldo_inicial, umbral). */
+export const INT4_MIN = -2_147_483_647;
+export const INT4_MAX = 2_147_483_647;
+/** Entrada que se persiste en INTEGER del flujo (sellado y ajustes). */
+export const saldoEntradaInt4Schema = z.number().int().min(INT4_MIN).max(INT4_MAX);
+export const cabeEnSaldoInt4 = (n: number): boolean =>
+  Number.isInteger(n) && n >= INT4_MIN && n <= INT4_MAX;
 export const seccionSchema = z.enum(["ingreso", "egreso"]);
 export const capaSchema = z.enum(["plan", "comprometido", "real"]);
 
@@ -55,8 +62,8 @@ export const celdaSchema = z.object({
 });
 
 export const ajustesSchema = z.object({
-  saldoInicial: saldoSchema,
-  umbral: saldoSchema,
+  saldoInicial: saldoEntradaInt4Schema,
+  umbral: saldoEntradaInt4Schema,
   desde: semanaSchema,
   toleranciaCierre: montoSchema.default(1000),
   horizonteSemanas: z.number().int().min(1).max(52).default(12),
