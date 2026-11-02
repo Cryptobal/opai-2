@@ -45,6 +45,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.usage.summary",
   "cpq.catalogo_categorias.list",
   "cpq.catalogo_items.list",
+  "cpq.cotizaciones.explicar",
   "cpq.cotizaciones.preview_pdf",
   "cpq.marca_documento.get",
   "cpq.motor.simular",
