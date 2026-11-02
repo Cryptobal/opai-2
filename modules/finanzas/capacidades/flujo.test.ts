@@ -203,3 +203,15 @@ describe("finanzas.flujo.aviso", () => {
     expect(b).toMatchObject({ ok: true });
   });
 });
+
+describe("finanzas.filas.archivar", () => {
+  it("dry_run y escritura desactivan la fila", async () => {
+    const { ctx } = nuevo();
+    const vp = await executeCapability(ctx, "finanzas.filas.archivar", { id: FILA_EGR, archivar: true }, {
+      dryRun: true,
+    });
+    expect(vp).toMatchObject({ ok: true, data: { activa: false } });
+    const r = await executeCapability(ctx, "finanzas.filas.archivar", { id: FILA_EGR, archivar: true });
+    expect(r).toMatchObject({ ok: true, data: { activa: false } });
+  });
+});

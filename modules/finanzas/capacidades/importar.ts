@@ -39,7 +39,7 @@ export const flujoImportar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    if (input.formato !== "csv") throw reglaDeNegocio("Solo CSV en este PR; XLSX: TODO(decisión Carlos).");
+    if (input.formato !== "csv") throw reglaDeNegocio("Solo se admite importación CSV en este release.");
     const registros = parsearCsv(input.contenido);
     if (registros.length > MAX_FILAS_IMPORT) throw reglaDeNegocio(`Máximo ${MAX_FILAS_IMPORT} filas por importación.`);
     const filasDb = await ctx.db.flujoFila.findMany({});
