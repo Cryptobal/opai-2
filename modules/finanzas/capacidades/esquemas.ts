@@ -21,8 +21,17 @@ export const semanaSchema = z
   .refine(esLunes, "La semana se indica con su lunes (YYYY-MM-DD).");
 /** Monto en CLP entero, sin negativos (el signo lo da la sección de la fila). Int en Postgres; tope validado aquí. */
 export const montoSchema = z.number().int().min(0).max(2_000_000_000);
-/** Saldo y umbral de aviso: API en number; `aviso_umbral` y `saldo_proyectado` en BIGINT en base. */
-export const saldoSchema = z.number().int().min(-2_000_000_000).max(2_000_000_000);
+/**
+ * Saldo acumulado, neto y umbrales en la API (number JSON). Puede superar `montoSchema` porque la
+ * planilla suma varias celdas. Tope = entero seguro en JS (coherente con serialización actual).
+ * En Postgres: `flujo_celdas.monto`, `flujo_cierres` y `flujo_ajustes.saldo_inicial`/`umbral` son
+ * INTEGER; solo `flujo_ajustes.aviso_umbral` y `flujo_avisos_emitidos.saldo_proyectado` son BIGINT.
+ */
+export const saldoSchema = z
+  .number()
+  .int()
+  .min(-Number.MAX_SAFE_INTEGER)
+  .max(Number.MAX_SAFE_INTEGER);
 export const seccionSchema = z.enum(["ingreso", "egreso"]);
 export const capaSchema = z.enum(["plan", "comprometido", "real"]);
 
