@@ -23,7 +23,7 @@ export default function Preferencias() {
       ruta="/mi-cuenta/preferencias"
       completo
       cargando="detalle"
-      volver={{ href: "/", etiqueta: "Inicio" }}
+      volver={{ href: "/configuracion", etiqueta: "Configuración" }}
       volverSoloTelefono
       cargar={async () => {
         const [identidad, ajustes] = await Promise.all([

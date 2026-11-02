@@ -6,6 +6,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 
 import { cargarIndice } from "../../_centro/datos";
 import { grupoPorId } from "../../_centro/grupos";
+import { EncabezadoGrupo } from "../../_centro/encabezado-grupo";
 import { ListaGrupo } from "../../_centro/lista-grupo";
 import { NotaModulos } from "../../_centro/nota-modulos";
 
@@ -15,8 +16,8 @@ type Props = { params: Promise<{ id: string }> };
 
 /**
  * Lista de un grupo del centro de Configuración (brief §4.2). En teléfono es la pantalla principal del
- * grupo (la tarjeta de la portada lleva aquí); en iPad/escritorio la tarjeta va directo a la primera
- * entrada, y aquí se ve la lista con un vacío discreto a la derecha. Un id de grupo inexistente da el
+ * grupo (todas las tarjetas de la portada llevan aquí); en iPad/escritorio se ve la lista con un
+ * vacío discreto a la derecha, bajo el encabezado compartido. Un id de grupo inexistente da el
  * 404 del ERP con su shell (proxy + `notFound`); un grupo sin entradas visibles da «Sin permiso».
  */
 export default async function GrupoConfig({ params }: Props) {
@@ -26,7 +27,7 @@ export default async function GrupoConfig({ params }: Props) {
   return (
     <PaginaPortal
       portal="erp"
-      titulo={grupo.etiqueta}
+      titulo="Configuración"
       ruta={`/configuracion/grupo/${grupo.id}`}
       completo
       volver={{ href: "/configuracion", etiqueta: "Configuración" }}
@@ -41,22 +42,25 @@ export default async function GrupoConfig({ params }: Props) {
           );
         }
         return (
-          <SplitScreen
-            telefono="lista"
-            etiquetaLista={`Entradas de ${grupo.etiqueta}`}
-            vacio={{ texto: `Elige un ajuste de ${grupo.etiqueta}`, icono: grupo.icono }}
-            lista={
-              <>
-                <h2 className="t-title mb-3 text-fg md:hidden">{grupo.etiqueta}</h2>
-                <ListaGrupo
-                  etiqueta={grupo.etiqueta}
-                  entradas={entradas}
-                  aprobaciones={indice.aprobaciones}
-                />
-                {grupo.id === "modulos" ? <NotaModulos entradas={entradas} /> : null}
-              </>
-            }
-          />
+          <>
+            <EncabezadoGrupo grupo={grupo} />
+            <SplitScreen
+              contenido
+              telefono="lista"
+              etiquetaLista={`Entradas de ${grupo.etiqueta}`}
+              vacio={{ texto: `Elige un ajuste de ${grupo.etiqueta}`, icono: grupo.icono }}
+              lista={
+                <>
+                  <ListaGrupo
+                    etiqueta={grupo.etiqueta}
+                    entradas={entradas}
+                    aprobaciones={indice.aprobaciones}
+                  />
+                  {grupo.id === "modulos" ? <NotaModulos entradas={entradas} /> : null}
+                </>
+              }
+            />
+          </>
         );
       }}
     </PaginaPortal>

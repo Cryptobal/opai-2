@@ -27,7 +27,7 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       orden: 1,
     },
     {
-      area: "clientes",
+      area: "operaciones",
       href: "/instalaciones",
       etiqueta: mayuscula(voc.instalacion.plural),
       icono: "MapPin",

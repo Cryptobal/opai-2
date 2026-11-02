@@ -6,7 +6,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 
 import { cargarIndice, grupoDeSeccion, type Indice } from "./datos";
 import { ListaGrupo } from "./lista-grupo";
-import { Migas } from "./migas";
+import { EncabezadoGrupo } from "./encabezado-grupo";
 
 type Cab = { subtitulo?: ReactNode; acciones?: ReactNode };
 
@@ -59,34 +59,37 @@ export function PaginaConfig<T = undefined>({
         const grupo = grupoDeSeccion(sel);
         const entradas = grupo ? indice.secciones.filter((s) => s.grupo === grupo.id) : [];
         return (
-          <SplitScreen
-            telefono="detalle"
-            etiquetaLista="Entradas del grupo"
-            etiquetaDetalle={t}
-            lista={
-              grupo ? (
-                <ListaGrupo
-                  etiqueta={grupo.etiqueta}
-                  entradas={entradas}
-                  aprobaciones={indice.aprobaciones}
-                  seleccionada={sel}
-                />
-              ) : null
-            }
-            detalle={
-              <div className="flex w-full max-w-[960px] flex-col">
-                <Cabecera
-                  titulo={t}
-                  tituloSiempre
-                  tituloDetalle
-                  {...(grupo ? { sobre: <Migas grupo={grupo} /> } : {})}
-                  {...(c.subtitulo ? { subtitulo: c.subtitulo } : {})}
-                  {...(c.acciones ? { acciones: c.acciones } : {})}
-                />
-                {children(datos, indice)}
-              </div>
-            }
-          />
+          <>
+            {grupo ? <EncabezadoGrupo grupo={grupo} entrada /> : null}
+            <SplitScreen
+              contenido
+              telefono="detalle"
+              etiquetaLista="Entradas del grupo"
+              etiquetaDetalle={t}
+              lista={
+                grupo ? (
+                  <ListaGrupo
+                    etiqueta={grupo.etiqueta}
+                    entradas={entradas}
+                    aprobaciones={indice.aprobaciones}
+                    seleccionada={sel}
+                  />
+                ) : null
+              }
+              detalle={
+                <div className="flex w-full max-w-[960px] flex-col">
+                  <Cabecera
+                    titulo={t}
+                    tituloSiempre
+                    tituloDetalle
+                    {...(c.subtitulo ? { subtitulo: c.subtitulo } : {})}
+                    {...(c.acciones ? { acciones: c.acciones } : {})}
+                  />
+                  {children(datos, indice)}
+                </div>
+              }
+            />
+          </>
         );
       }}
     </PaginaPortal>

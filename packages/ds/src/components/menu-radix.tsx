@@ -19,6 +19,7 @@ export type MenuProps = {
   /** Dónde se abre respecto del disparador. */
   lado?: keyof typeof LADO;
   className?: string;
+  claseContenido?: string;
   claseDisparador?: string;
   /** Abierto al montar (la versión diferida lo monta con el primer clic). */
   abiertoInicial?: boolean;
@@ -46,11 +47,13 @@ export function MenuRadix(props: MenuProps) {
           className={cn(
             claseOverlay,
             "max-h-(--radix-dropdown-menu-content-available-height) w-64 overflow-y-auto py-1",
+            props.claseContenido,
           )}
         >
           {cabecera ? <div className="border-b border-border px-3 py-2.5">{cabecera}</div> : null}
           {items.map((item, i) => (
             <div key={item.id}>
+              {item.separador ? <DropdownMenu.Separator className="my-1 h-px bg-border" /> : null}
               {item.grupo ? (
                 <>
                   {i > 0 ? <DropdownMenu.Separator className="my-1 h-px bg-border" /> : null}
@@ -63,12 +66,17 @@ export function MenuRadix(props: MenuProps) {
                 disabled={item.deshabilitado}
                 onSelect={item.onSelect}
                 className={cn(
-                  "flex h-11 cursor-default items-center gap-2.5 px-3 text-base outline-none select-none data-[disabled]:opacity-45 data-[highlighted]:bg-fill",
+                  "flex min-h-11 py-2 cursor-default items-center gap-2.5 px-3 text-base outline-none select-none data-[disabled]:opacity-45 data-[highlighted]:bg-fill",
                   item.peligro ? "text-danger-fg" : "text-fg",
                 )}
               >
                 {item.icono ? <item.icono className="size-4 text-fg-muted" aria-hidden /> : null}
-                <span className="min-w-0 flex-1 truncate">{item.etiqueta}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block">{item.etiqueta}</span>
+                  {item.descripcion ? (
+                    <span className="block text-xs text-fg-muted">{item.descripcion}</span>
+                  ) : null}
+                </span>
                 {item.marcado ? <Check className="size-4 text-accent" aria-label="actual" /> : null}
               </DropdownMenu.Item>
             </div>

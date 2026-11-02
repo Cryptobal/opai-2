@@ -1,4 +1,4 @@
-import { Menu as IconoMenu } from "lucide-react";
+import { Ellipsis as IconoMenu } from "lucide-react";
 
 import { cn } from "../cn";
 import type { ItemMenu } from "../components/menu";
@@ -41,7 +41,10 @@ export function BottomNav({
   extras = [],
   onNavegar,
   principales: elegidas,
-  fijados, errorFijados, reintentarFijados, onDesfijar,
+  fijados,
+  errorFijados,
+  reintentarFijados,
+  onDesfijar,
 }: InferiorProps) {
   // "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del riel ni de la barra lateral.
   const principales = elegidas ?? items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
@@ -58,7 +61,7 @@ export function BottomNav({
         ...principales.slice(visibles.length),
         ...items.filter((i) => i.pie || i.soloAmplio || i.fueraInferior),
       ];
-  const enResto = resto.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn));
+  const enResto = !visibles.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn));
   return (
     <nav
       aria-label="Principal"
@@ -84,7 +87,9 @@ export function BottomNav({
                     <Contador n={item.alerta ? item.contador : undefined} />
                   )}
                 </span>
-                <span lang="es" className="w-full hyphens-auto wrap-normal text-center">{item.corta ?? item.etiqueta}</span>
+                <span lang="es" className="w-full truncate whitespace-nowrap text-center">
+                  {item.corta ?? item.etiqueta}
+                </span>
               </Link>
             </li>
           );
@@ -92,13 +97,15 @@ export function BottomNav({
         {conMas ? (
           <li className="min-w-0 flex-1">
             <MenuMas
-              items={items}
+              items={resto}
               rutaActual={rutaActual}
-              {...(fijados ? { fijados } : {})}
+              {...(fijados
+                ? { fijados: fijados.filter((f) => !visibles.some((v) => v.href === f.href)) }
+                : {})}
               {...(errorFijados ? { errorFijados } : {})}
               {...(reintentarFijados ? { reintentarFijados } : {})}
               {...(onDesfijar ? { onDesfijar } : {})}
-              extras={extras}
+              extras={[]}
               {...(onNavegar ? { onNavegar } : {})}
               disparador={
                 <span className={claseItemInferior(enResto)}>
