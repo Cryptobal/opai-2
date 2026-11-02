@@ -61,6 +61,7 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE (PR 1)", () => {
     expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const lista = await s.mod.executeCapability(s.ctx(s.tenantId), "finanzas.ventas.listar", {});
     expect(lista.ok).toBe(true);
+    if (!lista.ok) throw new Error("listar ventas");
     const ids = (lista.data as { items: { id: string }[] }).items.map((i) => i.id);
     expect(ids).not.toContain(s.documentoB);
   });
