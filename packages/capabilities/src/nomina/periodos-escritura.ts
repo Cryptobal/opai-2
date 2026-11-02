@@ -92,6 +92,9 @@ export const periodosCambiarEstado = defineCapability({
       motivoReapertura: retroceso ? (motivo ?? null) : p.motivoReapertura,
     };
     const cuenta = await ctx.db.nominaNovedad.count({ where: { periodoId: id, estado: "vigente" } });
+    if (de === "abierto" && a === "en_revision" && cuenta === 0) {
+      throw reglaDeNegocio("Registra al menos una novedad antes de pasar a revisión.");
+    }
     if (dryRun) return vistaPeriodo({ ...p, ...datos }, cuenta);
     return ctx.transaccion(async (tx) => {
       await bloquearPeriodo(tx, ctx.tenantId, id);

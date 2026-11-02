@@ -43,6 +43,14 @@ const data = <T>(r: Awaited<ReturnType<typeof run>>) => {
 };
 const abrir = async (c: Ctx, mes = 11) =>
   data<{ id: string }>(await run(c, "nomina.periodos.abrir", { anio: 2026, mes }));
+const licenciaEn = (periodoId: string) => ({
+  periodoId,
+  personaId: P1,
+  tipo: "licencia",
+  fechaDesde: "2026-11-03",
+  fechaHasta: "2026-11-07",
+  cantidad: 5,
+});
 
 describe("períodos", () => {
   it("abre un mes con cierre previsto y crea sus tres obligaciones mensuales", async () => {
@@ -69,6 +77,21 @@ describe("períodos", () => {
     });
   });
 
+  it("R-REM-011: abierto → en revisión exige al menos una novedad vigente (también en dryRun)", async () => {
+    const c = como();
+    const { id } = await abrir(c);
+    expect(await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" })).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE", message: expect.stringContaining("novedad") },
+    });
+    expect(await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" }, { dryRun: true })).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE" },
+    });
+    data(await run(c, "nomina.novedades.crear", licenciaEn(id)));
+    expect((await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" })).ok).toBe(true);
+  });
+
   it("avanza, no salta etapas y devolver exige motivo", async () => {
     const c = como();
     const { id } = await abrir(c);
@@ -76,6 +99,7 @@ describe("períodos", () => {
       ok: false,
       error: { code: "UNPROCESSABLE" },
     });
+    data(await run(c, "nomina.novedades.crear", licenciaEn(id)));
     data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" }));
     data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "cerrado" }));
     expect(await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" })).toMatchObject({
@@ -92,6 +116,7 @@ describe("períodos", () => {
     const c = como();
     const { id } = await abrir(c);
     expect(await run(c, "nomina.periodos.marcar_pagado", { id })).toMatchObject({ ok: false });
+    data(await run(c, "nomina.novedades.crear", licenciaEn(id)));
     data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" }));
     data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "cerrado" }));
     expect(data<{ estado: string }>(await run(c, "nomina.periodos.marcar_pagado", { id })).estado).toBe("pagado");
@@ -133,6 +158,7 @@ describe("novedades", () => {
       (await run(c, "nomina.novedades.crear", { periodoId: id, personaId: P1, tipo: "prestamo", fechaDesde: "2026-11-10", montoClp: 1000 })).ok,
     ).toBe(false);
     expect((await run(c, "nomina.novedades.crear", { ...licencia(id), fechaDesde: "2026-12-03", fechaHasta: "2026-12-07" })).ok).toBe(false);
+    data(await run(c, "nomina.novedades.crear", licencia(id)));
     data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" }));
     data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "cerrado" }));
     expect(await run(c, "nomina.novedades.crear", licencia(id))).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
