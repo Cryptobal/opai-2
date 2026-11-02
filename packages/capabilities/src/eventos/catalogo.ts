@@ -72,6 +72,10 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
     id: "core.integracion.actualizada",
     descripcion: "Cambió la configuración o un secreto de una integración.",
   },
+  {
+    id: "core.integracion.certificado_dte",
+    descripcion: "Se subió o reemplazó el certificado digital de emisión DTE (sin secretos en el payload).",
+  },
   { id: "core.integracion.error", descripcion: "La prueba o el uso de una integración falló." },
   {
     id: "core.agente.autonomia_cambiada",
