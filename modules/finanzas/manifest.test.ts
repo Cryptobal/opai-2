@@ -22,14 +22,14 @@ describe("manifest de Finanzas (Compras + Flujo de caja)", () => {
       "/finanzas/flujo",
       "/finanzas/plan-de-cuentas",
     ]);
-    expect(manifest.eventos).toHaveLength(16);
-    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(16);
+    expect(manifest.eventos).toHaveLength(18);
+    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(18);
     expect(manifest.configuracion).toBe(ajustesFinanzas);
   });
 
-  it("tiene 25 capacidades con ids únicos", () => {
+  it("tiene 27 capacidades con ids únicos", () => {
     const ids = manifest.capacidades.map((c) => c.id);
-    expect(ids).toHaveLength(25);
-    expect(new Set(ids).size).toBe(25);
+    expect(ids).toHaveLength(27);
+    expect(new Set(ids).size).toBe(27);
   });
 });

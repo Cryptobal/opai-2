@@ -220,9 +220,11 @@ finanzas_compras_asignar_centro
 finanzas_compras_importar
 finanzas_compras_listar
 finanzas_compras_registrar
+finanzas_derivadas_listar
 finanzas_filas_actualizar
 finanzas_filas_crear
 finanzas_filas_listar
+finanzas_flujo_importar
 finanzas_plan_actualizar
 finanzas_plan_crear
 finanzas_plan_inicializar
@@ -392,6 +394,7 @@ preview_finanzas_compras_importar
 preview_finanzas_compras_registrar
 preview_finanzas_filas_actualizar
 preview_finanzas_filas_crear
+preview_finanzas_flujo_importar
 preview_finanzas_plan_actualizar
 preview_finanzas_plan_crear
 preview_finanzas_plan_inicializar

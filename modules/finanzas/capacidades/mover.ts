@@ -5,7 +5,7 @@ import { defineCapability } from "@opai/capabilities";
 import { calcularPlanilla, planificarMovimiento, semanasDesde, sumarSemanas } from "../domain";
 import { saldoSchema, semanaSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR } from "./permisos";
-import { aFecha, ajustesDe, aIso, cargarFlujo, filaDe, selladasDe } from "./util";
+import { aFecha, ajustesDe, aIso, bloquearSemanaFlujo, cargarFlujo, filaDe, selladasDe, semanaSelladaEnTx } from "./util";
 import { reglaDeNegocio } from "@opai/capabilities";
 
 export const celdasMover = defineCapability({
@@ -67,6 +67,15 @@ export const celdasMover = defineCapability({
     const resultado = { movimientos: plan.movimientos, saldos };
     if (dryRun) return resultado;
     await ctx.transaccion(async (tx) => {
+      const semanasLock = new Set([
+        ...plan.movimientos.map((m) => m.desde),
+        ...plan.movimientos.map((m) => m.hasta),
+      ]);
+      for (const s of semanasLock) {
+        await bloquearSemanaFlujo(tx, ctx, s);
+        if (await semanaSelladaEnTx(tx, s))
+          throw reglaDeNegocio("Una de las semanas está sellada: reábrela antes de mover.");
+      }
       const filas = celdas.filter((c) => c.filaId === fila.id);
       const poSemana = new Map(filas.map((c) => [aIso(c.semana), c]));
       for (const m of plan.movimientos)

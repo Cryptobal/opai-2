@@ -19,6 +19,8 @@ export type PlanillaScreenProps = {
   columnas: readonly ColumnaPlanilla[];
   celda: (filaId: string, columnaId: string) => Celda | null;
   textos?: TextosEstado;
+  /** Si se define, se invoca al tocar una celda (además del zoom en móvil). */
+  onCelda?: (filaId: string, columnaId: string) => void;
 };
 
 /* Códigos de turno del diseño: D info, N acento, L libre (sin fondo), V success, X danger (sin cubrir). */
@@ -44,6 +46,7 @@ export function PlanillaScreen({
   columnas,
   celda,
   textos,
+  onCelda,
 }: PlanillaScreenProps) {
   const [seleccion, setSeleccion] = useState<{
     fila: FilaPlanilla;
@@ -95,7 +98,10 @@ export function PlanillaScreen({
                         {valor ? (
                           <button
                             type="button"
-                            onClick={() => setSeleccion({ fila: f, columna: c, celda: valor })}
+                            onClick={() => {
+                              onCelda?.(f.id, c.id);
+                              setSeleccion({ fila: f, columna: c, celda: valor });
+                            }}
                             className={cn(
                               "flex min-h-9 w-full min-w-9 items-center justify-center rounded-sm text-xs font-medium",
                               TONO[valor.tono ?? "neutro"],
