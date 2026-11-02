@@ -6,3 +6,4 @@ export * from "./compras";
 export * from "./ventas";
 export * from "./ventas-nc";
 export * from "./proyeccion-flujo";
+export * from "./bancos";
