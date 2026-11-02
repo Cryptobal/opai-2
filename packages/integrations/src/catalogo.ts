@@ -4,6 +4,7 @@
 import { z } from "zod";
 
 import { baseUrlEsPublica } from "./ia/red-segura";
+import { INTEGRACIONES_EXTRA } from "./catalogo-extra";
 
 export type CategoriaIntegracion =
   | "correo"
@@ -120,25 +121,7 @@ export const CATALOGO_INTEGRACIONES: readonly DefinicionIntegracion[] = [
       .strict(),
     disponible: true,
   },
-  ...(
-    [
-      ["whatsapp", "WhatsApp", "whatsapp"],
-      ["dte", "Facturación electrónica (DTE)", "dte"],
-      ["fintoc", "Banco (Fintoc)", "banco"],
-      ["factoring", "Factoring", "factoring"],
-      ["biometria", "Biometría", "biometria"],
-      ["slack", "Slack", "slack"],
-      ["webhooks", "Webhooks", "webhooks"],
-    ] as const
-  ).map(([id, nombre, categoria]) => ({
-    id,
-    nombre,
-    categoria,
-    modalidades: ["propia"] as const,
-    secretos: [],
-    config: sinConfig,
-    disponible: false,
-  })),
+  ...INTEGRACIONES_EXTRA,
 ];
 
 export const definicionIntegracion = (id: string) =>

@@ -53,7 +53,7 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE (PR 1)", () => {
         data: { tenantId, nombre: "Cliente Ficticio Ltda.", rut: "77234567-8" },
       })
     ).id;
-    await dato("finanzas.dte.configuracion.actualizar", {
+    await dato("finanzas.dte_config.actualizar", {
       ambiente: "certificacion",
       rutEmisor: "76111222-3",
     });

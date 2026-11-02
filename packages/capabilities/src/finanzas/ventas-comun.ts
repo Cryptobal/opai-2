@@ -30,6 +30,18 @@ export function montosDesdeLineas(tipo: 33 | 34, lineas: readonly { monto: numbe
   return { neto: 0, exento: bruto, iva: 0, otros: 0, total: bruto };
 }
 
+export function montosNotaCredito(
+  ref: { montoNeto: number; montoExento: number; montoTotal: number },
+  monto: number,
+): MontosDteVenta {
+  if (ref.montoExento > 0 || ref.montoNeto === 0) {
+    return { neto: 0, exento: monto, iva: 0, otros: 0, total: monto };
+  }
+  const neto = Math.round((monto * ref.montoNeto) / ref.montoTotal);
+  const iva = monto - neto;
+  return { neto, exento: 0, iva, otros: 0, total: monto };
+}
+
 export async function cuentaDe(ctx: Contexto, id: string) {
   const c = await ctx.db.cuenta.findFirst({ where: { id }, select: { id: true, nombre: true, rut: true } });
   if (!c) throw noEncontrado("La cuenta");

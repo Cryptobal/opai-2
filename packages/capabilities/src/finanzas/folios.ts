@@ -82,11 +82,15 @@ export const foliosCargarCaf = defineCapability({
     const fila = await escribirConEvento(ctx, {
       tipo: "finanzas.folios.caf_cargado",
       entidadTipo: "dte_folio",
-      payload: (r) => ({ tipoDte: r.tipoDte, folioDesde: r.folioDesde, folioHasta: r.folioHasta }),
+      payload: () => ({
+        tipoDte: input.tipoDte,
+        folioDesde: input.folioDesde,
+        folioHasta: input.folioHasta,
+      }),
     }, async (tx) => {
       await tx.dteFolio.updateMany({ where: { tipoDte: input.tipoDte, activo: true }, data: { activo: false } });
       return tx.dteFolio.create({ data });
     });
-    return folioVista(fila);
+    return folioVista(fila as Parameters<typeof folioVista>[0]);
   },
 });

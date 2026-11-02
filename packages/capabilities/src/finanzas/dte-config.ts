@@ -13,7 +13,7 @@ const configSchema = z.object({
 });
 
 export const dteConfigObtener = defineCapability({
-  id: "finanzas.dte.configuracion.obtener",
+  id: "finanzas.dte_config.obtener",
   descripcion:
     "Devuelve la configuración DTE del tenant: ambiente SII (certificación o producción) y RUT emisor si está definido.",
   permiso: PERMISO_READ,
@@ -31,7 +31,7 @@ export const dteConfigObtener = defineCapability({
 });
 
 export const dteConfigActualizar = defineCapability({
-  id: "finanzas.dte.configuracion.actualizar",
+  id: "finanzas.dte_config.actualizar",
   descripcion:
     "Actualiza el ambiente SII y opcionalmente el RUT emisor del tenant. Pasar a producción requiere revisión explícita del responsable antes de usarlo en vivo.",
   permiso: PERMISO_VENTAS,

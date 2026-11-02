@@ -33,6 +33,16 @@ export const ventasListar = defineCapability({
   auditarLectura: (s) => [...new Set(s.items.map((i: z.infer<typeof ventaSchema>) => i.cuentaId))],
   async handler(ctx, input) {
     const folio = input.q && /^\d{1,9}$/.test(input.q) ? Number(input.q) : null;
+    let cuentaIds: string[] | undefined;
+    if (input.q && folio === null) {
+      const cs = await ctx.db.cuenta.findMany({
+        where: { nombre: { contains: input.q, mode: "insensitive" } },
+        select: { id: true },
+        take: 50,
+      });
+      cuentaIds = cs.map((c) => c.id);
+      if (cuentaIds.length === 0) return { items: [], siguiente: null };
+    }
     const where = {
       ...(input.periodo
         ? {
@@ -43,14 +53,8 @@ export const ventasListar = defineCapability({
           }
         : {}),
       ...(input.estadoDte ? { estadoDte: input.estadoDte } : {}),
-      ...(input.q
-        ? {
-            OR: [
-              ...(folio !== null ? [{ folio }] : []),
-              { cuenta: { nombre: { contains: input.q, mode: "insensitive" as const } } },
-            ],
-          }
-        : {}),
+      ...(folio !== null ? { folio } : {}),
+      ...(cuentaIds ? { cuentaId: { in: cuentaIds } } : {}),
     };
     const filas = await ctx.db.documentoEmitido.findMany({
       where,

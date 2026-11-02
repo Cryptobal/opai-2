@@ -45,8 +45,8 @@ export const ventasPdf = defineCapability({
       iva: doc.montoIva,
       total: doc.montoTotal,
       timbrePdf417: doc.timbrePdf417,
-      glosa: doc.glosa ?? undefined,
+      ...(doc.glosa ? { glosa: doc.glosa } : {}),
     });
-    return { base64: Buffer.from(bytes).toString("base64"), mime: "application/pdf" };
+    return { base64: Buffer.from(bytes).toString("base64"), mime: "application/pdf" as const };
   },
 });
