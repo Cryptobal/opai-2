@@ -11,6 +11,8 @@ export const CONTACTO_1 = "0192f3a0-0000-7000-8000-0000000000a2";
 export const EMBUDO_1 = "0192f3a0-0000-7000-8000-0000000000e9";
 export const ETAPA_PROSPECTO = "0192f3a0-0000-7000-8000-0000000000e0";
 export const ETAPA_PROPUESTA = "0192f3a0-0000-7000-8000-0000000000e3";
+export const PLANTILLA_COTIZACION = "0192f3a0-0000-7000-8000-0000000000f1";
+export const PLANTILLA_PROPUESTA = "0192f3a0-0000-7000-8000-0000000000f2";
 
 const negocio = (
   id: string,
@@ -91,6 +93,30 @@ export function semilla() {
         etapaId: ETAPA_PROSPECTO,
       }),
       negocio(NEGOCIO_CERRADO, "ganado"),
+    ],
+    cpqMarcaDocumento: [{ tenantId: TENANT_DE_PRUEBA, version: 1, tipografia: "inter" }],
+    cpqPlantillaDocumento: [
+      {
+        id: PLANTILLA_COTIZACION,
+        tenantId: TENANT_DE_PRUEBA,
+        tipo: "cotizacion",
+        base: "clasica",
+        bloquesJson: "[]",
+        version: 1,
+        activa: true,
+      },
+      {
+        id: PLANTILLA_PROPUESTA,
+        tenantId: TENANT_DE_PRUEBA,
+        tipo: "propuesta_tecnica",
+        base: "clasica",
+        bloquesJson:
+          '[{"tipo":"portada","activo":true,"fijo":true,"opcional":false},{"tipo":"detalle_servicio","activo":true,"fijo":true,"opcional":false}]',
+        nombreVisible: "Oferta de servicio",
+        aperturaMaxima: "por_instalacion",
+        version: 1,
+        activa: true,
+      },
     ],
   };
 }

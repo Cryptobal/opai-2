@@ -98,6 +98,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: es el control humano sobre lo que propone un agente (margen CPQ).",
   "cpq.cotizaciones.rechazar_aprobacion":
     "Solo personas: es el control humano sobre lo que propone un agente (margen CPQ).",
+  "cpq.cotizaciones.enviar":
+    "Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad.",
   "core.remuneraciones.confirmar":
     "Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034).",
   "core.remuneraciones.confirmar_mutual":
