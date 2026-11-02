@@ -57,5 +57,15 @@ export function accionesSolicitud(s: SolicitudDato, posibles: SolicitudDato[]): 
         exito: "Solicitud reabierta",
       },
     });
+  if (s.estado === "convertida")
+    lista.push({
+      id: "pasar-cotizacion",
+      etiqueta: "Abrir cotización CPQ",
+      capacidad: {
+        id: "comercial.solicitudes.pasar_a_cotizacion",
+        input: { id: s.id },
+        exito: "Cotización creada; ábrela desde el negocio",
+      },
+    });
   return lista;
 }

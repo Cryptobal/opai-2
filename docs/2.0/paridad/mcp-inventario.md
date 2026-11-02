@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 401 pares pantalla→capacidad · 361 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 411 pares pantalla→capacidad · 371 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -79,6 +79,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.list` | `cpq_catalogo_items_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.update` | `cpq_marca_documento_update` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.get` | `cpq_plantillas_documento_get` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.update` | `cpq_plantillas_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.actualizar` | `finanzas_ajustes_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.ajustes.obtener` | `finanzas_ajustes_obtener` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
@@ -143,6 +148,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.quitar` | `cpq_lineas_quitar` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.create` | `core_contactos_create` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.update` | `core_contactos_update` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.archive` | `core_cuentas_archive` | existe |
@@ -282,6 +290,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.get` | `comercial_solicitudes_get` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.list` | `comercial_solicitudes_list` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.marcar_duplicada` | `comercial_solicitudes_marcar_duplicada` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.pasar_a_cotizacion` | `comercial_solicitudes_pasar_a_cotizacion` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.reabrir` | `comercial_solicitudes_reabrir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.crear` | `tickets_tickets_crear` | existe |
@@ -367,6 +376,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios` | `core.users.remove` | `core_users_remove` | existe |
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
+| erp | `/cotizaciones/[id]` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
 | erp | `/cotizaciones/[id]` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
@@ -593,14 +603,22 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
-- `cpq.cotizaciones.calcular`
+- `cpq.catalogo_categorias.create`
+- `cpq.catalogo_categorias.desactivar`
+- `cpq.catalogo_categorias.list`
+- `cpq.catalogo_categorias.update`
+- `cpq.catalogo_items.archivar`
+- `cpq.catalogo_items.create`
+- `cpq.catalogo_items.update`
+- `cpq.correlativos.fijar`
+- `cpq.cotizaciones.clonar`
+- `cpq.cotizaciones.enviar`
 - `cpq.cotizaciones.get`
-- `cpq.lineas.actualizar`
-- `cpq.lineas.crear`
-- `cpq.lineas.quitar`
+- `cpq.cotizaciones.preview_pdf`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
 - `cpq.secciones.margen`
+- `cpq.versiones.crear`
 - `cpq.versiones.margen`
 - `finanzas.cierres.listar`
 - `finanzas.compras.importar`

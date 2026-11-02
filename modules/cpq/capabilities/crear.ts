@@ -9,6 +9,8 @@ import {
 } from "@opai/capabilities";
 
 import { anioEnZona, formatearCodigo, validaHastaPorDefecto } from "../domain";
+import { ensurePlantillaCatalogo } from "../persistencia/catalogo-seed";
+import { sincronizarSecciones } from "../persistencia/secciones-sync";
 import { monedaSchema, uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE } from "./permisos";
 import { ID_VISTA_PREVIA } from "./util";
@@ -64,7 +66,7 @@ export const cotizacionesCreate = defineCapability({
       };
     }
     try {
-      return await ctx.transaccion(async (tx) => {
+      const creado = await ctx.transaccion(async (tx) => {
         // Upsert atómico: la fila se bloquea hasta el fin de la transacción, así que dos creaciones
         // simultáneas no repiten número (R54) y un fallo posterior no deja un hueco.
         const corr = await tx.cpqCorrelativo.upsert({
@@ -108,6 +110,9 @@ export const cotizacionesCreate = defineCapability({
         });
         return { id: c.id, codigo, versionId: v.id, vigente };
       });
+      await ensurePlantillaCatalogo(ctx);
+      await sincronizarSecciones(ctx, creado.versionId, negocio.id);
+      return creado;
     } catch (e) {
       // Carrera por «una vigente por negocio»: la otra transacción llegó primero.
       if ((e as { code?: unknown } | null)?.code === "P2002")
