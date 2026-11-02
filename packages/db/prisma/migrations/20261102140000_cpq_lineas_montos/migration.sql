@@ -22,5 +22,5 @@ ALTER TABLE "cpq"."lineas" ADD COLUMN IF NOT EXISTS "huella_juego_valores" TEXT;
 COMMIT;
 
 -- Reversión manual (rol propietario):
--- ALTER TABLE "cpq"."lineas" DROP COLUMN IF EXISTS "huella_juego_valores", ... ;
+-- ALTER TABLE "cpq"."lineas" DROP COLUMN IF EXISTS "patron", DROP COLUMN IF EXISTS "hora_inicio", DROP COLUMN IF EXISTS "hora_fin", DROP COLUMN IF EXISTS "dias_cobertura", DROP COLUMN IF EXISTS "personas_por_posicion_escaladas", DROP COLUMN IF EXISTS "personas_motivo", DROP COLUMN IF EXISTS "sueldo_base_clp", DROP COLUMN IF EXISTS "item_codigo", DROP COLUMN IF EXISTS "cantidad_escalada", DROP COLUMN IF EXISTS "rateo_json", DROP COLUMN IF EXISTS "precio_unitario_clp", DROP COLUMN IF EXISTS "margen_propio_pct", DROP COLUMN IF EXISTS "alcance_dotacion", DROP COLUMN IF EXISTS "huella_juego_valores";
 -- ALTER TABLE "cpq"."secciones" DROP COLUMN IF EXISTS "margen_pct";
