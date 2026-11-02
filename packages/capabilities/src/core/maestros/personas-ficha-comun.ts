@@ -22,3 +22,13 @@ export function enmascararCuenta(numero: string | null, enmascarar: boolean): st
   if (limpio.length <= 4) return "****";
   return `****${limpio.slice(-4)}`;
 }
+
+/** Supervisor: plan ISAPRE presente pero sin descifrar (dato de salud, R-PER-004). */
+export function enmascararPlanIsapre(_planCifrado: string): string {
+  return "••••";
+}
+
+/** ¿El rol debe recibir previsión/banco enmascarados desde el servidor (R-PER-004)? */
+export function enmascararDatosSensiblesPersona(ctx: Contexto): boolean {
+  return ctx.rol === "supervisor";
+}

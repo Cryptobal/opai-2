@@ -3,7 +3,7 @@ import { z } from "zod";
 import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
-import { enmascararCuenta } from "./personas-ficha-comun";
+import { enmascararCuenta, enmascararDatosSensiblesPersona } from "./personas-ficha-comun";
 
 export const pagoVerSchema = z.object({
   personaId: z.string(),
@@ -38,7 +38,7 @@ async function descifrarNumero(
 }
 
 export async function vistaPago(ctx: Contexto, personaId: string) {
-  const enmascarar = ctx.rol === "supervisor";
+  const enmascarar = enmascararDatosSensiblesPersona(ctx);
   const vigente = await ctx.db.personaPago.findUnique({ where: { personaId } });
   const pendiente = await ctx.db.personaPagoSolicitud.findFirst({
     where: { personaId, estado: "pendiente" },

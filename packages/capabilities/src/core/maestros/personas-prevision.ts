@@ -6,7 +6,12 @@ import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento, textoOpcional } from "./comun";
-import { personaFicha } from "./personas-ficha-comun";
+import {
+  enmascararDatosSensiblesPersona,
+  enmascararPlanIsapre,
+  personaFicha,
+} from "./personas-ficha-comun";
+import type { Contexto } from "../../types";
 
 const previsionSchema = z.object({
   personaId: z.string(),
@@ -31,7 +36,7 @@ const inputPrevision = z.object({
 });
 
 async function vistaPrevision(
-  ctx: Parameters<typeof cifradoDeCampos>[0],
+  ctx: Contexto,
   fila: {
     personaId: string;
     afp: string | null;
@@ -56,16 +61,25 @@ async function vistaPrevision(
       cotizacionUfPct: null,
     };
   }
-  const cifrado = cifradoDeCampos(ctx);
-  const plan = fila.planIsapre
-    ? await cifrado.descifrar("personas_prevision", "plan_isapre", fila.planIsapre)
-    : null;
+  const enmascarar = enmascararDatosSensiblesPersona(ctx);
+  let plan: string | null = null;
+  if (fila.planIsapre) {
+    if (enmascarar) {
+      plan = enmascararPlanIsapre(fila.planIsapre);
+    } else {
+      plan = await cifradoDeCampos(ctx).descifrar(
+        "personas_prevision",
+        "plan_isapre",
+        fila.planIsapre,
+      );
+    }
+  }
   return {
     personaId: fila.personaId,
-    afp: fila.afp,
-    regimen: fila.regimen,
-    sistemaSalud: fila.sistemaSalud,
-    isapreNombre: fila.isapreNombre,
+    afp: fila.afp ?? null,
+    regimen: fila.regimen ?? null,
+    sistemaSalud: fila.sistemaSalud ?? null,
+    isapreNombre: fila.isapreNombre ?? null,
     planIsapre: plan,
     planUf: fila.planUf?.toString() ?? null,
     cotizacionUfPct: fila.cotizacionUfPct?.toString() ?? null,
@@ -76,8 +90,9 @@ export const personasPrevisionVer = defineCapability({
   auditarLectura: (s) => [s.personaId],
   id: "core.personas.prevision_ver",
   descripcion:
-    "Muestra la previsión social de una persona (AFP, régimen, salud e ISAPRE). Dato reservado de RRHH; queda auditado quién lo consultó.",
+    "Muestra la previsión social de una persona (AFP, régimen, salud e ISAPRE). Dato reservado de RRHH; el supervisor recibe el plan ISAPRE enmascarado sin descifrar (R-PER-004).",
   permiso: PERMISOS_CORE.personasPrevisionRead,
+  portales: ["erp", "supervisor"],
   input: z.object({ id: uuidSchema }),
   output: previsionSchema,
   efecto: "lectura",
