@@ -1,5 +1,11 @@
 /* eslint-disable max-lines -- CAF (CAR-143) + guardarSecretoTx certificado DTE (CAR-149) en el mismo módulo */
-import { cifrar, descifrar, generarDek, kekDelEntorno, sufijoDe, sufijoParaGuardar } from "@opai/integrations";
+import {
+  cifrar,
+  descifrar,
+  generarDek,
+  kekDelEntorno,
+  sufijoParaGuardar,
+} from "@opai/integrations";
 
 import type { TenantTx } from "@opai/db";
 
@@ -77,7 +83,7 @@ export async function guardarSecretoConIdTx(
   await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
   const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
   const row = await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
-  return { id: row.id, sufijo: sufijoDe(valor) };
+  return { id: row.id, sufijo: sufijoParaGuardar(nombre, valor) };
 }
 
 /** Inserta un secreto cifrado; falla si el nombre ya existe (nunca sobrescribe). */
@@ -101,7 +107,7 @@ export async function insertarSecretoConIdTx(
     cifrado: bytes(c.cifrado),
     iv: bytes(c.iv),
     tag: bytes(c.tag),
-    sufijo: sufijoDe(valor),
+    sufijo: sufijoParaGuardar(nombre, valor),
   };
   const row = await tx.secreto.create({
     data: {
@@ -112,7 +118,7 @@ export async function insertarSecretoConIdTx(
       creadoPor: ctx.usuario?.id ?? null,
     },
   });
-  return { id: row.id, sufijo: sufijoDe(valor) };
+  return { id: row.id, sufijo: sufijoParaGuardar(nombre, valor) };
 }
 
 /** Guarda un secreto cifrado y devuelve su id (p. ej. CAF en finanzas.dte_folios). */
