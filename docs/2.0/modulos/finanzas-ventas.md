@@ -24,6 +24,7 @@ Programación/cierre de mes, cobranza, banca, factoring, integraciones UI, nota 
 |---------|-------------|---------------------------|
 | `finanzas:read` (libro ventas) | sí | no |
 | `finanzas:ventas.manage` | sí | no |
+| `finanzas:ventas.configure` (cargar CAF, config DTE) | sí | no |
 
 ## Capacidades
 

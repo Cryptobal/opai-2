@@ -33,7 +33,11 @@ export const manifest = defineModule({
     { id: "finanzas:compras.manage", descripcion: "Registrar, importar y asignar centro de costo a documentos recibidos" },
     { id: "finanzas:proveedores.manage", descripcion: "Crear y editar proveedores y sus valores por defecto" },
     { id: "finanzas:plan.manage", descripcion: "Cargar y editar el plan de cuentas" },
-    { id: "finanzas:ventas.manage", descripcion: "Emitir facturas electrónicas, notas de crédito y administrar folios CAF" },
+    { id: "finanzas:ventas.manage", descripcion: "Emitir facturas electrónicas, notas de crédito y operar el libro de ventas" },
+    {
+      id: "finanzas:ventas.configure",
+      descripcion: "Configurar facturación electrónica: cargar CAF y parámetros DTE del tenant",
+    },
     { id: PERMISO_VER, descripcion: "Ver la planilla del flujo de caja" },
     { id: PERMISO_GESTIONAR, descripcion: "Fijar, mover y dar por cumplidas las celdas del flujo" },
     { id: PERMISO_CERRAR, descripcion: "Sellar y reabrir semanas del flujo" },

@@ -21,6 +21,7 @@ const ROL = "opai_app";
 // En los controles, un índice único formado solo por tenant y referencias choca con la fila original:
 // llegar a ese error ya prueba que la política y los triggers aceptaron la fila (van antes del índice).
 const UNICO = "23505";
+const EXCL = "23P01";
 // Mensaje de `core.verificar_mismo_tenant`. En su control basta que el error, si lo hay, venga de
 // después (un CHECK, otro trigger o un único): la referencia de la misma empresa ya pasó.
 const OTRA = /apunta a una fila de otra empresa o inexistente/;
@@ -136,7 +137,7 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
       if (!rechazo) malas.push(`${x.nombre} desde A: ${JSON.stringify(cruzado)}`);
       if (!(await privilegio(admin, ROL, x.nombre, "INSERT"))) continue;
       const propio = await comoTenant(app, t.b, sql, params);
-      if (propio.codigo && propio.codigo !== UNICO)
+      if (propio.codigo && propio.codigo !== UNICO && propio.codigo !== EXCL)
         malas.push(`${x.nombre} control con B: ${propio.mensaje}`);
     }
     expect(malas).toEqual([]);

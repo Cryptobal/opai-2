@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -17,6 +17,13 @@ vi.mock("@/app/_components/maestros/enlace-boton-hoja", () => ({
 vi.mock("@/app/(erp)/cuentas/_componentes/diferidas", () => ({
   HojaContacto: () => "Formulario nuevo",
 }));
+vi.mock("@/app/(erp)/contactos/_componentes/lista-vinculos-diferida", async () => {
+  const { ListaVinculos } = await import("@/app/(erp)/contactos/_componentes/lista-vinculos");
+  return {
+    ListaVinculosDiferida: (p: ComponentProps<typeof ListaVinculos>) =>
+      createElement(ListaVinculos, p),
+  };
+});
 import { CuentasContacto } from "@/app/(erp)/contactos/_componentes/cuentas-contacto";
 import { ListaVinculos } from "@/app/(erp)/contactos/_componentes/lista-vinculos";
 import { ContactosCuenta } from "@/app/(erp)/cuentas/_componentes/contactos-cuenta";

@@ -6,6 +6,7 @@ const PERMISOS_FINANZAS = [
   "finanzas:read",
   "finanzas:compras.manage",
   "finanzas:ventas.manage",
+  "finanzas:ventas.configure",
   "finanzas:proveedores.manage",
   "finanzas:plan.manage",
 ] as const;

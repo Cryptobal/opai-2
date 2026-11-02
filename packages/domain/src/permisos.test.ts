@@ -164,6 +164,13 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
     viewer: false,
   },
   "finanzas:read": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
+  "finanzas:ventas.configure": {
+    owner: true,
+    admin: true,
+    gerente: false,
+    supervisor: false,
+    viewer: false,
+  },
   "finanzas:dte.emit": {
     owner: true,
     admin: true,
