@@ -28,6 +28,15 @@ export type ContactoDestino = {
   roles: string[];
 };
 
+export type VinculoDestino = {
+  id: string;
+  contactoId: string;
+  cuentaId: string;
+  cargo: string | null;
+  roles: string[];
+  esPrincipal: boolean;
+};
+
 export type InstalacionDestino = {
   id: string;
   cuentaId: string;
@@ -48,6 +57,7 @@ export type IdExternoDestino = {
 export type EstadoDestino = {
   cuentas: CuentaDestino[];
   contactos: ContactoDestino[];
+  vinculos: VinculoDestino[];
   instalaciones: InstalacionDestino[];
   ids: IdExternoDestino[];
 };
@@ -55,6 +65,7 @@ export type EstadoDestino = {
 export const estadoVacio = (): EstadoDestino => ({
   cuentas: [],
   contactos: [],
+  vinculos: [],
   instalaciones: [],
   ids: [],
 });

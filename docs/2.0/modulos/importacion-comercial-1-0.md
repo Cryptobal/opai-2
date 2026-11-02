@@ -33,6 +33,31 @@ Esquema Zod en `packages/db/scripts/importar-opai1/origen.ts`. Campos de cuenta 
 - En el JSON de 1.0: `id` de cada fila.
 - En 2.0: `core.ids_externos` con sistema **`opai1`**.
 
+## Programación de facturas recurrentes (pendiente)
+
+**No se persiste en 2.0 todavía** (`pendiente_modelo_finanzas_programacion`). El export 1.0 puede traer `recurringInvoiceSchedules[]`; el importador solo las cuenta en `pendientes` del dry-run.
+
+Esquema JSON aceptado en origen (Zod `programacionRecurrenteOpai1` en `packages/db/scripts/importar-opai1/origen.ts`):
+
+```json
+{
+  "recurringInvoiceSchedules": [
+    {
+      "id": "string",
+      "accountId": "string",
+      "active": true,
+      "frequency": "monthly",
+      "dayOfMonth": 5,
+      "amount": 100000,
+      "description": "string",
+      "lastRunAt": "2026-01-05T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Cuando exista el modelo Finanzas en 2.0, un PR aparte mapeará estas filas; hasta entonces no se inventa tabla ni capacidad.
+
 ## Referencias
 
 - Simulación previa: `docs/2.0/briefs/BRIEF-07-importacion-opai1-simulacion.md`

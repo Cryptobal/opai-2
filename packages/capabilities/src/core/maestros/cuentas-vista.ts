@@ -17,6 +17,8 @@ export const cuentaSchema = z.object({
   calle: z.string().nullable(),
   comuna: z.string().nullable(),
   region: z.string().nullable(),
+  ciudad: z.string().nullable(),
+  emailDte: z.string().nullable(),
   escrituraFecha: z.string().nullable(),
   escrituraNotaria: z.string().nullable(),
   notas: z.string().nullable(),
@@ -38,6 +40,8 @@ type FilaCuenta = {
   calle: string | null;
   comuna: string | null;
   region: string | null;
+  ciudad: string | null;
+  emailDte: string | null;
   escrituraFecha: Date | null;
   escrituraNotaria: string | null;
   notas: string | null;
@@ -61,6 +65,8 @@ export function vistaCuenta(c: FilaCuenta): z.input<typeof cuentaSchema> {
     calle: n(c.calle),
     comuna: n(c.comuna),
     region: n(c.region),
+    ciudad: n(c.ciudad),
+    emailDte: n(c.emailDte),
     escrituraFecha: dia(c.escrituraFecha),
     escrituraNotaria: n(c.escrituraNotaria),
     notas: n(c.notas),

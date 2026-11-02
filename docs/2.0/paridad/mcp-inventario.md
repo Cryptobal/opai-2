@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 451 pares pantalla→capacidad · 406 con herramienta · 45 excepciones justificadas · 0 faltantes.
+**Resumen:** 452 pares pantalla→capacidad · 406 con herramienta · 46 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -80,6 +80,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.list` | `cpq_catalogo_items_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.update` | `cpq_marca_documento_update` | existe |
@@ -511,6 +512,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | --- | --- |
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
+| `comercial.importar_1_0` | Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25). |
 | `core.anexos.aprobar` | Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032). |
 | `core.anexos.rechazar` | Solo personas: rechazar el anexo de contrato es una decisión humana responsable (Brief 07b PR 4, ADR-032). |
 | `core.apikeys.create` | Solo personas: una key no se crea keys ni ve secretos (ADR-032). |
@@ -573,6 +575,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
+| `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
 | `core.anexos.rechazar` | `app/_components` | no | reservada a personas |
 | `core.apikeys.create` | `/configuracion/agentes` | no | reservada a personas |
