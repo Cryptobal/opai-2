@@ -43,23 +43,48 @@ export const personasLaboralActualizar = defineCapability({
       async (tx) => {
         if (input.uniforme) {
           const { entrega, ...uniformeData } = input.uniforme;
-          const uCampos = {
-            tallaCamisa: uniformeData.tallaCamisa ?? null,
-            tallaPantalon: uniformeData.tallaPantalon ?? null,
-            tallaChaqueta: uniformeData.tallaChaqueta ?? null,
-            tallaZapato: uniformeData.tallaZapato ?? null,
-            notas: uniformeData.notas ?? null,
-          };
-          const u = await tx.personaUniforme.upsert({
-            where: { personaId: p.id },
-            create: { tenantId: p.tenantId, personaId: p.id, ...uCampos },
-            update: uCampos,
-          });
+          const patch: Record<string, string | null> = {};
+          if (uniformeData.tallaCamisa !== undefined) patch.tallaCamisa = uniformeData.tallaCamisa;
+          if (uniformeData.tallaPantalon !== undefined) patch.tallaPantalon = uniformeData.tallaPantalon;
+          if (uniformeData.tallaChaqueta !== undefined) patch.tallaChaqueta = uniformeData.tallaChaqueta;
+          if (uniformeData.tallaZapato !== undefined) patch.tallaZapato = uniformeData.tallaZapato;
+          if (uniformeData.notas !== undefined) patch.notas = uniformeData.notas;
+          let u = await tx.personaUniforme.findUnique({ where: { personaId: p.id } });
+          if (Object.keys(patch).length) {
+            u = await tx.personaUniforme.upsert({
+              where: { personaId: p.id },
+              create: {
+                tenantId: p.tenantId,
+                personaId: p.id,
+                tallaCamisa: patch.tallaCamisa ?? null,
+                tallaPantalon: patch.tallaPantalon ?? null,
+                tallaChaqueta: patch.tallaChaqueta ?? null,
+                tallaZapato: patch.tallaZapato ?? null,
+                notas: patch.notas ?? null,
+              },
+              update: patch,
+            });
+          }
           if (entrega) {
+            const uniforme =
+              u ??
+              (await tx.personaUniforme.upsert({
+                where: { personaId: p.id },
+                create: {
+                  tenantId: p.tenantId,
+                  personaId: p.id,
+                  tallaCamisa: null,
+                  tallaPantalon: null,
+                  tallaChaqueta: null,
+                  tallaZapato: null,
+                  notas: null,
+                },
+                update: {},
+              }));
             await tx.personaUniformeEntrega.create({
               data: {
                 tenantId: p.tenantId,
-                uniformeId: u.id,
+                uniformeId: uniforme.id,
                 personaId: p.id,
                 entregadaEn: aFecha(entrega.entregadaEn),
                 articulo: entrega.articulo,
@@ -72,50 +97,78 @@ export const personasLaboralActualizar = defineCapability({
         }
         if (input.jornadaDt) {
           const j = input.jornadaDt;
-          const jBase = {
-            resolucion: j.resolucion ?? null,
-            resolucionVigenteDesde: j.resolucionVigenteDesde
+          const patch: Record<string, unknown> = {};
+          if (j.resolucion !== undefined) patch.resolucion = j.resolucion;
+          if (j.resolucionVigenteDesde !== undefined) {
+            patch.resolucionVigenteDesde = j.resolucionVigenteDesde
               ? aFecha(j.resolucionVigenteDesde)
-              : null,
-            horasSemanales: j.horasSemanales ?? null,
-            distribucion: j.distribucion ?? null,
-            articulo22: j.articulo22 ?? false,
-            plazoFijoPeriodo: j.plazoFijoPeriodo ?? null,
-            terminoPlazoFijo: j.terminoPlazoFijo ? aFecha(j.terminoPlazoFijo) : null,
-            avisoTerminoDias: j.avisoTerminoDias ?? null,
-          };
-          await tx.personaJornadaDt.upsert({
-            where: { personaId: p.id },
-            create: { tenantId: p.tenantId, personaId: p.id, ...jBase },
-            update: jBase,
-          });
+              : null;
+          }
+          if (j.horasSemanales !== undefined) patch.horasSemanales = j.horasSemanales;
+          if (j.distribucion !== undefined) patch.distribucion = j.distribucion;
+          if (j.articulo22 !== undefined) patch.articulo22 = j.articulo22;
+          if (j.plazoFijoPeriodo !== undefined) patch.plazoFijoPeriodo = j.plazoFijoPeriodo;
+          if (j.terminoPlazoFijo !== undefined) {
+            patch.terminoPlazoFijo = j.terminoPlazoFijo ? aFecha(j.terminoPlazoFijo) : null;
+          }
+          if (j.avisoTerminoDias !== undefined) patch.avisoTerminoDias = j.avisoTerminoDias;
+          if (Object.keys(patch).length) {
+            await tx.personaJornadaDt.upsert({
+              where: { personaId: p.id },
+              create: {
+                tenantId: p.tenantId,
+                personaId: p.id,
+                resolucion: null,
+                resolucionVigenteDesde: null,
+                horasSemanales: null,
+                distribucion: null,
+                articulo22: false,
+                plazoFijoPeriodo: null,
+                terminoPlazoFijo: null,
+                avisoTerminoDias: null,
+                ...patch,
+              },
+              update: patch,
+            });
+          }
         }
         if (input.os10) {
           const o = input.os10;
-          const oBase = {
-            credencial: o.credencial ?? null,
-            venceEn: o.venceEn ? aFecha(o.venceEn) : null,
-          };
-          await tx.personaOs10.upsert({
-            where: { personaId: p.id },
-            create: { tenantId: p.tenantId, personaId: p.id, ...oBase },
-            update: oBase,
-          });
+          const patch: Record<string, unknown> = {};
+          if (o.credencial !== undefined) patch.credencial = o.credencial;
+          if (o.venceEn !== undefined) patch.venceEn = o.venceEn ? aFecha(o.venceEn) : null;
+          if (Object.keys(patch).length) {
+            await tx.personaOs10.upsert({
+              where: { personaId: p.id },
+              create: { tenantId: p.tenantId, personaId: p.id, credencial: null, venceEn: null, ...patch },
+              update: patch,
+            });
+          }
         }
         if (input.contacto) {
           const c = input.contacto;
-          const cBase = {
-            estadoCivil: c.estadoCivil ?? null,
-            telefonoSecundario: c.telefonoSecundario ?? null,
-            emergenciaNombre: c.emergenciaNombre ?? null,
-            emergenciaRelacion: c.emergenciaRelacion ?? null,
-            emergenciaTelefono: c.emergenciaTelefono ?? null,
-          };
-          await tx.personaContactoLaboral.upsert({
-            where: { personaId: p.id },
-            create: { tenantId: p.tenantId, personaId: p.id, ...cBase },
-            update: cBase,
-          });
+          const patch: Record<string, string | null> = {};
+          if (c.estadoCivil !== undefined) patch.estadoCivil = c.estadoCivil;
+          if (c.telefonoSecundario !== undefined) patch.telefonoSecundario = c.telefonoSecundario;
+          if (c.emergenciaNombre !== undefined) patch.emergenciaNombre = c.emergenciaNombre;
+          if (c.emergenciaRelacion !== undefined) patch.emergenciaRelacion = c.emergenciaRelacion;
+          if (c.emergenciaTelefono !== undefined) patch.emergenciaTelefono = c.emergenciaTelefono;
+          if (Object.keys(patch).length) {
+            await tx.personaContactoLaboral.upsert({
+              where: { personaId: p.id },
+              create: {
+                tenantId: p.tenantId,
+                personaId: p.id,
+                estadoCivil: null,
+                telefonoSecundario: null,
+                emergenciaNombre: null,
+                emergenciaRelacion: null,
+                emergenciaTelefono: null,
+                ...patch,
+              },
+              update: patch,
+            });
+          }
         }
         return { id: p.id };
       },

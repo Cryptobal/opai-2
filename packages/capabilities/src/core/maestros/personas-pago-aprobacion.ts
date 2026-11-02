@@ -2,13 +2,15 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
-import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
+import {
+  cifrarCampoEnTransaccion,
+  descifrarCampoEnTransaccion,
+} from "../cumplimiento/cifrado-campos";
 import { defineCapability } from "../../define";
-import { reglaDeNegocio } from "../../errores";
+import { conflicto, prohibido, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaFicha } from "./personas-ficha-comun";
-import { solicitudPendienteDe } from "./personas-pago";
 import { vistaPago } from "./personas-pago-vista";
 
 const motivoRechazo = z.string().trim().min(5).max(500);
@@ -24,23 +26,48 @@ export const personasPagoAprobarCambio = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const p = await personaFicha(ctx, input.id);
-    const s = await solicitudPendienteDe(ctx, p.id);
+    const s = await ctx.db.personaPagoSolicitud.findFirst({
+      where: { personaId: p.id, estado: "pendiente" },
+    });
+    if (!s) throw conflicto("No hay una solicitud pendiente para esta persona.");
     if (!ctx.usuario?.id) throw reglaDeNegocio("Se requiere un usuario autenticado.");
     if (s.solicitadoPorId === ctx.usuario.id)
-      throw reglaDeNegocio("No puedes aprobar una solicitud que tú mismo registraste.");
+      throw prohibido("No puedes aprobar una solicitud que tú mismo registraste.");
     if (dryRun) return { personaId: p.id, solicitudId: s.id, estado: "aprobada" as const };
-    const cifrado = cifradoDeCampos(ctx);
-    const numeroVigente = s.numeroCuenta
-      ? await cifrado.cifrar(
-          "personas_pago",
-          "numero_cuenta",
-          await cifrado.descifrar("personas_pago_solicitudes", "numero_cuenta", s.numeroCuenta),
-        )
-      : null;
     await escribirConEvento(
       ctx,
       { tipo: "core.persona.pago_aprobado", entidadTipo: "persona" },
       async (tx) => {
+        const resuelta = await tx.personaPagoSolicitud.updateMany({
+          where: {
+            id: s.id,
+            estado: "pendiente",
+            solicitadoPorId: { not: ctx.usuario!.id },
+          },
+          data: {
+            estado: "aprobada",
+            resueltoPorId: ctx.usuario!.id,
+            resueltaEn: new Date(),
+          },
+        });
+        if (resuelta.count !== 1) {
+          throw conflicto("La solicitud ya no está pendiente o no puedes resolverla.");
+        }
+        const numeroVigente = s.numeroCuenta
+          ? await cifrarCampoEnTransaccion(
+              ctx,
+              tx,
+              "personas_pago",
+              "numero_cuenta",
+              await descifrarCampoEnTransaccion(
+                ctx,
+                tx,
+                "personas_pago_solicitudes",
+                "numero_cuenta",
+                s.numeroCuenta,
+              ),
+            )
+          : null;
         await tx.personaPago.upsert({
           where: { personaId: p.id },
           create: {
@@ -56,14 +83,6 @@ export const personasPagoAprobarCambio = defineCapability({
             tipoCuenta: s.tipoCuenta,
             numeroCuenta: numeroVigente,
             rutTitular: s.rutTitular,
-          },
-        });
-        await tx.personaPagoSolicitud.update({
-          where: { id: s.id },
-          data: {
-            estado: "aprobada",
-            resueltoPorId: ctx.usuario!.id,
-            resueltaEn: new Date(),
           },
         });
         return { id: p.id };
@@ -86,24 +105,36 @@ export const personasPagoRechazarCambio = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const p = await personaFicha(ctx, input.id);
-    const s = await solicitudPendienteDe(ctx, p.id);
+    const s = await ctx.db.personaPagoSolicitud.findFirst({
+      where: { personaId: p.id, estado: "pendiente" },
+    });
+    if (!s) throw conflicto("No hay una solicitud pendiente para esta persona.");
     if (!ctx.usuario?.id) throw reglaDeNegocio("Se requiere un usuario autenticado.");
     if (s.solicitadoPorId === ctx.usuario.id)
-      throw reglaDeNegocio("No puedes rechazar una solicitud que tú mismo registraste.");
+      throw prohibido("No puedes rechazar una solicitud que tú mismo registraste.");
     if (dryRun) return { personaId: p.id, solicitudId: s.id, estado: "rechazada" as const };
     await escribirConEvento(
       ctx,
       { tipo: "core.persona.pago_rechazado", entidadTipo: "persona" },
-      (tx) =>
-        tx.personaPagoSolicitud.update({
-          where: { id: s.id },
+      async (tx) => {
+        const resuelta = await tx.personaPagoSolicitud.updateMany({
+          where: {
+            id: s.id,
+            estado: "pendiente",
+            solicitadoPorId: { not: ctx.usuario!.id },
+          },
           data: {
             estado: "rechazada",
             motivoRechazo: input.motivo,
             resueltoPorId: ctx.usuario!.id,
             resueltaEn: new Date(),
           },
-        }),
+        });
+        if (resuelta.count !== 1) {
+          throw conflicto("La solicitud ya no está pendiente o no puedes resolverla.");
+        }
+        return { id: p.id };
+      },
     );
     return { personaId: p.id, solicitudId: s.id, estado: "rechazada" as const };
   },

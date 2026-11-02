@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
-import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
+import { cifrarCampoEnTransaccion } from "../cumplimiento/cifrado-campos";
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
@@ -51,18 +51,11 @@ export const personasPagoSolicitarCambio = defineCapability({
       where: { personaId: p.id, estado: "pendiente" },
     });
     if (ya) throw reglaDeNegocio("Ya hay una solicitud de cambio pendiente para esta persona.");
-    const cifrado = cifradoDeCampos(ctx);
-    const numeroCifrado = await cifrado.cifrar(
-      "personas_pago_solicitudes",
-      "numero_cuenta",
-      input.numeroCuenta,
-    );
     const data = {
       tenantId: p.tenantId,
       personaId: p.id,
       bancoCodigo: input.bancoCodigo,
       tipoCuenta: input.tipoCuenta,
-      numeroCuenta: numeroCifrado,
       rutTitular: input.rutTitular ?? null,
       estado: "pendiente",
       solicitadoPorId: ctx.usuario.id,
@@ -72,7 +65,16 @@ export const personasPagoSolicitarCambio = defineCapability({
       escribirConEvento(
         ctx,
         { tipo: "core.persona.pago_solicitud_creada", entidadTipo: "persona" },
-        (tx) => tx.personaPagoSolicitud.create({ data }),
+        async (tx) => {
+          const numeroCifrado = await cifrarCampoEnTransaccion(
+            ctx,
+            tx,
+            "personas_pago_solicitudes",
+            "numero_cuenta",
+            input.numeroCuenta,
+          );
+          return tx.personaPagoSolicitud.create({ data: { ...data, numeroCuenta: numeroCifrado } });
+        },
       ),
       "Ya hay una solicitud pendiente para esta persona.",
     );

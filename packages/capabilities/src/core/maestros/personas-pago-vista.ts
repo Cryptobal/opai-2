@@ -3,7 +3,7 @@ import { z } from "zod";
 import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
-import { enmascararCuenta, enmascararDatosSensiblesPersona } from "./personas-ficha-comun";
+import { enmascararCuenta, enmascararCuentaEnLectura } from "./personas-ficha-comun";
 
 export const pagoVerSchema = z.object({
   personaId: z.string(),
@@ -38,7 +38,7 @@ async function descifrarNumero(
 }
 
 export async function vistaPago(ctx: Contexto, personaId: string) {
-  const enmascarar = enmascararDatosSensiblesPersona(ctx);
+  const enmascarar = enmascararCuentaEnLectura(ctx);
   const vigente = await ctx.db.personaPago.findUnique({ where: { personaId } });
   const pendiente = await ctx.db.personaPagoSolicitud.findFirst({
     where: { personaId, estado: "pendiente" },
@@ -70,7 +70,7 @@ export async function vistaPago(ctx: Contexto, personaId: string) {
           numeroCuenta: pendNum,
           rutTitular: pendiente.rutTitular,
           solicitadoPorId: pendiente.solicitadoPorId,
-          motivoRechazo: pendiente.motivoRechazo,
+          motivoRechazo: pendiente.motivoRechazo ?? null,
           createdAt: pendiente.createdAt.toISOString(),
         }
       : null,

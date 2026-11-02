@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
@@ -9,11 +9,15 @@ describe.skipIf(!urlPropietario)("inventario NÚCLEO-H: accesos sensibles en Pos
   let e: Entorno, mod: typeof Mod, a: FixtureLecturas, b: FixtureLecturas;
   beforeAll(async () => {
     e = await prepararEntorno();
+    Object.assign(process.env, {
+      OPAI_SECRETS_KEY: randomBytes(32).toString("base64"),
+      OPAI_SECRETS_KEY_VERSION: "1",
+    });
     mod = await import("../src");
     mod.limpiarRegistro();
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
-    a = await sembrarLecturas(e);
-    b = await sembrarLecturas(e);
+    a = await sembrarLecturas(e, mod as Parameters<typeof sembrarLecturas>[1]);
+    b = await sembrarLecturas(e, mod as Parameters<typeof sembrarLecturas>[1]);
   });
   afterAll(async () => {
     await e?.cerrar();

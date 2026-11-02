@@ -2,13 +2,13 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
-import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
+import { cifradoDeCampos, cifrarCampoEnTransaccion } from "../cumplimiento/cifrado-campos";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento, textoOpcional } from "./comun";
 import {
-  enmascararDatosSensiblesPersona,
   enmascararPlanIsapre,
+  enmascararPlanIsapreEnLectura,
   personaFicha,
 } from "./personas-ficha-comun";
 import type { Contexto } from "../../types";
@@ -61,7 +61,7 @@ async function vistaPrevision(
       cotizacionUfPct: null,
     };
   }
-  const enmascarar = enmascararDatosSensiblesPersona(ctx);
+  const enmascarar = enmascararPlanIsapreEnLectura(ctx);
   let plan: string | null = null;
   if (fila.planIsapre) {
     if (enmascarar) {
@@ -116,37 +116,43 @@ export const personasPrevisionActualizar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const p = await personaFicha(ctx, input.id);
-    const cifrado = cifradoDeCampos(ctx);
-    const planCifrado =
-      input.planIsapre === undefined
-        ? undefined
-        : input.planIsapre === null
-          ? null
-          : await cifrado.cifrar("personas_prevision", "plan_isapre", input.planIsapre);
-    const data = {
-      tenantId: p.tenantId,
-      personaId: p.id,
-      ...(input.afp !== undefined ? { afp: input.afp } : {}),
-      ...(input.regimen !== undefined ? { regimen: input.regimen } : {}),
-      ...(input.sistemaSalud !== undefined ? { sistemaSalud: input.sistemaSalud } : {}),
-      ...(input.isapreNombre !== undefined ? { isapreNombre: input.isapreNombre } : {}),
-      ...(planCifrado !== undefined ? { planIsapre: planCifrado } : {}),
-      ...(input.planUf !== undefined ? { planUf: input.planUf } : {}),
-      ...(input.cotizacionUfPct !== undefined ? { cotizacionUfPct: input.cotizacionUfPct } : {}),
-    };
     if (dryRun) {
       const prev = await ctx.db.personaPrevision.findUnique({ where: { personaId: p.id } });
-      return vistaPrevision(ctx, { ...(prev ?? data), personaId: p.id } as never, p.id);
+      return vistaPrevision(ctx, { ...(prev ?? { tenantId: p.tenantId, personaId: p.id }), personaId: p.id } as never, p.id);
     }
     const fila = await escribirConEvento(
       ctx,
       { tipo: "core.persona.prevision_actualizada", entidadTipo: "persona" },
-      (tx) =>
-        tx.personaPrevision.upsert({
+      async (tx) => {
+        const planCifrado =
+          input.planIsapre === undefined
+            ? undefined
+            : input.planIsapre === null
+              ? null
+              : await cifrarCampoEnTransaccion(
+                  ctx,
+                  tx,
+                  "personas_prevision",
+                  "plan_isapre",
+                  input.planIsapre,
+                );
+        const data = {
+          tenantId: p.tenantId,
+          personaId: p.id,
+          ...(input.afp !== undefined ? { afp: input.afp } : {}),
+          ...(input.regimen !== undefined ? { regimen: input.regimen } : {}),
+          ...(input.sistemaSalud !== undefined ? { sistemaSalud: input.sistemaSalud } : {}),
+          ...(input.isapreNombre !== undefined ? { isapreNombre: input.isapreNombre } : {}),
+          ...(planCifrado !== undefined ? { planIsapre: planCifrado } : {}),
+          ...(input.planUf !== undefined ? { planUf: input.planUf } : {}),
+          ...(input.cotizacionUfPct !== undefined ? { cotizacionUfPct: input.cotizacionUfPct } : {}),
+        };
+        return tx.personaPrevision.upsert({
           where: { personaId: p.id },
           create: data as never,
           update: data,
-        }),
+        });
+      },
     );
     return vistaPrevision(ctx, fila, p.id);
   },

@@ -1,9 +1,20 @@
 import { randomUUID } from "node:crypto";
 
 import type { Entorno } from "../../db/test/entorno";
+import type { ParametrosContexto } from "../src/contexto";
+
+type ModuloLecturas = {
+  crearContexto: (params: ParametrosContexto) => unknown;
+  executeCapability: (
+    ctx: unknown,
+    id: string,
+    input: object,
+    opts?: { dryRun?: boolean },
+  ) => Promise<{ ok: boolean }>;
+};
 
 /** Solo datos ficticios en la base local de pruebas, nunca servicios externos. */
-export async function sembrarLecturas(e: Entorno) {
+export async function sembrarLecturas(e: Entorno, mod?: ModuloLecturas) {
   const sufijo = randomUUID();
   const tenantId = (
     await e.admin.tenant.create({
@@ -145,6 +156,66 @@ export async function sembrarLecturas(e: Entorno) {
       },
     })
   ).id;
+  const puestoId = (
+    await e.admin.puesto.create({
+      data: {
+        tenantId,
+        instalacionId,
+        cargoId,
+        nombre: "Puesto lectura",
+        diasTrabajo: 5,
+        diasDescanso: 2,
+        horaInicio: "08:00",
+        horaFin: "17:00",
+        dotacion: 1,
+        estado: "activo",
+      },
+    })
+  ).id;
+  const estructuraId = (
+    await e.admin.estructuraSueldo.create({
+      data: {
+        tenantId,
+        nivel: "puesto",
+        puestoId,
+        cargoId,
+        sueldoBase: 450_000,
+        vigenteDesde: new Date("2026-01-01"),
+      },
+    })
+  ).id;
+  if (mod) {
+    const ctx = mod.crearContexto({
+      tenantId,
+      actor: { tipo: "user", id: userId },
+      usuario: { id: userId, nombre: "Lectura", email: `lecturas-${sufijo}@example.test`, platformRole: null },
+      rol: "owner",
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      medidor: { registrar: async () => undefined },
+    });
+    await mod.executeCapability(
+      ctx,
+      "core.personas.prevision_actualizar",
+      { id: personaId, planIsapre: "plan-reservado-lecturas", afp: "modelo" },
+      { dryRun: false },
+    );
+    await mod.executeCapability(ctx, "core.personas.laboral_actualizar", {
+      id: personaId,
+      contacto: { emergenciaNombre: "Contacto ficticio" },
+    }, { dryRun: false });
+    await mod.executeCapability(
+      ctx,
+      "core.personas.pago_solicitar_cambio",
+      {
+        id: personaId,
+        bancoCodigo: "001",
+        tipoCuenta: "corriente",
+        numeroCuenta: "9876543210",
+      },
+      { dryRun: false },
+    );
+  }
   return {
     tenantId,
     userId,
@@ -152,6 +223,7 @@ export async function sembrarLecturas(e: Entorno) {
     instalacionId,
     contactoId,
     personaId,
+    cargoId,
     vinculoId,
     consentimientoId,
     solicitudId,
@@ -163,6 +235,8 @@ export async function sembrarLecturas(e: Entorno) {
     membershipId,
     apiKeyId,
     aprobacionId,
+    puestoId,
+    estructuraId,
   };
 }
 
@@ -175,6 +249,10 @@ export function casosLecturas(f: FixtureLecturas): [string, object, string[]][] 
     ["core.instalaciones.get", { id: f.instalacionId }, [f.instalacionId]],
     ["core.excepciones.list", { membershipId: f.membershipId }, [f.userId]],
     ["core.personas.get", { id: f.personaId }, [f.personaId]],
+    ["core.personas.prevision_ver", { id: f.personaId }, [f.personaId]],
+    ["core.personas.pago_ver", { id: f.personaId }, [f.personaId]],
+    ["core.personas.laboral_ver", { id: f.personaId }, [f.personaId]],
+    ["core.cargos.montos_por_instalacion", { id: f.cargoId }, [f.instalacionId, f.estructuraId]],
     ["core.contactos.list", { cuentaId: f.cuentaId }, [f.contactoId]],
     ["core.contactos.get", { id: f.contactoId }, [f.contactoId]],
     ["core.vinculos.list", { personaId: f.personaId }, [f.vinculoId]],

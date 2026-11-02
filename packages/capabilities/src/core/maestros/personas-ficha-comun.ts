@@ -1,3 +1,5 @@
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { dondePersona } from "./alcance";
@@ -14,7 +16,7 @@ export async function personaFicha(ctx: Contexto, id: string) {
   return p;
 }
 
-/** Enmascara número de cuenta para supervisores (últimos 4 dígitos). */
+/** Enmascara número de cuenta para quien solo tiene lectura de pago (sin manage). */
 export function enmascararCuenta(numero: string | null, enmascarar: boolean): string | null {
   if (!numero) return null;
   if (!enmascarar) return numero;
@@ -23,12 +25,17 @@ export function enmascararCuenta(numero: string | null, enmascarar: boolean): st
   return `****${limpio.slice(-4)}`;
 }
 
-/** Supervisor: plan ISAPRE presente pero sin descifrar (dato de salud, R-PER-004). */
+/** Plan ISAPRE presente pero sin descifrar (dato de salud, R-PER-004). */
 export function enmascararPlanIsapre(_planCifrado: string): string {
   return "••••";
 }
 
-/** ¿El rol debe recibir previsión/banco enmascarados desde el servidor (R-PER-004)? */
-export function enmascararDatosSensiblesPersona(ctx: Contexto): boolean {
-  return ctx.rol === "supervisor";
+/** Ver plan ISAPRE en claro solo con permiso de gestión (no por nombre de rol). */
+export function enmascararPlanIsapreEnLectura(ctx: Contexto): boolean {
+  return !ctx.autorizar(PERMISOS_CORE.personasPrevisionManage);
+}
+
+/** Ver número de cuenta en claro solo con permiso de gestión de pago. */
+export function enmascararCuentaEnLectura(ctx: Contexto): boolean {
+  return !ctx.autorizar(PERMISOS_CORE.personasPagoManage);
 }

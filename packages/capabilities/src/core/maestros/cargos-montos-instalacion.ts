@@ -17,13 +17,17 @@ const filaSchema = z.object({
 });
 
 export const cargosMontosPorInstalacion = defineCapability({
-  auditarLectura: (s) => s.items.map((i) => i.instalacionId),
+  auditarLectura: (s) => [...s.items.map((i) => i.instalacionId), ...s.estructurasReveladas],
   id: "core.cargos.montos_por_instalacion",
   descripcion:
     "Lista, por instalación, los montos de sueldo resueltos en los puestos de un cargo (solo lectura). Respeta cargos sensibles y el permiso de montos sensibles.",
   permiso: PERMISOS_CORE.estructurasRead,
   input: z.object({ id: uuidSchema, fecha: z.string().optional() }),
-  output: z.object({ cargoId: z.string(), items: z.array(filaSchema) }),
+  output: z.object({
+    cargoId: z.string(),
+    items: z.array(filaSchema),
+    estructurasReveladas: z.array(z.string()),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -38,6 +42,7 @@ export const cargosMontosPorInstalacion = defineCapability({
       string,
       { nombre: string; puestos: number; sueldo: number | null; sensible: boolean }
     >();
+    const estructurasReveladas: string[] = [];
     for (const p of puestos) {
       const key = p.instalacionId;
       const agg = porInst.get(key) ?? {
@@ -60,9 +65,12 @@ export const cargosMontosPorInstalacion = defineCapability({
       if (est) {
         const oculto =
           cargo.sueldoSensible ||
-          (await ocultarMontos(ctx, { ...est, cargoId: cargo.id }, false));
+          (await ocultarMontos(ctx, { ...est, cargoId: cargo.id }, true));
         if (oculto) agg.sensible = true;
-        else if (est.sueldoBase != null) agg.sueldo = est.sueldoBase;
+        else {
+          if (est.sueldoBase != null) agg.sueldo = est.sueldoBase;
+          estructurasReveladas.push(est.id);
+        }
       }
       porInst.set(key, agg);
     }
@@ -73,6 +81,6 @@ export const cargosMontosPorInstalacion = defineCapability({
       sueldoBase: v.sensible ? null : v.sueldo,
       sensible: v.sensible,
     }));
-    return { cargoId: cargo.id, items };
+    return { cargoId: cargo.id, items, estructurasReveladas };
   },
 });
