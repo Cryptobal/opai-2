@@ -136,7 +136,22 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.cuentas_contables": { valores: () => ({ tipo: "activo", naturaleza: "deudora" }) },
   "finanzas.centros_costo": { valores: () => ({ tipo: "general" }) },
   "finanzas.documentos_recibidos": { valores: () => ({ tipo_dte: 33, monto_total: 0 }) },
-  "finanzas.dte_config": { valores: () => ({ ambiente: "certificacion" }) },
+  "finanzas.dte_config": { valores: () => ({ ambiente: "certificacion", emision_proveedor: "simulado" }) },
+  "finanzas.dte_envios": {
+    dependencias: ["finanzas.documentos_emitidos"],
+    valores: () => ({ track_id: "SIM-1", estado: "pendiente", intentos: 0, max_intentos: 7 }),
+  },
+  "finanzas.cesiones": {
+    dependencias: ["finanzas.documentos_emitidos"],
+    valores: () => ({
+      factor_rut: "76000000-0",
+      anticipo: 1000,
+      merma: 0,
+      saldo_factor: 0,
+      estado: "simulada",
+      proveedor: "octava",
+    }),
+  },
   "finanzas.dte_folios": {
     valores: () => ({ tipo_dte: 33, folio_desde: 1, folio_hasta: 100, folio_actual: 1 }),
   },

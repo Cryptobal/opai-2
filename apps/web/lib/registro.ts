@@ -10,6 +10,7 @@ import {
   registrarModulos,
   registrarTrabajos,
   trabajosDelNucleo,
+  trabajosFinanzas,
 } from "@opai/capabilities";
 import { modulos } from "@opai/modules";
 
@@ -28,7 +29,7 @@ export function asegurarRegistro(): void {
   limpiarConsumidores();
   registrarCapacidades(capacidadesDelNucleo);
   registrarModulos(modulos);
-  registrarTrabajos(trabajosDelNucleo);
+  registrarTrabajos([...trabajosDelNucleo, ...trabajosFinanzas]);
   registrarConsumidores(consumidoresDelNucleo);
   hecho = true;
 }

@@ -118,6 +118,7 @@ export async function marcarBorradorEmitido(
       fechaEmision: data.fechaEmision,
       estadoDte: "enviado",
       timbrePdf417: data.timbrePdf417,
+      xmlStorageKey: `dte/${documentoId}.xml`,
       cesionEstado: "no_cedido",
     },
   });

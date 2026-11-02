@@ -27,6 +27,20 @@ export function hoyEn(zona: string, ahora = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: zona, dateStyle: "short" }).format(ahora);
 }
 
+/** «aaaa-mm-ddTHH» (hora calendario del tenant, UTC+0 etiqueta) para trabajos horarios. */
+export function horaEn(zona: string, ahora = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: zona,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(ahora);
+  const g = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  return `${g("year")}-${g("month")}-${g("day")}T${g("hour")}`;
+}
+
 /** Ejecuta `fn` por cada tenant operable; un tenant que falla no detiene a los demás. */
 export async function porTenant<T>(
   fn: (t: { id: string; slug: string; timezone: string }) => Promise<T>,
