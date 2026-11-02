@@ -1,5 +1,3 @@
-import type { TenantTx } from "@opai/db";
-
 import { estaCifrado } from "./cifrado-campos";
 import type { Recifrador } from "./rotar-dek";
 
