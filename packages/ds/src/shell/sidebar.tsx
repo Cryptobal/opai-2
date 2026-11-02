@@ -24,31 +24,25 @@ type SidebarProps = {
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant | undefined;
-  /** Cambiar de empresa (ítems del menú del selector de portal). */
   empresas?: readonly ItemMenu[] | undefined;
-  /** Usuario al pie de la barra (ShellDesktop): con `menuUsuario`, abre su menú hacia arriba. */
   usuario?: Usuario | undefined;
   menuUsuario?: readonly ItemMenu[] | undefined;
-  /** Fijados (D3): sin esta prop, la sección no se muestra (portales sin fijados todavía). */
   fijados?: readonly ItemFijado[] | undefined;
   errorFijados?: boolean | undefined;
   reintentarFijados?: (() => void) | undefined;
   onFijar?: ((item: NavItem) => void) | undefined;
   onDesfijar?: ((href: string) => void) | undefined;
-  /** Acordeón por área (D1): área abierta controlada por quien use `Sidebar`. Sin esta prop, cada
-   *  `Sidebar` recuerda su propia área activa al montar (portales sin preferencia persistida). */
   areaAbierta?: string | null | undefined;
   onAreaAbierta?: ((area: string) => void) | undefined;
 };
 
-/**
- * Desktop (ShellDesktop): fijados, la marca, el selector de portal y empresa en tarjeta, las áreas
- * en acordeón (D1), Configuración y el usuario al pie. Las áreas de una sola entrada visible van
- * sueltas, sin encabezado (R3, ya resuelto por quien arma la navegación).
- */
+/** Desktop: acordeón D1 en ERP; secciones planas si no hay `onAreaAbierta`. */
 export function Sidebar(props: SidebarProps) {
   const { items, rutaActual, Link = LinkPorDefecto } = props;
   const grupos = agrupar(items.filter((i) => !i.pie));
+  const abierto = props.areaAbierta ?? null;
+  const acordeon = !!props.onAreaAbierta;
+  const tituloGrupo = "t-overline px-2 py-2 text-fg-muted";
   const fijadosHrefs = new Set((props.fijados ?? []).map((f) => f.href));
   const pinDe = (item: NavItem) =>
     item.fijable && props.onFijar
@@ -93,29 +87,47 @@ export function Sidebar(props: SidebarProps) {
               return (
                 <div key="suelto" className="flex flex-col gap-px px-3">
                   {lista.map((item) => (
-                    <Item
-                      key={item.href}
-                      item={item}
-                      rutaActual={rutaActual}
-                      Link={Link}
-                      {...pinDe(item)}
-                    />
+                    <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} {...pinDe(item)} />
                   ))}
                 </div>
               );
             }
+            const area = lista[0]?.area;
+            const clave = area ?? grupo;
+            if (lista.length === 1) {
+              return (
+                <div key={clave} className="flex flex-col gap-px px-3">
+                  <Item item={lista[0]!} rutaActual={rutaActual} Link={Link} {...pinDe(lista[0]!)} />
+                </div>
+              );
+            }
+            const colapsable = acordeon;
+            const expandido = !colapsable || abierto === clave;
             return (
-              <section key={grupo} className="mt-3 px-3" aria-label={grupo}>
-                <h2 className="t-overline px-2 py-2 text-fg-muted">{grupo}</h2>
-                {lista.map((item) => (
-                  <Item
-                    key={item.href}
-                    item={item}
-                    rutaActual={rutaActual}
-                    Link={Link}
-                    {...pinDe(item)}
-                  />
-                ))}
+              <section key={clave} className="mt-3 px-3" aria-label={grupo}>
+                {colapsable ? (
+                  <button
+                    type="button"
+                    aria-expanded={expandido}
+                    className={tituloGrupo}
+                    onClick={() => props.onAreaAbierta!(area ?? grupo)}
+                  >
+                    {grupo}
+                  </button>
+                ) : (
+                  <h2 className={tituloGrupo}>{grupo}</h2>
+                )}
+                {expandido
+                  ? lista.map((item) => (
+                      <Item
+                        key={item.href}
+                        item={item}
+                        rutaActual={rutaActual}
+                        Link={Link}
+                        {...pinDe(item)}
+                      />
+                    ))
+                  : null}
               </section>
             );
           })}
