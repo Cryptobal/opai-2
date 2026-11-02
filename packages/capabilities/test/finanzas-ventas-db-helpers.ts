@@ -3,15 +3,18 @@ import { randomUUID } from "node:crypto";
 import { type Entorno, prepararEntorno } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
+import type { Contexto } from "../src/types";
+
+type ModuloCap = typeof ModuloCapacidades;
 
 export type VentasDbSuite = {
   e: Entorno;
-  mod: typeof ModuloCapacidades;
+  mod: ModuloCap;
   tenantId: string;
   tenantB: string;
   cuentaId: string;
   documentoB: string;
-  ctx: (tid?: string) => ReturnType<ModuloCapacidades["crearContexto"]>;
+  ctx: (tid?: string) => Contexto;
   dato: <T>(id: string, input: Record<string, unknown>, opts?: { dryRun?: boolean }) => Promise<T>;
 };
 
