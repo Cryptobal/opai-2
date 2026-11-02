@@ -249,7 +249,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
         verificacion: "verificado",
       },
     });
-    const tope = Math.round(base * (1 + Math.min(3 * 0.0005, 0.03)));
+    const tope = Math.floor(base * (1 + Math.min(3 * 0.0005, 0.03)));
     const id = await enTransaccionCapturaSii(tenantId, (tx) =>
       remuneracionesPublicarSii(tx, {
         clave: "uf",
