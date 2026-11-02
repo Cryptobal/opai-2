@@ -50,10 +50,19 @@ export const manifest = defineModule({
     {
       portal: "erp",
       area: "finanzas",
+      href: "/finanzas/folios",
+      etiqueta: "Folios",
+      icono: "ReceiptText",
+      orden: 3,
+      permiso: "finanzas:ventas.configure",
+    },
+    {
+      portal: "erp",
+      area: "finanzas",
       href: "/finanzas/ventas",
       etiqueta: "Ventas",
       icono: "FileText",
-      orden: 3,
+      orden: 4,
       permiso: "finanzas:read",
     },
     {
@@ -62,7 +71,7 @@ export const manifest = defineModule({
       href: "/finanzas/compras",
       etiqueta: "Compras",
       icono: "FileText",
-      orden: 4,
+      orden: 5,
       permiso: "finanzas:read",
     },
     {
@@ -71,7 +80,7 @@ export const manifest = defineModule({
       href: "/finanzas/bancos",
       etiqueta: "Bancos",
       icono: "Landmark",
-      orden: 5,
+      orden: 6,
       permiso: PERMISO_BANCOS_VER,
     },
     {
@@ -80,7 +89,7 @@ export const manifest = defineModule({
       href: "/finanzas/plan-de-cuentas",
       etiqueta: "Plan de cuentas",
       icono: "Briefcase",
-      orden: 6,
+      orden: 7,
       permiso: "finanzas:read",
     },
     {
@@ -89,7 +98,7 @@ export const manifest = defineModule({
       href: "/finanzas/flujo",
       etiqueta: "Flujo de caja",
       icono: "ChartLine",
-      orden: 10,
+      orden: 11,
       permiso: PERMISO_VER,
     },
   ],
