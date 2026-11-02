@@ -5,16 +5,11 @@ import Link from "next/link";
 
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
-import {
-  AccionesFlujoEscritorio,
-  AccionesFlujoMovil,
-  MetasRendimientoFlujo,
-} from "./acciones-flujo-toolbar";
+import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
 import { celdaEditable, type Planilla } from "./datos";
 import type { ArmadoPlanilla } from "./datos";
 
 const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
-const HojaCierre = dynamic(() => import("./hoja-cierre").then((m) => ({ default: m.HojaCierre })));
 const HojaImportar = dynamic(() => import("./hoja-importar").then((m) => ({ default: m.HojaImportar })));
 const HojaMover = dynamic(() => import("./hoja-mover").then((m) => ({ default: m.HojaMover })));
 
@@ -23,7 +18,6 @@ type Props = {
   planilla: Planilla;
   armado: ArmadoPlanilla;
   gestiona: boolean;
-  cierra: boolean;
   configura: boolean;
   avisoTitulo: string | null;
   textosError: Record<string, unknown> | undefined;
@@ -38,7 +32,6 @@ export function PlanillaFlujoEscritorio({
   planilla: p,
   armado,
   gestiona,
-  cierra,
   configura,
   avisoTitulo,
   textosError,
@@ -53,13 +46,6 @@ export function PlanillaFlujoEscritorio({
         <Alerta tono="danger" titulo={avisoTitulo}>
           Revisa la semana en la planilla. Aviso in-app sin envío externo (CAR-136).
         </Alerta>
-      ) : null}
-      {p.ajustes.metasVisibles ? (
-        <MetasRendimientoFlujo
-          metaCeldaMs={p.ajustes.metaCeldaMs}
-          metaGuardadoP95Ms={p.ajustes.metaGuardadoP95Ms}
-          metaCargaInicialS={p.ajustes.metaCargaInicialS}
-        />
       ) : null}
       <PlanillaScreen
         state={state}
@@ -94,7 +80,7 @@ export function PlanillaFlujoEscritorio({
       />
       {gestiona ? (
         <p className="text-sm text-fg-muted">
-          Toca una celda planificada para editarla.{" "}
+          Toca una celda planificada para editarla. Las semanas pasadas muestran lo real según cartola.{" "}
           <Link href="/configuracion/modulo/finanzas?seccion=flujo-caja" className="text-accent underline">
             Filas y ajustes
           </Link>
@@ -110,9 +96,9 @@ export function PlanillaFlujoEscritorio({
           <HojaMover
             filas={p.filas}
             semanas={p.semanas.map((s) => s.semana)}
+            semanasPasadas={p.semanas.filter((s) => s.pasada).map((s) => s.semana)}
             horizonte={p.semanas.length}
           />
-          {cierra ? <HojaCierre semanas={p.semanas} /> : null}
         </>
       ) : null}
       {configura ? (

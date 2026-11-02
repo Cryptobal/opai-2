@@ -117,11 +117,6 @@ export function EditorFlujoCaja({
             inputMode="numeric"
           />
         </Campo>
-        <Checkbox
-          marcado={aj.metasVisibles}
-          onCambiar={(m) => setAj({ ...aj, metasVisibles: m })}
-          etiqueta="Mostrar metas de rendimiento bajo la planilla"
-        />
         <Button disabled={pendiente} onClick={() => void guardarAjustes()}>
           Guardar ajustes
         </Button>

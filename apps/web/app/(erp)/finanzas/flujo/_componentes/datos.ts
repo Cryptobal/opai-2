@@ -25,7 +25,7 @@ export type SemanaFlujo = {
   neto: number;
   saldoFinal: number;
   tono: "peligro" | "alerta" | null;
-  sellada: boolean;
+  pasada: boolean;
 };
 export type AjustesFlujo = {
   saldoInicial: number;
@@ -75,7 +75,7 @@ const corta = (iso: string) => fechaDdMmAaaa(iso).slice(0, 5);
 export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
   const columnas: ColumnaPlanilla[] = p.semanas.map((s) => ({
     id: s.semana,
-    etiqueta: corta(s.semana),
+    etiqueta: s.pasada ? `${corta(s.semana)} · real` : corta(s.semana),
     destacada: s.semana === p.columnaHoy,
   }));
   const filas: FilaPlanilla[] = [
@@ -99,8 +99,8 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
       return {
         texto: clp(s.saldoFinal),
         tono: s.tono === "peligro" ? "danger" : s.tono === "alerta" ? "warning" : "neutro",
-        detalle: s.sellada
-          ? "Sellada"
+        detalle: s.pasada
+          ? "Real según cartola"
           : s.tono === "peligro"
             ? "Saldo negativo proyectado"
             : s.tono === "alerta"
@@ -109,7 +109,7 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
       };
     const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);
     if (!c) {
-      if (opts?.gestiona && esFilaMonto(filaId) && !s.sellada) {
+      if (opts?.gestiona && esFilaMonto(filaId) && !s.pasada) {
         return { texto: "—", tono: "neutro", detalle: "Planificar" };
       }
       return null;
@@ -130,7 +130,7 @@ export type ArmadoPlanilla = ReturnType<typeof armarPlanilla>;
 export function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
   if (filaId.startsWith("total") || filaId === TOTALES.saldo) return false;
   const s = p.semanas.find((x) => x.semana === semana);
-  if (!s || s.sellada) return false;
+  if (!s || s.pasada) return false;
   const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);
   if (c && c.capa !== "plan") return false;
   return Boolean(p.filas.find((f) => f.id === filaId));

@@ -40,8 +40,7 @@ export function etiquetaSemanaCierre(s: SemanaFlujo): string {
   const mFin = mesCorto(fin);
   const rango =
     mIni === mFin ? `Semana del ${iniD} al ${finD} ${mFin}` : `Semana del ${iniD} ${mIni} al ${finD} ${mFin}`;
-  const sellada = s.sellada ? " · sellada" : "";
-  return `${rango}${sellada} · ${clp(s.saldoFinal)}`;
+  return `${rango} · ${clp(s.saldoFinal)}`;
 }
 
 function ultimosDigitos(numero: string): string {

@@ -1,12 +1,16 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { ACTIVOS, FILA_ING, S0, semilla } from "./fixtures";
 import { MONTO_FLUJO_MAX } from "./esquemas";
 import { capacidades } from "./index";
 
-beforeAll(() => registrarCapacidades(capacidades));
+beforeAll(() => {
+  registrarCapacidades(capacidades);
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-26T12:00:00Z"));
+});
 
 /** V205-01 / CAR-139: saldos acumulados grandes tras migración BIGINT. */
 describe("finanzas flujo · saldos acumulados grandes", () => {

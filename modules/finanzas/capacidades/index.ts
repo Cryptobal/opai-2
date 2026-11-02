@@ -3,7 +3,7 @@ import type { Capacidad } from "@opai/capabilities";
 
 import { ajustesActualizar, ajustesObtener } from "./ajustes";
 import { celdasCumplir, celdasFijar } from "./celdas";
-import { cierreReabrir, cierresListar, cierreSellar } from "./cierre";
+import { cierresListar } from "./cierre";
 import { flujoDerivadasListar } from "./derivadas";
 import { capacidadesBancos } from "./bancos";
 import { filasActualizar, filasArchivar, filasCrear } from "./filas";
@@ -21,8 +21,6 @@ export const capacidades: readonly Capacidad[] = [
   celdasMover,
   celdasCumplir,
   cierresListar,
-  cierreSellar,
-  cierreReabrir,
   ajustesObtener,
   ajustesActualizar,
   flujoImportar,
