@@ -25,7 +25,9 @@ import {
 } from "./credenciales-dte-util";
 import type { Integracion } from "./tipos";
 
-const Uploader = dynamic(() => import("@opai/ds").then((m) => m.Uploader), { ssr: false });
+const Uploader = dynamic(() => import("@opai/ds/uploader").then((m) => m.Uploader), {
+  ssr: false,
+});
 
 /** Certificado .pfx/.p12 de emisión DTE (CAR-149): carga de archivo + clave, metadatos sin secretos. */
 export function CredencialesDteEmision({ item }: { item: Integracion }) {
