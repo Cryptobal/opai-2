@@ -3,7 +3,8 @@ import { Estado } from "@opai/ds";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { EditorCanales, type CanalConfig } from "./editor-canales";
+import { EditorCanalesDiferido } from "./editor-canales-diferido";
+import type { CanalConfig } from "./editor-canales";
 
 /**
  * Pestaña «Canales de entrada» de Configuración → Módulos → Comercial (Leads, diseño 07): estado de
@@ -14,7 +15,7 @@ export async function SeccionCanales() {
   const r = await ejecutarComoUsuario<CanalConfig[]>("erp", "comercial.canales.get", {});
   return (
     <Estado state={r.ok ? "ready" : estadoPantalla(r)} variante="formulario">
-      {r.ok ? <EditorCanales canales={r.data} /> : null}
+      {r.ok ? <EditorCanalesDiferido canales={r.data} /> : null}
     </Estado>
   );
 }

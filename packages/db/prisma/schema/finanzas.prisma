@@ -237,3 +237,121 @@ model DocumentoRecibido {
   @@map("documentos_recibidos")
   @@schema("finanzas")
 }
+
+// Módulo Finanzas · Ventas DTE (CAR-137, Brief 22): libro de ventas, folios/CAF y emisión 33/34/61.
+
+/// Rango de folios autorizados por CAF. El XML del CAF vive cifrado en core.secretos (ADR-027).
+model DteFolio {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  tipoDte       Int       @map("tipo_dte")
+  folioDesde    Int       @map("folio_desde")
+  folioHasta    Int       @map("folio_hasta")
+  /// Próximo folio a consumir (atómico en transacción).
+  folioActual   Int       @map("folio_actual")
+  cafSecretoId  String?   @map("caf_secreto_id") @db.Uuid
+  cafVenceEn    DateTime? @map("caf_vence_en") @db.Date
+  umbralAviso   Int       @default(20) @map("umbral_aviso")
+  activo        Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, tipoDte, activo])
+  @@map("dte_folios")
+  @@schema("finanzas")
+}
+
+/// Documento emitido del libro de ventas. Folio null mientras es borrador.
+model DocumentoEmitido {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  cuentaId              String    @map("cuenta_id") @db.Uuid
+  instalacionId         String?   @map("instalacion_id") @db.Uuid
+  cotizacionId          String?   @map("cotizacion_id") @db.Uuid
+  tipoDte               Int       @map("tipo_dte")
+  folio                 Int?
+  fechaEmision          DateTime? @map("fecha_emision") @db.Date
+  fechaVencimiento      DateTime? @map("fecha_vencimiento") @db.Date
+  montoNeto             Int       @default(0) @map("monto_neto")
+  montoExento           Int       @default(0) @map("monto_exento")
+  montoIva              Int       @default(0) @map("monto_iva")
+  montoOtros            Int       @default(0) @map("monto_otros")
+  montoTotal            Int       @default(0) @map("monto_total")
+  /// borrador | enviado | aceptado | rechazado | anulado_nc
+  estadoDte             String    @default("borrador") @map("estado_dte")
+  /// pendiente | pagada_parcial | pagada
+  estadoCobro           String    @default("pendiente") @map("estado_cobro")
+  montoCobrado          Int       @default(0) @map("monto_cobrado")
+  glosa                 String?
+  xmlStorageKey         String?   @map("xml_storage_key")
+  timbrePdf417          String?   @map("timbre_pdf417")
+  trackIdSii            String?   @map("track_id_sii")
+  documentoReferenciaId String?   @map("documento_referencia_id") @db.Uuid
+  codigoReferencia      Int?      @map("codigo_referencia")
+  motivoNc              String?   @map("motivo_nc")
+  /// emitido | cedido | no_cedido (paridad 1.0 / Cobranzas)
+  cesionEstado          String?   @map("cesion_estado")
+  cesionProveedor       String?   @map("cesion_proveedor")
+  cesionOperacionId     String?   @map("cesion_operacion_id")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  lineas      DocumentoEmitidoLinea[]
+  referencias DocumentoEmitidoReferencia[]
+
+  @@index([tenantId, estadoDte, fechaEmision])
+  @@index([tenantId, cuentaId])
+  @@index([tenantId, cotizacionId])
+  @@map("documentos_emitidos")
+  @@schema("finanzas")
+}
+
+model DocumentoEmitidoLinea {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  documentoId  String   @map("documento_id") @db.Uuid
+  orden        Int      @default(0)
+  glosa        String
+  monto        Int
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, documentoId])
+  @@map("documentos_emitidos_lineas")
+  @@schema("finanzas")
+}
+
+model DocumentoEmitidoReferencia {
+  id          String @id @default(uuid(7)) @db.Uuid
+  tenantId    String @map("tenant_id") @db.Uuid
+  documentoId String @map("documento_id") @db.Uuid
+  tipoDteRef  Int    @map("tipo_dte_ref")
+  folioRef    Int    @map("folio_ref")
+  codigoRef   Int    @map("codigo_ref")
+  razonRef    String? @map("razon_ref")
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, documentoId])
+  @@map("documentos_emitidos_referencias")
+  @@schema("finanzas")
+}
+
+/// Ajustes DTE por tenant (ambiente SII; certificado vía integración dte).
+model DteConfig {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @unique @map("tenant_id") @db.Uuid
+  /// certificacion | produccion
+  ambiente  String   @default("certificacion")
+  rutEmisor         String?  @map("rut_emisor")
+  /// Porcentaje del rango CAF bajo el cual avisar folios bajos (R-FIN-038).
+  umbralFoliosPct   Int      @default(20) @map("umbral_folios_pct")
+  /// Días antes del vencimiento del CAF para avisar (R-FIN-038).
+  avisoCafDias     Int      @default(30) @map("aviso_caf_dias")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("dte_config")
+  @@schema("finanzas")
+}

@@ -83,6 +83,27 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.cuentas_contables": { valores: () => ({ tipo: "activo", naturaleza: "deudora" }) },
   "finanzas.centros_costo": { valores: () => ({ tipo: "general" }) },
   "finanzas.documentos_recibidos": { valores: () => ({ tipo_dte: 33, monto_total: 0 }) },
+  "finanzas.dte_config": { valores: () => ({ ambiente: "certificacion" }) },
+  "finanzas.dte_folios": {
+    valores: () => ({ tipo_dte: 33, folio_desde: 1, folio_hasta: 100, folio_actual: 1 }),
+  },
+  "finanzas.documentos_emitidos": {
+    dependencias: ["core.cuentas"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "core.cuentas"),
+      tipo_dte: 33,
+      estado_dte: "borrador",
+      estado_cobro: "pendiente",
+    }),
+  },
+  "finanzas.documentos_emitidos_lineas": {
+    dependencias: ["finanzas.documentos_emitidos"],
+    valores: () => ({ glosa: "Servicio de prueba", monto: 1000 }),
+  },
+  "finanzas.documentos_emitidos_referencias": {
+    dependencias: ["finanzas.documentos_emitidos"],
+    valores: () => ({ tipo_dte_ref: 33, folio_ref: 1, codigo_ref: 1 }),
+  },
   // CRM PR 2a: el trigger de core.contactos crea el vínculo inicial contacto–cuenta.
   "core.contacto_cuentas": {
     dependencias: ["core.contactos", "core.cuentas"],

@@ -4,32 +4,34 @@ import { describe, expect, it } from "vitest";
 import { manifest } from "./manifest";
 
 // Condición del Revisor (#186/#182): un solo módulo `finanzas` con los permisos, la navegación, los
-// eventos y las capacidades de Compras y de Flujo de caja, sin perder ni duplicar ninguno.
-describe("manifest de Finanzas (Compras + Flujo de caja)", () => {
-  it("reúne los permisos, la navegación y los eventos de los dos conjuntos", () => {
-    expect(manifest.permisos.map((p) => p.id).sort()).toEqual([
+// eventos y las capacidades de Compras, Flujo de caja y Ventas DTE, sin perder ni duplicar ninguno.
+describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
+  it("reúne los permisos, la navegación y los eventos de los tres conjuntos", () => {
+    expect(manifest.permisos.map((p) => p.id)).toEqual([
+      "finanzas:read",
       "finanzas:compras.manage",
+      "finanzas:proveedores.manage",
+      "finanzas:plan.manage",
+      "finanzas:ventas.manage",
+      "finanzas:flujo.ver",
+      "finanzas:flujo.gestionar",
       "finanzas:flujo.cerrar",
       "finanzas:flujo.configurar",
-      "finanzas:flujo.gestionar",
-      "finanzas:flujo.ver",
-      "finanzas:plan.manage",
-      "finanzas:proveedores.manage",
-      "finanzas:read",
     ]);
-    expect(manifest.navegacion.map((n) => n.href).sort()).toEqual([
+    expect(manifest.navegacion.map((n) => n.href)).toEqual([
+      "/finanzas/ventas",
       "/finanzas/compras",
-      "/finanzas/flujo",
       "/finanzas/plan-de-cuentas",
+      "/finanzas/flujo",
     ]);
-    expect(manifest.eventos).toHaveLength(18);
-    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(18);
+    expect(manifest.eventos).toHaveLength(23);
+    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(23);
     expect(manifest.configuracion).toBe(ajustesFinanzas);
   });
 
-  it("tiene 27 capacidades con ids únicos", () => {
+  it("tiene 40 capacidades con ids únicos", () => {
     const ids = manifest.capacidades.map((c) => c.id);
-    expect(ids).toHaveLength(27);
-    expect(new Set(ids).size).toBe(27);
+    expect(ids).toHaveLength(40);
+    expect(new Set(ids).size).toBe(40);
   });
 });
