@@ -1,5 +1,5 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
-import { contextoDePrueba } from "@opai/capabilities/testing";
+import { contextoDePrueba, USUARIO_DE_PRUEBA } from "@opai/capabilities/testing";
 import { publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -67,6 +67,61 @@ describe("cpq aprobación y envío (CAR-141)", () => {
       { dryRun: true },
     );
     expect(env.ok).toBe(true);
+  });
+
+  it("solicitar aprobación con actor agente guarda viaUserId en solicitadaPorId", async () => {
+    const { ctx } = ctxOwner();
+    const agentCtx = {
+      ...ctx,
+      actor: { tipo: "agent" as const, id: "key-cpq-aprob", viaUserId: USUARIO_DE_PRUEBA.id },
+    };
+    const id = await cotizacionConPuesto(agentCtx);
+    const pedido = await executeCapability(agentCtx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    expect(pedido.ok).toBe(true);
+    if (!pedido.ok) throw new Error("pedido");
+    const aprobacionId = (pedido.data as { aprobacionId: string }).aprobacionId;
+    const fila = await agentCtx.db.cpqAprobacion.findFirst({ where: { id: aprobacionId } });
+    expect(fila?.solicitadaPorId).toBe(USUARIO_DE_PRUEBA.id);
+    expect(fila?.solicitadaPorId).not.toBe("key-cpq-aprob");
+  });
+
+  it("un agente no puede aprobar ni rechazar_aprobacion", async () => {
+    const { ctx } = ctxOwner();
+    const id = await cotizacionConPuesto(ctx);
+    await executeCapability(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const agent = {
+      ...ctx,
+      actor: { tipo: "agent" as const, id: "key-apr", viaUserId: USUARIO_DE_PRUEBA.id },
+      autorizar: (p: string) => [...GESTOR, ...CON_COSTOS, "cpq:aprobar"].includes(p),
+    };
+    expect(await executeCapability(agent, "cpq.cotizaciones.aprobar", { id })).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
+    expect(
+      await executeCapability(agent, "cpq.cotizaciones.rechazar_aprobacion", { id, motivo: "No cumple" }),
+    ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("sin cpq:costos.ver la ficha no trae costo, huella ni costosLinea y explicar es FORBIDDEN", async () => {
+    const { ctx } = ctxOwner();
+    const id = await cotizacionConPuesto(ctx);
+    const sinCostos = { ...ctx, autorizar: (p: string) => GESTOR.includes(p) };
+    const f = await executeCapability(sinCostos, "cpq.cotizaciones.ficha", { id });
+    expect(f.ok).toBe(true);
+    if (!f.ok) throw new Error("ficha");
+    const data = f.data as {
+      meta: { costosLinea?: unknown };
+      secciones: { lineas: Record<string, unknown>[] }[];
+    };
+    expect(data.meta.costosLinea).toBeUndefined();
+    const linea = data.secciones.flatMap((s) => s.lineas)[0];
+    expect(linea?.costo).toBeUndefined();
+    expect(linea?.huellaJuegoValores).toBeUndefined();
+    expect(await executeCapability(sinCostos, "cpq.cotizaciones.explicar", { id })).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
   });
 
   it("ficha trae meta de fecha de cálculo y semáforo con costos", async () => {

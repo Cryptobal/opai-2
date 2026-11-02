@@ -30,8 +30,9 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
   const c = d.calculo as Parameters<typeof ResumenCotizacion>[0]["calculo"];
   const meta = d.meta as Parameters<typeof ResumenCotizacion>[0]["meta"];
   const recargar = () => router.refresh();
+  const propsMeta = meta !== undefined ? { meta } : {};
 
-  const resumen = <ResumenCotizacion version={d.version} calculo={c} meta={meta} />;
+  const resumen = <ResumenCotizacion version={d.version} calculo={c} {...propsMeta} />;
 
   return (
     <Estado state={datos.state} variante="detalle" textos={{ error: { accion: <BotonReintentar /> } }}>
@@ -51,7 +52,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
               cotizacionId={d.cotizacion.id}
               version={d.version}
               calculo={c}
-              meta={meta}
+              {...propsMeta}
               gestionar={datos.gestionar}
               aprobar={datos.aprobar}
               onHecho={recargar}
