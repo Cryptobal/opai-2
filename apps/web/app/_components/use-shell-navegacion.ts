@@ -2,9 +2,9 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Pin } from "lucide-react";
 
 import type { AreaNav } from "@opai/domain";
-import { avisar, esActivo } from "@opai/ds";
+import { avisar } from "@opai/ds";
 
-import { entradaInicio, entradasAreaPrincipal, type GrupoArea } from "@/lib/navegacion-areas";
+import { entradaInicio, entradasAreaPrincipal, areaNavActivaEnRuta, type GrupoArea } from "@/lib/navegacion-areas";
 import type { ItemNav } from "@/lib/navegacion";
 import { validarFichasNav } from "@/app/_acciones/validar-fichas-nav";
 
@@ -71,7 +71,7 @@ export function useShellNavegacion(
   // D1: al entrar queda abierta el área de la página actual; si la persona abre o pliega otra, se
   // recuerda por usuario y empresa (`navegacion_area_abierta`, null = sin preferencia explícita).
   const areaActiva = useMemo(
-    () => grupos?.find((g) => g.area !== "inicio" && g.entradas.some((e) => esActivo(rutaEfectiva, e.href)))?.area ?? null,
+    () => (grupos ? areaNavActivaEnRuta(grupos, rutaEfectiva) : null),
     [grupos, rutaEfectiva],
   );
   const rutaPrevia = useRef(rutaEfectiva);

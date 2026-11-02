@@ -1,6 +1,5 @@
 import type { PreferenciasShell } from "./preferencias-shell";
 
-/** Props de navegación diferida (fijados y acordeón D1) para `AppShell`. */
 export function propsPreferenciasShell(preferencias: PreferenciasShell) {
   return {
     fijados: preferencias.fijados,
