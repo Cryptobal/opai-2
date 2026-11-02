@@ -8,6 +8,7 @@ import { SeccionPortalCliente } from "@/app/(erp)/configuracion/_portal_cliente/
 import { SeccionCanales } from "@/app/(erp)/configuracion/_leads/seccion-canales";
 import { SeccionTiposIncidente } from "@/app/(erp)/configuracion/_rondas/seccion-tipos-incidente";
 import { SeccionCentrosCosto } from "@/app/(erp)/configuracion/_finanzas/seccion-centros-costo";
+import { SeccionFlujoCaja } from "@/app/(erp)/configuracion/_finanzas/seccion-flujo-caja";
 import { SeccionPlanCuentas } from "@/app/(erp)/configuracion/_finanzas/seccion-plan-cuentas";
 import { SeccionCatalogoCpq } from "@/app/(erp)/configuracion/_cpq/seccion-catalogo";
 import { SeccionMarcaPlantillasCpq } from "@/app/(erp)/configuracion/_cpq/seccion-marca-plantillas";
@@ -85,6 +86,12 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
     },
   ],
   finanzas: [
+    {
+      id: "flujo-caja",
+      etiqueta: "Flujo de caja",
+      permiso: "finanzas:flujo.configurar",
+      Contenido: SeccionFlujoCaja,
+    },
     {
       id: "plan-cuentas",
       etiqueta: "Plan de cuentas",

@@ -4,7 +4,8 @@ import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabiliti
 
 import { celdaSchema, montoSchema, semanaSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR } from "./permisos";
-import { aFecha, aIso, exigirSemanaAbierta, filaDe, ID_VISTA_PREVIA } from "./util";
+import { aFecha, aIso, bloquearSemanaFlujo, filaDe, ID_VISTA_PREVIA, semanaSelladaEnTx, selladasDe } from "./util";
+import { sincronizarAvisosEnTx } from "./aviso";
 
 const vista = (c: {
   id: string;
@@ -40,7 +41,8 @@ export const celdasFijar = defineCapability({
     const fila = await filaDe(ctx, input.filaId);
     if (!fila.activa)
       throw reglaDeNegocio("La fila está inactiva: actívala antes de cargarle cifras.");
-    await exigirSemanaAbierta(ctx, input.semana);
+    if ((await selladasDe(ctx)).has(input.semana))
+      throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
     const actual = await ctx.db.flujoCelda.findFirst({
       where: { filaId: fila.id, semana: aFecha(input.semana) },
     });
@@ -59,6 +61,9 @@ export const celdasFijar = defineCapability({
         nota,
       });
     const c = await ctx.transaccion(async (tx) => {
+      await bloquearSemanaFlujo(tx, ctx, input.semana);
+      if (await semanaSelladaEnTx(tx, input.semana))
+        throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
       const r = actual
         ? await tx.flujoCelda.update({
             where: { id: actual.id },
@@ -79,6 +84,7 @@ export const celdasFijar = defineCapability({
         entidadTipo: "flujoCelda",
         entidadId: r.id,
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
       return r;
     });
     return vista(c);
@@ -98,10 +104,15 @@ export const celdasCumplir = defineCapability({
     const c = await ctx.db.flujoCelda.findFirst({ where: { id: input.id } });
     if (!c) throw noEncontrado("La celda del flujo");
     if (c.capa !== "plan") throw reglaDeNegocio("Solo se da por cumplida una celda planificada.");
-    await exigirSemanaAbierta(ctx, aIso(c.semana));
+    const semana = aIso(c.semana);
+    if ((await selladasDe(ctx)).has(semana))
+      throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
     const monto = input.monto ?? c.monto;
     if (dryRun) return vista({ ...c, capa: "real", monto });
     const r = await ctx.transaccion(async (tx) => {
+      await bloquearSemanaFlujo(tx, ctx, semana);
+      if (await semanaSelladaEnTx(tx, semana))
+        throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
       const u = await tx.flujoCelda.update({
         where: { id: c.id },
         data: { capa: "real", monto, cumplidaEn: new Date() },
@@ -111,6 +122,7 @@ export const celdasCumplir = defineCapability({
         entidadTipo: "flujoCelda",
         entidadId: c.id,
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
       return u;
     });
     return vista(r);

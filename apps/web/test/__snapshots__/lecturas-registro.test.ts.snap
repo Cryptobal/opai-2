@@ -52,6 +52,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "finanzas.ajustes.obtener",
   "finanzas.centros_costo.listar",
   "finanzas.cierres.listar",
+  "finanzas.derivadas.listar",
   "finanzas.filas.listar",
   "finanzas.plan.listar",
   "finanzas.planilla.obtener",

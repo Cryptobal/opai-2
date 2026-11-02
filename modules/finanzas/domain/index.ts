@@ -140,7 +140,11 @@ export function planificarMovimiento(o: {
 }
 
 /** Diferencia entre el banco y lo sugerido, y si exige motivo para sellar. */
-export function evaluarCierre(saldoSugerido: number, saldoBanco: number) {
+export function evaluarCierre(
+  saldoSugerido: number,
+  saldoBanco: number,
+  tolerancia = TOLERANCIA_CIERRE_CLP,
+) {
   const diferencia = saldoBanco - saldoSugerido;
-  return { diferencia, exigeMotivo: Math.abs(diferencia) > TOLERANCIA_CIERRE_CLP };
+  return { diferencia, exigeMotivo: Math.abs(diferencia) > tolerancia };
 }

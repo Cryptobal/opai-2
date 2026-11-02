@@ -79,7 +79,9 @@ export const manifest = defineModule({
     { id: "finanzas.flujo.celda_cumplida", descripcion: "Se dio por cumplida una celda del flujo." },
     { id: "finanzas.flujo.semana_sellada", descripcion: "Se selló una semana del flujo." },
     { id: "finanzas.flujo.semana_reabierta", descripcion: "Se reabrió una semana sellada del flujo." },
-    { id: "finanzas.flujo.ajustes_cambiados", descripcion: "Cambiaron el saldo inicial o el umbral del flujo." },
+    { id: "finanzas.flujo.ajustes_cambiados", descripcion: "Cambiaron los ajustes del flujo." },
+    { id: "finanzas.flujo.saldo_negativo_avisado", descripcion: "Una semana futura quedó bajo el umbral del aviso in-app." },
+    { id: "finanzas.flujo.importado", descripcion: "Se importó un lote de celdas al flujo." },
   ],
   capacidades: [...capacidadesFinanzas, ...capacidadesFlujo],
 });

@@ -34,7 +34,10 @@ function aplicar(fila: Fila, data: Fila | undefined): Fila {
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   const tablas = new Map<string, Fila[]>(Object.entries(semilla).map(([k, v]) => [k, [...v]]));
   const tabla = (n: string) => tablas.get(n) ?? (tablas.set(n, []), tablas.get(n) as Fila[]);
-  const unicos: Record<string, string[]> = { trabajo: ["claveUnica"] };
+  const unicos: Record<string, string[]> = {
+    trabajo: ["claveUnica"],
+    flujoAvisoEmitido: ["semana"],
+  };
 
   function delegado(modelo: string) {
     const filas = () => tabla(modelo);
@@ -53,15 +56,24 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
       return filas().filter((x) => cumple(x, w));
     };
     const crear = (data: Fila) => {
+      if (duplicado(data)) {
+        const err = new Error(`${modelo}: valor único duplicado`) as Error & { code?: string };
+        err.code = "P2002";
+        throw err;
+      }
       const fila = { id: idOrdenado(), createdAt: new Date(), updatedAt: new Date(), ...data };
       filas().push(fila);
       return fila;
     };
+    const mismoValor = (a: unknown, b: unknown) =>
+      a instanceof Date && b instanceof Date ? a.getTime() === b.getTime() : a === b;
     const duplicado = (data: Fila) =>
       (unicos[modelo] ?? []).some(
         (c) =>
           data[c] != null &&
-          filas().some((f) => f[c] === data[c] && f["tenantId"] === data["tenantId"]),
+          filas().some(
+            (f) => mismoValor(f[c], data[c]) && f["tenantId"] === data["tenantId"],
+          ),
       );
     const buscar = (a: Args = {}) => {
       const orden = ordenar(filtrar(a.where), a.orderBy);

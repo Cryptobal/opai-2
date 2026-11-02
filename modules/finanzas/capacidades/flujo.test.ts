@@ -2,7 +2,8 @@ import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { ACTIVOS, FILA_ING, S0, S1, S2, semilla } from "./fixtures";
+import { ACTIVOS, FILA_EGR, FILA_ING, S0, S1, S2, semilla } from "./fixtures";
+import { aFecha } from "./util";
 import { capacidades } from "./index";
 
 beforeAll(() => registrarCapacidades(capacidades));
@@ -139,5 +140,66 @@ describe("cierre semanal", () => {
       motivo: "Corrección de banco",
     });
     expect(re).toMatchObject({ ok: true, data: { sellada: false } });
+  });
+});
+
+describe("finanzas.flujo.aviso", () => {
+  it("planilla.obtener no inserta avisos emitidos", async () => {
+    const { ctx } = nuevo({
+      flujoAjustes: [
+        {
+          ...semilla().flujoAjustes[0]!,
+          avisoActivo: true,
+          avisoUmbral: 10_000,
+        },
+      ],
+    });
+    const antes = await ctx.db.flujoAvisoEmitido.findMany({});
+    await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 3 });
+    await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 3 });
+    expect(await ctx.db.flujoAvisoEmitido.findMany({})).toHaveLength(antes.length);
+  });
+
+  it("escrituras seguidas no duplican el aviso de una misma semana", async () => {
+    const { ctx } = nuevo({
+      flujoAjustes: [
+        {
+          ...semilla().flujoAjustes[0]!,
+          avisoActivo: true,
+          avisoUmbral: 50_000,
+        },
+      ],
+    });
+    await executeCapability(ctx, "finanzas.celdas.fijar", {
+      filaId: FILA_EGR,
+      semana: S2,
+      monto: 80_000,
+    });
+    await executeCapability(ctx, "finanzas.celdas.fijar", {
+      filaId: FILA_EGR,
+      semana: S2,
+      monto: 85_000,
+    });
+    expect(
+      await ctx.db.flujoAvisoEmitido.findMany({ where: { semana: aFecha(S2) } }),
+    ).toHaveLength(1);
+  });
+
+  it("dos escrituras concurrentes terminan sin error", async () => {
+    const { ctx } = nuevo({
+      flujoAjustes: [
+        {
+          ...semilla().flujoAjustes[0]!,
+          avisoActivo: true,
+          avisoUmbral: 50_000,
+        },
+      ],
+    });
+    const [a, b] = await Promise.all([
+      executeCapability(ctx, "finanzas.celdas.fijar", { filaId: FILA_EGR, semana: S2, monto: 80_000 }),
+      executeCapability(ctx, "finanzas.celdas.fijar", { filaId: FILA_EGR, semana: S2, monto: 85_000 }),
+    ]);
+    expect(a).toMatchObject({ ok: true });
+    expect(b).toMatchObject({ ok: true });
   });
 });
