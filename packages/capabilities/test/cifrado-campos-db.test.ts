@@ -160,6 +160,8 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
       actor: { tipo: "user", id: usuario.id },
       usuario: { id: usuario.id, nombre: "Rot DEK", email: usuario.email, platformRole: null },
       rol: "owner",
+      portal: "erp",
+      portalesMembresia: ["erp"],
       medidor: { registrar: async () => undefined },
     });
     await mod.executeCapability(

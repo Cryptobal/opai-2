@@ -178,7 +178,6 @@ export async function sembrarLecturas(e: Entorno, mod?: ModuloLecturas) {
         tenantId,
         nivel: "puesto",
         puestoId,
-        cargoId,
         sueldoBase: 450_000,
         vigenteDesde: new Date("2026-01-01"),
       },
