@@ -14,8 +14,8 @@ export const metadata = { title: "Configuración" };
 
 /**
  * Portada del centro de Configuración (brief §4.1): buscador de ajustes, aviso de aprobaciones y una
- * grilla de tarjetas de grupo sin contadores. Cada tarjeta lleva a la primera entrada visible del
- * grupo (iPad/escritorio) o a la lista del grupo (teléfono).
+ * grilla de tarjetas de grupo sin contadores. Cada tarjeta lleva a la lista del grupo en todos
+ * los tamaños (MC-22).
  */
 export default function Configuracion({ searchParams }: { searchParams: SearchParams }) {
   return (
@@ -63,7 +63,7 @@ export default function Configuracion({ searchParams }: { searchParams: SearchPa
               grupos={grupos.map((g) => ({ id: g.grupo.id, etiqueta: g.grupo.etiqueta }))}
               inicial={q}
             >
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 max-md:gap-0 max-md:overflow-hidden max-md:rounded-lg max-md:border max-md:border-border max-md:bg-surface md:gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {grupos.map((g) => (
                   <TarjetaGrupo key={g.grupo.id} grupo={g.grupo} entradas={g.entradas} />
                 ))}

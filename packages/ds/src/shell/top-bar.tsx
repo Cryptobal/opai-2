@@ -31,6 +31,7 @@ export type ComunesBarra = {
   campana?: ReactNode;
   /** Abre la búsqueda global (⌘K). Sin ella, no hay búsqueda. */
   onBuscar?: () => void;
+  busquedaCompacta?: boolean;
   volver?: Volver;
   /** El "Atrás" solo en teléfono (detalle dentro de una vista dividida en md+). */
   volverSoloTelefono?: boolean;
@@ -129,13 +130,28 @@ export function AppBar(props: AppBarProps) {
             type="button"
             onClick={onBuscar}
             aria-label="Buscar o ir a"
-            className="flex h-11 w-[280px] min-w-0 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9 xl:w-80"
+            className={cn(
+              "flex h-11 min-w-0 items-center gap-2 rounded-md border border-border bg-surface px-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9",
+              props.busquedaCompacta ? "w-auto" : "w-[280px] xl:w-80",
+            )}
           >
             <Search className="size-4 flex-none" aria-hidden />
-            <span className="flex-1 truncate text-left xl:hidden">
+            <span
+              className={cn(
+                "flex-1 truncate text-left xl:hidden",
+                props.busquedaCompacta && "hidden",
+              )}
+            >
               Buscar personas, clientes, folios
             </span>
-            <span className="hidden flex-1 text-left xl:inline">Buscar</span>
+            <span
+              className={cn(
+                "hidden flex-1 text-left xl:inline",
+                props.busquedaCompacta && "xl:hidden",
+              )}
+            >
+              Buscar
+            </span>
             <AtajoBusqueda className="hidden xl:inline-flex" />
           </button>
         ) : null}

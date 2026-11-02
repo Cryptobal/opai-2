@@ -17,10 +17,18 @@ async function comprobarPalabras(nav: Locator) {
         const rects = [...rango.getClientRects()];
         const limites = elemento.getBoundingClientRect();
         const estilo = getComputedStyle(elemento);
-        const corteSilabico = estilo.hyphens === "auto" && elemento.getAttribute("lang") === "es" &&
-          estilo.wordBreak === "normal" && estilo.overflowWrap === "normal";
-        return rects.length > 0 && (rects.length === 1 || corteSilabico) &&
-          rects.every((rect) => rect.left >= limites.left - 0.5 && rect.right <= limites.right + 0.5);
+        const corteSilabico =
+          estilo.hyphens === "auto" &&
+          elemento.getAttribute("lang") === "es" &&
+          estilo.wordBreak === "normal" &&
+          estilo.overflowWrap === "normal";
+        return (
+          rects.length > 0 &&
+          (rects.length === 1 || corteSilabico) &&
+          rects.every(
+            (rect) => rect.left >= limites.left - 0.5 && rect.right <= limites.right + 0.5,
+          )
+        );
       });
     });
     expect(resultado).not.toBeNull();
@@ -33,18 +41,37 @@ test("etiquetas completas en riel y barra", async ({ page }, info) => {
   await entrar(page);
   await page.goto("/mi-cuenta/preferencias");
   await page.getByRole("radio", { name: /^Personas/ }).click();
-  await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
-  const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
-  const cargo = nav.getByRole("link", { name: "Cargos", exact: true });
-  await expect(cargo).toContainText("Cargos");
-  await expect.poll(() => cargo.locator("span").last().evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
+  await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute(
+    "data-state",
+    "checked",
+  );
+  const nav = page
+    .getByRole("navigation", { name: "Principal", exact: true })
+    .filter({ visible: true });
+  const cargo = nav.getByRole("link", { name: "Personas", exact: true });
+  await expect(cargo).toContainText("Personas");
+  await expect
+    .poll(() =>
+      cargo
+        .locator("span")
+        .last()
+        .evaluate((e) => e.scrollWidth <= e.clientWidth),
+    )
+    .toBe(true);
   await comprobarPalabras(nav);
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await page.setViewportSize({ width: 768, height: 900 });
   for (const nombre of ["Instalaciones", "Configuración"]) {
     const enlace = nav.getByRole("link", { name: nombre, exact: true });
     await expect(enlace).toContainText(nombre);
-    await expect.poll(() => enlace.locator("span").last().evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
+    await expect
+      .poll(() =>
+        enlace
+          .locator("span")
+          .last()
+          .evaluate((e) => e.scrollWidth <= e.clientWidth),
+      )
+      .toBe(true);
   }
   await comprobarPalabras(nav);
 });

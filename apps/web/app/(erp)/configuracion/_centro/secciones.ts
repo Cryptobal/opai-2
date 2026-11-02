@@ -69,7 +69,7 @@ export const SECCIONES: readonly Seccion[] = [
   s({
     id: "operaciones",
     titulo: "Patrones y funciones",
-    descripcion: "Patrones de turno y funciones de los puestos",
+    descripcion: "Patrones de turno y funciones de cada puesto",
     corta: "Patrones de turno y funciones",
     icono: CalendarClock,
     grupo: "operacion",
@@ -78,7 +78,7 @@ export const SECCIONES: readonly Seccion[] = [
   s({
     id: "calendario",
     titulo: "Calendario",
-    descripcion: "Feriados nacionales y días propios de la empresa",
+    descripcion: "Feriados que se aplican a la pauta y a los recargos",
     corta: "Feriados y días de la empresa",
     icono: CalendarDays,
     grupo: "operacion",
@@ -87,7 +87,7 @@ export const SECCIONES: readonly Seccion[] = [
   s({
     id: "documentos",
     titulo: "Documentos",
-    descripcion: "Tipos de documento, vencimientos y alertas",
+    descripcion: "Plantillas de contratos y anexos",
     corta: "Tipos y vencimientos",
     icono: FileText,
     grupo: "operacion",

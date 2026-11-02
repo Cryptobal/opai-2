@@ -17,14 +17,20 @@ export function UserMenu({ usuario, items, lado, conNombre }: Props) {
   return (
     <Menu
       etiqueta="Menú de usuario"
+      claseContenido="w-[248px]"
       items={items}
       {...(lado ? { lado } : {})}
       {...(conNombre ? { className: "w-full", claseDisparador: "w-full justify-start" } : {})}
       cabecera={
-        <>
-          <p className="truncate text-base font-medium text-fg">{usuario.nombre}</p>
-          {usuario.email ? <p className="truncate text-xs text-fg-muted">{usuario.email}</p> : null}
-        </>
+        <div className="flex items-center gap-2">
+          <Avatar nombre={usuario.nombre} />
+          <div className="min-w-0">
+            <p className="truncate text-base font-medium text-fg">{usuario.nombre}</p>
+            {usuario.email ? (
+              <p className="truncate text-xs text-fg-muted">{usuario.email}</p>
+            ) : null}
+          </div>
+        </div>
       }
       disparador={
         conNombre ? (
