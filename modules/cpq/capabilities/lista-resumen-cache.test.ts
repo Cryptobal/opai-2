@@ -1,11 +1,9 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
-import { publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import * as proveedor from "../persistencia/proveedor";
-import * as valoresLegales from "../persistencia/valores-legales";
-import { ACTIVOS, CON_COSTOS, GESTOR, GESTOR_COSTOS, NEGOCIO_1, semilla } from "./fixtures";
+import { mockMotorLegal } from "../persistencia/mock-motor-legal";
+import { ACTIVOS, GESTOR, GESTOR_COSTOS, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 
 beforeAll(() => {
@@ -15,8 +13,7 @@ beforeAll(() => {
 describe("calculoCongeladoJson en lista (C-1)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(valoresLegales, "juegoParaFecha").mockResolvedValue(publicacionesReferencia());
-    vi.spyOn(proveedor, "mutualAdicionalTenant").mockResolvedValue(0.0095);
+    mockMotorLegal();
   });
 
   it("recalcular sin cpq:costos.ver guarda semáforo y margen; otro usuario con permiso los ve en lista", async () => {
@@ -62,6 +59,7 @@ describe("calculoCongeladoJson en lista (C-1)", () => {
     });
 
     const listaSin = await executeCapability(sinCostos, "cpq.cotizaciones.list", { negocioId: NEGOCIO_1 });
+    if (!listaSin.ok) throw new Error("lista");
     expect((listaSin.data as { items: { resumenCalculo?: unknown }[] }).items[0]?.resumenCalculo).toBeUndefined();
   });
 });
