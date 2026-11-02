@@ -50,10 +50,4 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Confirmar un valor propuesto o retenido en Configuración › Remuneraciones: la acción por fila entra con el diseño aprobado del brief 07e M2.",
   },
-  "finanzas.folios.cargar_caf": {
-    encargo: "CAR-147",
-    desde: "2026-11-02",
-    motivo:
-      "Cargar el XML del CAF en Finanzas: solo personas porque incluye la llave privada (CAR-143); la pantalla entra en el PR #221.",
-  },
 };

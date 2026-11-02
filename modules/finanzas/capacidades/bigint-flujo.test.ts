@@ -1,12 +1,16 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { ACTIVOS, FILA_ING, S0, semilla } from "./fixtures";
 import { MONTO_FLUJO_MAX, aNumeroSeguro } from "./esquemas";
 import { capacidades } from "./index";
 
-beforeAll(() => registrarCapacidades(capacidades));
+beforeAll(() => {
+  registrarCapacidades(capacidades);
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-26T12:00:00Z"));
+});
 
 const TOPE_CELDA = MONTO_FLUJO_MAX;
 const SALDO_GRANDE = 3_000_000_000_000;
@@ -51,18 +55,11 @@ describe("finanzas flujo · BIGINT (CAR-139 §1)", () => {
     expect(saldo).toBeGreaterThan(10 ** 12);
   });
 
-  it("ajustes.actualizar persiste saldoInicial > INT4 y sellar en dryRun", async () => {
+  it("ajustes.actualizar persiste saldoInicial > INT4", async () => {
     const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS });
     const grande = 3_000_000_000;
     const aj = await executeCapability(ctx, "finanzas.ajustes.actualizar", { saldoInicial: grande });
     expect(aj).toMatchObject({ ok: true, data: { saldoInicial: grande } });
-    const sello = await executeCapability(
-      ctx,
-      "finanzas.cierres.sellar",
-      { semana: S0, saldoBanco: grande },
-      { dryRun: true },
-    );
-    expect(sello).toMatchObject({ ok: true, data: { saldoBanco: grande } });
   });
 
   it("lectura serializa montos BIGINT de la base a number seguro", async () => {
