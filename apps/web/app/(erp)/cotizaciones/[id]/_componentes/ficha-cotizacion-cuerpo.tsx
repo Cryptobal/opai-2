@@ -42,6 +42,9 @@ export function FichaCotizacionCuerpo({
   modales: ModalesFichaCotizacion;
   meta?: MetaFicha;
 }) {
+  const metaEnvio = meta ?? (d.meta as MetaFicha | undefined);
+  const puedeEnviar = Boolean(metaEnvio?.puedeEnviar ?? d.version.estado === "lista");
+
   return (
     <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-4 min-w-0">
@@ -82,7 +85,7 @@ export function FichaCotizacionCuerpo({
           cuentaId={d.cuentaId}
           gestionar={datos.gestionar}
           aprobarEnvios={datos.aprobarEnvios}
-          puedeEnviar={Boolean(meta?.puedeEnviar ?? d.version.estado === "lista")}
+          puedeEnviar={puedeEnviar}
         />
       </aside>
     </div>
