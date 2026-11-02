@@ -28,8 +28,8 @@ export type ValorIndicador<K extends Indicador = Indicador> = {
 
 /** 11 indicadores independientes; gratificación es derivada del IMM (art. 50). */
 export const INDICADORES = {
-  uf: { periodicidad: "diaria", unidad: "centavos", fuente: "Banco Central / SII" },
-  utm: { periodicidad: "mensual", unidad: "clp", fuente: "Banco Central / SII" },
+  uf: { periodicidad: "diaria", unidad: "centavos", fuente: "SII" },
+  utm: { periodicidad: "mensual", unidad: "clp", fuente: "SII" },
   imm: { periodicidad: "ley", unidad: "clp", fuente: "Diario Oficial / DT" },
   topes: { periodicidad: "anual", unidad: "uf_escalada", fuente: "Superintendencia de Pensiones" },
   afp: { periodicidad: "ley", unidad: "tasa_escalada", fuente: "Superintendencia de Pensiones" },

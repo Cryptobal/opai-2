@@ -1,48 +1,80 @@
 import type { Contexto } from "../../types";
 
-/** Intenta leer UF/UTM del SII. Sin red o parseo fallido, registra captura fallida sin inventar valores. */
-export async function capturarUfUtmSii(ctx: Contexto): Promise<void> {
+import { publicarValorPlataforma } from "./publicar-plataforma";
+import {
+  primerDiaMes,
+  ufCentavosDelDia,
+  urlSiiUf,
+  urlSiiUtm,
+  utmClpDelMes,
+} from "./sii-parse";
+
+export type ConsultaSii = (url: string, signal?: AbortSignal) => Promise<string>;
+
+export const consultaSiiPorDefecto: ConsultaSii = async (url, signal) => {
+  const res = await fetch(url, { signal: signal ?? AbortSignal.timeout(15_000) });
+  if (!res.ok) throw new Error(`SII respondió ${res.status}`);
+  return res.text();
+};
+
+type OpcionesCaptura = {
+  dia?: string;
+  consulta?: ConsultaSii;
+  signal?: AbortSignal;
+};
+
+/**
+ * Lee UF y UTM solo desde las publicaciones oficiales del SII (www.sii.cl/valores_y_fechas),
+ * registra captura y actualiza `core.valores_publicados` (plataforma, todos los tenants).
+ */
+export async function capturarUfUtmSii(ctx: Contexto, opciones: OpcionesCaptura = {}): Promise<void> {
+  const dia = opciones.dia ?? new Date().toISOString().slice(0, 10);
+  const consulta = opciones.consulta ?? consultaSiiPorDefecto;
+  const anio = Number(dia.slice(0, 4));
+  const mes = Number(dia.slice(5, 7));
   const indicadores = await ctx.db.indicadorLegal.findMany({ where: { clave: { in: ["uf", "utm"] } } });
+
+  const htmlUf = await consulta(urlSiiUf(anio), opciones.signal).catch(() => null);
+  const htmlUtm = await consulta(urlSiiUtm(anio), opciones.signal).catch(() => null);
+
   for (const ind of indicadores) {
-    const fuente =
-      ind.clave === "uf"
-        ? "https://www.sii.cl/valores_y_fechas/uf/uf2026.htm"
-        : "https://www.sii.cl/valores_y_fechas/utm/utm2026.htm";
+    const fuente = ind.clave === "uf" ? urlSiiUf(anio) : urlSiiUtm(anio);
     let resultado = "fallido";
-    let valorLeido: unknown = null;
+    let valorLeido: number | null = null;
+    let vigenteDesde = dia;
+    let publicadoId: string | null = null;
+
     try {
-      const res = await fetch(fuente, { signal: AbortSignal.timeout(15_000) });
-      if (res.ok) {
-        const html = await res.text();
-        valorLeido = ind.clave === "uf" ? extraerUf(html) : extraerUtm(html);
-        if (valorLeido != null) resultado = "ok";
+      if (ind.clave === "uf" && htmlUf) {
+        valorLeido = ufCentavosDelDia(htmlUf, dia);
+      } else if (ind.clave === "utm" && htmlUtm) {
+        valorLeido = utmClpDelMes(htmlUtm, mes);
+        vigenteDesde = primerDiaMes(dia);
+      }
+      if (valorLeido != null) {
+        resultado = "ok";
+        const pub = await publicarValorPlataforma(ctx, {
+          indicadorId: ind.id,
+          valorJson: valorLeido,
+          vigenteDesde,
+          fuente,
+          consultadaEl: dia,
+        });
+        publicadoId = pub.publicadoId;
       }
     } catch {
       resultado = "fallido";
     }
+
     await ctx.db.capturaIndicador.create({
       data: {
         indicadorId: ind.id,
         fuenteConsultada: fuente,
-        ...(valorLeido != null ? { valorLeidoJson: valorLeido as object } : {}),
+        ...(valorLeido != null ? { valorLeidoJson: valorLeido } : {}),
+        ...(publicadoId ? { valorVigenteId: publicadoId } : {}),
         resultado,
         alertaEmitida: resultado !== "ok",
       },
     });
   }
-}
-
-function extraerUf(html: string): number | null {
-  const m = html.match(/[\d.]+,\d{2}/);
-  if (!m) return null;
-  const n = Number(m[0].replace(/\./g, "").replace(",", "."));
-  if (!Number.isFinite(n)) return null;
-  return Math.round(n * 100);
-}
-
-function extraerUtm(html: string): number | null {
-  const m = html.match(/UTM[^0-9]*(\d[\d.]*)/i);
-  if (!m) return null;
-  const n = Number(m[1]!.replace(/\./g, ""));
-  return Number.isFinite(n) ? n : null;
 }
