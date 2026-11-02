@@ -13,7 +13,6 @@ import { renderPdfPropuestaTecnica } from "../persistencia/pdf-propuesta-tecnica
 import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
 import {
   actualizarPropuestaArmador,
-  obtenerOCrearPropuestaTecnica,
   propuestaServicioDesactualizado,
   servicioDesdeFilas,
   sincronizarServicioDesdeCotizacion,
@@ -25,30 +24,33 @@ import { uuidSchema } from "./esquemas";
 import { cotizacionDe } from "./util";
 
 export const propuestaTecnicaGet = defineCapability({
-  auditarLectura: (s) => [s.id, s.cotizacionId],
+  auditarLectura: (s) => (s ? [s.id, s.cotizacionId] : []),
   id: "cpq.propuestas_tecnica.get",
-  descripcion: "Obtiene o crea el armador de propuesta técnica de la cotización.",
+  descripcion: "Lee el armador de propuesta técnica de la cotización (no crea filas).",
   permiso: PERMISO_READ,
   input: z.object({ cotizacionId: uuidSchema }),
-  output: z.object({
-    id: z.string(),
-    cotizacionId: z.string(),
-    versionId: z.string(),
-    base: z.enum(BASES_PLANTILLA),
-    estado: z.enum(["borrador", "congelada"]),
-    bloques: z.array(bloqueArmadorSchema),
-    servicioDesactualizado: z.boolean(),
-    editadoParaCliente: z.boolean(),
-    codigo: z.string(),
-    versionNumero: z.number().int(),
-  }),
+  output: z
+    .object({
+      id: z.string(),
+      cotizacionId: z.string(),
+      versionId: z.string(),
+      base: z.enum(BASES_PLANTILLA),
+      estado: z.enum(["borrador", "congelada"]),
+      bloques: z.array(bloqueArmadorSchema),
+      servicioDesactualizado: z.boolean(),
+      editadoParaCliente: z.boolean(),
+      codigo: z.string(),
+      versionNumero: z.number().int(),
+    })
+    .nullable(),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const c = await cotizacionDe(ctx, input.cotizacionId);
     const pack = await cargarFilasVersion(ctx, input.cotizacionId, undefined, false);
     if (!pack) throw noEncontrado("La versión");
-    const prop = await obtenerOCrearPropuestaTecnica(ctx, c.id, pack.version.id, ctx.actor.id ?? c.creadoPorId);
+    const prop = await ctx.db.cpqPropuestaTecnica.findFirst({ where: { versionId: pack.version.id } });
+    if (!prop) return null;
     const servicio = servicioDesdeFilas(packServicioCotizacion(c, pack));
     return {
       id: prop.id,

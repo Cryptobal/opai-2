@@ -8,24 +8,44 @@ import { LinkNext } from "@/app/_components/link-next";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { etiquetaBasePlantillaCpq } from "@/lib/cpq-plantilla-presentacion";
 
+type PropuestaVista = {
+  id: string;
+  codigo: string;
+  base: string;
+  servicioDesactualizado: boolean;
+  estado: string;
+};
+
 export function PaginaArmadorPropuesta({ cotizacionId }: { cotizacionId: string }) {
   const { ejecutar, pendiente } = useCapacidad("erp");
-  const [propuesta, setPropuesta] = useState<{
-    id: string;
-    codigo: string;
-    base: string;
-    servicioDesactualizado: boolean;
-    estado: string;
-  } | null>(null);
+  const [propuesta, setPropuesta] = useState<PropuestaVista | null>(null);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    void ejecutar("cpq.propuestas_tecnica.get", { cotizacionId }).then((r) => {
-      if (r && typeof r === "object" && "id" in r) setPropuesta(r as typeof propuesta);
-    });
+    let activo = true;
+    void (async () => {
+      setCargando(true);
+      const leida = await ejecutar("cpq.propuestas_tecnica.get", { cotizacionId });
+      if (!activo) return;
+      if (leida && typeof leida === "object" && "id" in leida) {
+        setPropuesta(leida as PropuestaVista);
+        setCargando(false);
+        return;
+      }
+      const creada = await ejecutar("cpq.propuestas_tecnica.inicializar", { cotizacionId }, false);
+      if (!activo) return;
+      if (creada && typeof creada === "object" && "id" in creada) {
+        setPropuesta(creada as PropuestaVista);
+      }
+      setCargando(false);
+    })();
+    return () => {
+      activo = false;
+    };
   }, [cotizacionId, ejecutar]);
 
   return (
-    <Estado state={propuesta ? "ready" : "loading"} variante="detalle">
+    <Estado state={cargando ? "loading" : propuesta ? "ready" : "error"} variante="detalle">
       {propuesta ? (
         <div className="space-y-4 p-4">
           <p className="t-h2">Propuesta técnica · {propuesta.codigo}</p>

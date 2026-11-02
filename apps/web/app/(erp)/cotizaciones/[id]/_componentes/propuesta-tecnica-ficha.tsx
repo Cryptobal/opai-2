@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { Button } from "@opai/ds";
@@ -7,7 +8,10 @@ import { Button } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { EnvioPropuestaCotizacion } from "./envio-propuesta-cotizacion";
+const EnvioPropuestaCotizacion = dynamic(
+  () => import("./envio-propuesta-cotizacion").then((m) => m.EnvioPropuestaCotizacion),
+  { ssr: false, loading: () => <p className="t-caption text-fg-muted">Cargando envío…</p> },
+);
 
 export function PropuestaTecnicaFicha({
   cotizacionId,

@@ -26,3 +26,16 @@ export const destinatarioSchema = z.object({
 });
 
 export const basesPlantillaSchema = z.enum(BASES_PLANTILLA);
+
+export const armadorPropuestaVistaSchema = z.object({
+  id: z.string(),
+  cotizacionId: z.string(),
+  versionId: z.string(),
+  base: basesPlantillaSchema,
+  estado: z.enum(["borrador", "congelada"]),
+  bloques: z.array(bloqueArmadorSchema),
+  servicioDesactualizado: z.boolean(),
+  editadoParaCliente: z.boolean(),
+  codigo: z.string(),
+  versionNumero: z.number().int(),
+});
