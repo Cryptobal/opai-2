@@ -104,6 +104,42 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["finanzas.documentos_emitidos"],
     valores: () => ({ tipo_dte_ref: 33, folio_ref: 1, codigo_ref: 1 }),
   },
+  "finanzas.cuentas_bancarias": { valores: () => ({ banco: "Banco Sintético", numero_visible: "00012345678" }) },
+  "finanzas.cartolas_importadas": {
+    dependencias: ["finanzas.cuentas_bancarias"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "finanzas.cuentas_bancarias"),
+      formato: "generico",
+      saldo_final: 0,
+      idempotency_key: "test-cartola",
+    }),
+  },
+  "finanzas.movimientos_bancarios": {
+    dependencias: ["finanzas.cuentas_bancarias"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "finanzas.cuentas_bancarias"),
+      fecha: "2026-01-05",
+      monto: 1000,
+      glosa: "Abono prueba",
+      clave_dedupe: "2026-01-05|1000|ABONO PRUEBA|",
+      estado: "pendiente",
+      origen: "cartola",
+    }),
+  },
+  "finanzas.conciliaciones": {
+    dependencias: ["finanzas.movimientos_bancarios", "finanzas.flujo_filas"],
+    valores: (ctx) => ({
+      movimiento_id: id(ctx, "finanzas.movimientos_bancarios"),
+      tipo_enlace: "flujo_fila",
+      enlace_id: id(ctx, "finanzas.flujo_filas"),
+      monto: 1000,
+    }),
+  },
+  "finanzas.reglas_conciliacion": { valores: () => ({ nombre: "Regla prueba", condiciones: {} }) },
+  "finanzas.banco_avisos_emitidos": {
+    dependencias: ["finanzas.cuentas_bancarias"],
+    valores: (ctx) => ({ cuenta_id: id(ctx, "finanzas.cuentas_bancarias"), dia: "2026-01-05", saldo: 0 }),
+  },
   // CRM PR 2a: el trigger de core.contactos crea el vínculo inicial contacto–cuenta.
   "core.contacto_cuentas": {
     dependencias: ["core.contactos", "core.cuentas"],

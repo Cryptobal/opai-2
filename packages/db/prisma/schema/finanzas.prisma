@@ -355,3 +355,137 @@ model DteConfig {
   @@map("dte_config")
   @@schema("finanzas")
 }
+
+// Módulo Finanzas · Bancos PR 1 (CAR-97): cuentas, cartolas, movimientos, conciliación y reglas.
+
+model CuentaBancaria {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  banco          String
+  numeroVisible  String   @map("numero_visible")
+  moneda         String   @default("CLP")
+  /// Fila «saldo» del flujo de caja vinculada a esta cuenta.
+  flujoFilaId    String?  @map("flujo_fila_id") @db.Uuid
+  /// Mapeo de columnas para importación genérica CSV/XLSX (guardado por cuenta).
+  mapeoColumnas  Json?    @map("mapeo_columnas")
+  activa         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  movimientos MovimientoBancario[]
+  cartolas    CartolaImportada[]
+
+  @@unique([tenantId, banco, numeroVisible])
+  @@index([tenantId, activa])
+  @@map("cuentas_bancarias")
+  @@schema("finanzas")
+}
+
+model CartolaImportada {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  cuentaId        String   @map("cuenta_id") @db.Uuid
+  /// santander | generico
+  formato         String
+  nombreArchivo   String?  @map("nombre_archivo")
+  fechaDesde      DateTime? @map("fecha_desde") @db.Date
+  fechaHasta      DateTime? @map("fecha_hasta") @db.Date
+  saldoFinal      BigInt   @map("saldo_final")
+  movimientosNuevos Int    @default(0) @map("movimientos_nuevos")
+  duplicados      Int      @default(0)
+  rechazados      Int      @default(0)
+  idempotencyKey  String   @map("idempotency_key")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  cuenta      CuentaBancaria       @relation(fields: [cuentaId], references: [id], onDelete: Restrict)
+  movimientos MovimientoBancario[]
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, cuentaId, createdAt])
+  @@map("cartolas_importadas")
+  @@schema("finanzas")
+}
+
+model MovimientoBancario {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  cuentaId      String    @map("cuenta_id") @db.Uuid
+  cartolaId     String?   @map("cartola_id") @db.Uuid
+  fecha         DateTime  @db.Date
+  monto         BigInt
+  glosa         String
+  referencia    String?
+  sucursal      String?
+  saldoDespues  BigInt?   @map("saldo_despues")
+  claveDedupe   String    @map("clave_dedupe")
+  /// pendiente | sugerido | conciliado | por_autorizar | ignorado
+  estado        String    @default("pendiente")
+  /// cartola | manual | web4leads
+  origen        String    @default("cartola")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cuenta         CuentaBancaria    @relation(fields: [cuentaId], references: [id], onDelete: Restrict)
+  cartola        CartolaImportada? @relation(fields: [cartolaId], references: [id], onDelete: SetNull)
+  conciliaciones ConciliacionBanco[]
+
+  @@unique([tenantId, cuentaId, claveDedupe])
+  @@index([tenantId, cuentaId, estado, fecha])
+  @@map("movimientos_bancarios")
+  @@schema("finanzas")
+}
+
+model ConciliacionBanco {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  movimientoId  String   @map("movimiento_id") @db.Uuid
+  /// documento_emitido | documento_recibido | flujo_fila
+  tipoEnlace    String   @map("tipo_enlace")
+  enlaceId      String   @map("enlace_id") @db.Uuid
+  monto         BigInt
+  /// false cuando se deshace la conciliación.
+  activa        Boolean  @default(true)
+  /// true mientras es propuesta de agente o sugerencia sin confirmar.
+  propuesta     Boolean  @default(false)
+  confirmada    Boolean  @default(false)
+  explicacion   Json?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdById   String?  @map("created_by_id") @db.Uuid
+
+  movimiento MovimientoBancario @relation(fields: [movimientoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, movimientoId, activa])
+  @@index([tenantId, tipoEnlace, enlaceId])
+  @@map("conciliaciones")
+  @@schema("finanzas")
+}
+
+model ReglaConciliacion {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  nombre      String
+  prioridad   Int      @default(0)
+  /// todas | alguna
+  modo        String   @default("todas")
+  condiciones Json
+  activa      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, activa, prioridad])
+  @@map("reglas_conciliacion")
+  @@schema("finanzas")
+}
+
+model BancoAvisoEmitido {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  cuentaId   String   @map("cuenta_id") @db.Uuid
+  dia        DateTime @db.Date
+  saldo      BigInt
+  emitidoEn  DateTime @default(now()) @map("emitido_en") @db.Timestamptz(6)
+
+  @@unique([tenantId, cuentaId, dia])
+  @@map("banco_avisos_emitidos")
+  @@schema("finanzas")
+}
