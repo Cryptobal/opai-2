@@ -96,11 +96,11 @@ describe("finanzas.flujo.celdas", () => {
     const { ctx } = nuevo();
     const semFutura = "2026-11-16";
     await executeCapability(ctx, "finanzas.celdas.fijar", {
-      filaId: FILA_ING,
+      filaId: FILA_EGR,
       semana: semFutura,
       monto: 100_000,
     });
-    const entrada = { filaId: FILA_ING, semanas: [semFutura], por: -2 };
+    const entrada = { filaId: FILA_EGR, semanas: [semFutura], por: -2 };
     const previa = await executeCapability(ctx, "finanzas.celdas.mover", entrada, { dryRun: true });
     expect(previa).toMatchObject({ ok: true, data: { avisoSemanaPasada: true } });
     const sinConfirmar = await executeCapability(ctx, "finanzas.celdas.mover", entrada);
