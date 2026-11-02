@@ -49,6 +49,19 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // CPQ (CAR-119): CHECK de tipo de línea (lineas_tipo_check).
   "cpq.lineas": { valores: () => ({ tipo: "item" }) },
+  // CPQ (CAR-135): CHECK tipo/base; `copia` no debe regenerar `tipo` (índice único parcial por tenant+tipo).
+  "cpq.plantillas_documento": {
+    fijas: ["tipo", "base"],
+    valores: () => ({ tipo: "cotizacion", base: "clasica", bloques_json: "[]" }),
+  },
+  "cpq.plantillas_documento_revisiones": {
+    dependencias: ["cpq.plantillas_documento"],
+    valores: (ctx) => ({
+      plantilla_documento_id: id(ctx, "cpq.plantillas_documento"),
+      base: "clasica",
+      bloques_json: "[]",
+    }),
+  },
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
