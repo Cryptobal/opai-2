@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,8 +12,17 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { DatosFicha } from "../page";
 import { AccionesCotizacion } from "./acciones-cotizacion";
-import { LineaCotizacion } from "./linea-cotizacion";
 import { ResumenCotizacion } from "./resumen-cotizacion";
+
+const LineaCotizacion = dynamic(
+  () => import("./linea-cotizacion").then((m) => m.LineaCotizacion),
+  { ssr: false },
+);
+
+const PropuestaTecnicaFicha = dynamic(
+  () => import("./propuesta-tecnica-ficha").then((m) => m.PropuestaTecnicaFicha),
+  { ssr: false, loading: () => null },
+);
 
 export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
   const router = useRouter();
@@ -26,6 +36,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
       </Estado>
     );
   }
+  const aprobarEnvios = datos.aprobarEnvios;
   const editable = datos.gestionar && d.version.editable;
   const c = d.calculo as Parameters<typeof ResumenCotizacion>[0]["calculo"];
   const meta = d.meta as Parameters<typeof ResumenCotizacion>[0]["meta"];
@@ -116,7 +127,18 @@ export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
             </details>
           ))}
         </div>
-        <aside className="hidden lg:block">{resumen}</aside>
+        <aside className="hidden lg:block space-y-4">
+          {resumen}
+          <PropuestaTecnicaFicha
+            cotizacionId={d.cotizacion.id}
+            cuentaId={(d as { cuentaId?: string | null }).cuentaId ?? null}
+            gestionar={datos.gestionar}
+            aprobarEnvios={datos.aprobarEnvios}
+            puedeEnviar={Boolean(
+              (meta as { puedeEnviar?: boolean } | undefined)?.puedeEnviar ?? d.version.estado === "lista",
+            )}
+          />
+        </aside>
       </div>
     </Estado>
   );

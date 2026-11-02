@@ -4,6 +4,9 @@ import { CLAVES_INDICADORES, sinFuenteNoHayInvento } from "@opai/domain";
 
 import { publicacionDesdeFila } from "./comun";
 
+/** UF y UTM son solo de plataforma (SII); el tenant no puede sobreescribirlos (CAR-148). */
+const INDICADOR_SOLO_PLATAFORMA = new Set<string>(["uf", "utm"]);
+
 function vigenteEnFecha(vigenteDesde: Date, vigenteHasta: Date | null, f: Date): boolean {
   if (vigenteDesde > f) return false;
   if (vigenteHasta && vigenteHasta < f) return false;
@@ -28,7 +31,9 @@ export async function publicacionesParaFecha(ctx: Contexto, fecha: string): Prom
   }
   for (const t of tenantPorInd.values()) {
     const meta = byId.get(t.indicadorId);
-    if (meta) pubs.push(publicacionDesdeFila({ ...t, indicador: meta }));
+    if (!meta) continue;
+    if (INDICADOR_SOLO_PLATAFORMA.has(meta.clave)) continue;
+    pubs.push(publicacionDesdeFila({ ...t, indicador: meta }));
   }
   for (const ind of indicadores) {
     if (pubs.some((x) => x.indicador === ind.clave)) continue;
