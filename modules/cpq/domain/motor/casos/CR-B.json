@@ -1,0 +1,198 @@
+{
+  "caso": "CR-B",
+  "puestos": [
+    {
+      "etiqueta": "Puesto 1",
+      "patron": "4x4",
+      "inicio": "20:00",
+      "fin": "08:00",
+      "diasCobertura": 7,
+      "personas": 2,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1709795,
+      "seccion": 1
+    },
+    {
+      "etiqueta": "Puesto 2",
+      "patron": "4x4",
+      "inicio": "08:00",
+      "fin": "20:00",
+      "diasCobertura": 7,
+      "personas": 3,
+      "posiciones": 1,
+      "costoEmpleadorPorPersona1_0": 1709795,
+      "seccion": 1
+    }
+  ],
+  "secciones": [],
+  "uniformes": [
+    {
+      "precio": 350000
+    },
+    {
+      "precio": 12000
+    },
+    {
+      "precio": 22000
+    },
+    {
+      "precio": 25000
+    },
+    {
+      "precio": 400000
+    },
+    {
+      "precio": 35000
+    },
+    {
+      "precio": 8000
+    },
+    {
+      "precio": 15000
+    },
+    {
+      "precio": 9990
+    },
+    {
+      "precio": 32000
+    },
+    {
+      "precio": 300000
+    }
+  ],
+  "examenes": [
+    {
+      "precio": 80000,
+      "personas": null,
+      "meses": null
+    }
+  ],
+  "costos": [
+    {
+      "quantity": 1,
+      "unitPrice": 1969959,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 2250000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 750000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 2000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 20000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 984980,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 200000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 5000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 0,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 80000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 1,
+      "unitPrice": 12000,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    },
+    {
+      "quantity": 2,
+      "unitPrice": 63493.3,
+      "recurring": true,
+      "enabled": true,
+      "isAmortizable": false,
+      "investmentAmount": null,
+      "amortizationMonths": null
+    }
+  ],
+  "colaciones": [],
+  "vehiculos": [],
+  "adicionales": [],
+  "margenPct": 15,
+  "referencia": {
+    "costsBase": 13810067.961111112,
+    "monthlyTotal": 14226661.263105415,
+    "salePriceMonthly": 16663732,
+    "totalGuards": 5,
+    "grupos": {
+      "monthlyHolidayAdjustment": 237471.52777777778,
+      "monthlyUniforms": 651862.5,
+      "monthlyExams": 100000,
+      "monthlyCostItems": 4271758.933333334,
+      "monthlyFinancial": 416593.3019943021,
+      "monthlyPolicy": 0
+    }
+  }
+}

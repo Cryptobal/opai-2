@@ -32,6 +32,33 @@ async function main(): Promise<void> {
   });
   console.log(`${email} es owner de ${tenant.slug} con todos los portales.`);
 
+  const qaEmail = "portal-qa-trabajador@opai.cl";
+  const qaUser = await db.user.upsert({
+    where: { email: qaEmail },
+    update: { name: "TEST QA" },
+    create: { name: "TEST QA", email: qaEmail },
+  });
+  await db.membership.upsert({
+    where: { tenantId_userId: { tenantId: tenant.id, userId: qaUser.id } },
+    update: { rol: "viewer", portales: ["trabajador"], estado: "activa" },
+    create: { tenantId: tenant.id, userId: qaUser.id, rol: "viewer", portales: ["trabajador"], estado: "activa" },
+  });
+  const rutQa = `99000000-${digitoVerificador("99000000")}`;
+  const personaQa = await db.persona.findFirst({ where: { tenantId: tenant.id, usuarioId: qaUser.id } });
+  if (!personaQa) {
+    await db.persona.create({
+      data: {
+        tenantId: tenant.id,
+        usuarioId: qaUser.id,
+        nombres: "TEST",
+        apellidos: "QA",
+        rut: rutQa,
+        emailLaboral: qaEmail,
+      },
+    });
+  }
+  console.log(`${qaEmail} es trabajador de prueba (ficha TEST QA, RUT ficticio ${rutQa}).`);
+
   const otra = await db.tenant.upsert({
     where: { slug: "otra-e2e" },
     update: {},

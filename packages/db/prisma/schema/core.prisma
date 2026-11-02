@@ -238,6 +238,10 @@ model SolicitudArco {
   titularNombre        String?   @map("titular_nombre")
   /// "acceso"|"rectificacion"|"cancelacion"|"oposicion"|"portabilidad"|"bloqueo"
   tipo                 String
+  /// Detalle libre del titular (portal trabajador, Ley 21.719).
+  detalle              String?
+  /// Campos que el titular menciona (p. ej. teléfono, dirección).
+  campos               Json?
   /// "recibida"|"en_proceso"|"resuelta"|"rechazada"
   estado               String    @default("recibida")
   /// Plazo legal calculado al recibir; null si los días aún no están configurados (§16.3).
