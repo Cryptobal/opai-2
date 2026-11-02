@@ -14,6 +14,8 @@ type Detalle = Venta & {
   montoNeto: number;
   montoExento: number;
   montoIva: number;
+  montoCobrado: number;
+  cesionProveedor: string | null;
   glosa: string | null;
   lineas: { glosa: string; monto: number }[];
   trackIdSii: string | null;
@@ -77,6 +79,14 @@ function Ficha({ state, venta }: { state: EstadoPantalla; venta: Detalle | null 
           <div>
             <dt className="text-fg-muted">Total</dt>
             <dd className="tabular-nums font-medium">{pesos(venta.montoTotal)}</dd>
+          </div>
+          <div>
+            <dt className="text-fg-muted">Estado de cobro</dt>
+            <dd>{venta.estadoCobro}</dd>
+          </div>
+          <div>
+            <dt className="text-fg-muted">Cesión</dt>
+            <dd>{venta.cesionEstado ?? "—"}{venta.cesionProveedor ? ` · ${venta.cesionProveedor}` : ""}</dd>
           </div>
           {venta.trackIdSii ? (
             <div className="sm:col-span-2">

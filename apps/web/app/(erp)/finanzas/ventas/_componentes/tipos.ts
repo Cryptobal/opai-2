@@ -11,6 +11,7 @@ export type Venta = {
   montoTotal: number;
   estadoDte: "borrador" | "enviado" | "aceptado" | "rechazado" | "anulado_nc";
   estadoCobro: "pendiente" | "pagada_parcial" | "pagada";
+  cesionEstado: "emitido" | "cedido" | "no_cedido" | null;
 };
 
 export type LibroVentas = {

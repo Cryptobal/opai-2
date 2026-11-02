@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   ESTADOS_COBRO_VENTA,
   ESTADOS_DTE_EMITIDO,
+  ESTADOS_CESION,
   NOMBRE_TIPO_DTE_VENTA,
   type TipoDteVenta,
 } from "@opai/domain";
@@ -36,6 +37,8 @@ export const ventaSchema = z.object({
   estadoDte: z.enum(ESTADOS_DTE_EMITIDO),
   estadoCobro: z.enum(ESTADOS_COBRO_VENTA),
   montoCobrado: z.number().int(),
+  cesionEstado: z.enum(ESTADOS_CESION).nullable(),
+  cesionProveedor: z.string().nullable(),
   glosa: z.string().nullable(),
   trackIdSii: z.string().nullable(),
   documentoReferenciaId: z.string().nullable(),
@@ -59,6 +62,8 @@ type FilaVenta = {
   estadoDte: string;
   estadoCobro: string;
   montoCobrado: number;
+  cesionEstado?: string | null;
+  cesionProveedor?: string | null;
   glosa: string | null;
   trackIdSii: string | null;
   documentoReferenciaId: string | null;
@@ -91,6 +96,8 @@ export function vistaVenta(
     estadoDte: d.estadoDte as (typeof ESTADOS_DTE_EMITIDO)[number],
     estadoCobro: d.estadoCobro as (typeof ESTADOS_COBRO_VENTA)[number],
     montoCobrado: d.montoCobrado,
+    cesionEstado: (d.cesionEstado as (typeof ESTADOS_CESION)[number] | null) ?? null,
+    cesionProveedor: d.cesionProveedor ?? null,
     glosa: d.glosa,
     trackIdSii: d.trackIdSii,
     documentoReferenciaId: d.documentoReferenciaId,
