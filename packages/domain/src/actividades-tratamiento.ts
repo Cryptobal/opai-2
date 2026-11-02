@@ -49,7 +49,17 @@ export type ActividadTratamiento = {
 /** Las actividades que cubren TODO el inventario del Núcleo. Las 6 primeras son las de la sábana
  *  (ParteC:236-241); las demás se agregan para no dejar ninguna tabla sin actividad. */
 export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
-  { id: 1, actividad: "Gestión de personal de seguridad", categoriaPrincipal: "Laboral", baseLicitud: "relacion_laboral", tablas: ["personas", "vinculos_laborales"] },
+  { id: 1, actividad: "Gestión de personal de seguridad", categoriaPrincipal: "Laboral", baseLicitud: "relacion_laboral", tablas: [
+    "personas",
+    "vinculos_laborales",
+    "personas_prevision",
+    "personas_pago",
+    "personas_pago_solicitudes",
+    "personas_uniforme",
+    "personas_jornada_dt",
+    "personas_os10",
+    "personas_contacto_laboral",
+  ] },
   { id: 2, actividad: "Sueldos y estructuras", categoriaPrincipal: "Económica", baseLicitud: "relacion_laboral", tablas: ["estructuras_sueldo"] },
   { id: 3, actividad: "Contactos de clientes", categoriaPrincipal: "Contacto", baseLicitud: "interes_legitimo", tablas: ["contactos", "cuentas", "cuentas_representantes"] },
   { id: 4, actividad: "Notificaciones y avisos operativos", categoriaPrincipal: "Contacto", baseLicitud: "interes_legitimo", tablas: ["envios"] },

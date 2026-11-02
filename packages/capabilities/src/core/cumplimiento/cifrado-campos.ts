@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 import { camposACifrar, type DatoPersonalDeclarado } from "@opai/domain";
 import { cifrar, descifrar } from "@opai/integrations";
 
+import type { TenantTx } from "@opai/db";
+
 import { reglaDeNegocio } from "../../errores";
 import { dekDe } from "../../integraciones/secretos";
 import type { Contexto } from "../../types";
@@ -89,6 +91,37 @@ export type CifradoDeCampos = {
  */
 export const cifradoDeCampos = (ctx: Contexto): CifradoDeCampos =>
   crearCifradoDeCampos(ctx, listarInventario());
+
+/** Bloqueo compartido de la DEK del tenant antes de cifrar en una escritura (§22, mismo patrón que secretos). */
+export async function bloquearDekLectura(tx: TenantTx, tenantId: string): Promise<void> {
+  await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${tenantId}::uuid FOR SHARE`;
+}
+
+export function cifradoDeCamposTx(ctx: Contexto, tx: TenantTx): CifradoDeCampos {
+  return crearCifradoDeCampos({ ...ctx, db: tx }, listarInventario());
+}
+
+export async function cifrarCampoEnTransaccion(
+  ctx: Contexto,
+  tx: TenantTx,
+  tabla: string,
+  campo: string,
+  valor: string,
+): Promise<string> {
+  await bloquearDekLectura(tx, ctx.tenantId);
+  return cifradoDeCamposTx(ctx, tx).cifrar(tabla, campo, valor);
+}
+
+export async function descifrarCampoEnTransaccion(
+  ctx: Contexto,
+  tx: TenantTx,
+  tabla: string,
+  campo: string,
+  guardado: string,
+): Promise<string> {
+  await bloquearDekLectura(tx, ctx.tenantId);
+  return cifradoDeCamposTx(ctx, tx).descifrar(tabla, campo, guardado);
+}
 
 /** Variante con inventario explícito, solo para pruebas: el código de negocio usa `cifradoDeCampos`. */
 export function crearCifradoDeCampos(

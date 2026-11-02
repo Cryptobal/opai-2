@@ -9,6 +9,7 @@ import { fecha, rut, telefono } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
 
 import { etiquetaDe, NACIONALIDADES, SEXOS } from "./opciones-persona";
+import { ResumenContactoEmergencia } from "./seccion-contacto-laboral";
 
 /** Años cumplidos a una fecha ISO (aaaa-mm-dd). */
 function edad(nacimiento: string, hoy: string) {
@@ -85,6 +86,7 @@ export function ResumenPersona({ p, hoy }: Props) {
             },
           ]}
         />
+        <ResumenContactoEmergencia personaId={p.id} />
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Dirección">
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px] md:items-start">
