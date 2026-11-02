@@ -15,11 +15,13 @@ CREATE OR REPLACE FUNCTION "core"."remuneraciones_publicar_sii"(
 ) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
+  v_hoy date := (clock_timestamp() AT TIME ZONE 'America/Santiago')::date;
   v_indicador_id uuid;
   v_actual "core"."valores_publicados"%ROWTYPE;
   v_referencia "core"."valores_publicados"%ROWTYPE;
   v_anterior bigint;
   v_max_ratio numeric;
+  v_ref_desde date;
   v_id uuid;
 BEGIN
   IF p_clave NOT IN ('uf', 'utm') THEN
@@ -37,11 +39,11 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'remuneraciones_publicar_sii: fuente SII inválida' USING ERRCODE = 'check_violation';
   END IF;
-  IF p_clave = 'uf' AND (p_vigente_desde < CURRENT_DATE - 1 OR p_vigente_desde > CURRENT_DATE + 1) THEN
+  IF p_clave = 'uf' AND (p_vigente_desde < v_hoy - 1 OR p_vigente_desde > v_hoy) THEN
     RAISE EXCEPTION 'remuneraciones_publicar_sii: vigente_desde UF fuera de ventana'
       USING ERRCODE = 'check_violation';
   END IF;
-  IF p_clave = 'utm' AND p_vigente_desde <> date_trunc('month', CURRENT_DATE)::date THEN
+  IF p_clave = 'utm' AND p_vigente_desde <> date_trunc('month', v_hoy)::date THEN
     RAISE EXCEPTION 'remuneraciones_publicar_sii: vigente_desde UTM fuera de ventana'
       USING ERRCODE = 'check_violation';
   END IF;
@@ -81,18 +83,22 @@ BEGIN
       USING ERRCODE = 'check_violation';
   END IF;
 
+  v_ref_desde := CASE
+    WHEN p_clave = 'uf' THEN p_vigente_desde - 1
+    ELSE (date_trunc('month', p_vigente_desde)::date - interval '1 month')::date
+  END;
+
   SELECT * INTO v_referencia
     FROM "core"."valores_publicados"
     WHERE indicador_id = v_indicador_id
       AND estado = 'vigente'
-      AND vigente_desde < p_vigente_desde
-    ORDER BY vigente_desde DESC
+      AND vigente_desde = v_ref_desde
     LIMIT 1;
 
   IF v_referencia.id IS NOT NULL THEN
     v_anterior := (v_referencia.valor_json::text)::bigint;
     IF v_anterior IS NOT NULL AND v_anterior > 0 AND p_valor <> v_anterior THEN
-      v_max_ratio := CASE WHEN p_clave = 'uf' THEN 0.05 ELSE 0.25 END;
+      v_max_ratio := CASE WHEN p_clave = 'uf' THEN 0.005 ELSE 0.05 END;
       IF abs(p_valor - v_anterior)::numeric / v_anterior::numeric > v_max_ratio THEN
         RAISE EXCEPTION 'remuneraciones_publicar_sii: variación excesiva'
           USING ERRCODE = 'check_violation';

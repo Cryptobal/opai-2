@@ -3,22 +3,48 @@ import type { TenantTx } from "@opai/db";
 import type { Contexto } from "../../types";
 
 import { publicarValorPlataformaEnTx } from "./publicar-plataforma";
-import { primerDiaMes, urlSiiUf, urlSiiUtm, ufCentavosDelDia, utmClpDelMes } from "./sii-parse";
+import {
+  primerDiaMes,
+  primerDiaMesAnterior,
+  restarDiasCivil,
+  urlSiiUf,
+  urlSiiUtm,
+  ufCentavosDelDia,
+  utmClpDelMes,
+} from "./sii-parse";
 import { fuenteEsSii, valorEnRango, variacionPermitida } from "./sii-validacion";
 import { fechaCivil } from "./comun";
 
 type IndicadorCaptura = { id: string; clave: string };
 
-async function valorVigenteAnterior(
-  ctx: Contexto,
+async function ultimoValorVigente(
+  tx: TenantTx,
   indicadorId: string,
 ): Promise<{ valor: number | null; vigenteDesde: string | null }> {
-  const row = await ctx.db.valorPublicado.findFirst({
+  const row = await tx.valorPublicado.findFirst({
     where: { indicadorId, estado: "vigente" },
     orderBy: { vigenteDesde: "desc" },
   });
   if (!row) return { valor: null, vigenteDesde: null };
   return { valor: Number(row.valorJson), vigenteDesde: fechaCivil(row.vigenteDesde) };
+}
+
+async function valorReferenciaVariacion(
+  tx: TenantTx,
+  indicadorId: string,
+  clave: "uf" | "utm",
+  vigenteDesde: string,
+): Promise<number | null> {
+  const refDesde =
+    clave === "uf" ? restarDiasCivil(vigenteDesde, 1) : primerDiaMesAnterior(vigenteDesde);
+  const row = await tx.valorPublicado.findFirst({
+    where: {
+      indicadorId,
+      estado: "vigente",
+      vigenteDesde: new Date(`${refDesde}T12:00:00.000Z`),
+    },
+  });
+  return row ? Number(row.valorJson) : null;
 }
 
 export async function registrarCapturasOmitidasPorLock(
@@ -64,8 +90,10 @@ export async function registrarCapturasSiiEnTx(
     let publicadoId: string | null = null;
     let motivoFallo: string | undefined;
 
-    const anterior = await valorVigenteAnterior(ctx, ind.id);
+    const vigente = await ultimoValorVigente(tx, ind.id);
+    const valorRef = await valorReferenciaVariacion(tx, ind.id, clave, vigenteDesde);
 
+    await tx.$executeRawUnsafe(`SAVEPOINT captura_sii_${clave}`);
     try {
       if (clave === "uf" && htmlUf) {
         valorLeido = ufCentavosDelDia(htmlUf, dia);
@@ -80,9 +108,9 @@ export async function registrarCapturasSiiEnTx(
         motivoFallo = "fuente";
       } else if (!valorEnRango(clave, valorLeido)) {
         motivoFallo = "rango";
-      } else if (anterior.vigenteDesde != null && vigenteDesde < anterior.vigenteDesde) {
+      } else if (vigente.vigenteDesde != null && vigenteDesde < vigente.vigenteDesde) {
         motivoFallo = "vigencia_anterior";
-      } else if (anterior.valor != null && !variacionPermitida(clave, valorLeido, anterior.valor)) {
+      } else if (valorRef != null && !variacionPermitida(clave, valorLeido, valorRef)) {
         motivoFallo = "variacion";
       } else {
         publicadoId = await publicarValorPlataformaEnTx(ctx, tx, {
@@ -91,11 +119,12 @@ export async function registrarCapturasSiiEnTx(
           vigenteDesde,
           fuente,
           consultadaEn,
-          valorAnterior: anterior.valor,
+          valorAnterior: valorRef,
         });
         resultado = "ok";
       }
     } catch {
+      await tx.$executeRawUnsafe(`ROLLBACK TO SAVEPOINT captura_sii_${clave}`);
       motivoFallo = motivoFallo ?? "publicacion";
       resultado = "fallido";
     }

@@ -94,3 +94,18 @@ export function primerDiaMes(fecha: string): string {
   const [y, m] = fecha.split("-");
   return `${y}-${m}-01`;
 }
+
+/** Resta días calendario a una fecha aaaa-mm-dd (sin depender de la TZ del runtime). */
+export function restarDiasCivil(fecha: string, dias: number): string {
+  const [y, m, d] = fecha.split("-").map(Number);
+  const t = Date.UTC(y!, m! - 1, d! - dias);
+  return new Date(t).toISOString().slice(0, 10);
+}
+
+/** Primer día del mes calendario anterior a `fecha` (aaaa-mm-dd). */
+export function primerDiaMesAnterior(fecha: string): string {
+  const [y, m] = fecha.split("-").map(Number);
+  const mes = m === 1 ? 12 : m! - 1;
+  const anio = m === 1 ? y! - 1 : y!;
+  return `${anio}-${String(mes).padStart(2, "0")}-01`;
+}

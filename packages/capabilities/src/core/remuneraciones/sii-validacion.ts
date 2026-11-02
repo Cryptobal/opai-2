@@ -2,8 +2,8 @@ export type ClaveSiiPublicable = "uf" | "utm";
 
 export const RANGO_UF_CENTAVOS = { min: 1_000_000, max: 20_000_000 } as const;
 export const RANGO_UTM_CLP = { min: 10_000, max: 500_000 } as const;
-export const VARIACION_MAX_UF = 0.05;
-export const VARIACION_MAX_UTM = 0.25;
+export const VARIACION_MAX_UF = 0.005;
+export const VARIACION_MAX_UTM = 0.05;
 
 export function fuenteEsSii(fuente: string): boolean {
   return /^https:\/\/(www\.)?sii\.cl\//i.test(fuente);

@@ -8,6 +8,12 @@ import {
 } from "./sii-captura-persistir";
 import { urlSiiUf, urlSiiUtm } from "./sii-parse";
 
+const ZONA_CAPTURA_SII = "America/Santiago";
+
+function hoyCivilEn(zona: string, ahora = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: zona, dateStyle: "short" }).format(ahora);
+}
+
 export type ConsultaSii = (url: string, signal?: AbortSignal) => Promise<string>;
 
 const TIMEOUT_MS = 15_000;
@@ -55,7 +61,7 @@ type OpcionesCaptura = {
  */
 export async function capturarUfUtmSii(ctx: Contexto, opciones: OpcionesCaptura = {}): Promise<void> {
   const consultadaEn = new Date();
-  const dia = opciones.dia ?? consultadaEn.toISOString().slice(0, 10);
+  const dia = opciones.dia ?? hoyCivilEn(ZONA_CAPTURA_SII, consultadaEn);
   const consulta = opciones.consulta ?? consultaSiiPorDefecto;
   const anio = Number(dia.slice(0, 4));
   const mes = Number(dia.slice(5, 7));

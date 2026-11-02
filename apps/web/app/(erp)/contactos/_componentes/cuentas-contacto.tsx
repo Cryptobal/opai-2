@@ -6,7 +6,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
-import { ListaVinculos } from "./lista-vinculos";
+import { ListaVinculosDiferida } from "./diferidas";
 import type { VinculoContacto } from "./vinculos-tipos";
 
 /** La capacidad filtra las cuentas por tenant y alcance antes de enviarlas al navegador. */
@@ -28,5 +28,7 @@ export async function CuentasContacto({ contactoId }: { contactoId: string }) {
       </SeccionTarjeta>
     );
   const gestionar = identidad ? puedeDeIdentidad(identidad)(PERMISOS_CORE.cuentasManage) : false;
-  return <ListaVinculos contactoId={contactoId} vinculos={r.data} gestionar={gestionar} />;
+  return (
+    <ListaVinculosDiferida contactoId={contactoId} vinculos={r.data} gestionar={gestionar} />
+  );
 }
