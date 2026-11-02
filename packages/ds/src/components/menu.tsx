@@ -9,6 +9,8 @@ import type { MenuProps } from "./menu-radix";
 export type ItemMenu = {
   id: string;
   etiqueta: string;
+  descripcion?: string;
+  separador?: boolean;
   icono?: LucideIcon;
   /** Marca de selección (empresa o portal actual). */
   marcado?: boolean;

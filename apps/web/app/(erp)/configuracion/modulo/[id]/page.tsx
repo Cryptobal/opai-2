@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { listarModulos } from "@opai/capabilities";
 import { Alerta, Empty, Tabs } from "@opai/ds";
@@ -27,6 +27,7 @@ export default function AjustesModulo({ params, searchParams }: Props) {
       titulo={(d) => d.manifest?.nombre ?? "Ajustes del módulo"}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
+        if (id === "agente") redirect("/configuracion/grupo/agentes/agente-interno");
         const manifest = listarModulos().find((m) => m.id === id) ?? null;
         if (!manifest) notFound();
         return { id, manifest, pedida: p["seccion"], ajustes: await cargarAjustes(id) };
