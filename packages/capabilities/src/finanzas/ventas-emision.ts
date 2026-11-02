@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-import { puedeTransicionDte, validarMontosVenta, type TipoDteVenta } from "@opai/domain";
-import { adaptadorSiiDesdeEntorno } from "@opai/integrations";
+import { validarMontosVenta, type TipoDteVenta } from "@opai/domain";
+import { adaptadorSiiDe } from "./adaptador-sii";
+import { encolarConsultaSiPendiente } from "./trabajos-dte";
 
 import { defineCapability } from "../define";
 import { aFecha, escribirConEvento, hoy } from "../core/maestros/comun";
@@ -51,7 +52,7 @@ export const ventasEmitir = defineCapability({
     const ambiente = await ambienteDe(ctx);
     const rutEmisor = await rutEmisorDe(ctx);
     const emision = doc.fechaEmision?.toISOString().slice(0, 10) ?? hoy();
-    const adaptador = adaptadorSiiDesdeEntorno();
+    const adaptador = await adaptadorSiiDe(ctx);
     if (!adaptador.disponible) throw reglaDeNegocio("El adaptador SII no está disponible.");
     if (dryRun) {
       const folio = await consumirFolio(ctx, tipo, true);
@@ -118,10 +119,11 @@ export const ventasEnviarSii = defineCapability({
     if (doc.estadoDte !== "enviado") throw reglaDeNegocio("Solo se envía al SII un documento en estado enviado.");
     if (doc.folio == null) throw reglaDeNegocio("El documento no tiene folio.");
     const ambiente = await ambienteDe(ctx);
-    const adaptador = adaptadorSiiDesdeEntorno();
+    const adaptador = await adaptadorSiiDe(ctx);
     const xml = `<DTE folio="${doc.folio}"/>`;
     if (dryRun) return vistaDeDocumento(ctx, doc.id);
     const envio = await adaptador.enviar(xml, ambiente);
+    let envioId = "";
     await escribirConEvento(
       ctx,
       {
@@ -129,16 +131,25 @@ export const ventasEnviarSii = defineCapability({
         entidadTipo: "documento_emitido",
         payload: () => ({ trackId: envio.trackId }),
       },
-      (tx) =>
-        tx.documentoEmitido.update({
+      async (tx) => {
+        await tx.documentoEmitido.update({
           where: { id: doc.id },
           data: { trackIdSii: envio.trackId },
-        }),
+        });
+        const fila = await tx.dteEnvio.create({
+          data: {
+            tenantId: ctx.tenantId,
+            documentoId: doc.id,
+            trackId: envio.trackId,
+            estado: "pendiente",
+            proximaConsultaEn: new Date(),
+          },
+        });
+        envioId = fila.id;
+        return { id: doc.id };
+      },
     );
-    const consulta = await adaptador.consultar(envio.trackId, ambiente);
-    if (consulta.estado === "aceptado" && puedeTransicionDte("enviado", "aceptado")) {
-      await ctx.db.documentoEmitido.update({ where: { id: doc.id }, data: { estadoDte: "aceptado" } });
-    }
+    if (envioId) await encolarConsultaSiPendiente(ctx, envioId, new Date());
     return vistaDeDocumento(ctx, doc.id);
   },
 });
