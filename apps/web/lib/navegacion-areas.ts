@@ -99,3 +99,18 @@ export function entradasAreaPrincipal(
   }
   return elegido.entradas.slice(0, 3);
 }
+
+function bajoRuta(ruta: string, href: string, exacta = false, activoEn?: string): boolean {
+  const prefijo = (base: string) => ruta === base || ruta.startsWith(`${base}/`);
+  if (activoEn && prefijo(activoEn)) return true;
+  return exacta || href === "/" ? ruta === href : prefijo(href);
+}
+
+/** D1: área del ERP que contiene la ruta (shell antes de preferencias). */
+export function areaNavActivaEnRuta(grupos: readonly GrupoArea[], ruta: string): AreaNav | null {
+  for (const g of grupos) {
+    if (g.area === "inicio") continue;
+    if (g.entradas.some((e) => bajoRuta(ruta, e.href))) return g.area;
+  }
+  return null;
+}

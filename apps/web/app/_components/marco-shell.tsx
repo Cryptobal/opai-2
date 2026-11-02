@@ -6,7 +6,6 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@opai/ds";
 
-
 import type { DatosShell } from "./tipos-shell";
 export type { DatosShell } from "./tipos-shell";
 
@@ -20,13 +19,12 @@ import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
 import { padreConfiguracion } from "./padre-configuracion";
 import { menuCuentaShell } from "./menu-cuenta-shell";
+import { propsPreferenciasShell } from "./shell-props-preferencias";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
 // Conserva el render de servidor de la campana; su contador ya se consulta después de pintar.
 const Campana = dynamic(() => import("./campana").then((m) => m.Campana));
-// Los avisos (sonner) también: se montan después de hidratar y no bloquean el primer render.
-// El cambio de contraseña (formulario y diálogo) solo se descarga si se abre.
 const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
 const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: false });
 const Preferencias = dynamic(
@@ -34,7 +32,6 @@ const Preferencias = dynamic(
   { ssr: false },
 );
 const PortalInicio = dynamic(() => import("./portal-inicio").then((m) => m.PortalInicio));
-
 
 /**
  * Shell persistente del portal (ADR-045): vive en el layout de cada portal, así que la navegación,
@@ -50,11 +47,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const [inicio, setInicio] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
   const [preferencias, setPreferencias] = useState<PreferenciasShell | null>(null);
-  // El ERP del usuario con acceso: habilita búsqueda, ⌘K y Preferencias. Sin acceso al portal el
-  // shell se monta igual (aviso «Sin permisos»), pero sin estas acciones y sin que la acción del
-  // servidor (`ejecutarCapacidad`) devuelva nada del portal ajeno.
+  // ERP con acceso: búsqueda, ⌘K y preferencias; sin acceso el shell avisa «Sin permisos».
   const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
-  // Una revocación puede refrescar el layout sin cambiar la época de usuario/empresa.
   if (!enErp && preferencias !== null) setPreferencias(null);
   useEpocaSesion(datos.epoca);
   useEffect(() => {
@@ -85,17 +79,18 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const tituloEfectivo = enConfiguracion
     ? "Configuración"
     : (navPendiente?.etiqueta ?? cabecera.titulo);
-  // Recientes (§4.3, §10): solo en este navegador, por usuario y empresa; no cuando hay un
-  // destino pendiente (se registraría dos veces al llegar) ni mientras no haya acceso.
-  // Preferencias de navegación (D1, D3, §3): se cargan después de montar, sin sumar consultas al
-  // servidor por navegación (ADR-045); hasta entonces, la barra inferior usa el área por defecto
-  // del rol que ya trae `datos.navInferior` y el acordeón abre la del lugar actual.
-  const { esFicha, fichaFijada, onFijarFicha } = (enErp ? preferencias : null) ?? {};
+  // Preferencias D1/D3: isla post-hidratar; barra inferior por defecto del rol hasta cargar.
+  const {
+    navInferiorResuelto: navInferiorPreferido,
+    esFicha,
+    fichaFijada,
+    onFijarFicha,
+  } = (enErp ? preferencias : null) ?? {};
   const navInferiorDefecto = useMemo(
     () => datos.navInferior?.map((n) => ({ ...n, icono: iconoShell(n.icono, datos.iconos) })),
     [datos.navInferior, datos.iconos],
   );
-  const navInferiorBase = navInferiorDefecto;
+  const navInferiorBase = navInferiorPreferido ?? navInferiorDefecto;
   const { boton: pinFicha, menu: pinMenu } = pinDeFicha(enErp && Boolean(esFicha), fichaFijada, onFijarFicha);
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
@@ -132,24 +127,13 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         {...(empresas.length ? { empresas } : {})}
         usuario={datos.usuario}
         menuUsuario={menu}
-        {...(enErp ? { fijados: preferencias?.fijados ?? [] } : {})}
         campana={
           datos.tenant ? (
             <Campana key={datos.epoca} portal={datos.portal} pendiente={bandejaPendiente} />
           ) : undefined
         }
         {...(enErp ? { onBuscar: () => setPaleta(true) } : {})}
-        {...(enErp && preferencias
-          ? {
-              fijados: preferencias.fijados,
-              errorFijados: preferencias.errorFijados,
-              reintentarFijados: () => {
-                void preferencias.reintentarFijados();
-              },
-              onFijar: preferencias.onFijar,
-              onDesfijar: preferencias.onDesfijar,
-            }
-          : {})}
+        {...(enErp && preferencias ? propsPreferenciasShell(preferencias) : {})}
         onNavegar={(href) => router.push(href)}
         Link={LinkMenu}
       >
