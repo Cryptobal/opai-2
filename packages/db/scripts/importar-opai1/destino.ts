@@ -20,7 +20,17 @@ export async function leerEstadoDestino(
       // Solo lectura también en la base; secuencial: una transacción interactiva usa una conexión.
       await tx.$executeRaw`SET TRANSACTION READ ONLY`;
       const cuentas = await tx.cuenta.findMany({
-        select: { id: true, nombre: true, razonSocial: true, rut: true },
+        select: {
+          id: true,
+          nombre: true,
+          razonSocial: true,
+          rut: true,
+          giro: true,
+          calle: true,
+          comuna: true,
+          ciudad: true,
+          emailDte: true,
+        },
         orderBy: { id: "asc" },
       });
       const contactos = await tx.contacto.findMany({

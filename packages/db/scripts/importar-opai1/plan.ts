@@ -1,6 +1,6 @@
 // Plan completo de la importación desde 1.0: puro y determinista (mismo origen + mismo estado 2.0 →
 // mismo plan). No escribe: la carga real (otro PR, con el OK de Carlos) consumirá este plan.
-import { pendientesComerciales, type Pendiente } from "./comercial-pendiente";
+import { pendientesImportacion, type Pendiente } from "./comercial-pendiente";
 import { type Aviso, type Decision, ordenEstable, type Propuesta } from "./comun";
 import type { DatosContacto } from "./contactos-datos";
 import { planContactos } from "./contactos";
@@ -8,7 +8,9 @@ import { type DatosCuenta, planCuentas, resolverCuentas } from "./cuentas";
 import type { EstadoDestino } from "./destino-tipos";
 import { type DatosInstalacion, planInstalaciones } from "./instalaciones";
 import { nombreCanonico, textoLimpio } from "./normalizar";
+import { OPCIONES_POR_DEFECTO, type OpcionesPlan } from "./opciones";
 import type { DatosOpai1 } from "./origen";
+import { avisosTributariosCuentas, resumenTributario, type ResumenTributario } from "./tributario-plan";
 
 /** Valor de rubro/segmento/tamaño de 1.0 que pasaría a etiqueta (Carlos los confirma). */
 export type EtiquetaPropuesta = {
@@ -18,6 +20,7 @@ export type EtiquetaPropuesta = {
 };
 
 export type Plan = {
+  opciones: OpcionesPlan;
   cuentas: Decision<DatosCuenta>[];
   contactos: Decision<DatosContacto>[];
   instalaciones: Decision<DatosInstalacion>[];
@@ -25,21 +28,34 @@ export type Plan = {
   avisos: Aviso[];
   etiquetas: EtiquetaPropuesta[];
   pendientes: Pendiente[];
+  tributario: ResumenTributario;
 };
 
-export function calcularPlan(origen: DatosOpai1, destino: EstadoDestino): Plan {
+export function calcularPlan(
+  origen: DatosOpai1,
+  destino: EstadoDestino,
+  opciones: OpcionesPlan = OPCIONES_POR_DEFECTO,
+): Plan {
   const cuentas = planCuentas(origen.accounts, destino);
   const resolver = resolverCuentas(cuentas.decisiones);
   const contactos = planContactos(origen.contacts, resolver, destino);
   const instalaciones = planInstalaciones(origen.installations, resolver, destino);
+  const avisosTrib = avisosTributariosCuentas(cuentas.decisiones);
   return {
+    opciones,
     cuentas: cuentas.decisiones,
     contactos: contactos.decisiones,
     instalaciones: instalaciones.decisiones,
     propuestas: [...cuentas.propuestas, ...contactos.propuestas],
-    avisos: [...cuentas.avisos, ...contactos.avisos, ...instalaciones.avisos],
+    avisos: [
+      ...cuentas.avisos,
+      ...contactos.avisos,
+      ...instalaciones.avisos,
+      ...avisosTrib,
+    ],
     etiquetas: etiquetasPropuestas(origen),
-    pendientes: pendientesComerciales(origen),
+    pendientes: pendientesImportacion(origen, opciones),
+    tributario: resumenTributario(cuentas.decisiones),
   };
 }
 

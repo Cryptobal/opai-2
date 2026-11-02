@@ -52,6 +52,10 @@ describe("idempotencia del plan", () => {
     if (!a6) throw new Error("fixture sin acc-a6");
     a6.name = "Delta Logística Renombrada";
     const d = calcularPlan(datos, cargado).cuentas.find((x) => x.idOpai1 === "acc-a6");
-    expect(d).toMatchObject({ accion: "actualizar", motivo: "cambian_campos", campos: ["nombre"] });
+    expect(d).toMatchObject({
+      accion: "actualizar",
+      motivo: "cambian_campos",
+      campos: ["nombre", "razonSocial"],
+    });
   });
 });

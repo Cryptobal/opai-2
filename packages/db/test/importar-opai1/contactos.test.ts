@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { MOTIVO_NN } from "../../scripts/importar-opai1/contactos";
-import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
+import { estadoVacio, cuentaDestino } from "../../scripts/importar-opai1/destino-tipos";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
 import { fixture } from "./memoria";
 
@@ -65,8 +65,8 @@ describe("plan de contactos", () => {
 
   it("contra 2.0: vincula por correo en la misma cuenta; en otra cuenta es N–N", () => {
     const destino = estadoVacio();
-    destino.cuentas.push({ id: "c-1", nombre: "Alfa", razonSocial: null, rut: "76111111-6" });
-    destino.cuentas.push({ id: "c-5", nombre: "Gamma", razonSocial: null, rut: null });
+    destino.cuentas.push(cuentaDestino({ id: "c-1", nombre: "Alfa", rut: "76111111-6" }));
+    destino.cuentas.push(cuentaDestino({ id: "c-5", nombre: "Gamma" }));
     const base = { apellidos: "X", telefono: null, cargo: null, esPrincipal: false, roles: [] };
     destino.contactos.push(
       { ...base, id: "k-1", cuentaId: "c-1", nombres: "A", email: "bruno@ejemplo.test" },
