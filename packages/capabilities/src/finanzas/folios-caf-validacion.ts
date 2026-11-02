@@ -5,6 +5,15 @@ import { hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
+export function errorFolioInicialCaf(codigo: "fuera_rango_opai1"): never {
+  if (codigo === "fuera_rango_opai1") {
+    throw reglaDeNegocio(
+      "El último folio usado en OPAI 1.0 queda fuera del rango del CAF; cargue un CAF que cubra ese folio o ajuste la fecha de corte.",
+    );
+  }
+  throw reglaDeNegocio("No se pudo calcular el folio inicial del CAF.");
+}
+
 export function errorDeValidacionCaf(
   codigo: "xml_invalido" | "rut_distinto" | "tipo_no_habilitado" | "solape" | "vencido" | "no_sintetico",
 ): never {

@@ -247,6 +247,8 @@ model DteFolio {
   tipoDte       Int       @map("tipo_dte")
   folioDesde    Int       @map("folio_desde")
   folioHasta    Int       @map("folio_hasta")
+  /// Columna int4range mantenida por trigger; no se escribe desde la app.
+  folioRango    Unsupported("int4range")? @map("folio_rango")
   /// Próximo folio a consumir (atómico en transacción).
   folioActual   Int       @map("folio_actual")
   cafSecretoId  String?   @map("caf_secreto_id") @db.Uuid

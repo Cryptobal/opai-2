@@ -35,13 +35,15 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
     expect(despuesSecretos).toBe(antesSecretos);
   });
 
-  it("la respuesta y auditoría no incluyen el XML del CAF", async () => {
+  it("la respuesta y auditoría no incluyen el XML del CAF ni la llave", async () => {
     const xml = cafXmlSintetico({ folioDesde: 6100, folioHasta: 6102, idk: "CERT-UNICO-6100" });
     const marca = "MARCA_SECRETA_XML_NO_DEBE_FILTRAR_6100";
+    const llaveMarca = "LLAVE_PRIVADA_MARCA_6100";
     const out = await s.dato<{ lectura: string }>("finanzas.folios.cargar_caf", {
-      cafXml: xml.replace("c2luZ3R1cmE=", marca),
+      cafXml: xml.replace("c2luZ3R1cmE=", marca).replace("<FRMA", `<RSAPRIVATEKEY>${llaveMarca}</RSAPRIVATEKEY><FRMA`),
     });
     expect(JSON.stringify(out)).not.toContain(marca);
+    expect(JSON.stringify(out)).not.toContain(llaveMarca);
     expect(out.lectura).not.toContain("<");
     const eventos = await s.e.admin.bitacora.findMany({
       where: { tenantId: s.tenantId, tipo: "finanzas.folios.caf_cargado" },
@@ -49,13 +51,24 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
       take: 1,
     });
     expect(eventos[0]?.payloadCanon ?? "").not.toContain(marca);
+    const audit = await s.e.admin.auditEvent.findMany({
+      where: { tenantId: s.tenantId, capability: "finanzas.folios.cargar_caf" },
+      orderBy: { seq: "desc" },
+      take: 1,
+    });
+    const auditTexto = JSON.stringify(audit[0]?.payload ?? {});
+    expect(auditTexto).not.toContain(marca);
+    expect(auditTexto).not.toContain(llaveMarca);
+    expect(auditTexto).not.toContain("<CAF");
+    expect(auditTexto).toContain("[oculto]");
   });
 
   it("tenant B no ve folios del tenant A; mismo rango en B permitido", async () => {
+    const rutB = "10000013-K";
     const xml = cafXmlSintetico({ folioDesde: 5000, folioHasta: 5002 });
     await s.mod.executeCapability(s.ctx(s.tenantB), "finanzas.dte_config.actualizar", {
       ambiente: "certificacion",
-      rutEmisor: "77234567-8",
+      rutEmisor: rutB,
     });
     const listaB0 = await s.mod.executeCapability(s.ctx(s.tenantB), "finanzas.folios.listar", {});
     expect(listaB0.ok).toBe(true);
@@ -63,7 +76,7 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
     expect((listaB0.data as { items: unknown[] }).items).toHaveLength(0);
 
     const cargadoB = await s.mod.executeCapability(s.ctx(s.tenantB), "finanzas.folios.cargar_caf", {
-      cafXml: xml.replace("76111222-8", "77234567-8"),
+      cafXml: xml.replace("76111222-8", rutB),
     });
     expect(cargadoB.ok).toBe(true);
 
@@ -93,6 +106,10 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
       cafXml: cafXmlSintetico({ idk: "PRODUCCION-NO-SINTETICO", rut: "12345678-5" }),
     });
     expect(mal).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const trampa = await s.mod.executeCapability(s.ctx(qaId), "finanzas.folios.cargar_caf", {
+      cafXml: cafXmlSintetico({ idk: "EVIL-SINTETICO-FAKE", rut: "12345678-5" }),
+    });
+    expect(trampa).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     await s.e.admin.tenant.delete({ where: { id: qaId } }).catch(() => undefined);
   });
 
@@ -145,6 +162,34 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
       cafXml: cafXmlSintetico({ folioDesde: 7200, folioHasta: 7210, idk: "CERT-7200-CORTE" }),
     });
     expect(out.folioActual).toBe(7206);
+  });
+
+  it("rechaza CAF si el folio 1.0 queda fuera del rango (C2)", async () => {
+    await s.dato("finanzas.dte_config.actualizar", {
+      ambiente: "certificacion",
+      rutEmisor: "76111222-8",
+      fechaCorte1_0: "2026-06-01",
+    });
+    await s.e.admin.documentoEmitido.create({
+      data: {
+        tenantId: s.tenantId,
+        cuentaId: s.cuentaId,
+        tipoDte: 33,
+        folio: 9500,
+        fechaEmision: new Date("2026-05-15T00:00:00.000Z"),
+        montoNeto: 10_000,
+        montoExento: 0,
+        montoIva: 1900,
+        montoTotal: 11_900,
+        estadoDte: "aceptado",
+      },
+    });
+    const mal = await s.mod.executeCapability(s.ctx(), "finanzas.folios.cargar_caf", {
+      cafXml: cafXmlSintetico({ folioDesde: 8500, folioHasta: 8510, idk: "CERT-8500-FUERA" }),
+    });
+    expect(mal).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    if (mal.ok) throw new Error("esperaba error");
+    expect(mal.error.message).toMatch(/fuera del rango del CAF/i);
   });
 
   it("listar avisa folios que vencerán sin usar", async () => {

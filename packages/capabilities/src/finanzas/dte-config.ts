@@ -6,7 +6,7 @@ import { defineCapability } from "../define";
 import { dia, diaSchema, escribirConEvento, rutSchema } from "../core/maestros/comun";
 import { prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
-import { PERMISO_READ, PERMISO_VENTAS } from "./comun";
+import { PERMISO_READ, PERMISO_VENTAS_CONFIGURE } from "./comun";
 
 const proveedorEmisionSchema = z.enum(["simulado", "simpleapi"]);
 const proveedorCesionSchema = z.enum(["octava"]).nullable();
@@ -77,7 +77,7 @@ export const dteConfigActualizar = defineCapability({
   id: "finanzas.dte_config.actualizar",
   descripcion:
     "Actualiza ambiente SII, conectores y umbrales. Pasar a producción solo lo puede hacer el owner, con vista previa y auditoría.",
-  permiso: PERMISO_VENTAS,
+  permiso: PERMISO_VENTAS_CONFIGURE,
   input: z.object({
     ambiente: z.enum(AMBIENTES_SII),
     rutEmisor: rutSchema.optional(),
@@ -120,6 +120,8 @@ export const dteConfigActualizar = defineCapability({
     if (next.ambiente === "produccion" && !next.rutEmisor) {
       throw reglaDeNegocio("Producción requiere RUT emisor configurado.");
     }
+    const fechaCorteAnterior = dia(prev?.fechaCorte1_0 ?? null);
+    const fechaCorteNueva = dia(next.fechaCorte1_0);
     const cfg = await escribirConEvento(
       ctx,
       {
@@ -129,6 +131,9 @@ export const dteConfigActualizar = defineCapability({
           ambiente: next.ambiente,
           emisionProveedor: next.emisionProveedor,
           cesionProveedor: next.cesionProveedor,
+          ...(input.fechaCorte1_0 !== undefined && fechaCorteNueva !== fechaCorteAnterior
+            ? { fechaCorte1_0: fechaCorteNueva }
+            : {}),
         }),
       },
       (tx) =>

@@ -85,6 +85,7 @@ export const foliosCargarCaf = defineCapability({
   output: folioVistaSchema,
   efecto: "escritura",
   dryRun: true,
+  sensibles: ["cafXml"],
   async handler(ctx, input, { dryRun }) {
     const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
     if (!cfg?.rutEmisor) {
@@ -92,13 +93,13 @@ export const foliosCargarCaf = defineCapability({
     }
     const rutEmisor = cfg.rutEmisor;
     const avisos = await avisosDteDe(ctx);
-    const { lectura, hoyIso, ultimoFolioOpai1 } = await validarCafParaTenant(
+    const { lectura, hoyIso, ultimoFolioOpai1, folioActual } = await validarCafParaTenant(
       ctx,
       input.cafXml,
       rutEmisor,
       cfg.fechaCorte1_0,
     );
-    const preview = vistaPreviaCafCargado(lectura, avisos, hoyIso, ultimoFolioOpai1);
+    const preview = vistaPreviaCafCargado(lectura, avisos, hoyIso, ultimoFolioOpai1, folioActual);
     if (dryRun) return preview;
     const fila = await escribirConEvento(
       ctx,

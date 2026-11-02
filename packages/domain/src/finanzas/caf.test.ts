@@ -116,14 +116,25 @@ describe("utilidades CAF", () => {
     );
   });
 
-  it("marca CAF sintético", () => {
-    const l = leerCafXml(xmlBase({ idk: "CERT-123" }))!;
-    expect(esCafMarcadoSintetico(l)).toBe(true);
+  it("marca CAF sintético por RUT reservado o IDK exacto OPAI2", () => {
+    expect(esCafMarcadoSintetico(leerCafXml(xmlBase({}))!)).toBe(true);
+    expect(
+      esCafMarcadoSintetico(
+        leerCafXml(xmlBase({ idk: "CERT-SINTETICO-OPAI2-TEST", re: "12345678-5" }))!,
+      ),
+    ).toBe(true);
   });
 
-  it("folio inicial respeta último folio 1.0", () => {
-    expect(folioActualInicialCaf(100, null)).toBe(100);
-    expect(folioActualInicialCaf(100, 150)).toBe(151);
+  it("no acepta SINTETICO como substring en IDK", () => {
+    expect(
+      esCafMarcadoSintetico(leerCafXml(xmlBase({ idk: "EVIL-SINTETICO-FAKE", re: "12345678-5" }))!),
+    ).toBe(false);
+  });
+
+  it("folio inicial respeta último folio 1.0 dentro del rango", () => {
+    expect(folioActualInicialCaf(100, 200, null)).toEqual({ ok: true, valor: 100 });
+    expect(folioActualInicialCaf(100, 200, 150)).toEqual({ ok: true, valor: 151 });
+    expect(folioActualInicialCaf(8500, 8510, 9500)).toEqual({ ok: false, error: "fuera_rango_opai1" });
   });
 
   it("aviso de folios por vencer sin usar", () => {

@@ -56,9 +56,10 @@ export async function columnasActualizables(pg: Client, rol: string, t: Tabla): 
  */
 export function copia(t: Tabla, fila: Fila, cambios: Fila = {}): Fila {
   const refs = new Set(t.referencias.map((r) => r.columna));
+  const omitir = new Set(AJUSTES[t.nombre]?.omitir ?? []);
   const nueva: Fila = {};
   for (const c of t.columnas) {
-    if (c.generada || !(c.nombre in fila)) continue;
+    if (c.generada || omitir.has(c.nombre) || !(c.nombre in fila)) continue;
     const valor = fila[c.nombre];
     const regenerar =
       t.unicas.has(c.nombre) &&

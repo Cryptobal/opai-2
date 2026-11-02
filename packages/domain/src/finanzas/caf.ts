@@ -10,8 +10,11 @@ export type TipoDteCaf = (typeof TIPOS_DTE_CAF)[number];
 /** Slug del tenant QA de Finanzas («Vigía Austral SpA»): solo CAF sintéticos. */
 export const SLUG_TENANT_QA_FINANZAS = "vigia-austral";
 
+/** IDK exacto de fixtures OPAI 2.0; no se acepta «SINTETICO» como substring en otros IDK. */
+export const IDK_CAF_SINTETICO_OPAI2 = "CERT-SINTETICO-OPAI2-TEST";
+
 /** RUT emisor de prueba aceptados en certificación / fixtures (sin datos reales de clientes). */
-export const RUTS_CAF_SINTETICO = new Set(["55555555-5", "66666666-6", "76111222-8", "77234567-8"]);
+export const RUTS_CAF_SINTETICO = new Set(["55555555-5", "66666666-6", "76111222-8"]);
 
 export type CafLectura = {
   rutEmisor: string;
@@ -101,19 +104,25 @@ export function rangosCafSeSolapan(
 }
 
 export function esCafMarcadoSintetico(lectura: CafLectura): boolean {
-  if (lectura.idk?.toUpperCase().includes("SINTETICO")) return true;
-  if (lectura.idk?.toUpperCase().startsWith("CERT")) return true;
-  return RUTS_CAF_SINTETICO.has(lectura.rutEmisor);
+  if (RUTS_CAF_SINTETICO.has(lectura.rutEmisor)) return true;
+  return lectura.idk === IDK_CAF_SINTETICO_OPAI2;
 }
 
 export function requiereCafSintetico(slugTenant: string): boolean {
   return slugTenant === SLUG_TENANT_QA_FINANZAS;
 }
 
-/** Próximo folio al cargar CAF, respetando el último consumido en OPAI 1.0 si se conoce. */
-export function folioActualInicialCaf(folioDesde: number, ultimoFolioOpai1: number | null | undefined): number {
-  if (ultimoFolioOpai1 == null) return folioDesde;
-  return Math.max(folioDesde, ultimoFolioOpai1 + 1);
+export type ErrorFolioInicialCaf = "fuera_rango_opai1";
+
+/** Próximo folio al cargar CAF, dentro del rango autorizado y respetando el último de 1.0 si aplica. */
+export function folioActualInicialCaf(
+  folioDesde: number,
+  folioHasta: number,
+  ultimoFolioOpai1: number | null | undefined,
+): { ok: true; valor: number } | { ok: false; error: ErrorFolioInicialCaf } {
+  const valor = ultimoFolioOpai1 == null ? folioDesde : Math.max(folioDesde, ultimoFolioOpai1 + 1);
+  if (valor > folioHasta) return { ok: false, error: "fuera_rango_opai1" };
+  return { ok: true, valor };
 }
 
 export type ErrorCaf = "xml_invalido" | "rut_distinto" | "tipo_no_habilitado" | "solape" | "vencido" | "no_sintetico";

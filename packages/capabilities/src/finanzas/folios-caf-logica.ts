@@ -16,6 +16,7 @@ import type { Contexto } from "../types";
 import { folioVista } from "./ventas-comun";
 import {
   errorDeValidacionCaf,
+  errorFolioInicialCaf,
   esViolacionSolapeFolios,
   ultimoFolioOpai1AntesCorte,
   validarCafConRangos,
@@ -66,7 +67,9 @@ export async function validarCafParaTenant(
     );
   }
   const ultimoFolioOpai1 = await ultimoFolioOpai1AntesCorte(ctx.db, lectura.tipoDte, fechaCorte1_0);
-  return { lectura, hoyIso, ultimoFolioOpai1 };
+  const folioInicial = folioActualInicialCaf(lectura.folioDesde, lectura.folioHasta, ultimoFolioOpai1);
+  if (!folioInicial.ok) errorFolioInicialCaf(folioInicial.error);
+  return { lectura, hoyIso, ultimoFolioOpai1, folioActual: folioInicial.valor };
 }
 
 export function vistaPreviaCafCargado(
@@ -74,8 +77,8 @@ export function vistaPreviaCafCargado(
   avisos: AvisosDte,
   hoyIso: string,
   ultimoFolioOpai1: number | null,
+  folioActual: number,
 ) {
-  const folioActual = folioActualInicialCaf(lectura.folioDesde, ultimoFolioOpai1);
   return {
     ...folioVista(
       {
@@ -113,10 +116,12 @@ export async function persistirCafCargado(
     rangosCargados.map((v) => ({ folioDesde: v.folioDesde, folioHasta: v.folioHasta })),
   );
   const ultimoFolioOpai1 = await ultimoFolioOpai1AntesCorte(tx, lectura.tipoDte, fechaCorte1_0);
+  const folioInicial = folioActualInicialCaf(lectura.folioDesde, lectura.folioHasta, ultimoFolioOpai1);
+  if (!folioInicial.ok) errorFolioInicialCaf(folioInicial.error);
+  const folioActual = folioInicial.valor;
   const integracionId = await integracionDteId(tx, ctx.tenantId);
   const nombreSecreto = nombreSecretoCaf(lectura.tipoDte, lectura.idk, lectura.folioDesde, lectura.folioHasta);
   const { id: secretoId } = await insertarSecretoConIdTx(tx, ctx, integracionId, nombreSecreto, cafXml);
-  const folioActual = folioActualInicialCaf(lectura.folioDesde, ultimoFolioOpai1);
   for (const v of rangosCargados) {
     if (v.tipoDte !== lectura.tipoDte) continue;
     if (!v.activo) continue;
