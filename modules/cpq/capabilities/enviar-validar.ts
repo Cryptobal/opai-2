@@ -19,8 +19,8 @@ export async function validarEnvioCpq(
     throw reglaDeNegocio("La cotización no se puede enviar: revisa advertencias y costos pendientes.");
   if (resultado.requiereAprobacion && version.estado !== "lista")
     throw reglaDeNegocio("El margen requiere aprobación antes de enviar.");
-  const juego = await juegoParaFecha(ctx, fechaCalculoHoy());
-  if (juegoDesactualizado(huellaJuego(juego), lineas) && !input.confirmarValoresViejos) {
+  const resuelto = await juegoParaFecha(ctx, fechaCalculoHoy());
+  if (juegoDesactualizado(huellaJuego(resuelto.juego), lineas) && !input.confirmarValoresViejos) {
     throw reglaDeNegocio(
       "Los valores legales cambiaron desde el último cálculo; confirma el envío o recalcula antes.",
     );

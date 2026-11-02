@@ -96,4 +96,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: es el control humano sobre lo que propone un agente (margen CPQ).",
   "cpq.cotizaciones.rechazar_aprobacion":
     "Solo personas: es el control humano sobre lo que propone un agente (margen CPQ).",
+  "core.remuneraciones.confirmar":
+    "Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034).",
+  "core.remuneraciones.confirmar_mutual":
+    "Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034).",
 };

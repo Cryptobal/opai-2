@@ -24,7 +24,8 @@ export async function metaFicha(
   calculo: ResultadoCalculo,
 ) {
   const fechaCalculo = fechaCalculoHoy();
-  const juego = await juegoParaFecha(ctx, fechaCalculo);
+  const resuelto = await juegoParaFecha(ctx, fechaCalculo);
+  const juego = resuelto.juego;
   const huella = huellaJuego(juego);
   const desactualizado = juegoDesactualizado(huella, lineas);
   const pend = version.estado === "en_aprobacion" ? await aprobacionPendiente(ctx, version.id) : null;

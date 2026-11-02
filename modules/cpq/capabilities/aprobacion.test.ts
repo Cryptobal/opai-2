@@ -1,9 +1,8 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba, USUARIO_DE_PRUEBA } from "@opai/capabilities/testing";
-import { publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import * as valoresLegales from "../persistencia/valores-legales";
+import { mockMotorLegal } from "../persistencia/mock-motor-legal";
 import { ACTIVOS, CON_COSTOS, CONTACTO_1, GESTOR, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 
@@ -26,7 +25,7 @@ async function cotizacionConPuesto(ctx: ReturnType<typeof ctxOwner>["ctx"]) {
   });
   if (!c.ok) throw new Error("fixture");
   const id = (c.data as { id: string }).id;
-  vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+  mockMotorLegal();
   const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
   if (!f.ok) throw new Error("ficha");
   const sec = (f.data as { secciones: { id: string }[] }).secciones[0]!;
