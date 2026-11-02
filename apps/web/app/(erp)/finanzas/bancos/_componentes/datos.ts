@@ -3,25 +3,9 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
-export type CuentaBanco = {
-  id: string;
-  banco: string;
-  numeroVisible: string;
-  moneda: string;
-  flujoFilaId: string | null;
-  activa: boolean;
-};
+import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
 
-export type MovimientoBanco = {
-  id: string;
-  cuentaId: string;
-  fecha: string;
-  monto: number;
-  glosa: string;
-  referencia: string | null;
-  estado: string;
-  origen: string;
-};
+export type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
 
 export async function cargarBancos(sp: SearchParams) {
   const p = await leerParametros(sp);

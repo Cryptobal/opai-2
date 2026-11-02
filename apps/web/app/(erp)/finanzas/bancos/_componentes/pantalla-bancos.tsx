@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -8,18 +9,12 @@ import { Badge, Button, Empty, Estado, Tabs, type EstadoPantalla } from "@opai/d
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import type { CuentaBanco, MovimientoBanco } from "./datos";
+import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
+import { PESTANAS_ESTADO_BANCO } from "./bancos-tipos";
 import { clp } from "../../flujo/_componentes/datos";
-import { HojaReconocer } from "./hoja-reconocer";
-import { HojaSubirCartola } from "./hoja-subir-cartola";
 
-const ESTADOS = [
-  { id: "pendiente", etiqueta: "Sin reconocer" },
-  { id: "sugerido", etiqueta: "Sugeridos" },
-  { id: "por_autorizar", etiqueta: "Por autorizar" },
-  { id: "conciliado", etiqueta: "Conciliados" },
-  { id: "ignorado", etiqueta: "Ignorados" },
-] as const;
+const HojaReconocer = dynamic(() => import("./hoja-reconocer").then((m) => ({ default: m.HojaReconocer })));
+const HojaSubirCartola = dynamic(() => import("./hoja-subir-cartola").then((m) => ({ default: m.HojaSubirCartola })));
 
 type Props = {
   state: EstadoPantalla;
@@ -87,7 +82,7 @@ export function PantallaBancos({
             <Tabs
               Link={LinkNext}
               activa={estado}
-              tabs={ESTADOS.map((e) => ({ id: e.id, etiqueta: e.etiqueta, href: params(e.id) }))}
+              tabs={PESTANAS_ESTADO_BANCO.map((e) => ({ id: e.id, etiqueta: e.etiqueta, href: params(e.id) }))}
             />
             {movimientos.length === 0 ? (
               <Empty titulo="Sin movimientos en esta pestaña" descripcion="Importa una cartola o cambia el filtro de estado." />

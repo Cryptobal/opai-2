@@ -2,37 +2,14 @@
 
 import { useMemo, useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Select, Sheet } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Input, Select, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { CuentaBanco } from "./datos";
-
-type VistaCartola = {
-  aplicados: number;
-  duplicados: number;
-  rechazados: number;
-  saldoFinal: number | null;
-  filas: {
-    indice: number;
-    estado: string;
-    motivo: string | null;
-    monto: number | null;
-    glosa: string | null;
-  }[];
-};
-
-function archivoABase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const data = reader.result as string;
-      resolve(data.split(",")[1] ?? "");
-    };
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
+import { archivoABase64 } from "./cartola-archivo";
+import type { CuentaBanco } from "./bancos-tipos";
+import type { VistaCartolaPreview } from "./tipos-cartola";
+import { VistaCartolaPreview as VistaCartolaPreviewUi } from "./vista-cartola-preview";
 
 export function HojaSubirCartola({
   cuentas,
@@ -49,7 +26,7 @@ export function HojaSubirCartola({
   const [cuenta, setCuenta] = useState(cuentaId ?? cuentas[0]?.id ?? "");
   const [formato, setFormato] = useState<"santander" | "generico">("santander");
   const [archivo, setArchivo] = useState<File | null>(null);
-  const [vista, setVista] = useState<VistaCartola | null>(null);
+  const [vista, setVista] = useState<VistaCartolaPreview | null>(null);
   const idempotencyKey = useMemo(
     () => (archivo ? `${archivo.name}-${archivo.lastModified}-${archivo.size}` : ""),
     [archivo],
@@ -60,7 +37,7 @@ export function HojaSubirCartola({
     limpiarError();
     const contenidoBase64 = await archivoABase64(archivo);
     const fmt = formato === "santander" ? "santander" : "generico";
-    const r = await ejecutar<VistaCartola>(
+    const r = await ejecutar<VistaCartolaPreview>(
       "finanzas.cartolas.importar",
       { cuentaId: cuenta, formato: fmt, contenidoBase64, nombreArchivo: archivo.name, idempotencyKey },
       true,
@@ -146,11 +123,11 @@ export function HojaSubirCartola({
           />
         </Campo>
         <Campo etiqueta="Archivo" htmlFor="cartola-archivo">
-          <input
+          <Input
             id="cartola-archivo"
             type="file"
             accept={formato === "santander" ? ".xlsx,.xls" : ".csv,.txt"}
-            className="t-body-sm w-full"
+            className="t-body-sm file:mr-2 file:rounded file:border-0 file:bg-surface-muted file:px-2 file:py-1"
             onChange={(e) => {
               setArchivo(e.target.files?.[0] ?? null);
               setVista(null);
@@ -158,22 +135,12 @@ export function HojaSubirCartola({
           />
         </Campo>
         {vista ? (
-          <>
-            <Alerta
-              tono="info"
-              titulo={`${vista.aplicados} nuevos · ${vista.duplicados} duplicados · ${vista.rechazados} rechazados`}
-            />
-            <ul className="max-h-48 overflow-auto text-sm text-fg-muted">
-              {vista.filas.slice(0, 40).map((f) => (
-                <li key={f.indice} className="border-b border-border py-1">
-                  Fila {f.indice + 1}: {f.estado}
-                  {f.monto != null ? ` · ${f.monto.toLocaleString("es-CL")} CLP` : ""}
-                  {f.glosa ? ` · ${f.glosa}` : ""}
-                  {f.motivo ? ` · ${f.motivo}` : ""}
-                </li>
-              ))}
-            </ul>
-          </>
+          <VistaCartolaPreviewUi
+            aplicados={vista.aplicados}
+            duplicados={vista.duplicados}
+            rechazados={vista.rechazados}
+            filas={vista.filas}
+          />
         ) : null}
       </div>
     </Sheet>
