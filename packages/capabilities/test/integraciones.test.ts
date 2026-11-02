@@ -44,6 +44,46 @@ describe("integraciones y secretos (ADR-027)", () => {
     expect(resend).toMatchObject({ estado: "configurada" });
   });
 
+  it("no revela sufijo legacy en get/list para certificado_clave (C1)", async () => {
+    const { ctx } = contextoDePrueba();
+    await executeCapability(ctx, "core.integraciones.set_secreto", {
+      proveedor: "dte_emision",
+      nombre: "certificado_clave",
+      valor: "clave-certificado-legacy",
+    });
+    const fila = await ctx.db.secreto.findFirst({
+      where: { tenantId: ctx.tenantId, nombre: "certificado_clave" },
+    });
+    expect(fila).toBeTruthy();
+    await ctx.db.secreto.update({
+      where: {
+        tenantId_integracionId_nombre: {
+          tenantId: ctx.tenantId,
+          integracionId: fila!.integracionId as string,
+          nombre: "certificado_clave",
+        },
+      },
+      data: { sufijo: "leak" },
+    });
+    const get = await executeCapability(ctx, "core.integraciones.get", { proveedor: "dte_emision" });
+    const list = await executeCapability(ctx, "core.integraciones.list", {});
+    const mascaraGet = get.ok
+      ? (get.data as { secretos: { nombre: string; mascara: string | null }[] }).secretos.find(
+          (s) => s.nombre === "certificado_clave",
+        )?.mascara
+      : null;
+    expect(mascaraGet).toBe("••••••••");
+    expect(mascaraGet).not.toContain("leak");
+    const itemList = list.ok
+      ? (list.data as { proveedor: string; secretos: { nombre: string; mascara: string | null }[] }[]).find(
+          (i) => i.proveedor === "dte_emision",
+        )
+      : null;
+    const mascaraList = itemList?.secretos.find((s) => s.nombre === "certificado_clave")?.mascara;
+    expect(mascaraList).toBe("••••••••");
+    expect(mascaraList).not.toContain("leak");
+  });
+
   it("no revela sufijo de secretos tipo clave (Octava)", async () => {
     const valor = "octava-clave-secreta-99";
     const { ctx } = contextoDePrueba();
