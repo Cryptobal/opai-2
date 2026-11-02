@@ -279,7 +279,7 @@ model DocumentoEmitido {
   montoTotal            Int       @default(0) @map("monto_total")
   /// borrador | enviado | aceptado | rechazado | anulado_nc
   estadoDte             String    @default("borrador") @map("estado_dte")
-  /// pendiente | pagada_parcial | pagada
+  /// pendiente | pagada_parcial | pagada | cedida
   estadoCobro           String    @default("pendiente") @map("estado_cobro")
   montoCobrado          Int       @default(0) @map("monto_cobrado")
   glosa                 String?
@@ -372,7 +372,7 @@ model DteEnvio {
   trackId            String    @map("track_id")
   intentos           Int       @default(0)
   maxIntentos        Int       @default(7) @map("max_intentos")
-  /// pendiente | aceptado | rechazado
+  /// pendiente | aceptado | rechazado | sin_respuesta
   estado             String    @default("pendiente")
   glosa              String?
   proximaConsultaEn  DateTime? @map("proxima_consulta_en") @db.Timestamptz(6)

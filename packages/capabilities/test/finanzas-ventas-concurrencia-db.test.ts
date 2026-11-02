@@ -98,4 +98,39 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE · concurrencia (db)", 
     const emitida = await s.dato<{ folio: number }>("finanzas.ventas.emitir", { documentoId: borrador.id });
     expect(emitida.folio).toBe(8000);
   });
+
+  it("C2 · dos cesiones concurrentes del mismo documento: solo una reserva", async () => {
+    process.env.CESION_ADAPTADOR = "simulado";
+    const borrador = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
+      cuentaId: s.cuentaId,
+      tipoDte: 33,
+      lineas: [{ glosa: "Base cesión", monto: 40_000 }],
+    });
+    await s.dato("finanzas.ventas.emitir", { documentoId: borrador.id });
+    await s.dato("finanzas.ventas.enviar_sii", { documentoId: borrador.id });
+    const envio = await s.e.admin.dteEnvio.findFirstOrThrow({ where: { documentoId: borrador.id } });
+    const consulta = s.mod.obtenerTrabajo("finanzas.dte.consultar_sii");
+    if (!consulta) throw new Error("trabajo consultar_sii");
+    await consulta.ejecutar(s.ctx(), { envioId: envio.id });
+    await s.e.admin.documentoEmitido.update({
+      where: { id: borrador.id },
+      data: { xmlStorageKey: `dte/${borrador.id}.xml` },
+    });
+    const ceder = () =>
+      s.mod.executeCapability(s.ctx(), "finanzas.ventas.cesion_ceder", {
+        documentoId: borrador.id,
+        factorRut: "76000000-0",
+      });
+    const r = await Promise.allSettled([ceder(), ceder()]);
+    const ok = r.filter((x) => x.status === "fulfilled" && x.value.ok);
+    const mal = r.filter((x) => x.status === "fulfilled" && !x.value.ok);
+    expect(ok).toHaveLength(1);
+    expect(mal).toHaveLength(1);
+    expect(mal[0]?.status === "fulfilled" && mal[0].value).toMatchObject({
+      ok: false,
+      error: { code: "CONFLICT" },
+    });
+    const doc = await s.e.admin.documentoEmitido.findFirstOrThrow({ where: { id: borrador.id } });
+    expect(doc).toMatchObject({ cesionEstado: "cedido", estadoCobro: "cedida" });
+  });
 });

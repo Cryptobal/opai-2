@@ -14,6 +14,7 @@ describe("derivadas DTE (CAR-140)", () => {
       montoCobrado: 0,
       estadoDte: "aceptado",
       estadoCobro: "pendiente",
+      cesionEstado: null,
       glosa: null,
     };
     expect(celdasDerivadasDte([doc], "2026-11-02")).toEqual([
@@ -33,8 +34,26 @@ describe("derivadas DTE (CAR-140)", () => {
       montoCobrado: 0,
       estadoDte: "borrador",
       estadoCobro: "pendiente",
+      cesionEstado: null,
       glosa: null,
     };
     expect(celdasDerivadasDte([doc], "2026-11-09")).toHaveLength(1);
+  });
+
+  it("C5 · excluye facturas cedidas del comprometido", () => {
+    const doc = {
+      id: "c",
+      tipoDte: 33,
+      folio: 11,
+      fechaEmision: "2026-11-05",
+      fechaVencimiento: null,
+      montoTotal: 100_000,
+      montoCobrado: 0,
+      estadoDte: "aceptado",
+      estadoCobro: "cedida",
+      cesionEstado: "cedido",
+      glosa: null,
+    };
+    expect(celdasDerivadasDte([doc], "2026-11-02")).toEqual([]);
   });
 });

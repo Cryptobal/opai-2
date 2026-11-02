@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { puedeTransicionDte } from "@opai/domain";
+import { puedeTransicionDte, proximaConsultaDteSii } from "@opai/domain";
 
 import { defineTrabajo } from "../trabajos/registro";
 import { adaptadorSiiDe } from "./adaptador-sii";
@@ -9,51 +9,77 @@ import type { Contexto } from "../types";
 
 const payloadConsulta = z.object({ envioId: z.uuid() });
 
+async function marcarAceptadoSii(
+  ctx: Contexto,
+  envioId: string,
+  docId: string,
+  intentos: number,
+  glosa: string | null,
+  cesionEstado: string | null,
+) {
+  await ctx.transaccion(async (tx) => {
+    await tx.dteEnvio.update({
+      where: { id: envioId },
+      data: { intentos, estado: "aceptado", glosa, proximaConsultaEn: null },
+    });
+    await tx.documentoEmitido.update({
+      where: { id: docId },
+      data: { estadoDte: "aceptado", cesionEstado: cesionEstado ?? "no_cedido" },
+    });
+  });
+}
+
 export const trabajoConsultarDteSii = defineTrabajo({
   tipo: "finanzas.dte.consultar_sii",
   descripcion:
-    "Consulta el estado de un envío al SII (hasta 7 intentos, paridad 1.0) y actualiza el documento si fue aceptado o rechazado.",
+    "Consulta el estado de un envío al SII con backoff (15 min × 2 h, luego diario hasta 7 días) y actualiza el documento.",
   payload: payloadConsulta,
   async handler(ctx, input) {
     const envio = await ctx.db.dteEnvio.findFirst({ where: { id: input.envioId } });
     if (!envio || envio.estado !== "pendiente") return { omitido: true };
-    if (envio.intentos >= envio.maxIntentos) {
-      await ctx.db.dteEnvio.update({
-        where: { id: envio.id },
-        data: { estado: "rechazado", glosa: "Agotados los intentos de consulta." },
-      });
-      return { agotado: true };
-    }
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: envio.documentoId } });
     if (!doc) return { omitido: true };
+    const intentos = envio.intentos + 1;
     const ambiente = await ambienteDe(ctx);
     const adaptador = await adaptadorSiiDe(ctx);
     const consulta = await adaptador.consultar(envio.trackId, ambiente);
-    const intentos = envio.intentos + 1;
-    if (consulta.estado === "aceptado" && puedeTransicionDte("enviado", "aceptado")) {
-      await ctx.transaccion(async (tx) => {
-        await tx.dteEnvio.update({
-          where: { id: envio.id },
-          data: { intentos, estado: "aceptado", glosa: consulta.glosa ?? null, proximaConsultaEn: null },
-        });
-        await tx.documentoEmitido.update({
-          where: { id: doc.id },
-          data: { estadoDte: "aceptado", cesionEstado: doc.cesionEstado ?? "no_cedido" },
-        });
-      });
-      return { aceptado: true, intentos };
+    if (
+      (consulta.estado === "aceptado" || consulta.estado === "reparo") &&
+      puedeTransicionDte("enviado", "aceptado")
+    ) {
+      await marcarAceptadoSii(
+        ctx,
+        envio.id,
+        doc.id,
+        intentos,
+        consulta.glosa ?? null,
+        doc.cesionEstado,
+      );
+      return { aceptado: true, intentos, reparo: consulta.estado === "reparo" };
     }
     if (consulta.estado === "rechazado") {
       await ctx.transaccion(async (tx) => {
         await tx.dteEnvio.update({
           where: { id: envio.id },
-          data: { intentos, estado: "rechazado", glosa: consulta.glosa ?? null },
+          data: { intentos, estado: "rechazado", glosa: consulta.glosa ?? null, proximaConsultaEn: null },
         });
         await tx.documentoEmitido.update({ where: { id: doc.id }, data: { estadoDte: "rechazado" } });
       });
       return { rechazado: true, intentos };
     }
-    const proxima = new Date(Date.now() + 15 * 60_000);
+    const proxima = proximaConsultaDteSii(envio.createdAt, intentos);
+    if (!proxima) {
+      await ctx.db.dteEnvio.update({
+        where: { id: envio.id },
+        data: {
+          intentos,
+          estado: "sin_respuesta",
+          glosa: "Agotado el plazo de consulta al SII.",
+          proximaConsultaEn: null,
+        },
+      });
+      return { sinRespuesta: true, intentos };
+    }
     await ctx.db.dteEnvio.update({
       where: { id: envio.id },
       data: { intentos, proximaConsultaEn: proxima, glosa: consulta.glosa ?? null },

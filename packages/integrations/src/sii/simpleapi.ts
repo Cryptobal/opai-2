@@ -29,6 +29,17 @@ async function postJson(url: string, apiKey: string, body: unknown): Promise<Res
   });
 }
 
+function mapearEstadoConsulta(raw: string | undefined, glosa?: string): ConsultaSiiResultado {
+  const e = raw?.trim().toLowerCase() ?? "";
+  if (e === "aceptado" || e === "accepted") return { estado: "aceptado", ...(glosa ? { glosa } : {}) };
+  if (e === "rechazado" || e === "rejected") return { estado: "rechazado", ...(glosa ? { glosa } : {}) };
+  if (e === "reparo" || e === "aceptado con reparos" || e.includes("reparo")) {
+    return { estado: "reparo", ...(glosa ? { glosa } : {}) };
+  }
+  if (e === "pendiente") return { estado: "pendiente", ...(glosa ? { glosa } : {}) };
+  return { estado: "pendiente", ...(glosa ? { glosa } : {}) };
+}
+
 /** Adaptador productivo; si faltan credenciales, queda no disponible. */
 export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): AdaptadorSii {
   const sim = adaptadorSiiSimulado();
@@ -61,10 +72,7 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       const res = await postJson(`${BASE[ambiente]}/dte/consultar`, creds.apiKey, { trackId, ambiente });
       if (!res.ok) throw new Error(`SimpleAPI consultar: HTTP ${res.status}`);
       const data = (await res.json()) as { estado?: string; glosa?: string };
-      if (data.estado === "rechazado") {
-        return { estado: "rechazado", ...(data.glosa ? { glosa: data.glosa } : {}) };
-      }
-      return { estado: "aceptado", ...(data.glosa ? { glosa: data.glosa } : {}) };
+      return mapearEstadoConsulta(data.estado, data.glosa);
     },
   };
 }

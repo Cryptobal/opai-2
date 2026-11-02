@@ -128,7 +128,9 @@ export function ListaVentas(p: {
           id: "cobro",
           etiqueta: "Cobro",
           render: (v) => (
-            <Badge tono={v.estadoCobro === "pagada" ? "success" : "neutro"}>{v.estadoCobro}</Badge>
+            <Badge tono={v.estadoCobro === "pagada" ? "success" : v.estadoCobro === "cedida" ? "info" : "neutro"}>
+              {v.estadoCobro === "cedida" ? "Cedida" : v.estadoCobro}
+            </Badge>
           ),
         },
         {

@@ -1,5 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
-import { celdasDerivadasDte, type DocumentoDerivadaDte } from "@opai/domain";
+import { celdasDerivadasDte, documentoPorCobrar, type DocumentoDerivadaDte } from "@opai/domain";
 
 import { aNumeroSeguro, type celdaSchema } from "../esquemas";
 import type { z } from "zod";
@@ -20,8 +20,12 @@ export async function derivadasDteSemana(
   const docs = await ctx.db.documentoEmitido.findMany({
     where: {
       OR: [
-        { estadoDte: "borrador" },
-        { estadoDte: { in: ["enviado", "aceptado"] }, estadoCobro: { not: "pagada" } },
+        { estadoDte: "borrador", cesionEstado: { not: "cedido" } },
+        {
+          estadoDte: { in: ["enviado", "aceptado"] },
+          estadoCobro: { notIn: ["pagada", "cedida"] },
+          cesionEstado: { not: "cedido" },
+        },
       ],
     },
     select: {
@@ -34,21 +38,32 @@ export async function derivadasDteSemana(
       montoCobrado: true,
       estadoDte: true,
       estadoCobro: true,
+      cesionEstado: true,
       glosa: true,
     },
   });
-  const entrada: DocumentoDerivadaDte[] = docs.map((d) => ({
-    id: d.id,
-    tipoDte: d.tipoDte,
-    folio: d.folio,
-    fechaEmision: d.fechaEmision?.toISOString().slice(0, 10) ?? null,
-    fechaVencimiento: d.fechaVencimiento?.toISOString().slice(0, 10) ?? null,
-    montoTotal: d.montoTotal,
-    montoCobrado: d.montoCobrado,
-    estadoDte: d.estadoDte,
-    estadoCobro: d.estadoCobro,
-    glosa: d.glosa,
-  }));
+  const entrada: DocumentoDerivadaDte[] = docs
+    .filter((d) =>
+      documentoPorCobrar({
+        estadoCobro: d.estadoCobro,
+        cesionEstado: d.cesionEstado,
+        montoTotal: d.montoTotal,
+        montoCobrado: d.montoCobrado,
+      }) || d.estadoDte === "borrador",
+    )
+    .map((d) => ({
+      id: d.id,
+      tipoDte: d.tipoDte,
+      folio: d.folio,
+      fechaEmision: d.fechaEmision?.toISOString().slice(0, 10) ?? null,
+      fechaVencimiento: d.fechaVencimiento?.toISOString().slice(0, 10) ?? null,
+      montoTotal: d.montoTotal,
+      montoCobrado: d.montoCobrado,
+      estadoDte: d.estadoDte,
+      estadoCobro: d.estadoCobro,
+      cesionEstado: d.cesionEstado,
+      glosa: d.glosa,
+    }));
   const derivadas = celdasDerivadasDte(entrada, semana);
   return {
     disponible: true,

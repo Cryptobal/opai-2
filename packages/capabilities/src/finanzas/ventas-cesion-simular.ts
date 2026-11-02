@@ -1,9 +1,10 @@
 import { z } from "zod";
 
-import { puedeCederDocumento, simularCesion } from "@opai/domain";
+import { existeAnulacionCod1, puedeCederDocumento, simularCesion } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
+import { notasCreditoPreviasDe } from "./ventas-nc-comun";
 import { PERMISO_VENTAS, documentoEmitidoIdSchema } from "./ventas-comun";
 
 export const simulacionCesionSchema = z.object({
@@ -34,11 +35,16 @@ export const ventasCesionSimular = defineCapability({
   async handler(ctx, input) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");
+    const previas = await notasCreditoPreviasDe(ctx, doc.id);
     const bloqueo = puedeCederDocumento({
       tipoDte: doc.tipoDte,
       estadoDte: doc.estadoDte,
       cesionEstado: doc.cesionEstado,
       xmlStorageKey: doc.xmlStorageKey,
+      estadoCobro: doc.estadoCobro,
+      montoTotal: doc.montoTotal,
+      montoCobrado: doc.montoCobrado,
+      anuladaPorNc: existeAnulacionCod1(previas),
     });
     if (bloqueo) throw reglaDeNegocio(bloqueo);
     const calc = simularCesion(doc.montoTotal, input.tasaBps);

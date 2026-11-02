@@ -1,14 +1,27 @@
 import { z } from "zod";
 
-import { puedeCederDocumento, simularCesion } from "@opai/domain";
+import { existeAnulacionCod1, puedeCederDocumento, simularCesion } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { escribirConEvento } from "../core/maestros/comun";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
 import { adaptadorCesionDe } from "./adaptador-cesion";
+import { notasCreditoPreviasDe } from "./ventas-nc-comun";
 import { PERMISO_VENTAS, documentoEmitidoIdSchema, rutEmisorDe } from "./ventas-comun";
 import { vistaDeDocumento } from "./ventas-consulta";
+import { xmlBase64ParaCesion } from "./ventas-xml";
 import { ventaSchema } from "./vistas-venta";
+import type { Contexto } from "../types";
+
+async function revertirReservaCesion(ctx: Contexto, docId: string, cesionId: string) {
+  await ctx.transaccion(async (tx) => {
+    await tx.cesion.update({ where: { id: cesionId }, data: { estado: "anulada" } });
+    await tx.documentoEmitido.update({
+      where: { id: docId },
+      data: { cesionEstado: "no_cedido", cesionOperacionId: null, cesionProveedor: null },
+    });
+  });
+}
 
 export const ventasCesionCeder = defineCapability({
   id: "finanzas.ventas.cesion_ceder",
@@ -28,11 +41,16 @@ export const ventasCesionCeder = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");
+    const previas = await notasCreditoPreviasDe(ctx, doc.id);
     const bloqueo = puedeCederDocumento({
       tipoDte: doc.tipoDte,
       estadoDte: doc.estadoDte,
       cesionEstado: doc.cesionEstado,
       xmlStorageKey: doc.xmlStorageKey,
+      estadoCobro: doc.estadoCobro,
+      montoTotal: doc.montoTotal,
+      montoCobrado: doc.montoCobrado,
+      anuladaPorNc: existeAnulacionCod1(previas),
     });
     if (bloqueo) throw reglaDeNegocio(bloqueo);
     const calc = simularCesion(doc.montoTotal, input.tasaBps);
@@ -42,16 +60,54 @@ export const ventasCesionCeder = defineCapability({
     if (!cuenta?.rut) throw reglaDeNegocio("El cliente debe tener RUT.");
     const adaptador = await adaptadorCesionDe(ctx);
     if (!adaptador.disponible) throw reglaDeNegocio("Configure la integración de cesión (Octava) antes de ceder.");
-    const envio = await adaptador.enviar({
-      documentoId: doc.id,
-      folio: doc.folio!,
-      rutEmisor,
-      rutDeudor: cuenta.rut,
-      montoTotal: doc.montoTotal,
-      xmlBase64: Buffer.from(`<DTE folio="${doc.folio}"/>`, "utf8").toString("base64"),
-      factorRut: input.factorRut,
-      tasaBps: input.tasaBps,
+    let cesionId = "";
+    await ctx.transaccion(async (tx) => {
+      const { count } = await tx.documentoEmitido.updateMany({
+        where: {
+          id: doc.id,
+          estadoDte: "aceptado",
+          cesionEstado: "no_cedido",
+          cesionOperacionId: null,
+        },
+        data: { cesionEstado: "emitido" },
+      });
+      if (count !== 1) throw conflicto("La factura ya está en cesión o fue cedida.");
+      const cesion = await tx.cesion.create({
+        data: {
+          tenantId: ctx.tenantId,
+          documentoId: doc.id,
+          factorRut: input.factorRut,
+          factorNombre: input.factorNombre ?? null,
+          tasaBps: input.tasaBps,
+          anticipo: calc.anticipo,
+          merma: calc.merma,
+          saldoFactor: calc.saldoFactor,
+          estado: "enviada",
+          proveedor: adaptador.nombre,
+        },
+      });
+      cesionId = cesion.id;
+      await tx.documentoEmitido.update({
+        where: { id: doc.id },
+        data: { cesionOperacionId: cesion.id, cesionProveedor: adaptador.nombre },
+      });
     });
+    let envio;
+    try {
+      envio = await adaptador.enviar({
+        documentoId: doc.id,
+        folio: doc.folio!,
+        rutEmisor,
+        rutDeudor: cuenta.rut,
+        montoTotal: doc.montoTotal,
+        xmlBase64: await xmlBase64ParaCesion(ctx, doc, adaptador),
+        factorRut: input.factorRut,
+        tasaBps: input.tasaBps,
+      });
+    } catch (e) {
+      await revertirReservaCesion(ctx, doc.id, cesionId);
+      throw reglaDeNegocio(e instanceof Error ? e.message : "Falló el envío de la cesión al proveedor.");
+    }
     await escribirConEvento(
       ctx,
       {
@@ -60,28 +116,13 @@ export const ventasCesionCeder = defineCapability({
         payload: () => ({ operacionExternaId: envio.operacionExternaId }),
       },
       async (tx) => {
-        const cesion = await tx.cesion.create({
-          data: {
-            tenantId: ctx.tenantId,
-            documentoId: doc.id,
-            factorRut: input.factorRut,
-            factorNombre: input.factorNombre ?? null,
-            tasaBps: input.tasaBps,
-            anticipo: calc.anticipo,
-            merma: calc.merma,
-            saldoFactor: calc.saldoFactor,
-            estado: envio.estado,
-            proveedor: adaptador.nombre,
-            operacionExternaId: envio.operacionExternaId,
-          },
+        await tx.cesion.update({
+          where: { id: cesionId },
+          data: { estado: envio.estado, operacionExternaId: envio.operacionExternaId },
         });
         await tx.documentoEmitido.update({
           where: { id: doc.id },
-          data: {
-            cesionEstado: "cedido",
-            cesionProveedor: adaptador.nombre,
-            cesionOperacionId: cesion.id,
-          },
+          data: { cesionEstado: "cedido", estadoCobro: "cedida" },
         });
         return { id: doc.id };
       },

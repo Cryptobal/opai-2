@@ -5,6 +5,7 @@ import { AMBIENTES_SII, AVISO_CAF_DIAS_DEFECTO, UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO 
 import { defineCapability } from "../define";
 import { escribirConEvento, rutSchema } from "../core/maestros/comun";
 import { prohibido, reglaDeNegocio } from "../errores";
+import type { Contexto } from "../types";
 import { PERMISO_READ, PERMISO_VENTAS } from "./comun";
 
 const proveedorEmisionSchema = z.enum(["simulado", "simpleapi"]);
@@ -59,6 +60,15 @@ export const dteConfigObtener = defineCapability({
   },
 });
 
+function exigeOwnerHumano(ctx: Contexto, accion: string) {
+  if (ctx.actor.tipo !== "user") {
+    throw prohibido(`Solo un usuario humano owner puede ${accion}.`);
+  }
+  if (ctx.rol !== "owner") {
+    throw prohibido(`Solo el owner puede ${accion}.`);
+  }
+}
+
 export const dteConfigActualizar = defineCapability({
   id: "finanzas.dte_config.actualizar",
   descripcion:
@@ -76,8 +86,12 @@ export const dteConfigActualizar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    if (input.ambiente === "produccion" && ctx.rol !== "owner") {
-      throw prohibido("Solo el owner puede activar el ambiente de producción SII.");
+    const tocaSensibles =
+      input.ambiente === "produccion" ||
+      input.emisionProveedor !== undefined ||
+      input.cesionProveedor !== undefined;
+    if (tocaSensibles) {
+      exigeOwnerHumano(ctx, "activar producción SII o cambiar conectores DTE");
     }
     const rut = input.rutEmisor ?? undefined;
     const prev = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });

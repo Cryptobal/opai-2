@@ -13,6 +13,7 @@ export type DocumentoDerivadaDte = {
   montoCobrado: number;
   estadoDte: string;
   estadoCobro: string;
+  cesionEstado: string | null;
   glosa: string | null;
 };
 
@@ -30,6 +31,7 @@ function montoPendiente(d: DocumentoDerivadaDte): number {
 
 /** Semana ISO (lunes) donde aporta comprometido; null si no aplica a la semana pedida. */
 export function semanaComprometidoDte(d: DocumentoDerivadaDte): string | null {
+  if (d.cesionEstado === "cedido" || d.estadoCobro === "cedida") return null;
   if (d.estadoDte === "borrador") {
     const ref = d.fechaVencimiento ?? d.fechaEmision;
     return ref ? lunesDe(ref) : null;

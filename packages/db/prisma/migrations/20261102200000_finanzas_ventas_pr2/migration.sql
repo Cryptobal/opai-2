@@ -74,13 +74,17 @@ ALTER TABLE "finanzas"."cesiones" ADD CONSTRAINT "cesiones_documento_id_fkey"
   FOREIGN KEY ("documento_id") REFERENCES "finanzas"."documentos_emitidos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE "finanzas"."dte_envios" ADD CONSTRAINT "dte_envios_estado_chk"
-  CHECK ("estado" IN ('pendiente', 'aceptado', 'rechazado'));
+  CHECK ("estado" IN ('pendiente', 'aceptado', 'rechazado', 'sin_respuesta'));
 ALTER TABLE "finanzas"."dte_envios" ADD CONSTRAINT "dte_envios_intentos_chk"
   CHECK ("intentos" >= 0 AND "max_intentos" BETWEEN 1 AND 20);
 ALTER TABLE "finanzas"."cesiones" ADD CONSTRAINT "cesiones_estado_chk"
   CHECK ("estado" IN ('simulada', 'enviada', 'aprobada', 'financiada', 'cobrada', 'cerrada', 'anulada'));
 ALTER TABLE "finanzas"."cesiones" ADD CONSTRAINT "cesiones_montos_chk"
   CHECK ("anticipo" >= 0 AND "merma" >= 0 AND "saldo_factor" >= 0);
+
+ALTER TABLE "finanzas"."documentos_emitidos" DROP CONSTRAINT IF EXISTS "documentos_emitidos_estado_cobro_chk";
+ALTER TABLE "finanzas"."documentos_emitidos" ADD CONSTRAINT "documentos_emitidos_estado_cobro_chk"
+  CHECK ("estado_cobro" IN ('pendiente', 'pagada_parcial', 'pagada', 'cedida'));
 
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "finanzas"."dte_envios"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('documento_id', 'finanzas.documentos_emitidos');
