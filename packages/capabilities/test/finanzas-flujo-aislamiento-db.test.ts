@@ -75,12 +75,6 @@ describe.skipIf(!urlPropietario)("flujo de caja: dos empresas en base real", () 
     expect(celdas.map((c) => c.semana.toISOString().slice(0, 10))).toEqual([sumarSemanas(futura, 1)]);
   });
 
-  it("sella la primera semana y bloquea cambios en ella", async () => {
-    await ok(t.a, "finanzas.cierres.sellar", { semana: desde, saldoBanco: 1000 });
-    const r = await run(t.a, "finanzas.celdas.fijar", { filaId: fila, semana: desde, monto: 1 });
-    expect(r.ok).toBe(false);
-  });
-
   it("la empresa B no ve ni toca nada de A (RLS)", async () => {
     expect(await ok<unknown[]>(t.b, "finanzas.filas.listar", {})).toEqual([]);
     expect(await ok<unknown[]>(t.b, "finanzas.cierres.listar", {})).toEqual([]);

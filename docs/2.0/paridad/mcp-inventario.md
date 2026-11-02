@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 455 pares pantalla→capacidad · 410 con herramienta · 45 excepciones justificadas · 0 faltantes.
+**Resumen:** 452 pares pantalla→capacidad · 407 con herramienta · 45 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -202,12 +202,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.crear` | `finanzas_proveedores_crear` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.obtener` | `finanzas_proveedores_obtener` | existe |
-| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.bancos.saldo_sugerido` | `finanzas_bancos_saldo_sugerido` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.cumplir` | `finanzas_celdas_cumplir` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.fijar` | `finanzas_celdas_fijar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.mover` | `finanzas_celdas_mover` | existe |
-| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.cierres.reabrir` | `finanzas_cierres_reabrir` | existe |
-| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.cierres.sellar` | `finanzas_cierres_sellar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.flujo.importar` | `finanzas_flujo_importar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.cargar_caf` | — | excepción |
@@ -687,6 +684,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
 - `finanzas.bancos.guardar`
+- `finanzas.bancos.saldo_sugerido`
 - `finanzas.cesiones.listar`
 - `finanzas.cierres.listar`
 - `finanzas.cobros.manual`
