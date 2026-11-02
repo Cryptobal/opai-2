@@ -32,7 +32,8 @@ for (const { ruta, titulo } of PANTALLAS) {
     const vacio = page.getByText("Tu cuenta aún no tiene una ficha");
     const conFicha = page.getByRole("button", { name: "Guardar cambios" });
     const privacidad = page.getByText("Quién cuida tus datos");
-    await expect(vacio.or(conFicha).or(privacidad).first()).toBeVisible();
+    const derechosArco = page.getByText("Tus derechos");
+    await expect(vacio.or(conFicha).or(privacidad).or(derechosArco).first()).toBeVisible();
     await expect(page.getByText("No pudimos cargar esta información")).toHaveCount(0);
     await expect(page.locator("main, [data-contenido]").first()).not.toContainText("undefined");
     // Sin scroll horizontal en teléfono (375): el contenido cabe en el ancho.
@@ -40,6 +41,17 @@ for (const { ruta, titulo } of PANTALLAS) {
     expect(ancho).toBeLessThanOrEqual(0);
   });
 }
+
+test("Privacidad: derechos ARCO con ficha o orientación sin ficha", async ({ page }) => {
+  await entrar(page);
+  await page.goto("/trabajador/privacidad");
+  const acciones = page.getByRole("button", { name: "Descargar mis datos" });
+  const sinFicha = page.getByText("Tu cuenta aún no tiene una ficha");
+  await expect(acciones.or(sinFicha).first()).toBeVisible();
+  if (await acciones.isVisible()) {
+    await expect(page.getByRole("button", { name: "Corregir mis datos" })).toBeVisible();
+  }
+});
 
 test("Inicio saluda sin errores y navega a Mis datos desde la barra", async ({ page }) => {
   await entrar(page);

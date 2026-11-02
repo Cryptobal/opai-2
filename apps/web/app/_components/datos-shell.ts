@@ -20,6 +20,7 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const visibles = portalesVisibles(
     actual?.portales ?? [],
     tieneAccesoAPortal(identidad, "platform"),
+    identidad.modulosActivos,
   );
   // Acceso efectivo al portal actual, calculado igual que `tieneAccesoAPortal` del servidor
   // (plataforma por `platformRole`, los demás por la membresía). Lo usa el shell para no ofrecer
@@ -37,7 +38,11 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
           vocabulario(esVertical(vertical) ? vertical : "seguridad"),
         )
       : null;
-  const nav = erp ? erp.nav : !acceso ? [] : navegacionPortal(inicio, portal, puede);
+  const nav = erp
+    ? erp.nav
+    : !acceso
+      ? []
+      : navegacionPortal(inicio, portal, puede, identidad.modulosActivos);
   return {
     portal,
     acceso,

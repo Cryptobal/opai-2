@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 380 pares pantalla→capacidad · 340 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 382 pares pantalla→capacidad · 342 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -282,7 +282,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.arco.solicitar` | `portal_trabajador_arco_solicitar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
 | erp | `/cargos/[id]` | `core.cargos.set_activo` | `core_cargos_set_activo` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
@@ -572,6 +574,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.puestos.get`
 - `core.usage.summary`
 - `cpq.cotizaciones.get`
+- `cpq.motor.simular`
 - `finanzas.ajustes.actualizar`
 - `finanzas.ajustes.obtener`
 - `finanzas.celdas.cumplir`
@@ -596,5 +599,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.users.list`
 - `platform.users.set_role`
 - `portal_cliente.mi_acceso`
+- `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.reasignar`
