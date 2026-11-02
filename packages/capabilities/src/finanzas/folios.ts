@@ -31,7 +31,7 @@ export const foliosListar = defineCapability({
   id: "finanzas.folios.listar",
   descripcion:
     "Lista los rangos de folios autorizados por CAF: folio actual, restantes y avisos por folios bajos (porcentaje del rango) o CAF por vencer.",
-  permiso: PERMISO_VENTAS_CONFIGURE,
+  permiso: PERMISO_VENTAS,
   input: z.object({
     tipoDte: tipoDteVentaSchema.optional(),
     soloActivos: z.boolean().default(true),
@@ -59,7 +59,7 @@ export const foliosCargarCaf = defineCapability({
   id: "finanzas.folios.cargar_caf",
   descripcion:
     "Registra un rango de folios autorizados por CAF (referencia al secreto cifrado, sin subir el XML aquí). No desactiva un rango vigente que aún tenga folios disponibles.",
-  permiso: PERMISO_VENTAS,
+  permiso: PERMISO_VENTAS_CONFIGURE,
   input: z.object({
     tipoDte: tipoDteVentaSchema,
     folioDesde: z.number().int().min(1).max(2_000_000_000),
