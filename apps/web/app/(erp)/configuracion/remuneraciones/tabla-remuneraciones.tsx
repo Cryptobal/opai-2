@@ -7,21 +7,23 @@ import { Button, Card, Table, Td, Th, Tr } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 type Props = {
-  data: {
-    fecha: string;
-    filas: {
-      clave: string;
-      nombre: string;
-      valorResumen: string;
-      vigenteDesde: string;
-      fuente: string;
-      verificacion: string;
-      estado: string;
-      pendienteConfirmar: boolean;
-    }[];
-    mutualAdicional: { escalada: number | null; estado: string; resumen: string };
-  };
+  data: DatosRemuneraciones;
   puede: boolean;
+};
+
+export type DatosRemuneraciones = {
+  fecha: string;
+  filas: {
+    clave: string;
+    nombre: string;
+    valorResumen: string;
+    vigenteDesde: string;
+    fuente: string;
+    verificacion: string;
+    estado: string;
+    pendienteConfirmar: boolean;
+  }[];
+  mutualAdicional: { escalada: number | null; estado: string; resumen: string };
 };
 
 export function TablaRemuneraciones({ data, puede }: Props) {
@@ -33,8 +35,8 @@ export function TablaRemuneraciones({ data, puede }: Props) {
     const n = Number(raw.replace(",", "."));
     if (!Number.isFinite(n) || n < 0) return;
     const tasaEscalada = Math.round(n * 10_000);
-        const r = await ejecutar("core.remuneraciones.confirmar_mutual", { tasaEscalada });
-    if (r.ok) router.refresh();
+    const ok = await ejecutar("core.remuneraciones.confirmar_mutual", { tasaEscalada });
+    if (ok != null) router.refresh();
   };
   return (
     <div className="flex flex-col gap-4">

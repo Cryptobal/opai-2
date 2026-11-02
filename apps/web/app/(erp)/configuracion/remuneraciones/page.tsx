@@ -1,3 +1,4 @@
+import type { Resultado } from "@opai/capabilities";
 import { PERMISOS_CORE } from "@opai/domain";
 import { Estado, Forbidden } from "@opai/ds";
 
@@ -6,17 +7,19 @@ import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
-import { TablaRemuneraciones } from "./tabla-remuneraciones";
+import { TablaRemuneraciones, type DatosRemuneraciones } from "./tabla-remuneraciones";
 
 export const metadata = { title: "Remuneraciones" };
 
+type Carga = { r: Resultado<DatosRemuneraciones> };
+
 export default function Remuneraciones() {
   return (
-    <PaginaConfig
+    <PaginaConfig<Carga>
       seccion="remuneraciones"
       titulo="Remuneraciones"
       cargar={async () => {
-        const r = await ejecutarComoUsuario("erp", "core.remuneraciones.listar", {});
+        const r = await ejecutarComoUsuario<DatosRemuneraciones>("erp", "core.remuneraciones.listar", {});
         return { r };
       }}
       cabecera={() => ({
@@ -27,11 +30,11 @@ export default function Remuneraciones() {
         const puedeLeer = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.remuneracionesRead);
         const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.remuneracionesManage);
         if (!puedeLeer) {
-          return <Forbidden title="Sin acceso" description="Necesitas permiso de remuneraciones." />;
+          return <Forbidden descripcion="Necesitas permiso de remuneraciones." />;
         }
         return (
-          <Estado state={r ? estadoPantalla(r) : "error"} variante="lista">
-            {r?.ok ? <TablaRemuneraciones data={r.data} puede={puede} /> : null}
+          <Estado state={estadoPantalla(r)} variante="lista">
+            {r.ok ? <TablaRemuneraciones data={r.data} puede={puede} /> : null}
           </Estado>
         );
       }}
