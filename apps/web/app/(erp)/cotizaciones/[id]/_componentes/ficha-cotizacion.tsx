@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,9 +12,17 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import type { DatosFicha } from "../page";
 import { AccionesCotizacion } from "./acciones-cotizacion";
-import { LineaCotizacion } from "./linea-cotizacion";
 import { ResumenCotizacion } from "./resumen-cotizacion";
-import { PropuestaTecnicaFicha } from "./propuesta-tecnica-ficha";
+
+const LineaCotizacion = dynamic(
+  () => import("./linea-cotizacion").then((m) => m.LineaCotizacion),
+  { ssr: false },
+);
+
+const PropuestaTecnicaFicha = dynamic(
+  () => import("./propuesta-tecnica-ficha").then((m) => m.PropuestaTecnicaFicha),
+  { ssr: false, loading: () => null },
+);
 
 export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
   const router = useRouter();
