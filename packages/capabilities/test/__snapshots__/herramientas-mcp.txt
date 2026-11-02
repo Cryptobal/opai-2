@@ -290,7 +290,6 @@ finanzas_filas_archivar
 finanzas_filas_crear
 finanzas_filas_listar
 finanzas_flujo_importar
-finanzas_folios_cargar_caf
 finanzas_folios_listar
 finanzas_movimientos_bancarios_listar
 finanzas_plan_actualizar
@@ -526,7 +525,6 @@ preview_finanzas_filas_actualizar
 preview_finanzas_filas_archivar
 preview_finanzas_filas_crear
 preview_finanzas_flujo_importar
-preview_finanzas_folios_cargar_caf
 preview_finanzas_plan_actualizar
 preview_finanzas_plan_crear
 preview_finanzas_plan_inicializar
