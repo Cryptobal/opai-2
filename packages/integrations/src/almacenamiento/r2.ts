@@ -48,6 +48,10 @@ export const base64AHex = (b64: string) => Buffer.from(b64, "base64").toString("
 
 const codificar = (clave: string) => clave.split("/").map(encodeURIComponent).join("/");
 
+function bytesSubida(cuerpo: string | Uint8Array | Buffer): string | Uint8Array {
+  return typeof cuerpo === "string" ? cuerpo : new Uint8Array(cuerpo);
+}
+
 export function almacenamientoR2(config: ConfigR2): Almacenamiento {
   const cliente = new AwsClient({
     accessKeyId: config.accessKeyId,
@@ -74,7 +78,7 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
       const r = await cliente.fetch(`${base}/${codificar(clave)}`, {
         method: "PUT",
         headers: { "content-type": mime, "x-amz-checksum-sha256": hexABase64(sha256) },
-        body: cuerpo,
+        body: bytesSubida(cuerpo),
       });
       if (!r.ok) throw new Error(`R2 respondió ${r.status} al subir el archivo.`);
     },

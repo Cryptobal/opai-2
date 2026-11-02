@@ -20,10 +20,10 @@ describe("registrar PDF propuesta CPQ (C5)", () => {
     expect(esperado).not.toBe(corrupto);
 
     const almacen = almacenamientoEnMemoria();
-    let cuerpoSubido: string | Uint8Array | Buffer = "";
+    let cuerpoSubido: Uint8Array | null = null;
     vi.spyOn(almacen.almacenamiento, "subir").mockImplementation(async (_k, cuerpo, _m, sha) => {
-      cuerpoSubido = cuerpo;
-      almacen.subir(_k, Buffer.byteLength(cuerpo), "application/pdf", sha);
+      cuerpoSubido = typeof cuerpo === "string" ? new TextEncoder().encode(cuerpo) : new Uint8Array(cuerpo);
+      almacen.subir(_k, cuerpoSubido.byteLength, "application/pdf", sha);
     });
     const { ctx: base } = contextoDePrueba();
     const ctx = {
@@ -32,6 +32,6 @@ describe("registrar PDF propuesta CPQ (C5)", () => {
     };
     const subido = await subirPdfPropuestaAlmacenamiento(ctx, { codigo: "CPQ-2026-1", pdf });
     expect(subido.checksum).toBe(esperado);
-    expect(Buffer.from(cuerpoSubido as Buffer).equals(Buffer.from(pdf))).toBe(true);
+    expect(cuerpoSubido).toEqual(pdf);
   });
 });
