@@ -3,7 +3,6 @@ import { contextoDePrueba } from "@opai/capabilities/testing";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { mockMotorLegal } from "../persistencia/mock-motor-legal";
-import * as valoresLegales from "../persistencia/valores-legales";
 import {
   ACTIVOS,
   CON_COSTOS,

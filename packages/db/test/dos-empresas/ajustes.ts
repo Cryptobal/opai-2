@@ -123,4 +123,13 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["core.etiquetas", "core.cuentas"],
     valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas") }),
   },
+  "core.valores_tenant": {
+    valores: () => ({
+      indicador_id: "a1000001-0001-4001-8001-000000000001",
+      valor_json: 4123701,
+      vigente_desde: "2026-01-01",
+      estado: "propuesto",
+      origen: "sigue_fuente",
+    }),
+  },
 };

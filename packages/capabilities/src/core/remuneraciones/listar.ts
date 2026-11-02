@@ -35,6 +35,7 @@ export const remuneracionesIndicadoresListar = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: () => [],
   async handler(ctx, input) {
     const fecha = input.fecha ?? new Date().toISOString().slice(0, 10);
     const [indicadores, perfil] = await Promise.all([
@@ -102,6 +103,7 @@ export const remuneracionesHistorial = defineCapability({
   ),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: () => [],
   async handler(ctx, { clave }) {
     const ind = await ctx.db.indicadorLegal.findUnique({ where: { clave } });
     if (!ind) return [];

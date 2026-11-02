@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { juegoReferencia, publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
+import { juegoReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
 import { PCT_ESCALA } from "@opai/domain/dinero";
 
 import { entradaCostoDesdeLinea, proveedorDesdeLineas } from "./proveedor";
@@ -41,7 +41,6 @@ describe("adaptador CPQ proveedor 07e", () => {
   });
 
   it("plazo fijo usa cesantía 3,0 %", () => {
-    const juego = publicacionesReferencia();
     const indef = entradaCostoDesdeLinea(700_000, { mutualAdicional: 2_700, tipoContrato: "indefinido" });
     const fijo = entradaCostoDesdeLinea(700_000, { mutualAdicional: 2_700, tipoContrato: "plazo_fijo" });
     expect(indef.contrato).toBe("indefinido");

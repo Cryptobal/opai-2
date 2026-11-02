@@ -91,7 +91,7 @@ describe.skipIf(!urlPropietario)("remuneraciones en base real: RLS y mutual", ()
         origen: "propio",
       },
     });
-    const r = await mod.executeCapability(ctx(t.a, { tipo: "user", id: userId }), "core.remuneraciones.confirmar", {
+    const r = await mod.executeCapability(ctx(t.a), "core.remuneraciones.confirmar", {
       valorTenantId: rechazado.id,
     });
     expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");

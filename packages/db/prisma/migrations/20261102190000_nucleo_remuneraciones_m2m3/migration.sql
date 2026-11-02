@@ -147,6 +147,9 @@ WHERE NOT EXISTS (
   WHERE p.indicador_id = i.id AND p.vigente_desde = v.desde::date
 );
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON "core"."valores_tenant" TO opai_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON "core"."remuneraciones_perfil" TO opai_app;
+
 ALTER TABLE "core"."valores_tenant" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core"."valores_tenant" FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_isolation ON "core"."valores_tenant";
@@ -169,3 +172,13 @@ REVOKE ALL ON "core"."capturas_indicador" FROM opai_app;
 GRANT SELECT, INSERT ON "core"."capturas_indicador" TO opai_app;
 
 COMMIT;
+
+-- Reversión: requiere snapshot de Neon previo (tablas nuevas y seed de indicadores/valores publicados).
+-- BEGIN;
+-- SET LOCAL lock_timeout = '5s';
+-- DROP TABLE IF EXISTS "core"."remuneraciones_perfil";
+-- DROP TABLE IF EXISTS "core"."valores_tenant";
+-- DROP TABLE IF EXISTS "core"."capturas_indicador";
+-- DROP TABLE IF EXISTS "core"."valores_publicados";
+-- DROP TABLE IF EXISTS "core"."indicadores_legales";
+-- COMMIT;

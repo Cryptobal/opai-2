@@ -1,6 +1,5 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
-import { juegoDeValores } from "@opai/domain";
 import { publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
