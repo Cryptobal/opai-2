@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -13,11 +14,14 @@ import {
   clp,
   type Planilla,
 } from "./datos";
-import { HojaCelda } from "./hoja-celda";
-import { HojaCierre } from "./hoja-cierre";
-import { HojaImportar } from "./hoja-importar";
-import { HojaMover } from "./hoja-mover";
-import { VistaMovilFlujo } from "./vista-movil";
+
+const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
+const HojaCierre = dynamic(() => import("./hoja-cierre").then((m) => ({ default: m.HojaCierre })));
+const HojaImportar = dynamic(() => import("./hoja-importar").then((m) => ({ default: m.HojaImportar })));
+const HojaMover = dynamic(() => import("./hoja-mover").then((m) => ({ default: m.HojaMover })));
+const VistaMovilFlujo = dynamic(() =>
+  import("./vista-movil").then((m) => ({ default: m.VistaMovilFlujo })),
+);
 
 type Props = {
   state: EstadoPantalla;

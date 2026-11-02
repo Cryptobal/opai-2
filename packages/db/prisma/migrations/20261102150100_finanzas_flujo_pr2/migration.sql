@@ -37,8 +37,8 @@ ALTER TABLE "finanzas"."flujo_avisos_emitidos" FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation" ON "finanzas"."flujo_avisos_emitidos"
   AS PERMISSIVE FOR ALL TO opai_app
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+  USING ("tenant_id" = (NULLIF(current_setting('app.tenant_id', true), ''))::uuid)
+  WITH CHECK ("tenant_id" = (NULLIF(current_setting('app.tenant_id', true), ''))::uuid);
 
 ALTER TABLE "finanzas"."flujo_avisos_emitidos"
   ADD CONSTRAINT "flujo_avisos_emitidos_tenant_id_fkey"
