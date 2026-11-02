@@ -2,10 +2,14 @@ import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
+import { enTransaccion } from "../../db/src/transaccion";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
+import { aislarValoresPlataformaUfUtm } from "../../db/test/aislar-valores-plataforma";
 
+import type * as CapabilitiesModule from "../src";
+import { referenciaVariacion } from "../src/core/remuneraciones/sii-captura-referencia";
 import { capturarUfUtmSii } from "../src/core/remuneraciones/sii-captura";
 
 const dirFix = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
@@ -14,17 +18,30 @@ const utm2026 = readFileSync(join(dirFix, "sii-utm-2026-snippet.html"), "utf8");
 
 describe.skipIf(!urlPropietario)("captura SII UF/UTM en base real", () => {
   let e: Entorno;
-  let mod: typeof import("../src");
+  let mod: typeof CapabilitiesModule;
+  let ufId = "";
+  let utmId = "";
   const tenantId = randomUUID();
+  const aislar = aislarValoresPlataformaUfUtm(
+    () => e,
+    () => ({ ufId, utmId }),
+  );
 
   beforeAll(async () => {
     e = await prepararEntorno();
     await e.admin.tenant.create({
       data: { id: tenantId, slug: `cap-${randomUUID().slice(0, 6)}`, nombre: "Cap", vertical: "seguridad" },
     });
+    ufId = (await e.admin.indicadorLegal.findFirstOrThrow({ where: { clave: "uf" } })).id;
+    utmId = (await e.admin.indicadorLegal.findFirstOrThrow({ where: { clave: "utm" } })).id;
+    await aislar.beforeAll();
     mod = await import("../src");
     mod.limpiarRegistro();
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
+  });
+
+  afterEach(async () => {
+    await aislar.afterEach();
   });
 
   afterAll(async () => {
@@ -52,6 +69,30 @@ describe.skipIf(!urlPropietario)("captura SII UF/UTM en base real", () => {
     });
     expect(capturas.length).toBe(2);
     expect(capturas.some((c) => c.resultado === "ok")).toBe(true);
+  });
+
+  it("referenciaVariacion UTM usa último vigente si falta el 1.º del mes anterior", async () => {
+    const mesActual = "2026-11-01";
+    const dosMesesAtras = "2026-08-01";
+    const fuente = "https://www.sii.cl/valores_y_fechas/utm/utm2026.htm";
+    await e.admin.valorPublicado.deleteMany({ where: { indicadorId: utmId } });
+    await e.admin.valorPublicado.create({
+      data: {
+        indicadorId: utmId,
+        valorJson: 70_000,
+        vigenteDesde: new Date(`${dosMesesAtras}T12:00:00.000Z`),
+        estado: "vigente",
+        fuente,
+        verificacion: "verificado",
+      },
+    });
+    const ref = await enTransaccion(tenantId, (tx) =>
+      referenciaVariacion(tx, utmId, "utm", mesActual),
+    );
+    expect("sinReferencia" in ref).toBe(false);
+    if ("sinReferencia" in ref) return;
+    expect(ref.vigenteDesde).toBe(dosMesesAtras);
+    expect(ref.valor).toBe(70_000);
   });
 
   it("registra captura fallida si Postgres rechaza la publicación", async () => {

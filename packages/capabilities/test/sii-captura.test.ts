@@ -55,10 +55,14 @@ describe("validación SII", () => {
   it("valida rangos y variación", () => {
     expect(valorEnRango("uf", 4125826)).toBe(true);
     expect(valorEnRango("uf", 0)).toBe(false);
-    expect(variacionPermitida("uf", 4125826, 4123701)).toBe(true);
-    expect(variacionPermitida("uf", 5000000, 4123701)).toBe(false);
-    expect(topeVariacionAcumulada("uf", 3)).toBeCloseTo(0.015);
+    expect(variacionPermitida("uf", 4_123_907, 4_123_701)).toBe(true);
+    expect(variacionPermitida("uf", 4_125_826, 4_123_701)).toBe(false);
+    expect(topeVariacionAcumulada("uf", 3)).toBeCloseTo(0.0015);
+    expect(topeVariacionAcumulada("uf", 61)).toBeCloseTo(0.03);
+    expect(topeVariacionAcumulada("utm", 400)).toBeCloseTo(0.06);
     expect(variacionPermitidaAcumulada("uf", 4_125_826, 4_125_826, 3)).toBe(true);
     expect(variacionPermitidaAcumulada("uf", 19_999_999, 4_125_826, 3)).toBe(false);
+    expect(variacionPermitidaAcumulada("uf", 4_120_000, 4_000_000, 61)).toBe(true);
+    expect(variacionPermitidaAcumulada("uf", 4_200_000, 4_000_000, 61)).toBe(false);
   });
 });

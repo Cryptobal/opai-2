@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { enTransaccion } from "../src/transaccion";
 import { remuneracionesPublicarSii } from "../src/remuneraciones-sii";
 import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
+import { aislarValoresPlataformaUfUtm } from "./aislar-valores-plataforma";
 
 const ZONA = "America/Santiago";
 
@@ -30,6 +31,10 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
   const hoy = hoySantiago();
   const ayer = restarDias(hoy, 1);
   const anio = Number(hoy.slice(0, 4));
+  const aislar = aislarValoresPlataformaUfUtm(
+    () => e,
+    () => ({ ufId, utmId }),
+  );
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -38,6 +43,11 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
     });
     ufId = (await e.admin.indicadorLegal.findFirstOrThrow({ where: { clave: "uf" } })).id;
     utmId = (await e.admin.indicadorLegal.findFirstOrThrow({ where: { clave: "utm" } })).id;
+    await aislar.beforeAll();
+  });
+
+  afterEach(async () => {
+    await aislar.afterEach();
   });
 
   afterAll(async () => {
@@ -239,7 +249,7 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
         verificacion: "verificado",
       },
     });
-    const tope = Math.round(base * (1 + 3 * 0.005));
+    const tope = Math.round(base * (1 + Math.min(3 * 0.0005, 0.03)));
     const id = await enTransaccion(tenantId, (tx) =>
       remuneracionesPublicarSii(tx, {
         clave: "uf",
@@ -252,7 +262,62 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
     expect(id).toBeTruthy();
   });
 
-  it("rechaza UTM del mes sin valor el día 1 del mes anterior (first-mover)", async () => {
+  it("rechaza UF tras hueco de 61 días si la variación supera el techo del 3 %", async () => {
+    await e.admin.valorPublicado.deleteMany({ where: { indicadorId: ufId } });
+    const fuente = `https://www.sii.cl/valores_y_fechas/uf/uf${anio}.htm`;
+    const base = 4_000_000;
+    const hace61 = restarDias(hoy, 61);
+    await e.admin.valorPublicado.create({
+      data: {
+        indicadorId: ufId,
+        valorJson: base,
+        vigenteDesde: new Date(`${hace61}T12:00:00.000Z`),
+        estado: "vigente",
+        fuente,
+        verificacion: "verificado",
+      },
+    });
+    await expect(
+      enTransaccion(tenantId, (tx) =>
+        remuneracionesPublicarSii(tx, {
+          clave: "uf",
+          valor: Math.round(base * 1.04),
+          vigenteDesde: hoy,
+          fuente,
+          consultadaEn: new Date(),
+        }),
+      ),
+    ).rejects.toThrow(/variación/i);
+  });
+
+  it("acepta UTM del mes usando último vigente si falta el 1.º del mes anterior", async () => {
+    const mesActual = primerDiaMes(hoy);
+    const dosMesesAtras = `${restarDias(mesActual, 40).slice(0, 7)}-01`;
+    const fuente = `https://www.sii.cl/valores_y_fechas/utm/utm${anio}.htm`;
+    await e.admin.valorPublicado.deleteMany({ where: { indicadorId: utmId } });
+    await e.admin.valorPublicado.create({
+      data: {
+        indicadorId: utmId,
+        valorJson: 70_000,
+        vigenteDesde: new Date(dosMesesAtras),
+        estado: "vigente",
+        fuente,
+        verificacion: "verificado",
+      },
+    });
+    const id = await enTransaccion(tenantId, (tx) =>
+      remuneracionesPublicarSii(tx, {
+        clave: "utm",
+        valor: 70_350,
+        vigenteDesde: mesActual,
+        fuente,
+        consultadaEn: new Date(),
+      }),
+    );
+    expect(id).toBeTruthy();
+  });
+
+  it("rechaza UTM del mes con último vigente lejano si la variación supera el tope", async () => {
     const mesActual = primerDiaMes(hoy);
     const dosMesesAtras = `${restarDias(mesActual, 40).slice(0, 7)}-01`;
     const fuente = `https://www.sii.cl/valores_y_fechas/utm/utm${anio}.htm`;
@@ -271,12 +336,12 @@ describe.skipIf(!urlPropietario)("remuneraciones SII publicar (SECURITY DEFINER)
       enTransaccion(tenantId, (tx) =>
         remuneracionesPublicarSii(tx, {
           clave: "utm",
-          valor: Math.round(70_000 * 1.05),
+          valor: Math.round(70_000 * 1.25),
           vigenteDesde: mesActual,
           fuente,
           consultadaEn: new Date(),
         }),
       ),
-    ).rejects.toThrow(/referencia mes anterior/i);
+    ).rejects.toThrow(/variación/i);
   });
 });

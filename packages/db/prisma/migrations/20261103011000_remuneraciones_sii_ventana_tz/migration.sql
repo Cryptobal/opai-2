@@ -93,10 +93,6 @@ BEGIN
     LIMIT 1;
 
   IF v_referencia.id IS NULL THEN
-    IF p_clave = 'utm' THEN
-      RAISE EXCEPTION 'remuneraciones_publicar_sii: referencia mes anterior faltante'
-        USING ERRCODE = 'check_violation';
-    END IF;
     SELECT * INTO v_referencia
       FROM "core"."valores_publicados"
       WHERE indicador_id = v_indicador_id
@@ -111,8 +107,8 @@ BEGIN
     v_dias := p_vigente_desde - v_referencia.vigente_desde;
     IF v_anterior IS NOT NULL AND v_anterior > 0 AND p_valor <> v_anterior AND v_dias > 0 THEN
       v_max_ratio := CASE
-        WHEN p_clave = 'uf' THEN v_dias * 0.005
-        ELSE (v_dias::numeric / 30.0) * 0.05
+        WHEN p_clave = 'uf' THEN LEAST(v_dias * 0.0005, 0.03)
+        ELSE LEAST((v_dias::numeric / 30.0) * 0.05, 0.06)
       END;
       IF abs(p_valor - v_anterior)::numeric / v_anterior::numeric > v_max_ratio THEN
         RAISE EXCEPTION 'remuneraciones_publicar_sii: variación excesiva'

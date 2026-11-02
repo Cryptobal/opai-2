@@ -2,8 +2,18 @@ export type ClaveSiiPublicable = "uf" | "utm";
 
 export const RANGO_UF_CENTAVOS = { min: 1_000_000, max: 20_000_000 } as const;
 export const RANGO_UTM_CLP = { min: 10_000, max: 500_000 } as const;
-export const VARIACION_MAX_UF = 0.005;
-export const VARIACION_MAX_UTM = 0.05;
+/** ~0,05 % diario sobre UF (referencia histórica SII). */
+export const TASA_DIARIA_UF = 0.0005;
+/** Tope acumulado UF aunque el hueco sea largo. */
+export const TECHO_VARIACION_UF = 0.03;
+/** ~5 % mensual UTM, prorrateado por días / 30. */
+export const TASA_MENSUAL_UTM = 0.05;
+export const TECHO_VARIACION_UTM = 0.06;
+
+/** @deprecated Usar TASA_DIARIA_UF; conservado para tests que importaban el nombre. */
+export const VARIACION_MAX_UF = TASA_DIARIA_UF;
+/** @deprecated Usar TASA_MENSUAL_UTM. */
+export const VARIACION_MAX_UTM = TASA_MENSUAL_UTM;
 
 export function fuenteEsSii(fuente: string): boolean {
   return /^https:\/\/(www\.)?sii\.cl\//i.test(fuente);
@@ -23,11 +33,11 @@ export function diasEntreCivil(desde: string, hasta: string): number {
   return Math.max(0, Math.round(ms / 86_400_000));
 }
 
-/** Tope de variación relativa acumulada según días desde la referencia. */
+/** Tope de variación relativa acumulada: min(días × tasa, techo). */
 export function topeVariacionAcumulada(clave: ClaveSiiPublicable, dias: number): number {
   if (dias <= 0) return 0;
-  if (clave === "uf") return dias * VARIACION_MAX_UF;
-  return (dias / 30) * VARIACION_MAX_UTM;
+  if (clave === "uf") return Math.min(dias * TASA_DIARIA_UF, TECHO_VARIACION_UF);
+  return Math.min((dias / 30) * TASA_MENSUAL_UTM, TECHO_VARIACION_UTM);
 }
 
 export function variacionPermitidaAcumulada(
