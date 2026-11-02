@@ -1,10 +1,16 @@
 import type { Contexto } from "@opai/capabilities";
 
 import type { ResultadoCalculo } from "../domain/motor";
-import { resumenCalculoCongeladoParaLista } from "./resumen-lista-cache";
 import type { VersionCtx } from "./version";
 
 type FilaLinea = { tipo: string; habilitada: boolean; posiciones: number };
+
+type ResumenListaLegacy = {
+  ventaMensual: number | null;
+  semaforo: "verde" | "amarillo" | "rojo";
+  margenEfectivoPct: number;
+  noEnviable: boolean;
+};
 
 export const AVISO_SIN_CALCULO = "sin cálculo congelado completo";
 
@@ -63,7 +69,7 @@ function esResultadoCalculoCompleto(parsed: unknown): parsed is ResultadoCalculo
   );
 }
 
-function esResumenListaLegacy(parsed: unknown): parsed is ReturnType<typeof resumenCalculoCongeladoParaLista> {
+function esResumenListaLegacy(parsed: unknown): parsed is ResumenListaLegacy {
   if (!parsed || typeof parsed !== "object") return false;
   const o = parsed as Record<string, unknown>;
   const keys = Object.keys(o);
@@ -77,7 +83,7 @@ function esResumenListaLegacy(parsed: unknown): parsed is ReturnType<typeof resu
 }
 
 function reconstruirDesdeResumenLegacy(
-  parsed: ReturnType<typeof resumenCalculoCongeladoParaLista>,
+  parsed: ResumenListaLegacy,
   version: Pick<VersionCtx, "ventaMensualClp" | "validaHasta">,
   lineas: readonly FilaLinea[],
 ): ResultadoCalculo {

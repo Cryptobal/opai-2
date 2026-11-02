@@ -4,6 +4,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { resumenCalculoCongeladoParaLista } from "../persistencia/resumen-lista-cache";
 import { mockMotorLegal } from "../persistencia/mock-motor-legal";
+import type { ResultadoCalculo } from "../domain/motor";
 import { ACTIVOS, CON_COSTOS, GESTOR, GESTOR_COSTOS, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 
@@ -67,7 +68,7 @@ describe("calculoCongeladoJson por estado (C-2)", () => {
         const { id, jsonCompleto } = await cotizacionConPuesto(ctx);
         const json = legacy
           ? JSON.stringify(
-              resumenCalculoCongeladoParaLista(JSON.parse(jsonCompleto) as import("../domain/motor").ResultadoCalculo),
+              resumenCalculoCongeladoParaLista(JSON.parse(jsonCompleto) as ResultadoCalculo),
             )
           : jsonCompleto;
         await ctx.db.cpqVersion.updateMany({
