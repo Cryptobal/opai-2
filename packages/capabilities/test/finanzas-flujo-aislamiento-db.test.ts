@@ -86,9 +86,14 @@ describe.skipIf(!urlPropietario)("flujo de caja: dos empresas en base real", () 
     expect(await ok<unknown[]>(t.b, "finanzas.cierres.listar", {})).toEqual([]);
     const sobre = await run(t.b, "finanzas.celdas.fijar", { filaId: fila, semana: futura, monto: 9 });
     expect(sobre).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    const archivar = await run(t.b, "finanzas.filas.archivar", { id: fila, archivar: true });
+    expect(archivar).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const mover = await run(t.b, "finanzas.celdas.mover", { filaId: fila, semanas: [futura], por: 1 });
     expect(mover.ok).toBe(false);
     expect(await e.admin.flujoCelda.count({ where: { tenantId: t.b } })).toBe(0);
+    const filaA = await e.admin.flujoFila.findUnique({ where: { id: fila } });
+    expect(filaA?.tenantId).toBe(t.a);
+    expect(filaA?.activa).toBe(true);
   });
 
   it("un rol sin permisos financieros no entra", async () => {

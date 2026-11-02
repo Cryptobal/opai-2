@@ -250,6 +250,7 @@ finanzas_derivadas_listar
 finanzas_dte_config_actualizar
 finanzas_dte_config_obtener
 finanzas_filas_actualizar
+finanzas_filas_archivar
 finanzas_filas_crear
 finanzas_filas_listar
 finanzas_flujo_importar
@@ -461,6 +462,7 @@ preview_finanzas_compras_importar
 preview_finanzas_compras_registrar
 preview_finanzas_dte_config_actualizar
 preview_finanzas_filas_actualizar
+preview_finanzas_filas_archivar
 preview_finanzas_filas_crear
 preview_finanzas_flujo_importar
 preview_finanzas_folios_cargar_caf
