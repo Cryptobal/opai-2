@@ -4,6 +4,7 @@ export * from "./plan-validacion";
 export * from "./centro-costo";
 export * from "./compras";
 export * from "./ventas";
+export * from "./caf";
 export * from "./ventas-nc";
 export * from "./proyeccion-flujo";
 export * from "./bancos";
