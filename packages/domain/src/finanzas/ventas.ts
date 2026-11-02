@@ -21,7 +21,7 @@ export const ESTADOS_DTE_EMITIDO = [
 export type EstadoDteEmitido = (typeof ESTADOS_DTE_EMITIDO)[number];
 
 /** Cobro básico en PR 1 (conciliación bancaria refina en PR posterior). */
-export const ESTADOS_COBRO_VENTA = ["pendiente", "pagada_parcial", "pagada"] as const;
+export const ESTADOS_COBRO_VENTA = ["pendiente", "pagada_parcial", "pagada", "cedida"] as const;
 export type EstadoCobroVenta = (typeof ESTADOS_COBRO_VENTA)[number];
 
 /** Ambiente del adaptador SII; producción solo con ajuste explícito del tenant. */
