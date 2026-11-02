@@ -26,6 +26,8 @@ export const LIMITES = {
   verificar: { maximo: 30, ventanaMs: 60_000 },
   /** /api/existe (proxy interno), por usuario de la sesión: 120 por minuto. */
   existe: { maximo: 120, ventanaMs: 60_000 },
+  /** Formulario web público por tenant, por IP y slug (Brief 07 PR 2). */
+  formularioWeb: { maximo: 20, ventanaMs: 60_000 },
   /** Proxy de mapas, por usuario: 30 por minuto. */
   geoMapa: { maximo: 30, ventanaMs: 60_000 },
 } as const;

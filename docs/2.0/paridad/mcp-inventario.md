@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 454 pares pantalla→capacidad · 409 con herramienta · 45 excepciones justificadas · 0 faltantes.
+**Resumen:** 456 pares pantalla→capacidad · 409 con herramienta · 46 excepciones justificadas · 1 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -17,6 +17,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/agente` | `agente.turno.preparar` | — | excepción |
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
 | — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
+| — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.firmar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.rechazar` | — | excepción |
@@ -95,6 +96,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.filas.listar` | `finanzas_filas_listar` | existe |
 | compartido | `app/(erp)/configuracion/_finanzas` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.get` | `comercial_canales_get` | existe |
+| compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.rotar_token_formulario` | — | excepción |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.update` | `comercial_canales_update` | existe |
 | compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.actualizar` | `nomina_conceptos_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.crear` | `nomina_conceptos_crear` | existe |
@@ -398,7 +400,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/operaciones` | `core.patrones.list` | `core_patrones_list` | existe |
 | erp | `/configuracion/operaciones` | `core.patrones.set_activo` | `core_patrones_set_activo` | existe |
 | erp | `/configuracion/operaciones` | `core.patrones.update` | `core_patrones_update` | existe |
-| erp | `/configuracion/remuneraciones` | `core.remuneraciones.confirmar_mutual` | — | excepción |
+| erp | `/configuracion/remuneraciones` | `core.remuneraciones.confirmar_mutual` | — | falta |
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.listar` | `core_remuneraciones_listar` | existe |
 | erp | `/configuracion/usuarios/roles` | `core.roles.archive` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.create` | — | excepción |
@@ -491,7 +493,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#registrarYAceptar` | Identidad: crea la cuenta propia y acepta la invitación. |
 | `app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion` | Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial. |
 | `app/api/agente/route.ts` | Agente interno (ADR-049): agente.turno.preparar/agente.plan.confirmar (solo personas, con motivo); un agente externo usa el MCP. |
-| `app/api/auth/[...all]/route.ts` | Better Auth (sesión, OAuth y verificación de correo). |
 | `app/api/cron/programador/route.ts` | Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029). |
 | `app/api/cron/trabajos/route.ts` | Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029). |
 | `app/api/csp-report/route.ts` | Reportes CSP del navegador; solo logs categóricos. |
@@ -502,6 +503,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/mcp/[[...transport]]/route.ts` | Servidor MCP (Authorization: Bearer). |
 | `app/api/mcp/k/[key]/[[...transport]]/route.ts` | Servidor MCP con la key en la URL: deprecado (410 Gone salvo MCP_KEY_EN_URL_HASTA). |
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
+| `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
@@ -514,6 +516,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | --- | --- |
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
+| `comercial.canales.rotar_token_formulario` | Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant. |
+| `comercial.solicitudes.recibir_formulario_web` | Interna: el endpoint público `/api/t/[slug]/solicitudes` valida la clave del canal antes de existir sesión (Brief 07 PR 2). |
 | `core.anexos.aprobar` | Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032). |
 | `core.anexos.rechazar` | Solo personas: rechazar el anexo de contrato es una decisión humana responsable (Brief 07b PR 4, ADR-032). |
 | `core.apikeys.create` | Solo personas: una key no se crea keys ni ve secretos (ADR-032). |
@@ -550,7 +554,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.invitations.peek` | Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial). |
 | `core.invitations.request_new` | Interna: la pide quien aún no tiene sesión (token vencido o usado). |
 | `core.remuneraciones.confirmar` | Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034). |
-| `core.remuneraciones.confirmar_mutual` | Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034). |
 | `core.roles.archive` | Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034). |
 | `core.roles.assign` | Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034). |
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
@@ -576,6 +579,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
+| `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
 | `core.anexos.rechazar` | `app/_components` | no | reservada a personas |
 | `core.apikeys.create` | `/configuracion/agentes` | no | reservada a personas |
