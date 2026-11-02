@@ -9,6 +9,12 @@ import { identidadActual, contextoServidor } from "@/lib/servidor";
 import { HojaEditarVinculo, HojaVinculo } from "../../_componentes/diferidas";
 import { HistorialVinculos, VinculoVigente } from "../../_componentes/laboral";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
+import { SeccionContactoLaboral } from "../../_componentes/seccion-contacto-laboral";
+import { SeccionJornadaDt } from "../../_componentes/seccion-jornada-dt";
+import { SeccionOs10 } from "../../_componentes/seccion-os10";
+import { SeccionPago } from "../../_componentes/seccion-pago";
+import { SeccionPrevision } from "../../_componentes/seccion-prevision";
+import { SeccionUniforme } from "../../_componentes/seccion-uniforme";
 
 export const metadata = { title: "Laboral" };
 export default function Laboral(props: {
@@ -88,6 +94,14 @@ export default function Laboral(props: {
                 cargos={cargos}
                 cargosRetirados={panel.cargosRetirados}
               />
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <SeccionPrevision personaId={p.id} />
+              <SeccionPago personaId={p.id} />
+              <SeccionUniforme personaId={p.id} />
+              <SeccionJornadaDt personaId={p.id} />
+              <SeccionOs10 personaId={p.id} />
+              <SeccionContactoLaboral personaId={p.id} />
             </div>
             {gestionar && actual ? (
               <HojaEditarVinculo key={JSON.stringify(actual)} actual={actual} {...opciones} />
