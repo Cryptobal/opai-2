@@ -89,3 +89,8 @@ export { MANUALES } from "./manuales";
 
 export type { PanelSueldo } from "./core/maestros/estructuras-panel-schema";
 export { noRecontratarHabilitadaAhora } from "./core/maestros/personas-no-recontratar-vigencia";
+export {
+  clavesFaltantes,
+  mutualAdicionalTenant,
+  publicacionesParaFecha,
+} from "./core/remuneraciones";

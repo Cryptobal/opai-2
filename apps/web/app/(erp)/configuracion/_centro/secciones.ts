@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   UserCheck,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import { PERMISOS_CORE } from "@opai/domain";
@@ -74,6 +75,15 @@ export const SECCIONES: readonly Seccion[] = [
     icono: CalendarClock,
     grupo: "operacion",
     permiso: PERMISOS_CORE.patronesRead,
+  }),
+  s({
+    id: "remuneraciones",
+    titulo: "Remuneraciones",
+    descripcion: "Indicadores legales, confirmación y mutual adicional",
+    corta: "Valores legales del costo",
+    icono: Wallet,
+    grupo: "operacion",
+    permiso: PERMISOS_CORE.remuneracionesRead,
   }),
   s({
     id: "calendario",

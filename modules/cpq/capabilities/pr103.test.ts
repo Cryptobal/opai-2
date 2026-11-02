@@ -1,8 +1,8 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
-import { publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mockMotorLegal } from "../persistencia/mock-motor-legal";
 import * as valoresLegales from "../persistencia/valores-legales";
 import {
   ACTIVOS,
@@ -50,7 +50,7 @@ describe("CAR-135 pr103", () => {
   });
 
   it("enviar exige contacto de la cuenta del negocio", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = ctxGestor(true);
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,
@@ -82,7 +82,7 @@ describe("CAR-135 pr103", () => {
   });
 
   it("enviar persiste calculoCongeladoJson", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = ctxGestor(true);
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,
@@ -150,7 +150,7 @@ describe("CAR-135 pr103", () => {
   });
 
   it("clonar desde versión enviada recalcula precio de ítem", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = ctxGestor(true);
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,
@@ -191,7 +191,7 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
   });
 
   it("ficha, preview_pdf, calcular dry_run y enviar dry_run no siembran catálogo", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = ctxGestor(true);
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,
@@ -253,7 +253,7 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
   });
 
   it("enviar dry_run no deja la versión enviada ni documentos", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = ctxGestor(true);
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,
@@ -284,7 +284,7 @@ describe("CAR-135 corrección 1 (lecturas puras y permisos)", () => {
   });
 
   it("enviar rechaza contacto sin correo", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = ctxGestor(true);
     const sinMail = "0192f3a0-0000-7000-8000-0000000000a9";
     await ctx.db.contacto.create({
@@ -335,7 +335,7 @@ describe("cpq correlativos catalogo seed", () => {
   });
 
   it("el catálogo del tenant afecta el cálculo", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = ctxGestor(true);
     const c0 = await executeCapability(ctx, "cpq.cotizaciones.create", {
       negocioId: NEGOCIO_1,

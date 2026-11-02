@@ -4,7 +4,7 @@ import { calcular, resultadoSinCostos, type ResultadoCalculo } from "../domain/m
 import { cotizacionDe } from "../capabilities/util";
 import { modeloDesdeCatalogo } from "./catalogo-modelo";
 import { mapearVersionCalculo } from "./mapear";
-import { juegoParaFecha, proveedorDesdeLineas } from "./proveedor";
+import { juegoParaFecha, mutualAdicionalTenant, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
 
@@ -45,8 +45,10 @@ export async function recalcularVersion(
   if (!pack) return null;
   const { version, secciones, lineas } = pack;
   const consulta = (version.validaHasta ?? new Date()).toISOString().slice(0, 10);
-  const juego = await juegoParaFecha(ctx, consulta);
+  const resuelto = await juegoParaFecha(ctx, consulta);
+  const juego = resuelto.juego;
   const fecha = juego?.fecha ?? consulta;
+  const mutual = await mutualAdicionalTenant(ctx);
   const ufInd = juego?.valores.find((v) => v.indicador === "uf");
   const uf = ufInd ? { valorClpEscalado: Math.round((ufInd.valor as number) * 100), fecha } : null;
   const proveedor = proveedorDesdeLineas(
@@ -56,15 +58,23 @@ export async function recalcularVersion(
       patron: l.patron,
       horaInicio: l.horaInicio,
       horaFin: l.horaFin,
+      colacionClp: 0,
+      movilizacionClp: 0,
+      tipoContrato: "indefinido",
     })),
     juego,
+    mutual,
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
   const entrada = mapearVersionCalculo(version, secciones, lineas, modelo);
   const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
-  if (!uf && juego) {
-    resultado.advertencias = [...new Set([...resultado.advertencias, AVISO_FALTA_UF])];
-    resultado.noEnviable = true;
+  const advertenciasExtra = [
+    ...(resuelto.pendiente ? [resuelto.pendiente] : []),
+    ...(!uf && juego ? [AVISO_FALTA_UF] : []),
+  ];
+  if (advertenciasExtra.length) {
+    resultado.advertencias = [...new Set([...resultado.advertencias, ...advertenciasExtra])];
+    if (resuelto.pendiente || !uf) resultado.noEnviable = true;
   }
   if (puedeEscribirVersion(version, escribir)) {
     await ctx.db.cpqVersion.update({

@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 418 pares pantalla→capacidad · 378 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 420 pares pantalla→capacidad · 380 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -364,6 +364,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/operaciones` | `core.patrones.list` | `core_patrones_list` | existe |
 | erp | `/configuracion/operaciones` | `core.patrones.set_activo` | `core_patrones_set_activo` | existe |
 | erp | `/configuracion/operaciones` | `core.patrones.update` | `core_patrones_update` | existe |
+| erp | `/configuracion/remuneraciones` | `core.remuneraciones.confirmar_mutual` | `core_remuneraciones_confirmar_mutual` | existe |
+| erp | `/configuracion/remuneraciones` | `core.remuneraciones.listar` | `core_remuneraciones_listar` | existe |
 | erp | `/configuracion/usuarios/roles` | `core.roles.archive` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.create` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.update` | — | excepción |
@@ -609,6 +611,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`
+- `core.remuneraciones.confirmar`
+- `core.remuneraciones.historial`
 - `core.usage.summary`
 - `cpq.catalogo_categorias.create`
 - `cpq.catalogo_categorias.desactivar`
