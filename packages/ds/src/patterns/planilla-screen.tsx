@@ -15,11 +15,17 @@ export type PlanillaScreenProps = {
   titulo: string;
   subtitulo?: string;
   acciones?: ReactNode;
+  /** Muestra acciones también en escritorio (1280+), no solo en teléfono. */
+  accionesSiempre?: boolean;
+  /** Cabecera de título/subtítulo solo en teléfono; acciones en menú aparte. */
+  cabeceraSoloTelefono?: boolean;
   filas: readonly FilaPlanilla[];
   columnas: readonly ColumnaPlanilla[];
   celda: (filaId: string, columnaId: string) => Celda | null;
+  /** Si se define, indica qué celdas de datos admiten edición (incluidas vacías). */
+  celdaEditable?: (filaId: string, columnaId: string) => boolean;
   textos?: TextosEstado;
-  /** Si se define, se invoca al tocar una celda (además del zoom en móvil). */
+  /** Si se define, se invoca al tocar una celda editable (además del zoom en móvil). */
   onCelda?: (filaId: string, columnaId: string) => void;
 };
 
@@ -33,6 +39,9 @@ const TONO: Record<TonoCelda, string> = {
   accent: "bg-accent-muted text-accent",
 };
 
+const claseCeldaNumero =
+  "min-h-9 min-w-[7.5rem] whitespace-nowrap tabular-nums text-xs font-medium";
+
 /**
  * Planilla: grilla con cabeceras de fila y columna fijas y scroll interno.
  * En teléfono, tocar una celda la amplía en la barra inferior (zoom de celda).
@@ -42,9 +51,12 @@ export function PlanillaScreen({
   titulo,
   subtitulo,
   acciones,
+  accionesSiempre,
+  cabeceraSoloTelefono,
   filas,
   columnas,
   celda,
+  celdaEditable,
   textos,
   onCelda,
 }: PlanillaScreenProps) {
@@ -55,14 +67,16 @@ export function PlanillaScreen({
   } | null>(null);
   const vacio = state === "ready" && filas.length === 0 ? "empty" : state;
   return (
-    <section>
+    <section className="min-w-0">
       <Cabecera
         titulo={titulo}
         {...(subtitulo ? { subtitulo } : {})}
         {...(acciones ? { acciones } : {})}
+        {...(accionesSiempre ? { accionesSiempre: true } : {})}
+        {...(cabeceraSoloTelefono ? { soloTelefono: true } : {})}
       />
       <Estado state={vacio} variante="planilla" {...(textos ? { textos } : {})}>
-        <div className="max-h-[70dvh] overflow-auto rounded-lg border border-border bg-surface">
+        <div className="max-h-[70dvh] min-w-0 overflow-auto rounded-lg border border-border bg-surface lg:min-w-0">
           <table className="border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
@@ -73,7 +87,7 @@ export function PlanillaScreen({
                   <th
                     key={c.id}
                     className={cn(
-                      "t-numeric sticky top-0 z-10 min-w-10 border-b border-border bg-surface px-1 py-2 text-center text-xs",
+                      "sticky top-0 z-10 min-w-[7.5rem] border-b border-border bg-surface px-1 py-2 text-center text-xs tabular-nums whitespace-nowrap",
                       c.destacada ? "text-accent" : "text-fg-subtle",
                     )}
                   >
@@ -93,23 +107,48 @@ export function PlanillaScreen({
                   </th>
                   {columnas.map((c) => {
                     const valor = celda(f.id, c.id);
-                    return (
-                      <td key={c.id} className="border-b border-border p-0.5">
-                        {valor ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onCelda?.(f.id, c.id);
-                              setSeleccion({ fila: f, columna: c, celda: valor });
-                            }}
+                    const editable = Boolean(onCelda && celdaEditable?.(f.id, c.id));
+                    const tono = valor?.tono ?? "neutro";
+                    const texto = valor?.texto ?? "—";
+                    if (!valor && !editable) {
+                      return <td key={c.id} className="border-b border-border p-0.5" tabIndex={-1} />;
+                    }
+                    if (!editable) {
+                      return (
+                        <td key={c.id} className="border-b border-border p-0.5">
+                          <span
+                            tabIndex={-1}
                             className={cn(
-                              "flex min-h-9 w-full min-w-9 items-center justify-center rounded-sm text-xs font-medium",
-                              TONO[valor.tono ?? "neutro"],
+                              "flex w-full items-center justify-center rounded-sm px-1",
+                              claseCeldaNumero,
+                              TONO[tono],
                             )}
                           >
-                            {valor.texto}
-                          </button>
-                        ) : null}
+                            {texto}
+                          </span>
+                        </td>
+                      );
+                    }
+                    return (
+                      <td key={c.id} className="border-b border-border p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onCelda?.(f.id, c.id);
+                            setSeleccion({
+                              fila: f,
+                              columna: c,
+                              celda: valor ?? { texto, tono: "neutro", detalle: "Planificar" },
+                            });
+                          }}
+                          className={cn(
+                            "flex w-full items-center justify-center rounded-sm px-1",
+                            claseCeldaNumero,
+                            TONO[tono],
+                          )}
+                        >
+                          {texto}
+                        </button>
                       </td>
                     );
                   })}
@@ -125,7 +164,7 @@ export function PlanillaScreen({
               <span className="text-fg-muted"> · {seleccion.columna.etiqueta} · </span>
               <span
                 className={cn(
-                  "rounded-sm px-1.5 py-0.5 text-sm",
+                  "rounded-sm px-1.5 py-0.5 text-sm tabular-nums whitespace-nowrap",
                   TONO[seleccion.celda.tono ?? "neutro"],
                 )}
               >
