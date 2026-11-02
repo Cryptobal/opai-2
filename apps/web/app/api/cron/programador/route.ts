@@ -1,7 +1,7 @@
 import { purgarIntentosLogin } from "@opai/auth";
-import { programarPeriodicos } from "@opai/capabilities";
+import { programarPeriodicos, programarHorarios } from "@opai/capabilities";
 
-import { autorizarCron, hoyEn, porTenant } from "@/lib/cron";
+import { autorizarCron, hoyEn, horaEn, porTenant } from "@/lib/cron";
 import { contextoSistema } from "@/lib/medidor";
 import { purgarVentanas } from "@/lib/rate-limit";
 
@@ -14,9 +14,14 @@ export async function GET(req: Request): Promise<Response> {
   let resultados: Record<string, unknown> = {};
   let errorTenants = false;
   try {
-    resultados = await porTenant((t) =>
-      programarPeriodicos(contextoSistema(t.id), hoyEn(t.timezone)),
-    );
+    resultados = await porTenant((t) => {
+      const hoy = hoyEn(t.timezone);
+      const hora = horaEn(t.timezone);
+      return Promise.all([
+        programarPeriodicos(contextoSistema(t.id), hoy),
+        programarHorarios(contextoSistema(t.id), hora),
+      ]).then(([diarios, horarios]) => ({ diarios, horarios }));
+    });
   } catch {
     errorTenants = true;
     console.error("[cron programador] falló la programación por tenant");

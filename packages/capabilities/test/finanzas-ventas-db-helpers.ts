@@ -23,7 +23,9 @@ export async function prepararVentasDb(): Promise<VentasDbSuite> {
   const e = await prepararEntorno();
   const mod = await import("../src");
   mod.limpiarRegistro();
+  mod.limpiarTrabajos();
   mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesFinanzas]);
+  mod.registrarTrabajos([...mod.trabajosDelNucleo, ...mod.trabajosFinanzas]);
   const medidor = { registrar: async () => undefined };
   const usuarioId = randomUUID();
   const tenantId = (

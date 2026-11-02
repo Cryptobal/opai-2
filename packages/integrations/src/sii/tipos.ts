@@ -15,7 +15,7 @@ export type EnvioSiiResultado = {
 };
 
 export type ConsultaSiiResultado = {
-  estado: "aceptado" | "rechazado";
+  estado: "aceptado" | "rechazado" | "reparo" | "pendiente";
   glosa?: string;
 };
 
