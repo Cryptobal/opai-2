@@ -37,10 +37,8 @@ test("crea desde negocio abierto con vista previa y aparece en ambas listas", as
   await page.getByRole("button", { name: "Confirmar creación" }).click();
   await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
   await page.goto("/cotizaciones");
-  await expect(
-    page.getByRole("link").filter({ hasText: titulo }).filter({ visible: true }).first(),
-  ).toBeVisible();
-  await expect(page.getByText("Pendiente").filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: new RegExp(titulo) })).toBeVisible();
+  await expect(page.getByRole("link", { name: new RegExp(titulo) })).toContainText("Pendiente");
   await sinDesborde(page);
   await page.screenshot({ path: info.outputPath("cpq-lista.png"), fullPage: true });
   await page.goto(`/negocios/${negocio}/cotizaciones`);
@@ -75,13 +73,13 @@ test("desde lista elige un negocio abierto; editar invalida la vista previa", as
   await page.getByRole("button", { name: "Confirmar creación" }).click();
   await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
   await page.goto("/cotizaciones");
-  await expect(page.getByText(titulo, { exact: true }).filter({ visible: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: new RegExp(titulo) })).toBeVisible();
 });
 
 test("sin lectura no muestra entrada ni pestaña; lector no puede crear", async ({ page }) => {
   await entrar(page, "cpq-sin-lectura@example.test");
   await page.goto("/cotizaciones");
-  await expect(page.getByRole("heading", { name: "Sin permisos" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
   await expect(page.locator('nav a[href="/cotizaciones"]')).toHaveCount(0);
   await page.goto("/negocios/00000000-0000-7000-8000-000000001321");
   await expect(page.getByRole("link", { name: "Cotizaciones", exact: true })).toHaveCount(0);
@@ -91,5 +89,5 @@ test("sin lectura no muestra entrada ni pestaña; lector no puede crear", async 
   await page.goto("/cotizaciones");
   await expect(page.getByRole("link", { name: "Nueva cotización", exact: true })).toHaveCount(0);
   await page.goto("/cotizaciones/nueva");
-  await expect(page.getByRole("heading", { name: "Sin permisos" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
 });

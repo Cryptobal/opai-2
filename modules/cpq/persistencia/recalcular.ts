@@ -7,7 +7,6 @@ import { mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { juegoParaFecha, mutualAdicionalTenant, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
-import { resumenCalculoCongeladoParaLista } from "./resumen-lista-cache";
 import { mesesContrato, versionParaFicha } from "./version";
 
 export const AVISO_FALTA_UF = "Falta valor UF del día o del período.";
@@ -83,7 +82,7 @@ export async function recalcularVersion(
       where: { id: version.id },
       data: {
         ventaMensualClp: resultado.ventaMensual,
-        calculoCongeladoJson: JSON.stringify(resumenCalculoCongeladoParaLista(resultado)),
+        calculoCongeladoJson: JSON.stringify(resultado),
       },
     });
     for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {

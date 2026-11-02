@@ -36,9 +36,14 @@ describe("calculoCongeladoJson en lista (C-1)", () => {
     const sinCostos = { ...h.ctx, autorizar: (p: string) => GESTOR.includes(p) };
     await executeCapability(sinCostos, "cpq.cotizaciones.calcular", { id });
     const v = await h.ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id }, orderBy: { numero: "desc" } });
-    const cache = JSON.parse(v!.calculoCongeladoJson!) as { semaforo?: string; margenEfectivoPct?: number };
+    const cache = JSON.parse(v!.calculoCongeladoJson!) as {
+      semaforo?: string;
+      margenEfectivoPct?: number;
+      advertencias?: unknown;
+    };
     expect(cache.semaforo).toMatch(/verde|amarillo|rojo/);
     expect(typeof cache.margenEfectivoPct).toBe("number");
+    expect(Array.isArray(cache.advertencias)).toBe(true);
 
     const conCostos = { ...h.ctx, autorizar: (p: string) => GESTOR_COSTOS.includes(p) };
     const lista = await executeCapability(conCostos, "cpq.cotizaciones.list", { negocioId: NEGOCIO_1 });

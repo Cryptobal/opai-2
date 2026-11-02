@@ -25,9 +25,9 @@ test("ficha CPQ muestra resumen en español y patrón lista+ficha", async ({ pag
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
   await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
-  await expect(page.getByRole("heading", { name: /CPQ-/ }).first()).toBeVisible();
-  await expect(page.getByText("Resumen", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Mano de obra").first()).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /^CPQ-/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
+  await expect(page.getByText("Mano de obra", { exact: true })).toBeVisible();
   await expect(page.getByText("mano_obra")).toHaveCount(0);
   await sinDesborde(page);
   await page.screenshot({
@@ -36,7 +36,7 @@ test("ficha CPQ muestra resumen en español y patrón lista+ficha", async ({ pag
   });
 });
 
-test("muestra el error del servidor al dejar lista con costos pendientes", async ({ page }, info) => {
+test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({ page }, info) => {
   const numero = numeros[info.project.name] ?? 1;
   const negocio = `00000000-0000-7000-8000-00000000132${numero}`;
   await entrar(page, "cpq-gestor@example.test");
@@ -47,10 +47,10 @@ test("muestra el error del servidor al dejar lista con costos pendientes", async
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
   await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
-  await page.getByRole("button", { name: "Agregar puesto" }).first().click();
+  await page.getByRole("button", { name: "Agregar puesto" }).click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Dejar lista" })).toBeVisible({ timeout: 15_000 });
-  await page.getByRole("button", { name: "Dejar lista" }).click();
-  await expect(page.getByText("hay costos o UF pendientes")).toBeVisible();
+  await expect(page.getByText("No enviable")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: "Dejar lista" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Vista previa PDF" })).toBeVisible();
   await sinDesborde(page);
 });

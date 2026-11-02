@@ -1,6 +1,6 @@
 import type { ResultadoCalculo } from "../domain/motor";
 
-/** Resumen mínimo persistido en `calculoCongeladoJson` (sin filtrar por permiso al guardar). */
+/** Resumen mínimo de cuatro campos (legacy C-1); la persistencia guarda el resultado completo. */
 export function resumenCalculoCongeladoParaLista(r: ResultadoCalculo) {
   return {
     ventaMensual: r.ventaMensual,
