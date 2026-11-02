@@ -28,6 +28,7 @@ import { ventasPdf } from "./ventas-pdf";
 import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
 
 export { ajustesFinanzas } from "./ajustes";
+export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
 export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion];
 

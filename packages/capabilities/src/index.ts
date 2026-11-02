@@ -5,6 +5,7 @@ export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
+export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,
@@ -90,3 +91,8 @@ export { MANUALES } from "./manuales";
 
 export type { PanelSueldo } from "./core/maestros/estructuras-panel-schema";
 export { noRecontratarHabilitadaAhora } from "./core/maestros/personas-no-recontratar-vigencia";
+export {
+  clavesFaltantes,
+  mutualAdicionalTenant,
+  publicacionesParaFecha,
+} from "./core/remuneraciones";

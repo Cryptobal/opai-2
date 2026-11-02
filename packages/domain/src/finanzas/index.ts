@@ -10,3 +10,4 @@ export * from "./flujo-semana";
 export * from "./derivadas-dte";
 export * from "./dte-consulta-sii";
 export * from "./cesion-calculo";
+export * from "./bancos";

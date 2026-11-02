@@ -43,13 +43,14 @@ export async function derivadasDteSemana(
     },
   });
   const entrada: DocumentoDerivadaDte[] = docs
-    .filter((d) =>
-      documentoPorCobrar({
-        estadoCobro: d.estadoCobro,
-        cesionEstado: d.cesionEstado,
-        montoTotal: d.montoTotal,
-        montoCobrado: d.montoCobrado,
-      }) || d.estadoDte === "borrador",
+    .filter(
+      (d) =>
+        documentoPorCobrar({
+          estadoCobro: d.estadoCobro,
+          cesionEstado: d.cesionEstado,
+          montoTotal: d.montoTotal,
+          montoCobrado: d.montoCobrado,
+        }) || d.estadoDte === "borrador",
     )
     .map((d) => ({
       id: d.id,

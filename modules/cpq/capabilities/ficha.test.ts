@@ -3,6 +3,7 @@ import { contextoDePrueba } from "@opai/capabilities/testing";
 import { publicacionesReferencia } from "../../../packages/domain/src/remuneraciones/referencia.fixture";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mockMotorLegal } from "../persistencia/mock-motor-legal";
 import * as proveedor from "../persistencia/proveedor";
 import * as valoresLegales from "../persistencia/valores-legales";
 import { AVISO_FALTA_UF } from "../persistencia/recalcular";
@@ -48,7 +49,7 @@ describe("cpq ficha y líneas (CAR-134)", () => {
     );
     expect(prev.ok).toBe(true);
     expect(await ctx.db.cpqLinea.count()).toBe(0);
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const real = await executeCapability(ctx, "cpq.lineas.crear", {
       seccionId: sec!.id,
       tipo: "puesto",
@@ -106,7 +107,7 @@ describe("cpq ficha y líneas (CAR-134)", () => {
   });
 
   it("con costos y valores legales trae margen", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = contextoDePrueba({
       semilla: semilla(),
       modulosActivos: ACTIVOS,
@@ -132,7 +133,7 @@ describe("cpq ficha y líneas (CAR-134)", () => {
   });
 
   it("ficha no persiste venta en borrador (use calcular)", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = contextoDePrueba({
       semilla: semilla(),
       modulosActivos: ACTIVOS,
@@ -172,7 +173,7 @@ describe("cpq lineas costos (CAR-134 C5)", () => {
 
 describe("paridad CPQ (CAR-134)", () => {
   it("R-CPQ-010: versión enviada muestra venta congelada sin recalcular", async () => {
-    vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
+    mockMotorLegal();
     const { ctx } = contextoDePrueba({
       semilla: semilla(),
       modulosActivos: ACTIVOS,
@@ -229,10 +230,12 @@ describe("paridad CPQ (CAR-134)", () => {
 
   it("R-CPQ-028: sin UF del período avisa explícito y no inventa valor", async () => {
     vi.spyOn(proveedor, "juegoParaFecha").mockImplementation(async (_ctx, fecha) => ({
-      fecha,
-      huella: "test-sin-uf",
-      valores: publicacionesReferencia().filter((v) => v.indicador !== "uf"),
-      advertencias: [],
+      juego: {
+        fecha,
+        huella: "test-sin-uf",
+        valores: publicacionesReferencia().filter((v) => v.indicador !== "uf"),
+        advertencias: [],
+      },
     }));
     const { ctx } = ctxGestor(true);
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Sin UF" });

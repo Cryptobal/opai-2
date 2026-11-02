@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Textarea } from "@opai/ds";
 
@@ -16,6 +16,14 @@ export function HojaCierre({ semanas }: { semanas: SemanaFlujo[] }) {
   const [banco, setBanco] = useState("");
   const [motivo, setMotivo] = useState("");
   const [vista, setVista] = useState<{ diferencia: number; exigeMotivo?: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!abierta || !semana) return;
+    void ejecutar<{ saldo: number | null }>("finanzas.bancos.saldo_sugerido", { semana }).then((r) => {
+      if (r?.saldo != null) setBanco(String(r.saldo));
+      else setBanco("");
+    });
+  }, [abierta, semana, ejecutar]);
 
   const entrada = () => ({
     semana,

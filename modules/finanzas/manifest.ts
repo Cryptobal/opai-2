@@ -7,6 +7,11 @@ import {
   PERMISO_GESTIONAR,
   PERMISO_VER,
 } from "./capacidades/permisos";
+import {
+  PERMISO_BANCOS_AUTORIZAR,
+  PERMISO_BANCOS_GESTIONAR,
+  PERMISO_BANCOS_VER,
+} from "./capacidades/bancos/permisos";
 
 /**
  * Manifest del módulo Finanzas (ADR-003). El núcleo deriva navegación, permisos, configuración,
@@ -33,6 +38,9 @@ export const manifest = defineModule({
     { id: PERMISO_GESTIONAR, descripcion: "Fijar, mover y dar por cumplidas las celdas del flujo" },
     { id: PERMISO_CERRAR, descripcion: "Sellar y reabrir semanas del flujo" },
     { id: PERMISO_CONFIGURAR, descripcion: "Configurar filas, saldo inicial y umbral del flujo" },
+    { id: PERMISO_BANCOS_VER, descripcion: "Ver cuentas bancarias, movimientos y sugerencias de conciliación" },
+    { id: PERMISO_BANCOS_GESTIONAR, descripcion: "Importar cartolas, conciliar movimientos y administrar reglas" },
+    { id: PERMISO_BANCOS_AUTORIZAR, descripcion: "Autorizar movimientos de remuneraciones y pagos sensibles" },
   ],
   navegacion: [
     {
@@ -52,6 +60,15 @@ export const manifest = defineModule({
       icono: "FileText",
       orden: 4,
       permiso: "finanzas:read",
+    },
+    {
+      portal: "erp",
+      area: "finanzas",
+      href: "/finanzas/bancos",
+      etiqueta: "Bancos",
+      icono: "Landmark",
+      orden: 5,
+      permiso: PERMISO_BANCOS_VER,
     },
     {
       portal: "erp",
@@ -93,6 +110,13 @@ export const manifest = defineModule({
     { id: "finanzas.flujo.ajustes_cambiados", descripcion: "Cambiaron los ajustes del flujo." },
     { id: "finanzas.flujo.saldo_negativo_avisado", descripcion: "Una semana futura quedó bajo el umbral del aviso in-app." },
     { id: "finanzas.flujo.importado", descripcion: "Se importó un lote de celdas al flujo." },
+    { id: "finanzas.banco.cuenta_creada", descripcion: "Se creó una cuenta bancaria." },
+    { id: "finanzas.banco.cuenta_actualizada", descripcion: "Se actualizó una cuenta bancaria." },
+    { id: "finanzas.banco.cartola_importada", descripcion: "Se importó una cartola bancaria." },
+    { id: "finanzas.banco.conciliacion_confirmada", descripcion: "Se confirmó una conciliación bancaria." },
+    { id: "finanzas.banco.conciliacion_deshecha", descripcion: "Se deshizo una conciliación bancaria." },
+    { id: "finanzas.banco.cobro_manual", descripcion: "Se registró un cobro manual sin movimiento bancario." },
+    { id: "finanzas.banco.saldo_bajo_avisado", descripcion: "El saldo de cartola quedó bajo el umbral (campana in-app)." },
     { id: "finanzas.venta.borrador_creado", descripcion: "Se creó un borrador de factura o nota en el libro de ventas." },
     { id: "finanzas.venta.emitida", descripcion: "Se emitió un DTE con folio y firma." },
     { id: "finanzas.venta.enviada_sii", descripcion: "Se envió un DTE al SII." },

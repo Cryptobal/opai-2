@@ -67,6 +67,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.cumplimientoDpaAceptar,
       // Calendario (CAR-79): gestionar los feriados del tenant es de owner y admin; gerente solo ve.
       PERMISOS_CORE.calendarioManage,
+      PERMISOS_CORE.remuneracionesManage,
+      PERMISOS_CORE.remuneracionesAprobar,
+      PERMISOS_CORE.remuneracionesRetroactivo,
       // Tickets (CAR-84): configurar los tipos del tenant es de owner y admin, igual que los
       // catálogos de Comercial y Rondas.
       "tickets:tipos.manage",
