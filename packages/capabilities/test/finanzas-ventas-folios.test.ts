@@ -16,10 +16,11 @@ describe("consumirFolio", () => {
       folioHasta: 105,
       folioActual: 102,
       activo: true,
+      cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
     };
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
-    const findFirst = vi.fn().mockResolvedValue(rango);
-    const tx = { dteFolio: { findFirst, updateMany } };
+    const findMany = vi.fn().mockResolvedValue([rango]);
+    const tx = { dteFolio: { findMany, updateMany } };
     const ctx = {
       tenantId: "t1",
       db: tx,
@@ -38,12 +39,15 @@ describe("consumirFolio", () => {
     const updateMany = vi.fn();
     const tx = {
       dteFolio: {
-        findFirst: vi.fn().mockResolvedValue({
-          id: "f1",
-          folioActual: 10,
-          folioHasta: 20,
-          activo: true,
-        }),
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "f1",
+            folioActual: 10,
+            folioHasta: 20,
+            activo: true,
+            cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
+          },
+        ]),
         updateMany,
       },
     };
@@ -57,12 +61,15 @@ describe("consumirFolio", () => {
   it("falla si updateMany no actualiza (carrera)", async () => {
     const tx = {
       dteFolio: {
-        findFirst: vi.fn().mockResolvedValue({
-          id: "f1",
-          folioActual: 5,
-          folioHasta: 10,
-          activo: true,
-        }),
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "f1",
+            folioActual: 5,
+            folioHasta: 10,
+            activo: true,
+            cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
+          },
+        ]),
         updateMany: vi.fn().mockResolvedValue({ count: 0 }),
       },
     };
@@ -72,16 +79,18 @@ describe("consumirFolio", () => {
     await expect(consumirFolio(ctx, 33, false)).rejects.toMatchObject({ code: "UNPROCESSABLE" });
   });
 
-  it("rechaza CAF vencido", async () => {
+  it("rechaza CAF vencido si no hay otro rango", async () => {
     const tx = {
       dteFolio: {
-        findFirst: vi.fn().mockResolvedValue({
-          id: "f1",
-          folioActual: 5,
-          folioHasta: 10,
-          activo: true,
-          cafVenceEn: new Date("2020-01-01T00:00:00.000Z"),
-        }),
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "f1",
+            folioActual: 5,
+            folioHasta: 10,
+            activo: true,
+            cafVenceEn: new Date("2020-01-01T00:00:00.000Z"),
+          },
+        ]),
         updateMany: vi.fn(),
       },
     };
@@ -89,6 +98,39 @@ describe("consumirFolio", () => {
       transaccion: async <T>(fn: (t: typeof tx) => Promise<T>) => fn(tx),
     } as unknown as Contexto;
     await expect(consumirFolio(ctx, 33, false)).rejects.toMatchObject({ code: "UNPROCESSABLE" });
+  });
+
+  it("N15: salta un rango con CAF vencido y usa el siguiente", async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const tx = {
+      dteFolio: {
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "viejo",
+            folioActual: 10,
+            folioHasta: 20,
+            activo: true,
+            cafVenceEn: new Date("2020-01-01T00:00:00.000Z"),
+          },
+          {
+            id: "nuevo",
+            folioActual: 8000,
+            folioHasta: 8010,
+            activo: true,
+            cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
+          },
+        ]),
+        updateMany,
+      },
+    };
+    const ctx = {
+      transaccion: async <T>(fn: (t: typeof tx) => Promise<T>) => fn(tx),
+    } as unknown as Contexto;
+    await expect(consumirFolio(ctx, 33, false)).resolves.toBe(8000);
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: "nuevo", folioActual: 8000, activo: true },
+      data: { folioActual: 8001 },
+    });
   });
 });
 

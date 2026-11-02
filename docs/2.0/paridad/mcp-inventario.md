@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 385 pares pantalla→capacidad · 345 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 396 pares pantalla→capacidad · 356 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -16,6 +16,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/agente` | `agente.plan.confirmar` | — | excepción |
 | — | `/api/agente` | `agente.turno.preparar` | — | excepción |
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
+| — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.firmar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.rechazar` | — | excepción |
@@ -230,11 +231,18 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.cancelar` | `nomina_prestamos_cancelar` | existe |
 | compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.crear` | `nomina_prestamos_crear` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.alertas.listar` | `pauta_alertas_listar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.cobertura.confirmar` | `pauta_cobertura_confirmar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.cobertura.deshacer` | `pauta_cobertura_deshacer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.excepciones.anular` | `pauta_excepciones_anular` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.excepciones.crear` | `pauta_excepciones_crear` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.historial.listar` | `pauta_historial_listar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.marca.registrar` | `pauta_marca_registrar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.mes.leer` | `pauta_mes_leer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.ppc.listar` | `pauta_ppc_listar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.reemplazos.asignar` | `pauta_reemplazos_asignar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.reemplazos.sugerir` | `pauta_reemplazos_sugerir` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.refuerzos.agregar` | `pauta_refuerzos_agregar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.resumen.leer` | `pauta_resumen_leer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -354,6 +362,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
+| erp | `/finanzas/ventas/nuevo` | `core.cuentas.list` | `core_cuentas_list` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir` | `finanzas_ventas_emitir` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.cargos.list` | `core_cargos_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.funciones.list` | `core_funciones_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.patrones.list` | `core_patrones_list` | existe |
@@ -432,6 +443,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/marca/[slug]/[asset]/route.ts` | URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP. |
 | `app/api/mcp/[[...transport]]/route.ts` | Servidor MCP (Authorization: Bearer). |
 | `app/api/mcp/k/[key]/[[...transport]]/route.ts` | Servidor MCP con la key en la URL: deprecado (410 Gone salvo MCP_KEY_EN_URL_HASTA). |
+| `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
@@ -594,8 +606,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.listar`
 - `finanzas.folios.cargar_caf`
 - `finanzas.folios.listar`
-- `finanzas.ventas.crear_borrador`
-- `finanzas.ventas.emitir`
 - `finanzas.ventas.emitir_nota_credito`
 - `finanzas.ventas.enviar_sii`
 - `finanzas.ventas.pdf`

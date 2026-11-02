@@ -26,27 +26,30 @@ type TxLike = Pick<Contexto, "db" | "transaccion" | "tenantId">;
 
 async function reservarFolioEnTx(tx: TenantTx, tipoDte: TipoDteVenta, dryRun: boolean): Promise<number> {
   const hoyIso = hoy();
-  const rango = await tx.dteFolio.findFirst({
+  const rangos = await tx.dteFolio.findMany({
     where: { tipoDte, activo: true },
     orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
   });
-  if (!rango || rango.folioActual > rango.folioHasta) {
+  for (const rango of rangos) {
+    if (rango.folioActual > rango.folioHasta) continue;
+    const venceIso = rango.cafVenceEn?.toISOString().slice(0, 10) ?? null;
+    if (cafVencido(venceIso, hoyIso)) continue;
+    const folio = rango.folioActual;
+    if (dryRun) return folio;
+    const { count } = await tx.dteFolio.updateMany({
+      where: { id: rango.id, folioActual: folio, activo: true },
+      data: { folioActual: folio + 1 },
+    });
+    if (count !== 1) {
+      throw reglaDeNegocio("No se pudo reservar el folio; reintente la emisión.");
+    }
+    return folio;
+  }
+  const hayActivos = rangos.some((r) => r.folioActual <= r.folioHasta);
+  if (!hayActivos) {
     throw reglaDeNegocio(`No hay folios disponibles para el DTE ${tipoDte}. Cargue un CAF.`);
   }
-  const venceIso = rango.cafVenceEn?.toISOString().slice(0, 10) ?? null;
-  if (cafVencido(venceIso, hoyIso)) {
-    throw reglaDeNegocio("El CAF vigente está vencido; cargue un CAF nuevo antes de emitir.");
-  }
-  const folio = rango.folioActual;
-  if (dryRun) return folio;
-  const { count } = await tx.dteFolio.updateMany({
-    where: { id: rango.id, folioActual: folio, activo: true },
-    data: { folioActual: folio + 1 },
-  });
-  if (count !== 1) {
-    throw reglaDeNegocio("No se pudo reservar el folio; reintente la emisión.");
-  }
-  return folio;
+  throw reglaDeNegocio("El CAF vigente está vencido; cargue un CAF nuevo antes de emitir.");
 }
 
 /** Reserva el siguiente folio del rango activo (optimista con updateMany). */

@@ -7,7 +7,7 @@ import { escribirConEvento } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { montoSchema } from "./comun";
 import { vistaDeDocumento } from "./ventas-consulta";
-import { notasCreditoPreviasDe, validarNotaCreditoEmision } from "./ventas-nc-comun";
+import { bloquearYValidarNotaCredito, notasCreditoPreviasDe, validarNotaCreditoEmision } from "./ventas-nc-comun";
 import { persistirNotaCredito } from "./ventas-nc-escritura";
 import { previewNotaCreditoDryRun } from "./ventas-nc-preview";
 import {
@@ -47,15 +47,15 @@ export const ventasEmitirNotaCredito = defineCapability({
     }
     const folioRef = ref.folio;
     if (folioRef == null || ref.tipoDte === 61) throw reglaDeNegocio("Referencia inválida.");
-    const previas = await notasCreditoPreviasDe(ctx, ref.id);
-    const { monto, restante } = validarNotaCreditoEmision(ref, input.codigoReferencia, input.monto, previas);
-    const montos = montosNotaCredito(ref, monto);
-    const error = validarMontosVenta(61, montos);
-    if (error) throw reglaDeNegocio(error);
     const cuenta = await cuentaDe(ctx, ref.cuentaId);
     const rutReceptor = cuenta.rut;
     if (!rutReceptor) throw reglaDeNegocio("El cliente debe tener RUT para emitir la nota de crédito.");
     if (dryRun) {
+      const previas = await notasCreditoPreviasDe(ctx, ref.id);
+      const { monto } = validarNotaCreditoEmision(ref, input.codigoReferencia, input.monto, previas);
+      const montos = montosNotaCredito(ref, monto);
+      const error = validarMontosVenta(61, montos);
+      if (error) throw reglaDeNegocio(error);
       return previewNotaCreditoDryRun(ctx, { ref, montos, motivo: input.motivo, monto, cuenta });
     }
     const ambiente = await ambienteDe(ctx);
@@ -69,20 +69,25 @@ export const ventasEmitirNotaCredito = defineCapability({
         payload: () => ({ folio: folioEmitido, codigoReferencia: input.codigoReferencia }),
       },
       async (tx) => {
-        const { doc, folioEmitido: folio } = await persistirNotaCredito(ctx, {
-          ref,
-          folioRef,
-          rutReceptor,
-          razonSocialReceptor: cuenta.nombre,
-          ambiente,
-          rutEmisor,
-          montos,
-          motivo: input.motivo,
-          codigoReferencia: input.codigoReferencia,
-          montoLinea: monto,
-          monto,
-          restante,
-        }, tx);
+        const prep = await bloquearYValidarNotaCredito(ctx, tx, ref.id, input.codigoReferencia, input.monto);
+        const { doc, folioEmitido: folio } = await persistirNotaCredito(
+          ctx,
+          {
+            ref: prep.ref,
+            folioRef: prep.folioRef,
+            rutReceptor,
+            razonSocialReceptor: cuenta.nombre,
+            ambiente,
+            rutEmisor,
+            montos: prep.montos,
+            motivo: input.motivo,
+            codigoReferencia: input.codigoReferencia,
+            montoLinea: prep.monto,
+            monto: prep.monto,
+            restante: prep.restante,
+          },
+          tx,
+        );
         folioEmitido = folio;
         return doc;
       },

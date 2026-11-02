@@ -20,6 +20,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP.",
   "app/api/geo/mapa/route.ts":
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
+  "app/api/pauta/export/route.ts":
+    "Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar.",
   "app/api/marca/[slug]/[asset]/route.ts":
     "URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP.",
   "app/api/existe/route.ts":

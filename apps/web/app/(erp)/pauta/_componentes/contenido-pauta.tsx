@@ -1,18 +1,25 @@
+import dynamic from "next/dynamic";
+
 import { Empty, Estado, KpiTile } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 
 import { BarraPauta } from "./barra-pauta";
+import { Diaria } from "./diaria";
 import type { DatosPauta } from "./datos";
 import { pct } from "./etiquetas";
 import { GrillaMes } from "./grilla-mes";
-import { HojaExcepcion } from "./hoja-excepcion";
-import { HojaHistorial } from "./hoja-historial";
-import { HojaSerie } from "./hoja-serie";
 import { ListaDias } from "./lista-dias";
 import { PpcLista } from "./ppc-lista";
 import { TodasInstalaciones } from "./todas-instalaciones";
 import type { ResumenCobertura } from "./tipos";
+
+const HojaExcepcion = dynamic(() => import("./hoja-excepcion").then((m) => ({ default: m.HojaExcepcion })));
+const HojaSerie = dynamic(() => import("./hoja-serie").then((m) => ({ default: m.HojaSerie })));
+const HojaHistorial = dynamic(() => import("./hoja-historial").then((m) => ({ default: m.HojaHistorial })));
+const HojaReemplazo = dynamic(() => import("./hoja-reemplazo").then((m) => ({ default: m.HojaReemplazo })));
+const HojaRefuerzo = dynamic(() => import("./hoja-refuerzo").then((m) => ({ default: m.HojaRefuerzo })));
+const AlertasPauta = dynamic(() => import("./alertas-pauta").then((m) => ({ default: m.AlertasPauta })));
 
 function Resumen({ r }: { r: ResumenCobertura }) {
   return (
@@ -32,14 +39,14 @@ export function ContenidoPauta({ d, puedeEditar }: { d: DatosPauta; puedeEditar:
   const sinDatos = d.mensual ? d.mensual.puestos.length === 0 : (d.todas?.instalaciones.length ?? 0) === 0;
   return (
     <div className="flex flex-col gap-4">
-      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} />
+      <BarraPauta instalaciones={d.instalaciones} inst={d.inst} anio={d.anio} mes={d.mes} verPpc={d.verPpc} diaria={d.diaria} fecha={d.fecha} />
       <Estado
         state={d.state}
         variante="planilla"
         textos={{ error: { accion: <BotonReintentar /> } }}
       >
-        {resumen ? <Resumen r={resumen} /> : null}
-        {sinDatos ? (
+        {!d.diaria && resumen ? <Resumen r={resumen} /> : null}
+        {d.diaria ? <Diaria mes={d.mensual} fecha={d.fecha} sinCubrir={d.verPpc} /> : sinDatos ? (
           <Empty
             titulo={d.mensual ? "Esta instalación no tiene puestos" : "Aún no hay puestos con pauta"}
             descripcion="Crea los puestos de la instalación y fija su serie para ver la cobertura."
@@ -57,7 +64,13 @@ export function ContenidoPauta({ d, puedeEditar }: { d: DatosPauta; puedeEditar:
         {d.mensual ? (
           <>
             <HojaSerie mes={d.mensual} puedeEditar={puedeEditar} />
-            <HojaExcepcion mes={d.mensual} puedeEditar={puedeEditar} />
+            <HojaExcepcion mes={d.mensual} puedeEditar={puedeEditar} diaria={d.diaria} />
+            <HojaReemplazo mes={d.mensual} puedeEditar={puedeEditar} />
+            <HojaRefuerzo mes={d.mensual} puedeEditar={puedeEditar} />
+            <AlertasPauta
+              semanaDesde={d.alertas?.semanaDesde ?? null}
+              alertas={d.alertas === undefined ? null : (d.alertas?.alertas ?? [])}
+            />
           </>
         ) : null}
       </Estado>

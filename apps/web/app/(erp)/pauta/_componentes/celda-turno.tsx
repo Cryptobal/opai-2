@@ -1,6 +1,6 @@
 import { cn } from "@opai/ds";
 
-import { MOTIVO } from "./etiquetas";
+import { etiquetaVariante, MOTIVO } from "./etiquetas";
 import type { CeldaDia } from "./tipos";
 
 /** Códigos de turno del diseño: D info, N acento, L libre, X danger (puesto por cubrir). */
@@ -16,15 +16,25 @@ export function codigoCelda(c: CeldaDia, noche: boolean): { texto: string; clase
 
 /** Texto accesible de una celda: estado, motivo, excepción y feriado. */
 export function descripcionCelda(c: CeldaDia): string {
+  const variante = etiquetaVariante(c.variante ?? null);
   const estado =
     c.estado === "cubierto"
-      ? "Cubierto"
+      ? variante
+        ? variante
+        : c.confirmado
+          ? "Cubierto · confirmado"
+          : "Cubierto"
       : c.estado === "libre"
         ? "Libre"
         : c.estado === "sin_serie"
           ? "Sin serie"
           : `Sin cubrir · ${c.motivo ? MOTIVO[c.motivo] : ""}`;
-  return [estado, c.excepcion ? "excepción" : null, c.feriado ? `feriado: ${c.feriado}` : null]
+  return [
+    estado,
+    c.marcaManual ? "marca manual" : null,
+    c.excepcion && !variante ? "excepción" : null,
+    c.feriado ? `feriado: ${c.feriado}` : null,
+  ]
     .filter(Boolean)
     .join(" · ");
 }
