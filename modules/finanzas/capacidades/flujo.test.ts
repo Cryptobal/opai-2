@@ -71,7 +71,7 @@ describe("finanzas.flujo.celdas", () => {
     const r = await executeCapability(ctx, "finanzas.celdas.mover", entrada);
     expect(r).toMatchObject({ ok: true });
     const celdas = await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_ING } });
-    expect(celdas.some((c) => c.semana.toISOString().startsWith(S2) && c.monto === 1000)).toBe(
+    expect(celdas.some((c) => c.semana.toISOString().startsWith(S2) && Number(c.monto) === 1000)).toBe(
       true,
     );
   });

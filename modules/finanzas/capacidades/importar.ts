@@ -117,7 +117,7 @@ export const flujoImportar = defineCapability({
           const guardada = actual
             ? await tx.flujoCelda.update({
                 where: { id: actual.id },
-                data: { monto: row.monto, nota: row.nota ?? actual.nota },
+                data: { monto: BigInt(row.monto), nota: row.nota ?? actual.nota },
               })
             : await tx.flujoCelda.create({
                 data: {
@@ -125,7 +125,7 @@ export const flujoImportar = defineCapability({
                   filaId: f.id,
                   semana: aFecha(row.semana),
                   capa: "plan",
-                  monto: row.monto,
+                  monto: BigInt(row.monto),
                   nota: row.nota ?? null,
                 },
               });
@@ -148,14 +148,14 @@ export const flujoImportar = defineCapability({
       const base = await ajustesDe(ctx);
       await ctx.transaccion(async (tx) => {
         const data = {
-          saldoInicial: input.saldoInicial ?? base.saldoInicial,
-          umbral: base.umbral,
+          saldoInicial: BigInt(input.saldoInicial ?? base.saldoInicial),
+          umbral: BigInt(base.umbral),
           desde: aFecha(input.desde ?? base.desde ?? lunesDe(hoy)),
-          toleranciaCierre: base.toleranciaCierre,
+          toleranciaCierre: BigInt(base.toleranciaCierre),
           horizonteSemanas: base.horizonteSemanas,
           calendarioPagos: base.calendarioPagos,
           avisoActivo: base.avisoActivo,
-          avisoUmbral: base.avisoUmbral,
+          avisoUmbral: BigInt(base.avisoUmbral),
           metaCeldaMs: base.metaCeldaMs,
           metaGuardadoP95Ms: base.metaGuardadoP95Ms,
           metaCargaInicialS: base.metaCargaInicialS,

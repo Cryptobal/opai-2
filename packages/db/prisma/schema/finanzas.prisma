@@ -36,7 +36,7 @@ model FlujoCelda {
   filaId      String    @map("fila_id") @db.Uuid
   semana      DateTime  @db.Date
   capa        String    @default("plan")
-  monto       Int
+  monto       BigInt
   nota        String?
   cumplidaEn  DateTime? @map("cumplida_en") @db.Timestamptz(6)
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -56,8 +56,8 @@ model FlujoCierre {
   id             String    @id @default(uuid(7)) @db.Uuid
   tenantId       String    @map("tenant_id") @db.Uuid
   semana         DateTime  @db.Date
-  saldoSugerido  Int       @map("saldo_sugerido")
-  saldoBanco     Int       @map("saldo_banco")
+  saldoSugerido  BigInt    @map("saldo_sugerido")
+  saldoBanco     BigInt    @map("saldo_banco")
   motivo         String?
   sellada        Boolean   @default(true)
   selladaEn      DateTime? @map("sellada_en") @db.Timestamptz(6)
@@ -75,12 +75,12 @@ model FlujoCierre {
 model FlujoAjustes {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @unique @map("tenant_id") @db.Uuid
-  saldoInicial Int      @default(0) @map("saldo_inicial")
+  saldoInicial BigInt   @default(0) @map("saldo_inicial")
   /// Saldo bajo el cual la planilla marca la semana (0 = solo alerta bajo cero).
-  umbral       Int      @default(0)
+  umbral       BigInt   @default(0)
   /// Semana (lunes) desde la que parte el saldo inicial.
   desde        DateTime @db.Date
-  toleranciaCierre     Int      @default(1000) @map("tolerancia_cierre")
+  toleranciaCierre     BigInt   @default(1000) @map("tolerancia_cierre")
   horizonteSemanas     Int      @default(12) @map("horizonte_semanas")
   calendarioPagos      Json     @default("{}") @map("calendario_pagos")
   avisoActivo          Boolean  @default(false) @map("aviso_activo")

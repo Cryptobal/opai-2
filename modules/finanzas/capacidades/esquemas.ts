@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { conflicto } from "@opai/capabilities";
+import { conflicto, reglaDeNegocio } from "@opai/capabilities";
 
 import { esLunes } from "../domain";
 
@@ -19,26 +19,29 @@ export const uuidSchema = z.uuid();
 export const semanaSchema = z
   .string()
   .refine(esLunes, "La semana se indica con su lunes (YYYY-MM-DD).");
-/** Monto en CLP entero, sin negativos (el signo lo da la sección de la fila). Int en Postgres; tope validado aquí. */
-export const montoSchema = z.number().int().min(0).max(2_000_000_000);
+/** Tope por celda en CLP (paridad 1.0). */
+export const MONTO_FLUJO_MAX = 999_999_999_999;
+/** Monto en CLP entero, sin negativos (el signo lo da la sección de la fila). BIGINT en Postgres. */
+export const montoSchema = z.number().int().min(0).max(MONTO_FLUJO_MAX);
 /**
  * Saldo acumulado, neto y umbrales en la API (number JSON). Puede superar `montoSchema` porque la
  * planilla suma varias celdas. Tope = entero seguro en JS (coherente con serialización actual).
- * En Postgres: `flujo_celdas.monto`, `flujo_cierres` y `flujo_ajustes.saldo_inicial`/`umbral` son
- * INTEGER; solo `flujo_ajustes.aviso_umbral` y `flujo_avisos_emitidos.saldo_proyectado` son BIGINT.
  */
 export const saldoSchema = z
   .number()
   .int()
   .min(-Number.MAX_SAFE_INTEGER)
   .max(Number.MAX_SAFE_INTEGER);
-/** Rango de columnas INTEGER en Postgres (saldo_banco, saldo_sugerido, saldo_inicial, umbral). */
-export const INT4_MIN = -2_147_483_647;
-export const INT4_MAX = 2_147_483_647;
-/** Entrada que se persiste en INTEGER del flujo (sellado y ajustes). */
-export const saldoEntradaInt4Schema = z.number().int().min(INT4_MIN).max(INT4_MAX);
-export const cabeEnSaldoInt4 = (n: number): boolean =>
-  Number.isInteger(n) && n >= INT4_MIN && n <= INT4_MAX;
+
+/** Serializa BIGINT de Postgres a number JSON; falla cerrado fuera de MAX_SAFE_INTEGER. */
+export function aNumeroSeguro(v: bigint | number): number {
+  const n = typeof v === "bigint" ? Number(v) : v;
+  if (!Number.isSafeInteger(n)) {
+    throw reglaDeNegocio("El monto supera el rango seguro para la API (entero JS).");
+  }
+  return n;
+}
+
 export const seccionSchema = z.enum(["ingreso", "egreso"]);
 export const capaSchema = z.enum(["plan", "comprometido", "real"]);
 
@@ -62,8 +65,8 @@ export const celdaSchema = z.object({
 });
 
 export const ajustesSchema = z.object({
-  saldoInicial: saldoEntradaInt4Schema,
-  umbral: saldoEntradaInt4Schema,
+  saldoInicial: saldoSchema,
+  umbral: saldoSchema,
   desde: semanaSchema,
   toleranciaCierre: montoSchema.default(1000),
   horizonteSemanas: z.number().int().min(1).max(52).default(12),

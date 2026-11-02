@@ -4,6 +4,8 @@ import type { TenantTx } from "@opai/db";
 
 import { lunesDe, type Capa, type CeldaFlujo, type FilaFlujo, type Seccion } from "../domain";
 
+import { aNumeroSeguro } from "./esquemas";
+
 /** Id de relleno de las vistas previas (dry_run): no existe fila, pero cumple el esquema de salida. */
 export const ID_VISTA_PREVIA = "00000000-0000-0000-0000-000000000000";
 
@@ -12,14 +14,14 @@ export const aIso = (d: Date | string): string =>
 export const aFecha = (iso: string): Date => new Date(`${iso}T00:00:00Z`);
 
 type AjustesDb = {
-  saldoInicial: number;
-  umbral: number;
+  saldoInicial: bigint | number;
+  umbral: bigint | number;
   desde: Date;
-  toleranciaCierre: number;
+  toleranciaCierre: bigint | number;
   horizonteSemanas: number;
   calendarioPagos: unknown;
   avisoActivo: boolean;
-  avisoUmbral: number | bigint;
+  avisoUmbral: bigint | number;
   metaCeldaMs: number;
   metaGuardadoP95Ms: number;
   metaCargaInicialS: number;
@@ -31,10 +33,10 @@ const calendarioDefecto = () => ({});
 export function vistaAjustes(a: AjustesDb) {
   const cal = (a.calendarioPagos ?? {}) as Record<string, number | undefined>;
   return {
-    saldoInicial: a.saldoInicial,
-    umbral: a.umbral,
+    saldoInicial: aNumeroSeguro(a.saldoInicial),
+    umbral: aNumeroSeguro(a.umbral),
     desde: aIso(a.desde),
-    toleranciaCierre: a.toleranciaCierre,
+    toleranciaCierre: aNumeroSeguro(a.toleranciaCierre),
     horizonteSemanas: a.horizonteSemanas,
     calendarioPagos: {
       ...(cal.remuneraciones != null ? { remuneraciones: cal.remuneraciones } : {}),
@@ -43,7 +45,7 @@ export function vistaAjustes(a: AjustesDb) {
       ...(cal.iva != null ? { iva: cal.iva } : {}),
     },
     avisoActivo: a.avisoActivo,
-    avisoUmbral: Number(a.avisoUmbral),
+    avisoUmbral: aNumeroSeguro(a.avisoUmbral),
     metaCeldaMs: a.metaCeldaMs,
     metaGuardadoP95Ms: a.metaGuardadoP95Ms,
     metaCargaInicialS: a.metaCargaInicialS,
@@ -121,7 +123,7 @@ export async function cargarFlujo(ctx: Contexto, desde: string, hasta: string, t
     filaId: c.filaId,
     semana: aIso(c.semana),
     capa: c.capa as Capa,
-    monto: c.monto,
+    monto: aNumeroSeguro(c.monto),
   }));
   return { filas, celdas, dominio, celdasDom };
 }

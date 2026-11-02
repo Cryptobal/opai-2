@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { reglaDeNegocio } from "@opai/capabilities";
 
 import { lunesDe } from "../domain";
+import { MONTO_FLUJO_MAX } from "./esquemas";
 
 import type { filaImportSchema } from "./importar-esquema";
 
@@ -16,15 +17,24 @@ export function parsearMontoClp(
 ): { ok: true; monto: number } | { ok: false; motivo: string } {
   const t = texto.trim();
   if (!t) return { ok: true, monto: 0 };
+  if (/^\d+\.\d+$/.test(t) && !/^\d+(\.\d{3})+$/.test(t))
+    return {
+      ok: false,
+      motivo:
+        "Use montos enteros en CLP, sin decimales (ej. «1234.56» no es válido: indique 123456).",
+    };
   if (t.includes(","))
-    return { ok: false, motivo: "Use montos enteros en CLP, sin decimales ni coma." };
+    return {
+      ok: false,
+      motivo: "Use montos enteros en CLP, sin decimales (ej. «1234.56» no es válido: use 123456).",
+    };
   if (!/^\d+(\.\d{3})*$/.test(t))
     return {
       ok: false,
       motivo: "Monto inválido: use enteros con punto de miles opcional (ej. 1.234.567).",
     };
   const monto = Number(t.replace(/\./g, ""));
-  if (!Number.isSafeInteger(monto) || monto < 0 || monto > 2_000_000_000)
+  if (!Number.isSafeInteger(monto) || monto < 0 || monto > MONTO_FLUJO_MAX)
     return { ok: false, motivo: "Monto fuera de rango permitido." };
   return { ok: true, monto };
 }

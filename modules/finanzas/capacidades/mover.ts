@@ -87,7 +87,7 @@ export const celdasMover = defineCapability({
         if (destino && !origen.has(m.hasta))
           await tx.flujoCelda.update({
             where: { id: destino.id },
-            data: { monto: destino.monto + m.monto },
+            data: { monto: BigInt(Number(destino.monto) + m.monto) },
           });
         else
           await tx.flujoCelda.create({
@@ -96,7 +96,7 @@ export const celdasMover = defineCapability({
               filaId: fila.id,
               semana: aFecha(m.hasta),
               capa: "plan",
-              monto: m.monto,
+              monto: BigInt(m.monto),
               nota: origenFila.nota,
             },
           });
