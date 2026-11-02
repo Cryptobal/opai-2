@@ -1,12 +1,18 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { ACTIVOS, FILA_EGR, FILA_ING, S0, S1, S2, semilla } from "./fixtures";
 import { aFecha } from "./util";
 import { capacidades } from "./index";
 
-beforeAll(() => registrarCapacidades(capacidades));
+beforeAll(() => {
+  registrarCapacidades(capacidades);
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-26T12:00:00Z"));
+});
+afterAll(() => vi.useRealTimers());
+
 const nuevo = (extra: Record<string, unknown[]> = {}, permisos?: string[]) =>
   contextoDePrueba({
     semilla: { ...semilla(), ...extra },
@@ -20,15 +26,17 @@ describe("finanzas.planilla.obtener", () => {
     const r = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 3 });
     if (!r.ok) throw new Error(JSON.stringify(r));
     const sem = (
-      r.data as { semanas: { semana: string; saldoFinal: number; tono: string | null }[] }
+      r.data as { semanas: { semana: string; saldoFinal: number; tono: string | null; pasada: boolean }[] }
     ).semanas;
     expect(sem.map((s) => s.saldoFinal)).toEqual([800, 1300, 1100]);
     expect(sem.map((s) => s.tono)).toEqual([null, null, null]);
+    expect(sem[0]?.pasada).toBe(false);
   });
 });
 
 describe("finanzas.flujo.celdas", () => {
-  it("fijar: crea, rechaza lo comprometido y semanas selladas, y el dry_run no escribe", async () => {
+  it("fijar: crea, rechaza lo comprometido y semanas pasadas, y el dry_run no escribe", async () => {
+    vi.setSystemTime(new Date("2026-11-09T12:00:00Z"));
     const { ctx } = nuevo();
     const ok = await executeCapability(ctx, "finanzas.celdas.fijar", {
       filaId: FILA_ING,
@@ -36,12 +44,19 @@ describe("finanzas.flujo.celdas", () => {
       monto: 700,
     });
     expect(ok).toMatchObject({ ok: true });
+    const pasada = await executeCapability(ctx, "finanzas.celdas.fijar", {
+      filaId: FILA_ING,
+      semana: S0,
+      monto: 1,
+    });
+    expect(pasada).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     const choque = await executeCapability(ctx, "finanzas.celdas.fijar", {
       filaId: FILA_ING,
       semana: S1,
       monto: 1,
     });
     expect(choque).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    vi.setSystemTime(new Date("2026-10-26T12:00:00Z"));
     const antes = (await ctx.db.flujoCelda.findMany({})).length;
     await executeCapability(
       ctx,
@@ -76,6 +91,28 @@ describe("finanzas.flujo.celdas", () => {
     );
   });
 
+  it("mover a semana pasada: dry_run avisa; escritura exige confirmarSemanaPasada", async () => {
+    vi.setSystemTime(new Date("2026-11-09T12:00:00Z"));
+    const { ctx } = nuevo();
+    const semFutura = "2026-11-16";
+    await executeCapability(ctx, "finanzas.celdas.fijar", {
+      filaId: FILA_EGR,
+      semana: semFutura,
+      monto: 100_000,
+    });
+    const entrada = { filaId: FILA_EGR, semanas: [semFutura], por: -2 };
+    const previa = await executeCapability(ctx, "finanzas.celdas.mover", entrada, { dryRun: true });
+    expect(previa).toMatchObject({ ok: true, data: { avisoSemanaPasada: true } });
+    const sinConfirmar = await executeCapability(ctx, "finanzas.celdas.mover", entrada);
+    expect(sinConfirmar).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const ok = await executeCapability(ctx, "finanzas.celdas.mover", {
+      ...entrada,
+      confirmarSemanaPasada: true,
+    });
+    expect(ok).toMatchObject({ ok: true });
+    vi.setSystemTime(new Date("2026-10-26T12:00:00Z"));
+  });
+
   it("mover no toca lo comprometido", async () => {
     const { ctx } = nuevo();
     const r = await executeCapability(ctx, "finanzas.celdas.mover", {
@@ -108,38 +145,12 @@ describe("finanzas.flujo.celdas", () => {
   });
 });
 
-describe("cierre semanal", () => {
-  it("exige motivo sobre la tolerancia, sella, bloquea cambios y reabre con motivo", async () => {
-    const { ctx } = nuevo();
-    const sinMotivo = await executeCapability(ctx, "finanzas.cierres.sellar", {
-      semana: S0,
-      saldoBanco: 5000,
-    });
-    expect(sinMotivo).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-    const ok = await executeCapability(ctx, "finanzas.cierres.sellar", {
-      semana: S0,
-      saldoBanco: 800,
-    });
-    expect(ok).toMatchObject({
-      ok: true,
-      data: { saldoSugerido: 800, diferencia: 0, sellada: true },
-    });
-    const bloqueada = await executeCapability(ctx, "finanzas.celdas.fijar", {
-      filaId: FILA_ING,
-      semana: S0,
-      monto: 1,
-    });
-    expect(bloqueada).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-    const doble = await executeCapability(ctx, "finanzas.cierres.sellar", {
-      semana: S0,
-      saldoBanco: 800,
-    });
-    expect(doble).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
-    const re = await executeCapability(ctx, "finanzas.cierres.reabrir", {
-      semana: S0,
-      motivo: "Corrección de banco",
-    });
-    expect(re).toMatchObject({ ok: true, data: { sellada: false } });
+describe("cierre semanal retirado (flujo v2 PR A)", () => {
+  it("no registra capacidades de sellar ni reabrir", () => {
+    const ids = capacidades.map((c) => c.id);
+    expect(ids).not.toContain("finanzas.cierres.sellar");
+    expect(ids).not.toContain("finanzas.cierres.reabrir");
+    expect(ids).toContain("finanzas.cierres.listar");
   });
 });
 

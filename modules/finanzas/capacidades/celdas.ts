@@ -2,9 +2,10 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
+import { lunesDe } from "../domain";
 import { celdaSchema, montoSchema, semanaSchema, uuidSchema, aNumeroSeguro } from "./esquemas";
 import { PERMISO_GESTIONAR } from "./permisos";
-import { aFecha, aIso, bloquearSemanaFlujo, filaDe, ID_VISTA_PREVIA, semanaSelladaEnTx, selladasDe } from "./util";
+import { aFecha, aIso, bloquearSemanaFlujo, filaDe, ID_VISTA_PREVIA } from "./util";
 import { sincronizarAvisosEnTx } from "./aviso";
 
 const vista = (c: {
@@ -26,7 +27,7 @@ const vista = (c: {
 export const celdasFijar = defineCapability({
   id: "finanzas.celdas.fijar",
   descripcion:
-    "Fija la cifra planificada de una fila en una semana (o la reemplaza) y su nota; no toca semanas selladas ni celdas comprometidas o reales.",
+    "Fija la cifra planificada de una fila en una semana actual o futura (o la reemplaza) y su nota; no edita semanas pasadas ni celdas comprometidas o reales.",
   permiso: PERMISO_GESTIONAR,
   input: z.object({
     filaId: uuidSchema,
@@ -41,8 +42,9 @@ export const celdasFijar = defineCapability({
     const fila = await filaDe(ctx, input.filaId);
     if (!fila.activa)
       throw reglaDeNegocio("La fila está inactiva: actívala antes de cargarle cifras.");
-    if ((await selladasDe(ctx)).has(input.semana))
-      throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
+    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+    if (input.semana < hoy)
+      throw reglaDeNegocio("Las semanas pasadas se leen de la cartola; no se ajustan montos a mano.");
     const actual = await ctx.db.flujoCelda.findFirst({
       where: { filaId: fila.id, semana: aFecha(input.semana) },
     });
@@ -62,8 +64,6 @@ export const celdasFijar = defineCapability({
       });
     const c = await ctx.transaccion(async (tx) => {
       await bloquearSemanaFlujo(tx, ctx, input.semana);
-      if (await semanaSelladaEnTx(tx, input.semana))
-        throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
       const r = actual
         ? await tx.flujoCelda.update({
             where: { id: actual.id },
@@ -105,14 +105,13 @@ export const celdasCumplir = defineCapability({
     if (!c) throw noEncontrado("La celda del flujo");
     if (c.capa !== "plan") throw reglaDeNegocio("Solo se da por cumplida una celda planificada.");
     const semana = aIso(c.semana);
-    if ((await selladasDe(ctx)).has(semana))
-      throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
+    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+    if (semana < hoy)
+      throw reglaDeNegocio("Las semanas pasadas se leen de la cartola; no se ajustan montos a mano.");
     const montoNum = input.monto ?? aNumeroSeguro(c.monto);
     if (dryRun) return vista({ ...c, capa: "real", monto: montoNum });
     const r = await ctx.transaccion(async (tx) => {
       await bloquearSemanaFlujo(tx, ctx, semana);
-      if (await semanaSelladaEnTx(tx, semana))
-        throw reglaDeNegocio("La semana está sellada: reábrela con su motivo antes de cambiarla.");
       const u = await tx.flujoCelda.update({
         where: { id: c.id },
         data: { capa: "real", monto: BigInt(montoNum), cumplidaEn: new Date() },

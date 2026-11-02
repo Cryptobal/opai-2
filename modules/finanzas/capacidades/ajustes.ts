@@ -9,7 +9,7 @@ import { aFecha, ajustesDe } from "./util";
 export const ajustesObtener = defineCapability({
   id: "finanzas.ajustes.obtener",
   descripcion:
-    "Entrega los ajustes del flujo de caja: saldo inicial, umbral, tolerancia de cierre, calendario de pagos, aviso de saldo y metas de rendimiento.",
+    "Entrega los ajustes del flujo de caja: saldo inicial, umbral, calendario de pagos y aviso de saldo.",
   permiso: PERMISO_VER,
   input: z.object({}),
   output: ajustesSchema,
@@ -21,7 +21,7 @@ export const ajustesObtener = defineCapability({
 export const ajustesActualizar = defineCapability({
   id: "finanzas.ajustes.actualizar",
   descripcion:
-    "Fija saldo inicial, umbral, tolerancia de cierre, calendario de pagos, aviso de saldo y metas del flujo de caja; la planilla recalcula con ellos.",
+    "Fija saldo inicial, umbral, calendario de pagos y aviso del flujo de caja; la planilla recalcula con ellos.",
   permiso: PERMISO_CONFIGURAR,
   input: ajustesSchema.partial(),
   output: ajustesSchema,

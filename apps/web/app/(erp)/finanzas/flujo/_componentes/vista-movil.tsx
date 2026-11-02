@@ -25,7 +25,9 @@ export function VistaMovilFlujo({
         <section key={s.semana} className="rounded-lg border border-border bg-surface p-4">
           <header className="mb-2 flex items-center justify-between gap-2">
             <h2 className="font-medium text-fg">Semana {s.semana.slice(8, 10)}-{s.semana.slice(5, 7)}</h2>
-            <span className="text-sm text-fg-muted">{s.sellada ? "Sellada" : clp(s.saldoFinal)}</span>
+            <span className="text-sm text-fg-muted">
+              {s.pasada ? "Real (cartola)" : clp(s.saldoFinal)}
+            </span>
           </header>
           <ul className="flex flex-col gap-1 text-sm">
             {planilla.filas.map((f) => {
@@ -33,7 +35,7 @@ export function VistaMovilFlujo({
               return (
                 <li key={f.id} className="flex justify-between gap-2 border-b border-border py-1 last:border-0">
                   <span>{f.etiqueta}</span>
-                  {gestiona && (!c || c.capa === "plan") && !s.sellada ? (
+                  {gestiona && (!c || c.capa === "plan") && !s.pasada ? (
                     <Button variant="ghost" onClick={() => onCelda(f.id, s.semana)}>
                       {c ? clp(c.monto) : "—"}
                     </Button>

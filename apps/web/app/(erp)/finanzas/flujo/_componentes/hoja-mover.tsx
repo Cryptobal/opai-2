@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Select, Sheet } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Checkbox, Input, Select, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -11,10 +11,12 @@ import { clp } from "./datos";
 export function HojaMover({
   filas,
   semanas,
+  semanasPasadas,
   horizonte,
 }: {
   filas: { id: string; etiqueta: string }[];
   semanas: string[];
+  semanasPasadas: string[];
   horizonte: number;
 }) {
   const [abierta, setAbierta] = useState(false);
@@ -22,14 +24,17 @@ export function HojaMover({
   const [filaId, setFilaId] = useState(filas[0]?.id ?? "");
   const [semana, setSemana] = useState(semanas[0] ?? "");
   const [por, setPor] = useState("1");
+  const [confirmarPasada, setConfirmarPasada] = useState(false);
   const [vista, setVista] = useState<{ movimientos: { desde: string; hasta: string; monto: number }[] } | null>(
     null,
   );
   const opcionesSemana = semanas.length ? semanas : [];
+  const pasadasSet = useMemo(() => new Set(semanasPasadas), [semanasPasadas]);
 
   function abrir() {
     setSemana(semanas[0] ?? "");
     setVista(null);
+    setConfirmarPasada(false);
     setAbierta(true);
   }
 
@@ -37,14 +42,25 @@ export function HojaMover({
     filaId,
     semanas: [semana],
     por: Number(por),
+    ...(confirmarPasada ? { confirmarSemanaPasada: true as const } : {}),
   });
+
+  const requiereConfirmacionPasada = (movs: { desde: string; hasta: string }[]) =>
+    movs.some((m) => pasadasSet.has(m.desde) || pasadasSet.has(m.hasta));
 
   async function previsualizar() {
     limpiarError();
-    setVista(await ejecutar("finanzas.celdas.mover", entrada(), true));
+    const r = (await ejecutar("finanzas.celdas.mover", entrada(), true)) as {
+      movimientos: { desde: string; hasta: string; monto: number }[];
+    } | null;
+    if (r) setVista(r);
   }
 
   async function aplicar() {
+    if (vista && requiereConfirmacionPasada(vista.movimientos) && !confirmarPasada) {
+      avisar.error("Confirma mover a una semana pasada antes de aplicar.");
+      return;
+    }
     const r = await ejecutar("finanzas.celdas.mover", entrada());
     if (!r) return;
     avisar.exito("Celdas reprogramadas");
@@ -52,6 +68,12 @@ export function HojaMover({
   }
 
   const errorServidor = codigo === "INTERNAL";
+  const avisoPasada =
+    vista && requiereConfirmacionPasada(vista.movimientos) ? (
+      <Alerta tono="warning" titulo="Semana pasada">
+        El movimiento no queda respaldado por la cartola importada. Confirma antes de aplicar.
+      </Alerta>
+    ) : null;
 
   return (
     <>
@@ -90,6 +112,7 @@ export function HojaMover({
               ) : null}
             </Alerta>
           ) : null}
+          {avisoPasada}
           <Campo etiqueta="Fila" htmlFor="mv-fila">
             <Select
               id="mv-fila"
@@ -108,6 +131,7 @@ export function HojaMover({
               onCambiar={(v) => {
                 setSemana(v);
                 setVista(null);
+                setConfirmarPasada(false);
               }}
               opciones={opcionesSemana.map((s) => ({ valor: s, etiqueta: s }))}
             />
@@ -115,6 +139,13 @@ export function HojaMover({
           <Campo etiqueta="Semanas a mover" htmlFor="mv-por">
             <Input id="mv-por" value={por} onChange={(e) => setPor(e.target.value)} inputMode="numeric" />
           </Campo>
+          {vista && requiereConfirmacionPasada(vista.movimientos) ? (
+            <Checkbox
+              marcado={confirmarPasada}
+              onCambiar={setConfirmarPasada}
+              etiqueta="Confirmo mover a una semana pasada"
+            />
+          ) : null}
           {vista?.movimientos.length ? (
             <ul className="text-sm text-fg-muted">
               {vista.movimientos.map((m) => (
