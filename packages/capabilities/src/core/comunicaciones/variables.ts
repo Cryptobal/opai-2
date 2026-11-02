@@ -94,5 +94,20 @@ export async function variablesDe(
   }
   if (ev.tipo === "core.bitacora.rota")
     return { seq: p["primeraRota"] ?? "", empresa, url: `${base}/configuracion/auditoria` };
+  if (ev.tipo === "comercial.solicitud.creada") {
+    return {
+      solicitud: {
+        nombre: p["nombre"] ?? "",
+        canal:
+          p["canal"] === "formulario_web"
+            ? "Web"
+            : p["canal"] === "correo"
+              ? "Correo"
+              : String(p["canal"] ?? ""),
+      },
+      empresa,
+      url: typeof p["url"] === "string" ? p["url"] : `${base}/solicitudes`,
+    };
+  }
   return { ...p, empresa };
 }

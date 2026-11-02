@@ -29,6 +29,7 @@ import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
+import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
@@ -126,6 +127,7 @@ export const consumidoresDelNucleo = [
   consumidorComunicaciones,
   consumidorAnexos,
   consumidorFirmaDocumento,
+  consumidorSolicitudCreada,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */

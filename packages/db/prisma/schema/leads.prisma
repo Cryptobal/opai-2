@@ -38,6 +38,12 @@ model Solicitud {
   negocioId         String?   @map("negocio_id") @db.Uuid
   cuentaId          String?   @map("cuenta_id") @db.Uuid
   contactoId        String?   @map("contacto_id") @db.Uuid
+  utmSource         String?   @map("utm_source")
+  utmMedium         String?   @map("utm_medium")
+  utmCampaign       String?   @map("utm_campaign")
+  utmContent        String?   @map("utm_content")
+  utmTerm           String?   @map("utm_term")
+  paginaOrigen      String?   @map("pagina_origen")
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -66,6 +72,12 @@ model CanalSolicitud {
   dominioAutorizado   String?  @map("dominio_autorizado")
   remitentesIgnorados String[] @default([]) @map("remitentes_ignorados")
   responsableId       String?  @map("responsable_id") @db.Uuid
+  /// SHA-256 hex del token del formulario web; nunca el token en claro.
+  tokenHash           String?  @unique @map("token_hash")
+  /// Últimos cuatro caracteres del token, solo para mostrar en configuración.
+  tokenSufijo         String?  @map("token_sufijo")
+  tokenCreadoEn       DateTime? @map("token_creado_en") @db.Timestamptz(6)
+  ultimaSolicitudEn   DateTime? @map("ultima_solicitud_en") @db.Timestamptz(6)
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
