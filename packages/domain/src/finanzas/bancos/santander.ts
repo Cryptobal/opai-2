@@ -1,7 +1,9 @@
 import ExcelJS from "exceljs";
 
-import { claveDedupe } from "./dedupe";
+import { valorCeldaExcel } from "./celda-excel";
+import { claveDedupeCartola } from "./dedupe";
 import { fechaDesdeDdMmAaaa } from "./fechas";
+import { validarFilasCartola, validarTamanoCartola } from "./limites-cartola";
 import { esRemuneracion } from "./remuneracion";
 
 export type FilaCartolaParseada = {
@@ -24,26 +26,26 @@ export type ResultadoCartola = {
   rechazadas: { indice: number; motivo: string }[];
 };
 
-const MAX_BYTES = 5 * 1024 * 1024;
-
-/** Parser cartola Santander XLSX (columnas MONTO, DESCRIPCIÓN, FECHA, N° DOC, SUCURSAL). */
+/** Parser cartola Santander XLSX (columnas MONTO, DESCRIPCIÓN, FECHA, N° DOC, SUCURSAL). Carga en memoria (sin temporales). */
 export async function parsearCartolaSantander(contenido: Buffer): Promise<ResultadoCartola> {
-  if (contenido.byteLength > MAX_BYTES) {
-    throw new Error("La cartola supera el máximo de 5 MB.");
-  }
+  validarTamanoCartola(contenido.byteLength);
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(contenido as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
   const hoja = workbook.worksheets[0];
   if (!hoja) return { fechaDesde: null, fechaHasta: null, saldoFinal: null, filas: [], rechazadas: [] };
   const rows: (string | number | null)[][] = [];
+  let filasLeidas = 0;
   hoja.eachRow((row) => {
-    const vals = row.values as (string | number | null | undefined)[];
-    rows.push(vals.slice(1).map((c) => (c === undefined ? null : c)));
+    filasLeidas += 1;
+    validarFilasCartola(filasLeidas);
+    const vals = row.values as unknown[];
+    rows.push(vals.slice(1).map((c) => valorCeldaExcel(c)));
   });
   return parsearFilasSantander(rows);
 }
 
 export function parsearFilasSantander(rows: (string | number | null)[][]): ResultadoCartola {
+  validarFilasCartola(rows.length);
   let fechaDesde: string | null = null;
   let fechaHasta: string | null = null;
   let saldoFinal: number | null = null;
@@ -97,7 +99,12 @@ function filaDesdeRow(
   | { ok: true; fila?: FilaCartolaParseada; saldoFinal?: number }
   | { ok: false; motivo: string } {
   const fechaRaw = row[cols.fecha ?? -1];
-  const iso = fechaDesdeDdMmAaaa(String(fechaRaw ?? ""));
+  const iso =
+    typeof fechaRaw === "string"
+      ? fechaDesdeDdMmAaaa(fechaRaw)
+      : fechaRaw == null
+        ? null
+        : fechaDesdeDdMmAaaa(String(fechaRaw));
   if (!iso) return { ok: false, motivo: "Fecha inválida." };
   const monto = parseMonto(row[cols.monto ?? -1]);
   if (monto == null || monto === 0) return { ok: false, motivo: "Monto inválido." };
@@ -106,7 +113,7 @@ function filaDesdeRow(
   const referencia = cols.ref != null ? String(row[cols.ref] ?? "").trim() || null : null;
   const sucursal = cols.suc != null ? String(row[cols.suc] ?? "").trim() || null : null;
   const saldoCell = cols.saldo != null ? parseMonto(row[cols.saldo]) : null;
-  const clave = claveDedupe({ fecha: iso, monto, glosa, referencia });
+  const clave = claveDedupeCartola({ fecha: iso, monto, glosa });
   const fila: FilaCartolaParseada = {
     indice,
     fecha: iso,

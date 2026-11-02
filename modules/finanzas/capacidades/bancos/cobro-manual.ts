@@ -24,7 +24,7 @@ export const bancosCobroManual = defineCapability({
     documentoId: z.uuid(),
     monto: z.number().int().positive(),
     nota: z.string().max(300).optional(),
-    cuentaId: z.uuid().optional(),
+    cuentaId: z.uuid(),
     fecha: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -59,10 +59,8 @@ export const bancosCobroManual = defineCapability({
       return { movimientoId: "", estadoCobro, montoCobrado };
     }
 
-    const cuenta = input.cuentaId
-      ? await ctx.db.cuentaBancaria.findFirst({ where: { id: input.cuentaId } })
-      : await ctx.db.cuentaBancaria.findFirst({ where: { activa: true }, orderBy: { createdAt: "asc" } });
-    if (!cuenta) throw reglaDeNegocio("No hay cuenta bancaria activa para registrar el cobro.");
+    const cuenta = await ctx.db.cuentaBancaria.findFirst({ where: { id: input.cuentaId } });
+    if (!cuenta) throw reglaDeNegocio("La cuenta bancaria no existe.");
 
     const fechaIso = input.fecha ?? aIso(new Date());
     const glosa = input.nota?.trim() ? `Cobro manual: ${input.nota.trim()}` : "Cobro manual";

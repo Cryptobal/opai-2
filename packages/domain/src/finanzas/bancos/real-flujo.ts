@@ -5,6 +5,7 @@ export const ETIQUETAS_FLUJO = {
   otrosIngresos: "Otros ingresos",
   otrosEgresos: "Otros egresos",
   costoFactoring: "Costo factoring",
+  cobrosSinFila: "Cobros",
 } as const;
 
 export type CeldaRealBanco = {
@@ -65,10 +66,9 @@ export function celdasRealesDesdeMovimientos(movs: MovimientoReal[]): CeldaRealB
     }
     if (m.cobrosFactura?.length) {
       for (const c of m.cobrosFactura) {
-        if (!c.filaEtiqueta) continue;
         out.push({
           semana: lunesIso(m.fecha),
-          filaEtiqueta: c.filaEtiqueta,
+          filaEtiqueta: c.filaEtiqueta || ETIQUETAS_FLUJO.cobrosSinFila,
           monto: c.monto,
           movimientoId: m.id,
           nota: m.glosa,

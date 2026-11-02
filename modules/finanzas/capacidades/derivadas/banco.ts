@@ -1,5 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
-import { celdasRealesDesdeMovimientos, finSemanaIso } from "@opai/domain";
+import { celdasRealesDesdeMovimientos, ETIQUETAS_FLUJO, finSemanaIso } from "@opai/domain";
 
 import { aNumeroSeguro } from "../esquemas";
 import type { celdaSchema } from "../esquemas";
@@ -13,10 +13,8 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
   const finSemana = semana ? finSemanaIso(semana) : undefined;
   const movs = await ctx.db.movimientoBancario.findMany({
     where: {
-      estado: { in: ["conciliado", "pendiente", "sugerido", "por_autorizar"] },
-      ...(semana
-        ? { fecha: { gte: aFecha(semana), lte: aFecha(finSemana!) } }
-        : {}),
+      estado: "conciliado",
+      ...(semana ? { fecha: { gte: aFecha(semana), lte: aFecha(finSemana!) } } : {}),
     },
     include: { conciliaciones: { where: { activa: true, confirmada: true } } },
     orderBy: [{ fecha: "asc" }, { id: "asc" }],
@@ -44,26 +42,28 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
   const nombreCuenta = new Map(cuentas.map((c) => [c.id, c.nombre] as const));
   const filaPorDoc = new Map<string, string>();
   for (const d of docs) {
-    const nombre = nombreCuenta.get(d.cuentaId);
-    if (nombre) filaPorDoc.set(d.id, nombre);
+    filaPorDoc.set(d.id, nombreCuenta.get(d.cuentaId) ?? "");
   }
 
   const filas = await ctx.db.flujoFila.findMany({ select: { id: true, etiqueta: true } });
   const porEtiqueta = new Map(filas.map((f) => [f.etiqueta.toLowerCase(), f.id]));
   const porId = new Map(filas.map((f) => [f.id, f.etiqueta]));
+  if (!porEtiqueta.has(ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase())) {
+    porEtiqueta.set(ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase(), ETIQUETAS_FLUJO.cobrosSinFila);
+  }
 
   const mapped = movs.map((m) => {
-    const conciliado = m.estado === "conciliado";
+    const conciliado = true;
     let filaCliente: string | null = null;
     const enlaceFila = m.conciliaciones.find((c) => c.tipoEnlace === "flujo_fila");
     if (enlaceFila) filaCliente = porId.get(enlaceFila.enlaceId) ?? null;
 
     const cobrosFactura = m.conciliaciones
       .filter((c) => c.tipoEnlace === "documento_emitido")
-      .flatMap((c) => {
-        const filaEtiqueta = filaPorDoc.get(c.enlaceId);
-        return filaEtiqueta ? [{ filaEtiqueta, monto: montoDe(c.monto) }] : [];
-      });
+      .map((c) => ({
+        filaEtiqueta: filaPorDoc.get(c.enlaceId) ?? "",
+        monto: montoDe(c.monto),
+      }));
 
     const base = {
       id: m.id,
@@ -73,7 +73,7 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
       conciliado,
       filaCliente,
       esFactoringMerma: /MERMA|FACTORING/i.test(m.glosa),
-      esRemuneracion: m.estado === "por_autorizar" || /REMUNERACI|PREVIRED/i.test(m.glosa),
+      esRemuneracion: /REMUNERACI|PREVIRED/i.test(m.glosa),
     };
     return cobrosFactura.length > 0 ? { ...base, cobrosFactura } : base;
   });
@@ -81,7 +81,11 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
   const celdas = celdasRealesDesdeMovimientos(mapped);
 
   return celdas.flatMap((c) => {
-    const filaId = porEtiqueta.get(c.filaEtiqueta.toLowerCase());
+    let filaId = porEtiqueta.get(c.filaEtiqueta.toLowerCase());
+    if (!filaId && c.filaEtiqueta === ETIQUETAS_FLUJO.cobrosSinFila) {
+      const gen = filas.find((f) => f.etiqueta.toLowerCase() === ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase());
+      filaId = gen?.id;
+    }
     if (!filaId) return [];
     return [
       {

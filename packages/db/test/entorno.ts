@@ -10,8 +10,6 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 export const urlPropietario = process.env["DATABASE_URL_TEST"];
-if (!urlPropietario?.trim())
-  throw new Error("Falta DATABASE_URL_TEST: RLS requiere Postgres real.");
 
 function urlParaRol(url: string, usuario: string, password: string): string {
   const u = new URL(url);
@@ -21,7 +19,8 @@ function urlParaRol(url: string, usuario: string, password: string): string {
 }
 
 export async function prepararEntorno() {
-  const url = urlPropietario as string;
+  const url = urlPropietario?.trim();
+  if (!url) throw new Error("Falta DATABASE_URL_TEST: RLS requiere Postgres real.");
   const password = randomBytes(24).toString("base64url");
   const rol = `opai_test_${randomUUID().slice(0, 8).replace(/-/g, "")}`;
   execFileSync("pnpm", ["exec", "prisma", "migrate", "deploy"], {

@@ -1,12 +1,13 @@
 import ExcelJS from "exceljs";
 import { describe, expect, it } from "vitest";
 
-import { claveDedupe, mismoSaldoDespues, planificarDedupeCartola } from "./dedupe";
+import { claveDedupe, claveDedupeCartola, mismoSaldoDespues, planificarDedupeCartola } from "./dedupe";
 import { parsearCsvGenerico } from "./generico";
 import { parsearCartolaSantander, parsearFilasSantander } from "./santander";
 import { sugerirConciliacion, TOLERANCIA_CLP } from "./conciliacion";
 import { calcularSaldoSugeridoSemana, finSemanaIso } from "./saldo-sugerido";
-import { celdasRealesDesdeMovimientos } from "./real-flujo";
+import { ETIQUETAS_FLUJO, celdasRealesDesdeMovimientos } from "./real-flujo";
+import { valorCeldaExcel } from "./celda-excel";
 
 describe("bancos dedupe", () => {
   it("arma la clave fecha|monto|glosa|referencia", () => {
@@ -21,11 +22,11 @@ describe("bancos dedupe", () => {
   });
 
   it("C4 · dos apariciones iguales en el archivo reciben ordinal distinto", () => {
-    const base = claveDedupe({ fecha: "2026-10-29", monto: 5000, glosa: "Transferencia", referencia: "1" });
+    const base = claveDedupeCartola({ fecha: "2026-10-29", monto: 5000, glosa: "Transferencia" });
     const plan = planificarDedupeCartola(
       [
-        { indice: 0, base, saldoDespues: 100 },
-        { indice: 1, base, saldoDespues: 200 },
+        { indice: 0, base, saldoDespues: null },
+        { indice: 1, base, saldoDespues: null },
       ],
       [],
     );
@@ -36,19 +37,39 @@ describe("bancos dedupe", () => {
   });
 
   it("C4 · reimportar el mismo archivo no duplica movimientos", () => {
-    const base = claveDedupe({ fecha: "2026-10-29", monto: 5000, glosa: "Transferencia", referencia: "1" });
-    const existentes = [
-      { claveDedupe: base, saldoDespues: 100n },
-      { claveDedupe: `${base}#2`, saldoDespues: 200n },
-    ];
+    const base = claveDedupeCartola({ fecha: "2026-10-29", monto: 5000, glosa: "Transferencia" });
+    const existentes = [{ claveDedupe: base }, { claveDedupe: `${base}#2` }];
     const plan = planificarDedupeCartola(
       [
-        { indice: 0, base, saldoDespues: 100 },
-        { indice: 1, base, saldoDespues: 200 },
+        { indice: 0, base, saldoDespues: null },
+        { indice: 1, base, saldoDespues: null },
       ],
       existentes,
     );
     expect(plan.every((p) => p.estado === "duplicada")).toBe(true);
+  });
+
+  it("C6 · reimportar sin saldo: 0 filas nuevas (min(n,k))", () => {
+    const base = claveDedupeCartola({ fecha: "2026-10-29", monto: 9000, glosa: "Abono" });
+    const plan = planificarDedupeCartola([{ indice: 0, base, saldoDespues: null }], [{ claveDedupe: base }]);
+    expect(plan.filter((p) => p.estado === "leida")).toHaveLength(0);
+    expect(plan.filter((p) => p.estado === "duplicada")).toHaveLength(1);
+  });
+
+  it("C6 · tres iguales con dos guardadas inserta una", () => {
+    const base = claveDedupeCartola({ fecha: "2026-10-29", monto: 4444, glosa: "Rep" });
+    const plan = planificarDedupeCartola(
+      [
+        { indice: 0, base, saldoDespues: null },
+        { indice: 1, base, saldoDespues: null },
+        { indice: 2, base, saldoDespues: null },
+      ],
+      [{ claveDedupe: base }, { claveDedupe: `${base}#2` }],
+    );
+    expect(plan.filter((p) => p.estado === "duplicada")).toHaveLength(2);
+    expect(plan.filter((p) => p.estado === "leida")).toHaveLength(1);
+    const leida = plan.find((p) => p.estado === "leida");
+    expect(leida?.estado === "leida" && leida.claveDedupe).toBe(`${base}#3`);
   });
 });
 
@@ -84,6 +105,14 @@ describe("cartola generica csv", () => {
 });
 
 describe("cartola santander xlsx", () => {
+  it("N7 · normaliza Date, rich text, fórmula e hipervínculo", () => {
+    const d = new Date("2026-10-29T12:00:00.000Z");
+    expect(valorCeldaExcel(d)).toBe("29/10/2026");
+    expect(valorCeldaExcel({ richText: [{ text: "Abono " }, { text: "cliente" }] })).toBe("Abono cliente");
+    expect(valorCeldaExcel({ formula: "A1*2", result: 1500 })).toBe(1500);
+    expect(valorCeldaExcel({ text: "Ver", hyperlink: "https://banco.test/mov/1" })).toBe("Ver");
+  });
+
   it("parsea filas de encabezado sin librería vulnerable", async () => {
     const rows = [
       ["Fecha desde 01/10/2026 hasta 31/10/2026"],
@@ -124,7 +153,7 @@ describe("saldo sugerido al cierre", () => {
       ],
       "2026-11-01",
     );
-    expect(r).toEqual({ saldo: 500_000, fechaCorte: "2026-10-29" });
+    expect(r).toEqual({ saldo: 500_000, fechaCorte: "2026-10-29", cuentasSinSaldoIds: ["c1"] });
     const sinSaldo = calcularSaldoSugeridoSemana(
       ["c1"],
       [{ cuentaId: "c1", fecha: "2026-10-28", id: "a", saldoDespues: null }],
@@ -152,5 +181,19 @@ describe("capa real flujo", () => {
       filaEtiqueta: "Cliente A",
       monto: 100_000,
     });
+  });
+
+  it("Paridad · cobro sin fila de cliente va a Cobros genéricos", () => {
+    const celdas = celdasRealesDesdeMovimientos([
+      {
+        id: "m2",
+        fecha: "2026-10-29",
+        monto: 50_000,
+        glosa: "Cobro",
+        conciliado: true,
+        cobrosFactura: [{ filaEtiqueta: "", monto: 50_000 }],
+      },
+    ]);
+    expect(celdas[0]?.filaEtiqueta).toBe(ETIQUETAS_FLUJO.cobrosSinFila);
   });
 });

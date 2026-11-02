@@ -1,5 +1,6 @@
-import { claveDedupe } from "./dedupe";
+import { claveDedupeCartola } from "./dedupe";
 import { fechaDesdeDdMmAaaa } from "./fechas";
+import { validarFilasCartola, validarTextoCartola } from "./limites-cartola";
 import { esRemuneracion } from "./remuneracion";
 import type { FilaCartolaParseada } from "./santander";
 
@@ -16,7 +17,9 @@ export function parsearCsvGenerico(
   contenido: string,
   mapeo: MapeoColumnasGenerico,
 ): { filas: FilaCartolaParseada[]; rechazadas: { indice: number; motivo: string }[] } {
+  validarTextoCartola(contenido);
   const lineas = contenido.split(/\r?\n/).filter((l) => l.trim());
+  validarFilasCartola(lineas.length);
   if (lineas.length < 2) return { filas: [], rechazadas: [] };
   const header = lineas[0];
   if (!header) return { filas: [], rechazadas: [] };
@@ -61,7 +64,7 @@ export function parsearCsvGenerico(
       referencia,
       sucursal,
       saldoDespues,
-      claveDedupe: claveDedupe({ fecha: iso, monto, glosa, referencia }),
+      claveDedupe: claveDedupeCartola({ fecha: iso, monto, glosa }),
       esRemuneracion: esRemuneracion(glosa),
     });
   }

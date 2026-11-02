@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ErrorCapacidad, validarDocumentoCobroBanco } from "../src";
+import { ErrorCapacidad, validarDocumentoCobroBanco, validarDocumentoCompraBanco } from "../src";
 
 const docBase = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -37,5 +37,17 @@ describe("validarDocumentoCobroBanco · C5", () => {
 
   it("rechaza enlace sobre movimiento negativo", () => {
     rechaza({}, -50_000);
+  });
+});
+
+describe("validarDocumentoCompraBanco · Paridad signo compras", () => {
+  const docCompra = { tipoDte: 33 };
+
+  it("rechaza enlace sobre movimiento positivo (debe ser cargo)", () => {
+    expect(() => validarDocumentoCompraBanco(docCompra, 50_000)).toThrow(ErrorCapacidad);
+  });
+
+  it("acepta movimiento negativo", () => {
+    expect(() => validarDocumentoCompraBanco(docCompra, -50_000)).not.toThrow();
   });
 });

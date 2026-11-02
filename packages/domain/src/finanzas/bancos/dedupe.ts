@@ -13,6 +13,11 @@ export function claveDedupe(input: {
   return `${base}|${ref}`;
 }
 
+/** Clave de cartola (fecha|monto|glosa sin referencia). */
+export function claveDedupeCartola(input: { fecha: string; monto: number; glosa: string }): string {
+  return claveDedupe({ ...input, suelta: true });
+}
+
 export function normalizarGlosa(glosa: string): string {
   return glosa.trim().replace(/\s+/g, " ").toUpperCase();
 }
@@ -33,7 +38,7 @@ export function descomponerClaveDedupe(clave: string): { base: string; ordinal: 
   return { base: clave, ordinal: 1 };
 }
 
-/** Misma operación si el saldo posterior al movimiento coincide. */
+/** Misma operación si el saldo posterior al movimiento coincide (solo señal API). */
 export function mismoSaldoDespues(a: bigint | number | null | undefined, b: bigint | number | null | undefined): boolean {
   if (a == null || b == null) return false;
   return BigInt(a) === BigInt(b);
@@ -49,17 +54,18 @@ export type FilaDedupePlanificada =
   | { indice: number; estado: "leida"; claveDedupe: string; base: string; saldoDespues: number | null }
   | { indice: number; estado: "duplicada"; base: string; saldoDespues: number | null };
 
-/** Asigna ordinal por aparición (archivo + ya importadas) como en 1.0. */
+/**
+ * Regla cartola 1.0: por clave cuenta k guardadas y n en archivo; min(n,k) duplicadas; inserta n−k.
+ * No usa saldo (solo señal en movimientos por API).
+ */
 export function planificarDedupeCartola(
   filas: FilaDedupeEntrada[],
-  existentes: { claveDedupe: string; saldoDespues: bigint | number | null }[],
+  existentes: { claveDedupe: string; saldoDespues?: bigint | number | null }[],
 ): FilaDedupePlanificada[] {
-  const dbPorBase = new Map<string, ({ clave: string; saldo: bigint | number | null } | undefined)[]>();
+  const kPorBase = new Map<string, number>();
   for (const e of existentes) {
-    const { base, ordinal } = descomponerClaveDedupe(e.claveDedupe);
-    const list = dbPorBase.get(base) ?? [];
-    list[ordinal - 1] = { clave: e.claveDedupe, saldo: e.saldoDespues };
-    dbPorBase.set(base, list);
+    const { base } = descomponerClaveDedupe(e.claveDedupe);
+    kPorBase.set(base, (kPorBase.get(base) ?? 0) + 1);
   }
 
   const porBase = new Map<string, FilaDedupeEntrada[]>();
@@ -71,23 +77,17 @@ export function planificarDedupeCartola(
 
   const out: FilaDedupePlanificada[] = [];
   for (const [base, lista] of porBase) {
-    const dbSlots = dbPorBase.get(base) ?? [];
-    let nuevosEnArchivo = 0;
+    const k = kPorBase.get(base) ?? 0;
+    const n = lista.length;
+    const duplicadas = Math.min(n, k);
+
     for (let i = 0; i < lista.length; i += 1) {
       const fila = lista[i]!;
-      const slot = i + 1;
-      const db = dbSlots[slot - 1];
-      if (db && mismoSaldoDespues(db.saldo, fila.saldoDespues)) {
+      if (i < duplicadas) {
         out.push({ indice: fila.indice, estado: "duplicada", base, saldoDespues: fila.saldoDespues });
         continue;
       }
-      let ordinal = slot;
-      if (db) {
-        ordinal = dbSlots.length + nuevosEnArchivo + 1;
-      } else {
-        ordinal = Math.max(slot, dbSlots.length + nuevosEnArchivo + 1);
-      }
-      nuevosEnArchivo += 1;
+      const ordinal = k + (i - duplicadas) + 1;
       out.push({
         indice: fila.indice,
         estado: "leida",

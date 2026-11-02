@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability } from "@opai/capabilities";
+import { defineCapability, documentoEmitidoConciliable } from "@opai/capabilities";
 import { sugerirConciliacion } from "@opai/domain";
 
 import { PERMISO_BANCOS_VER } from "./permisos";
@@ -29,7 +29,7 @@ export const bancosConciliacionSugerir = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const mov = await movimientoDe(ctx, input.movimientoId);
-    if (mov.estado === "por_autorizar") return { sugerencias: [] };
+    if (mov.estado === "por_autorizar" || mov.estado === "ignorado") return { sugerencias: [] };
     const desde = new Date(mov.fecha);
     desde.setUTCDate(desde.getUTCDate() - 15);
     const hasta = new Date(mov.fecha);
@@ -43,6 +43,9 @@ export const bancosConciliacionSugerir = defineCapability({
         },
         select: {
           id: true,
+          tipoDte: true,
+          estadoDte: true,
+          cesionEstado: true,
           montoTotal: true,
           montoCobrado: true,
           glosa: true,
@@ -65,15 +68,17 @@ export const bancosConciliacionSugerir = defineCapability({
     );
 
     const docs = [
-      ...emitidos.map((d) => ({
-        id: d.id,
-        tipo: "documento_emitido" as const,
-        montoTotal: d.montoTotal,
-        montoPendiente: d.montoTotal - d.montoCobrado,
-        rut: cuentasMap.get(d.cuentaId) ?? null,
-        glosa: d.glosa,
-        fecha: null,
-      })),
+      ...emitidos
+        .filter((d) => documentoEmitidoConciliable(d))
+        .map((d) => ({
+          id: d.id,
+          tipo: "documento_emitido" as const,
+          montoTotal: d.montoTotal,
+          montoPendiente: d.montoTotal - d.montoCobrado,
+          rut: cuentasMap.get(d.cuentaId) ?? null,
+          glosa: d.glosa,
+          fecha: null,
+        })),
       ...recibidos.map((d) => ({
         id: d.id,
         tipo: "documento_recibido" as const,

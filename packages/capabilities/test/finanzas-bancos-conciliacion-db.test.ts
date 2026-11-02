@@ -3,12 +3,12 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { capacidades } from "../../../modules/finanzas/capacidades";
-import { claveDedupe } from "@opai/domain";
+import { claveDedupeCartola } from "@opai/domain";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
 
-describe.skipIf(!urlPropietario)("Finanzas · bancos (db)", () => {
+describe.skipIf(!urlPropietario?.trim())("Finanzas · bancos (db)", () => {
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
   let tenantId = "";
@@ -123,11 +123,10 @@ describe.skipIf(!urlPropietario)("Finanzas · bancos (db)", () => {
   });
 
   it("C4 · importa dos transferencias iguales y reimportar no duplica", async () => {
-    const base = claveDedupe({
+    const base = claveDedupeCartola({
       fecha: "2026-10-29",
       monto: 7777,
       glosa: "Abono doble",
-      referencia: "X1",
     });
     const csv = `fecha,monto,glosa,referencia\n29/10/2026,7777,Abono doble,X1\n29/10/2026,7777,Abono doble,X1\n`;
     const b64 = Buffer.from(csv, "utf8").toString("base64");
@@ -160,6 +159,90 @@ describe.skipIf(!urlPropietario)("Finanzas · bancos (db)", () => {
     expect(count2).toBe(2);
   });
 
+  it("C6 · vista previa dryRun marca duplicados reales", async () => {
+    const base = claveDedupeCartola({ fecha: "2026-10-30", monto: 1111, glosa: "Preview dup" });
+    const csv = `fecha,monto,glosa\n30/10/2026,1111,Preview dup\n`;
+    const b64 = Buffer.from(csv, "utf8").toString("base64");
+    await dato("finanzas.cartolas.importar", {
+      cuentaId,
+      formato: "generico",
+      contenidoBase64: b64,
+      mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa" },
+      idempotencyKey: `cartola-${randomUUID()}`,
+    });
+    const prev = await dato<{ filas: { estado: string }[]; duplicados: number; aplicados: number }>(
+      "finanzas.cartolas.importar",
+      {
+        cuentaId,
+        formato: "generico",
+        contenidoBase64: b64,
+        mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa" },
+        idempotencyKey: `cartola-${randomUUID()}`,
+      },
+      { dryRun: true },
+    );
+    expect(prev.aplicados).toBe(0);
+    expect(prev.duplicados).toBe(1);
+    expect(prev.filas.filter((f) => f.estado === "duplicada")).toHaveLength(1);
+    expect(await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: base } })).toBe(1);
+  });
+
+  it("C6 · reimportar CSV sin saldo no inserta movimientos", async () => {
+    const base = claveDedupeCartola({
+      fecha: "2026-10-30",
+      monto: 3333,
+      glosa: "Sin saldo csv",
+    });
+    const csv = `fecha,monto,glosa,referencia\n30/10/2026,3333,Sin saldo csv,S1\n`;
+    const b64 = Buffer.from(csv, "utf8").toString("base64");
+    await dato("finanzas.cartolas.importar", {
+      cuentaId,
+      formato: "generico",
+      contenidoBase64: b64,
+      mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa", referencia: "referencia" },
+      idempotencyKey: `cartola-${randomUUID()}`,
+    });
+    const r2 = await dato<{ aplicados: number; duplicados: number }>("finanzas.cartolas.importar", {
+      cuentaId,
+      formato: "generico",
+      contenidoBase64: b64,
+      mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa", referencia: "referencia" },
+      idempotencyKey: `cartola-${randomUUID()}`,
+    });
+    expect(r2.aplicados).toBe(0);
+    expect(r2.duplicados).toBe(1);
+    expect(await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: base } })).toBe(1);
+  });
+
+  it("C6 · tres filas iguales con dos guardadas inserta una", async () => {
+    const base = claveDedupeCartola({
+      fecha: "2026-10-31",
+      monto: 4444,
+      glosa: "Transferencia repetida",
+    });
+    const fila = `31/10/2026,4444,Transferencia repetida\n`;
+    const tres = `fecha,monto,glosa\n${fila}${fila}${fila}`;
+    await dato("finanzas.cartolas.importar", {
+      cuentaId,
+      formato: "generico",
+      contenidoBase64: Buffer.from(`${`fecha,monto,glosa\n${fila}${fila}`}`, "utf8").toString("base64"),
+      mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa" },
+      idempotencyKey: `cartola-${randomUUID()}`,
+    });
+    const r = await dato<{ aplicados: number; duplicados: number }>("finanzas.cartolas.importar", {
+      cuentaId,
+      formato: "generico",
+      contenidoBase64: Buffer.from(tres, "utf8").toString("base64"),
+      mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa" },
+      idempotencyKey: `cartola-${randomUUID()}`,
+    });
+    expect(r.aplicados).toBe(1);
+    expect(r.duplicados).toBe(2);
+    expect(
+      await e.admin.movimientoBancario.count({ where: { tenantId, cuentaId, claveDedupe: { startsWith: base } } }),
+    ).toBe(3);
+  });
+
   it("C5 · no concilia un documento de otro tenant (RLS)", async () => {
     const cuentaB = (await e.admin.cuenta.create({ data: { tenantId: tenantB, nombre: "Cliente B", rut: "77999999-9" } }))
       .id;
@@ -188,7 +271,173 @@ describe.skipIf(!urlPropietario)("Finanzas · bancos (db)", () => {
     expect(doc?.montoCobrado).toBe(0);
   });
 
-  it("Paridad 1 · saldo sugerido suma cuentas activas y null sin saldo en cartola CSV", async () => {
+  it("Paridad 1 · deshacer cobro manual deja el movimiento ignorado y fuera de sugerir y real", async () => {
+    const borrador = await dato<{ id: string }>("finanzas.ventas.crear_borrador", {
+      cuentaId: clienteId,
+      tipoDte: 33,
+      lineas: [{ glosa: "Factura P1", monto: 60_000 }],
+    });
+    await dato("finanzas.ventas.emitir", { documentoId: borrador.id });
+    const r = await dato<{ movimientoId: string }>("finanzas.cobros.manual", {
+      documentoId: borrador.id,
+      cuentaId,
+      monto: 60_000,
+    });
+    await dato("finanzas.conciliaciones.deshacer", { movimientoId: r.movimientoId, motivo: "Revertir cobro manual P1" });
+    const mov = await e.admin.movimientoBancario.findFirst({ where: { id: r.movimientoId } });
+    expect(mov?.estado).toBe("ignorado");
+    const sug = await dato<{ sugerencias: unknown[] }>("finanzas.conciliaciones.sugerir", {
+      movimientoId: r.movimientoId,
+    });
+    expect(sug.sugerencias).toHaveLength(0);
+    const derivadas = await dato<{ fuentes: { id: string; celdas: { id: string }[] }[] }>("finanzas.derivadas.listar", {
+      semana: "2026-10-26",
+    });
+    const ids = derivadas.fuentes.find((f) => f.id === "banco")?.celdas.map((c) => c.id) ?? [];
+    expect(ids).not.toContain(r.movimientoId);
+  });
+
+  it("Paridad 2 · sugerir excluye los mismos documentos que rechaza C5", async () => {
+    const doc56 = (
+      await e.admin.documentoEmitido.create({
+        data: {
+          tenantId,
+          cuentaId: clienteId,
+          tipoDte: 56,
+          folio: 9001,
+          fechaEmision: new Date("2026-10-29"),
+          montoTotal: 55_555,
+          montoNeto: 46_000,
+          montoIva: 9555,
+          montoCobrado: 0,
+          estadoDte: "aceptado",
+        },
+      })
+    ).id;
+    const mov56 = await movimiento(55_555, `p2-56-${randomUUID()}`);
+    const sug56 = await dato<{ sugerencias: { documentoId: string }[] }>("finanzas.conciliaciones.sugerir", {
+      movimientoId: mov56.id,
+    });
+    expect(sug56.sugerencias.some((s) => s.documentoId === doc56)).toBe(false);
+
+    const movOk = await movimiento(100_000, `p2-ok-${randomUUID()}`);
+    const sugOk = await dato<{ sugerencias: { documentoId: string }[] }>("finanzas.conciliaciones.sugerir", {
+      movimientoId: movOk.id,
+    });
+    expect(sugOk.sugerencias.some((s) => s.documentoId === documentoId)).toBe(true);
+  });
+
+  it("Paridad 3 · confirmar compra exige movimiento negativo", async () => {
+    const proveedorId = (
+      await dato<{ id: string }>("finanzas.proveedores.crear", {
+        rut: "77.888.777-0",
+        razonSocial: "Proveedor P3 SpA",
+        plazoPagoDias: 30,
+      })
+    ).id;
+    const compra = await dato<{ id: string }>("finanzas.compras.registrar", {
+      proveedorId,
+      tipoDte: 33,
+      folio: 8001,
+      fechaEmision: "2026-10-28",
+      fechaRecepcion: "2026-10-29",
+      montoNeto: 80_000,
+      montoIva: 15_200,
+    });
+    const movCargo = await e.admin.movimientoBancario.create({
+      data: {
+        tenantId,
+        cuentaId,
+        fecha: new Date("2026-10-29T12:00:00.000Z"),
+        monto: BigInt(-95_200),
+        glosa: "Pago proveedor",
+        claveDedupe: `p3-neg-${randomUUID()}`,
+        estado: "pendiente",
+        origen: "cartola",
+      },
+    });
+    const ok = await mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", {
+      movimientoId: movCargo.id,
+      enlaces: [{ tipo: "documento_recibido", id: compra.id, monto: 95_200 }],
+    });
+    expect(ok.ok).toBe(true);
+    const movAbono = await movimiento(95_200, `p3-pos-${randomUUID()}`);
+    const mal = await mod.executeCapability(ctx(), "finanzas.conciliaciones.confirmar", {
+      movimientoId: movAbono.id,
+      enlaces: [{ tipo: "documento_recibido", id: compra.id, monto: 95_200 }],
+    });
+    expect(mal).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("Paridad 4 · capa real solo conciliado; cobro sin fila de cliente va a Cobros", async () => {
+    const filaCobros = (
+      await e.admin.flujoFila.create({
+        data: {
+          tenantId,
+          seccion: "ingreso",
+          etiqueta: "Cobros",
+          vinculo: null,
+          arrastre: true,
+          orden: 98,
+          activa: true,
+        },
+      })
+    ).id;
+    await e.admin.flujoFila.create({
+      data: {
+        tenantId,
+        seccion: "ingreso",
+        etiqueta: "Cliente visible",
+        vinculo: null,
+        arrastre: true,
+        orden: 99,
+        activa: true,
+      },
+    });
+    const cuentaSinNombre = (await e.admin.cuenta.create({ data: { tenantId, nombre: "", rut: "77000001-9" } })).id;
+    const docSinFila = (
+      await e.admin.documentoEmitido.create({
+        data: {
+          tenantId,
+          cuentaId: cuentaSinNombre,
+          tipoDte: 33,
+          folio: 9002,
+          fechaEmision: new Date("2026-10-29"),
+          montoTotal: 33_333,
+          montoNeto: 28_000,
+          montoIva: 5333,
+          montoCobrado: 0,
+          estadoDte: "aceptado",
+        },
+      })
+    ).id;
+    const movConc = await movimiento(33_333, `p4-conc-${randomUUID()}`);
+    await dato("finanzas.conciliaciones.confirmar", {
+      movimientoId: movConc.id,
+      enlaces: [{ tipo: "documento_emitido", id: docSinFila, monto: 33_333 }],
+    });
+    const movAuth = await e.admin.movimientoBancario.create({
+      data: {
+        tenantId,
+        cuentaId,
+        fecha: new Date("2026-10-29T12:00:00.000Z"),
+        monto: BigInt(20_000),
+        glosa: "REMUNERACION PREVIRED",
+        claveDedupe: `p4-auth-${randomUUID()}`,
+        estado: "por_autorizar",
+        origen: "cartola",
+      },
+    });
+    const semana = "2026-10-26";
+    const derivadas = await dato<{
+      fuentes: { id: string; celdas: { filaId: string; monto: number; id: string }[] }[];
+    }>("finanzas.derivadas.listar", { semana });
+    const banco = derivadas.fuentes.find((f) => f.id === "banco")?.celdas ?? [];
+    expect(banco.some((c) => c.id === movConc.id && c.filaId === filaCobros && c.monto === 33_333)).toBe(true);
+    expect(banco.some((c) => c.id === movAuth.id)).toBe(false);
+  });
+
+  it("Paridad 5 · saldo sugerido avisa cuentas sin saldo en cartola", async () => {
     const cuenta2 = (
       await dato<{ id: string }>("finanzas.bancos.guardar", {
         banco: "BCI",
@@ -214,73 +463,20 @@ describe.skipIf(!urlPropietario)("Finanzas · bancos (db)", () => {
         cuentaId: cuenta2,
         fecha: new Date("2026-10-29T00:00:00Z"),
         monto: BigInt(1),
-        glosa: "Saldo B",
+        glosa: "Mov sin saldo",
         claveDedupe: `saldo-b-${randomUUID()}`,
-        saldoDespues: BigInt(250_000),
+        saldoDespues: null,
         estado: "pendiente",
         origen: "cartola",
       },
     });
-    const sugerido = await dato<{ saldo: number | null }>("finanzas.bancos.saldo_sugerido", {
-      semana: "2026-10-26",
-    });
-    expect(sugerido.saldo).toBe(1_250_000);
-
-    const csv = `fecha,monto,glosa\n30/10/2026,100,Abono sin saldo\n`;
-    await dato("finanzas.cartolas.importar", {
-      cuentaId,
-      formato: "generico",
-      contenidoBase64: Buffer.from(csv, "utf8").toString("base64"),
-      mapeoColumnas: { fecha: "fecha", monto: "monto", glosa: "glosa" },
-      idempotencyKey: `cartola-${randomUUID()}`,
-    });
-    const soloCsv = await dato<{ saldo: number | null }>("finanzas.bancos.saldo_sugerido", {
-      semana: "2026-10-26",
-      cuentaId,
-    });
-    expect(soloCsv.saldo).toBeNull();
-  });
-
-  it("Paridad 2 · cobro manual crea movimiento deshacible y suma en cobros activos", async () => {
-    const r = await dato<{ movimientoId: string; montoCobrado: number }>("finanzas.cobros.manual", {
-      documentoId,
-      monto: 40_000,
-    });
-    expect(r.montoCobrado).toBe(40_000);
-    let doc = await e.admin.documentoEmitido.findFirst({ where: { id: documentoId } });
-    expect(doc?.estadoCobro).toBe("pagada_parcial");
-    await dato("finanzas.conciliaciones.deshacer", { movimientoId: r.movimientoId, motivo: "Revertir cobro manual" });
-    doc = await e.admin.documentoEmitido.findFirst({ where: { id: documentoId } });
-    expect(doc?.montoCobrado).toBe(0);
-  });
-
-  it("Paridad 3 · derivadas banco filtra por semana y expone cobro en fila del cliente", async () => {
-    await e.admin.flujoFila.create({
-      data: {
-        tenantId,
-        seccion: "ingreso",
-        etiqueta: "Cliente",
-        vinculo: null,
-        arrastre: true,
-        orden: 99,
-        activa: true,
-      },
-    });
-    const mov = await movimiento(50_000, `par3-${randomUUID()}`);
-    await dato("finanzas.conciliaciones.confirmar", {
-      movimientoId: mov.id,
-      enlaces: [{ tipo: "documento_emitido", id: documentoId, monto: 50_000 }],
-    });
-    const semanaMov = "2026-10-26";
-    const otraSemana = "2026-11-03";
-    const derivadas = await dato<{
-      fuentes: { id: string; celdas: { semana: string; monto: number }[] }[];
-    }>("finanzas.derivadas.listar", { semana: semanaMov });
-    const banco = derivadas.fuentes.find((f) => f.id === "banco");
-    expect(banco?.celdas.some((c) => c.semana === semanaMov && c.monto === 50_000)).toBe(true);
-    const vacio = await dato<{ fuentes: { id: string; celdas: unknown[] }[] }>("finanzas.derivadas.listar", {
-      semana: otraSemana,
-    });
-    expect(vacio.fuentes.find((f) => f.id === "banco")?.celdas).toHaveLength(0);
+    const sugerido = await dato<{
+      saldo: number | null;
+      aviso: string | null;
+      cuentasSinSaldo: { cuentaId: string; banco: string }[];
+    }>("finanzas.bancos.saldo_sugerido", { semana: "2026-10-26" });
+    expect(sugerido.saldo).toBe(1_000_000);
+    expect(sugerido.cuentasSinSaldo.some((c) => c.cuentaId === cuenta2)).toBe(true);
+    expect(sugerido.aviso).toMatch(/Sin saldo en cartola/);
   });
 });

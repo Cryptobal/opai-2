@@ -35,6 +35,33 @@ export function validarDocumentoCobroBanco(doc: DocCobro, signoMovimiento: numbe
   }
 }
 
+type DocCompra = { tipoDte: number };
+
+/** Valida enlace de un pago a compras (egreso bancario). */
+export function validarDocumentoCompraBanco(doc: DocCompra, signoMovimiento: number): void {
+  if (!TIPOS_FACTURA_COBRABLE.has(doc.tipoDte)) {
+    throw reglaDeNegocio("Solo se concilian pagos contra facturas de compra (33 o 34), no notas ni otros DTE.");
+  }
+  if (signoMovimiento >= 0) {
+    throw reglaDeNegocio("Un pago de compras exige un movimiento bancario negativo (cargo).");
+  }
+}
+
+export type DocEmitidoSugerencia = {
+  tipoDte: number;
+  estadoDte: string;
+  cesionEstado: string | null;
+};
+
+/** Mismos filtros que C5 para sugerencias de cobro. */
+export function documentoEmitidoConciliable(doc: DocEmitidoSugerencia): boolean {
+  if (doc.estadoDte === "borrador" || doc.estadoDte === "rechazado" || doc.estadoDte === "anulado_nc") {
+    return false;
+  }
+  if (doc.cesionEstado === "cedido") return false;
+  return TIPOS_FACTURA_COBRABLE.has(doc.tipoDte);
+}
+
 /** Recalcula `monto_cobrado` y `estado_cobro` desde conciliaciones activas confirmadas. */
 export async function sincronizarCobroDocumento(
   tx: TenantTx,

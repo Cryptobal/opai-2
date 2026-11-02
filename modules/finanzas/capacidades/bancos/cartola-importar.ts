@@ -4,9 +4,11 @@ import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 import {
+  CARTOLA_MAX_BASE64,
   planificarDedupeCartola,
   parsearCartolaSantander,
   parsearCsvGenerico,
+  validarTamanoCartola,
   type FilaCartolaParseada,
   type MapeoColumnasGenerico,
 } from "@opai/domain";
@@ -16,7 +18,7 @@ import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { cuentaDe } from "./util";
 import { aplicarImportacionCartola } from "./cartola-importar-aplicar";
 
-const MAX_B64 = 7_000_000;
+const MAX_B64 = CARTOLA_MAX_BASE64;
 
 export const bancosCartolaImportar = defineCapability({
   id: "finanzas.cartolas.importar",
@@ -57,6 +59,7 @@ export const bancosCartolaImportar = defineCapability({
     if (prevCartola && !dryRun) throw reglaDeNegocio("Importación ya aplicada con esta clave de idempotencia.");
 
     const buf = Buffer.from(input.contenidoBase64, "base64");
+    validarTamanoCartola(buf.byteLength);
     let parsedFilas: FilaCartolaParseada[];
     let rechazadas: { indice: number; motivo: string }[];
     let saldoFinal: number | null;

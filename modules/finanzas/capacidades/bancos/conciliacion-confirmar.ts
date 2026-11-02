@@ -6,6 +6,7 @@ import {
   reglaDeNegocio,
   sincronizarCobroDocumento,
   validarDocumentoCobroBanco,
+  validarDocumentoCompraBanco,
 } from "@opai/capabilities";
 import type { Prisma } from "@opai/db";
 
@@ -61,6 +62,11 @@ export const bancosConciliacionConfirmar = defineCapability({
           validarDocumentoCobroBanco(doc, signoMov);
           docsSync.add(e.id);
         }
+        if (e.tipo === "documento_recibido") {
+          const doc = await tx.documentoRecibido.findFirst({ where: { id: e.id } });
+          if (!doc) throw reglaDeNegocio("El documento recibido no existe.");
+          validarDocumentoCompraBanco(doc, signoMov);
+        }
         await tx.conciliacionBanco.create({
           data: {
             tenantId: ctx.tenantId,
@@ -102,6 +108,8 @@ export const bancosConciliacionDeshacer = defineCapability({
     await movimientoDe(ctx, input.movimientoId);
     if (dryRun) return { deshecho: true };
     await ctx.transaccion(async (tx) => {
+      const movActual = await tx.movimientoBancario.findFirst({ where: { id: input.movimientoId } });
+      if (!movActual) throw reglaDeNegocio("El movimiento no existe.");
       const activas = await tx.conciliacionBanco.findMany({
         where: { movimientoId: input.movimientoId, activa: true, confirmada: true },
       });
@@ -115,9 +123,10 @@ export const bancosConciliacionDeshacer = defineCapability({
       for (const docId of docsSync) {
         await sincronizarCobroDocumento(tx, docId);
       }
+      const nuevoEstado = movActual.origen === "manual" ? "ignorado" : "pendiente";
       await tx.movimientoBancario.update({
         where: { id: input.movimientoId },
-        data: { estado: "pendiente" },
+        data: { estado: nuevoEstado },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.banco.conciliacion_deshecha",

@@ -12,15 +12,16 @@ export type MovimientoSaldoCuenta = {
   saldoDespues: number | null;
 };
 
-/** Suma el saldo posterior del último movimiento por cuenta activa hasta `finSemana`. */
+/** Suma saldos por cuenta; avisa cuentas sin saldo posterior en lugar de omitirlas en silencio. */
 export function calcularSaldoSugeridoSemana(
   cuentaIds: string[],
   movimientos: MovimientoSaldoCuenta[],
   finSemana: string,
-): { saldo: number | null; fechaCorte: string | null } {
+): { saldo: number | null; fechaCorte: string | null; cuentasSinSaldoIds: string[] } {
   let sum = 0;
   let alguno = false;
   let fechaCorte: string | null = null;
+  const cuentasSinSaldoIds: string[] = [];
 
   for (const cuentaId of cuentaIds) {
     const ultimo = movimientos
@@ -29,11 +30,18 @@ export function calcularSaldoSugeridoSemana(
         if (a.fecha !== b.fecha) return a.fecha > b.fecha ? -1 : 1;
         return a.id > b.id ? -1 : a.id < b.id ? 1 : 0;
       })[0];
-    if (!ultimo || ultimo.saldoDespues == null) continue;
+    if (!ultimo) {
+      cuentasSinSaldoIds.push(cuentaId);
+      continue;
+    }
+    if (ultimo.saldoDespues == null) {
+      cuentasSinSaldoIds.push(cuentaId);
+      continue;
+    }
     sum += ultimo.saldoDespues;
     alguno = true;
     if (!fechaCorte || ultimo.fecha > fechaCorte) fechaCorte = ultimo.fecha;
   }
 
-  return { saldo: alguno ? sum : null, fechaCorte };
+  return { saldo: alguno ? sum : null, fechaCorte, cuentasSinSaldoIds };
 }

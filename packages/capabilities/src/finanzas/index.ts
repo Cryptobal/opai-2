@@ -23,7 +23,7 @@ import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectur
 import { ventasPdf } from "./ventas-pdf";
 
 export { ajustesFinanzas } from "./ajustes";
-export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco } from "./cobros";
+export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
 export const capacidadesFinanzas: readonly Capacidad[] = [
   planListar,
