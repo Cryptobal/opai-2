@@ -73,10 +73,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       // Tickets (CAR-84): configurar los tipos del tenant es de owner y admin, igual que los
       // catálogos de Comercial y Rondas.
       "tickets:tipos.manage",
-      // CPQ (CAR-119, ADR-042 (5) y (8)): aprobar márgenes y configurar el modelo de costeo son de
-      // owner y admin. `cpq:costos.ver` sí lo conserva (cpq.md §7) y no abre estructuras sensibles.
-      "cpq:aprobar",
-      "cpq:modelo.manage",
+      // CPQ (CAR-119): aprobar, modelo, biblioteca y envíos de propuesta: owner/admin.
+      "cpq:aprobar", "cpq:modelo.manage", "cpq:biblioteca.manage", "cpq:envios.aprobar",
     ],
   },
   supervisor: {
