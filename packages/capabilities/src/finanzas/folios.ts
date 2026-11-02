@@ -7,6 +7,7 @@ import { reglaDeNegocio } from "../errores";
 import { foliosRestantes } from "@opai/domain";
 import {
   PERMISO_VENTAS,
+  PERMISO_VENTAS_CONFIGURE,
   avisosDteDe,
   folioVista,
   tipoDteVentaSchema,
@@ -30,7 +31,7 @@ export const foliosListar = defineCapability({
   id: "finanzas.folios.listar",
   descripcion:
     "Lista los rangos de folios autorizados por CAF: folio actual, restantes y avisos por folios bajos (porcentaje del rango) o CAF por vencer.",
-  permiso: PERMISO_VENTAS,
+  permiso: PERMISO_VENTAS_CONFIGURE,
   input: z.object({
     tipoDte: tipoDteVentaSchema.optional(),
     soloActivos: z.boolean().default(true),

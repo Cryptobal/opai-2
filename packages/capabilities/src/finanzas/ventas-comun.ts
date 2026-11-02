@@ -20,6 +20,8 @@ export {
 } from "./ventas-folios-logica";
 
 export const PERMISO_VENTAS = "finanzas:ventas.manage";
+/** Cargar CAF y administrar folios (decisión Carlos; paridad 1.0 `facturacion_configure`). */
+export const PERMISO_VENTAS_CONFIGURE = "finanzas:ventas.configure";
 
 export const tipoDteVentaSchema = z
   .union([z.literal(33), z.literal(34), z.literal(61)])

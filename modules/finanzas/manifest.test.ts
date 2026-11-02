@@ -13,6 +13,7 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "finanzas:proveedores.manage",
       "finanzas:plan.manage",
       "finanzas:ventas.manage",
+      "finanzas:ventas.configure",
       "finanzas:flujo.ver",
       "finanzas:flujo.gestionar",
       "finanzas:flujo.cerrar",
@@ -22,6 +23,7 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "finanzas:bancos.autorizar",
     ]);
     expect(manifest.navegacion.map((n) => n.href)).toEqual([
+      "/finanzas/folios",
       "/finanzas/ventas",
       "/finanzas/compras",
       "/finanzas/bancos",
