@@ -2,6 +2,12 @@
 
 **Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct; decisiones de diseño del 26-oct en §10, que quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos) · **Fecha:** 23-oct-2026, actualizado el 26-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado (fuente: «Confirmo que apruebo el diseño 53e9b74b» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz)); se implementa con `briefs/BRIEF-05-navegacion.md`.
 
+## Enmienda de Configuración v1.1 · PR-A
+
+El encargo aprobado por Carlos del 1-nov-2026 (18:59 CLT, fuente: encargo recibido y QA `/workspace/qa/menus-config-1142/`) cambia la presentación del ERP: secciones planas siempre visibles, Bandeja como destino explícito con conteo real, barra móvil Inicio/Pauta/Personas/Bandeja/Más según disponibilidad y permisos, y Más sin duplicados ni cuenta. Las preferencias previas y los fijados se conservan; la preferencia de área ya no sustituye esa barra. Ctrl+K mantiene su lógica. El menú de usuario muestra Mi cuenta y Preferencias, conserva Portal de inicio y ofrece salida neutra; la contraseña vive dentro de Mi cuenta. El ancho de 1024 mantiene sidebar completo.
+
+Las tarjetas de Configuración abren `/configuracion/grupo/<id>`; Agente interno pasa a `/configuracion/grupo/agentes/agente-interno` y su URL antigua redirige. El padre móvil se obtiene de la ruta confirmada. Ver [alcance, CA parciales y exclusiones de PR-A](briefs/CONFIGURACION-v11-PR-A.md). Esta enmienda prevalece sobre la descripción histórica de acordeones y barra por área de las secciones siguientes, sin modificar permisos ni licencias.
+
 ## 1. Principios
 
 1. **Áreas, no módulos.** El menú se ordena por lo que la persona hace (vender, operar, pagar), no por cómo está dividido el código. Cada módulo aporta entradas a un área.
