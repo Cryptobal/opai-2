@@ -27,7 +27,8 @@ export type ValidarCafInput = {
   xml: string;
   rutEmisorEsperado: string;
   hoyIso: string;
-  rangosActivos: readonly { folioDesde: number; folioHasta: number }[];
+  /** Todos los rangos ya cargados del tenant (activos, inactivos o agotados). */
+  rangosCargados: readonly { folioDesde: number; folioHasta: number }[];
 };
 
 function etiqueta(tag: string, xml: string): string | null {
@@ -124,7 +125,7 @@ export function validarCaf(input: ValidarCafInput): { ok: true; lectura: CafLect
   if (!(TIPOS_DTE_CAF as readonly number[]).includes(lectura.tipoDte)) {
     return { ok: false, error: "tipo_no_habilitado" };
   }
-  for (const r of input.rangosActivos) {
+  for (const r of input.rangosCargados) {
     if (rangosCafSeSolapan(lectura.folioDesde, lectura.folioHasta, r.folioDesde, r.folioHasta)) {
       return { ok: false, error: "solape" };
     }

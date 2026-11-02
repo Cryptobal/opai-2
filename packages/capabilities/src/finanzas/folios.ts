@@ -7,6 +7,7 @@ import { escribirConEvento, hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import {
   PERMISO_VENTAS,
+  PERMISO_VENTAS_CONFIGURE,
   avisosDteDe,
   folioVista,
 } from "./ventas-comun";
@@ -73,7 +74,7 @@ export const foliosCargarCaf = defineCapability({
   id: "finanzas.folios.cargar_caf",
   descripcion:
     "Registra un rango de folios a partir del XML del CAF: valida RUT, tipo, solape y vencimiento; cifra el XML en core.secretos (ADR-027). dryRun devuelve la lectura sin guardar.",
-  permiso: PERMISO_VENTAS,
+  permiso: PERMISO_VENTAS_CONFIGURE,
   input: z.object({
     cafXml: z
       .string()
@@ -89,9 +90,15 @@ export const foliosCargarCaf = defineCapability({
     if (!cfg?.rutEmisor) {
       throw reglaDeNegocio("Configure el RUT emisor en la configuración DTE antes de cargar un CAF.");
     }
+    const rutEmisor = cfg.rutEmisor;
     const avisos = await avisosDteDe(ctx);
-    const { lectura, hoyIso, vigentes } = await validarCafParaTenant(ctx, input.cafXml, cfg.rutEmisor);
-    const preview = vistaPreviaCafCargado(lectura, avisos, hoyIso);
+    const { lectura, hoyIso, ultimoFolioOpai1 } = await validarCafParaTenant(
+      ctx,
+      input.cafXml,
+      rutEmisor,
+      cfg.fechaCorte1_0,
+    );
+    const preview = vistaPreviaCafCargado(lectura, avisos, hoyIso, ultimoFolioOpai1);
     if (dryRun) return preview;
     const fila = await escribirConEvento(
       ctx,
@@ -104,7 +111,8 @@ export const foliosCargarCaf = defineCapability({
           folioHasta: lectura.folioHasta,
         }),
       },
-      (tx) => persistirCafCargado(ctx, tx, input.cafXml, lectura, vigentes, avisos),
+      (tx) =>
+        persistirCafCargado(ctx, tx, input.cafXml, lectura, rutEmisor, avisos, cfg.fechaCorte1_0),
     );
     return {
       ...folioVista(fila as Parameters<typeof folioVista>[0], { ...avisos, hoyIso }),

@@ -66,6 +66,41 @@ export async function guardarSecretoConIdTx(
   return { id: row.id, sufijo: sufijoDe(valor) };
 }
 
+/** Inserta un secreto cifrado; falla si el nombre ya existe (nunca sobrescribe). */
+export async function insertarSecretoConIdTx(
+  tx: TenantTx,
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+): Promise<{ id: string; sufijo: string }> {
+  await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
+  const previo = await tx.secreto.findUnique({
+    where: { tenantId_integracionId_nombre: { tenantId: ctx.tenantId, integracionId, nombre } },
+    select: { id: true },
+  });
+  if (previo) {
+    throw reglaDeNegocio("Ya existe un secreto registrado para este rango de folios.");
+  }
+  const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+  const datos = {
+    cifrado: bytes(c.cifrado),
+    iv: bytes(c.iv),
+    tag: bytes(c.tag),
+    sufijo: sufijoDe(valor),
+  };
+  const row = await tx.secreto.create({
+    data: {
+      tenantId: ctx.tenantId,
+      integracionId,
+      nombre,
+      ...datos,
+      creadoPor: ctx.usuario?.id ?? null,
+    },
+  });
+  return { id: row.id, sufijo: sufijoDe(valor) };
+}
+
 /** Guarda un secreto cifrado y devuelve su id (p. ej. CAF en finanzas.dte_folios). */
 export async function guardarSecretoConId(
   ctx: Contexto,

@@ -5,16 +5,21 @@ import {
   formatearLecturaCaf,
   leerCafXml,
   requiereCafSintetico,
-  validarCaf,
   type CafLectura,
 } from "@opai/domain";
 import type { TenantTx } from "@opai/db";
 
 import { aFecha, hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
-import { guardarSecretoConIdTx } from "../integraciones/secretos";
+import { insertarSecretoConIdTx } from "../integraciones/secretos";
 import type { Contexto } from "../types";
 import { folioVista } from "./ventas-comun";
+import {
+  errorDeValidacionCaf,
+  esViolacionSolapeFolios,
+  ultimoFolioOpai1AntesCorte,
+  validarCafConRangos,
+} from "./folios-caf-validacion";
 
 type AvisosDte = { umbralFoliosPct: number; avisoCafDias: number };
 
@@ -37,51 +42,40 @@ function nombreSecretoCaf(tipoDte: number, idk: string | null, folioDesde: numbe
   return `caf_${tipoDte}_${folioDesde}_${folioHasta}_${suf}`;
 }
 
-function errorDeValidacionCaf(codigo: "xml_invalido" | "rut_distinto" | "tipo_no_habilitado" | "solape" | "vencido" | "no_sintetico"): never {
-  switch (codigo) {
-    case "xml_invalido":
-      throw reglaDeNegocio("El XML del CAF no es válido o está corrupto.");
-    case "rut_distinto":
-      throw reglaDeNegocio("El RUT del CAF no coincide con el RUT emisor configurado.");
-    case "tipo_no_habilitado":
-      throw reglaDeNegocio("El tipo de DTE del CAF no está habilitado para este tenant.");
-    case "solape":
-      throw reglaDeNegocio("El rango del CAF se solapa con un rango activo del tenant.");
-    case "vencido":
-      throw reglaDeNegocio("El CAF está vencido; solicite uno nuevo al SII.");
-    default:
-      throw reglaDeNegocio("No se pudo validar el CAF.");
-  }
-}
-
-export async function validarCafParaTenant(ctx: Contexto, cafXml: string, rutEmisor: string) {
+export async function validarCafParaTenant(
+  ctx: Contexto,
+  cafXml: string,
+  rutEmisor: string,
+  fechaCorte1_0: Date | null | undefined,
+) {
   const hoyIso = hoy();
   const pre = leerCafXml(cafXml);
-  const vigentes = await ctx.db.dteFolio.findMany({ where: { activo: true } });
-  const validacion = validarCaf({
-    xml: cafXml,
-    rutEmisorEsperado: rutEmisor,
-    hoyIso,
-    rangosActivos: vigentes
-      .filter((v) => (pre ? v.tipoDte === pre.tipoDte : true))
-      .map((v) => ({ folioDesde: v.folioDesde, folioHasta: v.folioHasta })),
+  const rangosCargados = await ctx.db.dteFolio.findMany({
+    where: pre ? { tipoDte: pre.tipoDte } : {},
+    select: { folioDesde: true, folioHasta: true, tipoDte: true, activo: true, folioActual: true, id: true },
   });
-  if (!validacion.ok) errorDeValidacionCaf(validacion.error);
+  const lectura = validarCafConRangos(
+    cafXml,
+    rutEmisor,
+    rangosCargados.map((v) => ({ folioDesde: v.folioDesde, folioHasta: v.folioHasta })),
+  );
   const slug = await slugTenantDe(ctx);
-  if (requiereCafSintetico(slug) && !esCafMarcadoSintetico(validacion.lectura)) {
+  if (requiereCafSintetico(slug) && !esCafMarcadoSintetico(lectura)) {
     throw reglaDeNegocio(
       "En el tenant QA solo se aceptan CAF sintéticos de certificación (IDK o RUT de prueba).",
     );
   }
-  return { lectura: validacion.lectura, hoyIso, vigentes };
+  const ultimoFolioOpai1 = await ultimoFolioOpai1AntesCorte(ctx.db, lectura.tipoDte, fechaCorte1_0);
+  return { lectura, hoyIso, ultimoFolioOpai1 };
 }
 
 export function vistaPreviaCafCargado(
   lectura: CafLectura,
   avisos: AvisosDte,
   hoyIso: string,
+  ultimoFolioOpai1: number | null,
 ) {
-  const folioActual = folioActualInicialCaf(lectura.folioDesde, null);
+  const folioActual = folioActualInicialCaf(lectura.folioDesde, ultimoFolioOpai1);
   return {
     ...folioVista(
       {
@@ -105,31 +99,48 @@ export async function persistirCafCargado(
   tx: TenantTx,
   cafXml: string,
   lectura: CafLectura,
-  vigentes: Awaited<ReturnType<typeof ctx.db.dteFolio.findMany>>,
+  rutEmisor: string,
   avisos: AvisosDte,
+  fechaCorte1_0: Date | null | undefined,
 ) {
+  const rangosCargados = await tx.dteFolio.findMany({
+    where: { tipoDte: lectura.tipoDte },
+    select: { folioDesde: true, folioHasta: true, tipoDte: true, activo: true, folioActual: true, id: true },
+  });
+  validarCafConRangos(
+    cafXml,
+    rutEmisor,
+    rangosCargados.map((v) => ({ folioDesde: v.folioDesde, folioHasta: v.folioHasta })),
+  );
+  const ultimoFolioOpai1 = await ultimoFolioOpai1AntesCorte(tx, lectura.tipoDte, fechaCorte1_0);
   const integracionId = await integracionDteId(tx, ctx.tenantId);
   const nombreSecreto = nombreSecretoCaf(lectura.tipoDte, lectura.idk, lectura.folioDesde, lectura.folioHasta);
-  const { id: secretoId } = await guardarSecretoConIdTx(tx, ctx, integracionId, nombreSecreto, cafXml);
-  const folioActual = folioActualInicialCaf(lectura.folioDesde, null);
-  for (const v of vigentes) {
+  const { id: secretoId } = await insertarSecretoConIdTx(tx, ctx, integracionId, nombreSecreto, cafXml);
+  const folioActual = folioActualInicialCaf(lectura.folioDesde, ultimoFolioOpai1);
+  for (const v of rangosCargados) {
     if (v.tipoDte !== lectura.tipoDte) continue;
+    if (!v.activo) continue;
     if (foliosRestantes(v.folioActual, v.folioHasta) > 0) continue;
     await tx.dteFolio.update({ where: { id: v.id }, data: { activo: false } });
   }
-  return tx.dteFolio.create({
-    data: {
-      tenantId: ctx.tenantId,
-      tipoDte: lectura.tipoDte,
-      folioDesde: lectura.folioDesde,
-      folioHasta: lectura.folioHasta,
-      folioActual,
-      cafSecretoId: secretoId,
-      cafVenceEn: lectura.venceEn ? aFecha(lectura.venceEn) : null,
-      cafAutorizadoEn: aFecha(lectura.autorizadoEn),
-      cafIdk: lectura.idk,
-      umbralAviso: avisos.umbralFoliosPct,
-      activo: true,
-    },
-  });
+  try {
+    return await tx.dteFolio.create({
+      data: {
+        tenantId: ctx.tenantId,
+        tipoDte: lectura.tipoDte,
+        folioDesde: lectura.folioDesde,
+        folioHasta: lectura.folioHasta,
+        folioActual,
+        cafSecretoId: secretoId,
+        cafVenceEn: lectura.venceEn ? aFecha(lectura.venceEn) : null,
+        cafAutorizadoEn: aFecha(lectura.autorizadoEn),
+        cafIdk: lectura.idk,
+        umbralAviso: avisos.umbralFoliosPct,
+        activo: true,
+      },
+    });
+  } catch (error) {
+    if (esViolacionSolapeFolios(error)) errorDeValidacionCaf("solape");
+    throw error;
+  }
 }

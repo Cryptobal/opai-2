@@ -72,7 +72,7 @@ describe("validarCaf", () => {
     xml: xmlBase({}),
     rutEmisorEsperado: "76111222-8",
     hoyIso: "2026-01-01",
-    rangosActivos: [] as { folioDesde: number; folioHasta: number }[],
+    rangosCargados: [] as { folioDesde: number; folioHasta: number }[],
   };
 
   it("falla si RUT distinto", () => {
@@ -83,7 +83,7 @@ describe("validarCaf", () => {
   it("falla si hay solape", () => {
     const r = validarCaf({
       ...base,
-      rangosActivos: [{ folioDesde: 2000, folioHasta: 2100 }],
+      rangosCargados: [{ folioDesde: 2000, folioHasta: 2100 }],
     });
     expect(r).toEqual({ ok: false, error: "solape" });
   });

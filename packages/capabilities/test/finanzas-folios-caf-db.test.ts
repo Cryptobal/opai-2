@@ -96,6 +96,57 @@ describe.skipIf(!urlPropietario)("Finanzas · folios CAF endurecido (db)", () =>
     await s.e.admin.tenant.delete({ where: { id: qaId } }).catch(() => undefined);
   });
 
+  it("rechaza recargar un rango ya cargado aunque esté inactivo (A1)", async () => {
+    const xml = cafXmlSintetico({ folioDesde: 7000, folioHasta: 7002, idk: "CERT-7000-UNICO" });
+    await s.dato("finanzas.folios.cargar_caf", { cafXml: xml });
+    await s.e.admin.dteFolio.updateMany({
+      where: { tenantId: s.tenantId, folioDesde: 7000 },
+      data: { activo: false, folioActual: 7003 },
+    });
+    const mal = await s.mod.executeCapability(s.ctx(), "finanzas.folios.cargar_caf", { cafXml: xml });
+    expect(mal).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("dos cargas concurrentes del mismo rango: solo una persiste (A2)", async () => {
+    const xml = cafXmlSintetico({ folioDesde: 7100, folioHasta: 7105, idk: "CERT-7100-RACE" });
+    const cargar = () => s.mod.executeCapability(s.ctx(), "finanzas.folios.cargar_caf", { cafXml: xml });
+    const r = await Promise.allSettled([cargar(), cargar()]);
+    const ok = r.filter((x) => x.status === "fulfilled" && x.value.ok);
+    const mal = r.filter((x) => x.status === "fulfilled" && !x.value.ok);
+    expect(ok).toHaveLength(1);
+    expect(mal).toHaveLength(1);
+    const n = await s.e.admin.dteFolio.count({
+      where: { tenantId: s.tenantId, folioDesde: 7100, folioHasta: 7105 },
+    });
+    expect(n).toBe(1);
+  });
+
+  it("folio inicial respeta documentos emitidos antes de fecha_corte_1_0 (M1)", async () => {
+    await s.dato("finanzas.dte_config.actualizar", {
+      ambiente: "certificacion",
+      rutEmisor: "76111222-8",
+      fechaCorte1_0: "2026-06-01",
+    });
+    await s.e.admin.documentoEmitido.create({
+      data: {
+        tenantId: s.tenantId,
+        cuentaId: s.cuentaId,
+        tipoDte: 33,
+        folio: 7205,
+        fechaEmision: new Date("2026-05-15T00:00:00.000Z"),
+        montoNeto: 10_000,
+        montoExento: 0,
+        montoIva: 1900,
+        montoTotal: 11_900,
+        estadoDte: "aceptado",
+      },
+    });
+    const out = await s.dato<{ folioActual: number }>("finanzas.folios.cargar_caf", {
+      cafXml: cafXmlSintetico({ folioDesde: 7200, folioHasta: 7210, idk: "CERT-7200-CORTE" }),
+    });
+    expect(out.folioActual).toBe(7206);
+  });
+
   it("listar avisa folios que vencerán sin usar", async () => {
     await s.e.admin.dteFolio.updateMany({
       where: { tenantId: s.tenantId, activo: true },
