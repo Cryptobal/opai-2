@@ -6,4 +6,8 @@ export * from "./compras";
 export * from "./ventas";
 export * from "./ventas-nc";
 export * from "./proyeccion-flujo";
+export * from "./flujo-semana";
+export * from "./derivadas-dte";
+export * from "./dte-consulta-sii";
+export * from "./cesion-calculo";
 export * from "./bancos";

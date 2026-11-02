@@ -279,7 +279,7 @@ model DocumentoEmitido {
   montoTotal            Int       @default(0) @map("monto_total")
   /// borrador | enviado | aceptado | rechazado | anulado_nc
   estadoDte             String    @default("borrador") @map("estado_dte")
-  /// pendiente | pagada_parcial | pagada
+  /// pendiente | pagada_parcial | pagada | cedida
   estadoCobro           String    @default("pendiente") @map("estado_cobro")
   montoCobrado          Int       @default(0) @map("monto_cobrado")
   glosa                 String?
@@ -298,6 +298,8 @@ model DocumentoEmitido {
 
   lineas      DocumentoEmitidoLinea[]
   referencias DocumentoEmitidoReferencia[]
+  enviosSii   DteEnvio[]
+  cesiones    Cesion[]
 
   @@index([tenantId, estadoDte, fechaEmision])
   @@index([tenantId, cuentaId])
@@ -345,6 +347,12 @@ model DteConfig {
   /// certificacion | produccion
   ambiente  String   @default("certificacion")
   rutEmisor         String?  @map("rut_emisor")
+  /// simpleapi | simulado (CAR-140, integración dte_emision).
+  emisionProveedor  String   @default("simulado") @map("emision_proveedor")
+  /// octava cuando el tenant activa cesión (integración dte_cesion).
+  cesionProveedor   String?  @map("cesion_proveedor")
+  certificadoSecretoId   String? @map("certificado_secreto_id") @db.Uuid
+  emisionApiKeySecretoId String? @map("emision_api_key_secreto_id") @db.Uuid
   /// Porcentaje del rango CAF bajo el cual avisar folios bajos (R-FIN-038).
   umbralFoliosPct   Int      @default(20) @map("umbral_folios_pct")
   /// Días antes del vencimiento del CAF para avisar (R-FIN-038).
@@ -353,6 +361,56 @@ model DteConfig {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("dte_config")
+  @@schema("finanzas")
+}
+
+/// Seguimiento de envío al SII (track ID e intentos de consulta, paridad 1.0).
+model DteEnvio {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  documentoId        String    @map("documento_id") @db.Uuid
+  trackId            String    @map("track_id")
+  intentos           Int       @default(0)
+  maxIntentos        Int       @default(7) @map("max_intentos")
+  /// pendiente | aceptado | rechazado | sin_respuesta
+  estado             String    @default("pendiente")
+  glosa              String?
+  proximaConsultaEn  DateTime? @map("proxima_consulta_en") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, estado])
+  @@index([tenantId, documentoId])
+  @@map("dte_envios")
+  @@schema("finanzas")
+}
+
+/// Operación de cesión / factoring (Octava + RPETC, CAR-140).
+model Cesion {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  documentoId         String   @map("documento_id") @db.Uuid
+  secuencia           Int      @default(1)
+  factorRut           String   @map("factor_rut")
+  factorNombre        String?  @map("factor_nombre")
+  tasaBps             Int      @default(0) @map("tasa_bps")
+  anticipo            Int
+  merma               Int      @default(0)
+  saldoFactor         Int      @default(0) @map("saldo_factor")
+  /// simulada … anulada (paridad 1.0 RPETC)
+  estado              String   @default("simulada")
+  proveedor           String   @default("octava")
+  operacionExternaId  String?  @map("operacion_externa_id")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, documentoId, secuencia])
+  @@index([tenantId, estado])
+  @@map("cesiones")
   @@schema("finanzas")
 }
 
