@@ -32,6 +32,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
   let puestoX3 = "";
   let luis = "";
   let rosa = "";
+  let martin = "";
   const userSup = randomUUID();
   const medidor = { registrar: async () => undefined };
   const manana = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
@@ -105,6 +106,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     personaB = await persona(tenantB, b.cargo, instB, "Persona", "22.222.222-2");
     luis = await persona(tenantA, a.cargo, instA, "Luis", "13.131.313-1");
     rosa = await persona(tenantA, a.cargo, instA, "Rosa", "14.141.414-1");
+    martin = await persona(tenantA, a.cargo, instA, "Martín", "15.151.515-1");
   });
 
   afterAll(async () => {
@@ -212,6 +214,17 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect(await crear(sumar(6), sumar(13))).toMatchObject({ ok: true, data: { dias: 4 } });
   });
 
+  it("anulaciones concurrentes no registran dos veces la misma excepción", async () => {
+    expect((await fijar(puestoExtra, { titularPersonaId: null })).ok).toBe(true);
+    expect((await ejecutar(ctxOwner(tenantA), "pauta.excepciones.crear", { puestoId: puestoExtra, tipo: "ausencia", motivo: "Prueba", desde: manana })).ok).toBe(true);
+    const antes = await e.admin.historialPauta.count({ where: { puestoId: puestoExtra, accion: "excepcion_anulada" } });
+    const anular = () => ejecutar(ctxOwner(tenantA), "pauta.excepciones.anular", { puestoId: puestoExtra, desde: manana });
+    const resultados = await Promise.all([anular(), anular()]);
+    expect(resultados.filter((r) => r.ok)).toHaveLength(1);
+    expect(resultados.filter((r) => !r.ok)).toHaveLength(1);
+    expect(await e.admin.historialPauta.count({ where: { puestoId: puestoExtra, accion: "excepcion_anulada" } })).toBe(antes + 1);
+  });
+
   it("el historial lista los cambios y es append-only para la app", async () => {
     const h = await ejecutar(ctxOwner(tenantA), "pauta.historial.listar", { instalacionId: instA });
     expect(h.ok && (h.data as { items: unknown[] }).items.length).toBeGreaterThan(2);
@@ -227,6 +240,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect(fijarB).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const exc = await ejecutar(ctxOwner(tenantA), "pauta.excepciones.crear", { puestoId: puestoB, tipo: "ausencia", motivo: "Ausencia", desde: manana });
     expect(exc).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await ejecutar(ctxOwner(tenantA), "pauta.excepciones.anular", { puestoId: puestoB, desde: manana })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await e.forTenant(tenantA).seriePauta.count({ where: { puestoId: puestoB } })).toBe(0);
     expect(await e.forTenant(tenantB).seriePauta.count()).toBe(0);
   });
@@ -236,6 +250,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect((await ejecutar(dentro, "pauta.mes.leer", { instalacionId: instA, anio, mes })).ok).toBe(true);
     expect(await ejecutar(dentro, "pauta.mes.leer", { instalacionId: instA2, anio, mes })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await ejecutar(dentro, "pauta.excepciones.crear", { puestoId: puestoOtraInst, tipo: "permiso", motivo: "Permiso", desde: manana })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await ejecutar(dentro, "pauta.excepciones.anular", { puestoId: puestoOtraInst, desde: manana })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const resumen = await ejecutar(dentro, "pauta.resumen.leer", { anio, mes });
     expect((resumen as { data: { instalaciones: { instalacionId: string }[] } }).data.instalaciones.every((i) => i.instalacionId === instA)).toBe(true);
     const sinNada = await ejecutar(ctxSup({ instalaciones: [] }), "pauta.resumen.leer", { anio, mes });
@@ -248,5 +263,69 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     const viewer = mod.crearContexto({ tenantId: tenantA, actor: { tipo: "user", id: randomUUID() }, portal: "erp", portalesMembresia: ["erp"], rol: "viewer", modulosActivos: ["pauta"], medidor });
     expect((await ejecutar(viewer, "pauta.mes.leer", { instalacionId: instA, anio, mes })).ok).toBe(true);
     expect(await ejecutar(viewer, "pauta.excepciones.crear", { puestoId: puestoDia, tipo: "ausencia", motivo: "Ausencia", desde: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await ejecutar(viewer, "pauta.excepciones.anular", { puestoId: puestoDia, desde: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await ejecutar(viewer, "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: manana })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("PR2: dry_run no escribe confirmación ni reemplazo", async () => {
+    const dia = sumar(20);
+    const prevConf = await ejecutar(ctxOwner(tenantA), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: dia }, { dryRun: true });
+    expect(prevConf.ok).toBe(true);
+    expect(await e.admin.registroOperativoPauta.count({ where: { puestoId: puestoDia, fecha: new Date(`${dia}T00:00:00.000Z`) } })).toBe(0);
+    await fijar(puestoExtra, { titularPersonaId: null, desde: dia, inicioCiclo: dia });
+    const prevReemp = await ejecutar(
+      ctxOwner(tenantA),
+      "pauta.reemplazos.asignar",
+      { puestoId: puestoExtra, fecha: dia, personaId: martin, motivo: "Cubre turno" },
+      { dryRun: true },
+    );
+    expect(prevReemp.ok).toBe(true);
+    expect(await e.admin.excepcionPauta.count({ where: { puestoId: puestoExtra, tipo: "reemplazo", fecha: new Date(`${dia}T00:00:00.000Z`) } })).toBe(0);
+  });
+
+  it("PR2: confirma cobertura en día cubierto y deshace", async () => {
+    const dia = sumar(21);
+    const conf = await ejecutar(ctxOwner(tenantA), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: dia });
+    expect(conf.ok).toBe(true);
+    expect(
+      await e.admin.registroOperativoPauta.count({
+        where: { puestoId: puestoDia, tipo: "cobertura_confirmada", estado: "activa", fecha: new Date(`${dia}T00:00:00.000Z`) },
+      }),
+    ).toBe(1);
+    const mesConf = Number(dia.slice(5, 7));
+    const anioConf = Number(dia.slice(0, 4));
+    const mesR = await ejecutar(ctxOwner(tenantA), "pauta.mes.leer", { instalacionId: instA, anio: anioConf, mes: mesConf });
+    const celda = (mesR as { data: { puestos: { id: string; celdas: { fecha: string; confirmado?: boolean }[] }[] } }).data.puestos
+      .find((p) => p.id === puestoDia)
+      ?.celdas.find((c) => c.fecha === dia);
+    expect(celda?.confirmado).toBe(true);
+    expect((await ejecutar(ctxOwner(tenantA), "pauta.cobertura.deshacer", { puestoId: puestoDia, fecha: dia })).ok).toBe(true);
+  });
+
+  it("PR2: reemplazo emite evento y exporta filas", async () => {
+    const dia = sumar(22);
+    const puestoPpc = puestoX3;
+    await fijar(puestoPpc, { titularPersonaId: null, desde: dia, inicioCiclo: dia });
+    const asignar = await ejecutar(ctxOwner(tenantA), "pauta.reemplazos.asignar", {
+      puestoId: puestoPpc,
+      fecha: dia,
+      personaId: martin,
+      motivo: "Reemplazo de prueba",
+    });
+    expect(asignar.ok).toBe(true);
+    const eventos = await e.admin.evento.findMany({ where: { tenantId: tenantA, tipo: "pauta.excepcion.creada" }, orderBy: { createdAt: "desc" }, take: 1 });
+    expect((eventos[0]?.payload as { tipo?: string })?.tipo).toBe("reemplazo");
+    const mesExp = Number(dia.slice(5, 7));
+    const anioExp = Number(dia.slice(0, 4));
+    const exp = await ejecutar(ctxOwner(tenantA), "pauta.exportar", { instalacionId: instA, anio: anioExp, mes: mesExp, formato: "excel", sinCubrir: true });
+    expect(exp.ok).toBe(true);
+    const csv = Buffer.from((exp as { data: { base64: string } }).data.base64, "base64").toString("utf8");
+    expect(csv.toLowerCase()).toContain("ppc");
+  });
+
+  it("PR2: tenant B no confirma cobertura en puesto de A", async () => {
+    expect(
+      await ejecutar(ctxOwner(tenantB), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: sumar(23) }),
+    ).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 });

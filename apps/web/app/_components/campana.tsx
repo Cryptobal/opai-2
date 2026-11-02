@@ -5,7 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-import { Alerta, Button, Empty, Popover, Punto, Skeleton } from "@opai/ds";
+import { Alerta, Button, Empty, Popover, Contador, Punto, Skeleton } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
@@ -91,7 +91,11 @@ function CampanaAvisos({
           className="relative"
         >
           <Bell className="size-5" />
-          <Punto visible={pendiente} />
+          {noLeidas === null ? (
+            <Punto visible={pendiente} />
+          ) : (
+            <Contador n={noLeidas + (aprobaciones ?? 0)} />
+          )}
         </Button>
       }
     >

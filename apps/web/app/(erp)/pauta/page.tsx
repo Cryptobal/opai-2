@@ -12,8 +12,8 @@ export const metadata = { title: "Pauta" };
 type Props = { searchParams: SearchParams };
 
 /**
- * Pauta · Mensual (Operaciones, Brief 11b PR 1). Sin `?inst` muestra todas las instalaciones; con una
- * instalación, su grilla. La pestaña Diaria llega en el PR 2 (CAR-86).
+ * Pauta · Mensual y Diaria (Operaciones, Brief 11b PR 1–2). Sin `?inst` muestra todas las instalaciones; con una
+ * instalación, su grilla o la vista diaria (CAR-86).
  */
 export default function Pauta({ searchParams }: Props) {
   return (

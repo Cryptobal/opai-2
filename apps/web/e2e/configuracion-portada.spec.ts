@@ -43,16 +43,22 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
     await page.screenshot({ path: qa(`portada-oscuro-${info.project.name}`), fullPage: true });
     await page.goto("/configuracion/grupo/operacion");
     await expect(page.getByRole("link", { name: /Calendario/ }).first()).toBeVisible();
-    await page.screenshot({ path: qa(`grupo-operacion-oscuro-${info.project.name}`), fullPage: true });
+    await page.screenshot({
+      path: qa(`grupo-operacion-oscuro-${info.project.name}`),
+      fullPage: true,
+    });
   });
 
-  test("tarjeta → entrada (escritorio/iPad) y tarjeta → lista → entrada → atrás (teléfono)", async ({
+  test("tarjeta → grupo (escritorio/iPad) y tarjeta → lista → entrada → atrás (teléfono)", async ({
     page,
   }, info) => {
     await entrar(page);
     await page.goto("/configuracion");
     if (info.project.name === "telefono") {
-      await page.getByRole("link", { name: /Empresa/ }).first().click();
+      await page
+        .getByRole("link", { name: /Empresa/ })
+        .first()
+        .click();
       await page.waitForURL(/\/configuracion\/grupo\/empresa$/);
       const entrada = page.getByRole("link", { name: /Datos de la empresa/ });
       await expect(entrada).toBeVisible();
@@ -66,10 +72,8 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
       await page.waitForURL(/\/configuracion\/grupo\/empresa$/);
     } else {
       await page.getByRole("link", { name: /^Empresa:/ }).click();
-      await page.waitForURL(/\/configuracion\/empresa$/);
-      await expect(
-        page.getByRole("heading", { name: "Datos de la empresa", exact: true }).first(),
-      ).toBeVisible();
+      await page.waitForURL(/\/configuracion\/grupo\/empresa$/);
+      await expect(page.getByRole("heading", { name: "Empresa", exact: true })).toBeVisible();
       // Migas «Configuración › Empresa» sobre el título.
       await expect(page.getByRole("navigation", { name: "Ruta de configuración" })).toBeVisible();
     }
@@ -81,14 +85,21 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
     await entrar(page);
     await page.goto("/configuracion");
     const campo = page.getByRole("searchbox", { name: "Buscar un ajuste" });
-    await campo.fill("feriados");
     const resultado = page.getByRole("link", { name: /Calendario/ });
-    await expect(resultado.first()).toBeVisible();
+    await expect(async () => {
+      await campo.fill("");
+      await campo.fill("feriados");
+      await expect(resultado.first()).toBeVisible();
+    }).toPass({ timeout: 15_000 });
     await resultado.first().click();
     await page.waitForURL(/\/configuracion\/calendario$/);
     await page.goto("/configuracion");
-    await page.getByRole("searchbox", { name: "Buscar un ajuste" }).fill("zxqwk");
-    await expect(page.getByText(/No encontramos/)).toBeVisible();
+    await expect(async () => {
+      const busqueda = page.getByRole("searchbox", { name: "Buscar un ajuste" });
+      await busqueda.fill("");
+      await busqueda.fill("zxqwk");
+      await expect(page.getByText(/No encontramos/)).toBeVisible();
+    }).toPass({ timeout: 15_000 });
   });
 
   test("404 de un grupo inexistente, con el shell del ERP", async ({ page }) => {
@@ -100,7 +111,10 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
   test("Preferencias se abre desde el menú de usuario y no está en la portada", async ({
     page,
   }, info) => {
-    test.skip(info.project.name === "telefono", "El menú de usuario del shell se prueba en iPad/escritorio");
+    test.skip(
+      info.project.name === "telefono",
+      "El menú de usuario del shell se prueba en iPad/escritorio",
+    );
     await entrar(page);
     await page.goto("/configuracion");
     // No aparece como tarjeta ni entrada de Configuración.

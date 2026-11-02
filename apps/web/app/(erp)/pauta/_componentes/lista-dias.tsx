@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Badge, cn } from "@opai/ds";
 
 import { descripcionCelda } from "./celda-turno";
-import { diaSemana, fechaCl, MOTIVO } from "./etiquetas";
+import { claveMes, diaSemana, fechaCl, MOTIVO } from "./etiquetas";
 import type { CeldaDia, MesPauta } from "./tipos";
 
 function EstadoDia({ c }: { c: CeldaDia }) {
@@ -21,7 +21,7 @@ function PuestosDeLaInstalacion({ mes }: { mes: MesPauta }) {
         {mes.puestos.map((p) => (
           <li key={p.id}>
             <Link
-              href={`?serie=${p.id}`}
+              href={`?inst=${mes.instalacionId}&mes=${claveMes(mes.anio, mes.mes)}&serie=${p.id}`}
               scroll={false}
               className="flex min-h-14 items-center justify-between gap-3 px-4 py-2 outline-none focus-visible:outline-2 focus-visible:outline-focus"
             >
@@ -64,7 +64,7 @@ export function ListaDias({ mes }: { mes: MesPauta }) {
               {filas.map(({ p, c }) => (
                 <li key={p.id}>
                   <Link
-                    href={`?dia=${p.id}_${fecha}`}
+                    href={`?inst=${mes.instalacionId}&mes=${claveMes(mes.anio, mes.mes)}&dia=${p.id}_${fecha}`}
                     scroll={false}
                     aria-label={`${p.nombre}: ${descripcionCelda(c)}`}
                     className="flex min-h-14 items-center justify-between gap-3 px-4 py-2 outline-none focus-visible:outline-2 focus-visible:outline-focus"

@@ -16,6 +16,8 @@ type Props = {
   telefono: "lista" | "detalle";
   /** Ancho de la lista desde 1280: 400 px (por defecto) o 360. */
   anchoXl?: 360 | 400;
+  /** Configuración: encabezado externo y columnas dentro del contenedor. */
+  contenido?: boolean;
   /**
    * Fichas con lista + detalle: de 768 a 1023 px se ve un solo panel a todo el ancho (la lista en
    * su ruta, el detalle en la suya, con "Volver a la lista") y la vista dividida empieza en 1024.
@@ -40,11 +42,13 @@ export function SplitScreen(props: Props) {
     <div
       className={cn(
         "flex min-h-0 flex-1",
-        props.incrustado
-          ? "overflow-hidden rounded-lg border border-border md:h-[440px]"
-          : uno
-            ? "lg:-mx-6 lg:-mt-5 lg:-mb-8 lg:h-[calc(100dvh-60px)] xl:-mx-8"
-            : "md:-mx-6 md:-mt-5 md:-mb-8 md:h-[calc(100dvh-60px)] xl:-mx-8",
+        props.contenido
+          ? "gap-4"
+          : props.incrustado
+            ? "overflow-hidden rounded-lg border border-border md:h-[440px]"
+            : uno
+              ? "lg:-mx-6 lg:-mt-5 lg:-mb-8 lg:h-[calc(100dvh-60px)] xl:-mx-8"
+              : "md:-mx-6 md:-mt-5 md:-mb-8 md:h-[calc(100dvh-60px)] xl:-mx-8",
       )}
     >
       <section
@@ -54,8 +58,8 @@ export function SplitScreen(props: Props) {
           uno
             ? "lg:flex lg:flex-none lg:overflow-y-auto lg:border-r lg:border-border lg:bg-surface lg:w-[360px]"
             : "md:flex md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
-          !uno && "md:w-[360px]",
-          anchoXl === 400 && "xl:w-[400px]",
+          !uno && (props.contenido ? "md:w-64" : "md:w-[360px]"),
+          !props.contenido && anchoXl === 400 && "xl:w-[400px]",
           telefono === "lista" ? "flex w-full" : "hidden",
         )}
       >

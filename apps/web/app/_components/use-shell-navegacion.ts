@@ -81,7 +81,7 @@ export function useShellNavegacion(
       rutaPrevia.current = rutaEfectiva;
       if (areaActiva) {
         void Promise.resolve().then(() => setAreaElegida(areaActiva));
-        prefs.fijarAreaAbierta(areaActiva);
+        // El menú plano no persiste aperturas ni invalida el layout al navegar.
       }
     }
   }, [rutaEfectiva, areaActiva, prefs]);

@@ -22,6 +22,7 @@ export function esIdInvalido(pathname: string): boolean {
 
 /** Página a la que el proxy reescribe un 404: la del portal de la ruta, no la del ERP. */
 export function destino404(pathname: string): string {
+  if (pathname.startsWith("/configuracion/grupo/")) return `/configuracion/no-encontrado?ruta=${encodeURIComponent(pathname)}`;
   const [primero] = pathname.split("/").filter(Boolean);
   return primero && PORTALES.includes(primero) ? `/${primero}/no-encontrado` : "/no-encontrado";
 }
