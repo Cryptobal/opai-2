@@ -3,7 +3,7 @@ import { z } from "zod";
 import { conflicto, defineCapability, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
 import { calcularPlanilla, evaluarCierre, semanasDesde } from "../domain";
-import { saldoSchema, semanaSchema } from "./esquemas";
+import { cabeEnSaldoInt4, saldoEntradaInt4Schema, saldoSchema, semanaSchema } from "./esquemas";
 import { PERMISO_CERRAR, PERMISO_VER } from "./permisos";
 import { aFecha, ajustesDe, aIso, bloquearSemanaFlujo, cargarFlujo, semanaSelladaEnTx } from "./util";
 
@@ -53,7 +53,7 @@ export const cierreSellar = defineCapability({
   permiso: PERMISO_CERRAR,
   input: z.object({
     semana: semanaSchema,
-    saldoBanco: saldoSchema,
+    saldoBanco: saldoEntradaInt4Schema,
     motivo: z.string().trim().min(3).max(500).optional(),
   }),
   output: cierreSchema,
@@ -79,6 +79,10 @@ export const cierreSellar = defineCapability({
         filas: dominio,
         celdas: celdasDom,
       }).at(-1)?.saldoFinal ?? ajustes.saldoInicial;
+    if (!cabeEnSaldoInt4(sugerido) || !cabeEnSaldoInt4(input.saldoBanco))
+      throw reglaDeNegocio(
+        "El saldo sugerido o el saldo del banco supera el rango que admite guardar un cierre (±2.147.483.647). Reduce cifras en la planilla o corrige el saldo del banco.",
+      );
     const { exigeMotivo } = evaluarCierre(sugerido, input.saldoBanco, ajustes.toleranciaCierre);
     if (exigeMotivo && !input.motivo)
       throw reglaDeNegocio("La diferencia con el banco supera la tolerancia: indica el motivo.");
