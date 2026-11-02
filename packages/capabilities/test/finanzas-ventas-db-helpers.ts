@@ -59,7 +59,7 @@ export async function prepararVentasDb(): Promise<VentasDbSuite> {
   };
   await dato("finanzas.dte_config.actualizar", {
     ambiente: "certificacion",
-    rutEmisor: "76111222-3",
+    rutEmisor: "76111222-8",
   });
   await dato("finanzas.folios.cargar_caf", {
     tipoDte: 33,
