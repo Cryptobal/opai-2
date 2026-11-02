@@ -6,7 +6,7 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import type { CuentaFila, Pagina } from "@/lib/tipos-maestros";
 
-import { FormularioEmitir } from "./formulario-emitir";
+import { FormularioEmitirDiferido } from "./formulario-emitir-diferido";
 
 export const metadata = { title: "Emitir DTE" };
 
@@ -38,7 +38,7 @@ export default async function EmitirVentaPage() {
     >
       {(d) => {
         if (d.state === "forbidden") redirect("/finanzas/ventas");
-        return <FormularioEmitir cuentas={d.cuentas} />;
+        return <FormularioEmitirDiferido cuentas={d.cuentas} />;
       }}
     </PaginaPortal>
   );
