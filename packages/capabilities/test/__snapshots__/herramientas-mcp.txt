@@ -317,6 +317,7 @@ finanzas_ventas_libro_resumen
 finanzas_ventas_listar
 finanzas_ventas_obtener
 finanzas_ventas_pdf
+finanzas_ventas_preflight_emision
 finanzas_ventas_proyeccion_flujo
 nomina_anticipos_fijar_regla
 nomina_anticipos_generar

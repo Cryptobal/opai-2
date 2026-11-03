@@ -12,17 +12,29 @@ async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleA
   const integ = await ctx.db.integracion.findUnique({
     where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_emision" } },
   });
-  if (!integ) return null;
+  const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
+  if (!integ || !cfg?.resolucionSiiNumero || !cfg.resolucionSiiFecha) return null;
   const [apiKey, certificadoPfx, certificadoClave] = await Promise.all([
     leerSecreto(ctx, integ.id, "api_key"),
     leerSecreto(ctx, integ.id, "certificado_pfx"),
     leerSecreto(ctx, integ.id, "certificado_clave"),
   ]);
   if (!apiKey || !certificadoPfx || !certificadoClave) return null;
-  return { apiKey, certificadoPfx, certificadoClave };
+  const tenant = await ctx.db.tenant.findUnique({
+    where: { id: ctx.tenantId },
+    select: { nombre: true },
+  });
+  return {
+    apiKey,
+    certificadoPfxBase64: certificadoPfx,
+    certificadoClave,
+    resolucionNumero: cfg.resolucionSiiNumero,
+    resolucionFecha: cfg.resolucionSiiFecha.toISOString().slice(0, 10),
+    ...(tenant?.nombre ? { razonSocialEmisor: tenant.nombre } : {}),
+  };
 }
 
-/** Adaptador SII efectivo del tenant (simulado en test; SimpleAPI si está configurado). */
+/** Adaptador SII efectivo del tenant (simulado en test; SimpleAPI v1 si está configurado). */
 export async function adaptadorSiiDe(ctx: Contexto): Promise<AdaptadorSii> {
   if (process.env.NODE_ENV === "test" || process.env.SII_ADAPTADOR === "simulado") {
     return adaptadorSiiSimulado();

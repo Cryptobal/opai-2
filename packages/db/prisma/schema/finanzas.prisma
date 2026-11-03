@@ -356,6 +356,9 @@ model DteConfig {
   emisionProveedor  String   @default("simulado") @map("emision_proveedor")
   /// octava cuando el tenant activa cesión (integración dte_cesion).
   cesionProveedor   String?  @map("cesion_proveedor")
+  /// Resolución de autorización del SII (requerida con SimpleAPI real).
+  resolucionSiiNumero Int?   @map("resolucion_sii_numero")
+  resolucionSiiFecha  DateTime? @map("resolucion_sii_fecha") @db.Date
   certificadoSecretoId   String? @map("certificado_secreto_id") @db.Uuid
   emisionApiKeySecretoId String? @map("emision_api_key_secreto_id") @db.Uuid
   /// Porcentaje del rango CAF bajo el cual avisar folios bajos (R-FIN-038).

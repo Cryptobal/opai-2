@@ -1,45 +1,18 @@
 import { z } from "zod";
 
-import { AMBIENTES_SII, AVISO_CAF_DIAS_DEFECTO, UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO } from "@opai/domain";
+import { AVISO_CAF_DIAS_DEFECTO, AMBIENTES_SII, UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { dia, diaSchema, escribirConEvento, rutSchema } from "../core/maestros/comun";
-import { prohibido, reglaDeNegocio } from "../errores";
-import type { Contexto } from "../types";
+import { reglaDeNegocio } from "../errores";
 import { PERMISO_READ, PERMISO_VENTAS_CONFIGURE } from "./comun";
-
-const proveedorEmisionSchema = z.enum(["simulado", "simpleapi"]);
-const proveedorCesionSchema = z.enum(["octava"]).nullable();
-
-const configSchema = z.object({
-  ambiente: z.enum(AMBIENTES_SII),
-  rutEmisor: z.string().nullable(),
-  emisionProveedor: proveedorEmisionSchema,
-  cesionProveedor: proveedorCesionSchema,
-  umbralFoliosPct: z.number().int().min(1).max(100),
-  avisoCafDias: z.number().int().min(1).max(365),
-  fechaCorte1_0: z.string().nullable(),
-});
-
-function vistaCfg(cfg: {
-  ambiente: string;
-  rutEmisor: string | null;
-  emisionProveedor: string;
-  cesionProveedor: string | null;
-  umbralFoliosPct: number;
-  avisoCafDias: number;
-  fechaCorte1_0?: Date | null;
-}) {
-  return {
-    ambiente: cfg.ambiente as (typeof AMBIENTES_SII)[number],
-    rutEmisor: cfg.rutEmisor,
-    emisionProveedor: cfg.emisionProveedor as z.infer<typeof proveedorEmisionSchema>,
-    cesionProveedor: cfg.cesionProveedor as z.infer<typeof proveedorCesionSchema>,
-    umbralFoliosPct: cfg.umbralFoliosPct,
-    avisoCafDias: cfg.avisoCafDias,
-    fechaCorte1_0: dia(cfg.fechaCorte1_0 ?? null),
-  };
-}
+import {
+  configDteSchema,
+  exigeOwnerHumanoDte,
+  proveedorCesionSchema,
+  proveedorEmisionSchema,
+  vistaCfgDte,
+} from "./dte-config-vista";
 
 export const dteConfigObtener = defineCapability({
   id: "finanzas.dte_config.obtener",
@@ -47,31 +20,24 @@ export const dteConfigObtener = defineCapability({
     "Devuelve la configuración DTE del tenant: ambiente SII, conectores de emisión/cesión y umbrales de aviso CAF/folios.",
   permiso: PERMISO_READ,
   input: z.object({}),
-  output: configSchema,
+  output: configDteSchema,
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
     const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
-    return vistaCfg({
+    return vistaCfgDte({
       ambiente: cfg?.ambiente ?? "certificacion",
       rutEmisor: cfg?.rutEmisor ?? null,
       emisionProveedor: cfg?.emisionProveedor ?? "simulado",
       cesionProveedor: cfg?.cesionProveedor ?? null,
+      resolucionSiiNumero: cfg?.resolucionSiiNumero ?? null,
+      resolucionSiiFecha: cfg?.resolucionSiiFecha ?? null,
       umbralFoliosPct: cfg?.umbralFoliosPct ?? UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
       avisoCafDias: cfg?.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
       fechaCorte1_0: cfg?.fechaCorte1_0 ?? null,
     });
   },
 });
-
-function exigeOwnerHumano(ctx: Contexto, accion: string) {
-  if (ctx.actor.tipo !== "user") {
-    throw prohibido(`Solo un usuario humano owner puede ${accion}.`);
-  }
-  if (ctx.rol !== "owner") {
-    throw prohibido(`Solo el owner puede ${accion}.`);
-  }
-}
 
 export const dteConfigActualizar = defineCapability({
   id: "finanzas.dte_config.actualizar",
@@ -83,20 +49,22 @@ export const dteConfigActualizar = defineCapability({
     rutEmisor: rutSchema.optional(),
     emisionProveedor: proveedorEmisionSchema.optional(),
     cesionProveedor: proveedorCesionSchema.optional(),
+    resolucionSiiNumero: z.number().int().min(1).max(999_999).nullable().optional(),
+    resolucionSiiFecha: diaSchema.nullable().optional(),
     umbralFoliosPct: z.number().int().min(1).max(100).optional(),
     avisoCafDias: z.number().int().min(1).max(365).optional(),
     fechaCorte1_0: diaSchema.nullable().optional(),
   }),
-  output: configSchema,
+  output: configDteSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const tocaSensibles =
-      input.ambiente === "produccion" ||
-      input.emisionProveedor !== undefined ||
-      input.cesionProveedor !== undefined;
+      input.ambiente === "produccion"
+      || input.emisionProveedor !== undefined
+      || input.cesionProveedor !== undefined;
     if (tocaSensibles) {
-      exigeOwnerHumano(ctx, "activar producción SII o cambiar conectores DTE");
+      exigeOwnerHumanoDte(ctx, "activar producción SII o cambiar conectores DTE");
     }
     const rut = input.rutEmisor ?? undefined;
     const prev = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
@@ -106,19 +74,31 @@ export const dteConfigActualizar = defineCapability({
         : input.fechaCorte1_0
           ? new Date(`${input.fechaCorte1_0}T00:00:00.000Z`)
           : null;
+    const resolucionFechaDb =
+      input.resolucionSiiFecha === undefined
+        ? prev?.resolucionSiiFecha ?? null
+        : input.resolucionSiiFecha
+          ? new Date(`${input.resolucionSiiFecha}T00:00:00.000Z`)
+          : null;
     const next = {
       ambiente: input.ambiente,
       rutEmisor: rut ?? prev?.rutEmisor ?? null,
       emisionProveedor: input.emisionProveedor ?? prev?.emisionProveedor ?? "simulado",
       cesionProveedor:
         input.cesionProveedor !== undefined ? input.cesionProveedor : (prev?.cesionProveedor ?? null),
+      resolucionSiiNumero:
+        input.resolucionSiiNumero !== undefined ? input.resolucionSiiNumero : (prev?.resolucionSiiNumero ?? null),
+      resolucionSiiFecha: resolucionFechaDb,
       umbralFoliosPct: input.umbralFoliosPct ?? prev?.umbralFoliosPct ?? UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
       avisoCafDias: input.avisoCafDias ?? prev?.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
       fechaCorte1_0: fechaCorteDb,
     };
-    if (dryRun) return vistaCfg(next);
+    if (dryRun) return vistaCfgDte(next);
     if (next.ambiente === "produccion" && !next.rutEmisor) {
       throw reglaDeNegocio("Producción requiere RUT emisor configurado.");
+    }
+    if (next.emisionProveedor === "simpleapi" && (!next.resolucionSiiNumero || !next.resolucionSiiFecha)) {
+      throw reglaDeNegocio("SimpleAPI requiere número y fecha de resolución SII del emisor.");
     }
     const fechaCorteAnterior = dia(prev?.fechaCorte1_0 ?? null);
     const fechaCorteNueva = dia(next.fechaCorte1_0);
@@ -143,6 +123,6 @@ export const dteConfigActualizar = defineCapability({
           update: next,
         }),
     );
-    return vistaCfg(cfg);
+    return vistaCfgDte(cfg);
   },
 });

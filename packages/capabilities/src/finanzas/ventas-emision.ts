@@ -3,6 +3,7 @@ import { z } from "zod";
 import { validarMontosVenta, type TipoDteVenta } from "@opai/domain";
 import { adaptadorSiiDe } from "./adaptador-sii";
 import { guardarXmlFirmadoDte } from "./ventas-xml";
+import { payloadEmisionDteDe } from "./ventas-payload-emision";
 
 import { defineCapability } from "../define";
 import { aFecha, escribirConEvento, hoy } from "../core/maestros/comun";
@@ -15,7 +16,6 @@ import {
   cuentaDe,
   documentoEmitidoIdSchema,
   marcarBorradorEmitido,
-  camposReceptorDteEnPayload,
   rutEmisorDe,
 } from "./ventas-comun";
 import { ventaSchema } from "./vistas-venta";
@@ -33,14 +33,15 @@ export const ventasEmitir = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const doc = await ctx.db.documentoEmitido.findFirst({
       where: { id: input.documentoId },
-      include: { lineas: { orderBy: { orden: "asc" } } },
+      include: { lineas: { orderBy: { orden: "asc" } }, referencias: true },
     });
     if (!doc) throw noEncontrado("El documento");
     if (doc.estadoDte !== "borrador") throw reglaDeNegocio("Solo se emiten borradores.");
     if (doc.folio != null) throw reglaDeNegocio("El borrador ya tiene folio asignado.");
     if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
     const cuenta = await cuentaDe(ctx, doc.cuentaId);
-    if (!cuenta.rut) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");
+    const rutReceptor = cuenta.rut;
+    if (!rutReceptor) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");
     const tipo = doc.tipoDte as TipoDteVenta;
     const error = validarMontosVenta(tipo, {
       neto: doc.montoNeto,
@@ -75,22 +76,24 @@ export const ventasEmitir = defineCapability({
       },
       async (tx) => {
         folioEmitido = await consumirFolio(ctx, tipo, false, tx);
-        const payload = {
+        const payload = await payloadEmisionDteDe(ctx, {
           ambiente,
-          tipoDte: tipo,
-          folio: folioEmitido,
-          fechaEmision: emision,
           rutEmisor,
-          rutReceptor: cuenta.rut!,
-          ...camposReceptorDteEnPayload(cuenta),
-          montos: {
-            neto: doc.montoNeto,
-            exento: doc.montoExento,
-            iva: doc.montoIva,
-            total: doc.montoTotal,
+          cuenta: { ...cuenta, rut: rutReceptor },
+          doc: {
+            tipoDte: doc.tipoDte,
+            folio: folioEmitido,
+            fechaEmision: emision,
+            glosa: doc.glosa,
+            montoNeto: doc.montoNeto,
+            montoExento: doc.montoExento,
+            montoIva: doc.montoIva,
+            montoTotal: doc.montoTotal,
+            lineas: doc.lineas,
+            referencias: doc.referencias,
           },
-          ...(doc.glosa != null && doc.glosa !== "" ? { glosa: doc.glosa } : {}),
-        };
+          incluirCaf: adaptador.nombre !== "simulado",
+        });
         const firmado = await adaptador.firmar(payload);
         if (adaptador.nombre !== "simulado") {
           await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml);
