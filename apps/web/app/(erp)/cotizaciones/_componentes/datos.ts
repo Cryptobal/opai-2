@@ -5,6 +5,8 @@ import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
+import type { LineaEditable } from "./puesto-tipos";
+
 export type CotizacionFila = {
   id: string;
   codigo: string;
@@ -104,7 +106,7 @@ export async function cargarFichaCotizacion(id: string) {
     secciones: {
       id: string;
       nombre: string;
-      lineas: { id: string; nombre: string; tipo: string; costo?: unknown; posiciones?: number }[];
+      lineas: (LineaEditable & { tipo: string; costo?: unknown })[];
     }[];
   };
   const r = await ejecutarComoUsuario<FichaRespuesta>("erp", "cpq.cotizaciones.ficha", { id });
