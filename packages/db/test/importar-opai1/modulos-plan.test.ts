@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   MOTIVO_MODULO_COMERCIAL_INACTIVO,
   MOTIVO_MODULO_FINANZAS_INACTIVO,
-  MOTIVO_PENDIENTE_CRM,
   pendientesImportacion,
 } from "../../scripts/importar-opai1/comercial-pendiente";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
@@ -30,9 +29,31 @@ describe("plan según módulos del tenant", () => {
     });
   });
 
-  it("con Comercial activo pero sin schema: negocios pendientes de CRM PR 1", () => {
-    const pendientes = pendientesImportacion(fixture(), { modulosActivos: ["comercial"] });
-    expect(pendientes).toContainEqual({ entidad: "negocio", filas: 1, motivo: MOTIVO_PENDIENTE_CRM });
+  it("con Comercial activo: negocios entran al plan (no pendiente_crm)", () => {
+    const plan = calcularPlan(fixture(), estadoVacio(), { modulosActivos: ["comercial"] });
+    expect(plan.pendientes.find((p) => p.motivo === "pendiente_crm_pr1")).toBeUndefined();
+    expect(plan.comercial.etapas.filter((e) => e.accion === "crear").length).toBe(3);
+    expect(plan.comercial.negocios.filter((n) => n.accion === "crear").length).toBe(1);
+    expect(plan.comercial.historial.filter((h) => h.accion === "crear").length).toBe(2);
+    expect(plan.comercial.contactosNegocio.filter((c) => c.accion === "crear").length).toBe(1);
+  });
+
+  it("cotizaciones: export incompleto en pendientes y omitidas en el plan", () => {
+    const datos = {
+      ...fixture(),
+      cpqQuotes: [
+        { id: "q-1", code: "CPQ-2025-001", createdAt: "2025-01-01T12:00:00.000Z" },
+      ],
+    };
+    const plan = calcularPlan(datos, estadoVacio(), { modulosActivos: ["comercial", "cpq"] });
+    expect(plan.pendientes).toContainEqual({
+      entidad: "cotizacion",
+      filas: 1,
+      motivo: "export_cpq_incompleto",
+    });
+    expect(plan.comercial.cotizaciones).toEqual([
+      expect.objectContaining({ idOpai1: "q-1", accion: "omitido", motivo: "export_cpq_incompleto" }),
+    ]);
   });
 
   it("recurrentes: sin Finanzas queda pendiente; con Finanzas entra al plan", () => {

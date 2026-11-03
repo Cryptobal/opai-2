@@ -1,6 +1,7 @@
 // Plan completo de la importación desde 1.0: puro y determinista (mismo origen + mismo estado 2.0 →
 // mismo plan). No escribe: la carga real (otro PR, con el OK de Carlos) consumirá este plan.
 import { pendientesImportacion, type Pendiente } from "./comercial-pendiente";
+import { planComercial, type PlanComercial } from "./comercial-plan";
 import { type CorrelativoCpqPropuesto, planCorrelativosCpq } from "./correlativos-cpq";
 import { type Aviso, type Decision, ordenEstable, type Propuesta } from "./comun";
 import type { DatosContacto } from "./contactos-datos";
@@ -28,6 +29,7 @@ export type Plan = {
   contactos: Decision<DatosContacto>[];
   instalaciones: Decision<DatosInstalacion>[];
   programaciones: Decision<DatosProgramacion>[];
+  comercial: PlanComercial;
   destinatarios: ResumenDestinatarios;
   correlativosCpq: CorrelativoCpqPropuesto[];
   propuestas: Propuesta[];
@@ -75,6 +77,17 @@ export function calcularPlan(
     ultimoCpq,
     modulosDelPlan(opciones).cpq,
   );
+  const comercial = planComercial(
+    origen,
+    destino,
+    opciones,
+    (id) => {
+      const r = resolver(id);
+      if (!r) return null;
+      return r.destinoId ?? r.clave;
+    },
+    (id) => resolverContacto(id),
+  );
   const avisosTrib = avisosTributariosCuentas(cuentas.decisiones);
   return {
     opciones,
@@ -82,6 +95,7 @@ export function calcularPlan(
     contactos: contactos.decisiones,
     instalaciones: instalaciones.decisiones,
     programaciones: recurrentes.decisiones,
+    comercial,
     destinatarios: recurrentes.destinatarios,
     correlativosCpq,
     propuestas: [...cuentas.propuestas, ...contactos.propuestas],
@@ -90,6 +104,7 @@ export function calcularPlan(
       ...contactos.avisos,
       ...instalaciones.avisos,
       ...avisosTrib,
+      ...comercial.avisos,
     ],
     etiquetas: etiquetasPropuestas(origen),
     pendientes: pendientesImportacion(origen, opciones),

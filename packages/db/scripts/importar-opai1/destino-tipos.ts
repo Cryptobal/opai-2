@@ -2,7 +2,16 @@
 
 export const SISTEMA_OPAI1 = "opai1";
 
-export type EntidadImportada = "cuenta" | "contacto" | "instalacion" | "programacion_recurrente";
+export type EntidadImportada =
+  | "cuenta"
+  | "contacto"
+  | "instalacion"
+  | "programacion_recurrente"
+  | "etapa"
+  | "negocio"
+  | "negocio_etapa"
+  | "negocio_contacto"
+  | "cotizacion";
 
 export type CuentaDestino = {
   id: string;

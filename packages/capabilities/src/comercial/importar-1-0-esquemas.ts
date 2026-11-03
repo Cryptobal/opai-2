@@ -12,6 +12,11 @@ export const reporteImportar10Schema = z.object({
     contacto: z.record(accionSchema, z.number().int()),
     instalacion: z.record(accionSchema, z.number().int()),
     programacion_recurrente: z.record(accionSchema, z.number().int()),
+    etapa: z.record(accionSchema, z.number().int()),
+    negocio: z.record(accionSchema, z.number().int()),
+    negocio_etapa: z.record(accionSchema, z.number().int()),
+    negocio_contacto: z.record(accionSchema, z.number().int()),
+    cotizacion: z.record(accionSchema, z.number().int()),
   }),
   tributario: z.object({
     cuentasConsideradas: z.number().int(),
