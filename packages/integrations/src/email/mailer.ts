@@ -4,6 +4,8 @@ export type Correo = {
   asunto: string;
   texto: string;
   html?: string;
+  /** Reply-To (p. ej. la dirección de respuestas de un seguimiento y el correo del vendedor). */
+  responderA?: string[];
 };
 
 export interface Mailer {
