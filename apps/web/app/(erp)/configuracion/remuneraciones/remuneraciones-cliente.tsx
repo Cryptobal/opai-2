@@ -9,12 +9,19 @@ import { TablaRemuneraciones, type DatosRemuneraciones } from "./tabla-remunerac
 export function RemuneracionesCliente({
   r,
   puede,
+  abrirMutual = false,
 }: {
   r: Extract<Resultado<DatosRemuneraciones>, { ok: true }>;
   puede: boolean;
+  abrirMutual?: boolean;
 }) {
   const router = useRouter();
   return (
-    <TablaRemuneraciones data={r.data} puede={puede} onActualizado={() => router.refresh()} />
+    <TablaRemuneraciones
+      data={r.data}
+      puede={puede}
+      abrirMutual={abrirMutual}
+      onActualizado={() => router.refresh()}
+    />
   );
 }

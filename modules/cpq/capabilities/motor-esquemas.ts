@@ -50,9 +50,14 @@ export const motorInputSchema = z.object({
 });
 const firmado = z.number().int().safe();
 const uf = z.object({ valorClpEscalado: entero, fecha }).nullable();
+/** Causa tipada de lo pendiente (CAR-162), sin montos: la ven también quienes no tienen costos. */
+const aviso = z.object({ codigo: z.enum(["mutual_sin_confirmar", "sueldo_faltante", "juego_legal_faltante"]),
+  mensaje: z.string().max(200), lineaId: id.optional(), indicador: z.string().max(80).optional() });
 const publico = { ventaMensual: entero.nullable(), pagosUnicos: entero,
   dotacion: z.object({ posiciones: entero, personasEscaladas: entero }), uf, fecha,
-  estado: z.literal("borrador"), advertencias: z.array(z.string().max(200)), noEnviable: z.boolean() };
+  estado: z.literal("borrador"), advertencias: z.array(z.string().max(200)), noEnviable: z.boolean(),
+  // Un aviso por línea (máx. 200) más los globales (mutual, juego legal): el tope no puede ser 200.
+  avisos: z.array(aviso).max(210).optional() };
 export const motorOutputSchema = z.union([
   z.strictObject({ ...publico,
     lineas: z.array(z.object({ id, seccion: id, categoria: id, costoMensual: entero, costoUnico: entero, ventaAdicional: entero, ventaUnica: entero })),

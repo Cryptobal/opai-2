@@ -12,11 +12,13 @@ export type ImpactoSueldo = {
     diferencia: number | null;
   }[];
 };
+const conteo = (n: number, singular: string, plural = `${singular}s`) => `${n} ${n === 1 ? singular : plural}`;
+
 export function ImpactoCambio({ impacto: i }: { impacto: ImpactoSueldo }) {
   return (
     <Alerta
       tono="info"
-      titulo={`${i.puestos} puestos · ${i.personasRut} personas con capa RUT · ${i.borradores} borradores previstos`}
+      titulo={`${conteo(i.puestos, "puesto")} · ${conteo(i.personasRut, "persona")} con capa RUT · ${conteo(i.borradores, "borrador previsto", "borradores previstos")}`}
     >
       <p>
         {i.pendientesVinculo} vínculos vigentes de la empresa pendientes de vínculo con instalación;

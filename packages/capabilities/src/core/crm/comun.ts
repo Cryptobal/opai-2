@@ -22,6 +22,7 @@ export const TIPOS_ACTIVIDAD = [
   "visita",
   "tarea",
 ] as const;
+export const RESULTADOS_LLAMADA = ["contesto", "no_contesto", "volver_a_llamar"] as const;
 export const ENTIDADES_ACTIVIDAD = ["negocio", "cuenta", "contacto", "instalacion"] as const;
 export const ENTIDADES_ETIQUETA = ["negocio", "cuenta", "contacto"] as const;
 export const TONOS_ETIQUETA = ["neutral", "info", "success", "warning", "danger"] as const;

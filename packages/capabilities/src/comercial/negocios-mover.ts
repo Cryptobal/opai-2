@@ -5,6 +5,7 @@ import { ajuste } from "../core/config";
 import { reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { PERMISO_MANAGE, etapaDe, negocioDe, negocioSchema, vistaNegocio } from "./comun";
+import { efectosGanarSchema, planGanar } from "./ganar-efectos";
 import { aplicarEtapa } from "./transiciones-util";
 import { validarEntrada } from "./validaciones";
 
@@ -45,10 +46,10 @@ export const negociosMover = defineCapability({
 export const negociosGanar = defineCapability({
   id: "comercial.negocios.ganar",
   descripcion:
-    "IRREVERSIBLE: marca un negocio como ganado (etapa ganada del embudo), validando los requisitos. Un agente queda en la cola de aprobación humana (R18, R20).",
+    "IRREVERSIBLE: marca un negocio como ganado (etapa ganada del embudo), validando los requisitos. Devuelve los efectos (R18): la cuenta pasa a cliente activo, se activan las instalaciones, la cotización vigente queda aceptada y cuántos puestos se ofrecerán; la vista previa los muestra sin aplicarlos. Un agente queda en la cola de aprobación humana (R20).",
   permiso: PERMISO_MANAGE,
   input: z.object({ id: uuidSchema }),
-  output: negocioSchema.extend({ aviso: z.string().nullable() }),
+  output: negocioSchema.extend({ aviso: z.string().nullable(), efectos: efectosGanarSchema }),
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
@@ -74,14 +75,21 @@ export const negociosGanar = defineCapability({
       () => true,
     );
     const aviso = sinCotizacion && avisar ? "Se gana sin cotización enviada." : null;
+    // Los efectos los aplican los consumidores de `comercial.negocio.ganado` (R18, R45); aquí se
+    // calculan con el mismo plan para que la vista previa diga exactamente lo que va a pasar.
+    const { efectos } = await planGanar(ctx.db, negocio);
     if (dryRun)
-      return { ...vistaNegocio({ ...negocio, etapaId: ganada.id, estado: "ganado" }), aviso };
+      return {
+        ...vistaNegocio({ ...negocio, etapaId: ganada.id, estado: "ganado" }),
+        aviso,
+        efectos,
+      };
     const r = await ctx.transaccion((tx) =>
       aplicarEtapa(ctx, tx, negocio, ganada, {
         evento: "comercial.negocio.ganado",
         datos: { ganadoEn: new Date() },
       }),
     );
-    return { ...vistaNegocio(r), aviso };
+    return { ...vistaNegocio(r), aviso, efectos };
   },
 });

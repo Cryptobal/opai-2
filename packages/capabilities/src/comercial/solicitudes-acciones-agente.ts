@@ -39,9 +39,13 @@ export const solicitudesAccionesAgente = defineCapability({
     const filas = await ctx.db.auditEvent.findMany({
       where: {
         tenantId: ctx.tenantId,
-        entityType: "solicitud",
-        entityId: input.id,
         capability: { in: caps },
+        // La propuesta de conversión queda en la auditoría de la aprobación (entidad «aprobacion»):
+        // se liga a la solicitud por el id de su input.
+        OR: [
+          { entityType: "solicitud", entityId: input.id },
+          { entityType: "aprobacion", payload: { path: ["input", "id"], equals: input.id } },
+        ],
       },
       orderBy: { createdAt: "desc" },
       take: input.limite,
