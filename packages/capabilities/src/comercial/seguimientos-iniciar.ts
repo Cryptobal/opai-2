@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { agendarPasos, generarTokenRespuesta } from "@opai/domain";
 
+import { exigirResponsables } from "../core/crm/comun";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
@@ -37,6 +38,11 @@ export const seguimientosIniciar = defineCapability({
     if (!plan.activo) throw reglaDeNegocio("Ese plan está desactivado.");
     const vivo = await ctx.db.seguimiento.findFirst({ where: { negocioId: negocio.id, estado: { in: ["activo", "pausado"] } } });
     if (vivo && !input.reemplazar) throw reglaDeNegocio("El negocio ya tiene un seguimiento en curso; indica reemplazar.");
+    if (input.asignadoId) await exigirResponsables(ctx, [input.asignadoId]);
+    // El destinatario de los correos es un contacto vinculado al negocio: el indicado o el principal.
+    const vinculos = await ctx.db.negocioContacto.findMany({ where: { negocioId: negocio.id }, orderBy: { esPrincipal: "desc" } });
+    const contactoId = input.contactoId ?? vinculos[0]?.contactoId ?? null;
+    if (input.contactoId && !vinculos.some((v) => v.contactoId === input.contactoId)) throw noEncontrado("El contacto");
     const ancla = input.ancla ? new Date(input.ancla) : new Date();
     const config = await configDeVersion(ctx, plan.id, plan.versionActual);
     const agenda = agendarPasos(config, ancla, await ambitoHabil(ctx, ancla), await zonaDe(ctx));
@@ -44,7 +50,7 @@ export const seguimientosIniciar = defineCapability({
       return {
         id: "", negocioId: negocio.id, planId: plan.id, planNombre: plan.nombre, planVersion: plan.versionActual,
         estado: "activo", estadoVisible: "activo", motivo: null, ancla: ancla.toISOString(),
-        cotizacionCodigo: input.cotizacionCodigo ?? null, contactoId: input.contactoId ?? null, proximoPasoId: null,
+        cotizacionCodigo: input.cotizacionCodigo ?? null, contactoId, proximoPasoId: null,
         pasos: agenda.map((a) => {
           const p = config.pasos[a.orden - 1]!;
           return { id: "", orden: a.orden, titulo: p.titulo, canal: p.canal, ejecutor: p.ejecutor, estado: "programado",
@@ -62,7 +68,7 @@ export const seguimientosIniciar = defineCapability({
         data: {
           tenantId: ctx.tenantId, negocioId: negocio.id, planId: plan.id, planVersion: plan.versionActual, ancla,
           cotizacionId: input.cotizacionId ?? null, cotizacionCodigo: input.cotizacionCodigo ?? null,
-          contactoId: input.contactoId ?? null, token: generarTokenRespuesta(), creadoPorId: ctx.actor.id ?? null,
+          contactoId, token: generarTokenRespuesta(), creadoPorId: ctx.actor.id ?? null,
         },
       });
       await tx.seguimientoPaso.createMany({
