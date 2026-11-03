@@ -28,6 +28,9 @@ export type Reporte = {
   etiquetas: EtiquetaPropuesta[];
   pendientes: Pendiente[];
   tributario: ResumenTributario;
+  etapasSinMapear: string[];
+  negociosIncompletos: string[];
+  importacionId: string | null;
 };
 
 function conteo(decisiones: readonly Decision<unknown>[]): Record<Accion, number> {
@@ -74,13 +77,22 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
       cuenta: conteo(plan.cuentas),
       contacto: conteo(plan.contactos),
       instalacion: conteo(plan.instalaciones),
+      negocio: conteo(plan.negocios),
     },
-    detalle: [...detalle(plan.cuentas), ...detalle(plan.contactos), ...detalle(plan.instalaciones)],
+    detalle: [
+      ...detalle(plan.cuentas),
+      ...detalle(plan.contactos),
+      ...detalle(plan.instalaciones),
+      ...detalle(plan.negocios),
+    ],
     propuestasFusion: plan.propuestas,
     avisos: [...avisos].map(([codigo, idsOpai1]) => ({ codigo, idsOpai1 })),
     etiquetas: plan.etiquetas,
     pendientes: plan.pendientes,
     tributario: plan.tributario,
+    etapasSinMapear: plan.etapasSinMapear,
+    negociosIncompletos: plan.negociosIncompletos,
+    importacionId: plan.importacionId,
   };
 }
 
@@ -99,6 +111,11 @@ export function resumenLegible(r: Reporte): string {
   if (r.etiquetas.length > 0)
     lineas.push(`  Etiquetas por confirmar (rubro/segmento/tamaño): ${r.etiquetas.length}`);
   for (const p of r.pendientes) lineas.push(`  Pendiente ${p.entidad} (${p.motivo}): ${p.filas}`);
+  if (r.etapasSinMapear.length > 0)
+    lineas.push(`  Etapas sin mapear en historial: ${r.etapasSinMapear.length}`);
+  if (r.negociosIncompletos.length > 0)
+    lineas.push(`  Negocios incompletos (aviso): ${r.negociosIncompletos.length}`);
+  if (r.importacionId) lineas.push(`  Corrida: ${r.importacionId}`);
   lineas.push(
     `  Tributario: ${r.tributario.listasParaFacturar} listas · ${r.tributario.incompletas} incompletas (de ${r.tributario.cuentasConsideradas} cuentas)`,
   );

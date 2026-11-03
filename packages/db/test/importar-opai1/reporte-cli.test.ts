@@ -105,7 +105,7 @@ describe("reporte y CLI de la simulación", () => {
     ).toBe(1);
     await expect(
       ejecutar(["--dry-run", "--tenant", "gard", "--origen", "opai1"], d),
-    ).rejects.toThrow(/no configurado/);
+    ).rejects.toThrow(/OPAI1_EXPORT/);
   });
 
   it("un origen inválido se rechaza sin mostrar valores", () => {

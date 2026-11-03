@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   MOTIVO_MODULO_COMERCIAL_INACTIVO,
   MOTIVO_MODULO_FINANZAS_INACTIVO,
-  MOTIVO_PENDIENTE_CRM,
   MOTIVO_PENDIENTE_MODELO_PROGRAMACION,
   pendientesImportacion,
 } from "../../scripts/importar-opai1/comercial-pendiente";
@@ -22,9 +21,9 @@ describe("plan según módulos del tenant", () => {
     });
   });
 
-  it("con Comercial activo pero sin schema: negocios pendientes de CRM PR 1", () => {
+  it("con Comercial activo ya no marca pendiente_crm_pr1", () => {
     const pendientes = pendientesImportacion(fixture(), { modulosActivos: ["comercial"] });
-    expect(pendientes).toContainEqual({ entidad: "negocio", filas: 1, motivo: MOTIVO_PENDIENTE_CRM });
+    expect(pendientes.some((p) => p.motivo === "pendiente_crm_pr1")).toBe(false);
   });
 
   it("recurrentes: sin Finanzas no se programan; con Finanzas falta modelo en 2.0", () => {

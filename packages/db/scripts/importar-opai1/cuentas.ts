@@ -2,7 +2,6 @@
 // RUT, el nombre canónico solo genera propuestas de fusión, nunca una fusión automática (R28).
 import {
   type Aviso,
-  camposDistintos,
   type Decision,
   decision,
   decisionDuplicado,
@@ -11,6 +10,7 @@ import {
   ordenEstable,
   type Propuesta,
 } from "./comun";
+import { camposCompletarVacios } from "./completar-vacios";
 import type { EstadoDestino } from "./destino-tipos";
 import { correo, nombreCanonico, rut, textoLimpio } from "./normalizar";
 import type { CuentaOpai1 } from "./origen";
@@ -24,27 +24,37 @@ export type DatosCuenta = {
   comuna: string | null;
   ciudad: string | null;
   emailDte: string | null;
+  estado: string;
 };
 
-export type PlanCuentas = {
-  decisiones: Decision<DatosCuenta>[];
-  propuestas: Propuesta[];
-  avisos: Aviso[];
+const estadoCuenta = (f: CuentaOpai1): string => {
+  const s = f.status?.trim().toLowerCase();
+  if (s === "client_active") return "cliente_activo";
+  if (s === "client_inactive") return "cliente_inactivo";
+  if (s === "prospect") return "prospecto";
+  if (f.type?.trim().toLowerCase() === "client") return f.isActive === false ? "cliente_inactivo" : "cliente_activo";
+  return "prospecto";
 };
 
 export function datosCuenta(f: CuentaOpai1): DatosCuenta {
-  const razon = textoLimpio(f.legalName) ?? textoLimpio(f.name);
   return {
     nombre: textoLimpio(f.name) ?? f.name,
-    razonSocial: razon,
+    razonSocial: textoLimpio(f.legalName),
     rut: rut(f.rut),
     giro: textoLimpio(f.giro),
     calle: textoLimpio(f.address),
     comuna: textoLimpio(f.commune),
     ciudad: textoLimpio(f.city),
     emailDte: correo(f.emailDte),
+    estado: estadoCuenta(f),
   };
 }
+
+export type PlanCuentas = {
+  decisiones: Decision<DatosCuenta>[];
+  propuestas: Propuesta[];
+  avisos: Aviso[];
+};
 
 export function planCuentas(filas: readonly CuentaOpai1[], destino: EstadoDestino): PlanCuentas {
   const ids = indiceIds(destino, "cuenta");
@@ -76,7 +86,7 @@ export function planCuentas(filas: readonly CuentaOpai1[], destino: EstadoDestin
       d = decision("cuenta", f.id, "actualizar", {
         motivo: "vincula_por_rut",
         destinoId: existente.id,
-        campos: camposDistintos(datos, existente),
+        campos: camposCompletarVacios(datos, existente).campos,
         datos,
       });
     if (datos.rut) canonPorRut.set(datos.rut, d);

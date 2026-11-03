@@ -28,6 +28,14 @@ export type DatosInstalacion = {
   placeId: string | null;
   lat: number | null;
   lng: number | null;
+  estado: string;
+};
+
+const estadoInstalacion = (status: string | null | undefined): string => {
+  const s = status?.trim().toLowerCase();
+  if (s === "active") return "activa";
+  if (s === "inactive") return "inactiva";
+  return "prospecto";
 };
 
 type Ubicacion = Pick<DatosInstalacion, "placeId" | "lat" | "lng">;
@@ -57,6 +65,7 @@ export function datosInstalacion(f: InstalacionOpai1, cuentaId: string): DatosIn
     // core.instalaciones guarda Decimal(10,7): se redondea igual para que el plan sea idempotente.
     lat: f.lat == null ? null : Math.round(f.lat * 1e7) / 1e7,
     lng: f.lng == null ? null : Math.round(f.lng * 1e7) / 1e7,
+    estado: estadoInstalacion(f.status),
   };
 }
 

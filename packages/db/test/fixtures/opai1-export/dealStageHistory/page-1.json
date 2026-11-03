@@ -1,0 +1,23 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-03T12:00:00.000Z",
+  "recurso": "dealStageHistory",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "h-1",
+      "dealId": "deal-1",
+      "fromStageId": null,
+      "toStageId": "st-1",
+      "changedAt": "2025-01-05T12:00:00.000Z"
+    },
+    {
+      "id": "h-2",
+      "dealId": "deal-1",
+      "fromStageId": "st-1",
+      "toStageId": "st-3",
+      "changedAt": "2025-01-06T12:00:00.000Z"
+    }
+  ]
+}

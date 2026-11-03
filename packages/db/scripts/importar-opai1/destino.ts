@@ -5,7 +5,7 @@ import type { TenantTx } from "../../src/transaccion";
 import type { EntidadImportada, EstadoDestino } from "./destino-tipos";
 import { SISTEMA_OPAI1 } from "./destino-tipos";
 
-const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion"]);
+const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion", "negocio"]);
 const esEntidad = (t: string): t is EntidadImportada => ENTIDADES.has(t);
 const numero = (d: { toNumber(): number } | null) => (d ? d.toNumber() : null);
 
@@ -23,6 +23,7 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
           comuna: true,
           ciudad: true,
           emailDte: true,
+          estado: true,
         },
         orderBy: { id: "asc" },
       });
@@ -50,6 +51,20 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
           placeId: true,
           lat: true,
           lng: true,
+          estado: true,
+        },
+        orderBy: { id: "asc" },
+      });
+      const negocios = await tx.negocio.findMany({
+        select: {
+          id: true,
+          cuentaId: true,
+          etapaId: true,
+          titulo: true,
+          montoEstimadoMensual: true,
+          probabilidad: true,
+          cierreEstimado: true,
+          cotizacionEnviadaEn: true,
         },
         orderBy: { id: "asc" },
       });
@@ -73,6 +88,11 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
     contactos,
     vinculos,
     instalaciones: instalaciones.map((i) => ({ ...i, lat: numero(i.lat), lng: numero(i.lng) })),
+    negocios: negocios.map((n) => ({
+      ...n,
+      cierreEstimado: n.cierreEstimado?.toISOString().slice(0, 10) ?? null,
+      cotizacionEnviadaEn: n.cotizacionEnviadaEn?.toISOString() ?? null,
+    })),
     ids: ids.flatMap((i) =>
       esEntidad(i.entidadTipo) ? [{ ...i, entidadTipo: i.entidadTipo }] : [],
     ),

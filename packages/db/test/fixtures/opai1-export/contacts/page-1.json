@@ -1,0 +1,100 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-03T12:00:00.000Z",
+  "recurso": "contacts",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "con-c1",
+      "accountId": "acc-a1",
+      "firstName": "Ana",
+      "lastName": "Prueba",
+      "email": " Ana.Prueba@Ejemplo.TEST ",
+      "phone": "9 8765 4321",
+      "roleTitle": "Gerenta",
+      "isPrimary": true,
+      "recibeFacturacion": true,
+      "recibeNotasCredito": true,
+      "createdAt": "2025-01-02T12:00:00.000Z",
+      "updatedAt": "2025-01-02T12:00:00.000Z"
+    },
+    {
+      "id": "con-c2",
+      "accountId": "acc-a1",
+      "firstName": "Ana",
+      "lastName": "Prueba",
+      "email": "ana.prueba@ejemplo.test",
+      "createdAt": "2025-01-03T12:00:00.000Z",
+      "updatedAt": "2025-01-03T12:00:00.000Z"
+    },
+    {
+      "id": "con-c3",
+      "accountId": "acc-a2",
+      "firstName": "Bruno",
+      "lastName": "Ficticio",
+      "email": "bruno@ejemplo.test",
+      "isPrimary": true,
+      "recibeCobranza": true,
+      "createdAt": "2025-02-02T12:00:00.000Z",
+      "updatedAt": "2025-03-01T12:00:00.000Z"
+    },
+    {
+      "id": "con-c4",
+      "accountId": "acc-a3",
+      "firstName": "Carla",
+      "lastName": "Inventada",
+      "email": "carla@ejemplo.test",
+      "createdAt": "2025-01-06T12:00:00.000Z",
+      "updatedAt": "2025-01-06T12:00:00.000Z"
+    },
+    {
+      "id": "con-c5",
+      "accountId": "acc-a6",
+      "firstName": "Carla",
+      "lastName": "Inventada",
+      "email": "CARLA@ejemplo.test",
+      "createdAt": "2025-01-13T12:00:00.000Z",
+      "updatedAt": "2025-01-13T12:00:00.000Z"
+    },
+    {
+      "id": "con-c6",
+      "accountId": "acc-a3",
+      "firstName": "Diego",
+      "lastName": "Demo",
+      "phone": "+56 9 1111 2222",
+      "recibeCesion": true,
+      "recibeOperacional": true,
+      "createdAt": "2025-01-07T12:00:00.000Z",
+      "updatedAt": "2025-01-07T12:00:00.000Z"
+    },
+    {
+      "id": "con-c7",
+      "accountId": "acc-a6",
+      "firstName": "Diego",
+      "lastName": "Demo",
+      "phone": "911112222",
+      "createdAt": "2025-01-14T12:00:00.000Z",
+      "updatedAt": "2025-01-14T12:00:00.000Z"
+    },
+    {
+      "id": "con-c8",
+      "accountId": "acc-zz",
+      "firstName": "Elena",
+      "lastName": "Sinuenta",
+      "email": "elena@ejemplo.test",
+      "createdAt": "2025-01-15T12:00:00.000Z",
+      "updatedAt": "2025-01-15T12:00:00.000Z"
+    },
+    {
+      "id": "con-c9",
+      "accountId": "acc-a5",
+      "firstName": "Fabio",
+      "lastName": "Ejemplar",
+      "email": "fabio-sin-arroba",
+      "phone": "123",
+      "createdAt": "2025-01-16T12:00:00.000Z",
+      "updatedAt": "2025-01-16T12:00:00.000Z"
+    }
+  ]
+}

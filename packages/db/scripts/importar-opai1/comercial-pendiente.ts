@@ -1,6 +1,7 @@
 // Mapeo puro de negocios, etapas, historial y contactos del negocio (CrmPipelineStage, CrmDeal,
 // CrmDealStageHistory, CrmDealContact). PENDIENTE de que el CRM PR 1 (schema comercial) esté en main:
 // aquí no se importa nada de `comercial.prisma` (no existe en main) y el plan solo cuenta filas.
+import { mapearEtapaLegacy } from "./etapas-equivalencia";
 import { modulosDelPlan, type OpcionesPlan } from "./opciones";
 import { nombreCanonico } from "./normalizar";
 import type {
@@ -12,7 +13,7 @@ import type {
 } from "./origen";
 
 /** Se pasa a `true` en el PR que agregue la carga comercial, cuando el CRM PR 1 esté en main. */
-export const COMERCIAL_EN_MAIN: boolean = false;
+export const COMERCIAL_EN_MAIN: boolean = true;
 
 export const MOTIVO_PENDIENTE_CRM = "pendiente_crm_pr1";
 export const MOTIVO_MODULO_COMERCIAL_INACTIVO = "modulo_comercial_inactivo";
@@ -22,16 +23,9 @@ export const MOTIVO_PENDIENTE_MODELO_PROGRAMACION = "pendiente_modelo_finanzas_p
 export type TipoEtapa = "abierta" | "ganada" | "perdida";
 export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
 
-/** Mapeo 1:1 (§6): `isClosedWon`/`isClosedLost` → `tipo`; `isAccepted` → exige inicio de servicio. */
+/** @deprecated Usar `resolverEtapaNegocio` y equivalencia por tenant. */
 export function mapearEtapa(e: EtapaOpai1): EtapaMapeada | { error: "etapa_ambigua" } {
-  if (e.isClosedWon && e.isClosedLost) return { error: "etapa_ambigua" };
-  const tipo: TipoEtapa = e.isClosedWon ? "ganada" : e.isClosedLost ? "perdida" : "abierta";
-  return {
-    nombre: e.name.trim(),
-    orden: e.order,
-    tipo,
-    exige: e.isAccepted ? ["inicio_servicio"] : [],
-  };
+  return mapearEtapaLegacy(e);
 }
 
 export const MOTIVOS_PERDIDA = [

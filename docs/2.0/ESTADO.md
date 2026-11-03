@@ -6,6 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
+| **CAR-157** (rama `feat/car-157-importador-v2`) | P6 Brief B3: importador v2 (equivalencia de etapas, completar vacíos, corridas `core.importaciones`, conciliar/revertir, lector export B2) | En curso | Sí, `20261103150000_core_importaciones_opai1` (**no aplicada**) |
 | **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`, PR #234) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En revisión | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |

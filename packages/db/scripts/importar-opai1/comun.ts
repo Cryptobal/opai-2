@@ -1,4 +1,5 @@
 // Tipos y utilidades compartidas del plan de importación (puro, sin base).
+import { camposCompletarVacios } from "./completar-vacios";
 import type { EntidadImportada, EstadoDestino } from "./destino-tipos";
 
 export type Accion = "crear" | "actualizar" | "sin_cambios" | "conflicto" | "omitido";
@@ -99,7 +100,7 @@ export function decisionDuplicado<D>(
   });
 }
 
-/** Decisión para una fila ya mapeada: sin cambios o actualizar (solo nombres de campos). */
+/** Decisión para una fila ya mapeada: solo completar vacíos; conflictos si ambos llenos y distintos. */
 export function decisionMapeada<D extends Record<string, unknown>>(
   entidad: EntidadImportada,
   idOpai1: string,
@@ -109,13 +110,20 @@ export function decisionMapeada<D extends Record<string, unknown>>(
 ): Decision<D> {
   if (!actual)
     return decision<D>(entidad, idOpai1, "conflicto", { motivo: "id_externo_huerfano", destinoId });
-  const campos = camposDistintos(datos, actual);
+  const { campos, conflictos } = camposCompletarVacios(datos, actual);
+  if (conflictos.length > 0)
+    return decision<D>(entidad, idOpai1, "conflicto", {
+      motivo: "conflicto_completar_vacios",
+      destinoId,
+      campos: conflictos,
+      datos,
+    });
   return campos.length === 0
     ? decision<D>(entidad, idOpai1, "sin_cambios", { destinoId, datos })
     : decision<D>(entidad, idOpai1, "actualizar", {
         destinoId,
         campos,
         datos,
-        motivo: "cambian_campos",
+        motivo: "completar_vacios",
       });
 }

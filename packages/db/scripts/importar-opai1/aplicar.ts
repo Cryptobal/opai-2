@@ -3,6 +3,7 @@
 /* eslint-disable max-lines -- apply transaccional por entidad (CAR-25) */
 import type { TenantTx } from "../../src/transaccion";
 import type { Decision } from "./comun";
+import { completarVacios } from "./completar-vacios";
 import { MOTIVO_VINCULO_PERSONA } from "./contactos";
 import type { DatosCuenta } from "./cuentas";
 import { SISTEMA_OPAI1, type EntidadImportada } from "./destino-tipos";
@@ -31,6 +32,7 @@ const cuentaPrisma = (d: DatosCuenta) => ({
   comuna: d.comuna,
   ciudad: d.ciudad,
   emailDte: d.emailDte,
+  estado: d.estado,
 });
 
 async function unicoPrincipal(tx: TenantTx, cuentaId: string, contactoId: string) {
@@ -136,8 +138,10 @@ async function aplicarCuentas(
       mapas.cuenta.set(d.idOpai1, c.id);
       await registrarExterno(tx, tenantId, "cuenta", d.idOpai1, c.id);
       n += 1;
-    } else if (d.accion === "actualizar" && d.destinoId) {
-      await tx.cuenta.update({ where: { id: d.destinoId }, data });
+    } else if (d.accion === "actualizar" && d.destinoId && d.datos) {
+      const prev = await tx.cuenta.findFirst({ where: { id: d.destinoId } });
+      const { patch } = completarVacios(d.datos, (prev ?? {}) as Record<string, unknown>);
+      await tx.cuenta.update({ where: { id: d.destinoId }, data: patch });
       mapas.cuenta.set(d.idOpai1, d.destinoId);
       await registrarExterno(tx, tenantId, "cuenta", d.idOpai1, d.destinoId);
       n += 1;
@@ -254,6 +258,7 @@ async function aplicarInstalaciones(
       placeId: d.datos.placeId,
       lat: d.datos.lat,
       lng: d.datos.lng,
+      estado: d.datos.estado,
     };
     if (d.accion === "sin_cambios" && d.destinoId) {
       mapas.instalacion.set(d.idOpai1, d.destinoId);
@@ -265,8 +270,13 @@ async function aplicarInstalaciones(
       mapas.instalacion.set(d.idOpai1, i.id);
       await registrarExterno(tx, tenantId, "instalacion", d.idOpai1, i.id);
       n += 1;
-    } else if (d.accion === "actualizar" && d.destinoId) {
-      await tx.instalacion.update({ where: { id: d.destinoId }, data: { ...data, cuentaId } });
+    } else if (d.accion === "actualizar" && d.destinoId && d.datos) {
+      const prev = await tx.instalacion.findFirst({ where: { id: d.destinoId } });
+      const { patch } = completarVacios(d.datos, (prev ?? {}) as Record<string, unknown>);
+      await tx.instalacion.update({
+        where: { id: d.destinoId },
+        data: { ...patch, cuentaId },
+      });
       mapas.instalacion.set(d.idOpai1, d.destinoId);
       await registrarExterno(tx, tenantId, "instalacion", d.idOpai1, d.destinoId);
       n += 1;
@@ -280,7 +290,8 @@ export async function aplicarPlanEnTransaccion(
   tx: TenantTx,
   tenantId: string,
   plan: Plan,
-): Promise<ResultadoAplicacion> {
+  importacionId?: string,
+): Promise<ResultadoAplicacion & { importacionId?: string }> {
   const mapas: MapasImportacion = {
     cuenta: new Map(),
     contacto: new Map(),
@@ -293,9 +304,8 @@ export async function aplicarPlanEnTransaccion(
     [...plan.cuentas, ...plan.contactos, ...plan.instalaciones].filter(
       (d) => d.accion === "conflicto" || (d.accion === "omitido" && !d.fusionaCon),
     ).length;
-  return {
-    mapas,
-    aplicadas: { cuentas, contactos, instalaciones },
-    omitidas,
-  };
+  if (importacionId !== undefined) {
+    return { mapas, aplicadas: { cuentas, contactos, instalaciones }, omitidas, importacionId };
+  }
+  return { mapas, aplicadas: { cuentas, contactos, instalaciones }, omitidas };
 }

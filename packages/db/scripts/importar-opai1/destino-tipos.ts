@@ -2,7 +2,7 @@
 
 export const SISTEMA_OPAI1 = "opai1";
 
-export type EntidadImportada = "cuenta" | "contacto" | "instalacion";
+export type EntidadImportada = "cuenta" | "contacto" | "instalacion" | "negocio";
 
 export type CuentaDestino = {
   id: string;
@@ -14,6 +14,7 @@ export type CuentaDestino = {
   comuna: string | null;
   ciudad: string | null;
   emailDte: string | null;
+  estado: string;
 };
 
 export type ContactoDestino = {
@@ -46,6 +47,18 @@ export type InstalacionDestino = {
   placeId: string | null;
   lat: number | null;
   lng: number | null;
+  estado: string;
+};
+
+export type NegocioDestino = {
+  id: string;
+  cuentaId: string;
+  etapaId: string;
+  titulo: string;
+  montoEstimadoMensual: number | null;
+  probabilidad: number;
+  cierreEstimado: string | null;
+  cotizacionEnviadaEn: string | null;
 };
 
 export type IdExternoDestino = {
@@ -59,6 +72,7 @@ export type EstadoDestino = {
   contactos: ContactoDestino[];
   vinculos: VinculoDestino[];
   instalaciones: InstalacionDestino[];
+  negocios: NegocioDestino[];
   ids: IdExternoDestino[];
 };
 
@@ -67,6 +81,7 @@ export const estadoVacio = (): EstadoDestino => ({
   contactos: [],
   vinculos: [],
   instalaciones: [],
+  negocios: [],
   ids: [],
 });
 
@@ -82,6 +97,7 @@ export function cuentaDestino(
     comuna: null,
     ciudad: null,
     emailDte: null,
+    estado: "prospecto",
     ...parcial,
   };
 }

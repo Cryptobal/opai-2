@@ -23,6 +23,9 @@ export const cuentaOpai1 = z.object({
   city: texto,
   /** Correo receptor DTE en la cuenta (no sustituye contactos con rol facturación). */
   emailDte: texto,
+  status: z.enum(["prospect", "client_active", "client_inactive"]).nullish(),
+  type: texto,
+  isActive: z.boolean().nullish(),
   createdAt: fecha,
   updatedAt: fecha,
 });
@@ -64,6 +67,7 @@ export const instalacionOpai1 = z.object({
   lat: z.number().nullish(),
   lng: z.number().nullish(),
   activatedByDealId: texto,
+  status: z.enum(["prospect", "active", "inactive"]).nullish(),
   createdAt: fecha,
   updatedAt: fecha,
 });
@@ -84,6 +88,11 @@ export const negocioOpai1 = z.object({
   title: z.string(),
   installationName: texto,
   lostReasonCategory: texto,
+  status: z.enum(["open", "won", "lost", "closed"]).nullish(),
+  amount: z.number().int().nullish(),
+  probability: z.number().int().min(0).max(100).nullish(),
+  expectedCloseDate: z.string().nullish(),
+  proposalSentAt: fecha.nullish(),
   createdAt: fecha,
 });
 
@@ -162,20 +171,4 @@ export function lectorFixtures(ruta: string): LectorOrigen {
   };
 }
 
-/**
- * Lector por API/MCP de OPAI 1.0: pendiente. Necesita una key dedicada de 1.0, de solo lectura, que
- * crea Carlos y que viviría en el almacén cifrado del tenant (ADR-027), nunca en `.env` ni en el chat.
- * Hasta entonces falla cerrado y no intenta ninguna conexión.
- */
-export function lectorApiOpai1(): LectorOrigen {
-  return {
-    descripcion: "opai1",
-    leer() {
-      return Promise.reject(
-        new Error(
-          "Lector de OPAI 1.0 no configurado: falta la key dedicada de 1.0 en el almacén cifrado del tenant. Usa --origen fixtures:<ruta>.",
-        ),
-      );
-    },
-  };
-}
+export { lectorApiOpai1, lectorContratoFixtures } from "./origen-api";

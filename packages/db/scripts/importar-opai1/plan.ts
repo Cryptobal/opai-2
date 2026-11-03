@@ -1,14 +1,15 @@
 // Plan completo de la importación desde 1.0: puro y determinista (mismo origen + mismo estado 2.0 →
 // mismo plan). No escribe: la carga real (otro PR, con el OK de Carlos) consumirá este plan.
-import { pendientesImportacion, type Pendiente } from "./comercial-pendiente";
+import { COMERCIAL_EN_MAIN, pendientesImportacion, type Pendiente } from "./comercial-pendiente";
 import { type Aviso, type Decision, ordenEstable, type Propuesta } from "./comun";
 import type { DatosContacto } from "./contactos-datos";
 import { planContactos } from "./contactos";
 import { type DatosCuenta, planCuentas, resolverCuentas } from "./cuentas";
 import type { EstadoDestino } from "./destino-tipos";
 import { type DatosInstalacion, planInstalaciones } from "./instalaciones";
+import { modulosDelPlan, OPCIONES_POR_DEFECTO, type OpcionesPlan } from "./opciones";
 import { nombreCanonico, textoLimpio } from "./normalizar";
-import { OPCIONES_POR_DEFECTO, type OpcionesPlan } from "./opciones";
+import { type DatosNegocio, planNegocios } from "./negocios-plan";
 import type { DatosOpai1 } from "./origen";
 import { avisosTributariosCuentas, resumenTributario, type ResumenTributario } from "./tributario-plan";
 
@@ -24,11 +25,15 @@ export type Plan = {
   cuentas: Decision<DatosCuenta>[];
   contactos: Decision<DatosContacto>[];
   instalaciones: Decision<DatosInstalacion>[];
+  negocios: Decision<DatosNegocio>[];
   propuestas: Propuesta[];
   avisos: Aviso[];
   etiquetas: EtiquetaPropuesta[];
   pendientes: Pendiente[];
   tributario: ResumenTributario;
+  etapasSinMapear: string[];
+  negociosIncompletos: string[];
+  importacionId: string | null;
 };
 
 export function calcularPlan(
@@ -36,26 +41,36 @@ export function calcularPlan(
   destino: EstadoDestino,
   opciones: OpcionesPlan = OPCIONES_POR_DEFECTO,
 ): Plan {
+  const { comercial } = modulosDelPlan(opciones);
   const cuentas = planCuentas(origen.accounts, destino);
   const resolver = resolverCuentas(cuentas.decisiones);
   const contactos = planContactos(origen.contacts, resolver, destino);
   const instalaciones = planInstalaciones(origen.installations, resolver, destino);
+  const neg =
+    comercial && COMERCIAL_EN_MAIN
+      ? planNegocios(origen, resolver, destino, opciones.tenantSlug ?? "gard")
+      : { decisiones: [], avisos: [], etapasSinMapear: [], negociosIncompletos: [] };
   const avisosTrib = avisosTributariosCuentas(cuentas.decisiones);
   return {
     opciones,
     cuentas: cuentas.decisiones,
     contactos: contactos.decisiones,
     instalaciones: instalaciones.decisiones,
+    negocios: neg.decisiones,
     propuestas: [...cuentas.propuestas, ...contactos.propuestas],
     avisos: [
       ...cuentas.avisos,
       ...contactos.avisos,
       ...instalaciones.avisos,
+      ...neg.avisos,
       ...avisosTrib,
     ],
     etiquetas: etiquetasPropuestas(origen),
     pendientes: pendientesImportacion(origen, opciones),
     tributario: resumenTributario(cuentas.decisiones),
+    etapasSinMapear: neg.etapasSinMapear,
+    negociosIncompletos: neg.negociosIncompletos,
+    importacionId: null,
   };
 }
 

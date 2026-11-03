@@ -44,6 +44,7 @@ describe("plan de instalaciones", () => {
       placeId: null,
       lat: -33.45001,
       lng: -70.65001,
+      estado: "prospecto",
     });
     const d = por(plan(destino), "ins-i1");
     expect(d).toMatchObject({
@@ -51,7 +52,7 @@ describe("plan de instalaciones", () => {
       motivo: "vincula_por_ubicacion",
       destinoId: "n-1",
     });
-    expect(d?.campos).toEqual(expect.arrayContaining(["nombre", "placeId"]));
+    expect(d?.campos).toEqual(expect.arrayContaining(["nombre", "lat", "lng"]));
   });
 
   it("contra 2.0: mismo nombre con otra ubicación en la cuenta es conflicto", () => {
@@ -66,6 +67,7 @@ describe("plan de instalaciones", () => {
       placeId: "place-otro",
       lat: null,
       lng: null,
+      estado: "prospecto",
     });
     expect(por(plan(destino), "ins-i5")).toMatchObject({
       accion: "conflicto",
