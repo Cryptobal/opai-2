@@ -40,6 +40,8 @@ export const cuentasCreate = defineCapability({
         calle: null,
         comuna: null,
         region: null,
+        ciudad: null,
+        emailDte: null,
         escrituraFecha: null,
         escrituraNotaria: null,
         notas: null,

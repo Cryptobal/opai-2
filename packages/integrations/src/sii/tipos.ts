@@ -28,6 +28,11 @@ export type PayloadEmisionDte = {
   rutEmisor: string;
   rutReceptor: string;
   razonSocialReceptor: string;
+  giroReceptor?: string;
+  direccionReceptor?: string;
+  comunaReceptor?: string;
+  ciudadReceptor?: string;
+  emailReceptor?: string;
   montos: { neto: number; exento: number; iva: number; total: number };
   glosa?: string;
   referencias?: readonly { tipoDte: number; folio: number; codigo: number; razon?: string }[];

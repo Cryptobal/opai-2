@@ -59,6 +59,28 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE (PR 1)", () => {
     expect(e2.folio).toBe(e1.folio! + 1);
   });
 
+  it("emisión usa el giro tributario de la cuenta en el timbre simulado", async () => {
+    await s.e.admin.cuenta.update({
+      where: { id: s.cuentaId },
+      data: {
+        razonSocial: "Cliente Facturación SpA",
+        giro: "Servicios de seguridad",
+        calle: "Av. Apoquindo 100",
+        comuna: "Las Condes",
+        ciudad: "Santiago",
+        emailDte: "dte@cliente.cl",
+      },
+    });
+    const borrador = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
+      cuentaId: s.cuentaId,
+      tipoDte: 33,
+      lineas: [{ glosa: "Servicio", monto: 50_000 }],
+    });
+    await s.dato("finanzas.ventas.emitir", { documentoId: borrador.id });
+    const doc = await s.e.admin.documentoEmitido.findFirstOrThrow({ where: { id: borrador.id } });
+    expect(doc.timbrePdf417).toContain("Servicios de seguridad");
+  });
+
   it("tenant A no obtiene documentos del tenant B (RLS)", async () => {
     const r = await s.mod.executeCapability(s.ctx(s.tenantId), "finanzas.ventas.obtener", {
       documentoId: s.documentoB,

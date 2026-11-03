@@ -9,6 +9,7 @@ export function accesoCpq(identidad: Identidad | null) {
     leer,
     crear: leer && puede("cpq:cotizaciones.manage"),
     aprobar: leer && puede("cpq:aprobar"),
+    costos: leer && puede("cpq:costos.ver"),
     aprobarEnvios: leer && puede("cpq:envios.aprobar"),
   };
 }

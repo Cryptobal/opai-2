@@ -16,7 +16,11 @@ model Cuenta {
   sitioWeb         String?   @map("sitio_web")
   calle            String?
   comuna           String?
+  /// Ciudad tributaria (SII); distinta de comuna en muchos casos.
+  ciudad           String?
   region           String?
+  /// Correo del receptor DTE (datos SII / SimpleAPI); no sustituye contactos con rol facturación.
+  emailDte         String?   @map("email_dte")
   pais             String    @default("CL")
   escrituraFecha   DateTime? @map("escritura_fecha") @db.Date
   escrituraNotaria String?   @map("escritura_notaria")

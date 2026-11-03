@@ -106,4 +106,6 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034).",
   "core.remuneraciones.confirmar_mutual":
     "Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034).",
+  "comercial.importar_1_0":
+    "Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25).",
 };
