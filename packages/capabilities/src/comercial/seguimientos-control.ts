@@ -52,7 +52,7 @@ export const seguimientosControlar = defineCapability({
 export const seguimientosRegistrarRespuesta = defineCapability({
   id: "comercial.seguimientos.registrar_respuesta",
   descripcion:
-    "Registra que el cliente respondió (por teléfono, WhatsApp u otro medio): según el plan pausa o detiene el seguimiento, deja una nota en el negocio y avisa al responsable. Es la acción manual «El cliente respondió».",
+    "Registra que el cliente respondió (por teléfono, WhatsApp u otro medio): según el plan pausa o detiene el seguimiento y deja una nota en el negocio. Es la acción manual «El cliente respondió».",
   permiso: PERMISO_MANAGE,
   input: z.object({ id: uuidSchema, detalle: z.string().trim().max(1000).optional().describe("Qué dijo el cliente, en palabras de quien lo registra.") }),
   output: seguimientoVistaSchema,
