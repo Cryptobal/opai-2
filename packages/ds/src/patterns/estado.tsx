@@ -73,6 +73,8 @@ export type CabeceraProps = {
   tituloDetalle?: boolean;
   /** Toda la cabecera solo en teléfono (el subtítulo también es solo de teléfono). */
   soloTelefono?: boolean;
+  /** Teléfono: título y metadatos a ancho completo y acciones en fila aparte debajo (fichas CPQ). */
+  accionesDebajoEnTelefono?: boolean;
 };
 
 /**
@@ -82,10 +84,12 @@ export type CabeceraProps = {
 export function Cabecera(props: CabeceraProps) {
   const { titulo, subtitulo, sobre, acciones, tituloSiempre, tituloDetalle } = props;
   const accionesVisibles = tituloSiempre || props.accionesSiempre;
+  const apilada = props.accionesDebajoEnTelefono;
   return (
     <div
       className={cn(
-        "mb-4 flex items-start justify-between gap-x-3 gap-y-2",
+        "mb-4 flex gap-x-3 gap-y-2",
+        apilada ? "flex-col md:flex-row md:items-start md:justify-between" : "items-start justify-between",
         props.soloTelefono && "md:hidden",
       )}
     >
@@ -105,7 +109,13 @@ export function Cabecera(props: CabeceraProps) {
         {subtitulo ? <p className="mt-0.5 text-base text-fg-muted">{subtitulo}</p> : null}
       </div>
       {acciones ? (
-        <div className={cn("flex shrink-0 items-center gap-2", !accionesVisibles && "md:hidden")}>
+        <div
+          className={cn(
+            "flex min-w-0 items-center gap-2",
+            apilada ? "w-full shrink-0 md:w-auto" : "shrink-0",
+            !accionesVisibles && "md:hidden",
+          )}
+        >
           {acciones}
         </div>
       ) : null}

@@ -7,7 +7,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { fecha } from "@/lib/fechas";
 
 import { accionesSolicitud, nombreDe } from "./acciones-solicitud";
-import type { SolicitudDato } from "./datos";
+import type { AccionAgenteDato, SolicitudDato } from "./datos";
 import { CANAL, ESTADO } from "./etiquetas";
 import { CuerpoSolicitud } from "./cuerpo-solicitud";
 import { HojaConvertir } from "./hojas-solicitud";
@@ -18,6 +18,7 @@ type Ficha = { solicitud: SolicitudDato; posiblesDuplicadas: SolicitudDato[] };
 export function FichaSolicitud(p: {
   state: EstadoPantalla;
   ficha: Ficha | null;
+  accionesAgente?: AccionAgenteDato[];
   gestiona: boolean;
 }) {
   const f = p.ficha;
@@ -54,7 +55,11 @@ export function FichaSolicitud(p: {
     >
       {s && f ? (
         <div className="flex flex-col gap-4">
-          <CuerpoSolicitud s={s} posibles={f.posiblesDuplicadas} />
+          <CuerpoSolicitud
+            s={s}
+            posibles={f.posiblesDuplicadas}
+            accionesAgente={p.accionesAgente ?? []}
+          />
           {p.gestiona && abierta ? <HojaConvertir s={s} /> : null}
         </div>
       ) : null}

@@ -51,6 +51,12 @@ test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
   await expect(page.getByText("No enviable")).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("button", { name: "Dejar lista" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Vista previa PDF" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Pedir aprobación" })).toHaveCount(0);
+  if (info.project.name === "telefono") {
+    await page.getByRole("button", { name: "Más acciones de la cotización" }).click();
+    await expect(page.getByRole("menuitem", { name: "Vista previa PDF" })).toBeVisible();
+  } else {
+    await expect(page.getByRole("button", { name: "Vista previa PDF" })).toBeVisible();
+  }
   await sinDesborde(page);
 });

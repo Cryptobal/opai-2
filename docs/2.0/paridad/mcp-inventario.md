@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 463 pares pantalla→capacidad · 415 con herramienta · 48 excepciones justificadas · 0 faltantes.
+**Resumen:** 464 pares pantalla→capacidad · 416 con herramienta · 48 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -330,6 +330,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.acciones_agente` | `comercial_solicitudes_acciones_agente` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.convertir` | `comercial_solicitudes_convertir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.create` | `comercial_solicitudes_create` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.derivar` | `comercial_solicitudes_derivar` | existe |
@@ -640,6 +641,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 - `agente.historial.list`
 - `agente.modelos.list`
+- `comercial.solicitudes.buscar_duplicadas`
+- `comercial.solicitudes.enriquecer`
 - `core.actividades.completar`
 - `core.actividades.create`
 - `core.actividades.delete`

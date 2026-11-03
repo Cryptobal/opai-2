@@ -78,6 +78,10 @@ export const manifest = defineModule({
     { id: "comercial.negocio.perdido", descripcion: "Un negocio se marcó como perdido." },
     { id: "comercial.negocio.archivado", descripcion: "Un negocio se archivó o se desarchivó." },
     { id: "comercial.solicitud.creada", descripcion: "Entró una solicitud a la bandeja." },
+    {
+      id: "comercial.solicitud.enriquecida",
+      descripcion: "Un agente enriqueció los datos propuestos de una solicitud.",
+    },
     { id: "comercial.solicitud.derivada", descripcion: "Una solicitud pasó a revisión." },
     { id: "comercial.solicitud.descartada", descripcion: "Se descartó una solicitud." },
     { id: "comercial.solicitud.reabierta", descripcion: "Se reabrió una solicitud descartada." },

@@ -26,10 +26,18 @@ model Solicitud {
   rut               String?
   comuna            String?
   servicio          String?
+  /// Origen comercial informado por el agente (UTM, campaña, referido…).
+  fuente            String?
+  /// Notas internas del agente; no es contenido externo del consultante.
+  notasAgente       String?   @map("notas_agente")
   responsableId     String?   @map("responsable_id") @db.Uuid
   /// Quién la registró: "usuario" | "agente" | "sistema" (canales automáticos del PR 2).
   registradaPorTipo String    @map("registrada_por_tipo")
   registradaPorId   String?   @map("registrada_por_id") @db.Uuid
+  /// API key del agente externo que registró la solicitud (canal «agente»).
+  registradaPorApiKeyId String? @map("registrada_por_api_key_id") @db.Uuid
+  /// Nombres de campo que el agente propuso (icono de generado en la ficha).
+  camposPropuestosAgente String[] @default([]) @map("campos_propuestos_agente")
   motivoDescarte    String?   @map("motivo_descarte")
   descartadaEn      DateTime? @map("descartada_en") @db.Timestamptz(6)
   convertidaEn      DateTime? @map("convertida_en") @db.Timestamptz(6)

@@ -38,6 +38,9 @@ export const solicitudSchema = z.object({
   rut: ext(),
   comuna: ext(),
   servicio: ext(),
+  fuente: ext(),
+  notasAgente: z.string().nullable(),
+  camposPropuestosAgente: z.array(z.string()),
   responsableId: z.string().nullable(),
   registradaPorTipo: z.string(),
   registradaPorId: z.string().nullable(),
@@ -64,6 +67,9 @@ type Fila = {
   rut: string | null;
   comuna: string | null;
   servicio: string | null;
+  fuente: string | null;
+  notasAgente: string | null;
+  camposPropuestosAgente: string[];
   responsableId: string | null;
   registradaPorTipo: string;
   registradaPorId: string | null;
@@ -91,6 +97,9 @@ export function vistaSolicitud(s: Fila): z.input<typeof solicitudSchema> {
     rut: s.rut,
     comuna: s.comuna,
     servicio: s.servicio,
+    fuente: s.fuente,
+    notasAgente: s.notasAgente,
+    camposPropuestosAgente: s.camposPropuestosAgente ?? [],
     responsableId: s.responsableId,
     registradaPorTipo: s.registradaPorTipo,
     registradaPorId: s.registradaPorId,
