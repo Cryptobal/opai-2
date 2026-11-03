@@ -5,7 +5,7 @@ import type { TenantTx } from "../../src/transaccion";
 import type { EntidadImportada, EstadoDestino } from "./destino-tipos";
 import { SISTEMA_OPAI1 } from "./destino-tipos";
 
-const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion"]);
+const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion", "programacion_recurrente"]);
 const esEntidad = (t: string): t is EntidadImportada => ENTIDADES.has(t);
 const numero = (d: { toNumber(): number } | null) => (d ? d.toNumber() : null);
 
@@ -68,6 +68,10 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
         where: { sistema: SISTEMA_OPAI1 },
         select: { entidadTipo: true, idExterno: true, entidadId: true },
       });
+      const correlativosCpq = await tx.cpqCorrelativo.findMany({
+        select: { anio: true, ultimo: true },
+        orderBy: { anio: "asc" },
+      });
   return {
     cuentas,
     contactos,
@@ -76,6 +80,7 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
     ids: ids.flatMap((i) =>
       esEntidad(i.entidadTipo) ? [{ ...i, entidadTipo: i.entidadTipo }] : [],
     ),
+    correlativosCpq,
   };
 }
 

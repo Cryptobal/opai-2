@@ -9,16 +9,23 @@ import { SISTEMA_OPAI1, type EntidadImportada } from "./destino-tipos";
 import type { DatosInstalacion } from "./instalaciones";
 import type { Plan } from "./plan";
 import type { DatosContacto } from "./contactos-datos";
+import type { DatosProgramacion } from "./recurrentes";
 
 export type MapasImportacion = {
   cuenta: Map<string, string>;
   contacto: Map<string, string>;
   instalacion: Map<string, string>;
+  programacion: Map<string, string>;
 };
 
 export type ResultadoAplicacion = {
   mapas: MapasImportacion;
-  aplicadas: { cuentas: number; contactos: number; instalaciones: number };
+  aplicadas: {
+    cuentas: number;
+    contactos: number;
+    instalaciones: number;
+    programaciones: number;
+  };
   omitidas: number;
 };
 
@@ -107,6 +114,81 @@ function resolverCuentaId(mapas: MapasImportacion, clave: string): string {
     return id;
   }
   return clave;
+}
+
+function resolverInstalacionId(mapas: MapasImportacion, clave: string): string | null {
+  if (clave.startsWith("nueva:")) {
+    return mapas.instalacion.get(clave.slice(6)) ?? null;
+  }
+  return clave;
+}
+
+const fechaOp = (iso: string | null) => (iso ? new Date(iso) : null);
+
+async function aplicarProgramaciones(
+  tx: TenantTx,
+  tenantId: string,
+  decisiones: readonly Decision<DatosProgramacion>[],
+  mapas: MapasImportacion,
+): Promise<number> {
+  let n = 0;
+  for (const d of decisiones) {
+    if (d.accion === "sin_cambios" && d.destinoId) {
+      mapas.programacion.set(d.idOpai1, d.destinoId);
+      await registrarExterno(tx, tenantId, "programacion_recurrente", d.idOpai1, d.destinoId);
+      continue;
+    }
+    if (!d.datos || d.accion !== "crear") continue;
+    const cuentaId = resolverCuentaId(mapas, d.datos.cuentaId);
+    const instalacionId = d.datos.instalacionId
+      ? resolverInstalacionId(mapas, d.datos.instalacionId)
+      : null;
+    if (d.datos.instalacionId && !instalacionId) {
+      throw new Error(`Instalación no resuelta para programación ${d.idOpai1}`);
+    }
+    const p = await tx.ventasProgramacion.create({
+      data: {
+        tenantId,
+        cuentaId,
+        instalacionId,
+        nombre: d.datos.nombre,
+        activa: d.datos.activa,
+        tipoDte: d.datos.tipoDte,
+        diaGeneracion: d.datos.diaGeneracion,
+        moneda: d.datos.moneda,
+        plazoPagoDias: d.datos.plazoPagoDias,
+        facturaTiming: d.datos.facturaTiming,
+        facturaDia: d.datos.facturaDia,
+        facturaMesRelativo: d.datos.facturaMesRelativo,
+        diasFacturacion: d.datos.diasFacturacion,
+        modoPeriodoFacturado: d.datos.modoPeriodoFacturado,
+        politicaTextoPeriodo: d.datos.politicaTextoPeriodo,
+        montoVariable: d.datos.montoVariable,
+        autoEnvioProforma: d.datos.autoEnvioProforma,
+        autoEnvioEstadoPago: d.datos.autoEnvioEstadoPago,
+        notas: d.datos.notas,
+        referenciasAdicionales: d.datos.referenciasAdicionales as object,
+        proximaEjecucionEn: fechaOp(d.datos.proximaEjecucionEn),
+        ultimaEjecucionEn: fechaOp(d.datos.ultimaEjecucionEn),
+      },
+    });
+    for (const [orden, l] of d.datos.lineas.entries()) {
+      await tx.ventasProgramacionLinea.create({
+        data: { tenantId, programacionId: p.id, orden, glosa: l.glosa, monto: l.monto },
+      });
+    }
+    for (const [orden, cidOpai1] of d.datos.destinatariosContactoOpai1Ids.entries()) {
+      const contactoId = mapas.contacto.get(cidOpai1);
+      if (!contactoId) continue;
+      await tx.ventasProgramacionDestinatario.create({
+        data: { tenantId, programacionId: p.id, contactoId, orden },
+      });
+    }
+    mapas.programacion.set(d.idOpai1, p.id);
+    await registrarExterno(tx, tenantId, "programacion_recurrente", d.idOpai1, p.id);
+    n += 1;
+  }
+  return n;
 }
 
 async function aplicarCuentas(
@@ -285,17 +367,19 @@ export async function aplicarPlanEnTransaccion(
     cuenta: new Map(),
     contacto: new Map(),
     instalacion: new Map(),
+    programacion: new Map(),
   };
   const cuentas = await aplicarCuentas(tx, tenantId, plan.cuentas, mapas);
   const contactos = await aplicarContactos(tx, tenantId, plan.contactos, mapas);
   const instalaciones = await aplicarInstalaciones(tx, tenantId, plan.instalaciones, mapas);
+  const programaciones = await aplicarProgramaciones(tx, tenantId, plan.programaciones, mapas);
   const omitidas =
-    [...plan.cuentas, ...plan.contactos, ...plan.instalaciones].filter(
+    [...plan.cuentas, ...plan.contactos, ...plan.instalaciones, ...plan.programaciones].filter(
       (d) => d.accion === "conflicto" || (d.accion === "omitido" && !d.fusionaCon),
     ).length;
   return {
     mapas,
-    aplicadas: { cuentas, contactos, instalaciones },
+    aplicadas: { cuentas, contactos, instalaciones, programaciones },
     omitidas,
   };
 }

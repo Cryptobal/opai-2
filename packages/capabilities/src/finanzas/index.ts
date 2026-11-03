@@ -26,6 +26,10 @@ import {
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
 import { ventasPdf } from "./ventas-pdf";
 import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
+import {
+  ventasProgramacionesListar,
+  ventasProgramacionesObtener,
+} from "./ventas-programacion-lectura";
 
 export { ajustesFinanzas } from "./ajustes";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
@@ -49,6 +53,8 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasListar,
   ventasObtener,
   ventasLibroResumen,
+  ventasProgramacionesListar,
+  ventasProgramacionesObtener,
   ventasCrearBorrador,
   ventasEmitir,
   ventasEnviarSii,

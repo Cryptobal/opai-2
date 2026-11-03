@@ -11,13 +11,18 @@ import type {
   NegocioOpai1,
 } from "./origen";
 
-/** Se pasa a `true` en el PR que agregue la carga comercial, cuando el CRM PR 1 esté en main. */
-export const COMERCIAL_EN_MAIN: boolean = false;
+/** El schema comercial está en main; el apply CRM sigue pendiente (solo dry-run en el plan). */
+export const COMERCIAL_EN_MAIN: boolean = true;
 
 export const MOTIVO_PENDIENTE_CRM = "pendiente_crm_pr1";
 export const MOTIVO_MODULO_COMERCIAL_INACTIVO = "modulo_comercial_inactivo";
 export const MOTIVO_MODULO_FINANZAS_INACTIVO = "modulo_finanzas_inactivo";
+export const MOTIVO_MODULO_CPQ_INACTIVO = "modulo_cpq_inactivo";
 export const MOTIVO_PENDIENTE_MODELO_PROGRAMACION = "pendiente_modelo_finanzas_programacion";
+export const MOTIVO_EXPORT_CPQ_INCOMPLETO = "export_cpq_incompleto";
+
+/** Se pasa a `true` cuando finanzas.ventas_programaciones está en main (CAR-25 recurrentes). */
+export const FINANZAS_PROGRAMACION_EN_MAIN = true;
 
 export type TipoEtapa = "abierta" | "ganada" | "perdida";
 export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
@@ -134,7 +139,7 @@ export type Pendiente = { entidad: string; filas: number; motivo: string };
 
 /** Filas que el plan no importa aún, según módulos del tenant y modelos disponibles en 2.0. */
 export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan): Pendiente[] {
-  const { comercial, finanzas } = modulosDelPlan(opciones);
+  const { comercial, finanzas, cpq } = modulosDelPlan(opciones);
   const salida: Pendiente[] = [];
 
   const conteosCrm: [string, number][] = [
@@ -149,6 +154,17 @@ export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan)
     else if (!COMERCIAL_EN_MAIN) salida.push({ entidad, filas, motivo: MOTIVO_PENDIENTE_CRM });
   }
 
+  const cotizaciones = datos.cpqQuotes.length;
+  if (cotizaciones > 0) {
+    if (!cpq) salida.push({ entidad: "cotizacion", filas: cotizaciones, motivo: MOTIVO_MODULO_CPQ_INACTIVO });
+    else
+      salida.push({
+        entidad: "cotizacion",
+        filas: cotizaciones,
+        motivo: MOTIVO_EXPORT_CPQ_INCOMPLETO,
+      });
+  }
+
   const recurrentes = datos.recurringInvoiceSchedules.length;
   if (recurrentes > 0) {
     if (!finanzas)
@@ -157,7 +173,7 @@ export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan)
         filas: recurrentes,
         motivo: MOTIVO_MODULO_FINANZAS_INACTIVO,
       });
-    else
+    else if (!FINANZAS_PROGRAMACION_EN_MAIN)
       salida.push({
         entidad: "programacion_factura_recurrente",
         filas: recurrentes,
