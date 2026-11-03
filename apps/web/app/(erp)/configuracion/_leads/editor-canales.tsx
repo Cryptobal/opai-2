@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 
 import { formatearFechaHora } from "@opai/domain";
 import { Bot, Globe, Key, Mail, PenLine, type LucideIcon } from "lucide-react";

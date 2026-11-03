@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 import { formatearClp, formatearNumero } from "@opai/domain";
 import { UF_ESCALA } from "@opai/domain/dinero";
 

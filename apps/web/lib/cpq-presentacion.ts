@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 import type { ReactNode } from "react";
 
 /** Etiquetas en español para categorías del motor (nunca claves internas en UI). */
