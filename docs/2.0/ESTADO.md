@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |
-| #231 | Importación 1.0: programaciones recurrentes de Finanzas, destinatarios, correlativo CPQ y simulación de negocios (CAR-25) | Abierto. **No integrar sin corregir** la forma de las líneas, las frecuencias, la cuenta nula, las recurrentes inactivas hasta el corte y el correlativo dentro de la corrida ([auditoría §2.3](auditoria-2026-11.md#23-migración-desde-10-importador-packagesdbscriptsimportar-opai1-y-pr-231)); le falta la etiqueta `migracion-pendiente` | Sí, `20261103140000_finanzas_ventas_programacion` |
+| **CAR-25 · B1** (rama `claude/new-session-bgvb4t`, continúa #231) | Recurrentes con la forma real de 1.0 (`FinanceDteRecurringTemplate`): líneas con cantidad, precio CLP o UF, descuento y exento; frecuencias mensual/quincenal/semanal/anual; día -1; tipos 33/34/56/61; receptor congelado cuando 1.0 no tiene cuenta en 2.0; destinatarios por correo; importadas **pausadas y sin próxima ejecución** (no se copia `nextRunAt`) con `ultimo_periodo_1_0`; informe con `omitidas[]`. Tabla `ventas_programaciones_corridas` (UNIQUE programación + período) para el brief A4. Reemplaza a #231, que el operador cierra | En revisión | **Sí**: `20261103160000_finanzas_programacion_forma_1_0` (aditiva; etiqueta `migracion-pendiente`) |
 | #213 | Cargos y Remuneraciones: pantallas lista-ficha | **En pausa**: en conflicto con `main` y Vercel en rojo. Se retoma en la semana 3 con un merge de `main` | — |
 | #168 | Restablecer MFA y regenerar códigos de respaldo (CAR-54) | **En pausa**: en conflicto. Se retoma después de la migración | — |
 
@@ -32,15 +32,14 @@ Detalle, brechas y evidencia en la [auditoría §1.2](auditoria-2026-11.md#12-po
 
 ## Migraciones en Neon
 
-Evidencia: retiro de `migracion-pendiente` por el operador (ADR-054). Ningún PR tiene el aviso escrito de «aplicada en dev y main». Hasta `20261028230000` están todas declaradas aplicadas (`migraciones.md`).
+Al 3-nov-2026 todas las migraciones integradas en `main` están aplicadas en Neon `dev` y `main`, incluida `20261103140000_finanzas_ventas_programacion` (#231, instrucción de Carlos en el brief B). Esa migración no se edita: las correcciones van en migraciones aditivas nuevas.
 
 | Estado | Migraciones |
 |---|---|
-| Aplicadas (etiqueta retirada) | #200 `pauta_diaria_pr2` · #201 `cpq_lineas_montos` · #204 `finanzas_ventas_pr1` · #207 `finanzas_flujo_bigint` · #210 `nucleo_remuneraciones_m2m3` · #211 `finanzas_bancos_pr1` · #214 `personas_cargos_pr2` |
-| **Sin evidencia: integradas con la etiqueta aún puesta** | #181 `portal_cliente_acceso` · #199 `solicitud_arco_detalle_portal` · #203 `cpq_pr103` y `cpq_marca_plantillas` · #205 `finanzas_flujo_pr2` · #217 `finanzas_caf_endurecido_pr3` · #218 `cpq_propuesta_tecnica` · #219 `finanzas_flujo_sin_cierre` · #223 `cuentas_datos_tributarios_dte` · #224 `comercial_leads_formulario_web` · #225 `comercial_solicitudes_canal_agente` |
-| **Sin evidencia: nunca etiquetadas** | #209 `finanzas_ventas_pr2` · #220 `remuneraciones_sii_ventana_tz`, `remuneraciones_sii_rol_cron` y el seed SII |
+| Aplicadas en `dev` y `main` | Las 76 de `main` y `20261103140000_finanzas_ventas_programacion` |
+| **Pendiente de aplicar (etiqueta `migracion-pendiente`)** | `20261103160000_finanzas_programacion_forma_1_0` (CAR-25 · B1) |
 
-**Acción O1 del ROADMAP:** el operador las verifica en Neon, aplica las que falten con respaldo, deja el aviso en cada PR y retira la etiqueta.
+Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de ADR-054 para cada PR nuevo con migración: el operador respalda, aplica `dev` → `main`, deja el aviso en el PR y retira la etiqueta.
 
 ## Pendientes
 
@@ -53,7 +52,7 @@ Evidencia: retiro de `migracion-pendiente` por el operador (ADR-054). Ningún PR
 - Sin envío del DTE al cliente.
 - Consulta al SII por RUT inexistente.
 - Importador sin origen (no hay exportador de 1.0) y que degrada datos: todo queda como prospecto, la razón social se rellena con el nombre y al actualizar escribe nulos.
-- Recurrentes de #231 que no calzan con 1.0.
+- Recurrentes con la forma de 1.0: corregido en B1 (CAR-25); falta la generación de borradores (brief A4) y el exportador de 1.0 (B2).
 - Seguimiento de cotizaciones solo en especificación.
 - **Infraestructura:**
   - Cortes de conexión con Neon en `test.opai.cl`: 1.585 errores de conexión en 7 días, que afectaron a 29 usuarios; siguen activos ([auditoría §4.1](auditoria-2026-11.md#41-errores-reales-en-testopaicl-vercel-27-oct--3-nov)).

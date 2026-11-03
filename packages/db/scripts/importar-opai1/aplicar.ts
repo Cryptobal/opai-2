@@ -124,6 +124,8 @@ function resolverInstalacionId(mapas: MapasImportacion, clave: string): string |
 }
 
 const fechaOp = (iso: string | null) => (iso ? new Date(iso) : null);
+/** Columna `DATE` (AAAA-MM-DD) como medianoche UTC. */
+const fechaDia = (dia: string | null) => (dia ? new Date(`${dia}T00:00:00.000Z`) : null);
 
 async function aplicarProgramaciones(
   tx: TenantTx,
@@ -139,49 +141,85 @@ async function aplicarProgramaciones(
       continue;
     }
     if (!d.datos || d.accion !== "crear") continue;
-    const cuentaId = resolverCuentaId(mapas, d.datos.cuentaId);
+    const cuentaId = d.datos.cuentaId ? resolverCuentaId(mapas, d.datos.cuentaId) : null;
     const instalacionId = d.datos.instalacionId
       ? resolverInstalacionId(mapas, d.datos.instalacionId)
       : null;
     if (d.datos.instalacionId && !instalacionId) {
       throw new Error(`Instalación no resuelta para programación ${d.idOpai1}`);
     }
+    const dp = d.datos;
     const p = await tx.ventasProgramacion.create({
       data: {
         tenantId,
         cuentaId,
         instalacionId,
-        nombre: d.datos.nombre,
-        activa: d.datos.activa,
-        tipoDte: d.datos.tipoDte,
-        diaGeneracion: d.datos.diaGeneracion,
-        moneda: d.datos.moneda,
-        plazoPagoDias: d.datos.plazoPagoDias,
-        facturaTiming: d.datos.facturaTiming,
-        facturaDia: d.datos.facturaDia,
-        facturaMesRelativo: d.datos.facturaMesRelativo,
-        diasFacturacion: d.datos.diasFacturacion,
-        modoPeriodoFacturado: d.datos.modoPeriodoFacturado,
-        politicaTextoPeriodo: d.datos.politicaTextoPeriodo,
-        montoVariable: d.datos.montoVariable,
-        autoEnvioProforma: d.datos.autoEnvioProforma,
-        autoEnvioEstadoPago: d.datos.autoEnvioEstadoPago,
-        notas: d.datos.notas,
-        referenciasAdicionales: d.datos.referenciasAdicionales as object,
-        proximaEjecucionEn: fechaOp(d.datos.proximaEjecucionEn),
-        ultimaEjecucionEn: fechaOp(d.datos.ultimaEjecucionEn),
+        nombre: dp.nombre,
+        activa: dp.activa,
+        tipoDte: dp.tipoDte,
+        frecuencia: dp.frecuencia,
+        diaGeneracion: dp.diaGeneracion,
+        diaSemana: dp.diaSemana,
+        mesDelAnio: dp.mesDelAnio,
+        moneda: dp.moneda,
+        plazoPagoDias: dp.plazoPagoDias,
+        facturaTiming: dp.facturaTiming,
+        facturaDia: dp.facturaDia,
+        facturaMesRelativo: dp.facturaMesRelativo,
+        modoPeriodoFacturado: dp.modoPeriodoFacturado,
+        politicaTextoPeriodo: dp.politicaTextoPeriodo,
+        montoVariable: dp.montoVariable,
+        autoEnvioProforma: dp.autoEnvioProforma,
+        autoEnvioEstadoPago: dp.autoEnvioEstadoPago,
+        envioAutomatico: dp.envioAutomatico,
+        notas: dp.notas,
+        referenciasAdicionales: dp.referenciasAdicionales as object,
+        fechaInicio: fechaDia(dp.fechaInicio),
+        fechaFin: fechaDia(dp.fechaFin),
+        politicaUf: dp.politicaUf,
+        diaUf: dp.diaUf,
+        ajusteIpcMeses: dp.ajusteIpcMeses,
+        ajusteIpcDesde: fechaDia(dp.ajusteIpcDesde),
+        receptorRut: dp.receptor.rut,
+        receptorRazonSocial: dp.receptor.razonSocial,
+        receptorGiro: dp.receptor.giro,
+        receptorDireccion: dp.receptor.direccion,
+        receptorComuna: dp.receptor.comuna,
+        receptorCiudad: dp.receptor.ciudad,
+        ultimoPeriodo10: dp.ultimoPeriodo10,
+        // Importada pausada: nunca se copia `nextRunAt` de 1.0.
+        proximaEjecucionEn: null,
+        ultimaEjecucionEn: fechaOp(dp.ultimaEjecucionEn),
       },
     });
-    for (const [orden, l] of d.datos.lineas.entries()) {
+    for (const [orden, l] of dp.lineas.entries()) {
       await tx.ventasProgramacionLinea.create({
-        data: { tenantId, programacionId: p.id, orden, glosa: l.glosa, monto: l.monto },
+        data: {
+          tenantId,
+          programacionId: p.id,
+          orden,
+          glosa: l.glosa,
+          cantidad: l.cantidad,
+          unidad: l.unidad,
+          precioUnitarioClp: l.precioUnitarioClp === null ? null : BigInt(l.precioUnitarioClp),
+          precioUnitarioUf: l.precioUnitarioUf === null ? null : BigInt(l.precioUnitarioUf),
+          descuentoPct: l.descuentoPct,
+          exento: l.exento,
+        },
       });
     }
-    for (const [orden, cidOpai1] of d.datos.destinatariosContactoOpai1Ids.entries()) {
-      const contactoId = mapas.contacto.get(cidOpai1);
-      if (!contactoId) continue;
+    for (const [orden, c] of dp.destinatariosCorreo.entries()) {
       await tx.ventasProgramacionDestinatario.create({
-        data: { tenantId, programacionId: p.id, contactoId, orden },
+        data: { tenantId, programacionId: p.id, correo: c.correo, tipo: c.tipo, orden },
+      });
+    }
+    const contactosVistos = new Set<string>();
+    for (const [orden, cidOpai1] of dp.destinatariosContactoOpai1Ids.entries()) {
+      const contactoId = mapas.contacto.get(cidOpai1);
+      if (!contactoId || contactosVistos.has(contactoId)) continue;
+      contactosVistos.add(contactoId);
+      await tx.ventasProgramacionDestinatario.create({
+        data: { tenantId, programacionId: p.id, contactoId, orden: orden + dp.destinatariosCorreo.length },
       });
     }
     mapas.programacion.set(d.idOpai1, p.id);

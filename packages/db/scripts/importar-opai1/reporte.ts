@@ -25,6 +25,8 @@ export type Reporte = {
   modulosActivos: readonly string[];
   conteos: Record<EntidadImportada, Record<Accion, number>>;
   detalle: GrupoDetalle[];
+  /** Filas que no entran, con su motivo nombrado (solo ids de 1.0). */
+  omitidas: { entidad: EntidadImportada; motivo: string; idsOpai1: string[] }[];
   propuestasFusion: Propuesta[];
   avisos: { codigo: string; idsOpai1: string[] }[];
   etiquetas: EtiquetaPropuesta[];
@@ -66,7 +68,24 @@ function detalle(decisiones: readonly Decision<unknown>[]): GrupoDetalle[] {
   return [...grupos.values()];
 }
 
+function omitidasDe(grupos: readonly GrupoDetalle[]): Reporte["omitidas"] {
+  return grupos
+    .filter((g) => g.accion === "omitido")
+    .map(({ entidad, motivo, idsOpai1 }) => ({ entidad, motivo, idsOpai1 }));
+}
+
 export function construirReporte(plan: Plan, tenant: string): Reporte {
+  const grupos = [
+    ...detalle(plan.cuentas),
+    ...detalle(plan.contactos),
+    ...detalle(plan.instalaciones),
+    ...detalle(plan.programaciones),
+    ...detalle(plan.comercial.etapas),
+    ...detalle(plan.comercial.negocios),
+    ...detalle(plan.comercial.historial),
+    ...detalle(plan.comercial.contactosNegocio),
+    ...detalle(plan.comercial.cotizaciones),
+  ];
   const avisos = new Map<string, string[]>();
   for (const a of plan.avisos) avisos.set(a.codigo, [...(avisos.get(a.codigo) ?? []), a.idOpai1]);
   return {
@@ -85,17 +104,8 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
       negocio_contacto: conteo(plan.comercial.contactosNegocio),
       cotizacion: conteo(plan.comercial.cotizaciones),
     },
-    detalle: [
-      ...detalle(plan.cuentas),
-      ...detalle(plan.contactos),
-      ...detalle(plan.instalaciones),
-      ...detalle(plan.programaciones),
-      ...detalle(plan.comercial.etapas),
-      ...detalle(plan.comercial.negocios),
-      ...detalle(plan.comercial.historial),
-      ...detalle(plan.comercial.contactosNegocio),
-      ...detalle(plan.comercial.cotizaciones),
-    ],
+    detalle: grupos,
+    omitidas: omitidasDe(grupos),
     propuestasFusion: plan.propuestas,
     avisos: [...avisos].map(([codigo, idsOpai1]) => ({ codigo, idsOpai1 })),
     etiquetas: plan.etiquetas,

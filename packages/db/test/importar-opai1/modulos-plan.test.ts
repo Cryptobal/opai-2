@@ -10,7 +10,7 @@ import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
 import { programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen";
 import { fixture } from "./memoria";
 
-function scheduleRecurrente(partial: { id: string; accountId: string; lines: { description: string; amount: number }[] }) {
+function scheduleRecurrente(partial: { id: string; crmAccountId: string; lines: { description: string; unitPrice: number }[] }) {
   return programacionRecurrenteOpai1.parse({
     createdAt: "2025-01-01T12:00:00.000Z",
     updatedAt: "2025-01-01T12:00:00.000Z",
@@ -62,8 +62,8 @@ describe("plan según módulos del tenant", () => {
       recurringInvoiceSchedules: [
         scheduleRecurrente({
           id: "rec-1",
-          accountId: "acc-a1",
-          lines: [{ description: "Servicio", amount: 100_000 }],
+          crmAccountId: "acc-a1",
+          lines: [{ description: "Servicio", unitPrice: 100_000 }],
         }),
       ],
     };

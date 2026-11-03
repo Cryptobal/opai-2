@@ -18,6 +18,9 @@ export const reporteImportar10Schema = z.object({
     negocio_contacto: z.record(accionSchema, z.number().int()),
     cotizacion: z.record(accionSchema, z.number().int()),
   }),
+  omitidas: z.array(
+    z.object({ entidad: z.string(), motivo: z.string(), idsOpai1: z.array(z.string()) }),
+  ),
   tributario: z.object({
     cuentasConsideradas: z.number().int(),
     listasParaFacturar: z.number().int(),

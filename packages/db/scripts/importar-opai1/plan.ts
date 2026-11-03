@@ -101,6 +101,7 @@ export function calcularPlan(
     propuestas: [...cuentas.propuestas, ...contactos.propuestas],
     avisos: [
       ...cuentas.avisos,
+      ...recurrentes.avisos,
       ...contactos.avisos,
       ...instalaciones.avisos,
       ...avisosTrib,

@@ -7,7 +7,7 @@ describe("destinatarios recurrentes 1.0", () => {
   it("une recipientContactIds con contactos recibeFacturacion de la cuenta", () => {
     const fila = programacionRecurrenteOpai1.parse({
       id: "rec-1",
-      accountId: "acc-1",
+      crmAccountId: "acc-1",
       recipientContactIds: ["c-explicit"],
       createdAt: "2025-01-01T12:00:00.000Z",
       updatedAt: "2025-01-01T12:00:00.000Z",
