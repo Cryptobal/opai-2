@@ -18,8 +18,9 @@ import {
   vistaSolicitud,
 } from "./solicitudes-comun";
 
+// El texto original no se toca al enriquecer: no forma parte del input.
 const enriquecimiento = {
-  ...camposSolicitud,
+  ...z.object(camposSolicitud).omit({ textoOriginal: true }).shape,
   notasAgente: z
     .string()
     .trim()

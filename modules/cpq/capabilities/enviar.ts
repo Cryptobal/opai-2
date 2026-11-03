@@ -144,12 +144,6 @@ export const cotizacionesEnviar = defineCapability({
       });
       documentoId = vinculo?.documentoId ?? c.id;
     }
-    return {
-      versionId: version.id,
-      estado: "enviada" as const,
-      documentoId,
-      manifest,
-      correo: correoPreview,
-    };
+    return { versionId: version.id, estado: "enviada" as const, documentoId, manifest, correo: correoPreview };
   },
 });

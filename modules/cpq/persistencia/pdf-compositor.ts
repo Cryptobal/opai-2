@@ -13,32 +13,29 @@ export type PaginaPdf = { lineas: LineaPdf[] };
 export function componerPdf(paginas: PaginaPdf[], fuenteBase: string): Uint8Array {
   const fontRegular = fuenteBase;
   const fontBold = fuenteBase.includes("Bold") ? fuenteBase : `${fuenteBase}-Bold`;
-  const objetos: string[] = [];
-  let n = 1;
-  objetos.push(`${n} 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj`);
-  n += 1;
-  const pagesRef = n;
-  n += 1;
+  // Numeración fija: 1 catálogo, 2 árbol de páginas, 2 objetos por página y al final las dos fuentes.
+  // Las fuentes se conocen antes del bucle para que toda página las referencie bien (antes cada
+  // página apuntaba a «n» del momento y, con más de una página, a objetos que no eran fuentes).
+  const pagesRef = 2;
+  const f1 = 3 + 2 * paginas.length;
+  const f2 = f1 + 1;
+  const objetos: string[] = [`1 0 obj<< /Type /Catalog /Pages ${pagesRef} 0 R >>endobj`];
   const pageKids: string[] = [];
-
-  for (let pi = 0; pi < paginas.length; pi++) {
-    const contentRef = n;
-    n += 1;
-    const pageRef = n;
-    n += 1;
-    const stream = streamDePagina(paginas[pi]!);
+  paginas.forEach((pagina, pi) => {
+    const contentRef = 3 + 2 * pi;
+    const pageRef = contentRef + 1;
+    const stream = streamDePagina(pagina, fontRegular, fontBold);
     objetos.push(`${contentRef} 0 obj<< /Length ${stream.length} >>stream\n${stream}\nendstream endobj`);
     objetos.push(
-      `${pageRef} 0 obj<< /Type /Page /Parent ${pagesRef} 0 R /MediaBox [0 0 595 842] /Contents ${contentRef} 0 R /Resources<< /Font<< /F1 ${n} 0 R /F2 ${n + 1} 0 R >> >> >>endobj`,
+      `${pageRef} 0 obj<< /Type /Page /Parent ${pagesRef} 0 R /MediaBox [0 0 595 842] /Contents ${contentRef} 0 R /Resources<< /Font<< /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> >>endobj`,
     );
     pageKids.push(`${pageRef} 0 R`);
-  }
+  });
   objetos.push(`${pagesRef} 0 obj<< /Type /Pages /Kids [${pageKids.join(" ")}] /Count ${paginas.length} >>endobj`);
-  const f1 = n;
-  n += 1;
-  const f2 = n;
   objetos.push(`${f1} 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /${fontRegular} >>endobj`);
   objetos.push(`${f2} 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /${fontBold} >>endobj`);
+  // La tabla xref va en orden de número de objeto, no de inserción.
+  objetos.sort((a, b) => Number.parseInt(a, 10) - Number.parseInt(b, 10));
 
   let body = "%PDF-1.4\n";
   const offsets: number[] = [0];
@@ -56,7 +53,7 @@ export function componerPdf(paginas: PaginaPdf[], fuenteBase: string): Uint8Arra
   return new TextEncoder().encode(body);
 }
 
-function streamDePagina(pagina: PaginaPdf): string {
+function streamDePagina(pagina: PaginaPdf, _fRegular: string, _fBold: string): string {
   const ops: string[] = [];
   let y = 800;
   for (const l of pagina.lineas) {

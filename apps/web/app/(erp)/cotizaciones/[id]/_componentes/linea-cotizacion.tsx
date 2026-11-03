@@ -6,7 +6,8 @@ import { Button, type ItemMenu, Menu } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
-import { avisoLineaPuesto, subtituloLineaCpq } from "@/lib/cpq-presentacion";
+import { avisoLineaPuesto } from "@/lib/cpq-avisos";
+import { subtituloLineaCpq } from "@/lib/cpq-presentacion";
 
 type CostoLinea = {
   estado: string;
@@ -45,7 +46,7 @@ export function LineaCotizacion({
   onTraza: (id: string) => void;
 }) {
   const costo = linea.costo as CostoLinea | undefined;
-  const aviso = avisoLineaPuesto(costo?.mensaje, linea.nombre);
+  const aviso = avisoLineaPuesto(costo?.mensaje, linea);
   const subtitulo = subtituloLineaCpq(linea);
 
   function payloadEditar() {
@@ -129,7 +130,11 @@ export function LineaCotizacion({
         >
           <p className="font-semibold leading-snug">{aviso.titulo}</p>
           {aviso.detalle ? <p className="mt-1 text-warning-fg/90">{aviso.detalle}</p> : null}
-          {aviso.enlace ? (
+          {aviso.accion && editable ? (
+            <Button type="button" variant="ghost" size="md" className="mt-2 px-0" disabled={pendiente} onClick={payloadEditar}>
+              {aviso.accion.etiqueta}
+            </Button>
+          ) : aviso.enlace ? (
             <LinkNext href={aviso.enlace.href} className="mt-2 inline-flex min-h-11 items-center font-semibold underline">
               {aviso.enlace.etiqueta}
             </LinkNext>

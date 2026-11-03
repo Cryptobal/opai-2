@@ -4,27 +4,17 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  Alerta,
-  avisar,
-  Button,
-} from "@opai/ds";
+import { avisar } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
 import type { Venta } from "../_componentes/tipos";
+import { AccionesEmitir, AlertasEmitir } from "./acciones-emitir";
+import { construirInputBorrador, type ItemPreflight, type LineaForm, parseMonto } from "./emitir-util";
 import { BloqueEmisionGuardada, EmitirDialogos } from "./emitir-secciones";
 import { EmitirClienteTipo } from "./emitir-cliente";
 import { EmitirLineasDetalle } from "./emitir-lineas";
-
-type LineaForm = { glosa: string; montoTexto: string };
-
-function parseMonto(texto: string): number | null {
-  const n = Number(texto.replace(/\./g, "").replace(",", "."));
-  if (!Number.isFinite(n) || n <= 0 || !Number.isInteger(n)) return null;
-  return n;
-}
 
 /** Emisión DTE 33/34: borrador con vista previa (dryRun) y emisión con aprobación para agentes. */
 export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
@@ -41,24 +31,14 @@ export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
   const [dialogo, setDialogo] = useState<"borrador" | "emitir" | null>(null);
   const [preflightBloqueante, setPreflightBloqueante] = useState<string | null>(null);
 
-  type ItemPreflight = { codigo: string; ok: boolean; mensaje: string; bloqueante: boolean };
-
   const cuenta = cuentas.find((c) => c.id === cuentaId);
   const lineasValidas = lineas.every((l) => l.glosa.trim().length > 0 && parseMonto(l.montoTexto) != null);
   const plazo = Number(plazoPagoDias);
   const plazoOk = Number.isInteger(plazo) && plazo >= 0 && plazo <= 365;
   const formOk = Boolean(cuentaId && cuenta?.rut && lineasValidas && plazoOk);
 
-  function inputBorrador(dryRun: boolean) {
-    return {
-      cuentaId: cuentaId!,
-      tipoDte: Number(tipoDte) as 33 | 34,
-      plazoPagoDias: plazo,
-      lineas: lineas.map((l) => ({ glosa: l.glosa.trim(), monto: parseMonto(l.montoTexto)! })),
-      ...(glosa.trim() ? { glosa: glosa.trim() } : {}),
-      dryRun,
-    };
-  }
+  const inputBorrador = (dryRun: boolean) =>
+    construirInputBorrador({ cuentaId: cuentaId!, tipoDte, plazo, lineas, glosa, dryRun });
 
   async function revisarBorrador() {
     if (!formOk) return;
@@ -115,33 +95,24 @@ export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
   }
 
   const accionesForm = (
-    <>
-      <Button variant="secondary" disabled={pendiente} onClick={() => router.push("/finanzas/ventas")}>
-        Cancelar
-      </Button>
-      <Button variant="secondary" disabled={pendiente || !formOk || Boolean(documentoId)} onClick={() => void revisarBorrador()}>
-        Revisar borrador
-      </Button>
-      <Button disabled={pendiente || !formOk || Boolean(documentoId)} onClick={() => void guardarBorrador()}>
-        Guardar borrador
-      </Button>
-    </>
+    <AccionesEmitir
+      pendiente={pendiente}
+      formOk={formOk}
+      hayDocumento={Boolean(documentoId)}
+      onCancelar={() => router.push("/finanzas/ventas")}
+      onRevisar={() => void revisarBorrador()}
+      onGuardar={() => void guardarBorrador()}
+    />
   );
 
   return (
     <div className="flex flex-col gap-4 pb-36 md:pb-0">
       <div className="hidden items-center justify-end gap-3 md:flex">{accionesForm}</div>
-      {error ? <Alerta tono="danger" titulo={error} /> : null}
-      {preflightBloqueante ? (
-        <Alerta tono="warning" titulo="Emisión no lista">
-          {preflightBloqueante}
-        </Alerta>
-      ) : null}
-      {cuentaId && !cuenta?.rut ? (
-        <Alerta tono="warning" titulo="La cuenta seleccionada no tiene RUT">
-          Complete el RUT del cliente antes de emitir un DTE.
-        </Alerta>
-      ) : null}
+      <AlertasEmitir
+        error={error}
+        preflightBloqueante={preflightBloqueante}
+        cuentaSinRut={Boolean(cuentaId && !cuenta?.rut)}
+      />
       <div className="grid gap-6 lg:grid-cols-2">
         <EmitirClienteTipo
           cuentas={cuentas}

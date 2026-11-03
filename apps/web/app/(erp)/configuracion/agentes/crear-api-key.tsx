@@ -2,16 +2,15 @@
 /* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 
 import { formatearUsd } from "@opai/domain";
-import { useState } from "react";
 
 import { Alerta, Button, Campo, Input, Sheet, Switch } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { type KeyCreada, SecretoCreado } from "./secreto-creado";
+import { SecretoCreado } from "./secreto-creado";
 import { ModulosKey, PermisosKey } from "./permisos-key";
-import { montoUsd } from "./monto";
 import { PresupuestoKey } from "./presupuesto-key";
+import { useFormKey } from "./use-form-key";
 
 type Props = {
   abierto: boolean;
@@ -30,37 +29,11 @@ export function CrearApiKey({
   puedeCrearServicio,
 }: Props) {
   const { ejecutar, error, limpiarError } = useCapacidad("erp");
-  const [nombre, setNombre] = useState("");
-  const [todos, setTodos] = useState(false);
-  const [servicio, setServicio] = useState(false);
-  const [hereda, setHereda] = useState(true);
-  const [permisos, setPermisos] = useState<string[]>([]);
-  const [modulos, setModulos] = useState<string[]>(["core"]);
-  const [presupuesto, setPresupuesto] = useState("");
-  const [creada, setCreada] = useState<KeyCreada | null>(null);
-  const [enviando, setEnviando] = useState(false);
-  const tope = montoUsd(presupuesto);
-  const montoInvalido = presupuesto.trim() !== "" && tope === null;
-  const configuracionInvalida =
-    montoInvalido ||
-    (servicio && tope === null) ||
-    ((servicio || !hereda) && permisos.length === 0);
-  const deshabilitado =
-    enviando ||
-    nombre.trim().length < 2 ||
-    (!todos && modulos.length === 0) ||
-    configuracionInvalida;
-
-  const limpiar = () => {
-    setNombre("");
-    setPresupuesto("");
-    setTodos(false);
-    setServicio(false);
-    setHereda(true);
-    setPermisos([]);
-    setModulos(["core"]);
-    limpiarError();
-  };
+  const {
+    nombre, setNombre, todos, setTodos, servicio, setServicio, hereda, setHereda,
+    permisos, setPermisos, modulos, setModulos, presupuesto, setPresupuesto,
+    creada, setCreada, enviando, setEnviando, tope, montoInvalido, deshabilitado, limpiar,
+  } = useFormKey(limpiarError);
 
   async function crear() {
     if (deshabilitado) return;
