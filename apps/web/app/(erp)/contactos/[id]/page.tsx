@@ -7,7 +7,7 @@ import { conBusqueda, type SearchParams } from "@/lib/parametros";
 
 import { cargarContacto, cargarContactos, filtrosDe } from "../_componentes/datos";
 import { DetalleContacto } from "../_componentes/detalle-contacto";
-import { ListaContactos } from "../_componentes/lista-contactos";
+import { ListaContactosSplit } from "../_componentes/lista-contactos-split";
 
 export const metadata = { title: "Contacto" };
 type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
@@ -36,7 +36,9 @@ export default function Contacto({ params, searchParams }: Props) {
           telefono="detalle"
           unPanelHastaLg
           etiquetaLista="Lista de contactos"
-          lista={<ListaContactos state={lista.state} items={lista.items} seleccionado={id} q={p.q} />}
+          lista={
+            <ListaContactosSplit state={lista.state} items={lista.items} seleccionado={id} q={p.q} />
+          }
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>
               <DetalleContacto datos={datos} />

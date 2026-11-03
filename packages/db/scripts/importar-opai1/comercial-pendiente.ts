@@ -1,6 +1,7 @@
 // Mapeo puro de negocios, etapas, historial y contactos del negocio (CrmPipelineStage, CrmDeal,
 // CrmDealStageHistory, CrmDealContact). PENDIENTE de que el CRM PR 1 (schema comercial) esté en main:
 // aquí no se importa nada de `comercial.prisma` (no existe en main) y el plan solo cuenta filas.
+import { modulosDelPlan, type OpcionesPlan } from "./opciones";
 import { nombreCanonico } from "./normalizar";
 import type {
   DatosOpai1,
@@ -14,6 +15,9 @@ import type {
 export const COMERCIAL_EN_MAIN: boolean = false;
 
 export const MOTIVO_PENDIENTE_CRM = "pendiente_crm_pr1";
+export const MOTIVO_MODULO_COMERCIAL_INACTIVO = "modulo_comercial_inactivo";
+export const MOTIVO_MODULO_FINANZAS_INACTIVO = "modulo_finanzas_inactivo";
+export const MOTIVO_PENDIENTE_MODELO_PROGRAMACION = "pendiente_modelo_finanzas_programacion";
 
 export type TipoEtapa = "abierta" | "ganada" | "perdida";
 export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
@@ -128,16 +132,43 @@ export function instalacionesDeNegocio(
 
 export type Pendiente = { entidad: string; filas: number; motivo: string };
 
-/** Mientras el schema comercial no esté en main, el plan solo cuenta las filas pendientes. */
-export function pendientesComerciales(datos: DatosOpai1): Pendiente[] {
-  if (COMERCIAL_EN_MAIN) return [];
-  const conteos: [string, number][] = [
+/** Filas que el plan no importa aún, según módulos del tenant y modelos disponibles en 2.0. */
+export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan): Pendiente[] {
+  const { comercial, finanzas } = modulosDelPlan(opciones);
+  const salida: Pendiente[] = [];
+
+  const conteosCrm: [string, number][] = [
     ["etapa", datos.pipelineStages.length],
     ["negocio", datos.deals.length],
     ["negocio_etapa", datos.dealStageHistory.length],
     ["negocio_contacto", datos.dealContacts.length],
   ];
-  return conteos
-    .filter(([, n]) => n > 0)
-    .map(([entidad, filas]) => ({ entidad, filas, motivo: MOTIVO_PENDIENTE_CRM }));
+  for (const [entidad, filas] of conteosCrm) {
+    if (filas === 0) continue;
+    if (!comercial) salida.push({ entidad, filas, motivo: MOTIVO_MODULO_COMERCIAL_INACTIVO });
+    else if (!COMERCIAL_EN_MAIN) salida.push({ entidad, filas, motivo: MOTIVO_PENDIENTE_CRM });
+  }
+
+  const recurrentes = datos.recurringInvoiceSchedules.length;
+  if (recurrentes > 0) {
+    if (!finanzas)
+      salida.push({
+        entidad: "programacion_factura_recurrente",
+        filas: recurrentes,
+        motivo: MOTIVO_MODULO_FINANZAS_INACTIVO,
+      });
+    else
+      salida.push({
+        entidad: "programacion_factura_recurrente",
+        filas: recurrentes,
+        motivo: MOTIVO_PENDIENTE_MODELO_PROGRAMACION,
+      });
+  }
+
+  return salida;
+}
+
+/** @deprecated Usar `pendientesImportacion`. Mantenido para tests del mapeo CRM. */
+export function pendientesComerciales(datos: DatosOpai1): Pendiente[] {
+  return pendientesImportacion(datos, { modulosActivos: ["comercial"] });
 }

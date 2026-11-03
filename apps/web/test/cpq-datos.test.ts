@@ -17,6 +17,7 @@ const fila = {
   titulo: "Cotización ficticia",
   negocioId,
   negocioTitulo: "Negocio ficticio",
+  cuentaTitulo: "Cuenta ficticia",
   vigente: true,
   alternativaDeId: null,
   creadoPorId: "dato no necesario",
@@ -42,6 +43,7 @@ describe("CPQ: datos de pantalla autorizados en servidor", () => {
         state: "forbidden",
         items: [],
         crear: false,
+        costos: false,
       });
     }
     expect(mocks.ejecutar).not.toHaveBeenCalled();

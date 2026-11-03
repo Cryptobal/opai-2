@@ -13,9 +13,24 @@ export const cuentaOpai1 = z.object({
   name: z.string().min(1),
   legalName: texto,
   rut: texto,
+  /** Actividad económica SII (distinto de `industry` interno). */
+  giro: texto,
   industry: texto,
   segment: texto,
   size: texto,
+  address: texto,
+  commune: texto,
+  city: texto,
+  /** Correo receptor DTE en la cuenta (no sustituye contactos con rol facturación). */
+  emailDte: texto,
+  createdAt: fecha,
+  updatedAt: fecha,
+});
+
+/** Programación de facturas recurrentes de 1.0 (Finanzas). Se importa solo con módulo Finanzas y modelo en 2.0. */
+export const programacionRecurrenteOpai1 = z.object({
+  id: z.string().min(1),
+  accountId: z.string().min(1),
   createdAt: fecha,
   updatedAt: fecha,
 });
@@ -87,6 +102,11 @@ export const negocioContactoOpai1 = z.object({
   role: z.string().default("participant"),
 });
 
+export const usuarioOpai1 = z.object({
+  id: z.string().min(1),
+  email: z.string().email(),
+});
+
 export const datosOpai1 = z.object({
   accounts: z.array(cuentaOpai1).default([]),
   contacts: z.array(contactoOpai1).default([]),
@@ -95,6 +115,9 @@ export const datosOpai1 = z.object({
   deals: z.array(negocioOpai1).default([]),
   dealStageHistory: z.array(historialEtapaOpai1).default([]),
   dealContacts: z.array(negocioContactoOpai1).default([]),
+  recurringInvoiceSchedules: z.array(programacionRecurrenteOpai1).default([]),
+  /** Usuarios de 1.0 referenciados en el JSON; se resuelven por correo a membresías del tenant. */
+  users: z.array(usuarioOpai1).default([]),
 });
 
 export type CuentaOpai1 = z.infer<typeof cuentaOpai1>;
@@ -104,6 +127,8 @@ export type EtapaOpai1 = z.infer<typeof etapaOpai1>;
 export type NegocioOpai1 = z.infer<typeof negocioOpai1>;
 export type HistorialEtapaOpai1 = z.infer<typeof historialEtapaOpai1>;
 export type NegocioContactoOpai1 = z.infer<typeof negocioContactoOpai1>;
+export type ProgramacionRecurrenteOpai1 = z.infer<typeof programacionRecurrenteOpai1>;
+export type UsuarioOpai1 = z.infer<typeof usuarioOpai1>;
 export type DatosOpai1 = z.infer<typeof datosOpai1>;
 
 /** Fuente de las filas de 1.0. La simulación y la carga real usan la misma interfaz. */

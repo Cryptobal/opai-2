@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { planCuentas, resolverCuentas } from "../../scripts/importar-opai1/cuentas";
-import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
+import { cuentaDestino, estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
 import { fixture } from "./memoria";
 
 const por = (plan: ReturnType<typeof planCuentas>, id: string) =>
@@ -45,9 +45,9 @@ describe("plan de cuentas", () => {
   it("contra 2.0: vincula por RUT, detecta conflicto y cambios de campos", () => {
     const destino = estadoVacio();
     destino.cuentas.push(
-      { id: "c-1", nombre: "Comercial Alfa SpA", razonSocial: null, rut: "76111111-6" },
-      { id: "c-6", nombre: "Delta", razonSocial: null, rut: "76333333-7" },
-      { id: "c-3", nombre: "Inmobiliaria BETA S.A.", razonSocial: null, rut: null },
+      cuentaDestino({ id: "c-1", nombre: "Comercial Alfa SpA", rut: "76111111-6" }),
+      cuentaDestino({ id: "c-6", nombre: "Delta", rut: "76333333-7" }),
+      cuentaDestino({ id: "c-3", nombre: "Inmobiliaria BETA S.A." }),
     );
     destino.ids.push(
       { entidadTipo: "cuenta", idExterno: "acc-otra", entidadId: "c-6" },
