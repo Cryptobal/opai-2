@@ -6,6 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
+| **CAR-162** (rama `brief/car-162-actividad-tareas`, [brief](briefs/BRIEF-comercial-actividad-tareas.md)) | Comercial · Actividad y tareas: compositor (nota, llamada, reunión, tarea) y línea de tiempo mixta en negocio, cuenta e instalación; Mis tareas (`/tareas` y panel en Inicio); aviso diario de tareas vencidas (evento comunicable, silencio por defecto); `TareaFila` y `CompositorActividad` en el DS | En revisión | Sí, `20261103200000_core_actividades_aviso_vencida` (aditiva) |
 | **CAR-153** (`claude/new-session-gpqpn4`, PR A1 del [brief A](briefs/brief-A-comercial-finanzas.md)) | Textos y estilos: clases `t-*` vigiladas por test (B2), formateador único con espacio duro en `@opai/domain` (B3, R4), estados de venta en español (B4), sin referencias internas ni jerga (B5, B6), errores del servidor en español (B7, B8), calendario de pagos sin JSON (B10), un solo título en Bancos y Venta (B11) y Bandeja de Inicio con error visible (B12). Quedan en A5: refresco visual C1–C5 | En revisión | No |
 | **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`, PR #234) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En revisión | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
@@ -47,6 +48,8 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 ## Pendientes
 
 **R2 (CAR-161): typecheck de la web sin la bandera de memoria.** Medido el 3-nov-2026: `tsc` sobre `packages/capabilities` genera 1,2 millones de tipos y usa ~2,8 GB (la web, que importa las capacidades como fuente, ~2,5 GB); el tope por defecto de Node es 2,1 GB. Cerca de un tercio de los tipos viene del cliente de Prisma (~300 modelos), y el resto son los esquemas zod y los tipos inferidos de las capacidades. Lo que se arregló: una comparación estructural entre dos `Omit<ClienteApp, …>` que costaba ~17 s. Lo que falta: **referencias de proyecto** (`composite`, `declaration` y `references` por paquete, con `tsc -b`), para que la web lea `.d.ts` y no vuelva a chequear las capacidades. Es un cambio de configuración de todos los paquetes (tests y scripts que cruzan paquetes por rutas relativas hay que separarlos) y va en su propio PR.
+
+**Comercial · Actividad y tareas (CAR-162), segundo PR:** ChipsEtiquetas y filtro por etiqueta en listas, archivar/restaurar contacto, tarjetas «Próxima tarea» y «Último contacto real» en el Resumen del negocio y la actividad en la ficha de contacto (hoy sin pestañas). El aviso de tareas vencidas no envía nada hasta que el tenant crea una regla en Comunicaciones (ADR-020); el ajuste `actividades_aviso_responsables` agrega la campana a los responsables.
 
 **Bloqueantes para migrar Gard (plan P1–P10 del ROADMAP):**
 - **Adaptadores SimpleAPI y Octava que no corresponden a la API real** (`packages/integrations/src/sii/simpleapi.ts`, `cesion/octava.ts`).
