@@ -23,6 +23,7 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "finanzas:bancos.autorizar",
     ]);
     expect(manifest.navegacion.map((n) => n.href)).toEqual([
+      "/finanzas/configuracion-dte",
       "/finanzas/folios",
       "/finanzas/ventas",
       "/finanzas/compras",
