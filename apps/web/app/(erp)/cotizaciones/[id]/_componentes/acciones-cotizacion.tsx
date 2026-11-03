@@ -1,16 +1,17 @@
 "use client";
 
-import { MoreHorizontal, Send } from "lucide-react";
+import { Send } from "lucide-react";
 
-import { Alerta, avisar, Button, Menu } from "@opai/ds";
+import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { resumenRecalculo } from "@/lib/cpq-recalculo";
 
-import { AccionesAprobacionMargen } from "./acciones-cotizacion-aprobacion";
-import { AccionesCotizacionExtras } from "./acciones-cotizacion-extras";
+import { AccionesCotizacionBarraFija } from "./acciones-cotizacion-barra-fija";
+import { AccionesCotizacionCabecera } from "./acciones-cotizacion-cabecera";
 import {
   accionPrimariaCpq,
+  bloqueoCalculoEnBarraFija,
   bloqueoEnvioCpq,
   bloqueoMutualCpq,
   pedirAprobacionDeshabilitada,
@@ -44,9 +45,7 @@ export function AccionesCotizacion({
   onVistaPrevia?: () => void;
   /** Abre la hoja de edición de una línea (aviso de sueldo faltante, CAR-162). */
   onEditarLinea?: (lineaId: string) => void;
-  /** Barra fija móvil: solo acción primaria o aviso de bloqueo. */
   soloPrimaria?: boolean;
-  /** Cabecera: en teléfono la primaria va solo en la barra fija. */
   ocultarPrimariaEnTelefono?: boolean;
 }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
@@ -58,8 +57,9 @@ export function AccionesCotizacion({
   const muestraAprobacion =
     aprobar && version.estado === "en_aprobacion" && Boolean(puedeDecidir || motivoBloqueo);
   const primaria = accionPrimariaCpq(params);
-  const bloqueo = bloqueoEnvioCpq(params) ?? bloqueoMutualCpq(params);
-  const bloqueoCalculo = bloqueoEnvioCpq(params);
+  const bloqueoMutual = bloqueoMutualCpq(params);
+  const bloqueo = bloqueoEnvioCpq(params) ?? bloqueoMutual;
+  const bloqueoCalculoBarra = bloqueoCalculoEnBarraFija(params);
   const puedeNuevaVersion =
     gestionar && version.estado !== "borrador" && version.estado !== "en_aprobacion";
   const ocultar = Boolean(ocultarPrimariaEnTelefono);
@@ -110,56 +110,41 @@ export function AccionesCotizacion({
       </Button>
     ) : null;
 
-  // Barra fija del teléfono: si solo falta la mutual, se explica por qué no se puede enviar.
   if (soloPrimaria) {
-    if (bloqueoCalculo || !bloqueo) return bloqueoCalculo ? avisoBloqueo(bloqueoCalculo) : botonPrimaria("w-full");
-    return <div className="flex w-full flex-col gap-2">{avisoBloqueo(bloqueo)}{botonPrimaria("w-full")}</div>;
+    return (
+      <AccionesCotizacionBarraFija
+        bloqueoCalculo={bloqueoCalculoBarra}
+        bloqueoMutual={bloqueoMutual}
+        avisoBloqueo={avisoBloqueo}
+        botonPrimaria={botonPrimaria}
+      />
+    );
   }
 
-  const claseTelefono = ocultar ? "hidden md:inline-flex" : undefined;
   const comunes = { cotizacionId, gestionar, puedeNuevaVersion, onVistaPrevia, ejecutar, limpiarError, onHecho };
-  const items = itemsMenuCotizacion(comunes);
-  const extras = <AccionesCotizacionExtras {...comunes} pendiente={pendiente} />;
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-2">
-      {bloqueo ? (
-        <div className={ocultar ? "hidden md:block" : undefined}>{avisoBloqueo(bloqueo)}</div>
-      ) : null}
-      <div className="flex min-w-0 flex-wrap items-center gap-2">
-        {pedirAprobacionDeshabilitada(params) ? (
-          <Button type="button" disabled title={bloqueo?.mensaje} className={claseTelefono}>
-            Pedir aprobación
-          </Button>
-        ) : (
-          botonPrimaria(claseTelefono)
-        )}
-        {ocultar ? null : extras}
-        {ocultar && items.length > 0 ? (
-          <div className="md:hidden">
-            <Menu
-              etiqueta="Más acciones de la cotización"
-              items={items}
-              disparador={<MoreHorizontal className="size-5" aria-hidden />}
-              claseDisparador="border border-border-strong bg-surface size-11"
-            />
-          </div>
-        ) : null}
-        <AccionesAprobacionMargen
-          cotizacionId={cotizacionId}
-          visible={muestraAprobacion}
-          puedeDecidir={puedeDecidir}
-          motivoBloqueo={motivoBloqueo}
-          pendiente={pendiente}
-          error={error}
-          ocultarEnTelefono={ocultar}
-          ejecutar={ejecutar}
-          limpiarError={limpiarError}
-          onHecho={onHecho}
-        />
-        {ocultar ? <div className="hidden md:contents">{extras}</div> : null}
-      </div>
-      {error ? <Alerta tono="danger" titulo={error} className="w-full max-w-xl" /> : null}
-    </div>
+    <AccionesCotizacionCabecera
+      bloqueo={bloqueo}
+      ocultar={ocultar}
+      pedirDeshabilitado={pedirAprobacionDeshabilitada(params)}
+      botonPrimaria={botonPrimaria}
+      extrasProps={{ ...comunes, pendiente }}
+      items={itemsMenuCotizacion(comunes)}
+      avisoBloqueo={avisoBloqueo}
+      aprobacion={{
+        cotizacionId,
+        visible: muestraAprobacion,
+        puedeDecidir,
+        motivoBloqueo,
+        pendiente,
+        error,
+        ocultarEnTelefono: ocultar,
+        ejecutar,
+        limpiarError,
+        onHecho,
+      }}
+      error={error}
+    />
   );
 }
