@@ -65,6 +65,7 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/api/t/[slug]/solicitudes/route.ts":
     "Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2).",
   // Infraestructura: sin datos de negocio.
+  "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
   "app/api/cron/programador/route.ts":
     "Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029).",
   "app/api/cron/trabajos/route.ts": "Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029).",
