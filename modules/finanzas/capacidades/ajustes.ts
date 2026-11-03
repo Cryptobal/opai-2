@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
 
+import { sincronizarAvisosEnTx } from "./aviso";
 import { ajustesSchema } from "./esquemas";
 import { PERMISO_CONFIGURAR, PERMISO_VER } from "./permisos";
 import { aFecha, ajustesDe } from "./util";
@@ -55,6 +56,7 @@ export const ajustesActualizar = defineCapability({
         entidadTipo: "flujoAjustes",
         entidadId: a.id,
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     });
     return nuevo;
   },

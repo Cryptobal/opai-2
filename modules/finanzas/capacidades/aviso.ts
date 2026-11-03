@@ -63,6 +63,20 @@ export async function sincronizarAvisosEnTx(
   const hoy = lunesHoy();
   const umbral = ajustes.avisoUmbral;
   const candidatas = semanas.filter((x) => x.semana >= hoy && x.saldoFinal < umbral);
+  // Re-aviso (hallazgo 14): si la semana se recuperó, se libera el registro para que pueda avisar de nuevo.
+  const vigentes = await tx.flujoAvisoEmitido.findMany({ where: { semana: { gte: aFecha(hoy) } } });
+  const siguenBajo = new Set(candidatas.map((c) => c.semana));
+  const recuperadas = vigentes.filter((v) => !siguenBajo.has(aIso(v.semana)));
+  if (recuperadas.length)
+    await tx.flujoAvisoEmitido.deleteMany({ where: { id: { in: recuperadas.map((v) => v.id) } } });
+  for (const v of vigentes) {
+    const c = candidatas.find((x) => x.semana === aIso(v.semana));
+    if (c && Number(v.saldoProyectado) !== c.saldoFinal)
+      await tx.flujoAvisoEmitido.update({
+        where: { id: v.id },
+        data: { saldoProyectado: BigInt(c.saldoFinal) },
+      });
+  }
   if (!candidatas.length) return;
 
   const fechas = candidatas.map((c) => aFecha(c.semana));

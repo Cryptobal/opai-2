@@ -1,6 +1,7 @@
 // Escritura por lote de la importación CSV del flujo (CAR-161 · R3): una sola transacción y un
 // número de consultas que no crece con las filas (crear filas nuevas y celdas con createMany).
 import type { Contexto } from "@opai/capabilities";
+import type { TenantTx } from "@opai/db";
 
 import { sincronizarAvisosEnTx } from "./aviso";
 import type { filaImportSchema } from "./importar-parse";
@@ -24,6 +25,8 @@ export async function aplicarFilasImportadas(
   filas: readonly FilaValida[],
   filasExistentes: readonly { id: string; etiqueta: string }[],
   celdasExistentes: readonly CeldaExistente[],
+  /** Se ejecuta en la misma transacción: si falla, no queda nada aplicado. */
+  adicional?: (tx: TenantTx) => Promise<void>,
 ): Promise<void> {
   const finales = ultimaPorCelda(filas);
   await ctx.transaccion(async (tx) => {
@@ -66,6 +69,7 @@ export async function aplicarFilasImportadas(
         where: { id: { in: g.ids } },
         data: g.nota === null ? { monto: g.monto } : { monto: g.monto, nota: g.nota },
       });
+    if (adicional) await adicional(tx);
     await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
   });
 }

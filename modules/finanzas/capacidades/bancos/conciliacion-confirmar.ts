@@ -10,6 +10,7 @@ import {
 } from "@opai/capabilities";
 import type { Prisma } from "@opai/db";
 
+import { sincronizarAvisosEnTx } from "../aviso";
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_AUTORIZAR } from "./permisos";
 import { montoDe } from "./esquemas";
 import { movimientoDe } from "./util";
@@ -101,6 +102,7 @@ export const bancosConciliacionConfirmar = defineCapability({
         entidadTipo: "movimientoBancario",
         entidadId: mov.id,
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     });
     return { conciliado: true, estadoCobro };
   },
@@ -144,6 +146,7 @@ export const bancosConciliacionDeshacer = defineCapability({
         entidadId: input.movimientoId,
         payload: { motivo: input.motivo },
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     });
     return { deshecho: true };
   },
