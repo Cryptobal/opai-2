@@ -16,7 +16,7 @@ import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
 import { estadoCpqBadge } from "@/lib/cpq-presentacion";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
-import { hayBarraFijaCpq } from "./acciones-cotizacion-logica";
+import { hayBarraFijaCpq, bloqueoEnvioCpq } from "./acciones-cotizacion-logica";
 import { AccionesCotizacion } from "./acciones-cotizacion";
 import { FichaCotizacionCuerpo } from "./ficha-cotizacion-cuerpo";
 import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotizacion-modales";
@@ -137,7 +137,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           {...(meta !== undefined ? { meta } : {})}
         />
         {muestraBarraFija ? (
-          <AccionFijaTelefono>
+          <AccionFijaTelefono compacto={!bloqueoEnvioCpq(paramsBarra)}>
             <AccionesCotizacion {...propsAcciones} soloPrimaria />
           </AccionFijaTelefono>
         ) : null}
