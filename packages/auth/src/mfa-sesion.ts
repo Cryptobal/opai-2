@@ -1,5 +1,6 @@
 import type { BetterAuthPlugin } from "better-auth";
 import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
+import { expireCookie } from "better-auth/cookies";
 
 import { clienteAuth } from "@opai/db";
 
@@ -72,6 +73,10 @@ export const marcaMfaSesion = {
           // Un código correcto reinicia el tope con sesión (reserva de arriba); sin sesión (desafío
           // de login) ya lo reinicia el propio plugin (`resetTwoFactorFailures`); repetirlo es inofensivo.
           await limpiarFallosMfaConSesion(actual.user.id);
+          // `mfaVerified` cambió en la base, pero la caché de cookie (60 s) lo guardó en `false`: se
+          // expira para que la siguiente lectura la rehaga desde la base y no deje al usuario en el
+          // desafío hasta `maxAge`.
+          expireCookie(ctx, ctx.context.authCookies.sessionData);
         }),
       },
     ],

@@ -13,13 +13,15 @@ async function main() {
   const tenant = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await enTransaccion(tenant.id, async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(132102)`;
-    for (const tipo of ["gestor", "lector", "sin-lectura"]) {
+    // «costos»: gestor con cpq:costos.ver, para ingresar sueldos (e2e de tenant vacío, CAR-162).
+    for (const tipo of ["gestor", "lector", "sin-lectura", "costos"]) {
       const user = await usuarioE2E(`cpq-${tipo}@example.test`, `CPQ E2E ${tipo}`, hash);
       const permisos = [
         "comercial:negocios.read",
         "core:cuentas.read",
         ...(tipo !== "sin-lectura" ? ["cpq:cotizaciones.read"] : []),
-        ...(tipo === "gestor" ? ["cpq:cotizaciones.manage"] : []),
+        ...(tipo === "gestor" || tipo === "costos" ? ["cpq:cotizaciones.manage"] : []),
+        ...(tipo === "costos" ? ["cpq:costos.ver"] : []),
       ];
       const rol = await tx.rol.upsert({
         where: { tenantId_nombre: { tenantId: tenant.id, nombre: `CPQ E2E ${tipo}` } },

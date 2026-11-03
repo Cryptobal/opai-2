@@ -1,10 +1,16 @@
-import { avisosDesdeCalculo } from "@/lib/cpq-presentacion";
+import {
+  avisosCpq,
+  RUTA_CONFIRMAR_MUTUAL,
+  type AccionAvisoCpq,
+  type AvisoServidorCpq,
+} from "@/lib/cpq-avisos";
 
 export type MetaAccionesCpq = {
   avisoRecalculo?: unknown;
   puedeEnviar?: boolean;
   puedeAprobarMargen?: boolean;
   motivoNoAprobarMargen?: string | null;
+  requiereConfirmarMutual?: boolean;
 };
 
 export type AccionPrimariaCpq = {
@@ -13,63 +19,62 @@ export type AccionPrimariaCpq = {
   variant?: "secondary";
 };
 
-/** Props de `BloqueoCotizacion` (CAR-150 #226), derivadas del cálculo. */
+/** Props de `BloqueoCotizacion`, derivadas de la causa concreta del cálculo (CAR-162). */
 export type BloqueoEnvioCpq = {
+  titulo: string;
   mensaje: string;
-  laboralPendiente: boolean;
+  /** Ofrece «Recalcular» (falta un dato que se completa fuera de la cotización). */
+  recalcular: boolean;
   enlace?: { href: string; etiqueta: string };
+  accion?: AccionAvisoCpq;
 };
 
 type ParamsAcciones = {
   version: { estado: string };
-  calculo: { requiereAprobacion?: boolean; noEnviable?: boolean; advertencias?: string[] };
+  calculo: {
+    requiereAprobacion?: boolean;
+    noEnviable?: boolean;
+    advertencias?: string[];
+    avisos?: AvisoServidorCpq[];
+  };
   meta?: MetaAccionesCpq;
   gestionar: boolean;
 };
 
-function esBloqueoLaboral(advertencias: string[]): boolean {
-  return advertencias.some(
-    (a) =>
-      a.toLowerCase().includes("costo laboral") ||
-      a.includes("motor de sueldos") ||
-      a.includes("valores legales") ||
-      a.includes("mutual adicional") ||
-      a.includes("falta valor UF"),
-  );
-}
-
-/** Bloqueo alineado a `solicitar_aprobacion` / `marcar_lista` cuando `noEnviable`. */
+/** Bloqueo alineado a `solicitar_aprobacion` / `marcar_lista` cuando `noEnviable`; nombra la causa. */
 export function bloqueoEnvioCpq(p: ParamsAcciones): BloqueoEnvioCpq | null {
   const { version, calculo, gestionar } = p;
   if (!gestionar || version.estado !== "borrador" || !calculo.noEnviable) return null;
-  const advertencias = calculo.advertencias ?? [];
-  const avisos = avisosDesdeCalculo(advertencias);
+  const avisos = avisosCpq(calculo).filter((a) => a.bloquea);
   const primero = avisos[0];
-  const laboralPendiente = esBloqueoLaboral(advertencias) && !advertencias.some((a) => a.includes("sueldo base"));
-
-  if (laboralPendiente) {
+  if (!primero) {
     return {
+      titulo: "Cotización bloqueada",
       mensaje:
-        primero?.detalle ??
-        "Completa el costo laboral (motor de sueldos) antes de pedir aprobación o dejar la cotización lista.",
-      laboralPendiente: true,
+        "Hay datos pendientes para calcular la cotización. Recalcula o completa lo que falta.",
+      recalcular: true,
     };
   }
-
-  if (primero) {
-    return {
-      mensaje: primero.detalle ?? primero.titulo,
-      laboralPendiente: false,
-      ...(primero.enlace ? { enlace: primero.enlace } : {}),
-    };
-  }
-
-  const uf = advertencias.find((a) => a.includes("UF"));
+  const mas = avisos.length > 1 ? ` (y ${avisos.length - 1} más en la ficha)` : "";
   return {
+    titulo: primero.titulo,
+    mensaje: `${primero.detalle ?? ""}${mas}`.trim(),
+    recalcular: !primero.accion,
+    ...(primero.enlace ? { enlace: primero.enlace } : {}),
+    ...(primero.accion ? { accion: primero.accion } : {}),
+  };
+}
+
+/** Enviar exige confirmar la mutual (misma regla que `cpq.envios_propuesta.*` en el servidor). */
+export function bloqueoMutualCpq(p: ParamsAcciones): BloqueoEnvioCpq | null {
+  if (!p.gestionar || !p.meta?.requiereConfirmarMutual || bloqueoEnvioCpq(p)) return null;
+  if (p.version.estado !== "borrador" && p.version.estado !== "lista") return null;
+  return {
+    titulo: "Confirma la mutual adicional para enviar",
     mensaje:
-      uf ??
-      "Hay datos pendientes para calcular la cotización. Recalcula o completa lo que falta.",
-    laboralPendiente: false,
+      "La cotización se calcula con 0 % de mutual adicional. Confírmala antes de enviarla al cliente.",
+    recalcular: false,
+    enlace: { href: RUTA_CONFIRMAR_MUTUAL, etiqueta: "Confirmar mutual" },
   };
 }
 
@@ -77,7 +82,8 @@ export function accionPrimariaCpq(p: ParamsAcciones): AccionPrimariaCpq | null {
   const { version, calculo, meta, gestionar } = p;
   if (version.estado === "en_aprobacion") return null;
   if (bloqueoEnvioCpq(p)) return null;
-  if (gestionar && meta?.avisoRecalculo) return { id: "recalcular", etiqueta: "Recalcular", variant: "secondary" };
+  if (gestionar && meta?.avisoRecalculo)
+    return { id: "recalcular", etiqueta: "Recalcular", variant: "secondary" };
   if (gestionar && version.estado === "borrador" && calculo.requiereAprobacion)
     return { id: "pedir", etiqueta: "Pedir aprobación" };
   if (gestionar && meta?.puedeEnviar) return { id: "enviar", etiqueta: "Enviar al contacto" };
@@ -93,8 +99,8 @@ export function hayBarraFijaCpq(p: ParamsAcciones): boolean {
 export function pedirAprobacionDeshabilitada(p: ParamsAcciones): boolean {
   return Boolean(
     p.gestionar &&
-      p.version.estado === "borrador" &&
-      p.calculo.requiereAprobacion &&
-      bloqueoEnvioCpq(p),
+    p.version.estado === "borrador" &&
+    p.calculo.requiereAprobacion &&
+    bloqueoEnvioCpq(p),
   );
 }
