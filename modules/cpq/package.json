@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./manifest.ts",
+    "./consumidor-bandeja": "./consumidor-bandeja.ts",
     "./motor": {
       "browser": null,
       "default": "./domain/motor/index.ts"

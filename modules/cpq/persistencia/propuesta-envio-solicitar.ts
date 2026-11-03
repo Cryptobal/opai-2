@@ -56,6 +56,23 @@ export async function registrarOEnviarSolicitudEnvioPropuesta(
   });
 
   if (pendiente) {
+    const cot = await ctx.db.cpqCotizacion.findFirst({
+      where: { id: input.cotizacionId },
+      select: { codigo: true },
+    });
+    await ctx.transaccion(async (tx) => {
+      await ctx.eventos.emitir(tx, {
+        tipo: "cpq.envio_propuesta.solicitado",
+        entidadTipo: "cotizacion",
+        entidadId: input.cotizacionId,
+        payload: {
+          envioId: envio.id,
+          solicitadoPorId,
+          codigo: cot?.codigo ?? "",
+        },
+      });
+    });
+    ctx.despacharEventos();
     return { envioId: envio.id, estado: "pendiente_aprobacion" as const, destinatarios: input.destinatarios };
   }
 

@@ -10,12 +10,13 @@ import {
 } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
 import { estadoCpqBadge } from "@/lib/cpq-presentacion";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
-import { hayBarraFijaCpq } from "./acciones-cotizacion-logica";
+import { hayBarraFijaCpq, bloqueoEnvioCpq } from "./acciones-cotizacion-logica";
 import { AccionesCotizacion } from "./acciones-cotizacion";
 import { FichaCotizacionCuerpo } from "./ficha-cotizacion-cuerpo";
 import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotizacion-modales";
@@ -29,6 +30,7 @@ type MetaFicha = {
   puedeAprobarMargen?: boolean;
   motivoNoAprobarMargen?: string | null;
   autoaprobacionMargen?: boolean | null;
+  aprobacion?: { bandejaId?: string } | null;
 };
 
 export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
@@ -108,7 +110,18 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
         {error ? <Alerta tono="danger" titulo={error} className="mb-4" /> : null}
         {aprobacionTxt ? (
           <Alerta tono="info" titulo={aprobacionTxt.titulo} className="mb-4">
-            {aprobacionTxt.detalle}
+            <span className="flex flex-col gap-2">
+              <span>{aprobacionTxt.detalle}</span>
+              {meta?.aprobacion?.bandejaId ? (
+                <EnlaceBoton
+                  href={`/configuracion/aprobaciones?ver=${encodeURIComponent(meta.aprobacion.bandejaId)}`}
+                  variante="ghost"
+                  className="self-start px-0"
+                >
+                  Ver en la bandeja de aprobaciones
+                </EnlaceBoton>
+              ) : null}
+            </span>
           </Alerta>
         ) : null}
         <FichaCotizacionCuerpo
@@ -124,7 +137,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           {...(meta !== undefined ? { meta } : {})}
         />
         {muestraBarraFija ? (
-          <AccionFijaTelefono>
+          <AccionFijaTelefono compacto={!bloqueoEnvioCpq(paramsBarra)}>
             <AccionesCotizacion {...propsAcciones} soloPrimaria />
           </AccionFijaTelefono>
         ) : null}

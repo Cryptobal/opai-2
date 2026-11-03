@@ -20,6 +20,10 @@
     {
       "archivo": "app/firmar/[slug]/[token]/acciones.ts",
       "motivo": "Firmar por enlace personal ocurre antes de existir sesión (firma.md §5, §10): resuelve el tenant por slug con tenantPorSlug() y luego ejecuta capacidades internas con el enlace como credencial."
+    },
+    {
+      "archivo": "app/api/t/[slug]/solicitudes/route.ts",
+      "motivo": "Formulario web público pre-sesión: resuelve el tenant por slug con tenantPorSlug() y ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2)."
     }
   ],
   "internasPermitidas": [
@@ -34,6 +38,10 @@
     {
       "archivo": "app/firmar/[slug]/[token]/acciones.ts",
       "motivo": "Flujo de firma pre-sesión (firma.md R19, §10): ver_firmante, firmar y rechazar son internas; el enlace personal es la credencial."
+    },
+    {
+      "archivo": "app/api/t/[slug]/solicitudes/route.ts",
+      "motivo": "Formulario web público: recibir_formulario_web es interna; la clave Bearer del canal es la credencial antes de existir sesión (Brief 07 PR 2)."
     }
   ],
   "infraestructuraLibConDb": [

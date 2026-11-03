@@ -31,7 +31,7 @@ export function HistorialVersionesCpq({
                 <p className="t-label">
                   {e.etiqueta}
                   {v.ventaMensualClp != null ? (
-                    <span className="t-caption text-fg-muted font-normal">
+                    <span className="t-caption font-normal text-fg-muted">
                       {" "}
                       · {pesos(v.ventaMensualClp)} mensual
                     </span>
@@ -50,9 +50,6 @@ export function HistorialVersionesCpq({
           );
         })}
       </ol>
-      <p className="t-caption text-fg-muted mt-4">
-        Reimprimir el PDF exacto enviado llegará con el rediseño del documento (PR siguiente).
-      </p>
     </SeccionTarjeta>
   );
 }
@@ -73,16 +70,18 @@ export function PanelDocumentoPdf({
     <SeccionTarjeta
       titulo="Documento PDF"
       accion={
-        <Button type="button" variant="secondary" size="md" onClick={onVistaPrevia}>
+        <Button type="button" variant="secondary" size="md" className="max-md:min-h-11" onClick={onVistaPrevia}>
           Vista previa
         </Button>
       }
     >
       <p className="t-body-sm text-fg-muted">
-        Plantilla del tenant (Clásica / Moderna / Compacta en Configuración › Marca y plantillas).
+        Usa la plantilla y la marca definidas en Configuración › CPQ › Marca y plantillas (Clásica, Moderna o
+        Compacta).
       </p>
-      <p className="t-caption text-fg-muted mt-2">
-        {codigo} v{version} · {borrador ? "Vista previa con marca BORRADOR" : "Documento enviado sin borrador"}
+      <p className="t-caption mt-2 text-fg-subtle">
+        {codigo} · versión {version}
+        {borrador ? " · vista previa con marca de borrador" : " · documento enviado al contacto"}
       </p>
     </SeccionTarjeta>
   );

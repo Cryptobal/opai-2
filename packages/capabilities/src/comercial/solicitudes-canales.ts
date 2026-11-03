@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { rutaEndpointFormulario } from "@opai/domain";
+
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
@@ -19,6 +21,11 @@ export const canalSchema = z.object({
   dominioAutorizado: z.string().nullable(),
   remitentesIgnorados: z.array(externo(z.string())),
   responsableId: z.string().nullable(),
+  /** Solo formulario web: metadatos del endpoint público (sin secretos). */
+  endpoint: z.string().optional(),
+  tokenSufijo: z.string().nullable().optional(),
+  tokenActivo: z.boolean().optional(),
+  ultimaSolicitudEn: z.string().nullable().optional(),
 });
 
 type FilaCanal = {
@@ -27,6 +34,9 @@ type FilaCanal = {
   dominioAutorizado: string | null;
   remitentesIgnorados: string[];
   responsableId: string | null;
+  tokenSufijo?: string | null;
+  tokenHash?: string | null;
+  ultimaSolicitudEn?: Date | null;
 };
 
 const vacio = (canal: CanalSolicitud): FilaCanal => ({
@@ -37,13 +47,23 @@ const vacio = (canal: CanalSolicitud): FilaCanal => ({
   responsableId: null,
 });
 
-const vista = (f: FilaCanal): z.input<typeof canalSchema> => ({
-  canal: f.canal as CanalSolicitud,
-  estado: f.estado as (typeof ESTADOS_CANAL)[number],
-  dominioAutorizado: f.dominioAutorizado,
-  remitentesIgnorados: f.remitentesIgnorados,
-  responsableId: f.responsableId,
-});
+const vista = (f: FilaCanal, slug?: string): z.input<typeof canalSchema> => {
+  const base = {
+    canal: f.canal as CanalSolicitud,
+    estado: f.estado as (typeof ESTADOS_CANAL)[number],
+    dominioAutorizado: f.dominioAutorizado,
+    remitentesIgnorados: f.remitentesIgnorados,
+    responsableId: f.responsableId,
+  };
+  if (f.canal !== "formulario_web" || !slug) return base;
+  return {
+    ...base,
+    endpoint: rutaEndpointFormulario(slug),
+    tokenSufijo: f.tokenSufijo ?? null,
+    tokenActivo: Boolean(f.tokenHash && f.estado === "conectado"),
+    ultimaSolicitudEn: f.ultimaSolicitudEn?.toISOString() ?? null,
+  };
+};
 
 export const canalesGet = defineCapability({
   // Perfil de configuración sin IDs de salida (NÚCLEO-H): se audita con tenant, actor y capacidad.
@@ -57,8 +77,17 @@ export const canalesGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
-    const filas = await ctx.db.canalSolicitud.findMany();
-    return CANALES_SOLICITUD.map((c) => vista(filas.find((f) => f.canal === c) ?? vacio(c)));
+    const [filas, tenant] = await Promise.all([
+      ctx.db.canalSolicitud.findMany(),
+      ctx.db.tenant.findUniqueOrThrow({
+        where: { id: ctx.tenantId },
+        select: { slug: true },
+      }),
+    ]);
+    return CANALES_SOLICITUD.map((c) => {
+      const f = filas.find((x) => x.canal === c);
+      return vista(f ?? vacio(c), tenant.slug);
+    });
   },
 });
 
@@ -100,7 +129,13 @@ export const canalesUpdate = defineCapability({
         ? { remitentesIgnorados: [...new Set(input.remitentesIgnorados.filter(Boolean))] }
         : {}),
     };
-    if (dryRun) return vista({ ...(actual ?? vacio(input.canal)), ...cambios });
+    const slug = (
+      await ctx.db.tenant.findUniqueOrThrow({
+        where: { id: ctx.tenantId },
+        select: { slug: true },
+      })
+    ).slug;
+    if (dryRun) return vista({ ...(actual ?? vacio(input.canal)), ...cambios }, slug);
     const guardado = await ctx.transaccion(async (tx) => {
       const c = await tx.canalSolicitud.upsert({
         where: { tenantId_canal: { tenantId: ctx.tenantId, canal: input.canal } },
@@ -120,6 +155,6 @@ export const canalesUpdate = defineCapability({
       });
       return c;
     });
-    return vista(guardado);
+    return vista(guardado, slug);
   },
 });

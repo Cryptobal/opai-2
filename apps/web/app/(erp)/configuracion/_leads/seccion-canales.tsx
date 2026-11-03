@@ -8,8 +8,8 @@ import type { CanalConfig } from "./editor-canales";
 
 /**
  * Pestaña «Canales de entrada» de Configuración → Módulos → Comercial (Leads, diseño 07): estado de
- * los cuatro canales y su responsable por defecto. Formulario web y correo quedan «Sin conectar»
- * hasta el PR 2 (infraestructura y claves). Lee y escribe solo por capacidades.
+ * los cuatro canales, clave y endpoint del formulario web (PR 2), y responsable por defecto.
+ * Lee y escribe solo por capacidades.
  */
 export async function SeccionCanales() {
   const r = await ejecutarComoUsuario<CanalConfig[]>("erp", "comercial.canales.get", {});

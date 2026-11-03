@@ -4,6 +4,7 @@ import {
   avisosDesdeCalculo,
   avisoLineaPuesto,
   etiquetaCategoria,
+  subtituloLineaCpq,
   ventaMensualTexto,
 } from "@/lib/cpq-presentacion";
 import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
@@ -35,6 +36,19 @@ describe("cpq-presentacion", () => {
   it("aviso por línea con nombre del puesto", () => {
     const a = avisoLineaPuesto("costo pendiente: falta sueldo base", "Guardia noche");
     expect(a?.titulo).toContain("Guardia noche");
+  });
+
+  it("subtítulo de línea puesto sin repetir tipo genérico", () => {
+    expect(
+      subtituloLineaCpq({
+        tipo: "puesto",
+        posiciones: 2,
+        patron: "4×4",
+        horaInicio: "08:00",
+        horaFin: "20:00",
+      }),
+    ).toBe("4×4 · 2 guardias");
+    expect(subtituloLineaCpq({ tipo: "mano_obra" })).toBe("Mano de obra");
   });
 
   it("texto N6 de aprobación de margen", () => {

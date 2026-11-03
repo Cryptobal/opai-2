@@ -2,8 +2,8 @@
 
 export type Aprobacion = {
   id: string;
-  /** plataforma: acción platform.*, se resuelve con platform.aprobaciones.* (CAR-36). */
-  ambito: "empresa" | "plataforma";
+  /** plataforma: acción platform.*; cpq: margen o envío conjunto. */
+  ambito: "empresa" | "plataforma" | "cpq";
   apiKeyId: string | null;
   agente: string;
   via: string | null;
@@ -18,7 +18,8 @@ export type Aprobacion = {
   creadaEn: string;
 };
 
-export const quien = (a: Aprobacion) => `${a.agente}${a.via ? ` vía ${a.via}` : ""}`;
+export const quien = (a: Aprobacion) =>
+  a.ambito === "cpq" ? a.agente : `${a.agente}${a.via ? ` vía ${a.via}` : ""}`;
 
 /** "vence en 23 h" / "vence en 2 días". */
 export function venceEn(iso: string, ahora: number) {

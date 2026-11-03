@@ -8,7 +8,6 @@ import { Versiones } from "./estructura-cargo";
 import { HojaCargo, SwitchSensible } from "./diferidas";
 import { SeccionMontosPorInstalacion } from "./seccion-montos-instalacion";
 import { NotaRetiroCargo } from "./nota-retiro-cargo";
-import { SeccionMontosPorInstalacion } from "./seccion-montos-instalacion";
 
 type Props = {
   datos: ReturnType<typeof cargarCargo>;
