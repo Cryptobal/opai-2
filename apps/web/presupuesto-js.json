@@ -8,6 +8,7 @@
     "/(erp)/configuracion*": 177,
     "/(erp)/configuracion/modulo/[id]": 180,
     "/(erp)/instalaciones/nueva": 178,
+    "/(erp)/negocios/[id]/seguimiento": 169,
     "/(erp)/pauta": 172,
     "/(erp)/personas/vencimientos": 175,
     "/(erp)/personas/[id]": 166,
