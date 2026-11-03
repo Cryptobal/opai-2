@@ -62,5 +62,5 @@ export const VERBOS: Record<string, string> = {
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
-  publicar: "Publicar", sync_servicio: "Sincronizar servicio",
+  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
 };
