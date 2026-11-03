@@ -148,6 +148,16 @@ describe.skipIf(!urlPropietario)("MFA: endpoints directos y confirmación (#65, 
   it("confirmar un enrolamiento pendiente válido activa MFA y verifica solo su sesión", async () => {
     await e.admin.user.update({ where: { id: userId }, data: { twoFactorEnabled: false } });
     await e.admin.twoFactor.update({ where: { userId }, data: { verified: false } });
+    // Quien se enrola entra con `twoFactorEnabled=false`: la sesión (y su caché de cookie de 60 s)
+    // debe nacer con ese estado, no con el `true` que dejó el `beforeEach`.
+    const r = await auth.api.signInSocial({
+      body: { provider: "google", idToken: { token: "token-falso" } },
+      returnHeaders: true,
+    });
+    estado.cookie = r.headers
+      .getSetCookie()
+      .map((c) => c.split(";")[0])
+      .join("; ");
     expect(await mfa.confirmarSegundoFactor(await codigo())).toEqual({ ok: true });
     expect((await e.admin.user.findUnique({ where: { id: userId } }))?.twoFactorEnabled).toBe(true);
     expect(await e.admin.session.findMany({ where: { userId, mfaVerified: true } })).toHaveLength(

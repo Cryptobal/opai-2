@@ -86,7 +86,7 @@ async function cotizacionConPuesto(ctx: ReturnType<typeof ctxOwner>["ctx"]) {
     seccionId: sec.id,
     tipo: "puesto",
     nombre: "Turno",
-    sueldoBaseClp: 400_000,
+    sueldoBaseClp: 600_000,
   });
   await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
   return id;

@@ -19,7 +19,8 @@ export class ErrorCapacidad extends Error {
 
 export const noEncontrado = (que: string) => new ErrorCapacidad("NOT_FOUND", `${que} no existe.`);
 export const conflicto = (mensaje: string) => new ErrorCapacidad("CONFLICT", mensaje);
-export const reglaDeNegocio = (mensaje: string) => new ErrorCapacidad("UNPROCESSABLE", mensaje);
+export const reglaDeNegocio = (mensaje: string, detalles?: unknown) =>
+  new ErrorCapacidad("UNPROCESSABLE", mensaje, detalles);
 export const prohibido = (mensaje: string, detalles?: unknown) =>
   new ErrorCapacidad("FORBIDDEN", mensaje, detalles);
 

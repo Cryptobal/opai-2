@@ -2,12 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  AccionFijaTelefono,
-  Alerta,
-  Badge,
-  DetailScreen,
-} from "@opai/ds";
+import { AccionFijaTelefono, Alerta, Badge, DetailScreen } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -31,6 +26,7 @@ type MetaFicha = {
   motivoNoAprobarMargen?: string | null;
   autoaprobacionMargen?: boolean | null;
   aprobacion?: { bandejaId?: string } | null;
+  requiereConfirmarMutual?: boolean;
 };
 
 export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
@@ -50,6 +46,9 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
   const meta = d.meta as MetaFicha | undefined;
   const badge = estadoCpqBadge(d.version.estado);
   const recargar = () => router.refresh();
+  // Sin `cpq:costos.ver` no se ingresa sueldo: el aviso no ofrece abrir la hoja (CAR-162).
+  const editarLinea =
+    editable && datos.costos ? { onEditarLinea: (id: string) => modales.editarLineaDe(d.secciones, id) } : {};
   const aprobacionTxt =
     d.version.estado === "en_aprobacion"
       ? textoAprobacionMargenN6({
@@ -65,6 +64,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
       calculo={c}
       {...(meta !== undefined ? { meta } : {})}
       verCostos={datos.costos}
+      {...editarLinea}
     />
   );
 
@@ -78,6 +78,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
     onHecho: recargar,
     onEnviar: () => modales.setEnviarAbierto(true),
     onVistaPrevia: () => modales.setPreviewAbierto(true),
+    ...editarLinea,
   };
   const paramsBarra = {
     version: d.version,
@@ -151,6 +152,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
         requiereAprobacion={Boolean(c.requiereAprobacion)}
         estadoVersion={d.version.estado}
         enviada={d.version.estado === "enviada" || d.version.estado === "aceptada"}
+        verCostos={datos.costos}
         recargar={recargar}
       />
     </>

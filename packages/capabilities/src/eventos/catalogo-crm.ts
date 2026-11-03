@@ -22,6 +22,10 @@ export const EVENTOS_CRM: readonly EventoDeDominio[] = [
     descripcion: "Se asignó una tarea a uno o más responsables.",
   },
   { id: "core.actividad.tarea_completada", descripcion: "Se completó una tarea." },
+  {
+    id: "core.actividad.tarea_vencida",
+    descripcion: "Una tarea pendiente pasó su vencimiento (aviso diario, una vez por vencimiento).",
+  },
   { id: "core.etiqueta.creada", descripcion: "Se creó una etiqueta del catálogo." },
   { id: "core.etiqueta.actualizada", descripcion: "Cambió una etiqueta del catálogo." },
   { id: "core.etiqueta.eliminada", descripcion: "Se eliminó una etiqueta del catálogo." },

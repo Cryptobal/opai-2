@@ -6,6 +6,7 @@ import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { fecha, rut } from "@/lib/fechas";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
+import { FacturarCuenta } from "./facturar-cuenta";
 import { VinculosComercialCuenta } from "./vinculos-comercial-cuenta";
 
 /** Tab Resumen de una cuenta: identificación y representante legal (01). */
@@ -45,6 +46,7 @@ export function ResumenCuenta({ c }: { c: CuentaDetalle }) {
           ]}
         />
       </SeccionTarjeta>
+      <FacturarCuenta c={c} />
       <SeccionTarjeta titulo="Representante legal">
         <ParesGrid
           items={[

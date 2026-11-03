@@ -57,6 +57,24 @@ describe.skipIf(!urlPropietario)("session.cookieCache 60 s (CAR-152)", () => {
     return new Headers({ cookie });
   }
 
+  /** Lo que haría el navegador: aplica los `Set-Cookie` de una respuesta sobre la jarra de cookies. */
+  function aplicar(headers: Headers, respuesta: Headers): Headers {
+    const jarra = new Map(
+      (headers.get("cookie") ?? "")
+        .split("; ")
+        .filter(Boolean)
+        .map((c) => [c.split("=")[0]!, c] as const),
+    );
+    for (const sc of respuesta.getSetCookie()) {
+      const [par = "", ...attrs] = sc.split("; ");
+      const nombre = par.split("=")[0]!;
+      const vacia = par.endsWith("=") || attrs.some((a) => /^max-age=0$/i.test(a));
+      if (vacia) jarra.delete(nombre);
+      else jarra.set(nombre, par);
+    }
+    return new Headers({ cookie: [...jarra.values()].join("; ") });
+  }
+
   it("fija cookieCache habilitada con maxAge 60 s", () => {
     expect(auth.options.session?.cookieCache).toEqual({ enabled: true, maxAge: 60 });
   });
@@ -80,12 +98,25 @@ describe.skipIf(!urlPropietario)("session.cookieCache 60 s (CAR-152)", () => {
     await e.admin.session.deleteMany({ where: { userId } });
   });
 
-  it("sign-out invalida de inmediato aunque la caché no haya vencido", async () => {
+  it("sign-out invalida de inmediato la sesión del navegador que la cierra", async () => {
     vi.useFakeTimers();
     const headers = await entrar();
     expect((await auth.api.getSession({ headers }))?.user.id).toBe(userId);
-    await auth.api.signOut({ headers });
-    expect(await auth.api.getSession({ headers })).toBeNull();
+    const r = await auth.api.signOut({ headers, returnHeaders: true });
+    // Los `Set-Cookie` de la respuesta borran token y caché: el navegador queda sin sesión...
+    expect(await auth.api.getSession({ headers: aplicar(headers, r.headers) })).toBeNull();
+    // ...y la fila de la base ya no existe.
+    expect(await e.admin.session.count({ where: { userId } })).toBe(0);
+    vi.useRealTimers();
+  });
+
+  it("riesgo aceptado (D1): una cookie copiada antes del sign-out autentica hasta el maxAge", async () => {
+    vi.useFakeTimers();
+    const copia = await entrar();
+    await auth.api.signOut({ headers: copia });
+    expect((await auth.api.getSession({ headers: copia }))?.user.id).toBe(userId);
+    vi.advanceTimersByTime(61_000);
+    expect(await auth.api.getSession({ headers: copia })).toBeNull();
     vi.useRealTimers();
   });
 
@@ -109,11 +140,14 @@ describe.skipIf(!urlPropietario)("session.cookieCache 60 s (CAR-152)", () => {
     const headers = await entrar();
     expect((await auth.api.getSession({ headers }))?.session.mfaVerified).toBe(false);
     const codigo = await createOTP(secret, { digits: 6, period: 30 }).totp();
-    await auth.api.verifyTOTP({
+    const r = await auth.api.verifyTOTP({
       body: { code: codigo },
       headers,
+      returnHeaders: true,
     });
-    expect((await auth.api.getSession({ headers }))?.session.mfaVerified).toBe(true);
+    // El navegador aplica los `Set-Cookie` de la verificación (expiran la caché con `false`).
+    const despues = aplicar(headers, r.headers);
+    expect((await auth.api.getSession({ headers: despues }))?.session.mfaVerified).toBe(true);
     await e.admin.twoFactor.deleteMany({ where: { userId } });
     await e.admin.user.update({ where: { id: userId }, data: { twoFactorEnabled: false } });
     await e.admin.session.deleteMany({ where: { userId } });

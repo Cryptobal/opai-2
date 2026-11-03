@@ -1,11 +1,10 @@
 "use client";
 
 import { Download } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import { Alerta, Button, Dialog } from "@opai/ds";
 
-import { useCapacidad } from "@/app/_components/use-capacidad";
+import { useVistaPreviaPdf } from "./use-vista-previa-pdf";
 
 export function DialogoVistaPreviaPdf({
   cotizacionId,
@@ -20,19 +19,9 @@ export function DialogoVistaPreviaPdf({
   enviada: boolean;
   onCerrar: () => void;
 }) {
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [paginas, setPaginas] = useState<number | null>(null);
-
-  useEffect(() => {
-    void ejecutar("cpq.cotizaciones.preview_pdf", { id: cotizacionId }, true).then((r) => {
-      if (r && typeof r === "object" && "pdfBase64" in r) {
-        const data = r as { pdfBase64: string; bytes?: number };
-        setPdfUrl(`data:application/pdf;base64,${data.pdfBase64}`);
-        setPaginas(data.bytes ? Math.max(1, Math.round(data.bytes / 12_000)) : null);
-      }
-    });
-  }, [cotizacionId, ejecutar]);
+  const { estado, mensaje, reintentar } = useVistaPreviaPdf(cotizacionId);
+  const pdfUrl = estado.fase === "listo" ? estado.pdfUrl : null;
+  const paginas = estado.fase === "listo" ? estado.paginas : null;
 
   return (
     <Dialog abierto titulo={`Vista previa · ${codigo} v${version}`} onCerrar={onCerrar} tamano="grande">
@@ -41,12 +30,26 @@ export function DialogoVistaPreviaPdf({
           {paginas ? `${paginas} páginas A4 · ` : null}
           {!enviada ? "Marca de agua BORRADOR hasta que se envíe" : "Sin marca de agua"}
         </p>
-        {error ? <Alerta tono="danger" titulo={error} /> : null}
+        {mensaje ? (
+          <Alerta
+            tono="danger"
+            titulo="No se pudo mostrar la vista previa"
+            accion={
+              <Button type="button" variant="secondary" size="md" onClick={reintentar}>
+                Reintentar
+              </Button>
+            }
+          >
+            {mensaje}
+          </Alerta>
+        ) : null}
         {pdfUrl ? (
           <iframe title="Vista previa PDF" src={pdfUrl} className="h-[70vh] w-full rounded-md border border-border" />
-        ) : (
-          <p className="t-body-sm text-fg-muted">{pendiente ? "Generando PDF…" : "Sin vista previa"}</p>
-        )}
+        ) : estado.fase === "generando" ? (
+          <p role="status" className="t-body-sm text-fg-muted">
+            Generando PDF…
+          </p>
+        ) : null}
         <div className="flex justify-end gap-2">
           {pdfUrl ? (
             <Button

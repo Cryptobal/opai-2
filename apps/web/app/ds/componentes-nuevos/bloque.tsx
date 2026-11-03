@@ -7,6 +7,7 @@ import { MuestraDsV2 } from "./ds-v2";
 import { MuestraOverlays } from "./overlays";
 import { MuestraSeleccion } from "./seleccion";
 import { MuestraSplit } from "./split";
+import { MuestraTareas } from "./tareas-ds";
 
 // Fechas, direcciones y mapa se cargan aparte: no pesan en el primer JS de /ds (ADR-037).
 const MuestraCampos = dynamic(() => import("./campos").then((m) => m.MuestraCampos));
@@ -32,6 +33,9 @@ export function BloqueNuevos({ state }: { state: EstadoPantalla }) {
       </Bloque>
       <Bloque titulo="Tabs por ruta, FilaSeleccionable, Vigencia, Timeline y AjustesForm">
         <MuestraActividad />
+      </Bloque>
+      <Bloque titulo="TareaFila y CompositorActividad · estados">
+        <MuestraTareas />
       </Bloque>
     </>
   );
