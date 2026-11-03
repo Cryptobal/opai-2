@@ -1,5 +1,6 @@
 "use client";
 
+import { formatearNumero } from "@opai/domain";
 import { Alerta } from "@opai/ds";
 
 export type FilaVistaCartola = {
@@ -28,7 +29,7 @@ export function VistaCartolaPreview({
         {filas.slice(0, 40).map((f) => (
           <li key={f.indice} className="border-b border-border py-1">
             Fila {f.indice + 1}: {f.estado}
-            {f.monto != null ? ` · ${f.monto.toLocaleString("es-CL")} CLP` : ""}
+            {f.monto != null ? ` · ${formatearNumero(f.monto)} CLP` : ""}
             {f.glosa ? ` · ${f.glosa}` : ""}
             {f.motivo ? ` · ${f.motivo}` : ""}
           </li>

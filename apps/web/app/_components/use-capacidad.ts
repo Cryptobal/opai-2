@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Resultado } from "@opai/capabilities";
 
 import { ejecutarCapacidad, type Revalidacion } from "@/app/_acciones/capacidad";
+import { mensajeDeError } from "@/lib/mensajes-error";
 
 /**
  * Ejecuta capacidades desde la UI (acción de servidor). La acción invalida las rutas tras una
@@ -38,7 +39,9 @@ export function useCapacidad(portal: string) {
         idempotencyKey,
       );
       if (!r.ok) {
-        setError(r.error.message);
+        // El detalle técnico queda en la consola; la pantalla recibe el mensaje de negocio.
+        console.warn(`[${id}] ${r.error.code}: ${r.error.message}`);
+        setError(mensajeDeError(r.error.code, r.error.message));
         setCodigo(r.error.code);
         return null;
       }
@@ -46,7 +49,7 @@ export function useCapacidad(portal: string) {
     } catch {
       // La acción ya no lanza, pero un corte de red o un despliegue nuevo sí rechazan la llamada:
       // se trata como un error interno visible y el llamador revierte con `null`.
-      setError("Ocurrió un error en el servidor. Reintenta en unos minutos.");
+      setError(mensajeDeError("INTERNAL", ""));
       setCodigo("INTERNAL");
       return null;
     } finally {

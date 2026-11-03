@@ -32,7 +32,7 @@ describe("useCapacidad", () => {
     await expect(render().ejecutar("core.config.set", {})).resolves.toBeNull();
     const despues = render();
     expect(despues.codigo).toBe("INTERNAL");
-    expect(despues.error).toMatch(/Ocurrió un error en el servidor/);
+    expect(despues.error).toMatch(/Ocurrió un error de nuestro lado/);
     expect(despues.pendiente).toBe(false);
   });
 

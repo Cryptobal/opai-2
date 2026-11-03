@@ -83,7 +83,7 @@ export function HojaSubirCaf({
     >
       <div className="flex flex-col gap-4">
         {error ? (
-          <Alerta tono="danger" titulo={errorServidor ? "Error del servidor" : "No se pudo cargar el CAF"}>
+          <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : "No se pudo cargar el CAF"}>
             {error}
             {errorServidor ? (
               <Button variant="secondary" className="mt-2" onClick={() => void previsualizar()}>

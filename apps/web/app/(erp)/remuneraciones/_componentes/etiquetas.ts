@@ -1,3 +1,4 @@
+import { formatearClp } from "@opai/domain";
 import type {
   EstadoObligacion,
   EstadoPeriodo,
@@ -55,4 +56,4 @@ export const MES_LARGO = [
 ];
 
 /** $ 1.234.567 */
-export const pesos = (n: number) => `$ ${n.toLocaleString("es-CL")}`;
+export const pesos = (n: number) => formatearClp(n);

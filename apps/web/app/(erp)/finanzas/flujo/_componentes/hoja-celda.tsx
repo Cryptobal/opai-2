@@ -95,7 +95,7 @@ function HojaCeldaForm({ onCerrar, contexto }: { onCerrar: () => void; contexto:
     >
       <div className="flex flex-col gap-4">
         {error ? (
-          <Alerta tono="danger" titulo={errorServidor ? "Error del servidor" : error}>
+          <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
             {errorServidor ? (
               <Button variant="secondary" className="mt-2" onClick={() => void guardar()}>
                 Reintentar

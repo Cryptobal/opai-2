@@ -1,4 +1,4 @@
-import { esVertical, vocabulario } from "@opai/domain";
+import { esVertical, formatearNumero, formatearUsd, vocabulario } from "@opai/domain";
 import { Badge } from "@opai/ds";
 
 /** Estado de una empresa: activa, en prueba o suspendida (el color es estado). */
@@ -22,13 +22,13 @@ export const nombreVertical = (v: string) => (esVertical(v) ? vocabulario(v).ver
 export const usd = (n: number | null | undefined) =>
   n == null
     ? "—"
-    : `US$ ${n.toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    : formatearUsd(n);
 
 /** "6,8 M" / "2.296". */
 export function cantidad(n: number) {
   if (n >= 1_000_000)
-    return `${(n / 1_000_000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} M`;
-  return n.toLocaleString("es-CL");
+    return `${formatearNumero(n / 1_000_000, 1)} M`;
+  return formatearNumero(n);
 }
 
 /** Insignia de la barra superior de Plataforma. */

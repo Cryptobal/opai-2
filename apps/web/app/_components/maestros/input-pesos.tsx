@@ -1,5 +1,6 @@
 "use client";
 
+import { formatearClp } from "@opai/domain";
 import { Input } from "@opai/ds";
 
 const digitos = (t: string) => t.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
@@ -17,7 +18,7 @@ export function InputPesos(props: {
       inputMode="numeric"
       placeholder={props.placeholder ?? "$ —"}
       className="t-numeric"
-      value={props.valor ? `$ ${Number(props.valor).toLocaleString("es-CL")}` : ""}
+      value={props.valor ? formatearClp(Number(props.valor)) : ""}
       onChange={(e) => props.onCambiar(digitos(e.target.value))}
     />
   );

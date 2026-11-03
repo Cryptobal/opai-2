@@ -82,7 +82,7 @@ export function Administradores({ detalle }: { detalle: DetalleTenant }) {
           onCambiar={setRol}
           className="md:w-40"
           opciones={[
-            { valor: "owner", etiqueta: "Owner" },
+            { valor: "owner", etiqueta: "Propietario" },
             { valor: "admin", etiqueta: "Administrador" },
           ]}
         />

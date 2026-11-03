@@ -52,7 +52,7 @@ export function CamposPunto({
         onCambiar={(v) => set("modo", v as ModoPunto)}
         opciones={MODOS_PUNTO.map((m) => ({ valor: m, etiqueta: MODO_PUNTO[m] }))}
       />
-      <p className="t-caption -mt-2">Por defecto del tenant: {MODO_PUNTO[defectos.modo]}.</p>
+      <p className="t-caption -mt-2">Valor por defecto de la empresa: {MODO_PUNTO[defectos.modo]}.</p>
       {gps ? (
         <>
           <div className="grid grid-cols-2 gap-3">

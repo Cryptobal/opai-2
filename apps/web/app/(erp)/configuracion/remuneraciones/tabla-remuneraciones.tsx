@@ -60,7 +60,7 @@ export function TablaRemuneraciones({ data, puede, onActualizado }: Props) {
             : " Aún no hay capturas automáticas registradas."}
         </Alerta>
       ) : data.capturaSii.ultimaCaptura ? (
-        <p className="t-caption text-muted-foreground">
+        <p className="t-caption text-fg-muted">
           Última captura SII (UF): {data.capturaSii.ultimaCaptura}
           {data.capturaSii.ufVigenteDesde ? ` · UF vigente desde ${data.capturaSii.ufVigenteDesde}` : null}
         </p>
@@ -68,12 +68,12 @@ export function TablaRemuneraciones({ data, puede, onActualizado }: Props) {
 
       <Card className="flex flex-col gap-3 p-4">
         <div className="flex flex-col gap-1">
-          <p className="t-label-sm text-muted-foreground">Cotización adicional de la mutual</p>
+          <p className="t-label-sm text-fg-muted">Cotización adicional de la mutual</p>
           <p className="t-body">
             {mutual.estado === "vigente" ? mutual.resumen : "Pendiente de confirmar."}
           </p>
           {mutual.estado === "vigente" && mutual.confirmadoPor ? (
-            <p className="t-caption text-muted-foreground">
+            <p className="t-caption text-fg-muted">
               Confirmada por {mutual.confirmadoPor}
               {mutual.confirmadoEn ? ` el ${mutual.confirmadoEn}` : null}
             </p>

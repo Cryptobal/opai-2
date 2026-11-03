@@ -53,12 +53,12 @@ export function HojaEvento({ e, cuando, entidad }: Props) {
             </Par>
           ) : null}
           {[
-            ["Payload", e.detalle],
+            ["Datos de la acción", e.detalle],
             ["Resultado", e.extra],
           ].map(([t, v]) => (
             <details
               key={String(t)}
-              open={t === "Payload"}
+              open={t === "Datos de la acción"}
               className="group rounded-md border border-border"
             >
               <summary className="min-h-11 cursor-pointer px-3 py-2.5 text-md font-semibold text-fg">
