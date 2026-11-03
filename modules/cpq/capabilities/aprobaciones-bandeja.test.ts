@@ -1,5 +1,5 @@
 import { executeCapability, registrarCapacidades, registrarConsumidores } from "@opai/capabilities";
-import { contextoDePrueba, USUARIO_DE_PRUEBA } from "@opai/capabilities/testing";
+import { contextoDePrueba } from "@opai/capabilities/testing";
 import { consumidorCpqBandeja } from "../consumidor-bandeja";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 

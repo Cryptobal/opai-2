@@ -6,7 +6,7 @@ import { costoLineaPuestoFicha } from "./costo-puesto-ficha";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { huellaJuego, juegoDesactualizado } from "./juego-vigente";
 import { juegoParaFecha } from "./proveedor";
-import { aprobacionPendiente } from "./aprobacion-margen";
+import { aprobacionPendiente } from "./aprobacion-reglas";
 import { evaluarAprobacionMargen } from "./aprobacion-reglas";
 import { idBandejaCpq } from "./aprobaciones-bandeja-id";
 

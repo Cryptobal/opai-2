@@ -1,32 +1,14 @@
 import type { Contexto } from "@opai/capabilities";
 
-import { idBandejaCpq } from "./aprobaciones-bandeja-id";
-import { recalcularVersion } from "./recalcular";
+import {
+  enriquecerEnvio,
+  enriquecerMargen,
+  filasEnvio,
+  filasMargen,
+} from "./aprobaciones-bandeja-enriquecer";
+import type { ItemBandejaCpq } from "./aprobaciones-bandeja-tipos";
 
-/** Margen mínimo Gard (10 % sobre venta), mismo tope que el motor en recalcular. */
-const MARGEN_MINIMO_PCT = 100_000;
-
-export type ItemBandejaCpq = {
-  id: string;
-  tipo: "margen" | "envio_propuesta";
-  estado: string;
-  resumen: string;
-  cotizacionId: string;
-  codigo: string;
-  titulo: string;
-  cuentaNombre: string;
-  ventaMensualClp: number | null;
-  margenEfectivoPct: number | null;
-  margenMinimoPct: number;
-  solicitanteId: string;
-  solicitanteNombre: string;
-  comentario: string | null;
-  creadaEn: string;
-  resueltaEn: string | null;
-  motivo: string | null;
-  enlaceCotizacion: string;
-  enlaceBandeja: string;
-};
+export type { ItemBandejaCpq } from "./aprobaciones-bandeja-tipos";
 
 async function nombresUsuarios(ctx: Contexto, ids: string[]) {
   if (!ids.length) return new Map<string, string>();
@@ -35,14 +17,6 @@ async function nombresUsuarios(ctx: Contexto, ids: string[]) {
     include: { user: { select: { name: true } } },
   });
   return new Map(rows.map((m) => [m.userId, m.user?.name ?? "Usuario"]));
-}
-
-async function cuentaDeNegocio(ctx: Contexto, negocioId: string) {
-  const n = await ctx.db.negocio.findFirst({
-    where: { id: negocioId },
-    select: { cuenta: { select: { nombre: true } } },
-  });
-  return n?.cuenta?.nombre ?? "—";
 }
 
 export async function contarPendientesBandejaCpq(ctx: Contexto) {
@@ -54,120 +28,6 @@ export async function contarPendientesBandejaCpq(ctx: Contexto) {
     total += await ctx.db.cpqPropuestaEnvio.count({ where: { estado: "pendiente_aprobacion" } });
   }
   return total;
-}
-
-async function enriquecerMargen(
-  ctx: Contexto,
-  fila: Awaited<ReturnType<typeof filasMargen>>[number],
-  nombres: Map<string, string>,
-  baseUrl: string,
-): Promise<ItemBandejaCpq> {
-  const version = fila.version;
-  const cot = version?.cotizacion;
-  if (!version || !cot) {
-    throw new Error("Aprobación CPQ sin versión o cotización enlazada.");
-  }
-  const cuenta = await cuentaDeNegocio(ctx, cot.negocioId);
-  let margenEfectivoPct: number | null = null;
-  let venta = version.ventaMensualClp;
-  if (ctx.autorizar("cpq:costos.ver")) {
-    const calc = await recalcularVersion(ctx, cot.id, fila.version.numero, false);
-    if (calc) {
-      margenEfectivoPct = calc.margenEfectivoPct;
-      venta = calc.ventaMensual;
-    }
-  }
-  const refId = fila.id;
-  const id = idBandejaCpq("margen", cot.id);
-  const resumen = `Margen · ${cot.codigo} · ${cuenta}`;
-  return {
-    id,
-    tipo: "margen",
-    estado: fila.estado,
-    resumen,
-    cotizacionId: cot.id,
-    codigo: cot.codigo,
-    titulo: cot.titulo,
-    cuentaNombre: cuenta,
-    ventaMensualClp: venta,
-    margenEfectivoPct,
-    margenMinimoPct: MARGEN_MINIMO_PCT,
-    solicitanteId: fila.solicitadaPorId,
-    solicitanteNombre: nombres.get(fila.solicitadaPorId) ?? "Usuario",
-    comentario: fila.comentario ?? null,
-    creadaEn: fila.createdAt.toISOString(),
-    resueltaEn: fila.decididaEn?.toISOString() ?? null,
-    motivo: fila.motivo ?? null,
-    enlaceCotizacion: `${baseUrl}/cotizaciones/${cot.id}`,
-    enlaceBandeja: `${baseUrl}/configuracion/aprobaciones?ver=${encodeURIComponent(id)}`,
-  };
-}
-
-async function filasMargen(ctx: Contexto, historial: boolean) {
-  return ctx.db.cpqAprobacion.findMany({
-    where: historial ? { NOT: { estado: "pendiente" } } : { estado: "pendiente" },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      version: { include: { cotizacion: true } },
-    },
-  });
-}
-
-async function filasEnvio(ctx: Contexto, historial: boolean) {
-  return ctx.db.cpqPropuestaEnvio.findMany({
-    where: historial
-      ? { NOT: { estado: "pendiente_aprobacion" } }
-      : { estado: "pendiente_aprobacion" },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: { propuestaTecnica: { select: { cotizacionId: true } } },
-  });
-}
-
-async function enriquecerEnvio(
-  ctx: Contexto,
-  fila: Awaited<ReturnType<typeof filasEnvio>>[number],
-  nombres: Map<string, string>,
-  baseUrl: string,
-): Promise<ItemBandejaCpq | null> {
-  const cot = await ctx.db.cpqCotizacion.findFirst({ where: { id: fila.cotizacionId } });
-  if (!cot) return null;
-  const version = await ctx.db.cpqVersion.findFirst({ where: { id: fila.versionId } });
-  const cuenta = await cuentaDeNegocio(ctx, cot.negocioId);
-  let margenEfectivoPct: number | null = null;
-  let venta = version?.ventaMensualClp ?? null;
-  if (ctx.autorizar("cpq:costos.ver") && version) {
-    const calc = await recalcularVersion(ctx, cot.id, version.numero, false);
-    if (calc) {
-      margenEfectivoPct = calc.margenEfectivoPct;
-      venta = calc.ventaMensual;
-    }
-  }
-  const refId = fila.id;
-  const id = idBandejaCpq("envio", refId);
-  const resumen = `Envío propuesta · ${cot.codigo} · ${cuenta}`;
-  return {
-    id,
-    tipo: "envio_propuesta",
-    estado: fila.estado,
-    resumen,
-    cotizacionId: cot.id,
-    codigo: cot.codigo,
-    titulo: cot.titulo,
-    cuentaNombre: cuenta,
-    ventaMensualClp: venta,
-    margenEfectivoPct,
-    margenMinimoPct: MARGEN_MINIMO_PCT,
-    solicitanteId: fila.solicitadoPorId,
-    solicitanteNombre: nombres.get(fila.solicitadoPorId) ?? "Usuario",
-    comentario: fila.mensaje,
-    creadaEn: fila.createdAt.toISOString(),
-    resueltaEn: fila.enviadoEn?.toISOString() ?? null,
-    motivo: null,
-    enlaceCotizacion: `${baseUrl}/cotizaciones/${cot.id}`,
-    enlaceBandeja: `${baseUrl}/configuracion/aprobaciones?ver=${encodeURIComponent(id)}`,
-  };
 }
 
 export async function listarBandejaCpq(ctx: Contexto, historial: boolean) {
