@@ -4,11 +4,11 @@ import { z } from "zod";
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { lunesDe } from "../domain";
-import { semanaSchema, sinDuplicado } from "./esquemas";
+import { semanaSchema } from "./esquemas";
 import { filaImportSchema, filaDesdeRegistroCsv, MAX_FILAS_IMPORT, parsearCsv } from "./importar-parse";
 import { PERMISO_CONFIGURAR } from "./permisos";
 import { aFecha, ajustesDe, bloquearSemanaFlujo } from "./util";
-import { sincronizarAvisosEnTx } from "./aviso";
+import { aplicarFilasImportadas, type FilaValida } from "./importar-aplicar";
 
 const resultadoFila = z.object({
   indice: z.number().int(),
@@ -50,6 +50,8 @@ export const flujoImportar = defineCapability({
     let errores = 0;
     const hoy = lunesDe(new Date().toISOString().slice(0, 10));
 
+    // 1) Validación pura de todas las filas.
+    const validas: { indice: number; row: FilaValida }[] = [];
     for (const [indice, reg] of registros.entries()) {
       const parsed = filaDesdeRegistroCsv(reg, indice);
       if (!parsed.ok) {
@@ -63,85 +65,47 @@ export const flujoImportar = defineCapability({
         filas.push({ indice, estado: "error", mensaje: "Datos inválidos en la fila." });
         continue;
       }
-      const row = v.data;
-      if (row.semana < hoy) {
+      if (v.data.semana < hoy) {
         omitidas += 1;
         filas.push({ indice, estado: "omitida", mensaje: "Semana pasada (cartola)." });
         continue;
       }
+      validas.push({ indice, row: v.data });
+    }
+
+    // 2) Una sola lectura de las celdas que las filas tocan.
+    const filaIds = [...new Set(validas.flatMap((v) => porEtiqueta.get(v.row.etiqueta.toLowerCase())?.id ?? []))];
+    const celdas = filaIds.length
+      ? await ctx.db.flujoCelda.findMany({
+          where: { filaId: { in: filaIds }, semana: { in: [...new Set(validas.map((v) => aFecha(v.row.semana)))] } },
+        })
+      : [];
+    const celdaDe = new Map(celdas.map((c) => [`${c.filaId}|${c.semana.toISOString().slice(0, 10)}`, c]));
+    const aEscribir: FilaValida[] = [];
+    for (const { indice, row } of validas) {
       const fila = porEtiqueta.get(row.etiqueta.toLowerCase());
-      const celda = fila
-        ? await ctx.db.flujoCelda.findFirst({ where: { filaId: fila.id, semana: aFecha(row.semana) } })
-        : null;
+      const celda = fila ? celdaDe.get(`${fila.id}|${row.semana}`) : undefined;
       if (celda && celda.capa !== "plan") {
         omitidas += 1;
         filas.push({ indice, estado: "omitida", mensaje: "Celda comprometida o real." });
         continue;
       }
-      if (dryRun) {
-        aplicadas += 1;
-        filas.push({ indice, estado: "ok", mensaje: null, montoInterpretado: row.monto });
-        continue;
-      }
+      aplicadas += 1;
+      aEscribir.push(row);
+      filas.push({ indice, estado: "ok", mensaje: null, ...(dryRun ? { montoInterpretado: row.monto } : {}) });
+    }
+
+    // 3) Escritura por lote, todo o nada.
+    if (!dryRun && aEscribir.length > 0) {
       try {
-        await ctx.transaccion(async (tx) => {
-          await bloquearSemanaFlujo(tx, ctx, row.semana);
-          let f = porEtiqueta.get(row.etiqueta.toLowerCase());
-          if (!f) {
-            f = await sinDuplicado(
-              tx.flujoFila.create({
-                data: {
-                  tenantId: ctx.tenantId,
-                  seccion: row.seccion,
-                  etiqueta: row.etiqueta,
-                  vinculo: row.vinculo ?? null,
-                  arrastre: false,
-                  orden: filasDb.length + indice,
-                  activa: true,
-                },
-              }),
-              `Ya existe una fila llamada "${row.etiqueta}".`,
-            );
-            porEtiqueta.set(row.etiqueta.toLowerCase(), f);
-            await ctx.eventos.emitir(tx, {
-              tipo: "finanzas.flujo.fila_creada",
-              entidadTipo: "flujoFila",
-              entidadId: f.id,
-            });
-          }
-          const actual = await tx.flujoCelda.findFirst({
-            where: { filaId: f.id, semana: aFecha(row.semana) },
-          });
-          if (actual && actual.capa !== "plan") throw reglaDeNegocio("Celda no editable.");
-          const guardada = actual
-            ? await tx.flujoCelda.update({
-                where: { id: actual.id },
-                data: { monto: BigInt(row.monto), nota: row.nota ?? actual.nota },
-              })
-            : await tx.flujoCelda.create({
-                data: {
-                  tenantId: ctx.tenantId,
-                  filaId: f.id,
-                  semana: aFecha(row.semana),
-                  capa: "plan",
-                  monto: BigInt(row.monto),
-                  nota: row.nota ?? null,
-                },
-              });
-          await ctx.eventos.emitir(tx, {
-            tipo: "finanzas.flujo.celda_fijada",
-            entidadTipo: "flujoCelda",
-            entidadId: guardada.id,
-          });
-          await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
-        });
-        aplicadas += 1;
-        filas.push({ indice, estado: "ok", mensaje: null });
+        await aplicarFilasImportadas(ctx, aEscribir, filasDb, celdas);
       } catch {
-        errores += 1;
-        filas.push({ indice, estado: "error", mensaje: "No se pudo importar la fila." });
+        errores += aplicadas;
+        aplicadas = 0;
+        for (const f of filas) if (f.estado === "ok") Object.assign(f, { estado: "error", mensaje: "No se pudo importar la fila." });
       }
     }
+    filas.sort((a, b) => a.indice - b.indice);
 
     if (!dryRun && (input.saldoInicial != null || input.desde)) {
       const base = await ajustesDe(ctx);
