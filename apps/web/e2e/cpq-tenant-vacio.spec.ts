@@ -46,9 +46,10 @@ test("tenant vacío: de la cotización nueva al costo calculado y la vista previ
   // Puesto sin sueldo: el aviso nombra la causa y su acción abre la hoja, sin navegar.
   await visible(page, "Agregar puesto").click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
-  await expect(page.getByText(/Falta el sueldo base de «Guardia»/).filter({ visible: true }).first()).toBeVisible({
+  await expect(page.getByText(/Falta el sueldo base de «Guardia»/).filter({ visible: true })).toHaveCount(1, {
     timeout: 15_000,
   });
+  await expect(page.getByRole("button", { name: "Ingresar sueldo" }).filter({ visible: true })).toHaveCount(1);
   await expect(page.getByText("Ver cargos")).toHaveCount(0);
   await sinEnlacesRotos(page);
   await visible(page, "Ingresar sueldo").click();

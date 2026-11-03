@@ -132,6 +132,10 @@ export function avisosCpq(calculo: {
   });
 }
 
+export function avisoEsSueldoFaltante(a: AvisoCpq): boolean {
+  return a.accion?.etiqueta === "Ingresar sueldo";
+}
+
 /** Aviso bajo una línea de puesto con costo pendiente (`costosLinea`, solo con costos). */
 export function avisoLineaPuesto(
   mensaje: string | undefined,
