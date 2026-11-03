@@ -58,8 +58,8 @@ model Seguimiento {
   cotizacionId  String?   @map("cotizacion_id") @db.Uuid
   cotizacionCodigo String? @map("cotizacion_codigo")
   contactoId    String?   @map("contacto_id") @db.Uuid
-  /// Hash SHA-256 del token opaco de la dirección de respuesta (token@respuestas.opai.cl).
-  tokenHash     String    @map("token_hash")
+  /// Token aleatorio de 128 bits de la dirección de respuesta (<token>@respuestas.opai.cl); único.
+  token         String    @unique
   creadoPorId   String?   @map("creado_por_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)

@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS "comercial"."seguimientos" (
     "cotizacion_id" UUID,
     "cotizacion_codigo" TEXT,
     "contacto_id" UUID,
-    "token_hash" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
     "creado_por_id" UUID,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
@@ -65,7 +65,7 @@ CREATE INDEX IF NOT EXISTS "seguimientos_tenant_id_estado_idx" ON "comercial"."s
 -- A lo más un seguimiento vivo (activo o pausado) por negocio (R6).
 CREATE UNIQUE INDEX IF NOT EXISTS "seguimientos_negocio_vivo_key"
     ON "comercial"."seguimientos"("negocio_id") WHERE "estado" IN ('activo', 'pausado');
-CREATE UNIQUE INDEX IF NOT EXISTS "seguimientos_token_hash_key" ON "comercial"."seguimientos"("token_hash");
+CREATE UNIQUE INDEX IF NOT EXISTS "seguimientos_token_key" ON "comercial"."seguimientos"("token");
 
 CREATE TABLE IF NOT EXISTS "comercial"."seguimiento_pasos" (
     "id" UUID NOT NULL,
@@ -223,13 +223,13 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "comercial"."seguimiento_
     'plan_id', 'comercial.seguimiento_planes');
 
 -- Resuelve el tenant y el seguimiento de un token de respuesta (receptor del correo entrante). Corre
--- sin tenant fijado, así que es SECURITY DEFINER: devuelve solo (tenant_id, seguimiento_id) de un hash
--- exacto de 64 hex; opai_app no puede listar tokens ni leer otra columna.
-CREATE OR REPLACE FUNCTION "comercial"."seguimiento_resolver_token"(p_hash text)
+-- sin tenant fijado, así que es SECURITY DEFINER: devuelve solo (tenant_id, seguimiento_id) de un token
+-- exacto («s» + 32 hex, aleatorio de 128 bits); opai_app no puede listar tokens ni leer otra columna.
+CREATE OR REPLACE FUNCTION "comercial"."seguimiento_resolver_token"(p_token text)
 RETURNS TABLE(tenant_id uuid, seguimiento_id uuid)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
   SELECT s.tenant_id, s.id FROM "comercial"."seguimientos" s
-  WHERE p_hash ~ '^[0-9a-f]{64}$' AND s.token_hash = p_hash LIMIT 1
+  WHERE p_token ~ '^s[0-9a-f]{32}$' AND s.token = p_token LIMIT 1
 $$;
 REVOKE ALL ON FUNCTION "comercial"."seguimiento_resolver_token"(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION "comercial"."seguimiento_resolver_token"(text) TO opai_app;

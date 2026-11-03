@@ -1,14 +1,12 @@
 // Dirección de respuesta de un seguimiento: <token>@respuestas.opai.cl (R12). El token es aleatorio de
-// 128 bits (nunca un id adivinable); en la base solo se guarda su hash SHA-256. Lógica pura.
-import { createHash, randomBytes } from "node:crypto";
+// 128 bits (nunca un id adivinable ni derivado de uno). Lógica pura.
+import { randomBytes } from "node:crypto";
 
 export const DOMINIO_RESPUESTAS = "respuestas.opai.cl";
 const TOKEN = /^s([0-9a-f]{32})$/;
 
 /** Token nuevo: «s» + 32 hex en minúscula (los buzones no distinguen mayúsculas). */
 export const generarTokenRespuesta = (): string => `s${randomBytes(16).toString("hex")}`;
-export const hashTokenRespuesta = (token: string): string =>
-  createHash("sha256").update(token.toLowerCase()).digest("hex");
 export const direccionRespuesta = (token: string, dominio = DOMINIO_RESPUESTAS): string => `${token}@${dominio}`;
 
 /** ¿La dirección (con o sin «Nombre <...>») es de nuestro dominio de respuestas? */

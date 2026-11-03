@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   agendarPasos, direccionRespuesta, esDeRespuestas, estadoVisible, generarTokenRespuesta,
-  hashTokenRespuesta, instanteLocal, planBasePorVertical, proximoMomento, proximoPaso,
+  instanteLocal, planBasePorVertical, proximoMomento, proximoPaso,
   tokenDeDireccion, transicionPaso, transicionSeguimiento, validarConfigPlan,
 } from "./seguimiento";
 
@@ -100,11 +100,10 @@ describe("estados", () => {
 });
 
 describe("token de la dirección de respuesta", () => {
-  it("es aleatorio, el hash es estable y la dirección se reconoce con o sin nombre", () => {
+  it("es aleatorio y la dirección se reconoce con o sin nombre", () => {
     const t = generarTokenRespuesta();
     expect(t).toMatch(/^s[0-9a-f]{32}$/);
     expect(generarTokenRespuesta()).not.toBe(t);
-    expect(hashTokenRespuesta(t)).toBe(hashTokenRespuesta(t.toUpperCase().replace(/^S/, "s")));
     expect(tokenDeDireccion(direccionRespuesta(t))).toBe(t);
     expect(tokenDeDireccion(`Atlas <${direccionRespuesta(t).toUpperCase()}>`)).toBe(t);
   });

@@ -14,6 +14,7 @@ export function mailerResend(apiKey: string, remitente: string): Mailer {
           subject: correo.asunto,
           text: correo.texto,
           ...(correo.html ? { html: correo.html } : {}),
+          ...(correo.responderA?.length ? { reply_to: correo.responderA } : {}),
         }),
       });
       if (!res.ok) {
