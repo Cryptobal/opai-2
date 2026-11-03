@@ -8,6 +8,7 @@ export const VERBOS: Record<string, string> = {
   reintentar: "Reintentar", cancelar: "Cancelar", configurar: "Configurar", set_secreto: "Guardar clave",
   guardar_certificado_dte: "Guardar certificado", probar: "Probar", autocompletar: "Autocompletar",
   detalle: "Detalle", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar",
+  consultar_sii: "Consultar al SII", facturable: "Ver si está lista para facturar", aplicar_sii: "Aplicar datos del SII",
   set_representantes: "Definir representantes", set_activo: "Activar o desactivar", bloquear: "Bloquear",
   desbloquear: "Desbloquear", vincular_usuario: "Vincular usuario", no_recontratar_ver: "Ver no recontratar",
   marcar_no_recontratar: "Marcar como no recontratar", quitar_no_recontratar: "Quitar no recontratar",

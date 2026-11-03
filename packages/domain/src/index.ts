@@ -2,6 +2,7 @@ export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";
+export * from "./comercial/datos-sii";
 export * from "./precios-base";
 export * from "./dinero";
 export * from "./formato";

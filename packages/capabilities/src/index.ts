@@ -28,6 +28,8 @@ export {
 export { defineCapability } from "./define";
 export { conflicto, ErrorCapacidad, noEncontrado, prohibido, reglaDeNegocio } from "./errores";
 export { aplicarEtapa } from "./comercial/transiciones-util";
+export { fijarFuenteContribuyente } from "./core/maestros/cuentas-sii-fuente";
+export { planGanar, efectosGanarSchema, type EfectosGanar } from "./comercial/ganar-efectos";
 export { sha256 } from "./core/comun";
 export { uuid7 } from "./core/documentos/uuid7";
 export { executeCapability } from "./execute";

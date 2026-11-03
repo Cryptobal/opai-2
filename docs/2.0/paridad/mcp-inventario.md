@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 487 pares pantalla→capacidad · 436 con herramienta · 51 excepciones justificadas · 0 faltantes.
+**Resumen:** 490 pares pantalla→capacidad · 439 con herramienta · 51 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -191,9 +191,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cuentas/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.create` | `core_contactos_create` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.update` | `core_contactos_update` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.aplicar_sii` | `core_cuentas_aplicar_sii` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.archive` | `core_cuentas_archive` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.consultar_sii` | `core_cuentas_consultar_sii` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.create` | `core_cuentas_create` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.facturable` | `core_cuentas_facturable` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_estado` | `core_cuentas_set_estado` | existe |
