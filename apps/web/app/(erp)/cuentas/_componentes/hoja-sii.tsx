@@ -87,7 +87,8 @@ export function HojaSii({ cuenta }: { cuenta: CuentaDetalle }) {
   const cargar = (r: Consulta | null) => {
     if (!r) return;
     setC(r);
-    setElegidos(new Set(r.campos.filter(campoElegible).map((x) => x.campo)));
+    const conEtiqueta = r.campos.map((x) => ({ ...x, etiqueta: ETIQUETA_CAMPO_SII[x.campo] }));
+    setElegidos(new Set(conEtiqueta.filter(campoElegible).map((x) => x.campo)));
   };
   // La consulta (lectura) va con su propio estado de error; aplicar, con el de abajo.
   const pedir = () => {
@@ -118,7 +119,7 @@ export function HojaSii({ cuenta }: { cuenta: CuentaDetalle }) {
       abierto={hoja.abierta}
       onCerrar={hoja.cerrar}
       titulo="Datos del SII"
-      descripcion={cuenta.rut ? `RUT ${rut(cuenta.rut)}` : undefined}
+      {...(cuenta.rut ? { descripcion: `RUT ${rut(cuenta.rut)}` } : {})}
       telefono="completo"
       acciones={
         ok ? (
