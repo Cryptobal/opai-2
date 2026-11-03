@@ -70,6 +70,7 @@ export async function cuentaDe(ctx: Contexto, id: string) {
 
 /** Datos del receptor DTE desde la cuenta (importación 1.0 / ficha de cliente). */
 export function receptorDteDe(cuenta: {
+  rut?: string | null;
   nombre: string;
   razonSocial: string | null;
   giro: string | null;

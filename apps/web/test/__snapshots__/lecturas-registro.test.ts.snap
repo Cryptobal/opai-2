@@ -59,6 +59,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "finanzas.plan.listar",
   "finanzas.planilla.obtener",
   "finanzas.ventas.libro_resumen",
+  "finanzas.ventas.preflight_emision",
   "finanzas.ventas.proyeccion_flujo",
   "nomina.conceptos.listar",
   "nomina.obligaciones.listar",

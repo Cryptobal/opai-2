@@ -1,11 +1,13 @@
 import { CESION_DEFECTO_EMITIDO } from "@opai/domain";
-import { adaptadorSiiDesdeEntorno } from "@opai/integrations";
 
 import { aFecha, hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
-import { consumirFolio } from "./ventas-comun";
+import { adaptadorSiiDe } from "./adaptador-sii";
+import { consumirFolio, cuentaDe } from "./ventas-comun";
+import { payloadEmisionDteDe } from "./ventas-payload-emision";
 import { debeAnularDocumentoOriginal } from "./ventas-nc-comun";
+import { guardarXmlFirmadoDte, claveXmlDte } from "./ventas-xml";
 
 type RefDoc = {
   id: string;
@@ -13,7 +15,12 @@ type RefDoc = {
   instalacionId: string | null;
   cotizacionId: string | null;
   tipoDte: number;
+  folio: number | null;
   fechaVencimiento: Date | null;
+  montoNeto: number;
+  montoExento: number;
+  montoIva: number;
+  montoTotal: number;
 };
 
 type MontosNc = { neto: number; exento: number; iva: number; total: number };
@@ -38,26 +45,35 @@ export async function persistirNotaCredito(
 ) {
   const folioEmitido = await consumirFolio(ctx, 61, false, tx);
   const emision = hoy();
-  const adaptador = adaptadorSiiDesdeEntorno();
-  const payload = {
+  const adaptador = await adaptadorSiiDe(ctx);
+  const cuenta = await cuentaDe(ctx, p.ref.cuentaId);
+  const rutReceptor = cuenta.rut;
+  if (!rutReceptor) throw reglaDeNegocio("El cliente debe tener RUT para emitir la nota de crédito.");
+  const payload = await payloadEmisionDteDe(ctx, {
     ambiente: p.ambiente,
-    tipoDte: 61 as const,
-    folio: folioEmitido,
-    fechaEmision: emision,
     rutEmisor: p.rutEmisor,
-    rutReceptor: p.rutReceptor,
-    razonSocialReceptor: p.razonSocialReceptor,
-    montos: { neto: p.montos.neto, exento: p.montos.exento, iva: p.montos.iva, total: p.montos.total },
-    glosa: p.motivo,
-    referencias: [
-      {
-        tipoDte: p.ref.tipoDte,
-        folio: p.folioRef,
-        codigo: p.codigoReferencia,
-        razon: p.motivo,
-      },
-    ],
-  };
+    cuenta: { ...cuenta, rut: rutReceptor },
+    doc: {
+      tipoDte: 61,
+      folio: folioEmitido,
+      fechaEmision: emision,
+      glosa: p.motivo,
+      montoNeto: p.montos.neto,
+      montoExento: p.montos.exento,
+      montoIva: p.montos.iva,
+      montoTotal: p.montos.total,
+      lineas: [{ orden: 0, glosa: p.motivo, monto: p.montoLinea }],
+      referencias: [
+        {
+          tipoDteRef: p.ref.tipoDte,
+          folioRef: p.folioRef,
+          codigoRef: p.codigoReferencia,
+          razonRef: p.motivo,
+        },
+      ],
+    },
+    incluirCaf: adaptador.nombre !== "simulado",
+  });
   const firmado = await adaptador.firmar(payload);
   const doc = await tx.documentoEmitido.create({
     data: {
@@ -95,6 +111,13 @@ export async function persistirNotaCredito(
       },
     },
   });
+  if (adaptador.nombre !== "simulado") {
+    await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml);
+    await tx.documentoEmitido.update({
+      where: { id: doc.id },
+      data: { xmlStorageKey: claveXmlDte(doc.id) },
+    });
+  }
   if (debeAnularDocumentoOriginal(p.codigoReferencia, p.monto, p.restante)) {
     const { count } = await tx.documentoEmitido.updateMany({
       where: { id: p.ref.id, estadoDte: { in: ["enviado", "aceptado"] } },

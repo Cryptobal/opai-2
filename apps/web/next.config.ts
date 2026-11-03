@@ -53,6 +53,8 @@ const nextConfig: NextConfig = {
       { source: "/personas/cargos-y-sueldos", destination: "/cargos", permanent: false },
       { source: "/cargos/personas", destination: "/personas", permanent: false },
       { source: "/cargos/vencimientos", destination: "/personas/vencimientos", permanent: false },
+      { source: "/nomina", destination: "/remuneraciones", permanent: false },
+      { source: "/nomina/:path*", destination: "/remuneraciones/:path*", permanent: false },
     ];
   },
   async headers() {

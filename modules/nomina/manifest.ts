@@ -12,7 +12,7 @@ import { ajustesNomina, capacidadesNomina, defineModule } from "@opai/capabiliti
  */
 export const manifest = defineModule({
   id: "nomina",
-  nombre: "Nómina",
+  nombre: "Remuneraciones",
   version: "0.1.0",
   dependencias: [],
   permisos: [
@@ -31,8 +31,8 @@ export const manifest = defineModule({
     {
       portal: "erp",
       area: "personas",
-      href: "/nomina",
-      etiqueta: "Nómina",
+      href: "/remuneraciones",
+      etiqueta: "Remuneraciones",
       icono: "Wallet",
       orden: 5,
       permiso: "nomina:read",
