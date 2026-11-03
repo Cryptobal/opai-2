@@ -6,62 +6,65 @@ import { exigirBorrador, versionDeCotizacion } from "../persistencia/version";
 import { recalcularVersion } from "../persistencia/recalcular";
 import { cotizacionDe } from "./util";
 import { PERMISO_MANAGE } from "./permisos";
-import { seccionDe, vistaPrevia, rechazarCostosSinPermiso, CAMPOS_COSTO_CREAR, CAMPOS_COSTO_ACTUALIZAR } from "./lineas-util";
+import { seccionDe, rechazarCostosSinPermiso } from "./lineas-util";
+import { camposPuesto, CAMPOS_COSTO_PUESTO } from "./lineas-esquemas";
+import { resolverSueldoPuesto } from "./lineas-puesto";
 import { uuidSchema } from "./esquemas";
+import { ID_VISTA_PREVIA } from "./util";
 
-const hora = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
+const salida = z.object({ id: uuidSchema, ventaMensualClp: z.number().int().nullable() });
 
 export const lineasCrear = defineCapability({
   id: "cpq.lineas.crear",
-  descripcion: "Agrega una línea de puesto o ítem a una sección en borrador; recalcula venta en servidor.",
+  descripcion:
+    "Agrega una línea de puesto o ítem a una sección en borrador; con cargo trae su sueldo de referencia y recalcula la venta.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     seccionId: uuidSchema,
     tipo: z.enum(["puesto", "item", "adicional"]),
     nombre: z.string().trim().min(1).max(120),
+    grupo: z.string().trim().max(60).optional(),
     posiciones: z.number().int().min(1).max(10_000).default(1),
-    patron: z.string().max(20).optional(),
-    horaInicio: hora.optional(),
-    horaFin: hora.optional(),
-    diasCobertura: z.number().int().min(1).max(7).optional(),
-    sueldoBaseClp: z.number().int().min(0).optional(),
+    ...camposPuesto,
     itemCodigo: z.string().max(40).optional(),
     cantidadEscalada: z.number().int().min(1).optional(),
     precioUnitarioClp: z.number().int().min(0).optional(),
     recurrencia: z.enum(["mensual", "unico"]).default("mensual"),
   }),
-  output: z.object({ id: uuidSchema, ventaMensualClp: z.number().int().nullable() }),
+  output: salida,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    rechazarCostosSinPermiso(ctx, input, CAMPOS_COSTO_CREAR);
+    rechazarCostosSinPermiso(ctx, input, CAMPOS_COSTO_PUESTO);
     const sec = await seccionDe(ctx, input.seccionId);
     const version = await versionDeCotizacion(ctx, sec.versionId);
     exigirBorrador(version);
     const cot = await cotizacionDe(ctx, version.cotizacionId);
-    if (dryRun) return { id: "00000000-0000-0000-0000-000000000000", ...(await vistaPrevia(ctx, cot.id)) };
+    const { seccionId: _s, ...resto } = input;
+    const puesto = input.tipo === "puesto";
+    const derivados = puesto ? await resolverSueldoPuesto(ctx, resto, null) : {};
+    const sueldo = sinIndefinidos({ ...resto, ...derivados });
     const existentes = await ctx.db.cpqLinea.findMany({ where: { seccionId: sec.id }, select: { orden: true } });
-    const orden = existentes.reduce((m, l) => Math.max(m, l.orden), -1) + 1;
-    const linea = await ctx.db.cpqLinea.create({
-      data: {
-        tenantId: ctx.tenantId,
-        seccionId: sec.id,
-        tipo: input.tipo,
-        nombre: input.nombre,
-        posiciones: input.posiciones,
-        habilitada: true,
-        patron: input.patron ?? (input.tipo === "puesto" ? "4x4" : null),
-        horaInicio: input.horaInicio ?? (input.tipo === "puesto" ? "08:00" : null),
-        horaFin: input.horaFin ?? (input.tipo === "puesto" ? "20:00" : null),
-        diasCobertura: input.diasCobertura ?? (input.tipo === "puesto" ? 7 : null),
-        sueldoBaseClp: input.sueldoBaseClp ?? null,
-        itemCodigo: input.itemCodigo ?? (input.tipo === "puesto" ? null : "equipo"),
-        cantidadEscalada: input.cantidadEscalada ?? 10_000,
-        precioUnitarioClp: input.precioUnitarioClp ?? null,
-        recurrencia: input.recurrencia,
-        orden,
-      },
-    });
+    const data = {
+      tenantId: ctx.tenantId,
+      seccionId: sec.id,
+      ...sueldo,
+      habilitada: true,
+      patron: input.patron ?? (puesto ? "4x4" : null),
+      horaInicio: input.horaInicio ?? (puesto ? "08:00" : null),
+      horaFin: input.horaFin ?? (puesto ? "20:00" : null),
+      diasCobertura: derivados.diasCobertura ?? input.diasCobertura ?? (puesto ? 7 : null),
+      itemCodigo: input.itemCodigo ?? (puesto ? null : "equipo"),
+      cantidadEscalada: input.cantidadEscalada ?? 10_000,
+      orden: existentes.reduce((m, l) => Math.max(m, l.orden), -1) + 1,
+    };
+    if (dryRun) {
+      const r = await recalcularVersion(ctx, cot.id, undefined, false, {
+        lineas: (ls) => [...ls, { ...ls[0], ...nuevaVacia(), ...data, id: ID_VISTA_PREVIA } as (typeof ls)[number]],
+      });
+      return { id: ID_VISTA_PREVIA, ventaMensualClp: r?.ventaMensual ?? null };
+    }
+    const linea = await ctx.db.cpqLinea.create({ data });
     await recalcularVersion(ctx, cot.id, undefined, true);
     const v = await ctx.db.cpqVersion.findFirst({ where: { id: version.id } });
     if (!v) throw noEncontrado("La versión");
@@ -69,32 +72,48 @@ export const lineasCrear = defineCapability({
   },
 });
 
+/** Quita las claves `undefined` (exactOptionalPropertyTypes de Prisma): solo se escribe lo pedido. */
+function sinIndefinidos<T extends object>(o: T): { [K in keyof T]: Exclude<T[K], undefined> } {
+  const r: Partial<Record<keyof T, unknown>> = {};
+  for (const k of Object.keys(o) as (keyof T)[]) if (o[k] !== undefined) r[k] = o[k];
+  return r as { [K in keyof T]: Exclude<T[K], undefined> };
+}
+
+/** Columnas nulas de una línea nueva para la vista previa en memoria. */
+function nuevaVacia() {
+  return {
+    grupo: null, recurrencia: "mensual", visibleCliente: true, personasPorPosicionEscaladas: null, personasMotivo: null,
+    sueldoBaseClp: null, rateoJson: null, precioUnitarioClp: null, margenPropioPct: null, alcanceDotacion: null,
+    huellaJuegoValores: null, cargoId: null, diasSemana: [], sueldoOrigen: null, sueldoModo: "bruto",
+    liquidoObjetivoClp: null, colacionClp: null, movilizacionClp: null, afp: null, saludTipo: null,
+    saludPlanUf: null, tipoContrato: null,
+  };
+}
+
 export const lineasActualizar = defineCapability({
   id: "cpq.lineas.actualizar",
-  descripcion: "Edita una línea de cotización en borrador (puesto, ítem o adicional).",
+  descripcion:
+    "Edita una línea en borrador: cargo, patrón, días, horario, sueldo bruto o líquido, colación, movilización y supuestos.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     id: uuidSchema,
     nombre: z.string().trim().min(1).max(120).optional(),
+    grupo: z.string().trim().max(60).nullable().optional(),
     habilitada: z.boolean().optional(),
     posiciones: z.number().int().min(1).max(10_000).optional(),
-    patron: z.string().max(20).optional(),
-    horaInicio: hora.optional(),
-    horaFin: hora.optional(),
-    diasCobertura: z.number().int().min(1).max(7).optional(),
-    personasPorPosicionEscaladas: z.number().int().min(10_000).max(1_000_000_000).optional(),
-    personasMotivo: z.string().trim().min(1).max(500).optional(),
-    sueldoBaseClp: z.number().int().min(0).optional(),
+    ...camposPuesto,
+    personasPorPosicionEscaladas: z.number().int().min(10_000).max(1_000_000_000).nullable().optional(),
+    personasMotivo: z.string().trim().min(1).max(500).nullable().optional(),
     cantidadEscalada: z.number().int().min(1).optional(),
     precioUnitarioClp: z.number().int().min(0).optional(),
     margenPropioPct: z.number().int().min(0).max(999_999).optional(),
     recurrencia: z.enum(["mensual", "unico"]).optional(),
   }),
-  output: z.object({ id: uuidSchema, ventaMensualClp: z.number().int().nullable() }),
+  output: salida,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    rechazarCostosSinPermiso(ctx, input, CAMPOS_COSTO_ACTUALIZAR);
+    rechazarCostosSinPermiso(ctx, input, CAMPOS_COSTO_PUESTO);
     const actual = await ctx.db.cpqLinea.findFirst({ where: { id: input.id } });
     if (!actual) throw noEncontrado("La línea");
     const sec = await seccionDe(ctx, actual.seccionId);
@@ -102,36 +121,18 @@ export const lineasActualizar = defineCapability({
     exigirBorrador(version);
     const cot = await cotizacionDe(ctx, version.cotizacionId);
     const { id, ...cambios } = input;
-    const data = Object.fromEntries(Object.entries(cambios).filter(([, v]) => v !== undefined));
-    if (dryRun) return { id, ...(await vistaPrevia(ctx, cot.id)) };
+    const derivados = actual.tipo === "puesto" ? await resolverSueldoPuesto(ctx, cambios, actual) : {};
+    const data = sinIndefinidos({ ...cambios, ...derivados });
+    if (dryRun) {
+      const r = await recalcularVersion(ctx, cot.id, undefined, false, {
+        lineas: (ls) => ls.map((l) => (l.id === id ? ({ ...l, ...data } as typeof l) : l)),
+      });
+      return { id, ventaMensualClp: r?.ventaMensual ?? null };
+    }
     await ctx.db.cpqLinea.update({ where: { id }, data });
     await recalcularVersion(ctx, cot.id, undefined, true);
     const v = await ctx.db.cpqVersion.findFirst({ where: { id: version.id } });
     if (!v) throw noEncontrado("La versión");
     return { id, ventaMensualClp: v.ventaMensualClp };
-  },
-});
-
-export const lineasQuitar = defineCapability({
-  id: "cpq.lineas.quitar",
-  descripcion: "Quita una línea de la cotización en borrador.",
-  permiso: PERMISO_MANAGE,
-  input: z.object({ id: uuidSchema }),
-  output: z.object({ ok: z.literal(true), ventaMensualClp: z.number().int().nullable() }),
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    const actual = await ctx.db.cpqLinea.findFirst({ where: { id: input.id } });
-    if (!actual) throw noEncontrado("La línea");
-    const sec = await seccionDe(ctx, actual.seccionId);
-    const version = await versionDeCotizacion(ctx, sec.versionId);
-    exigirBorrador(version);
-    const cot = await cotizacionDe(ctx, version.cotizacionId);
-    if (dryRun) return { ok: true as const, ...(await vistaPrevia(ctx, cot.id)) };
-    await ctx.db.cpqLinea.delete({ where: { id: input.id } });
-    await recalcularVersion(ctx, cot.id, undefined, true);
-    const v = await ctx.db.cpqVersion.findFirst({ where: { id: version.id } });
-    if (!v) throw noEncontrado("La versión");
-    return { ok: true as const, ventaMensualClp: v.ventaMensualClp };
   },
 });

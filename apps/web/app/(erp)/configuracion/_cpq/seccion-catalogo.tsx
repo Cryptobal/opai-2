@@ -2,6 +2,8 @@ import { formatearNumero } from "@opai/domain";
 import { Estado } from "@opai/ds";
 
 import { estadoPantalla } from "@/lib/formato";
+
+import { type FilaReferencia, SueldosReferenciaCpq } from "./sueldos-referencia-cpq";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 type ItemCatalogo = {
@@ -18,6 +20,8 @@ export async function SeccionCatalogoCpq() {
   const r = await ejecutarComoUsuario<{ items: ItemCatalogo[] }>("erp", "cpq.catalogo_items.list", {
     incluirInactivos: true,
   });
+  const ref = await ejecutarComoUsuario<{ items: FilaReferencia[] }>("erp", "cpq.sueldos_referencia.list", {});
+  const verReferencias = ref.ok && ref.data.items.some((i) => i.sueldoBaseClp !== undefined);
   return (
     <Estado state={r.ok ? "ready" : estadoPantalla(r)} variante="formulario">
       {r.ok ? (
@@ -38,6 +42,7 @@ export async function SeccionCatalogoCpq() {
               </li>
             ))}
           </ul>
+          {ref.ok && verReferencias ? <SueldosReferenciaCpq filas={ref.data.items} /> : null}
         </div>
       ) : null}
     </Estado>

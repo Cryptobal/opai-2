@@ -55,12 +55,12 @@ export function semaforoEtiqueta(semaforo: string | undefined) {
 /** Subtítulo bajo el nombre de la línea (sin repetir «puesto · N posición»). */
 export function subtituloLineaCpq(linea: {
   tipo: string;
-  posiciones?: number;
-  patron?: string | null;
-  horaInicio?: string | null;
-  horaFin?: string | null;
-  diasCobertura?: number | null;
-  cantidadEscalada?: number | null;
+  posiciones?: number | undefined;
+  patron?: string | null | undefined;
+  horaInicio?: string | null | undefined;
+  horaFin?: string | null | undefined;
+  diasCobertura?: number | null | undefined;
+  cantidadEscalada?: number | null | undefined;
 }): string | null {
   if (linea.tipo !== "puesto") {
     const etiqueta = ETIQUETA_CATEGORIA_CPQ[linea.tipo] ?? linea.tipo.replaceAll("_", " ");

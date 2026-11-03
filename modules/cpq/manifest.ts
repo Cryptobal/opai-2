@@ -1,8 +1,8 @@
-import { z } from "zod";
 
 import { defineModule } from "@opai/capabilities";
 
 import { capacidades } from "./capabilities";
+import { ajustesCpq } from "./persistencia/supuestos";
 
 /**
  * Manifest del módulo CPQ (CAR-119, Brief 10 · PR 10.1, ADR-003/ADR-042). Datos y capacidades base de
@@ -44,7 +44,7 @@ export const manifest = defineModule({
       permiso: "cpq:cotizaciones.read",
     },
   ],
-  configuracion: z.object({}),
+  configuracion: ajustesCpq,
   eventos: [
     { id: "cpq.cotizacion.creada", descripcion: "Se creó una cotización en borrador." },
     { id: "cpq.cotizacion.aprobacion_solicitada", descripcion: "Una cotización pasó a aprobación por margen." },
