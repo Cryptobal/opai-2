@@ -29,6 +29,7 @@ export type AvisoServidorCpq = {
 const CUBIERTAS = (a: string) =>
   a === "costo laboral pendiente: motor de sueldos" ||
   a.startsWith("costo pendiente: falta") ||
+  a === "costo pendiente: indicadores incompletos" ||
   a.startsWith("Mutual adicional sin confirmar");
 
 function desdeCodigo(a: AvisoServidorCpq): AvisoCpq | null {
@@ -36,7 +37,10 @@ function desdeCodigo(a: AvisoServidorCpq): AvisoCpq | null {
     return {
       id: `legal-${a.indicador ?? "juego"}`,
       tono: "warning",
-      titulo: `Falta el valor legal «${a.indicador ?? "indicadores"}»`,
+      titulo:
+        a.indicador && a.indicador !== "indicadores"
+          ? `Falta el valor legal «${a.indicador}»`
+          : "Faltan valores legales para la fecha de la cotización",
       detalle:
         "Sin ese valor no se puede calcular el costo. Revisa los indicadores en Remuneraciones.",
       enlace: { href: RUTA_REMUNERACIONES, etiqueta: "Ir a Remuneraciones" },

@@ -56,7 +56,8 @@ const aviso = z.object({ codigo: z.enum(["mutual_sin_confirmar", "sueldo_faltant
 const publico = { ventaMensual: entero.nullable(), pagosUnicos: entero,
   dotacion: z.object({ posiciones: entero, personasEscaladas: entero }), uf, fecha,
   estado: z.literal("borrador"), advertencias: z.array(z.string().max(200)), noEnviable: z.boolean(),
-  avisos: z.array(aviso).max(200).optional() };
+  // Un aviso por línea (máx. 200) más los globales (mutual, juego legal): el tope no puede ser 200.
+  avisos: z.array(aviso).max(210).optional() };
 export const motorOutputSchema = z.union([
   z.strictObject({ ...publico,
     lineas: z.array(z.object({ id, seccion: id, categoria: id, costoMensual: entero, costoUnico: entero, ventaAdicional: entero, ventaUnica: entero })),

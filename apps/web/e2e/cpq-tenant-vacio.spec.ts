@@ -65,7 +65,7 @@ test("tenant vacío: de la cotización nueva al costo calculado y la vista previ
   });
   await expect(page.getByText(/^Costo empresa: \$/).first()).toBeAttached();
   await expect(page.getByText(/Mutual adicional sin confirmar/).filter({ visible: true }).first()).toBeVisible();
-  const confirmar = page.getByRole("link", { name: "Confirmar mutual" }).first();
+  const confirmar = page.getByRole("link", { name: "Confirmar mutual" }).filter({ visible: true }).first();
   await expect(confirmar).toHaveAttribute("href", "/configuracion/remuneraciones?mutual=1");
   await expect(page.getByRole("button", { name: "Enviar al contacto" })).toHaveCount(0);
   await sinEnlacesRotos(page);

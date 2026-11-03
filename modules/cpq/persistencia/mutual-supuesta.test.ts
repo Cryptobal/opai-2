@@ -2,8 +2,8 @@ import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { validarEnvioCpq } from "../capabilities/enviar-validar";
-import { ACTIVOS, CON_COSTOS, GESTOR, NEGOCIO_1, semilla } from "../capabilities/fixtures";
+import { ACTIVOS, CON_COSTOS, CONTACTO_1, GESTOR, NEGOCIO_1, semilla } from "../capabilities/fixtures";
+import { prepararEnvio } from "../capabilities/preparar-envio.test-helper";
 import { capacidades } from "../capabilities/index";
 import { avisosCalculo } from "./avisos-calculo";
 import { huellaLinea, juegoDesactualizado } from "./juego-vigente";
@@ -18,7 +18,7 @@ type Calc = { ventaMensual: number | null; noEnviable: boolean; advertencias: st
 async function cotizacionConPuesto(sueldoBaseClp?: number) {
   mockMotorLegal();
   vi.spyOn(proveedor, "mutualParaCalculo").mockResolvedValue({ tasa: 0, confirmada: false });
-  const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS, permisos: [...GESTOR, ...CON_COSTOS] });
+  const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS, permisos: [...GESTOR, ...CON_COSTOS, "cpq:aprobar"] });
   const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Mutual" });
   if (!c.ok) throw new Error("fixture");
   const id = (c.data as { id: string }).id;
@@ -57,14 +57,13 @@ describe("mutual adicional sin confirmar (CAR-162)", () => {
     expect(meta.requiereConfirmarMutual).toBe(true);
   });
 
-  it("el envío se bloquea con el código mutual_sin_confirmar (misma regla para MCP)", async () => {
+  it("enviar por executeCapability (pantalla, API y MCP) se bloquea con mutual_sin_confirmar", async () => {
     const { ctx, id } = await cotizacionConPuesto(650_000);
-    const r = await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
-    if (!r.ok) throw new Error("calc");
-    const resultado = { ...(r.data as Calc), requiereAprobacion: false } as Parameters<typeof validarEnvioCpq>[4];
-    await expect(
-      validarEnvioCpq(ctx, {}, { estado: "lista" }, [], resultado, true, id),
-    ).rejects.toMatchObject({ code: "UNPROCESSABLE", detalles: { codigo: "mutual_sin_confirmar" } });
+    await prepararEnvio(ctx, id);
+    const env = await executeCapability(ctx, "cpq.cotizaciones.enviar", { id, contactoId: CONTACTO_1 });
+    expect(env.ok).toBe(false);
+    if (env.ok) return;
+    expect(env.error).toMatchObject({ code: "UNPROCESSABLE", detalles: { codigo: "mutual_sin_confirmar" } });
   });
 
   it("al confirmar la mutual (incluso en 0 %) la cotización queda desactualizada", async () => {

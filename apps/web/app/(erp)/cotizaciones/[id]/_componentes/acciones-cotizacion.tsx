@@ -110,7 +110,11 @@ export function AccionesCotizacion({
       </Button>
     ) : null;
 
-  if (soloPrimaria) return bloqueoCalculo ? avisoBloqueo(bloqueoCalculo) : botonPrimaria("w-full");
+  // Barra fija del teléfono: si solo falta la mutual, se explica por qué no se puede enviar.
+  if (soloPrimaria) {
+    if (bloqueoCalculo || !bloqueo) return bloqueoCalculo ? avisoBloqueo(bloqueoCalculo) : botonPrimaria("w-full");
+    return <div className="flex w-full flex-col gap-2">{avisoBloqueo(bloqueo)}{botonPrimaria("w-full")}</div>;
+  }
 
   const claseTelefono = ocultar ? "hidden md:inline-flex" : undefined;
   const comunes = { cotizacionId, gestionar, puedeNuevaVersion, onVistaPrevia, ejecutar, limpiarError, onHecho };
