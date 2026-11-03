@@ -53,6 +53,10 @@ model Actividad {
   completadaEn    DateTime? @map("completada_en") @db.Timestamptz(6)
   completadaPorId String?   @map("completada_por_id") @db.Uuid
   creadaPorId     String?   @map("creada_por_id") @db.Uuid
+  /// Llamadas y correos registrados: "contesto" | "no_contesto" | "volver_a_llamar".
+  resultado       String?
+  /// Solo tareas: cuándo se emitió el aviso de tarea vencida (una vez por vencimiento; posponer lo limpia).
+  avisoVencidaEn  DateTime? @map("aviso_vencida_en") @db.Timestamptz(6)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
