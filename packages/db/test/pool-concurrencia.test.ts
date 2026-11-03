@@ -44,11 +44,21 @@ describe.skipIf(!urlPropietario)("pool de la app contra Postgres real", () => {
   });
 
   it("lecturas de auth fuera del hot path no solapan consultas en la conexión", async () => {
-    const cuenta = await entorno.admin.account.findFirst({ orderBy: { createdAt: "desc" } });
-    expect(cuenta).toBeTruthy();
-    const { clienteAuth } = await import("../src/identidad");
-    await clienteAuth().account.findFirst({ where: { id: cuenta!.id } });
-    await new Promise((r) => setImmediate(r));
-    expect(avisos.filter((a) => a.includes("already executing a query"))).toEqual([]);
+    // La base del CI nace vacía: el test siembra su propio usuario y cuenta (y los borra al final).
+    const sufijo = randomUUID().slice(0, 8);
+    const usuario = await entorno.admin.user.create({
+      data: { name: "Pool", email: `pool-${sufijo}@example.test` },
+    });
+    try {
+      const cuenta = await entorno.admin.account.create({
+        data: { accountId: `pool-${sufijo}`, providerId: "credential", userId: usuario.id },
+      });
+      const { clienteAuth } = await import("../src/identidad");
+      await clienteAuth().account.findFirst({ where: { id: cuenta.id } });
+      await new Promise((r) => setImmediate(r));
+      expect(avisos.filter((a) => a.includes("already executing a query"))).toEqual([]);
+    } finally {
+      await entorno.admin.user.delete({ where: { id: usuario.id } });
+    }
   });
 });
