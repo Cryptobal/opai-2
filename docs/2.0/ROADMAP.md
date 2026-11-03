@@ -29,7 +29,7 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 | PR | Rama sugerida | Alcance | Migración | Depende de |
 |---|---|---|---|---|
 | **P0** · CAR-151 | `docs/car-151-auditoria-2026-11` | Esta auditoría, ESTADO limpio y plan; tests de `main` en verde; bug B1 | No | — |
-| **P1** · CAR-152 | `fix/conexiones-neon` | Cortes de conexión con Neon (1.585 errores en 7 días): `cookieCache` de sesión en Better Auth, confirmar el host `-pooler` y la suspensión de la compute, medir las precargas por navegación, corregir el `client.query()` concurrente | No | Decisión D1 |
+| **P1** · CAR-152 | `fix/conexiones-neon` | Cortes de conexión con Neon (1.585 errores en 7 días): `cookieCache` de sesión en Better Auth, confirmar el host `-pooler` y la suspensión de la compute, medir las precargas por navegación, corregir el `client.query()` concurrente | No | **D1 aceptada (3-nov-2026): `cookieCache` 60 s** |
 | **P2** · CAR-153 | `qa/textos-y-estilos` | Bugs B2–B9 y B11: clases inexistentes, montos que se cortan, estados de Finanzas traducidos, sin referencias internas ni jerga, errores de negocio en lugar de mensajes crudos; formateador único de CLP y fecha (R4) | No | — |
 | **P3** · CAR-154 | `brief/finanzas-simpleapi-real` | Portar los adaptadores **SimpleAPI y Octava de 1.0** (pieza aislada, con revisión) detrás de `AdaptadorSii`; payload completo (detalle de líneas, CAF del rango, referencias OC/HES, resolución SII del emisor); NC con el adaptador del tenant; preflight de emisión; test de contrato con respuestas grabadas de certificación | Sí, aditiva (resolución SII y referencias en borrador) | O1; D5 para probar contra certificación |
 | **P4** · CAR-155 | `brief/finanzas-ficha-venta` | Ficha de venta con acciones (enviar al SII, PDF, NC, ceder); pantalla **Configuración DTE** con fuente única de ambiente y checklist de producción; **envío del DTE al cliente** (PDF + XML por Comunicaciones, a los contactos con rol facturación) | Posible, aditiva (registro de envíos) | P3 |
@@ -75,7 +75,7 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 
 | # | Decisión | Bloquea |
 |---|---|---|
-| D1 | ¿Se acepta que una sesión revocada siga válida hasta 60 s a cambio de quitar una consulta a la base por request (`cookieCache` de Better Auth)? | P1 |
+| D1 | ¿Se acepta que una sesión revocada siga válida hasta 60 s a cambio de quitar una consulta a la base por request (`cookieCache` de Better Auth)? | **Sí (3-nov-2026)** · PR CAR-152 |
 | D2 | Confirmar con el operador qué migraciones están aplicadas en Neon, y que desde ahora no se integra nada con `migracion-pendiente` puesta | P3 y todo lo que sigue |
 | D3 | Cómo se leen los datos de 1.0 para la migración: un rol de **solo lectura** en la base de 1.0 o una key de solo lectura de su API | P7 |
 | D4 | **Fecha de corte** con 1.0 para facturación (folios y recurrentes) y para Comercial; tabla de equivalencia de etapas del embudo | P7, ensayo, emisión real |
