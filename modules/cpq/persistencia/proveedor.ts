@@ -1,7 +1,8 @@
 import { costoEmpleadorPorPersona, juegoDeValores, type EntradaCostoEmpleador, type JuegoDeValores } from "@opai/domain";
 
 import type { ProveedorCostoEmpleador } from "../domain/motor/tipos";
-import { juegoParaFecha, valoresLegalesTenant, mutualAdicionalTenant } from "./valores-legales";
+import { huellaLinea } from "./juego-vigente";
+import { juegoParaFecha, valoresLegalesTenant, mutualAdicionalTenant, mutualParaCalculo } from "./valores-legales";
 
 export type LineaPuesto = {
   id: string;
@@ -14,7 +15,7 @@ export type LineaPuesto = {
   tipoContrato?: "indefinido" | "plazo_fijo";
 };
 
-export { juegoParaFecha, mutualAdicionalTenant, valoresLegalesTenant };
+export { juegoParaFecha, mutualAdicionalTenant, mutualParaCalculo, valoresLegalesTenant };
 
 /** Entrada de cotización con supuestos M1/D2/D3 (21 días, indemnización imponible, indefinido por defecto). */
 export function entradaCostoDesdeLinea(
@@ -58,6 +59,8 @@ export function proveedorDesdeLineas(
   lineas: readonly LineaPuesto[],
   juego: JuegoDeValores | null,
   mutualAdicional: number | null,
+  /** false: la tasa es el 0 % supuesto y la huella lo marca para detectar el cambio al confirmar. */
+  mutualConfirmada = true,
 ): ProveedorCostoEmpleador {
   const porId = new Map(lineas.map((l) => [l.id, l]));
   return {
@@ -74,7 +77,7 @@ export function proveedorDesdeLineas(
         }),
         juego,
       );
-      return { costoMensualClp: r.costoEmpresaMensualClp, origen: `07e:${r.huellaJuegoDeValores}` };
+      return { costoMensualClp: r.costoEmpresaMensualClp, origen: huellaLinea(r.huellaJuegoDeValores, mutualConfirmada) };
     },
   };
 }

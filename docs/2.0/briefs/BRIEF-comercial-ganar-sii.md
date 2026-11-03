@@ -42,7 +42,8 @@ PR 1: **sin migración**. PR 2: sin migración prevista (la caché persistente q
 |---|---|---|
 | `comercial.negocios.ganar` | irreversible, dryRun | Salida con `efectos` (cuenta, instalaciones, cotización, rechazadas, puestosPorOfrecer) |
 | `core.cuentas.consultar_sii` | lectura | Nueva (PR 2): datos del SII y comparación campo a campo, marcados como externos |
-| `core.cuentas.aplicar_sii` | escritura, dryRun | Nueva (PR 2): aplica solo los campos elegidos |
+| `core.cuentas.aplicar_sii` | escritura, dryRun | Nueva (PR 2): aplica solo los campos elegidos; vuelve a consultar al SII (nunca toma el valor del input) |
+| `core.cuentas.facturable` | lectura | Nueva (PR 2): «Lista para facturar» y lo que falta, sin llamar al SII (indicador de la ficha) |
 Las nuevas generan herramienta MCP; se actualiza la instantánea `herramientas-mcp.txt` y el inventario.
 
 ## 8. Interfaz y responsive
