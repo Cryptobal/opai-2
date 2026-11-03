@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const h = vi.hoisted(() => ({ slots: [] as unknown[], cursor: 0, accion: vi.fn() }));
 // Estado conservado entre renders sin un renderer de React (como `preferencias-cola.test.ts`).
 vi.mock("react", () => ({
+  useCallback: <T>(f: T) => f,
   useState: (valor: unknown) => {
     const i = h.cursor++;
     if (!(i in h.slots)) h.slots[i] = valor;

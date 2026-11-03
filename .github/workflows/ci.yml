@@ -17,7 +17,8 @@ jobs:
   gate:
     name: typecheck · lint · test · test:db
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # El chequeo de tipos de todo el monorepo ya toma ~10 min sin caché de Turborepo.
+    timeout-minutes: 45
     env:
       TURBO_CACHE_DIR: .turbo
     services:
@@ -48,8 +49,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
+      # Dos tsc a la vez como máximo: en paralelo sin tope el runner (7 GB) se queda sin memoria y se cae.
+      # El tsc de apps/web necesita más que el heap por defecto (~2 GB): 4,5 GB deja margen para el otro.
+      - run: pnpm turbo run typecheck --concurrency=2
+        env:
+          NODE_OPTIONS: --max-old-space-size=4608
       - run: pnpm lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=4608
       - run: pnpm test
       - run: pnpm test:db
         env:
@@ -74,6 +81,8 @@ jobs:
           BETTER_AUTH_SECRET: ficticio-solo-para-build-de-ci-000000000000
           BETTER_AUTH_URL: http://localhost:3000
           NEXT_TELEMETRY_DISABLED: "1"
+          # El chequeo de tipos de `next build` supera el heap por defecto (~2 GB) desde fines de octubre.
+          NODE_OPTIONS: --max-old-space-size=5120
       - run: pnpm presupuesto
 
   secretos:
@@ -308,6 +317,8 @@ jobs:
       # El build no se conecta a la base (ADR-037); la app lee DATABASE_URL al arrancar.
       - name: Construir la app (producción)
         run: pnpm --filter @opai/web build
+        env:
+          NODE_OPTIONS: --max-old-space-size=5120
       - name: Instalar Chromium de Playwright
         run: pnpm --filter @opai/web exec playwright install --with-deps chromium
       - name: Levantar la app (next start) y calentar las rutas del protocolo

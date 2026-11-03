@@ -58,6 +58,8 @@ export const actividadesUpdate = defineCapability({
       ...Object.fromEntries(Object.entries(cambios).filter(([, v]) => v !== undefined)),
       ...(cambios.ocurrioEn ? { ocurrioEn: new Date(cambios.ocurrioEn) } : {}),
       ...(cambios.vencimiento ? { vencimiento: new Date(cambios.vencimiento) } : {}),
+      // Posponer (cambiar el vencimiento) rearma el aviso de tarea vencida.
+      ...(cambios.vencimiento !== undefined ? { avisoVencidaEn: null } : {}),
     };
     if (dryRun) {
       const v = await vistaDe(ctx, id);

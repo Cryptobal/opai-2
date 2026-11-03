@@ -6,7 +6,10 @@ import { Button, type ItemMenu, Menu } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
-import { avisoLineaPuesto, subtituloLineaCpq } from "@/lib/cpq-presentacion";
+import { avisoLineaPuesto } from "@/lib/cpq-avisos";
+import { subtituloLineaCpq } from "@/lib/cpq-presentacion";
+
+import type { LineaEditable } from "../../_componentes/puesto-tipos";
 
 type CostoLinea = {
   estado: string;
@@ -24,40 +27,25 @@ export function LineaCotizacion({
   onQuitar,
   onTraza,
 }: {
-  linea: {
-    id: string;
-    nombre: string;
+  linea: LineaEditable & {
     tipo: string;
     costo?: unknown;
-    posiciones?: number;
-    sueldoBaseClp?: number;
-    patron?: string | null;
-    horaInicio?: string | null;
-    horaFin?: string | null;
     diasCobertura?: number | null;
     cantidadEscalada?: number | null;
   };
   editable: boolean;
   pendiente: boolean;
   verCostos: boolean;
-  onEditar: (linea: { id: string; nombre: string; posiciones?: number; sueldoBaseClp?: number }) => void;
+  onEditar: (linea: LineaEditable) => void;
   onQuitar: (id: string) => void;
   onTraza: (id: string) => void;
 }) {
   const costo = linea.costo as CostoLinea | undefined;
-  const aviso = avisoLineaPuesto(costo?.mensaje, linea.nombre);
+  const aviso = avisoLineaPuesto(costo?.mensaje, linea);
   const subtitulo = subtituloLineaCpq(linea);
 
   function payloadEditar() {
-    const payload: {
-      id: string;
-      nombre: string;
-      posiciones?: number;
-      sueldoBaseClp?: number;
-    } = { id: linea.id, nombre: linea.nombre };
-    if (linea.posiciones !== undefined) payload.posiciones = linea.posiciones;
-    if (linea.sueldoBaseClp !== undefined) payload.sueldoBaseClp = linea.sueldoBaseClp;
-    onEditar(payload);
+    onEditar(linea);
   }
 
   const itemsMenu: ItemMenu[] = [];
@@ -129,7 +117,11 @@ export function LineaCotizacion({
         >
           <p className="font-semibold leading-snug">{aviso.titulo}</p>
           {aviso.detalle ? <p className="mt-1 text-warning-fg/90">{aviso.detalle}</p> : null}
-          {aviso.enlace ? (
+          {aviso.accion && editable ? (
+            <Button type="button" variant="ghost" size="md" className="mt-2 px-0" disabled={pendiente} onClick={payloadEditar}>
+              {aviso.accion.etiqueta}
+            </Button>
+          ) : aviso.enlace ? (
             <LinkNext href={aviso.enlace.href} className="mt-2 inline-flex min-h-11 items-center font-semibold underline">
               {aviso.enlace.etiqueta}
             </LinkNext>

@@ -7,6 +7,7 @@ import { prepararEntorno, type Entorno } from "../../db/test/entorno";
 import * as mod from "../src";
 import { capacidadesComercial } from "../src/comercial";
 import { consumidorSolicitudCreada } from "../src/comercial/consumidor-solicitud";
+import { registrarModuloComercial } from "./comercial-modulo";
 import { codigo, dato } from "./maestros-ayuda";
 
 // Brief 07 · PR 2: formulario web público (token, idempotencia, UTM, RLS).
@@ -29,6 +30,7 @@ describe("comercial · formulario web contra Postgres real", () => {
     e = await prepararEntorno();
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...capacidadesComercial]);
+    registrarModuloComercial();
     slugA = `web-a-${sufijo}`;
     const tb = `web-b-${sufijo}`;
     tenantA = (await e.admin.tenant.create({ data: { slug: slugA, nombre: slugA, vertical: "seguridad" } }))
@@ -99,7 +101,7 @@ describe("comercial · formulario web contra Postgres real", () => {
       await codigo(ctx(tenantA), "comercial.solicitudes.recibir_formulario_web", {
         token: "opai_frm_invalido",
         mensaje: "x",
-        email: "a@b.c",
+        email: "a@b.cl",
         website: "",
       }),
     ).toBe("UNPROCESSABLE");
@@ -110,7 +112,7 @@ describe("comercial · formulario web contra Postgres real", () => {
         {
           token: rot.token,
           mensaje: "spam",
-          email: "a@b.c",
+          email: "a@b.cl",
           website: "http://spam",
         },
         { idempotencyKey: `frm-${sufijo}-hp` },
@@ -134,7 +136,7 @@ describe("comercial · formulario web contra Postgres real", () => {
         },
         { idempotencyKey: `frm-${sufijo}-dup` },
       ),
-    ).toBe("UNPROCESSABLE");
+    ).toBe("CONFLICT");
   });
 
   it("otra empresa no reutiliza el token ni ve solicitudes (RLS)", async () => {
@@ -154,7 +156,7 @@ describe("comercial · formulario web contra Postgres real", () => {
       await codigo(ctx(tenantB), "comercial.solicitudes.recibir_formulario_web", {
         token: rot.token,
         mensaje: "intruso",
-        email: "x@y.z",
+        email: "x@y.cl",
         website: "",
       }, { idempotencyKey: `frm-${sufijo}-rls-b` }),
     ).toBe("UNPROCESSABLE");
