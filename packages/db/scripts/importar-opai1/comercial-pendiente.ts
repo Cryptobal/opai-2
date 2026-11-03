@@ -19,6 +19,9 @@ export const MOTIVO_MODULO_COMERCIAL_INACTIVO = "modulo_comercial_inactivo";
 export const MOTIVO_MODULO_FINANZAS_INACTIVO = "modulo_finanzas_inactivo";
 export const MOTIVO_PENDIENTE_MODELO_PROGRAMACION = "pendiente_modelo_finanzas_programacion";
 
+/** Se pasa a `true` cuando finanzas.ventas_programaciones está en main (CAR-25 recurrentes). */
+export const FINANZAS_PROGRAMACION_EN_MAIN = true;
+
 export type TipoEtapa = "abierta" | "ganada" | "perdida";
 export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
 
@@ -157,7 +160,7 @@ export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan)
         filas: recurrentes,
         motivo: MOTIVO_MODULO_FINANZAS_INACTIVO,
       });
-    else
+    else if (!FINANZAS_PROGRAMACION_EN_MAIN)
       salida.push({
         entidad: "programacion_factura_recurrente",
         filas: recurrentes,

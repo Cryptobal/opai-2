@@ -554,3 +554,76 @@ model BancoAvisoEmitido {
   @@map("banco_avisos_emitidos")
   @@schema("finanzas")
 }
+
+// Finanzas · Ventas · programación recurrente (CAR-25 PR recurrentes): plantillas que generan borradores.
+// Receptor DTE (RUT, razón social, giro, dirección) se lee de core.cuentas al emitir; aquí solo cuenta e instalación.
+
+model VentasProgramacion {
+  id                     String    @id @default(uuid(7)) @db.Uuid
+  tenantId               String    @map("tenant_id") @db.Uuid
+  cuentaId               String    @map("cuenta_id") @db.Uuid
+  instalacionId          String?   @map("instalacion_id") @db.Uuid
+  nombre                 String
+  activa                 Boolean   @default(true)
+  tipoDte                Int       @map("tipo_dte")
+  /// mensual (paridad frequency=monthly de 1.0)
+  frecuencia             String    @default("mensual")
+  diaGeneracion          Int       @map("dia_generacion")
+  moneda                 String    @default("CLP")
+  plazoPagoDias           Int       @default(30) @map("plazo_pago_dias")
+  facturaTiming          String    @map("factura_timing")
+  facturaDia             Int?      @map("factura_dia")
+  facturaMesRelativo     String    @map("factura_mes_relativo")
+  diasFacturacion        Int?      @map("dias_facturacion")
+  modoPeriodoFacturado   String    @default("CURRENT_MONTH") @map("modo_periodo_facturado")
+  politicaTextoPeriodo   String    @default("CURRENT_MONTH") @map("politica_texto_periodo")
+  montoVariable          Boolean   @default(false) @map("monto_variable")
+  autoEnvioProforma      Boolean   @default(false) @map("auto_envio_proforma")
+  autoEnvioEstadoPago    Boolean   @default(false) @map("auto_envio_estado_pago")
+  notas                  String?
+  referenciasAdicionales Json      @default("[]") @map("referencias_adicionales")
+  proximaEjecucionEn     DateTime? @map("proxima_ejecucion_en") @db.Timestamptz(6)
+  ultimaEjecucionEn      DateTime? @map("ultima_ejecucion_en") @db.Timestamptz(6)
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  lineas         VentasProgramacionLinea[]
+  destinatarios  VentasProgramacionDestinatario[]
+
+  @@index([tenantId, cuentaId])
+  @@index([tenantId, activa])
+  @@map("ventas_programaciones")
+  @@schema("finanzas")
+}
+
+model VentasProgramacionLinea {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  programacionId  String   @map("programacion_id") @db.Uuid
+  orden           Int      @default(0)
+  glosa           String
+  monto           Int
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, programacionId])
+  @@map("ventas_programaciones_lineas")
+  @@schema("finanzas")
+}
+
+model VentasProgramacionDestinatario {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  programacionId String   @map("programacion_id") @db.Uuid
+  contactoId     String   @map("contacto_id") @db.Uuid
+  orden          Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, programacionId, contactoId])
+  @@index([tenantId, programacionId])
+  @@map("ventas_programaciones_destinatarios")
+  @@schema("finanzas")
+}

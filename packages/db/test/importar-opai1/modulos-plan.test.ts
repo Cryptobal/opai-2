@@ -4,12 +4,20 @@ import {
   MOTIVO_MODULO_COMERCIAL_INACTIVO,
   MOTIVO_MODULO_FINANZAS_INACTIVO,
   MOTIVO_PENDIENTE_CRM,
-  MOTIVO_PENDIENTE_MODELO_PROGRAMACION,
   pendientesImportacion,
 } from "../../scripts/importar-opai1/comercial-pendiente";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
 import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
+import { programacionRecurrenteOpai1 } from "../../scripts/importar-opai1/origen";
 import { fixture } from "./memoria";
+
+function scheduleRecurrente(partial: { id: string; accountId: string; lines: { description: string; amount: number }[] }) {
+  return programacionRecurrenteOpai1.parse({
+    createdAt: "2025-01-01T12:00:00.000Z",
+    updatedAt: "2025-01-01T12:00:00.000Z",
+    ...partial,
+  });
+}
 
 describe("plan según módulos del tenant", () => {
   it("sin módulos: CRM y recurrentes quedan pendientes (no se asume Finanzas ni Comercial)", () => {
@@ -27,16 +35,15 @@ describe("plan según módulos del tenant", () => {
     expect(pendientes).toContainEqual({ entidad: "negocio", filas: 1, motivo: MOTIVO_PENDIENTE_CRM });
   });
 
-  it("recurrentes: sin Finanzas no se programan; con Finanzas falta modelo en 2.0", () => {
+  it("recurrentes: sin Finanzas queda pendiente; con Finanzas entra al plan", () => {
     const datos = {
       ...fixture(),
       recurringInvoiceSchedules: [
-        {
+        scheduleRecurrente({
           id: "rec-1",
           accountId: "acc-a1",
-          createdAt: "2025-01-01T12:00:00.000Z",
-          updatedAt: "2025-01-01T12:00:00.000Z",
-        },
+          lines: [{ description: "Servicio", amount: 100_000 }],
+        }),
       ],
     };
     expect(
@@ -49,6 +56,9 @@ describe("plan según módulos del tenant", () => {
       pendientesImportacion(datos, { modulosActivos: ["finanzas"] }).find(
         (p) => p.entidad === "programacion_factura_recurrente",
       ),
-    ).toMatchObject({ filas: 1, motivo: MOTIVO_PENDIENTE_MODELO_PROGRAMACION });
+    ).toBeUndefined();
+
+    const plan = calcularPlan(datos, estadoVacio(), { modulosActivos: ["finanzas"] });
+    expect(plan.programaciones.length).toBe(1);
   });
 });
