@@ -23,6 +23,7 @@ export function mailerResend(apiKey: string, remitente: string): Mailer {
                 })),
               }
             : {}),
+          ...(correo.responderA?.length ? { reply_to: correo.responderA } : {}),
         }),
       });
       if (!res.ok) {

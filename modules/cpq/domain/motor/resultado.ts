@@ -1,3 +1,5 @@
+import type { AvisoCalculoCpq } from "./avisos";
+import { AVISO_MUTUAL_SUPUESTA } from "./avisos";
 import type { LineaCalculada, ParametrosCalculo, Traza } from "./tipos";
 export type ResultadoCalculo = {
   lineas: LineaCalculada[];
@@ -12,6 +14,8 @@ export type ResultadoCalculo = {
   dotacion: { posiciones: number; personasEscaladas: number };
   uf: ParametrosCalculo["uf"]; fecha: string; estado: "borrador";
   advertencias: string[]; noEnviable: boolean; requiereAprobacion: boolean; traza: Traza[];
+  /** Causas tipadas de lo pendiente (CAR-162); las agrega la persistencia, no el motor puro. */
+  avisos?: AvisoCalculoCpq[];
 };
 /** Proyección por lista permitida: nunca clona/resta campos ni devuelve operandos o semáforo. R59. */
 export function resultadoSinCostos(r: ResultadoCalculo) {
@@ -22,7 +26,9 @@ export function resultadoSinCostos(r: ResultadoCalculo) {
         a === "costo laboral pendiente: motor de sueldos" ||
         a === "falta valor UF" ||
         a === "Falta valor UF del día o del período." ||
-        a === "rateo mayor que plazo del contrato",
+        a === "rateo mayor que plazo del contrato" ||
+        a === AVISO_MUTUAL_SUPUESTA,
     ),
-    noEnviable: r.noEnviable };
+    noEnviable: r.noEnviable,
+    ...(r.avisos ? { avisos: r.avisos.map((a) => ({ ...a })) } : {}) };
 }

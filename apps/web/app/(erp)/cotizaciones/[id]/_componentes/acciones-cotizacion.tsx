@@ -1,21 +1,24 @@
 "use client";
 
-import { Copy, Eye, GitBranch, MoreHorizontal, Send } from "lucide-react";
-import { useState } from "react";
+import { Send } from "lucide-react";
 
-import { Alerta, Button, type ItemMenu, Menu } from "@opai/ds";
+import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { resumenRecalculo } from "@/lib/cpq-recalculo";
 
-import { AccionesCotizacionExtras } from "./acciones-cotizacion-extras";
+import { AccionesCotizacionBarraFija } from "./acciones-cotizacion-barra-fija";
+import { AccionesCotizacionCabecera } from "./acciones-cotizacion-cabecera";
 import {
   accionPrimariaCpq,
+  bloqueoCalculoEnBarraFija,
   bloqueoEnvioCpq,
+  bloqueoMutualCpq,
   pedirAprobacionDeshabilitada,
   type MetaAccionesCpq,
 } from "./acciones-cotizacion-logica";
+import { itemsMenuCotizacion } from "./acciones-cotizacion-menu";
 import { BloqueoCotizacion } from "./bloqueo-cotizacion";
-import { DialogoRechazarAprobacion } from "./dialogo-rechazar-aprobacion";
 
 export function AccionesCotizacion({
   cotizacionId,
@@ -27,262 +30,121 @@ export function AccionesCotizacion({
   onHecho,
   onEnviar,
   onVistaPrevia,
+  onEditarLinea,
   soloPrimaria,
   ocultarPrimariaEnTelefono,
 }: {
   cotizacionId: string;
   version: { estado: string; editable?: boolean };
-  calculo: { requiereAprobacion?: boolean; noEnviable?: boolean; advertencias?: string[] };
+  calculo: Parameters<typeof bloqueoEnvioCpq>[0]["calculo"];
   meta?: MetaAccionesCpq;
   gestionar: boolean;
   aprobar: boolean;
   onHecho: () => void;
   onEnviar?: () => void;
   onVistaPrevia?: () => void;
-  /** Barra fija móvil: solo acción primaria o aviso de bloqueo. */
+  /** Abre la hoja de edición de una línea (aviso de sueldo faltante, CAR-162). */
+  onEditarLinea?: (lineaId: string) => void;
   soloPrimaria?: boolean;
-  /** Cabecera: en teléfono la primaria va solo en la barra fija. */
   ocultarPrimariaEnTelefono?: boolean;
 }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
-  const [rechazoAbierto, setRechazoAbierto] = useState(false);
   if (!gestionar && !aprobar) return null;
 
-  const params = {
-    version,
-    calculo,
-    gestionar,
-    ...(meta !== undefined ? { meta } : {}),
-  };
-  const bloqueada = version.estado === "en_aprobacion";
+  const params = { version, calculo, gestionar, ...(meta !== undefined ? { meta } : {}) };
   const puedeDecidir = Boolean(meta?.puedeAprobarMargen);
   const motivoBloqueo = meta?.motivoNoAprobarMargen ?? null;
-  const muestraAprobacion = aprobar && bloqueada && (puedeDecidir || motivoBloqueo);
+  const muestraAprobacion =
+    aprobar && version.estado === "en_aprobacion" && Boolean(puedeDecidir || motivoBloqueo);
   const primaria = accionPrimariaCpq(params);
-  const bloqueo = bloqueoEnvioCpq(params);
-  const pedirDeshabilitada = pedirAprobacionDeshabilitada(params);
-  const puedeNuevaVersion = gestionar && version.estado !== "borrador" && version.estado !== "en_aprobacion";
-
-  async function despues(r: unknown) {
-    if (r != null) {
-      limpiarError();
-      onHecho();
-    }
-  }
+  const bloqueoMutual = bloqueoMutualCpq(params);
+  const bloqueo = bloqueoEnvioCpq(params) ?? bloqueoMutual;
+  const bloqueoCalculoBarra = bloqueoCalculoEnBarraFija(params);
+  const puedeNuevaVersion =
+    gestionar && version.estado !== "borrador" && version.estado !== "en_aprobacion";
+  const ocultar = Boolean(ocultarPrimariaEnTelefono);
+  const despues = (r: unknown) => void (r != null && (limpiarError(), onHecho()));
+  // Recalcular informa qué cambió o qué falta (CAR-162), no solo recarga.
+  const recalcular = () => {
+    limpiarError();
+    void ejecutar<typeof calculo>("cpq.cotizaciones.calcular", { id: cotizacionId }).then((r) => {
+      if (r == null) return;
+      const { tono, texto } = resumenRecalculo(calculo, r);
+      avisar[tono](texto);
+      despues(r);
+    });
+  };
 
   async function ejecutarPrimaria() {
     if (!primaria) return;
     limpiarError();
-    if (primaria.id === "enviar") {
-      onEnviar?.();
-      return;
-    }
-    if (primaria.id === "preview") {
-      onVistaPrevia?.();
-      return;
-    }
+    if (primaria.id === "enviar") return onEnviar?.();
+    if (primaria.id === "preview") return onVistaPrevia?.();
+    if (primaria.id === "recalcular") return recalcular();
     if (primaria.id === "pedir") {
-      await ejecutar("cpq.cotizaciones.solicitar_aprobacion", { id: cotizacionId }).then(despues);
-    } else if (primaria.id === "lista") {
-      await ejecutar("cpq.cotizaciones.marcar_lista", { id: cotizacionId }).then(despues);
-    } else if (primaria.id === "recalcular") {
-      await ejecutar("cpq.cotizaciones.calcular", { id: cotizacionId }).then(despues);
+      despues(await ejecutar("cpq.cotizaciones.solicitar_aprobacion", { id: cotizacionId }));
+    } else {
+      despues(await ejecutar("cpq.cotizaciones.marcar_lista", { id: cotizacionId }));
     }
   }
 
-  const recalcular = () => {
-    limpiarError();
-    void ejecutar("cpq.cotizaciones.calcular", { id: cotizacionId }).then(despues);
-  };
-
-  if (soloPrimaria) {
-    if (bloqueo) {
-      return (
-        <BloqueoCotizacion
-          mensaje={bloqueo.mensaje}
-          laboralPendiente={bloqueo.laboralPendiente}
-          pendiente={pendiente}
-          onRecalcular={recalcular}
-          {...(bloqueo.enlace ? { enlace: bloqueo.enlace } : {})}
-        />
-      );
-    }
-    if (!primaria) return null;
-    return (
+  const avisoBloqueo = (b: NonNullable<typeof bloqueo>) => (
+    <BloqueoCotizacion
+      bloqueo={b}
+      pendiente={pendiente}
+      onRecalcular={recalcular}
+      {...(onEditarLinea ? { onEditarLinea } : {})}
+    />
+  );
+  const botonPrimaria = (clase?: string) =>
+    primaria ? (
       <Button
         type="button"
         variant={primaria.variant === "secondary" ? "secondary" : "primary"}
         disabled={pendiente}
-        className="w-full"
+        className={clase}
         onClick={() => void ejecutarPrimaria()}
       >
         {primaria.id === "enviar" ? <Send className="size-4" aria-hidden /> : null}
         {primaria.etiqueta}
       </Button>
+    ) : null;
+
+  if (soloPrimaria) {
+    return (
+      <AccionesCotizacionBarraFija
+        bloqueoCalculo={bloqueoCalculoBarra}
+        bloqueoMutual={bloqueoMutual}
+        avisoBloqueo={avisoBloqueo}
+        botonPrimaria={botonPrimaria}
+      />
     );
   }
 
-  const itemsMenu: ItemMenu[] = [];
-  if (onVistaPrevia) {
-    itemsMenu.push({
-      id: "preview-pdf",
-      etiqueta: "Vista previa PDF",
-      icono: Eye,
-      onSelect: onVistaPrevia,
-    });
-  }
-  if (gestionar) {
-    itemsMenu.push({
-      id: "clonar",
-      etiqueta: "Clonar",
-      icono: Copy,
-      onSelect: () => {
-        limpiarError();
-        void ejecutar("cpq.cotizaciones.clonar", { id: cotizacionId }).then((r) => {
-          if (r != null) onHecho();
-        });
-      },
-    });
-    if (puedeNuevaVersion) {
-      itemsMenu.push({
-        id: "nueva-version",
-        etiqueta: "Nueva versión",
-        icono: GitBranch,
-        onSelect: () => {
-          limpiarError();
-          void ejecutar("cpq.versiones.crear", { cotizacionId }).then((r) => r != null && onHecho());
-        },
-      });
-    }
-  }
-
-  const botonPrimario = pedirDeshabilitada ? (
-    <Button
-      type="button"
-      disabled
-      title={bloqueo?.mensaje}
-      className={ocultarPrimariaEnTelefono ? "hidden md:inline-flex" : undefined}
-    >
-      Pedir aprobación
-    </Button>
-  ) : primaria ? (
-    <Button
-      type="button"
-      variant={primaria.variant === "secondary" ? "secondary" : "primary"}
-      disabled={pendiente}
-      className={ocultarPrimariaEnTelefono ? "hidden md:inline-flex" : undefined}
-      onClick={() => void ejecutarPrimaria()}
-    >
-      {primaria.id === "enviar" ? <Send className="size-4" aria-hidden /> : null}
-      {primaria.etiqueta}
-    </Button>
-  ) : null;
+  const comunes = { cotizacionId, gestionar, puedeNuevaVersion, onVistaPrevia, ejecutar, limpiarError, onHecho };
 
   return (
-    <>
-      <div className="flex w-full min-w-0 flex-col gap-2">
-        {bloqueo ? (
-          <div className={ocultarPrimariaEnTelefono ? "hidden md:block" : undefined}>
-            <BloqueoCotizacion
-              mensaje={bloqueo.mensaje}
-              laboralPendiente={bloqueo.laboralPendiente}
-              pendiente={pendiente}
-              onRecalcular={recalcular}
-              {...(bloqueo.enlace ? { enlace: bloqueo.enlace } : {})}
-            />
-          </div>
-        ) : null}
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          {botonPrimario}
-          {!ocultarPrimariaEnTelefono && onVistaPrevia ? (
-            <Button type="button" variant="secondary" disabled={pendiente} onClick={onVistaPrevia}>
-              <Eye className="size-4" aria-hidden />
-              Vista previa PDF
-            </Button>
-          ) : null}
-          {gestionar && !ocultarPrimariaEnTelefono ? (
-            <AccionesCotizacionExtras
-              cotizacionId={cotizacionId}
-              puedeNuevaVersion={puedeNuevaVersion}
-              pendiente={pendiente}
-              ejecutar={ejecutar}
-              limpiarError={limpiarError}
-              onHecho={onHecho}
-            />
-          ) : null}
-          {ocultarPrimariaEnTelefono && itemsMenu.length > 0 ? (
-            <div className="md:hidden">
-              <Menu
-                etiqueta="Más acciones de la cotización"
-                items={itemsMenu}
-                disparador={<MoreHorizontal className="size-5" aria-hidden />}
-                claseDisparador="border border-border-strong bg-surface size-11"
-              />
-            </div>
-          ) : null}
-          {muestraAprobacion ? (
-            <>
-              <Button
-                type="button"
-                disabled={pendiente || !puedeDecidir}
-                title={!puedeDecidir ? (motivoBloqueo ?? undefined) : undefined}
-                className={ocultarPrimariaEnTelefono ? "hidden md:inline-flex" : undefined}
-                onClick={() => {
-                  limpiarError();
-                  void ejecutar("cpq.cotizaciones.aprobar", { id: cotizacionId }).then(despues);
-                }}
-              >
-                Aprobar margen
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={pendiente || !puedeDecidir}
-                className={ocultarPrimariaEnTelefono ? "hidden md:inline-flex" : undefined}
-                onClick={() => setRechazoAbierto(true)}
-              >
-                Rechazar
-              </Button>
-            </>
-          ) : null}
-          {ocultarPrimariaEnTelefono ? (
-            <div className="hidden md:contents">
-              {onVistaPrevia ? (
-                <Button type="button" variant="secondary" disabled={pendiente} onClick={onVistaPrevia}>
-                  <Eye className="size-4" aria-hidden />
-                  Vista previa PDF
-                </Button>
-              ) : null}
-              {gestionar ? (
-                <AccionesCotizacionExtras
-                  cotizacionId={cotizacionId}
-                  puedeNuevaVersion={puedeNuevaVersion}
-                  pendiente={pendiente}
-                  ejecutar={ejecutar}
-                  limpiarError={limpiarError}
-                  onHecho={onHecho}
-                />
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-        {error ? <Alerta tono="danger" titulo={error} className="w-full max-w-xl" /> : null}
-      </div>
-      <DialogoRechazarAprobacion
-        abierto={rechazoAbierto}
-        pendiente={pendiente}
-        error={error}
-        onCerrar={() => setRechazoAbierto(false)}
-        onConfirmar={(motivo) => {
-          limpiarError();
-          void ejecutar("cpq.cotizaciones.rechazar_aprobacion", { id: cotizacionId, motivo }).then((r) => {
-            if (r != null) {
-              setRechazoAbierto(false);
-              onHecho();
-            }
-          });
-        }}
-      />
-    </>
+    <AccionesCotizacionCabecera
+      bloqueo={bloqueo}
+      ocultar={ocultar}
+      pedirDeshabilitado={pedirAprobacionDeshabilitada(params)}
+      botonPrimaria={botonPrimaria}
+      extrasProps={{ ...comunes, pendiente }}
+      items={itemsMenuCotizacion(comunes)}
+      avisoBloqueo={avisoBloqueo}
+      aprobacion={{
+        cotizacionId,
+        visible: muestraAprobacion,
+        puedeDecidir,
+        motivoBloqueo,
+        pendiente,
+        error,
+        ocultarEnTelefono: ocultar,
+        ejecutar,
+        limpiarError,
+        onHecho,
+      }}
+      error={error}
+    />
   );
 }

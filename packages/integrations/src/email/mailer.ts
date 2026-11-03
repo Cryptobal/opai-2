@@ -14,6 +14,8 @@ export type Correo = {
   /** Copia visible para los demás destinatarios del mismo aviso (p. ej. contactos de facturación). */
   cc?: readonly string[];
   adjuntos?: readonly AdjuntoCorreo[];
+  /** Reply-To (p. ej. la dirección de respuestas de un seguimiento y el correo del vendedor). */
+  responderA?: string[];
 };
 
 export interface Mailer {

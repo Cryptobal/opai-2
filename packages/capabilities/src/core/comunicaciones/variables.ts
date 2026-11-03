@@ -1,54 +1,7 @@
 import type { EventoPublicado } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
-
-const fechaCl = (iso: unknown) =>
-  typeof iso === "string" && /^\d{4}-\d{2}-\d{2}/.test(iso)
-    ? iso.slice(0, 10).split("-").reverse().join("-")
-    : "";
-
-const RUTA_ENTIDAD: Record<string, string> = {
-  persona: "/personas",
-  cuenta: "/cuentas",
-  instalacion: "/instalaciones",
-  tenant: "/configuracion/documentos",
-};
-
-async function nombreEntidad(ctx: Contexto, tipo: string, id: string): Promise<string> {
-  if (tipo === "persona") {
-    const p = await ctx.db.persona.findUnique({ where: { id } });
-    return p ? `${p.nombres} ${p.apellidos}` : "";
-  }
-  if (tipo === "cuenta") return (await ctx.db.cuenta.findUnique({ where: { id } }))?.nombre ?? "";
-  if (tipo === "instalacion")
-    return (await ctx.db.instalacion.findUnique({ where: { id } }))?.nombre ?? "";
-  if (tipo === "puesto") return (await ctx.db.puesto.findUnique({ where: { id } }))?.nombre ?? "";
-  return (await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId } }))?.nombre ?? "";
-}
-
-async function datosDocumento(ctx: Contexto, ev: EventoPublicado, p: Record<string, unknown>) {
-  const d = ev.entidadId
-    ? await ctx.db.documento.findUnique({ where: { id: ev.entidadId } })
-    : null;
-  const tipo = d?.tipoId
-    ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } })
-    : null;
-  const v = d
-    ? await ctx.db.documentoVinculo.findFirst({ where: { documentoId: d.id, rol: "propietario" } })
-    : null;
-  const ruta = v
-    ? `${RUTA_ENTIDAD[v.entidadTipo] ?? ""}${v.entidadTipo === "tenant" ? "" : `/${v.entidadId}/documentos`}`
-    : "";
-  return {
-    documento: {
-      nombre: d?.nombre ?? "",
-      tipo: tipo?.nombre ?? "Documento",
-      vence: fechaCl(p["venceEn"]),
-      dias: String(p["dias"] ?? ""),
-    },
-    entidad: { nombre: v ? await nombreEntidad(ctx, v.entidadTipo, v.entidadId) : "" },
-    url: `${ctx.servicios.urlBase}${ruta}`,
-  };
-}
+import { datosDocumento, datosTarea, fechaCl } from "./variables-entidades";
+import { variablesCpq } from "./variables-cpq";
 
 /**
  * Variables de cada evento comunicable a partir del evento del outbox. Los textos vienen de la base
@@ -65,6 +18,8 @@ export async function variablesDe(
   const base = ctx.servicios.urlBase;
   if (ev.tipo.startsWith("core.documento."))
     return { ...(await datosDocumento(ctx, ev, p)), empresa };
+  if (ev.tipo === "core.actividad.tarea_vencida")
+    return { ...(await datosTarea(ctx, ev, p)), empresa };
   if (ev.tipo === "core.aprobacion.pendiente") {
     return {
       agente: { nombre: p["agente"] ?? "" },
@@ -94,60 +49,7 @@ export async function variablesDe(
   }
   if (ev.tipo === "core.bitacora.rota")
     return { seq: p["primeraRota"] ?? "", empresa, url: `${base}/configuracion/auditoria` };
-  if (ev.tipo.startsWith("cpq.")) {
-    const cotId =
-      ev.entidadTipo === "cotizacion"
-        ? ev.entidadId
-        : ev.entidadTipo === "cotizacion_version" && ev.entidadId
-          ? (
-              await ctx.db.cpqVersion.findFirst({
-                where: { id: ev.entidadId },
-                select: { cotizacion: { select: { id: true, codigo: true } } },
-              })
-            )?.cotizacion
-          : null;
-    const codigo =
-      (cotId && typeof cotId === "object" ? cotId.codigo : null) ??
-      (typeof p["codigo"] === "string" ? p["codigo"] : "") ??
-      (ev.entidadId
-        ? ((await ctx.db.cpqCotizacion.findFirst({ where: { id: ev.entidadId } }))?.codigo ?? "")
-        : "");
-    const cotizacionPk =
-      typeof cotId === "object" && cotId && "id" in cotId
-        ? cotId.id
-        : typeof ev.entidadId === "string"
-          ? ev.entidadId
-          : "";
-    const urlBandeja = `${base}/configuracion/aprobaciones`;
-    const urlCotizacion = cotizacionPk ? `${base}/cotizaciones/${cotizacionPk}` : urlBandeja;
-    const solicitanteId =
-      typeof p["solicitadaPorId"] === "string"
-        ? p["solicitadaPorId"]
-        : typeof p["solicitadoPorId"] === "string"
-          ? p["solicitadoPorId"]
-          : null;
-    const solicitante = solicitanteId
-      ? await ctx.db.user.findFirst({ where: { id: solicitanteId }, select: { name: true } })
-      : null;
-    const resumen =
-      ev.tipo === "cpq.envio_propuesta.solicitado"
-        ? `Envío propuesta · ${codigo}`
-        : ev.tipo === "cpq.cotizacion.aprobacion_solicitada"
-          ? `Margen · ${codigo}`
-          : (typeof p["resumen"] === "string" ? p["resumen"] : codigo);
-    return {
-      cotizacion: { codigo },
-      solicitante: { nombre: solicitante?.name ?? "Usuario" },
-      resumen,
-      motivo: typeof p["motivo"] === "string" ? p["motivo"] : "",
-      empresa,
-      url:
-        ev.tipo === "cpq.cotizacion.aprobacion_solicitada" ||
-        ev.tipo === "cpq.envio_propuesta.solicitado"
-          ? urlBandeja
-          : urlCotizacion,
-    };
-  }
+  if (ev.tipo.startsWith("cpq.")) return variablesCpq(ctx, ev, p, base, empresa);
   if (ev.tipo === "comercial.solicitud.creada") {
     return {
       solicitud: {

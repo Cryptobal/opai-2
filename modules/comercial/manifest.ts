@@ -57,6 +57,15 @@ export const manifest = defineModule({
     },
     {
       portal: "erp",
+      area: "comercial",
+      href: "/tareas",
+      etiqueta: "Mis tareas",
+      icono: "ListChecks",
+      orden: 3,
+      permiso: "comercial:negocios.read",
+    },
+    {
+      portal: "erp",
       area: "clientes",
       href: "/contactos",
       etiqueta: "Contactos",
@@ -68,6 +77,14 @@ export const manifest = defineModule({
   // Ajustes del módulo (ADR-008), declarados en packages/capabilities/src/comercial/ajustes.ts.
   configuracion: ajustesComercial,
   eventos: [
+    { id: "comercial.seguimiento.iniciado", descripcion: "Se inició el seguimiento de un negocio." },
+    { id: "comercial.seguimiento.pausado", descripcion: "Un seguimiento quedó pausado." },
+    { id: "comercial.seguimiento.reanudado", descripcion: "Un seguimiento se reanudó." },
+    { id: "comercial.seguimiento.cancelado", descripcion: "Un seguimiento se canceló." },
+    { id: "comercial.seguimiento.terminado", descripcion: "Un seguimiento terminó." },
+    { id: "comercial.seguimiento.cliente_respondio", descripcion: "El cliente respondió y el seguimiento se detuvo." },
+    { id: "comercial.seguimiento.paso_registrado", descripcion: "Se hizo, envió, omitió o pospuso un paso del seguimiento." },
+    { id: "comercial.seguimiento.plan_actualizado", descripcion: "Se creó o cambió un plan de seguimiento." },
     { id: "comercial.negocio.creado", descripcion: "Se creó un negocio." },
     {
       id: "comercial.negocio.actualizado",

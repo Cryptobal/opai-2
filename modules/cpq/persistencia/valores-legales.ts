@@ -14,19 +14,36 @@ export async function valoresLegalesTenant(ctx: Contexto, fecha: string): Promis
   return publicacionesParaFecha(ctx, fecha);
 }
 
-export type JuegoResuelto = { juego: JuegoDeValores | null; pendiente?: string };
+/**
+ * `pendiente` conserva el texto histórico de la advertencia; `faltante` es el indicador que falta
+ * (para el aviso tipado `juego_legal_faltante`). La mutual ya no bloquea el juego (CAR-162).
+ */
+export type JuegoResuelto = { juego: JuegoDeValores | null; pendiente?: string; faltante?: string };
 
-/** Juego legal congelado; null si faltan publicaciones o mutual adicional del tenant. */
+/** Juego legal congelado; null solo si faltan publicaciones legales para la fecha. */
 export async function juegoParaFecha(ctx: Contexto, fecha: string): Promise<JuegoResuelto> {
   const valores = await valoresLegalesTenant(ctx, fecha);
   const faltantes = clavesFaltantes(fecha, valores);
-  if (faltantes.length > 0) return { juego: null, pendiente: `costo pendiente: falta ${faltantes[0]}` };
-  const mutual = await mutualAdicionalTenant(ctx);
-  if (mutual == null) return { juego: null, pendiente: "costo pendiente: falta mutual adicional" };
+  const primero = faltantes[0];
+  if (primero) return { juego: null, pendiente: `costo pendiente: falta ${primero}`, faltante: primero };
   try {
     return { juego: await juegoDeValores(fecha, valores) };
   } catch (e) {
-    const msg = e instanceof ValorLegalFaltante ? `costo pendiente: falta ${e.indicador}` : "costo pendiente: indicadores incompletos";
-    return { juego: null, pendiente: msg };
+    if (e instanceof ValorLegalFaltante) {
+      return { juego: null, pendiente: `costo pendiente: falta ${e.indicador}`, faltante: e.indicador };
+    }
+    return { juego: null, pendiente: "costo pendiente: indicadores incompletos", faltante: "indicadores" };
   }
+}
+
+/** Mutual adicional usada en el cálculo: la confirmada o 0 % supuesto (decisión de Carlos, 3-nov-2026). */
+export type MutualResuelta = { tasa: number; confirmada: boolean };
+
+/**
+ * Sin confirmar, la tasa adicional se calcula con 0 % y se marca como supuesta: no se escribe nada
+ * en `core.remuneraciones_perfil` y la tasa sigue pendiente hasta que alguien la confirme.
+ */
+export async function mutualParaCalculo(ctx: Contexto): Promise<MutualResuelta> {
+  const tasa = await mutualAdicionalTenant(ctx);
+  return tasa == null ? { tasa: 0, confirmada: false } : { tasa, confirmada: true };
 }

@@ -15,7 +15,7 @@ import type { EtapaTablero } from "./tablero/use-mover";
 const TONO = { abierto: "info", ganado: "success", perdido: "danger" } as const;
 const ESTADO = { abierto: "Abierto", ganado: "Ganado", perdido: "Perdido" } as const;
 
-export type TabNegocio = "resumen" | "cotizaciones" | "documentos" | "actividad";
+export type TabNegocio = "resumen" | "cotizaciones" | "documentos" | "seguimiento" | "actividad";
 
 /** Ficha de un negocio: estado sobre el título, cuenta y etapa; pestañas por ruta (ADR-041). */
 export function FichaNegocio(p: {
@@ -96,6 +96,7 @@ export function FichaNegocio(p: {
             ? [{ id: "cotizaciones", etiqueta: "Cotizaciones", href: `${base}/cotizaciones` }]
             : []),
           { id: "documentos", etiqueta: "Documentos", href: `${base}/documentos` },
+          { id: "seguimiento", etiqueta: "Seguimiento", href: `${base}/seguimiento` },
           { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
         ]}
       >
