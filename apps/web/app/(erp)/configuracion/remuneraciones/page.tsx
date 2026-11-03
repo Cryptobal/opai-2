@@ -7,7 +7,8 @@ import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
-import { TablaRemuneraciones, type DatosRemuneraciones } from "./tabla-remuneraciones";
+import { RemuneracionesCliente } from "./remuneraciones-cliente";
+import type { DatosRemuneraciones } from "./tabla-remuneraciones";
 
 export const metadata = { title: "Remuneraciones" };
 
@@ -23,7 +24,7 @@ export default function Remuneraciones() {
         return { r };
       }}
       cabecera={() => ({
-        subtitulo: "Indicadores legales y mutual adicional del tenant",
+        subtitulo: "Indicadores legales y cotización adicional de la mutual",
       })}
     >
       {({ r }, indice) => {
@@ -34,7 +35,7 @@ export default function Remuneraciones() {
         }
         return (
           <Estado state={estadoPantalla(r)} variante="lista">
-            {r.ok ? <TablaRemuneraciones data={r.data} puede={puede} /> : null}
+            {r.ok ? <RemuneracionesCliente r={r} puede={puede} /> : null}
           </Estado>
         );
       }}
