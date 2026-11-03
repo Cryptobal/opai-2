@@ -80,7 +80,10 @@ export async function recalcularVersion(
   if (puedeEscribirVersion(version, escribir)) {
     await ctx.db.cpqVersion.update({
       where: { id: version.id },
-      data: { ventaMensualClp: resultado.ventaMensual },
+      data: {
+        ventaMensualClp: resultado.ventaMensual,
+        calculoCongeladoJson: JSON.stringify(resultado),
+      },
     });
     for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
       const d = proveedor.obtener({ lineaId: l.id, fecha });

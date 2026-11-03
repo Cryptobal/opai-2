@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 452 pares pantalla→capacidad · 406 con herramienta · 46 excepciones justificadas · 0 faltantes.
+**Resumen:** 456 pares pantalla→capacidad · 411 con herramienta · 45 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -152,13 +152,19 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.vincular` | `core_contactos_vincular` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.clonar` | `cpq_cotizaciones_clonar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.explicar` | `cpq_cotizaciones_explicar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.marcar_lista` | `cpq_cotizaciones_marcar_lista` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.preview_pdf` | `cpq_cotizaciones_preview_pdf` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.solicitar_aprobacion` | `cpq_cotizaciones_solicitar_aprobacion` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.aprobar` | `cpq_envios_propuesta_aprobar` | existe |
@@ -168,6 +174,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.quitar` | `cpq_lineas_quitar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.crear` | `cpq_versiones_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
@@ -413,8 +420,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios` | `core.users.remove` | `core_users_remove` | existe |
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
-| erp | `/cotizaciones/[id]` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
-| erp | `/cotizaciones/[id]` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
@@ -681,7 +686,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.motor.simular`
 - `cpq.propuestas_tecnica.update`
 - `cpq.secciones.margen`
-- `cpq.versiones.crear`
 - `cpq.versiones.margen`
 - `finanzas.bancos.guardar`
 - `finanzas.bancos.saldo_sugerido`
