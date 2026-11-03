@@ -1,5 +1,6 @@
 import {
   capacidadesDelNucleo,
+  consumidorSeguimientoCierre,
   consumidoresDelNucleo,
   limpiarConsumidores,
   limpiarModulos,
@@ -9,6 +10,7 @@ import {
   registrarConsumidores,
   registrarModulos,
   registrarTrabajos,
+  trabajosComercial,
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
@@ -29,7 +31,7 @@ export function asegurarRegistro(): void {
   limpiarConsumidores();
   registrarCapacidades(capacidadesDelNucleo);
   registrarModulos(modulos);
-  registrarTrabajos([...trabajosDelNucleo, ...trabajosFinanzas]);
-  registrarConsumidores([...consumidoresDelNucleo, consumidorCpqBandeja]);
+  registrarTrabajos([...trabajosDelNucleo, ...trabajosFinanzas, ...trabajosComercial]);
+  registrarConsumidores([...consumidoresDelNucleo, consumidorCpqBandeja, consumidorSeguimientoCierre]);
   hecho = true;
 }

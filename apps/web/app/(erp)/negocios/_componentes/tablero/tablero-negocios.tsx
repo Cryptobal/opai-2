@@ -46,6 +46,9 @@ export function TableroNegocios(p: {
       />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <VistaNegocios activa="tablero" />
+        <EnlaceBoton href="/negocios/seguimiento" variante="secondary">
+          Pendientes de seguimiento
+        </EnlaceBoton>
         <SelectorEtapa
           etapas={p.etapas.map((e) => ({ id: e.id, nombre: e.nombre, n: de(e.id).length }))}
           inicial={p.etapa}
