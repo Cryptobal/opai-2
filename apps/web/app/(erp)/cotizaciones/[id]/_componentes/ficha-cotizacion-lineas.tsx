@@ -3,6 +3,7 @@
 import { Button, SeccionTarjeta } from "@opai/ds";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
+import type { LineaEditable } from "../../_componentes/puesto-tipos";
 import { LineaCotizacion } from "./linea-cotizacion";
 
 type Ficha = NonNullable<DatosFichaCotizacion["ficha"]>;
@@ -22,7 +23,7 @@ export function FichaCotizacionLineas({
   pendiente: boolean;
   verCostos: boolean;
   onAgregar: (seccionId: string) => void;
-  onEditar: (linea: { id: string; nombre: string; posiciones?: number; sueldoBaseClp?: number }) => void;
+  onEditar: (linea: LineaEditable) => void;
   onQuitar: (id: string) => void;
   onTraza: (lineaId: string) => void;
 }) {

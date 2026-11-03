@@ -7,6 +7,7 @@ import { mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { aplicarAvisos, avisosCalculo } from "./avisos-calculo";
 import { juegoParaFecha, mutualParaCalculo, proveedorDesdeLineas } from "./proveedor";
+import { supuestosTenant } from "./supuestos";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
 
@@ -37,15 +38,23 @@ export async function cargarFilasVersion(
   return { cot, version, secciones, lineas };
 }
 
+type Filas = NonNullable<Awaited<ReturnType<typeof cargarFilasVersion>>>;
+/** Cambio en memoria para la vista previa (dryRun): el cálculo ve las filas como quedarían. */
+export type AjusteVistaPrevia = { lineas?: (l: Filas["lineas"]) => Filas["lineas"]; version?: (v: Filas["version"]) => Filas["version"] };
+
 export async function recalcularVersion(
   ctx: Contexto,
   cotizacionId: string,
   numero?: number,
   escribir = true,
+  ajuste?: AjusteVistaPrevia,
 ): Promise<ResultadoCalculo | null> {
-  const pack = await cargarFilasVersion(ctx, cotizacionId, numero, escribir);
+  const pack = await cargarFilasVersion(ctx, cotizacionId, numero, escribir && !ajuste);
   if (!pack) return null;
-  const { version, secciones, lineas } = pack;
+  const { secciones } = pack;
+  const lineas = ajuste?.lineas ? ajuste.lineas(pack.lineas) : pack.lineas;
+  const version = ajuste?.version ? ajuste.version(pack.version) : pack.version;
+  if (ajuste) escribir = false;
   const consulta = fechaCalculoHoy();
   const resuelto = await juegoParaFecha(ctx, consulta);
   const juego = resuelto.juego;
@@ -53,20 +62,14 @@ export async function recalcularVersion(
   const mutual = await mutualParaCalculo(ctx);
   const ufInd = juego?.valores.find((v) => v.indicador === "uf");
   const uf = ufInd ? { valorClpEscalado: Math.round((ufInd.valor as number) * 100), fecha } : null;
+  // Colación, movilización, AFP, salud, contrato y líquido objetivo vienen de la línea; lo que la
+  // línea no fija, de los supuestos del tenant (CPQ v4; antes colación y movilización iban en 0).
   const proveedor = proveedorDesdeLineas(
-    lineas.filter((l) => l.tipo === "puesto").map((l) => ({
-      id: l.id,
-      sueldoBaseClp: l.sueldoBaseClp,
-      patron: l.patron,
-      horaInicio: l.horaInicio,
-      horaFin: l.horaFin,
-      colacionClp: 0,
-      movilizacionClp: 0,
-      tipoContrato: "indefinido",
-    })),
+    lineas.filter((l) => l.tipo === "puesto"),
     juego,
     mutual.tasa,
     mutual.confirmada,
+    await supuestosTenant(ctx),
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
   const entrada = mapearVersionCalculo(version, secciones, lineas, modelo);
