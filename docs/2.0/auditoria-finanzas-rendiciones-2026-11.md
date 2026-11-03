@@ -235,8 +235,8 @@ Contraste con el DS 2.0 y con los exports `export-finanzas-ventas-banca-v3`, `ex
   - Hay e2e de compras y flujo.
   - No hay e2e de Ventas, Bancos, Folios ni Configuración DTE.
   - Las capacidades de ventas tienen pruebas de base (#234) y las de flujo, unitarias (`modules/finanzas/capacidades/flujo.test.ts`).
-  - No se encontró una prueba de aislamiento entre dos empresas específica de Finanzas más allá del gate global de RLS (`packages/db/test/rls-nucleo*.test.ts`).
-  - Propuesta: un caso «dos empresas» por submódulo (ventas, bancos, compras), en el PR de unificación.
+  - **Aislamiento entre empresas:** ya hay pruebas con dos tenants y capacidades reales. `finanzas-aislamiento-db.test.ts` cubre proveedores, libro de compras, plan, referencias cruzadas rechazadas por el trigger y el rol sin tenant. `finanzas-flujo-aislamiento-db.test.ts` cubre el flujo. Bancos, folios y ventas tienen casos de otra empresa en sus `*-db.test.ts`.
+  - **Pendiente:** el mismo caso para las capacidades nuevas (programación recurrente de #235, NC y cesión) y para cada capacidad que agreguen F2–F7. No hay que duplicar las pruebas existentes.
 
 ## 6. Plan
 
@@ -252,7 +252,7 @@ PR chicos y secuenciales. Primero lo que bloquea la migración de Gard, después
 | **F5** | `brief/car-finanzas-cierre-mes` | Tablero del período: emisión en lote con una aprobación; EP/proforma | Sí, aditiva | F3 |
 | **F6** | `brief/car-finanzas-apertura` | Importar saldos de apertura (bancos), cuentas por cobrar abiertas y último folio por tipo, sobre `core.importaciones` | Sí, aditiva | #237 |
 | **F7** | `brief/car-finanzas-banca-reglas` | Pantalla de reglas, cobro manual, conciliación N:M y saldo de apertura visible | Sí, aditiva | F6 |
-| **F8** | `perf/car-finanzas-unificar` | Mover `packages/capabilities/src/finanzas` a `modules/finanzas/capacidades/`, sin cambio de comportamiento; casos «dos empresas»; seed de QA | No | Después de F2 y F3, para no chocar |
+| **F8** | `perf/car-finanzas-unificar` | Mover `packages/capabilities/src/finanzas` a `modules/finanzas/capacidades/`, sin cambio de comportamiento; casos «dos empresas» solo para lo que no los tiene (programación, NC, cesión); seed de QA | No | Después de F2 y F3, para no chocar |
 | **C1** | `brief/car-contabilidad-asientos` | Asientos y períodos (modelo, capacidades y pantallas del export 07) | Sí | Después del corte |
 | **C2** | `brief/car-contabilidad-apertura-auto` | Asiento de apertura y asientos automáticos por evento | Sí | C1, F6 |
 | **I1** | `brief/car-finanzas-informes` | Libros de ventas y compras con IVA del período (base del F29), cobranza y aging | No | F4 |

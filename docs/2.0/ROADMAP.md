@@ -98,7 +98,7 @@ Sale de la [auditoría de Finanzas y Rendiciones](auditoria-finanzas-rendiciones
 | **F5** (CAR-167) | Cierre de mes: emisión en lote con una aprobación; EP/proforma | Sí | F3 |
 | **F6** (CAR-168) | Saldos de apertura, cuentas por cobrar abiertas y último folio por tipo desde 1.0 | Sí | #237 |
 | **F7** (CAR-169) | Banca: reglas y cobro manual en pantalla, conciliación N:M | Sí | F6 |
-| **F8** (CAR-170) | Unificar capacidades en `modules/finanzas`, casos «dos empresas», seed de QA | No | F2, F3 |
+| **F8** (CAR-170) | Unificar capacidades en `modules/finanzas`, casos «dos empresas» faltantes (programación, NC, cesión), seed de QA | No | F2, F3 |
 | **C1–C2** (CAR-171, CAR-172) | Asientos y períodos; apertura y asientos automáticos por evento | Sí | Después del corte; C2 depende de F6 |
 | **I1–I2** (CAR-173, CAR-174) | Libros con IVA (base F29), cobranza; EERR, balance, mayor y rentabilidad por instalación | No | F4; C2 |
 | **R1–R5** (CAR-175 a CAR-179) | Rendiciones: base y MCP; solicitante (ERP y Portal Trabajador); aprobador; lotes de pago con evento hacia Finanzas; reporte y configuración | R1 y R4 | Hoja de alcance y Propuesta B (Carlos) |
