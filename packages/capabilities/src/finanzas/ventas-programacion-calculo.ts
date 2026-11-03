@@ -68,12 +68,15 @@ export async function calcularPeriodo(
   periodo: string,
   fecha: string,
   ufEstimada: bigint | null = null,
+  /** true: usar `ufEstimada` sin consultar la UF exacta (proyecciones en lote, sin N+1). */
+  soloEstimada = false,
 ) {
   const motivo = motivoNoActivable(p);
   if (motivo) return { ok: false as const, resultado: omitido(periodo, fecha, motivo) };
   const usaUf = p.lineas.some((l) => l.precioUnitarioUf !== null);
   const fechaUf = fechaUfDe(p.politicaUf, p.diaUf, fecha);
-  const uf = usaUf ? ((await ufCentavosDelDia(ctx.db, fechaUf)) ?? ufEstimada) : null;
+  const exacta = usaUf && !soloEstimada ? await ufCentavosDelDia(ctx.db, fechaUf) : null;
+  const uf = usaUf ? (exacta ?? ufEstimada) : null;
   if (usaUf && uf === null)
     return { ok: false as const, resultado: omitido(periodo, fecha, motivoSinUf(fechaUf)) };
   const calc = montosProgramacion(p.tipoDte, p.lineas.map(aLineaMonto), uf);
