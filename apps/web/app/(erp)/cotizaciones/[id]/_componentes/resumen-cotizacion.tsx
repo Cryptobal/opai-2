@@ -6,7 +6,8 @@ import { Alerta, Badge, Button, Pares, SeccionTarjeta } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
-import { avisosCpq, type AvisoServidorCpq } from "@/lib/cpq-avisos";
+import { avisosResumenCpq } from "@/lib/cpq-avisos-compactos";
+import { type AvisoServidorCpq } from "@/lib/cpq-avisos";
 import { estadoCpqBadge, etiquetaCategoria, ventaMensualTexto } from "@/lib/cpq-presentacion";
 
 import { SemaforoMargenCpq } from "../../_componentes/semaforo-margen-cpq";
@@ -58,7 +59,7 @@ export function ResumenCotizacion({
   const ventaTxt = ventaMensualTexto(calculo.ventaMensual, costoPendiente);
   const ventaMostrar = typeof ventaTxt === "number" ? pesos(ventaTxt) : ventaTxt;
   const badge = estadoCpqBadge(version.estado);
-  const avisos = avisosCpq(calculo);
+  const avisos = avisosResumenCpq(calculo);
   // Sin cálculo, una sola fila: no ocho «Pendiente» ni ceros (CAR-162).
   const categorias = costoPendiente
     ? [{ etiqueta: "Costos pendientes", valor: "—" }]

@@ -28,7 +28,7 @@ describe("acciones-cotizacion-logica", () => {
     expect(hayBarraFijaCpq(p)).toBe(true);
   });
 
-  it("sueldo faltante: la causa nombra el puesto y su acción abre la hoja, sin «Ver cargos»", () => {
+  it("sueldo faltante: encabezado compacto «Costo pendiente», acción solo en la línea", () => {
     const p = {
       version: { estado: "borrador" },
       calculo: {
@@ -45,13 +45,10 @@ describe("acciones-cotizacion-logica", () => {
       gestionar: true,
     };
     const b = bloqueoEnvioCpq(p);
-    expect(b?.titulo).toContain("Guardia día");
-    expect(b?.accion).toEqual({
-      tipo: "editar_linea",
-      lineaId: LINEA,
-      etiqueta: "Ingresar sueldo",
-    });
+    expect(b?.titulo).toBe("Costo pendiente");
+    expect(b?.accion).toBeUndefined();
     expect(b?.enlace).toBeUndefined();
+    expect(hayBarraFijaCpq(p)).toBe(false);
     expect(JSON.stringify(b)).not.toContain("Ver cargos");
   });
 
