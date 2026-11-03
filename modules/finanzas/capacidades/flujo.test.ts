@@ -150,7 +150,7 @@ describe("cierre semanal retirado (flujo v2 PR A)", () => {
     const ids = capacidades.map((c) => c.id);
     expect(ids).not.toContain("finanzas.cierres.sellar");
     expect(ids).not.toContain("finanzas.cierres.reabrir");
-    expect(ids).toContain("finanzas.cierres.listar");
+    expect(ids).not.toContain("finanzas.cierres.listar");
   });
 });
 

@@ -8,10 +8,14 @@ import { comoTransaccion, exigirSinLockAuditoria } from "./lock-auditoria";
  * Se deriva del cliente con el contador de consultas (ADR-045), así que cada operación de modelo
  * dentro de la transacción también se cuenta por request.
  */
-export type TenantTx = Omit<
-  ClienteApp,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use" | ModelosCredenciales
->;
+export type TenantTx = Omit<TxDePrisma, ModelosCredenciales>;
+
+/**
+ * Tipo exacto del `tx` que Prisma entrega a `$transaction(fn)`. Derivar `TenantTx` de él (y no de
+ * otro `Omit<ClienteApp, …>`) evita que el compilador compare dos tipos estructurales gigantes cada
+ * vez que `tx` pasa a `fn` (CAR-161 · R2: esa sola comparación tardaba ~20 s y ~600 MB).
+ */
+type TxDePrisma = Parameters<Parameters<ClienteApp["$transaction"]>[0]>[0];
 
 /**
  * Tablas de credenciales de Better Auth (CAR-43): `opai_app` no tiene privilegios sobre ellas y el
