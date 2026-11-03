@@ -20,6 +20,10 @@
     {
       "archivo": "app/firmar/[slug]/[token]/acciones.ts",
       "motivo": "Firmar por enlace personal ocurre antes de existir sesión (firma.md §5, §10): resuelve el tenant por slug con tenantPorSlug() y luego ejecuta capacidades internas con el enlace como credencial."
+    },
+    {
+      "archivo": "app/api/t/[slug]/solicitudes/route.ts",
+      "motivo": "Endpoint público del formulario web (#224, comercial-formulario-web.md): ocurre sin sesión; resuelve el tenant por slug con tenantPorSlug() y usa la clave del canal (Bearer opai_frm_…) como credencial."
     }
   ],
   "internasPermitidas": [
@@ -34,6 +38,10 @@
     {
       "archivo": "app/firmar/[slug]/[token]/acciones.ts",
       "motivo": "Flujo de firma pre-sesión (firma.md R19, §10): ver_firmante, firmar y rechazar son internas; el enlace personal es la credencial."
+    },
+    {
+      "archivo": "app/api/t/[slug]/solicitudes/route.ts",
+      "motivo": "Recepción del formulario web: comercial.solicitudes.recibir_formulario_web es interna por diseño; la credencial es la clave del canal, con rate limit e idempotencia."
     }
   ],
   "infraestructuraLibConDb": [

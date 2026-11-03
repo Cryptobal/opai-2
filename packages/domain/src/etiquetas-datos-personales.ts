@@ -16,6 +16,10 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   comuna: "comuna",
   region: "región",
   direccion_formateada: "dirección",
+  // datos tributarios de cuenta (#223)
+  giro: "giro",
+  ciudad: "ciudad",
+  email_dte: "correo de recepción de facturas",
   // personas PR 2
   banco_codigo: "banco",
   tipo_cuenta: "tipo de cuenta",
