@@ -6,6 +6,7 @@ import { sembrarComercial } from "@opai/db";
 import { prepararEntorno, type Entorno } from "../../db/test/entorno";
 import * as mod from "../src";
 import { capacidadesComercial } from "../src/comercial";
+import { registrarModuloComercial } from "./comercial-modulo";
 import { codigo, dato } from "./maestros-ayuda";
 
 type Sol = {
@@ -41,21 +42,26 @@ describe("comercial · canal agente (GrowthBot) contra Postgres real", () => {
     e = await prepararEntorno();
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...capacidadesComercial]);
+    registrarModuloComercial();
     tenant = (
       await e.admin.tenant.create({
         data: { slug: `growth-${sufijo}`, nombre: "Growth test", vertical: "seguridad" },
       })
     ).id;
     await sembrarComercial(e.admin.$extends({}), tenant);
-    const owner = await e.admin.membership.findFirstOrThrow({
-      where: { tenantId: tenant, rol: "owner" },
+    // La base del CI nace vacía: el test siembra su propio responsable (owner).
+    const owner = await e.admin.user.create({
+      data: { name: "Owner", email: `owner-${sufijo}@prueba.cl`, emailVerified: true },
     });
-    ownerUserId = owner.userId;
+    await e.admin.membership.create({
+      data: { tenantId: tenant, userId: owner.id, rol: "owner", portales: ["erp"] },
+    });
+    ownerUserId = owner.id;
     keyId = (
       await e.admin.apiKey.create({
         data: {
           tenantId: tenant,
-          userId: owner.userId,
+          userId: owner.id,
           nombre: "GrowthBot test",
           prefijo: `gb${sufijo}`,
           hash: randomUUID(),
