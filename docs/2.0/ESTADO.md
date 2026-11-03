@@ -6,6 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
+| **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En construcción | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |
 | #231 | Importación 1.0: programaciones recurrentes de Finanzas, destinatarios, correlativo CPQ y simulación de negocios (CAR-25) | Abierto. **No integrar sin corregir** la forma de las líneas, las frecuencias, la cuenta nula, las recurrentes inactivas hasta el corte y el correlativo dentro de la corrida ([auditoría §2.3](auditoria-2026-11.md#23-migración-desde-10-importador-packagesdbscriptsimportar-opai1-y-pr-231)); le falta la etiqueta `migracion-pendiente` | Sí, `20261103140000_finanzas_ventas_programacion` |
 | #213 | Cargos y Remuneraciones: pantallas lista-ficha | **En pausa**: en conflicto con `main` y Vercel en rojo. Se retoma en la semana 3 con un merge de `main` | — |

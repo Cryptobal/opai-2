@@ -19,7 +19,15 @@ export type ConsultaSiiResultado = {
   glosa?: string;
 };
 
-/** Datos mínimos para firmar y enviar; montos y folio ya validados en dominio. */
+export type LineaEmisionDte = {
+  orden: number;
+  glosa: string;
+  monto: number;
+  cantidad?: number;
+  precioUnitario?: number;
+};
+
+/** Datos para generar el XML (SimpleAPI v1) o simular; montos y folio ya validados en dominio. */
 export type PayloadEmisionDte = {
   ambiente: AmbienteSii;
   tipoDte: TipoDteVentaSii;
@@ -35,6 +43,9 @@ export type PayloadEmisionDte = {
   emailReceptor?: string;
   montos: { neto: number; exento: number; iva: number; total: number };
   glosa?: string;
+  lineas?: readonly LineaEmisionDte[];
+  /** XML del CAF del rango (obligatorio con SimpleAPI real). */
+  cafXml?: string;
   referencias?: readonly { tipoDte: number; folio: number; codigo: number; razon?: string }[];
 };
 

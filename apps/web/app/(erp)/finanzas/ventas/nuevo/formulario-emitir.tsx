@@ -38,6 +38,9 @@ export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
   const [previewEmitir, setPreviewEmitir] = useState<Venta | null>(null);
   const [documentoId, setDocumentoId] = useState<string | null>(null);
   const [dialogo, setDialogo] = useState<"borrador" | "emitir" | null>(null);
+  const [preflightBloqueante, setPreflightBloqueante] = useState<string | null>(null);
+
+  type ItemPreflight = { codigo: string; ok: boolean; mensaje: string; bloqueante: boolean };
 
   const cuenta = cuentas.find((c) => c.id === cuentaId);
   const lineasValidas = lineas.every((l) => l.glosa.trim().length > 0 && parseMonto(l.montoTexto) != null);
@@ -77,6 +80,19 @@ export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
 
   async function revisarEmision() {
     if (!documentoId) return;
+    setPreflightBloqueante(null);
+    const pf = await ejecutar<{ listo: boolean; items: ItemPreflight[] }>(
+      "finanzas.ventas.preflight_emision",
+      { documentoId },
+      false,
+    );
+    if (pf && !pf.listo) {
+      const bloqueo = pf.items.find((i) => i.bloqueante && !i.ok);
+      if (bloqueo) {
+        setPreflightBloqueante(bloqueo.mensaje);
+        return;
+      }
+    }
     const r = await ejecutar<Venta>("finanzas.ventas.emitir", { documentoId }, true);
     if (r) {
       setPreviewEmitir(r);
@@ -115,6 +131,11 @@ export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
     <div className="flex flex-col gap-4 pb-36 md:pb-0">
       <div className="hidden items-center justify-end gap-3 md:flex">{accionesForm}</div>
       {error ? <Alerta tono="danger" titulo={error} /> : null}
+      {preflightBloqueante ? (
+        <Alerta tono="warning" titulo="Emisión no lista">
+          {preflightBloqueante}
+        </Alerta>
+      ) : null}
       {cuentaId && !cuenta?.rut ? (
         <Alerta tono="warning" titulo="La cuenta seleccionada no tiene RUT">
           Complete el RUT del cliente antes de emitir un DTE.

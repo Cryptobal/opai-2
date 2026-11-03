@@ -20,6 +20,18 @@ import { ventaSchema } from "./vistas-venta";
 
 const tipoBorradorSchema = z.union([z.literal(33), z.literal(34)]);
 
+const referenciaBorradorSchema = z.object({
+  tipoDteRef: z
+    .number()
+    .int()
+    .min(1)
+    .max(999)
+    .describe("Tipo de referencia SII (por ejemplo 801 orden de compra, 802 hes)."),
+  folioRef: z.number().int().min(1),
+  codigoRef: z.number().int().min(1).max(3).default(1),
+  razonRef: textoOpcional(90),
+});
+
 export const ventasCrearBorrador = defineCapability({
   id: "finanzas.ventas.crear_borrador",
   descripcion:
@@ -31,6 +43,7 @@ export const ventasCrearBorrador = defineCapability({
     cotizacionId: uuidSchema.optional(),
     tipoDte: tipoBorradorSchema,
     lineas: z.array(lineaInputSchema).min(1).max(60),
+    referencias: z.array(referenciaBorradorSchema).max(10).optional(),
     plazoPagoDias: z.number().int().min(0).max(365).default(PLAZO_PAGO_DEFECTO),
     glosa: textoOpcional(300),
   }),
@@ -101,6 +114,19 @@ export const ventasCrearBorrador = defineCapability({
             montoTotal: montos.total,
             glosa: input.glosa ?? null,
             lineas: { create: lineasData },
+            ...(input.referencias?.length
+              ? {
+                  referencias: {
+                    create: input.referencias.map((r) => ({
+                      tenantId: ctx.tenantId,
+                      tipoDteRef: r.tipoDteRef,
+                      folioRef: r.folioRef,
+                      codigoRef: r.codigoRef,
+                      razonRef: r.razonRef ?? null,
+                    })),
+                  },
+                }
+              : {}),
           },
           include: { lineas: { orderBy: { orden: "asc" } } },
         }),
