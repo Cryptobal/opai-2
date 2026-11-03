@@ -57,6 +57,10 @@ model CpqVersion {
   marcaDocumentoVersion Int? @map("marca_documento_version")
   plantillaDocumentoId String? @map("plantilla_documento_id") @db.Uuid
   plantillaDocumentoVersion Int? @map("plantilla_documento_version")
+  /// Instrumentos financieros propios de la versión (JSON de `Instrumentos`); nulo = defecto del tenant (R60).
+  instrumentosJson String? @map("instrumentos_json")
+  /// Meses de contrato pactados (R57); nulo = se deducen de la validez como antes.
+  mesesContrato  Int?      @map("meses_contrato")
   creadoPorId       String    @map("creado_por_id") @db.Uuid
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -126,6 +130,26 @@ model CpqLinea {
   margenPropioPct Int?    @map("margen_propio_pct")
   alcanceDotacion String? @map("alcance_dotacion")
   huellaJuegoValores String? @map("huella_juego_valores")
+  /// Cargo del catálogo del núcleo (`core.cargos`); trae el sueldo de referencia para cotizar (R20).
+  cargoId        String?  @map("cargo_id") @db.Uuid
+  /// Días de la semana cubiertos (1 = lunes … 7 = domingo); `dias_cobertura` es su cantidad.
+  diasSemana     Int[]    @default([]) @map("dias_semana")
+  /// Origen del sueldo: "referencia_cargo" | "manual" (R20). Nulo en líneas anteriores a CPQ v4.
+  sueldoOrigen   String?  @map("sueldo_origen")
+  /// "bruto" | "liquido": con líquido objetivo, el sueldo base se calcula en el dominio (CampoSueldo).
+  sueldoModo     String   @default("bruto") @map("sueldo_modo")
+  liquidoObjetivoClp Int? @map("liquido_objetivo_clp")
+  /// Colación y movilización mensuales por persona (no imponibles), CLP.
+  colacionClp    Int?     @map("colacion_clp")
+  movilizacionClp Int?    @map("movilizacion_clp")
+  /// Supuestos previsionales de la línea; nulos = defecto del tenant (ajustes de CPQ).
+  afp            String?
+  /// "fonasa" | "isapre"
+  saludTipo      String?  @map("salud_tipo")
+  /// Plan Isapre en UF escalada (UF_ESCALA).
+  saludPlanUf    Int?     @map("salud_plan_uf")
+  /// "indefinido" | "plazo_fijo"
+  tipoContrato   String?  @map("tipo_contrato")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -398,5 +422,24 @@ model CpqPropuestaEnvio {
   @@index([tenantId, cotizacionId])
   @@index([tenantId, estado])
   @@map("propuesta_envios")
+  @@schema("cpq")
+}
+
+/// Sueldo de referencia para cotizar por cargo (pregunta 1, R20): supuesto de venta, no el sueldo que
+/// se paga. Configuración versionada del tenant (ADR-021): cada cambio es una fila nueva con su vigencia;
+/// rige la de mayor `vigente_desde` que no sea futura. Cambiarla no altera cotizaciones enviadas.
+model CpqSueldoReferencia {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  cargoId       String   @map("cargo_id") @db.Uuid
+  sueldoBaseClp Int      @map("sueldo_base_clp")
+  vigenteDesde  DateTime @map("vigente_desde") @db.Date
+  creadoPorId   String   @map("creado_por_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, cargoId, vigenteDesde])
+  @@index([tenantId, cargoId])
+  @@map("sueldos_referencia")
   @@schema("cpq")
 }

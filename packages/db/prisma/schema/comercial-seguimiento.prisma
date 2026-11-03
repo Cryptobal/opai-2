@@ -1,0 +1,129 @@
+// Seguimiento comercial (CAR-67, modulos/seguimiento-comercial.md). Planes versionados por tenant
+// (ADR-021: la configuración es un JSON versionado que evalúa packages/domain), seguimientos por
+// negocio, sus pasos agendados y los correos entrantes del cliente. Toda tabla con tenant_id y RLS
+// `tenant_isolation`. Sin @relation a Negocio ni Tenant: las FK y los triggers de mismo tenant van en el SQL.
+
+/// Receta de seguimiento del tenant. `versionActual` apunta a la última versión publicada.
+model PlanSeguimiento {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  nombre        String
+  /// "cotizacion_enviada" | "entra_a_etapa" | "manual"
+  disparador    String
+  porDefecto    Boolean  @default(false) @map("por_defecto")
+  activo        Boolean  @default(true)
+  versionActual Int      @default(1) @map("version_actual")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  versiones PlanSeguimientoVersion[]
+
+  @@index([tenantId])
+  @@map("seguimiento_planes")
+  @@schema("comercial")
+}
+
+/// Versión inmutable de un plan: `config` valida con el esquema de packages/domain (pasos, días, canal…).
+model PlanSeguimientoVersion {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  planId    String   @map("plan_id") @db.Uuid
+  version   Int
+  config    Json
+  creadaPor String?  @map("creada_por") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  plan PlanSeguimiento @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, version])
+  @@index([tenantId])
+  @@map("seguimiento_plan_versiones")
+  @@schema("comercial")
+}
+
+/// La aplicación de un plan a un negocio. A lo más uno activo o pausado por negocio (índice parcial).
+model Seguimiento {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  negocioId     String    @map("negocio_id") @db.Uuid
+  planId        String    @map("plan_id") @db.Uuid
+  planVersion   Int       @map("plan_version")
+  /// "activo" | "pausado" | "terminado" | "cancelado"
+  estado        String    @default("activo")
+  /// "cliente_respondio" | "sin_respuesta" | "ganado" | "perdido" | "reemplazado" | "manual" | null
+  motivo        String?
+  motivoDetalle String?   @map("motivo_detalle")
+  ancla         DateTime  @db.Timestamptz(6)
+  /// Referencia que entrega CPQ al iniciar (Comercial no lee tablas de CPQ, ADR-040).
+  cotizacionId  String?   @map("cotizacion_id") @db.Uuid
+  cotizacionCodigo String? @map("cotizacion_codigo")
+  contactoId    String?   @map("contacto_id") @db.Uuid
+  /// Token aleatorio de 128 bits de la dirección de respuesta (<token>@respuestas.opai.cl); único.
+  token         String    @unique
+  creadoPorId   String?   @map("creado_por_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  pasos     SeguimientoPaso[]
+  entrantes SeguimientoEntrante[]
+
+  @@index([tenantId, negocioId])
+  @@index([tenantId, estado])
+  @@map("seguimientos")
+  @@schema("comercial")
+}
+
+/// Un paso agendado con su fecha real y su resultado. El registro de lo hecho vive en core.actividades.
+model SeguimientoPaso {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  seguimientoId String    @map("seguimiento_id") @db.Uuid
+  orden         Int
+  /// "correo" | "whatsapp" | "llamada" | "interno"
+  canal         String
+  /// "persona" | "opai_automatico" | "agente"
+  ejecutor      String
+  programadoEn  DateTime  @map("programado_en") @db.Timestamptz(6)
+  /// "programado" | "por_hacer" | "por_preparar" | "hecho" | "omitido" | "fallido" | "cancelado"
+  estado        String    @default("programado")
+  asignadoId    String?   @map("asignado_id") @db.Uuid
+  asunto        String?
+  cuerpo        String?
+  resultado     String?
+  error         String?
+  actividadId   String?   @map("actividad_id") @db.Uuid
+  hechoEn       DateTime? @map("hecho_en") @db.Timestamptz(6)
+  hechoPorId    String?   @map("hecho_por_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  seguimiento Seguimiento @relation(fields: [seguimientoId], references: [id], onDelete: Cascade)
+
+  @@unique([seguimientoId, orden])
+  @@index([tenantId, estado, programadoEn])
+  @@index([tenantId, asignadoId])
+  @@map("seguimiento_pasos")
+  @@schema("comercial")
+}
+
+/// Respuesta del cliente recibida por correo. El texto es de un tercero: siempre contenido externo.
+model SeguimientoEntrante {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  seguimientoId String   @map("seguimiento_id") @db.Uuid
+  /// Id del correo en el proveedor: idempotencia del webhook (único por tenant).
+  mensajeId     String   @map("mensaje_id")
+  remitente     String
+  asunto        String?
+  texto         String
+  actividadId   String?  @map("actividad_id") @db.Uuid
+  recibidoEn    DateTime @map("recibido_en") @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  seguimiento Seguimiento @relation(fields: [seguimientoId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, mensajeId])
+  @@index([tenantId, seguimientoId])
+  @@map("seguimiento_entrantes")
+  @@schema("comercial")
+}

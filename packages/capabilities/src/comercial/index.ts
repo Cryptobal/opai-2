@@ -31,6 +31,7 @@ import {
   solicitudesReabrir,
 } from "./solicitudes-estado";
 import { solicitudesGet, solicitudesList } from "./solicitudes-lectura";
+import { capacidadesSeguimiento } from "./seguimiento-index";
 import { negociosDesvincularInstalacion, negociosVincularInstalacion } from "./negocios-vinculos";
 
 export { ajustesComercial } from "./ajustes";
@@ -72,4 +73,5 @@ export const capacidadesComercial: readonly Capacidad[] = [
   canalesRotarTokenFormulario,
   solicitudesRecibirFormularioWeb,
   comercialImportar10,
+  ...capacidadesSeguimiento,
 ];

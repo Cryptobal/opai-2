@@ -51,7 +51,8 @@ describe.skipIf(!urlPropietario)("Comercial · triggers con opai_app", () => {
       FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
       WHERE n.nspname = 'comercial'`;
     expect(filas.length).toBeGreaterThanOrEqual(2);
-    expect(filas.filter((f) => f.definer).map((f) => f.nombre)).toEqual([]);
+    // Única excepción deliberada: resuelve el token público del seguimiento sin sesión (migración CAR-67).
+    expect(filas.filter((f) => f.definer && f.nombre !== "seguimiento_resolver_token").map((f) => f.nombre)).toEqual([]);
   });
 
   it("el estado se deriva de la etapa también al escribir como la aplicación", async () => {

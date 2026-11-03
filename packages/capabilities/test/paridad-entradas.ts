@@ -64,6 +64,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
   "app/api/t/[slug]/solicitudes/route.ts":
     "Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2).",
+  "app/api/webhooks/resend/entrante/route.ts":
+    "Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna).",
   // Infraestructura: sin datos de negocio.
   "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
   "app/api/cron/programador/route.ts":
