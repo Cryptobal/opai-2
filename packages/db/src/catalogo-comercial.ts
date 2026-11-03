@@ -1,12 +1,14 @@
 // Siembra idempotente del catálogo base de Comercial (Brief 07 · PR 1): embudo por defecto con sus
 // etapas y los catálogos de tipos, orígenes y motivos de pérdida.
+import { type ClienteSeguimiento, sembrarPlanSeguimiento } from "./catalogo-seguimiento";
 import type { TenantDb } from "./for-tenant";
 
 /** Lo mínimo para sembrar el catálogo base de Comercial (Brief 07 · PR 1). */
 export type ClienteComercial = Pick<
   TenantDb,
   "embudo" | "etapa" | "tipoNegocio" | "origenNegocio" | "motivoPerdida"
->;
+> &
+  ClienteSeguimiento;
 
 // Embudo por defecto: los 8 nombres de etapa del embudo de Gard de 1.0 (alcance-crm.md «Decide Carlos»
 // punto 2), con la etapa ganada llamada «Adjudicado» (Page de decisiones del 25-oct). 6 abiertas, 1
@@ -126,4 +128,5 @@ export async function sembrarComercial(db: ClienteComercial, tenantId: string) {
       },
     });
   }
+  await sembrarPlanSeguimiento(db, tenantId);
 }
