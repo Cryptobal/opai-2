@@ -27,6 +27,8 @@ export const ventasProgramacionVistaPrevia = defineCapability({
   output: z.object({ periodos: z.array(resultadoSchema) }),
   efecto: "lectura",
   dryRun: false,
+  // Solo cifras calculadas de la propia programación, sin datos personales: perfil sin IDs revelados.
+  auditarLectura: () => [],
   async handler(ctx, input) {
     const p = await cargarGenerable(ctx, input.programacionId);
     const h = hoy();

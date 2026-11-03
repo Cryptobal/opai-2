@@ -11,6 +11,7 @@ import {
   programacionSchema,
 } from "./ventas-programacion-vistas";
 import { ufCentavosUltima } from "./ventas-programacion-uf";
+import { detalleProgramacionSchema, extrasDetalle } from "./ventas-programacion-detalle";
 
 export { programacionSchema } from "./ventas-programacion-vistas";
 
@@ -50,7 +51,11 @@ export const ventasProgramacionesListar = defineCapability({
     const cuentaMap = new Map(
       (
         await ctx.db.cuenta.findMany({
-          where: { id: { in: [...new Set(slice.map((f) => f.cuentaId).filter((x): x is string => x !== null))] } },
+          where: {
+            id: {
+              in: [...new Set(slice.map((f) => f.cuentaId).filter((x): x is string => x !== null))],
+            },
+          },
           select: { id: true, nombre: true },
         })
       ).map((c) => [c.id, c.nombre]),
@@ -66,17 +71,24 @@ export const ventasProgramacionesListar = defineCapability({
           ).map((i) => [i.id, i.nombre])
         : [],
     );
-    const items = await enriquecerProgramaciones(ctx, slice as FilaProg[], cuentaMap, instMap, await ufCentavosUltima(ctx.db));
+    const items = await enriquecerProgramaciones(
+      ctx,
+      slice as FilaProg[],
+      cuentaMap,
+      instMap,
+      await ufCentavosUltima(ctx.db),
+    );
     return { items, siguiente };
   },
 });
 
 export const ventasProgramacionesObtener = defineCapability({
   id: "finanzas.ventas_programacion.obtener",
-  descripcion: "Detalle de una plantilla de facturación recurrente con líneas y destinatarios.",
+  descripcion:
+    "Detalle de una plantilla de facturación recurrente con líneas, destinatarios, datos para editarla y el historial de borradores generados por período.",
   permiso: PERMISO_READ,
   input: z.object({ programacionId: uuidSchema }),
-  output: programacionSchema,
+  output: detalleProgramacionSchema,
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => (s.cuentaId ? [s.cuentaId] : []),
@@ -107,7 +119,13 @@ export const ventasProgramacionesObtener = defineCapability({
           ).map((i) => [i.id, i.nombre]),
         )
       : new Map<string, string>();
-    const [item] = await enriquecerProgramaciones(ctx, [f as FilaProg], cuentaMap, instMap, await ufCentavosUltima(ctx.db));
-    return item!;
+    const [item] = await enriquecerProgramaciones(
+      ctx,
+      [f as FilaProg],
+      cuentaMap,
+      instMap,
+      await ufCentavosUltima(ctx.db),
+    );
+    return { ...item!, ...(await extrasDetalle(ctx, f)) };
   },
 });
