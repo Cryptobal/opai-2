@@ -2,35 +2,24 @@
 
 import { useState } from "react";
 
-import { HojaAgregarPuesto } from "./hoja-agregar-puesto";
-import { HojaEditarPuesto } from "./hoja-editar-puesto";
+import type { LineaEditable } from "../../_componentes/puesto-tipos";
+import { HojaPuesto } from "./hoja-puesto";
 import { HojaTrazaCalculo } from "./hoja-traza-calculo";
 import { DialogoEnviarCotizacionLazy, DialogoVistaPreviaPdfLazy } from "./ficha-cotizacion-modales-lazy";
 
 export function useModalesFichaCotizacion() {
   const [hojaSeccion, setHojaSeccion] = useState<string | null>(null);
-  const [lineaEditar, setLineaEditar] = useState<{
-    id: string;
-    nombre: string;
-    posiciones?: number;
-    sueldoBaseClp?: number;
-  } | null>(null);
+  const [lineaEditar, setLineaEditar] = useState<LineaEditable | null>(null);
   const [trazaAbierta, setTrazaAbierta] = useState<{ titulo: string; traza: Record<string, unknown>[] } | null>(
     null,
   );
   const [enviarAbierto, setEnviarAbierto] = useState(false);
   const [previewAbierto, setPreviewAbierto] = useState(false);
-  type LineaEditable = { id: string; nombre: string; posiciones?: number; sueldoBaseClp?: number };
   /** Abre la hoja de edición de la línea del aviso de sueldo faltante (CAR-162), sin navegar. */
   function editarLineaDe(secciones: readonly { lineas: readonly LineaEditable[] }[], lineaId: string) {
     const l = secciones.flatMap((s) => s.lineas).find((x) => x.id === lineaId);
     if (!l) return;
-    setLineaEditar({
-      id: l.id,
-      nombre: l.nombre,
-      ...(l.posiciones !== undefined ? { posiciones: l.posiciones } : {}),
-      ...(l.sueldoBaseClp !== undefined ? { sueldoBaseClp: l.sueldoBaseClp } : {}),
-    });
+    setLineaEditar(l);
   }
   return {
     editarLineaDe,
@@ -58,16 +47,17 @@ export function FichaCotizacionModales(p: {
   requiereAprobacion: boolean;
   estadoVersion: string;
   enviada: boolean;
+  verCostos: boolean;
   recargar: () => void;
 }) {
   const m = p.modales;
   return (
     <>
       {m.hojaSeccion ? (
-        <HojaAgregarPuesto seccionId={m.hojaSeccion} onCerrar={() => m.setHojaSeccion(null)} onCreado={p.recargar} />
+        <HojaPuesto seccionId={m.hojaSeccion} verCostos={p.verCostos} onCerrar={() => m.setHojaSeccion(null)} onListo={p.recargar} />
       ) : null}
       {m.lineaEditar ? (
-        <HojaEditarPuesto linea={m.lineaEditar} onCerrar={() => m.setLineaEditar(null)} onGuardado={p.recargar} />
+        <HojaPuesto linea={m.lineaEditar} verCostos={p.verCostos} onCerrar={() => m.setLineaEditar(null)} onListo={p.recargar} />
       ) : null}
       {m.trazaAbierta ? (
         <HojaTrazaCalculo
