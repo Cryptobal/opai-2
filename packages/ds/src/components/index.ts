@@ -44,3 +44,4 @@ export {
   type TipoCompositor,
 } from "./compositor-actividad";
 export { TareaFila, type TonoVencimientoTarea } from "./tarea-fila";
+export { campoElegible, type CampoDatosSii, DatosSii, type EstadoDatosSii } from "./datos-sii";

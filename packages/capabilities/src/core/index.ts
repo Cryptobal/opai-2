@@ -31,6 +31,8 @@ import { consumidorTareaVencida, trabajoTareasVencidas } from "./crm/actividades
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
+import { consumidorNegocioGanado } from "../comercial/consumidor-ganado";
+import { consumidorCpqGanado } from "../comercial/consumidor-ganado-cpq";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
@@ -130,6 +132,8 @@ export const consumidoresDelNucleo = [
   consumidorFirmaDocumento,
   consumidorSolicitudCreada,
   consumidorTareaVencida,
+  consumidorNegocioGanado,
+  consumidorCpqGanado,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */

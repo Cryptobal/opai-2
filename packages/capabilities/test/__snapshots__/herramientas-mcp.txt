@@ -77,9 +77,12 @@ core_contactos_list
 core_contactos_set_roles
 core_contactos_update
 core_contactos_vincular
+core_cuentas_aplicar_sii
 core_cuentas_archive
+core_cuentas_consultar_sii
 core_cuentas_contactos
 core_cuentas_create
+core_cuentas_facturable
 core_cuentas_get
 core_cuentas_list
 core_cuentas_set_estado
@@ -413,6 +416,7 @@ preview_core_contactos_desvincular
 preview_core_contactos_set_roles
 preview_core_contactos_update
 preview_core_contactos_vincular
+preview_core_cuentas_aplicar_sii
 preview_core_cuentas_archive
 preview_core_cuentas_create
 preview_core_cuentas_set_estado
