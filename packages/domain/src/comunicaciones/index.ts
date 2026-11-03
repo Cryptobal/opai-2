@@ -1,4 +1,5 @@
 import { COMUNICABLES_CUMPLIMIENTO } from "./cumplimiento";
+import { COMUNICABLES_CPQ } from "./cpq";
 import { COMUNICABLES_DOCUMENTOS } from "./documentos";
 import { COMUNICABLES_SISTEMA } from "./sistema";
 import type { EventoComunicable } from "./tipos";
@@ -18,6 +19,7 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_DOCUMENTOS,
   ...COMUNICABLES_SISTEMA,
   ...COMUNICABLES_CUMPLIMIENTO,
+  ...COMUNICABLES_CPQ,
 ];
 
 /** Datos de ejemplo anidados a partir de las rutas declaradas ("documento.tipo" → { documento: { tipo } }). */

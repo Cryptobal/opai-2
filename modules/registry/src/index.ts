@@ -14,6 +14,8 @@ import { manifest as agente } from "@opai/mod-agente";
 
 import { manifest as Comercial } from "@opai/mod-comercial";
 
+export { consumidorCpqBandeja } from "@opai/mod-cpq/consumidor-bandeja";
+
 /**
  * Registro de módulos vendibles (ADR-003). `pnpm scaffold:module <id>` agrega el import y la entrada.
  * apps/web registra estos manifests al arrancar; de ellos se derivan navegación, permisos,

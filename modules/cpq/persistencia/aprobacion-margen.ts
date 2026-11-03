@@ -61,7 +61,11 @@ export async function solicitarAprobacionMargen(
       tipo: "cpq.cotizacion.aprobacion_solicitada",
       entidadTipo: "cotizacion_version",
       entidadId: versionId,
-      payload: { aprobacionId: creada.id, margenEfectivoPct: resultado.margenEfectivoPct },
+      payload: {
+        aprobacionId: creada.id,
+        solicitadaPorId: actorId,
+        margenEfectivoPct: resultado.margenEfectivoPct,
+      },
     });
     return creada;
   });

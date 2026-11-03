@@ -8,6 +8,7 @@ import { huellaJuego, juegoDesactualizado } from "./juego-vigente";
 import { juegoParaFecha } from "./proveedor";
 import { aprobacionPendiente } from "./aprobacion-margen";
 import { evaluarAprobacionMargen } from "./aprobacion-reglas";
+import { idBandejaCpq } from "./aprobaciones-bandeja-id";
 
 type FilaLinea = {
   id: string;
@@ -20,6 +21,7 @@ type FilaLinea = {
 
 export async function metaFicha(
   ctx: Contexto,
+  cotizacionId: string,
   creadoPorId: string,
   version: { id: string; estado: string; validaHasta: Date | null },
   lineas: readonly FilaLinea[],
@@ -51,7 +53,12 @@ export async function metaFicha(
         }
       : null,
     aprobacion: pend
-      ? { id: pend.id, estado: pend.estado, solicitadaPorId: pend.solicitadaPorId }
+      ? {
+          id: pend.id,
+          bandejaId: idBandejaCpq("margen", cotizacionId),
+          estado: pend.estado,
+          solicitadaPorId: pend.solicitadaPorId,
+        }
       : null,
     puedeAprobarMargen: decision?.puedeDecidir ?? false,
     motivoNoAprobarMargen: decision?.motivoNoDecidir ?? null,
