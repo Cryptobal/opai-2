@@ -5,7 +5,8 @@ import { esEditable, type EstadoCotizacion } from "../domain";
 import { costoLineaPuestoFicha } from "./costo-puesto-ficha";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { huellaJuego, juegoDesactualizado } from "./juego-vigente";
-import { juegoParaFecha } from "./proveedor";
+import { mutualBloqueaEnvio } from "./avisos-calculo";
+import { juegoParaFecha, mutualParaCalculo } from "./proveedor";
 import { aprobacionPendiente } from "./aprobacion-reglas";
 import { evaluarAprobacionMargen } from "./aprobacion-reglas";
 import { idBandejaCpq } from "./aprobaciones-bandeja-id";
@@ -31,7 +32,8 @@ export async function metaFicha(
   const resuelto = await juegoParaFecha(ctx, fechaCalculo);
   const juego = resuelto.juego;
   const huella = huellaJuego(juego);
-  const desactualizado = juegoDesactualizado(huella, lineas);
+  const mutual = await mutualParaCalculo(ctx);
+  const desactualizado = juegoDesactualizado(huella, lineas, mutual.confirmada);
   const pend = version.estado === "en_aprobacion" ? await aprobacionPendiente(ctx, version.id) : null;
   const decision = pend != null ? evaluarAprobacionMargen(ctx, creadoPorId) : null;
   const verCostos = ctx.autorizar("cpq:costos.ver");
@@ -39,7 +41,7 @@ export async function metaFicha(
     ? Object.fromEntries(
         lineas
           .filter((l) => l.tipo === "puesto")
-          .map((l) => [l.id, costoLineaPuestoFicha(l, juego)]),
+          .map((l) => [l.id, costoLineaPuestoFicha(l, juego, mutual.tasa)]),
       )
     : undefined;
   return {
@@ -65,9 +67,12 @@ export async function metaFicha(
     autoaprobacionMargen: pend != null ? (decision?.autoaprobacion ?? false) : null,
     puedeEnviar:
       !calculo.noEnviable &&
+      !mutualBloqueaEnvio(calculo) &&
       version.estado !== "en_aprobacion" &&
       (version.estado === "lista" || !calculo.requiereAprobacion),
     requiereConfirmacionValoresViejos: desactualizado,
+    /** Enviar exige confirmar la mutual adicional (CAR-162); se confirma en Configuración › Remuneraciones. */
+    requiereConfirmarMutual: mutualBloqueaEnvio(calculo),
     costosLinea,
   };
 }

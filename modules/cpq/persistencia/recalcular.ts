@@ -5,7 +5,8 @@ import { cotizacionDe } from "../capabilities/util";
 import { modeloDesdeCatalogo } from "./catalogo-modelo";
 import { mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
-import { juegoParaFecha, mutualAdicionalTenant, proveedorDesdeLineas } from "./proveedor";
+import { aplicarAvisos, avisosCalculo } from "./avisos-calculo";
+import { juegoParaFecha, mutualParaCalculo, proveedorDesdeLineas } from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
 
@@ -49,7 +50,7 @@ export async function recalcularVersion(
   const resuelto = await juegoParaFecha(ctx, consulta);
   const juego = resuelto.juego;
   const fecha = juego?.fecha ?? consulta;
-  const mutual = await mutualAdicionalTenant(ctx);
+  const mutual = await mutualParaCalculo(ctx);
   const ufInd = juego?.valores.find((v) => v.indicador === "uf");
   const uf = ufInd ? { valorClpEscalado: Math.round((ufInd.valor as number) * 100), fecha } : null;
   const proveedor = proveedorDesdeLineas(
@@ -64,7 +65,8 @@ export async function recalcularVersion(
       tipoContrato: "indefinido",
     })),
     juego,
-    mutual,
+    mutual.tasa,
+    mutual.confirmada,
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
   const entrada = mapearVersionCalculo(version, secciones, lineas, modelo);
@@ -77,6 +79,7 @@ export async function recalcularVersion(
     resultado.advertencias = [...new Set([...resultado.advertencias, ...advertenciasExtra])];
     if (resuelto.pendiente || !uf) resultado.noEnviable = true;
   }
+  aplicarAvisos(resultado, avisosCalculo(lineas, resuelto, mutual));
   if (puedeEscribirVersion(version, escribir)) {
     await ctx.db.cpqVersion.update({
       where: { id: version.id },

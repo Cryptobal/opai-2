@@ -134,23 +134,8 @@ export const solicitudesRecibirFormularioWeb = defineCapability({
     if (!input.email?.trim() && !input.telefono?.trim()) {
       throw reglaDeNegocio("Indica un correo o un teléfono de contacto.");
     }
-    const clave = idempotencyKey;
-    if (!clave) throw reglaDeNegocio("Falta la cabecera Idempotency-Key.");
-    const reserva = await ctx.idempotencia.reservar(
-      "comercial.solicitudes.recibir_formulario_web",
-      clave,
-      input,
-    );
-    if (reserva.estado === "hecha") {
-      const prev = reserva.resultado as { id: string; creadaEn: string };
-      return prev;
-    }
-    if (reserva.estado === "distinta") {
-      throw reglaDeNegocio("La clave de idempotencia ya se usó con otro contenido.");
-    }
-    if (reserva.estado === "en_curso") {
-      throw reglaDeNegocio("El envío ya se está procesando.");
-    }
+    // La reserva de idempotencia la hace `executeCapability` con la misma clave: aquí solo se exige.
+    if (!idempotencyKey) throw reglaDeNegocio("Falta la cabecera Idempotency-Key.");
     const responsableId = canal.responsableId;
     await responsableValido(ctx, responsableId);
     const textoOriginal = textoOriginalDesdeFormulario({
@@ -179,10 +164,7 @@ export const solicitudesRecibirFormularioWeb = defineCapability({
       registradaPorTipo: "sistema",
       registradaPorId: null,
     });
-    if (dryRun) {
-      await ctx.idempotencia.liberar(reserva.id);
-      return { id: "", creadaEn: new Date().toISOString() };
-    }
+    if (dryRun) return { id: "", creadaEn: new Date().toISOString() };
     const tenant = await ctx.db.tenant.findUniqueOrThrow({
       where: { id: ctx.tenantId },
       select: { nombre: true, slug: true },
@@ -224,9 +206,7 @@ export const solicitudesRecibirFormularioWeb = defineCapability({
         },
       );
     }
-    const result = { id: salida.id, creadaEn: salida.creadaEn };
-    await ctx.idempotencia.completar(reserva.id, result);
-    return result;
+    return { id: salida.id, creadaEn: salida.creadaEn };
   },
 });
 
