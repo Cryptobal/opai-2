@@ -6,6 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
+| **CAR-162 · Ganar con efectos** (rama `brief/car-162-ganar-efectos`, [brief](briefs/BRIEF-comercial-ganar-sii.md) PR 1) | R18 y R45: al ganar, el consumidor `comercial.ganar.activar` pasa la cuenta a cliente activo y activa las instalaciones del negocio (prospecto o inactivas), y `cpq.ganar.aceptar` deja aceptada la versión enviada de la cotización vigente, rechaza las demás abiertas y emite `cpq.cotizacion.aceptada` con los puestos por ofrecer. Idempotentes, en transacción y con evento por cambio. `comercial.negocios.ganar` devuelve `efectos` también en la vista previa, y la hoja ganar muestra «Qué va a pasar», confirmando, éxito con enlaces y error del servidor. La oferta de puestos (R2) y el SII (PR 2) quedan pendientes | En revisión | No |
 | **CAR-153** (`claude/new-session-gpqpn4`, PR A1 del [brief A](briefs/brief-A-comercial-finanzas.md)) | Textos y estilos: clases `t-*` vigiladas por test (B2), formateador único con espacio duro en `@opai/domain` (B3, R4), estados de venta en español (B4), sin referencias internas ni jerga (B5, B6), errores del servidor en español (B7, B8), calendario de pagos sin JSON (B10), un solo título en Bancos y Venta (B11) y Bandeja de Inicio con error visible (B12). Quedan en A5: refresco visual C1–C5 | En revisión | No |
 | **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`, PR #234) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En revisión | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
@@ -55,7 +56,8 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 - SimpleAPI no activable desde la pantalla (`finanzas.dte_config.*` sin pantalla y dos fuentes de ambiente).
 - Ficha de venta sin acciones.
 - Sin envío del DTE al cliente.
-- Consulta al SII por RUT inexistente.
+- Consulta al SII por RUT inexistente: va en el PR 2 de CAR-162 ([brief](briefs/BRIEF-comercial-ganar-sii.md)).
+- Ganar un negocio no activaba cuenta ni instalaciones (R18): resuelto en el PR 1 de CAR-162. Falta la **oferta de puestos al ganar** (R2 de CPQ): el evento `cpq.cotizacion.aceptada` ya trae `puestosPorOfrecer`, y la hoja «Crear puestos» (CPQ v4) y la confirmación de RRHH van en su propio PR.
 - Importador sin origen (no hay exportador de 1.0) y que degrada datos: todo queda como prospecto, la razón social se rellena con el nombre y al actualizar escribe nulos.
 - Recurrentes con la forma de 1.0: corregido en B1 (CAR-25); falta la generación de borradores (brief A4) y el exportador de 1.0 (B2).
 - Seguimiento de cotizaciones solo en especificación.
