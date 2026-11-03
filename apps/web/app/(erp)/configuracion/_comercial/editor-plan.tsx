@@ -51,7 +51,7 @@ export function EditorPlan({ id, plan, onCerrar }: Props) {
         </Campo>
         <Switch activo={porDefecto} onCambiar={setPorDefecto} etiqueta="Plan por defecto" descripcion="Es el que se inicia al enviar una cotización." />
         <Switch activo={activo} onCambiar={setActivo} etiqueta="Plan activo" />
-        <h3 className="t-h3">Pasos</h3>
+        <h3 className="t-heading">Pasos</h3>
         {c.pasos.map((p, i) => (
           <div key={i} className="flex flex-col gap-3 rounded-md border border-border p-3">
             <Campo etiqueta={`Paso ${i + 1}`} htmlFor={`paso-t-${i}`}><Input id={`paso-t-${i}`} maxLength={60} value={p.titulo} onChange={(e) => paso(i, { titulo: e.target.value })} /></Campo>
