@@ -16,6 +16,7 @@ import {
   cuentaDe,
   documentoEmitidoIdSchema,
   montosNotaCredito,
+  receptorDteDe,
   rutEmisorDe,
 } from "./ventas-comun";
 import { ventaSchema } from "./vistas-venta";
@@ -70,13 +71,14 @@ export const ventasEmitirNotaCredito = defineCapability({
       },
       async (tx) => {
         const prep = await bloquearYValidarNotaCredito(ctx, tx, ref.id, input.codigoReferencia, input.monto);
+        const { razonSocialReceptor } = receptorDteDe(cuenta);
         const { doc, folioEmitido: folio } = await persistirNotaCredito(
           ctx,
           {
             ref: prep.ref,
             folioRef: prep.folioRef,
             rutReceptor,
-            razonSocialReceptor: cuenta.nombre,
+            razonSocialReceptor,
             ambiente,
             rutEmisor,
             montos: prep.montos,

@@ -3,11 +3,15 @@ import { z } from "zod";
 import { defineCapability } from "@opai/capabilities";
 
 import { calcularPlanilla, lunesDe, semanasDesde, sumarSemanas } from "../domain";
+import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { ajustesSchema, aNumeroSeguro, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
 import type { capaSchema } from "./esquemas";
 import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
-import { aIso, ajustesDe, cargarFlujo, selladasDe } from "./util";
+import { aIso, ajustesDe, cargarFlujo } from "./util";
+
+/** Etiqueta de lectura para planes en semana pasada (no entran al saldo real de cartola). */
+export const PLAN_SIN_RESPALDO_CARTOLA = "Plan sin respaldo en cartola";
 
 const semanaCalculadaSchema = z.object({
   semana: semanaSchema,
@@ -17,7 +21,7 @@ const semanaCalculadaSchema = z.object({
   neto: saldoSchema,
   saldoFinal: saldoSchema,
   tono: z.enum(["peligro", "alerta"]).nullable(),
-  sellada: z.boolean(),
+  pasada: z.boolean(),
 });
 
 const avisoSchema = z.object({
@@ -49,7 +53,7 @@ export const filasListar = defineCapability({
 export const planillaObtener = defineCapability({
   id: "finanzas.planilla.obtener",
   descripcion:
-    "Entrega la planilla del flujo de caja por semana: filas y celdas por capa, saldos, semanas selladas, metas y aviso in-app de saldo bajo umbral.",
+    "Entrega la planilla del flujo de caja por semana: filas y celdas por capa, saldos, semanas pasadas según cartola y aviso in-app de saldo bajo umbral.",
   permiso: PERMISO_VER,
   input: z.object({
     desde: semanaSchema.optional(),
@@ -77,43 +81,76 @@ export const planillaObtener = defineCapability({
       desde,
       sumarSemanas(desde, cantidad - 1),
     );
-    const previas =
-      ajustes.desde < desde
-        ? await ctx.db.flujoCelda.findMany({
-            where: {
-              semana: {
-                lt: new Date(`${desde}T00:00:00Z`),
-                gte: new Date(`${ajustes.desde}T00:00:00Z`),
-              },
-            },
-          })
-        : [];
-    const saldoPrevio = previas.reduce((s, c) => {
-      const f = dominio.find((x) => x.id === c.filaId);
-      return f ? s + (f.seccion === "ingreso" ? aNumeroSeguro(c.monto) : -aNumeroSeguro(c.monto)) : s;
-    }, ajustes.saldoInicial);
+    let saldoPrevio = ajustes.saldoInicial;
+    if (ajustes.desde < desde) {
+      const previasHasta = sumarSemanas(desde, -1);
+      const cantPrevias =
+        Math.round((Date.parse(previasHasta) - Date.parse(ajustes.desde)) / (7 * 86_400_000)) + 1;
+      const prevLista = semanasDesde(ajustes.desde, cantPrevias);
+      const { dominio: prevDom, celdasDom: prevCeldas } = await cargarFlujo(
+        ctx,
+        ajustes.desde,
+        previasHasta,
+      );
+      const { dominio: prevConCartola } = await celdasDominioConCartolaPasada(
+        ctx,
+        prevCeldas,
+        hoy,
+        prevLista,
+      );
+      const prevCalc = calcularPlanilla({
+        saldoInicial: ajustes.saldoInicial,
+        umbral: ajustes.umbral,
+        semanas: prevLista,
+        filas: prevDom,
+        celdas: prevConCartola,
+      });
+      saldoPrevio = prevCalc.at(-1)?.saldoFinal ?? ajustes.saldoInicial;
+    }
+
+    const { dominio: celdasCalc, extraVista } = await celdasDominioConCartolaPasada(
+      ctx,
+      celdasDom,
+      hoy,
+      lista,
+    );
     const calculo = calcularPlanilla({
       saldoInicial: saldoPrevio,
       umbral: ajustes.umbral,
       semanas: lista,
       filas: dominio,
-      celdas: celdasDom,
+      celdas: celdasCalc,
     });
-    const selladas = await selladasDe(ctx);
-    const semanasOut = calculo.map((s) => ({ ...s, tono: s.tono, sellada: selladas.has(s.semana) }));
+    const semanasOut = calculo.map((s) => ({ ...s, pasada: s.semana < hoy }));
     const avisoSemanas = await avisoLeido(ctx, ajustes, semanasOut);
     type CapaOut = z.infer<typeof capaSchema>;
-    return {
-      ajustes,
-      filas: filas.map(vistaFila),
-      celdas: celdas.map((c) => ({
+
+    const pasadas = new Set(lista.filter((s) => s < hoy));
+    const celdasDbVista = celdas
+      .filter((c) => !pasadas.has(aIso(c.semana)))
+      .map((c) => ({
         id: c.id,
         filaId: c.filaId,
         semana: aIso(c.semana),
         capa: c.capa as CapaOut,
         monto: aNumeroSeguro(c.monto),
         nota: c.nota,
-      })),
+      }));
+    const planesPasadaVista = celdas
+      .filter((c) => pasadas.has(aIso(c.semana)) && c.capa === "plan")
+      .map((c) => ({
+        id: c.id,
+        filaId: c.filaId,
+        semana: aIso(c.semana),
+        capa: "plan" as CapaOut,
+        monto: aNumeroSeguro(c.monto),
+        nota: c.nota ? `${c.nota} · ${PLAN_SIN_RESPALDO_CARTOLA}` : PLAN_SIN_RESPALDO_CARTOLA,
+      }));
+
+    return {
+      ajustes,
+      filas: filas.map(vistaFila),
+      celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,
       aviso: { activo: ajustes.avisoActivo, umbral: ajustes.avisoUmbral, semanas: avisoSemanas },
       columnaHoy: lista.includes(hoy) ? hoy : null,

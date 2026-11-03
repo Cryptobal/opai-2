@@ -73,6 +73,7 @@ export {
   type ColaTrabajos,
   ejecutarTrabajos,
   esperaReintento,
+  programarCapturaSii,
   programarPeriodicos,
   programarHorarios,
 } from "./trabajos/runner";

@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./importar-opai1": "./scripts/importar-opai1/publico.ts"
   },
   "scripts": {
     "postinstall": "prisma generate",
@@ -12,6 +13,7 @@
     "migrate": "prisma migrate dev --create-only",
     "deploy": "prisma migrate deploy",
     "role:password": "tsx scripts/set-app-role-password.ts",
+    "role:cron-sii-password": "tsx scripts/set-cron-sii-role-password.ts",
     "seed:dev-tenant": "tsx scripts/seed-dev-tenant.ts",
     "seed:staging": "tsx scripts/seed-staging.ts",
     "typecheck": "tsc -p tsconfig.json",

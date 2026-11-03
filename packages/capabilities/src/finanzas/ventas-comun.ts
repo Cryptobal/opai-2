@@ -20,6 +20,8 @@ export {
 } from "./ventas-folios-logica";
 
 export const PERMISO_VENTAS = "finanzas:ventas.manage";
+/** Cargar CAF y configuración DTE sensible (paridad 1.0 `facturacion_configure`). Owner/admin vía `finanzas:*`. */
+export const PERMISO_VENTAS_CONFIGURE = "finanzas:ventas.configure";
 
 export const tipoDteVentaSchema = z
   .union([z.literal(33), z.literal(34), z.literal(61)])
@@ -48,9 +50,55 @@ export function montosNotaCredito(
 }
 
 export async function cuentaDe(ctx: Contexto, id: string) {
-  const c = await ctx.db.cuenta.findFirst({ where: { id }, select: { id: true, nombre: true, rut: true } });
+  const c = await ctx.db.cuenta.findFirst({
+    where: { id },
+    select: {
+      id: true,
+      nombre: true,
+      razonSocial: true,
+      rut: true,
+      giro: true,
+      calle: true,
+      comuna: true,
+      ciudad: true,
+      emailDte: true,
+    },
+  });
   if (!c) throw noEncontrado("La cuenta");
   return c;
+}
+
+/** Datos del receptor DTE desde la cuenta (importación 1.0 / ficha de cliente). */
+export function receptorDteDe(cuenta: {
+  nombre: string;
+  razonSocial: string | null;
+  giro: string | null;
+  calle: string | null;
+  comuna: string | null;
+  ciudad: string | null;
+  emailDte: string | null;
+}) {
+  const razon = cuenta.razonSocial?.trim();
+  return {
+    razonSocialReceptor: (razon && razon.length > 0 ? razon : cuenta.nombre).trim(),
+    giroReceptor: cuenta.giro?.trim() || undefined,
+    direccionReceptor: cuenta.calle?.trim() || undefined,
+    comunaReceptor: cuenta.comuna?.trim() || undefined,
+    ciudadReceptor: cuenta.ciudad?.trim() || undefined,
+    emailReceptor: cuenta.emailDte?.trim() || undefined,
+  };
+}
+
+export function camposReceptorDteEnPayload(cuenta: Parameters<typeof receptorDteDe>[0]) {
+  const r = receptorDteDe(cuenta);
+  return {
+    razonSocialReceptor: r.razonSocialReceptor,
+    ...(r.giroReceptor ? { giroReceptor: r.giroReceptor } : {}),
+    ...(r.direccionReceptor ? { direccionReceptor: r.direccionReceptor } : {}),
+    ...(r.comunaReceptor ? { comunaReceptor: r.comunaReceptor } : {}),
+    ...(r.ciudadReceptor ? { ciudadReceptor: r.ciudadReceptor } : {}),
+    ...(r.emailReceptor ? { emailReceptor: r.emailReceptor } : {}),
+  };
 }
 
 export async function instalacionDe(ctx: Contexto, id: string, cuentaId: string) {

@@ -49,12 +49,17 @@ describe.skipIf(!urlPropietario)("políticas y referencias del núcleo", () => {
     expect(filas.length).toBeGreaterThanOrEqual(38);
     const filtro =
       /^\(tenant_id = \(NULLIF\(current_setting\('app\.tenant_id'::text, true\), ''::text\)\)::uuid\)$/;
+    const rolesTenantIsolation = (f: Politica): boolean => {
+      if (f.tabla !== "audit_events") return String(f.roles) === "opai_app";
+      const roles = Array.isArray(f.roles) ? [...f.roles].sort() : [String(f.roles)];
+      return roles.length === 2 && roles[0] === "opai_app" && roles[1] === "opai_cron_sii";
+    };
     const malas = filas
       .filter(
         (f) =>
           f.cmd !== "ALL" ||
           f.permissive !== "PERMISSIVE" ||
-          String(f.roles) !== "opai_app" ||
+          !rolesTenantIsolation(f) ||
           !filtro.test(f.qual ?? "") ||
           f.with_check !== f.qual,
       )

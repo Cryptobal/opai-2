@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
+import { cuentaDestino, estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
 import { datosInstalacion } from "../../scripts/importar-opai1/instalaciones";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
 import { fixture } from "./memoria";
@@ -34,7 +34,7 @@ describe("plan de instalaciones", () => {
 
   it("contra 2.0: vincula por ubicación dentro de la cuenta existente", () => {
     const destino = estadoVacio();
-    destino.cuentas.push({ id: "c-1", nombre: "Alfa", razonSocial: null, rut: "76111111-6" });
+    destino.cuentas.push(cuentaDestino({ id: "c-1", nombre: "Alfa", rut: "76111111-6" }));
     destino.instalaciones.push({
       id: "n-1",
       cuentaId: "c-1",
@@ -56,7 +56,7 @@ describe("plan de instalaciones", () => {
 
   it("contra 2.0: mismo nombre con otra ubicación en la cuenta es conflicto", () => {
     const destino = estadoVacio();
-    destino.cuentas.push({ id: "c-6", nombre: "Delta", razonSocial: null, rut: "76333333-7" });
+    destino.cuentas.push(cuentaDestino({ id: "c-6", nombre: "Delta", rut: "76333333-7" }));
     destino.instalaciones.push({
       id: "n-6",
       cuentaId: "c-6",

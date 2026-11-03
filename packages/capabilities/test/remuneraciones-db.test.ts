@@ -97,13 +97,14 @@ describe.skipIf(!urlPropietario)("remuneraciones en base real: RLS y mutual", ()
     expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");
   });
 
-  it("publicacionesParaFecha respeta vigencia, excluye retenidos de plataforma y elige tenant más reciente", async () => {
+  it("publicacionesParaFecha: tenant más reciente salvo UF/UTM (solo plataforma SII)", async () => {
     const uf = await e.admin.indicadorLegal.findFirstOrThrow({ where: { clave: "uf" } });
+    const imm = await e.admin.indicadorLegal.findFirstOrThrow({ where: { clave: "imm" } });
     await e.admin.valorTenant.createMany({
       data: [
         {
           tenantId: t.a,
-          indicadorId: uf.id,
+          indicadorId: imm.id,
           valorJson: 100,
           vigenteDesde: new Date("2026-01-01"),
           vigenteHasta: new Date("2026-06-30"),
@@ -112,7 +113,7 @@ describe.skipIf(!urlPropietario)("remuneraciones en base real: RLS y mutual", ()
         },
         {
           tenantId: t.a,
-          indicadorId: uf.id,
+          indicadorId: imm.id,
           valorJson: 200,
           vigenteDesde: new Date("2026-07-01"),
           estado: "vigente",
@@ -122,7 +123,7 @@ describe.skipIf(!urlPropietario)("remuneraciones en base real: RLS y mutual", ()
           tenantId: t.a,
           indicadorId: uf.id,
           valorJson: 50,
-          vigenteDesde: new Date("2026-05-01"),
+          vigenteDesde: new Date("2026-07-01"),
           estado: "vigente",
           origen: "propio",
         },
@@ -131,6 +132,15 @@ describe.skipIf(!urlPropietario)("remuneraciones en base real: RLS y mutual", ()
     await e.admin.valorPublicado.create({
       data: {
         indicadorId: uf.id,
+        valorJson: 4_125_826,
+        vigenteDesde: new Date("2026-07-01"),
+        estado: "vigente",
+        fuente: "https://www.sii.cl/valores_y_fechas/uf/uf2026.htm",
+      },
+    });
+    await e.admin.valorPublicado.create({
+      data: {
+        indicadorId: imm.id,
         valorJson: 999,
         vigenteDesde: new Date("2026-01-01"),
         estado: "retenido",
@@ -139,10 +149,9 @@ describe.skipIf(!urlPropietario)("remuneraciones en base real: RLS y mutual", ()
     });
     const c = ctx(t.a);
     const fuera = await mod.publicacionesParaFecha(c, "2026-03-15");
-    const ufFuera = fuera.find((p: ValorIndicador) => p.indicador === "uf");
-    expect(ufFuera?.valor).toBe(100);
+    expect(fuera.find((p: ValorIndicador) => p.indicador === "imm")?.valor).toBe(100);
     const dentro = await mod.publicacionesParaFecha(c, "2026-08-01");
-    const ufDentro = dentro.find((p: ValorIndicador) => p.indicador === "uf");
-    expect(ufDentro?.valor).toBe(200);
+    expect(dentro.find((p: ValorIndicador) => p.indicador === "imm")?.valor).toBe(200);
+    expect(dentro.find((p: ValorIndicador) => p.indicador === "uf")?.valor).toBe(4_125_826);
   });
 });

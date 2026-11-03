@@ -18,12 +18,11 @@ type Props = {
   state: EstadoPantalla;
   planilla: Planilla | null;
   gestiona: boolean;
-  cierra: boolean;
   configura: boolean;
   movil: boolean;
 };
 
-export function PlanillaFlujo({ state, planilla, gestiona, cierra, configura, movil }: Props) {
+export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: Props) {
   const router = useRouter();
   const [seleccion, setSeleccion] = useState<{ filaId: string; semana: string } | null>(null);
   const [importAbierta, setImportAbierta] = useState(false);
@@ -94,7 +93,6 @@ export function PlanillaFlujo({ state, planilla, gestiona, cierra, configura, mo
       planilla={p}
       armado={armado}
       gestiona={gestiona}
-      cierra={cierra}
       configura={configura}
       avisoTitulo={avisoTitulo}
       textosError={textosError}

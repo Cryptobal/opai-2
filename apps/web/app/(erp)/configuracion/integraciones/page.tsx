@@ -4,6 +4,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
+import { gruposTarjetasIntegraciones } from "./_componentes/integraciones-tarjetas";
 import { TarjetaIntegracion } from "./_componentes/tarjeta-integracion";
 import type { Integracion } from "./_componentes/tipos";
 
@@ -22,14 +23,12 @@ export default function Integraciones() {
     >
       {(r) => {
         const lista = r.ok ? r.data : [];
-        const grupos = [...new Set(lista.map((i) => i.categoria))].map((c) =>
-          lista.filter((i) => i.categoria === c),
-        );
+        const grupos = gruposTarjetasIntegraciones(lista);
         return (
           <Estado state={estadoPantalla(r)} variante="lista">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {grupos.map((g) => (
-                <TarjetaIntegracion key={g[0]?.categoria} items={g} />
+                <TarjetaIntegracion key={g[0]?.proveedor ?? g[0]?.categoria} items={g} />
               ))}
             </div>
           </Estado>
