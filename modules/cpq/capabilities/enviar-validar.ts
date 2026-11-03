@@ -4,7 +4,7 @@ import type { Contexto } from "@opai/capabilities";
 import type { ResultadoCalculo } from "../domain/motor";
 import { fechaCalculoHoy } from "../persistencia/fecha-calculo";
 import { huellaJuego, juegoDesactualizado } from "../persistencia/juego-vigente";
-import { juegoParaFecha } from "../persistencia/proveedor";
+import { AVISO_MUTUAL_SIN_CONFIRMAR, juegoParaFecha, mutualAdicionalTenant } from "../persistencia/proveedor";
 
 export async function validarEnvioCpq(
   ctx: Contexto,
@@ -15,6 +15,9 @@ export async function validarEnvioCpq(
   dryRun: boolean,
   cotizacionId: string,
 ) {
+  if (resultado.advertencias.includes(AVISO_MUTUAL_SIN_CONFIRMAR) || (await mutualAdicionalTenant(ctx)) == null) {
+    throw reglaDeNegocio("Confirma la mutual adicional en Configuración › Remuneraciones antes de enviar al cliente.");
+  }
   if (resultado.noEnviable)
     throw reglaDeNegocio("La cotización no se puede enviar: revisa advertencias y costos pendientes.");
   if (resultado.requiereAprobacion && version.estado !== "lista")

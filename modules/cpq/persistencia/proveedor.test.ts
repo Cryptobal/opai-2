@@ -6,10 +6,12 @@ import { PCT_ESCALA } from "@opai/domain/dinero";
 import { entradaCostoDesdeLinea, proveedorDesdeLineas } from "./proveedor";
 
 describe("adaptador CPQ proveedor 07e", () => {
-  it("sin juego ni mutual devuelve null (costo pendiente)", async () => {
+  it("sin juego devuelve null (costo pendiente)", async () => {
     const juego = await juegoReferencia();
-    const p = proveedorDesdeLineas([{ id: "l1", sueldoBaseClp: 700_000, patron: "5x2", horaInicio: "08:00", horaFin: "20:00" }], juego, null);
+    const p = proveedorDesdeLineas([{ id: "l1", sueldoBaseClp: 700_000, patron: "5x2", horaInicio: "08:00", horaFin: "20:00" }], null, 0);
     expect(p.obtener({ lineaId: "l1", fecha: "2026-10-29" })).toBeNull();
+    const conJuego = proveedorDesdeLineas([{ id: "l1", sueldoBaseClp: 700_000, patron: "5x2", horaInicio: "08:00", horaFin: "20:00" }], juego, 0);
+    expect(conJuego.obtener({ lineaId: "l1", fecha: "2026-10-29" })?.costoMensualClp).toBeGreaterThan(0);
   });
 
   it("con mutual y juego calcula costo GC-A al peso 2.0", async () => {

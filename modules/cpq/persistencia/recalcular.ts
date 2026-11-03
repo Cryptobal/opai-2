@@ -5,7 +5,12 @@ import { cotizacionDe } from "../capabilities/util";
 import { modeloDesdeCatalogo } from "./catalogo-modelo";
 import { mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
-import { juegoParaFecha, mutualAdicionalTenant, proveedorDesdeLineas } from "./proveedor";
+import {
+  AVISO_MUTUAL_SIN_CONFIRMAR,
+  juegoParaFecha,
+  mutualAdicionalCalculo,
+  proveedorDesdeLineas,
+} from "./proveedor";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
 
@@ -49,7 +54,8 @@ export async function recalcularVersion(
   const resuelto = await juegoParaFecha(ctx, consulta);
   const juego = resuelto.juego;
   const fecha = juego?.fecha ?? consulta;
-  const mutual = await mutualAdicionalTenant(ctx);
+  const mutual = await mutualAdicionalCalculo(ctx);
+  const hayPuestosConSueldo = lineas.some((l) => l.tipo === "puesto" && l.sueldoBaseClp);
   const ufInd = juego?.valores.find((v) => v.indicador === "uf");
   const uf = ufInd ? { valorClpEscalado: Math.round((ufInd.valor as number) * 100), fecha } : null;
   const proveedor = proveedorDesdeLineas(
@@ -64,18 +70,21 @@ export async function recalcularVersion(
       tipoContrato: "indefinido",
     })),
     juego,
-    mutual,
+    mutual.tasaEscalada,
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
   const entrada = mapearVersionCalculo(version, secciones, lineas, modelo);
   const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
   const advertenciasExtra = [
     ...(resuelto.pendiente ? [resuelto.pendiente] : []),
+    ...(!mutual.confirmada ? [AVISO_MUTUAL_SIN_CONFIRMAR] : []),
     ...(!uf && juego ? [AVISO_FALTA_UF] : []),
   ];
   if (advertenciasExtra.length) {
     resultado.advertencias = [...new Set([...resultado.advertencias, ...advertenciasExtra])];
-    if (resuelto.pendiente || !uf) resultado.noEnviable = true;
+  }
+  if (!mutual.confirmada || (resuelto.pendiente && hayPuestosConSueldo) || (!uf && juego)) {
+    resultado.noEnviable = true;
   }
   if (puedeEscribirVersion(version, escribir)) {
     await ctx.db.cpqVersion.update({

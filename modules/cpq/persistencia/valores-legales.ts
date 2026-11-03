@@ -16,13 +16,21 @@ export async function valoresLegalesTenant(ctx: Contexto, fecha: string): Promis
 
 export type JuegoResuelto = { juego: JuegoDeValores | null; pendiente?: string };
 
-/** Juego legal congelado; null si faltan publicaciones o mutual adicional del tenant. */
+export const AVISO_MUTUAL_SIN_CONFIRMAR = "costo pendiente: mutual adicional sin confirmar";
+
+/** Tasa para el motor: 0 % si la mutual no está confirmada (CAR-162). */
+export async function mutualAdicionalCalculo(
+  ctx: Contexto,
+): Promise<{ tasaEscalada: number; confirmada: boolean }> {
+  const confirmada = await mutualAdicionalTenant(ctx);
+  return { tasaEscalada: confirmada ?? 0, confirmada: confirmada != null };
+}
+
+/** Juego legal congelado; null si faltan publicaciones del tenant (la mutual no bloquea el juego). */
 export async function juegoParaFecha(ctx: Contexto, fecha: string): Promise<JuegoResuelto> {
   const valores = await valoresLegalesTenant(ctx, fecha);
   const faltantes = clavesFaltantes(fecha, valores);
   if (faltantes.length > 0) return { juego: null, pendiente: `costo pendiente: falta ${faltantes[0]}` };
-  const mutual = await mutualAdicionalTenant(ctx);
-  if (mutual == null) return { juego: null, pendiente: "costo pendiente: falta mutual adicional" };
   try {
     return { juego: await juegoDeValores(fecha, valores) };
   } catch (e) {

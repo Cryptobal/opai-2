@@ -1,7 +1,13 @@
 import { costoEmpleadorPorPersona, juegoDeValores, type EntradaCostoEmpleador, type JuegoDeValores } from "@opai/domain";
 
 import type { ProveedorCostoEmpleador } from "../domain/motor/tipos";
-import { juegoParaFecha, valoresLegalesTenant, mutualAdicionalTenant } from "./valores-legales";
+import {
+  AVISO_MUTUAL_SIN_CONFIRMAR,
+  juegoParaFecha,
+  mutualAdicionalCalculo,
+  mutualAdicionalTenant,
+  valoresLegalesTenant,
+} from "./valores-legales";
 
 export type LineaPuesto = {
   id: string;
@@ -14,7 +20,13 @@ export type LineaPuesto = {
   tipoContrato?: "indefinido" | "plazo_fijo";
 };
 
-export { juegoParaFecha, mutualAdicionalTenant, valoresLegalesTenant };
+export {
+  AVISO_MUTUAL_SIN_CONFIRMAR,
+  juegoParaFecha,
+  mutualAdicionalCalculo,
+  mutualAdicionalTenant,
+  valoresLegalesTenant,
+};
 
 /** Entrada de cotización con supuestos M1/D2/D3 (21 días, indemnización imponible, indefinido por defecto). */
 export function entradaCostoDesdeLinea(
@@ -57,12 +69,12 @@ export function entradaCostoDesdeSueldo(sueldoBaseClp: number): EntradaCostoEmpl
 export function proveedorDesdeLineas(
   lineas: readonly LineaPuesto[],
   juego: JuegoDeValores | null,
-  mutualAdicional: number | null,
+  mutualAdicional: number,
 ): ProveedorCostoEmpleador {
   const porId = new Map(lineas.map((l) => [l.id, l]));
   return {
     obtener: ({ lineaId }) => {
-      if (!juego || mutualAdicional == null) return null;
+      if (!juego) return null;
       const l = porId.get(lineaId);
       if (!l?.sueldoBaseClp) return null;
       const r = costoEmpleadorPorPersona(

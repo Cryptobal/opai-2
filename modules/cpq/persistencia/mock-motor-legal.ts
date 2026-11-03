@@ -9,6 +9,7 @@ import * as valoresLegales from "./valores-legales";
 export function mockMotorLegal() {
   vi.spyOn(valoresLegales, "valoresLegalesTenant").mockResolvedValue(publicacionesReferencia());
   vi.spyOn(valoresLegales, "mutualAdicionalTenant").mockResolvedValue(2_700);
+  vi.spyOn(valoresLegales, "mutualAdicionalCalculo").mockResolvedValue({ tasaEscalada: 2_700, confirmada: true });
   vi.spyOn(proveedor, "juegoParaFecha").mockImplementation(async (_ctx, fecha) => ({
     juego: await juegoDeValores(fecha, publicacionesReferencia()),
   }));
