@@ -9,11 +9,6 @@ on:
 permissions:
   contents: read
 
-# El chequeo de tipos de `next build` supera el heap por defecto de Node (~2 GB) desde fines de
-# octubre (OOM en «build · presupuesto de JS» y «rendimiento»). Tope, no reserva: aplica a todos los jobs.
-env:
-  NODE_OPTIONS: --max-old-space-size=5120
-
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -53,7 +48,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
+      # Dos tsc a la vez como máximo: en paralelo sin tope el runner (7 GB) se queda sin memoria y se cae.
+      - run: pnpm turbo run typecheck --concurrency=2
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm test:db
@@ -79,6 +75,8 @@ jobs:
           BETTER_AUTH_SECRET: ficticio-solo-para-build-de-ci-000000000000
           BETTER_AUTH_URL: http://localhost:3000
           NEXT_TELEMETRY_DISABLED: "1"
+          # El chequeo de tipos de `next build` supera el heap por defecto (~2 GB) desde fines de octubre.
+          NODE_OPTIONS: --max-old-space-size=5120
       - run: pnpm presupuesto
 
   secretos:
@@ -313,6 +311,8 @@ jobs:
       # El build no se conecta a la base (ADR-037); la app lee DATABASE_URL al arrancar.
       - name: Construir la app (producción)
         run: pnpm --filter @opai/web build
+        env:
+          NODE_OPTIONS: --max-old-space-size=5120
       - name: Instalar Chromium de Playwright
         run: pnpm --filter @opai/web exec playwright install --with-deps chromium
       - name: Levantar la app (next start) y calentar las rutas del protocolo
