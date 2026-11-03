@@ -17,7 +17,8 @@ jobs:
   gate:
     name: typecheck · lint · test · test:db
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # El chequeo de tipos de todo el monorepo ya toma ~10 min sin caché de Turborepo.
+    timeout-minutes: 45
     env:
       TURBO_CACHE_DIR: .turbo
     services:
@@ -49,8 +50,13 @@ jobs:
             ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm install --frozen-lockfile
       # Dos tsc a la vez como máximo: en paralelo sin tope el runner (7 GB) se queda sin memoria y se cae.
+      # El tsc de apps/web necesita más que el heap por defecto (~2 GB): 4,5 GB deja margen para el otro.
       - run: pnpm turbo run typecheck --concurrency=2
+        env:
+          NODE_OPTIONS: --max-old-space-size=4608
       - run: pnpm lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=4608
       - run: pnpm test
       - run: pnpm test:db
         env:
