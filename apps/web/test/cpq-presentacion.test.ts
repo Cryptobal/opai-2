@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   avisosDesdeCalculo,
   avisoLineaPuesto,
+  dotacionPersonasTexto,
   etiquetaCategoria,
+  mensajeFaltantesRecalcular,
   subtituloLineaCpq,
   ventaMensualTexto,
 } from "@/lib/cpq-presentacion";
@@ -24,13 +26,24 @@ describe("cpq-presentacion", () => {
   it("avisos accionables desde el motor", () => {
     const a = avisosDesdeCalculo([
       "costo laboral pendiente: motor de sueldos",
-      "costo pendiente: falta mutual adicional",
+      "costo pendiente: mutual adicional sin confirmar",
     ]);
-    expect(a.map((x) => x.titulo)).toEqual([
-      "Falta completar el costo laboral",
-      "Falta la tasa de mutual adicional",
-    ]);
-    expect(a[0]?.enlace?.href).toContain("remuneraciones");
+    expect(a.map((x) => x.titulo)).toEqual(["Mutual adicional sin confirmar"]);
+    expect(a[0]?.enlace?.href).toBe("/configuracion/remuneraciones");
+  });
+
+  it("mensaje de recálculo resume faltantes", () => {
+    expect(
+      mensajeFaltantesRecalcular([
+        "costo pendiente: falta sueldo_imponible_minimo",
+        "costo pendiente: mutual adicional sin confirmar",
+      ]),
+    ).toMatch(/sueldo_imponible_minimo/);
+  });
+
+  it("dotación pluraliza personas", () => {
+    expect(dotacionPersonasTexto(10_000)).toBe("1 persona");
+    expect(dotacionPersonasTexto(20_000)).toBe("2 personas");
   });
 
   it("aviso por línea con nombre del puesto", () => {

@@ -9,6 +9,7 @@ import { pesos } from "@/lib/fechas";
 import {
   avisosDesdeCalculo,
   costoCategoriaTexto,
+  dotacionPersonasTexto,
   estadoCpqBadge,
   etiquetaCategoria,
   ventaMensualTexto,
@@ -52,20 +53,22 @@ export function ResumenCotizacion({
   } | undefined;
   verCostos: boolean;
 }) {
-  const costoPendiente = calculo.ventaMensual == null || Boolean(calculo.noEnviable);
+  const costoPendiente = calculo.ventaMensual == null;
   const ventaTxt = ventaMensualTexto(calculo.ventaMensual, costoPendiente);
   const ventaMostrar = typeof ventaTxt === "number" ? pesos(ventaTxt) : ventaTxt;
   const badge = estadoCpqBadge(version.estado);
   const avisos = avisosDesdeCalculo(calculo.advertencias);
 
-  const categorias = ORDEN_CATEGORIAS.map((id) => {
-    const cat = calculo.categorias?.find((c) => c.id === id);
-    const valor = costoCategoriaTexto(cat?.costoMensual ?? 0, costoPendiente);
-    return {
-      etiqueta: etiquetaCategoria(id),
-      valor: typeof valor === "number" ? pesos(valor) : valor,
-    };
-  });
+  const categorias = costoPendiente
+    ? [{ etiqueta: "Costos pendientes", valor: "—" }]
+    : ORDEN_CATEGORIAS.map((id) => {
+        const cat = calculo.categorias?.find((c) => c.id === id);
+        const valor = costoCategoriaTexto(cat?.costoMensual ?? 0, false);
+        return {
+          etiqueta: etiquetaCategoria(id),
+          valor: typeof valor === "number" ? pesos(valor) : valor,
+        };
+      });
 
   return (
     <SeccionTarjeta titulo="Resumen">
@@ -83,6 +86,9 @@ export function ResumenCotizacion({
             <p className="t-caption text-fg-subtle">
               Pagos únicos: {pesos(calculo.pagosUnicos)} · Dotación{" "}
               {calculo.dotacion?.posiciones ?? "—"} posiciones
+              {calculo.dotacion?.personasEscaladas != null
+                ? ` · ${dotacionPersonasTexto(calculo.dotacion.personasEscaladas)}`
+                : null}
             </p>
           ) : null}
         </div>
@@ -97,6 +103,7 @@ export function ResumenCotizacion({
         {verCostos && "margenEfectivoPct" in calculo ? (
           <SemaforoMargenCpq
             margenEfectivoPct={calculo.margenEfectivoPct}
+            costoPendiente={costoPendiente}
             {...(calculo.semaforo ? { semaforo: calculo.semaforo } : {})}
           />
         ) : null}

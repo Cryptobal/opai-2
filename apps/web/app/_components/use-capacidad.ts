@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { Resultado } from "@opai/capabilities";
 
@@ -18,41 +18,44 @@ export function useCapacidad(portal: string) {
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState<string | null>(null);
 
-  async function ejecutar<T = unknown>(
-    id: string,
-    input: unknown,
-    dryRun = false,
-    revalidar: Revalidacion = "layout",
-    idempotencyKey?: string,
-  ): Promise<T | null> {
-    setError(null);
-    setCodigo(null);
-    setPendiente(true);
-    try {
-      const r: Resultado = await ejecutarCapacidad(
-        portal,
-        id,
-        input,
-        dryRun,
-        revalidar,
-        idempotencyKey,
-      );
-      if (!r.ok) {
-        setError(r.error.message);
-        setCodigo(r.error.code);
+  const ejecutar = useCallback(
+    async function ejecutar<T = unknown>(
+      id: string,
+      input: unknown,
+      dryRun = false,
+      revalidar: Revalidacion = "layout",
+      idempotencyKey?: string,
+    ): Promise<T | null> {
+      setError(null);
+      setCodigo(null);
+      setPendiente(true);
+      try {
+        const r: Resultado = await ejecutarCapacidad(
+          portal,
+          id,
+          input,
+          dryRun,
+          revalidar,
+          idempotencyKey,
+        );
+        if (!r.ok) {
+          setError(r.error.message);
+          setCodigo(r.error.code);
+          return null;
+        }
+        return r.data as T;
+      } catch {
+        // La acción ya no lanza, pero un corte de red o un despliegue nuevo sí rechazan la llamada:
+        // se trata como un error interno visible y el llamador revierte con `null`.
+        setError("Ocurrió un error en el servidor. Reintenta en unos minutos.");
+        setCodigo("INTERNAL");
         return null;
+      } finally {
+        setPendiente(false);
       }
-      return r.data as T;
-    } catch {
-      // La acción ya no lanza, pero un corte de red o un despliegue nuevo sí rechazan la llamada:
-      // se trata como un error interno visible y el llamador revierte con `null`.
-      setError("Ocurrió un error en el servidor. Reintenta en unos minutos.");
-      setCodigo("INTERNAL");
-      return null;
-    } finally {
-      setPendiente(false);
-    }
-  }
+    },
+    [portal],
+  );
 
   return { ejecutar, pendiente, error, codigo, limpiarError: () => setError(null) };
 }

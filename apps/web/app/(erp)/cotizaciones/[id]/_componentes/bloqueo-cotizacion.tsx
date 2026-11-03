@@ -2,7 +2,7 @@ import { Alerta, Button } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-const REMUNERACIONES = "/configuracion/grupo/operacion/remuneraciones";
+const REMUNERACIONES = "/configuracion/remuneraciones";
 
 export function BloqueoCotizacion({
   mensaje,

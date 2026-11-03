@@ -25,13 +25,18 @@ export function DialogoVistaPreviaPdf({
   const [paginas, setPaginas] = useState<number | null>(null);
 
   useEffect(() => {
+    let activo = true;
     void ejecutar("cpq.cotizaciones.preview_pdf", { id: cotizacionId }, true).then((r) => {
+      if (!activo) return;
       if (r && typeof r === "object" && "pdfBase64" in r) {
         const data = r as { pdfBase64: string; bytes?: number };
         setPdfUrl(`data:application/pdf;base64,${data.pdfBase64}`);
         setPaginas(data.bytes ? Math.max(1, Math.round(data.bytes / 12_000)) : null);
       }
     });
+    return () => {
+      activo = false;
+    };
   }, [cotizacionId, ejecutar]);
 
   return (

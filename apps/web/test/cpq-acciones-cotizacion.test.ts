@@ -24,7 +24,7 @@ describe("acciones-cotizacion-logica", () => {
     expect(hayBarraFijaCpq(p)).toBe(true);
   });
 
-  it("sueldo base bloqueado enlaza a cargos, no a Remuneraciones fija", () => {
+  it("sueldo base bloqueado pide editar el puesto, sin enlace a cargos", () => {
     const p = {
       version: { estado: "borrador" },
       calculo: {
@@ -36,7 +36,8 @@ describe("acciones-cotizacion-logica", () => {
     };
     const b = bloqueoEnvioCpq(p);
     expect(b?.laboralPendiente).toBe(false);
-    expect(b?.enlace?.etiqueta).toBe("Ver cargos");
+    expect(b?.enlace).toBeUndefined();
+    expect(b?.mensaje).toMatch(/hoja de edición del puesto/i);
   });
 
   it("pedir aprobación solo cuando el cálculo lo permite", () => {

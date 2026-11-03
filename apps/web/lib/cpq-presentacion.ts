@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { avisoDesdeTexto, type AvisoCpq } from "@/lib/cpq-presentacion-avisos";
+
 /** Etiquetas en español para categorías del motor (nunca claves internas en UI). */
 export const ETIQUETA_CATEGORIA_CPQ: Record<string, string> = {
   mano_obra: "Mano de obra",
@@ -13,6 +15,8 @@ export const ETIQUETA_CATEGORIA_CPQ: Record<string, string> = {
   infraestructura: "Infraestructura",
   otros: "Otros",
 };
+
+export type { AvisoCpq };
 
 const ESTADO_BADGE: Record<
   string,
@@ -37,8 +41,8 @@ export function etiquetaCategoria(id: string) {
   return ETIQUETA_CATEGORIA_CPQ[id] ?? id.replaceAll("_", " ");
 }
 
-export function margenPctTexto(margenEfectivoPct: number | null | undefined) {
-  if (margenEfectivoPct == null || margenEfectivoPct < 0) return "—";
+export function margenPctTexto(margenEfectivoPct: number | null | undefined, costoPendiente = false) {
+  if (costoPendiente || margenEfectivoPct == null || margenEfectivoPct < 0) return "—";
   return `${(margenEfectivoPct / 10_000).toFixed(1)} %`;
 }
 
@@ -49,13 +53,12 @@ export function semaforoEtiqueta(semaforo: string | undefined) {
   return semaforo ?? "—";
 }
 
-export type AvisoCpq = {
-  id: string;
-  tono: "warning" | "info" | "danger";
-  titulo: string;
-  detalle?: string;
-  enlace?: { href: string; etiqueta: string };
-};
+/** Personas escaladas del motor (escala 10_000), con plural correcto. */
+export function dotacionPersonasTexto(personasEscaladas: number | undefined) {
+  if (personasEscaladas == null) return "—";
+  const n = Math.round(personasEscaladas / 10_000);
+  return `${n} ${n === 1 ? "persona" : "personas"}`;
+}
 
 /** Traduce advertencias técnicas del motor a avisos accionables (CAR-141). */
 export function avisosDesdeCalculo(
@@ -64,7 +67,15 @@ export function avisosDesdeCalculo(
 ): AvisoCpq[] {
   const out: AvisoCpq[] = [];
   const vistos = new Set<string>();
-  for (const raw of advertencias ?? []) {
+  const rawList = advertencias ?? [];
+  const hayEspecificos = rawList.some(
+    (a) =>
+      a.startsWith("costo pendiente:") &&
+      a !== "costo laboral pendiente: motor de sueldos" &&
+      !a.includes("motor de sueldos"),
+  );
+  for (const raw of rawList) {
+    if (raw === "costo laboral pendiente: motor de sueldos" && hayEspecificos) continue;
     const a = avisoDesdeTexto(raw, ctx);
     if (a && !vistos.has(a.id)) {
       vistos.add(a.id);
@@ -74,73 +85,11 @@ export function avisosDesdeCalculo(
   return out;
 }
 
-function avisoDesdeTexto(raw: string, ctx?: { nombrePuesto?: string }): AvisoCpq | null {
-  const puesto = ctx?.nombrePuesto ?? "el puesto";
-  if (raw === "costo laboral pendiente: motor de sueldos") {
-    return {
-      id: "motor",
-      tono: "warning",
-      titulo: "Falta completar el costo laboral",
-      detalle:
-        "Publica los valores legales del día, confirma la mutual adicional de la empresa y asigna sueldo base a cada puesto.",
-      enlace: { href: "/configuracion/grupo/remuneraciones", etiqueta: "Ir a Remuneraciones" },
-    };
-  }
-  if (raw.startsWith("costo pendiente: falta sueldo base")) {
-    return {
-      id: "sueldo-base",
-      tono: "warning",
-      titulo: `Falta el sueldo base de ${puesto}`,
-      detalle: "Configúralo en la línea del puesto o en Instalación › Sueldo.",
-      enlace: { href: "/personas/cargos", etiqueta: "Ver cargos" },
-    };
-  }
-  if (raw === "costo pendiente: falta mutual adicional") {
-    return {
-      id: "mutual",
-      tono: "warning",
-      titulo: "Falta la tasa de mutual adicional",
-      detalle: "Ingrésala en Configuración › Remuneraciones.",
-      enlace: { href: "/configuracion/grupo/remuneraciones", etiqueta: "Configurar mutual" },
-    };
-  }
-  if (raw.startsWith("costo pendiente: falta ")) {
-    const indicador = raw.replace("costo pendiente: falta ", "");
-    return {
-      id: `legal-${indicador}`,
-      tono: "warning",
-      titulo: `Falta el indicador «${indicador}»`,
-      detalle: "Publica el valor legal vigente en Remuneraciones.",
-      enlace: { href: "/configuracion/grupo/remuneraciones", etiqueta: "Ir a Remuneraciones" },
-    };
-  }
-  if (raw.includes("valores legales")) {
-    return {
-      id: "legales",
-      tono: "warning",
-      titulo: "Faltan valores legales para calcular",
-      detalle: raw,
-      enlace: { href: "/configuracion/grupo/remuneraciones", etiqueta: "Ir a Remuneraciones" },
-    };
-  }
-  if (raw === "falta valor UF") {
-    return {
-      id: "uf",
-      tono: "warning",
-      titulo: "Falta el valor UF del día",
-      detalle: "Sin UF no se pueden calcular instrumentos en UF.",
-      enlace: { href: "/configuracion/grupo/remuneraciones", etiqueta: "Ver remuneraciones" },
-    };
-  }
-  if (raw === "precio subvalorado") {
-    return {
-      id: "subvalorado",
-      tono: "info",
-      titulo: "Precio por debajo del mínimo",
-      detalle: "El margen efectivo queda bajo el mínimo configurado; pide aprobación antes de enviar.",
-    };
-  }
-  return { id: raw, tono: "warning", titulo: raw };
+/** Texto corto tras recalcular cuando aún faltan datos (CAR-162). */
+export function mensajeFaltantesRecalcular(advertencias: string[] | undefined): string | null {
+  const avisos = avisosDesdeCalculo(advertencias);
+  if (avisos.length === 0) return null;
+  return avisos.map((a) => a.titulo).join(" · ");
 }
 
 export function avisoLineaPuesto(mensaje: string | undefined, nombreLinea: string): AvisoCpq | null {

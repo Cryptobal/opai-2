@@ -7,11 +7,25 @@ export function SemaforoMargenCpq({
   margenEfectivoPct,
   semaforo,
   minimoPct = 100_000,
+  costoPendiente = false,
 }: {
   margenEfectivoPct?: number;
   semaforo?: string;
   minimoPct?: number;
+  costoPendiente?: boolean;
 }) {
+  if (costoPendiente) {
+    return (
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="t-overline text-fg-muted">Margen efectivo</span>
+        </div>
+        <p className="t-h3 t-numeric">—</p>
+        <p className="t-caption text-fg-muted">Costos pendientes</p>
+      </div>
+    );
+  }
+
   const pct = margenEfectivoPct != null && margenEfectivoPct >= 0 ? margenEfectivoPct / 10_000 : null;
   const min = minimoPct / 10_000;
   const tono =
@@ -22,7 +36,7 @@ export function SemaforoMargenCpq({
         <span className="t-overline text-fg-muted">Margen efectivo</span>
         <Badge tono={tono}>{semaforoEtiqueta(semaforo)}</Badge>
       </div>
-      <p className="t-h3 t-numeric">{margenPctTexto(margenEfectivoPct)}</p>
+      <p className="t-h3 t-numeric">{margenPctTexto(margenEfectivoPct, false)}</p>
       {pct != null ? (
         <div className="relative h-2 overflow-hidden rounded-full bg-fill">
           <div

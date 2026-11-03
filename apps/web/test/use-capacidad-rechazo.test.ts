@@ -8,6 +8,7 @@ vi.mock("react", () => ({
     if (!(i in h.slots)) h.slots[i] = valor;
     return [h.slots[i], (siguiente: unknown) => void (h.slots[i] = siguiente)];
   },
+  useCallback: <T,>(fn: T) => fn,
 }));
 vi.mock("@/app/_acciones/capacidad", () => ({ ejecutarCapacidad: h.accion }));
 

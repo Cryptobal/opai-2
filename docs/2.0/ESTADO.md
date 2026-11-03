@@ -6,6 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
+| **CAR-162** (rama `fix/car-162-cpq-desbloqueo`) | CPQ: desbloqueo primera cotización (QA 3-nov): rutas Remuneraciones, avisos concretos, mutual 0 % con aviso, margen/costos pendientes, useCapacidad estable, e2e tenant vacío, Design Prompt v4 | En revisión | No |
 | **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`, PR #234) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En revisión | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |

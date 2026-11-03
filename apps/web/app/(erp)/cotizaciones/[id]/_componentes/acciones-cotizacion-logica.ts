@@ -1,4 +1,4 @@
-import { avisosDesdeCalculo } from "@/lib/cpq-presentacion";
+import { avisosDesdeCalculo, mensajeFaltantesRecalcular } from "@/lib/cpq-presentacion";
 
 export type MetaAccionesCpq = {
   avisoRecalculo?: unknown;
@@ -38,6 +38,19 @@ function esBloqueoLaboral(advertencias: string[]): boolean {
   );
 }
 
+function mensajeBloqueo(advertencias: string[]): string {
+  const avisos = avisosDesdeCalculo(advertencias);
+  const resumen = mensajeFaltantesRecalcular(advertencias);
+  if (resumen) return resumen;
+  const primero = avisos[0];
+  if (primero) return primero.detalle ?? primero.titulo;
+  const uf = advertencias.find((a) => a.includes("UF"));
+  return (
+    uf ??
+    "Hay datos pendientes para calcular la cotización. Recalcula o completa lo que falta."
+  );
+}
+
 /** Bloqueo alineado a `solicitar_aprobacion` / `marcar_lista` cuando `noEnviable`. */
 export function bloqueoEnvioCpq(p: ParamsAcciones): BloqueoEnvioCpq | null {
   const { version, calculo, gestionar } = p;
@@ -45,14 +58,14 @@ export function bloqueoEnvioCpq(p: ParamsAcciones): BloqueoEnvioCpq | null {
   const advertencias = calculo.advertencias ?? [];
   const avisos = avisosDesdeCalculo(advertencias);
   const primero = avisos[0];
-  const laboralPendiente = esBloqueoLaboral(advertencias) && !advertencias.some((a) => a.includes("sueldo base"));
+  const laboralPendiente =
+    esBloqueoLaboral(advertencias) && !advertencias.some((a) => a.includes("sueldo base"));
 
   if (laboralPendiente) {
     return {
-      mensaje:
-        primero?.detalle ??
-        "Completa el costo laboral (motor de sueldos) antes de pedir aprobación o dejar la cotización lista.",
+      mensaje: mensajeBloqueo(advertencias),
       laboralPendiente: true,
+      ...(primero?.enlace ? { enlace: primero.enlace } : {}),
     };
   }
 
@@ -64,11 +77,8 @@ export function bloqueoEnvioCpq(p: ParamsAcciones): BloqueoEnvioCpq | null {
     };
   }
 
-  const uf = advertencias.find((a) => a.includes("UF"));
   return {
-    mensaje:
-      uf ??
-      "Hay datos pendientes para calcular la cotización. Recalcula o completa lo que falta.",
+    mensaje: mensajeBloqueo(advertencias),
     laboralPendiente: false,
   };
 }
@@ -98,3 +108,5 @@ export function pedirAprobacionDeshabilitada(p: ParamsAcciones): boolean {
       bloqueoEnvioCpq(p),
   );
 }
+
+export { mensajeFaltantesRecalcular };
