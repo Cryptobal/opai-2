@@ -10,21 +10,21 @@
 
 1. **El repo es la fuente única.** Briefs, decisiones, estado y pendientes viven en `docs/2.0/`.
 2. **Quién hace qué.**
-   - **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) escribe los briefs y construye.
+   - **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) escribe los briefs, construye e **integra a `main` con squash** cuando se cumplen las condiciones de integración (ADR-060).
    - **Carlos** aprueba **una vez por módulo** una hoja de alcance de una página: qué pasa de 1.0 a 2.0, qué no pasa y qué mejoras se suman. **1.0 es el piso, no el techo.**
-   - El **bot OPAI 2.0** (Cursor) opera la cola: avisa a los revisores, aplica migraciones, integra y toma capturas.
+   - El **bot OPAI 2.0** (Cursor) opera la cola: avisa a los revisores, aplica migraciones con respaldo, **también puede integrar con squash** bajo las mismas condiciones, toma capturas y responde `@opai-2.0:` en PRs o correo a carlos.irigoyen@mail.grokbot.com.
 3. **Cada PR actualiza `docs/2.0/ESTADO.md`** con lo que cambia: qué entró, qué quedó pendiente y qué decisión se tomó. Sin esa actualización, el PR no está listo.
 4. **Rutina cada 15 minutos.** El bot revisa los PRs abiertos de `Cryptobal/opai-2`. Cada PR nuevo o con head nuevo se pasa al **Revisor** (bot `4e22026b`) y a **QA** (bot `9ea32915`).
 5. **Migraciones.** Si el PR trae migración (etiqueta `migracion-pendiente`), el bot la aplica en Neon **con respaldo previo**:
    - Proyecto `steep-wildflower-90764475`.
    - Primero la rama **dev** (`br-cool-cell-b6f9h1vh`), después **main** (`br-dawn-morning-b6037bp9`).
    - Snapshot (o rama de respaldo) antes de cada una, `lock_timeout` corto y verificación posterior.
-   - Luego el bot quita la etiqueta e **integra** el PR (squash; sin force-push ni rebase).
-6. **Reglas de revisión e integración (t618u, 27-oct-2026 17:30, vigentes):**
+   - Luego el bot quita la etiqueta. **Integración:** Claude o el bot «OPAI 2.0» hace squash cuando se cumplen las condiciones (A.6); sin force-push ni rebase.
+6. **Reglas de revisión e integración (t618u, 27-oct-2026 17:30; integrador ampliado ADR-060, 3-nov-2026):**
    - El Revisor hace **una sola pasada**.
    - Solo **bloquea** por **seguridad, migraciones o datos** (RLS, permisos, pérdida o mezcla de datos entre tenants).
    - Todo lo demás es no bloqueante y va a un **PR de pendientes**, no a otra vuelta del mismo PR.
-   - Se integra con los checks obligatorios en verde y la rama al día con main.
+   - Se integra (Claude o el bot «OPAI 2.0») con los checks obligatorios en verde sobre el head, la rama al día con `main`, sin bloqueo del Revisor (si trae migración o toca RLS/permisos/tenant, tras su pasada), migración ya aplicada y etiqueta `migracion-pendiente` quitada si corresponde, y sin veto de Carlos.
 7. **QA en vivo va después de integrar** (en test.opai.cl) y **no frena nada**. Sus hallazgos van al PR de pendientes, salvo que sean de seguridad o datos: en ese caso se abre un arreglo inmediato.
 8. **Capturas.** Cuando Carlos quiera ver algo, se las pide al bot OPAI 2.0, que las toma en test.opai.cl.
 9. **Avisos:** siempre en español, al integrar y al migrar.
@@ -53,7 +53,7 @@
 3. **1.0 es piso, no techo (26-oct):** hoja de alcance de una página por módulo, que Carlos aprueba una vez (ver A.2).
 4. **Preguntas antes de cada módulo (24-oct 23:05):** todas las dudas se hacen y refinan con Carlos antes de empezar el módulo. Después no se vuelve a preguntar.
 5. **Credenciales (24-oct):** todas están en 1Password y se usan sin pedirlas. A Carlos solo se le piden aprobaciones o 2FA. Los secretos de CI van en GitHub y Vercel, **nunca** en bots ni en el repo.
-6. **Integración (24-oct 16:59):** integra el bot OPAI 2.0 (squash), sin force-push ni rebase, y avisa a Carlos. Carlos conserva el veto.
+6. **Integración (24-oct 16:59; ADR-060, 3-nov-2026):** integra Claude (proyecto «OPAI 2.0») o el bot «OPAI 2.0» (squash), sin force-push ni rebase, bajo las mismas condiciones; avisa a Carlos al migrar y al integrar. Carlos conserva el veto.
 7. **Modelos:**
    - 23-oct: Opus para planear, Sonnet por defecto, Haiku para tareas mecánicas.
    - **Vigente desde el 27-oct (00:38, t512u):** Claude Sonnet por defecto; terra para arreglos chicos y QA; luna para documentos; sol u Opus solo como excepción justificada.

@@ -1048,16 +1048,16 @@ identidad de servicio en main.
 
 ## ADR-054 · Flujo operativo del 28-oct-2026
 
-**Fecha:** 28-oct-2026 · **Estado:** vigente · **Reemplaza a ADR-043 v3 en lo que choque** (y, con él, a la «Segunda modificación de Carlos (24-oct)» en lo que toca a `ESTADO.md`). Lo que no choca de ADR-043 v3 sigue vigente: integra solo el bot «OPAI 2.0», con squash, sin force-push ni rebase; Carlos conserva el veto; el Revisor usa el modelo contrario al que construyó.
+**Fecha:** 28-oct-2026 · **Estado:** vigente · **Reemplaza a ADR-043 v3 en lo que choque** (y, con él, a la «Segunda modificación de Carlos (24-oct)» en lo que toca a `ESTADO.md`). Lo que no choca de ADR-043 v3 sigue vigente: squash, sin force-push ni rebase; Carlos conserva el veto; el Revisor usa el modelo contrario al que construyó. **Quién integra:** ADR-060 (3-nov-2026).
 
 **Contexto.** Flujo acordado con Carlos el 28-oct-2026 y reglas de revisión e integración t618u (27-oct-2026 17:30), más los mandatos t500u (26-oct) y t682u (28-oct), bajo los cuales el bot ya aplicaba migraciones con respaldo (por ejemplo, el #91). El detalle, las reglas permanentes, las decisiones por confirmar, los pendientes y las preguntas abiertas están en [`OPERACION-agentes.md`](OPERACION-agentes.md); este ADR no los copia.
 
 **Decisión.**
 
 1. **El repo es la fuente única** del flujo de trabajo (`docs/2.0/`); manda `OPERACION-agentes.md` ante un choque.
-2. **Claude escribe los briefs** y construye. **Carlos** aprueba una vez por módulo una hoja de alcance de una página (1.0 es el piso, no el techo). El **bot «OPAI 2.0»** opera la cola: avisa al Revisor y a QA, aplica migraciones, integra y toma capturas.
+2. **Claude escribe los briefs**, construye e integra cuando cumple las condiciones (ADR-060). **Carlos** aprueba una vez por módulo una hoja de alcance de una página (1.0 es el piso, no el techo). El **bot «OPAI 2.0»** opera la cola: avisa al Revisor y a QA, aplica migraciones, puede integrar y toma capturas.
 3. **Cada PR actualiza `ESTADO.md`** (qué entró, qué quedó pendiente, qué se decidió). Linear queda como referencia.
-4. **Migraciones:** las aplica el bot «OPAI 2.0» en Neon con respaldo previo, primero `dev` y después `main`, con `lock_timeout` corto y verificación posterior; luego quita `migracion-pendiente` e integra.
+4. **Migraciones:** las aplica el bot «OPAI 2.0» en Neon con respaldo previo, primero `dev` y después `main`, con `lock_timeout` corto y verificación posterior; luego quita `migracion-pendiente`. Integración (squash): Claude o el bot (ADR-060).
 5. **Revisor:** una sola pasada; solo bloquea por seguridad, migraciones o datos; lo demás va a un PR de pendientes. Tras un push, revisa solo el delta.
 6. **Integración:** con los checks obligatorios en verde y la rama al día con `main`, sin bloqueos del Revisor ni veto de Carlos y, si el PR trae migración, ya aplicada con respaldo en `dev` y `main`.
 7. **QA en vivo** después de integrar, sin frenar; los hallazgos de seguridad o datos abren un arreglo inmediato.
@@ -1175,3 +1175,21 @@ identidad de servicio en main.
 **CASCADE de `instalacion_id`.** La FK `dias_calendario_instalacion_id_fkey` es `ON DELETE CASCADE` (migración `20261030000000`): al borrar una instalación del tenant se borran también sus feriados propios acotados a esa instalación, que no tienen sentido sin ella. Los feriados globales del tenant (`instalacion_id` nulo) y los de plataforma no se ven afectados. El trigger `mismo_tenant` garantiza que la instalación de una fila del tenant es del mismo tenant.
 
 **Consecuencias.** Reemplaza el «[dato a confirmar]» del #139 sobre la fuente de feriados movibles por este cálculo con revisión anual. Sin impacto en otros ADR. Las fechas marcadas **[por verificar]** se listan en el PR y en `ESTADO.md` para el primer contraste oficial.
+
+---
+
+## ADR-060 · Claude integra a `main`; el bot «OPAI 2.0» aplica migraciones y da apoyo
+
+**Fecha:** 3-nov-2026 · **Estado:** vigente · **Autor:** Carlos (decisión 19:29 CLT) · **Modifica** ADR-043 v3, ADR-054 y ADR-035 en lo que toca a **quién integra**; el resto de esos ADR sigue vigente.
+
+**Contexto.** Desde ADR-043 v3 y ADR-054 solo el bot «OPAI 2.0» hacía squash a `main` cuando se cumplían las condiciones; Claude construía y abría el PR pero no integraba. Carlos quiere cerrar el ciclo en el mismo chat de construcción, con todo el contexto registrado en el repo, pantallas siempre basadas en Claude Design, y el bot como operador de migraciones Neon y apoyo operativo.
+
+**Decisión.**
+
+1. **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) **integra a `main` con squash** cuando se cumplen las condiciones de integración de `AGENTS.md` («Integración a `main`»).
+2. El **bot «OPAI 2.0»** sigue aplicando las migraciones en Neon **con respaldo** (primero `dev`, luego `main`), quitando `migracion-pendiente` tras el aviso en el PR, operando la cola (Revisor, QA en vivo, capturas) y **también puede integrar con squash** bajo las mismas condiciones.
+3. **Condiciones de merge** (sin cambio de fondo respecto de ADR-054, salvo quién ejecuta el squash): checks obligatorios del ruleset «Proteger main» en verde sobre el head; rama al día con `main`; sin bloqueo del Revisor (si el PR trae migración o toca RLS, permisos o aislamiento por tenant, tras su pasada; si no, no hace falta esperarla); si trae migración, comentario del bot de migración aplicada y etiqueta `migracion-pendiente` quitada; sin `VETO` ni etiqueta `veto` de Carlos.
+4. **Apoyo al bot:** comentario en el PR que empiece con `@opai-2.0:` o correo a **carlos.irigoyen@mail.grokbot.com** (asunto `OPAI 2.0: <tema>`, con número de PR).
+5. **Registro:** decisiones, briefs, diseños aprobados y `ESTADO.md` siguen obligatorios en el repo; lo acordado en chat que cambie reglas o alcance se escribe en el repo antes de seguir.
+
+**Consecuencias.** Se actualizan `AGENTS.md`, `OPERACION-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` y `CLAUDE.md`. Carlos debe pegar de nuevo las instrucciones en el proyecto de claude.ai. Quedan por alinear `checklists/revision.md` y otros documentos que aún digan que solo el bot integra; mientras tanto manda este ADR y `AGENTS.md`.
