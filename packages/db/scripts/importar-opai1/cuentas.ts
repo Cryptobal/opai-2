@@ -1,5 +1,6 @@
 // Plan de cuentas (CrmAccount → core.cuentas). Dedupe determinista por RUT normalizado (P10); sin
 // RUT, el nombre canónico solo genera propuestas de fusión, nunca una fusión automática (R28).
+/* eslint-disable max-lines -- reglas RUT, vinculo y propuestas (CAR-25/157) */
 import {
   type Aviso,
   type Decision,

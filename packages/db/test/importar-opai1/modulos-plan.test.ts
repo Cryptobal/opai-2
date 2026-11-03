@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   MOTIVO_MODULO_COMERCIAL_INACTIVO,
   MOTIVO_MODULO_FINANZAS_INACTIVO,
-  MOTIVO_PENDIENTE_MODELO_PROGRAMACION,
   pendientesImportacion,
 } from "../../scripts/importar-opai1/comercial-pendiente";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";

@@ -1,5 +1,6 @@
 // Plan de embudo comercial (etapas, negocios, historial, contactos del negocio) en dry-run.
 // La carga real a `comercial.*` queda fuera de `aplicar.ts` hasta el PR de apply CRM.
+/* eslint-disable max-lines -- plan comercial + equivalencia Gard (CAR-157) */
 import { type Aviso, type Decision, decision, indiceIds, ordenEstable } from "./comun";
 import {
   COMERCIAL_EN_MAIN,
