@@ -44,11 +44,12 @@ export function FormularioProgramacion({ cuentas, inicial, programacionId }: Pro
       return;
     }
     setInvalido(null);
-    const id = programacionId
-      ? "finanzas.ventas_programacion.actualizar"
-      : "finanzas.ventas_programacion.crear";
-    const input = programacionId ? { ...r.input, programacionId } : r.input;
-    const res = await ejecutar<{ id: string }>(id, input);
+    const res = programacionId
+      ? await ejecutar<{ id: string }>("finanzas.ventas_programacion.actualizar", {
+          ...r.input,
+          programacionId,
+        })
+      : await ejecutar<{ id: string }>("finanzas.ventas_programacion.crear", r.input);
     if (res) {
       avisar.exito(programacionId ? "Programación actualizada" : "Programación creada (pausada)");
       router.push(`/finanzas/ventas/programacion/${res.id}`);
