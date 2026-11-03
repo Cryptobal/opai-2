@@ -137,3 +137,5 @@ export function resolverCuentas(
     return { clave: d.destinoId ?? `nueva:${d.idOpai1}`, destinoId: d.destinoId };
   };
 }
+
+export type ResolverCuentasFn = ReturnType<typeof resolverCuentas>;

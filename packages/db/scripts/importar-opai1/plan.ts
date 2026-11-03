@@ -1,6 +1,8 @@
 // Plan completo de la importación desde 1.0: puro y determinista (mismo origen + mismo estado 2.0 →
 // mismo plan). No escribe: la carga real (otro PR, con el OK de Carlos) consumirá este plan.
 import { pendientesImportacion, type Pendiente } from "./comercial-pendiente";
+import { planComercial, type PlanComercial } from "./comercial-plan";
+import { type CorrelativoCpqPropuesto, planCorrelativosCpq } from "./correlativos-cpq";
 import { type Aviso, type Decision, ordenEstable, type Propuesta } from "./comun";
 import type { DatosContacto } from "./contactos-datos";
 import { planContactos } from "./contactos";
@@ -8,8 +10,10 @@ import { type DatosCuenta, planCuentas, resolverCuentas } from "./cuentas";
 import type { EstadoDestino } from "./destino-tipos";
 import { type DatosInstalacion, planInstalaciones } from "./instalaciones";
 import { nombreCanonico, textoLimpio } from "./normalizar";
-import { OPCIONES_POR_DEFECTO, type OpcionesPlan } from "./opciones";
+import { modulosDelPlan, OPCIONES_POR_DEFECTO, type OpcionesPlan } from "./opciones";
 import type { DatosOpai1 } from "./origen";
+import type { DatosProgramacion, ResumenDestinatarios } from "./recurrentes";
+import { planRecurrentes } from "./recurrentes";
 import { avisosTributariosCuentas, resumenTributario, type ResumenTributario } from "./tributario-plan";
 
 /** Valor de rubro/segmento/tamaño de 1.0 que pasaría a etiqueta (Carlos los confirma). */
@@ -24,12 +28,27 @@ export type Plan = {
   cuentas: Decision<DatosCuenta>[];
   contactos: Decision<DatosContacto>[];
   instalaciones: Decision<DatosInstalacion>[];
+  programaciones: Decision<DatosProgramacion>[];
+  comercial: PlanComercial;
+  destinatarios: ResumenDestinatarios;
+  correlativosCpq: CorrelativoCpqPropuesto[];
   propuestas: Propuesta[];
   avisos: Aviso[];
   etiquetas: EtiquetaPropuesta[];
   pendientes: Pendiente[];
   tributario: ResumenTributario;
 };
+
+function resolverDesdeDecisiones<D>(decisiones: readonly Decision<D>[]) {
+  const porId = new Map(decisiones.map((d) => [d.idOpai1, d]));
+  return (idOpai1: string): string | null => {
+    let d = porId.get(idOpai1);
+    if (!d) return null;
+    if (d.fusionaCon && d.accion !== "conflicto") d = porId.get(d.fusionaCon) ?? d;
+    if (d.accion === "conflicto" || (d.accion === "omitido" && !d.fusionaCon)) return null;
+    return d.destinoId ?? `nueva:${d.idOpai1}`;
+  };
+}
 
 export function calcularPlan(
   origen: DatosOpai1,
@@ -40,18 +59,53 @@ export function calcularPlan(
   const resolver = resolverCuentas(cuentas.decisiones);
   const contactos = planContactos(origen.contacts, resolver, destino);
   const instalaciones = planInstalaciones(origen.installations, resolver, destino);
+  const resolverInst = resolverDesdeDecisiones(instalaciones.decisiones);
+  const resolverContacto = resolverDesdeDecisiones(contactos.decisiones);
+  const recurrentes = planRecurrentes(
+    origen.recurringInvoiceSchedules,
+    origen.contacts,
+    destino,
+    opciones,
+    resolver,
+    (id) => (id ? resolverInst(id) : null),
+    resolverContacto,
+    cuentas.decisiones,
+  );
+  const ultimoCpq = new Map(destino.correlativosCpq.map((c) => [c.anio, c.ultimo]));
+  const correlativosCpq = planCorrelativosCpq(
+    origen.cpqQuotes,
+    ultimoCpq,
+    modulosDelPlan(opciones).cpq,
+  );
+  const comercial = planComercial(
+    origen,
+    destino,
+    opciones,
+    (id) => {
+      const r = resolver(id);
+      if (!r) return null;
+      return r.destinoId ?? r.clave;
+    },
+    (id) => resolverContacto(id),
+  );
   const avisosTrib = avisosTributariosCuentas(cuentas.decisiones);
   return {
     opciones,
     cuentas: cuentas.decisiones,
     contactos: contactos.decisiones,
     instalaciones: instalaciones.decisiones,
+    programaciones: recurrentes.decisiones,
+    comercial,
+    destinatarios: recurrentes.destinatarios,
+    correlativosCpq,
     propuestas: [...cuentas.propuestas, ...contactos.propuestas],
     avisos: [
       ...cuentas.avisos,
+      ...recurrentes.avisos,
       ...contactos.avisos,
       ...instalaciones.avisos,
       ...avisosTrib,
+      ...comercial.avisos,
     ],
     etiquetas: etiquetasPropuestas(origen),
     pendientes: pendientesImportacion(origen, opciones),

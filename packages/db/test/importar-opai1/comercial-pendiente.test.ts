@@ -22,14 +22,9 @@ const etapa = (extra: Partial<Parameters<typeof mapearEtapa>[0]> = {}) => ({
 });
 
 describe("mapeo comercial (pendiente de CRM PR 1)", () => {
-  it("la bandera sigue apagada y el plan solo cuenta filas pendientes", () => {
-    expect(COMERCIAL_EN_MAIN).toBe(false);
-    expect(pendientesComerciales(fixture())).toEqual([
-      { entidad: "etapa", filas: 3, motivo: "pendiente_crm_pr1" },
-      { entidad: "negocio", filas: 1, motivo: "pendiente_crm_pr1" },
-      { entidad: "negocio_etapa", filas: 2, motivo: "pendiente_crm_pr1" },
-      { entidad: "negocio_contacto", filas: 1, motivo: "pendiente_crm_pr1" },
-    ]);
+  it("COMERCIAL_EN_MAIN activo: el plan cuenta etapas y negocios (apply CRM pendiente)", () => {
+    expect(COMERCIAL_EN_MAIN).toBe(true);
+    expect(pendientesComerciales(fixture())).toEqual([]);
   });
 
   it("etapas 1:1 con tipo y exigencia de inicio de servicio", () => {
