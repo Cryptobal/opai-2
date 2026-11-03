@@ -6,7 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
-| **CI · memoria del build** (rama `ci/car-181-memoria-build`) | El `next build` se queda sin memoria (heap de 2 GB) en el chequeo de tipos de forma intermitente y deja en rojo `build · presupuesto de JS` en varios PR (#240, #243, #244, #245, #246). Sube el heap del build a 4 GB. | En revisión | No |
+| **CI · memoria en Actions** (rama `ci/car-181-memoria-build`, PR #247) | En el runner estándar (~7 GB), Turbo paralelizaba muchos `tsc` y el job `typecheck · lint · test · test:db` moría por OOM (~2 min en `@opai/capabilities`); el `next build` también agotaba 2 GB de heap. PR #247: heap 4 GB en build, `--concurrency=1`, `NODE_OPTIONS` y swap 8 GB en el gate. | En revisión | No |
 | **CAR-153** (`claude/new-session-gpqpn4`, PR A1 del [brief A](briefs/brief-A-comercial-finanzas.md)) | Textos y estilos: clases `t-*` vigiladas por test (B2), formateador único con espacio duro en `@opai/domain` (B3, R4), estados de venta en español (B4), sin referencias internas ni jerga (B5, B6), errores del servidor en español (B7, B8), calendario de pagos sin JSON (B10), un solo título en Bancos y Venta (B11) y Bandeja de Inicio con error visible (B12). Quedan en A5: refresco visual C1–C5 | En revisión | No |
 | **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`, PR #234) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En revisión | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |

@@ -18,8 +18,10 @@ jobs:
     name: typecheck · lint · test · test:db
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Runner estándar ~7 GB: muchos `tsc` en paralelo vía Turbo agotan RAM (p. ej. @opai/capabilities ~2,8 GB).
     env:
       TURBO_CACHE_DIR: .turbo
+      NODE_OPTIONS: --max-old-space-size=4096
     services:
       postgres:
         image: postgres:16
@@ -35,6 +37,14 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
+      - name: Ampliar swap (runner ~7 GB)
+        run: |
+          sudo swapoff -a 2>/dev/null || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -48,8 +58,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
-      - run: pnpm lint
+      - run: pnpm typecheck -- --concurrency=1
+      - run: pnpm lint -- --concurrency=1
       - run: pnpm test
       - run: pnpm test:db
         env:
@@ -274,7 +284,7 @@ jobs:
       BETTER_AUTH_URL: http://localhost:3000
       NEXT_TELEMETRY_DISABLED: "1"
       # Gate estricto (ADR-045): las metas fallan el job, no solo informan.
-      # Check obligatorio del ruleset «Proteger main» (decisión de Carlos, t306u).
+      # Corre en CI; no es check obligatorio del ruleset «Proteger main» (25783585).
       GATE_ESTRICTO: "1"
     steps:
       - uses: actions/checkout@v4
