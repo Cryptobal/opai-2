@@ -23,7 +23,7 @@
     },
     {
       "archivo": "app/api/t/[slug]/solicitudes/route.ts",
-      "motivo": "Formulario web público pre-sesión: resuelve el tenant por slug con tenantPorSlug() y ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2)."
+      "motivo": "Endpoint público del formulario web (#224, comercial-formulario-web.md): ocurre sin sesión; resuelve el tenant por slug con tenantPorSlug() y usa la clave del canal (Bearer opai_frm_…) como credencial."
     }
   ],
   "internasPermitidas": [
@@ -41,7 +41,7 @@
     },
     {
       "archivo": "app/api/t/[slug]/solicitudes/route.ts",
-      "motivo": "Formulario web público: recibir_formulario_web es interna; la clave Bearer del canal es la credencial antes de existir sesión (Brief 07 PR 2)."
+      "motivo": "Recepción del formulario web: comercial.solicitudes.recibir_formulario_web es interna por diseño; la credencial es la clave del canal, con rate limit e idempotencia."
     }
   ],
   "infraestructuraLibConDb": [
