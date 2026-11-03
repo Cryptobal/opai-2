@@ -7,7 +7,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { permisosNomina } from "../_componentes/datos";
 import { ListaObligaciones } from "../_componentes/lista-obligaciones";
-import { NavegacionNomina } from "../_componentes/navegacion";
+import { SegmentoRemuneraciones, SegmentoRemuneracionesMovil } from "../_componentes/segmento-remuneraciones";
 import type { Obligacion } from "../_componentes/tipos";
 
 export const metadata = { title: "Calendario de obligaciones" };
@@ -17,8 +17,8 @@ export default function Calendario({ searchParams }: { searchParams: SearchParam
   return (
     <PaginaPortal
       portal="erp"
-      titulo="Calendario de obligaciones"
-      ruta="/nomina/calendario"
+      titulo="Remuneraciones"
+      ruta="/remuneraciones/calendario"
       cargar={async () => {
         const p = await leerParametros(searchParams);
         const anio = Number(p["anio"]) || new Date().getFullYear();
@@ -28,12 +28,15 @@ export default function Calendario({ searchParams }: { searchParams: SearchParam
         ]);
         return { r, permisos, anio };
       }}
+      opciones={() => ({ insignia: <SegmentoRemuneraciones activa="calendario" /> })}
     >
       {(d) => (
         <div className="flex flex-col gap-4">
-          <NavegacionNomina activa="calendario" />
+          <SegmentoRemuneracionesMovil activa="calendario" />
           <Estado state={estadoPantalla(d.r)} variante="lista">
-            {d.r.ok ? <ListaObligaciones obligaciones={d.r.data} anio={d.anio} gestiona={d.permisos.obligaciones} /> : null}
+            {d.r.ok ? (
+              <ListaObligaciones obligaciones={d.r.data} anio={d.anio} gestiona={d.permisos.obligaciones} />
+            ) : null}
           </Estado>
         </div>
       )}

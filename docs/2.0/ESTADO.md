@@ -9,7 +9,7 @@
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |
 | #231 | Importación 1.0: programaciones recurrentes de Finanzas, destinatarios, correlativo CPQ y simulación de negocios (CAR-25) | Abierto. **No integrar sin corregir** la forma de las líneas, las frecuencias, la cuenta nula, las recurrentes inactivas hasta el corte y el correlativo dentro de la corrida ([auditoría §2.3](auditoria-2026-11.md#23-migración-desde-10-importador-packagesdbscriptsimportar-opai1-y-pr-231)); le falta la etiqueta `migracion-pendiente` | Sí, `20261103140000_finanzas_ventas_programacion` |
-| #213 | Cargos y Remuneraciones: pantallas lista-ficha | **En pausa**: en conflicto con `main` y Vercel en rojo. Se retoma en la semana 3 con un merge de `main` | — |
+| #213 | Cargos y Remuneraciones (solo UI; rama `cursor/personas-pantallas-cargos-remuneraciones-65e7`): SplitScreen como Cuentas; catálogo sin montos; menú y ruta **Remuneraciones** (`/remuneraciones`, redirect `/nomina`); períodos lista+ficha; «Pasar a revisión» con R-REM-011 en UI y `nomina.periodos.cambiar_estado` (incl. dry_run). Sin migración ni cambios MCP/API `nomina.*` | En revisión (merge con `main` post #232). Pendiente: CI, Revisor y QA 375/1280 | — |
 | #168 | Restablecer MFA y regenerar códigos de respaldo (CAR-54) | **En pausa**: en conflicto. Se retoma después de la migración | — |
 
 ## Integrado en `main`, por módulo

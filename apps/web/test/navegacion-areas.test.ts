@@ -61,8 +61,8 @@ const PUESTOS: EntradaArea = {
 };
 const NOMINA: EntradaArea = {
   area: "personas",
-  href: "/nomina",
-  etiqueta: "Nómina",
+  href: "/remuneraciones",
+  etiqueta: "Remuneraciones",
   icono: "Gauge",
   modulo: "nomina",
   permiso: "nomina:read",
