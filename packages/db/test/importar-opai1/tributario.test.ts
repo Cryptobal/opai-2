@@ -41,9 +41,12 @@ describe("datos tributarios de cuenta", () => {
     expect(cuentaListaParaFacturar(d)).toBe(true);
   });
 
-  it("razón social cae al nombre comercial si legalName viene vacío", () => {
+  it("razón social nunca se rellena con el nombre de fantasía", () => {
     const d = datosCuenta(cuentaCompleta({ legalName: null, name: "Marca visible" }));
-    expect(d.razonSocial).toBe("Marca visible");
+    expect(d.razonSocial).toBeNull();
+    const plan = planCuentas([cuentaCompleta({ legalName: null })], estadoVacio());
+    expect(plan.avisos).toContainEqual({ codigo: "cuenta_no_lista_sin_razon_social", idOpai1: "acc-x" });
+    expect(resumenTributario(plan.decisiones).listasParaFacturar).toBe(0);
   });
 
   it("dry-run marca faltantes sin inventar defaults", () => {

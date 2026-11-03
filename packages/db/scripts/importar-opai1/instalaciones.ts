@@ -28,6 +28,7 @@ export type DatosInstalacion = {
   placeId: string | null;
   lat: number | null;
   lng: number | null;
+  estado: "prospecto" | "activa" | "inactiva";
 };
 
 type Ubicacion = Pick<DatosInstalacion, "placeId" | "lat" | "lng">;
@@ -47,6 +48,16 @@ function ubicacionCompatible(a: Ubicacion, b: Ubicacion): boolean {
   return !placeDistinto && !ambosPuntos;
 }
 
+/** `active | inactive | prospect` de 1.0 → `activa | inactiva | prospecto`. */
+export function estadoInstalacion(f: InstalacionOpai1): DatosInstalacion["estado"] {
+  const s = textoLimpio(f.status)?.toLowerCase();
+  if (s === "active") return "activa";
+  if (s === "inactive") return "inactiva";
+  return "prospecto";
+}
+
+export const EQUIVALENTES_INSTALACION = { estado: "prospecto" } as const;
+
 export function datosInstalacion(f: InstalacionOpai1, cuentaId: string): DatosInstalacion {
   return {
     cuentaId,
@@ -57,6 +68,7 @@ export function datosInstalacion(f: InstalacionOpai1, cuentaId: string): DatosIn
     // core.instalaciones guarda Decimal(10,7): se redondea igual para que el plan sea idempotente.
     lat: f.lat == null ? null : Math.round(f.lat * 1e7) / 1e7,
     lng: f.lng == null ? null : Math.round(f.lng * 1e7) / 1e7,
+    estado: estadoInstalacion(f),
   };
 }
 
@@ -99,7 +111,7 @@ export function planInstalaciones(
     } else if (previas.some((p) => p.datos && nombreCanonico(p.datos.nombre) === nombre))
       d = decision("instalacion", f.id, "conflicto", { motivo: "nombre_repetido_en_cuenta" });
     else if (mapeado)
-      d = decisionMapeada("instalacion", f.id, datos, actuales.get(mapeado), mapeado);
+      d = decisionMapeada("instalacion", f.id, datos, actuales.get(mapeado), mapeado, EQUIVALENTES_INSTALACION);
     else d = vincularOCrear(f.id, datos, cuenta, nombre, destino, ids.mapeadoAOtro);
     canonicas.set(cuenta.clave, [...previas, { ...d, datos }]);
     decisiones.push(d);
@@ -131,7 +143,7 @@ function vincularOCrear(
       destinoId: existente.id,
     });
   return {
-    ...decisionMapeada("instalacion", id, datos, existente, existente.id),
+    ...decisionMapeada("instalacion", id, datos, existente, existente.id, EQUIVALENTES_INSTALACION),
     accion: "actualizar",
     motivo: porUbicacion ? "vincula_por_ubicacion" : "vincula_por_nombre",
   };

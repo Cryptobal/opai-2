@@ -2,7 +2,6 @@
 // RUT, el nombre canónico solo genera propuestas de fusión, nunca una fusión automática (R28).
 import {
   type Aviso,
-  camposDistintos,
   type Decision,
   decision,
   decisionDuplicado,
@@ -11,6 +10,7 @@ import {
   ordenEstable,
   type Propuesta,
 } from "./comun";
+import { completarVacios } from "./completar-vacios";
 import type { EstadoDestino } from "./destino-tipos";
 import { correo, nombreCanonico, rut, textoLimpio } from "./normalizar";
 import type { CuentaOpai1 } from "./origen";
@@ -24,6 +24,13 @@ export type DatosCuenta = {
   comuna: string | null;
   ciudad: string | null;
   emailDte: string | null;
+  estado: "prospecto" | "cliente_activo" | "cliente_inactivo";
+  escrituraNotaria: string | null;
+  escrituraFecha: string | null;
+  clienteDesde: string | null;
+  clienteHasta: string | null;
+  representanteNombre: string | null;
+  representanteRut: string | null;
 };
 
 export type PlanCuentas = {
@@ -32,19 +39,49 @@ export type PlanCuentas = {
   avisos: Aviso[];
 };
 
+const RE_DIA = /^\d{4}-\d{2}-\d{2}/;
+const dia = (v: string | null | undefined) => {
+  const t = textoLimpio(v);
+  return t && RE_DIA.test(t) ? t.slice(0, 10) : null;
+};
+
+/** `status` de 1.0; si falta, `type` / `isActive` heredados. Sin información queda prospecto. */
+export function estadoCuenta(f: CuentaOpai1): DatosCuenta["estado"] {
+  const status = textoLimpio(f.status)?.toLowerCase();
+  if (status === "client_active") return "cliente_activo";
+  if (status === "client_inactive") return "cliente_inactivo";
+  if (status === "prospect") return "prospecto";
+  const tipo = textoLimpio(f.type)?.toLowerCase();
+  if (tipo === "client" || tipo === "cliente")
+    return f.isActive === false ? "cliente_inactivo" : "cliente_activo";
+  return "prospecto";
+}
+
+/** La razón social sale solo de `legalName`: nunca se rellena con el nombre de fantasía. */
 export function datosCuenta(f: CuentaOpai1): DatosCuenta {
-  const razon = textoLimpio(f.legalName) ?? textoLimpio(f.name);
+  const rep = textoLimpio(f.legalRepresentativeName);
+  const repRut = rut(f.legalRepresentativeRut);
   return {
     nombre: textoLimpio(f.name) ?? f.name,
-    razonSocial: razon,
+    razonSocial: textoLimpio(f.legalName),
     rut: rut(f.rut),
     giro: textoLimpio(f.giro),
     calle: textoLimpio(f.address),
     comuna: textoLimpio(f.commune),
     ciudad: textoLimpio(f.city),
     emailDte: correo(f.emailDte),
+    estado: estadoCuenta(f),
+    escrituraNotaria: textoLimpio(f.notaryName),
+    escrituraFecha: dia(f.notaryDate),
+    clienteDesde: dia(f.startDate),
+    clienteHasta: dia(f.endDate),
+    representanteNombre: rep && repRut ? rep : null,
+    representanteRut: rep && repRut ? repRut : null,
   };
 }
+
+/** `prospecto` es el estado por defecto de 2.0: equivale a «sin dato» y puede completarse. */
+export const EQUIVALENTES_CUENTA = { estado: "prospecto" } as const;
 
 export function planCuentas(filas: readonly CuentaOpai1[], destino: EstadoDestino): PlanCuentas {
   const ids = indiceIds(destino, "cuenta");
@@ -57,6 +94,7 @@ export function planCuentas(filas: readonly CuentaOpai1[], destino: EstadoDestin
   for (const f of ordenEstable(filas)) {
     const datos = datosCuenta(f);
     if (textoLimpio(f.rut) && !datos.rut) avisos.push({ codigo: "rut_invalido", idOpai1: f.id });
+    if (!datos.razonSocial) avisos.push({ codigo: "cuenta_no_lista_sin_razon_social", idOpai1: f.id });
     const mapeado = ids.porExterno.get(f.id);
     const canonica = datos.rut ? canonPorRut.get(datos.rut) : undefined;
     if (canonica) {
@@ -65,20 +103,24 @@ export function planCuentas(filas: readonly CuentaOpai1[], destino: EstadoDestin
     }
     let d: Decision<DatosCuenta>;
     const existente = datos.rut ? porRut.get(datos.rut) : undefined;
-    if (mapeado) d = decisionMapeada("cuenta", f.id, datos, actuales.get(mapeado), mapeado);
+    if (mapeado)
+      d = decisionMapeada("cuenta", f.id, datos, actuales.get(mapeado), mapeado, EQUIVALENTES_CUENTA);
     else if (!existente) d = decision("cuenta", f.id, "crear", { datos });
     else if (ids.mapeadoAOtro(existente.id, [f.id]))
       d = decision("cuenta", f.id, "conflicto", {
         motivo: "rut_ya_mapeado",
         destinoId: existente.id,
       });
-    else
+    else {
+      const { escribir, conflictos } = completarVacios(datos, existente, EQUIVALENTES_CUENTA);
       d = decision("cuenta", f.id, "actualizar", {
         motivo: "vincula_por_rut",
         destinoId: existente.id,
-        campos: camposDistintos(datos, existente),
+        campos: Object.keys(escribir),
+        conflictos,
         datos,
       });
+    }
     if (datos.rut) canonPorRut.set(datos.rut, d);
     decisiones.push(d);
   }

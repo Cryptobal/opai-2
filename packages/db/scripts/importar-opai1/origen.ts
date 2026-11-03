@@ -31,6 +31,17 @@ export const cuentaOpai1 = z.object({
   city: texto,
   /** Correo receptor DTE en la cuenta (no sustituye contactos con rol facturación). */
   emailDte: texto,
+  /** `prospect | client_active | client_inactive`; si falta se usa `type` / `isActive` heredados. */
+  status: texto,
+  type: texto,
+  isActive: z.boolean().nullish(),
+  legalRepresentativeName: texto,
+  legalRepresentativeRut: texto,
+  notaryName: texto,
+  notaryDate: texto,
+  ownerId: texto,
+  startDate: texto,
+  endDate: texto,
   createdAt: fecha,
   updatedAt: fecha,
 });
@@ -64,6 +75,8 @@ export const instalacionOpai1 = z.object({
   lat: z.number().nullish(),
   lng: z.number().nullish(),
   activatedByDealId: texto,
+  /** `prospect | active | inactive`. */
+  status: texto,
   createdAt: fecha,
   updatedAt: fecha,
 });

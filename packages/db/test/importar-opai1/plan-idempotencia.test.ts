@@ -45,17 +45,29 @@ describe("idempotencia del plan", () => {
     expect(calcularPlan(fixture(), cargado)).toEqual(segundo);
   });
 
-  it("un cambio en 1.0 después de la carga sale como actualizar con el nombre del campo", () => {
+  it("un valor distinto en 1.0 después de la carga es un conflicto de campo y no se escribe", () => {
     const cargado = aplicarEnMemoria(calcularPlan(fixture(), estadoVacio()), estadoVacio());
     const datos = fixture();
     const a6 = datos.accounts.find((a) => a.id === "acc-a6");
     if (!a6) throw new Error("fixture sin acc-a6");
     a6.name = "Delta Logística Renombrada";
     const d = calcularPlan(datos, cargado).cuentas.find((x) => x.idOpai1 === "acc-a6");
-    expect(d).toMatchObject({
-      accion: "actualizar",
-      motivo: "cambian_campos",
-      campos: ["nombre", "razonSocial"],
-    });
+    expect(d).toMatchObject({ accion: "sin_cambios", campos: [], conflictos: ["nombre"] });
+  });
+
+  it("un campo vacío en 2.0 se completa; uno nulo en 1.0 no borra nada", () => {
+    const cargado = aplicarEnMemoria(calcularPlan(fixture(), estadoVacio()), estadoVacio());
+    const fila = cargado.cuentas.find((c) => c.rut === "76333333-7");
+    if (!fila) throw new Error("fixture sin cuenta 76333333-7");
+    fila.giro = null;
+    fila.ciudad = "Valparaíso";
+    const datos = fixture();
+    const a6 = datos.accounts.find((a) => a.id === "acc-a6");
+    if (!a6) throw new Error("fixture sin acc-a6");
+    a6.giro = "Servicios de seguridad";
+    a6.city = null;
+    const d = calcularPlan(datos, cargado).cuentas.find((x) => x.idOpai1 === "acc-a6");
+    expect(d).toMatchObject({ accion: "actualizar", campos: ["giro"], conflictos: [] });
+    expect(d?.campos).not.toContain("ciudad");
   });
 });
