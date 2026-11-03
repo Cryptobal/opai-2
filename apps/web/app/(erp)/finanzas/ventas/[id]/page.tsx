@@ -8,6 +8,8 @@ import { fecha, pesos, rut } from "@/lib/fechas";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "../_componentes/etiquetas-venta";
+import { AccionesVenta } from "../_componentes/acciones-venta";
+import { HistorialEnvios, type EnvioCliente } from "../_componentes/historial-envios";
 import type { Venta } from "../_componentes/tipos";
 
 type Detalle = Venta & {
@@ -24,7 +26,10 @@ type Detalle = Venta & {
 async function cargar(id: string) {
   await requerirIdentidad(`/finanzas/ventas/${id}`);
   const r = await ejecutarComoUsuario<Detalle>("erp", "finanzas.ventas.obtener", { documentoId: id });
-  return { state: estadoPantalla(r), venta: r.ok ? r.data : null };
+  const e = r.ok
+    ? await ejecutarComoUsuario<{ envios: EnvioCliente[] }>("erp", "finanzas.ventas.envios", { documentoId: id })
+    : null;
+  return { state: estadoPantalla(r), venta: r.ok ? r.data : null, envios: e?.ok ? e.data.envios : [] };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -51,13 +56,13 @@ export default async function VentaDetallePage({ params }: { params: Promise<{ i
     >
       {(d) => {
         if (d.state === "ready" && !d.venta) notFound();
-        return <Ficha state={d.state} venta={d.venta} />;
+        return <Ficha state={d.state} venta={d.venta} envios={d.envios} />;
       }}
     </PaginaPortal>
   );
 }
 
-function Ficha({ state, venta }: { state: EstadoPantalla; venta: Detalle | null }) {
+function Ficha({ state, venta, envios }: { state: EstadoPantalla; venta: Detalle | null; envios: EnvioCliente[] }) {
   if (state !== "ready" || !venta) return null;
   const dte = estadoDteVenta(venta.estadoDte);
   const cobro = estadoCobroVenta(venta.estadoCobro);
@@ -120,6 +125,8 @@ function Ficha({ state, venta }: { state: EstadoPantalla; venta: Detalle | null 
         ) : null}
         {venta.glosa ? <p className="text-sm text-fg-muted">{venta.glosa}</p> : null}
       </Card>
+      <AccionesVenta venta={venta} enviosPrevios={envios.filter((x) => x.estado === "enviado").length} />
+      <HistorialEnvios envios={envios} />
     </div>
   );
 }

@@ -5,9 +5,10 @@ import { enviarCorreo } from "../core/comunicaciones";
 import { escribirConEvento } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { correoDe } from "../integraciones/adaptadores";
+import { adaptadorSiiDe } from "./adaptador-sii";
 import { PERMISO_VENTAS, cuentaDe, documentoEmitidoIdSchema } from "./ventas-comun";
 import { pdfDeDocumento } from "./ventas-pdf-doc";
-import { leerXmlFirmadoDte } from "./ventas-xml";
+import { xmlParaEnvioSii } from "./ventas-xml";
 
 const TIPOS: Record<number, string> = {
   33: "Factura electrónica",
@@ -74,7 +75,7 @@ export const ventasEnviarCliente = defineCapability({
     const adjuntos = ["pdf", "xml"] as const;
     if (dryRun) return { documentoId: doc.id, para, cc, adjuntos: [...adjuntos], estado: "vista_previa" as const };
 
-    const xml = await leerXmlFirmadoDte(ctx, doc.xmlStorageKey);
+    const xml = await xmlParaEnvioSii(ctx, doc, await adaptadorSiiDe(ctx));
     const pdf = await pdfDeDocumento(ctx, doc);
     const cuenta = await cuentaDe(ctx, doc.cuentaId);
     const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } });
