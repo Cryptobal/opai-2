@@ -31,6 +31,7 @@ type FilaEnvio = {
   destinatariosJson: string;
   snapshotJson: string;
   mensaje: string | null;
+  solicitadoPorId: string;
 };
 
 export async function ejecutarEnvioPropuestaAprobado(
@@ -120,6 +121,7 @@ export async function ejecutarEnvioPropuestaAprobado(
       destinatarios: destinatarios.length,
       snapshotJson,
       envioDirectoDentroMargen: input.envioDirectoDentroMargen ?? false,
+      solicitadoPorId: row.solicitadoPorId,
     });
   } catch (e) {
     await liberarReclamoEnvioPropuesta(ctx, row.id, input.actorId);

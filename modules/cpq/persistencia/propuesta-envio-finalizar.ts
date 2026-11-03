@@ -52,6 +52,7 @@ export async function marcarEnvioPropuestaEnviado(
     destinatarios: number;
     snapshotJson: string;
     envioDirectoDentroMargen: boolean;
+    solicitadoPorId: string;
   },
 ) {
   await ctx.transaccion(async (tx) => {
@@ -87,6 +88,7 @@ export async function marcarEnvioPropuestaEnviado(
         incluyeCotizacion: input.incluyeCotizacion,
         incluyePropuesta: input.incluyePropuesta,
         destinatarios: input.destinatarios,
+        solicitadoPorId: input.solicitadoPorId,
       },
     });
   });
