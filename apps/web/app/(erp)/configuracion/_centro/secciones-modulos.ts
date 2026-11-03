@@ -12,6 +12,7 @@ import { SeccionFlujoCaja } from "@/app/(erp)/configuracion/_finanzas/seccion-fl
 import { SeccionPlanCuentas } from "@/app/(erp)/configuracion/_finanzas/seccion-plan-cuentas";
 import { SeccionCatalogoCpq } from "@/app/(erp)/configuracion/_cpq/seccion-catalogo";
 import { SeccionMarcaPlantillasCpq } from "@/app/(erp)/configuracion/_cpq/seccion-marca-plantillas";
+import { SeccionSeguimiento } from "@/app/(erp)/configuracion/_comercial/seccion-seguimiento";
 import { SeccionImportar10 } from "@/app/(erp)/configuracion/_comercial/seccion-importar-1-0";
 
 /**
@@ -56,6 +57,12 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       etiqueta: "Canales de entrada",
       permiso: "comercial:canales.manage",
       Contenido: SeccionCanales,
+    },
+    {
+      id: "seguimiento",
+      etiqueta: "Seguimiento",
+      permiso: "comercial:config.manage",
+      Contenido: SeccionSeguimiento,
     },
   ],
   nomina: [

@@ -110,6 +110,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25).",
   "comercial.solicitudes.recibir_formulario_web":
     "Interna: el endpoint público `/api/t/[slug]/solicitudes` valida la clave del canal antes de existir sesión (Brief 07 PR 2).",
+  "comercial.seguimientos.recibir_correo":
+    "Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67).",
   "comercial.canales.rotar_token_formulario":
     "Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant.",
 };
