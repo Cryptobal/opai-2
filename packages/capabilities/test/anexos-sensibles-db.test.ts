@@ -23,6 +23,10 @@ vi.mock("../src/core/anexos/plantilla", async (original) => ({
 }));
 
 type Fila = { concepto: string; antes: string; despues: string };
+/** Intl usa espacio duro («$\u00a0700.000») según la versión de ICU del runner. */
+const sinNbsp = (t: string | undefined) => (t ?? "").replace(/\u00a0/g, " ");
+const normal = (f: Fila | undefined) =>
+  f && { ...f, antes: sinNbsp(f.antes), despues: sinNbsp(f.despues) };
 
 describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en base real", () => {
   let e: Entorno;
@@ -153,7 +157,7 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       snapshotDespues: { estructuraId: v2.id },
     });
     const detalle = await dato<{ filas: Fila[] }>(ctx(), "core.anexos.get", { id: a.id });
-    expect(detalle.filas.find((f) => f.concepto === "Sueldo base")).toEqual({
+    expect(normal(detalle.filas.find((f) => f.concepto === "Sueldo base"))).toEqual({
       concepto: "Sueldo base",
       antes: "$ 700.000",
       despues: "$ 800.000",
@@ -166,8 +170,8 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
     expect(aprobado.estado).toBe("aprobado");
     const doc = await e.admin.documento.findUniqueOrThrow({ where: { id: aprobado.documentoId } });
     const html = cuerpos.get(doc.storageKey) ?? "";
-    expect(html).toContain("$ 700.000");
-    expect(html).toContain("$ 800.000");
+    expect(sinNbsp(html)).toContain("$ 700.000");
+    expect(sinNbsp(html)).toContain("$ 800.000");
   });
 
   it("cambio de capa sin versión previa: el «antes» es la capa que regía, no una columna de «—»", async () => {
@@ -191,7 +195,7 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       snapshotDespues: { estructuraId: porRut.id },
     });
     const { filas } = await dato<{ filas: Fila[] }>(ctx(), "core.anexos.get", { id: a.id });
-    expect(filas.find((f) => f.concepto === "Sueldo base")).toEqual({
+    expect(normal(filas.find((f) => f.concepto === "Sueldo base"))).toEqual({
       concepto: "Sueldo base",
       antes: "$ 600.000",
       despues: "$ 650.000",
@@ -235,7 +239,7 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       snapshotDespues: { tipo: "anulacion", nivel: "persona", ref: personaId },
     });
     const { filas } = await dato<{ filas: Fila[] }>(ctx(), "core.anexos.get", { id: a.id });
-    expect(filas.find((f) => f.concepto === "Sueldo base")).toEqual({
+    expect(normal(filas.find((f) => f.concepto === "Sueldo base"))).toEqual({
       concepto: "Sueldo base",
       antes: "$ 690.000",
       despues: "$ 610.000",
