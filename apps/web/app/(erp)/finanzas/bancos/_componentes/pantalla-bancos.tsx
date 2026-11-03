@@ -65,8 +65,7 @@ export function PantallaBancos({
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="t-heading">Bancos</h1>
-            <p className="t-body-sm text-muted">
+            <p className="t-body-sm text-fg-muted">
               {cuenta ? `${cuenta.banco} · ${cuenta.numeroVisible}` : "Configura una cuenta para importar cartolas."}
             </p>
           </div>
@@ -103,7 +102,7 @@ export function PantallaBancos({
                   <li key={m.id} className="rowcard flex flex-wrap items-center gap-2 p-3">
                     <div className="min-w-0 flex-1">
                       <p className="t-body-sm font-medium">{m.glosa}</p>
-                      <p className="t-caption text-muted">
+                      <p className="t-caption text-fg-muted">
                         {fechaDdMmAaaa(m.fecha)}
                         {m.referencia ? ` · ${m.referencia}` : ""}
                       </p>

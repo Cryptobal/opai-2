@@ -1,3 +1,4 @@
+import { formatearNumero } from "@opai/domain";
 import { Estado } from "@opai/ds";
 
 import { estadoPantalla } from "@/lib/formato";
@@ -31,7 +32,7 @@ export async function SeccionCatalogoCpq() {
                   <span className="t-mono text-fg-muted">{i.codigo}</span> · {i.nombre}
                 </span>
                 <span className="t-caption text-fg-muted">
-                  {i.costoUnitarioClp.toLocaleString("es-CL")} CLP · {i.recurrencia}
+                  {formatearNumero(i.costoUnitarioClp)} CLP · {i.recurrencia}
                   {!i.activo ? " · inactivo" : ""}
                 </span>
               </li>

@@ -44,7 +44,7 @@ export function PlanillaFlujoEscritorio({
     <div className="flex min-w-0 flex-col gap-4">
       {avisoTitulo ? (
         <Alerta tono="danger" titulo={avisoTitulo}>
-          Revisa la semana en la planilla. Aviso in-app sin envío externo (CAR-136).
+          Revisa la semana en la planilla. El aviso se muestra solo dentro de OPAI, sin enviar correos.
         </Alerta>
       ) : null}
       <PlanillaScreen

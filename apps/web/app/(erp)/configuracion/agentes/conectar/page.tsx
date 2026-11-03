@@ -86,7 +86,6 @@ export default function Conectar() {
                     </div>
                     <p className="t-caption">
                       Lectura libre · escritura con vista previa · irreversible con aprobación
-                      (ADR-032)
                     </p>
                   </div>
                 ),

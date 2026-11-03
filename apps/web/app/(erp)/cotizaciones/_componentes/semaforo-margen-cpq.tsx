@@ -22,7 +22,7 @@ export function SemaforoMargenCpq({
         <span className="t-overline text-fg-muted">Margen efectivo</span>
         <Badge tono={tono}>{semaforoEtiqueta(semaforo)}</Badge>
       </div>
-      <p className="t-h3 t-numeric">{margenPctTexto(margenEfectivoPct)}</p>
+      <p className="t-subheading t-numeric">{margenPctTexto(margenEfectivoPct)}</p>
       {pct != null ? (
         <div className="relative h-2 overflow-hidden rounded-full bg-fill">
           <div

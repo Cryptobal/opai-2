@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { Badge, Card, type EstadoPantalla } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { LinkNext } from "@/app/_components/link-next";
 import { estadoPantalla } from "@/lib/formato";
-import { pesos, rut } from "@/lib/fechas";
+import { fecha, pesos, rut } from "@/lib/fechas";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
+import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "../_componentes/etiquetas-venta";
 import type { Venta } from "../_componentes/tipos";
 
 type Detalle = Venta & {
@@ -29,14 +29,26 @@ async function cargar(id: string) {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return { title: `Venta ${id.slice(0, 8)}…` };
+  try {
+    const d = await cargar(id);
+    return { title: d.venta ? tituloVenta(d.venta) : "Venta" };
+  } catch {
+    return { title: "Venta" };
+  }
 }
 
 /** Ficha de un documento emitido. */
 export default async function VentaDetallePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return (
-    <PaginaPortal portal="erp" titulo="Ventas (DTE)" ruta="/finanzas/ventas" cargar={() => cargar(id)}>
+    <PaginaPortal
+      portal="erp"
+      titulo="Venta"
+      ruta="/finanzas/ventas"
+      volver={{ href: "/finanzas/ventas", etiqueta: "Ventas" }}
+      cargar={() => cargar(id)}
+      opciones={(d) => ({ titulo: d.venta ? tituloVenta(d.venta) : "Venta" })}
+    >
       {(d) => {
         if (d.state === "ready" && !d.venta) notFound();
         return <Ficha state={d.state} venta={d.venta} />;
@@ -47,21 +59,16 @@ export default async function VentaDetallePage({ params }: { params: Promise<{ i
 
 function Ficha({ state, venta }: { state: EstadoPantalla; venta: Detalle | null }) {
   if (state !== "ready" || !venta) return null;
-  const titulo = venta.folio
-    ? `${venta.tipoDteNombre} · folio ${venta.folio}`
-    : `Borrador · ${venta.tipoDteNombre}`;
+  const dte = estadoDteVenta(venta.estadoDte);
+  const cobro = estadoCobroVenta(venta.estadoCobro);
   return (
     <div className="flex flex-col gap-4">
-      <LinkNext href="/finanzas/ventas" className="text-sm text-fg-muted">
-        ← Volver al libro
-      </LinkNext>
       <Card className="p-4 flex flex-col gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <h2 className="text-xl font-semibold text-fg">{titulo}</h2>
-            <p className="text-fg-muted">{venta.cuentaNombre}</p>
+            <p className="t-subheading text-fg">{venta.cuentaNombre}</p>
           </div>
-          <Badge tono={venta.estadoDte === "aceptado" ? "success" : "neutro"}>{venta.estadoDte}</Badge>
+          <Badge tono={dte.tono}>{dte.etiqueta}</Badge>
         </div>
         <dl className="grid gap-2 sm:grid-cols-2 text-sm">
           <div>
@@ -70,11 +77,11 @@ function Ficha({ state, venta }: { state: EstadoPantalla; venta: Detalle | null 
           </div>
           <div>
             <dt className="text-fg-muted">Emisión</dt>
-            <dd>{venta.fechaEmision ?? "—"}</dd>
+            <dd>{fecha(venta.fechaEmision)}</dd>
           </div>
           <div>
             <dt className="text-fg-muted">Vencimiento</dt>
-            <dd>{venta.fechaVencimiento ?? "—"}</dd>
+            <dd>{fecha(venta.fechaVencimiento)}</dd>
           </div>
           <div>
             <dt className="text-fg-muted">Total</dt>
@@ -82,15 +89,18 @@ function Ficha({ state, venta }: { state: EstadoPantalla; venta: Detalle | null 
           </div>
           <div>
             <dt className="text-fg-muted">Estado de cobro</dt>
-            <dd>{venta.estadoCobro}</dd>
+            <dd>{cobro.etiqueta}</dd>
           </div>
           <div>
             <dt className="text-fg-muted">Cesión</dt>
-            <dd>{venta.cesionEstado ?? "—"}{venta.cesionProveedor ? ` · ${venta.cesionProveedor}` : ""}</dd>
+            <dd>
+              {venta.cesionEstado ? estadoCesionVenta(venta.cesionEstado).etiqueta : "—"}
+              {venta.cesionProveedor ? ` · ${venta.cesionProveedor}` : ""}
+            </dd>
           </div>
           {venta.trackIdSii ? (
             <div className="sm:col-span-2">
-              <dt className="text-fg-muted">Track ID SII</dt>
+              <dt className="text-fg-muted">Código de seguimiento del SII</dt>
               <dd className="font-mono text-xs">{venta.trackIdSii}</dd>
             </div>
           ) : null}

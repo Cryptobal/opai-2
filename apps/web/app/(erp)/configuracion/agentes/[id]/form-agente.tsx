@@ -77,11 +77,11 @@ export function FormAgente({ k, barra }: Props) {
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Autonomía">
         <p className="t-caption mb-3">
-          ADR-032 · Lectura libre; escritura con vista previa; irreversible con aprobación salvo que
+          Lectura libre; escritura con vista previa; irreversible con aprobación salvo que
           la autorices aquí.
         </p>
         {k.autonomia.length === 0 ? (
-          <p className="text-base text-fg-muted">Sus scopes no incluyen acciones irreversibles.</p>
+          <p className="text-base text-fg-muted">Sus permisos no incluyen acciones irreversibles.</p>
         ) : (
           <ul className="flex flex-col">
             {k.autonomia.map((a) => (

@@ -97,7 +97,7 @@ export function ResumenTenant({ d, panel, problemas }: Props) {
               items={[
                 { etiqueta: "Zona horaria", valor: d.tenant.timezone },
                 {
-                  etiqueta: owners.length > 1 ? "Owners" : "Owner",
+                  etiqueta: owners.length > 1 ? "Propietarios" : "Propietario",
                   valor: owners.join(", ") || null,
                 },
                 {

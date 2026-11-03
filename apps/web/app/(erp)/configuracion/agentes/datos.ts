@@ -1,3 +1,4 @@
+import { formatearUsd } from "@opai/domain";
 import { listarModulos } from "@opai/capabilities";
 
 import { datosSiHayPermiso } from "@/lib/carga";
@@ -63,5 +64,4 @@ export async function cargarKeys() {
   };
 }
 
-export const usd = (n: number) =>
-  `US$ ${n.toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const usd = (n: number) => formatearUsd(n);

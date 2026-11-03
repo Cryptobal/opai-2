@@ -105,7 +105,7 @@ export function EditorImportar10() {
           {vista.usuariosSinMembresia.length > 0 ? (
             <Alerta
               tono="warning"
-              titulo={`${vista.usuariosSinMembresia.length} usuarios del JSON sin membresía en este tenant`}
+              titulo={`${vista.usuariosSinMembresia.length} usuarios del JSON sin acceso a esta empresa`}
             />
           ) : null}
           {vista.reporte.pendientes.length > 0 ? (

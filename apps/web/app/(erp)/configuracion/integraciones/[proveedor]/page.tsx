@@ -1,3 +1,4 @@
+import { formatearNumero, formatearUsd } from "@opai/domain";
 import { notFound } from "next/navigation";
 
 import { Alerta, Badge, Button, SeccionTarjeta } from "@opai/ds";
@@ -141,11 +142,7 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
             {consumo ? (
               <SeccionTarjeta titulo="Consumo del mes">
                 <p className="t-numeric text-md font-semibold text-fg">
-                  {consumo.tokens.toLocaleString("es-CL")} tokens · US${" "}
-                  {consumo.usd.toLocaleString("es-CL", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {formatearNumero(consumo.tokens)} tokens · {formatearUsd(consumo.usd)}
                 </p>
                 <p className="t-caption mt-1">
                   Con credenciales propias, el costo lo cobra el proveedor directamente.

@@ -8,23 +8,12 @@ import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos, rut } from "@/lib/fechas";
 
+import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "./etiquetas-venta";
 import type { LibroVentas, Venta } from "./tipos";
 
 function badgeEstado(v: Venta) {
-  switch (v.estadoDte) {
-    case "borrador":
-      return <Badge tono="neutro">Borrador</Badge>;
-    case "enviado":
-      return <Badge tono="info">SII enviado</Badge>;
-    case "aceptado":
-      return <Badge tono="success">SII aceptado</Badge>;
-    case "rechazado":
-      return <Badge tono="danger">SII rechazado</Badge>;
-    case "anulado_nc":
-      return <Badge tono="warning">Anulado por NC</Badge>;
-    default:
-      return null;
-  }
+  const e = estadoDteVenta(v.estadoDte);
+  return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
 }
 
 /** Libro de ventas (DTE): facturas 33/34, notas de crédito 61. */
@@ -108,8 +97,7 @@ export function ListaVentas(p: {
         {
           id: "doc",
           etiqueta: "Documento",
-          render: (v) =>
-            v.folio ? `${v.tipoDteNombre} · folio ${v.folio}` : `Borrador · ${v.tipoDteNombre}`,
+          render: (v) => tituloVenta(v),
         },
         {
           id: "cliente",
@@ -132,18 +120,19 @@ export function ListaVentas(p: {
         {
           id: "cobro",
           etiqueta: "Cobro",
-          render: (v) => (
-            <Badge tono={v.estadoCobro === "pagada" ? "success" : v.estadoCobro === "cedida" ? "info" : "neutro"}>
-              {v.estadoCobro === "cedida" ? "Cedida" : v.estadoCobro}
-            </Badge>
-          ),
+          render: (v) => {
+            const e = estadoCobroVenta(v.estadoCobro);
+            return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
+          },
         },
         {
           id: "cesion",
           etiqueta: "Cesión",
           render: (v) =>
             v.cesionEstado ? (
-              <Badge tono={v.cesionEstado === "cedido" ? "info" : "neutro"}>{v.cesionEstado}</Badge>
+              <Badge tono={estadoCesionVenta(v.cesionEstado).tono}>
+                {estadoCesionVenta(v.cesionEstado).etiqueta}
+              </Badge>
             ) : (
               "—"
             ),

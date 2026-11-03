@@ -1,3 +1,4 @@
+import { formatearClp } from "@opai/domain";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
 
 export type FilaFlujo = {
@@ -61,7 +62,7 @@ const CAPA: Record<CeldaFlujo["capa"], { tono: NonNullable<Celda["tono"]>; detal
   real: { tono: "success", detalle: "Real" },
 };
 
-export const clp = (n: number) => `${n < 0 ? "$ −" : "$ "}${Math.abs(n).toLocaleString("es-CL")}`;
+export const clp = (n: number) => formatearClp(n);
 
 /** ISO `aaaa-mm-dd` → `dd-mm-aaaa` para UI es-CL. */
 export function fechaDdMmAaaa(iso: string): string {

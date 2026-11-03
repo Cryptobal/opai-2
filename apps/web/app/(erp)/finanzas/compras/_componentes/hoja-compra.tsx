@@ -1,5 +1,6 @@
 "use client";
 
+import { formatearClp } from "@opai/domain";
 import { useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
@@ -104,7 +105,7 @@ export function HojaCompra({ proveedores, centros }: { proveedores: Proveedor[];
         <Campo etiqueta="Exento" htmlFor="co-exento">
           <InputPesos id="co-exento" valor={exento} onCambiar={setExento} />
         </Campo>
-        <p className="t-numeric text-md font-medium">Total $ {total.toLocaleString("es-CL")}</p>
+        <p className="t-numeric text-md font-medium">Total {formatearClp(total)}</p>
         <Campo etiqueta="Centro de costo" htmlFor="co-centro" ayuda="Opcional: si lo dejas vacío queda «sin centro de costo» con una sugerencia.">
           <Select
             id="co-centro"
