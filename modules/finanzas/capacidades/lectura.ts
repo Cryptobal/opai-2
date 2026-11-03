@@ -2,13 +2,12 @@ import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
 
-import { calcularPlanilla, lunesDe, semanasDesde, sumarSemanas } from "../domain";
-import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { ajustesSchema, aNumeroSeguro, celdaSchema, filaSchema, saldoSchema, semanaSchema, vistaFila } from "./esquemas";
 import type { capaSchema } from "./esquemas";
 import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
-import { aIso, ajustesDe, cargarFlujo } from "./util";
+import { desdeVentana, SEMANAS_HISTORIA, serieSaldos } from "./serie-saldos";
+import { aIso, ajustesDe, lunesHoy } from "./util";
 
 /** Etiqueta de lectura para planes en semana pasada (no entran al saldo real de cartola). */
 export const PLAN_SIN_RESPALDO_CARTOLA = "Plan sin respaldo en cartola";
@@ -72,55 +71,17 @@ export const planillaObtener = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const ajustes = await ajustesDe(ctx);
-    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
-    const cantidad = input.movil ? 4 : (input.semanas ?? ajustes.horizonteSemanas);
-    const desde = input.desde ?? (input.movil ? hoy : ajustes.desde);
-    const lista = semanasDesde(desde, cantidad);
-    const { filas, celdas, dominio, celdasDom } = await cargarFlujo(
+    const hoy = lunesHoy();
+    const cantidad = input.movil
+      ? 4
+      : (input.semanas ?? ajustes.horizonteSemanas + SEMANAS_HISTORIA);
+    const desde = input.movil ? hoy : desdeVentana(ajustes, input.desde, hoy);
+    const { lista, calculo, extraVista, filas, celdas } = await serieSaldos(
       ctx,
+      ajustes,
       desde,
-      sumarSemanas(desde, cantidad - 1),
+      cantidad,
     );
-    let saldoPrevio = ajustes.saldoInicial;
-    if (ajustes.desde < desde) {
-      const previasHasta = sumarSemanas(desde, -1);
-      const cantPrevias =
-        Math.round((Date.parse(previasHasta) - Date.parse(ajustes.desde)) / (7 * 86_400_000)) + 1;
-      const prevLista = semanasDesde(ajustes.desde, cantPrevias);
-      const { dominio: prevDom, celdasDom: prevCeldas } = await cargarFlujo(
-        ctx,
-        ajustes.desde,
-        previasHasta,
-      );
-      const { dominio: prevConCartola } = await celdasDominioConCartolaPasada(
-        ctx,
-        prevCeldas,
-        hoy,
-        prevLista,
-      );
-      const prevCalc = calcularPlanilla({
-        saldoInicial: ajustes.saldoInicial,
-        umbral: ajustes.umbral,
-        semanas: prevLista,
-        filas: prevDom,
-        celdas: prevConCartola,
-      });
-      saldoPrevio = prevCalc.at(-1)?.saldoFinal ?? ajustes.saldoInicial;
-    }
-
-    const { dominio: celdasCalc, extraVista } = await celdasDominioConCartolaPasada(
-      ctx,
-      celdasDom,
-      hoy,
-      lista,
-    );
-    const calculo = calcularPlanilla({
-      saldoInicial: saldoPrevio,
-      umbral: ajustes.umbral,
-      semanas: lista,
-      filas: dominio,
-      celdas: celdasCalc,
-    });
     const semanasOut = calculo.map((s) => ({ ...s, pasada: s.semana < hoy }));
     const avisoSemanas = await avisoLeido(ctx, ajustes, semanasOut);
     type CapaOut = z.infer<typeof capaSchema>;

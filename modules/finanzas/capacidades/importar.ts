@@ -6,7 +6,7 @@ import { lunesDe } from "../domain";
 import { semanaSchema } from "./esquemas";
 import { filaImportSchema, filaDesdeRegistroCsv, MAX_FILAS_IMPORT, parsearCsv } from "./importar-parse";
 import { PERMISO_CONFIGURAR } from "./permisos";
-import { aFecha, ajustesDe } from "./util";
+import { aFecha, ajustesDe, lunesHoy } from "./util";
 import { aplicarFilasImportadas, type FilaValida } from "./importar-aplicar";
 
 const resultadoFila = z.object({
@@ -47,7 +47,7 @@ export const flujoImportar = defineCapability({
     let aplicadas = 0;
     let omitidas = 0;
     let errores = 0;
-    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+    const hoy = lunesHoy();
 
     // 1) Validación pura de todas las filas.
     const validas: { indice: number; row: FilaValida }[] = [];

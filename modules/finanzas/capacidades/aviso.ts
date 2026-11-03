@@ -2,9 +2,8 @@ import type { Contexto } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 import { randomUUID } from "node:crypto";
 
-import { calcularPlanilla, lunesDe, semanasDesde } from "../domain";
-import { aNumeroSeguro } from "./esquemas";
-import { aFecha, aIso, cargarFlujo, vistaAjustes } from "./util";
+import { desdeVentana, serieSaldos } from "./serie-saldos";
+import { aFecha, aIso, lunesHoy, vistaAjustes } from "./util";
 import type { ajustesDe } from "./util";
 
 type SemanaSaldo = { semana: string; saldoFinal: number };
@@ -15,34 +14,15 @@ export async function semanasProyectadas(
   ajustes: Awaited<ReturnType<typeof ajustesDe>>,
   tx?: TenantTx,
 ): Promise<SemanaSaldo[]> {
-  const lista = semanasDesde(ajustes.desde, ajustes.horizonteSemanas);
-  const primero = lista[0];
-  if (!primero) return [];
-  const hasta = lista.at(-1) as string;
-  const db = tx ?? ctx.db;
-  const { dominio, celdasDom } = await cargarFlujo(ctx, ajustes.desde, hasta, tx);
-  const previas =
-    ajustes.desde < primero
-      ? await db.flujoCelda.findMany({
-          where: {
-            semana: {
-              lt: aFecha(primero),
-              gte: aFecha(ajustes.desde),
-            },
-          },
-        })
-      : [];
-  const saldoPrevio = previas.reduce((s, c) => {
-    const f = dominio.find((x) => x.id === c.filaId);
-    return f ? s + (f.seccion === "ingreso" ? aNumeroSeguro(c.monto) : -aNumeroSeguro(c.monto)) : s;
-  }, ajustes.saldoInicial);
-  return calcularPlanilla({
-    saldoInicial: saldoPrevio,
-    umbral: ajustes.umbral,
-    semanas: lista,
-    filas: dominio,
-    celdas: celdasDom,
-  }).map((s) => ({ semana: s.semana, saldoFinal: s.saldoFinal }));
+  const hoy = lunesHoy();
+  const { calculo } = await serieSaldos(
+    ctx,
+    ajustes,
+    desdeVentana(ajustes, hoy, hoy),
+    ajustes.horizonteSemanas,
+    tx,
+  );
+  return calculo.map((s) => ({ semana: s.semana, saldoFinal: s.saldoFinal }));
 }
 
 /** Estado del aviso para la planilla (lectura pura, sin escribir). */
@@ -52,7 +32,7 @@ export async function avisoLeido(
   semanasOut: SemanaSaldo[],
 ) {
   if (!ajustes.avisoActivo) return [];
-  const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+  const hoy = lunesHoy();
   const umbral = ajustes.avisoUmbral;
   const candidatas = semanasOut.filter((s) => s.semana >= hoy && s.saldoFinal < umbral);
   const emitidos = new Set(
@@ -80,7 +60,7 @@ export async function sincronizarAvisosEnTx(
   if (!row?.avisoActivo) return;
   const ajustes = vistaAjustes(row);
   const semanas = await semanasProyectadas(ctx, ajustes, tx);
-  const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+  const hoy = lunesHoy();
   const umbral = ajustes.avisoUmbral;
   const candidatas = semanas.filter((x) => x.semana >= hoy && x.saldoFinal < umbral);
   if (!candidatas.length) return;
