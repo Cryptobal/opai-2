@@ -14,7 +14,8 @@ vi.mock("react", async (importar) => ({
   useEffect: (f: () => void) => h.efectos.push(f),
 }));
 vi.mock("@/app/_acciones/capacidad", () => ({ ejecutarCapacidad: h.ejecutar }));
-import { Bandeja, conPlazo } from "@/app/(erp)/_componentes/bandeja";
+import { Bandeja } from "@/app/(erp)/_componentes/bandeja";
+import { conPlazo } from "@/app/(erp)/_componentes/con-plazo";
 
 afterEach(() => vi.unstubAllGlobals());
 

@@ -9,25 +9,7 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import type { Aviso } from "@/app/_components/campana";
 import { ListaAvisos } from "@/app/_components/lista-avisos";
 import { BandejaCorta } from "./bandeja-corta";
-
-const PLAZO_MS = 10_000;
-
-/** Rechaza si la acción no responde a tiempo: así la tarjeta muestra su error en vez de quedar cargando. */
-export function conPlazo<T>(p: Promise<T>, ms = PLAZO_MS): Promise<T> {
-  return new Promise<T>((resolver, rechazar) => {
-    const t = setTimeout(() => rechazar(new Error("plazo")), ms);
-    p.then(
-      (v) => {
-        clearTimeout(t);
-        resolver(v);
-      },
-      (e: unknown) => {
-        clearTimeout(t);
-        rechazar(e instanceof Error ? e : new Error("fallo"));
-      },
-    );
-  });
-}
+import { conPlazo } from "./con-plazo";
 
 /** Una sola Bandeja; el servidor aplica destinatario, permisos efectivos y tenant. */
 export function Bandeja({ corta = false }: { corta?: boolean }) {
