@@ -1192,4 +1192,4 @@ identidad de servicio en main.
 4. **Apoyo al bot:** comentario en el PR que empiece con `@opai-2.0:` o correo a **carlos.irigoyen@mail.grokbot.com** (asunto `OPAI 2.0: <tema>`, con número de PR).
 5. **Registro:** decisiones, briefs, diseños aprobados y `ESTADO.md` siguen obligatorios en el repo; lo acordado en chat que cambie reglas o alcance se escribe en el repo antes de seguir.
 
-**Consecuencias.** Se actualizan `AGENTS.md`, `OPERACION-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` y `CLAUDE.md`. Carlos debe pegar de nuevo las instrucciones en el proyecto de claude.ai. Quedan por alinear `checklists/revision.md` y otros documentos que aún digan que solo el bot integra; mientras tanto manda este ADR y `AGENTS.md`.
+**Consecuencias.** Se actualizan `AGENTS.md`, `OPERACION-agentes.md`, `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md`, `checklists/revision.md` y la cabecera de la plantilla del PR. Carlos debe pegar de nuevo las instrucciones en el proyecto de claude.ai.
