@@ -728,7 +728,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.ventas.cesion_ceder`
 - `finanzas.ventas.cesion_simular`
 - `finanzas.ventas.emitir_nota_credito`
+- `finanzas.ventas.enviar_cliente`
 - `finanzas.ventas.enviar_sii`
+- `finanzas.ventas.envios`
 - `finanzas.ventas.pdf`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
