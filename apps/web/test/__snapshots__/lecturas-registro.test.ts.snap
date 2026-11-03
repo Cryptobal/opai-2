@@ -51,7 +51,6 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "cpq.plantillas_documento.get",
   "finanzas.ajustes.obtener",
   "finanzas.centros_costo.listar",
-  "finanzas.cierres.listar",
   "finanzas.derivadas.listar",
   "finanzas.dte_config.obtener",
   "finanzas.filas.listar",
