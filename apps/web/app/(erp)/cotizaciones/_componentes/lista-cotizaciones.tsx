@@ -1,110 +1,103 @@
-import { Badge, ListScreen } from "@opai/ds";
+import { Plus } from "lucide-react";
 
-import { BotonReintentar } from "@/app/_components/boton-reintentar";
+import { Badge } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-import { pesos } from "@/lib/fechas";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { conBusqueda } from "@/lib/parametros";
+import { estadoCpqBadge } from "@/lib/cpq-presentacion";
 
-import type { CotizacionFila, DatosCotizaciones } from "./datos";
+import type { DatosCotizaciones } from "./datos";
+import { margenLista, ventaLista } from "./lista-cotizaciones-helpers";
 
-const ESTADOS: Record<string, string> = {
-  borrador: "Borrador",
-  en_aprobacion: "En aprobación",
-  lista: "Lista",
-  enviada: "Enviada",
-  aceptada: "Aceptada",
-  rechazada: "Rechazada",
-  vencida: "Vencida",
-  reemplazada: "Reemplazada",
-  archivada: "Archivada",
-};
-const estado = (c: CotizacionFila) => (
-  <Badge tono={c.version?.estado === "aceptada" ? "success" : "neutro"}>
-    {ESTADOS[c.version?.estado ?? ""] ?? "Sin versión"}
-  </Badge>
-);
-const vigencia = (c: CotizacionFila) => (c.vigente ? "Vigente" : "Alternativa");
-const fecha = (c: CotizacionFila) =>
-  c.version?.validaHasta?.split("-").reverse().join("-") ?? "Sin fecha";
-const venta = (c: CotizacionFila) =>
-  c.version?.ventaMensualClp == null ? "Sin calcular" : pesos(c.version.ventaMensualClp);
-
-/** Lista móvil y tabla desde md; el código abre las cotizaciones de su negocio. */
+/** Columna izquierda del patrón lista y ficha (CAR-141). */
 export function ListaCotizaciones({
   datos: d,
-  negocioId,
-  abierto = true,
+  seleccionada,
+  q,
   base = "/cotizaciones",
 }: {
   datos: DatosCotizaciones;
-  negocioId?: string;
-  abierto?: boolean;
+  seleccionada?: string;
+  q?: string;
   base?: string;
 }) {
-  const nueva =
-    d.crear && abierto ? (
-      <EnlaceBoton href={`/cotizaciones/nueva${negocioId ? `?negocio=${negocioId}` : ""}`}>
-        Nueva cotización
-      </EnlaceBoton>
-    ) : undefined;
+  const nueva = d.crear ? (
+    <EnlaceBotonHoja href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`} icono={Plus}>
+      Nueva
+    </EnlaceBotonHoja>
+  ) : undefined;
   return (
-    <ListScreen
+    <ListaMaestro
       state={d.state}
       titulo="Cotizaciones"
-      items={d.items}
-      clave={(c) => c.id}
-      accionPrincipal={nueva}
-      Link={LinkNext}
-      href={(c) => `/cotizaciones/${c.id}`}
-      textos={{
-        vacio: {
-          titulo: "Aún no hay cotizaciones",
-          descripcion: "Crea una cotización ligada a un negocio abierto.",
-          accion: nueva,
-        },
-        error: { accion: <BotonReintentar /> },
+      accion={nueva}
+      buscar="Buscar cotización"
+      meta={{
+        izquierda: `${d.items.length} cotizaciones`,
+        derecha: "Más recientes",
       }}
-      tarjeta={(c) => (
-        <div className="min-w-0 flex-1 space-y-2">
-          <p className="t-label">
-            {c.codigo} · {c.titulo}
-          </p>
-          <p className="t-body-sm break-words">{c.negocioTitulo ?? "Negocio"}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            {estado(c)}
-            <Badge punto={false}>{vigencia(c)}</Badge>
-          </div>
-          <p className="t-caption">
-            Versión {c.version?.numero ?? "—"} · Válida hasta {fecha(c)}
-          </p>
-          <p className="t-body-sm text-fg-muted">{venta(c)}</p>
-        </div>
-      )}
-      columnas={[
-        {
-          id: "codigo",
-          etiqueta: "Cotización",
-          render: (c) => (
+      seleccionada={seleccionada}
+      vacio={{
+        titulo: "Aún no hay cotizaciones",
+        descripcion: "Crea una cotización ligada a un negocio abierto.",
+        accion: nueva,
+      }}
+      pie={
+        d.siguiente ? (
+          <LinkNext
+            href={conBusqueda(`${base}?cursor=${d.siguiente}`, q)}
+            className="t-label text-accent"
+          >
+            Siguiente página
+          </LinkNext>
+        ) : undefined
+      }
+      filas={d.items.map((c) => {
+        const e = estadoCpqBadge(c.version?.estado ?? "borrador");
+        const margen = margenLista(c, d.costos);
+        return {
+          id: c.id,
+          href: conBusqueda(`${base}/${c.id}`, q),
+          titulo: (
             <>
-              <p className="t-label">{c.codigo}</p>
-              <p>{c.titulo}</p>
+              <span className="t-mono text-[13px]">{c.codigo}</span>
+              <span className="t-body-sm block truncate">{c.titulo}</span>
             </>
           ),
-        },
-        { id: "negocio", etiqueta: "Negocio", render: (c) => c.negocioTitulo ?? "Negocio" },
-        { id: "estado", etiqueta: "Estado", render: estado },
-        { id: "version", etiqueta: "Versión", render: (c) => c.version?.numero ?? "—" },
-        { id: "validez", etiqueta: "Válida hasta", render: fecha },
-        { id: "vigente", etiqueta: "Vigencia", render: vigencia },
-        { id: "venta", etiqueta: "Venta mensual", render: venta },
-      ]}
-      paginacion={
-        d.siguiente ? (
-          <EnlaceBoton href={`${base}?cursor=${d.siguiente}`} variante="secondary">
-            Siguiente
-          </EnlaceBoton>
-        ) : null
-      }
+          secundario: (
+            <>
+              {c.cuentaTitulo ?? c.negocioTitulo ?? "Sin cuenta"}
+              <span className="md:hidden"> · {e.etiqueta}</span>
+            </>
+          ),
+          terciario: (
+            <span className="t-caption">
+              v{c.version?.numero ?? "—"} · {ventaLista(c)}
+              {margen ? ` · Margen ${margen}` : null}
+            </span>
+          ),
+          fin: (
+            <div className="hidden flex-col items-end gap-1 md:flex">
+              <Badge tono={e.tono}>{e.etiqueta}</Badge>
+              {d.costos && c.resumenCalculo?.semaforo ? (
+                <Badge
+                  tono={
+                    c.resumenCalculo.semaforo === "verde"
+                      ? "success"
+                      : c.resumenCalculo.semaforo === "rojo"
+                        ? "danger"
+                        : "warning"
+                  }
+                  punto
+                >
+                  {c.resumenCalculo.semaforo}
+                </Badge>
+              ) : null}
+            </div>
+          ),
+        };
+      })}
     />
   );
 }

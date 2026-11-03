@@ -11,10 +11,21 @@ import {
   versionSchema,
 } from "./esquemas";
 import { PERMISO_READ } from "./permisos";
+import { resumenListaDesdeVersion } from "./lista-resumen";
 import { cotizacionDe, vistaCotizacion, vistaVersion } from "./util";
+
+const resumenListaSchema = z
+  .object({
+    semaforo: z.enum(["verde", "amarillo", "rojo"]).optional(),
+    margenEfectivoPct: z.number().int().optional(),
+    costoPendiente: z.boolean(),
+  })
+  .optional();
 
 const itemSchema = cotizacionSchema.extend({
   negocioTitulo: z.string().nullable(),
+  cuentaTitulo: z.string().nullable(),
+  resumenCalculo: resumenListaSchema,
   version: versionSchema.nullable(),
 });
 
@@ -51,15 +62,20 @@ export const cotizacionesList = defineCapability({
     });
     const negocios = await ctx.db.negocio.findMany({
       where: { tenantId: ctx.tenantId, id: { in: [...new Set(items.map((c) => c.negocioId))] } },
-      select: { id: true, titulo: true },
+      select: { id: true, titulo: true, cuenta: { select: { nombre: true } } },
     });
-    const titulos = new Map(negocios.map((n) => [n.id, n.titulo]));
+    const negocioMeta = new Map(
+      negocios.map((n) => [n.id, { titulo: n.titulo, cuenta: n.cuenta?.nombre ?? null }]),
+    );
     return {
       items: items.map((c) => {
         const ultima = versiones.find((v) => v.cotizacionId === c.id);
+        const meta = negocioMeta.get(c.negocioId);
         return {
           ...vistaCotizacion(c),
-          negocioTitulo: titulos.get(c.negocioId) ?? null,
+          negocioTitulo: meta?.titulo ?? null,
+          cuentaTitulo: meta?.cuenta ?? null,
+          resumenCalculo: ultima ? resumenListaDesdeVersion(ctx, ultima) : undefined,
           version: ultima ? vistaVersion(ctx, ultima) : null,
         };
       }),

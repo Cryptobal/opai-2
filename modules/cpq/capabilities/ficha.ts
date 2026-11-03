@@ -24,6 +24,7 @@ const metaSchema = z.object({
   puedeEnviar: z.boolean(),
   puedeAprobarMargen: z.boolean(),
   motivoNoAprobarMargen: z.string().nullable(),
+  autoaprobacionMargen: z.boolean().nullable(),
   requiereConfirmacionValoresViejos: z.boolean(),
   costosLinea: z.record(z.string(), z.unknown()).optional(),
 });
