@@ -24,6 +24,7 @@ export function rolesDeContacto(f: ContactoOpai1): string[] {
   if (f.recibeFacturacion || f.recibeNotasCredito) roles.add("facturacion");
   if (f.recibeCobranza) roles.add("cobranza");
   if (f.recibeOperacional) roles.add("operacional");
+  if (f.recibeCesion) roles.add("cesion");
   return [...roles].sort();
 }
 
@@ -32,7 +33,6 @@ export function datosContacto(f: ContactoOpai1, cuentaId: string, avisos: Aviso[
   const tel = telefono(f.phone);
   if (textoLimpio(f.email) && !email) avisos.push({ codigo: "correo_invalido", idOpai1: f.id });
   if (textoLimpio(f.phone) && !tel) avisos.push({ codigo: "telefono_invalido", idOpai1: f.id });
-  if (f.recibeCesion) avisos.push({ codigo: "rol_cesion_pendiente_crm_pr2", idOpai1: f.id });
   return {
     cuentaId,
     nombres: textoLimpio(f.firstName) ?? "",

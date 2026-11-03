@@ -93,9 +93,9 @@ describe("reporte y CLI de la simulación", () => {
       conflicto: 0,
       omitido: 1,
     });
-    expect(reporte.conteos.contacto.conflicto).toBe(2);
-    expect(texto).toContain("requiere_nn_crm_pr2");
-    expect(texto).toContain("con-c4");
+    expect(reporte.conteos.contacto.conflicto).toBe(0);
+    expect(texto).toContain("persona_unica_vinculo");
+    expect(texto).toContain("con-c5");
   });
 
   it("tenant inexistente y lector de 1.0 sin configurar fallan cerrados", async () => {
