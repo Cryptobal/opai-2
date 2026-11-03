@@ -9,7 +9,14 @@ import type {
 } from "./tipos";
 
 function timbreFake(payload: PayloadEmisionDte): string {
-  return `PDF417-SIM|${payload.tipoDte}|${payload.folio}|${payload.rutEmisor}|${payload.montos.total}`;
+  return [
+    "PDF417-SIM",
+    payload.tipoDte,
+    payload.folio,
+    payload.rutEmisor,
+    payload.montos.total,
+    payload.giroReceptor ?? "",
+  ].join("|");
 }
 
 export function adaptadorSiiSimulado(): AdaptadorSii {

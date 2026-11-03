@@ -6,7 +6,7 @@ import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { PERMISO_READ } from "./comun";
-import { cuentaDe, rutEmisorDe } from "./ventas-comun";
+import { cuentaDe, receptorDteDe, rutEmisorDe } from "./ventas-comun";
 
 export const ventasPdf = defineCapability({
   id: "finanzas.ventas.pdf",
@@ -38,7 +38,7 @@ export const ventasPdf = defineCapability({
       fechaEmision: doc.fechaEmision?.toISOString().slice(0, 10) ?? "",
       emisorRazon: tenant?.nombre ?? "Emisor",
       emisorRut: rutEmisor,
-      receptorRazon: cuenta.nombre,
+      receptorRazon: receptorDteDe(cuenta).razonSocialReceptor,
       receptorRut: cuenta.rut ?? "66000000-0",
       neto: doc.montoNeto,
       exento: doc.montoExento,

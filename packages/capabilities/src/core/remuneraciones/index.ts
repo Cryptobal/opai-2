@@ -1,5 +1,6 @@
 import { remuneracionesIndicadoresConfirmar, remuneracionesMutualConfirmar } from "./confirmar";
-import { remuneracionesHistorial, remuneracionesIndicadoresListar } from "./listar";
+import { remuneracionesHistorial } from "./historial";
+import { remuneracionesIndicadoresListar } from "./listar";
 
 export const capacidadesRemuneraciones = [
   remuneracionesIndicadoresListar,

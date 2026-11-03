@@ -1,8 +1,9 @@
-// Plan de contactos (CrmContact → core.contactos). En main el contacto tiene UNA cuenta: el mismo
-// correo en cuentas distintas es una persona N–N que llega con el CRM PR 2, así que se reporta como
-// conflicto y no se resuelve aquí. Duplicados en la misma cuenta se funden (mismo correo).
+// Plan de contactos (CrmContact → persona única + core.contacto_cuentas). Mismo correo en cuentas
+// distintas es una sola persona con un vínculo por cuenta (ADR-040 §5).
+/* eslint-disable max-lines -- reglas N–N y vínculos (CAR-25) */
 import {
   type Aviso,
+  camposDistintos,
   type Decision,
   decision,
   decisionDuplicado,
@@ -14,7 +15,7 @@ import {
 import { propuestasContactos } from "./contactos-propuestas";
 import { type DatosContacto, datosContacto, resolverPrincipales } from "./contactos-datos";
 import type { CuentaResuelta } from "./cuentas";
-import type { EstadoDestino } from "./destino-tipos";
+import type { ContactoDestino, EstadoDestino, VinculoDestino } from "./destino-tipos";
 import type { ContactoOpai1 } from "./origen";
 
 export type PlanContactos = {
@@ -26,7 +27,34 @@ export type PlanContactos = {
 type Resolver = (id: string | null | undefined) => CuentaResuelta | null | undefined;
 type Fila = { fila: ContactoOpai1; datos: DatosContacto; cuenta: CuentaResuelta };
 
-export const MOTIVO_NN = "requiere_nn_crm_pr2";
+/** Vínculo adicional de la misma persona (correo) en otra cuenta. */
+export const MOTIVO_VINCULO_PERSONA = "persona_unica_vinculo";
+/** @deprecated Usar MOTIVO_VINCULO_PERSONA; alias para tests heredados. */
+export const MOTIVO_NN = MOTIVO_VINCULO_PERSONA;
+
+function vinculoDe(
+  destino: EstadoDestino,
+  contactoId: string,
+  cuentaId: string | null,
+): VinculoDestino | undefined {
+  if (!cuentaId) return undefined;
+  return destino.vinculos.find((v) => v.contactoId === contactoId && v.cuentaId === cuentaId);
+}
+
+function camposVinculo(propuesto: DatosContacto, v: VinculoDestino): string[] {
+  return camposDistintos(
+    {
+      cargo: propuesto.cargo,
+      roles: propuesto.roles,
+      esPrincipal: propuesto.esPrincipal,
+    },
+    v,
+  );
+}
+
+function personaPorEmail(destino: EstadoDestino, email: string): ContactoDestino | undefined {
+  return destino.contactos.find((c) => c.email === email);
+}
 
 export function planContactos(
   filas: readonly ContactoOpai1[],
@@ -48,15 +76,32 @@ export function planContactos(
     validas.push({ fila, cuenta, datos: datosContacto(fila, cuenta.clave, avisos) });
   }
   resolverPrincipales(validas, avisos);
-  const nn = correosMultiCuenta(validas, destino, ids.porDestino);
+
+  const canonEmail = new Map<string, string>();
+  for (const { fila, datos } of validas) {
+    if (!datos.email || canonEmail.has(datos.email)) continue;
+    canonEmail.set(datos.email, fila.id);
+  }
+
   const canonicas = new Map<string, Decision<DatosContacto>>();
 
   for (const { fila, datos, cuenta } of validas) {
     const mapeado = ids.porExterno.get(fila.id);
-    if (datos.email && nn.has(datos.email)) {
-      decisiones.push(decision("contacto", fila.id, "conflicto", { motivo: MOTIVO_NN }));
-      continue;
+    const canonId = datos.email ? canonEmail.get(datos.email) : undefined;
+    if (datos.email && canonId && canonId !== fila.id && !mapeado) {
+      const filaCanon = validas.find((v) => v.fila.id === canonId);
+      if (filaCanon && filaCanon.cuenta.clave !== cuenta.clave) {
+        decisiones.push(
+          decision("contacto", fila.id, "actualizar", {
+            motivo: MOTIVO_VINCULO_PERSONA,
+            fusionaCon: canonId,
+            datos,
+          }),
+        );
+        continue;
+      }
     }
+
     const clave = datos.email ? `${cuenta.clave}|${datos.email}` : null;
     const canonica = clave ? canonicas.get(clave) : undefined;
     if (canonica) {
@@ -65,23 +110,77 @@ export function planContactos(
       );
       continue;
     }
-    const existente = destino.contactos.find(
+
+    const persona = datos.email ? personaPorEmail(destino, datos.email) : undefined;
+    const existenteMismaCuenta = destino.contactos.find(
       (c) => datos.email !== null && c.email === datos.email && c.cuentaId === cuenta.destinoId,
     );
+
     let d: Decision<DatosContacto>;
-    if (mapeado) d = decisionMapeada("contacto", fila.id, datos, actuales.get(mapeado), mapeado);
-    else if (!existente) d = decision("contacto", fila.id, "crear", { datos });
-    else if (ids.mapeadoAOtro(existente.id, [fila.id]))
+    if (mapeado) {
+      const actual = actuales.get(mapeado);
+      const v = vinculoDe(destino, mapeado, cuenta.destinoId);
+      if (v) {
+        const cv = camposVinculo(datos, v);
+        const camposPersona = actual
+          ? camposDistintos(
+              {
+                nombres: datos.nombres,
+                apellidos: datos.apellidos,
+                email: datos.email,
+                telefono: datos.telefono,
+              },
+              actual,
+            )
+          : [];
+        const campos = [...new Set([...camposPersona, ...cv])].sort();
+        d =
+          campos.length === 0
+            ? decision("contacto", fila.id, "sin_cambios", { destinoId: mapeado, datos })
+            : decision("contacto", fila.id, "actualizar", {
+                destinoId: mapeado,
+                campos,
+                datos,
+                motivo: "cambian_campos",
+              });
+      } else {
+        d = decisionMapeada("contacto", fila.id, datos, actual, mapeado);
+      }
+    } else if (persona && persona.cuentaId !== cuenta.destinoId) {
+      const v = vinculoDe(destino, persona.id, cuenta.destinoId);
+      if (v) {
+        const campos = camposVinculo(datos, v);
+        d =
+          campos.length === 0
+            ? decision("contacto", fila.id, "sin_cambios", { destinoId: persona.id, datos })
+            : decision("contacto", fila.id, "actualizar", {
+                motivo: "vincula_persona_correo",
+                destinoId: persona.id,
+                campos,
+                datos,
+              });
+      } else {
+        d = decision("contacto", fila.id, "actualizar", {
+          motivo: "vincula_persona_correo",
+          destinoId: persona.id,
+          datos,
+        });
+      }
+    } else if (!existenteMismaCuenta) d = decision("contacto", fila.id, "crear", { datos });
+    else if (ids.mapeadoAOtro(existenteMismaCuenta.id, [fila.id]))
       d = decision("contacto", fila.id, "conflicto", {
         motivo: "correo_ya_mapeado",
-        destinoId: existente.id,
+        destinoId: existenteMismaCuenta.id,
       });
-    else
+    else {
+      const v = vinculoDe(destino, existenteMismaCuenta.id, cuenta.destinoId);
       d = {
-        ...decisionMapeada("contacto", fila.id, datos, existente, existente.id),
+        ...decisionMapeada("contacto", fila.id, datos, existenteMismaCuenta, existenteMismaCuenta.id),
         accion: "actualizar",
         motivo: "vincula_por_correo",
+        campos: v ? camposVinculo(datos, v) : camposDistintos(datos, existenteMismaCuenta),
       };
+    }
     if (clave) canonicas.set(clave, d);
     decisiones.push(d);
   }
@@ -90,20 +189,4 @@ export function planContactos(
     propuestas: propuestasContactos(validas, decisiones, destino),
     avisos,
   };
-}
-
-/** Correos que aparecen en más de una cuenta (1.0, o 1.0 + 2.0 no mapeado): persona N–N. */
-function correosMultiCuenta(
-  filas: readonly Fila[],
-  destino: EstadoDestino,
-  mapeados: ReadonlyMap<string, string[]>,
-): Set<string> {
-  const cuentas = new Map<string, Set<string>>();
-  const agregar = (email: string, cuenta: string) =>
-    cuentas.set(email, (cuentas.get(email) ?? new Set()).add(cuenta));
-  for (const f of filas) if (f.datos.email) agregar(f.datos.email, f.cuenta.clave);
-  for (const c of destino.contactos) {
-    if (c.email && cuentas.has(c.email) && !mapeados.has(c.id)) agregar(c.email, c.cuentaId);
-  }
-  return new Set([...cuentas].filter(([, s]) => s.size > 1).map(([email]) => email));
 }

@@ -33,7 +33,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     tabla: "cuentas",
     finalidad: "Datos de la cuenta cliente; cuando es persona natural, su nombre y RUT son personales.",
     categorias: ["identificacion"],
-    campos: ["nombre", "rut"],
+    campos: ["nombre", "rut", "giro", "calle", "comuna", "ciudad", "email_dte"],
     baseLicitud: "contrato",
   },
   {

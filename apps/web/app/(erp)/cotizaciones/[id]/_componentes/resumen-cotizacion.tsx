@@ -1,20 +1,37 @@
 "use client";
 
-import { Alerta, Badge } from "@opai/ds";
+import { Lock } from "lucide-react";
 
+import { Alerta, Badge, Pares, SeccionTarjeta } from "@opai/ds";
+
+import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
+import {
+  avisosDesdeCalculo,
+  costoCategoriaTexto,
+  estadoCpqBadge,
+  etiquetaCategoria,
+  ventaMensualTexto,
+} from "@/lib/cpq-presentacion";
 
-const ESTADOS: Record<string, string> = {
-  borrador: "Borrador",
-  en_aprobacion: "En aprobación",
-  lista: "Lista",
-  enviada: "Enviada",
-};
+import { SemaforoMargenCpq } from "../../_componentes/semaforo-margen-cpq";
+
+const ORDEN_CATEGORIAS = [
+  "mano_obra",
+  "feriados",
+  "uniformes",
+  "examenes",
+  "colacion",
+  "movilizacion",
+  "equipamiento",
+  "vehiculos",
+];
 
 export function ResumenCotizacion({
   version,
   calculo,
   meta,
+  verCostos,
 }: {
   version: { numero: number; estado: string; validaHasta: string | null };
   calculo: {
@@ -25,64 +42,105 @@ export function ResumenCotizacion({
     requiereAprobacion?: boolean;
     noEnviable?: boolean;
     advertencias?: string[];
+    pagosUnicos?: number;
+    dotacion?: { posiciones: number; personasEscaladas: number };
   };
   meta?: {
     fechaCalculo?: string;
     validaHastaContrato?: string | null;
     avisoRecalculo?: { mensaje: string } | null;
-  };
+  } | undefined;
+  verCostos: boolean;
 }) {
-  const venta =
-    calculo.ventaMensual == null ? "Borrador sin precio" : pesos(calculo.ventaMensual);
+  const costoPendiente = calculo.ventaMensual == null || Boolean(calculo.noEnviable);
+  const ventaTxt = ventaMensualTexto(calculo.ventaMensual, costoPendiente);
+  const ventaMostrar = typeof ventaTxt === "number" ? pesos(ventaTxt) : ventaTxt;
+  const badge = estadoCpqBadge(version.estado);
+  const avisos = avisosDesdeCalculo(calculo.advertencias);
+
+  const categorias = ORDEN_CATEGORIAS.map((id) => {
+    const cat = calculo.categorias?.find((c) => c.id === id);
+    const valor = costoCategoriaTexto(cat?.costoMensual ?? 0, costoPendiente);
+    return {
+      etiqueta: etiquetaCategoria(id),
+      valor: typeof valor === "number" ? pesos(valor) : valor,
+    };
+  });
+
   return (
-    <div className="space-y-2 rounded-lg border border-border bg-surface p-4">
-      <p className="t-label">Resumen</p>
-      <p className="t-body-sm">Venta mensual: {venta}</p>
-      {"margenEfectivoPct" in calculo ? (
-        <p className="t-caption">
-          Margen {((calculo.margenEfectivoPct ?? 0) / 10_000).toFixed(1)} %
+    <SeccionTarjeta titulo="Resumen">
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tono={badge.tono}>{badge.etiqueta}</Badge>
+          {calculo.requiereAprobacion ? <Badge tono="warning">Requiere aprobación</Badge> : null}
+          {calculo.noEnviable ? <Badge tono="warning">No enviable</Badge> : null}
+        </div>
+
+        <div>
+          <p className="t-overline text-fg-subtle">Venta mensual</p>
+          <p className="t-h2 t-numeric">{ventaMostrar}</p>
+          {!costoPendiente && calculo.pagosUnicos != null ? (
+            <p className="t-caption text-fg-subtle">
+              Pagos únicos: {pesos(calculo.pagosUnicos)} · Dotación{" "}
+              {calculo.dotacion?.posiciones ?? "—"} posiciones
+            </p>
+          ) : null}
+        </div>
+
+        {!verCostos ? (
+          <Alerta tono="neutral" titulo="Costos ocultos" icono={Lock}>
+            No tienes permiso para ver costos ni margen. Pide{" "}
+            <span className="t-mono text-xs">cpq:costos.ver</span> a un administrador.
+          </Alerta>
+        ) : null}
+
+        {verCostos && "margenEfectivoPct" in calculo ? (
+          <SemaforoMargenCpq
+            margenEfectivoPct={calculo.margenEfectivoPct}
+            {...(calculo.semaforo ? { semaforo: calculo.semaforo } : {})}
+          />
+        ) : null}
+
+        {meta?.avisoRecalculo ? (
+          <Alerta tono="warning" titulo="Valores desactualizados">
+            {meta.avisoRecalculo.mensaje}
+          </Alerta>
+        ) : null}
+
+        {avisos.map((a) => (
+          <Alerta
+            key={a.id}
+            tono={a.tono}
+            titulo={a.titulo}
+            accion={
+              a.enlace ? (
+                <LinkNext href={a.enlace.href} className="text-sm font-semibold underline">
+                  {a.enlace.etiqueta}
+                </LinkNext>
+              ) : undefined
+            }
+          >
+            {a.detalle}
+          </Alerta>
+        ))}
+
+        {verCostos ? (
+          <div className="border-t border-border pt-3">
+            <p className="t-label mb-2">Costos por categoría</p>
+            <Pares items={categorias.map((c) => ({ etiqueta: c.etiqueta, valor: c.valor, numerico: true }))} />
+          </div>
+        ) : null}
+
+        <p className="t-caption text-fg-subtle border-t border-border pt-3">
+          v{version.numero} · {badge.etiqueta}
+          {meta?.fechaCalculo
+            ? ` · Cálculo ${meta.fechaCalculo.split("-").reverse().join("-")}`
+            : null}
+          {(meta?.validaHastaContrato ?? version.validaHasta)
+            ? ` · Válida hasta ${(meta?.validaHastaContrato ?? version.validaHasta)?.split("-").reverse().join("-")}`
+            : null}
         </p>
-      ) : null}
-      {calculo.semaforo ? (
-        <Badge
-          tono={
-            calculo.semaforo === "verde" ? "success" : calculo.semaforo === "rojo" ? "danger" : "warning"
-          }
-        >
-          {calculo.semaforo}
-        </Badge>
-      ) : null}
-      {calculo.requiereAprobacion ? <Badge tono="warning">Requiere aprobación</Badge> : null}
-      {calculo.noEnviable ? <Badge tono="warning">No enviable</Badge> : null}
-      {meta?.avisoRecalculo ? (
-        <Alerta tono="warning" titulo="Valores desactualizados">
-          {meta.avisoRecalculo.mensaje}
-        </Alerta>
-      ) : null}
-      {calculo.advertencias?.map((a) => (
-        <p key={a} className="t-caption text-fg-muted">
-          {a}
-        </p>
-      ))}
-      <p className="t-caption">
-        v{version.numero} · {ESTADOS[version.estado] ?? version.estado}
-      </p>
-      {meta?.fechaCalculo ? (
-        <p className="t-caption text-fg-muted">
-          Cálculo: {meta.fechaCalculo.split("-").reverse().join("-")}
-        </p>
-      ) : null}
-      {(meta?.validaHastaContrato ?? version.validaHasta) ? (
-        <p className="t-caption text-fg-muted">
-          Válida hasta{" "}
-          {(meta?.validaHastaContrato ?? version.validaHasta)?.split("-").reverse().join("-")}
-        </p>
-      ) : null}
-      {calculo.categorias?.slice(0, 8).map((cat) => (
-        <p key={cat.id} className="t-caption">
-          {cat.id}: {pesos(cat.costoMensual)}
-        </p>
-      ))}
-    </div>
+      </div>
+    </SeccionTarjeta>
   );
 }

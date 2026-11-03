@@ -12,10 +12,19 @@ import {
   type Propuesta,
 } from "./comun";
 import type { EstadoDestino } from "./destino-tipos";
-import { nombreCanonico, rut, textoLimpio } from "./normalizar";
+import { correo, nombreCanonico, rut, textoLimpio } from "./normalizar";
 import type { CuentaOpai1 } from "./origen";
 
-export type DatosCuenta = { nombre: string; razonSocial: string | null; rut: string | null };
+export type DatosCuenta = {
+  nombre: string;
+  razonSocial: string | null;
+  rut: string | null;
+  giro: string | null;
+  calle: string | null;
+  comuna: string | null;
+  ciudad: string | null;
+  emailDte: string | null;
+};
 
 export type PlanCuentas = {
   decisiones: Decision<DatosCuenta>[];
@@ -24,10 +33,16 @@ export type PlanCuentas = {
 };
 
 export function datosCuenta(f: CuentaOpai1): DatosCuenta {
+  const razon = textoLimpio(f.legalName) ?? textoLimpio(f.name);
   return {
     nombre: textoLimpio(f.name) ?? f.name,
-    razonSocial: textoLimpio(f.legalName),
+    razonSocial: razon,
     rut: rut(f.rut),
+    giro: textoLimpio(f.giro),
+    calle: textoLimpio(f.address),
+    comuna: textoLimpio(f.commune),
+    ciudad: textoLimpio(f.city),
+    emailDte: correo(f.emailDte),
   };
 }
 
