@@ -51,6 +51,16 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     disponible: true,
   },
   {
+    // Consulta de contribuyente por RUT (CAR-162): producto SimpleAPI RUT, distinto de la emisión.
+    id: "sii_contribuyente",
+    nombre: "Datos del SII por RUT",
+    categoria: "dte",
+    modalidades: ["propia"] as const,
+    secretos: [{ nombre: "api_key", etiqueta: "API key SimpleAPI RUT" }],
+    config: sinConfig,
+    disponible: true,
+  },
+  {
     id: "dte_cesion",
     nombre: "Cesión DTE (factoring)",
     categoria: "factoring",
