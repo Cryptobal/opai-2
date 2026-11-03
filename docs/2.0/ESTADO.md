@@ -33,11 +33,11 @@ Detalle, brechas y evidencia en la [auditoría §1.2](auditoria-2026-11.md#12-po
 
 ## Migraciones en Neon
 
-Al 3-nov-2026 todas las migraciones integradas en `main` están aplicadas en Neon `dev` y `main`, incluida `20261103140000_finanzas_ventas_programacion` (#231, instrucción de Carlos en el brief B). Esa migración no se edita: las correcciones van en migraciones aditivas nuevas.
+Al 3-nov-2026 todas las migraciones integradas en `main` están aplicadas en Neon `dev` y `main`, **salvo `20261103160000_finanzas_programacion_forma_1_0` (#235) y con `20261103180000_finanzas_dte_emision_real` (#234) por confirmar** (auditoría de Finanzas, F-B1). Incluye `20261103140000_finanzas_ventas_programacion` (#231, instrucción de Carlos en el brief B). Esa migración no se edita: las correcciones van en migraciones aditivas nuevas.
 
 | Estado | Migraciones |
 |---|---|
-| Aplicadas en `dev` y `main` | Las 76 de `main` y `20261103140000_finanzas_ventas_programacion` |
+| Aplicadas en `dev` y `main` | Las de `main` hasta `20261103140000_finanzas_ventas_programacion` (79 carpetas en `main`; ver las dos excepciones) |
 | **Integrada sin aplicar y sin etiqueta** | `20261103160000_finanzas_programacion_forma_1_0` (#235). El historial de etiquetas de #235 está vacío: se integró sin `migracion-pendiente`. **Consecuencia en vivo:** `finanzas.ventas_programacion.listar` falla con `PrismaClientKnownRequestError` y Ventas › Programación muestra «No pudimos cargar esta información» (auditoría de Finanzas, F-B1). Además, confirmar que `20261103180000_finanzas_dte_emision_real` (#234) está aplicada |
 
 Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de ADR-054 para cada PR nuevo con migración: el operador respalda, aplica `dev` → `main`, deja el aviso en el PR y retira la etiqueta.

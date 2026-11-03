@@ -20,7 +20,7 @@
 
 ## 1. Estado real por submódulo
 
-Cifras de `main`: 30 capacidades de Finanzas en `packages/capabilities/src/finanzas/` y 56 ids (capacidades y eventos) en `modules/finanzas/`. Pantallas en `apps/web/app/(erp)/finanzas/`: `flujo`, `compras`, `compras/proveedores`, `ventas`, `ventas/[id]`, `ventas/nuevo`, `ventas/programacion` (nueva con #235), `bancos`, `folios`, `configuracion-dte` y `plan-de-cuentas`. No hay portada `/finanzas`.
+Cifras de `main`: 32 capacidades de Finanzas en `packages/capabilities/src/finanzas/` y 56 ids (capacidades y eventos) en `modules/finanzas/`. Pantallas en `apps/web/app/(erp)/finanzas/`: `flujo`, `compras`, `compras/proveedores`, `ventas`, `ventas/[id]`, `ventas/nuevo`, `ventas/programacion` (nueva con #235), `bancos`, `folios`, `configuracion-dte` y `plan-de-cuentas`. No hay portada `/finanzas`.
 
 ### 1.1 Flujo de caja — listo
 
@@ -164,7 +164,7 @@ Cifras de `main`: 30 capacidades de Finanzas en `packages/capabilities/src/finan
   - Cuenta de destino = Ficha de persona (núcleo).
   - Lote de pago = archivo descargable.
   - Si Finanzas está activo, Rendiciones publica `rendiciones.lote_pagado`, y un consumidor de Finanzas lo convierte en movimiento esperado en Bancos y en salida del flujo. Si Finanzas está apagado, el evento no tiene consumidor y nada se rompe (ADR-003, comunicación por eventos).
-- **Nota sobre el manifest de Finanzas:** «Configuración DTE» aparece **primera en el menú de Finanzas** (`modules/finanzas/manifest.ts:49-53`). Según ADR-018 y `NAVEGACION.md`, la configuración de un módulo va en el centro de Configuración y no como entrada de su menú (Media, F-B6).
+- **Nota sobre el manifest de Finanzas:** «Configuración DTE» aparece **primera en el menú de Finanzas** (`modules/finanzas/manifest.ts:50-58`, `orden: 2`). Según ADR-018 y `NAVEGACION.md`, la configuración de un módulo va en el centro de Configuración y no como entrada de su menú (Media, F-B6).
 
 ## 3. Diseño y UX
 
@@ -208,11 +208,11 @@ Contraste con el DS 2.0 y con los exports `export-finanzas-ventas-banca-v3`, `ex
 | F-B3 | Media | El selector de proveedor de «Registrar documento» abre vacío, sin mensaje ni opción para crear uno | Compras › Registrar documento, con el tenant sin proveedores | `compras/_componentes/hoja-compra.tsx` |
 | F-B4 | Media | El estado vacío de Compras dice «impórtalos desde el RCV con la API o el agente»: es jerga interna y no tiene botón | Compras vacía | `compras/_componentes/libro-compras.tsx` |
 | F-B5 | Baja | Texto interno visible: «Plantillas que generan borradores (el cron no emite al SII)» | Ventas › Programación | `ventas/programacion/page.tsx` |
-| F-B6 | Media | «Configuración DTE» es la primera entrada del menú de Finanzas | Menú lateral | `modules/finanzas/manifest.ts:49` |
+| F-B6 | Media | «Configuración DTE» es la primera entrada del menú de Finanzas | Menú lateral | `modules/finanzas/manifest.ts:50-58` |
 | F-B7 | Baja | Trato mezclado: Folios dice «Suba el XML» (usted) y el resto tutea | Folios vacío | `folios/_componentes/pantalla-folios.tsx` |
 | F-B8 | Media | Compras tarda 4,6 s en el primer byte (contra 0,4–1,5 s del resto de Finanzas) | Abrir `/finanzas/compras` en frío | `finanzas.compras.listar` (revisar consultas por navegación, ADR-045) |
 | F-B9 | Media | La CSP se aplica en modo estricto (`content-security-policy`) y no en «Report-Only», como dice `REGLAS-codigo.md` | Cabeceras de cualquier página | `apps/web/lib/cabeceras-seguridad.ts`, o corregir la regla |
-| F-B10 | Baja | Tres archivos superan las 150 líneas: `ventas/nuevo/formulario-emitir.tsx` (179), `flujo/_componentes/hoja-mover.tsx` (162) y `configuracion-dte/_componentes/pantalla-config-dte.tsx` (199) | — | Dividirlos |
+| F-B10 | Baja | Ocho archivos superan las 150 líneas. Pantallas: `ventas/nuevo/formulario-emitir.tsx` (179), `flujo/_componentes/hoja-mover.tsx` (162) y `configuracion-dte/_componentes/pantalla-config-dte.tsx` (199). Capacidades: `modules/finanzas/capacidades/bancos/cartola-importar.ts` (158), `capacidades/lectura.ts` (159), `capacidades/bancos/cuentas.ts` (152), `modules/finanzas/manifest.ts` (151) y `packages/capabilities/src/finanzas/folios-caf-logica.ts` (151) | — | Dividirlos (pantallas en F1, capacidades en F8) |
 
 **Pantalla contra MCP:** las capacidades sin pantalla son `ventas.pdf`, `ventas.enviar_sii`, `ventas.emitir_nota_credito`, `ventas.cesion_*`, `cesiones.listar`, `ventas.proyeccion_flujo`, `compras.importar`, `reglas_banco.*`, `cobros.manual` y `bancos.saldo_sugerido`. Al revés, no se encontró nada: todas las acciones de pantalla llaman capacidades y el gate de paridad está en verde.
 
@@ -224,7 +224,7 @@ Contraste con el DS 2.0 y con los exports `export-finanzas-ventas-banca-v3`, `ex
 ## 5. Peso y salud del código
 
 - **Capacidades en dos lugares:**
-  - `packages/capabilities/src/finanzas/` (30 capacidades): ventas, DTE, folios, NC, cesión, compras, proveedores, plan y programación.
+  - `packages/capabilities/src/finanzas/` (32 capacidades): ventas, DTE, folios, NC, cesión, compras, proveedores, plan y programación.
   - `modules/finanzas/capacidades/` (flujo, celdas, filas, ajustes y bancos).
   - **Conviene unificar en `modules/finanzas/capacidades/<submódulo>/`**, como manda ADR-003. Sin eso, Finanzas no se puede empaquetar ni apagar por partes, y el typecheck de la web recorre las capacidades como fuente (R2 de CAR-161).
   - Hacerlo en un PR mecánico, sin cambio de comportamiento, por submódulo: Ventas, luego Compras y luego Plan. La instantánea MCP no debe cambiar.
@@ -245,7 +245,7 @@ PR chicos y secuenciales. Primero lo que bloquea la migración de Gard, después
 | # | PR | Alcance | Migración | Depende de |
 |---|---|---|---|---|
 | **O-1** | Operador (no es PR) | Aplicar `20261103160000` con respaldo en `dev` y `main` y dejar el aviso en #235. Renombrar el prefijo de la migración de #237 antes de integrarla | — | — |
-| **F1** | `qa/car-finanzas-pulido` | F-B3 a F-B8 y F-B10: selector de proveedor con «Crear proveedor», estados vacíos con acción, textos, menú sin Configuración DTE ni Folios (pasan a Configuración), esqueletos de ruta, hojas del flujo con `dynamic()` | No | — |
+| **F1** | `qa/car-finanzas-pulido` | F-B3 a F-B10 (en F-B9, decidir si se corrige la cabecera o la regla de `REGLAS-codigo.md:73`): selector de proveedor con «Crear proveedor», estados vacíos con acción, textos, menú sin Configuración DTE ni Folios (pasan a Configuración), esqueletos de ruta, hojas del flujo con `dynamic()` | No | — |
 | **F2** | `brief/car-finanzas-ficha-venta` (CAR-155) | Ficha con acciones (PDF, enviar SII, NC total o parcial, ceder) y **envío al cliente** por Comunicaciones a los contactos de facturación | Sí, aditiva (registro de envíos) | — |
 | **F3** | `brief/car-finanzas-recurrentes` (CAR-159) | Crear, editar y pausar programaciones; trabajo diario que genera borradores por corrida; UF del SII según la política; activación desde la fecha de corte; proyección en el flujo | No (tablas de #235) | O-1 |
 | **F4** | `brief/car-finanzas-cobranza` | Vencimiento, aging y recordatorios con feriados; pausa al conciliar; «Hoy en Finanzas» | Sí, aditiva | F2 |
@@ -265,7 +265,6 @@ PR chicos y secuenciales. Primero lo que bloquea la migración de Gard, después
 
 - **Pausar:** factoring y landing de cobro hasta después de F4. Contabilidad (C1 y C2) hasta después del corte.
 - **Descartar:** el cierre semanal del flujo (ya retirado); Slack y otros canales en Finanzas.
-- **Cerrar:** #231, reemplazado por #235.
 
 **Corte de Gard en Finanzas:** O-1 + F2 + F3 + F4 + F6, más las credenciales reales (D5) y la fecha de corte (D4). Con eso Gard factura, envía, cobra y concilia en 2.0. Contabilidad e informes pueden seguir un mes más en 1.0 en solo lectura.
 
