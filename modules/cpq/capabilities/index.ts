@@ -22,6 +22,11 @@ import {
   cotizacionesRechazarAprobacion,
   cotizacionesRetirarAprobacion,
 } from "./aprobacion-decidir";
+import {
+  cpqAprobacionesContar,
+  cpqAprobacionesGet,
+  cpqAprobacionesList,
+} from "./aprobaciones-bandeja";
 import { cotizacionesMarcarLista, cotizacionesSolicitarAprobacion } from "./aprobacion-flujo";
 import { cotizacionesCalcular } from "./ficha-calcular";
 import { cotizacionesFicha } from "./ficha";
@@ -67,6 +72,9 @@ export const capacidades: readonly Capacidad[] = [
   cotizacionesRetirarAprobacion,
   cotizacionesAprobarMargen,
   cotizacionesRechazarAprobacion,
+  cpqAprobacionesList,
+  cpqAprobacionesGet,
+  cpqAprobacionesContar,
   cotizacionesEnviar,
   cotizacionesPreviewPdf,
   lineasCrear,

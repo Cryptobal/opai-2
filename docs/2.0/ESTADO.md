@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Foto verificada contra el código de `main` en `fac5738` (#229), 3-nov-2026**, por la [auditoría profunda](auditoria-2026-11.md) (CAR-151). Cada PR actualiza este archivo (ADR-054): lo que entra, lo que queda pendiente y lo que se decide. Una entrada «integrado» acredita el merge en `main`, no el despliegue ni la migración en Neon: eso va en la tabla de migraciones. El plan está en [ROADMAP](ROADMAP.md), las decisiones en [ADR](01-decisiones.md) y el flujo en [OPERACION-agentes](OPERACION-agentes.md). Lo anterior a esta foto está en [ESTADO-archivo](ESTADO-archivo.md).
+**Foto verificada contra el código de `main` en `fac5738` (#229), 3-nov-2026, más #230 integrado después (`8912c27`)**, por la [auditoría profunda](auditoria-2026-11.md) (CAR-151). Cada PR actualiza este archivo (ADR-054): lo que entra, lo que queda pendiente y lo que se decide. Una entrada «integrado» acredita el merge en `main`, no el despliegue ni la migración en Neon: eso va en la tabla de migraciones. El plan está en [ROADMAP](ROADMAP.md), las decisiones en [ADR](01-decisiones.md) y el flujo en [OPERACION-agentes](OPERACION-agentes.md). Lo anterior a esta foto está en [ESTADO-archivo](ESTADO-archivo.md).
 
 ## En curso
 
@@ -8,7 +8,6 @@
 |---|---|---|---|
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |
 | #231 | Importación 1.0: programaciones recurrentes de Finanzas, destinatarios, correlativo CPQ y simulación de negocios (CAR-25) | Abierto. **No integrar sin corregir** la forma de las líneas, las frecuencias, la cuenta nula, las recurrentes inactivas hasta el corte y el correlativo dentro de la corrida ([auditoría §2.3](auditoria-2026-11.md#23-migración-desde-10-importador-packagesdbscriptsimportar-opai1-y-pr-231)); le falta la etiqueta `migracion-pendiente` | Sí, `20261103140000_finanzas_ventas_programacion` |
-| #230 | Bandeja y campana conectadas a las aprobaciones de CPQ (CAR-141) | Abierto, Vercel en verde | No |
 | #213 | Cargos y Remuneraciones: pantallas lista-ficha | **En pausa**: en conflicto con `main` y Vercel en rojo. Se retoma en la semana 3 con un merge de `main` | — |
 | #168 | Restablecer MFA y regenerar códigos de respaldo (CAR-54) | **En pausa**: en conflicto. Se retoma después de la migración | — |
 
@@ -19,7 +18,7 @@ Detalle, brechas y evidencia en la [auditoría §1.2](auditoria-2026-11.md#12-po
 - **Núcleo:** maestros (cuentas con RUT único y datos tributarios #223, contactos N–N #196, instalaciones, personas, cargos), documentos y vencimientos, comunicaciones, auditoría encadenada (#71) y FORCE RLS (#79), identidad y MFA (#65, #74, #131), roles y alcance del supervisor (#46, #47, #51, #105, #106), Ley 21.719 (#56, #61, #107), plataforma (#109), calendario (#139, #143), capas de sueldo y anexo (#80–#93), Personas y Cargos PR 1 y PR 2 (#165, #214), motor de sueldos M1–M3 y captura SII de UF/UTM (#197, #210, #220, #227), firma N1 (#140, #153), ficha de cuenta post-QA (#226).
 - **Configuración:** portada por grupos y v1.1 (#160, #202), acordeón del sidebar (#216), integraciones con certificado `.pfx` y tarjeta Octava (#222).
 - **Comercial:** negocios y embudo (#97–#110, #194), solicitudes y canales (#184), contactos y actividad unificada (backend #190, pantallas #196), formulario web público (#224), canal agente GrowthBot (#225), importación 1.0 del núcleo (#223, solo simulación por CLI).
-- **CPQ:** base y pantallas (#187, #195, #201), motor (#198), cotizar en serio con marca y plantillas (#203), cierre con aprobación por margen y PDF (#208), ficha visual (#215), propuesta técnica v2 (#218), ficha a 375 px (#228), PDF rediseñado (#229).
+- **CPQ:** base y pantallas (#187, #195, #201), motor (#198), cotizar en serio con marca y plantillas (#203), cierre con aprobación por margen y PDF (#208), ficha visual (#215), propuesta técnica v2 (#218), ficha a 375 px (#228), PDF rediseñado (#229), bandeja y campana conectadas a las aprobaciones de CPQ (#230: consumidor `cpq.bandeja` y `cpq.aprobaciones.{list,get,contar}`, que delegan en las capacidades de aprobación y envío existentes).
 - **Finanzas:** flujo de caja (#186, #205, #206, #207) y v2 sin cierre semanal (#219); compras, proveedores y plan de cuentas (#186); ventas DTE PR 1 y PR 2 (#204, #209); bancos y conciliación (#211, #212); CAF endurecido y pantalla de folios (#217, #221).
 - **Operaciones:** Pauta mensual (#180) y diaria (#200).
 - **Rondas:** configuración en el ERP y QR (#137, #141, #145).

@@ -19,7 +19,6 @@ const MSG_SOLO_OWNER_ADMIN =
   "Solo un owner o un admin puede decidir la aprobación de margen.";
 const MSG_ADMIN_PROPIA =
   "Un admin no puede aprobar su propia cotización; pide revisión a otro admin o al owner.";
-
 /**
  * Reglas N6 (Carlos, 2-nov-2026): «propia» = cotización que creó el actor (`creadoPorId`).
  * Owner autoaprueba la suya; owner y admin aprueban las ajenas; admin nunca la propia.
@@ -77,4 +76,11 @@ export function exigirDecisorAprobacionMargen(ctx: Contexto, creadoPorId: string
     throw prohibido(msg);
   }
   return e;
+}
+
+export async function aprobacionPendiente(ctx: Contexto, versionId: string) {
+  return ctx.db.cpqAprobacion.findFirst({
+    where: { versionId, estado: "pendiente" },
+    orderBy: { createdAt: "desc" },
+  });
 }
