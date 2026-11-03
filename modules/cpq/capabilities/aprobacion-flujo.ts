@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado } from "@opai/capabilities";
+import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 import { marcarLista, solicitarAprobacionMargen } from "../persistencia/aprobacion-margen";
 import { cargarFilasVersion, recalcularVersion } from "../persistencia/recalcular";
@@ -28,6 +28,10 @@ export const cotizacionesSolicitarAprobacion = defineCapability({
     const resultado = await recalcularVersion(ctx, input.id, undefined, false);
     if (!resultado) throw noEncontrado("La versión");
     if (dryRun) {
+      if (resultado.noEnviable)
+        throw reglaDeNegocio("Completa los costos pendientes antes de pedir aprobación.");
+      if (!resultado.requiereAprobacion)
+        throw reglaDeNegocio("El margen no requiere aprobación; puedes dejarla lista o enviar.");
       return { estado: "en_aprobacion" as const, aprobacionId: pack.version.id };
     }
     const r = await solicitarAprobacionMargen(ctx, pack.version.id, resultado, input.comentario);
@@ -51,7 +55,13 @@ export const cotizacionesMarcarLista = defineCapability({
     exigirEditable(pack.version);
     const resultado = await recalcularVersion(ctx, input.id, undefined, false);
     if (!resultado) throw noEncontrado("La versión");
-    if (dryRun) return { estado: "lista" as const };
+    if (dryRun) {
+      if (resultado.noEnviable)
+        throw reglaDeNegocio("La cotización no está lista: hay costos o UF pendientes.");
+      if (resultado.requiereAprobacion)
+        throw reglaDeNegocio("El margen requiere aprobación; usa «Pedir aprobación».");
+      return { estado: "lista" as const };
+    }
     return marcarLista(ctx, pack.version.id, resultado);
   },
 });

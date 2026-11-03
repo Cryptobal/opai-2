@@ -104,7 +104,6 @@ export function AccionesCotizacion({
           pendiente={pendiente}
           onRecalcular={recalcular}
           {...(bloqueo.enlace ? { enlace: bloqueo.enlace } : {})}
-          compacto
         />
       );
     }
@@ -188,7 +187,7 @@ export function AccionesCotizacion({
               mensaje={bloqueo.mensaje}
               laboralPendiente={bloqueo.laboralPendiente}
               pendiente={pendiente}
-              {...(bloqueo.laboralPendiente ? { onRecalcular: recalcular } : {})}
+              onRecalcular={recalcular}
               {...(bloqueo.enlace ? { enlace: bloqueo.enlace } : {})}
             />
           </div>

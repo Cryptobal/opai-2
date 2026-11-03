@@ -45,12 +45,41 @@ const COMERCIAL = [
   "comercial_negocios_set_contactos",
 ];
 
+const BANCOS = [
+  "finanzas_bancos_listar",
+  "finanzas_bancos_guardar",
+  "preview_finanzas_bancos_guardar",
+  "finanzas_cartolas_importar",
+  "preview_finanzas_cartolas_importar",
+  "finanzas_movimientos_bancarios_listar",
+  "finanzas_conciliaciones_sugerir",
+  "finanzas_conciliaciones_confirmar",
+  "preview_finanzas_conciliaciones_confirmar",
+];
+
 describe("MCP: herramientas según módulo activo y scopes de la key (servidor real)", () => {
   it("con Comercial activo, una key «*» o con el scope comercial lista comercial_*", async () => {
     for (const scopes of [["*"], ["core", "comercial"]]) {
       const nombres = await herramientas({ modulosActivos: ["comercial"], key: { scopes } });
       for (const n of COMERCIAL) expect(nombres, `${scopes.join(",")}: ${n}`).toContain(n);
     }
+  });
+
+  it("con Finanzas activo, una key «*» o con el scope finanzas lista finanzas_bancos_* y cartolas", async () => {
+    for (const scopes of [["*"], ["core", "finanzas"]]) {
+      const nombres = await herramientas({ modulosActivos: ["finanzas"], key: { scopes } });
+      for (const n of BANCOS) expect(nombres, `${scopes.join(",")}: ${n}`).toContain(n);
+    }
+  });
+
+  it("sin el scope finanzas o con el módulo inactivo, no lista finanzas_bancos_*", async () => {
+    const sinScope = await herramientas({
+      modulosActivos: ["finanzas"],
+      key: { scopes: ["core"] },
+    });
+    expect(sinScope.filter((n) => n.startsWith("finanzas_bancos_"))).toEqual([]);
+    const inactivo = await herramientas({ modulosActivos: ["comercial"], key: { scopes: ["*"] } });
+    expect(inactivo.filter((n) => n.startsWith("finanzas_bancos_"))).toEqual([]);
   });
 
   it("sin el scope comercial (key por módulos) o con el módulo inactivo, no lista comercial_*", async () => {

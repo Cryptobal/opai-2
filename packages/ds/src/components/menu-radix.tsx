@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { DropdownMenu } from "radix-ui";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { cn } from "../cn";
 import { claseDisparadorMenu, claseOverlay, type ItemMenu, LADO } from "./menu";
@@ -28,8 +28,12 @@ export type MenuProps = {
 /** Menú desplegable sobre Radix (ADR-017): teclado, Escape y clic fuera; ítems de 44 px. */
 export function MenuRadix(props: MenuProps) {
   const { disparador, etiqueta, items, cabecera, lado = "abajo-derecha" } = props;
+  const [abierto, setAbierto] = useState(false);
+  useEffect(() => {
+    if (props.abiertoInicial) setAbierto(true);
+  }, [props.abiertoInicial]);
   return (
-    <DropdownMenu.Root modal={false} defaultOpen={props.abiertoInicial ?? false}>
+    <DropdownMenu.Root modal={false} open={abierto} onOpenChange={setAbierto}>
       <div className={cn("relative", props.className)}>
         <DropdownMenu.Trigger
           aria-label={etiqueta}

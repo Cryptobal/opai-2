@@ -75,12 +75,18 @@ export function useNavegacionArea(portal: string, activo: boolean) {
                  : "areaPrincipal";
           // La cola compara con el último valor confirmado, no con el render que la encoló.
           if (Object.is(siguiente[campo], actual.current[campo])) return;
-          const r = await ejecutarCapacidad(portal, "core.config.set", {
-            modulo: "core",
-            clave,
-            valor: siguiente[campo],
-            versionEsperada: revision,
-          });
+          const r = await ejecutarCapacidad(
+            portal,
+            "core.config.set",
+            {
+              modulo: "core",
+              clave,
+              valor: siguiente[campo],
+              versionEsperada: revision,
+            },
+            false,
+            "ninguna",
+          );
           if (!r.ok) {
             avisar.error("No se guardó la preferencia. Recarga e inténtalo de nuevo.");
             await cargar();

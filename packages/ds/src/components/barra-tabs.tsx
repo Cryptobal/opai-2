@@ -20,7 +20,11 @@ type Props = {
 export function BarraTabs({ como: Tag, activa, etiqueta, role, children }: Props) {
   return (
     <div className="-mx-4 min-w-0 md:mx-0">
-      <Tag aria-label={etiqueta} role={role} className="ds-barra-tabs flex gap-1 px-4 md:px-0">
+      <Tag
+        aria-label={etiqueta}
+        role={role}
+        className="ds-barra-tabs flex max-w-full flex-nowrap gap-1 px-4 md:px-0"
+      >
         {children}
       </Tag>
       <RealceBarra activa={activa} />
