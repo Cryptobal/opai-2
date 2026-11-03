@@ -1,4 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
+import type { TenantTx } from "@opai/db";
 import { celdasRealesDesdeMovimientos, finSemanaIso } from "@opai/domain";
 
 import { aNumeroSeguro } from "../esquemas";
@@ -17,9 +18,11 @@ export async function derivadasBanco(
   ctx: Contexto,
   semana?: string,
   hastaSemana?: string,
+  tx?: TenantTx,
 ): Promise<z.infer<typeof celdaSchema>[]> {
+  const db = tx ?? ctx.db;
   const finSemana = semana ? finSemanaIso(hastaSemana ?? semana) : undefined;
-  const movs = await ctx.db.movimientoBancario.findMany({
+  const movs = await db.movimientoBancario.findMany({
     where: {
       estado: { not: "ignorado" },
       ...(semana ? { fecha: { gte: aFecha(semana), lte: aFecha(finSemana!) } } : {}),
@@ -37,7 +40,7 @@ export async function derivadasBanco(
   ];
   const docs =
     docIds.length > 0
-      ? await ctx.db.documentoEmitido.findMany({
+      ? await db.documentoEmitido.findMany({
           where: { id: { in: docIds } },
           select: { id: true, cuentaId: true },
         })
@@ -45,7 +48,7 @@ export async function derivadasBanco(
   const cuentaIds = [...new Set(docs.map((d) => d.cuentaId))];
   const cuentas =
     cuentaIds.length > 0
-      ? await ctx.db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } })
+      ? await db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } })
       : [];
   const nombreCuenta = new Map(cuentas.map((c) => [c.id, c.nombre] as const));
   const filaPorDoc = new Map<string, string>();
@@ -54,7 +57,7 @@ export async function derivadasBanco(
   }
 
   // Solo filas activas: lo real nunca cae en una fila archivada que la planilla no suma (hallazgo 4).
-  const filas = await ctx.db.flujoFila.findMany({
+  const filas = await db.flujoFila.findMany({
     where: { activa: true },
     select: { id: true, etiqueta: true, seccion: true },
   });

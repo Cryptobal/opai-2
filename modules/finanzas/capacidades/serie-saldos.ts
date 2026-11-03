@@ -42,7 +42,7 @@ export async function serieSaldos(
       Math.round((Date.parse(previasHasta) - Date.parse(ajustes.desde)) / (7 * 86_400_000)) + 1;
     const prevLista = semanasDesde(ajustes.desde, cantPrevias);
     const prev = await cargarFlujo(ctx, ajustes.desde, previasHasta, tx);
-    const { dominio } = await celdasDominioConCartolaPasada(ctx, prev.celdasDom, hoy, prevLista);
+    const { dominio } = await celdasDominioConCartolaPasada(ctx, prev.celdasDom, hoy, prevLista, tx);
     const calc = calcularPlanilla({
       saldoInicial: ajustes.saldoInicial,
       umbral: ajustes.umbral,
@@ -57,6 +57,7 @@ export async function serieSaldos(
     transformar ? transformar(cargado.celdasDom) : cargado.celdasDom,
     hoy,
     lista,
+    tx,
   );
   const calculo = calcularPlanilla({
     saldoInicial: saldoPrevio,

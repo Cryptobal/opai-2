@@ -1,5 +1,5 @@
 import { formatearClp } from "@opai/domain";
-import { celdaAgregada } from "./celda-agregada";
+import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
 
 export type FilaFlujo = {
@@ -91,7 +91,7 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
     { id: TOTALES.saldo, etiqueta: "Saldo final" },
   ];
   const esFilaMonto = (filaId: string) =>
-    filaId !== TOTALES.ingresos && filaId !== TOTALES.egresos && filaId !== TOTALES.saldo;
+    filaId !== TOTALES.ingresos && filaId !== TOTALES.egresos && filaId !== TOTALES.saldo && !esFilaVirtual(filaId);
   const celda = (filaId: string, semana: string): Celda | null => {
     const s = p.semanas.find((x) => x.semana === semana);
     if (!s) return null;
@@ -132,7 +132,7 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
 export type ArmadoPlanilla = ReturnType<typeof armarPlanilla>;
 
 export function celdaEditablePlan(p: Planilla, filaId: string, semana: string) {
-  if (filaId.startsWith("total") || filaId === TOTALES.saldo) return false;
+  if (filaId.startsWith("total") || filaId === TOTALES.saldo || esFilaVirtual(filaId)) return false;
   const s = p.semanas.find((x) => x.semana === semana);
   if (!s || s.pasada) return false;
   const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);

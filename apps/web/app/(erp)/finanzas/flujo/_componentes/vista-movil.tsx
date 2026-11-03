@@ -2,7 +2,7 @@
 
 import { Button } from "@opai/ds";
 
-import { celdaAgregada } from "./celda-agregada";
+import { celdaAgregada, esFilaVirtual } from "./celda-agregada";
 import { clp, type Planilla } from "./datos";
 
 export function VistaMovilFlujo({
@@ -37,7 +37,7 @@ export function VistaMovilFlujo({
               return (
                 <li key={f.id} className="flex justify-between gap-2 border-b border-border py-1 last:border-0">
                   <span>{f.etiqueta}</span>
-                  {gestiona && (!c || c.capa === "plan") && !s.pasada ? (
+                  {gestiona && !esFilaVirtual(f.id) && (!c || c.capa === "plan") && !s.pasada ? (
                     <Button variant="ghost" onClick={() => onCelda(f.id, s.semana)}>
                       {monto}
                     </Button>

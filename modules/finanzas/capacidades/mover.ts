@@ -109,12 +109,14 @@ export const celdasMover = defineCapability({
       for (const m of plan.movimientos) {
         const destino = poSemana.get(m.hasta);
         const origenFila = poSemana.get(m.desde) as { nota: string | null };
-        if (destino && !origen.has(m.hasta))
+        if (destino && !origen.has(m.hasta)) {
+          if (destino.capa !== "plan")
+            throw reglaDeNegocio("La celda de destino cambió mientras se movía: vuelve a previsualizar.");
           await tx.flujoCelda.update({
             where: { id: destino.id },
             data: { monto: BigInt(Number(destino.monto) + m.monto) },
           });
-        else
+        } else
           await tx.flujoCelda.create({
             data: {
               tenantId: ctx.tenantId,

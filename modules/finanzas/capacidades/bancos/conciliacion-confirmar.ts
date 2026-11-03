@@ -1,13 +1,7 @@
 import { z } from "zod";
 
-import {
-  defineCapability,
-  conflicto,
-  reglaDeNegocio,
-  sincronizarCobroDocumento,
-  validarDocumentoCobroBanco,
-  validarDocumentoCompraBanco,
-} from "@opai/capabilities";
+import { defineCapability, conflicto, reglaDeNegocio, sincronizarCobroDocumento } from "@opai/capabilities";
+import { validarDocumentoCobroBanco, validarDocumentoCompraBanco } from "@opai/capabilities";
 import type { Prisma } from "@opai/db";
 
 import { sincronizarAvisosEnTx } from "../aviso";
