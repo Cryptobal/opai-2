@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@opai/ds";
+import { avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -29,15 +29,18 @@ export function AccionesCotizacion({
   aprobar: boolean;
   onHecho: () => void;
 }) {
-  const { ejecutar, pendiente } = useCapacidad("erp");
+  const { ejecutar, pendiente, error } = useCapacidad("erp");
   if (!gestionar && !aprobar) return null;
   const req = calculo.requiereAprobacion;
   const bloqueada = version.estado === "en_aprobacion";
   const puedeDecidir = Boolean(meta?.puedeAprobarMargen);
   const motivoBloqueo = meta?.motivoNoAprobarMargen ?? null;
   const muestraAprobacion = aprobar && bloqueada && (puedeDecidir || motivoBloqueo);
-  const despues = (r: unknown) => {
-    if (r != null) onHecho();
+  const despues = (r: unknown, mensaje?: string) => {
+    if (r != null) {
+      if (mensaje) avisar.exito(mensaje);
+      onHecho();
+    }
   };
   return (
     <div className="flex flex-wrap gap-2">
@@ -45,7 +48,11 @@ export function AccionesCotizacion({
         <Button
           type="button"
           disabled={pendiente}
-          onClick={() => void ejecutar("cpq.cotizaciones.solicitar_aprobacion", { id: cotizacionId }).then(despues)}
+          onClick={() =>
+            void ejecutar("cpq.cotizaciones.solicitar_aprobacion", { id: cotizacionId }).then((r) =>
+              despues(r, "Pedido de aprobación enviado"),
+            )
+          }
         >
           Pedir aprobación
         </Button>
@@ -55,7 +62,11 @@ export function AccionesCotizacion({
           type="button"
           variant="secondary"
           disabled={pendiente}
-          onClick={() => void ejecutar("cpq.cotizaciones.marcar_lista", { id: cotizacionId }).then(despues)}
+          onClick={() =>
+            void ejecutar("cpq.cotizaciones.marcar_lista", { id: cotizacionId }).then((r) =>
+              despues(r, "Cotización marcada como lista"),
+            )
+          }
         >
           Dejar lista
         </Button>
@@ -110,6 +121,7 @@ export function AccionesCotizacion({
           Enviar
         </Button>
       ) : null}
+      {error ? <p className="t-caption text-danger w-full">{error}</p> : null}
     </div>
   );
 }

@@ -27,7 +27,7 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       orden: 1,
     },
     {
-      area: "operaciones",
+      area: "clientes",
       href: "/instalaciones",
       etiqueta: mayuscula(voc.instalacion.plural),
       icono: "MapPin",
@@ -54,13 +54,13 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       orden: 2,
     },
     {
-      area: "documentos",
+      area: "clientes",
       href: "/documentos/firmas",
       etiqueta: "Firmas",
       icono: "PenLine",
       modulo: "core",
       permiso: PERMISOS_CORE.firmasRead,
-      orden: 1,
+      orden: 3,
     },
   ];
 }
