@@ -24,6 +24,8 @@ import {
   ventasEnviarSii,
 } from "./ventas-escritura";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
+import { ventasEnviarCliente } from "./ventas-enviar-cliente";
+import { ventasEnvios } from "./ventas-envios";
 import { ventasPdf } from "./ventas-pdf";
 import { ventasPreflightEmision } from "./ventas-preflight";
 import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
@@ -79,6 +81,8 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasCesionCeder,
   ventasCesionListar,
   ventasPdf,
+  ventasEnviarCliente,
+  ventasEnvios,
   foliosListar,
   foliosCargarCaf,
   dteConfigObtener,

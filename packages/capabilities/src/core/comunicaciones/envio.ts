@@ -1,6 +1,6 @@
 import { renderizarCorreo } from "@opai/domain";
 import type { TenantTx } from "@opai/db";
-import type { Mailer } from "@opai/integrations";
+import type { AdjuntoCorreo, Mailer } from "@opai/integrations";
 
 import { comunicableDe, marcaDe, plantillaVigente } from "./resolver";
 
@@ -21,6 +21,7 @@ export async function enviarCorreo(
   evento: string,
   para: string,
   datos: Record<string, unknown>,
+  extra: { cc?: readonly string[]; adjuntos?: readonly AdjuntoCorreo[] } = {},
 ) {
   const e = comunicableDe(evento);
   if (!e) throw new Error(`Evento no comunicable: ${evento}`);
@@ -41,7 +42,14 @@ export async function enviarCorreo(
   }
   try {
     const r = renderizarCorreo(e, plantilla, datos, await marcaDe(d.db, d.tenantId, d.urlBase));
-    await d.correo.enviar({ para, asunto: r.asunto, texto: r.texto, html: r.html });
+    await d.correo.enviar({
+      para,
+      asunto: r.asunto,
+      texto: r.texto,
+      html: r.html,
+      ...(extra.cc?.length ? { cc: extra.cc } : {}),
+      ...(extra.adjuntos?.length ? { adjuntos: extra.adjuntos } : {}),
+    });
     await d.db.envio.create({ data: { ...base, estado: "enviado" } });
     return true;
   } catch (error) {

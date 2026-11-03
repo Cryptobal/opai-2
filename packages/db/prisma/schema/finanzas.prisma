@@ -311,6 +311,7 @@ model DocumentoEmitido {
   @@index([tenantId, cuentaId])
   @@index([tenantId, cotizacionId])
   corridasProgramacion VentasProgramacionCorrida[]
+  enviosCliente        DocumentoEmitidoEnvio[]
   @@map("documentos_emitidos")
   @@schema("finanzas")
 }
@@ -691,5 +692,28 @@ model VentasProgramacionCorrida {
   @@index([tenantId])
   @@index([documentoId])
   @@map("ventas_programaciones_corridas")
+  @@schema("finanzas")
+}
+
+/// Envío de un documento emitido al cliente por correo, con PDF y XML (BRIEF-28 · CAR-155).
+model DocumentoEmitidoEnvio {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  documentoId   String   @map("documento_id") @db.Uuid
+  /// Primer correo = destinatario; el resto va en copia.
+  destinatarios String[]
+  /// "pdf" | "xml"
+  adjuntos      String[]
+  /// "enviado" | "fallido"
+  estado        String
+  error         String?
+  enviadoPor    String?  @map("enviado_por") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, documentoId, createdAt], map: "documentos_emitidos_envios_tenant_documento_idx")
+  @@map("documentos_emitidos_envios")
   @@schema("finanzas")
 }

@@ -14,6 +14,15 @@ export function mailerResend(apiKey: string, remitente: string): Mailer {
           subject: correo.asunto,
           text: correo.texto,
           ...(correo.html ? { html: correo.html } : {}),
+          ...(correo.cc?.length ? { cc: correo.cc } : {}),
+          ...(correo.adjuntos?.length
+            ? {
+                attachments: correo.adjuntos.map((a) => ({
+                  filename: a.nombre,
+                  content: a.contenidoBase64,
+                })),
+              }
+            : {}),
         }),
       });
       if (!res.ok) {

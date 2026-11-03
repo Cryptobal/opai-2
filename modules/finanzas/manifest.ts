@@ -142,6 +142,7 @@ export const manifest = defineModule({
     { id: "finanzas.venta.borrador_creado", descripcion: "Se creó un borrador de factura o nota en el libro de ventas." },
     { id: "finanzas.venta.emitida", descripcion: "Se emitió un DTE con folio y firma." },
     { id: "finanzas.venta.enviada_sii", descripcion: "Se envió un DTE al SII." },
+    { id: "finanzas.venta.enviada_cliente", descripcion: "Se envió por correo un documento emitido al cliente (PDF y XML)." },
     { id: "finanzas.venta.nota_credito_emitida", descripcion: "Se emitió una nota de crédito con referencia." },
     { id: "finanzas.venta.cedida", descripcion: "Se registró una cesión de factoring sobre una factura." },
     { id: "finanzas.programacion.creada", descripcion: "Se creó una programación de facturación recurrente." },
