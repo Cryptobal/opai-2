@@ -2,29 +2,13 @@ import { conflicto, noEncontrado, reglaDeNegocio, type Contexto } from "@opai/ca
 
 import { puedeTransicionar, type EstadoCotizacion } from "../domain";
 import type { ResultadoCalculo } from "../domain/motor";
-import { exigirDecisorAprobacionMargen, creadoPorIdDeVersion, usuarioReal } from "./aprobacion-reglas";
+import {
+  aprobacionPendiente,
+  creadoPorIdDeVersion,
+  exigirDecisorAprobacionMargen,
+  usuarioReal,
+} from "./aprobacion-reglas";
 import { versionDeCotizacion } from "./version";
-
-async function aprobacionPendiente(ctx: Contexto, versionId: string) {
-  return ctx.db.cpqAprobacion.findFirst({
-    where: { versionId, estado: "pendiente" },
-    orderBy: { createdAt: "desc" },
-  });
-}
-
-export async function transicionVersion(
-  ctx: Contexto,
-  versionId: string,
-  hasta: EstadoCotizacion,
-  data?: Partial<{ estado: string }>,
-) {
-  const v = await versionDeCotizacion(ctx, versionId);
-  if (!puedeTransicionar(v.estado as EstadoCotizacion, hasta))
-    throw reglaDeNegocio(`No se puede pasar de ${v.estado} a ${hasta}.`);
-  await ctx.db.cpqVersion.update({ where: { id: versionId }, data: { estado: hasta, ...data } });
-  return v;
-}
-
 export async function solicitarAprobacionMargen(
   ctx: Contexto,
   versionId: string,
@@ -61,22 +45,27 @@ export async function solicitarAprobacionMargen(
       tipo: "cpq.cotizacion.aprobacion_solicitada",
       entidadTipo: "cotizacion_version",
       entidadId: versionId,
-      payload: { aprobacionId: creada.id, margenEfectivoPct: resultado.margenEfectivoPct },
+      payload: {
+        aprobacionId: creada.id,
+        solicitadaPorId: actorId,
+        margenEfectivoPct: resultado.margenEfectivoPct,
+      },
     });
     return creada;
   });
   ctx.despacharEventos();
   return { aprobacionId: fila.id, estado: "en_aprobacion" as const };
 }
-
 export async function marcarLista(ctx: Contexto, versionId: string, resultado: ResultadoCalculo) {
   if (resultado.noEnviable) throw reglaDeNegocio("La cotización no está lista: hay costos o UF pendientes.");
   if (resultado.requiereAprobacion)
     throw reglaDeNegocio("El margen requiere aprobación; usa «Pedir aprobación».");
-  await transicionVersion(ctx, versionId, "lista");
+  const v = await versionDeCotizacion(ctx, versionId);
+  if (!puedeTransicionar(v.estado as EstadoCotizacion, "lista"))
+    throw reglaDeNegocio(`No se puede pasar de ${v.estado} a lista.`);
+  await ctx.db.cpqVersion.update({ where: { id: versionId }, data: { estado: "lista" } });
   return { estado: "lista" as const };
 }
-
 export async function retirarAprobacion(ctx: Contexto, versionId: string) {
   const v = await versionDeCotizacion(ctx, versionId);
   if (v.estado !== "en_aprobacion") throw reglaDeNegocio("No hay un pedido de aprobación activo.");
@@ -100,7 +89,6 @@ export async function retirarAprobacion(ctx: Contexto, versionId: string) {
   });
   return { estado: "borrador" as const };
 }
-
 export async function resolverAprobacionMargen(
   ctx: Contexto,
   versionId: string,
@@ -154,5 +142,3 @@ export async function resolverAprobacionMargen(
   ctx.despacharEventos();
   return { estado: nuevo, aprobacionId: pend.id, autoaprobacion: aprobar ? autoaprobacion : false };
 }
-
-export { aprobacionPendiente };

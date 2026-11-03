@@ -40,8 +40,18 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
       setAprobaciones(total);
       // null significa sin permiso: no se solicita la lista para viewer/supervisor.
       if (total !== null && total > 0) {
-        const a = await ejecutarCapacidad("erp", "core.aprobaciones.list", { estado: "pendiente" });
-        if (a.ok) setDecisiones((a.data as { id: string; resumen: string }[]).slice(0, 5));
+        const [a, cpq] = await Promise.all([
+          ejecutarCapacidad("erp", "core.aprobaciones.list", { estado: "pendiente" }),
+          ejecutarCapacidad("erp", "cpq.aprobaciones.list", { limite: 5 }),
+        ]);
+        const agente = a.ok ? (a.data as { id: string; resumen: string }[]) : [];
+        const cpqItems = cpq.ok
+          ? (cpq.data as { id: string; resumen: string }[]).map((x) => ({
+              id: x.id,
+              resumen: x.resumen,
+            }))
+          : [];
+        setDecisiones([...agente, ...cpqItems].slice(0, 5));
       } else setDecisiones([]);
     }
   }, []);
@@ -114,7 +124,7 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
             {decisiones.map((d) => (
               <Link
                 key={d.id}
-                href={`/configuracion/aprobaciones?id=${d.id}`}
+                href={`/configuracion/aprobaciones?ver=${encodeURIComponent(d.id)}`}
                 className="flex min-h-11 items-center text-fg"
               >
                 {d.resumen}

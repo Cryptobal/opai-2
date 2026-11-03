@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 466 pares pantalla→capacidad · 418 con herramienta · 48 excepciones justificadas · 0 faltantes.
+**Resumen:** 472 pares pantalla→capacidad · 422 con herramienta · 50 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -69,6 +69,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/_componentes` | `cpq.aprobaciones.list` | `cpq_aprobaciones_list` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.create` | `core_cargos_create` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
@@ -374,6 +375,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.aprobar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.list` | `core_aprobaciones_list` | existe |
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.rechazar` | — | excepción |
+| erp | `/configuracion/aprobaciones` | `cpq.aprobaciones.list` | `cpq_aprobaciones_list` | existe |
+| erp | `/configuracion/aprobaciones` | `cpq.cotizaciones.aprobar` | — | excepción |
+| erp | `/configuracion/aprobaciones` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
+| erp | `/configuracion/aprobaciones` | `cpq.envios_propuesta.aprobar` | `cpq_envios_propuesta_aprobar` | existe |
+| erp | `/configuracion/aprobaciones` | `cpq.envios_propuesta.cancelar` | `cpq_envios_propuesta_cancelar` | existe |
 | erp | `/configuracion/aprobaciones` | `platform.aprobaciones.aprobar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `platform.aprobaciones.rechazar` | — | excepción |
 | erp | `/configuracion/calendario` | `core.calendario.actualizar` | `core_calendario_actualizar` | existe |
@@ -631,8 +637,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
-| `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes` | no | reservada a personas |
-| `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes` | no | reservada a personas |
+| `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
+| `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `finanzas.folios.cargar_caf` | `app/(erp)/finanzas/folios/_componentes` | no | reservada a personas |
 | `platform.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `platform.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
@@ -682,6 +688,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
+- `cpq.aprobaciones.contar`
+- `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
 - `cpq.catalogo_categorias.create`
 - `cpq.catalogo_categorias.desactivar`

@@ -218,6 +218,9 @@ core_vinculos_list
 core_vinculos_previsualizar
 core_vinculos_terminar
 core_vinculos_update
+cpq_aprobaciones_contar
+cpq_aprobaciones_get
+cpq_aprobaciones_list
 cpq_biblioteca_bloques_list
 cpq_biblioteca_bloques_publicar
 cpq_catalogo_categorias_create

@@ -19,7 +19,12 @@ const metaSchema = z.object({
     .object({ mensaje: z.string(), huellaActual: z.string().nullable() })
     .nullable(),
   aprobacion: z
-    .object({ id: uuidSchema, estado: z.string(), solicitadaPorId: uuidSchema })
+    .object({
+      id: uuidSchema,
+      bandejaId: z.string(),
+      estado: z.string(),
+      solicitadaPorId: uuidSchema,
+    })
     .nullable(),
   puedeEnviar: z.boolean(),
   puedeAprobarMargen: z.boolean(),
@@ -82,7 +87,7 @@ export const cotizacionesFicha = defineCapability({
         ? await recalcularVersion(ctx, input.id, input.version, false)
         : calculoCongelado(ctx, version, lineas);
     if (!r) throw noEncontrado("La versión");
-    const meta = await metaFicha(ctx, c.creadoPorId, version, lineas, r);
+    const meta = await metaFicha(ctx, c.id, c.creadoPorId, version, lineas, r);
     const verCostos = ctx.autorizar(PERMISO_COSTOS);
     return {
       cotizacion: {
