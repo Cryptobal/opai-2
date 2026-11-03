@@ -53,7 +53,8 @@ export function ResumenCotizacion({
   /** Abre la hoja de edición de una línea desde su aviso (CAR-162). */
   onEditarLinea?: (lineaId: string) => void;
 }) {
-  const costoPendiente = calculo.ventaMensual == null || Boolean(calculo.noEnviable);
+  // Sin venta (sin puestos o con costo pendiente) no hay cálculo que mostrar: «—» y sin semáforo.
+  const costoPendiente = !calculo.ventaMensual || Boolean(calculo.noEnviable);
   const ventaTxt = ventaMensualTexto(calculo.ventaMensual, costoPendiente);
   const ventaMostrar = typeof ventaTxt === "number" ? pesos(ventaTxt) : ventaTxt;
   const badge = estadoCpqBadge(version.estado);

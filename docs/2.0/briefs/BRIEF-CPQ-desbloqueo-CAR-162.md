@@ -106,4 +106,11 @@ Sin cambios de RLS ni de permisos. `cpq:costos.ver` se respeta: la advertencia d
 - Rollback: revertir el PR. No hay datos ni migraciones.
 
 ## 16. Reporte de ejecución
-(Se completa al abrir el PR.)
+Diferencias con el brief (se conserva el objetivo):
+- La lectura de la ficha agrega `meta.requiereConfirmarMutual`; el bloqueo de envío va en `validarEnvioCpq` (usado por `cpq.envios_propuesta.*` y el envío legado), con `detalles.codigo = "mutual_sin_confirmar"`. Para eso `reglaDeNegocio` acepta `detalles` opcionales.
+- «Confirmar mutual» lleva a `/configuracion/remuneraciones?mutual=1`, que abre el diálogo existente; no hay pantalla nueva.
+- Con la mutual confirmada la huella de línea no cambia respecto de antes (las cotizaciones existentes no quedan desactualizadas); con 0 % supuesto lleva el sufijo `:mutual-supuesta`.
+- Además de `ventaMensual == null`, una venta 0 (cotización sin puestos) también se muestra como «sin cálculo».
+- `acciones-cotizacion.tsx` y `cpq-presentacion.ts` ya superaban 150 líneas en `main`; se dividieron (avisos en `lib/cpq-avisos.ts`, aprobación y menú en archivos propios).
+- El seed e2e de CPQ suma el usuario `cpq-costos@example.test` (con `cpq:costos.ver`), necesario para ingresar sueldo.
+- Instantánea MCP: sin cambios (no cambian ids de herramientas; el esquema de salida suma campos opcionales).

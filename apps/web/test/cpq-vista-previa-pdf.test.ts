@@ -48,7 +48,7 @@ afterEach(() => vi.useRealTimers());
 
 describe("vista previa del PDF (CAR-162)", () => {
   it("muestra el error del servidor y no queda en «Generando»", async () => {
-    h.ejecutar.mockResolvedValue({ ok: false, error: { code: "INTERNAL", message: "Fallo del PDF" } });
+    h.ejecutar.mockResolvedValue({ ok: false, error: { code: "UNPROCESSABLE", message: "Fallo del PDF" } });
     render();
     correrEfecto();
     await vi.runAllTicks();

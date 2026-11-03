@@ -1,4 +1,5 @@
 import { avisosCpq, type AvisoServidorCpq } from "./cpq-avisos";
+import { pesos as clp } from "./fechas";
 
 type Calculo = {
   ventaMensual?: number | null;
@@ -6,8 +7,6 @@ type Calculo = {
   advertencias?: string[];
   avisos?: AvisoServidorCpq[];
 };
-
-const clp = (n: number) => `$${n.toLocaleString("es-CL")}`;
 
 /**
  * Texto al terminar «Recalcular» (CAR-162): qué cambió o, si nada cambió, qué falta. Nunca revela

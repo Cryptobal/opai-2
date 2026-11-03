@@ -81,11 +81,11 @@ export function AccionesCotizacion({
     if (primaria.id === "enviar") return onEnviar?.();
     if (primaria.id === "preview") return onVistaPrevia?.();
     if (primaria.id === "recalcular") return recalcular();
-    const id =
-      primaria.id === "pedir"
-        ? "cpq.cotizaciones.solicitar_aprobacion"
-        : "cpq.cotizaciones.marcar_lista";
-    despues(await ejecutar(id, { id: cotizacionId }));
+    if (primaria.id === "pedir") {
+      despues(await ejecutar("cpq.cotizaciones.solicitar_aprobacion", { id: cotizacionId }));
+    } else {
+      despues(await ejecutar("cpq.cotizaciones.marcar_lista", { id: cotizacionId }));
+    }
   }
 
   const avisoBloqueo = (b: NonNullable<typeof bloqueo>) => (
