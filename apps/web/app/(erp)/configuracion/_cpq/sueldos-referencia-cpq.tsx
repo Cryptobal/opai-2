@@ -52,7 +52,7 @@ function Fila({ f }: { f: FilaReferencia }) {
 export function SueldosReferenciaCpq({ filas }: { filas: readonly FilaReferencia[] }) {
   return (
     <div className="space-y-3">
-      <h3 className="t-h3">Sueldos de referencia para cotizar</h3>
+      <h3 className="t-heading">Sueldos de referencia para cotizar</h3>
       <p className="t-body-sm text-fg-muted">
         Supuesto de venta por cargo: no es el sueldo que se paga. Cambiarlo no toca las cotizaciones enviadas.
       </p>
