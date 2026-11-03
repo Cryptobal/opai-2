@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 478 pares pantalla→capacidad · 428 con herramienta · 50 excepciones justificadas · 0 faltantes.
+**Resumen:** 486 pares pantalla→capacidad · 436 con herramienta · 50 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -30,7 +30,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/_components` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/_components` | `core.actividad.list` | `core_actividad_list` | existe |
+| compartido | `app/_components` | `core.actividades.completar` | `core_actividades_completar` | existe |
+| compartido | `app/_components` | `core.actividades.create` | `core_actividades_create` | existe |
+| compartido | `app/_components` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
+| compartido | `app/_components` | `core.actividades.timeline` | `core_actividades_timeline` | existe |
+| compartido | `app/_components` | `core.actividades.update` | `core_actividades_update` | existe |
 | compartido | `app/_components` | `core.anexos.aprobar` | — | excepción |
 | compartido | `app/_components` | `core.anexos.get` | `core_anexos_get` | existe |
 | compartido | `app/_components` | `core.anexos.list` | `core_anexos_list` | existe |
@@ -64,6 +70,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
+| compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.aprobaciones.list` | `core_aprobaciones_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.inicio.pendientes` | `core_inicio_pendientes` | existe |
 | compartido | `app/(erp)/_componentes` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
@@ -351,6 +358,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.pasar_a_cotizacion` | `comercial_solicitudes_pasar_a_cotizacion` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.reabrir` | `comercial_solicitudes_reabrir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `core.users.list` | `core_users_list` | existe |
+| compartido | `app/(erp)/tareas/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.crear` | `tickets_tickets_crear` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.listar` | `tickets_tickets_listar` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.obtener` | `tickets_tickets_obtener` | existe |
@@ -660,12 +668,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `agente.modelos.list`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
-- `core.actividades.completar`
-- `core.actividades.create`
 - `core.actividades.delete`
-- `core.actividades.tareas`
-- `core.actividades.timeline`
-- `core.actividades.update`
 - `core.anexos.generar`
 - `core.aprobaciones.get`
 - `core.audit.list`
