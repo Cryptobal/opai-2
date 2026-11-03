@@ -14,6 +14,9 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   fecha_nacimiento: "fecha de nacimiento",
   calle: "calle",
   comuna: "comuna",
+  ciudad: "ciudad",
+  giro: "giro comercial",
+  email_dte: "correo receptor DTE",
   region: "región",
   direccion_formateada: "dirección",
   // personas PR 2
