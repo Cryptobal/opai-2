@@ -3,6 +3,12 @@ import { z } from "zod";
 import { defineCapability } from "../define";
 import { emailSchema, uuidSchema } from "../core/esquemas";
 import { definidos, rutSchema, telefonoSchema, textoOpcional } from "../core/maestros/comun";
+import {
+  CAMPOS_PROPUESTOS,
+  exigirTopeEscriturasAgente,
+  fusionarCamposPropuestos,
+  type CampoPropuesto,
+} from "./solicitudes-agente-comun";
 import { PERMISO_SOLICITUDES_MANAGE, solicitudSchema, vistaSolicitud } from "./solicitudes-comun";
 import { responsableValido } from "./validaciones";
 import type { CanalSolicitud } from "./solicitudes-dominio";
@@ -24,6 +30,7 @@ export const camposSolicitud = {
   rut: rutSchema.nullable().optional().describe("RUT de la empresa o persona, si lo informó."),
   comuna: textoOpcional(80),
   servicio: textoOpcional(160).describe("Servicio que pide (por ejemplo «guardias 24/7»)."),
+  fuente: textoOpcional(120).describe("Origen comercial (campaña, referido, canal de marketing)."),
 };
 
 export const solicitudesCreate = defineCapability({
@@ -49,6 +56,12 @@ export const solicitudesCreate = defineCapability({
       where: { tenantId_canal: { tenantId: ctx.tenantId, canal } },
     });
     const responsableId = input.responsableId ?? config?.responsableId ?? null;
+    const parcial: Partial<Record<CampoPropuesto, unknown>> = {};
+    for (const k of CAMPOS_PROPUESTOS) {
+      if (input[k] !== undefined && input[k] !== null && String(input[k]).trim() !== "") {
+        parcial[k] = input[k];
+      }
+    }
     const data = definidos({
       ...input,
       canal,
@@ -56,6 +69,8 @@ export const solicitudesCreate = defineCapability({
       responsableId,
       registradaPorTipo: esAgente ? "agente" : "usuario",
       registradaPorId: ctx.usuario?.id ?? null,
+      registradaPorApiKeyId: esAgente ? ctx.actor.id : null,
+      camposPropuestosAgente: esAgente ? fusionarCamposPropuestos([], parcial) : [],
     });
     if (dryRun) {
       return vistaSolicitud({
@@ -68,6 +83,8 @@ export const solicitudesCreate = defineCapability({
         rut: null,
         comuna: null,
         servicio: null,
+        fuente: null,
+        notasAgente: null,
         motivoDescarte: null,
         descartadaEn: null,
         convertidaEn: null,
@@ -77,10 +94,12 @@ export const solicitudesCreate = defineCapability({
         contactoId: null,
         createdAt: new Date(),
         ...data,
+        camposPropuestosAgente: data.camposPropuestosAgente ?? [],
         responsableId,
         registradaPorId: data.registradaPorId ?? null,
       });
     }
+    if (esAgente) await exigirTopeEscriturasAgente(ctx);
     const creada = await ctx.transaccion(async (tx) => {
       const s = await tx.solicitud.create({ data: { ...data, tenantId: ctx.tenantId } });
       await ctx.eventos.emitir(tx, {

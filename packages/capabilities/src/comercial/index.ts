@@ -13,8 +13,11 @@ import { negociosEmbudo, negociosList } from "./negocios-lectura";
 import { negociosGanar, negociosMover } from "./negocios-mover";
 import { negociosSetContactos } from "./negocios-contactos";
 import { comercialImportar10 } from "./importar-1-0";
+import { solicitudesAccionesAgente } from "./solicitudes-acciones-agente";
+import { solicitudesBuscarDuplicadas } from "./solicitudes-buscar-duplicadas";
 import { canalesGet, canalesUpdate } from "./solicitudes-canales";
 import { solicitudesConvertir } from "./solicitudes-convertir";
+import { solicitudesEnriquecer } from "./solicitudes-enriquecer";
 import { solicitudesPasarACotizacion } from "./solicitudes-pasar-cotizacion";
 import { solicitudesCreate } from "./solicitudes-crear";
 import {
@@ -51,6 +54,9 @@ export const capacidadesComercial: readonly Capacidad[] = [
   solicitudesList,
   solicitudesGet,
   solicitudesCreate,
+  solicitudesEnriquecer,
+  solicitudesBuscarDuplicadas,
+  solicitudesAccionesAgente,
   solicitudesDerivar,
   solicitudesDescartar,
   solicitudesReabrir,
