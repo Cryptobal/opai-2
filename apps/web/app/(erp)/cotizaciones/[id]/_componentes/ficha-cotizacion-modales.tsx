@@ -20,7 +20,20 @@ export function useModalesFichaCotizacion() {
   );
   const [enviarAbierto, setEnviarAbierto] = useState(false);
   const [previewAbierto, setPreviewAbierto] = useState(false);
+  type LineaEditable = { id: string; nombre: string; posiciones?: number; sueldoBaseClp?: number };
+  /** Abre la hoja de edición de la línea del aviso de sueldo faltante (CAR-162), sin navegar. */
+  function editarLineaDe(secciones: readonly { lineas: readonly LineaEditable[] }[], lineaId: string) {
+    const l = secciones.flatMap((s) => s.lineas).find((x) => x.id === lineaId);
+    if (!l) return;
+    setLineaEditar({
+      id: l.id,
+      nombre: l.nombre,
+      ...(l.posiciones !== undefined ? { posiciones: l.posiciones } : {}),
+      ...(l.sueldoBaseClp !== undefined ? { sueldoBaseClp: l.sueldoBaseClp } : {}),
+    });
+  }
   return {
+    editarLineaDe,
     hojaSeccion,
     setHojaSeccion,
     lineaEditar,
