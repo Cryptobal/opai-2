@@ -73,6 +73,19 @@ export async function cargarSeries(ctx: Contexto, puestoId: string): Promise<Ser
   return (await armarSeries(ctx, filas)).get(puestoId) ?? [];
 }
 
+/** Series de varios puestos en dos consultas (series y patrones), en orden de vigencia. */
+export async function cargarSeriesDe(
+  ctx: Contexto,
+  puestoIds: readonly string[],
+): Promise<Map<string, SerieCargada[]>> {
+  if (puestoIds.length === 0) return new Map();
+  const filas = await ctx.db.seriePauta.findMany({
+    where: { puestoId: { in: [...puestoIds] } },
+    orderBy: { vigenteDesde: "asc" },
+  });
+  return armarSeries(ctx, filas);
+}
+
 /** Carga series, excepciones y feriados de varios puestos y expande el mes de cada uno. */
 export async function cargarMes(
   ctx: Contexto,

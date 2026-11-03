@@ -6,7 +6,7 @@ import { uuidSchema } from "../core/esquemas";
 import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
-import { cargarSeries } from "./cargar";
+import { cargarSeriesDe } from "./cargar";
 import { aFechaDb, diaSchema, PERMISO_READ, hoy } from "./comun";
 import { nombresDePersonas } from "./nombres";
 
@@ -57,15 +57,21 @@ export const alertasListar = defineCapability({
     const semanaDesde = inicioSemana(anchor);
     const semanaFin = new Date(Date.parse(`${semanaDesde}T00:00:00Z`) + 6 * 86_400_000).toISOString().slice(0, 10);
     const turnos: { personaId: string; fecha: string; horaInicio: string; horaFin: string }[] = [];
+    // Lecturas por lote: series y excepciones de todos los puestos en una consulta cada una.
+    const ids = puestos.map((p) => p.id);
+    const seriesPorPuesto = await cargarSeriesDe(ctx, ids);
+    const excepciones = ids.length
+      ? await ctx.db.excepcionPauta.findMany({
+          where: {
+            puestoId: { in: ids },
+            estado: "activa",
+            fecha: { gte: aFechaDb(semanaDesde), lte: aFechaDb(semanaFin) },
+          },
+        })
+      : [];
     for (const p of puestos) {
-      const series = await cargarSeries(ctx, p.id);
-      const exc = await ctx.db.excepcionPauta.findMany({
-        where: {
-          puestoId: p.id,
-          estado: "activa",
-          fecha: { gte: aFechaDb(semanaDesde), lte: aFechaDb(semanaFin) },
-        },
-      });
+      const series = seriesPorPuesto.get(p.id) ?? [];
+      const exc = excepciones.filter((x) => x.puestoId === p.id);
       for (let d = semanaDesde; d <= semanaFin; d = new Date(Date.parse(`${d}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10)) {
         const vig = serieVigente(series, d);
         if (!vig) continue;
