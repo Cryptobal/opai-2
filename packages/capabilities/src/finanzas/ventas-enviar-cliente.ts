@@ -72,10 +72,13 @@ export const ventasEnviarCliente = defineCapability({
     if (previo && !input.reenviar) {
       throw reglaDeNegocio(`Este documento ya se envió el ${dmy(previo.createdAt)}. Confirma el reenvío para volver a mandarlo.`);
     }
-    const adjuntos = ["pdf", "xml"] as const;
-    if (dryRun) return { documentoId: doc.id, para, cc, adjuntos: [...adjuntos], estado: "vista_previa" as const };
+    // Con el SII simulado el XML es un marcador de pruebas: no se le manda al cliente.
+    const adaptador = await adaptadorSiiDe(ctx);
+    const conXml = adaptador.nombre !== "simulado";
+    const adjuntos: ("pdf" | "xml")[] = conXml ? ["pdf", "xml"] : ["pdf"];
+    if (dryRun) return { documentoId: doc.id, para, cc, adjuntos, estado: "vista_previa" as const };
 
-    const xml = await xmlParaEnvioSii(ctx, doc, await adaptadorSiiDe(ctx));
+    const xml = conXml ? await xmlParaEnvioSii(ctx, doc, adaptador) : null;
     const pdf = await pdfDeDocumento(ctx, doc);
     const cuenta = await cuentaDe(ctx, doc.cuentaId);
     const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } });
@@ -98,7 +101,9 @@ export const ventasEnviarCliente = defineCapability({
         cc,
         adjuntos: [
           { nombre: `${etiqueta}.pdf`, contenidoBase64: Buffer.from(pdf).toString("base64"), mime: "application/pdf" },
-          { nombre: `${etiqueta}.xml`, contenidoBase64: Buffer.from(xml, "utf8").toString("base64"), mime: "application/xml" },
+          ...(xml
+            ? [{ nombre: `${etiqueta}.xml`, contenidoBase64: Buffer.from(xml, "utf8").toString("base64"), mime: "application/xml" }]
+            : []),
         ],
       },
     );

@@ -31,7 +31,7 @@ export function HojaNotaCredito({
   const [codigo, setCodigo] = useState("1");
   const [intento] = useState(() => crypto.randomUUID());
   const valor = Number(monto);
-  const valido = Number.isInteger(valor) && valor >= 0 && valor <= total && motivo.trim().length >= 3;
+  const valido = Number.isInteger(valor) && valor > 0 && valor <= total && motivo.trim().length >= 3;
   const input = useMemo(
     () => ({ documentoReferenciaId: documentoId, monto: valor, motivo: motivo.trim(), codigoReferencia: Number(codigo) }),
     [documentoId, valor, motivo, codigo],

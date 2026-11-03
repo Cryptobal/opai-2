@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Alerta, avisar, Button, Dialog } from "@opai/ds";
 
@@ -23,9 +23,10 @@ function descargar(base64: string, nombre: string) {
 /** Acciones de la ficha: cada una llama a su capacidad; el servidor decide si corresponde. */
 export function AccionesVenta({ venta, enviosPrevios }: { venta: Venta; enviosPrevios: number }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const intento = useRef(crypto.randomUUID());
   const [hoja, setHoja] = useState<"nc" | "ceder" | "reenviar" | null>(null);
   const emitido = venta.estadoDte === "enviado" || venta.estadoDte === "aceptado";
-  const puedeCeder = venta.estadoDte === "aceptado" && venta.tipoDte !== 61 && venta.cesionEstado !== "cedido";
+  const puedeCeder = venta.estadoDte === "aceptado" && (venta.tipoDte === 33 || venta.tipoDte === 34) && venta.cesionEstado !== "cedido";
 
   async function pdf() {
     const r = await ejecutar<{ base64: string }>("finanzas.ventas.pdf", { documentoId: venta.id }, false, "ninguna");
@@ -44,9 +45,10 @@ export function AccionesVenta({ venta, enviosPrevios }: { venta: Venta; enviosPr
       { documentoId: venta.id, reenviar },
       false,
       "layout",
-      `cliente-${venta.id}-${enviosPrevios}-${reenviar}`,
+      `cliente-${venta.id}-${intento.current}`,
     );
     setHoja(null);
+    intento.current = crypto.randomUUID();
     if (r?.estado === "enviado") avisar.exito(`Enviado a ${r.para}`);
     else if (r) avisar.error("El correo no salió. Revisa el historial de envíos.");
   }
@@ -62,11 +64,11 @@ export function AccionesVenta({ venta, enviosPrevios }: { venta: Venta; enviosPr
             Enviar al cliente
           </Button>
         ) : null}
-        {emitido && venta.tipoDte !== 61 ? <Button variant="secondary" onClick={() => setHoja("nc")}>Nota de crédito</Button> : null}
+        {emitido && (venta.tipoDte === 33 || venta.tipoDte === 34) ? <Button variant="secondary" onClick={() => setHoja("nc")}>Nota de crédito</Button> : null}
         {puedeCeder ? <Button variant="secondary" onClick={() => setHoja("ceder")}>Ceder</Button> : null}
       </div>
-      <HojaNotaCredito documentoId={venta.id} total={venta.montoTotal} abierta={hoja === "nc"} onCerrar={() => setHoja(null)} />
-      <HojaCeder documentoId={venta.id} abierta={hoja === "ceder"} onCerrar={() => setHoja(null)} />
+      {hoja === "nc" ? <HojaNotaCredito documentoId={venta.id} total={venta.montoTotal} abierta onCerrar={() => setHoja(null)} /> : null}
+      {hoja === "ceder" ? <HojaCeder documentoId={venta.id} abierta onCerrar={() => setHoja(null)} /> : null}
       {hoja === "reenviar" ? (
         <Dialog abierto titulo="¿Reenviar al cliente?" onCerrar={() => setHoja(null)}>
           <p className="text-sm">Este documento ya se envió {enviosPrevios} {enviosPrevios === 1 ? "vez" : "veces"}. El cliente recibirá otro correo.</p>

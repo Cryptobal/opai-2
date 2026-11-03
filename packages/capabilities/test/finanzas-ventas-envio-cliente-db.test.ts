@@ -52,11 +52,11 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas · envío al cliente (db)",
     expect(vista.estado).toBe("vista_previa");
     const r = await s.dato<Envio>("finanzas.ventas.enviar_cliente", { documentoId: docId });
     expect(r).toMatchObject({ estado: "enviado", para: "facturas@cliente.cl", cc: ["contabilidad@cliente.cl"] });
-    expect(r.adjuntos).toEqual(["pdf", "xml"]);
+    expect(r.adjuntos).toEqual(["pdf"]); // SII simulado: no se manda el XML de prueba
     expect(enviados).toHaveLength(1);
     expect(enviados[0]?.para).toBe("facturas@cliente.cl");
     expect(enviados[0]?.cc).toEqual(["contabilidad@cliente.cl"]);
-    expect(enviados[0]?.adjuntos?.map((a) => a.mime)).toEqual(["application/pdf", "application/xml"]);
+    expect(enviados[0]?.adjuntos?.map((a) => a.mime)).toEqual(["application/pdf"]);
     const { envios } = await s.dato<{ envios: { estado: string }[] }>("finanzas.ventas.envios", { documentoId: docId });
     expect(envios).toHaveLength(1);
   });
