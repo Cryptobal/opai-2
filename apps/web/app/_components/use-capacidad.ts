@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { Resultado } from "@opai/capabilities";
 
@@ -12,13 +12,15 @@ import { ejecutarCapacidad, type Revalidacion } from "@/app/_acciones/capacidad"
  * navegador vacía: no hace falta un `router.refresh()` aparte, que además taparía un fallo de esa
  * invalidación. `revalidar: "ninguna"` la salta para cambios que ya se reflejan en el cliente (las
  * preferencias propias, B1). Nunca rechaza: cualquier fallo queda en `error` y devuelve `null`.
+ * `ejecutar` y `limpiarError` son estables entre renders (CAR-162): una pantalla que los pone en las
+ * dependencias de un efecto lo corre una vez, sin bucle que borre el error.
  */
 export function useCapacidad(portal: string) {
   const [pendiente, setPendiente] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState<string | null>(null);
 
-  async function ejecutar<T = unknown>(
+  const ejecutar = useCallback(async function ejecutar<T = unknown>(
     id: string,
     input: unknown,
     dryRun = false,
@@ -52,7 +54,8 @@ export function useCapacidad(portal: string) {
     } finally {
       setPendiente(false);
     }
-  }
+  }, [portal]);
+  const limpiarError = useCallback(() => setError(null), []);
 
-  return { ejecutar, pendiente, error, codigo, limpiarError: () => setError(null) };
+  return { ejecutar, pendiente, error, codigo, limpiarError };
 }
