@@ -18,17 +18,13 @@ export async function celdasDominioConCartolaPasada(
   const dominio: CeldaFlujo[] = [...sinPasadas];
   const extraVista: z.infer<typeof celdaSchema>[] = [];
 
-  for (const semana of pasadas) {
-    const bank = await derivadasBanco(ctx, semana);
-    for (const b of bank) {
-      dominio.push({
-        filaId: b.filaId,
-        semana: b.semana,
-        capa: "real",
-        monto: b.monto,
-      });
-      extraVista.push(b);
-    }
+  // Una sola consulta para todas las semanas pasadas del rango (hallazgo 15).
+  const ordenadas = [...pasadas].sort();
+  const bank = await derivadasBanco(ctx, ordenadas[0], ordenadas.at(-1));
+  const enRango = bank.filter((b) => pasadas.has(b.semana));
+  for (const b of enRango) {
+    dominio.push({ filaId: b.filaId, semana: b.semana, capa: "real", monto: b.monto });
+    extraVista.push(b);
   }
   return { dominio, extraVista };
 }

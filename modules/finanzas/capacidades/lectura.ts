@@ -6,6 +6,7 @@ import { ajustesSchema, aNumeroSeguro, celdaSchema, filaSchema, saldoSchema, sem
 import type { capaSchema } from "./esquemas";
 import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
+import { FILAS_VIRTUALES_VISTA } from "./filas-virtuales";
 import { desdeVentana, SEMANAS_HISTORIA, serieSaldos } from "./serie-saldos";
 import { aIso, ajustesDe, lunesHoy } from "./util";
 
@@ -110,7 +111,10 @@ export const planillaObtener = defineCapability({
 
     return {
       ajustes,
-      filas: filas.map(vistaFila),
+      filas: [
+        ...filas.map(vistaFila),
+        ...FILAS_VIRTUALES_VISTA.filter((f) => extraVista.some((c) => c.filaId === f.id)),
+      ],
       celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,
       aviso: { activo: ajustes.avisoActivo, umbral: ajustes.avisoUmbral, semanas: avisoSemanas },

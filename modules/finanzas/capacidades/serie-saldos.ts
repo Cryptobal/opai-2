@@ -3,6 +3,7 @@ import type { TenantTx } from "@opai/db";
 
 import { calcularPlanilla, semanasDesde, sumarSemanas, type CeldaFlujo } from "../domain";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
+import { FILAS_VIRTUALES_DOMINIO } from "./filas-virtuales";
 import { cargarFlujo, lunesHoy } from "./util";
 import type { ajustesDe } from "./util";
 
@@ -46,7 +47,7 @@ export async function serieSaldos(
       saldoInicial: ajustes.saldoInicial,
       umbral: ajustes.umbral,
       semanas: prevLista,
-      filas: prev.dominio,
+      filas: [...prev.dominio, ...FILAS_VIRTUALES_DOMINIO],
       celdas: dominio,
     });
     saldoPrevio = calc.at(-1)?.saldoFinal ?? ajustes.saldoInicial;
@@ -61,7 +62,7 @@ export async function serieSaldos(
     saldoInicial: saldoPrevio,
     umbral: ajustes.umbral,
     semanas: lista,
-    filas: cargado.dominio,
+    filas: [...cargado.dominio, ...FILAS_VIRTUALES_DOMINIO],
     celdas: celdasCalc,
   });
   return { hoy, lista, calculo, extraVista, ...cargado };
