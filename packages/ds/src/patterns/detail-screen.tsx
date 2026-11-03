@@ -12,6 +12,8 @@ export type DetailScreenProps = {
   /** Badge de estado (va sobre el título, con un texto corto opcional como "desde 01-03-2024"). */
   estado?: ReactNode;
   acciones?: ReactNode;
+  /** Teléfono: acciones debajo del título (no comparten fila con metadatos). */
+  accionesDebajoEnTelefono?: boolean;
   /** Avatar o monograma a la izquierda del título (ficha de persona). */
   inicio?: ReactNode;
   tabs?: readonly Tab[];
@@ -29,6 +31,7 @@ export function DetailScreen({
   subtitulo,
   estado,
   acciones,
+  accionesDebajoEnTelefono,
   inicio,
   tabs,
   tabActiva,
@@ -44,6 +47,7 @@ export function DetailScreen({
       {...(subtitulo ? { subtitulo } : {})}
       {...(estado ? { sobre: estado } : {})}
       {...(acciones ? { acciones } : {})}
+      {...(accionesDebajoEnTelefono ? { accionesDebajoEnTelefono } : {})}
     />
   );
   return (
