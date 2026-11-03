@@ -35,7 +35,7 @@ export const seguimientosList = defineCapability({
     soloPendientes: z.boolean().default(false).describe("Solo seguimientos con un paso por hacer, por preparar o fallido."),
     limite: z.number().int().min(1).max(100).default(50),
   }),
-  output: z.array(seguimientoVistaSchema),
+  output: z.array(seguimientoVistaSchema.extend({ negocioTitulo: z.string() })),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -64,10 +64,12 @@ export const seguimientosList = defineCapability({
     });
     const planes = new Map((await ctx.db.planSeguimiento.findMany()).map((p) => [p.id, p.nombre]));
     const pasos = await ctx.db.seguimientoPaso.findMany({ where: { seguimientoId: { in: filas.map((s) => s.id) } } });
+    const negocios = new Map((await ctx.db.negocio.findMany({ where: { id: { in: filas.map((s) => s.negocioId) } }, select: { id: true, titulo: true } })).map((n) => [n.id, n.titulo]));
     return Promise.all(
-      filas.map(async (s) =>
-        vistaSeguimiento(s, pasos.filter((p) => p.seguimientoId === s.id), await configDeVersion(ctx, s.planId, s.planVersion), planes.get(s.planId) ?? ""),
-      ),
+      filas.map(async (s) => ({
+        ...vistaSeguimiento(s, pasos.filter((p) => p.seguimientoId === s.id), await configDeVersion(ctx, s.planId, s.planVersion), planes.get(s.planId) ?? ""),
+        negocioTitulo: negocios.get(s.negocioId) ?? "Negocio",
+      })),
     );
   },
 });
