@@ -15,6 +15,7 @@ import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
 import { estadoCpqBadge } from "@/lib/cpq-presentacion";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
+import { hayBarraFijaCpq } from "./acciones-cotizacion-logica";
 import { AccionesCotizacion } from "./acciones-cotizacion";
 import { FichaCotizacionCuerpo } from "./ficha-cotizacion-cuerpo";
 import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotizacion-modales";
@@ -76,6 +77,13 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
     onEnviar: () => modales.setEnviarAbierto(true),
     onVistaPrevia: () => modales.setPreviewAbierto(true),
   };
+  const paramsBarra = {
+    version: d.version,
+    calculo: c,
+    gestionar: datos.gestionar,
+    ...(meta !== undefined ? { meta } : {}),
+  };
+  const muestraBarraFija = editable && hayBarraFijaCpq(paramsBarra);
 
   return (
     <>
@@ -94,7 +102,8 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
             {!d.cotizacion.vigente ? <Badge tono="neutro">Alternativa</Badge> : null}
           </>
         }
-        acciones={<AccionesCotizacion {...propsAcciones} />}
+        accionesDebajoEnTelefono
+        acciones={<AccionesCotizacion {...propsAcciones} ocultarPrimariaEnTelefono />}
       >
         {error ? <Alerta tono="danger" titulo={error} className="mb-4" /> : null}
         {aprobacionTxt ? (
@@ -114,7 +123,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           modales={modales}
           {...(meta !== undefined ? { meta } : {})}
         />
-        {editable ? (
+        {muestraBarraFija ? (
           <AccionFijaTelefono>
             <AccionesCotizacion {...propsAcciones} soloPrimaria />
           </AccionFijaTelefono>
