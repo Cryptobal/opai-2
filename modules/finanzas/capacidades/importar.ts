@@ -1,4 +1,3 @@
-/* eslint-disable max-lines -- importación por filas con vista previa; el parseo vive en importar-parse.ts */
 import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
@@ -7,7 +6,7 @@ import { lunesDe } from "../domain";
 import { semanaSchema } from "./esquemas";
 import { filaImportSchema, filaDesdeRegistroCsv, MAX_FILAS_IMPORT, parsearCsv } from "./importar-parse";
 import { PERMISO_CONFIGURAR } from "./permisos";
-import { aFecha, ajustesDe, bloquearSemanaFlujo } from "./util";
+import { aFecha, ajustesDe } from "./util";
 import { aplicarFilasImportadas, type FilaValida } from "./importar-aplicar";
 
 const resultadoFila = z.object({
