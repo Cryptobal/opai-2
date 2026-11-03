@@ -2,23 +2,17 @@ import type { Contexto } from "@opai/capabilities";
 
 import type { ResultadoCalculo } from "../domain/motor";
 import { esEditable, type EstadoCotizacion } from "../domain";
-import { costoLineaPuestoFicha } from "./costo-puesto-ficha";
+import { costoLineaPuestoFicha, type LineaPuestoFicha } from "./costo-puesto-ficha";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { huellaJuego, juegoDesactualizado } from "./juego-vigente";
 import { mutualBloqueaEnvio } from "./avisos-calculo";
 import { juegoParaFecha, mutualParaCalculo } from "./proveedor";
+import { supuestosTenant } from "./supuestos";
 import { aprobacionPendiente } from "./aprobacion-reglas";
 import { evaluarAprobacionMargen } from "./aprobacion-reglas";
 import { idBandejaCpq } from "./aprobaciones-bandeja-id";
 
-type FilaLinea = {
-  id: string;
-  tipo: string;
-  nombre: string;
-  sueldoBaseClp: number | null;
-  huellaJuegoValores: string | null;
-  [key: string]: unknown;
-};
+type FilaLinea = LineaPuestoFicha & { nombre: string };
 
 export async function metaFicha(
   ctx: Contexto,
@@ -37,11 +31,12 @@ export async function metaFicha(
   const pend = version.estado === "en_aprobacion" ? await aprobacionPendiente(ctx, version.id) : null;
   const decision = pend != null ? evaluarAprobacionMargen(ctx, creadoPorId) : null;
   const verCostos = ctx.autorizar("cpq:costos.ver");
+  const supuestos = verCostos ? await supuestosTenant(ctx) : undefined;
   const costosLinea = verCostos
     ? Object.fromEntries(
         lineas
           .filter((l) => l.tipo === "puesto")
-          .map((l) => [l.id, costoLineaPuestoFicha(l, juego, mutual.tasa)]),
+          .map((l) => [l.id, costoLineaPuestoFicha(l, juego, mutual.tasa, supuestos)]),
       )
     : undefined;
   return {

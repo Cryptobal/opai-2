@@ -708,7 +708,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.motor.simular`
 - `cpq.propuestas_tecnica.update`
 - `cpq.secciones.margen`
+- `cpq.sueldos_referencia.fijar`
+- `cpq.sueldos_referencia.list`
 - `cpq.versiones.margen`
+- `cpq.versiones.parametros`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.manual`

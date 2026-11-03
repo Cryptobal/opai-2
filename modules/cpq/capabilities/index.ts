@@ -32,10 +32,13 @@ import { cotizacionesCalcular } from "./ficha-calcular";
 import { cotizacionesFicha } from "./ficha";
 import { cotizacionesExplicar } from "./ficha-explicar";
 import { cotizacionesGet, cotizacionesList } from "./lectura";
-import { lineasActualizar, lineasCrear, lineasQuitar } from "./lineas";
+import { lineasActualizar, lineasCrear } from "./lineas";
+import { lineasQuitar } from "./lineas-quitar";
 import { lineasReordenar } from "./lineas-reordenar";
 import { marcaDocumentoGet, marcaDocumentoUpdate } from "./marca-documento";
 import { seccionMargenActualizar, versionMargenActualizar } from "./margen";
+import { versionParametros } from "./parametros";
+import { sueldosReferenciaFijar, sueldosReferenciaList } from "./sueldos-referencia";
 import {
   cotizacionesPreviewPdf,
   plantillasDocumentoGet,
@@ -83,6 +86,9 @@ export const capacidades: readonly Capacidad[] = [
   lineasReordenar,
   versionMargenActualizar,
   seccionMargenActualizar,
+  versionParametros,
+  sueldosReferenciaList,
+  sueldosReferenciaFijar,
   versionesCrear,
   correlativosFijar,
   catalogoCategoriasList,
