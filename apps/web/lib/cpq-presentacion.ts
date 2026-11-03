@@ -1,3 +1,7 @@
+import { conteo } from "./plural";
+
+export { conteo };
+
 /** Etiquetas en español para categorías del motor (nunca claves internas en UI). */
 export const ETIQUETA_CATEGORIA_CPQ: Record<string, string> = {
   mano_obra: "Mano de obra",
@@ -81,9 +85,4 @@ export function ventaMensualTexto(
 ) {
   if (costoPendiente || ventaMensual == null) return "—";
   return ventaMensual;
-}
-
-/** Plural simple en español para conteos visibles («1 persona», «2 personas»). */
-export function conteo(n: number, singular: string, plural = `${singular}s`) {
-  return `${n} ${n === 1 ? singular : plural}`;
 }

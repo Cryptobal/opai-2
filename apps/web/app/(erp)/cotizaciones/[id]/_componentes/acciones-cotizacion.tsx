@@ -2,9 +2,10 @@
 
 import { MoreHorizontal, Send } from "lucide-react";
 
-import { Alerta, Button, Menu } from "@opai/ds";
+import { Alerta, avisar, Button, Menu } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { resumenRecalculo } from "@/lib/cpq-recalculo";
 
 import { AccionesAprobacionMargen } from "./acciones-cotizacion-aprobacion";
 import { AccionesCotizacionExtras } from "./acciones-cotizacion-extras";
@@ -63,9 +64,15 @@ export function AccionesCotizacion({
     gestionar && version.estado !== "borrador" && version.estado !== "en_aprobacion";
   const ocultar = Boolean(ocultarPrimariaEnTelefono);
   const despues = (r: unknown) => void (r != null && (limpiarError(), onHecho()));
+  // Recalcular informa qué cambió o qué falta (CAR-162), no solo recarga.
   const recalcular = () => {
     limpiarError();
-    void ejecutar("cpq.cotizaciones.calcular", { id: cotizacionId }).then(despues);
+    void ejecutar<typeof calculo>("cpq.cotizaciones.calcular", { id: cotizacionId }).then((r) => {
+      if (r == null) return;
+      const { tono, texto } = resumenRecalculo(calculo, r);
+      avisar[tono](texto);
+      despues(r);
+    });
   };
 
   async function ejecutarPrimaria() {
