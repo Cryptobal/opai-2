@@ -6,6 +6,7 @@ import type { cargarCargo } from "./datos";
 import { CLASES } from "./datos";
 import { Versiones } from "./estructura-cargo";
 import { HojaCargo, SwitchSensible } from "./diferidas";
+import { SeccionMontosPorInstalacion } from "./seccion-montos-instalacion";
 import { NotaRetiroCargo } from "./nota-retiro-cargo";
 import { SeccionMontosPorInstalacion } from "./seccion-montos-instalacion";
 
