@@ -72,7 +72,7 @@ export function HojaImportar({
         abierto={abierto}
         onCerrar={() => setAbierto(false)}
         titulo="Importar planilla"
-        descripcion="CSV con columnas seccion, etiqueta, semana, monto, nota, vinculo. Solo CSV en este PR."
+        descripcion="CSV con columnas seccion, etiqueta, semana, monto, nota, vinculo. Solo se aceptan archivos CSV."
         acciones={
           <>
             <Button variant="secondary" onClick={() => setAbierto(false)}>
@@ -92,7 +92,7 @@ export function HojaImportar({
       >
         <div className="flex flex-col gap-4">
           {error ? (
-            <Alerta tono="danger" titulo={errorServidor ? "Error del servidor" : error}>
+            <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
               {errorServidor ? (
                 <Button variant="secondary" className="mt-2" onClick={() => void previsualizar()}>
                   Reintentar

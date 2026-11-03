@@ -89,8 +89,7 @@ export function ResumenCotizacion({
 
         {!verCostos ? (
           <Alerta tono="neutral" titulo="Costos ocultos" icono={Lock}>
-            No tienes permiso para ver costos ni margen. Pide{" "}
-            <span className="t-mono text-xs">cpq:costos.ver</span> a un administrador.
+            No tienes permiso para ver costos ni margen. Pídele a un administrador que te dé acceso a los costos de las cotizaciones.
           </Alerta>
         ) : null}
 

@@ -5,6 +5,7 @@ import { Badge, Table, Td, Th, Tr } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { margenPctTexto } from "@/lib/cpq-presentacion";
 import { fecha, hora, pesos } from "@/lib/fechas";
+import { etiquetaCapacidad } from "../auditoria/_componentes/capacidad";
 
 import { AccionesDetalle } from "./acciones-detalle";
 import { type Aprobacion, ESTADO, quien, RIESGO } from "./tipos";
@@ -29,7 +30,7 @@ export function DetalleAprobacion({ a }: { a: Aprobacion }) {
         <Badge tono={RIESGO[a.riesgo].tono}>{RIESGO[a.riesgo].etiqueta}</Badge>
         <span className="t-caption">
           {a.riesgo === "alto"
-            ? "Capacidad irreversible · requiere aprobación (ADR-032)"
+            ? "Acción irreversible · requiere aprobación"
             : esCpq
               ? "Aprobación CPQ · margen o envío conjunto"
               : "Requiere aprobación"}
@@ -48,7 +49,7 @@ export function DetalleAprobacion({ a }: { a: Aprobacion }) {
           {!esCpq ? (
             <>
               {" "}
-              · <span className="t-mono">{a.capability}</span>
+              · <span>{etiquetaCapacidad(a.capability)}</span>
             </>
           ) : null}
         </span>

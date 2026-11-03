@@ -76,7 +76,7 @@ function Formulario({
       abierto
       onCerrar={onCerrar}
       titulo={editar ? `Editar punto · ${actual.nombre}` : "Nuevo punto"}
-      descripcion="Los valores en blanco heredan los del tenant (Configuración → Rondas)."
+      descripcion="Los valores en blanco heredan los de la empresa (Configuración → Rondas)."
       acciones={
         <>
           {editar && actual.estado === "activo" ? (
