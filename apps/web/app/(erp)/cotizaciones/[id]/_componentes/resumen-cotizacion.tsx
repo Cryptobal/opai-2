@@ -78,7 +78,7 @@ export function ResumenCotizacion({
 
         <div>
           <p className="t-overline text-fg-subtle">Venta mensual</p>
-          <p className="t-h2 t-numeric">{ventaMostrar}</p>
+          <p className="t-heading t-numeric">{ventaMostrar}</p>
           {!costoPendiente && calculo.pagosUnicos != null ? (
             <p className="t-caption text-fg-subtle">
               Pagos únicos: {pesos(calculo.pagosUnicos)} · Dotación{" "}
