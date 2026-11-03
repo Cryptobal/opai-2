@@ -14,7 +14,6 @@ export function componerPdf(paginas: PaginaPdf[], fuenteBase: string): Uint8Arra
   const fontRegular = fuenteBase;
   const fontBold = fuenteBase.includes("Bold") ? fuenteBase : `${fuenteBase}-Bold`;
   const objetos: string[] = [];
-  const refsPaginas: string[] = [];
   let n = 1;
   objetos.push(`${n} 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj`);
   n += 1;
@@ -27,7 +26,7 @@ export function componerPdf(paginas: PaginaPdf[], fuenteBase: string): Uint8Arra
     n += 1;
     const pageRef = n;
     n += 1;
-    const stream = streamDePagina(paginas[pi]!, fontRegular, fontBold);
+    const stream = streamDePagina(paginas[pi]!);
     objetos.push(`${contentRef} 0 obj<< /Length ${stream.length} >>stream\n${stream}\nendstream endobj`);
     objetos.push(
       `${pageRef} 0 obj<< /Type /Page /Parent ${pagesRef} 0 R /MediaBox [0 0 595 842] /Contents ${contentRef} 0 R /Resources<< /Font<< /F1 ${n} 0 R /F2 ${n + 1} 0 R >> >> >>endobj`,
@@ -38,7 +37,6 @@ export function componerPdf(paginas: PaginaPdf[], fuenteBase: string): Uint8Arra
   const f1 = n;
   n += 1;
   const f2 = n;
-  n += 1;
   objetos.push(`${f1} 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /${fontRegular} >>endobj`);
   objetos.push(`${f2} 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /${fontBold} >>endobj`);
 
@@ -58,12 +56,11 @@ export function componerPdf(paginas: PaginaPdf[], fuenteBase: string): Uint8Arra
   return new TextEncoder().encode(body);
 }
 
-function streamDePagina(pagina: PaginaPdf, fRegular: string, fBold: string): string {
+function streamDePagina(pagina: PaginaPdf): string {
   const ops: string[] = [];
   let y = 800;
   for (const l of pagina.lineas) {
     if (l.espacioAntes) y -= l.espacioAntes;
-    const font = l.negrita ? fBold : fRegular;
     const size = l.tamano ?? 10;
     if (l.colorRgb) {
       const [r, g, b] = l.colorRgb.map((c) => (c / 255).toFixed(3));

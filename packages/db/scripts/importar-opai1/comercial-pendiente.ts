@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 // Mapeo puro de negocios, etapas, historial y contactos del negocio (CrmPipelineStage, CrmDeal,
 // CrmDealStageHistory, CrmDealContact). PENDIENTE de que el CRM PR 1 (schema comercial) esté en main:
 // aquí no se importa nada de `comercial.prisma` (no existe en main) y el plan solo cuenta filas.
