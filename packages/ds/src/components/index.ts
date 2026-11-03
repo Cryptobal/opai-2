@@ -38,4 +38,10 @@ export { subirConProgreso, Uploader } from "./uploader";
 export { TipoArchivo } from "./tipo-archivo";
 export { CeldaVigencia, type EstadoVigencia, textoVigencia, Vigencia } from "./vigencia";
 export { DatoArchivado } from "./dato-archivado";
+export {
+  CompositorActividad,
+  TIPOS_COMPOSITOR,
+  type TipoCompositor,
+} from "./compositor-actividad";
+export { TareaFila, type TonoVencimientoTarea } from "./tarea-fila";
 export { campoElegible, type CampoDatosSii, DatosSii, type EstadoDatosSii } from "./datos-sii";
