@@ -2,6 +2,7 @@
 // completó. Se niega entera si alguna fila se modificó después en 2.0, y la informa.
 import { enTransaccion } from "../../src/index";
 import type { TenantTx } from "../../src/transaccion";
+import { dependientesPostImport } from "./revertir-dependientes";
 import { previosDeFecha } from "./registro";
 
 export type FilaBloqueada = { entidad: string; id10: string; motivo: string };
@@ -17,6 +18,7 @@ type Fila = { entidad: string; id10: string; id20: string | null; accion: string
 
 const ORDEN_BORRADO = ["programacion_recurrente", "instalacion", "contacto", "cuenta"] as const;
 const MODIFICADA = "modificada_despues_de_la_importacion";
+const DEPENDIENTES = "tiene_dependientes_en_2_0";
 
 async function modificadaDespues(tx: TenantTx, f: Fila, hasta: Date): Promise<boolean> {
   if (!f.id20) return false;
@@ -97,6 +99,8 @@ export async function revertirCorrida(
       for (const f of accionables) {
         if (await modificadaDespues(tx, f, corrida.terminadaEn))
           bloqueadas.push({ entidad: f.entidad, id10: f.id10, motivo: MODIFICADA });
+        else if (await dependientesPostImport(tx, f, corrida.terminadaEn))
+          bloqueadas.push({ entidad: f.entidad, id10: f.id10, motivo: DEPENDIENTES });
       }
       const creadas = accionables.filter((f) => f.accion === "creado");
       const completadas = accionables.filter((f) => f.accion === "completado");

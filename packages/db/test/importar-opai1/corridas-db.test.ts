@@ -97,6 +97,21 @@ describe.skipIf(!urlPropietario)("Corridas de importación (CAR-157)", () => {
     expect(await e.admin.cuenta.count({ where: { tenantId } })).toBeGreaterThan(1);
   });
 
+  it("se niega a revertir si hay dependientes en 2.0 creados después de la importación", async () => {
+    const { id } = await correr();
+    const c = await e.admin.cuenta.findFirstOrThrow({ where: { tenantId, rut: "76333333-7" } });
+    const etiqueta = await e.admin.etiqueta.create({
+      data: { tenantId, nombre: `et-${randomUUID().slice(0, 8)}` },
+    });
+    await e.admin.etiquetaAsignacion.create({ data: { tenantId, etiquetaId: etiqueta.id, cuentaId: c.id } });
+    const prueba = await revertirCorrida(tenantId, id, true);
+    expect(prueba.revertida).toBe(false);
+    expect(prueba.bloqueadas.some((b) => b.motivo === "tiene_dependientes_en_2_0")).toBe(true);
+    const real = await revertirCorrida(tenantId, id, false);
+    expect(real.revertida).toBe(false);
+    expect(await e.admin.etiquetaAsignacion.count({ where: { cuentaId: c.id } })).toBe(1);
+  });
+
   it("las corridas y sus filas están aisladas por empresa", async () => {
     expect(await e.forTenant(otro).importacion.findMany({})).toHaveLength(0);
     expect((await e.forTenant(tenantId).importacion.findMany({})).length).toBeGreaterThan(0);
