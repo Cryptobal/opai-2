@@ -18,7 +18,7 @@ test("vencimientos conserva el origen y la campana abre avisos", async ({ page }
   await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible();
   await expect(
     page.getByRole("dialog", { name: "Notificaciones" }).getByRole("link", { name: "Ver todo" }),
-  ).toHaveAttribute("href", "/#bandeja");
+  ).toHaveAttribute("href", "/bandeja");
 });
 
 test("Inicio y Vencimientos concuerdan y registran las vistas", async ({ page }, info) => {

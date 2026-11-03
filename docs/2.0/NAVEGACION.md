@@ -23,13 +23,12 @@ Las tarjetas de Configuración abren `/configuracion/grupo/<id>`; Agente interno
 
 | Área | Entradas (orden) | Módulo que la aporta | Fase |
 |---|---|---|---|
-| **Inicio** | Inicio, entrada suelta (pendientes, alertas, accesos y la **Bandeja** dentro: aprobaciones, avisos y, desde la fase 2, tareas asignadas) | Núcleo | 1 |
-| **Comercial** | Solicitudes · Negocios (embudo y lista) · Cotizaciones · Licitaciones | Comercial, CPQ, Licitaciones | 2 (Licitaciones: 6) |
-| **Clientes** | Cuentas · Contactos · Instalaciones | Núcleo | 1 (Contactos: 2) |
+| **Inicio** | Inicio, entrada suelta (pendientes, alertas y accesos). Debajo, **Bandeja**, entrada suelta con su número (aprobaciones, avisos y tareas asignadas): desde CAR-182 vive solo en `/bandeja`, Inicio no la repite | Núcleo | 1 |
+| **Comercial** | Solicitudes · Negocios (embudo y lista) · Cotizaciones · Cuentas · Contactos · Licitaciones *(CAR-182: el área Clientes se funde en Comercial)* | Comercial, CPQ, Núcleo, Licitaciones | 2 (Licitaciones: 6) |
 | **Operaciones** | Pauta (planificación de turnos) · Turnos extra · Supervisión · Rondas · Novedades · Tickets · Central *(CAR-70, decidido por Carlos el 29-oct-2026; deja el área en 7, el máximo)* | Operaciones, Rondas, Tickets, Central | 3 |
-| **Personas** | Personas (con la vista Vencimientos dentro) · Asistencia · Nómina · Cargos y sueldos | Núcleo, Asistencia, Nómina | 1 (Asistencia: 4, Nómina: 6) |
-| **Finanzas** | Flujo de caja · Banca y conciliación · Ventas (DTE) · Compras · Rendiciones · Contabilidad · Informes | Finanzas (sub-módulos activables) | 5 |
-| **Documentos** | Documentos (explorador, plantillas, firmas pendientes) | Documentos | 2 |
+| **Personas** | Personas (con la vista Vencimientos dentro) · Asistencia · Remuneraciones (períodos, novedades y calendario). *Cargos y sueldos* salió del menú: es un catálogo en Configuración › Operación (CAR-182) | Núcleo, Asistencia, Nómina | 1 (Asistencia: 4, Nómina: 6) |
+| **Finanzas** | Ventas (DTE) · Compras · Banca y conciliación · Flujo de caja · Rendiciones · Contabilidad · Informes. Facturación electrónica y Folios van en Configuración › Empresa y Plan de cuentas en Configuración › Módulos › Finanzas (CAR-182) | Finanzas (sub-módulos activables) | 5 |
+| **Documentos** | Documentos (explorador, pendiente de diseño) · Firmas. Todo documento se centraliza aquí (decisión de Carlos, 3-nov-2026, CAR-182) | Núcleo | 2 |
 | *(pie)* **Configuración** | Una sola entrada; dentro, el centro por **tarjetas de grupo** (6 grupos cerrados, máx. 7 entradas por grupo salvo Módulos; ver `REGLA-configuracion.md`): **Empresa** (datos, marca, datos personales, comunicaciones) · **Operación** (patrones y funciones, calendario, documentos) · **Personas y acceso** (usuarios y permisos) · **Agentes** (agentes y API keys, aprobaciones) · **Módulos** (catálogo + un ajuste por módulo activo) · **Uso y registros** (integraciones, consumos, auditoría). Preferencias sale al menú de usuario, página propia de la cuenta en `/mi-cuenta/preferencias` (REGLA §3b; decisión de Carlos, 30-oct-2026 09:33 CLT, chat con OPAI 2.0; `/configuracion/preferencias` redirige) | Núcleo | 1 |
 
 Notas:
@@ -37,7 +36,9 @@ Notas:
 - **Puestos** no tiene entrada: es pestaña de Instalación y se planifica en Pauta.
 - **Modelo de costeo** de CPQ es una pantalla del módulo, accesible desde Cotizaciones (acción secundaria «Modelo de costeo», solo owner y admin, ADR-042.8), no una entrada del menú.
 - **Vencimientos** (documentos por vencer de personas) es una vista dentro de Personas, no una entrada del menú, como está construido hoy (§10, D8); los vencimientos de cuentas e instalaciones viven en Documentos.
-- **Aprobaciones** dejan de ser una entrada suelta en el celular: van en la Bandeja, dentro de Inicio. La campana de la barra superior muestra un punto de no leído y abre una vista corta de esa misma Bandeja, con «Ver todo» a `/#bandeja`; no hay otra lista de avisos (§10, D4 y D6).
+- **Aprobaciones** van en la Bandeja (`/bandeja`). La campana de la barra superior muestra un punto de no leído y abre una vista corta de esa misma Bandeja, con «Ver todo» a `/bandeja`; no hay otra lista de avisos (§10, D4 y D6; CAR-182).
+- **Orden de las áreas** (CAR-182, decisión de Carlos del 3-nov-2026): Comercial, Operaciones, Personas, Finanzas y Documentos. Al menú va solo el trabajo diario; los catálogos que se editan pocas veces al año van a Configuración, con la misma ruta.
+- **Número en el menú** (cambia D5, decisión de Carlos del 3-nov-2026): solo la Bandeja lleva número en la barra lateral; ninguna otra entrada.
 - **Plataforma** no está en el menú del ERP: se entra por el selector de portal.
 
 ## 3. Celular: barra inferior
@@ -120,7 +121,7 @@ El estado siguiente describe esta rama, no una integración a `main` ni el cierr
 - **Responsive:** barra lateral desde 1024, riel existente entre 768–1023, barra inferior por área principal en teléfono con respaldo Inicio · Cuentas · Personas · Más. Buscar sigue en la TopBar (ADR-050, reemplaza D7); usuario al pie de la lateral.
 - **Fijados y recientes:** hasta cinco fijados por usuario/empresa mediante `core.config`; entradas autorizadas y fichas revalidadas por capacidades con alcance. Hasta diez recientes locales por usuario/empresa, sin consulta ni auditoría por navegación. Acciones de ⌘K solo navegan y se filtran por permisos.
 - **Preferencias:** Área principal con vista previa; acordeón persistido por usuario/empresa. Las escrituras de navegación tienen control optimista de revisión y error visible, además del bloqueo transaccional del servidor.
-- **Inicio:** Bandeja única de avisos propios y aprobaciones permitidas; la campana abre una vista corta de esa misma Bandeja con «Ver todo» a `/#bandeja`. Inicio y campana comparten el punto, sin números en la navegación.
+- **Inicio:** Bandeja única de avisos propios y aprobaciones permitidas; la campana abre una vista corta de esa misma Bandeja con «Ver todo» a `/bandeja`. Inicio y campana comparten el punto, sin números en la navegación.
 - **Shell:** persiste en `PortalLayout`, con precarga por intención conservada de `main`; al cambiar de identidad/empresa se reinicia su estado local. Sin migraciones nuevas.
 
 ### Foto histórica anterior al PR B
@@ -149,8 +150,8 @@ Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos
 | D2 | Más de siete entradas | Máximo 7 por área. Si un área pasa de 7, se divide en dos áreas; no hay scroll interno |
 | D3 | Fijados | Se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron |
 | D4 | Inicio y Bandeja | Inicio es una entrada suelta arriba; la Bandeja vive dentro de Inicio |
-| D5 | Contador de la Bandeja | En la barra inferior del celular, Inicio muestra un punto y el número aparece dentro de la pantalla. No hay contadores en la barra lateral |
-| D6 | Campana (ADR-014) | Muestra un punto de no leído y abre una vista corta de la misma Bandeja, con «Ver todo» a `/#bandeja`. No hay una segunda lista de avisos. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u |
+| D5 | Contador de la Bandeja | En la barra inferior del celular, Inicio muestra un punto y el número aparece dentro de la pantalla. En la barra lateral, solo la entrada Bandeja lleva su número; ninguna otra entrada tiene contador (cambio de Carlos del 3-nov-2026, CAR-182) |
+| D6 | Campana (ADR-014) | Muestra un punto de no leído y abre una vista corta de la misma Bandeja, con «Ver todo» a `/bandeja`. No hay una segunda lista de avisos. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u |
 | D7 | Búsqueda en el celular | ~~Sale de la barra superior; solo queda «Buscar» en la barra inferior~~. **Reemplazada por ADR-050** (Carlos, 26-oct-2026 17:57): «Buscar» va en la barra superior y no en la inferior |
 | D8 | Vencimientos | Vista dentro de Personas, como está construido hoy (corrige el mapa de §2) |
 | D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo y sin plegarse a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). De 768 a 1023 sigue el riel actual |

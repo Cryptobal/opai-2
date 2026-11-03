@@ -93,10 +93,11 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
     await entrar(page);
     await page.goto("/personas");
     await expect(page.getByRole("link", { name: "Vencimientos" }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Cargos" })).toHaveCount(1); // solo el menú lateral
+    // Cargos ya no está en el menú (CAR-182): vive en Configuración › Operación.
+    await expect(page.getByRole("link", { name: "Cargos" })).toHaveCount(0);
     await page.goto("/cargos");
     await expect(page.getByRole("link", { name: "Vencimientos" })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Cargos" })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "Cargos" })).toHaveCount(0);
     await page.goto("/personas/cargos");
     await expect(page).toHaveURL(/\/cargos$/);
   });

@@ -18,6 +18,7 @@ vi.mock("@/lib/servidor", () => ({
 }));
 vi.mock("@/app/_components/marco-shell", () => ({ MarcoShell: () => null }));
 import { PortalLayout } from "@/app/_components/portal-layout";
+import { asegurarRegistro } from "@/lib/registro";
 
 function identidad(): Identidad {
   const actual = membresia();
@@ -127,22 +128,26 @@ describe("seguimiento del shell", () => {
   });
 
   it("el menú del ERP usa los permisos efectivos, no el rol base (I4/P4)", () => {
+    asegurarRegistro();
     const href = (i: Identidad) => datosShell(i, "erp").nav.map((x) => x.href);
-    // Rol base supervisor (sin `estructuras.read`): «Cargos y sueldos» no aparece por el rol base.
+    // Rol base supervisor (sin `nomina:read`): «Remuneraciones» no aparece por el rol base. Antes se
+    // probaba con Cargos, que salió del menú en CAR-182 (vive en Configuración).
     const base = identidad();
     base.actual = membresia({ rol: "supervisor" });
-    expect(href(base)).not.toContain("/cargos");
+    base.modulosActivos = ["nomina"];
+    expect(href(base)).not.toContain("/remuneraciones");
     expect(href(base)).toContain("/personas");
-    // Mismo rol base, pero con un rol personalizado que concede `estructuras.read`: ahora sí aparece
+    // Mismo rol base, pero con un rol personalizado que concede `nomina:read`: ahora sí aparece
     // (y se pierden las secciones que el personalizado no concede, como «Cuentas»).
     const conRol = identidad();
     conRol.actual = membresia({ rol: "supervisor" });
+    conRol.modulosActivos = ["nomina"];
     conRol.acceso = {
-      permisosRol: ["core:estructuras.read", "core:personas.read"],
+      permisosRol: ["nomina:read", "core:personas.read"],
       excepciones: [],
       instalaciones: ["instalacion-limitada"],
     };
-    expect(href(conRol)).toContain("/cargos");
+    expect(href(conRol)).toContain("/remuneraciones");
     expect(href(conRol)).toContain("/personas");
     expect(href(conRol)).not.toContain("/cuentas");
     // Una excepción que deniega gana sobre el rol base: «Personas» desaparece aunque el rol lo dé.

@@ -17,7 +17,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   const segunRol = page.getByRole("radio", { name: /^Según mi rol/ });
   await segunRol.click();
   await expect(segunRol).toHaveAttribute("data-state", "checked");
-  await page.goto("/");
+  // La Bandeja vive solo en /bandeja (CAR-182): Inicio ya no la repite.
+  await page.goto("/bandeja");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   const nav = page
     .getByRole("navigation", { name: "Principal", exact: true })
@@ -41,7 +42,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await page.keyboard.press("Escape");
     await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
   } else {
-    const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
+    const clientes = nav.getByRole("button", { name: "Comercial", exact: true });
     if ((await clientes.getAttribute("aria-expanded")) !== "true") await clientes.click();
     await expect(clientes).toHaveAttribute("aria-expanded", "true");
     const personas = nav.getByRole("button", { name: "Personas", exact: true });
@@ -127,7 +128,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(nav.getByRole("link", { name: "Bandeja", exact: true })).toBeVisible();
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
-  await page.goto("/");
+  // La Bandeja vive solo en /bandeja (CAR-182): Inicio ya no la repite.
+  await page.goto("/bandeja");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   await page.locator("header").getByRole("button", { name: /Notificaciones/ }).click();
   await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible();
@@ -135,7 +137,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const tema of ["light", "dark"]) {
     await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), tema);
-    await comprobarContrasteNavegacion(page, 'header.sticky, nav[aria-label="Principal"], #bandeja');
+    await comprobarContrasteNavegacion(page, 'header.sticky, nav[aria-label="Principal"]');
     await page.screenshot({ path: info.outputPath(`navegacion-${tema}.png`), fullPage: true });
     await page.keyboard.press("Control+k");
     await expect(page.getByRole("dialog")).toBeVisible();
