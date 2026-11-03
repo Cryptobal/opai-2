@@ -50,6 +50,15 @@ export const manifest = defineModule({
     {
       portal: "erp",
       area: "finanzas",
+      href: "/finanzas/configuracion-dte",
+      etiqueta: "Configuración DTE",
+      icono: "Settings",
+      orden: 2,
+      permiso: "finanzas:ventas.configure",
+    },
+    {
+      portal: "erp",
+      area: "finanzas",
       href: "/finanzas/folios",
       etiqueta: "Folios",
       icono: "ReceiptText",

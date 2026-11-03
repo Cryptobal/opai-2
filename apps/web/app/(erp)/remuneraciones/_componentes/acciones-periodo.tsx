@@ -48,16 +48,24 @@ export function AccionesPeriodo({ periodo, puedePagar }: { periodo: Periodo; pue
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {PASOS[periodo.estado].map((p) => (
-        <Button
-          key={p.a}
-          variant={p.retroceso ? "ghost" : "secondary"}
-          disabled={pendiente}
-          onClick={() => (p.retroceso ? (limpiarError(), setDevolver(p)) : void cambiar(p))}
-        >
-          {p.texto}
-        </Button>
-      ))}
+      {PASOS[periodo.estado].map((paso) => {
+        const sinNovedades =
+          periodo.estado === "abierto" && paso.a === "en_revision" && periodo.novedades === 0;
+        return (
+          <span key={paso.a} className="inline-flex flex-col gap-1">
+            <Button
+              variant={paso.retroceso ? "ghost" : "secondary"}
+              disabled={pendiente || sinNovedades}
+              onClick={() => (paso.retroceso ? (limpiarError(), setDevolver(paso)) : void cambiar(paso))}
+            >
+              {paso.texto}
+            </Button>
+            {sinNovedades ? (
+              <span className="t-caption text-fg-muted">Registra al menos una novedad antes de pasar a revisión.</span>
+            ) : null}
+          </span>
+        );
+      })}
       {periodo.estado === "cerrado" && puedePagar ? (
         <Button disabled={pendiente} onClick={() => (limpiarError(), setPagar(true))}>
           Marcar pagado

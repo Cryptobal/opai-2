@@ -18,7 +18,7 @@ const MODULOS: Record<string, string> = {
   rondas: "Rondas",
   asistencia: "Asistencia",
   finanzas: "Finanzas",
-  nomina: "Nómina",
+  nomina: "Remuneraciones",
   agente: "Agente interno",
 };
 

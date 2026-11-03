@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import {
   Cabecera,
+  cn,
   Estado,
   type EstadoPantalla,
   FilaSeleccionable,
@@ -10,6 +11,7 @@ import {
 } from "@opai/ds";
 
 import { LinkNext } from "../link-next";
+import { AccionListaFlotante } from "./accion-lista-flotante";
 import { Buscador } from "./buscador";
 import type { Filtro } from "./chips-filtro";
 import { ChipsFiltroDiferido } from "./chips-filtro-diferido";
@@ -31,6 +33,8 @@ type Props = {
   /** Título de la lista en teléfono (en md+ va en la barra superior). */
   titulo: string;
   accion?: ReactNode;
+  /** En teléfono la acción va flotante (D-B); en lg+ sigue en la cabecera de la lista. */
+  accionFlotante?: boolean;
   /** Fila sobre la búsqueda (por ejemplo, el cambio Tablero/Lista de Negocios). */
   vista?: ReactNode;
   buscar: string;
@@ -50,9 +54,12 @@ export function ListaMaestro(p: Props) {
       {/* En teléfono, título + acción; en md+ el título vive en la barra superior, pero la acción
           principal se queda en el patrón (Brief 05 §8.3, REGLAS-codigo UI), arriba de la lista. */}
       {p.accion ? (
-        <div className="md:px-4 md:pt-3">
-          <Cabecera titulo={p.titulo} acciones={p.accion} accionesSiempre />
-        </div>
+        <>
+          <div className={cn("md:px-4 md:pt-3", p.accionFlotante && "hidden lg:block")}>
+            <Cabecera titulo={p.titulo} acciones={p.accion} accionesSiempre />
+          </div>
+          {p.accionFlotante ? <AccionListaFlotante>{p.accion}</AccionListaFlotante> : null}
+        </>
       ) : (
         <div className="md:hidden">
           <Cabecera titulo={p.titulo} />

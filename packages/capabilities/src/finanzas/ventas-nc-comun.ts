@@ -65,6 +65,7 @@ export async function bloquearYValidarNotaCredito(
       fechaVencimiento: true,
       montoNeto: true,
       montoExento: true,
+      montoIva: true,
       montoTotal: true,
       estadoDte: true,
     },

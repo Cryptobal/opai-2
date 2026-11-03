@@ -25,6 +25,7 @@ import {
 } from "./ventas-escritura";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
 import { ventasPdf } from "./ventas-pdf";
+import { ventasPreflightEmision } from "./ventas-preflight";
 import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
 import {
   ventasProgramacionesListar,
@@ -57,6 +58,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasProgramacionesObtener,
   ventasCrearBorrador,
   ventasEmitir,
+  ventasPreflightEmision,
   ventasEnviarSii,
   ventasEmitirNotaCredito,
   ventasProyeccionFlujo,

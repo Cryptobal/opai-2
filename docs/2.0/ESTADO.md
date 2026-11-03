@@ -6,10 +6,11 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
+| **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`, PR #234) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En revisión | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |
 | **CAR-25 · B1** (rama `claude/new-session-bgvb4t`, continúa #231) | Recurrentes con la forma real de 1.0 (`FinanceDteRecurringTemplate`): líneas con cantidad, precio CLP o UF, descuento y exento; frecuencias mensual/quincenal/semanal/anual; día -1; tipos 33/34/56/61; receptor congelado cuando 1.0 no tiene cuenta en 2.0; destinatarios por correo; importadas **pausadas y sin próxima ejecución** (no se copia `nextRunAt`) con `ultimo_periodo_1_0`; informe con `omitidas[]`. Tabla `ventas_programaciones_corridas` (UNIQUE programación + período) para el brief A4. Reemplaza a #231, que el operador cierra | En revisión | **Sí**: `20261103160000_finanzas_programacion_forma_1_0` (aditiva; etiqueta `migracion-pendiente`) |
-| #213 | Cargos y Remuneraciones: pantallas lista-ficha | **En pausa**: en conflicto con `main` y Vercel en rojo. Se retoma en la semana 3 con un merge de `main` | — |
+| #213 | Cargos y Remuneraciones (solo UI; rama `cursor/personas-pantallas-cargos-remuneraciones-65e7`): SplitScreen como Cuentas; catálogo sin montos; menú y ruta **Remuneraciones** (`/remuneraciones`, redirect `/nomina`); períodos lista+ficha; «Pasar a revisión» con R-REM-011 en UI y `nomina.periodos.cambiar_estado` (incl. dry_run). Sin migración ni cambios MCP/API `nomina.*` | En revisión (merge con `main` post #232). Pendiente: CI, Revisor y QA 375/1280 | — |
 | #168 | Restablecer MFA y regenerar códigos de respaldo (CAR-54) | **En pausa**: en conflicto. Se retoma después de la migración | — |
 
 ## Integrado en `main`, por módulo
