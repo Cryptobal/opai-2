@@ -9,6 +9,11 @@ export type CuentaDestino = {
   nombre: string;
   razonSocial: string | null;
   rut: string | null;
+  giro: string | null;
+  calle: string | null;
+  comuna: string | null;
+  ciudad: string | null;
+  emailDte: string | null;
 };
 
 export type ContactoDestino = {
@@ -21,6 +26,15 @@ export type ContactoDestino = {
   cargo: string | null;
   esPrincipal: boolean;
   roles: string[];
+};
+
+export type VinculoDestino = {
+  id: string;
+  contactoId: string;
+  cuentaId: string;
+  cargo: string | null;
+  roles: string[];
+  esPrincipal: boolean;
 };
 
 export type InstalacionDestino = {
@@ -43,6 +57,7 @@ export type IdExternoDestino = {
 export type EstadoDestino = {
   cuentas: CuentaDestino[];
   contactos: ContactoDestino[];
+  vinculos: VinculoDestino[];
   instalaciones: InstalacionDestino[];
   ids: IdExternoDestino[];
 };
@@ -50,6 +65,23 @@ export type EstadoDestino = {
 export const estadoVacio = (): EstadoDestino => ({
   cuentas: [],
   contactos: [],
+  vinculos: [],
   instalaciones: [],
   ids: [],
 });
+
+/** Defaults nulos para tests en memoria. */
+export function cuentaDestino(
+  parcial: Pick<CuentaDestino, "id" | "nombre"> & Partial<Omit<CuentaDestino, "id" | "nombre">>,
+): CuentaDestino {
+  return {
+    razonSocial: null,
+    rut: null,
+    giro: null,
+    calle: null,
+    comuna: null,
+    ciudad: null,
+    emailDte: null,
+    ...parcial,
+  };
+}

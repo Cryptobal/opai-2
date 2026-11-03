@@ -15,6 +15,7 @@ import {
   cuentaDe,
   documentoEmitidoIdSchema,
   marcarBorradorEmitido,
+  camposReceptorDteEnPayload,
   rutEmisorDe,
 } from "./ventas-comun";
 import { ventaSchema } from "./vistas-venta";
@@ -81,7 +82,7 @@ export const ventasEmitir = defineCapability({
           fechaEmision: emision,
           rutEmisor,
           rutReceptor: cuenta.rut!,
-          razonSocialReceptor: cuenta.nombre,
+          ...camposReceptorDteEnPayload(cuenta),
           montos: {
             neto: doc.montoNeto,
             exento: doc.montoExento,

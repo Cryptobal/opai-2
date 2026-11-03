@@ -104,6 +104,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad.",
   "core.remuneraciones.confirmar":
     "Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034).",
+  "core.remuneraciones.confirmar_mutual":
+    "Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034).",
+  "comercial.importar_1_0":
+    "Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25).",
   "comercial.solicitudes.recibir_formulario_web":
     "Interna: el endpoint público `/api/t/[slug]/solicitudes` valida la clave del canal antes de existir sesión (Brief 07 PR 2).",
   "comercial.canales.rotar_token_formulario":

@@ -39,6 +39,8 @@ export function AccionesFlujoMovil({ configura, onImportar }: Props) {
     <div className="xl:hidden">
       <Menu
         etiqueta="Acciones del flujo"
+        lado="abajo-derecha"
+        className="relative inline-flex"
         disparador={<MoreHorizontal className="size-5" aria-hidden />}
         items={[
           {

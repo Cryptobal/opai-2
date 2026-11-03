@@ -55,6 +55,7 @@ export async function metaFicha(
       : null,
     puedeAprobarMargen: decision?.puedeDecidir ?? false,
     motivoNoAprobarMargen: decision?.motivoNoDecidir ?? null,
+    autoaprobacionMargen: pend != null ? (decision?.autoaprobacion ?? false) : null,
     puedeEnviar:
       !calculo.noEnviable &&
       version.estado !== "en_aprobacion" &&

@@ -4,6 +4,7 @@ import type { Pendiente } from "./comercial-pendiente";
 import type { Accion, Decision, Propuesta } from "./comun";
 import type { EntidadImportada } from "./destino-tipos";
 import type { EtiquetaPropuesta, Plan } from "./plan";
+import type { ResumenTributario } from "./tributario-plan";
 
 const ACCIONES: Accion[] = ["crear", "actualizar", "sin_cambios", "conflicto", "omitido"];
 
@@ -19,12 +20,14 @@ export type Reporte = {
   modo: "simulacion";
   sistema: "opai1";
   tenant: string;
+  modulosActivos: readonly string[];
   conteos: Record<EntidadImportada, Record<Accion, number>>;
   detalle: GrupoDetalle[];
   propuestasFusion: Propuesta[];
   avisos: { codigo: string; idsOpai1: string[] }[];
   etiquetas: EtiquetaPropuesta[];
   pendientes: Pendiente[];
+  tributario: ResumenTributario;
 };
 
 function conteo(decisiones: readonly Decision<unknown>[]): Record<Accion, number> {
@@ -66,6 +69,7 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
     modo: "simulacion",
     sistema: "opai1",
     tenant,
+    modulosActivos: plan.opciones.modulosActivos,
     conteos: {
       cuenta: conteo(plan.cuentas),
       contacto: conteo(plan.contactos),
@@ -76,6 +80,7 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
     avisos: [...avisos].map(([codigo, idsOpai1]) => ({ codigo, idsOpai1 })),
     etiquetas: plan.etiquetas,
     pendientes: plan.pendientes,
+    tributario: plan.tributario,
   };
 }
 
@@ -94,5 +99,8 @@ export function resumenLegible(r: Reporte): string {
   if (r.etiquetas.length > 0)
     lineas.push(`  Etiquetas por confirmar (rubro/segmento/tamaño): ${r.etiquetas.length}`);
   for (const p of r.pendientes) lineas.push(`  Pendiente ${p.entidad} (${p.motivo}): ${p.filas}`);
+  lineas.push(
+    `  Tributario: ${r.tributario.listasParaFacturar} listas · ${r.tributario.incompletas} incompletas (de ${r.tributario.cuentasConsideradas} cuentas)`,
+  );
   return lineas.join("\n");
 }

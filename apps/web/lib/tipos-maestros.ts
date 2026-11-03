@@ -14,6 +14,8 @@ export type Cuenta = {
   calle: string | null;
   comuna: string | null;
   region: string | null;
+  ciudad: string | null;
+  emailDte: string | null;
   escrituraFecha: string | null;
   escrituraNotaria: string | null;
   notas: string | null;

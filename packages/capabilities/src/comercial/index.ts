@@ -12,6 +12,7 @@ import { negociosGet } from "./negocios-ficha";
 import { negociosEmbudo, negociosList } from "./negocios-lectura";
 import { negociosGanar, negociosMover } from "./negocios-mover";
 import { negociosSetContactos } from "./negocios-contactos";
+import { comercialImportar10 } from "./importar-1-0";
 import { canalesGet, canalesUpdate } from "./solicitudes-canales";
 import {
   canalesRotarTokenFormulario,
@@ -64,4 +65,5 @@ export const capacidadesComercial: readonly Capacidad[] = [
   canalesUpdate,
   canalesRotarTokenFormulario,
   solicitudesRecibirFormularioWeb,
+  comercialImportar10,
 ];
