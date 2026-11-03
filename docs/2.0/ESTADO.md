@@ -6,6 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
+| **CAR-153** (`claude/new-session-gpqpn4`, PR A1 del [brief A](briefs/brief-A-comercial-finanzas.md)) | Textos y estilos: clases `t-*` vigiladas por test (B2), formateador único con espacio duro en `@opai/domain` (B3, R4), estados de venta en español (B4), sin referencias internas ni jerga (B5, B6), errores del servidor en español (B7, B8), calendario de pagos sin JSON (B10), un solo título en Bancos y Venta (B11) y Bandeja de Inicio con error visible (B12). Quedan en A5: refresco visual C1–C5 | En revisión | No |
 | **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |
 | #231 | Importación 1.0: programaciones recurrentes de Finanzas, destinatarios, correlativo CPQ y simulación de negocios (CAR-25) | Abierto. **No integrar sin corregir** la forma de las líneas, las frecuencias, la cuenta nula, las recurrentes inactivas hasta el corte y el correlativo dentro de la corrida ([auditoría §2.3](auditoria-2026-11.md#23-migración-desde-10-importador-packagesdbscriptsimportar-opai1-y-pr-231)); le falta la etiqueta `migracion-pendiente` | Sí, `20261103140000_finanzas_ventas_programacion` |
