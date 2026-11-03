@@ -148,5 +148,20 @@ export async function variablesDe(
           : urlCotizacion,
     };
   }
+  if (ev.tipo === "comercial.solicitud.creada") {
+    return {
+      solicitud: {
+        nombre: p["nombre"] ?? "",
+        canal:
+          p["canal"] === "formulario_web"
+            ? "Web"
+            : p["canal"] === "correo"
+              ? "Correo"
+              : String(p["canal"] ?? ""),
+      },
+      empresa,
+      url: typeof p["url"] === "string" ? p["url"] : `${base}/solicitudes`,
+    };
+  }
   return { ...p, empresa };
 }

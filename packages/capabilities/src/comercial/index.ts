@@ -16,6 +16,10 @@ import { comercialImportar10 } from "./importar-1-0";
 import { solicitudesAccionesAgente } from "./solicitudes-acciones-agente";
 import { solicitudesBuscarDuplicadas } from "./solicitudes-buscar-duplicadas";
 import { canalesGet, canalesUpdate } from "./solicitudes-canales";
+import {
+  canalesRotarTokenFormulario,
+  solicitudesRecibirFormularioWeb,
+} from "./solicitudes-formulario-web";
 import { solicitudesConvertir } from "./solicitudes-convertir";
 import { solicitudesEnriquecer } from "./solicitudes-enriquecer";
 import { solicitudesPasarACotizacion } from "./solicitudes-pasar-cotizacion";
@@ -65,5 +69,7 @@ export const capacidadesComercial: readonly Capacidad[] = [
   solicitudesPasarACotizacion,
   canalesGet,
   canalesUpdate,
+  canalesRotarTokenFormulario,
+  solicitudesRecibirFormularioWeb,
   comercialImportar10,
 ];
