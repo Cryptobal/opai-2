@@ -1,6 +1,6 @@
-import { formatearClp } from "@opai/domain";
 "use client";
 
+import { formatearClp } from "@opai/domain";
 import { useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";

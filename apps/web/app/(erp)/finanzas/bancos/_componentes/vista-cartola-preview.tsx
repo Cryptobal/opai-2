@@ -1,6 +1,6 @@
-import { formatearNumero } from "@opai/domain";
 "use client";
 
+import { formatearNumero } from "@opai/domain";
 import { Alerta } from "@opai/ds";
 
 export type FilaVistaCartola = {

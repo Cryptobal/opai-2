@@ -1,6 +1,6 @@
-import { formatearClp } from "@opai/domain";
 "use client";
 
+import { formatearClp } from "@opai/domain";
 import { Input } from "@opai/ds";
 
 const digitos = (t: string) => t.replace(/\D/g, "").replace(/^0+(?=\d)/, "");

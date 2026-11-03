@@ -1,6 +1,6 @@
-import { formatearFechaHora } from "@opai/domain";
 "use client";
 
+import { formatearFechaHora } from "@opai/domain";
 import { Bot, Globe, Key, Mail, PenLine, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 

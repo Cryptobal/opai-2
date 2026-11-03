@@ -1,6 +1,6 @@
-import { formatearUsd } from "@opai/domain";
 "use client";
 
+import { formatearUsd } from "@opai/domain";
 import { useState } from "react";
 
 import { Alerta, Button, Campo, Input, Sheet, Switch } from "@opai/ds";

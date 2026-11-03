@@ -1,6 +1,6 @@
-import { formatearClp } from "@opai/domain";
 "use client";
 
+import { formatearClp } from "@opai/domain";
 import { Campo, Input, InputFecha, Select } from "@opai/ds";
 
 import { InputPesos } from "@/app/_components/maestros/input-pesos";

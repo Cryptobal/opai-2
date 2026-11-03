@@ -1,6 +1,6 @@
-import { formatearNumero } from "@opai/domain";
 "use client";
 
+import { formatearNumero } from "@opai/domain";
 import { useState } from "react";
 
 import { Alerta, avisar, Button, Sheet, Textarea } from "@opai/ds";
