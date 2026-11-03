@@ -12,6 +12,8 @@ import { PanelDetalleIndicador } from "./panel-detalle-indicador";
 type Props = {
   data: DatosRemuneraciones;
   puede: boolean;
+  /** Abre la confirmación de la mutual al llegar (enlace «Confirmar mutual» de CPQ). */
+  abrirMutual?: boolean;
   onActualizado: () => void;
 };
 
@@ -43,8 +45,8 @@ export type DatosRemuneraciones = {
   };
 };
 
-export function TablaRemuneraciones({ data, puede, onActualizado }: Props) {
-  const [mutualAbierto, setMutualAbierto] = useState(false);
+export function TablaRemuneraciones({ data, puede, abrirMutual = false, onActualizado }: Props) {
+  const [mutualAbierto, setMutualAbierto] = useState(abrirMutual);
   const [detalle, setDetalle] = useState<DatosRemuneraciones["filas"][number] | null>(null);
   const mutual = data.mutualAdicional;
 
@@ -81,7 +83,7 @@ export function TablaRemuneraciones({ data, puede, onActualizado }: Props) {
         </div>
         {puede ? (
           <Button className="self-start" onClick={() => setMutualAbierto(true)}>
-            Editar tasa
+            {mutual.estado === "vigente" ? "Editar tasa" : "Confirmar tasa"}
           </Button>
         ) : null}
       </Card>
