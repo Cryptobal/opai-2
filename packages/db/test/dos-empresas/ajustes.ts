@@ -21,6 +21,9 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Comercial · seguimiento (CAR-67): CHECK de disparador, canal y ejecutor.
+  "comercial.seguimiento_planes": { valores: () => ({ nombre: "Plan de prueba", disparador: "manual" }) },
+  "comercial.seguimiento_pasos": { valores: () => ({ canal: "interno", ejecutor: "persona" }) },
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },
