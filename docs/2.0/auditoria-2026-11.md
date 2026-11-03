@@ -373,13 +373,15 @@ Mediciones en una máquina de 2 vCPU y 7 GB. [M] = medido, [E] = estimado.
 
 ## 7. Issues propuestos para Linear (equipo CAR)
 
-**Aplicados en Linear por este PR:**
+**Aplicados en Linear (3-nov-2026):**
 - Creado **CAR-151** (este encargo).
-- Creados los issues del plan (§«Plan» de `ROADMAP.md`); cada uno lleva el número de PR del plan en el título.
-- Cerrados: **CAR-138** como duplicado de CAR-144 (la propuesta técnica ya entró en #218), **CAR-129** («Míralo», resuelto por CAR-130) y **CAR-75** como hecho (Rondas PR 1 integrado en #137, #141 y #145).
-- **CAR-98** pasa a Backlog: solo entró Compras (#186); rendiciones y contabilidad no empezaron.
+- Creados los issues del plan, uno por PR: **CAR-152** (P1) a **CAR-161** (P10). Ver `ROADMAP.md` §3.
+- **CAR-75** cerrado como hecho (Rondas PR 1 integrado en #137, #141 y #145).
 
-**Propuestos, sin aplicar (Carlos decide):**
+**Propuestos, sin aplicar** (el sistema no permitió más cambios de estado; Carlos decide):
+- Cerrar **CAR-138** como duplicado de CAR-144 (la propuesta técnica ya entró en #218).
+- Cerrar **CAR-129** («Míralo», resuelto por CAR-130).
+- Pasar **CAR-98** a Backlog: solo entró Compras (#186); rendiciones y contabilidad no empezaron.
 - CAR-103 a CAR-118 son tareas del sitio web y otros frentes (Search Console, GA4, fotos, GTM, Cursor) mezcladas en el equipo CAR. Conviene moverlas a su propio proyecto para que no ensucien el tablero de OPAI 2.0.
 - CAR-120 (chat del agente) sigue en pausa hasta la semana 3 (ver el plan); pasar de «In Progress» a «Todo».
 - CAR-27 (Comercial PR 3: reportes, exportación, campos, fusión) se fusiona con el issue nuevo de reportes comerciales y la fusión de duplicados.
