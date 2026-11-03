@@ -23,6 +23,7 @@ export const RECURSOS: Record<string, string> = {
   series: "Series", cobertura: "Cobertura", reemplazos: "Reemplazos", refuerzos: "Refuerzos",
   alertas: "Alertas", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas",
+  ventas_programacion: "Programación recurrente",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
   planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja",
   derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios",

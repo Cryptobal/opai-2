@@ -1,4 +1,5 @@
 import { formatearClp } from "@opai/domain";
+import { celdaAgregada } from "./celda-agregada";
 import type { Celda, ColumnaPlanilla, FilaPlanilla } from "@opai/ds";
 
 export type FilaFlujo = {
@@ -101,20 +102,22 @@ export function armarPlanilla(p: Planilla, opts?: { gestiona?: boolean }) {
         texto: clp(s.saldoFinal),
         tono: s.tono === "peligro" ? "danger" : s.tono === "alerta" ? "warning" : "neutro",
         detalle: s.pasada
-          ? "Real según cartola"
+          ? "Según cartola"
           : s.tono === "peligro"
             ? "Saldo negativo proyectado"
             : s.tono === "alerta"
               ? "Bajo el umbral"
               : "Proyectado",
       };
-    const c = p.celdas.find((x) => x.filaId === filaId && x.semana === semana);
+    const c = celdaAgregada(p.celdas, filaId, semana, s.pasada);
     if (!c) {
       if (opts?.gestiona && esFilaMonto(filaId) && !s.pasada) {
         return { texto: "—", tono: "neutro", detalle: "Planificar" };
       }
       return null;
     }
+    if (c.soloPlanSinRespaldo)
+      return { texto: "—", tono: "neutro", detalle: `Plan sin respaldo en cartola: ${clp(c.monto)}` };
     return {
       texto: clp(c.monto),
       tono: CAPA[c.capa].tono,

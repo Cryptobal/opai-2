@@ -137,7 +137,7 @@ export function HojaMover({
             />
           </Campo>
           <Campo etiqueta="Semanas a mover" htmlFor="mv-por">
-            <Input id="mv-por" value={por} onChange={(e) => setPor(e.target.value)} inputMode="numeric" />
+            <Input id="mv-por" value={por} onChange={(e) => (setPor(e.target.value), setVista(null))} inputMode="numeric" />
           </Campo>
           {vista && requiereConfirmacionPasada(vista.movimientos) ? (
             <Checkbox
