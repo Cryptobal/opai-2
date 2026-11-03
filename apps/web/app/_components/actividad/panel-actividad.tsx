@@ -1,12 +1,13 @@
+import dynamic from "next/dynamic";
+
 import { PERMISOS_CORE } from "@opai/domain";
-import { Estado, Segmentado, Timeline } from "@opai/ds";
+import { Estado, Segmentado, Skeleton, Timeline } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
-import { CompositorResponsivo } from "./compositor-telefono";
 import { itemActividad } from "./frases";
 import { TareasFicha } from "./tareas-ficha";
 import {
@@ -16,6 +17,12 @@ import {
   type ItemOrdenado,
   type ListaActividades,
 } from "./tipos";
+
+// El compositor se carga aparte del primer JS de la ficha (ADR-037).
+const CompositorResponsivo = dynamic(() =>
+  import("./compositor-telefono").then((m) => m.CompositorResponsivo),
+  { loading: () => <Skeleton className="h-12 w-full" /> },
+);
 
 const esFiltro = (v: string | undefined): v is FiltroActividad =>
   FILTROS_ACTIVIDAD.some((f) => f.id === v);

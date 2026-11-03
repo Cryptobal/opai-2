@@ -1,21 +1,16 @@
 "use client";
 
 import { Clock } from "lucide-react";
+import dynamic from "next/dynamic";
 import { type ReactNode, useState } from "react";
 
-import { instanteEnZona, posponerTarea } from "@opai/domain";
-import {
-  avisar,
-  Button,
-  Campo,
-  Dialog,
-  InputFecha,
-  Menu,
-  TareaFila,
-  type TonoVencimientoTarea,
-} from "@opai/ds";
+import { posponerTarea } from "@opai/domain";
+import { avisar, Menu, TareaFila, type TonoVencimientoTarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+
+// El selector de fecha solo se carga si se elige «Elegir fecha» (ADR-037).
+const PosponerFecha = dynamic(() => import("./posponer-fecha").then((m) => m.PosponerFecha));
 
 type Props = {
   id: string;
@@ -35,7 +30,6 @@ export function TareaConAcciones(p: Props) {
   const { ejecutar, pendiente } = useCapacidad("erp");
   const [hecha, setHecha] = useState(false);
   const [eligiendo, setEligiendo] = useState(false);
-  const [dia, setDia] = useState("");
   async function completar() {
     setHecha(true);
     const r = await ejecutar("core.actividades.completar", { id: p.id });
@@ -75,29 +69,15 @@ export function TareaConAcciones(p: Props) {
           ) : null
         }
       />
-      <Dialog
-        abierto={eligiendo}
-        onCerrar={() => setEligiendo(false)}
-        titulo="Posponer tarea"
-        descripcion={p.titulo}
-        acciones={
-          <>
-            <Button variant="secondary" onClick={() => setEligiendo(false)}>
-              Cancelar
-            </Button>
-            <Button
-              disabled={!dia || pendiente}
-              onClick={() => void posponer(instanteEnZona(dia, "09:00"))}
-            >
-              Posponer
-            </Button>
-          </>
-        }
-      >
-        <Campo etiqueta="Nueva fecha" htmlFor={`posponer-${p.id}`}>
-          <InputFecha id={`posponer-${p.id}`} valor={dia} onCambiar={setDia} />
-        </Campo>
-      </Dialog>
+      {eligiendo ? (
+        <PosponerFecha
+          titulo={p.titulo}
+          id={p.id}
+          pendiente={pendiente}
+          onCerrar={() => setEligiendo(false)}
+          onPosponer={(v) => void posponer(v)}
+        />
+      ) : null}
     </>
   );
 }
