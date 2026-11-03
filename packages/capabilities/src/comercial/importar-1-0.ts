@@ -1,50 +1,37 @@
 import { z } from "zod";
 
+import { enTransaccion } from "@opai/db";
 import {
   aplicarPlanEnTransaccion,
   calcularPlan,
   construirReporte,
   datosOpai1,
   leerEstadoDestinoPorTenantId,
+  type Plan,
   validarDatos,
 } from "@opai/db/importar-opai1";
-import { enTransaccion } from "@opai/db";
 
 import { defineCapability } from "../define";
-import { prohibido } from "../errores";
+import { ErrorCapacidad, prohibido } from "../errores";
+import { executeCapability } from "../execute";
 import type { Contexto } from "../types";
+import { resultadoImportar10Schema } from "./importar-1-0-esquemas";
 
-const reporteSchema = z.object({
-  modo: z.literal("simulacion"),
-  sistema: z.literal("opai1"),
-  tenant: z.string(),
-  modulosActivos: z.array(z.string()),
-  tributario: z.object({
-    cuentasConsideradas: z.number().int(),
-    listasParaFacturar: z.number().int(),
-    incompletas: z.number().int(),
-    faltantesPorCampo: z.record(z.string(), z.number().int()),
-  }),
-  pendientes: z.array(
-    z.object({ entidad: z.string(), filas: z.number().int(), motivo: z.string() }),
-  ),
-  avisos: z.array(z.object({ codigo: z.string(), idsOpai1: z.array(z.string()) })),
-});
-
-const resultadoSchema = z.object({
-  dryRun: z.boolean(),
-  reporte: reporteSchema,
-  aplicadas: z
-    .object({
-      cuentas: z.number().int(),
-      contactos: z.number().int(),
-      instalaciones: z.number().int(),
-      omitidas: z.number().int(),
-    })
-    .nullable(),
-  usuariosResueltos: z.number().int(),
-  usuariosSinMembresia: z.array(z.string()),
-});
+async function fijarCorrelativosCpqDesdePlan(ctx: Contexto, plan: Plan, dryRun: boolean): Promise<number> {
+  let n = 0;
+  for (const c of plan.correlativosCpq) {
+    if (c.omitido) continue;
+    const r = await executeCapability(
+      ctx,
+      "cpq.correlativos.fijar",
+      { anio: c.anio, ultimo: c.fijariaUltimo },
+      { dryRun },
+    );
+    if (!r.ok) throw new ErrorCapacidad(r.error.code, r.error.message);
+    n += 1;
+  }
+  return n;
+}
 
 async function exigirOwnerAdmin(ctx: Contexto) {
   if (ctx.rol !== "owner" && ctx.rol !== "admin") {
@@ -85,7 +72,7 @@ export const comercialImportar10 = defineCapability({
   id: "comercial.importar_1_0",
   soloPersonas: true,
   descripcion:
-    "Importa un export JSON de OPAI 1.0 (cuentas con datos tributarios, contactos con vínculos por cuenta e instalaciones). Idempotente por id de origen; usuarios del JSON se validan por correo contra membresías del tenant. Solo owner o admin; incluye vista previa sin escrituras.",
+    "Importa un export JSON de OPAI 1.0 (cuentas con datos tributarios, contactos, instalaciones, plantillas de facturación recurrente con destinatarios y correlativo CPQ por año). Idempotente por id de origen; solo owner o admin; incluye vista previa sin escrituras.",
   permiso: "comercial:config.manage",
   input: z.object({
     origen: datosOpai1,
@@ -93,7 +80,7 @@ export const comercialImportar10 = defineCapability({
       .array(z.object({ origen1Id: z.string().min(1), email: z.string().email() }))
       .default([]),
   }),
-  output: resultadoSchema,
+  output: resultadoImportar10Schema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
@@ -109,11 +96,21 @@ export const comercialImportar10 = defineCapability({
     const plan = calcularPlan(datos, estado, { modulosActivos: ctx.modulosActivos });
     const reporte = construirReporte(plan, ctx.tenantId);
     const reporteSalida = {
-      ...reporte,
+      modo: reporte.modo,
+      sistema: reporte.sistema,
+      tenant: reporte.tenant,
       modulosActivos: [...reporte.modulosActivos],
+      conteos: reporte.conteos,
+      omitidas: reporte.omitidas,
+      tributario: reporte.tributario,
+      destinatarios: reporte.destinatarios,
+      correlativosCpq: reporte.correlativosCpq,
+      pendientes: reporte.pendientes,
+      avisos: reporte.avisos,
     };
 
     if (dryRun) {
+      await fijarCorrelativosCpqDesdePlan(ctx, plan, true);
       return {
         dryRun: true,
         reporte: reporteSalida,
@@ -126,6 +123,7 @@ export const comercialImportar10 = defineCapability({
     const aplicadas = await enTransaccion(ctx.tenantId, async (tx) =>
       aplicarPlanEnTransaccion(tx, ctx.tenantId, plan),
     );
+    const correlativosCpq = await fijarCorrelativosCpqDesdePlan(ctx, plan, false);
     return {
       dryRun: false,
       reporte: reporteSalida,
@@ -133,6 +131,8 @@ export const comercialImportar10 = defineCapability({
         cuentas: aplicadas.aplicadas.cuentas,
         contactos: aplicadas.aplicadas.contactos,
         instalaciones: aplicadas.aplicadas.instalaciones,
+        programaciones: aplicadas.aplicadas.programaciones,
+        correlativosCpq,
         omitidas: aplicadas.omitidas,
       },
       usuariosResueltos: resueltos,

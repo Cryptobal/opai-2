@@ -2,7 +2,16 @@
 
 export const SISTEMA_OPAI1 = "opai1";
 
-export type EntidadImportada = "cuenta" | "contacto" | "instalacion";
+export type EntidadImportada =
+  | "cuenta"
+  | "contacto"
+  | "instalacion"
+  | "programacion_recurrente"
+  | "etapa"
+  | "negocio"
+  | "negocio_etapa"
+  | "negocio_contacto"
+  | "cotizacion";
 
 export type CuentaDestino = {
   id: string;
@@ -60,6 +69,7 @@ export type EstadoDestino = {
   vinculos: VinculoDestino[];
   instalaciones: InstalacionDestino[];
   ids: IdExternoDestino[];
+  correlativosCpq: { anio: number; ultimo: number }[];
 };
 
 export const estadoVacio = (): EstadoDestino => ({
@@ -68,6 +78,7 @@ export const estadoVacio = (): EstadoDestino => ({
   vinculos: [],
   instalaciones: [],
   ids: [],
+  correlativosCpq: [],
 });
 
 /** Defaults nulos para tests en memoria. */
