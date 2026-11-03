@@ -35,9 +35,11 @@ describe("menú del ERP (CAR-182)", () => {
     expect(grupos).toEqual(["Comercial", "Operaciones", "Personas", "Finanzas", "Documentos"]);
   });
 
-  it("pone Cuentas y Contactos en Comercial, después de Cotizaciones", () => {
+  it("pone Cuentas y Contactos al final de Comercial", () => {
     const comercial = armar().nav.filter((n) => n.grupo === "Comercial").map((n) => n.href);
-    expect(comercial).toEqual(["/solicitudes", "/negocios", "/cotizaciones", "/cuentas", "/contactos"]);
+    expect(comercial.slice(0, 2)).toEqual(["/solicitudes", "/negocios"]);
+    expect(comercial).toEqual(expect.arrayContaining(["/tareas", "/cotizaciones"]));
+    expect(comercial.slice(-2)).toEqual(["/cuentas", "/contactos"]);
   });
 
   it("mantiene Remuneraciones en Personas y Firmas en Documentos", () => {

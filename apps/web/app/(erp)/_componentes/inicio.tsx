@@ -1,4 +1,5 @@
 import { Building2, MapPin, UserPlus } from "lucide-react";
+import { Suspense } from "react";
 
 import { Estado } from "@opai/ds";
 
@@ -11,6 +12,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 
 import { ActividadInicio } from "./actividad-inicio";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
+import { TareasInicio } from "./tareas-inicio";
 
 const acciones = (persona: string) => [
   { href: "/cuentas?nueva=1", etiqueta: "Nueva cuenta", corta: "Cuenta", icono: Building2 },
@@ -95,6 +97,9 @@ export async function InicioErp({ nombre, empresa, actor }: Props) {
         </div>
         <ActividadInicio actor={actor} />
       </div>
+      <Suspense fallback={null}>
+        <TareasInicio />
+      </Suspense>
     </div>
   );
 }

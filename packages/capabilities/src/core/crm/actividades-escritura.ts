@@ -9,7 +9,13 @@ import {
   vinculoActividadSchema,
   vistaActividad,
 } from "./actividades-comun";
-import { TIPOS_ACTIVIDAD, exigirEntidad, exigirResponsables, refDe } from "./comun";
+import {
+  RESULTADOS_LLAMADA,
+  TIPOS_ACTIVIDAD,
+  exigirEntidad,
+  exigirResponsables,
+  refDe,
+} from "./comun";
 
 const fechaHora = z.iso.datetime({ offset: true });
 
@@ -38,6 +44,10 @@ export const actividadesCreate = defineCapability({
     asistentes: z.array(z.string().trim().min(1).max(120)).max(30).default([]),
     acuerdos: textoOpcional(4000),
     proximoPaso: textoOpcional(1000),
+    resultado: z
+      .enum(RESULTADOS_LLAMADA)
+      .optional()
+      .describe("Solo llamadas y correos: contestó, no contestó o pidió volver a llamar."),
   }),
   output: actividadSchema,
   efecto: "escritura",
@@ -51,6 +61,8 @@ export const actividadesCreate = defineCapability({
       (input.asistentes.length || input.acuerdos || input.proximoPaso)
     )
       throw reglaDeNegocio("Solo las reuniones llevan asistentes, acuerdos y próximo paso.");
+    if (input.resultado && input.tipo !== "llamada" && input.tipo !== "correo")
+      throw reglaDeNegocio("Solo las llamadas y los correos llevan resultado.");
     const claves = input.vinculos.map((v) => `${v.tipo}:${v.id}`);
     if (new Set(claves).size !== claves.length) throw reglaDeNegocio("Hay vínculos repetidos.");
     for (const v of input.vinculos) await exigirEntidad(ctx, v.tipo, v.id);
@@ -76,6 +88,7 @@ export const actividadesCreate = defineCapability({
       asistentes: input.asistentes,
       acuerdos: input.acuerdos ?? null,
       proximoPaso: input.proximoPaso ?? null,
+      resultado: input.resultado ?? null,
       completadaEn: null,
       creadaPorId: ctx.usuario?.id ?? null,
     };

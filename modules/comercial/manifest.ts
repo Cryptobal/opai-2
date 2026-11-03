@@ -58,6 +58,15 @@ export const manifest = defineModule({
     {
       portal: "erp",
       area: "comercial",
+      href: "/tareas",
+      etiqueta: "Mis tareas",
+      icono: "ListChecks",
+      orden: 3,
+      permiso: "comercial:negocios.read",
+    },
+    {
+      portal: "erp",
+      area: "comercial",
       href: "/contactos",
       etiqueta: "Contactos",
       icono: "Users",
