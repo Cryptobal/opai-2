@@ -190,9 +190,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cuentas/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.create` | `core_contactos_create` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.update` | `core_contactos_update` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.aplicar_sii` | `core_cuentas_aplicar_sii` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.archive` | `core_cuentas_archive` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.consultar_sii` | `core_cuentas_consultar_sii` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.create` | `core_cuentas_create` | existe |
+| compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.facturable` | `core_cuentas_facturable` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_estado` | `core_cuentas_set_estado` | existe |
