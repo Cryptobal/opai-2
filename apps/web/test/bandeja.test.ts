@@ -14,7 +14,7 @@ vi.mock("react", async (importar) => ({
   useEffect: (f: () => void) => h.efectos.push(f),
 }));
 vi.mock("@/app/_acciones/capacidad", () => ({ ejecutarCapacidad: h.ejecutar }));
-import { Bandeja } from "@/app/(erp)/_componentes/bandeja";
+import { Bandeja, conPlazo } from "@/app/(erp)/_componentes/bandeja";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -75,3 +75,23 @@ for (const rol of ["viewer", "supervisor", "owner"]) {
     );
   });
 }
+
+it("una acción que rechaza deja el error visible y no «Todo al día» (B12)", () => {
+  h.valores = [[], 0, [], true, 0, false];
+  const html = renderToStaticMarkup(createElement(Bandeja));
+  expect(html).toContain("No pudimos actualizar la Bandeja");
+  expect(html).not.toContain("Todo al día");
+});
+
+it("conPlazo rechaza si la acción no responde a tiempo", async () => {
+  vi.useFakeTimers();
+  try {
+    const colgada = conPlazo(new Promise<never>(() => undefined), 3_000);
+    const visto = expect(colgada).rejects.toThrow("plazo");
+    await vi.advanceTimersByTimeAsync(3_000);
+    await visto;
+    await expect(conPlazo(Promise.resolve(7))).resolves.toBe(7);
+  } finally {
+    vi.useRealTimers();
+  }
+});
