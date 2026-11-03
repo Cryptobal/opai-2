@@ -310,6 +310,7 @@ model DocumentoEmitido {
   @@index([tenantId, estadoDte, fechaEmision])
   @@index([tenantId, cuentaId])
   @@index([tenantId, cotizacionId])
+  corridasProgramacion VentasProgramacionCorrida[]
   @@map("documentos_emitidos")
   @@schema("finanzas")
 }
@@ -675,12 +676,20 @@ model VentasProgramacionCorrida {
   tenantId       String   @map("tenant_id") @db.Uuid
   programacionId String   @map("programacion_id") @db.Uuid
   periodo        String
+  /// Borrador generado para el período (BRIEF-26).
+  documentoId     String?   @map("documento_id") @db.Uuid
+  fechaGeneracion DateTime? @map("fecha_generacion") @db.Date
+  /// UF usada (centavos de CLP), si la programación es en UF.
+  ufCentavos      BigInt?   @map("uf_centavos")
+  montoTotal      BigInt?   @map("monto_total")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
+  documento    DocumentoEmitido?  @relation(fields: [documentoId], references: [id], onDelete: Restrict)
 
   @@unique([programacionId, periodo], map: "ventas_programaciones_corridas_programacion_periodo_key")
   @@index([tenantId])
+  @@index([documentoId])
   @@map("ventas_programaciones_corridas")
   @@schema("finanzas")
 }
