@@ -30,7 +30,7 @@ export const ventasProgramacionesListar = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (s) => [...new Set(s.items.map((i) => i.cuentaId))],
+  auditarLectura: (s) => [...new Set(s.items.flatMap((i) => (i.cuentaId ? [i.cuentaId] : [])))],
   async handler(ctx, input) {
     const where: Record<string, unknown> = {};
     if (input.activa !== undefined) where.activa = input.activa;
@@ -49,7 +49,7 @@ export const ventasProgramacionesListar = defineCapability({
     const cuentaMap = new Map(
       (
         await ctx.db.cuenta.findMany({
-          where: { id: { in: [...new Set(slice.map((f) => f.cuentaId))] } },
+          where: { id: { in: [...new Set(slice.map((f) => f.cuentaId).filter((x): x is string => x !== null))] } },
           select: { id: true, nombre: true },
         })
       ).map((c) => [c.id, c.nombre]),
@@ -78,7 +78,7 @@ export const ventasProgramacionesObtener = defineCapability({
   output: programacionSchema,
   efecto: "lectura",
   dryRun: false,
-  auditarLectura: (s) => [s.cuentaId],
+  auditarLectura: (s) => (s.cuentaId ? [s.cuentaId] : []),
   async handler(ctx, input) {
     const f = await ctx.db.ventasProgramacion.findFirst({
       where: { id: input.programacionId },
@@ -91,7 +91,7 @@ export const ventasProgramacionesObtener = defineCapability({
     const cuentaMap = new Map(
       (
         await ctx.db.cuenta.findMany({
-          where: { id: f.cuentaId },
+          where: { id: f.cuentaId ?? "00000000-0000-0000-0000-000000000000" },
           select: { id: true, nombre: true },
         })
       ).map((c) => [c.id, c.nombre]),

@@ -101,6 +101,7 @@ export const comercialImportar10 = defineCapability({
       tenant: reporte.tenant,
       modulosActivos: [...reporte.modulosActivos],
       conteos: reporte.conteos,
+      omitidas: reporte.omitidas,
       tributario: reporte.tributario,
       destinatarios: reporte.destinatarios,
       correlativosCpq: reporte.correlativosCpq,
