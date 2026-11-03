@@ -144,6 +144,7 @@ model CuentaContable {
   hijas            CuentaContable[] @relation("JerarquiaCuentas")
   proveedoresGasto Proveedor[]      @relation("CuentaGastoProveedor")
   proveedoresPagar Proveedor[]      @relation("CuentaPagarProveedor")
+  lineasProgramacion VentasProgramacionLinea[]
 
   @@unique([tenantId, codigo])
   @@unique([tenantId, claveSistema])
@@ -555,5 +556,131 @@ model BancoAvisoEmitido {
 
   @@unique([tenantId, cuentaId, dia])
   @@map("banco_avisos_emitidos")
+  @@schema("finanzas")
+}
+
+// Finanzas · Ventas · programación recurrente (CAR-25 PR recurrentes): plantillas que generan borradores.
+// Receptor DTE (RUT, razón social, giro, dirección) se lee de core.cuentas al emitir; aquí solo cuenta e instalación.
+
+model VentasProgramacion {
+  id                     String    @id @default(uuid(7)) @db.Uuid
+  tenantId               String    @map("tenant_id") @db.Uuid
+  /// Nula si 1.0 no tenía cuenta: entonces va con el receptor congelado (`receptor*`).
+  cuentaId               String?   @map("cuenta_id") @db.Uuid
+  instalacionId          String?   @map("instalacion_id") @db.Uuid
+  nombre                 String
+  activa                 Boolean   @default(true)
+  tipoDte                Int       @map("tipo_dte")
+  /// mensual | quincenal | semanal | anual (paridad con 1.0)
+  frecuencia             String    @default("mensual")
+  diaGeneracion          Int       @map("dia_generacion")
+  moneda                 String    @default("CLP")
+  plazoPagoDias           Int       @default(30) @map("plazo_pago_dias")
+  facturaTiming          String    @map("factura_timing")
+  facturaDia             Int?      @map("factura_dia")
+  facturaMesRelativo     String    @map("factura_mes_relativo")
+  diasFacturacion        Int?      @map("dias_facturacion")
+  modoPeriodoFacturado   String    @default("CURRENT_MONTH") @map("modo_periodo_facturado")
+  politicaTextoPeriodo   String    @default("CURRENT_MONTH") @map("politica_texto_periodo")
+  montoVariable          Boolean   @default(false) @map("monto_variable")
+  autoEnvioProforma      Boolean   @default(false) @map("auto_envio_proforma")
+  autoEnvioEstadoPago    Boolean   @default(false) @map("auto_envio_estado_pago")
+  notas                  String?
+  referenciasAdicionales Json      @default("[]") @map("referencias_adicionales")
+  proximaEjecucionEn     DateTime? @map("proxima_ejecucion_en") @db.Timestamptz(6)
+  ultimaEjecucionEn      DateTime? @map("ultima_ejecucion_en") @db.Timestamptz(6)
+  diaSemana              Int?      @map("dia_semana")
+  mesDelAnio             Int?      @map("mes_del_anio")
+  fechaInicio            DateTime? @map("fecha_inicio") @db.Date
+  fechaFin               DateTime? @map("fecha_fin") @db.Date
+  /// RUN_DAY | LAST_DAY_PREV_MONTH | FIRST_DAY_MONTH | LAST_DAY_MONTH | CUSTOM_DAY
+  politicaUf             String?   @map("politica_uf")
+  diaUf                  Int?      @map("dia_uf")
+  ajusteIpcMeses         Int?      @map("ajuste_ipc_meses")
+  ajusteIpcDesde         DateTime? @map("ajuste_ipc_desde") @db.Date
+  envioAutomatico        Boolean   @default(false) @map("envio_automatico")
+  receptorRut            String?   @map("receptor_rut")
+  receptorRazonSocial    String?   @map("receptor_razon_social")
+  receptorGiro           String?   @map("receptor_giro")
+  receptorDireccion      String?   @map("receptor_direccion")
+  receptorComuna         String?   @map("receptor_comuna")
+  receptorCiudad         String?   @map("receptor_ciudad")
+  /// Último período generado en 1.0 (AAAA-MM o AAAA-MM-DD): la primera generación en 2.0 es el siguiente.
+  ultimoPeriodo10        String?   @map("ultimo_periodo_1_0")
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  lineas         VentasProgramacionLinea[]
+  destinatarios  VentasProgramacionDestinatario[]
+  corridas       VentasProgramacionCorrida[]
+
+  @@index([tenantId, cuentaId])
+  @@index([tenantId, activa])
+  @@map("ventas_programaciones")
+  @@schema("finanzas")
+}
+
+model VentasProgramacionLinea {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  programacionId  String   @map("programacion_id") @db.Uuid
+  orden           Int      @default(0)
+  glosa           String
+  /// Solo compatibilidad con el modelo anterior; el precio vive en `precioUnitario*`.
+  monto           Int?
+  cantidad        Decimal  @default(1) @db.Decimal(14, 4)
+  unidad          String?
+  /// Exactamente uno de los dos precios, según la moneda de la programación.
+  precioUnitarioClp BigInt? @map("precio_unitario_clp")
+  /// UF escalada por UF_ESCALA.
+  precioUnitarioUf  BigInt? @map("precio_unitario_uf")
+  /// Centésimas de punto porcentual (1550 = 15,50 %).
+  descuentoPct    Int      @default(0) @map("descuento_pct")
+  exento          Boolean  @default(false)
+  cuentaContableId String? @map("cuenta_contable_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
+  cuentaContable CuentaContable? @relation(fields: [cuentaContableId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, programacionId])
+  @@map("ventas_programaciones_lineas")
+  @@schema("finanzas")
+}
+
+model VentasProgramacionDestinatario {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  programacionId String   @map("programacion_id") @db.Uuid
+  contactoId     String?  @map("contacto_id") @db.Uuid
+  /// Destinatario por correo cuando no es un contacto importado.
+  correo         String?
+  /// para | cc
+  tipo           String   @default("para")
+  orden          Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, programacionId, contactoId])
+  @@unique([tenantId, programacionId, correo], map: "vp_destinatarios_tenant_prog_correo_key")
+  @@index([tenantId, programacionId])
+  @@map("ventas_programaciones_destinatarios")
+  @@schema("finanzas")
+}
+
+/// Una fila por programación y período: la unicidad hace idempotente la generación de borradores.
+model VentasProgramacionCorrida {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  programacionId String   @map("programacion_id") @db.Uuid
+  periodo        String
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
+
+  @@unique([programacionId, periodo], map: "ventas_programaciones_corridas_programacion_periodo_key")
+  @@index([tenantId])
+  @@map("ventas_programaciones_corridas")
   @@schema("finanzas")
 }

@@ -48,7 +48,7 @@ export function PaginaArmadorPropuesta({ cotizacionId }: { cotizacionId: string 
     <Estado state={cargando ? "loading" : propuesta ? "ready" : "error"} variante="detalle">
       {propuesta ? (
         <div className="space-y-4 p-4">
-          <p className="t-h2">Propuesta técnica · {propuesta.codigo}</p>
+          <p className="t-heading">Propuesta técnica · {propuesta.codigo}</p>
           <Badge tono="info">Base {etiquetaBasePlantillaCpq(propuesta.base)}</Badge>
           {propuesta.servicioDesactualizado ? (
             <p className="t-caption text-warning">La cotización cambió · actualiza la sección del servicio.</p>

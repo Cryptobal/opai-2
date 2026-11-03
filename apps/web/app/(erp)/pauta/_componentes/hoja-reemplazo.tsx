@@ -82,7 +82,7 @@ function Formulario({
     if (r) {
       avisar.exito("Reemplazo asignado");
       if (r.variante === "refuerzo_extra") {
-        avisar.info("Quedará como turno extra por aprobar cuando exista el módulo de turnos extra (CAR-96).");
+        avisar.info("Quedará como turno extra por aprobar.");
       }
       onCerrar();
     }
@@ -147,8 +147,7 @@ function Formulario({
               />
             </Campo>
             <p className="t-caption text-fg-muted">
-              Quedará como turno extra por aprobar. La aprobación formal llegará con el módulo de turnos extra
-              (CAR-96).
+              Quedará como turno extra por aprobar.
             </p>
           </>
         )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatearNumero } from "@opai/domain";
 import { useState } from "react";
 
 import { Alerta, avisar, Button, Sheet, Textarea } from "@opai/ds";
@@ -71,7 +72,7 @@ export function HojaImportar({
         abierto={abierto}
         onCerrar={() => setAbierto(false)}
         titulo="Importar planilla"
-        descripcion="CSV con columnas seccion, etiqueta, semana, monto, nota, vinculo. Solo CSV en este PR."
+        descripcion="CSV con columnas seccion, etiqueta, semana, monto, nota, vinculo. Solo se aceptan archivos CSV."
         acciones={
           <>
             <Button variant="secondary" onClick={() => setAbierto(false)}>
@@ -91,7 +92,7 @@ export function HojaImportar({
       >
         <div className="flex flex-col gap-4">
           {error ? (
-            <Alerta tono="danger" titulo={errorServidor ? "Error del servidor" : error}>
+            <Alerta tono="danger" titulo={errorServidor ? "No pudimos completar la acción. Reintenta; si sigue igual, avisa a un administrador." : error}>
               {errorServidor ? (
                 <Button variant="secondary" className="mt-2" onClick={() => void previsualizar()}>
                   Reintentar
@@ -117,7 +118,7 @@ export function HojaImportar({
                 {vista.filas.map((f) => (
                   <li key={f.indice} className="border-b border-border py-1">
                     Fila {f.indice + 2}: {f.estado}
-                    {f.montoInterpretado != null ? ` · ${f.montoInterpretado.toLocaleString("es-CL")} CLP` : ""}
+                    {f.montoInterpretado != null ? ` · ${formatearNumero(f.montoInterpretado)} CLP` : ""}
                     {f.mensaje ? ` · ${f.mensaje}` : ""}
                   </li>
                 ))}

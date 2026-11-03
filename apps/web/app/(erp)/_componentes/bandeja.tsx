@@ -9,6 +9,7 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import type { Aviso } from "@/app/_components/campana";
 import { ListaAvisos } from "@/app/_components/lista-avisos";
 import { BandejaCorta } from "./bandeja-corta";
+import { conPlazo } from "./con-plazo";
 
 /** Una sola Bandeja; el servidor aplica destinatario, permisos efectivos y tenant. */
 export function Bandeja({ corta = false }: { corta?: boolean }) {
@@ -20,39 +21,47 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
   const [cargandoMas, setCargandoMas] = useState(false);
   const cargar = useCallback(async () => {
     setError(false);
-    const r = await ejecutarCapacidad("erp", "core.notificaciones.list", {
-      limite: 50,
-      soloNoLeidas: true,
-    });
-    const c = await ejecutarCapacidad("erp", "core.resumen.contadores", {
-      campos: ["aprobacionesPendientes"],
-    });
-    if (r.ok) {
-      const d = r.data as { items: Aviso[]; noLeidas: number };
-      setAvisos(d.items.filter((a) => !a.leidaEn));
-      setNoLeidas(d.noLeidas);
-    } else {
-      setAvisos([]);
+    try {
+      // Las dos lecturas van juntas y una acción de servidor que se cuelga o rechaza (corte de red,
+      // despliegue nuevo) deja la tarjeta en error, nunca en esqueleto para siempre (B12).
+      const [r, c] = await Promise.all([
+        conPlazo(
+          ejecutarCapacidad("erp", "core.notificaciones.list", { limite: 50, soloNoLeidas: true }),
+        ),
+        conPlazo(
+          ejecutarCapacidad("erp", "core.resumen.contadores", { campos: ["aprobacionesPendientes"] }),
+        ),
+      ]);
+      if (r.ok) {
+        const d = r.data as { items: Aviso[]; noLeidas: number };
+        setAvisos(d.items.filter((a) => !a.leidaEn));
+        setNoLeidas(d.noLeidas);
+      } else {
+        setAvisos([]);
+        setError(true);
+      }
+      if (c.ok) {
+        const total = (c.data as { aprobacionesPendientes: number | null }).aprobacionesPendientes;
+        setAprobaciones(total);
+        // null significa sin permiso: no se solicita la lista para viewer/supervisor.
+        if (total !== null && total > 0) {
+          const [a, cpq] = await Promise.all([
+            conPlazo(ejecutarCapacidad("erp", "core.aprobaciones.list", { estado: "pendiente" })),
+            conPlazo(ejecutarCapacidad("erp", "cpq.aprobaciones.list", { limite: 5 })),
+          ]);
+          const agente = a.ok ? (a.data as { id: string; resumen: string }[]) : [];
+          const cpqItems = cpq.ok
+            ? (cpq.data as { id: string; resumen: string }[]).map((x) => ({
+                id: x.id,
+                resumen: x.resumen,
+              }))
+            : [];
+          setDecisiones([...agente, ...cpqItems].slice(0, 5));
+        } else setDecisiones([]);
+      }
+    } catch {
+      setAvisos((prev) => prev ?? []);
       setError(true);
-    }
-    if (c.ok) {
-      const total = (c.data as { aprobacionesPendientes: number | null }).aprobacionesPendientes;
-      setAprobaciones(total);
-      // null significa sin permiso: no se solicita la lista para viewer/supervisor.
-      if (total !== null && total > 0) {
-        const [a, cpq] = await Promise.all([
-          ejecutarCapacidad("erp", "core.aprobaciones.list", { estado: "pendiente" }),
-          ejecutarCapacidad("erp", "cpq.aprobaciones.list", { limite: 5 }),
-        ]);
-        const agente = a.ok ? (a.data as { id: string; resumen: string }[]) : [];
-        const cpqItems = cpq.ok
-          ? (cpq.data as { id: string; resumen: string }[]).map((x) => ({
-              id: x.id,
-              resumen: x.resumen,
-            }))
-          : [];
-        setDecisiones([...agente, ...cpqItems].slice(0, 5));
-      } else setDecisiones([]);
     }
   }, []);
   useEffect(() => {
@@ -136,7 +145,7 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
                 Cargar más avisos
               </Button>
             ) : null}
-            {!avisos.length && !aprobaciones ? (
+            {!avisos.length && !aprobaciones && !error ? (
               <p className="t-body text-fg-muted">Todo al día. No tienes nada pendiente.</p>
             ) : null}
             {avisos.length ? (

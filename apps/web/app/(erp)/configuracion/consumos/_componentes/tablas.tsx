@@ -1,13 +1,12 @@
+import { formatearNumero, formatearUsd } from "@opai/domain";
 import { Bot } from "lucide-react";
 
 import { Table, Td, Th, Tr } from "@opai/ds";
 
 import { nombreModulo, nombreRecurso, type PorAgente, type Resumen } from "./datos";
 
-const usd = (n: number) =>
-  `US$ ${n.toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const num = (n: number) =>
-  n.toLocaleString("es-CL", { notation: n >= 100_000 ? "compact" : "standard" });
+const usd = (n: number) => formatearUsd(n);
+const num = (n: number) => formatearNumero(n);
 const der = "text-right t-numeric";
 
 /** Por recurso y módulo (33): la IA de entrada y salida se suma por clase. */

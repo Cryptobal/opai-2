@@ -25,7 +25,7 @@ export function CuerpoHojaReconocer({
   return (
     <div className="flex flex-col gap-4">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
-      <p className="t-caption text-muted">
+      <p className="t-caption text-fg-muted">
         {movimiento.fecha}
         {movimiento.referencia ? ` · Ref. ${movimiento.referencia}` : ""}
       </p>

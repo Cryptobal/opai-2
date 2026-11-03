@@ -1,4 +1,4 @@
-import { formatearCLP, formatearRut, formatearTelefono, clp } from "@opai/domain";
+import { formatearClp, formatearFecha, formatearRut, formatearTelefono } from "@opai/domain";
 
 const ZONA = "America/Santiago";
 
@@ -20,22 +20,8 @@ export function haceCuanto(valor: string | Date | null | undefined, ahora = new 
   return fecha(d);
 }
 
-/** dd-mm-aaaa en la zona del tenant. Acepta ISO de fecha (`aaaa-mm-dd`) sin correr el día. */
-export function fecha(valor: string | Date | null | undefined, zona = ZONA): string {
-  if (!valor) return "—";
-  if (typeof valor === "string" && /^\d{4}-\d{2}-\d{2}$/.test(valor)) {
-    const [a, mes, d] = valor.split("-");
-    return `${d}-${mes}-${a}`;
-  }
-  return new Intl.DateTimeFormat("es-CL", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: zona,
-  })
-    .format(new Date(valor))
-    .replace(/\//g, "-");
-}
+/** dd-mm-aaaa en la zona del tenant (formateador central). */
+export const fecha = formatearFecha;
 
 /** HH:mm en la zona del tenant. */
 export function hora(valor: string | Date, zona = ZONA): string {
@@ -64,7 +50,7 @@ export function hoyIso(zona = ZONA): string {
 }
 
 export const pesos = (n: number | null | undefined) =>
-  n == null ? "—" : formatearCLP(clp(Math.round(n)));
+  n == null ? "—" : formatearClp(Math.round(n));
 export const rut = (r: string | null | undefined) => (r ? formatearRut(r) : "—");
 export const telefono = (t: string | null | undefined) => (t ? formatearTelefono(t) : "—");
 

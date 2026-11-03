@@ -20,7 +20,7 @@ export function PaginaBibliotecaPropuesta() {
   return (
     <Estado state="ready" variante="lista">
       <div className="space-y-4 p-4">
-        <h1 className="t-h2">Biblioteca · Propuesta técnica</h1>
+        <h1 className="t-heading">Biblioteca · Propuesta técnica</h1>
         <ul className="space-y-2">
           {bloques.map((b) => (
             <li key={b.id} className="flex items-center justify-between rounded-lg border border-border p-3">
