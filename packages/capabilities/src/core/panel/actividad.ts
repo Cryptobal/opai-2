@@ -8,6 +8,7 @@ import { entidadEnAlcance } from "../maestros/alcance";
 import { nombres } from "./actividad-actores";
 import { visibleSinAnexos } from "./actividad-anexos";
 import { visibleSinNoRecontratar } from "./actividad-no-recontratar";
+import { ocultarPreferenciaNav } from "./actividad-preferencias-nav";
 import { auditarHistorialSensible, redactarSensibles } from "./actividad-sensible";
 import { capacidadesDeCambios, cambios, frase } from "./actividad-texto";
 import { auditoriaSelect } from "./auditoria-select";
@@ -103,7 +104,9 @@ export const actividadList = defineCapability({
     const leidas = filas.slice(0, input.limite);
     const visibleAnexos = await visibleSinAnexos(ctx, leidas);
     const visibleMarca = visibleSinNoRecontratar(ctx);
-    const pagina = leidas.filter((f) => visibleAnexos(f) && visibleMarca(f));
+    const pagina = leidas.filter(
+      (f) => visibleAnexos(f) && visibleMarca(f) && !ocultarPreferenciaNav(f),
+    );
     await auditarHistorialSensible(ctx, pagina, "core.actividad.list");
     const quien = await nombres(
       ctx,

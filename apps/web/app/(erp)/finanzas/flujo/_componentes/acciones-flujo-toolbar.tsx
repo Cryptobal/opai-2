@@ -39,6 +39,8 @@ export function AccionesFlujoMovil({ configura, onImportar }: Props) {
     <div className="xl:hidden">
       <Menu
         etiqueta="Acciones del flujo"
+        lado="abajo-derecha"
+        className="relative inline-flex"
         disparador={<MoreHorizontal className="size-5" aria-hidden />}
         items={[
           {
@@ -58,35 +60,6 @@ export function AccionesFlujoMovil({ configura, onImportar }: Props) {
           },
         ]}
       />
-    </div>
-  );
-}
-
-export function MetasRendimientoFlujo({
-  metaCeldaMs,
-  metaGuardadoP95Ms,
-  metaCargaInicialS,
-}: {
-  metaCeldaMs: number;
-  metaGuardadoP95Ms: number;
-  metaCargaInicialS: number;
-}) {
-  return (
-    <div className="grid gap-2 rounded-lg border border-border bg-surface p-3 text-sm md:grid-cols-3">
-      <Meta titulo="Celda" meta={`${metaCeldaMs} ms`} real="—" />
-      <Meta titulo="Guardado p95" meta={`${metaGuardadoP95Ms} ms`} real="—" />
-      <Meta titulo="Carga inicial" meta={`${metaCargaInicialS} s`} real="—" />
-    </div>
-  );
-}
-
-function Meta({ titulo, meta, real }: { titulo: string; meta: string; real: string }) {
-  return (
-    <div>
-      <div className="font-medium text-fg">{titulo}</div>
-      <div className="text-fg-muted">
-        Meta {meta} · Real {real}
-      </div>
     </div>
   );
 }

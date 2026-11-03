@@ -124,6 +124,25 @@ export function ListaVentas(p: {
           render: (v) => pesos(v.tipoDte === 61 ? -v.montoTotal : v.montoTotal),
         },
         { id: "estado", etiqueta: "Estado SII", render: (v) => badgeEstado(v) },
+        {
+          id: "cobro",
+          etiqueta: "Cobro",
+          render: (v) => (
+            <Badge tono={v.estadoCobro === "pagada" ? "success" : v.estadoCobro === "cedida" ? "info" : "neutro"}>
+              {v.estadoCobro === "cedida" ? "Cedida" : v.estadoCobro}
+            </Badge>
+          ),
+        },
+        {
+          id: "cesion",
+          etiqueta: "Cesión",
+          render: (v) =>
+            v.cesionEstado ? (
+              <Badge tono={v.cesionEstado === "cedido" ? "info" : "neutro"}>{v.cesionEstado}</Badge>
+            ) : (
+              "—"
+            ),
+        },
       ]}
     />
   );

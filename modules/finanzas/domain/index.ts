@@ -96,15 +96,13 @@ export type PlanMovimiento =
 /**
  * Reprograma celdas de una fila ± `por` semanas. Solo se mueve la capa Plan (lo comprometido o
  * real viene de hechos y no se mueve); con `arrastre` en la fila se mueven también todas las celdas
- * Plan posteriores (las no-Plan posteriores se quedan donde están) a la primera seleccionada. No se toca una semana sellada, ni de origen ni de
- * destino, y una celda Plan se suma a otra Plan del destino pero nunca pisa una no-Plan.
+ * Plan posteriores (las no-Plan posteriores se quedan donde están) a la primera seleccionada. Una celda Plan se suma a otra Plan del destino pero nunca pisa una no-Plan.
  */
 export function planificarMovimiento(o: {
   fila: FilaFlujo;
   celdas: readonly CeldaFlujo[];
   semanas: readonly string[];
   por: number;
-  selladas: ReadonlySet<string>;
 }): PlanMovimiento {
   if (!Number.isInteger(o.por) || o.por === 0)
     return { ok: false, motivo: "Indica cuántas semanas mover." };
@@ -127,9 +125,6 @@ export function planificarMovimiento(o: {
     hasta: sumarSemanas(c.semana, o.por),
     monto: c.monto,
   }));
-  for (const m of movimientos)
-    if (o.selladas.has(m.desde) || o.selladas.has(m.hasta))
-      return { ok: false, motivo: "Una de las semanas está sellada: reábrela antes de mover." };
   const origenes = new Set(movimientos.map((m) => m.desde));
   for (const m of movimientos) {
     const choca = deLaFila.find((c) => c.semana === m.hasta && !origenes.has(c.semana));

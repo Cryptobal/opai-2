@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cifrar, descifrar, enmascarar, generarDek, kekDelEntorno, sufijoDe } from "./cifrado";
+import { cifrar, descifrar, enmascarar, generarDek, kekDelEntorno, sufijoDe, sufijoParaGuardar } from "./cifrado";
 
 describe("cifrado de secretos (envelope AES-256-GCM)", () => {
   it("ida y vuelta: KEK cifra la DEK y la DEK cifra el secreto", () => {
@@ -36,5 +36,12 @@ describe("cifrado de secretos (envelope AES-256-GCM)", () => {
 
   it("enmascara mostrando solo los últimos 4", () => {
     expect(enmascarar(sufijoDe("re_abcdefgh1234"))).toBe("••••••••1234");
+  });
+
+  it("enmascara tipo clave sin revelar sufijo", () => {
+    const clave = "x";
+    expect(enmascarar(sufijoParaGuardar("certificado_clave", clave))).toBe("••••••••");
+    expect(enmascarar(sufijoParaGuardar("certificado_clave", clave))).not.toContain(clave);
+    expect(enmascarar(sufijoParaGuardar("clave", "octava-secreta"))).toBe("••••••••");
   });
 });

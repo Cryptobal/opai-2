@@ -36,6 +36,21 @@ import {
   plantillasDocumentoGet,
   plantillasDocumentoUpdate,
 } from "./plantillas-documento";
+import {
+  bibliotecaBloquesList,
+  bibliotecaBloquesPublicar,
+  enviosPropuestaAprobar,
+  enviosPropuestaCancelar,
+  enviosPropuestaList,
+  enviosPropuestaSolicitar,
+  plantillasPropuestaGet,
+  plantillasPropuestaUpdate,
+  propuestaTecnicaGet,
+  propuestaTecnicaInicializar,
+  propuestaTecnicaPreviewPdf,
+  propuestaTecnicaSyncServicio,
+  propuestaTecnicaUpdate,
+} from "./propuesta-tecnica";
 import { cotizacionesClonar, versionesCrear } from "./versiones";
 
 export const capacidades: readonly Capacidad[] = [
@@ -74,4 +89,17 @@ export const capacidades: readonly Capacidad[] = [
   marcaDocumentoUpdate,
   plantillasDocumentoGet,
   plantillasDocumentoUpdate,
+  bibliotecaBloquesList,
+  bibliotecaBloquesPublicar,
+  plantillasPropuestaGet,
+  plantillasPropuestaUpdate,
+  propuestaTecnicaGet,
+  propuestaTecnicaInicializar,
+  propuestaTecnicaUpdate,
+  propuestaTecnicaSyncServicio,
+  propuestaTecnicaPreviewPdf,
+  enviosPropuestaList,
+  enviosPropuestaSolicitar,
+  enviosPropuestaAprobar,
+  enviosPropuestaCancelar,
 ];

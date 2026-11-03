@@ -1,123 +1,145 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-import { Button, Campo, Estado, Input } from "@opai/ds";
+import {
+  AccionFijaTelefono,
+  Alerta,
+  Badge,
+  DetailScreen,
+} from "@opai/ds";
 
-import { LinkNext } from "@/app/_components/link-next";
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
+import { estadoCpqBadge } from "@/lib/cpq-presentacion";
 
-import type { DatosFicha } from "../page";
+import type { DatosFichaCotizacion } from "../../_componentes/datos";
+import { hayBarraFijaCpq } from "./acciones-cotizacion-logica";
 import { AccionesCotizacion } from "./acciones-cotizacion";
-import { LineaCotizacion } from "./linea-cotizacion";
+import { FichaCotizacionCuerpo } from "./ficha-cotizacion-cuerpo";
+import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotizacion-modales";
 import { ResumenCotizacion } from "./resumen-cotizacion";
 
-export function FichaCotizacion({ datos }: { datos: DatosFicha }) {
+type MetaFicha = {
+  fechaCalculo?: string;
+  validaHastaContrato?: string | null;
+  avisoRecalculo?: { mensaje: string } | null;
+  puedeEnviar?: boolean;
+  puedeAprobarMargen?: boolean;
+  motivoNoAprobarMargen?: string | null;
+  autoaprobacionMargen?: boolean | null;
+};
+
+export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
   const router = useRouter();
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
-  const [nombreNueva, setNombreNueva] = useState("Guardia");
+  const modales = useModalesFichaCotizacion();
+  const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const d = datos.ficha;
   if (!d) {
     return (
-      <Estado state={datos.state} variante="detalle" textos={{ error: { accion: <BotonReintentar /> } }}>
+      <DetailScreen state={datos.state} titulo="Cotización" textos={{ error: { accion: <BotonReintentar /> } }}>
         {null}
-      </Estado>
+      </DetailScreen>
     );
   }
   const editable = datos.gestionar && d.version.editable;
   const c = d.calculo as Parameters<typeof ResumenCotizacion>[0]["calculo"];
-  const meta = d.meta as Parameters<typeof ResumenCotizacion>[0]["meta"];
+  const meta = d.meta as MetaFicha | undefined;
+  const badge = estadoCpqBadge(d.version.estado);
   const recargar = () => router.refresh();
-  const propsMeta = meta !== undefined ? { meta } : {};
+  const aprobacionTxt =
+    d.version.estado === "en_aprobacion"
+      ? textoAprobacionMargenN6({
+          autoaprobacionMargen: meta?.autoaprobacionMargen,
+          puedeAprobarMargen: Boolean(meta?.puedeAprobarMargen),
+          motivoNoAprobarMargen: meta?.motivoNoAprobarMargen,
+        })
+      : null;
 
-  const resumen = <ResumenCotizacion version={d.version} calculo={c} {...propsMeta} />;
+  const resumen = (
+    <ResumenCotizacion
+      version={d.version}
+      calculo={c}
+      {...(meta !== undefined ? { meta } : {})}
+      verCostos={datos.costos}
+    />
+  );
+
+  const propsAcciones = {
+    cotizacionId: d.cotizacion.id,
+    version: d.version,
+    calculo: c,
+    ...(meta !== undefined ? { meta } : {}),
+    gestionar: datos.gestionar,
+    aprobar: datos.aprobar,
+    onHecho: recargar,
+    onEnviar: () => modales.setEnviarAbierto(true),
+    onVistaPrevia: () => modales.setPreviewAbierto(true),
+  };
+  const paramsBarra = {
+    version: d.version,
+    calculo: c,
+    gestionar: datos.gestionar,
+    ...(meta !== undefined ? { meta } : {}),
+  };
+  const muestraBarraFija = editable && hayBarraFijaCpq(paramsBarra);
 
   return (
-    <Estado state={datos.state} variante="detalle" textos={{ error: { accion: <BotonReintentar /> } }}>
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-4">
-          <header className="space-y-2">
-            <h1 className="t-h2">
-              {d.cotizacion.codigo} · {d.cotizacion.titulo}
-            </h1>
-            <p className="t-body-sm text-fg-muted">
-              {d.negocioTitulo ?? "Negocio"} ·{" "}
-              <LinkNext href={`/negocios/${d.cotizacion.negocioId}`} className="text-accent">
-                Abrir negocio
-              </LinkNext>
-            </p>
-            <AccionesCotizacion
-              cotizacionId={d.cotizacion.id}
-              version={d.version}
-              calculo={c}
-              {...propsMeta}
-              gestionar={datos.gestionar}
-              aprobar={datos.aprobar}
-              onHecho={recargar}
-            />
-          </header>
-          {error ? <p className="t-caption text-danger">{error}</p> : null}
-          <div className="lg:hidden">{resumen}</div>
-          {d.secciones.map((s) => (
-            <details key={s.id} className="rounded-lg border border-border bg-surface p-3" open>
-              <summary className="t-label cursor-pointer">{s.nombre}</summary>
-              {editable ? (
-                <div className="mt-2 flex flex-wrap items-end gap-2">
-                  <Campo etiqueta="Nueva línea" htmlFor={`linea-${s.id}`}>
-                    <Input
-                      id={`linea-${s.id}`}
-                      value={nombreNueva}
-                      onChange={(e) => setNombreNueva(e.target.value)}
-                      className="max-w-xs"
-                    />
-                  </Campo>
-                  <Button
-                    type="button"
-                    disabled={pendiente}
-                    onClick={() =>
-                      void ejecutar("cpq.lineas.crear", {
-                        seccionId: s.id,
-                        tipo: "puesto",
-                        nombre: nombreNueva.trim() || "Puesto",
-                      }).then((r) => r != null && recargar())
-                    }
-                  >
-                    Agregar puesto
-                  </Button>
-                </div>
-              ) : null}
-              <ul className="mt-2 space-y-2">
-                {s.lineas.length === 0 ? (
-                  <li className="t-caption text-fg-muted">Sin líneas</li>
-                ) : (
-                  s.lineas.map((l) => (
-                    <LineaCotizacion
-                      key={l.id}
-                      linea={l}
-                      editable={Boolean(editable)}
-                      pendiente={pendiente}
-                      onRenombrar={(id, nombre) =>
-                        void ejecutar("cpq.lineas.actualizar", { id, nombre }).then((r) => r != null && recargar())
-                      }
-                      onQuitar={(id) => void ejecutar("cpq.lineas.quitar", { id }).then((r) => r != null && recargar())}
-                      onTraza={(lineaId) =>
-                        void ejecutar("cpq.cotizaciones.explicar", { id: d.cotizacion.id, lineaId }).then((r) => {
-                          if (r && typeof r === "object" && "traza" in r) {
-                            window.alert(JSON.stringify((r as { traza: unknown[] }).traza.slice(0, 8), null, 2));
-                          }
-                        })
-                      }
-                    />
-                  ))
-                )}
-              </ul>
-            </details>
-          ))}
-        </div>
-        <aside className="hidden lg:block">{resumen}</aside>
-      </div>
-    </Estado>
+    <>
+      <DetailScreen
+        state={datos.state}
+        titulo={d.cotizacion.codigo}
+        subtitulo={
+          <>
+            {d.cotizacion.titulo} · v{d.version.numero}
+            {d.negocioTitulo ? <> · {d.negocioTitulo}</> : null}
+          </>
+        }
+        estado={
+          <>
+            <Badge tono={badge.tono}>{badge.etiqueta}</Badge>
+            {!d.cotizacion.vigente ? <Badge tono="neutro">Alternativa</Badge> : null}
+          </>
+        }
+        accionesDebajoEnTelefono
+        acciones={<AccionesCotizacion {...propsAcciones} ocultarPrimariaEnTelefono />}
+      >
+        {error ? <Alerta tono="danger" titulo={error} className="mb-4" /> : null}
+        {aprobacionTxt ? (
+          <Alerta tono="info" titulo={aprobacionTxt.titulo} className="mb-4">
+            {aprobacionTxt.detalle}
+          </Alerta>
+        ) : null}
+        <FichaCotizacionCuerpo
+          d={d}
+          datos={datos}
+          resumen={resumen}
+          editable={Boolean(editable)}
+          pendiente={pendiente}
+          ejecutar={ejecutar}
+          limpiarError={limpiarError}
+          recargar={recargar}
+          modales={modales}
+          {...(meta !== undefined ? { meta } : {})}
+        />
+        {muestraBarraFija ? (
+          <AccionFijaTelefono>
+            <AccionesCotizacion {...propsAcciones} soloPrimaria />
+          </AccionFijaTelefono>
+        ) : null}
+      </DetailScreen>
+      <FichaCotizacionModales
+        modales={modales}
+        cotizacionId={d.cotizacion.id}
+        codigo={d.cotizacion.codigo}
+        versionNumero={d.version.numero}
+        cuentaId={d.cuentaId}
+        requiereAprobacion={Boolean(c.requiereAprobacion)}
+        estadoVersion={d.version.estado}
+        enviada={d.version.estado === "enviada" || d.version.estado === "aceptada"}
+        recargar={recargar}
+      />
+    </>
   );
 }

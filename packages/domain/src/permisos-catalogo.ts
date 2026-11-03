@@ -31,6 +31,14 @@ export const PERMISOS_CORE = {
   // el resto no ve ni que la sección existe (denegado explícito a gerente, fuera del allowlist de
   // supervisor y viewer).
   personasNoRecontratarManage: "core:personas.no_recontratar.manage",
+  // Personas y Cargos PR 2: previsión, pago bancario (aprobación RRHH) y ficha laboral ampliada.
+  personasPrevisionRead: "core:personas.prevision.read",
+  personasPrevisionManage: "core:personas.prevision.manage",
+  personasPagoRead: "core:personas.pago.read",
+  personasPagoManage: "core:personas.pago.manage",
+  personasPagoAprobar: "core:personas.pago.aprobar",
+  personasLaboralRead: "core:personas.laboral.read",
+  personasLaboralManage: "core:personas.laboral.manage",
   estructurasRead: "core:estructuras.read",
   estructurasManage: "core:estructuras.manage",
   estructurasReadSensible: "core:estructuras.read_sensible",

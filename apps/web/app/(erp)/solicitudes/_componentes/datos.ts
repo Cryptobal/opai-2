@@ -19,6 +19,9 @@ export type SolicitudDato = {
   rut: string | null;
   comuna: string | null;
   servicio: string | null;
+  fuente: string | null;
+  notasAgente: string | null;
+  camposPropuestosAgente: string[];
   responsableId: string | null;
   registradaPorTipo: string;
   motivoDescarte: string | null;
@@ -31,6 +34,24 @@ export type SolicitudDato = {
 
 type Lista = { items: SolicitudDato[]; siguiente: string | null };
 type Ficha = { solicitud: SolicitudDato; posiblesDuplicadas: SolicitudDato[] };
+
+export type AccionAgenteDato = {
+  id: string;
+  capability: string;
+  creadaEn: string;
+  resumen: string;
+  apiKeyNombre: string | null;
+  responsableNombre: string | null;
+};
+
+export async function cargarAccionesAgente(id: string) {
+  const r = await ejecutarComoUsuario<AccionAgenteDato[]>(
+    "erp",
+    "comercial.solicitudes.acciones_agente",
+    { id: requerirUuid(id), limite: 30 },
+  );
+  return r.ok ? r.data : [];
+}
 
 export async function cargarSolicitudes(f: Record<string, string | undefined>) {
   const r = await ejecutarComoUsuario<Lista>("erp", "comercial.solicitudes.list", {

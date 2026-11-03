@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Alerta, Badge, Button, SeccionTarjeta } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { datosSiHayPermiso, exigirDatos } from "@/lib/carga";
 import { haceCuanto } from "@/lib/fechas";
 import { requerirEncontrado } from "@/lib/ids";
@@ -123,6 +124,17 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
         return (
           <div className="flex flex-col gap-4">
             <PruebaIntegracion items={items} />
+            {i.proveedor === "dte_emision" ? (
+              <Alerta tono="info" titulo="Folios (CAF)">
+                <p className="t-body-sm">
+                  Los rangos de folios autorizados por el SII se cargan en Facturación, aparte del certificado
+                  digital.
+                </p>
+                <EnlaceBoton href="/finanzas/folios" variante="secondary" className="mt-3">
+                  Administrar folios
+                </EnlaceBoton>
+              </Alerta>
+            ) : null}
             <FormIntegracion items={items}>
               <Credenciales items={items} conNombre={items.length > 1} />
             </FormIntegracion>

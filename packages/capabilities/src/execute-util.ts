@@ -55,6 +55,7 @@ const SINGULAR: Record<string, string> = {
   estructuras: "estructura",
   documentos: "documento",
   apikeys: "api_key",
+  solicitudes: "solicitud",
   users: "usuario",
   aprobaciones: "aprobacion",
 };

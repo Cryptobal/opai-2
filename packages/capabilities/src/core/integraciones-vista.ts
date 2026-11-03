@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { credencialDePlataforma, definicionIntegracion, enmascarar } from "@opai/integrations";
+import {
+  credencialDePlataforma,
+  definicionIntegracion,
+  enmascarar,
+  secretoOcultaSufijo,
+} from "@opai/integrations";
 
 import { noEncontrado } from "../errores";
 import { externo } from "../externo";
@@ -48,7 +53,14 @@ export async function vistaIntegracion(ctx: Contexto, proveedor: string) {
     config: fila?.config ?? {},
     secretos: def.secretos.map((s) => {
       const guardado = secretos.find((x) => x.nombre === s.nombre);
-      return { ...s, mascara: guardado ? enmascarar(guardado.sufijo) : null };
+      return {
+        ...s,
+        mascara: guardado
+          ? secretoOcultaSufijo(s.nombre)
+            ? enmascarar("")
+            : enmascarar(guardado.sufijo)
+          : null,
+      };
     }),
     ultimoTestEn: iso(fila?.ultimoTestEn),
     ultimoError: fila?.ultimoError ?? null,

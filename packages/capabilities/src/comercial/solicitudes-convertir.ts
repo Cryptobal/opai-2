@@ -29,8 +29,9 @@ const revisados = {
 export const solicitudesConvertir = defineCapability({
   id: "comercial.solicitudes.convertir",
   descripcion:
-    "Convierte una solicitud en un negocio en un solo paso: reutiliza la cuenta (por RUT o por correo del contacto) o la crea, reutiliza o crea el contacto y abre el negocio en la primera etapa del embudo. Los datos enviados corrigen los de la solicitud. Con vista previa muestra qué se reutiliza y qué se crea.",
+    "Convierte una solicitud en un negocio en un solo paso: reutiliza la cuenta (por RUT o por correo del contacto) o la crea, reutiliza o crea el contacto y abre el negocio en la primera etapa del embudo. Los datos enviados corrigen los de la solicitud. Con vista previa muestra qué se reutiliza y qué se crea. Un agente externo necesita aprobación humana para ejecutarla (use preview_ antes).",
   permiso: PERMISO_SOLICITUDES_MANAGE,
+  exigeAprobacion: () => true,
   input: idSolicitud.extend({
     ...revisados,
     cuentaId: uuidSchema.optional().describe("Fuerza una cuenta existente en vez de buscarla."),

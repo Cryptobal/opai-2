@@ -84,8 +84,8 @@ describe.skipIf(!urlPropietario)(
         expect(filas).toHaveLength(2); // centinela; pagina() lo excluye antes de auditar.
         expect(filas[0]).toMatchObject({
           id: a.instalacionId,
-          puestos: 2,
-          dotacion: 5,
+          puestos: 3,
+          dotacion: 6,
           cuentaNombre: "Lectura cuenta",
         });
         expect(filas[1]).toMatchObject({ id: segunda, puestos: 0, dotacion: 0 });

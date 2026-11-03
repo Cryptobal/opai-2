@@ -80,7 +80,10 @@ export async function recalcularVersion(
   if (puedeEscribirVersion(version, escribir)) {
     await ctx.db.cpqVersion.update({
       where: { id: version.id },
-      data: { ventaMensualClp: resultado.ventaMensual },
+      data: {
+        ventaMensualClp: resultado.ventaMensual,
+        calculoCongeladoJson: JSON.stringify(resultado),
+      },
     });
     for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
       const d = proveedor.obtener({ lineaId: l.id, fecha });
@@ -92,6 +95,43 @@ export async function recalcularVersion(
 
 export function proyectarCalculo(ctx: Contexto, r: ResultadoCalculo) {
   return ctx.autorizar("cpq:costos.ver") ? r : resultadoSinCostos(r);
+}
+
+export function packServicioCotizacion(
+  c: { codigo: string },
+  pack: {
+    version: { numero: number };
+    secciones: { id: string; nombre: string }[];
+    lineas: {
+      seccionId: string;
+      nombre: string;
+      tipo: string;
+      posiciones: number;
+      patron: string | null;
+      horaInicio: string | null;
+      horaFin: string | null;
+      diasCobertura: number | null;
+    }[];
+  },
+) {
+  return {
+    codigo: c.codigo,
+    versionNumero: pack.version.numero,
+    secciones: pack.secciones.map((s) => ({
+      nombre: s.nombre,
+      lineas: pack.lineas
+        .filter((l) => l.seccionId === s.id)
+        .map((l) => ({
+          nombre: l.nombre,
+          tipo: l.tipo,
+          posiciones: l.posiciones,
+          patron: l.patron,
+          horaInicio: l.horaInicio,
+          horaFin: l.horaFin,
+          diasCobertura: l.diasCobertura,
+        })),
+    })),
+  };
 }
 
 export { mesesContrato };

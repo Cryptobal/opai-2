@@ -83,7 +83,7 @@ export const ajustesSchema = z.object({
   metaCeldaMs: z.number().int().min(1).max(10_000).default(100),
   metaGuardadoP95Ms: z.number().int().min(1).max(60_000).default(1000),
   metaCargaInicialS: z.number().int().min(1).max(120).default(2),
-  metasVisibles: z.boolean().default(true),
+  metasVisibles: z.boolean().default(false),
 });
 
 type FilaDb = {

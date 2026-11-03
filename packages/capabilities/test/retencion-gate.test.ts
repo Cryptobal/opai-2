@@ -53,9 +53,20 @@ describe("ajustes de la política", () => {
     }
   });
 
-  it("las 7 categorías pendientes son configurables y parten APAGADAS (0), solo personas (CAR-39)", () => {
+  it("las categorías pendientes son configurables y parten APAGADAS (0), solo personas (CAR-39)", () => {
     expect(reglasPendientes().map((r) => r.clave).sort()).toEqual(
-      ["aprobaciones", "cuentas", "documentos", "gasto_agente_mes", "representantes", "sesiones", "usuarios"],
+      [
+        "aprobaciones",
+        "cuentas",
+        "documentos",
+        "gasto_agente_mes",
+        "personas_contacto_laboral",
+        "personas_pago_solicitudes",
+        "personas_uniforme",
+        "representantes",
+        "sesiones",
+        "usuarios",
+      ],
     );
     for (const r of reglasPendientes()) {
       const a = ajustes.find((x) => x.clave === claveAjusteRetencion(r.clave));

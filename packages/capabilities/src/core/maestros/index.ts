@@ -47,6 +47,17 @@ import {
   personasNoRecontratarVer,
   personasQuitarNoRecontratar,
 } from "./personas-no-recontratar";
+import {
+  personasPrevisionActualizar,
+  personasPrevisionVer,
+} from "./personas-prevision";
+import { personasPagoSolicitarCambio, personasPagoVer } from "./personas-pago";
+import {
+  personasPagoAprobarCambio,
+  personasPagoRechazarCambio,
+} from "./personas-pago-aprobacion";
+import { personasLaboralActualizar, personasLaboralVer } from "./personas-laboral";
+import { cargosMontosPorInstalacion } from "./cargos-montos-instalacion";
 import { puestosCreate, puestosUpdate } from "./puestos-escritura";
 import { puestosSetEstado } from "./puestos-estado";
 import { puestosGet, puestosList } from "./puestos";
@@ -98,6 +109,14 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasNoRecontratarVer,
   personasMarcarNoRecontratar,
   personasQuitarNoRecontratar,
+  personasPrevisionVer,
+  personasPrevisionActualizar,
+  personasPagoVer,
+  personasPagoSolicitarCambio,
+  personasPagoAprobarCambio,
+  personasPagoRechazarCambio,
+  personasLaboralVer,
+  personasLaboralActualizar,
   vinculosPrevisualizar,
   vinculosList,
   vinculosCreate,
@@ -108,6 +127,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   cargosCreate,
   cargosUpdate,
   cargosSetActivo,
+  cargosMontosPorInstalacion,
   estructurasPanel,
   estructurasList,
   estructurasGet,

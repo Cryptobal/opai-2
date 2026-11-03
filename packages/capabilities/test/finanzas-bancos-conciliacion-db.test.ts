@@ -1,5 +1,5 @@
 // C2–C5 · bancos: conciliación, dedupe de cartola y RLS (CAR-97, review #211).
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { capacidades } from "../../../modules/finanzas/capacidades";
@@ -7,6 +7,7 @@ import { claveDedupeCartola } from "@opai/domain";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
+import { cafXmlSintetico } from "./finanzas-caf-fixture";
 
 describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
   let e: Entorno;
@@ -71,6 +72,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
 
   beforeAll(async () => {
     process.env.SII_ADAPTADOR = "simulado";
+    process.env.OPAI_SECRETS_KEY = randomBytes(32).toString("base64");
+    process.env.OPAI_SECRETS_KEY_VERSION = "99";
+    delete process.env.OPAI_SECRETS_KEY_ANTERIOR;
     e = await prepararEntorno();
     mod = await import("../src");
     mod.limpiarRegistro();
@@ -88,10 +92,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     clienteId = (await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente", rut: "76111222-8" } })).id;
     await dato("finanzas.dte_config.actualizar", { ambiente: "certificacion", rutEmisor: "76111222-8" });
     await dato("finanzas.folios.cargar_caf", {
-      tipoDte: 33,
-      folioDesde: 7000,
-      folioHasta: 7020,
-      cafVenceEn: "2027-12-31",
+      cafXml: cafXmlSintetico({ folioDesde: 7000, folioHasta: 7020 }),
     });
     const borrador = await dato<{ id: string }>("finanzas.ventas.crear_borrador", {
       cuentaId: clienteId,
@@ -106,6 +107,11 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
   });
 
   afterAll(async () => {
+    if (tenantId) {
+      const where = { tenantId: { in: [tenantId, tenantB].filter(Boolean) } };
+      await e?.admin.secreto.deleteMany({ where }).catch(() => undefined);
+      await e?.admin.claveTenant.deleteMany({ where }).catch(() => undefined);
+    }
     await e?.cerrar();
   });
 

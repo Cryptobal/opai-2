@@ -15,7 +15,9 @@ type PackEnviar = {
   negocioId: string;
   versionId: string;
   versionNumero: number;
-  contactoId: string;
+  contactoId: string | null;
+  /** Si false, no envía correo aquí (p. ej. envío conjunto con varios destinatarios). */
+  enviarCorreo?: boolean;
   pdf: Uint8Array;
   pdfPack: { marcaVersion: number; plantillaId: string; plantillaVersion: number };
   resultado: ResultadoCalculo;
@@ -81,7 +83,7 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
     throw e;
   }
   const para = pack.correoPreview.para;
-  if (ctx.actor.tipo !== "agent" && para) {
+  if (pack.enviarCorreo !== false && ctx.actor.tipo !== "agent" && para) {
     try {
       await enviarCorreo(
         { db: ctx.db, tenantId: ctx.tenantId, correo: ctx.servicios.correo, urlBase: ctx.servicios.urlBase },
