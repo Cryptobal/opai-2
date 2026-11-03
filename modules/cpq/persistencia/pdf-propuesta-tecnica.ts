@@ -1,3 +1,4 @@
+import { formatearClp } from "@opai/domain";
 import { proyectarResumenEconomico, type AperturaPropuesta, type ServicioDesdeCotizacion } from "../domain/documento/propuesta-tecnica";
 import type { MarcaDocumentoVista } from "./marca-documento";
 import type { PlantillaPropuestaVista } from "./plantilla-propuesta";
@@ -49,16 +50,16 @@ export function renderPdfPropuestaTecnica(input: {
         break;
       case "resumen_economico":
         for (const l of resumen.lineas) {
-          lineas.push(`  ${l.instalacion}: $ ${l.netoMensualClp.toLocaleString("es-CL")}`);
+          lineas.push(`  ${l.instalacion}: ${formatearClp(l.netoMensualClp)}`);
         }
-        lineas.push(`Neto: $ ${resumen.netoTotalClp.toLocaleString("es-CL")}`);
-        lineas.push(`IVA: $ ${resumen.ivaClp.toLocaleString("es-CL")}`);
+        lineas.push(`Neto: ${formatearClp(resumen.netoTotalClp)}`);
+        lineas.push(`IVA: ${formatearClp(resumen.ivaClp)}`);
         if (resumen.gastosGeneralesYUtilidadClp != null) {
           lineas.push(
-            `Gastos generales y utilidad: $ ${resumen.gastosGeneralesYUtilidadClp.toLocaleString("es-CL")}`,
+            `Gastos generales y utilidad: ${formatearClp(resumen.gastosGeneralesYUtilidadClp)}`,
           );
         }
-        lineas.push(`Total: $ ${resumen.totalClp.toLocaleString("es-CL")}`);
+        lineas.push(`Total: ${formatearClp(resumen.totalClp)}`);
         break;
       case "indice":
         lineas.push("Índice", ...bloques.map((x, i) => `  ${i + 1}. ${x.tipo.replaceAll("_", " ")}`));

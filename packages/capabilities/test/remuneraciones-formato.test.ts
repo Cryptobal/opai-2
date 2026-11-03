@@ -11,8 +11,8 @@ import {
 describe("formato remuneraciones", () => {
   it("formatea pesos, UF y porcentajes", () => {
     expect(ufCentavosDisplay(4_123_701)).toBe("$ 41.237,01");
-    expect(resumenIndicador("imm", 553_553)).toBe("$ 553.553");
-    expect(resumenIndicador("utm", 72_151)).toBe("$ 72.151");
+    expect(resumenIndicador("imm", 553_553)).toBe("$\u00a0553.553");
+    expect(resumenIndicador("utm", 72_151)).toBe("$\u00a072.151");
     expect(resumenIndicador("sis", 17_800)).toBe("1,78 %");
     expect(resumenIndicador("jornada", 42)).toBe("42 h");
   });

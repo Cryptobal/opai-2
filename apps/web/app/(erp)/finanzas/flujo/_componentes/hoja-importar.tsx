@@ -1,3 +1,4 @@
+import { formatearNumero } from "@opai/domain";
 "use client";
 
 import { useState } from "react";
@@ -117,7 +118,7 @@ export function HojaImportar({
                 {vista.filas.map((f) => (
                   <li key={f.indice} className="border-b border-border py-1">
                     Fila {f.indice + 2}: {f.estado}
-                    {f.montoInterpretado != null ? ` · ${f.montoInterpretado.toLocaleString("es-CL")} CLP` : ""}
+                    {f.montoInterpretado != null ? ` · ${formatearNumero(f.montoInterpretado)} CLP` : ""}
                     {f.mensaje ? ` · ${f.mensaje}` : ""}
                   </li>
                 ))}

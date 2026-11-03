@@ -1,3 +1,4 @@
+import { formatearClp } from "@opai/domain";
 "use client";
 
 import { Campo, Input, InputFecha, Select } from "@opai/ds";
@@ -95,7 +96,7 @@ export function CamposNegocio({ d, set, config, editar }: Props) {
           <Input
             id="neg-monto"
             disabled
-            value={d.monto ? `$ ${Number(d.monto).toLocaleString("es-CL")}` : ""}
+            value={d.monto ? formatearClp(Number(d.monto)) : ""}
             readOnly
           />
         ) : (

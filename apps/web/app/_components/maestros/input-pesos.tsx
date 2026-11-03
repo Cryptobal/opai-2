@@ -1,3 +1,4 @@
+import { formatearClp } from "@opai/domain";
 "use client";
 
 import { Input } from "@opai/ds";
@@ -17,7 +18,7 @@ export function InputPesos(props: {
       inputMode="numeric"
       placeholder={props.placeholder ?? "$ —"}
       className="t-numeric"
-      value={props.valor ? `$ ${Number(props.valor).toLocaleString("es-CL")}` : ""}
+      value={props.valor ? formatearClp(Number(props.valor)) : ""}
       onChange={(e) => props.onCambiar(digitos(e.target.value))}
     />
   );

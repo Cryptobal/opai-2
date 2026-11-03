@@ -1,4 +1,4 @@
-import { clp, formatearCLP, PCT_ESCALA, UF_ESCALA } from "@opai/domain";
+import { formatearClp, PCT_ESCALA, UF_ESCALA } from "@opai/domain";
 
 const ZONA = "America/Santiago";
 
@@ -38,7 +38,7 @@ export function resumenIndicador(clave: string, valor: unknown): string {
       return ufCentavosDisplay(Number(valor));
     case "utm":
     case "imm":
-      return formatearCLP(clp(Number(valor)));
+      return formatearClp(Number(valor));
     case "sis":
       return pctDisplay(Number(valor));
     case "jornada":

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   clp,
-  formatearCLP,
   IVA_PCT,
   ivaCLP,
   porcentajeCLP,
@@ -58,12 +57,9 @@ describe("UF", () => {
   });
 });
 
-describe("sumarCLP y formatearCLP", () => {
-  it("suma y formatea con punto de miles y sin decimales", () => {
+describe("sumarCLP", () => {
+  it("suma el neto y el IVA", () => {
     const total = sumarCLP(clp(5_550_000), ivaCLP(clp(5_550_000)));
     expect(total).toBe(6_604_500);
-    expect(formatearCLP(total)).toBe("$ 6.604.500");
-    expect(formatearCLP(clp(-12_300))).toBe("-$ 12.300");
-    expect(formatearCLP(clp(0))).toBe("$ 0");
   });
 });

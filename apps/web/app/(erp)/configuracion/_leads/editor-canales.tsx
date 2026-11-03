@@ -1,3 +1,4 @@
+import { formatearFechaHora } from "@opai/domain";
 "use client";
 
 import { Bot, Globe, Key, Mail, PenLine, type LucideIcon } from "lucide-react";
@@ -143,7 +144,7 @@ function TarjetaCanal({ c }: { c: CanalConfig }) {
               <p className="t-caption text-fg-muted">
                 Clave activa · termina en <span className="t-mono">{tokenSufijo}</span>
                 {c.ultimaSolicitudEn
-                  ? ` · último envío ${new Date(c.ultimaSolicitudEn).toLocaleString("es-CL")}`
+                  ? ` · último envío ${formatearFechaHora(c.ultimaSolicitudEn)}`
                   : ""}
               </p>
             ) : null}
