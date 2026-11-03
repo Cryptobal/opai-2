@@ -1,6 +1,7 @@
 import type { Contexto } from "@opai/capabilities";
 
 import { commitEnviarCotizacion } from "../capabilities/enviar-commit";
+import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
 import { pdfCotizacionConMarca } from "./pdf-cotizacion";
 import type { SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecnica";
 import type { ResultadoCalculo } from "../domain/motor";
@@ -35,20 +36,25 @@ export async function documentoCotizacionEnvioConjunto(
     emailPreview: string | null;
   },
 ) {
-  const pdfCotPack = await pdfCotizacionConMarca(
-    ctx,
-    {
+  const entrada =
+    (await entradaPdfDesdeCotizacion(ctx, input.cotizacionId, { enviada: true })) ?? {
       codigo: input.codigo,
       titulo: input.titulo,
       negocio: input.negocioTitulo,
-      secciones: input.seccionesVista,
+      secciones: input.seccionesVista.map((s) => ({
+        nombre: s.nombre,
+        lineas: s.lineas.map((l) => ({ nombre: l.nombre, tipo: l.tipo })),
+      })),
       calculo: {
         ventaMensual: input.calculoPublico.ventaMensual ?? null,
         fecha: input.calculoPublico.fecha ?? "",
         pagosUnicos: input.calculoPublico.pagosUnicos ?? 0,
         borradorSinPrecio: input.calculoPublico.ventaMensual == null,
       },
-    },
+    };
+  const pdfCotPack = await pdfCotizacionConMarca(
+    ctx,
+    entrada,
     {
       marcaDocumentoVersion: input.snapshot.marcaDocumentoVersion,
       plantillaDocumentoId: input.snapshot.plantillaDocumentoId,

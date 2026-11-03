@@ -34,7 +34,13 @@ export function FichaCotizacionLineas({
           titulo={s.nombre}
           accion={
             editable ? (
-              <Button type="button" variant="secondary" size="md" onClick={() => onAgregar(s.id)}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                className="max-md:min-h-11 max-md:text-sm"
+                onClick={() => onAgregar(s.id)}
+              >
                 Agregar puesto
               </Button>
             ) : undefined
@@ -46,7 +52,7 @@ export function FichaCotizacionLineas({
               <li className="p-4 t-caption text-fg-muted">Sin líneas en esta sección</li>
             ) : (
               s.lineas.map((l) => (
-                <li key={l.id} className="p-4">
+                <li key={l.id} className="px-4 py-3.5 md:py-4">
                   <LineaCotizacion
                     linea={l}
                     editable={editable}

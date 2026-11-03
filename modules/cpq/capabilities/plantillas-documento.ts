@@ -3,9 +3,9 @@ import { z } from "zod";
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { BASES_PLANTILLA, BLOQUES_COTIZACION } from "../domain/documento/bloques";
+import { entradaPdfDesdeCotizacion } from "../persistencia/entrada-pdf-cotizacion";
 import { pdfCotizacionConMarca } from "../persistencia/pdf-cotizacion";
-import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
-import { calculoCongelado } from "../persistencia/calculo-congelado";
+import { cargarFilasVersion } from "../persistencia/recalcular";
 import {
   actualizarPlantillaCotizacion,
   plantillaActivaCotizacion,
@@ -13,7 +13,6 @@ import {
   vistaPlantilla,
 } from "../persistencia/plantilla-documento";
 import { PERMISO_MODELO, PERMISO_READ } from "./permisos";
-import { cotizacionDe } from "./util";
 import { uuidSchema } from "./esquemas";
 
 const bloqueSchema = z.object({
@@ -91,38 +90,14 @@ export const cotizacionesPreviewPdf = defineCapability({
   efecto: "lectura",
   dryRun: true,
   async handler(ctx, input) {
-    const c = await cotizacionDe(ctx, input.id);
     const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
     if (!pack) throw noEncontrado("La versión");
-    const { version, secciones, lineas } = pack;
-    const resultado =
-      version.estado === "borrador"
-        ? await recalcularVersion(ctx, input.id, undefined, false)
-        : calculoCongelado(ctx, version, lineas);
-    if (!resultado) throw noEncontrado("El cálculo");
-    const calculo = proyectarCalculo(ctx, resultado);
-    const neg = await ctx.db.negocio.findFirst({
-      where: { id: c.negocioId },
-      select: { titulo: true },
-    });
-    const seccionesVista = secciones.map((s) => ({
-      nombre: s.nombre,
-      lineas: lineas.filter((l) => l.seccionId === s.id).map((l) => ({ nombre: l.nombre })),
-    }));
+    const { version } = pack;
+    const entrada = await entradaPdfDesdeCotizacion(ctx, input.id);
+    if (!entrada) throw noEncontrado("La cotización");
     const pdf = await pdfCotizacionConMarca(
       ctx,
-      {
-        codigo: c.codigo,
-        titulo: c.titulo,
-        negocio: neg?.titulo ?? "",
-        secciones: seccionesVista,
-        calculo: {
-          ventaMensual: calculo.ventaMensual ?? null,
-          fecha: calculo.fecha ?? "",
-          pagosUnicos: "pagosUnicos" in calculo ? calculo.pagosUnicos : 0,
-          borradorSinPrecio: calculo.ventaMensual == null,
-        },
-      },
+      entrada,
       version.estado !== "borrador"
         ? {
             marcaDocumentoVersion: version.marcaDocumentoVersion,
