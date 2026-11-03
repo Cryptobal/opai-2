@@ -76,7 +76,7 @@ export function lectorContratoFixtures(dir: string): LectorOrigen {
     async leer() {
       const acumulado: Record<string, unknown[]> = Object.fromEntries(RECURSOS.map((r) => [r, []]));
       for (const recurso of RECURSOS) {
-        let archivos: string[] = [];
+        let archivos: string[];
         try {
           archivos = readdirSync(join(dir, recurso))
             .filter((f) => f.endsWith(".json"))

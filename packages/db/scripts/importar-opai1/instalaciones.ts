@@ -9,6 +9,7 @@ import {
   indiceIds,
   ordenEstable,
 } from "./comun";
+import { completarVacios } from "./completar-vacios";
 import type { CuentaResuelta } from "./cuentas";
 import type { EstadoDestino } from "./destino-tipos";
 import {
@@ -139,9 +140,18 @@ function vincularOCrear(
       motivo: "instalacion_ya_mapeada",
       destinoId: existente.id,
     });
-  return {
-    ...decisionMapeada("instalacion", id, datos, existente, existente.id),
-    accion: "actualizar",
-    motivo: porUbicacion ? "vincula_por_ubicacion" : "vincula_por_nombre",
-  };
+  const base = decisionMapeada("instalacion", id, datos, existente, existente.id);
+  const motivo = porUbicacion ? "vincula_por_ubicacion" : "vincula_por_nombre";
+  if (base.accion === "conflicto") {
+    const { escribir } = completarVacios(datos, existente);
+    const campos = Object.keys(escribir);
+    if (campos.length === 0) return base;
+    return {
+      ...base,
+      accion: "actualizar",
+      motivo,
+      campos,
+    };
+  }
+  return { ...base, accion: "actualizar", motivo };
 }

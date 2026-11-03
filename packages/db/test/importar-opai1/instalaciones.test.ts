@@ -52,7 +52,7 @@ describe("plan de instalaciones", () => {
       motivo: "vincula_por_ubicacion",
       destinoId: "n-1",
     });
-    expect(d?.campos).toEqual(expect.arrayContaining(["nombre", "lat", "lng"]));
+    expect(d?.campos).toEqual(expect.arrayContaining(["calle", "comuna", "placeId"]));
   });
 
   it("contra 2.0: mismo nombre con otra ubicación en la cuenta es conflicto", () => {
