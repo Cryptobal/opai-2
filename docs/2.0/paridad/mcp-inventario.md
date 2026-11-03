@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 473 pares pantalla→capacidad · 423 con herramienta · 50 excepciones justificadas · 0 faltantes.
+**Resumen:** 472 pares pantalla→capacidad · 422 con herramienta · 50 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -74,7 +74,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.montos_por_instalacion` | `core_cargos_montos_por_instalacion` | existe |
-| compartido | `app/(erp)/cargos/_componentes` | `core.cargos.set_activo` | `core_cargos_set_activo` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.update` | `core_cargos_update` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.estructuras.list` | `core_estructuras_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
@@ -217,8 +216,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.crear` | `finanzas_proveedores_crear` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.proveedores.obtener` | `finanzas_proveedores_obtener` | existe |
-| compartido | `app/(erp)/finanzas/configuracion-dte/_componentes` | `finanzas.dte_config.actualizar` | `finanzas_dte_config_actualizar` | existe |
-| compartido | `app/(erp)/finanzas/configuracion-dte/_componentes` | `finanzas.dte_config.obtener` | `finanzas_dte_config_obtener` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.cumplir` | `finanzas_celdas_cumplir` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.fijar` | `finanzas_celdas_fijar` | existe |
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.celdas.mover` | `finanzas_celdas_mover` | existe |
@@ -278,6 +275,20 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.guardar_catalogo` | `comercial_config_guardar_catalogo` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.reordenar_etapas` | `comercial_config_reordenar_etapas` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `core.personas.list` | `core_personas_list` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.obligaciones.generar_calendario` | `nomina_obligaciones_generar_calendario` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.abrir` | `nomina_periodos_abrir` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.cambiar_estado` | `nomina_periodos_cambiar_estado` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.listar` | `nomina_periodos_listar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.marcar_pagado` | `nomina_periodos_marcar_pagado` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.aplicar_cuotas` | `nomina_prestamos_aplicar_cuotas` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.cancelar` | `nomina_prestamos_cancelar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.crear` | `nomina_prestamos_crear` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.alertas.listar` | `pauta_alertas_listar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.cobertura.confirmar` | `pauta_cobertura_confirmar` | existe |
@@ -320,20 +331,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.obligaciones.generar_calendario` | `nomina_obligaciones_generar_calendario` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.abrir` | `nomina_periodos_abrir` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.cambiar_estado` | `nomina_periodos_cambiar_estado` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.listar` | `nomina_periodos_listar` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.periodos.marcar_pagado` | `nomina_periodos_marcar_pagado` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.aplicar_cuotas` | `nomina_prestamos_aplicar_cuotas` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.cancelar` | `nomina_prestamos_cancelar` | existe |
-| compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.prestamos.crear` | `nomina_prestamos_crear` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.acciones_agente` | `comercial_solicitudes_acciones_agente` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.convertir` | `comercial_solicitudes_convertir` | existe |
 | compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.create` | `comercial_solicitudes_create` | existe |
@@ -365,6 +362,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
+| erp | `/cargos/[id]` | `core.cargos.set_activo` | `core_cargos_set_activo` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.set_autonomia` | — | excepción |
@@ -441,7 +439,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/finanzas/ventas/nuevo` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir` | `finanzas_ventas_emitir` | existe |
-| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preflight_emision` | `finanzas_ventas_preflight_emision` | existe |
+| erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
+| erp | `/finanzas/ventas/programacion` | `finanzas.ventas_programacion.listar` | `finanzas_ventas_programacion_listar` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.cargos.list` | `core_cargos_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.funciones.list` | `core_funciones_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.patrones.list` | `core_patrones_list` | existe |
@@ -451,11 +450,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/nueva` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | erp | `/instalaciones/nueva` | `core.puestos.create` | `core_puestos_create` | existe |
 | erp | `/mi-cuenta/preferencias` | `core.config.set` | `core_config_set` | existe |
+| erp | `/nomina/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
+| erp | `/nomina/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
+| erp | `/nomina/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
+| erp | `/nomina/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
-| erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
-| erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
-| erp | `/remuneraciones/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
-| erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
 | platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
 | platform | `/platform/consumos` | `platform.consumos.summary` | `platform_consumos_summary` | existe |
@@ -713,6 +712,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.cobros.manual`
 - `finanzas.compras.importar`
 - `finanzas.derivadas.listar`
+- `finanzas.dte_config.actualizar`
+- `finanzas.dte_config.obtener`
 - `finanzas.filas.actualizar`
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`

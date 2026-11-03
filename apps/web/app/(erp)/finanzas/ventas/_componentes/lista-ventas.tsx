@@ -47,11 +47,16 @@ export function ListaVentas(p: {
           : "Facturas 33 y 34, notas de crédito 61"
       }
       accionPrincipal={
-        p.gestiona ? (
-          <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
-            Emitir
+        <div className="flex flex-wrap gap-2">
+          <EnlaceBoton href="/finanzas/ventas/programacion" icono={FileText}>
+            Programación
           </EnlaceBoton>
-        ) : undefined
+          {p.gestiona ? (
+            <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
+              Emitir
+            </EnlaceBoton>
+          ) : null}
+        </div>
       }
       buscador={<Buscador placeholder="Buscar folio o cliente" />}
       filtros={

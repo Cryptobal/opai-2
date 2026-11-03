@@ -49,6 +49,23 @@ export const AJUSTES: Record<string, Ajuste> = {
       gratificacion: "legal",
     }),
   },
+  // Finanzas · programación recurrente (CAR-25): cuenta o RUT del receptor, y un precio por línea
+  // que coincide con la moneda (CLP por defecto).
+  "finanzas.ventas_programaciones": {
+    dependencias: ["core.cuentas"],
+    valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas"), tipo_dte: 33, dia_generacion: 1, moneda: "CLP", frecuencia: "mensual", plazo_pago_dias: 30 }),
+  },
+  "finanzas.ventas_programaciones_destinatarios": {
+    dependencias: ["finanzas.ventas_programaciones", "core.contactos"],
+    valores: (ctx) => ({
+      programacion_id: id(ctx, "finanzas.ventas_programaciones"),
+      contacto_id: id(ctx, "core.contactos"),
+    }),
+  },
+  "finanzas.ventas_programaciones_lineas": {
+    dependencias: ["finanzas.ventas_programaciones"],
+    valores: () => ({ precio_unitario_clp: 1, precio_unitario_uf: null }),
+  },
   // CPQ (CAR-119): CHECK de tipo de línea (lineas_tipo_check).
   "cpq.lineas": { valores: () => ({ tipo: "item" }) },
   // CPQ (CAR-135): CHECK tipo/base; `copia` no debe regenerar `tipo` (índice único parcial por tenant+tipo).
