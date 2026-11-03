@@ -5,8 +5,8 @@ export function buildPdfPropuesta(input: {
   codigo: string;
   titulo: string;
   negocio: string;
-  secciones: readonly { nombre: string; lineas: readonly { nombre: string }[] }[];
-  calculo: { ventaMensual: number | null; fecha: string };
+  secciones: readonly { nombre: string; lineas: readonly { nombre: string; tipo?: string }[] }[];
+  calculo: { ventaMensual: number | null; fecha: string; borradorSinPrecio?: boolean };
 }): Uint8Array {
   const marca = {
     version: 1,
@@ -34,7 +34,27 @@ export function buildPdfPropuesta(input: {
       { id: "pie" as const, activo: true },
     ],
   };
-  return renderPdfCotizacion(input, marca, plantilla);
+  return renderPdfCotizacion(
+    {
+      ...input,
+      secciones: input.secciones.map((s) => ({
+        nombre: s.nombre,
+        lineas: s.lineas.map((l) => ({
+          nombre: l.nombre,
+          tipo: l.tipo ?? "puesto",
+          posiciones: 1,
+          ventaMensualClp:
+            input.calculo.ventaMensual != null ? Math.round(input.calculo.ventaMensual / Math.max(1, s.lineas.length)) : null,
+        })),
+      })),
+      calculo: {
+        ...input.calculo,
+        borradorSinPrecio: input.calculo.borradorSinPrecio ?? input.calculo.ventaMensual == null,
+      },
+    },
+    marca,
+    plantilla,
+  );
 }
 
 export { renderPdfCotizacion } from "./documento-pdf";

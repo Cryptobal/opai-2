@@ -1,14 +1,44 @@
+import { UF_ESCALA } from "@opai/domain/dinero";
+
 import type { BloqueConfig } from "../domain/documento/bloques";
 import type { MarcaDocumentoVista } from "./marca-documento";
 import type { PlantillaDocumentoVista } from "./plantilla-documento";
+import { componerPdf, escPdf, parseColorHex, type LineaPdf, type PaginaPdf } from "./pdf-compositor";
+
+export type LineaPdfCotizacion = {
+  nombre: string;
+  tipo: string;
+  posiciones?: number;
+  ventaMensualClp?: number | null;
+};
 
 export type EntradaPdfCotizacion = {
   codigo: string;
   titulo: string;
   negocio: string;
-  secciones: readonly { nombre: string; lineas: readonly { nombre: string }[] }[];
-  calculo: { ventaMensual: number | null; fecha: string; pagosUnicos?: number; borradorSinPrecio?: boolean };
+  versionNumero?: number;
+  secciones: readonly {
+    nombre: string;
+    lineas: readonly LineaPdfCotizacion[];
+  }[];
+  calculo: {
+    ventaMensual: number | null;
+    fecha: string;
+    pagosUnicos?: number;
+    borradorSinPrecio?: boolean;
+    uf?: { valorClpEscalado: number; fecha: string } | null;
+  };
   condiciones?: string | null;
+  validaHasta?: string | null;
+  cliente?: {
+    nombre: string;
+    razonSocial: string | null;
+    rut: string | null;
+    giro: string | null;
+    direccion: string | null;
+  } | null;
+  ejecutivo?: string | null;
+  enviada?: boolean;
 };
 
 export function renderPdfCotizacion(
@@ -16,95 +46,200 @@ export function renderPdfCotizacion(
   marca: MarcaDocumentoVista,
   plantilla: PlantillaDocumentoVista,
 ): Uint8Array {
-  const lineas: string[] = [];
   const bloques = plantilla.bloques.filter((b) => b.activo);
-  for (const b of bloques) {
-    lineas.push(...bloqueTexto(b, entrada, marca, plantilla.base));
-    lineas.push("");
-  }
   const fuente = marca.tipografia === "times" ? "Times-Roman" : "Helvetica";
-  return pdfSimple(lineas.join("\n").trim(), fuente, marca.colorPrimario);
+  const acento = parseColorHex(marca.colorPrimario);
+  const paginas: PaginaPdf[] = [{ lineas: [] }];
+  let pagina = paginas[0]!;
+
+  const push = (l: LineaPdf) => {
+    if (pagina.lineas.length > 52) {
+      pagina = { lineas: [] };
+      paginas.push(pagina);
+    }
+    pagina.lineas.push(l);
+  };
+
+  const marcaAgua =
+    !entrada.enviada || entrada.calculo.borradorSinPrecio
+      ? entrada.calculo.borradorSinPrecio
+        ? "BORRADOR SIN PRECIO"
+        : "BORRADOR"
+      : null;
+  if (marcaAgua) {
+    push({ texto: marcaAgua, tamano: 22, negrita: true, colorRgb: [180, 180, 180], espacioAntes: 0 });
+    push({ texto: "", espacioAntes: 8 });
+  }
+
+  for (const b of bloques) {
+    for (const l of bloqueLineas(b, entrada, marca, plantilla.base, acento)) push(l);
+    push({ texto: "", espacioAntes: 6 });
+  }
+
+  return componerPdf(paginas, fuente);
 }
 
-function bloqueTexto(
+function bloqueLineas(
   bloque: BloqueConfig,
   e: EntradaPdfCotizacion,
   marca: MarcaDocumentoVista,
   base: PlantillaDocumentoVista["base"],
-): string[] {
+  acento: [number, number, number] | undefined,
+): LineaPdf[] {
+  const titulo =
+    base === "compacta"
+      ? `${e.codigo}${e.versionNumero != null ? ` v${e.versionNumero}` : ""} · ${e.titulo}`
+      : `Cotización ${e.codigo}${e.versionNumero != null ? ` · v${e.versionNumero}` : ""}`;
+
   switch (bloque.id) {
     case "encabezado": {
-      const titulo =
-        base === "compacta" ? `${e.codigo} · ${e.titulo}` : `Propuesta ${e.codigo}\n${e.titulo}`;
-      return [marca.nombreComercial ?? "Empresa", titulo];
+      const empresa = marca.nombreComercial ?? marca.razonSocial ?? "Empresa";
+      const lineas: LineaPdf[] = [
+        { texto: empresa, tamano: 14, negrita: true, ...(acento ? { colorRgb: acento } : {}) },
+        { texto: titulo, tamano: 12, negrita: true, espacioAntes: 4 },
+        { texto: e.negocio, tamano: 10, espacioAntes: 2 },
+      ];
+      if (e.ejecutivo) lineas.push({ texto: `Ejecutivo: ${e.ejecutivo}`, tamano: 9, espacioAntes: 2 });
+      return lineas;
     }
     case "datos_empresa":
       return [
-        marca.razonSocial ?? marca.nombreComercial ?? "Datos de empresa",
-        marca.rut ? `RUT ${marca.rut}` : "",
-        marca.direccion ?? "",
-      ].filter(Boolean);
+        { texto: "Datos del proveedor", tamano: 10, negrita: true, espacioAntes: 4 },
+        { texto: marca.razonSocial ?? marca.nombreComercial ?? "—", tamano: 10 },
+        ...(marca.rut ? [{ texto: `RUT ${marca.rut}`, tamano: 9 }] : []),
+        ...(marca.direccion ? [{ texto: marca.direccion, tamano: 9 }] : []),
+      ];
     case "resumen_comercial": {
-      const venta =
-        e.calculo.ventaMensual == null
-          ? e.calculo.borradorSinPrecio
-            ? "Venta mensual: Borrador sin precio"
-            : "Venta mensual: costo pendiente"
-          : `Venta mensual: $ ${e.calculo.ventaMensual.toLocaleString("es-CL")} CLP`;
-      const unicos =
-        e.calculo.pagosUnicos && e.calculo.pagosUnicos > 0
-          ? `Pagos únicos: $ ${e.calculo.pagosUnicos.toLocaleString("es-CL")} CLP`
-          : null;
-      return [`Negocio: ${e.negocio}`, `Válida hasta: ${e.calculo.fecha}`, venta, unicos].filter(
-        Boolean,
-      ) as string[];
+      const cli = e.cliente;
+      const lineas: LineaPdf[] = [
+        { texto: "Cliente", tamano: 10, negrita: true, espacioAntes: 4 },
+        { texto: cli?.razonSocial ?? cli?.nombre ?? "—", tamano: 10 },
+      ];
+      if (cli?.rut) lineas.push({ texto: `RUT ${cli.rut}`, tamano: 9 });
+      if (cli?.giro) lineas.push({ texto: `Giro: ${cli.giro}`, tamano: 9 });
+      if (cli?.direccion) lineas.push({ texto: cli.direccion, tamano: 9 });
+      lineas.push(
+        { texto: "Validez y referencia", tamano: 10, negrita: true, espacioAntes: 8 },
+        {
+          texto: `Válida hasta: ${e.validaHasta ?? e.calculo.fecha ?? "—"}`,
+          tamano: 9,
+        },
+        {
+          texto: `Valores al ${e.calculo.fecha || "—"}`,
+          tamano: 9,
+        },
+      );
+      return lineas;
     }
     case "detalle_secciones":
-      return e.secciones.flatMap((s) => {
-        const ls = s.lineas.map((l) => `  · ${l.nombre}`);
-        return [s.nombre, ...(ls.length ? ls : ["  (sin líneas)"])];
-      });
-    case "condiciones":
-      return [e.condiciones ?? marca.condicionesDefault ?? "Condiciones comerciales estándar."];
+      return tablaServicios(e);
+    case "condiciones": {
+      const texto = e.condiciones ?? marca.condicionesDefault ?? "Condiciones comerciales estándar del tenant.";
+      return [
+        { texto: "Condiciones comerciales", tamano: 10, negrita: true, espacioAntes: 4 },
+        ...partirParrafos(texto).map((p) => ({ texto: p, tamano: 9 })),
+      ];
+    }
     case "pie":
-      return [marca.piePagina ?? `${marca.nombreComercial ?? "Empresa"} · documento generado en OPAI`];
+      return [
+        { texto: "Firma", tamano: 10, negrita: true, espacioAntes: 12 },
+        { texto: "_______________________________", tamano: 10 },
+        { texto: marca.nombreComercial ?? marca.razonSocial ?? "Empresa", tamano: 9, espacioAntes: 4 },
+        {
+          texto: marca.piePagina ?? `${marca.nombreComercial ?? "Empresa"} · documento generado en OPAI`,
+          tamano: 8,
+          espacioAntes: 10,
+        },
+      ];
     default:
       return [];
   }
 }
 
-function pdfSimple(texto: string, baseFont: string, _colorPrimario: string | null): Uint8Array {
-  const esc = texto.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-  const lines = esc.split("\n");
-  const ops = ["BT", `/F1 11 Tf`, "50 750 Td"];
-  for (let i = 0; i < lines.length; i++) {
-    if (i > 0) ops.push("0 -14 Td");
-    ops.push(`(${lines[i]}) Tj`);
-    if (i > 50) break;
+function tablaServicios(e: EntradaPdfCotizacion): LineaPdf[] {
+  const lineas: LineaPdf[] = [
+    { texto: "Detalle de servicios", tamano: 10, negrita: true, espacioAntes: 4 },
+    {
+      texto: "Instalación / ítem · Tipo · Dotación · Venta mensual (CLP)",
+      tamano: 8,
+      negrita: true,
+      espacioAntes: 4,
+    },
+  ];
+  for (const s of e.secciones) {
+    lineas.push({ texto: s.nombre, tamano: 9, negrita: true, espacioAntes: 6 });
+    for (const l of s.lineas) {
+      const dot = l.posiciones != null && l.posiciones > 0 ? ` ×${l.posiciones}` : "";
+      const venta = formatoVentaLinea(l.ventaMensualClp, e.calculo.borradorSinPrecio);
+      lineas.push({
+        texto: `  ${l.nombre} · ${etiquetaTipo(l.tipo)}${dot} · ${venta}`,
+        tamano: 9,
+      });
+    }
+    if (!s.lineas.length) lineas.push({ texto: "  (sin líneas)", tamano: 9 });
   }
-  ops.push("ET");
-  const stream = ops.join("\n");
-  const len = stream.length;
-  const doc = `%PDF-1.4
-1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj
-2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj
-3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources<< /Font<< /F1 5 0 R >> >> >>endobj
-4 0 obj<< /Length ${len} >>stream
-${stream}
-endstream
-endobj
-5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /${baseFont} >>endobj
-xref
-0 6
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000266 00000 n 
-0000000${String(350 + len).padStart(3, "0")} 00000 n 
-trailer<< /Size 6 /Root 1 0 R >>
-startxref
-${400 + len}
-%%EOF`;
-  return new TextEncoder().encode(doc);
+  lineas.push(
+    { texto: "Totales", tamano: 10, negrita: true, espacioAntes: 10 },
+    { texto: `Venta mensual: ${formatoVenta(e.calculo.ventaMensual, e.calculo.borradorSinPrecio)}`, tamano: 10, negrita: true },
+  );
+  if (e.calculo.uf && e.calculo.ventaMensual != null && e.calculo.uf.valorClpEscalado > 0) {
+    const clpUf = e.calculo.uf.valorClpEscalado / UF_ESCALA;
+    const enUf = e.calculo.ventaMensual / clpUf;
+    lineas.push({
+      texto: `Equivalente UF ${enUf.toLocaleString("es-CL", { maximumFractionDigits: 2 })} (UF $ ${clpUf.toLocaleString("es-CL")})`,
+      tamano: 9,
+    });
+  }
+  if (e.calculo.pagosUnicos && e.calculo.pagosUnicos > 0) {
+    lineas.push({
+      texto: `Pagos únicos: $ ${e.calculo.pagosUnicos.toLocaleString("es-CL")} CLP`,
+      tamano: 9,
+      espacioAntes: 2,
+    });
+  }
+  return lineas;
+}
+
+function formatoVenta(venta: number | null, borrador?: boolean): string {
+  if (venta == null) return borrador ? "Borrador sin precio" : "Pendiente";
+  return `$ ${venta.toLocaleString("es-CL")} CLP`;
+}
+
+function formatoVentaLinea(venta: number | null | undefined, borrador?: boolean): string {
+  if (venta == null || venta === undefined) return borrador ? "Borrador sin precio" : "—";
+  return `$ ${venta.toLocaleString("es-CL")}`;
+}
+
+function etiquetaTipo(tipo: string): string {
+  if (tipo === "puesto") return "Puesto";
+  if (tipo === "item") return "Ítem";
+  if (tipo === "adicional") return "Adicional";
+  return tipo;
+}
+
+function partirParrafos(texto: string): string[] {
+  return texto
+    .split(/\n+/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .flatMap((p) => (p.length > 110 ? partirLinea(p, 110) : [p]));
+}
+
+function partirLinea(texto: string, max: number): string[] {
+  const out: string[] = [];
+  let rest = texto;
+  while (rest.length > max) {
+    let corte = rest.lastIndexOf(" ", max);
+    if (corte < 20) corte = max;
+    out.push(rest.slice(0, corte).trim());
+    rest = rest.slice(corte).trim();
+  }
+  if (rest) out.push(rest);
+  return out;
+}
+
+/** Compatibilidad tests: el PDF contiene texto escapado legible. */
+export function pdfContieneTexto(bytes: Uint8Array, fragmento: string): boolean {
+  const raw = new TextDecoder("latin1").decode(bytes);
+  return raw.includes(escPdf(fragmento)) || raw.includes(fragmento);
 }
