@@ -58,8 +58,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck -- --concurrency=1
-      - run: pnpm lint -- --concurrency=1
+      - run: pnpm turbo run typecheck --concurrency=1
+      - run: pnpm turbo run lint --concurrency=1
       - run: pnpm test
       - run: pnpm test:db
         env:
