@@ -8,10 +8,11 @@ export type Sesion = SesionAuth;
 
 /**
  * Sesión del request actual (Server Components, route handlers, server actions), o null. Envuelta en
- * `cache` de React: Better Auth valida la sesión contra la base (`session.findFirst` + `user.findFirst`,
- * cada una en su transacción con `SET LOCAL ROLE opai_auth`, CAR-43) una sola vez por petición aunque
- * varios componentes la pidan, para no multiplicar esas transacciones bajo ráfaga (B1). `identidadActual`
- * (`apps/web/lib/servidor.ts`) ya cachea la identidad completa encima de esto.
+ * `cache` de React: Better Auth resuelve la sesión una sola vez por petición aunque varios componentes la
+ * pidan. Con `session.cookieCache` (60 s, CAR-152) la mayoría de peticiones no consulta la base; al
+ * vencer la caché o en operaciones sensibles de auth se revalida contra Postgres (hot path por función
+ * SECURITY DEFINER, CAR-43). `identidadActual` (`apps/web/lib/servidor.ts`) sigue leyendo membresías y
+ * permisos del tenant en cada render.
  */
 export const getSession = cache(async (): Promise<Sesion | null> => {
   return auth.api.getSession({ headers: await headers() });

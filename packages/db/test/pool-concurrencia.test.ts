@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { type Entorno, prepararEntorno } from "./entorno";
+import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
 
 // Cada archivo corre en su propio proceso: `util.deprecate` de pg avisa una sola vez por proceso,
 // así que este archivo no debe compartir proceso con consultas concurrentes previas.
-describe("pool de la app contra Postgres real", () => {
+describe.skipIf(!urlPropietario)("pool de la app contra Postgres real", () => {
   let entorno: Entorno;
   const avisos: string[] = [];
   const escuchar = (w: Error) => avisos.push(`${w.name}: ${w.message}`);
@@ -41,5 +41,14 @@ describe("pool de la app contra Postgres real", () => {
     const db = entorno.forTenant(randomUUID());
     const res = await Promise.all(Array.from({ length: 25 }, () => db.persona.count()));
     expect(res.every((n) => n === 0)).toBe(true);
+  });
+
+  it("lecturas de auth fuera del hot path no solapan consultas en la conexión", async () => {
+    const cuenta = await entorno.admin.account.findFirst({ orderBy: { createdAt: "desc" } });
+    expect(cuenta).toBeTruthy();
+    const { clienteAuth } = await import("../src/identidad");
+    await clienteAuth().account.findFirst({ where: { id: cuenta!.id } });
+    await new Promise((r) => setImmediate(r));
+    expect(avisos.filter((a) => a.includes("already executing a query"))).toEqual([]);
   });
 });

@@ -3,7 +3,7 @@ import { Estado } from "@opai/ds";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import type { Concepto } from "@/app/(erp)/nomina/_componentes/tipos";
+import type { Concepto } from "@/app/(erp)/remuneraciones/_componentes/tipos";
 
 import { EditorConceptos } from "./editor-conceptos";
 

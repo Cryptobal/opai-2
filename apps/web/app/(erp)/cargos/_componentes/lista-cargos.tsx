@@ -1,16 +1,15 @@
 import { Briefcase, Lock, Plus } from "lucide-react";
 
-import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
+import { Badge, type EstadoPantalla } from "@opai/ds";
 
-import { LinkNext } from "@/app/_components/link-next";
-import { Buscador } from "@/app/_components/maestros/buscador";
-import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { conBusqueda } from "@/lib/parametros";
 
 import { CLASES, type CargoFila } from "./datos";
 
 const clase = (v: string) => CLASES.find((c) => c.valor === v)?.etiqueta ?? v;
-const conteo = (n: number) => String(n);
+const plural = (n: number, uno: string, muchos: string) => `${n} ${n === 1 ? uno : muchos}`;
 
 function Nombre({ c }: { c: CargoFila }) {
   return (
@@ -23,98 +22,84 @@ function Nombre({ c }: { c: CargoFila }) {
   );
 }
 
-function Estado({ activo }: { activo: boolean }) {
-  return <Badge tono={activo ? "success" : "neutro"}>{activo ? "Activo" : "Inactivo"}</Badge>;
-}
-
-const num = "text-right t-numeric";
-
-/** Catálogo de cargos sin montos. */
+/** Columna de cargos (14): catálogo sin montos; lista + ficha como Cuentas. */
 export function ListaCargos({
   state,
   items,
+  seleccionada,
+  q,
   puedeGestionar,
 }: {
   state: EstadoPantalla;
   items: CargoFila[];
+  seleccionada?: string;
+  q?: string;
   puedeGestionar: boolean;
 }) {
+  const activos = items.filter((c) => c.activo).length;
   const nuevo = puedeGestionar ? (
     <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
       Nuevo
     </EnlaceBotonHoja>
   ) : undefined;
   return (
-    <ListScreen<CargoFila>
+    <ListaMaestro
       state={state}
       titulo="Cargos"
-      accionPrincipal={nuevo}
-      buscador={<Buscador placeholder="Buscar cargo" />}
-      filtros={
-        <ChipsFiltro
-          filtros={[
-            { param: "clase", etiqueta: "Clase", opciones: CLASES },
-            {
-              param: "estado",
-              etiqueta: "Estado",
-              opciones: [
-                { valor: "activo", etiqueta: "Activo" },
-                { valor: "inactivo", etiqueta: "Inactivo" },
-              ],
-            },
-          ]}
-        />
-      }
-      items={items}
-      clave={(c) => c.id}
-      href={(c) => `/cargos/${c.id}`}
-      Link={LinkNext}
-      tarjeta={(c) => (
-        <>
+      accion={nuevo}
+      accionFlotante={Boolean(nuevo)}
+      buscar="Buscar cargo"
+      filtros={[
+        { param: "clase", etiqueta: "Clase", opciones: CLASES },
+        {
+          param: "estado",
+          etiqueta: "Estado",
+          opciones: [
+            { valor: "activo", etiqueta: "Activo" },
+            { valor: "inactivo", etiqueta: "Inactivo" },
+          ],
+        },
+      ]}
+      meta={{
+        izquierda: `${items.length} cargos · ${activos} ${activos === 1 ? "activo" : "activos"}`,
+        derecha: "Nombre A–Z",
+      }}
+      seleccionada={seleccionada}
+      vacio={{
+        titulo: "Sin cargos",
+        descripcion: puedeGestionar ? "Crea el primero o ajusta los filtros." : "Ajusta los filtros.",
+        accion: nuevo,
+      }}
+      filas={items.map((c) => ({
+        id: c.id,
+        href: conBusqueda(`/cargos/${c.id}`, q),
+        inicio: (
           <span className="flex size-10 flex-none items-center justify-center rounded-sm bg-fill text-fg-muted">
             <Briefcase className="size-4" aria-hidden />
           </span>
-          <span className="flex min-w-0 flex-1 flex-col">
-            <Nombre c={c} />
-            <span className="truncate text-sm text-fg-muted">
-              {clase(c.clase)} · {c.personasVigentes}{" "}
-              {c.personasVigentes === 1 ? "persona" : "personas"}
+        ),
+        titulo: <Nombre c={c} />,
+        secundario: (
+          <>
+            {clase(c.clase)}
+            <span className="md:hidden"> · {c.activo ? "Activo" : "Inactivo"}</span>
+            <span className="hidden md:inline">
+              {" "}
+              · {plural(c.personasVigentes, "persona", "personas")} · {plural(c.puestosActivos, "puesto", "puestos")}
             </span>
+          </>
+        ),
+        terciario: (
+          <span className="md:hidden">
+            {plural(c.personasVigentes, "persona", "personas")} · {plural(c.puestosActivos, "puesto", "puestos")}
           </span>
-          <Estado activo={c.activo} />
-        </>
-      )}
-      columnas={[
-        { id: "cargo", etiqueta: "Cargo", render: (c) => <Nombre c={c} /> },
-        { id: "clase", etiqueta: "Clase", render: (c) => clase(c.clase) },
-        {
-          id: "personas",
-          etiqueta: "Personas",
-          className: num,
-          render: (c) => conteo(c.personasVigentes),
-        },
-        {
-          id: "puestos",
-          etiqueta: "Puestos",
-          className: num,
-          render: (c) => conteo(c.puestosActivos),
-        },
-        {
-          id: "sensible",
-          etiqueta: "Sueldo sensible",
-          render: (c) => (c.sueldoSensible ? "Sí" : "No"),
-        },
-        { id: "estado", etiqueta: "Estado", render: (c) => <Estado activo={c.activo} /> },
-      ]}
-      textos={{
-        vacio: {
-          titulo: "Sin cargos",
-          descripcion: puedeGestionar
-            ? "Crea el primero o ajusta los filtros."
-            : "Ajusta los filtros.",
-          accion: nuevo,
-        },
-      }}
+        ),
+        fin: (
+          <Badge tono={c.activo ? "success" : "neutro"} className="hidden md:inline-flex">
+            {c.activo ? "Activo" : "Inactivo"}
+          </Badge>
+        ),
+      }))}
     />
   );
 }

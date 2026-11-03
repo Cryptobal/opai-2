@@ -6,10 +6,11 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
-| **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En construcción | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
+| **CAR-154** (rama `fix/car-154-simpleapi-real-1f1d`, PR #234) | P3 auditoría: adaptador SimpleAPI v1 real, payload de emisión completo, preflight, pantalla Configuración DTE y NC con adaptador del tenant | En revisión | Sí, `20261103180000_finanzas_dte_emision_real` (**no aplicada**) |
+| **CAR-152** (`fix/car-152-neon-sesion-b5fb`) | `cookieCache` 60 s, verificación de pooler y consultas pg serializadas | En revisión | No |
 | **CAR-151** (rama `docs/car-151-auditoria-2026-11`) | Auditoría profunda, ESTADO limpio y plan. Además, tres arreglos triviales: gate de paridad y RAT en verde (5 tests rojos en `main` tras #223 y #224) y barra de Ventas › Nuevo visible en móvil (B1) | En revisión | No |
 | #231 | Importación 1.0: programaciones recurrentes de Finanzas, destinatarios, correlativo CPQ y simulación de negocios (CAR-25) | Abierto. **No integrar sin corregir** la forma de las líneas, las frecuencias, la cuenta nula, las recurrentes inactivas hasta el corte y el correlativo dentro de la corrida ([auditoría §2.3](auditoria-2026-11.md#23-migración-desde-10-importador-packagesdbscriptsimportar-opai1-y-pr-231)); le falta la etiqueta `migracion-pendiente` | Sí, `20261103140000_finanzas_ventas_programacion` |
-| #213 | Cargos y Remuneraciones: pantallas lista-ficha | **En pausa**: en conflicto con `main` y Vercel en rojo. Se retoma en la semana 3 con un merge de `main` | — |
+| #213 | Cargos y Remuneraciones (solo UI; rama `cursor/personas-pantallas-cargos-remuneraciones-65e7`): SplitScreen como Cuentas; catálogo sin montos; menú y ruta **Remuneraciones** (`/remuneraciones`, redirect `/nomina`); períodos lista+ficha; «Pasar a revisión» con R-REM-011 en UI y `nomina.periodos.cambiar_estado` (incl. dry_run). Sin migración ni cambios MCP/API `nomina.*` | En revisión (merge con `main` post #232). Pendiente: CI, Revisor y QA 375/1280 | — |
 | #168 | Restablecer MFA y regenerar códigos de respaldo (CAR-54) | **En pausa**: en conflicto. Se retoma después de la migración | — |
 
 ## Integrado en `main`, por módulo
@@ -83,7 +84,7 @@ Evidencia: retiro de `migracion-pendiente` por el operador (ADR-054). Ningún PR
 
 ## Decisiones y riesgos vigentes
 
-- **Decisiones pendientes de Carlos:** D1–D8 del [ROADMAP §5](ROADMAP.md#5-decisiones-que-necesita-carlos) (`cookieCache`, migraciones, acceso de solo lectura a 1.0, fecha de corte, credenciales DTE, diseño, CAR-120 y orden de Linear).
+- **Decisiones pendientes de Carlos:** D2–D8 del [ROADMAP §5](ROADMAP.md#5-decisiones-que-necesita-carlos) (migraciones, acceso de solo lectura a 1.0, fecha de corte, credenciales DTE, diseño, CAR-120 y orden de Linear). **D1 (`cookieCache` 60 s) aceptada el 3-nov-2026 (CAR-152).**
 - **Regla de integración reafirmada:** no se integra con `migracion-pendiente` puesta (ADR-043 v3, ADR-054). Diez PR se integraron así (#181 y nueve entre el 1 y el 3-nov).
 - **BYPASSRLS de `neondb_owner`:** el dueño de las tablas en Neon (rol de `prisma migrate deploy`) tiene BYPASSRLS, así que FORCE no le afecta. La garantía es `opai_app` sin BYPASSRLS con `tenant_isolation` (ADR-002, [NUCLEO-G2](briefs/NUCLEO-G2-force-rls.md)). Toda migración de datos posterior a `20261028170000` verifica las filas afectadas (`REGLAS-codigo.md`).
 - **Inspector DT:** solo lectura; ve sueldos, auditoría y montos sensibles (`core:estructuras.read_sensible`, decisión t479u del 26-oct; `packages/db/scripts/roles-base-plantillas.ts`).

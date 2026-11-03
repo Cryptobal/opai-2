@@ -50,6 +50,10 @@ export const auth = betterAuth({
   user: { additionalFields: camposUsuario },
   session: {
     additionalFields: { mfaVerified: { type: "boolean", defaultValue: false, input: false } },
+    // CAR-152 · D1 (3-nov-2026): evita la lectura de sesión en Neon en cada request y precarga RSC.
+    // Una sesión revocada en la base puede seguir autorizando hasta `maxAge` s; sign-out, MFA y demás
+    // operaciones sensibles de Better Auth revalidan contra la base (`disableCookieCache`).
+    cookieCache: { enabled: true, maxAge: 60 },
   },
   emailAndPassword: {
     enabled: true,

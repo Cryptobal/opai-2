@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Alerta, avisar, Badge, Button, Input, SeccionTarjeta, Select, Switch } from "@opai/ds";
 
-import type { Concepto } from "@/app/(erp)/nomina/_componentes/tipos";
+import type { Concepto } from "@/app/(erp)/remuneraciones/_componentes/tipos";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 const TIPOS = [{ valor: "haber", etiqueta: "Haber" }, { valor: "descuento", etiqueta: "Descuento" }];

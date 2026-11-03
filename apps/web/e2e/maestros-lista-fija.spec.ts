@@ -16,6 +16,11 @@ const MODULOS = [
     tabs: ["Puestos", "Documentos", "Actividad", "Resumen"],
   },
   {
+    ruta: "/cargos",
+    lista: "Lista de cargos",
+    tabs: [] as string[],
+  },
+  {
     ruta: "/personas",
     lista: "Lista de personas",
     tabs: ["Laboral", "Documentos", "Actividad", "Resumen"],
@@ -29,8 +34,9 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
   for (const m of MODULOS) {
-    test(`${m.ruta}: todas las pestañas de la ficha conservan la lista`, async ({ page }, info) => {
+    test(`${m.ruta}: ${m.tabs.length ? "todas las pestañas de la ficha conservan la lista" : "la ficha conserva la lista"}`, async ({ page }, info) => {
       test.skip(info.project.name !== "desktop", "Se prueba a 1280 px");
+      test.skip(m.tabs.length === 0 && m.ruta !== "/cargos", "Sin pestañas");
       await entrar(page);
       await page.goto(m.ruta);
       const lista = page.getByRole("region", { name: m.lista });
@@ -40,6 +46,10 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
       await page.waitForURL(new RegExp(`${m.ruta}/[0-9a-f-]{36}$`));
       const ficha = page.getByRole("region", { name: "Detalle" });
       await expect(ficha).toBeVisible();
+      if (m.tabs.length === 0) {
+        await expect(lista).toBeVisible();
+        return;
+      }
       for (const tab of m.tabs) {
         const enlace = ficha.getByRole("link", { name: new RegExp(`^${tab}`) }).first();
         const destino = new URL((await enlace.getAttribute("href")) ?? "", page.url()).pathname;
