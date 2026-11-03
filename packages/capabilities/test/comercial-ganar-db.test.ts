@@ -58,12 +58,23 @@ describe("comercial · ganar con efectos en base real", () => {
     });
     const usuario = (
       await e.admin.user.create({
-        data: { email: `ganar-${randomUUID().slice(0, 8)}@prueba.cl`, name: "Ana", emailVerified: true },
+        data: {
+          email: `ganar-${randomUUID().slice(0, 8)}@prueba.cl`,
+          name: "Ana",
+          emailVerified: true,
+        },
       })
     ).id;
     const cot = (codigo: string, vigente: boolean) =>
       e.admin.cpqCotizacion.create({
-        data: { tenantId: t.id, negocioId: negocio.id, codigo, titulo: codigo, vigente, creadoPorId: usuario },
+        data: {
+          tenantId: t.id,
+          negocioId: negocio.id,
+          codigo,
+          titulo: codigo,
+          vigente,
+          creadoPorId: usuario,
+        },
       });
     const vigente = await cot(`CPQ-${t.id.slice(0, 6)}-1`, true);
     const otra = await cot(`CPQ-${t.id.slice(0, 6)}-2`, false);
@@ -78,7 +89,13 @@ describe("comercial · ganar con efectos en base real", () => {
       data: { tenantId: t.id, versionId: v2.id, nombre: "Planta Norte" },
     });
     await e.admin.cpqLinea.create({
-      data: { tenantId: t.id, seccionId: seccion.id, tipo: "puesto", nombre: "Guardia día", posiciones: 2 },
+      data: {
+        tenantId: t.id,
+        seccionId: seccion.id,
+        tipo: "puesto",
+        nombre: "Guardia día",
+        posiciones: 2,
+      },
     });
     await e.admin.cpqLinea.create({
       data: { tenantId: t.id, seccionId: seccion.id, tipo: "item", nombre: "Radio", posiciones: 3 },
@@ -121,7 +138,9 @@ describe("comercial · ganar con efectos en base real", () => {
     const cuenta = await e.admin.cuenta.findUniqueOrThrow({ where: { id: a.cuentaId } });
     expect(cuenta.estado).toBe("cliente_activo");
     expect(cuenta.clienteDesde).not.toBeNull();
-    const inst = await e.admin.instalacion.findMany({ where: { id: { in: [a.planta, a.bodega] } } });
+    const inst = await e.admin.instalacion.findMany({
+      where: { id: { in: [a.planta, a.bodega] } },
+    });
     expect(inst.map((i) => i.estado)).toEqual(["activa", "activa"]);
     const estado = async (id: string) =>
       (await e.admin.cpqVersion.findUniqueOrThrow({ where: { id } })).estado;
@@ -156,8 +175,8 @@ describe("comercial · ganar con efectos en base real", () => {
     expect(await estado(b.v2.id)).toBe("enviada");
     // Y su negocio no es visible desde el contexto de A (RLS): el consumidor no lo encuentra.
     await mod.despacharPendientes(ctx(a.tenantId));
-    expect(
-      (await e.admin.instalacion.findUniqueOrThrow({ where: { id: b.planta } })).estado,
-    ).toBe("prospecto");
+    expect((await e.admin.instalacion.findUniqueOrThrow({ where: { id: b.planta } })).estado).toBe(
+      "prospecto",
+    );
   });
 });

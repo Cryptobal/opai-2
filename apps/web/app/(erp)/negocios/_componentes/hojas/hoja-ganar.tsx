@@ -71,7 +71,11 @@ export function HojaGanar({ n }: { n: NegocioDetalle }) {
       }
     >
       <div className="flex flex-col gap-4">
-        {error ? <Alerta tono="danger" titulo="No se pudo ganar el negocio">{error}</Alerta> : null}
+        {error ? (
+          <Alerta tono="danger" titulo="No se pudo ganar el negocio">
+            {error}
+          </Alerta>
+        ) : null}
         {!error && previa.error ? <Alerta tono="warning" titulo={previa.error} /> : null}
         {pendiente ? (
           <Alerta tono="info" titulo="Aplicando los cambios en Cuentas, Operaciones y CPQ…" />

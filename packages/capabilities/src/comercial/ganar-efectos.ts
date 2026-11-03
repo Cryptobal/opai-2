@@ -17,7 +17,12 @@ export const VERSION_ABIERTA = ["borrador", "en_aprobacion", "lista", "enviada"]
 
 export const efectosGanarSchema = z.object({
   cuenta: z
-    .object({ id: z.string(), nombre: z.string(), desde: z.string(), hacia: z.literal("cliente_activo") })
+    .object({
+      id: z.string(),
+      nombre: z.string(),
+      desde: z.string(),
+      hacia: z.literal("cliente_activo"),
+    })
     .nullable(),
   instalaciones: z.array(z.object({ id: z.string(), nombre: z.string(), desde: z.string() })),
   cotizacion: z
@@ -86,7 +91,12 @@ export async function planGanar(db: TenantTx, negocio: { id: string; cuentaId: s
     cuenta && (CUENTA_SE_ACTIVA as readonly string[]).includes(cuenta.estado) ? cuenta : null;
   const efectos: EfectosGanar = {
     cuenta: activaCuenta
-      ? { id: activaCuenta.id, nombre: activaCuenta.nombre, desde: activaCuenta.estado, hacia: "cliente_activo" }
+      ? {
+          id: activaCuenta.id,
+          nombre: activaCuenta.nombre,
+          desde: activaCuenta.estado,
+          hacia: "cliente_activo",
+        }
       : null,
     instalaciones: instalaciones
       .filter(
