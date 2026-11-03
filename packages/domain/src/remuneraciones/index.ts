@@ -5,3 +5,4 @@ export * from "./costo-empresa";
 export * from "./costo-turno";
 export * from "./horas-extra";
 export * from "./jornada";
+export * from "./liquido-bruto";
