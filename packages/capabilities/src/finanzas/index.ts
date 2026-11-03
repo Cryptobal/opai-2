@@ -31,11 +31,19 @@ import {
   ventasProgramacionesListar,
   ventasProgramacionesObtener,
 } from "./ventas-programacion-lectura";
+import {
+  ventasProgramacionActualizar,
+  ventasProgramacionCambiarEstado,
+  ventasProgramacionCrear,
+} from "./ventas-programacion-escritura";
+import { ventasProgramacionGenerar } from "./ventas-programacion-generar";
+import { ventasProgramacionVistaPrevia } from "./ventas-programacion-vista-previa";
+import { trabajoGenerarProgramaciones } from "./ventas-programacion-trabajo";
 
 export { ajustesFinanzas } from "./ajustes";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
-export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion];
+export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones];
 
 export const capacidadesFinanzas: readonly Capacidad[] = [
   planListar,
@@ -56,6 +64,11 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasLibroResumen,
   ventasProgramacionesListar,
   ventasProgramacionesObtener,
+  ventasProgramacionCrear,
+  ventasProgramacionActualizar,
+  ventasProgramacionCambiarEstado,
+  ventasProgramacionGenerar,
+  ventasProgramacionVistaPrevia,
   ventasCrearBorrador,
   ventasEmitir,
   ventasPreflightEmision,

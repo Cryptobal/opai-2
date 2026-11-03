@@ -10,6 +10,7 @@ import {
   type FilaProg,
   programacionSchema,
 } from "./ventas-programacion-vistas";
+import { ufCentavosUltima } from "./ventas-programacion-uf";
 
 export { programacionSchema } from "./ventas-programacion-vistas";
 
@@ -65,7 +66,7 @@ export const ventasProgramacionesListar = defineCapability({
           ).map((i) => [i.id, i.nombre])
         : [],
     );
-    const items = await enriquecerProgramaciones(ctx, slice as FilaProg[], cuentaMap, instMap);
+    const items = await enriquecerProgramaciones(ctx, slice as FilaProg[], cuentaMap, instMap, await ufCentavosUltima(ctx.db));
     return { items, siguiente };
   },
 });
@@ -106,7 +107,7 @@ export const ventasProgramacionesObtener = defineCapability({
           ).map((i) => [i.id, i.nombre]),
         )
       : new Map<string, string>();
-    const [item] = await enriquecerProgramaciones(ctx, [f as FilaProg], cuentaMap, instMap);
+    const [item] = await enriquecerProgramaciones(ctx, [f as FilaProg], cuentaMap, instMap, await ufCentavosUltima(ctx.db));
     return item!;
   },
 });

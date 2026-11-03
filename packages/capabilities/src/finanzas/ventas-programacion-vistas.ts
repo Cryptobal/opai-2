@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { montoLineaProgramacion } from "@opai/domain";
+
 const lineaSchema = z.object({
   id: z.string(),
   glosa: z.string(),
@@ -24,7 +26,8 @@ export const programacionSchema = z.object({
   tipoDte: z.union([z.literal(33), z.literal(34), z.literal(56), z.literal(61)]),
   diaGeneracion: z.number().int(),
   moneda: z.string(),
-  montoTotal: z.number().int(),
+  montoTotal: z.number().int().describe("Total neto del período en CLP; en UF, estimado con la última UF."),
+  frecuencia: z.string(),
   plazoPagoDias: z.number().int(),
   proximaEjecucionEn: z.string().nullable(),
   destinatarios: z.array(destinatarioSchema),
@@ -39,6 +42,7 @@ export type FilaProg = {
   instalacionId: string | null;
   tipoDte: number;
   diaGeneracion: number;
+  frecuencia: string;
   moneda: string;
   plazoPagoDias: number;
   proximaEjecucionEn: Date | null;
@@ -46,18 +50,28 @@ export type FilaProg = {
   lineas: {
     id: string;
     glosa: string;
-    cantidad: { toNumber(): number };
+    cantidad: { toString(): string };
     precioUnitarioClp: bigint | null;
+    precioUnitarioUf: bigint | null;
     descuentoPct: number;
   }[];
   destinatarios: { contactoId: string | null; orden: number }[];
 };
 
-/** Total CLP de la línea (cantidad × precio − descuento). Las líneas en UF se muestran en la ficha de A4. */
-function montoLineaClp(l: FilaProg["lineas"][number]): number {
-  if (l.precioUnitarioClp === null) return 0;
-  const bruto = l.cantidad.toNumber() * Number(l.precioUnitarioClp);
-  return Math.round(bruto * (1 - l.descuentoPct / 10_000));
+/** Total CLP exacto de la línea; las líneas en UF se valorizan con la última UF (estimado). */
+function montoLineaClp(l: FilaProg["lineas"][number], ufEstimada: bigint | null): number {
+  if (l.precioUnitarioClp === null && (l.precioUnitarioUf === null || ufEstimada === null)) return 0;
+  return montoLineaProgramacion(
+    {
+      glosa: l.glosa,
+      cantidad: l.cantidad.toString(),
+      precioUnitarioClp: l.precioUnitarioClp,
+      precioUnitarioUf: l.precioUnitarioUf,
+      descuentoPct: l.descuentoPct,
+      exento: false,
+    },
+    ufEstimada,
+  );
 }
 
 export async function enriquecerProgramaciones(
@@ -65,6 +79,7 @@ export async function enriquecerProgramaciones(
   filas: FilaProg[],
   cuentas: Map<string, string>,
   instalaciones: Map<string, string>,
+  ufEstimada: bigint | null = null,
 ) {
   const contactoIds = [
     ...new Set(filas.flatMap((f) => f.destinatarios.flatMap((d) => (d.contactoId ? [d.contactoId] : [])))),
@@ -77,7 +92,7 @@ export async function enriquecerProgramaciones(
     : [];
   const contactoMap = new Map(contactos.map((c) => [c.id, c]));
   return filas.map((f) => {
-    const lineas = f.lineas.map((l) => ({ id: l.id, glosa: l.glosa, monto: montoLineaClp(l) }));
+    const lineas = f.lineas.map((l) => ({ id: l.id, glosa: l.glosa, monto: montoLineaClp(l, ufEstimada) }));
     const montoTotal = lineas.reduce((a, l) => a + l.monto, 0);
     return {
       id: f.id,
@@ -91,6 +106,7 @@ export async function enriquecerProgramaciones(
       diaGeneracion: f.diaGeneracion,
       moneda: f.moneda,
       montoTotal,
+      frecuencia: f.frecuencia,
       plazoPagoDias: f.plazoPagoDias,
       proximaEjecucionEn: f.proximaEjecucionEn ? f.proximaEjecucionEn.toISOString().slice(0, 10) : null,
       destinatarios: f.destinatarios.flatMap((d) => {

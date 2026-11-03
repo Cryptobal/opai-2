@@ -723,6 +723,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.ventas.enviar_sii`
 - `finanzas.ventas.pdf`
 - `finanzas.ventas.proyeccion_flujo`
+- `finanzas.ventas_programacion.actualizar`
+- `finanzas.ventas_programacion.cambiar_estado`
+- `finanzas.ventas_programacion.crear`
+- `finanzas.ventas_programacion.generar`
+- `finanzas.ventas_programacion.vista_previa`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
