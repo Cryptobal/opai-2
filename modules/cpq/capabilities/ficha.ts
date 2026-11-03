@@ -7,8 +7,12 @@ import { cotizacionDe } from "./util";
 import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
 import { calculoCongelado } from "../persistencia/calculo-congelado";
 import { metaFicha } from "../persistencia/ficha-meta";
-import { versionParaFicha } from "../persistencia/version";
+import { mesesContrato, versionParaFicha } from "../persistencia/version";
+import { INSTRUMENTOS_DEFECTO } from "../domain/motor/plantilla";
+import { instrumentosSchema, leerInstrumentos } from "../persistencia/instrumentos-version";
 import { motorOutputSchema } from "./motor-esquemas";
+import { lineaDeFicha } from "./ficha-lineas";
+import type { CostoLineaFicha } from "../persistencia/costo-puesto-ficha";
 import { uuidSchema } from "./esquemas";
 
 const metaSchema = z.object({
@@ -33,6 +37,15 @@ const metaSchema = z.object({
   requiereConfirmacionValoresViejos: z.boolean(),
   requiereConfirmarMutual: z.boolean(),
   costosLinea: z.record(z.string(), z.unknown()).optional(),
+});
+
+const parametrosSchema = z.object({
+  mesesContrato: z.number().int(),
+  mesesPactados: z.boolean(),
+  margenModo: z.string(),
+  margenObjetivoPct: z.number().int().nullable(),
+  sobrescrito: z.boolean(),
+  instrumentos: instrumentosSchema,
 });
 
 export const cotizacionesFicha = defineCapability({
@@ -60,6 +73,8 @@ export const cotizacionesFicha = defineCapability({
       editable: z.boolean(),
     }),
     meta: metaSchema,
+    /** Parámetros financieros de la versión; solo con `cpq:costos.ver` (R59). */
+    parametros: parametrosSchema.optional(),
     secciones: z.array(
       z.object({
         id: uuidSchema,
@@ -108,30 +123,25 @@ export const cotizacionesFicha = defineCapability({
         editable: meta.editable,
       },
       meta,
+      ...(verCostos
+        ? {
+            parametros: {
+              mesesContrato: version.mesesContrato ?? mesesContrato(version.validaHasta),
+              mesesPactados: version.mesesContrato !== null,
+              margenModo: version.margenModo,
+              margenObjetivoPct: version.margenObjetivoPct,
+              sobrescrito: version.instrumentosJson !== null,
+              instrumentos: leerInstrumentos(version.instrumentosJson) ?? INSTRUMENTOS_DEFECTO,
+            },
+          }
+        : {}),
       secciones: secciones.map((s) => ({
         id: s.id,
         nombre: s.nombre,
         instalacionId: s.instalacionId,
         lineas: lineas
           .filter((l) => l.seccionId === s.id)
-          .map((l) => ({
-            id: l.id,
-            tipo: l.tipo,
-            nombre: l.nombre,
-            posiciones: l.posiciones,
-            recurrencia: l.recurrencia,
-            habilitada: l.habilitada,
-            patron: l.patron,
-            horaInicio: l.horaInicio,
-            horaFin: l.horaFin,
-            diasCobertura: l.diasCobertura,
-            sueldoBaseClp: verCostos ? l.sueldoBaseClp : undefined,
-            itemCodigo: l.itemCodigo,
-            cantidadEscalada: l.cantidadEscalada,
-            precioUnitarioClp: verCostos ? l.precioUnitarioClp : undefined,
-            huellaJuegoValores: verCostos ? l.huellaJuegoValores : undefined,
-            costo: verCostos ? meta.costosLinea?.[l.id] : undefined,
-          })),
+          .map((l) => lineaDeFicha(l, verCostos, meta.costosLinea?.[l.id] as CostoLineaFicha | undefined)),
       })),
       calculo: proyectarCalculo(ctx, r),
     };
