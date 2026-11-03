@@ -1,6 +1,7 @@
 import { Alerta, Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
 
 import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
+import { conteo } from "@/lib/plural";
 
 import type { cargarCargo } from "./datos";
 import { CLASES } from "./datos";
@@ -27,7 +28,7 @@ export async function DetalleCargo({ datos, puedeGestionar, puedeVerSensible }: 
             estado: (
               <Badge tono={c.activo ? "success" : "neutro"}>{c.activo ? "Activo" : "Inactivo"}</Badge>
             ),
-            subtitulo: `${CLASES.find((x) => x.valor === c.clase)?.etiqueta ?? c.clase} · ${c.personasVigentes} personas · ${c.puestosActivos} puestos`,
+            subtitulo: `${CLASES.find((x) => x.valor === c.clase)?.etiqueta ?? c.clase} · ${conteo(c.personasVigentes, "persona")} · ${conteo(c.puestosActivos, "puesto")}`,
             acciones: (
               <AccionesEntidad
                 etiqueta="Acciones del cargo"
