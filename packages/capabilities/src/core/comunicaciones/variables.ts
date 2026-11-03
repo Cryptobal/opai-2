@@ -1,55 +1,7 @@
 import type { EventoPublicado } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
+import { datosDocumento, datosTarea, fechaCl } from "./variables-entidades";
 import { variablesCpq } from "./variables-cpq";
-
-const fechaCl = (iso: unknown) =>
-  typeof iso === "string" && /^\d{4}-\d{2}-\d{2}/.test(iso)
-    ? iso.slice(0, 10).split("-").reverse().join("-")
-    : "";
-
-const RUTA_ENTIDAD: Record<string, string> = {
-  persona: "/personas",
-  cuenta: "/cuentas",
-  instalacion: "/instalaciones",
-  tenant: "/configuracion/documentos",
-};
-
-async function nombreEntidad(ctx: Contexto, tipo: string, id: string): Promise<string> {
-  if (tipo === "persona") {
-    const p = await ctx.db.persona.findUnique({ where: { id } });
-    return p ? `${p.nombres} ${p.apellidos}` : "";
-  }
-  if (tipo === "cuenta") return (await ctx.db.cuenta.findUnique({ where: { id } }))?.nombre ?? "";
-  if (tipo === "instalacion")
-    return (await ctx.db.instalacion.findUnique({ where: { id } }))?.nombre ?? "";
-  if (tipo === "puesto") return (await ctx.db.puesto.findUnique({ where: { id } }))?.nombre ?? "";
-  return (await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId } }))?.nombre ?? "";
-}
-
-async function datosDocumento(ctx: Contexto, ev: EventoPublicado, p: Record<string, unknown>) {
-  const d = ev.entidadId
-    ? await ctx.db.documento.findUnique({ where: { id: ev.entidadId } })
-    : null;
-  const tipo = d?.tipoId
-    ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } })
-    : null;
-  const v = d
-    ? await ctx.db.documentoVinculo.findFirst({ where: { documentoId: d.id, rol: "propietario" } })
-    : null;
-  const ruta = v
-    ? `${RUTA_ENTIDAD[v.entidadTipo] ?? ""}${v.entidadTipo === "tenant" ? "" : `/${v.entidadId}/documentos`}`
-    : "";
-  return {
-    documento: {
-      nombre: d?.nombre ?? "",
-      tipo: tipo?.nombre ?? "Documento",
-      vence: fechaCl(p["venceEn"]),
-      dias: String(p["dias"] ?? ""),
-    },
-    entidad: { nombre: v ? await nombreEntidad(ctx, v.entidadTipo, v.entidadId) : "" },
-    url: `${ctx.servicios.urlBase}${ruta}`,
-  };
-}
 
 /**
  * Variables de cada evento comunicable a partir del evento del outbox. Los textos vienen de la base
@@ -66,6 +18,8 @@ export async function variablesDe(
   const base = ctx.servicios.urlBase;
   if (ev.tipo.startsWith("core.documento."))
     return { ...(await datosDocumento(ctx, ev, p)), empresa };
+  if (ev.tipo === "core.actividad.tarea_vencida")
+    return { ...(await datosTarea(ctx, ev, p)), empresa };
   if (ev.tipo === "core.aprobacion.pendiente") {
     return {
       agente: { nombre: p["agente"] ?? "" },

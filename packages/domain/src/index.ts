@@ -52,3 +52,4 @@ export * from "./portal-cliente";
 
 export * from "./finanzas";
 export * from "./remuneraciones";
+export * from "./actividades-tareas";

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { entidadVisible, filtrarVisibles, visibilidad } from "./actividades-alcance";
-import { ENTIDADES_ACTIVIDAD, TIPOS_ACTIVIDAD, columnaDe, iso } from "./comun";
+import { ENTIDADES_ACTIVIDAD, RESULTADOS_LLAMADA, TIPOS_ACTIVIDAD, columnaDe, iso } from "./comun";
 
 export const PERMISO_READ = "core:actividades.read";
 export const PERMISO_MANAGE = "core:actividades.manage";
@@ -27,6 +27,7 @@ export const actividadSchema = z.object({
   asistentes: z.array(z.string()),
   acuerdos: z.string().nullable(),
   proximoPaso: z.string().nullable(),
+  resultado: z.enum(RESULTADOS_LLAMADA).nullable(),
   completadaEn: z.string().nullable(),
   creadaPorId: z.string().nullable(),
   responsables: z.array(z.string()),
@@ -46,6 +47,7 @@ type Fila = {
   asistentes: string[];
   acuerdos: string | null;
   proximoPaso: string | null;
+  resultado?: string | null;
   completadaEn: Date | null;
   creadaPorId: string | null;
 };
@@ -67,6 +69,7 @@ export const vistaActividad = (
   asistentes: a.asistentes,
   acuerdos: a.acuerdos,
   proximoPaso: a.proximoPaso,
+  resultado: (a.resultado ?? null) as (typeof RESULTADOS_LLAMADA)[number] | null,
   completadaEn: iso(a.completadaEn),
   creadaPorId: a.creadaPorId,
   responsables,

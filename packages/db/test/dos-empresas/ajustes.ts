@@ -23,6 +23,14 @@ const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? nul
 export const AJUSTES: Record<string, Ajuste> = {
   // Comercial · seguimiento (CAR-67): CHECK de disparador, canal y ejecutor.
   "comercial.seguimiento_planes": { valores: () => ({ nombre: "Plan de prueba", disparador: "manual" }) },
+  "comercial.seguimiento_plan_versiones": {
+    valores: () => ({
+      config: JSON.stringify({
+        conteo: "habiles", desde: "inicio", hora: "09:00", ventana: { desde: "09:00", hasta: "18:00" },
+        alResponder: "pausar", alTerminar: "solo_avisar", pasos: [],
+      }),
+    }),
+  },
   "comercial.seguimiento_pasos": { valores: () => ({ canal: "interno", ejecutor: "persona" }) },
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },

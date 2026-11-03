@@ -27,6 +27,7 @@ import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicac
 import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
+import { consumidorTareaVencida, trabajoTareasVencidas } from "./crm/actividades-vencidas";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
@@ -130,6 +131,7 @@ export const consumidoresDelNucleo = [
   consumidorAnexos,
   consumidorFirmaDocumento,
   consumidorSolicitudCreada,
+  consumidorTareaVencida,
   consumidorNegocioGanado,
   consumidorCpqGanado,
 ];
@@ -143,4 +145,5 @@ export const trabajosDelNucleo = [
   ...trabajosCumplimiento,
   ...trabajosMaestros,
   trabajoCapturaIndicadoresSii,
+  trabajoTareasVencidas,
 ];
