@@ -82,7 +82,7 @@ function avisoDesdeTexto(raw: string, ctx?: { nombrePuesto?: string }): AvisoCpq
       tono: "warning",
       titulo: "Falta completar el costo laboral",
       detalle:
-        "Publica los valores legales del día, confirma la mutual adicional del tenant y asigna sueldo base a cada puesto.",
+        "Publica los valores legales del día, confirma la mutual adicional de la empresa y asigna sueldo base a cada puesto.",
       enlace: { href: "/configuracion/grupo/remuneraciones", etiqueta: "Ir a Remuneraciones" },
     };
   }
@@ -100,7 +100,7 @@ function avisoDesdeTexto(raw: string, ctx?: { nombrePuesto?: string }): AvisoCpq
       id: "mutual",
       tono: "warning",
       titulo: "Falta la tasa de mutual adicional",
-      detalle: "Ingrésala en Configuración › Remuneraciones para este tenant.",
+      detalle: "Ingrésala en Configuración › Remuneraciones.",
       enlace: { href: "/configuracion/grupo/remuneraciones", etiqueta: "Configurar mutual" },
     };
   }
@@ -137,7 +137,7 @@ function avisoDesdeTexto(raw: string, ctx?: { nombrePuesto?: string }): AvisoCpq
       id: "subvalorado",
       tono: "info",
       titulo: "Precio por debajo del mínimo",
-      detalle: "El margen efectivo queda bajo el mínimo del tenant; pide aprobación antes de enviar.",
+      detalle: "El margen efectivo queda bajo el mínimo configurado; pide aprobación antes de enviar.",
     };
   }
   return { id: raw, tono: "warning", titulo: raw };
@@ -146,6 +146,33 @@ function avisoDesdeTexto(raw: string, ctx?: { nombrePuesto?: string }): AvisoCpq
 export function avisoLineaPuesto(mensaje: string | undefined, nombreLinea: string): AvisoCpq | null {
   if (!mensaje) return null;
   return avisoDesdeTexto(mensaje, { nombrePuesto: nombreLinea });
+}
+
+/** Subtítulo bajo el nombre de la línea (sin repetir «puesto · N posición»). */
+export function subtituloLineaCpq(linea: {
+  tipo: string;
+  posiciones?: number;
+  patron?: string | null;
+  horaInicio?: string | null;
+  horaFin?: string | null;
+  diasCobertura?: number | null;
+  cantidadEscalada?: number | null;
+}): string | null {
+  if (linea.tipo !== "puesto") {
+    const etiqueta = ETIQUETA_CATEGORIA_CPQ[linea.tipo] ?? linea.tipo.replaceAll("_", " ");
+    return etiqueta;
+  }
+  const partes: string[] = [];
+  if (linea.patron?.trim()) partes.push(linea.patron.trim());
+  else if (linea.horaInicio && linea.horaFin) partes.push(`${linea.horaInicio}–${linea.horaFin}`);
+  const dotacion = linea.posiciones ?? linea.cantidadEscalada;
+  if (dotacion != null && dotacion > 0) {
+    partes.push(`${dotacion} guardia${dotacion === 1 ? "" : "s"}`);
+  }
+  if (linea.diasCobertura != null && linea.diasCobertura > 0) {
+    partes.push(`${linea.diasCobertura} días a la semana`);
+  }
+  return partes.length > 0 ? partes.join(" · ") : null;
 }
 
 export function ventaMensualTexto(ventaMensual: number | null | undefined, costoPendiente: boolean) {

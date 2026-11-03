@@ -56,9 +56,21 @@ export function ParesGrid({
 }
 
 /** Teléfono: acción principal fija sobre la barra inferior ("Crear versión"); en md+ va en la barra superior. */
-export function AccionFijaTelefono({ children }: { children: ReactNode }) {
+export function AccionFijaTelefono({
+  children,
+  compacto = true,
+}: {
+  children: ReactNode;
+  /** false cuando el hijo no es un solo botón (p. ej. aviso de bloqueo con acciones). */
+  compacto?: boolean;
+}) {
   return (
-    <div className="sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 -mx-4 mt-4 border-t border-border bg-bg/95 px-4 py-3 backdrop-blur md:hidden [&>*]:h-12 [&>*]:w-full">
+    <div
+      className={cn(
+        "sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-30 -mx-4 mt-4 border-t border-border bg-bg/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur md:hidden",
+        compacto && "[&>button]:h-11 [&>button]:w-full",
+      )}
+    >
       {children}
     </div>
   );
