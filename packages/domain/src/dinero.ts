@@ -70,14 +70,6 @@ export function ufACLP(uf: number, valorUfClp: number): CLP {
   return redondearCLP((uf * valorUfClp) / UF_ESCALA);
 }
 
-/** Formato chileno: `$ 1.850.000`, `-$ 12.300`. Sin decimales. */
-export function formatearCLP(monto: CLP): string {
-  const abs = Math.abs(monto)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return monto < 0 ? `-$ ${abs}` : `$ ${abs}`;
-}
-
 /** Razón exacta: mitad hacia arriba en valor absoluto, sin productos float. */
 export function redondearRazonCLP(numerador: bigint, denominador: bigint): CLP {
   if (denominador <= 0n) throw new RangeError("Denominador inválido");

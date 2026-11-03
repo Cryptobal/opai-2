@@ -77,7 +77,7 @@ export function ResumenCotizacion({
 
         <div>
           <p className="t-overline text-fg-subtle">Venta mensual</p>
-          <p className="t-h2 t-numeric">{ventaMostrar}</p>
+          <p className="t-heading t-numeric">{ventaMostrar}</p>
           {!costoPendiente && calculo.pagosUnicos != null ? (
             <p className="t-caption text-fg-subtle">
               Pagos únicos: {pesos(calculo.pagosUnicos)} · Dotación{" "}
@@ -88,8 +88,7 @@ export function ResumenCotizacion({
 
         {!verCostos ? (
           <Alerta tono="neutral" titulo="Costos ocultos" icono={Lock}>
-            No tienes permiso para ver costos ni margen. Pide{" "}
-            <span className="t-mono text-xs">cpq:costos.ver</span> a un administrador.
+            No tienes permiso para ver costos ni margen. Pídele a un administrador que te dé acceso a los costos de las cotizaciones.
           </Alerta>
         ) : null}
 

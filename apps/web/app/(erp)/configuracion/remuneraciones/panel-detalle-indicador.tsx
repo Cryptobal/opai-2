@@ -41,10 +41,10 @@ function TablaHistorial({ clave }: { clave: string }) {
 
   if (error) return <Alerta tono="danger" titulo={error} />;
   if (historial == null || pendiente) {
-    return <p className="t-body-sm text-muted-foreground">Cargando historial…</p>;
+    return <p className="t-body-sm text-fg-muted">Cargando historial…</p>;
   }
   if (historial.length === 0) {
-    return <p className="t-body-sm text-muted-foreground">Sin registros anteriores.</p>;
+    return <p className="t-body-sm text-fg-muted">Sin registros anteriores.</p>;
   }
   return (
     <Table>
@@ -88,18 +88,18 @@ export function PanelDetalleIndicador({ fila, onCerrar }: Props) {
       {fila ? (
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-2">
-            <h3 className="t-label-sm text-muted-foreground">Desglose vigente</h3>
+            <h3 className="t-label-sm text-fg-muted">Desglose vigente</h3>
             <ul className="t-body list-inside list-disc space-y-1">
               {fila.desglose.map((linea) => (
                 <li key={linea}>{linea}</li>
               ))}
             </ul>
-            <p className="t-caption text-muted-foreground">
+            <p className="t-caption text-fg-muted">
               Vigente desde {fila.vigenteDesde} · Fuente: {fila.fuente}
             </p>
           </section>
           <section className="flex flex-col gap-2">
-            <h3 className="t-label-sm text-muted-foreground">Historial</h3>
+            <h3 className="t-label-sm text-fg-muted">Historial</h3>
             <TablaHistorial key={fila.clave} clave={fila.clave} />
           </section>
         </div>

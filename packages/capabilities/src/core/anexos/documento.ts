@@ -1,4 +1,4 @@
-import { clp, formatearCLP } from "@opai/domain";
+import { formatearClp } from "@opai/domain";
 
 import type { Contexto } from "../../types";
 import { capaQueRige, diaAnterior } from "./capa-documento";
@@ -17,7 +17,7 @@ const CONCEPTOS = [
   { campo: "gratificacionMonto", etiqueta: "Gratificación" },
 ] as const;
 
-const monto = (n: number | null | undefined) => (n == null ? "—" : formatearCLP(clp(n)));
+const monto = (n: number | null | undefined) => (n == null ? "—" : formatearClp(n));
 
 /**
  * Filas antes/después del documento final (R15): montos reales de la estructura referenciada por el

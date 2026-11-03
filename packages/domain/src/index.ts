@@ -3,6 +3,7 @@ export * from "./catalogos";
 export * from "./comercial/formulario-web";
 export * from "./precios-base";
 export * from "./dinero";
+export * from "./formato";
 export * from "./mfa";
 export * from "./documentos";
 export * from "./comunicaciones";

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatearUsd } from "@opai/domain";
 import { useState } from "react";
 
 import { Alerta, Button, Campo, Input, Sheet, Switch } from "@opai/ds";
@@ -76,7 +77,7 @@ export function CrearApiKey({
       setCreada({
         secreto: r.secreto,
         nombre,
-        resumen: `Scopes: ${todos ? `todos los módulos${modulos.includes("platform") ? " + platform" : ""}` : modulos.join(", ")} · ${tope !== null ? `presupuesto US$ ${tope.toLocaleString("es-CL", { maximumFractionDigits: 6 })} al mes` : "sin presupuesto"} · irreversibles con aprobación`,
+        resumen: `Alcance: ${todos ? `todos los módulos${modulos.includes("platform") ? " + platform" : ""}` : modulos.join(", ")} · ${tope !== null ? `presupuesto ${formatearUsd(tope, 2)} al mes` : "sin presupuesto"} · irreversibles con aprobación`,
       });
       limpiar();
     }

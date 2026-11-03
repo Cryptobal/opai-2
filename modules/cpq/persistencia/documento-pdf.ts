@@ -1,3 +1,4 @@
+import { formatearClp, formatearNumero } from "@opai/domain";
 import { UF_ESCALA } from "@opai/domain/dinero";
 
 import type { BloqueConfig } from "../domain/documento/bloques";
@@ -186,13 +187,13 @@ function tablaServicios(e: EntradaPdfCotizacion): LineaPdf[] {
     const clpUf = e.calculo.uf.valorClpEscalado / UF_ESCALA;
     const enUf = e.calculo.ventaMensual / clpUf;
     lineas.push({
-      texto: `Equivalente UF ${enUf.toLocaleString("es-CL", { maximumFractionDigits: 2 })} (UF $ ${clpUf.toLocaleString("es-CL")})`,
+      texto: `Equivalente UF ${formatearNumero(enUf, 2)} (UF ${formatearClp(clpUf)})`,
       tamano: 9,
     });
   }
   if (e.calculo.pagosUnicos && e.calculo.pagosUnicos > 0) {
     lineas.push({
-      texto: `Pagos únicos: $ ${e.calculo.pagosUnicos.toLocaleString("es-CL")} CLP`,
+      texto: `Pagos únicos: ${formatearClp(e.calculo.pagosUnicos)} CLP`,
       tamano: 9,
       espacioAntes: 2,
     });
@@ -202,12 +203,12 @@ function tablaServicios(e: EntradaPdfCotizacion): LineaPdf[] {
 
 function formatoVenta(venta: number | null, borrador?: boolean): string {
   if (venta == null) return borrador ? "Borrador sin precio" : "Pendiente";
-  return `$ ${venta.toLocaleString("es-CL")} CLP`;
+  return `${formatearClp(venta)} CLP`;
 }
 
 function formatoVentaLinea(venta: number | null | undefined, borrador?: boolean): string {
   if (venta == null || venta === undefined) return borrador ? "Borrador sin precio" : "—";
-  return `$ ${venta.toLocaleString("es-CL")}`;
+  return formatearClp(venta);
 }
 
 function etiquetaTipo(tipo: string): string {

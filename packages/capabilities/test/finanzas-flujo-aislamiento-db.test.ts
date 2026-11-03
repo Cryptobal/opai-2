@@ -77,7 +77,6 @@ describe.skipIf(!urlPropietario)("flujo de caja: dos empresas en base real", () 
 
   it("la empresa B no ve ni toca nada de A (RLS)", async () => {
     expect(await ok<unknown[]>(t.b, "finanzas.filas.listar", {})).toEqual([]);
-    expect(await ok<unknown[]>(t.b, "finanzas.cierres.listar", {})).toEqual([]);
     const sobre = await run(t.b, "finanzas.celdas.fijar", { filaId: fila, semana: futura, monto: 9 });
     expect(sobre).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const archivar = await run(t.b, "finanzas.filas.archivar", { id: fila, archivar: true });

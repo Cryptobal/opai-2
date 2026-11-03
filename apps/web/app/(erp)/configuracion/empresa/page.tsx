@@ -28,7 +28,7 @@ export default function Empresa() {
         const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.tenantManage);
         return {
           subtitulo: tenant
-            ? `${tenant.nombre} · slug ${tenant.slug} · aparecen en documentos, correos y portales`
+            ? `${tenant.nombre} · aparecen en documentos, correos y portales`
             : undefined,
           acciones: puede ? (
             <Button type="submit" form="form-empresa">

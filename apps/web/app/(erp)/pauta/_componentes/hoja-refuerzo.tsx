@@ -102,7 +102,7 @@ function Formulario({
           />
         </Campo>
         <p className="t-caption text-fg-muted">
-          Fuera de la serie del puesto. Quedará como turno extra por aprobar (CAR-96).
+          Fuera de la serie del puesto. Quedará como turno extra por aprobar.
         </p>
       </div>
     </Sheet>

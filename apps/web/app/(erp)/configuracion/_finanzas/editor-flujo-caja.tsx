@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Checkbox, Campo, Input, Select, Textarea } from "@opai/ds";
+import { Alerta, avisar, Button, Checkbox, Campo, Input, Select } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { CalendarioPagosEditor } from "./calendario-pagos";
 import type { FilaFlujo, AjustesFlujo } from "@/app/(erp)/finanzas/flujo/_componentes/datos";
 
 export function EditorFlujoCaja({
@@ -106,8 +107,8 @@ export function EditorFlujoCaja({
         <Checkbox
           marcado={aj.avisoActivo}
           onCambiar={(m) => setAj({ ...aj, avisoActivo: m })}
-          etiqueta="Campanita in-app (saldo bajo umbral)"
-          descripcion="Banner en la planilla y notificación interna. Solo campanita: quienes tienen permiso de ver el flujo."
+          etiqueta="Aviso en OPAI cuando el saldo baja del umbral"
+          descripcion="Se muestra un aviso en la planilla y en las notificaciones de OPAI a quienes pueden ver el flujo. No se envían correos."
         />
         <Campo etiqueta="Umbral del aviso (CLP)" htmlFor="aj-au">
           <Input
@@ -124,19 +125,11 @@ export function EditorFlujoCaja({
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-medium text-fg">Calendario de pagos</h2>
         <p className="text-sm text-fg-muted">
-          Días del mes para proyecciones automáticas cuando existan adaptadores de nómina e IVA. Edición JSON
-          provisional hasta el diseño completo del calendario.
+          Día del mes en que se paga cada concepto, para proyectar el flujo de caja.
         </p>
-        <Textarea
-          value={JSON.stringify(aj.calendarioPagos, null, 2)}
-          onChange={(e) => {
-            try {
-              setAj({ ...aj, calendarioPagos: JSON.parse(e.target.value) as Record<string, number> });
-            } catch {
-              /* espera JSON válido al guardar */
-            }
-          }}
-          rows={4}
+        <CalendarioPagosEditor
+          valor={aj.calendarioPagos}
+          onCambiar={(v) => setAj({ ...aj, calendarioPagos: v })}
         />
       </section>
     </div>

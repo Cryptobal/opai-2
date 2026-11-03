@@ -24,7 +24,7 @@ export function SemaforoMargenCpq({
         {/* Sin cálculo no hay semáforo: el margen se muestra «—» sin color (CAR-162). */}
         {semaforo && pct != null ? <Badge tono={tono}>{semaforoEtiqueta(semaforo)}</Badge> : null}
       </div>
-      <p className="t-h3 t-numeric">{margenPctTexto(margenEfectivoPct)}</p>
+      <p className="t-subheading t-numeric">{margenPctTexto(margenEfectivoPct)}</p>
       {pct != null ? (
         <div className="relative h-2 overflow-hidden rounded-full bg-fill">
           <div

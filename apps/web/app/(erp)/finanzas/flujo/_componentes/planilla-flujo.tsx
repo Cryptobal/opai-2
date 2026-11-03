@@ -50,7 +50,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
       <>
         {avisoTitulo ? (
           <Alerta tono="danger" titulo={avisoTitulo}>
-            Aviso in-app configurado en el módulo. No se envía correo externo en este PR.
+            El aviso se muestra solo dentro de OPAI y no envía correos.
           </Alerta>
         ) : null}
         <VistaMovilFlujo planilla={p} gestiona={gestiona} onCelda={(filaId, semana) => setSeleccion({ filaId, semana })} />

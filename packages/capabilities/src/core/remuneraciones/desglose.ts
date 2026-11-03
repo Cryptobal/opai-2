@@ -1,4 +1,4 @@
-import { clp, formatearCLP, UF_ESCALA } from "@opai/domain";
+import { formatearClp, UF_ESCALA } from "@opai/domain";
 
 import { pctDisplay, resumenIndicador, ufCentavosDisplay, ufEscaladaDisplay } from "./formato";
 
@@ -23,7 +23,7 @@ export function desgloseIndicador(clave: string, valor: unknown): string[] {
       return [`Valor del día: ${ufCentavosDisplay(Number(valor))}`];
     case "utm":
     case "imm":
-      return [`Monto: ${formatearCLP(clp(Number(valor)))}`];
+      return [`Monto: ${formatearClp(Number(valor))}`];
     case "sis":
       return [`Tasa SIS: ${pctDisplay(Number(valor))}`];
     case "jornada":
