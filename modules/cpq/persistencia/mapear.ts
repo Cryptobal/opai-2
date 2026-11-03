@@ -1,11 +1,12 @@
 import type { Item, LineaItem, ModeloCosteo, Puesto, Rateo, VersionCalculo } from "../domain/motor/tipos";
+import { instrumentosDeVersion } from "./instrumentos-version";
 import { mesesContrato, type VersionCtx } from "./version";
 
 type FilaSeccion = { id: string; nombre: string; margenPct: number | null; instalacionId: string | null };
 type FilaLinea = {
   id: string; seccionId: string; tipo: string; grupo: string | null; nombre: string; posiciones: number;
   recurrencia: string; habilitada: boolean; patron: string | null; horaInicio: string | null; horaFin: string | null;
-  diasCobertura: number | null; personasPorPosicionEscaladas: number | null; personasMotivo: string | null;
+  diasCobertura: number | null; diasSemana?: number[] | undefined; personasPorPosicionEscaladas: number | null; personasMotivo: string | null;
   sueldoBaseClp: number | null; itemCodigo: string | null; cantidadEscalada: number | null; rateoJson: string | null;
   precioUnitarioClp: number | null; margenPropioPct: number | null; alcanceDotacion: string | null;
 };
@@ -59,7 +60,7 @@ export function mapearVersionCalculo(
           patron: l.patron ?? "4x4",
           horaInicio: l.horaInicio ?? "08:00",
           horaFin: l.horaFin ?? "20:00",
-          diasCobertura: l.diasCobertura ?? 7,
+          diasCobertura: l.diasSemana?.length ? l.diasSemana.length : (l.diasCobertura ?? 7),
           ...(l.personasPorPosicionEscaladas != null
             ? { personasPorPosicionEscaladas: l.personasPorPosicionEscaladas, motivoPersonas: l.personasMotivo ?? "" }
             : {}),
@@ -90,12 +91,13 @@ export function mapearVersionCalculo(
     numero: version.numero,
     modeloId: "seguridad",
     modeloVersion: 1,
-    meses: mesesContrato(version.validaHasta),
+    meses: version.mesesContrato ?? mesesContrato(version.validaHasta),
     margenPct: version.margenObjetivoPct ?? 0,
     margenModo: version.margenModo as VersionCalculo["margenModo"],
     ...(margenesSeccion.length ? { margenesSeccion } : {}),
     variables: {},
     lineas: mapped,
+    ...instrumentosDeVersion(version.instrumentosJson),
   };
 }
 

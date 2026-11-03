@@ -1,9 +1,11 @@
 import {
+  avisoEsSueldoFaltante,
   avisosCpq,
   RUTA_CONFIRMAR_MUTUAL,
   type AccionAvisoCpq,
   type AvisoServidorCpq,
 } from "@/lib/cpq-avisos";
+import { TEXTO_COSTO_PENDIENTE } from "@/lib/cpq-avisos-compactos";
 
 export type MetaAccionesCpq = {
   avisoRecalculo?: unknown;
@@ -55,6 +57,13 @@ export function bloqueoEnvioCpq(p: ParamsAcciones): BloqueoEnvioCpq | null {
       recalcular: true,
     };
   }
+  if (avisoEsSueldoFaltante(primero)) {
+    return {
+      titulo: TEXTO_COSTO_PENDIENTE,
+      mensaje: "",
+      recalcular: false,
+    };
+  }
   const mas = avisos.length > 1 ? ` (y ${avisos.length - 1} más en la ficha)` : "";
   return {
     titulo: primero.titulo,
@@ -93,7 +102,18 @@ export function accionPrimariaCpq(p: ParamsAcciones): AccionPrimariaCpq | null {
 }
 
 export function hayBarraFijaCpq(p: ParamsAcciones): boolean {
-  return Boolean(accionPrimariaCpq(p) || bloqueoEnvioCpq(p));
+  const bloqueo = bloqueoEnvioCpq(p);
+  if (bloqueo?.titulo === TEXTO_COSTO_PENDIENTE && !bloqueo.enlace && !bloqueo.accion) {
+    return Boolean(accionPrimariaCpq(p));
+  }
+  return Boolean(accionPrimariaCpq(p) || bloqueo);
+}
+
+/** Bloqueo de cálculo que no debe repetirse en la barra fija del teléfono (sueldo en la línea). */
+export function bloqueoCalculoEnBarraFija(p: ParamsAcciones): BloqueoEnvioCpq | null {
+  const bloqueo = bloqueoEnvioCpq(p);
+  if (bloqueo?.titulo === TEXTO_COSTO_PENDIENTE && !bloqueo.enlace && !bloqueo.accion) return null;
+  return bloqueo;
 }
 
 export function pedirAprobacionDeshabilitada(p: ParamsAcciones): boolean {

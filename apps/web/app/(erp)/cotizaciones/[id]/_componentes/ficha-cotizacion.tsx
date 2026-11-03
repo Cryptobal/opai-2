@@ -152,6 +152,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
         requiereAprobacion={Boolean(c.requiereAprobacion)}
         estadoVersion={d.version.estado}
         enviada={d.version.estado === "enviada" || d.version.estado === "aceptada"}
+        verCostos={datos.costos}
         recargar={recargar}
       />
     </>

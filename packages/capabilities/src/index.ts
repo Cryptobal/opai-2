@@ -1,12 +1,13 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { ajustesComercial, capacidadesComercial } from "./comercial";
+export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
-export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
+export { ajuste, defineAjustes, valoresEfectivos, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,
   estaCifrado,
