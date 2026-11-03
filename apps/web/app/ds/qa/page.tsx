@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 
 import { Bloque } from "../bloques";
 import { MuestraFormulario, MuestraQaPasada1 } from "./muestra";
+import { MuestraGanar } from "./muestra-ganar";
+import { MuestraSii } from "./muestra-sii";
 import { MuestraDireccionesSinId, MuestraHojaConFecha } from "./muestra-pasada5";
 import { MuestraPestanas } from "./muestra-pestanas";
 
@@ -23,6 +25,12 @@ export default function PaginaQa() {
       </Bloque>
       <Bloque titulo="QA pasada 5 · dos direcciones sin id">
         <MuestraDireccionesSinId />
+      </Bloque>
+      <Bloque titulo="Ganar un negocio · qué va a pasar (vista previa, cargando, sin efectos)">
+        <MuestraGanar />
+      </Bloque>
+      <Bloque titulo="DatosSII · datos del SII de una cuenta (todos sus estados)">
+        <MuestraSii />
       </Bloque>
       <Bloque titulo="Pestañas que no caben en el celular · solo scroll horizontal">
         <MuestraPestanas />

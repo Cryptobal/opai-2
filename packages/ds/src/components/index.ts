@@ -38,3 +38,4 @@ export { subirConProgreso, Uploader } from "./uploader";
 export { TipoArchivo } from "./tipo-archivo";
 export { CeldaVigencia, type EstadoVigencia, textoVigencia, Vigencia } from "./vigencia";
 export { DatoArchivado } from "./dato-archivado";
+export { campoElegible, type CampoDatosSii, DatosSii, type EstadoDatosSii } from "./datos-sii";
