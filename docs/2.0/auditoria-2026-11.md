@@ -11,14 +11,14 @@
 
 ## 0. Los cinco hallazgos más importantes
 
-1. **No se puede emitir una factura real desde 2.0, aunque todo «esté construido».** El adaptador SimpleAPI de 2.0 (`packages/integrations/src/sii/simpleapi.ts`) llama a endpoints que no son los de la API real: `/v2/dte/firmar|enviar|consultar`, en JSON y con la key en claro. El adaptador que funciona en 1.0 (`src/modules/finance/shared/adapters/simpleapi.provider.ts`) usa `api/v1/dte/generar` → `envio/generar` → `envio/enviar`, en multipart con el `.pfx` y el CAF, y auth Basic. Además:
+1. **No se puede emitir una factura real desde 2.0, aunque todo «esté construido».** El adaptador SimpleAPI de 2.0 (`packages/integrations/src/sii/simpleapi.ts`) llama a endpoints que no son los de la API real: `/v2/dte/firmar|enviar|consultar`, en JSON y con la key en `Authorization` sin el esquema Basic que exige la API. El adaptador que funciona en 1.0 (`src/modules/finance/shared/adapters/simpleapi.provider.ts`) usa `api/v1/dte/generar` → `envio/generar` → `envio/enviar`, en multipart con el `.pfx` y el CAF, y auth Basic. Además:
    - la emisión no envía el CAF ni las líneas de detalle ni las referencias OC/HES;
    - la nota de crédito usa siempre el SII simulado (`ventas-nc-escritura.ts:41`);
    - SimpleAPI no se puede activar desde la pantalla: Finanzas lee `dte_config.emisionProveedor`, que ninguna pantalla escribe.
 
    Los tests pasan porque solo usan un mock. El adaptador de cesión Octava tiene el mismo problema.
 2. **`test.opai.cl` sigue cortándose contra Neon.** Vercel registra **1.585 errores «Connection terminated due to connection timeout» en 7 días, que afectaron a 29 usuarios**. Hay otros ~1.300 de la misma familia: P2028, «timeout exceeded when trying to connect» y `error_interno` de capacidades. El último fue el 3-nov a las 02:21 UTC. Se ven en casi todas las rutas y casi siempre empiezan al leer la sesión de Better Auth. CAR-31 y CAR-35 se cerraron, pero el problema sigue (§4.1).
-3. **13 migraciones integradas en `main` no tienen evidencia de estar aplicadas en Neon.** Nueve de ellas siguen con la etiqueta `migracion-pendiente` (#199, #203, #205, #217, #218, #219, #223, #224, #225) y dos PR con migración nunca la tuvieron (#209, #220). Entre ellas están las que necesitan Ventas DTE, CAF, propuesta técnica, flujo sin cierre, formulario web, canal agente y los datos tributarios de la cuenta. Si no están aplicadas, `test.opai.cl` corre código que espera tablas y columnas que no existen. Además, `ESTADO.md` afirma lo contrario en tres lugares (§1.3).
+3. **13 PR integrados en `main` (15 archivos de migración) no tienen evidencia de estar aplicados en Neon.** Diez siguen con la etiqueta `migracion-pendiente` (#181, #199, #203, #205, #217, #218, #219, #223, #224, #225) y dos nunca la tuvieron (#209, #220). Entre ellas están las que necesitan Ventas DTE, CAF, propuesta técnica, flujo sin cierre, formulario web, canal agente y los datos tributarios de la cuenta. Si no están aplicadas, `test.opai.cl` corre código que espera tablas y columnas que no existen. Además, `ESTADO.md` afirma lo contrario en tres lugares (§1.3).
 4. **La migración de Gard desde 1.0 todavía no puede salir bien.**
    - No hay de dónde leer: no existe exportador en 1.0 y el lector API falla cerrado.
    - El importador degrada datos:
@@ -101,7 +101,7 @@ Ningún PR tiene un aviso del bot del tipo «aplicada en dev y main». La eviden
 - Daba por aplicada la migración de #225, que sigue con la etiqueta puesta.
 - Daba por no aplicadas las de #201 y #207, cuya etiqueta ya se retiró.
 
-**Regla rota:** según ADR-043 v3 y ADR-054, no se integra con `migracion-pendiente` puesta. Nueve PR se integraron así.
+**Regla rota:** según ADR-043 v3 y ADR-054, no se integra con `migracion-pendiente` puesta. Diez PR se integraron así (#181 y nueve entre el 1 y el 3-nov).
 
 ---
 
@@ -288,6 +288,8 @@ Todos pasan por Claude Design (Design Prompt «DS 2.0 · refresco visual v1.1»)
 | `/finanzas/flujo`: se pasa una función (`celda`) a un componente cliente | 11 | 4 | Último: 2-nov 05:33; probablemente corregido por #219 (verificar) |
 | `/invitacion/[slug]/[token]`: `Date.now()` durante el prerender | 1 | 1 | Bajo |
 | Aviso `pg`: `client.query()` concurrente en un mismo cliente | 159 | 39 | Se vuelve error en pg 9 |
+
+**Antecedente:** #193 (CAR-50) ya dejó la lectura de sesión del hot path en una consulta en vez de dos, y #134–#142 ajustaron el pool. Los errores siguen después de eso.
 
 **Causa probable:** cada request (incluidas las precargas RSC de la navegación) abre una lectura de sesión en la base. Better Auth no tiene `cookieCache` (`packages/auth/src/auth.ts:51`). El pool es de 10 conexiones por instancia, con 10 s de espera, y la compute de Neon se suspende.
 

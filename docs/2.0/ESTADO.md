@@ -27,6 +27,8 @@ Detalle, brechas y evidencia en la [auditoría §1.2](auditoria-2026-11.md#12-po
 - **Nómina:** períodos, novedades, préstamos y calendario, sin cálculo (#183, #192).
 - **Portales:** Trabajador PR 1 y PR 2 (#189, #199); Cliente PR 1 (#181).
 - **Agente interno:** servidor y proveedores de IA (#62, #73). **No hay pantalla de chat** (CAR-120).
+- **Infraestructura y rendimiento:** pool de Neon y lecturas de sesión (#100–#102, #134–#142, #193), CI sin corte por tiempo (#191), presupuesto de JS (#129).
+- **Exports de diseño aprobados:** #148–#151, #154, #155, #157, #159, #161–#164, #166, #167, #170–#173, #175–#179, #185.
 
 ## Migraciones en Neon
 
@@ -82,7 +84,7 @@ Evidencia: retiro de `migracion-pendiente` por el operador (ADR-054). Ningún PR
 ## Decisiones y riesgos vigentes
 
 - **Decisiones pendientes de Carlos:** D1–D8 del [ROADMAP §5](ROADMAP.md#5-decisiones-que-necesita-carlos) (`cookieCache`, migraciones, acceso de solo lectura a 1.0, fecha de corte, credenciales DTE, diseño, CAR-120 y orden de Linear).
-- **Regla de integración reafirmada:** no se integra con `migracion-pendiente` puesta (ADR-043 v3, ADR-054). Nueve PR se integraron así entre el 1 y el 3-nov.
+- **Regla de integración reafirmada:** no se integra con `migracion-pendiente` puesta (ADR-043 v3, ADR-054). Diez PR se integraron así (#181 y nueve entre el 1 y el 3-nov).
 - **BYPASSRLS de `neondb_owner`:** el dueño de las tablas en Neon (rol de `prisma migrate deploy`) tiene BYPASSRLS, así que FORCE no le afecta. La garantía es `opai_app` sin BYPASSRLS con `tenant_isolation` (ADR-002, [NUCLEO-G2](briefs/NUCLEO-G2-force-rls.md)). Toda migración de datos posterior a `20261028170000` verifica las filas afectadas (`REGLAS-codigo.md`).
 - **Inspector DT:** solo lectura; ve sueldos, auditoría y montos sensibles (`core:estructuras.read_sensible`, decisión t479u del 26-oct; `packages/db/scripts/roles-base-plantillas.ts`).
 - **`IF NOT EXISTS` en migraciones:** no valida el esquema de lo que ya existe. Una migración nueva no depende de eso para reintentos si no tiene un test equivalente (`plataforma-migracion-reintento.test.ts`).

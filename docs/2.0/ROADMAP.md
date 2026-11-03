@@ -7,7 +7,7 @@
 **Reglas del plan:**
 - PR chicos y secuenciales: un brief por PR, dentro del PR.
 - Las migraciones son aditivas y las aplica el operador con respaldo.
-- Ningún PR se integra con `migracion-pendiente` puesta (ADR-043 v3, ADR-054). Esto se rompió nueve veces la semana pasada.
+- Ningún PR se integra con `migracion-pendiente` puesta (ADR-043 v3, ADR-054). Esto se rompió diez veces (#181 y nueve PR entre el 1 y el 3-nov).
 - Las fechas son estimaciones para un constructor (Claude) con revisión por bots y decisiones de Carlos a tiempo.
 
 ## 1. Ciclo de cada módulo (ADR-047)
@@ -18,7 +18,7 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 
 | # | Qué | Quién | Por qué |
 |---|---|---|---|
-| O1 | Aplicar en Neon `dev` y `main`, con respaldo, las 13 migraciones integradas sin evidencia de aplicación (lista en [auditoría §1.3](auditoria-2026-11.md#13-migraciones-recientes-y-su-evidencia-de-aplicación)), verificarlas y retirar `migracion-pendiente` de cada PR | Operador «OPAI 2.0» | Sin ellas, Ventas DTE, CAF, propuesta técnica, formulario web y canal agente corren contra tablas que pueden no existir |
+| O1 | Aplicar en Neon `dev` y `main`, con respaldo, los 13 PR integrados (15 migraciones) sin evidencia de aplicación (lista en [auditoría §1.3](auditoria-2026-11.md#13-migraciones-recientes-y-su-evidencia-de-aplicación)), verificarlas y retirar `migracion-pendiente` de cada PR | Operador «OPAI 2.0» | Sin ellas, Ventas DTE, CAF, propuesta técnica, formulario web y canal agente corren contra tablas que pueden no existir |
 | O2 | Revisar por qué GitHub Actions termina en `startup_failure` en todas las corridas desde el 31-oct | Carlos / operador | Mientras tanto basta el OK de Vercel, pero el gate de tests no corre |
 | O3 | Decisiones de la §5 | Carlos | P1, P3, P6 y P7 dependen de ellas |
 
@@ -31,7 +31,7 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 | **P0** · CAR-151 | `docs/car-151-auditoria-2026-11` | Esta auditoría, ESTADO limpio y plan; tests de `main` en verde; bug B1 | No | — |
 | **P1** · CAR-152 | `fix/conexiones-neon` | Cortes de conexión con Neon (1.585 errores en 7 días): `cookieCache` de sesión en Better Auth, confirmar el host `-pooler` y la suspensión de la compute, medir las precargas por navegación, corregir el `client.query()` concurrente | No | Decisión D1 |
 | **P2** · CAR-153 | `qa/textos-y-estilos` | Bugs B2–B9 y B11: clases inexistentes, montos que se cortan, estados de Finanzas traducidos, sin referencias internas ni jerga, errores de negocio en lugar de mensajes crudos; formateador único de CLP y fecha (R4) | No | — |
-| **P3** · CAR-154 | `brief/finanzas-simpleapi-real` | Portar los adaptadores **SimpleAPI y Octava de 1.0** (pieza aislada, con revisión) detrás de `AdaptadorSii`; payload completo (detalle de líneas, CAF del rango, referencias OC/HES, resolución SII del emisor); NC con el adaptador del tenant; preflight de emisión; test de contrato con respuestas grabadas de certificación | Sí, aditiva (resolución SII y referencias en borrador) | O1 |
+| **P3** · CAR-154 | `brief/finanzas-simpleapi-real` | Portar los adaptadores **SimpleAPI y Octava de 1.0** (pieza aislada, con revisión) detrás de `AdaptadorSii`; payload completo (detalle de líneas, CAF del rango, referencias OC/HES, resolución SII del emisor); NC con el adaptador del tenant; preflight de emisión; test de contrato con respuestas grabadas de certificación | Sí, aditiva (resolución SII y referencias en borrador) | O1; D5 para probar contra certificación |
 | **P4** · CAR-155 | `brief/finanzas-ficha-venta` | Ficha de venta con acciones (enviar al SII, PDF, NC, ceder); pantalla **Configuración DTE** con fuente única de ambiente y checklist de producción; **envío del DTE al cliente** (PDF + XML por Comunicaciones, a los contactos con rol facturación) | Posible, aditiva (registro de envíos) | P3 |
 | **P5** · CAR-156 | `brief/comercial-consulta-sii` | `consultarContribuyente(rut)` en el adaptador; capacidades `core.cuentas.consultar_sii` (lectura) y `aplicar_sii` (diff por campo, dryRun) con su MCP; consulta en cola y cacheada; indicador «lista para facturar» en lista y ficha de cuenta | Sí, aditiva (caché por RUT) | P3 |
 | Diseño | — | Design Prompt «DS 2.0 · refresco visual v1.1» (C1, C3 y C4 de la auditoría) para Claude Design | — | Carlos aprueba |
