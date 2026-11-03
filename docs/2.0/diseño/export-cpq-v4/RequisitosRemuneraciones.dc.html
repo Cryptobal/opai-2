@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-100);font-family:var(--font-sans);font-feature-settings:"cv11","ss01";color:var(--ds-fg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">CPQ v4 · Vigía Sur SpA · Configuración › Remuneraciones</span>
+    <span style="font:600 28px/34px var(--font-sans);letter-spacing:-.02em">Requisitos del tenant</span>
+    <span style="font:400 15px/22px var(--font-sans);color:var(--ds-fg-muted);max-width:880px">Destino único de «Confirmar mutual adicional». Los valores legales se obtienen solos y son de solo lectura; si una fuente trae un valor distinto, owner o admin lo revisan. Si una fuente falla, se usa el último valor y nunca bloquea.</span>
+  </div>
+  <sc-for list="{{ secciones }}" as="sec" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:20px">
+      <span style="font:600 18px/26px var(--font-sans)">{{ sec.t }}</span>
+      <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+        <sc-for list="{{ sec.frames }}" as="fr" hint-placeholder-count="2">
+          <div id="{{ fr.id }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">{{ fr.id }}</span><span style="font:500 14px/20px var(--font-sans)">{{ fr.cap }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">{{ fr.w }}</span></div>
+            <div data-device="{{ fr.dev }}" data-shot="{{ fr.id }}" data-theme="light" style="position:relative;width:{{ fr.w }}px;height:{{ fr.h }}px;border-radius:{{ fr.rad }};border:1px solid var(--ds-border-strong);overflow:hidden;background:var(--ds-bg);color:var(--ds-fg);flex:none">
+              <div style="display:flex;flex-direction:{{ fr.dir }};height:100%">
+                <sc-if value="{{ fr.isPhone }}">
+                  <div class="safe-top" style="display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:600 15px/20px var(--font-sans)"><span>9:41</span><span style="width:18px;height:10px;border-radius:2px;border:1.5px solid var(--ds-fg)"></span></div>
+                  <div class="topbar"><button class="icon-btn" aria-label="Volver"><span class="ic i-chevron-left"></span></button><span style="font:600 15px/20px var(--font-sans);flex:1">Remuneraciones</span></div>
+                </sc-if>
+                <sc-if value="{{ fr.isDesk }}">
+                  <aside class="sidebar">
+                    <div class="sidebar-head"><span class="wordmark">OPAI</span><span class="tenant">VS</span></div>
+                    <button class="sidebar-portal"><span class="ic sm i-grid"></span><span style="flex:1;font:500 14px/20px var(--font-sans)">ERP</span><span class="ic sm i-updown" style="color:var(--ds-fg-subtle)"></span></button>
+                    <div class="nav-group" style="padding-top:12px"><button class="nav-item"><span class="ic i-home"></span>Inicio</button></div>
+                    <div class="nav-group"><span class="h">Comercial</span><button class="nav-item"><span class="ic i-briefcase"></span>Negocios</button><button class="nav-item"><span class="ic i-file"></span>Cotizaciones</button></div>
+                    <div class="nav-group"><span class="h">Configuración</span><button class="nav-item"><span class="ic i-file"></span>CPQ</button><button class="nav-item on"><span class="ic i-wallet"></span>Remuneraciones</button><button class="nav-item"><span class="ic i-users"></span>Usuarios</button></div>
+                    <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)"><span class="avatar">{{ fr.ini }}</span><span style="display:flex;flex-direction:column"><span style="font:500 14px/20px var(--font-sans)">{{ fr.user }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ fr.rol }}</span></span></div>
+                  </aside>
+                </sc-if>
+                <sc-if value="{{ fr.isTab }}"><nav class="rail"><button class="rail-portal"><span class="ic i-grid"></span>ERP</button><button class="rail-item"><span class="ic i-home"></span>Inicio</button><button class="rail-item"><span class="ic i-briefcase"></span>Comercial</button><button class="rail-item on"><span class="ic i-menu"></span>Ajustes</button></nav></sc-if>
+                <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column">
+                  <sc-if value="{{ fr.wide }}"><header class="appbar" style="padding:0 {{ fr.gut }}"><span style="flex:1;font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Configuración › Remuneraciones › Requisitos</span><button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button></header></sc-if>
+                  <div style="flex:1;min-height:0;overflow:auto;padding:{{ fr.pad }};display:flex;flex-direction:column;gap:16px">
+                    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                      <div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Remuneraciones</span><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Actualizados automáticamente · última captura hoy 09:00</span></div>
+                      <span class="{{ fr.estadoCls }}">{{ fr.estadoTxt }}</span>
+                    </div>
+                    <div class="tabs" style="margin:0 {{ fr.tabNeg }};padding:0 {{ fr.tabPad }}"><button class="tab on">Requisitos</button><button class="tab">Haberes</button><button class="tab">Descuentos</button><button class="tab">Previred</button></div>
+
+                    <sc-if value="{{ fr.hayCambio }}">
+                      <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="font:600 16px/24px var(--font-sans)">Cambio propuesto</span><span class="badge b-warning">Por revisar</span></div>
+                        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                          <span style="display:flex;flex-direction:column;gap:2px"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Tope imponible AFP · actual</span><span style="font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums">UF 87,8</span></span>
+                          <span class="ic i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
+                          <span style="display:flex;flex-direction:column;gap:2px"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Propuesto · desde 01-01-2027</span><span style="font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums">UF 89,9</span></span>
+                        </div>
+                        <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Fuente: Superintendencia de Pensiones · capturado hoy 09:00. Al aprobarlo, las cotizaciones con inicio desde el 01-01-2027 lo usan; las enviadas no cambian.</span>
+                        <sc-if value="{{ fr.puedeDecidir }}"><div style="display:flex;gap:8px;justify-content:{{ fr.btnJust }}"><button class="btn btn-secondary" onClick="{{ fr.rechazar }}" style="flex:{{ fr.btnFlex }}">Rechazar</button><button class="btn btn-primary" onClick="{{ fr.aprobar }}" style="flex:{{ fr.btnFlex }}">Aprobar</button></div></sc-if>
+                        <sc-if value="{{ fr.soloVer }}"><div class="alerta" style="background:var(--ds-fill);color:var(--ds-fg-muted)"><span class="ic i-lock"></span><span class="txt"><span>Lo deciden el owner o un admin. Pídeselo a Tomás Fuentes, admin de Vigía Sur SpA.</span></span></div></sc-if>
+                      </div>
+                    </sc-if>
+
+                    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="font:600 16px/24px var(--font-sans)">Mutual adicional</span><span class="{{ fr.mutCls }}">{{ fr.mutTxt }}</span></div>
+                      <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Tasa adicional según tu adhesión a la mutual (Ley 16.744). La básica, 0,93 %, se obtiene sola. Enviar una cotización exige confirmarla.</span>
+                      <sc-if value="{{ fr.mutPend }}">
+                        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+                          <div class="field" style="width:160px"><span class="lbl">Tasa adicional</span><div class="input compact focus"><span class="grow" style="font-variant-numeric:tabular-nums">0,95</span><span class="trail">%</span></div></div>
+                          <sc-if value="{{ fr.puedeDecidir }}"><button class="btn btn-primary" onClick="{{ fr.confirmar }}">Confirmar</button></sc-if>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ fr.mutOk }}"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="font:400 13px/18px var(--font-sans)">Confirmada · 0,95 % · por Tomás Fuentes el 03-11-2026</span><button class="btn btn-ghost" style="height:32px">Cambiar</button></div></sc-if>
+                    </div>
+
+                    <div class="card" style="overflow:hidden">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-bottom:1px solid var(--ds-border)"><span style="font:600 16px/24px var(--font-sans)">Valores legales</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Solo lectura</span></div>
+                      <sc-if value="{{ fr.wide }}">
+                        <div style="display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1.2fr);gap:12px;padding:8px 16px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)"><span>Valor</span><span style="text-align:right">Actual</span><span>Fuente y captura</span></div>
+                      </sc-if>
+                      <sc-for list="{{ fr.valores }}" as="v" hint-placeholder-count="8">
+                        <div style="display:grid;grid-template-columns:{{ fr.vcols }};gap:{{ fr.vgap }};align-items:center;padding:10px 16px;border-bottom:1px solid var(--ds-border);font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">
+                          <span style="display:flex;flex-direction:column"><span style="font-weight:500">{{ v.n }}</span><sc-if value="{{ v.hayProx }}"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ v.prox }}</span></sc-if></span>
+                          <span style="text-align:{{ fr.valAlign }};font-weight:500">{{ v.v }}</span>
+                          <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                            <span title="{{ v.tip }}" style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;white-space:nowrap;font:500 12px/16px var(--font-sans);background:{{ v.bg }};color:{{ v.fg }}">{{ v.fuente }}</span>
+                            <sc-if value="{{ v.respaldo }}"><button class="btn btn-ghost" onClick="{{ fr.reintentar }}" style="height:28px;padding:0 8px;font-size:13px">Reintentar</button></sc-if>
+                          </span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <sc-if value="{{ fr.isPhone }}"><nav class="tabbar" style="padding-bottom:28px"><button><span class="ic i-home"></span>Inicio</button><button><span class="ic i-briefcase"></span>Comercial</button><button><span class="ic i-users"></span>Personas</button><button class="on"><span class="ic i-menu"></span>Más</button></nav></sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ fr.hayToast }}"><div style="position:absolute;left:16px;right:16px;bottom:{{ fr.toastBot }};z-index:30;display:flex;justify-content:center"><div class="toast">{{ fr.toast }}</div></div></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DIMS = { phone: [375, 812], tablet: [1024, 768], desktop: [1280, 800] };
+const SECS = [
+  { t: '1 · Con cambio propuesto y mutual sin confirmar', frames: [['1a', 'phone', 'Owner', {}], ['1b', 'tablet', 'Owner', {}], ['1c', 'desktop', 'Owner', {}]] },
+  { t: '2 · Fuente en respaldo', frames: [['2a', 'desktop', 'La UF no respondió', { respaldo: true }], ['2b', 'phone', 'La UF no respondió', { respaldo: true }]] },
+  { t: '3 · Resuelto y sin permiso', frames: [['3a', 'desktop', 'Mutual confirmada y cambio aprobado', { mutual: true, cambio: 'ok' }], ['3b', 'tablet', 'Ejecutivo sin permiso para decidir', { viewer: true }]] }
+];
+const N = { bg: 'var(--ds-fill)', fg: 'var(--ds-fg-muted)' };
+class Component extends DCLogic {
+  state = (() => { const fs = {}; SECS.forEach(s => s.frames.forEach(([id, , , o]) => { fs[id] = { respaldo: false, mutual: false, cambio: 'pend', viewer: false, toast: null, ...o }; })); return { fs }; })();
+  up(id, p) { this.setState(st => ({ fs: { ...st.fs, [id]: { ...st.fs[id], ...p } } })); }
+  say(id, t) { this.up(id, { toast: t }); setTimeout(() => this.up(id, { toast: null }), 3000); }
+  renderVals() {
+    const secciones = SECS.map(sec => ({ t: sec.t, frames: sec.frames.map(([id, vp, cap]) => {
+      const s = this.state.fs[id];
+      const [w, h] = DIMS[vp];
+      const ph = vp === 'phone';
+      const valores = [
+        s.respaldo ? { n: 'UF', v: '39.488,10', fuente: 'La fuente no respondió · se usa el valor del 28-10', tip: 'SII no respondió a las 09:00 · reintentamos cada hora', bg: 'var(--ds-warning-muted)', fg: 'var(--ds-warning-fg)', respaldo: true }
+                   : { n: 'UF', v: '39.512,34', fuente: 'SII · hoy 09:00', tip: 'Capturado 03-11-2026 09:00', ...N },
+        { n: 'UTM', v: '$ 69.542', fuente: 'SII · nov-2026', tip: 'Capturado 01-11-2026', ...N },
+        { n: 'Ingreso mínimo mensual', v: '$ 539.000', fuente: 'Previred · jul-2026', tip: 'Vigente desde 01-07-2026', ...N },
+        { n: 'Tope imponible AFP', v: 'UF 87,8', fuente: 'Previred · ene-2026', tip: 'Vigente desde 01-01-2026', ...N, hayProx: s.cambio === 'ok', prox: 'Desde 01-01-2027: UF 89,9 · aprobado hoy' },
+        { n: 'Tope seguro de cesantía', v: 'UF 131,9', fuente: 'Previred · ene-2026', tip: 'Vigente desde 01-01-2026', ...N },
+        { n: 'AFP (modelo)', v: '10,58 %', fuente: 'Previred · nov-2026', tip: 'Cotización obligatoria más comisión', ...N },
+        { n: 'SIS', v: '1,49 %', fuente: 'Previred · nov-2026', tip: 'Seguro de invalidez y sobrevivencia', ...N },
+        { n: 'Seguro de cesantía · empleador', v: '2,4 % · 3,0 %', fuente: 'Previred · indefinido · plazo fijo', tip: 'Contrato indefinido 2,4 % · plazo fijo 3,0 %', ...N },
+        { n: 'Mutual básica', v: '0,93 %', fuente: 'Ley 16.744 · vigente', tip: 'Cotización básica', ...N }
+      ].map(v => ({ hayProx: false, respaldo: false, ...v }));
+      const puede = !s.viewer;
+      return { id, cap, w, h, dev: vp, rad: ph ? '44px' : '12px', isPhone: ph, wide: !ph, isTab: vp === 'tablet', isDesk: vp === 'desktop',
+        dir: ph ? 'column' : 'row', gut: vp === 'tablet' ? '24px' : '32px', pad: ph ? '4px 16px 24px' : (vp === 'tablet' ? '24px' : '24px 32px'),
+        tabNeg: ph ? '-16px' : '0', tabPad: ph ? '16px' : '0',
+        vcols: ph ? 'minmax(0,1fr) auto' : 'minmax(0,1fr) 170px minmax(0,1.2fr)', vgap: ph ? '4px 12px' : '12px', valAlign: 'right',
+        estadoTxt: s.respaldo ? '1 valor en respaldo' : 'Al día', estadoCls: s.respaldo ? 'badge b-warning' : 'badge b-success',
+        hayCambio: s.cambio === 'pend', puedeDecidir: puede, soloVer: !puede, btnJust: ph ? 'stretch' : 'flex-end', btnFlex: ph ? '1' : 'none',
+        ini: s.viewer ? 'PL' : 'TF', user: s.viewer ? 'Pedro Lagos' : 'Tomás Fuentes', rol: s.viewer ? 'Ejecutivo comercial' : 'Admin',
+        aprobar: () => { this.up(id, { cambio: 'ok' }); this.say(id, 'Cambio aprobado · se aplica desde 01-01-2027'); },
+        rechazar: () => { this.up(id, { cambio: 'no' }); this.say(id, 'Cambio rechazado · se mantiene UF 87,8'); },
+        mutPend: !s.mutual, mutOk: s.mutual, mutTxt: s.mutual ? 'Confirmada · 0,95 %' : 'Sin confirmar · se cotiza con 0 %', mutCls: s.mutual ? 'badge b-success' : 'badge b-warning',
+        confirmar: () => { this.up(id, { mutual: true }); this.say(id, 'Mutual adicional confirmada · 0,95 %'); },
+        reintentar: () => this.say(id, 'La fuente sigue sin responder · reintentamos cada hora'),
+        valores, hayToast: !!s.toast, toast: s.toast, toastBot: ph ? '100px' : '24px' };
+    }) }));
+    return { secciones };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="neg" title="Negocios" count="{{ openCount }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Negocios" subtitle="{{ subtitle }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" size="{{ btnSize }}" on-click="{{ openNew }}" hint-size="160px,40px">Nuevo negocio</x-import>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar negocio, cuenta o folio" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="width:288px;max-width:100%;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar negocio, cuenta o folio" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import></div>
+</sc-if>
+<div class="chip-row" style="max-width:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Mis negocios" count="{{ 6 }}" selected="{{ mine }}" on-click="{{ toggleMine }}" hint-size="130px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" label="Cierre" value="Nov 2026" on-remove="{{ noop }}" hint-size="150px,32px"></x-import>
+<sc-if value="{{ tagFilter }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" label="Etiqueta" value="Logística" on-remove="{{ noop }}" hint-size="150px,32px"></x-import></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" hint-size="140px,32px"></x-import>
+</div>
+<div style="display:flex;gap:8px;align-items:center;position:relative;margin-left:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ viewOpts }}" value="{{ view }}" on-change="{{ setView }}" label="Vista de negocios" hint-size="160px,36px"></x-import>
+<sc-if value="{{ showExport }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" on-click="{{ openExport }}" hint-size="120px,40px">Exportar</x-import>
+</sc-if>
+<sc-if value="{{ showColBtn }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon-right="chevron-down" on-click="{{ toggleCols }}" hint-size="130px,40px">{{ colBtnLabel }}</x-import>
+</sc-if>
+<sc-if value="{{ colsOpen }}" hint-placeholder-val="{{ false }}">
+<div class="overlay" style="position:absolute;top:calc(100% + 6px);right:0;width:264px;z-index:20;padding:8px 12px 4px;display:flex;flex-direction:column">
+<span class="t-caption" style="padding:4px 0 2px">Columnas visibles</span>
+<sc-for list="{{ colOpts }}" as="c" hint-placeholder-count="10">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ c.on }}" disabled="{{ c.locked }}" label="{{ c.label }}" on-change="{{ c.toggle }}" hint-size="100%,44px"></x-import>
+</sc-for>
+<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--ds-border);margin-top:4px;padding:4px 0">
+<span class="t-caption">Se guarda para tu usuario</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ resetCols }}" hint-size="100px,40px">Restablecer</x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+<sc-if value="{{ phoneGrouped }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<sc-for list="{{ groupedCols }}" as="col" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" count="{{ col.count }}" hint-size="100%,33px">{{ col.name }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tableCols }}" rows="{{ col.deals }}" cards="{{ true }}" to-card="{{ toCardSeg }}" on-row-click="{{ noop }}" hint-size="100%,140px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ boardVisible }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;align-items:flex-start;scroll-snap-type:x mandatory">
+<sc-for list="{{ columns }}" as="col" hint-placeholder-count="8">
+<div style="flex:none;width:{{ colWidth }};display:flex;flex-direction:column;gap:8px;scroll-snap-align:start">
+<div style="display:flex;flex-direction:column;gap:2px;padding:4px 4px 8px;border-bottom:2px solid {{ col.bar }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+<span style="font:600 14px/20px var(--font-sans)">{{ col.name }}</span>
+<span class="t-body-sm subtle t-numeric">{{ col.count }}</span>
+</div>
+<span class="t-caption t-numeric">{{ col.meta }}</span>
+</div>
+<sc-for list="{{ col.deals }}" as="d" hint-placeholder-count="2">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;cursor:pointer">
+<span class="t-mono subtle" style="font-size:12px;line-height:16px">{{ d.folio }}</span>
+<span style="font:500 14px/20px var(--font-sans);text-wrap:pretty">{{ d.name }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ d.acc }}</span>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:4px">
+<span class="t-numeric" style="font:600 15px/20px var(--font-sans)">{{ d.valFmt }}</span>
+<span class="t-caption t-numeric">{{ d.dateLabel }}</span>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px">
+<span style="display:flex;align-items:center;gap:8px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ d.own }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
+<span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.ownName }}</span>
+</span>
+<sc-if value="{{ d.showStale }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="90px,22px">{{ d.staleLabel }}</x-import>
+</sc-if>
+<sc-if value="{{ d.lostReason }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="color:var(--ds-danger-fg)">{{ d.lostReason }}</span>
+</sc-if>
+</div>
+<sc-if value="{{ d.ind }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ d.ind.tone }}" style="align-self:flex-start;margin-top:2px" hint-size="120px,22px">{{ d.ind.label }}</x-import>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tableCols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tableCols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ selCount }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectionBar" label="{{ selLabel }}" on-clear="{{ clearSel }}" placement="{{ selPlacement }}" style="margin-top:12px" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="user-check" on-click="{{ openTransfer }}" hint-size="120px,40px">Transferir</x-import>
+</x-import>
+</sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">
+<span class="t-numeric">{{ pageLabel }}</span>
+<span class="t-numeric">{{ listTotal }}</span>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+<sc-if value="{{ newOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Nuevo negocio" description="Se crea en la etapa que elijas y queda a tu nombre." actions="{{ newActions }}" on-close="{{ closeNew }}" hint-size="440px,560px">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre del negocio" value="{{ newName }}" on-change="{{ setNewName }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cuenta" value="{{ newAcc }}" options="{{ accOpts }}" on-change="{{ setNewAcc }}" hint="Si la cuenta no existe, créala desde Cuentas." hint-size="100%,90px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="Nueva instalación" options="{{ tipoOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Origen" value="Referido" options="{{ origenOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Etapa inicial" value="s1" options="{{ stageOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cierre estimado" value="30-11-2026" icon="calendar" hint-size="100%,70px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Valor mensual estimado" prefix="$" value="6.480.000" hint="Se reemplaza por el total de la cotización cuando exista." hint-size="100%,90px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ exportOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Exportar negocios" description="Archivo CSV o Excel con las columnas que elijas." actions="{{ exportActions }}" on-close="{{ closeAll }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ expVista }}" hint-placeholder-val="{{ true }}">
+<div role="radiogroup" aria-label="Qué exportar" style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ expScope }}" as="r" hint-placeholder-count="2">
+<div role="radio" aria-checked="{{ r.on }}" tabindex="0" onClick="{{ r.select }}" style="display:flex;gap:12px;padding:14px;border-radius:16px;border:1px solid {{ r.border }};background:{{ r.bg }};cursor:pointer;align-items:flex-start"><span aria-hidden="true" style="width:20px;height:20px;border-radius:999px;flex:none;box-sizing:border-box;border:{{ r.dot }};background:var(--ds-surface)"></span><span style="display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="font-weight:600">{{ r.label }}</span><span class="t-caption">{{ r.desc }}</span></span></div>
+</sc-for>
+</div>
+<section style="display:flex;flex-direction:column"><span class="t-label" style="margin-bottom:4px">Columnas</span>
+<sc-for list="{{ expCols }}" as="c" hint-placeholder-count="8"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ c.on }}" label="{{ c.label }}" description="{{ c.desc }}" hint-size="100%,44px"></x-import></sc-for>
+</section>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-body-sm" style="font-weight:500">Formato</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ fmtOpts }}" value="xlsx" label="Formato" hint-size="100%,36px"></x-import></div>
+<div style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-lock" aria-hidden="true" style="flex:none;margin-top:2px"></span><span>Incluye datos personales de contactos. Queda registrado quién exportó, cuándo y qué columnas (Ley 21.719).</span></div>
+</sc-if>
+<sc-if value="{{ expPrep }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:10px"><span class="t-body-sm">Preparando 12 negocios · 9 columnas</span><div style="height:6px;border-radius:999px;background:var(--ds-fill);overflow:hidden"><div style="width:60%;height:100%;background:var(--ds-accent)"></div></div><span class="t-caption">Puedes cerrar esta hoja; te avisamos en la campana cuando esté listo.</span></div>
+</sc-if>
+<sc-if value="{{ expReady }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StateTile" icon="check-circle" tone="success" hint-size="48px,48px"></x-import><span class="t-subheading">Tu archivo está listo</span><span class="t-body-sm muted">negocios-29-10-2026.xlsx · 12 filas · 38 KB · disponible por 24 horas</span><span class="t-caption">Registrado: Camila Rojas exportó 12 negocios el 29-10-2026 a las 10:52.</span></div>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ transferOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="{{ trTitle }}" description="{{ trDesc }}" actions="{{ transferActions }}" on-close="{{ closeAll }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ trForm }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Nuevo responsable" value="FS" options="{{ ownerOpts }}" hint-size="100%,70px"></x-import>
+<section style="display:flex;flex-direction:column"><span class="t-label" style="margin-bottom:4px">Qué se transfiere</span>
+<sc-for list="{{ trItems }}" as="c" hint-placeholder-count="3"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ c.on }}" label="{{ c.label }}" description="{{ c.desc }}" hint-size="100%,60px"></x-import></sc-for>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Avisar a Francisca Soto" description="Recibe una notificación con la lista y tu mensaje." hint-size="100%,60px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Mensaje" value="{{ trMsg }}" rows="{{ 3 }}" hint-size="100%,110px"></x-import>
+</sc-if>
+<sc-if value="{{ trError }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-danger-muted);color:var(--ds-danger-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">No se pudo transferir 1 negocio</b><span>«Francisca Soto no tiene acceso a la cuenta Clínica Los Leones S.A. Dale acceso o elige otro responsable.»</span><span class="t-mono" style="font-size:12px">REGLA-TRANS-02</span></span></div>
+</sc-if>
+<sc-if value="{{ trOk }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StateTile" icon="check-circle" tone="success" hint-size="48px,48px"></x-import><span class="t-subheading">Transferido a Francisca Soto</span><span class="t-body-sm muted">3 negocios y 4 tareas cambiaron de responsable. Le avisamos por la campana.</span></div>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tablero&quot;,&quot;lista&quot;,&quot;nuevo&quot;,&quot;exportar&quot;,&quot;transferir&quot;,&quot;cartera&quot;],&quot;default&quot;:&quot;tablero&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;seg&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;vista&quot;,&quot;preparando&quot;,&quot;listo&quot;,&quot;confirmando&quot;,&quot;exito&quot;,&quot;error&quot;],&quot;default&quot;:&quot;vista&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { sel: null, dlg: null, scope: null, q: "", mine: false, view: null, colsOpen: null, newOpen: null, newName: "Guardias 24/7 · Bodega Pudahuel", newAcc: "Distribuidora Pacífico Sur Ltda.", cols: ["neg", "cuenta", "etapa", "valor", "cierre", "resp"] };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "tablero";
+    const isPhone = device === "phone";
+    if (!C) return { device, theme, isPhone, notPhone: !isPhone };
+    const seg = !!this.props.seg;
+    const estado = this.props.estado ?? "vista";
+    const listy = ["lista", "exportar", "transferir", "cartera"].includes(screen);
+    const view = this.state.view ?? (listy ? "lista" : "tablero");
+    const colsOpen = this.state.colsOpen ?? (screen === "lista" && !isPhone);
+    const sel = this.state.sel ?? (screen === "transferir" ? { "NEG-0139": 1, "NEG-0147": 1, "NEG-0153": 1 } : {});
+    const selN = Object.keys(sel).filter((k) => sel[k]).length;
+    const dlg = this.state.dlg ?? ({ exportar: "exp", transferir: isPhone ? "none" : "tr", cartera: "tr" }[screen] || "none");
+    const closeAll = () => this.setState({ dlg: "none" });
+    const btnE = (p, t) => h(NS.Button, p, t);
+    const radioS = (on) => ({ border: on ? "var(--ds-accent)" : "var(--ds-border)", bg: on ? "var(--ds-accent-muted)" : "var(--ds-surface)", dot: on ? "6px solid var(--ds-accent)" : "1.5px solid var(--ds-border-strong)" });
+    const scope = this.state.scope ?? "ves";
+    const newOpen = this.state.newOpen ?? (screen === "nuevo");
+    const q = this.state.q.toLowerCase();
+    let deals = C.deals.filter((d) => !q || (d.name + d.acc + d.folio).toLowerCase().includes(q));
+    if (this.state.mine) deals = deals.filter((d) => d.own === "CR");
+    const open = C.deals.filter((d) => d.stage !== "s7" && d.stage !== "s8");
+    const openSum = open.reduce((a, d) => a + d.val, 0);
+    const columns = C.stages.map((s) => {
+      const ds = deals.filter((d) => d.stage === s.id);
+      const sum = ds.reduce((a, d) => a + d.val, 0);
+      const closed = s.id === "s7" || s.id === "s8";
+      return {
+        id: s.id, name: s.name, count: ds.length,
+        bar: s.id === "s7" ? "var(--ds-success)" : s.id === "s8" ? "var(--ds-danger)" : "var(--ds-border-strong)",
+        meta: closed ? C.fmt(sum) + " · octubre" : C.fmt(sum) + " · " + s.prob + " %",
+        deals: ds.map((d) => ({
+          ...d, valFmt: C.fmt(d.val),
+          dateLabel: closed ? (s.id === "s7" ? "Ganado " : "Perdido ") + d.close.slice(0, 5) : "Cierre " + d.close.slice(0, 5),
+          stale: !closed && s.dias && d.days > s.dias, staleLabel: d.days + " d en etapa",
+          ind: seg ? C.segInd && C.segInd[d.folio] : null,
+          showStale: !closed && s.dias && d.days > s.dias && !(seg && C.segInd && C.segInd[d.folio]),
+          lostReason: s.id === "s8" ? C.motivos[d.folio] : null,
+        })),
+      };
+    });
+    const ALL = [
+      { key: "neg", label: "Negocio", locked: true, render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.name), h("span", { className: "t-mono subtle", style: { fontSize: 12 } }, r.folio)) },
+      { key: "cuenta", label: "Cuenta", render: (r) => r.acc },
+      { key: "etapa", label: "Etapa", render: (r) => h(NS.Badge, { tone: C.stageTone(r.stage) }, C.stageName(r.stage)) },
+      { key: "valor", label: "Valor mensual", align: "right", render: (r) => h("span", { className: "t-numeric" }, C.fmt(r.val)) },
+      { key: "prob", label: "Probabilidad", align: "right", render: (r) => C.stages.find((s) => s.id === r.stage).prob + " %" },
+      { key: "cierre", label: "Cierre estimado", render: (r) => h("span", { className: "t-numeric" }, r.close) },
+      { key: "resp", label: "Responsable", render: (r) => h("span", { style: { display: "flex", gap: 8, alignItems: "center" } }, h(NS.Avatar, { initials: r.own, size: 24 }), r.ownName) },
+      { key: "origen", label: "Origen", render: (r) => r.origen },
+      { key: "tipo", label: "Tipo", render: (r) => r.tipo },
+      { key: "dias", label: "Días en etapa", align: "right", render: (r) => (r.stage === "s7" || r.stage === "s8" ? "—" : r.days + " d") },
+    ];
+    if (seg) ALL.splice(3, 0, { key: "seg", label: "Seguimiento", render: (r) => (C.segInd[r.folio] ? h(NS.Badge, { tone: C.segInd[r.folio].tone }, C.segInd[r.folio].label) : h("span", { className: "subtle" }, "—")) });
+    const selCol = { key: "sel", label: "", width: 48, render: (r) => h(NS.Checkbox, { checked: !!sel[r.folio], onChange: () => this.setState({ sel: { ...sel, [r.folio]: !sel[r.folio] } }) }) };
+    const cols = seg ? [...this.state.cols.slice(0, 3), "seg", ...this.state.cols.slice(3)] : this.state.cols;
+    const colOpts = ALL.map((c) => ({ label: c.label, on: cols.includes(c.key), locked: !!c.locked, toggle: () => this.setState((s) => ({ cols: s.cols.includes(c.key) ? s.cols.filter((k) => k !== c.key) : ALL.map((a) => a.key).filter((k) => s.cols.includes(k) || k === c.key) })) }));
+    const rows = deals.filter((d) => d.stage !== "s8");
+    const opts = (a) => a.map((x) => ({ value: x, label: x }));
+    return {
+      device, theme, isPhone, notPhone: !isPhone,
+      tabs: C.tabs, groups: C.groups, openCount: open.length,
+      subtitle: open.length + " abiertos · " + C.fmt(openSum) + " mensuales en curso",
+      btnSize: isPhone ? "lg" : "md",
+      q: this.state.q, setQ: (v) => this.setState({ q: v }),
+      mine: this.state.mine, toggleMine: () => this.setState((s) => ({ mine: !s.mine })),
+      noop: () => {},
+      viewOpts: [{ value: "tablero", label: "Tablero" }, { value: "lista", label: "Lista" }, { value: "pendientes", label: "Pendientes" }],
+      phoneGrouped: seg && isPhone && view === "tablero",
+      boardVisible: view === "tablero" && !(seg && isPhone),
+      groupedCols: columns.filter((c) => c.deals.length && c.id !== "s7" && c.id !== "s8"),
+      toCardSeg: (r) => ({ title: r.name, subtitle: r.acc + " · " + C.fmt(r.val), meta: r.folio, badge: C.segInd[r.folio] ? { tone: C.segInd[r.folio].tone, label: C.segInd[r.folio].label } : null, chevron: true }),
+      tagFilter: screen === "exportar" || !!this.props.etiqueta,
+      showExport: view === "lista",
+      openExport: () => this.setState({ dlg: "exp" }),
+      selCount: listy && selN > 0, selLabel: selN + " negocios seleccionados", clearSel: () => this.setState({ sel: {} }),
+      selPlacement: isPhone ? "float" : "sticky",
+      openTransfer: () => this.setState({ dlg: "tr" }),
+      closeAll, sheetSide: isPhone ? "bottom" : "right",
+      exportOpen: dlg === "exp", transferOpen: dlg === "tr",
+      expVista: estado === "vista", expPrep: estado === "preparando", expReady: estado === "listo",
+      expScope: [{ id: "ves", label: "Lo que ves · 12 negocios", desc: "Con tus filtros: Cierre nov 2026 · Etiqueta Logística" }, { id: "todo", label: "Todo · 17 negocios", desc: "Sin filtros, incluye cerrados" }].map((r) => ({ ...r, on: scope === r.id, ...radioS(scope === r.id), select: () => this.setState({ scope: r.id }) })),
+      expCols: [["Negocio y folio", true], ["Cuenta", true], ["Etapa", true], ["Valor mensual", true], ["Cierre estimado", true], ["Responsable", true], ["Origen", true], ["Etiquetas", true], ["Contacto principal", true, "Nombre, correo y teléfono · datos personales"], ["Motivo de pérdida", false]].map(([label, on, desc]) => ({ label, on, desc })),
+      fmtOpts: [{ value: "xlsx", label: "Excel" }, { value: "csv", label: "CSV" }],
+      exportActions: estado === "listo" ? [btnE({ key: "c", variant: "secondary", onClick: closeAll }, "Cerrar"), btnE({ key: "d", icon: "download" }, "Descargar")] : [btnE({ key: "c", variant: "secondary", onClick: closeAll }, "Cancelar"), btnE({ key: "e", icon: "download", disabled: estado === "preparando" }, estado === "preparando" ? "Preparando…" : "Exportar")],
+      trTitle: screen === "cartera" ? "Transferir cartera de Matías Fuentes" : "Transferir 3 negocios",
+      trDesc: screen === "cartera" ? "Deja Atlas Seguridad SpA el 06-11-2026. Su cartera pasa a otra persona." : "Clínica Los Leones, Sucursales zona sur y Bodega Renca",
+      trForm: estado === "vista" || estado === "confirmando" || estado === "error", trError: estado === "error", trOk: estado === "exito",
+      ownerOpts: [{ value: "FS", label: "Francisca Soto · Ejecutiva comercial" }, { value: "MF", label: "Matías Fuentes · Ejecutivo comercial" }, { value: "CI", label: "Carlos Irigoyen · Administrador" }],
+      trItems: screen === "cartera" ? [{ label: "Negocios abiertos", desc: "5 negocios · $ 37.590.000 mensuales", on: true }, { label: "Tareas pendientes", desc: "7 tareas, 2 vencidas", on: true }, { label: "Cuentas", desc: "6 cuentas donde es responsable", on: true }] : [{ label: "Negocios seleccionados", desc: "3 negocios · $ 28.700.000 mensuales", on: true }, { label: "Tareas pendientes de esos negocios", desc: "4 tareas", on: true }, { label: "Cuentas de esos negocios", desc: "Solo si no tienen otros negocios tuyos", on: false }],
+      trMsg: screen === "cartera" ? "Francisca, te dejo la cartera de Matías. Ojo con la renovación de Colina." : "Te paso estos tres mientras estoy de vacaciones hasta el 16-11.",
+      transferActions: estado === "exito" ? [btnE({ key: "c", onClick: closeAll }, "Listo")] : [btnE({ key: "c", variant: "secondary", onClick: closeAll }, "Cancelar"), btnE({ key: "t", icon: "user-check", disabled: estado === "confirmando" }, estado === "confirmando" ? "Transfiriendo…" : "Transferir")],
+      view, setView: (v) => this.setState({ view: v, colsOpen: false }),
+      isBoard: view === "tablero", isList: view === "lista",
+      showColBtn: view === "lista" && !isPhone,
+      colBtnLabel: "Columnas · " + cols.length,
+      colsOpen: colsOpen && view === "lista" && !isPhone,
+      toggleCols: () => this.setState({ colsOpen: !colsOpen }),
+      colOpts, resetCols: () => this.setState({ cols: ["neg", "cuenta", "etapa", "valor", "cierre", "resp"] }),
+      columns, colWidth: isPhone ? "296px" : "272px",
+      tableCols: [...(listy && screen !== "lista" && screen !== "exportar" ? [selCol] : []), ...ALL.filter((c) => cols.includes(c.key))],
+      rows,
+      toCard: (r) => ({ title: r.name, subtitle: r.acc + " · " + C.fmt(r.val), meta: r.folio, badge: { tone: C.stageTone(r.stage), label: C.stageName(r.stage) }, chevron: true }),
+      pageLabel: "1–" + rows.length + " de " + rows.length + " · sin perdidos",
+      listTotal: "Total " + C.fmt(rows.reduce((a, d) => a + d.val, 0)) + " mensuales",
+      newOpen, openNew: () => this.setState({ newOpen: true }), closeNew: () => this.setState({ newOpen: false }),
+      newName: this.state.newName, setNewName: (v) => this.setState({ newName: v }),
+      newAcc: this.state.newAcc, setNewAcc: (v) => this.setState({ newAcc: v }),
+      accOpts: opts(["Distribuidora Pacífico Sur Ltda.", "Frigorífico del Maipo S.A.", "Logística Andina SpA", "Retail Austral SpA", "Clínica Los Leones S.A."]),
+      tipoOpts: opts(["Nuevo cliente", "Nueva instalación", "Ampliación de dotación", "Renovación de contrato", "Servicio temporal"]),
+      origenOpts: opts(["Referido", "Sitio web", "Licitación", "Prospección en frío", "Cliente actual", "LinkedIn", "Feria o evento"]),
+      stageOpts: C.stages.slice(0, 6).map((s) => ({ value: s.id, label: s.name })),
+      newActions: NS.Button ? [h(NS.Button, { key: "c", variant: "secondary", onClick: () => this.setState({ newOpen: false }) }, "Cancelar"), h(NS.Button, { key: "o", onClick: () => this.setState({ newOpen: false }) }, "Crear negocio")] : null,
+    };
+  }
+}
+</script>
+</body>
+</html>

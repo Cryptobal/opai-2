@@ -4,6 +4,7 @@
 - **Auditoría:** `docs/2.0/auditoria-cpq-2026-11.md` (CAR-162).
 - **Aprobación:** Carlos, 3-nov-2026 a las 11:44, en el chat del proyecto: «ok avanza con eso».
 - **Alcance aprobado:** el prototipo navegable a 375 px.
+- **Complemento (3-nov, 12:45):** Carlos subió el export completo: 15 pantallas a 375, 1024 y 1280, con modo oscuro, `ConfigSueldosReferencia`, `RequisitosRemuneraciones`, `Cotizaciones` con archivar y `AgenteCPQ`. La tabla «Lo que falta» de abajo queda cubierta; se conserva como historial.
 
 **Contenido:** `FlujoCompletoCPQ.dc.html`, un prototipo navegable de 12 pasos en el teléfono con el tenant nuevo «Vigía Sur SpA», más `shots/step01–12.png`, capturas a 375 px tomadas del prototipo:
 

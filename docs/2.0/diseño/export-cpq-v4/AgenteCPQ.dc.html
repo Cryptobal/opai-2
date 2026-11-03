@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-100);font-family:var(--font-sans);font-feature-settings:"cv11","ss01";color:var(--ds-fg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">CPQ v4 · Vigía Sur SpA · <a href="FlujoCompletoCPQ.dc.html">Prototipo navegable</a></span>
+    <span style="font:600 28px/34px var(--font-sans);letter-spacing:-.02em">Agente sobre CPQ</span>
+    <span style="font:400 15px/22px var(--font-sans);color:var(--ds-fg-muted);max-width:880px">Panel lateral en escritorio y hoja completa en el teléfono. El agente propone un plan con vista previa; aplicar crea o cambia un borrador y enviar al cliente siempre pide aprobación humana. El texto del cliente va como cita externa.</span>
+  </div>
+  <sc-for list="{{ secciones }}" as="sec" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">{{ sec.t }}</span><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">{{ sec.d }}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+        <sc-for list="{{ sec.frames }}" as="fr" hint-placeholder-count="2">
+          <div id="{{ fr.id }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">{{ fr.id }}</span><span style="font:500 14px/20px var(--font-sans)">{{ fr.cap }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">{{ fr.w }}</span></div>
+            <div data-shot="{{ fr.id }}" style="position:relative;width:{{ fr.w }}px;height:{{ fr.h }}px;flex:none;border-radius:{{ fr.rad }};overflow:hidden">
+              <dc-import name="FlujoCompletoCPQ" embed="true" vp="{{ fr.vp }}" step="{{ fr.step }}" preset="ficha" hint-size="100%,100%"></dc-import>
+              <div data-device="{{ fr.dev }}" data-theme="light" style="position:absolute;inset:0;pointer-events:none;z-index:50">
+                <sc-if value="{{ fr.isPhone }}"><div class="scrim" style="pointer-events:auto"></div></sc-if>
+                <div style="pointer-events:auto;position:absolute;right:0;top:{{ fr.pTop }};bottom:0;width:{{ fr.pW }};display:flex;flex-direction:column;background:var(--ds-surface-raised);color:var(--ds-fg);border-left:1px solid var(--ds-border);border-radius:{{ fr.pRad }};box-shadow:var(--ds-shadow-overlay)">
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 8px 10px 16px;border-bottom:1px solid var(--ds-border)">
+                    <span style="width:32px;height:32px;border-radius:999px;background:var(--ds-accent-muted);color:var(--ds-accent);display:flex;align-items:center;justify-content:center;flex:none"><span class="ic sm i-bot"></span></span>
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font:600 15px/20px var(--font-sans)">Agente</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ fr.ctx }}</span></span>
+                    <button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px">
+                    <sc-for list="{{ fr.msgs }}" as="m" hint-placeholder-count="4">
+                      <sc-if value="{{ m.isUser }}"><div style="align-self:flex-end;max-width:85%;padding:10px 12px;border-radius:14px 14px 4px 14px;background:var(--ds-fill);font:400 14px/20px var(--font-sans)">{{ m.t }}</div></sc-if>
+                      <sc-if value="{{ m.isCita }}">
+                        <div style="align-self:flex-end;max-width:85%;display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:var(--radius-md);border:1px solid var(--ds-border);background:var(--ds-bg)">
+                          <span style="display:flex;align-items:center;gap:6px;font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)"><span class="ic sm i-message" style="width:14px;height:14px"></span>{{ m.src }}</span>
+                          <span style="font:400 14px/20px var(--font-sans);font-style:italic;color:var(--ds-fg-muted)">«{{ m.t }}»</span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ m.isTexto }}"><div style="font:400 14px/20px var(--font-sans);text-wrap:pretty">{{ m.t }}</div></sc-if>
+                      <sc-if value="{{ m.isPregunta }}">
+                        <div style="display:flex;flex-direction:column;gap:8px">
+                          <span style="font:400 14px/20px var(--font-sans)">{{ m.t }}</span>
+                          <div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ m.ops }}" as="op"><span class="{{ op.cls }}" style="height:auto;min-height:36px;padding:6px 12px;white-space:normal">{{ op.t }}</span></sc-for></div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ m.isTop }}">
+                        <div style="display:flex;flex-direction:column;gap:8px">
+                          <span style="font:400 14px/20px var(--font-sans)">{{ m.t }}</span>
+                          <div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden">
+                            <sc-for list="{{ m.rows }}" as="r"><div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--ds-border);font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums"><span style="width:20px;height:20px;border-radius:999px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center;font:600 11px/1 var(--font-sans);flex:none">{{ r.n }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:500">{{ r.k }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ r.d }}</span></span><span style="display:flex;flex-direction:column;align-items:flex-end"><span style="font-weight:500">{{ r.v }}</span><a href="#" style="font:500 12px/16px var(--font-sans);text-decoration:none">Ver traza</a></span></div></sc-for>
+                          </div>
+                          <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ m.pie }}</span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ m.isPlan }}">
+                        <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);display:flex;flex-direction:column">
+                          <div style="padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:600 14px/20px var(--font-sans)">{{ m.t }}</span><span class="badge b-accent nodot">Vista previa</span></div>
+                          <div style="padding:0 14px;display:flex;flex-direction:column">
+                            <sc-for list="{{ m.pasos }}" as="pa"><div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--ds-border)"><span style="width:20px;height:20px;border-radius:999px;border:1px solid var(--ds-border-strong);display:flex;align-items:center;justify-content:center;font:600 11px/1 var(--font-sans);flex:none;margin-top:1px">{{ pa.n }}</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font:500 13px/18px var(--font-sans)">{{ pa.t }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ pa.d }}</span><sc-if value="{{ pa.hayChip }}"><span class="badge b-neutral nodot" style="align-self:flex-start">{{ pa.chip }}</span></sc-if></span></div></sc-for>
+                          </div>
+                          <sc-if value="{{ m.hayDeltas }}">
+                            <div style="margin:4px 14px 0;padding:8px 10px;border-radius:var(--radius-md);background:var(--ds-bg);display:flex;flex-direction:column;gap:4px">
+                              <sc-for list="{{ m.deltas }}" as="dl"><div style="display:flex;align-items:center;gap:8px;font:400 13px/18px var(--font-sans);font-variant-numeric:tabular-nums"><span style="flex:1;color:var(--ds-fg-muted)">{{ dl.k }}</span><span class="tl-was">{{ dl.a }}</span><span class="ic sm i-chevron-right" style="width:12px;height:12px;color:var(--ds-fg-subtle)"></span><span style="font-weight:600">{{ dl.b }}</span></div></sc-for>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ m.haySup }}">
+                            <div style="padding:10px 14px 0;display:flex;flex-direction:column;gap:4px"><span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Supuestos</span><sc-for list="{{ m.sup }}" as="sp"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">· {{ sp }}</span></sc-for></div>
+                          </sc-if>
+                          <sc-if value="{{ m.hayAviso }}"><div class="alerta" style="margin:10px 14px 0;background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic sm i-alert"></span><span class="txt"><span>{{ m.aviso }}</span></span></div></sc-if>
+                          <div style="display:flex;gap:8px;padding:12px 14px 6px"><button class="btn btn-secondary" style="flex:1;height:36px">Ver vista previa</button><button class="btn btn-primary" style="flex:1;height:36px">{{ m.accion }}</button></div>
+                          <span style="padding:0 14px 12px;font:400 11px/14px var(--font-sans);color:var(--ds-fg-subtle)">{{ m.pieTxt }}</span>
+                        </div>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                  <div style="flex:none;padding:12px 16px {{ fr.padBot }};border-top:1px solid var(--ds-border)"><div class="input" style="height:44px"><span class="grow" style="color:var(--ds-fg-subtle);font-size:14px">Pídele algo al agente</span><span class="ic sm i-up" style="color:var(--ds-fg-muted)"></span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DIMS = { phone: [375, 812], tablet: [1024, 768], desktop: [1280, 800] };
+const PIE = 'Aplicar cambia solo el borrador. Enviar al cliente siempre pide tu aprobación.';
+const M = {
+  a: { step: 1, ctx: 'Negocio · Guardias Planta Norte', msgs: [
+    { k: 'user', t: 'Cotiza lo que pide esta solicitud' },
+    { k: 'cita', src: 'Correo de Paula Soto · Logística Andes SpA · 02-11-2026', t: 'Necesitamos guardia 24/7 en Planta Norte desde el 1 de diciembre, y una ronda vehicular de noche. Contrato por un año.' },
+    { k: 'texto', t: 'Armé un plan de 2 pasos con el catálogo y los sueldos de referencia de Vigía Sur SpA.' },
+    { k: 'plan', t: 'Crear CPQ-2026-014 v1', accion: 'Aplicar plan', pasos: [
+      { n: '1', t: 'Agregar 2 líneas 4x4 en Planta Norte', d: 'Guardia diurno 08:00 → 20:00 y nocturno 20:00 → 08:00 +1 · 2 personas cada una', chip: 'Referencia del cargo · $ 620.000' },
+      { n: '2', t: 'Agregar camioneta de ronda en Común', d: 'Vehículos · $ 420.000 mensual · no visible al cliente' }],
+      deltas: [{ k: 'Venta mensual', a: '—', b: '$ 3.779.468' }],
+      sup: ['Inicio 01-12-2026 · 12 meses («por un año»)', 'Margen del tenant 12,0 % sobre la venta', '«Ronda vehicular de noche» se cotiza como camioneta; la dotación de la ronda queda por confirmar'],
+      aviso: 'Mutual adicional sin confirmar: se calcula con 0 %.' }] },
+  b: { step: 7, ctx: 'CPQ-2026-014 v1 · borrador', msgs: [
+    { k: 'user', t: 'Sube el margen a 18 % y agrega un guardia nocturno' },
+    { k: 'pregunta', t: '¿El guardia nocturno es una posición nueva o una persona más en la línea que ya existe?', ops: [{ t: 'Posición nueva 4x4 · 2 personas, 20:00 → 08:00 +1', cls: 'chip toggle on' }, { t: 'Una persona más en «Guardia nocturno»', cls: 'chip toggle' }] },
+    { k: 'user', t: 'Posición nueva' },
+    { k: 'plan', t: 'Cambios en CPQ-2026-014 v1', accion: 'Aplicar cambios', pasos: [
+      { n: '1', t: 'Margen 12,0 % → 18,0 % sobre la venta', d: 'Sobre el objetivo del tenant (15,0 %): no necesita aprobación' },
+      { n: '2', t: 'Agregar «Guardia nocturno 2» en Planta Norte', d: '4x4 · 20:00 → 08:00 +1 · 2 personas', chip: 'Referencia del cargo · $ 620.000' }],
+      deltas: [{ k: 'Margen', a: '12,0 %', b: '18,0 %' }, { k: 'Dotación', a: '4 personas', b: '6 personas' }, { k: 'Venta mensual', a: '$ 3.893.127', b: '$ 5.947.850' }] }] },
+  c: { step: 7, ctx: 'CPQ-2026-014 v1 · borrador', msgs: [
+    { k: 'user', t: '¿Por qué cuesta tanto?' },
+    { k: 'top', t: 'El costo mensual es $ 3.425.951. Estos 3 componentes suman el 98 %:', rows: [
+      { n: '1', k: 'Guardia nocturno', d: '2 personas · $ 650.000 escrito a mano', v: '$ 1.502.660' },
+      { n: '2', k: 'Guardia diurno', d: '2 personas · referencia $ 620.000', v: '$ 1.439.768' },
+      { n: '3', k: 'Camioneta de ronda', d: 'Vehículos · Común', v: '$ 420.000' }],
+      pie: 'El margen de 12,0 % agrega $ 467.176 sobre el costo. El sueldo nocturno está $ 30.000 sobre la referencia del cargo.' }] },
+  d: { step: 1, ctx: 'Negocio · Guardias Planta Norte', msgs: [
+    { k: 'user', t: 'Cotiza 2 guardias 4x4 en Planta Norte para este negocio' },
+    { k: 'plan', t: 'Crear CPQ-2026-014 v1', accion: 'Crear borrador', pasos: [
+      { n: '1', t: 'Crear la cotización en «Guardias Planta Norte»', d: 'Cuenta Logística Andes SpA · instalación Planta Norte' },
+      { n: '2', t: 'Agregar 2 posiciones 4x4 de Guardia de seguridad', d: 'Diurno 08:00 → 20:00 y nocturno 20:00 → 08:00 +1 · 2 personas cada una', chip: 'Referencia del cargo · $ 620.000' }],
+      deltas: [{ k: 'Venta mensual', a: '—', b: '$ 3.298.377' }],
+      sup: ['Margen del tenant 12,0 %', 'Colación $ 40.000 y movilización $ 30.000 por persona'],
+      aviso: 'Mutual adicional sin confirmar: se calcula con 0 %. Para enviar hay que confirmarla.' }] }
+};
+const SECS = [
+  { t: '1 · Escritorio', d: 'Panel lateral de 420 px sobre la pantalla en la que estás.', frames: [['1a', 'desktop', 'a'], ['1b', 'desktop', 'b'], ['1c', 'desktop', 'c'], ['1d', 'desktop', 'd']] },
+  { t: '2 · Teléfono', d: 'Hoja completa.', frames: [['2a', 'phone', 'a'], ['2b', 'phone', 'b'], ['2c', 'phone', 'c'], ['2d', 'phone', 'd']] },
+  { t: '3 · iPad', d: 'Panel lateral.', frames: [['3a', 'tablet', 'b']] }
+];
+const CAP = { a: 'Cotiza lo que pide esta solicitud', b: 'Margen 18 % y un guardia nocturno', c: '¿Por qué cuesta tanto?', d: 'Cotiza 2 guardias 4x4 en Planta Norte' };
+class Component extends DCLogic {
+  renderVals() {
+    const secciones = SECS.map(sec => ({ t: sec.t, d: sec.d, frames: sec.frames.map(([id, vp, mk]) => {
+      const mo = M[mk]; const [w, h] = DIMS[vp]; const ph = vp === 'phone';
+      const msgs = mo.msgs.map(m => ({ ...m, isUser: m.k === 'user', isCita: m.k === 'cita', isTexto: m.k === 'texto', isPregunta: m.k === 'pregunta', isTop: m.k === 'top', isPlan: m.k === 'plan',
+        hayDeltas: !!(m.deltas && m.deltas.length), haySup: !!(m.sup && m.sup.length), hayAviso: !!m.aviso, pieTxt: PIE,
+        pasos: (m.pasos || []).map(p => ({ ...p, hayChip: !!p.chip })) }));
+      return { id, cap: CAP[mk], vp, step: String(mo.step), dev: vp, w, h, rad: ph ? '44px' : '12px', isPhone: ph, ctx: mo.ctx, msgs,
+        pTop: ph ? '44px' : '0', pW: ph ? '100%' : '420px', pRad: ph ? '20px 20px 0 0' : '0', padBot: ph ? '28px' : '12px' };
+    }) }));
+    return { secciones };
+  }
+}
+</script>
+</body>
+</html>

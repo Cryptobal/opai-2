@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="con" title="Contactos" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 4 }}" hide-top-bar="{{ hideTop }}" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ isFicha }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0;z-index:3"><a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Contactos</a><span style="flex:1"></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Contactos</a></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Viña Cordillera Ltda." title="Hernán Bustos" subtitle="Encargado de seguridad · +56 9 6402 8817 · hbustos@vinacordillera.cl" hint-size="100%,80px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="phone" hint-size="100px,40px">Llamar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;height:0;z-index:10"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ menuItems }}" on-select="{{ pick }}" style="position:absolute;right:0;top:-16px;width:220px" hint-size="220px,150px"></x-import></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="res" hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px 32px;margin-top:20px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Contacto" rows="{{ rows1 }}" hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Rol en negocios" rows="{{ rows2 }}" hint-size="100%,140px"></x-import>
+</div>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isLista }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Contactos" subtitle="2 archivados" hint-size="100%,80px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<div style="width:{{ searchW }};max-width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre, cuenta o correo" style="width:100%" hint-size="100%,44px"></x-import></div>
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Con negocios abiertos" hint-size="170px,32px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Archivados" count="{{ 2 }}" selected="{{ true }}" hint-size="130px,32px"></x-import></div>
+</div>
+<div class="card" style="overflow:hidden;padding:0">
+<sc-for list="{{ archived }}" as="c" hint-placeholder-count="2">
+<div style="display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ c.ini }}" hint-size="32px,32px"></x-import>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted)">{{ c.name }}</span><span class="t-caption">{{ c.sub }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="refresh" hint-size="110px,40px">Restaurar</x-import>
+</div>
+</sc-for>
+</div>
+<p class="t-caption" style="margin:12px 0 0">Los archivados no aparecen en búsquedas ni al elegir contactos, y siguen en el historial de sus cuentas y negocios.</p>
+</x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ dlgOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Archivar a Hernán Bustos" description="Viña Cordillera Ltda. · Encargado de seguridad" actions="{{ actions }}" on-close="{{ close }}" hint-size="440px,320px">
+<div style="display:flex;flex-direction:column;gap:12px;padding-bottom:4px">
+<sc-if value="{{ isErr }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-danger-muted);color:var(--ds-danger-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">No se puede archivar</b><span>«Hernán Bustos es el contacto de facturación de Viña Cordillera Ltda. Asigna otro antes de archivarlo.»</span><span class="t-mono" style="font-size:12px">REGLA-CON-04</span></span></div>
+</sc-if>
+<sc-if value="{{ notErr }}" hint-placeholder-val="{{ true }}">
+<p class="t-body-sm m0" style="text-wrap:pretty">Deja de aparecer en búsquedas, listas y al elegir contactos. Sigue visible en el historial de Viña Cordillera Ltda. y de sus 2 negocios cerrados.</p>
+<p class="t-body-sm muted m0">Puedes restaurarlo cuando quieras desde el filtro «Archivados».</p>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;menu&quot;,&quot;archivar&quot;,&quot;error&quot;,&quot;archivados&quot;],&quot;default&quot;:&quot;archivar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { dlg: null };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "archivar";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, isFicha: screen !== "archivados", isLista: screen === "archivados", notErr: true };
+    if (!C || !NS.Button) return base;
+    const dlg = this.state.dlg ?? (screen === "archivar" || screen === "error");
+    const close = () => this.setState({ dlg: false });
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups,
+      hideTop: isPhone && screen !== "archivados",
+      menuOpen: screen === "menu",
+      menuItems: [{ label: "Editar contacto", icon: "file" }, { label: "Fusionar con…", icon: "merge" }, { divider: true }, { label: "Archivar", icon: "archive" }],
+      pick: (it) => it.label === "Archivar" && this.setState({ dlg: true }),
+      tabItems: [{ id: "res", label: "Resumen" }, { id: "act", label: "Actividad" }, { id: "mail", label: "Correos", count: 2 }],
+      rows1: [{ label: "Cuenta", value: "Viña Cordillera Ltda." }, { label: "Cargo", value: "Encargado de seguridad" }, { label: "Teléfono", value: "+56 9 6402 8817", numeric: true }, { label: "Correo", value: "hbustos@vinacordillera.cl" }],
+      rows2: [{ label: "NEG-0128 · Ganado", value: "Técnico" }, { label: "NEG-0097 · Perdido", value: "Decisor" }],
+      searchW: isPhone ? "100%" : "288px",
+      archived: [{ ini: "HB", name: "Hernán Bustos", sub: "Viña Cordillera Ltda. · archivado hoy por Camila Rojas" }, { ini: "LM", name: "Luis Medina", sub: "Retail Austral SpA · archivado el 14-09-2026 · ya no trabaja ahí" }],
+      dlgOpen: dlg, close, isErr: screen === "error", notErr: screen !== "error",
+      actions: screen === "error" ? [h(NS.Button, { key: "c", variant: "secondary", onClick: close }, "Cerrar")] : [h(NS.Button, { key: "c", variant: "secondary", onClick: close }, "Cancelar"), h(NS.Button, { key: "a", icon: "archive", onClick: close }, "Archivar")],
+    };
+  }
+}
+</script>
+</body>
+</html>

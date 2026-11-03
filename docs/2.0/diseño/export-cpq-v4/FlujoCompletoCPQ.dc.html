@@ -19,62 +19,60 @@
 <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
 <style>body{margin:0;background:var(--ds-bg);font-family:var(--font-sans);font-feature-settings:"cv11","ss01";color:var(--ds-fg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
 </helmet>
-<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start;padding:32px 24px;box-sizing:border-box;background:var(--ds-bg)">
+<div style="min-height:{{ rootMinH }};display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start;padding:{{ rootPad }};box-sizing:border-box;background:var(--ds-bg)">
 
-  <aside style="width:300px;max-width:100%;display:flex;flex-direction:column;gap:16px">
-    <div style="display:flex;flex-direction:column;gap:4px">
-      <span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">CPQ v4 · Prototipo navegable</span>
-      <span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Flujo completo de punta a punta</span>
-      <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);text-wrap:pretty">Tenant nuevo «Vigía Sur SpA» en el teléfono (375). Cada paso deja el estado listo; dentro de la pantalla todo es tocable.</span>
-    </div>
-    <nav style="display:flex;flex-direction:column;gap:2px">
-      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="12">
-        <button class="{{ st.cls }}" onClick="{{ st.go }}" style="height:auto;min-height:40px;padding:8px;align-items:flex-start;gap:10px">
-          <span style="font:500 12px/20px var(--font-mono);color:var(--ds-fg-subtle);width:20px;flex:none;font-variant-numeric:tabular-nums">{{ st.n }}</span>
-          <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+  <sc-if value="{{ notEmbed }}" hint-placeholder-val="{{ true }}">
+    <aside style="width:300px;max-width:100%;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">CPQ v4 · Prototipo navegable</span>
+        <span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Flujo completo de punta a punta</span>
+        <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);text-wrap:pretty">Tenant nuevo «Vigía Sur SpA». Cada paso deja el estado listo; dentro de la pantalla todo es tocable.</span>
+      </div>
+      <div class="seg" style="width:100%">
+        <button class="{{ vpPhone }}" onClick="{{ setPhone }}">Teléfono</button>
+        <button class="{{ vpTab }}" onClick="{{ setTab }}">iPad</button>
+        <button class="{{ vpDesk }}" onClick="{{ setDesk }}">Escritorio</button>
+      </div>
+      <nav style="display:flex;flex-direction:column;gap:2px">
+        <sc-for list="{{ steps }}" as="st" hint-placeholder-count="12">
+          <button class="{{ st.cls }}" onClick="{{ st.go }}" style="height:auto;min-height:40px;padding:8px;align-items:flex-start;gap:10px">
+            <span style="font:500 12px/20px var(--font-mono);color:var(--ds-fg-subtle);width:20px;flex:none">{{ st.n }}</span>
             <span style="font:500 14px/20px var(--font-sans)">{{ st.label }}</span>
-          </span>
-        </button>
-      </sc-for>
-    </nav>
-  </aside>
+          </button>
+        </sc-for>
+      </nav>
+      <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);text-wrap:pretty">{{ stepNota }}</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-secondary" onClick="{{ prev }}"><span class="ic sm i-chevron-left"></span>Anterior</button>
+        <span style="flex:1;text-align:center;font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ stepN }} / 12</span>
+        <button class="btn btn-secondary" onClick="{{ next }}">Siguiente<span class="ic sm i-chevron-right"></span></button>
+      </div>
+    </aside>
+  </sc-if>
 
-  <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
-    <div data-device="phone" data-theme="{{ theme }}" data-screen-label="{{ screenLabel }}" style="position:relative;width:375px;height:812px;border-radius:44px;border:1px solid var(--ds-border-strong);overflow:hidden;background:var(--ds-bg);color:var(--ds-fg);flex:none">
+  <div data-device="{{ dev }}" data-theme="{{ theme }}" data-shot="{{ shot }}" data-screen-label="{{ screenLabel }}" style="position:relative;width:{{ fw }}px;height:{{ fh }}px;border-radius:{{ frad }};border:1px solid var(--ds-border-strong);overflow:hidden;background:var(--ds-bg);color:var(--ds-fg);flex:none;zoom:{{ zoom }};font-family:var(--font-sans);font-feature-settings:'cv11','ss01'">
+
+    <!-- ================= TELÉFONO ================= -->
+    <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
       <div class="screen" style="height:100%">
-        <div class="safe-top" style="display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:600 15px/20px var(--font-sans);font-variant-numeric:tabular-nums"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><span style="width:18px;height:10px;border-radius:2px;border:1.5px solid var(--ds-fg)"></span></span></div>
-
+        <div class="safe-top" style="display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:600 15px/20px var(--font-sans);font-variant-numeric:tabular-nums"><span>9:41</span><span style="width:18px;height:10px;border-radius:2px;border:1.5px solid var(--ds-fg)"></span></div>
         <div class="topbar">
-          <sc-if value="{{ showBack }}" hint-placeholder-val="{{ true }}">
-            <button class="icon-btn" aria-label="Volver" onClick="{{ back }}"><span class="ic i-chevron-left"></span></button>
-          </sc-if>
+          <sc-if value="{{ showBack }}"><button class="icon-btn" aria-label="Volver" onClick="{{ back }}"><span class="ic i-chevron-left"></span></button></sc-if>
           <span style="font:600 15px/20px var(--font-sans);flex:1;min-width:0;padding-left:4px">{{ topTitle }}</span>
-          <button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button>
+          <button class="icon-btn" aria-label="Agente" onClick="{{ agente }}"><span class="ic i-bot"></span></button>
           <button class="icon-btn" aria-label="Notificaciones" onClick="{{ toBandeja }}"><span class="ic i-bell"></span><sc-if value="{{ bellDot }}"><span class="dot-count">1</span></sc-if></button>
         </div>
+        <div ref="{{ scrollRef }}" data-scroll="1" style="flex:1;min-height:0;overflow:auto">
 
-        <div style="flex:1;min-height:0;overflow:auto">
-
-          <!-- NEGOCIO -->
-          <sc-if value="{{ vNeg }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ vNeg }}">
             <div style="display:flex;flex-direction:column;gap:16px;padding:4px 16px 24px">
               <div style="display:flex;flex-direction:column;gap:6px">
                 <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Negocio · Logística Andes SpA</span>
                 <span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Guardias Planta Norte</span>
-                <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  <sc-if value="{{ ganada }}"><span class="badge b-success">Ganado</span></sc-if>
-                  <sc-if value="{{ noGanada }}"><span class="badge b-neutral">Propuesta</span></sc-if>
-                  <span class="badge b-neutral nodot">1 instalación</span>
-                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="{{ negCls }}">{{ negTxt }}</span><span class="badge b-neutral nodot">1 instalación</span></div>
               </div>
-              <div class="tabs" style="margin:0 -16px;padding:0 16px">
-                <button class="tab">Resumen</button>
-                <button class="tab on">Cotizaciones <span class="n">{{ nCot }}</span></button>
-                <button class="tab">Contactos</button>
-                <button class="tab">Actividad</button>
-              </div>
-
-              <sc-if value="{{ negVacio }}" hint-placeholder-val="{{ true }}">
+              <div class="tabs" style="margin:0 -16px;padding:0 16px"><button class="tab">Resumen</button><button class="tab on">Cotizaciones <span class="n">{{ nCot }}</span></button><button class="tab">Contactos</button><button class="tab">Actividad</button></div>
+              <sc-if value="{{ negVacio }}">
                 <div class="state-panel" style="padding:40px 20px">
                   <span class="state-ic"><span class="ic i-file"></span></span>
                   <span class="t">Este negocio aún no tiene cotización</span>
@@ -85,23 +83,14 @@
                   </div>
                 </div>
               </sc-if>
-
               <sc-if value="{{ negConCot }}">
-                <sc-if value="{{ ganada }}">
-                  <sc-if value="{{ puestosPend }}">
-                    <div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)">
-                      <span class="ic i-alert"></span>
-                      <span class="txt"><span class="tit">4 puestos por crear</span><span>La cotización aceptada lleva la dotación a Planta Norte.</span></span>
-                    </div>
-                    <button class="btn btn-primary block" onClick="{{ openCrear }}">Crear puestos</button>
-                  </sc-if>
-                  <sc-if value="{{ puestos }}">
-                    <div class="alerta" style="background:var(--ds-success-muted);color:var(--ds-success-fg)">
-                      <span class="ic i-check-circle"></span>
-                      <span class="txt"><span class="tit">4 puestos creados en Planta Norte</span><span>RRHH confirma los sueldos en los puestos de la instalación.</span></span>
-                    </div>
-                    <button class="btn btn-secondary block" onClick="{{ verPuestos }}">Ver puestos de Planta Norte</button>
-                  </sc-if>
+                <sc-if value="{{ ganPend }}">
+                  <div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic i-alert"></span><span class="txt"><span class="tit">4 puestos por crear</span><span>La cotización aceptada lleva la dotación a Planta Norte.</span></span></div>
+                  <button class="btn btn-primary block" onClick="{{ openCrear }}">Crear puestos</button>
+                </sc-if>
+                <sc-if value="{{ ganHecho }}">
+                  <div class="alerta" style="background:var(--ds-success-muted);color:var(--ds-success-fg)"><span class="ic i-check-circle"></span><span class="txt"><span class="tit">4 puestos creados en Planta Norte</span><span>RRHH confirma los sueldos en los puestos de la instalación.</span></span></div>
+                  <button class="btn btn-secondary block" onClick="{{ verPuestos }}">Ver puestos de Planta Norte</button>
                 </sc-if>
                 <div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
                   <button class="rowcard" onClick="{{ toFicha }}" style="cursor:pointer;border:0">
@@ -117,34 +106,23 @@
             </div>
           </sc-if>
 
-          <!-- BANDEJA DE INICIO (aprobador) -->
           <sc-if value="{{ vBan }}">
             <div style="display:flex;flex-direction:column;gap:16px;padding:4px 16px 24px">
-              <div style="display:flex;flex-direction:column;gap:4px">
-                <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Marcela Rojas · gerente comercial</span>
-                <span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Inicio</span>
-              </div>
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Marcela Rojas · gerente comercial</span><span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Inicio</span></div>
               <span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Bandeja · {{ banCount }}</span>
               <sc-if value="{{ banPend }}">
                 <div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
                   <button class="rowcard" onClick="{{ openDecidir }}" style="cursor:pointer;border:0">
                     <span class="avatar">TF</span>
-                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-                      <span style="font:500 15px/20px var(--font-sans)">Aprobar margen de CPQ-2026-014</span>
-                      <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Tomás Fuentes · hace 2 min</span>
-                      <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Margen 9,0 % · mínimo 10,0 %</span>
-                    </span>
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">Aprobar margen de CPQ-2026-014</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Tomás Fuentes · hace 2 min</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">12,0 % → 9,0 % · mínimo 10,0 %</span></span>
                     <span class="badge b-warning">Por decidir</span>
                   </button>
                 </div>
               </sc-if>
-              <sc-if value="{{ banVacia }}">
-                <div class="state-panel"><span class="state-ic"><span class="ic i-inbox"></span></span><span class="t">Nada por decidir</span><span class="d">Te avisamos cuando alguien pida una aprobación.</span><button class="btn btn-secondary" onClick="{{ toFicha }}">Volver a la cotización</button></div>
-              </sc-if>
+              <sc-if value="{{ banVacia }}"><div class="state-panel"><span class="state-ic"><span class="ic i-inbox"></span></span><span class="t">Nada por decidir</span><span class="d">Te avisamos cuando alguien pida una aprobación.</span><button class="btn btn-secondary" onClick="{{ toFicha }}">Volver a la cotización</button></div></sc-if>
             </div>
           </sc-if>
 
-          <!-- FICHA DE LA COTIZACIÓN -->
           <sc-if value="{{ vFicha }}">
             <div style="display:flex;flex-direction:column;gap:16px;padding:4px 16px 24px">
               <div style="display:flex;flex-direction:column;gap:6px">
@@ -153,103 +131,55 @@
                 <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Logística Andes SpA · Planta Norte</span>
                 <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="{{ estadoCls }}">{{ estadoTxt }}</span></div>
               </div>
-
-              <sc-if value="{{ vistaAlerta }}">
-                <div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-eye"></span><span class="txt"><span class="tit">Vista por el cliente hace 2 h</span><span>3 vistas · descargó el PDF una vez.</span></span></div>
-              </sc-if>
-
+              <sc-if value="{{ vistaAlerta }}"><div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-eye"></span><span class="txt"><span class="tit">Vista por el cliente hace 2 h</span><span>3 vistas · descargó el PDF una vez.</span></span></div></sc-if>
               <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px">
-                  <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
-                    <span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Venta mensual</span>
-                    <span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em;font-variant-numeric:tabular-nums">{{ ventaTxt }}</span>
-                    <span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ ventaSub }}</span>
-                  </div>
-                  <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
-                    <span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Margen</span>
-                    <span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em;font-variant-numeric:tabular-nums">{{ margenTxt }}</span>
+                <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px">
+                  <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Venta mensual</span><span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em;font-variant-numeric:tabular-nums">{{ ventaTxt }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ ventaSub }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Margen</span><span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em;font-variant-numeric:tabular-nums">{{ margenTxt }}</span>
                     <sc-if value="{{ calc }}"><span class="{{ semCls }}" style="align-self:flex-start;white-space:normal;height:auto;min-height:22px;padding:3px 8px;max-width:100%;box-sizing:border-box">{{ semTxt }}</span></sc-if>
+                    <sc-if value="{{ hayNota }}"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ margenNota }}</span></sc-if>
                   </div>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:6px">
-                  <sc-for list="{{ fuentes }}" as="fv" hint-placeholder-count="3">
-                    <span title="{{ fv.tip }}" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:999px;font:500 12px/16px var(--font-sans);font-variant-numeric:tabular-nums;background:{{ fv.bg }};color:{{ fv.fg }}">{{ fv.txt }}</span>
-                  </sc-for>
+                  <sc-for list="{{ fuentes }}" as="fv" hint-placeholder-count="3"><span title="{{ fv.tip }}" style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;white-space:nowrap;font:500 12px/16px var(--font-sans);font-variant-numeric:tabular-nums;background:{{ fv.bg }};color:{{ fv.fg }}">{{ fv.txt }}</span></sc-for>
                 </div>
-                <sc-if value="{{ editable }}">
-                  <div style="display:flex;justify-content:flex-end;margin-top:-4px"><button class="btn btn-ghost" onClick="{{ recalcular }}" style="height:36px;padding:0 10px"><span class="ic sm i-refresh"></span>Recalcular</button></div>
-                </sc-if>
+                <sc-if value="{{ editable }}"><div style="display:flex;justify-content:flex-end;margin-top:-4px"><button class="btn btn-ghost" onClick="{{ recalcular }}" style="height:36px;padding:0 10px"><span class="ic sm i-refresh"></span>Recalcular</button></div></sc-if>
               </div>
-
               <sc-if value="{{ enviada }}">
                 <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                    <span style="font:600 16px/24px var(--font-sans)">Enlace del cliente</span>
-                    <span class="badge b-success">Activo · vence 01-12-2026</span>
-                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font:600 16px/24px var(--font-sans)">Enlace del cliente</span><span class="{{ linkCls2 }}">{{ linkEstado }}</span></div>
                   <div class="input compact" style="background:var(--ds-bg)"><span class="grow" style="font:400 14px/20px var(--font-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">opai.app/p/7KQ2-M9XA</span></div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    <button class="btn btn-secondary" onClick="{{ copiar }}"><span class="ic sm i-paperclip"></span>Copiar enlace</button>
-                    <button class="btn btn-secondary" onClick="{{ openCompartir }}"><span class="ic sm i-message"></span>WhatsApp</button>
-                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-secondary" onClick="{{ copiar }}"><span class="ic sm i-paperclip"></span>Copiar enlace</button><button class="btn btn-secondary" onClick="{{ openCompartir }}"><span class="ic sm i-message"></span>WhatsApp</button></div>
                   <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ vistasTxt }}</span>
                 </div>
               </sc-if>
-
               <div style="display:flex;flex-direction:column;gap:8px">
-                <button onClick="{{ togPN }}" style="display:flex;align-items:center;gap:8px;height:44px;border:0;background:transparent;padding:0;color:var(--ds-fg);cursor:pointer;text-align:left">
-                  <span class="{{ chevPN }}"></span>
-                  <span style="flex:1;font:600 16px/24px var(--font-sans)">Planta Norte</span>
-                  <span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ subPN }}</span>
-                </button>
-                <sc-if value="{{ openPN }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ togPN }}" style="display:flex;align-items:center;gap:8px;height:44px;border:0;background:transparent;padding:0;color:var(--ds-fg);cursor:pointer;text-align:left"><span class="{{ chevPN }}"></span><span style="flex:1;font:600 16px/24px var(--font-sans)">Planta Norte</span><span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ subPN }}</span></button>
+                <sc-if value="{{ openPN }}">
                   <div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
                     <sc-for list="{{ lineasPN }}" as="ln" hint-placeholder-count="2">
                       <button class="rowcard" onClick="{{ ln.open }}" style="cursor:pointer;border-left:0;border-right:0;border-top:0">
-                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-                          <span style="font:500 15px/20px var(--font-sans)">{{ ln.name }}</span>
-                          <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ ln.meta }}</span>
-                        </span>
+                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">{{ ln.name }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ ln.meta }}</span></span>
                         <sc-if value="{{ ln.falta }}"><span class="badge b-warning">Falta sueldo</span></sc-if>
                         <sc-if value="{{ ln.tieneMonto }}"><span style="font:500 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">{{ ln.monto }}</span></sc-if>
                       </button>
                     </sc-for>
-                    <sc-if value="{{ hayIncluye }}">
-                      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
-                        <span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Incluye, sin costo</span>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ incluyeList }}" as="inc"><span class="badge b-neutral nodot">{{ inc }}</span></sc-for></div>
-                      </div>
-                    </sc-if>
+                    <sc-if value="{{ hayIncluye }}"><div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"><span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Incluye, sin costo</span><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ incluyeList }}" as="inc"><span class="badge b-neutral nodot">{{ inc }}</span></sc-for></div></div></sc-if>
                   </div>
                 </sc-if>
-                <button onClick="{{ togCom }}" style="display:flex;align-items:center;gap:8px;height:44px;border:0;background:transparent;padding:0;color:var(--ds-fg);cursor:pointer;text-align:left">
-                  <span class="{{ chevCom }}"></span>
-                  <span style="flex:1;font:600 16px/24px var(--font-sans)">Común</span>
-                  <span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ subCom }}</span>
-                </button>
+                <button onClick="{{ togCom }}" style="display:flex;align-items:center;gap:8px;height:44px;border:0;background:transparent;padding:0;color:var(--ds-fg);cursor:pointer;text-align:left"><span class="{{ chevCom }}"></span><span style="flex:1;font:600 16px/24px var(--font-sans)">Común</span><span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ subCom }}</span></button>
                 <sc-if value="{{ openCom }}">
                   <div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
-                    <sc-for list="{{ lineasCom }}" as="ln">
-                      <div class="rowcard"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">{{ ln.name }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ ln.meta }}</span></span><span style="font:500 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">{{ ln.monto }}</span></div>
-                    </sc-for>
+                    <sc-for list="{{ lineasCom }}" as="ln"><div class="rowcard"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">{{ ln.name }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ ln.meta }}</span></span><span style="font:500 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">{{ ln.monto }}</span></div></sc-for>
                     <sc-if value="{{ comVacio }}"><div style="padding:14px 16px;font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Sin ítems comunes. Agrega vehículos o infraestructura que sirvan a todas las instalaciones.</div></sc-if>
                   </div>
                 </sc-if>
               </div>
-
               <div class="card" style="padding:16px;display:flex;flex-direction:column">
                 <span style="font:600 16px/24px var(--font-sans);margin-bottom:4px">Costos por categoría</span>
-                <sc-if value="{{ calc }}">
-                  <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
-                    <div class="pg-kv"><span class="l">{{ c.k }}</span><span class="v" style="font-variant-numeric:tabular-nums">{{ c.v }}</span></div>
-                  </sc-for>
-                  <div class="pg-kv" style="font-weight:600"><span>Costo total</span><span style="font-variant-numeric:tabular-nums">{{ costoTxt }}</span></div>
-                </sc-if>
-                <sc-if value="{{ noCalc }}">
-                  <div class="pg-kv"><span class="l">Costos pendientes</span><span class="v" style="color:var(--ds-fg-subtle)">Falta el sueldo de Guardia diurno</span></div>
-                </sc-if>
+                <sc-if value="{{ calc }}"><sc-for list="{{ cats }}" as="c" hint-placeholder-count="4"><div class="pg-kv"><span class="l">{{ c.k }}</span><span class="v" style="font-variant-numeric:tabular-nums">{{ c.v }}</span></div></sc-for><div class="pg-kv" style="font-weight:600"><span>Costo total</span><span style="font-variant-numeric:tabular-nums">{{ costoTxt }}</span></div></sc-if>
+                <sc-if value="{{ noCalc }}"><div class="pg-kv"><span class="l">Costos pendientes</span><span class="v" style="color:var(--ds-fg-subtle)">Falta el sueldo de Guardia diurno</span></div></sc-if>
               </div>
-
               <sc-if value="{{ editable }}">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
                   <button class="btn btn-secondary" onClick="{{ openPuesto }}"><span class="ic sm i-plus"></span>Agregar puesto</button>
@@ -258,18 +188,10 @@
                   <button class="btn btn-secondary" onClick="{{ openMargen }}">Condiciones</button>
                 </div>
               </sc-if>
-
               <sc-if value="{{ enviada }}">
                 <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
                   <span style="font:600 16px/24px var(--font-sans)">Seguimiento</span>
-                  <div class="tl">
-                    <sc-for list="{{ timeline }}" as="ev" hint-placeholder-count="3">
-                      <div class="tl-item">
-                        <span class="tl-dot person"><span class="ic sm i-check" style="width:12px;height:12px"></span></span>
-                        <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:500 14px/20px var(--font-sans)">{{ ev.t }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ ev.d }}</span></span>
-                      </div>
-                    </sc-for>
-                  </div>
+                  <div class="tl"><sc-for list="{{ timeline }}" as="ev" hint-placeholder-count="3"><div class="tl-item"><span class="tl-dot person"><span class="ic sm i-check" style="width:12px;height:12px"></span></span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:500 14px/20px var(--font-sans)">{{ ev.t }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ ev.d }}</span></span></div></sc-for></div>
                   <div class="alerta" style="background:var(--ds-fill);color:var(--ds-fg-muted)"><span class="ic i-lock"></span><span class="txt"><span>La v1 enviada queda en solo lectura. Editar crea la v2 y la v1 sigue disponible para el cliente.</span></span></div>
                   <button class="btn btn-secondary block" onClick="{{ editarV2 }}">Editar crea la v2</button>
                 </div>
@@ -277,21 +199,14 @@
             </div>
           </sc-if>
         </div>
-
-        <!-- Barra de requisitos + acción principal (ficha) -->
         <sc-if value="{{ vFicha }}">
           <div style="flex:none;display:flex;flex-direction:column;gap:8px;padding:10px 16px 12px;border-top:1px solid var(--ds-border);background:color-mix(in srgb,var(--ds-bg) 95%,transparent)">
-            <sc-if value="{{ editable }}">
-              <button onClick="{{ openReqs }}" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:var(--radius-md);border:0;cursor:pointer;font:500 13px/18px var(--font-sans);background:{{ barBg }};color:{{ barFg }}">
-                <span class="{{ barIc }}"></span><span style="flex:1;text-align:left">{{ barTxt }}</span><span class="ic sm i-chevron-right"></span>
-              </button>
-            </sc-if>
+            <sc-if value="{{ editable }}"><button onClick="{{ openReqs }}" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:var(--radius-md);border:0;cursor:pointer;font:500 13px/18px var(--font-sans);background:{{ barBg }};color:{{ barFg }}"><span class="{{ barIc }}"></span><span style="flex:1;text-align:left">{{ barTxt }}</span><span class="ic sm i-chevron-right"></span></button></sc-if>
             <sc-if value="{{ priOn }}"><button class="btn btn-primary block lg" onClick="{{ priAct }}">{{ priTxt }}</button></sc-if>
             <sc-if value="{{ priOff }}"><button class="btn btn-primary block lg" disabled="disabled">{{ priTxt }}</button></sc-if>
             <sc-if value="{{ enviadaNoGanada }}"><button class="btn btn-ghost block" onClick="{{ aceptar }}">Registrar aceptación del cliente</button></sc-if>
           </div>
         </sc-if>
-
         <nav class="tabbar" style="padding-bottom:28px">
           <button class="{{ tabInicio }}" onClick="{{ toBandeja }}"><span class="ic i-home"></span>Inicio</button>
           <button class="{{ tabCom }}" onClick="{{ toNegocio }}"><span class="ic i-briefcase"></span>Comercial</button>
@@ -299,17 +214,268 @@
           <button><span class="ic i-menu"></span>Más</button>
         </nav>
       </div>
+    </sc-if>
 
-      <!-- ============ HOJAS ============ -->
-      <sc-if value="{{ anySheet }}">
-        <div class="scrim" onClick="{{ closeSheet }}" style="z-index:10"></div>
-      </sc-if>
+    <!-- ================= iPAD / ESCRITORIO ================= -->
+    <sc-if value="{{ wide }}">
+      <div style="display:flex;height:100%;background:var(--ds-bg)">
+        <sc-if value="{{ isDesk }}">
+          <aside class="sidebar">
+            <div class="sidebar-head"><span class="wordmark">OPAI</span><span class="tenant">VS</span></div>
+            <button class="sidebar-portal"><span class="ic sm i-grid"></span><span style="flex:1;font:500 14px/20px var(--font-sans)">ERP</span><span class="ic sm i-updown" style="color:var(--ds-fg-subtle)"></span></button>
+            <div class="nav-group" style="padding-top:12px"><button class="{{ navIni }}" onClick="{{ toBandeja }}"><span class="ic i-home"></span>Inicio<sc-if value="{{ bellDot }}"><span class="n">1</span></sc-if></button></div>
+            <div class="nav-group"><span class="h">Comercial</span>
+              <button class="{{ navNeg }}" onClick="{{ toNegocio }}"><span class="ic i-briefcase"></span>Negocios</button>
+              <button class="nav-item"><span class="ic i-file"></span>Cotizaciones<span class="n">6</span></button>
+              <button class="nav-item"><span class="ic i-building"></span>Cuentas</button>
+            </div>
+            <div class="nav-group"><span class="h">Operaciones</span>
+              <button class="nav-item"><span class="ic i-pin"></span>Instalaciones</button>
+              <button class="nav-item"><span class="ic i-users"></span>Personas</button>
+              <button class="nav-item"><span class="ic i-calendar"></span>Pautas</button>
+            </div>
+            <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)">
+              <span class="avatar">{{ userIni }}</span>
+              <span style="display:flex;flex-direction:column;min-width:0"><span style="font:500 14px/20px var(--font-sans)">{{ userName }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ userRol }}</span></span>
+            </div>
+          </aside>
+        </sc-if>
+        <sc-if value="{{ isTab }}">
+          <nav class="rail">
+            <button class="rail-portal"><span class="ic i-grid"></span>ERP</button>
+            <button class="{{ railIni }}" onClick="{{ toBandeja }}"><span class="ic i-home"></span>Inicio</button>
+            <button class="{{ railCom }}" onClick="{{ toNegocio }}"><span class="ic i-briefcase"></span>Comercial</button>
+            <button class="rail-item"><span class="ic i-pin"></span>Operación</button>
+            <button class="rail-item"><span class="ic i-users"></span>Personas</button>
+          </nav>
+        </sc-if>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+          <header class="appbar" style="padding:0 {{ gut }}">
+            <span style="flex:1;min-width:0;font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ crumb }}</span>
+            <div class="searchbox" style="width:220px"><span class="ic sm i-search"></span><span style="flex:1">Buscar</span><span class="kbd">⌘K</span></div>
+            <button class="btn btn-ghost" onClick="{{ agente }}" style="height:36px;padding:0 10px"><span class="ic sm i-bot"></span>Agente</button>
+            <button class="icon-btn" aria-label="Notificaciones" onClick="{{ toBandeja }}"><span class="ic i-bell"></span><sc-if value="{{ bellDot }}"><span class="dot-count">1</span></sc-if></button>
+          </header>
+          <div ref="{{ scrollRef }}" data-scroll="1" style="flex:1;min-height:0;overflow:auto">
 
-      <!-- Cotización rápida -->
-      <sc-if value="{{ shRapida }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:120px">
-          <div class="grabber"></div>
-          <div style="padding:12px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">Cotización rápida</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Guardias Planta Norte · Logística Andes SpA</span></div>
+            <sc-if value="{{ vNeg }}">
+              <div style="padding:24px {{ gut }} 32px;display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                  <div style="display:flex;flex-direction:column;gap:4px"><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Negocio · Logística Andes SpA</span><div style="display:flex;align-items:center;gap:10px"><span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Guardias Planta Norte</span><span class="{{ negCls }}">{{ negTxt }}</span></div><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">1 instalación · Planta Norte · contacto Paula Soto</span></div>
+                  <sc-if value="{{ negConCot }}"><button class="btn btn-secondary" onClick="{{ openRapida }}"><span class="ic sm i-plus"></span>Nueva cotización</button></sc-if>
+                </div>
+                <div class="tabs"><button class="tab">Resumen</button><button class="tab on">Cotizaciones <span class="n">{{ nCot }}</span></button><button class="tab">Contactos</button><button class="tab">Actividad</button></div>
+                <sc-if value="{{ negVacio }}">
+                  <div class="state-panel">
+                    <span class="state-ic"><span class="ic i-file"></span></span>
+                    <span class="t">Este negocio aún no tiene cotización</span>
+                    <span class="d">Parte con la cotización rápida: eliges un paquete y la ficha queda lista para completar.</span>
+                    <div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-secondary" onClick="{{ openRapida }}">Nueva cotización</button><button class="btn btn-primary" onClick="{{ openRapida }}">Cotización rápida</button></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ negConCot }}">
+                  <sc-if value="{{ ganPend }}"><div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic i-alert"></span><span class="txt"><span class="tit">4 puestos por crear</span><span>La cotización aceptada lleva la dotación a Planta Norte.</span></span><button class="btn btn-primary acc" onClick="{{ openCrear }}">Crear puestos</button></div></sc-if>
+                  <sc-if value="{{ ganHecho }}"><div class="alerta" style="background:var(--ds-success-muted);color:var(--ds-success-fg)"><span class="ic i-check-circle"></span><span class="txt"><span class="tit">4 puestos creados en Planta Norte</span><span>RRHH confirma los sueldos en los puestos de la instalación.</span></span><button class="btn btn-secondary acc" onClick="{{ verPuestos }}">Ver puestos</button></div></sc-if>
+                  <div class="tbl-wrap">
+                    <div style="display:grid;grid-template-columns:150px minmax(0,1fr) 130px 90px 150px 110px;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)"><span>Folio</span><span>Instalaciones</span><span style="text-align:right">Venta mensual</span><span style="text-align:right">Margen</span><span>Estado</span><span>Actualizada</span></div>
+                    <button onClick="{{ toFicha }}" style="display:grid;grid-template-columns:150px minmax(0,1fr) 130px 90px 150px 110px;gap:12px;align-items:center;width:100%;min-height:52px;padding:0 16px;border:0;background:transparent;color:var(--ds-fg);text-align:left;cursor:pointer;font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">
+                      <span style="font-family:var(--font-mono)">CPQ-2026-014 v1</span><span>Planta Norte · Guardia 24/7 4x4</span><span style="text-align:right">{{ ventaTxt }}</span><span style="text-align:right">{{ margenTxt }}</span><span><span class="{{ estadoCls }}">{{ estadoTxt }}</span></span><span style="color:var(--ds-fg-muted)">04-11-2026</span>
+                    </button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ vBan }}">
+              <div style="padding:24px {{ gut }} 32px;display:flex;flex-direction:column;gap:16px;max-width:880px">
+                <div style="display:flex;flex-direction:column;gap:4px"><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Marcela Rojas · gerente comercial</span><span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Inicio</span></div>
+                <sc-if value="{{ banPend }}">
+                  <div class="card" style="overflow:hidden">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--ds-border)"><span style="font:600 16px/24px var(--font-sans)">Bandeja</span><span class="badge b-warning">1 por decidir</span></div>
+                    <button class="rowcard" onClick="{{ openDecidir }}" style="cursor:pointer;border:0;align-items:center">
+                      <span class="avatar">TF</span>
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">Aprobar margen de CPQ-2026-014 · Guardias Planta Norte</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Tomás Fuentes · hace 2 min · 12,0 % → 9,0 % · mínimo 10,0 %</span></span>
+                      <span class="btn btn-secondary" style="height:36px">Decidir</span>
+                    </button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ banVacia }}"><div class="state-panel"><span class="state-ic"><span class="ic i-inbox"></span></span><span class="t">Nada por decidir</span><span class="d">Te avisamos cuando alguien pida una aprobación.</span><button class="btn btn-secondary" onClick="{{ toFicha }}">Volver a la cotización</button></div></sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ vFicha }}">
+              <div style="padding:24px {{ gut }} 32px;display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                  <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+                    <span style="font:500 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">CPQ-2026-014 · v1</span>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Guardias Planta Norte</span><span class="{{ estadoCls }}">{{ estadoTxt }}</span></div>
+                    <span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Logística Andes SpA · Planta Norte · 12 meses desde 01-12-2026</span>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <sc-if value="{{ editable }}"><button class="btn btn-secondary" onClick="{{ recalcular }}"><span class="ic sm i-refresh"></span>Recalcular</button></sc-if>
+                    <sc-if value="{{ enviadaNoGanada }}"><button class="btn btn-secondary" onClick="{{ aceptar }}">Registrar aceptación</button></sc-if>
+                    <sc-if value="{{ enviada }}"><button class="btn btn-secondary" onClick="{{ editarV2 }}">Editar crea la v2</button></sc-if>
+                    <sc-if value="{{ priOn }}"><button class="btn btn-primary" onClick="{{ priAct }}">{{ priTxt }}</button></sc-if>
+                    <sc-if value="{{ priOff }}"><button class="btn btn-primary" disabled="disabled">{{ priTxt }}</button></sc-if>
+                  </div>
+                </div>
+                <sc-if value="{{ vistaAlerta }}"><div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-eye"></span><span class="txt"><span class="tit">Vista por el cliente hace 2 h</span><span>3 vistas · descargó el PDF una vez. La v1 está en solo lectura.</span></span></div></sc-if>
+
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) {{ rcol }};gap:16px;align-items:start">
+                  <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                    <div class="tbl-wrap" style="overflow:hidden">
+                      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px 10px 16px;border-bottom:1px solid var(--ds-border)">
+                        <span style="flex:1;font:600 16px/24px var(--font-sans)">Planilla</span>
+                        <sc-if value="{{ editable }}"><button class="btn btn-ghost" onClick="{{ openItem }}" style="height:32px;padding:0 10px"><span class="ic sm i-plus"></span>Ítem</button><button class="btn btn-secondary" onClick="{{ openPuesto }}" style="height:32px;padding:0 10px"><span class="ic sm i-plus"></span>Puesto</button></sc-if>
+                        <sc-if value="{{ enviada }}"><span class="badge b-neutral nodot"><span class="ic sm i-lock" style="width:12px;height:12px"></span>Solo lectura</span></sc-if>
+                      </div>
+                      <div style="display:grid;grid-template-columns:{{ pcols }};gap:10px;padding:8px 16px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)"><span>Línea</span><span>Horario</span><span style="text-align:right">Dotación</span><span>Sueldo</span><span style="text-align:right">Costo</span></div>
+                      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--ds-bg);border-bottom:1px solid var(--ds-border);font:600 13px/18px var(--font-sans)"><span style="flex:1">Planta Norte</span><span style="font-variant-numeric:tabular-nums;color:var(--ds-fg-muted)">{{ subPN }}</span></div>
+                      <sc-for list="{{ lineasPN }}" as="ln" hint-placeholder-count="2">
+                        <button onClick="{{ ln.open }}" style="display:grid;grid-template-columns:{{ pcols }};gap:10px;align-items:center;width:100%;box-sizing:border-box;min-height:52px;padding:8px 16px;border:0;border-bottom:1px solid var(--ds-border);background:transparent;color:var(--ds-fg);text-align:left;cursor:pointer;font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">
+                          <span style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:500">{{ ln.name }}</span><span style="font-size:12px;line-height:16px;color:var(--ds-fg-subtle)">{{ ln.pat }}</span></span>
+                          <span style="color:var(--ds-fg-muted)">{{ ln.hor }}</span>
+                          <span style="text-align:right">{{ ln.dot }}</span>
+                          <span style="display:flex;flex-direction:column;gap:2px;align-items:flex-start">
+                            <sc-if value="{{ ln.falta }}"><span class="btn btn-secondary" style="height:28px;padding:0 8px;font-size:13px;color:var(--ds-warning-fg);border-color:var(--ds-warning)">Agregar sueldo</span></sc-if>
+                            <sc-if value="{{ ln.tieneSueldo }}"><span>{{ ln.sueldo }}</span><span style="font:500 11px/14px var(--font-sans);color:var(--ds-fg-subtle)">{{ ln.origen }}</span></sc-if>
+                            <sc-if value="{{ ln.sinSueldo }}"><span style="color:var(--ds-fg-subtle)">—</span></sc-if>
+                          </span>
+                          <span style="text-align:right;font-weight:500">{{ ln.montoW }}</span>
+                        </button>
+                      </sc-for>
+                      <sc-if value="{{ hayIncluye }}"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--ds-border)"><span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Incluye, sin costo</span><sc-for list="{{ incluyeList }}" as="inc"><span class="badge b-neutral nodot">{{ inc }}</span></sc-for></div></sc-if>
+                      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--ds-bg);border-bottom:1px solid var(--ds-border);font:600 13px/18px var(--font-sans)"><span style="flex:1">Común</span><span style="font-variant-numeric:tabular-nums;color:var(--ds-fg-muted)">{{ subCom }}</span></div>
+                      <sc-for list="{{ lineasCom }}" as="ln"><div style="display:grid;grid-template-columns:{{ pcols }};gap:10px;align-items:center;min-height:52px;padding:8px 16px;font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums"><span style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:500">{{ ln.name }}</span><span style="font-size:12px;line-height:16px;color:var(--ds-fg-subtle)">Vehículos · no visible al cliente</span></span><span style="color:var(--ds-fg-muted)">Mensual</span><span style="text-align:right">1</span><span style="color:var(--ds-fg-subtle)">—</span><span style="text-align:right;font-weight:500">{{ ln.monto }}</span></div></sc-for>
+                      <sc-if value="{{ comVacio }}"><div style="padding:14px 16px;font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Sin ítems comunes.</div></sc-if>
+                    </div>
+
+                    <div class="card" style="overflow:hidden">
+                      <button onClick="{{ togPol }}" style="display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:0 16px;border:0;background:transparent;color:var(--ds-fg);cursor:pointer;text-align:left"><span class="{{ chevPol }}"></span><span style="flex:1;font:600 16px/24px var(--font-sans)">Pólizas y finanzas</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ polResumen }}</span></button>
+                      <sc-if value="{{ secPol }}">
+                        <div style="padding:4px 16px 16px;display:flex;flex-direction:column;gap:16px;border-top:1px solid var(--ds-border)">
+                          <div style="display:flex;flex-direction:column;gap:10px;padding-top:12px">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                              <span style="font:600 14px/20px var(--font-sans)">Margen</span>
+                              <div class="seg"><button class="{{ mV }}" onClick="{{ setMV }}">Sobre la venta</button><button class="{{ mK }}" onClick="{{ setMK }}">Markup</button><button class="{{ mM }}" onClick="{{ setMM }}">Sobre la mano de obra</button></div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                              <div style="display:flex;align-items:center;gap:4px"><button class="btn btn-secondary icon" onClick="{{ mMenos }}" aria-label="Bajar margen" style="height:36px;width:36px">−</button><span style="min-width:84px;text-align:center;font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums">{{ margenCfg }}</span><button class="btn btn-secondary icon" onClick="{{ mMas }}" aria-label="Subir margen" style="height:36px;width:36px"><span class="ic sm i-plus"></span></button></div>
+                              <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ modoAyuda }}</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                              <sc-for list="{{ simul }}" as="sm" hint-placeholder-count="3"><button onClick="{{ sm.pick }}" style="display:flex;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:var(--radius-md);border:1px solid var(--ds-border);background:var(--ds-surface);color:var(--ds-fg);cursor:pointer;font:400 13px/18px var(--font-sans);font-variant-numeric:tabular-nums"><span style="color:var(--ds-fg-muted)">{{ sm.m }}</span><span style="font-weight:600">{{ sm.v }}</span></button></sc-for>
+                            </div>
+                          </div>
+                          <div style="display:flex;flex-direction:column">
+                            <span style="font:600 14px/20px var(--font-sans);margin-bottom:4px">Instrumentos</span>
+                            <sc-for list="{{ instr }}" as="in" hint-placeholder-count="3">
+                              <div style="border-bottom:1px solid var(--ds-border)">
+                                <div style="display:flex;align-items:center;gap:8px;min-height:52px">
+                                  <button class="switch-area" onClick="{{ in.tog }}" aria-label="{{ in.n }}" style="margin-left:-2px"><span class="{{ in.cls }}"></span></button>
+                                  <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font:500 14px/20px var(--font-sans);display:flex;gap:6px;align-items:center">{{ in.n }}<sc-if value="{{ in.sob }}"><span class="badge b-info nodot">Sobrescrito</span></sc-if></span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ in.d }}</span></span>
+                                  <span style="font:500 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">{{ in.costo }}</span>
+                                  <button class="icon-btn" onClick="{{ in.exp }}" aria-label="Ver detalle"><span class="{{ in.chev }}"></span></button>
+                                </div>
+                                <sc-if value="{{ in.open }}">
+                                  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:4px 0 14px 54px">
+                                    <sc-for list="{{ in.det }}" as="dt"><span style="display:flex;flex-direction:column;gap:2px"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ dt.k }}</span><span style="font:500 13px/18px var(--font-sans);font-variant-numeric:tabular-nums">{{ dt.v }}</span></span></sc-for>
+                                  </div>
+                                </sc-if>
+                              </div>
+                            </sc-for>
+                          </div>
+                          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+                            <div class="field"><span class="lbl">Meses de contrato</span><div class="input compact"><span class="grow" style="font-variant-numeric:tabular-nums">12</span></div><span class="hint">No se deduce de la validez</span></div>
+                            <div class="field"><span class="lbl">Validez de la oferta</span><div class="input compact"><span class="grow">30 días</span></div></div>
+                            <div class="field"><span class="lbl">Inicio</span><div class="input compact"><span class="grow" style="font-variant-numeric:tabular-nums">01-12-2026</span></div></div>
+                          </div>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <div class="card" style="overflow:hidden">
+                      <button onClick="{{ togCond }}" style="display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:0 16px;border:0;background:transparent;color:var(--ds-fg);cursor:pointer;text-align:left"><span class="{{ chevCond }}"></span><span style="flex:1;font:600 16px/24px var(--font-sans)">Condiciones</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Pago a 30 días · IPC anual</span></button>
+                      <sc-if value="{{ secCond }}"><div style="padding:4px 16px 12px;border-top:1px solid var(--ds-border)"><div class="pg-kv"><span class="l">Pago</span><span class="v">30 días desde factura</span></div><div class="pg-kv"><span class="l">Reajuste</span><span class="v">IPC anual</span></div><div class="pg-kv"><span class="l">Moneda</span><span class="v">CLP · referencia UF</span></div><div class="pg-kv"><span class="l">Horas extra</span><span class="v">Se facturan aparte con 50 % de recargo</span></div></div></sc-if>
+                    </div>
+                    <div class="card" style="overflow:hidden">
+                      <button onClick="{{ togSupD }}" style="display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:0 16px;border:0;background:transparent;color:var(--ds-fg);cursor:pointer;text-align:left"><span class="{{ chevSupD }}"></span><span style="flex:1;font:600 16px/24px var(--font-sans)">Supuestos</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">AFP modelo · Fonasa 7 % · cesantía indefinido</span></button>
+                      <sc-if value="{{ secSup }}"><div style="padding:4px 16px 12px;border-top:1px solid var(--ds-border)"><div class="pg-kv"><span class="l">AFP</span><span class="v">Modelo · 10,58 %</span></div><div class="pg-kv"><span class="l">Salud</span><span class="v">Fonasa 7 %</span></div><div class="pg-kv"><span class="l">Seguro de cesantía</span><span class="v">Indefinido · 2,4 % empleador</span></div><div class="pg-kv"><span class="l">SIS</span><span class="v">1,49 %</span></div><div class="pg-kv"><span class="l">Mutual</span><span class="v">{{ mutualKv }}</span></div></div></sc-if>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;gap:16px;min-width:0;position:sticky;top:16px">
+                    <sc-if value="{{ editable }}">
+                      <sc-if value="{{ allOk }}"><div class="card" style="padding:12px 16px;display:flex;gap:10px;align-items:center;color:var(--ds-success-fg)"><span class="ic i-check-circle"></span><span style="font:500 14px/20px var(--font-sans)">Todo listo para enviar</span></div></sc-if>
+                      <sc-if value="{{ notAllOk }}">
+                        <div class="card" style="padding:12px 16px;display:flex;flex-direction:column">
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:4px"><span style="font:600 16px/24px var(--font-sans)">Requisitos</span><span class="{{ reqBadgeCls }}">{{ reqBadge }}</span></div>
+                          <span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle);padding-top:8px">Para calcular</span>
+                          <sc-for list="{{ reqCalc }}" as="r" hint-placeholder-count="3">
+                            <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--ds-border)">
+                              <span class="{{ r.ic }}" style="margin-top:2px;width:16px;height:16px;color:{{ r.color }}"></span>
+                              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 13px/18px var(--font-sans)">{{ r.t }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ r.c }}</span></span>
+                              <sc-if value="{{ r.hasAct }}"><button class="btn btn-secondary" onClick="{{ r.act }}" style="height:32px;padding:0 10px;font-size:13px">{{ r.a }}</button></sc-if>
+                              <sc-if value="{{ r.busy }}"><span class="btn btn-ghost" aria-busy="true" style="height:32px;width:40px"><span class="btn-spin"></span></span></sc-if>
+                            </div>
+                          </sc-for>
+                          <sc-if value="{{ mutInline }}">
+                            <div style="display:flex;flex-direction:column;gap:10px;padding:12px;margin-top:10px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-bg)">
+                              <div class="field"><span class="lbl">Tasa de mutual adicional</span><div class="input compact focus"><span class="grow" style="font-variant-numeric:tabular-nums">0,95</span><span class="trail">%</span></div><span class="hint">Según tu adhesión vigente. Aplica a todas las cotizaciones.</span></div>
+                              <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onClick="{{ mutCancel }}" style="height:36px">Cancelar</button><button class="btn btn-primary" onClick="{{ mutConfirm }}" style="height:36px">Confirmar</button></div>
+                            </div>
+                          </sc-if>
+                          <span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle);padding-top:12px">Para enviar</span>
+                          <sc-for list="{{ reqEnvDesk }}" as="r" hint-placeholder-count="2">
+                            <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--ds-border)">
+                              <span class="{{ r.ic }}" style="margin-top:2px;width:16px;height:16px;color:{{ r.color }}"></span>
+                              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 13px/18px var(--font-sans)">{{ r.t }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ r.c }}</span></span>
+                              <sc-if value="{{ r.hasAct }}"><button class="btn btn-secondary" onClick="{{ r.act }}" style="height:32px;padding:0 10px;font-size:13px">{{ r.a }}</button></sc-if>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                    </sc-if>
+
+                    <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                      <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Venta mensual</span><span style="font:600 28px/34px var(--font-sans);letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ ventaTxt }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ ventaSub }}</span></div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="display:flex;flex-direction:column"><span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Margen sobre la venta</span><span style="font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums">{{ margenTxt }}</span></span><sc-if value="{{ calc }}"><span class="{{ semCls }}">{{ semTxt }}</span></sc-if></div>
+                      <sc-if value="{{ hayNota }}"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle);margin-top:-6px">{{ margenNota }}</span></sc-if>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ fuentes }}" as="fv"><span title="{{ fv.tip }}" style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;white-space:nowrap;font:500 12px/16px var(--font-sans);font-variant-numeric:tabular-nums;background:{{ fv.bg }};color:{{ fv.fg }}">{{ fv.txt }}</span></sc-for></div>
+                      <div style="display:flex;flex-direction:column;border-top:1px solid var(--ds-border);padding-top:4px">
+                        <sc-if value="{{ calc }}"><sc-for list="{{ cats }}" as="c"><div class="pg-kv" style="min-height:34px;padding:6px 0"><span class="l">{{ c.k }}</span><span class="v" style="font-variant-numeric:tabular-nums">{{ c.v }}</span></div></sc-for><div class="pg-kv" style="min-height:34px;padding:6px 0;font-weight:600"><span>Costo total</span><span style="font-variant-numeric:tabular-nums">{{ costoTxt }}</span></div></sc-if>
+                        <sc-if value="{{ noCalc }}"><div class="pg-kv"><span class="l">Costos pendientes</span><span class="v" style="color:var(--ds-fg-subtle);font-size:13px">Falta un sueldo</span></div></sc-if>
+                      </div>
+                    </div>
+
+                    <sc-if value="{{ enviada }}">
+                      <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span style="font:600 16px/24px var(--font-sans)">Enlace del cliente</span><span class="{{ linkCls2 }}">{{ linkEstado }}</span></div>
+                        <div class="input compact" style="background:var(--ds-bg)"><span class="grow" style="font:400 13px/18px var(--font-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">opai.app/p/7KQ2-M9XA</span><button class="btn btn-ghost" onClick="{{ copiar }}" style="height:28px;padding:0 8px;font-size:13px">Copiar</button></div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onClick="{{ whatsapp }}" style="height:36px"><span class="ic sm i-message"></span>WhatsApp</button><button class="btn btn-secondary" onClick="{{ copiar }}" style="height:36px">Correo</button><button class="btn btn-ghost" onClick="{{ revocar }}" style="height:36px;color:var(--ds-danger-fg)">Revocar</button></div>
+                        <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ vistasTxt }}</span>
+                      </div>
+                      <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                        <span style="font:600 16px/24px var(--font-sans)">Seguimiento</span>
+                        <div class="tl"><sc-for list="{{ timeline }}" as="ev"><div class="tl-item"><span class="tl-dot person"><span class="ic sm i-check" style="width:12px;height:12px"></span></span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:500 14px/20px var(--font-sans)">{{ ev.t }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ ev.d }}</span></span></div></sc-for></div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ================= OVERLAYS (compartidos) ================= -->
+    <sc-if value="{{ anySheet }}"><div class="scrim" onClick="{{ closeSheet }}" style="z-index:10"></div></sc-if>
+
+    <sc-if value="{{ shRapida }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.rapida.cls }}" style="pointer-events:auto;position:{{ o.rapida.pos }};top:{{ o.rapida.top }};width:{{ o.rapida.w }};max-height:{{ o.rapida.mh }};border-radius:{{ o.rapida.rad }}">
+          <sc-if value="{{ isPhone }}"><div class="grabber"></div></sc-if>
+          <div style="padding:16px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">Cotización rápida</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Guardias Planta Norte · Logística Andes SpA</span></div>
           <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
             <div class="field"><span class="lbl">Instalación</span><button class="input"><span class="grow">Planta Norte · Av. Los Industriales 1450, Quilicura</span><span class="trail ic i-chevron-down"></span></button></div>
             <div class="field"><span class="lbl">Paquete</span>
@@ -321,14 +487,15 @@
             <div class="pg-kv"><span class="l">Margen</span><span class="v">12,0 % · del tenant</span></div>
             <div class="alerta" style="background:var(--ds-fill);color:var(--ds-fg)"><span class="ic i-info"></span><span class="txt"><span>Se creará <b style="font-family:var(--font-mono)">CPQ-2026-014</b> v1 con 2 posiciones 4x4.</span></span></div>
           </div>
-          <div class="sheet-actions"><button class="btn btn-secondary" onClick="{{ closeSheet }}">Cancelar</button><button class="btn btn-primary" onClick="{{ crearCot }}">Crear cotización</button></div>
+          <div class="sheet-actions" style="padding-bottom:{{ padBot }}"><button class="btn btn-secondary" onClick="{{ closeSheet }}">Cancelar</button><button class="btn btn-primary" onClick="{{ crearCot }}">Crear cotización</button></div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Requisitos -->
-      <sc-if value="{{ shReqs }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:180px">
-          <div class="grabber"></div>
+    <sc-if value="{{ shReqs }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.reqs.cls }}" style="pointer-events:auto;position:{{ o.reqs.pos }};top:{{ o.reqs.top }};width:{{ o.reqs.w }};max-height:{{ o.reqs.mh }};border-radius:{{ o.reqs.rad }}">
+          <sc-if value="{{ isPhone }}"><div class="grabber"></div></sc-if>
           <div style="padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center"><span style="font:600 18px/26px var(--font-sans)">Requisitos</span><button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
           <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px;padding-top:4px">
             <span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Para calcular</span>
@@ -361,11 +528,12 @@
             </div>
           </div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Hoja de puesto -->
-      <sc-if value="{{ shPuesto }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:44px;border-radius:var(--radius-xl) var(--radius-xl) 0 0">
+    <sc-if value="{{ shPuesto }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.puesto.cls }}" style="pointer-events:auto;position:{{ o.puesto.pos }};top:{{ o.puesto.top }};width:{{ o.puesto.w }};max-height:{{ o.puesto.mh }};border-radius:{{ o.puesto.rad }}">
           <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--ds-border)">
             <span style="flex:1;display:flex;flex-direction:column"><span style="font:600 17px/24px var(--font-sans)">Guardia diurno</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Planta Norte · Guardias</span></span>
             <button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button>
@@ -381,22 +549,15 @@
                 <span class="lbl">Cargo</span>
                 <button class="{{ cargoCls }}" onClick="{{ togCombo }}"><span class="grow">{{ cargoTxt }}</span><span class="trail ic i-updown"></span></button>
                 <sc-if value="{{ comboOpen }}">
-                  <div class="listbox overlay" style="position:relative;top:0;margin-top:6px">
-                    <sc-for list="{{ cargos }}" as="cg" hint-placeholder-count="3">
-                      <button class="opt" onClick="{{ cg.pick }}" style="min-height:52px"><span style="flex:1"><span>{{ cg.n }}</span><span class="desc">{{ cg.d }}</span></span></button>
-                    </sc-for>
-                  </div>
+                  <div class="listbox overlay" style="position:relative;top:0;margin-top:6px"><sc-for list="{{ cargos }}" as="cg" hint-placeholder-count="3"><button class="opt" onClick="{{ cg.pick }}" style="min-height:52px"><span style="flex:1"><span>{{ cg.n }}</span><span class="desc">{{ cg.d }}</span></span></button></sc-for></div>
                 </sc-if>
                 <sc-if value="{{ cargoSet }}"><span class="hint">Funciones: control de acceso, rondas perimetrales y libro de novedades.</span></sc-if>
               </div>
             </div>
-
             <div style="display:flex;flex-direction:column;gap:12px">
               <span style="font:600 15px/20px var(--font-sans)">Horario</span>
               <div class="chip-row"><button class="chip toggle on" style="height:36px">4x4</button><button class="chip toggle" style="height:36px">7x7</button><button class="chip toggle" style="height:36px">14x14</button><button class="chip toggle" style="height:36px">5x2</button><button class="chip toggle" style="height:36px">2x5</button><button class="chip toggle" style="height:36px">3x4</button></div>
-              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
-                <span class="chip toggle on" style="height:36px;justify-content:center;padding:0">L</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">M</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">M</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">J</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">V</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">S</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">D</span>
-              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">L</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">M</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">M</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">J</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">V</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">S</span><span class="chip toggle on" style="height:36px;justify-content:center;padding:0">D</span></div>
               <div class="input"><span class="ic sm i-clock" style="color:var(--ds-fg-muted)"></span><span class="grow" style="font-variant-numeric:tabular-nums">08:00 → 20:00</span><span class="trail" style="font:400 13px/18px var(--font-sans)">12 h</span></div>
               <span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">42 h semanales promedio · dentro de la jornada legal (42 h). La línea nocturna cruza medianoche: 20:00 → 08:00 +1.</span>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -404,11 +565,8 @@
                 <div class="field"><span class="lbl">Personas por posición</span><div class="input"><span class="grow" style="font-variant-numeric:tabular-nums">2</span></div><span class="hint">Sugerido por 4x4 de 12 h</span></div>
               </div>
             </div>
-
             <div style="display:flex;flex-direction:column;gap:12px">
-              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 15px/20px var(--font-sans)">Sueldo</span>
-                <div class="seg"><button class="{{ segBruto }}" onClick="{{ setBruto }}">Bruto</button><button class="{{ segLiq }}" onClick="{{ setLiq }}">Líquido objetivo</button></div>
-              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font:600 15px/20px var(--font-sans)">Sueldo</span><div class="seg"><button class="{{ segBruto }}" onClick="{{ setBruto }}">Bruto</button><button class="{{ segLiq }}" onClick="{{ setLiq }}">Líquido objetivo</button></div></div>
               <div class="field">
                 <div class="{{ sueldoCls }}"><span style="color:var(--ds-fg-muted)">$</span><input class="bare" inputmode="numeric" value="{{ sueldoTxt }}" onChange="{{ onSueldo }}" placeholder="Elige un cargo o escribe el sueldo" style="font-variant-numeric:tabular-nums"></div>
                 <sc-if value="{{ sueldoErr }}"><span class="err"><span class="ic sm i-alert"></span>Queda bajo el ingreso mínimo ($ 539.000)</span></sc-if>
@@ -423,9 +581,12 @@
                 <div class="field"><span class="lbl">Movilización</span><div class="input"><span style="color:var(--ds-fg-muted)">$</span><span class="grow" style="font-variant-numeric:tabular-nums">30.000</span></div></div>
               </div>
               <span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle);margin-top:-6px">Mensual por persona · no imponible</span>
-              <button class="chip add" style="align-self:flex-start;height:36px"><span class="ic sm i-plus"></span>Bono u otro concepto</button>
+              <div style="display:flex;flex-direction:column">
+                <span style="font:500 14px/20px var(--font-sans);padding-bottom:4px">Bonos y otros conceptos</span>
+                <div class="pg-kv"><span class="l">Bono de responsabilidad · imponible</span><span class="v" style="font-variant-numeric:tabular-nums">$ 0</span></div>
+                <button class="chip add" style="align-self:flex-start;height:36px;margin-top:8px"><span class="ic sm i-plus"></span>Bono u otro concepto</button>
+              </div>
             </div>
-
             <div style="border:1px solid var(--ds-border);border-radius:var(--radius-md)">
               <button onClick="{{ togSup }}" style="display:flex;align-items:center;gap:8px;width:100%;min-height:52px;padding:8px 12px;border:0;background:transparent;color:var(--ds-fg);cursor:pointer;text-align:left">
                 <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/20px var(--font-sans)">Supuestos previsionales</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">AFP modelo · Fonasa 7 % · cesantía indefinido</span></span>
@@ -442,7 +603,7 @@
               </sc-if>
             </div>
           </div>
-          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px 28px;border-top:1px solid var(--ds-border);background:var(--ds-surface-raised)">
+          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px {{ padBot }};border-top:1px solid var(--ds-border);background:var(--ds-surface-raised)">
             <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums">
               <span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">Costo {{ lineaCosto }} · Venta</span>
               <span style="font:600 16px/24px var(--font-sans)">{{ lineaVenta }} / mes</span>
@@ -452,30 +613,34 @@
             <sc-if value="{{ noGuardar }}"><button class="btn btn-primary lg" disabled="disabled">Guardar</button></sc-if>
           </div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Hoja de ítem -->
-      <sc-if value="{{ shItem }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:44px">
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 0 16px">
-            <span style="flex:1;font:600 17px/24px var(--font-sans)">Agregar ítem</span>
-            <button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button>
-          </div>
-          <div class="tabs" style="padding:0 16px">
-            <button class="{{ tabCat }}" onClick="{{ setTabCat }}">Catálogo</button>
-            <button class="{{ tabPaq }}" onClick="{{ setTabPaq }}">Paquetes</button>
-            <button class="{{ tabInc }}" onClick="{{ setTabInc }}">Incluye <span class="n">{{ nInc }}</span></button>
-          </div>
+    <sc-if value="{{ shItem }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.item.cls }}" style="pointer-events:auto;position:{{ o.item.pos }};top:{{ o.item.top }};width:{{ o.item.w }};max-height:{{ o.item.mh }};border-radius:{{ o.item.rad }}">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 0 16px"><span style="flex:1;font:600 17px/24px var(--font-sans)">Agregar ítem</span><button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+          <div class="tabs" style="padding:0 16px"><button class="{{ tabCat }}" onClick="{{ setTabCat }}">Catálogo</button><button class="{{ tabPaq }}" onClick="{{ setTabPaq }}">Paquetes</button><button class="{{ tabInc }}" onClick="{{ setTabInc }}">Incluye <span class="n">{{ nInc }}</span></button></div>
           <div class="sheet-body" style="display:flex;flex-direction:column;gap:12px">
             <sc-if value="{{ itCat }}">
-              <div class="input"><span class="ic sm i-search" style="color:var(--ds-fg-muted)"></span><span class="grow ph" style="color:var(--ds-fg-subtle)">Buscar en el catálogo</span></div>
-              <div class="chip-row" style="margin:0 -16px;padding:0 16px"><span class="chip toggle on" style="height:36px">Todos</span><span class="chip toggle" style="height:36px">Uniformes</span><span class="chip toggle" style="height:36px">Exámenes</span><span class="chip toggle" style="height:36px">Equipamiento</span><span class="chip toggle" style="height:36px">Vehículos</span><span class="chip toggle" style="height:36px">Infraestructura</span></div>
+              <div class="input"><span class="ic sm i-search" style="color:var(--ds-fg-muted)"></span><span class="grow" style="color:var(--ds-fg-subtle)">Buscar en el catálogo</span></div>
+              <div class="chip-row" style="flex-wrap:nowrap;overflow-x:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none"><span class="chip toggle on" style="height:36px">Todos</span><span class="chip toggle" style="height:36px">Uniformes</span><span class="chip toggle" style="height:36px">Exámenes</span><span class="chip toggle" style="height:36px">Equipamiento</span><span class="chip toggle" style="height:36px">Vehículos</span><span class="chip toggle" style="height:36px">Infraestructura</span><span class="chip toggle" style="height:36px">Otros</span></div>
               <div style="display:flex;flex-direction:column">
                 <sc-for list="{{ catalogo }}" as="it" hint-placeholder-count="5">
-                  <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--ds-border)">
-                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">{{ it.n }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ it.d }}</span></span>
-                    <sc-if value="{{ it.on }}"><button class="btn btn-secondary" onClick="{{ it.tog }}" style="height:36px;padding:0 10px;color:var(--ds-accent);border-color:var(--ds-accent)"><span class="ic sm i-check"></span>{{ it.q }}</button></sc-if>
-                    <sc-if value="{{ it.off }}"><button class="btn btn-secondary" onClick="{{ it.tog }}" style="height:36px;padding:0 10px"><span class="ic sm i-plus"></span>Agregar</button></sc-if>
+                  <div style="display:flex;flex-direction:column;border-bottom:1px solid var(--ds-border)">
+                    <div style="display:flex;gap:12px;align-items:center;padding:12px 0">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">{{ it.n }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ it.d }}</span></span>
+                      <sc-if value="{{ it.on }}"><button class="btn btn-secondary" onClick="{{ it.tog }}" style="height:36px;padding:0 10px;color:var(--ds-accent);border-color:var(--ds-accent)"><span class="ic sm i-check"></span>{{ it.q }}</button></sc-if>
+                      <sc-if value="{{ it.off }}"><button class="btn btn-secondary" onClick="{{ it.tog }}" style="height:36px;padding:0 10px"><span class="ic sm i-plus"></span>Agregar</button></sc-if>
+                    </div>
+                    <sc-if value="{{ it.det }}">
+                      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 0 12px">
+                        <div class="field"><span class="hint">Cantidad</span><div class="input compact"><span class="grow" style="font-variant-numeric:tabular-nums">{{ it.q }}</span></div></div>
+                        <div class="field"><span class="hint">Rateo</span><button class="input compact"><span class="grow">{{ it.rateo }}</span><span class="trail ic sm i-chevron-down"></span></button></div>
+                        <div class="field"><span class="hint">Costo unitario</span><div class="input compact"><span class="grow" style="font-variant-numeric:tabular-nums">{{ it.cu }}</span></div></div>
+                        <div class="switch-row" style="grid-column:1 / -1;min-height:36px"><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Visible al cliente</span><span class="{{ it.visCls }}"></span></div>
+                      </div>
+                    </sc-if>
                   </div>
                 </sc-for>
               </div>
@@ -483,116 +648,105 @@
             <sc-if value="{{ itInc }}">
               <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Se muestran al cliente sin costo en la propuesta.</span>
               <sc-for list="{{ incluye }}" as="it" hint-placeholder-count="3">
-                <button class="check-row" onClick="{{ it.tog }}" style="border:0;background:transparent;padding:0;width:100%;text-align:left;border-bottom:1px solid var(--ds-border)">
-                  <span class="area-44" style="margin-left:-12px"><span class="{{ it.cls }}"><sc-if value="{{ it.on }}"><span class="ic sm i-check"></span></sc-if></span></span>
-                  <span class="txt"><span>{{ it.n }}</span></span>
-                </button>
+                <button class="check-row" onClick="{{ it.tog }}" style="border:0;background:transparent;padding:0;width:100%;text-align:left;border-bottom:1px solid var(--ds-border)"><span class="area-44"><span class="{{ it.cls }}"><sc-if value="{{ it.on }}"><span class="ic sm i-check"></span></sc-if></span></span><span class="txt"><span>{{ it.n }}</span></span></button>
               </sc-for>
             </sc-if>
             <sc-if value="{{ itPaq }}">
-              <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span style="font:500 15px/20px var(--font-sans)">Guardia 24/7 4x4</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">2 líneas · uniformes · examen psicolaboral</span></div>
-              <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span style="font:500 15px/20px var(--font-sans)">Ronda vehicular nocturna</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">1 línea 7x7 · camioneta · radio portátil</span></div>
+              <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span style="font:500 15px/20px var(--font-sans)">Guardia 24/7 4x4</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">2 líneas · uniformes · examen psicolaboral</span><button class="btn btn-secondary" style="align-self:flex-start;height:32px;margin-top:8px">Agregar paquete</button></div>
+              <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span style="font:500 15px/20px var(--font-sans)">Ronda vehicular nocturna</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">1 línea 7x7 · camioneta · radio portátil</span><button class="btn btn-secondary" style="align-self:flex-start;height:32px;margin-top:8px">Agregar paquete</button></div>
+              <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span style="font:500 15px/20px var(--font-sans)">Control de acceso 5x2</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">1 línea · libro de novedades digital</span><button class="btn btn-secondary" style="align-self:flex-start;height:32px;margin-top:8px">Agregar paquete</button></div>
             </sc-if>
           </div>
-          <div class="sheet-actions" style="padding-bottom:28px"><span style="flex:1;align-self:center;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ itemsResumen }}</span><button class="btn btn-primary" onClick="{{ closeSheet }}" style="flex:none;padding:0 28px">Listo</button></div>
+          <div class="sheet-actions" style="padding-bottom:{{ padBot }}"><span style="flex:1;align-self:center;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ itemsResumen }}</span><button class="btn btn-primary" onClick="{{ closeSheet }}" style="flex:none;padding:0 28px">Listo</button></div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Margen y finanzas -->
-      <sc-if value="{{ shMargen }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:44px">
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--ds-border)">
-            <span style="flex:1;font:600 17px/24px var(--font-sans)">Margen y finanzas</span>
-            <button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button>
+    <sc-if value="{{ shMargen }}">
+      <div class="sheet" style="z-index:11;max-height:none;top:44px">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--ds-border)"><span style="flex:1;font:600 17px/24px var(--font-sans)">Margen y finanzas</span><button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+        <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <button class="btn btn-secondary icon" onClick="{{ mMenos }}" aria-label="Bajar margen" style="font:500 20px/1 var(--font-sans)">−</button>
+              <span style="flex:1;text-align:center;font:600 28px/34px var(--font-sans);letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ margenCfg }}</span>
+              <button class="btn btn-secondary icon" onClick="{{ mMas }}" aria-label="Subir margen"><span class="ic i-plus"></span></button>
+            </div>
+            <span style="text-align:center;font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ modoAyuda }}</span>
+            <div class="seg" style="width:100%"><button class="{{ mV }}" onClick="{{ setMV }}">Venta</button><button class="{{ mK }}" onClick="{{ setMK }}">Markup</button><button class="{{ mM }}" onClick="{{ setMM }}">Mano de obra</button></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <sc-for list="{{ simul }}" as="sm" hint-placeholder-count="3"><button onClick="{{ sm.pick }}" style="display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:var(--radius-md);border:1px solid var(--ds-border);background:var(--ds-surface);color:var(--ds-fg);cursor:pointer;text-align:left"><span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ sm.m }}</span><span style="font:600 13px/18px var(--font-sans);font-variant-numeric:tabular-nums">{{ sm.v }}</span></button></sc-for>
+            </div>
           </div>
-          <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
-            <div style="display:flex;flex-direction:column;gap:12px">
-              <div style="display:flex;align-items:center;gap:12px">
-                <button class="btn btn-secondary icon" onClick="{{ mMenos }}" aria-label="Bajar margen" style="font:500 20px/1 var(--font-sans)">−</button>
-                <span style="flex:1;text-align:center;font:600 28px/34px var(--font-sans);letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ margenTxt }}</span>
-                <button class="btn btn-secondary icon" onClick="{{ mMas }}" aria-label="Subir margen"><span class="ic i-plus"></span></button>
+          <div style="display:flex;flex-direction:column">
+            <span style="font:600 15px/20px var(--font-sans);margin-bottom:4px">Instrumentos</span>
+            <sc-for list="{{ instr }}" as="in" hint-placeholder-count="3">
+              <div class="switch-row" style="border-bottom:1px solid var(--ds-border);padding:6px 0">
+                <span style="display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/20px var(--font-sans);display:flex;gap:6px;align-items:center">{{ in.n }}<sc-if value="{{ in.sob }}"><span class="badge b-info nodot">Sobrescrito</span></sc-if></span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ in.d }}</span></span>
+                <button class="switch-area" onClick="{{ in.tog }}" aria-label="{{ in.n }}"><span class="{{ in.cls }}"></span></button>
               </div>
-              <span style="text-align:center;font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Mínimo 10,0 % · objetivo 15,0 % (márgenes del tenant)</span>
-              <div class="seg" style="width:100%"><button class="on">Sobre la venta</button><button>Sobre el costo</button></div>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-                <sc-for list="{{ simul }}" as="sm" hint-placeholder-count="3">
-                  <button onClick="{{ sm.pick }}" style="display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:var(--radius-md);border:1px solid var(--ds-border);background:var(--ds-surface);color:var(--ds-fg);cursor:pointer;text-align:left"><span style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ sm.m }}</span><span style="font:600 13px/18px var(--font-sans);font-variant-numeric:tabular-nums">{{ sm.v }}</span></button>
-                </sc-for>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column">
-              <span style="font:600 15px/20px var(--font-sans);margin-bottom:4px">Instrumentos</span>
-              <sc-for list="{{ instr }}" as="in" hint-placeholder-count="3">
-                <div class="switch-row" style="border-bottom:1px solid var(--ds-border);padding:6px 0">
-                  <span style="display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/20px var(--font-sans)">{{ in.n }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ in.d }}</span></span>
-                  <button class="switch-area" onClick="{{ in.tog }}" aria-label="{{ in.n }}"><span class="{{ in.cls }}"></span></button>
-                </div>
-              </sc-for>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div class="field"><span class="lbl">Meses de contrato</span><div class="input"><span class="grow" style="font-variant-numeric:tabular-nums">12</span></div></div>
-              <div class="field"><span class="lbl">Validez</span><div class="input"><span class="grow" style="font-variant-numeric:tabular-nums">30 días</span></div></div>
-            </div>
-            <div style="display:flex;flex-direction:column">
-              <span style="font:600 15px/20px var(--font-sans);margin-bottom:4px">Condiciones comerciales</span>
-              <div class="pg-kv"><span class="l">Pago</span><span class="v">30 días desde factura</span></div>
-              <div class="pg-kv"><span class="l">Reajuste</span><span class="v">IPC anual</span></div>
-              <div class="pg-kv"><span class="l">Moneda</span><span class="v">CLP · referencia UF</span></div>
-            </div>
+            </sc-for>
           </div>
-          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px 28px;border-top:1px solid var(--ds-border);background:var(--ds-surface-raised)">
-            <span style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font:600 16px/24px var(--font-sans);font-variant-numeric:tabular-nums">{{ ventaTxt }} / mes</span><span class="{{ semCls }}" style="align-self:flex-start">{{ semTxt }}</span></span>
-            <button class="btn btn-primary lg" onClick="{{ closeSheet }}">Listo</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><span class="lbl">Meses de contrato</span><div class="input"><span class="grow" style="font-variant-numeric:tabular-nums">12</span></div></div>
+            <div class="field"><span class="lbl">Validez</span><div class="input"><span class="grow" style="font-variant-numeric:tabular-nums">30 días</span></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <span style="font:600 15px/20px var(--font-sans);margin-bottom:4px">Condiciones comerciales</span>
+            <div class="pg-kv"><span class="l">Pago</span><span class="v">30 días desde factura</span></div>
+            <div class="pg-kv"><span class="l">Reajuste</span><span class="v">IPC anual</span></div>
+            <div class="pg-kv"><span class="l">Moneda</span><span class="v">CLP · referencia UF</span></div>
           </div>
         </div>
-      </sc-if>
-
-      <!-- Pedir aprobación -->
-      <sc-if value="{{ shAprob }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:200px">
-          <div class="grabber"></div>
-          <div style="padding:12px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">Pedir aprobación</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">El margen queda bajo el mínimo del tenant.</span></div>
-          <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
-            <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:var(--radius-md)">
-              <span style="display:flex;flex-direction:column"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Mínimo</span><span style="font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums">10,0 %</span></span>
-              <span class="ic i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
-              <span style="display:flex;flex-direction:column"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Propuesto</span><span style="font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums;color:var(--ds-danger-fg)">{{ margenTxt }}</span></span>
-            </div>
-            <div class="pg-kv"><span class="l">Venta mensual</span><span class="v" style="font-variant-numeric:tabular-nums">{{ ventaTxt }}</span></div>
-            <div class="pg-kv"><span class="l">Decide</span><span class="v">Marcela Rojas · gerente comercial</span></div>
-            <div class="field"><span class="lbl">Motivo</span><textarea class="input" rows="3" style="min-height:80px">El cliente comparó con otra empresa. Con 9 % cerramos 12 meses y la ronda vehicular.</textarea></div>
-          </div>
-          <div class="sheet-actions" style="padding-bottom:28px"><button class="btn btn-secondary" onClick="{{ closeSheet }}">Cancelar</button><button class="btn btn-primary" onClick="{{ pedirAprob }}">Pedir aprobación</button></div>
+        <div style="flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px 28px;border-top:1px solid var(--ds-border);background:var(--ds-surface-raised)">
+          <span style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font:600 16px/24px var(--font-sans);font-variant-numeric:tabular-nums">{{ ventaTxt }} / mes</span><span class="{{ semCls }}" style="align-self:flex-start">{{ semTxt }}</span></span>
+          <button class="btn btn-primary lg" onClick="{{ closeSheet }}">Listo</button>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Decidir (aprobador) -->
-      <sc-if value="{{ shDecidir }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:140px">
-          <div class="grabber"></div>
-          <div style="padding:12px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:500 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">CPQ-2026-014 · v1</span><span style="font:600 18px/26px var(--font-sans)">Aprobar margen de 9,0 %</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Pedido por Tomás Fuentes · Guardias Planta Norte</span></div>
+    <sc-if value="{{ shAprob }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.aprob.cls }}" style="pointer-events:auto;position:{{ o.aprob.pos }};top:{{ o.aprob.top }};width:{{ o.aprob.w }};max-height:{{ o.aprob.mh }};border-radius:{{ o.aprob.rad }}">
+          <sc-if value="{{ isPhone }}"><div class="grabber"></div></sc-if>
+          <div style="padding:16px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">Pedir aprobación</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Bajaste el margen de 12,0 % a 9,0 %: queda bajo el mínimo del tenant (10,0 %).</span></div>
           <div class="sheet-body" style="display:flex;flex-direction:column;gap:12px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="kpi"><span class="k">Antes</span><span class="v">12,0 %</span></div>
-              <div class="kpi"><span class="k">Después</span><span class="v" style="color:var(--ds-danger-fg)">9,0 %</span></div>
+            <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:var(--radius-md)">
+              <span style="display:flex;flex-direction:column"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Antes</span><span style="font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums">12,0 %</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ venta12 }}</span></span>
+              <span class="ic i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
+              <span style="display:flex;flex-direction:column"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Propuesto</span><span style="font:600 18px/26px var(--font-sans);font-variant-numeric:tabular-nums;color:var(--ds-danger-fg)">{{ margenTxt }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ ventaTxt }}</span></span>
             </div>
-            <div class="pg-kv"><span class="l">Venta mensual</span><span class="v" style="font-variant-numeric:tabular-nums">{{ ventaTxt }}</span></div>
+            <div class="pg-kv"><span class="l">Mínimo del tenant</span><span class="v">10,0 %</span></div>
+            <div class="pg-kv"><span class="l">Decide</span><span class="v">Marcela Rojas · gerente comercial</span></div>
+            <div class="field"><span class="lbl">Motivo</span><textarea class="input" rows="3" style="min-height:80px" defaultValue="El cliente comparó con otra empresa. Con 9 % cerramos 12 meses y la ronda vehicular."></textarea></div>
+          </div>
+          <div class="sheet-actions" style="padding-bottom:{{ padBot }}"><button class="btn btn-secondary" onClick="{{ closeSheet }}">Cancelar</button><button class="btn btn-primary" onClick="{{ pedirAprob }}">Pedir aprobación</button></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ shDecidir }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.decidir.cls }}" style="pointer-events:auto;position:{{ o.decidir.pos }};top:{{ o.decidir.top }};width:{{ o.decidir.w }};max-height:{{ o.decidir.mh }};border-radius:{{ o.decidir.rad }}">
+          <sc-if value="{{ isPhone }}"><div class="grabber"></div></sc-if>
+          <div style="padding:16px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:500 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">CPQ-2026-014 · v1</span><span style="font:600 18px/26px var(--font-sans)">Aprobar margen de 9,0 %</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Pedido por Tomás Fuentes · Guardias Planta Norte</span></div>
+          <div class="sheet-body" style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="kpi"><span class="k">Antes</span><span class="v">12,0 %</span></div><div class="kpi"><span class="k">Después</span><span class="v" style="color:var(--ds-danger-fg)">9,0 %</span></div></div>
+            <div class="pg-kv"><span class="l">Venta mensual</span><span class="v" style="font-variant-numeric:tabular-nums">{{ venta12 }} → {{ ventaTxt }}</span></div>
             <div class="pg-kv"><span class="l">Mínimo del tenant</span><span class="v">10,0 %</span></div>
             <div class="pg-kv"><span class="l">Contrato</span><span class="v">12 meses</span></div>
             <div style="padding:12px;border-radius:var(--radius-md);background:var(--ds-fill);font:400 14px/20px var(--font-sans)">«El cliente comparó con otra empresa. Con 9 % cerramos 12 meses y la ronda vehicular.»</div>
             <div class="field"><span class="lbl">Comentario (opcional)</span><textarea class="input" rows="2" style="min-height:64px" placeholder="Se guarda en la traza"></textarea></div>
           </div>
-          <div class="sheet-actions" style="padding-bottom:28px"><button class="btn btn-secondary" onClick="{{ rechazar }}">Rechazar</button><button class="btn btn-primary" onClick="{{ aprobar }}">Aprobar</button></div>
+          <div class="sheet-actions" style="padding-bottom:{{ padBot }}"><button class="btn btn-secondary" onClick="{{ rechazar }}">Rechazar</button><button class="btn btn-primary" onClick="{{ aprobar }}">Aprobar</button></div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Enviar -->
-      <sc-if value="{{ shEnviar }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:44px">
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--ds-border)">
-            <span style="flex:1;display:flex;flex-direction:column"><span style="font:600 17px/24px var(--font-sans)">Enviar cotización</span><span style="font:400 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">CPQ-2026-014 · v1</span></span>
-            <button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button>
-          </div>
+    <sc-if value="{{ shEnviar }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.enviar.cls }}" style="pointer-events:auto;position:{{ o.enviar.pos }};top:{{ o.enviar.top }};width:{{ o.enviar.w }};max-height:{{ o.enviar.mh }};border-radius:{{ o.enviar.rad }}">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--ds-border)"><span style="flex:1;display:flex;flex-direction:column"><span style="font:600 17px/24px var(--font-sans)">Enviar cotización</span><span style="font:400 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">CPQ-2026-014 · v1</span></span><button class="icon-btn" onClick="{{ closeSheet }}" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
           <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
             <div style="display:flex;flex-direction:column">
               <span style="font:600 15px/20px var(--font-sans)">Bloqueos y avisos</span>
@@ -611,20 +765,15 @@
                 </div>
               </sc-if>
             </div>
-
             <div style="display:flex;flex-direction:column;gap:10px">
               <span style="font:600 15px/20px var(--font-sans)">Vista previa</span>
               <div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-fill);padding:12px;display:flex;flex-direction:column;gap:10px">
                 <sc-if value="{{ pdfGen }}">
-                  <div style="display:flex;gap:8px">
-                    <div class="skel" style="width:96px;height:136px;border-radius:4px"></div>
-                    <div class="skel" style="width:96px;height:136px;border-radius:4px"></div>
-                    <div class="skel" style="width:96px;height:136px;border-radius:4px"></div>
-                  </div>
-                  <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Generando el documento…</span>
+                  <div style="display:flex;gap:8px"><div class="skel" style="width:{{ thW }};height:{{ thH }};border-radius:4px"></div><div class="skel" style="width:{{ thW }};height:{{ thH }};border-radius:4px"></div><div class="skel" style="width:{{ thW }};height:{{ thH }};border-radius:4px"></div></div>
+                  <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Generando el documento · suele tardar menos de 10 s</span>
                 </sc-if>
                 <sc-if value="{{ pdfLento }}">
-                  <div style="display:flex;gap:8px"><div class="skel" style="width:96px;height:136px;border-radius:4px"></div><div class="skel" style="width:96px;height:136px;border-radius:4px"></div></div>
+                  <div style="display:flex;gap:8px"><div class="skel" style="width:{{ thW }};height:{{ thH }};border-radius:4px"></div><div class="skel" style="width:{{ thW }};height:{{ thH }};border-radius:4px"></div></div>
                   <div style="display:flex;align-items:center;gap:8px"><span style="flex:1;font:500 13px/18px var(--font-sans);color:var(--ds-warning-fg)">Esto tarda más de lo normal</span><button class="btn btn-secondary" onClick="{{ pdfRetry }}" style="height:36px">Reintentar</button></div>
                 </sc-if>
                 <sc-if value="{{ pdfErr }}">
@@ -634,16 +783,12 @@
                 <sc-if value="{{ pdfOk }}">
                   <div style="display:flex;gap:8px;overflow-x:auto">
                     <sc-for list="{{ paginas }}" as="pg" hint-placeholder-count="3">
-                      <div style="position:relative;width:96px;height:136px;flex:none;border-radius:4px;background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);padding:10px 8px;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;overflow:hidden">
+                      <div style="position:relative;width:{{ thW }};height:{{ thH }};flex:none;border-radius:4px;background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);padding:10px 8px;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;overflow:hidden">
                         <span style="font:700 7px/9px var(--font-sans)">Vigía Sur SpA</span>
-                        <span style="height:4px;width:70%;background:var(--ds-paper-rule)"></span>
-                        <span style="height:3px;width:90%;background:var(--ds-paper-rule-subtle)"></span>
-                        <span style="height:3px;width:85%;background:var(--ds-paper-rule-subtle)"></span>
-                        <span style="height:3px;width:60%;background:var(--ds-paper-rule-subtle)"></span>
-                        <span style="height:18px;width:100%;border:1px solid var(--ds-paper-rule);margin-top:4px"></span>
-                        <span style="height:3px;width:80%;background:var(--ds-paper-rule-subtle)"></span>
+                        <span style="height:4px;width:70%;background:var(--ds-paper-rule)"></span><span style="height:3px;width:90%;background:var(--ds-paper-rule-subtle)"></span><span style="height:3px;width:85%;background:var(--ds-paper-rule-subtle)"></span><span style="height:3px;width:60%;background:var(--ds-paper-rule-subtle)"></span>
+                        <span style="height:18px;width:100%;border:1px solid var(--ds-paper-rule);margin-top:4px"></span><span style="height:3px;width:80%;background:var(--ds-paper-rule-subtle)"></span>
                         <span style="position:absolute;left:50%;top:55%;transform:translate(-50%,-50%) rotate(-30deg);font:700 13px/1 var(--font-sans);letter-spacing:.05em;color:var(--ds-paper-rule)">BORRADOR</span>
-                        <span style="position:absolute;bottom:4px;right:6px;font:500 7px/9px var(--font-sans);color:var(--ds-fg-subtle)">{{ pg }}</span>
+                        <span style="position:absolute;bottom:4px;right:6px;font:500 7px/9px var(--font-sans);color:var(--ds-paper-fg)">{{ pg }}</span>
                       </div>
                     </sc-for>
                   </div>
@@ -652,104 +797,115 @@
               </div>
               <div class="seg" style="width:100%"><button class="{{ fmtSola }}" onClick="{{ setFmtSola }}">Cotización</button><button class="{{ fmtProp }}" onClick="{{ setFmtProp }}">+ propuesta técnica</button></div>
             </div>
-
             <div class="field">
               <span class="lbl">Destinatarios</span>
-              <div class="input" style="height:auto;min-height:44px;padding:6px 8px;flex-wrap:wrap;gap:6px">
-                <span class="chip" style="height:32px">Paula Soto <span class="k">· Jefa de compras</span><span class="x"><span class="ic sm i-x"></span></span></span>
-                <span class="grow" style="color:var(--ds-fg-subtle);font-size:14px;min-width:80px">Buscar contacto</span>
-              </div>
+              <div class="input" style="height:auto;min-height:44px;padding:6px 8px;flex-wrap:wrap;gap:6px"><span class="chip" style="height:32px">Paula Soto <span class="k">· Jefa de compras</span><span class="x"><span class="ic sm i-x"></span></span></span><span class="grow" style="color:var(--ds-fg-subtle);font-size:14px;min-width:80px">Buscar contacto</span></div>
               <button class="enlace enlace-accion" style="border:0;background:transparent;padding:0;font:500 13px/18px var(--font-sans);align-self:flex-start;min-height:32px">Agregar contacto al negocio</button>
             </div>
-
             <div style="display:flex;flex-direction:column">
               <span style="font:600 15px/20px var(--font-sans);margin-bottom:4px">Canal</span>
               <button class="check-row" onClick="{{ togCorreo }}" style="border:0;background:transparent;padding:0;text-align:left"><span class="area-44"><span class="{{ correoCls }}"><sc-if value="{{ correo }}"><span class="ic sm i-check"></span></sc-if></span></span><span class="txt"><span>Correo</span></span></button>
               <button class="check-row" onClick="{{ togLink }}" style="border:0;background:transparent;padding:0;text-align:left"><span class="area-44"><span class="{{ linkCls }}"><sc-if value="{{ link }}"><span class="ic sm i-check"></span></sc-if></span></span><span class="txt"><span>Enlace para compartir</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Vence en 30 días · puedes revocarlo</span></span></button>
             </div>
-
-            <button class="check-row" onClick="{{ togCongela }}" style="border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface);padding:0 12px 0 20px;text-align:left">
-              <span class="area-44"><span class="{{ congelaCls }}"><sc-if value="{{ congela }}"><span class="ic sm i-check"></span></sc-if></span></span>
-              <span class="txt"><span style="font-weight:500">Enviar congela esta versión</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Para cambiarla después, se crea la v2.</span></span>
-            </button>
+            <button class="check-row" onClick="{{ togCongela }}" style="border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface);padding:0 12px 0 20px;text-align:left"><span class="area-44"><span class="{{ congelaCls }}"><sc-if value="{{ congela }}"><span class="ic sm i-check"></span></sc-if></span></span><span class="txt"><span style="font-weight:500">Enviar congela esta versión</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Para cambiarla después, se crea la v2.</span></span></button>
           </div>
-          <div class="sheet-actions" style="padding-bottom:28px;flex-direction:column;gap:6px">
-            <sc-if value="{{ puedeEnviar }}"><button class="btn btn-primary" onClick="{{ enviar }}" style="width:100%;flex:none">Enviar a Paula Soto</button></sc-if>
-            <sc-if value="{{ noEnviar }}"><button class="btn btn-primary" disabled="disabled" style="width:100%;flex:none">Enviar a Paula Soto</button><span style="text-align:center;font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ motivoNoEnviar }}</span></sc-if>
+          <div class="sheet-actions" style="padding-bottom:{{ padBot }};flex-direction:column;gap:6px">
+            <sc-if value="{{ puedeEnviar }}"><button class="btn btn-primary" onClick="{{ enviar }}" style="width:100%;flex:none;height:44px">Enviar a Paula Soto</button></sc-if>
+            <sc-if value="{{ noEnviar }}"><button class="btn btn-primary" disabled="disabled" style="width:100%;flex:none;height:44px">Enviar a Paula Soto</button><span style="text-align:center;font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ motivoNoEnviar }}</span></sc-if>
           </div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Compartir -->
-      <sc-if value="{{ shCompartir }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:300px">
-          <div class="grabber"></div>
-          <div style="padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center"><span style="font:600 18px/26px var(--font-sans)">Compartir</span><span class="badge b-success">Activo · vence 01-12-2026</span></div>
+    <sc-if value="{{ shCompartir }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.compartir.cls }}" style="pointer-events:auto;position:{{ o.compartir.pos }};top:{{ o.compartir.top }};width:{{ o.compartir.w }};max-height:{{ o.compartir.mh }};border-radius:{{ o.compartir.rad }}">
+          <sc-if value="{{ isPhone }}"><div class="grabber"></div></sc-if>
+          <div style="padding:16px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font:600 18px/26px var(--font-sans)">Compartir</span><span class="{{ linkCls2 }}">{{ linkEstado }}</span></div>
           <div class="sheet-body" style="display:flex;flex-direction:column;gap:12px">
             <div class="input" style="background:var(--ds-bg)"><span class="grow" style="font:400 14px/20px var(--font-mono)">opai.app/p/7KQ2-M9XA</span><button class="btn btn-ghost" onClick="{{ copiar }}" style="height:36px;padding:0 10px;margin-right:-6px">Copiar</button></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <button class="btn btn-primary" onClick="{{ whatsapp }}"><span class="ic sm i-message"></span>WhatsApp</button>
-              <button class="btn btn-secondary" onClick="{{ copiar }}">Correo</button>
-            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-primary" onClick="{{ whatsapp }}"><span class="ic sm i-message"></span>WhatsApp</button><button class="btn btn-secondary" onClick="{{ copiar }}">Correo</button></div>
             <div style="padding:12px;border-radius:var(--radius-md);background:var(--ds-fill);font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">«Hola Paula, te comparto la cotización de guardias para Planta Norte: opai.app/p/7KQ2-M9XA»</div>
             <div class="pg-kv"><span class="l">Vistas</span><span class="v">{{ vistasTxt }}</span></div>
             <button class="btn btn-ghost" onClick="{{ revocar }}" style="color:var(--ds-danger-fg);align-self:flex-start">Revocar enlace</button>
           </div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <!-- Crear puestos -->
-      <sc-if value="{{ shCrear }}">
-        <div class="sheet" style="z-index:11;max-height:none;top:160px">
-          <div class="grabber"></div>
-          <div style="padding:12px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">Crear puestos</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Se crearán 4 puestos en Planta Norte</span></div>
+    <sc-if value="{{ shCrear }}">
+      <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div class="{{ o.crear.cls }}" style="pointer-events:auto;position:{{ o.crear.pos }};top:{{ o.crear.top }};width:{{ o.crear.w }};max-height:{{ o.crear.mh }};border-radius:{{ o.crear.rad }}">
+          <sc-if value="{{ isPhone }}"><div class="grabber"></div></sc-if>
+          <div style="padding:16px 16px 4px;display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">Crear puestos</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Se crearán 4 puestos en Planta Norte</span></div>
           <div class="sheet-body" style="display:flex;flex-direction:column;gap:12px">
-            <div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
-              <div class="rowcard"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">Guardia diurno × 2</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">4x4 · 08:00 → 20:00 · $ 620.000</span></span><span class="badge b-neutral nodot">Referencia del cargo</span></div>
-              <div class="rowcard"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">Guardia nocturno × 2</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">4x4 · 20:00 → 08:00 +1 · $ 650.000</span></span><span class="badge b-warning nodot">Escrito a mano</span></div>
-            </div>
+            <sc-if value="{{ isPhone }}">
+              <div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+                <div class="rowcard"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">Guardia diurno × 2</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">4x4 · 08:00 → 20:00 · $ 620.000</span></span><span class="badge b-neutral nodot">Referencia del cargo</span></div>
+                <div class="rowcard"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 15px/20px var(--font-sans)">Guardia nocturno × 2</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">4x4 · 20:00 → 08:00 +1 · $ 650.000</span></span><span class="badge b-warning nodot">Escrito a mano</span></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ wide }}">
+              <div class="tbl-wrap">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 90px 160px 120px 170px;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)"><span>Línea de la cotización</span><span style="text-align:right">Puestos</span><span>Horario</span><span style="text-align:right">Sueldo</span><span>Origen del sueldo</span></div>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 90px 160px 120px 170px;gap:12px;align-items:center;min-height:52px;padding:0 16px;border-bottom:1px solid var(--ds-border);font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums"><span style="display:flex;flex-direction:column"><span style="font-weight:500">Guardia diurno</span><span style="font-size:12px;line-height:16px;color:var(--ds-fg-subtle)">Guardia de seguridad · 4x4</span></span><span style="text-align:right">2</span><span>08:00 → 20:00</span><span style="text-align:right">$ 620.000</span><span><span class="badge b-neutral nodot">Referencia del cargo</span></span></div>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 90px 160px 120px 170px;gap:12px;align-items:center;min-height:52px;padding:0 16px;font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums"><span style="display:flex;flex-direction:column"><span style="font-weight:500">Guardia nocturno</span><span style="font-size:12px;line-height:16px;color:var(--ds-fg-subtle)">Guardia de seguridad · 4x4</span></span><span style="text-align:right">2</span><span>20:00 → 08:00 +1</span><span style="text-align:right">$ 650.000</span><span><span class="badge b-warning nodot">Escrito a mano</span></span></div>
+              </div>
+              <div class="pg-kv"><span class="l">Destino</span><span class="v">Planta Norte › Puestos · inicio 01-12-2026</span></div>
+            </sc-if>
             <div class="alerta" style="background:var(--ds-fill);color:var(--ds-fg)"><span class="ic i-info"></span><span class="txt"><span>RRHH confirma cada sueldo en el puesto. El sueldo de la cotización es un supuesto de venta, no el sueldo que se paga.</span></span></div>
           </div>
-          <div class="sheet-actions" style="padding-bottom:28px"><button class="btn btn-secondary" onClick="{{ closeSheet }}">Cancelar</button><button class="btn btn-primary" onClick="{{ crearPuestos }}">Crear 4 puestos</button></div>
+          <div class="sheet-actions" style="padding-bottom:{{ padBot }}"><button class="btn btn-secondary" onClick="{{ closeSheet }}">Cancelar</button><button class="btn btn-primary" onClick="{{ crearPuestos }}">Crear 4 puestos</button></div>
         </div>
-      </sc-if>
+      </div>
+    </sc-if>
 
-      <sc-if value="{{ hasToast }}">
-        <div style="position:absolute;left:16px;right:16px;bottom:100px;z-index:30;display:flex;justify-content:center"><div class="toast">{{ toast }}</div></div>
-      </sc-if>
-    </div>
-
-    <div style="display:flex;gap:8px;align-items:center;width:375px;max-width:100%">
-      <button class="btn btn-secondary" onClick="{{ prev }}"><span class="ic sm i-chevron-left"></span>Anterior</button>
-      <span style="flex:1;text-align:center;font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">Paso {{ stepN }} de 12</span>
-      <button class="btn btn-secondary" onClick="{{ next }}">Siguiente<span class="ic sm i-chevron-right"></span></button>
-    </div>
-    <span style="width:375px;max-width:100%;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);text-wrap:pretty">{{ stepNota }}</span>
+    <sc-if value="{{ hasToast }}"><div style="position:absolute;left:16px;right:16px;bottom:{{ toastBot }};z-index:30;display:flex;justify-content:center;pointer-events:none"><div class="toast">{{ toast }}</div></div></sc-if>
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;},&quot;legales&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;al día&quot;,&quot;respaldo&quot;],&quot;default&quot;:&quot;al día&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Estados&quot;},&quot;pdf&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;lento&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Estados&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;},&quot;legales&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;al día&quot;,&quot;respaldo&quot;],&quot;default&quot;:&quot;al día&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Estados&quot;},&quot;pdf&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;lento&quot;,&quot;error&quot;,&quot;generando&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Estados&quot;},&quot;vp&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;'phone'|'tablet'|'desktop'&quot;},&quot;step&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;preset&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;embed&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;scroll&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;shot&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;}}">
 const CLP = n => '$\u00a0' + Math.round(n).toLocaleString('es-CL');
-const PCT = n => n.toFixed(1).replace('.', ',') + ' %';
+const PCT = n => n.toFixed(1).replace('.', ',') + '\u00a0%';
 const STEPS = [
-  ['Negocio sin cotización', 'Ficha del negocio (export-crm), pestaña Cotizaciones vacía.'],
+  ['Negocio sin cotización', 'Ficha del negocio, pestaña Cotizaciones vacía.'],
   ['Cotización rápida', 'Cuenta y negocio ya elegidos. Vista previa del folio antes de crear.'],
-  ['Ficha con requisitos', 'Tenant nuevo: venta y margen «—», una fila «Costos pendientes», barra «2 pendientes · Ver» sobre la acción principal.'],
+  ['Ficha con requisitos', 'Tenant nuevo: venta y margen «—», una fila «Costos pendientes» y requisitos con acción en el lugar.'],
   ['Hoja de puesto', 'Elige el cargo: el sueldo se autocompleta con «Referencia del cargo». Pie con costo y venta en vivo.'],
   ['Hoja de ítem', 'Agrega uniformes, examen y camioneta; en Incluye marca radio y linterna.'],
-  ['Margen y finanzas', 'Margen 12 %, póliza de garantía activa. Venta y semáforo en vivo en el pie.'],
-  ['Resumen', 'Venta calculada, semáforo sobre el mínimo y costos por categoría.'],
-  ['Pedir aprobación y decidir', 'El ejecutivo baja a 9 %. Pide aprobación; la aprobadora decide desde la Bandeja de Inicio.'],
-  ['Enviar', 'Bloqueo «Confirma la mutual adicional» con acción en línea. Vista previa con estados generando, lento y error (tweak).'],
+  ['Margen y finanzas', 'Margen 12 % sobre la venta y póliza de garantía. En escritorio son secciones plegables bajo la planilla.'],
+  ['Resumen', 'Venta $ 3.893.127 con margen 12,0 %, sobre el mínimo (10,0 %).'],
+  ['Pedir aprobación y decidir', 'El ejecutivo baja el margen de 12,0 % a 9,0 % para cerrar. Pide aprobación; Marcela Rojas decide desde la Bandeja de Inicio.'],
+  ['Enviar', 'Margen 9,0 % aprobado (por eso cae desde el paso 7). Bloqueo «Confirma la mutual adicional» con acción en línea.'],
   ['Compartir', 'Enlace del cliente, WhatsApp, copiar y revocar.'],
   ['Seguimiento', 'Vista por el cliente hace 2 h. v1 en solo lectura; editar crea la v2.'],
-  ['Ganado → Crear puestos', 'Negocio ganado con «4 puestos por crear». La hoja de RRHH lleva la dotación a Planta Norte.']
+  ['Ganado → Crear puestos', 'Negocio ganado con «4 puestos por crear». RRHH lleva la dotación a Planta Norte.']
 ];
 const BASE = { view: 'negocio', sheet: null, cot: false, sueldoD: null, origen: null, cargo: null, combo: false, sup: false, modo: 'bruto',
   mutual: false, mutInline: false, busy: null, items: { u: 0, e: 0, c: 0, l: 0, b: 0 }, inc: { radio: 0, linterna: 0, libro: 0 }, itTab: 'cat',
-  margen: 12, poliza: true, rc: false, fin: false, aprob: 'none', enviada: false, vistas: 0, revocado: false, ganada: false, puestos: false,
-  pdf: 'gen', fmt: 'sola', correo: true, link: true, congela: false, pn: true, com: false, toast: null };
+  margen: 12, modoM: 'venta', poliza: true, rc: false, fin: false, instrOpen: null, aprob: 'none', enviada: false, vistas: 0, revocado: false, ganada: false, puestos: false,
+  pdf: 'gen', fmt: 'sola', correo: true, link: true, congela: false, pn: true, com: false, secPol: true, secCond: false, secSup: false, toast: null };
 const ITEMS_OK = { u: 1, e: 1, c: 1, l: 0, b: 0 }, INC_OK = { radio: 1, linterna: 1, libro: 0 };
+const PRESETS = {
+  listo: { mutual: true },
+  'puesto-lleno': { sueldoD: 620000, origen: 'ref', cargo: 'Guardia de seguridad', sheet: 'puesto' },
+  'puesto-combo': { combo: true, sheet: 'puesto' },
+  'puesto-error': { sueldoD: 480000, origen: 'mano', cargo: 'Guardia de seguridad', sheet: 'puesto' },
+  'puesto-liquido': { sueldoD: 620000, origen: 'ref', cargo: 'Guardia de seguridad', modo: 'liq', sheet: 'puesto' },
+  'item-lleno': { items: { u: 1, e: 1, c: 1, l: 0, b: 0 }, inc: { radio: 1, linterna: 1, libro: 0 }, com: true, sheet: 'item' },
+  'item-incluye': { items: { u: 1, e: 1, c: 1, l: 0, b: 0 }, inc: { radio: 1, linterna: 1, libro: 0 }, com: true, itTab: 'inc', sheet: 'item' },
+  'item-paquetes': { items: { u: 1, e: 1, c: 1, l: 0, b: 0 }, inc: { radio: 1, linterna: 1, libro: 0 }, com: true, itTab: 'paq', sheet: 'item' },
+  'margen-detalle': { sheet: null, instrOpen: 'poliza', secCond: true },
+  'margen-markup': { sheet: null, modoM: 'markup', instrOpen: 'rc', rc: true, secSup: true },
+  ficha: { sheet: null },
+  ganado: { sheet: null },
+  'puestos-creados': { sheet: null, puestos: true },
+  'enviar-listo': { mutual: true, congela: true },
+  revocado: { revocado: true, sheet: null },
+  bandeja: { view: 'bandeja', aprob: 'pedida', sheet: null },
+  decidir: { view: 'bandeja', aprob: 'pedida', sheet: 'decidir' }
+};
+const DIMS = { phone: [375, 812], tablet: [1024, 768], desktop: [1280, 800] };
 function snap(n) {
   const s = { ...BASE, items: { ...BASE.items }, inc: { ...BASE.inc } };
   if (n >= 2) s.sheet = 'rapida';
@@ -769,18 +925,30 @@ function snap(n) {
   return s;
 }
 class Component extends DCLogic {
-  state = { step: 1, ...snap(1) };
+  scrollRef = React.createRef();
+  state = this.init();
+  init() {
+    const p = this.props || {};
+    const st = Math.max(1, Math.min(12, Number(p.step) || 1));
+    return { step: st, ...snap(st), ...(PRESETS[p.preset] || {}), vp: p.vp || 'phone', ww: typeof window !== 'undefined' ? window.innerWidth : 1600 };
+  }
   go = n => { n = Math.max(1, Math.min(12, n)); this.setState({ step: n, ...snap(n) }); };
   set = patch => () => this.setState(patch);
   say(t) { clearTimeout(this._t); this.setState({ toast: t }); this._t = setTimeout(() => this.setState({ toast: null }), 2800); }
-  componentDidUpdate(pp, ps) {
-    if (this.state.sheet === 'enviar' && ps.sheet !== 'enviar') this.startPdf();
+  onResize = () => this.setState({ ww: window.innerWidth });
+  componentDidMount() {
+    window.addEventListener('resize', this.onResize);
+    if (this.state.sheet === 'enviar') this.startPdf();
+    const sc = Number(this.props.scroll);
+    if (sc) { const go = () => { const el = this.scrollRef.current || (this.props.shot && document.querySelector('[data-shot="' + this.props.shot + '"] [data-scroll]')); if (el) el.scrollTop = sc; }; [120, 500, 1200].forEach(t => setTimeout(go, t)); }
   }
-  componentDidMount() { if (this.state.sheet === 'enviar') this.startPdf(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); clearTimeout(this._t); clearTimeout(this._p); }
+  componentDidUpdate(pp, ps) { if (this.state.sheet === 'enviar' && ps.sheet !== 'enviar') this.startPdf(); }
   startPdf() {
     clearTimeout(this._p);
     this.setState({ pdf: 'gen' });
     const mode = this.props.pdf ?? 'normal';
+    if (mode === 'generando') return;
     this._p = setTimeout(() => this.setState({ pdf: mode === 'lento' ? 'lento' : mode === 'error' ? 'error' : 'ok' }), 1600);
   }
   resolveMutual() {
@@ -789,6 +957,11 @@ class Component extends DCLogic {
   }
   renderVals() {
     const s = this.state, p = this.props;
+    const embed = !!p.embed && p.embed !== 'false';
+    const vp = s.vp, isPhone = vp === 'phone', isTab = vp === 'tablet', isDesk = vp === 'desktop', wide = !isPhone;
+    const [fw, fh0] = DIMS[vp]; const fh = Number(p.h) || fh0;
+    let zoom = 1;
+    if (!embed) { const avail = s.ww - (s.ww > 1100 ? 420 : 48); zoom = Math.min(1, Math.max(0.35, avail / fw)); }
     const respaldo = (p.legales ?? 'al día') === 'respaldo';
     const calc = s.sueldoD != null;
     const f = 1 + 0.0149 + 0.024 + 0.0093 + (s.mutual ? 0.0095 : 0);
@@ -799,19 +972,24 @@ class Component extends DCLogic {
     const base = lD + lN + iu + ie + icm + il + ib;
     const instrR = (s.poliza ? 0.008 : 0) + (s.rc ? 0.004 : 0) + (s.fin ? 0.011 : 0);
     const costo = base * (1 + instrR);
-    const vOf = m => costo / (1 - m / 100);
+    const labor = (lD + lN) * (1 + instrR);
+    const vOf = (m, modo = s.modoM) => modo === 'markup' ? costo * (1 + m / 100) : modo === 'mo' ? costo + labor * (m / 100) / (1 - m / 100) : costo / (1 - m / 100);
     const venta = vOf(s.margen);
-    const bajoMin = s.margen < 10, aprobOk = s.aprob === 'aprobada';
+    const mEf = venta > 0 ? (venta - costo) / venta * 100 : 0;
+    const bajoMin = mEf < 10 - 1e-9, aprobOk = s.aprob === 'aprobada';
     let semTxt = 'Sobre el objetivo', semCls = 'badge b-success';
-    if (s.margen < 15) semTxt = 'Sobre el mínimo';
+    if (mEf < 15) semTxt = 'Sobre el mínimo';
     if (bajoMin) { semTxt = aprobOk ? 'Bajo el mínimo · aprobado' : 'Bajo el mínimo'; semCls = aprobOk ? 'badge b-warning' : 'badge b-danger'; }
+    const margenNota = bajoMin && aprobOk ? 'Bajó de 12,0 % · aprobado por Marcela Rojas el 03-11-2026' : '';
+    const modoLbl = { venta: 'sobre la venta', markup: 'markup sobre el costo', mo: 'sobre la mano de obra' }[s.modoM];
+    const modoAyuda = s.modoM === 'venta' ? 'Mínimo 10,0 % · objetivo 15,0 % (márgenes del tenant)' : 'Equivale a ' + PCT(mEf) + ' sobre la venta · mínimo 10,0 %';
 
     const tone = { ok: ['ic i-check-circle', 'var(--ds-success-fg)'], aviso: ['ic i-info', 'var(--ds-warning-fg)'], falta: ['ic i-alert', 'var(--ds-danger-fg)'] };
     const row = (key, st, t, c, a, act) => ({ key, st, ic: tone[st][0], color: tone[st][1], t, c, a, act, busy: s.busy === key, hasAct: !!a && s.busy !== key });
     const openMut = () => this.setState({ mutInline: true });
     const reqCalc = [
       respaldo ? row('leg', 'aviso', 'UF del 28-10 · la fuente no respondió', 'Se usa el último valor. No bloquea el cálculo.', 'Reintentar', () => { this.setState({ busy: 'leg' }); setTimeout(() => { this.setState({ busy: null }); this.say('La fuente sigue sin responder · reintentamos cada hora'); }, 900); })
-               : row('leg', 'ok', 'Valores legales al día', 'Actualizados automáticamente · hoy 06:00'),
+               : row('leg', 'ok', 'Valores legales al día', 'Actualizados automáticamente · hoy 09:00'),
       calc ? row('sue', 'ok', 'Sueldo de Guardia diurno', (s.origen === 'ref' ? 'Referencia del cargo · ' : 'Escrito a mano · ') + CLP(s.sueldoD))
            : row('sue', 'falta', 'Falta el sueldo de Guardia diurno', 'El costo de esa línea queda pendiente', 'Agregar sueldo', () => this.setState({ sheet: 'puesto' })),
       s.mutual ? row('mutual', 'ok', 'Mutual adicional confirmada · 0,95 %', 'Se aplica a todas las líneas')
@@ -821,22 +999,26 @@ class Component extends DCLogic {
       s.mutual ? row('mutual', 'ok', 'Mutual adicional confirmada', '0,95 % · desde hoy')
                : row('mutual', 'falta', 'Confirma la mutual adicional', 'Enviar al cliente exige confirmarla', s.mutInline ? null : 'Confirmar', openMut),
       bajoMin && !aprobOk ? row('apr', 'falta', 'Margen bajo el mínimo sin aprobación', 'Pídela antes de enviar', 'Pedir', () => this.setState({ sheet: 'aprob' }))
-               : row('apr', 'ok', bajoMin ? 'Margen aprobado por Marcela Rojas' : 'Margen sobre el mínimo', PCT(s.margen)),
+               : row('apr', 'ok', bajoMin ? 'Margen aprobado por Marcela Rojas' : 'Margen sobre el mínimo', PCT(mEf)),
       respaldo ? row('uf', 'aviso', 'UF del 28-10', 'La fuente no respondió · se usa el último valor') : row('uf', 'ok', 'UF del día', '39.512,34 · SII · hoy'),
       row('col', 'ok', 'Colación y movilización', 'Definidas en las 2 líneas')
     ];
+    const reqEnvDesk = reqEnv.filter(r => r.key !== 'mutual' || s.mutual);
     const nPend = reqCalc.filter(r => r.st !== 'ok').length;
     const nFalta = reqCalc.filter(r => r.st === 'falta').length;
+    const allOk = nPend === 0 && reqEnv.every(r => r.st === 'ok');
     let barTxt, barBg, barFg, barIc;
     if (nPend === 0) { barTxt = 'Todo listo para enviar'; barBg = 'var(--ds-success-muted)'; barFg = 'var(--ds-success-fg)'; barIc = 'ic sm i-check-circle'; }
     else if (nFalta) { barTxt = nPend + ' pendientes · Ver'; barBg = 'var(--ds-warning-muted)'; barFg = 'var(--ds-warning-fg)'; barIc = 'ic sm i-alert'; }
-    else { barTxt = nPend + (nPend === 1 ? ' aviso' : ' avisos') + ' · sin bloqueo para calcular · Ver'; barBg = 'var(--ds-fill)'; barFg = 'var(--ds-fg-muted)'; barIc = 'ic sm i-info'; }
+    else { barTxt = nPend + (nPend === 1 ? ' aviso' : ' avisos') + ' · no bloquea el cálculo · Ver'; barBg = 'var(--ds-fill)'; barFg = 'var(--ds-fg-muted)'; barIc = 'ic sm i-info'; }
+    const reqBadge = nFalta ? (nPend + ' pendientes') : nPend ? (nPend + (nPend === 1 ? ' aviso' : ' avisos')) : 'Para enviar';
+    const reqBadgeCls = nFalta ? 'badge b-warning' : 'badge b-neutral';
 
     const fuentes = [
-      respaldo ? { txt: 'UF 39.488,10 · último valor del 28-10', tip: 'SII no respondió · capturado 28-10-2026 06:00', bg: 'var(--ds-warning-muted)', fg: 'var(--ds-warning-fg)' }
-               : { txt: 'UF 39.512,34 · SII · hoy', tip: 'SII · capturado 03-11-2026 06:00', bg: 'var(--ds-fill)', fg: 'var(--ds-fg-muted)' },
-      { txt: 'IMM $ 539.000 · Previred · vigente desde 01-07-2026', tip: 'Previred · capturado 03-11-2026 06:00', bg: 'var(--ds-fill)', fg: 'var(--ds-fg-muted)' },
-      s.mutual ? { txt: 'Mutual adicional 0,95 % · confirmada', tip: 'Confirmada por el tenant', bg: 'var(--ds-fill)', fg: 'var(--ds-fg-muted)' }
+      respaldo ? { txt: 'UF 39.488,10 · respaldo 28-10', tip: 'SII no respondió · último valor capturado el 28-10-2026 09:00', bg: 'var(--ds-warning-muted)', fg: 'var(--ds-warning-fg)' }
+               : { txt: 'UF 39.512,34 · SII · hoy', tip: 'SII · capturado 03-11-2026 09:00', bg: 'var(--ds-fill)', fg: 'var(--ds-fg-muted)' },
+      { txt: 'IMM $ 539.000 · Previred · jul-2026', tip: 'Previred · vigente desde 01-07-2026 · capturado 03-11-2026 09:00', bg: 'var(--ds-fill)', fg: 'var(--ds-fg-muted)' },
+      s.mutual ? { txt: 'Mutual adicional 0,95 %', tip: 'Confirmada por el tenant', bg: 'var(--ds-fill)', fg: 'var(--ds-fg-muted)' }
                : { txt: 'Mutual adicional 0 % · sin confirmar', tip: 'Se cotiza con 0 % hasta confirmarla', bg: 'var(--ds-warning-muted)', fg: 'var(--ds-warning-fg)' }
     ];
 
@@ -847,32 +1029,33 @@ class Component extends DCLogic {
 
     const editable = !s.enviada;
     let priTxt = 'Enviar', priAct = () => this.setState({ sheet: 'enviar' }), priOff = false;
-    if (!calc) { priTxt = 'Enviar'; priOff = true; }
+    if (!calc) priOff = true;
     else if (bajoMin && s.aprob === 'none') { priTxt = 'Pedir aprobación'; priAct = () => this.setState({ sheet: 'aprob' }); }
     else if (s.aprob === 'pedida') { priTxt = 'Esperando aprobación'; priOff = true; }
     if (s.enviada) { priTxt = 'Compartir'; priAct = () => this.setState({ sheet: 'compartir' }); priOff = false; }
 
+    const mm = s.margen / 100;
+    const vLine = c => s.modoM === 'markup' ? c * (1 + mm) : c / (1 - mm);
     const openP = () => this.setState({ sheet: 'puesto' });
-    const lineasPN = [
-      { name: 'Guardia diurno', meta: '4x4 · 08:00 → 20:00 · 2 personas', falta: !calc, tieneMonto: calc, monto: CLP(lD), open: openP },
-      { name: 'Guardia nocturno', meta: '4x4 · 20:00 → 08:00 +1 · 2 personas', falta: false, tieneMonto: true, monto: CLP(lN), open: openP }
-    ];
     const openI = () => this.setState({ sheet: 'item' });
-    if (it.u) lineasPN.push({ name: 'Uniforme completo × 4', meta: 'Uniformes · rateo 12 meses', tieneMonto: true, monto: CLP(iu), open: openI });
-    if (it.e) lineasPN.push({ name: 'Examen psicolaboral × 4', meta: 'Exámenes · rateo 12 meses', tieneMonto: true, monto: CLP(ie), open: openI });
-    if (it.l) lineasPN.push({ name: 'Linterna táctica × 4', meta: 'Equipamiento · mensual', tieneMonto: true, monto: CLP(il), open: openI });
-    if (it.b) lineasPN.push({ name: 'Botas de seguridad × 4', meta: 'Uniformes · rateo 12 meses', tieneMonto: true, monto: CLP(ib), open: openI });
+    const lineasPN = [
+      { name: 'Guardia diurno', meta: '4x4 · 08:00 → 20:00 · 2 personas', pat: 'Guardia de seguridad · 4x4', hor: '08:00 → 20:00', dot: '1 × 2', falta: !calc, tieneMonto: calc, tieneSueldo: calc, sinSueldo: false, sueldo: calc ? CLP(s.sueldoD) : '', origen: s.origen === 'ref' ? 'Referencia del cargo' : 'Escrito a mano', monto: CLP(lD), montoW: calc ? CLP(lD) : '—', open: openP },
+      { name: 'Guardia nocturno', meta: '4x4 · 20:00 → 08:00 +1 · 2 personas', pat: 'Guardia de seguridad · 4x4', hor: '20:00 → 08:00 +1', dot: '1 × 2', falta: false, tieneMonto: true, tieneSueldo: true, sinSueldo: false, sueldo: CLP(650000), origen: 'Escrito a mano', monto: CLP(lN), montoW: CLP(lN), open: openP }
+    ];
+    const itemRow = (name, meta, cat, q, m) => ({ name: name + ' × ' + q, meta, pat: cat, hor: 'Rateo 12 meses', dot: String(q), falta: false, tieneMonto: true, tieneSueldo: false, sinSueldo: true, monto: CLP(m), montoW: CLP(m), open: openI });
+    if (it.u) lineasPN.push(itemRow('Uniforme completo', 'Uniformes · rateo 12 meses', 'Uniformes', 4, iu));
+    if (it.e) lineasPN.push(itemRow('Examen psicolaboral', 'Exámenes · rateo 12 meses', 'Exámenes', 4, ie));
+    if (it.l) lineasPN.push(itemRow('Linterna táctica', 'Equipamiento · mensual', 'Equipamiento', 4, il));
+    if (it.b) lineasPN.push(itemRow('Botas de seguridad', 'Uniformes · rateo 12 meses', 'Uniformes', 4, ib));
     const lineasCom = it.c ? [{ name: 'Camioneta de ronda', meta: 'Vehículos · arriendo mensual · no visible al cliente', monto: CLP(icm) }] : [];
     const incN = { radio: 'Radio portátil', linterna: 'Linterna', libro: 'Libro de novedades digital' };
     const incluyeList = Object.keys(s.inc).filter(k => s.inc[k]).map(k => incN[k]);
     const subPN = calc ? CLP(lD + lN + iu + ie + il + ib) : 'Pendiente';
-
     const cats = [['Personal', lD + lN], ['Uniformes', iu + ib], ['Exámenes', ie], ['Equipamiento', il], ['Vehículos', icm], ['Instrumentos financieros', base * instrR]]
       .filter(c => c[1] > 0).map(c => ({ k: c[0], v: CLP(c[1]) }));
 
     const steps = STEPS.map((x, i) => ({ n: String(i + 1).padStart(2, '0'), label: x[0], cls: 'nav-item' + (s.step === i + 1 ? ' on' : ''), go: () => this.go(i + 1) }));
 
-    // hoja de puesto
     const sv = s.sueldoD;
     const sueldoErr = sv != null && sv < 539000;
     const lineaC = sv != null ? (sv * f + 70000) * 2 : 0;
@@ -881,25 +1064,27 @@ class Component extends DCLogic {
       { n: 'Supervisor de turno', d: 'Referencia $ 890.000', pick: () => this.setState({ cargo: 'Supervisor de turno', sueldoD: 890000, origen: 'ref', combo: false }) },
       { n: 'Conserje', d: 'Referencia $ 560.000', pick: () => this.setState({ cargo: 'Conserje', sueldoD: 560000, origen: 'ref', combo: false }) }
     ];
-
     const tg = k => () => this.setState(st => ({ items: { ...st.items, [k]: st.items[k] ? 0 : 1 }, com: k === 'c' ? true : st.com }));
     const catalogo = [
-      ['u', 'Uniforme completo', '$ 74.000 por persona · rateo 12 meses', 'Uniformes'],
-      ['b', 'Botas de seguridad', '$ 9.000 por persona · rateo 12 meses', 'Uniformes'],
-      ['e', 'Examen psicolaboral', '$ 35.000 por persona · rateo 12 meses', 'Exámenes'],
-      ['l', 'Linterna táctica', '$ 6.500 por persona · mensual', 'Equipamiento'],
-      ['c', 'Camioneta de ronda', '$ 420.000 mensual · sección Común', 'Vehículos']
-    ].map(([k, n, d]) => ({ n, d, on: !!it[k], off: !it[k], q: k === 'c' ? '1' : '4', tog: tg(k) }));
+      ['u', 'Uniforme completo', '$ 74.000 por persona · rateo 12 meses', '12 meses', '$ 74.000'],
+      ['b', 'Botas de seguridad', '$ 9.000 por persona · rateo 12 meses', '12 meses', '$ 9.000'],
+      ['e', 'Examen psicolaboral', '$ 35.000 por persona · rateo 12 meses', '12 meses', '$ 35.000'],
+      ['l', 'Linterna táctica', '$ 6.500 por persona · mensual', 'Mensual', '$ 6.500'],
+      ['c', 'Camioneta de ronda', '$ 420.000 mensual · sección Común', 'Mensual', '$ 420.000']
+    ].map(([k, n, d, rateo, cu]) => ({ n, d, rateo, cu, on: !!it[k], off: !it[k], det: wide && !!it[k], q: k === 'c' ? '1' : '4', visCls: 'switch' + (k === 'c' ? '' : ' on'), tog: tg(k) }));
     const incluye = Object.keys(incN).map(k => ({ n: incN[k], on: !!s.inc[k], cls: 'check' + (s.inc[k] ? ' on' : ''), tog: () => this.setState(st => ({ inc: { ...st.inc, [k]: st.inc[k] ? 0 : 1 } })) }));
     const nItems = Object.values(it).filter(Boolean).length;
 
-    const sw = (k) => () => this.setState(st => ({ [k]: !st[k] }));
+    const sw = k => () => this.setState(st => ({ [k]: !st[k] }));
+    const ex = k => () => this.setState(st => ({ instrOpen: st.instrOpen === k ? null : k }));
+    const mk = (k, n, d, on, rate, det, sob) => ({ n, d, sob, cls: 'switch' + (on ? ' on' : ''), tog: sw(k), exp: ex(k), open: s.instrOpen === k, chev: 'ic sm ' + (s.instrOpen === k ? 'i-chevron-down' : 'i-chevron-right'), costo: on ? CLP(base * rate) : '—', det });
     const instr = [
-      { n: 'Póliza de garantía', d: '0,8 % del costo · 12 meses', cls: 'switch' + (s.poliza ? ' on' : ''), tog: sw('poliza') },
-      { n: 'Responsabilidad civil', d: '0,4 % del costo', cls: 'switch' + (s.rc ? ' on' : ''), tog: sw('rc') },
-      { n: 'Costo financiero', d: 'Pago a 30 días · 1,1 %', cls: 'switch' + (s.fin ? ' on' : ''), tog: sw('fin') }
+      mk('poliza', 'Póliza de garantía', '0,8 % del costo · 12 meses', s.poliza, 0.008, [{ k: 'Base', v: 'Costo mensual × 12' }, { k: 'Tasa', v: '0,8 % · del tenant' }, { k: 'Cobertura', v: '10 % del contrato' }, { k: 'Costo mensual', v: s.poliza ? CLP(base * 0.008) : '—' }], false),
+      mk('rc', 'Responsabilidad civil', '0,4 % del costo · tenant 0,5 %', s.rc, 0.004, [{ k: 'Base', v: 'Costo mensual' }, { k: 'Tasa', v: '0,4 % · tenant 0,5 %' }, { k: 'Cobertura', v: 'UF 5.000 por evento' }, { k: 'Costo mensual', v: s.rc ? CLP(base * 0.004) : '—' }], true),
+      mk('fin', 'Costo financiero', 'Pago a 30 días · 1,1 %', s.fin, 0.011, [{ k: 'Base', v: 'Venta mensual' }, { k: 'Plazo de pago', v: '30 días' }, { k: 'Tasa', v: '1,1 % mensual' }, { k: 'Costo mensual', v: s.fin ? CLP(base * 0.011) : '—' }], false)
     ];
     const simul = [10, 12, 15].map(m => ({ m: PCT(m), v: CLP(vOf(m)), pick: () => this.setState({ margen: m }) }));
+    const polResumen = PCT(s.margen) + ' ' + (s.modoM === 'venta' ? 'sobre venta' : s.modoM === 'markup' ? 'markup' : 'sobre M. de O.') + ' · ' + [s.poliza && 'póliza', s.rc && 'RC', s.fin && 'financiero'].filter(Boolean).join(', ');
 
     const pdfReady = s.pdf === 'ok';
     const puedeEnviar = s.mutual && s.congela && pdfReady && (s.correo || s.link) && !(bajoMin && !aprobOk);
@@ -910,31 +1095,50 @@ class Component extends DCLogic {
 
     const timeline = [
       { t: 'Creada desde cotización rápida', d: 'Tomás Fuentes · 03-11-2026 09:12' },
-      { t: 'Margen 9,0 % aprobado', d: 'Marcela Rojas · 03-11-2026 10:40' },
+      { t: 'Margen bajó de 12,0 % a 9,0 % · aprobado', d: 'Marcela Rojas · 03-11-2026 10:40' },
       { t: 'Enviada a Paula Soto', d: 'Correo y enlace · 03-11-2026 11:05' }
     ];
     if (s.vistas) { timeline.push({ t: 'Abierta por el cliente · 3 veces', d: 'Última hace 2 h · 03-11-2026 14:20' }); timeline.push({ t: 'PDF descargado', d: '03-11-2026 14:22' }); }
+    if (s.revocado) timeline.push({ t: 'Enlace revocado', d: 'Tomás Fuentes · hoy' });
     if (s.ganada) timeline.push({ t: 'Aceptada por el cliente', d: 'Paula Soto · 04-11-2026 09:30' });
+    const vistasTxt = s.revocado ? 'Revocado · el cliente ya no puede abrirlo' : s.vistas ? '3 vistas · última hace 2 h' : 'Aún no la abre';
 
-    const vistasTxt = s.revocado ? 'Enlace revocado · el cliente ya no puede abrirlo' : s.vistas ? '3 vistas · última hace 2 h' : 'Aún no la abre';
-    const topTitle = s.view === 'negocio' ? 'Negocio' : s.view === 'bandeja' ? 'Inicio' : 'Cotización';
+    const OV = (pTop, mode, w) => isPhone ? { cls: 'sheet', pos: 'absolute', top: pTop, w: 'auto', mh: 'none', rad: 'var(--radius-xl) var(--radius-xl) 0 0' }
+      : mode === 'side' ? { cls: 'sheet side', pos: 'absolute', top: '0', w, mh: 'none', rad: 'var(--radius-lg) 0 0 var(--radius-lg)' }
+      : { cls: 'sheet side', pos: 'relative', top: 'auto', w, mh: '88%', rad: 'var(--radius-lg)' };
+    const o = { rapida: OV('120px', 'dialog', '520px'), reqs: OV('180px', 'side', '420px'), puesto: OV('44px', 'side', '480px'), item: OV('44px', 'side', '440px'),
+      aprob: OV('200px', 'dialog', '480px'), decidir: OV('140px', 'side', '440px'), enviar: OV('44px', 'side', '560px'), compartir: OV('300px', 'dialog', '440px'), crear: OV('160px', 'dialog', '760px') };
+
+    const label = String(s.step).padStart(2, '0') + ' ' + STEPS[s.step - 1][0];
+    const crumb = s.view === 'bandeja' ? 'Inicio' : s.view === 'negocio' ? 'Comercial › Negocios › Guardias Planta Norte' : 'Comercial › Negocios › Guardias Planta Norte › CPQ-2026-014';
+    const asApprover = s.view === 'bandeja';
 
     return {
-      theme: p.theme ?? 'light', steps, stepN: s.step, stepNota: STEPS[s.step - 1][1], screenLabel: String(s.step).padStart(2, '0') + ' ' + STEPS[s.step - 1][0],
+      notEmbed: !embed, rootMinH: embed ? '0' : '100vh', rootPad: embed ? '0' : '32px 24px',
+      dev: vp, fw, fh, frad: isPhone ? '44px' : '12px', zoom, shot: p.shot || '', theme: p.theme ?? 'light',
+      isPhone, isTab, isDesk, wide, rcol: isTab ? '280px' : '312px', gut: isTab ? '24px' : '32px', pcols: 'minmax(0,1fr) 112px 52px 120px 96px',
+      vpPhone: isPhone ? 'on' : '', vpTab: isTab ? 'on' : '', vpDesk: isDesk ? 'on' : '',
+      setPhone: this.set({ vp: 'phone' }), setTab: this.set({ vp: 'tablet' }), setDesk: this.set({ vp: 'desktop' }),
+      steps, stepN: s.step, stepNota: STEPS[s.step - 1][1], screenLabel: label,
       prev: () => this.go(s.step - 1), next: () => this.go(s.step + 1),
-      showBack: s.view !== 'bandeja', back: () => this.setState({ view: s.view === 'ficha' ? 'negocio' : 'ficha', sheet: null }), topTitle,
-      bellDot: s.aprob === 'pedida',
+      showBack: s.view !== 'bandeja', back: () => this.setState({ view: s.view === 'ficha' ? 'negocio' : 'ficha', sheet: null }),
+      topTitle: s.view === 'negocio' ? 'Negocio' : s.view === 'bandeja' ? 'Inicio' : 'Cotización', crumb,
+      bellDot: s.aprob === 'pedida', agente: () => this.say('Abre el agente (ver AgenteCPQ)'),
+      userName: asApprover ? 'Marcela Rojas' : 'Tomás Fuentes', userIni: asApprover ? 'MR' : 'TF', userRol: asApprover ? 'Gerente comercial' : 'Ejecutivo comercial',
+      navIni: 'nav-item' + (asApprover ? ' on' : ''), navNeg: 'nav-item' + (!asApprover ? ' on' : ''), railIni: 'rail-item' + (asApprover ? ' on' : ''), railCom: 'rail-item' + (!asApprover ? ' on' : ''),
       toBandeja: () => this.setState({ view: 'bandeja', sheet: null }), toNegocio: () => this.setState({ view: 'negocio', sheet: null }), toFicha: () => this.setState({ view: s.cot ? 'ficha' : 'negocio', sheet: null }),
-      tabInicio: s.view === 'bandeja' ? 'on' : '', tabCom: s.view !== 'bandeja' ? 'on' : '',
+      tabInicio: asApprover ? 'on' : '', tabCom: !asApprover ? 'on' : '',
       vNeg: s.view === 'negocio', vBan: s.view === 'bandeja', vFicha: s.view === 'ficha',
-      ganada: s.ganada, noGanada: !s.ganada, nCot: s.cot ? 1 : 0, negVacio: !s.cot, negConCot: s.cot, puestos: s.puestos, puestosPend: !s.puestos,
-      openRapida: this.set({ sheet: 'rapida' }), openCrear: this.set({ sheet: 'crear' }),
-      verPuestos: () => this.say('Abre Planta Norte › Puestos (export-puestos)'),
-      banPend: s.aprob === 'pedida', banVacia: s.aprob !== 'pedida', banCount: s.aprob === 'pedida' ? '1 por decidir' : 'al día',
-      openDecidir: this.set({ sheet: 'decidir' }),
+      negTxt: s.ganada ? 'Ganado' : 'Propuesta', negCls: s.ganada ? 'badge b-success' : 'badge b-neutral',
+      nCot: s.cot ? 1 : 0, negVacio: !s.cot, negConCot: s.cot, ganPend: s.ganada && !s.puestos, ganHecho: s.ganada && s.puestos,
+      openRapida: this.set({ sheet: 'rapida' }), openCrear: this.set({ sheet: 'crear' }), verPuestos: () => this.say('Abre Planta Norte › Puestos'),
+      banPend: s.aprob === 'pedida', banVacia: s.aprob !== 'pedida', banCount: s.aprob === 'pedida' ? '1 por decidir' : 'al día', openDecidir: this.set({ sheet: 'decidir' }),
       estadoTxt, estadoCls, vistaAlerta: s.vistas > 0 && !s.ganada,
-      calc, noCalc: !calc, ventaTxt: calc ? CLP(venta) : '—', ventaSub: calc ? '≈ UF ' + (venta / 39512.34).toFixed(2).replace('.', ',') + ' · 12 meses' : 'Se calcula al completar los requisitos',
-      margenTxt: calc ? PCT(s.margen) : '—', semTxt, semCls, fuentes, editable, enviada: s.enviada, enviadaNoGanada: s.enviada && !s.ganada,
+      calc, noCalc: !calc, ventaTxt: calc ? CLP(venta) : '—', venta12: calc ? CLP(vOf(12, 'venta')) : '—',
+      ventaSub: calc ? '≈ UF ' + (venta / 39512.34).toFixed(2).replace('.', ',') + ' · 12 meses' : 'Se calcula al completar los requisitos',
+      margenTxt: calc ? PCT(mEf) : '—', margenCfg: PCT(s.margen), semTxt, semCls, margenNota, hayNota: !!margenNota && calc, modoAyuda,
+      fuentes, editable, enviada: s.enviada, enviadaNoGanada: s.enviada && !s.ganada,
+      linkEstado: s.revocado ? 'Revocado' : 'Activo · vence 01-12-2026', linkCls2: s.revocado ? 'badge b-neutral' : 'badge b-success',
       recalcular: () => this.say(calc ? 'Sin cambios: los valores legales siguen iguales' : 'Sin cambios: falta el sueldo de Guardia diurno'),
       copiar: () => this.say('Enlace copiado'), openCompartir: this.set({ sheet: 'compartir' }), vistasTxt,
       whatsapp: () => this.say('Abre WhatsApp con el mensaje y el enlace'), revocar: () => { this.setState({ revocado: true, sheet: null }); this.say('Enlace revocado'); },
@@ -942,13 +1146,14 @@ class Component extends DCLogic {
       hayIncluye: incluyeList.length > 0, incluyeList,
       togCom: () => this.setState({ com: !s.com }), openCom: s.com, chevCom: 'ic sm ' + (s.com ? 'i-chevron-down' : 'i-chevron-right'), subCom: it.c ? CLP(icm) : '$ 0', lineasCom, comVacio: !it.c,
       cats, costoTxt: CLP(costo),
-      openPuesto: openP, openItem: openI, openMargen: this.set({ sheet: 'margen' }),
+      openPuesto: openP, openItem: openI, openMargen: () => isPhone ? this.setState({ sheet: 'margen' }) : this.setState({ secPol: true }),
       editarV2: () => this.say('Se creó la v2 en borrador · la v1 sigue vigente para el cliente'),
-      openReqs: this.set({ sheet: 'reqs' }), barTxt, barBg, barFg, barIc,
+      openReqs: this.set({ sheet: 'reqs' }), barTxt, barBg, barFg, barIc, allOk, notAllOk: !allOk, reqBadge, reqBadgeCls, reqEnvDesk,
       priOn: !priOff, priOff, priTxt, priAct,
       aceptar: () => { this.setState({ step: 12, ganada: true, view: 'negocio', sheet: null }); this.say('Cotización aceptada · negocio ganado'); },
-      anySheet: !!s.sheet, closeSheet: this.set({ sheet: null, combo: false, mutInline: false }),
-      shRapida: s.sheet === 'rapida', shReqs: s.sheet === 'reqs', shPuesto: s.sheet === 'puesto', shItem: s.sheet === 'item', shMargen: s.sheet === 'margen',
+      anySheet: !!s.sheet && !(s.sheet === 'margen' && wide), closeSheet: this.set({ sheet: null, combo: false, mutInline: false }), o,
+      padBot: isPhone ? '28px' : '12px', toastBot: isPhone ? '100px' : '24px',
+      shRapida: s.sheet === 'rapida', shReqs: s.sheet === 'reqs', shPuesto: s.sheet === 'puesto', shItem: s.sheet === 'item', shMargen: s.sheet === 'margen' && isPhone,
       shAprob: s.sheet === 'aprob', shDecidir: s.sheet === 'decidir', shEnviar: s.sheet === 'enviar', shCompartir: s.sheet === 'compartir', shCrear: s.sheet === 'crear',
       crearCot: () => { this.setState({ step: 3, cot: true, view: 'ficha', sheet: null }); this.say('CPQ-2026-014 v1 creada'); },
       reqCalc, reqEnv, mutInline: s.mutInline, mutCancel: this.set({ mutInline: false }), mutConfirm: () => this.resolveMutual(),
@@ -960,21 +1165,25 @@ class Component extends DCLogic {
       origenOn: s.origen != null, origenTxt: s.origen === 'ref' ? 'Referencia del cargo' : 'Escrito a mano', origenCls: 'badge nodot ' + (s.origen === 'ref' ? 'b-neutral' : 'b-warning'),
       liqHint: s.modo === 'liq' && sv != null, brutoCalc: sv != null ? '≈ ' + CLP(sv) + ' bruto' : '',
       puedeRest: s.origen === 'mano' && !!s.cargo, restablecer: () => this.setState({ sueldoD: s.cargo === 'Supervisor de turno' ? 890000 : s.cargo === 'Conserje' ? 560000 : 620000, origen: 'ref' }),
-      togSup: this.set({ sup: !s.sup }), supOpen: s.sup, chevSup: 'ic sm ' + (s.sup ? 'i-chevron-down' : 'i-chevron-right'),
+      togSup: this.set({ sup: !s.sup }), supOpen: s.sup || wide, chevSup: 'ic sm ' + (s.sup || wide ? 'i-chevron-down' : 'i-chevron-right'),
       mutualKv: s.mutual ? 'Básica 0,93 % + adicional 0,95 %' : 'Básica 0,93 % + adicional 0 % · sin confirmar',
-      lineaCosto: sv != null ? CLP(lineaC) : '—', lineaVenta: sv != null ? CLP(lineaC / (1 - s.margen / 100)) : '—',
+      lineaCosto: sv != null ? CLP(lineaC) : '—', lineaVenta: sv != null ? CLP(vLine(lineaC)) : '—',
       verTraza: () => this.say('Traza: sueldo × (1 + SIS + cesantía + mutual) + colación + movilización'),
       puedeGuardar: sv != null && !sueldoErr, noGuardar: sv == null || sueldoErr,
-      guardarPuesto: () => { this.setState({ sheet: null, combo: false }); this.say('Recalculado: venta ' + CLP(venta) + ' · margen ' + PCT(s.margen)); },
+      guardarPuesto: () => { this.setState({ sheet: null, combo: false }); this.say('Recalculado: venta ' + CLP(venta) + ' · margen ' + PCT(mEf)); },
       tabCat: 'tab' + (s.itTab === 'cat' ? ' on' : ''), tabPaq: 'tab' + (s.itTab === 'paq' ? ' on' : ''), tabInc: 'tab' + (s.itTab === 'inc' ? ' on' : ''),
       setTabCat: this.set({ itTab: 'cat' }), setTabPaq: this.set({ itTab: 'paq' }), setTabInc: this.set({ itTab: 'inc' }),
       itCat: s.itTab === 'cat', itPaq: s.itTab === 'paq', itInc: s.itTab === 'inc', nInc: incluyeList.length, catalogo, incluye,
       itemsResumen: nItems + ' ítems · ' + incluyeList.length + ' incluidos',
-      mMenos: () => this.setState({ margen: Math.max(0, s.margen - 0.5) }), mMas: () => this.setState({ margen: s.margen + 0.5 }), simul, instr,
+      mMenos: () => this.setState({ margen: Math.max(0, s.margen - 0.5) }), mMas: () => this.setState({ margen: s.margen + 0.5 }), simul, instr, polResumen,
+      mV: s.modoM === 'venta' ? 'on' : '', mK: s.modoM === 'markup' ? 'on' : '', mM: s.modoM === 'mo' ? 'on' : '',
+      setMV: this.set({ modoM: 'venta' }), setMK: this.set({ modoM: 'markup' }), setMM: this.set({ modoM: 'mo' }),
+      secPol: s.secPol, secCond: s.secCond, secSup: s.secSup, togPol: this.set({ secPol: !s.secPol }), togCond: this.set({ secCond: !s.secCond }), togSupD: this.set({ secSup: !s.secSup }),
+      chevPol: 'ic sm ' + (s.secPol ? 'i-chevron-down' : 'i-chevron-right'), chevCond: 'ic sm ' + (s.secCond ? 'i-chevron-down' : 'i-chevron-right'), chevSupD: 'ic sm ' + (s.secSup ? 'i-chevron-down' : 'i-chevron-right'),
       pedirAprob: () => { this.setState({ aprob: 'pedida', view: 'bandeja', sheet: null }); this.say('Solicitud enviada a Marcela Rojas'); },
       aprobar: () => { this.setState({ aprob: 'aprobada', view: 'ficha', sheet: null, step: 9 }); this.say('Margen 9,0 % aprobado'); },
       rechazar: () => { this.setState({ aprob: 'none', margen: 12, view: 'ficha', sheet: null }); this.say('Rechazado · la cotización vuelve a 12,0 %'); },
-      pdfGen: s.pdf === 'gen', pdfLento: s.pdf === 'lento', pdfErr: s.pdf === 'error', pdfOk: pdfReady,
+      pdfGen: s.pdf === 'gen', pdfLento: s.pdf === 'lento', pdfErr: s.pdf === 'error', pdfOk: pdfReady, thW: isPhone ? '96px' : '128px', thH: isPhone ? '136px' : '181px',
       pdfRetry: () => { clearTimeout(this._p); this.setState({ pdf: 'gen' }); this._p = setTimeout(() => this.setState({ pdf: 'ok' }), 1200); },
       paginas: s.fmt === 'sola' ? ['1', '2', '3'] : ['1', '2', '3', '4', '5', '6', '7'], paginasTxt: s.fmt === 'sola' ? '3 páginas' : '7 páginas',
       fmtSola: s.fmt === 'sola' ? 'on' : '', fmtProp: s.fmt === 'prop' ? 'on' : '', setFmtSola: this.set({ fmt: 'sola' }), setFmtProp: this.set({ fmt: 'prop' }),
@@ -985,7 +1194,7 @@ class Component extends DCLogic {
       enviar: () => { this.setState({ step: 10, enviada: true, sheet: null }); this.say('Enviada a Paula Soto · v1 congelada'); },
       timeline,
       crearPuestos: () => { this.setState({ puestos: true, sheet: null }); this.say('4 puestos creados en Planta Norte'); },
-      hasToast: !!s.toast, toast: s.toast
+      hasToast: !!s.toast, toast: s.toast, scrollRef: this.scrollRef
     };
   }
 }

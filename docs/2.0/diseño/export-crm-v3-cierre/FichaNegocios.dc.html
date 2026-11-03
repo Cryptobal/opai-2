@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ navActive }}" title="{{ section }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>{{ section }}</a>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>{{ section }}</a>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ eyebrow }}" title="{{ title }}" subtitle="{{ sub }}" badge="{{ badge }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="file" size="{{ btnSize }}" hint-size="100px,40px">Editar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" size="{{ btnSize }}" hint-size="160px,40px">Nuevo negocio</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="neg" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:20px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ filterOpts }}" value="{{ filter }}" on-change="{{ setFilter }}" label="Filtrar negocios" hint-size="280px,36px"></x-import>
+<span class="t-body-sm muted t-numeric">{{ summary }}</span>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,240px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,240px"></x-import>
+</sc-if>
+<p class="t-caption" style="margin:0;text-wrap:pretty">{{ note }}</p>
+</div>
+</x-import>
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cuenta&quot;,&quot;instalacion&quot;],&quot;default&quot;:&quot;cuenta&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { filter: "todos" };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "cuenta";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone };
+    if (!C || !NS.Badge) return base;
+    const cuenta = screen === "cuenta";
+    const all = cuenta ? [
+      { id: 1, folio: "NEG-0142", name: "Seguridad 24/7 · CD Lampa", ins: "CD Lampa · Planta San Bernardo", stage: "s5", val: 14250000, own: "CR", date: "Cierre 15-11-2026" },
+      { id: 2, folio: "NEG-0156", name: "Guardia adicional · Planta San Bernardo", ins: "Planta San Bernardo", stage: "s4", val: 2200000, own: "CR", date: "Cierre 15-11-2026" },
+      { id: 3, folio: "NEG-0119", name: "Seguridad · Planta San Bernardo", ins: "Planta San Bernardo", stage: "s7", val: 4400000, own: "MF", date: "Ganado 03-03-2025" },
+      { id: 4, folio: "NEG-0097", name: "Rondas · Bodega Buin", ins: "Bodega Buin", stage: "s8", val: 1850000, own: "MF", date: "Perdido 12-08-2024" },
+    ] : [
+      { id: 1, folio: "NEG-0142", name: "Seguridad 24/7 · CD Lampa", ins: "Ampliación +2 puestos noche", stage: "s5", val: 4400000, own: "CR", date: "Cierre 15-11-2026" },
+      { id: 2, folio: "NEG-0156", name: "Guardia adicional · Planta San Bernardo", ins: "+1 puesto día", stage: "s4", val: 2200000, own: "CR", date: "Cierre 15-11-2026" },
+      { id: 3, folio: "NEG-0119", name: "Seguridad · Planta San Bernardo", ins: "Origen del servicio · 2 puestos", stage: "s7", val: 4400000, own: "MF", date: "Ganado 03-03-2025" },
+    ];
+    const f = this.state.filter;
+    const rows = all.filter((r) => f === "todos" || (f === "abiertos" && !["s7", "s8"].includes(r.stage)) || (f === "cerrados" && ["s7", "s8"].includes(r.stage)));
+    const open = all.filter((r) => !["s7", "s8"].includes(r.stage));
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups,
+      navActive: cuenta ? "cue" : "ins", section: cuenta ? "Cuentas" : "Instalaciones",
+      btnSize: isPhone ? "lg" : "md",
+      eyebrow: cuenta ? "Cuenta · RUT 96.874.320-5" : "Frigorífico del Maipo S.A.",
+      title: cuenta ? "Frigorífico del Maipo S.A." : "Instalación: Planta San Bernardo",
+      sub: cuenta ? "Alimentos · Av. Portales 3400, San Bernardo · cliente desde 03-2025" : "Av. Portales 3400, San Bernardo · 2 puestos · 4×4 · 12 h",
+      badge: h(NS.Badge, { tone: "success" }, cuenta ? "Cliente" : "Operativa"),
+      tabItems: cuenta
+        ? [{ id: "res", label: "Resumen" }, { id: "ins", label: "Instalaciones", count: 2 }, { id: "neg", label: "Negocios", count: 4 }, { id: "con", label: "Contactos", count: 4 }, { id: "doc", label: "Documentos" }]
+        : [{ id: "res", label: "Resumen" }, { id: "pue", label: "Puestos", count: 2 }, { id: "per", label: "Personas", count: 6 }, { id: "neg", label: "Negocios", count: 3 }, { id: "doc", label: "Documentos" }],
+      filterOpts: [{ value: "todos", label: "Todos · " + all.length }, { value: "abiertos", label: "Abiertos · " + open.length }, { value: "cerrados", label: "Cerrados · " + (all.length - open.length) }],
+      filter: f, setFilter: (v) => this.setState({ filter: v }),
+      summary: open.length + " abiertos · " + C.fmt(open.reduce((a, r) => a + r.val, 0)) + " mensuales en curso",
+      cols: [
+        { key: "name", label: "Negocio", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.name), h("span", { className: "t-mono subtle", style: { fontSize: 12 } }, r.folio)) },
+        { key: "ins", label: cuenta ? "Instalaciones" : "Alcance en esta instalación", muted: true },
+        { key: "stage", label: "Etapa", render: (r) => h(NS.Badge, { tone: C.stageTone(r.stage) }, C.stageName(r.stage)) },
+        { key: "val", label: cuenta ? "Valor mensual" : "Valor aquí", align: "right", render: (r) => h("span", { className: "t-numeric" }, C.fmt(r.val)) },
+        { key: "date", label: "Fecha", render: (r) => h("span", { className: "t-numeric" }, r.date) },
+        { key: "own", label: "Responsable", render: (r) => h("span", { style: { display: "flex", gap: 8, alignItems: "center" } }, h(NS.Avatar, { initials: r.own, size: 24 }), C.OWN[r.own]) },
+      ],
+      rows,
+      toCard: (r) => ({ title: r.name, subtitle: r.ins + " · " + C.fmt(r.val), meta: r.folio, badge: { tone: C.stageTone(r.stage), label: C.stageName(r.stage) }, chevron: true }),
+      note: cuenta ? "«Nuevo negocio» desde aquí deja la cuenta ya elegida. Solo se listan negocios de esta cuenta, en todas sus instalaciones." : "Un negocio aparece aquí si incluye esta instalación. El valor es la parte que corresponde a esta instalación.",
+      noop: () => {},
+    };
+  }
+}
+</script>
+</body>
+</html>

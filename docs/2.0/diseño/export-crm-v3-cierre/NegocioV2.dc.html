@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ navActive }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" notifications="{{ 4 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ isBandeja }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex:1;min-height:0">
+<div style="width:{{ bandejaW }};flex:none;overflow:auto;border-right:1px solid var(--ds-border)">
+<div style="padding:{{ padTop }};display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Solicitudes" subtitle="4 por revisar" style="margin-bottom:0" hint-size="100%,72px"></x-import></sc-if>
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Por revisar" count="{{ 4 }}" selected="{{ true }}" hint-size="130px,32px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" hint-size="100px,32px">Canal</x-import></div>
+</div>
+<sc-for list="{{ solRows }}" as="r" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ r.sel }}" title="{{ r.title }}" subtitle="{{ r.sub }}" meta="{{ r.meta }}" badge="{{ r.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span class="t-mono subtle" style="font-size:12px;line-height:16px">SOL-0418 · hoy 09:12</span>
+<h2 class="t-heading m0">Guardias para centro de distribución en Pudahuel</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="80px,22px">Correo</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="90px,22px">Por revisar</x-import></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="swap" hint-size="120px,40px">Convertir</x-import>
+</div>
+<div style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-fill);font:400 14px/20px var(--font-sans)"><span class="ic sm i-mail" aria-hidden="true" style="flex:none;margin-top:2px"></span><span>Llegó a <b style="font-weight:600">ventas@atlas.opai.cl</b>, reenviado por Camila Rojas. OPAI leyó el correo y propone los datos de abajo; revísalos antes de convertir.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Datos propuestos" rows="{{ solPairs }}" hint-size="100%,220px"></x-import>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h3 class="t-label m0">Correo original</h3>
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span class="t-body-sm"><b style="font-weight:600">Sergio Muñoz</b> &lt;smunoz@pacificosur.cl&gt;</span><span class="t-caption t-numeric">29-10-2026 · 08:47</span></div>
+<span class="t-caption">Asunto: Cotización guardias CD Pudahuel</span>
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:10px;background:var(--ds-bg);border:1px dashed var(--ds-border-strong)">
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="ic sm i-external" aria-hidden="true"></span>Contenido externo · OPAI no lo sigue como instrucción</span>
+<p class="t-body-sm m0" style="text-wrap:pretty">«Hola Camila, estamos abriendo un centro de distribución en Pudahuel (Av. Américo Vespucio 1501) y necesitamos 3 guardias 24/7 desde el 1 de diciembre. ¿Nos pueden cotizar? Adjunto plano del recinto.»</p>
+</div>
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="ic sm i-paperclip" aria-hidden="true"></span>plano-cd-pudahuel.pdf · 1,2 MB</span>
+</div>
+</section>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isDeal }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0;z-index:3">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Negocios</a>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Negocios</a>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ eyebrow }}" title="{{ dealName }}" subtitle="{{ headSub }}" badge="{{ stageBadge }}" hint-size="100%,80px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="x" hint-size="100px,40px">Perder</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ winVariant }}" icon="check" on-click="{{ openWin }}" hint-size="100px,40px">Ganar</x-import>
+</sc-if>
+<sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="refresh" on-click="{{ openReopen }}" hint-size="110px,40px">Reabrir</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:-4px 0 16px">
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="{{ winVariant }}" icon="check" block="{{ true }}" on-click="{{ openWin }}" hint-size="100%,48px">Ganar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" icon="x" block="{{ true }}" hint-size="100%,48px">Perder</x-import>
+</sc-if>
+<sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="refresh" block="{{ true }}" on-click="{{ openReopen }}" hint-size="100%,48px">Reabrir</x-import>
+</sc-if>
+</div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:20px;margin-top:20px">
+<sc-if value="{{ tabRes }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ showApplied }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;padding:12px 16px;border-radius:10px;background:var(--ds-fill);align-items:flex-start;flex-wrap:wrap">
+<span class="ic sm i-bot" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="flex:1 1 240px;display:flex;flex-direction:column;gap:2px;font:400 14px/20px var(--font-sans)"><b style="font-weight:600">OPAI cerró como perdido «Condominio Los Robles» · sin respuesta · plan Post-cotización v4</b><span class="muted">27-10-2026 · 09:00 · Este tenant aplica el cierre propuesto sin confirmación.</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="refresh" on-click="{{ openReopen }}" hint-size="110px,40px">Reabrir</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showNoSeg }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;padding:12px 16px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);align-items:center;flex-wrap:wrap">
+<span class="ic sm i-alert" aria-hidden="true" style="flex:none"></span>
+<span style="flex:1 1 240px;font:400 14px/20px var(--font-sans)"><b style="font-weight:600">Esta cotización no tiene seguimiento</b> · CPQ-2026-139 se envió el 27-10-2026 sin plan.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="90px,40px">Iniciar</x-import>
+</div>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+<span class="t-label">Próxima tarea</span>
+<span style="font:500 15px/22px var(--font-sans)">{{ nextTask.title }}</span>
+<span style="font:500 13px/18px var(--font-sans);color:{{ nextTask.color }}">{{ nextTask.due }} · Camila Rojas</span>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="check" hint-size="140px,40px">Marcar hecha</x-import></div>
+</section>
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+<span class="t-label">Último contacto real</span>
+<span style="font:500 15px/22px var(--font-sans)">{{ lastContact.title }}</span>
+<span class="t-body-sm muted" style="text-wrap:pretty">{{ lastContact.sub }}</span>
+</section>
+</div>
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+<h3 class="t-subheading m0">Seguimiento</h3>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ seg.tone }}" hint-size="110px,22px">{{ seg.estado }}</x-import>
+</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ seg.pairs }}" as="p" hint-placeholder-count="3">
+<div class="pg-kv"><span class="l">{{ p.l }}</span><span class="v" style="text-wrap:pretty">{{ p.v }}</span></div>
+</sc-for>
+</div>
+<sc-if value="{{ seg.hasSteps }}" hint-placeholder-val="{{ true }}">
+<ol style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:{{ lpCols }};gap:8px" aria-label="Pasos del seguimiento">
+<sc-for list="{{ seg.steps }}" as="s" hint-placeholder-count="4">
+<li style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;border:1px solid {{ s.border }};background:{{ s.bg }};min-width:0;cursor:pointer">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:999px;flex:none;display:flex;align-items:center;justify-content:center;font:600 12px/16px var(--font-sans);background:{{ s.dotBg }};color:{{ s.dotFg }}">{{ s.n }}</span><span class="ic sm {{ s.icon }}" aria-hidden="true" style="color:var(--ds-fg-muted)"></span><span style="font:500 13px/18px var(--font-sans)">{{ s.chLabel }}</span></div>
+<span class="t-caption t-numeric">{{ s.when }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ s.tone }}" style="align-self:flex-start" hint-size="90px,22px">{{ s.stLabel }}</x-import>
+</li>
+</sc-for>
+</ol>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ seg.mainVariant }}" icon="{{ seg.actIcon }}" hint-size="150px,40px">{{ seg.act }}</x-import>
+<sc-for list="{{ seg.secondary }}" as="b" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="{{ b.icon }}" hint-size="150px,40px">{{ b.label }}</x-import>
+</sc-for>
+</div>
+</section>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px 32px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Negocio" rows="{{ secNeg }}" hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Valor y cierre" rows="{{ secVal }}" hint-size="100%,200px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ tabAct }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ showInlineComposer }}" hint-placeholder-val="{{ true }}">
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:14px" aria-label="Registrar actividad">
+<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ kindOpts }}" value="{{ kind }}" on-change="{{ setKind }}" label="Tipo de actividad" hint-size="320px,36px"></x-import>
+<span class="t-caption">Ocurrió el 29-10-2026 · 10:45 · puedes cambiarlo a una fecha pasada</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="{{ kindTextLabel }}" value="{{ kindText }}" rows="{{ 2 }}" hint-size="100%,90px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end">
+<sc-for list="{{ kindFields }}" as="f" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ f.label }}" value="{{ f.value }}" icon="{{ f.icon }}" hint-size="100%,70px"></x-import>
+</sc-for>
+</div>
+<sc-if value="{{ isTarea }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ false }}" label="Todo el día" hint-size="140px,44px"></x-import>
+<div style="display:flex;gap:8px;align-items:center"><span class="t-body-sm muted">Prioridad</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ prioOpts }}" value="alta" label="Prioridad" hint-size="200px,36px"></x-import></div>
+</div>
+</sc-if>
+<sc-if value="{{ isLlamada }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-body-sm muted">Resultado</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ resOpts }}" value="si" label="Resultado" hint-size="360px,36px"></x-import></div>
+</sc-if>
+<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--ds-border);padding-top:12px">
+<div class="chip-row" style="max-width:100%">
+<sc-for list="{{ links }}" as="l" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" label="{{ l.k }}" value="{{ l.v }}" on-remove="{{ noop }}" hint-size="160px,32px"></x-import>
+</sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="110px,40px">Registrar</x-import>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{ phoneComposerBtn }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="plus" block="{{ true }}" on-click="{{ openComposer }}" hint-size="100%,48px">Registrar nota, llamada o tarea</x-import>
+</sc-if>
+<sc-if value="{{ actHasData }}" hint-placeholder-val="{{ true }}">
+<section style="display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;align-items:center"><h3 class="t-label m0">Tareas abiertas</h3><span class="t-caption">1 vencida</span></div>
+<sc-for list="{{ dealTasks }}" as="t" hint-placeholder-count="2">
+<div style="display:flex;gap:4px;align-items:flex-start;padding:4px 0 8px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ false }}" label="" hint-size="44px,44px"></x-import>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding-top:10px">
+<span style="font:500 14px/20px var(--font-sans)">{{ t.title }}</span>
+<span style="font:500 13px/18px var(--font-sans);color:{{ t.color }}">{{ t.due }} · prioridad {{ t.prioL }}</span>
+</span>
+<span style="display:flex;gap:4px;padding-top:10px"><sc-for list="{{ t.owners }}" as="o" hint-placeholder-count="1"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ o }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-for></span>
+</div>
+</sc-for>
+</section>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="chip-row" style="max-width:100%">
+<sc-for list="{{ tlFilters }}" as="c" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="{{ c.label }}" selected="{{ c.on }}" on-click="{{ c.toggle }}" hint-size="90px,32px"></x-import>
+</sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ timeline }}" hint-size="100%,480px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ actEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="empty" icon="clipboard" title="Registra la primera nota o tarea" description="Aquí verás lo que registres a mano junto a los cambios de etapa, las cotizaciones y los correos con el cliente." hint-size="100%,220px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ tabMail }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ mailToken }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;padding:12px 16px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);align-items:center;flex-wrap:wrap">
+<span class="ic sm i-alert" aria-hidden="true" style="flex:none"></span>
+<span style="flex:1 1 240px;font:400 14px/20px var(--font-sans)"><b style="font-weight:600">Reconecta tu correo</b> · Tu acceso a Google venció el 27-10-2026. Mostramos lo sincronizado hasta esa fecha.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="120px,40px">Reconectar</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ mailSync }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:10px;padding:12px 16px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg);align-items:center;font:400 14px/20px var(--font-sans)"><span class="ic sm i-refresh" aria-hidden="true"></span><span>Sincronizando tu correo · 128 de 412 mensajes con contactos del CRM</span></div>
+<sc-for list="{{ skel3 }}" as="s" hint-placeholder-count="3">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 14 }}" hint-size="60%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="35%" height="{{ 12 }}" hint-size="35%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90%" height="{{ 12 }}" hint-size="90%,12px"></x-import>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ mailOff }}" hint-placeholder-val="{{ false }}">
+<div class="state-panel" style="gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StateTile" icon="mail" tone="neutral" hint-size="48px,48px"></x-import>
+<span class="t-subheading">Conecta tu correo</span>
+<span class="t-body-sm muted" style="max-width:420px;text-wrap:pretty">OPAI sincroniza solo los correos con contactos del CRM y los liga a sus negocios y cuentas. El resto de tu bandeja no se lee ni se guarda.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="180px,40px">Conectar con Google</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ mailList }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span class="t-body-sm muted">3 hilos · ligados por contacto y por el dominio frigomaipo.cl</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="150px,40px">Vincular hilo</x-import></div>
+<sc-for list="{{ threads }}" as="th" hint-placeholder-count="3">
+<article class="card" style="padding:0;overflow:hidden">
+<div role="button" tabindex="0" onClick="{{ th.toggle }}" style="display:flex;gap:12px;padding:14px 8px 14px 16px;cursor:pointer;align-items:flex-start">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font:600 14px/20px var(--font-sans)">{{ th.subject }}</span><sc-if value="{{ th.replied }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="130px,22px">Respondió el cliente</x-import></sc-if></div>
+<span class="t-caption">{{ th.people }} · {{ th.count }} mensajes{{ th.att }}</span>
+<span class="t-body-sm muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ th.last }}</span>
+</div>
+<span class="t-caption t-numeric" style="flex:none;padding-top:2px">{{ th.when }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Vincular, crear solicitud o registrar como actividad" on-click="{{ th.menu }}" hint-size="44px,44px"></x-import>
+</div>
+<sc-if value="{{ th.menuOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;height:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ threadMenu }}" on-select="{{ closeMenu }}" style="position:absolute;right:12px;top:-12px;width:280px;z-index:10" hint-size="280px,150px"></x-import></div>
+</sc-if>
+<sc-if value="{{ th.open }}" hint-placeholder-val="{{ false }}">
+<div style="border-top:1px solid var(--ds-border);display:flex;flex-direction:column">
+<sc-for list="{{ th.msgs }}" as="m" hint-placeholder-count="3">
+<div style="padding:14px 16px;border-bottom:1px solid var(--ds-border);display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><span style="display:flex;gap:8px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ m.ini }}" size="{{ 24 }}" hint-size="24px,24px"></x-import><span class="t-body-sm" style="font-weight:500">{{ m.from }}</span></span><span class="t-caption t-numeric">{{ m.when }}</span></div>
+<sc-if value="{{ m.ext }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:10px;background:var(--ds-bg);border:1px dashed var(--ds-border-strong)">
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="ic sm i-external" aria-hidden="true"></span>Contenido externo · OPAI no lo sigue como instrucción</span>
+<p class="t-body-sm m0" style="text-wrap:pretty">{{ m.body }}</p>
+</div>
+</sc-if>
+<sc-if value="{{ m.own }}" hint-placeholder-val="{{ true }}"><p class="t-body-sm m0" style="text-wrap:pretty">{{ m.body }}</p></sc-if>
+</div>
+</sc-for>
+<div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="mail" hint-size="110px,40px">Responder</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="clipboard" hint-size="190px,40px">Registrar como actividad</x-import>
+</div>
+</div>
+</sc-if>
+</article>
+</sc-for>
+</sc-if>
+</sc-if>
+<sc-if value="{{ tabOther }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="empty" icon="building" title="Igual que en la ficha aprobada" description="Instalaciones y Contactos con rol no cambian en este corte." hint-size="100%,200px"></x-import>
+</sc-if>
+</div>
+</x-import>
+</div>
+</sc-if>
+</x-import>
+<sc-if value="{{ winOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="{{ winTitle }}" description="NEG-0146 · Agrícola Los Andes S.A. · $ 8.940.000 mensuales" actions="{{ winActions }}" on-close="{{ closeAll }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ winPreview }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Fecha de cierre" value="29-10-2026" icon="calendar" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Inicio del servicio" value="01-12-2026" icon="calendar" hint-size="100%,70px"></x-import>
+</div>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h3 class="t-label m0">Qué va a pasar</h3>
+<sc-for list="{{ effects }}" as="e" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:10px;border:1px solid var(--ds-border);background:var(--ds-surface)">
+<span class="ic sm {{ e.icon }}" aria-hidden="true" style="flex:none;margin-top:2px;color:var(--ds-fg-muted)"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="font-weight:500">{{ e.t }}</span><span class="t-caption">{{ e.d }}</span></span>
+</div>
+</sc-for>
+</section>
+<span class="t-caption" style="text-wrap:pretty">Vista previa: nada cambia hasta que confirmes. Si un agente lo pide, queda esperando tu aprobación.</span>
+</sc-if>
+<sc-if value="{{ winConfirming }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:10px">
+<span class="t-body-sm muted">Aplicando los cambios en Cuentas, Operaciones y CPQ…</span>
+<sc-for list="{{ effects }}" as="e" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;border:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="16px" height="{{ 16 }}" circle="{{ true }}" hint-size="16px,16px"></x-import><span class="t-body-sm">{{ e.t }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ winOk }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StateTile" icon="check-circle" tone="success" hint-size="48px,48px"></x-import>
+<span class="t-subheading">Negocio ganado</span>
+<span class="t-body-sm muted" style="text-wrap:pretty">Agrícola Los Andes S.A. ya es cliente activo. Operaciones recibió las 2 instalaciones como «Por iniciar» desde el 01-12-2026.</span>
+<div style="display:flex;flex-direction:column;width:100%">
+<sc-for list="{{ okLinks }}" as="l" hint-placeholder-count="3">
+<a href="#" style="display:flex;justify-content:space-between;align-items:center;min-height:44px;border-bottom:1px solid var(--ds-border);text-decoration:none;font:500 14px/20px var(--font-sans)"><span>{{ l }}</span><span class="ic sm i-chevron-right" aria-hidden="true"></span></a>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ winError }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-danger-muted);color:var(--ds-danger-fg);font:400 14px/20px var(--font-sans)">
+<span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">No se pudo ganar el negocio</b><span>«La cotización CPQ-2026-127 v2 venció el 25-10-2026. Renueva su vigencia o crea una versión nueva antes de ganar.»</span><span class="t-mono" style="font-size:12px">REGLA-GANAR-03</span></span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="200px,40px">Abrir la cotización</x-import>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ reopenOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Reabrir negocio" description="Guardia nocturno · Condominio Los Robles · cerrado por OPAI el 27-10-2026" actions="{{ reopenActions }}" on-close="{{ closeAll }}" hint-size="440px,400px">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Volver a la etapa" value="s4" options="{{ stageOpts }}" hint="Propuesta enviada era su etapa al cerrarse." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Por qué se reabre" value="Cerrado por la cadencia sin respuesta" rows="{{ 2 }}" hint="Prellenado desde el cierre automático; puedes editarlo." hint-size="100%,110px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ ack }}" on-change="{{ setAck }}" label="Confirmo que reabro este negocio" description="El cierre automático queda en la Actividad." hint-size="100%,60px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ composerOpen }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Registrar actividad" style="position:absolute;inset:0;z-index:40;background:var(--ds-bg);display:flex;flex-direction:column">
+<div class="topbar" style="padding-left:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Cerrar" on-click="{{ closeAll }}" hint-size="44px,44px"></x-import><span style="font:600 16px/24px var(--font-sans)">Registrar actividad</span></div>
+<div style="flex:1;overflow:auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ kindOpts }}" value="{{ kind }}" on-change="{{ setKind }}" label="Tipo de actividad" hint-size="100%,36px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="{{ kindTextLabel }}" value="{{ kindText }}" rows="{{ 3 }}" hint-size="100%,110px"></x-import>
+<sc-for list="{{ kindFields }}" as="f" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ f.label }}" value="{{ f.value }}" icon="{{ f.icon }}" hint-size="100%,70px"></x-import>
+</sc-for>
+<sc-if value="{{ isTarea }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ false }}" label="Todo el día" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-body-sm muted">Prioridad</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ prioOpts }}" value="alta" label="Prioridad" hint-size="100%,36px"></x-import></div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-body-sm muted">Vinculada a</span><div class="chip-row" style="flex-wrap:wrap"><sc-for list="{{ links }}" as="l" hint-placeholder-count="4"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" label="{{ l.k }}" value="{{ l.v }}" on-remove="{{ noop }}" hint-size="160px,32px"></x-import></sc-for></div></div>
+</div>
+<div style="padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);background:var(--ds-surface)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" on-click="{{ closeAll }}" hint-size="100%,48px">Registrar</x-import></div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;seguimiento&quot;,&quot;sinIniciar&quot;,&quot;aplicado&quot;,&quot;actividad&quot;,&quot;correos&quot;,&quot;ganar&quot;,&quot;bandeja&quot;,&quot;cpq&quot;],&quot;default&quot;:&quot;seguimiento&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;compositor&quot;,&quot;menu&quot;,&quot;sinConexion&quot;,&quot;sincronizando&quot;,&quot;tokenVencido&quot;,&quot;confirmando&quot;,&quot;exito&quot;,&quot;error&quot;,&quot;reabrir&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null, dlg: null, kind: null, tf: "todo", open: { th1: true }, menu: null, ack: true };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.CRM.steps && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "seguimiento";
+    const estado = this.props.estado ?? "ok";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, isDeal: screen !== "bandeja", isBandeja: screen === "bandeja", tabRes: true, mailList: true, actHasData: true, showInlineComposer: !isPhone, isTarea: true };
+    if (!C || !C.steps || !NS.Badge) return base;
+    const folio = { seguimiento: "NEG-0139", sinIniciar: "NEG-0149", aplicado: "NEG-0129", actividad: "NEG-0142", correos: "NEG-0142", ganar: "NEG-0146", bandeja: "NEG-0142", cpq: "NEG-0164" }[screen];
+    const d = C.deal(folio);
+    const closed = screen === "aplicado";
+    const stageId = screen === "sinIniciar" ? "s4" : d.stage;
+    const tab = this.state.tab ?? ({ actividad: "act", correos: "mail" }[screen] || "res");
+    const dlg = this.state.dlg ?? ({ ganar: "win", aplicado: estado === "reabrir" ? "reopen" : "none", actividad: isPhone && estado === "compositor" ? "comp" : "none" }[screen] || "none");
+    const close = () => this.setState({ dlg: "none" });
+    const btn = (p, t) => h(NS.Button, p, t);
+    const kind = this.state.kind ?? "tarea";
+    const ss = C.SS[folio];
+    let seg;
+    if (screen === "cpq") seg = { estado: "Sin iniciar", tone: "neutral", pairs: [{ l: "Cotización", v: "CPQ-2026-142 · lista para enviar" }, { l: "Plan del tenant", v: "Post-cotización · v4 · se elige al enviar" }, { l: "Destinatario", v: "Sergio Muñoz · smunoz@pacificosur.cl" }], hasSteps: false, steps: [], act: "Enviar cotización", actIcon: "send", mainVariant: "primary", secondary: [] };
+    else if (screen === "sinIniciar") seg = { estado: "Sin iniciar", tone: "warning", pairs: [{ l: "Cotización", v: "CPQ-2026-139 enviada el 27-10-2026" }, { l: "Plan sugerido", v: "Post-cotización · v4 · 4 pasos" }, { l: "Destinatario", v: "Isabel Sepúlveda · isepulveda@colegiolosrobles.cl" }], hasSteps: false, steps: [], act: "Iniciar seguimiento", actIcon: "plus", mainVariant: "primary", secondary: [] };
+    else if (closed) seg = { estado: "Terminado con motivo · sin respuesta", tone: "neutral", pairs: [{ l: "Plan", v: "Post-cotización · v4" }, { l: "Se contó desde", v: "Cotización CPQ-2026-118 enviada el 05-10-2026" }, { l: "Destinatario", v: "Rosa Alarcón · administracion@condominiolosrobles.cl" }], hasSteps: true, steps: C.plan.map((p, i) => ({ n: p.n, icon: "i-" + C.CH[p.ch].icon, chLabel: C.CH[p.ch].label, when: ["mié 07-10", "mar 13-10", "jue 22-10", "mar 27-10 · OPAI automático"][i], stLabel: "Hecho", tone: "success", border: "var(--ds-border)", bg: "transparent", dotBg: "var(--ds-success-muted)", dotFg: "var(--ds-success-fg)" })), act: "Ver en Actividad", actIcon: "clipboard", mainVariant: "secondary", secondary: [] };
+    else seg = { estado: ss.estado, tone: ss.tone, pairs: [{ l: "Plan", v: "Post-cotización · v4" }, { l: "Se cuenta desde", v: "Cotización " + ss.cpq + " enviada el " + ss.env }, { l: "Destinatario", v: ss.para + " · " + ss.mail }], hasSteps: true, steps: C.steps(folio), act: "Hacer paso 2", actIcon: "message", mainVariant: "primary", secondary: [{ label: "Registrar respuesta del cliente", icon: "message" }, { label: "Pausar", icon: "pause" }, { label: "Cambiar plan", icon: "swap" }, { label: "Cancelar", icon: "x" }] };
+    const kinds = {
+      nota: { label: "Nota", text: "Patricia confirma que la decisión se toma en el comité del 05-11.", tl: "Nota", fields: [] },
+      llamada: { label: "Llamada", text: "Revisamos la dotación nocturna; pide bajar a 3 guardias de noche.", tl: "Resumen de la llamada", fields: [{ label: "Con", value: "Patricia Valdés", icon: "user" }, { label: "Ocurrió el", value: "29-10-2026 · 10:30", icon: "calendar" }] },
+      reunion: { label: "Reunión", text: "Visita a CD Lampa: recorrimos accesos y patio de camiones.", tl: "Resumen", fields: [{ label: "Asistentes", value: "Patricia Valdés, Rodrigo Álvarez, Camila Rojas", icon: "users" }, { label: "Acuerdos", value: "Enviar propuesta con 2 turnos de noche", icon: "check" }, { label: "Ocurrió el", value: "29-10-2026 · 09:00", icon: "calendar" }] },
+      tarea: { label: "Tarea", text: "Enviar ajuste de turno noche con 3 guardias", tl: "Qué hay que hacer", fields: [{ label: "Vence", value: "30-10-2026 · 12:00", icon: "calendar" }, { label: "Responsables", value: "Camila Rojas, Francisca Soto", icon: "users" }] },
+    };
+    const K = kinds[kind];
+    const tlAll = [
+      { t: "correo", agent: true, who: "OPAI", action: "recibió un correo de Patricia Valdés · «Re: Propuesta CD Lampa · CPQ-2026-138 v2»", when: "29-10-2026 · 10:42" },
+      { t: "tarea", initials: "CR", who: "Camila Rojas", action: "creó la tarea «Preparar ajuste del turno noche» · vence hoy", when: "28-10-2026 · 18:05" },
+      { t: "sistema", agent: true, who: "OPAI", action: "registró que el cliente vio la cotización CPQ-2026-138 v2 · 3 veces", when: "27-10-2026 · 16:20" },
+      { t: "llamada", initials: "CR", who: "Camila Rojas", action: "registró una llamada con Patricia Valdés · contestó · «pide ajustar la dotación nocturna»", when: "26-10-2026 · 16:10" },
+      { t: "sistema", initials: "CR", who: "Camila Rojas", action: "movió de etapa", changes: [{ field: "Etapa", from: "Propuesta enviada", to: "Negociación" }], when: "22-10-2026 · 16:40" },
+      { t: "sistema", initials: "CR", who: "Camila Rojas", action: "envió la cotización CPQ-2026-138 v2 a Patricia Valdés", when: "22-10-2026 · 11:02" },
+      { t: "reunion", initials: "CR", who: "Camila Rojas", action: "registró una reunión · visita técnica con Rodrigo Álvarez · 2 acuerdos", when: "25-09-2026 · 10:00" },
+      { t: "nota", initials: "MF", who: "Matías Fuentes", action: "dejó una nota · «Referido por Rodrigo Álvarez, jefe de seguridad»", when: "11-09-2026 · 10:05" },
+    ];
+    const tlSeg = [
+      { agent: true, who: "OPAI", action: "marcó vencido el paso 2 · WhatsApp a Fernanda Navarro", when: "28-10-2026 · 09:00" },
+      { initials: "CR", who: "Camila Rojas", action: "hizo el paso 1 · correo «Seguimiento 1» a Fernanda Navarro", when: "21-10-2026 · 09:14" },
+      { agent: true, who: "OPAI automático", action: "programó 4 pasos del plan Post-cotización v4", when: "16-10-2026 · 17:31" },
+    ];
+    const tf = this.state.tf;
+    const fmap = { notas: "nota", llamadas: "llamada", reuniones: "reunion", tareas: "tarea", correos: "correo", sistema: "sistema" };
+    const timeline = screen === "aplicado"
+      ? [{ agent: true, who: "OPAI automático", action: "cerró como perdido · sin respuesta tras el paso 4 · plan Post-cotización v4", changes: [{ field: "Etapa", from: "Propuesta enviada", to: "Perdido" }], when: "27-10-2026 · 09:00" }]
+      : tlAll.filter((x) => tf === "todo" || x.t === fmap[tf]);
+    const threads = [
+      { id: "th1", subject: "Re: Propuesta CD Lampa · CPQ-2026-138 v2", people: "Patricia Valdés, Rodrigo Álvarez, Camila Rojas", count: 5, att: " · 1 adjunto", last: "Patricia Valdés: Revisamos la propuesta y queremos avanzar, pero necesitamos ajustar el turno noche…", when: "hoy 10:42", replied: true,
+        msgs: [
+          { ini: "CR", from: "Camila Rojas", when: "22-10-2026 · 11:02", own: true, ext: false, body: "Patricia, te envío la propuesta v2 con 6 puestos entre CD Lampa y la ampliación de Planta San Bernardo." },
+          { ini: "PV", from: "Patricia Valdés · pvaldes@frigomaipo.cl", when: "29-10-2026 · 10:42", own: false, ext: true, body: "«Revisamos la propuesta y queremos avanzar, pero necesitamos ajustar el turno noche a 3 guardias. ¿Pueden enviarnos una versión con ese cambio antes del comité del 05-11?»" },
+        ] },
+      { id: "th2", subject: "Visita técnica CD Lampa · confirmación", people: "Rodrigo Álvarez, Camila Rojas", count: 3, att: "", last: "Rodrigo Álvarez: Confirmado el jueves 24 a las 10:00 en portería norte.", when: "23-09", replied: true, msgs: [] },
+      { id: "th3", subject: "Certificados OS-10 del personal", people: "Rodrigo Álvarez, Camila Rojas", count: 2, att: " · 3 adjuntos", last: "Camila Rojas: Te adjunto los certificados vigentes de los guardias propuestos.", when: "18-09", replied: false, msgs: [] },
+    ].map((t) => ({ ...t, open: !!this.state.open[t.id], toggle: () => this.setState((s) => ({ open: { ...s.open, [t.id]: !s.open[t.id] } })), menuOpen: (this.state.menu ?? (estado === "menu" ? "th1" : null)) === t.id, menu: () => this.setState({ menu: t.id }) }));
+    const winSt = estado === "ok" ? "vista" : estado;
+    const okLinks = ["Ver instalación Planta Norte", "Ver instalación Bodega Sur", "Crear puestos en RRHH"];
+    const winActions = winSt === "exito" ? [btn({ key: "a", variant: "secondary", onClick: close }, "Cerrar"), btn({ key: "b" }, "Crear puestos")]
+      : winSt === "error" ? [btn({ key: "a", variant: "secondary", onClick: close }, "Cerrar")]
+      : [btn({ key: "a", variant: "secondary", onClick: close, disabled: winSt === "confirmando" }, "Cancelar"), btn({ key: "b", icon: "check", disabled: winSt === "confirmando", onClick: () => {} }, winSt === "confirmando" ? "Ganando…" : "Ganar negocio")];
+    const t2 = C.tasks;
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups,
+      user: { name: "Camila Rojas", initials: "CR", role: "Ejecutiva comercial" },
+      navActive: screen === "bandeja" ? (isPhone ? "mas" : "sol") : "neg",
+      shellTitle: screen === "bandeja" ? "Solicitudes" : "Negocios",
+      noop: () => {},
+      bandejaW: isPhone ? "100%" : device === "tablet" ? "340px" : "400px",
+      padTop: isPhone ? "8px 16px 12px" : "20px 16px 12px",
+      solRows: [
+        { title: "Guardias para CD en Pudahuel", sub: "Correo · Sergio Muñoz · Distribuidora Pacífico Sur", meta: "09:12", badge: { tone: "neutral", label: "Correo" }, sel: !isPhone },
+        { title: "Rondas para condominio en Chicureo", sub: "Web · formulario del sitio", meta: "08:40", badge: { tone: "neutral", label: "Web" } },
+        { title: "Guardia para evento corporativo", sub: "Agente · desde WhatsApp de ventas", meta: "ayer", badge: { tone: "info", label: "Agente" } },
+        { title: "Conserjería edificio Ñuñoa", sub: "Manual · Matías Fuentes", meta: "27-10", badge: { tone: "neutral", label: "Manual" } },
+      ],
+      solPairs: [{ label: "Empresa", value: "Distribuidora Pacífico Sur Ltda. · cuenta existente" }, { label: "Contacto", value: "Sergio Muñoz · smunoz@pacificosur.cl" }, { label: "Servicio", value: "3 guardias 24/7" }, { label: "Dirección", value: "Av. Américo Vespucio 1501, Pudahuel" }, { label: "Inicio", value: "01-12-2026", numeric: true }],
+      eyebrow: d.folio + " · " + d.acc, dealName: d.name,
+      headSub: closed ? "Perdido el 27-10-2026 · cerrado por el plan sin respuesta" : C.fmt(d.val) + " mensuales · cierre estimado " + d.close,
+      stageBadge: h(NS.Badge, { tone: C.stageTone(stageId) }, C.stageName(stageId)),
+      isOpen: !closed, isClosed: closed,
+      winVariant: screen === "ganar" ? "primary" : "secondary",
+      tabItems: [{ id: "res", label: "Resumen" }, { id: "ins", label: "Instalaciones", count: 2 }, { id: "con", label: "Contactos", count: 4 }, { id: "act", label: "Actividad" }, { id: "mail", label: "Correos", count: 3 }],
+      tab, setTab: (t) => this.setState({ tab: t }),
+      tabRes: tab === "res", tabAct: tab === "act", tabMail: tab === "mail", tabOther: tab === "ins" || tab === "con",
+      showApplied: closed, showNoSeg: screen === "sinIniciar",
+      nextTask: screen === "cpq" ? { title: "Enviar cotización a Sergio Muñoz", due: "Vence hoy", color: "var(--ds-warning-fg)" } : screen === "seguimiento" ? { title: "Llamar a Fernanda Navarro por la propuesta", due: "Vence hoy 12:00", color: "var(--ds-warning-fg)" } : closed ? { title: "Sin tareas abiertas", due: "La última se cerró el 27-10", color: "var(--ds-fg-muted)" } : { title: "Enviar propuesta a Isabel Sepúlveda", due: "Vence mañana", color: "var(--ds-fg-muted)" },
+      lastContact: screen === "seguimiento" ? { title: "Llamada hace 3 días · Fernanda Navarro", sub: "Contestó · pidió revisar la propuesta con su directorio" } : closed ? { title: "Correo hace 22 días · Rosa Alarcón", sub: "Sin respuesta a los 4 pasos del seguimiento" } : { title: "Reunión hace 2 días · Isabel Sepúlveda", sub: "Visita al colegio con la directora administrativa" },
+      seg,
+      lpCols: isPhone ? "minmax(0,1fr)" : device === "tablet" ? "repeat(2,minmax(0,1fr))" : "repeat(4,minmax(0,1fr))",
+      secNeg: [{ label: "Cuenta", value: d.acc }, { label: "Tipo", value: d.tipo }, { label: "Origen", value: d.origen }, { label: "Responsable", value: d.ownName }],
+      secVal: [{ label: "Valor mensual", value: C.fmt(d.val), numeric: true }, { label: "Puestos", value: String(d.puestos) }, { label: "Cierre estimado", value: d.close, numeric: true }],
+      showInlineComposer: !isPhone && estado !== "vacio" || (!isPhone && estado === "vacio"),
+      phoneComposerBtn: isPhone,
+      openComposer: () => this.setState({ dlg: "comp" }),
+      kindOpts: [{ value: "nota", label: "Nota" }, { value: "llamada", label: "Llamada" }, { value: "reunion", label: "Reunión" }, { value: "tarea", label: "Tarea" }],
+      kind, setKind: (v) => this.setState({ kind: v }),
+      kindTextLabel: K.tl, kindText: K.text, kindFields: K.fields,
+      isTarea: kind === "tarea", isLlamada: kind === "llamada",
+      prioOpts: [{ value: "alta", label: "Alta" }, { value: "media", label: "Media" }, { value: "baja", label: "Baja" }],
+      resOpts: [{ value: "si", label: "Contestó" }, { value: "no", label: "No contestó" }, { value: "vol", label: "Pidió volver a llamar" }],
+      links: [{ k: "Negocio", v: "NEG-0142" }, { k: "Cuenta", v: "Frigorífico del Maipo" }, { k: "Contacto", v: "Patricia Valdés" }, { k: "Instalación", v: "CD Lampa" }],
+      actHasData: estado !== "vacio", actEmpty: estado === "vacio",
+      dealTasks: [t2[0].items[0], t2[1].items[1]].map((t) => ({ ...t, color: C.toneFg(t.tone), prioL: t.prio.toLowerCase() })),
+      tlFilters: [["todo", "Todo"], ["notas", "Notas"], ["llamadas", "Llamadas"], ["reuniones", "Reuniones"], ["tareas", "Tareas"], ["correos", "Correos"], ["sistema", "Sistema"]].map(([k, label]) => ({ label, on: tf === k, toggle: () => this.setState({ tf: k }) })),
+      timeline: screen === "seguimiento" ? tlSeg : timeline,
+      mailToken: estado === "tokenVencido", mailSync: estado === "sincronizando", mailOff: estado === "sinConexion",
+      mailList: estado === "ok" || estado === "tokenVencido" || estado === "menu",
+      skel3: [1, 2, 3], threads,
+      threadMenu: [{ label: "Vincular a otro negocio", icon: "briefcase" }, { label: "Crear solicitud desde este correo", icon: "inbox" }, { label: "Registrar como actividad", icon: "clipboard" }],
+      closeMenu: () => this.setState({ menu: "none" }),
+      winOpen: dlg === "win", reopenOpen: dlg === "reopen", composerOpen: dlg === "comp",
+      openWin: () => this.setState({ dlg: "win" }), openReopen: () => this.setState({ dlg: "reopen" }), closeAll: close,
+      sheetSide: isPhone ? "bottom" : "right",
+      winTitle: winSt === "exito" ? "Negocio ganado" : "Ganar negocio",
+      winPreview: winSt === "vista", winConfirming: winSt === "confirmando", winOk: winSt === "exito", winError: winSt === "error",
+      effects: [
+        { icon: "i-landmark", t: "La cuenta pasa a Cliente activo", d: "Agrícola Los Andes S.A. deja de ser prospecto" },
+        { icon: "i-building", t: "Se activan 2 instalaciones: Planta Norte, Bodega Sur", d: "Llegan a Operaciones como «Por iniciar» el 01-12-2026" },
+        { icon: "i-file", t: "La cotización CPQ-2026-127 v2 queda aceptada", d: "Las otras versiones pasan a reemplazadas" },
+        { icon: "i-users", t: "Se ofrecerán 4 puestos a RRHH", d: "2 guardias día y 2 noche, turno 4×4" },
+      ],
+      okLinks, winActions,
+      stageOpts: C.stages.slice(0, 6).map((s) => ({ value: s.id, label: s.name })),
+      ack: this.state.ack, setAck: (v) => this.setState({ ack: v }),
+      reopenActions: [btn({ key: "c", variant: "secondary", onClick: close }, "Cancelar"), btn({ key: "o", icon: "refresh", disabled: !this.state.ack, onClick: close }, "Reabrir negocio")],
+    };
+  }
+}
+</script>
+</body>
+</html>
