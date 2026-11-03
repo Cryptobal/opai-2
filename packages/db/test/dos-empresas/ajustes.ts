@@ -66,6 +66,8 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["finanzas.ventas_programaciones"],
     valores: () => ({ precio_unitario_clp: 1, precio_unitario_uf: null }),
   },
+  // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
+  "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
   // CPQ (CAR-119): CHECK de tipo de línea (lineas_tipo_check).
   "cpq.lineas": { valores: () => ({ tipo: "item" }) },
   // CPQ (CAR-135): CHECK tipo/base; `copia` no debe regenerar `tipo` (índice único parcial por tenant+tipo).
