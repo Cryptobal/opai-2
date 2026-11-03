@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { avisosResumenCpq } from "@/lib/cpq-avisos-compactos";
 import { avisoLineaPuesto, avisosCpq, RUTA_REMUNERACIONES } from "@/lib/cpq-avisos";
 import {
   conteo,
@@ -59,6 +60,18 @@ describe("cpq-presentacion", () => {
     expect(a?.titulo).toContain("Guardia noche");
     expect(a?.accion).toMatchObject({ tipo: "editar_linea", lineaId: "l9" });
     expect(a?.enlace).toBeUndefined();
+  });
+
+  it("resumen: un «Costo pendiente» sin botón si falta sueldo", () => {
+    const r = avisosResumenCpq({
+      avisos: [
+        { codigo: "sueldo_faltante", mensaje: "Falta el sueldo base de «Guardia».", lineaId: "l1" },
+        { codigo: "mutual_sin_confirmar", mensaje: "m" },
+      ],
+    });
+    expect(r.filter((x) => x.titulo.includes("Falta el sueldo"))).toHaveLength(0);
+    expect(r.find((x) => x.titulo === "Costo pendiente")?.accion).toBeUndefined();
+    expect(r.some((x) => x.id === "mutual")).toBe(true);
   });
 
   it("plurales", () => {
