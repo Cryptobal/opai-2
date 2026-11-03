@@ -27,12 +27,13 @@ export const seguimientosRecibirCorreo = defineCapability({
   }),
   output: z.object({ registrado: z.boolean() }),
   efecto: "escritura",
-  dryRun: false,
-  async handler(ctx, input) {
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
     const s = await ctx.db.seguimiento.findUnique({ where: { id: input.seguimientoId } });
     if (!s) throw noEncontrado("El seguimiento");
     const previo = await ctx.db.seguimientoEntrante.findUnique({ where: { tenantId_mensajeId: { tenantId: ctx.tenantId, mensajeId: input.mensajeId } } });
     if (previo) return { registrado: false };
+    if (dryRun) return { registrado: true };
     const config = await configDeVersion(ctx, s.planId, s.planVersion);
     await ctx.transaccion(async (tx) => {
       const vivo = s.estado === "activo" || s.estado === "pausado";
