@@ -25,9 +25,9 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
     expect(manifest.navegacion.map((n) => n.href)).toEqual([
       "/finanzas/folios",
       "/finanzas/ventas",
+      "/finanzas/compras",
       "/finanzas/bancos",
       "/finanzas/plan-de-cuentas",
-      "/finanzas/compras",
       "/finanzas/flujo",
     ]);
     expect(manifest.eventos).toHaveLength(33);

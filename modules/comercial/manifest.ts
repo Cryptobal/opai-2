@@ -61,8 +61,8 @@ export const manifest = defineModule({
       href: "/contactos",
       etiqueta: "Contactos",
       icono: "Users",
-      orden: 2,
-      permiso: "core:cuentas.read",
+      orden: 1.5,
+      permiso: "comercial:negocios.read",
     },
   ],
   // Ajustes del módulo (ADR-008), declarados en packages/capabilities/src/comercial/ajustes.ts.

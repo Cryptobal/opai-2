@@ -99,18 +99,20 @@ export function navegacionErp(
   const nav: ItemNav[] = [];
   const orden = [
     "inicio",
-    "comercial",
-    "clientes",
     "operaciones",
     "personas",
     "finanzas",
+    "comercial",
+    "clientes",
     "documentos",
   ];
   for (const g of [...grupos].sort((a, b) => orden.indexOf(a.area) - orden.indexOf(b.area))) {
     for (const e of g.entradas) {
       nav.push(
         itemDe(e, {
-          ...(g.area === "inicio" ? {} : { grupo: g.etiqueta }),
+          ...(g.area === "inicio"
+            ? {}
+            : { grupo: g.area === "documentos" ? "Firmas" : g.etiqueta }),
           ...(g.area !== "inicio" ? { area: g.area, fijable: true } : {}),
         }),
       );
