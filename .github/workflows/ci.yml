@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# El chequeo de tipos de `next build` supera el heap por defecto de Node (~2 GB) desde fines de
+# octubre (OOM en «build · presupuesto de JS» y «rendimiento»). Tope, no reserva: aplica a todos los jobs.
+env:
+  NODE_OPTIONS: --max-old-space-size=5120
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
