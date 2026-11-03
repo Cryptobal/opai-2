@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarDays, FileText, Wallet } from "lucide-react";
+import { CalendarClock, CalendarDays, FileText, IdCard, Wallet } from "lucide-react";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
@@ -13,6 +13,17 @@ export const SECCIONES_OPERACION: readonly Seccion[] = [
     icono: CalendarClock,
     grupo: "operacion",
     permiso: PERMISOS_CORE.patronesRead,
+  }),
+  // Catálogo de cargos y sueldos: sale del menú de Personas (CAR-182); la ruta no cambia.
+  s({
+    id: "cargos",
+    href: "/cargos",
+    titulo: "Cargos y sueldos",
+    descripcion: "Catálogo de cargos con sus estructuras de sueldo",
+    corta: "Cargos y estructuras de sueldo",
+    icono: IdCard,
+    grupo: "operacion",
+    permiso: PERMISOS_CORE.estructurasRead,
   }),
   s({
     id: "remuneraciones",

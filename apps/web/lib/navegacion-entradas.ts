@@ -9,22 +9,22 @@ const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  *  no tiene entradas visibles, `entradasAreaPrincipal` cae a la primera disponible, sin error (§10). */
 export function areaPrincipalPorRol(rol: Rol): AreaNav {
   if (rol === "supervisor") return "operaciones";
-  if (rol === "viewer") return "clientes";
   return "comercial";
 }
 
-/** Entradas del núcleo (Brief 05, §4.3): Inicio suelta, Clientes y Personas con sus permisos. */
+/** Entradas del núcleo (Brief 05, §4.3): Inicio suelta, Cuentas (en Comercial desde CAR-182) y
+ *  Personas con sus permisos. Cargos es un catálogo: vive en Configuración › Operación (CAR-182). */
 export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
   return [
     { area: "inicio", href: "/", etiqueta: "Inicio", icono: "Home", modulo: "core" },
     {
-      area: "clientes",
+      area: "comercial",
       href: "/cuentas",
       etiqueta: "Cuentas",
       icono: "Building2",
       modulo: "core",
       permiso: PERMISOS_CORE.cuentasRead,
-      orden: 1,
+      orden: 4,
     },
     {
       area: "operaciones",
@@ -43,15 +43,6 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       modulo: "core",
       permiso: PERMISOS_CORE.personasRead,
       orden: 1,
-    },
-    {
-      area: "personas",
-      href: "/cargos",
-      etiqueta: "Cargos",
-      icono: "Briefcase",
-      modulo: "core",
-      permiso: PERMISOS_CORE.estructurasRead,
-      orden: 2,
     },
     {
       area: "documentos",
