@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 import { pdfCotizacionConMarca } from "../persistencia/pdf-cotizacion";
+import { entradaPdfDesdeCotizacion } from "../persistencia/entrada-pdf-cotizacion";
 import { exigirGatesEnvioCpq } from "../persistencia/propuesta-envio-aprobacion";
 import { registrarOEnviarSolicitudEnvioPropuesta } from "../persistencia/propuesta-envio-solicitar";
 import { proyectarCalculo } from "../persistencia/recalcular";
@@ -96,23 +97,23 @@ export const cotizacionesEnviar = defineCapability({
         "Fuera de márgenes: el envío queda pendiente de aprobación. Usa cpq.envios_propuesta.solicitar desde la ficha.",
       );
     }
-    const pdfPack = await pdfCotizacionConMarca(
-      ctx,
-      {
+    const entrada =
+      (await entradaPdfDesdeCotizacion(ctx, input.id, { enviada: true })) ?? {
         codigo: c.codigo,
         titulo: c.titulo,
         negocio: neg.titulo ?? "Negocio",
-        secciones: seccionesVista,
+        secciones: seccionesVista.map((s) => ({
+          nombre: s.nombre,
+          lineas: s.lineas.map((l) => ({ nombre: l.nombre, tipo: l.tipo })),
+        })),
         calculo: {
           ventaMensual: calculoPublico.ventaMensual ?? null,
           fecha: calculoPublico.fecha ?? "",
           pagosUnicos: "pagosUnicos" in calculoPublico ? calculoPublico.pagosUnicos : 0,
           borradorSinPrecio: calculoPublico.ventaMensual == null,
         },
-      },
-      undefined,
-      { siembraDocumento: false },
-    );
+      };
+    const pdfPack = await pdfCotizacionConMarca(ctx, entrada, undefined, { siembraDocumento: false });
     const correoPreview = {
       evento: "cpq.cotizacion.enviada" as const,
       para: contacto.email,

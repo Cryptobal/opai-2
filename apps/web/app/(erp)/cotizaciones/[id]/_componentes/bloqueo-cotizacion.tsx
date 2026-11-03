@@ -21,17 +21,17 @@ export function BloqueoCotizacion({
     <Alerta tono="warning" titulo="Cotización bloqueada" className="w-full">
       <p>{mensaje}</p>
       {laboralPendiente ? (
-        <div className="mt-2 flex flex-wrap gap-2">
-          <EnlaceBoton href={REMUNERACIONES} variante="secondary">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <EnlaceBoton href={REMUNERACIONES} variante="secondary" className="min-h-11 w-full sm:w-auto">
             Ir a Remuneraciones
           </EnlaceBoton>
-          <Button type="button" variant="ghost" disabled={pendiente} onClick={onRecalcular}>
+          <Button type="button" variant="ghost" className="min-h-11 w-full sm:w-auto" disabled={pendiente} onClick={onRecalcular}>
             Recalcular
           </Button>
         </div>
       ) : enlace ? (
-        <div className="mt-2 flex flex-wrap gap-2">
-          <EnlaceBoton href={enlace.href} variante="secondary">
+        <div className="mt-3">
+          <EnlaceBoton href={enlace.href} variante="secondary" className="min-h-11 w-full sm:w-auto">
             {enlace.etiqueta}
           </EnlaceBoton>
         </div>
