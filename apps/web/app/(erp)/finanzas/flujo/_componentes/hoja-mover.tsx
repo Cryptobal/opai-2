@@ -25,9 +25,7 @@ export function HojaMover({
   const [semana, setSemana] = useState(semanas[0] ?? "");
   const [por, setPor] = useState("1");
   const [confirmarPasada, setConfirmarPasada] = useState(false);
-  const [vista, setVista] = useState<{ movimientos: { desde: string; hasta: string; monto: number }[] } | null>(
-    null,
-  );
+  const [vista, setVista] = useState<{ movimientos: { desde: string; hasta: string; monto: number }[] } | null>(null);
   const opcionesSemana = semanas.length ? semanas : [];
   const pasadasSet = useMemo(() => new Set(semanasPasadas), [semanasPasadas]);
 
@@ -70,9 +68,7 @@ export function HojaMover({
   const errorServidor = codigo === "INTERNAL";
   const avisoPasada =
     vista && requiereConfirmacionPasada(vista.movimientos) ? (
-      <Alerta tono="warning" titulo="Semana pasada">
-        El movimiento no queda respaldado por la cartola importada. Confirma antes de aplicar.
-      </Alerta>
+      <Alerta tono="warning" titulo="Semana pasada">El movimiento no queda respaldado por la cartola importada. Confirma antes de aplicar.</Alerta>
     ) : null;
 
   return (
@@ -137,10 +133,7 @@ export function HojaMover({
             />
           </Campo>
           <Campo etiqueta="Semanas a mover" htmlFor="mv-por">
-            <Input id="mv-por" value={por} onChange={(e) => {
-              setPor(e.target.value);
-              setVista(null);
-            }} inputMode="numeric" />
+            <Input id="mv-por" value={por} onChange={(e) => { setPor(e.target.value); setVista(null); }} inputMode="numeric" />
           </Campo>
           {vista && requiereConfirmacionPasada(vista.movimientos) ? (
             <Checkbox
