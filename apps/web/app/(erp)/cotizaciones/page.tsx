@@ -1,8 +1,9 @@
-import { FileText } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 
 import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
 import { cargarCotizaciones } from "./_componentes/datos";
@@ -21,6 +22,17 @@ export default function Cotizaciones({ searchParams }: { searchParams: SearchPar
         const p = await leerParametros(searchParams);
         return { ...(await cargarCotizaciones(p["cursor"])), q: p.q };
       }}
+      opciones={(d) =>
+        d.crear
+          ? {
+              acciones: (
+                <EnlaceBoton href="/cotizaciones/nueva" icono={Plus}>
+                  Nueva cotización
+                </EnlaceBoton>
+              ),
+            }
+          : {}
+      }
     >
       {(l) => (
         <SplitScreen

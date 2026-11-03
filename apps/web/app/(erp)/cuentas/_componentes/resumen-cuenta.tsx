@@ -6,6 +6,8 @@ import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { fecha, rut } from "@/lib/fechas";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
+import { VinculosComercialCuenta } from "./vinculos-comercial-cuenta";
+
 /** Tab Resumen de una cuenta: identificación y representante legal (01). */
 export function ResumenCuenta({ c }: { c: CuentaDetalle }) {
   const principal = c.contactos.find((k) => k.esPrincipal)?.nombre ?? null;
@@ -66,6 +68,7 @@ export function ResumenCuenta({ c }: { c: CuentaDetalle }) {
           ]}
         />
       </SeccionTarjeta>
+      <VinculosComercialCuenta cuentaId={c.id} />
     </div>
   );
 }
