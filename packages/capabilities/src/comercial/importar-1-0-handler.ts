@@ -1,24 +1,24 @@
 import { z } from "zod";
 
 import {
-  aplicarPlanEnTransaccion,
+  aplicarPorLotes,
   bloquearAplicarPorEtapas,
   calcularPlan,
+  cerrarCorrida,
   conciliar,
   construirReporte,
   datosOpai1,
+  exigirImportacionAbierta,
+  ImportacionCerradaError,
+  iniciarCorrida,
   leerEstadoDestinoPorTenantId,
-  registrarCorrida,
   revertirCorrida,
-  tenantImportacionCerrada,
   validarDatos,
-  cerrarCorrida,
+  type Plan,
 } from "@opai/db/importar-opai1";
-import { enTransaccion } from "@opai/db";
 
 import { prohibido } from "../errores";
 import type { Contexto } from "../types";
-import type { Plan } from "@opai/db/importar-opai1";
 
 const accionImport = z.enum(["simular", "aplicar", "conciliar", "revertir"]);
 
@@ -74,18 +74,19 @@ export async function ejecutarImportar10(
 
   if (input.accion === "revertir") {
     if (!input.importacionId) throw prohibido("Falta importacionId para revertir.");
-    const rev = await enTransaccion(ctx.tenantId, (tx) =>
-      revertirCorrida(tx, ctx.tenantId, input.importacionId!, dryRun),
-    );
+    const rev = await revertirCorrida(ctx.tenantId, input.importacionId, dryRun);
     return {
       dryRun,
       accion: "revertir" as const,
-      revertir: rev,
+      revertir: {
+        revertidos: rev.revertida ? rev.porRevertir.creadas + rev.porRevertir.completadas : 0,
+        bloqueados: rev.bloqueadas,
+      },
       reporte: null,
       aplicadas: null,
       conciliacion: null,
       usuariosResueltos: 0,
-      usuariosSinMembresia: [],
+      usuariosSinMembresia: [] as string[],
     };
   }
 
@@ -108,11 +109,10 @@ export async function ejecutarImportar10(
   });
 
   if (input.accion === "conciliar") {
-    const c = conciliar(datos, plan);
     return {
       dryRun: true,
       accion: "conciliar" as const,
-      conciliacion: c,
+      conciliacion: conciliar(datos, plan),
       reporte: construirReporte(plan, ctx.tenantId),
       aplicadas: null,
       revertir: null,
@@ -126,12 +126,12 @@ export async function ejecutarImportar10(
   }
 
   const reporte = construirReporte(plan, ctx.tenantId);
-
   if (input.accion === "simular" || dryRun) {
     return {
       dryRun: true,
       accion: "simular" as const,
       reporte,
+      plan,
       aplicadas: null,
       conciliacion: null,
       revertir: null,
@@ -140,40 +140,41 @@ export async function ejecutarImportar10(
     };
   }
 
-  const cerrada = await enTransaccion(ctx.tenantId, (tx) => tenantImportacionCerrada(tx, ctx.tenantId));
-  if (cerrada && !input.permitirReimportacion) {
-    throw prohibido("Importación cerrada en este tenant. Use permitirReimportacion si corresponde.");
+  try {
+    await exigirImportacionAbierta(ctx.tenantId, input.permitirReimportacion);
+  } catch (e) {
+    if (e instanceof ImportacionCerradaError) {
+      throw prohibido("Importación cerrada en este tenant. Use permitirReimportacion si corresponde.");
+    }
+    throw e;
   }
 
-  const aplicadas = await enTransaccion(ctx.tenantId, async (tx) => {
-    const importacionId = await registrarCorrida(tx, {
-      tenantId: ctx.tenantId,
-      modo: "aplicar",
-      lanzadoPorId: ctx.usuario?.id ?? null,
-    });
-    const r = await aplicarPlanEnTransaccion(tx, ctx.tenantId, plan, importacionId);
-    await cerrarCorrida(tx, importacionId, {
-      creados: r.aplicadas.cuentas + r.aplicadas.contactos + r.aplicadas.instalaciones,
-      completados: 0,
-      sinCambio: 0,
-      omitidos: r.omitidas,
-    }, "completada");
-    plan = { ...plan, importacionId };
-    return { ...r, importacionId };
+  const importacionId = await iniciarCorrida(ctx.tenantId, {
+    modo: "aplicar",
+    origen: "instantanea",
+    lanzadaPorId: ctx.usuario?.id ?? null,
   });
+  const r = await aplicarPorLotes(ctx.tenantId, importacionId, plan);
+  await cerrarCorrida(ctx.tenantId, importacionId, "completada", {
+    aplicadas: r.aplicadas,
+    omitidas: r.omitidas,
+  });
+  plan = { ...plan, importacionId };
 
   return {
     dryRun: false,
     accion: "aplicar" as const,
     reporte: construirReporte(plan, ctx.tenantId),
+    plan,
     conciliacion: null,
     revertir: null,
     aplicadas: {
-      cuentas: aplicadas.aplicadas.cuentas,
-      contactos: aplicadas.aplicadas.contactos,
-      instalaciones: aplicadas.aplicadas.instalaciones,
-      omitidas: aplicadas.omitidas,
-      importacionId: aplicadas.importacionId,
+      cuentas: r.aplicadas.cuentas,
+      contactos: r.aplicadas.contactos,
+      instalaciones: r.aplicadas.instalaciones,
+      programaciones: r.aplicadas.programaciones,
+      omitidas: r.omitidas,
+      importacionId,
     },
     usuariosResueltos: resueltos,
     usuariosSinMembresia: sinMembresia,

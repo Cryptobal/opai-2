@@ -1,51 +1,49 @@
-// Política «solo completar vacíos»: nunca escribe null ni pisa un valor existente en 2.0.
-import { camposDistintos } from "./comun";
+// Política «solo completar vacíos» (CAR-157): una actualización escribe únicamente en campos que
+// están vacíos en 2.0. Nunca escribe nulos y nunca pisa un valor existente; si los dos lados traen
+// valores distintos es un conflicto que se informa por nombre de campo y no se escribe.
 
-export function campoVacio(val: unknown): boolean {
-  if (val === null || val === undefined) return true;
-  if (typeof val === "string" && val.trim() === "") return true;
-  return false;
-}
-
-export type ResultadoCompletar<D extends Record<string, unknown>> = {
-  patch: Partial<D>;
-  campos: string[];
+export type Completado = {
+  /** Campos (y valores) que se pueden escribir: vacíos en 2.0 y con valor en 1.0. */
+  escribir: Record<string, unknown>;
+  /** Campos con dos valores distintos (solo nombres, nunca valores). */
   conflictos: string[];
 };
 
-/** Fusiona propuesto en actual solo donde actual está vacío. */
-export function completarVacios<D extends Record<string, unknown>>(
-  propuesto: D,
-  actual: Record<string, unknown>,
-): ResultadoCompletar<D> {
-  const patch: Partial<D> = {};
-  const campos: string[] = [];
+const vacio = (v: unknown): boolean =>
+  v === null || v === undefined || (typeof v === "string" && v.trim() === "") || (Array.isArray(v) && v.length === 0);
+
+/** Alias legible para tests y reglas de negocio. */
+export const campoVacio = vacio;
+
+const normal = (v: unknown) => JSON.stringify(Array.isArray(v) ? [...v].sort() : v);
+
+/**
+ * @param equivalentes valor que 2.0 usa como «sin dato» para un campo (p. ej. estado `prospecto`).
+ */
+export function completarVacios(
+  propuesto: Readonly<Record<string, unknown>>,
+  actual: Readonly<Record<string, unknown>>,
+  equivalentes: Readonly<Record<string, unknown>> = {},
+): Completado {
+  const escribir: Record<string, unknown> = {};
   const conflictos: string[] = [];
-  for (const k of Object.keys(propuesto)) {
-    const pv = propuesto[k];
-    const av = actual[k];
-    if (campoVacio(pv)) continue;
-    if (campoVacio(av)) {
-      patch[k as keyof D] = pv as D[keyof D];
-      campos.push(k);
-    } else if (JSON.stringify(pv) !== JSON.stringify(av)) conflictos.push(k);
+  for (const campo of Object.keys(propuesto).sort()) {
+    const nuevo = propuesto[campo];
+    if (vacio(nuevo)) continue;
+    const previo = actual[campo];
+    const sinDato = vacio(previo) || (campo in equivalentes && previo === equivalentes[campo]);
+    if (sinDato) {
+      // Mismo valor que ya hay (p. ej. prospecto sobre prospecto): no es un cambio.
+      if (normal(nuevo) !== normal(previo)) escribir[campo] = nuevo;
+    }
+    else if (normal(nuevo) !== normal(previo)) conflictos.push(campo);
   }
-  return { patch, campos, conflictos };
+  return { escribir, conflictos };
 }
 
-/** Campos que cambiarían con la política de vacíos (para el plan). */
-export function camposCompletarVacios<D extends Record<string, unknown>>(
-  propuesto: D,
-  actual: Record<string, unknown>,
-): { campos: string[]; conflictos: string[] } {
-  const r = completarVacios(propuesto, actual);
-  return { campos: r.campos, conflictos: r.conflictos };
-}
-
-/** Comparación estricta (tests y avisos). */
-export function distintosEstricto<D extends Record<string, unknown>>(
-  propuesto: D,
-  actual: Record<string, unknown>,
-): string[] {
-  return camposDistintos(propuesto, actual);
+/** Subconjunto de `datos` con solo las claves pedidas (campos a completar). */
+export function soloCampos<D extends Record<string, unknown>>(datos: D, campos: readonly string[]): Partial<D> {
+  const salida: Partial<D> = {};
+  for (const c of campos) if (c in datos) (salida as Record<string, unknown>)[c] = datos[c];
+  return salida;
 }

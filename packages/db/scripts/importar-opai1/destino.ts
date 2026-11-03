@@ -5,8 +5,9 @@ import type { TenantTx } from "../../src/transaccion";
 import type { EntidadImportada, EstadoDestino } from "./destino-tipos";
 import { SISTEMA_OPAI1 } from "./destino-tipos";
 
-const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion", "negocio"]);
+const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion", "programacion_recurrente"]);
 const esEntidad = (t: string): t is EntidadImportada => ENTIDADES.has(t);
+const dia = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
 const numero = (d: { toNumber(): number } | null) => (d ? d.toNumber() : null);
 
 async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
@@ -24,6 +25,11 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
           ciudad: true,
           emailDte: true,
           estado: true,
+          escrituraNotaria: true,
+          escrituraFecha: true,
+          clienteDesde: true,
+          clienteHasta: true,
+          representantes: { select: { nombre: true, rut: true }, orderBy: { id: "asc" }, take: 1 },
         },
         orderBy: { id: "asc" },
       });
@@ -55,19 +61,6 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
         },
         orderBy: { id: "asc" },
       });
-      const negocios = await tx.negocio.findMany({
-        select: {
-          id: true,
-          cuentaId: true,
-          etapaId: true,
-          titulo: true,
-          montoEstimadoMensual: true,
-          probabilidad: true,
-          cierreEstimado: true,
-          cotizacionEnviadaEn: true,
-        },
-        orderBy: { id: "asc" },
-      });
       const vinculos = await tx.contactoCuenta.findMany({
         select: {
           id: true,
@@ -83,19 +76,26 @@ async function cargarEstadoDestino(tx: TenantTx): Promise<EstadoDestino> {
         where: { sistema: SISTEMA_OPAI1 },
         select: { entidadTipo: true, idExterno: true, entidadId: true },
       });
+      const correlativosCpq = await tx.cpqCorrelativo.findMany({
+        select: { anio: true, ultimo: true },
+        orderBy: { anio: "asc" },
+      });
   return {
-    cuentas,
+    cuentas: cuentas.map(({ representantes, ...c }) => ({
+      ...c,
+      escrituraFecha: dia(c.escrituraFecha),
+      clienteDesde: dia(c.clienteDesde),
+      clienteHasta: dia(c.clienteHasta),
+      representanteNombre: representantes[0]?.nombre ?? null,
+      representanteRut: representantes[0]?.rut ?? null,
+    })),
     contactos,
     vinculos,
     instalaciones: instalaciones.map((i) => ({ ...i, lat: numero(i.lat), lng: numero(i.lng) })),
-    negocios: negocios.map((n) => ({
-      ...n,
-      cierreEstimado: n.cierreEstimado?.toISOString().slice(0, 10) ?? null,
-      cotizacionEnviadaEn: n.cotizacionEnviadaEn?.toISOString() ?? null,
-    })),
     ids: ids.flatMap((i) =>
       esEntidad(i.entidadTipo) ? [{ ...i, entidadTipo: i.entidadTipo }] : [],
     ),
+    correlativosCpq,
   };
 }
 

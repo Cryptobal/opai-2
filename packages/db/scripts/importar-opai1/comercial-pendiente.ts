@@ -1,9 +1,9 @@
 // Mapeo puro de negocios, etapas, historial y contactos del negocio (CrmPipelineStage, CrmDeal,
 // CrmDealStageHistory, CrmDealContact). PENDIENTE de que el CRM PR 1 (schema comercial) esté en main:
 // aquí no se importa nada de `comercial.prisma` (no existe en main) y el plan solo cuenta filas.
-import { mapearEtapaLegacy } from "./etapas-equivalencia";
 import { modulosDelPlan, type OpcionesPlan } from "./opciones";
 import { nombreCanonico } from "./normalizar";
+import { mapearEtapaLegacy } from "./etapas-equivalencia";
 import type {
   DatosOpai1,
   EtapaOpai1,
@@ -12,18 +12,22 @@ import type {
   NegocioOpai1,
 } from "./origen";
 
-/** Se pasa a `true` en el PR que agregue la carga comercial, cuando el CRM PR 1 esté en main. */
+/** El schema comercial está en main; el apply CRM de embudo sigue en dry-run (`comercial-plan`). */
 export const COMERCIAL_EN_MAIN: boolean = true;
 
 export const MOTIVO_PENDIENTE_CRM = "pendiente_crm_pr1";
 export const MOTIVO_MODULO_COMERCIAL_INACTIVO = "modulo_comercial_inactivo";
 export const MOTIVO_MODULO_FINANZAS_INACTIVO = "modulo_finanzas_inactivo";
+export const MOTIVO_MODULO_CPQ_INACTIVO = "modulo_cpq_inactivo";
 export const MOTIVO_PENDIENTE_MODELO_PROGRAMACION = "pendiente_modelo_finanzas_programacion";
+export const MOTIVO_EXPORT_CPQ_INCOMPLETO = "export_cpq_incompleto";
+
+export const FINANZAS_PROGRAMACION_EN_MAIN = true;
 
 export type TipoEtapa = "abierta" | "ganada" | "perdida";
 export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
 
-/** @deprecated Usar `resolverEtapaNegocio` y equivalencia por tenant. */
+/** @deprecated Usar equivalencia por tenant (`resolverEtapaNegocio`). Conservado para dry-run de etapas. */
 export function mapearEtapa(e: EtapaOpai1): EtapaMapeada | { error: "etapa_ambigua" } {
   return mapearEtapaLegacy(e);
 }
@@ -128,7 +132,7 @@ export type Pendiente = { entidad: string; filas: number; motivo: string };
 
 /** Filas que el plan no importa aún, según módulos del tenant y modelos disponibles en 2.0. */
 export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan): Pendiente[] {
-  const { comercial, finanzas } = modulosDelPlan(opciones);
+  const { comercial, finanzas, cpq } = modulosDelPlan(opciones);
   const salida: Pendiente[] = [];
 
   const conteosCrm: [string, number][] = [
@@ -143,6 +147,17 @@ export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan)
     else if (!COMERCIAL_EN_MAIN) salida.push({ entidad, filas, motivo: MOTIVO_PENDIENTE_CRM });
   }
 
+  const cotizaciones = datos.cpqQuotes.length;
+  if (cotizaciones > 0) {
+    if (!cpq) salida.push({ entidad: "cotizacion", filas: cotizaciones, motivo: MOTIVO_MODULO_CPQ_INACTIVO });
+    else
+      salida.push({
+        entidad: "cotizacion",
+        filas: cotizaciones,
+        motivo: MOTIVO_EXPORT_CPQ_INCOMPLETO,
+      });
+  }
+
   const recurrentes = datos.recurringInvoiceSchedules.length;
   if (recurrentes > 0) {
     if (!finanzas)
@@ -151,7 +166,7 @@ export function pendientesImportacion(datos: DatosOpai1, opciones: OpcionesPlan)
         filas: recurrentes,
         motivo: MOTIVO_MODULO_FINANZAS_INACTIVO,
       });
-    else
+    else if (!FINANZAS_PROGRAMACION_EN_MAIN)
       salida.push({
         entidad: "programacion_factura_recurrente",
         filas: recurrentes,

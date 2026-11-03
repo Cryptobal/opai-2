@@ -4,7 +4,10 @@ import { join } from "node:path";
 
 import { z } from "zod";
 
-import { type DatosOpai1, type LectorOrigen, validarDatos } from "./origen";
+import type { DatosOpai1 } from "./origen";
+import type { LectorOrigen } from "./origen-lectores";
+import { validarDatos } from "./origen-lectores";
+import { normalizarDatosExport } from "./origen-api-normalizar";
 
 const paginaExport = z.object({
   version: z.literal("opai1-export/v1"),
@@ -24,16 +27,21 @@ const RECURSOS: (keyof DatosOpai1)[] = [
   "dealStageHistory",
   "dealContacts",
   "recurringInvoiceSchedules",
+  "cpqQuotes",
+  "activities",
   "users",
 ];
+
+function armarDatos(acumulado: Record<string, unknown[]>): DatosOpai1 {
+  return normalizarDatosExport(validarDatos(acumulado));
+}
 
 async function fetchPagina(url: string, key: string, cursor: string | null) {
   const u = new URL(url);
   if (cursor) u.searchParams.set("cursor", cursor);
   const res = await fetch(u, { headers: { Authorization: `Bearer ${key}` } });
   if (!res.ok) throw new Error(`Exportador OPAI 1.0 respondió ${res.status}`);
-  const crudo: unknown = await res.json();
-  return paginaExport.parse(crudo);
+  return paginaExport.parse(await res.json());
 }
 
 export function lectorApiOpai1(baseUrl = process.env.OPAI1_EXPORT_URL): LectorOrigen {
@@ -44,7 +52,7 @@ export function lectorApiOpai1(baseUrl = process.env.OPAI1_EXPORT_URL): LectorOr
       const key = process.env.OPAI1_EXPORT_KEY?.trim();
       if (!url || !key) {
         throw new Error(
-          "Faltan OPAI1_EXPORT_URL y OPAI1_EXPORT_KEY en la sesión. Usa --origen fixtures:<ruta>.",
+          "Faltan OPAI1_EXPORT_URL y OPAI1_EXPORT_KEY. Usa --origen fixtures:<ruta>.",
         );
       }
       const acumulado: Record<string, unknown[]> = Object.fromEntries(RECURSOS.map((r) => [r, []]));
@@ -57,33 +65,31 @@ export function lectorApiOpai1(baseUrl = process.env.OPAI1_EXPORT_URL): LectorOr
           if (!cursor) break;
         }
       }
-      return validarDatos(acumulado);
+      return armarDatos(acumulado);
     },
   };
 }
 
-/** Une páginas JSON ficticias del contrato (tests). */
 export function lectorContratoFixtures(dir: string): LectorOrigen {
   return {
     descripcion: "fixtures-export",
     async leer() {
       const acumulado: Record<string, unknown[]> = Object.fromEntries(RECURSOS.map((r) => [r, []]));
       for (const recurso of RECURSOS) {
-        const carpeta = join(dir, recurso);
         let archivos: string[] = [];
         try {
-          archivos = readdirSync(carpeta)
+          archivos = readdirSync(join(dir, recurso))
             .filter((f) => f.endsWith(".json"))
             .sort();
         } catch {
           continue;
         }
         for (const f of archivos) {
-          const pagina = paginaExport.parse(JSON.parse(readFileSync(join(carpeta, f), "utf8")));
+          const pagina = paginaExport.parse(JSON.parse(readFileSync(join(dir, recurso, f), "utf8")));
           acumulado[recurso]?.push(...pagina.filas);
         }
       }
-      return validarDatos(acumulado);
+      return armarDatos(acumulado);
     },
   };
 }

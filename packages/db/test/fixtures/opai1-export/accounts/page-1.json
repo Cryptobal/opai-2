@@ -1,1 +1,20 @@
-{"version":"opai1-export/v1","generadoEn":"2026-11-03T12:00:00.000Z","recurso":"accounts","cursor":null,"siguiente":null,"filas":[]}
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-03T12:00:00.000Z",
+  "recurso": "accounts",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "acc-a1",
+      "name": "Comercial Ficticia SpA",
+      "legalName": "Comercial Ficticia SpA",
+      "rut": "76111111-6",
+      "emailDte": "dte@ejemplo.test",
+      "ownerId": "usr-owner-1",
+      "status": "client_active",
+      "createdAt": "2025-01-01T12:00:00.000Z",
+      "updatedAt": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}

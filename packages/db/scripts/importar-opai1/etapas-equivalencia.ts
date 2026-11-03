@@ -4,7 +4,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { EtapaOpai1, HistorialEtapaOpai1, NegocioOpai1 } from "./origen";
-import type { EtapaMapeada, TipoEtapa } from "./comercial-pendiente";
+
+export type TipoEtapa = "abierta" | "ganada" | "perdida";
+export type EtapaMapeada = { nombre: string; orden: number; tipo: TipoEtapa; exige: string[] };
 
 export const ETAPA_PERDIDO_2 = "01a1839d-4893-72c8-9ef2-ad39950c50b1";
 export const ETAPA_ADJUDICADO_2 = "01a1839d-486d-75ba-ae40-321733b40b70";

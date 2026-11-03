@@ -50,8 +50,8 @@ export function aplicarEnMemoria(plan: Plan, estado: EstadoDestino): EstadoDesti
       } else if (d.accion === "actualizar" && datos && d.destinoId) {
         const fila = tabla.find((f) => f["id"] === d.destinoId);
         if (fila) {
-          const { patch } = completarVacios(datos, fila as Record<string, unknown>);
-          Object.assign(fila, patch);
+          const { escribir } = completarVacios(datos, fila as Record<string, unknown>);
+          Object.assign(fila, escribir);
         }
         mapear(d.idOpai1, d.destinoId);
       } else if (d.accion === "omitido" && d.fusionaCon) {

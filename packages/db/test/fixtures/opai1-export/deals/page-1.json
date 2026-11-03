@@ -3,13 +3,14 @@
   "generadoEn": "2026-11-03T12:00:00.000Z",
   "recurso": "deals",
   "cursor": null,
-  "siguiente": null,
+  "siguiente": "deal-1",
   "filas": [
     {
       "id": "deal-1",
       "accountId": "acc-a1",
       "stageId": "st-3",
       "title": "Servicio bodega",
+      "status": "open",
       "createdAt": "2025-01-05T12:00:00.000Z"
     }
   ]

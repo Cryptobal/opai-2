@@ -6,7 +6,7 @@
 
 | PR | Qué | Estado | Migración |
 |---|---|---|---|
-| **CAR-157** (rama `feat/car-157-importador-v2`) | P6 Brief B3: importador v2 (equivalencia de etapas, completar vacíos, corridas `core.importaciones`, conciliar/revertir, lector export B2) | En curso | Sí, `20261103150000_core_importaciones_opai1` (**no aplicada**) |
+| **CAR-157** (rama `feat/car-157-importador-v2`) | P6 Brief B3: importador v2 (equivalencia Gard, completar vacíos, corridas `core.importaciones`, conciliar/revertir, lector export) | En curso | Sí, `20261103180000_nucleo_importaciones` (**no aplicada**) |
 | **CAR-25 · B1** (rama `claude/new-session-bgvb4t`, continúa #231) | Recurrentes con la forma real de 1.0 (`FinanceDteRecurringTemplate`): líneas con cantidad, precio CLP o UF, descuento y exento; frecuencias mensual/quincenal/semanal/anual; día -1; tipos 33/34/56/61; receptor congelado cuando 1.0 no tiene cuenta en 2.0; destinatarios por correo; importadas **pausadas y sin próxima ejecución** (no se copia `nextRunAt`) con `ultimo_periodo_1_0`; informe con `omitidas[]`. Tabla `ventas_programaciones_corridas` (UNIQUE programación + período) para el brief A4. Reemplaza a #231, que el operador cierra | En revisión | **Sí**: `20261103160000_finanzas_programacion_forma_1_0` (aditiva; etiqueta `migracion-pendiente`) |
 | #213 | Cargos y Remuneraciones: pantallas lista-ficha | **En pausa**: en conflicto con `main` y Vercel en rojo. Se retoma en la semana 3 con un merge de `main` | — |
 | #168 | Restablecer MFA y regenerar códigos de respaldo (CAR-54) | **En pausa**: en conflicto. Se retoma después de la migración | — |

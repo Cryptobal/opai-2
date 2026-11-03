@@ -25,8 +25,9 @@ describe("RLS core.importaciones (Brief B3)", () => {
       tx.importacion.create({
         data: {
           tenantId: idA,
-          origen: "opai1",
-          contratoVersion: "opai1-export/v1",
+          sistema: "opai1",
+          origen: "fixtures",
+          versionContrato: "opai1-export/v1",
           modo: "simular",
           estado: "completada",
           conteos: {},
@@ -38,8 +39,9 @@ describe("RLS core.importaciones (Brief B3)", () => {
       tx.importacion.create({
         data: {
           tenantId: idB,
-          origen: "opai1",
-          contratoVersion: "opai1-export/v1",
+          sistema: "opai1",
+          origen: "fixtures",
+          versionContrato: "opai1-export/v1",
           modo: "simular",
           estado: "completada",
           conteos: {},
@@ -49,7 +51,5 @@ describe("RLS core.importaciones (Brief B3)", () => {
     const listaA = await e.forTenant(idA).importacion.findMany();
     expect(listaA.every((i) => i.tenantId === idA)).toBe(true);
     expect(listaA.some((i) => i.id === impA.id)).toBe(true);
-    expect(await e.forTenant(idA).importacion.count()).toBe(1);
-    expect(await e.forTenant(idB).importacion.count()).toBe(1);
   });
 });

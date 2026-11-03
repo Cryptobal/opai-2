@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { campoVacio, completarVacios } from "../../scripts/importar-opai1/completar-vacios";
+import { conciliar } from "../../scripts/importar-opai1/conciliar";
 import { bloquearAplicarPorEtapas } from "../../scripts/importar-opai1/negocios-plan";
-import { conciliar } from "../../scripts/importar-opai1/corrida/conciliar";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
 import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
 import { aplicarEnMemoria, fixture } from "./memoria";
@@ -14,7 +14,7 @@ describe("importador v2", () => {
       { nombre: "Nuevo", giro: null, rut: "1-9" },
       { nombre: "Viejo", giro: "Servicios", rut: null },
     );
-    expect(r.patch).toEqual({ rut: "1-9" });
+    expect(r.escribir).toEqual({ rut: "1-9" });
     expect(r.conflictos).toEqual(["nombre"]);
   });
 
@@ -42,6 +42,12 @@ describe("importador v2", () => {
       ciudad: null,
       emailDte: null,
       estado: "prospecto",
+      escrituraNotaria: null,
+      escrituraFecha: null,
+      clienteDesde: null,
+      clienteHasta: null,
+      representanteNombre: null,
+      representanteRut: null,
     });
     destino.ids.push({ entidadTipo: "cuenta", idExterno: "acc-a1", entidadId: "c-1" });
     const datos = fixture();

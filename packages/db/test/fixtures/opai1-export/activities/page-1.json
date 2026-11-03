@@ -1,0 +1,19 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-03T12:00:00.000Z",
+  "recurso": "activities",
+  "cursor": null,
+  "siguiente": "nota:n-1",
+  "filas": [
+    {
+      "id": "n-1",
+      "tipo": "nota",
+      "negocioId": "deal-1",
+      "cuentaId": "acc-a1",
+      "autor": "usr-1",
+      "fecha": "2026-01-02T12:00:00.000Z",
+      "texto": "Primera",
+      "estado": "ok"
+    }
+  ]
+}

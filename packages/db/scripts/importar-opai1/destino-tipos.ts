@@ -2,7 +2,16 @@
 
 export const SISTEMA_OPAI1 = "opai1";
 
-export type EntidadImportada = "cuenta" | "contacto" | "instalacion" | "negocio";
+export type EntidadImportada =
+  | "cuenta"
+  | "contacto"
+  | "instalacion"
+  | "programacion_recurrente"
+  | "etapa"
+  | "negocio"
+  | "negocio_etapa"
+  | "negocio_contacto"
+  | "cotizacion";
 
 export type CuentaDestino = {
   id: string;
@@ -15,6 +24,13 @@ export type CuentaDestino = {
   ciudad: string | null;
   emailDte: string | null;
   estado: string;
+  escrituraNotaria: string | null;
+  /** AAAA-MM-DD. */
+  escrituraFecha: string | null;
+  clienteDesde: string | null;
+  clienteHasta: string | null;
+  representanteNombre: string | null;
+  representanteRut: string | null;
 };
 
 export type ContactoDestino = {
@@ -50,17 +66,6 @@ export type InstalacionDestino = {
   estado: string;
 };
 
-export type NegocioDestino = {
-  id: string;
-  cuentaId: string;
-  etapaId: string;
-  titulo: string;
-  montoEstimadoMensual: number | null;
-  probabilidad: number;
-  cierreEstimado: string | null;
-  cotizacionEnviadaEn: string | null;
-};
-
 export type IdExternoDestino = {
   entidadTipo: EntidadImportada;
   idExterno: string;
@@ -72,8 +77,8 @@ export type EstadoDestino = {
   contactos: ContactoDestino[];
   vinculos: VinculoDestino[];
   instalaciones: InstalacionDestino[];
-  negocios: NegocioDestino[];
   ids: IdExternoDestino[];
+  correlativosCpq: { anio: number; ultimo: number }[];
 };
 
 export const estadoVacio = (): EstadoDestino => ({
@@ -81,8 +86,8 @@ export const estadoVacio = (): EstadoDestino => ({
   contactos: [],
   vinculos: [],
   instalaciones: [],
-  negocios: [],
   ids: [],
+  correlativosCpq: [],
 });
 
 /** Defaults nulos para tests en memoria. */
@@ -98,6 +103,12 @@ export function cuentaDestino(
     ciudad: null,
     emailDte: null,
     estado: "prospecto",
+    escrituraNotaria: null,
+    escrituraFecha: null,
+    clienteDesde: null,
+    clienteHasta: null,
+    representanteNombre: null,
+    representanteRut: null,
     ...parcial,
   };
 }

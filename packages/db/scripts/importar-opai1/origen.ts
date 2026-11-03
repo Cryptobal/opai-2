@@ -1,8 +1,16 @@
 // Origen de la importación desde OPAI 1.0 (Brief 07): filas de 1.0 validadas con Zod en el borde.
 // Los nombres de campo siguen el schema de 1.0 (`extraccion/comercial-y-cpq.md`). Solo lectura.
-import { readFile } from "node:fs/promises";
-
 import { z } from "zod";
+
+import { cotizacionOpai1, programacionRecurrenteOpai1 } from "./origen-recurrentes-cpq";
+
+export {
+  cotizacionOpai1,
+  lineaRecurrenteOpai1,
+  programacionRecurrenteOpai1,
+  referenciaRecurrenteOpai1,
+} from "./origen-recurrentes-cpq";
+export type { CotizacionOpai1, ProgramacionRecurrenteOpai1 } from "./origen-recurrentes-cpq";
 
 const fecha = z.iso.datetime({ offset: true });
 const texto = z.string().nullish();
@@ -21,19 +29,19 @@ export const cuentaOpai1 = z.object({
   address: texto,
   commune: texto,
   city: texto,
-  /** Correo receptor DTE en la cuenta (no sustituye contactos con rol facturación). */
+  /** En el export B2: último DTE aceptado de la cuenta; no sustituye contactos con rol facturación. */
   emailDte: texto,
-  status: z.enum(["prospect", "client_active", "client_inactive"]).nullish(),
+  /** `prospect | client_active | client_inactive`; si falta se usa `type` / `isActive` heredados. */
+  status: texto,
   type: texto,
   isActive: z.boolean().nullish(),
-  createdAt: fecha,
-  updatedAt: fecha,
-});
-
-/** Programación de facturas recurrentes de 1.0 (Finanzas). Se importa solo con módulo Finanzas y modelo en 2.0. */
-export const programacionRecurrenteOpai1 = z.object({
-  id: z.string().min(1),
-  accountId: z.string().min(1),
+  legalRepresentativeName: texto,
+  legalRepresentativeRut: texto,
+  notaryName: texto,
+  notaryDate: texto,
+  ownerId: texto,
+  startDate: texto,
+  endDate: texto,
   createdAt: fecha,
   updatedAt: fecha,
 });
@@ -67,7 +75,8 @@ export const instalacionOpai1 = z.object({
   lat: z.number().nullish(),
   lng: z.number().nullish(),
   activatedByDealId: texto,
-  status: z.enum(["prospect", "active", "inactive"]).nullish(),
+  /** `prospect | active | inactive`. */
+  status: texto,
   createdAt: fecha,
   updatedAt: fecha,
 });
@@ -89,11 +98,23 @@ export const negocioOpai1 = z.object({
   installationName: texto,
   lostReasonCategory: texto,
   status: z.enum(["open", "won", "lost", "closed"]).nullish(),
+  ownerId: texto,
   amount: z.number().int().nullish(),
   probability: z.number().int().min(0).max(100).nullish(),
   expectedCloseDate: z.string().nullish(),
   proposalSentAt: fecha.nullish(),
   createdAt: fecha,
+});
+
+export const actividadOpai1 = z.object({
+  id: z.string().min(1),
+  tipo: z.enum(["nota", "tarea", "reunion"]),
+  negocioId: texto,
+  cuentaId: texto,
+  autor: texto,
+  fecha: fecha,
+  texto: texto,
+  estado: texto,
 });
 
 export const historialEtapaOpai1 = z.object({
@@ -125,7 +146,8 @@ export const datosOpai1 = z.object({
   dealStageHistory: z.array(historialEtapaOpai1).default([]),
   dealContacts: z.array(negocioContactoOpai1).default([]),
   recurringInvoiceSchedules: z.array(programacionRecurrenteOpai1).default([]),
-  /** Usuarios de 1.0 referenciados en el JSON; se resuelven por correo a membresías del tenant. */
+  cpqQuotes: z.array(cotizacionOpai1).default([]),
+  activities: z.array(actividadOpai1).default([]),
   users: z.array(usuarioOpai1).default([]),
 });
 
@@ -134,41 +156,12 @@ export type ContactoOpai1 = z.infer<typeof contactoOpai1>;
 export type InstalacionOpai1 = z.infer<typeof instalacionOpai1>;
 export type EtapaOpai1 = z.infer<typeof etapaOpai1>;
 export type NegocioOpai1 = z.infer<typeof negocioOpai1>;
+export type ActividadOpai1 = z.infer<typeof actividadOpai1>;
 export type HistorialEtapaOpai1 = z.infer<typeof historialEtapaOpai1>;
 export type NegocioContactoOpai1 = z.infer<typeof negocioContactoOpai1>;
-export type ProgramacionRecurrenteOpai1 = z.infer<typeof programacionRecurrenteOpai1>;
 export type UsuarioOpai1 = z.infer<typeof usuarioOpai1>;
 export type DatosOpai1 = z.infer<typeof datosOpai1>;
 
-/** Fuente de las filas de 1.0. La simulación y la carga real usan la misma interfaz. */
-export interface LectorOrigen {
-  readonly descripcion: string;
-  leer(): Promise<DatosOpai1>;
-}
-
-/** Valida un objeto ya parseado. El error nombra solo rutas y tipos, nunca valores (Ley 21.719). */
-export function validarDatos(crudo: unknown): DatosOpai1 {
-  const r = datosOpai1.safeParse(crudo);
-  if (r.success) return r.data;
-  const rutas = r.error.issues.slice(0, 10).map((i) => `${i.path.join(".")} (${i.code})`);
-  throw new Error(`Origen inválido: ${rutas.join("; ")}`);
-}
-
-/** Fixtures JSON locales (datos ficticios). */
-export function lectorFixtures(ruta: string): LectorOrigen {
-  return {
-    descripcion: "fixtures",
-    async leer() {
-      let crudo: unknown;
-      try {
-        crudo = JSON.parse(await readFile(ruta, "utf8"));
-      } catch {
-        // El mensaje de JSON.parse puede citar un trozo del archivo: no se repite en el log.
-        throw new Error("JSON inválido en el origen.");
-      }
-      return validarDatos(crudo);
-    },
-  };
-}
-
+export type { LectorOrigen } from "./origen-lectores";
 export { lectorApiOpai1, lectorContratoFixtures } from "./origen-api";
+export { lectorFixtures, validarDatos } from "./origen-lectores";

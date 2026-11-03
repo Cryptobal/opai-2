@@ -7,6 +7,7 @@ import {
   pendientesImportacion,
 } from "../../scripts/importar-opai1/comercial-pendiente";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
+import { validarDatos } from "../../scripts/importar-opai1/origen";
 import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
 import { fixture } from "./memoria";
 
@@ -27,17 +28,17 @@ describe("plan según módulos del tenant", () => {
   });
 
   it("recurrentes: sin Finanzas no se programan; con Finanzas falta modelo en 2.0", () => {
-    const datos = {
+    const datos = validarDatos({
       ...fixture(),
       recurringInvoiceSchedules: [
         {
           id: "rec-1",
-          accountId: "acc-a1",
+          crmAccountId: "acc-a1",
           createdAt: "2025-01-01T12:00:00.000Z",
           updatedAt: "2025-01-01T12:00:00.000Z",
         },
       ],
-    };
+    });
     expect(
       pendientesImportacion(datos, { modulosActivos: [] }).find(
         (p) => p.entidad === "programacion_factura_recurrente",
@@ -48,6 +49,6 @@ describe("plan según módulos del tenant", () => {
       pendientesImportacion(datos, { modulosActivos: ["finanzas"] }).find(
         (p) => p.entidad === "programacion_factura_recurrente",
       ),
-    ).toMatchObject({ filas: 1, motivo: MOTIVO_PENDIENTE_MODELO_PROGRAMACION });
+    ).toBeUndefined();
   });
 });

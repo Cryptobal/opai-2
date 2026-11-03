@@ -1,9 +1,11 @@
 // Reporte de la simulación: solo conteos, motivos, nombres de campos e IDs (de 1.0 y de 2.0). Nunca
 // nombres, RUT, correos ni teléfonos (Ley 21.719): `datos` del plan no se copia.
 import type { Pendiente } from "./comercial-pendiente";
+import type { CorrelativoCpqPropuesto } from "./correlativos-cpq";
 import type { Accion, Decision, Propuesta } from "./comun";
 import type { EntidadImportada } from "./destino-tipos";
 import type { EtiquetaPropuesta, Plan } from "./plan";
+import type { ResumenDestinatarios } from "./recurrentes";
 import type { ResumenTributario } from "./tributario-plan";
 
 const ACCIONES: Accion[] = ["crear", "actualizar", "sin_cambios", "conflicto", "omitido"];
@@ -23,11 +25,15 @@ export type Reporte = {
   modulosActivos: readonly string[];
   conteos: Record<EntidadImportada, Record<Accion, number>>;
   detalle: GrupoDetalle[];
+  /** Filas que no entran, con su motivo nombrado (solo ids de 1.0). */
+  omitidas: { entidad: EntidadImportada; motivo: string; idsOpai1: string[] }[];
   propuestasFusion: Propuesta[];
   avisos: { codigo: string; idsOpai1: string[] }[];
   etiquetas: EtiquetaPropuesta[];
   pendientes: Pendiente[];
   tributario: ResumenTributario;
+  destinatarios: ResumenDestinatarios;
+  correlativosCpq: CorrelativoCpqPropuesto[];
   etapasSinMapear: string[];
   negociosIncompletos: string[];
   importacionId: string | null;
@@ -65,7 +71,27 @@ function detalle(decisiones: readonly Decision<unknown>[]): GrupoDetalle[] {
   return [...grupos.values()];
 }
 
+function omitidasDe(grupos: readonly GrupoDetalle[]): Reporte["omitidas"] {
+  return grupos
+    .filter((g) => g.accion === "omitido")
+    .map(({ entidad, motivo, idsOpai1 }) => ({ entidad, motivo, idsOpai1 }));
+}
+
 export function construirReporte(plan: Plan, tenant: string): Reporte {
+  const grupos = [
+    ...detalle(plan.cuentas),
+    ...detalle(plan.contactos),
+    ...detalle(plan.instalaciones),
+    ...detalle(plan.programaciones),
+    ...detalle(plan.comercial.etapas),
+    ...(plan.negocios.length > 0
+      ? detalle(plan.negocios)
+      : detalle(plan.comercial.negocios)),
+    ...detalle(plan.comercial.historial),
+    ...detalle(plan.comercial.contactosNegocio),
+    ...detalle(plan.comercial.cotizaciones),
+    ...(plan.negocios.length > 0 ? detalle(plan.negocios) : detalle(plan.comercial.negocios)),
+  ];
   const avisos = new Map<string, string[]>();
   for (const a of plan.avisos) avisos.set(a.codigo, [...(avisos.get(a.codigo) ?? []), a.idOpai1]);
   return {
@@ -77,19 +103,23 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
       cuenta: conteo(plan.cuentas),
       contacto: conteo(plan.contactos),
       instalacion: conteo(plan.instalaciones),
-      negocio: conteo(plan.negocios),
+      programacion_recurrente: conteo(plan.programaciones),
+      etapa: conteo(plan.comercial.etapas),
+      negocio:
+        plan.negocios.length > 0 ? conteo(plan.negocios) : conteo(plan.comercial.negocios),
+      negocio_etapa: conteo(plan.comercial.historial),
+      negocio_contacto: conteo(plan.comercial.contactosNegocio),
+      cotizacion: conteo(plan.comercial.cotizaciones),
     },
-    detalle: [
-      ...detalle(plan.cuentas),
-      ...detalle(plan.contactos),
-      ...detalle(plan.instalaciones),
-      ...detalle(plan.negocios),
-    ],
+    detalle: grupos,
+    omitidas: omitidasDe(grupos),
     propuestasFusion: plan.propuestas,
     avisos: [...avisos].map(([codigo, idsOpai1]) => ({ codigo, idsOpai1 })),
     etiquetas: plan.etiquetas,
     pendientes: plan.pendientes,
     tributario: plan.tributario,
+    destinatarios: plan.destinatarios,
+    correlativosCpq: plan.correlativosCpq,
     etapasSinMapear: plan.etapasSinMapear,
     negociosIncompletos: plan.negociosIncompletos,
     importacionId: plan.importacionId,
@@ -111,13 +141,16 @@ export function resumenLegible(r: Reporte): string {
   if (r.etiquetas.length > 0)
     lineas.push(`  Etiquetas por confirmar (rubro/segmento/tamaño): ${r.etiquetas.length}`);
   for (const p of r.pendientes) lineas.push(`  Pendiente ${p.entidad} (${p.motivo}): ${p.filas}`);
-  if (r.etapasSinMapear.length > 0)
-    lineas.push(`  Etapas sin mapear en historial: ${r.etapasSinMapear.length}`);
-  if (r.negociosIncompletos.length > 0)
-    lineas.push(`  Negocios incompletos (aviso): ${r.negociosIncompletos.length}`);
-  if (r.importacionId) lineas.push(`  Corrida: ${r.importacionId}`);
   lineas.push(
     `  Tributario: ${r.tributario.listasParaFacturar} listas · ${r.tributario.incompletas} incompletas (de ${r.tributario.cuentasConsideradas} cuentas)`,
   );
+  lineas.push(
+    `  Destinatarios programación: ${r.destinatarios.asignados} asignados · ${r.destinatarios.omitidos} omitidos (de ${r.destinatarios.entrantes} en origen)`,
+  );
+  for (const c of r.correlativosCpq) {
+    lineas.push(
+      `  CPQ ${c.anio}: último export ${c.ultimoEnExport} · fijaría ${c.fijariaUltimo}${c.omitido ? ` (${c.motivo})` : ""}`,
+    );
+  }
   return lineas.join("\n");
 }

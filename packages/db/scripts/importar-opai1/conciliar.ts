@@ -1,7 +1,7 @@
-// Conciliación de lectura: conteos 1.0 vs importado (sin datos personales).
-import type { Plan } from "../plan";
-import type { DatosOpai1 } from "../origen";
-import type { Accion } from "../comun";
+// Conciliación de lectura: conteos 1.0 vs plan (sin datos personales).
+import type { Accion } from "./comun";
+import type { Plan } from "./plan";
+import type { DatosOpai1 } from "./origen";
 
 export type ResumenEntidad = {
   entidad: string;
@@ -19,20 +19,20 @@ export type ResumenConciliacion = {
   cuentasConRutDestino: number;
 };
 
-const contarAccion = (acciones: readonly { accion: Accion }[], a: Accion) =>
-  acciones.filter((d) => d.accion === a).length;
+const contar = (decisiones: readonly { accion: Accion }[], a: Accion) =>
+  decisiones.filter((d) => d.accion === a).length;
 
 export function conciliar(origen: DatosOpai1, plan: Plan): ResumenConciliacion {
   const bloques: [string, number, readonly { accion: Accion }[]][] = [
     ["cuenta", origen.accounts.length, plan.cuentas],
     ["contacto", origen.contacts.length, plan.contactos],
     ["instalacion", origen.installations.length, plan.instalaciones],
-    ["negocio", origen.deals.length, plan.negocios ?? []],
+    ["programacion_recurrente", origen.recurringInvoiceSchedules.length, plan.programaciones],
+    ["negocio", origen.deals.length, plan.negocios],
   ];
   const entidades = bloques.map(([entidad, enOrigen, decisiones]) => {
-    const importados = contarAccion(decisiones, "crear") + contarAccion(decisiones, "actualizar");
-    const omitidos =
-      contarAccion(decisiones, "omitido") + contarAccion(decisiones, "conflicto");
+    const importados = contar(decisiones, "crear") + contar(decisiones, "actualizar");
+    const omitidos = contar(decisiones, "omitido") + contar(decisiones, "conflicto");
     return { entidad, enOrigen, importados, omitidos, diferencia: enOrigen - importados - omitidos };
   });
   const abiertos = origen.deals.filter((d) => (d.status ?? "open") === "open");
