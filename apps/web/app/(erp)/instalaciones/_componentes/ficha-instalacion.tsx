@@ -5,48 +5,17 @@ import { Badge, DetailScreen, Enlace, type EstadoPantalla } from "@opai/ds";
 
 import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
-import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
+import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
 import { fecha } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
+import { accionesInstalacion } from "./acciones-instalacion";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 export type TabInstalacion =
   "resumen" | "puestos" | "sueldo" | "negocios" | "rondas" | "documentos" | "actividad";
-
-function acciones(i: InstalacionDetalle): AccionEntidad[] {
-  const otro = i.estado === "activa" ? "inactiva" : "activa";
-  return [
-    { id: "editar", etiqueta: "Editar", parametro: { clave: "editar", valor: "1" } },
-    {
-      id: "estado",
-      etiqueta: otro === "activa" ? "Activar" : "Desactivar",
-      capacidad: {
-        id: "core.instalaciones.set_estado",
-        input: { id: i.id, estado: otro },
-        exito: "Estado actualizado",
-      },
-    },
-    {
-      id: "archivar",
-      etiqueta: "Archivar",
-      peligro: true,
-      capacidad: {
-        id: "core.instalaciones.archive",
-        input: { id: i.id },
-        exito: "Instalación archivada",
-      },
-      confirmar: {
-        titulo: `Archivar ${i.nombre}`,
-        descripcion: "Exige que no tenga puestos activos. Sus datos y documentos se conservan.",
-        boton: "Archivar",
-        peligro: true,
-      },
-    },
-  ];
-}
 
 /** Ficha de instalación (07/08): estado y vigencia, nombre, cuenta; tabs con "Personas" deshabilitada. */
 export function FichaInstalacion(p: {
@@ -93,7 +62,15 @@ export function FichaInstalacion(p: {
                 </Enlace>
               ),
               acciones: (
-                <AccionesEntidad etiqueta="Acciones de la instalación" acciones={acciones(i)} />
+                <AccionesEntidad
+                  etiqueta="Acciones de la instalación"
+                  acciones={accionesInstalacion(i)}
+                  agente={{
+                    contexto: { tipo: "instalacion", id: i.id },
+                    nombre: i.nombre,
+                    articulo: "esta instalación",
+                  }}
+                />
               ),
             }
           : {})}
