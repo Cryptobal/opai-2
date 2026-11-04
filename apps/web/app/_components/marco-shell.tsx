@@ -159,6 +159,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
             epoca={datos.epoca}
             acciones={datos.acciones ?? []}
             nav={datos.nav}
+            agente={Boolean(datos.agente)}
           />
         ) : null}
         {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}

@@ -25,6 +25,15 @@ export const manifest = defineModule({
         permiso: "agente:configurar",
         soloPersonas: true,
       }),
+    retencionConversacionesDias: z.number().int().min(7).max(365).default(90).meta({
+      etiqueta: "Retención de conversaciones (días)",
+      ayuda:
+        "Las conversaciones del agente sin actividad por más de este plazo se borran solas (Ley 21.719). Cada persona también puede borrar las suyas.",
+      ambito: "tenant",
+      permiso: "agente:configurar",
+      soloPersonas: true,
+      control: "numero",
+    }),
   }),
   eventos: [],
   capacidades,

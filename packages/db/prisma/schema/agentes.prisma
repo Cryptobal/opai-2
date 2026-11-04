@@ -385,6 +385,8 @@ model AgenteConversacion {
   contextoId      String?   @map("contexto_id") @db.Uuid
   /// Lista ordenada de `{ rol: "usuario" | "agente", texto, pasos?, fecha }`; tope en la capacidad.
   mensajes        Json      @default("[]")
+  /// Control de concurrencia optimista: cada guardado sube la versión y solo escribe si no cambió.
+  version         Int       @default(0)
   archivadaEn     DateTime? @map("archivada_en") @db.Timestamptz(6)
   ultimaActividad DateTime  @default(now()) @map("ultima_actividad") @db.Timestamptz(6)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -393,6 +395,7 @@ model AgenteConversacion {
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, userId, ultimaActividad(sort: Desc)])
+  @@index([tenantId, ultimaActividad])
   @@map("agente_conversaciones")
   @@schema("core")
 }

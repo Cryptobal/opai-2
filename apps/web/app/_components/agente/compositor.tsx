@@ -11,11 +11,14 @@ const MAXIMO = 6_000;
 export function Compositor({
   onEnviar,
   deshabilitado,
+  inicial = "",
 }: {
   onEnviar: (texto: string) => void;
   deshabilitado: boolean;
+  /** Texto con el que arranca (⌘K → «Preguntar a OPAI»). */
+  inicial?: string;
 }) {
-  const [texto, setTexto] = useState("");
+  const [texto, setTexto] = useState(inicial);
   const enviar = () => {
     const t = texto.trim();
     if (!t || deshabilitado) return;

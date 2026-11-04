@@ -1,38 +1,57 @@
 "use client";
 
-import { History, Plus, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { History, Plus, Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { Banda, Button, Empty, PanelLateral, Segmentado, Select, Skeleton } from "@opai/ds";
+import { Banda, Button, Empty, PanelLateral, Skeleton } from "@opai/ds";
 
+import { BarraModelo } from "./barra-modelo";
 import { Compositor } from "./compositor";
 import { HiloAgente } from "./hilo-agente";
 import { HistorialAgente } from "./historial-agente";
-import type { Modelo } from "./tipos";
+import { MenuDelHilo } from "./menu-del-hilo";
+import type { SolicitudAgente } from "./abrir-agente";
 import { useAgente } from "./use-agente";
 import { useHistorial } from "./use-historial";
 
-const CLASE = { economica: "económica", estandar: "estándar", potente: "potente" } as const;
-const clave = (m: Modelo) => `${m.proveedor}::${m.modelo}`;
-
 /**
- * Panel del agente interno (CAR-120, PR 5a). Cliente de las capacidades `agente.*`: prepara un plan
- * con vistas previas y solo ejecuta lo que la persona confirma aquí. Cada turno queda guardado en
- * su conversación privada (PR 5b); desde el historial se retoma o se borra.
+ * Panel del agente interno (CAR-120). Cliente de las capacidades `agente.*`: prepara un plan con
+ * vistas previas y solo ejecuta lo que la persona confirma aquí. Cada turno queda guardado en su
+ * conversación privada (5b); desde el historial se retoma, y aquí se renombra, archiva o borra (5c).
  */
 export function PanelAgente({
   abierto,
   onCerrar,
   portal,
+  solicitud,
 }: {
   abierto: boolean;
   onCerrar: () => void;
   portal: string;
+  /** Pedido externo (historial, ⌘K, ficha, URL); `n` cambia con cada pedido. */
+  solicitud: (SolicitudAgente & { n: number }) | null;
 }) {
   const a = useAgente(portal, abierto);
-  const [verHistorial, setVerHistorial] = useState(false);
+  // El historial se muestra hasta que llega un pedido nuevo (retomar o preguntar por una ficha).
+  const [histEn, setHistEn] = useState<number | null>(null);
+  const verHistorial = histEn === (solicitud?.n ?? 0);
+  const setVerHistorial = (v: boolean | ((x: boolean) => boolean)) =>
+    setHistEn((typeof v === "function" ? v(verHistorial) : v) ? (solicitud?.n ?? 0) : null);
   const h = useHistorial(portal, abierto && verHistorial);
+  const { cargar, sobreFicha } = a;
+  const { abrir } = h;
+  useEffect(() => {
+    if (!solicitud) return;
+    const { conversacionId, contexto, etiqueta } = solicitud;
+    if (conversacionId) {
+      void abrir(conversacionId).then((r) => r && cargar(conversacionId, r.hilo, r.meta));
+    } else if (contexto) sobreFicha({ contexto, etiqueta });
+  }, [solicitud, abrir, cargar, sobreFicha]);
   const sinModelos = a.modelos !== null && a.modelos.length === 0;
+  const volver = () => {
+    a.nueva();
+    setVerHistorial(false);
+  };
   return (
     <PanelLateral
       abierto={abierto}
@@ -41,6 +60,7 @@ export function PanelAgente({
       retener={a.hayPlanPendiente}
       acciones={
         <>
+          {verHistorial ? null : <MenuDelHilo a={a} h={h} />}
           <Button
             variant="ghost"
             aria-label={verHistorial ? "Volver a la conversación" : "Historial"}
@@ -56,10 +76,7 @@ export function PanelAgente({
             aria-label="Nueva conversación"
             className="size-11 p-0"
             disabled={a.hayPlanPendiente}
-            onClick={() => {
-              a.nueva();
-              setVerHistorial(false);
-            }}
+            onClick={volver}
           >
             <Plus className="size-5" aria-hidden />
           </Button>
@@ -67,34 +84,13 @@ export function PanelAgente({
       }
     >
       {a.modelos && a.modelos.length > 0 ? (
-        <div className="flex flex-none flex-col gap-2 border-b border-border p-3">
-          <Select
-            aria-label="Modelo"
-            valor={a.modelo ? clave(a.modelo) : undefined}
-            onCambiar={(v) => a.setModelo(a.modelos?.find((m) => clave(m) === v) ?? null)}
-            opciones={a.modelos.map((m) => ({
-              valor: clave(m),
-              etiqueta: m.modelo,
-              descripcion: CLASE[m.clase],
-            }))}
-          />
-          <Segmentado
-            etiqueta="Nivel de confirmación"
-            activa={a.nivel}
-            opciones={[
-              {
-                id: "paso_a_paso",
-                etiqueta: "Paso a paso",
-                onClick: () => a.setNivel("paso_a_paso"),
-              },
-              {
-                id: "aprobar_todo",
-                etiqueta: "Aprobar todo",
-                onClick: () => a.setNivel("aprobar_todo"),
-              },
-            ]}
-          />
-        </div>
+        <BarraModelo
+          modelos={a.modelos}
+          modelo={a.modelo}
+          nivel={a.nivel}
+          onModelo={a.setModelo}
+          onNivel={a.setNivel}
+        />
       ) : null}
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3" aria-live="polite">
         {verHistorial ? (
@@ -106,9 +102,9 @@ export function PanelAgente({
               void h.borrar(id);
             }}
             onAbrir={(id) =>
-              void h.abrir(id).then((hilo) => {
-                if (!hilo) return;
-                a.cargar(id, hilo);
+              void h.abrir(id).then((r) => {
+                if (!r) return;
+                a.cargar(id, r.hilo, r.meta);
                 setVerHistorial(false);
               })
             }
@@ -125,17 +121,35 @@ export function PanelAgente({
         ) : a.mensajes.length === 0 ? (
           <Empty
             icono={<Sparkles className="size-5" aria-hidden />}
-            titulo="¿En qué te ayudo?"
+            titulo={a.ficha ? "Pregúntame sobre esta ficha" : "¿En qué te ayudo?"}
             descripcion="Pregunta por tus datos o pide un cambio. Antes de escribir algo, te muestro el plan para que lo confirmes."
           />
         ) : (
           <HiloAgente mensajes={a.mensajes} onDecidir={(id, ok) => void a.decidir(id, ok)} />
         )}
       </div>
+      {a.ficha && !verHistorial ? (
+        <p className="t-caption flex flex-none items-center justify-between gap-2 border-t border-border px-3 py-1">
+          <span className="truncate">Sobre {a.ficha.etiqueta ?? "esta ficha"}</span>
+          <Button
+            variant="ghost"
+            aria-label="Quitar la ficha"
+            className="size-11 p-0"
+            onClick={a.quitarFicha}
+          >
+            <X className="size-4" aria-hidden />
+          </Button>
+        </p>
+      ) : null}
       {typeof navigator !== "undefined" && !navigator.onLine ? (
         <Banda flotante={false} mensaje="Sin conexión. Tu borrador se conserva." />
       ) : null}
-      <Compositor onEnviar={(t) => void a.enviar(t)} deshabilitado={!a.modelo || a.trabajando} />
+      <Compositor
+        key={solicitud?.n ?? 0}
+        inicial={solicitud?.borrador ?? ""}
+        onEnviar={(t) => void a.enviar(t)}
+        deshabilitado={!a.modelo || a.trabajando}
+      />
       <p className="t-caption flex-none px-3 pb-2 text-center">
         {a.modelo ? `OPAI usa ${a.modelo.modelo}. ` : ""}Revisa el plan antes de confirmar.
       </p>

@@ -82,7 +82,15 @@ export function FichaNegocio(p: {
                       {p.gestiona ? <Cierre n={n} base={base} /> : null}
                     </span>
                     {p.gestiona ? (
-                      <AccionesEntidad etiqueta="Más acciones" acciones={acciones(n)} />
+                      <AccionesEntidad
+                        etiqueta="Más acciones"
+                        acciones={acciones(n)}
+                        agente={{
+                          contexto: { tipo: "negocio", id: n.id },
+                          nombre: n.titulo,
+                          articulo: "este negocio",
+                        }}
+                      />
                     ) : null}
                   </>
                 ) : undefined,
