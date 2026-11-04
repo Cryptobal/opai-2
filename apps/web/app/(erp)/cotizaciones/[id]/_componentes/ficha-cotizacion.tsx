@@ -148,8 +148,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
         cotizacionId={d.cotizacion.id}
         codigo={d.cotizacion.codigo}
         versionNumero={d.version.numero}
-        cuentaId={d.cuentaId}
-        negocioId={d.cotizacion.negocioId}
+        cuentaId={d.cuentaId} negocioId={d.cotizacion.negocioId}
         requiereAprobacion={Boolean(c.requiereAprobacion)}
         estadoVersion={d.version.estado}
         enviada={d.version.estado === "enviada" || d.version.estado === "aceptada"}

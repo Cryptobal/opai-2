@@ -1,7 +1,7 @@
 import { cache } from "react";
 
 import { cargarOpcionesEtiqueta, filtroEtiquetaDe } from "@/app/_components/etiquetas/opciones";
-import type { EtiquetaDeFila } from "@/lib/tipos-maestros";
+import type { EtiquetaDeFila } from "@/lib/tipos-etiquetas";
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid, requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { leerParametros } from "@/lib/parametros";
