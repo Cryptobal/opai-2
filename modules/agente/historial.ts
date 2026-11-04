@@ -18,13 +18,15 @@ const salidaSchema = z.object({
     .describe("Entidad afectada, solo si la persona puede leer su ficha; sin datos personales."),
 });
 
-// Estado de la aprobación humana → resultado mostrado. `aprobada` se lee del resultado guardado.
+// Estado de la aprobación humana → resultado mostrado. `aprobada` guarda el envoltorio de
+// `executeCapability` ({ok:true,data} o {ok:false,error}); solo `ok === true` cuenta como hecho, y un
+// resultado ausente o ilegible (ejecución interrumpida) se muestra conservadoramente como «error».
 function resultadoDeAprobacion(estado: string, resultado: unknown): Resultado {
   if (estado === "pendiente") return "pendiente";
   if (estado === "rechazada") return "rechazado";
   if (estado === "vencida") return "vencido";
-  const ok = resultado && typeof resultado === "object" && "ok" in resultado ? resultado.ok : true;
-  return ok === false ? "error" : "ok";
+  const ok = !!resultado && typeof resultado === "object" && "ok" in resultado && resultado.ok;
+  return ok === true ? "ok" : "error";
 }
 
 export const historialList = defineCapability({
