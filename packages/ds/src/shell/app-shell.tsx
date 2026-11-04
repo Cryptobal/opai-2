@@ -30,6 +30,8 @@ export type AppShellProps = ComunesBarra & {
   reintentarFijados?: () => void;
   onFijar?: (item: NavItem) => void;
   onDesfijar?: (href: string) => void;
+  /** Recientes del navegador para el menú «Más» del teléfono; se leen al abrirlo. */
+  recientes?: () => readonly ItemFijado[];
   areaAbierta?: string | null;
   onAreaAbierta?: (area: string) => void;
   children: ReactNode;
@@ -104,6 +106,8 @@ export function AppShell(props: AppShellProps) {
         {...(props.errorFijados ? { errorFijados: true } : {})}
         {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
         {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
+        {...(props.onBuscar ? { onBuscar: props.onBuscar } : {})}
+        {...(props.recientes ? { recientes: props.recientes } : {})}
         {...(props.menuUsuario ? { extras: props.menuUsuario } : {})}
         {...(onNavegar ? { onNavegar } : {})}
         Link={Link}

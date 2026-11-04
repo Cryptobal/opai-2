@@ -1059,7 +1059,7 @@ identidad de servicio en main.
 3. **Cada PR actualiza `ESTADO.md`** (qué entró, qué quedó pendiente, qué se decidió). Linear queda como referencia.
 4. **Migraciones:** las aplica el bot «OPAI 2.0» en Neon con respaldo previo, primero `dev` y después `main`, con `lock_timeout` corto y verificación posterior; luego quita `migracion-pendiente`. Integración (squash): Claude o el bot (ADR-060).
 5. **Revisor:** una sola pasada; solo bloquea por seguridad, migraciones o datos; lo demás va a un PR de pendientes. Tras un push, revisa solo el delta.
-6. **Integración:** con los checks obligatorios en verde y la rama al día con `main`, sin bloqueos del Revisor ni veto de Carlos y, si el PR trae migración, ya aplicada con respaldo en `dev` y `main`.
+6. **Integración:** con los cuatro checks obligatorios en verde sobre el head, sin conflictos con `main` (traer `main` con merge solo si hay conflicto; ADR-061), sin veto de Carlos y, si el PR trae migración, ya aplicada con respaldo en `dev` y `main`; Revisor obligatorio solo si trae migración o toca RLS, permisos o datos de tenants, con «Revisor OPAI 2.0: sin bloqueos» sobre el head (ADR-060).
 7. **QA en vivo** después de integrar, sin frenar; los hallazgos de seguridad o datos abren un arreglo inmediato.
 
 **Consecuencias.** Se ajustan `AGENTS.md`, `CONTEXTO-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` (Carlos debe pegarlas de nuevo en el proyecto de claude.ai) y la cabecera de `ESTADO.md`. Quedan por alinear la plantilla del PR, `checklists/revision.md`, `checklists/qa.md`, `ROADMAP.md`, `PLAN-desarrollo.md` y `00-documento-de-arranque.md`; mientras tanto, manda este ADR. El cuarto check obligatorio (`rendimiento`, ADR-045) está por confirmar en el ruleset (`OPERACION-agentes.md` E.4).
@@ -1186,10 +1186,26 @@ identidad de servicio en main.
 
 **Decisión.**
 
-1. **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) **integra a `main` con squash** cuando se cumplen las condiciones de integración de `AGENTS.md` («Integración a `main`»).
+1. **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) **integra a `main` con squash** cuando se cumplen las condiciones de integración de `AGENTS.md` («Integración a `main`»); el bot «OPAI 2.0» puede hacerlo también — **quien llegue primero**.
 2. El **bot «OPAI 2.0»** sigue aplicando las migraciones en Neon **con respaldo** (primero `dev`, luego `main`), quitando `migracion-pendiente` tras el aviso en el PR, operando la cola (Revisor, QA en vivo, capturas) y **también puede integrar con squash** bajo las mismas condiciones.
-3. **Condiciones de merge** (sin cambio de fondo respecto de ADR-054, salvo quién ejecuta el squash): checks obligatorios del ruleset «Proteger main» en verde sobre el head; rama al día con `main`; sin bloqueo del Revisor (si el PR trae migración o toca RLS, permisos o aislamiento por tenant, tras su pasada; si no, no hace falta esperarla); si trae migración, comentario del bot de migración aplicada y etiqueta `migracion-pendiente` quitada; sin `VETO` ni etiqueta `veto` de Carlos.
+3. **Condiciones de merge:** los cuatro checks obligatorios del ruleset «Proteger main» en verde sobre el head; sin conflictos con `main` (traer `main` con merge solo si hay conflicto; ADR-061); sin `VETO` ni etiqueta `veto` de Carlos; si trae migración, comentario del bot de migración aplicada y etiqueta `migracion-pendiente` quitada. **Revisor:** obligatorio solo si el PR trae migración o toca RLS, permisos o aislamiento por tenant; su OK para integrar es el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head; si no toca eso, no hace falta esperarlo.
 4. **Apoyo al bot:** comentario en el PR que empiece con `@opai-2.0:` o correo a **carlos.irigoyen@mail.grokbot.com** (asunto `OPAI 2.0: <tema>`, con número de PR).
 5. **Registro:** decisiones, briefs, diseños aprobados y `ESTADO.md` siguen obligatorios en el repo; lo acordado en chat que cambie reglas o alcance se escribe en el repo antes de seguir.
 
-**Consecuencias.** Se actualizan `AGENTS.md`, `OPERACION-agentes.md`, `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md`, `checklists/revision.md` y la cabecera de la plantilla del PR. Carlos debe pegar de nuevo las instrucciones en el proyecto de claude.ai.
+**Consecuencias.** Se actualizan `AGENTS.md`, `OPERACION-agentes.md`, `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md`, `checklists/revision.md` y la cabecera de la plantilla del PR. Carlos debe pegar de nuevo las instrucciones en el proyecto de claude.ai. Las reglas del ruleset sobre rama al día con `main` quedan reemplazadas por ADR-061 (4-nov-2026).
+
+---
+
+## ADR-061 · «Proteger main» sin exigir rama al día con `main`
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos · **Modifica** ADR-043 v3, ADR-054 y ADR-060 en lo que toca a **actualización de la rama** antes del squash.
+
+**Contexto.** Hasta el 3-nov-2026 la integración exigía traer `main` con merge y comprobar que la rama no estuviera «behind» justo antes del squash. Eso frenaba PRs listos cuando `main` avanzaba por otros merges.
+
+**Decisión.**
+
+1. El ruleset «Proteger main» **ya no exige** que la rama esté al día con `main`. Basta con que **no tenga conflictos** con `main` y que los **cuatro checks obligatorios** estén en verde sobre el head: `typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos` y `migración pendiente`.
+2. **Traer `main` con merge** solo hace falta si GitHub reporta conflicto (o para resolverlo en local). Sin rebase ni force-push.
+3. **Justo antes del squash** quien integra **no** comprueba «behind»; comprueba checks en verde sobre el head y, cuando corresponde Revisor, «Revisor OPAI 2.0: sin bloqueos» sobre ese head.
+
+**Consecuencias.** Se alinean `AGENTS.md`, `OPERACION-agentes.md`, `01-decisiones.md` (ADR-054 §6), `checklists/revision.md`, `INSTRUCCIONES-proyecto-claude.md` y la plantilla del PR.

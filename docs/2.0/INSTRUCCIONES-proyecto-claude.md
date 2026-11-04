@@ -106,9 +106,9 @@ Al terminar de escribir un brief, ejecútalo sin esperar confirmación, salvo qu
 5. En el último bloque, actualiza `docs/2.0/ESTADO.md` y agrega a la sección de pendientes lo que quede sin resolver. Vincula el PR a Linear (`Fixes CAR-n`).
 6. Antes de abrir el PR, un subagente que no participó en la implementación revisa el diff completo contra el brief, los criterios de aceptación, `AGENTS.md` y `docs/2.0/checklists/revision.md`. Se corrige lo que encuentre.
 7. Sube la rama y abre el PR, fuera de borrador, con el brief y los criterios en la descripción, e indica si trae migración. Si el CI falla, corrige y vuelve a subir. Para ponerte al día con `main` usa merge, nunca rebase ni force-push.
-8. **Integras tú a `main` (squash)** cuando se cumple todo esto (el bot «OPAI 2.0» puede hacerlo también bajo las mismas reglas, ADR-060):
-   - los checks obligatorios del ruleset «Proteger main» están en verde sobre el head y la rama está al día con `main`;
-   - no hay un comentario de bloqueo del Revisor (solo bloquea por seguridad, migraciones o datos: RLS, permisos, pérdida o mezcla de datos). Si el PR trae migración o toca RLS, permisos o aislamiento por tenant, espera su pasada; si no, no la esperes;
+8. **Integras tú a `main` (squash)** cuando se cumple todo esto (el bot «OPAI 2.0» puede hacerlo también bajo las mismas reglas, ADR-060; quien llegue primero):
+   - los cuatro checks obligatorios del ruleset «Proteger main» están en verde sobre el head (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`) y el PR no tiene conflictos con `main` (trae `main` con merge solo si hay conflicto; ADR-061);
+   - si el PR trae migración o toca RLS, permisos o aislamiento por tenant, el Revisor dejó «Revisor OPAI 2.0: sin bloqueos» sobre el head y no hay **PEDIR CAMBIOS** vigente por seguridad, migraciones o datos; si no toca eso, no esperes al Revisor;
    - si trae migración, el bot «OPAI 2.0» ya dejó en el PR el comentario de migración aplicada con respaldo en `dev` y `main` y quitó la etiqueta `migracion-pendiente`. Nunca integres con esa etiqueta puesta;
    - no hay `VETO` ni etiqueta `veto` de Carlos.
    Al integrar, deja en el PR un comentario corto con qué entró y actualiza `ESTADO.md` si no quedó al día.

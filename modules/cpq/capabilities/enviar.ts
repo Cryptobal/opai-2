@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";

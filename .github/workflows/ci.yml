@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  merge_group:
+  schedule:
+    # 03:00 America/Santiago (UTC−3) ≈ 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
 
 # Mínimo privilegio: ningún job necesita escribir en el repositorio.
 permissions:
@@ -11,14 +17,141 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  gate:
-    name: typecheck · lint · test · test:db
+  typecheck:
+    name: typecheck
     runs-on: ubuntu-latest
-    # El chequeo de tipos de todo el monorepo ya toma ~10 min sin caché de Turborepo.
-    timeout-minutes: 45
+    timeout-minutes: 25
+    env:
+      TURBO_CACHE_DIR: .turbo
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - name: Ampliar swap (runner ~7 GB)
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        run: |
+          sudo swapoff -a 2>/dev/null || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+      - uses: pnpm/action-setup@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Restaurar caché de Turborepo
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
+      - run: pnpm install --frozen-lockfile
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - run: pnpm turbo run typecheck --concurrency=1
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: Solo documentación
+        if: steps.solo_docs.outputs.only_docs == 'true'
+        run: 'echo "PR de solo *.md y docs/** — typecheck omitido."'
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TURBO_CACHE_DIR: .turbo
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - name: Ampliar swap (runner ~7 GB)
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        run: |
+          sudo swapoff -a 2>/dev/null || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+      - uses: pnpm/action-setup@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Restaurar caché de Turborepo
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
+      - run: pnpm install --frozen-lockfile
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - run: pnpm turbo run lint --concurrency=1
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: Solo documentación
+        if: steps.solo_docs.outputs.only_docs == 'true'
+        run: 'echo "PR de solo *.md y docs/** — lint omitido."'
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TURBO_CACHE_DIR: .turbo
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - uses: pnpm/action-setup@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Restaurar caché de Turborepo
+        if: steps.solo_docs.outputs.only_docs != 'true'
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
+      - run: pnpm install --frozen-lockfile
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - run: pnpm test
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: Solo documentación
+        if: steps.solo_docs.outputs.only_docs == 'true'
+        run: 'echo "PR de solo *.md y docs/** — test omitido."'
+
+  test-db:
+    name: test:db
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       TURBO_CACHE_DIR: .turbo
     services:
@@ -36,31 +169,58 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
       - uses: pnpm/action-setup@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
       - uses: actions/setup-node@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - name: Restaurar caché de Turborepo
+        if: steps.solo_docs.outputs.only_docs != 'true'
         uses: actions/cache@v4
         with:
           path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm install --frozen-lockfile
-      # Dos tsc a la vez como máximo: en paralelo sin tope el runner (7 GB) se queda sin memoria y se cae.
-      # El tsc de apps/web necesita más que el heap por defecto (~2 GB): 4,5 GB deja margen para el otro.
-      - run: pnpm turbo run typecheck --concurrency=2
-        env:
-          NODE_OPTIONS: --max-old-space-size=4608
-      - run: pnpm lint
-        env:
-          NODE_OPTIONS: --max-old-space-size=4608
-      - run: pnpm test
+        if: steps.solo_docs.outputs.only_docs != 'true'
       - run: pnpm test:db
+        if: steps.solo_docs.outputs.only_docs != 'true'
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
+      - name: Solo documentación
+        if: steps.solo_docs.outputs.only_docs == 'true'
+        run: 'echo "PR de solo *.md y docs/** — test:db omitido."'
+
+  gate:
+    name: typecheck · lint · test · test:db
+    needs: [typecheck, lint, test, test-db]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Comprobar jobs del gate
+        env:
+          TYPECHECK: ${{ needs.typecheck.result }}
+          LINT: ${{ needs.lint.result }}
+          TEST: ${{ needs.test.result }}
+          TEST_DB: ${{ needs.test-db.result }}
+        run: |
+          set -euo pipefail
+          for r in "$TYPECHECK" "$LINT" "$TEST" "$TEST_DB"; do
+            if [ "$r" != success ]; then
+              echo "::error::Un job del gate terminó en $r (esperado: success)."
+              exit 1
+            fi
+          done
+          echo "Gate en verde."
 
   presupuesto:
     name: build · presupuesto de JS
@@ -68,22 +228,34 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
       - uses: pnpm/action-setup@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
       - uses: actions/setup-node@v4
+        if: steps.solo_docs.outputs.only_docs != 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+        if: steps.solo_docs.outputs.only_docs != 'true'
       # Variables ficticias: el build no se conecta a la base ni envía correos (ADR-037).
       - run: pnpm --filter @opai/web build
+        if: steps.solo_docs.outputs.only_docs != 'true'
         env:
           DATABASE_URL: postgresql://opai_app:ficticia@localhost:5432/opai
           BETTER_AUTH_SECRET: ficticio-solo-para-build-de-ci-000000000000
           BETTER_AUTH_URL: http://localhost:3000
           NEXT_TELEMETRY_DISABLED: "1"
-          # El chequeo de tipos de `next build` supera el heap por defecto (~2 GB) desde fines de octubre.
           NODE_OPTIONS: --max-old-space-size=5120
       - run: pnpm presupuesto
+        if: steps.solo_docs.outputs.only_docs != 'true'
+      - name: Solo documentación
+        if: steps.solo_docs.outputs.only_docs == 'true'
+        run: 'echo "PR de solo *.md y docs/** — build y presupuesto omitidos."'
 
   secretos:
     name: secretos
@@ -93,21 +265,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      # Gitleaks con versión y suma fijas; no necesita secretos de CI (AGENTS.md: sin secretos en el código).
+      - name: Detectar solo documentación
+        id: solo_docs
+        run: .github/scripts/ci-solo-documentacion.sh
+      - name: Solo documentación
+        if: steps.solo_docs.outputs.only_docs == 'true'
+        run: 'echo "PR de solo *.md y docs/** — gitleaks omitido (sin diff de código)."'
       - name: Instalar gitleaks 8.24.0
+        if: steps.solo_docs.outputs.only_docs != 'true'
         run: |
           curl -sSfL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.24.0/gitleaks_8.24.0_linux_x64.tar.gz
           echo "cb49b7de5ee986510fe8666ca0273a6cc15eb82571f2f14832c9e8920751f3a4  gitleaks.tgz" | sha256sum -c -
           tar xzf gitleaks.tgz gitleaks
       - name: Escanear la historia del repositorio (pull_request)
-        if: github.event_name == 'pull_request'
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'pull_request'
         run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 --log-opts="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" .
+      - name: Escanear la historia del repositorio (merge_group)
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'merge_group'
+        run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 --log-opts="${{ github.event.merge_group.base_sha }}..${{ github.event.merge_group.head_sha }}" .
       - name: Escanear la historia del repositorio (push)
-        if: github.event_name == 'push'
+        if: steps.solo_docs.outputs.only_docs != 'true' && github.event_name == 'push'
         run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 --log-opts="${{ github.sha }}" .
 
   e2e:
     name: e2e · shard ${{ matrix.shard }}/6
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e'))
     runs-on: ubuntu-latest
     timeout-minutes: 35
     strategy:
@@ -128,9 +310,6 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      # Base efímera del propio job (servicio de Postgres): no hay secretos del repositorio ni de Neon.
-      # La URL del rol propietario (DATABASE_URL_MIGRATE) solo existe en el paso de migrar y sembrar:
-      # la app y los e2e corren únicamente con `opai_app`, como en producción.
       BETTER_AUTH_URL: http://localhost:3000
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -141,9 +320,6 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Credenciales inventadas para esta ejecución; viven solo en el job y se enmascaran en el log.
-      # RONDAS_ETIQUETA_SECRET es obligatoria desde la corrección de la review 5713377140 del PR #145
-      # (sin respaldo a BETTER_AUTH_SECRET): sin ella, crear un punto QR en e2e fallaría cerrado.
       - name: Generar credenciales efímeras
         run: |
           for var in OPAI_APP_DB_PASSWORD BETTER_AUTH_SECRET CRON_SECRET RONDAS_ETIQUETA_SECRET; do
@@ -167,13 +343,8 @@ jobs:
           pnpm --filter @opai/db seed:e2e
           pnpm --filter @opai/db seed:maestros-demo
           pnpm --filter @opai/db exec tsx scripts/fixture-vencimientos-e2e.ts
-          # Fixture de Pauta (CAR-81): instalación ficticia, dos puestos y dos personas; activa el módulo.
-          # `DATABASE_URL` se exporta a GITHUB_ENV y no rige dentro de este mismo paso: la fixture escribe
-          # con el rol de la app (RLS) y la pasa explícita.
           DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/db seed:pauta-e2e
-          # Usuario con dos empresas para selector-riel.spec.ts (selector de portal y empresa en iPad).
           pnpm --filter @opai/auth seed:multiempresa-e2e
-          # Admin y owner también requieren MFA; conservar los mismos roles de los fixtures.
           SEED_OWNER_EMAIL=e2e-selector@opai.cl pnpm --filter @opai/auth seed:e2e-mfa
           SEED_OWNER_EMAIL=e2e-multiempresa@opai.cl pnpm --filter @opai/auth seed:e2e-mfa
       - name: Versión de Playwright
@@ -190,8 +361,6 @@ jobs:
       - name: Instalar Chromium de Playwright
         if: steps.chromium.outputs.cache-hit != 'true'
         run: pnpm --filter @opai/web exec playwright install chromium
-      # Las páginas /ds solo existen fuera de producción: se levanta `pnpm dev`. La primera visita de
-      # cada ruta la compila, así que se calientan antes de que corran los e2e (sin tocar las pruebas).
       - name: Levantar la app y calentar las rutas
         run: |
           nohup pnpm --filter @opai/web dev > "$RUNNER_TEMP/app.log" 2>&1 &
@@ -220,7 +389,7 @@ jobs:
   e2e-informe:
     name: e2e · informe
     needs: e2e
-    if: ${{ always() }}
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e')))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -252,7 +421,7 @@ jobs:
   e2e-check:
     name: e2e (Playwright)
     needs: [e2e, e2e-informe]
-    if: ${{ always() }}
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -264,6 +433,7 @@ jobs:
 
   rendimiento:
     name: rendimiento
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e'))
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
@@ -282,8 +452,6 @@ jobs:
     env:
       BETTER_AUTH_URL: http://localhost:3000
       NEXT_TELEMETRY_DISABLED: "1"
-      # Gate estricto (ADR-045): las metas fallan el job, no solo informan.
-      # Check obligatorio del ruleset «Proteger main» (decisión de Carlos, t306u).
       GATE_ESTRICTO: "1"
     steps:
       - uses: actions/checkout@v4
@@ -314,7 +482,6 @@ jobs:
           pnpm --filter @opai/auth seed:platform-owner
           pnpm --filter @opai/db seed:e2e
           pnpm --filter @opai/db seed:maestros-demo
-      # El build no se conecta a la base (ADR-037); la app lee DATABASE_URL al arrancar.
       - name: Construir la app (producción)
         run: pnpm --filter @opai/web build
         env:

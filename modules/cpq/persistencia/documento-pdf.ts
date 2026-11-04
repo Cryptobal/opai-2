@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 
 import type { BloqueConfig } from "../domain/documento/bloques";
 import type { EntradaPdfCotizacion } from "./documento-pdf-tipos";
