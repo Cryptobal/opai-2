@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
-import { ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { ParesGrid, SeccionTarjeta, Skeleton } from "@opai/ds";
 
+import { EtiquetasFicha } from "@/app/_components/etiquetas/etiquetas-ficha";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { fecha, rut } from "@/lib/fechas";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
@@ -46,6 +48,9 @@ export function ResumenCuenta({ c }: { c: CuentaDetalle }) {
           ]}
         />
       </SeccionTarjeta>
+      <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+        <EtiquetasFicha tipo="cuenta" id={c.id} />
+      </Suspense>
       <FacturarCuenta c={c} />
       <SeccionTarjeta titulo="Representante legal">
         <ParesGrid

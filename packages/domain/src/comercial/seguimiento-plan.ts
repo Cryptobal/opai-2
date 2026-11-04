@@ -28,8 +28,12 @@ export type ConfigPlan = {
   ventana: { desde: string; hasta: string };
   /** Al responder el cliente: pausar (se puede reanudar) o detener (termina el seguimiento). */
   alResponder: "pausar" | "detener";
+  /** Etapa abierta (id) a la que pasa el negocio cuando el cliente responde; nunca lo baja. */
+  etapaAlResponder?: string | undefined;
   /** Al terminar sin respuesta: proponer el cierre (tarea) o solo avisar. */
-  alTerminar: "proponer_cierre" | "solo_avisar";
+  alTerminar: "proponer_cierre" | "aplicar_cierre_propuesto" | "solo_avisar";
+  /** Etapa abierta (id) desde la cual el plan nunca aplica un cierre solo. */
+  noCerrarDesdeEtapa?: string | undefined;
   pasos: PasoPlan[];
 };
 

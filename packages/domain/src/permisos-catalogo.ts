@@ -48,6 +48,10 @@ export const PERMISOS_CORE = {
   anexosManage: "core:anexos.manage",
   documentosRead: "core:documentos.read",
   documentosManage: "core:documentos.manage",
+  // CAR-182 (decisión de Carlos, 4-nov-2026): subir documentos SOLO vinculados a una instalación a
+  // cargo del actor (ADR-022). No gestiona nada más: quien tiene `documentos.manage` conserva todo.
+  // La capacidad de subida lo acepta como alternativa y limita el destino y la visibilidad.
+  documentosSubirAlcance: "core:documentos.subir_alcance",
   // Firma electrónica del núcleo (firma.md §8, CAR-82). Enviar y leer solicitudes; configurar la
   // política por tipo de documento (solo owner/admin); registrar el estado del finiquito en la DT.
   // Firmar y rechazar como firmante son actos personales sin permiso de rol (soloPersonas).

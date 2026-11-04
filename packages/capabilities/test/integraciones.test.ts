@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { z } from "zod";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -272,12 +273,14 @@ describe("fallas de Google Maps visibles (autocompletar)", () => {
 });
 
 describe("secretos opcionales del catálogo", () => {
-  it("dte_cesion queda configurada sin pass_acceso_api, que es opcional", async () => {
+  it("un secreto marcado opcional no impide que la integración quede configurada", async () => {
     const { estadoIntegracion } = await import("../src/integraciones/resolver");
-    const { definicionIntegracion } = await import("@opai/integrations");
-    const def = definicionIntegracion("dte_cesion");
-    if (!def) throw new Error("falta dte_cesion");
-    expect(estadoIntegracion(def, null, ["usuario", "clave"])).toBe("configurada");
-    expect(estadoIntegracion(def, null, ["usuario"])).toBe("no_configurada");
+    const def = {
+      id: "x", nombre: "X", categoria: "factoring" as const, modalidades: ["propia"] as const,
+      secretos: [{ nombre: "a", etiqueta: "A" }, { nombre: "b", etiqueta: "B", opcional: true }],
+      config: z.object({}), disponible: true,
+    };
+    expect(estadoIntegracion(def, null, ["a"])).toBe("configurada");
+    expect(estadoIntegracion(def, null, [])).toBe("no_configurada");
   });
 });

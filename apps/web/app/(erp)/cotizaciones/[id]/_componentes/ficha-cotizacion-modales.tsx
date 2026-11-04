@@ -82,6 +82,7 @@ export function FichaCotizacionModales(p: {
           codigo={codigo}
           version={versionNumero}
           cuentaId={d.cuentaId}
+          negocioId={d.cotizacion.negocioId}
           requiereAprobacion={Boolean(c.requiereAprobacion)}
           requiereMutual={Boolean(p.meta?.requiereConfirmarMutual)}
           margenTexto={p.verCostos ? margenPctTexto(c.margenEfectivoPct) : null}

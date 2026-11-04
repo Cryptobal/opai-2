@@ -46,4 +46,5 @@ export {
   type TipoCompositor,
 } from "./compositor-actividad";
 export { TareaFila, type TonoVencimientoTarea } from "./tarea-fila";
+export { ChipsEtiquetas, type EtiquetaChip, type TonoEtiqueta } from "./chips-etiquetas";
 export { campoElegible, type CampoDatosSii, DatosSii, type EstadoDatosSii } from "./datos-sii";

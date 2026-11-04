@@ -33,6 +33,7 @@ comercial_seguimiento_planes_crear_base
 comercial_seguimiento_planes_guardar
 comercial_seguimiento_planes_list
 comercial_seguimientos_controlar
+comercial_seguimientos_correos
 comercial_seguimientos_enviar_paso
 comercial_seguimientos_get
 comercial_seguimientos_iniciar
@@ -92,6 +93,7 @@ core_contactos_cuentas
 core_contactos_desvincular
 core_contactos_get
 core_contactos_list
+core_contactos_restaurar
 core_contactos_set_roles
 core_contactos_update
 core_contactos_vincular
@@ -468,6 +470,7 @@ preview_core_config_set
 preview_core_contactos_archive
 preview_core_contactos_create
 preview_core_contactos_desvincular
+preview_core_contactos_restaurar
 preview_core_contactos_set_roles
 preview_core_contactos_update
 preview_core_contactos_vincular

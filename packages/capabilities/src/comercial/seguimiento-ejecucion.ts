@@ -5,6 +5,8 @@ import { refDe } from "../core/crm/comun";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { reglaDeNegocio } from "../errores";
+import { aplicarEtapa } from "./transiciones-util";
+import { validarEntrada } from "./validaciones";
 
 type Tx = Parameters<Parameters<Contexto["transaccion"]>[0]>[0];
 type Seg = { id: string; negocioId: string; token: string; contactoId: string | null; estado: string };
@@ -39,12 +41,37 @@ export async function enviarCorreoSeguimiento(ctx: Contexto, s: Seg, asunto: str
 }
 
 /**
+ * R13: al responder el cliente el negocio pasa a la etapa configurada, nunca hacia atrás y solo si
+ * cumple los requisitos de entrada de esa etapa. Devuelve `true` si se movió.
+ */
+export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: string, etapaId: string | undefined): Promise<boolean> {
+  if (!etapaId) return false;
+  const negocio = await tx.negocio.findUnique({ where: { id: negocioId } });
+  if (!negocio || negocio.estado !== "abierto") return false;
+  const [destino, actual] = await Promise.all([
+    tx.etapa.findUnique({ where: { id: etapaId } }),
+    tx.etapa.findUnique({ where: { id: negocio.etapaId } }),
+  ]);
+  if (!destino || !actual || destino.tipo !== "abierta" || !destino.activa) return false;
+  if (destino.embudoId !== negocio.embudoId || destino.orden <= actual.orden) return false;
+  try {
+    await validarEntrada(ctx, negocio, destino);
+  } catch {
+    return false;
+  }
+  await aplicarEtapa(ctx, tx, negocio, destino, { evento: "comercial.negocio.etapa_cambiada", motivo: "El cliente respondió" });
+  return true;
+}
+
+/**
  * El cliente respondió: según el plan, pausa o detiene el seguimiento (R: pausa y espera a la persona)
  * y deja una nota en la ficha. `texto` es de un tercero: se guarda como dato, nunca se interpreta.
  */
 export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: ConfigPlan, nota: { titulo: string; detalle?: string | null }): Promise<string> {
   const destino = transicionSeguimiento(s.estado as Parameters<typeof transicionSeguimiento>[0], config.alResponder === "detener" ? "cancelar" : "pausar");
-  const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: nota.detalle ?? null, negocioId: s.negocioId });
+  const movido = await avanzarPorRespuesta(ctx, tx, s.negocioId, config.etapaAlResponder);
+  const detalle = [nota.detalle, movido ? "El negocio pasó a la etapa configurada en el plan." : null].filter(Boolean).join(" ");
+  const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: detalle || null, negocioId: s.negocioId });
   if (destino) {
     await tx.seguimiento.update({ where: { id: s.id }, data: { estado: destino, motivo: "cliente_respondio" } });
     if (destino === "cancelado")
