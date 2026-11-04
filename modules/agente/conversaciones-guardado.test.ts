@@ -11,7 +11,7 @@ function falso(opciones: { servicio?: boolean; existente?: unknown } = {}) {
     agenteConversacion: {
       deleteMany: vi.fn(async () => ({ count: 0 })),
       findFirst: vi.fn(async () => opciones.existente ?? null),
-      update: vi.fn(async () => ({})),
+      update: vi.fn(async (_a: { data: { mensajes: unknown[] } }) => ({})),
       create: vi.fn(async () => ({ id: "nueva" })),
     },
   };
@@ -53,10 +53,8 @@ it("retoma una conversación propia y agrega los dos mensajes; una ajena crea ot
       where: expect.objectContaining({ userId: USUARIO, tenantId: TENANT, id: "c1" }),
     }),
   );
-  const data = a.db.agenteConversacion.update.mock.calls[0]?.[0] as {
-    data: { mensajes: unknown[] };
-  };
-  expect(data.data.mensajes).toHaveLength(3);
+  const data = a.db.agenteConversacion.update.mock.calls[0]?.[0];
+  expect(data?.data.mensajes).toHaveLength(3);
   const b = falso();
   expect(await guardarTurno(b.ctx, { ...turno, conversacionId: "ajena" })).toBe("nueva");
 });

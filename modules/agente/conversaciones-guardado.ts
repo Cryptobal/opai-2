@@ -18,6 +18,10 @@ export const mensajeSchema = z.object({
 });
 export type Mensaje = z.infer<typeof mensajeSchema>;
 
+const TOPE_TEXTO = 8_000;
+const recortar = (t: string) => (t.length > TOPE_TEXTO ? `${t.slice(0, TOPE_TEXTO)}…` : t);
+/** Límite de la retención: lo más antiguo que se conserva. */
+export const corteRetencion = (ahora: Date) => new Date(ahora.getTime() - RETENCION_DIAS * 864e5);
 const titular = (texto: string) => texto.replace(/\s+/g, " ").trim().slice(0, 80);
 
 type Turno = {
@@ -34,22 +38,24 @@ export async function guardarTurno(ctx: Contexto, t: Turno): Promise<string | nu
   if (!usuario || ctx.principal?.tipo === "servicio") return null;
   const ahora = new Date();
   const nuevos: Mensaje[] = [
-    { rol: "usuario", texto: t.mensaje, fecha: ahora.toISOString() },
+    { rol: "usuario", texto: recortar(t.mensaje), fecha: ahora.toISOString() },
     {
       rol: "agente",
-      texto: t.texto,
+      texto: recortar(t.texto),
       ...(t.pasos.length ? { pasos: t.pasos } : {}),
       fecha: ahora.toISOString(),
     },
   ];
   const propia = { tenantId: ctx.tenantId, userId: usuario.id };
-  // Retención (R19/R20): las conversaciones propias sin actividad por más de 90 días se borran.
-  await ctx.db.agenteConversacion.deleteMany({
-    where: {
-      ...propia,
-      ultimaActividad: { lt: new Date(ahora.getTime() - RETENCION_DIAS * 864e5) },
-    },
-  });
+  // Retención (R19/R20): las propias sin actividad por más de 90 días se borran, salvo la que se usa.
+  const purgar = (excepto?: string) =>
+    ctx.db.agenteConversacion.deleteMany({
+      where: {
+        ...propia,
+        ...(excepto ? { id: { not: excepto } } : {}),
+        ultimaActividad: { lt: corteRetencion(ahora) },
+      },
+    });
   if (t.conversacionId) {
     const actual = await ctx.db.agenteConversacion.findFirst({
       where: { ...propia, id: t.conversacionId, archivadaEn: null },
@@ -62,9 +68,11 @@ export async function guardarTurno(ctx: Contexto, t: Turno): Promise<string | nu
         where: { id: actual.id },
         data: { mensajes: todos, ultimaActividad: ahora },
       });
+      await purgar(actual.id);
       return actual.id;
     }
   }
+  await purgar();
   const creada = await ctx.db.agenteConversacion.create({
     data: {
       ...propia,

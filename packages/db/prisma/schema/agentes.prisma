@@ -385,7 +385,6 @@ model AgenteConversacion {
   contextoId      String?   @map("contexto_id") @db.Uuid
   /// Lista ordenada de `{ rol: "usuario" | "agente", texto, pasos?, fecha }`; tope en la capacidad.
   mensajes        Json      @default("[]")
-  accionesHechas  Int       @default(0) @map("acciones_hechas")
   archivadaEn     DateTime? @map("archivada_en") @db.Timestamptz(6)
   ultimaActividad DateTime  @default(now()) @map("ultima_actividad") @db.Timestamptz(6)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)

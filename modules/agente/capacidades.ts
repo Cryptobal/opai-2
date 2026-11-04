@@ -79,13 +79,14 @@ export const turnoPreparar = defineCapability({
     const firma = secreto();
     const ia = await iaElegidaDelAgente(delegado, input.modelo);
     const plan = await prepararTurno(delegado, input.mensaje, ia);
+    // Si guardar falla, el plan ya costó IA: se entrega igual, sin conversación guardada.
     const conversacionId = await guardarTurno(ctx, {
       conversacionId: input.conversacionId,
       contexto: input.contexto,
       mensaje: input.mensaje,
       texto: plan.texto,
       pasos: plan.pasos.map((p) => p.capacidad),
-    });
+    }).catch(() => null);
     return {
       conversacionId,
       token: plan.pasos.length ? firmarPlan(delegado, plan, input.nivel, firma) : null,

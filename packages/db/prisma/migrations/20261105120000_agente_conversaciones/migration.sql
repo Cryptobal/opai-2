@@ -13,7 +13,6 @@ CREATE TABLE "core"."agente_conversaciones" (
     "contexto_tipo" TEXT,
     "contexto_id" UUID,
     "mensajes" JSONB NOT NULL DEFAULT '[]',
-    "acciones_hechas" INTEGER NOT NULL DEFAULT 0,
     "archivada_en" TIMESTAMPTZ(6),
     "ultima_actividad" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,

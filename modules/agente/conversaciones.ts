@@ -1,7 +1,7 @@
 import { defineCapability, externo, noEncontrado, prohibido } from "@opai/capabilities";
 import { z } from "zod";
 
-import { contextoSchema, mensajeSchema } from "./conversaciones-guardado";
+import { contextoSchema, corteRetencion, mensajeSchema } from "./conversaciones-guardado";
 
 const uuid = z.string().uuid();
 
@@ -74,6 +74,7 @@ export const conversacionesList = defineCapability({
         tenantId: ctx.tenantId,
         userId: persona(ctx),
         archivadaEn: input.archivadas ? { not: null } : null,
+        ultimaActividad: { gte: corteRetencion(new Date()) },
       },
       orderBy: { ultimaActividad: "desc" },
       take: input.limite,
@@ -95,7 +96,12 @@ export const conversacionesGet = defineCapability({
   auditarLectura: (s) => [s.id],
   async handler(ctx, input) {
     const f = await ctx.db.agenteConversacion.findFirst({
-      where: { tenantId: ctx.tenantId, userId: persona(ctx), id: input.id },
+      where: {
+        tenantId: ctx.tenantId,
+        userId: persona(ctx),
+        id: input.id,
+        ultimaActividad: { gte: corteRetencion(new Date()) },
+      },
       select: SELECT,
     });
     if (!f) throw noEncontrado("La conversación");
