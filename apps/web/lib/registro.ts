@@ -14,7 +14,7 @@ import {
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
-import { consumidorCpqBandeja, modulos, trabajosAgente } from "@opai/modules";
+import { consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente } from "@opai/modules";
 
 let hecho = false;
 
@@ -40,6 +40,7 @@ export function asegurarRegistro(): void {
   registrarConsumidores([
     ...consumidoresDelNucleo,
     consumidorCpqBandeja,
+    consumidorCpqEnlace,
     consumidorSeguimientoCierre,
   ]);
   hecho = true;

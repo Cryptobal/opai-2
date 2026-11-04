@@ -198,7 +198,14 @@ describe.skipIf(!urlPropietario)("cpq · puestos al ganar, compartir y archivar 
     expect(est.enlace).not.toBeNull();
     expect(JSON.stringify(est)).not.toContain(token);
     expect(est.enlace).not.toHaveProperty("url");
-    expect((await publica(a.tenantId, token)).ok).toBe(false);
+    // Un token de la empresa B pedido con el slug de A (tenant A) da NOT_FOUND, igual que uno inexistente.
+    const cruzado = await publica(a.tenantId, token);
+    expect(cruzado.ok).toBe(false);
+    expect(!cruzado.ok && cruzado.error.code).toBe("NOT_FOUND");
+    expect(!cruzado.ok && cruzado.error.code).toBe(
+      (await publica(a.tenantId, "f".repeat(32)).then((x) => (!x.ok ? x.error.code : "ok"))),
+    );
+    expect((await e.admin.cpqEnlaceCompartido.findFirstOrThrow({ where: { tokenHash: sha(token) } })).vistas).toBe(1);
   });
 
   it("revocar y vencer cierran el enlace; uno nuevo revoca el anterior", async () => {
@@ -224,5 +231,19 @@ describe.skipIf(!urlPropietario)("cpq · puestos al ganar, compartir y archivar 
     await ok(b.tenantId, "cpq.cotizaciones.restaurar", { id: b.cotizacionId });
     expect((await lista(b.tenantId)).items).toHaveLength(1);
     expect((await lista(a.tenantId, { soloArchivadas: true })).items).toHaveLength(0);
+  });
+
+  it("costos por categoría: la otra empresa no los lee ni los escribe", async () => {
+    const borrador = await e.admin.cpqVersion.create({
+      data: { tenantId: a.tenantId, cotizacionId: a.cotizacionId, numero: 2, estado: "borrador", creadoPorId: usuario },
+    });
+    const costo = { categoria: "uniformes", montoClp: 50_000, lineaId: null };
+    const lee = await run(b.tenantId, "cpq.costos_categoria.list", { versionId: borrador.id });
+    expect(!lee.ok && lee.error.code).toBe("NOT_FOUND");
+    for (const dryRun of [true, false]) {
+      const escribe = await run(b.tenantId, "cpq.costos_categoria.guardar", { versionId: borrador.id, items: [costo] }, dryRun);
+      expect(!escribe.ok && escribe.error.code).toBe("NOT_FOUND");
+    }
+    expect(await e.admin.cpqCostoCategoria.count({ where: { versionId: borrador.id } })).toBe(0);
   });
 });
