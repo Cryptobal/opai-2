@@ -77,6 +77,21 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["finanzas.ventas_programaciones"],
     valores: () => ({ precio_unitario_clp: 1, precio_unitario_uf: null }),
   },
+  // Rendiciones (CAR-175): CHECK de tipo, estado, centro de costo (administración sin instalación),
+  // aprobador distinto del solicitante y monto positivo en los gastos.
+  "rendiciones.rendiciones": {
+    valores: (ctx) => ({
+      tipo: "compra",
+      estado: "borrador",
+      centro_costo: "administracion",
+      instalacion_id: null,
+      solicitante_id: ctx.usuario,
+      aprobador_id: null,
+      decidida_por_id: null,
+      monto_total: 0,
+    }),
+  },
+  "rendiciones.rendicion_items": { valores: () => ({ monto: 1 }) },
   // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
   "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
   // Finanzas · cobranza (CAR-166): CHECKs de canal, origen y resultado.

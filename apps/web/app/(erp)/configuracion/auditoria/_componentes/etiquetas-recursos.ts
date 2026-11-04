@@ -1,6 +1,6 @@
 /** Recurso (segunda parte de «modulo.recurso.verbo») → nombre de negocio. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const RECURSOS: Record<string, string> = {
-  ping: "Conexión", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", invitations: "Invitaciones",
+  ping: "Conexión", rendiciones: "Rendiciones", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", invitations: "Invitaciones",
   modules: "Módulos", apikeys: "API keys", audit: "Auditoría", usage: "Uso", tenants: "Empresas",
   admins: "Administradores", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",

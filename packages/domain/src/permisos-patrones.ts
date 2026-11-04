@@ -71,6 +71,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       "pauta:*",
       "asistencia:*",
       "tickets:*",
+      "rendiciones:rendir",
       "personas:read",
       "personas:*.read",
       PERMISOS_CORE.tenantRead,

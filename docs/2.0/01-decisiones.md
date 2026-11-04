@@ -1332,3 +1332,12 @@ identidad de servicio en main.
 **No cambia.** El flujo de caja ya trata cada NC como su propia celda negativa; restarla además de la factura la contaría dos veces.
 
 **Fuera de este corte.** Las facturas de compra (documentos recibidos) mantienen `total − conciliado`: las NC recibidas no se descuentan todavía.
+
+## ADR-069 · Rendiciones: módulo propio, un nivel de aprobación y el solicitante nunca decide lo suyo
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (decisiones del 4-nov-2026), implementadas por Claude (CAR-175, R1).
+
+**Decisión.** Rendiciones es un módulo vendible con su schema `rendiciones` y sin dependencia de Finanzas (ADR-048). (1) Rinden solo usuarios del ERP con permiso `rendiciones:rendir`; guardias y supervisores sin usuario, en un bloque posterior. (2) Hay **un solo nivel de aprobación con aprobador asignado**; el solicitante nunca aprueba, rechaza, devuelve ni paga lo suyo (regla en el dominio, en las capacidades y en un CHECK de la base). (3) «Pagada» se marca al confirmar el lote de pago (R3). (4) El kilometraje es **configurable por empresa** (por consumo, por tarifa por km o monto fijo por tramo) como configuración versionada evaluada en `packages/domain` (ADR-021); llega en R2. (5) «Devuelta» (se corrige y se reenvía) es distinto de «Rechazada» (definitiva). Aprobar y rechazar son irreversibles para los agentes (aprobación humana).
+
+**Consecuencias.** R1 entrega el modelo y las 9 capacidades por MCP sin pantallas; el código REN-n es correlativo por empresa con bloqueo; la boleta repetida (proveedor + folio + monto) solo avisa.
+
