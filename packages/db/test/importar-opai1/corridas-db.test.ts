@@ -25,12 +25,12 @@ describe.skipIf(!urlPropietario)("Corridas de importación (CAR-157)", () => {
     await e?.cerrar();
   });
 
-  async function correr(datos = fixture()) {
-    const estado = await leerEstadoDestinoPorTenantId(tenantId);
+  async function correr(datos = fixture(), tenant = tenantId) {
+    const estado = await leerEstadoDestinoPorTenantId(tenant);
     const plan = calcularPlan(datos, estado, { modulosActivos: [] });
-    const id = await iniciarCorrida(tenantId, { modo: "aplicar", origen: "fixtures" });
-    const r = await aplicarPorLotes(tenantId, id, plan, 2);
-    await cerrarCorrida(tenantId, id, "completada", r.aplicadas);
+    const id = await iniciarCorrida(tenant, { modo: "aplicar", origen: "fixtures" });
+    const r = await aplicarPorLotes(tenant, id, plan, 2);
+    await cerrarCorrida(tenant, id, "completada", r.aplicadas);
     return { id, r };
   }
 
@@ -98,16 +98,21 @@ describe.skipIf(!urlPropietario)("Corridas de importación (CAR-157)", () => {
   });
 
   it("se niega a revertir si hay dependientes en 2.0 creados después de la importación", async () => {
-    const { id } = await correr();
-    const c = await e.admin.cuenta.findFirstOrThrow({ where: { tenantId, rut: "76333333-7" } });
+    const aislado = (
+      await e.admin.tenant.create({
+        data: { slug: `cor-dep-${randomUUID().slice(0, 8)}`, nombre: "Dep", vertical: "seguridad" },
+      })
+    ).id;
+    const { id } = await correr(fixture(), aislado);
+    const c = await e.admin.cuenta.findFirstOrThrow({ where: { tenantId: aislado, rut: "76333333-7" } });
     const etiqueta = await e.admin.etiqueta.create({
-      data: { tenantId, nombre: `et-${randomUUID().slice(0, 8)}` },
+      data: { tenantId: aislado, nombre: `et-${randomUUID().slice(0, 8)}` },
     });
-    await e.admin.etiquetaAsignacion.create({ data: { tenantId, etiquetaId: etiqueta.id, cuentaId: c.id } });
-    const prueba = await revertirCorrida(tenantId, id, true);
+    await e.admin.etiquetaAsignacion.create({ data: { tenantId: aislado, etiquetaId: etiqueta.id, cuentaId: c.id } });
+    const prueba = await revertirCorrida(aislado, id, true);
     expect(prueba.revertida).toBe(false);
     expect(prueba.bloqueadas.some((b) => b.motivo === "tiene_dependientes_en_2_0")).toBe(true);
-    const real = await revertirCorrida(tenantId, id, false);
+    const real = await revertirCorrida(aislado, id, false);
     expect(real.revertida).toBe(false);
     expect(await e.admin.etiquetaAsignacion.count({ where: { cuentaId: c.id } })).toBe(1);
   });
