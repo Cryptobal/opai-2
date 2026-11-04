@@ -8,6 +8,16 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "finanzas.apertura.importar": {
+    encargo: "CAR-168",
+    desde: "2026-11-04",
+    motivo: "Carga de apertura desde 1.0: se opera una vez por empresa; su pantalla (Finanzas › Apertura) y el CLI llegan cuando el exportador 1.0 entregue documentos y saldos.",
+  },
+  "finanzas.apertura.revertir": {
+    encargo: "CAR-168",
+    desde: "2026-11-04",
+    motivo: "Reversión de la carga de apertura; va en la misma pantalla de Finanzas › Apertura.",
+  },
   "core.firmas.firmante_empresa_set": {
     encargo: "CAR-82",
     desde: "2026-10-29",

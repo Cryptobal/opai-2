@@ -42,6 +42,7 @@ import { cobranzaPausar, cobranzaRecordar, cobranzaRegistrarGestion } from "./co
 import { cobranzaDeudor, cobranzaResumen } from "./cobranza-resumen";
 import { trabajoRecordatoriosCobranza } from "./cobranza-trabajo";
 import { hoyEnFinanzas } from "./hoy-resumen";
+import { aperturaImportar, aperturaRevertir } from "./apertura";
 import { ventasProgramacionGenerar } from "./ventas-programacion-generar";
 import { ventasProgramacionVistaPrevia } from "./ventas-programacion-vista-previa";
 import { trabajoGenerarProgramaciones } from "./ventas-programacion-trabajo";
@@ -74,6 +75,8 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   cobranzaPausar,
   cobranzaRegistrarGestion,
   hoyEnFinanzas,
+  aperturaImportar,
+  aperturaRevertir,
   ventasProgramacionesListar,
   ventasProgramacionesObtener,
   ventasProgramacionCrear,

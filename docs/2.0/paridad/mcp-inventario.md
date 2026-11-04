@@ -648,6 +648,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `cpq.cotizaciones.aprobar` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
 | `cpq.cotizaciones.enviar` | Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad. |
 | `cpq.cotizaciones.rechazar_aprobacion` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
+| `finanzas.apertura.importar` | Solo personas: carga de apertura contable y de cobranza desde 1.0 (saldos, facturas y folios); gobierno de datos del tenant (CAR-168). |
+| `finanzas.apertura.revertir` | Solo personas: deshace una carga de apertura desde 1.0; gobierno de datos del tenant (CAR-168). |
 | `finanzas.folios.cargar_caf` | Solo personas: el XML del CAF incluye la llave privada; un agente no lo encola en aprobaciones (CAR-143). |
 | `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
 | `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
@@ -706,6 +708,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
 | `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
+| `finanzas.apertura.importar` | sin pantalla todavía · CAR-168 · desde 2026-11-04 | no | reservada a personas |
+| `finanzas.apertura.revertir` | sin pantalla todavía · CAR-168 · desde 2026-11-04 | no | reservada a personas |
 | `finanzas.folios.cargar_caf` | `app/(erp)/finanzas/folios/_componentes` | no | reservada a personas |
 | `platform.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `platform.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
