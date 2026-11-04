@@ -23,13 +23,14 @@ Fuentes: `extraccion/rendiciones.md` (código de 1.0, 115 reglas) y el diseño a
 ## 3. Mejoras que se suman
 Borrar adjuntos solo en borrador; detección de boleta duplicada (proveedor + folio + monto) con aviso; reenvío tras rechazo sin chocar con el índice de aprobaciones; todo con `dryRun`, auditoría y herramienta MCP.
 
-## 4. Defaults que tomo (di «no» a cualquiera y lo cambio)
-1. Pueden rendir los usuarios del ERP con permiso; guardias y supervisores sin usuario, en R4.
-2. Un solo nivel de aprobación por rendición; el aprobador sale de la configuración. Niveles por monto, en R3.
-3. Estado «Devuelta» distinto de «Rechazada» (la devuelta se corrige y reenvía).
-4. Sin respaldo no se envía, salvo la opción «sin respaldo» con motivo, que el tenant puede apagar.
-5. Plazo máximo para rendir: configurable, sin tope por defecto; fecha futura no permitida.
-6. Una rendición pagada solo se revierte con un lote de reversa, por quien tenga el permiso de pagos.
+## 4. Decisiones de Carlos (4-nov-2026)
+1. Pueden rendir solo usuarios del ERP con permiso; guardias y supervisores sin usuario, en un bloque posterior.
+2. Un solo nivel de aprobación con aprobador asignado; el solicitante nunca aprueba ni paga lo suyo. Niveles por monto, después.
+3. «Pagada» se marca al **confirmar el lote de pago**, no al generarlo.
+4. **Kilometraje configurable por empresa**: cada empresa elige en Configuración › Módulos › Rendiciones el método de cálculo (por consumo, por tarifa por km o monto fijo por tramo) y fija sus propias variables (rendimiento km/l, precio del litro, recargo, tarifa por km, peaje). La fórmula la evalúa `packages/domain` como configuración versionada (ADR-021), nunca código por empresa.
 
-## 5. Lo que necesito de ti (solo negocio)
-a) Quién puede rendir (punto 1). b) Niveles de aprobación (punto 2). c) Si el kilometraje se paga por consumo, como en 1.0, o por tarifa por km. d) Si «Pagada» se marca al generar el lote o al confirmar el banco.
+## 5. Defaults que tomo (avísame si alguno no te sirve)
+Estado «Devuelta» distinto de «Rechazada»; sin respaldo solo con motivo y apagable por empresa; fecha futura no permitida; reversa de una rendición pagada solo con lote de reversa y permiso de pagos.
+
+## 6. Plan por bloques
+R1 modelo, rendición de compra, aprobación y «Mis rendiciones» · R2 kilometraje configurable · R3 lotes de pago y nómina Santander · R4 reporte, exportación y configuración · R5 pulido y traspaso a Contabilidad (evento `rendiciones.pagada`).
