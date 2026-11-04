@@ -67,6 +67,15 @@ export const manifest = defineModule({
     {
       portal: "erp",
       area: "comercial",
+      href: "/negocios/seguimiento",
+      etiqueta: "Pendientes",
+      icono: "BellRing",
+      orden: 3,
+      permiso: "comercial:negocios.read",
+    },
+    {
+      portal: "erp",
+      area: "comercial",
       href: "/contactos",
       etiqueta: "Contactos",
       icono: "Users",
@@ -83,6 +92,7 @@ export const manifest = defineModule({
     { id: "comercial.seguimiento.cancelado", descripcion: "Un seguimiento se canceló." },
     { id: "comercial.seguimiento.terminado", descripcion: "Un seguimiento terminó." },
     { id: "comercial.seguimiento.cliente_respondio", descripcion: "El cliente respondió y el seguimiento se detuvo." },
+    { id: "comercial.seguimiento.cierre_aplicado", descripcion: "OPAI cerró un negocio porque el plan terminó sin respuesta del cliente." },
     { id: "comercial.seguimiento.paso_registrado", descripcion: "Se hizo, envió, omitió o pospuso un paso del seguimiento." },
     { id: "comercial.seguimiento.plan_actualizado", descripcion: "Se creó o cambió un plan de seguimiento." },
     { id: "comercial.negocio.creado", descripcion: "Se creó un negocio." },

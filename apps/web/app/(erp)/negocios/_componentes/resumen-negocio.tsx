@@ -1,11 +1,15 @@
-import { Badge, Enlace, ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { Suspense } from "react";
+
+import { Badge, Enlace, ParesGrid, SeccionTarjeta, Skeleton } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { fecha, pesos } from "@/lib/fechas";
 
 import type { NegocioDetalle } from "./datos";
+import { EtiquetasFicha } from "@/app/_components/etiquetas/etiquetas-ficha";
 import { ROL_CONTACTO as ROL, TIPO_VINCULO } from "./etiquetas";
+import { TarjetasActividad } from "./tarjetas-actividad";
 
 /** Abre una hoja de vínculos de la ficha (`?instalaciones=1`, `?contactos=1`). */
 const AccionHoja = (p: { id: string; hoja: string; texto: string }) => (
@@ -50,6 +54,12 @@ export function ResumenNegocio({ n }: { n: NegocioDetalle }) {
           ]}
         />
       </SeccionTarjeta>
+      <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+        <EtiquetasFicha tipo="negocio" id={n.id} />
+      </Suspense>
+      <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+        <TarjetasActividad negocioId={n.id} />
+      </Suspense>
       <SeccionTarjeta
         titulo={`Instalaciones (${n.instalaciones.length})`}
         {...(n.archivadoEn

@@ -58,6 +58,7 @@ export default function Negocios({ searchParams }: Props) {
                   items={d.filas?.items ?? []}
                   p={d.p}
                   etapas={d.etapas}
+                  etiquetas={d.filas?.etiquetas ?? []}
                   {...(d.gestiona ? { nuevo: accionNuevo } : {})}
                 />
               }

@@ -1,4 +1,6 @@
-import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
+import { Avatar, Badge, ChipsEtiquetas, type EstadoPantalla } from "@opai/ds";
+
+import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etiquetas/opciones";
 
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { telefono } from "@/lib/fechas";
@@ -12,6 +14,7 @@ export function ListaContactos(p: {
   items: ContactoFila[];
   seleccionado?: string;
   q?: string | undefined;
+  etiquetas?: OpcionEtiqueta[];
 }) {
   const principales = p.items.filter((c) => c.esPrincipal).length;
   return (
@@ -21,6 +24,8 @@ export function ListaContactos(p: {
       buscar="Buscar por nombre o correo"
       filtros={[
         { param: "principales", etiqueta: "Principales", opciones: [{ valor: "si", etiqueta: "Sí" }] },
+        { param: "archivados", etiqueta: "Archivados", opciones: [{ valor: "si", etiqueta: "Incluir" }] },
+        ...filtroDeEtiquetas(p.etiquetas ?? []),
       ]}
       meta={{
         izquierda: `${p.items.length} contactos · ${principales} ${principales === 1 ? "principal" : "principales"}`,
@@ -38,11 +43,16 @@ export function ListaContactos(p: {
         titulo: c.nombre,
         secundario: [c.cuentaNombre, c.cargo].filter(Boolean).join(" · "),
         terciario: (
-          <span className="md:hidden">
-            {[c.email, c.telefono ? telefono(c.telefono) : null].filter(Boolean).join(" · ")}
-          </span>
+          <>
+            <span className="md:hidden">
+              {[c.email, c.telefono ? telefono(c.telefono) : null].filter(Boolean).join(" · ")}
+            </span>
+            <ChipsEtiquetas compacto etiquetas={c.etiquetas} className="mt-1" />
+          </>
         ),
-        fin: c.esPrincipal ? (
+        fin: c.archivado ? (
+          <Badge punto={false}>Archivado</Badge>
+        ) : c.esPrincipal ? (
           <Badge punto={false} className="hidden md:inline-flex">
             Principal
           </Badge>

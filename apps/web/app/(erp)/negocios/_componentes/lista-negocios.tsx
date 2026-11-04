@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 
-import { Badge, type EstadoPantalla, MonoAv } from "@opai/ds";
+import { Badge, ChipsEtiquetas, type EstadoPantalla, MonoAv } from "@opai/ds";
+
+import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etiquetas/opciones";
 
 import { monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
@@ -26,6 +28,8 @@ export function ListaNegocios(p: {
   etapas: { valor: string; etiqueta: string }[];
   /** «Nuevo negocio» en teléfono (en md+ va en la barra superior); también en el estado vacío. */
   nuevo?: ReactNode;
+  /** Catálogo de etiquetas para el filtro `?etiqueta=`. */
+  etiquetas?: OpcionEtiqueta[];
 }) {
   const abiertos = p.items.filter((n) => n.estado === "abierto").length;
   const consulta = consultaLista(p.p);
@@ -47,6 +51,7 @@ export function ListaNegocios(p: {
           opciones: Object.entries(ESTADO).map(([valor, etiqueta]) => ({ valor, etiqueta })),
         },
         ...(p.etapas.length ? [{ param: "etapa", etiqueta: "Etapa", opciones: p.etapas }] : []),
+        ...filtroDeEtiquetas(p.etiquetas ?? []),
       ]}
       meta={{
         izquierda: `${p.items.length} negocios · ${abiertos} ${abiertos === 1 ? "abierto" : "abiertos"}`,
@@ -74,8 +79,12 @@ export function ListaNegocios(p: {
             <span> · {n.etapaNombre}</span>
           </>
         ),
-        terciario:
-          monto(n) != null ? <span className="md:hidden">{pesos(monto(n))}/mes</span> : undefined,
+        terciario: (
+          <>
+            {monto(n) != null ? <span className="md:hidden">{pesos(monto(n))}/mes</span> : null}
+            <ChipsEtiquetas compacto etiquetas={n.etiquetas ?? []} className="mt-1" />
+          </>
+        ),
         fin: (
           <span className="flex flex-col items-end gap-1">
             <Badge tono={TONO[n.estado]}>{ESTADO[n.estado]}</Badge>

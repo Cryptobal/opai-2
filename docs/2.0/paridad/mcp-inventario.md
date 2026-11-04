@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 562 pares pantalla→capacidad · 506 con herramienta · 56 excepciones justificadas · 0 faltantes.
+**Resumen:** 577 pares pantalla→capacidad · 521 con herramienta · 56 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -75,6 +75,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.documentos.url_descarga` | `core_documentos_url_descarga` | existe |
 | compartido | `app/_components` | `core.estructuras.anular` | `core_estructuras_anular` | existe |
 | compartido | `app/_components` | `core.estructuras.create` | `core_estructuras_create` | existe |
+| compartido | `app/_components` | `core.etiquetas.asignar` | `core_etiquetas_asignar` | existe |
+| compartido | `app/_components` | `core.etiquetas.create` | `core_etiquetas_create` | existe |
+| compartido | `app/_components` | `core.etiquetas.de_entidad` | `core_etiquetas_de_entidad` | existe |
+| compartido | `app/_components` | `core.etiquetas.list` | `core_etiquetas_list` | existe |
+| compartido | `app/_components` | `core.etiquetas.quitar` | `core_etiquetas_quitar` | existe |
 | compartido | `app/_components` | `core.firmas.enviar` | `core_firmas_enviar` | existe |
 | compartido | `app/_components` | `core.geo.autocompletar` | `core_geo_autocompletar` | existe |
 | compartido | `app/_components` | `core.geo.detalle` | `core_geo_detalle` | existe |
@@ -84,6 +89,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
 | compartido | `app/(erp)/_componentes` | `core.aprobaciones.list` | `core_aprobaciones_list` | existe |
@@ -106,6 +112,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/configuracion/_comercial` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.importar_1_0` | — | excepción |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
@@ -184,9 +191,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.permisos.catalogo` | `core_permisos_catalogo` | existe |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.roles.list` | `core_roles_list` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `comercial.contactos.list` | `comercial_contactos_list` | existe |
+| compartido | `app/(erp)/contactos/_componentes` | `core.contactos.archive` | `core_contactos_archive` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.cuentas` | `core_contactos_cuentas` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.desvincular` | `core_contactos_desvincular` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.get` | `core_contactos_get` | existe |
+| compartido | `app/(erp)/contactos/_componentes` | `core.contactos.restaurar` | `core_contactos_restaurar` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.set_roles` | `core_contactos_set_roles` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.vincular` | `core_contactos_vincular` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
@@ -197,6 +206,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.puestos.confirmar` | `cpq_puestos_confirmar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.get` | `comercial_seguimientos_get` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.iniciar` | `comercial_seguimientos_iniciar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.crear` | `cpq_compartir_crear` | existe |
@@ -343,6 +355,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.set_contactos` | `comercial_negocios_set_contactos` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.update` | `comercial_negocios_update` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.vincular_instalacion` | `comercial_negocios_vincular_instalacion` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `core.actividades.timeline` | `core_actividades_timeline` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
@@ -353,6 +367,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.reordenar_etapas` | `comercial_config_reordenar_etapas` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.controlar` | `comercial_seguimientos_controlar` | existe |
+| compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.correos` | `comercial_seguimientos_correos` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.enviar_paso` | `comercial_seguimientos_enviar_paso` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.get` | `comercial_seguimientos_get` | existe |
 | compartido | `app/(erp)/negocios/_seguimiento` | `comercial.seguimientos.iniciar` | `comercial_seguimientos_iniciar` | existe |
@@ -760,17 +775,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.audit.list`
 - `core.bitacora.verificar`
 - `core.consumos.por_recurso`
-- `core.contactos.archive`
 - `core.documentos.desvincular`
 - `core.documentos.vencimientos`
 - `core.documentos.vincular`
 - `core.estructuras.get`
-- `core.etiquetas.asignar`
-- `core.etiquetas.create`
-- `core.etiquetas.de_entidad`
 - `core.etiquetas.delete`
-- `core.etiquetas.list`
-- `core.etiquetas.quitar`
 - `core.etiquetas.update`
 - `core.firmas.politica_get`
 - `core.firmas.politica_set`

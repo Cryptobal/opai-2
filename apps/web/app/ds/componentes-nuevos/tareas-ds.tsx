@@ -2,7 +2,42 @@
 
 import { useState } from "react";
 
-import { Alerta, Button, CompositorActividad, TareaFila, type TipoCompositor } from "@opai/ds";
+import {
+  Alerta,
+  Button,
+  ChipsEtiquetas,
+  CompositorActividad,
+  type EtiquetaChip,
+  TareaFila,
+  type TipoCompositor,
+} from "@opai/ds";
+
+const CATALOGO: EtiquetaChip[] = [
+  { id: "a", nombre: "Minería", tono: "info" },
+  { id: "b", nombre: "Cliente clave", tono: "success" },
+  { id: "c", nombre: "Pago lento", tono: "warning" },
+  { id: "d", nombre: "Evitar", tono: "danger" },
+  { id: "e", nombre: "Referido", tono: "neutral" },
+];
+
+/** ChipsEtiquetas (CAR-162): con permiso (quitar y agregar), de solo lectura y vacío. */
+export function MuestraEtiquetas() {
+  const [ids, setIds] = useState(["a", "b"]);
+  const activas = CATALOGO.filter((e) => ids.includes(e.id));
+  return (
+    <div className="flex flex-col gap-4">
+      <ChipsEtiquetas
+        etiquetas={activas}
+        disponibles={CATALOGO.filter((e) => !ids.includes(e.id))}
+        onAgregar={(id) => setIds([...ids, id])}
+        onQuitar={(id) => setIds(ids.filter((x) => x !== id))}
+        onCrear={() => undefined}
+      />
+      <ChipsEtiquetas etiquetas={CATALOGO.slice(0, 3)} />
+      <ChipsEtiquetas etiquetas={[]} vacio="Esta ficha no tiene etiquetas." />
+    </div>
+  );
+}
 
 /** TareaFila (pendiente, hoy, vencida, hecha, solo lectura) y CompositorActividad (CAR-162). */
 export function MuestraTareas() {

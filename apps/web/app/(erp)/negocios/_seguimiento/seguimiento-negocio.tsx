@@ -1,9 +1,12 @@
-import { Badge, Empty, SeccionTarjeta } from "@opai/ds";
+import { Suspense } from "react";
+
+import { Badge, Empty, SeccionTarjeta, Skeleton } from "@opai/ds";
 
 import { fecha, hora } from "@/lib/fechas";
 
 import { BarraSeguimiento, BotonesPaso, IniciarSeguimiento } from "./acciones";
 import type { PlanOpcion, VistaSeguimiento } from "./datos";
+import { CorreosCliente } from "./correos-cliente";
 import { CANAL, EJECUTOR, ESTADO_PASO, ESTADO_VISIBLE, MOTIVO } from "./etiquetas";
 
 type Props = { negocioId: string; seguimiento: VistaSeguimiento | null; planes: PlanOpcion[]; gestiona: boolean; abierto: boolean };
@@ -61,6 +64,9 @@ export function SeguimientoNegocio({ negocioId, seguimiento: s, planes, gestiona
           })}
         </ol>
       </SeccionTarjeta>
+      <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+        <CorreosCliente negocioId={negocioId} />
+      </Suspense>
     </div>
   );
 }
