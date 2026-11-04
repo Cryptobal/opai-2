@@ -73,13 +73,17 @@ describe("vista previa del PDF (CAR-162)", () => {
   });
 
   it("con PDF termina en listo con la URL", async () => {
+    const crear = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:pdf-previa");
     h.ejecutar.mockResolvedValue({ ok: true, data: { pdfBase64: "QUJD", bytes: 24_000 } });
     render();
     correrEfecto();
     await vi.runAllTicks();
     await Promise.resolve();
     const r = render();
-    expect(r.estado).toEqual({ fase: "listo", pdfUrl: "data:application/pdf;base64,QUJD", paginas: 2 });
+    // `blob:` y no `data:`: la CSP (`frame-src`) bloquea los `data:` en el iframe del PDF.
+    expect(r.estado).toEqual({ fase: "listo", pdfUrl: "blob:pdf-previa", paginas: 2 });
+    expect(crear).toHaveBeenCalledOnce();
+    expect((crear.mock.calls[0]?.[0] as Blob).type).toBe("application/pdf");
     expect(r.mensaje).toBeNull();
   });
 });
