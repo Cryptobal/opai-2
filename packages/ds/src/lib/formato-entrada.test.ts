@@ -24,4 +24,15 @@ describe("formato de entrada", () => {
   it("devuelve solo dígitos", () => {
     expect(soloDigitos("1.250.000")).toBe("1250000");
   });
+  it("corta en la coma decimal en vez de pegar los decimales al entero", () => {
+    expect(soloDigitos("800.000,50")).toBe("800000");
+    expect(soloDigitos("1.250,")).toBe("1250");
+    expect(soloDigitos(",5")).toBe("");
+  });
+  it("rechaza los negativos en vez de volverlos positivos", () => {
+    expect(soloDigitos("-5")).toBe("");
+    expect(soloDigitos(" -800.000")).toBe("");
+    expect(soloDigitos("\u22125")).toBe("");
+    expect(soloDigitos("800-000")).toBe("800000");
+  });
 });

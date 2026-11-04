@@ -19,7 +19,13 @@ export function formatearMiles(digitos: string): string {
   return d.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-/** Solo los dígitos de un texto con formato («800.000» → «800000»). */
+/**
+ * Solo los dígitos de un texto con formato es-CL («800.000» → «800000»). La coma es el decimal:
+ * corta ahí y descarta los decimales («800.000,50» → «800000»), en vez de pegarlos al entero. Los
+ * montos no admiten signo: un texto negativo («-5») se rechaza (vacío) y no se vuelve positivo.
+ */
 export function soloDigitos(texto: string): string {
-  return texto.replace(/\D/g, "");
+  const entero = texto.split(",")[0] ?? "";
+  if (/^\s*[-\u2212]/.test(entero)) return "";
+  return entero.replace(/\D/g, "");
 }
