@@ -1262,7 +1262,7 @@ identidad de servicio en main.
 
 **Consecuencias.** `AGENTS.md` (roles y «Prohibido») queda alineado con esta decisión.
 
-## ADR-065 · Agente interno: conversaciones sin pisarse, retención por empresa y contexto revalidado
+## ADR-066 · Agente interno: conversaciones sin pisarse, retención por empresa y contexto revalidado
 
 **Fecha:** 5-nov-2026 · **Decide:** Claude (constructor, PR 5c de CAR-120), dentro de la spec del agente (R9, R19, R20); sin cambio de alcance de negocio.
 
