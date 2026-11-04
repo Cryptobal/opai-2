@@ -1175,3 +1175,22 @@ identidad de servicio en main.
 **CASCADE de `instalacion_id`.** La FK `dias_calendario_instalacion_id_fkey` es `ON DELETE CASCADE` (migración `20261030000000`): al borrar una instalación del tenant se borran también sus feriados propios acotados a esa instalación, que no tienen sentido sin ella. Los feriados globales del tenant (`instalacion_id` nulo) y los de plataforma no se ven afectados. El trigger `mismo_tenant` garantiza que la instalación de una fila del tenant es del mismo tenant.
 
 **Consecuencias.** Reemplaza el «[dato a confirmar]» del #139 sobre la fuente de feriados movibles por este cálculo con revisión anual. Sin impacto en otros ADR. Las fechas marcadas **[por verificar]** se listan en el PR y en `ESTADO.md` para el primer contraste oficial.
+
+## ADR-060 · Cobranza de ventas: vencimiento derivado y recordatorios en días hábiles
+
+**Fecha:** 4-nov-2026 · **Estado:** propuesto (reglas por confirmar por Carlos) · **Origen:** CAR-166 (F4), auditoría de Finanzas §2.1, construido por Claude.
+
+**Contexto.** 1.0 materializa «vencida» con un cron que cambia `paymentStatus`, pierde de vista la factura con abono vencida y solo recuerda la confirmación de la proforma (+3, +7 y +12 días hábiles sin feriados), no el cobro de la factura. 2.0 no tenía cobranza.
+
+**Decisión.**
+
+1. **Vencida se deriva**, sin columna ni cron: documento 33/34 en estado `enviado` o `aceptado`, no cedido, con saldo y `fecha_vencimiento` (o emisión + plazo de cobro por defecto) anterior a hoy en la zona del tenant. El día del vencimiento no está vencido. Un abono parcial no saca la factura de la cobranza.
+2. **Tramos** 1-30, 31-60 y 61+ días vencidos, más «por vencer». El diseño dice «0-30 / 31-60 / 60+», que se solapa en 60.
+3. **Secuencia de recordatorios** configurable por empresa: hasta 3 pasos en días hábiles después del vencimiento (por defecto 3, 7 y 12), con los feriados del calendario del núcleo. Sale un paso por factura y por ejecución. Se detiene al pagar, al pausar la factura o al agotar los pasos.
+4. **Silencio por defecto (ADR-020):** el envío automático viene apagado; el envío manual existe siempre, es irreversible y pide aprobación a los agentes.
+5. **Historial de gestiones** (`finanzas.cobranza_gestiones`) con índice único parcial por documento y paso para que la secuencia no se repita.
+6. **WhatsApp:** solo enlace manual por ahora; el envío automático requiere aprobación por lote y queda para una etapa posterior.
+
+**Por confirmar (Carlos):** pasos contados desde el vencimiento (en 1.0, desde el envío de la proforma), tramos sin solape y WhatsApp solo manual.
+
+**Fuera de alcance:** seguimiento de proforma y estado de pago (F5), cesión y factoring.

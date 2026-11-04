@@ -44,8 +44,8 @@ Fuera: WhatsApp automático (queda el enlace manual `wa.me`, variante B del dise
 - `SET LOCAL lock_timeout`, prefijo `20261105120000`, entrada en `packages/db/test/dos-empresas/ajustes.ts`. **No se aplica**; etiqueta `migracion-pendiente` al abrir el PR.
 
 ## 7. Capacidades (todas con MCP)
-Lecturas (`finanzas:ventas.read`): `finanzas.cobranza.resumen` (tramos y deudores), `finanzas.cobranza.deudor` (ficha: facturas, contactos, gestiones), `finanzas.hoy.resumen` (qué emitir, cobrar y conciliar, con conteos por grupo).
-Escrituras (`finanzas:ventas.manage`, `dryRun`, `idempotencyKey`, auditadas, evento de dominio por outbox): `finanzas.cobranza.recordar` (irreversible: pide aprobación a agentes), `finanzas.cobranza.pausar` / `reanudar`, `finanzas.cobranza.registrar_gestion` (nota manual). Ajustes por `core.config.set`.
+Lecturas (`finanzas:read`, como el resto de Ventas): `finanzas.cobranza.resumen` (tramos y deudores), `finanzas.cobranza.deudor` (ficha: facturas, contactos, gestiones), `finanzas.hoy.resumen` (qué emitir, cobrar y conciliar, con conteos por grupo).
+Escrituras (`finanzas:ventas.manage`, `dryRun`, `idempotencyKey`, auditadas, evento de dominio por outbox): `finanzas.cobranza.recordar` (irreversible: pide aprobación a agentes), `finanzas.cobranza.pausar` (con `pausada: true | false`, pausa y reanuda), `finanzas.cobranza.registrar_gestion` (nota manual). Ajustes por `core.config.set`.
 
 ## 8. Interfaz y responsive
 Solo `@opai/ds`; patrones `ListScreen`/`DetailScreen` con los cuatro estados (cargando, vacío, error, sin permiso: supervisor, gerente y viewer ven Forbidden). 375, 1024 y 1280 px, claro y oscuro. Presupuesto de JS por ruta; sheets cargados bajo demanda. «Hoy en Finanzas»: bandeja única con grupos y contador, cada fila con su acción directa.
@@ -83,7 +83,7 @@ Dominio (vencimiento, tramos, días hábiles con feriados, evaluador); capacidad
 Riesgo: enviar correos de cobranza por error. Mitigación: automático apagado por defecto, `dryRun`, aprobación a agentes y vista previa. Rollback: la migración es aditiva (se revierte con DROP de la tabla y la columna); apagar `cobranza.recordatoriosAutomaticos`.
 
 ## 16. Reporte de ejecución
-Se completa en el PR.
+Ver la descripción del PR. Cambios respecto del plan: pausar y reanudar son una sola capacidad (`pausada`); el menú suma «Hoy en Finanzas» y «Cobranza».
 
 ## Decisiones propuestas a Carlos
 1. Pasos por defecto +3, +7 y +12 días hábiles **después del vencimiento** (en 1.0 son después del envío de la proforma).
