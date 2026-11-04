@@ -17,6 +17,8 @@ type Props = {
   errorFijados?: boolean;
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
+  onBuscar?: () => void;
+  recientes?: () => readonly ItemFijado[];
 };
 const Contenido = lazy(() => import("./contenido-mas").then((m) => ({ default: m.ContenidoMas })));
 

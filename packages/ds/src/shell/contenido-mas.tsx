@@ -1,11 +1,14 @@
 "use client";
 
+import { useMemo, useRef } from "react";
+
 import { Button } from "../components/button";
 import { cn } from "../cn";
 import { Sheet } from "../components/dialog";
 import type { ItemMenu } from "../components/menu";
 import { iconoDeArea } from "./area-iconos";
-import { Fijados, type ItemFijado } from "./fijados";
+import type { ItemFijado } from "./fijados";
+import { baldosasDeAcceso, BuscadorMas, RecientesMas } from "./mas-acceso";
 import { agrupar } from "./sidebar-item";
 import { esActivo, type NavItem } from "./types";
 
@@ -20,7 +23,8 @@ export function ContenidoMas({
   fijados,
   errorFijados,
   reintentarFijados,
-  onDesfijar,
+  onBuscar,
+  recientes,
 }: {
   items: readonly NavItem[];
   extras: readonly ItemMenu[];
@@ -33,7 +37,17 @@ export function ContenidoMas({
   errorFijados?: boolean;
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
+  onBuscar?: () => void;
+  /** Se lee al abrir el menú (localStorage del navegador), no en cada render del shell. */
+  recientes?: () => readonly ItemFijado[];
 }) {
+  // Se relee al abrir; al cerrar se conserva la última lectura para que la fila no se vacíe mientras la hoja sale.
+  const ultimos = useRef<readonly ItemFijado[]>([]);
+  const leidos = useMemo<readonly ItemFijado[]>(() => {
+    if (abierto) ultimos.current = recientes?.() ?? [];
+    return ultimos.current;
+  }, [abierto, recientes]);
+  const accesos = baldosasDeAcceso(fijados ?? [], leidos);
   const grupos = agrupar(items.filter((i) => !i.pie));
   const pie = items.filter((i) => i.pie);
   const navegar = (href: string) => {
@@ -89,16 +103,25 @@ export function ContenidoMas({
   return (
     <Sheet abierto={abierto} onCerrar={onCerrar} onRestaurarFoco={onRestaurarFoco} titulo="Más">
       <div className="flex flex-col gap-1 pb-[env(safe-area-inset-bottom)]">
-        {fijados ? (
-          <Fijados
-            items={fijados}
-            rutaActual={rutaActual}
-            onDesfijar={onDesfijar ?? (() => undefined)}
-            className="px-0"
-            onNavegar={navegar}
-            {...(errorFijados ? { error: true } : {})}
-            {...(reintentarFijados ? { reintentar: reintentarFijados } : {})}
+        {onBuscar ? (
+          <BuscadorMas
+            onBuscar={() => {
+              onCerrar();
+              // Después de que la hoja devuelva el foco: así la paleta se queda con él y no hay dos capas modales a la vez.
+              setTimeout(onBuscar, 0);
+            }}
           />
+        ) : null}
+        {fijados || recientes ? (
+          <div className="mt-3">
+            <RecientesMas
+              items={accesos}
+              rutaActual={rutaActual}
+              onNavegar={navegar}
+              {...(errorFijados ? { error: true } : {})}
+              {...(reintentarFijados ? { reintentar: reintentarFijados } : {})}
+            />
+          </div>
         ) : null}
         {grupos.map(([grupo, lista]) => {
           if (!grupo) {
