@@ -5,7 +5,7 @@ import {
   type CredencialesOctava,
 } from "@opai/integrations";
 
-import { leerSecreto, guardarSecreto } from "../integraciones/secretos";
+import { leerSecreto, guardarSecretoTx } from "../integraciones/secretos";
 import type { Contexto } from "../types";
 
 export type ConfigCesion = { emailCedente?: string; direccionCedente?: string; contactoNombre?: string; contactoEmail?: string };
@@ -19,12 +19,19 @@ export async function integradorOctava(ctx: Contexto, integracionId: string): Pr
   return usuario && clave ? { usuario, clave } : null;
 }
 
+/**
+ * Estos secretos se guardan en una transacción independiente: si la cesión falla después de registrar
+ * al cedente, el ROLLBACK de la solicitud no debe llevarse la PassAccesoApi (Octava no la reenvía) ni el token.
+ */
+const guardarDurable = (ctx: Contexto, integracionId: string, nombre: string, valor: string) =>
+  ctx.transaccionIndependiente((tx) => guardarSecretoTx(tx, ctx, integracionId, nombre, valor));
+
 /** PassAccesoApi y token de Octava viven como secretos cifrados de la misma integración (sin columnas nuevas). */
 export function almacenSesionOctava(ctx: Contexto, integracionId: string): AlmacenSesionOctava {
   return {
     leerPassAcceso: () => leerSecreto(ctx, integracionId, "pass_acceso_api"),
     async guardarPassAcceso(pass) {
-      await guardarSecreto(ctx, integracionId, "pass_acceso_api", pass);
+      await guardarDurable(ctx, integracionId, "pass_acceso_api", pass);
     },
     async leerToken() {
       const crudo = await leerSecreto(ctx, integracionId, "token_sesion");
@@ -33,7 +40,7 @@ export function almacenSesionOctava(ctx: Contexto, integracionId: string): Almac
       return token && Number(exp) > 0 ? { token, expiraEn: Number(exp) } : null;
     },
     async guardarToken(t) {
-      await guardarSecreto(ctx, integracionId, "token_sesion", t ? `${t.expiraEn}|${t.token}` : "0|");
+      await guardarDurable(ctx, integracionId, "token_sesion", t ? `${t.expiraEn}|${t.token}` : "0|");
     },
   };
 }
