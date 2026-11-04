@@ -1,47 +1,32 @@
-import { formatearNumero } from "@opai/domain";
 import { Estado } from "@opai/ds";
 
 import { estadoPantalla } from "@/lib/formato";
+import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
 
+import { CatalogoEditable } from "./catalogo-editable";
+import type { CategoriaCatalogo, ItemCatalogo } from "./catalogo-tipos";
 import { type FilaReferencia, SueldosReferenciaCpq } from "./sueldos-referencia-cpq";
-import { ejecutarComoUsuario } from "@/lib/servidor";
 
-type ItemCatalogo = {
-  id: string;
-  codigo: string;
-  nombre: string;
-  costoUnitarioClp: number;
-  recurrencia: string;
-  activo: boolean;
-};
-
-/** Pestaña Catálogo de Configuración → Módulos → CPQ. */
+/** Pestaña Catálogo de Configuración → Módulos → CPQ: ítems y categorías editables y sueldos de referencia. */
 export async function SeccionCatalogoCpq() {
-  const r = await ejecutarComoUsuario<{ items: ItemCatalogo[] }>("erp", "cpq.catalogo_items.list", {
-    incluirInactivos: true,
-  });
-  const ref = await ejecutarComoUsuario<{ items: FilaReferencia[] }>("erp", "cpq.sueldos_referencia.list", {});
+  const identidad = await identidadActual();
+  const editable = identidad ? puedeDeIdentidad(identidad)("cpq:modelo.manage") : false;
+  const [r, cats, ref] = await Promise.all([
+    ejecutarComoUsuario<{ items: ItemCatalogo[] }>("erp", "cpq.catalogo_items.list", { incluirInactivos: true }),
+    ejecutarComoUsuario<{ items: CategoriaCatalogo[] }>("erp", "cpq.catalogo_categorias.list", { incluirInactivas: true }),
+    ejecutarComoUsuario<{ items: FilaReferencia[] }>("erp", "cpq.sueldos_referencia.list", {}),
+  ]);
   const verReferencias = ref.ok && ref.data.items.some((i) => i.sueldoBaseClp !== undefined);
+  const falla = !r.ok ? r : !cats.ok ? cats : null;
   return (
-    <Estado state={r.ok ? "ready" : estadoPantalla(r)} variante="formulario">
-      {r.ok ? (
-        <div className="space-y-3">
+    <Estado state={falla ? estadoPantalla(falla) : "ready"} variante="formulario">
+      {r.ok && cats.ok ? (
+        <div className="space-y-6">
           <p className="t-body-sm text-fg-muted">
-            Ítems del catálogo CPQ del tenant (costo unitario y recurrencia por defecto).
+            Ítems y categorías del catálogo CPQ de la empresa. Editar o archivar no cambia las cotizaciones ya armadas ni las enviadas.
           </p>
-          <ul className="divide-y divide-border rounded-lg border border-border">
-            {r.data.items.map((i) => (
-              <li key={i.id} className="flex flex-wrap items-baseline justify-between gap-2 px-3 py-2">
-                <span className="t-body-sm">
-                  <span className="t-mono text-fg-muted">{i.codigo}</span> · {i.nombre}
-                </span>
-                <span className="t-caption text-fg-muted">
-                  {formatearNumero(i.costoUnitarioClp)} CLP · {i.recurrencia}
-                  {!i.activo ? " · inactivo" : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <CatalogoEditable items={r.data.items} categorias={cats.data.items} editable={editable} />
           {ref.ok && verReferencias ? <SueldosReferenciaCpq filas={ref.data.items} /> : null}
         </div>
       ) : null}
