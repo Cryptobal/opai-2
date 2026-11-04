@@ -11,7 +11,8 @@ import { EditorPlan } from "./editor-plan";
 export type PasoConfig = { dias: number; hora?: string; canal: "correo" | "whatsapp" | "llamada" | "interno"; ejecutor: "persona" | "opai_automatico" | "agente"; titulo: string; guion?: string };
 export type ConfigPlan = {
   conteo: "habiles" | "corridos"; desde: "inicio" | "paso_anterior"; hora: string; ventana: { desde: string; hasta: string };
-  alResponder: "pausar" | "detener"; alTerminar: "proponer_cierre" | "solo_avisar"; pasos: PasoConfig[];
+  alResponder: "pausar" | "detener"; etapaAlResponder?: string | undefined;
+  alTerminar: "proponer_cierre" | "aplicar_cierre_propuesto" | "solo_avisar"; noCerrarDesdeEtapa?: string | undefined; pasos: PasoConfig[];
 };
 export type PlanConfig = { id: string; nombre: string; disparador: string; porDefecto: boolean; activo: boolean; version: number; config: ConfigPlan; enCurso: number };
 
@@ -21,7 +22,9 @@ const PLAN_VACIO: ConfigPlan = {
 };
 
 /** Lista de planes con «Editar» y «Nuevo plan». Sin planes, ofrece crear el base de la vertical. */
-export function PlanesSeguimiento({ planes }: { planes: PlanConfig[] }) {
+export type EtapaOpcion = { valor: string; etiqueta: string };
+
+export function PlanesSeguimiento({ planes, etapas }: { planes: PlanConfig[]; etapas: EtapaOpcion[] }) {
   const [editando, setEditando] = useState<PlanConfig | "nuevo" | null>(null);
   const { ejecutar, pendiente } = useCapacidad("erp");
   async function crearBase() {
@@ -61,6 +64,7 @@ export function PlanesSeguimiento({ planes }: { planes: PlanConfig[] }) {
         <EditorPlan
           plan={editando === "nuevo" ? { nombre: "", porDefecto: false, activo: true, config: planes[0]?.config ?? PLAN_VACIO } : editando}
           {...(editando !== "nuevo" ? { id: editando.id } : {})}
+          etapas={etapas}
           onCerrar={() => setEditando(null)}
         />
       ) : null}

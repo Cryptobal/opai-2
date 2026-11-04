@@ -17,6 +17,7 @@ type Detalle = Venta & {
   montoExento: number;
   montoIva: number;
   montoCobrado: number;
+  montoPendiente: number;
   cesionProveedor: string | null;
   glosa: string | null;
   lineas: { glosa: string; monto: number }[];
@@ -125,7 +126,7 @@ function Ficha({ state, venta, envios }: { state: EstadoPantalla; venta: Detalle
         ) : null}
         {venta.glosa ? <p className="text-sm text-fg-muted">{venta.glosa}</p> : null}
       </Card>
-      <AccionesVenta venta={venta} montoCobrado={venta.montoCobrado} enviosPrevios={envios.filter((x) => x.estado === "enviado").length} />
+      <AccionesVenta venta={venta} montoPendiente={venta.montoPendiente} enviosPrevios={envios.filter((x) => x.estado === "enviado").length} />
       <HistorialEnvios envios={envios} />
     </div>
   );

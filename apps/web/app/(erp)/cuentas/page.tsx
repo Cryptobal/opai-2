@@ -33,7 +33,7 @@ export default function Cuentas({ searchParams }: Props) {
             unPanelHastaLg
             etiquetaLista="Lista de cuentas"
             vacio={{ texto: "Elige una cuenta", icono: Building2 }}
-            lista={<ListaCuentas state={l.state} items={l.items} q={l.q} />}
+            lista={<ListaCuentas state={l.state} items={l.items} q={l.q} etiquetas={l.etiquetas} />}
           />
           <HojaCuenta />
         </>

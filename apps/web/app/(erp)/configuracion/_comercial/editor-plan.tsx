@@ -6,14 +6,22 @@ import { Alerta, avisar, Button, Campo, Input, Select, Sheet, Switch, Textarea }
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { ConfigPlan, PasoConfig } from "./planes-seguimiento";
+import type { ConfigPlan, EtapaOpcion, PasoConfig } from "./planes-seguimiento";
 
-type Props = { id?: string; plan: { nombre: string; porDefecto: boolean; activo: boolean; config: ConfigPlan }; onCerrar: () => void };
+type Props = { id?: string; plan: { nombre: string; porDefecto: boolean; activo: boolean; config: ConfigPlan }; etapas: EtapaOpcion[]; onCerrar: () => void };
+const NINGUNA = "ninguna";
 const CANALES = [{ valor: "correo", etiqueta: "Correo" }, { valor: "whatsapp", etiqueta: "WhatsApp" }, { valor: "llamada", etiqueta: "Llamada" }, { valor: "interno", etiqueta: "Interno" }];
 const EJECUTORES = [{ valor: "persona", etiqueta: "Una persona" }, { valor: "opai_automatico", etiqueta: "Automático" }, { valor: "agente", etiqueta: "Agente" }];
 
+/** Fija (o quita) una de las etapas del plan; `ninguna` la borra de la configuración. */
+function conEtapa(c: ConfigPlan, campo: "etapaAlResponder" | "noCerrarDesdeEtapa", valor: string): ConfigPlan {
+  const { [campo]: _quitada, ...resto } = c;
+  return valor === NINGUNA ? resto : { ...resto, [campo]: valor };
+}
+
 /** Edita un plan: nombre, conteo de días y cada paso. Guardar publica una versión nueva si cambió. */
-export function EditorPlan({ id, plan, onCerrar }: Props) {
+export function EditorPlan({ id, plan, etapas, onCerrar }: Props) {
+  const conNinguna = [{ valor: NINGUNA, etiqueta: "No cambiar la etapa" }, ...etapas];
   const [nombre, setNombre] = useState(plan.nombre);
   const [porDefecto, setPorDefecto] = useState(plan.porDefecto);
   const [activo, setActivo] = useState(plan.activo);
@@ -49,6 +57,19 @@ export function EditorPlan({ id, plan, onCerrar }: Props) {
         <Campo etiqueta="Si el cliente responde" htmlFor="plan-resp">
           <Select id="plan-resp" valor={c.alResponder} onCambiar={(v) => setC({ ...c, alResponder: v === "detener" ? "detener" : "pausar" })} opciones={[{ valor: "pausar", etiqueta: "Pausar (se puede reanudar)" }, { valor: "detener", etiqueta: "Detener el seguimiento" }]} />
         </Campo>
+        {etapas.length ? (
+          <Campo etiqueta="Al responder, el negocio pasa a" htmlFor="plan-etapa-resp" ayuda="Nunca baja un negocio que ya está en esa etapa o más adelante, ni lo mueve si no cumple los requisitos de entrada.">
+            <Select id="plan-etapa-resp" valor={c.etapaAlResponder ?? NINGUNA} onCambiar={(v) => setC(conEtapa(c, "etapaAlResponder", v))} opciones={conNinguna} />
+          </Campo>
+        ) : null}
+        <Campo etiqueta="Si termina sin respuesta" htmlFor="plan-terminar" ayuda="«Cerrar solo» pierde el negocio con el motivo «Sin respuesta», lo deja anotado y avisa; se puede reabrir.">
+          <Select id="plan-terminar" valor={c.alTerminar} onCambiar={(v) => setC({ ...c, alTerminar: v === "aplicar_cierre_propuesto" || v === "solo_avisar" ? v : "proponer_cierre" })} opciones={[{ valor: "proponer_cierre", etiqueta: "Proponer el cierre a una persona" }, { valor: "aplicar_cierre_propuesto", etiqueta: "Cerrar solo (perder el negocio)" }, { valor: "solo_avisar", etiqueta: "Solo avisar" }]} />
+        </Campo>
+        {c.alTerminar === "aplicar_cierre_propuesto" && etapas.length ? (
+          <Campo etiqueta="No cerrar solo desde la etapa" htmlFor="plan-no-cerrar" ayuda="Desde esa etapa en adelante, el plan nunca cierra el negocio.">
+            <Select id="plan-no-cerrar" valor={c.noCerrarDesdeEtapa ?? NINGUNA} onCambiar={(v) => setC(conEtapa(c, "noCerrarDesdeEtapa", v))} opciones={[{ valor: NINGUNA, etiqueta: "Sin límite" }, ...etapas]} />
+          </Campo>
+        ) : null}
         <Switch activo={porDefecto} onCambiar={setPorDefecto} etiqueta="Plan por defecto" descripcion="Es el que se inicia al enviar una cotización." />
         <Switch activo={activo} onCambiar={setActivo} etiqueta="Plan activo" />
         <h3 className="t-heading">Pasos</h3>

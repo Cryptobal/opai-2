@@ -6,6 +6,12 @@ import { defineCapability } from "../define";
 import { prohibido } from "../errores";
 import { dondeContacto } from "../core/maestros/alcance";
 import { cursorDe, listaSchema, pagina } from "../core/maestros/comun";
+import {
+  conEtiqueta,
+  etiquetasDeFilas,
+  etiquetasFilaSchema,
+  filtroEtiqueta,
+} from "../core/crm/etiquetas-filas";
 import type { Contexto } from "../types";
 import { PERMISO_READ } from "./comun";
 
@@ -19,6 +25,8 @@ const fila = z.object({
   cargo: z.string().nullable(),
   esPrincipal: z.boolean(),
   negociosAbiertos: z.number(),
+  archivado: z.boolean(),
+  etiquetas: etiquetasFilaSchema,
 });
 
 async function cuentasYNegocios(ctx: Contexto, contactos: { id: string; cuentaId: string }[]) {
@@ -53,7 +61,10 @@ export const contactosList = defineCapability({
   descripcion:
     "Lista los contactos (personas) de la empresa con su cuenta, correo, teléfono, cargo y cuántos negocios abiertos tienen, paginada por cursor.",
   permiso: PERMISO_READ,
-  input: listaSchema.extend({ soloPrincipales: z.boolean().default(false) }),
+  input: listaSchema.extend({
+    soloPrincipales: z.boolean().default(false),
+    etiquetaId: filtroEtiqueta,
+  }),
   output: z.object({ items: z.array(fila), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
@@ -70,6 +81,7 @@ export const contactosList = defineCapability({
         AND: [dondeContacto(ctx)],
         ...(input.incluirArchivadas ? {} : { archivadoEn: null }),
         ...(input.soloPrincipales ? { esPrincipal: true } : {}),
+        ...conEtiqueta(input.etiquetaId),
         ...(q
           ? {
               OR: [
@@ -85,7 +97,10 @@ export const contactosList = defineCapability({
       ...cursorDe(input.cursor),
     });
     const p = pagina(filas, input.limite);
-    const extra = await cuentasYNegocios(ctx, p.items);
+    const [extra, etiquetas] = await Promise.all([
+      cuentasYNegocios(ctx, p.items),
+      etiquetasDeFilas(ctx, "contacto", p.items.map((c) => c.id)),
+    ]);
     return {
       items: p.items.map((c) => ({
         id: c.id,
@@ -95,6 +110,8 @@ export const contactosList = defineCapability({
         telefono: c.telefono ?? null,
         cargo: c.cargo ?? null,
         esPrincipal: c.esPrincipal,
+        archivado: c.archivadoEn != null,
+        etiquetas: etiquetas(c.id),
         ...extra(c),
       })),
       siguiente: p.siguiente,
