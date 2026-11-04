@@ -28,7 +28,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(nav.getByRole("link", { name: "Personas", exact: true })).toBeVisible();
     await nav.getByRole("button", { name: "Más opciones" }).click();
     const mas = page.getByRole("dialog", { name: "Más", exact: true });
-    await expect(mas.getByText("Fijados", { exact: true })).toBeVisible();
+    await expect(mas.getByText("Recientes y fijados", { exact: true })).toBeVisible();
     await expect(mas.getByRole("button", { name: "Instalaciones", exact: true })).toBeVisible();
     await expect(mas.getByRole("button", { name: "Configuración", exact: true })).toBeVisible();
     await expect(mas.getByText("Cuenta", { exact: true })).toHaveCount(0);
