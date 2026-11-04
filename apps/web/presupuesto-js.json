@@ -32,7 +32,7 @@
     "/(erp)/instalaciones/[id]/sueldo": 168,
     "/(erp)/personas/[id]/actividad": 168,
     "/(erp)/instalaciones/[id]/documentos": 168,
-    "/(erp)/instalaciones/[id]/rondas": 168,
+    "/(erp)/instalaciones/[id]/rondas": 169,
     "/(erp)/remuneraciones/calendario": 174,
     "/(erp)/remuneraciones/novedades": 173,
     "/(erp)/remuneraciones/[id]": 169,
