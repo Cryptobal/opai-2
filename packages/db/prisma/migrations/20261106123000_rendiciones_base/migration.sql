@@ -134,3 +134,7 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "rendiciones"."rendicion_
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('rendicion_id', 'rendiciones.rendiciones');
 
 COMMIT;
+
+-- Reversión: migración aditiva sin datos previos; si hace falta deshacerla antes de usarla:
+-- DROP SCHEMA "rendiciones" CASCADE; (borra las 4 tablas, sus políticas y triggers). Con datos ya
+-- cargados no se borra: se restaura desde el snapshot previo de Neon.

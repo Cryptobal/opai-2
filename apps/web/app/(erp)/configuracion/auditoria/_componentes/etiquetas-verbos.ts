@@ -22,7 +22,7 @@ export const VERBOS: Record<string, string> = {
   tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar",
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
-  aprobar: "Aprobar", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
+  aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
   confirmar_subida: "Confirmar subida", url_descarga: "Descargar", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",

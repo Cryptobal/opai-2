@@ -19,6 +19,7 @@ export const rendicionesListar = defineCapability({
   output: z.object({ rendiciones: z.array(resumenSchema) }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => s.rendiciones.map((r) => r.id),
   async handler(ctx, input) {
     const yo = actorId(ctx);
     if (input.alcance === "todas" && !ctx.autorizar(PERMISO_VER_TODAS)) throw prohibido("No puedes ver las rendiciones de toda la empresa.");
@@ -45,6 +46,7 @@ export const rendicionesObtener = defineCapability({
   output: z.object({ rendicion: rendicionSchema }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (s) => [s.rendicion.id],
   async handler(ctx, input) {
     actorId(ctx);
     return { rendicion: vistaDe(await rendicionDe(ctx, input.id)) };
