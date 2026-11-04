@@ -539,7 +539,7 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     const sup = ctxSup({ instalaciones: [instA] });
     const completa = await dato<Pag>(sup, "core.documentos.explorar", { orden: "vence", limite: 100 });
     const esperado = completa.items.map((d) => d.id);
-    expect(esperado.length).toBeGreaterThan(3);
+    expect(esperado.length).toBeGreaterThanOrEqual(3); // 2 con fecha + al menos 1 sin fecha
     expect(esperado.slice(0, 2)).toEqual([docConAjeno, docA]); // con fecha primero, los sin fecha al final
     for (const limite of [1, 2]) {
       const vistos: string[] = [];
