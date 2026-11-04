@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "rotar-kek": "tsx scripts/rotar-kek.ts",
-    "rotar-dek": "tsx scripts/rotar-dek.ts"
+    "rotar-dek": "tsx scripts/rotar-dek.ts",
+    "seed:finanzas-qa": "tsx scripts/seed-finanzas-qa.ts"
   },
   "dependencies": {
     "@opai/db": "workspace:*",
