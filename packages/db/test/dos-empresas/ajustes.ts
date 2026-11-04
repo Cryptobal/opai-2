@@ -258,6 +258,26 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["core.etiquetas", "core.cuentas"],
     valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas") }),
   },
+  // CAR-157: vocabularios cerrados en corrida y fila de registro.
+  "core.importaciones": {
+    valores: () => ({
+      sistema: "opai1",
+      origen: "fixtures",
+      version_contrato: "opai1-export/v1",
+      modo: "simular",
+      estado: "completada",
+      conteos: "{}",
+    }),
+  },
+  "core.importaciones_filas": {
+    dependencias: ["core.importaciones"],
+    valores: (ctx) => ({
+      importacion_id: id(ctx, "core.importaciones"),
+      entidad: "cuenta",
+      id_1_0: "acc-prueba-dos-empresas",
+      accion: "omitido",
+    }),
+  },
   "core.valores_tenant": {
     valores: () => ({
       indicador_id: "a1000001-0001-4001-8001-000000000001",
