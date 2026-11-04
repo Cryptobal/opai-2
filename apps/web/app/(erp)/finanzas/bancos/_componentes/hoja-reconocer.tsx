@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { diferenciaAsignada } from "@opai/domain";
 import { avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -11,6 +12,7 @@ import { DialogDeshacerBanco } from "./dialog-deshacer-banco";
 import type { MovimientoBanco } from "./bancos-tipos";
 import { CuerpoHojaReconocer } from "./cuerpo-hoja-reconocer";
 import type { SugerenciaReconocer } from "./lista-sugerencias-reconocer";
+import type { Elegida } from "./seleccion-conciliacion";
 
 export function HojaReconocer({
   movimiento,
@@ -23,7 +25,7 @@ export function HojaReconocer({
 }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [sugerencias, setSugerencias] = useState<SugerenciaReconocer[]>([]);
-  const [docManual, setDocManual] = useState("");
+  const [elegidas, setElegidas] = useState<Elegida[]>([]);
   const [deshacerAbierto, setDeshacerAbierto] = useState(false);
   const [motivoDeshacer, setMotivoDeshacer] = useState("");
 
@@ -37,7 +39,9 @@ export function HojaReconocer({
     void ejecutar<{ sugerencias: SugerenciaReconocer[] }>("finanzas.conciliaciones.sugerir", {
       movimientoId,
     }).then((r) => {
-      if (!cancel) setSugerencias(r?.sugerencias ?? []);
+      if (cancel) return;
+      setElegidas([]);
+      setSugerencias(r?.sugerencias ?? []);
     });
     return () => {
       cancel = true;
@@ -49,33 +53,18 @@ export function HojaReconocer({
   const montoAbs = Math.abs(movimiento.monto);
   const esConciliado = movimiento.estado === "conciliado";
 
-  async function confirmarEnlace(enlace: {
-    tipo: "documento_emitido" | "documento_recibido" | "flujo_fila";
-    id: string;
-    monto: number;
-  }) {
+  async function confirmar() {
     limpiarError();
-    const prev = await ejecutar(
-      "finanzas.conciliaciones.confirmar",
-      { movimientoId: movimiento!.id, enlaces: [enlace] },
-      true,
-    );
-    if (!prev) return;
-    const r = await ejecutar("finanzas.conciliaciones.confirmar", {
-      movimientoId: movimiento!.id,
-      enlaces: [enlace],
-    });
+    const enlaces = elegidas.filter((e) => e.monto > 0).map((e) => ({ tipo: e.tipo, id: e.id, monto: e.monto }));
+    const input = { movimientoId: movimiento!.id, enlaces };
+    if (!(await ejecutar("finanzas.conciliaciones.confirmar", input, true))) return;
+    const r = await ejecutar("finanzas.conciliaciones.confirmar", input);
     if (r) {
-      avisar.exito("Movimiento conciliado");
+      avisar.exito(enlaces.length > 1 ? `Movimiento conciliado con ${enlaces.length} documentos` : "Movimiento conciliado");
       onCerrar();
     }
   }
-
-  async function confirmarManual() {
-    const id = docManual.trim();
-    if (!id) return;
-    await confirmarEnlace({ tipo: "documento_emitido", id, monto: montoAbs });
-  }
+  const cuadra = elegidas.some((e) => e.monto > 0) && diferenciaAsignada(montoAbs, elegidas) === 0;
 
   async function deshacer() {
     const r = await ejecutar("finanzas.conciliaciones.deshacer", {
@@ -111,8 +100,8 @@ export function HojaReconocer({
               <Button variant="secondary" onClick={onCerrar}>
                 Sin conciliar
               </Button>
-              <Button disabled={pendiente || docManual.trim().length < 36} onClick={() => void confirmarManual()}>
-                Confirmar documento
+              <Button disabled={pendiente || !cuadra} onClick={() => void confirmar()}>
+                Confirmar conciliación
               </Button>
             </>
           )
@@ -124,11 +113,8 @@ export function HojaReconocer({
           error={error}
           sugerencias={sugerencias}
           pendiente={pendiente}
-          docManual={docManual}
-          onDocManual={setDocManual}
-          onElegirSugerencia={(s) =>
-            void confirmarEnlace({ tipo: s.tipo, id: s.documentoId, monto: montoAbs })
-          }
+          elegidas={elegidas}
+          onElegidas={setElegidas}
         />
       </Sheet>
       <DialogDeshacerBanco

@@ -33,6 +33,6 @@ export const RECURSOS: Record<string, string> = {
   marca_documento: "Marca de documentos", plantillas_documento: "Plantillas de documento",
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
   propuestas_tecnica: "Propuestas técnicas", envios_propuesta: "Envíos de propuesta",
-  cobranza: "Cobranza", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0",
+  cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0",
   informes: "Informes", reportes: "Reportes",
 };
