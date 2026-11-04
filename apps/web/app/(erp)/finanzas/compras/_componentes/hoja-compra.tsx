@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+
 import { InputPesos } from "@/app/_components/maestros/input-pesos";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -71,15 +73,25 @@ export function HojaCompra({ proveedores, centros }: { proveedores: Proveedor[];
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <Campo etiqueta="Proveedor" htmlFor="co-prov">
-          <Select
-            id="co-prov"
-            valor={proveedorId}
-            onCambiar={setProveedorId}
-            placeholder="Elige un proveedor"
-            opciones={proveedores.map((p) => ({ valor: p.id, etiqueta: p.razonSocial }))}
-          />
-        </Campo>
+        {proveedores.length === 0 ? (
+          <Alerta
+            tono="info"
+            titulo="Sin proveedores"
+            accion={<EnlaceBoton href="/finanzas/compras/proveedores?nuevo=1" variante="secondary">Crear proveedor</EnlaceBoton>}
+          >
+            Crea el proveedor que emitió el documento y vuelve a registrarlo.
+          </Alerta>
+        ) : (
+          <Campo etiqueta="Proveedor" htmlFor="co-prov">
+            <Select
+              id="co-prov"
+              valor={proveedorId}
+              onCambiar={setProveedorId}
+              placeholder="Elige un proveedor"
+              opciones={proveedores.map((p) => ({ valor: p.id, etiqueta: p.razonSocial }))}
+            />
+          </Campo>
+        )}
         <Campo etiqueta="Tipo de documento" htmlFor="co-tipo">
           <Select id="co-tipo" valor={tipo} onCambiar={setTipo} opciones={TIPOS} />
         </Campo>

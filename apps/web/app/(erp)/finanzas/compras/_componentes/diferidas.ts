@@ -9,3 +9,6 @@ export const HojaCompra = hojaDiferida(["nuevo"], () =>
 export const HojaLote = hojaDiferida(["lote"], () =>
   import("./hoja-lote").then((m) => m.HojaLote),
 );
+export const HojaRcv = hojaDiferida(["rcv"], () =>
+  import("./hoja-rcv").then((m) => m.HojaRcv),
+);
