@@ -531,6 +531,63 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     expect(key.items.map((d) => d.id).sort()).toEqual([...ids].sort());
   });
 
+  it("CAR-182: orden «vence» con documentos sin fecha pagina sin repetir ni saltar filas", async () => {
+    // Postgres no compara NULL con `<`/`>`: el cursor compuesto debe tratar los sin fecha aparte.
+    await e.admin.documento.update({ where: { id: docA }, data: { venceEn: new Date("2099-03-01") } });
+    await e.admin.documento.update({ where: { id: docConAjeno }, data: { venceEn: new Date("2099-01-15") } });
+    type Pag = { items: { id: string }[]; siguiente: string | null };
+    const sup = ctxSup({ instalaciones: [instA] });
+    const completa = await dato<Pag>(sup, "core.documentos.explorar", { orden: "vence", limite: 100 });
+    const esperado = completa.items.map((d) => d.id);
+    expect(esperado.length).toBeGreaterThan(3);
+    expect(esperado.slice(0, 2)).toEqual([docConAjeno, docA]); // con fecha primero, los sin fecha al final
+    for (const limite of [1, 2]) {
+      const vistos: string[] = [];
+      let cursor: string | undefined;
+      for (let i = 0; i < 50; i++) {
+        const r: Pag = await dato(sup, "core.documentos.explorar", { orden: "vence", limite, ...(cursor ? { cursor } : {}) });
+        vistos.push(...r.items.map((d) => d.id));
+        if (!r.siguiente) break;
+        cursor = r.siguiente;
+      }
+      expect(vistos, `limite ${limite}`).toEqual(esperado);
+    }
+  });
+
+  it("CAR-182: un documento sensible a cargo del supervisor no aparece, no cuenta y no sirve de cursor", async () => {
+    const solicitud = await dato<{ id: string }>(ctxOwner(), "core.cumplimiento.solicitud_crear", {
+      tipo: "acceso",
+      titular: { tipo: "persona", id: personaId },
+    });
+    const sensible = await e.admin.documento.create({
+      data: {
+        tenantId,
+        nombre: "sensible-explorar.pdf",
+        mime: "application/pdf",
+        tamano: 1,
+        storageKey: `k-${randomUUID()}`,
+        estado: "disponible",
+        creadoPorTipo: "user",
+      },
+    });
+    await e.admin.documentoVinculo.createMany({
+      data: [
+        // Dueño en una instalación a cargo (entraría por alcance) + vínculo de cumplimiento (la excluye).
+        { tenantId, documentoId: sensible.id, entidadTipo: "instalacion", entidadId: instA, rol: "propietario" },
+        { tenantId, documentoId: sensible.id, entidadTipo: "solicitud_arco", entidadId: solicitud.id, rol: "referencia" },
+      ],
+    });
+    type Pag = { items: { id: string }[]; total: number };
+    const sup = ctxSup({ instalaciones: [instA] });
+    const lista = await dato<Pag>(sup, "core.documentos.explorar", { limite: 100 });
+    expect(lista.items.map((d) => d.id)).not.toContain(sensible.id);
+    expect(lista.total).toBe(lista.items.length);
+    const buscado = await dato<Pag>(sup, "core.documentos.explorar", { q: "sensible-explorar" });
+    expect(buscado.total).toBe(0);
+    const r = await mod.executeCapability(sup, "core.documentos.explorar", { cursor: sensible.id });
+    expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
   it("B-A: la ficha de un documento a cargo no expone vínculos ajenos y no filtra sus versiones", async () => {
     const conAjeno = await dato<{ vinculos: { entidadTipo: string; entidadId: string; rol: string }[] }>(
       ctxSup({ instalaciones: [instA] }),
