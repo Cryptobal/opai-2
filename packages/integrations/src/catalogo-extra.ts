@@ -79,7 +79,16 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
       { nombre: "usuario", etiqueta: "Usuario Octava" },
       { nombre: "clave", etiqueta: "Clave Octava" },
     ],
-    config: z.object({ proveedor: z.enum(["octava"]).default("octava") }).strict(),
+    config: z
+      .object({
+        proveedor: z.enum(["octava"]).default("octava"),
+        /** Datos del cedente que Octava exige en CedeDte (CAR-154); sin ellos se usa el usuario que cede. */
+        emailCedente: z.string().trim().email().max(40).optional(),
+        direccionCedente: z.string().trim().min(3).max(70).optional(),
+        contactoNombre: z.string().trim().min(2).max(40).optional(),
+        contactoEmail: z.string().trim().email().max(40).optional(),
+      })
+      .strict(),
     disponible: true,
   },
 ];
