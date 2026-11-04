@@ -21,7 +21,12 @@ function estadoDe(plan: PlanVista, i: number): EstadoPaso {
   const r = plan.resultados.find((x) => x.paso === i);
   if (r?.ok) return "hecho";
   if (r) return r.code === "APPROVAL_REQUIRED" ? "aprobacion" : "fallo";
-  if (plan.estado === "fallido" || plan.estado === "aprobacion" || plan.estado === "rechazado")
+  if (
+    plan.estado === "fallido" ||
+    plan.estado === "aprobacion" ||
+    plan.estado === "rechazado" ||
+    plan.estado === "vencido"
+  )
     return "omitido";
   return i === plan.siguiente || plan.nivel === "aprobar_todo" ? "actual" : "pendiente";
 }

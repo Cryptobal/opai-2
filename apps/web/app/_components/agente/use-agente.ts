@@ -4,13 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
-import { textoError } from "./mensajes-error";
+import { ERROR_RED, ERROR_RED_PLAN, ERROR_VENCIDO, textoError } from "./mensajes-error";
+import { aplicarRespuesta } from "./respuesta-plan";
 import {
   type Mensaje,
   type Modelo,
   type Nivel,
   type PlanVista,
-  type Resolucion,
   type Turno,
   VIGENCIA_PLAN_MS,
 } from "./tipos";
@@ -59,33 +59,39 @@ export function useAgente(portal: string, abierto: boolean) {
         { id: nuevoId(), rol: "yo", texto },
         { id, rol: "agente", texto: "" },
       ]);
-      const r = await ejecutarCapacidad(
-        portal,
-        "agente.turno.preparar",
-        { mensaje: texto, modelo, nivel },
-        false,
-        "ninguna",
-        nuevoId(),
-      );
-      if (!r.ok) {
-        poner(id, (m) => ({ ...m, error: textoError(r.error.code, r.error.message) }));
-      } else {
-        const t = r.data as Turno;
-        const plan: PlanVista | undefined = t.token
-          ? {
-              pasos: t.pasos,
-              nivel,
-              token: t.token,
-              siguiente: 0,
-              resultados: [],
-              estado: "propuesto",
-              vence: Date.now() + VIGENCIA_PLAN_MS,
-            }
-          : undefined;
-        poner(id, (m) => ({ ...m, texto: t.texto, ...(plan ? { plan } : {}) }));
+      try {
+        const r = await ejecutarCapacidad(
+          portal,
+          "agente.turno.preparar",
+          { mensaje: texto, modelo, nivel },
+          false,
+          "ninguna",
+          nuevoId(),
+        );
+        if (!r.ok) {
+          poner(id, (m) => ({ ...m, error: textoError(r.error.code, r.error.message) }));
+        } else {
+          const t = r.data as Turno;
+          const plan: PlanVista | undefined = t.token
+            ? {
+                pasos: t.pasos,
+                nivel,
+                token: t.token,
+                siguiente: 0,
+                resultados: [],
+                estado: "propuesto",
+                // Margen de 30 s: el reloj del servidor corre desde antes de que llegue la respuesta.
+                vence: Date.now() + VIGENCIA_PLAN_MS - 30_000,
+              }
+            : undefined;
+          poner(id, (m) => ({ ...m, texto: t.texto, ...(plan ? { plan } : {}) }));
+        }
+      } catch {
+        poner(id, (m) => ({ ...m, error: ERROR_RED }));
+      } finally {
+        ocupado.current = false;
+        setTrabajando(false);
       }
-      ocupado.current = false;
-      setTrabajando(false);
     },
     [modelo, nivel, portal, poner],
   );
@@ -94,48 +100,47 @@ export function useAgente(portal: string, abierto: boolean) {
     async (id: string, aceptar: boolean) => {
       const actual = mensajes.find((m) => m.id === id)?.plan;
       if (!actual?.token || ocupado.current) return;
+      if (Date.now() >= actual.vence) {
+        return poner(id, (m) =>
+          m.plan ? { ...m, plan: { ...m.plan, estado: "vencido", error: ERROR_VENCIDO } } : m,
+        );
+      }
       ocupado.current = true;
-      poner(id, (m) => (m.plan ? { ...m, plan: { ...m.plan, estado: "ejecutando" } } : m));
-      const r = await ejecutarCapacidad(
-        portal,
-        "agente.plan.confirmar",
-        { token: actual.token, aceptar },
-        false,
-        "layout",
-        nuevoId(),
-      );
+      const previo = actual.estado;
       poner(id, (m) => {
         if (!m.plan) return m;
-        if (!r.ok) {
-          const vencido = r.error.code === "FORBIDDEN";
-          const error = vencido
-            ? "Este plan ya no está disponible. Pídelo de nuevo."
-            : textoError(r.error.code, r.error.message);
-          return { ...m, plan: { ...m.plan, estado: vencido ? "vencido" : "propuesto", error } };
-        }
-        const res = r.data as Resolucion;
-        const resultados = [...m.plan.resultados, ...res.resultados];
-        const hechos = resultados.filter((x) => x.ok).length;
-        const estado = res.estado === "pendiente" ? "en_curso" : res.estado;
-        return {
-          ...m,
-          plan: {
-            ...m.plan,
-            token: res.siguiente,
-            resultados,
-            siguiente: hechos,
-            estado: estado === "prevista" ? "propuesto" : estado,
-          },
-        };
+        const { error: _descartado, ...resto } = m.plan;
+        return { ...m, plan: { ...resto, estado: "ejecutando" } };
       });
-      ocupado.current = false;
+      try {
+        const r = await ejecutarCapacidad(
+          portal,
+          "agente.plan.confirmar",
+          { token: actual.token, aceptar },
+          false,
+          "layout",
+          nuevoId(),
+        );
+        poner(id, (m) => aplicarRespuesta(m, r, previo));
+      } catch {
+        // Puede que algún paso ya se haya ejecutado: no se afirma que no pasó nada.
+        poner(id, (m) =>
+          m.plan ? { ...m, plan: { ...m.plan, estado: previo, error: ERROR_RED_PLAN } } : m,
+        );
+      } finally {
+        ocupado.current = false;
+      }
     },
     [mensajes, poner, portal],
   );
 
   const nueva = useCallback(() => setMensajes([]), []);
   const hayPlanPendiente = mensajes.some(
-    (m) => m.plan && (m.plan.estado === "propuesto" || m.plan.estado === "en_curso"),
+    (m) =>
+      m.plan &&
+      (m.plan.estado === "propuesto" ||
+        m.plan.estado === "en_curso" ||
+        m.plan.estado === "ejecutando"),
   );
   return {
     modelos,

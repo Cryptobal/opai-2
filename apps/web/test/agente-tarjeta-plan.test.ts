@@ -76,4 +76,15 @@ describe("VistaPrevia y errores", () => {
     expect(textoError("RATE_LIMITED", "x")).toContain("Espera un minuto");
     expect(textoError("INTERNAL", "Falló.")).toContain("No se hizo ningún cambio");
   });
+
+  it("plan vencido: los pasos no se ofrecen y se pide generar otro", () => {
+    const out = html(plan({ estado: "vencido" }));
+    expect(out).toContain("No se ejecutó");
+    expect(out).not.toContain("Por confirmar");
+    expect(out).not.toContain("Confirmar");
+  });
+
+  it("tras confirmar no afirma que no se hizo ningún cambio", () => {
+    expect(textoError("INTERNAL", "Falló.", true)).not.toContain("No se hizo ningún cambio");
+  });
 });

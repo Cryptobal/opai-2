@@ -28,6 +28,7 @@ const XL = "(min-width: 1280px)";
  */
 export function PanelLateral({ abierto, onCerrar, titulo, acciones, retener, children }: Props) {
   const origen = useRef<HTMLElement | null>(null);
+  const panel = useRef<HTMLElement | null>(null);
   const alCerrar = useRef(onCerrar);
   alCerrar.current = onCerrar;
   const bloqueado = useRef(retener);
@@ -35,6 +36,7 @@ export function PanelLateral({ abierto, onCerrar, titulo, acciones, retener, chi
   useEffect(() => {
     if (!abierto) return;
     origen.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    panel.current?.focus();
     const raiz = document.documentElement;
     const mq = window.matchMedia(XL);
     const ajustar = () =>
@@ -44,7 +46,7 @@ export function PanelLateral({ abierto, onCerrar, titulo, acciones, retener, chi
     ajustar();
     mq.addEventListener("change", ajustar);
     const tecla = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !bloqueado.current) alCerrar.current();
+      if (e.key === "Escape" && !e.defaultPrevented && !bloqueado.current) alCerrar.current();
     };
     document.addEventListener("keydown", tecla);
     return () => {
@@ -65,10 +67,12 @@ export function PanelLateral({ abierto, onCerrar, titulo, acciones, retener, chi
         }}
       />
       <aside
+        ref={panel}
+        tabIndex={-1}
         role="dialog"
         aria-label={titulo}
         className={cn(
-          "pt-safe fixed inset-0 z-50 flex flex-col bg-bg",
+          "pt-safe fixed inset-0 z-50 flex flex-col bg-bg outline-none",
           "md:inset-y-auto md:top-[60px] md:right-0 md:bottom-0 md:left-auto md:w-[400px] md:border-l md:border-border md:pt-0 md:shadow-overlay",
           "animate-[ds-aparecer_150ms_ease-out] motion-reduce:animate-none",
         )}
