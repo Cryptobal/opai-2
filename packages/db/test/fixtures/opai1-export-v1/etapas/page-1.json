@@ -1,0 +1,48 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-04T13:00:00.000Z",
+  "recurso": "etapas",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "44444444-4444-4444-8444-444444444441",
+      "tenantId": "t",
+      "name": "Contacto inicial",
+      "order": 1,
+      "color": null,
+      "isActive": true,
+      "isClosedWon": false,
+      "isClosedLost": false,
+      "isAccepted": false,
+      "createdAt": "2026-01-05T12:00:00.000Z",
+      "updatedAt": "2026-01-05T12:00:00.000Z"
+    },
+    {
+      "id": "44444444-4444-4444-8444-444444444442",
+      "tenantId": "t",
+      "name": "Propuesta enviada",
+      "order": 2,
+      "color": null,
+      "isActive": true,
+      "isClosedWon": false,
+      "isClosedLost": false,
+      "isAccepted": false,
+      "createdAt": "2026-01-05T12:00:00.000Z",
+      "updatedAt": "2026-01-05T12:00:00.000Z"
+    },
+    {
+      "id": "44444444-4444-4444-8444-444444444443",
+      "tenantId": "t",
+      "name": "Adjudicado",
+      "order": 3,
+      "color": null,
+      "isActive": true,
+      "isClosedWon": true,
+      "isClosedLost": false,
+      "isAccepted": false,
+      "createdAt": "2026-01-05T12:00:00.000Z",
+      "updatedAt": "2026-01-05T12:00:00.000Z"
+    }
+  ]
+}
