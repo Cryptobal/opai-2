@@ -78,11 +78,17 @@ export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: Co
       await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
   }
   // Una sola vez por seguimiento: la primera respuesta registrada avisa al vendedor, haya o no cambio
-  // de estado (una pausa manual previa no la silencia). El motivo `cliente_respondio` marca «ya avisado».
-  const yaAvisado = s.motivo === "cliente_respondio";
-  if (!destino && !yaAvisado)
-    await tx.seguimiento.update({ where: { id: s.id }, data: { motivo: "cliente_respondio" } });
-  if (destino || !yaAvisado)
+  // de estado (una pausa manual previa no la silencia). El motivo `cliente_respondio` marca «ya avisado»
+  // y se reserva con un UPDATE condicional: si dos correos llegan a la vez, solo uno modifica la fila y avisa.
+  let avisar = Boolean(destino);
+  if (!destino && s.motivo !== "cliente_respondio") {
+    const reservado = await tx.seguimiento.updateMany({
+      where: { id: s.id, OR: [{ motivo: null }, { motivo: { not: "cliente_respondio" } }] },
+      data: { motivo: "cliente_respondio" },
+    });
+    avisar = reservado.count > 0;
+  }
+  if (avisar)
     await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
   return actividadId;
 }
