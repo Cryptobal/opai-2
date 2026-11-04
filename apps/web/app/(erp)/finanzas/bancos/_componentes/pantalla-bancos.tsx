@@ -11,6 +11,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import type { CuentaBanco, MovimientoBanco } from "./bancos-tipos";
 import { PESTANAS_ESTADO_BANCO } from "./bancos-tipos";
+import { fechaHora } from "@/lib/formato";
 import { clp, fechaDdMmAaaa } from "../../flujo/_componentes/datos";
 
 const HojaReconocer = dynamic(() => import("./hoja-reconocer").then((m) => ({ default: m.HojaReconocer })));
@@ -68,6 +69,12 @@ export function PantallaBancos({
             <p className="t-body-sm text-fg-muted">
               {cuenta ? `${cuenta.banco} · ${cuenta.numeroVisible}` : "Configura una cuenta para importar cartolas."}
             </p>
+            {cuenta?.ultimaSyncEn ? (
+              <p className="t-body-sm text-fg-muted">
+                Sincronizado con el banco el {fechaHora(cuenta.ultimaSyncEn)}
+                {cuenta.saldoBanco !== null ? ` · saldo ${clp(cuenta.saldoBanco)}` : ""}
+              </p>
+            ) : null}
           </div>
           {gestiona && cuentas.length > 0 ? (
             <Button variant="primary" onClick={() => setSubirAbierta(true)}>
