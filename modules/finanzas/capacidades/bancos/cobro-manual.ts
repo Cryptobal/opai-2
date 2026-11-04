@@ -72,7 +72,7 @@ export const bancosCobroManual = defineCapability({
       const actual = await tx.documentoEmitido.findFirst({ where: { id: input.documentoId } });
       if (!actual) throw reglaDeNegocio("El documento no existe.");
       validarDocumentoCobroBanco(actual, input.monto);
-      await exigirTopeDocumento(tx, "documento_emitido", actual.id, actual.montoTotal, input.monto);
+      await exigirTopeDocumento(tx, ctx.tenantId, "documento_emitido", actual.id, actual.montoTotal, input.monto);
 
       const mov = await tx.movimientoBancario.create({
         data: {

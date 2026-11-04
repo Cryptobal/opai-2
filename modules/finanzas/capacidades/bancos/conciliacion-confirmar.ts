@@ -67,19 +67,20 @@ export const bancosConciliacionConfirmar = defineCapability({
       if (reserva.count !== 1) throw conflicto("El movimiento ya está conciliado.");
 
       const docsSync = new Set<string>();
-      for (const e of input.enlaces) {
+      const ordenados = [...input.enlaces].sort((a, b) => `${a.tipo}:${a.id}`.localeCompare(`${b.tipo}:${b.id}`));
+      for (const e of ordenados) {
         if (e.tipo === "documento_emitido") {
           const doc = await tx.documentoEmitido.findFirst({ where: { id: e.id } });
           if (!doc) throw reglaDeNegocio("El documento emitido no existe.");
           validarDocumentoCobroBanco(doc, signoMov);
-          await exigirTopeDocumento(tx, "documento_emitido", doc.id, doc.montoTotal, e.monto);
+          await exigirTopeDocumento(tx, ctx.tenantId, "documento_emitido", doc.id, doc.montoTotal, e.monto);
           docsSync.add(e.id);
         }
         if (e.tipo === "documento_recibido") {
           const doc = await tx.documentoRecibido.findFirst({ where: { id: e.id } });
           if (!doc) throw reglaDeNegocio("El documento recibido no existe.");
           validarDocumentoCompraBanco(doc, signoMov);
-          await exigirTopeDocumento(tx, "documento_recibido", doc.id, doc.montoTotal, e.monto);
+          await exigirTopeDocumento(tx, ctx.tenantId, "documento_recibido", doc.id, doc.montoTotal, e.monto);
         }
         await tx.conciliacionBanco.create({
           data: {

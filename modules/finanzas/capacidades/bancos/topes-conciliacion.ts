@@ -1,6 +1,7 @@
 import { reglaDeNegocio } from "@opai/capabilities";
 
 type Agregador = {
+  $executeRaw(consulta: TemplateStringsArray, ...valores: unknown[]): Promise<number>;
   conciliacionBanco: {
     aggregate(args: {
       where: { enlaceId: string; tipoEnlace: string; activa: boolean; confirmada: boolean };
@@ -22,11 +23,15 @@ export function exigirEnlacesDistintos(enlaces: { tipo: string; id: string }[]):
 /** El monto conciliado de un documento nunca supera su total: lo ya conciliado + lo nuevo ≤ total. */
 export async function exigirTopeDocumento(
   db: Agregador,
+  tenantId: string,
   tipo: "documento_emitido" | "documento_recibido",
   documentoId: string,
   montoTotal: number,
   monto: number,
 ): Promise<void> {
+  // Serializa las conciliaciones y cobros del mismo documento: sin esto, dos transacciones simultáneas
+  // leen la misma suma previa y entre las dos superan el total (el candado cae al terminar la tx).
+  await db.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`conciliacion:${tenantId}:${tipo}:${documentoId}`}, 0))`;
   const previo = await db.conciliacionBanco.aggregate({
     where: { enlaceId: documentoId, tipoEnlace: tipo, activa: true, confirmada: true },
     _sum: { monto: true },

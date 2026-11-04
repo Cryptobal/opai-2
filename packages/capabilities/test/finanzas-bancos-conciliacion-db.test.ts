@@ -591,11 +591,30 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
       monto: doc.montoTotal + 1,
       cuentaId,
     });
-    expect(sobre).toMatchObject({ ok: false });
+    expect(sobre).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     await dato("finanzas.cobros.manual", { documentoId: doc.id, monto: doc.montoTotal - 1_000, cuentaId });
     const resto = await mod.executeCapability(ctx(), "finanzas.cobros.manual", { documentoId: doc.id, monto: 2_000, cuentaId });
-    expect(resto).toMatchObject({ ok: false });
-    const ajena = await mod.executeCapability(ctx(tenantB), "finanzas.cobros.manual", { documentoId: doc.id, monto: 1_000, cuentaId });
-    expect(ajena).toMatchObject({ ok: false });
+    expect(resto).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const cuentaB = await e.admin.cuentaBancaria.create({
+      data: { tenantId: tenantB, banco: "Chile", numeroVisible: "9990001", moneda: "CLP" },
+    });
+    const ajena = await mod.executeCapability(ctx(tenantB), "finanzas.cobros.manual", { documentoId: doc.id, monto: 1_000, cuentaId: cuentaB.id });
+    expect(ajena).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE", message: "El documento no existe." } });
+  });
+
+  it("N:M · varios cobros simultáneos sobre el mismo documento no superan su total", async () => {
+    const doc = await emitirFactura(60_000, "Factura carrera");
+    const parte = Math.ceil(doc.montoTotal * 0.3);
+    const rs = await Promise.all(
+      Array.from({ length: 8 }, () =>
+        mod.executeCapability(ctx(), "finanzas.cobros.manual", { documentoId: doc.id, monto: parte, cuentaId }),
+      ),
+    );
+    expect(rs.filter((r) => r.ok).length).toBeLessThanOrEqual(3);
+    const conciliado = await e.admin.conciliacionBanco.aggregate({
+      where: { enlaceId: doc.id, activa: true },
+      _sum: { monto: true },
+    });
+    expect(Number(conciliado._sum.monto)).toBeLessThanOrEqual(doc.montoTotal);
   });
 });
