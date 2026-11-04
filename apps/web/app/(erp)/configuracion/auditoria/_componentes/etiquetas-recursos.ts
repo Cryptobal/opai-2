@@ -6,7 +6,7 @@ export const RECURSOS: Record<string, string> = {
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",
   cuentas: "Cuentas", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
   patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos",
-  cargos: "Cargos", estructuras: "Sueldos", buscar: "Búsqueda", actividades: "Actividades",
+  cargos: "Cargos", conversaciones: "Conversaciones", estructuras: "Sueldos", buscar: "Búsqueda", actividades: "Actividades",
   etiquetas: "Etiquetas", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos",
   actividad: "Actividad", resumen: "Resumen", inicio: "Inicio", permisos: "Permisos", roles: "Roles",
   excepciones: "Excepciones de permisos", supervisores: "Supervisores", documento_tipos: "Tipos de documento",

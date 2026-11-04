@@ -1,46 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 import { ERROR_RED, ERROR_RED_PLAN, ERROR_VENCIDO, textoError } from "./mensajes-error";
 import { aplicarRespuesta } from "./respuesta-plan";
-import {
-  type Mensaje,
-  type Modelo,
-  type Nivel,
-  type PlanVista,
-  type Turno,
-  VIGENCIA_PLAN_MS,
-} from "./tipos";
+import { useModelos } from "./use-modelos";
+import { type Mensaje, type Nivel, type PlanVista, type Turno, VIGENCIA_PLAN_MS } from "./tipos";
 
 const nuevoId = () => crypto.randomUUID();
 
-/** Estado del hilo del agente: vive en la pantalla; no se guarda nada (conversaciones: PR 5b). */
+/** Estado del hilo del agente. El servidor guarda cada turno en la conversación de la persona (R19). */
 export function useAgente(portal: string, abierto: boolean) {
-  const [modelos, setModelos] = useState<Modelo[] | null>(null);
-  const [errorModelos, setErrorModelos] = useState(false);
-  const [modelo, setModelo] = useState<Modelo | null>(null);
+  const { modelos, errorModelos, modelo, setModelo } = useModelos(portal, abierto);
   const [nivel, setNivel] = useState<Nivel>("paso_a_paso");
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [trabajando, setTrabajando] = useState(false);
+  const [conversacionId, setConversacionId] = useState<string | null>(null);
+  const conversacion = useRef<string | null>(null);
   const ocupado = useRef(false);
-
-  useEffect(() => {
-    if (!abierto || modelos !== null) return;
-    let vivo = true;
-    void ejecutarCapacidad(portal, "agente.modelos.list", {}).then((r) => {
-      if (!vivo) return;
-      if (!r.ok) return setErrorModelos(true);
-      const lista = r.data as Modelo[];
-      setModelos(lista);
-      setModelo((m) => m ?? lista[0] ?? null);
-    });
-    return () => {
-      vivo = false;
-    };
-  }, [abierto, modelos, portal]);
 
   const poner = useCallback(
     (id: string, cambio: (m: Mensaje) => Mensaje) =>
@@ -63,7 +42,12 @@ export function useAgente(portal: string, abierto: boolean) {
         const r = await ejecutarCapacidad(
           portal,
           "agente.turno.preparar",
-          { mensaje: texto, modelo, nivel },
+          {
+            mensaje: texto,
+            modelo,
+            nivel,
+            ...(conversacion.current ? { conversacionId: conversacion.current } : {}),
+          },
           false,
           "ninguna",
           nuevoId(),
@@ -72,6 +56,10 @@ export function useAgente(portal: string, abierto: boolean) {
           poner(id, (m) => ({ ...m, error: textoError(r.error.code, r.error.message) }));
         } else {
           const t = r.data as Turno;
+          if (t.conversacionId) {
+            conversacion.current = t.conversacionId;
+            setConversacionId(t.conversacionId);
+          }
           const plan: PlanVista | undefined = t.token
             ? {
                 pasos: t.pasos,
@@ -134,7 +122,12 @@ export function useAgente(portal: string, abierto: boolean) {
     [mensajes, poner, portal],
   );
 
-  const nueva = useCallback(() => setMensajes([]), []);
+  const cargar = useCallback((id: string | null, hilo: Mensaje[]) => {
+    conversacion.current = id;
+    setConversacionId(id);
+    setMensajes(hilo);
+  }, []);
+  const nueva = useCallback(() => cargar(null, []), [cargar]);
   const hayPlanPendiente = mensajes.some(
     (m) =>
       m.plan &&
@@ -154,6 +147,8 @@ export function useAgente(portal: string, abierto: boolean) {
     enviar,
     decidir,
     nueva,
+    cargar,
+    conversacionId,
     hayPlanPendiente,
   };
 }
