@@ -7,7 +7,14 @@ import { fecha } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
-import { cargarFirmas, ETIQUETA_CLASE, ETIQUETA_ESTADO, filtrosDe, TONO_ESTADO, type Solicitud } from "./_componentes/datos";
+import {
+  cargarFirmas,
+  ETIQUETA_CLASE,
+  ETIQUETA_ESTADO,
+  filtrosDe,
+  TONO_ESTADO,
+  type Solicitud,
+} from "./_componentes/datos";
 
 export const metadata = { title: "Firmas" };
 type Props = { searchParams: SearchParams };
@@ -45,7 +52,9 @@ export default function Firmas({ searchParams }: Props) {
             state={estadoPantalla(r)}
             titulo="Firmas"
             filtros={
-              <ChipsFiltro filtros={[{ param: "estado", etiqueta: "Estado", opciones: OPCIONES_ESTADO }]} />
+              <ChipsFiltro
+                filtros={[{ param: "estado", etiqueta: "Estado", opciones: OPCIONES_ESTADO }]}
+              />
             }
             items={items}
             clave={(s) => s.id}
@@ -62,8 +71,8 @@ export default function Firmas({ searchParams }: Props) {
                   </Badge>
                 </span>
                 <span className="t-caption">
-                  Nivel {s.nivel} · {s.firmantes.filter((f) => f.rol === "firma").length} firmante(s) ·
-                  vence {fecha(s.plazoVence)}
+                  Nivel {s.nivel} · {s.firmantes.filter((f) => f.rol === "firma").length}{" "}
+                  firmante(s) · vence {fecha(s.plazoVence)}
                 </span>
               </span>
             )}
@@ -89,7 +98,12 @@ export default function Firmas({ searchParams }: Props) {
                 render: (s) =>
                   `${s.firmantes.filter((f) => f.estado === "firmado").length}/${s.firmantes.filter((f) => f.rol === "firma").length}`,
               },
-              { id: "vence", etiqueta: "Vence", render: (s) => fecha(s.plazoVence), className: "t-numeric" },
+              {
+                id: "vence",
+                etiqueta: "Vence",
+                render: (s) => fecha(s.plazoVence),
+                className: "t-numeric",
+              },
             ]}
             textos={{
               vacio: {

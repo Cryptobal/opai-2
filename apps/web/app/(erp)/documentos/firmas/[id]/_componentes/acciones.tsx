@@ -9,7 +9,11 @@ import { DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 /** Recordar y cancelar (firma.md §8, R4, CA6): acciones de quien envió sobre una solicitud viva. */
-export function AccionesSolicitud({ id, puedeGestionar, viva }: {
+export function AccionesSolicitud({
+  id,
+  puedeGestionar,
+  viva,
+}: {
   id: string;
   puedeGestionar: boolean;
   viva: boolean;
@@ -25,7 +29,12 @@ export function AccionesSolicitud({ id, puedeGestionar, viva }: {
         disabled={pendiente}
         onClick={async () => {
           const r = await ejecutar<{ recordados: number }>("core.firmas.recordar", { id });
-          if (r) avisar.exito(r.recordados === 1 ? "Recordatorio enviado" : `${r.recordados} recordatorios enviados`);
+          if (r)
+            avisar.exito(
+              r.recordados === 1
+                ? "Recordatorio enviado"
+                : `${r.recordados} recordatorios enviados`,
+            );
         }}
       >
         Recordar
