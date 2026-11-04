@@ -90,3 +90,31 @@ describe("catálogos en Configuración (CAR-182)", () => {
     }
   });
 });
+
+describe("menú del ERP sin duplicados ni ítems fuera de su área (CAR-182)", () => {
+  it("ninguna ruta se repite en la barra lateral", () => {
+    const hrefs = armar().nav.map((n) => n.href);
+    expect(hrefs.filter((h, i) => hrefs.indexOf(h) !== i)).toEqual([]);
+  });
+
+  it("ningún ítem de área aparece también como entrada suelta y la Bandeja no tiene área", () => {
+    const { nav } = armar();
+    expect(nav.find((n) => n.href === "/bandeja")).toMatchObject({ icono: "Inbox" });
+    expect(nav.find((n) => n.href === "/bandeja")?.grupo).toBeUndefined();
+    for (const n of nav.filter((x) => x.grupo)) expect(n.area, n.href).toBeDefined();
+  });
+
+  it("cada ítem queda en el área que le corresponde", () => {
+    const { nav } = armar();
+    const grupoDe = (href: string) => nav.find((n) => n.href === href)?.grupo;
+    expect(grupoDe("/remuneraciones")).toBe("Personas");
+    expect(grupoDe("/documentos/firmas")).toBe("Documentos");
+    for (const href of CATALOGOS) expect(grupoDe(href), href).toBeUndefined();
+  });
+
+  it("la barra inferior solo repite entradas del menú y la Bandeja va una vez", () => {
+    const { nav, navInferior } = armar();
+    for (const n of navInferior) expect(nav.some((x) => x.href === n.href), n.href).toBe(true);
+    expect(navInferior.filter((n) => n.href === "/bandeja")).toHaveLength(1);
+  });
+});

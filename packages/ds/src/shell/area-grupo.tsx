@@ -59,7 +59,7 @@ export function AreaGrupo({
           abierto ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
       >
-        <div className="flex min-h-0 flex-col gap-px overflow-hidden">{children}</div>
+        <div className="flex min-h-0 flex-col gap-0.5 overflow-hidden pt-0.5 pb-1.5">{children}</div>
       </div>
     </div>
   );
