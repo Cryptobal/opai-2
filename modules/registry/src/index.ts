@@ -14,6 +14,7 @@ import { manifest as agente } from "@opai/mod-agente";
 
 import { manifest as Comercial } from "@opai/mod-comercial";
 
+export { trabajosAgente } from "@opai/mod-agente/trabajos";
 export { consumidorCpqBandeja } from "@opai/mod-cpq/consumidor-bandeja";
 
 /**

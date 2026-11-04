@@ -9,6 +9,7 @@ import {
 import { z } from "zod";
 
 import { prepararTurno } from "./bucle";
+import { lineaContexto, revalidarContexto } from "./conversaciones-contexto";
 import { contextoSchema, guardarTurno } from "./conversaciones-guardado";
 import {
   conversacionesArchivar,
@@ -56,6 +57,8 @@ export const turnoPreparar = defineCapability({
     /** Retoma esta conversación; sin id se crea una nueva (R19). */
     conversacionId: z.string().uuid().optional(),
     contexto: contextoSchema.optional(),
+    /** Identifica el turno: un reintento con el mismo id no se vuelve a guardar. */
+    turnoId: z.string().uuid().optional(),
   }),
   output: z.object({
     conversacionId: z.string().uuid().nullable(),
@@ -77,11 +80,17 @@ export const turnoPreparar = defineCapability({
         tokens: 0,
       };
     const firma = secreto();
+    // El contexto lo manda el navegador: se revalida con el alcance de la persona antes de usarlo.
+    if (input.contexto) await revalidarContexto(delegado, input.contexto);
     const ia = await iaElegidaDelAgente(delegado, input.modelo);
-    const plan = await prepararTurno(delegado, input.mensaje, ia);
+    const consulta = input.contexto
+      ? `${lineaContexto(input.contexto)}\n${input.mensaje}`
+      : input.mensaje;
+    const plan = await prepararTurno(delegado, consulta, ia);
     // Guardar corre en la misma transacción que la auditoría (ADR-052): si falla, el turno falla cerrado.
     const conversacionId = await guardarTurno(ctx, {
       conversacionId: input.conversacionId,
+      turnoId: input.turnoId,
       contexto: input.contexto,
       mensaje: input.mensaje,
       texto: plan.texto,
