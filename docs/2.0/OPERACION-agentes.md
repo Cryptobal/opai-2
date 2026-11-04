@@ -24,7 +24,7 @@
    - El Revisor hace **una sola pasada**.
    - Solo **bloquea** por **seguridad, migraciones o datos** (RLS, permisos, pérdida o mezcla de datos entre tenants).
    - Todo lo demás es no bloqueante y va a un **PR de pendientes**, no a otra vuelta del mismo PR.
-   - Se integra con los checks obligatorios en verde y la rama al día con main.
+   - Se integra con los checks obligatorios en verde y la rama al día con main. Cuando Carlos active la **cola de merge** en el ruleset «Proteger main», el bot «OPAI 2.0» encola el PR ahí: GitHub vuelve a correr los checks obligatorios en el evento `merge_group` (sin e2e ni rendimiento) y hace el squash sin reiniciar el CI de todos los demás PR abiertos.
 7. **QA en vivo va después de integrar** (en test.opai.cl) y **no frena nada**. Sus hallazgos van al PR de pendientes, salvo que sean de seguridad o datos: en ese caso se abre un arreglo inmediato.
 8. **Capturas.** Cuando Carlos quiera ver algo, se las pide al bot OPAI 2.0, que las toma en test.opai.cl.
 9. **Avisos:** siempre en español, al integrar y al migrar.
@@ -39,7 +39,7 @@
 | 3 | `AGENTS.md` y ADR-043 v3 (Revisor) | Se exige APROBAR sin condiciones, y cualquier push invalida la aprobación. | **Una pasada; solo bloquea por seguridad, migraciones o datos** (A.6). Tras un push, el Revisor revisa solo el delta. |
 | 4 | `AGENTS.md`, checks del ruleset «Proteger main» | 3 obligatorios: `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`. | t618u habla de 4. Decisión de Carlos (26-oct 11:49, t306u): `rendimiento` (ADR-045) pasa a obligatorio cuando el Brief 03 PR 2 esté integrado y estable. El #88 ya entró, pero **falta confirmar en el ruleset** cuál es el cuarto. Ver E.4. |
 | 5 | Práctica del 27-oct (t618u) | QA sin bloqueantes **antes** de integrar. | **QA en vivo después de integrar, sin frenar** (A.7). Esto coincide con ADR-043 v3. |
-| 6 | ADR-043 v3 §8 / `REGLAS-codigo.md` (e2e) | La e2e no es obligatoria. | Igual. Además, regla t611u (27-oct 16:44): en local corren solo los specs tocados, más el gate completo antes del push; el CI juzga el resto. |
+| 6 | ADR-043 v3 §8 / `REGLAS-codigo.md` (e2e) | La e2e no es obligatoria. | Igual (sigue sin ser check obligatorio del ruleset). En CI (PR #248 / CAR-181): **e2e** (6 shards), informe, **`e2e (Playwright)`** y **rendimiento** corren en cron nocturno (03:00 Santiago), `workflow_dispatch`, push a `main` o PR con etiqueta **`e2e`** (la pone Carlos); no en cada `pull_request`. El gate **`typecheck · lint · test · test:db`** corre en cuatro jobs paralelos más un agregador con el mismo nombre. Regla t611u (27-oct): en local, specs tocados + gate completo antes del push. |
 | 7 | `CONTEXTO-agentes.md` (rol del bot) | El bot «prepara los prompts de cada encargo». | **Claude escribe los briefs** (A.2). El bot opera la cola. |
 | 8 | Memoria del 26-oct (flujo acelerado) | «No se abren PRs de solo documentos: el brief va dentro del PR que construye». | Sigue vigente para los briefs. El PR que sube este archivo es una excepción pedida por Carlos el 28-oct. |
 | 9 | Memoria del 24-oct (regla de merge) | «Un PR con migración pendiente no entra hasta que Carlos la aplique». | Reemplazada por t500u, t682u y A.5. |
