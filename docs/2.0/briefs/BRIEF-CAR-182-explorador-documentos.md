@@ -38,7 +38,7 @@ Una pantalla central, `/documentos`, donde el equipo encuentra cualquier documen
 
 - **Vigencia en la consulta.** Depende de los días de alerta de cada tipo, así que se agrupan los tipos por esos días y cada grupo lleva su ventana (`explorar-filtros.ts`); sin tipo, 30 días como `vistaDocumento`. Paginación y total cuentan solo lo que corresponde.
 - **Orden estable** (`recientes`, `nombre`, `vence` con nulos al final) con `id` de desempate, para que el cursor no repita ni salte filas.
-- **Cursor** = id del último documento. Antes de usarlo se comprueba que **esta misma consulta** lo devolvería: un cursor fuera de alcance, de otro tenant o sensible responde `NOT_FOUND` y no sirve de ancla.
+- **Cursor** = id del último documento, pero la página siguiente se arma a mano sobre las columnas del orden (keyset: `venceEn`/`createdAt`/`id`, `nombre`/`id` o `createdAt`/`id`) y no con el `cursor` de Prisma, que falla con `venceEn` nulo en Postgres. Antes de usarlo se comprueba que **esta misma consulta** lo devolvería: un cursor fuera de alcance, de otro tenant o sensible responde `NOT_FOUND` y no sirve de ancla.
 - **Propietario** (`explorar-entidades.ts`): tipo e id siempre; **nombre solo si el actor puede leer ese tipo de entidad** (cuentas, instalaciones y puestos, personas). Sin el permiso, `nombre: null`.
 - **Firma**: `pendiente` si hay una solicitud viva, `firmado` si alguna se completó; solo con `core:firmas.read`.
 - Sin migración: la búsqueda usa `contains` insensible sobre `nombre` y `titulo` y `has` sobre `etiquetas`, acotada por tenant y alcance. Si el volumen lo pide, un índice trigram es una migración aditiva futura (ver riesgos).
@@ -114,6 +114,8 @@ Búsqueda sin resultados (estado «Sin resultados», distinto del vacío); tenan
 
 ## 15. Riesgos y rollback
 
+- **Consultas por navegación (ADR-045, ≤ 8).** La capacidad hace, en una llamada: 1 (ancla, solo si hay cursor) + 1 (página) + 1 (`count`) + 1 (tipos, solo con filtro de vigencia por estado vigente o por vencer) + 1 (tipos de la fila) + 1 (vínculos propietarios) + hasta 4 de nombres (cuentas, instalaciones, puestos, personas; solo los tipos presentes y permitidos) + 1 (firmas, con permiso) + 1 de auditoría; más las de alcance del supervisor (`documentosEnAlcance`, 3 bloqueos `FOR SHARE` + 1). La pantalla suma `documento_tipos.list` y la identidad. En el peor caso (supervisor, filtro de vigencia, cursor) son unas 14 sentencias en una sola ida al servidor y varias van en paralelo; para un owner sin filtros son ~8. No se midió contra Neon: queda para la QA en vivo.
+- **`id IN (...)` grande para supervisores.** El alcance se aplica pasando a la consulta la lista de ids de los documentos a cargo (`documentosEnAlcance`, mismo patrón que `list` y `vencimientos`). Con miles de documentos a cargo la lista de parámetros crece y el plan se degrada; es aceptable al volumen de hoy. Mitigación futura: resolver el alcance como subconsulta/`EXISTS` sobre `documento_vinculos` en vez de ids materializados.
 - **Búsqueda sin índice:** `contains` insensible recorre los documentos del tenant. Aceptable para miles; con decenas de miles de filas conviene un índice trigram (migración aditiva futura). Rollback: revertir el PR; no hay datos migrados.
 - **`vigencia` por grupos de tipos:** si el catálogo trajera muchos valores distintos de días de alerta, la consulta crece (hoy son pocos).
 - **Total en cada página:** un `count` extra por consulta; sin problema a este volumen.
