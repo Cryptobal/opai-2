@@ -1,5 +1,7 @@
 // Áreas de navegación del ERP (Brief 05, ADR-046, NAVEGACION.md §7). Lista cerrada y en el orden de
-// R1: Inicio (suelta), Comercial, Clientes, Operaciones, Personas, Finanzas, Documentos.
+// R1: Inicio (suelta), Comercial, Clientes, Operaciones, Personas, Finanzas, Documentos. Desde CAR-182
+// «clientes» ya no tiene entradas (Cuentas y Contactos van en Comercial), pero sigue en la lista porque
+// hay preferencias guardadas con ese valor; el menú ordena las áreas por uso en `navegacion.ts`.
 // Configuración no es un área: la agrega el núcleo al pie, fuera de esta lista (ADR-018).
 
 export const AREAS_NAV = [

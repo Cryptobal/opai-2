@@ -14,6 +14,8 @@ export type Seccion = {
   grupo: GrupoId;
   /** Permiso para ver la sección (nunca `null`; sin permiso no aparece, REGLA §3.7). */
   permiso: string;
+  /** Módulo que debe estar activo (o en trial) para mostrarla; ausente: núcleo, siempre. */
+  modulo?: string;
 };
 
 /** Sección con su ruta por defecto (`/configuracion/<id>`). */

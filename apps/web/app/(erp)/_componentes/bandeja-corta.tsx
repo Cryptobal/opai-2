@@ -60,7 +60,7 @@ export function BandejaCorta({
         </div>
       )}
       <Link
-        href="/#bandeja"
+        href="/bandeja"
         className="flex min-h-11 items-center border-t border-border px-4 text-accent"
       >
         Ver todo
