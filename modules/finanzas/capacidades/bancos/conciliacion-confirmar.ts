@@ -12,6 +12,7 @@ import type { Prisma } from "@opai/db";
 
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_AUTORIZAR } from "./permisos";
 import { montoDe } from "./esquemas";
+import { exigirEnlacesDistintos, exigirTopeDocumento } from "./topes-conciliacion";
 import { movimientoDe } from "./util";
 
 const ESTADOS_CONFIRMABLE = ["pendiente", "sugerido", "por_autorizar"] as const;
@@ -49,6 +50,7 @@ export const bancosConciliacionConfirmar = defineCapability({
       const puede = ctx.autorizar(PERMISO_BANCOS_AUTORIZAR);
       if (!puede) throw reglaDeNegocio("El movimiento requiere autorización.");
     }
+    exigirEnlacesDistintos(input.enlaces);
     const total = input.enlaces.reduce((s, e) => s + e.monto, 0);
     if (Math.abs(total) !== Math.abs(montoDe(mov.monto))) {
       throw reglaDeNegocio("La suma de enlaces debe coincidir con el monto del movimiento.");
@@ -65,17 +67,20 @@ export const bancosConciliacionConfirmar = defineCapability({
       if (reserva.count !== 1) throw conflicto("El movimiento ya está conciliado.");
 
       const docsSync = new Set<string>();
-      for (const e of input.enlaces) {
+      const ordenados = [...input.enlaces].sort((a, b) => `${a.tipo}:${a.id}`.localeCompare(`${b.tipo}:${b.id}`));
+      for (const e of ordenados) {
         if (e.tipo === "documento_emitido") {
           const doc = await tx.documentoEmitido.findFirst({ where: { id: e.id } });
           if (!doc) throw reglaDeNegocio("El documento emitido no existe.");
           validarDocumentoCobroBanco(doc, signoMov);
+          await exigirTopeDocumento(tx, ctx.tenantId, "documento_emitido", doc.id, doc.montoTotal, e.monto);
           docsSync.add(e.id);
         }
         if (e.tipo === "documento_recibido") {
           const doc = await tx.documentoRecibido.findFirst({ where: { id: e.id } });
           if (!doc) throw reglaDeNegocio("El documento recibido no existe.");
           validarDocumentoCompraBanco(doc, signoMov);
+          await exigirTopeDocumento(tx, ctx.tenantId, "documento_recibido", doc.id, doc.montoTotal, e.monto);
         }
         await tx.conciliacionBanco.create({
           data: {
