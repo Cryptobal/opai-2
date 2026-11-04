@@ -21,6 +21,8 @@ export type DatosShell = {
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
+  /** El agente interno está disponible: módulo activo en la empresa y permiso `agente:usar` (ERP). */
+  agente?: boolean;
   /** Quién y en qué empresa ve la página (`lib/epoca-sesion.ts`); las pestañas la comparan. */
   epoca: string;
 };

@@ -90,7 +90,7 @@ export function AppShell(props: AppShellProps) {
         />
         <main
           className={cn(
-            "mx-auto flex w-full flex-1 flex-col px-4 pt-1 pb-[calc(96px+env(safe-area-inset-bottom))] md:px-6 md:pt-5 md:pb-8 xl:px-8",
+            "mx-auto flex w-full flex-1 flex-col px-4 pt-1 pb-[calc(96px+env(safe-area-inset-bottom))] md:px-6 md:pt-5 md:pb-8 xl:pl-8 xl:pr-[calc(2rem+var(--panel-lateral,0px))]",
             !completo && "max-w-[1280px]",
             className,
           )}
