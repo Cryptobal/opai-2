@@ -33,13 +33,13 @@ const vivo = { token: "TOKEN-VIVO", expiraEn: 9_999_999_999 };
 const SIN_RED = () => Promise.reject(new Error("no debe llamar a la red"));
 
 describe("adaptador Octava", () => {
-  it("no está disponible sin credenciales del integrador", () => {
+  it("no está disponible sin credenciales de acceso", () => {
     const { almacen } = almacenMemoria();
-    expect(adaptadorOctava(depsPrueba(SIN_RED, almacen, { integrador: null })).disponible).toBe(false);
+    expect(adaptadorOctava(depsPrueba(SIN_RED, almacen, { acceso: null })).disponible).toBe(false);
   });
 
   it("envía: carga el XML y cede con los datos del cesionario; no usa Basic ni rutas inventadas", async () => {
-    const { almacen } = almacenMemoria({ pass: "P", token: vivo });
+    const { almacen } = almacenMemoria({ token: vivo });
     const { fetch, llamadas } = fetchGrabado({ CargaXmlCesion: [cargaOk], CedeDte: [cedeOk] });
     const r = await adaptadorOctava(depsPrueba(fetch, almacen)).enviar(PAYLOAD);
     expect(r).toEqual({ operacionExternaId: "octava:0:76111222-8:33:450", estado: "enviada" });
@@ -52,27 +52,23 @@ describe("adaptador Octava", () => {
     });
   });
 
-  it("registra al cedente y obtiene token la primera vez, y los guarda", async () => {
+  it("sin token guardado pide uno con el RUT y la contraseña de acceso, y lo guarda", async () => {
     const { almacen, estado } = almacenMemoria();
-    const { fetch, llamadas } = fetchGrabado({
-      RegistraCedente: [{ IdResultadoFE: "0", PassAccesoApi: "PASS-1" }],
-      ObtenerToken: [tokenOk], CargaXmlCesion: [cargaYaCargado], CedeDte: [cedeOk],
-    });
+    const { fetch, llamadas } = fetchGrabado({ ObtenerToken: [tokenOk], CargaXmlCesion: [cargaYaCargado], CedeDte: [cedeOk] });
     await adaptadorOctava(depsPrueba(fetch, almacen)).enviar(PAYLOAD);
-    expect(llamadas.map((l) => l.endpoint)).toEqual(["RegistraCedente", "ObtenerToken", "CargaXmlCesion", "CedeDte"]);
-    expect(llamadas[0]?.cuerpo).toMatchObject({ INTEGRADOR: "77888999-0", PASSWORDINTEGRADOR: "clave-integrador", RUTAUTORIZADOSII: "11111111-1" });
-    expect(estado.pass).toBe("PASS-1");
+    expect(llamadas.map((l) => l.endpoint)).toEqual(["ObtenerToken", "CargaXmlCesion", "CedeDte"]);
+    expect(llamadas[0]?.cuerpo).toEqual({ RUTACCESOAPI: "76111222-8", PASSWORDACCESOAPI: "clave-acceso" });
     expect(estado.token?.token).toBe("TOKEN-A");
   });
 
   it("CedeDte con IdResultadoFE=3 (ya cedido) sigue como enviada", async () => {
-    const { almacen } = almacenMemoria({ pass: "P", token: vivo });
+    const { almacen } = almacenMemoria({ token: vivo });
     const { fetch } = fetchGrabado({ CargaXmlCesion: [cargaOk], CedeDte: [cedeYa] });
     expect((await adaptadorOctava(depsPrueba(fetch, almacen)).enviar(PAYLOAD)).estado).toBe("enviada");
   });
 
   it("token expirado (TEXP): renueva una vez y reintenta", async () => {
-    const { almacen, estado } = almacenMemoria({ pass: "P", token: vivo });
+    const { almacen, estado } = almacenMemoria({ token: vivo });
     const { fetch, llamadas } = fetchGrabado({
       CargaXmlCesion: [cargaExpirado, cargaOk], ObtenerToken: [tokenOk], CedeDte: [cedeOk],
     });
@@ -83,7 +79,7 @@ describe("adaptador Octava", () => {
   });
 
   it("falla con mensaje claro si falta un dato exigido o la respuesta no es JSON", async () => {
-    const { almacen } = almacenMemoria({ pass: "P", token: vivo });
+    const { almacen } = almacenMemoria({ token: vivo });
     const a = adaptadorOctava(depsPrueba(SIN_RED, almacen));
     await expect(a.enviar({ ...PAYLOAD, emailDeudor: " " })).rejects.toThrow(/correo del deudor/);
     const { fetch } = fetchGrabado({ CargaXmlCesion: ["<html>502</html>"] });
@@ -91,7 +87,7 @@ describe("adaptador Octava", () => {
   });
 
   it("consulta: EOK → aprobada; vacío/PEN → enviada; RSC → anulada con glosa", async () => {
-    const { almacen } = almacenMemoria({ pass: "P", token: vivo });
+    const { almacen } = almacenMemoria({ token: vivo });
     const { fetch, llamadas } = fetchGrabado({ ConsultaEstadoAEC: [estadoEok, estadoPen, estadoRsc] });
     const a = adaptadorOctava(depsPrueba(fetch, almacen));
     const id = "octava:0:76111222-8:33:450";
