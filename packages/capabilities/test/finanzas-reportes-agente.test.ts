@@ -193,6 +193,8 @@ describe("finanzas.ventas.buscar", () => {
 
   it("normaliza el RUT y filtra por cliente", async () => {
     expect(rutNormalizado(" 76.543.210-3 ")).toBe("76543210-3");
+    expect(rutNormalizado("765432103")).toBe("76543210-3");
+    expect(rutNormalizado("76.543")).toBe("76543");
     expect(await buscar({ rut: "76.543.210-3" })).toEqual([10, 12, 13]);
     expect(await buscar({ rut: "99.999.999-9" })).toEqual([]);
     expect(await buscar({ rut: "76.543.210-3", cuentaId: C2 })).toEqual([]);
