@@ -7,6 +7,7 @@ import {
   diasRetencion,
   mensajeSchema,
 } from "./conversaciones-guardado";
+import { busquedaSchema, filtroTitulo } from "./conversaciones-busqueda";
 
 const uuid = z.string().uuid();
 
@@ -64,9 +65,10 @@ export const conversacionesList = defineCapability({
   id: "agente.conversaciones.list",
   permiso: "agente:usar",
   descripcion:
-    "Lista las conversaciones guardadas del agente interno de la persona actual en esta empresa, las más recientes primero.",
+    "Lista las conversaciones guardadas del agente interno de la persona actual en esta empresa, las más recientes primero. Con `q` busca por título (mínimo 2 caracteres, sin distinguir mayúsculas).",
   input: z.object({
     archivadas: z.boolean().default(false),
+    q: busquedaSchema.optional(),
     limite: z.number().int().min(1).max(50).default(20),
   }),
   output: z.array(resumenSchema),
@@ -81,6 +83,7 @@ export const conversacionesList = defineCapability({
         userId: persona(ctx),
         archivadaEn: input.archivadas ? { not: null } : null,
         ultimaActividad: { gte: corteRetencion(new Date(), dias) },
+        ...filtroTitulo(input.q),
       },
       orderBy: { ultimaActividad: "desc" },
       take: input.limite,
