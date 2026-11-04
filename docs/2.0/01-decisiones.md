@@ -1226,6 +1226,16 @@ identidad de servicio en main.
 
 ---
 
+## Adenda ADR-019 y ADR-022 · El supervisor sube documentos a sus instalaciones (CAR-182)
+
+**Fecha:** 4-nov-2026 (17:10) · **Estado:** vigente · **Autor de la decisión:** Carlos (chat, 4-nov-2026) · **Implementa:** Claude (constructor), [brief](briefs/BRIEF-CAR-182-supervisor-sube-documentos.md) · **Cierra** el punto pendiente de la adenda del explorador de Documentos (punto 5 y «Segundo paso»: «decisión de permisos aparte») · **Complementa** ADR-016, ADR-019 y ADR-022.
+
+1. **Decisión de Carlos.** Los supervisores pueden subir documentos, **solo vinculados a instalaciones que tienen a su cargo**.
+2. **Permiso nuevo y estrecho:** `core:documentos.subir_alcance`, concedido al rol supervisor en `PATRONES_POR_ROL` (owner, admin y gerente lo cubren por comodín; viewer no). **No se amplía `core:documentos.manage`**, que sigue siendo de owner, admin y gerente. Se eligió este nombre porque el alcance (qué filas) es una dimensión aparte del permiso (qué acción) en ADR-022, y el sufijo `_alcance` dice que solo vale dentro del alcance del actor.
+3. **Mecanismo.** Las capacidades `core.documentos.iniciar_subida` y `core.documentos.confirmar_subida` aceptan el permiso nuevo como alternativa a `documentos.manage` (`Capacidad.permisosAlternos`: la autorización y la visibilidad en el MCP aceptan uno u otro; el handler acota). Quien tiene `manage` conserva todo igual. Quien solo tiene el permiso nuevo: (a) sube únicamente a una instalación dentro de `ctx.alcance.instalaciones`, comprobado en el servidor; (b) nunca a la empresa, una cuenta, una persona o un puesto, ni versiona un documento; (c) el documento queda con visibilidad en portales vacía (la más restrictiva), aunque el tipo traiga portales por defecto, y no puede cambiarla después (`core.documentos.update` exige `manage`); (d) confirma solo lo que subió él. Cualquier otro intento recibe el rechazo que ya daba el sistema (`FORBIDDEN` sin detalles, o `NOT_FOUND` idéntico para instalación fuera de alcance e inexistente).
+4. **Interfaz.** En `/documentos`, «Subir» aparece con el permiso nuevo y alcance por filas; «Vincular a» ofrece solo «Instalación» (candidatos de `core.instalaciones.list`, ya acotados); la hoja no muestra «Visible en portal». La UI solo ofrece; la capacidad decide.
+5. **Sin migración ni capacidad nueva**: los roles base son código y la herramienta MCP es la misma. Pasa por el Revisor (toca permisos y alcance).
+
 ## ADR-062 · Cobranza de ventas: vencimiento derivado y recordatorios en días hábiles
 
 **Fecha:** 4-nov-2026 · **Estado:** propuesto (reglas por confirmar por Carlos) · **Origen:** CAR-166 (F4), auditoría de Finanzas §2.1, construido por Claude.

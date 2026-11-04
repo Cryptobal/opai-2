@@ -75,6 +75,12 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   return null;
 }
 
+/** Si el actor tiene el permiso de la capacidad o alguno de sus permisos alternos. */
+export function tienePermisoDeCapacidad(ctx: Contexto, c: Capacidad): boolean {
+  if (c.permiso === null) return true;
+  return ctx.autorizar(c.permiso) || (c.permisosAlternos ?? []).some((p) => ctx.autorizar(p));
+}
+
 /** Reglas previas al handler: restricciones y permiso. */
 export function denegar(ctx: Contexto, c: Capacidad): Falla | null {
   const r = restriccion(ctx, c);
@@ -84,5 +90,7 @@ export function denegar(ctx: Contexto, c: Capacidad): Falla | null {
       ctx.actor.tipo === "system" && process.env.NODE_ENV === "production";
     return sistemaEnProduccion && !c.interna ? falla("UNAUTHENTICATED", "Requiere sesión.") : null;
   }
-  return ctx.autorizar(c.permiso) ? null : falla("FORBIDDEN", "Sin permiso para esta capacidad.");
+  return tienePermisoDeCapacidad(ctx, c)
+    ? null
+    : falla("FORBIDDEN", "Sin permiso para esta capacidad.");
 }

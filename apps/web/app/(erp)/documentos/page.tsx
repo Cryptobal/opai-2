@@ -47,6 +47,7 @@ export default function Documentos({ searchParams }: { searchParams: SearchParam
                 tenantId: d.tenantId,
                 etiquetas: etiquetasEntidad(d.voc),
                 disponibles: d.vinculables,
+                acotada: d.acotada,
               }}
             />
           ) : null}
