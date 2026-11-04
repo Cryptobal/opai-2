@@ -14,7 +14,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - `pnpm db:generate` · `pnpm db:migrate` (crea la migración sin aplicarla; usa `DATABASE_URL_MIGRATE`) · `pnpm db:deploy` (aplica; solo con instrucción explícita y contra el entorno indicado)
 - `pnpm --filter @opai/db role:password` fija la contraseña del rol `opai_app` desde `OPAI_APP_DB_PASSWORD`.
 - `pnpm --filter @opai/db seed:dev-tenant` crea el tenant `gard` con su catálogo base (solo para desarrollo); `seed:maestros-demo` agrega los maestros ficticios del diseño (solo `dev`).
-- `pnpm --filter @opai/capabilities seed:finanzas-qa` siembra en `dev` (tenant `gard`) datos ficticios de Finanzas: proveedor, cuenta Santander con 3 movimientos, CAF sintético de certificación y un cliente con datos tributarios; idempotente, nunca en producción (CAR-170).
+- `pnpm --filter @opai/capabilities seed:finanzas-qa` siembra en `dev` datos ficticios de Finanzas: proveedor, cuenta Santander con 3 movimientos, CAF sintético de certificación y un cliente con datos tributarios; idempotente. Exige `OPAI_ENTORNO=dev` y `--tenant <slug>` explícito, simula por defecto y escribe solo con `--confirmar`; no pisa la configuración DTE existente ni toca tenants en producción (CAR-170).
 - `pnpm --filter @opai/capabilities rotar-kek` recifra las DEK con una KEK nueva (`OPAI_SECRETS_KEY`, versión +1, y la vigente en `OPAI_SECRETS_KEY_ANTERIOR`).
 - `pnpm --filter @opai/auth seed:platform-owner` crea (idempotente) el usuario plataforma desde `SEED_OWNER_PASSWORD`; usa `DATABASE_URL_MIGRATE`.
 - `pnpm --filter @opai/web e2e` corre Playwright: `/ds`, acceso (`/ds/acceso`, variantes del diseño) y el flujo con sesión (usa `SEED_OWNER_PASSWORD` del `.env.local` de la raíz contra `dev`).

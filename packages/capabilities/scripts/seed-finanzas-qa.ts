@@ -1,8 +1,9 @@
-// Datos de QA de Finanzas SOLO para desarrollo (tenant `gard` de dev): proveedor, cuenta Santander con
-// cartola de ejemplo, CAF de certificación ficticio y un cliente con datos tributarios. Todo ficticio
-// (RUT 76111222-8, CAF sintético); idempotente. Nunca corre en producción.
-// Uso: DATABASE_URL=<opai_app> DATABASE_URL_MIGRATE=<propietario de dev> OPAI_SECRETS_KEY=<clave dev> \
-//      pnpm --filter @opai/capabilities seed:finanzas-qa
+// Datos de QA de Finanzas SOLO para desarrollo: proveedor, cuenta Santander con cartola de ejemplo, CAF de
+// certificación ficticio y un cliente con datos tributarios. Todo ficticio (RUT 76111222-8, CAF sintético);
+// idempotente. Guardas: exige OPAI_ENTORNO=dev y un tenant explícito (`--tenant <slug>` u OPAI_QA_TENANT),
+// por defecto solo simula (dry-run) y escribe con `--confirmar`; nunca pisa la configuración DTE existente.
+// Uso: OPAI_ENTORNO=dev DATABASE_URL=<opai_app> DATABASE_URL_MIGRATE=<propietario de dev> OPAI_SECRETS_KEY=<clave dev> \
+//      pnpm --filter @opai/capabilities seed:finanzas-qa --tenant <slug> [--confirmar]
 import { randomUUID } from "node:crypto";
 
 import { cerrarClientes, dbAdmin } from "@opai/db";
@@ -22,12 +23,23 @@ const RUT_EMISOR = "76111222-8";
 const dia = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 
 async function main(): Promise<void> {
-  if (process.env["VERCEL_ENV"] === "production" || process.env["NODE_ENV"] === "production")
-    throw new Error("Solo para desarrollo.");
+  if (process.env["VERCEL_ENV"] === "production" || process.env["NODE_ENV"] === "production" || process.env["OPAI_ENTORNO"] !== "dev")
+    throw new Error("Solo para desarrollo: exige OPAI_ENTORNO=dev y una base de dev.");
+  const args = process.argv.slice(2);
+  const i = args.indexOf("--tenant");
+  const slug = (i >= 0 ? args[i + 1] : undefined) ?? process.env["OPAI_QA_TENANT"];
+  if (!slug) throw new Error("Indica el tenant de QA con --tenant <slug> u OPAI_QA_TENANT.");
+  const confirmar = args.includes("--confirmar");
   const admin = dbAdmin();
-  const tenant = await admin.tenant.findUnique({ where: { slug: "gard" } });
-  if (!tenant) throw new Error("Primero corre seed:dev-tenant.");
+  const tenant = await admin.tenant.findUnique({ where: { slug } });
+  if (!tenant) throw new Error(`No existe el tenant «${slug}» (¿corriste seed:dev-tenant?).`);
   const tenantId = tenant.id;
+  const config = await admin.dteConfig.findUnique({ where: { tenantId } });
+  if (config?.ambiente === "produccion") throw new Error(`El tenant «${slug}» emite en producción: no es de QA.`);
+  if (!confirmar) {
+    console.log(`Simulación: escribiría datos de QA en el tenant «${slug}». Repite con --confirmar para aplicar.`);
+    return;
+  }
 
   registrarCapacidades([...capacidadesDelNucleo, ...capacidadesFinanzas]);
   const usuarioId = randomUUID();
@@ -87,7 +99,7 @@ async function main(): Promise<void> {
   }
 
   // Emisión de certificación y CAF sintético (la capacidad rechaza CAF reales en el tenant QA).
-  await ejecutar("finanzas.dte_config.actualizar", { ambiente: "certificacion", rutEmisor: RUT_EMISOR });
+  if (!config) await ejecutar("finanzas.dte_config.actualizar", { ambiente: "certificacion", rutEmisor: RUT_EMISOR });
   if (!(await admin.dteFolio.count({ where: { tenantId, tipoDte: 33, folioDesde: 9000 } }))) {
     await ejecutar("finanzas.folios.cargar_caf", { cafXml: cafXmlSintetico({ folioDesde: 9000, folioHasta: 9050 }) });
   }
