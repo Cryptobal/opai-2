@@ -33,6 +33,7 @@ export const puestosOfrecer = defineCapability({
   descripcion:
     "Lista los puestos que ofrece la cotización aceptada (una fila por línea de guardias: cargo, posiciones, instalación, patrón, horario y lo ya creado) para que RRHH los confirme. No crea nada.",
   permiso: PERMISO_PUESTOS_CONFIRMAR,
+  auditarLectura: (s) => [s.cotizacionId, ...s.items.map((i) => i.lineaId)],
   input: z.object({ cotizacionId: uuidSchema }),
   output: z.object({
     cotizacionId: uuidSchema,

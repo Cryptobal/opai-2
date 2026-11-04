@@ -27,7 +27,7 @@ export const RECURSOS: Record<string, string> = {
   planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja",
   derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios",
   cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", reglas_banco: "Reglas del banco",
-  tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", lineas: "Líneas",
+  tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", compartir: "Compartir cotización", lineas: "Líneas",
   versiones: "Versiones", secciones: "Secciones", correlativos: "Correlativos",
   catalogo_categorias: "Categorías del catálogo", catalogo_items: "Ítems del catálogo", sueldos_referencia: "Sueldos de referencia",
   marca_documento: "Marca de documentos", plantillas_documento: "Plantillas de documento",

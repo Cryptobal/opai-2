@@ -89,7 +89,7 @@ export function HojaCrearPuestos(p: {
       abierto={p.abierta}
       onCerrar={p.onCerrar}
       titulo="Crear puestos"
-      descripcion={oferta ? `Cotización ${oferta.codigo} aceptada` : undefined}
+      {...(oferta ? { descripcion: `Cotización ${oferta.codigo} aceptada` } : {})}
       tamano="grande"
       acciones={
         <>

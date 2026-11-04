@@ -17,6 +17,7 @@ export const cotizacionesEstadoComercial = defineCapability({
   descripcion:
     "Dice si una cotización está archivada o aceptada, si tiene un enlace público activo (con vencimiento y vistas) y cuántos puestos faltan por crear al ganar.",
   permiso: PERMISO_READ,
+  auditarLectura: () => [],
   input: z.object({ id: uuidSchema }),
   output: z.object({
     archivada: z.boolean(),
