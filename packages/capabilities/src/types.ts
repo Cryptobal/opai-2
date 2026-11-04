@@ -174,6 +174,12 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   descripcion: string;
   /** `null` = solo requiere actor autenticado (no `system` en producción, salvo internas). */
   permiso: string | null;
+  /**
+   * Otros permisos que también dejan ejecutar la capacidad (basta uno, o `permiso`). El handler
+   * debe acotar lo que puede hacer quien solo tiene uno de estos (p. ej. subir a lo que tiene a
+   * cargo). Quien tiene `permiso` conserva todo igual.
+   */
+  permisosAlternos?: readonly string[];
   input: I;
   output: O;
   efecto: Efecto;

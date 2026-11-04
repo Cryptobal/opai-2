@@ -1,4 +1,4 @@
-// Cliente tipado de los 5 endpoints de Octava (RegistraCedente, ObtenerToken, CargaXmlCesion, CedeDte, ConsultaEstadoAEC).
+// Cliente tipado de los endpoints de Octava que usa OPAI (ObtenerToken, CargaXmlCesion, CedeDte, ConsultaEstadoAEC).
 import type {
   CargaXmlCesionRequest,
   CargaXmlCesionResponse,
@@ -8,15 +8,11 @@ import type {
   ConsultaEstadoAecResponse,
   ObtenerTokenRequest,
   ObtenerTokenResponse,
-  RegistraCedenteRequest,
-  RegistraCedenteResponse,
 } from "./octava-api";
 import { postOctava, type OpcionesOctava } from "./octava-http";
 
 export function clienteOctava(op: OpcionesOctava = {}) {
   return {
-    registraCedente: (b: RegistraCedenteRequest) =>
-      postOctava<RegistraCedenteRequest, RegistraCedenteResponse>("RegistraCedente", b, op),
     obtenerToken: (b: ObtenerTokenRequest) =>
       postOctava<ObtenerTokenRequest, ObtenerTokenResponse>("ObtenerToken", b, op),
     cargaXmlCesion: (b: CargaXmlCesionRequest) =>

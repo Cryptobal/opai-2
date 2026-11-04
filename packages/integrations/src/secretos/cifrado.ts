@@ -52,7 +52,6 @@ export function secretoOcultaSufijo(nombre: string): boolean {
   return (
     nombre === "certificado_clave" ||
     nombre === "clave" ||
-    nombre === "pass_acceso_api" ||
     nombre === "token_sesion"
   );
 }

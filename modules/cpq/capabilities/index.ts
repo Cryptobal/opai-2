@@ -14,6 +14,7 @@ import {
   catalogoItemsUpdate,
 } from "./catalogo-items";
 import { correlativosFijar } from "./correlativos";
+import { costosCategoriaGuardar, costosCategoriaList } from "./costos-categoria";
 import { motorSimular } from "./motor";
 import { cotizacionesCreate } from "./crear";
 import { cotizacionesEnviar } from "./enviar";
@@ -90,6 +91,8 @@ export const capacidades: readonly Capacidad[] = [
   lineasActualizar,
   lineasQuitar,
   lineasReordenar,
+  costosCategoriaList,
+  costosCategoriaGuardar,
   versionMargenActualizar,
   seccionMargenActualizar,
   versionParametros,

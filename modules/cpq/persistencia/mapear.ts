@@ -11,6 +11,9 @@ type FilaLinea = {
   precioUnitarioClp: number | null; margenPropioPct: number | null; alcanceDotacion: string | null;
 };
 
+/** Costo manual por categoría (CAR-162): `lineaId` nulo = global de la cotización. */
+export type FilaCosto = { id: string; lineaId: string | null; categoria: string; montoClp: number };
+
 function slugSeccion(s: FilaSeccion) {
   return s.instalacionId ? s.nombre.replace(/\s+/g, "_").slice(0, 40) : "comun";
 }
@@ -38,6 +41,7 @@ export function mapearVersionCalculo(
   secciones: FilaSeccion[],
   lineas: FilaLinea[],
   modelo: ModeloCosteo,
+  costos: readonly FilaCosto[] = [],
 ): VersionCalculo {
   const porSeccion = new Map(secciones.map((s) => [s.id, s]));
   const margenesSeccion = secciones
@@ -87,6 +91,11 @@ export function mapearVersionCalculo(
       };
       return li;
     });
+  // Los costos de un puesto deshabilitado no cuentan (el puesto tampoco entra al cálculo).
+  const inactivos = new Set(lineas.filter((l) => !l.habilitada).map((l) => l.id));
+  const ajustes = costos
+    .filter((c) => c.lineaId === null || !inactivos.has(c.lineaId))
+    .map((c) => ({ id: c.id, categoria: c.categoria, montoClp: c.montoClp, ...(c.lineaId ? { puestoId: c.lineaId } : {}) }));
   return {
     numero: version.numero,
     modeloId: "seguridad",
@@ -97,6 +106,7 @@ export function mapearVersionCalculo(
     ...(margenesSeccion.length ? { margenesSeccion } : {}),
     variables: {},
     lineas: mapped,
+    ...(ajustes.length ? { ajustes } : {}),
     ...instrumentosDeVersion(version.instrumentosJson),
   };
 }

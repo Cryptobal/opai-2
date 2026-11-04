@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Segmentado, Select, Sheet, Switch } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Input, InputMonto, Segmentado, Select, Sheet, Switch } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -80,7 +80,7 @@ export function HojaItemCatalogo({
         </Campo>
         {verCosto ? (
           <Campo etiqueta="Costo unitario (CLP)" htmlFor="cat-costo">
-            <Input id="cat-costo" inputMode="numeric" value={costo} onChange={(e) => setCosto(e.target.value.replace(/\D/g, ""))} />
+            <InputMonto id="cat-costo" valor={costo} onCambiar={setCosto} />
           </Campo>
         ) : null}
         <Segmentado

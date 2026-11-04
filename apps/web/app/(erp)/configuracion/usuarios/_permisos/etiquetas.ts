@@ -55,6 +55,7 @@ const ESPECIALES: Record<string, string> = {
   "patrones.desactivar": "Desactivar patrones de turno",
   "funciones.desactivar": "Desactivar funciones",
   "cumplimiento.dpa_aceptar": "Aceptar el acuerdo de datos (DPA)",
+  "documentos.subir_alcance": "Subir documentos de sus instalaciones",
   usar: "Usar el agente",
   configurar: "Configurar el agente",
 };

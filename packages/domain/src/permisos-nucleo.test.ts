@@ -34,6 +34,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.personasLaboralManage]: [true, true, false, false, false],
   [P.documentosRead]: [true, true, true, true, true],
   [P.documentosManage]: [true, true, true, false, false],
+  // CAR-182: subir solo a instalaciones a cargo; el supervisor sí, el viewer no (`*:*.read` no lo cubre).
+  [P.documentosSubirAlcance]: [true, true, true, true, false],
   // Firma (firma.md §8). Enviar: owner/admin sí, gerente «según tipo», supervisor «actas», viewer no
   // (el tipo y el alcance se aplican en la capacidad). Leer: todos «según tipo» (viewer por *:*.read).
   // Configurar la política y registrar el finiquito: solo owner/admin.

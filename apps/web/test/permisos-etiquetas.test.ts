@@ -25,6 +25,7 @@ describe("etiquetas de la matriz de permisos (CAR-37)", () => {
     expect(nombrePermiso("core:instalaciones.manage")).toBe("Gestionar Instalaciones");
     expect(nombrePermiso("core:personas.read")).toBe("Ver Personas");
     expect(nombrePermiso("core:estructuras.read_sensible")).toBe("Ver sensible · Estructuras y sueldos");
+    expect(nombrePermiso("core:documentos.subir_alcance")).toBe("Subir documentos de sus instalaciones");
   });
 
   it("lista los ids del catálogo sin nulos", () => {
