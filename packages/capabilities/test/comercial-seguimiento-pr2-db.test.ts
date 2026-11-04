@@ -46,20 +46,30 @@ describe("comercial · seguimiento y actividad, segundo PR (Postgres real)", () 
     await e?.cerrar();
   });
 
-  it("al responder el cliente el negocio avanza a la etapa del plan y nunca retrocede", async () => {
+  it("al responder el cliente el negocio avanza a la etapa del plan, nunca retrocede y respeta los requisitos de salida", async () => {
     const calificado = A.etapas.find((x) => x.nombre === "Calificado")!;
-    await configurar(A.c, { etapaAlResponder: calificado.id });
-    const n = await A.nuevoNegocio();
-    const s = await dato<{ id: string }>(A.c, "comercial.seguimientos.iniciar", { negocioId: n.id });
-    await dato(A.c, "comercial.seguimientos.registrar_respuesta", { id: s.id });
-    expect((await e.admin.negocio.findUniqueOrThrow({ where: { id: n.id } })).etapaId).toBe(calificado.id);
-    // Un negocio que ya está más adelante no baja.
     const visita = A.etapas.find((x) => x.nombre === "Visita técnica")!;
-    const m = await A.nuevoNegocio();
-    await e.admin.negocio.update({ where: { id: m.id }, data: { etapaId: visita.id } });
-    const s2 = await dato<{ id: string }>(A.c, "comercial.seguimientos.iniciar", { negocioId: m.id });
-    await dato(A.c, "comercial.seguimientos.registrar_respuesta", { id: s2.id });
-    expect((await e.admin.negocio.findUniqueOrThrow({ where: { id: m.id } })).etapaId).toBe(visita.id);
+    const responder = async (negocioId: string) => {
+      const s = await dato<{ id: string }>(A.c, "comercial.seguimientos.iniciar", { negocioId, reemplazar: true });
+      await dato(A.c, "comercial.seguimientos.registrar_respuesta", { id: s.id });
+    };
+    const etapaDe = async (id: string) => (await e.admin.negocio.findUniqueOrThrow({ where: { id } })).etapaId;
+    // Desde la segunda etapa avanza a la etapa configurada.
+    await configurar(A.c, { etapaAlResponder: visita.id });
+    const n = await A.nuevoNegocio();
+    await e.admin.negocio.update({ where: { id: n.id }, data: { etapaId: calificado.id, montoEstimadoMensual: 1_000_000 } });
+    await responder(n.id);
+    expect(await etapaDe(n.id)).toBe(visita.id);
+    // Un negocio que ya está más adelante no baja.
+    await configurar(A.c, { etapaAlResponder: calificado.id });
+    await responder(n.id);
+    expect(await etapaDe(n.id)).toBe(visita.id);
+    // Salir de la primera etapa exige una instalación (R10): sin ella no se mueve.
+    await configurar(A.c, { etapaAlResponder: calificado.id });
+    const p = await A.nuevoNegocio();
+    const primera = await etapaDe(p.id);
+    await responder(p.id);
+    expect(await etapaDe(p.id)).toBe(primera);
   });
 
   async function terminarSinRespuesta(negocioId: string) {
