@@ -9,6 +9,13 @@ import {
 import { z } from "zod";
 
 import { prepararTurno } from "./bucle";
+import { contextoSchema, guardarTurno } from "./conversaciones-guardado";
+import {
+  conversacionesArchivar,
+  conversacionesBorrar,
+  conversacionesRenombrar,
+} from "./conversaciones-escritura";
+import { conversacionesGet, conversacionesList } from "./conversaciones";
 import { confirmarPlan, firmarPlan } from "./planes";
 
 export const modeloSchema = z.object({
@@ -46,8 +53,12 @@ export const turnoPreparar = defineCapability({
     mensaje: z.string().trim().min(1).max(6_000),
     modelo: modeloSchema,
     nivel: z.enum(["aprobar_todo", "paso_a_paso"]),
+    /** Retoma esta conversación; sin id se crea una nueva (R19). */
+    conversacionId: z.string().uuid().optional(),
+    contexto: contextoSchema.optional(),
   }),
   output: z.object({
+    conversacionId: z.string().uuid().nullable(),
     token: z.string().nullable(),
     texto: externo(z.string()),
     pasos: z.array(z.unknown()),
@@ -59,6 +70,7 @@ export const turnoPreparar = defineCapability({
     const delegado = comoAgenteInterno(ctx);
     if (modo.dryRun)
       return {
+        conversacionId: null,
         token: null,
         texto: "Solicitará un plan sin ejecutar escrituras.",
         pasos: [],
@@ -67,7 +79,16 @@ export const turnoPreparar = defineCapability({
     const firma = secreto();
     const ia = await iaElegidaDelAgente(delegado, input.modelo);
     const plan = await prepararTurno(delegado, input.mensaje, ia);
+    // Guardar corre en la misma transacción que la auditoría (ADR-052): si falla, el turno falla cerrado.
+    const conversacionId = await guardarTurno(ctx, {
+      conversacionId: input.conversacionId,
+      contexto: input.contexto,
+      mensaje: input.mensaje,
+      texto: plan.texto,
+      pasos: plan.pasos.map((p) => p.capacidad),
+    });
     return {
+      conversacionId,
       token: plan.pasos.length ? firmarPlan(delegado, plan, input.nivel, firma) : null,
       texto: plan.texto,
       pasos: plan.pasos,
@@ -96,7 +117,7 @@ export const historialList = defineCapability({
   id: "agente.historial.list",
   permiso: "agente:usar",
   descripcion:
-    "Lista metadatos de las acciones del agente interno vía el usuario actual; no guarda conversaciones ni memoria.",
+    "Lista metadatos de las acciones del agente interno vía el usuario actual; las conversaciones se consultan en agente.conversaciones.list.",
   input: z.object({ limite: z.number().int().min(1).max(50).default(20) }),
   output: z.array(z.object({ capacidad: z.string(), fecha: z.string() })),
   efecto: "lectura",
@@ -120,4 +141,14 @@ export const historialList = defineCapability({
   },
 });
 
-export const capacidades = [modelosList, turnoPreparar, planConfirmar, historialList];
+export const capacidades = [
+  modelosList,
+  turnoPreparar,
+  planConfirmar,
+  historialList,
+  conversacionesList,
+  conversacionesGet,
+  conversacionesRenombrar,
+  conversacionesArchivar,
+  conversacionesBorrar,
+];

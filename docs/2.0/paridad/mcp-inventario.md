@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 530 pares pantalla→capacidad · 476 con herramienta · 54 excepciones justificadas · 0 faltantes.
+**Resumen:** 531 pares pantalla→capacidad · 477 con herramienta · 54 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -31,6 +31,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/_components` | `agente.conversaciones.borrar` | `agente_conversaciones_borrar` | existe |
+| compartido | `app/_components` | `agente.conversaciones.get` | `agente_conversaciones_get` | existe |
+| compartido | `app/_components` | `agente.conversaciones.list` | `agente_conversaciones_list` | existe |
 | compartido | `app/_components` | `agente.modelos.list` | `agente_modelos_list` | existe |
 | compartido | `app/_components` | `agente.plan.confirmar` | — | excepción |
 | compartido | `app/_components` | `agente.turno.preparar` | — | excepción |
@@ -217,8 +220,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_representantes` | `core_cuentas_set_representantes` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.update` | `core_cuentas_update` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
-| compartido | `app/(erp)/documentos/_componentes` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
-| compartido | `app/(erp)/documentos/_componentes` | `core.documentos.explorar` | `core_documentos_explorar` | existe |
 | compartido | `app/(erp)/documentos/firmas/_componentes` | `core.firmas.list` | `core_firmas_list` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.cancelar` | `core_firmas_cancelar` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.recordar` | `core_firmas_recordar` | existe |
@@ -709,6 +710,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `agente.conversaciones.archivar`
+- `agente.conversaciones.renombrar`
 - `agente.historial.list`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`

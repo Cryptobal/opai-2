@@ -11,7 +11,13 @@ export type PasoPlan = {
   clave: string;
   vistaPrevia: { data: unknown };
 };
-export type Turno = { token: string | null; texto: string; pasos: PasoPlan[]; tokens: number };
+export type Turno = {
+  conversacionId: string | null;
+  token: string | null;
+  texto: string;
+  pasos: PasoPlan[];
+  tokens: number;
+};
 export type Resolucion = {
   estado: "completo" | "rechazado" | "fallido" | "aprobacion" | "pendiente" | "prevista";
   resultados: { paso: number; ok: boolean; code?: string; aprobacionId?: string }[];
