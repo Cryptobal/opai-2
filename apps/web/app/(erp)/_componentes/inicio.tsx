@@ -13,6 +13,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 import { ActividadInicio } from "./actividad-inicio";
 import { IndicadoresInicio } from "./indicadores-inicio";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
+import { SeguimientosInicio } from "./seguimientos-inicio";
 import { TareasInicio } from "./tareas-inicio";
 
 const acciones = (persona: string) => [
@@ -103,6 +104,9 @@ export async function InicioErp({ nombre, empresa, actor }: Props) {
       </div>
       <Suspense fallback={null}>
         <TareasInicio />
+      </Suspense>
+      <Suspense fallback={null}>
+        <SeguimientosInicio />
       </Suspense>
     </div>
   );

@@ -53,6 +53,7 @@ export function PaginaNegocio({ params, searchParams, tab, children }: Props) {
               seleccionado={id}
               p={p}
               etapas={etapas}
+              etiquetas={lista.etiquetas}
             />
           }
           detalle={

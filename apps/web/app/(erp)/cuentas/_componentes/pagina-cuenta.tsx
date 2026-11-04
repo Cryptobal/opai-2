@@ -57,7 +57,13 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
             unPanelHastaLg
             etiquetaLista="Lista de cuentas"
             lista={
-              <ListaCuentas state={lista.state} items={lista.items} seleccionada={id} q={p.q} />
+              <ListaCuentas
+                state={lista.state}
+                items={lista.items}
+                seleccionada={id}
+                q={p.q}
+                etiquetas={lista.etiquetas}
+              />
             }
             detalle={
               <Suspense fallback={<Loading variante="detalle" />}>

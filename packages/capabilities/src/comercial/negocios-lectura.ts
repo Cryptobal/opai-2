@@ -2,6 +2,12 @@ import { z } from "zod";
 
 import { defineCapability } from "../define";
 import { cursorDe, listaSchema, pagina } from "../core/maestros/comun";
+import {
+  conEtiqueta,
+  etiquetasDeFilas,
+  etiquetasFilaSchema,
+  filtroEtiqueta,
+} from "../core/crm/etiquetas-filas";
 import type { Contexto } from "../types";
 import { PERMISO_READ, embudoPorDefecto, negocioSchema, vistaNegocio } from "./comun";
 
@@ -15,6 +21,7 @@ const filtros = listaSchema.extend({
   responsableId: z.uuid().optional().describe("Filtra por responsable."),
   origenId: z.uuid().optional().describe("Filtra por origen."),
   estado: z.enum(["abierto", "ganado", "perdido"]).optional(),
+  etiquetaId: filtroEtiqueta,
 });
 
 const filaLista = negocioSchema.extend({
@@ -22,6 +29,7 @@ const filaLista = negocioSchema.extend({
   etapaNombre: z.string(),
   responsableNombre: z.string().nullable(),
 });
+const filaListaConEtiquetas = filaLista.extend({ etiquetas: etiquetasFilaSchema });
 
 type Base = { cuentaId: string; etapaId: string; responsableId: string | null };
 
@@ -56,7 +64,7 @@ export const negociosList = defineCapability({
     "Lista los negocios (oportunidades de venta) de la empresa con filtros por etapa, responsable, origen y estado, paginada por cursor.",
   permiso: PERMISO_READ,
   input: filtros,
-  output: z.object({ items: z.array(filaLista), siguiente: z.string().nullable() }),
+  output: z.object({ items: z.array(filaListaConEtiquetas), siguiente: z.string().nullable() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -79,15 +87,19 @@ export const negociosList = defineCapability({
         ...(input.origenId ? { origenId: input.origenId } : {}),
         ...(input.estado ? { estado: input.estado } : {}),
         ...(q ? { titulo: { contains: q, mode: "insensitive" } } : {}),
+        ...conEtiqueta(input.etiquetaId),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: input.limite + 1,
       ...cursorDe(input.cursor),
     });
     const p = pagina(filas, input.limite);
-    const extra = await enriquecer(ctx, p.items);
+    const [extra, etiquetas] = await Promise.all([
+      enriquecer(ctx, p.items),
+      etiquetasDeFilas(ctx, "negocio", p.items.map((n) => n.id)),
+    ]);
     return {
-      items: p.items.map((n) => ({ ...vistaNegocio(n), ...extra(n) })),
+      items: p.items.map((n) => ({ ...vistaNegocio(n), ...extra(n), etiquetas: etiquetas(n.id) })),
       siguiente: p.siguiente,
     };
   },

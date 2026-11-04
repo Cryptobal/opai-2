@@ -26,6 +26,52 @@ export const COMUNICABLES_COMERCIAL: readonly EventoComunicable[] = [
     },
   },
   {
+    evento: "comercial.seguimiento.cliente_respondio",
+    nombre: "El cliente respondió al seguimiento",
+    descripcion:
+      "Avisa cuando un cliente responde a una cotización en seguimiento (por correo o registrado a mano). Llega a quien indique la regla, o al vendedor del negocio si la empresa activa ese aviso en Comercial.",
+    transaccional: false,
+    variables: [
+      v("negocio.titulo", "texto", "Guardias · Planta 1", "Negocio cuyo cliente respondió."),
+      EMPRESA,
+      URL("Seguimiento del negocio en OPAI."),
+    ],
+    plantillas: {
+      inapp: {
+        asunto: "Respondió el cliente de «{{negocio.titulo}}»",
+        cuerpo: "El seguimiento quedó detenido. Elige el próximo paso.",
+      },
+      correo: {
+        asunto: "El cliente respondió: {{negocio.titulo}}",
+        cuerpo:
+          "El cliente de «{{negocio.titulo}}» respondió y el seguimiento quedó detenido.\n\nRevisa su respuesta y elige el próximo paso:\n{{url}}",
+      },
+    },
+  },
+  {
+    evento: "comercial.seguimiento.cierre_aplicado",
+    nombre: "OPAI cerró un negocio sin respuesta",
+    descripcion:
+      "Avisa cuando el plan de seguimiento, configurado para cerrar solo, perdió un negocio porque el cliente no respondió a ningún paso.",
+    transaccional: false,
+    variables: [
+      v("negocio.titulo", "texto", "Guardias · Planta 1", "Negocio que se cerró."),
+      EMPRESA,
+      URL("Negocio en OPAI, desde donde se puede reabrir."),
+    ],
+    plantillas: {
+      inapp: {
+        asunto: "Se cerró «{{negocio.titulo}}» sin respuesta",
+        cuerpo: "Puedes reabrirlo desde el negocio.",
+      },
+      correo: {
+        asunto: "Negocio cerrado sin respuesta: {{negocio.titulo}}",
+        cuerpo:
+          "El plan de seguimiento cerró «{{negocio.titulo}}» porque el cliente no respondió.\n\nSi fue un error, reábrelo aquí:\n{{url}}",
+      },
+    },
+  },
+  {
     evento: "comercial.solicitud.acuse",
     nombre: "Acuse de recibo al solicitante",
     descripcion:
