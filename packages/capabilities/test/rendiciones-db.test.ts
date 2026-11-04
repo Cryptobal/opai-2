@@ -155,13 +155,31 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
   });
 
   it("el respaldo debe ser un documento ya subido y confirmado, no uno pendiente", async () => {
-    const doc = (estado: string) =>
+    const doc = (estado: string, por = rinde) =>
       e.admin.documento.create({
-        data: { tenantId: tenantA, nombre: "boleta.pdf", mime: "application/pdf", tamano: 1_000, storageKey: `k-${randomUUID()}`, estado, creadoPorTipo: "user" },
+        data: { tenantId: tenantA, nombre: "boleta.pdf", mime: "application/pdf", tamano: 1_000, storageKey: `k-${randomUUID()}`, estado, creadoPorTipo: "user", creadoPorId: por },
       }).then((d) => d.id);
     const conDoc = (documentoId: string) => cuerpo({ items: [item({ documentoId, sinRespaldoMotivo: undefined, folio: `R-${documentoId.slice(0, 6)}` })] });
     expect(await yo("rendiciones.rendiciones.crear", conDoc(await doc("pendiente")))).toMatchObject({ ok: false });
     expect(await yo("rendiciones.rendiciones.crear", conDoc(await doc("disponible")))).toMatchObject({ ok: true });
+  });
+
+  it("un supervisor no adjunta respaldos que subió otra persona", async () => {
+    const ajenoDoc = await e.admin.documento
+      .create({ data: { tenantId: tenantA, nombre: "ajena.pdf", mime: "application/pdf", tamano: 1_000, storageKey: `k-${randomUUID()}`, estado: "disponible", creadoPorTipo: "user", creadoPorId: otroAprobador } })
+      .then((d) => d.id);
+    const r = await yo("rendiciones.rendiciones.crear", cuerpo({ items: [item({ documentoId: ajenoDoc, sinRespaldoMotivo: undefined, folio: "R-ajeno" })] }));
+    expect(r).toMatchObject({ ok: false });
+  });
+
+  it("el respaldo subido por una key de agente cuenta como propio de su responsable, no de otro", async () => {
+    const porKey = (via: string) =>
+      e.admin.documento
+        .create({ data: { tenantId: tenantA, nombre: "key.pdf", mime: "application/pdf", tamano: 1_000, storageKey: `k-${randomUUID()}`, estado: "disponible", creadoPorTipo: "agent", creadoPorId: randomUUID(), viaUserId: via } })
+        .then((d) => d.id);
+    const con = (documentoId: string) => cuerpo({ items: [item({ documentoId, sinRespaldoMotivo: undefined, folio: `K-${documentoId.slice(0, 6)}` })] });
+    expect(await yo("rendiciones.rendiciones.crear", con(await porKey(otroAprobador)))).toMatchObject({ ok: false });
+    expect(await yo("rendiciones.rendiciones.crear", con(await porKey(rinde)))).toMatchObject({ ok: true });
   });
 
   it("la vista previa no escribe nada", async () => {
