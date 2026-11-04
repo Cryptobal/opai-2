@@ -124,8 +124,8 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
   - GitHub Actions en `startup_failure` desde el 31-oct.
 - **CPQ después de CAR-162 (plan de la [auditoría CPQ §5](auditoria-cpq-2026-11.md#5-plan)):**
   - **PR B** (CAR-183, en revisión): automatiza 5 de los 9 indicadores legales que no son UF/UTM (ingreso mínimo, topes, AFP, SIS, cesantía) desde Previred, con cambio propuesto y aprobación humana. Pendiente: lector para reforma, mutual, jornada e impuesto (no salen de Previred; impuesto puede leerse del SII).
-  - **PR C (entregado en CAR-162 parte 1, falta la pantalla «Margen y finanzas»: editar margen, modo y parámetros financieros por versión; la capacidad `cpq.versiones.parametros` ya existe):** sueldo de referencia por cargo con autocompletado en la línea y hoja de puesto completa (cargo, patrón, días, tramos, colación, movilización, AFP y salud, líquido → bruto). Depende del diseño v4.
-  - **PR D:** parámetros financieros por versión, margen y finanzas en pantalla, catálogo editable y drawer de envío fiel al v3. Depende del diseño v4.
+  - **PR C (entregado en CAR-162 parte 1; la pantalla «Margen y finanzas» entró en el PR D):** sueldo de referencia por cargo con autocompletado en la línea y hoja de puesto completa (cargo, patrón, días, tramos, colación, movilización, AFP y salud, líquido → bruto). Depende del diseño v4.
+  - **PR D (CAR-162, [brief](briefs/BRIEF-CPQ-v4-margen-finanzas.md)):** entró la hoja «Margen y finanzas» (margen, modo, instrumentos y meses de contrato por versión, con vista previa y solo con `cpq:costos.ver`), el catálogo editable en Configuración (crear, editar, archivar y restaurar ítems y categorías) y la hoja de envío con bloqueos y avisos (mutual sin confirmar bloquea, con «Confirmar» en línea), vista previa del PDF y adjuntos. Sin migración. **Queda:** los tres escenarios de margen con precio, validez de la oferta y condiciones comerciales de la hoja; filas «UF del día» y «Colación y movilización» en el envío; miniaturas de página en la vista previa. Sin e2e ni capturas a 375/1024/1280 propias: el entorno del constructor no tiene sesión contra `dev`.
   - **PR E:** compartir y WhatsApp, crear puestos al ganar y archivar. Depende del diseño v4.
   - **Design Prompt v4** ([`design/DESIGN-PROMPT-cpq-v4-modulo-completo.md`](design/DESIGN-PROMPT-cpq-v4-modulo-completo.md)): pendiente de pasar por Claude Design y de la aprobación de Carlos.
   - Riesgo aceptado (decisión de Carlos, 3-nov): cotizar con la mutual al 0 % subestima el costo si la tasa real es mayor; lo mitigan el aviso y el bloqueo de envío.
@@ -138,7 +138,6 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 - **Pantallas que faltan sobre capacidades existentes:**
   - Notas y tareas en las fichas (`core.actividades.*`), etiquetas y archivar contacto.
   - Revocar invitación.
-  - Editar el catálogo de CPQ.
   - Editar la ficha laboral de Persona PR 2.
   - Firmante de empresa y política de firma.
   - Confirmar remuneraciones.
@@ -175,3 +174,4 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 
 - CAR-158 (regla de Carlos, 4-nov 12:31): el importador nunca se detiene por un dato malo de 1.0. Un opcional sin valor por defecto (rut, correo…) con dato malo queda vacío; si el campo es un monto, una lista (líneas, referencias) o tiene valor por defecto en el esquema, se descarta la fila completa (la recurrente entera, nunca una línea suelta) para no inventar datos, y todo queda en `reporte.advertencias` (recurso, campo, código, ids de 1.0; nunca valores). Solo cortan conexión, clave, formato de página y empresa equivocada. Referencias de recurrentes sin folio ni fecha se descartan; a medias se omiten con advertencia. Los rangos de líneas y días de cobro pasaron del esquema a la conversión (motivo nombrado en `omitidas`). Pendiente: revisar con el dryRun real si alguna fila se descarta por campos obligatorios (`createdAt`, `name`).
 - CAR-185 (arreglo de CI, 4-nov): el test del manifest de Finanzas esperaba 72 capacidades y desde #277 son 74; actualizado para destrabar `test` en main.
+- CAR-162 (PR D, presupuesto de JS): tope de `/(erp)/configuracion/modulo/[id]` de 182 a 185 KB; medido 183,4 KB. El catálogo editable de CPQ (ítems, categorías, archivar y restaurar) vive en esa ruta y trae el formulario de ítem. Pendiente: cargar la hoja del ítem bajo demanda para volver a 182 KB.
