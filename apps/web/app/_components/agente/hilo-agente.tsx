@@ -1,5 +1,6 @@
 "use client";
 
+import { Banda } from "@opai/ds";
 import { Loader2 } from "lucide-react";
 
 import { TarjetaPlan } from "./tarjeta-plan";
@@ -37,6 +38,7 @@ export function HiloAgente({
                 {m.error}
               </p>
             ) : null}
+            {m.aviso ? <Banda flotante={false} mensaje={m.aviso} className="mt-2" /> : null}
             {m.plan ? <TarjetaPlan plan={m.plan} onDecidir={(ok) => onDecidir(m.id, ok)} /> : null}
           </div>
         </div>
