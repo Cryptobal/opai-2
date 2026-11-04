@@ -37,7 +37,9 @@ export function AreaGrupo({
         aria-expanded={abierto}
         aria-controls={id}
         className={cn(
-          "flex h-11 items-center gap-2.5 rounded-md px-2 text-base font-medium text-fg-muted outline-none hover:bg-fill hover:text-fg focus-visible:outline-2 focus-visible:outline-focus",
+          "flex h-11 items-center gap-2.5 rounded-md px-2 text-base font-medium outline-none hover:bg-fill hover:text-fg focus-visible:outline-2 focus-visible:outline-focus",
+          // El área de la página actual se distingue aunque esté plegada: texto fuerte, fondo y acento.
+          activa ? "bg-fill font-semibold text-fg" : "text-fg-muted",
         )}
       >
         <Icono className={cn("size-4 flex-none", activa && "text-accent")} aria-hidden />
