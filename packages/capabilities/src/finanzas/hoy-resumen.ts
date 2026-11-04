@@ -38,12 +38,15 @@ export const hoyEnFinanzas = defineCapability({
         _sum: { montoTotal: true },
       }),
       ctx.db.ventasProgramacion.count({ where: { activa: true, proximaEjecucionEn: { lte: ahora } } }),
-      ctx.db.movimientoBancario.groupBy({
-        by: ["estado"],
-        where: { estado: { in: ["pendiente", "sugerido", "por_autorizar"] } },
-        _count: { _all: true },
-        _sum: { monto: true },
-      }),
+      // Los movimientos bancarios exigen `finanzas:bancos.ver`; sin él, el grupo va en cero.
+      ctx.autorizar("finanzas:bancos.ver")
+        ? ctx.db.movimientoBancario.groupBy({
+            by: ["estado"],
+            where: { estado: { in: ["pendiente", "sugerido", "por_autorizar"] } },
+            _count: { _all: true },
+            _sum: { monto: true },
+          })
+        : Promise.resolve([]),
       ctx.db.cobranzaGestion.findMany({
         where: { origen: "automatico", resultado: "enviado", paso: { not: null } },
         select: { documentoId: true, paso: true },

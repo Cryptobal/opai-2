@@ -62,6 +62,7 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 **CAR-166 (cobranza):**
 - Un recordatorio automático puede duplicarse si dos ejecuciones del trabajo corren a la vez entre el envío y el registro de la gestión; el índice único protege el registro, no el correo. Hoy el trabajo corre una vez al día por empresa.
 - Los correos de cobranza no se anonimizan con el contacto en el historial de gestiones (Ley 21.719): revisar con el resto de los registros de envío.
+- Revisión independiente (no bloqueante): reservar el paso antes de enviar (resultado `pendiente`) para cerrar el doble envío ante corridas concurrentes; el correo de cobranza no pasa por `ctx.medidor` (brecha heredada de CAR-155); la ficha del deudor audita solo el `cuentaId`, no los contactos; el trabajo recarga documentos por cada envío (O(n²)) y traga errores sin registro; al activar el envío automático sobre facturas muy atrasadas salen los pasos 1, 2 y 3 en días consecutivos (evaluar saltar al último).
 - WhatsApp automático por lote queda fuera: solo hay enlace manual (a confirmar por Carlos).
 - «Hoy en Finanzas» no incluye aún qué esperar de OC/HES ni el seguimiento de proforma (F5).
 
