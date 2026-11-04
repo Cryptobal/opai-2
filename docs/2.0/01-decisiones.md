@@ -1261,3 +1261,14 @@ identidad de servicio en main.
 **Sin cambios:** Claude no escribe `VETO`; el veto de Carlos se respeta; `migracion-pendiente` la sigue poniendo quien abre el PR con migración.
 
 **Consecuencias.** `AGENTS.md` (roles y «Prohibido») queda alineado con esta decisión.
+
+## ADR-064 · Movimientos bancarios por Web4Leads, no por Fintoc directo
+**Fecha:** 4-nov-2026 · **Decide:** Carlos (instrucción en el chat) · **Registra:** Claude
+
+**Decisión.** OPAI 2.0 recibe los movimientos del banco en línea por el webhook firmado de Web4Leads (que administra Carlos y ya usa Fintoc), en `/api/t/<slug>/banco/web4leads`, con la misma carga y firma HMAC-SHA256 que usa 1.0. No se construye un adaptador Fintoc propio ni se guardan credenciales del banco.
+
+**Por qué.** Web4Leads ya está operativo y probado con las cuentas de Gard; evita custodiar llaves bancarias y retrasar Finanzas.
+
+**Reglas.** El secreto de firma es por empresa, se ingresa en Configuración › Integraciones › «Banco (Web4Leads)» y se guarda cifrado (ADR-027). La deduplicación reutiliza la huella de la cartola para que ambas vías convivan. Las cuentas no reconocidas se ignoran con 200 (pendiente avisar al administrador).
+
+**Consecuencias.** Si más adelante se ofrece conexión bancaria como producto de plataforma, se reevalúa un adaptador Fintoc propio.
