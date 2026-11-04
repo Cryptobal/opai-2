@@ -55,11 +55,11 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     const pin = fila.getByRole("button");
     if ((await pin.getAttribute("aria-label")) === "Desfijar") await pin.click();
     await expect(pin).toHaveAttribute("aria-label", "Fijar");
-    const filaInstalaciones = nav.getByRole("link", { name: "Instalaciones", exact: true }).last().locator("..");
-    await filaInstalaciones.hover();
-    const pinInstalaciones = filaInstalaciones.getByRole("button");
-    if ((await pinInstalaciones.getAttribute("aria-label")) === "Desfijar") await pinInstalaciones.click();
-    await expect(pinInstalaciones).toHaveAttribute("aria-label", "Fijar");
+    const filaNegocios = nav.getByRole("link", { name: "Negocios", exact: true }).last().locator("..");
+    await filaNegocios.hover();
+    const pinNegocios = filaNegocios.getByRole("button");
+    if ((await pinNegocios.getAttribute("aria-label")) === "Desfijar") await pinNegocios.click();
+    await expect(pinNegocios).toHaveAttribute("aria-label", "Fijar");
     let liberar = () => {};
     const demora = new Promise<void>((resolve) => {
       liberar = resolve;
@@ -81,15 +81,15 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     );
     await pin.click();
     await guardado;
-    await pinInstalaciones.click();
+    await pinNegocios.click();
     liberar();
     await expect(pin).toHaveAttribute("aria-label", "Desfijar");
-    await expect(pinInstalaciones).toHaveAttribute("aria-label", "Desfijar");
+    await expect(pinNegocios).toHaveAttribute("aria-label", "Desfijar");
     await page.unrouteAll({ behavior: "wait" });
     await page.reload();
     await expect(nav.getByText("Fijados", { exact: true })).toBeVisible();
     await expect(nav.getByRole("link", { name: "Cuentas", exact: true }).first()).toBeVisible();
-    await expect(nav.getByRole("link", { name: "Instalaciones", exact: true }).first()).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Negocios", exact: true }).first()).toBeVisible();
   }
   await nav.evaluate((el) => el.setAttribute("data-prueba-persistencia", "mismo-shell"));
   if (info.project.name === "telefono") {
