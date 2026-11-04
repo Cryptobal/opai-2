@@ -16,6 +16,8 @@ const HERRAMIENTAS_BANCOS = [
   "finanzas_bancos_saldo_sugerido",
   "finanzas_cartolas_importar",
   "preview_finanzas_cartolas_importar",
+  "finanzas_bancos_sincronizar",
+  "preview_finanzas_bancos_sincronizar",
   "finanzas_movimientos_bancarios_listar",
   "finanzas_conciliaciones_sugerir",
   "finanzas_conciliaciones_confirmar",
@@ -44,7 +46,8 @@ describe("MCP · capacidades de Bancos (CAR-97)", () => {
     }).ctx;
     const nombres = new Set(herramientasMcp(ctx).map((h) => h.nombre));
     for (const c of capacidadesBancos) {
-      expect(nombres.has(nombreHerramienta(c.id)), c.id).toBe(true);
+      // Las internas (receptor de Web4Leads) las ejecuta una ruta pública, no un agente.
+      expect(nombres.has(nombreHerramienta(c.id)), c.id).toBe(!c.interna);
     }
   });
 

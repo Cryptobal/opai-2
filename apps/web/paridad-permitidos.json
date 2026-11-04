@@ -26,6 +26,10 @@
       "motivo": "Endpoint público del formulario web (#224, comercial-formulario-web.md): ocurre sin sesión; resuelve el tenant por slug con tenantPorSlug() y usa la clave del canal (Bearer opai_frm_…) como credencial."
     },
     {
+      "archivo": "app/api/t/[slug]/banco/web4leads/route.ts",
+      "motivo": "Receptor de movimientos de Web4Leads: ocurre sin sesión; resuelve el tenant por slug con tenantPorSlug() y la firma HMAC se verifica dentro de la capacidad interna con el secreto cifrado de la empresa."
+    },
+    {
       "archivo": "app/api/webhooks/resend/entrante/route.ts",
       "motivo": "Receptor del correo entrante de Resend (CAR-67): ocurre sin sesión; resuelve el tenant del token de la dirección con una función SECURITY DEFINER (resolverTokenSeguimiento), verifica la firma Svix y ejecuta la capacidad interna."
     }
@@ -46,6 +50,10 @@
     {
       "archivo": "app/api/t/[slug]/solicitudes/route.ts",
       "motivo": "Recepción del formulario web: comercial.solicitudes.recibir_formulario_web es interna por diseño; la credencial es la clave del canal, con rate limit e idempotencia."
+    },
+    {
+      "archivo": "app/api/t/[slug]/banco/web4leads/route.ts",
+      "motivo": "finanzas.bancos.recibir_web4leads es interna por diseño: solo este receptor la ejecuta, con la firma HMAC de la empresa como credencial (la entrada de agentes es finanzas.bancos.sincronizar)."
     },
     {
       "archivo": "app/api/webhooks/resend/entrante/route.ts",

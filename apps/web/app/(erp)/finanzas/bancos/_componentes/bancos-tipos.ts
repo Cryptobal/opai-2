@@ -5,6 +5,8 @@ export type CuentaBanco = {
   moneda: string;
   flujoFilaId: string | null;
   activa: boolean;
+  ultimaSyncEn: string | null;
+  saldoBanco: number | null;
 };
 
 export type MovimientoBanco = {

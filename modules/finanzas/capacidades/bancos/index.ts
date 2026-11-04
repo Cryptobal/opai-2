@@ -5,7 +5,9 @@ import { bancosConciliacionSugerir } from "./conciliacion-sugerir";
 import { bancosCuentasGuardar } from "./cuentas-guardar";
 import { bancosCuentasListar, bancosSaldoSugerido } from "./cuentas";
 import { bancosMovimientosListar } from "./movimientos";
+import { bancosRecibirWeb4leads } from "./recibir-web4leads";
 import { bancosReglasGuardar, bancosReglasListar } from "./reglas";
+import { bancosSincronizar } from "./sincronizar";
 
 export const capacidadesBancos = [
   bancosCuentasListar,
@@ -13,6 +15,8 @@ export const capacidadesBancos = [
   bancosSaldoSugerido,
   bancosMovimientosListar,
   bancosCartolaImportar,
+  bancosSincronizar,
+  bancosRecibirWeb4leads,
   bancosConciliacionSugerir,
   bancosConciliacionConfirmar,
   bancosConciliacionDeshacer,

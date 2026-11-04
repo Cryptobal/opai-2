@@ -126,6 +126,7 @@ export const manifest = defineModule({
     { id: "finanzas.banco.cuenta_creada", descripcion: "Se creó una cuenta bancaria." },
     { id: "finanzas.banco.cuenta_actualizada", descripcion: "Se actualizó una cuenta bancaria." },
     { id: "finanzas.banco.cartola_importada", descripcion: "Se importó una cartola bancaria." },
+    { id: "finanzas.banco.movimientos_sincronizados", descripcion: "El banco en línea (Web4Leads) entregó movimientos." },
     { id: "finanzas.banco.conciliacion_confirmada", descripcion: "Se confirmó una conciliación bancaria." },
     { id: "finanzas.banco.conciliacion_deshecha", descripcion: "Se deshizo una conciliación bancaria." },
     { id: "finanzas.banco.cobro_manual", descripcion: "Se registró un cobro manual sin movimiento bancario." },
