@@ -20,7 +20,7 @@ Cerrar el flujo del cotizador: al ganar el negocio, RRHH confirma y crea los pue
 - **Confirmación de RRHH = permiso y aprobación.** `cpq.puestos.confirmar` exige `cpq:puestos.confirmar` (nuevo; owner y admin) más `core:instalaciones.manage`, y es `irreversible`: un agente queda en la cola de aprobación humana (`APPROVAL_REQUIRED`). El consumidor de `cpq.cotizacion.aceptada` **no crea nada**: la oferta se calcula al abrir la hoja, así que ningún evento crea puestos en silencio.
 - **Sin imports cruzados.** CPQ escribe `core.puestos` por su cliente de tenant (el núcleo es siempre dependencia) y emite `core.puesto.creado` por puesto y `cpq.puestos.confirmados` por confirmación.
 - **Idempotencia.** `cpq.puestos_creados` es único por (línea, posición): repetir no duplica y dos confirmaciones simultáneas dan CONFLICT. Los nombres se numeran por posición (`<nombre base> n`) y se validan contra los puestos de la instalación.
-- **Enlace público** `/p/<slug>/<token>` (el tenant sale del slug, como la firma por enlace). Token de 128 bits (32 hex). `cpq.compartir.ver` es interna, corre con el sistema, cuenta la vista y devuelve solo alcance y venta mensual (nunca costos, sueldos ni margen, R59). Revocado, vencido, archivado o inexistente dan el mismo NOT_FOUND. Tope por IP y token con `permitir(..., { fallarCerrado: true })`.
+- **Enlace público** `/p/<slug>/<token>` (el tenant sale del slug, como la firma por enlace). Token de 128 bits (32 hex); la base guarda solo su hash sha256 y la URL se ve únicamente al crearlo (ver «Decisión de Carlos, 4-nov»). `cpq.compartir.ver` es interna, corre con el sistema, cuenta la vista y devuelve solo alcance y venta mensual (nunca costos, sueldos ni margen, R59). Revocado, vencido, archivado o inexistente dan el mismo NOT_FOUND. Tope por IP y token con `permitir(..., { fallarCerrado: true })`.
 - **Archivar** es una columna de la cotización (`archivada_en`), no un estado de versión: sirve en cualquier estado salvo `aceptada` (base del contrato) y `en_aprobacion`.
 
 ## 5. Archivos
@@ -37,14 +37,14 @@ Cerrar el flujo del cotizador: al ganar el negocio, RRHH confirma y crea los pue
 | `cpq.compartir.crear` / `revocar` | escritura, dryRun | Un enlace activo por cotización; vence en 1 a 90 días (15 por defecto) |
 | `cpq.compartir.ver` | interna | Solo la página pública; por eso está en `paridad-excepciones.ts` y `paridad-permitidos.json` |
 | `cpq.cotizaciones.archivar` / `restaurar` | escritura, dryRun | |
-| `cpq.cotizaciones.estado_comercial` | lectura | Archivada, aceptada, enlace (solo con `cpq:cotizaciones.manage`) y puestos pendientes |
+| `cpq.cotizaciones.estado_comercial` | lectura | Archivada, aceptada, si el enlace está permitido, estado del enlace activo (vencimiento y vistas, nunca la URL; solo con `cpq:cotizaciones.manage`) y puestos pendientes |
 | `cpq.cotizaciones.list` | lectura | Nuevo `soloArchivadas`; por defecto oculta las archivadas |
 
 ## 8. Interfaz y responsive
 Tarjeta «Compartir y cierre» en la ficha (Compartir, Crear puestos (n), Archivar o Restaurar). **Compartir** (`Sheet`): enlace con vencimiento, Copiar, WhatsApp, Correo, mensaje de ejemplo, vistas y «Revocar enlace»; sin enlace o vencido, «Crear enlace». **Crear puestos** (`Dialog` grande): una fila por línea con cargo, instalación, patrón, horario, sueldo cotizado y su origen (solo con costos), casilla, nombre base y cantidad; pie «Confirmar y crear n puestos»; éxito con enlaces a los puestos de cada instalación. Lista: chip «Mostrar › Archivadas». Página pública con `AuthCard`. Todo con `@opai/ds`, sin hex ni estilos inline, a 375, 1024 y 1280 px.
 
 ## 9. Seguridad y tenant
-RLS en las dos tablas; el tenant sale de la sesión o del slug del enlace, nunca del body. El token es una credencial: solo lo ve quien puede gestionar cotizaciones. Los costos no salen en la oferta sin `cpq:costos.ver` ni en la página pública. Un lector no confirma ni comparte.
+RLS en las dos tablas; el tenant sale de la sesión o del slug del enlace, nunca del body. El token es una credencial: se muestra una sola vez, al crearlo, a quien puede gestionar cotizaciones. Los costos no salen en la oferta sin `cpq:costos.ver` ni en la página pública. Un lector no confirma ni comparte.
 
 ## 10. Casos límite
 Sin versión aceptada: la oferta lo dice. Línea sin instalación, cargo, patrón u horario: el servidor lo pide por nombre. Patrón «4×4» o «4x4» se casa con el catálogo; si no existe, se interpreta `NxM`. Nombre repetido en la instalación: CONFLICT con el nombre. Reconfirmar lo ya creado: regla de negocio, sin duplicar. Cotización archivada: no se comparte y su enlace deja de abrir. Crear un enlace revoca el anterior.
@@ -70,3 +70,11 @@ El sueldo cotizado no pasa al puesto (queda para el brief de Remuneraciones 07b)
 
 ## 16. Reporte de ejecución
 Ver la descripción del PR y `ESTADO.md`.
+
+## Decisión de Carlos, 4-nov-2026 17:34 CLT (Opción A) y su aplicación
+Para Gard todo pasa por el Portal Cliente; el enlace suelto es un respaldo para empresas sin portal.
+1. **Correo al cliente con enlace al Portal Cliente.** El correo de `cpq.cotizaciones.enviar` (y el de envío conjunto) usa ahora el evento comunicable `cpq.cotizacion.enviada_cliente` (nuevo, transaccional, plantilla de correo editable en Comunicaciones) con `url` = `<urlBase>/cliente`. Hallazgo: `cpq.cotizacion.enviada` no estaba en el catálogo comunicable, así que el correo se descartaba en silencio (envío «best-effort»). **El Portal Cliente aún no tiene vista de cotización** (solo existe `/cliente`, el resumen del mes): el correo apunta a esa ruta y queda pendiente la vista de cotización en el portal (cambiar solo la ruta en `persistencia/correo-cliente.ts`).
+2. **Enlace apagado por defecto.** Ajuste `cpq.enlace_publico` (`.default(false)`, Configuración › CPQ › Ajustes). Solo aplica si el tenant NO tiene `portal_cliente` activo: con portal, `cpq.compartir.crear` falla aunque el ajuste esté en verdadero. Se valida en el servidor (`enlacePublicoPermitido`): en `crear`, en `ver` y en la página `/p/` (que lee los módulos reales de la empresa); apagado o con portal, `/p/` responde el mismo NOT_FOUND. La tarjeta oculta Compartir (enlace, WhatsApp, correo) cuando no aplica (`enlacePermitido` en `estado_comercial`). `revocar` siempre funciona.
+3. **Token con hash.** `cpq.enlaces_compartidos.token_hash` (CHECK 64 hex, único); la búsqueda en `/p/` es por hash. La URL completa solo se devuelve al crear; `estado_comercial` y cualquier lectura devuelven solo «hay enlace activo», vencimiento, vistas y estado. La hoja Compartir ofrece «Crear enlace nuevo» (revoca el actual) si hace falta volver a verla. La migración `20261105171500` se editó (no estaba aplicada en Neon).
+4. **Tope por IP sin el token** en `/p/` (además del tope por IP y token).
+Fuera de este PR: el enlace para la propuesta técnica (otro PR). Tests: ajuste apagado, ajuste encendido sin portal y ajuste encendido con portal (`cpq-puestos-compartir-db.test.ts`).
