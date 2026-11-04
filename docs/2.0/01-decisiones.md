@@ -1313,6 +1313,14 @@ identidad de servicio en main.
 
 **Fuera de este corte.** El enlace público donde el cliente aprueba u observa la proforma y el envío automático de la proforma quedan como pendiente: hoy una persona registra la respuesta del cliente.
 
+## ADR-070 · Frente único: las sesiones de Claude integran, el bot vigila y migra
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (instrucción directa en el chat del 4-nov-2026), registrada por Claude (Sesión 4).
+
+**Decisión.** Las sesiones de Claude planifican, construyen e integran sus propios PRs. El bot «OPAI 2.0» no integra ni escribe encargos o briefs: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:`, toma capturas) y aplica las migraciones de Neon, con respaldo previo y en `dev` antes que `main`, cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos» sobre el head del PR.
+
+**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. **Pendiente:** `AGENTS.md` (tabla de roles, «Integración a `main`» y «Prohibido») todavía nombra al bot como integrador y a Claude como quien aplica migraciones; ante el choque, `OPERACION-agentes.md` manda y `AGENTS.md` se corrige en un PR aparte.
+
 ## ADR-068 · El pendiente de una factura descuenta sus notas de crédito parciales
 
 **Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (regla de negocio, dada directamente en el chat del 4-nov-2026), implementada por Claude (CAR-170). Cierra el N1 de #289.
