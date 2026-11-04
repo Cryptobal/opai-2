@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { defineCapability, documentoEmitidoConciliable } from "@opai/capabilities";
-import { sugerirConciliacion } from "@opai/domain";
+import { defineCapability, documentoEmitidoConciliable, notasCreditoPorDocumento } from "@opai/capabilities";
+import { saldoPendiente, sugerirConciliacion } from "@opai/domain";
 
 import { PERMISO_BANCOS_VER } from "./permisos";
 import { montoDe } from "./esquemas";
@@ -63,6 +63,7 @@ export const bancosConciliacionSugerir = defineCapability({
         select: { id: true, folio: true, montoTotal: true, glosa: true, proveedor: { select: { rut: true, razonSocial: true } } },
       }),
     ]);
+    const nc = await notasCreditoPorDocumento(ctx.db, emitidos.map((e) => e.id));
     const cuentaIds = emitidos.map((e) => e.cuentaId);
     const cuentasMap = new Map(
       (
@@ -80,7 +81,7 @@ export const bancosConciliacionSugerir = defineCapability({
           id: d.id,
           tipo: "documento_emitido" as const,
           montoTotal: d.montoTotal,
-          montoPendiente: d.montoTotal - d.montoCobrado,
+          montoPendiente: saldoPendiente({ ...d, montoNotasCredito: nc.get(d.id) ?? 0 }),
           rut: cuentasMap.get(d.cuentaId)?.rut ?? null,
           glosa: d.glosa,
           fecha: null,

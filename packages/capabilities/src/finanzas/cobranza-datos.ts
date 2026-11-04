@@ -1,6 +1,7 @@
 import { type DocumentoCobranza, diaEnZona, ESTADOS_DTE_COBRABLES, TIPOS_DTE_COBRABLES } from "@opai/domain";
 
 import type { Contexto } from "../types";
+import { notasCreditoPorDocumento } from "./cobros";
 import { ambitoHabil, zonaDe } from "../comercial/seguimiento-comun";
 import { ajuste } from "../core/config/valores";
 
@@ -37,8 +38,10 @@ export async function documentosCobrables(ctx: Contexto, cuentaId?: string): Pro
     },
     orderBy: [{ fechaVencimiento: "asc" }, { id: "asc" }],
   });
+  const nc = await notasCreditoPorDocumento(ctx.db, filas.map((f) => f.id));
   return filas.map((f) => ({
     ...f,
+    montoNotasCredito: nc.get(f.id) ?? 0,
     fechaVencimiento: fecha(f.fechaVencimiento),
     fechaEmision: fecha(f.fechaEmision),
   }));

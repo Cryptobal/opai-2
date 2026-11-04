@@ -108,3 +108,16 @@ describe("recordatorios", () => {
     expect(evaluarRecordatorio({ ...base, hoy: "2026-09-20", doc: doc() })).toEqual({ accion: "omitir", motivo: "no_vencida" });
   });
 });
+
+describe("saldoPendiente con notas de crédito parciales (regla de Carlos, 4-nov-2026)", () => {
+  it("factura de 1.000.000 con NC parcial de 200.000 queda con pendiente 800.000", () => {
+    expect(saldoPendiente({ montoTotal: 1_000_000, montoCobrado: 0, montoNotasCredito: 200_000 })).toBe(800_000);
+  });
+  it("descuenta también lo ya cobrado y nunca baja de cero", () => {
+    expect(saldoPendiente({ montoTotal: 1_000_000, montoCobrado: 500_000, montoNotasCredito: 200_000 })).toBe(300_000);
+    expect(saldoPendiente({ montoTotal: 1_000_000, montoCobrado: 900_000, montoNotasCredito: 200_000 })).toBe(0);
+  });
+  it("sin notas de crédito se comporta como antes", () => {
+    expect(saldoPendiente({ montoTotal: 100, montoCobrado: 30 })).toBe(70);
+  });
+});

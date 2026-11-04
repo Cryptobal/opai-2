@@ -9,7 +9,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { clp } from "../../flujo/_componentes/datos";
 import { etiquetaDoc, type Elegida } from "./seleccion-conciliacion";
 
-type Venta = { id: string; folio: number | null; tipoDte: number; cuentaNombre: string; montoTotal: number; montoCobrado: number; estadoCobro: string };
+type Venta = { id: string; folio: number | null; tipoDte: number; cuentaNombre: string; montoTotal: number; montoCobrado: number; montoPendiente: number; estadoCobro: string };
 
 /** Busca una factura emitida por folio para sumarla al abono (reemplaza pegar el id del documento). */
 export function BuscarFactura({ elegidas, onAgregar }: { elegidas: Elegida[]; onAgregar: (e: Elegida) => void }) {
@@ -35,7 +35,7 @@ export function BuscarFactura({ elegidas, onAgregar }: { elegidas: Elegida[]; on
         <div key={v.id} className="rowcard flex flex-wrap items-center gap-2 p-3">
           <p className="t-body-sm min-w-0 flex-1">
             {etiquetaDoc(v.folio, v.cuentaNombre, v.tipoDte)}
-            <span className="t-caption block text-fg-muted">Pendiente {clp(v.montoTotal - v.montoCobrado)}</span>
+            <span className="t-caption block text-fg-muted">Pendiente {clp(v.montoPendiente)}</span>
           </p>
           <Button variant="secondary" disabled={elegidas.some((x) => x.id === v.id)}
             onClick={() => onAgregar({ id: v.id, tipo: "documento_emitido", etiqueta: etiquetaDoc(v.folio, v.cuentaNombre, v.tipoDte), pendiente: v.montoTotal - v.montoCobrado, monto: 0 })}>

@@ -22,14 +22,14 @@ function descargar(base64: string, nombre: string) {
 }
 
 /** Acciones de la ficha: cada una llama a su capacidad; el servidor decide si corresponde. */
-export function AccionesVenta({ venta, enviosPrevios, montoCobrado }: { venta: Venta; enviosPrevios: number; montoCobrado: number }) {
+export function AccionesVenta({ venta, enviosPrevios, montoPendiente }: { venta: Venta; enviosPrevios: number; montoPendiente: number }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const intento = useRef(crypto.randomUUID());
   const [hoja, setHoja] = useState<"nc" | "ceder" | "reenviar" | "cobro" | null>(null);
   const emitido = venta.estadoDte === "enviado" || venta.estadoDte === "aceptado";
   const puedeCeder = venta.estadoDte === "aceptado" && (venta.tipoDte === 33 || venta.tipoDte === 34) && venta.cesionEstado !== "cedido";
 
-  const porCobrar = venta.montoTotal - montoCobrado;
+  const porCobrar = montoPendiente; // monto − notas de crédito parciales − cobrado (calculado en el servidor)
   const puedeCobrar = venta.estadoDte === "aceptado" && venta.cesionEstado !== "cedido" && (venta.tipoDte === 33 || venta.tipoDte === 34) && porCobrar > 0;
 
   async function pdf() {
