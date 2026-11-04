@@ -16,6 +16,7 @@ export {
   esActivo,
   type LinkComponent,
   LinkPorDefecto,
+  type BusquedaMasRender,
   type LinkProps,
   type NavItem,
   type Portal,

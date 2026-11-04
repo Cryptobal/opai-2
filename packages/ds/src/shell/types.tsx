@@ -35,6 +35,17 @@ export type NavItem = {
   fijable?: boolean;
 };
 
+/**
+ * Resultados de la búsqueda dentro del menú «Más» del teléfono (CAR-182): los pinta la app (datos de
+ * `core.buscar`) con el campo de «Más» como entrada. `onElegido` cierra el menú tras ir al destino y
+ * `onVolver` regresa a las áreas.
+ */
+export type BusquedaMasRender = (p: {
+  q: string;
+  onElegido: () => void;
+  onVolver: () => void;
+}) => ReactNode;
+
 /** Barra superior en modo detalle: "‹ Cuentas / Logística Andina SpA". */
 export type Volver = { href: string; etiqueta: string };
 
