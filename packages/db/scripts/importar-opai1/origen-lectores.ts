@@ -21,7 +21,9 @@ export function validarDatos(crudo: unknown): DatosOpai1 {
     g.n += 1;
     grupos.set(clave, g);
   }
-  const rutas = [...grupos].slice(0, 40).map(([k, g]) => (g.n > 1 ? `${k} ×${g.n}, p. ej. ${g.primera}` : g.primera + k.slice(k.indexOf(" ("))));
+  const todos = [...grupos];
+  const rutas = todos.slice(0, 40).map(([k, g]) => (g.n > 1 ? `${k} ×${g.n}, p. ej. ${g.primera}` : g.primera + k.slice(k.indexOf(" ("))));
+  if (todos.length > 40) rutas.push(`y ${todos.length - 40} grupos más`);
   throw new Error(`Origen inválido: ${rutas.join("; ")}`);
 }
 
