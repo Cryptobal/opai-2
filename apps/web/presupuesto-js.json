@@ -5,6 +5,7 @@
   "rutas": {
     "/(erp)": 170,
     "/(erp)/tareas": 171,
+    "/(erp)/agente/historial": 171,
     "/(erp)/finanzas/ventas/programacion/*": 175,
     "/(erp)/negocios/[id]/actividad": 176,
     "/(erp)/instalaciones/[id]/actividad": 177,
@@ -18,7 +19,7 @@
     "/(erp)/personas/vencimientos": 175,
     "/(erp)/personas/[id]": 169,
     "/(erp)/personas/[id]/laboral": 168,
-    "/(erp)/personas/[id]/documentos": 168,
+    "/(erp)/personas/[id]/documentos": 169,
     "/(erp)/cargos/[id]": 167,
     "/(erp)/cuentas/[id]": 168,
     "/(erp)/cuentas/[id]/actividad": 177,

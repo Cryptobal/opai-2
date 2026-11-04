@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
-import { EVENTO_AGENTE, registrarAgente, type SolicitudAgente } from "./abrir-agente";
+import type { SolicitudAgente } from "./abrir-agente";
 
 // Ni el botón ni el panel pesan en el JS inicial: se descargan solo donde el agente existe (ADR-037).
 const PanelAgente = dynamic(() => import("./panel-agente").then((m) => m.PanelAgente), {
@@ -11,7 +11,6 @@ const PanelAgente = dynamic(() => import("./panel-agente").then((m) => m.PanelAg
 });
 const BotonAgente = dynamic(() => import("./boton-agente").then((m) => m.BotonAgente));
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Pedido = SolicitudAgente & { n: number };
 
 /**
@@ -37,24 +36,18 @@ export function useAgenteShell(disponible: boolean, portal: string) {
   }, [disponible]);
   useEffect(() => {
     if (!disponible) return;
-    const pedir = (s: SolicitudAgente) => {
-      setPedido((p) => ({ ...s, n: (p?.n ?? 0) + 1 }));
-      setAbierto(true);
-    };
-    const alEvento = (e: Event) => pedir((e as CustomEvent<SolicitudAgente>).detail ?? {});
-    window.addEventListener(EVENTO_AGENTE, alEvento);
-    const darDeBaja = registrarAgente();
-    const url = new URL(window.location.href);
-    if (url.searchParams.has("agente")) {
-      const conversacion = url.searchParams.get("conversacion") ?? "";
-      pedir(UUID.test(conversacion) ? { conversacionId: conversacion } : {});
-      url.searchParams.delete("agente");
-      url.searchParams.delete("conversacion");
-      window.history.replaceState(window.history.state, "", url);
-    }
+    let baja: (() => void) | undefined;
+    let vigente = true;
+    void import("./escucha-agente").then((m) => {
+      if (!vigente) return;
+      baja = m.escuchar((s) => {
+        setPedido((p) => ({ ...s, n: (p?.n ?? 0) + 1 }));
+        setAbierto(true);
+      });
+    });
     return () => {
-      window.removeEventListener(EVENTO_AGENTE, alEvento);
-      darDeBaja();
+      vigente = false;
+      baja?.();
     };
   }, [disponible]);
   const lanzador: ReactNode = disponible ? (
