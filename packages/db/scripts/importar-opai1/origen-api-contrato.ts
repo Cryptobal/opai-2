@@ -80,6 +80,8 @@ function agregarNegocio(acc: Acumulado, fila: Fila): void {
       });
     }
   }
+  // Un negocio repetido entre páginas reemplaza el vínculo derivado anterior (solo vale la última versión).
+  acc.dealContacts = acc.dealContacts.filter((v) => !(esFila(v) && v["dealId"] === id));
   const contacto = fila["primaryContactId"];
   if (typeof contacto === "string" && contacto) {
     acc.dealContacts.push({

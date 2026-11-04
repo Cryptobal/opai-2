@@ -144,3 +144,5 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 - **`IF NOT EXISTS` en migraciones:** no valida el esquema de lo que ya existe. Una migración nueva no depende de eso para reintentos si no tiene un test equivalente (`plataforma-migracion-reintento.test.ts`).
 - **Ley 21.719:** integrada (#56, #61, #107), pero eso no acredita cumplimiento legal ni activación operativa. Confirmar el plazo de retención con el abogado antes de activarla. La marca «No recontratar» queda bloqueada en producción hasta el 1-dic-2026.
 - **Prisma drift heredado** entre migraciones y schema (FK de Pauta, visto en el merge de CAR-81): sigue sin diff vacío acreditado.
+
+- CAR-158 (seguimiento): el vínculo principal derivado del negocio se reemplaza cuando el mismo negocio reaparece con otro `primaryContactId` (hallazgo de Codex en #268). Primera captura Previred en Neon `main`: 4 indicadores renovados; `topes` propuestos, pendientes de aprobación de Carlos en Plataforma → Valores legales.
