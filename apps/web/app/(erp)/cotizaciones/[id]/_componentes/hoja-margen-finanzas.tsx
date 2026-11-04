@@ -82,7 +82,7 @@ export function HojaMargenFinanzas({
             <p className="t-subheading t-numeric">{venta != null ? `${pesos(venta)} / mes` : "—"}</p>
             <p className="t-caption text-fg-muted">{vigente && !vigente.fallo ? "Con tus cambios" : "Venta mensual actual"}</p>
           </div>
-          <Button type="button" disabled={pendiente || !cambios || !mesesOk} onClick={() => void guardar()}>
+          <Button type="button" disabled={pendiente || !mesesOk} onClick={() => (cambios ? void guardar() : onCerrar())}>
             Listo
           </Button>
         </>
