@@ -1,21 +1,24 @@
 "use client";
 
-import { Loader2, Plus, Sparkles } from "lucide-react";
+import { History, Plus, Sparkles } from "lucide-react";
+import { useState } from "react";
 
 import { Banda, Button, Empty, PanelLateral, Segmentado, Select, Skeleton } from "@opai/ds";
 
 import { Compositor } from "./compositor";
-import { TarjetaPlan } from "./tarjeta-plan";
+import { HiloAgente } from "./hilo-agente";
+import { HistorialAgente } from "./historial-agente";
 import type { Modelo } from "./tipos";
 import { useAgente } from "./use-agente";
+import { useHistorial } from "./use-historial";
 
 const CLASE = { economica: "económica", estandar: "estándar", potente: "potente" } as const;
 const clave = (m: Modelo) => `${m.proveedor}::${m.modelo}`;
 
 /**
  * Panel del agente interno (CAR-120, PR 5a). Cliente de las capacidades `agente.*`: prepara un plan
- * con vistas previas y solo ejecuta lo que la persona confirma aquí. La conversación vive en la
- * pantalla; guardarla es del PR 5b.
+ * con vistas previas y solo ejecuta lo que la persona confirma aquí. Cada turno queda guardado en
+ * su conversación privada (PR 5b); desde el historial se retoma o se borra.
  */
 export function PanelAgente({
   abierto,
@@ -27,6 +30,8 @@ export function PanelAgente({
   portal: string;
 }) {
   const a = useAgente(portal, abierto);
+  const [verHistorial, setVerHistorial] = useState(false);
+  const h = useHistorial(portal, abierto && verHistorial);
   const sinModelos = a.modelos !== null && a.modelos.length === 0;
   return (
     <PanelLateral
@@ -35,14 +40,30 @@ export function PanelAgente({
       titulo="OPAI"
       retener={a.hayPlanPendiente}
       acciones={
-        <Button
-          variant="ghost"
-          aria-label="Nueva conversación"
-          className="size-11 p-0"
-          onClick={a.nueva}
-        >
-          <Plus className="size-5" aria-hidden />
-        </Button>
+        <>
+          <Button
+            variant="ghost"
+            aria-label={verHistorial ? "Volver a la conversación" : "Historial"}
+            aria-pressed={verHistorial}
+            className="size-11 p-0"
+            disabled={a.hayPlanPendiente}
+            onClick={() => setVerHistorial((v) => !v)}
+          >
+            <History className="size-5" aria-hidden />
+          </Button>
+          <Button
+            variant="ghost"
+            aria-label="Nueva conversación"
+            className="size-11 p-0"
+            disabled={a.hayPlanPendiente}
+            onClick={() => {
+              a.nueva();
+              setVerHistorial(false);
+            }}
+          >
+            <Plus className="size-5" aria-hidden />
+          </Button>
+        </>
       }
     >
       {a.modelos && a.modelos.length > 0 ? (
@@ -76,7 +97,23 @@ export function PanelAgente({
         </div>
       ) : null}
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3" aria-live="polite">
-        {a.modelos === null && !a.errorModelos ? (
+        {verHistorial ? (
+          <HistorialAgente
+            lista={h.lista}
+            error={h.error}
+            onBorrar={(id) => {
+              if (id === a.conversacionId) a.nueva();
+              void h.borrar(id);
+            }}
+            onAbrir={(id) =>
+              void h.abrir(id).then((hilo) => {
+                if (!hilo) return;
+                a.cargar(id, hilo);
+                setVerHistorial(false);
+              })
+            }
+          />
+        ) : a.modelos === null && !a.errorModelos ? (
           <Skeleton className="h-24 w-full" />
         ) : a.errorModelos ? (
           <Empty titulo="No pudimos abrir el agente" descripcion="Reintenta en unos minutos." />
@@ -92,37 +129,7 @@ export function PanelAgente({
             descripcion="Pregunta por tus datos o pide un cambio. Antes de escribir algo, te muestro el plan para que lo confirmes."
           />
         ) : (
-          a.mensajes.map((m) => (
-            <div key={m.id} className={m.rol === "yo" ? "flex justify-end" : "flex justify-start"}>
-              <div
-                className={
-                  m.rol === "yo"
-                    ? "max-w-[85%] rounded-lg bg-accent-muted px-3 py-2"
-                    : "w-full rounded-lg bg-surface px-3 py-2"
-                }
-              >
-                {m.rol === "agente" && m.texto === "" && !m.error ? (
-                  <p className="t-caption flex items-center gap-2" role="status">
-                    <Loader2
-                      className="size-4 animate-spin motion-reduce:animate-none"
-                      aria-hidden
-                    />
-                    Preparando…
-                  </p>
-                ) : (
-                  <p className="text-md break-words whitespace-pre-wrap text-fg">{m.texto}</p>
-                )}
-                {m.error ? (
-                  <p role="alert" className="t-caption text-danger-fg">
-                    {m.error}
-                  </p>
-                ) : null}
-                {m.plan ? (
-                  <TarjetaPlan plan={m.plan} onDecidir={(ok) => void a.decidir(m.id, ok)} />
-                ) : null}
-              </div>
-            </div>
-          ))
+          <HiloAgente mensajes={a.mensajes} onDecidir={(id, ok) => void a.decidir(id, ok)} />
         )}
       </div>
       {typeof navigator !== "undefined" && !navigator.onLine ? (
