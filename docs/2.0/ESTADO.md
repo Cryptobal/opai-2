@@ -146,3 +146,5 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 - **Prisma drift heredado** entre migraciones y schema (FK de Pauta, visto en el merge de CAR-81): sigue sin diff vacío acreditado.
 
 - CAR-158 (seguimiento): el vínculo principal derivado del negocio se reemplaza cuando el mismo negocio reaparece con otro `primaryContactId` (hallazgo de Codex en #268). Primera captura Previred en Neon `main`: 4 indicadores renovados; `topes` propuestos, pendientes de aprobación de Carlos en Plataforma → Valores legales.
+
+- CAR-158 (dryRun real, 4-nov): `additionalReferences` llega `null` (Json? en 1.0); el lector lo normaliza a arreglo (acepta null, texto JSON u objeto suelto) y el validador agrupa los errores por campo con conteo y primera fila. Carlos repite el dryRun.
