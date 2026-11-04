@@ -1,5 +1,10 @@
 import type { Contexto } from "@opai/capabilities";
-import { celdasDerivadasDte, documentoPorCobrar, type DocumentoDerivadaDte } from "@opai/domain";
+import {
+  celdasDerivadasDte,
+  documentoPorCobrar,
+  type DocumentoDerivadaDte,
+  notasCreditoConReferenciaVigente,
+} from "@opai/domain";
 
 import { aNumeroSeguro, type celdaSchema } from "../esquemas";
 import type { z } from "zod";
@@ -19,12 +24,13 @@ export async function derivadasDteSemana(
   }
   const docs = await ctx.db.documentoEmitido.findMany({
     where: {
+      // `cesionEstado: { not: "cedido" }` sola excluye los NULL (los borradores nacen sin cesión).
+      AND: [{ OR: [{ cesionEstado: null }, { cesionEstado: { not: "cedido" } }] }],
       OR: [
-        { estadoDte: "borrador", cesionEstado: { not: "cedido" } },
+        { estadoDte: "borrador" },
         {
           estadoDte: { in: ["enviado", "aceptado"] },
           estadoCobro: { notIn: ["pagada", "cedida"] },
-          cesionEstado: { not: "cedido" },
         },
       ],
     },
@@ -40,9 +46,10 @@ export async function derivadasDteSemana(
       estadoCobro: true,
       cesionEstado: true,
       glosa: true,
+      documentoReferenciaId: true,
     },
   });
-  const entrada: DocumentoDerivadaDte[] = docs
+  const entrada: DocumentoDerivadaDte[] = notasCreditoConReferenciaVigente(docs)
     .filter(
       (d) =>
         documentoPorCobrar({

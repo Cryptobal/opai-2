@@ -1,10 +1,15 @@
 import { z } from "zod";
 
-import { type IngresoProyectadoDesdeDte, ingresosEnHorizonte } from "@opai/domain";
+import {
+  type IngresoProyectadoDesdeDte,
+  ingresosEnHorizonte,
+  notasCreditoConReferenciaVigente,
+} from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { hoy } from "../core/maestros/comun";
 import { PERMISO_READ } from "./comun";
+import { ingresosDeProgramaciones } from "./ventas-programacion-proyeccion";
 
 const DIA_MS = 86_400_000;
 
@@ -19,7 +24,8 @@ function sumarSemanas(lunes: string, n: number): string {
 }
 
 const ingresoSchema = z.object({
-  documentoEmitidoId: z.string(),
+  documentoEmitidoId: z.string().nullable(),
+  programacionId: z.string().nullable().optional(),
   cuentaId: z.string(),
   instalacionId: z.string().nullable(),
   semanaCobro: z.string(),
@@ -31,10 +37,16 @@ const ingresoSchema = z.object({
 export const ventasProyeccionFlujo = defineCapability({
   id: "finanzas.ventas.proyeccion_flujo",
   descripcion:
-    "Proyecta ingresos de cobro desde el libro de ventas hacia el flujo de caja (CAR-136): borradores como comprometido y documentos enviados o aceptados como real, agrupados por semana de vencimiento.",
+    "Proyecta ingresos de cobro hacia el flujo de caja: borradores y programaciones recurrentes activas como comprometido, documentos enviados o aceptados como real, por semana de vencimiento. Una NC total deja la factura en cero.",
   permiso: PERMISO_READ,
   input: z.object({
-    semanas: z.number().int().min(1).max(52).default(13).describe("Horizonte en semanas desde el lunes actual."),
+    semanas: z
+      .number()
+      .int()
+      .min(1)
+      .max(52)
+      .default(13)
+      .describe("Horizonte en semanas desde el lunes actual."),
   }),
   output: z.object({ items: z.array(ingresoSchema) }),
   efecto: "lectura",
@@ -46,6 +58,7 @@ export const ventasProyeccionFlujo = defineCapability({
       where: {
         estadoDte: { in: ["borrador", "enviado", "aceptado"] },
         fechaVencimiento: { not: null },
+        AND: [{ OR: [{ cesionEstado: null }, { cesionEstado: { not: "cedido" } }] }],
       },
       select: {
         id: true,
@@ -57,9 +70,10 @@ export const ventasProyeccionFlujo = defineCapability({
         montoTotal: true,
         estadoDte: true,
         glosa: true,
+        documentoReferenciaId: true,
       },
     });
-    const items: IngresoProyectadoDesdeDte[] = filas.map((d) => {
+    const items: IngresoProyectadoDesdeDte[] = notasCreditoConReferenciaVigente(filas).map((d) => {
       const vence = d.fechaVencimiento!.toISOString().slice(0, 10);
       const capa = d.estadoDte === "borrador" ? "comprometido" : "real";
       const folio = d.folio != null ? ` folio ${d.folio}` : "";
@@ -73,6 +87,7 @@ export const ventasProyeccionFlujo = defineCapability({
         capa,
       };
     });
-    return { items: ingresosEnHorizonte(items, desde, hasta) };
+    const programadas = await ingresosDeProgramaciones(ctx, sumarSemanas(hasta, 1), lunesDe);
+    return { items: ingresosEnHorizonte([...items, ...programadas], desde, hasta) };
   },
 });

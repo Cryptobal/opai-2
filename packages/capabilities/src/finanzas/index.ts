@@ -24,6 +24,8 @@ import {
   ventasEnviarSii,
 } from "./ventas-escritura";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
+import { ventasEnviarCliente } from "./ventas-enviar-cliente";
+import { ventasEnvios } from "./ventas-envios";
 import { ventasPdf } from "./ventas-pdf";
 import { ventasPreflightEmision } from "./ventas-preflight";
 import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
@@ -31,11 +33,19 @@ import {
   ventasProgramacionesListar,
   ventasProgramacionesObtener,
 } from "./ventas-programacion-lectura";
+import {
+  ventasProgramacionActualizar,
+  ventasProgramacionCambiarEstado,
+  ventasProgramacionCrear,
+} from "./ventas-programacion-escritura";
+import { ventasProgramacionGenerar } from "./ventas-programacion-generar";
+import { ventasProgramacionVistaPrevia } from "./ventas-programacion-vista-previa";
+import { trabajoGenerarProgramaciones } from "./ventas-programacion-trabajo";
 
 export { ajustesFinanzas } from "./ajustes";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
-export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion];
+export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones];
 
 export const capacidadesFinanzas: readonly Capacidad[] = [
   planListar,
@@ -56,6 +66,11 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasLibroResumen,
   ventasProgramacionesListar,
   ventasProgramacionesObtener,
+  ventasProgramacionCrear,
+  ventasProgramacionActualizar,
+  ventasProgramacionCambiarEstado,
+  ventasProgramacionGenerar,
+  ventasProgramacionVistaPrevia,
   ventasCrearBorrador,
   ventasEmitir,
   ventasPreflightEmision,
@@ -66,6 +81,8 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasCesionCeder,
   ventasCesionListar,
   ventasPdf,
+  ventasEnviarCliente,
+  ventasEnvios,
   foliosListar,
   foliosCargarCaf,
   dteConfigObtener,
