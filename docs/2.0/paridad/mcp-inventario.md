@@ -751,6 +751,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.cesiones.listar`
 - `finanzas.cobranza.deudor`
+- `finanzas.cobranza.pausar`
+- `finanzas.cobranza.recordar`
+- `finanzas.cobranza.registrar_gestion`
 - `finanzas.cobranza.resumen`
 - `finanzas.cobros.manual`
 - `finanzas.compras.importar`
