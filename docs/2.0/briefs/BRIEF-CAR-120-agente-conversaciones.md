@@ -14,7 +14,7 @@ Tabla `core.agente_conversaciones`; capacidades `agente.conversaciones.list/.get
 `modules/agente/conversaciones*.ts` (capacidades y guardado). El guardado corre dentro de `agente.turno.preparar`, de modo que el turno y su registro comparten la auditoría de la capacidad. UI: `use-historial.ts`, `historial-agente.tsx`, `hilo-agente.tsx`, `use-modelos.ts` en `apps/web/app/_components/agente/`.
 
 ## 5. Archivos
-Ver el diff del PR: schema `agentes.prisma`, migración `20261105120000_agente_conversaciones`, `modules/agente/*`, componentes del panel, snapshot MCP e inventario de paridad.
+Ver el diff del PR: schema `agentes.prisma`, migración `20261105130000_agente_conversaciones`, `modules/agente/*`, componentes del panel, snapshot MCP e inventario de paridad.
 
 ## 6. Modelo de datos y migraciones (aditivas)
 `core.agente_conversaciones` (id uuid7, tenant_id, user_id, titulo, contexto_tipo/id, mensajes jsonb, acciones_hechas, archivada_en, ultima_actividad, timestamps). RLS `tenant_isolation` + FORCE, `lock_timeout` 5 s. Sin backfill ni cambios en tablas existentes. Etiqueta `migracion-pendiente`.
