@@ -98,7 +98,7 @@ export function operacionesCobros(db: TenantTx, tenantId: string) {
       cargos.length
         ? (
             await db.cobroCargo.createMany({
-              data: cargos.map((c) => ({ ...c, tenantId })),
+              data: cargos.map((c) => ({ ...c, tenantId, estado: "listo" })),
               skipDuplicates: true,
             })
           ).count

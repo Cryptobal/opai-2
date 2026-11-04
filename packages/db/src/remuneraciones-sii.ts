@@ -18,7 +18,10 @@ export async function tryLockCapturaSiiXact(tx: TenantTx): Promise<boolean> {
 }
 
 /** Publica UF/UTM del SII en valores_publicados (SECURITY DEFINER). */
-export async function remuneracionesPublicarSii(tx: TenantTx, input: PublicarSiiInput): Promise<string> {
+export async function remuneracionesPublicarSii(
+  tx: TenantTx,
+  input: PublicarSiiInput,
+): Promise<string> {
   const [fila] = await tx.$queryRaw<{ id: string }[]>`
     SELECT "core"."remuneraciones_publicar_sii"(
       ${input.clave},

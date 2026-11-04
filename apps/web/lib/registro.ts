@@ -10,6 +10,7 @@ import {
   registrarConsumidores,
   registrarModulos,
   registrarTrabajos,
+  trabajoCobrosMesAnterior,
   trabajosComercial,
   trabajosDelNucleo,
   trabajosFinanzas,
@@ -36,6 +37,7 @@ export function asegurarRegistro(): void {
     ...trabajosFinanzas,
     ...trabajosComercial,
     ...trabajosAgente,
+    trabajoCobrosMesAnterior,
   ]);
   registrarConsumidores([
     ...consumidoresDelNucleo,

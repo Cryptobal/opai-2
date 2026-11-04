@@ -57,7 +57,8 @@ export function soloIgualdad(where: unknown, campo: string): string | null {
   if (v && typeof v === "object") {
     const o = v as Record<string, unknown>;
     const ks = Object.keys(o);
-    if (ks.length === 1 && ks[0] === "equals" && typeof o["equals"] === "string") return o["equals"];
+    if (ks.length === 1 && ks[0] === "equals" && typeof o["equals"] === "string")
+      return o["equals"];
   }
   return null;
 }
@@ -147,7 +148,10 @@ export async function lecturaAuthPorFuncion(
   if (model === "Session") {
     const token = soloIgualdad(where, "token");
     if (token !== null) {
-      return { manejada: true, valor: await leerSesionPorToken(base, token, Boolean(select?.user)) };
+      return {
+        manejada: true,
+        valor: await leerSesionPorToken(base, token, Boolean(select?.user)),
+      };
     }
   } else if (model === "User") {
     const id = soloIgualdad(where, "id");

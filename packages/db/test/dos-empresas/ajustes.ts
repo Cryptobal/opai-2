@@ -326,4 +326,24 @@ export const AJUSTES: Record<string, Ajuste> = {
       origen: "sigue_fuente",
     }),
   },
+  // Cobro por módulo (CAR-188): CHECK de moneda, montos, días, UF solo en UF y anulación.
+  "core.cobro_condiciones": {
+    valores: () => ({ moneda: "CLP", precio_mensual: 100000, descuento_pct: 0 }),
+  },
+  "core.cobro_cargos": {
+    fijas: ["periodo"],
+    valores: () => ({
+      periodo: "2026-01-01",
+      moneda: "CLP",
+      precio_mensual: 100000,
+      descuento_pct: 0,
+      dias_cobrados: 31,
+      dias_mes: 31,
+      monto: 100000,
+      uf_centavos: null,
+      monto_clp: 100000,
+      estado: "listo",
+      anulado_en: null,
+    }),
+  },
 };

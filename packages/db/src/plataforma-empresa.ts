@@ -124,7 +124,8 @@ export function operacionesEmpresa(db: TenantTx, tenantId: string) {
           ultimoError: true,
         },
       }),
-    modulos: () => db.tenantModule.findMany({ select: { moduloId: true, estado: true } }),
+    modulos: () =>
+      db.tenantModule.findMany({ where: { tenantId }, select: { moduloId: true, estado: true } }),
     fijarModulo: (moduloId: string, estado: string) =>
       db.tenantModule.upsert({
         where: { tenantId_moduloId: { tenantId, moduloId } },

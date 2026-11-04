@@ -89,7 +89,7 @@ export class PoolConReintento extends pg.Pool {
     let reintentos = 0;
     let otrosFallos = 0;
     // A lo más tantos descartes como conexiones caben: tras eso, una conexión nueva o un error.
-    for (let descartes = 0; ; ) {
+    for (let descartes = 0; ;) {
       const inicio = Date.now();
       let cliente: pg.PoolClient;
       try {
