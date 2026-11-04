@@ -42,14 +42,14 @@ export async function aplicarSincronizacion(
           })),
         })
       : { count: 0 };
+    // Una entrega repetida (sin movimientos nuevos) no pisa un saldo que ya se tenía: podría ser más antiguo.
+    const previo = await tx.cuentaBancaria.findUnique({ where: { id: p.cuentaId }, select: { saldoBanco: true } });
+    const saldo = p.saldoBanco != null && (count > 0 || previo?.saldoBanco == null) ? p.saldoBanco : null;
     await tx.cuentaBancaria.update({
       where: { id: p.cuentaId },
-      data: {
-        ultimaSyncEn: new Date(),
-        ...(p.saldoBanco != null ? { saldoBanco: BigInt(p.saldoBanco) } : {}),
-      },
+      data: { ultimaSyncEn: new Date(), ...(saldo != null ? { saldoBanco: BigInt(saldo) } : {}) },
     });
-    await sincronizarAvisoSaldoBajo(ctx, tx, p.cuentaId, p.saldoBanco);
+    await sincronizarAvisoSaldoBajo(ctx, tx, p.cuentaId, saldo);
     await ctx.eventos.emitir(tx, {
       tipo: "finanzas.banco.movimientos_sincronizados",
       entidadTipo: "cuentaBancaria",

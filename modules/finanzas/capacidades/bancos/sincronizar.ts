@@ -67,6 +67,9 @@ function saldoReportado(i: SincronizarInput): number | null {
 export async function sincronizarMovimientos(ctx: Contexto, input: SincronizarInput, dryRun: boolean): Promise<Salida> {
   const cuenta = await resolverCuenta(ctx, input.numeroCuenta, input.codigoBanco);
   if (!cuenta) return sinCuenta;
+  // Serializa entregas simultáneas de la misma cuenta: el UPDATE toma el bloqueo de la fila hasta el COMMIT
+  // y las lecturas de abajo ya ven lo que confirmó la entrega anterior (ordinales y huellas correctos).
+  if (!dryRun) await ctx.db.cuentaBancaria.update({ where: { id: cuenta.id }, data: { ultimaSyncEn: new Date() } });
   const entrantes: MovimientoApiEntrada[] = input.movimientos.map((m, indice) => ({
     indice, idExterno: m.idExterno, fecha: m.fecha, monto: m.monto, glosa: m.glosa, saldoDespues: m.saldoDespues ?? null,
   }));

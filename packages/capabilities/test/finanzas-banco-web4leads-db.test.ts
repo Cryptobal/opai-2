@@ -94,6 +94,22 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     expect(await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaB } })).toBe(0);
   });
 
+  it("una entrega repetida con saldo antiguo no pisa el saldo vigente y dos entregas simultáneas no pierden operaciones", async () => {
+    const nueva = payload([mov("a3", -1_000, 1_019_000)], { accountBalance: { current: 1_019_000, asOf: "2026-11-02T11:00:00Z" } });
+    await recibir(tenantA, nueva);
+    const vieja = payload([mov("a1", -50_000, 900_000)], { accountBalance: { current: 900_000, asOf: "2026-11-02T09:00:00Z" } });
+    await recibir(tenantA, vieja);
+    const c = await e.admin.cuentaBancaria.findUniqueOrThrow({ where: { id: cuentaA } });
+    expect(c.saldoBanco).toBe(1_019_000n);
+    // Misma fecha, monto y glosa con ids y saldos distintos, entregadas a la vez: ambas deben quedar.
+    const antes = await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaA } });
+    await Promise.all([
+      recibir(tenantA, payload([mov("q1", -3_333, 500_000)])),
+      recibir(tenantA, payload([mov("q2", -3_333, 496_667)])),
+    ]);
+    expect(await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaA } })).toBe(antes + 2);
+  });
+
   it("misma operación que ya vino por cartola (misma huella y saldo) se descarta", async () => {
     await e.admin.movimientoBancario.create({
       data: {
