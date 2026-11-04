@@ -63,5 +63,7 @@ export const ajustesFinanzas = z.object({
       ambito: "tenant",
       permiso: "finanzas:ventas.manage",
       control: "switch",
+      // Lo que sale solo al cliente lo enciende una persona, nunca un agente (revisión de #263).
+      soloPersonas: true,
     }),
 });

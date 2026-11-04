@@ -11,6 +11,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { ActividadInicio } from "./actividad-inicio";
+import { IndicadoresInicio } from "./indicadores-inicio";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
 import { TareasInicio } from "./tareas-inicio";
 
@@ -73,6 +74,9 @@ export async function InicioErp({ nombre, empresa, actor }: Props) {
           ))}
         </div>
       </div>
+      <Suspense fallback={null}>
+        <IndicadoresInicio />
+      </Suspense>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
         {/* Sin el permiso, la bandeja queda vacía; un fallo se ve como error, no como «nada pendiente» (CAR-50). */}
         {r.ok || r.error.code === "FORBIDDEN" ? (
