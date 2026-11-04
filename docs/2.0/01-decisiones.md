@@ -1292,3 +1292,11 @@ identidad de servicio en main.
 **Reglas.** El secreto de firma es por empresa, se ingresa en Configuración › Integraciones › «Banco (Web4Leads)» y se guarda cifrado (ADR-027). La deduplicación reutiliza la huella de la cartola para que ambas vías convivan. Las cuentas no reconocidas se ignoran con 200 (pendiente avisar al administrador).
 
 **Consecuencias.** Si más adelante se ofrece conexión bancaria como producto de plataforma, se reevalúa un adaptador Fintoc propio.
+
+## ADR-067 · Cierre de mes: seguimiento por borrador y emisión en lote todo o nada
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Claude (CAR-167 · F5), sobre el diseño aprobado «Programación y cierre».
+
+**Decisión.** La etapa de un borrador del cierre se **deriva** (`etapaCierre`) de su estado de documento y de una fila de seguimiento (`finanzas.ventas_cierre_seguimientos`); no hay un campo de etapa que pueda desincronizarse. La emisión en lote (`finanzas.cierre.emitir_lote`) es irreversible, exige aprobación humana a los agentes y corre en **una sola transacción**: si una emisión falla, no se emite ninguna, porque un parcial dejaría folios consumidos sin documento. Los elementos no listos o ya emitidos se omiten con motivo, y repetir el lote no duplica nada.
+
+**Fuera de este corte.** El enlace público donde el cliente aprueba u observa la proforma y el envío automático de la proforma quedan como pendiente: hoy una persona registra la respuesta del cliente.
