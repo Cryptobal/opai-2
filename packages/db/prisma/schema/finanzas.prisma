@@ -315,6 +315,7 @@ model DocumentoEmitido {
   @@index([tenantId, cotizacionId])
   corridasProgramacion VentasProgramacionCorrida[]
   enviosCliente        DocumentoEmitidoEnvio[]
+  seguimientoCierre    VentasCierreSeguimiento?
   @@map("documentos_emitidos")
   @@schema("finanzas")
 }
@@ -752,5 +753,31 @@ model CobranzaGestion {
   @@index([tenantId, documentoId, createdAt], map: "cobranza_gestiones_tenant_documento_idx")
   @@index([tenantId, cuentaId, createdAt], map: "cobranza_gestiones_tenant_cuenta_idx")
   @@map("cobranza_gestiones")
+  @@schema("finanzas")
+}
+
+/// Seguimiento del cierre de mes de un borrador: proforma enviada, OK u observación del cliente y OC/HES (BRIEF-33 · CAR-167).
+model VentasCierreSeguimiento {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  documentoId      String    @unique @map("documento_id") @db.Uuid
+  /// pendiente | enviada | observada | ok
+  estado           String    @default("pendiente")
+  requiereOcHes    Boolean   @default(false) @map("requiere_oc_hes")
+  ordenCompra      String?   @map("orden_compra")
+  hes              String?
+  observacion      String?
+  enviadaEn        DateTime? @map("enviada_en") @db.Timestamptz(6)
+  recordadaEn      DateTime? @map("recordada_en") @db.Timestamptz(6)
+  okEn             DateTime? @map("ok_en") @db.Timestamptz(6)
+  observadaEn      DateTime? @map("observada_en") @db.Timestamptz(6)
+  actualizadoPorId String?   @map("actualizado_por_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, estado])
+  @@map("ventas_cierre_seguimientos")
   @@schema("finanzas")
 }

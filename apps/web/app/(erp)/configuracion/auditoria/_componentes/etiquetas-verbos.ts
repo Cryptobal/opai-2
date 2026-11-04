@@ -55,7 +55,7 @@ export const VERBOS: Record<string, string> = {
   generar_calendario: "Generar calendario", leer: "Leer", deshacer: "Deshacer", registrar: "Registrar",
   sugerir: "Sugerir", agregar: "Agregar", candidatos: "Candidatos", inicializar: "Inicializar",
   importar: "Importar", revertir: "Revertir", sincronizar: "Sincronizar con el banco", recibir_web4leads: "Recibir movimientos del banco (Web4Leads)", asignar_centro: "Asignar centro de costo", libro_resumen: "Resumen del libro",
-  vista_previa: "Vista previa", crear_borrador: "Crear borrador", emitir: "Emitir", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
+  vista_previa: "Vista previa", crear_borrador: "Crear borrador", emitir: "Emitir", emitir_lote: "Emitir en lote", tablero: "Tablero del mes", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
   emitir_nota_credito: "Emitir nota de crédito", proyeccion_flujo: "Proyección de flujo",
   cesion_simular: "Simular cesión", cesion_ceder: "Ceder", cargar_caf: "Cargar folios (CAF)",
   crear_base: "Crear plan base", iniciar: "Iniciar", controlar: "Pausar, reanudar o cancelar",

@@ -284,6 +284,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.cambiar_estado` | `finanzas_ventas_programacion_cambiar_estado` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.crear` | `finanzas_ventas_programacion_crear` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.generar` | `finanzas_ventas_programacion_generar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.actualizar` | `finanzas_cierre_actualizar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
