@@ -32,11 +32,9 @@ test("Inspector con base supervisor: menú efectivo y dirección de Empresa de s
   await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL((u) => u.pathname === "/");
-  if (info.project.name === "desktop") {
-    const personas = page.getByRole("button", { name: "Personas", exact: true });
-    if ((await personas.getAttribute("aria-expanded")) === "false") await personas.click();
-    await expect(page.getByRole("link", { name: "Cargos", exact: true }).first()).toBeVisible();
-  }
+  // Cargos salió del menú (CAR-182): el inspector llega desde Configuración › Operación.
+  await page.goto("/configuracion/grupo/operacion");
+  await expect(page.getByRole("link", { name: /Cargos y sueldos/ }).first()).toBeVisible();
   await page.goto("/cargos");
   await expect(page.getByRole("heading", { name: "Cargos", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Nuevo", exact: true })).toHaveCount(0);

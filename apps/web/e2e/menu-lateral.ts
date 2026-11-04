@@ -4,7 +4,8 @@ import { expect, type Page } from "@playwright/test";
 export const menu = (page: Page, nombre: RegExp) =>
   page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: nombre });
 
-const GRUPO = { Personas: "Personas", Cuentas: "Clientes" } as const;
+// Cuentas está en Comercial desde CAR-182 (antes, en el área «Clientes»).
+const GRUPO = { Personas: "Personas", Cuentas: "Comercial" } as const;
 
 /**
  * El menú lateral es un acordeón: si el enlace está en un grupo cerrado, se abre antes del clic.
