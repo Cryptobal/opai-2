@@ -21,14 +21,15 @@ export async function aplicarApertura(
   const rechazos: Rechazo[] = [...r0];
   const [cuentas, existentes, bancos, folios, conApertura] = await Promise.all([
     ctx.db.cuenta.findMany({ where: { rut: { not: null } }, select: { id: true, rut: true } }),
-    ctx.db.documentoEmitido.findMany({ where: { folio: { not: null } }, select: { tipoDte: true, folio: true } }),
+    ctx.db.documentoEmitido.findMany({ where: { folio: { not: null } }, select: { tipoDte: true, folio: true, montoNeto: true, montoExento: true, montoIva: true, montoTotal: true, montoCobrado: true } }),
     ctx.db.cuentaBancaria.findMany({ select: { id: true, banco: true, numeroVisible: true, moneda: true } }),
     ctx.db.dteFolio.findMany({ where: { activo: true }, select: { id: true, tipoDte: true, folioActual: true, folioHasta: true } }),
-    ctx.db.movimientoBancario.findMany({ where: { origen: "manual" }, select: { cuentaId: true } }),
+    ctx.db.movimientoBancario.findMany({ where: { claveDedupe: { startsWith: "apertura:" } }, select: { cuentaId: true, monto: true } }),
   ]);
-  const cuentasConApertura = new Set(conApertura.map((m) => m.cuentaId));
+  const cuentasConApertura = new Map(conApertura.map((m) => [m.cuentaId, Number(m.monto)]));
   const cuentaPorRut = new Map(cuentas.map((c) => [normalizarRut(c.rut ?? "") ?? "", c.id]));
   const hay = new Set(existentes.map((d) => `${d.tipoDte}-${d.folio}`));
+  const retenidos = new Map(existentes.map((d) => [`${d.tipoDte}-${d.folio}`, d]));
   const bancoPor = new Map(bancos.map((b) => [`${b.banco}/${b.numeroVisible}`, b]));
 
   const docs: { d: DocumentoApertura; cuentaId: string }[] = [];
@@ -44,7 +45,7 @@ export async function aplicarApertura(
   const saldos = validas.saldos.filter((s) => {
     const cb = bancoPor.get(`${s.banco}/${s.numeroVisible}`);
     const ok = cb !== undefined && cb.moneda === s.moneda;
-    if (ok) saldosConocidos.push(s);
+    if (ok) saldosConocidos.push(cuentasConApertura.has(cb.id) ? { ...s, saldo: cuentasConApertura.get(cb.id) as number } : s);
     if (ok && cuentasConApertura.has(cb.id)) {
       sinCambio += 1;
       return false;
@@ -60,13 +61,20 @@ export async function aplicarApertura(
     }
     return filas.flatMap((fila) => {
       const { proximo, cambia } = proximoFolio(fila.folioActual, f.ultimoFolio);
-      return cambia ? [{ fila, proximo }] : [];
+      const tope = Math.min(proximo, fila.folioHasta + 1); // un CAF agotado queda en su propio límite
+      return cambia && tope !== fila.folioActual ? [{ fila, proximo: tope }] : [];
     });
   });
 
   const aceptada: EntradaApertura = {
     saldos: saldosConocidos,
-    documentos: [...docs.map((x) => x.d), ...validas.documentos.filter((d) => hay.has(`${d.tipoDte}-${d.folio}`))],
+    documentos: [
+      ...docs.map((x) => x.d),
+      ...validas.documentos.flatMap((d) => {
+        const r = retenidos.get(`${d.tipoDte}-${d.folio}`);
+        return r ? [{ ...d, montoNeto: r.montoNeto, montoExento: r.montoExento, montoIva: r.montoIva, montoTotal: r.montoTotal, montoCobrado: r.montoCobrado }] : [];
+      }),
+    ],
     folios: validas.folios,
   };
   const origen = sumasControl(bruta);
@@ -107,7 +115,7 @@ export async function aplicarApertura(
           glosa: d.glosa ?? "Documento de apertura desde OPAI 1.0",
         },
       });
-      await fila("documento_cobrar", `${d.tipoDte}-${d.folio}`, doc.id);
+      await fila("documento_cobrar", `${d.tipoDte}-${d.folio}`, doc.id, { cobradoApertura: d.montoCobrado });
     }
     for (const { fila: f, proximo } of foliosAplicar) {
       await tx.dteFolio.update({ where: { id: f.id }, data: { folioActual: proximo } });
