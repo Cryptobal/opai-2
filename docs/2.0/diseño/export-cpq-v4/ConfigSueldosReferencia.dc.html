@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-100);font-family:var(--font-sans);font-feature-settings:"cv11","ss01";color:var(--ds-fg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">CPQ v4 · Vigía Sur SpA · Configuración › CPQ › Catálogo</span>
+    <span style="font:600 28px/34px var(--font-sans);letter-spacing:-.02em">Sueldos de referencia para cotizar</span>
+    <span style="font:400 15px/22px var(--font-sans);color:var(--ds-fg-muted);max-width:880px">Sub-sección dentro de la pestaña Catálogo, sin pestaña nueva. Pólizas y finanzas y Márgenes son las de v3. Edición en línea con aviso del impacto en cotizaciones abiertas.</span>
+  </div>
+  <sc-for list="{{ secciones }}" as="sec" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:20px">
+      <span style="font:600 18px/26px var(--font-sans)">{{ sec.t }}</span>
+      <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+        <sc-for list="{{ sec.frames }}" as="fr" hint-placeholder-count="2">
+          <div id="{{ fr.id }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">{{ fr.id }}</span><span style="font:500 14px/20px var(--font-sans)">{{ fr.cap }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">{{ fr.w }}</span></div>
+            <div data-device="{{ fr.dev }}" data-shot="{{ fr.id }}" data-theme="light" style="position:relative;width:{{ fr.w }}px;height:{{ fr.h }}px;border-radius:{{ fr.rad }};border:1px solid var(--ds-border-strong);overflow:hidden;background:var(--ds-bg);color:var(--ds-fg);flex:none">
+
+              <sc-if value="{{ fr.isPhone }}">
+                <div class="screen" style="height:100%">
+                  <div class="safe-top" style="display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:600 15px/20px var(--font-sans)"><span>9:41</span><span style="width:18px;height:10px;border-radius:2px;border:1.5px solid var(--ds-fg)"></span></div>
+                  <div class="topbar"><button class="icon-btn" aria-label="Volver"><span class="ic i-chevron-left"></span></button><span style="font:600 15px/20px var(--font-sans);flex:1">Configuración de CPQ</span></div>
+                  <div style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:24px">
+                    <div class="tabs" style="padding:0 16px"><button class="tab on">Catálogo</button><button class="tab">Pólizas y finanzas</button><button class="tab">Márgenes</button><button class="tab">Plantillas</button></div>
+                    <div class="chip-row" style="padding:0 16px"><span class="chip toggle">Ítems</span><span class="chip toggle">Paquetes</span><span class="chip toggle">Cargos</span><span class="chip toggle on">Sueldos de referencia</span></div>
+                    <div style="padding:0 16px;display:flex;flex-direction:column;gap:12px">
+                      <span style="font:600 18px/26px var(--font-sans)">Sueldos de referencia para cotizar</span>
+                      <div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-info"></span><span class="txt"><span class="tit">Es un supuesto de venta, no el sueldo que se paga</span><span>RRHH define el sueldo real en cada puesto de la instalación.</span></span></div>
+                    </div>
+                    <div class="rows">
+                      <sc-for list="{{ fr.rows }}" as="r" hint-placeholder-count="5">
+                        <div style="display:flex;flex-direction:column;border-bottom:1px solid var(--ds-border)">
+                          <div style="display:flex;gap:12px;align-items:center;padding:14px 16px">
+                            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                              <span style="font:500 15px/20px var(--font-sans);display:flex;gap:6px;align-items:center">{{ r.n }}<sc-if value="{{ r.nuevo }}"><span class="badge b-success nodot">Actualizado hoy</span></sc-if></span>
+                              <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ r.valTxt }} · {{ r.vig }}</span>
+                              <span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">{{ r.usoTxt }}</span>
+                            </span>
+                            <sc-if value="{{ r.noEdit }}"><button class="btn btn-secondary" onClick="{{ r.editar }}" style="height:36px;padding:0 12px">{{ r.accion }}</button></sc-if>
+                          </div>
+                          <sc-if value="{{ r.editando }}">
+                            <div style="display:flex;flex-direction:column;gap:10px;padding:0 16px 16px">
+                              <div class="field"><span class="lbl">Sueldo bruto de referencia</span><div class="{{ r.inCls }}"><span style="color:var(--ds-fg-muted)">$</span><input class="bare" inputmode="numeric" value="{{ r.inVal }}" onChange="{{ r.onIn }}" style="font-variant-numeric:tabular-nums"></div><sc-if value="{{ r.err }}"><span class="err"><span class="ic sm i-alert"></span>Queda bajo el ingreso mínimo ($ 539.000)</span></sc-if><span class="hint">Vigente desde hoy, 03-11-2026</span></div>
+                              <sc-if value="{{ r.usado }}"><div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic i-alert"></span><span class="txt"><span class="tit">{{ r.usoTxt }}</span><span>Cambiarlo no altera cotizaciones enviadas; las abiertas quedan desactualizadas.</span></span></div></sc-if>
+                              <div style="display:flex;gap:8px"><button class="btn btn-secondary" onClick="{{ fr.cancelar }}" style="flex:1">Cancelar</button><sc-if value="{{ r.puede }}"><button class="btn btn-primary" onClick="{{ fr.guardar }}" style="flex:1">Guardar</button></sc-if><sc-if value="{{ r.err }}"><button class="btn btn-primary" disabled="disabled" style="flex:1">Guardar</button></sc-if></div>
+                            </div>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <nav class="tabbar" style="padding-bottom:28px"><button><span class="ic i-home"></span>Inicio</button><button><span class="ic i-briefcase"></span>Comercial</button><button><span class="ic i-users"></span>Personas</button><button class="on"><span class="ic i-menu"></span>Más</button></nav>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ fr.wide }}">
+                <div style="display:flex;height:100%">
+                  <sc-if value="{{ fr.isDesk }}">
+                    <aside class="sidebar">
+                      <div class="sidebar-head"><span class="wordmark">OPAI</span><span class="tenant">VS</span></div>
+                      <button class="sidebar-portal"><span class="ic sm i-grid"></span><span style="flex:1;font:500 14px/20px var(--font-sans)">ERP</span><span class="ic sm i-updown" style="color:var(--ds-fg-subtle)"></span></button>
+                      <div class="nav-group" style="padding-top:12px"><button class="nav-item"><span class="ic i-home"></span>Inicio</button></div>
+                      <div class="nav-group"><span class="h">Comercial</span><button class="nav-item"><span class="ic i-briefcase"></span>Negocios</button><button class="nav-item"><span class="ic i-file"></span>Cotizaciones</button></div>
+                      <div class="nav-group"><span class="h">Configuración</span><button class="nav-item on"><span class="ic i-file"></span>CPQ</button><button class="nav-item"><span class="ic i-wallet"></span>Remuneraciones</button><button class="nav-item"><span class="ic i-users"></span>Usuarios</button></div>
+                      <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)"><span class="avatar">TF</span><span style="display:flex;flex-direction:column"><span style="font:500 14px/20px var(--font-sans)">Tomás Fuentes</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Admin</span></span></div>
+                    </aside>
+                  </sc-if>
+                  <sc-if value="{{ fr.isTab }}"><nav class="rail"><button class="rail-portal"><span class="ic i-grid"></span>ERP</button><button class="rail-item"><span class="ic i-home"></span>Inicio</button><button class="rail-item"><span class="ic i-briefcase"></span>Comercial</button><button class="rail-item on"><span class="ic i-menu"></span>Ajustes</button></nav></sc-if>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+                    <header class="appbar" style="padding:0 {{ fr.gut }}"><span style="flex:1;font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Configuración › CPQ › Catálogo</span><button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button></header>
+                    <div style="flex:1;min-height:0;overflow:auto;padding:24px {{ fr.gut }};display:flex;flex-direction:column;gap:16px">
+                      <span style="font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Configuración de CPQ</span>
+                      <div class="tabs"><button class="tab on">Catálogo</button><button class="tab">Pólizas y finanzas</button><button class="tab">Márgenes</button><button class="tab">Plantillas</button></div>
+                      <div style="display:grid;grid-template-columns:{{ fr.cols }};gap:24px;align-items:start">
+                        <sc-if value="{{ fr.isDesk }}">
+                          <nav style="display:flex;flex-direction:column;gap:1px"><button class="nav-item">Ítems</button><button class="nav-item">Paquetes</button><button class="nav-item">Cargos</button><button class="nav-item on" style="height:auto;min-height:35px;padding:6px 8px">Sueldos de referencia para cotizar</button></nav>
+                        </sc-if>
+                        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                          <sc-if value="{{ fr.isTab }}"><div class="chip-row"><span class="chip toggle">Ítems</span><span class="chip toggle">Paquetes</span><span class="chip toggle">Cargos</span><span class="chip toggle on">Sueldos de referencia para cotizar</span></div></sc-if>
+                          <div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">Sueldos de referencia para cotizar</span><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">El sueldo con que se cotiza cada cargo al agregar un puesto. La línea lo muestra como «Referencia del cargo».</span></div>
+                          <div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-info"></span><span class="txt"><span class="tit">Es un supuesto de venta, no el sueldo que se paga</span><span>RRHH define el sueldo real en cada puesto de la instalación.</span></span></div>
+                          <div class="tbl-wrap" style="overflow:hidden">
+                            <div style="display:grid;grid-template-columns:{{ fr.tcols }};gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)"><span>Cargo</span><span style="text-align:right">Sueldo de referencia</span><span>Vigente desde</span><span>Uso</span><span></span></div>
+                            <sc-for list="{{ fr.rows }}" as="r" hint-placeholder-count="6">
+                              <div style="display:flex;flex-direction:column;border-bottom:1px solid var(--ds-border);background:{{ r.bg }}">
+                                <div style="display:grid;grid-template-columns:{{ fr.tcols }};gap:12px;align-items:center;min-height:52px;padding:6px 16px;font:400 14px/20px var(--font-sans);font-variant-numeric:tabular-nums">
+                                  <span style="font-weight:500;display:flex;gap:6px;align-items:center;flex-wrap:wrap">{{ r.n }}<sc-if value="{{ r.nuevo }}"><span class="badge b-success nodot">Actualizado hoy</span></sc-if></span>
+                                  <sc-if value="{{ r.noEdit }}"><span style="text-align:right;color:{{ r.valColor }}">{{ r.valTxt }}</span></sc-if>
+                                  <sc-if value="{{ r.editando }}"><div class="{{ r.inCls }}" style="height:36px"><span style="color:var(--ds-fg-muted)">$</span><input class="bare" inputmode="numeric" value="{{ r.inVal }}" onChange="{{ r.onIn }}" style="text-align:right;font-variant-numeric:tabular-nums"></div></sc-if>
+                                  <span style="color:var(--ds-fg-muted)">{{ r.vig }}</span>
+                                  <span style="color:{{ r.usoColor }}">{{ r.usoTxt }}</span>
+                                  <span style="display:flex;justify-content:flex-end"><sc-if value="{{ r.noEdit }}"><button class="btn btn-ghost" onClick="{{ r.editar }}" style="height:32px;padding:0 10px">{{ r.accion }}</button></sc-if></span>
+                                </div>
+                                <sc-if value="{{ r.editando }}">
+                                  <div style="display:flex;align-items:center;gap:12px;padding:0 16px 12px;flex-wrap:wrap">
+                                    <sc-if value="{{ r.err }}"><span class="err" style="flex:1;font:500 12px/16px var(--font-sans);color:var(--ds-danger-fg);display:flex;gap:6px;align-items:center"><span class="ic sm i-alert"></span>Queda bajo el ingreso mínimo ($ 539.000)</span></sc-if>
+                                    <sc-if value="{{ r.avisoUso }}"><span style="flex:1;min-width:240px;display:flex;gap:8px;align-items:flex-start;font:400 13px/18px var(--font-sans);color:var(--ds-warning-fg)"><span class="ic sm i-alert" style="margin-top:1px"></span><span>Cambiarlo no altera cotizaciones enviadas; las abiertas quedan desactualizadas. <b>{{ r.folios }}</b></span></span></sc-if>
+                                    <sc-if value="{{ r.sinUso }}"><span style="flex:1;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Vigente desde hoy, 03-11-2026. No hay cotizaciones abiertas con este cargo.</span></sc-if>
+                                    <button class="btn btn-ghost" onClick="{{ fr.cancelar }}" style="height:32px">Cancelar</button>
+                                    <sc-if value="{{ r.puede }}"><button class="btn btn-primary" onClick="{{ fr.guardar }}" style="height:32px">Guardar</button></sc-if>
+                                    <sc-if value="{{ r.err }}"><button class="btn btn-primary" disabled="disabled" style="height:32px">Guardar</button></sc-if>
+                                  </div>
+                                </sc-if>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ fr.hayToast }}"><div style="position:absolute;left:16px;right:16px;bottom:{{ fr.toastBot }};z-index:30;display:flex;justify-content:center"><div class="toast">{{ fr.toast }}</div></div></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CLP = n => '$\u00a0' + Math.round(n).toLocaleString('es-CL');
+const CARGOS = [
+  { k: 'gs', n: 'Guardia de seguridad', v: 620000, vig: '01-07-2026', uso: 3, folios: 'CPQ-2026-014, CPQ-2026-010 y CPQ-2026-007' },
+  { k: 'gb', n: 'Guardia con licencia clase B', v: 680000, vig: '01-07-2026', uso: 1, folios: 'CPQ-2026-011' },
+  { k: 'st', n: 'Supervisor de turno', v: 890000, vig: '01-07-2026', uso: 1, folios: 'CPQ-2026-013' },
+  { k: 'cc', n: 'Operador de CCTV', v: 650000, vig: '01-09-2026', uso: 2, folios: 'CPQ-2026-013 y CPQ-2026-007' },
+  { k: 'co', n: 'Conserje', v: 560000, vig: '01-07-2026', uso: 0 },
+  { k: 'js', n: 'Jefe de seguridad', v: 1250000, vig: '01-07-2026', uso: 0 },
+  { k: 'aa', n: 'Auxiliar de aseo', v: null, vig: '—', uso: 0 }
+];
+const DIMS = { phone: [375, 812], tablet: [1024, 768], desktop: [1280, 800] };
+const SECS = [
+  { t: '1 · Tabla de cargos', frames: [['1a', 'phone', 'Lista', {}], ['1b', 'tablet', 'Tabla', {}], ['1c', 'desktop', 'Tabla', {}]] },
+  { t: '2 · Edición en línea', frames: [['2a', 'desktop', 'Editando un cargo usado en 3 cotizaciones abiertas', { edit: 'gs', val: 640000 }], ['2b', 'desktop', 'Bajo el ingreso mínimo', { edit: 'co', val: 520000 }], ['2c', 'phone', 'Editando en el teléfono', { edit: 'gs', val: 640000 }]] }
+];
+class Component extends DCLogic {
+  state = (() => { const fs = {}; SECS.forEach(s => s.frames.forEach(([id, , , o]) => { fs[id] = { edit: null, val: null, vals: {}, nuevos: {}, toast: null, ...o }; })); return { fs }; })();
+  up(id, patch) { this.setState(st => ({ fs: { ...st.fs, [id]: { ...st.fs[id], ...patch } } })); }
+  renderVals() {
+    const secciones = SECS.map(sec => ({ t: sec.t, frames: sec.frames.map(([id, vp, cap]) => {
+      const s = this.state.fs[id];
+      const [w, h] = DIMS[vp];
+      const rows = CARGOS.map(c => {
+        const v = s.vals[c.k] ?? c.v;
+        const ed = s.edit === c.k;
+        const err = ed && s.val != null && s.val < 539000;
+        const usoTxt = c.uso ? 'Usado en ' + c.uso + (c.uso === 1 ? ' cotización abierta' : ' cotizaciones abiertas') : (v == null ? 'Las cotizaciones piden el sueldo a mano' : 'Sin cotizaciones abiertas');
+        return { n: c.n, valTxt: v == null ? 'Sin referencia' : CLP(v), valColor: v == null ? 'var(--ds-fg-subtle)' : 'var(--ds-fg)', vig: s.nuevos[c.k] ? '03-11-2026' : c.vig,
+          usoTxt, usoColor: c.uso ? 'var(--ds-fg)' : 'var(--ds-fg-subtle)', usado: c.uso > 0, folios: c.folios ? 'Quedarán desactualizadas: ' + c.folios + '.' : '',
+          avisoUso: ed && !err && c.uso > 0, sinUso: ed && !err && !c.uso,
+          accion: v == null ? 'Agregar' : 'Editar', editando: ed, noEdit: !ed, nuevo: !!s.nuevos[c.k], bg: ed ? 'var(--ds-bg)' : 'transparent',
+          inVal: s.val != null ? Math.round(s.val).toLocaleString('es-CL') : '', inCls: 'input compact' + (err ? ' invalid' : ' focus'), err, puede: ed && !err,
+          onIn: e => { const d = parseInt(String(e.target.value).replace(/\D/g, ''), 10); this.up(id, { val: isNaN(d) ? null : d }); },
+          editar: () => this.up(id, { edit: c.k, val: v ?? 600000 }) };
+      });
+      const c = CARGOS.find(x => x.k === s.edit);
+      return { id, cap, w, h, dev: vp, rad: vp === 'phone' ? '44px' : '12px', isPhone: vp === 'phone', wide: vp !== 'phone', isTab: vp === 'tablet', isDesk: vp === 'desktop',
+        gut: vp === 'tablet' ? '24px' : '32px', cols: vp === 'desktop' ? '200px minmax(0,1fr)' : 'minmax(0,1fr)', tcols: 'minmax(150px,1fr) 136px 104px 172px 72px', rows,
+        cancelar: () => this.up(id, { edit: null, val: null }),
+        guardar: () => { if (!c) return; this.up(id, { vals: { ...s.vals, [c.k]: s.val }, nuevos: { ...s.nuevos, [c.k]: 1 }, edit: null, val: null, toast: c.uso ? 'Sueldo actualizado · ' + c.uso + (c.uso === 1 ? ' cotización abierta quedó desactualizada' : ' cotizaciones abiertas quedaron desactualizadas') : 'Sueldo actualizado' }); setTimeout(() => this.up(id, { toast: null }), 3200); },
+        hayToast: !!s.toast, toast: s.toast, toastBot: vp === 'phone' ? '100px' : '24px' };
+    }) }));
+    return { secciones };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<sc-if value="{{ bgPend }}" hint-placeholder-val="{{ true }}">
+<dc-import name="Pendientes" device="{{ device }}" theme="{{ theme }}" hint-size="100%,100%"></dc-import>
+</sc-if>
+<sc-if value="{{ bgDeal }}" hint-placeholder-val="{{ false }}">
+<dc-import name="NegocioV2" screen="cpq" device="{{ device }}" theme="{{ theme }}" hint-size="100%,100%"></dc-import>
+</sc-if>
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;z-index:50">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div class="scrim"></div></sc-if>
+<div class="{{ panelCls }}" role="dialog" aria-modal="true" aria-label="{{ cfg.title }}" style="top:0;width:{{ panelW }};max-height:none;border-radius:{{ panelRad }};display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:{{ headPad }};border-bottom:1px solid var(--ds-border);flex:none">
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0;padding-top:6px">
+<span class="t-caption">{{ cfg.eyebrow }}</span>
+<span class="t-subheading">{{ cfg.title }}</span>
+<span class="t-body-sm muted">{{ cfg.desc }}</span>
+</span>
+<span style="display:flex;gap:0;flex:none">
+<sc-if value="{{ cfg.more }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Posponer u omitir" on-click="{{ toggleMore }}" hint-size="44px,44px"></x-import></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Cerrar" hint-size="44px,44px"></x-import>
+</span>
+</div>
+<sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;height:0;z-index:5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ moreItems }}" on-select="{{ pickMore }}" style="position:absolute;right:52px;top:-8px;width:240px" hint-size="240px,100px"></x-import></div>
+</sc-if>
+<div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando el paso" style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 12 }}" hint-size="30%,12px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" radius="{{ 10 }}" hint-size="100%,44px"></x-import></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ stForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ejecutar este paso" description="El negocio es de Camila Rojas. Pídele que te agregue como colaborador o habla con Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stBody }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ cfg.agent }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-bot" aria-hidden="true" style="flex:none;margin-top:2px"></span><span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">Preparado por el agente comercial · 08:12</b><span>Usó la plantilla «Seguimiento 1» y la cotización CPQ-2026-140. Nada sale hasta que lo apruebes; si lo descartas, el paso vuelve a ti.</span></span></div>
+</sc-if>
+<sc-if value="{{ showReplace }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span>Se cancelarán 2 pasos pendientes del seguimiento anterior (CPQ-2026-128).</span></div>
+</sc-if>
+<sc-if value="{{ showRuleError }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-danger-muted);color:var(--ds-danger-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">No pudimos iniciar el seguimiento</b><span>«{{ cfg.ruleError }}»</span><span class="t-mono" style="font-size:12px">{{ cfg.ruleCode }}</span></span></div>
+</sc-if>
+<sc-if value="{{ isCorreo }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ viewOpts }}" value="{{ mailView }}" on-change="{{ setMailView }}" label="Vista" hint-size="100%,36px"></x-import>
+<sc-if value="{{ mailEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="De" value="Camila Rojas · camila.rojas@atlas.opai.cl" read-only="{{ true }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Responder a" value="camila.rojas@atlasseguridad.cl" read-only="{{ true }}" hint="Las respuestas llegan a tu correo y al negocio." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Para" value="{{ cfg.para }}" options="{{ cfg.paraOpts }}" error="{{ cfg.paraError }}" hint="Contactos con rol en el negocio" hint-size="100%,90px"></x-import>
+<sc-if value="{{ cfg.failed }}" hint-placeholder-val="{{ false }}"><div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="user" hint-size="200px,40px">Elegir otro contacto</x-import></div></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="CC" value="{{ cfg.cc }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plantilla" value="{{ cfg.tpl }}" options="{{ tplOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Asunto" value="{{ cfg.subject }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Mensaje" value="{{ cfg.body }}" rows="{{ 9 }}" hint-size="100%,230px"></x-import>
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;border:1px solid var(--ds-border);background:var(--ds-surface)"><span class="ic i-file" aria-hidden="true" style="color:var(--ds-fg-muted)"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-body-sm" style="font-weight:500">{{ cfg.cpq }}</span><span class="t-caption t-numeric">{{ cfg.cpqSub }}</span></span><a href="#" style="font:500 14px/20px var(--font-sans);text-decoration:none">Ver</a></div>
+</sc-if>
+<sc-if value="{{ mailPreview }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
+<div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="AS" hint-size="28px,28px"></x-import><span style="font:600 14px/20px var(--font-sans)">Atlas Seguridad SpA</span></div>
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-body-sm" style="font-weight:600">{{ cfg.subject }}</span>
+<p class="t-body-sm m0" style="white-space:pre-line;text-wrap:pretty">{{ cfg.body }}</p>
+<span style="align-self:flex-start;padding:10px 16px;border-radius:10px;background:var(--ds-accent);color:var(--ds-accent-fg);font:600 14px/20px var(--font-sans)">Ver la propuesta</span>
+<span class="t-caption">Atlas Seguridad SpA · Av. Apoquindo 4499, Las Condes · enviado con OPAI</span>
+</div>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ isWa }}" hint-placeholder-val="{{ false }}">
+<div class="pg-kv"><span class="l">Para</span><span class="v t-numeric">Fernanda Navarro · +56 9 8765 4321</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Mensaje" value="Hola Fernanda, soy Camila de Atlas Seguridad. ¿Pudiste revisar la propuesta de seguridad para la clínica que te envié el 16-10? Si te sirve, la vemos en 15 minutos esta semana." rows="{{ 5 }}" hint="Se abre WhatsApp en tu teléfono con este texto listo. OPAI no envía el mensaje." hint-size="100%,170px"></x-import>
+<sc-if value="{{ waAsk }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:16px;border:1px solid var(--ds-border-strong);background:var(--ds-surface)">
+<span class="t-body-sm" style="font-weight:600">¿Lo enviaste?</span>
+<span class="t-caption">Abriste WhatsApp a las 10:47. Si dices que sí, el paso 2 queda hecho.</span>
+<div style="display:flex;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="140px,40px">Sí, registrar</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="80px,40px">No</x-import></div>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ isLlamada }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px solid var(--ds-border);background:var(--ds-surface)"><span style="display:flex;flex-direction:column"><span class="t-body-sm" style="font-weight:500">Javier Toro · Prevencionista de riesgos</span><span class="t-caption t-numeric">+56 9 5521 7843</span></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="phone" hint-size="100px,40px">Llamar</x-import></div>
+<section style="display:flex;flex-direction:column;gap:6px"><h3 class="t-label m0">Guion</h3><ol class="t-body-sm" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;text-wrap:pretty"><li>Confirma que recibió la propuesta CPQ-2026-124 para la faena.</li><li>Pregunta si los 5 guardias OS-10 cubren los dos accesos.</li><li>Ofrece la visita del supervisor antes del 06-11.</li></ol></section>
+</sc-if>
+<sc-if value="{{ isInterno }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ intPairs }}" as="p" hint-placeholder-count="4"><div class="pg-kv"><span class="l">{{ p.l }}</span><span class="v t-numeric">{{ p.v }}</span></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isRespondio }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:10px;background:var(--ds-bg);border:1px dashed var(--ds-border-strong)">
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="ic sm i-external" aria-hidden="true"></span>Externo · correo de Patricia Valdés, 29-10-2026 10:42 · no es una instrucción</span>
+<p class="t-body-sm m0" style="text-wrap:pretty">«Revisamos la propuesta y queremos avanzar, pero necesitamos ajustar el turno noche a 3 guardias. ¿Pueden enviarnos una versión con ese cambio antes del comité del 05-11?»</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-body-sm" style="font-weight:500">Canal</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ chanOpts }}" value="correo" label="Canal" hint-size="100%,36px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cuándo" value="29-10-2026 · 10:42" icon="calendar" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Resumen" value="Quiere avanzar con 3 guardias de noche. Pide una versión nueva antes del comité del 05-11." rows="{{ 3 }}" hint="Esto es una respuesta del cliente: detiene el seguimiento. Una nota común no lo detiene." hint-size="100%,130px"></x-import>
+<section style="display:flex;flex-direction:column;gap:8px"><h3 class="t-label m0">Qué va a pasar</h3>
+<div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:var(--ds-fill)">
+<span class="t-body-sm" style="display:flex;gap:8px;align-items:center"><span class="ic sm i-pause" aria-hidden="true"></span>Se detiene el seguimiento · se cancelan los pasos 3 y 4</span>
+<span class="t-body-sm" style="display:flex;gap:8px;align-items:center"><span class="ic sm i-chevron-right" aria-hidden="true"></span>El negocio pasa a Negociación</span>
+</div></section>
+<h3 class="t-label m0">¿Qué haces ahora?</h3>
+</sc-if>
+<sc-if value="{{ hasRadios }}" hint-placeholder-val="{{ false }}">
+<div role="radiogroup" aria-label="{{ cfg.radioLabel }}" style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ radios }}" as="r" hint-placeholder-count="3">
+<div role="radio" aria-checked="{{ r.on }}" tabindex="0" onClick="{{ r.select }}" style="display:flex;gap:12px;padding:14px;border-radius:16px;border:1px solid {{ r.border }};background:{{ r.bg }};cursor:pointer;align-items:flex-start">
+<span aria-hidden="true" style="width:20px;height:20px;border-radius:999px;flex:none;box-sizing:border-box;border:{{ r.dot }};margin-top:1px;background:var(--ds-surface)"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+<span class="t-body-sm" style="font-weight:600">{{ r.label }}</span>
+<span class="t-caption" style="text-wrap:pretty">{{ r.desc }}</span>
+<sc-if value="{{ r.showPlan }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plan" value="pc" options="{{ planOpts }}" hint-size="100%,70px"></x-import>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ planDates }}" as="p" hint-placeholder-count="4"><div class="pg-kv"><span class="l" style="display:flex;gap:8px;align-items:center"><span class="ic sm {{ p.icon }}" aria-hidden="true"></span>{{ p.l }}</span><span class="v t-numeric">{{ p.v }}</span></div></sc-for>
+</div>
+<span class="t-caption">Destinatario: Sergio Muñoz · smunoz@pacificosur.cl · días hábiles, sin fines de semana ni feriados.</span>
+</div>
+</sc-if>
+<sc-if value="{{ r.showStage }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Etapa" value="s5" options="{{ stageOpts }}" hint-size="100%,70px"></x-import></div></sc-if>
+<sc-if value="{{ r.showMotivo }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Motivo de pérdida" value="Sin respuesta del cliente" options="{{ motivoOpts }}" hint="Sugerido por el plan; puedes cambiarlo." hint-size="100%,90px"></x-import></div></sc-if>
+<sc-if value="{{ r.showSeguir }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cómo sigues" value="pos" options="{{ seguirOpts }}" hint-size="100%,70px"></x-import></div></sc-if>
+<sc-if value="{{ r.showFecha }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Fecha" value="{{ r.fecha }}" icon="calendar" hint-size="100%,70px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Hora" value="{{ r.hora }}" icon="clock" hint-size="100%,70px"></x-import></div></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isLlamada }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Nota" value="Le interesa; pide que el supervisor visite la faena antes de decidir." rows="{{ 3 }}" hint-size="100%,110px"></x-import>
+</sc-if>
+<sc-if value="{{ showPostpone }}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;border:1px solid var(--ds-border-strong)">
+<span class="t-body-sm" style="font-weight:600">Posponer este paso</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Fecha" value="lun 02-11-2026" icon="calendar" hint-size="100%,70px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Hora" value="09:00" icon="clock" hint-size="100%,70px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Mover también los siguientes" description="Los pasos 3 y 4 se corren 2 días hábiles." hint-size="100%,60px"></x-import>
+</section>
+</sc-if>
+</sc-if>
+</div>
+<sc-if value="{{ showActions }}" hint-placeholder-val="{{ true }}">
+<div class="sheet-actions" style="flex-wrap:wrap">
+<sc-for list="{{ actions }}" as="a" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ a.variant }}" icon="{{ a.icon }}" disabled="{{ a.disabled }}" size="{{ btnSize }}" hint-size="140px,40px">{{ a.label }}</x-import>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:16px;right:16px;bottom:{{ toastBottom }};display:flex;justify-content:center;z-index:60">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check-circle" tone="success" message="{{ toast.msg }}" action="{{ toast.act }}" duration="{{ 0 }}" hint-size="356px,48px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;hoja&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;iniciar&quot;,&quot;correo&quot;,&quot;correoAgente&quot;,&quot;whatsapp&quot;,&quot;llamada&quot;,&quot;interno&quot;,&quot;respondio&quot;],&quot;default&quot;:&quot;correo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;vista&quot;,&quot;preview&quot;,&quot;cargando&quot;,&quot;enviando&quot;,&quot;confirmando&quot;,&quot;exito&quot;,&quot;error&quot;,&quot;fallido&quot;,&quot;reemplazo&quot;,&quot;sinPermisos&quot;,&quot;menu&quot;,&quot;posponer&quot;,&quot;confirmar&quot;,&quot;rellamar&quot;],&quot;default&quot;:&quot;vista&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { opt: null, more: false, view: null };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.CRM.steps && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const hoja = this.props.hoja ?? "correo";
+    const estado = this.props.estado ?? "vista";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, bgPend: hoja !== "iniciar", bgDeal: hoja === "iniciar", sheetOpen: true, cfg: {}, stBody: true };
+    if (!C || !C.steps) return base;
+    const o = (a) => a.map((x) => (typeof x === "string" ? { value: x, label: x } : x));
+    const sig = "\n\nSaludos,\nCamila Rojas\nEjecutiva comercial · Atlas Seguridad SpA\n+56 9 7421 3388";
+    const failed = estado === "fallido";
+    const CFG = {
+      iniciar: { eyebrow: "Enviar cotización · paso 3 de 3", title: "Después de enviar", desc: "CPQ-2026-142 a Sergio Muñoz · Guardias 24/7 · Bodega Pudahuel", radioLabel: "Qué pasa después de enviar", ruleError: "El destinatario Sergio Muñoz no acepta correos: rebotó el 12-10-2026. Elige otro contacto con rol o actualiza su correo.", ruleCode: "REGLA-SEG-07" },
+      correo: failed
+        ? { eyebrow: "Seguimiento 1 de 4 · Correo · falló ayer 09:00", title: "Correo de seguimiento", desc: "Seguridad · Bodega Renca · Transportes Cordillera Norte", more: true, para: "lh", paraOpts: [{ value: "lh", label: "Luis Henríquez · Decisor · sin correo" }, { value: "vc", label: "Verónica Castro · Compras" }], paraError: "El contacto no tiene correo", failed: true, cc: "", tpl: "s1", subject: "Propuesta de seguridad para Bodega Renca · CPQ-2026-137", body: "Hola Luis:\n\nTe escribo por la propuesta de seguridad para la bodega de Renca que te enviamos el 23-10-2026." + sig, cpq: "CPQ-2026-137 · v1", cpqSub: "$ 3.740.000 mensuales · vigente hasta 22-11-2026" }
+        : { eyebrow: "Seguimiento 1 de 4 · Correo · vence hoy 15:00", title: "Correo de seguimiento", desc: "Vigilancia · Sucursales zona sur · Retail Austral SpA", more: true, para: "mr", paraOpts: [{ value: "mr", label: "Marcela Riquelme · Decisora" }, { value: "pf", label: "Pablo Fuentes · Compras" }], cc: "Pablo Fuentes · pfuentes@retailaustral.cl", tpl: "s1", subject: "Propuesta de vigilancia para sucursales zona sur · CPQ-2026-133", body: "Hola Marcela:\n\nTe escribo para saber si pudiste revisar la propuesta de vigilancia para las 6 sucursales de la zona sur que te enviamos el 26-10-2026. Incluye guardias en horario comercial y rondas nocturnas en Temuco y Osorno.\n\nSi te acomoda, la revisamos en una llamada de 15 minutos esta semana." + sig, cpq: "CPQ-2026-133 · v1", cpqSub: "$ 11.400.000 mensuales · vigente hasta 25-11-2026" },
+      correoAgente: { eyebrow: "Seguimiento 1 de 4 · Correo · hoy 09:00", title: "Revisa el correo del agente", desc: "Guardia adicional · Planta San Bernardo · Frigorífico del Maipo", agent: true, more: true, para: "pv", paraOpts: [{ value: "pv", label: "Patricia Valdés · Decisora" }], cc: "", tpl: "s1", subject: "Guardia adicional para Planta San Bernardo · CPQ-2026-140", body: "Hola Patricia:\n\nTe escribo por la propuesta del guardia adicional nocturno para Planta San Bernardo que enviamos el 26-10-2026. Podemos partir el 16-11 sin cambiar el contrato vigente." + sig, cpq: "CPQ-2026-140 · v1", cpqSub: "$ 2.200.000 mensuales · vigente hasta 25-11-2026" },
+      whatsapp: { eyebrow: "Seguimiento 2 de 4 · WhatsApp · vencido hace 2 días hábiles", title: "WhatsApp de seguimiento", desc: "Seguridad · Clínica Los Leones · Clínica Los Leones S.A.", more: true },
+      llamada: { eyebrow: "Seguimiento 3 de 4 · Llamada · vence hoy 11:00", title: "Llamada de seguimiento", desc: "Guardias OS-10 · Faena Til Til · Constructora Andes Sur", more: true, radioLabel: "Resultado de la llamada" },
+      interno: { eyebrow: "Seguimiento 4 de 4 · Interno · hoy", title: "Proponer perdido", desc: "Guardias de evento · Feria Espacio Riesco · Producciones Cordillera", more: true, radioLabel: "Qué haces con el negocio" },
+      respondio: { eyebrow: "Registro · respuesta del cliente", title: "Respuesta del cliente", desc: "Seguridad 24/7 · CD Lampa · Frigorífico del Maipo", radioLabel: "Qué haces ahora" },
+    };
+    const cfg = CFG[hoja];
+    const RAD = {
+      iniciar: [
+        { id: "seg", label: "Iniciar seguimiento", desc: "Plan Post-cotización v4 · 4 pasos", showPlan: true },
+        { id: "etapa", label: "Mover a otra etapa sin seguimiento", desc: "Para cotizaciones que ya conversaste con el cliente", showStage: true },
+        { id: "solo", label: "Solo enviar", desc: "Sin pasos ni cambio de etapa" },
+      ],
+      llamada: [
+        { id: "si", label: "Contestó con interés", desc: "Se registra y avanza al paso 4" },
+        { id: "no-int", label: "Contestó sin interés", desc: "Te proponemos perder el negocio" },
+        { id: "nc", label: "No contestó", desc: "El paso queda hecho sin respuesta" },
+        { id: "vol", label: "Pidió que lo llamen el…", desc: "Se pospone la llamada a esa fecha", showFecha: true, fecha: "lun 02-11-2026", hora: "16:00" },
+      ],
+      interno: [
+        { id: "perder", label: "Perder", desc: "Cierra el negocio con el motivo", showMotivo: true },
+        { id: "seguir", label: "Seguir", desc: "Pospón o inicia otro plan", showSeguir: true },
+      ],
+      respondio: [
+        { id: "resp", label: "Responder", desc: "Abre el correo a Patricia Valdés con el hilo" },
+        { id: "cot", label: "Cotizar", desc: "Nueva versión: CPQ-2026-138 v3" },
+        { id: "ag", label: "Agendar", desc: "Llamada o reunión con Patricia Valdés", showFecha: true, fecha: "lun 02-11-2026", hora: "10:00" },
+      ],
+    }[hoja] || [];
+    const defOpt = { iniciar: "seg", llamada: estado === "rellamar" ? "vol" : "si", interno: "perder", respondio: "resp" }[hoja];
+    const opt = this.state.opt ?? defOpt;
+    const radios = RAD.map((r) => {
+      const on = r.id === opt;
+      return { ...r, on, showPlan: on && r.showPlan, showStage: on && r.showStage, showMotivo: on && r.showMotivo, showSeguir: on && r.showSeguir, showFecha: on && r.showFecha, border: on ? "var(--ds-accent)" : "var(--ds-border)", bg: on ? "var(--ds-accent-muted)" : "var(--ds-surface)", dot: on ? "6px solid var(--ds-accent)" : "1.5px solid var(--ds-border-strong)", select: () => this.setState({ opt: r.id }) };
+    });
+    const busy = estado === "confirmando" || estado === "enviando";
+    const A = (label, variant, icon, disabled) => ({ label, variant: variant || "primary", icon, disabled: !!disabled || (busy && variant !== "secondary" && variant !== "ghost") });
+    const initLabel = { seg: "Enviar e iniciar seguimiento", etapa: "Enviar y mover", solo: "Enviar" }[opt] || "Enviar";
+    let actions = {
+      iniciar: [A("Atrás", "secondary"), A(busy ? "Enviando…" : initLabel, "primary", "send", estado === "error")],
+      correo: [A("Ya lo envié por fuera", "secondary"), A(busy ? "Enviando…" : "Enviar desde OPAI", "primary", "send", failed)],
+      correoAgente: [A("Descartar", "ghost"), A("Editar", "secondary"), A(busy ? "Enviando…" : "Aprobar y enviar", "primary", "check")],
+      whatsapp: [A("Abrir WhatsApp", "primary", "message")],
+      llamada: [A(busy ? "Registrando…" : "Registrar", "primary", "check")],
+      interno: [A(opt === "perder" ? "Perder negocio" : "Seguir", opt === "perder" ? "destructive" : "primary")],
+      respondio: [A("Decidir después", "ghost"), A({ resp: "Registrar y responder", cot: "Registrar y cotizar", ag: "Registrar y agendar" }[opt], "primary")],
+    }[hoja];
+    if (hoja === "whatsapp" && estado === "confirmar") actions = [A("Abrir de nuevo", "secondary", "message")];
+    const exito = estado === "exito";
+    const toastMsg = { iniciar: ["Cotización enviada · seguimiento iniciado", "Ver seguimiento"], correo: ["Correo enviado a Marcela Riquelme · paso 1 hecho", "Deshacer"], correoAgente: ["Correo aprobado y enviado a Patricia Valdés", "Ver"], llamada: ["Llamada registrada · paso 3 hecho", "Ver"], whatsapp: ["WhatsApp registrado · paso 2 hecho", "Ver"], interno: ["Negocio perdido · sin respuesta", "Reabrir"], respondio: ["Respuesta registrada · negocio en Negociación", "Ver"] }[hoja];
+    const isCorreo = hoja === "correo" || hoja === "correoAgente";
+    const mailView = this.state.view ?? (estado === "preview" ? "prev" : "edit");
+    return {
+      ...base,
+      sheetOpen: !exito,
+      toast: exito ? { msg: toastMsg[0], act: toastMsg[1] } : null,
+      toastBottom: isPhone ? "calc(72px + env(safe-area-inset-bottom))" : "24px",
+      panelCls: isPhone ? "sheet" : "sheet side",
+      panelW: isPhone ? "100%" : "440px",
+      panelRad: isPhone ? "0" : "var(--radius-lg) 0 0 var(--radius-lg)",
+      headPad: isPhone ? "52px 4px 12px 16px" : "12px 8px 12px 16px",
+      btnSize: isPhone ? "lg" : "md",
+      cfg,
+      moreOpen: this.state.more || estado === "menu",
+      toggleMore: () => this.setState((s) => ({ more: !s.more })),
+      moreItems: [{ label: "Posponer", icon: "clock", meta: "fecha y hora" }, { label: "Omitir", icon: "x", meta: "con motivo" }],
+      pickMore: () => this.setState({ more: false }),
+      stLoading: estado === "cargando", stForbidden: estado === "sinPermisos", stBody: !["cargando", "sinPermisos"].includes(estado),
+      skel: [1, 2, 3, 4, 5],
+      showReplace: hoja === "iniciar" && estado === "reemplazo",
+      showRuleError: hoja === "iniciar" && estado === "error",
+      isCorreo, isWa: hoja === "whatsapp", isLlamada: hoja === "llamada", isInterno: hoja === "interno", isRespondio: hoja === "respondio",
+      waAsk: estado === "confirmar",
+      viewOpts: [{ value: "edit", label: "Editar" }, { value: "prev", label: "Vista del correo" }],
+      mailView, setMailView: (v) => this.setState({ view: v }), mailEdit: mailView === "edit", mailPreview: mailView === "prev",
+      tplOpts: [{ value: "s1", label: "Seguimiento 1 · la del paso" }, { value: "s3", label: "Seguimiento 3" }, { value: "neg", label: "Seguimiento en Negociación · sugerida para la etapa" }, { value: "ren", label: "Renovar oferta" }],
+      hasRadios: radios.length > 0, radios,
+      planOpts: [{ value: "pc", label: "Post-cotización · v4 · por defecto" }, { value: "ren", label: "Renovación · v2" }],
+      planDates: C.plan.map((p) => ({ icon: "i-" + C.CH[p.ch].icon, l: p.n + " · " + C.CH[p.ch].label, v: p.fecha + " · " + p.hora })),
+      stageOpts: C.stages.slice(0, 6).map((s) => ({ value: s.id, label: s.name })),
+      motivoOpts: o(["Precio", "Eligió a la competencia", "Sin presupuesto", "Cliente postergó la decisión", "Sin respuesta del cliente", "No cumplimos requisitos técnicos", "Otro"]),
+      seguirOpts: [{ value: "pos", label: "Posponer 5 días hábiles" }, { value: "ren", label: "Iniciar plan Renovación · v2" }],
+      chanOpts: [{ value: "correo", label: "Correo" }, { value: "llamada", label: "Llamada" }, { value: "wa", label: "WhatsApp" }, { value: "reu", label: "Reunión" }, { value: "otro", label: "Otro" }],
+      intPairs: [{ l: "Desde el envío", v: "19 días hábiles · 02-10-2026" }, { l: "Pasos hechos", v: "2 de 3 · 1 omitido" }, { l: "Última actividad", v: "13-10-2026 · correo sin respuesta" }, { l: "Valor mensual", v: "$ 2.900.000" }],
+      showPostpone: estado === "posponer",
+      showActions: !["sinPermisos"].includes(estado),
+      actions,
+    };
+  }
+}
+</script>
+</body>
+</html>

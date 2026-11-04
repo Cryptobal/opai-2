@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="neg" title="Negocios" count="{{ 13 }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}">
+<div style="width:320px;flex:none;border-right:1px solid var(--ds-border);background:var(--ds-surface);overflow:auto">
+<sc-for list="{{ sideList }}" as="s" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ s.selected }}" title="{{ s.name }}" subtitle="{{ s.sub }}" meta="{{ s.meta }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Negocios</a>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showEnv }}" hint-placeholder-val="{{ true }}">
+<div class="banner"><span class="ic sm i-alert" aria-hidden="true"></span><span>Ambiente de prueba · Puedes ganar sin cotización mientras CPQ no esté disponible.</span></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Negocios</a>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ eyebrow }}" title="{{ deal.name }}" subtitle="{{ headSub }}" badge="{{ stageBadge }}" hint-size="100%,80px">
+<sc-if value="{{ headActs }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="x" on-click="{{ openLose }}" hint-size="100px,40px">Perder</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" on-click="{{ openWin }}" hint-size="100px,40px">Ganar</x-import>
+</sc-if>
+<sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="refresh" on-click="{{ openReopen }}" hint-size="110px,40px">Reabrir</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ phoneActs }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:-4px 0 16px">
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="check" block="{{ true }}" on-click="{{ openWin }}" hint-size="100%,48px">Ganar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" icon="x" block="{{ true }}" on-click="{{ openLose }}" hint-size="100%,48px">Perder</x-import>
+</sc-if>
+<sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="refresh" block="{{ true }}" on-click="{{ openReopen }}" hint-size="100%,48px">Reabrir</x-import>
+</sc-if>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px">
+<sc-for list="{{ track }}" as="t" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span style="height:4px;border-radius:999px;background:{{ t.color }}"></span>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<span style="font:{{ t.font }};color:{{ t.text }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm muted">{{ trackLabel }}</span>
+</sc-if>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:24px;margin-top:20px">
+<sc-if value="{{ tabRes }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px 32px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Negocio" rows="{{ secNeg }}" hint-size="100%,240px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Valor y cierre" rows="{{ secVal }}" hint-size="100%,240px"></x-import>
+</div>
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Cotización" rows="{{ secCot }}" hint-size="100%,100px">
+<p class="t-caption" style="margin:8px 0 0;text-wrap:pretty">{{ cotNote }}</p>
+</x-import>
+</sc-if>
+<sc-if value="{{ isClosed }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Cierre" rows="{{ secLost }}" hint-size="100%,160px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ tabIns }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+<span class="t-body-sm muted t-numeric">2 instalaciones · 6 puestos · $ 14.250.000 mensuales</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="180px,40px">Agregar instalación</x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ insCols }}" rows="{{ insRows }}" cards="{{ true }}" to-card="{{ insCard }}" hint-size="100%,160px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ insCols }}" rows="{{ insRows }}" on-row-click="{{ noop }}" hint-size="100%,160px"></x-import>
+</sc-if>
+<p class="t-caption" style="margin:0">Al ganar, las instalaciones nuevas se crean en Operaciones como «Por iniciar» y las existentes suman los puestos ampliados.</p>
+</sc-if>
+<sc-if value="{{ tabCon }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+<span class="t-body-sm muted">4 contactos · el rol aplica solo a este negocio</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="170px,40px">Agregar contacto</x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ conCols }}" rows="{{ conRows }}" cards="{{ true }}" to-card="{{ conCard }}" hint-size="100%,280px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ conCols }}" rows="{{ conRows }}" on-row-click="{{ noop }}" hint-size="100%,240px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ tabHis }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px 32px;align-items:start">
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-label m0">Cambios de etapa</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ history }}" hint-size="100%,420px"></x-import>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Tiempo por etapa" rows="{{ timeRows }}" hint-size="100%,240px">
+<p class="t-caption" style="margin:8px 0 0">Esperado según Configuración → Comercial. Sobre lo esperado se marca en el tablero.</p>
+</x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+</div>
+</div>
+</x-import>
+<sc-if value="{{ winOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Ganar negocio" description="Seguridad 24/7 · CD Lampa · $ 14.250.000 mensuales" actions="{{ winActions }}" on-close="{{ closeAll }}" hint-size="440px,480px">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+<sc-if value="{{ envTest }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:10px;padding:12px;border-radius:var(--radius-md);background:var(--ds-warning-muted);color:var(--ds-warning-fg);font:400 14px/20px var(--font-sans)">
+<span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">Ambiente de prueba: ganarás sin cotización</b><span>Mientras CPQ no esté disponible, solo aquí se permite. En producción, ganar exige una cotización aceptada.</span></span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Fecha de cierre" value="26-10-2026" icon="calendar" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Inicio del servicio" value="01-12-2026" icon="calendar" hint-size="100%,70px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ ack }}" on-change="{{ setAck }}" label="Entiendo que gano este negocio sin cotización" description="Queda registrado en el historial con tu nombre." hint-size="100%,60px"></x-import>
+</sc-if>
+<sc-if value="{{ envProd }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:10px;padding:12px;border-radius:var(--radius-md);background:var(--ds-fill);color:var(--ds-fg);font:400 14px/20px var(--font-sans)">
+<span class="ic sm i-lock" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">Necesitas una cotización aceptada</b><span class="muted">En producción solo se gana con cotización. CPQ aún no está disponible; mientras tanto, mueve el negocio a «Firma de contrato».</span></span>
+</div>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ loseOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Perder negocio" description="Seguridad 24/7 · CD Lampa. Podrás reabrirlo después." actions="{{ loseActions }}" on-close="{{ closeAll }}" hint-size="440px,420px">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Motivo de pérdida" placeholder="Elige un motivo" value="{{ motivo }}" options="{{ motivoOpts }}" on-change="{{ setMotivo }}" error="{{ motivoError }}" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Detalle" placeholder="Qué pasó, con quién competimos, a qué precio" rows="{{ 3 }}" hint="Opcional. Obligatorio si eliges «Otro»." hint-size="100%,130px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ reopenOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Reabrir negocio" description="Rondas · Condominio Los Trapenses · perdido el 08-10-2026" actions="{{ reopenActions }}" on-close="{{ closeAll }}" hint-size="440px,400px">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Volver a la etapa" value="{{ reopenStage }}" options="{{ stageOpts }}" on-change="{{ setReopenStage }}" hint="Propuesta enviada era su etapa al perderse." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Por qué se reabre" value="La administración pidió una nueva propuesta para 2027." rows="{{ 2 }}" hint="El motivo de pérdida anterior queda en el historial." hint-size="100%,110px"></x-import>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;resumen&quot;,&quot;instalaciones&quot;,&quot;contactos&quot;,&quot;historial&quot;,&quot;ganar&quot;,&quot;perder&quot;,&quot;reabrir&quot;],&quot;default&quot;:&quot;resumen&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;ambiente&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;prueba&quot;,&quot;produccion&quot;],&quot;default&quot;:&quot;prueba&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null, dlg: null, ack: false, motivo: null, tried: null, reopenStage: "s4" };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "resumen";
+    const env = this.props.ambiente ?? "prueba";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, isTablet: device === "tablet" };
+    if (!C || !NS.Badge) return base;
+    const closedDeal = screen === "reabrir";
+    const deal = C.deals.find((d) => d.folio === (closedDeal ? "NEG-0134" : "NEG-0142"));
+    const tabMap = { resumen: "res", instalaciones: "ins", contactos: "con", historial: "his", ganar: "res", perder: "res", reabrir: "res" };
+    const tab = this.state.tab ?? tabMap[screen];
+    const dlg = this.state.dlg ?? ({ ganar: "win", perder: "lose", reabrir: "reopen" }[screen] || "none");
+    const tried = this.state.tried ?? (screen === "perder");
+    const curIdx = closedDeal ? 3 : 4;
+    const track = C.stages.slice(0, 6).map((s, i) => ({
+      name: s.name,
+      color: closedDeal ? (i <= curIdx ? "var(--ds-danger)" : "var(--ds-border)") : i < curIdx ? "var(--ds-fg)" : i === curIdx ? "var(--ds-accent)" : "var(--ds-border)",
+      text: i === curIdx ? "var(--ds-fg)" : "var(--ds-fg-subtle)",
+      font: i === curIdx ? "500 12px/16px var(--font-sans)" : "400 12px/16px var(--font-sans)",
+    }));
+    const close = () => this.setState({ dlg: "none" });
+    const btn = (p, t) => h(NS.Button, p, t);
+    const sideDeals = C.deals.filter((d) => (closedDeal ? d.stage === "s8" || d.stage === "s7" : ["s4", "s5", "s6"].includes(d.stage)));
+    const insRows = [
+      { id: 1, name: "CD Lampa", dir: "Camino Lo Echevers 1250, Lampa", sit: "Nueva", tone: "info", puestos: "4 · 2 día, 2 noche", turnos: "4×4 · 12 h", val: 9850000 },
+      { id: 2, name: "Planta San Bernardo", dir: "Av. Portales 3400, San Bernardo", sit: "Ampliación", tone: "neutral", puestos: "+2 · noche", turnos: "4×4 · 12 h", val: 4400000 },
+    ];
+    const conRows = [
+      { id: 1, ini: "PV", name: "Patricia Valdés", cargo: "Gerenta de operaciones", rol: "Decisora", tel: "+56 9 8123 4417", mail: "pvaldes@frigomaipo.cl" },
+      { id: 2, ini: "AL", name: "Andrés Lagos", cargo: "Gerente general", rol: "Firmante", tel: "+56 9 9012 5586", mail: "alagos@frigomaipo.cl" },
+      { id: 3, ini: "RÁ", name: "Rodrigo Álvarez", cargo: "Jefe de seguridad", rol: "Técnico", tel: "+56 9 7765 0932", mail: "ralvarez@frigomaipo.cl" },
+      { id: 4, ini: "MP", name: "Mónica Paredes", cargo: "Jefa de compras", rol: "Compras", tel: "+56 2 2948 3100", mail: "mparedes@frigomaipo.cl" },
+    ];
+    const ack = this.state.ack;
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups,
+      sideList: sideDeals.map((d) => ({ name: d.name, sub: d.acc + " · " + C.stageName(d.stage), meta: C.fmt(d.val), selected: d.folio === deal.folio })),
+      showEnv: env === "prueba" && !closedDeal,
+      deal, eyebrow: deal.folio + " · " + deal.acc,
+      headSub: closedDeal ? "Perdido el 08-10-2026 · Eligió a la competencia" : C.fmt(deal.val) + " mensuales · cierre estimado " + deal.close,
+      stageBadge: h(NS.Badge, { tone: C.stageTone(deal.stage) }, C.stageName(deal.stage)),
+      isOpen: !closedDeal, isClosed: closedDeal,
+      headActs: !isPhone, phoneActs: isPhone,
+      track, trackLabel: closedDeal ? "Se perdió en Propuesta enviada" : "Etapa 5 de 6 · Negociación · 4 días",
+      tabItems: [{ id: "res", label: "Resumen" }, { id: "ins", label: "Instalaciones", count: 2 }, { id: "con", label: "Contactos", count: 4 }, { id: "his", label: "Historial de etapas", count: closedDeal ? 5 : 5 }],
+      tab, setTab: (t) => this.setState({ tab: t }),
+      tabRes: tab === "res", tabIns: tab === "ins", tabCon: tab === "con", tabHis: tab === "his",
+      noop: () => {},
+      secNeg: [
+        { label: "Cuenta", value: deal.acc }, { label: "Tipo", value: deal.tipo }, { label: "Origen", value: closedDeal ? "Sitio web" : "Referido · Rodrigo Álvarez" },
+        { label: "Responsable", value: deal.ownName }, { label: "Creado", value: closedDeal ? "02-09-2026" : "11-09-2026", numeric: true },
+      ],
+      secVal: closedDeal ? [
+        { label: "Valor mensual", value: C.fmt(deal.val), numeric: true }, { label: "Puestos", value: "1 · rondas nocturnas" },
+        { label: "Probabilidad", value: "0 %", numeric: true }, { label: "Cierre estimado", value: "30-10-2026", numeric: true },
+      ] : [
+        { label: "Valor mensual", value: C.fmt(deal.val), numeric: true }, { label: "Puestos", value: "6 · 2 instalaciones" },
+        { label: "Probabilidad", value: "70 % · por etapa", numeric: true }, { label: "Valor ponderado", value: C.fmt(deal.val * 0.7), numeric: true },
+        { label: "Cierre estimado", value: deal.close, numeric: true },
+      ],
+      secCot: [{ label: "Estado", value: "Sin cotización" }],
+      cotNote: env === "prueba" ? "CPQ aún no está disponible. En este ambiente de prueba puedes ganar sin cotización; el valor mensual se toma de este negocio." : "CPQ aún no está disponible. En producción no se puede ganar sin una cotización aceptada.",
+      secLost: [
+        { label: "Resultado", value: "Perdido" }, { label: "Fecha", value: "08-10-2026", numeric: true },
+        { label: "Motivo", value: "Eligió a la competencia" }, { label: "Detalle", value: "«Ofrecieron 2 rondas más por el mismo valor»" },
+        { label: "Registró", value: "Matías Fuentes" },
+      ],
+      insCols: [
+        { key: "name", label: "Instalación", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.name), h("span", { className: "t-caption" }, r.dir)) },
+        { key: "sit", label: "Situación", render: (r) => h(NS.Badge, { tone: r.tone }, r.sit) },
+        { key: "puestos", label: "Puestos" }, { key: "turnos", label: "Jornada" },
+        { key: "val", label: "Valor mensual", align: "right", render: (r) => h("span", { className: "t-numeric" }, C.fmt(r.val)) },
+      ],
+      insRows, insCard: (r) => ({ icon: "building", title: r.name, subtitle: r.puestos + " · " + C.fmt(r.val), badge: { tone: r.tone, label: r.sit } }),
+      conCols: [
+        { key: "name", label: "Nombre", render: (r) => h("span", { style: { display: "flex", gap: 10, alignItems: "center" } }, h(NS.Avatar, { initials: r.ini, size: 24 }), h("span", { style: { fontWeight: 500 } }, r.name)) },
+        { key: "cargo", label: "Cargo", muted: true },
+        { key: "rol", label: "Rol en el negocio", render: (r) => h(NS.Badge, { tone: r.rol === "Decisora" ? "accent" : "neutral", dot: false }, r.rol) },
+        { key: "tel", label: "Teléfono", render: (r) => h("span", { className: "t-numeric" }, r.tel) },
+        { key: "mail", label: "Correo", muted: true },
+      ],
+      conRows, conCard: (r) => ({ initials: r.ini, title: r.name, subtitle: r.cargo, meta: r.tel, badge: { tone: r.rol === "Decisora" ? "accent" : "neutral", label: r.rol } }),
+      history: closedDeal ? [
+        { initials: "MF", who: "Matías Fuentes", action: "perdió el negocio · Eligió a la competencia", changes: [{ field: "Etapa", from: "Propuesta enviada", to: "Perdido" }], when: "08-10-2026 · 17:20" },
+        { initials: "MF", who: "Matías Fuentes", action: "movió de etapa · 9 días en Visita técnica", changes: [{ field: "Etapa", from: "Visita técnica", to: "Propuesta enviada" }], when: "25-09-2026 · 10:12" },
+        { initials: "MF", who: "Matías Fuentes", action: "movió de etapa", changes: [{ field: "Etapa", from: "Calificado", to: "Visita técnica" }], when: "16-09-2026 · 09:40" },
+        { initials: "MF", who: "Matías Fuentes", action: "movió de etapa", changes: [{ field: "Etapa", from: "Prospecto", to: "Calificado" }], when: "09-09-2026 · 15:05" },
+        { agent: true, who: "OPAI", action: "creó el negocio desde el formulario del sitio web en Prospecto", when: "02-09-2026 · 08:31" },
+      ] : [
+        { initials: "CR", who: "Camila Rojas", action: "movió de etapa · 13 días en Propuesta enviada", changes: [{ field: "Etapa", from: "Propuesta enviada", to: "Negociación" }, { field: "Valor mensual", from: "$ 13.100.000", to: "$ 14.250.000" }], when: "22-10-2026 · 16:40" },
+        { initials: "CR", who: "Camila Rojas", action: "movió de etapa · 14 días en Visita técnica", changes: [{ field: "Etapa", from: "Visita técnica", to: "Propuesta enviada" }], when: "09-10-2026 · 11:05" },
+        { initials: "MF", who: "Matías Fuentes", action: "movió de etapa · 7 días en Calificado", changes: [{ field: "Etapa", from: "Calificado", to: "Visita técnica" }], when: "25-09-2026 · 09:30" },
+        { initials: "CR", who: "Camila Rojas", action: "movió de etapa · 7 días en Prospecto", changes: [{ field: "Etapa", from: "Prospecto", to: "Calificado" }], when: "18-09-2026 · 12:15" },
+        { initials: "CR", who: "Camila Rojas", action: "creó el negocio en Prospecto", when: "11-09-2026 · 10:02" },
+      ],
+      timeRows: closedDeal ? [
+        { label: "Prospecto", value: "7 d · esperado 7", numeric: true }, { label: "Calificado", value: "7 d · esperado 7", numeric: true },
+        { label: "Visita técnica", value: "9 d · esperado 10", numeric: true }, { label: "Propuesta enviada", value: "13 d · esperado 14", numeric: true },
+        { label: "Total", value: "36 días", numeric: true },
+      ] : [
+        { label: "Prospecto", value: "7 d · esperado 7", numeric: true }, { label: "Calificado", value: "7 d · esperado 7", numeric: true },
+        { label: "Visita técnica", value: "14 d · esperado 10", numeric: true }, { label: "Propuesta enviada", value: "13 d · esperado 14", numeric: true },
+        { label: "Negociación", value: "4 d en curso · esperado 14", numeric: true }, { label: "Total", value: "45 días", numeric: true },
+      ],
+      envTest: env === "prueba", envProd: env !== "prueba",
+      winOpen: dlg === "win", loseOpen: dlg === "lose", reopenOpen: dlg === "reopen",
+      openWin: () => this.setState({ dlg: "win" }), openLose: () => this.setState({ dlg: "lose", tried: false }), openReopen: () => this.setState({ dlg: "reopen" }),
+      closeAll: close,
+      ack, setAck: (v) => this.setState({ ack: v }),
+      winActions: [btn({ key: "c", variant: "secondary", onClick: close }, "Cancelar"), btn({ key: "o", icon: "check", disabled: env === "prueba" ? !ack : true, onClick: close }, "Ganar negocio")],
+      motivo: this.state.motivo, setMotivo: (v) => this.setState({ motivo: v }),
+      motivoError: tried && !this.state.motivo ? "Elige un motivo para perder el negocio." : undefined,
+      motivoOpts: ["Precio", "Eligió a la competencia", "Sin presupuesto", "Cliente postergó la decisión", "Sin respuesta del cliente", "No cumplimos requisitos técnicos", "Otro"].map((x) => ({ value: x, label: x })),
+      loseActions: [btn({ key: "c", variant: "secondary", onClick: close }, "Cancelar"), btn({ key: "o", variant: "destructive", onClick: () => (this.state.motivo ? close() : this.setState({ tried: true })) }, "Perder negocio")],
+      stageOpts: C.stages.slice(0, 6).map((s) => ({ value: s.id, label: s.name })),
+      reopenStage: this.state.reopenStage, setReopenStage: (v) => this.setState({ reopenStage: v }),
+      reopenActions: [btn({ key: "c", variant: "secondary", onClick: close }, "Cancelar"), btn({ key: "o", icon: "refresh", onClick: close }, "Reabrir negocio")],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-100);font-family:var(--font-sans);font-feature-settings:"cv11","ss01";color:var(--ds-fg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">CPQ v4 · Vigía Sur SpA · <a href="FlujoCompletoCPQ.dc.html">Prototipo navegable</a></span>
+    <span style="font:600 28px/34px var(--font-sans);letter-spacing:-.02em">Cotizaciones</span>
+    <span style="font:400 15px/22px var(--font-sans);color:var(--ds-fg-muted);max-width:880px">Lista en SplitScreen con filtros por chips. En lugar de borrar se archiva; borrar definitivamente es solo para borradores nunca enviados. Cada marco es interactivo y tiene su propio estado.</span>
+  </div>
+
+  <sc-for list="{{ secciones }}" as="sec" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:20px">
+      <span style="font:600 18px/26px var(--font-sans)">{{ sec.t }}</span>
+      <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+        <sc-for list="{{ sec.frames }}" as="fr" hint-placeholder-count="2">
+          <div id="{{ fr.id }}" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">{{ fr.id }}</span><span style="font:500 14px/20px var(--font-sans)">{{ fr.cap }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">{{ fr.w }}</span></div>
+            <div data-device="{{ fr.dev }}" data-shot="{{ fr.id }}" data-theme="light" style="position:relative;width:{{ fr.w }}px;height:{{ fr.h }}px;border-radius:{{ fr.rad }};border:1px solid var(--ds-border-strong);overflow:hidden;background:var(--ds-bg);color:var(--ds-fg);flex:none">
+
+              <sc-if value="{{ fr.isPhone }}">
+                <div class="screen" style="height:100%">
+                  <div class="safe-top" style="display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:600 15px/20px var(--font-sans)"><span>9:41</span><span style="width:18px;height:10px;border-radius:2px;border:1.5px solid var(--ds-fg)"></span></div>
+                  <div class="topbar"><span style="font:600 15px/20px var(--font-sans);flex:1;padding-left:4px">Cotizaciones</span><button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button><button class="icon-btn" aria-label="Nueva cotización" onClick="{{ fr.nueva }}"><span class="ic i-plus"></span></button></div>
+                  <div style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:4px 0 24px">
+                    <div style="padding:0 16px"><div class="seg" style="width:100%"><button class="{{ fr.segA }}" onClick="{{ fr.verA }}">Abiertas · {{ fr.nA }}</button><button class="{{ fr.segR }}" onClick="{{ fr.verR }}">Archivadas · {{ fr.nR }}</button></div></div>
+                    <sc-if value="{{ fr.abiertas }}"><div class="chip-row" style="padding:0 16px"><sc-for list="{{ fr.chips }}" as="ch"><button class="{{ ch.cls }}" onClick="{{ ch.tog }}">{{ ch.t }} <span class="cnt">{{ ch.n }}</span></button></sc-for></div></sc-if>
+                    <sc-if value="{{ fr.hayRows }}">
+                      <div class="rows">
+                        <sc-for list="{{ fr.rows }}" as="r" hint-placeholder-count="4">
+                          <div class="rowcard" style="align-items:center">
+                            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                              <span style="display:flex;gap:8px;align-items:center"><span style="font:500 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">{{ r.f }}</span><span class="{{ r.ecls }}">{{ r.e }}</span></span>
+                              <span style="font:500 15px/20px var(--font-sans)">{{ r.n }}</span>
+                              <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ r.c }} · {{ r.v }}</span>
+                              <sc-if value="{{ r.hayReq }}"><span style="font:500 12px/16px var(--font-sans);color:var(--ds-warning-fg)">{{ r.req }}</span></sc-if>
+                            </span>
+                            <sc-if value="{{ r.archivada }}"><button class="btn btn-secondary" onClick="{{ r.restaurar }}" style="height:36px;padding:0 12px">Restaurar</button></sc-if>
+                            <sc-if value="{{ r.abierta }}"><button class="icon-btn" onClick="{{ r.menu }}" aria-label="Acciones"><span class="ic i-more"></span></button></sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ fr.vacioTotal }}"><div style="padding:0 16px"><div class="state-panel"><span class="state-ic"><span class="ic i-file"></span></span><span class="t">Aún no hay cotizaciones</span><span class="d">Crea la primera desde un negocio o con la cotización rápida.</span><button class="btn btn-primary" onClick="{{ fr.nueva }}">Nueva cotización</button></div></div></sc-if>
+                    <sc-if value="{{ fr.vacioFiltro }}"><div style="padding:0 16px"><div class="state-panel"><span class="state-ic"><span class="ic i-filter"></span></span><span class="t">{{ fr.vacioTxt }}</span><button class="btn btn-secondary" onClick="{{ fr.limpiar }}">Limpiar filtros</button></div></div></sc-if>
+                  </div>
+                  <nav class="tabbar" style="padding-bottom:28px"><button><span class="ic i-home"></span>Inicio</button><button class="on"><span class="ic i-briefcase"></span>Comercial</button><button><span class="ic i-users"></span>Personas</button><button><span class="ic i-menu"></span>Más</button></nav>
+                </div>
+                <sc-if value="{{ fr.menuOpen }}">
+                  <div class="scrim" onClick="{{ fr.cerrar }}" style="z-index:10"></div>
+                  <div class="sheet" style="z-index:11">
+                    <div class="grabber"></div>
+                    <div style="padding:12px 16px 0;display:flex;flex-direction:column"><span style="font:500 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">{{ fr.menuF }}</span><span style="font:600 17px/24px var(--font-sans)">{{ fr.menuN }}</span></div>
+                    <div class="menu" style="padding:8px 8px 34px"><button class="menu-item">Abrir</button><button class="menu-item">Duplicar como borrador</button><button class="menu-item" onClick="{{ fr.archivar }}">Archivar</button></div>
+                  </div>
+                </sc-if>
+              </sc-if>
+
+              <sc-if value="{{ fr.wide }}">
+                <div style="display:flex;height:100%">
+                  <sc-if value="{{ fr.isDesk }}">
+                    <aside class="sidebar">
+                      <div class="sidebar-head"><span class="wordmark">OPAI</span><span class="tenant">VS</span></div>
+                      <button class="sidebar-portal"><span class="ic sm i-grid"></span><span style="flex:1;font:500 14px/20px var(--font-sans)">ERP</span><span class="ic sm i-updown" style="color:var(--ds-fg-subtle)"></span></button>
+                      <div class="nav-group" style="padding-top:12px"><button class="nav-item"><span class="ic i-home"></span>Inicio</button></div>
+                      <div class="nav-group"><span class="h">Comercial</span><button class="nav-item"><span class="ic i-briefcase"></span>Negocios</button><button class="nav-item on"><span class="ic i-file"></span>Cotizaciones<span class="n">{{ fr.nA }}</span></button><button class="nav-item"><span class="ic i-building"></span>Cuentas</button></div>
+                      <div class="nav-group"><span class="h">Operaciones</span><button class="nav-item"><span class="ic i-pin"></span>Instalaciones</button><button class="nav-item"><span class="ic i-users"></span>Personas</button><button class="nav-item"><span class="ic i-calendar"></span>Pautas</button></div>
+                      <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)"><span class="avatar">TF</span><span style="display:flex;flex-direction:column"><span style="font:500 14px/20px var(--font-sans)">Tomás Fuentes</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">Ejecutivo comercial</span></span></div>
+                    </aside>
+                  </sc-if>
+                  <sc-if value="{{ fr.isTab }}">
+                    <nav class="rail"><button class="rail-portal"><span class="ic i-grid"></span>ERP</button><button class="rail-item"><span class="ic i-home"></span>Inicio</button><button class="rail-item on"><span class="ic i-briefcase"></span>Comercial</button><button class="rail-item"><span class="ic i-pin"></span>Operación</button><button class="rail-item"><span class="ic i-users"></span>Personas</button></nav>
+                  </sc-if>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+                    <header class="appbar" style="padding:0 {{ fr.gut }}"><span style="flex:1;font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Comercial › Cotizaciones</span><button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button></header>
+                    <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:16px;padding:24px {{ fr.gut }}">
+                      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                        <span style="flex:1;font:600 22px/28px var(--font-sans);letter-spacing:-.015em">Cotizaciones</span>
+                        <div class="input compact" style="width:288px"><span class="ic sm i-search" style="color:var(--ds-fg-muted)"></span><span class="grow" style="color:var(--ds-fg-subtle)">Buscar por folio, cuenta o negocio</span></div>
+                        <button class="btn btn-primary" onClick="{{ fr.nueva }}"><span class="ic sm i-plus"></span>Nueva cotización</button>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                        <div class="seg"><button class="{{ fr.segA }}" onClick="{{ fr.verA }}">Abiertas · {{ fr.nA }}</button><button class="{{ fr.segR }}" onClick="{{ fr.verR }}">Archivadas · {{ fr.nR }}</button></div>
+                        <sc-if value="{{ fr.abiertas }}"><div class="chip-row"><button class="chip"><span class="k">Estado</span> Todos<span class="ic sm i-chevron-down"></span></button><sc-for list="{{ fr.chips }}" as="ch"><button class="{{ ch.cls }}" onClick="{{ ch.tog }}">{{ ch.t }} <span class="cnt">{{ ch.n }}</span></button></sc-for></div></sc-if>
+                      </div>
+                      <sc-if value="{{ fr.vacioTotal }}"><div class="state-panel" style="flex:1"><span class="state-ic"><span class="ic i-file"></span></span><span class="t">Aún no hay cotizaciones</span><span class="d">Crea la primera desde un negocio o con la cotización rápida.</span><button class="btn btn-primary" onClick="{{ fr.nueva }}">Nueva cotización</button></div></sc-if>
+                      <sc-if value="{{ fr.conDatos }}">
+                        <div style="flex:1;min-height:0;display:grid;grid-template-columns:{{ fr.split }};gap:16px">
+                          <div class="card" style="overflow-y:auto;overflow-x:hidden;min-height:0">
+                            <sc-for list="{{ fr.rows }}" as="r" hint-placeholder-count="5">
+                              <div class="{{ r.selCls }}" onClick="{{ r.sel }}" style="position:relative">
+                                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                                  <span style="display:flex;gap:8px;align-items:center"><span style="font:500 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">{{ r.f }}</span><span class="{{ r.ecls }}">{{ r.e }}</span></span>
+                                  <span style="font:500 14px/20px var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.n }}</span>
+                                  <span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ r.c }} · {{ r.v }}</span>
+                                  <sc-if value="{{ r.hayReq }}"><span style="font:500 12px/16px var(--font-sans);color:var(--ds-warning-fg)">{{ r.req }}</span></sc-if>
+                                </span>
+                                <sc-if value="{{ r.archivada }}"><button class="btn btn-secondary" onClick="{{ r.restaurar }}" style="height:32px;padding:0 10px">Restaurar</button></sc-if>
+                                <sc-if value="{{ r.abierta }}"><button class="icon-btn" onClick="{{ r.menu }}" aria-label="Acciones" style="width:36px;height:36px"><span class="ic sm i-more"></span></button></sc-if>
+                                <sc-if value="{{ r.menuOpen }}">
+                                  <div class="overlay menu" style="position:absolute;right:12px;top:52px;z-index:5;width:220px">
+                                    <button class="menu-item">Abrir</button><button class="menu-item">Duplicar como borrador</button><button class="menu-item" onClick="{{ fr.archivar }}">Archivar</button>
+                                  </div>
+                                </sc-if>
+                              </div>
+                            </sc-for>
+                            <sc-if value="{{ fr.vacioFiltro }}"><div style="padding:24px 16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span style="font:500 14px/20px var(--font-sans)">{{ fr.vacioTxt }}</span><button class="btn btn-secondary" onClick="{{ fr.limpiar }}" style="height:32px">Limpiar filtros</button></div></sc-if>
+                          </div>
+                          <sc-if value="{{ fr.haySel }}">
+                            <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;overflow-x:hidden;min-height:0">
+                              <div style="display:flex;flex-direction:column;gap:4px"><span style="font:500 12px/16px var(--font-mono);color:var(--ds-fg-subtle)">{{ fr.d.f }} · v1</span><span style="font:600 20px/26px var(--font-sans);letter-spacing:-.01em">{{ fr.d.n }}</span><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">{{ fr.d.c }}</span><span class="{{ fr.d.ecls }}" style="align-self:flex-start;margin-top:4px">{{ fr.d.e }}</span></div>
+                              <sc-if value="{{ fr.d.hayReq }}"><div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic i-alert"></span><span class="txt"><span class="tit">Requisitos pendientes</span><span>{{ fr.d.req }}</span></span></div></sc-if>
+                              <sc-if value="{{ fr.d.archivada }}"><div class="alerta" style="background:var(--ds-fill);color:var(--ds-fg-muted)"><span class="ic i-inbox"></span><span class="txt"><span>Archivada el {{ fr.d.archF }}. No aparece en la lista ni en los reportes de pipeline.</span></span></div></sc-if>
+                              <div style="display:flex;flex-direction:column">
+                                <div class="pg-kv"><span class="l">Venta mensual</span><span class="v" style="font-variant-numeric:tabular-nums">{{ fr.d.v }}</span></div>
+                                <div class="pg-kv"><span class="l">Margen</span><span class="v" style="font-variant-numeric:tabular-nums">{{ fr.d.m }}</span></div>
+                                <div class="pg-kv"><span class="l">Instalaciones</span><span class="v">{{ fr.d.inst }}</span></div>
+                                <div class="pg-kv"><span class="l">Vence</span><span class="v">{{ fr.d.vence }}</span></div>
+                                <div class="pg-kv"><span class="l">Actualizada</span><span class="v">{{ fr.d.upd }}</span></div>
+                              </div>
+                              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+                                <sc-if value="{{ fr.d.abierta }}"><button class="btn btn-secondary">Abrir cotización</button><button class="btn btn-ghost" onClick="{{ fr.archivarSel }}">Archivar</button></sc-if>
+                                <sc-if value="{{ fr.d.archivada }}"><button class="btn btn-secondary" onClick="{{ fr.restaurarSel }}">Restaurar</button></sc-if>
+                                <sc-if value="{{ fr.d.borrable }}"><button class="btn btn-ghost" onClick="{{ fr.pedirBorrar }}" style="color:var(--ds-danger-fg)">Eliminar definitivamente</button></sc-if>
+                              </div>
+                            </div>
+                          </sc-if>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </div>
+                <sc-if value="{{ fr.confirmOpen }}">
+                  <div class="scrim" onClick="{{ fr.cerrar }}" style="z-index:10"></div>
+                  <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none">
+                    <div class="overlay dialog" style="pointer-events:auto">
+                      <div class="dh"><span style="font:600 18px/26px var(--font-sans)">¿Eliminar {{ fr.d.f }} para siempre?</span><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Es un borrador que nunca se envió. No queda en la traza ni se puede restaurar.</span></div>
+                      <div class="actions"><button class="btn btn-secondary" onClick="{{ fr.cerrar }}">Cancelar</button><button class="btn btn-destructive" onClick="{{ fr.borrar }}">Eliminar</button></div>
+                    </div>
+                  </div>
+                </sc-if>
+              </sc-if>
+
+              <sc-if value="{{ fr.hayToast }}"><div style="position:absolute;left:16px;right:16px;bottom:{{ fr.toastBot }};z-index:30;display:flex;justify-content:center"><div class="toast">{{ fr.toast }}<sc-if value="{{ fr.hayDeshacer }}"><button class="act" onClick="{{ fr.deshacer }}">Deshacer</button></sc-if></div></div></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const Q = [
+  { f: 'CPQ-2026-014', c: 'Logística Andes SpA', n: 'Guardias Planta Norte', v: '$ 3.893.127', m: '12,0 %', e: 'Borrador', ecls: 'badge b-neutral', fl: ['req'], req: 'Mutual adicional sin confirmar', inst: 'Planta Norte', vence: '—', upd: '03-11-2026', enviada: false },
+  { f: 'CPQ-2026-013', c: 'Inmobiliaria Cordillera', n: 'Edificio Alto Lyon', v: '$ 5.214.800', m: '14,2 %', e: 'Enviada', ecls: 'badge b-info', fl: ['vig', 'v7'], inst: 'Torre A · Torre B', vence: '08-11-2026', upd: '29-10-2026', enviada: true },
+  { f: 'CPQ-2026-012', c: 'Clínica Bío Bío', n: 'Urgencias 24/7', v: '$ 8.940.300', m: '16,1 %', e: 'Aceptada', ecls: 'badge b-success', fl: [], inst: 'Sede Concepción', vence: '—', upd: '27-10-2026', enviada: true },
+  { f: 'CPQ-2026-011', c: 'Puerto Seco Talca', n: 'Bodega 3', v: '$ 2.630.000', m: '8,4 %', e: 'Enviada', ecls: 'badge b-info', fl: ['vig', 'bajo'], inst: 'Bodega 3', vence: '20-11-2026', upd: '24-10-2026', enviada: true },
+  { f: 'CPQ-2026-010', c: 'Colegio Los Robles', n: 'Portería y rondas', v: '—', m: '—', e: 'Borrador', ecls: 'badge b-neutral', fl: ['req'], req: 'Falta el sueldo de Conserje', inst: 'Sede Talca', vence: '—', upd: '22-10-2026', enviada: false },
+  { f: 'CPQ-2026-009', c: 'Retail Sur', n: 'Mall Temuco', v: '$ 6.120.450', m: '11,3 %', e: 'Rechazada', ecls: 'badge b-danger', fl: [], inst: 'Mall Temuco', vence: '—', upd: '18-10-2026', enviada: true },
+  { f: 'CPQ-2026-007', c: 'Agrícola Maule', n: 'Packing temporada', v: '$ 1.980.000', m: '13,0 %', e: 'En aprobación', ecls: 'badge b-warning', fl: ['vig', 'v7'], inst: 'Packing San Clemente', vence: '06-11-2026', upd: '15-10-2026', enviada: false },
+  { f: 'CPQ-2026-004', c: 'Transportes Lircay', n: 'Patio de buses', v: '$ 3.410.000', m: '12,5 %', e: 'Vencida', ecls: 'badge b-neutral', fl: [], inst: 'Patio Lircay', vence: '30-09-2026', upd: '30-09-2026', enviada: true },
+  { f: 'CPQ-2026-002', c: 'Constructora Ñuble', n: 'Obra Chillán', v: '—', m: '—', e: 'Borrador', ecls: 'badge b-neutral', fl: [], inst: 'Obra Chillán', vence: '—', upd: '12-09-2026', enviada: false }
+];
+const CHIPS = [['vig', 'Vigente'], ['v7', 'Vence en 7 días'], ['bajo', 'Bajo margen'], ['req', 'Con requisitos pendientes']];
+const ARCH0 = { 'CPQ-2026-004': '01-10-2026', 'CPQ-2026-002': '15-09-2026' };
+const DIMS = { phone: [375, 812], tablet: [1024, 768], desktop: [1280, 800] };
+const SECS = [
+  { t: '1 · Lista', frames: [['1a', 'phone', 'Abiertas', {}], ['1b', 'tablet', 'Filtro «Con requisitos pendientes»', { filtros: ['req'], sel: 'CPQ-2026-010' }], ['1c', 'desktop', 'Abiertas', {}]] },
+  { t: '2 · Archivar y restaurar', frames: [['2a', 'desktop', 'Acción de fila «Archivar»', { menu: 'CPQ-2026-009', sel: 'CPQ-2026-009' }], ['2b', 'desktop', 'Vista «Archivadas»', { view: 'arch', sel: 'CPQ-2026-002' }], ['2c', 'phone', 'Vista «Archivadas»', { view: 'arch' }]] },
+  { t: '3 · Borrar definitivamente y vacío', frames: [['3a', 'desktop', 'Confirmación (borrador nunca enviado)', { view: 'arch', sel: 'CPQ-2026-002', confirm: true }], ['3b', 'phone', 'Vacío', { empty: true }], ['3c', 'desktop', 'Vacío', { empty: true }]] }
+];
+class Component extends DCLogic {
+  state = (() => {
+    const fs = {};
+    SECS.forEach(s => s.frames.forEach(([id, , , o]) => { fs[id] = { view: 'abiertas', filtros: [], sel: 'CPQ-2026-014', menu: null, confirm: false, arch: { ...ARCH0 }, empty: false, toast: null, undo: null, ...o }; }));
+    return { fs };
+  })();
+  up(id, patch) { this.setState(st => ({ fs: { ...st.fs, [id]: { ...st.fs[id], ...(typeof patch === 'function' ? patch(st.fs[id]) : patch) } } })); }
+  toast(id, t, undo) { this.up(id, { toast: t, undo }); clearTimeout(this['_t' + id]); this['_t' + id] = setTimeout(() => this.up(id, { toast: null, undo: null }), 3500); }
+  archive(id, f) { this.up(id, s => ({ arch: { ...s.arch, [f]: '03-11-2026' }, menu: null })); this.toast(id, f + ' archivada', f); }
+  restore(id, f) { this.up(id, s => { const a = { ...s.arch }; delete a[f]; return { arch: a }; }); this.toast(id, f + ' restaurada'); }
+  renderVals() {
+    const secciones = SECS.map(sec => ({ t: sec.t, frames: sec.frames.map(([id, vp, cap]) => {
+      const s = this.state.fs[id];
+      const [w, h] = DIMS[vp];
+      const all = s.empty ? [] : Q.filter(q => !(s.del || []).includes(q.f));
+      const abiertasL = all.filter(q => !s.arch[q.f]), archL = all.filter(q => s.arch[q.f]);
+      let list = s.view === 'arch' ? archL : abiertasL;
+      if (s.view !== 'arch' && s.filtros.length) list = list.filter(q => s.filtros.every(k => q.fl.includes(k)));
+      const rows = list.map(q => ({ ...q, hayReq: !!q.req && !s.arch[q.f], archivada: !!s.arch[q.f], abierta: !s.arch[q.f],
+        selCls: 'selrow' + (s.sel === q.f ? ' on' : ''), sel: () => this.up(id, { sel: q.f, menu: null }),
+        menu: e => { e && e.stopPropagation && e.stopPropagation(); this.up(id, { menu: s.menu === q.f ? null : q.f, sel: q.f }); }, menuOpen: s.menu === q.f && vp !== 'phone',
+        restaurar: e => { e && e.stopPropagation && e.stopPropagation(); this.restore(id, q.f); } }));
+      const dq = list.find(q => q.f === s.sel) || list[0];
+      const d = dq ? { ...dq, hayReq: !!dq.req && !s.arch[dq.f], archivada: !!s.arch[dq.f], abierta: !s.arch[dq.f], archF: s.arch[dq.f] || '', borrable: !!s.arch[dq.f] && !dq.enviada } : {};
+      const chips = CHIPS.map(([k, t]) => ({ t, n: abiertasL.filter(q => q.fl.includes(k)).length, cls: 'chip toggle' + (s.filtros.includes(k) ? ' on' : ''),
+        tog: () => this.up(id, st => ({ filtros: st.filtros.includes(k) ? st.filtros.filter(x => x !== k) : [...st.filtros, k] })) }));
+      const mq = Q.find(q => q.f === s.menu);
+      return {
+        id, cap, w, h, dev: vp, rad: vp === 'phone' ? '44px' : '12px', isPhone: vp === 'phone', wide: vp !== 'phone', isTab: vp === 'tablet', isDesk: vp === 'desktop',
+        gut: vp === 'tablet' ? '24px' : '32px', split: vp === 'tablet' ? 'minmax(0,1fr) minmax(0,1fr)' : '440px minmax(0,1fr)',
+        segA: s.view !== 'arch' ? 'on' : '', segR: s.view === 'arch' ? 'on' : '', verA: () => this.up(id, { view: 'abiertas', menu: null }), verR: () => this.up(id, { view: 'arch', menu: null, sel: archL[0] && archL[0].f }),
+        nA: abiertasL.length, nR: archL.length, abiertas: s.view !== 'arch' && !s.empty, chips, rows,
+        hayRows: rows.length > 0, vacioTotal: all.length === 0, conDatos: all.length > 0,
+        vacioFiltro: all.length > 0 && rows.length === 0, vacioTxt: s.view === 'arch' ? 'No hay cotizaciones archivadas' : 'Sin cotizaciones con estos filtros',
+        limpiar: () => this.up(id, { filtros: [], view: 'abiertas' }), nueva: () => this.toast(id, 'Abre la cotización rápida'),
+        haySel: !!dq, d,
+        menuOpen: !!mq && vp === 'phone', menuF: mq ? mq.f : '', menuN: mq ? mq.n : '',
+        cerrar: () => this.up(id, { menu: null, confirm: false }),
+        archivar: e => { e && e.stopPropagation && e.stopPropagation(); if (s.menu) this.archive(id, s.menu); },
+        archivarSel: () => dq && this.archive(id, dq.f), restaurarSel: () => dq && this.restore(id, dq.f),
+        pedirBorrar: () => this.up(id, { confirm: true }), confirmOpen: !!s.confirm && !!dq,
+        borrar: () => { this.up(id, st => { const a = { ...st.arch }; delete a[dq.f]; return { confirm: false, arch: a, del: [...(st.del || []), dq.f], sel: null }; }); this.toast(id, dq.f + ' eliminada'); },
+        hayToast: !!s.toast, toast: s.toast, hayDeshacer: !!s.undo, deshacer: () => { const f = s.undo; this.up(id, st => { const a = { ...st.arch }; delete a[f]; return { arch: a, toast: null, undo: null }; }); },
+        toastBot: vp === 'phone' ? '100px' : '24px'
+      };
+    }) }));
+    return { secciones };
+  }
+}
+</script>
+</body>
+</html>

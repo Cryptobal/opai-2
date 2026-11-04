@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ navActive }}" title="Configuración" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 4 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<nav style="width:220px;flex:none;border-right:1px solid var(--ds-border);padding:24px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto" aria-label="Secciones de configuración">
+<span class="t-caption" style="padding:0 8px 8px">Configuración</span>
+<sc-for list="{{ cfgNav }}" as="n" hint-placeholder-count="8"><a href="#" class="{{ n.cls }}"><span class="ic {{ n.icon }}" aria-hidden="true"></span>{{ n.label }}</a></sc-for>
+</nav>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0;z-index:3"><a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>{{ backLabel }}</a></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}">
+<a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>{{ backLabel }}</a>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ head.eyebrow }}" title="{{ head.title }}" subtitle="{{ head.sub }}" badge="{{ head.badge }}" hint-size="100%,80px">
+<sc-if value="{{ head.showBtn }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="{{ head.btnIcon }}" on-click="{{ head.onBtn }}" hint-size="150px,40px">{{ head.btn }}</x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-fill);font:400 14px/20px var(--font-sans);margin-bottom:16px"><span class="ic sm i-eye" aria-hidden="true" style="flex:none;margin-top:2px"></span><span>Solo lectura en el teléfono. Edita desde un iPad o un computador.</span></div>
+</sc-if>
+<sc-if value="{{ showComTabs }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ comTabs }}" value="seg" hint-size="100%,44px"></x-import>
+<div style="height:20px"></div>
+</sc-if>
+<sc-if value="{{ isPlanes }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ planCols }}" rows="{{ planRows }}" cards="{{ true }}" to-card="{{ planCard }}" hint-size="100%,300px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ planCols }}" rows="{{ planRows }}" on-row-click="{{ noop }}" hint-size="100%,260px"></x-import>
+</sc-if>
+<p class="t-caption" style="margin:12px 0 0;text-wrap:pretty">Un plan por disparador queda por defecto. Desactivar un plan no corta los seguimientos en curso: terminan con su versión.</p>
+</sc-if>
+<sc-if value="{{ isEditor }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<fieldset class="pg-fieldset" style="display:flex;flex-direction:column;gap:14px">
+<legend>Plan</legend>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="Post-cotización" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Disparador" value="cot" options="{{ trigOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Desde dónde se cuenta" value="env" options="{{ fromOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-body-sm" style="font-weight:500">Cómo se cuentan los días</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ dayOpts }}" value="hab" label="Cómo se cuentan los días" hint-size="220px,36px"></x-import></div>
+<a href="#" style="font:500 14px/20px var(--font-sans);text-decoration:none;align-self:flex-end;min-height:36px;display:flex;align-items:center">Calendario hábil del núcleo · 16 feriados 2026</a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Hora por defecto" value="09:00" icon="clock" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Ventana de envío" value="08:30–18:30" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Llamadas" value="09:30–18:00" hint="Ventana opcional del canal" disabled="{{ ro }}" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="WhatsApp" value="09:00–20:00" hint="Ventana opcional del canal" disabled="{{ ro }}" hint-size="100%,90px"></x-import>
+</div>
+</fieldset>
+<div style="display:grid;grid-template-columns:{{ stepsGrid }};gap:16px;align-items:start">
+<fieldset class="pg-fieldset" style="display:flex;flex-direction:column;gap:0;min-width:0">
+<legend>Pasos</legend>
+<sc-for list="{{ editSteps }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:10px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center">
+<span class="ic sm i-grip" aria-hidden="true" style="color:var(--ds-fg-subtle);cursor:grab"></span>
+<span style="width:24px;height:24px;border-radius:999px;flex:none;display:flex;align-items:center;justify-content:center;font:600 12px/16px var(--font-sans);background:var(--ds-fill)">{{ s.n }}</span>
+<span class="ic sm {{ s.icon }}" aria-hidden="true" style="color:var(--ds-fg-muted)"></span>
+<span style="font:500 14px/20px var(--font-sans);flex:1;min-width:0">{{ s.dia }} · {{ s.hora }} · {{ s.chLabel }}</span>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="up" label="Subir paso" hint-size="44px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="down" label="Bajar paso" hint-size="44px,44px"></x-import>
+</sc-if>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding-left:32px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Quién lo ejecuta" value="{{ s.quien }}" options="{{ quienOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plantilla" value="{{ s.tpl }}" options="{{ s.tplOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Mover a etapa" value="{{ s.etapa }}" options="{{ etapaOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+</div>
+<sc-if value="{{ s.alert }}" hint-placeholder-val="{{ false }}">
+<div style="margin-left:32px;display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:10px;background:{{ s.alertBg }};color:{{ s.alertFg }};font:400 14px/20px var(--font-sans)">
+<span style="display:flex;gap:8px"><span class="ic sm {{ s.alertIcon }}" aria-hidden="true" style="flex:none;margin-top:2px"></span><span>{{ s.alert }}</span></span>
+<sc-if value="{{ s.audit }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="padding-left:24px;color:inherit">{{ s.audit }}</span></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<div style="padding-top:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" disabled="{{ ro }}" hint-size="150px,40px">Agregar paso</x-import></div>
+</fieldset>
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Vista previa de fechas</span>
+<span class="t-body-sm" style="text-wrap:pretty">Si envías hoy, jueves 29-10-2026, los pasos caen:</span>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ previewDates }}" as="p" hint-placeholder-count="4"><div class="pg-kv"><span class="l" style="display:flex;gap:8px;align-items:center"><span class="ic sm {{ p.icon }}" aria-hidden="true"></span>{{ p.l }}</span><span class="v t-numeric">{{ p.v }}</span></div></sc-for>
+</div>
+<span class="t-caption" style="text-wrap:pretty">Salta sábados, domingos y el feriado del 31-10 (Día de las Iglesias Evangélicas).</span>
+</section>
+</div>
+<fieldset class="pg-fieldset" style="display:flex;flex-direction:column;gap:12px">
+<legend>Quién ejecuta el paso 4</legend>
+<div role="radiogroup" aria-label="Quién ejecuta el paso 4" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px">
+<sc-for list="{{ execOpts }}" as="r" hint-placeholder-count="4">
+<div role="radio" aria-checked="{{ r.on }}" aria-disabled="{{ r.disabled }}" style="display:flex;gap:12px;padding:14px;border-radius:16px;border:1px solid {{ r.border }};background:{{ r.bg }};opacity:{{ r.op }};align-items:flex-start;cursor:pointer">
+<span aria-hidden="true" style="width:20px;height:20px;border-radius:999px;flex:none;box-sizing:border-box;border:{{ r.dot }};background:var(--ds-surface)"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="font-weight:600">{{ r.label }}</span><span class="t-caption" style="text-wrap:pretty">{{ r.desc }}</span></span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ showExecPreview }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);font:400 14px/20px var(--font-sans)">
+<span style="display:flex;gap:8px"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span><b style="font-weight:600">Este paso sale sin que una persona lo revise.</b> OPAI crea la propuesta de cierre a las 09:00 del día hábil 15 y la deja en «Esperan tu aprobación».</span></span>
+<span class="t-caption" style="padding-left:24px;color:inherit">{{ auditLine }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ noPermNote }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="ic sm i-lock" aria-hidden="true"></span>Lo cambian el owner, un administrador o un rol con permiso para configurar Comercial.</span>
+</sc-if>
+</fieldset>
+<fieldset class="pg-fieldset" style="display:flex;flex-direction:column;gap:12px">
+<legend>Cuando el cliente responde</legend>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Qué hace el seguimiento" value="det" options="{{ respOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Etapa destino" value="s5" options="{{ etapaOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Recordar elegir el próximo paso tras" value="1 día hábil" disabled="{{ ro }}" hint-size="100%,70px"></x-import>
+</div>
+</fieldset>
+<fieldset class="pg-fieldset" style="display:flex;flex-direction:column;gap:12px">
+<legend>Al terminar sin respuesta</legend>
+<div role="radiogroup" aria-label="Al terminar sin respuesta" style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ endOpts }}" as="r" hint-placeholder-count="3">
+<div role="radio" aria-checked="{{ r.on }}" tabindex="0" onClick="{{ r.select }}" style="display:flex;gap:12px;padding:14px;border-radius:16px;border:1px solid {{ r.border }};background:{{ r.bg }};opacity:{{ r.op }};align-items:flex-start;cursor:pointer">
+<span aria-hidden="true" style="width:20px;height:20px;border-radius:999px;flex:none;box-sizing:border-box;border:{{ r.dot }};background:var(--ds-surface)"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="font-weight:600">{{ r.label }}</span><span class="t-caption" style="text-wrap:pretty">{{ r.desc }}</span></span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ showAutoClose }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);font:400 14px/20px var(--font-sans)">
+<span style="display:flex;gap:8px"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span><b style="font-weight:600">OPAI cerrará sin confirmación de una persona.</b> Con la regla actual se cerrarían hoy 2 negocios: Feria Espacio Riesco y Condominio Lomas de Chicureo.</span></span>
+<span class="t-caption" style="padding-left:24px;color:inherit">Desactivado por Carlos Irigoyen · 12-10-2026 · plan v3</span>
+</div>
+</sc-if>
+<div style="max-width:320px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Nunca cerrar solo desde la etapa" value="s5" options="{{ etapaOpts }}" disabled="{{ ro }}" hint-size="100%,70px"></x-import></div>
+</fieldset>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ barSummary }}" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" on-click="{{ openSave }}" hint-size="150px,40px">Guardar versión 5</x-import>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isVariantes }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end"><div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-label m0">Evento · Seguimiento · correo al cliente</h2><span class="t-caption">Cada paso de correo usa una variante. Sin etapas marcadas, aplica en todas.</span></div></div>
+<sc-for list="{{ variants }}" as="v" hint-placeholder-count="4">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:600 15px/22px var(--font-sans)">{{ v.name }}</span><span class="t-caption">Usada en: {{ v.uso }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="90px,40px">Editar</x-import>
+</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-body-sm muted">Aplica en las etapas</span>
+<sc-for list="{{ v.chips }}" as="c" hint-placeholder-count="2"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" value="{{ c }}" on-remove="{{ noop }}" hint-size="140px,32px"></x-import></sc-for>
+<sc-if value="{{ v.all }}" hint-placeholder-val="{{ false }}"><span class="t-body-sm">Todas</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" hint-size="100px,32px">Etapa</x-import>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEtiquetas }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:24px">
+<sc-for list="{{ tagGroups }}" as="g" hint-placeholder-count="4">
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap"><span style="display:flex;flex-direction:column;gap:2px"><h2 class="t-label m0">{{ g.name }}</h2><span class="t-caption">{{ g.desc }}</span></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="110px,40px">Agregar</x-import></div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tagCols }}" rows="{{ g.rows }}" cards="{{ true }}" to-card="{{ tagCard }}" hint-size="100%,200px"></x-import></div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tagCols }}" rows="{{ g.rows }}" compact="{{ true }}" hint-size="100%,200px"></x-import></sc-if>
+</section>
+</sc-for>
+<p class="t-caption m0" style="text-wrap:pretty">Una etiqueta en uso no se elimina: se desactiva y deja de ofrecerse. Las fichas que ya la tienen la conservan.</p>
+</div>
+</sc-if>
+</x-import>
+</div>
+</div>
+</x-import>
+<sc-if value="{{ saveOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Guardar la versión 5" description="Hay 12 seguimientos en curso con la versión 4. ¿Pasarlos a la versión 5?" actions="{{ saveActions }}" on-close="{{ closeSave }}" hint-size="480px,420px">
+<div style="display:flex;flex-direction:column;gap:8px;padding-bottom:4px">
+<span class="t-label">Fechas que cambian</span>
+<sc-for list="{{ changes }}" as="c" hint-placeholder-count="3"><div class="pg-kv"><span class="l">{{ c.l }}</span><span class="v t-numeric">{{ c.v }}</span></div></sc-for>
+<span class="t-caption">Y 9 seguimientos más. Si eliges No, siguen con la versión 4 hasta terminar.</span>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;planes&quot;,&quot;editor&quot;,&quot;variantes&quot;,&quot;etiquetas&quot;],&quot;default&quot;:&quot;planes&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;guardar&quot;,&quot;sinAgente&quot;,&quot;sinPermiso&quot;,&quot;planBasico&quot;,&quot;autoCierre&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { end: null, save: null };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.CRM.steps && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "planes";
+    const estado = this.props.estado ?? "ok";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, isTablet: device === "tablet", isDesktop: device === "desktop", isPlanes: screen === "planes", isEditor: screen === "editor", isVariantes: screen === "variantes", isEtiquetas: screen === "etiquetas", head: {}, showComTabs: screen === "planes" || screen === "editor" };
+    if (!C || !NS.Badge) return base;
+    const ro = isPhone || estado === "sinPermiso";
+    const radio = (on, disabled) => ({ border: on ? "var(--ds-accent)" : "var(--ds-border)", bg: on ? "var(--ds-accent-muted)" : "var(--ds-surface)", dot: on ? "6px solid var(--ds-accent)" : "1.5px solid var(--ds-border-strong)", op: disabled ? "0.45" : "1" });
+    const sw = (on, dis) => h(NS.Switch, { checked: on, disabled: dis || ro });
+    const navSel = { planes: "Comercial", editor: "Comercial", variantes: "Comunicaciones", etiquetas: "Etiquetas" }[screen];
+    const planRows = [
+      { id: 1, name: "Post-cotización", trig: "Cuando se envía una cotización", def: true, on: true, v: "v4", curso: 12 },
+      { id: 2, name: "Entrada a Propuesta", trig: "Cuando entra a Propuesta enviada", def: true, on: true, v: "v2", curso: 3 },
+      { id: 3, name: "Renovación", trig: "A mano", def: false, on: true, v: "v2", curso: 2 },
+      { id: 4, name: "Reactivar perdidos", trig: "A mano", def: false, on: false, v: "v1", curso: 0 },
+    ];
+    const heads = {
+      planes: { eyebrow: "Configuración", title: "Comercial", sub: "Embudo, catálogos y planes de seguimiento de Atlas Seguridad SpA.", btn: "Nuevo plan", btnIcon: "plus", showBtn: !isPhone },
+      editor: { eyebrow: "Comercial · Seguimiento", title: "Post-cotización", sub: "Versión 4 en uso · 12 seguimientos en curso · editada por Carlos Irigoyen el 28-10-2026", badge: h(NS.Badge, { tone: "success" }, "Activo"), showBtn: false },
+      variantes: { eyebrow: "Configuración · Comunicaciones", title: "Variantes del correo de seguimiento", sub: "La edición de cada variante usa el editor de plantillas de Comunicaciones.", btn: "Nueva variante", btnIcon: "plus", showBtn: !isPhone },
+      etiquetas: { eyebrow: "Configuración", title: "Etiquetas", sub: "Grupos y valores que se usan en cuentas, contactos, instalaciones y negocios.", btn: "Nuevo grupo", btnIcon: "plus", showBtn: !isPhone },
+    };
+    const editSteps = C.plan.map((p, i) => {
+      const q = ["agcon", "per", "per", "auto"][i];
+      let alert = null, audit = null, alertBg = "var(--ds-info-muted)", alertFg = "var(--ds-info-fg)", alertIcon = "i-bot";
+      if (i === 0) { alert = estado === "sinAgente" ? "Sin agente conectado: este paso pasará a una persona al vencer." : "El agente prepara el borrador y espera tu aprobación antes de enviar."; if (estado === "sinAgente") { alertBg = "var(--ds-warning-muted)"; alertFg = "var(--ds-warning-fg)"; alertIcon = "i-alert"; } }
+      if (i === 3) { alert = "OPAI automático: crea la propuesta de cierre sin que una persona lo revise."; audit = "Activado por Carlos Irigoyen · 28-10-2026 · plan v4"; alertBg = "var(--ds-warning-muted)"; alertFg = "var(--ds-warning-fg)"; alertIcon = "i-alert"; }
+      return { ...p, icon: "i-" + C.CH[p.ch].icon, chLabel: C.CH[p.ch].label, quien: q, tpl: ["s1", "wa", "call", "close"][i], tplOpts: [[{ value: "s1", label: "Seguimiento 1" }], [{ value: "wa", label: "Seguimiento WhatsApp" }], [{ value: "call", label: "Guion llamada de cierre" }], [{ value: "close", label: "Proponer perdido" }]][i], etapa: i === 2 ? "s5" : "none", alert, audit, alertBg, alertFg, alertIcon };
+    });
+    const plan = estado === "planBasico";
+    const execOpts = [
+      { label: "Persona", desc: "Por defecto. La persona recibe el borrador listo." },
+      { label: "OPAI automático", desc: plan ? "Disponible en tu plan de OPAI" : estado === "sinPermiso" ? "Deshabilitado: no tienes permiso para configurar Comercial" : "Lo activan el owner, un administrador o quien configure Comercial", on: !plan, disabled: plan || estado === "sinPermiso" },
+      { label: "Agente con aprobación", desc: "El agente prepara; una persona aprueba", disabled: estado === "sinPermiso" },
+      { label: "Agente sin aprobación", desc: "Solo lo activa el owner, con confirmación", disabled: true },
+    ].map((r) => ({ ...r, ...radio(!!r.on, r.disabled), disabled: !!r.disabled }));
+    if (plan) execOpts[0] = { ...execOpts[0], ...radio(true, false) };
+    const end = this.state.end ?? (estado === "autoCierre" ? "auto" : "prop");
+    const endOpts = [
+      { id: "prop", label: "Proponer el cierre", desc: "Por defecto. Aparece en «Esperan tu aprobación» y confirma una persona." },
+      { id: "auto", label: "Aplicar el cierre propuesto automáticamente", desc: estado === "sinPermiso" ? "Deshabilitado: no tienes permiso para configurar Comercial" : "OPAI cierra como perdido y avisa con «Reabrir»", disabled: estado === "sinPermiso" },
+      { id: "avisar", label: "Solo avisar", desc: "Notifica al responsable y no propone nada" },
+    ].map((r) => ({ ...r, ...radio(r.id === end, r.disabled), select: () => !r.disabled && !ro && this.setState({ end: r.id }) }));
+    const save = this.state.save ?? (estado === "guardar");
+    const btn = (p, t) => h(NS.Button, p, t);
+    const tagRows = (k, items) => items.map((it, i) => ({ id: k + i, name: it[0], uso: it[1], on: it[2] !== false }));
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups, noop: () => {}, ro,
+      navActive: isPhone || device === "tablet" ? "mas" : "cfg",
+      backLabel: screen === "editor" ? "Seguimiento" : "Configuración",
+      cfgNav: [["General", "i-grid"], ["Empresa", "i-landmark"], ["Usuarios y permisos", "i-user-check"], ["Operaciones", "i-building"], ["Comercial", "i-briefcase"], ["Etiquetas", "i-tag"], ["Comunicaciones", "i-mail"], ["Facturación", "i-wallet"], ["Integraciones", "i-swap"]].map(([label, icon]) => ({ label, icon, cls: label === navSel ? "nav-item on" : "nav-item" })),
+      head: heads[screen],
+      comTabs: [{ id: "emb", label: "Embudo de etapas", count: 8 }, { id: "cat", label: "Catálogos", count: 3 }, { id: "seg", label: "Seguimiento", count: 4 }],
+      planCols: [
+        { key: "name", label: "Plan", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.name), h("span", { className: "t-caption" }, r.trig)) },
+        { key: "def", label: "Por defecto", render: (r) => (r.def ? h(NS.Badge, { tone: "accent" }, "Por defecto") : h("span", { className: "subtle" }, "—")) },
+        { key: "v", label: "Versión", render: (r) => h("span", { className: "t-mono" }, r.v) },
+        { key: "curso", label: "En curso", align: "right", render: (r) => h("span", { className: "t-numeric" }, String(r.curso)) },
+        { key: "on", label: "Activo", align: "right", width: 88, render: (r) => sw(r.on) },
+      ],
+      planRows,
+      planCard: (r) => ({ title: r.name, subtitle: r.trig + " · " + r.v + " · " + r.curso + " en curso", badge: r.def ? { tone: "accent", label: "Por defecto" } : r.on ? null : { tone: "neutral", label: "Inactivo" } }),
+      trigOpts: [{ value: "cot", label: "Cuando se envía una cotización" }, { value: "prop", label: "Cuando entra a Propuesta enviada" }, { value: "mano", label: "A mano" }],
+      fromOpts: [{ value: "env", label: "Envío de la cotización" }, { value: "etapa", label: "Entrada a la etapa" }],
+      dayOpts: [{ value: "hab", label: "Hábiles" }, { value: "cor", label: "Corridos" }],
+      stepsGrid: device === "desktop" ? "minmax(0,1fr) 300px" : "minmax(0,1fr)",
+      editSteps,
+      quienOpts: [{ value: "per", label: "Persona" }, { value: "auto", label: "OPAI automático" }, { value: "agcon", label: "Agente con aprobación" }, { value: "agsin", label: "Agente sin aprobación" }],
+      etapaOpts: [{ value: "none", label: "No mover" }, ...C.stages.slice(0, 6).map((s) => ({ value: s.id, label: s.name }))],
+      previewDates: C.plan.map((p) => ({ icon: "i-" + C.CH[p.ch].icon, l: "Paso " + p.n + " · " + p.dia, v: p.fecha + " · " + p.hora })),
+      execOpts,
+      showExecPreview: !plan,
+      auditLine: estado === "sinPermiso" ? "Activado por Carlos Irigoyen · 28-10-2026 · plan v4 · no puedes cambiarlo" : "Activado por Carlos Irigoyen · 28-10-2026 · plan v4",
+      noPermNote: estado === "sinPermiso",
+      respOpts: [{ value: "det", label: "Detener y mover a etapa" }, { value: "pau", label: "Pausar hasta una fecha" }, { value: "rei", label: "Reiniciar desde un paso" }],
+      endOpts, showAutoClose: end === "auto",
+      barSummary: [{ label: "Cambios", value: "2" }, { label: "Versión", value: "4 → 5" }],
+      saveOpen: save, openSave: () => this.setState({ save: true }), closeSave: () => this.setState({ save: false }),
+      saveActions: [btn({ key: "n", variant: "secondary", onClick: () => this.setState({ save: false }) }, "No"), btn({ key: "s", onClick: () => this.setState({ save: false }) }, "Sí, pasarlos")],
+      changes: [{ l: "Clínica Los Leones · paso 3", v: "jue 05-11 → vie 06-11" }, { l: "Faena Til Til · paso 4", v: "vie 30-10 → lun 02-11" }, { l: "Bodega Pudahuel · paso 2", v: "lun 09-11 → mar 10-11" }],
+      variants: [
+        { name: "Seguimiento 1", uso: "Post-cotización paso 1", chips: ["Propuesta enviada"] },
+        { name: "Seguimiento 3", uso: "Entrada a Propuesta paso 3", chips: ["Propuesta enviada", "Visita técnica"] },
+        { name: "Seguimiento en Negociación", uso: "sugerida al ejecutar un paso", chips: ["Negociación"] },
+        { name: "Renovar oferta", uso: "Renovación paso 1", chips: [], all: true },
+      ],
+      tagCols: [
+        { key: "name", label: "Valor", render: (r) => h("span", { style: { display: "flex", gap: 8, alignItems: "center", opacity: r.on ? 1 : 0.45 } }, h("span", { className: "ic sm i-tag", "aria-hidden": true }), r.name) },
+        { key: "uso", label: "En uso", align: "right", render: (r) => h("span", { className: "t-numeric" }, String(r.uso)) },
+        { key: "ren", label: "", align: "right", width: 120, render: () => h(NS.Button, { variant: "ghost" }, "Renombrar") },
+        { key: "on", label: "Activa", align: "right", width: 88, render: (r) => sw(r.on) },
+      ],
+      tagCard: (r) => ({ title: r.name, subtitle: r.uso + " en uso" + (r.on ? "" : " · desactivada"), trailing: sw(r.on) }),
+      tagGroups: [
+        { name: "Rubro", desc: "Un valor por ficha", rows: tagRows("r", [["Logística", 9], ["Retail", 6], ["Inmobiliario", 5], ["Salud", 4], ["Educación", 3], ["Construcción", 2]]) },
+        { name: "Segmento", desc: "Un valor por ficha", rows: tagRows("s", [["Corporativo", 14], ["Pyme", 11], ["Sector público", 3]]) },
+        { name: "Tamaño", desc: "Por dotación contratada", rows: tagRows("t", [["Grande · 20 o más puestos", 5], ["Mediano · 5 a 19", 12], ["Pequeño · menos de 5", 11]]) },
+        { name: "Libres", desc: "Varias por ficha; se crean al etiquetar si tienes permiso", rows: tagRows("l", [["Licitación pública", 6], ["Cliente estratégico", 4], ["Referido por cliente", 7], ["Riesgo de fuga", 2, false]]) },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

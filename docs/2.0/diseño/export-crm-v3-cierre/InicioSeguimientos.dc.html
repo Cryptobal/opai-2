@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="ini" title="Inicio" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" notifications="{{ 4 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="jueves 29-10-2026" title="Hola, Camila" subtitle="Esto es lo que te toca hoy en Comercial." hint-size="100%,80px"></x-import>
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;align-items:start">
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+<h2 class="t-subheading m0">Mis seguimientos de hoy</h2>
+<a href="Pendientes.dc.html" style="font:500 14px/20px var(--font-sans);text-decoration:none;min-height:44px;display:flex;align-items:center">Ver todos</a>
+</div>
+<sc-if value="{{ hasSeg }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<sc-for list="{{ counts }}" as="c" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:10px;background:var(--ds-fill)">
+<span class="t-caption">{{ c.label }}</span>
+<span class="t-numeric" style="font:600 22px/28px var(--font-sans);color:{{ c.color }}">{{ c.value }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;margin:0 -16px -16px">
+<sc-for list="{{ top }}" as="it" hint-placeholder-count="3">
+<a href="Pendientes.dc.html" style="display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--ds-border);text-decoration:none;color:var(--ds-fg);min-height:44px">
+<span style="width:32px;height:32px;border-radius:10px;background:var(--ds-fill);color:var(--ds-fg-muted);display:flex;align-items:center;justify-content:center;flex:none"><span class="ic sm {{ it.icon }}" aria-hidden="true"></span></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="font:500 14px/20px var(--font-sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.name }}</span>
+<span style="font:500 13px/18px var(--font-sans);color:{{ it.color }}">{{ it.cuando }}</span>
+</span>
+<span class="ic sm i-chevron-right subtle" aria-hidden="true"></span>
+</a>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ noSeg }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:8px 0 4px">
+<span class="t-body-sm muted">No tienes seguimientos para hoy. Los próximos pasos aparecen aquí el día que tocan.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="180px,40px">Ver negocios abiertos</x-import>
+</div>
+</sc-if>
+</section>
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+<h2 class="t-subheading m0">Mis tareas</h2>
+<a href="MisTareas.dc.html" style="font:500 14px/20px var(--font-sans);text-decoration:none;min-height:44px;display:flex;align-items:center">Ver todas</a>
+</div>
+<div style="display:flex;flex-direction:column;margin:0 -16px -16px">
+<sc-for list="{{ tasks }}" as="t" hint-placeholder-count="4">
+<div style="display:flex;gap:4px;align-items:flex-start;padding:4px 16px 8px 4px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ t.done }}" on-change="{{ t.toggle }}" label="" hint-size="44px,44px"></x-import>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding-top:10px">
+<span style="font:500 14px/20px var(--font-sans);text-decoration:{{ t.strike }}">{{ t.title }}</span>
+<span style="font:500 13px/18px var(--font-sans);color:{{ t.color }}">{{ t.due }} · <span style="color:var(--ds-fg-muted);font-weight:400">{{ t.link }}</span></span>
+</span>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vacio&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { done: {} };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.CRM.steps && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const vacio = !!this.props.vacio;
+    const base = { device, theme, hasSeg: !vacio, noSeg: vacio };
+    if (!C || !C.steps) return base;
+    const g = (id) => C.pend.find((x) => x.id === id).items;
+    const top = [...g("venc"), ...g("hoy")].slice(0, 3).map((it) => ({ name: C.deal(it.folio).name, cuando: it.cuando, icon: "i-" + C.CH[it.ch].icon, color: C.toneFg(it.tone) }));
+    const tasks = [...C.tasks[0].items, ...C.tasks[1].items].map((t) => ({ ...t, done: !!this.state.done[t.id], strike: this.state.done[t.id] ? "line-through" : "none", color: C.toneFg(t.tone), toggle: () => this.setState((s) => ({ done: { ...s.done, [t.id]: !s.done[t.id] } })) }));
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups,
+      user: { name: "Camila Rojas", initials: "CR", role: "Ejecutiva comercial" },
+      gridCols: device === "phone" ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))",
+      counts: [{ label: "Vencidos", value: "2", color: "var(--ds-danger-fg)" }, { label: "Hoy", value: "2", color: "var(--ds-warning-fg)" }, { label: "Detenidos", value: "1", color: "var(--ds-fg)" }],
+      top, tasks,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-100);font-family:var(--font-sans);font-feature-settings:"cv11","ss01";color:var(--ds-fg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content">
+  <div style="display:flex;flex-direction:column;gap:4px"><span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">CPQ v4 · Vigía Sur SpA · <a href="FlujoCompletoCPQ.dc.html">Prototipo navegable</a></span><span style="font:600 28px/34px var(--font-sans);letter-spacing:-.02em">Enviar con vista previa</span><span style="font:400 15px/22px var(--font-sans);color:var(--ds-fg-muted);max-width:880px">Drawer de 560 px en escritorio, hoja completa en el teléfono. Bloqueos con acción en línea, vista previa con máximo visible, formato, destinatarios y canal.</span></div>
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">1 · Con bloqueo de mutual</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+      <div id="1a" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">1a</span><span style="font:500 14px/20px var(--font-sans)">Mutual sin confirmar</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">375</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="phone" step="9" shot="1a" hint-size="375px,812px"></dc-import>
+      </div>
+      <div id="1b" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">1b</span><span style="font:500 14px/20px var(--font-sans)">Mutual sin confirmar</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">1024</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="tablet" step="9" shot="1b" hint-size="1024px,768px"></dc-import>
+      </div>
+      <div id="1c" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">1c</span><span style="font:500 14px/20px var(--font-sans)">Mutual sin confirmar</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">1280</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="desktop" step="9" shot="1c" hint-size="1280px,800px"></dc-import>
+      </div>
+    </div>
+  </section>
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">2 · Estados de la vista previa</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+      <div id="2a" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">2a</span><span style="font:500 14px/20px var(--font-sans)">Generando</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">1280</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="desktop" step="9" preset="enviar-listo" pdf="generando" shot="2a" hint-size="1280px,800px"></dc-import>
+      </div>
+      <div id="2b" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">2b</span><span style="font:500 14px/20px var(--font-sans)">Lento · Reintentar</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">1280</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="desktop" step="9" preset="enviar-listo" pdf="lento" shot="2b" hint-size="1280px,800px"></dc-import>
+      </div>
+      <div id="2c" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">2c</span><span style="font:500 14px/20px var(--font-sans)">Error</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">1280</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="desktop" step="9" preset="enviar-listo" pdf="error" shot="2c" hint-size="1280px,800px"></dc-import>
+      </div>
+      <div id="2d" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">2d</span><span style="font:500 14px/20px var(--font-sans)">Listo para enviar</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">1280</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="desktop" step="9" preset="enviar-listo" shot="2d" hint-size="1280px,800px"></dc-import>
+      </div>
+    </div>
+  </section>
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 18px/26px var(--font-sans)">3 · Modo oscuro</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+      <div id="3a" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">3a</span><span style="font:500 14px/20px var(--font-sans)">Listo</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">375 · oscuro</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="phone" step="9" preset="enviar-listo" theme="dark" shot="3a" hint-size="375px,812px"></dc-import>
+      </div>
+      <div id="3b" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent nodot" style="font-family:var(--font-mono)">3b</span><span style="font:500 14px/20px var(--font-sans)">Listo</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">1280 · oscuro</span></div>
+        <dc-import name="FlujoCompletoCPQ" embed="true" vp="desktop" step="9" preset="enviar-listo" theme="dark" shot="3b" hint-size="1280px,800px"></dc-import>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+</body>
+</html>
