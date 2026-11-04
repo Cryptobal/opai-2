@@ -9,6 +9,9 @@ export const cuentaSchema = z.object({
   moneda: z.string(),
   flujoFilaId: z.string().nullable(),
   activa: z.boolean(),
+  /** Última entrega del banco en línea (Web4Leads) y saldo que informó; null si nunca sincronizó. */
+  ultimaSyncEn: z.string().nullable(),
+  saldoBanco: z.number().int().nullable(),
 });
 
 export const movimientoSchema = z.object({
