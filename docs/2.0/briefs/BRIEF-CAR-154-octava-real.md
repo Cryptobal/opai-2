@@ -12,10 +12,10 @@ Cliente HTTP con `fetch` inyectable; registro único del cedente; token de 6 h c
 ## 4. Arquitectura
 `@opai/integrations/cesion` queda sin base ni `process.env`: recibe dependencias (`integrador`, `cedente`, `almacen`, `ambiente`, `fetch`). `packages/capabilities/src/finanzas/adaptador-cesion*.ts` las arma desde la integración del tenant.
 - **Mapeo de credenciales.** `usuario` = RUT de la empresa integradora que contrató Octava (`INTEGRADOR`); `clave` = su contraseña (`PASSWORDINTEGRADOR`). Reemplaza a `OCTAVA_INTEGRADOR_RUT/PASSWORD` de 1.0: cada empresa trae su contrato con Octava.
-- **Certificado del cedente.** Es el `.pfx` de `dte_emision`; RUT y nombre del titular se leen del propio archivo con `validarCertificadoPfx`. Solo se descifra para el registro inicial; si falta, falla con «falta el certificado digital (.pfx) del cedente».
-- **Sesión.** `PassAccesoApi` y el token se guardan como secretos cifrados de la integración `dte_cesion` (`pass_acceso_api`, `token_sesion`), sin columnas ni migración. No se les guarda sufijo.
+- **Sin registro ni certificado (ajuste 4-nov-2026).** Octava confirmó a Carlos que con el RUT y la contraseña de acceso que ellos entregaron se obtiene el token (6 h) con `ObtenerToken`. OPAI 2 no llama a `RegistraCedente`, no usa el `.pfx` ni guarda `PassAccesoApi`; `usuario` = `RUTACCESOAPI` y `clave` = `PASSWORDACCESOAPI`.
+- **Sesión.** El token se guarda como secreto cifrado de la integración `dte_cesion` (`token_sesion`), sin columnas ni migración y sin sufijo.
 - **Identificador de operación.** Octava no entrega uno: `octava:<ambiente>:<rutEmisor>:<tipo>:<folio>` en `cesiones.operacion_externa_id`, suficiente para `ConsultaEstadoAEC`.
-- **Respuestas.** El string `"NULL"` se trata como ausente; `IdResultadoFE=3` en `CedeDte` (ya cedido) sigue como enviada; en `RegistraCedente` sin `PassAccesoApi` se explica qué falta y no se inventa; `CodigoCesion`: `EOK` → aprobada, vacío o `PEN` → enviada, otro → anulada con glosa.
+- **Respuestas.** El string `"NULL"` se trata como ausente; `IdResultadoFE=3` en `CedeDte` (ya cedido) sigue como enviada; `CodigoCesion`: `EOK` → aprobada, vacío o `PEN` → enviada, otro → anulada con glosa.
 
 ## 5. Archivos
 `packages/integrations/src/cesion/` (`tipos`, `simulado`, `octava-api`, `octava-http`, `octava-cliente`, `octava-sesion`, `octava-estado`, `octava`, `octava-doble`, pruebas y `fixtures/`); `packages/capabilities/src/finanzas/adaptador-cesion.ts` y `adaptador-cesion-octava.ts`; `ventas-cesion-ceder.ts`; `trabajos-cesion.ts`; `catalogo-extra.ts`; `hoja-ceder.tsx`.
@@ -33,7 +33,7 @@ La hoja «Ceder factura» suma correo y dirección del factor.
 Secretos cifrados por tenant, nunca en `process.env`; sin logs de cuerpos ni de credenciales; el trabajo horario captura el fallo de una consulta sin frenar las demás.
 
 ## 10. Casos límite
-Token expirado, `TDUP` con token `"NULL"`, DTE ya cargado (`5`), ya cedido (`3`), RUT del cedente ya registrado sin clave guardada, certificado ausente, datos del deudor o del factor faltantes, respuesta que no es JSON.
+Token expirado, `TDUP` con token `"NULL"`, DTE ya cargado (`5`), ya cedido (`3`), datos del deudor o del factor faltantes, respuesta que no es JSON.
 
 ## 11 a 13. Plan, tests y validación
 Dos commits: cliente y adaptador; integración con capacidades, pantalla y docs. Vitest con `fetch` grabado (cero llamadas reales), almacén de sesión en `capabilities`. Gate: `pnpm typecheck && pnpm lint && pnpm test`.

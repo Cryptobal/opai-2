@@ -20,22 +20,18 @@ async function integracionCesion() {
 }
 
 describe("almacén de sesión Octava (CAR-154)", () => {
-  it("guarda y lee PassAccesoApi y token cifrados; token nulo se lee como ausente", async () => {
+  it("guarda y lee el token cifrado; token nulo se lee como ausente", async () => {
     const { ctx, id } = await integracionCesion();
     const a = almacenSesionOctava(ctx, id);
-    expect(await a.leerPassAcceso()).toBeNull();
     expect(await a.leerToken()).toBeNull();
-    await a.guardarPassAcceso("PASS-1");
     await a.guardarToken({ token: "tok|con|barras", expiraEn: 123456 });
-    expect(await a.leerPassAcceso()).toBe("PASS-1");
     expect(await a.leerToken()).toEqual({ token: "tok|con|barras", expiraEn: 123456 });
     await a.guardarToken(null);
     expect(await a.leerToken()).toBeNull();
   });
 
-  it("no persiste sufijo de PassAccesoApi ni del token (no se filtran por máscara)", async () => {
+  it("no persiste sufijo del token (no se filtran por máscara)", async () => {
     const { ctx, id } = await integracionCesion();
-    expect((await guardarSecreto(ctx, id, "pass_acceso_api", "PASS-ABCD")).sufijo).toBe("");
     expect((await guardarSecreto(ctx, id, "token_sesion", "1|TOKEN-WXYZ")).sufijo).toBe("");
   });
 });

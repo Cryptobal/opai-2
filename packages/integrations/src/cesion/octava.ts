@@ -1,5 +1,5 @@
 // Adaptador de cesión App Octava (CAR-154): flujo portado de OPAI 1.0 (`octava-cesion.ts`).
-// Registro del cedente → token → CargaXmlCesion → CedeDte; el estado lo consulta el trabajo horario.
+// ObtenerToken (RUT + contraseña de acceso) → CargaXmlCesion → CedeDte; el estado lo consulta el trabajo horario.
 import type { OctavaRespuestaBase } from "./octava-api";
 import { clienteOctava } from "./octava-cliente";
 import { operacionOctavaId, estadoDesdeCodigo, leerOperacionOctavaId } from "./octava-estado";
@@ -18,7 +18,7 @@ import type { AdaptadorCesion, PayloadCesion } from "./tipos";
 
 export type DepsAdaptadorOctava = {
   /** null = el tenant no configuró la integración: el adaptador queda no disponible. */
-  integrador: CredencialesOctava | null;
+  acceso: CredencialesOctava | null;
   cedente: CedenteOctava;
   almacen: AlmacenSesionOctava;
   ambiente: "certificacion" | "produccion";
@@ -35,7 +35,7 @@ function exigir<T>(valor: T | undefined, mensaje: string): T {
 const TOKEN_VENCIDO = new Set(["TEXP", "TINV"]);
 
 export function adaptadorOctava(deps: DepsAdaptadorOctava): AdaptadorCesion {
-  const { integrador, cedente, ambiente } = deps;
+  const { acceso, cedente, ambiente } = deps;
   const amb = ambienteOctava(ambiente);
   const cliente = clienteOctava({
     ...(deps.fetch ? { fetch: deps.fetch } : {}),
@@ -43,7 +43,7 @@ export function adaptadorOctava(deps: DepsAdaptadorOctava): AdaptadorCesion {
   });
   const sesion = (): DepsSesion => ({
     cliente,
-    integrador: exigir(integrador ?? undefined, "no configurado."),
+    acceso: exigir(acceso ?? undefined, "no configurado."),
     cedente,
     almacen: deps.almacen,
     ahora: deps.ahora ?? Date.now,
@@ -60,7 +60,7 @@ export function adaptadorOctava(deps: DepsAdaptadorOctava): AdaptadorCesion {
 
   return {
     nombre: "octava",
-    disponible: Boolean(integrador?.usuario && integrador.clave),
+    disponible: Boolean(acceso?.usuario && acceso.clave),
     async enviar(p: PayloadCesion) {
       const tipoDte = exigir(p.tipoDte, "falta el tipo de DTE a ceder.");
       const rutEmisor = formatoRutOctava(p.rutEmisor);

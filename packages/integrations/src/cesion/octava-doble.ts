@@ -19,14 +19,11 @@ export function fetchGrabado(respuestas: Record<string, unknown[]>) {
   return { fetch, llamadas };
 }
 
-export function almacenMemoria(inicial: { pass?: string; token?: { token: string; expiraEn: number } } = {}) {
-  const estado = { pass: inicial.pass ?? null, token: inicial.token ?? null } as {
-    pass: string | null;
+export function almacenMemoria(inicial: { token?: { token: string; expiraEn: number } } = {}) {
+  const estado = { token: inicial.token ?? null } as {
     token: { token: string; expiraEn: number } | null;
   };
   const almacen: AlmacenSesionOctava = {
-    leerPassAcceso: async () => estado.pass,
-    guardarPassAcceso: async (p) => void (estado.pass = p),
     leerToken: async () => estado.token,
     guardarToken: async (t) => void (estado.token = t),
   };
@@ -40,9 +37,6 @@ export const CEDENTE: CedenteOctava = {
   email: "cobranza@cedente.test",
   contactoNombre: "Ana Prueba",
   contactoEmail: "ana@cedente.test",
-  rutTitular: "11111111-1",
-  nombreTitular: "Titular Prueba",
-  certificado: { pfxBase64: Buffer.from("pfx-falso").toString("base64"), clave: "clave-cert" },
 };
 
 export function depsPrueba(
@@ -51,7 +45,7 @@ export function depsPrueba(
   extra: Partial<DepsAdaptadorOctava> = {},
 ): DepsAdaptadorOctava {
   return {
-    integrador: { usuario: "77.888.999-0", clave: "clave-integrador" },
+    acceso: { usuario: "76.111.222-8", clave: "clave-acceso" },
     cedente: CEDENTE,
     almacen,
     ambiente: "certificacion",

@@ -76,10 +76,8 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     categoria: "factoring",
     modalidades: ["propia"] as const,
     secretos: [
-      { nombre: "usuario", etiqueta: "Usuario Octava" },
-      { nombre: "clave", etiqueta: "Clave Octava" },
-      // Solo si el RUT ya estaba registrado como cedente en Octava (p. ej. por OPAI 1): la clave que Octava entregó una vez.
-      { nombre: "pass_acceso_api", etiqueta: "Clave de acceso API (PassAccesoApi), si ya existe", opcional: true },
+      { nombre: "usuario", etiqueta: "RUT de acceso a la API de Octava" },
+      { nombre: "clave", etiqueta: "Contraseña de acceso a la API de Octava" },
     ],
     config: z
       .object({
