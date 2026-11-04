@@ -9,7 +9,7 @@ describe("leerRcv", () => {
     const r = leerRcv(`${CAB}\n1;33;Del Giro;76.123.456-7;Proveedor SpA;1234;03/11/2026;04/11/2026 10:00:00;0;1.000;190;1.190`);
     expect(r.errores).toEqual([]);
     expect(r.filas).toEqual([
-      expect.objectContaining({ proveedorRut: "76.123.456-7", tipoDte: 33, folio: 1234, fechaEmision: "2026-11-03", montoNeto: 1000, montoIva: 190, montoTotal: 1190 }),
+      expect.objectContaining({ proveedorRut: "76.123.456-7", tipoDte: 33, folio: 1234, fechaEmision: "2026-11-03", montoNeto: 1000, montoIva: 190, montoTotal: 1190, fechaRecepcion: "2026-11-04" }),
     ]);
   });
 
@@ -18,6 +18,12 @@ describe("leerRcv", () => {
     expect(r.errores.map((e) => e.linea)).toEqual([2, 3, 4]);
     expect(r.filas).toHaveLength(1);
     expect(r.filas[0]).toMatchObject({ tipoDte: 61, folio: 8 });
+  });
+
+  it("rechaza folios o montos fuera de rango", () => {
+    const r = leerRcv(`${CAB}\n1;33;x;76.1-1;A;9999999999;03/11/2026;;0;1;0;1\n2;33;x;76.1-1;A;5;03/11/2026;;0;3000000000;0;1`);
+    expect(r.filas).toEqual([]);
+    expect(r.errores).toHaveLength(2);
   });
 
   it("rechaza un archivo sin las columnas esperadas", () => {

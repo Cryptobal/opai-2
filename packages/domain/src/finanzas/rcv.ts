@@ -17,6 +17,7 @@ export type FilaRcv = {
 };
 export type ErrorRcv = { linea: number; motivo: string };
 
+const MAX = 2_000_000_000;
 const sinTildes = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 type Clave = "tipo" | "rut" | "razon" | "folio" | "emision" | "recepcion" | "exento" | "neto" | "iva" | "total";
 const ALIAS: Record<Clave, string[]> = {
@@ -35,7 +36,7 @@ const ALIAS: Record<Clave, string[]> = {
 /** `dd/mm/aaaa` o `aaaa-mm-dd` → `aaaa-mm-dd`; `null` si no es una fecha real. */
 export function fechaRcv(t: string): string | null {
   const v = t.trim();
-  const dma = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(v);
+  const dma = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(\s.*)?$/.exec(v);
   const amd = /^(\d{4})-(\d{2})-(\d{2})/.exec(v);
   const [d, mes, a] = dma ? [dma[1], dma[2], dma[3]] : amd ? [amd[3], amd[2], amd[1]] : [];
   if (!d || !mes || !a) return null;
@@ -75,6 +76,8 @@ export function leerRcv(texto: string): { filas: FilaRcv[]; errores: ErrorRcv[] 
     if (!Number.isInteger(folio) || folio < 1) return void errores.push({ linea, motivo: "Folio inválido." });
     if (!emision) return void errores.push({ linea, motivo: "Fecha de emisión inválida." });
     if (!at("rut").trim()) return void errores.push({ linea, motivo: "Falta el RUT del proveedor." });
+    if (folio > MAX || montos.some((m) => m !== null && m > MAX)) return void errores.push({ linea, motivo: "Un folio o monto supera el máximo permitido." });
+    if (at("razon").trim().length > 160) return void errores.push({ linea, motivo: "La razón social supera los 160 caracteres." });
     if (montos.some((m) => m === null || m < 0)) return void errores.push({ linea, motivo: "Un monto no es un número entero." });
     const [montoExento, montoNeto, montoIva, montoTotal] = montos as number[];
     filas.push({

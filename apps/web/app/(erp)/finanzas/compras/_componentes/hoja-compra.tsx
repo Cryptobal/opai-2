@@ -26,7 +26,7 @@ const IVA = 0.19;
 const num = (d: string) => (d ? Number(d) : 0);
 
 /** Registrar a mano un documento recibido (factura, exenta, nota de débito o de crédito). */
-export function HojaCompra({ proveedores, centros }: { proveedores: Proveedor[]; centros: Centro[] }) {
+export function HojaCompra({ proveedores, centros, puedeCrearProveedores }: { proveedores: Proveedor[]; centros: Centro[]; puedeCrearProveedores: boolean }) {
   const hoja = useHojaUrl("nuevo");
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [proveedorId, setProveedorId] = useState("");
@@ -77,9 +77,11 @@ export function HojaCompra({ proveedores, centros }: { proveedores: Proveedor[];
           <Alerta
             tono="info"
             titulo="Sin proveedores"
-            accion={<EnlaceBoton href="/finanzas/compras/proveedores?nuevo=1" variante="secondary">Crear proveedor</EnlaceBoton>}
+            {...(puedeCrearProveedores
+              ? { accion: <EnlaceBoton href="/finanzas/compras/proveedores?nuevo=1" variante="secondary">Crear proveedor</EnlaceBoton> }
+              : {})}
           >
-            Crea el proveedor que emitió el documento y vuelve a registrarlo.
+            {puedeCrearProveedores ? "Crea el proveedor que emitió el documento y vuelve a registrarlo." : "Pide a un administrador que cree el proveedor."}
           </Alerta>
         ) : (
           <Campo etiqueta="Proveedor" htmlFor="co-prov">

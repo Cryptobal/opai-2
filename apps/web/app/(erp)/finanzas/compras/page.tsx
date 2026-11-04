@@ -29,7 +29,7 @@ export default function Compras({ searchParams }: { searchParams: SearchParams }
           />
           {d.gestiona ? (
             <>
-              <HojaCompra proveedores={d.proveedores} centros={d.centros} />
+              <HojaCompra proveedores={d.proveedores} centros={d.centros} puedeCrearProveedores={d.puedeCrearProveedores} />
               <HojaRcv puedeCrearProveedores={d.puedeCrearProveedores} />
               <HojaLote
                 centros={d.centros}

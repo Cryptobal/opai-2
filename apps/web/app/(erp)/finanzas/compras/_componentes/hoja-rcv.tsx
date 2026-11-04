@@ -8,7 +8,17 @@ import { Alerta, avisar, Button, Campo, Checkbox, Input, Sheet } from "@opai/ds"
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-type Vista = { nuevos: number; duplicados: number; errores: number; proveedoresCreados: number };
+type Vista = { nuevos: number; duplicados: number; errores: number; proveedoresCreados: number; filas: { indice: number; estado: string; mensaje: string | null }[] };
+
+/** Los CSV del SII suelen venir en Windows-1252: se prueba UTF-8 estricto y, si falla, ese. */
+async function textoDe(f: File): Promise<string> {
+  const b = await f.arrayBuffer();
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(b);
+  } catch {
+    return new TextDecoder("windows-1252").decode(b);
+  }
+}
 
 /** Importa el CSV del RCV descargado del SII: vista previa (nuevos, repetidos, con error) y luego aplica. */
 export function HojaRcv({ puedeCrearProveedores }: { puedeCrearProveedores: boolean }) {
@@ -23,8 +33,9 @@ export function HojaRcv({ puedeCrearProveedores }: { puedeCrearProveedores: bool
   async function leer(f: File | undefined) {
     setVista(null);
     limpiarError();
+    setMalas([]);
     if (!f) return setFilas([]);
-    const r = leerRcv(await f.text());
+    const r = leerRcv(await textoDe(f));
     setFilas(r.filas);
     setMalas(r.errores.slice(0, 5).map((e) => `Línea ${e.linea}: ${e.motivo}`));
   }
@@ -71,6 +82,11 @@ export function HojaRcv({ puedeCrearProveedores }: { puedeCrearProveedores: bool
         ) : null}
         {puedeCrearProveedores ? (
           <Checkbox marcado={crear} onCambiar={(v) => { setCrear(v); setVista(null); }} etiqueta="Crear los proveedores que aún no existen" />
+        ) : null}
+        {vista && vista.errores > 0 ? (
+          <Alerta tono="warning" titulo="Filas con error">
+            {vista.filas.filter((x) => x.estado === "error").slice(0, 5).map((x) => `Documento ${x.indice + 1}: ${x.mensaje ?? "error"}`).join(" · ")}
+          </Alerta>
         ) : null}
         {vista ? (
           <p className="text-md">
