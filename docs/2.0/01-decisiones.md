@@ -1230,3 +1230,22 @@ identidad de servicio en main.
 **Por confirmar (Carlos):** pasos contados desde el vencimiento (en 1.0, desde el envío de la proforma), tramos sin solape y WhatsApp solo manual.
 
 **Fuera de alcance:** seguimiento de proforma y estado de pago (F5), cesión y factoring.
+
+---
+
+## ADR-063 · Claude avanza sin esperar: integra y aplica migraciones
+
+**Fecha:** 4-nov-2026 (10:39 CLT) · **Estado:** vigente · **Autor:** Carlos · **Modifica** ADR-054 y ADR-060 en lo que toca a quién aplica migraciones y a qué se espera.
+
+**Decisión.**
+
+1. **Claude no espera al bot «OPAI 2.0» ni a nadie para avanzar.** Con los cuatro checks obligatorios en verde sobre el head y sin conflicto, integra con squash. Si hay conflicto, trae `main` con merge, nunca rebase.
+2. **Claude aplica las migraciones** de sus PR: antes saca el respaldo de `main` en Neon (proyecto `steep-wildflower-90764475`), migra primero `dev` y luego `main`, quita `migracion-pendiente`, deja un comentario en el PR con lo aplicado y el respaldo, e integra. El bot puede seguir haciéndolo si llega primero.
+3. **Claude verifica por sí mismo** en Neon, GitHub y `test.opai.cl` que algo quedó aplicado; no se lo pregunta a Carlos.
+4. **Revisor:** solo se espera si el PR toca migraciones, permisos, RLS o datos de tenants. Lo demás se integra sin él.
+5. **Claude solo se detiene** ante lo que debe hacer Carlos: claves, 2FA, aprobaciones en 1Password o cambios en 1.0. Nunca maneja ni imprime secretos; si no tiene acceso a Neon en la sesión, lo reporta como bloqueo de acceso.
+6. Al terminar una tarea, sigue con la próxima de `ESTADO.md` sin preguntar.
+
+**Sin cambios:** Claude no escribe `VETO`; el veto de Carlos se respeta; `migracion-pendiente` la sigue poniendo quien abre el PR con migración.
+
+**Consecuencias.** `AGENTS.md` (roles y «Prohibido») queda alineado con esta decisión.
