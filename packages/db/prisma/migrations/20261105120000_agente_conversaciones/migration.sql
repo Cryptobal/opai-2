@@ -33,3 +33,10 @@ CREATE POLICY tenant_isolation ON "core"."agente_conversaciones" AS PERMISSIVE F
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 COMMIT;
+
+-- Reversión: snapshot Neon previo. A mano solo sirve mientras nadie dependa de las conversaciones
+-- guardadas (el DROP las pierde):
+-- BEGIN;
+-- SET LOCAL lock_timeout = '5s';
+-- DROP TABLE IF EXISTS "core"."agente_conversaciones";
+-- COMMIT;
