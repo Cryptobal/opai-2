@@ -19,20 +19,29 @@ describe("validación tolerante: un dato malo de 1.0 nunca detiene la carga", ()
     expect(d.advertencias.filter((a) => a.codigo === "fila_descartada")).toHaveLength(2);
   });
 
-  it("un elemento malo de una lista se descarta sin perder los demás", () => {
+  it("una cantidad inválida descarta la plantilla recurrente completa (no inventa cantidad 1)", () => {
     const ahora = "2026-11-01T09:00:00.000Z";
     const d = validarDatos({
       recurringInvoiceSchedules: [
-        {
-          id: "r1",
-          createdAt: ahora,
-          updatedAt: ahora,
-          lines: [{ itemName: "bueno", unitPrice: 100 }, { itemName: "malo", unitPrice: "abc" }],
-        },
+        { id: "r1", createdAt: ahora, updatedAt: ahora, lines: [{ itemName: "malo", quantity: "abc", unitPrice: 100 }] },
+        { id: "r2", createdAt: ahora, updatedAt: ahora, lines: [{ itemName: "bueno", quantity: 2, unitPrice: 100 }] },
       ],
     });
-    expect(d.recurringInvoiceSchedules[0]?.lines).toHaveLength(1);
-    expect(d.advertencias[0]).toMatchObject({ recurso: "recurringInvoiceSchedules", idOpai1: "r1" });
-    expect(d.advertencias[0]?.campo).toContain("lines[1]");
+    expect(d.recurringInvoiceSchedules.map((r) => r.id)).toEqual(["r2"]);
+    expect(d.advertencias).toContainEqual({
+      codigo: "fila_descartada",
+      recurso: "recurringInvoiceSchedules",
+      idOpai1: "r1",
+      campo: "lines",
+    });
+  });
+
+  it("un campo con valor por defecto inválido (moneda, frecuencia, día) descarta la fila, no lo inventa", () => {
+    const ahora = "2026-11-01T09:00:00.000Z";
+    const d = validarDatos({
+      recurringInvoiceSchedules: [{ id: "r3", createdAt: ahora, updatedAt: ahora, dayOfMonth: "x", lines: [] }],
+    });
+    expect(d.recurringInvoiceSchedules).toEqual([]);
+    expect(d.advertencias[0]).toMatchObject({ codigo: "fila_descartada", campo: "dayOfMonth" });
   });
 });

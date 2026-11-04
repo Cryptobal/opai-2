@@ -29,7 +29,29 @@ function esquemaFila(recurso: Recurso): z.ZodType {
   return datosOpai1.shape[recurso].unwrap().element as z.ZodType;
 }
 
-/** Valida una fila; vacía los campos inválidos (o el elemento de lista) y reintenta; si no hay arreglo, la descarta. */
+const MONTOS = new Set([
+  "amount",
+  "quantity",
+  "unitPrice",
+  "unitPriceUf",
+  "discountPct",
+  "price",
+  "total",
+]);
+
+/** Solo se puede vaciar un opcional sin valor por defecto que no sea monto, lista ni referencias. */
+function sePuedeVaciar(recurso: Recurso, campo: string, valor: unknown): boolean {
+  if (MONTOS.has(campo) || Array.isArray(valor)) return false;
+  const def = (
+    esquemaFila(recurso) as unknown as { shape?: Record<string, { def?: { type?: string } }> }
+  ).shape?.[campo];
+  return def?.def?.type !== "default";
+}
+
+/**
+ * Valida una fila. Un opcional sin valor por defecto (rut, correo…) con dato malo queda vacío. Si el campo es
+ * un monto, una lista, o tiene valor por defecto, vaciarlo inventaría un dato: se descarta la fila completa.
+ */
 function validarFila(
   recurso: Recurso,
   cruda: unknown,
@@ -45,29 +67,27 @@ function validarFila(
     return undefined;
   }
   const fila: Fila = { ...cruda };
-  const vaciados = new Set<string>();
+  const vaciados: Advertencia[] = [];
+  let culpable = "-";
   for (let intento = 0; intento < 40; intento++) {
     const r = esquema.safeParse(fila);
-    if (r.success) return r.data;
-    const issue = r.error.issues[0];
-    const campo = typeof issue?.path[0] === "string" ? issue.path[0] : null;
-    if (!issue || campo === null || campo === "id") break;
-    const hijo = issue.path[1];
-    const lista = fila[campo];
-    if (typeof hijo === "number" && Array.isArray(lista)) {
-      fila[campo] = lista.filter((_, i) => i !== hijo);
-      aviso(
-        "elemento_descartado",
-        `${campo}[${hijo}]${typeof issue.path[2] === "string" ? `.${issue.path[2]}` : ""}`,
-      );
-      continue;
+    if (r.success) {
+      avisos.push(...vaciados);
+      return r.data;
     }
-    if (vaciados.has(campo)) break;
-    vaciados.add(campo);
+    const campo = r.error.issues[0]?.path[0];
+    if (typeof campo !== "string") break;
+    culpable = campo;
+    if (
+      campo === "id" ||
+      !sePuedeVaciar(recurso, campo, fila[campo]) ||
+      vaciados.some((v) => v.campo === campo)
+    )
+      break;
     delete fila[campo];
-    aviso("campo_vaciado", campo);
+    vaciados.push({ codigo: "campo_vaciado", recurso, idOpai1: id, campo });
   }
-  aviso("fila_descartada", "-");
+  aviso("fila_descartada", culpable);
   return undefined;
 }
 
