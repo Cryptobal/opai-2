@@ -1,7 +1,10 @@
-import { Alerta, Campo, Input } from "@opai/ds";
+import { Alerta } from "@opai/ds";
 
 import type { MovimientoBanco } from "./bancos-tipos";
+import { BuscarFactura } from "./buscar-factura";
 import { ListaSugerenciasReconocer, type SugerenciaReconocer } from "./lista-sugerencias-reconocer";
+import { PanelProrrateo } from "./panel-prorrateo";
+import type { Elegida } from "./seleccion-conciliacion";
 
 export function CuerpoHojaReconocer({
   movimiento,
@@ -9,19 +12,18 @@ export function CuerpoHojaReconocer({
   error,
   sugerencias,
   pendiente,
-  docManual,
-  onDocManual,
-  onElegirSugerencia,
+  elegidas,
+  onElegidas,
 }: {
   movimiento: MovimientoBanco;
   esConciliado: boolean;
   error: string | null;
   sugerencias: SugerenciaReconocer[];
   pendiente: boolean;
-  docManual: string;
-  onDocManual: (v: string) => void;
-  onElegirSugerencia: (s: SugerenciaReconocer) => void;
+  elegidas: Elegida[];
+  onElegidas: (e: Elegida[]) => void;
 }) {
+  const agregar = (e: Elegida) => onElegidas([...elegidas, e]);
   return (
     <div className="flex flex-col gap-4">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
@@ -35,22 +37,18 @@ export function CuerpoHojaReconocer({
         </Alerta>
       ) : (
         <>
-          <Alerta tono="info" titulo="Es una sugerencia">
-            No marca la factura como pagada hasta que confirmes.
+          <Alerta tono="info" titulo="Un abono puede pagar varias facturas">
+            Agrega los documentos y reparte el monto. No se marca nada como pagado hasta que confirmes.
           </Alerta>
           <ListaSugerenciasReconocer
             sugerencias={sugerencias}
+            elegidas={elegidas}
             pendiente={pendiente}
-            onElegir={onElegirSugerencia}
+            onAgregar={agregar}
+            onQuitar={(id) => onElegidas(elegidas.filter((x) => x.id !== id))}
           />
-          <Campo etiqueta="Otro documento (UUID)" htmlFor="banco-doc-manual">
-            <Input
-              id="banco-doc-manual"
-              value={docManual}
-              onChange={(e) => onDocManual(e.target.value)}
-              placeholder="ID del DTE emitido"
-            />
-          </Campo>
+          <BuscarFactura elegidas={elegidas} onAgregar={agregar} />
+          <PanelProrrateo abono={Math.abs(movimiento.monto)} elegidas={elegidas} onCambiar={onElegidas} />
         </>
       )}
     </div>
