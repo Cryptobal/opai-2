@@ -4,8 +4,8 @@ import { ajuste, type Contexto } from "@opai/capabilities";
 import { trabajoConversacionesVencidas } from "./conversaciones-barrido";
 
 // El ajuste del módulo no está registrado en estos tests unitarios: se fija el defecto.
-vi.mock("@opai/capabilities", async (original) => ({
-  ...(await original<typeof import("@opai/capabilities")>()),
+vi.mock("@opai/capabilities", async () => ({
+  ...(await vi.importActual<Record<string, unknown>>("@opai/capabilities")),
   ajuste: vi.fn(async () => 90),
 }));
 
