@@ -57,11 +57,9 @@ export type NavegacionErp = {
 };
 
 const ICONOS_RUTA: Record<string, string> = {
-  "/cargos": "IdCard",
   "/solicitudes": "NotebookPen",
   "/contactos": "ContactRound",
   "/cotizaciones": "ReceiptText",
-  "/finanzas/plan-de-cuentas": "BookOpen",
 };
 
 const esDesarrollo = process.env.NODE_ENV !== "production";
@@ -97,22 +95,22 @@ export function navegacionErp(
   const items = [...entradasNucleo(voc), ...entradasModulos()];
   const grupos = armarNavegacion(items, { puede, modulosActivos });
   const nav: ItemNav[] = [];
+  // Orden por uso (CAR-182): Comercial, Operaciones, Personas, Finanzas y Documentos. «clientes»
+  // sigue en la lista cerrada (hay preferencias guardadas con ese valor), pero ya no tiene entradas.
   const orden = [
     "inicio",
+    "comercial",
     "operaciones",
     "personas",
     "finanzas",
-    "comercial",
-    "clientes",
     "documentos",
+    "clientes",
   ];
   for (const g of [...grupos].sort((a, b) => orden.indexOf(a.area) - orden.indexOf(b.area))) {
     for (const e of g.entradas) {
       nav.push(
         itemDe(e, {
-          ...(g.area === "inicio"
-            ? {}
-            : { grupo: g.area === "documentos" ? "Firmas" : g.etiqueta }),
+          ...(g.area === "inicio" ? {} : { grupo: g.etiqueta }),
           ...(g.area !== "inicio" ? { area: g.area, fijable: true } : {}),
         }),
       );
@@ -120,6 +118,7 @@ export function navegacionErp(
   }
   if (esDesarrollo) nav.push({ href: "/ds", etiqueta: "Diseño", icono: "Palette" });
   nav.push({ href: "/configuracion", etiqueta: "Configuración", icono: "Settings", pie: true });
+  // Única entrada de la Bandeja (CAR-182): Inicio ya no la repite. Su número lo pone el shell.
   const bandeja: ItemNav = { href: "/bandeja", etiqueta: "Bandeja", icono: "Inbox" };
   nav.splice(1, 0, bandeja);
   const navInferior = ["/", "/pauta", "/personas", "/bandeja"].flatMap((href) =>
