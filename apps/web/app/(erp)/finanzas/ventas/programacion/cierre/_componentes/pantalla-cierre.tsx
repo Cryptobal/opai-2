@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 
 import { NOMBRE_ETAPA } from "@opai/domain";
@@ -11,9 +12,12 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
 import { mesVecino, RUTA_CIERRE } from "./meses";
-import { DialogoLote, DialogoObservar, DialogoOcHes } from "./dialogos-cierre";
 import { type AccionFila, FilaCierre } from "./fila-cierre";
 import type { ItemCierre, ResultadoLote, TableroCierre } from "./tipos";
+
+const DialogoLote = dynamic(() => import("./dialogos-cierre").then((m) => ({ default: m.DialogoLote })));
+const DialogoObservar = dynamic(() => import("./dialogos-cierre").then((m) => ({ default: m.DialogoObservar })));
+const DialogoOcHes = dynamic(() => import("./dialogos-cierre").then((m) => ({ default: m.DialogoOcHes })));
 
 const PESTANAS = [
   { id: "plantillas", etiqueta: "Plantillas", href: "/finanzas/ventas/programacion" },
