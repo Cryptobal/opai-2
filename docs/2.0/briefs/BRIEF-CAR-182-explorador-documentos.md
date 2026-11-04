@@ -121,6 +121,8 @@ Búsqueda sin resultados (estado «Sin resultados», distinto del vacío); tenan
 - **Total en cada página:** un `count` extra por consulta; sin problema a este volumen.
 - **Subida a empresa desde el explorador** puede sorprender: la hoja lo dice en su descripción.
 
+Pendientes no bloqueantes (revisión): (a) índice único parcial `(tenant_id, documento_id) WHERE rol='propietario'` o filtrar con `vinculoEnAlcance` en `explorar-entidades.ts`; (b) test que compare la regla de vigencia de `dondeVigencia` con `estadoVigencia`.
+
 ## 16. Reporte de ejecución
 
 Ver el PR y «CAR-182 · PR 4» en `ESTADO.md`.

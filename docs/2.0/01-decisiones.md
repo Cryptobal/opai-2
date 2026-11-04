@@ -1212,7 +1212,6 @@ identidad de servicio en main.
 
 ---
 
-<<<<<<< HEAD
 ## Adenda ADR-019 · Explorador central de Documentos (CAR-182 · PR 4)
 
 **Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude (constructor), a confirmar por Carlos en los puntos marcados · **Complementa** ADR-019, ADR-022 y NÚCLEO-H.
@@ -1222,7 +1221,9 @@ identidad de servicio en main.
 3. El nombre de la entidad propietaria solo se devuelve si el actor puede leer ese tipo de entidad; sin permiso viaja solo su tipo y su id.
 4. La búsqueda cubre nombre de archivo, título y etiquetas; no el RUT ni el contenido del archivo.
 5. Subir desde el explorador es a nivel empresa; subir a una persona, cuenta o instalación se hace desde su ficha hasta que exista el selector «Vincular a». *A confirmar con Carlos.*
-=======
+
+---
+
 ## ADR-062 · Cobranza de ventas: vencimiento derivado y recordatorios en días hábiles
 
 **Fecha:** 4-nov-2026 · **Estado:** propuesto (reglas por confirmar por Carlos) · **Origen:** CAR-166 (F4), auditoría de Finanzas §2.1, construido por Claude.
@@ -1241,4 +1242,3 @@ identidad de servicio en main.
 **Por confirmar (Carlos):** pasos contados desde el vencimiento (en 1.0, desde el envío de la proforma), tramos sin solape y WhatsApp solo manual.
 
 **Fuera de alcance:** seguimiento de proforma y estado de pago (F5), cesión y factoring.
->>>>>>> origin/main
