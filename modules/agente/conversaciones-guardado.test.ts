@@ -3,6 +3,12 @@ import type { Contexto } from "@opai/capabilities";
 
 import { guardarTurno } from "./conversaciones-guardado";
 
+// El ajuste del módulo no está registrado en estos tests unitarios: se fija el defecto.
+vi.mock("@opai/capabilities", async (original) => ({
+  ...(await original<typeof import("@opai/capabilities")>()),
+  ajuste: vi.fn(async () => 90),
+}));
+
 const USUARIO = "00000000-0000-4000-8000-000000000001";
 const TENANT = "00000000-0000-4000-8000-0000000000aa";
 const TURNO = "00000000-0000-4000-8000-0000000000bb";

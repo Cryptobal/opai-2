@@ -1,7 +1,13 @@
 import { expect, it, vi } from "vitest";
-import type { Contexto } from "@opai/capabilities";
+import { ajuste, type Contexto } from "@opai/capabilities";
 
 import { trabajoConversacionesVencidas } from "./conversaciones-barrido";
+
+// El ajuste del módulo no está registrado en estos tests unitarios: se fija el defecto.
+vi.mock("@opai/capabilities", async (original) => ({
+  ...(await original<typeof import("@opai/capabilities")>()),
+  ajuste: vi.fn(async () => 90),
+}));
 
 const TENANT = "00000000-0000-4000-8000-0000000000aa";
 
@@ -44,4 +50,11 @@ it("sin vencidas no borra nada y es diario", async () => {
   expect(await trabajoConversacionesVencidas.ejecutar(ctx, {})).toEqual({ borradas: 0 });
   expect(db.agenteConversacion.deleteMany).not.toHaveBeenCalled();
   expect(trabajoConversacionesVencidas.periodicidad).toBe("diaria");
+});
+
+it("si el ajuste de retención no se puede leer, falla y no borra nada", async () => {
+  const { ctx, db } = falso([["a"]]);
+  vi.mocked(ajuste).mockRejectedValueOnce(new Error("config caída"));
+  await expect(trabajoConversacionesVencidas.ejecutar(ctx, {})).rejects.toThrow("config caída");
+  expect(db.agenteConversacion.deleteMany).not.toHaveBeenCalled();
 });

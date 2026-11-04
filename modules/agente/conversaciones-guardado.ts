@@ -30,7 +30,7 @@ export const corteRetencion = (ahora: Date, dias: number = RETENCION_DIAS) =>
   new Date(ahora.getTime() - dias * 864e5);
 const titular = (texto: string) => texto.replace(/\s+/g, " ").trim().slice(0, 80);
 
-/** Días de retención de la empresa (ajuste del módulo); sin ajuste declarado rige el defecto. */
+/** Días de retención de la empresa (ajuste del módulo; sin valor rige el defecto). */
 // Falla cerrado: si el ajuste no se puede leer, el error sube y nada se borra. Con 90 de
 // respaldo, una falla transitoria destruiría el historial de una empresa que configuró más.
 export async function diasRetencion(ctx: Contexto): Promise<number> {
