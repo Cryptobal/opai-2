@@ -87,7 +87,8 @@ export async function capturarPrevisional(
     let r: Resultado;
     if (!html) r = { clave, resultado: "fallido", motivo: "fuente_caida" };
     else if (!valido?.success) r = { clave, resultado: "fallido", motivo: "sin_lectura" };
-    else if (vigentes[clave] !== undefined && !dentroDeBanda(clave, vigentes[clave], valido.data))
+    else if (vigentes[clave] === undefined) r = { clave, resultado: "fallido", motivo: "sin_vigente_valido" };
+    else if (!dentroDeBanda(clave, vigentes[clave], valido.data))
       r = { clave, resultado: "fallido", motivo: "fuera_de_banda" };
     else {
       try {

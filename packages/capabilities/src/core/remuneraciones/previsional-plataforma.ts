@@ -34,7 +34,7 @@ export const platformIndicadoresPropuestas = defineCapability({
         clave: z.string(),
         capturadoEn: z.string(),
         resultado: z.string().describe("ok (renovado), propuesto o fallido."),
-        motivo: z.string().nullable().describe("Por qué falló: fuente_caida, sin_lectura, fuera_de_banda o publicacion."),
+        motivo: z.string().nullable().describe("Por qué falló: fuente_caida, sin_lectura, fuera_de_banda, sin_vigente_valido o publicacion."),
         alerta: z.boolean(),
       }),
     ),

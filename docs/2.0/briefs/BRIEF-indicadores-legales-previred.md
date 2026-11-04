@@ -41,8 +41,10 @@ Plataforma → Valores legales: alertas por indicador con la fuente caída («se
 ## 9. Seguridad y tenant
 Tablas globales (sin `tenant_id`). Escritura solo por funciones SECURITY DEFINER; `opai_app` no puede proponer; resolver exige usuario de plataforma dentro de SQL. Fuente restringida por regex. Sin secretos. La captura no propone si la lectura sale de la banda de sanidad.
 
+Riesgo residual aceptado (revisión independiente): `remuneraciones_resolver_propuesta` confía en el `p_actor` que le pasa el código de la aplicación (la capacidad ya exige `platform_role`, `soloPersonas` y permiso `tenantsManage`); un `$queryRaw` dentro de `enTransaccion` podría llamarla con otro id, pero ese código está prohibido por AGENTS.md y lo vigila el lint. Atar el actor a un GUC o rol dedicado queda como endurecimiento posterior.
+
 ## 10. Casos límite
-Página irreconocible o caída → todo `fallido`, vigente intacto. Un indicador falla → los demás siguen. `topes` vigente trae `ipsPorVerificar`: la primera captura lo propone sin la marca y, al aprobarlo, queda verificado. Propuesta que se vuelve a leer igual → idempotente; la fuente vuelve al vigente → la propuesta se descarta.
+Página irreconocible o caída → todo `fallido`, vigente intacto. Un indicador falla → los demás siguen. `topes` vigente trae `ipsPorVerificar`: la primera captura lo propone sin la marca y, al aprobarlo, queda verificado. Si el vigente ya empieza el primer día del mes, la propuesta toma vigencia desde el día siguiente (para que sea aprobable). La renovación solo cambia la fecha de consulta (y la fuente solo si ya era oficial); la fecha de consulta debe ser de hoy o ayer. Vigente con forma inválida → `sin_vigente_valido`, no se propone. Propuesta que se vuelve a leer igual → idempotente; la fuente vuelve al vigente → la propuesta se descarta.
 
 ## 11. Plan por bloques
 1. Dominio: lectores y banda. 2. Migración y wrappers. 3. Captura, trabajo y programación. 4. Capacidades de plataforma y pantalla. 5. Pruebas, ESTADO.

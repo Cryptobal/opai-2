@@ -35,6 +35,9 @@ BEGIN
   IF p_vigente_desde <> date_trunc('month', v_hoy)::date THEN
     RAISE EXCEPTION 'proponer_previsional: vigente_desde fuera de ventana' USING ERRCODE = 'check_violation';
   END IF;
+  IF p_consultada IS NULL OR p_consultada NOT BETWEEN v_hoy - 1 AND v_hoy THEN
+    RAISE EXCEPTION 'proponer_previsional: fecha de consulta fuera de ventana' USING ERRCODE = 'check_violation';
+  END IF;
   IF p_valor IS NULL OR jsonb_typeof(p_valor) = 'null' THEN
     RAISE EXCEPTION 'proponer_previsional: valor inválido' USING ERRCODE = 'check_violation';
   END IF;
@@ -60,8 +63,11 @@ BEGIN
     WHERE indicador_id = v_indicador_id AND estado = 'propuesto' FOR UPDATE;
 
   IF v_actual.valor_json = p_valor THEN
+    -- Solo la fecha de consulta; la fuente se pisa únicamente si ya era una fuente oficial (no una evidencia sembrada).
     UPDATE "core"."valores_publicados"
-      SET consultada_el = p_consultada, fuente = p_fuente WHERE id = v_actual.id;
+      SET consultada_el = p_consultada,
+          fuente = CASE WHEN fuente ~ '^https://(www\.)?(previred\.com|spensiones\.cl)/' THEN p_fuente ELSE fuente END
+      WHERE id = v_actual.id;
     IF v_pendiente.id IS NOT NULL THEN
       UPDATE "core"."valores_publicados" SET estado = 'rechazado', resuelto_en = clock_timestamp()
         WHERE id = v_pendiente.id;
@@ -82,7 +88,7 @@ BEGIN
   INSERT INTO "core"."valores_publicados" (
     id, indicador_id, valor_json, vigente_desde, estado, fuente, consultada_el, verificacion
   ) VALUES (
-    gen_random_uuid(), v_indicador_id, p_valor, p_vigente_desde, 'propuesto', p_fuente, p_consultada, 'por_verificar'
+    gen_random_uuid(), v_indicador_id, p_valor, GREATEST(p_vigente_desde, v_actual.vigente_desde + 1), 'propuesto', p_fuente, p_consultada, 'por_verificar'
   );
   RETURN 'propuesto';
 END;
@@ -151,6 +157,16 @@ UPDATE "core"."indicadores_legales"
 SET "fuente_primaria" = 'Previred', "fuente_contraste" = 'Superintendencia de Pensiones',
     "lectura_automatica" = true, "updated_at" = CURRENT_TIMESTAMP
 WHERE "clave" IN ('imm', 'topes', 'afp', 'sis', 'cesantia');
+
+DO $$
+DECLARE v_filas integer;
+BEGIN
+  SELECT count(*) INTO v_filas FROM "core"."indicadores_legales"
+    WHERE "clave" IN ('imm', 'topes', 'afp', 'sis', 'cesantia') AND "lectura_automatica";
+  IF v_filas <> 5 THEN
+    RAISE EXCEPTION 'previsional: se esperaban 5 indicadores marcados y hay %', v_filas;
+  END IF;
+END $$;
 
 COMMIT;
 
