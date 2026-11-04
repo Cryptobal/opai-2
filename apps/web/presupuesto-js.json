@@ -28,7 +28,7 @@
     "/(erp)/cuentas/[id]/instalaciones": 171,
     "/(erp)/cuentas/[id]/negocios": 171,
     "/(erp)/cuentas/[id]/portal": 178,
-    "/(erp)/instalaciones/[id]": 169,
+    "/(erp)/instalaciones/[id]": 170,
     "/(erp)/instalaciones/[id]/puestos": 169,
     "/(erp)/instalaciones/[id]/sueldo": 169,
     "/(erp)/personas/[id]/actividad": 169,
