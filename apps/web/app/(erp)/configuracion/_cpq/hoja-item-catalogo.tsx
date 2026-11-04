@@ -66,7 +66,7 @@ export function HojaItemCatalogo({
       }
     >
       <div className="space-y-4">
-        <Campo etiqueta="Código" htmlFor="cat-codigo" ayuda={item ? "El código no se cambia." : undefined}>
+        <Campo etiqueta="Código" htmlFor="cat-codigo" ayuda={item ? "El código no se cambia." : "Identificador corto, único en la empresa."}>
           <Input id="cat-codigo" value={codigo} readOnly={Boolean(item)} onChange={(e) => setCodigo(e.target.value)} />
         </Campo>
         <Campo etiqueta="Nombre" htmlFor="cat-nombre">
