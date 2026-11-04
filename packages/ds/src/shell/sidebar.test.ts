@@ -1,4 +1,4 @@
-import { Home, Settings2 } from "lucide-react";
+import { Home, PenLine, Settings2, Users } from "lucide-react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -46,5 +46,28 @@ describe("Sidebar", () => {
     const menuUsuario = [{ id: "salir", etiqueta: "Cerrar sesión", onSelect: () => undefined }];
     const html = renderToStaticMarkup(createElement(Sidebar, { ...base, usuario, menuUsuario }));
     expect(html).toContain('aria-label="Menú de usuario"');
+  });
+
+  it("en el acordeón, un área con una sola entrada lleva su encabezado y no queda suelta", () => {
+    const conAreas: NavItem[] = [
+      ...items.slice(0, 1),
+      { href: "/personas", etiqueta: "Personas", icono: Users, grupo: "Personas", area: "personas" },
+      { href: "/firmas", etiqueta: "Firmas", icono: PenLine, grupo: "Documentos", area: "documentos" },
+    ];
+    const html = renderToStaticMarkup(
+      createElement(Sidebar, {
+        ...base,
+        items: conAreas,
+        rutaActual: "/firmas",
+        areaAbierta: "documentos",
+        onAreaAbierta: () => undefined,
+      }),
+    );
+    // Encabezado del área con chevron y aria-expanded; Firmas dentro, con la barra de la activa.
+    expect(html).toMatch(/<button[^>]*aria-expanded="true"[^>]*>.*?Documentos/s);
+    expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>.*?Personas/s);
+    expect(html).toContain('aria-current="page"');
+    // El área activa se distingue del resto aunque esté plegada.
+    expect(html).toContain("font-semibold");
   });
 });
