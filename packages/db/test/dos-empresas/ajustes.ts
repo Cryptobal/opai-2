@@ -79,6 +79,18 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
   "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
+  // Finanzas · cobranza (CAR-166): CHECKs de canal, origen y resultado.
+  "finanzas.cobranza_gestiones": {
+    dependencias: ["finanzas.documentos_emitidos", "core.cuentas"],
+    valores: (ctx) => ({
+      documento_id: id(ctx, "finanzas.documentos_emitidos"),
+      cuenta_id: id(ctx, "core.cuentas"),
+      canal: "correo",
+      origen: "manual",
+      resultado: "enviado",
+      paso: null,
+    }),
+  },
   // CPQ (CAR-119): CHECK de tipo de línea (lineas_tipo_check).
   "cpq.lineas": { valores: () => ({ tipo: "item" }) },
   // CPQ (CAR-135): CHECK tipo/base; `copia` no debe regenerar `tipo` (índice único parcial por tenant+tipo).
