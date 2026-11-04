@@ -69,3 +69,9 @@ export {
   tryLockCapturaSiiXact,
   type PublicarSiiInput,
 } from "./remuneraciones-sii";
+export {
+  remuneracionesProponerPrevisional,
+  remuneracionesResolverPropuesta,
+  type ClavePrevisional,
+  type ProponerPrevisionalInput,
+} from "./remuneraciones-previsional";

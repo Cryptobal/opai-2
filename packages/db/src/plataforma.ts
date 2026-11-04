@@ -1,6 +1,7 @@
 import { clienteApp } from "./client";
 import type { Prisma } from "./generated/prisma/client";
 import { operacionesAprobacionesPlataforma } from "./plataforma-aprobaciones";
+import { operacionesIndicadoresPlataforma } from "./plataforma-indicadores";
 import type { TenantTx } from "./transaccion";
 
 // Perfil que devuelve tenantSchema. No expone datos legales, DPO ni otros ajustes del tenant.
@@ -35,6 +36,7 @@ export function accesoPlataforma() {
   return {
     // Cola de aprobaciones y auditoría de plataforma, fuera de los tenants (CAR-36).
     ...operacionesAprobacionesPlataforma(),
+    ...operacionesIndicadoresPlataforma(),
     tenantPorId: (id: string) => db.tenant.findUnique({ where: { id }, select: perfil }),
     tenantPorSlug: (slug: string) => db.tenant.findUnique({ where: { slug }, select: perfil }),
     listarTenants,
