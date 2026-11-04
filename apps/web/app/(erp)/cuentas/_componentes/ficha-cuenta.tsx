@@ -88,7 +88,15 @@ export function FichaCuenta(p: {
                 </>
               ),
               acciones: (
-                <AccionesEntidad etiqueta="Acciones de la cuenta" acciones={accionesCuenta(c)} />
+                <AccionesEntidad
+                  etiqueta="Acciones de la cuenta"
+                  acciones={accionesCuenta(c)}
+                  agente={{
+                    contexto: { tipo: "cuenta", id: c.id },
+                    nombre: c.nombre,
+                    articulo: "esta cuenta",
+                  }}
+                />
               ),
             }
           : {})}

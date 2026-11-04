@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { Button, Empty, Skeleton } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+
 import type { Resumen } from "./use-historial";
 
 const fecha = (iso: string) =>
@@ -79,6 +81,9 @@ export function HistorialAgente({
           )}
         </div>
       ))}
+      <EnlaceBoton href="/agente/historial" variante="secondary">
+        Ver todo el historial
+      </EnlaceBoton>
     </div>
   );
 }

@@ -1,7 +1,12 @@
 import { defineCapability, externo, noEncontrado, prohibido } from "@opai/capabilities";
 import { z } from "zod";
 
-import { contextoSchema, corteRetencion, mensajeSchema } from "./conversaciones-guardado";
+import {
+  contextoSchema,
+  corteRetencion,
+  diasRetencion,
+  mensajeSchema,
+} from "./conversaciones-guardado";
 
 const uuid = z.string().uuid();
 
@@ -69,12 +74,13 @@ export const conversacionesList = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.map((c) => c.id),
   async handler(ctx, input) {
+    const dias = await diasRetencion(ctx);
     const filas = await ctx.db.agenteConversacion.findMany({
       where: {
         tenantId: ctx.tenantId,
         userId: persona(ctx),
         archivadaEn: input.archivadas ? { not: null } : null,
-        ultimaActividad: { gte: corteRetencion(new Date()) },
+        ultimaActividad: { gte: corteRetencion(new Date(), dias) },
       },
       orderBy: { ultimaActividad: "desc" },
       take: input.limite,
@@ -95,12 +101,13 @@ export const conversacionesGet = defineCapability({
   dryRun: false,
   auditarLectura: (s) => [s.id],
   async handler(ctx, input) {
+    const dias = await diasRetencion(ctx);
     const f = await ctx.db.agenteConversacion.findFirst({
       where: {
         tenantId: ctx.tenantId,
         userId: persona(ctx),
         id: input.id,
-        ultimaActividad: { gte: corteRetencion(new Date()) },
+        ultimaActividad: { gte: corteRetencion(new Date(), dias) },
       },
       select: SELECT,
     });

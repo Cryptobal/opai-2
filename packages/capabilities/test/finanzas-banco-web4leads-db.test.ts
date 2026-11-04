@@ -25,10 +25,15 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     mod.crearContexto({
       tenantId: tid,
       actor: sistema ? { tipo: "system" } : { tipo: "user", id: usuarioId },
-      usuario: { id: usuarioId, nombre: "Admin", email: "admin@w4l.test", platformRole: null },
-      portal: "erp",
-      portalesMembresia: ["erp"],
-      rol: "owner",
+      // El receptor público corre como sistema, sin usuario ni rol: así se prueba lo que pasa en producción.
+      ...(sistema
+        ? {}
+        : {
+            usuario: { id: usuarioId, nombre: "Admin", email: "admin@w4l.test", platformRole: null },
+            portal: "erp" as const,
+            portalesMembresia: ["erp" as const],
+            rol: "owner" as const,
+          }),
       modulosActivos: ["finanzas"],
       medidor,
     });

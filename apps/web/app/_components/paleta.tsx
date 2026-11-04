@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, MapPin, Settings } from "lucide-react";
+import { Building2, MapPin, Settings, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
@@ -11,9 +11,16 @@ import { destinoAjuste } from "@/lib/ajuste-destino";
 import type { AccionCmdK } from "@/lib/navegacion-entradas";
 import type { ItemNav } from "@/lib/navegacion";
 
+import { abrirAgente } from "./agente/abrir-agente";
 import { icono } from "./iconos";
 import { useRecientesPaleta } from "./use-recientes-paleta";
 
+/** Prefijo del id de la fila «Preguntar a OPAI»; el resto del id es el texto buscado. */
+const ASK = "agente:";
+const grupoAgente = (hay: boolean, q: string): GrupoPaleta[] =>
+  hay
+    ? [{ titulo: "Agente", items: [{ id: ASK + q, etiqueta: q ? `Preguntar a OPAI: «${q}»` : "Preguntar a OPAI", icono: Sparkles, href: "#" }] }]
+    : [];
 type Resultado = { id: string; titulo: string; detalle: string | null; href: string };
 type Busqueda = Record<"cuentas" | "instalaciones" | "personas" | "contactos", Resultado[]>;
 type Ajuste = { modulo: string; clave: string; etiqueta: string; grupo: string | null };
@@ -25,12 +32,15 @@ export function Paleta({
   epoca,
   acciones,
   nav,
+  agente = false,
 }: {
   abierto: boolean;
   onCerrar: () => void;
   epoca: string;
   acciones: AccionCmdK[];
   nav: ItemNav[];
+  /** Hay agente interno disponible: se ofrece «Preguntar a OPAI». */
+  agente?: boolean;
 }) {
   const router = useRouter();
   const { recientes, limpiarRecientes } = useRecientesPaleta(abierto, epoca, nav);
@@ -47,6 +57,7 @@ export function Paleta({
       ];
     });
     return [
+      ...grupoAgente(agente, ""),
       { titulo: "Recientes", items: visibles },
       { titulo: "Acciones", items: acciones.map((a) => ({ ...a, icono: icono(a.icono) })) },
     ].filter((g) => g.items.length > 0);
@@ -60,6 +71,7 @@ export function Paleta({
       const d = r.ok ? (r.data as Busqueda) : null;
       const t = q.toLowerCase();
       const grupos: GrupoPaleta[] = [
+        ...grupoAgente(agente, q),
         {
           titulo: "Acciones",
           items: acciones
@@ -123,7 +135,7 @@ export function Paleta({
       ];
       return grupos.filter((g) => g.items.length > 0);
     },
-    [nav, acciones],
+    [nav, acciones, agente],
   );
   return (
     <CommandPalette
@@ -134,6 +146,7 @@ export function Paleta({
       onElegir={(it) => {
         limpiarRecientes();
         onCerrar();
+        if (it.id.startsWith(ASK)) return abrirAgente({ borrador: it.id.slice(ASK.length) });
         router.push(it.href);
       }}
     />
