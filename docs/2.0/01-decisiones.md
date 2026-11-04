@@ -1262,7 +1262,15 @@ identidad de servicio en main.
 
 **Consecuencias.** `AGENTS.md` (roles y «Prohibido») queda alineado con esta decisión.
 
-## ADR-064 · Movimientos bancarios por Web4Leads, no por Fintoc directo
+## ADR-064 · Apertura de Finanzas desde 1.0: sin migración, corrida reversible y entrada por capacidad
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude, con las respuestas de Carlos del 4-nov (sin fecha de corte, todas las facturas, export con key READ).
+
+**Decisión.** La apertura (saldos de banco, facturas con su saldo y último folio usado por tipo) se carga con `finanzas.apertura.importar` (solo personas, `dryRun`) y se deshace con `finanzas.apertura.revertir`. Cada carga es una corrida de `core.importaciones` (`versionContrato = finanzas-apertura@1`) con una fila por saldo, documento y folio. Nunca pisa: un documento con el mismo tipo y folio queda «sin cambio», un RUT sin cuenta en 2.0 o una cuenta bancaria inexistente se rechaza con motivo, y el folio solo avanza. Compara sumas de control 1.0 vs 2.0 (saldos, documentos, monto total, por cobrar). No hay migración: los saldos usan origen `manual` con `claveDedupe` `apertura:<corrida>`.
+
+**Pendiente de 1.0.** El exportador `opai1-export/v1` aún no trae `documentos` ni `saldos_bancarios`; hasta que Opai Producto los agregue, la entrada se entrega a la capacidad directamente.
+
+## ADR-065 · Movimientos bancarios por Web4Leads, no por Fintoc directo
 **Fecha:** 4-nov-2026 · **Decide:** Carlos (instrucción en el chat) · **Registra:** Claude
 
 **Decisión.** OPAI 2.0 recibe los movimientos del banco en línea por el webhook firmado de Web4Leads (que administra Carlos y ya usa Fintoc), en `/api/t/<slug>/banco/web4leads`, con la misma carga y firma HMAC-SHA256 que usa 1.0. No se construye un adaptador Fintoc propio ni se guardan credenciales del banco.

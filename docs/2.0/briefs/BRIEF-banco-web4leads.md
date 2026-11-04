@@ -3,7 +3,7 @@
 **Rama:** `brief/car-web4leads-bancos` · **Autor:** Claude · **Fecha:** 4-nov-2026 · **Migración:** `20261105150000_finanzas_banco_web4leads` (aditiva)
 
 ## 1. Objetivo
-Que los movimientos del banco lleguen solos a Finanzas › Bancos, sin subir cartolas, usando Web4Leads (que administra Carlos y ya se conecta a Fintoc) como puente. OPAI no guarda credenciales del banco ni integra Fintoc directo (ver ADR-064).
+Que los movimientos del banco lleguen solos a Finanzas › Bancos, sin subir cartolas, usando Web4Leads (que administra Carlos y ya se conecta a Fintoc) como puente. OPAI no guarda credenciales del banco ni integra Fintoc directo (ver ADR-065).
 
 ## 2. Estado actual (verificado)
 - Bancos hoy solo importa cartolas (Santander o CSV) con deduplicación por huella `fecha|monto|GLOSA` y saldo posterior.
