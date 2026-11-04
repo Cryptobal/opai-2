@@ -23,7 +23,7 @@ export const aperturaRevertir = defineCapability({
   id: "finanzas.apertura.revertir",
   soloPersonas: true,
   descripcion:
-    "Deshace una carga de apertura desde OPAI 1.0: borra los documentos y saldos que creó y devuelve el folio. Se niega entera si algo ya tiene cobros, gestiones o conciliaciones.",
+    "Deshace una carga de apertura desde OPAI 1.0: borra los documentos y saldos que creó; el folio no se devuelve, porque lo que 1.0 emitió ante el SII sigue usado. Se niega entera si algo ya tiene cobros, gestiones o conciliaciones.",
   permiso: PERMISO_VENTAS_CONFIGURE,
   input: inputAperturaRevertir,
   output: z.object({

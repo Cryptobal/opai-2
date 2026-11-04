@@ -95,6 +95,17 @@ describe.skipIf(!urlPropietario)("finanzas.apertura · carga desde 1.0", () => {
     expect((await e.admin.dteFolio.findFirst({ where: { tenantId: tB, tipoDte: 33 } }))?.folioActual).toBe(101);
   });
 
+  it("revertir NO baja el folio (lo que 1.0 emitió sigue usado)", async () => {
+    const tC = (await e.admin.tenant.create({ data: { slug: `ap-c-${randomUUID().slice(0, 8)}`, nombre: "ap-c", vertical: "seguridad" } })).id;
+    await e.admin.dteFolio.create({ data: { tenantId: tC, tipoDte: 33, folioDesde: 1, folioHasta: 100, folioActual: 5 } });
+    const ap = await mod.executeCapability(ctx(tC), "finanzas.apertura.importar", { fechaCorte: "2026-10-31", entrada: { saldos: [], documentos: [], folios: [{ tipoDte: 33, ultimoFolio: 12 }] } });
+    const id = (ap as { data: { importacionId: string } }).data.importacionId;
+    expect((await e.admin.dteFolio.findFirst({ where: { tenantId: tC } }))?.folioActual).toBe(13);
+    const r = await mod.executeCapability(ctx(tC), "finanzas.apertura.revertir", { importacionId: id });
+    expect(r).toMatchObject({ ok: true, data: { revertida: true } });
+    expect((await e.admin.dteFolio.findFirst({ where: { tenantId: tC } }))?.folioActual).toBe(13);
+  });
+
   it("la otra empresa no ve ni recibe nada", async () => {
     expect(await e.admin.documentoEmitido.count({ where: { tenantId: tB } })).toBe(0);
     const corrida = await e.admin.importacion.findFirst({ where: { tenantId: tA, versionContrato: "finanzas-apertura@1", estado: "completada" } });
@@ -109,7 +120,7 @@ describe.skipIf(!urlPropietario)("finanzas.apertura · carga desde 1.0", () => {
     expect(await e.admin.documentoEmitido.count({ where: { tenantId: tA } })).toBe(3);
   });
 
-  it("revierte una carga intacta: borra lo creado y devuelve el folio", async () => {
+  it("revierte una carga intacta: borra documentos y saldos", async () => {
     const entradaB = { saldos: [{ banco: "Santander", numeroVisible: "001", moneda: "CLP", saldo: 700 }], documentos: [doc(20)], folios: [{ tipoDte: 33, ultimoFolio: 50 }] };
     const ap = await mod.executeCapability(ctx(tB), "finanzas.apertura.importar", { fechaCorte: "2026-10-31", entrada: entradaB });
     const id = (ap as { data: { importacionId: string } }).data.importacionId;

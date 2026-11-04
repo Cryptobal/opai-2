@@ -101,7 +101,7 @@ export async function aplicarApertura(
       const m = await tx.movimientoBancario.create({
         data: {
           tenantId: ctx.tenantId, cuentaId, fecha: aFecha(fechaCorte), monto: BigInt(s.saldo), glosa: "Saldo de apertura desde OPAI 1.0",
-          saldoDespues: BigInt(s.saldo), claveDedupe: `apertura:${corrida.id}`, estado: "ignorado", origen: "manual",
+          saldoDespues: BigInt(s.saldo), claveDedupe: "apertura:saldo", estado: "ignorado", origen: "manual",
         },
       });
       await fila("saldo_banco", `${s.banco}/${s.numeroVisible}`, m.id);
@@ -118,7 +118,7 @@ export async function aplicarApertura(
       await fila("documento_cobrar", `${d.tipoDte}-${d.folio}`, doc.id, { cobradoApertura: d.montoCobrado });
     }
     for (const { fila: f, proximo } of foliosAplicar) {
-      await tx.dteFolio.update({ where: { id: f.id }, data: { folioActual: proximo } });
+      await tx.dteFolio.updateMany({ where: { id: f.id, folioActual: { lt: proximo } }, data: { folioActual: proximo } });
       await fila("folio", String(f.tipoDte), f.id, { folioActual: f.folioActual });
     }
     await tx.importacion.update({

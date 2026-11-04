@@ -4,7 +4,8 @@ import { z } from "zod";
 import { uuidSchema } from "../core/esquemas";
 
 const fechaSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato aaaa-mm-dd.");
-const monto = z.number().int();
+const monto = z.number().int().min(-2_147_483_647).max(2_147_483_647);
+const montoDoc = z.number().int().min(0).max(2_147_483_647);
 
 export const entradaAperturaSchema = z.object({
   saldos: z
@@ -18,11 +19,11 @@ export const entradaAperturaSchema = z.object({
         rutReceptor: z.string().max(20),
         fechaEmision: fechaSchema,
         fechaVencimiento: fechaSchema.nullable().default(null),
-        montoNeto: monto,
-        montoExento: monto,
-        montoIva: monto,
-        montoTotal: monto,
-        montoCobrado: monto,
+        montoNeto: montoDoc,
+        montoExento: montoDoc,
+        montoIva: montoDoc,
+        montoTotal: montoDoc,
+        montoCobrado: montoDoc,
         glosa: z.string().max(500).nullable().default(null),
       }),
     )

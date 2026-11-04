@@ -45,10 +45,7 @@ export async function revertirApertura(ctx: Contexto, importacionId: string, dry
         await tx.documentoEmitidoReferencia.deleteMany({ where: { documentoId: f.id20 } });
         await tx.documentoEmitido.delete({ where: { id: f.id20 } });
       } else if (f.entidad === "saldo_banco") await tx.movimientoBancario.delete({ where: { id: f.id20 } });
-      else if (f.entidad === "folio") {
-        const previo = (f.previos as { folioActual?: number } | null)?.folioActual;
-        if (typeof previo === "number") await tx.dteFolio.update({ where: { id: f.id20 }, data: { folioActual: previo } });
-      }
+      // El folio NO se devuelve: lo que 1.0 emitió ante el SII sigue usado (la apertura solo lo hace avanzar).
     }
     await tx.importacion.update({ where: { id: importacionId }, data: { estado: "revertida", revertidaEn: new Date() } });
     return { revertida: true, ...resumen, bloqueos };
