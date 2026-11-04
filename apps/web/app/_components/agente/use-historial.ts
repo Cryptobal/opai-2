@@ -41,6 +41,7 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
   useEffect(() => {
     if (!activo) return;
     let vivo = true;
+    setError(null);
     void ejecutarCapacidad(portal, "agente.conversaciones.list", {
       archivadas,
       limite: 50,
@@ -48,7 +49,7 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
     })
       .then((r) => {
         if (!vivo) return;
-        setError(r.ok ? null : "No pudimos cargar tus conversaciones.");
+        if (!r.ok) setError("No pudimos cargar tus conversaciones.");
         if (r.ok) setCargada({ archivadas, q, filas: r.data as Resumen[] });
       })
       .catch(() => vivo && setError(SIN_RED));
