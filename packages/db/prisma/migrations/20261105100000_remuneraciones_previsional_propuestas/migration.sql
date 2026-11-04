@@ -176,8 +176,10 @@ COMMIT;
 -- SET LOCAL lock_timeout = '5s';
 -- DROP FUNCTION IF EXISTS "core"."remuneraciones_resolver_propuesta"(uuid, boolean, uuid);
 -- DROP FUNCTION IF EXISTS "core"."remuneraciones_proponer_previsional"(text, jsonb, date, text, date);
--- UPDATE "core"."indicadores_legales" SET "lectura_automatica" = false, "fuente_primaria" = NULL, "fuente_contraste" = NULL
---   WHERE "clave" IN ('imm', 'topes', 'afp', 'sis', 'cesantia');  -- verificar contra la semilla 20261102190000 l.116-121
+-- UPDATE "core"."indicadores_legales" SET "lectura_automatica" = false, "fuente_contraste" = NULL,
+--   "fuente_primaria" = CASE "clave" WHEN 'imm' THEN 'Diario Oficial / DT' WHEN 'cesantia' THEN 'Ley 19.728 / DT'
+--                       ELSE 'Superintendencia de Pensiones' END
+--   WHERE "clave" IN ('imm', 'topes', 'afp', 'sis', 'cesantia');
 -- DROP INDEX IF EXISTS "core"."valores_publicados_indicador_propuesto_idx";
 -- ALTER TABLE "core"."valores_publicados" DROP COLUMN IF EXISTS "resuelto_por_id", DROP COLUMN IF EXISTS "resuelto_en";
 -- COMMIT;

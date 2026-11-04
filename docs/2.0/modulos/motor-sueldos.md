@@ -79,12 +79,12 @@ Montos: CLP en enteros, nunca float (REGLAS-codigo); tope por concepto de 100.00
 |---|---|---|---|---|
 | UF | Banco Central, API BDE (requiere cuenta y token) | SII, tabla UF del año | Diaria (se conoce por adelantado) | Sí (API) |
 | UTM | Banco Central, API BDE | SII, tabla UTM | Mensual | Sí (API) |
-| Ingreso mínimo mensual | Ley publicada en el Diario Oficial (hoy, según el buscador, Ley 21.830: $553.553 desde el 1-may-2026, publicada el 22-jun-2026 con efecto retroactivo; coincide con el valor de 1.0; *por verificar* en el texto) | Dirección del Trabajo | Por ley | No: OPAI lo publica como propuesto con la ley; lo confirma una persona del tenant (R5) |
+| Ingreso mínimo mensual | Ley publicada en el Diario Oficial (hoy, según el buscador, Ley 21.830: $553.553 desde el 1-may-2026, publicada el 22-jun-2026 con efecto retroactivo; coincide con el valor de 1.0; *por verificar* en el texto) | Dirección del Trabajo | Por ley | Desde CAR-183 se lee de Previred y lo aprueba un owner de plataforma; el caso retroactivo (Ley 21.830) y la ley como fuente primaria los confirma una persona del tenant (R5) |
 | Topes imponibles (AFP/salud/Ley 16.744 y seguro de cesantía) | Superintendencia de Pensiones (2026: 90,0 UF y 135,2 UF desde el 1-feb-2026, iguales a 1.0; que la Res. Ex. 237 reemplazó a la 27 viene del buscador, *por verificar*) | Previred, indicadores del mes | Anual, con correcciones | Semiautomática: se lee y se confirma |
 | Comisión por AFP | Superintendencia de Pensiones | Previred | Cambia por AFP | Semiautomática |
 | SIS | Superintendencia de Pensiones | Previred | Por licitación | Semiautomática |
 | Cotización adicional del empleador (Ley 21.735) | Ley 21.735, art. transitorio (1 % desde ago-2025 y 3,5 % desde ago-2026, iguales a 1.0; 4,25 % desde ago-2027 y la escala hasta 8,5 %, *por verificar*) | Superintendencia de Pensiones | Cada agosto | Calendario cargado por adelantado (R4) |
-| Seguro de cesantía (empleador 2,4 % indefinido, 3 % plazo fijo; trabajador 0,6 %) | Ley 19.728 | AFC / Dirección del Trabajo | Por ley | OPAI lo publica como propuesto con la norma; lo confirma una persona del tenant (R5) |
+| Seguro de cesantía (empleador 2,4 % indefinido, 3 % plazo fijo; trabajador 0,6 %) | Ley 19.728 | AFC / Dirección del Trabajo | Por ley | Desde CAR-183 se lee de Previred (AFC) y lo aprueba un owner de plataforma; el resto lo confirma una persona del tenant (R5) |
 | Cotización básica Ley 16.744 (0,90 %; 1.0 usa 0,93 %, que podría ser la básica más la extraordinaria de 0,03 % (Ley SANNA), *por verificar*) | Ley 16.744 / SUSESO | ISL | Por ley | OPAI lo publica como propuesto con la norma; lo confirma una persona del tenant (R5) |
 | Tope de gratificación (4,75 IMM al año) | Código del Trabajo art. 50 | Dirección del Trabajo | Sigue al IMM | Derivado (no se carga) |
 | Jornada legal semanal (44 → 42 h el 26-abr-2026 → 40 h el 26-abr-2028) | Ley 21.561 | Mintrab | Por tramos | Calendario por adelantado (R4) |
