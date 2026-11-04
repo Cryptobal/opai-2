@@ -7,7 +7,7 @@ import { prepararEntorno, type Entorno } from "../../db/test/entorno";
 import * as mod from "../src";
 import { capacidadesComercial } from "../src/comercial";
 import { trabajoVencerPasosSeguimiento } from "../src/comercial/seguimiento-trabajo";
-import { dato } from "./maestros-ayuda";
+import { codigo, dato } from "./maestros-ayuda";
 
 type Plan = { id: string; porDefecto: boolean; config: Record<string, unknown> };
 
@@ -123,5 +123,17 @@ describe("comercial · seguimiento y actividad, segundo PR (Postgres real)", () 
     expect(restaurado.archivadoEn).toBeNull();
     const activos = await dato<{ items: { id: string; archivado: boolean }[] }>(A.c, "comercial.contactos.list", {});
     expect(activos.items.find((x) => x.id === c.id)?.archivado).toBe(false);
+  });
+
+  it("entre empresas: la otra no restaura contactos ni etiqueta o filtra con lo de la primera (N4 de #296)", async () => {
+    const c = await dato<{ id: string }>(A.c, "core.contactos.create", { cuentaId: A.cuentaId, nombres: "Luis", apellidos: "Mora", email: "luis@gama.cl" });
+    await dato(A.c, "core.contactos.archive", { id: c.id });
+    expect(await codigo(B.c, "core.contactos.restaurar", { id: c.id })).toBe("NOT_FOUND");
+    expect(await codigo(B.c, "core.contactos.restaurar", { id: c.id }, { dryRun: true })).toBe("NOT_FOUND");
+    expect((await e.admin.contacto.findUniqueOrThrow({ where: { id: c.id } })).archivadoEn).not.toBeNull();
+    const et = await dato<{ id: string }>(A.c, "core.etiquetas.create", { nombre: "Solo Gama" });
+    expect(await codigo(B.c, "core.etiquetas.asignar", { entidadTipo: "cuenta", entidadIds: [B.cuentaId], etiquetaIds: [et.id] })).toBe("NOT_FOUND");
+    expect(await codigo(B.c, "core.etiquetas.asignar", { entidadTipo: "cuenta", entidadIds: [A.cuentaId], etiquetaIds: [et.id] })).toBe("NOT_FOUND");
+    expect(await e.admin.etiquetaAsignacion.count({ where: { tenantId: B.tenantId } })).toBe(0);
   });
 });
