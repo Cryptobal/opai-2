@@ -9,7 +9,7 @@ import { aplicarEtapa } from "./transiciones-util";
 import { validarEntrada } from "./validaciones";
 
 type Tx = Parameters<Parameters<Contexto["transaccion"]>[0]>[0];
-type Seg = { id: string; negocioId: string; token: string; contactoId: string | null; estado: string };
+type Seg = { id: string; negocioId: string; token: string; contactoId: string | null; estado: string; motivo?: string | null };
 
 /** Registra en la ficha del negocio lo que pasó con un paso (nota, correo, llamada, whatsapp o tarea). */
 export async function actividadDePaso(
@@ -77,9 +77,12 @@ export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: Co
     if (destino === "cancelado")
       await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
   }
-  // Una vez por cambio real de estado (activo → pausado/cancelado): las respuestas siguientes a un
-  // seguimiento ya detenido dejan su nota pero no repiten el aviso al vendedor.
-  if (destino)
+  // Una sola vez por seguimiento: la primera respuesta registrada avisa al vendedor, haya o no cambio
+  // de estado (una pausa manual previa no la silencia). El motivo `cliente_respondio` marca «ya avisado».
+  const yaAvisado = s.motivo === "cliente_respondio";
+  if (!destino && !yaAvisado)
+    await tx.seguimiento.update({ where: { id: s.id }, data: { motivo: "cliente_respondio" } });
+  if (destino || !yaAvisado)
     await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
   return actividadId;
 }
