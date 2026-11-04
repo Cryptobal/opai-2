@@ -443,6 +443,10 @@ model CuentaBancaria {
   /// Mapeo de columnas para importación genérica CSV/XLSX (guardado por cuenta).
   mapeoColumnas  Json?    @map("mapeo_columnas")
   activa         Boolean  @default(true)
+  /// Última sincronización automática (Web4Leads); null si la cuenta solo recibe cartolas.
+  ultimaSyncEn   DateTime? @map("ultima_sync_en") @db.Timestamptz(6)
+  /// Saldo que reportó el banco en esa sincronización (CLP); el ledger de movimientos manda.
+  saldoBanco     BigInt?  @map("saldo_banco")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -492,6 +496,8 @@ model MovimientoBancario {
   sucursal      String?
   saldoDespues  BigInt?   @map("saldo_despues")
   claveDedupe   String    @map("clave_dedupe")
+  /// Id del movimiento en el sistema de origen (Web4Leads); null en cartola y manual.
+  idExterno     String?   @map("id_externo")
   /// pendiente | sugerido | conciliado | por_autorizar | ignorado
   estado        String    @default("pendiente")
   /// cartola | manual | web4leads
@@ -504,6 +510,7 @@ model MovimientoBancario {
   conciliaciones ConciliacionBanco[]
 
   @@unique([tenantId, cuentaId, claveDedupe])
+  @@unique([tenantId, cuentaId, idExterno])
   @@index([tenantId, cuentaId, estado, fecha])
   @@map("movimientos_bancarios")
   @@schema("finanzas")
