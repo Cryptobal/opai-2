@@ -22,7 +22,7 @@ const tituloGrupo = "t-overline px-2 py-2 text-fg-muted";
 export function GrupoNav({ grupo, lista, rutaActual, Link, abierto, onAreaAbierta, pinDe }: Props) {
   if (!grupo) {
     return (
-      <div className="flex flex-col gap-px px-3">
+      <div className="flex flex-col gap-0.5 px-3 pb-1">
         {lista.map((item) => (
           <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} {...pinDe(item)} />
         ))}
@@ -55,7 +55,7 @@ export function GrupoNav({ grupo, lista, rutaActual, Link, abierto, onAreaAbiert
   // y la activa, la barra de acento (§8.2.2). Un área con una sola entrada también lleva
   // su encabezado, para que Firmas no quede suelta fuera de Documentos.
   return (
-    <section className="mt-1 px-3" aria-label={grupo}>
+    <section className="mt-2 px-3" aria-label={grupo}>
       <AreaGrupo
         etiqueta={grupo}
         icono={iconoDeArea(area)}
