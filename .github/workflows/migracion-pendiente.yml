@@ -7,6 +7,7 @@ name: Migración pendiente
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
+  merge_group:
 
 permissions:
   contents: read
@@ -14,8 +15,8 @@ permissions:
   issues: read
 
 concurrency:
-  group: migracion-pendiente-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: migracion-pendiente-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   migracion-pendiente:
@@ -23,7 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Cola de merge (control ya hecho en el PR)
+        if: github.event_name == 'merge_group'
+        run: echo "merge_group sin número de PR — migración y etiqueta ya revisadas en el PR original."
+
       - name: Revisar etiqueta y migraciones nuevas
+        if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
