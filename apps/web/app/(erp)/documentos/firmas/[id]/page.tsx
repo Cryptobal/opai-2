@@ -34,9 +34,7 @@ export default function FirmaFicha({ params }: Props) {
         );
         return { id, r, puedeGestionar };
       }}
-      opciones={({ r }) => ({
-        titulo: r.ok ? (ETIQUETA_CLASE[r.data.clase] ?? r.data.clase) : "Solicitud de firma",
-      })}
+      opciones={({ r }) => ({ titulo: r.ok ? (ETIQUETA_CLASE[r.data.clase] ?? r.data.clase) : "Solicitud de firma" })}
     >
       {({ id, r, puedeGestionar }) => {
         const s = r.ok ? r.data : null;
@@ -44,26 +42,12 @@ export default function FirmaFicha({ params }: Props) {
           <DetailScreen
             state={estadoPantalla(r)}
             titulo={s ? (ETIQUETA_CLASE[s.clase] ?? s.clase) : "Solicitud de firma"}
-            subtitulo={
-              s
-                ? `Nivel ${s.nivel} · orden ${s.orden === "paralelo" ? "paralelo" : "secuencial"}`
-                : undefined
-            }
+            subtitulo={s ? `Nivel ${s.nivel} · orden ${s.orden === "paralelo" ? "paralelo" : "secuencial"}` : undefined}
             estado={
-              s ? (
-                <Badge tono={TONO_ESTADO[s.estado] ?? "neutro"}>
-                  {ETIQUETA_ESTADO[s.estado] ?? s.estado}
-                </Badge>
-              ) : undefined
+              s ? <Badge tono={TONO_ESTADO[s.estado] ?? "neutro"}>{ETIQUETA_ESTADO[s.estado] ?? s.estado}</Badge> : undefined
             }
             acciones={
-              s ? (
-                <AccionesSolicitud
-                  id={id}
-                  puedeGestionar={puedeGestionar}
-                  viva={VIVOS.has(s.estado)}
-                />
-              ) : undefined
+              s ? <AccionesSolicitud id={id} puedeGestionar={puedeGestionar} viva={VIVOS.has(s.estado)} /> : undefined
             }
           >
             {s ? (
@@ -73,9 +57,7 @@ export default function FirmaFicha({ params }: Props) {
                     { etiqueta: "Vence", valor: fecha(s.plazoVence) },
                     { etiqueta: "Enviada", valor: fecha(s.creadaEn) },
                     ...(s.motivo ? [{ etiqueta: "Motivo", valor: s.motivo }] : []),
-                    ...(s.completadaEn
-                      ? [{ etiqueta: "Completada", valor: fecha(s.completadaEn) }]
-                      : []),
+                    ...(s.completadaEn ? [{ etiqueta: "Completada", valor: fecha(s.completadaEn) }] : []),
                   ]}
                 />
                 <section className="flex flex-col gap-2">
@@ -95,20 +77,8 @@ export default function FirmaFicha({ params }: Props) {
                             {f.motivoRechazo ? ` · rechazó: ${f.motivoRechazo}` : ""}
                           </span>
                         </span>
-                        <Badge
-                          tono={
-                            f.estado === "firmado"
-                              ? "success"
-                              : f.estado === "rechazado"
-                                ? "danger"
-                                : "neutro"
-                          }
-                        >
-                          {f.estado === "firmado"
-                            ? "Firmó"
-                            : f.estado === "rechazado"
-                              ? "Rechazó"
-                              : "Pendiente"}
+                        <Badge tono={f.estado === "firmado" ? "success" : f.estado === "rechazado" ? "danger" : "neutro"}>
+                          {f.estado === "firmado" ? "Firmó" : f.estado === "rechazado" ? "Rechazó" : "Pendiente"}
                         </Badge>
                       </li>
                     ))}
