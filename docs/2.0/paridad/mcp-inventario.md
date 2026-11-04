@@ -715,6 +715,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `agente.conversaciones.archivar`
 - `agente.conversaciones.renombrar`
 - `agente.historial.list`
+- `comercial.informes.cierre`
+- `comercial.informes.perdidos_por_motivo`
+- `comercial.negocios.alertas`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
 - `core.actividades.delete`
