@@ -338,6 +338,8 @@ finanzas_proveedores_listar
 finanzas_proveedores_obtener
 finanzas_reglas_banco_guardar
 finanzas_reglas_banco_listar
+finanzas_reportes_resultados
+finanzas_ventas_buscar
 finanzas_ventas_cesion_ceder
 finanzas_ventas_cesion_simular
 finanzas_ventas_crear_borrador
