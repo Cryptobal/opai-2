@@ -147,4 +147,5 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 
 - CAR-158 (seguimiento): el vínculo principal derivado del negocio se reemplaza cuando el mismo negocio reaparece con otro `primaryContactId` (hallazgo de Codex en #268). Primera captura Previred en Neon `main`: 4 indicadores renovados; `topes` propuestos, pendientes de aprobación de Carlos en Plataforma → Valores legales.
 
+- CAR-158 (dryRun real, 4-nov): `additionalReferences` llega `null` (Json? en 1.0); el lector lo normaliza a arreglo (acepta null, texto JSON u objeto suelto) y el validador agrupa los errores por campo con conteo y primera fila. Carlos repite el dryRun.
 - Conciliación del 4-nov-2026 (Claude): 10 filas «en revisión» pasaron a «Integrado» tras comprobar el merge en GitHub; quedan abiertos #270 (CAR-168), #246 (CAR-181, con conflicto), #241, #240 y #168. Carlos aprobó los `topes` de Previred: Valores legales quedó «Sin cambios por aprobar». #247 cerrado por obsoleto. Carlos pide a Opai Producto, por PR en 1.0, el recurso de usuarios y el período facturado de `ultimaCorridaExitosa`; el dryRun del importador lo corre él.

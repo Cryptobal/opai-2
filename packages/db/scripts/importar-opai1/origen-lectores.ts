@@ -13,7 +13,15 @@ export interface LectorOrigen {
 export function validarDatos(crudo: unknown): DatosOpai1 {
   const r = datosOpai1.safeParse(crudo);
   if (r.success) return r.data;
-  const rutas = r.error.issues.slice(0, 10).map((i) => `${i.path.join(".")} (${i.code})`);
+  // Agrupa por campo (índices → N) con filas afectadas y la primera fila, para ver todo de una vez.
+  const grupos = new Map<string, { n: number; primera: string }>();
+  for (const i of r.error.issues) {
+    const clave = `${i.path.map((x) => (typeof x === "number" ? "N" : x)).join(".")} (${i.code})`;
+    const g = grupos.get(clave) ?? { n: 0, primera: i.path.join(".") };
+    g.n += 1;
+    grupos.set(clave, g);
+  }
+  const rutas = [...grupos].slice(0, 40).map(([k, g]) => (g.n > 1 ? `${k} ×${g.n}, p. ej. ${g.primera}` : g.primera + k.slice(k.indexOf(" ("))));
   throw new Error(`Origen inválido: ${rutas.join("; ")}`);
 }
 

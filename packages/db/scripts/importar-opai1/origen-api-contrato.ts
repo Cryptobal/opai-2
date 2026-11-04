@@ -93,6 +93,20 @@ function agregarNegocio(acc: Acumulado, fila: Fila): void {
   }
 }
 
+/** `additionalReferences` es `Json?` en 1.0: null, texto JSON, objeto suelto o arreglo. Siempre un arreglo de objetos. */
+export function referenciasComoArreglo(v: unknown): unknown[] {
+  let valor = v;
+  if (typeof valor === "string") {
+    try {
+      valor = JSON.parse(valor);
+    } catch {
+      return [];
+    }
+  }
+  if (Array.isArray(valor)) return valor.filter(esFila);
+  return esFila(valor) ? [valor] : [];
+}
+
 function adaptarRecurrente(fila: Fila): Fila {
   const { isActive, ultimaCorridaExitosa: corrida, ...conNulos } = fila;
   // Columnas anulables en 1.0 cuyo esquema de lectura usa valor por defecto: null se lee como «ausente».
@@ -105,6 +119,7 @@ function adaptarRecurrente(fila: Fila): Fila {
   return {
     ...resto,
     active: isActive === true,
+    additionalReferences: referenciasComoArreglo(resto["additionalReferences"]),
     lastSuccessfulRun: typeof ranAt === "string" ? { runAt: ranAt, period: null } : null,
   };
 }
