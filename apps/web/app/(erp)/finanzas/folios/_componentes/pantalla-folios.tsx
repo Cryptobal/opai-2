@@ -69,7 +69,7 @@ export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
       <ListScreen<FolioCaf>
         state={state}
         titulo="Folios"
-        subtitulo="Facturación · rangos autorizados por CAF"
+        sinCabecera
         accionPrincipal={
           puedeCargar ? (
             <Button variant="primary" onClick={() => setSubirAbierta(true)}>
