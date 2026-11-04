@@ -71,7 +71,9 @@ export async function validarItems(ctx: Contexto, items: readonly Item[]): Promi
   if (futura >= 0) throw reglaDeNegocio(`El gasto ${futura + 1} tiene fecha futura.`);
   const ids = [...new Set(items.flatMap((i) => (i.documentoId ? [i.documentoId] : [])))];
   // N1 (Revisor): quien no ve todas las rendiciones solo adjunta respaldos que él mismo subió (ADR-022).
-  const propios = ctx.autorizar(PERMISO_VER_TODAS) ? {} : { creadoPorId: actorId(ctx) };
+  // Una key de agente guarda su propio ID en creadoPorId y a su responsable en viaUserId: ambos cuentan como propios.
+  const yo = actorId(ctx);
+  const propios = ctx.autorizar(PERMISO_VER_TODAS) ? {} : { OR: [{ creadoPorId: yo }, { viaUserId: yo }] };
   if (ids.length > 0 && (await ctx.db.documento.count({ where: { id: { in: ids }, estado: "disponible", ...propios } })) !== ids.length)
     throw reglaDeNegocio("Un respaldo no existe entre tus documentos o aún no terminó de subirse.");
   const exigir = await ajuste<boolean>(ctx, "rendiciones", "exigir_respaldo");

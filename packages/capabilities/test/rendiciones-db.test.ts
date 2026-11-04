@@ -172,6 +172,16 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     expect(r).toMatchObject({ ok: false });
   });
 
+  it("el respaldo subido por una key de agente cuenta como propio de su responsable, no de otro", async () => {
+    const porKey = (via: string) =>
+      e.admin.documento
+        .create({ data: { tenantId: tenantA, nombre: "key.pdf", mime: "application/pdf", tamano: 1_000, storageKey: `k-${randomUUID()}`, estado: "disponible", creadoPorTipo: "agent", creadoPorId: randomUUID(), viaUserId: via } })
+        .then((d) => d.id);
+    const con = (documentoId: string) => cuerpo({ items: [item({ documentoId, sinRespaldoMotivo: undefined, folio: `K-${documentoId.slice(0, 6)}` })] });
+    expect(await yo("rendiciones.rendiciones.crear", con(await porKey(otroAprobador)))).toMatchObject({ ok: false });
+    expect(await yo("rendiciones.rendiciones.crear", con(await porKey(rinde)))).toMatchObject({ ok: true });
+  });
+
   it("la vista previa no escribe nada", async () => {
     const antes = await e.admin.rendicion.count({ where: { tenantId: tenantA } });
     expect(await yo("rendiciones.rendiciones.crear", cuerpo(), { dryRun: true })).toMatchObject({ ok: true });
