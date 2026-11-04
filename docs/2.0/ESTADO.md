@@ -180,3 +180,5 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 - CAR-185 (arreglo de CI, 4-nov): el test del manifest de Finanzas esperaba 72 capacidades y desde #277 son 74; actualizado para destrabar `test` en main.
 - CAR-162 (PR D, presupuesto de JS): tope de `/(erp)/configuracion/modulo/[id]` de 182 a 185 KB; medido 183,4 KB. El catálogo editable de CPQ (ítems, categorías, archivar y restaurar) vive en esa ruta y trae el formulario de ítem. Pendiente: cargar la hoja del ítem bajo demanda para volver a 182 KB.
 - Comercial actividad y seguimiento PR 2 (presupuesto de JS, 4-nov): sube el tope de 42 rutas, casi todas entre 0,1 y 1,5 KB (la mayor, +8,9 KB, en las fichas de cuenta/negocio que ahora cargan etiquetas, tarjetas de actividad y la hoja de seguimiento). Cada tope queda en lo medido, redondeado hacia arriba. Pendiente: medir qué parte del aumento común viene del menú «Pendientes» y de `ChipsEtiquetas`, y cargar en diferido lo que no se usa al abrir la pantalla.
+
+- CAR-154: «Probar conexión» de la integración de cesión (Octava) pide el token con el RUT y la contraseña guardados (`core.integraciones.probar`); no cede ni emite nada.

@@ -12,11 +12,12 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import { externo } from "../externo";
 import { correoDe, iaDe } from "../integraciones/adaptadores";
 import { probarGeo } from "./integraciones-probar-geo";
+import { probarOctava } from "./integraciones-probar-octava";
 
 export const integracionesProbar = defineCapability({
   id: "core.integraciones.probar",
   descripcion:
-    "Prueba la conexión de una integración con su credencial vigente (correo, geolocalización o IA) y guarda el resultado en su estado.",
+    "Prueba la conexión de una integración con su credencial vigente (correo, geolocalización, IA o cesión con Octava) y guarda el resultado en su estado.",
   permiso: PERMISOS_CORE.integracionesManage,
   input: z.object({ proveedor: z.string() }),
   // Ante un error, `mensaje` incluye el texto que devolvió el proveedor (saneado): dato externo.
@@ -43,6 +44,8 @@ export const integracionesProbar = defineCapability({
         // su mensaje saneado (sin la key) y se muestra tal cual en pantalla.
         await ia.completar({ prompt: "Responde solo: ok", maxTokens: 256 });
         mensaje = `Conexión correcta (${ia.proveedor}, ${ia.modelo}).`;
+      } else if (def.id === "dte_cesion") {
+        mensaje = await probarOctava(ctx);
       } else {
         const correo = await correoDe(ctx);
         if (!correo.remitente)
