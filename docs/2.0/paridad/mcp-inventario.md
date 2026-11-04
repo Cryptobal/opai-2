@@ -720,6 +720,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `agente.conversaciones.archivar`
 - `agente.conversaciones.renombrar`
 - `agente.historial.list`
+- `comercial.informes.cierre`
+- `comercial.informes.perdidos_por_motivo`
+- `comercial.negocios.alertas`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
 - `core.actividades.delete`
@@ -746,6 +749,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.funciones.get`
 - `core.geo.geocodificar`
 - `core.ia.probar`
+- `core.indicadores.uf_utm`
 - `core.invitations.revoke`
 - `core.patrones.get`
 - `core.personas.laboral_actualizar`
@@ -780,6 +784,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.actualizar`
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
+- `finanzas.reportes.resultados`
+- `finanzas.ventas.buscar`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`

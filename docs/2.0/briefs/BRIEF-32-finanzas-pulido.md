@@ -1,4 +1,4 @@
-# BRIEF-31 · Finanzas: pulido de QA (CAR-165 · F1)
+# BRIEF-32 · Finanzas: pulido de QA (CAR-165 · F1)
 
 ## 1 Objetivo
 Cerrar los hallazgos F-B3 a F-B8 y F-B10 de la auditoría de Finanzas y Rendiciones (§4, PR #241) que siguen abiertos en `main`.

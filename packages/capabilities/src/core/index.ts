@@ -44,6 +44,7 @@ import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform
 import { invitationsList, invitationsRevoke, usersInvite } from "./invitations";
 import { me } from "./me";
 import { mePortalInicio } from "./portal-inicio";
+import { indicadoresUfUtm } from "./indicadores-uf-utm";
 import { ping } from "./ping";
 import { platformTenantsCreate } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
@@ -57,6 +58,7 @@ import { usersRestablecerMfa } from "./users-mfa";
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
 export const capacidadesDelNucleo: readonly Capacidad[] = [
   ping,
+  indicadoresUfUtm,
   me,
   mePortalInicio,
   tenantGet,
