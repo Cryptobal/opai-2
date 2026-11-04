@@ -5,6 +5,7 @@
   "rutas": {
     "/(erp)": 170,
     "/(erp)/tareas": 171,
+    "/(erp)/finanzas/ventas/programacion/*": 175,
     "/(erp)/negocios/[id]/actividad": 175,
     "/(erp)/instalaciones/[id]/actividad": 175,
     "/(auth)/*": 153,
