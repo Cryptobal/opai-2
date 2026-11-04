@@ -21,7 +21,7 @@ export const consumidorSeguimientoAviso = defineConsumidor({
     if (!e || !plantilla) return;
     const negocio = await ctx.db.negocio.findUnique({ where: { id: ev.entidadId }, select: { responsableId: true } });
     if (!negocio?.responsableId) return;
-    const activo = await ctx.db.membership.findFirst({ where: { userId: negocio.responsableId, estado: "activa" }, select: { userId: true } });
+    const activo = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: negocio.responsableId, estado: "activa" }, select: { userId: true } });
     if (!activo) return;
     if (await ctx.db.notificacion.findFirst({ where: { eventoId: ev.id, usuarioId: activo.userId } })) return;
     const datos = await variablesDe(ctx, ev);
