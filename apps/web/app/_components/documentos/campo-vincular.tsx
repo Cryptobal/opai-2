@@ -6,6 +6,7 @@ import { Campo, Combobox, Select } from "@opai/ds";
 
 import { buscarCandidatosDocumento } from "@/app/_acciones/candidatos-documento";
 
+import { FILA_INFO, opcionesDeCandidatos } from "./opciones-candidatos";
 import type { EntidadVinculable } from "./tipos";
 
 /** A qué se vincula el documento que se está subiendo; `id` es null mientras no se elige. */
@@ -20,7 +21,6 @@ export type OpcionesVincular = {
   disponibles: EntidadVinculable[];
 };
 
-const ERROR = "__error";
 const MENSAJE_FALLO = "No se pudo buscar. Reintenta en unos segundos.";
 
 /** Descripción de la hoja según el destino elegido. */
@@ -55,14 +55,8 @@ export function CampoVincular({
         ok: false as const,
         mensaje: MENSAJE_FALLO,
       }));
-      // Sin estado de error propio en el Combobox: el fallo se muestra como única fila, no elegible.
-      if (!r.ok) return [{ valor: ERROR, etiqueta: r.mensaje }];
-      for (const c of r.items) nombres.current.set(c.id, c.etiqueta);
-      return r.items.map((c) => ({
-        valor: c.id,
-        etiqueta: c.etiqueta,
-        ...(c.detalle ? { detalle: c.detalle } : {}),
-      }));
+      if (r.ok) for (const c of r.items) nombres.current.set(c.id, c.etiqueta);
+      return opcionesDeCandidatos(r);
     },
     [tipoBuscado],
   );
@@ -97,7 +91,7 @@ export function CampoVincular({
             valor={vinculo.id}
             onBuscar={buscar}
             onCambiar={([id]) => {
-              if (!id || id === ERROR) return;
+              if (!id || FILA_INFO.has(id)) return;
               onCambiar({ ...vinculo, id, nombre: nombres.current.get(id) ?? null });
             }}
           />

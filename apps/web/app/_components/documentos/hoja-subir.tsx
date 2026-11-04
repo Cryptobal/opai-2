@@ -39,6 +39,7 @@ export function HojaSubir({
   const {
     vinculo,
     setVinculo,
+    reiniciar,
     visibles,
     destino: destinoSubida,
   } = useDestino(entidad, tipos, vincular);
@@ -55,6 +56,12 @@ export function HojaSubir({
   function cerrar() {
     if (subidos) router.refresh();
     setSubidos(0);
+    if (vincular) {
+      // La hoja queda montada: sin esto reabre con la entidad y el tipo de la vez anterior.
+      reiniciar();
+      setTipoId(null);
+      setPortales([]);
+    }
     hoja.cerrar();
   }
   return (
