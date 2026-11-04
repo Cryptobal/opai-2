@@ -162,3 +162,4 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 - CAR-158 (Revisor de #272): additionalReferences no interpretable (texto no JSON, elementos no objeto, texto >100 KB) ahora detiene el dryRun nombrando la plantilla, en vez de perder la referencia en silencio; el validador indica «y N grupos más». Siguen pendientes de #268: verificar el tenant de origen antes de la importación real, tope y timeout de la paginación.
 
 - CAR-158 (pendientes de #268 del Revisor): el lector HTTP verifica que todas las filas sean de una sola empresa de 1.0 (y de la indicada en `OPAI1_EXPORT_TENANT`, opcional), corta cursores repetidos, limita a 2000 páginas por recurso y aplica timeout de 30 s por pedido.
+- CAR-185 (arreglo de CI, 4-nov): el test del manifest de Finanzas esperaba 72 capacidades y desde #277 son 74; actualizado para destrabar `test` en main.
