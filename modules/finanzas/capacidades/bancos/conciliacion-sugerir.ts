@@ -16,6 +16,10 @@ const sugerenciaSchema = z.object({
   montoDocumento: z.number().int(),
   montoPendiente: z.number().int(),
   diferencia: z.number().int(),
+  /** Folio y cliente/proveedor para reconocer el documento sin mostrar su id. */
+  folio: z.number().int().nullable(),
+  tipoDte: z.number().int().nullable(),
+  contraparte: z.string().nullable(),
 });
 
 export const bancosConciliacionSugerir = defineCapability({
@@ -51,11 +55,12 @@ export const bancosConciliacionSugerir = defineCapability({
           montoCobrado: true,
           glosa: true,
           cuentaId: true,
+          folio: true,
         },
       }),
       ctx.db.documentoRecibido.findMany({
         where: { fechaEmision: { gte: desde, lte: hasta } },
-        select: { id: true, montoTotal: true, glosa: true, proveedor: { select: { rut: true } } },
+        select: { id: true, folio: true, montoTotal: true, glosa: true, proveedor: { select: { rut: true, razonSocial: true } } },
       }),
     ]);
     const cuentaIds = emitidos.map((e) => e.cuentaId);
@@ -63,9 +68,9 @@ export const bancosConciliacionSugerir = defineCapability({
       (
         await ctx.db.cuenta.findMany({
           where: { id: { in: cuentaIds } },
-          select: { id: true, rut: true },
+          select: { id: true, rut: true, nombre: true },
         })
-      ).map((c) => [c.id, c.rut]),
+      ).map((c) => [c.id, c]),
     );
 
     const docs = [
@@ -76,7 +81,7 @@ export const bancosConciliacionSugerir = defineCapability({
           tipo: "documento_emitido" as const,
           montoTotal: d.montoTotal,
           montoPendiente: d.montoTotal - d.montoCobrado,
-          rut: cuentasMap.get(d.cuentaId) ?? null,
+          rut: cuentasMap.get(d.cuentaId)?.rut ?? null,
           glosa: d.glosa,
           fecha: null,
         })),
@@ -110,6 +115,12 @@ export const bancosConciliacionSugerir = defineCapability({
       });
     }
 
-    return { sugerencias };
+    const info = new Map<string, { folio: number | null; tipoDte: number | null; contraparte: string | null }>([
+      ...emitidos.map((d) => [d.id, { folio: d.folio, tipoDte: d.tipoDte, contraparte: cuentasMap.get(d.cuentaId)?.nombre ?? null }] as const),
+      ...recibidos.map((d) => [d.id, { folio: d.folio, tipoDte: null, contraparte: d.proveedor.razonSocial }] as const),
+    ]);
+    return {
+      sugerencias: sugerencias.map((x) => ({ ...x, ...(info.get(x.documentoId) ?? { folio: null, tipoDte: null, contraparte: null }) })),
+    };
   },
 });

@@ -7,6 +7,7 @@ import { Alerta, avisar, Button, Dialog } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { HojaCeder } from "./hoja-ceder";
+import { HojaCobroManual } from "./hoja-cobro-manual";
 import { HojaNotaCredito } from "./hoja-nota-credito";
 import type { Venta } from "./tipos";
 
@@ -21,12 +22,15 @@ function descargar(base64: string, nombre: string) {
 }
 
 /** Acciones de la ficha: cada una llama a su capacidad; el servidor decide si corresponde. */
-export function AccionesVenta({ venta, enviosPrevios }: { venta: Venta; enviosPrevios: number }) {
+export function AccionesVenta({ venta, enviosPrevios, montoCobrado }: { venta: Venta; enviosPrevios: number; montoCobrado: number }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const intento = useRef(crypto.randomUUID());
-  const [hoja, setHoja] = useState<"nc" | "ceder" | "reenviar" | null>(null);
+  const [hoja, setHoja] = useState<"nc" | "ceder" | "reenviar" | "cobro" | null>(null);
   const emitido = venta.estadoDte === "enviado" || venta.estadoDte === "aceptado";
   const puedeCeder = venta.estadoDte === "aceptado" && (venta.tipoDte === 33 || venta.tipoDte === 34) && venta.cesionEstado !== "cedido";
+
+  const porCobrar = venta.montoTotal - montoCobrado;
+  const puedeCobrar = venta.estadoDte === "aceptado" && venta.cesionEstado !== "cedido" && (venta.tipoDte === 33 || venta.tipoDte === 34) && porCobrar > 0;
 
   async function pdf() {
     const r = await ejecutar<{ base64: string }>("finanzas.ventas.pdf", { documentoId: venta.id }, false, "ninguna");
@@ -65,9 +69,11 @@ export function AccionesVenta({ venta, enviosPrevios }: { venta: Venta; enviosPr
           </Button>
         ) : null}
         {emitido && (venta.tipoDte === 33 || venta.tipoDte === 34) ? <Button variant="secondary" onClick={() => setHoja("nc")}>Nota de crédito</Button> : null}
+        {puedeCobrar ? <Button variant="secondary" onClick={() => setHoja("cobro")}>Registrar cobro</Button> : null}
         {puedeCeder ? <Button variant="secondary" onClick={() => setHoja("ceder")}>Ceder</Button> : null}
       </div>
       {hoja === "nc" ? <HojaNotaCredito documentoId={venta.id} total={venta.montoTotal} abierta onCerrar={() => setHoja(null)} /> : null}
+      {hoja === "cobro" ? <HojaCobroManual documentoId={venta.id} pendienteCobro={porCobrar} abierta onCerrar={() => setHoja(null)} /> : null}
       {hoja === "ceder" ? <HojaCeder documentoId={venta.id} abierta onCerrar={() => setHoja(null)} /> : null}
       {hoja === "reenviar" ? (
         <Dialog abierto titulo="¿Reenviar al cliente?" onCerrar={() => setHoja(null)}>
