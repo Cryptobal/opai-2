@@ -63,4 +63,20 @@ describe("mailer", () => {
     await expect(mailer.enviar({ para: "a@b.cl", asunto: "x", texto: "y" })).rejects.toThrow(/422/);
     expect(fetch).toHaveBeenCalledWith("https://api.resend.com/emails", expect.anything());
   });
+
+  it("Resend recibe los adjuntos en base64 y la copia a los demás contactos", async () => {
+    const fetch = vi.fn(async (_url: string, _init: RequestInit) => new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetch);
+    const mailer = mailerDelEntorno({ RESEND_API_KEY: "re_x", EMAIL_FROM: "OPAI <a@opai.cl>" });
+    await mailer.enviar({
+      para: "a@b.cl",
+      cc: ["c@d.cl"],
+      asunto: "Factura 123",
+      texto: "Adjuntamos la factura.",
+      adjuntos: [{ nombre: "factura-123.pdf", contenidoBase64: "QUJD", mime: "application/pdf" }],
+    });
+    const cuerpo = JSON.parse(String(fetch.mock.calls[0]?.[1].body)) as Record<string, unknown>;
+    expect(cuerpo["cc"]).toEqual(["c@d.cl"]);
+    expect(cuerpo["attachments"]).toEqual([{ filename: "factura-123.pdf", content: "QUJD" }]);
+  });
 });
