@@ -1,6 +1,7 @@
 import { defineTrabajo } from "@opai/capabilities";
 import { z } from "zod";
 
+import { auditarPurga } from "./conversaciones-auditoria";
 import { corteRetencion, diasRetencion } from "./conversaciones-guardado";
 
 const LOTE = 500;
@@ -28,15 +29,20 @@ export const trabajoConversacionesVencidas = defineTrabajo({
         take: LOTE,
       });
       if (lote.length === 0) break;
-      const r = await ctx.db.agenteConversacion.deleteMany({
-        // Repite el plazo: una conversación que recibió un turno tras el findMany ya no está vencida.
-        where: {
-          tenantId: ctx.tenantId,
-          id: { in: lote.map((c) => c.id) },
-          ultimaActividad: { lt: corte },
-        },
+      // Cada lote se borra junto con su traza de auditoría (solo el conteo): sin una no hay la otra.
+      const n = await ctx.transaccion(async (tx) => {
+        const r = await tx.agenteConversacion.deleteMany({
+          // Repite el plazo: una conversación que recibió un turno tras el findMany ya no está vencida.
+          where: {
+            tenantId: ctx.tenantId,
+            id: { in: lote.map((c) => c.id) },
+            ultimaActividad: { lt: corte },
+          },
+        });
+        if (r.count > 0) await auditarPurga(ctx, tx, { borradas: r.count, corte, origen: "barrido" });
+        return r.count;
       });
-      borradas += r.count;
+      borradas += n;
       if (lote.length < LOTE) break;
     }
     return { borradas };
