@@ -3,11 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar, Button, Campo, Combobox, InputFecha, Sheet, Switch, Uploader } from "@opai/ds";
+import { avisar, Button, Sheet, Uploader } from "@opai/ds";
 
 import { useHojaUrl, useParametros } from "../maestros/use-url";
+import { CampoVincular, type OpcionesVincular, textoDestino } from "./campo-vincular";
+import { CamposDocumento } from "./campos-documento";
+import { CampoVisibilidad } from "./campo-visibilidad";
 import { subirDocumento } from "./subir";
-import type { EntidadDocumento, TipoDocumento } from "./tipos";
+import { CAPA_DE_ENTIDAD, type EntidadDocumento, type TipoDocumento } from "./tipos";
+import { useDestino } from "./use-destino";
 
 /** Subir documento (17): archivo, tipo, emisión, vencimiento y visibilidad en portales. */
 export function HojaSubir({
@@ -15,6 +19,7 @@ export function HojaSubir({
   tipos,
   portal = "erp",
   destino,
+  vincular,
 }: {
   entidad: EntidadDocumento;
   tipos: TipoDocumento[];
@@ -22,17 +27,30 @@ export function HojaSubir({
   portal?: string;
   /** A qué se vincula el documento, cuando la hoja no está dentro de la ficha de la entidad. */
   destino?: string;
+  /**
+   * Explorador: ofrece «Vincular a» (empresa, cuenta, instalación o persona) y, con `tipos` de
+   * todas las capas, muestra solo los de la capa elegida. Sin esto la hoja sube a `entidad`.
+   */
+  vincular?: OpcionesVincular;
 }) {
   const hoja = useHojaUrl("subir");
   const { valor } = useParametros();
   const router = useRouter();
-  const [tipoId, setTipoId] = useState<string | null>(valor("tipo"));
+  const {
+    vinculo,
+    setVinculo,
+    visibles,
+    destino: destinoSubida,
+  } = useDestino(entidad, tipos, vincular);
+  const [tipoId, setTipoId] = useState<string | null>(() => {
+    const v = valor("tipo");
+    return v && visibles.some((t) => t.id === v) ? v : null;
+  });
   const [emitido, setEmitido] = useState("");
   const [vence, setVence] = useState("");
   const [portales, setPortales] = useState<string[]>([]);
   const [subidos, setSubidos] = useState(0);
   const [procesando, setProcesando] = useState(0);
-  const tipo = tipos.find((t) => t.id === tipoId);
   const reemplaza = valor("reemplaza");
   function cerrar() {
     if (subidos) router.refresh();
@@ -44,7 +62,11 @@ export function HojaSubir({
       abierto={hoja.abierta}
       onCerrar={cerrar}
       titulo={reemplaza ? "Nueva versión" : "Subir documento"}
-      {...(destino ? { descripcion: destino } : {})}
+      {...(vincular
+        ? { descripcion: textoDestino(vinculo, vincular.etiquetas) }
+        : destino
+          ? { descripcion: destino }
+          : {})}
       acciones={
         <>
           <Button variant="secondary" onClick={cerrar}>
@@ -65,14 +87,32 @@ export function HojaSubir({
       }
     >
       <div className="flex flex-col gap-4">
+        {vincular ? (
+          <CampoVincular
+            vinculo={vinculo}
+            opciones={vincular}
+            bloqueado={procesando > 0 || subidos > 0}
+            onCambiar={(v) => {
+              setVinculo(v);
+              // Los tipos son de la capa de la entidad: un tipo de otra capa ya no se ofrece.
+              const capa = CAPA_DE_ENTIDAD[v.tipo];
+              if (!tipos.some((t) => t.id === tipoId && t.capa === capa)) {
+                setTipoId(null);
+                setPortales([]);
+              }
+            }}
+          />
+        ) : null}
         <Uploader
+          disabled={!destinoSubida}
           tipos="PDF, JPG o PNG"
           multiple={!reemplaza}
           procesar={async (archivo, progreso) => {
+            if (!destinoSubida) return;
             setProcesando((n) => n + 1);
             try {
               await subirDocumento(
-                entidad,
+                destinoSubida,
                 archivo,
                 {
                   ...(tipoId ? { tipoId } : {}),
@@ -90,54 +130,19 @@ export function HojaSubir({
             }
           }}
         />
-        <Campo
-          etiqueta="Tipo de documento"
-          htmlFor="d-tipo"
-          ayuda="Elígelo antes de agregar el archivo."
-        >
-          <Combobox
-            id="d-tipo"
-            placeholder="Elegir tipo"
-            opciones={tipos.map((t) => ({
-              valor: t.id,
-              etiqueta: t.nombre,
-              ...(t.obligatorio ? { detalle: "Obligatorio" } : {}),
-            }))}
-            valor={tipoId}
-            onCambiar={([v]) => {
-              setTipoId(v ?? null);
-              const t = tipos.find((x) => x.id === v);
-              if (t) setPortales(t.visiblePortalDefault);
-            }}
-          />
-        </Campo>
-        <div className="grid grid-cols-2 gap-3">
-          <Campo etiqueta="Emisión" htmlFor="d-emision">
-            <InputFecha id="d-emision" valor={emitido} onCambiar={setEmitido} />
-          </Campo>
-          {tipo?.tieneVencimiento !== false ? (
-            <Campo etiqueta="Vencimiento" htmlFor="d-vence">
-              <InputFecha id="d-vence" valor={vence} onCambiar={setVence} />
-            </Campo>
-          ) : null}
-        </div>
-        <fieldset>
-          <legend className="t-label mb-1 text-fg">Visible en portal</legend>
-          {[
-            ["cliente", "Cliente"],
-            ["trabajador", "Trabajador"],
-          ].map(([id, etiqueta]) => (
-            <Switch
-              key={id}
-              etiqueta={etiqueta ?? ""}
-              activo={portales.includes(id ?? "")}
-              onCambiar={(on) =>
-                setPortales((p) => (on ? [...p, id ?? ""] : p.filter((x) => x !== id)))
-              }
-            />
-          ))}
-          <p className="t-caption">Se aplica a los portales cuando estén disponibles.</p>
-        </fieldset>
+        <CamposDocumento
+          visibles={visibles}
+          tipoId={tipoId}
+          onTipo={(t) => {
+            setTipoId(t?.id ?? null);
+            if (t) setPortales(t.visiblePortalDefault);
+          }}
+          emitido={emitido}
+          onEmitido={setEmitido}
+          vence={vence}
+          onVence={setVence}
+        />
+        <CampoVisibilidad portales={portales} onCambiar={setPortales} />
       </div>
     </Sheet>
   );
