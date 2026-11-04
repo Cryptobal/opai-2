@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { CAPA_DE_ENTIDAD } from "../../../apps/web/app/_components/documentos/tipos";
+import { CAPA_DE } from "../src/core/documentos/entidad";
 import { contextoDePrueba } from "../src/testing";
 import { codigo, dato, reiniciar } from "./maestros-ayuda";
 
@@ -52,6 +53,12 @@ async function escenario() {
 }
 
 describe("subir desde el explorador: «Vincular a»", () => {
+  it("la tabla de capas de la UI es la del servidor", () => {
+    for (const [tipo, capa] of Object.entries(CAPA_DE_ENTIDAD)) {
+      expect(CAPA_DE[tipo as keyof typeof CAPA_DE], tipo).toBe(capa);
+    }
+  });
+
   it("cada entidad acepta los tipos de su capa (la tabla de la UI coincide con el servidor)", async () => {
     const { ctx, entidades, tipos } = await escenario();
     for (const [clave, entidad] of Object.entries(entidades)) {
@@ -95,10 +102,14 @@ describe("subir desde el explorador: «Vincular a»", () => {
   });
 
   it("un actor sin nada a cargo no puede vincular a ninguna entidad", async () => {
-    const { ctx: dueno, entidades, tipos } = await escenario();
-    const acotado = contextoDePrueba({ rol: "supervisor", alcance: { instalaciones: [] } });
-    // Mismo escenario en memoria: el alcance vacío no deja vincular a nada.
-    expect(dueno.tenantId).toBe(acotado.ctx.tenantId);
+    const { entidades, tipos } = await escenario();
+    // Con el permiso de gestionar documentos concedido (pasa la autorización) y nada a cargo, lo
+    // que decide es el alcance: ninguna entidad es visible, así que no existe para este actor.
+    const acotado = contextoDePrueba({
+      rol: "supervisor",
+      alcance: { instalaciones: [] },
+      excepciones: [{ permiso: "core:documentos.manage", conceder: true }],
+    });
     for (const [clave, entidad] of Object.entries(entidades)) {
       const capa = CAPA_DE_ENTIDAD[clave as keyof typeof CAPA_DE_ENTIDAD];
       const r = await codigo(
@@ -107,7 +118,7 @@ describe("subir desde el explorador: «Vincular a»", () => {
         subida(entidad, tipos[capa]),
         { dryRun: true },
       );
-      expect(["NOT_FOUND", "FORBIDDEN"], clave).toContain(r);
+      expect(r, clave).toBe("NOT_FOUND");
     }
   });
 });
