@@ -43,11 +43,12 @@ export function SelectorHora({ valor, onCambiar, invalido, className, ...props }
     setTexto(t);
     onCambiar(horaValida(t));
   };
-  const elegir = (h: string, m: string) => {
+  // Elegir la hora deja el selector abierto para los minutos; elegir los minutos lo cierra.
+  const elegir = (h: string, m: string, cerrar: boolean) => {
     const t = `${h || "00"}:${m || "00"}`;
     setTexto(t);
     onCambiar(t);
-    if (h && m) setAbierto(false);
+    if (cerrar) setAbierto(false);
   };
   return (
     <span className={cn("relative block", className)}>
@@ -88,7 +89,7 @@ export function SelectorHora({ valor, onCambiar, invalido, className, ...props }
                 <button
                   type="button"
                   aria-pressed={h === hh}
-                  onClick={() => elegir(h, mm)}
+                  onClick={() => elegir(h, mm, false)}
                   className={cn(OPCION, h === hh && "bg-accent-muted font-medium")}
                 >
                   {h}
@@ -96,13 +97,13 @@ export function SelectorHora({ valor, onCambiar, invalido, className, ...props }
               </li>
             ))}
           </ul>
-          <ul aria-label="Minutos" className="grid max-h-56 grid-cols-2 gap-1 overflow-y-auto">
+          <ul aria-label="Minutos" className="grid max-h-56 grid-cols-2 gap-1 overflow-y-auto border-l border-border pl-2">
             {MINUTOS.map((m) => (
               <li key={m}>
                 <button
                   type="button"
                   aria-pressed={m === mm}
-                  onClick={() => elegir(hh, m)}
+                  onClick={() => elegir(hh, m, true)}
                   className={cn(OPCION, m === mm && "bg-accent-muted font-medium")}
                 >
                   {m}
