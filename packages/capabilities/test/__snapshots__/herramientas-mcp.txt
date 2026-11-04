@@ -112,6 +112,7 @@ core_documento_tipos_update
 core_documentos_archive
 core_documentos_confirmar_subida
 core_documentos_desvincular
+core_documentos_explorar
 core_documentos_get
 core_documentos_iniciar_subida
 core_documentos_list

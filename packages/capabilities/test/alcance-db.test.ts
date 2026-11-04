@@ -477,6 +477,60 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     expect(idsOwner).toContain(docEmpresaExtra);
   });
 
+  it("CAR-182: el explorador acota al supervisor, no cruza tenants y valida el cursor con la misma consulta", async () => {
+    // Un documento de OTRO tenant: ni el owner ni el supervisor lo ven, ni sirve de cursor.
+    const otro = await e.admin.tenant.create({
+      data: { slug: `ex-${randomUUID().slice(0, 8)}`, nombre: "Otro", vertical: "seguridad" },
+    });
+    const ajeno = await e.admin.documento.create({
+      data: {
+        tenantId: otro.id,
+        nombre: "ajeno-explorar.pdf",
+        mime: "application/pdf",
+        tamano: 1,
+        storageKey: `explorar/${randomUUID()}`,
+        estado: "disponible",
+        creadoPorTipo: "system",
+      },
+    });
+    type Pag = { items: { id: string; entidad: { tipo: string; id: string } | null }[]; siguiente: string | null; total: number };
+    const sup = ctxSup({ instalaciones: [instA] });
+    const lista = await dato<Pag>(sup, "core.documentos.explorar", {});
+    const ids = lista.items.map((d) => d.id);
+    expect(ids).toContain(docA);
+    expect(ids).toContain(docConAjeno);
+    for (const fuera of [docFuera, docEmpresa, docPersonaExtra, docEmpresaExtra, ajeno.id])
+      expect(ids).not.toContain(fuera);
+    expect(lista.total).toBe(lista.items.length);
+    // Filtrar por tipo de entidad ajeno al alcance no revela nada.
+    const empresa = await dato<Pag>(sup, "core.documentos.explorar", { entidadTipo: "tenant" });
+    expect(empresa.items).toHaveLength(0);
+    expect(empresa.total).toBe(0);
+    // Paginar de a una fila recorre exactamente lo visible.
+    const vistos: string[] = [];
+    let cursor: string | undefined;
+    for (let i = 0; i < 50; i++) {
+      const r: Pag = await dato(sup, "core.documentos.explorar", { limite: 1, ...(cursor ? { cursor } : {}) });
+      vistos.push(...r.items.map((d) => d.id));
+      if (!r.siguiente) break;
+      cursor = r.siguiente;
+    }
+    expect([...vistos].sort()).toEqual([...ids].sort());
+    // Un cursor fuera de alcance (empresa o de otro tenant) no sirve de ancla.
+    for (const ancla of [docEmpresa, ajeno.id]) {
+      const r = await mod.executeCapability(sup, "core.documentos.explorar", { cursor: ancla });
+      expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    }
+    // El owner ve los de su tenant (incluida la empresa) y nada del otro.
+    const owner = await dato<Pag>(ctxOwner(), "core.documentos.explorar", { limite: 100 });
+    const idsOwner = owner.items.map((d) => d.id);
+    expect(idsOwner).toContain(docEmpresa);
+    expect(idsOwner).not.toContain(ajeno.id);
+    // La llave de un agente con alcance acotado ve lo mismo que su responsable.
+    const key = await dato<Pag>(ctxKeySup({ instalaciones: [instA] }), "core.documentos.explorar", {});
+    expect(key.items.map((d) => d.id).sort()).toEqual([...ids].sort());
+  });
+
   it("B-A: la ficha de un documento a cargo no expone vínculos ajenos y no filtra sus versiones", async () => {
     const conAjeno = await dato<{ vinculos: { entidadTipo: string; entidadId: string; rol: string }[] }>(
       ctxSup({ instalaciones: [instA] }),

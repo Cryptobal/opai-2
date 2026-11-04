@@ -712,6 +712,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.consumos.por_recurso`
 - `core.contactos.archive`
 - `core.documentos.desvincular`
+- `core.documentos.explorar`
 - `core.documentos.vencimientos`
 - `core.documentos.vincular`
 - `core.estructuras.get`
