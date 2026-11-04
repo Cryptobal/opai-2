@@ -43,7 +43,7 @@ export function estadoIntegracion(
     fila?.modalidad ?? (def.modalidades.includes("plataforma") ? "plataforma" : "propia");
   if (modalidad === "plataforma")
     return credencialDePlataforma(def.id) ? "configurada" : "no_disponible";
-  return def.secretos.every((s) => secretosConfigurados.includes(s.nombre))
+  return def.secretos.every((s) => s.opcional || secretosConfigurados.includes(s.nombre))
     ? "configurada"
     : "no_configurada";
 }
