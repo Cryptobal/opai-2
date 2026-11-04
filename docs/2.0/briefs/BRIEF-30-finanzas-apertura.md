@@ -27,7 +27,7 @@ No entra: líneas, XML y PDF originales de los DTE históricos, movimientos banc
 
 ## 6. Modelo de datos y migraciones (aditivas)
 - `movimientos_bancarios.origen` admite `apertura` (CHECK si existe; si no, solo convención y test).
-- `documentos_emitidos`: columna `origen_importacion boolean default false` para distinguir lo importado de lo emitido en 2.0 y excluirlo de los libros nuevos y del envío al SII.
+- **Sin migración (decidido en la implementación):** `movimientos_bancarios.origen` tiene un CHECK que no admite «apertura», y lo importado se identifica por `core.importaciones_filas` (entidad `documento_cobrar`), así que no se agrega columna. Los saldos usan origen `manual`, `claveDedupe` `apertura:<corrida>` y estado `ignorado`.
 - `dte_folios`: sin cambio de esquema; solo sube `folio_actual`.
 - Sin tablas nuevas si basta `importaciones_filas`. Prefijo de migración único, `SET LOCAL lock_timeout`; la aplica el operador.
 
@@ -38,7 +38,7 @@ No entra: líneas, XML y PDF originales de los DTE históricos, movimientos banc
 Sin pantalla nueva en este PR: la operan el operador y Carlos por MCP/CLI. La conciliación se muestra en la corrida existente de Configuración si ya hay pantalla; si no, queda como pendiente.
 
 ## 9. Seguridad y tenant
-Tenant desde la sesión; cuentas bancarias y receptores se resuelven por RUT/número dentro del tenant; nada cross-tenant. Los DTE importados quedan `origen_importacion = true` y nunca se reenvían al SII ni al cliente. Sin datos reales en el repo: fixtures sintéticas.
+Tenant desde la sesión; cuentas bancarias y receptores se resuelven por RUT/número dentro del tenant; nada cross-tenant. Los DTE importados quedan `aceptado` sin XML y se identifican por `importaciones_filas`; el bloqueo explícito de reenvío al SII/cliente queda como pendiente (ESTADO). Sin datos reales en el repo: fixtures sintéticas.
 
 ## 10. Casos límite
 - Receptor sin cuenta en 2.0: se omite con aviso (no se crea cuenta fantasma).
@@ -61,7 +61,7 @@ Dominio (sumas, plan, casos límite); db: corrida completa, idempotencia, revers
 Saldos, por cobrar y folios importados coinciden con las sumas de control de 1.0; la cobranza (F4) y el flujo de caja ven las cuentas por cobrar; no se puede emitir con un folio ya usado en 1.0; revertir deja el tenant como estaba.
 
 ## 15. Riesgos y rollback
-Doble facturación si 1.0 sigue emitiendo tras el corte (mitigación: fecha de corte única y bloqueo de segunda corrida). Rollback: reversión de la corrida; la migración es aditiva.
+Doble facturación si 1.0 sigue emitiendo tras el corte (mitigación: fecha de corte única y bloqueo de segunda corrida). Rollback: `finanzas.apertura.revertir` (se niega entera si hay cobros, gestiones, cesiones o conciliaciones). Sin migración.
 
 ## 16. Reporte de ejecución
 Se completa en el PR.
