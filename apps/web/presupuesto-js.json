@@ -12,7 +12,7 @@
     "/(auth)/*": 153,
     "/(auth)/activar-mfa": 160,
     "/(erp)/configuracion*": 177,
-    "/(erp)/configuracion/modulo/[id]": 182,
+    "/(erp)/configuracion/modulo/[id]": 185,
     "/(erp)/instalaciones/nueva": 178,
     "/(erp)/negocios/[id]/seguimiento": 171,
     "/(erp)/pauta": 174,
