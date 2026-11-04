@@ -25,6 +25,8 @@ export const hoyEnFinanzas = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
+  // Solo conteos y montos agregados: no revela personas ni documentos concretos.
+  auditarLectura: () => [],
   async handler(ctx) {
     const p = await parametrosCobranza(ctx);
     const ahora = new Date();

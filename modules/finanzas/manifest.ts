@@ -50,6 +50,15 @@ export const manifest = defineModule({
     {
       portal: "erp",
       area: "finanzas",
+      href: "/finanzas",
+      etiqueta: "Hoy en Finanzas",
+      icono: "ListChecks",
+      orden: 3,
+      permiso: "finanzas:read",
+    },
+    {
+      portal: "erp",
+      area: "finanzas",
       href: "/finanzas/ventas",
       etiqueta: "Ventas",
       icono: "FileText",
@@ -63,6 +72,15 @@ export const manifest = defineModule({
       etiqueta: "Compras",
       icono: "FileText",
       orden: 5,
+      permiso: "finanzas:read",
+    },
+    {
+      portal: "erp",
+      area: "finanzas",
+      href: "/finanzas/cobranza",
+      etiqueta: "Cobranza",
+      icono: "Wallet",
+      orden: 4.5,
       permiso: "finanzas:read",
     },
     {

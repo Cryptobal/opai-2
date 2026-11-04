@@ -24,8 +24,10 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
     ]);
     // Configuración DTE, Folios y Plan de cuentas salieron del menú: van en Configuración (CAR-182).
     expect(manifest.navegacion.map((n) => n.href)).toEqual([
+      "/finanzas",
       "/finanzas/ventas",
       "/finanzas/compras",
+      "/finanzas/cobranza",
       "/finanzas/bancos",
       "/finanzas/flujo",
     ]);
