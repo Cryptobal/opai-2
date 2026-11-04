@@ -13,7 +13,13 @@ const FRECUENCIAS: Record<string, string> = {
   weekly: "semanal",
   yearly: "anual",
 };
-const POLITICAS_UF = ["RUN_DAY", "LAST_DAY_PREV_MONTH", "FIRST_DAY_MONTH", "LAST_DAY_MONTH", "CUSTOM_DAY"];
+const POLITICAS_UF = [
+  "RUN_DAY",
+  "LAST_DAY_PREV_MONTH",
+  "FIRST_DAY_MONTH",
+  "LAST_DAY_MONTH",
+  "CUSTOM_DAY",
+];
 const RE_PERIODO = /^\d{4}-\d{2}(-\d{2})?$/;
 const RE_FECHA = /^\d{4}-\d{2}-\d{2}/;
 
@@ -29,13 +35,18 @@ function fechaDia(v: string | null | undefined): Resultado<string | null> {
   return RE_FECHA.test(t) ? ok(t.slice(0, 10)) : no("fecha_invalida");
 }
 
-function convertirLinea(l: ProgramacionRecurrenteOpai1["lines"][number], moneda: string): Resultado<LineaProgramacion> {
+function convertirLinea(
+  l: ProgramacionRecurrenteOpai1["lines"][number],
+  moneda: string,
+): Resultado<LineaProgramacion> {
   const glosa = textoLimpio(l.itemName) ?? textoLimpio(l.description);
   if (!glosa) return no("linea_sin_glosa");
-  if (l.quantity < 0 || l.discountPct < 0 || l.discountPct > 100) return no("linea_valor_fuera_de_rango");
+  if (l.quantity < 0 || l.discountPct < 0 || l.discountPct > 100)
+    return no("linea_valor_fuera_de_rango");
   const uf = moneda === "UF";
   const precio = uf ? l.unitPriceUf : l.unitPrice;
   if (precio == null) return no("linea_sin_precio_de_la_moneda");
+  if (precio < 0) return no("linea_valor_fuera_de_rango");
   return ok({
     glosa: glosa.slice(0, 500),
     cantidad: l.quantity.toFixed(4),
@@ -54,7 +65,11 @@ export function ultimoPeriodo(f: ProgramacionRecurrenteOpai1): string | null {
   if (exacto && RE_PERIODO.test(exacto)) return exacto;
   const fuente = f.lastSuccessfulRun?.runAt ?? f.lastRunAt;
   if (!fuente) return null;
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit" })
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Santiago",
+    year: "numeric",
+    month: "2-digit",
+  })
     .format(new Date(fuente))
     .slice(0, 7);
 }
@@ -85,7 +100,8 @@ export function convertirProgramacion(f: ProgramacionRecurrenteOpai1): Resultado
   if (f.dayOfMonth !== -1 && !enRango(f.dayOfMonth, 1, 31)) return no("dia_del_mes_fuera_de_rango");
   if (!enRango(f.dayOfWeek, 0, 6)) return no("dia_de_semana_fuera_de_rango");
   if (!enRango(f.monthOfYear, 1, 12)) return no("mes_del_anio_fuera_de_rango");
-  if (f.ufFixingPolicy && !POLITICAS_UF.includes(f.ufFixingPolicy)) return no("politica_uf_no_soportada");
+  if (f.ufFixingPolicy && !POLITICAS_UF.includes(f.ufFixingPolicy))
+    return no("politica_uf_no_soportada");
   if (!enRango(f.ufFixingDay, 1, 31)) return no("dia_uf_fuera_de_rango");
   if (!enRango(f.ipcAdjustmentMonths, 1, 60)) return no("ajuste_ipc_fuera_de_rango");
   if (!enRango(f.diasCobroDesdeFactura, 0, 365)) return no("dias_cobro_fuera_de_rango");
