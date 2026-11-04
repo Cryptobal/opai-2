@@ -19,4 +19,6 @@ regexes = [
   # en el código vigente, pero siguen en el historial del commit ee401d40.
   '''secreto-de-prueba-rondas-etiqueta-32-bytes-o-mas''',
   '''otro-secreto-de-prueba-tambien-de-32-bytes-o-mas''',
+  # Token ficticio del test de idempotencia (CAR-162): simula el token de 32 hex de un enlace público.
+  '''0123456789abcdef0123456789abcdef''',
 ]
