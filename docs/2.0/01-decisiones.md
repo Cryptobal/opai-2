@@ -1245,19 +1245,19 @@ identidad de servicio en main.
 
 ---
 
-## ADR-063 · Autonomía de ejecución: Claude integra, migra y verifica sin esperar a nadie
+## ADR-063 · Claude avanza sin esperar: integra y aplica migraciones
 
-**Fecha:** 4-nov-2026 · **Estado:** vigente · **Decisión de Carlos** (chat, 4-nov-2026 10:40 CLT) · **Autor:** Claude (registro) · **Ajusta** ADR-054, ADR-060 y ADR-061.
+**Fecha:** 4-nov-2026 (10:39 CLT) · **Estado:** vigente · **Autor:** Carlos · **Modifica** ADR-054 y ADR-060 en lo que toca a quién aplica migraciones y a qué se espera.
 
-**Regla.** No se espera al bot «OPAI 2.0» ni a nadie para avanzar:
+**Decisión.**
 
-1. **Integra Claude** con `gh pr merge --squash` cuando están en verde los cuatro checks obligatorios. Si hay conflicto, se trae `main` con merge, nunca con rebase.
-2. **Si el PR trae migración, la aplica Claude:** primero el respaldo de `main` en Neon (proyecto `steep-wildflower-90764475`), después migra `dev` y luego `main`, quita `migracion-pendiente`, deja un comentario en el PR e integra.
-3. Claude **verifica por sí mismo** en Neon, GitHub y test.opai.cl; no pregunta si algo quedó aplicado.
-4. **Al Revisor solo se lo espera** si el PR toca migraciones, permisos, RLS o datos de tenants. Los demás PRs se integran sin esperarlo.
-5. **Solo se detiene** por lo que debe hacer Carlos: claves, 2FA, aprobaciones en 1Password o cambios en OPAI 1.0.
+1. **Claude no espera al bot «OPAI 2.0» ni a nadie para avanzar.** Con los cuatro checks obligatorios en verde sobre el head y sin conflicto, integra con squash. Si hay conflicto, trae `main` con merge, nunca rebase.
+2. **Claude aplica las migraciones** de sus PR: antes saca el respaldo de `main` en Neon (proyecto `steep-wildflower-90764475`), migra primero `dev` y luego `main`, quita `migracion-pendiente`, deja un comentario en el PR con lo aplicado y el respaldo, e integra. El bot puede seguir haciéndolo si llega primero.
+3. **Claude verifica por sí mismo** en Neon, GitHub y `test.opai.cl` que algo quedó aplicado; no se lo pregunta a Carlos.
+4. **Revisor:** solo se espera si el PR toca migraciones, permisos, RLS o datos de tenants. Lo demás se integra sin él.
+5. **Claude solo se detiene** ante lo que debe hacer Carlos: claves, 2FA, aprobaciones en 1Password o cambios en 1.0. Nunca maneja ni imprime secretos; si no tiene acceso a Neon en la sesión, lo reporta como bloqueo de acceso.
 6. Al terminar una tarea, sigue con la próxima de `ESTADO.md` sin preguntar.
 
-**Sigue vigente:** el veto de Carlos, no tocar la producción de Gard ni OPAI 1.0, no force-push ni rebase, no desactivar tests, y que los secretos no pasan por el chat ni el repositorio.
+**Sin cambios:** Claude no escribe `VETO`; el veto de Carlos se respeta; `migracion-pendiente` la sigue poniendo quien abre el PR con migración.
 
-**Efecto sobre `AGENTS.md`:** las filas de roles y la sección «Integración a `main`» que atribuyen las migraciones y la etiqueta `migracion-pendiente` solo al bot quedan ajustadas por esta decisión (Claude también migra y la quita).
+**Consecuencias.** `AGENTS.md` (roles y «Prohibido») queda alineado con esta decisión.
