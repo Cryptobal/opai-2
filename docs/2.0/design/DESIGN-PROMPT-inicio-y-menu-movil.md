@@ -45,12 +45,13 @@ Problemas observados por Carlos (captura a 375 px, usuario owner):
 4. **«Recientes y fijados» repite** lo que ya está abajo (Configuración, Pauta, Hoy en Finanzas, Cobranza aparecen dos veces).
 5. **Íconos repetidos:** «Hoy en Finanzas» y «Mis tareas» comparten ícono (`ListChecks`); «Cobranza» y «Remuneraciones» comparten billetera (`Wallet`); «Ventas» y «Compras» comparten hoja (`FileText`).
 6. **El título de la página queda detrás de la hoja** (se lee «Configuración» tapado por el scrim).
+7. **Dos buscadores distintos (dato de Carlos, captura de la búsqueda):** el campo «Buscar módulos, personas, documentos…» de «Más» **no es un campo**: es un botón con apariencia de campo (`BuscadorMas`, `mas-acceso.tsx`) que cierra la hoja y, con un `setTimeout`, abre la paleta global (`CommandPalette`, `components/command-palette.tsx`) a pantalla completa, con otro texto de ayuda («Buscar cuentas, instalaciones, personas o ajustes»), botón «Cancelar» y secciones Agente («Preguntar a OPAI»), Recientes (hasta 8–10 lugares) y Acciones (Nueva cuenta, Agregar guardia, Nueva instalación). Se hizo así para no tener dos capas modales a la vez, pero la persona toca un campo, no puede escribir y la pantalla cambia: parece dos buscadores. La barra superior (ícono de buscar) abre esa misma paleta, así que hoy hay dos puertas a la misma búsqueda con aspectos distintos.
 
 ### 3.3 Reglas de navegación que NO cambian (`NAVEGACION.md`)
 - Áreas por trabajo, no por módulo; máximo 7 entradas por área; una entrada sola se muestra suelta, pero (D12) toda área lleva encabezado con ícono; el área de la página actual se distingue aunque esté plegada; la entrada activa lleva barra o marca de acento.
 - Barra inferior del teléfono: **Inicio · Pauta · Personas · Bandeja · Más** (según disponibilidad y permisos). Inicio con punto si hay Bandeja pendiente; el número solo dentro de la pantalla (D5). «Más» **no** duplica las entradas de la barra inferior ni la cuenta del usuario.
 - Barra superior del teléfono: selector de portal/empresa a la izquierda; a la derecha, fijos, **Buscar · agente (robot, D11, solo cuando exista) · campana · avatar**. El orden y el tamaño de ese grupo no cambian (CAR-12).
-- Búsqueda global (⌘K / «Buscar») sigue siendo la forma principal de saltar; «Más» solo la invoca, no tiene buscador propio.
+- Búsqueda global (⌘K / «Buscar») sigue siendo la forma principal de saltar. **Cambio pedido por Carlos:** en el teléfono hay un solo flujo de búsqueda; el campo de «Más» se escribe ahí mismo (ver 5.1) y comparte superficie, texto y fuente con el ícono de la barra superior.
 - Fijados: hasta 5 por usuario y empresa, ordenados por fecha de fijado (D3). Recientes: últimos 10 lugares visitados, guardados en el navegador.
 - Menú para colecciones, pestañas para partes (ADR-041): no se agregan entradas nuevas.
 
@@ -105,7 +106,15 @@ Baldosa compacta (≥ 44 px de alto, ancho flexible, ícono 20 px, etiqueta en u
 ## 5. Pantalla B — Menú «Más» del teléfono
 
 ### 5.1 Reglas comunes a las tres variantes
-- **Contenido (D13, se mantiene el orden):** (1) búsqueda arriba, que abre la búsqueda global; (2) **«Fijados y recientes»** una sola vez; (3) las áreas; (4) Configuración al pie. Nada de cuenta de usuario ni entradas de la barra inferior.
+- **Contenido (D13, se mantiene el orden):** (1) búsqueda arriba; (2) **«Fijados y recientes»** una sola vez; (3) las áreas; (4) Configuración al pie. Nada de cuenta de usuario ni entradas de la barra inferior.
+- **UN solo flujo de búsqueda en el teléfono (decisión de Carlos, 4-nov-2026).** Hoy son dos (ver 3.2, punto 7) y debe haber uno. Reglas:
+  1. El campo de búsqueda de «Más» es un **campo real**: se escribe ahí mismo, en el mismo lugar, sin cerrar la hoja ni abrir otra pantalla. Mientras se escribe, filtra módulos y entradas del menú, y muestra resultados de personas, cuentas, instalaciones y ajustes en la misma hoja.
+  2. **Estado inicial (campo vacío o recién enfocado):** se ven las mismas secciones que hoy muestra la paleta: Agente («Preguntar a OPAI», solo si el agente existe, D11), Recientes y Acciones (Nueva cuenta, Agregar persona, Nueva instalación…, según permisos). Los fijados y las áreas del menú se ven cuando el campo está vacío y sin foco; al enfocar el campo, la hoja pasa a modo búsqueda (la lista de áreas cede su lugar a Agente, Recientes y Acciones, con «Cancelar» a la derecha del campo, como hoy).
+  3. **Con texto:** secciones de resultados con encabezado (Módulos, Personas, Cuentas, Instalaciones, Ajustes, Acciones), el término resaltado, hasta 5 por sección y «Ver todos». Sin resultados: «No encontramos “xyz”. Prueba con otra palabra» y enlaces a las áreas.
+  4. **Mismo componente y mismo texto de ayuda en las dos puertas:** el ícono de buscar de la barra superior y el campo de «Más» abren **la misma superficie** (la paleta o la hoja en modo búsqueda; Claude Design elige y justifica la que quede más natural en 375 px, pero solo una), con el mismo texto de ayuda único («Buscar o ir a…»: módulos, personas, cuentas, instalaciones, ajustes) y el mismo «Cancelar». Se elimina el segundo texto («Buscar módulos, personas, documentos…»).
+  5. Una sola capa modal a la vez y el foco no se pierde: tocar el campo no debe producir un salto visual ni cerrar y reabrir nada. «Cancelar» o Escape vuelve al menú «Más» tal como estaba (misma área abierta y mismo scroll).
+  6. Fuente de datos: la misma capacidad `core.buscar` (herramienta MCP `core_buscar`) que usa hoy la paleta, más las entradas del menú, las acciones y los recientes locales; nada de capacidades nuevas.
+  7. Escritorio e iPad no cambian: la caja ⌘K de la barra superior sigue abriendo la paleta; el diseño debe mostrar que es el mismo componente que el del teléfono.
 - **Sin duplicados:** «Fijados y recientes» **excluye** las entradas de la barra inferior y marca con un pin pequeño las que además están en las áreas, o bien las oculta de las áreas mientras estén fijadas (probar ambas en la variante A y elegir la más clara; reportar la elección).
 - **Etiquetas completas, nunca cortadas.** Se usa siempre el nombre completo (la regla de nombres de `NAVEGACION.md` §6 prohíbe abreviar: nada de «Instalac.»). Si no cabe en una línea, pasa a dos con `line-clamp-2` y `text-balance`; nunca desborda su contenedor ni se corta una palabra. Las filas a ancho completo (variantes A y C) lo resuelven sin recortes; la cuadrícula (variante B) debe demostrarlo con «Remuneraciones» y «Configuración».
 - **Táctil:** cada elemento interactivo ≥ 44 × 44 px; separación ≥ 8 px entre objetivos.
@@ -136,7 +145,7 @@ Mostrar el arreglo del solape, sin cambiar el orden del grupo fijo: el selector 
 - **Editando fijados:** botón de desfijar de 44 px sobre cada fijado; «Listo» para salir.
 - **Error al cargar fijados:** línea «No pudimos cargar tus fijados · Reintentar».
 - **Roles:** owner (cinco áreas), supervisor (pocas entradas, áreas de una entrada con encabezado, D12), viewer (sin Remuneraciones, sin Finanzas). Un área sin entradas visibles no aparece.
-- **Búsqueda:** al tocar el campo, la hoja se cierra y se abre la búsqueda global (no hay dos capas a la vez); mostrar esa transición en una lámina.
+- **Búsqueda unificada:** mostrar en láminas (a) campo enfocado y vacío con Agente, Recientes y Acciones; (b) escribiendo, con resultados por sección; (c) sin resultados; (d) cargando resultados (esqueleto) y error de búsqueda con «Reintentar»; (e) la misma superficie abierta desde el ícono de la barra superior. Sin salto ni cierre de capa al tocar el campo.
 - **Oscuro** con `scrim`, bordes y estados de foco visibles.
 
 ## 6. Accesibilidad (obligatoria)
@@ -166,7 +175,7 @@ Componentes nuevos a mostrar en una lámina con sus estados (reposo, hover, foco
 ## 9. Entregables
 Pantallas numeradas `NN_Nombre_ancho`, cada una en claro y oscuro salvo indicación:
 - **A · Inicio:** `01` owner 1280; `02` owner 1024; `03` owner 375; `04` comparación de cuatro roles a 1280 (owner, gerente, supervisor, viewer); `05` estados a 375 (cargando, vacío, error por bloque, datos parciales); `06` empresa nueva sin módulos; `07` Hoy del portal Supervisor 375.
-- **B · Más:** `10` variante A abierta a 375 (con área activa), `11` variante A con otra área y sin activa, `12` variante B, `13` variante C, `14` comparación de las tres a 375 lado a lado, `15` editando fijados, `16` sin fijados ni recientes, `17` roles (owner, supervisor, viewer), `18` barra superior a 375 con nombre largo (antes y después), `19` transición «Más → búsqueda».
+- **B · Más:** `10` variante A abierta a 375 (con área activa), `11` variante A con otra área y sin activa, `12` variante B, `13` variante C, `14` comparación de las tres a 375 lado a lado, `15` editando fijados, `16` sin fijados ni recientes, `17` roles (owner, supervisor, viewer), `18` barra superior a 375 con nombre largo (antes y después), `19` búsqueda unificada a 375: enfocado/vacío, escribiendo, sin resultados, cargando y error, y abierta desde la barra superior (misma superficie).
 - **Láminas:** `20` componentes nuevos con estados; `21` tabla de íconos únicos de «Más».
 - Un comentario por pantalla con las capacidades que usa (de 4.4) y cualquier dato que el diseño necesite y no exista (lista de «requiere capacidad nueva»).
 
@@ -180,4 +189,5 @@ Pantallas numeradas `NN_Nombre_ancho`, cada una en claro y oscuro salvo indicaci
 7. Solo tokens y componentes del DS 2.0; ningún hex, ningún tamaño de letra fuera de la escala; claro y oscuro con contraste AA.
 8. La barra superior a 375 px no solapa el selector con los botones fijos con un nombre de empresa de 40 caracteres.
 9. Todo dato mostrado corresponde a una capacidad de 4.4; lo que no, está listado como «requiere capacidad nueva».
-10. Respeta `NAVEGACION.md`: áreas y orden, barra inferior, sin contadores salvo la Bandeja, Configuración al pie, sin cuenta ni duplicados de la barra inferior en «Más».
+10. Hay **un solo** buscador en el teléfono: el campo de «Más» se escribe en su lugar, comparte superficie y texto de ayuda con el ícono de la barra superior, y muestra Agente, Recientes y Acciones como estado inicial y resultados por sección al escribir; no hay cierre y reapertura de capas.
+11. Respeta `NAVEGACION.md`: áreas y orden, barra inferior, sin contadores salvo la Bandeja, Configuración al pie, sin cuenta ni duplicados de la barra inferior en «Más».
