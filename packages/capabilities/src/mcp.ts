@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { restriccion } from "./autorizacion";
+import { restriccion, tienePermisoDeCapacidad } from "./autorizacion";
 import { executeCapability } from "./execute";
 import { camposExternos } from "./externo";
 import { listarCapacidades } from "./registry";
@@ -40,7 +40,7 @@ export const nombreHerramienta = (id: string): string => id.replace(/\./g, "_");
 export function esVisible(ctx: Contexto, c: Capacidad): boolean {
   if (c.interna) return false;
   if (restriccion(ctx, c)) return false;
-  return c.permiso === null || ctx.autorizar(c.permiso);
+  return tienePermisoDeCapacidad(ctx, c);
 }
 
 function describir(c: Capacidad, preview: boolean): string {

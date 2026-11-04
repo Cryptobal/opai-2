@@ -17,6 +17,7 @@ import { uuidSchema } from "../esquemas";
 import { aFecha, diaSchema, hoy, textoOpcional } from "../maestros/comun";
 import { ajuste } from "../config/valores";
 import { documentoAReemplazar, tipoParaEntidad, verificarEntidad } from "./entidad";
+import { exigirDestinoAcotado, subidaAcotada, VISIBILIDAD_ACOTADA } from "./subida-acotada";
 import { uuid7 } from "./uuid7";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
 
@@ -25,8 +26,10 @@ const VIGENCIA_SUBIDA_S = 600;
 export const documentosIniciarSubida = defineCapability({
   id: "core.documentos.iniciar_subida",
   descripcion:
-    "Primer paso para subir un documento: valida tipo, tamaño (ajuste de la empresa, hasta 25 MB) y formato, crea el documento pendiente y entrega una URL PUT firmada por 10 minutos con las cabeceras a enviar (incluye la huella SHA-256 declarada). Luego llama a core.documentos.confirmar_subida.",
+    "Primer paso para subir un documento (quien solo puede subir a lo que tiene a cargo, como un supervisor, únicamente a sus instalaciones y sin visibilidad en portales): valida tipo, tamaño (ajuste de la empresa, hasta 25 MB) y formato, crea el documento pendiente y entrega una URL PUT firmada por 10 minutos con las cabeceras a enviar (incluye la huella SHA-256 declarada). Luego llama a core.documentos.confirmar_subida.",
   permiso: PERMISOS_CORE.documentosManage,
+  // Quien solo tiene este permiso sube a instalaciones a su cargo, sin visibilidad en portales.
+  permisosAlternos: [PERMISOS_CORE.documentosSubirAlcance],
   portales: ["erp", "supervisor"],
   input: z.object({
     entidad: entidadSchema,
@@ -57,6 +60,8 @@ export const documentosIniciarSubida = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    const acotada = subidaAcotada(ctx);
+    if (acotada) exigirDestinoAcotado(ctx, input.entidad, input.reemplazaAId);
     await verificarEntidad(ctx, input.entidad);
     const anterior = input.reemplazaAId
       ? await documentoAReemplazar(ctx, input.reemplazaAId, input.entidad)
@@ -105,7 +110,7 @@ export const documentosIniciarSubida = defineCapability({
       reemplazaAId: anterior?.id ?? null,
       emitidoEn: input.emitidoEn ? aFecha(input.emitidoEn) : null,
       venceEn: input.venceEn ? aFecha(input.venceEn) : null,
-      visibleEn: tipo?.visiblePortalDefault ?? [],
+      visibleEn: acotada ? VISIBILIDAD_ACOTADA : (tipo?.visiblePortalDefault ?? []),
       creadoPorTipo: ctx.actor.tipo,
       creadoPorId: ctx.actor.id ?? null,
       viaUserId: ctx.actor.viaUserId ?? null,
