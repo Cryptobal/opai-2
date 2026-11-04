@@ -703,8 +703,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
 | `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
 | `cpq.cotizaciones.rechazar_aprobacion` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
-| `finanzas.apertura.importar` | — | no | reservada a personas |
-| `finanzas.apertura.revertir` | — | no | reservada a personas |
+| `finanzas.apertura.importar` | sin pantalla todavía · CAR-168 · desde 2026-11-04 | no | reservada a personas |
+| `finanzas.apertura.revertir` | sin pantalla todavía · CAR-168 · desde 2026-11-04 | no | reservada a personas |
 | `finanzas.folios.cargar_caf` | `app/(erp)/finanzas/folios/_componentes` | no | reservada a personas |
 | `platform.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `platform.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |

@@ -1,6 +1,6 @@
 // Aplica la apertura (BRIEF-30): saldos de banco, facturas por cobrar y último folio. Todo en una
 // corrida de `core.importaciones` para poder conciliar y revertir. Nunca pisa lo que ya existe.
-import { diferenciasControl, normalizarRut, sumasControl, validarApertura } from "@opai/domain";
+import { diferenciasControl, normalizarRut, proximoFolio, sumasControl, validarApertura } from "@opai/domain";
 import type { DocumentoApertura, EntradaApertura, Rechazo } from "@opai/domain";
 
 import type { Contexto } from "../types";
@@ -15,20 +15,21 @@ export async function aplicarApertura(
   fechaCorte: string,
   bruta: EntradaApertura,
   dryRun: boolean,
+  aceptarRechazos = false,
 ): Promise<ResultadoApertura> {
   const { validas, rechazos: r0 } = validarApertura(bruta);
   const rechazos: Rechazo[] = [...r0];
   const [cuentas, existentes, bancos, folios, conApertura] = await Promise.all([
     ctx.db.cuenta.findMany({ where: { rut: { not: null } }, select: { id: true, rut: true } }),
     ctx.db.documentoEmitido.findMany({ where: { folio: { not: null } }, select: { tipoDte: true, folio: true } }),
-    ctx.db.cuentaBancaria.findMany({ select: { id: true, banco: true, numeroVisible: true } }),
+    ctx.db.cuentaBancaria.findMany({ select: { id: true, banco: true, numeroVisible: true, moneda: true } }),
     ctx.db.dteFolio.findMany({ where: { activo: true }, select: { id: true, tipoDte: true, folioActual: true, folioHasta: true } }),
     ctx.db.movimientoBancario.findMany({ where: { origen: "manual" }, select: { cuentaId: true } }),
   ]);
   const cuentasConApertura = new Set(conApertura.map((m) => m.cuentaId));
   const cuentaPorRut = new Map(cuentas.map((c) => [normalizarRut(c.rut ?? "") ?? "", c.id]));
   const hay = new Set(existentes.map((d) => `${d.tipoDte}-${d.folio}`));
-  const bancoPor = new Map(bancos.map((b) => [`${b.banco}/${b.numeroVisible}`, b.id]));
+  const bancoPor = new Map(bancos.map((b) => [`${b.banco}/${b.numeroVisible}`, b]));
 
   const docs: { d: DocumentoApertura; cuentaId: string }[] = [];
   let sinCambio = 0;
@@ -41,20 +42,26 @@ export async function aplicarApertura(
   }
   const saldosConocidos: typeof validas.saldos = [];
   const saldos = validas.saldos.filter((s) => {
-    const idCuenta = bancoPor.get(`${s.banco}/${s.numeroVisible}`);
-    const ok = idCuenta !== undefined;
+    const cb = bancoPor.get(`${s.banco}/${s.numeroVisible}`);
+    const ok = cb !== undefined && cb.moneda === s.moneda;
     if (ok) saldosConocidos.push(s);
-    if (ok && cuentasConApertura.has(idCuenta)) {
+    if (ok && cuentasConApertura.has(cb.id)) {
       sinCambio += 1;
       return false;
     }
-    if (!ok) rechazos.push({ entidad: "saldo", clave: `${s.banco}/${s.numeroVisible}`, motivo: "la cuenta bancaria no existe en 2.0" });
+    if (!ok) rechazos.push({ entidad: "saldo", clave: `${s.banco}/${s.numeroVisible}`, motivo: cb ? "la moneda no coincide con la cuenta de 2.0" : "la cuenta bancaria no existe en 2.0" });
     return ok;
   });
   const foliosAplicar = validas.folios.flatMap((f) => {
-    const fila = folios.find((x) => x.tipoDte === f.tipoDte && x.folioActual <= f.ultimoFolio);
-    if (!fila) return [];
-    return [{ fila, proximo: f.ultimoFolio + 1 }];
+    const filas = folios.filter((x) => x.tipoDte === f.tipoDte);
+    if (filas.length === 0) {
+      rechazos.push({ entidad: "folio", clave: String(f.tipoDte), motivo: "no hay CAF activo de ese tipo en 2.0: no se puede proteger el folio" });
+      return [];
+    }
+    return filas.flatMap((fila) => {
+      const { proximo, cambia } = proximoFolio(fila.folioActual, f.ultimoFolio);
+      return cambia ? [{ fila, proximo }] : [];
+    });
   });
 
   const aceptada: EntradaApertura = {
@@ -64,12 +71,15 @@ export async function aplicarApertura(
   };
   const origen = sumasControl(bruta);
   const destino = sumasControl(aceptada);
-  const creados = { saldos: saldos.length, documentos: docs.length, folios: foliosAplicar.length };
+  const bloqueada = rechazos.length > 0 && !aceptarRechazos && !dryRun;
+  const creados = bloqueada
+    ? { saldos: 0, documentos: 0, folios: 0 }
+    : { saldos: saldos.length, documentos: docs.length, folios: foliosAplicar.length };
   const salida = (importacionId: string | null): ResultadoApertura => ({
     importacionId, creados, sinCambio, rechazos, origen, destino,
     diferencias: diferenciasControl(origen, destino),
   });
-  if (dryRun) return salida(null);
+  if (dryRun || (rechazos.length > 0 && !aceptarRechazos)) return salida(null);
 
   const id = await ctx.transaccion(async (tx) => {
     const corrida = await tx.importacion.create({
@@ -79,7 +89,7 @@ export async function aplicarApertura(
     const fila = (entidad: string, id10: string, id20: string, previos?: Record<string, number>) =>
       tx.importacionFila.create({ data: { tenantId: ctx.tenantId, importacionId: corrida.id, entidad, id10, id20, accion: "creado", ...(previos ? { previos } : {}) } });
     for (const s of saldos) {
-      const cuentaId = bancoPor.get(`${s.banco}/${s.numeroVisible}`) as string;
+      const cuentaId = (bancoPor.get(`${s.banco}/${s.numeroVisible}`) as { id: string }).id;
       const m = await tx.movimientoBancario.create({
         data: {
           tenantId: ctx.tenantId, cuentaId, fecha: aFecha(fechaCorte), monto: BigInt(s.saldo), glosa: "Saldo de apertura desde OPAI 1.0",
@@ -100,7 +110,7 @@ export async function aplicarApertura(
       await fila("documento_cobrar", `${d.tipoDte}-${d.folio}`, doc.id);
     }
     for (const { fila: f, proximo } of foliosAplicar) {
-      await tx.dteFolio.update({ where: { id: f.id }, data: { folioActual: Math.min(proximo, f.folioHasta + 1) } });
+      await tx.dteFolio.update({ where: { id: f.id }, data: { folioActual: proximo } });
       await fila("folio", String(f.tipoDte), f.id, { folioActual: f.folioActual });
     }
     await tx.importacion.update({

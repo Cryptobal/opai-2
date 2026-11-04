@@ -33,6 +33,7 @@ export const entradaAperturaSchema = z.object({
 export const inputAperturaImportar = z.object({
   fechaCorte: fechaSchema.describe("Fecha de los saldos de banco (aaaa-mm-dd)."),
   entrada: entradaAperturaSchema,
+  aceptarRechazos: z.boolean().default(false).describe("Si hay filas rechazadas (RUT sin cuenta, banco inexistente, sin CAF), no se aplica nada salvo que se acepte explícitamente."),
 });
 
 export const inputAperturaRevertir = z.object({ importacionId: uuidSchema });

@@ -16,7 +16,7 @@ export const aperturaImportar = defineCapability({
   output: resultadoApertura,
   efecto: "escritura",
   dryRun: true,
-  handler: (ctx, input, { dryRun }) => aplicarApertura(ctx, input.fechaCorte, input.entrada, dryRun),
+  handler: (ctx, input, { dryRun }) => aplicarApertura(ctx, input.fechaCorte, input.entrada, dryRun, input.aceptarRechazos),
 });
 
 export const aperturaRevertir = defineCapability({

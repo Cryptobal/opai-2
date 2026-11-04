@@ -45,11 +45,17 @@ describe.skipIf(!urlPropietario)("finanzas.apertura · carga desde 1.0", () => {
   });
 
   const importar = (t: string, dryRun: boolean) =>
-    mod.executeCapability(ctx(t), "finanzas.apertura.importar", { fechaCorte: "2026-10-31", entrada }, { dryRun });
+    mod.executeCapability(ctx(t), "finanzas.apertura.importar", { fechaCorte: "2026-10-31", entrada, aceptarRechazos: true }, { dryRun });
 
   it("la vista previa no escribe", async () => {
     const r = await importar(tA, true);
     expect(r).toMatchObject({ data: { importacionId: null, creados: { documentos: 3, saldos: 1, folios: 1 } } });
+    expect(await e.admin.documentoEmitido.count({ where: { tenantId: tA } })).toBe(0);
+  });
+
+  it("con filas rechazadas no aplica nada si no se aceptan", async () => {
+    const r = await mod.executeCapability(ctx(tA), "finanzas.apertura.importar", { fechaCorte: "2026-10-31", entrada });
+    expect(r).toMatchObject({ ok: true, data: { importacionId: null, creados: { documentos: 0 } } });
     expect(await e.admin.documentoEmitido.count({ where: { tenantId: tA } })).toBe(0);
   });
 

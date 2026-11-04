@@ -78,3 +78,9 @@ Recursos de `opai1-export/v1`: cuentas, contactos, instalaciones, etapas, negoci
 1. Fecha de corte única de 1.0 → 2.0 (la misma de `fecha_corte_1_0` pendiente).
 2. ¿Se importan solo los DTE con saldo pendiente (propuesto) o también los pagados del año en curso?
 3. Quién genera el export de 1.0 (P7) y con qué credencial de solo lectura.
+
+## Diferencias respecto del brief original (implementación)
+- No existe `finanzas.apertura.conciliar`: la conciliación (sumas de control 1.0 vs 2.0) es parte del resultado de `importar` (también en `dryRun`).
+- Si hay filas rechazadas (RUT sin cuenta, banco inexistente, moneda distinta, tipo sin CAF) no se aplica nada salvo `aceptarRechazos: true`. Repetir la carga es idempotente (no hay bloqueo de segunda corrida: lo ya cargado queda «sin cambio»).
+- `soloPersonas` impide que un agente la ejecute, por lo que no usa `exigeAprobacion`. Permiso: `finanzas:ventas.configure`.
+- La reversión se niega si hay cobros/gestiones/cesiones/envíos, conciliaciones o movimientos bancarios posteriores en la cuenta.

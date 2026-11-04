@@ -27,7 +27,10 @@ export async function revertirApertura(ctx: Contexto, importacionId: string, dry
         else if (n.gestionesCobranza + n.cesiones + n.enviosSii > 0) b(f, "tiene_dependientes");
         else if ((await tx.conciliacionBanco.count({ where: { enlaceId: f.id20, activa: true } })) > 0) b(f, "conciliado");
       } else if (f.entidad === "saldo_banco") {
+        const base = await tx.movimientoBancario.findFirst({ where: { id: f.id20 }, select: { cuentaId: true } });
         if ((await tx.conciliacionBanco.count({ where: { movimientoId: f.id20, activa: true } })) > 0) b(f, "conciliado");
+        else if (base && (await tx.movimientoBancario.count({ where: { cuentaId: base.cuentaId, id: { not: f.id20 }, createdAt: { gt: c.terminadaEn } } })) > 0)
+          b(f, "hay_movimientos_posteriores");
       } else if (f.entidad === "folio") {
         const fo = await tx.dteFolio.findFirst({ where: { id: f.id20 }, select: { updatedAt: true } });
         if (fo && fo.updatedAt > c.terminadaEn) b(f, "folio_usado_despues");
