@@ -17,6 +17,8 @@ export type DocumentoCobranza = {
   cesionEstado: string | null;
   montoTotal: number;
   montoCobrado: number;
+  /** Suma de las notas de crédito (61) emitidas contra la factura; ausente = 0. */
+  montoNotasCredito?: number;
   /** aaaa-mm-dd; nulo si el documento no tiene vencimiento propio. */
   fechaVencimiento: string | null;
   /** aaaa-mm-dd; nula en borradores. */
@@ -24,9 +26,16 @@ export type DocumentoCobranza = {
   cobranzaPausada?: boolean;
 };
 
-/** Saldo pendiente en CLP enteros; nunca negativo. */
-export function saldoPendiente(doc: Pick<DocumentoCobranza, "montoTotal" | "montoCobrado">): number {
-  return Math.max(0, doc.montoTotal - doc.montoCobrado);
+/** Tipo de DTE que reduce la deuda de una factura. La nota de débito (56) no suma deuda (regla de Carlos, 4-nov-2026). */
+export const TIPO_DTE_NOTA_CREDITO = 61;
+/** Estados en que una nota de crédito ya existe ante el SII y resta deuda (no borrador, rechazada ni anulada). */
+export const ESTADOS_NC_QUE_RESTAN: readonly string[] = ["enviado", "aceptado"];
+
+/** Saldo pendiente en CLP enteros: monto − notas de crédito − cobrado; nunca negativo. */
+export function saldoPendiente(
+  doc: Pick<DocumentoCobranza, "montoTotal" | "montoCobrado" | "montoNotasCredito">,
+): number {
+  return Math.max(0, doc.montoTotal - (doc.montoNotasCredito ?? 0) - doc.montoCobrado);
 }
 
 /** ¿Entra al universo de cobranza? Excluye NC, borradores, rechazados, anulados, cedidos y saldo cero. */

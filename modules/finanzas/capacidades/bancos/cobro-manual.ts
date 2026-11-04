@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   calcularEstadoCobro,
   defineCapability,
+  pendienteFacturaEmitida,
   reglaDeNegocio,
   sincronizarCobroDocumento,
   validarDocumentoCobroBanco,
@@ -43,18 +44,12 @@ export const bancosCobroManual = defineCapability({
     if (!doc) throw reglaDeNegocio("El documento no existe.");
     validarDocumentoCobroBanco(doc, input.monto);
 
-    const agg = await ctx.db.conciliacionBanco.aggregate({
-      where: {
-        enlaceId: input.documentoId,
-        tipoEnlace: "documento_emitido",
-        activa: true,
-        confirmada: true,
-      },
-      _sum: { monto: true },
-    });
-    const previo = Number(agg._sum.monto ?? 0n);
-    const montoCobrado = Math.min(doc.montoTotal, previo + input.monto);
-    const estadoCobro = calcularEstadoCobro(doc.montoTotal, montoCobrado);
+    // El servidor valida el pendiente (monto − NC parciales − cobrado) también en la vista previa.
+    const r = await ctx.transaccion((tx) => pendienteFacturaEmitida(tx, input.documentoId));
+    if (!r) throw reglaDeNegocio("El documento no existe.");
+    if (input.monto > r.pendiente) throw reglaDeNegocio(`El monto supera lo pendiente del documento (${r.pendiente}).`);
+    const montoCobrado = r.exigible - r.pendiente + input.monto;
+    const estadoCobro = calcularEstadoCobro(r.exigible, montoCobrado);
 
     if (dryRun) {
       return { movimientoId: "", estadoCobro, montoCobrado };
@@ -72,7 +67,7 @@ export const bancosCobroManual = defineCapability({
       const actual = await tx.documentoEmitido.findFirst({ where: { id: input.documentoId } });
       if (!actual) throw reglaDeNegocio("El documento no existe.");
       validarDocumentoCobroBanco(actual, input.monto);
-      await exigirTopeDocumento(tx, ctx.tenantId, "documento_emitido", actual.id, actual.montoTotal, input.monto);
+      await exigirTopeDocumento(tx, ctx.tenantId, "documento_emitido", actual.id, input.monto);
 
       const mov = await tx.movimientoBancario.create({
         data: {
