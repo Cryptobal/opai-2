@@ -139,6 +139,7 @@ export const NAV_PLATAFORMA: ItemNav[] = [
     activoEn: "/platform/tenants",
   },
   { href: "/platform/trabajos", etiqueta: "Trabajos", icono: "Clock" },
+  { href: "/platform/indicadores", etiqueta: "Valores legales", icono: "FileText" },
   { href: "/platform/consumos", etiqueta: "Consumos", icono: "Gauge" },
   { href: "/platform/ajustes", etiqueta: "Ajustes", icono: "SlidersHorizontal", pie: true },
 ];

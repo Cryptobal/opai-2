@@ -42,6 +42,10 @@ export function globalesEnMemoria(delegado: (m: string) => Delegado): Globales {
       }),
     precioPorVigencia: (where: Fila) => delegado("precioRecurso").findUnique({ where }),
     guardarPrecio: (args: Upsert, _tx?: unknown) => delegado("precioRecurso").upsert(args),
+    // Indicadores legales (CAR-193): propuestas de la semilla; la resolución real se prueba en Postgres.
+    propuestasIndicadores: () => delegado("propuestaIndicador").findMany({}),
+    capturasPrevisionales: async () => [],
+    resolverPropuestaIndicador: async () => "aprobado",
   };
   return globales as Globales;
 }

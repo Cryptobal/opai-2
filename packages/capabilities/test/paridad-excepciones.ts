@@ -39,6 +39,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36).",
   "platform.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36).",
+  "platform.indicadores.resolver":
+    "Solo personas: aprobar un indicador legal cambia el cálculo de todas las empresas y lo decide un humano (ADR-032, CAR-193).",
   "core.users.restablecer_mfa":
     "Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54).",
   "platform.usuarios.restablecer_mfa":

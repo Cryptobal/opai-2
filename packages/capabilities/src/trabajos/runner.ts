@@ -99,18 +99,22 @@ export async function programarPeriodicos(ctx: Contexto, hoy: string): Promise<s
 
 const TIPO_CAPTURA_SII = "core.remuneraciones.captura_sii";
 
-/** Encola una sola corrida diaria de captura SII (plataforma; no por cada tenant). */
+const TIPO_CAPTURA_PREVISIONAL = "core.remuneraciones.captura_previsional";
+/** Previred publica a comienzos de mes: se intenta cada día del 1 al 7 y el 15 (cada corrida es idempotente). */
+const DIAS_CAPTURA_PREVISIONAL = new Set([1, 2, 3, 4, 5, 6, 7, 15]);
+
+/** Encola las capturas de plataforma del día: UF/UTM (SII) y, en su ventana del mes, los indicadores de Previred. */
 export async function programarCapturaSii(ctx: Contexto, hoy: string): Promise<boolean> {
-  const def = obtenerTrabajo(TIPO_CAPTURA_SII);
-  if (!def) return false;
-  const nuevo = await ctx.transaccion((tx) =>
-    ctx.trabajos.encolar(tx, {
-      tipo: TIPO_CAPTURA_SII,
-      payload: { dia: hoy },
-      claveUnica: `${TIPO_CAPTURA_SII}:${hoy}`,
-    }),
-  );
-  return !!nuevo;
+  const encolar = async (tipo: string): Promise<boolean> => {
+    if (!obtenerTrabajo(tipo)) return false;
+    const nuevo = await ctx.transaccion((tx) =>
+      ctx.trabajos.encolar(tx, { tipo, payload: { dia: hoy }, claveUnica: `${tipo}:${hoy}` }),
+    );
+    return !!nuevo;
+  };
+  const sii = await encolar(TIPO_CAPTURA_SII);
+  if (DIAS_CAPTURA_PREVISIONAL.has(Number(hoy.slice(8, 10)))) await encolar(TIPO_CAPTURA_PREVISIONAL);
+  return sii;
 }
 
 /** Encola trabajos horarios (`hora` = «aaaa-mm-ddTHH» en UTC). */
