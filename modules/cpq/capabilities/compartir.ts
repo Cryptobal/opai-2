@@ -41,6 +41,9 @@ export const compartirCrear = defineCapability({
     diasVigencia: z.number().int().min(1).max(90).default(15),
   }),
   output: enlaceSchema,
+  // El token va en la URL: la reserva de idempotencia (24 h) no lo guarda; reintentar con la misma
+  // clave devuelve el enlace sin token y hay que crear otro (revoca el anterior).
+  salidaIdempotente: (s) => ({ ...s, url: s.url.replace(/[0-9a-f]{32}$/, "[oculto]") }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
