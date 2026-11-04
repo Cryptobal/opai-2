@@ -38,7 +38,7 @@ export function PaginaCotizacion({ params, searchParams, children }: Props) {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
         const datos = cargarFichaCotizacion(id);
         datos.catch(() => undefined);
-        const lista = await cargarCotizaciones(p["cursor"]);
+        const lista = await cargarCotizaciones(p["cursor"], undefined, p["ver"] === "archivadas");
         return { id, p, datos, lista };
       }}
     >

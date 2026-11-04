@@ -32,6 +32,8 @@ export type CotizacionFila = {
 };
 export type ListaCotizaciones = { items: CotizacionFila[]; siguiente: string | null };
 export type DatosCotizaciones = ListaCotizaciones & {
+  /** Lista de «Archivadas» (CPQ v4): se pide con `?ver=archivadas`. */
+  archivadas?: boolean;
   state: EstadoPantalla;
   crear: boolean;
   costos: boolean;
@@ -41,6 +43,7 @@ export type DatosCotizaciones = ListaCotizaciones & {
 export async function cargarCotizaciones(
   cursor?: string,
   negocioId?: string,
+  archivadas = false,
 ): Promise<DatosCotizaciones> {
   const acceso = accesoCpq(await identidadActual());
   if (!acceso.leer) {
@@ -50,8 +53,10 @@ export async function cargarCotizaciones(
     limite: 20,
     ...(cursor && esUuid(cursor) ? { cursor } : {}),
     ...(negocioId ? { negocioId } : {}),
+    ...(archivadas ? { soloArchivadas: true } : {}),
   });
   return {
+    archivadas,
     state: estadoPantalla(r),
     crear: acceso.crear,
     costos: acceso.costos,
@@ -91,6 +96,7 @@ export async function cargarFichaCotizacion(id: string) {
       gestionar: false,
       aprobar: false,
       aprobarEnvios: false,
+      confirmarPuestos: false,
       costos: false,
       ficha: null,
       versiones: [] as { numero: number; estado: string; enviadaEn: Date | null }[],
@@ -116,6 +122,7 @@ export async function cargarFichaCotizacion(id: string) {
       gestionar: false,
       aprobar: false,
       aprobarEnvios: false,
+      confirmarPuestos: false,
       costos: acceso.costos,
       ficha: null,
       versiones: [],
@@ -135,6 +142,7 @@ export async function cargarFichaCotizacion(id: string) {
     gestionar: acceso.crear,
     aprobar: acceso.aprobar,
     aprobarEnvios: acceso.aprobarEnvios,
+    confirmarPuestos: acceso.confirmarPuestos,
     costos: acceso.costos,
     ficha,
     versiones: get.ok ? get.data.versiones : [],
