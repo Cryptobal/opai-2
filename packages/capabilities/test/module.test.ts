@@ -121,3 +121,31 @@ describe("registrarModulos", () => {
     ).toThrow(/depende/);
   });
 });
+
+describe("defineModule · permisosAlternos", () => {
+  const conAlterno = (alterno: string) =>
+    defineCapability({
+      id: "demo.sube",
+      descripcion: "Sube algo del módulo demo (capacidad de prueba).",
+      permiso: "demo:read",
+      permisosAlternos: [alterno],
+      input: z.object({}),
+      output: z.object({}),
+      efecto: "lectura",
+      dryRun: false,
+      handler: async () => ({}),
+    });
+
+  it("rechaza un permiso alterno no declarado", () => {
+    expect(() => defineModule({ ...base, capacidades: [conAlterno("demo:fantasma")] })).toThrow(
+      /alterno no declarado/,
+    );
+  });
+
+  it("acepta un permiso alterno declarado", () => {
+    const permisos = [...base.permisos, { id: "demo:sube", descripcion: "Subir" }];
+    expect(() =>
+      defineModule({ ...base, permisos, capacidades: [conAlterno("demo:sube")] }),
+    ).not.toThrow();
+  });
+});

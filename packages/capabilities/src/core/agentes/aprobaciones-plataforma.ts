@@ -2,6 +2,7 @@ import type { AprobacionPlataforma } from "@opai/db";
 import { PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { auditarEnPlataforma, esDePlataforma, hechoPlataforma } from "../../agentes/plataforma";
+import { tienePermisoDeCapacidad } from "../../autorizacion";
 import { noEncontrado, prohibido } from "../../errores";
 import { obtenerCapacidad } from "../../registry";
 import type { Contexto } from "../../types";
@@ -23,8 +24,8 @@ export const veAprobacionesPlataforma = (ctx: Contexto) =>
 export function exigirVisiblePlataforma(ctx: Contexto, capability: string, resolver = false) {
   if (!esDePlataforma(capability)) return;
   if (!veAprobacionesPlataforma(ctx)) throw noEncontrado("La aprobación");
-  const permiso = obtenerCapacidad(capability)?.permiso;
-  if (resolver && permiso && !ctx.autorizar(permiso))
+  const capacidad = obtenerCapacidad(capability);
+  if (resolver && capacidad?.permiso && !tienePermisoDeCapacidad(ctx, capacidad))
     throw prohibido("No tienes el permiso de plataforma que exige esta acción.");
 }
 

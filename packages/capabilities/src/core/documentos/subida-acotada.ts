@@ -7,7 +7,9 @@ import type { Entidad } from "./entidad";
 /**
  * Subida acotada (CAR-182, decisión de Carlos del 4-nov-2026): el actor tiene
  * `core:documentos.subir_alcance` pero no `core:documentos.manage`. Quien tiene `manage` no pasa por
- * aquí y conserva todo igual.
+ * aquí y conserva todo igual. Se llama solo después de que `executeCapability` autorizó (permiso o
+ * alterno): si no tiene `manage`, entonces entró por el alterno. No es un chequeo de acceso por sí
+ * mismo, y no debe usarse antes de autorizar.
  */
 export const subidaAcotada = (ctx: Contexto): boolean =>
   !ctx.autorizar(PERMISOS_CORE.documentosManage);
