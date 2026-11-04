@@ -22,7 +22,9 @@ import {
 import { integracionesGuardarCertificadoDte } from "./integraciones-certificado-dte";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
-import { capacidadesRemuneraciones, trabajoCapturaIndicadoresSii } from "./remuneraciones";
+import {
+  capacidadesRemuneraciones, trabajoCapturaIndicadoresSii, trabajoCapturaPrevisional,
+} from "./remuneraciones";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
@@ -145,5 +147,6 @@ export const trabajosDelNucleo = [
   ...trabajosCumplimiento,
   ...trabajosMaestros,
   trabajoCapturaIndicadoresSii,
+  trabajoCapturaPrevisional,
   trabajoTareasVencidas,
 ];

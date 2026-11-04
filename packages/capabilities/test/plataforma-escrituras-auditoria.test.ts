@@ -35,6 +35,7 @@ const TRABAJO_FALLIDO = "0192f3a0-0000-7000-8000-0000000000f1";
 const TRABAJO_PENDIENTE = "0192f3a0-0000-7000-8000-0000000000f2";
 const APROBACION_A = "0192f3a0-0000-7000-8000-0000000000f3";
 const APROBACION_R = "0192f3a0-0000-7000-8000-0000000000f4";
+const PROPUESTA = "0192f3a0-0000-7000-8000-0000000000f5";
 const manana = () => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
 
 function semilla() {
@@ -77,6 +78,17 @@ function semilla() {
     ],
     trabajo: [trabajo(TRABAJO_FALLIDO, "fallido"), trabajo(TRABAJO_PENDIENTE, "pendiente")],
     aprobacionPlataforma: [aprobacion(APROBACION_A), aprobacion(APROBACION_R)],
+    propuestaIndicador: [
+      {
+        id: PROPUESTA,
+        indicador: { clave: "imm", nombre: "Ingreso mínimo mensual" },
+        valorJson: 560_000,
+        vigente: { valorJson: 539_000 },
+        vigenteDesde: new Date(),
+        fuente: "https://www.previred.com/indicadores-previsionales/",
+        consultadaEl: null,
+      },
+    ],
   };
 }
 
@@ -107,6 +119,7 @@ const CASOS: Record<string, Record<string, unknown>> = {
   "platform.usuarios.borrar": { email: "suelto@prueba.cl" },
   "platform.aprobaciones.aprobar": { id: APROBACION_A },
   "platform.aprobaciones.rechazar": { id: APROBACION_R, motivo: "no corresponde" },
+  "platform.indicadores.resolver": { propuestaId: PROPUESTA, aprobar: true },
 };
 
 describe("auditoría global de las escrituras de plataforma (CAR-41)", () => {
