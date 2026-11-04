@@ -16,8 +16,10 @@ La UI llegará en otro PR con export aprobado, siempre con el Design System de O
    ese token para aceptar. En paso_a_paso, solo el servidor entrega el token siguiente.
 5. Lo irreversible queda en core.aprobaciones con APPROVAL_REQUIRED: solo una persona
    puede aprobarlo. El plan se detiene allí; no adelanta los pasos siguientes.
-6. agente.historial.list muestra solo metadatos de acciones vía el usuario actual,
-   nunca conversaciones, resultados de lecturas ni datos de otra empresa.
+6. agente.historial.list muestra solo metadatos de acciones vía el usuario actual: acción,
+   fecha, resultado (hecho, falló, en aprobación, rechazado, vencido) y entidad afectada,
+   con nombre solo de cuenta o instalación y solo si la persona puede leer esa ficha dentro
+   de su alcance. Nunca conversaciones, input, resultados de lecturas ni datos de otra empresa.
 
 ## Seguridad y límites
 

@@ -17,6 +17,7 @@ import {
   conversacionesRenombrar,
 } from "./conversaciones-escritura";
 import { conversacionesGet, conversacionesList } from "./conversaciones";
+import { historialList } from "./historial";
 import { confirmarPlan, firmarPlan } from "./planes";
 
 export const modeloSchema = z.object({
@@ -120,34 +121,6 @@ export const planConfirmar = defineCapability({
   dryRun: true,
   handler: async (ctx, input, modo) =>
     confirmarPlan(ctx, comoAgenteInterno(ctx), input.token, input.aceptar, secreto(), modo.dryRun),
-});
-
-export const historialList = defineCapability({
-  id: "agente.historial.list",
-  permiso: "agente:usar",
-  descripcion:
-    "Lista metadatos de las acciones del agente interno vía el usuario actual; las conversaciones se consultan en agente.conversaciones.list.",
-  input: z.object({ limite: z.number().int().min(1).max(50).default(20) }),
-  output: z.array(z.object({ capacidad: z.string(), fecha: z.string() })),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx, input) {
-    if (!ctx.usuario) throw prohibido("Requiere usuario.");
-    // Un servicio no hereda el historial personal de su responsable (ADR-051).
-    if (ctx.principal?.tipo === "servicio") return [];
-    const filas = await ctx.db.auditEvent.findMany({
-      where: {
-        tenantId: ctx.tenantId,
-        actorType: "agent",
-        actorId: `agente-interno:${ctx.usuario.id}`,
-        viaUserId: ctx.usuario.id,
-      },
-      orderBy: { createdAt: "desc" },
-      take: input.limite,
-      select: { capability: true, createdAt: true },
-    });
-    return filas.map((f) => ({ capacidad: f.capability, fecha: f.createdAt.toISOString() }));
-  },
 });
 
 export const capacidades = [
