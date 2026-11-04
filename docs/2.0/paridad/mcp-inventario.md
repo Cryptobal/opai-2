@@ -821,5 +821,14 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.users.set_role`
 - `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
+- `rendiciones.rendiciones.actualizar`
+- `rendiciones.rendiciones.anular`
+- `rendiciones.rendiciones.aprobar`
+- `rendiciones.rendiciones.crear`
+- `rendiciones.rendiciones.devolver`
+- `rendiciones.rendiciones.enviar`
+- `rendiciones.rendiciones.listar`
+- `rendiciones.rendiciones.obtener`
+- `rendiciones.rendiciones.rechazar`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.reasignar`
