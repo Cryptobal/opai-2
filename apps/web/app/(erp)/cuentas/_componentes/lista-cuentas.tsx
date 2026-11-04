@@ -1,6 +1,8 @@
 import { Plus } from "lucide-react";
 
-import { Badge, type EstadoPantalla, MonoAv } from "@opai/ds";
+import { Badge, ChipsEtiquetas, type EstadoPantalla, MonoAv } from "@opai/ds";
+
+import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etiquetas/opciones";
 
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_CUENTA, estadoDe, monograma } from "@/app/_components/maestros/estados";
@@ -19,6 +21,8 @@ export function ListaCuentas(p: {
   seleccionada?: string;
   /** Búsqueda vigente: se conserva al abrir una ficha y al volver. */
   q?: string | undefined;
+  /** Catálogo de etiquetas para el filtro `?etiqueta=`. */
+  etiquetas?: OpcionEtiqueta[];
 }) {
   const activas = p.items.filter((c) => c.estado === "cliente_activo").length;
   const nueva = (
@@ -46,6 +50,7 @@ export function ListaCuentas(p: {
           etiqueta: "Con instalaciones",
           opciones: [{ valor: "si", etiqueta: "Sí" }],
         },
+        ...filtroDeEtiquetas(p.etiquetas ?? []),
       ]}
       meta={{
         izquierda: `${p.items.length} cuentas · ${activas} ${activas === 1 ? "cliente activo" : "clientes activos"}`,
@@ -71,7 +76,12 @@ export function ListaCuentas(p: {
               <span className="hidden md:inline"> · {plural(c.instalaciones)}</span>
             </>
           ),
-          terciario: <span className="md:hidden">{plural(c.instalaciones)}</span>,
+          terciario: (
+            <>
+              <span className="md:hidden">{plural(c.instalaciones)}</span>
+              <ChipsEtiquetas compacto etiquetas={c.etiquetas ?? []} className="mt-1" />
+            </>
+          ),
           fin: (
             <Badge tono={e.tono} className="hidden md:inline-flex">
               {e.corta}

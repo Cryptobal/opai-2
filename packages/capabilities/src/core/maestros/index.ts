@@ -3,6 +3,7 @@ import { estructurasPanel } from "./estructuras-panel";
 import type { Capacidad } from "../../types";
 import { buscar } from "./buscar";
 import { cargosCreate, cargosGet, cargosList, cargosSetActivo, cargosUpdate } from "./cargos";
+import { contactosRestaurar } from "./contactos-restaurar";
 import {
   contactosArchive,
   contactosCreate,
@@ -81,6 +82,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   contactosCreate,
   contactosUpdate,
   contactosArchive,
+  contactosRestaurar,
   instalacionesList,
   instalacionesGet,
   instalacionesCreate,

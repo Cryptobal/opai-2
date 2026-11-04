@@ -1,18 +1,16 @@
 import { adaptadorCesionSimulado, adaptadorOctava, type AdaptadorCesion, type AlmacenSesionOctava } from "@opai/integrations";
 
 import type { Contexto } from "../types";
-import { almacenSesionOctava, cedenteOctava, integradorOctava, type ConfigCesion } from "./adaptador-cesion-octava";
+import { accesoOctava, almacenSesionOctava, cedenteOctava, type ConfigCesion } from "./adaptador-cesion-octava";
 
 const ALMACEN_VACIO: AlmacenSesionOctava = {
-  leerPassAcceso: async () => null,
-  guardarPassAcceso: async () => {},
   leerToken: async () => null,
   guardarToken: async () => {},
 };
 
 /**
  * Adaptador de cesión efectivo del tenant: simulado en test o sin proveedor; Octava (API real, CAR-154)
- * con las credenciales del integrador cifradas en la integración `dte_cesion` y el certificado de `dte_emision`.
+ * con el RUT y la contraseña de acceso cifrados en la integración `dte_cesion` (ObtenerToken, token de 6 h).
  */
 export async function adaptadorCesionDe(ctx: Contexto): Promise<AdaptadorCesion> {
   if (process.env.NODE_ENV === "test" || process.env.CESION_ADAPTADOR === "simulado") {
@@ -25,24 +23,21 @@ export async function adaptadorCesionDe(ctx: Contexto): Promise<AdaptadorCesion>
   const integ = await ctx.db.integracion.findUnique({
     where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_cesion" } },
   });
-  const integrador = integ ? await integradorOctava(ctx, integ.id) : null;
-  if (!integ || !integrador) {
+  const acceso = integ ? await accesoOctava(ctx, integ.id) : null;
+  if (!integ || !acceso) {
     // Sin credenciales queda no disponible; quien llama pide configurar la integración.
     return adaptadorOctava({
-      integrador: null,
-      cedente: await cedenteOctava(ctx, {}, rutEmisor, false),
+      acceso: null,
+      cedente: await cedenteOctava(ctx, {}, rutEmisor),
       almacen: ALMACEN_VACIO,
       ambiente,
     });
   }
-  const almacen = almacenSesionOctava(ctx, integ.id);
-  // El certificado solo hace falta para el registro inicial; con la clave de acceso guardada no se toca.
-  const necesitaRegistro = (await almacen.leerPassAcceso()) === null;
   const config = (integ.config ?? {}) as ConfigCesion;
   return adaptadorOctava({
-    integrador,
-    cedente: await cedenteOctava(ctx, config, rutEmisor, necesitaRegistro),
-    almacen,
+    acceso,
+    cedente: await cedenteOctava(ctx, config, rutEmisor),
+    almacen: almacenSesionOctava(ctx, integ.id),
     ambiente,
   });
 }

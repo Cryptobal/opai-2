@@ -41,7 +41,7 @@ export default function Contacto({ params, searchParams }: Props) {
           }
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>
-              <DetalleContacto datos={datos} />
+              <DetalleContacto datos={datos} tipo={p["tipo"]} q={p.q} />
             </Suspense>
           }
         />

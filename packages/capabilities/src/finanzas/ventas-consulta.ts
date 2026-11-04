@@ -1,5 +1,6 @@
 import type { Contexto } from "../types";
 import { noEncontrado } from "../errores";
+import { notasCreditoPorDocumento } from "./cobros";
 import { vistaVenta } from "./vistas-venta";
 
 type Fila = Parameters<typeof vistaVenta>[0] & {
@@ -15,7 +16,9 @@ export async function vistasDeVentas(ctx: Contexto, filas: readonly Fila[]) {
       })
     : [];
   const cuentaDe = new Map(cuentas.map((c) => [c.id, c]));
-  return filas.map((f) => {
+  const nc = await notasCreditoPorDocumento(ctx.db, filas.map((f) => f.id));
+  return filas.map((fila) => {
+    const f = { ...fila, montoNotasCredito: nc.get(fila.id) ?? 0 };
     const c = cuentaDe.get(f.cuentaId) ?? { nombre: "—", rut: null as string | null };
     const lineas = (f.lineas ?? []).map((l) => ({
       id: l.id,

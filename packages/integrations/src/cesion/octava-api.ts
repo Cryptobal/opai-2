@@ -18,22 +18,6 @@ export type OctavaRespuestaBase = {
   ResultadoFE?: string;
 };
 
-export type RegistraCedenteRequest = {
-  RUT: string;
-  RAZONSOCIAL: string;
-  RUTAUTORIZADOSII: string;
-  NOMBREAUTORIZADOSII: string;
-  CERTDIGBASE64: string;
-  PASSCERTDIG: string;
-  INTEGRADOR: string;
-  PASSWORDINTEGRADOR: string;
-};
-/** IdResultadoFE: 0 creada · 1 clave cert · 2 admin · 3 RUT ya registrado · 4 titular no autorizado · 5/6 cert. */
-export type RegistraCedenteResponse = OctavaRespuestaBase & {
-  PassAccesoApi?: string;
-  FechaExpiracionCD?: string;
-};
-
 export type ObtenerTokenRequest = { RUTACCESOAPI: string; PASSWORDACCESOAPI: string };
 export type ObtenerTokenResponse = OctavaRespuestaBase & { Token?: string };
 

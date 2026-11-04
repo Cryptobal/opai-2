@@ -6,7 +6,7 @@ export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
-export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
+export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajuste, defineAjustes, valoresEfectivos, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,
@@ -33,6 +33,7 @@ export { planGanar, efectosGanarSchema, type EfectosGanar } from "./comercial/ga
 export { sha256 } from "./core/comun";
 export { uuid7 } from "./core/documentos/uuid7";
 export { executeCapability } from "./execute";
+export { entidadAuditada } from "./execute-util";
 export {
   limpiarRegistro,
   listarCapacidades,

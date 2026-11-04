@@ -231,7 +231,7 @@ Cambios que esta pantalla **pide al servidor** (los fija el brief, no este docum
 
 1. `agente.turno.preparar` acepta **contexto** (tipo + id de entidad), revalidado con el alcance (R9), y el id de conversación (pregunta 1).
 2. Eventos SSE de **progreso por herramienta** (nombre de negocio de la capacidad y conteo de registros, sin contenido) para los «pasos de trabajo» del hilo; hoy el SSE solo emite iniciado/resultado/error. El **texto** puede seguir llegando completo, sin fragmentos (pregunta 8).
-3. `agente.historial.list` agrega entidad afectada, resultado y referencia de auditoría (hoy solo capacidad y fecha).
+3. `agente.historial.list` agrega entidad afectada y resultado (CAR-120, fix acciones-columnas); la referencia de auditoría queda pendiente.
 4. Conversaciones (pregunta 1, decidido que sí): `agente.conversaciones.list`, `.get`, `.renombrar`, `.archivar`, `.borrar` (del propio usuario); las tres escrituras aceptan `dryRun` (en MCP, `preview_…`) e `idempotencyKey` y quedan en la auditoría, con MCP para keys de tipo usuario (leen solo las de su responsable) y nunca para keys de servicio; tabla nueva con `tenant_id`, RLS `tenant_isolation`, prueba de dos empresas e inventario 07d.
 5. Consumo y presupuesto del agente interno: fila «Agente interno» en Consumos (hoy `core.consumos.por_agente` solo cuenta keys) y una lectura del estado del presupuesto del mes (porcentaje usado) para la banda del 80 % (R17), visible para `agente:configurar`.
 6. Señal estructurada en la respuesta del turno cuando una herramienta respondió «sin permiso» o «módulo inactivo» (R13), sin revelar datos.
