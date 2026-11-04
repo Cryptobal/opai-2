@@ -28,6 +28,8 @@ type InferiorProps = NavProps & {
   errorFijados?: boolean;
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
+  onBuscar?: () => void;
+  recientes?: () => readonly ItemFijado[];
 };
 
 /**
@@ -45,6 +47,8 @@ export function BottomNav({
   errorFijados,
   reintentarFijados,
   onDesfijar,
+  onBuscar,
+  recientes,
 }: InferiorProps) {
   // "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del riel ni de la barra lateral.
   const principales = elegidas ?? items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
@@ -105,6 +109,8 @@ export function BottomNav({
               {...(errorFijados ? { errorFijados } : {})}
               {...(reintentarFijados ? { reintentarFijados } : {})}
               {...(onDesfijar ? { onDesfijar } : {})}
+              {...(onBuscar ? { onBuscar } : {})}
+              {...(recientes ? { recientes } : {})}
               extras={[]}
               {...(onNavegar ? { onNavegar } : {})}
               disparador={
