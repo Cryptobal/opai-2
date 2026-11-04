@@ -34,6 +34,9 @@ export type Reporte = {
   tributario: ResumenTributario;
   destinatarios: ResumenDestinatarios;
   correlativosCpq: CorrelativoCpqPropuesto[];
+  etapasSinMapear: string[];
+  negociosIncompletos: string[];
+  importacionId: string | null;
 };
 
 function conteo(decisiones: readonly Decision<unknown>[]): Record<Accion, number> {
@@ -81,10 +84,13 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
     ...detalle(plan.instalaciones),
     ...detalle(plan.programaciones),
     ...detalle(plan.comercial.etapas),
-    ...detalle(plan.comercial.negocios),
+    ...(plan.negocios.length > 0
+      ? detalle(plan.negocios)
+      : detalle(plan.comercial.negocios)),
     ...detalle(plan.comercial.historial),
     ...detalle(plan.comercial.contactosNegocio),
     ...detalle(plan.comercial.cotizaciones),
+    ...(plan.negocios.length > 0 ? detalle(plan.negocios) : detalle(plan.comercial.negocios)),
   ];
   const avisos = new Map<string, string[]>();
   for (const a of plan.avisos) avisos.set(a.codigo, [...(avisos.get(a.codigo) ?? []), a.idOpai1]);
@@ -99,7 +105,8 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
       instalacion: conteo(plan.instalaciones),
       programacion_recurrente: conteo(plan.programaciones),
       etapa: conteo(plan.comercial.etapas),
-      negocio: conteo(plan.comercial.negocios),
+      negocio:
+        plan.negocios.length > 0 ? conteo(plan.negocios) : conteo(plan.comercial.negocios),
       negocio_etapa: conteo(plan.comercial.historial),
       negocio_contacto: conteo(plan.comercial.contactosNegocio),
       cotizacion: conteo(plan.comercial.cotizaciones),
@@ -113,6 +120,9 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
     tributario: plan.tributario,
     destinatarios: plan.destinatarios,
     correlativosCpq: plan.correlativosCpq,
+    etapasSinMapear: plan.etapasSinMapear,
+    negociosIncompletos: plan.negociosIncompletos,
+    importacionId: plan.importacionId,
   };
 }
 

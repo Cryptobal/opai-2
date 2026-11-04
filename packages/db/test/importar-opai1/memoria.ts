@@ -3,6 +3,7 @@
 import { readFileSync } from "node:fs";
 
 import { MOTIVO_VINCULO_PERSONA } from "../../scripts/importar-opai1/contactos";
+import { completarVacios } from "../../scripts/importar-opai1/completar-vacios";
 import type { DatosContacto } from "../../scripts/importar-opai1/contactos-datos";
 import type { Decision } from "../../scripts/importar-opai1/comun";
 import type { ContactoDestino, EntidadImportada, EstadoDestino, VinculoDestino } from "../../scripts/importar-opai1/destino-tipos";
@@ -48,7 +49,10 @@ export function aplicarEnMemoria(plan: Plan, estado: EstadoDestino): EstadoDesti
         if (entidad === "cuenta") cuentaReal.set(`nueva:${d.idOpai1}`, id);
       } else if (d.accion === "actualizar" && datos && d.destinoId) {
         const fila = tabla.find((f) => f["id"] === d.destinoId);
-        if (fila) Object.assign(fila, datos);
+        if (fila) {
+          const { escribir } = completarVacios(datos, fila as Record<string, unknown>);
+          Object.assign(fila, escribir);
+        }
         mapear(d.idOpai1, d.destinoId);
       } else if (d.accion === "omitido" && d.fusionaCon) {
         const canonica = destinoDe.get(d.fusionaCon);

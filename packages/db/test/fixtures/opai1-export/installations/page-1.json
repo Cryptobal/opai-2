@@ -1,0 +1,64 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-03T12:00:00.000Z",
+  "recurso": "installations",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "ins-i1",
+      "accountId": "acc-a1",
+      "name": "Bodega Central",
+      "address": "Calle Falsa 123",
+      "commune": "Santiago",
+      "placeId": "place-1",
+      "lat": -33.45,
+      "lng": -70.65,
+      "createdAt": "2025-01-04T12:00:00.000Z",
+      "updatedAt": "2025-01-04T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i2",
+      "accountId": "acc-a2",
+      "name": "Bodega Central Norte",
+      "lat": -33.4502,
+      "lng": -70.6501,
+      "activatedByDealId": "deal-1",
+      "createdAt": "2025-02-03T12:00:00.000Z",
+      "updatedAt": "2025-02-03T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i3",
+      "accountId": "acc-a1",
+      "name": "Bodega  central",
+      "lat": -33.5,
+      "lng": -70.7,
+      "createdAt": "2025-02-04T12:00:00.000Z",
+      "updatedAt": "2025-02-04T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i4",
+      "accountId": null,
+      "leadId": "lead-1",
+      "name": "Sitio Prospecto",
+      "createdAt": "2025-02-05T12:00:00.000Z",
+      "updatedAt": "2025-02-05T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i5",
+      "accountId": "acc-a6",
+      "name": "Oficina Delta",
+      "placeId": "place-9",
+      "createdAt": "2025-01-20T12:00:00.000Z",
+      "updatedAt": "2025-01-20T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i6",
+      "accountId": "acc-a6",
+      "name": "Sucursal Delta",
+      "placeId": "place-9",
+      "createdAt": "2025-01-21T12:00:00.000Z",
+      "updatedAt": "2025-01-21T12:00:00.000Z"
+    }
+  ]
+}

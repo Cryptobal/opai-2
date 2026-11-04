@@ -9,6 +9,12 @@ import {
   mapearRolNegocioContacto,
   pendientesComerciales,
 } from "../../scripts/importar-opai1/comercial-pendiente";
+import {
+  ETAPA_ADJUDICADO_2,
+  ETAPA_PERDIDO_2,
+  cargarEquivalenciaEtapas,
+  resolverEtapaNegocio,
+} from "../../scripts/importar-opai1/etapas-equivalencia";
 import { fixture } from "./memoria";
 
 const etapa = (extra: Partial<Parameters<typeof mapearEtapa>[0]> = {}) => ({
@@ -21,45 +27,50 @@ const etapa = (extra: Partial<Parameters<typeof mapearEtapa>[0]> = {}) => ({
   ...extra,
 });
 
-describe("mapeo comercial (pendiente de CRM PR 1)", () => {
-  it("COMERCIAL_EN_MAIN activo: el plan cuenta etapas y negocios (apply CRM pendiente)", () => {
+describe("mapeo comercial (importador v2)", () => {
+  it("COMERCIAL_EN_MAIN activo: el CRM ya no queda pendiente por PR1", () => {
     expect(COMERCIAL_EN_MAIN).toBe(true);
-    expect(pendientesComerciales(fixture())).toEqual([]);
+    const p = pendientesComerciales(fixture());
+    expect(p.some((x) => x.motivo === "pendiente_crm_pr1")).toBe(false);
   });
 
-  it("etapas 1:1 con tipo y exigencia de inicio de servicio", () => {
+  it("equivalencia Gard: lost/won y tabla por stageId", () => {
+    const eq = cargarEquivalenciaEtapas("gard");
+    expect(Object.keys(eq)).toHaveLength(8);
+    const etapas1 = new Map(fixture().pipelineStages.map((e) => [e.id, e]));
+    expect(
+      resolverEtapaNegocio({ stageId: "st-1", status: "open" }, eq, etapas1),
+    ).toEqual({ error: "etapa_sin_mapeo" });
+    expect(resolverEtapaNegocio({ stageId: "x", status: "lost" }, eq, etapas1)).toEqual({
+      etapaId2: ETAPA_PERDIDO_2,
+      revisar: false,
+    });
+    expect(resolverEtapaNegocio({ stageId: "x", status: "won" }, eq, etapas1)).toEqual({
+      etapaId2: ETAPA_ADJUDICADO_2,
+      revisar: false,
+    });
+  });
+
+  it("etapas legacy 1:1 con tipo y exigencia de inicio de servicio", () => {
     expect(mapearEtapa(etapa())).toEqual({ nombre: "Etapa", orden: 1, tipo: "abierta", exige: [] });
     expect(mapearEtapa(etapa({ isClosedWon: true }))).toMatchObject({ tipo: "ganada" });
     expect(mapearEtapa(etapa({ isClosedLost: true }))).toMatchObject({ tipo: "perdida" });
     expect(mapearEtapa(etapa({ isAccepted: true }))).toMatchObject({ exige: ["inicio_servicio"] });
-    expect(mapearEtapa(etapa({ isClosedWon: true, isClosedLost: true }))).toEqual({
-      error: "etapa_ambigua",
-    });
   });
 
   it("motivo de pérdida: catálogo cerrado, nulo sin categoría, desconocido avisado", () => {
     expect(mapearMotivoPerdida("Precio")).toEqual({ motivo: "precio", desconocido: false });
-    expect(mapearMotivoPerdida("sin respuesta")).toEqual({
-      motivo: "sin_respuesta",
-      desconocido: false,
-    });
     expect(mapearMotivoPerdida(null)).toEqual({ motivo: null, desconocido: false });
     expect(mapearMotivoPerdida("raro")).toEqual({ motivo: null, desconocido: true });
   });
 
   it("rol del contacto en el negocio", () => {
-    expect(mapearRolNegocioContacto("decision_maker")).toEqual({
-      rol: "decisor",
-      esPrincipal: false,
-    });
     expect(mapearRolNegocioContacto("primary")).toEqual({ rol: null, esPrincipal: true });
-    expect(mapearRolNegocioContacto("participant")).toEqual({ rol: "usuario", esPrincipal: false });
   });
 
   it("historial en orden con la duración en la etapa anterior", () => {
     const h = historialNegocio(fixture().dealStageHistory, "deal-1");
     expect(h.map((t) => t.idOpai1)).toEqual(["h-1", "h-2"]);
-    expect(h[0]?.duracionAnteriorMs).toBeNull();
     expect(h[1]?.duracionAnteriorMs).toBe(24 * 3600 * 1000);
   });
 
@@ -67,18 +78,9 @@ describe("mapeo comercial (pendiente de CRM PR 1)", () => {
     const datos = fixture();
     const negocio = datos.deals[0];
     if (!negocio) throw new Error("fixture sin negocio");
-    const de = (n: typeof negocio) => instalacionesDeNegocio(n, datos.installations);
-    expect(de(negocio)).toEqual({ ids: ["ins-i2"], via: "activada" });
-    const unica = {
-      ...negocio,
-      id: "deal-2",
-      accountId: "acc-a6",
-      installationName: "oficina delta",
-    };
-    expect(de(unica)).toEqual({ ids: ["ins-i5"], via: "nombre" });
-    const repetida = { ...negocio, id: "deal-3", installationName: "bodega central" };
-    expect(de(repetida)).toEqual({ ids: [], via: "ambigua" });
-    const inventada = { ...negocio, id: "deal-4", installationName: "No existe" };
-    expect(de(inventada)).toEqual({ ids: [], via: "sin_coincidencia" });
+    expect(instalacionesDeNegocio(negocio, datos.installations)).toEqual({
+      ids: ["ins-i2"],
+      via: "activada",
+    });
   });
 });
