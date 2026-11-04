@@ -17,6 +17,9 @@ export const ESTADO_PLAN_TEXTO = {
   vencido: "El plan venció",
 } as const;
 
+export const AVISO_SIN_HISTORIAL =
+  "Esta conversación no quedó guardada en tu historial. Copia lo que necesites antes de cerrar el panel.";
+
 export const ERROR_RED = "No hay conexión con OPAI. Tu mensaje no se envió; vuelve a intentarlo.";
 export const ERROR_RED_PLAN =
   "Se perdió la conexión. Revisa el estado de los cambios antes de volver a confirmar.";

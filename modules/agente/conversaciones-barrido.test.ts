@@ -21,7 +21,15 @@ function falso(lotes: string[][]) {
       })),
     },
   };
-  return { ctx: { tenantId: TENANT, db } as unknown as Contexto, db };
+  const registrar = vi.fn(async () => ({ seq: 1, hash: "h" }));
+  const ctx = {
+    tenantId: TENANT,
+    actor: { tipo: "system" },
+    db,
+    transaccion: async (fn: (tx: unknown) => Promise<unknown>) => fn(db),
+    auditoria: { registrar },
+  } as unknown as Contexto;
+  return { ctx, db, registrar };
 }
 
 it("borra lo vencido de su empresa, con el plazo por defecto de 90 días", async () => {
@@ -57,4 +65,24 @@ it("si el ajuste de retención no se puede leer, falla y no borra nada", async (
   vi.mocked(ajuste).mockRejectedValueOnce(new Error("config caída"));
   await expect(trabajoConversacionesVencidas.ejecutar(ctx, {})).rejects.toThrow("config caída");
   expect(db.agenteConversacion.deleteMany).not.toHaveBeenCalled();
+});
+
+it("deja traza de la purga con el conteo, sin IDs ni contenido de conversaciones", async () => {
+  const { ctx, registrar } = falso([["a", "b"]]);
+  await trabajoConversacionesVencidas.ejecutar(ctx, {});
+  expect(registrar).toHaveBeenCalledTimes(1);
+  const [, evento] = registrar.mock.calls[0] as unknown as [unknown, { payload: unknown }];
+  expect(evento).toMatchObject({
+    tenantId: TENANT,
+    capability: "agente.conversaciones.vencidas",
+    payload: { borradas: 2, origen: "barrido" },
+  });
+  expect(JSON.stringify(evento)).not.toMatch(/"a"|"b"|mensajes|titulo/);
+});
+
+it("si no se borró nada no deja traza", async () => {
+  const { ctx, db, registrar } = falso([["a"]]);
+  db.agenteConversacion.deleteMany.mockResolvedValueOnce({ count: 0 });
+  await trabajoConversacionesVencidas.ejecutar(ctx, {});
+  expect(registrar).not.toHaveBeenCalled();
 });

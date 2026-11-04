@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest";
-import type { Contexto } from "@opai/capabilities";
+import { ajuste, type Contexto } from "@opai/capabilities";
 
-import { guardarTurno } from "./conversaciones-guardado";
+import { corteRetencion, diasRetencion, guardarTurno } from "./conversaciones-guardado";
 
 // El ajuste del módulo no está registrado en estos tests unitarios: se fija el defecto.
 vi.mock("@opai/capabilities", async () => ({
@@ -29,13 +29,16 @@ function falso(opciones: Opciones = {}) {
       create: vi.fn(async () => ({ id: "nueva" })),
     },
   };
+  const registrar = vi.fn(async () => ({ seq: 1, hash: "h" }));
   const ctx = {
     tenantId: TENANT,
+    actor: { tipo: "user", id: USUARIO },
+    auditoria: { registrar },
     usuario: { id: USUARIO },
     principal: opciones.servicio ? { tipo: "servicio" } : null,
     db,
   } as unknown as Contexto;
-  return { ctx, db };
+  return { ctx, db, registrar };
 }
 const turno = { mensaje: "  Hola   OPAI  ", texto: "Hola", pasos: ["core.cargos.create"] };
 const previo = [{ rol: "usuario", texto: "antes", fecha: "2026-11-01T00:00:00.000Z" }];
@@ -106,4 +109,47 @@ it("un reintento con el mismo turnoId no duplica los mensajes", async () => {
   const a = falso({ existente: [{ id: "c1", mensajes: guardado, version: 5 }] });
   expect(await guardarTurno(a.ctx, { ...turno, conversacionId: "c1", turnoId: TURNO })).toBe("c1");
   expect(a.db.agenteConversacion.updateMany).not.toHaveBeenCalled();
+});
+
+it("la purga al guardar deja traza con el conteo y sin contenido", async () => {
+  const a = falso();
+  a.db.agenteConversacion.deleteMany.mockResolvedValueOnce({ count: 3 });
+  await guardarTurno(a.ctx, turno);
+  expect(a.registrar).toHaveBeenCalledTimes(1);
+  const [, evento] = a.registrar.mock.calls[0] as unknown as [unknown, { payload: unknown }];
+  expect(evento).toMatchObject({
+    capability: "agente.conversaciones.vencidas",
+    payload: { borradas: 3, origen: "guardado" },
+  });
+  expect(JSON.stringify(evento)).not.toMatch(/Hola|mensajes|titulo/);
+});
+
+it("si el historial no se puede guardar, falla cerrado con un mensaje claro", async () => {
+  const a = falso();
+  a.db.agenteConversacion.create.mockRejectedValueOnce(new Error("conexión caída: detalle interno"));
+  const error = await guardarTurno(a.ctx, turno).then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toMatchObject({
+    code: "INTERNAL",
+    message: "No pudimos guardar la conversación en tu historial.",
+  });
+  expect(String((error as Error).message)).not.toContain("detalle interno");
+});
+
+it("el piso de retención es 7 días: valores fuera de rango o no enteros rigen el defecto", async () => {
+  const dias = async (v: unknown) => {
+    vi.mocked(ajuste).mockResolvedValueOnce(v);
+    return diasRetencion(falso().ctx);
+  };
+  expect(await dias(7)).toBe(7);
+  expect(await dias(365)).toBe(365);
+  expect(await dias(6)).toBe(90);
+  expect(await dias(0)).toBe(90);
+  expect(await dias(366)).toBe(90);
+  expect(await dias(30.5)).toBe(90);
+  expect(await dias("30")).toBe(90);
+  const ahora = new Date("2026-11-04T00:00:00Z");
+  expect(corteRetencion(ahora, 7).toISOString()).toBe("2026-10-28T00:00:00.000Z");
 });

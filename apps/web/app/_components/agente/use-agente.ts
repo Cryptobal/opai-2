@@ -5,16 +5,10 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 import { ERROR_RED, textoError } from "./mensajes-error";
+import { aplicarTurno } from "./respuesta-plan";
 import { useDecision } from "./use-decision";
 import { useModelos } from "./use-modelos";
-import {
-  type Contexto,
-  type Mensaje,
-  type Nivel,
-  type PlanVista,
-  type Turno,
-  VIGENCIA_PLAN_MS,
-} from "./tipos";
+import { type Contexto, type Mensaje, type Nivel, type Turno } from "./tipos";
 
 const nuevoId = () => crypto.randomUUID();
 /** Igual que el servidor al titular una conversación nueva. */
@@ -86,19 +80,7 @@ export function useAgente(portal: string, abierto: boolean) {
             conversacion.current = t.conversacionId;
             setConversacionId(t.conversacionId);
           }
-          const plan: PlanVista | undefined = t.token
-            ? {
-                pasos: t.pasos,
-                nivel,
-                token: t.token,
-                siguiente: 0,
-                resultados: [],
-                estado: "propuesto",
-                // Margen de 30 s: el reloj del servidor corre desde antes de que llegue la respuesta.
-                vence: Date.now() + VIGENCIA_PLAN_MS - 30_000,
-              }
-            : undefined;
-          poner(id, (m) => ({ ...m, texto: t.texto, ...(plan ? { plan } : {}) }));
+          poner(id, (m) => aplicarTurno(m, t, nivel));
         }
       } catch {
         poner(id, (m) => ({ ...m, error: ERROR_RED }));

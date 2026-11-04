@@ -1,8 +1,13 @@
-import { ajuste, conflicto } from "@opai/capabilities";
+import { ajuste, conflicto, ErrorCapacidad } from "@opai/capabilities";
 import type { Contexto } from "@opai/capabilities";
 import { z } from "zod";
 
+import { auditarPurga } from "./conversaciones-auditoria";
+
 export const RETENCION_DIAS = 90;
+/** Piso y techo de la retención: los mismos del ajuste del manifest, para que rijan donde se lee. */
+export const RETENCION_MIN = 7;
+export const RETENCION_MAX = 365;
 export const MAX_MENSAJES = 200;
 /** Intentos de guardar sobre la versión vigente cuando otra pestaña escribió primero. */
 const INTENTOS = 4;
@@ -35,7 +40,10 @@ const titular = (texto: string) => texto.replace(/\s+/g, " ").trim().slice(0, 80
 // respaldo, una falla transitoria destruiría el historial de una empresa que configuró más.
 export async function diasRetencion(ctx: Contexto): Promise<number> {
   const v = await ajuste<unknown>(ctx, "agente", "retencionConversacionesDias");
-  return typeof v === "number" && v >= 1 ? v : RETENCION_DIAS;
+  // Un valor fuera del rango del ajuste no puede venir de la configuración: rige el defecto.
+  return typeof v === "number" && Number.isInteger(v) && v >= RETENCION_MIN && v <= RETENCION_MAX
+    ? v
+    : RETENCION_DIAS;
 }
 
 type Turno = {
@@ -53,6 +61,16 @@ type Turno = {
  * sus mensajes en vez de pisarlos. Un `turnoId` ya guardado no se repite.
  */
 export async function guardarTurno(ctx: Contexto, t: Turno): Promise<string | null> {
+  try {
+    return await escribirTurno(ctx, t);
+  } catch (error) {
+    if (error instanceof ErrorCapacidad) throw error;
+    // Falla cerrado (ADR-052), pero con un mensaje que la persona entiende en vez de un error interno.
+    throw new ErrorCapacidad("INTERNAL", "No pudimos guardar la conversación en tu historial.");
+  }
+}
+
+async function escribirTurno(ctx: Contexto, t: Turno): Promise<string | null> {
   const usuario = ctx.usuario;
   if (!usuario || ctx.principal?.tipo === "servicio") return null;
   const ahora = new Date();
@@ -69,14 +87,17 @@ export async function guardarTurno(ctx: Contexto, t: Turno): Promise<string | nu
   const propia = { tenantId: ctx.tenantId, userId: usuario.id };
   const corte = corteRetencion(ahora, await diasRetencion(ctx));
   // Retención (R19/R20): las propias sin actividad por más del plazo se borran, salvo la que se usa.
-  const purgar = (excepto?: string) =>
-    ctx.db.agenteConversacion.deleteMany({
+  const purgar = async (excepto?: string) => {
+    const r = await ctx.db.agenteConversacion.deleteMany({
       where: {
         ...propia,
         ...(excepto ? { id: { not: excepto } } : {}),
         ultimaActividad: { lt: corte },
       },
     });
+    if (r.count > 0)
+      await auditarPurga(ctx, ctx.db, { borradas: r.count, corte, origen: "guardado" });
+  };
   if (t.conversacionId) {
     let agotado = true;
     for (let intento = 0; intento < INTENTOS; intento++) {
