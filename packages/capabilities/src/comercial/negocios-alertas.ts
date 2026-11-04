@@ -36,7 +36,9 @@ export const negociosAlertas = defineCapability({
     hoy: z.string(),
     inactividadEvaluada: z
       .boolean()
-      .describe("false si el actor no puede leer actividades: entonces no se evalúa sin_actividad."),
+      .describe(
+        "false si el actor no puede leer actividades: entonces no se evalúa sin_actividad.",
+      ),
     total: z.number().int(),
     items: z.array(filaSchema),
   }),
@@ -66,7 +68,12 @@ export const negociosAlertas = defineCapability({
         where: { negocioId: { in: negocios.map((n) => n.id) } },
         select: { negocioId: true, actividadId: true },
       });
-      const visibles = new Set(await filtrarVisibles(ctx, vinculos.map((v) => v.actividadId)));
+      const visibles = new Set(
+        await filtrarVisibles(
+          ctx,
+          vinculos.map((v) => v.actividadId),
+        ),
+      );
       const acts = await ctx.db.actividad.findMany({
         where: { id: { in: [...visibles] }, tipo: { not: "tarea" } },
         select: { id: true, ocurrioEn: true },
@@ -99,9 +106,14 @@ export const negociosAlertas = defineCapability({
     evaluados.sort((a, b) => b.alertas.length - a.alertas.length);
     const pagina = evaluados.slice(0, input.limite);
     const cuentaIds = [...new Set(pagina.map((e) => e.n.cuentaId))];
-    const userIds = [...new Set(pagina.flatMap((e) => (e.n.responsableId ? [e.n.responsableId] : [])))];
+    const userIds = [
+      ...new Set(pagina.flatMap((e) => (e.n.responsableId ? [e.n.responsableId] : []))),
+    ];
     const [cuentas, usuarios] = await Promise.all([
-      ctx.db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } }),
+      ctx.db.cuenta.findMany({
+        where: { id: { in: cuentaIds } },
+        select: { id: true, nombre: true },
+      }),
       userIds.length
         ? ctx.db.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } })
         : Promise.resolve([]),

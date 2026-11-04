@@ -33,7 +33,10 @@ export const indicadoresUfUtm = defineCapability({
     const fecha = input.fecha ?? hoy();
     const [uf, utm] = await Promise.all(
       (["uf", "utm"] as const).map(async (clave) => {
-        const ind = await ctx.db.indicadorLegal.findFirst({ where: { clave }, select: { id: true } });
+        const ind = await ctx.db.indicadorLegal.findFirst({
+          where: { clave },
+          select: { id: true },
+        });
         if (!ind) return null;
         const fila = await ctx.db.valorPublicado.findFirst({
           where: { indicadorId: ind.id, estado: "vigente", vigenteDesde: { lte: aFecha(fecha) } },

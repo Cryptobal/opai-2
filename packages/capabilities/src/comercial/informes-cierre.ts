@@ -73,10 +73,16 @@ export const informesCierre = defineCapability({
     ];
     const [usuarios, origenes] = await Promise.all([
       input.agruparPor === "responsable"
-        ? ctx.db.user.findMany({ where: { id: { in: ids("responsableId") } }, select: { id: true, name: true } })
+        ? ctx.db.user.findMany({
+            where: { id: { in: ids("responsableId") } },
+            select: { id: true, name: true },
+          })
         : Promise.resolve([]),
       input.agruparPor === "origen"
-        ? ctx.db.origenNegocio.findMany({ where: { id: { in: ids("origenId") } }, select: { id: true, nombre: true } })
+        ? ctx.db.origenNegocio.findMany({
+            where: { id: { in: ids("origenId") } },
+            select: { id: true, nombre: true },
+          })
         : Promise.resolve([]),
     ]);
     const acum = new Map<string, Acum>();
@@ -98,10 +104,10 @@ export const informesCierre = defineCapability({
     const etiqueta = (clave: string) =>
       input.agruparPor === "mes"
         ? clave
-        : (input.agruparPor === "responsable"
+        : ((input.agruparPor === "responsable"
             ? usuarios.find((u) => u.id === clave)?.name
             : origenes.find((o) => o.id === clave)?.nombre) ??
-          (input.agruparPor === "responsable" ? "Sin responsable" : "Sin origen");
+          (input.agruparPor === "responsable" ? "Sin responsable" : "Sin origen"));
     const grupos = [...acum.entries()]
       .map(([clave, a]) => ({
         clave,
@@ -112,7 +118,9 @@ export const informesCierre = defineCapability({
         montoGanadoMensualClp: a.mg,
         montoPerdidoMensualClp: a.mp,
       }))
-      .sort((a, b) => (input.agruparPor === "mes" ? a.clave.localeCompare(b.clave) : b.ganados - a.ganados));
+      .sort((a, b) =>
+        input.agruparPor === "mes" ? a.clave.localeCompare(b.clave) : b.ganados - a.ganados,
+      );
     const suma = (l: typeof ganados) => l.reduce((s, n) => s + montoMensual(n), 0);
     return {
       desde,

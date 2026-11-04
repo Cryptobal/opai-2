@@ -33,7 +33,14 @@ function bot() {
     semilla: {
       ...comercial,
       tenant: [{ ...comercial.tenant[0]!, timezone: "America/Santiago" }],
-      apiKey: [{ id: KEY, nombre: "Grokbot", userId: USUARIO_DE_PRUEBA.id, scopes: ["core", "comercial", "finanzas"] }],
+      apiKey: [
+        {
+          id: KEY,
+          nombre: "Grokbot",
+          userId: USUARIO_DE_PRUEBA.id,
+          scopes: ["core", "comercial", "finanzas"],
+        },
+      ],
       documentoEmitido: [],
       documentoRecibido: [],
     },
@@ -66,7 +73,9 @@ describe("manual operar-grokbot", () => {
 
   it("toda herramienta nombrada en el manual existe en la instantánea de herramientas", () => {
     const nombradas = [
-      ...readFileSync(RUTA, "utf8").matchAll(/`((?:preview_)?(?:core|comercial|cpq|finanzas)_[a-z_]+)`/g),
+      ...readFileSync(RUTA, "utf8").matchAll(
+        /`((?:preview_)?(?:core|comercial|cpq|finanzas)_[a-z_]+)`/g,
+      ),
     ].map((m) => m[1] ?? "");
     const existentes = new Set(readFileSync(SNAPSHOT, "utf8").split("\n"));
     expect(nombradas.length).toBeGreaterThan(40);
@@ -92,7 +101,10 @@ describe("manual operar-grokbot", () => {
     const { ctx } = bot();
     const yo = await usar(ctx, "core_me", {});
     expect(yo).toMatchObject({ ok: true, data: { agente: { nombre: "Grokbot" } } });
-    expect(await usar(ctx, "core_indicadores_uf_utm", {})).toMatchObject({ ok: true, data: { uf: null } });
+    expect(await usar(ctx, "core_indicadores_uf_utm", {})).toMatchObject({
+      ok: true,
+      data: { uf: null },
+    });
     expect(await usar(ctx, "comercial_negocios_embudo", {})).toMatchObject({ ok: true });
     expect(await usar(ctx, "comercial_negocios_alertas", {})).toMatchObject({
       ok: true,
@@ -106,7 +118,9 @@ describe("manual operar-grokbot", () => {
       ok: true,
       data: { totalPerdidos: 0 },
     });
-    expect(await usar(ctx, "finanzas_reportes_resultados", { desde: "2026-09", hasta: "2026-10" })).toMatchObject({
+    expect(
+      await usar(ctx, "finanzas_reportes_resultados", { desde: "2026-09", hasta: "2026-10" }),
+    ).toMatchObject({
       ok: true,
       data: { totales: { resultadoClp: 0 } },
     });
@@ -119,17 +133,31 @@ describe("manual operar-grokbot", () => {
   it("escribe con vista previa e idempotencia, y lo irreversible queda en aprobación humana", async () => {
     const { ctx, tabla } = bot();
     const nuevo = { cuentaId: CU, titulo: "Guardias · Planta 2" };
-    expect(await usar(ctx, "preview_comercial_negocios_create", nuevo)).toMatchObject({ ok: true, dryRun: true });
+    expect(await usar(ctx, "preview_comercial_negocios_create", nuevo)).toMatchObject({
+      ok: true,
+      dryRun: true,
+    });
     expect(tabla("negocio")).toHaveLength(1);
     await usar(ctx, "comercial_negocios_create", { ...nuevo, idempotency_key: "bot-negocio-001" });
-    expect(await usar(ctx, "comercial_negocios_create", { ...nuevo, idempotency_key: "bot-negocio-001" })).toMatchObject({
+    expect(
+      await usar(ctx, "comercial_negocios_create", {
+        ...nuevo,
+        idempotency_key: "bot-negocio-001",
+      }),
+    ).toMatchObject({
       ok: true,
       repetida: true,
     });
     expect(tabla("negocio")).toHaveLength(2);
-    const ganar = await usar(ctx, "comercial_negocios_ganar", { id: N1, idempotency_key: "bot-ganar-001" });
+    const ganar = await usar(ctx, "comercial_negocios_ganar", {
+      id: N1,
+      idempotency_key: "bot-ganar-001",
+    });
     expect(ganar).toMatchObject({ ok: false, error: { code: "APPROVAL_REQUIRED" } });
-    const emitir = await usar(ctx, "finanzas_ventas_emitir", { documentoId: DOC, idempotency_key: "bot-emitir-001" });
+    const emitir = await usar(ctx, "finanzas_ventas_emitir", {
+      documentoId: DOC,
+      idempotency_key: "bot-emitir-001",
+    });
     expect(emitir).toMatchObject({ ok: false, error: { code: "APPROVAL_REQUIRED" } });
   });
 });

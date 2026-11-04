@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  ESTADOS_CESION,
-  ESTADOS_COBRO_VENTA,
-  ESTADOS_DTE_EMITIDO,
-} from "@opai/domain";
+import { ESTADOS_CESION, ESTADOS_COBRO_VENTA, ESTADOS_DTE_EMITIDO } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
@@ -22,7 +18,13 @@ export const ventasBuscar = defineCapability({
     "Búsqueda avanzada en el libro de ventas para agentes: por RUT o cuenta del cliente, folio, tipo de documento, estado ante el SII, estado de cobro, estado de cesión, rango de fechas de emisión y rango de monto total. Devuelve los mismos documentos que el libro, paginados por cursor.",
   permiso: PERMISO_READ,
   input: z.object({
-    rut: z.string().trim().min(2).max(14).optional().describe("RUT del cliente, con o sin puntos y guion."),
+    rut: z
+      .string()
+      .trim()
+      .min(2)
+      .max(14)
+      .optional()
+      .describe("RUT del cliente, con o sin puntos y guion."),
     cuentaId: uuidSchema.optional(),
     folio: z.number().int().positive().optional(),
     tipoDte: z
@@ -54,11 +56,14 @@ export const ventasBuscar = defineCapability({
       cuentaIds = cs.map((c) => c.id);
       if (cuentaIds.length === 0) return { items: [], siguiente: null };
       // Con RUT y cuenta a la vez, la cuenta debe ser una de las del RUT.
-      if (input.cuentaId && !cuentaIds.includes(input.cuentaId)) return { items: [], siguiente: null };
+      if (input.cuentaId && !cuentaIds.includes(input.cuentaId))
+        return { items: [], siguiente: null };
     }
     const emision = {
       ...(input.emitidaDesde ? { gte: aFecha(input.emitidaDesde) } : {}),
-      ...(input.emitidaHasta ? { lt: new Date(aFecha(input.emitidaHasta).getTime() + 86_400_000) } : {}),
+      ...(input.emitidaHasta
+        ? { lt: new Date(aFecha(input.emitidaHasta).getTime() + 86_400_000) }
+        : {}),
     };
     const monto = {
       ...(input.montoMin !== undefined ? { gte: input.montoMin } : {}),

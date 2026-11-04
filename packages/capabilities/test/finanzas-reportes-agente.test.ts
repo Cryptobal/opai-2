@@ -47,15 +47,52 @@ function ctxFin(extra: Record<string, unknown[]> = {}) {
         { id: C1, tenantId: TENANT_DE_PRUEBA, nombre: "Minera Norte", rut: "76543210-3" },
         { id: C2, tenantId: TENANT_DE_PRUEBA, nombre: "Retail Sur", rut: "77111222-K" },
       ],
-      proveedor: [{ id: P1, tenantId: TENANT_DE_PRUEBA, razonSocial: "Uniformes SpA", rut: "76000111-2" }],
+      proveedor: [
+        { id: P1, tenantId: TENANT_DE_PRUEBA, razonSocial: "Uniformes SpA", rut: "76000111-2" },
+      ],
       documentoEmitido: [
-        emitido({ folio: 10, fechaEmision: f("2026-09-10"), montoNeto: 1_000_000, montoTotal: 1_190_000 }),
-        emitido({ folio: 11, fechaEmision: f("2026-10-05"), montoNeto: 500_000, montoTotal: 595_000, cuentaId: C2, estadoCobro: "cedida", cesionEstado: "cedido" }),
-        emitido({ folio: 12, tipoDte: 61, fechaEmision: f("2026-10-20"), montoNeto: 100_000, montoTotal: 119_000 }),
-        emitido({ folio: 13, estadoDte: "borrador", fechaEmision: f("2026-10-21"), montoNeto: 999_999 }),
+        emitido({
+          folio: 10,
+          fechaEmision: f("2026-09-10"),
+          montoNeto: 1_000_000,
+          montoTotal: 1_190_000,
+        }),
+        emitido({
+          folio: 11,
+          fechaEmision: f("2026-10-05"),
+          montoNeto: 500_000,
+          montoTotal: 595_000,
+          cuentaId: C2,
+          estadoCobro: "cedida",
+          cesionEstado: "cedido",
+        }),
+        emitido({
+          folio: 12,
+          tipoDte: 61,
+          fechaEmision: f("2026-10-20"),
+          montoNeto: 100_000,
+          montoTotal: 119_000,
+        }),
+        emitido({
+          folio: 13,
+          estadoDte: "borrador",
+          fechaEmision: f("2026-10-21"),
+          montoNeto: 999_999,
+        }),
       ],
       documentoRecibido: [
-        { id: "0192f3a0-0000-7000-8000-00000000f001", tenantId: TENANT_DE_PRUEBA, proveedorId: P1, tipoDte: 33, folio: 1, fechaEmision: f("2026-10-02"), fechaRecepcion: f("2026-10-03"), montoNeto: 300_000, montoExento: 0, montoTotal: 357_000 },
+        {
+          id: "0192f3a0-0000-7000-8000-00000000f001",
+          tenantId: TENANT_DE_PRUEBA,
+          proveedorId: P1,
+          tipoDte: 33,
+          folio: 1,
+          fechaEmision: f("2026-10-02"),
+          fechaRecepcion: f("2026-10-03"),
+          montoNeto: 300_000,
+          montoExento: 0,
+          montoTotal: 357_000,
+        },
       ],
       ...extra,
     },
@@ -69,7 +106,12 @@ beforeAll(() => {
 
 describe("finanzas · resultado por mes (cálculo puro)", () => {
   it("lista meses de borde a borde y cruza el año", () => {
-    expect(periodosEntre("2026-11", "2027-02")).toEqual(["2026-11", "2026-12", "2027-01", "2027-02"]);
+    expect(periodosEntre("2026-11", "2027-02")).toEqual([
+      "2026-11",
+      "2026-12",
+      "2027-01",
+      "2027-02",
+    ]);
     expect(periodosEntre("2026-12", "2026-11")).toEqual([]);
   });
 
@@ -80,7 +122,12 @@ describe("finanzas · resultado por mes (cálculo puro)", () => {
       { tipoDte: 34, fecha: "2026-10-07", montoNeto: 0, montoExento: 130, contraparteId: "b" },
     ];
     const [m] = resultadoPorMes(["2026-10"], docs, []);
-    expect(m).toMatchObject({ ventasClp: 250, comprasClp: 0, resultadoClp: 250, ventasDocumentos: 3 });
+    expect(m).toMatchObject({
+      ventasClp: 250,
+      comprasClp: 0,
+      resultadoClp: 250,
+      ventasDocumentos: 3,
+    });
     expect(ranking(docs, 1)).toEqual([{ id: "b", montoClp: 130 }]);
   });
 });
@@ -88,13 +135,26 @@ describe("finanzas · resultado por mes (cálculo puro)", () => {
 describe("finanzas.reportes.resultados", () => {
   it("ventas sin borradores menos compras, por mes, con rankings y nombres", async () => {
     const { ctx } = ctxFin();
-    const r = await executeCapability(ctx, "finanzas.reportes.resultados", { desde: "2026-09", hasta: "2026-10" });
+    const r = await executeCapability(ctx, "finanzas.reportes.resultados", {
+      desde: "2026-09",
+      hasta: "2026-10",
+    });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const d = r.data as { meses: { periodo: string; ventasClp: number; comprasClp: number; resultadoClp: number }[]; totales: { resultadoClp: number }; topClientes: { nombre: string; montoClp: number }[]; topProveedores: { nombre: string }[] };
+    const d = r.data as {
+      meses: { periodo: string; ventasClp: number; comprasClp: number; resultadoClp: number }[];
+      totales: { resultadoClp: number };
+      topClientes: { nombre: string; montoClp: number }[];
+      topProveedores: { nombre: string }[];
+    };
     expect(d.meses).toEqual([
       expect.objectContaining({ periodo: "2026-09", ventasClp: 1_000_000, comprasClp: 0 }),
-      expect.objectContaining({ periodo: "2026-10", ventasClp: 400_000, comprasClp: 300_000, resultadoClp: 100_000 }),
+      expect.objectContaining({
+        periodo: "2026-10",
+        ventasClp: 400_000,
+        comprasClp: 300_000,
+        resultadoClp: 100_000,
+      }),
     ]);
     expect(d.totales.resultadoClp).toBe(1_100_000);
     expect(d.topClientes[0]).toMatchObject({ nombre: "Minera Norte", montoClp: 900_000 });
@@ -103,14 +163,23 @@ describe("finanzas.reportes.resultados", () => {
 
   it("rechaza rangos invertidos o de más de 24 meses", async () => {
     const { ctx } = ctxFin();
-    for (const rango of [{ desde: "2026-10", hasta: "2026-09" }, { desde: "2024-01", hasta: "2026-10" }]) {
-      expect(await executeCapability(ctx, "finanzas.reportes.resultados", rango)).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    for (const rango of [
+      { desde: "2026-10", hasta: "2026-09" },
+      { desde: "2024-01", hasta: "2026-10" },
+    ]) {
+      expect(await executeCapability(ctx, "finanzas.reportes.resultados", rango)).toMatchObject({
+        ok: false,
+        error: { code: "UNPROCESSABLE" },
+      });
     }
   });
 
   it("exige finanzas:read", async () => {
     const { ctx } = contextoDePrueba({ rol: null, permisosRol: [], modulosActivos: ["finanzas"] });
-    expect(await executeCapability(ctx, "finanzas.reportes.resultados", {})).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await executeCapability(ctx, "finanzas.reportes.resultados", {})).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
   });
 });
 

@@ -12,10 +12,34 @@ const semilla = {
     { id: "i-utm", clave: "utm" },
   ],
   valorPublicado: [
-    { id: "v1", indicadorId: "i-uf", estado: "vigente", vigenteDesde: f("2026-11-03"), valorJson: 3_912_345 },
-    { id: "v2", indicadorId: "i-uf", estado: "vigente", vigenteDesde: f("2026-11-04"), valorJson: 3_913_000 },
-    { id: "v3", indicadorId: "i-uf", estado: "propuesto", vigenteDesde: f("2026-11-05"), valorJson: 1 },
-    { id: "v4", indicadorId: "i-utm", estado: "vigente", vigenteDesde: f("2026-11-01"), valorJson: 69_000 },
+    {
+      id: "v1",
+      indicadorId: "i-uf",
+      estado: "vigente",
+      vigenteDesde: f("2026-11-03"),
+      valorJson: 3_912_345,
+    },
+    {
+      id: "v2",
+      indicadorId: "i-uf",
+      estado: "vigente",
+      vigenteDesde: f("2026-11-04"),
+      valorJson: 3_913_000,
+    },
+    {
+      id: "v3",
+      indicadorId: "i-uf",
+      estado: "propuesto",
+      vigenteDesde: f("2026-11-05"),
+      valorJson: 1,
+    },
+    {
+      id: "v4",
+      indicadorId: "i-utm",
+      estado: "vigente",
+      vigenteDesde: f("2026-11-01"),
+      valorJson: 69_000,
+    },
   ],
 };
 
@@ -31,9 +55,13 @@ describe("core.indicadores.uf_utm", () => {
 
   it("si falta el día, devuelve la última anterior marcada como no exacta; ignora lo no vigente", async () => {
     const { ctx } = contextoDePrueba({ semilla });
-    const r = await dato<{ uf: { fecha: string; exacta: boolean; centavosClp: number } }>(ctx, "core.indicadores.uf_utm", {
-      fecha: "2026-11-09",
-    });
+    const r = await dato<{ uf: { fecha: string; exacta: boolean; centavosClp: number } }>(
+      ctx,
+      "core.indicadores.uf_utm",
+      {
+        fecha: "2026-11-09",
+      },
+    );
     expect(r.uf).toEqual({ fecha: "2026-11-04", exacta: false, centavosClp: 3_913_000 });
   });
 
