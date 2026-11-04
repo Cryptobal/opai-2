@@ -34,6 +34,15 @@ export const ajustesCpq = z.object({
     permiso: "cpq:modelo.manage",
     control: "seleccion",
   }),
+  enlace_publico: z.boolean().default(false).meta({
+    etiqueta: "Compartir cotizaciones por enlace público",
+    ayuda:
+      "Apagado por defecto. Solo aplica si la empresa no usa el Portal Cliente: con el portal activo, el cliente ve sus cotizaciones ahí y el enlace suelto no se puede crear.",
+    grupo: "Compartir",
+    ambito: "tenant",
+    permiso: "cpq:modelo.manage",
+    control: "switch",
+  }),
 });
 
 export type SupuestosTenant = {
@@ -44,11 +53,11 @@ export type SupuestosTenant = {
 
 export const SUPUESTOS_DEFECTO: SupuestosTenant = { afp: "modelo", salud: "fonasa", contrato: "indefinido" };
 
-const CAMPOS = defineAjustes("cpq", ajustesCpq);
+export const CAMPOS_CPQ = defineAjustes("cpq", ajustesCpq);
 
 /** Valores efectivos (defecto → plataforma → tenant); no depende de que el módulo esté registrado. */
 export async function supuestosTenant(ctx: Contexto): Promise<SupuestosTenant> {
-  const v = await valoresEfectivos(ctx, CAMPOS);
+  const v = await valoresEfectivos(ctx, CAMPOS_CPQ);
   const leer = <T>(clave: string, defecto: T) => (v.get(`cpq.${clave}`)?.valor as T | undefined) ?? defecto;
   return {
     afp: leer("supuestos_afp", SUPUESTOS_DEFECTO.afp),

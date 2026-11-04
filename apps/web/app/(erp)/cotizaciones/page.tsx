@@ -20,7 +20,7 @@ export default function Cotizaciones({ searchParams }: { searchParams: SearchPar
       completo
       cargar={async () => {
         const p = await leerParametros(searchParams);
-        return { ...(await cargarCotizaciones(p["cursor"])), q: p.q };
+        return { ...(await cargarCotizaciones(p["cursor"], undefined, p["ver"] === "archivadas")), q: p.q };
       }}
       opciones={(d) =>
         d.crear

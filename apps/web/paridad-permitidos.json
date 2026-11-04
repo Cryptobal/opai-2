@@ -22,6 +22,10 @@
       "motivo": "Firmar por enlace personal ocurre antes de existir sesión (firma.md §5, §10): resuelve el tenant por slug con tenantPorSlug() y luego ejecuta capacidades internas con el enlace como credencial."
     },
     {
+      "archivo": "app/p/[slug]/[token]/ver.ts",
+      "motivo": "Cotización compartida por enlace (CPQ v4): pública, sin sesión; resuelve el tenant por slug con tenantPorSlug() y ejecuta cpq.compartir.ver (interna) con el token de 128 bits como credencial, con rate limit que falla cerrado."
+    },
+    {
       "archivo": "app/api/t/[slug]/solicitudes/route.ts",
       "motivo": "Endpoint público del formulario web (#224, comercial-formulario-web.md): ocurre sin sesión; resuelve el tenant por slug con tenantPorSlug() y usa la clave del canal (Bearer opai_frm_…) como credencial."
     },
@@ -46,6 +50,10 @@
     {
       "archivo": "app/firmar/[slug]/[token]/acciones.ts",
       "motivo": "Flujo de firma pre-sesión (firma.md R19, §10): ver_firmante, firmar y rechazar son internas; el enlace personal es la credencial."
+    },
+    {
+      "archivo": "app/p/[slug]/[token]/ver.ts",
+      "motivo": "cpq.compartir.ver es interna por diseño: solo la página pública /p/<slug>/<token> la ejecuta, con el enlace revocable y con vencimiento como credencial."
     },
     {
       "archivo": "app/api/t/[slug]/solicitudes/route.ts",

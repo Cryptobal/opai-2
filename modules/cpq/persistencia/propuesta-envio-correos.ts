@@ -1,6 +1,7 @@
 import { enviarCorreo, type Contexto } from "@opai/capabilities";
 
 import type { DestinatarioEnvio } from "../domain/documento/propuesta-tecnica";
+import { datosCorreoCliente, EVENTO_CORREO_CLIENTE } from "./correo-cliente";
 
 export async function enviarCorreosEnvioPropuesta(
   ctx: Contexto,
@@ -12,9 +13,9 @@ export async function enviarCorreosEnvioPropuesta(
     try {
       await enviarCorreo(
         { db: ctx.db, tenantId: ctx.tenantId, correo: ctx.servicios.correo, urlBase: ctx.servicios.urlBase },
-        "cpq.cotizacion.enviada",
+        EVENTO_CORREO_CLIENTE,
         d.email,
-        datos,
+        await datosCorreoCliente(ctx, datos),
       );
     } catch {
       /* best-effort */

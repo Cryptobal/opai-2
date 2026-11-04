@@ -61,6 +61,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       "cpq:modelo.manage",
       "cpq:biblioteca.manage",
       "cpq:envios.aprobar",
+      "cpq:puestos.confirmar",
     ],
   },
   supervisor: {

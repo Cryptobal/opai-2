@@ -1,6 +1,7 @@
 import type { Contexto } from "@opai/capabilities";
 import { enviarCorreo } from "@opai/capabilities";
 
+import { datosCorreoCliente, EVENTO_CORREO_CLIENTE } from "../persistencia/correo-cliente";
 import { moverNegocioPropuestaEnviada } from "../persistencia/enviar-negocio";
 import {
   eliminarPdfPropuestaAlmacenamiento,
@@ -87,9 +88,9 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
     try {
       await enviarCorreo(
         { db: ctx.db, tenantId: ctx.tenantId, correo: ctx.servicios.correo, urlBase: ctx.servicios.urlBase },
-        "cpq.cotizacion.enviada",
+        EVENTO_CORREO_CLIENTE,
         para,
-        pack.correoPreview.datos,
+        await datosCorreoCliente(ctx, pack.correoPreview.datos),
       );
     } catch {
       /* best-effort */

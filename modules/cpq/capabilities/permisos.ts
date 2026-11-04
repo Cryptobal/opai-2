@@ -9,3 +9,5 @@ export const PERMISO_MODELO = "cpq:modelo.manage";
 export const PERMISO_BIBLIOTECA = "cpq:biblioteca.manage";
 /** Aprobar envíos conjuntos cotización/propuesta (CAR-144). */
 export const PERMISO_ENVIOS_APROBAR = "cpq:envios.aprobar";
+/** Confirmar la creación de puestos de una cotización aceptada (R2): decide RRHH, no un agente. */
+export const PERMISO_PUESTOS_CONFIRMAR = "cpq:puestos.confirmar";

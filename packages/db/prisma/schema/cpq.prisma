@@ -18,14 +18,19 @@ model CpqCotizacion {
   /// Una sola vigente por negocio (índice parcial en el SQL, R46).
   vigente        Boolean  @default(false)
   creadoPorId    String   @map("creado_por_id") @db.Uuid
+  /// Archivada (CPQ v4): fuera de la lista y de los reportes; se restaura. No es un estado de versión.
+  archivadaEn    DateTime? @map("archivada_en") @db.Timestamptz(6)
+  archivadaPorId String?   @map("archivada_por_id") @db.Uuid
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   versiones          CpqVersion[]
   propuestasTecnicas CpqPropuestaTecnica[]
+  enlaces            CpqEnlaceCompartido[]
 
   @@unique([tenantId, codigo])
   @@index([tenantId, negocioId])
+  @@index([tenantId, archivadaEn])
   @@map("cotizaciones")
   @@schema("cpq")
 }
@@ -465,5 +470,47 @@ model CpqSueldoReferencia {
   @@unique([tenantId, cargoId, vigenteDesde])
   @@index([tenantId, cargoId])
   @@map("sueldos_referencia")
+  @@schema("cpq")
+}
+
+/// Enlace público de una cotización enviada (CPQ v4 «Compartir»): token de 128 bits, vence y se revoca.
+/// Un solo enlace activo por cotización (índice parcial en el SQL). Resuelve el tenant por el slug.
+model CpqEnlaceCompartido {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  cotizacionId  String    @map("cotizacion_id") @db.Uuid
+  versionId     String    @map("version_id") @db.Uuid
+  /// sha256 (64 hex) del token del enlace; el token en claro solo se muestra al crearlo.
+  tokenHash     String    @unique @map("token_hash")
+  venceEn       DateTime  @map("vence_en") @db.Timestamptz(6)
+  revocadoEn    DateTime? @map("revocado_en") @db.Timestamptz(6)
+  vistas        Int       @default(0)
+  ultimaVistaEn DateTime? @map("ultima_vista_en") @db.Timestamptz(6)
+  creadoPorId   String    @map("creado_por_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cotizacion CpqCotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, cotizacionId])
+  @@map("enlaces_compartidos")
+  @@schema("cpq")
+}
+
+/// Puesto creado desde la oferta al ganar (R2): una fila por posición confirmada por RRHH. La unicidad
+/// (línea, posición) hace idempotente la confirmación.
+model CpqPuestoCreado {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  lineaId         String   @map("linea_id") @db.Uuid
+  posicion        Int
+  puestoId        String   @map("puesto_id") @db.Uuid
+  confirmadoPorId String   @map("confirmado_por_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([lineaId, posicion])
+  @@index([tenantId])
+  @@map("puestos_creados")
   @@schema("cpq")
 }

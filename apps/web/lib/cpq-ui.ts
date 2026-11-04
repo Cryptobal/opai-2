@@ -11,5 +11,6 @@ export function accesoCpq(identidad: Identidad | null) {
     aprobar: leer && puede("cpq:aprobar"),
     costos: leer && puede("cpq:costos.ver"),
     aprobarEnvios: leer && puede("cpq:envios.aprobar"),
+    confirmarPuestos: leer && puede("cpq:puestos.confirmar"),
   };
 }
