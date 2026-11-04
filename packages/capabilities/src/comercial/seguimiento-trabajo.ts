@@ -6,6 +6,7 @@ import { esPasoPendiente, type EstadoPaso } from "@opai/domain";
 import { defineConsumidor } from "../eventos/consumidores";
 import { defineTrabajo } from "../trabajos/registro";
 import { configDeVersion } from "./seguimiento-comun";
+import { cerrarSinRespuesta } from "./seguimiento-cierre";
 import { actividadDePaso, enviarCorreoSeguimiento } from "./seguimiento-ejecucion";
 
 const LOTE = 50;
@@ -53,8 +54,9 @@ export const trabajoVencerPasosSeguimiento = defineTrabajo({
         await ctx.db.seguimientoPaso.update({ where: { id: paso.id }, data: { estado: "fallido", error: e instanceof Error ? e.message.slice(0, 300) : "Error desconocido" } });
       }
     }
-    const vivos = await ctx.db.seguimiento.findMany({ where: { estado: "activo" }, select: { id: true, negocioId: true }, take: 200 });
+    const vivos = await ctx.db.seguimiento.findMany({ where: { estado: "activo" }, select: { id: true, negocioId: true, planId: true, planVersion: true }, take: 200 });
     let terminados = 0;
+    let cerrados = 0;
     for (const s of vivos) {
       const pasos = await ctx.db.seguimientoPaso.findMany({ where: { seguimientoId: s.id }, select: { estado: true } });
       if (pasos.length && !pasos.some((p) => esPasoPendiente(p.estado as EstadoPaso))) {
@@ -63,9 +65,11 @@ export const trabajoVencerPasosSeguimiento = defineTrabajo({
           await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.terminado", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
         });
         terminados += 1;
+        // R15: si el plan lo pide, OPAI pierde el negocio sin respuesta; si falla, el seguimiento ya terminó.
+        if (await cerrarSinRespuesta(ctx, s, await configDeVersion(ctx, s.planId, s.planVersion)).catch(() => false)) cerrados += 1;
       }
     }
-    return { activados, fallidos, terminados };
+    return { activados, fallidos, terminados, cerrados };
   },
 });
 

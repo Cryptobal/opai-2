@@ -66,5 +66,12 @@ export async function variablesDe(
       url: typeof p["url"] === "string" ? p["url"] : `${base}/solicitudes`,
     };
   }
+  if (ev.tipo === "comercial.seguimiento.cliente_respondio" || ev.tipo === "comercial.seguimiento.cierre_aplicado") {
+    const n = ev.entidadId
+      ? await ctx.db.negocio.findUnique({ where: { id: ev.entidadId }, select: { titulo: true } })
+      : null;
+    const ruta = ev.tipo === "comercial.seguimiento.cierre_aplicado" ? "" : "/seguimiento";
+    return { negocio: { titulo: n?.titulo ?? "" }, empresa, url: `${base}/negocios/${ev.entidadId ?? ""}${ruta}` };
+  }
   return { ...p, empresa };
 }

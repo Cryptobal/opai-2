@@ -22,6 +22,15 @@ export const ajustesComercial = z.object({
     permiso: "comercial:config.manage",
     control: "switch",
   }),
+  seguimiento_aviso_responsable: z.boolean().default(false).meta({
+    etiqueta: "Avisar al vendedor cuando el cliente responde",
+    ayuda:
+      "Apagado por defecto (ADR-020): con el aviso encendido, el vendedor del negocio recibe una notificación en OPAI cuando su cliente responde un seguimiento o cuando OPAI cierra el negocio sin respuesta.",
+    grupo: "Seguimiento",
+    ambito: "tenant",
+    permiso: "comercial:config.manage",
+    control: "switch",
+  }),
   solicitudes_acuse_recibo: z.boolean().default(false).meta({
     etiqueta: "Enviar acuse de recibo al recibir una solicitud",
     ayuda:

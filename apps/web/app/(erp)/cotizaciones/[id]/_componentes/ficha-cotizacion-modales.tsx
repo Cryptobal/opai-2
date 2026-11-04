@@ -44,6 +44,7 @@ export function FichaCotizacionModales(p: {
   codigo: string;
   versionNumero: number;
   cuentaId: string | null;
+  negocioId?: string | null;
   requiereAprobacion: boolean;
   estadoVersion: string;
   enviada: boolean;
@@ -72,6 +73,7 @@ export function FichaCotizacionModales(p: {
           codigo={p.codigo}
           version={p.versionNumero}
           cuentaId={p.cuentaId}
+          negocioId={p.negocioId ?? null}
           requiereAprobacion={p.requiereAprobacion}
           estado={p.estadoVersion}
           onCerrar={() => m.setEnviarAbierto(false)}

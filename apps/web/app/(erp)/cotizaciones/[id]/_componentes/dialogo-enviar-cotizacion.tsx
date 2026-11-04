@@ -6,6 +6,8 @@ import { Alerta, avisar, Button, Campo, ChipToggle, Dialog, Input, Textarea } fr
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { OpcionSeguimiento, useSeguimientoAlEnviar } from "./opcion-seguimiento";
+
 type Contacto = { id: string; nombres: string; apellidos: string; email: string | null };
 
 export function DialogoEnviarCotizacion({
@@ -13,6 +15,7 @@ export function DialogoEnviarCotizacion({
   codigo,
   version,
   cuentaId,
+  negocioId = null,
   requiereAprobacion,
   estado,
   onCerrar,
@@ -22,12 +25,15 @@ export function DialogoEnviarCotizacion({
   codigo: string;
   version: number;
   cuentaId: string | null;
+  /** Negocio de la cotización: con él se ofrece iniciar el seguimiento al enviar. */
+  negocioId?: string | null;
   requiereAprobacion: boolean;
   estado: string;
   onCerrar: () => void;
   onEnviado: () => void;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const seguimiento = useSeguimientoAlEnviar(negocioId);
   const [contactos, setContactos] = useState<Contacto[]>([]);
   const [contactoId, setContactoId] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState(
@@ -76,6 +82,7 @@ export function DialogoEnviarCotizacion({
     if (r != null) {
       const estadoEnvio =
         r && typeof r === "object" && "estado" in r ? String((r as { estado: string }).estado) : null;
+      if (estadoEnvio !== "pendiente_aprobacion") await seguimiento.arrancar(cotizacionId, codigo);
       avisar.exito(
         estadoEnvio === "pendiente_aprobacion" ? "Envío pendiente de aprobación" : "Cotización enviada",
       );
@@ -120,6 +127,7 @@ export function DialogoEnviarCotizacion({
         <Campo etiqueta="Mensaje" htmlFor="cpq-mensaje">
           <Textarea id="cpq-mensaje" rows={4} value={mensaje} onChange={(e) => setMensaje(e.target.value)} />
         </Campo>
+        {!pedirAprobacion ? <OpcionSeguimiento s={seguimiento} /> : null}
         {pedirAprobacion ? (
           <Alerta tono="info" titulo="Requiere aprobación">
             La cotización queda pendiente; un owner o admin revisa el margen y recién ahí sale el correo.
