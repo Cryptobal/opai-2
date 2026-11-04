@@ -16,14 +16,20 @@ export const trabajoConsultarCesionesRpetc = defineTrabajo({
       take: 30,
     });
     let actualizadas = 0;
+    let fallidas = 0;
     for (const c of pendientes) {
       if (!c.operacionExternaId) continue;
-      const r = await adaptador.consultar(c.operacionExternaId);
-      if (r.estado === c.estado) continue;
-      await ctx.db.cesion.update({ where: { id: c.id }, data: { estado: r.estado } });
-      actualizadas += 1;
+      try {
+        const r = await adaptador.consultar(c.operacionExternaId);
+        if (r.estado === c.estado) continue;
+        await ctx.db.cesion.update({ where: { id: c.id }, data: { estado: r.estado } });
+        actualizadas += 1;
+      } catch {
+        // Una consulta caída (Octava, token) no frena a las demás; se reintenta en la próxima hora.
+        fallidas += 1;
+      }
     }
-    return { actualizadas };
+    return { actualizadas, fallidas };
   },
 });
 
