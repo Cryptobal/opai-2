@@ -5,17 +5,11 @@ import { useCallback, useEffect, useState } from "react";
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 import { useBusquedaDiferida } from "./use-busqueda";
+import type { Guardado, Resumen } from "./tipos-historial";
 import type { MetaConversacion } from "./use-agente";
 import type { Mensaje } from "./tipos";
 
-export type Resumen = {
-  id: string;
-  titulo: string;
-  mensajes: number;
-  ultimaActividad: string;
-  archivada: boolean;
-};
-type Guardado = { rol: "usuario" | "agente"; texto: string; pasos?: string[] };
+export type { Resumen };
 
 const nuevoId = () => crypto.randomUUID();
 const SIN_RED = "No hay conexión con OPAI. Reintenta en unos minutos.";
@@ -36,12 +30,16 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
   const buscado = vigente ? cargada.q : "";
   const setLista = (f: (l: Resumen[] | null) => Resumen[] | null) =>
     setCargada((c) => (c ? { ...c, filas: f(c.filas) ?? [] } : c));
-  const [error, setError] = useState<string | null>(null);
+  const [errorEscritura, setError] = useState<string | null>(null);
+  // El fallo de carga se ata a la búsqueda vigente: al cambiarla deja de mostrarse.
+  type Fallo = { archivadas: boolean; q: string; mensaje: string };
+  const [fallo, setFallo] = useState<Fallo | null>(null);
+  const falloVigente = fallo?.archivadas === archivadas && fallo.q === q ? fallo.mensaje : null;
+  const error = falloVigente ?? errorEscritura;
 
   useEffect(() => {
     if (!activo) return;
     let vivo = true;
-    setError(null);
     void ejecutarCapacidad(portal, "agente.conversaciones.list", {
       archivadas,
       limite: 50,
@@ -49,10 +47,13 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
     })
       .then((r) => {
         if (!vivo) return;
-        if (!r.ok) setError("No pudimos cargar tus conversaciones.");
-        if (r.ok) setCargada({ archivadas, q, filas: r.data as Resumen[] });
+        if (!r.ok)
+          return setFallo({ archivadas, q, mensaje: "No pudimos cargar tus conversaciones." });
+        setError(null);
+        setFallo(null);
+        setCargada({ archivadas, q, filas: r.data as Resumen[] });
       })
-      .catch(() => vivo && setError(SIN_RED));
+      .catch(() => vivo && setFallo({ archivadas, q, mensaje: SIN_RED }));
     return () => {
       vivo = false;
     };
