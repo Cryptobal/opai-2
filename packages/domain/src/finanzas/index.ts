@@ -15,3 +15,4 @@ export * from "./bancos";
 export * from "./programacion";
 export * from "./programacion-montos";
 export * from "./cobranza";
+export * from "./apertura";
