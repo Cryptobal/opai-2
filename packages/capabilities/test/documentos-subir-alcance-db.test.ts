@@ -106,14 +106,18 @@ describe("subida acotada del supervisor: alcance, tenant y visibilidad reales", 
 
   it("aislamiento: ni una instalación, cuenta o empresa de otra empresa (ni con su id a cargo)", async () => {
     // Aunque el id ajeno figurara en su alcance, la RLS y la verificación no lo encuentran.
+    expect(
+      await previa(supervisor([f.a, f.ajena]), subir({ tipo: "instalacion", id: f.ajena })),
+    ).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
     for (const entidad of [
-      { tipo: "instalacion", id: f.ajena },
       { tipo: "cuenta", id: cuentaAjena },
       { tipo: "tenant", id: f.otro },
     ]) {
       const r = await previa(supervisor([f.a, f.ajena]), subir(entidad));
-      expect(r, entidad.tipo).toMatchObject({ ok: false });
-      expect(!r.ok && ["NOT_FOUND", "FORBIDDEN"]).toContain(!r.ok && r.error.code);
+      expect(r, entidad.tipo).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     }
   });
 

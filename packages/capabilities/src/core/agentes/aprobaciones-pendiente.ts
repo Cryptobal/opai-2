@@ -1,5 +1,6 @@
 import type { AprobacionPlataforma } from "@opai/db";
 
+import { tienePermisoDeCapacidad } from "../../autorizacion";
 import { conflicto, noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import { obtenerCapacidad } from "../../registry";
 import type { Contexto } from "../../types";
@@ -35,8 +36,11 @@ export async function pendiente<A extends Pendiente["ambito"]>(
   if (p.ambito === "plataforma") exigirVisiblePlataforma(ctx, p.a.capability, true);
   // Aprobar ejecuta la acción con los permisos de quien aprueba: sin ese permiso se rechaza aquí,
   // antes de marcarla «aprobada» (si no, quedaría quemada con una ejecución fallida).
-  const permiso = obtenerCapacidad(p.a.capability)?.permiso;
-  if (aprobar && permiso && !ctx.autorizar(permiso))
+  // `tienePermisoDeCapacidad` respeta `permisosAlternos` (paridad con `executeCapability`): quien solo
+  // tiene un permiso alterno (p. ej. `subir_alcance`) ejecuta la acción acotada, igual que directo.
+  // No gana nada: resolver exige además el permiso de `core.aprobaciones.*`.
+  const capacidad = obtenerCapacidad(p.a.capability);
+  if (aprobar && capacidad?.permiso && !tienePermisoDeCapacidad(ctx, capacidad))
     throw prohibido("No tienes el permiso que exige la acción pedida; no se puede aprobar.");
   if (p.a.estado !== "pendiente") throw conflicto(`La aprobación ya está ${p.a.estado}.`);
   if (p.a.venceEn.getTime() <= Date.now())

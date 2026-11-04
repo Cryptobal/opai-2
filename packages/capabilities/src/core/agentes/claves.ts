@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { tienePermisoDeCapacidad } from "../../autorizacion";
 import { defineCapability } from "../../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import { obtenerCapacidad } from "../../registry";
@@ -115,7 +116,7 @@ export const apikeysSetAutonomia = defineCapability({
     if (
       input.nivel === "directo" &&
       c.modulo === "platform" &&
-      !(c.permiso && ctx.autorizar(c.permiso))
+      !(c.permiso && tienePermisoDeCapacidad(ctx, c))
     )
       throw prohibido(
         "Solo un usuario de plataforma con ese permiso da autonomía directa en plataforma.",
