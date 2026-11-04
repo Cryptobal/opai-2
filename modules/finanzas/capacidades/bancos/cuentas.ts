@@ -29,6 +29,8 @@ export const bancosCuentasListar = defineCapability({
         moneda: c.moneda,
         flujoFilaId: c.flujoFilaId,
         activa: c.activa,
+        ultimaSyncEn: c.ultimaSyncEn?.toISOString() ?? null,
+        saldoBanco: c.saldoBanco === null ? null : Number(c.saldoBanco),
       })),
     };
   },

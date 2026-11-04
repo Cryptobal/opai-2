@@ -13,6 +13,9 @@ comercial_config_get
 comercial_config_guardar_catalogo
 comercial_config_reordenar_etapas
 comercial_contactos_list
+comercial_informes_cierre
+comercial_informes_perdidos_por_motivo
+comercial_negocios_alertas
 comercial_negocios_archivar
 comercial_negocios_create
 comercial_negocios_desvincular_instalacion
@@ -160,6 +163,7 @@ core_geo_autocompletar
 core_geo_detalle
 core_geo_geocodificar
 core_ia_probar
+core_indicadores_uf_utm
 core_inicio_indicadores
 core_inicio_pendientes
 core_instalaciones_archive
@@ -294,6 +298,7 @@ finanzas_ajustes_obtener
 finanzas_bancos_guardar
 finanzas_bancos_listar
 finanzas_bancos_saldo_sugerido
+finanzas_bancos_sincronizar
 finanzas_cartolas_importar
 finanzas_celdas_cumplir
 finanzas_celdas_fijar
@@ -335,6 +340,8 @@ finanzas_proveedores_listar
 finanzas_proveedores_obtener
 finanzas_reglas_banco_guardar
 finanzas_reglas_banco_listar
+finanzas_reportes_resultados
+finanzas_ventas_buscar
 finanzas_ventas_cesion_ceder
 finanzas_ventas_cesion_simular
 finanzas_ventas_crear_borrador
@@ -564,6 +571,7 @@ preview_cpq_versiones_margen
 preview_cpq_versiones_parametros
 preview_finanzas_ajustes_actualizar
 preview_finanzas_bancos_guardar
+preview_finanzas_bancos_sincronizar
 preview_finanzas_cartolas_importar
 preview_finanzas_celdas_cumplir
 preview_finanzas_celdas_fijar
