@@ -3,6 +3,8 @@ export type Modelo = {
   modelo: string;
   clase: "economica" | "estandar" | "potente";
 };
+/** Ficha desde la que se pregunta al agente (R9). */
+export type Contexto = { tipo: "cuenta" | "instalacion" | "negocio" | "persona"; id: string };
 export type Nivel = "aprobar_todo" | "paso_a_paso";
 
 export type PasoPlan = {
