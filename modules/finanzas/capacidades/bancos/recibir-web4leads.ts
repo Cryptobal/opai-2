@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { z } from "zod";
 
 import { credencialDe, defineCapability, ErrorCapacidad, reglaDeNegocio } from "@opai/capabilities";
@@ -65,7 +67,8 @@ export const bancosRecibirWeb4leads = defineCapability({
           referencia: m.reference ?? null, monto: m.amount, saldoDespues: m.balance ?? null,
         })),
         saldoCuenta: p.data.accountBalance ? { actual: p.data.accountBalance.current, al: p.data.accountBalance.asOf } : null,
-        idempotencyKey: `web4leads:${input.timestamp}`,
+        // Incluye el hash del cuerpo: dos entregas con el mismo timestamp pero distinto contenido no se confunden.
+        idempotencyKey: `web4leads:${input.timestamp}:${createHash("sha256").update(input.cuerpo).digest("hex").slice(0, 16)}`,
       },
       dryRun,
     );

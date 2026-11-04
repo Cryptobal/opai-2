@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ESTADOS_CESION, ESTADOS_COBRO_VENTA, ESTADOS_DTE_EMITIDO } from "@opai/domain";
+import { ESTADOS_CESION, ESTADOS_COBRO_VENTA, ESTADOS_DTE_EMITIDO, normalizarRut } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
@@ -9,8 +9,12 @@ import { PERMISO_READ } from "./comun";
 import { vistasDeVentas } from "./ventas-consulta";
 import { ventaSchema } from "./vistas-venta";
 
-/** RUT sin puntos ni espacios y en mayúscula, como se guarda en la cuenta. */
-export const rutNormalizado = (rut: string) => rut.replace(/[.\s]/g, "").toUpperCase();
+/**
+ * RUT en la forma en que se guarda en la cuenta ("76543210-3"). Acepta con o sin puntos y guion
+ * ("765432103"); si no es un RUT completo válido, es una búsqueda por prefijo y solo se limpia.
+ */
+export const rutNormalizado = (rut: string) =>
+  normalizarRut(rut) ?? rut.replace(/[.\s]/g, "").toUpperCase();
 
 export const ventasBuscar = defineCapability({
   id: "finanzas.ventas.buscar",

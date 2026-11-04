@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { defineCapability } from "../define";
+import { externo } from "../externo";
 import { PERMISO_READ as PERMISO_ACTIVIDADES } from "../core/crm/actividades-comun";
 import { filtrarVisibles } from "../core/crm/actividades-alcance";
 import { hoy } from "../core/maestros/comun";
@@ -11,11 +12,11 @@ const alertaSchema = z.enum(["sin_monto", "sin_fecha_cierre", "cierre_vencido", 
 
 const filaSchema = z.object({
   negocioId: z.string(),
-  titulo: z.string(),
+  titulo: externo(z.string()),
   cuentaId: z.string(),
-  cuentaNombre: z.string(),
-  etapaNombre: z.string(),
-  responsableNombre: z.string().nullable(),
+  cuentaNombre: externo(z.string()),
+  etapaNombre: externo(z.string()),
+  responsableNombre: externo(z.string()).nullable(),
   montoMensualClp: z.number().int(),
   cierreEstimado: z.string().nullable(),
   diasSinActividad: z.number().int().nullable(),
