@@ -102,6 +102,27 @@ describe.skipIf(!urlPropietario)("Finanzas · cobranza · recordatorios (db)", (
     expect(enviados.length).toBe(antes + 1);
   });
 
+  it("una factura vencida importada de 1.0 no genera recordatorio automático", async () => {
+    await contacto("facturacion@cliente.test", ["facturacion"], true);
+    const imp = await s.e.admin.documentoEmitido.create({
+      data: {
+        tenantId: s.tenantId, cuentaId: s.cuentaId, tipoDte: 33, folio: 9202, estadoDte: "aceptado",
+        fechaEmision: diasAtras(60), fechaVencimiento: diasAtras(30), montoNeto: 100_000, montoTotal: 100_000,
+      },
+    });
+    const corrida = await s.e.admin.importacion.create({
+      data: { tenantId: s.tenantId, origen: "instantanea", versionContrato: "finanzas-apertura@1", modo: "aplicar", estado: "completada", terminadaEn: new Date() },
+    });
+    await s.e.admin.importacionFila.create({
+      data: { tenantId: s.tenantId, importacionId: corrida.id, entidad: "documento_cobrar", id10: "33-9202", id20: imp.id, accion: "creado" },
+    });
+    const antes = enviados.length;
+    const r = (await trabajoRecordatoriosCobranza.ejecutar(s.ctx(), {})) as Job;
+    expect(r.enviados).toBe(0);
+    expect(enviados.length).toBe(antes);
+    expect(await s.e.admin.cobranzaGestion.count({ where: { documentoId: imp.id } })).toBe(0);
+  });
+
   it("otra empresa no puede recordar ni pausar este documento", async () => {
     for (const [id, input] of [
       ["finanzas.cobranza.recordar", { documentoId: docId }],
