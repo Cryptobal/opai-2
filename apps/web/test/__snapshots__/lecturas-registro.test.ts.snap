@@ -73,6 +73,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "platform.bitacora.estado",
   "platform.consumos.summary",
   "platform.eventos.list",
+  "platform.indicadores.propuestas",
   "platform.integraciones.estado",
   "platform.precios.list",
   "platform.tenants.get",
