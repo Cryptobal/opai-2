@@ -1261,3 +1261,13 @@ identidad de servicio en main.
 **Sin cambios:** Claude no escribe `VETO`; el veto de Carlos se respeta; `migracion-pendiente` la sigue poniendo quien abre el PR con migración.
 
 **Consecuencias.** `AGENTS.md` (roles y «Prohibido») queda alineado con esta decisión.
+
+## ADR-064 · Agente interno: conversaciones sin pisarse, retención por empresa y contexto revalidado
+
+**Fecha:** 5-nov-2026 · **Decide:** Claude (constructor, PR 5c de CAR-120), dentro de la spec del agente (R9, R19, R20); sin cambio de alcance de negocio.
+
+1. **Concurrencia.** `core.agente_conversaciones.version` y escritura condicional (`updateMany ... WHERE version`) con hasta 4 reintentos; si se agotan, `CONFLICT`. Se eligió esto sobre `SELECT ... FOR UPDATE` porque las reglas prohíben SQL crudo fuera de `enTransaccion`.
+2. **Idempotencia.** `turnoId` marca los dos mensajes del turno; el cliente lo usa también como `idempotencyKey`. Un turno ya guardado no se repite.
+3. **Retención.** Ajuste `agente.retencionConversacionesDias` (7 a 365, defecto 90) fijado solo por una persona con `agente:configurar`. Se aplica al listar, al abrir, al guardar y en el trabajo diario `agente.conversaciones.vencidas`, que corre por empresa con su RLS (nunca `dbAdmin`).
+4. **Contexto de ficha.** El navegador no es fuente de verdad: antes de guardar o usar `contexto`, el servidor lee la ficha (`core.cuentas.get`, `core.instalaciones.get`, `comercial.negocios.get` o `core.personas.get`) con la identidad delegada de la persona; si no la ve, responde «no existe».
+5. **Fuera de este PR:** adjuntos (dependen de `core.documentos`, ADR-019).
