@@ -10,21 +10,22 @@
 
 1. **El repo es la fuente única.** Briefs, decisiones, estado y pendientes viven en `docs/2.0/`.
 2. **Quién hace qué.**
-   - **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) escribe los briefs y construye.
+   - **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) escribe los briefs, construye e **integra a `main` con squash** cuando se cumplen las condiciones de integración (ADR-060).
    - **Carlos** aprueba **una vez por módulo** una hoja de alcance de una página: qué pasa de 1.0 a 2.0, qué no pasa y qué mejoras se suman. **1.0 es el piso, no el techo.**
-   - El **bot OPAI 2.0** (Cursor) opera la cola: avisa a los revisores, aplica migraciones, integra y toma capturas.
+   - El **bot OPAI 2.0** (Cursor) opera la cola: avisa a los revisores, aplica migraciones con respaldo, **también puede integrar con squash** bajo las mismas condiciones, toma capturas y responde `@opai-2.0:` en PRs o correo a carlos.irigoyen@mail.grokbot.com.
 3. **Cada PR actualiza `docs/2.0/ESTADO.md`** con lo que cambia: qué entró, qué quedó pendiente y qué decisión se tomó. Sin esa actualización, el PR no está listo.
 4. **Rutina cada 15 minutos.** El bot revisa los PRs abiertos de `Cryptobal/opai-2`. Cada PR nuevo o con head nuevo se pasa al **Revisor** (bot `4e22026b`) y a **QA** (bot `9ea32915`).
 5. **Migraciones.** Si el PR trae migración (etiqueta `migracion-pendiente`), el bot la aplica en Neon **con respaldo previo**:
    - Proyecto `steep-wildflower-90764475`.
    - Primero la rama **dev** (`br-cool-cell-b6f9h1vh`), después **main** (`br-dawn-morning-b6037bp9`).
    - Snapshot (o rama de respaldo) antes de cada una, `lock_timeout` corto y verificación posterior.
-   - Luego el bot quita la etiqueta e **integra** el PR (squash; sin force-push ni rebase).
-6. **Reglas de revisión e integración (t618u, 27-oct-2026 17:30, vigentes):**
+   - Luego el bot quita la etiqueta. **Integración:** Claude o el bot «OPAI 2.0» hace squash cuando se cumplen las condiciones (A.6); sin force-push ni rebase.
+6. **Reglas de revisión e integración (t618u, 27-oct-2026 17:30; integrador ampliado ADR-060, 3-nov-2026):**
    - El Revisor hace **una sola pasada**.
    - Solo **bloquea** por **seguridad, migraciones o datos** (RLS, permisos, pérdida o mezcla de datos entre tenants).
    - Todo lo demás es no bloqueante y va a un **PR de pendientes**, no a otra vuelta del mismo PR.
-   - Se integra con los checks obligatorios en verde y la rama al día con main. Cuando Carlos active la **cola de merge** en el ruleset «Proteger main», el bot «OPAI 2.0» encola el PR ahí: GitHub vuelve a correr los checks obligatorios en el evento `merge_group` (sin e2e ni rendimiento) y hace el squash sin reiniciar el CI de todos los demás PR abiertos.
+   - Se integra (**Claude** o el bot «OPAI 2.0», quien llegue primero) con los cuatro checks obligatorios en verde sobre el head (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`), sin conflictos con `main` (traer `main` con merge solo si hay conflicto; decisión 4-nov-2026), sin veto de Carlos, migración ya aplicada con aviso en el PR y etiqueta `migracion-pendiente` quitada si corresponde, y —solo si el PR trae migración o toca RLS, permisos o datos de tenants— tras el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head.
+   - Cuando Carlos active la **cola de merge** en el ruleset «Proteger main», el bot «OPAI 2.0» encola el PR ahí: GitHub vuelve a correr los checks obligatorios en el evento `merge_group` (sin e2e ni rendimiento) y hace el squash sin reiniciar el CI de todos los demás PR abiertos.
 7. **QA en vivo va después de integrar** (en test.opai.cl) y **no frena nada**. Sus hallazgos van al PR de pendientes, salvo que sean de seguridad o datos: en ese caso se abre un arreglo inmediato.
 8. **Capturas.** Cuando Carlos quiera ver algo, se las pide al bot OPAI 2.0, que las toma en test.opai.cl.
 9. **Avisos:** siempre en español, al integrar y al migrar.
@@ -37,7 +38,7 @@
 | 1 | `01-decisiones.md` ADR-043 «Segunda modificación (24-oct)» e `INSTRUCCIONES-proyecto-claude.md` (Ejecución, paso 4); cabecera de `ESTADO.md` | Las tareas viven en Linear (`Fixes CAR-n`). `ESTADO.md` se toca solo si cambia la foto técnica. | **Cada PR actualiza `ESTADO.md`** (A.3). Linear puede seguir como referencia (`Fixes CAR-n`), pero no reemplaza a `ESTADO.md`. |
 | 2 | `AGENTS.md`, «Prohibido» y etiqueta `migracion-pendiente` | «Las migraciones de Neon las aplica Carlos desde su Mac»; «Solo Carlos» quita la etiqueta y ningún bot la pone ni la quita. | **El bot aplica la migración con respaldo, dev → main, y quita la etiqueta** (A.5). Esto ya se hacía así por los mandatos t500u (26-oct) y t682u (28-oct); por ejemplo, el #91. |
 | 3 | `AGENTS.md` y ADR-043 v3 (Revisor) | Se exige APROBAR sin condiciones, y cualquier push invalida la aprobación. | **Una pasada; solo bloquea por seguridad, migraciones o datos** (A.6). Tras un push, el Revisor revisa solo el delta. |
-| 4 | `AGENTS.md`, checks del ruleset «Proteger main» | 3 obligatorios: `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`. | t618u habla de 4. Decisión de Carlos (26-oct 11:49, t306u): `rendimiento` (ADR-045) pasa a obligatorio cuando el Brief 03 PR 2 esté integrado y estable. El #88 ya entró, pero **falta confirmar en el ruleset** cuál es el cuarto. Ver E.4. |
+| 4 | `AGENTS.md`, checks del ruleset «Proteger main» | 3 obligatorios: `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`. | Desde el 4-nov-2026 (ADR-061) son **4** obligatorios, incluido `migración pendiente` (CAR-61). `rendimiento` (ADR-045) sigue por confirmar aparte (E.4). |
 | 5 | Práctica del 27-oct (t618u) | QA sin bloqueantes **antes** de integrar. | **QA en vivo después de integrar, sin frenar** (A.7). Esto coincide con ADR-043 v3. |
 | 6 | ADR-043 v3 §8 / `REGLAS-codigo.md` (e2e) | La e2e no es obligatoria. | Igual (sigue sin ser check obligatorio del ruleset). En CI (PR #257 / CAR-181): **e2e** (6 shards), informe, **`e2e (Playwright)`** y **rendimiento** corren en cron nocturno (03:00 Santiago), `workflow_dispatch`, push a `main` o PR con etiqueta **`e2e`** (la pone Carlos); no en cada `pull_request`. El gate **`typecheck · lint · test · test:db`** corre en cuatro jobs paralelos más un agregador con el mismo nombre. Regla t611u (27-oct): en local, specs tocados + gate completo antes del push. |
 | 7 | `CONTEXTO-agentes.md` (rol del bot) | El bot «prepara los prompts de cada encargo». | **Claude escribe los briefs** (A.2). El bot opera la cola. |
@@ -53,7 +54,7 @@
 3. **1.0 es piso, no techo (26-oct):** hoja de alcance de una página por módulo, que Carlos aprueba una vez (ver A.2).
 4. **Preguntas antes de cada módulo (24-oct 23:05):** todas las dudas se hacen y refinan con Carlos antes de empezar el módulo. Después no se vuelve a preguntar.
 5. **Credenciales (24-oct):** todas están en 1Password y se usan sin pedirlas. A Carlos solo se le piden aprobaciones o 2FA. Los secretos de CI van en GitHub y Vercel, **nunca** en bots ni en el repo.
-6. **Integración (24-oct 16:59):** integra el bot OPAI 2.0 (squash), sin force-push ni rebase, y avisa a Carlos. Carlos conserva el veto.
+6. **Integración (24-oct 16:59; ADR-060, 3-nov-2026):** integra Claude (proyecto «OPAI 2.0») o el bot «OPAI 2.0» (squash), sin force-push ni rebase, bajo las mismas condiciones; avisa a Carlos al migrar y al integrar. Carlos conserva el veto.
 7. **Modelos:**
    - 23-oct: Opus para planear, Sonnet por defecto, Haiku para tareas mecánicas.
    - **Vigente desde el 27-oct (00:38, t512u):** Claude Sonnet por defecto; terra para arreglos chicos y QA; luna para documentos; sol u Opus solo como excepción justificada.
@@ -199,7 +200,7 @@ Fuente: `seguimiento.txt` del bot y los informes de QA en vivo del 28-oct (#87, 
 
 Pasa cuando no hay migraciones nuevas, o cuando la etiqueta se puso y ya se retiró. Al quitarla, el evento `unlabeled` vuelve a correr el check sobre el mismo head. Si la API de GitHub falla, el check queda en rojo (falla cerrado). Solo lee etiquetas, eventos y archivos con el `GITHUB_TOKEN` del job, en solo lectura: no pone ni quita etiquetas y no usa secretos nuevos.
 
-**Qué falta para que frene.** Carlos lo activa como check obligatorio en el ruleset «Proteger main» (los agentes no tocan el ruleset). Hasta entonces el check es informativo.
+**Qué falta para que frene.** Carlos lo activó como check obligatorio en el ruleset «Proteger main» (decisión 4-nov-2026, ADR-061).
 
 **Qué no cubre (operador, fuera del repo).** El check no valida *quién* retiró la etiqueta, ni que antes exista el aviso de migración aplicada con respaldo en `dev` y `main`, ni que una migración agregada por un push posterior a la retirada también se haya aplicado (en ese caso hay que volver a poner la etiqueta): eso lo sigue revisando el bot «OPAI 2.0» antes del squash (`AGENTS.md`, regla 5). La causa de por qué el bot integró #61, #65 y #70 con la etiqueta puesta queda en CAR-61 para el operador.
 
