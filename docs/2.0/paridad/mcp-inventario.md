@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 570 pares pantalla→capacidad · 515 con herramienta · 55 excepciones justificadas · 0 faltantes.
+**Resumen:** 572 pares pantalla→capacidad · 517 con herramienta · 55 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -209,6 +209,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.iniciar` | `comercial_seguimientos_iniciar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.guardar` | `cpq_costos_categoria_guardar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.list` | `cpq_costos_categoria_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.clonar` | `cpq_cotizaciones_clonar` | existe |
