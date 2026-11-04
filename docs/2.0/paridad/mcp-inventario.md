@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 516 pares pantalla→capacidad · 465 con herramienta · 51 excepciones justificadas · 0 faltantes.
+**Resumen:** 519 pares pantalla→capacidad · 466 con herramienta · 53 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -31,6 +31,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/_components` | `agente.modelos.list` | `agente_modelos_list` | existe |
+| compartido | `app/_components` | `agente.plan.confirmar` | — | excepción |
+| compartido | `app/_components` | `agente.turno.preparar` | — | excepción |
 | compartido | `app/_components` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/_components` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/_components` | `core.actividades.completar` | `core_actividades_completar` | existe |
@@ -642,8 +645,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 | Capacidad | Camino humano | API v1 con sesión | MCP |
 | --- | --- | --- | --- |
-| `agente.plan.confirmar` | `/api/agente` | no | reservada a personas |
-| `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
+| `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
+| `agente.turno.preparar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
@@ -694,7 +697,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
 - `agente.historial.list`
-- `agente.modelos.list`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
 - `core.actividades.delete`
