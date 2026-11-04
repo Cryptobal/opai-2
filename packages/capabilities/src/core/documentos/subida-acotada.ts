@@ -25,4 +25,4 @@ export function exigirDestinoAcotado(ctx: Contexto, e: Entidad, reemplazaAId?: s
 }
 
 /** Visibilidad en portales de un documento subido de forma acotada: ninguno (la más restrictiva). */
-export const VISIBILIDAD_ACOTADA: string[] = [];
+export const VISIBILIDAD_ACOTADA: readonly string[] = Object.freeze([]);

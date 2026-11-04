@@ -110,7 +110,7 @@ export const documentosIniciarSubida = defineCapability({
       reemplazaAId: anterior?.id ?? null,
       emitidoEn: input.emitidoEn ? aFecha(input.emitidoEn) : null,
       venceEn: input.venceEn ? aFecha(input.venceEn) : null,
-      visibleEn: acotada ? VISIBILIDAD_ACOTADA : (tipo?.visiblePortalDefault ?? []),
+      visibleEn: acotada ? [...VISIBILIDAD_ACOTADA] : (tipo?.visiblePortalDefault ?? []),
       creadoPorTipo: ctx.actor.tipo,
       creadoPorId: ctx.actor.id ?? null,
       viaUserId: ctx.actor.viaUserId ?? null,

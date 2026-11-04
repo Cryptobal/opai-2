@@ -53,6 +53,8 @@ export function HojaSubir({
   const [subidos, setSubidos] = useState(0);
   const [procesando, setProcesando] = useState(0);
   const reemplaza = valor("reemplaza");
+  // Subida acotada: la visibilidad en portales no se elige ni se envía (queda vacía en el servidor).
+  const acotada = vincular?.acotada === true;
   function cerrar() {
     if (subidos) router.refresh();
     setSubidos(0);
@@ -126,7 +128,7 @@ export function HojaSubir({
                   ...(emitido ? { emitidoEn: emitido } : {}),
                   ...(vence ? { venceEn: vence } : {}),
                   ...(reemplaza ? { reemplazaAId: reemplaza } : {}),
-                  visibleEn: portales,
+                  ...(acotada ? {} : { visibleEn: portales }),
                 },
                 progreso,
                 portal,
@@ -142,14 +144,14 @@ export function HojaSubir({
           tipoId={tipoId}
           onTipo={(t) => {
             setTipoId(t?.id ?? null);
-            if (t) setPortales(t.visiblePortalDefault);
+            if (t && !acotada) setPortales(t.visiblePortalDefault);
           }}
           emitido={emitido}
           onEmitido={setEmitido}
           vence={vence}
           onVence={setVence}
         />
-        <CampoVisibilidad portales={portales} onCambiar={setPortales} />
+        {acotada ? null : <CampoVisibilidad portales={portales} onCambiar={setPortales} />}
       </div>
     </Sheet>
   );

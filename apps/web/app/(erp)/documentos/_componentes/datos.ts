@@ -1,16 +1,12 @@
-import { PERMISOS_CORE } from "@opai/domain";
-
-import type {
-  Documento,
-  EntidadVinculable,
-  TipoDocumento,
-} from "@/app/_components/documentos/tipos";
+import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
+
+import { opcionesDeSubida } from "./subida-permisos";
 
 export const POR_PAGINA = 50;
 
@@ -57,22 +53,20 @@ export async function cargarExplorador(p: Parametros) {
     vocabularioActual(),
   ]);
   const tipos = t.ok ? t.data : [];
-  const puede = puedeDeIdentidad(identidad);
+  // El supervisor sube a sus instalaciones con el permiso acotado; la empresa no está en su alcance.
+  const subida = opcionesDeSubida(
+    puedeDeIdentidad(identidad),
+    identidad.actual?.rol,
+    identidad.acceso.instalaciones !== null,
+  );
   return {
     state: estadoPantalla(r),
     items: r.ok ? r.data.items : [],
     siguiente: r.ok ? r.data.siguiente : null,
     total: r.ok ? r.data.total : null,
     tipos,
-    vinculables: [
-      "tenant",
-      ...(puede(PERMISOS_CORE.cuentasRead) ? ["cuenta"] : []),
-      ...(puede(PERMISOS_CORE.instalacionesRead) ? ["instalacion"] : []),
-      ...(puede(PERMISOS_CORE.personasRead) ? ["persona"] : []),
-    ] as EntidadVinculable[],
+    ...subida,
     tenantId: identidad.actual?.tenantId ?? "",
-    // El supervisor sube desde las fichas de sus instalaciones; la empresa no está en su alcance.
-    puedeSubir: puede(PERMISOS_CORE.documentosManage) && identidad.actual?.rol !== "supervisor",
     voc,
   };
 }
