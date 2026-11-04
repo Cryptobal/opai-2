@@ -71,10 +71,10 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
   );
 
   /** Escritura sobre una conversación: devuelve si se hizo; si no, deja el error visible. */
-  const escribir = useCallback(
-    async (capacidad: string, input: object, fallo: string): Promise<boolean> => {
+  const intentar = useCallback(
+    async (llamada: () => Promise<{ ok: boolean }>, fallo: string): Promise<boolean> => {
       try {
-        const r = await ejecutarCapacidad(portal, capacidad, input, false, "ninguna", nuevoId());
+        const r = await llamada();
         setError(r.ok ? null : fallo);
         return r.ok;
       } catch {
@@ -82,32 +82,53 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
         return false;
       }
     },
-    [portal],
+    [],
   );
 
   const quitar = (id: string) => setLista((l) => l?.filter((c) => c.id !== id) ?? null);
   const borrar = async (id: string) => {
-    const ok = await escribir(
-      "agente.conversaciones.borrar",
-      { id },
+    const ok = await intentar(
+      () =>
+        ejecutarCapacidad(
+          portal,
+          "agente.conversaciones.borrar",
+          { id },
+          false,
+          "ninguna",
+          nuevoId(),
+        ),
       "No pudimos borrar la conversación.",
     );
     if (ok) quitar(id);
     return ok;
   };
   const archivar = async (id: string, archivar: boolean) => {
-    const ok = await escribir(
-      "agente.conversaciones.archivar",
-      { id, archivar },
+    const ok = await intentar(
+      () =>
+        ejecutarCapacidad(
+          portal,
+          "agente.conversaciones.archivar",
+          { id, archivar },
+          false,
+          "ninguna",
+          nuevoId(),
+        ),
       "No pudimos archivar la conversación.",
     );
     if (ok) quitar(id);
     return ok;
   };
   const renombrar = async (id: string, titulo: string) => {
-    const ok = await escribir(
-      "agente.conversaciones.renombrar",
-      { id, titulo },
+    const ok = await intentar(
+      () =>
+        ejecutarCapacidad(
+          portal,
+          "agente.conversaciones.renombrar",
+          { id, titulo },
+          false,
+          "ninguna",
+          nuevoId(),
+        ),
       "No pudimos cambiar el título.",
     );
     if (ok) setLista((l) => l?.map((c) => (c.id === id ? { ...c, titulo } : c)) ?? null);
