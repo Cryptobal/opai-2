@@ -93,18 +93,32 @@ function agregarNegocio(acc: Acumulado, fila: Fila): void {
   }
 }
 
-/** `additionalReferences` es `Json?` en 1.0: null, texto JSON, objeto suelto o arreglo. Siempre un arreglo de objetos. */
+/**
+ * `additionalReferences` es `Json?` en 1.0: null, texto JSON, objeto suelto o arreglo. Siempre un arreglo de objetos.
+ * Lo no interpretable falla cerrado (sin valores): perder una OC/HES en silencio sería peor que detener el dryRun.
+ */
 export function referenciasComoArreglo(v: unknown): unknown[] {
   let valor = v;
   if (typeof valor === "string") {
+    if (valor.length > 100_000) throw new Error("additionalReferences: texto demasiado largo");
     try {
       valor = JSON.parse(valor);
     } catch {
-      return [];
+      throw new Error("additionalReferences: texto que no es JSON");
     }
   }
-  if (Array.isArray(valor)) return valor.filter(esFila);
-  return esFila(valor) ? [valor] : [];
+  if (valor == null) return [];
+  const lista = Array.isArray(valor) ? valor : [valor];
+  if (!lista.every(esFila)) throw new Error("additionalReferences: contiene elementos que no son objetos");
+  return lista;
+}
+
+function referenciasConId(id: unknown, v: unknown): unknown[] {
+  try {
+    return referenciasComoArreglo(v);
+  } catch (e) {
+    throw new Error(`Recurrente ${String(id)}: ${(e as Error).message}`, { cause: e });
+  }
 }
 
 function adaptarRecurrente(fila: Fila): Fila {
@@ -119,7 +133,7 @@ function adaptarRecurrente(fila: Fila): Fila {
   return {
     ...resto,
     active: isActive === true,
-    additionalReferences: referenciasComoArreglo(resto["additionalReferences"]),
+    additionalReferences: referenciasConId(fila["id"], resto["additionalReferences"]),
     lastSuccessfulRun: typeof ranAt === "string" ? { runAt: ranAt, period: null } : null,
   };
 }
