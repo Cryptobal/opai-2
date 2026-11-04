@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 522 pares pantalla→capacidad · 468 con herramienta · 54 excepciones justificadas · 0 faltantes.
+**Resumen:** 525 pares pantalla→capacidad · 471 con herramienta · 54 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -31,6 +31,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/_components` | `agente.conversaciones.borrar` | `agente_conversaciones_borrar` | existe |
+| compartido | `app/_components` | `agente.conversaciones.get` | `agente_conversaciones_get` | existe |
+| compartido | `app/_components` | `agente.conversaciones.list` | `agente_conversaciones_list` | existe |
 | compartido | `app/_components` | `agente.modelos.list` | `agente_modelos_list` | existe |
 | compartido | `app/_components` | `agente.plan.confirmar` | — | excepción |
 | compartido | `app/_components` | `agente.turno.preparar` | — | excepción |
@@ -701,6 +704,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `agente.conversaciones.archivar`
+- `agente.conversaciones.renombrar`
 - `agente.historial.list`
 - `comercial.solicitudes.buscar_duplicadas`
 - `comercial.solicitudes.enriquecer`
