@@ -6,6 +6,7 @@ platform_auditoria_list
 platform_bitacora_estado
 platform_consumos_summary
 platform_eventos_list
+platform_indicadores_propuestas
 platform_integraciones_estado
 platform_modules_set
 platform_precios_list
