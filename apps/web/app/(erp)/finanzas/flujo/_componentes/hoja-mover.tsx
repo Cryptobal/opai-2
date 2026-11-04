@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Checkbox, Input, Select, Sheet } from "@opai/ds";
+import { Alerta, avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { clp } from "./datos";
+import { CamposMover } from "./campos-mover";
 
 export function HojaMover({
   filas,
@@ -28,7 +28,6 @@ export function HojaMover({
   const [vista, setVista] = useState<{ movimientos: { desde: string; hasta: string; monto: number }[] } | null>(
     null,
   );
-  const opcionesSemana = semanas.length ? semanas : [];
   const pasadasSet = useMemo(() => new Set(semanasPasadas), [semanasPasadas]);
 
   function abrir() {
@@ -113,48 +112,22 @@ export function HojaMover({
             </Alerta>
           ) : null}
           {avisoPasada}
-          <Campo etiqueta="Fila" htmlFor="mv-fila">
-            <Select
-              id="mv-fila"
-              valor={filaId}
-              onCambiar={(v) => {
-                setFilaId(v);
-                setVista(null);
-              }}
-              opciones={filas.map((f) => ({ valor: f.id, etiqueta: f.etiqueta }))}
-            />
-          </Campo>
-          <Campo etiqueta="Semana origen" htmlFor="mv-sem">
-            <Select
-              id="mv-sem"
-              valor={semana}
-              onCambiar={(v) => {
-                setSemana(v);
-                setVista(null);
-                setConfirmarPasada(false);
-              }}
-              opciones={opcionesSemana.map((s) => ({ valor: s, etiqueta: s }))}
-            />
-          </Campo>
-          <Campo etiqueta="Semanas a mover" htmlFor="mv-por">
-            <Input id="mv-por" value={por} onChange={(e) => setPor(e.target.value)} inputMode="numeric" />
-          </Campo>
-          {vista && requiereConfirmacionPasada(vista.movimientos) ? (
-            <Checkbox
-              marcado={confirmarPasada}
-              onCambiar={setConfirmarPasada}
-              etiqueta="Confirmo mover a una semana pasada"
-            />
-          ) : null}
-          {vista?.movimientos.length ? (
-            <ul className="text-sm text-fg-muted">
-              {vista.movimientos.map((m) => (
-                <li key={`${m.desde}-${m.hasta}`}>
-                  {m.desde} → {m.hasta}: {clp(m.monto)}
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <CamposMover
+            filas={filas}
+            semanas={semanas}
+            filaId={filaId}
+            semana={semana}
+            por={por}
+            vista={vista}
+            requierePasada={Boolean(vista && requiereConfirmacionPasada(vista.movimientos))}
+            confirmarPasada={confirmarPasada}
+            on={{
+              fila: (v) => { setFilaId(v); setVista(null); },
+              semana: (v) => { setSemana(v); setVista(null); setConfirmarPasada(false); },
+              por: setPor,
+              confirmar: setConfirmarPasada,
+            }}
+          />
         </div>
       </Sheet>
     </>

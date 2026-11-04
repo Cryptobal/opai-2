@@ -2,6 +2,8 @@
 // recursos en español, historial anidado en cada negocio y valores `Decimal` como texto.
 // Este módulo traduce esas filas a la forma que valida `origen.ts`. Funciones puras; no toca la red.
 import type { DatosOpai1 } from "./origen";
+import { limpiarReferencias } from "./origen-api-referencias";
+import type { Advertencia } from "./origen-tolerante";
 
 /** Recurso del exportador → clave de `DatosOpai1`. `correlativos` y `folios` no se leen: el correlativo CPQ se deriva de los códigos. */
 export const RECURSOS_V1 = {
@@ -18,7 +20,9 @@ export const RECURSOS_V1 = {
 export type RecursoV1 = keyof typeof RECURSOS_V1;
 export const NOMBRES_RECURSOS_V1 = Object.keys(RECURSOS_V1) as RecursoV1[];
 
-export type Acumulado = Record<keyof DatosOpai1, unknown[]>;
+export type Acumulado = Record<Exclude<keyof DatosOpai1, "advertencias">, unknown[]> & {
+  advertencias: Advertencia[];
+};
 
 export function acumuladoVacio(): Acumulado {
   return {
@@ -33,6 +37,7 @@ export function acumuladoVacio(): Acumulado {
     cpqQuotes: [],
     activities: [],
     users: [],
+    advertencias: [],
   };
 }
 
@@ -93,35 +98,7 @@ function agregarNegocio(acc: Acumulado, fila: Fila): void {
   }
 }
 
-/**
- * `additionalReferences` es `Json?` en 1.0: null, texto JSON, objeto suelto o arreglo. Siempre un arreglo de objetos.
- * Lo no interpretable falla cerrado (sin valores): perder una OC/HES en silencio sería peor que detener el dryRun.
- */
-export function referenciasComoArreglo(v: unknown): unknown[] {
-  let valor = v;
-  if (typeof valor === "string") {
-    if (valor.length > 100_000) throw new Error("additionalReferences: texto demasiado largo");
-    try {
-      valor = JSON.parse(valor);
-    } catch {
-      throw new Error("additionalReferences: texto que no es JSON");
-    }
-  }
-  if (valor == null) return [];
-  const lista = Array.isArray(valor) ? valor : [valor];
-  if (!lista.every(esFila)) throw new Error("additionalReferences: contiene elementos que no son objetos");
-  return lista;
-}
-
-function referenciasConId(id: unknown, v: unknown): unknown[] {
-  try {
-    return referenciasComoArreglo(v);
-  } catch (e) {
-    throw new Error(`Recurrente ${String(id)}: ${(e as Error).message}`, { cause: e });
-  }
-}
-
-function adaptarRecurrente(fila: Fila): Fila {
+function adaptarRecurrente(fila: Fila, advertencias: Advertencia[]): Fila {
   const { isActive, ultimaCorridaExitosa: corrida, ...conNulos } = fila;
   // Columnas anulables en 1.0 cuyo esquema de lectura usa valor por defecto: null se lee como «ausente».
   const resto = Object.fromEntries(
@@ -133,22 +110,28 @@ function adaptarRecurrente(fila: Fila): Fila {
   return {
     ...resto,
     active: isActive === true,
-    additionalReferences: referenciasConId(fila["id"], resto["additionalReferences"]),
+    additionalReferences: limpiarReferencias(String(fila["id"]), resto["additionalReferences"], advertencias),
     lastSuccessfulRun: typeof ranAt === "string" ? { runAt: ranAt, period: null } : null,
   };
 }
 
 /** Agrega una fila del exportador a `acc`. Una actividad sin fecha se omite (la fila exige fecha). */
 export function agregarFila(acc: Acumulado, recurso: RecursoV1, fila: unknown): void {
-  if (!esFila(fila)) return;
+  if (!esFila(fila)) {
+    acc.advertencias.push({ codigo: "fila_descartada", recurso, idOpai1: "-", campo: "-" });
+    return;
+  }
   switch (recurso) {
     case "negocios":
       return agregarNegocio(acc, fila);
     case "recurrentes":
-      acc.recurringInvoiceSchedules.push(adaptarRecurrente(fila));
+      acc.recurringInvoiceSchedules.push(adaptarRecurrente(fila, acc.advertencias));
       return;
     case "actividades":
       if (typeof fila["fecha"] === "string") acc.activities.push(fila);
+      else {
+        acc.advertencias.push({ codigo: "fila_descartada", recurso, idOpai1: String(fila["id"] ?? "-"), campo: "fecha" });
+      }
       return;
     default:
       acc[RECURSOS_V1[recurso]].push(fila);
