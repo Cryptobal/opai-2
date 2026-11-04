@@ -68,7 +68,7 @@ export function ContenidoMas({
         key={i.href}
         variant="ghost"
         className={cn(
-          "h-[88px] flex-col justify-center gap-2 rounded-2xl border px-1 text-center text-sm leading-4 font-medium whitespace-normal",
+          "h-[88px] min-w-0 flex-col justify-center gap-2 rounded-lg border px-1 text-center text-sm leading-4 font-medium break-words whitespace-normal md:h-[88px]",
           activo ? "border-accent bg-accent-muted text-fg" : "border-border bg-surface text-fg",
         )}
         aria-current={activo ? "page" : undefined}

@@ -70,4 +70,34 @@ describe("Sidebar", () => {
     // El área activa se distingue del resto aunque esté plegada.
     expect(html).toContain("font-semibold");
   });
+
+  it("plegada, el área de la página actual sigue marcada y su contenido queda inerte", () => {
+    const conAreas: NavItem[] = [
+      { href: "/personas", etiqueta: "Personas", icono: Users, grupo: "Personas", area: "personas" },
+      { href: "/firmas", etiqueta: "Firmas", icono: PenLine, grupo: "Documentos", area: "documentos" },
+    ];
+    const html = renderToStaticMarkup(
+      createElement(Sidebar, {
+        ...base,
+        items: conAreas,
+        rutaActual: "/firmas",
+        areaAbierta: "personas",
+        onAreaAbierta: () => undefined,
+      }),
+    );
+    const documentos = html.match(/<button[^>]*aria-expanded="false"[^>]*>(?:(?!<\/button>).)*Documentos/s);
+    expect(documentos?.[0]).toContain("font-semibold");
+    expect(html).toContain("inert");
+  });
+
+  it("sin acordeón, la entrada suelta no lleva botón y el grupo con varias entradas lleva título", () => {
+    const planos: NavItem[] = [
+      ...items.slice(0, 1),
+      { href: "/a", etiqueta: "Alfa", icono: Users, grupo: "Grupo", area: "x" },
+      { href: "/b", etiqueta: "Beta", icono: Users, grupo: "Grupo", area: "x" },
+    ];
+    const html = renderToStaticMarkup(createElement(Sidebar, { ...base, items: planos }));
+    expect(html).not.toContain("aria-controls");
+    expect(html).toMatch(/<h2[^>]*>Grupo<\/h2>/);
+  });
 });
