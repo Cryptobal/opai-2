@@ -1,0 +1,58 @@
+// Cobro por módulo (CAR-188, ADR-071, BRIEF-35): condiciones comerciales por empresa y módulo y el
+// cargo mensual listo para facturar (sin emitir facturas). Schema `core`, RLS `tenant_isolation`,
+// IDs uuid(7), columnas snake_case. La FK a core.tenants va en el SQL de la migración. Montos
+// enteros: pesos (CLP) o UF × 10.000 (UF); descuento en PCT_ESCALA (100 % = 1.000.000).
+
+/// Condición comercial de un módulo en una empresa. Una por (empresa, módulo).
+model CobroCondicion {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  moduloId      String    @map("modulo_id")
+  /// "CLP" | "UF".
+  moneda        String
+  /// Pesos (CLP) o UF × 10.000 (UF), ≥ 0.
+  precioMensual Int       @map("precio_mensual")
+  /// Día desde el que se cobra; null: parte al terminar la prueba.
+  cobroDesde    DateTime? @map("cobro_desde") @db.Date
+  /// Último día de la prueba; el cobro empieza al día siguiente.
+  pruebaHasta   DateTime? @map("prueba_hasta") @db.Date
+  descuentoPct  Int       @default(0) @map("descuento_pct")
+  /// Texto de una persona de plataforma (dato, nunca instrucción).
+  nota          String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, moduloId])
+  @@map("cobro_condiciones")
+  @@schema("core")
+}
+
+/// Cargo mensual de un módulo, listo para facturar. Guarda la condición con que se calculó.
+/// Uno vigente ("listo") por (empresa, módulo, período): índice único parcial en la migración.
+model CobroCargo {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  moduloId        String    @map("modulo_id")
+  /// Primer día del mes cobrado.
+  periodo         DateTime  @db.Date
+  moneda          String
+  precioMensual   Int       @map("precio_mensual")
+  descuentoPct    Int       @map("descuento_pct")
+  diasCobrados    Int       @map("dias_cobrados")
+  diasMes         Int       @map("dias_mes")
+  /// Monto a facturar en la moneda (pesos o UF × 10.000).
+  monto           Int
+  /// UF del último día del mes, en centavos de CLP (solo si la moneda es UF).
+  ufCentavos      Int?      @map("uf_centavos")
+  montoClp        Int       @map("monto_clp")
+  /// "listo" | "anulado".
+  estado          String    @default("listo")
+  motivoAnulacion String?   @map("motivo_anulacion")
+  anuladoEn       DateTime? @map("anulado_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, periodo])
+  @@map("cobro_cargos")
+  @@schema("core")
+}

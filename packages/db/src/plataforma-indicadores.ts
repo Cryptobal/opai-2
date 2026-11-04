@@ -14,7 +14,11 @@ export function operacionesIndicadoresPlataforma() {
         where: { estado: "propuesto", indicador: { clave: { in: CLAVES } } },
         orderBy: { createdAt: "asc" },
         select: {
-          id: true, valorJson: true, vigenteDesde: true, fuente: true, consultadaEl: true,
+          id: true,
+          valorJson: true,
+          vigenteDesde: true,
+          fuente: true,
+          consultadaEl: true,
           indicador: { select: { id: true, clave: true, nombre: true } },
         },
       });
@@ -29,6 +33,18 @@ export function operacionesIndicadoresPlataforma() {
         }),
       );
     },
+    /** UF publicada vigente a un día (centavos de CLP), con el día desde el que rige (CAR-188). */
+    ufAlDia: async (dia: Date) => {
+      const fila = await db.valorPublicado.findFirst({
+        where: { estado: "vigente", vigenteDesde: { lte: dia }, indicador: { clave: "uf" } },
+        orderBy: { vigenteDesde: "desc" },
+        select: { valorJson: true, vigenteDesde: true },
+      });
+      const n = Number(fila?.valorJson);
+      return fila && Number.isSafeInteger(n) && n > 0
+        ? { centavos: n, desde: fila.vigenteDesde }
+        : null;
+    },
     /** Última captura de cada indicador previsional, para el aviso de «fuente caída». */
     capturasPrevisionales: async () => {
       const filas = await db.capturaIndicador.findMany({
@@ -36,7 +52,10 @@ export function operacionesIndicadoresPlataforma() {
         orderBy: { capturadoEn: "desc" },
         take: 50,
         select: {
-          capturadoEn: true, resultado: true, diferencia: true, alertaEmitida: true,
+          capturadoEn: true,
+          resultado: true,
+          diferencia: true,
+          alertaEmitida: true,
           indicador: { select: { clave: true } },
         },
       });
