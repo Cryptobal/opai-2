@@ -14,6 +14,7 @@ import {
   catalogoItemsUpdate,
 } from "./catalogo-items";
 import { correlativosFijar } from "./correlativos";
+import { costosCategoriaGuardar, costosCategoriaList } from "./costos-categoria";
 import { motorSimular } from "./motor";
 import { cotizacionesCreate } from "./crear";
 import { cotizacionesEnviar } from "./enviar";
@@ -60,6 +61,12 @@ import {
   propuestaTecnicaUpdate,
 } from "./propuesta-tecnica";
 import { cotizacionesClonar, versionesCrear } from "./versiones";
+import { cotizacionesArchivar, cotizacionesRestaurar } from "./archivar";
+import { compartirCrear, compartirRevocar } from "./compartir";
+import { compartirVer } from "./compartir-ver";
+import { cotizacionesEstadoComercial } from "./estado-comercial";
+import { puestosConfirmar } from "./puestos-confirmar";
+import { puestosOfrecer } from "./puestos-ofrecer";
 
 export const capacidades: readonly Capacidad[] = [
   motorSimular,
@@ -84,6 +91,8 @@ export const capacidades: readonly Capacidad[] = [
   lineasActualizar,
   lineasQuitar,
   lineasReordenar,
+  costosCategoriaList,
+  costosCategoriaGuardar,
   versionMargenActualizar,
   seccionMargenActualizar,
   versionParametros,
@@ -116,4 +125,12 @@ export const capacidades: readonly Capacidad[] = [
   enviosPropuestaSolicitar,
   enviosPropuestaAprobar,
   enviosPropuestaCancelar,
+  cotizacionesEstadoComercial,
+  cotizacionesArchivar,
+  cotizacionesRestaurar,
+  compartirCrear,
+  compartirRevocar,
+  compartirVer,
+  puestosOfrecer,
+  puestosConfirmar,
 ];

@@ -61,6 +61,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       "cpq:modelo.manage",
       "cpq:biblioteca.manage",
       "cpq:envios.aprobar",
+      "cpq:puestos.confirmar",
     ],
   },
   supervisor: {
@@ -82,6 +83,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.personasRead,
       ...PERMITIR_SUPERVISOR_PERSONAS_PR2,
       PERMISOS_CORE.documentosRead,
+      PERMISOS_CORE.documentosSubirAlcance,
       PERMISOS_CORE.firmasEnviar,
       PERMISOS_CORE.firmasRead,
       PERMISOS_CORE.configRead,

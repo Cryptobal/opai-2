@@ -23,6 +23,7 @@ describe("CPQ CAR-132: entrada y acciones con permisos efectivos", () => {
         aprobar: rol !== "supervisor" && ["owner", "admin"].includes(rol),
         costos: rol !== "supervisor" && ["owner", "admin", "gerente"].includes(rol),
         aprobarEnvios: rol !== "supervisor" && ["owner", "admin"].includes(rol),
+        confirmarPuestos: rol !== "supervisor" && ["owner", "admin"].includes(rol),
       };
       expect(accesoCpq(i)).toEqual(esperado);
       const nav = armarNavegacion(entradas, {
@@ -42,6 +43,7 @@ describe("CPQ CAR-132: entrada y acciones con permisos efectivos", () => {
       aprobar: false,
       costos: false,
       aprobarEnvios: false,
+      confirmarPuestos: false,
     });
     expect(accesoCpq(null)).toEqual({
       leer: false,
@@ -49,6 +51,7 @@ describe("CPQ CAR-132: entrada y acciones con permisos efectivos", () => {
       aprobar: false,
       costos: false,
       aprobarEnvios: false,
+      confirmarPuestos: false,
     });
     expect(armarNavegacion(entradas, { puede: () => true, modulosActivos: [] })).toEqual([]);
   });
@@ -61,6 +64,7 @@ describe("CPQ CAR-132: entrada y acciones con permisos efectivos", () => {
       aprobar: false,
       costos: false,
       aprobarEnvios: false,
+      confirmarPuestos: false,
     });
     i.acceso.permisosRol = null;
     i.acceso.excepciones = [{ permiso: "cpq:cotizaciones.read", conceder: false }];
@@ -70,6 +74,7 @@ describe("CPQ CAR-132: entrada y acciones con permisos efectivos", () => {
       aprobar: false,
       costos: false,
       aprobarEnvios: false,
+      confirmarPuestos: false,
     });
   });
 });

@@ -2,26 +2,16 @@
 
 import { Lock } from "lucide-react";
 
-import { Alerta, Badge, Button, Pares, SeccionTarjeta } from "@opai/ds";
+import { Alerta, Badge, Button, SeccionTarjeta } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
 import { avisosResumenCpq } from "@/lib/cpq-avisos-compactos";
 import { type AvisoServidorCpq } from "@/lib/cpq-avisos";
-import { estadoCpqBadge, etiquetaCategoria, ventaMensualTexto } from "@/lib/cpq-presentacion";
+import { estadoCpqBadge, ventaMensualTexto } from "@/lib/cpq-presentacion";
 
 import { SemaforoMargenCpq } from "../../_componentes/semaforo-margen-cpq";
-
-const ORDEN_CATEGORIAS = [
-  "mano_obra",
-  "feriados",
-  "uniformes",
-  "examenes",
-  "colacion",
-  "movilizacion",
-  "equipamiento",
-  "vehiculos",
-];
+import { type CostosEditables, PanelCostosCategoria } from "./panel-costos-categoria";
 
 export function ResumenCotizacion({
   version,
@@ -29,6 +19,7 @@ export function ResumenCotizacion({
   meta,
   verCostos,
   onEditarLinea,
+  costos,
 }: {
   version: { numero: number; estado: string; validaHasta: string | null };
   calculo: {
@@ -53,6 +44,8 @@ export function ResumenCotizacion({
   verCostos: boolean;
   /** Abre la hoja de edición de una línea desde su aviso (CAR-162). */
   onEditarLinea?: (lineaId: string) => void;
+  /** Edición de costos por categoría (CAR-162); solo en borrador y con permiso de costos. */
+  costos?: CostosEditables;
 }) {
   // Sin venta (sin puestos o con costo pendiente) no hay cálculo que mostrar: «—» y sin semáforo.
   const costoPendiente = !calculo.ventaMensual || Boolean(calculo.noEnviable);
@@ -60,14 +53,6 @@ export function ResumenCotizacion({
   const ventaMostrar = typeof ventaTxt === "number" ? pesos(ventaTxt) : ventaTxt;
   const badge = estadoCpqBadge(version.estado);
   const avisos = avisosResumenCpq(calculo);
-  // Sin cálculo, una sola fila: no ocho «Pendiente» ni ceros (CAR-162).
-  const categorias = costoPendiente
-    ? [{ etiqueta: "Costos pendientes", valor: "—" }]
-    : ORDEN_CATEGORIAS.map((id) => ({
-        etiqueta: etiquetaCategoria(id),
-        valor: pesos(calculo.categorias?.find((c) => c.id === id)?.costoMensual ?? 0),
-      }));
-
   return (
     <SeccionTarjeta titulo="Resumen">
       <div className="space-y-4">
@@ -139,16 +124,11 @@ export function ResumenCotizacion({
         })}
 
         {verCostos ? (
-          <div className="border-t border-border pt-3">
-            <p className="t-label mb-2">Costos por categoría</p>
-            <Pares
-              items={categorias.map((c) => ({
-                etiqueta: c.etiqueta,
-                valor: c.valor,
-                numerico: true,
-              }))}
-            />
-          </div>
+          <PanelCostosCategoria
+            categorias={calculo.categorias}
+            costoPendiente={costoPendiente}
+            {...(costos ? { costos } : {})}
+          />
         ) : null}
 
         <p className="t-caption text-fg-subtle border-t border-border pt-3">

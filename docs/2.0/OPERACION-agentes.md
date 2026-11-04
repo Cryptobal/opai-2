@@ -8,24 +8,26 @@
 
 ## A. Flujo nuevo (acordado con Carlos el 28-oct-2026)
 
+> **Frente único (Carlos, 4-nov-2026, ADR-070).** Las sesiones de Claude **planifican, construyen e integran sus propios PRs**. El bot «OPAI 2.0» **no integra ni escribe encargos o briefs**: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:` y toma capturas) y **aplica las migraciones de Neon con respaldo cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos»** sobre el head del PR. Donde más abajo se diga que el bot integra, o que Claude también aplica migraciones (ADR-060, ADR-063), rige esta nota.
+
 1. **El repo es la fuente única.** Briefs, decisiones, estado y pendientes viven en `docs/2.0/`.
 2. **Quién hace qué.**
-   - **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) escribe los briefs, construye e **integra a `main` con squash** cuando se cumplen las condiciones de integración (ADR-060).
+   - **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code; una sesión por frente, con su número en el título del PR) planifica, escribe los briefs, construye e **integra a `main` con squash** sus propios PRs cuando se cumplen las condiciones de integración (ADR-060, ADR-070).
    - **Carlos** aprueba **una vez por módulo** una hoja de alcance de una página: qué pasa de 1.0 a 2.0, qué no pasa y qué mejoras se suman. **1.0 es el piso, no el techo.**
-   - El **bot OPAI 2.0** (Cursor) opera la cola: avisa a los revisores, aplica migraciones con respaldo, **también puede integrar con squash** bajo las mismas condiciones, toma capturas y responde `@opai-2.0:` en PRs o correo a carlos.irigoyen@mail.grokbot.com.
+   - El **bot OPAI 2.0** (Cursor) vigila GitHub y Linear: avisa a los revisores, **aplica las migraciones de Neon con respaldo cuando el Revisor deja «sin bloqueos»**, toma capturas y responde `@opai-2.0:` en PRs o correo a carlos.irigoyen@mail.grokbot.com. **No integra ni escribe encargos** (ADR-070).
 3. **Cada PR actualiza `docs/2.0/ESTADO.md`** con lo que cambia: qué entró, qué quedó pendiente y qué decisión se tomó. Sin esa actualización, el PR no está listo.
 4. **Rutina cada 15 minutos.** El bot revisa los PRs abiertos de `Cryptobal/opai-2`. Cada PR nuevo o con head nuevo se pasa al **Revisor** (bot `4e22026b`) y a **QA** (bot `9ea32915`).
 5. **Migraciones.** Si el PR trae migración (etiqueta `migracion-pendiente`), el bot la aplica en Neon **con respaldo previo**:
    - Proyecto `steep-wildflower-90764475`.
    - Primero la rama **dev** (`br-cool-cell-b6f9h1vh`), después **main** (`br-dawn-morning-b6037bp9`).
    - Snapshot (o rama de respaldo) antes de cada una, `lock_timeout` corto y verificación posterior.
-   - Luego el bot quita la etiqueta. **Integración:** Claude o el bot «OPAI 2.0» hace squash cuando se cumplen las condiciones (A.6); sin force-push ni rebase.
+   - Aplica solo después del comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head del PR. Luego el bot deja el aviso, quita la etiqueta y le avisa a la sesión de Claude. **Integración:** la sesión de Claude que lleva el PR hace squash cuando se cumplen las condiciones (A.6); sin force-push ni rebase.
 6. **Reglas de revisión e integración (t618u, 27-oct-2026 17:30; integrador ampliado ADR-060, 3-nov-2026):**
    - El Revisor hace **una sola pasada**.
    - Solo **bloquea** por **seguridad, migraciones o datos** (RLS, permisos, pérdida o mezcla de datos entre tenants).
    - Todo lo demás es no bloqueante y va a un **PR de pendientes**, no a otra vuelta del mismo PR.
-   - Se integra (**Claude** o el bot «OPAI 2.0», quien llegue primero) con los cuatro checks obligatorios en verde sobre el head (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`), sin conflictos con `main` (traer `main` con merge solo si hay conflicto; decisión 4-nov-2026), sin veto de Carlos, migración ya aplicada con aviso en el PR y etiqueta `migracion-pendiente` quitada si corresponde, y —solo si el PR trae migración o toca RLS, permisos o datos de tenants— tras el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head.
-   - Cuando Carlos active la **cola de merge** en el ruleset «Proteger main», el bot «OPAI 2.0» encola el PR ahí: GitHub vuelve a correr los checks obligatorios en el evento `merge_group` (sin e2e ni rendimiento) y hace el squash sin reiniciar el CI de todos los demás PR abiertos.
+   - Se integra (la **sesión de Claude** que lleva el PR) con los cuatro checks obligatorios en verde sobre el head (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`), sin conflictos con `main` (traer `main` con merge solo si hay conflicto; decisión 4-nov-2026), sin veto de Carlos, migración ya aplicada con aviso en el PR y etiqueta `migracion-pendiente` quitada si corresponde, y —solo si el PR trae migración o toca RLS, permisos o datos de tenants— tras el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head.
+   - Cuando Carlos active la **cola de merge** en el ruleset «Proteger main», la sesión de Claude encola el PR ahí: GitHub vuelve a correr los checks obligatorios en el evento `merge_group` (sin e2e ni rendimiento) y hace el squash sin reiniciar el CI de todos los demás PR abiertos.
 7. **QA en vivo va después de integrar** (en test.opai.cl) y **no frena nada**. Sus hallazgos van al PR de pendientes, salvo que sean de seguridad o datos: en ese caso se abre un arreglo inmediato.
 8. **Capturas.** Cuando Carlos quiera ver algo, se las pide al bot OPAI 2.0, que las toma en test.opai.cl.
 9. **Avisos:** siempre en español, al integrar y al migrar.
@@ -54,7 +56,7 @@
 3. **1.0 es piso, no techo (26-oct):** hoja de alcance de una página por módulo, que Carlos aprueba una vez (ver A.2).
 4. **Preguntas antes de cada módulo (24-oct 23:05):** todas las dudas se hacen y refinan con Carlos antes de empezar el módulo. Después no se vuelve a preguntar.
 5. **Credenciales (24-oct):** todas están en 1Password y se usan sin pedirlas. A Carlos solo se le piden aprobaciones o 2FA. Los secretos de CI van en GitHub y Vercel, **nunca** en bots ni en el repo.
-6. **Integración (24-oct 16:59; ADR-060, 3-nov-2026):** integra Claude (proyecto «OPAI 2.0») o el bot «OPAI 2.0» (squash), sin force-push ni rebase, bajo las mismas condiciones; avisa a Carlos al migrar y al integrar. Carlos conserva el veto.
+6. **Integración (24-oct 16:59; ADR-060, 3-nov-2026; frente único ADR-070, 4-nov-2026):** integra la sesión de Claude que lleva el PR (squash), no el bot, sin force-push ni rebase, bajo las mismas condiciones; avisa a Carlos al migrar y al integrar. Carlos conserva el veto.
 7. **Modelos:**
    - 23-oct: Opus para planear, Sonnet por defecto, Haiku para tareas mecánicas.
    - **Vigente desde el 27-oct (00:38, t512u):** Claude Sonnet por defecto; terra para arreglos chicos y QA; luna para documentos; sol u Opus solo como excepción justificada.

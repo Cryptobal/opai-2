@@ -1,11 +1,12 @@
 import { PCT_ESCALA } from "@opai/domain/dinero";
 import { aplicarMargen } from "./lineas";
 import { CERO, N, UNO, sumar, type Numero } from "./numero";
+import { SECCION_GLOBAL } from "./ajustes";
 import { agregarTraza } from "./resumen";
 import type { LineaCalculada, Traza, VersionCalculo } from "./tipos";
 
 export function margenDeSeccion(v: VersionCalculo, seccion: string): number {
-  if (!v.margenesSeccion) return v.margenPct;
+  if (!v.margenesSeccion || seccion === SECCION_GLOBAL) return v.margenPct;
   const margen = v.margenesSeccion.find((s) => s.seccion === seccion);
   if (!margen) throw new Error("Falta margen de sección");
   return margen.margenPct;
@@ -23,7 +24,10 @@ export function validarMargenesSeccion(v: VersionCalculo): void {
 
 /** Se suman bases con su margen sin redondear; instrumentos una vez por cotización. */
 export function calcularBaseConMargen(v: VersionCalculo, lineas: readonly LineaCalculada[], adicionales: ReadonlySet<string>, traza: Traza[]): Numero {
-  const secciones = v.margenesSeccion ? [...new Set(v.lineas.filter((l) => l.habilitada).map((l) => l.seccion))] : [null];
+  const globales = lineas.some((l) => l.seccion === SECCION_GLOBAL) ? [SECCION_GLOBAL] : [];
+  const secciones = v.margenesSeccion
+    ? [...new Set([...v.lineas.filter((l) => l.habilitada).map((l) => l.seccion), ...globales])]
+    : [null];
   return sumar(secciones.map((seccion) => {
     const margenPct = seccion === null ? v.margenPct : margenDeSeccion(v, seccion);
     const ls = lineas.filter((l) => !adicionales.has(l.id) && (seccion === null || l.seccion === seccion));

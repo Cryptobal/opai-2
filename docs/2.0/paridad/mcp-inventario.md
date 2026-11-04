@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 570 pares pantalla→capacidad · 515 con herramienta · 55 excepciones justificadas · 0 faltantes.
+**Resumen:** 579 pares pantalla→capacidad · 523 con herramienta · 56 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -24,6 +24,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/firmar/[slug]/[token]` | `core.firmas.firmar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.rechazar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.ver_firmante` | — | excepción |
+| — | `/p/[slug]/[token]` | `cpq.compartir.ver` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
@@ -204,18 +205,26 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.puestos.confirmar` | `cpq_puestos_confirmar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.get` | `comercial_seguimientos_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.iniciar` | `comercial_seguimientos_iniciar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.crear` | `cpq_compartir_crear` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.revocar` | `cpq_compartir_revocar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.guardar` | `cpq_costos_categoria_guardar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.list` | `cpq_costos_categoria_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.archivar` | `cpq_cotizaciones_archivar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.clonar` | `cpq_cotizaciones_clonar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.estado_comercial` | `cpq_cotizaciones_estado_comercial` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.explicar` | `cpq_cotizaciones_explicar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.marcar_lista` | `cpq_cotizaciones_marcar_lista` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.preview_pdf` | `cpq_cotizaciones_preview_pdf` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.restaurar` | `cpq_cotizaciones_restaurar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.solicitar_aprobacion` | `cpq_cotizaciones_solicitar_aprobacion` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.aprobar` | `cpq_envios_propuesta_aprobar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.cancelar` | `cpq_envios_propuesta_cancelar` | existe |
@@ -681,6 +690,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
+| `cpq.compartir.ver` | Interna: la abre el cliente en /p/<slug>/<token> sin sesión, con el enlace revocable y con vencimiento como credencial; los agentes gestionan el enlace con cpq.compartir.crear y revocar. |
 | `cpq.cotizaciones.aprobar` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
 | `cpq.cotizaciones.enviar` | Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad. |
 | `cpq.cotizaciones.rechazar_aprobacion` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
@@ -797,6 +807,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
 - `cpq.propuestas_tecnica.update`
+- `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
 - `cpq.versiones.margen`
 - `finanzas.bancos.saldo_sugerido`

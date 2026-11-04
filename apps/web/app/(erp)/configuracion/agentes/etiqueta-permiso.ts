@@ -18,6 +18,7 @@ const VERBOS: Record<string, string> = {
   read: "ver",
   manage: "gestionar",
   read_sensible: "ver (sensible)",
+  subir_alcance: "subir (solo a lo que tiene a cargo)",
   delete: "eliminar",
 };
 

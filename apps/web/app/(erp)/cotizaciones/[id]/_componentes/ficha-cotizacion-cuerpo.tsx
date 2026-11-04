@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
 import { FichaCotizacionLineas } from "./ficha-cotizacion-lineas";
 import type { ModalesFichaCotizacion } from "./ficha-cotizacion-modales";
+import { AccionesComerciales } from "./acciones-comerciales";
 import { HistorialVersionesCpq, PanelDocumentoPdf } from "./historial-versiones";
 import { TarjetaMargenFinanzas } from "./tarjeta-margen-finanzas";
 
@@ -80,6 +81,14 @@ export function FichaCotizacionCuerpo({
           version={d.version.numero}
           estado={d.version.estado}
           onVistaPrevia={() => modales.setPreviewAbierto(true)}
+        />
+        <AccionesComerciales
+          cotizacionId={d.cotizacion.id}
+          titulo={d.cotizacion.titulo}
+          estado={d.version.estado}
+          gestionar={datos.gestionar}
+          puedeConfirmarPuestos={datos.confirmarPuestos}
+          costos={datos.costos}
         />
         <HistorialVersionesCpq versiones={datos.versiones} codigo={d.cotizacion.codigo} />
       </div>

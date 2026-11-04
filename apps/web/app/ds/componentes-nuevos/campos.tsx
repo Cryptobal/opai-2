@@ -10,7 +10,9 @@ import {
   type Direccion,
   InputFecha,
   InputFechaRango,
+  InputMonto,
   MapaEstatico,
+  SelectorHora,
   Uploader,
 } from "@opai/ds";
 
@@ -33,6 +35,8 @@ async function subidaFicticia(archivo: File, progreso: (f: number) => void) {
 export function MuestraCampos() {
   const [fecha, setFecha] = useState("2025-03-03");
   const [rango, setRango] = useState({ desde: "2026-10-01", hasta: "2026-09-01" });
+  const [hora, setHora] = useState("08:00");
+  const [monto, setMonto] = useState("800000");
   const [dir, setDir] = useState<Direccion | null>(null);
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -44,6 +48,18 @@ export function MuestraCampos() {
           <span className="t-label">Rango desde / hasta</span>
           <InputFechaRango desde={rango.desde} hasta={rango.hasta} onCambiar={setRango} />
         </div>
+        <Campo etiqueta="Hora (selector del DS)" htmlFor="h1" ayuda="Se escribe con máscara o se elige de la lista.">
+          <SelectorHora id="h1" valor={hora} onCambiar={setHora} />
+        </Campo>
+        <Campo etiqueta="Monto CLP" htmlFor="m1" ayuda={`Valor guardado: ${monto || "vacío"}`}>
+          <InputMonto id="m1" valor={monto} onCambiar={setMonto} placeholder="0" />
+        </Campo>
+        <Campo etiqueta="Hora · inválida" htmlFor="h2">
+          <SelectorHora id="h2" valor="" onCambiar={() => undefined} invalido />
+        </Campo>
+        <Campo etiqueta="Monto · deshabilitado" htmlFor="m2">
+          <InputMonto id="m2" valor="1250000" onCambiar={() => undefined} disabled />
+        </Campo>
         <Campo etiqueta="Clave propia · ingresando" htmlFor="sec1">
           <CampoSecreto id="sec1" onGuardar={() => undefined} />
         </Campo>

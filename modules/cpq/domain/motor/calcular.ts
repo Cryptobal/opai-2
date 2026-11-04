@@ -1,6 +1,7 @@
 import { PCT_ESCALA } from "@opai/domain/dinero";
 import { personasPorPosicion } from "./dotacion";
 import { validarModelo } from "./formulas";
+import { calcularAjustes } from "./ajustes";
 import { calcularInstrumentos } from "./instrumentos";
 import { calcularBaseConMargen, margenDeSeccion, validarMargenesSeccion } from "./margenes";
 import { calcularItem } from "./lineas";
@@ -22,7 +23,7 @@ export function calcular(v: VersionCalculo, modelo: ModeloCosteo, parametros: Pa
   const posiciones = puestos.reduce((s, l) => s + l.posiciones, 0);
   const personas = sumar(puestos.map((l) => personasPorPosicion(l).por(N(l.posiciones))));
   let laboralPendiente = false;
-  const lineas = activas.flatMap((l) => {
+  const lineasBase = activas.flatMap((l) => {
     if (l.tipo !== "puesto") {
       const locales = puestos.filter((p) => p.seccion === l.seccion);
       const personasUsadas = l.alcanceDotacion === "seccion" ? sumar(locales.map((p) => personasPorPosicion(p).por(N(p.posiciones)))) : personas;
@@ -33,6 +34,8 @@ export function calcular(v: VersionCalculo, modelo: ModeloCosteo, parametros: Pa
     if (!dato) { laboralPendiente = true; return []; }
     return calcularPuesto(l, v, modelo, traza, dato);
   });
+  // Costos manuales por categoría (de un puesto o globales); sin ajustes no cambia nada.
+  const lineas = [...lineasBase, ...calcularAjustes(v, modelo, puestos, traza)];
   if (laboralPendiente) advertencias.push("costo laboral pendiente: motor de sueldos");
   const idsAdicionales = new Set(activas.filter((l) => l.tipo === "adicional").map((l) => l.id));
   const costo = (adicional: boolean) => N(lineas.filter((l) => idsAdicionales.has(l.id) === adicional).reduce((s, l) => s + l.costoMensual, 0));

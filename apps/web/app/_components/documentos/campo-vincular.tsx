@@ -19,6 +19,11 @@ export type OpcionesVincular = {
   etiquetas: Record<string, string>;
   /** Entidades que la persona puede elegir (según los permisos de lectura de cada lista). */
   disponibles: EntidadVinculable[];
+  /**
+   * Subida acotada (`documentos.subir_alcance`): solo a instalaciones a cargo y sin visibilidad en
+   * portales, así que la hoja no muestra ese campo ni lo envía (la capacidad lo fija vacío).
+   */
+  acotada?: boolean;
 };
 
 const MENSAJE_FALLO = "No se pudo buscar. Reintenta en unos segundos.";

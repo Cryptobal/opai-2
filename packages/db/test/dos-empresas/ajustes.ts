@@ -174,6 +174,16 @@ export const AJUSTES: Record<string, Ajuste> = {
       snapshot_json: "{}",
     }),
   },
+  // Enlace público (CPQ v4): el CHECK pide un hash de 64 hex; el uuid de la empresa sin guiones lo es.
+  "cpq.enlaces_compartidos": {
+    dependencias: ["cpq.cotizaciones", "cpq.versiones"],
+    fijas: ["token_hash"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      version_id: id(ctx, "cpq.versiones"),
+      token_hash: ctx.tenant.replaceAll("-", "").repeat(2),
+    }),
+  },
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },

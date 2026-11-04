@@ -138,10 +138,14 @@ function ExitoGanar(p: { abierta: boolean; cerrar: () => void; r: Ganado }) {
             ))}
           </div>
         ) : null}
-        {p.r.efectos.puestosPorOfrecer ? (
-          <p className="t-caption">
-            Los puestos se crean desde la instalación; RRHH confirma cada uno.
-          </p>
+        {p.r.efectos.puestosPorOfrecer && p.r.efectos.cotizacion ? (
+          <div className="flex flex-col gap-2">
+            <EnlaceBoton href={`/cotizaciones/${p.r.efectos.cotizacion.id}`}>Crear puestos</EnlaceBoton>
+            <p className="t-caption">
+              Se ofrece{p.r.efectos.puestosPorOfrecer === 1 ? " 1 puesto" : `n ${p.r.efectos.puestosPorOfrecer} puestos`} de la cotización; RRHH confirma antes de
+              crearlos.
+            </p>
+          </div>
         ) : null}
       </div>
     </Sheet>
