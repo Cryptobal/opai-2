@@ -140,6 +140,30 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     expect((await dato<{ advertencias: string[] }>(conPermiso)).advertencias).toHaveLength(2); // ve ambas
   });
 
+  it("el aprobador se valida con sus permisos efectivos: una excepción concede o deniega sobre el rol", async () => {
+    const miembro = async (rol: Rol, conceder: boolean) => {
+      const id = randomUUID();
+      await e.admin.user.create({ data: { id, name: rol, email: `${id.slice(0, 8)}@rend.test` } });
+      const m = await e.admin.membership.create({ data: { tenantId: tenantA, userId: id, rol, portales: ["erp"] } });
+      await e.admin.permisoExcepcion.create({ data: { tenantId: tenantA, membershipId: m.id, permiso: "rendiciones:aprobar", conceder } });
+      return id;
+    };
+    const supervisorConcedido = await miembro("supervisor", true);
+    const gerenteDenegado = await miembro("gerente", false);
+    expect(await yo("rendiciones.rendiciones.crear", cuerpo({ aprobadorId: supervisorConcedido }))).toMatchObject({ ok: true });
+    expect(await yo("rendiciones.rendiciones.crear", cuerpo({ aprobadorId: gerenteDenegado }))).toMatchObject({ ok: false });
+  });
+
+  it("el respaldo debe ser un documento ya subido y confirmado, no uno pendiente", async () => {
+    const doc = (estado: string) =>
+      e.admin.documento.create({
+        data: { tenantId: tenantA, nombre: "boleta.pdf", mime: "application/pdf", tamano: 1_000, storageKey: `k-${randomUUID()}`, estado, creadoPorTipo: "user" },
+      }).then((d) => d.id);
+    const conDoc = (documentoId: string) => cuerpo({ items: [item({ documentoId, sinRespaldoMotivo: undefined, folio: `R-${documentoId.slice(0, 6)}` })] });
+    expect(await yo("rendiciones.rendiciones.crear", conDoc(await doc("pendiente")))).toMatchObject({ ok: false });
+    expect(await yo("rendiciones.rendiciones.crear", conDoc(await doc("disponible")))).toMatchObject({ ok: true });
+  });
+
   it("la vista previa no escribe nada", async () => {
     const antes = await e.admin.rendicion.count({ where: { tenantId: tenantA } });
     expect(await yo("rendiciones.rendiciones.crear", cuerpo(), { dryRun: true })).toMatchObject({ ok: true });

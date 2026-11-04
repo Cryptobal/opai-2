@@ -1,6 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
 import { ajuste, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
-import { esRol, tienePermiso } from "@opai/domain";
+import { type Acceso, esRol, tienePermisoEfectivo } from "@opai/domain";
 
 import { claveDuplicado, codigoVisible, esFechaFutura, itemsSinRespaldo, type EstadoRendicion } from "../domain";
 import { PERMISO_APROBAR, PERMISO_VER_TODAS } from "./permisos";
@@ -40,11 +40,21 @@ export async function validarCentro(ctx: Contexto, instalacionId: string | undef
   if (!inst) throw reglaDeNegocio("La instalación no existe o no está activa en esta empresa.");
 }
 
-/** Aprobador: miembro activo con permiso de aprobar, distinto de quien rinde. */
+/** Aprobador: miembro activo con permiso efectivo de aprobar (rol base o personalizado + excepciones). */
 export async function validarAprobador(ctx: Contexto, aprobadorId: string, solicitanteId: string): Promise<void> {
   if (aprobadorId === solicitanteId) throw reglaDeNegocio("Nadie aprueba su propia rendición.");
-  const m = await ctx.db.membership.findFirst({ where: { tenantId: ctx.tenantId, userId: aprobadorId, estado: "activa" } });
-  if (!m || !esRol(m.rol) || !tienePermiso(m.rol, PERMISO_APROBAR))
+  const m = await ctx.db.membership.findFirst({
+    where: { tenantId: ctx.tenantId, userId: aprobadorId, estado: "activa" },
+    include: { rolTenant: true, excepciones: true },
+  });
+  const personalizado = m?.rolTenant;
+  const acceso: Acceso | null = m && {
+    rol: personalizado || !esRol(m.rol) ? null : m.rol,
+    // Un rol personalizado archivado deniega por defecto, igual que en la sesión.
+    permisosRol: personalizado ? (personalizado.archivadoEn ? [] : personalizado.permisos) : null,
+    excepciones: m.excepciones.map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
+  };
+  if (!acceso || !tienePermisoEfectivo(acceso, PERMISO_APROBAR))
     throw reglaDeNegocio("El aprobador elegido no puede aprobar rendiciones en esta empresa.");
 }
 
@@ -60,8 +70,8 @@ export async function validarItems(ctx: Contexto, items: readonly Item[]): Promi
   const futura = items.findIndex((i) => esFechaFutura(i.fecha, hoy));
   if (futura >= 0) throw reglaDeNegocio(`El gasto ${futura + 1} tiene fecha futura.`);
   const ids = [...new Set(items.flatMap((i) => (i.documentoId ? [i.documentoId] : [])))];
-  if (ids.length > 0 && (await ctx.db.documento.count({ where: { id: { in: ids } } })) !== ids.length)
-    throw reglaDeNegocio("Un respaldo no existe en los documentos de esta empresa.");
+  if (ids.length > 0 && (await ctx.db.documento.count({ where: { id: { in: ids }, estado: "disponible" } })) !== ids.length)
+    throw reglaDeNegocio("Un respaldo no existe en los documentos de esta empresa o aún no terminó de subirse.");
   const exigir = await ajuste<boolean>(ctx, "rendiciones", "exigir_respaldo");
   const faltan = itemsSinRespaldo(
     items.map((i) => ({ ...i, descripcion: "", tieneRespaldo: !!i.documentoId })),
