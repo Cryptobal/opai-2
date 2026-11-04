@@ -33,6 +33,8 @@ model ValorPublicado {
   fuente        String
   consultadaEl  DateTime? @map("consultada_el") @db.Date
   verificacion  String    @default("verificado")
+  resueltoPorId String?   @map("resuelto_por_id") @db.Uuid
+  resueltoEn    DateTime? @map("resuelto_en") @db.Timestamptz(6)
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
   indicador IndicadorLegal @relation(fields: [indicadorId], references: [id], onDelete: Restrict)
