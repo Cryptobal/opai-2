@@ -5,7 +5,6 @@ vi.mock("@/lib/servidor", () => ({ ejecutarComoUsuario: ejecutar }));
 
 import { buscarCandidatosDocumento } from "@/app/_acciones/candidatos-documento";
 import { textoDestino } from "@/app/_components/documentos/campo-vincular";
-import { CAPA_DE_ENTIDAD } from "@/app/_components/documentos/tipos";
 
 beforeEach(() => ejecutar.mockReset());
 
@@ -85,6 +84,35 @@ describe("candidatos de «Vincular a»", () => {
     expect(textoDestino({ tipo: "cuenta", id: "c", nombre: "Andina" }, e)).toBe(
       "Se guarda en los documentos de cuenta Andina.",
     );
-    expect(Object.keys(CAPA_DE_ENTIDAD)).toEqual(["tenant", "cuenta", "instalacion", "persona"]);
+    // La tabla de capas de la UI se compara con la del servidor en
+    // packages/capabilities/test/documentos-vincular-a.test.ts (CAPA_DE no se exporta a apps/web).
+  });
+
+  it("personas: con 1 carácter no consulta; sin texto o con 2 sí", async () => {
+    ejecutar.mockResolvedValue({ ok: true, data: { items: [persona], siguiente: null } });
+    expect(await buscarCandidatosDocumento({ tipo: "persona", q: " a " })).toEqual({
+      ok: true,
+      items: [],
+    });
+    expect(ejecutar).not.toHaveBeenCalled();
+    await buscarCandidatosDocumento({ tipo: "persona", q: "" });
+    expect(ejecutar).toHaveBeenLastCalledWith("erp", "core.personas.list", { limite: 20 });
+    await buscarCandidatosDocumento({ tipo: "persona", q: "an" });
+    expect(ejecutar).toHaveBeenLastCalledWith("erp", "core.personas.list", { limite: 20, q: "an" });
+    // Cuentas e instalaciones no son lecturas auditadas: buscan desde el primer carácter.
+    ejecutar.mockResolvedValue({ ok: true, data: { items: [] } });
+    await buscarCandidatosDocumento({ tipo: "cuenta", q: "a" });
+    expect(ejecutar).toHaveBeenLastCalledWith("erp", "core.cuentas.list", { limite: 20, q: "a" });
+  });
+
+  it("etiqueta de persona sin comas colgantes cuando falta un nombre", async () => {
+    const etiqueta = async (fila: object) => {
+      ejecutar.mockResolvedValue({ ok: true, data: { items: [{ id: "p", ...fila }] } });
+      const r = await buscarCandidatosDocumento({ tipo: "persona", q: "" });
+      return r.ok ? r.items[0]?.etiqueta : null;
+    };
+    expect(await etiqueta({ nombres: "Ana" })).toBe("Ana");
+    expect(await etiqueta({ apellidos: "Rojas", nombres: " " })).toBe("Rojas");
+    expect(await etiqueta({ apellidos: "Rojas", nombres: "Ana" })).toBe("Rojas, Ana");
   });
 });

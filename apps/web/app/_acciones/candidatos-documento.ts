@@ -10,9 +10,13 @@ const entrada = z.object({
 });
 
 export type Candidato = { id: string; etiqueta: string; detalle?: string };
-export type Candidatos = { ok: true; items: Candidato[] } | { ok: false; mensaje: string };
+/** `hayMas`: la lista llegó al tope y puede haber más coincidencias (hay que refinar). */
+export type Candidatos =
+  { ok: true; items: Candidato[]; hayMas?: true } | { ok: false; mensaje: string };
 
 const MAXIMO = 20;
+/** Mínimo de caracteres para buscar personas: cada consulta es una lectura auditada. */
+const MINIMO_PERSONA = 2;
 const MENSAJE_FALLO = "No se pudo buscar. Reintenta en unos segundos.";
 
 type Tipo = z.infer<typeof entrada>["tipo"];
@@ -26,7 +30,10 @@ type Fila = {
 };
 
 function aCandidato(tipo: Tipo, f: Fila): Candidato {
-  if (tipo === "persona") return { id: f.id, etiqueta: `${f.apellidos ?? ""}, ${f.nombres ?? ""}` };
+  if (tipo === "persona") {
+    const partes = [f.apellidos, f.nombres].map((x) => x?.trim() ?? "").filter(Boolean);
+    return { id: f.id, etiqueta: partes.join(", ") };
+  }
   return {
     id: f.id,
     etiqueta: f.nombre ?? "",
@@ -46,6 +53,8 @@ export async function buscarCandidatosDocumento(
   const e = entrada.safeParse(input);
   if (!e.success) return { ok: false, mensaje: MENSAJE_FALLO };
   const { tipo, q } = e.data;
+  if (tipo === "persona" && q.length > 0 && q.length < MINIMO_PERSONA)
+    return { ok: true, items: [] };
   const filtro = { limite: MAXIMO, ...(q ? { q } : {}) };
   // Ids literales: el gate de paridad rastrea qué capacidades invoca cada entrada de servidor.
   const r =
@@ -59,5 +68,6 @@ export async function buscarCandidatosDocumento(
       r.error.code === "FORBIDDEN" ? "No tienes permiso para ver esta lista." : MENSAJE_FALLO;
     return { ok: false, mensaje };
   }
-  return { ok: true, items: r.data.items.slice(0, MAXIMO).map((f) => aCandidato(tipo, f)) };
+  const items = r.data.items.slice(0, MAXIMO).map((f) => aCandidato(tipo, f));
+  return { ok: true, items, ...(r.data.items.length >= MAXIMO ? { hayMas: true as const } : {}) };
 }
