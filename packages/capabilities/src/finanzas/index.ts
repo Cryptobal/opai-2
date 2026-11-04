@@ -38,6 +38,8 @@ import {
   ventasProgramacionCambiarEstado,
   ventasProgramacionCrear,
 } from "./ventas-programacion-escritura";
+import { cobranzaDeudor, cobranzaResumen } from "./cobranza-resumen";
+import { hoyEnFinanzas } from "./hoy-resumen";
 import { ventasProgramacionGenerar } from "./ventas-programacion-generar";
 import { ventasProgramacionVistaPrevia } from "./ventas-programacion-vista-previa";
 import { trabajoGenerarProgramaciones } from "./ventas-programacion-trabajo";
@@ -64,6 +66,9 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasListar,
   ventasObtener,
   ventasLibroResumen,
+  cobranzaResumen,
+  cobranzaDeudor,
+  hoyEnFinanzas,
   ventasProgramacionesListar,
   ventasProgramacionesObtener,
   ventasProgramacionCrear,

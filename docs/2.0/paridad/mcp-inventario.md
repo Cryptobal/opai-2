@@ -750,10 +750,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.parametros`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.cesiones.listar`
+- `finanzas.cobranza.deudor`
+- `finanzas.cobranza.resumen`
 - `finanzas.cobros.manual`
 - `finanzas.compras.importar`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
+- `finanzas.hoy.resumen`
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
 - `finanzas.ventas.proyeccion_flujo`
