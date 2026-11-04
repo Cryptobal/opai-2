@@ -1319,7 +1319,7 @@ identidad de servicio en main.
 
 **Decisión.** Las sesiones de Claude planifican, construyen e integran sus propios PRs. El bot «OPAI 2.0» no integra ni escribe encargos o briefs: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:`, toma capturas) y aplica las migraciones de Neon, con respaldo previo y en `dev` antes que `main`, cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos» sobre el head del PR.
 
-**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. **Pendiente:** `AGENTS.md` (tabla de roles, «Integración a `main`» y «Prohibido») todavía nombra al bot como integrador y a Claude como quien aplica migraciones; ante el choque, `OPERACION-agentes.md` manda y `AGENTS.md` se corrige en un PR aparte.
+**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. `AGENTS.md` (encabezado, «Tareas (Linear)» regla 4, «Prohibido», tabla de roles y «Integración a `main`») se alineó el 4-nov-2026 (CAR-162, Sesión 4): integra la sesión de Claude que construyó el PR, el bot solo vigila y aplica migraciones.
 
 ## ADR-068 · El pendiente de una factura descuenta sus notas de crédito parciales
 
