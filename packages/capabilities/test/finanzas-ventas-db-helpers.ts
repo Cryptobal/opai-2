@@ -4,6 +4,7 @@ import { type Entorno, prepararEntorno } from "../../db/test/entorno";
 
 import { cafXmlSintetico } from "./finanzas-caf-fixture";
 import type * as ModuloCapacidades from "../src";
+import type { Servicios } from "../src/types";
 import type { Contexto } from "../src/types";
 
 type ModuloCap = typeof ModuloCapacidades;
@@ -19,7 +20,7 @@ export type VentasDbSuite = {
   dato: <T>(id: string, input: Record<string, unknown>, opts?: { dryRun?: boolean }) => Promise<T>;
 };
 
-export async function prepararVentasDb(): Promise<VentasDbSuite> {
+export async function prepararVentasDb(servicios?: Partial<Servicios>): Promise<VentasDbSuite> {
   process.env.SII_ADAPTADOR = "simulado";
   process.env.OPAI_SECRETS_KEY = randomBytes(32).toString("base64");
   // Versión alta: `secretos-db.test.ts` rota la KEK 1→2 sobre todas las DEK con versión menor.
@@ -58,6 +59,7 @@ export async function prepararVentasDb(): Promise<VentasDbSuite> {
       rol: "owner",
       modulosActivos: ["finanzas"],
       medidor,
+      ...(servicios ? { servicios } : {}),
     });
   const dato = async <T>(id: string, input: Record<string, unknown>, opts?: { dryRun?: boolean }): Promise<T> => {
     const r = await mod.executeCapability(ctx(), id, input, opts);

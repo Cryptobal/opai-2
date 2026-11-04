@@ -48,7 +48,9 @@ async function borrarCreada(tx: TenantTx, f: Fila): Promise<void> {
   const id = f.id20;
   if (!id) return;
   if (f.entidad === "programacion_recurrente") {
-    await tx.ventasProgramacionCorrida.deleteMany({ where: { programacionId: id } });
+    await tx.ventasProgramacionCorrida.deleteMany({
+      where: { programacionId: id, documentoId: null },
+    });
     await tx.ventasProgramacionDestinatario.deleteMany({ where: { programacionId: id } });
     await tx.ventasProgramacionLinea.deleteMany({ where: { programacionId: id } });
     await tx.ventasProgramacion.delete({ where: { id } });

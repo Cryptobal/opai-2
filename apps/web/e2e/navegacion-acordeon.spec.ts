@@ -11,7 +11,7 @@ test("recuerda el área abierta en Inicio y Configuración", async ({ page }, in
   await page.goto("/configuracion");
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
   const personas = nav.getByRole("button", { name: "Personas", exact: true });
-  const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
+  const clientes = nav.getByRole("button", { name: "Comercial", exact: true });
   if ((await clientes.getAttribute("aria-expanded")) !== "true") await clientes.click();
   await expect(
     nav
@@ -48,7 +48,7 @@ test("al navegar solo queda abierta el área de la ruta", async ({ page }, info)
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await page.goto("/cuentas");
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
-  const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
+  const clientes = nav.getByRole("button", { name: "Comercial", exact: true });
   const personas = nav.getByRole("button", { name: "Personas", exact: true });
   await expect(clientes).toHaveAttribute("aria-expanded", "true");
   await expect(personas).toHaveAttribute("aria-expanded", "false");

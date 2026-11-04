@@ -66,11 +66,11 @@ export const manifest = defineModule({
     },
     {
       portal: "erp",
-      area: "clientes",
+      area: "comercial",
       href: "/contactos",
       etiqueta: "Contactos",
       icono: "Users",
-      orden: 1.5,
+      orden: 5,
       permiso: "comercial:negocios.read",
     },
   ],

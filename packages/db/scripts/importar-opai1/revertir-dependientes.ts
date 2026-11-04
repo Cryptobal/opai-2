@@ -50,6 +50,16 @@ async function instalacionPostImport(tx: TenantTx, instalacionId: string, termin
   return supervisores + calendario + accesos + vinculos > 0;
 }
 
+/** Corridas con borrador generado en 2.0 (CAR-159) o creadas tras la importación: no se borran al revertir. */
+async function programacionPostImport(tx: TenantTx, programacionId: string, terminadaEn: Date): Promise<boolean> {
+  const c = despuesDe(terminadaEn);
+  const [corridasNuevas, conDocumento] = await Promise.all([
+    tx.ventasProgramacionCorrida.count({ where: { programacionId, createdAt: c } }),
+    tx.ventasProgramacionCorrida.count({ where: { programacionId, documentoId: { not: null } } }),
+  ]);
+  return corridasNuevas + conDocumento > 0;
+}
+
 /** True si borrar o restaurar la fila arrastraría datos añadidos en 2.0 tras la corrida. */
 export async function dependientesPostImport(
   tx: TenantTx,
@@ -66,5 +76,6 @@ export async function dependientesPostImport(
   if (f.accion !== "creado") return false;
   if (f.entidad === "contacto") return contactoPostImport(tx, f.id20, terminadaEn);
   if (f.entidad === "instalacion") return instalacionPostImport(tx, f.id20, terminadaEn);
+  if (f.entidad === "programacion_recurrente") return programacionPostImport(tx, f.id20, terminadaEn);
   return false;
 }
