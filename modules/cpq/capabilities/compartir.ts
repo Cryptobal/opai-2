@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { type Contexto, defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
+import { enlacePublicoPermitido, hashDeToken } from "../persistencia/enlace-publico";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE } from "./permisos";
 import { cotizacionDe } from "./util";
@@ -12,6 +13,7 @@ const DIA_MS = 86_400_000;
 
 export const enlaceSchema = z.object({
   id: uuidSchema,
+  /** Solo al crear: el token no se guarda en claro y no se puede volver a leer. */
   url: z.string(),
   venceEn: z.date(),
   vistas: z.number().int(),
@@ -42,6 +44,10 @@ export const compartirCrear = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    if (!(await enlacePublicoPermitido(ctx)))
+      throw reglaDeNegocio(
+        "El enlace público no está disponible: la empresa comparte las cotizaciones por el Portal Cliente (o el enlace está apagado en Ajustes de CPQ).",
+      );
     const c = await cotizacionDe(ctx, input.cotizacionId);
     if (c.archivadaEn) throw reglaDeNegocio("La cotización está archivada: restáurala para compartirla.");
     const version = await ctx.db.cpqVersion.findFirst({
@@ -70,7 +76,7 @@ export const compartirCrear = defineCapability({
           tenantId: ctx.tenantId,
           cotizacionId: c.id,
           versionId: version.id,
-          token,
+          tokenHash: hashDeToken(token),
           venceEn,
           creadoPorId: ctx.usuario!.id,
         },

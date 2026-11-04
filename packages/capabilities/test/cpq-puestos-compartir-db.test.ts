@@ -1,6 +1,6 @@
 // CAR-162 PR E · CPQ v4 contra Postgres real con un rol sin BYPASSRLS: crear puestos al ganar (R2,
 // confirma RRHH, idempotente), compartir por enlace (vence, se revoca, no cruza empresas) y archivar.
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { sembrarComercial } from "@opai/db";
@@ -18,7 +18,8 @@ describe.skipIf(!urlPropietario)("cpq · puestos al ganar, compartir y archivar 
   let mod: typeof ModuloCapacidades;
   const medidor = { registrar: async () => undefined };
   const usuario = randomUUID();
-  const ctx = (tenantId: string, rol: "owner" | "gerente" = "owner") =>
+  const sha = (t: string) => createHash("sha256").update(t).digest("hex");
+  const ctx = (tenantId: string, rol: "owner" | "gerente" = "owner", modulos: readonly string[] = ["comercial", "cpq"]) =>
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: usuario },
@@ -26,11 +27,24 @@ describe.skipIf(!urlPropietario)("cpq · puestos al ganar, compartir y archivar 
       portal: "erp",
       portalesMembresia: ["erp"],
       rol,
-      modulosActivos: ["comercial", "cpq"],
+      modulosActivos: modulos,
       medidor,
     });
-  const run = <T>(tenantId: string, id: string, input: unknown, dryRun = false, rol: "owner" | "gerente" = "owner") =>
-    mod.executeCapability(ctx(tenantId, rol), id, input, { dryRun }) as Promise<Res<T>>;
+  const run = <T>(
+    tenantId: string,
+    id: string,
+    input: unknown,
+    dryRun = false,
+    rol: "owner" | "gerente" = "owner",
+    modulos?: readonly string[],
+  ) => mod.executeCapability(ctx(tenantId, rol, modulos), id, input, { dryRun }) as Promise<Res<T>>;
+  /** Enciende o apaga el ajuste `cpq.enlace_publico` de la empresa (apagado por defecto). */
+  const ajusteEnlace = (tenantId: string, valor: boolean) =>
+    e.admin.ajuste.upsert({
+      where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "cpq", clave: "enlace_publico" } },
+      create: { tenantId, ambito: "tenant", sujetoId: tenantId, modulo: "cpq", clave: "enlace_publico", valor },
+      update: { valor },
+    });
   async function ok<T>(tenantId: string, id: string, input: unknown, dryRun = false) {
     const r = await run<T>(tenantId, id, input, dryRun);
     if (!r.ok) throw new Error(`${id}: ${JSON.stringify(r.error)}`);
@@ -46,9 +60,9 @@ describe.skipIf(!urlPropietario)("cpq · puestos al ganar, compartir y archivar 
     if (!r.ok) throw new Error(`${id}: ${JSON.stringify(r.error)}`);
     return r.data;
   }
-  const publica = (tenantId: string, token: string) =>
+  const publica = (tenantId: string, token: string, modulos: readonly string[] = ["cpq"]) =>
     mod.executeCapability(
-      mod.crearContexto({ tenantId, actor: { tipo: "system" }, modulosActivos: ["cpq"], medidor }),
+      mod.crearContexto({ tenantId, actor: { tipo: "system" }, modulosActivos: modulos, medidor }),
       "cpq.compartir.ver",
       { token },
     ) as Promise<Res<{ ventaMensualClp: number | null; secciones: { lineas: object[] }[] }>>;
@@ -143,16 +157,47 @@ describe.skipIf(!urlPropietario)("cpq · puestos al ganar, compartir y archivar 
     expect(await e.admin.puesto.count({ where: { tenantId: b.tenantId } })).toBe(0);
   });
 
-  it("compartir: crea el enlace, el cliente lo abre sin costos y cuenta la vista", async () => {
+  it("enlace apagado por defecto: no se crea y /p/ responde NOT_FOUND", async () => {
     await e.admin.cpqVersion.update({ where: { id: b.versionId }, data: { estado: "enviada" } });
+    const r = await run(b.tenantId, "cpq.compartir.crear", { cotizacionId: b.cotizacionId });
+    expect(r.ok).toBe(false);
+    expect((await publica(b.tenantId, "a".repeat(32)).then((x) => x.ok))).toBe(false);
+    const est = await ok<{ enlacePermitido: boolean }>(b.tenantId, "cpq.cotizaciones.estado_comercial", { id: b.cotizacionId });
+    expect(est.enlacePermitido).toBe(false);
+    expect(await e.admin.cpqEnlaceCompartido.count({ where: { tenantId: b.tenantId } })).toBe(0);
+  });
+
+  it("ajuste encendido pero con Portal Cliente: nunca se crea ni abre", async () => {
+    await ajusteEnlace(b.tenantId, true);
+    const conPortal = ["comercial", "cpq", "portal_cliente"];
+    const r = await run(b.tenantId, "cpq.compartir.crear", { cotizacionId: b.cotizacionId }, false, "owner", conPortal);
+    expect(r.ok).toBe(false);
+    const est = await run<{ enlacePermitido: boolean }>(b.tenantId, "cpq.cotizaciones.estado_comercial", { id: b.cotizacionId }, false, "owner", conPortal);
+    expect(est.ok && est.data.enlacePermitido).toBe(false);
+    // Un enlace creado antes de activar el portal deja de abrir apenas el portal está activo.
+    const antes = (await ok<{ url: string }>(b.tenantId, "cpq.compartir.crear", { cotizacionId: b.cotizacionId })).url.split("/").at(-1)!;
+    expect((await publica(b.tenantId, antes)).ok).toBe(true);
+    expect((await publica(b.tenantId, antes, conPortal)).ok).toBe(false);
+    await ok(b.tenantId, "cpq.compartir.revocar", { cotizacionId: b.cotizacionId });
+  });
+
+  it("compartir (ajuste encendido, sin portal): crea el enlace, el cliente lo abre sin costos y cuenta la vista", async () => {
+    await ajusteEnlace(b.tenantId, true);
     const c = await ok<{ url: string }>(b.tenantId, "cpq.compartir.crear", { cotizacionId: b.cotizacionId });
     const token = c.url.split("/").at(-1)!;
     expect(c.url).toContain("/p/cpq-");
     const v = await publica(b.tenantId, token);
     expect(v.ok && v.data.ventaMensualClp).toBe(3_791_510);
     expect(JSON.stringify(v)).not.toMatch(/sueldo|margen|costo/i);
-    const fila = await e.admin.cpqEnlaceCompartido.findFirstOrThrow({ where: { token } });
+    // Solo se guarda el hash sha256; el token en claro no está en la base ni vuelve a leerse.
+    const fila = await e.admin.cpqEnlaceCompartido.findFirstOrThrow({ where: { tokenHash: sha(token) } });
+    expect(fila.tokenHash).toMatch(/^[0-9a-f]{64}$/);
     expect(fila.vistas).toBe(1);
+    const est = await ok<{ enlacePermitido: boolean; enlace: Record<string, unknown> | null }>(b.tenantId, "cpq.cotizaciones.estado_comercial", { id: b.cotizacionId });
+    expect(est.enlacePermitido).toBe(true);
+    expect(est.enlace).not.toBeNull();
+    expect(JSON.stringify(est)).not.toContain(token);
+    expect(est.enlace).not.toHaveProperty("url");
     expect((await publica(a.tenantId, token)).ok).toBe(false);
   });
 
@@ -161,7 +206,7 @@ describe.skipIf(!urlPropietario)("cpq · puestos al ganar, compartir y archivar 
     const segundo = (await ok<{ url: string }>(b.tenantId, "cpq.compartir.crear", { cotizacionId: b.cotizacionId })).url.split("/").at(-1)!;
     expect((await publica(b.tenantId, primero)).ok).toBe(false);
     expect((await publica(b.tenantId, segundo)).ok).toBe(true);
-    await e.admin.cpqEnlaceCompartido.updateMany({ where: { token: segundo }, data: { venceEn: new Date(Date.now() - 1000) } });
+    await e.admin.cpqEnlaceCompartido.updateMany({ where: { tokenHash: sha(segundo) }, data: { venceEn: new Date(Date.now() - 1000) } });
     expect((await publica(b.tenantId, segundo)).ok).toBe(false);
     const nuevo = (await ok<{ url: string }>(b.tenantId, "cpq.compartir.crear", { cotizacionId: b.cotizacionId })).url.split("/").at(-1)!;
     await ok(b.tenantId, "cpq.compartir.revocar", { cotizacionId: b.cotizacionId });

@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { crearContexto, executeCapability, type Resultado } from "@opai/capabilities";
 import { tenantPorSlug } from "@opai/db";
 
+import { fuentesReales } from "@/lib/fuentes";
 import { medidorDiferido } from "@/lib/medidor";
 import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
 
@@ -28,20 +29,26 @@ export async function verCotizacionPublica(
   slug: string,
   token: string,
 ): Promise<{ limitada: true } | { ok: true; data: CotizacionPublica } | { ok: false }> {
-  const permitido = await permitir(
-    `cotizacion-publica:${ipDeCabeceras(await headers())}:${token}`,
-    LIMITES.verificar.maximo,
-    LIMITES.verificar.ventanaMs,
-    { fallarCerrado: true },
-  );
-  if (!permitido) return { limitada: true };
+  const ip = ipDeCabeceras(await headers());
+  // Dos topes: por IP y token, y por IP sola (sin el token, para que probar tokens distintos no lo evada).
+  const [porToken, porIp] = await Promise.all([
+    permitir(`cotizacion-publica:${ip}:${token}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs, {
+      fallarCerrado: true,
+    }),
+    permitir(`cotizacion-publica-ip:${ip}`, LIMITES.verificar.maximo * 2, LIMITES.verificar.ventanaMs, {
+      fallarCerrado: true,
+    }),
+  ]);
+  if (!porToken || !porIp) return { limitada: true };
   const tenant = await tenantPorSlug(slug);
   if (!tenant) return { ok: false };
-  // El enlace solo existe si CPQ creó la cotización: el módulo se da por activo (como el formulario web).
+  // Módulos reales de la empresa: con Portal Cliente o sin CPQ el enlace no abre (NOT_FOUND parejo).
+  const modulos = await fuentesReales.modulosActivos(tenant.id);
+  if (!modulos.includes("cpq")) return { ok: false };
   const ctx = crearContexto({
     tenantId: tenant.id,
     actor: { tipo: "system" },
-    modulosActivos: ["cpq"],
+    modulosActivos: modulos,
     medidor: medidorDiferido,
   });
   const r: Resultado = await executeCapability(ctx, "cpq.compartir.ver", { token });

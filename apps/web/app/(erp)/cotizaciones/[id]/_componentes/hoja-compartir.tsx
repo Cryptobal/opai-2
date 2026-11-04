@@ -16,7 +16,9 @@ const mensajeDe = (titulo: string, url: string) =>
 
 /**
  * Compartir (CPQ v4, `Compartir`): enlace público con vencimiento y vistas, WhatsApp y correo, y
- * revocar. WhatsApp abre `wa.me` con el texto y el enlace; no se envía nada por API.
+ * revocar. Solo para empresas sin Portal Cliente y con el ajuste encendido. El enlace completo se
+ * ve únicamente al crearlo (el servidor guarda su hash); luego solo se muestra el estado.
+ * WhatsApp abre `wa.me` con el texto y el enlace; no se envía nada por API.
  */
 export function HojaCompartir(p: {
   abierta: boolean;
@@ -28,12 +30,14 @@ export function HojaCompartir(p: {
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [copiado, setCopiado] = useState(false);
+  const [url, setUrl] = useState<string | null>(null);
   const activo = p.enlace && !p.enlace.vencido ? p.enlace : null;
-  const texto = activo ? mensajeDe(p.titulo, activo.url) : "";
+  const texto = url ? mensajeDe(p.titulo, url) : "";
 
   async function crear() {
-    const r = await ejecutar("cpq.compartir.crear", { cotizacionId: p.cotizacionId });
+    const r = await ejecutar<{ url: string }>("cpq.compartir.crear", { cotizacionId: p.cotizacionId });
     if (r) {
+      setUrl(r.url);
       avisar.exito("Enlace creado");
       p.onCambio();
     }
@@ -42,12 +46,13 @@ export function HojaCompartir(p: {
     const r = await ejecutar("cpq.compartir.revocar", { cotizacionId: p.cotizacionId });
     if (r) {
       avisar.exito("Enlace revocado: ya no se abre");
+      setUrl(null);
       p.onCambio();
     }
   }
   async function copiar() {
-    if (!activo) return;
-    await navigator.clipboard.writeText(activo.url);
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2000);
   }
@@ -70,9 +75,17 @@ export function HojaCompartir(p: {
             <Badge tono="success" punto className="self-start">
               Activo · vence {fecha(activo.venceEn)}
             </Badge>
+            {!url ? (
+              <Alerta tono="info" icono={Link2} titulo="El enlace ya no se puede volver a mostrar">
+                Por seguridad solo se ve al crearlo. Si necesitas compartirlo de nuevo, crea uno nuevo: el
+                actual deja de abrir.
+              </Alerta>
+            ) : null}
+            {url ? (
+            <>
             <div className="flex gap-2">
               <p className="t-mono flex min-h-11 min-w-0 flex-1 items-center rounded-md border border-border bg-bg px-3 text-sm break-all">
-                {activo.url}
+                {url}
               </p>
               <Button variant="secondary" onClick={() => void copiar()}>
                 {copiado ? <Check className="size-4" /> : <Copy className="size-4" />}
@@ -97,6 +110,12 @@ export function HojaCompartir(p: {
               </Button>
             </div>
             <p className="t-caption rounded-md bg-fill p-3">«{texto}»</p>
+            </>
+            ) : (
+              <Button variant="secondary" disabled={pendiente} onClick={() => void crear()}>
+                Crear enlace nuevo
+              </Button>
+            )}
             <dl className="flex items-center justify-between border-b border-border pb-3">
               <dt className="t-body-sm text-fg-muted">Vistas</dt>
               <dd className="t-body-sm">

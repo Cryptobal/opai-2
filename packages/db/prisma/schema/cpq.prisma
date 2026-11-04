@@ -456,7 +456,8 @@ model CpqEnlaceCompartido {
   tenantId      String    @map("tenant_id") @db.Uuid
   cotizacionId  String    @map("cotizacion_id") @db.Uuid
   versionId     String    @map("version_id") @db.Uuid
-  token         String    @unique
+  /// sha256 (64 hex) del token del enlace; el token en claro solo se muestra al crearlo.
+  tokenHash     String    @unique @map("token_hash")
   venceEn       DateTime  @map("vence_en") @db.Timestamptz(6)
   revocadoEn    DateTime? @map("revocado_en") @db.Timestamptz(6)
   vistas        Int       @default(0)

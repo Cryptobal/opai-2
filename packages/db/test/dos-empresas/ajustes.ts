@@ -159,14 +159,14 @@ export const AJUSTES: Record<string, Ajuste> = {
       snapshot_json: "{}",
     }),
   },
-  // Enlace público (CPQ v4): el CHECK pide un token de 32 hex; el uuid de la empresa sin guiones lo es.
+  // Enlace público (CPQ v4): el CHECK pide un hash de 64 hex; el uuid de la empresa sin guiones lo es.
   "cpq.enlaces_compartidos": {
     dependencias: ["cpq.cotizaciones", "cpq.versiones"],
-    fijas: ["token"],
+    fijas: ["token_hash"],
     valores: (ctx) => ({
       cotizacion_id: id(ctx, "cpq.cotizaciones"),
       version_id: id(ctx, "cpq.versiones"),
-      token: ctx.tenant.replaceAll("-", ""),
+      token_hash: ctx.tenant.replaceAll("-", "").repeat(2),
     }),
   },
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },

@@ -14,12 +14,13 @@ import { HojaCompartir } from "./hoja-compartir";
 export type EstadoComercial = {
   archivada: boolean;
   aceptada: boolean;
-  enlace: { url: string; venceEn: Date | string; vistas: number; ultimaVistaEn: Date | string | null; vencido: boolean } | null;
+  enlacePermitido: boolean;
+  enlace: { venceEn: Date | string; vistas: number; ultimaVistaEn: Date | string | null; vencido: boolean } | null;
   puestosPendientes: number;
 };
 
 /**
- * Acciones de cierre de la ficha (CPQ v4): Compartir (enlace, WhatsApp, correo), Crear puestos
+ * Acciones de cierre de la ficha (CPQ v4): Compartir (enlace, WhatsApp, correo; solo empresas sin Portal Cliente con el ajuste encendido), Crear puestos
  * (tras ganar; RRHH confirma) y Archivar o Restaurar. Se alimenta de una sola lectura y se vuelve a
  * leer tras cada cambio. Sin permiso de gestionar, solo se ve el estado.
  */
@@ -70,7 +71,7 @@ export function AccionesComerciales(p: {
         <p className="t-caption">No aparece en la lista ni en los reportes de pipeline. Restáurala para volver a trabajarla.</p>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        {p.gestionar && compartible && !e?.archivada ? (
+        {p.gestionar && compartible && e?.enlacePermitido && !e.archivada ? (
           <Button variant="secondary" onClick={() => setHoja("compartir")}>
             <Share2 className="size-4" aria-hidden /> Compartir
           </Button>

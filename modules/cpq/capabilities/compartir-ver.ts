@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
+import { enlacePublicoPermitido, hashDeToken } from "../persistencia/enlace-publico";
+
 const lineaPublica = z.object({ nombre: z.string(), posiciones: z.number().int() });
 
 /**
@@ -31,8 +33,10 @@ export const compartirVer = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    // Apagado por ajuste o con Portal Cliente: mismo NOT_FOUND que un enlace inexistente.
+    if (!(await enlacePublicoPermitido(ctx))) throw noEncontrado("El enlace");
     const e = await ctx.db.cpqEnlaceCompartido.findFirst({
-      where: { token: input.token, revocadoEn: null, venceEn: { gt: new Date() } },
+      where: { tokenHash: hashDeToken(input.token), revocadoEn: null, venceEn: { gt: new Date() } },
       include: { cotizacion: true },
     });
     if (!e || e.cotizacion.archivadaEn) throw noEncontrado("El enlace");

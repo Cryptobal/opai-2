@@ -4,7 +4,7 @@ import { defineCapability } from "@opai/capabilities";
 
 import { uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE, PERMISO_READ } from "./permisos";
-import { urlDeEnlace } from "./compartir";
+import { enlacePublicoPermitido } from "../persistencia/enlace-publico";
 import { cotizacionDe } from "./util";
 
 /**
@@ -15,16 +15,17 @@ import { cotizacionDe } from "./util";
 export const cotizacionesEstadoComercial = defineCapability({
   id: "cpq.cotizaciones.estado_comercial",
   descripcion:
-    "Dice si una cotización está archivada o aceptada, si tiene un enlace público activo (con vencimiento y vistas) y cuántos puestos faltan por crear al ganar.",
+    "Dice si una cotización está archivada o aceptada, si puede usar enlace público y tiene uno activo (con vencimiento y vistas, sin la URL) y cuántos puestos faltan por crear al ganar.",
   permiso: PERMISO_READ,
   auditarLectura: () => [],
   input: z.object({ id: uuidSchema }),
   output: z.object({
     archivada: z.boolean(),
     aceptada: z.boolean(),
+    /** ¿Esta empresa puede usar el enlace suelto? (ajuste encendido y sin Portal Cliente). */
+    enlacePermitido: z.boolean(),
     enlace: z
       .object({
-        url: z.string(),
         venceEn: z.date(),
         vistas: z.number().int(),
         ultimaVistaEn: z.date().nullable(),
@@ -65,10 +66,10 @@ export const cotizacionesEstadoComercial = defineCapability({
     return {
       archivada: c.archivadaEn !== null,
       aceptada: aceptada !== null,
-      // El enlace es una credencial: solo lo ve quien puede compartir (no un lector).
+      enlacePermitido: await enlacePublicoPermitido(ctx),
+      // Sin URL: el token no se guarda en claro. Solo quien puede compartir ve que hay un enlace activo.
       enlace: enlace && ctx.autorizar(PERMISO_MANAGE)
         ? {
-            url: await urlDeEnlace(ctx, enlace.token),
             venceEn: enlace.venceEn,
             vistas: enlace.vistas,
             ultimaVistaEn: enlace.ultimaVistaEn,

@@ -10,13 +10,13 @@ ALTER TABLE "cpq"."cotizaciones" ADD COLUMN IF NOT EXISTS "archivada_por_id" UUI
 CREATE INDEX IF NOT EXISTS "cotizaciones_tenant_id_archivada_en_idx"
   ON "cpq"."cotizaciones"("tenant_id", "archivada_en");
 
--- Enlace público de una cotización enviada: token aleatorio de 128 bits, vencimiento y revocación.
+-- Enlace público de una cotización enviada: solo el hash sha256 de un token aleatorio de 128 bits (el token en claro no se guarda), vencimiento y revocación.
 CREATE TABLE "cpq"."enlaces_compartidos" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "cotizacion_id" UUID NOT NULL,
     "version_id" UUID NOT NULL,
-    "token" TEXT NOT NULL,
+    "token_hash" TEXT NOT NULL,
     "vence_en" TIMESTAMPTZ(6) NOT NULL,
     "revocado_en" TIMESTAMPTZ(6),
     "vistas" INTEGER NOT NULL DEFAULT 0,
@@ -25,9 +25,9 @@ CREATE TABLE "cpq"."enlaces_compartidos" (
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
     CONSTRAINT "enlaces_compartidos_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "enlaces_compartidos_token_check" CHECK ("token" ~ '^[0-9a-f]{32}$')
+    CONSTRAINT "enlaces_compartidos_token_hash_check" CHECK ("token_hash" ~ '^[0-9a-f]{64}$')
 );
-CREATE UNIQUE INDEX "enlaces_compartidos_token_key" ON "cpq"."enlaces_compartidos"("token");
+CREATE UNIQUE INDEX "enlaces_compartidos_token_hash_key" ON "cpq"."enlaces_compartidos"("token_hash");
 CREATE INDEX "enlaces_compartidos_tenant_id_cotizacion_id_idx"
   ON "cpq"."enlaces_compartidos"("tenant_id", "cotizacion_id");
 -- Un solo enlace activo por cotización: crear otro revoca el anterior en la misma transacción.
