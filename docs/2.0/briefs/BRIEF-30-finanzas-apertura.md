@@ -13,8 +13,8 @@ Que al corte de Gard Finanzas arranque con la verdad de 1.0: el saldo de cada cu
 - Ningún importador contempla Finanzas.
 
 ## 3. Alcance
-Entra: (a) saldo de apertura por cuenta bancaria a la fecha de corte; (b) cuentas por cobrar: DTE 33/34 emitidos en 1.0 con saldo pendiente a la fecha de corte; (c) último folio usado por tipo (33, 34, 56, 61), para fijar `folio_actual` sin retroceder; (d) conciliación (conteos y sumas de control) y reversión de la corrida.
-No entra: histórico de DTE ya pagados, XML/PDF originales, movimientos bancarios históricos, compras, asientos contables (C2 usará este saldo después).
+Entra (decisión de Carlos, 4-nov-2026: «se trae todo»): (a) saldo de apertura por cuenta bancaria a la fecha del export; (b) **todos** los DTE emitidos en 1.0 (33, 34, 56, 61), pagados o no, a nivel de cabecera con su estado de cobro y monto cobrado (las cuentas por cobrar salen de ahí); (c) último folio usado por tipo (33, 34, 56, 61), para fijar `folio_actual` sin retroceder; (d) conciliación (conteos y sumas de control) y reversión de la corrida.
+No entra: líneas, XML y PDF originales de los DTE históricos, movimientos bancarios históricos, compras, asientos contables (C2 usará este saldo después).
 
 ## 4. Arquitectura
 - Contrato JSON versionado `finanzas-apertura@1` que produce el exportador de 1.0 (P7): `{ fechaCorte, cuentasBancarias[{banco, numeroVisible, moneda, saldo}], documentosPorCobrar[{tipoDte, folio, rutReceptor, fechaEmision, fechaVencimiento, montoNeto, montoExento, montoIva, montoTotal, montoCobrado, glosa}], ultimosFolios[{tipoDte, ultimoFolio}] }`. Montos en CLP enteros.
@@ -66,7 +66,15 @@ Doble facturación si 1.0 sigue emitiendo tras el corte (mitigación: fecha de c
 ## 16. Reporte de ejecución
 Se completa en el PR.
 
-## Decisiones que necesita Carlos
+## Decisiones de Carlos (4-nov-2026)
+1. Sin fecha de corte parcial: se trae todo; el saldo de apertura queda fechado al momento del export y el corte operativo (`fecha_corte_1_0`) lo fija quien aplica.
+2. Se importan todas las facturas, pagadas y no pagadas.
+3. Origen: el endpoint de 1.0 `/api/export/opai2/v1/[recurso]` (opai #1364), con una API key MCP de 1.0 con scope `READ` (la crea Carlos; `OPAI1_EXPORT_URL` y `OPAI1_EXPORT_KEY`).
+
+## Hallazgo: el exportador v1 no cubre F6 completo
+Recursos de `opai1-export/v1`: cuentas, contactos, instalaciones, etapas, negocios, actividades, cotizaciones, correlativos, recurrentes y **folios** (último folio por tipo, ya cubierto). **Faltan dos recursos**: `documentos` (FinanceDte emitidos con tipo, folio, receptor, fechas, montos, estado y monto cobrado) y `saldos_bancarios` (saldo por cuenta). Hay que pedirlos a Opai Producto (1.0) como extensión del contrato (`opai1-export/v1` con dos recursos más, solo lectura). Mientras tanto se construye contra fixtures.
+
+## Decisiones que necesitaba Carlos (resueltas)
 1. Fecha de corte única de 1.0 → 2.0 (la misma de `fecha_corte_1_0` pendiente).
 2. ¿Se importan solo los DTE con saldo pendiente (propuesto) o también los pagados del año en curso?
 3. Quién genera el export de 1.0 (P7) y con qué credencial de solo lectura.
