@@ -1,6 +1,10 @@
 import { PERMISOS_CORE } from "@opai/domain";
 
-import type { Documento, TipoDocumento } from "@/app/_components/documentos/tipos";
+import type {
+  Documento,
+  EntidadVinculable,
+  TipoDocumento,
+} from "@/app/_components/documentos/tipos";
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
@@ -41,8 +45,9 @@ export function entradaDe(p: Parametros) {
 
 /**
  * Documentos de la página, los tipos para el filtro y la subida, y los permisos de la persona, en
- * paralelo (una sola pasada por navegación, ADR-045). La subida del explorador es siempre a nivel
- * empresa: subir a una persona, cuenta o instalación se hace desde su ficha.
+ * paralelo (una sola pasada por navegación, ADR-045). La subida del explorador elige a qué vincular
+ * (empresa por defecto, cuenta, instalación o persona); `vinculables` solo ofrece las entidades cuya
+ * lista la persona puede leer. Quién puede vincular a cuál lo decide la capacidad de subida.
  */
 export async function cargarExplorador(p: Parametros) {
   const [r, t, identidad, voc] = await Promise.all([
@@ -59,6 +64,12 @@ export async function cargarExplorador(p: Parametros) {
     siguiente: r.ok ? r.data.siguiente : null,
     total: r.ok ? r.data.total : null,
     tipos,
+    vinculables: [
+      "tenant",
+      ...(puede(PERMISOS_CORE.cuentasRead) ? ["cuenta"] : []),
+      ...(puede(PERMISOS_CORE.instalacionesRead) ? ["instalacion"] : []),
+      ...(puede(PERMISOS_CORE.personasRead) ? ["persona"] : []),
+    ] as EntidadVinculable[],
     tenantId: identidad.actual?.tenantId ?? "",
     // El supervisor sube desde las fichas de sus instalaciones; la empresa no está en su alcance.
     puedeSubir: puede(PERMISOS_CORE.documentosManage) && identidad.actual?.rol !== "supervisor",

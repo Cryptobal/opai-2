@@ -17,3 +17,5 @@ export * from "./programacion-montos";
 export * from "./cobranza";
 export * from "./apertura";
 export * from "./rcv";
+export * from "./prorrateo";
+export * from "./cierre";

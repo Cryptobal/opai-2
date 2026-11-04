@@ -125,7 +125,7 @@ function Ficha({ state, venta, envios }: { state: EstadoPantalla; venta: Detalle
         ) : null}
         {venta.glosa ? <p className="text-sm text-fg-muted">{venta.glosa}</p> : null}
       </Card>
-      <AccionesVenta venta={venta} enviosPrevios={envios.filter((x) => x.estado === "enviado").length} />
+      <AccionesVenta venta={venta} montoCobrado={venta.montoCobrado} enviosPrevios={envios.filter((x) => x.estado === "enviado").length} />
       <HistorialEnvios envios={envios} />
     </div>
   );

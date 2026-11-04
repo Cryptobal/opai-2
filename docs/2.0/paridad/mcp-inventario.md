@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 538 pares pantalla→capacidad · 483 con herramienta · 55 excepciones justificadas · 0 faltantes.
+**Resumen:** 547 pares pantalla→capacidad · 492 con herramienta · 55 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -30,8 +30,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
+| compartido | `app/_acciones` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
+| compartido | `app/_acciones` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/_acciones` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/_components` | `agente.conversaciones.archivar` | `agente_conversaciones_archivar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.borrar` | `agente_conversaciones_borrar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.get` | `agente_conversaciones_get` | existe |
@@ -237,6 +240,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.deshacer` | `finanzas_conciliaciones_deshacer` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.sugerir` | `finanzas_conciliaciones_sugerir` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.movimientos_bancarios.listar` | `finanzas_movimientos_bancarios_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.ventas.buscar` | `finanzas_ventas_buscar` | existe |
 | compartido | `app/(erp)/finanzas/cobranza/_componentes` | `finanzas.cobranza.deudor` | `finanzas_cobranza_deudor` | existe |
 | compartido | `app/(erp)/finanzas/cobranza/_componentes` | `finanzas.cobranza.pausar` | `finanzas_cobranza_pausar` | existe |
 | compartido | `app/(erp)/finanzas/cobranza/_componentes` | `finanzas.cobranza.recordar` | `finanzas_cobranza_recordar` | existe |
@@ -267,6 +271,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.crear` | `finanzas_plan_crear` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.inicializar` | `finanzas_plan_inicializar` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.cobros.manual` | `finanzas_cobros_manual` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_ceder` | `finanzas_ventas_cesion_ceder` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_simular` | `finanzas_ventas_cesion_simular` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
@@ -281,6 +287,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.cambiar_estado` | `finanzas_ventas_programacion_cambiar_estado` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.crear` | `finanzas_ventas_programacion_crear` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.generar` | `finanzas_ventas_programacion_generar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.actualizar` | `finanzas_cierre_actualizar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.emitir_lote` | `finanzas_cierre_emitir_lote` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
@@ -562,6 +571,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/auth.ts#accionPedirRecuperacion` | Identidad: recuperar contraseña, pública y con rate limit cerrado. |
 | `app/_acciones/auth.ts#accionRestablecer` | Identidad: restablece la contraseña con el token del correo. |
 | `app/_acciones/auth.ts#accionSalir` | Identidad: cierra la sesión del navegador. |
+| `app/_acciones/candidatos-documento.ts#buscarCandidatosDocumento` | Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre. |
 | `app/_acciones/capacidad.ts#cambiarTenant` | Sesión humana: elige la empresa de la cookie; una key ya pertenece a una empresa. |
 | `app/_acciones/capacidad.ts#ejecutarCapacidad` | Pasarela de la UI: ejecuta cualquier capacidad no interna (su herramienta MCP es la de esa capacidad). |
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
@@ -783,13 +793,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
-- `finanzas.cobros.manual`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
 - `finanzas.reportes.resultados`
-- `finanzas.ventas.buscar`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`

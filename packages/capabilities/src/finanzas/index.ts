@@ -48,6 +48,9 @@ import { aperturaImportar, aperturaRevertir } from "./apertura";
 import { ventasProgramacionGenerar } from "./ventas-programacion-generar";
 import { ventasProgramacionVistaPrevia } from "./ventas-programacion-vista-previa";
 import { trabajoGenerarProgramaciones } from "./ventas-programacion-trabajo";
+import { cierreTablero } from "./cierre-tablero";
+import { cierreActualizar } from "./cierre-actualizar";
+import { cierreEmitirLote } from "./cierre-emitir-lote";
 
 export { ajustesFinanzas } from "./ajustes";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
@@ -88,6 +91,9 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasProgramacionCambiarEstado,
   ventasProgramacionGenerar,
   ventasProgramacionVistaPrevia,
+  cierreTablero,
+  cierreActualizar,
+  cierreEmitirLote,
   ventasCrearBorrador,
   ventasEmitir,
   ventasPreflightEmision,
