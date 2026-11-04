@@ -9,10 +9,14 @@ const FIX = new URL("../fixtures/opai1-export-v1", import.meta.url).pathname;
 describe("additionalReferences (Json? en 1.0)", () => {
   it("null, texto JSON y objeto suelto terminan como arreglo de objetos", () => {
     expect(referenciasComoArreglo(null)).toEqual([]);
-    expect(referenciasComoArreglo("no es json")).toEqual([]);
     expect(referenciasComoArreglo('[{"folioRef":"1"}]')).toEqual([{ folioRef: "1" }]);
     expect(referenciasComoArreglo({ folioRef: "2" })).toEqual([{ folioRef: "2" }]);
-    expect(referenciasComoArreglo([{ folioRef: "3" }, 5, null])).toEqual([{ folioRef: "3" }]);
+  });
+
+  it("lo no interpretable falla cerrado, sin mostrar valores", () => {
+    expect(() => referenciasComoArreglo("no es json")).toThrow(/no es JSON/);
+    expect(() => referenciasComoArreglo([{ folioRef: "3" }, 5])).toThrow(/no son objetos/);
+    expect(() => referenciasComoArreglo("x".repeat(100_001))).toThrow(/demasiado largo/);
   });
 
   it("el lector acepta plantillas con null, texto JSON u objeto", async () => {
