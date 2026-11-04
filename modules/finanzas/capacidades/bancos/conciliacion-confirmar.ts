@@ -73,14 +73,14 @@ export const bancosConciliacionConfirmar = defineCapability({
           const doc = await tx.documentoEmitido.findFirst({ where: { id: e.id } });
           if (!doc) throw reglaDeNegocio("El documento emitido no existe.");
           validarDocumentoCobroBanco(doc, signoMov);
-          await exigirTopeDocumento(tx, ctx.tenantId, "documento_emitido", doc.id, doc.montoTotal, e.monto);
+          await exigirTopeDocumento(tx, ctx.tenantId, "documento_emitido", doc.id, e.monto);
           docsSync.add(e.id);
         }
         if (e.tipo === "documento_recibido") {
           const doc = await tx.documentoRecibido.findFirst({ where: { id: e.id } });
           if (!doc) throw reglaDeNegocio("El documento recibido no existe.");
           validarDocumentoCompraBanco(doc, signoMov);
-          await exigirTopeDocumento(tx, ctx.tenantId, "documento_recibido", doc.id, doc.montoTotal, e.monto);
+          await exigirTopeDocumento(tx, ctx.tenantId, "documento_recibido", doc.id, e.monto);
         }
         await tx.conciliacionBanco.create({
           data: {

@@ -270,3 +270,14 @@ describe("fallas de Google Maps visibles (autocompletar)", () => {
     expect(fila?.ultimoError).toMatch(/PERMISSION_DENIED/);
   });
 });
+
+describe("secretos opcionales del catálogo", () => {
+  it("dte_cesion queda configurada sin pass_acceso_api, que es opcional", async () => {
+    const { estadoIntegracion } = await import("../src/integraciones/resolver");
+    const { definicionIntegracion } = await import("@opai/integrations");
+    const def = definicionIntegracion("dte_cesion");
+    if (!def) throw new Error("falta dte_cesion");
+    expect(estadoIntegracion(def, null, ["usuario", "clave"])).toBe("configurada");
+    expect(estadoIntegracion(def, null, ["usuario"])).toBe("no_configurada");
+  });
+});

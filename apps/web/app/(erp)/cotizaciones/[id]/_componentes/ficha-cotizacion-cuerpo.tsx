@@ -8,6 +8,7 @@ import { FichaCotizacionLineas } from "./ficha-cotizacion-lineas";
 import type { ModalesFichaCotizacion } from "./ficha-cotizacion-modales";
 import { AccionesComerciales } from "./acciones-comerciales";
 import { HistorialVersionesCpq, PanelDocumentoPdf } from "./historial-versiones";
+import { TarjetaMargenFinanzas } from "./tarjeta-margen-finanzas";
 
 const PropuestaTecnicaFicha = dynamic(
   () => import("./propuesta-tecnica-ficha").then((m) => m.PropuestaTecnicaFicha),
@@ -67,6 +68,14 @@ export function FichaCotizacionCuerpo({
             });
           }}
         />
+        {datos.costos && d.parametros ? (
+          <TarjetaMargenFinanzas
+            parametros={d.parametros}
+            margenEfectivoPct={(d.calculo as { margenEfectivoPct?: number }).margenEfectivoPct}
+            editable={editable}
+            onEditar={() => modales.setMargenAbierto(true)}
+          />
+        ) : null}
         <PanelDocumentoPdf
           codigo={d.cotizacion.codigo}
           version={d.version.numero}

@@ -6,6 +6,7 @@ import {
   ESTADOS_CESION,
   NOMBRE_TIPO_DTE_VENTA,
   type TipoDteVenta,
+  saldoPendiente,
 } from "@opai/domain";
 
 import { dia, hoy } from "../core/maestros/comun";
@@ -37,6 +38,8 @@ export const ventaSchema = z.object({
   estadoDte: z.enum(ESTADOS_DTE_EMITIDO),
   estadoCobro: z.enum(ESTADOS_COBRO_VENTA),
   montoCobrado: z.number().int(),
+  montoNotasCredito: z.number().int().describe("Suma de las notas de crédito (61) emitidas contra esta factura."),
+  montoPendiente: z.number().int().describe("Monto − notas de crédito parciales − cobrado; nunca negativo. La nota de débito no suma deuda."),
   cesionEstado: z.enum(ESTADOS_CESION).nullable(),
   cesionProveedor: z.string().nullable(),
   glosa: z.string().nullable(),
@@ -62,6 +65,7 @@ type FilaVenta = {
   estadoDte: string;
   estadoCobro: string;
   montoCobrado: number;
+  montoNotasCredito?: number;
   cesionEstado?: string | null;
   cesionProveedor?: string | null;
   glosa: string | null;
@@ -96,6 +100,8 @@ export function vistaVenta(
     estadoDte: d.estadoDte as (typeof ESTADOS_DTE_EMITIDO)[number],
     estadoCobro: d.estadoCobro as (typeof ESTADOS_COBRO_VENTA)[number],
     montoCobrado: d.montoCobrado,
+    montoNotasCredito: d.montoNotasCredito ?? 0,
+    montoPendiente: saldoPendiente(d),
     cesionEstado: (d.cesionEstado as (typeof ESTADOS_CESION)[number] | null) ?? null,
     cesionProveedor: d.cesionProveedor ?? null,
     glosa: d.glosa,

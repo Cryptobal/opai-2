@@ -51,6 +51,8 @@ export type Mensaje = {
   rol: "yo" | "agente";
   texto: string;
   error?: string;
+  /** Aviso que no invalida la respuesta (p. ej. no quedó en el historial). */
+  aviso?: string;
   plan?: PlanVista;
 };
 

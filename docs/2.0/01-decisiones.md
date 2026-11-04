@@ -1302,3 +1302,15 @@ identidad de servicio en main.
 **Decisión.** La etapa de un borrador del cierre se **deriva** (`etapaCierre`) de su estado de documento y de una fila de seguimiento (`finanzas.ventas_cierre_seguimientos`); no hay un campo de etapa que pueda desincronizarse. La emisión en lote (`finanzas.cierre.emitir_lote`) es irreversible, exige aprobación humana a los agentes y corre en **una sola transacción**: si una emisión falla, no se emite ninguna, porque un parcial dejaría folios consumidos sin documento. Los elementos no listos o ya emitidos se omiten con motivo, y repetir el lote no duplica nada.
 
 **Fuera de este corte.** El enlace público donde el cliente aprueba u observa la proforma y el envío automático de la proforma quedan como pendiente: hoy una persona registra la respuesta del cliente.
+
+## ADR-068 · El pendiente de una factura descuenta sus notas de crédito parciales
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (regla de negocio, dada directamente en el chat del 4-nov-2026), implementada por Claude (CAR-170). Cierra el N1 de #289.
+
+**Decisión.** El pendiente de una factura emitida es `monto − notas de crédito parciales (tipo 61) − cobrado`, nunca negativo. Ejemplo: factura de $1.000.000 con NC parcial de $200.000, pendiente $800.000. Solo restan las NC emitidas (`enviado` o `aceptado`) y monetarias (CodRef 1 anula, 3 corrige montos, como `montoNcAcumuladoMonetario`; la CodRef 2 «corrige texto» y las legadas sin código no restan); un borrador, una NC rechazada o anulada no restan. La **nota de débito (56) no suma deuda**.
+
+**Dónde rige.** Una sola fórmula en el dominio (`saldoPendiente`) y un lector en el servidor (`notasCreditoPorDocumento`, `pendienteFacturaEmitida`): tope de conciliación (`topes-conciliacion.ts`, que ahora toma el candado y recién después lee el documento), pago manual (también en la vista previa), candidatos de conciliación, cobranza y aging por cliente, «Hoy en Finanzas», y la ficha y búsqueda de ventas (`montoNotasCredito`, `montoPendiente`). `sincronizarCobroDocumento` salda la factura con `monto − NC`.
+
+**No cambia.** El flujo de caja ya trata cada NC como su propia celda negativa; restarla además de la factura la contaría dos veces.
+
+**Fuera de este corte.** Las facturas de compra (documentos recibidos) mantienen `total − conciliado`: las NC recibidas no se descuentan todavía.

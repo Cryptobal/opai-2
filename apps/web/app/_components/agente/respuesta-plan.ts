@@ -1,5 +1,12 @@
-import { ERROR_VENCIDO, textoError } from "./mensajes-error";
-import type { Mensaje, PlanVista, Resolucion } from "./tipos";
+import { AVISO_SIN_HISTORIAL, ERROR_VENCIDO, textoError } from "./mensajes-error";
+import {
+  type Mensaje,
+  type Nivel,
+  type PlanVista,
+  type Resolucion,
+  type Turno,
+  VIGENCIA_PLAN_MS,
+} from "./tipos";
 
 type Respuesta =
   { ok: true; data: unknown } | { ok: false; error: { code: string; message: string } };
@@ -25,5 +32,27 @@ export function aplicarRespuesta(m: Mensaje, r: Respuesta, previo: PlanVista["es
       siguiente: hechos,
       estado: estado === "prevista" ? "propuesto" : estado,
     },
+  };
+}
+
+/** Aplica al mensaje del agente la respuesta de `agente.turno.preparar`: texto, plan y aviso de historial. */
+export function aplicarTurno(m: Mensaje, t: Turno, nivel: Nivel): Mensaje {
+  const plan: PlanVista | undefined = t.token
+    ? {
+        pasos: t.pasos,
+        nivel,
+        token: t.token,
+        siguiente: 0,
+        resultados: [],
+        estado: "propuesto",
+        // Margen de 30 s: el reloj del servidor corre desde antes de que llegue la respuesta.
+        vence: Date.now() + VIGENCIA_PLAN_MS - 30_000,
+      }
+    : undefined;
+  return {
+    ...m,
+    texto: t.texto,
+    ...(plan ? { plan } : {}),
+    ...(t.conversacionId ? {} : { aviso: AVISO_SIN_HISTORIAL }),
   };
 }
