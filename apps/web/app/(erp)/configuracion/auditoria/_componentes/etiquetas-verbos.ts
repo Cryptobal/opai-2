@@ -33,7 +33,7 @@ export const VERBOS: Record<string, string> = {
   dpa_aceptar: "Aceptar acuerdo de datos", dpo_set: "Definir delegado de datos", rat: "Registro de tratamientos",
   consentimiento_registrar: "Registrar consentimiento", consentimiento_revocar: "Revocar consentimiento",
   consentimientos_listar: "Listar consentimientos", solicitud_crear: "Crear solicitud",
-  solicitud_avanzar: "Avanzar solicitud", solicitud_resolver: "Resolver solicitud",
+  propuestas: "Ver propuestas", resolver: "Resolver propuesta", solicitud_avanzar: "Avanzar solicitud", solicitud_resolver: "Resolver solicitud",
   solicitud_exportar: "Exportar solicitud", solicitudes_listar: "Listar solicitudes",
   solicitud_obtener: "Ver solicitud", incidente_registrar: "Registrar incidente",
   incidente_avanzar: "Avanzar incidente", incidente_notificar: "Notificar incidente",
