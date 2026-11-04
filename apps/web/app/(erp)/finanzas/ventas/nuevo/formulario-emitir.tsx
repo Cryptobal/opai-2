@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,10 +10,11 @@ import type { CuentaFila } from "@/lib/tipos-maestros";
 
 import type { Venta } from "../_componentes/tipos";
 import { AccionesEmitir, AlertasEmitir } from "./acciones-emitir";
-import { construirInputBorrador, type ItemPreflight, type LineaForm, parseMonto } from "./emitir-util";
+import { construirInputBorrador, type LineaForm, parseMonto } from "./emitir-util";
 import { BloqueEmisionGuardada, EmitirDialogos } from "./emitir-secciones";
 import { EmitirClienteTipo } from "./emitir-cliente";
 import { EmitirLineasDetalle } from "./emitir-lineas";
+import { useEmision } from "./use-emision";
 
 /** Emisión DTE 33/34: borrador con vista previa (dryRun) y emisión con aprobación para agentes. */
 export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
@@ -26,10 +26,9 @@ export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
   const [glosa, setGlosa] = useState("");
   const [lineas, setLineas] = useState<LineaForm[]>([{ glosa: "", montoTexto: "" }]);
   const [previewBorrador, setPreviewBorrador] = useState<Venta | null>(null);
-  const [previewEmitir, setPreviewEmitir] = useState<Venta | null>(null);
   const [documentoId, setDocumentoId] = useState<string | null>(null);
   const [dialogo, setDialogo] = useState<"borrador" | "emitir" | null>(null);
-  const [preflightBloqueante, setPreflightBloqueante] = useState<string | null>(null);
+  const { previewEmitir, preflightBloqueante, revisarEmision, emitir } = useEmision({ ejecutar, codigo, documentoId, setDialogo });
 
   const cuenta = cuentas.find((c) => c.id === cuentaId);
   const lineasValidas = lineas.every((l) => l.glosa.trim().length > 0 && parseMonto(l.montoTexto) != null);
@@ -57,41 +56,6 @@ export function FormularioEmitir({ cuentas }: { cuentas: CuentaFila[] }) {
     setPreviewBorrador(null);
     setDialogo(null);
     avisar.exito("Borrador guardado");
-  }
-
-  async function revisarEmision() {
-    if (!documentoId) return;
-    setPreflightBloqueante(null);
-    const pf = await ejecutar<{ listo: boolean; items: ItemPreflight[] }>(
-      "finanzas.ventas.preflight_emision",
-      { documentoId },
-      false,
-    );
-    if (pf && !pf.listo) {
-      const bloqueo = pf.items.find((i) => i.bloqueante && !i.ok);
-      if (bloqueo) {
-        setPreflightBloqueante(bloqueo.mensaje);
-        return;
-      }
-    }
-    const r = await ejecutar<Venta>("finanzas.ventas.emitir", { documentoId }, true);
-    if (r) {
-      setPreviewEmitir(r);
-      setDialogo("emitir");
-    }
-  }
-
-  async function emitir() {
-    if (!documentoId) return;
-    const r = await ejecutar<Venta>("finanzas.ventas.emitir", { documentoId }, false);
-    if (!r) {
-      if (codigo === "APPROVAL_REQUIRED") {
-        avisar.info("La emisión quedó en la cola de aprobaciones de agentes.");
-      }
-      return;
-    }
-    avisar.exito("Documento emitido");
-    router.push(`/finanzas/ventas/${r.id}`);
   }
 
   const accionesForm = (

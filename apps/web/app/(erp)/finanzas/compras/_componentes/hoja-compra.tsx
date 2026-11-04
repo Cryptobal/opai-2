@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+
 import { InputPesos } from "@/app/_components/maestros/input-pesos";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -24,7 +26,7 @@ const IVA = 0.19;
 const num = (d: string) => (d ? Number(d) : 0);
 
 /** Registrar a mano un documento recibido (factura, exenta, nota de débito o de crédito). */
-export function HojaCompra({ proveedores, centros }: { proveedores: Proveedor[]; centros: Centro[] }) {
+export function HojaCompra({ proveedores, centros, puedeCrearProveedores }: { proveedores: Proveedor[]; centros: Centro[]; puedeCrearProveedores: boolean }) {
   const hoja = useHojaUrl("nuevo");
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [proveedorId, setProveedorId] = useState("");
@@ -71,15 +73,27 @@ export function HojaCompra({ proveedores, centros }: { proveedores: Proveedor[];
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <Campo etiqueta="Proveedor" htmlFor="co-prov">
-          <Select
-            id="co-prov"
-            valor={proveedorId}
-            onCambiar={setProveedorId}
-            placeholder="Elige un proveedor"
-            opciones={proveedores.map((p) => ({ valor: p.id, etiqueta: p.razonSocial }))}
-          />
-        </Campo>
+        {proveedores.length === 0 ? (
+          <Alerta
+            tono="info"
+            titulo="Sin proveedores"
+            {...(puedeCrearProveedores
+              ? { accion: <EnlaceBoton href="/finanzas/compras/proveedores?nuevo=1" variante="secondary">Crear proveedor</EnlaceBoton> }
+              : {})}
+          >
+            {puedeCrearProveedores ? "Crea el proveedor que emitió el documento y vuelve a registrarlo." : "Pide a un administrador que cree el proveedor."}
+          </Alerta>
+        ) : (
+          <Campo etiqueta="Proveedor" htmlFor="co-prov">
+            <Select
+              id="co-prov"
+              valor={proveedorId}
+              onCambiar={setProveedorId}
+              placeholder="Elige un proveedor"
+              opciones={proveedores.map((p) => ({ valor: p.id, etiqueta: p.razonSocial }))}
+            />
+          </Campo>
+        )}
         <Campo etiqueta="Tipo de documento" htmlFor="co-tipo">
           <Select id="co-tipo" valor={tipo} onCambiar={setTipo} opciones={TIPOS} />
         </Campo>

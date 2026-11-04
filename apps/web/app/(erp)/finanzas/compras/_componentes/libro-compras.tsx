@@ -9,37 +9,11 @@ import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { pesos, rut } from "@/lib/fechas";
 
 import { type Centro, type Compra, diaCL, type Libro, NOMBRE_DTE } from "../../_componentes/tipos";
+import { CentroCelda, Plazo } from "./celdas-compras";
 import { periodosRecientes } from "./datos";
 
 /** Total con signo: una nota de crédito resta del libro. */
 const monto = (c: Compra) => pesos(c.tipoDte === 61 ? -c.montoTotal : c.montoTotal);
-
-function CentroCelda({ c, centros }: { c: Compra; centros: Centro[] }) {
-  if (c.centroCostoNombre) return <span>{c.centroCostoNombre}</span>;
-  const sugerido = c.sugerencia
-    ? centros.find((x) => x.id === c.sugerencia?.centroCostoId)?.nombre
-    : undefined;
-  return (
-    <span className="flex flex-col items-start gap-1">
-      <Badge tono="warning">Sin centro de costo</Badge>
-      {sugerido ? (
-        <span className="text-xs text-fg-muted">
-          Sugerido: {sugerido} ({c.sugerencia?.origen === "proveedor" ? "proveedor" : "última compra"})
-        </span>
-      ) : null}
-    </span>
-  );
-}
-
-function Plazo({ c }: { c: Compra }) {
-  if (c.estadoRecepcion !== "pendiente_revision") return <span>{c.estadoRecepcion}</span>;
-  if (c.diasParaReclamo < 0) return <Badge tono="danger">Plazo vencido</Badge>;
-  return (
-    <Badge tono={c.diasParaReclamo <= 2 ? "warning" : "neutro"}>
-      {c.diasParaReclamo === 0 ? "Vence hoy" : `${c.diasParaReclamo} d`}
-    </Badge>
-  );
-}
 
 /** Libro de compras (01): documentos recibidos con centro de costo, plazo y estado de pago. */
 export function LibroCompras(p: {
@@ -71,7 +45,14 @@ export function LibroCompras(p: {
           ? { subtitulo: `${r.documentos} documentos · Neto ${pesos(r.neto)} · Total ${pesos(r.total)}` }
           : {})}
         {...(p.gestiona
-          ? { accionPrincipal: <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>Registrar documento</EnlaceBotonHoja> }
+          ? {
+              accionPrincipal: (
+                <>
+                  <EnlaceBotonHoja href="?rcv=1" variante="secondary">Importar RCV</EnlaceBotonHoja>
+                  <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>Registrar documento</EnlaceBotonHoja>
+                </>
+              ),
+            }
           : {})}
         buscador={<Buscador placeholder="Buscar folio o proveedor" />}
         filtros={
@@ -90,7 +71,16 @@ export function LibroCompras(p: {
             ? { titulo: "Ningún documento coincide", descripcion: "Quita un filtro para ver más." }
             : {
                 titulo: "El libro de compras está vacío",
-                descripcion: "Registra un documento recibido o impórtalos desde el RCV con la API o el agente.",
+                descripcion: "Registra un documento recibido o importa el archivo del RCV que descargas del SII.",
+                ...(p.gestiona
+                  ? {
+                      accion: (
+                        <EnlaceBotonHoja href="?rcv=1" variante="secondary">
+                          Importar RCV
+                        </EnlaceBotonHoja>
+                      ),
+                    }
+                  : {}),
               },
         }}
         tarjeta={(c) => (
