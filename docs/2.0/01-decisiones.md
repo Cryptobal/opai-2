@@ -1214,13 +1214,13 @@ identidad de servicio en main.
 
 ## Adenda ADR-019 · Explorador central de Documentos (CAR-182 · PR 4)
 
-**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude (constructor), a confirmar por Carlos en los puntos marcados · **Complementa** ADR-019, ADR-022 y NÚCLEO-H.
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude (constructor), puntos 2, 4 y 5 confirmados por Carlos el 4-nov-2026 (chat, «ok» a la recomendación) · **Complementa** ADR-019, ADR-022 y NÚCLEO-H.
 
 1. El explorador (`/documentos`, diseño v4 · 01 aprobado el 30-oct-2026) lee con `core.documentos.explorar`, una lectura nueva: `list` queda para las fichas. Alcance del supervisor y exclusión de documentos sensibles van en la consulta; la lectura se audita con los ids de la página (y de las personas cuyo nombre se muestra).
-2. **La fila «Documento restringido» del diseño no se implementa.** Mostrarla revelaría que existe un documento que el actor no puede ver. Ni filas ni contadores de lo excluido. *A confirmar con Carlos si quiere un contador.*
+2. **La fila «Documento restringido» del diseño no se implementa.** Mostrarla revelaría que existe un documento que el actor no puede ver. Ni filas ni contadores de lo excluido. *Confirmado por Carlos (4-nov-2026).* Si más adelante hace falta pedir acceso, será un botón «Solicitar acceso» que no revele nada.
 3. El nombre de la entidad propietaria solo se devuelve si el actor puede leer ese tipo de entidad; sin permiso viaja solo su tipo y su id.
-4. La búsqueda cubre nombre de archivo, título y etiquetas; no el RUT ni el contenido del archivo.
-5. Subir desde el explorador es a nivel empresa; subir a una persona, cuenta o instalación se hace desde su ficha hasta que exista el selector «Vincular a». *A confirmar con Carlos.*
+4. La búsqueda cubre nombre de archivo, título y etiquetas; no el RUT ni el contenido del archivo. *Confirmado por Carlos (4-nov-2026).* El RUT se encuentra por la ficha de la persona (datos personales, Ley 21.719); la búsqueda dentro del texto de los archivos queda como proyecto aparte, solo si Gard lo pide.
+5. Subir desde el explorador es a nivel empresa; subir a una persona, cuenta o instalación se hace desde su ficha hasta que exista el selector «Vincular a». *Confirmado por Carlos (4-nov-2026), en dos pasos:* ahora, empresa; en un PR siguiente, el selector «Vincular a», que solo ofrece entidades dentro del alcance de quien sube (el servidor lo valida igual), con lo que los supervisores podrán subir a sus instalaciones; ese PR pasa por el Revisor porque toca permisos y alcance.
 
 ---
 
@@ -1242,3 +1242,22 @@ identidad de servicio en main.
 **Por confirmar (Carlos):** pasos contados desde el vencimiento (en 1.0, desde el envío de la proforma), tramos sin solape y WhatsApp solo manual.
 
 **Fuera de alcance:** seguimiento de proforma y estado de pago (F5), cesión y factoring.
+
+---
+
+## ADR-063 · Autonomía de ejecución: Claude integra, migra y verifica sin esperar a nadie
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Decisión de Carlos** (chat, 4-nov-2026 10:40 CLT) · **Autor:** Claude (registro) · **Ajusta** ADR-054, ADR-060 y ADR-061.
+
+**Regla.** No se espera al bot «OPAI 2.0» ni a nadie para avanzar:
+
+1. **Integra Claude** con `gh pr merge --squash` cuando están en verde los cuatro checks obligatorios. Si hay conflicto, se trae `main` con merge, nunca con rebase.
+2. **Si el PR trae migración, la aplica Claude:** primero el respaldo de `main` en Neon (proyecto `steep-wildflower-90764475`), después migra `dev` y luego `main`, quita `migracion-pendiente`, deja un comentario en el PR e integra.
+3. Claude **verifica por sí mismo** en Neon, GitHub y test.opai.cl; no pregunta si algo quedó aplicado.
+4. **Al Revisor solo se lo espera** si el PR toca migraciones, permisos, RLS o datos de tenants. Los demás PRs se integran sin esperarlo.
+5. **Solo se detiene** por lo que debe hacer Carlos: claves, 2FA, aprobaciones en 1Password o cambios en OPAI 1.0.
+6. Al terminar una tarea, sigue con la próxima de `ESTADO.md` sin preguntar.
+
+**Sigue vigente:** el veto de Carlos, no tocar la producción de Gard ni OPAI 1.0, no force-push ni rebase, no desactivar tests, y que los secretos no pasan por el chat ni el repositorio.
+
+**Efecto sobre `AGENTS.md`:** las filas de roles y la sección «Integración a `main`» que atribuyen las migraciones y la etiqueta `migracion-pendiente` solo al bot quedan ajustadas por esta decisión (Claude también migra y la quita).
