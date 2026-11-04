@@ -18,6 +18,9 @@ import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotiz
 import type { MetaFicha } from "./meta-ficha";
 import { ResumenCotizacion } from "./resumen-cotizacion";
 
+const puestosDe = (secciones: { lineas: { id: string; nombre: string; tipo: string }[] }[]) =>
+  secciones.flatMap((s) => s.lineas.filter((l) => l.tipo === "puesto").map((l) => ({ id: l.id, nombre: l.nombre })));
+
 export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
   const router = useRouter();
   const modales = useModalesFichaCotizacion();
@@ -54,6 +57,9 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
       {...(meta !== undefined ? { meta } : {})}
       verCostos={datos.costos}
       {...editarLinea}
+      {...(editable && datos.costos
+        ? { costos: { versionId: d.version.id, onGuardado: recargar, puestos: puestosDe(d.secciones) } }
+        : {})}
     />
   );
 

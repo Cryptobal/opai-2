@@ -39,12 +39,16 @@ export type LineaItem = BaseLinea & {
   costoUnitario?: number | undefined; rateo?: Rateo | undefined; margenPct: number;
   alcanceDotacion?: "cotizacion" | "seccion" | undefined;
 };
+/** Costo mensual manual por categoría (CLP entero): de un puesto (`puestoId`) o global de la cotización. */
+export type AjusteCosto = { id: string; categoria: string; montoClp: number; puestoId?: string | undefined };
 export type VersionCalculo = {
   numero: number; modeloId: string; modeloVersion: number; meses: number;
   margenPct: number; margenModo: "margen_sobre_venta" | "markup" | "margen_sobre_mano_de_obra";
   margenesSeccion?: readonly { seccion: string; margenPct: number }[] | undefined;
   precioManualClp?: number | undefined; variables: Valores; lineas: readonly (Puesto | LineaItem)[];
   instrumentos?: Instrumentos | undefined;
+  /** Costos manuales por categoría; ausente o vacío = el cálculo de siempre. */
+  ajustes?: readonly AjusteCosto[] | undefined;
 };
 export type ParametrosCalculo = {
   fecha: string; uf: { valorClpEscalado: number; fecha: string } | null;

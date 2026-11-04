@@ -35,12 +35,20 @@ export async function cargarFilasVersion(
     where: { seccionId: { in: secciones.map((s) => s.id) } },
     orderBy: [{ orden: "asc" }, { id: "asc" }],
   });
-  return { cot, version, secciones, lineas };
+  const costos = await ctx.db.cpqCostoCategoria.findMany({
+    where: { versionId: version.id },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  });
+  return { cot, version, secciones, lineas, costos };
 }
 
 type Filas = NonNullable<Awaited<ReturnType<typeof cargarFilasVersion>>>;
 /** Cambio en memoria para la vista previa (dryRun): el cálculo ve las filas como quedarían. */
-export type AjusteVistaPrevia = { lineas?: (l: Filas["lineas"]) => Filas["lineas"]; version?: (v: Filas["version"]) => Filas["version"] };
+export type AjusteVistaPrevia = {
+  lineas?: (l: Filas["lineas"]) => Filas["lineas"];
+  version?: (v: Filas["version"]) => Filas["version"];
+  costos?: (c: Filas["costos"]) => Filas["costos"];
+};
 
 export async function recalcularVersion(
   ctx: Contexto,
@@ -54,6 +62,7 @@ export async function recalcularVersion(
   const { secciones } = pack;
   const lineas = ajuste?.lineas ? ajuste.lineas(pack.lineas) : pack.lineas;
   const version = ajuste?.version ? ajuste.version(pack.version) : pack.version;
+  const costos = ajuste?.costos ? ajuste.costos(pack.costos) : pack.costos;
   if (ajuste) escribir = false;
   const consulta = fechaCalculoHoy();
   const resuelto = await juegoParaFecha(ctx, consulta);
@@ -72,7 +81,7 @@ export async function recalcularVersion(
     await supuestosTenant(ctx),
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
-  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo);
+  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo, costos);
   const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
   const advertenciasExtra = [
     ...(resuelto.pendiente ? [resuelto.pendiente] : []),

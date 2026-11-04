@@ -69,6 +69,7 @@ model CpqVersion {
   secciones        CpqSeccion[]
   aprobaciones     CpqAprobacion[]
   propuestaTecnica CpqPropuestaTecnica?
+  costosCategoria  CpqCostoCategoria[]
 
   @@unique([cotizacionId, numero])
   @@index([tenantId, cotizacionId])
@@ -154,9 +155,32 @@ model CpqLinea {
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   seccion CpqSeccion @relation(fields: [seccionId], references: [id], onDelete: Cascade)
+  costosCategoria CpqCostoCategoria[]
 
   @@index([tenantId, seccionId])
   @@map("lineas")
+  @@schema("cpq")
+}
+
+/// Costo mensual manual por categoría de una versión (CAR-162): de un puesto (`lineaId`) o global
+/// de la cotización (`lineaId` nulo). CLP entero; el motor lo suma como una línea de costo más.
+model CpqCostoCategoria {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  versionId String   @map("version_id") @db.Uuid
+  /// Puesto al que se asigna; nulo = global de la cotización.
+  lineaId   String?  @map("linea_id") @db.Uuid
+  /// Id de categoría del modelo de costeo (nunca «feriados», que se calcula).
+  categoria String
+  montoClp  Int      @map("monto_clp")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  version CpqVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  linea   CpqLinea?  @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, versionId])
+  @@map("costos_categoria")
   @@schema("cpq")
 }
 

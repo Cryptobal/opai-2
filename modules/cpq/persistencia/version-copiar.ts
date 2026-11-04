@@ -9,6 +9,7 @@ export async function copiarSeccionesYLineas(
   origenVersionId: string,
   destinoVersionId: string,
 ) {
+  const nuevaLinea = new Map<string, string>();
   const secciones = await tx.cpqSeccion.findMany({
     where: { versionId: origenVersionId },
     orderBy: [{ orden: "asc" }, { id: "asc" }],
@@ -29,7 +30,7 @@ export async function copiarSeccionesYLineas(
       orderBy: [{ orden: "asc" }, { id: "asc" }],
     });
     for (const l of lineas) {
-      await tx.cpqLinea.create({
+      const copia = await tx.cpqLinea.create({
         data: {
           tenantId,
           seccionId: nueva.id,
@@ -68,7 +69,20 @@ export async function copiarSeccionesYLineas(
           tipoContrato: l.tipoContrato,
         },
       });
+      nuevaLinea.set(l.id, copia.id);
     }
+  }
+  // Costos manuales por categoría (CAR-162): los de puesto siguen al puesto copiado.
+  const costos = await tx.cpqCostoCategoria.findMany({
+    where: { versionId: origenVersionId },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  });
+  for (const c of costos) {
+    const lineaId = c.lineaId ? nuevaLinea.get(c.lineaId) : null;
+    if (c.lineaId && !lineaId) continue;
+    await tx.cpqCostoCategoria.create({
+      data: { tenantId, versionId: destinoVersionId, lineaId: lineaId ?? null, categoria: c.categoria, montoClp: c.montoClp },
+    });
   }
 }
 

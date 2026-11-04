@@ -256,6 +256,8 @@ cpq_catalogo_items_create
 cpq_catalogo_items_list
 cpq_catalogo_items_update
 cpq_correlativos_fijar
+cpq_costos_categoria_guardar
+cpq_costos_categoria_list
 cpq_cotizaciones_calcular
 cpq_cotizaciones_clonar
 cpq_cotizaciones_create
@@ -548,6 +550,7 @@ preview_cpq_catalogo_items_archivar
 preview_cpq_catalogo_items_create
 preview_cpq_catalogo_items_update
 preview_cpq_correlativos_fijar
+preview_cpq_costos_categoria_guardar
 preview_cpq_cotizaciones_calcular
 preview_cpq_cotizaciones_clonar
 preview_cpq_cotizaciones_create
