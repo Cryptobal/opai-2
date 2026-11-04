@@ -12,6 +12,7 @@ import {
 import type { Prisma } from "@opai/db";
 
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
+import { exigirTopeDocumento } from "./topes-conciliacion";
 import { aIso } from "./util";
 
 /** Registra un pago manual como movimiento + conciliación deshacible (paridad 1.0 «sin conciliar»). */
@@ -71,6 +72,7 @@ export const bancosCobroManual = defineCapability({
       const actual = await tx.documentoEmitido.findFirst({ where: { id: input.documentoId } });
       if (!actual) throw reglaDeNegocio("El documento no existe.");
       validarDocumentoCobroBanco(actual, input.monto);
+      await exigirTopeDocumento(tx, "documento_emitido", actual.id, actual.montoTotal, input.monto);
 
       const mov = await tx.movimientoBancario.create({
         data: {
