@@ -22,6 +22,8 @@ export function HojaCeder({
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [factorRut, setFactorRut] = useState("");
   const [factorNombre, setFactorNombre] = useState("");
+  const [factorEmail, setFactorEmail] = useState("");
+  const [factorDireccion, setFactorDireccion] = useState("");
   const [tasa, setTasa] = useState("250");
   const [sim, setSim] = useState<Simulacion | null>(null);
   const [intento] = useState(() => crypto.randomUUID());
@@ -29,6 +31,8 @@ export function HojaCeder({
     documentoId,
     factorRut: factorRut.trim(),
     ...(factorNombre.trim() ? { factorNombre: factorNombre.trim() } : {}),
+    ...(factorEmail.trim() ? { factorEmail: factorEmail.trim() } : {}),
+    ...(factorDireccion.trim() ? { factorDireccion: factorDireccion.trim() } : {}),
     tasaBps: Number(tasa),
   };
   const valido = factorRut.trim().length >= 3 && Number(tasa) >= 0 && Number(tasa) <= 10_000;
@@ -67,6 +71,12 @@ export function HojaCeder({
         </Campo>
         <Campo etiqueta="Nombre del factor" htmlFor="ced-nombre">
           <Input id="ced-nombre" value={factorNombre} maxLength={120} onChange={(e) => setFactorNombre(e.target.value)} />
+        </Campo>
+        <Campo etiqueta="Correo del factor" htmlFor="ced-email" ayuda="Lo exige Octava para registrar la cesión.">
+          <Input id="ced-email" type="email" value={factorEmail} maxLength={40} onChange={(e) => setFactorEmail(e.target.value)} />
+        </Campo>
+        <Campo etiqueta="Dirección del factor" htmlFor="ced-dir">
+          <Input id="ced-dir" value={factorDireccion} maxLength={70} onChange={(e) => setFactorDireccion(e.target.value)} />
         </Campo>
         <Campo etiqueta="Tasa (puntos base)" htmlFor="ced-tasa" ayuda="250 = 2,5 %.">
           <Input id="ced-tasa" inputMode="numeric" value={tasa} onChange={(e) => { setTasa(e.target.value.replace(/\D/g, "")); setSim(null); }} />

@@ -32,6 +32,9 @@ export const ventasCesionCeder = defineCapability({
     documentoId: documentoEmitidoIdSchema,
     factorRut: z.string().trim().min(3).max(20),
     factorNombre: z.string().trim().max(120).optional(),
+    /** Octava (CedeDte) exige datos de contacto del cesionario. */
+    factorEmail: z.string().trim().email().max(40).optional(),
+    factorDireccion: z.string().trim().min(3).max(70).optional(),
     tasaBps: z.number().int().min(0).max(10_000).default(250),
   }),
   output: ventaSchema,
@@ -56,7 +59,7 @@ export const ventasCesionCeder = defineCapability({
     const calc = simularCesion(doc.montoTotal, input.tasaBps);
     if (dryRun) return vistaDeDocumento(ctx, doc.id);
     const rutEmisor = await rutEmisorDe(ctx);
-    const cuenta = await ctx.db.cuenta.findFirst({ where: { id: doc.cuentaId }, select: { rut: true } });
+    const cuenta = await ctx.db.cuenta.findFirst({ where: { id: doc.cuentaId }, select: { rut: true, emailDte: true } });
     if (!cuenta?.rut) throw reglaDeNegocio("El cliente debe tener RUT.");
     const adaptador = await adaptadorCesionDe(ctx);
     if (!adaptador.disponible) throw reglaDeNegocio("Configure la integración de cesión (Octava) antes de ceder.");
@@ -103,6 +106,12 @@ export const ventasCesionCeder = defineCapability({
         xmlBase64: await xmlBase64ParaCesion(ctx, doc, adaptador),
         factorRut: input.factorRut,
         tasaBps: input.tasaBps,
+        tipoDte: doc.tipoDte,
+        ...(input.factorNombre ? { factorNombre: input.factorNombre } : {}),
+        ...(input.factorEmail ? { factorEmail: input.factorEmail } : {}),
+        ...(input.factorDireccion ? { factorDireccion: input.factorDireccion } : {}),
+        ...(cuenta.emailDte ? { emailDeudor: cuenta.emailDte } : {}),
+        ...(doc.fechaVencimiento ? { fechaVencimiento: doc.fechaVencimiento.toISOString().slice(0, 10) } : {}),
       });
     } catch (e) {
       await revertirReservaCesion(ctx, doc.id, cesionId);
