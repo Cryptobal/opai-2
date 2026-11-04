@@ -24,7 +24,7 @@ export type DefinicionIntegracion = {
   categoria: CategoriaIntegracion;
   modalidades: readonly ("plataforma" | "propia")[];
   /** Secretos de la modalidad propia (se guardan cifrados). */
-  secretos: readonly { nombre: string; etiqueta: string }[];
+  secretos: readonly { nombre: string; etiqueta: string; opcional?: boolean }[];
   /** Configuración no secreta validada al guardar. */
   config: z.ZodType;
   /** false = aparece como "Próximamente". */
