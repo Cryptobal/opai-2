@@ -10,6 +10,7 @@ export { Sidebar } from "./sidebar";
 export { PortalSwitcher } from "./portal-switcher";
 export { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
 export { MenuMas } from "./menu-mas";
+export { PanelLateral } from "./panel-lateral";
 export { UserMenu } from "./user-menu";
 export {
   esActivo,

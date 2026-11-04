@@ -43,7 +43,7 @@ Detalle, brechas y evidencia en la [auditoría §1.2](auditoria-2026-11.md#12-po
 - **Tickets:** PR 1 y PR 2 (#169, #188).
 - **Nómina:** períodos, novedades, préstamos y calendario, sin cálculo (#183, #192).
 - **Portales:** Trabajador PR 1 y PR 2 (#189, #199); Cliente PR 1 (#181).
-- **Agente interno:** servidor y proveedores de IA (#62, #73). **No hay pantalla de chat** (CAR-120).
+- **Agente interno:** servidor y proveedores de IA (#62, #73). Pantalla en construcción: PR 5a del [panel](briefs/BRIEF-CAR-120-agente-panel.md) (botón junto a la campana, panel, plan con confirmación; sin guardar conversaciones). Pendiente 5b: conversaciones guardadas, adjuntos, historial, ⌘K, «Preguntar sobre esta ficha», `?agente=1` (CAR-120).
 - **Infraestructura y rendimiento:** pool de Neon y lecturas de sesión (#100–#102, #134–#142, #193), CI sin corte por tiempo (#191), presupuesto de JS (#129).
 - **Exports de diseño aprobados:** #148–#151, #154, #155, #157, #159, #161–#164, #166, #167, #170–#173, #175–#179, #185.
 
