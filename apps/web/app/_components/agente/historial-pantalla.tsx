@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Input, ListScreen, Segmentado } from "@opai/ds";
 
@@ -18,21 +18,13 @@ const fecha = (iso: string) =>
     minute: "2-digit",
   }).format(new Date(iso));
 type Pestana = "conversaciones" | "archivadas" | "acciones";
-const quitarTildes = (t: string) =>
-  t
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
+const recortar = (t: string) => (t.length > 40 ? `${t.slice(0, 40)}…` : t);
 
 /** `/agente/historial` (ListScreen): conversaciones propias con buscar, abrir y administrar, más las acciones. */
 export function HistorialPantalla({ portal }: { portal: string }) {
   const [pestana, setPestana] = useState<Pestana>("conversaciones");
   const [q, setQ] = useState("");
-  const h = useHistorial(portal, pestana !== "acciones", pestana === "archivadas");
-  const items = useMemo(() => {
-    const t = quitarTildes(q.trim());
-    return (h.lista ?? []).filter((c) => !t || quitarTildes(c.titulo).includes(t));
-  }, [h.lista, q]);
+  const h = useHistorial(portal, pestana !== "acciones", pestana === "archivadas", q);
   const pestanas = (
     <Segmentado
       etiqueta="Qué ver"
@@ -57,18 +49,22 @@ export function HistorialPantalla({ portal }: { portal: string }) {
         <Input
           type="search"
           aria-label="Buscar en mis conversaciones"
+          maxLength={120}
           placeholder="Buscar conversaciones"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
       }
       filtros={pestanas}
-      items={items}
+      items={h.lista ?? []}
       clave={(c) => c.id}
       onSeleccionar={(c) => abrirAgente({ conversacionId: c.id })}
       textos={{
-        vacio: q
-          ? { titulo: "Sin resultados", descripcion: "Prueba con otra palabra del título." }
+        vacio: h.buscado
+          ? {
+              titulo: `Sin resultados para “${recortar(h.buscado)}”`,
+              descripcion: "Prueba con otra palabra del título.",
+            }
           : {
               titulo:
                 pestana === "archivadas" ? "No hay archivadas" : "Aún no tienes conversaciones",

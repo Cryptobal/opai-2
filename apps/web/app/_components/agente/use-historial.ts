@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
+import { useBusquedaDiferida } from "./use-busqueda";
 import type { MetaConversacion } from "./use-agente";
 import type { Mensaje } from "./tipos";
 
@@ -21,13 +22,18 @@ const SIN_RED = "No hay conexión con OPAI. Reintenta en unos minutos.";
 
 /**
  * Conversaciones guardadas de la persona (spec agente §3.5, R19): listar (activas o archivadas),
- * abrir, renombrar, archivar y borrar. Cada escritura lleva su `idempotencyKey` y usa la misma
- * capacidad que el MCP.
+ * buscar por título en el servidor, abrir, renombrar, archivar y borrar. Las escrituras llevan
+ * `idempotencyKey` y usan las mismas capacidades que el MCP.
  */
-export function useHistorial(portal: string, activo: boolean, archivadas = false) {
-  const [cargada, setCargada] = useState<{ archivadas: boolean; filas: Resumen[] } | null>(null);
-  // La lista de otra pestaña (activas/archivadas) no se muestra mientras llega la nueva.
-  const lista = cargada?.archivadas === archivadas ? cargada.filas : null;
+export function useHistorial(portal: string, activo: boolean, archivadas = false, busqueda = "") {
+  const q = useBusquedaDiferida(busqueda);
+  type Carga = { archivadas: boolean; q: string; filas: Resumen[] };
+  const [cargada, setCargada] = useState<Carga | null>(null);
+  // La lista de otra pestaña o de otra búsqueda no se muestra mientras llega la nueva.
+  const vigente = cargada?.archivadas === archivadas && cargada.q === q;
+  const lista = vigente ? cargada.filas : null;
+  /** Texto con el que se obtuvo la lista que se ve (para «Sin resultados para …»). */
+  const buscado = vigente ? cargada.q : "";
   const setLista = (f: (l: Resumen[] | null) => Resumen[] | null) =>
     setCargada((c) => (c ? { ...c, filas: f(c.filas) ?? [] } : c));
   const [error, setError] = useState<string | null>(null);
@@ -35,17 +41,21 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
   useEffect(() => {
     if (!activo) return;
     let vivo = true;
-    void ejecutarCapacidad(portal, "agente.conversaciones.list", { archivadas, limite: 50 })
+    void ejecutarCapacidad(portal, "agente.conversaciones.list", {
+      archivadas,
+      limite: 50,
+      ...(q ? { q } : {}),
+    })
       .then((r) => {
         if (!vivo) return;
         setError(r.ok ? null : "No pudimos cargar tus conversaciones.");
-        if (r.ok) setCargada({ archivadas, filas: r.data as Resumen[] });
+        if (r.ok) setCargada({ archivadas, q, filas: r.data as Resumen[] });
       })
       .catch(() => vivo && setError(SIN_RED));
     return () => {
       vivo = false;
     };
-  }, [activo, archivadas, portal]);
+  }, [activo, archivadas, portal, q]);
 
   const abrir = useCallback(
     async (id: string): Promise<{ hilo: Mensaje[]; meta: MetaConversacion } | null> => {
@@ -135,5 +145,5 @@ export function useHistorial(portal: string, activo: boolean, archivadas = false
     return ok;
   };
 
-  return { lista, error, abrir, borrar, archivar, renombrar };
+  return { lista, buscado, error, abrir, borrar, archivar, renombrar };
 }
