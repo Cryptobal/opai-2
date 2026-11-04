@@ -84,10 +84,14 @@ export const programacionRecurrenteOpai1 = z.object({
   updatedAt: fecha,
 });
 
-/** Cotización CPQ de 1.0 (solo correlativo R54; no se importa el cuerpo). */
+/** Cotización CPQ de 1.0 (correlativo R54; el export incluye borradores sin `validUntil`). */
 export const cotizacionOpai1 = z.object({
   id: z.string().min(1),
   code: z.string().min(1),
+  validUntil: z.string().nullish(),
+  status: texto,
+  dealId: texto,
+  accountId: texto,
   createdAt: fecha,
 });
 

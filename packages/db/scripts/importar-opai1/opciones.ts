@@ -5,6 +5,8 @@
 /** Mismos ids que Plataforma › Módulos / `ctx.modulosActivos` (sin incluir `core`). */
 export type OpcionesPlan = {
   modulosActivos: readonly string[];
+  /** Slug del tenant para cargar equivalencia de etapas (`equivalencia-etapas.<slug>.json`). */
+  tenantSlug?: string;
 };
 
 /** Sin módulos opcionales: solo núcleo (cuentas, contactos, instalaciones). Conservador para dry-run. */

@@ -23,6 +23,14 @@ export type CuentaDestino = {
   comuna: string | null;
   ciudad: string | null;
   emailDte: string | null;
+  estado: string;
+  escrituraNotaria: string | null;
+  /** AAAA-MM-DD. */
+  escrituraFecha: string | null;
+  clienteDesde: string | null;
+  clienteHasta: string | null;
+  representanteNombre: string | null;
+  representanteRut: string | null;
 };
 
 export type ContactoDestino = {
@@ -55,6 +63,7 @@ export type InstalacionDestino = {
   placeId: string | null;
   lat: number | null;
   lng: number | null;
+  estado: string;
 };
 
 export type IdExternoDestino = {
@@ -93,6 +102,13 @@ export function cuentaDestino(
     comuna: null,
     ciudad: null,
     emailDte: null,
+    estado: "prospecto",
+    escrituraNotaria: null,
+    escrituraFecha: null,
+    clienteDesde: null,
+    clienteHasta: null,
+    representanteNombre: null,
+    representanteRut: null,
     ...parcial,
   };
 }

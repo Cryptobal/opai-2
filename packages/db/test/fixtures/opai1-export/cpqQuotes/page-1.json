@@ -1,0 +1,17 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-03T12:00:00.000Z",
+  "recurso": "cpqQuotes",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "q-draft-1",
+      "code": "CPQ-2026-0042",
+      "status": "draft",
+      "dealId": "deal-1",
+      "accountId": "acc-a1",
+      "createdAt": "2026-01-10T12:00:00.000Z"
+    }
+  ]
+}

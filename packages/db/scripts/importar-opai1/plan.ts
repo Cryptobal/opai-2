@@ -1,6 +1,6 @@
 // Plan completo de la importación desde 1.0: puro y determinista (mismo origen + mismo estado 2.0 →
 // mismo plan). No escribe: la carga real (otro PR, con el OK de Carlos) consumirá este plan.
-import { pendientesImportacion, type Pendiente } from "./comercial-pendiente";
+import { COMERCIAL_EN_MAIN, pendientesImportacion, type Pendiente } from "./comercial-pendiente";
 import { planComercial, type PlanComercial } from "./comercial-plan";
 import { type CorrelativoCpqPropuesto, planCorrelativosCpq } from "./correlativos-cpq";
 import { type Aviso, type Decision, ordenEstable, type Propuesta } from "./comun";
@@ -14,6 +14,7 @@ import { modulosDelPlan, OPCIONES_POR_DEFECTO, type OpcionesPlan } from "./opcio
 import type { DatosOpai1 } from "./origen";
 import type { DatosProgramacion, ResumenDestinatarios } from "./recurrentes";
 import { planRecurrentes } from "./recurrentes";
+import { type DatosNegocio, planNegocios } from "./negocios-plan";
 import { avisosTributariosCuentas, resumenTributario, type ResumenTributario } from "./tributario-plan";
 
 /** Valor de rubro/segmento/tamaño de 1.0 que pasaría a etiqueta (Carlos los confirma). */
@@ -37,6 +38,10 @@ export type Plan = {
   etiquetas: EtiquetaPropuesta[];
   pendientes: Pendiente[];
   tributario: ResumenTributario;
+  negocios: Decision<DatosNegocio>[];
+  etapasSinMapear: string[];
+  negociosIncompletos: string[];
+  importacionId: string | null;
 };
 
 function resolverDesdeDecisiones<D>(decisiones: readonly Decision<D>[]) {
@@ -88,6 +93,11 @@ export function calcularPlan(
     },
     (id) => resolverContacto(id),
   );
+  const { comercial: comercialOn } = modulosDelPlan(opciones);
+  const neg =
+    comercialOn && COMERCIAL_EN_MAIN
+      ? planNegocios(origen, resolver, destino, opciones.tenantSlug ?? "gard")
+      : { decisiones: [], avisos: [], etapasSinMapear: [], negociosIncompletos: [] };
   const avisosTrib = avisosTributariosCuentas(cuentas.decisiones);
   return {
     opciones,
@@ -106,10 +116,15 @@ export function calcularPlan(
       ...instalaciones.avisos,
       ...avisosTrib,
       ...comercial.avisos,
+      ...neg.avisos,
     ],
     etiquetas: etiquetasPropuestas(origen),
     pendientes: pendientesImportacion(origen, opciones),
     tributario: resumenTributario(cuentas.decisiones),
+    negocios: neg.decisiones,
+    etapasSinMapear: neg.etapasSinMapear,
+    negociosIncompletos: neg.negociosIncompletos,
+    importacionId: null,
   };
 }
 

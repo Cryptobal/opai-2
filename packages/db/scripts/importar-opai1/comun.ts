@@ -1,4 +1,5 @@
 // Tipos y utilidades compartidas del plan de importación (puro, sin base).
+import { completarVacios } from "./completar-vacios";
 import type { EntidadImportada, EstadoDestino } from "./destino-tipos";
 
 export type Accion = "crear" | "actualizar" | "sin_cambios" | "conflicto" | "omitido";
@@ -13,8 +14,10 @@ export type Decision<D> = {
   destinoId: string | null;
   /** Fila canónica de 1.0 con la que se funde (duplicado determinista). */
   fusionaCon: string | null;
-  /** Nombres de campos que cambian (nunca valores). */
+  /** Nombres de campos que se escriben (solo los vacíos en 2.0; nunca valores). */
   campos: string[];
+  /** Campos con valores distintos en 1.0 y 2.0: se informan y no se escriben. */
+  conflictos: string[];
   datos: D | null;
 };
 
@@ -41,6 +44,7 @@ export function decision<D>(
     destinoId: extra.destinoId ?? null,
     fusionaCon: extra.fusionaCon ?? null,
     campos: extra.campos ?? [],
+    conflictos: extra.conflictos ?? [],
     datos: extra.datos ?? null,
   };
 }
@@ -99,23 +103,36 @@ export function decisionDuplicado<D>(
   });
 }
 
-/** Decisión para una fila ya mapeada: sin cambios o actualizar (solo nombres de campos). */
+/**
+ * Decisión para una fila ya mapeada: sin cambios o actualizar. Solo completa campos vacíos de 2.0
+ * (`completarVacios`); los valores distintos quedan como conflictos de campo, sin escribir.
+ */
 export function decisionMapeada<D extends Record<string, unknown>>(
   entidad: EntidadImportada,
   idOpai1: string,
   datos: D,
   actual: Record<string, unknown> | undefined,
   destinoId: string,
+  equivalentes: Readonly<Record<string, unknown>> = {},
 ): Decision<D> {
   if (!actual)
     return decision<D>(entidad, idOpai1, "conflicto", { motivo: "id_externo_huerfano", destinoId });
-  const campos = camposDistintos(datos, actual);
+  const { escribir, conflictos } = completarVacios(datos, actual, equivalentes);
+  if (conflictos.length > 0)
+    return decision<D>(entidad, idOpai1, "conflicto", {
+      motivo: "conflicto_completar_vacios",
+      destinoId,
+      campos: conflictos,
+      conflictos,
+      datos,
+    });
+  const campos = Object.keys(escribir);
   return campos.length === 0
     ? decision<D>(entidad, idOpai1, "sin_cambios", { destinoId, datos })
     : decision<D>(entidad, idOpai1, "actualizar", {
         destinoId,
         campos,
         datos,
-        motivo: "cambian_campos",
+        motivo: "completa_vacios",
       });
 }

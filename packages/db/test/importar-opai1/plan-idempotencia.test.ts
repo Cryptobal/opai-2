@@ -53,9 +53,9 @@ describe("idempotencia del plan", () => {
     a6.name = "Delta Logística Renombrada";
     const d = calcularPlan(datos, cargado).cuentas.find((x) => x.idOpai1 === "acc-a6");
     expect(d).toMatchObject({
-      accion: "actualizar",
-      motivo: "cambian_campos",
-      campos: ["nombre", "razonSocial"],
+      accion: "conflicto",
+      motivo: "conflicto_completar_vacios",
+      campos: ["nombre"],
     });
   });
 });

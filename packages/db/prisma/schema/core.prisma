@@ -26,6 +26,8 @@ model Tenant {
   timezone  String   @default("America/Santiago")
   /// "trial" | "activo" | "suspendido". Suspendido bloquea el ingreso de sus miembros.
   estado    String   @default("trial")
+  /// Corte de la importación desde 1.0: con valor, `aplicar` se rechaza salvo reimportación del operador.
+  importacionCerradaEn DateTime? @map("importacion_cerrada_en") @db.Timestamptz(6)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -328,5 +330,54 @@ model RetencionEjecucion {
 
   @@index([tenantId, createdAt])
   @@map("retencion_ejecuciones")
+  @@schema("core")
+}
+
+/// Corrida de importación desde OPAI 1.0 (simular o aplicar). Una `aplicar` es reversible.
+model Importacion {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  sistema         String    @default("opai1")
+  /// "api" | "instantanea" | "fixtures"
+  origen          String
+  versionContrato String    @map("version_contrato")
+  /// "simular" | "aplicar"
+  modo            String
+  /// "en_curso" | "completada" | "fallida" | "revertida"
+  estado          String    @default("en_curso")
+  conteos         Json      @default("{}")
+  lanzadaPorId    String?   @map("lanzada_por_id") @db.Uuid
+  iniciadaEn      DateTime  @default(now()) @map("iniciada_en") @db.Timestamptz(6)
+  terminadaEn     DateTime? @map("terminada_en") @db.Timestamptz(6)
+  revertidaEn     DateTime? @map("revertida_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  filas ImportacionFila[]
+
+  @@index([tenantId, iniciadaEn])
+  @@map("importaciones")
+  @@schema("core")
+}
+
+/// Qué hizo la corrida con cada fila de 1.0. `previos` guarda solo los campos completados.
+model ImportacionFila {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  importacionId String   @map("importacion_id") @db.Uuid
+  entidad       String
+  id10          String   @map("id_1_0")
+  id20          String?  @map("id_2_0") @db.Uuid
+  /// "creado" | "completado" | "sin_cambio" | "omitido"
+  accion        String
+  motivo        String?
+  previos       Json?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  importacion Importacion @relation(fields: [importacionId], references: [id], onDelete: Restrict)
+
+  @@unique([importacionId, entidad, id10], map: "importaciones_filas_corrida_entidad_id_key")
+  @@index([tenantId, entidad, id20])
+  @@map("importaciones_filas")
   @@schema("core")
 }

@@ -33,16 +33,4 @@ export function lectorFixtures(ruta: string): LectorOrigen {
   };
 }
 
-/** Lector por API/MCP de OPAI 1.0: pendiente (ADR-027). */
-export function lectorApiOpai1(): LectorOrigen {
-  return {
-    descripcion: "opai1",
-    leer() {
-      return Promise.reject(
-        new Error(
-          "Lector de OPAI 1.0 no configurado: falta la key dedicada de 1.0 en el almacén cifrado del tenant. Usa --origen fixtures:<ruta>.",
-        ),
-      );
-    },
-  };
-}
+export { lectorApiOpai1, lectorContratoFixtures } from "./origen-api";

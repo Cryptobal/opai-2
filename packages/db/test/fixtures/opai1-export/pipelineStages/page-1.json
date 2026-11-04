@@ -1,0 +1,26 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-03T12:00:00.000Z",
+  "recurso": "pipelineStages",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "st-1",
+      "name": "Prospección",
+      "order": 1
+    },
+    {
+      "id": "st-2",
+      "name": "Aceptada",
+      "order": 2,
+      "isAccepted": true
+    },
+    {
+      "id": "st-3",
+      "name": "Ganada",
+      "order": 3,
+      "isClosedWon": true
+    }
+  ]
+}
