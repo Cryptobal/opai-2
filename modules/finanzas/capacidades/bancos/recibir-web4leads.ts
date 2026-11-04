@@ -5,7 +5,6 @@ import { z } from "zod";
 import { credencialDe, defineCapability, ErrorCapacidad, reglaDeNegocio } from "@opai/capabilities";
 import { verificarFirmaWeb4leads } from "@opai/domain";
 
-import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
 import { sincronizarMovimientos, sincronizarOutput } from "./sincronizar";
 
 /** Formato del webhook de Web4Leads, igual al de OPAI 1.0 para no cambiar lo que Web4Leads envía. */
@@ -31,7 +30,8 @@ export const bancosRecibirWeb4leads = defineCapability({
   id: "finanzas.bancos.recibir_web4leads",
   descripcion:
     "Recibe el webhook de movimientos de Web4Leads: verifica la firma con el secreto guardado de la empresa y delega en la sincronización de movimientos bancarios.",
-  permiso: PERMISO_BANCOS_GESTIONAR,
+  // Sin permiso de usuario: la llama el receptor público como sistema y la autoridad es la firma HMAC, no un rol.
+  permiso: null,
   interna: true,
   // El cuerpo trae movimientos y glosas bancarias y la firma es una credencial: nunca a la auditoría inmutable.
   sensibles: ["cuerpo", "firma"],

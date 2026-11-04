@@ -42,6 +42,10 @@ export async function POST(req: Request, { params }: Params): Promise<Response> 
   const r = await executeCapability(ctx, "finanzas.bancos.recibir_web4leads", { cuerpo, timestamp, firma });
   if (!r.ok) {
     if (r.error.code === "UNAUTHENTICATED") return json(401, { success: false, error: "Firma inválida." });
+    // Un fallo no previsto no puede quedar mudo: se registra solo la categoría, nunca el cuerpo ni la firma.
+    if (r.error.code !== "INVALID_INPUT" && r.error.code !== "UNPROCESSABLE") {
+      console.error("[web4leads] rechazo inesperado", { codigo: r.error.code });
+    }
     return r.error.code === "INVALID_INPUT" || r.error.code === "UNPROCESSABLE"
       ? json(400, { success: false, error: r.error.message })
       : json(500, { success: false, error: "Error transitorio." });
