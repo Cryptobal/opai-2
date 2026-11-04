@@ -2,9 +2,9 @@
 
 > **Estado:** listo para pegar en Claude Design (lo hace Carlos). Redactado por Claude (Sesión 2) el 4-nov-2026 por encargo de Carlos: «un diseño interactivo, muy completo, antes de seguir con el módulo».
 >
-> **Relación con v2:** el export `docs/2.0/diseño/export-rendiciones/` (8 pantallas, v2) **sigue vigente** como base visual. Este prompt lo **amplía**: portal Supervisor, kilometraje configurable por empresa, permisos visibles por rol, estados con y sin Finanzas y la **ficha comercial del módulo en Plataforma** (activar, probar, cobrar). Donde no diga lo contrario, se conserva v2.
+> **Relación con v2:** el export `docs/2.0/diseño/export-rendiciones/` (8 pantallas, v2) **sigue vigente** como base visual. Este prompt lo **amplía**: portal Supervisor, kilometraje configurable por empresa, permisos visibles por rol, estados con y sin Finanzas y la **ficha del módulo en Plataforma** (activar, desactivar y ver su uso; el cobro lo define otra sesión). Donde no diga lo contrario, se conserva v2.
 >
-> **Decisiones de Carlos ya incorporadas:** Rendiciones se vende sola (ADR-048) y **se factura y cobra aparte**: Carlos la activa o desactiva por empresa desde Plataforma (4-nov-2026). Un nivel de aprobación con aprobador asignado; el solicitante nunca aprueba ni paga lo suyo. «Pagada» se marca al confirmar el lote de pago. Kilometraje configurable por empresa (por consumo, por tarifa por km o monto fijo por tramo). Centros de costo = instalaciones activas + «Administración / Oficina central». Cuenta de destino desde la Ficha de persona, copiada al lote.
+> **Decisiones de Carlos ya incorporadas:** Rendiciones se vende sola (ADR-048): Carlos la activa o desactiva por empresa desde Plataforma (4-nov-2026). El precio y el cobro por módulo los resuelve una sesión aparte de Plataforma para todos los módulos. Un nivel de aprobación con aprobador asignado; el solicitante nunca aprueba ni paga lo suyo. «Pagada» se marca al confirmar el lote de pago. Kilometraje configurable por empresa (por consumo, por tarifa por km o monto fijo por tramo). Centros de costo = instalaciones activas + «Administración / Oficina central». Cuenta de destino desde la Ficha de persona, copiada al lote.
 
 Pegar completo en Claude Design, **en el mismo proyecto del export v2 de Rendiciones**, con el **Design System de OPAI 2.0 V2** (`packages/ds/src/tokens.css`, `docs/2.0/design/export-ds-2.0/`). Nunca el estilo de 1.0. Empresa de ejemplo: «Atlas Seguridad SpA», nunca Gard.
 
@@ -22,7 +22,7 @@ Resultado esperado: export HTML standalone, **una pantalla por archivo**, captur
 
 ## 2. Recorrido del prototipo (en este orden)
 
-1. **Plataforma › Empresa › Módulos › Rendiciones** (Carlos activa en modo prueba) → ver §5.
+1. **Plataforma › Empresa › Módulos › Rendiciones** (Carlos la activa en prueba) → ver §5.
 2. **Configuración › Módulos › Rendiciones** (administrador de la empresa) → pantalla 08 de v2, ampliada en §4.
 3. **Portal Supervisor › Más › Rendiciones › Mis rendiciones** (§3.1).
 4. **Nueva rendición de compra** desde el teléfono: foto de la boleta → monto, fecha, folio, proveedor, centro de costo → **aviso de boleta duplicada** → «Enviar» (§3.2).
@@ -30,7 +30,7 @@ Resultado esperado: export HTML standalone, **una pantalla por archivo**, captur
 6. **Bandeja del aprobador** (gerente) → detalle → Aprobar / Devolver con motivo / Rechazar (pantallas 04 y 05 de v2, con la hoja de decisión en 375).
 7. **Lotes de pago** (tesorería) → crear lote con cuentas copiadas de la Ficha → aviso «Sin datos bancarios en la ficha» → confirmar lote → las rendiciones pasan a **Pagada** → archivo de nómina Santander (06 de v2).
 8. **Reporte** con filtros y exportación a Excel (07 de v2).
-9. **Plataforma › Uso del módulo** (§5.3).
+9. **Plataforma › Uso del módulo** (§5.2).
 
 ## 3. Pantallas nuevas o ampliadas (usuario que rinde)
 
@@ -55,18 +55,17 @@ Resultado esperado: export HTML standalone, **una pantalla por archivo**, captur
 ## 4. Configuración del módulo (administrador de la empresa)
 Pantalla 08 de v2 ampliada, mobile first: **Aprobación** (aprobador por defecto como **selector de personas**, no código), **Respaldo** (exigir boleta; motivo si falta), **Kilometraje** (método y variables: rendimiento km/l, precio del litro, recargo %, tarifa por km, tramos), **Centros de costo** (solo lectura: instalaciones activas + Administración), **Pagos** (cuenta de origen del lote, formato de nómina Santander) y **Avisos** (qué eventos comunican por correo, silencio por defecto). Cada cambio muestra «Quién lo cambió y cuándo».
 
-## 5. Plataforma: Rendiciones como producto (solo Carlos y el equipo de plataforma)
+## 5. Plataforma: Rendiciones como módulo activable (solo Carlos y el equipo de plataforma)
+
+**Decisión de Carlos (4-nov-2026 20:24 CLT, comentario en el PR #313):** el cobro por módulo (precio mensual por empresa, inicio del cobro, fin de la prueba y cargo mensual listo para facturar) **no se construye dentro de Rendiciones**. Va en una sesión aparte de Plataforma y sirve para todos los módulos. Rendiciones solo usa el **estado del módulo** (prueba, activo o suspendido). Este diseño muestra únicamente eso; las condiciones comerciales las diseña esa otra sesión.
 
 ### 5.1 Ficha del módulo en una empresa (Plataforma › Empresas › Módulos)
-- Fila «Rendiciones» con **estado**: Prueba (con días restantes) · Activo · Suspendido, y un **interruptor** de activar/desactivar con confirmación que explica qué pasa al apagar (se ocultan menú, pantallas y herramientas MCP; **los datos se conservan**).
-- **Condiciones comerciales** de la empresa: precio mensual, moneda, inicio del cobro, fin de la prueba, descuento y nota interna.
+- Fila «Rendiciones» con **estado**: Prueba · Activo · Suspendido, y un **interruptor** de activar/desactivar con confirmación que explica qué pasa al apagar (se ocultan menú, pantallas y herramientas MCP; **los datos se conservan**).
+- Un espacio reservado «Condiciones comerciales: las define Plataforma» (sin campos de precio).
 - Dependencias: «Funciona sola; con Finanzas suma conciliación del pago».
 
-### 5.2 Catálogo de módulos y precios (Plataforma › Módulos)
-Lista de módulos vendibles con precio de lista, qué incluye y cuántas empresas lo tienen activo. Rendiciones aparece como producto independiente.
-
-### 5.3 Uso y cobro (Plataforma › Empresa › Uso)
-Por mes: usuarios que rindieron, rendiciones creadas y pagadas, monto rendido, y el **cargo del módulo del mes** listo para facturar (estado: pendiente / facturado / pagado). La emisión de la factura la hace la sesión de Facturación; aquí solo se muestra el cargo.
+### 5.2 Uso del módulo (Plataforma › Empresa › Uso)
+Por mes: usuarios que rindieron, rendiciones creadas y pagadas y monto rendido. Solo lectura; sin cargo ni precios.
 
 ## 6. Permisos visibles (por rol)
 
@@ -82,7 +81,7 @@ Mostrar en el prototipo un **selector de rol** para ver cómo cambia el menú, y
 Dos variantes del Lote de pago y del Detalle: **sin Finanzas** (solo estado y comprobante del lote) y **con Finanzas** (aparece «Conciliado con el movimiento del banco»). Nada del módulo se rompe si Finanzas está apagado.
 
 ## 8. Lista de archivos a entregar
-`01 Mis rendiciones` · `02 Nueva rendicion compra` · `03 Nueva rendicion kilometraje` · `04 Bandeja del aprobador` · `05 Detalle de rendicion` · `06 Lotes de pago` · `07 Reporte` · `08 Configuracion rendiciones` · `09 Plataforma ficha del modulo` · `10 Plataforma catalogo y uso` · `11 Sin permiso y estados` · `FlujoCompletoRendiciones` (prototipo) · `Índice`.
+`01 Mis rendiciones` · `02 Nueva rendicion compra` · `03 Nueva rendicion kilometraje` · `04 Bandeja del aprobador` · `05 Detalle de rendicion` · `06 Lotes de pago` · `07 Reporte` · `08 Configuracion rendiciones` · `09 Plataforma ficha del modulo` · `10 Plataforma uso` · `11 Sin permiso y estados` · `FlujoCompletoRendiciones` (prototipo) · `Índice`.
 
 ## 9. Fuera de alcance de este diseño
-Extracción de la boleta por IA, rendir desde el portal del guardia (sin usuario), anticipos y descuento por liquidación, asiento contable (Contabilidad C1) y la emisión de la factura del cargo del módulo (sesión de Facturación).
+Extracción de la boleta por IA, rendir desde el portal del guardia (sin usuario), anticipos y descuento por liquidación, asiento contable (Contabilidad C1) y todo lo de precio y cobro por módulo (sesión aparte de Plataforma).
