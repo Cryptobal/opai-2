@@ -26,6 +26,7 @@ export function HojaRcv({ puedeCrearProveedores }: { puedeCrearProveedores: bool
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [filas, setFilas] = useState<FilaRcv[]>([]);
   const [malas, setMalas] = useState<string[]>([]);
+  const [totalMalas, setTotalMalas] = useState(0);
   const [crear, setCrear] = useState(puedeCrearProveedores);
   const [vista, setVista] = useState<Vista | null>(null);
   const entrada = () => ({ documentos: filas.slice(0, 200), crearProveedores: crear });
@@ -34,9 +35,15 @@ export function HojaRcv({ puedeCrearProveedores }: { puedeCrearProveedores: bool
     setVista(null);
     limpiarError();
     setMalas([]);
+    setTotalMalas(0);
     if (!f) return setFilas([]);
+    if (f.size > 5_000_000) {
+      setFilas([]);
+      return setMalas(["El archivo pesa más de 5 MB: sube uno más chico."]);
+    }
     const r = leerRcv(await textoDe(f));
     setFilas(r.filas);
+    setTotalMalas(r.errores.length);
     setMalas(r.errores.slice(0, 5).map((e) => `Línea ${e.linea}: ${e.motivo}`));
   }
   async function previsualizar() {
@@ -72,16 +79,16 @@ export function HojaRcv({ puedeCrearProveedores }: { puedeCrearProveedores: bool
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
         <Campo etiqueta="Archivo CSV del RCV" htmlFor="rcv-csv" ayuda="Hasta 200 documentos por archivo. Los que ya están en el libro se omiten.">
-          <Input id="rcv-csv" type="file" accept=".csv,text/csv,text/plain" onChange={(e) => void leer(e.target.files?.[0])} />
+          <Input id="rcv-csv" type="file" disabled={pendiente} accept=".csv,text/csv,text/plain" onChange={(e) => void leer(e.target.files?.[0])} />
         </Campo>
         {filas.length > 200 ? <Alerta tono="warning" titulo="El archivo trae más de 200 documentos: se importan los primeros 200." /> : null}
         {malas.length > 0 ? (
-          <Alerta tono="warning" titulo="Algunas líneas no se pudieron leer">
+          <Alerta tono="warning" titulo={totalMalas > 5 ? `${totalMalas} líneas no se pudieron leer (se muestran 5)` : "Algunas líneas no se pudieron leer"}>
             {malas.join(" · ")}
           </Alerta>
         ) : null}
         {puedeCrearProveedores ? (
-          <Checkbox marcado={crear} onCambiar={(v) => { setCrear(v); setVista(null); }} etiqueta="Crear los proveedores que aún no existen" />
+          <Checkbox disabled={pendiente} marcado={crear} onCambiar={(v) => { setCrear(v); setVista(null); }} etiqueta="Crear los proveedores que aún no existen" />
         ) : null}
         {vista && vista.errores > 0 ? (
           <Alerta tono="warning" titulo="Filas con error">

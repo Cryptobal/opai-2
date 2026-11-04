@@ -26,6 +26,12 @@ describe("leerRcv", () => {
     expect(r.errores).toHaveLength(2);
   });
 
+  it("respeta campos entre comillas con punto y coma", () => {
+    const r = leerRcv(`"Tipo Doc";"RUT Proveedor";"Razon Social";"Folio";"Fecha Docto";"Monto Total"\n33;76.1-1;"Proveedor; SpA";9;03/11/2026;100`);
+    expect(r.errores).toEqual([]);
+    expect(r.filas[0]).toMatchObject({ proveedorRazonSocial: "Proveedor; SpA", folio: 9, montoTotal: 100 });
+  });
+
   it("rechaza un archivo sin las columnas esperadas", () => {
     expect(leerRcv("a;b\n1;2").errores).toHaveLength(1);
     expect(leerRcv("").filas).toEqual([]);

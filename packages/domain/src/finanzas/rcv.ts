@@ -51,10 +51,28 @@ const entero = (t: string | undefined): number | null => {
   return /^-?\d+$/.test(v.replace(/\./g, "")) ? Number(v.replace(/\./g, "")) : null;
 };
 
+/** Separa una línea por «;» respetando campos entre comillas (`"a;b"`, `""` como comilla). */
+export function partirLinea(l: string): string[] {
+  const campos: string[] = [];
+  let actual = "";
+  let dentro = false;
+  for (let i = 0; i < l.length; i += 1) {
+    const ch = l[i];
+    if (ch === '"') {
+      if (dentro && l[i + 1] === '"') { actual += '"'; i += 1; } else dentro = !dentro;
+    } else if (ch === ";" && !dentro) {
+      campos.push(actual);
+      actual = "";
+    } else actual += ch;
+  }
+  campos.push(actual);
+  return campos;
+}
+
 /** Lee el CSV del RCV de compras. Devuelve las filas válidas y los errores con su número de línea. */
 export function leerRcv(texto: string): { filas: FilaRcv[]; errores: ErrorRcv[] } {
   const lineas = texto.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim() !== "");
-  const cab = (lineas[0] ?? "").split(";").map(sinTildes);
+  const cab = partirLinea(lineas[0] ?? "").map(sinTildes);
   const col = Object.fromEntries(
     (Object.keys(ALIAS) as Clave[]).map((k) => [k, cab.findIndex((c) => ALIAS[k].includes(c))]),
   ) as Record<Clave, number>;
@@ -64,7 +82,7 @@ export function leerRcv(texto: string): { filas: FilaRcv[]; errores: ErrorRcv[] 
   const filas: FilaRcv[] = [];
   const errores: ErrorRcv[] = [];
   lineas.slice(1).forEach((l, i) => {
-    const c = l.split(";");
+    const c = partirLinea(l);
     const linea = i + 2;
     const at = (k: Clave) => c[col[k]] ?? "";
     const tipo = Number(at("tipo"));
