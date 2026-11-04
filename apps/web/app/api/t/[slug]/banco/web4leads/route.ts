@@ -30,7 +30,8 @@ export async function POST(req: Request, { params }: Params): Promise<Response> 
   if (cuerpo.length > MAX_CUERPO) return new Response(null, { status: 413 });
 
   const tenant = await tenantPorSlug(slug);
-  if (!tenant || tenant.estado !== "activo") return json(200, { success: true, skipped: "tenant_no_encontrado" });
+  // Misma respuesta que una firma mala: no revela qué slugs existen.
+  if (!tenant || tenant.estado !== "activo") return json(401, { success: false, error: "Firma inválida." });
 
   const ctx = crearContexto({
     tenantId: tenant.id,
@@ -40,6 +41,7 @@ export async function POST(req: Request, { params }: Params): Promise<Response> 
   });
   const r = await executeCapability(ctx, "finanzas.bancos.recibir_web4leads", { cuerpo, timestamp, firma });
   if (!r.ok) {
+    if (r.error.code === "UNAUTHENTICATED") return json(401, { success: false, error: "Firma inválida." });
     return r.error.code === "INVALID_INPUT" || r.error.code === "UNPROCESSABLE"
       ? json(400, { success: false, error: r.error.message })
       : json(500, { success: false, error: "Error transitorio." });

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { credencialDe, defineCapability, reglaDeNegocio } from "@opai/capabilities";
+import { credencialDe, defineCapability, ErrorCapacidad, reglaDeNegocio } from "@opai/capabilities";
 import { verificarFirmaWeb4leads } from "@opai/domain";
 
 import { PERMISO_BANCOS_GESTIONAR } from "./permisos";
@@ -31,6 +31,8 @@ export const bancosRecibirWeb4leads = defineCapability({
     "Recibe el webhook de movimientos de Web4Leads: verifica la firma con el secreto guardado de la empresa y delega en la sincronización de movimientos bancarios.",
   permiso: PERMISO_BANCOS_GESTIONAR,
   interna: true,
+  // El cuerpo trae movimientos y glosas bancarias y la firma es una credencial: nunca a la auditoría inmutable.
+  sensibles: ["cuerpo", "firma"],
   input: z.object({
     cuerpo: z.string().min(2).max(1_000_000),
     timestamp: z.string().max(20),
@@ -41,9 +43,9 @@ export const bancosRecibirWeb4leads = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const secreto = await credencialDe(ctx, "web4leads");
-    const sin = { reconocida: false, cuentaId: null, nuevos: 0, duplicados: 0, sospechosos: 0, saldoBanco: null };
+    // Firma inválida o sin secreto: se lanza antes de escribir, así el intento no deja fila en la auditoría.
     if (!secreto || !verificarFirmaWeb4leads(secreto.valor, input.cuerpo, input.timestamp, input.firma)) {
-      return { ...sin, firmaValida: false };
+      throw new ErrorCapacidad("UNAUTHENTICATED", "Firma inválida.");
     }
     let crudo: unknown;
     try {

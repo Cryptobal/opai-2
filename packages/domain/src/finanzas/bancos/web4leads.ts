@@ -14,6 +14,7 @@ export function verificarFirmaWeb4leads(
   ahoraS = Math.floor(Date.now() / 1000),
 ): boolean {
   if (!secreto || !timestamp || !firma) return false;
+  if (!/^\d{9,13}$/.test(timestamp)) return false;
   const ts = Number.parseInt(timestamp, 10);
   if (!Number.isFinite(ts) || Math.abs(ahoraS - ts) > VENTANA_WEB4LEADS_S) return false;
   const esperada = createHmac("sha256", secreto).update(cuerpo + timestamp).digest();

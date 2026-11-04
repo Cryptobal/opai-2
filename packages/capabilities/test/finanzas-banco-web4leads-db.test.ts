@@ -69,9 +69,11 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     await e?.cerrar?.();
   });
 
-  it("firma inválida: no importa nada y avisa firmaValida=false", async () => {
+  it("firma inválida: no importa nada, responde UNAUTHENTICATED y no deja rastro en la auditoría", async () => {
+    const antes = await e.admin.auditEvent.count({ where: { tenantId: tenantA } });
     const r = await recibir(tenantA, payload([mov("x1", -1000)]), "otro-secreto-cualquiera");
-    expect(r.ok && r.data).toMatchObject({ firmaValida: false, nuevos: 0 });
+    expect(!r.ok && r.error.code).toBe("UNAUTHENTICATED");
+    expect(await e.admin.auditEvent.count({ where: { tenantId: tenantA } })).toBe(antes);
     expect(await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaA } })).toBe(0);
   });
 
