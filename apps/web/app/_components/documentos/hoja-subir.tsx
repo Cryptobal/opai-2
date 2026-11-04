@@ -14,11 +14,14 @@ export function HojaSubir({
   entidad,
   tipos,
   portal = "erp",
+  destino,
 }: {
   entidad: EntidadDocumento;
   tipos: TipoDocumento[];
   /** Portal desde el que se sube (Supervisor en terreno). */
   portal?: string;
+  /** A qué se vincula el documento, cuando la hoja no está dentro de la ficha de la entidad. */
+  destino?: string;
 }) {
   const hoja = useHojaUrl("subir");
   const { valor } = useParametros();
@@ -41,6 +44,7 @@ export function HojaSubir({
       abierto={hoja.abierta}
       onCerrar={cerrar}
       titulo={reemplaza ? "Nueva versión" : "Subir documento"}
+      {...(destino ? { descripcion: destino } : {})}
       acciones={
         <>
           <Button variant="secondary" onClick={cerrar}>

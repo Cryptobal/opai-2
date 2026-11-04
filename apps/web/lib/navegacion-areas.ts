@@ -11,6 +11,8 @@ export type EntradaArea = {
   modulo: string;
   /** null/ausente: visible para cualquiera con acceso al portal (p. ej. Inicio). */
   permiso?: string | null;
+  /** Activa solo en su ruta exacta (cuando otra entrada del menú cuelga de la misma ruta). */
+  exacta?: boolean;
 };
 
 export type GrupoArea = {

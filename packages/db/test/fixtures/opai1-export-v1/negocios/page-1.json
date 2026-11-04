@@ -1,0 +1,56 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-04T13:00:00.000Z",
+  "recurso": "negocios",
+  "cursor": null,
+  "siguiente": "55555555-5555-4555-8555-555555555551",
+  "filas": [
+    {
+      "id": "55555555-5555-4555-8555-555555555551",
+      "tenantId": "t",
+      "accountId": "11111111-1111-4111-8111-111111111111",
+      "primaryContactId": "22222222-2222-4222-8222-222222222222",
+      "title": "Servicio bodega",
+      "amount": "1500000.00",
+      "stageId": "44444444-4444-4444-8444-444444444442",
+      "probability": 50,
+      "expectedCloseDate": "2026-12-01T00:00:00.000Z",
+      "status": "open",
+      "proposalSentAt": "2026-01-10T00:00:00.000Z",
+      "installationName": "Bodega Norte",
+      "lostReasonCategory": null,
+      "createdAt": "2026-01-05T12:00:00.000Z",
+      "updatedAt": "2026-01-05T12:00:00.000Z",
+      "etapa": {
+        "id": "44444444-4444-4444-8444-444444444442",
+        "name": "Propuesta enviada",
+        "order": 2,
+        "isClosedWon": false,
+        "isClosedLost": false,
+        "isActive": true
+      },
+      "duenoId": "usr-owner-1",
+      "duenoFuente": "CrmAccount.ownerId",
+      "historial_etapas": [
+        {
+          "id": "66666666-6666-4666-8666-666666666661",
+          "fromStageId": null,
+          "toStageId": "44444444-4444-4444-8444-444444444441",
+          "fromStageName": null,
+          "toStageName": "Contacto inicial",
+          "changedBy": "usr-owner-1",
+          "changedAt": "2026-01-05T12:00:00.000Z"
+        },
+        {
+          "id": "66666666-6666-4666-8666-666666666662",
+          "fromStageId": "44444444-4444-4444-8444-444444444441",
+          "toStageId": "44444444-4444-4444-8444-444444444442",
+          "fromStageName": "Contacto inicial",
+          "toStageName": "Propuesta enviada",
+          "changedBy": "usr-owner-1",
+          "changedAt": "2026-01-10T12:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

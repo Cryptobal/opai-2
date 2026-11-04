@@ -7,6 +7,12 @@ import { z } from "zod";
 import type { DatosOpai1 } from "./origen";
 import type { LectorOrigen } from "./origen-lectores";
 import { validarDatos } from "./origen-lectores";
+import {
+  acumuladoVacio,
+  agregarFila,
+  NOMBRES_RECURSOS_V1,
+  type Acumulado,
+} from "./origen-api-contrato";
 import { normalizarDatosExport } from "./origen-api-normalizar";
 
 const paginaExport = z.object({
@@ -18,21 +24,7 @@ const paginaExport = z.object({
   filas: z.array(z.unknown()),
 });
 
-const RECURSOS: (keyof DatosOpai1)[] = [
-  "accounts",
-  "contacts",
-  "installations",
-  "pipelineStages",
-  "deals",
-  "dealStageHistory",
-  "dealContacts",
-  "recurringInvoiceSchedules",
-  "cpqQuotes",
-  "activities",
-  "users",
-];
-
-function armarDatos(acumulado: Record<string, unknown[]>): DatosOpai1 {
+function armarDatos(acumulado: Acumulado): DatosOpai1 {
   return normalizarDatosExport(validarDatos(acumulado));
 }
 
@@ -55,12 +47,12 @@ export function lectorApiOpai1(baseUrl = process.env.OPAI1_EXPORT_URL): LectorOr
           "Faltan OPAI1_EXPORT_URL y OPAI1_EXPORT_KEY. Usa --origen fixtures:<ruta>.",
         );
       }
-      const acumulado: Record<string, unknown[]> = Object.fromEntries(RECURSOS.map((r) => [r, []]));
-      for (const recurso of RECURSOS) {
+      const acumulado = acumuladoVacio();
+      for (const recurso of NOMBRES_RECURSOS_V1) {
         let cursor: string | null = null;
         for (;;) {
           const pagina = await fetchPagina(`${url.replace(/\/$/, "")}/${recurso}`, key, cursor);
-          acumulado[recurso]?.push(...pagina.filas);
+          for (const fila of pagina.filas) agregarFila(acumulado, recurso, fila);
           cursor = pagina.siguiente;
           if (!cursor) break;
         }
@@ -74,8 +66,8 @@ export function lectorContratoFixtures(dir: string): LectorOrigen {
   return {
     descripcion: "fixtures-export",
     async leer() {
-      const acumulado: Record<string, unknown[]> = Object.fromEntries(RECURSOS.map((r) => [r, []]));
-      for (const recurso of RECURSOS) {
+      const acumulado = acumuladoVacio();
+      for (const recurso of NOMBRES_RECURSOS_V1) {
         let archivos: string[];
         try {
           archivos = readdirSync(join(dir, recurso))
@@ -85,8 +77,10 @@ export function lectorContratoFixtures(dir: string): LectorOrigen {
           continue;
         }
         for (const f of archivos) {
-          const pagina = paginaExport.parse(JSON.parse(readFileSync(join(dir, recurso, f), "utf8")));
-          acumulado[recurso]?.push(...pagina.filas);
+          const pagina = paginaExport.parse(
+            JSON.parse(readFileSync(join(dir, recurso, f), "utf8")),
+          );
+          for (const fila of pagina.filas) agregarFila(acumulado, recurso, fila);
         }
       }
       return armarDatos(acumulado);

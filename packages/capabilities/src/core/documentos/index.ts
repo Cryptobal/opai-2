@@ -1,6 +1,7 @@
 import type { Capacidad } from "../../types";
 import { documentosConfirmarSubida } from "./confirmar";
 import { documentosGet, documentosList } from "./consulta";
+import { documentosExplorar } from "./explorar";
 import { documentosMatriz } from "./matriz";
 import { documentosPedirRenovacion } from "./renovacion";
 import { documentosArchive, documentosUpdate, documentosUrlDescarga } from "./gestion";
@@ -19,6 +20,7 @@ export const capacidadesDocumentos: readonly Capacidad[] = [
   documentosIniciarSubida,
   documentosConfirmarSubida,
   documentosList,
+  documentosExplorar,
   documentosGet,
   documentosUpdate,
   documentosVincular,

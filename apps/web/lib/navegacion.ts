@@ -65,7 +65,8 @@ const ICONOS_RUTA: Record<string, string> = {
 const esDesarrollo = process.env.NODE_ENV !== "production";
 
 function itemDe(e: EntradaArea, extra: Partial<ItemNav> = {}): ItemNav {
-  return { href: e.href, etiqueta: e.etiqueta, icono: ICONOS_RUTA[e.href] ?? e.icono, ...extra };
+  const exacta = e.exacta ? { exacta: true } : {};
+  return { href: e.href, etiqueta: e.etiqueta, icono: ICONOS_RUTA[e.href] ?? e.icono, ...exacta, ...extra };
 }
 
 /**

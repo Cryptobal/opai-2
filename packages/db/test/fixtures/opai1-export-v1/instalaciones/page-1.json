@@ -1,0 +1,24 @@
+{
+  "version": "opai1-export/v1",
+  "generadoEn": "2026-11-04T13:00:00.000Z",
+  "recurso": "instalaciones",
+  "cursor": null,
+  "siguiente": null,
+  "filas": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "tenantId": "t",
+      "accountId": "11111111-1111-4111-8111-111111111111",
+      "name": "Bodega Norte",
+      "address": "Av. 1",
+      "commune": "Quilicura",
+      "lat": -33.36,
+      "lng": -70.73,
+      "status": "active",
+      "isActive": true,
+      "marcacionCode": "AB12CD34",
+      "createdAt": "2026-01-05T12:00:00.000Z",
+      "updatedAt": "2026-01-05T12:00:00.000Z"
+    }
+  ]
+}
