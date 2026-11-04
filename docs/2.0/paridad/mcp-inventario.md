@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 538 pares pantalla→capacidad · 483 con herramienta · 55 excepciones justificadas · 0 faltantes.
+**Resumen:** 541 pares pantalla→capacidad · 486 con herramienta · 55 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -30,8 +30,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
+| compartido | `app/_acciones` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
+| compartido | `app/_acciones` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/_acciones` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/_components` | `agente.conversaciones.archivar` | `agente_conversaciones_archivar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.borrar` | `agente_conversaciones_borrar` | existe |
 | compartido | `app/_components` | `agente.conversaciones.get` | `agente_conversaciones_get` | existe |
@@ -562,6 +565,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/auth.ts#accionPedirRecuperacion` | Identidad: recuperar contraseña, pública y con rate limit cerrado. |
 | `app/_acciones/auth.ts#accionRestablecer` | Identidad: restablece la contraseña con el token del correo. |
 | `app/_acciones/auth.ts#accionSalir` | Identidad: cierra la sesión del navegador. |
+| `app/_acciones/candidatos-documento.ts#buscarCandidatosDocumento` | Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre. |
 | `app/_acciones/capacidad.ts#cambiarTenant` | Sesión humana: elige la empresa de la cookie; una key ya pertenece a una empresa. |
 | `app/_acciones/capacidad.ts#ejecutarCapacidad` | Pasarela de la UI: ejecuta cualquier capacidad no interna (su herramienta MCP es la de esa capacidad). |
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |

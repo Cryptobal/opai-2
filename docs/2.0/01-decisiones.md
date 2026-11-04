@@ -1222,6 +1222,8 @@ identidad de servicio en main.
 4. La búsqueda cubre nombre de archivo, título y etiquetas; no el RUT ni el contenido del archivo. *Confirmado por Carlos (4-nov-2026).* El RUT se encuentra por la ficha de la persona (datos personales, Ley 21.719); la búsqueda dentro del texto de los archivos queda como proyecto aparte, solo si Gard lo pide.
 5. Subir desde el explorador es a nivel empresa; subir a una persona, cuenta o instalación se hace desde su ficha hasta que exista el selector «Vincular a». *Confirmado por Carlos (4-nov-2026), en dos pasos:* ahora, empresa; en un PR siguiente, el selector «Vincular a», que solo ofrece entidades dentro del alcance de quien sube (el servidor lo valida igual), con lo que los supervisores podrán subir a sus instalaciones; ese PR pasa por el Revisor porque toca permisos y alcance.
 
+**Segundo paso del punto 5 (CAR-182 · «Vincular a»).** *Decisiones de Carlos, 5-nov-2026:* (a) el selector «Vincular a» del explorador ofrece la empresa (por defecto), una cuenta, una instalación o una persona, con los tipos de documento de la capa elegida; (b) los candidatos salen de las capacidades de listar existentes, con alcance y permiso en la consulta, y la persona se muestra solo por nombre (sin RUT); (c) el servidor sigue decidiendo (`verificarEntidad`, `tipoParaEntidad`): la UI no repite esa lógica; (d) **no se amplían permisos**: `core:documentos.manage` sigue siendo de owner, admin y gerente, y el caso «el supervisor sube a sus instalaciones desde el explorador» queda como decisión de permisos aparte (permiso nuevo acotado, pasa por el Revisor). Hoy el supervisor sube desde la ficha de su instalación o persona.
+
 ---
 
 ## ADR-062 · Cobranza de ventas: vencimiento derivado y recordatorios en días hábiles
