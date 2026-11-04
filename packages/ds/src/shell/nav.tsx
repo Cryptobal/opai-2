@@ -71,7 +71,7 @@ export function BottomNav({
         {visibles.map((item) => {
           const activo = esActivo(rutaActual, item.href, item.exacta, item.activoEn);
           return (
-            <li key={item.href} className="relative min-w-0 flex-1">
+            <li key={item.href} className="relative min-w-fit flex-1">
               <Link
                 href={item.href}
                 title={item.etiqueta}
