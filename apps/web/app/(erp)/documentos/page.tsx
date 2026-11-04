@@ -3,6 +3,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
 import { cargarExplorador } from "./_componentes/datos";
+import { etiquetasEntidad } from "./_componentes/etiquetas";
 import { ListaDocumentos } from "./_componentes/lista-documentos";
 
 export const metadata = { title: "Documentos" };
@@ -10,7 +11,8 @@ export const metadata = { title: "Documentos" };
 /**
  * Explorador de Documentos (CAR-182 · PR 4, diseño v4 · 01): todos los documentos del tenant en una
  * tabla con búsqueda, filtros y paginación por cursor. La fila abre la vista previa (`?ver=`); subir
- * es a nivel empresa (`?subir=1`) y el resto se sube desde la ficha de cada entidad.
+ * (`?subir=1`) permite elegir a qué se vincula: la empresa (por defecto), una cuenta, una instalación
+ * o una persona.
  */
 export default function Documentos({ searchParams }: { searchParams: SearchParams }) {
   return (
@@ -40,8 +42,12 @@ export default function Documentos({ searchParams }: { searchParams: SearchParam
           {d.puedeSubir ? (
             <HojaSubir
               entidad={{ tipo: "tenant", id: d.tenantId }}
-              tipos={d.tipos.filter((t) => t.capa === "empresa")}
-              destino="Se guarda en los documentos de la empresa. Los de una persona, cuenta o instalación se suben desde su ficha."
+              tipos={d.tipos}
+              vincular={{
+                tenantId: d.tenantId,
+                etiquetas: etiquetasEntidad(d.voc),
+                disponibles: d.vinculables,
+              }}
             />
           ) : null}
         </>

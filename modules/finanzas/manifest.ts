@@ -133,6 +133,7 @@ export const manifest = defineModule({
     { id: "finanzas.banco.saldo_bajo_avisado", descripcion: "El saldo de cartola quedó bajo el umbral (campana in-app)." },
     { id: "finanzas.venta.borrador_creado", descripcion: "Se creó un borrador de factura o nota en el libro de ventas." },
     { id: "finanzas.venta.emitida", descripcion: "Se emitió un DTE con folio y firma." },
+    { id: "finanzas.cierre.actualizado", descripcion: "Se registró un avance del cierre de mes de un borrador (proforma, OK u observación del cliente, OC/HES)." },
     { id: "finanzas.venta.enviada_sii", descripcion: "Se envió un DTE al SII." },
     { id: "finanzas.venta.enviada_cliente", descripcion: "Se envió por correo un documento emitido al cliente (PDF y XML)." },
     { id: "finanzas.cobranza.recordatorio", descripcion: "Se envió (o se intentó) un recordatorio de cobro de una factura vencida." },
