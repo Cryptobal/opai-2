@@ -11,7 +11,7 @@ export {
   ocultarTokens,
 } from "./consola";
 export { entornoDesplegado } from "./entorno";
-export type { Correo, Mailer } from "./mailer";
+export type { AdjuntoCorreo, Correo, Mailer } from "./mailer";
 export { mailerResend } from "./resend";
 
 /**

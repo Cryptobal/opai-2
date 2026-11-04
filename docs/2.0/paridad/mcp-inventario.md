@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 503 pares pantalla→capacidad · 451 con herramienta · 52 excepciones justificadas · 0 faltantes.
+**Resumen:** 518 pares pantalla→capacidad · 466 con herramienta · 52 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -247,8 +247,20 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.crear` | `finanzas_plan_crear` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.inicializar` | `finanzas_plan_inicializar` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_ceder` | `finanzas_ventas_cesion_ceder` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_simular` | `finanzas_ventas_cesion_simular` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_cliente` | `finanzas_ventas_enviar_cliente` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_sii` | `finanzas_ventas_enviar_sii` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.libro_resumen` | `finanzas_ventas_libro_resumen` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.pdf` | `finanzas_ventas_pdf` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.actualizar` | `finanzas_ventas_programacion_actualizar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.cambiar_estado` | `finanzas_ventas_programacion_cambiar_estado` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.crear` | `finanzas_ventas_programacion_crear` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.generar` | `finanzas_ventas_programacion_generar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
@@ -464,12 +476,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
+| erp | `/finanzas/ventas/[id]` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
 | erp | `/finanzas/ventas/nuevo` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir` | `finanzas_ventas_emitir` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preflight_emision` | `finanzas_ventas_preflight_emision` | existe |
+| erp | `/finanzas/ventas/programacion/[id]/editar` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
+| erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.vista_previa` | `finanzas_ventas_programacion_vista_previa` | existe |
 | erp | `/finanzas/ventas/programacion` | `finanzas.ventas_programacion.listar` | `finanzas_ventas_programacion_listar` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.cargos.list` | `core_cargos_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.funciones.list` | `core_funciones_list` | existe |
@@ -745,11 +760,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.filas.actualizar`
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
-- `finanzas.ventas.cesion_ceder`
-- `finanzas.ventas.cesion_simular`
-- `finanzas.ventas.emitir_nota_credito`
-- `finanzas.ventas.enviar_sii`
-- `finanzas.ventas.pdf`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`
