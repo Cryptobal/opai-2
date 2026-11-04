@@ -49,7 +49,7 @@
     "/(erp)/mi-cuenta/preferencias": 178,
     "/(erp)/configuracion/integraciones/[proveedor]": 180,
     "/(platform)/platform/tenants/[id]/modulos": 171,
-    "/ds": 228,
+    "/ds": 231,
     "/(supervisor)/supervisor/personas/[id]": 165,
     "/(trabajador)/trabajador/mis-datos": 166,
     "/(trabajador)/trabajador/notificaciones": 166,
