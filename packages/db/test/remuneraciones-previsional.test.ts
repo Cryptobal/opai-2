@@ -91,7 +91,9 @@ describe.skipIf(!urlPropietario)("captura previsional: propuestas y aprobación 
   it("solo un usuario de plataforma resuelve; rechazar no toca el vigente", async () => {
     await proponer(vigenteValor + 300);
     const p = await e.admin.valorPublicado.findFirstOrThrow({ where: { indicadorId, estado: "propuesto" } });
-    await expect(resolver(p.id, true, comunId)).rejects.toThrow(/no es de plataforma/);
+    await expect(resolver(p.id, true, comunId)).rejects.toThrow(/no es owner de plataforma/);
+    const soporte = (await e.admin.user.create({ data: { name: "S", email: `s-${randomUUID()}@example.test`, platformRole: "support" } })).id;
+    await expect(resolver(p.id, true, soporte)).rejects.toThrow(/no es owner de plataforma/);
     expect(await resolver(p.id, false, platformId)).toBe("rechazado");
     const r = await e.admin.valorPublicado.findUniqueOrThrow({ where: { id: p.id } });
     expect([r.estado, r.resueltoPorId]).toEqual(["rechazado", platformId]);

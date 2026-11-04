@@ -106,9 +106,9 @@ DECLARE
   v_actual "core"."valores_publicados"%ROWTYPE;
 BEGIN
   IF p_actor IS NULL OR NOT EXISTS (
-    SELECT 1 FROM "core"."users" WHERE id = p_actor AND platform_role IS NOT NULL
+    SELECT 1 FROM "core"."users" WHERE id = p_actor AND platform_role = 'owner'
   ) THEN
-    RAISE EXCEPTION 'resolver_propuesta: el actor no es de plataforma' USING ERRCODE = 'check_violation';
+    RAISE EXCEPTION 'resolver_propuesta: el actor no es owner de plataforma' USING ERRCODE = 'check_violation';
   END IF;
   SELECT * INTO v_propuesta FROM "core"."valores_publicados" WHERE id = p_id;
   IF v_propuesta.id IS NULL OR v_propuesta.estado <> 'propuesto' THEN
@@ -170,11 +170,14 @@ END $$;
 
 COMMIT;
 
--- Reversión: snapshot Neon previo, o a mano:
+-- Reversión: snapshot Neon previo. A mano solo sirve si todavía no se aprobó ni rechazó ninguna propuesta
+-- (el DROP COLUMN pierde quién resolvió y las filas resueltas no vuelven a su estado):
 -- BEGIN;
 -- SET LOCAL lock_timeout = '5s';
 -- DROP FUNCTION IF EXISTS "core"."remuneraciones_resolver_propuesta"(uuid, boolean, uuid);
 -- DROP FUNCTION IF EXISTS "core"."remuneraciones_proponer_previsional"(text, jsonb, date, text, date);
+-- UPDATE "core"."indicadores_legales" SET "lectura_automatica" = false, "fuente_primaria" = NULL, "fuente_contraste" = NULL
+--   WHERE "clave" IN ('imm', 'topes', 'afp', 'sis', 'cesantia');  -- verificar contra la semilla 20261102190000 l.116-121
 -- DROP INDEX IF EXISTS "core"."valores_publicados_indicador_propuesto_idx";
 -- ALTER TABLE "core"."valores_publicados" DROP COLUMN IF EXISTS "resuelto_por_id", DROP COLUMN IF EXISTS "resuelto_en";
 -- COMMIT;
