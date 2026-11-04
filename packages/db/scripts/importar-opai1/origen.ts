@@ -149,6 +149,10 @@ export const datosOpai1 = z.object({
   cpqQuotes: z.array(cotizacionOpai1).default([]),
   activities: z.array(actividadOpai1).default([]),
   users: z.array(usuarioOpai1).default([]),
+  /** Avisos del lector (no frenan): código nombrado + id de 1.0, sin valores. */
+  advertencias: z
+    .array(z.object({ codigo: z.string(), recurso: z.string(), idOpai1: z.string(), campo: z.string() }))
+    .default([]),
 });
 
 export type CuentaOpai1 = z.infer<typeof cuentaOpai1>;

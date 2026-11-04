@@ -195,6 +195,71 @@
         "folioRef": "56",
         "tipoDocRef": "801"
       }
+    },
+    {
+      "id": "recurrente-refs-mixtas",
+      "tenantId": "t",
+      "name": "Refs mixtas",
+      "isActive": true,
+      "dteType": 33,
+      "receiverRut": "76000000-0",
+      "receiverName": "Cliente Demo SpA",
+      "receiverEmail": "dte@demo.cl",
+      "receiverEmailCc": [],
+      "recipientContactIds": [
+        "22222222-2222-4222-8222-222222222222"
+      ],
+      "crmAccountId": "11111111-1111-4111-8111-111111111111",
+      "installationId": "33333333-3333-4333-8333-333333333333",
+      "currency": "UF",
+      "lines": [
+        {
+          "itemName": "Servicio guardias",
+          "quantity": 1,
+          "unitPriceUf": 120.5,
+          "discountPct": 0,
+          "isExempt": false
+        }
+      ],
+      "frequency": "monthly",
+      "dayOfMonth": null,
+      "startDate": "2026-01-01T00:00:00.000Z",
+      "endDate": null,
+      "nextRunAt": "2026-12-01T00:00:00.000Z",
+      "lastRunAt": "2026-11-01T00:00:00.000Z",
+      "diasCobroDesdeFactura": null,
+      "ufFixingPolicy": "RUN_DAY",
+      "createdAt": "2026-01-05T12:00:00.000Z",
+      "updatedAt": "2026-01-05T12:00:00.000Z",
+      "attachments": [],
+      "ultimaCorridaExitosa": {
+        "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+        "templateId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "dteId": null,
+        "status": "success",
+        "error": null,
+        "ranAt": "2026-11-01T09:00:00.000Z",
+        "autoSendIssues": null
+      },
+      "additionalReferences": [
+        {
+          "fchRef": "",
+          "folioRef": "",
+          "tipoDocRef": "801",
+          "razonRef": null
+        },
+        {
+          "fchRef": "2026-10-01",
+          "folioRef": "",
+          "tipoDocRef": "801"
+        },
+        {
+          "fchRef": "2026-10-02",
+          "folioRef": 77,
+          "tipoDocRef": "HES",
+          "razonRef": "Servicio"
+        }
+      ]
     }
   ]
 }

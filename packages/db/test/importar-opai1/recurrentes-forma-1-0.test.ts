@@ -20,11 +20,9 @@ function plantilla(parcial: Record<string, unknown>) {
 }
 
 function planDe(...filas: ReturnType<typeof plantilla>[]) {
-  const plan = calcularPlan(
-    { ...fixture(), recurringInvoiceSchedules: filas },
-    estadoVacio(),
-    { modulosActivos: ["finanzas"] },
-  );
+  const plan = calcularPlan({ ...fixture(), recurringInvoiceSchedules: filas }, estadoVacio(), {
+    modulosActivos: ["finanzas"],
+  });
   return { plan, por: (id: string) => plan.programaciones.find((p) => p.idOpai1 === id) };
 }
 
@@ -66,7 +64,11 @@ describe("recurrentes con la forma real de 1.0", () => {
     );
     expect(por("q")?.datos?.frecuencia).toBe("quincenal");
     expect(por("s")?.datos).toMatchObject({ frecuencia: "semanal", diaSemana: 3 });
-    expect(por("a")?.datos).toMatchObject({ frecuencia: "anual", mesDelAnio: 6, diaGeneracion: -1 });
+    expect(por("a")?.datos).toMatchObject({
+      frecuencia: "anual",
+      mesDelAnio: 6,
+      diaGeneracion: -1,
+    });
   });
 
   it("sin cuenta de 1.0 pero con RUT: resuelve por RUT; sin cuenta en 2.0 queda congelada con aviso", () => {
@@ -88,7 +90,10 @@ describe("recurrentes con la forma real de 1.0", () => {
       razonSocial: "Receptor Ficticio",
       giro: "Servicios",
     });
-    expect(plan.avisos).toContainEqual({ codigo: "programacion_sin_cuenta_en_2_0", idOpai1: "congelada" });
+    expect(plan.avisos).toContainEqual({
+      codigo: "programacion_sin_cuenta_en_2_0",
+      idOpai1: "congelada",
+    });
     expect(por("nada")).toMatchObject({ accion: "omitido", motivo: "sin_cuenta_ni_rut" });
   });
 
@@ -102,6 +107,8 @@ describe("recurrentes con la forma real de 1.0", () => {
       plantilla({ id: "pol", ufFixingPolicy: "OTRA" }),
       plantilla({ id: "uf-sin-precio", currency: "UF" }),
       plantilla({ id: "vacia", lines: [] }),
+      plantilla({ id: "precio-neg", lines: [{ ...linea, unitPrice: -100 }] }),
+      plantilla({ id: "precio-uf-neg", currency: "UF", lines: [{ ...linea, unitPriceUf: -1 }] }),
     );
     expect(por("ok")?.accion).toBe("crear");
     expect(por("freq")?.motivo).toBe("frecuencia_no_soportada");
@@ -111,6 +118,8 @@ describe("recurrentes con la forma real de 1.0", () => {
     expect(por("pol")?.motivo).toBe("politica_uf_no_soportada");
     expect(por("uf-sin-precio")?.motivo).toBe("linea_sin_precio_de_la_moneda");
     expect(por("vacia")?.motivo).toBe("sin_lineas");
+    expect(por("precio-neg")?.motivo).toBe("linea_valor_fuera_de_rango");
+    expect(por("precio-uf-neg")?.motivo).toBe("linea_valor_fuera_de_rango");
     const reporte = construirReporte(plan, "gard");
     const motivos = reporte.omitidas.filter((o) => o.entidad === "programacion_recurrente");
     expect(motivos.map((o) => o.motivo).sort()).toContain("frecuencia_no_soportada");
@@ -126,7 +135,10 @@ describe("recurrentes con la forma real de 1.0", () => {
         lastRunAt: "2026-11-01T12:00:00.000Z",
         lastSuccessfulRun: { runAt: "2026-10-01T12:00:00.000Z" },
       }),
-      plantilla({ id: "exacto", lastSuccessfulRun: { runAt: "2026-10-01T12:00:00.000Z", period: "2026-09" } }),
+      plantilla({
+        id: "exacto",
+        lastSuccessfulRun: { runAt: "2026-10-01T12:00:00.000Z", period: "2026-09" },
+      }),
       plantilla({ id: "nunca" }),
     );
     expect(por("est")?.datos).toMatchObject({ activa: false, ultimoPeriodo10: "2026-10" });
@@ -178,7 +190,11 @@ describe("recurrentes con la forma real de 1.0", () => {
   it("la segunda corrida sobre un destino ya mapeado no crea nada", () => {
     const filas = [plantilla({ id: "idem" })];
     const destino = estadoVacio();
-    destino.ids.push({ entidadTipo: "programacion_recurrente", idExterno: "idem", entidadId: "p-1" });
+    destino.ids.push({
+      entidadTipo: "programacion_recurrente",
+      idExterno: "idem",
+      entidadId: "p-1",
+    });
     const plan = calcularPlan({ ...fixture(), recurringInvoiceSchedules: filas }, destino, {
       modulosActivos: ["finanzas"],
     });

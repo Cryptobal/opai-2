@@ -4,16 +4,18 @@ import { z } from "zod";
 const fecha = z.iso.datetime({ offset: true });
 const texto = z.string().nullish();
 const bandera = z.boolean().default(false);
+/** Número que 1.0 pudo guardar como texto dentro del JSON de líneas. */
+const numero = z.union([z.number(), z.string().trim().min(1).pipe(z.coerce.number())]).pipe(z.number().finite());
 
 /** Una línea de `FinanceDteRecurringTemplate.lines`: el precio es CLP (`unitPrice`) o UF (`unitPriceUf`). */
 export const lineaRecurrenteOpai1 = z.object({
   itemName: texto,
   description: texto,
-  quantity: z.number().min(0).default(1),
+  quantity: numero.default(1),
   unit: texto,
-  unitPrice: z.number().min(0).nullish(),
-  unitPriceUf: z.number().min(0).nullish(),
-  discountPct: z.number().min(0).max(100).default(0),
+  unitPrice: numero.nullish(),
+  unitPriceUf: numero.nullish(),
+  discountPct: numero.default(0),
   isExempt: bandera,
   /** Cuenta contable de 1.0 (sin equivalente directo en 2.0 todavía). */
   accountId: texto,
@@ -61,7 +63,7 @@ export const programacionRecurrenteOpai1 = z.object({
   facturaTiming: z.string().default("AL_EMITIR"),
   facturaDay: entero.nullish(),
   facturaMesRelativo: z.string().default("MES_SIGUIENTE"),
-  diasCobroDesdeFactura: entero.min(0).max(365).default(30),
+  diasCobroDesdeFactura: entero.default(30),
   billingPeriodMode: z.string().default("CURRENT_MONTH"),
   periodPolicy: z.string().default("CURRENT_MONTH"),
   variableAmount: bandera,
