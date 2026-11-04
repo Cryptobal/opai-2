@@ -6,7 +6,7 @@
     "/(erp)": 170,
     "/(erp)/tareas": 171,
     "/(erp)/finanzas/ventas/programacion/*": 175,
-    "/(erp)/negocios/[id]/actividad": 175,
+    "/(erp)/negocios/[id]/actividad": 176,
     "/(erp)/instalaciones/[id]/actividad": 177,
     "/(auth)/*": 153,
     "/(auth)/activar-mfa": 160,
