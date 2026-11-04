@@ -85,4 +85,5 @@ Recursos de `opai1-export/v1`: cuentas, contactos, instalaciones, etapas, negoci
 - `soloPersonas` impide que un agente la ejecute, por lo que no usa `exigeAprobacion`. Permiso: `finanzas:ventas.configure`.
 - La reversión se niega si hay cobros/gestiones/cesiones/envíos, conciliaciones o movimientos bancarios posteriores en la cuenta.
 - **Revertir nunca baja el folio** (Revisor B1): lo emitido por 1.0 ante el SII sigue usado aunque se deshaga la carga; el folio solo avanza.
-- Pendientes no bloqueantes del Revisor: excluir facturas de apertura de la secuencia automática de cobranza (si está activa), decidir si una ND (56) debe contar como deuda, bloqueos con motivo para envíos al cliente y programaciones en la reversión, tests de rechazo a agentes.
+- Decisiones de Carlos (4-nov): las facturas importadas quedan fuera de los recordatorios automáticos de cobranza (filtro en `cobranza-trabajo.ts`, con test); la ND (56) no cuenta como deuda (anula una NC; la deuda es la factura vigente).
+- Pendientes no bloqueantes del Revisor: bloqueos con motivo para envíos al cliente y programaciones en la reversión, tests de rechazo a agentes.

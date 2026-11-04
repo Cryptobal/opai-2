@@ -18,7 +18,17 @@ export const trabajoRecordatoriosCobranza = defineTrabajo({
   async handler(ctx) {
     const p = await parametrosCobranza(ctx);
     if (!p.automatico || p.pasos.length === 0) return { activo: false, enviados: 0, omitidos: 0, fallidos: 0 };
-    const docs = (await documentosCobrables(ctx)).filter((d) => estaVencida(d, p.hoy, p.plazoDefectoDias));
+    const vencidas = (await documentosCobrables(ctx)).filter((d) => estaVencida(d, p.hoy, p.plazoDefectoDias));
+    // Las facturas de la apertura desde 1.0 quedan fuera de lo automático (decisión de Carlos, CAR-168):
+    // 1.0 no mandaba nada solo y el cliente no debe recibir correos por deuda histórica sin que alguien lo decida.
+    const importadas = vencidas.length
+      ? await ctx.db.importacionFila.findMany({
+          where: { entidad: "documento_cobrar", id20: { in: vencidas.map((d) => d.id) }, importacion: { versionContrato: "finanzas-apertura@1" } },
+          select: { id20: true },
+        })
+      : [];
+    const deApertura = new Set(importadas.map((f) => f.id20));
+    const docs = vencidas.filter((d) => !deApertura.has(d.id));
     const previos = docs.length
       ? await ctx.db.cobranzaGestion.findMany({
           where: { documentoId: { in: docs.map((d) => d.id) }, origen: "automatico", resultado: "enviado", paso: { not: null } },

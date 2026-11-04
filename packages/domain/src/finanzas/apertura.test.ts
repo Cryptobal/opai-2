@@ -68,4 +68,10 @@ describe("apertura · folios y sumas", () => {
     expect(s).toEqual({ saldos: 1000, documentos: 2, montoTotal: 238_000, porCobrar: 119_000, folios: 0 });
     expect(diferenciasControl(s, { ...s, porCobrar: 0 })).toEqual(["porCobrar: 1.0=119000 · 2.0=0"]);
   });
+
+  it("la nota de débito (56) no cuenta como deuda: la deuda es la factura vigente", () => {
+    expect(saldoPorCobrar({ tipoDte: 56, montoTotal: 50_000, montoCobrado: 0 })).toBe(0);
+    expect(saldoPorCobrar({ tipoDte: 61, montoTotal: 50_000, montoCobrado: 0 })).toBe(0);
+    expect(saldoPorCobrar({ tipoDte: 33, montoTotal: 50_000, montoCobrado: 0 })).toBe(50_000);
+  });
 });

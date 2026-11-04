@@ -28,7 +28,11 @@ export type Rechazo = { entidad: "saldo" | "documento" | "folio"; clave: string;
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const entero = (n: unknown): n is number => typeof n === "number" && Number.isSafeInteger(n);
 
-/** Saldo pendiente de un documento (nunca negativo). Una NC/ND no genera cuenta por cobrar. */
+/**
+ * Saldo pendiente de un documento (nunca negativo). Una NC/ND no genera cuenta por cobrar.
+ * Regla de Carlos (4-nov-2026): la nota de débito (56) NO cuenta como deuda, porque anula una NC y
+ * la factura original vuelve a estar vigente; la deuda es esa factura, que ya viene en la apertura.
+ */
 export function saldoPorCobrar(d: Pick<DocumentoApertura, "tipoDte" | "montoTotal" | "montoCobrado">): number {
   if (d.tipoDte !== 33 && d.tipoDte !== 34) return 0;
   return Math.max(0, d.montoTotal - d.montoCobrado);
