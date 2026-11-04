@@ -65,13 +65,14 @@ export const catalogoCategoriasCreate = defineCapability({
 
 export const catalogoCategoriasUpdate = defineCapability({
   id: "cpq.catalogo_categorias.update",
-  descripcion: "Edita nombre, clase u orden de una categoría del catálogo CPQ del tenant.",
+  descripcion: "Edita nombre, clase u orden de una categoría del catálogo CPQ del tenant, o la restaura si estaba desactivada.",
   permiso: PERMISO_MODELO,
   input: z.object({
     id: uuidSchema,
     nombre: z.string().trim().min(1).max(120).optional(),
     clase: z.enum(["directo", "indirecto"]).optional(),
     orden: z.number().int().min(0).max(999).optional(),
+    activa: z.boolean().optional().describe("true restaura una categoría desactivada."),
   }),
   output: categoriaSchema,
   efecto: "escritura",

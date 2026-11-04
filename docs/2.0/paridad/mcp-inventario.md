@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 562 pares pantalla→capacidad · 507 con herramienta · 55 excepciones justificadas · 0 faltantes.
+**Resumen:** 570 pares pantalla→capacidad · 515 con herramienta · 55 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -116,7 +116,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.list` | `cpq_catalogo_categorias_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.update` | `cpq_catalogo_categorias_update` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.archivar` | `cpq_catalogo_items_archivar` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.create` | `cpq_catalogo_items_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.list` | `cpq_catalogo_items_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.update` | `cpq_catalogo_items_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.update` | `cpq_marca_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.get` | `cpq_plantillas_documento_get` | existe |
@@ -219,6 +226,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.sueldos_referencia.list` | `cpq_sueldos_referencia_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.crear` | `cpq_versiones_crear` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.parametros` | `cpq_versiones_parametros` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
@@ -783,13 +791,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
-- `cpq.catalogo_categorias.create`
-- `cpq.catalogo_categorias.desactivar`
-- `cpq.catalogo_categorias.list`
-- `cpq.catalogo_categorias.update`
-- `cpq.catalogo_items.archivar`
-- `cpq.catalogo_items.create`
-- `cpq.catalogo_items.update`
 - `cpq.correlativos.fijar`
 - `cpq.cotizaciones.retirar_aprobacion`
 - `cpq.envios_propuesta.list`
@@ -798,7 +799,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.propuestas_tecnica.update`
 - `cpq.secciones.margen`
 - `cpq.versiones.margen`
-- `cpq.versiones.parametros`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`

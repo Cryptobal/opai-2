@@ -29,7 +29,10 @@ export const versionMargenActualizar = defineCapability({
     if (input.margenModo) data["margenModo"] = input.margenModo;
     if (input.margenObjetivoPct !== undefined) data["margenObjetivoPct"] = input.margenObjetivoPct;
     if (dryRun) {
-      const r = await recalcularVersion(ctx, version.cotizacionId, version.numero, false);
+      // La vista previa aplica el cambio en memoria: antes devolvía la venta sin él.
+      const r = await recalcularVersion(ctx, version.cotizacionId, version.numero, false, {
+        version: (v) => ({ ...v, ...data }),
+      });
       return { ventaMensualClp: r?.ventaMensual ?? null };
     }
     await ctx.db.cpqVersion.update({ where: { id: version.id }, data });

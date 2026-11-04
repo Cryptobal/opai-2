@@ -15,19 +15,8 @@ import { hayBarraFijaCpq, bloqueoEnvioCpq } from "./acciones-cotizacion-logica";
 import { AccionesCotizacion } from "./acciones-cotizacion";
 import { FichaCotizacionCuerpo } from "./ficha-cotizacion-cuerpo";
 import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotizacion-modales";
+import type { MetaFicha } from "./meta-ficha";
 import { ResumenCotizacion } from "./resumen-cotizacion";
-
-type MetaFicha = {
-  fechaCalculo?: string;
-  validaHastaContrato?: string | null;
-  avisoRecalculo?: { mensaje: string } | null;
-  puedeEnviar?: boolean;
-  puedeAprobarMargen?: boolean;
-  motivoNoAprobarMargen?: string | null;
-  autoaprobacionMargen?: boolean | null;
-  aprobacion?: { bandejaId?: string } | null;
-  requiereConfirmarMutual?: boolean;
-};
 
 export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
   const router = useRouter();
@@ -143,18 +132,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           </AccionFijaTelefono>
         ) : null}
       </DetailScreen>
-      <FichaCotizacionModales
-        modales={modales}
-        cotizacionId={d.cotizacion.id}
-        codigo={d.cotizacion.codigo}
-        versionNumero={d.version.numero}
-        cuentaId={d.cuentaId} negocioId={d.cotizacion.negocioId}
-        requiereAprobacion={Boolean(c.requiereAprobacion)}
-        estadoVersion={d.version.estado}
-        enviada={d.version.estado === "enviada" || d.version.estado === "aceptada"}
-        verCostos={datos.costos}
-        recargar={recargar}
-      />
+      <FichaCotizacionModales modales={modales} d={d} calculo={c} meta={meta} verCostos={datos.costos} recargar={recargar} />
     </>
   );
 }

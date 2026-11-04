@@ -5,6 +5,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { esUuid } from "@/lib/ids";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
+import type { ParametrosVersion } from "../[id]/_componentes/margen-form";
 import type { LineaEditable } from "./puesto-tipos";
 
 export type CotizacionFila = {
@@ -102,7 +103,9 @@ export async function cargarFichaCotizacion(id: string) {
     cuentaId: string | null;
     meta?: Record<string, unknown>;
     calculo: Record<string, unknown>;
-    version: { editable: boolean; estado: string; validaHasta: string | null; numero: number };
+    version: { id: string; editable: boolean; estado: string; validaHasta: string | null; numero: number };
+    /** Solo con `cpq:costos.ver`. */
+    parametros?: ParametrosVersion;
     secciones: {
       id: string;
       nombre: string;
