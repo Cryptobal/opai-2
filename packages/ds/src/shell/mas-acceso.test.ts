@@ -57,3 +57,24 @@ describe("Más: buscador y recientes", () => {
     expect(html).toContain("Reintentar");
   });
 });
+
+describe("Más: desfijar", () => {
+  const props = {
+    items: [a, b],
+    onNavegar: () => undefined,
+    fijados: new Set(["/a"]),
+    onDesfijar: () => undefined,
+  };
+  it("con fijados ofrece «Editar»; los desfijar solo aparecen al editar (render inicial: ninguno)", () => {
+    const html = renderToStaticMarkup(createElement(RecientesMas, props));
+    expect(html).toContain("Editar");
+    expect(html).not.toContain("Desfijar");
+  });
+  it("sin fijados o sin acción no hay «Editar»", () => {
+    expect(
+      renderToStaticMarkup(createElement(RecientesMas, { ...props, fijados: new Set<string>() })),
+    ).not.toContain("Editar");
+    const { onDesfijar: _quitar, ...sinAccion } = props;
+    expect(renderToStaticMarkup(createElement(RecientesMas, sinAccion))).not.toContain("Editar");
+  });
+});

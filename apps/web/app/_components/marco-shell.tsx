@@ -14,6 +14,7 @@ import { iconoShell } from "./icono-shell";
 import { LinkMenu } from "./link-menu";
 import { empresasShell } from "./empresas-shell";
 import { usePendiente } from "./navegacion-pendiente";
+import { useAgenteShell } from "./agente/use-agente-shell";
 import { useRecientesMas } from "./use-recientes-mas";
 import { PinFichaContexto, pinDeFicha } from "./pin-ficha-contexto";
 import { useEpocaSesion } from "./refresco-navegador";
@@ -51,6 +52,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   // ERP con acceso: búsqueda, ⌘K y preferencias; sin acceso el shell avisa «Sin permisos».
   const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
   if (!enErp && preferencias !== null) setPreferencias(null);
+  const agente = useAgenteShell(Boolean(datos.agente), datos.portal);
   useEpocaSesion(datos.epoca);
   useEffect(() => {
     if (!enErp) return;
@@ -129,6 +131,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         {...(empresas.length ? { empresas } : {})}
         usuario={datos.usuario}
         menuUsuario={menu}
+        {...(agente.lanzador ? { agente: agente.lanzador } : {})}
         campana={
           datos.tenant ? (
             <Campana key={datos.epoca} portal={datos.portal} pendiente={bandejaPendiente} />
@@ -160,6 +163,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         ) : null}
         {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
         {inicio ? <PortalInicio portal={datos.portal} onCerrar={() => setInicio(false)} /> : null}
+        {agente.panel}
         <Avisos />
       </AppShell>
     </PinFichaContexto.Provider>

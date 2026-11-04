@@ -25,6 +25,7 @@ export function ContenidoMas({
   reintentarFijados,
   onBuscar,
   recientes,
+  onDesfijar,
 }: {
   items: readonly NavItem[];
   extras: readonly ItemMenu[];
@@ -118,6 +119,8 @@ export function ContenidoMas({
               items={accesos}
               rutaActual={rutaActual}
               onNavegar={navegar}
+              fijados={new Set((fijados ?? []).map((f) => f.href))}
+              {...(onDesfijar ? { onDesfijar } : {})}
               {...(errorFijados ? { error: true } : {})}
               {...(reintentarFijados ? { reintentar: reintentarFijados } : {})}
             />

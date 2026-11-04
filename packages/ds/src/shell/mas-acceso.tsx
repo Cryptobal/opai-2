@@ -1,6 +1,7 @@
 "use client";
 
-import { Clock, Search } from "lucide-react";
+import { Clock, PinOff, Search } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "../components/button";
 import type { ItemFijado } from "./fijados";
@@ -45,18 +46,37 @@ export function RecientesMas({
   onNavegar,
   error,
   reintentar,
+  fijados,
+  onDesfijar,
 }: {
   items: readonly ItemFijado[];
   rutaActual?: string;
   onNavegar: (href: string) => void;
+  /** Rutas fijadas: solo ellas se pueden desfijar (los recientes no). */
+  fijados?: ReadonlySet<string>;
+  onDesfijar?: (href: string) => void;
   error?: boolean;
   reintentar?: () => void;
 }) {
+  const [editando, setEditando] = useState(false);
+  const hayFijados = !!onDesfijar && items.some((i) => fijados?.has(i.href));
   return (
     <section aria-labelledby="mas-recientes" className="flex flex-col gap-2">
-      <h2 id="mas-recientes" className="t-label-sm px-1 text-fg">
-        Recientes y fijados
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 id="mas-recientes" className="t-label-sm px-1 text-fg">
+          Recientes y fijados
+        </h2>
+        {hayFijados ? (
+          <Button
+            variant="ghost"
+            className="h-11 px-2 text-sm text-accent"
+            aria-pressed={editando}
+            onClick={() => setEditando((v) => !v)}
+          >
+            {editando ? "Listo" : "Editar"}
+          </Button>
+        ) : null}
+      </div>
       {error ? (
         <p role="alert" className="t-caption px-1">
           No pudimos cargar tus fijados.{" "}
@@ -72,19 +92,33 @@ export function RecientesMas({
           {items.map((item) => {
             const Icono = item.icono ?? Clock;
             const activo = rutaActual !== undefined && esActivo(rutaActual, item.href);
+            const quitable = editando && !!onDesfijar && !!fijados?.has(item.href);
             return (
-              <Button
-                key={item.href}
-                variant="ghost"
-                className="h-20 min-w-0 flex-col justify-center gap-1.5 rounded-2xl border border-border bg-surface px-0.5 py-2 text-center text-xs leading-[14px] font-medium break-words whitespace-normal text-fg"
-                aria-current={activo ? "page" : undefined}
-                onClick={() => onNavegar(item.href)}
-              >
-                <span className="flex size-8 items-center justify-center rounded-[10px] bg-accent-muted text-accent">
-                  <Icono className="size-4" aria-hidden />
-                </span>
-                <span className="line-clamp-2">{item.etiqueta}</span>
-              </Button>
+              <div key={item.href} className="relative min-w-0">
+                <Button
+                  variant="ghost"
+                  className="h-20 w-full min-w-0 flex-col justify-center gap-1.5 rounded-2xl border border-border bg-surface px-0.5 py-2 text-center text-xs leading-[14px] font-medium break-words whitespace-normal text-fg"
+                  aria-current={activo ? "page" : undefined}
+                  onClick={() => onNavegar(item.href)}
+                >
+                  <span className="flex size-8 items-center justify-center rounded-[10px] bg-accent-muted text-accent">
+                    <Icono className="size-4" aria-hidden />
+                  </span>
+                  <span className="line-clamp-2">{item.etiqueta}</span>
+                </Button>
+                {quitable ? (
+                  <Button
+                    variant="ghost"
+                    className="absolute -top-2 -right-2 size-11 rounded-full p-0"
+                    aria-label={`Desfijar ${item.etiqueta}`}
+                    onClick={() => onDesfijar?.(item.href)}
+                  >
+                    <span className="flex size-6 items-center justify-center rounded-full bg-danger text-danger-fg shadow">
+                      <PinOff className="size-3.5" aria-hidden />
+                    </span>
+                  </Button>
+                ) : null}
+              </div>
             );
           })}
         </div>

@@ -46,6 +46,13 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   return {
     portal,
     acceso,
+    ...(acceso &&
+    portal === "erp" &&
+    actual &&
+    identidad.modulosActivos.includes("agente") &&
+    puede("agente:usar")
+      ? { agente: true }
+      : {}),
     epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
     iconos: Object.fromEntries(

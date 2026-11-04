@@ -81,5 +81,5 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 | D4 | **Fecha de corte** con 1.0 para facturación (folios y recurrentes) y para Comercial; tabla de equivalencia de etapas del embudo | P7, ensayo, emisión real |
 | D5 | Cargar en Configuración › Integraciones la API key de SimpleAPI, el `.pfx` con su clave y el RUT emisor; cargar el CAF real; pedir el set de certificación del SII si hace falta | Emisión real después de P3 y P4 |
 | D6 | Aprobar el Design Prompt del refresco visual y elegir los 3 o 4 indicadores de Inicio | Refresco del DS |
-| D7 | Confirmar que CAR-120 (chat del agente) va en la semana 3, después de la migración, y su precio como servicio aparte | CAR-120 |
+| D7 | ~~Confirmar que CAR-120 (chat del agente) va en la semana 3, después de la migración~~ **Adelantado por Carlos el 4-nov-2026 (chat): se construye ya**, en dos PR (5a panel y plan; 5b conversaciones guardadas, adjuntos e historial). Sigue pendiente su precio como servicio aparte (ADR-058) | CAR-120 |
 | D8 | Mover a otro proyecto de Linear las tareas CAR-103 a CAR-118, que no son de OPAI 2.0 | Orden del tablero |

@@ -9,6 +9,7 @@ import { BloqueComponentes } from "./bloque-componentes";
 import { MuestraAnexos } from "./componentes-nuevos/anexos";
 import { BloqueNuevos } from "./componentes-nuevos/bloque";
 import { MuestraCapasSueldo } from "./componentes-nuevos/capas-sueldo";
+import { MuestraPanelLateral } from "./componentes-nuevos/panel-lateral";
 import { BloqueDetalle } from "./bloque-detalle";
 import { BloqueLista } from "./bloque-lista";
 import { Bloque, BloqueFormulario, BloquePlanillaYDashboard } from "./bloques";
@@ -55,6 +56,7 @@ export function DsShowcase() {
       </Bloque>
       <Bloque titulo="PWA · sin conexión, versión nueva e instalar">
         <MuestraPwa />
+        <MuestraPanelLateral />
       </Bloque>
     </div>
   );
