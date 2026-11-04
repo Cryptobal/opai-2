@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 
 import { Button } from "../components/button";
 import { cn } from "../cn";
@@ -41,10 +41,12 @@ export function ContenidoMas({
   /** Se lee al abrir el menú (localStorage del navegador), no en cada render del shell. */
   recientes?: () => readonly ItemFijado[];
 }) {
-  const leidos = useMemo<readonly ItemFijado[]>(
-    () => (abierto ? (recientes?.() ?? []) : []),
-    [abierto, recientes],
-  );
+  // Se relee al abrir; al cerrar se conserva la última lectura para que la fila no se vacíe mientras la hoja sale.
+  const ultimos = useRef<readonly ItemFijado[]>([]);
+  const leidos = useMemo<readonly ItemFijado[]>(() => {
+    if (abierto) ultimos.current = recientes?.() ?? [];
+    return ultimos.current;
+  }, [abierto, recientes]);
   const accesos = baldosasDeAcceso(fijados ?? [], leidos);
   const grupos = agrupar(items.filter((i) => !i.pie));
   const pie = items.filter((i) => i.pie);
@@ -105,7 +107,8 @@ export function ContenidoMas({
           <BuscadorMas
             onBuscar={() => {
               onCerrar();
-              onBuscar();
+              // Después de que la hoja devuelva el foco: así la paleta se queda con él y no hay dos capas modales a la vez.
+              setTimeout(onBuscar, 0);
             }}
           />
         ) : null}
@@ -113,6 +116,7 @@ export function ContenidoMas({
           <div className="mt-3">
             <RecientesMas
               items={accesos}
+              rutaActual={rutaActual}
               onNavegar={navegar}
               {...(errorFijados ? { error: true } : {})}
               {...(reintentarFijados ? { reintentar: reintentarFijados } : {})}
