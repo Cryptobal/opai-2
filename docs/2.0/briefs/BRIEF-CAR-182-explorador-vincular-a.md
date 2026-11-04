@@ -115,7 +115,7 @@ Sin permiso de lectura de una lista (la entidad no se ofrece; si igual se pide, 
 
 ## 15. Riesgos y rollback
 
-- **Pendiente: el supervisor sube a sus instalaciones desde el explorador.** Hoy `core:documentos.manage` no es suyo y el explorador lo oculta; sube desde la ficha (portal supervisor). Hacerlo desde el explorador requiere un permiso nuevo y acotado (p. ej. subir solo a lo que tiene a cargo), que se define aparte, toca permisos y alcance y **pasa por el Revisor**. No se implementa aquí por decisión de Carlos.
+- **Pendiente: el supervisor sube a sus instalaciones desde el explorador.** Hoy `core:documentos.manage` no es suyo y el explorador lo oculta; sube desde la ficha (portal supervisor). Hacerlo desde el explorador requiere un permiso nuevo y acotado (p. ej. subir solo a lo que tiene a cargo), que se define aparte, toca permisos y alcance y **pasa por el Revisor**. No se implementa aquí por decisión de Carlos. *Resuelto después, el 4-nov-2026: ver [BRIEF-CAR-182-supervisor-sube-documentos](BRIEF-CAR-182-supervisor-sube-documentos.md).*
 - **Personas con el mismo nombre:** el selector no muestra RUT; si hay homónimos, hay que distinguirlos por contexto o subir desde la ficha. Si molesta, se puede agregar un dato no sensible (cargo o instalación) en un PR aparte.
 - **Estado de error del selector:** se resuelve con una fila no elegible porque el Combobox del DS no tiene estado de error. Si se agrega al DS (con diseño en Claude Design), se reemplaza.
 - **Tabla de capas duplicada** (`CAPA_DE_ENTIDAD` y `CAPA_DE`): la prueba falla si divergen; el servidor manda.
