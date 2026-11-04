@@ -744,6 +744,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.funciones.get`
 - `core.geo.geocodificar`
 - `core.ia.probar`
+- `core.indicadores.uf_utm`
 - `core.invitations.revoke`
 - `core.patrones.get`
 - `core.personas.laboral_actualizar`

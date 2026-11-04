@@ -163,6 +163,7 @@ core_geo_autocompletar
 core_geo_detalle
 core_geo_geocodificar
 core_ia_probar
+core_indicadores_uf_utm
 core_inicio_indicadores
 core_inicio_pendientes
 core_instalaciones_archive
