@@ -29,7 +29,12 @@ export const trabajoConversacionesVencidas = defineTrabajo({
       });
       if (lote.length === 0) break;
       const r = await ctx.db.agenteConversacion.deleteMany({
-        where: { tenantId: ctx.tenantId, id: { in: lote.map((c) => c.id) } },
+        // Repite el plazo: una conversación que recibió un turno tras el findMany ya no está vencida.
+        where: {
+          tenantId: ctx.tenantId,
+          id: { in: lote.map((c) => c.id) },
+          ultimaActividad: { lt: corte },
+        },
       });
       borradas += r.count;
       if (lote.length < LOTE) break;

@@ -29,8 +29,13 @@ it("borra lo vencido de su empresa, con el plazo por defecto de 90 días", async
   )[0].where;
   expect(corte.tenantId).toBe(TENANT);
   expect(antes - corte.ultimaActividad.lt.getTime()).toBeGreaterThanOrEqual(90 * 864e5 - 1000);
+  // El borrado repite el plazo: lo que recibió un turno entre la lectura y el borrado se salva.
   expect(db.agenteConversacion.deleteMany).toHaveBeenCalledWith({
-    where: { tenantId: TENANT, id: { in: ["a", "b"] } },
+    where: {
+      tenantId: TENANT,
+      id: { in: ["a", "b"] },
+      ultimaActividad: { lt: corte.ultimaActividad.lt },
+    },
   });
 });
 
