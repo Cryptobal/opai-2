@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 533 pares pantalla→capacidad · 479 con herramienta · 54 excepciones justificadas · 0 faltantes.
+**Resumen:** 534 pares pantalla→capacidad · 479 con herramienta · 55 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -17,6 +17,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/agente` | `agente.turno.preparar` | — | excepción |
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
 | — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
+| — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
@@ -581,6 +582,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/mcp/[[...transport]]/route.ts` | Servidor MCP (Authorization: Bearer). |
 | `app/api/mcp/k/[key]/[[...transport]]/route.ts` | Servidor MCP con la key en la URL: deprecado (410 Gone salvo MCP_KEY_EN_URL_HASTA). |
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
+| `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna). |
@@ -645,6 +647,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `cpq.cotizaciones.aprobar` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
 | `cpq.cotizaciones.enviar` | Interna legacy (CAR-144): el envío con regla A4 de márgenes va por cpq.envios_propuesta.solicitar en la ficha; se mantiene para tests y compatibilidad. |
 | `cpq.cotizaciones.rechazar_aprobacion` | Solo personas: es el control humano sobre lo que propone un agente (margen CPQ). |
+| `finanzas.bancos.recibir_web4leads` | Interna: la ruta pública `/api/t/[slug]/banco/web4leads` la ejecuta tras leer el cuerpo; la capacidad verifica la firma HMAC con el secreto de la empresa (la entrada de agentes es finanzas.bancos.sincronizar). |
 | `finanzas.folios.cargar_caf` | Solo personas: el XML del CAF incluye la llave privada; un agente no lo encola en aprobaciones (CAR-143). |
 | `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
 | `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
@@ -769,6 +772,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.margen`
 - `cpq.versiones.parametros`
 - `finanzas.bancos.saldo_sugerido`
+- `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.manual`
 - `finanzas.compras.importar`

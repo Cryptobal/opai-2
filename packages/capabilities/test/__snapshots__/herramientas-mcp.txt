@@ -294,6 +294,7 @@ finanzas_ajustes_obtener
 finanzas_bancos_guardar
 finanzas_bancos_listar
 finanzas_bancos_saldo_sugerido
+finanzas_bancos_sincronizar
 finanzas_cartolas_importar
 finanzas_celdas_cumplir
 finanzas_celdas_fijar
@@ -564,6 +565,7 @@ preview_cpq_versiones_margen
 preview_cpq_versiones_parametros
 preview_finanzas_ajustes_actualizar
 preview_finanzas_bancos_guardar
+preview_finanzas_bancos_sincronizar
 preview_finanzas_cartolas_importar
 preview_finanzas_celdas_cumplir
 preview_finanzas_celdas_fijar
