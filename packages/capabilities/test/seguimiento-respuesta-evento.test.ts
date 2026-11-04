@@ -8,7 +8,7 @@ describe("aplicarRespuesta · evento cliente_respondio", () => {
   it("la primera respuesta pausa y avisa; las siguientes dejan nota pero no repiten el evento", async () => {
     const { ctx, tabla } = contextoDePrueba({ modulosActivos: ["comercial"] });
     const fila = await ctx.db.seguimiento.create({
-      data: { tenantId: ctx.tenantId, negocioId: "n1", planId: "p1", planVersion: 1, estado: "activo" },
+      data: { tenantId: ctx.tenantId, negocioId: "n1", planId: "p1", planVersion: 1, estado: "activo", ancla: new Date(), token: "tok-1" },
     });
     const config = { alResponder: "pausar" } as never;
     for (const n of [1, 2, 3]) {

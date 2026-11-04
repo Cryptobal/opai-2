@@ -14,7 +14,7 @@ async function conMembresia(tenantId: (propio: string) => string) {
   await ctx.db.ajuste.create({
     data: { tenantId: ctx.tenantId, ambito: "tenant", sujetoId: ctx.tenantId, modulo: "comercial", clave: "seguimiento_aviso_responsable", valor: true, version: 1 },
   });
-  await ctx.db.negocio.create({ data: { id: "n1", tenantId: ctx.tenantId, titulo: "Negocio", responsableId: "vendedor-1" } });
+  await ctx.db.negocio.create({ data: { id: "n1", tenantId: ctx.tenantId, titulo: "Negocio", responsableId: "vendedor-1", cuentaId: "c1", embudoId: "e1", etapaId: "et1" } });
   await ctx.db.membership.create({ data: { tenantId: tenantId(ctx.tenantId), userId: "vendedor-1", estado: "activa", rol: "vendedor" } });
   await consumidorSeguimientoAviso.handler(ctx, ev);
   return tabla("notificacion").length;

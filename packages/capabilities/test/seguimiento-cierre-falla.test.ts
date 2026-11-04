@@ -20,7 +20,7 @@ describe("trabajo de seguimiento · cierre sin respuesta", () => {
   it("cuenta el cierre fallido y registra solo categorías, sin PII", async () => {
     const { ctx } = contextoDePrueba({ modulosActivos: ["comercial"] });
     const s = await ctx.db.seguimiento.create({
-      data: { tenantId: ctx.tenantId, negocioId: "n1", planId: "p1", planVersion: 1, estado: "activo" },
+      data: { tenantId: ctx.tenantId, negocioId: "n1", planId: "p1", planVersion: 1, estado: "activo", ancla: new Date(), token: "tok-1" },
     });
     await ctx.db.seguimientoPaso.create({
       data: { tenantId: ctx.tenantId, seguimientoId: s.id, orden: 1, estado: "hecho", ejecutor: "vendedor", canal: "llamada", programadoEn: new Date(0) },
