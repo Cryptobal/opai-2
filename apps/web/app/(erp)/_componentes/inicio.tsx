@@ -11,7 +11,6 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { ActividadInicio } from "./actividad-inicio";
-import { Bandeja } from "./bandeja-diferida";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
 import { TareasInicio } from "./tareas-inicio";
 
@@ -44,7 +43,8 @@ function saludo(ahora: Date) {
 
 type Props = { nombre: string; empresa: string; actor: string | undefined };
 
-/** Inicio del ERP (46/47): saludo, lo que requiere decisión hoy, accesos rápidos y actividad. */
+/** Inicio del ERP (46/47): saludo, lo que requiere decisión hoy, accesos rápidos y actividad. La
+ *  Bandeja completa vive solo en `/bandeja` (CAR-182): Inicio no la repite. */
 export async function InicioErp({ nombre, empresa, actor }: Props) {
   const r = await ejecutarComoUsuario<Pendiente[]>("erp", "core.inicio.pendientes", {});
   const ahora = new Date();
@@ -100,7 +100,6 @@ export async function InicioErp({ nombre, empresa, actor }: Props) {
       <Suspense fallback={null}>
         <TareasInicio />
       </Suspense>
-      <Bandeja />
     </div>
   );
 }

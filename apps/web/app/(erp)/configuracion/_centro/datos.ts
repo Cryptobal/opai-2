@@ -48,8 +48,12 @@ export async function cargarIndice() {
     }),
   ]);
   const conAjustes = new Set(datosSiHayPermiso(esquema, []).map((c) => c.modulo));
-  const modulos = datosSiHayPermiso(mods, [])
-    .filter((m) => (m.estado === "activo" || m.estado === "trial") && conAjustes.has(m.id))
+  const activos = datosSiHayPermiso(mods, []).filter(
+    (m) => m.estado === "activo" || m.estado === "trial",
+  );
+  const idsActivos = new Set(activos.map((m) => m.id));
+  const modulos = activos
+    .filter((m) => conAjustes.has(m.id))
     .map((m) =>
       m.id === "agente"
         ? {
@@ -61,7 +65,10 @@ export async function cargarIndice() {
           }
         : seccionModulo(m.id, m.nombre),
     );
-  const secciones: Seccion[] = [...SECCIONES, ...modulos].filter((x) => puede(x.permiso));
+  // Las entradas de un módulo (CAR-182: Facturación electrónica y Folios) piden el módulo activo.
+  const secciones: Seccion[] = [...SECCIONES, ...modulos].filter(
+    (x) => puede(x.permiso) && (x.modulo === undefined || idsActivos.has(x.modulo)),
+  );
   return {
     secciones,
     aprobaciones: n.ok ? (n.data.aprobacionesPendientes ?? 0) : 0,
