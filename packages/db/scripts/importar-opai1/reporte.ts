@@ -6,6 +6,7 @@ import type { Accion, Decision, Propuesta } from "./comun";
 import type { EntidadImportada } from "./destino-tipos";
 import type { EtiquetaPropuesta, Plan } from "./plan";
 import type { ResumenDestinatarios } from "./recurrentes";
+import { agruparAdvertencias, type AdvertenciaAgrupada } from "./reporte-advertencias";
 import type { ResumenTributario } from "./tributario-plan";
 
 const ACCIONES: Accion[] = ["crear", "actualizar", "sin_cambios", "conflicto", "omitido"];
@@ -37,6 +38,8 @@ export type Reporte = {
   etapasSinMapear: string[];
   negociosIncompletos: string[];
   importacionId: string | null;
+  /** Datos malos de 1.0 que no detuvieron la carga: por recurso, campo y código, con los ids de 1.0. */
+  advertencias: AdvertenciaAgrupada[];
 };
 
 function conteo(decisiones: readonly Decision<unknown>[]): Record<Accion, number> {
@@ -123,6 +126,7 @@ export function construirReporte(plan: Plan, tenant: string): Reporte {
     etapasSinMapear: plan.etapasSinMapear,
     negociosIncompletos: plan.negociosIncompletos,
     importacionId: plan.importacionId,
+    advertencias: agruparAdvertencias(plan.advertencias),
   };
 }
 
@@ -137,6 +141,9 @@ export function resumenLegible(r: Reporte): string {
   }
   if (r.propuestasFusion.length > 0)
     lineas.push(`  Propuestas de fusión (revisión humana): ${r.propuestasFusion.length}`);
+  for (const a of r.advertencias) {
+    lineas.push(`  Advertencia ${a.recurso}.${a.campo} (${a.codigo}): ${a.idsOpai1.length}`);
+  }
   for (const a of r.avisos) lineas.push(`  Aviso ${a.codigo}: ${a.idsOpai1.length}`);
   if (r.etiquetas.length > 0)
     lineas.push(`  Etiquetas por confirmar (rubro/segmento/tamaño): ${r.etiquetas.length}`);

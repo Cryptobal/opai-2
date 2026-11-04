@@ -32,6 +32,7 @@ function fechaDia(v: string | null | undefined): Resultado<string | null> {
 function convertirLinea(l: ProgramacionRecurrenteOpai1["lines"][number], moneda: string): Resultado<LineaProgramacion> {
   const glosa = textoLimpio(l.itemName) ?? textoLimpio(l.description);
   if (!glosa) return no("linea_sin_glosa");
+  if (l.quantity < 0 || l.discountPct < 0 || l.discountPct > 100) return no("linea_valor_fuera_de_rango");
   const uf = moneda === "UF";
   const precio = uf ? l.unitPriceUf : l.unitPrice;
   if (precio == null) return no("linea_sin_precio_de_la_moneda");
@@ -87,6 +88,7 @@ export function convertirProgramacion(f: ProgramacionRecurrenteOpai1): Resultado
   if (f.ufFixingPolicy && !POLITICAS_UF.includes(f.ufFixingPolicy)) return no("politica_uf_no_soportada");
   if (!enRango(f.ufFixingDay, 1, 31)) return no("dia_uf_fuera_de_rango");
   if (!enRango(f.ipcAdjustmentMonths, 1, 60)) return no("ajuste_ipc_fuera_de_rango");
+  if (!enRango(f.diasCobroDesdeFactura, 0, 365)) return no("dias_cobro_fuera_de_rango");
   const inicio = fechaDia(f.startDate);
   const fin = fechaDia(f.endDate);
   const ipcDesde = fechaDia(f.ipcStartDate);

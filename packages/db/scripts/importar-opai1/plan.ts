@@ -42,6 +42,8 @@ export type Plan = {
   etapasSinMapear: string[];
   negociosIncompletos: string[];
   importacionId: string | null;
+  /** Datos malos de 1.0 que el lector vació o descartó (recurso, fila y campo; sin valores). */
+  advertencias: DatosOpai1["advertencias"];
 };
 
 function resolverDesdeDecisiones<D>(decisiones: readonly Decision<D>[]) {
@@ -125,6 +127,7 @@ export function calcularPlan(
     etapasSinMapear: neg.etapasSinMapear,
     negociosIncompletos: neg.negociosIncompletos,
     importacionId: null,
+    advertencias: origen.advertencias,
   };
 }
 
