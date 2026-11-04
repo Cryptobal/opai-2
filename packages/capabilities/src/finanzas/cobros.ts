@@ -18,18 +18,22 @@ type LectorNc = {
   documentoEmitido: {
     groupBy(args: {
       by: ["documentoReferenciaId"];
-      where: { documentoReferenciaId: { in: string[] }; tipoDte: number; estadoDte: { in: string[] } };
+      where: { documentoReferenciaId: { in: string[] }; tipoDte: number; estadoDte: { in: string[] }; codigoReferencia: { in: number[] } };
       _sum: { montoTotal: true };
     }): Promise<{ documentoReferenciaId: string | null; _sum: { montoTotal: number | null } }[]>;
   };
 };
 
-/** Suma de las notas de crédito (61) emitidas contra cada factura. La nota de débito (56) no cuenta (regla de Carlos, 4-nov-2026). */
+/**
+ * Suma de las notas de crédito (61) emitidas contra cada factura. Solo restan las monetarias (CodRef 1 anula, 3 corrige montos),
+ * igual que `montoNcAcumuladoMonetario`; la CodRef 2 (corrige texto) y las legadas sin código no restan. La nota de débito (56)
+ * no cuenta (regla de Carlos, 4-nov-2026).
+ */
 export async function notasCreditoPorDocumento(db: LectorNc, ids: string[]): Promise<Map<string, number>> {
   if (ids.length === 0) return new Map();
   const filas = await db.documentoEmitido.groupBy({
     by: ["documentoReferenciaId"],
-    where: { documentoReferenciaId: { in: ids }, tipoDte: TIPO_DTE_NOTA_CREDITO, estadoDte: { in: [...ESTADOS_NC_QUE_RESTAN] } },
+    where: { documentoReferenciaId: { in: ids }, tipoDte: TIPO_DTE_NOTA_CREDITO, estadoDte: { in: [...ESTADOS_NC_QUE_RESTAN] }, codigoReferencia: { in: [1, 3] } },
     _sum: { montoTotal: true },
   });
   return new Map(filas.flatMap((f) => (f.documentoReferenciaId ? [[f.documentoReferenciaId, f._sum.montoTotal ?? 0] as const] : [])));

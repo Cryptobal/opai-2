@@ -1305,9 +1305,9 @@ identidad de servicio en main.
 
 ## ADR-068 · El pendiente de una factura descuenta sus notas de crédito parciales
 
-**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (regla de negocio), implementada por Claude (CAR-170). Cierra el N1 de #289.
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (regla de negocio, dada directamente en el chat del 4-nov-2026), implementada por Claude (CAR-170). Cierra el N1 de #289.
 
-**Decisión.** El pendiente de una factura emitida es `monto − notas de crédito parciales (tipo 61) − cobrado`, nunca negativo. Ejemplo: factura de $1.000.000 con NC parcial de $200.000, pendiente $800.000. Solo restan las NC emitidas (`enviado` o `aceptado`); un borrador, una NC rechazada o anulada no restan. La **nota de débito (56) no suma deuda**.
+**Decisión.** El pendiente de una factura emitida es `monto − notas de crédito parciales (tipo 61) − cobrado`, nunca negativo. Ejemplo: factura de $1.000.000 con NC parcial de $200.000, pendiente $800.000. Solo restan las NC emitidas (`enviado` o `aceptado`) y monetarias (CodRef 1 anula, 3 corrige montos, como `montoNcAcumuladoMonetario`; la CodRef 2 «corrige texto» y las legadas sin código no restan); un borrador, una NC rechazada o anulada no restan. La **nota de débito (56) no suma deuda**.
 
 **Dónde rige.** Una sola fórmula en el dominio (`saldoPendiente`) y un lector en el servidor (`notasCreditoPorDocumento`, `pendienteFacturaEmitida`): tope de conciliación (`topes-conciliacion.ts`, que ahora toma el candado y recién después lee el documento), pago manual (también en la vista previa), candidatos de conciliación, cobranza y aging por cliente, «Hoy en Finanzas», y la ficha y búsqueda de ventas (`montoNotasCredito`, `montoPendiente`). `sincronizarCobroDocumento` salda la factura con `monto − NC`.
 

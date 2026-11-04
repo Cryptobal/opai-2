@@ -130,6 +130,16 @@ describe.skipIf(omitirSuiteDb())("Finanzas · pendiente con notas de crédito pa
     expect(pend).toBeLessThan(doc.montoTotal);
   });
 
+  it("una NC que solo corrige texto (CodRef 2), o sin código, no resta deuda; la que corrige montos (3) sí", async () => {
+    const doc = await factura(150_000, "NC no monetaria");
+    const base = { tenantId, cuentaId: clienteId, documentoReferenciaId: doc.id, tipoDte: 61, estadoDte: "aceptado", montoNeto: 40_000, montoIva: 7_600, montoTotal: 47_600 };
+    await e.admin.documentoEmitido.create({ data: { ...base, codigoReferencia: 2 } });
+    await e.admin.documentoEmitido.create({ data: { ...base, codigoReferencia: null } });
+    expect(await pendienteDe(doc.id)).toMatchObject({ montoNotasCredito: 0, montoPendiente: doc.montoTotal });
+    await e.admin.documentoEmitido.create({ data: { ...base, codigoReferencia: 3 } });
+    expect(await pendienteDe(doc.id)).toMatchObject({ montoNotasCredito: 47_600, montoPendiente: doc.montoTotal - 47_600 });
+  });
+
   it("la nota de débito, y una NC rechazada o en borrador, no cambian el pendiente", async () => {
     const doc = await factura(120_000, "Ni ND ni NC inválida");
     const base = { tenantId, cuentaId: clienteId, documentoReferenciaId: doc.id, montoNeto: 40_000, montoIva: 7_600, montoTotal: 47_600 };
@@ -144,7 +154,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · pendiente con notas de crédito pa
     const cuentaB = await e.admin.cuenta.create({ data: { tenantId: tenantB, nombre: "Cliente B", rut: "77234567-8" } });
     await e.admin.documentoEmitido.create({
       data: { tenantId: tenantB, cuentaId: cuentaB.id, tipoDte: 61, estadoDte: "aceptado", documentoReferenciaId: doc.id, montoNeto: 50_000, montoTotal: 59_500 },
-    }).catch(() => undefined); // el trigger «mismo_tenant» puede rechazar la referencia cruzada: aún mejor
+    }).then(() => "creada", () => "rechazada"); // el trigger «mismo_tenant» puede rechazar la referencia cruzada: aún mejor
     expect(await pendienteDe(doc.id)).toMatchObject({ montoNotasCredito: 0, montoPendiente: doc.montoTotal });
     const ajeno = await mod.executeCapability(ctx(tenantB), "finanzas.cobros.manual", { documentoId: doc.id, monto: 1_000, cuentaId });
     expect(ajeno).toMatchObject({ ok: false });

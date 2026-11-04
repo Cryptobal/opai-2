@@ -38,7 +38,7 @@ export function BuscarFactura({ elegidas, onAgregar }: { elegidas: Elegida[]; on
             <span className="t-caption block text-fg-muted">Pendiente {clp(v.montoPendiente)}</span>
           </p>
           <Button variant="secondary" disabled={elegidas.some((x) => x.id === v.id)}
-            onClick={() => onAgregar({ id: v.id, tipo: "documento_emitido", etiqueta: etiquetaDoc(v.folio, v.cuentaNombre, v.tipoDte), pendiente: v.montoTotal - v.montoCobrado, monto: 0 })}>
+            onClick={() => onAgregar({ id: v.id, tipo: "documento_emitido", etiqueta: etiquetaDoc(v.folio, v.cuentaNombre, v.tipoDte), pendiente: v.montoPendiente, monto: 0 })}>
             Agregar
           </Button>
         </div>
