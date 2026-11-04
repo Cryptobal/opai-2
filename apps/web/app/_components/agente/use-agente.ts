@@ -33,6 +33,8 @@ export function useAgente(portal: string, abierto: boolean) {
   const [ficha, setFicha] = useState<FichaAgente | null>(null);
   const conversacion = useRef<string | null>(null);
   const ocupado = useRef(false);
+  /** Sube al sustituir el hilo: la respuesta tardía de un hilo anterior se descarta. */
+  const generacion = useRef(0);
   const bloqueo = useMemo(
     () => ({ ocupado: () => ocupado.current, fijar: (v: boolean) => void (ocupado.current = v) }),
     [],
@@ -51,6 +53,7 @@ export function useAgente(portal: string, abierto: boolean) {
       setTrabajando(true);
       const id = nuevoId();
       const turnoId = nuevoId();
+      const miGeneracion = generacion.current;
       setMensajes((ms) => [
         ...ms,
         { id: nuevoId(), rol: "yo", texto },
@@ -76,7 +79,7 @@ export function useAgente(portal: string, abierto: boolean) {
           poner(id, (m) => ({ ...m, error: textoError(r.error.code, r.error.message) }));
         } else {
           const t = r.data as Turno;
-          if (t.conversacionId) {
+          if (t.conversacionId && miGeneracion === generacion.current) {
             // Una conversación archivada no se retoma: el servidor abre otra y el título es el del turno.
             if (t.conversacionId !== conversacion.current)
               setMeta({ titulo: titular(texto), archivada: false });
@@ -111,6 +114,7 @@ export function useAgente(portal: string, abierto: boolean) {
 
   const cargar = useCallback(
     (id: string | null, hilo: Mensaje[], datos: MetaConversacion | null = null) => {
+      generacion.current += 1;
       conversacion.current = id;
       setConversacionId(id);
       setMeta(datos);
