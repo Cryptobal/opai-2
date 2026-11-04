@@ -9,7 +9,6 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
   ...(
     [
       ["whatsapp", "WhatsApp", "whatsapp"],
-      ["fintoc", "Banco (Fintoc)", "banco"],
       ["factoring", "Factoring", "factoring"],
       ["biometria", "Biometría", "biometria"],
       ["slack", "Slack", "slack"],
@@ -24,6 +23,17 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     config: sinConfig,
     disponible: false,
   })),
+  {
+    // Movimientos del banco en línea: Web4Leads (que se conecta a Fintoc) empuja un webhook firmado por
+    // empresa a `/api/t/<slug>/banco/web4leads`. OPAI no guarda credenciales del banco (CAR-bancos).
+    id: "web4leads",
+    nombre: "Banco (Web4Leads)",
+    categoria: "banco",
+    modalidades: ["propia"] as const,
+    secretos: [{ nombre: "api_key", etiqueta: "Secreto de firma del webhook de Web4Leads" }],
+    config: sinConfig,
+    disponible: true,
+  },
   {
     id: "dte_emision",
     nombre: "Emisión DTE (SII)",
