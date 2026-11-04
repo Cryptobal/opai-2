@@ -128,6 +128,18 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R1 (db)", () => {
     expect(await yo("rendiciones.rendiciones.crear", cuerpo({ centroCosto: "administracion", instalacionId: undefined }))).toMatchObject({ ok: true });
   });
 
+  it("el aviso de duplicado no revela rendiciones que quien consulta no puede ver", async () => {
+    await crear({ items: [item({ folio: "DUP-2", monto: 8_888 })] });
+    const ajeno = como(otroAprobador, "supervisor");
+    const vista = await ajeno("rendiciones.rendiciones.crear", cuerpo({ items: [item({ folio: "DUP-2", monto: 8_888 })] }), { dryRun: true });
+    expect((await dato<{ advertencias: string[] }>(vista)).advertencias).toEqual([]);
+    expect(JSON.stringify(vista)).not.toMatch(/REN-[1-9]/);
+    const r = await ajeno("rendiciones.rendiciones.crear", cuerpo({ items: [item({ folio: "DUP-2", monto: 8_888 })] }));
+    expect((await dato<{ advertencias: string[] }>(r)).advertencias).toEqual([]);
+    const conPermiso = await jefe("rendiciones.rendiciones.crear", cuerpo({ aprobadorId: undefined, items: [item({ folio: "DUP-2", monto: 8_888 })] }));
+    expect((await dato<{ advertencias: string[] }>(conPermiso)).advertencias).toHaveLength(2); // ve ambas
+  });
+
   it("la vista previa no escribe nada", async () => {
     const antes = await e.admin.rendicion.count({ where: { tenantId: tenantA } });
     expect(await yo("rendiciones.rendiciones.crear", cuerpo(), { dryRun: true })).toMatchObject({ ok: true });

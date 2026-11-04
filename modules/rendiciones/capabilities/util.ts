@@ -70,15 +70,20 @@ export async function validarItems(ctx: Contexto, items: readonly Item[]): Promi
   if (faltan.length > 0) throw reglaDeNegocio(`Al gasto ${faltan[0]! + 1} le falta la boleta o un motivo para no tenerla.`);
 }
 
-/** Avisos (no bloquean): la misma boleta ya rendida en otra rendición vigente. */
+/**
+ * Avisos (no bloquean): la misma boleta ya rendida en otra rendición vigente. Solo mira las
+ * rendiciones que el actor puede ver (ADR-022): si no, el aviso revelaría gastos y códigos ajenos.
+ */
 export async function avisosDuplicados(ctx: Contexto, items: readonly Item[], propiaId?: string): Promise<string[]> {
   const claves = new Map(items.flatMap((i, n) => { const k = claveDuplicado(i); return k ? [[k, n + 1] as const] : []; }));
   if (claves.size === 0) return [];
+  const yo = actorId(ctx);
+  const alcance = ctx.autorizar(PERMISO_VER_TODAS) ? {} : { OR: [{ solicitanteId: yo }, { aprobadorId: yo }] };
   const otros = await ctx.db.rendicionItem.findMany({
     where: {
       folio: { in: items.flatMap((i) => (i.folio ? [i.folio.trim()] : [])) },
       monto: { in: items.map((i) => i.monto) },
-      rendicion: { estado: { not: "anulada" }, ...(propiaId ? { id: { not: propiaId } } : {}) },
+      rendicion: { estado: { not: "anulada" }, ...alcance, ...(propiaId ? { id: { not: propiaId } } : {}) },
     },
     select: { proveedor: true, folio: true, monto: true, rendicion: { select: { codigo: true } } },
   });
