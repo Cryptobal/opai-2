@@ -65,7 +65,13 @@ const ICONOS_RUTA: Record<string, string> = {
 const esDesarrollo = process.env.NODE_ENV !== "production";
 
 function itemDe(e: EntradaArea, extra: Partial<ItemNav> = {}): ItemNav {
-  return { href: e.href, etiqueta: e.etiqueta, icono: ICONOS_RUTA[e.href] ?? e.icono, ...extra };
+  return {
+    href: e.href,
+    etiqueta: e.etiqueta,
+    icono: ICONOS_RUTA[e.href] ?? e.icono,
+    ...(e.exacta ? { exacta: true } : {}),
+    ...extra,
+  };
 }
 
 /**
@@ -166,10 +172,7 @@ export function navegacionPortal(
   if (portal === "trabajador") {
     const mas = { href: `${href}/mas`, etiqueta: "Más", icono: "Ellipsis", activoEn: `${href}/privacidad` };
     if (!modulosActivos.includes("portal_trabajador")) {
-      return [
-        { href, etiqueta: "Inicio", icono: "Home", exacta: true },
-        mas,
-      ];
+      return [{ href, etiqueta: "Inicio", icono: "Home", exacta: true }, mas];
     }
     return [
       { href, etiqueta: "Inicio", icono: "Home", exacta: true },

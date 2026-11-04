@@ -9,10 +9,15 @@ import { asegurarRegistro } from "@/lib/registro";
 /**
  * CAR-182: el menú del ERP con todos los módulos activos y todos los permisos. Bandeja una sola vez,
  * catálogos fuera del menú (Cargos, Folios, Configuración DTE, Plan de cuentas), Cuentas y Contactos
- * en Comercial, áreas en orden de uso y el área de Firmas rotulada «Documentos».
+ * en Comercial, áreas en orden de uso y el área Documentos con el Explorador y Firmas.
  */
 const MODULOS = ["comercial", "cpq", "pauta", "tickets", "nomina", "finanzas"];
-const CATALOGOS = ["/cargos", "/finanzas/folios", "/finanzas/configuracion-dte", "/finanzas/plan-de-cuentas"];
+const CATALOGOS = [
+  "/cargos",
+  "/finanzas/folios",
+  "/finanzas/configuracion-dte",
+  "/finanzas/plan-de-cuentas",
+];
 
 beforeAll(() => asegurarRegistro());
 
@@ -36,7 +41,9 @@ describe("menú del ERP (CAR-182)", () => {
   });
 
   it("pone Cuentas y Contactos al final de Comercial", () => {
-    const comercial = armar().nav.filter((n) => n.grupo === "Comercial").map((n) => n.href);
+    const comercial = armar()
+      .nav.filter((n) => n.grupo === "Comercial")
+      .map((n) => n.href);
     expect(comercial.slice(0, 2)).toEqual(["/solicitudes", "/negocios"]);
     expect(comercial).toEqual(expect.arrayContaining(["/tareas", "/cotizaciones"]));
     expect(comercial.slice(-2)).toEqual(["/cuentas", "/contactos"]);
@@ -47,12 +54,39 @@ describe("menú del ERP (CAR-182)", () => {
     expect(nav.find((n) => n.href === "/remuneraciones")?.grupo).toBe("Personas");
     expect(nav.find((n) => n.href === "/documentos/firmas")?.grupo).toBe("Documentos");
   });
+
+  it("pone el Explorador primero en Documentos, activo solo en su ruta, y Firmas después", () => {
+    const { nav } = armar();
+    const documentos = nav.filter((n) => n.grupo === "Documentos");
+    expect(documentos.map((n) => [n.href, n.etiqueta])).toEqual([
+      ["/documentos", "Explorador"],
+      ["/documentos/firmas", "Firmas"],
+    ]);
+    // `/documentos/firmas` cuelga de `/documentos`: sin `exacta` se marcarían las dos entradas.
+    expect(documentos[0]?.exacta).toBe(true);
+    expect(documentos[1]?.exacta).toBeUndefined();
+  });
+
+  it("el Explorador exige documentos.read y Firmas firmas.read, cada uno por separado", () => {
+    const sin = (p: string) =>
+      navegacionErp("owner", (x) => x !== p, MODULOS, vocabulario("seguridad")).nav.map(
+        (n) => n.href,
+      );
+    expect(sin("core:documentos.read")).not.toContain("/documentos");
+    expect(sin("core:documentos.read")).toContain("/documentos/firmas");
+    expect(sin("core:firmas.read")).toContain("/documentos");
+    expect(sin("core:firmas.read")).not.toContain("/documentos/firmas");
+  });
 });
 
 describe("catálogos en Configuración (CAR-182)", () => {
   it("Cargos en Operación, con el permiso de estructuras y su ruta de siempre", () => {
     const cargos = SECCIONES.find((s) => s.id === "cargos");
-    expect(cargos).toMatchObject({ href: "/cargos", grupo: "operacion", permiso: "core:estructuras.read" });
+    expect(cargos).toMatchObject({
+      href: "/cargos",
+      grupo: "operacion",
+      permiso: "core:estructuras.read",
+    });
     expect(cargos?.modulo).toBeUndefined();
   });
 
@@ -61,7 +95,10 @@ describe("catálogos en Configuración (CAR-182)", () => {
       ["facturacion-electronica", "/finanzas/configuracion-dte"],
       ["folios", "/finanzas/folios"],
     ] as const) {
-      expect(SECCIONES.find((s) => s.id === id), id).toMatchObject({
+      expect(
+        SECCIONES.find((s) => s.id === id),
+        id,
+      ).toMatchObject({
         href,
         grupo: "empresa",
         permiso: "finanzas:ventas.configure",
