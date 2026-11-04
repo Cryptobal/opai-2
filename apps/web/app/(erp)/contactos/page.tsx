@@ -30,7 +30,7 @@ export default function Contactos({ searchParams }: Props) {
           unPanelHastaLg
           etiquetaLista="Lista de contactos"
           vacio={{ texto: "Elige un contacto", icono: Users }}
-          lista={<ListaContactos state={l.state} items={l.items} q={l.q} />}
+          lista={<ListaContactos state={l.state} items={l.items} q={l.q} etiquetas={l.etiquetas} />}
         />
       )}
     </PaginaPortal>

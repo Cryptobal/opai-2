@@ -10,7 +10,7 @@ export function consultaLista(p: Parametros) {
   const columna = p["tablero"];
   if (p["vista"] !== "lista" && columna && esUuid(columna)) return `?tablero=${columna}`;
   const q = new URLSearchParams({ vista: "lista" });
-  for (const k of ["q", "estado", "etapa"]) if (p[k]) q.set(k, p[k]);
+  for (const k of ["q", "estado", "etapa", "etiqueta"]) if (p[k]) q.set(k, p[k]);
   return `?${q.toString()}`;
 }
 
