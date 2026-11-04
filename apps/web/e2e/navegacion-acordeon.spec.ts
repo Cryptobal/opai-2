@@ -52,6 +52,9 @@ test("al navegar solo queda abierta el área de la ruta", async ({ page }, info)
   const personas = nav.getByRole("button", { name: "Personas", exact: true });
   await expect(clientes).toHaveAttribute("aria-expanded", "true");
   await expect(personas).toHaveAttribute("aria-expanded", "false");
+  // Cada área es un grupo plegable (también las de una sola entrada, CAR-182): se abre y luego se entra.
+  await personas.click();
+  await expect(personas).toHaveAttribute("aria-expanded", "true");
   await nav.getByRole("link", { name: "Personas", exact: true }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/personas$/);
   await expect(personas).toHaveAttribute("aria-expanded", "true");

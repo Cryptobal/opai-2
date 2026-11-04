@@ -12,3 +12,5 @@ export * from "./derivadas-dte";
 export * from "./dte-consulta-sii";
 export * from "./cesion-calculo";
 export * from "./bancos";
+export * from "./programacion";
+export * from "./programacion-montos";
