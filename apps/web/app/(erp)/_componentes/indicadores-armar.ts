@@ -56,7 +56,7 @@ export function armarIndicadores(d: Indicadores, ufEscala: number): Tarjeta[] {
   if (d.negocios) {
     const n = d.negocios;
     const aprobar = d.cotizacionesPorAprobar;
-    const partes = [`${plural(n.cantidad, "negocio", "negocios")}/mes`];
+    const partes = [plural(n.cantidad, "negocio", "negocios")];
     if (aprobar !== null)
       partes.push(`${plural(aprobar, "cotización", "cotizaciones")} por aprobar`);
     t.push({

@@ -1,6 +1,7 @@
 import { enScope } from "../../../autorizacion";
 import type { Contexto } from "../../../types";
 
+// Abiertos = abierto y en_curso; `resuelto` no cuenta (core no importa el dominio de tickets).
 const VIVOS = ["abierto", "en_curso"];
 
 export type TicketsInicio = {
