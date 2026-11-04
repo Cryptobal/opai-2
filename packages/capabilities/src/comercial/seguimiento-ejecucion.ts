@@ -77,6 +77,9 @@ export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: Co
     if (destino === "cancelado")
       await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
   }
-  await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
+  // Una vez por cambio real de estado (activo → pausado/cancelado): las respuestas siguientes a un
+  // seguimiento ya detenido dejan su nota pero no repiten el aviso al vendedor.
+  if (destino)
+    await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
   return actividadId;
 }
