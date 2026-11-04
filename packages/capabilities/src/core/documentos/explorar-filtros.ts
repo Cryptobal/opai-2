@@ -61,3 +61,25 @@ export function ordenDe(o: Orden): Prisma.DocumentoOrderByWithRelationInput[] {
     return [{ venceEn: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }, { id: "asc" }];
   return [{ createdAt: "desc" }, { id: "desc" }];
 }
+
+type Ancla = { id: string; nombre: string; venceEn: Date | null; createdAt: Date };
+
+/**
+ * Página siguiente armada a mano (keyset) sobre las mismas columnas del orden. El `cursor` de Prisma
+ * no sirve con `venceEn` nulo: compara por la fila ancla y los NULL no se comparan con `<`/`>`.
+ */
+export function desdeAncla(o: Orden, a: Ancla): Prisma.DocumentoWhereInput {
+  const { id, createdAt } = a;
+  const masViejo: Prisma.DocumentoWhereInput = {
+    OR: [{ createdAt: { lt: createdAt } }, { createdAt, id: { gt: id } }],
+  };
+  if (o === "nombre")
+    return { OR: [{ nombre: { gt: a.nombre } }, { nombre: a.nombre, id: { gt: id } }] };
+  if (o === "recientes")
+    return { OR: [{ createdAt: { lt: createdAt } }, { createdAt, id: { lt: id } }] };
+  // "vence": venceEn asc con nulos al final, luego createdAt desc e id asc.
+  if (a.venceEn === null) return { venceEn: null, ...masViejo };
+  return {
+    OR: [{ venceEn: { gt: a.venceEn } }, { venceEn: a.venceEn, ...masViejo }, { venceEn: null }],
+  };
+}

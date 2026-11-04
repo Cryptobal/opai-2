@@ -10,7 +10,7 @@ import { hoy } from "../maestros/comun";
 import { documentosEnAlcance } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import { firmaDe, propietariosDe } from "./explorar-entidades";
-import { dondeTexto, dondeVigencia, ORDENES, ordenDe } from "./explorar-filtros";
+import { dondeTexto, dondeVigencia, desdeAncla, ORDENES, ordenDe } from "./explorar-filtros";
 import { filtroDocumentoSensible } from "./sensibles";
 import { documentoSchema, ENTIDADES, vistaDocumento } from "./vista";
 
@@ -79,20 +79,15 @@ export const documentosExplorar = defineCapability({
     ];
     const where: Prisma.DocumentoWhereInput = { AND: filtros };
     // El cursor debe ser un documento que esta misma consulta devolvería: ancla fuera de alcance = no existe.
-    if (
-      input.cursor &&
-      !(await ctx.db.documento.findFirst({
-        where: { AND: [where, { id: input.cursor }] },
-        select: { id: true },
-      }))
-    )
-      throw noEncontrado("La página pedida");
+    const ancla = input.cursor
+      ? await ctx.db.documento.findFirst({ where: { AND: [where, { id: input.cursor }] } })
+      : null;
+    if (input.cursor && !ancla) throw noEncontrado("La página pedida");
     const [filas, total] = await Promise.all([
       ctx.db.documento.findMany({
-        where,
+        where: ancla ? { AND: [where, desdeAncla(input.orden, ancla)] } : where,
         orderBy: ordenDe(input.orden),
         take: input.limite + 1,
-        ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
       }),
       ctx.db.documento.count({ where }),
     ]);
@@ -109,7 +104,7 @@ export const documentosExplorar = defineCapability({
     return {
       items: docs.map((d) => ({
         ...vistaDocumento(d, d.tipoId ? tipos.get(d.tipoId) : null, hoy()),
-        entidad: propietarios.porDocumento.get(d.id) ?? null,
+        entidad: propietarios.get(d.id) ?? null,
         firma: firmas.get(d.id) ?? null,
       })),
       siguiente: filas.length > input.limite ? (docs.at(-1)?.id ?? null) : null,

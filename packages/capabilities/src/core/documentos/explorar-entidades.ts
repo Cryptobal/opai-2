@@ -15,9 +15,9 @@ type Nombrada = { id: string; nombre: string };
 export async function propietariosDe(
   ctx: Contexto,
   documentoIds: readonly string[],
-): Promise<{ porDocumento: Map<string, EntidadVista>; personasReveladas: string[] }> {
+): Promise<Map<string, EntidadVista>> {
   const porDocumento = new Map<string, EntidadVista>();
-  if (!documentoIds.length) return { porDocumento, personasReveladas: [] };
+  if (!documentoIds.length) return porDocumento;
   const vinculos = await ctx.db.documentoVinculo.findMany({
     where: { documentoId: { in: [...documentoIds] }, rol: "propietario" },
     select: { documentoId: true, entidadTipo: true, entidadId: true },
@@ -59,7 +59,7 @@ export async function propietariosDe(
       id: v.entidadId,
       nombre: nombres.get(v.entidadId) ?? null,
     });
-  return { porDocumento, personasReveladas: personas.map((p) => p.id) };
+  return porDocumento;
 }
 
 /** Estado de firma por documento: pendiente si hay una solicitud viva; firmado si alguna se completó. */
