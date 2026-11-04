@@ -1,7 +1,8 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
 
-import { cargarCierre, RUTA_CIERRE } from "./_componentes/datos";
+import { cargarCierre } from "./_componentes/datos";
+import { RUTA_CIERRE } from "./_componentes/meses";
 import { PantallaCierre } from "./_componentes/pantalla-cierre";
 
 export const metadata = { title: "Cierre de mes" };

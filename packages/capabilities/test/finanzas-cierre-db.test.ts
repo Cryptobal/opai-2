@@ -82,6 +82,18 @@ describe.skipIf(!urlPropietario)("Finanzas · cierre de mes (db)", () => {
     expect(otra).toMatchObject({ emitidos: 0, omitidos: 2 });
   });
 
+  it("si una emisión del lote falla, no queda emitida ninguna (todo o nada)", async () => {
+    const sinRut = await s.e.admin.cuenta.create({ data: { tenantId: s.tenantId, nombre: "Cliente sin RUT" } });
+    const ok = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", { cuentaId: s.cuentaId, tipoDte: 33, lineas: [{ glosa: "A", monto: 10_000 }] });
+    const mal = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", { cuentaId: sinRut.id, tipoDte: 33, lineas: [{ glosa: "B", monto: 10_000 }] });
+    await cambiar(ok.id, { accion: "marcar_ok" });
+    await cambiar(mal.id, { accion: "marcar_ok" });
+    const r = await s.mod.executeCapability(s.ctx(), "finanzas.cierre.emitir_lote", { documentoIds: [ok.id, mal.id] });
+    expect(r.ok).toBe(false);
+    const filas = await s.e.admin.documentoEmitido.findMany({ where: { id: { in: [ok.id, mal.id] } }, select: { estadoDte: true, folio: true } });
+    expect(filas).toEqual([{ estadoDte: "borrador", folio: null }, { estadoDte: "borrador", folio: null }]);
+  });
+
   it("un documento emitido ya no admite seguimiento", async () => {
     const r = await s.mod.executeCapability(s.ctx(), "finanzas.cierre.actualizar", {
       documentoId: ids[0], cambio: { accion: "reabrir" },

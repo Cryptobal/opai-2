@@ -52,6 +52,8 @@ export const cierreActualizar = defineCapability({
         : {}),
       ...(input.cambio.accion === "marcar_ok" ? { okEn: ahora } : {}),
       ...(input.cambio.accion === "observar" ? { observadaEn: ahora } : {}),
+      ...(input.cambio.accion === "reabrir" ? { okEn: null, observadaEn: null } : {}),
+      ...(input.cambio.accion === "marcar_enviada" || input.cambio.accion === "observar" ? { okEn: null } : {}),
     };
     const datos = {
       estado: s.estado,

@@ -10,7 +10,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
-import { mesVecino, RUTA_CIERRE } from "./datos";
+import { mesVecino, RUTA_CIERRE } from "./meses";
 import { DialogoLote, DialogoObservar, DialogoOcHes } from "./dialogos-cierre";
 import { type AccionFila, FilaCierre } from "./fila-cierre";
 import type { ItemCierre, ResultadoLote, TableroCierre } from "./tipos";
@@ -34,7 +34,8 @@ export function PantallaCierre({ state, periodo, tablero, gestiona }: Props) {
   const [dialogo, setDialogo] = useState<{ tipo: "oc_hes" | "observar"; item: ItemCierre } | null>(null);
   const [lote, setLote] = useState<ResultadoLote | null>(null);
   const items = tablero?.items ?? [];
-  const listos = items.filter((i) => i.etapa === "listo");
+  const todosListos = items.filter((i) => i.etapa === "listo");
+  const listos = todosListos.slice(0, 50); // el lote admite hasta 50 por aprobación
 
   async function aplicar(item: ItemCierre, cambio: Record<string, unknown>, aviso: string) {
     const r = await ejecutar("finanzas.cierre.actualizar", { documentoId: item.documentoId, cambio });
@@ -57,7 +58,7 @@ export function PantallaCierre({ state, periodo, tablero, gestiona }: Props) {
   }
   async function emitirLote() {
     const r = await ejecutar<ResultadoLote>(
-      "finanzas.cierre.emitir_lote", { documentoIds: listos.map((i) => i.documentoId) }, false, "layout", `cierre-${periodo}-${intento.current}`,
+      "finanzas.cierre.emitir_lote", { documentoIds: listos.map((i) => i.documentoId) }, false, "layout", `cierre-${periodo}-${listos.map((i) => i.documentoId.slice(0, 8)).join("")}-${intento.current}`,
     );
     setLote(null);
     if (r) {
@@ -76,7 +77,7 @@ export function PantallaCierre({ state, periodo, tablero, gestiona }: Props) {
           <EnlaceBoton href={`${RUTA_CIERRE}?periodo=${mesVecino(periodo, 1)}`} variante="secondary" etiqueta="Mes siguiente">→</EnlaceBoton>
         </div>
         {gestiona && listos.length ? (
-          <Button disabled={pendiente} onClick={() => void revisarLote()}>Emitir {listos.length} listos</Button>
+          <Button disabled={pendiente} onClick={() => void revisarLote()}>Emitir {listos.length} listos{todosListos.length > listos.length ? ` de ${todosListos.length}` : ""}</Button>
         ) : null}
       </div>
       {error ? <Alerta tono="danger" titulo="No se pudo completar">{error}</Alerta> : null}

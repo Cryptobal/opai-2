@@ -45,11 +45,12 @@ export function DialogoObservar(p: { pendiente: boolean; onCerrar: () => void; o
 
 /** Confirmación del lote: la vista previa dice qué se emite y qué se omite; confirmar es la aprobación. */
 export function DialogoLote(p: { items: ItemCierre[]; vista: ResultadoLote | null; pendiente: boolean; onCerrar: () => void; onEmitir: () => void }) {
-  const total = p.items.reduce((s, i) => s + i.montoTotal, 0);
+  const omitidoIds = new Set(p.vista?.resultados.filter((r) => r.estado === "omitido").map((r) => r.documentoId));
+  const total = p.items.filter((i) => !omitidoIds.has(i.documentoId)).reduce((s, i) => s + i.montoTotal, 0);
   const omitidos = p.vista?.resultados.filter((r) => r.estado === "omitido") ?? [];
   return (
     <Dialog abierto titulo={`Emitir ${p.items.length} documento${p.items.length === 1 ? "" : "s"}`} onCerrar={p.onCerrar}>
-      <p className="text-sm">
+      <p className="t-body-sm">
         Se asignará folio y se firmará cada documento, por <strong className="t-numeric">{pesos(total)}</strong> en total. Es irreversible; si
         una emisión falla, no se emite ninguna.
       </p>
