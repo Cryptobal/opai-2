@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 // Plan de embudo comercial (etapas, negocios, historial, contactos del negocio) en dry-run.
 // La carga real a `comercial.*` queda fuera de `aplicar.ts` hasta el PR de apply CRM.
 /* eslint-disable max-lines -- plan comercial + equivalencia Gard (CAR-157) */
