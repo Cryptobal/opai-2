@@ -1209,3 +1209,15 @@ identidad de servicio en main.
 3. **Justo antes del squash** quien integra **no** comprueba «behind»; comprueba checks en verde sobre el head y, cuando corresponde Revisor, «Revisor OPAI 2.0: sin bloqueos» sobre ese head.
 
 **Consecuencias.** Se alinean `AGENTS.md`, `OPERACION-agentes.md`, `01-decisiones.md` (ADR-054 §6), `checklists/revision.md`, `INSTRUCCIONES-proyecto-claude.md` y la plantilla del PR.
+
+---
+
+## Adenda ADR-019 · Explorador central de Documentos (CAR-182 · PR 4)
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude (constructor), a confirmar por Carlos en los puntos marcados · **Complementa** ADR-019, ADR-022 y NÚCLEO-H.
+
+1. El explorador (`/documentos`, diseño v4 · 01 aprobado el 30-oct-2026) lee con `core.documentos.explorar`, una lectura nueva: `list` queda para las fichas. Alcance del supervisor y exclusión de documentos sensibles van en la consulta; la lectura se audita con los ids de la página (y de las personas cuyo nombre se muestra).
+2. **La fila «Documento restringido» del diseño no se implementa.** Mostrarla revelaría que existe un documento que el actor no puede ver. Ni filas ni contadores de lo excluido. *A confirmar con Carlos si quiere un contador.*
+3. El nombre de la entidad propietaria solo se devuelve si el actor puede leer ese tipo de entidad; sin permiso viaja solo su tipo y su id.
+4. La búsqueda cubre nombre de archivo, título y etiquetas; no el RUT ni el contenido del archivo.
+5. Subir desde el explorador es a nivel empresa; subir a una persona, cuenta o instalación se hace desde su ficha hasta que exista el selector «Vincular a». *A confirmar con Carlos.*
