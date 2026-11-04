@@ -1212,6 +1212,18 @@ identidad de servicio en main.
 
 ---
 
+## Adenda ADR-019 · Explorador central de Documentos (CAR-182 · PR 4)
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude (constructor), puntos 2, 4 y 5 confirmados por Carlos el 4-nov-2026 (chat, «ok» a la recomendación) · **Complementa** ADR-019, ADR-022 y NÚCLEO-H.
+
+1. El explorador (`/documentos`, diseño v4 · 01 aprobado el 30-oct-2026) lee con `core.documentos.explorar`, una lectura nueva: `list` queda para las fichas. Alcance del supervisor y exclusión de documentos sensibles van en la consulta; la lectura se audita con los ids de la página (y de las personas cuyo nombre se muestra).
+2. **La fila «Documento restringido» del diseño no se implementa.** Mostrarla revelaría que existe un documento que el actor no puede ver. Ni filas ni contadores de lo excluido. *Confirmado por Carlos (4-nov-2026).* Si más adelante hace falta pedir acceso, será un botón «Solicitar acceso» que no revele nada.
+3. El nombre de la entidad propietaria solo se devuelve si el actor puede leer ese tipo de entidad; sin permiso viaja solo su tipo y su id.
+4. La búsqueda cubre nombre de archivo, título y etiquetas; no el RUT ni el contenido del archivo. *Confirmado por Carlos (4-nov-2026).* El RUT se encuentra por la ficha de la persona (datos personales, Ley 21.719); la búsqueda dentro del texto de los archivos queda como proyecto aparte, solo si Gard lo pide.
+5. Subir desde el explorador es a nivel empresa; subir a una persona, cuenta o instalación se hace desde su ficha hasta que exista el selector «Vincular a». *Confirmado por Carlos (4-nov-2026), en dos pasos:* ahora, empresa; en un PR siguiente, el selector «Vincular a», que solo ofrece entidades dentro del alcance de quien sube (el servidor lo valida igual), con lo que los supervisores podrán subir a sus instalaciones; ese PR pasa por el Revisor porque toca permisos y alcance.
+
+---
+
 ## ADR-062 · Cobranza de ventas: vencimiento derivado y recordatorios en días hábiles
 
 **Fecha:** 4-nov-2026 · **Estado:** propuesto (reglas por confirmar por Carlos) · **Origen:** CAR-166 (F4), auditoría de Finanzas §2.1, construido por Claude.

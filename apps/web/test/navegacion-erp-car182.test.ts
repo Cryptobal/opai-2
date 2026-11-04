@@ -9,7 +9,7 @@ import { asegurarRegistro } from "@/lib/registro";
 /**
  * CAR-182: el menú del ERP con todos los módulos activos y todos los permisos. Bandeja una sola vez,
  * catálogos fuera del menú (Cargos, Folios, Configuración DTE, Plan de cuentas), Cuentas y Contactos
- * en Comercial, áreas en orden de uso y el área de Firmas rotulada «Documentos».
+ * en Comercial, áreas en orden de uso y el área Documentos con el Explorador y Firmas.
  */
 const MODULOS = ["comercial", "cpq", "pauta", "tickets", "nomina", "finanzas"];
 const CATALOGOS = ["/cargos", "/finanzas/folios", "/finanzas/configuracion-dte", "/finanzas/plan-de-cuentas"];
@@ -46,6 +46,26 @@ describe("menú del ERP (CAR-182)", () => {
     const { nav } = armar();
     expect(nav.find((n) => n.href === "/remuneraciones")?.grupo).toBe("Personas");
     expect(nav.find((n) => n.href === "/documentos/firmas")?.grupo).toBe("Documentos");
+  });
+
+  it("pone el Explorador primero en Documentos, activo solo en su ruta, y Firmas después", () => {
+    const documentos = armar().nav.filter((n) => n.grupo === "Documentos");
+    expect(documentos.map((n) => [n.href, n.etiqueta])).toEqual([
+      ["/documentos", "Explorador"],
+      ["/documentos/firmas", "Firmas"],
+    ]);
+    // `/documentos/firmas` cuelga de `/documentos`: sin `exacta` se marcarían las dos entradas.
+    expect(documentos[0]?.exacta).toBe(true);
+    expect(documentos[1]?.exacta).toBeUndefined();
+  });
+
+  it("el Explorador exige documentos.read y Firmas firmas.read, cada uno por separado", () => {
+    const sin = (p: string) =>
+      navegacionErp("owner", (x) => x !== p, MODULOS, vocabulario("seguridad")).nav.map((n) => n.href);
+    expect(sin("core:documentos.read")).not.toContain("/documentos");
+    expect(sin("core:documentos.read")).toContain("/documentos/firmas");
+    expect(sin("core:firmas.read")).toContain("/documentos");
+    expect(sin("core:firmas.read")).not.toContain("/documentos/firmas");
   });
 });
 

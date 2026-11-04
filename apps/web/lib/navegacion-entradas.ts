@@ -46,12 +46,23 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
     },
     {
       area: "documentos",
+      href: "/documentos",
+      etiqueta: "Explorador",
+      icono: "FileText",
+      modulo: "core",
+      permiso: PERMISOS_CORE.documentosRead,
+      orden: 1,
+      // `/documentos/firmas` es otra entrada: el explorador solo se marca en su propia ruta.
+      exacta: true,
+    },
+    {
+      area: "documentos",
       href: "/documentos/firmas",
       etiqueta: "Firmas",
       icono: "PenLine",
       modulo: "core",
       permiso: PERMISOS_CORE.firmasRead,
-      orden: 1,
+      orden: 2,
     },
   ];
 }

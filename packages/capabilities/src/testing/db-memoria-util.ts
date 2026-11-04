@@ -64,20 +64,31 @@ export function cumple(fila: Fila, where: Where = {}): boolean {
   });
 }
 
-type Orden = Record<string, "asc" | "desc">;
+type Dir = "asc" | "desc" | { sort: "asc" | "desc"; nulls?: "first" | "last" };
+type Orden = Record<string, Dir>;
 
-/** orderBy de Prisma: objeto o lista de objetos `{ campo: "asc" | "desc" }`. */
+/** orderBy de Prisma: objeto o lista de objetos `{ campo: "asc" | "desc" | { sort, nulls } }`. */
 export function ordenar(filas: Fila[], orderBy: unknown): Fila[] {
   if (!orderBy) return filas;
   const criterios = (Array.isArray(orderBy) ? orderBy : [orderBy]) as Orden[];
   return [...filas].sort((a, b) => {
     for (const c of criterios) {
-      for (const [campo, dir] of Object.entries(c)) {
-        const x = a[campo] as number | string | Date;
-        const y = b[campo] as number | string | Date;
+      for (const [campo, d] of Object.entries(c)) {
+        const sort = typeof d === "string" ? d : d.sort;
+        const nulls = typeof d === "string" ? undefined : d.nulls;
+        const x = a[campo] as number | string | Date | null | undefined;
+        const y = b[campo] as number | string | Date | null | undefined;
         if (x === y) continue;
+        const nx = x === null || x === undefined;
+        const ny = y === null || y === undefined;
+        if (nx || ny) {
+          if (nx && ny) continue;
+          // Prisma/Postgres: NULL al final en asc y al inicio en desc, salvo que se indique `nulls`.
+          const alFinal = nulls ? nulls === "last" : sort === "asc";
+          return nx === alFinal ? 1 : -1;
+        }
         const r = x < y ? -1 : 1;
-        return dir === "desc" ? -r : r;
+        return sort === "desc" ? -r : r;
       }
     }
     return 0;
