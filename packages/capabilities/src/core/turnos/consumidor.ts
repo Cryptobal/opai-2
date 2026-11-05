@@ -9,7 +9,7 @@ const payload = z.object({ puestoId: z.string().uuid(), desde: fecha, hasta: fec
 
 /**
  * Regenera los turnos esperados de los días que tocó un cambio de la Pauta. Elegimos un consumidor
- * idempotente del outbox (ADR-029) y no la misma transacción de cada capacidad (ADR-077): regenerar
+ * idempotente del outbox (ADR-029) y no la misma transacción de cada capacidad (ADR-078): regenerar
  * relee serie, excepciones y feriados y vuelve al mismo resultado cuantas veces se reintente, la
  * escritura de la Pauta no se alarga ni falla por esto, y el trabajo diario corrige cualquier
  * desfase. Una serie fijada rige «desde» en adelante, hasta el fin del horizonte.

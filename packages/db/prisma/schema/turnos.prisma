@@ -1,4 +1,4 @@
-// Turno esperado por persona y día (ADR-077): qué turno le toca a cada persona, materializado en el
+// Turno esperado por persona y día (ADR-078): qué turno le toca a cada persona, materializado en el
 // núcleo para que Pauta, Asistencia, Nómina y CPQ no lo recalculen. Vive en `core` porque los módulos
 // solo dependen del núcleo y Asistencia se vende sola (ADR-048). Semántica [inicio, fin): el fin es
 // exclusivo. Una fila nueva por cada cambio (version + 1); la anterior queda `vigente = false`, así

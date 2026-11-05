@@ -1,6 +1,6 @@
-# Checklist de revisión — «Revisor OPAI 2.0»
+# Checklist de revisión — sesión constructora y «Revisor OPAI 2.0»
 
-Lo usan el Revisor (con el modelo contrario al que construyó) y la autorrevisión del constructor antes de abrir el PR. Foco: **seguridad y aislamiento entre tenants**. Se responde ítem por ítem en la revisión. Un ✗ en las secciones 1 a 3 es «pedir cambios».
+Lo usan la **revisión final** de la sesión de Claude Code (comentario con SHA + `sin bloqueos` o bloqueos concretos; `OPERACION-agentes.md` A2.2) y, **solo si Carlos lo pide o hay riesgo grave**, el bot Revisor (modelo contrario al constructor). Foco: **seguridad y aislamiento entre tenants**. Un ✗ en las secciones 1 a 3 es bloqueo para integrar.
 
 ## 1. Tenants y datos
 - [ ] Toda tabla nueva con `tenant_id` tiene `ENABLE ROW LEVEL SECURITY` y la política `tenant_isolation` estándar en la misma migración. `pnpm test:db` lo verifica en cualquier schema.
@@ -37,4 +37,7 @@ Lo usan el Revisor (con el modelo contrario al que construyó) y la autorrevisi�
 - [ ] El PR está vinculado a su tarea de Linear (`Fixes CAR-123`), `ROADMAP.md` está actualizado si cambia el plan, y el PR trae el resumen ejecutivo para Carlos.
 
 ## Veredicto
-**APROBAR** o **PEDIR CAMBIOS**, con archivo:línea y la corrección propuesta, citando siempre el SHA completo del head revisado. Si no hay bloqueos de seguridad, migraciones o datos, el comentario de cierre incluye la línea exacta **Revisor OPAI 2.0: sin bloqueos** (junto con **APROBAR** o en su lugar, según el modelo). El Revisor **no integra**. **Claude** (proyecto «OPAI 2.0») o el bot «OPAI 2.0» integran a `main` con squash cuando se cumplen las condiciones de `AGENTS.md` («Integración a `main`», ADR-060 y ADR-061): cuatro checks obligatorios en verde sobre el head, sin conflictos con `main`, sin `VETO` ni etiqueta `veto`, y sin etiqueta `migracion-pendiente` si el PR trae migración (aplicada por el bot con respaldo en `dev` y `main` y aviso en el PR). Un **PEDIR CAMBIOS** vigente bloquea la integración. Si el PR trae migración o toca RLS, permisos o aislamiento por tenant, quien integra espera «Revisor OPAI 2.0: sin bloqueos» sobre el head; si no, no hace falta esperarlo. Si trae migraciones nuevas y `migracion-pendiente` no está puesta o su retirada no es válida (`AGENTS.md`), **PEDIR CAMBIOS**. El Revisor no escribe `VETO` ni `VETO LEVANTADO` y no pone ni quita las etiquetas `veto` ni `migracion-pendiente`. Tras un push, el Revisor revisa solo el delta.
+
+**Sesión constructora (A2.2):** comentario en el PR con el **SHA completo** del head y **`sin bloqueos`** o **bloqueos concretos** numerados (seguridad, RLS/tenant, permisos, migraciones, datos). Integra la sesión con squash cuando cumple `AGENTS.md` («Integración a `main`», ADR-077): cuatro checks en verde, sin veto, migración aplicada por el bot si corresponde, revisión final sobre el head y, si hay cambio visual, OK o delegación explícita de Carlos (A2.10).
+
+**Revisor OPAI 2.0 (solo bajo demanda):** **APROBAR** o **PEDIR CAMBIOS**, con archivo:línea, citando el SHA. Puede usar la línea **Revisor OPAI 2.0: sin bloqueos**; **no integra**. No escribe `VETO` ni maneja `migracion-pendiente`. Tras un push, solo revisa el delta si sigue activo el encargo de revisión.

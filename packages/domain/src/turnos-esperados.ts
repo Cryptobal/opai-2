@@ -1,4 +1,4 @@
-// Turno esperado por persona y día (ADR-048 y ADR-077): se deriva de la celda de la Pauta o de la
+// Turno esperado por persona y día (ADR-048 y ADR-078): se deriva de la celda de la Pauta o de la
 // jornada pactada y se guarda en `core.turnos_esperados`. Dominio puro: no toca la base.
 
 import type { CeldaPauta } from "./pauta/tipos";
