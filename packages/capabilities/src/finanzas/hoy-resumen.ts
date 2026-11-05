@@ -4,7 +4,7 @@ import { estaVencida, evaluarRecordatorio, saldoPendiente } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { PERMISO_READ } from "./comun";
-import { documentosCobrables, parametrosCobranza } from "./cobranza-datos";
+import { documentosCobrables, idsDeApertura, parametrosCobranza } from "./cobranza-datos";
 
 const grupoSchema = z.object({
   cantidad: z.number().int(),
@@ -53,8 +53,11 @@ export const hoyEnFinanzas = defineCapability({
       }),
     ]);
     const vencidas = docs.filter((d) => estaVencida(d, p.hoy, p.plazoDefectoDias));
+    // Lo importado de 1.0 no recibe recordatorios, así que tampoco «toca» (CAR-193, regla 11).
+    const deApertura = await idsDeApertura(ctx, vencidas);
     const tocan = vencidas.filter(
       (d) =>
+        !deApertura.has(d.id) &&
         evaluarRecordatorio({
           doc: d,
           hoy: p.hoy,

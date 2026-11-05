@@ -123,6 +123,15 @@ describe.skipIf(!urlPropietario)("Finanzas · cobranza · recordatorios (db)", (
     expect(await s.e.admin.cobranzaGestion.count({ where: { documentoId: imp.id } })).toBe(0);
   });
 
+  it("«Hoy en Finanzas» no cuenta lo importado de 1.0 entre los recordatorios que tocan (CAR-193)", async () => {
+    type Resumen = { cobrar: { vencidas: { cantidad: number }; recordatoriosQueTocan: { cantidad: number } } };
+    const r = await s.dato<Resumen>("finanzas.hoy.resumen", {});
+    // Las dos facturas siguen vencidas (hay que cobrarlas), pero a ninguna le toca recordatorio automático:
+    // la primera está pausada y la importada de 1.0 queda fuera por decisión de Carlos.
+    expect(r.cobrar.vencidas.cantidad).toBe(2);
+    expect(r.cobrar.recordatoriosQueTocan.cantidad).toBe(0);
+  });
+
   it("otra empresa no puede recordar ni pausar este documento", async () => {
     for (const [id, input] of [
       ["finanzas.cobranza.recordar", { documentoId: docId }],

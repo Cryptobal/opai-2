@@ -46,3 +46,16 @@ export async function documentosCobrables(ctx: Contexto, cuentaId?: string): Pro
     fechaEmision: fecha(f.fechaEmision),
   }));
 }
+
+/**
+ * Ids de las facturas que vienen de la apertura desde 1.0 (decisión de Carlos, CAR-168): 1.0 no mandaba nada solo
+ * y el cliente no debe recibir correos por deuda histórica. Quedan fuera de los recordatorios y de «Hoy en Finanzas».
+ */
+export async function idsDeApertura(ctx: Contexto, docs: { id: string }[]): Promise<Set<string>> {
+  if (!docs.length) return new Set();
+  const filas = await ctx.db.importacionFila.findMany({
+    where: { entidad: "documento_cobrar", id20: { in: docs.map((d) => d.id) }, importacion: { versionContrato: "finanzas-apertura@1" } },
+    select: { id20: true },
+  });
+  return new Set(filas.map((f) => f.id20));
+}
