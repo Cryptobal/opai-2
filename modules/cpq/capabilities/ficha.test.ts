@@ -287,3 +287,26 @@ describe("márgenes sin configurar en la ficha (CAR-192)", () => {
     expect(p.margenAlertaPct).toBeNull();
   });
 });
+
+describe("patrones de turno de la empresa en el cálculo (CAR-192)", () => {
+  it("un patrón creado en Operaciones se calcula; sin él, el motor no lo reconoce", async () => {
+    mockMotorLegal();
+    const { ctx } = ctxGestor(true);
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Patrón propio" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    if (!f.ok) throw new Error("ficha");
+    const sec = (f.data as { secciones: { id: string }[] }).secciones[0]!;
+    await ctx.db.patronTurno.create({
+      data: { tenantId: ctx.tenantId, nombre: "6x1", clase: "ciclico", diasTrabajo: 6, diasDescanso: 1, diasSemana: [], activo: true, orden: 9 },
+    });
+    const l = await executeCapability(ctx, "cpq.lineas.crear", {
+      seccionId: sec.id, tipo: "puesto", nombre: "Turno", sueldoBaseClp: 650_000, patron: "6x1",
+    });
+    expect(l.ok).toBe(true);
+    const r = await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    expect(r.ok).toBe(true);
+    expect((r as { data: { ventaMensual: number | null } }).data.ventaMensual).toBeGreaterThan(0);
+  });
+});

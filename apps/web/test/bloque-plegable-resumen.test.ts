@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { BloquePlegable } from "@opai/ds";
 
 const html = (resumen?: string) =>
-  renderToStaticMarkup(createElement(BloquePlegable, { paso: 2, titulo: "Puestos", ...(resumen ? { resumen } : {}) }, "x"));
+  renderToStaticMarkup(createElement(BloquePlegable, { paso: 2, titulo: "Puestos", children: "x", ...(resumen ? { resumen } : {}) }));
 
 describe("resumen del paso en teléfono (CAR-192)", () => {
   it("el resumen sale también en una segunda línea visible bajo 640 px", () => {

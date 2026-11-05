@@ -19,14 +19,18 @@ type Props = Omit<
   invalido?: boolean | undefined;
 };
 
-const HORAS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
-const MINUTOS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
+/** Reloj de 24 h: 00 a 23 (la medianoche de cierre es «00:00»; un turno que termina antes de empezar cruza el día). */
+export const HORAS_SELECTOR = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+/** Cuartos de hora (CAR-192); otros minutos se siguen pudiendo escribir con la máscara. */
+export const MINUTOS_SELECTOR = ["00", "15", "30", "45"] as const;
+const HORAS = HORAS_SELECTOR;
+const MINUTOS = MINUTOS_SELECTOR;
 const OPCION =
   "h-9 min-w-11 rounded-md px-2 text-base text-fg outline-none transition-colors duration-150 hover:bg-fill focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)]";
 
 /**
  * Hora «HH:mm» en 24 h con selector propio del DS (no el nativo del sistema): se escribe con
- * máscara o se elige de la lista de horas y minutos (cada 5). El valor es «HH:mm» válido o vacío.
+ * máscara o se elige de la lista de horas y minutos (00, 15, 30 y 45). El valor es «HH:mm» válido o vacío.
  */
 export function SelectorHora({ valor, onCambiar, invalido, className, ...props }: Props) {
   const [texto, setTexto] = useState(valor);
