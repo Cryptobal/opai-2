@@ -12,7 +12,7 @@ const TIPOS: Record<string, string> = {
   entrada: "Entrada", salida: "Salida", inicio_colacion: "Inicio de colación", fin_colacion: "Fin de colación",
 };
 
-const formato = new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "medium", timeZone: "America/Santiago" });
+const formato = new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeStyle: "medium", hourCycle: "h23", timeZone: "America/Santiago" });
 
 async function Contenido({ params }: Props) {
   const { slug, hash } = await params;

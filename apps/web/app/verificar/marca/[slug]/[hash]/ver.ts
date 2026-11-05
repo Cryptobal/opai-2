@@ -1,12 +1,13 @@
 import "server-only";
 
 import { headers } from "next/headers";
+import { connection } from "next/server";
 
-import { crearContexto, executeCapability, type Resultado } from "@opai/capabilities";
+import { executeCapability, type Resultado } from "@opai/capabilities";
 import { tenantPorSlug } from "@opai/db";
 
 import { fuentesReales } from "@/lib/fuentes";
-import { medidorDiferido } from "@/lib/medidor";
+import { contextoSistema } from "@/lib/medidor";
 import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
 
 export type MarcaVerificada = {
@@ -28,6 +29,8 @@ export async function verificarMarcaPublica(
   slug: string,
   hash: string,
 ): Promise<{ limitada: true } | { ok: true; data: MarcaVerificada } | { ok: false }> {
+  // Lectura en cada petición: ni el rate limit ni la base se evalúan durante el prerender.
+  await connection();
   const ip = ipDeCabeceras(await headers());
   const [porHash, porIp] = await Promise.all([
     permitir(`marca-publica:${ip}:${hash}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs, { fallarCerrado: true }),
@@ -38,12 +41,8 @@ export async function verificarMarcaPublica(
   if (!tenant) return { ok: false };
   const modulos = await fuentesReales.modulosActivos(tenant.id);
   if (!modulos.includes("asistencia")) return { ok: false };
-  const ctx = crearContexto({
-    tenantId: tenant.id,
-    actor: { tipo: "system" },
-    modulosActivos: modulos,
-    medidor: medidorDiferido,
-  });
+  // contextoSistema arma el registro de capacidades del proceso: esta ruta no pasa por el layout con sesión.
+  const ctx = contextoSistema(tenant.id, modulos);
   const r: Resultado = await executeCapability(ctx, "asistencia.marcas.verificar", { hash });
   const data = r.ok ? (r.data as MarcaVerificada) : null;
   return data?.valida ? { ok: true, data } : { ok: false };
