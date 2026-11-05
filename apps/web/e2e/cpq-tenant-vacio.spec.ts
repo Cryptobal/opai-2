@@ -81,7 +81,8 @@ test("tenant vacío: de la cotización nueva al costo calculado y la vista previ
   }
   const pdf = page.locator('iframe[title="Vista previa PDF"]');
   const error = page.getByText("No se pudo mostrar la vista previa");
-  await expect(pdf.or(error)).toBeVisible({ timeout: 21_000 });
+  // La primera generación del PDF compila su ruta en `next dev` y en el runner tarda más de 21 s.
+  await expect(pdf.or(error)).toBeVisible({ timeout: 60_000 });
   if (await error.isVisible()) await expect(page.getByRole("button", { name: "Reintentar" })).toBeVisible();
   await expect(page.getByText("Generando PDF…")).toHaveCount(0);
 });
