@@ -1,0 +1,9 @@
+# Verificación en vivo de Rendiciones en test.opai.cl (guion)
+
+Pendiente de correr desde un entorno con acceso a `test.opai.cl` y al MCP (la sesión de construcción no lo alcanza). **No se pegan ni se comparten claves en chats ni en PR**: la key va solo como variable de entorno `OPAI_MCP_KEY` en quien corre el guion.
+
+1. **Herramientas.** `OPAI_MCP_KEY=<key> pnpm mcp:verificar` debe listar, entre otras, `rendiciones_opciones_obtener`, `rendiciones_duplicados_consultar`, `rendiciones_kilometraje_calcular`, `rendiciones_rendiciones_{listar,obtener,crear,actualizar,enviar,anular}` y los `preview_…` de las escrituras, sin diferencias con la instantánea.
+2. **Kilometraje.** Llamar `rendiciones_kilometraje_calcular` con la empresa en método *consumo* (10 km/l, $1.500/l, recargo 10 %) y un viaje de 96 km con peaje $2.000: el monto esperado es **$17.840** (14.400 + 1.440 + 2.000). Con método *tramo fijo* (tramo $18.000, peaje $2.000): $20.000 y, con ida y vuelta, **$38.000** (desglose «Tramo X: $18.000 × 2 = $36.000»). Sin Google la distancia es en línea recta: para fijar 96 km, usar un par de puntos a esa distancia o comprobar el desglose contra los km devueltos.
+3. **Pantallas** (Playwright, 375, 1024 y 1280, con un supervisor y con un gerente): «Mis rendiciones» (pestañas y contadores, vacío), «Nueva rendición» de compra (paso 1 y 2, aviso de boleta repetida, guardar borrador, enviar con confirmación) y de kilometraje (desglose y total igual al de `calcular`). Comparar con las capturas de `docs/2.0/qa/rendiciones-r2b/` y con el diseño en `docs/2.0/diseño/export-rendiciones-v3/`.
+4. **Permisos.** Viewer: «No puedes rendir gastos». Una empresa sin aprobador por defecto ni elegibles: «Tu empresa aún no define quién aprueba» y solo guardar borrador. **No configurar un aprobador sin que Carlos indique quién.**
+5. **Aislamiento.** Con una segunda empresa, confirmar que no aparecen sus rendiciones ni sus nombres.
