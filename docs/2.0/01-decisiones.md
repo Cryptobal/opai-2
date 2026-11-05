@@ -829,6 +829,14 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 ---
 
+## Adenda ADR-046 · Menú «Más» del teléfono: variante A, un solo buscador y barra superior sin solape (CAR-182)
+
+**Fecha:** 4-nov-2026 (20:29) · **Estado:** vigente · **Decisión:** Carlos (chat, 4-nov-2026: «para el Más de celular tomar la recomendada») · **Implementa:** Claude (constructor, Sesión 1). Diseño en `design/export-inicio-mas/`.
+
+**Decisión.** (1) El menú «Más» usa la **variante A** del diseño: lista compacta con filas de 48 px, áreas plegables (encabezado de 48 px con ícono, nombre, conteo y chevron), solo el área activa abierta por defecto y lo que el usuario abre se recuerda por usuario y empresa en el navegador (preferencia de interfaz, como los recientes; no es dato de negocio ni lleva herramienta MCP). (2) «Fijados y recientes» va una sola vez, en una fila de hasta cuatro accesos rápidos bajo la búsqueda; las entradas fijadas que también están en las áreas llevan un pin. (3) **Un solo buscador en el teléfono:** el campo de «Más» se escribe en su lugar y el ícono de buscar de la barra superior abre la misma hoja en modo búsqueda, con el texto «Buscar o ir a…» y los mismos resultados (`core.buscar`, sin capacidades nuevas). Escritorio e iPad no cambian. (4) Barra superior a 375 px: el selector de portal trunca el nombre de la empresa y «ERP» pasa al interior del selector. (5) Cada entrada del menú tiene su propio ícono (sin repetidos dentro de «Más»).
+
+**No cambia.** El mapa de áreas, la barra inferior, la barra lateral de escritorio y el riel de iPad, los permisos y las capacidades. **Inicio** no se implementa con esta decisión.
+
 ## ADR-047 · Especificación funcional aprobada antes de diseñar o construir un módulo
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (pedido de Carlos, 23-oct) · Completa ADR-012 y ADR-043.
@@ -1319,7 +1327,7 @@ identidad de servicio en main.
 
 **Decisión.** Las sesiones de Claude planifican, construyen e integran sus propios PRs. El bot «OPAI 2.0» no integra ni escribe encargos o briefs: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:`, toma capturas) y aplica las migraciones de Neon, con respaldo previo y en `dev` antes que `main`, cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos» sobre el head del PR.
 
-**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. **Pendiente:** `AGENTS.md` (tabla de roles, «Integración a `main`» y «Prohibido») todavía nombra al bot como integrador y a Claude como quien aplica migraciones; ante el choque, `OPERACION-agentes.md` manda y `AGENTS.md` se corrige en un PR aparte.
+**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. `AGENTS.md` (encabezado, «Tareas (Linear)» regla 4, «Prohibido», tabla de roles y «Integración a `main`») se alineó el 4-nov-2026 (CAR-162, Sesión 4): integra la sesión de Claude que construyó el PR, el bot solo vigila y aplica migraciones.
 
 ## ADR-068 · El pendiente de una factura descuenta sus notas de crédito parciales
 
