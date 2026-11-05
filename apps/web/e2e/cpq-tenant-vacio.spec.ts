@@ -73,16 +73,16 @@ test("tenant vacío: de la cotización nueva al costo calculado y la vista previ
   await page.screenshot({ path: info.outputPath("cpq-tenant-vacio-calculado.png"), fullPage: true });
 
   // Vista previa del PDF: termina en menos de 20 s con el documento o con un error y «Reintentar».
-  const pdf = page.locator('iframe[title="Vista previa PDF"]');
+  // Con puntero táctil (teléfono) el visor ofrece «Abrir PDF» en vez del iframe (CAR-192).
+  const pdf = page
+    .locator('iframe[title="Vista previa PDF"]')
+    .or(page.getByRole("button", { name: "Abrir PDF" }));
   const error = page.getByText("No se pudo mostrar la vista previa");
   const generando = page.getByText("Generando PDF…");
   const abrirVistaPrevia = async () => {
-    if (info.project.name === "telefono") {
-      await page.getByRole("button", { name: "Más acciones de la cotización" }).click();
-      await page.getByRole("menuitem", { name: "Vista previa PDF" }).click();
-    } else {
-      await visible(page, "Vista previa PDF").click();
-    }
+    // «Vista previa PDF» vive en el menú «Más acciones» en todos los anchos.
+    await page.getByRole("button", { name: "Más acciones de la cotización" }).click();
+    await page.getByRole("menuitem", { name: "Vista previa PDF" }).click();
   };
   // Un clic antes de hidratar se pierde y el diálogo no se abre: se reintenta hasta verlo abierto.
   await expect(async () => {
