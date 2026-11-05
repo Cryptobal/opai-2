@@ -10,6 +10,7 @@ import { hoy } from "../../maestros/comun";
 import { porLotes } from "../metricas";
 import { periodoDe } from "./calculo";
 import { cobroDeEmpresa } from "./datos";
+import { debeAvisar, pruebasEnCurso } from "./pruebas";
 import {
   calculoSchema,
   cargoSchema,
@@ -31,6 +32,14 @@ const moduloSchema = z.object({
 const esContratado = (m: { estado: string | null }) =>
   m.estado === "activo" || m.estado === "trial";
 
+const pruebaSchema = z.object({
+  moduloId: z.string(),
+  nombre: z.string(),
+  pruebaHasta: z.string(),
+  diasRestantes: z.number().int(),
+  pasaACobro: z.boolean().describe("Al vencer: true se cobra; false queda en solo lectura."),
+});
+
 const empresaSchema = z.object({
   tenantId: z.string(),
   nombre: z.string(),
@@ -40,6 +49,7 @@ const empresaSchema = z.object({
   totalClp: z.number().int(),
   facturables: z.number().int(),
   noFacturables: z.number().int().describe("Contratados que este mes no se facturan."),
+  pruebas: z.array(pruebaSchema).describe("Pruebas en curso, con los días que les quedan."),
 });
 
 export const platformCobrosResumen = defineCapability({
@@ -59,6 +69,9 @@ export const platformCobrosResumen = defineCapability({
       .nullable()
       .describe("UF del último día del mes; exacta=false si es la última publicada (estimación)."),
     empresas: z.array(empresaSchema),
+    pruebasPorVencer: z
+      .array(pruebaSchema.extend({ tenantId: z.string(), empresa: z.string() }))
+      .describe("Pruebas que vencen en siete días o menos: aviso a Plataforma."),
     totales: z.object({
       totalClp: z.number().int(),
       facturables: z.number().int(),
@@ -81,6 +94,12 @@ export const platformCobrosResumen = defineCapability({
       const modulos = r.filas.map((f) => ({ ...f, cargo: r.vigentes.get(f.moduloId) ?? null }));
       const cobra = modulos.filter((m) => m.calculo.facturable);
       const noCobra = modulos.filter(esContratado).filter((m) => !m.calculo.facturable);
+      const nombres = new Map(modulos.map((m) => [m.moduloId, m.nombre]));
+      const pruebas = pruebasEnCurso(
+        modulos.flatMap((m) => (m.condicion ? [{ moduloId: m.moduloId, ...m.condicion }] : [])),
+        new Map(modulos.map((m) => [m.moduloId, m.estado ?? ""])),
+        hoy(),
+      ).map((p) => ({ ...p, nombre: nombres.get(p.moduloId) ?? p.moduloId }));
       return {
         tenantId: t.id,
         nombre: t.nombre,
@@ -89,6 +108,7 @@ export const platformCobrosResumen = defineCapability({
         modulos,
         facturables: cobra.length,
         noFacturables: noCobra.length,
+        pruebas,
         totalClp: cobra.reduce((s, m) => s + (m.cargo?.montoClp ?? m.calculo.montoClp ?? 0), 0),
       };
     });
@@ -104,6 +124,11 @@ export const platformCobrosResumen = defineCapability({
       periodo,
       uf,
       empresas,
+      pruebasPorVencer: empresas.flatMap((e) =>
+        e.pruebas
+          .filter(debeAvisar)
+          .map((p) => ({ ...p, tenantId: e.tenantId, empresa: e.nombre })),
+      ),
       totales: {
         totalClp: empresas.reduce((s, e) => s + e.totalClp, 0),
         facturables: todos.filter((m) => m.calculo.facturable).length,

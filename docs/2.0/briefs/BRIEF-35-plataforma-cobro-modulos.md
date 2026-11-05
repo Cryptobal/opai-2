@@ -30,7 +30,7 @@ Que Plataforma sepa cuánto cobrarle a cada empresa y deje cada mes un **cargo l
 
 Abrir una prueba exige una empresa validada con RUT. El RUT vive en `core.perfil_empresa.rut`, pero «Nueva empresa» no lo pedía. Se agrega: razón social y RUT obligatorios al crear la empresa (guardados con ella en una transacción), «Datos tributarios» editables en la ficha, aviso «Falta el RUT» en Atención, `platform.tenants.perfil_get` y `perfil_set`, e índice único parcial del RUT. Las empresas existentes quedan sin RUT hasta que Plataforma lo complete.
 
-## 4. PR 2 · Pruebas y solo lectura
+## 4. PR 2 · Pruebas y solo lectura (hecho)
 
 `platform.cobros.prueba_abrir`; trabajo diario de aviso a 7 días (ficha de empresa «Atención» y «Pruebas por vencer» en Facturación); al vencer, `activo` (pasa a cobro) o estado nuevo `solo_lectura` (`executeCapability` rechaza escrituras e irreversibles del módulo y deja pasar lecturas); `platform.modules.set` acepta `solo_lectura` y pasa a `irreversible` (hallazgo §2.9). Toca permisos: pide «Revisor OPAI 2.0: sin bloqueos».
 

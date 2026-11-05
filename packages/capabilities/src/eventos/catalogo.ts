@@ -1,4 +1,5 @@
 import { listarModulos, type EventoDeDominio } from "../module";
+import { EVENTOS_COBROS } from "./catalogo-cobros";
 import { EVENTOS_CRM } from "./catalogo-crm";
 
 /**
@@ -17,6 +18,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.contacto.creado", descripcion: "Se agregó un contacto a una cuenta." },
   { id: "core.contacto.actualizado", descripcion: "Cambiaron los datos de un contacto." },
   ...EVENTOS_CRM,
+  ...EVENTOS_COBROS,
   { id: "core.instalacion.creada", descripcion: "Se creó una instalación de una cuenta." },
   { id: "core.instalacion.actualizada", descripcion: "Cambiaron los datos de una instalación." },
   { id: "core.instalacion.estado_cambiado", descripcion: "Una instalación cambió de estado." },
@@ -64,10 +66,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
     descripcion: "Cambió el perfil legal o de contacto de la empresa.",
   },
   { id: "core.marca.actualizada", descripcion: "Cambió la marca de la empresa (logos o colores)." },
-  {
-    id: "core.plantilla.actualizada",
-    descripcion: "Se publicó una nueva versión de una plantilla.",
-  },
+  { id: "core.plantilla.actualizada", descripcion: "Se publicó una nueva versión de una plantilla." },
   {
     id: "core.integracion.actualizada",
     descripcion: "Cambió la configuración o un secreto de una integración.",

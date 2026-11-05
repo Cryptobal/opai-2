@@ -1,5 +1,6 @@
 import {
   capacidadesDelNucleo,
+  consumidorAvisoPrueba,
   consumidorSeguimientoCierre,
   consumidoresDelNucleo,
   limpiarConsumidores,
@@ -11,6 +12,7 @@ import {
   registrarModulos,
   registrarTrabajos,
   trabajoCobrosMesAnterior,
+  trabajoCobrosPruebas,
   trabajosComercial,
   trabajosDelNucleo,
   trabajosFinanzas,
@@ -40,6 +42,7 @@ export function asegurarRegistro(): void {
     ...trabajosAsistencia,
     ...trabajosCpq,
     trabajoCobrosMesAnterior,
+    trabajoCobrosPruebas,
   ]);
   registrarConsumidores([
     ...consumidoresDelNucleo,
@@ -47,6 +50,7 @@ export function asegurarRegistro(): void {
     consumidorCpqBandeja,
     consumidorCpqEnlace,
     consumidorSeguimientoCierre,
+    consumidorAvisoPrueba,
   ]);
   hecho = true;
 }

@@ -23,6 +23,8 @@ export type Identidad = {
   membresias: MembresiaConTenant[];
   actual: MembresiaConTenant | null;
   modulosActivos: string[];
+  /** Módulos activos en solo lectura (CAR-188): se ven, no se escribe. */
+  modulosSoloLectura?: string[];
   /** Acceso efectivo en el tenant actual (rol personalizado y excepciones, ADR-022). */
   acceso: AccesoFila;
   /** Segundo factor activo en la cuenta (NÚCLEO-F). Decide el enrolamiento obligatorio. */
@@ -44,7 +46,12 @@ export async function identidadDe(
 ): Promise<Identidad> {
   const membresias = await fuentes.membresiasDe(user.id);
   const actual = elegirMembresia(membresias, cookieTenant);
-  const { modulosActivos, acceso } = actual
+  type Modulos = { modulosActivos: string[]; modulosSoloLectura?: string[]; acceso: AccesoFila };
+  const {
+    modulosActivos,
+    modulosSoloLectura = [],
+    acceso,
+  }: Modulos = actual
     ? fuentes.accesoConModulos
       ? await fuentes.accesoConModulos(actual.tenantId, user.id)
       : await Promise.all([
@@ -58,6 +65,7 @@ export async function identidadDe(
     membresias,
     actual,
     modulosActivos,
+    modulosSoloLectura,
     acceso,
     mfaActiva: user.twoFactorEnabled === true,
   };
@@ -78,6 +86,7 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
     portal,
     portalesMembresia: actual?.portales ?? [],
     modulosActivos: identidad.modulosActivos,
+    modulosSoloLectura: identidad.modulosSoloLectura ?? [],
     medidor: medidorDiferido,
     diferir: diferirConAfter,
     ...(actual ? { despacharEventos: despacharDiferido(actual.tenantId) } : {}),

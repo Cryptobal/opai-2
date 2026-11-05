@@ -37,6 +37,7 @@ it("carga módulos y acceso del tenant/usuario elegido con una sola consulta", a
   });
   expect(await fuentesReales.accesoConModulos!("tenant-propio", "usuario")).toEqual({
     modulosActivos: ["comercial"],
+    modulosSoloLectura: [],
     acceso: {
       permisosRol: ["core:cuentas.read"],
       excepciones: [{ permiso: "core:personas.read", conceder: false }],
@@ -52,8 +53,8 @@ it("carga módulos y acceso del tenant/usuario elegido con una sola consulta", a
         tenant: {
           select: {
             modules: {
-              where: { estado: { in: ["activo", "trial"] } },
-              select: { moduloId: true },
+              where: { estado: { in: ["activo", "trial", "solo_lectura"] } },
+              select: { moduloId: true, estado: true },
             },
           },
         },
@@ -111,7 +112,36 @@ it("el contacto de un cliente solo alcanza las instalaciones que su acceso habil
 it("un contacto de cliente sin acceso activo no alcanza nada (fail-closed)", async () => {
   mocks.membership.mockResolvedValue(contacto);
   mocks.acceso.mockResolvedValue(null);
-  expect((await fuentesReales.accesoConModulos!("tenant", "usuario")).acceso.instalaciones).toEqual([]);
-  mocks.acceso.mockResolvedValue({ estado: "suspendido", cuentaId: "c1", todasInstalaciones: true, instalaciones: [] });
-  expect((await fuentesReales.accesoConModulos!("tenant", "usuario")).acceso.instalaciones).toEqual([]);
+  expect((await fuentesReales.accesoConModulos!("tenant", "usuario")).acceso.instalaciones).toEqual(
+    [],
+  );
+  mocks.acceso.mockResolvedValue({
+    estado: "suspendido",
+    cuentaId: "c1",
+    todasInstalaciones: true,
+    instalaciones: [],
+  });
+  expect((await fuentesReales.accesoConModulos!("tenant", "usuario")).acceso.instalaciones).toEqual(
+    [],
+  );
+});
+
+it("un módulo en solo lectura sigue activo y además se informa aparte (CAR-188)", async () => {
+  mocks.membership.mockResolvedValue({
+    id: "membresia",
+    rol: "viewer",
+    portales: ["erp"],
+    rolTenant: null,
+    excepciones: [],
+    tenant: {
+      modules: [
+        { moduloId: "comercial", estado: "activo" },
+        { moduloId: "cpq", estado: "solo_lectura" },
+      ],
+    },
+  });
+  expect(await fuentesReales.accesoConModulos!("tenant-propio", "usuario")).toMatchObject({
+    modulosActivos: ["comercial", "cpq"],
+    modulosSoloLectura: ["cpq"],
+  });
 });

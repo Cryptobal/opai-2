@@ -3,6 +3,7 @@ import { tenantPorSlug } from "@opai/db";
 
 import { ipDe, LIMITES, permitir } from "@/lib/rate-limit";
 import { medidorDiferido } from "@/lib/medidor";
+import { soloLecturaDe } from "@/lib/solo-lectura";
 import { asegurarRegistro } from "@/lib/registro";
 import { demasiadas } from "@/lib/respuestas";
 
@@ -54,6 +55,7 @@ export async function POST(req: Request, { params }: Params): Promise<Response> 
     actor: { tipo: "system" },
     medidor: medidorDiferido,
     modulosActivos: ["comercial"],
+    modulosSoloLectura: await soloLecturaDe(tenant.id, "comercial"),
   });
   const r = await executeCapability(
     ctx,
@@ -68,7 +70,7 @@ export async function POST(req: Request, { params }: Params): Promise<Response> 
   );
   if (!r.ok) {
     const status =
-      r.error.code === "UNPROCESSABLE" ? 422 : r.error.code === "NOT_FOUND" ? 404 : 400;
+      r.error.code === "UNPROCESSABLE" ? 422 : r.error.code === "NOT_FOUND" ? 404 : r.error.code === "FORBIDDEN" ? 403 : 400;
     return err(status, r.error.code, r.error.message);
   }
   return Response.json({ ok: true, ...(r.data as Record<string, unknown>) }, { status: 201 });
