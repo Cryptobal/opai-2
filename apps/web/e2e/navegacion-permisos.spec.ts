@@ -48,6 +48,8 @@ for (const conceder of [false, true]) {
   test(`Supervisor limitado ${conceder ? "con permiso" : "sin permiso"} no accede a persona fuera de alcance`, async ({
     page,
   }) => {
+    // La primera visita compila en frío la ruta y su 404 (cada intento puede tardar decenas de segundos en el runner).
+    test.setTimeout(180_000);
     await entrar(page, `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`);
     // El 404 real lo arma el proxy con un fetch de 4 s: si la ruta compila en frío, cae a 200 y se recarga.
     const noEncontrado = async (id: string) => {
@@ -55,7 +57,7 @@ for (const conceder of [false, true]) {
       await expect(async () => {
         await page.goto(`/supervisor/personas/${id}`);
         await expect(titulo).toBeVisible({ timeout: 8_000 });
-      }).toPass({ timeout: 45_000 });
+      }).toPass({ timeout: 90_000 });
     };
     await noEncontrado("00000000-0000-7000-8000-000000000078");
     await expect(page.getByRole("link", { name: "Subir documento" })).toHaveCount(0);

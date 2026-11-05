@@ -7,12 +7,20 @@ import { capturarConfiguracion, prepararConfiguracionTest } from "./configuracio
 
 test.beforeAll(prepararConfiguracionTest);
 
-/** Pulsa un enlace y espera la URL; reintenta si el clic llegó antes de hidratar y no navegó. */
+/**
+ * Pulsa un enlace y espera la URL. Si el enlace no está o el clic llegó antes de hidratar y no navegó, recarga
+ * la página de partida y lo repite: una página a medio cargar (streaming atascado en `next dev`) no se arregla
+ * reintentando el clic sobre ella.
+ */
 async function pulsarYLlegar(page: Page, enlace: Locator, url: RegExp) {
-  await expect(async () => {
+  const inicio = page.url();
+  const intento = async () => {
     await enlace.click({ timeout: 3_000 });
     await expect(page).toHaveURL(url, { timeout: 4_000 });
-  }).toPass({ timeout: 45_000 });
+  };
+  await expect(() =>
+    intento().catch(async (e) => (url.test(page.url()) ? Promise.reject(e) : page.goto(inicio).then(() => Promise.reject(e)))),
+  ).toPass({ timeout: 60_000 });
 }
 
 
