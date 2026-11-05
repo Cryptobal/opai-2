@@ -6,3 +6,4 @@ export * from "./siglas";
 export * from "./tipos";
 export * from "./alertas";
 export * from "./correcciones";
+export * from "./hash-correccion";

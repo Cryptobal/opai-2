@@ -24,6 +24,12 @@ export const manifest = defineModule({
   eventos: [
     { id: "asistencia.marca.registrada", descripcion: "Se registró una marca legal de asistencia." },
     { id: "asistencia.cadena.rota", descripcion: "La verificación diaria encontró la cadena de marcas rota." },
+    { id: "asistencia.correccion.propuesta", descripcion: "Se propuso corregir una marca; se avisa al trabajador." },
+    { id: "asistencia.correccion.respondida", descripcion: "El trabajador aceptó u objetó una corrección, o venció el plazo." },
+    { id: "asistencia.alerta.sin_marca_inicio", descripcion: "Pasaron 30 minutos del inicio del turno sin marca de entrada." },
+    { id: "asistencia.alerta.sin_marca_termino", descripcion: "El turno terminó sin marca de salida." },
+    { id: "asistencia.aviso.compensables", descripcion: "Aviso de horas compensables cada 30 días." },
+    { id: "asistencia.alerta.sin_correo_personal", descripcion: "Un trabajador marcó y no tiene correo personal para recibir el comprobante." },
   ],
   capacidades,
 });
