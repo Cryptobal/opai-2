@@ -1,6 +1,8 @@
 # ESTADO — OPAI 2.0
 
-**Foto verificada contra el código de `main` en `fac5738` (#229), 3-nov-2026, más #230 integrado después (`8912c27`)**, por la [auditoría profunda](auditoria-2026-11.md) (CAR-151). Cada PR actualiza este archivo (ADR-054): lo que entra, lo que queda pendiente y lo que se decide. Una entrada «integrado» acredita el merge en `main`, no el despliegue ni la migración en Neon: eso va en la tabla de migraciones. El plan está en [ROADMAP](ROADMAP.md), las decisiones en [ADR](01-decisiones.md) y el flujo en [OPERACION-agentes](OPERACION-agentes.md). Lo anterior a esta foto está en [ESTADO-archivo](ESTADO-archivo.md).
+**Foto verificada contra el código de `main` en `fac5738` (#229), 3-nov-2026, más #230 integrado después (`8912c27`)**, por la [auditoría profunda](auditoria-2026-11.md) (CAR-151). Cada PR actualiza este archivo (ADR-054): lo que entra, lo que queda pendiente y lo que se decide. Una entrada «integrado» acredita el merge en `main`, no el despliegue ni la migración en Neon: eso va en la tabla de migraciones. El plan está en [ROADMAP](ROADMAP.md), las decisiones en [ADR](01-decisiones.md) y el flujo en [OPERACION-agentes](OPERACION-agentes.md) (**A2 desde el 5-nov-2026, ADR-077**). Lo anterior a esta foto está en [ESTADO-archivo](ESTADO-archivo.md).
+
+**Decisión registrada (5-nov-2026, ADR-077):** Carlos autorizó un PR solo de documentación con el flujo operativo Grok Bot (coordinación OPAI 2.0, revisión final de Claude Code, señales en PR, horarios de vigilancia, correo a `carlos.irigoyen+claude@mail.grokbot.com`, Linear y diseño bajo demanda). Texto completo en `OPERACION-agentes.md` A2; `AGENTS.md` se alineará en un PR posterior si hace falta.
 
 ## En curso
 
