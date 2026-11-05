@@ -152,15 +152,16 @@ test.describe("fichas en un solo panel bajo 1024 px", () => {
       await page.goto(ruta);
       await expect(page.locator("header h1:visible")).toHaveCount(1, { timeout: 30_000 });
       await page.waitForLoadState("networkidle");
-      // El título conserva su sitio (no lo aplasta la acción principal) y nada se pisa ni se corta.
       // El título conserva su sitio: tiene ancho y su texto no queda cortado (un nombre corto mide poco, pero cabe).
       await expect
-        .poll(
-          async () =>
-            page.locator("header h1:visible").evaluate((h) => h.getBoundingClientRect().width > 0 && h.scrollWidth <= h.clientWidth + 1),
-          { message: ruta },
-        )
-        .toBe(true);
+        .poll(async () => page.locator("header h1:visible").evaluate((h) => h.getBoundingClientRect().width > 0 && h.scrollWidth <= h.clientWidth + 1))
+        .toBe(true)
+        .catch(async (error) => {
+          const hojas = await page.locator("header").first().evaluate((h) =>
+            [...h.querySelectorAll("*")].filter((n) => n.children.length === 0 && n.textContent?.trim())
+              .map((n) => `${n.tagName}:${n.textContent?.trim().slice(0, 28)}:${Math.round(n.getBoundingClientRect().width)}`).join(" | "));
+          throw new Error(`${ruta}: título cortado. Encabezado: ${hojas}`, { cause: error });
+        });
       expect(await sinDesborde(page), ruta).toBe(true);
       expect(await fueraDeVentana(page), ruta).toEqual([]);
       expect(await solapes(page), ruta).toEqual([]);
