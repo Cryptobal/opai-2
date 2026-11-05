@@ -47,15 +47,22 @@ test.describe("regresión Plataforma tras #59", () => {
         await expect(nav.getByRole("link")).toHaveCount(0);
         await expect(page.getByRole("link", { name: "Nueva", exact: true })).toHaveCount(0);
         if (info.project.name === "telefono") {
-          // Desde el Brief 05 (#75) «Más» es una hoja (Sheet), no un menú: la salida es un botón. Un
-          // clic antes de hidratar no la abre, así que se reintenta hasta verla.
+          // «Más» es una hoja (Sheet) y, desde CAR-182, ya no trae la salida: vive en el menú de
+          // usuario de la cabecera. Un clic antes de hidratar no abre la hoja, así que se reintenta.
           const mas = page.getByRole("dialog", { name: "Más", exact: true });
           await expect(async () => {
             if (!(await mas.isVisible()))
               await page.getByRole("button", { name: "Más opciones", exact: true }).click();
             await expect(mas).toBeVisible({ timeout: 1_000 });
           }).toPass({ timeout: 30_000 });
-          await expect(mas.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(mas).toBeHidden();
+          const menuUsuario = page.getByRole("button", { name: "Menú de usuario" }).first();
+          const salir = page.getByRole("menuitem", { name: "Cerrar sesión" });
+          await expect(async () => {
+            if (!(await salir.isVisible())) await menuUsuario.click();
+            await expect(salir).toBeVisible({ timeout: 1_000 });
+          }).toPass({ timeout: 30_000 });
           await page.keyboard.press("Escape");
         }
       }
