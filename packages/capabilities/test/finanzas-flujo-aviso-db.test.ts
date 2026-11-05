@@ -93,9 +93,13 @@ describe.skipIf(!urlPropietario)("flujo de caja: aviso idempotente en base real"
 
   it("cumplir: fijar y cumplir y otro fijar en la semana no abortan y dejan un aviso", async () => {
     const sem = sumarSemanas(semana, 1);
-    await ok("finanzas.celdas.fijar", { filaId: filaIng, semana: sem, monto: 500 });
+    // Los ingresos no se ajustan a mano (ADR-073): se usa una segunda fila de egresos.
+    const filaEgr2 = (
+      await ok<{ id: string }>("finanzas.filas.crear", { seccion: "egreso", etiqueta: "Egreso test 2", arrastre: false })
+    ).id;
+    await ok("finanzas.celdas.fijar", { filaId: filaEgr2, semana: sem, monto: 500 });
     const celda = await e.admin.flujoCelda.findFirstOrThrow({
-      where: { tenantId, filaId: filaIng, semana: new Date(`${sem}T00:00:00Z`) },
+      where: { tenantId, filaId: filaEgr2, semana: new Date(`${sem}T00:00:00Z`) },
     });
     await ok("finanzas.celdas.cumplir", { id: celda.id });
     await ok("finanzas.celdas.fijar", { filaId: filaEgr, semana: sem, monto: 90_000 });

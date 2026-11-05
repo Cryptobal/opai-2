@@ -1,6 +1,6 @@
 import { executeCapability, registrarCapacidades } from "@opai/capabilities";
-import { contextoDePrueba } from "@opai/capabilities/testing";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { contextoDePrueba, TENANT_DE_PRUEBA } from "@opai/capabilities/testing";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { ACTIVOS, FILA_EGR, FILA_ING, S0, S1, S2, semilla } from "./fixtures";
 import { aFecha } from "./util";
@@ -11,6 +11,7 @@ beforeAll(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-10-26T12:00:00Z"));
 });
+afterEach(() => vi.setSystemTime(new Date("2026-10-26T12:00:00Z")));
 afterAll(() => vi.useRealTimers());
 
 const nuevo = (extra: Record<string, unknown[]> = {}, permisos?: string[]) =>
@@ -37,21 +38,31 @@ describe("finanzas.planilla.obtener", () => {
 describe("finanzas.flujo.celdas", () => {
   it("fijar: crea, rechaza lo comprometido y semanas pasadas, y el dry_run no escribe", async () => {
     vi.setSystemTime(new Date("2026-11-09T12:00:00Z"));
-    const { ctx } = nuevo();
+    // Una celda comprometida de egresos en S1 para probar el choque.
+    const comprometida = {
+      id: "0192f3a0-0000-7000-8000-000000000150",
+      tenantId: TENANT_DE_PRUEBA,
+      filaId: FILA_EGR,
+      semana: aFecha(S1),
+      capa: "comprometido",
+      monto: 50,
+      nota: null,
+    };
+    const { ctx } = nuevo({ flujoCelda: [...semilla().flujoCelda, comprometida] });
     const ok = await executeCapability(ctx, "finanzas.celdas.fijar", {
-      filaId: FILA_ING,
+      filaId: FILA_EGR,
       semana: S2,
       monto: 700,
     });
     expect(ok).toMatchObject({ ok: true });
     const pasada = await executeCapability(ctx, "finanzas.celdas.fijar", {
-      filaId: FILA_ING,
+      filaId: FILA_EGR,
       semana: S0,
       monto: 1,
     });
     expect(pasada).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     const choque = await executeCapability(ctx, "finanzas.celdas.fijar", {
-      filaId: FILA_ING,
+      filaId: FILA_EGR,
       semana: S1,
       monto: 1,
     });
@@ -61,16 +72,33 @@ describe("finanzas.flujo.celdas", () => {
     await executeCapability(
       ctx,
       "finanzas.celdas.fijar",
-      { filaId: FILA_ING, semana: "2026-11-16", monto: 5 },
+      { filaId: FILA_EGR, semana: "2026-11-16", monto: 5 },
       { dryRun: true },
     );
     expect(await ctx.db.flujoCelda.findMany({})).toHaveLength(antes);
     const lunesMalo = await executeCapability(ctx, "finanzas.celdas.fijar", {
-      filaId: FILA_ING,
+      filaId: FILA_EGR,
       semana: "2026-11-10",
       monto: 5,
     });
     expect(lunesMalo).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
+  });
+
+  it("fijar y cumplir rechazan filas de ingresos (ADR-073: sin ajuste manual de ingresos)", async () => {
+    const { ctx } = nuevo();
+    const fijar = await executeCapability(ctx, "finanzas.celdas.fijar", { filaId: FILA_ING, semana: S2, monto: 700 });
+    expect(fijar).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const fijarPrevia = await executeCapability(
+      ctx,
+      "finanzas.celdas.fijar",
+      { filaId: FILA_ING, semana: S2, monto: 700 },
+      { dryRun: true },
+    );
+    expect(fijarPrevia).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const celda = (await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_ING, capa: "plan" } }))[0]!;
+    const cumplir = await executeCapability(ctx, "finanzas.celdas.cumplir", { id: celda.id });
+    expect(cumplir).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_ING, capa: "plan" } })).toHaveLength(1);
   });
 
   it("mover: vista previa con saldos, luego escritura real que cambia la semana", async () => {
@@ -126,7 +154,7 @@ describe("finanzas.flujo.celdas", () => {
   it("cumplir pasa la celda a real y exige estar en plan", async () => {
     const { ctx } = nuevo();
     const celda = (
-      await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_ING, capa: "plan" } })
+      await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_EGR, capa: "plan" } })
     )[0]!;
     const r = await executeCapability(ctx, "finanzas.celdas.cumplir", { id: celda.id, monto: 900 });
     expect(r).toMatchObject({ ok: true, data: { capa: "real", monto: 900 } });

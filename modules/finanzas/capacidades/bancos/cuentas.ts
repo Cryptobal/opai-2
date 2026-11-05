@@ -40,7 +40,7 @@ export const bancosCuentasListar = defineCapability({
 export const bancosSaldoSugerido = defineCapability({
   id: "finanzas.bancos.saldo_sugerido",
   descripcion:
-    "Suma el saldo posterior del último movimiento por cuenta activa hasta el cierre de la semana del flujo (sugerencia al sellar).",
+    "Suma el saldo del banco: el saldo posterior del último movimiento de cada cuenta activa hasta el fin de la semana indicada, y avisa qué cuentas no tienen saldo.",
   permiso: PERMISO_BANCOS_VER,
   input: z.object({
     cuentaId: z.uuid().optional(),
