@@ -82,6 +82,9 @@ export async function contextoDeApiKey(
     permisosRol: acceso.permisosRol,
     excepciones: acceso.excepciones,
   };
+  const modulos = fuentes.modulosConEstado
+    ? await fuentes.modulosConEstado(tenant.id)
+    : { activos: await fuentes.modulosActivos(tenant.id), soloLectura: [] };
   return crearContexto({
     tenantId: tenant.id,
     actor: { tipo: "agent", id: fila.id, viaUserId: usuario.id },
@@ -98,7 +101,8 @@ export async function contextoDeApiKey(
     // La key hereda el alcance por filas de su responsable (ADR-033); un servicio no hereda alcance.
     alcance: servicio ? null : alcanceDe(acceso.instalaciones),
     portal: null,
-    modulosActivos: await fuentes.modulosActivos(tenant.id),
+    modulosActivos: modulos.activos,
+    modulosSoloLectura: modulos.soloLectura,
     scopes: fila.scopes,
     principal: { tipo, id: servicio ? fila.id : (fila.principalId ?? usuario.id) },
     claveApi,

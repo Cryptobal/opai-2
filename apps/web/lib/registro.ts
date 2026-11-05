@@ -11,6 +11,7 @@ import {
   registrarModulos,
   registrarTrabajos,
   trabajoCobrosMesAnterior,
+  trabajoCobrosPruebas,
   trabajosComercial,
   trabajosDelNucleo,
   trabajosFinanzas,
@@ -39,6 +40,7 @@ export function asegurarRegistro(): void {
     ...trabajosAgente,
     ...trabajosCpq,
     trabajoCobrosMesAnterior,
+    trabajoCobrosPruebas,
   ]);
   registrarConsumidores([
     ...consumidoresDelNucleo,

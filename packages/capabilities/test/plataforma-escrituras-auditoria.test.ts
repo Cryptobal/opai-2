@@ -132,6 +132,7 @@ const CASOS: Record<string, Record<string, unknown>> = {
     condicion: { moneda: "CLP", precio: "100000", cobroDesde: "2026-01-01" },
   },
   "platform.cobros.cargos_generar": { tenantId: t, periodo: "2026-01" },
+  "platform.cobros.prueba_abrir": { tenantId: t, moduloId: "crm", pruebaHasta: "2099-12-31" },
   "platform.cobros.cargo_anular": { tenantId: t, cargoId: CARGO, motivo: "precio mal cargado" },
 };
 

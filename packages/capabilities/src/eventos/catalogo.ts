@@ -94,6 +94,14 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
     descripcion: "Una persona eligió su portal de inicio en la empresa.",
   },
   { id: "core.usuario.invitacion_solicitada", descripcion: "Alguien pidió una nueva invitación." },
+  {
+    id: "core.cobros.prueba_por_vencer",
+    descripcion: "Una prueba de módulo vence en siete días: aviso a Plataforma.",
+  },
+  {
+    id: "core.cobros.prueba_vencida",
+    descripcion: "Una prueba de módulo venció: pasó a cobro o quedó en solo lectura.",
+  },
   { id: "core.bitacora.rota", descripcion: "La verificación de la bitácora encontró un quiebre." },
   {
     id: "core.auditoria.rota",

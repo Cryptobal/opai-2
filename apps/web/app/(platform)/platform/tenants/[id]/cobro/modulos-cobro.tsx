@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { FlaskConical, Pencil } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
@@ -14,11 +14,13 @@ import {
   textoCondicion,
 } from "../../../facturacion/_componentes/cobro";
 // La hoja (Radix, formulario y vista previa) se descarga al abrirla: no pesa en la ruta (ADR-037).
+const HojaPrueba = dynamic(() => import("./hoja-prueba").then((m) => m.HojaPrueba));
 const HojaCondicion = dynamic(() => import("./hoja-condicion").then((m) => m.HojaCondicion));
 
 /** Cada módulo con su estado, su condición comercial y si se factura este mes (o por qué no). */
 export function ModulosCobro({ tenantId, modulos }: { tenantId: string; modulos: ModuloCobro[] }) {
   const [editando, setEditando] = useState<ModuloCobro | null>(null);
+  const [probando, setProbando] = useState<ModuloCobro | null>(null);
   if (modulos.length === 0) return <Empty titulo="Aún no hay módulos registrados" />;
   return (
     <>
@@ -64,13 +66,29 @@ export function ModulosCobro({ tenantId, modulos }: { tenantId: string; modulos:
                 <span className="t-caption">{m.calculo.motivoTexto}</span>
               )}
             </span>
-            <Button variant="secondary" onClick={() => setEditando(m)} className="md:w-auto">
-              <Pencil className="size-4" aria-hidden />
-              {m.condicion ? "Editar" : "Fijar precio"}
-            </Button>
+            <span className="flex flex-wrap gap-2">
+              {m.condicion && m.moduloId !== "base" && m.estado !== "activo" ? (
+                <Button variant="secondary" onClick={() => setProbando(m)} className="md:w-auto">
+                  <FlaskConical className="size-4" aria-hidden />
+                  {m.estado === "trial" ? "Cambiar prueba" : "Abrir prueba"}
+                </Button>
+              ) : null}
+              <Button variant="secondary" onClick={() => setEditando(m)} className="md:w-auto">
+                <Pencil className="size-4" aria-hidden />
+                {m.condicion ? "Editar" : "Fijar precio"}
+              </Button>
+            </span>
           </li>
         ))}
       </ul>
+      {probando ? (
+        <HojaPrueba
+          key={probando.moduloId}
+          tenantId={tenantId}
+          modulo={probando}
+          onCerrar={() => setProbando(null)}
+        />
+      ) : null}
       {editando ? (
         <HojaCondicion
           key={editando.moduloId}
