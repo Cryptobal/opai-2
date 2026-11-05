@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Alerta, BloquePlegable, DetailScreen } from "@opai/ds";
+import { AccionFijaTelefono, Alerta, BloquePlegable, DetailScreen } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -75,6 +75,17 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
         })
       : null;
   const costos = editable && datos.costos ? { versionId: d.version.id, onGuardado: recargar, puestos: puestosHabilitados } : undefined;
+  const propsAcciones = {
+    cotizacionId: d.cotizacion.id,
+    meta,
+    calculo: c,
+    gestionar: datos.gestionar,
+    aprobar: datos.aprobar,
+    onHecho: recargar,
+    onEnviar: () => modales.setEnviarAbierto(true),
+    onVistaPrevia: () => modales.setPreviewAbierto(true),
+    onCompletar: () => abrir(pasos.primeroAbierto)(true),
+  };
   const bloque = (b: BloqueFicha, paso: number, titulo: string, resumen: string | undefined, contenido: React.ReactNode) => (
     <BloquePlegable
       paso={paso}
@@ -102,17 +113,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
             parametros={d.parametros}
             puestos={puestosHabilitados.length}
             acciones={
-              <AccionesFicha
-                cotizacionId={d.cotizacion.id}
-                meta={meta}
-                calculo={c}
-                gestionar={datos.gestionar}
-                aprobar={datos.aprobar}
-                onHecho={recargar}
-                onEnviar={() => modales.setEnviarAbierto(true)}
-                onVistaPrevia={() => modales.setPreviewAbierto(true)}
-                onCompletar={() => abrir(pasos.primeroAbierto)(true)}
-              />
+              <AccionesFicha {...propsAcciones} />
             }
           />
           {aprobacionTxt ? (
@@ -135,6 +136,11 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           {bloque("documento", 4, "Documento y envío", undefined,
             <ContenidoDocumento d={d} datos={datos} meta={meta} calculo={c} onVistaPrevia={() => modales.setPreviewAbierto(true)} />)}
         </div>
+        {datos.gestionar && meta?.estadoFicha && !["esperar", "ninguna"].includes(meta.estadoFicha.siguiente.accion) ? (
+          <AccionFijaTelefono compacto={false}>
+            <AccionesFicha {...propsAcciones} modo="fija" />
+          </AccionFijaTelefono>
+        ) : null}
       </DetailScreen>
       <FichaCotizacionModales modales={modales} d={d} calculo={c} meta={meta} verCostos={datos.costos} recargar={recargar} />
     </>
