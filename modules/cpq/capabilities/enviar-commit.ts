@@ -8,6 +8,7 @@ import {
   registrarPdfPropuestaMetadatos,
   subirPdfPropuestaAlmacenamiento,
 } from "../persistencia/registrar-pdf-propuesta";
+import { exigirVersionEsperada, type VersionEsperada } from "../persistencia/version-esperada";
 import type { ResultadoCalculo } from "../domain/motor";
 
 type PackEnviar = {
@@ -16,6 +17,8 @@ type PackEnviar = {
   negocioId: string;
   versionId: string;
   versionNumero: number;
+  /** Estado y huella que validó el envío al inicio; el commit exige exactamente esos. */
+  versionEsperada: VersionEsperada;
   contactoId: string | null;
   /** Si false, no envía correo aquí (p. ej. envío conjunto con varios destinatarios). */
   enviarCorreo?: boolean;
@@ -47,10 +50,12 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
         cotizacionId: pack.cotizacionId,
         codigo: pack.codigo,
       });
-      // Condicionado al estado: si alguien reabrió o cambió la versión mientras se armaba el PDF, no se
-      // marca enviada con un cálculo y un documento que ya no corresponden (CAR-192).
+      // Condicionado al estado exacto que se validó al inicio y a la huella de la versión: si alguien
+      // reabrió (aunque la haya vuelto a dejar lista) o editó mientras se armaba el PDF, no se marca
+      // enviada con un cálculo y un documento que ya no corresponden (CAR-192).
+      await exigirVersionEsperada(tx, pack.versionId, pack.versionEsperada);
       const marcada = await tx.cpqVersion.updateMany({
-        where: { id: pack.versionId, tenantId: ctx.tenantId, estado: { in: ["borrador", "lista"] } },
+        where: { id: pack.versionId, tenantId: ctx.tenantId, estado: pack.versionEsperada.estado },
         data: {
           estado: "enviada",
           enviadaEn: ahora,

@@ -4,6 +4,7 @@ import { commitEnviarCotizacion } from "../capabilities/enviar-commit";
 import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
 import { pdfCotizacionConMarca } from "./pdf-cotizacion";
 import type { SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecnica";
+import type { VersionEsperada } from "./version-esperada";
 import type { ResultadoCalculo } from "../domain/motor";
 
 export async function documentoCotizacionEnvioConjunto(
@@ -17,6 +18,7 @@ export async function documentoCotizacionEnvioConjunto(
     negocioId: string;
     versionId: string;
     versionNumero: number;
+    versionEsperada: VersionEsperada;
     contactoId: string | null;
     resultado: ResultadoCalculo;
     seccionesVista: { nombre: string; lineas: { nombre: string; tipo: string }[] }[];
@@ -68,6 +70,7 @@ export async function documentoCotizacionEnvioConjunto(
     negocioId: input.negocioId,
     versionId: input.versionId,
     versionNumero: input.versionNumero,
+    versionEsperada: input.versionEsperada,
     contactoId: input.contactoId,
     pdf: pdfCotPack.bytes,
     pdfPack: pdfCotPack,

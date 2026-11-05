@@ -19,6 +19,7 @@ import {
   parseSnapshotEnvioPropuesta,
 } from "./propuesta-envio-snapshot";
 import { enviarCorreosEnvioPropuesta } from "./propuesta-envio-correos";
+import type { VersionEsperada } from "./version-esperada";
 import type { ResultadoCalculo } from "../domain/motor";
 
 type FilaEnvio = {
@@ -42,6 +43,7 @@ export async function ejecutarEnvioPropuestaAprobado(
     autoaprobacion: boolean;
     envioDirectoDentroMargen?: boolean;
     resultado: ResultadoCalculo;
+    versionEsperada: VersionEsperada;
   },
 ) {
   const destinatarios = normalizarDestinatariosEnvio(JSON.parse(row.destinatariosJson));
@@ -77,6 +79,7 @@ export async function ejecutarEnvioPropuestaAprobado(
         negocioId: c.negocioId,
         versionId: pack.version.id,
         versionNumero: pack.version.numero,
+        versionEsperada: input.versionEsperada,
         contactoId,
         resultado: input.resultado,
         seccionesVista,

@@ -59,7 +59,7 @@ export const enviosPropuestaSolicitar = defineCapability({
       });
       if (!prop) throw noEncontrado("La propuesta técnica");
     }
-    const { pack, resultado } = await exigirGatesEnvioCpq(
+    const { pack, resultado, versionEsperada } = await exigirGatesEnvioCpq(
       ctx,
       input.cotizacionId,
       input.confirmarValoresViejos,
@@ -77,6 +77,7 @@ export const enviosPropuestaSolicitar = defineCapability({
         destinatarios,
         creadoPorId: c.creadoPorId,
         resultado,
+        versionEsperada,
         ...(input.mensaje !== undefined ? { mensaje: input.mensaje } : {}),
       },
       dryRun,
