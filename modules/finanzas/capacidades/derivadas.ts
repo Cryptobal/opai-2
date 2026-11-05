@@ -8,8 +8,8 @@ import { lunesDe } from "../domain";
 import { derivadasBanco } from "./derivadas/banco";
 import { derivadasDteSemana } from "./derivadas/dte";
 import { derivadasNomina } from "./derivadas/nomina";
+import { hoyIso } from "./util";
 
-const hoyIso = () => new Date().toISOString().slice(0, 10);
 
 const fuenteSchema = z.object({
   id: z.enum(["dte", "banco", "nomina"]),

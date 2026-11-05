@@ -4,7 +4,7 @@ import { contextoDePrueba, USUARIO_DE_PRUEBA } from "@opai/capabilities/testing"
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { mockMotorLegal } from "../persistencia/mock-motor-legal";
-import { ACTIVOS, CON_COSTOS, CONTACTO_1, GESTOR, NEGOCIO_1, semilla } from "./fixtures";
+import { ACTIVOS, CON_COSTOS, CONTACTO_1, fijarMargenBajo, GESTOR, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 
 const USUARIO_ADMIN = {
@@ -88,6 +88,7 @@ async function cotizacionConPuesto(ctx: ReturnType<typeof ctxOwner>["ctx"]) {
     nombre: "Turno",
     sueldoBaseClp: 600_000,
   });
+  await fijarMargenBajo(ctx, id);
   await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
   return id;
 }

@@ -6,6 +6,8 @@ export const ETIQUETAS_FLUJO = {
   otrosEgresos: "Otros egresos",
   costoFactoring: "Costo factoring",
   cobrosSinFila: "Cobros",
+  abonoFactoring: "Abono factoring",
+  pagoProveedores: "Pago a proveedores",
 } as const;
 
 export type CeldaRealBanco = {
@@ -28,62 +30,44 @@ type MovimientoReal = {
   cobrosFactura?: CobroFacturaReal[];
   esFactoringMerma?: boolean;
   esRemuneracion?: boolean;
+  /** Pago a un documento recibido (egreso a proveedores). */
+  esPagoProveedor?: boolean;
 };
 
-/** Agrupa movimientos conciliados (capa real) hacia filas del flujo por semana ISO. */
+/**
+ * Capa real desde la cartola de la semana. Nunca descarta un movimiento (hallazgo 3, CAR-181):
+ * lo que no tiene fila propia va a «Otros ingresos» u «Otros egresos» según su signo, de modo
+ * que Σ celdas con signo = Σ movimientos con signo.
+ */
 export function celdasRealesDesdeMovimientos(movs: MovimientoReal[]): CeldaRealBanco[] {
   const out: CeldaRealBanco[] = [];
   for (const m of movs) {
+    const semana = lunesIso(m.fecha);
+    const abs = Math.abs(m.monto);
+    const poner = (filaEtiqueta: string, monto = abs) =>
+      out.push({ semana, filaEtiqueta, monto, movimientoId: m.id, nota: m.glosa });
+    const otros = (monto = abs) =>
+      poner(m.monto > 0 ? ETIQUETAS_FLUJO.otrosIngresos : ETIQUETAS_FLUJO.otrosEgresos, monto);
     if (!m.conciliado) {
-      out.push({
-        semana: lunesIso(m.fecha),
-        filaEtiqueta: m.monto > 0 ? ETIQUETAS_FLUJO.otrosIngresos : ETIQUETAS_FLUJO.otrosEgresos,
-        monto: Math.abs(m.monto),
-        movimientoId: m.id,
-        nota: m.glosa,
-      });
-      continue;
-    }
-    if (m.esFactoringMerma) {
-      out.push({
-        semana: lunesIso(m.fecha),
-        filaEtiqueta: ETIQUETAS_FLUJO.costoFactoring,
-        monto: Math.abs(m.monto),
-        movimientoId: m.id,
-        nota: m.glosa,
-      });
-      continue;
-    }
-    if (m.esRemuneracion) {
-      out.push({
-        semana: lunesIso(m.fecha),
-        filaEtiqueta: etiquetaFlujoRemuneracion(m.glosa),
-        monto: Math.abs(m.monto),
-        movimientoId: m.id,
-        nota: m.glosa,
-      });
-      continue;
-    }
-    if (m.cobrosFactura?.length) {
+      otros();
+    } else if (m.esFactoringMerma) {
+      // El abono del factoring entra como ingreso; solo la comisión es costo.
+      poner(m.monto > 0 ? ETIQUETAS_FLUJO.abonoFactoring : ETIQUETAS_FLUJO.costoFactoring);
+    } else if (m.esRemuneracion) {
+      poner(etiquetaFlujoRemuneracion(m.glosa));
+    } else if (m.cobrosFactura?.length) {
+      let asignado = 0;
       for (const c of m.cobrosFactura) {
-        out.push({
-          semana: lunesIso(m.fecha),
-          filaEtiqueta: c.filaEtiqueta || ETIQUETAS_FLUJO.cobrosSinFila,
-          monto: c.monto,
-          movimientoId: m.id,
-          nota: m.glosa,
-        });
+        poner(c.filaEtiqueta || ETIQUETAS_FLUJO.cobrosSinFila, c.monto);
+        asignado += c.monto;
       }
-      continue;
-    }
-    if (m.filaCliente) {
-      out.push({
-        semana: lunesIso(m.fecha),
-        filaEtiqueta: m.filaCliente,
-        monto: Math.abs(m.monto),
-        movimientoId: m.id,
-        nota: m.glosa,
-      });
+      if (abs - asignado > 0) otros(abs - asignado);
+    } else if (m.esPagoProveedor) {
+      poner(ETIQUETAS_FLUJO.pagoProveedores);
+    } else if (m.filaCliente) {
+      poner(m.filaCliente);
+    } else {
+      otros();
     }
   }
   return out;

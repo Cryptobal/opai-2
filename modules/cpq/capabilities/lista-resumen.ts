@@ -16,7 +16,9 @@ export function resumenListaDesdeVersion(
       margenEfectivoPct?: number;
       noEnviable?: boolean;
     };
-    costoPendiente = p.ventaMensual == null || Boolean(p.noEnviable);
+    // Sin venta (sin puestos o en $0) no hay margen que mostrar: «pendiente», no un 0 % en rojo (CAR-192).
+    costoPendiente = !p.ventaMensual || Boolean(p.noEnviable);
+    if (costoPendiente) return { costoPendiente };
     return {
       costoPendiente,
       ...(p.semaforo ? { semaforo: p.semaforo } : {}),

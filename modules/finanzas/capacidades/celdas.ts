@@ -2,10 +2,9 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
-import { lunesDe } from "../domain";
 import { celdaSchema, montoSchema, semanaSchema, uuidSchema, aNumeroSeguro } from "./esquemas";
 import { PERMISO_GESTIONAR } from "./permisos";
-import { aFecha, aIso, bloquearSemanaFlujo, filaDe, ID_VISTA_PREVIA } from "./util";
+import { aFecha, aIso, bloquearSemanaFlujo, filaDe, ID_VISTA_PREVIA, lunesHoy } from "./util";
 import { sincronizarAvisosEnTx } from "./aviso";
 
 const vista = (c: {
@@ -42,7 +41,7 @@ export const celdasFijar = defineCapability({
     const fila = await filaDe(ctx, input.filaId);
     if (!fila.activa)
       throw reglaDeNegocio("La fila está inactiva: actívala antes de cargarle cifras.");
-    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+    const hoy = lunesHoy();
     if (input.semana < hoy)
       throw reglaDeNegocio("Las semanas pasadas se leen de la cartola; no se ajustan montos a mano.");
     const actual = await ctx.db.flujoCelda.findFirst({
@@ -64,9 +63,17 @@ export const celdasFijar = defineCapability({
       });
     const c = await ctx.transaccion(async (tx) => {
       await bloquearSemanaFlujo(tx, ctx, input.semana);
-      const r = actual
+      // Releer con el lock tomado: dos «fijar» sobre una celda nueva ya no chocan (hallazgo 11).
+      const vigente = await tx.flujoCelda.findFirst({
+        where: { filaId: fila.id, semana: aFecha(input.semana) },
+      });
+      if (vigente && vigente.capa !== "plan")
+        throw reglaDeNegocio(
+          "Esa celda ya es comprometida o real: viene de hechos y no se edita a mano.",
+        );
+      const r = vigente
         ? await tx.flujoCelda.update({
-            where: { id: actual.id },
+            where: { id: vigente.id },
             data: { monto: BigInt(input.monto), nota },
           })
         : await tx.flujoCelda.create({
@@ -105,13 +112,16 @@ export const celdasCumplir = defineCapability({
     if (!c) throw noEncontrado("La celda del flujo");
     if (c.capa !== "plan") throw reglaDeNegocio("Solo se da por cumplida una celda planificada.");
     const semana = aIso(c.semana);
-    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+    const hoy = lunesHoy();
     if (semana < hoy)
       throw reglaDeNegocio("Las semanas pasadas se leen de la cartola; no se ajustan montos a mano.");
     const montoNum = input.monto ?? aNumeroSeguro(c.monto);
     if (dryRun) return vista({ ...c, capa: "real", monto: montoNum });
     const r = await ctx.transaccion(async (tx) => {
       await bloquearSemanaFlujo(tx, ctx, semana);
+      const vigente = await tx.flujoCelda.findFirst({ where: { id: c.id } });
+      if (!vigente || vigente.capa !== "plan")
+        throw reglaDeNegocio("Solo se da por cumplida una celda planificada.");
       const u = await tx.flujoCelda.update({
         where: { id: c.id },
         data: { capa: "real", monto: BigInt(montoNum), cumplidaEn: new Date() },

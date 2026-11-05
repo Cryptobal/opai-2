@@ -15,10 +15,9 @@ export async function solicitarAprobacionMargen(
   resultado: ResultadoCalculo,
   comentario?: string,
 ) {
-  if (!resultado.requiereAprobacion)
-    throw reglaDeNegocio("El margen no requiere aprobación; puedes dejarla lista o enviar.");
-  if (resultado.noEnviable)
-    throw reglaDeNegocio("Completa los costos pendientes antes de pedir aprobación.");
+  // La capacidad ya validó los requisitos (`exigirParaPedirAprobacion`); aquí queda la defensa mínima.
+  if (!resultado.requiereAprobacion || resultado.noEnviable)
+    throw reglaDeNegocio("La cotización no está en condiciones de pedir aprobación.");
   const v = await versionDeCotizacion(ctx, versionId);
   const prev = await aprobacionPendiente(ctx, versionId);
   if (v.estado === "en_aprobacion" && prev) return { aprobacionId: prev.id, estado: v.estado as EstadoCotizacion };
@@ -29,7 +28,8 @@ export async function solicitarAprobacionMargen(
   const fila = await ctx.transaccion(async (tx) => {
     const vr = await tx.cpqVersion.updateMany({
       where: { id: versionId, estado: desde },
-      data: { estado: "en_aprobacion" },
+      // Se congela lo que se pide aprobar: la ficha muestra este cálculo hasta que cambie el estado.
+      data: { estado: "en_aprobacion", ...datosCongelados(resultado) },
     });
     if (vr.count === 0) throw conflicto("La versión cambió de estado mientras tanto; vuelve a intentar.");
     const creada = await tx.cpqAprobacion.create({
@@ -56,14 +56,25 @@ export async function solicitarAprobacionMargen(
   ctx.despacharEventos();
   return { aprobacionId: fila.id, estado: "en_aprobacion" as const };
 }
+/** Venta y cálculo que queda congelado al dejar lista o pedir aprobación (R-CPQ-010). */
+function datosCongelados(resultado: ResultadoCalculo) {
+  return { ventaMensualClp: resultado.ventaMensual, calculoCongeladoJson: JSON.stringify(resultado) };
+}
+
+/** Requisitos ya validados por la capacidad (`exigirParaMarcarLista`); congela el cálculo aprobado. */
 export async function marcarLista(ctx: Contexto, versionId: string, resultado: ResultadoCalculo) {
-  if (resultado.noEnviable) throw reglaDeNegocio("La cotización no está lista: hay costos o UF pendientes.");
-  if (resultado.requiereAprobacion)
-    throw reglaDeNegocio("El margen requiere aprobación; usa «Pedir aprobación».");
   const v = await versionDeCotizacion(ctx, versionId);
   if (!puedeTransicionar(v.estado as EstadoCotizacion, "lista"))
     throw reglaDeNegocio(`No se puede pasar de ${v.estado} a lista.`);
-  await ctx.db.cpqVersion.update({ where: { id: versionId }, data: { estado: "lista" } });
+  // Condicionado al estado (en transacción): una edición o un pedido de aprobación que llegó entre el
+  // cálculo y este guardado no deja congelado un cálculo que ya no corresponde a las líneas.
+  await ctx.transaccion(async (tx) => {
+    const r = await tx.cpqVersion.updateMany({
+      where: { id: versionId, tenantId: ctx.tenantId, estado: "borrador" },
+      data: { estado: "lista", ...datosCongelados(resultado) },
+    });
+    if (r.count === 0) throw conflicto("La versión cambió de estado mientras tanto; vuelve a intentar.");
+  });
   return { estado: "lista" as const };
 }
 export async function retirarAprobacion(ctx: Contexto, versionId: string) {

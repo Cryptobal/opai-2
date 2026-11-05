@@ -1,15 +1,10 @@
 import { z } from "zod";
 
-import {
-  defineCapability,
-  conflicto,
-  reglaDeNegocio,
-  sincronizarCobroDocumento,
-  validarDocumentoCobroBanco,
-  validarDocumentoCompraBanco,
-} from "@opai/capabilities";
+import { defineCapability, conflicto, reglaDeNegocio, sincronizarCobroDocumento } from "@opai/capabilities";
+import { validarDocumentoCobroBanco, validarDocumentoCompraBanco } from "@opai/capabilities";
 import type { Prisma } from "@opai/db";
 
+import { sincronizarAvisosEnTx } from "../aviso";
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_AUTORIZAR } from "./permisos";
 import { montoDe } from "./esquemas";
 import { exigirEnlacesDistintos, exigirTopeDocumento } from "./topes-conciliacion";
@@ -106,6 +101,7 @@ export const bancosConciliacionConfirmar = defineCapability({
         entidadTipo: "movimientoBancario",
         entidadId: mov.id,
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     });
     return { conciliado: true, estadoCobro };
   },
@@ -149,6 +145,7 @@ export const bancosConciliacionDeshacer = defineCapability({
         entidadId: input.movimientoId,
         payload: { motivo: input.motivo },
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     });
     return { deshecho: true };
   },

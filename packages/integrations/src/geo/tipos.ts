@@ -1,5 +1,6 @@
 // Tipos y normalización de direcciones de la geolocalización del núcleo (ADR-027).
 
+import type { Distancia, Punto } from "./distancia";
 import type { ImagenMapa, OpcionesMapa } from "./mapa";
 
 export type DireccionGeo = {
@@ -23,6 +24,8 @@ export interface Geo {
   urlMapa(lat: number, lng: number, opciones?: OpcionesMapa): string;
   /** Imagen del mapa descargada en el servidor (la usa el proxy `/api/geo/mapa`). */
   mapa(lat: number, lng: number, opciones?: OpcionesMapa): Promise<ImagenMapa>;
+  /** Km por ruta (Routes API, sin tráfico, Chile); si Google falla, línea recta y así lo informa. */
+  distancia(origen: Punto, destino: Punto): Promise<Distancia>;
 }
 
 export type Componente = { longText?: string; long_name?: string; types: string[] };

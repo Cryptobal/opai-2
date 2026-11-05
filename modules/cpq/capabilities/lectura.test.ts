@@ -113,7 +113,7 @@ describe("cpq:costos.ver en el servidor (R59, CA15)", () => {
     const ficha = await executeCapability(lectura, "cpq.cotizaciones.get", { id: a });
     expect(ficha).toMatchObject({
       ok: true,
-      data: { versiones: [{ margen: { modo: "margen_sobre_venta", objetivoPct: null } }] },
+      data: { versiones: [{ margen: { modo: "margen_sobre_venta", objetivoPct: 200_000 } }] },
     });
   });
 

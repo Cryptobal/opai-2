@@ -114,7 +114,7 @@ export function puedeVer(ctx: Contexto, r: { solicitanteId: string; aprobadorId:
 }
 
 export async function rendicionDe(ctx: Contexto, id: string) {
-  const r = await ctx.db.rendicion.findFirst({ where: { id }, include: { items: { orderBy: { orden: "asc" } } } });
+  const r = await ctx.db.rendicion.findFirst({ where: { id }, include: { items: { orderBy: { orden: "asc" } }, viaje: true } });
   if (!r || !puedeVer(ctx, r)) throw noEncontrado("La rendición");
   return r;
 }
@@ -135,6 +135,20 @@ export function resumenDe(r: Fila) {
   };
 }
 
-export function vistaDe(r: Fila & { items: ItemFila[] }) {
-  return { ...resumenDe(r), items: r.items.map((i) => ({ ...i, fecha: i.fecha.toISOString().slice(0, 10) })) };
+type ViajeFila = {
+  origenTexto: string; destinoTexto: string; km: { toNumber(): number }; idaYVuelta: boolean; peajeClp: number;
+  metodo: string; origenDistancia: string; montoCalculado: number;
+};
+
+export function vistaDe(r: Fila & { items: ItemFila[]; viaje: ViajeFila | null }) {
+  const v = r.viaje;
+  return {
+    ...resumenDe(r),
+    items: r.items.map((i) => ({ ...i, fecha: i.fecha.toISOString().slice(0, 10) })),
+    viaje: v && {
+      origen: v.origenTexto, destino: v.destinoTexto, km: v.km.toNumber(), idaYVuelta: v.idaYVuelta, peajeClp: v.peajeClp,
+      metodo: v.metodo, origenDistancia: v.origenDistancia === "google" ? ("google" as const) : ("linea_recta" as const),
+      montoCalculado: v.montoCalculado,
+    },
+  };
 }

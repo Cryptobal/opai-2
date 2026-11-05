@@ -7,16 +7,22 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
+import { esFalloReal, FalloBloque } from "./fallo-bloque";
+
 /** «Mis tareas de hoy» en Inicio (CAR-162): vencidas y de hoy; sin tareas o sin permiso, no aparece. */
 export async function TareasInicio() {
   const [identidad, r] = await Promise.all([
     identidadActual(),
     ejecutarComoUsuario<ListaActividades>("erp", "core.actividades.tareas", { limite: 50 }),
   ]);
-  if (!r.ok || !identidad) return null;
+  if (!identidad) return null;
+  if (!r.ok)
+    return esFalloReal(r.error.code) ? <FalloBloque titulo="No pudimos cargar tus tareas" /> : null;
   const gestiona = puedeDeIdentidad(identidad)(PERMISOS_CORE.actividadesManage);
   const ahora = new Date();
-  const tareas = r.data.items.filter((t) => ["vencidas", "hoy"].includes(grupoDeTarea(t.vencimiento, ahora)));
+  const tareas = r.data.items
+    .filter((t) => ["vencidas", "hoy"].includes(grupoDeTarea(t.vencimiento, ahora)))
+    .slice(0, 5);
   if (!tareas.length) return null;
   return (
     <SeccionTarjeta

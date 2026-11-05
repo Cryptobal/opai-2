@@ -7,6 +7,7 @@ import { Alerta, avisar, Button, Campo, Input, Sheet, Textarea } from "@opai/ds"
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { clp } from "./datos";
+import { parsearMontoUi } from "./monto-ui";
 
 type Contexto = {
   fila: { id: string; etiqueta: string; seccion: string };
@@ -37,12 +38,17 @@ function HojaCeldaForm({ onCerrar, contexto }: { onCerrar: () => void; contexto:
   const ctx = contexto;
   const { ejecutar, pendiente, error, codigo, limpiarError } = useCapacidad("erp");
   const [monto, setMonto] = useState(String(ctx.celda?.monto ?? 0));
+  const [errorMonto, setErrorMonto] = useState<string | null>(null);
   const [nota, setNota] = useState(ctx.celda?.nota ?? "");
   const [celdaActual, setCeldaActual] = useState(ctx.celda);
 
   async function guardar() {
-    const m = Number(monto.replace(/\./g, "").replace(",", "."));
-    if (!Number.isFinite(m) || m < 0) return;
+    const m = parsearMontoUi(monto);
+    if (!m.ok) {
+      setErrorMonto(m.error);
+      return;
+    }
+    setErrorMonto(null);
     limpiarError();
     const r = await ejecutar<{
       id: string;
@@ -51,7 +57,7 @@ function HojaCeldaForm({ onCerrar, contexto }: { onCerrar: () => void; contexto:
     }>("finanzas.celdas.fijar", {
       filaId: ctx.fila.id,
       semana: ctx.semana,
-      monto: Math.round(m),
+      monto: m.monto,
       nota: nota.trim() || undefined,
     });
     if (!r) return;
@@ -103,7 +109,7 @@ function HojaCeldaForm({ onCerrar, contexto }: { onCerrar: () => void; contexto:
             ) : null}
           </Alerta>
         ) : null}
-        <Campo etiqueta="Monto (CLP)" htmlFor="fc-monto">
+        <Campo etiqueta="Monto (CLP)" htmlFor="fc-monto" error={errorMonto ?? undefined}>
           <Input id="fc-monto" value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="numeric" />
         </Campo>
         <Campo etiqueta="Nota" htmlFor="fc-nota">

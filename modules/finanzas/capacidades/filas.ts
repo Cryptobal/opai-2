@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability } from "@opai/capabilities";
 
+import { sincronizarAvisosEnTx } from "./aviso";
 import { filaSchema, seccionSchema, sinDuplicado, uuidSchema, vistaFila } from "./esquemas";
 import { PERMISO_CONFIGURAR } from "./permisos";
 import { filaDe, ID_VISTA_PREVIA } from "./util";
@@ -117,6 +118,7 @@ export const filasArchivar = defineCapability({
         entidadId: input.id,
         payload: { archivada: input.archivar },
       });
+      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
       return r;
     });
     return vistaFila(f);

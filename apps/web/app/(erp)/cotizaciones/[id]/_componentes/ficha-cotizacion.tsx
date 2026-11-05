@@ -1,31 +1,61 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { AccionFijaTelefono, Alerta, Badge, DetailScreen } from "@opai/ds";
+import { Alerta, BloquePlegable, DetailScreen } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
-import { estadoCpqBadge } from "@/lib/cpq-presentacion";
+import { avisosCpq } from "@/lib/cpq-avisos";
+import { type BloqueFicha, pasosDeFicha } from "@/lib/cpq-ficha-pasos";
+import { conteo } from "@/lib/cpq-presentacion";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
-import { hayBarraFijaCpq, bloqueoEnvioCpq } from "./acciones-cotizacion-logica";
-import { AccionesCotizacion } from "./acciones-cotizacion";
-import { FichaCotizacionCuerpo } from "./ficha-cotizacion-cuerpo";
+import { AccionesFicha } from "./acciones-ficha";
+import { ContenidoCliente } from "./contenido-cliente";
+import { ContenidoCostos } from "./contenido-costos";
+import { ContenidoDocumento } from "./contenido-documento";
+import { ContenidoPuestos } from "./contenido-puestos";
 import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotizacion-modales";
 import type { MetaFicha } from "./meta-ficha";
-import { ResumenCotizacion } from "./resumen-cotizacion";
+import { ResumenSuperior } from "./resumen-superior";
+
+type Calculo = Parameters<typeof ContenidoCostos>[0]["calculo"] & Parameters<typeof ResumenSuperior>[0]["calculo"];
 
 const puestosDe = (secciones: { lineas: { id: string; nombre: string; tipo: string }[] }[]) =>
   secciones.flatMap((s) => s.lineas.filter((l) => l.tipo === "puesto").map((l) => ({ id: l.id, nombre: l.nombre })));
 
+/** Ficha de cotización con pasos plegables (alternativa B, CAR-192): resumen fijo y cuatro bloques. */
 export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
   const router = useRouter();
   const modales = useModalesFichaCotizacion();
-  const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const { ejecutar, pendiente, limpiarError } = useCapacidad("erp");
   const d = datos.ficha;
+  const meta = d?.meta as MetaFicha | undefined;
+  const c = (d?.calculo ?? {}) as Calculo;
+  const editable = Boolean(datos.gestionar && d?.version.editable);
+  const puestosHabilitados = d ? puestosDe(d.secciones) : [];
+  const pasos = pasosDeFicha({
+    estado: meta?.estadoFicha?.estado ?? "incompleta",
+    tieneCuenta: Boolean(d?.cuentaId),
+    puestos: puestosHabilitados.length,
+    avisosBloqueantes: avisosCpq(c).filter((a) => a.bloquea && a.accion).length,
+    bloqueos: meta?.estadoFicha?.bloqueos.map((b) => b.codigo) ?? [],
+    mutualPendiente: Boolean(meta?.requiereConfirmarMutual),
+  });
+  const [abiertos, setAbiertos] = useState<Record<BloqueFicha, boolean>>({
+    cliente: false, puestos: false, costos: false, documento: false, [pasos.primeroAbierto]: true,
+  });
+  // Al resolver un paso se abre el siguiente con pendientes, sin cerrar lo que la persona abrió.
+  const [anterior, setAnterior] = useState(pasos.primeroAbierto);
+  if (anterior !== pasos.primeroAbierto) {
+    setAnterior(pasos.primeroAbierto);
+    setAbiertos((a) => ({ ...a, [pasos.primeroAbierto]: true }));
+  }
+
   if (!d) {
     return (
       <DetailScreen state={datos.state} titulo="Cotización" textos={{ error: { accion: <BotonReintentar /> } }}>
@@ -33,14 +63,9 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
       </DetailScreen>
     );
   }
-  const editable = datos.gestionar && d.version.editable;
-  const c = d.calculo as Parameters<typeof ResumenCotizacion>[0]["calculo"];
-  const meta = d.meta as MetaFicha | undefined;
-  const badge = estadoCpqBadge(d.version.estado);
   const recargar = () => router.refresh();
-  // Sin `cpq:costos.ver` no se ingresa sueldo: el aviso no ofrece abrir la hoja (CAR-162).
-  const editarLinea =
-    editable && datos.costos ? { onEditarLinea: (id: string) => modales.editarLineaDe(d.secciones, id) } : {};
+  const de = (b: BloqueFicha) => pasos.pasos.find((p) => p.bloque === b)!;
+  const abrir = (b: BloqueFicha) => (v: boolean) => setAbiertos((a) => ({ ...a, [b]: v }));
   const aprobacionTxt =
     d.version.estado === "en_aprobacion"
       ? textoAprobacionMargenN6({
@@ -49,94 +74,67 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           motivoNoAprobarMargen: meta?.motivoNoAprobarMargen,
         })
       : null;
-
-  const resumen = (
-    <ResumenCotizacion
-      version={d.version}
-      calculo={c}
-      {...(meta !== undefined ? { meta } : {})}
-      verCostos={datos.costos}
-      {...editarLinea}
-      {...(editable && datos.costos
-        ? { costos: { versionId: d.version.id, onGuardado: recargar, puestos: puestosDe(d.secciones) } }
-        : {})}
-    />
+  const costos = editable && datos.costos ? { versionId: d.version.id, onGuardado: recargar, puestos: puestosHabilitados } : undefined;
+  const bloque = (b: BloqueFicha, paso: number, titulo: string, resumen: string | undefined, contenido: React.ReactNode) => (
+    <BloquePlegable
+      paso={paso}
+      titulo={titulo}
+      {...(resumen ? { resumen } : {})}
+      pendientes={de(b).pendientes}
+      {...(de(b).bloqueado ? { bloqueado: "En espera" } : {})}
+      abierto={abiertos[b]}
+      onCambiar={abrir(b)}
+    >
+      {contenido}
+    </BloquePlegable>
   );
-
-  const propsAcciones = {
-    cotizacionId: d.cotizacion.id,
-    version: d.version,
-    calculo: c,
-    ...(meta !== undefined ? { meta } : {}),
-    gestionar: datos.gestionar,
-    aprobar: datos.aprobar,
-    onHecho: recargar,
-    onEnviar: () => modales.setEnviarAbierto(true),
-    onVistaPrevia: () => modales.setPreviewAbierto(true),
-    ...editarLinea,
-  };
-  const paramsBarra = {
-    version: d.version,
-    calculo: c,
-    gestionar: datos.gestionar,
-    ...(meta !== undefined ? { meta } : {}),
-  };
-  const muestraBarraFija = editable && hayBarraFijaCpq(paramsBarra);
-
   return (
     <>
       <DetailScreen
         state={datos.state}
         titulo={d.cotizacion.codigo}
-        subtitulo={
-          <>
-            {d.cotizacion.titulo} · v{d.version.numero}
-            {d.negocioTitulo ? <> · {d.negocioTitulo}</> : null}
-          </>
-        }
-        estado={
-          <>
-            <Badge tono={badge.tono}>{badge.etiqueta}</Badge>
-            {!d.cotizacion.vigente ? <Badge tono="neutro">Alternativa</Badge> : null}
-          </>
-        }
-        accionesDebajoEnTelefono
-        acciones={<AccionesCotizacion {...propsAcciones} ocultarPrimariaEnTelefono />}
+        subtitulo={<>{d.cotizacion.titulo}{d.cotizacion.vigente ? null : " · Alternativa"}</>}
       >
-        {error ? <Alerta tono="danger" titulo={error} className="mb-4" /> : null}
-        {aprobacionTxt ? (
-          <Alerta tono="info" titulo={aprobacionTxt.titulo} className="mb-4">
-            <span className="flex flex-col gap-2">
-              <span>{aprobacionTxt.detalle}</span>
-              {meta?.aprobacion?.bandejaId ? (
-                <EnlaceBoton
-                  href={`/configuracion/aprobaciones?ver=${encodeURIComponent(meta.aprobacion.bandejaId)}`}
-                  variante="ghost"
-                  className="self-start px-0"
-                >
-                  Ver en la bandeja de aprobaciones
-                </EnlaceBoton>
-              ) : null}
-            </span>
-          </Alerta>
-        ) : null}
-        <FichaCotizacionCuerpo
-          d={d}
-          datos={datos}
-          resumen={resumen}
-          editable={Boolean(editable)}
-          pendiente={pendiente}
-          ejecutar={ejecutar}
-          limpiarError={limpiarError}
-          recargar={recargar}
-          modales={modales}
-          {...(meta !== undefined ? { meta } : {})}
-        />
-        {muestraBarraFija ? (
-          <AccionFijaTelefono compacto={!bloqueoEnvioCpq(paramsBarra)}>
-            <AccionesCotizacion {...propsAcciones} soloPrimaria />
-          </AccionFijaTelefono>
-        ) : null}
+        <div className="space-y-3">
+          <ResumenSuperior
+            calculo={c}
+            meta={meta}
+            parametros={d.parametros}
+            puestos={puestosHabilitados.length}
+            acciones={
+              <AccionesFicha
+                cotizacionId={d.cotizacion.id}
+                meta={meta}
+                calculo={c}
+                gestionar={datos.gestionar}
+                aprobar={datos.aprobar}
+                onHecho={recargar}
+                onEnviar={() => modales.setEnviarAbierto(true)}
+                onVistaPrevia={() => modales.setPreviewAbierto(true)}
+                onCompletar={() => abrir(pasos.primeroAbierto)(true)}
+              />
+            }
+          />
+          {aprobacionTxt ? (
+            <Alerta tono="info" titulo={aprobacionTxt.titulo}>
+              <span className="flex flex-col gap-2">
+                <span>{aprobacionTxt.detalle}</span>
+                {meta?.aprobacion?.bandejaId ? (
+                  <EnlaceBoton href={`/configuracion/aprobaciones?ver=${encodeURIComponent(meta.aprobacion.bandejaId)}`} variante="ghost" className="self-start px-0">
+                    Ver en la bandeja de aprobaciones
+                  </EnlaceBoton>
+                ) : null}
+              </span>
+            </Alerta>
+          ) : null}
+          {bloque("cliente", 1, "Cliente e instalación", d.negocioTitulo ?? undefined, <ContenidoCliente d={d} />)}
+          {bloque("puestos", 2, "Puestos", conteo(puestosHabilitados.length, "puesto"),
+            <ContenidoPuestos d={d} verCostos={datos.costos} editable={editable} pendiente={pendiente} ejecutar={ejecutar} limpiarError={limpiarError} recargar={recargar} modales={modales} />)}
+          {bloque("costos", 3, "Costos y margen", undefined,
+            <ContenidoCostos d={d} calculo={c} meta={meta} editable={editable} modales={modales} {...(costos ? { costos } : {})} />)}
+          {bloque("documento", 4, "Documento y envío", undefined,
+            <ContenidoDocumento d={d} datos={datos} meta={meta} calculo={c} onVistaPrevia={() => modales.setPreviewAbierto(true)} />)}
+        </div>
       </DetailScreen>
       <FichaCotizacionModales modales={modales} d={d} calculo={c} meta={meta} verCostos={datos.costos} recargar={recargar} />
     </>

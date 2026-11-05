@@ -835,7 +835,7 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 **Decisión.** (1) El menú «Más» usa la **variante A** del diseño: lista compacta con filas de 48 px, áreas plegables (encabezado de 48 px con ícono, nombre, conteo y chevron), solo el área activa abierta por defecto y lo que el usuario abre se recuerda por usuario y empresa en el navegador (preferencia de interfaz, como los recientes; no es dato de negocio ni lleva herramienta MCP). (2) «Fijados y recientes» va una sola vez, en una fila de hasta cuatro accesos rápidos bajo la búsqueda; las entradas fijadas que también están en las áreas llevan un pin. (3) **Un solo buscador en el teléfono:** el campo de «Más» se escribe en su lugar y el ícono de buscar de la barra superior abre la misma hoja en modo búsqueda, con el texto «Buscar o ir a…» y los mismos resultados (`core.buscar`, sin capacidades nuevas). Escritorio e iPad no cambian. (4) Barra superior a 375 px: el selector de portal trunca el nombre de la empresa y «ERP» pasa al interior del selector. (5) Cada entrada del menú tiene su propio ícono (sin repetidos dentro de «Más»).
 
-**No cambia.** El mapa de áreas, la barra inferior, la barra lateral de escritorio y el riel de iPad, los permisos y las capacidades. **Inicio** no se implementa con esta decisión.
+**No cambia.** El mapa de áreas, la barra inferior, la barra lateral de escritorio y el riel de iPad, los permisos y las capacidades. **Inicio** no se implementa con esta decisión (lo pidió Carlos el 5-nov-2026 y se implementó en CAR-182 sobre las láminas 01 a 07; sin capacidades nuevas).
 
 ## ADR-047 · Especificación funcional aprobada antes de diseñar o construir un módulo
 

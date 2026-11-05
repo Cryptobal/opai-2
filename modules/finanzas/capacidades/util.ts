@@ -9,6 +9,17 @@ import { aNumeroSeguro } from "./esquemas";
 /** Id de relleno de las vistas previas (dry_run): no existe fila, pero cumple el esquema de salida. */
 export const ID_VISTA_PREVIA = "00000000-0000-0000-0000-000000000000";
 
+/** Zona civil que decide qué día es «hoy» hasta que el tenant fije la suya (hallazgo 7, CAR-181). */
+export const ZONA_FLUJO = "America/Santiago";
+
+/** Hoy como "aaaa-mm-dd" en la zona del negocio (nunca en UTC: el domingo en la noche ya es lunes en UTC). */
+export function hoyIso(ahora: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: ZONA_FLUJO }).format(ahora);
+}
+
+/** Lunes de la semana en curso, en la zona del negocio. */
+export const lunesHoy = (ahora?: Date): string => lunesDe(hoyIso(ahora));
+
 export const aIso = (d: Date | string): string =>
   (typeof d === "string" ? d : d.toISOString()).slice(0, 10);
 export const aFecha = (iso: string): Date => new Date(`${iso}T00:00:00Z`);
@@ -60,7 +71,7 @@ export async function ajustesDe(ctx: Contexto) {
   return vistaAjustes({
     saldoInicial: 0,
     umbral: 0,
-    desde: aFecha(lunesDe(new Date().toISOString().slice(0, 10))),
+    desde: aFecha(lunesHoy()),
     toleranciaCierre: 1000,
     horizonteSemanas: 12,
     calendarioPagos: calendarioDefecto(),

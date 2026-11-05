@@ -92,6 +92,10 @@ export const AJUSTES: Record<string, Ajuste> = {
     }),
   },
   "rendiciones.rendicion_items": { valores: () => ({ monto: 1 }) },
+  // Rendiciones · kilometraje (CAR-194): CHECK de método y de origen de la distancia, monto positivo.
+  "rendiciones.rendicion_viajes": {
+    valores: () => ({ metodo: "consumo", origen_distancia: "linea_recta", monto_calculado: 1, km: 1, peaje_clp: 0 }),
+  },
   // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
   "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
   // Finanzas · cobranza (CAR-166): CHECKs de canal, origen y resultado.

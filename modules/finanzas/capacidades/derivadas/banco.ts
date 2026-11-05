@@ -1,6 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
-import { reglaDeNegocio } from "@opai/capabilities";
-import { celdasRealesDesdeMovimientos, ETIQUETAS_FLUJO, finSemanaIso } from "@opai/domain";
+import type { TenantTx } from "@opai/db";
+import { celdasRealesDesdeMovimientos, finSemanaIso } from "@opai/domain";
 
 import { aNumeroSeguro } from "../esquemas";
 import type { celdaSchema } from "../esquemas";
@@ -8,34 +8,23 @@ import { aFecha, aIso } from "../util";
 import type { z } from "zod";
 
 import { montoDe } from "../bancos/esquemas";
+import { FILA_SIN_CLASIFICAR_EGRESO, FILA_SIN_CLASIFICAR_INGRESO } from "../filas-virtuales";
 
-async function idFilaCobros(ctx: Contexto, porEtiqueta: Map<string, string>): Promise<string> {
-  const key = ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase();
-  const existente = porEtiqueta.get(key);
-  if (existente) return existente;
-
-  const agg = await ctx.db.flujoFila.aggregate({ _max: { orden: true } });
-  const creada = await ctx.db.flujoFila.create({
-    data: {
-      tenantId: ctx.tenantId,
-      seccion: "ingreso",
-      etiqueta: ETIQUETAS_FLUJO.cobrosSinFila,
-      vinculo: null,
-      arrastre: true,
-      orden: (agg._max.orden ?? 0) + 1,
-      activa: true,
-    },
-  });
-  porEtiqueta.set(key, creada.id);
-  return creada.id;
-}
-
-/** Capa real del flujo desde movimientos bancarios conciliados (CAR-97). */
-export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.infer<typeof celdaSchema>[]> {
-  const finSemana = semana ? finSemanaIso(semana) : undefined;
-  const movs = await ctx.db.movimientoBancario.findMany({
+/**
+ * Capa real del flujo: TODA la cartola del rango (CAR-97, CAR-181). Una sola consulta por rango,
+ * sin importar cuántas semanas abarque. Entre `semana` y el fin de `hastaSemana` (o de `semana`).
+ */
+export async function derivadasBanco(
+  ctx: Contexto,
+  semana?: string,
+  hastaSemana?: string,
+  tx?: TenantTx,
+): Promise<z.infer<typeof celdaSchema>[]> {
+  const db = tx ?? ctx.db;
+  const finSemana = semana ? finSemanaIso(hastaSemana ?? semana) : undefined;
+  const movs = await db.movimientoBancario.findMany({
     where: {
-      estado: "conciliado",
+      estado: { not: "ignorado" },
       ...(semana ? { fecha: { gte: aFecha(semana), lte: aFecha(finSemana!) } } : {}),
     },
     include: { conciliaciones: { where: { activa: true, confirmada: true } } },
@@ -51,7 +40,7 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
   ];
   const docs =
     docIds.length > 0
-      ? await ctx.db.documentoEmitido.findMany({
+      ? await db.documentoEmitido.findMany({
           where: { id: { in: docIds } },
           select: { id: true, cuentaId: true },
         })
@@ -59,7 +48,7 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
   const cuentaIds = [...new Set(docs.map((d) => d.cuentaId))];
   const cuentas =
     cuentaIds.length > 0
-      ? await ctx.db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } })
+      ? await db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } })
       : [];
   const nombreCuenta = new Map(cuentas.map((c) => [c.id, c.nombre] as const));
   const filaPorDoc = new Map<string, string>();
@@ -67,12 +56,16 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
     filaPorDoc.set(d.id, nombreCuenta.get(d.cuentaId) ?? "");
   }
 
-  const filas = await ctx.db.flujoFila.findMany({ select: { id: true, etiqueta: true } });
-  const porEtiqueta = new Map(filas.map((f) => [f.etiqueta.toLowerCase(), f.id]));
+  // Solo filas activas: lo real nunca cae en una fila archivada que la planilla no suma (hallazgo 4).
+  const filas = await db.flujoFila.findMany({
+    where: { activa: true },
+    select: { id: true, etiqueta: true, seccion: true },
+  });
+  const porEtiqueta = new Map(filas.map((f) => [f.etiqueta.toLowerCase(), f]));
   const porId = new Map(filas.map((f) => [f.id, f.etiqueta]));
 
   const mapped = movs.map((m) => {
-    const conciliado = true;
+    const conciliado = m.estado === "conciliado";
     let filaCliente: string | null = null;
     const enlaceFila = m.conciliaciones.find((c) => c.tipoEnlace === "flujo_fila");
     if (enlaceFila) filaCliente = porId.get(enlaceFila.enlaceId) ?? null;
@@ -93,28 +86,25 @@ export async function derivadasBanco(ctx: Contexto, semana?: string): Promise<z.
       filaCliente,
       esFactoringMerma: /MERMA|FACTORING/i.test(m.glosa),
       esRemuneracion: /REMUNERACI|PREVIRED/i.test(m.glosa),
+      esPagoProveedor: m.conciliaciones.some((c) => c.tipoEnlace === "documento_recibido"),
     };
     return cobrosFactura.length > 0 ? { ...base, cobrosFactura } : base;
   });
 
   const celdas = celdasRealesDesdeMovimientos(mapped);
-  const cobrosKey = ETIQUETAS_FLUJO.cobrosSinFila.toLowerCase();
+  const signoDe = new Map(movs.map((m) => [m.id, aNumeroSeguro(m.monto) >= 0 ? 1 : -1] as const));
   const out: z.infer<typeof celdaSchema>[] = [];
 
   for (const c of celdas) {
-    const etiquetaKey = c.filaEtiqueta.toLowerCase();
-    let filaId = porEtiqueta.get(etiquetaKey);
-    if (!filaId && etiquetaKey === cobrosKey) {
-      filaId = await idFilaCobros(ctx, porEtiqueta);
-    }
-    if (!filaId) {
-      if (etiquetaKey === cobrosKey) {
-        throw reglaDeNegocio(
-          `Falta la fila «${ETIQUETAS_FLUJO.cobrosSinFila}» en el flujo de caja para cobros sin fila de cliente.`,
-        );
-      }
-      continue;
-    }
+    const fila = porEtiqueta.get(c.filaEtiqueta.toLowerCase());
+    const ingreso = (signoDe.get(c.movimientoId) ?? 1) > 0;
+    // La fila debe ser de la sección del signo; si no existe o no calza, va a «Sin clasificar».
+    const filaId =
+      fila && (fila.seccion === "ingreso") === ingreso
+        ? fila.id
+        : ingreso
+          ? FILA_SIN_CLASIFICAR_INGRESO
+          : FILA_SIN_CLASIFICAR_EGRESO;
     out.push({
       id: c.movimientoId,
       filaId,

@@ -76,38 +76,12 @@ export function LineaCotizacion({
           ) : null}
         </div>
         {itemsMenu.length > 0 ? (
-          <div className="flex shrink-0 items-center gap-2">
-            {verCostos && costo?.estado === "ok" ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="md"
-                className="hidden md:inline-flex"
-                disabled={pendiente}
-                onClick={() => onTraza(linea.id)}
-              >
-                Ver traza
-              </Button>
-            ) : null}
-            {editable ? (
-              <div className="hidden items-center gap-2 md:flex">
-                <Button type="button" variant="ghost" size="md" disabled={pendiente} onClick={payloadEditar}>
-                  Editar
-                </Button>
-                <Button type="button" variant="ghost" size="md" disabled={pendiente} onClick={() => onQuitar(linea.id)}>
-                  Quitar
-                </Button>
-              </div>
-            ) : null}
-            <div className="md:hidden">
-              <Menu
-                etiqueta="Acciones de la línea"
-                items={itemsMenu}
-                disparador={<MoreHorizontal className="size-5" aria-hidden />}
-                claseDisparador="border border-border-strong bg-surface size-11"
-              />
-            </div>
-          </div>
+          <Menu
+            etiqueta={`Acciones de ${linea.nombre}`}
+            items={itemsMenu}
+            disparador={<MoreHorizontal className="size-5" aria-hidden />}
+            claseDisparador="border border-border-strong bg-surface size-11 shrink-0"
+          />
         ) : null}
       </div>
       {costo?.estado === "pendiente" && aviso ? (

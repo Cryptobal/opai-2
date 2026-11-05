@@ -1,3 +1,4 @@
+import { executeCapability } from "@opai/capabilities";
 import { TENANT_DE_PRUEBA } from "@opai/capabilities/testing";
 
 // Fixtures compartidos por los tests de capacidades de CPQ. Datos ficticios.
@@ -125,3 +126,18 @@ export const SOLO_LECTURA = ["cpq:cotizaciones.read"];
 export const CON_COSTOS = ["cpq:cotizaciones.read", "cpq:costos.ver"];
 export const GESTOR = ["cpq:cotizaciones.read", "cpq:cotizaciones.manage"];
 export const GESTOR_COSTOS = [...GESTOR, ...CON_COSTOS];
+
+/**
+ * Fija un objetivo de 5 % (bajo el mínimo de 10 %) para que la cotización requiera aprobación de
+ * margen. Antes de CAR-192 el objetivo vacío valía 0 % y lo forzaba por accidente.
+ */
+export async function fijarMargenBajo(
+  ctx: Parameters<typeof executeCapability>[0],
+  cotizacionId: string,
+) {
+  const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id: cotizacionId });
+  if (!f.ok) throw new Error("ficha");
+  const versionId = (f.data as { version: { id: string } }).version.id;
+  const r = await executeCapability(ctx, "cpq.versiones.margen", { versionId, margenObjetivoPct: 50_000 });
+  if (!r.ok) throw new Error(`margen: ${JSON.stringify(r.error)}`);
+}
