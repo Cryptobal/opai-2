@@ -161,7 +161,7 @@ describe("finanzas.flujo.aviso", () => {
         {
           ...semilla().flujoAjustes[0]!,
           avisoActivo: true,
-          avisoUmbral: 10_000,
+          umbral: 10_000,
         },
       ],
     });
@@ -177,7 +177,7 @@ describe("finanzas.flujo.aviso", () => {
         {
           ...semilla().flujoAjustes[0]!,
           avisoActivo: true,
-          avisoUmbral: 50_000,
+          umbral: 50_000,
         },
       ],
     });
@@ -202,7 +202,7 @@ describe("finanzas.flujo.aviso", () => {
         {
           ...semilla().flujoAjustes[0]!,
           avisoActivo: true,
-          avisoUmbral: 50_000,
+          umbral: 50_000,
         },
       ],
     });

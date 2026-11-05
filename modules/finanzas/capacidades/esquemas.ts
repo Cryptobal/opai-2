@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { conflicto, reglaDeNegocio } from "@opai/capabilities";
 
-import { esLunes } from "../domain";
+import { esLunes, UMBRAL_SALDO_BAJO_DEFECTO } from "../domain";
 
 /** Traduce la violación de un índice único (carrera entre dos escrituras) a CONFLICT. */
 export async function sinDuplicado<T>(p: Promise<T>, mensaje: string): Promise<T> {
@@ -66,9 +66,9 @@ export const celdaSchema = z.object({
 
 export const ajustesSchema = z.object({
   saldoInicial: saldoSchema,
-  umbral: saldoSchema,
+  /** Un solo umbral de saldo bajo (planilla, aviso semanal y aviso de banco). */
+  umbral: saldoSchema.default(UMBRAL_SALDO_BAJO_DEFECTO),
   desde: semanaSchema,
-  toleranciaCierre: montoSchema.default(1000),
   horizonteSemanas: z.number().int().min(1).max(52).default(12),
   calendarioPagos: z
     .object({
@@ -78,8 +78,7 @@ export const ajustesSchema = z.object({
       iva: z.number().int().min(1).max(28).optional(),
     })
     .default({}),
-  avisoActivo: z.boolean().default(false),
-  avisoUmbral: saldoSchema.default(0),
+  avisoActivo: z.boolean().default(true),
   metaCeldaMs: z.number().int().min(1).max(10_000).default(100),
   metaGuardadoP95Ms: z.number().int().min(1).max(60_000).default(1000),
   metaCargaInicialS: z.number().int().min(1).max(120).default(2),

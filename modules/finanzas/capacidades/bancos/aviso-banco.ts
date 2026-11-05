@@ -14,7 +14,7 @@ export async function sincronizarAvisoSaldoBajo(
   if (saldo == null) return;
   const ajustes = await ajustesDe(ctx);
   if (!ajustes.avisoActivo) return;
-  if (saldo >= ajustes.avisoUmbral) return;
+  if (saldo >= ajustes.umbral) return;
   const dia = hoyIso();
   const { count } = await tx.bancoAvisoEmitido.createMany({
     data: [{ tenantId: ctx.tenantId, cuentaId, dia: aFecha(dia), saldo: BigInt(saldo) }],
@@ -29,6 +29,6 @@ export async function sincronizarAvisoSaldoBajo(
     tipo: "finanzas.banco.saldo_bajo_avisado",
     entidadTipo: "bancoAvisoEmitido",
     entidadId: row.id,
-    payload: { saldo, umbral: ajustes.avisoUmbral },
+    payload: { saldo, umbral: ajustes.umbral },
   });
 }

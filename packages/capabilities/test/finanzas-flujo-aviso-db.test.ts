@@ -61,10 +61,9 @@ describe.skipIf(!urlPropietario)("flujo de caja: aviso idempotente en base real"
     await e.admin.user.create({ data: { id: usuario, email: `u-${sufijo}@flujo.test`, name: "u" } });
     await ok("finanzas.ajustes.actualizar", {
       saldoInicial: 100,
-      umbral: 500,
       desde,
       avisoActivo: true,
-      avisoUmbral: 50_000,
+      umbral: 50_000,
     });
     filaIng = (
       await ok<{ id: string }>("finanzas.filas.crear", {

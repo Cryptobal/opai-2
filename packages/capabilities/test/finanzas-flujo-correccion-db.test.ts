@@ -146,7 +146,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · corrección del flujo (db)", () =>
   });
 
   it("bajar el saldo inicial con el aviso activo emite el aviso", async () => {
-    await ok("finanzas.ajustes.actualizar", { avisoActivo: true, avisoUmbral: 0, saldoInicial: -1_000_000_000 });
+    await ok("finanzas.ajustes.actualizar", { avisoActivo: true, umbral: 0, saldoInicial: -1_000_000_000 });
     expect(await e.admin.flujoAvisoEmitido.count({ where: { tenantId } })).toBeGreaterThan(0);
   });
 });

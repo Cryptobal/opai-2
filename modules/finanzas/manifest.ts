@@ -2,7 +2,6 @@ import { ajustesFinanzas, capacidadesFinanzas, defineModule } from "@opai/capabi
 
 import { capacidades as capacidadesFlujo } from "./capacidades";
 import {
-  PERMISO_CERRAR,
   PERMISO_CONFIGURAR,
   PERMISO_GESTIONAR,
   PERMISO_VER,
@@ -40,7 +39,6 @@ export const manifest = defineModule({
     },
     { id: PERMISO_VER, descripcion: "Ver la planilla del flujo de caja" },
     { id: PERMISO_GESTIONAR, descripcion: "Fijar, mover y dar por cumplidas las celdas del flujo" },
-    { id: PERMISO_CERRAR, descripcion: "Sellar y reabrir semanas del flujo" },
     { id: PERMISO_CONFIGURAR, descripcion: "Configurar filas, saldo inicial y umbral del flujo" },
     { id: PERMISO_BANCOS_VER, descripcion: "Ver cuentas bancarias, movimientos y sugerencias de conciliación" },
     { id: PERMISO_BANCOS_GESTIONAR, descripcion: "Importar cartolas, conciliar movimientos y administrar reglas" },
@@ -118,8 +116,6 @@ export const manifest = defineModule({
     { id: "finanzas.flujo.celda_fijada", descripcion: "Se fijó la cifra de una celda del flujo." },
     { id: "finanzas.flujo.celdas_movidas", descripcion: "Se reprogramaron celdas de una fila del flujo." },
     { id: "finanzas.flujo.celda_cumplida", descripcion: "Se dio por cumplida una celda del flujo." },
-    { id: "finanzas.flujo.semana_sellada", descripcion: "Se selló una semana del flujo." },
-    { id: "finanzas.flujo.semana_reabierta", descripcion: "Se reabrió una semana sellada del flujo." },
     { id: "finanzas.flujo.ajustes_cambiados", descripcion: "Cambiaron los ajustes del flujo." },
     { id: "finanzas.flujo.saldo_negativo_avisado", descripcion: "Una semana futura quedó bajo el umbral del aviso in-app." },
     { id: "finanzas.flujo.importado", descripcion: "Se importó un lote de celdas al flujo." },
