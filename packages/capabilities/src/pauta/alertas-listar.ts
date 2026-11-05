@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { calcularAlertasHoras, serieVigente, trabajaEn } from "@opai/domain";
 
-import { ajuste } from "../core/config";
 import { vigenciasJornada } from "../core/turnos/comun";
 
 import { uuidSchema } from "../core/esquemas";
@@ -10,6 +9,7 @@ import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
 import { cargarSeriesDe } from "./cargar";
+import { ajustesDeHoras } from "./ajustes";
 import { aFechaDb, diaSchema, PERMISO_READ, hoy } from "./comun";
 import { nombresDePersonas } from "./nombres";
 
@@ -93,12 +93,8 @@ export const alertasListar = defineCapability({
           turnos.push({ personaId: vig.titularId, fecha: d, horaInicio: p.horaInicio, horaFin: p.horaFin });
       }
     }
-    const [vigencias, limiteMensualHoras, descansoMinimoHoras] = await Promise.all([
-      vigenciasJornada(ctx),
-      ajuste<number>(ctx, "pauta", "limite_mensual_horas"),
-      ajuste<number>(ctx, "pauta", "descanso_minimo_horas"),
-    ]);
-    const alertas = calcularAlertasHoras(turnos, anchor, { vigencias, limiteMensualHoras, descansoMinimoHoras });
+    const [vigencias, limites] = await Promise.all([vigenciasJornada(ctx), ajustesDeHoras(ctx)]);
+    const alertas = calcularAlertasHoras(turnos, anchor, { vigencias, ...limites });
     const nombres = await nombresDePersonas(ctx, alertas.map((a) => a.personaId));
     return {
       instalacionId: inst.id,

@@ -39,15 +39,17 @@ const fecha = (d: Date) => d.toISOString().slice(0, 10);
  * que mandan donde se solapan.
  */
 export async function vigenciasJornada(ctx: Contexto): Promise<VigenciaJornada[]> {
-  const ind = await ctx.db.indicadorLegal.findUnique({ where: { clave: "jornada" }, select: { id: true } });
+  // Una sola lectura: el indicador con sus valores de plataforma y los de esta empresa.
+  const ind = await ctx.db.indicadorLegal.findUnique({
+    where: { clave: "jornada" },
+    select: {
+      publicados: { where: { estado: "vigente" }, orderBy: { vigenteDesde: "asc" } },
+      tenant: { where: { tenantId: ctx.tenantId, estado: "vigente" }, orderBy: { vigenteDesde: "asc" } },
+    },
+  });
   if (!ind) return [...VIGENCIAS_JORNADA_SEMANAL];
-  const [plataforma, tenant] = await Promise.all([
-    ctx.db.valorPublicado.findMany({ where: { indicadorId: ind.id, estado: "vigente" }, orderBy: { vigenteDesde: "asc" } }),
-    ctx.db.valorTenant.findMany({
-      where: { tenantId: ctx.tenantId, indicadorId: ind.id, estado: "vigente" },
-      orderBy: { vigenteDesde: "asc" },
-    }),
-  ]);
+  const plataforma = ind.publicados;
+  const tenant = ind.tenant;
   const aVigencia = (f: { valorJson: unknown; vigenteDesde: Date; vigenteHasta: Date | null }): VigenciaJornada[] =>
     typeof f.valorJson === "number" && f.valorJson > 0
       ? [{ desde: fecha(f.vigenteDesde), hasta: f.vigenteHasta ? fecha(f.vigenteHasta) : undefined, horas: f.valorJson }]

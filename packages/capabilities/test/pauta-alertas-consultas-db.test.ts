@@ -65,6 +65,7 @@ describe.skipIf(!urlPropietario)("Alertas de pauta: consultas constantes (CAR-16
     const pocas = await contarConsultas(await instalacionConPuestos(3));
     const muchas = await contarConsultas(await instalacionConPuestos(30));
     expect(muchas).toBe(pocas);
-    expect(muchas).toBeLessThanOrEqual(8);
+    // 8 de la pauta + zona del tenant, tope legal con vigencia y ajustes de horas (ADR-056, ADR-021).
+    expect(muchas).toBeLessThanOrEqual(12);
   });
 });

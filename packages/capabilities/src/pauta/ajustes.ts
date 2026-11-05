@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { DESCANSO_MINIMO_HORAS_DEFECTO, LIMITE_MENSUAL_HORAS_DEFECTO } from "@opai/domain";
 
+import { valoresEfectivos, type CampoAjuste } from "../core/config";
+import { campoAjuste } from "../core/config/catalogo";
+import type { Contexto } from "../types";
+
 // Ajustes del módulo Pauta (ADR-018, ADR-021). El tope semanal NO es un ajuste: sale del indicador
 // «jornada» del motor de sueldos, con vigencia (ADR-056). Aquí van el tope mensual y el descanso
 // mínimo entre turnos, que cada empresa puede ajustar.
@@ -25,3 +29,18 @@ export const ajustesPauta = z.object({
     control: "numero",
   }),
 });
+
+/**
+ * Tope mensual y descanso mínimo vigentes de la empresa. Si el módulo aún no está registrado (un
+ * proceso que arma el registro a mano), rigen los defectos del esquema, no un error.
+ */
+export async function ajustesDeHoras(ctx: Contexto) {
+  const campos = [campoAjuste("pauta", "limite_mensual_horas"), campoAjuste("pauta", "descanso_minimo_horas")];
+  if (campos.some((c) => !c))
+    return { limiteMensualHoras: LIMITE_MENSUAL_HORAS_DEFECTO, descansoMinimoHoras: DESCANSO_MINIMO_HORAS_DEFECTO };
+  const v = await valoresEfectivos(ctx, campos as CampoAjuste[]);
+  return {
+    limiteMensualHoras: v.get("pauta.limite_mensual_horas")?.valor as number,
+    descansoMinimoHoras: v.get("pauta.descanso_minimo_horas")?.valor as number,
+  };
+}
