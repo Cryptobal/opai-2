@@ -66,9 +66,14 @@ export async function marcarLista(ctx: Contexto, versionId: string, resultado: R
   const v = await versionDeCotizacion(ctx, versionId);
   if (!puedeTransicionar(v.estado as EstadoCotizacion, "lista"))
     throw reglaDeNegocio(`No se puede pasar de ${v.estado} a lista.`);
-  await ctx.db.cpqVersion.update({
-    where: { id: versionId },
-    data: { estado: "lista", ...datosCongelados(resultado) },
+  // Condicionado al estado (en transacción): una edición o un pedido de aprobación que llegó entre el
+  // cálculo y este guardado no deja congelado un cálculo que ya no corresponde a las líneas.
+  await ctx.transaccion(async (tx) => {
+    const r = await tx.cpqVersion.updateMany({
+      where: { id: versionId, tenantId: ctx.tenantId, estado: "borrador" },
+      data: { estado: "lista", ...datosCongelados(resultado) },
+    });
+    if (r.count === 0) throw conflicto("La versión cambió de estado mientras tanto; vuelve a intentar.");
   });
   return { estado: "lista" as const };
 }

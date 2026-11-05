@@ -9,7 +9,7 @@ export async function reabrirParaEditar(ctx: Contexto, versionId: string) {
     throw reglaDeNegocio("Solo se reabre una cotización que está lista; las demás se editan o se versionan.");
   await ctx.transaccion(async (tx) => {
     const r = await tx.cpqVersion.updateMany({
-      where: { id: versionId, estado: "lista" },
+      where: { id: versionId, tenantId: ctx.tenantId, estado: "lista" },
       data: { estado: "borrador" },
     });
     if (r.count === 0) throw conflicto("La versión cambió de estado mientras tanto; vuelve a cargar la ficha.");

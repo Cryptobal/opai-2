@@ -192,6 +192,30 @@ describe("versión lista: congelada, sin contradicciones", () => {
     expect(despues.meta.estadoFicha.estado).toBe("lista_para_enviar");
   });
 
+  it("tampoco cambia si después sube el mínimo de la empresa: lo aprobado queda congelado", async () => {
+    const { ctx } = ctxCon();
+    const id = await crear(ctx);
+    await ejecutar(ctx, "cpq.cotizaciones.marcar_lista", { id });
+    await ajuste(ctx, "margen_minimo_pct", 60);
+    const f = await ficha(ctx, id);
+    expect(f.meta.estadoFicha.estado).toBe("lista_para_enviar");
+    expect(f.calculo.requiereAprobacion).toBe(false);
+  });
+
+  it("pedir aprobación es idempotente y no se pide desde una versión lista", async () => {
+    const { ctx } = ctxCon();
+    const id = await crear(ctx);
+    await fijarMargenBajo(ctx, id);
+    const uno = await ejecutar(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    const dos = await ejecutar(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
+    expect(uno.ok && dos.ok).toBe(true);
+    if (uno.ok && dos.ok) expect((dos.data as { aprobacionId: string }).aprobacionId).toBe((uno.data as { aprobacionId: string }).aprobacionId);
+    const otra = await crear(ctx);
+    await ejecutar(ctx, "cpq.cotizaciones.marcar_lista", { id: otra });
+    for (const dryRun of [true, false])
+      expect(await ejecutar(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id: otra }, dryRun)).toMatchObject({ ok: false });
+  });
+
   it("no se edita ni se recalcula: se pide «Reabrir para editar»", async () => {
     const { ctx } = ctxCon();
     const id = await crear(ctx);

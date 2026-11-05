@@ -54,6 +54,8 @@ export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: stri
     tx.etapa.findUnique({ where: { id: negocio.etapaId } }),
   ]);
   if (!destino || !destino.activa) return "etapa_invalida";
+  const embudoDestino = await tx.embudo.findUnique({ where: { id: destino.embudoId }, select: { activo: true } });
+  if (!embudoDestino?.activo) return "etapa_invalida";
   if (!actual || destino.tipo !== "abierta") return "sin_cambio";
   if (destino.embudoId !== negocio.embudoId || destino.orden <= actual.orden) return "sin_cambio";
   try {

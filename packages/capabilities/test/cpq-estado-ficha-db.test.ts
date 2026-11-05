@@ -99,6 +99,14 @@ describe.skipIf(!urlPropietario)("cpq · estado de la ficha y respuesta del clie
     expect(await e.admin.cpqVersion.count({ where: { cotizacionId: c.id } })).toBe(1);
   });
 
+  it("dos reabrir a la vez: uno gana y el otro recibe un error claro, sin dejar dos borradores", async () => {
+    const c = await ok<{ id: string; versionId: string }>(a.tenantId, "cpq.cotizaciones.create", { negocioId: a.negocioId, titulo: "Carrera" });
+    await e.admin.cpqVersion.update({ where: { id: c.versionId }, data: { estado: "lista" } });
+    const rs = await Promise.all([run(a.tenantId, "cpq.cotizaciones.reabrir", { id: c.id }), run(a.tenantId, "cpq.cotizaciones.reabrir", { id: c.id })]);
+    expect(rs.filter((r) => r.ok)).toHaveLength(1);
+    expect((await e.admin.cpqVersion.findUniqueOrThrow({ where: { id: c.versionId } })).estado).toBe("borrador");
+  });
+
   it("nueva versión: en lista pide reabrir (sin chocar con el índice); con la última enviada sí crea", async () => {
     const c = await ok<{ id: string; versionId: string }>(a.tenantId, "cpq.cotizaciones.create", { negocioId: a.negocioId, titulo: "Versiones" });
     await e.admin.cpqVersion.update({ where: { id: c.versionId }, data: { estado: "lista" } });
@@ -139,5 +147,20 @@ describe.skipIf(!urlPropietario)("cpq · estado de la ficha y respuesta del clie
     const g = await e.admin.seguimiento.findUniqueOrThrow({ where: { id: ganado.id } });
     expect(g).toMatchObject({ estado: "terminado", motivo: "ganado", avisadoEn: null });
     expect((await e.admin.seguimiento.findUniqueOrThrow({ where: { id: ajeno.id } })).avisadoEn).toBeNull();
+  });
+
+  it("dos respuestas a la vez avisan una sola vez", async () => {
+    // Un solo seguimiento vivo por negocio: se cierran los de las pruebas anteriores.
+    await e.admin.seguimiento.updateMany({ where: { negocioId: a.negocioId }, data: { estado: "terminado", motivo: "perdido" } });
+    const plan = await e.admin.planSeguimiento.create({ data: { tenantId: a.tenantId, nombre: `Plan ${randomUUID().slice(0, 6)}`, disparador: "manual" } });
+    const fila = await e.admin.seguimiento.create({
+      data: { tenantId: a.tenantId, negocioId: a.negocioId, planId: plan.id, planVersion: 1, estado: "activo", ancla: new Date(), token: randomUUID() },
+    });
+    const cfg = { alResponder: "pausar", alTerminar: "solo_avisar", pasos: [] } as never;
+    const c = mod.crearContexto({ tenantId: a.tenantId, actor: { tipo: "system" }, rol: "owner", modulosActivos: ["comercial", "cpq"], medidor });
+    const antes = await e.admin.evento.count({ where: { tenantId: a.tenantId, tipo: "comercial.seguimiento.cliente_respondio", entidadId: a.negocioId } });
+    await Promise.all([1, 2].map((n) => c.transaccion((tx) => aplicarRespuesta(c, tx, fila, cfg, { titulo: `Respuesta ${n}` }))));
+    const despues = await e.admin.evento.count({ where: { tenantId: a.tenantId, tipo: "comercial.seguimiento.cliente_respondio", entidadId: a.negocioId } });
+    expect(despues - antes).toBe(1);
   });
 });

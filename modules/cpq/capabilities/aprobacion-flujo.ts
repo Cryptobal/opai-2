@@ -10,7 +10,8 @@ import {
   exigirParaMarcarLista,
   exigirParaPedirAprobacion,
 } from "../persistencia/requisitos";
-import { exigirBorrador, exigirEditable } from "../persistencia/version";
+import { aprobacionPendiente } from "../persistencia/aprobacion-reglas";
+import { exigirBorrador } from "../persistencia/version";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE } from "./permisos";
 import { cotizacionDe } from "./util";
@@ -30,7 +31,12 @@ export const cotizacionesSolicitarAprobacion = defineCapability({
     await cotizacionDe(ctx, input.id);
     const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
     if (!pack) throw noEncontrado("La versión");
-    exigirEditable(pack.version);
+    // Repetir el pedido es idempotente: devuelve el que ya está pendiente sin recalcular.
+    if (pack.version.estado === "en_aprobacion") {
+      const prev = await aprobacionPendiente(ctx, pack.version.id);
+      if (prev) return { estado: "en_aprobacion" as const, aprobacionId: prev.id };
+    }
+    exigirBorrador(pack.version);
     const resultado = await recalcularVersion(ctx, input.id, undefined, false);
     if (!resultado) throw noEncontrado("La versión");
     exigirParaPedirAprobacion(await entradaEstadoFicha(ctx, pack.version, pack.lineas, resultado));
