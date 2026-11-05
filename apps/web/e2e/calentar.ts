@@ -29,6 +29,8 @@ export default async function calentar() {
  */
 const RUTAS_CON_SESION = [
   "/configuracion/no-encontrado?ruta=%2Fconfiguracion%2Fgrupo%2Fx",
+  "/configuracion/grupo/inventado",
+  "/sin-conexion",
   "/no-encontrado",
   "/",
   "/negocios",
