@@ -134,7 +134,8 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
   test("la URL antigua de Preferencias redirige a /mi-cuenta/preferencias", async ({ page }) => {
     await entrar(page);
     await page.goto("/configuracion/preferencias");
-    await expect(page).toHaveURL(/\/mi-cuenta\/preferencias$/);
-    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible();
+    // La redirección llega tras el streaming de una ruta que compila en frío.
+    await expect(page).toHaveURL(/\/mi-cuenta\/preferencias$/, { timeout: 45_000 });
+    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible({ timeout: 45_000 });
   });
 });

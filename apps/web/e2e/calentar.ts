@@ -51,6 +51,7 @@ const RUTAS_CON_SESION = [
   "/finanzas/flujo",
   "/personas?nueva=1",
   "/mi-cuenta/preferencias",
+  "/configuracion/preferencias",
   "/configuracion",
   "/configuracion/grupo/operacion",
   "/configuracion/modulo/agente",
