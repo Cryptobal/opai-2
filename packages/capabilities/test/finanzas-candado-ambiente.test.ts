@@ -1,8 +1,9 @@
+import type * as integraciones from "@opai/integrations";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const octava = vi.hoisted(() => vi.fn());
 vi.mock("@opai/integrations", async (original) => ({
-  ...(await original<typeof import("@opai/integrations")>()),
+  ...(await original<typeof integraciones>()),
   adaptadorOctava: octava,
 }));
 
