@@ -17,6 +17,7 @@ import { Bloque, BloqueFormulario, BloquePlanillaYDashboard } from "./bloques";
 const ESTADOS: EstadoPantalla[] = ["ready", "loading", "empty", "error", "forbidden"];
 // Demostración bajo el primer viewport: no incorpora fijados y sus controles al arranque de /ds.
 const MuestraNavegacion = dynamic(() => import("./componentes-nuevos/navegacion").then((m) => m.MuestraNavegacion), { ssr: false });
+const MuestraTecladoPin = dynamic(() => import("./componentes-nuevos/teclado-pin").then((m) => m.MuestraTecladoPin), { ssr: false });
 const MuestraBloquePlegable = dynamic(() => import("./componentes-nuevos/bloque-plegable").then((m) => m.MuestraBloquePlegable), { ssr: false });
 const MuestraMas = dynamic(() => import("./componentes-nuevos/mas").then((m) => m.MuestraMas), { ssr: false });
 const MuestraPwa = dynamic(() => import("./componentes-nuevos/pwa").then((m) => m.MuestraPwa), { ssr: false });
@@ -58,6 +59,9 @@ export function DsShowcase() {
       </Bloque>
       <Bloque titulo="Menú «Más» del teléfono · variante A (CAR-182)">
         <MuestraMas />
+      </Bloque>
+      <Bloque titulo="Teclado de PIN · ingreso de terreno (CAR-78)">
+        <MuestraTecladoPin />
       </Bloque>
       <Bloque titulo="Bloque plegable · ficha en pasos (CAR-192)">
         <MuestraBloquePlegable />
