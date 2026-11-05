@@ -15,7 +15,11 @@ import { ipDeCabeceras, permitir } from "@/lib/rate-limit";
  * hash, auditoría— vive en `@opai/auth`. Esta acción no es una capacidad: abre una sesión.
  */
 export type EstadoPin =
-  { tipo: "inicial" } | { tipo: "error"; n: number } | { tipo: "pausado"; n: number };
+  | { tipo: "inicial" }
+  | { tipo: "error"; n: number }
+  | { tipo: "pausado"; n: number }
+  /** PIN temporal correcto: falta elegir el propio. No hay sesión hasta entonces (B3 del Revisor). */
+  | { tipo: "cambiar"; n: number; mensaje?: string };
 
 const VENTANA_MS = 15 * 60_000;
 const INTENTOS_RUT = 5;
