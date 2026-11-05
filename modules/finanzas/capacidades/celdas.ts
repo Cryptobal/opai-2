@@ -6,6 +6,7 @@ import { celdaSchema, montoSchema, semanaSchema, uuidSchema, aNumeroSeguro } fro
 import { PERMISO_GESTIONAR } from "./permisos";
 import { aFecha, aIso, bloquearSemanaFlujo, filaDe, ID_VISTA_PREVIA, lunesHoy } from "./util";
 import { sincronizarAvisosEnTx } from "./aviso";
+import { exigirFilaDeEgreso } from "./solo-egresos";
 
 const vista = (c: {
   id: string;
@@ -26,7 +27,7 @@ const vista = (c: {
 export const celdasFijar = defineCapability({
   id: "finanzas.celdas.fijar",
   descripcion:
-    "Fija la cifra planificada de una fila en una semana actual o futura (o la reemplaza) y su nota; no edita semanas pasadas ni celdas comprometidas o reales.",
+    "Fija la cifra planificada de una fila de egresos en una semana actual o futura (o la reemplaza) y su nota; no edita semanas pasadas, ingresos ni celdas comprometidas o reales.",
   permiso: PERMISO_GESTIONAR,
   input: z.object({
     filaId: uuidSchema,
@@ -39,6 +40,7 @@ export const celdasFijar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const fila = await filaDe(ctx, input.filaId);
+    exigirFilaDeEgreso(fila);
     if (!fila.activa)
       throw reglaDeNegocio("La fila está inactiva: actívala antes de cargarle cifras.");
     const hoy = lunesHoy();
@@ -110,6 +112,7 @@ export const celdasCumplir = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const c = await ctx.db.flujoCelda.findFirst({ where: { id: input.id } });
     if (!c) throw noEncontrado("La celda del flujo");
+    exigirFilaDeEgreso(await filaDe(ctx, c.filaId));
     if (c.capa !== "plan") throw reglaDeNegocio("Solo se da por cumplida una celda planificada.");
     const semana = aIso(c.semana);
     const hoy = lunesHoy();

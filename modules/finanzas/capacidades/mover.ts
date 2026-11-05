@@ -9,11 +9,12 @@ import { desdeVentana, serieSaldos } from "./serie-saldos";
 import { aFecha, ajustesDe, aIso, bloquearSemanaFlujo, cargarFlujo, filaDe, lunesHoy } from "./util";
 import { sincronizarAvisosEnTx } from "./aviso";
 import { reglaDeNegocio } from "@opai/capabilities";
+import { exigirFilaDeEgreso } from "./solo-egresos";
 
 export const celdasMover = defineCapability({
   id: "finanzas.celdas.mover",
   descripcion:
-    "Reprograma las cifras planificadas de una fila ± N semanas (con arrastre de las siguientes si la fila lo pide) y devuelve el saldo resultante; no mueve lo comprometido ni lo real. Mover a una semana pasada exige confirmarSemanaPasada.",
+    "Reprograma las cifras planificadas de una fila de egresos ± N semanas (con arrastre de las siguientes si la fila lo pide) y devuelve el saldo resultante; no mueve lo comprometido ni lo real. Mover a una semana pasada exige confirmarSemanaPasada.",
   permiso: PERMISO_GESTIONAR,
   input: z.object({
     filaId: uuidSchema,
@@ -38,6 +39,7 @@ export const celdasMover = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const fila = await filaDe(ctx, input.filaId);
+    exigirFilaDeEgreso(fila);
     if (!fila.activa) throw reglaDeNegocio("La fila está inactiva: actívala antes de moverle cifras.");
     const ajustes = await ajustesDe(ctx);
     const todas = [...input.semanas].sort();

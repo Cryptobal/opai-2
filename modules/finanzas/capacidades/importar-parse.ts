@@ -4,6 +4,7 @@ import { reglaDeNegocio } from "@opai/capabilities";
 
 import { esFechaIso, lunesDe } from "../domain";
 import { MONTO_FLUJO_MAX } from "./esquemas";
+import { MENSAJE_SIN_INGRESOS } from "./solo-egresos";
 
 import type { filaImportSchema } from "./importar-esquema";
 
@@ -103,6 +104,7 @@ export function filaDesdeRegistroCsv(
   const seccion = (r.seccion ?? "").toLowerCase();
   if (seccion !== "ingreso" && seccion !== "egreso")
     return { ok: false, motivo: `Fila ${filaNum}: sección inválida (use ingreso o egreso).` };
+  if (seccion === "ingreso") return { ok: false, motivo: `Fila ${filaNum}: ${MENSAJE_SIN_INGRESOS}` };
   // Un monto vacío no pisa el valor existente con 0: es un error de la fila.
   if (!(r.monto ?? "").trim()) return { ok: false, motivo: `Fila ${filaNum}: falta el monto.` };
   const montoParse = parsearMontoClp(r.monto ?? "");

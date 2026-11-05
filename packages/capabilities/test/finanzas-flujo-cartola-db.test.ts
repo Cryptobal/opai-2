@@ -110,7 +110,10 @@ describe.skipIf(omitirSuiteDb())("Finanzas · flujo sin cierre (db)", () => {
 
   it("plan movido a semana pasada se ve en lectura y no suma al saldo real", async () => {
     vi.setSystemTime(new Date("2026-11-09T12:00:00Z"));
-    const filaId = (await e.admin.flujoFila.findFirst({ where: { tenantId } }))!.id;
+    // Solo los egresos se planifican a mano (ADR-073).
+    const filaId = (
+      await ok<{ id: string }>("finanzas.filas.crear", { seccion: "egreso", etiqueta: "Egreso plan", arrastre: false })
+    ).id;
     const semFutura = "2026-11-16";
     const semPasadaDestino = "2026-11-02";
     await ok("finanzas.celdas.fijar", { filaId, semana: semFutura, monto: 100_000 });
@@ -122,11 +125,11 @@ describe.skipIf(omitirSuiteDb())("Finanzas · flujo sin cierre (db)", () => {
     });
     const planilla = await ok<{
       celdas: { semana: string; monto: number; capa: string; nota: string | null }[];
-      semanas: { semana: string; ingresos: number; pasada: boolean }[];
+      semanas: { semana: string; egresos: number; pasada: boolean }[];
     }>("finanzas.planilla.obtener", { desde: semPasadaDestino, semanas: 4 });
     const sem = planilla.semanas.find((s) => s.semana === semPasadaDestino);
     expect(sem?.pasada).toBe(true);
-    expect(sem?.ingresos).toBe(0);
+    expect(sem?.egresos).toBe(0);
     const plan = planilla.celdas.find(
       (c) => c.semana === semPasadaDestino && c.capa === "plan" && c.monto === 100_000,
     );

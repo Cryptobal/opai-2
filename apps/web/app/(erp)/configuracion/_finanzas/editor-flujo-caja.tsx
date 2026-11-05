@@ -89,7 +89,7 @@ export function EditorFlujoCaja({
             inputMode="numeric"
           />
         </Campo>
-        <Campo etiqueta="Umbral planilla (CLP)" htmlFor="aj-um">
+        <Campo etiqueta="Umbral de saldo bajo (CLP)" htmlFor="aj-um">
           <Input
             id="aj-um"
             value={String(aj.umbral)}
@@ -108,16 +108,8 @@ export function EditorFlujoCaja({
           marcado={aj.avisoActivo}
           onCambiar={(m) => setAj({ ...aj, avisoActivo: m })}
           etiqueta="Aviso en OPAI cuando el saldo baja del umbral"
-          descripcion="Se muestra un aviso en la planilla y en las notificaciones de OPAI a quienes pueden ver el flujo. No se envían correos."
+          descripcion="Un solo umbral para la planilla, el saldo proyectado y el saldo del banco. Avisa solo por la campana de OPAI, sin correos."
         />
-        <Campo etiqueta="Umbral del aviso (CLP)" htmlFor="aj-au">
-          <Input
-            id="aj-au"
-            value={String(aj.avisoUmbral)}
-            onChange={(e) => setAj({ ...aj, avisoUmbral: Number(e.target.value) || 0 })}
-            inputMode="numeric"
-          />
-        </Campo>
         <Button disabled={pendiente} onClick={() => void guardarAjustes()}>
           Guardar ajustes
         </Button>
