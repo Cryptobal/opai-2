@@ -25,7 +25,7 @@ export function pinTemporal(rut: string): string {
     const pin = String(randomInt(0, 1_000_000)).padStart(6, "0");
     if (!problemaDePin(pin, rut)) return pin;
   }
-  return "482916";
+  throw new Error("No se pudo generar un PIN temporal válido.");
 }
 
 const estadoSchema = z.object({

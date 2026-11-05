@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { hashPin } from "@opai/db";
-import { digitoVerificador } from "@opai/domain";
+import { digitoVerificador, formatearRut } from "@opai/domain";
 
 import type { Auth } from "../src/auth";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
@@ -12,8 +12,10 @@ import { verificarRutYPin } from "../src/pin-verificacion";
 
 /** RUT canónico válido a partir de su cuerpo. */
 const rutDe = (cuerpo: string) => `${cuerpo}-${digitoVerificador(cuerpo)}`;
-const RUT_A = rutDe("12345678");
-const RUT_B = rutDe("11111111");
+/** RUT distintos en cada corrida: la base de pruebas conserva las filas de corridas anteriores. */
+const BASE = 30_000_000 + Math.floor(Math.random() * 5_000_000);
+const RUT_A = rutDe(String(BASE));
+const RUT_B = rutDe(String(BASE + 1));
 const PIN_A = "482915";
 const PIN_B = "735291";
 
@@ -28,7 +30,7 @@ describe.skipIf(!urlPropietario)("ingreso con RUT + PIN (CAR-78 B1)", () => {
     tenantId: string,
     rut: string,
     pin: string,
-    opciones: { userId?: string; portales?: string[] } = {},
+    opciones: { userId?: string; portales?: string[]; debeCambiar?: boolean } = {},
   ) {
     const userId =
       opciones.userId ??
@@ -44,7 +46,13 @@ describe.skipIf(!urlPropietario)("ingreso con RUT + PIN (CAR-78 B1)", () => {
       data: { tenantId, nombres: "N", apellidos: "A", rut, usuarioId: userId },
     });
     await e.admin.credencialTerreno.create({
-      data: { tenantId, personaId: p.id, rut, pinHash: await hashPin(pin), debeCambiar: true },
+      data: {
+        tenantId,
+        personaId: p.id,
+        rut,
+        pinHash: await hashPin(pin),
+        debeCambiar: opciones.debeCambiar ?? false,
+      },
     });
     return { personaId: p.id, userId };
   }
@@ -69,21 +77,64 @@ describe.skipIf(!urlPropietario)("ingreso con RUT + PIN (CAR-78 B1)", () => {
   });
 
   it("acepta el RUT con puntos y el PIN correcto, y deja el rastro de seguridad", async () => {
-    const { userId, personaId } = await persona(t.A, RUT_A, PIN_A, { userId: userA });
+    const { userId, personaId } = await persona(t.A, RUT_A, PIN_A, {
+      userId: userA,
+      debeCambiar: true,
+    });
     const r = await verificarRutYPin(
-      "12.345.678-5",
+      formatearRut(RUT_A),
       PIN_A,
       new Headers({ "x-forwarded-for": "10.0.0.1" }),
     );
-    expect(r).toEqual({ userId, debeCambiar: true });
+    // PIN temporal de RR. HH.: correcto, pero NO hay sesión hasta elegir el propio (B3 del Revisor).
+    expect(r).toEqual({ estado: "cambiar" });
+    expect(
+      (await e.admin.credencialTerreno.findUniqueOrThrow({ where: { personaId } })).debeCambiar,
+    ).toBe(true);
+    // Un PIN nuevo débil o igual al temporal se rechaza sin tocar nada.
+    for (const malo of ["123456", PIN_A]) {
+      expect(await verificarRutYPin(RUT_A, PIN_A, null, new Date(), malo)).toMatchObject({
+        estado: "nuevo_invalido",
+      });
+    }
+    const ok = await verificarRutYPin(
+      formatearRut(RUT_A),
+      PIN_A,
+      new Headers({ "x-forwarded-for": "10.0.0.1" }),
+      new Date(),
+      "735291",
+    );
+    expect(ok).toEqual({ estado: "ok", userId });
     const c = await e.admin.credencialTerreno.findUniqueOrThrow({ where: { personaId } });
     expect(c.intentosFallidos).toBe(0);
+    expect(c.debeCambiar).toBe(false);
+    expect(c.pinCambiadoEn).not.toBeNull();
+    // Desde entonces solo sirve el PIN nuevo.
+    expect(await verificarRutYPin(RUT_A, PIN_A, null)).toBeNull();
+    expect(await verificarRutYPin(RUT_A, "735291", null)).toEqual({ estado: "ok", userId });
     const hechos = await e.admin.auditoriaGlobal.findMany({
       where: { capability: "seguridad.pin.ingreso", entityId: userId },
     });
-    expect(hechos).toHaveLength(1);
-    expect(JSON.stringify(hechos[0])).not.toContain(PIN_A);
-    expect(JSON.stringify(hechos[0])).not.toContain("10.0.0.1");
+    expect(hechos.length).toBeGreaterThanOrEqual(1);
+    for (const h of hechos) {
+      expect(JSON.stringify(h)).not.toContain(PIN_A);
+      expect(JSON.stringify(h)).not.toContain("735291");
+      expect(JSON.stringify(h)).not.toContain("10.0.0.1");
+    }
+  });
+
+  it("un usuario con ERP en otra empresa no entra con PIN (B2 del Revisor)", async () => {
+    const rut = rutDe(String(BASE + 6));
+    const a = await persona(t.A, rut, PIN_B);
+    // El mismo usuario tiene ERP en la otra empresa: el PIN no debe poder abrírsela.
+    await e.admin.membership.create({
+      data: { tenantId: t.B, userId: a.userId, rol: "viewer", portales: ["erp"] },
+    });
+    expect(await verificarRutYPin(rut, PIN_B, null)).toBeNull();
+    const c = await e.admin.credencialTerreno.findUniqueOrThrow({
+      where: { personaId: a.personaId },
+    });
+    expect(c.intentosFallidos).toBe(1);
   });
 
   it("RUT inexistente, mal formado o PIN con formato inválido: mismo resultado, sin error", async () => {
@@ -138,42 +189,45 @@ describe.skipIf(!urlPropietario)("ingreso con RUT + PIN (CAR-78 B1)", () => {
         },
       ],
     });
-    const { personaId } = await persona(tenant, rutDe("10000000"), PIN_B);
+    const { personaId } = await persona(tenant, rutDe(String(BASE + 2)), PIN_B);
     const ahora = new Date("2026-11-08T12:00:00Z");
-    for (let i = 0; i < 3; i++) await verificarRutYPin(rutDe("10000000"), "111112", null, ahora);
+    for (let i = 0; i < 3; i++)
+      await verificarRutYPin(rutDe(String(BASE + 2)), "111112", null, ahora);
     const c = await e.admin.credencialTerreno.findUniqueOrThrow({ where: { personaId } });
     expect(c.bloqueadoHasta?.toISOString()).toBe("2026-11-08T12:30:00.000Z");
   });
 
   it("el PIN no abre a quien tiene ERP, Supervisor o sin usuario", async () => {
-    const erp = await persona(t.A, rutDe("13000000"), PIN_B, { portales: ["trabajador", "erp"] });
-    expect(await verificarRutYPin(rutDe("13000000"), PIN_B, null)).toBeNull();
+    const erp = await persona(t.A, rutDe(String(BASE + 3)), PIN_B, {
+      portales: ["trabajador", "erp"],
+    });
+    expect(await verificarRutYPin(rutDe(String(BASE + 3)), PIN_B, null)).toBeNull();
     const c = await e.admin.credencialTerreno.findUniqueOrThrow({
       where: { personaId: erp.personaId },
     });
     expect(c.intentosFallidos).toBe(1);
     // Sin usuario vinculado.
     const sinUsuario = await e.admin.persona.create({
-      data: { tenantId: t.A, nombres: "S", apellidos: "U", rut: rutDe("14000000") },
+      data: { tenantId: t.A, nombres: "S", apellidos: "U", rut: rutDe(String(BASE + 4)) },
     });
     await e.admin.credencialTerreno.create({
       data: {
         tenantId: t.A,
         personaId: sinUsuario.id,
-        rut: rutDe("14000000"),
+        rut: rutDe(String(BASE + 4)),
         pinHash: await hashPin(PIN_B),
       },
     });
-    expect(await verificarRutYPin(rutDe("14000000"), PIN_B, null)).toBeNull();
+    expect(await verificarRutYPin(rutDe(String(BASE + 4)), PIN_B, null)).toBeNull();
   });
 
   it("el PIN de una empresa no abre a la persona de otra con el mismo RUT (criterio 5)", async () => {
-    const rut = rutDe("15000000");
+    const rut = rutDe(String(BASE + 5));
     const a = await persona(t.A, rut, PIN_A);
     const b = await persona(t.B, rut, PIN_B);
     // Cada PIN entra solo a su propia empresa.
-    expect((await verificarRutYPin(rut, PIN_A, null))?.userId).toBe(a.userId);
-    expect((await verificarRutYPin(rut, PIN_B, null))?.userId).toBe(b.userId);
+    expect(await verificarRutYPin(rut, PIN_A, null)).toEqual({ estado: "ok", userId: a.userId });
+    expect(await verificarRutYPin(rut, PIN_B, null)).toEqual({ estado: "ok", userId: b.userId });
     expect(await verificarRutYPin(rut, "111112", null)).toBeNull();
     // El fallo contra una empresa no cuenta contra la otra.
     expect(

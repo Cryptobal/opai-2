@@ -40,10 +40,20 @@ export function FormularioPin({ inicial }: { inicial?: EstadoPin }) {
           Hubo demasiados intentos. Vuelve a intentarlo en unos minutos o pide ayuda a RR. HH.
         </Alerta>
       ) : null}
+      {estado.tipo === "cambiar" ? (
+        <Alerta
+          key={estado.n}
+          tono={estado.mensaje ? "danger" : "info"}
+          titulo="Elige tu propio PIN"
+        >
+          {estado.mensaje ??
+            "RR. HH. te dio un PIN temporal. Elige uno nuevo que solo tú conozcas."}
+        </Alerta>
+      ) : null}
       <form
         action={(form) => {
           entrar(form);
-          setPin("");
+          if (estado.tipo !== "cambiar") setPin("");
         }}
         className="flex flex-col gap-5"
       >
@@ -61,14 +71,38 @@ export function FormularioPin({ inicial }: { inicial?: EstadoPin }) {
             required
           />
         </Campo>
-        <TecladoPin
-          name="pin"
-          valor={pin}
-          onCambiar={setPin}
-          disabled={pendiente}
-          error={estado.tipo === "error"}
-          etiqueta="PIN de 6 dígitos"
-        />
+        {estado.tipo === "cambiar" ? (
+          <>
+            <Input type="hidden" name="pin" value={pin} readOnly />
+            {(["nuevo", "repetir"] as const).map((campo) => (
+              <Campo
+                key={campo}
+                etiqueta={campo === "nuevo" ? "PIN nuevo (6 dígitos)" : "Repite el PIN nuevo"}
+                htmlFor={`pin-${campo}`}
+              >
+                <Input
+                  id={`pin-${campo}`}
+                  name={campo}
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={6}
+                  disabled={pendiente}
+                  required
+                />
+              </Campo>
+            ))}
+          </>
+        ) : (
+          <TecladoPin
+            name="pin"
+            valor={pin}
+            onCambiar={setPin}
+            disabled={pendiente}
+            error={estado.tipo === "error"}
+            etiqueta="PIN de 6 dígitos"
+          />
+        )}
         <Button type="submit" size="lg" block disabled={pendiente || !listo}>
           {pendiente ? "Entrando…" : "Entrar"}
         </Button>

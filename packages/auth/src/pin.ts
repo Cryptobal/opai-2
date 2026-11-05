@@ -18,7 +18,11 @@ import { verificarRutYPin } from "./pin-verificacion";
  * - El tope por RUT y por origen (rate limit cerrado) lo aplica quien llama, en `apps/web`.
  */
 export type ResultadoPin =
-  { ok: true; debeCambiar: boolean } | { ok: false; fallo: "credenciales" };
+  | { ok: true }
+  /** PIN temporal correcto: debe elegir el suyo antes de entrar (no se abre sesión). */
+  | { ok: false; fallo: "cambiar" }
+  | { ok: false; fallo: "nuevo_invalido"; mensaje: string }
+  | { ok: false; fallo: "credenciales" };
 
 const FALLO: ResultadoPin = { ok: false, fallo: "credenciales" };
 
@@ -26,15 +30,22 @@ const FALLO: ResultadoPin = { ok: false, fallo: "credenciales" };
  * Verifica RUT + PIN y, si son correctos, abre la sesión del usuario de la persona (cookies por
  * `nextCookies`). Devuelve `credenciales` ante cualquier problema, sin distinguir la causa.
  */
-export async function entrarConPin(rutEntrada: string, pin: string): Promise<ResultadoPin> {
+export async function entrarConPin(
+  rutEntrada: string,
+  pin: string,
+  nuevoPin?: string,
+): Promise<ResultadoPin> {
   const h = await cabeceras();
-  const ok = await verificarRutYPin(rutEntrada, pin, h);
-  if (!ok) return FALLO;
+  const r = await verificarRutYPin(rutEntrada, pin, h, new Date(), nuevoPin);
+  if (!r) return FALLO;
+  if (r.estado === "cambiar") return { ok: false, fallo: "cambiar" };
+  if (r.estado === "nuevo_invalido")
+    return { ok: false, fallo: "nuevo_invalido", mensaje: r.mensaje };
   try {
-    await auth.api.abrirSesionPin({ body: { userId: ok.userId }, headers: h });
+    await auth.api.abrirSesionPin({ body: { userId: r.userId }, headers: h });
   } catch (error) {
     if (error instanceof APIError) return FALLO;
     throw error;
   }
-  return { ok: true, debeCambiar: ok.debeCambiar };
+  return { ok: true };
 }

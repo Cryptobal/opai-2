@@ -9,7 +9,7 @@ import { MENSAJE_PROBLEMA_PIN, problemaDePin } from "@opai/domain";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 /** Cambiar PIN: PIN actual, nuevo y repetición. Las reglas del PIN nuevo se dicen antes de enviar. */
-export function FormularioCambiarPin({ primerIngreso }: { primerIngreso: boolean }) {
+export function FormularioCambiarPin({ primerIngreso = false }: { primerIngreso?: boolean }) {
   const { ejecutar, pendiente, error } = useCapacidad("trabajador");
   const router = useRouter();
   const [actual, setActual] = useState("");

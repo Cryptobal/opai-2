@@ -25,6 +25,10 @@ export async function accionEntrarConPin(previo: EstadoPin, form: FormData): Pro
   const n = ("n" in previo ? previo.n : 0) + 1;
   const rutEscrito = String(form.get("rut") ?? "");
   const pin = String(form.get("pin") ?? "");
+  const nuevo = form.get("nuevo") === null ? undefined : String(form.get("nuevo"));
+  if (nuevo !== undefined && nuevo !== String(form.get("repetir") ?? "")) {
+    return { tipo: "cambiar", n, mensaje: "Los PIN nuevos no coinciden." };
+  }
   const rut = normalizarRut(rutEscrito);
   // Un RUT que no se puede leer cuenta contra su propia clave: mismo comportamiento que uno inexistente.
   const clave =
@@ -39,8 +43,9 @@ export async function accionEntrarConPin(previo: EstadoPin, form: FormData): Pro
     await permitir(`pin-rut:${clave}`, INTENTOS_RUT, VENTANA_MS, { fallarCerrado: true }),
   ];
   if (!porOrigen || !porRut) return { tipo: "pausado", n };
-  const r = await entrarConPin(rutEscrito, pin);
-  if (!r.ok) return { tipo: "error", n };
-  const destino = r.debeCambiar ? "/trabajador/cambiar-pin?primero=1" : "/trabajador";
-  redirect(`/elegir-empresa?next=${encodeURIComponent(destino)}`);
+  const r = await entrarConPin(rutEscrito, pin, nuevo);
+  if (r.ok) redirect(`/elegir-empresa?next=${encodeURIComponent("/trabajador")}`);
+  if (r.fallo === "cambiar") return { tipo: "cambiar", n };
+  if (r.fallo === "nuevo_invalido") return { tipo: "cambiar", n, mensaje: r.mensaje };
+  return { tipo: "error", n };
 }

@@ -21,7 +21,9 @@ Un trabajador ingresa al Portal Trabajador con **RUT + PIN de 6 dígitos**, camb
 2. **El mismo RUT en dos empresas.** El ingreso evalúa todas las empresas candidatas sin escribir; si una coincide entra por ella y solo se cuentan fallos cuando ninguna coincidió (un trabajador de dos empresas no se bloquea una al ingresar a la otra).
 3. **El intento fallido de «Cambiar PIN» persiste** (`transaccionIndependiente`), porque el error revierte la transacción de la capacidad.
 4. **Sesión.** La del usuario vinculado a la persona, con la duración y renovación normales de Better Auth (7 días, renovada con el uso). «Sesión larga» más allá de eso es una decisión pendiente.
-5. **Obligación de cambiar el PIN.** Tras el primer ingreso se lleva a `/trabajador/cambiar-pin?primero=1`; no hay un bloqueo duro del resto del portal (queda como mejora).
+5. **Cambio obligatorio del PIN asignado (Revisor B3).** Con un PIN temporal correcto NO se abre sesión: el login pide elegir el PIN propio y el cambio ocurre antes de que exista la sesión, así que el servidor lo exige.
+6. **El PIN solo vale si todas las membresías del usuario son de Trabajador o Terreno (Revisor B2),** en cualquier empresa y estado; así la sesión no puede abrir ERP ni Supervisor en otra empresa.
+7. **La huella de idempotencia no guarda secretos (Revisor B1).** Los campos `sensibles` entran a la huella como HMAC con secreto del servidor (`idempotencia-sensibles.ts`).
 
 ## Criterios
 
