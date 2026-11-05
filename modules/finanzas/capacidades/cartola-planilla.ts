@@ -1,4 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
+import type { TenantTx } from "@opai/db";
 import type { CeldaFlujo } from "../domain";
 import { derivadasBanco } from "./derivadas/banco";
 import type { celdaSchema } from "./esquemas";
@@ -10,6 +11,7 @@ export async function celdasDominioConCartolaPasada(
   celdasDom: CeldaFlujo[],
   semanaActual: string,
   semanasRango: readonly string[],
+  tx?: TenantTx,
 ): Promise<{ dominio: CeldaFlujo[]; extraVista: z.infer<typeof celdaSchema>[] }> {
   const pasadas = new Set(semanasRango.filter((s) => s < semanaActual));
   if (pasadas.size === 0) return { dominio: celdasDom, extraVista: [] };
@@ -18,17 +20,13 @@ export async function celdasDominioConCartolaPasada(
   const dominio: CeldaFlujo[] = [...sinPasadas];
   const extraVista: z.infer<typeof celdaSchema>[] = [];
 
-  for (const semana of pasadas) {
-    const bank = await derivadasBanco(ctx, semana);
-    for (const b of bank) {
-      dominio.push({
-        filaId: b.filaId,
-        semana: b.semana,
-        capa: "real",
-        monto: b.monto,
-      });
-      extraVista.push(b);
-    }
+  // Una sola consulta para todas las semanas pasadas del rango (hallazgo 15).
+  const ordenadas = [...pasadas].sort();
+  const bank = await derivadasBanco(ctx, ordenadas[0], ordenadas.at(-1), tx);
+  const enRango = bank.filter((b) => pasadas.has(b.semana));
+  for (const b of enRango) {
+    dominio.push({ filaId: b.filaId, semana: b.semana, capa: "real", monto: b.monto });
+    extraVista.push(b);
   }
   return { dominio, extraVista };
 }

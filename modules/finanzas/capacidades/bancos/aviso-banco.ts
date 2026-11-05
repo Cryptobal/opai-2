@@ -1,7 +1,7 @@
 import type { Contexto } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 
-import { ajustesDe } from "../util";
+import { ajustesDe, hoyIso } from "../util";
 import { aFecha } from "./util";
 
 /** Emite aviso in-app si el saldo de cartola queda bajo el umbral configurado del flujo. */
@@ -15,7 +15,7 @@ export async function sincronizarAvisoSaldoBajo(
   const ajustes = await ajustesDe(ctx);
   if (!ajustes.avisoActivo) return;
   if (saldo >= ajustes.avisoUmbral) return;
-  const dia = new Date().toISOString().slice(0, 10);
+  const dia = hoyIso();
   const { count } = await tx.bancoAvisoEmitido.createMany({
     data: [{ tenantId: ctx.tenantId, cuentaId, dia: aFecha(dia), saldo: BigInt(saldo) }],
     skipDuplicates: true,

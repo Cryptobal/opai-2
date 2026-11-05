@@ -392,7 +392,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     expect(mal).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 
-  it("Paridad 4 · capa real solo conciliado; cobro sin fila de cliente va a Cobros", async () => {
+  it("Paridad 4 · la cartola completa entra a lo real; lo no conciliado va a «Sin clasificar», no a Cobros", async () => {
     const filaCobros = (
       await e.admin.flujoFila.create({
         data: {
@@ -457,7 +457,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     }>("finanzas.derivadas.listar", { semana });
     const banco = derivadas.fuentes.find((f) => f.id === "banco")?.celdas ?? [];
     expect(banco.some((c) => c.id === movConc.id && c.filaId === filaCobros && c.monto === 33_333)).toBe(true);
-    expect(banco.some((c) => c.id === movAuth.id)).toBe(false);
+    expect(banco.some((c) => c.id === movAuth.id && c.filaId !== filaCobros)).toBe(true);
   });
 
   it("Paridad 5 · saldo sugerido avisa cuentas sin saldo en cartola", async () => {
@@ -510,7 +510,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     expect(sugerido.aviso).toMatch(/Sin saldo en cartola/);
   });
 
-  it("Paridad · capa real crea fila Cobros si no existe en el flujo", async () => {
+  it("Paridad · sin fila «Cobros» el cobro va a «Sin clasificar» y la lectura no crea filas", async () => {
     await e.admin.flujoFila.deleteMany({ where: { tenantId, etiqueta: "Cobros" } });
     const cuentaSinNombre = (await e.admin.cuenta.create({ data: { tenantId, nombre: "", rut: "77000002-0" } })).id;
     const doc = (
@@ -539,10 +539,8 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
       fuentes: { id: string; celdas: { filaId: string; id: string }[] }[];
     }>("finanzas.derivadas.listar", { semana: "2026-10-26" });
     const celda = derivadas.fuentes.find((f) => f.id === "banco")?.celdas.find((c) => c.id === mov.id);
-    const filaCobros = await e.admin.flujoFila.findFirst({ where: { tenantId, etiqueta: "Cobros" } });
-    expect(filaCobros?.id).toBeTruthy();
-    expect(celda?.filaId).toBe(filaCobros?.id);
-    expect(celda?.filaId).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(celda?.filaId).toBe("00000000-0000-4000-8000-000000000001");
+    expect(await e.admin.flujoFila.count({ where: { tenantId, etiqueta: "Cobros" } })).toBe(0);
   });
 
   it("C7b · no confirma un movimiento ignorado tras deshacer cobro manual", async () => {

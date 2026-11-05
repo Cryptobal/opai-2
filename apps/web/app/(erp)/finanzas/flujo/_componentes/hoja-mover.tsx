@@ -124,7 +124,7 @@ export function HojaMover({
             on={{
               fila: (v) => { setFilaId(v); setVista(null); },
               semana: (v) => { setSemana(v); setVista(null); setConfirmarPasada(false); },
-              por: setPor,
+              por: (v) => { setPor(v); setVista(null); },
               confirmar: setConfirmarPasada,
             }}
           />

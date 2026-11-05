@@ -5,6 +5,7 @@ import { calcularSaldoSugeridoSemana, finSemanaIso } from "@opai/domain";
 
 import { cuentaSchema, montoDe } from "./esquemas";
 import { PERMISO_BANCOS_VER } from "./permisos";
+import { hoyIso } from "../util";
 import { aFecha, aIso } from "./util";
 
 export const bancosCuentasListar = defineCapability({
@@ -67,7 +68,7 @@ export const bancosSaldoSugerido = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.cuentaIds,
   async handler(ctx, input) {
-    const finSemana = input.semana ? finSemanaIso(input.semana) : aIso(new Date());
+    const finSemana = input.semana ? finSemanaIso(input.semana) : hoyIso();
     const cuentas = await ctx.db.cuentaBancaria.findMany({
       where: input.cuentaId ? { id: input.cuentaId } : { activa: true },
       orderBy: { createdAt: "asc" },

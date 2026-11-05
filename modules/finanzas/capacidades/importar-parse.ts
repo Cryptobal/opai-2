@@ -2,7 +2,7 @@ import type { z } from "zod";
 
 import { reglaDeNegocio } from "@opai/capabilities";
 
-import { lunesDe } from "../domain";
+import { esFechaIso, lunesDe } from "../domain";
 import { MONTO_FLUJO_MAX } from "./esquemas";
 
 import type { filaImportSchema } from "./importar-esquema";
@@ -39,6 +39,29 @@ export function parsearMontoClp(
   return { ok: true, monto };
 }
 
+/** Divide una línea CSV (RFC 4180): campos entre comillas con separador, comillas dobles escapadas. */
+export function dividirLineaCsv(linea: string, sep: string): string[] {
+  const out: string[] = [];
+  let actual = "";
+  let entre = false;
+  for (let i = 0; i < linea.length; i += 1) {
+    const ch = linea[i] as string;
+    if (entre) {
+      if (ch === '"' && linea[i + 1] === '"') {
+        actual += '"';
+        i += 1;
+      } else if (ch === '"') entre = false;
+      else actual += ch;
+    } else if (ch === '"') entre = true;
+    else if (ch === sep) {
+      out.push(actual.trim());
+      actual = "";
+    } else actual += ch;
+  }
+  out.push(actual.trim());
+  return out;
+}
+
 export function parsearCsv(texto: string): Record<string, string>[] {
   const lineas = texto
     .replace(/^\uFEFF/, "")
@@ -47,9 +70,9 @@ export function parsearCsv(texto: string): Record<string, string>[] {
     .filter(Boolean);
   if (lineas.length < 2) throw reglaDeNegocio("La planilla CSV debe tener encabezado y al menos una fila.");
   const sep = lineas[0]?.includes(";") && !lineas[0]?.includes(",") ? ";" : ",";
-  const cols = (lineas[0] ?? "").split(sep).map((c) => c.trim().toLowerCase());
+  const cols = dividirLineaCsv(lineas[0] ?? "", sep).map((c) => c.toLowerCase());
   return lineas.slice(1).map((linea) => {
-    const vals = linea.split(sep).map((v) => v.trim());
+    const vals = dividirLineaCsv(linea, sep);
     const row: Record<string, string> = {};
     cols.forEach((c, i) => {
       row[c] = vals[i] ?? "";
@@ -75,16 +98,14 @@ export function filaDesdeRegistroCsv(
   const filaNum = indice + 2;
   const semanaRaw = r.semana ?? r.lunes ?? "";
   if (!semanaRaw) return { ok: false, motivo: `Fila ${filaNum}: falta la semana.` };
-  let semana: string;
-  try {
-    semana = lunesDe(semanaRaw);
-  } catch {
-    return { ok: false, motivo: `Fila ${filaNum}: semana inválida.` };
-  }
+  if (!esFechaIso(semanaRaw)) return { ok: false, motivo: `Fila ${filaNum}: semana inválida.` };
+  const semana = lunesDe(semanaRaw);
   const seccion = (r.seccion ?? "").toLowerCase();
   if (seccion !== "ingreso" && seccion !== "egreso")
     return { ok: false, motivo: `Fila ${filaNum}: sección inválida (use ingreso o egreso).` };
-  const montoParse = parsearMontoClp(r.monto ?? "0");
+  // Un monto vacío no pisa el valor existente con 0: es un error de la fila.
+  if (!(r.monto ?? "").trim()) return { ok: false, motivo: `Fila ${filaNum}: falta el monto.` };
+  const montoParse = parsearMontoClp(r.monto ?? "");
   if (!montoParse.ok) return { ok: false, motivo: `Fila ${filaNum}: ${montoParse.motivo}` };
   const etiqueta = r.etiqueta ?? r.fila ?? "";
   if (etiqueta.trim().length < 2)

@@ -2,11 +2,11 @@ import { z } from "zod";
 
 import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
-import { lunesDe } from "../domain";
 import { semanaSchema } from "./esquemas";
 import { filaImportSchema, filaDesdeRegistroCsv, MAX_FILAS_IMPORT, parsearCsv } from "./importar-parse";
 import { PERMISO_CONFIGURAR } from "./permisos";
-import { aFecha, ajustesDe } from "./util";
+import { aFecha, ajustesDe, lunesHoy } from "./util";
+import { escribirAjustes } from "./importar-ajustes";
 import { aplicarFilasImportadas, type FilaValida } from "./importar-aplicar";
 
 const resultadoFila = z.object({
@@ -42,12 +42,13 @@ export const flujoImportar = defineCapability({
     const registros = parsearCsv(input.contenido);
     if (registros.length > MAX_FILAS_IMPORT) throw reglaDeNegocio(`Máximo ${MAX_FILAS_IMPORT} filas por importación.`);
     const filasDb = await ctx.db.flujoFila.findMany({});
+    // Se consideran todas las filas, pero escribir en una archivada es un error (hallazgo 9a).
     const porEtiqueta = new Map(filasDb.map((f) => [f.etiqueta.toLowerCase(), f]));
     const filas: z.infer<typeof resultadoFila>[] = [];
     let aplicadas = 0;
     let omitidas = 0;
     let errores = 0;
-    const hoy = lunesDe(new Date().toISOString().slice(0, 10));
+    const hoy = lunesHoy();
 
     // 1) Validación pura de todas las filas.
     const validas: { indice: number; row: FilaValida }[] = [];
@@ -64,9 +65,32 @@ export const flujoImportar = defineCapability({
         filas.push({ indice, estado: "error", mensaje: "Datos inválidos en la fila." });
         continue;
       }
+      const existente = porEtiqueta.get(v.data.etiqueta.toLowerCase());
+      if (existente && !existente.activa) {
+        errores += 1;
+        filas.push({ indice, estado: "error", mensaje: "La fila está archivada: reactívala antes de importar." });
+        continue;
+      }
+      if (existente && existente.seccion !== v.data.seccion) {
+        errores += 1;
+        filas.push({
+          indice,
+          estado: "error",
+          mensaje: `La fila «${existente.etiqueta}» ya existe como ${existente.seccion}: la sección del CSV no coincide.`,
+        });
+        continue;
+      }
       if (v.data.semana < hoy) {
         omitidas += 1;
         filas.push({ indice, estado: "omitida", mensaje: "Semana pasada (cartola)." });
+        continue;
+      }
+      const previa = validas.find(
+        (x) => x.row.etiqueta.toLowerCase() === v.data.etiqueta.toLowerCase() && x.row.seccion !== v.data.seccion,
+      );
+      if (previa) {
+        errores += 1;
+        filas.push({ indice, estado: "error", mensaje: "La misma etiqueta aparece con otra sección en el CSV." });
         continue;
       }
       validas.push({ indice, row: v.data });
@@ -94,46 +118,21 @@ export const flujoImportar = defineCapability({
       filas.push({ indice, estado: "ok", mensaje: null, ...(dryRun ? { montoInterpretado: row.monto } : {}) });
     }
 
-    // 3) Escritura por lote, todo o nada.
-    if (!dryRun && aEscribir.length > 0) {
-      try {
-        await aplicarFilasImportadas(ctx, aEscribir, filasDb, celdas);
-      } catch {
-        errores += aplicadas;
-        aplicadas = 0;
-        for (const f of filas) if (f.estado === "ok") Object.assign(f, { estado: "error", mensaje: "No se pudo importar la fila." });
-      }
+    // 3) Todo o nada: con errores no se aplica nada; si la escritura falla, el error se propaga.
+    if (!dryRun && errores > 0) {
+      for (const f of filas)
+        if (f.estado === "ok") {
+          Object.assign(f, { estado: "omitida", mensaje: "No se aplicó: corrija los errores y vuelva a importar." });
+          omitidas += 1;
+        }
+      aplicadas = 0;
+    } else if (!dryRun && (aEscribir.length > 0 || input.saldoInicial != null || input.desde)) {
+      const base = await ajustesDe(ctx);
+      const ajustes = escribirAjustes(ctx, base, hoy, input);
+      if (aEscribir.length > 0) await aplicarFilasImportadas(ctx, aEscribir, filasDb, celdas, ajustes);
+      else await ctx.transaccion(ajustes);
     }
     filas.sort((a, b) => a.indice - b.indice);
-
-    if (!dryRun && (input.saldoInicial != null || input.desde)) {
-      const base = await ajustesDe(ctx);
-      await ctx.transaccion(async (tx) => {
-        const data = {
-          saldoInicial: BigInt(input.saldoInicial ?? base.saldoInicial),
-          umbral: BigInt(base.umbral),
-          desde: aFecha(input.desde ?? base.desde ?? lunesDe(hoy)),
-          toleranciaCierre: BigInt(base.toleranciaCierre),
-          horizonteSemanas: base.horizonteSemanas,
-          calendarioPagos: base.calendarioPagos,
-          avisoActivo: base.avisoActivo,
-          avisoUmbral: BigInt(base.avisoUmbral),
-          metaCeldaMs: base.metaCeldaMs,
-          metaGuardadoP95Ms: base.metaGuardadoP95Ms,
-          metaCargaInicialS: base.metaCargaInicialS,
-          metasVisibles: base.metasVisibles,
-        };
-        const existe = await tx.flujoAjustes.findFirst({});
-        if (existe) await tx.flujoAjustes.update({ where: { id: existe.id }, data });
-        else await tx.flujoAjustes.create({ data: { ...data, tenantId: ctx.tenantId } });
-        await ctx.eventos.emitir(tx, {
-          tipo: "finanzas.flujo.ajustes_cambiados",
-          entidadTipo: "flujoAjustes",
-          entidadId: existe?.id ?? ctx.tenantId,
-        });
-      });
-    }
-
     if (!dryRun && aplicadas > 0) {
       await ctx.transaccion(async (tx) => {
         await ctx.eventos.emitir(tx, {
