@@ -20,7 +20,7 @@ async function escenario() {
   const tope = await etapa("Negociación", 5, "abierta");
   await ctx.db.motivoPerdida.create({ data: { tenantId: ctx.tenantId, codigo: "sin_respuesta", nombre: "Sin respuesta", activo: true } });
   const negocio = await ctx.db.negocio.create({
-    data: { tenantId: ctx.tenantId, titulo: "N", estado: "abierto", etapaId: propuesta.id, embudoId: embudo.id },
+    data: { tenantId: ctx.tenantId, cuentaId: "0192b5c0-0000-7000-8000-0000000000cc", titulo: "N", estado: "abierto", etapaId: propuesta.id, embudoId: embudo.id },
   });
   const seg = { id: "s1", negocioId: negocio.id, planVersion: 3 };
   return { ctx, tabla, embudo, propuesta, perdida, tope, negocio, seg };
