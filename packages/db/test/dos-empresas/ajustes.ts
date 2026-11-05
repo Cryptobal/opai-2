@@ -96,6 +96,16 @@ export const AJUSTES: Record<string, Ajuste> = {
   "rendiciones.rendicion_viajes": {
     valores: () => ({ metodo: "consumo", origen_distancia: "linea_recta", monto_calculado: 1, km: 1, peaje_clp: 0 }),
   },
+  // Asistencia (CAR-89): CHECK de enumeraciones. Las marcas y correcciones son inmutables.
+  "asistencia.marcas": {
+    valores: () => ({ tipo: "entrada", origen: "en_linea", metodo: "rut_pin", gps_estado: "sin_gps", snapshot: "{}", seq: 1 }),
+  },
+  "asistencia.cadenas_cabeza": { fijas: ["cadena"], valores: () => ({ cadena: "marcas" }) },
+  "asistencia.correcciones": { valores: () => ({ tipo_propuesto: "entrada", seq: 1 }) },
+  "asistencia.contingencias": { valores: () => ({ tipo: "entrada", estado: "pendiente" }) },
+  "asistencia.incidentes_tecnicos": {
+    valores: () => ({ tipo: "otro", severidad: "baja", origen: "manual" }),
+  },
   // Núcleo · turnos esperados (CAR-201): CHECK de origen y de intervalo (fin > inicio).
   "core.turnos_esperados": {
     valores: () => ({ origen: "pauta", inicio: "2026-12-01T12:00:00Z", fin: "2026-12-01T20:00:00Z" }),
