@@ -115,6 +115,7 @@ export async function cargarFichaCotizacion(id: string) {
     secciones: {
       id: string;
       nombre: string;
+      instalacionId?: string | null;
       lineas: (LineaEditable & { tipo: string; costo?: unknown })[];
     }[];
   };
@@ -132,7 +133,9 @@ export async function cargarFichaCotizacion(id: string) {
     };
   }
   let ficha = r.data;
-  if (acceso.crear && ficha.version.editable) {
+  // Con valores legales nuevos la versión queda «Desactualizada»: se recalcula con la acción explícita,
+  // no al abrir la ficha (CAR-192).
+  if (acceso.crear && ficha.version.editable && !(ficha.meta as { avisoRecalculo?: unknown } | undefined)?.avisoRecalculo) {
     await ejecutarComoUsuario("erp", "cpq.cotizaciones.calcular", { id }, false);
     const r2 = await ejecutarComoUsuario<FichaRespuesta>("erp", "cpq.cotizaciones.ficha", { id });
     if (r2.ok) ficha = r2.data;

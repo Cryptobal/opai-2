@@ -84,4 +84,6 @@ Una cotización nueva nace con el objetivo de la empresa y sin «Requiere aproba
 
 ## 16 · Reporte de ejecución
 
+PR 1 integrado en #324. PR 2: ficha B construida; capturas en `design/ficha-cpq-capturas/` (siete estados a 375 y 1280 px en claro, más 1024 y oscuro de los casos clave) y comparadas con el mockup B. Diferencias con el mockup: el resumen es una sola tarjeta fija arriba (precio, margen con barra y estado con su acción) en lugar de tres tarjetas, y en teléfono el botón principal queda dentro de ese resumen fijo, no en una barra inferior (la barra inferior de la app ya lleva la navegación); los costos se agrupan por categoría del motor (no «Uniformes y exámenes» juntos); el bloque «Documento y envío» muestra la mutual sin confirmar y reúne la propuesta técnica, el envío, compartir/archivar y el historial.
+
 En el cuerpo de cada PR (validaciones realmente ejecutadas, capturas y diferencias con el mockup en el PR 2) y en `docs/2.0/ESTADO.md`.
