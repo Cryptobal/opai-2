@@ -1,4 +1,4 @@
-import { adaptadorCesionSimulado, adaptadorOctava, type AdaptadorCesion, type AlmacenSesionOctava } from "@opai/integrations";
+import { adaptadorCesionSimulado, adaptadorOctava, ambienteTributarioEfectivo, type AdaptadorCesion, type AlmacenSesionOctava } from "@opai/integrations";
 
 import type { Contexto } from "../types";
 import { accesoOctava, almacenSesionOctava, cedenteOctava, type ConfigCesion } from "./adaptador-cesion-octava";
@@ -18,7 +18,8 @@ export async function adaptadorCesionDe(ctx: Contexto): Promise<AdaptadorCesion>
   }
   const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
   if (cfg?.cesionProveedor !== "octava") return adaptadorCesionSimulado();
-  const ambiente = cfg.ambiente === "produccion" ? "produccion" : "certificacion";
+  // Candado de ambiente (CAR-191): fuera de app.opai.cl, Octava solo en certificación.
+  const ambiente = ambienteTributarioEfectivo(cfg.ambiente);
   const rutEmisor = cfg.rutEmisor ?? "";
   const integ = await ctx.db.integracion.findUnique({
     where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_cesion" } },

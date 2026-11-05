@@ -32,10 +32,12 @@ No hay cierre ni sellado. Mandan la cartola y la proyección; no hay ajuste manu
 
 | # | Bloque | Por qué en este orden |
 |---|---|---|
-| **0** | **Candado de ambiente:** fuera de app.opai.cl, SimpleAPI solo en certificación y Octava sin ceder de verdad; y arreglo de la cesión anulada | **Hoy nada impide que test.opai.cl emita en el SII real** si en Configuración DTE se eligen SimpleAPI y «producción» con el certificado cargado (solo `NODE_ENV=test` o `SII_ADAPTADOR`/`CESION_ADAPTADOR=simulado` fuerzan el simulado; nada mira el dominio). No cambia el alcance: lo hago primero |
+| **0a** | Integrar #306 (pendientes de Octava, ya revisado) y CAR-195: `set_secreto` pide confirmación para reemplazar una credencial y descarta el token de Octava en la misma transacción | Cierra lo que dejó CAR-154 antes de tocar los mismos archivos |
+| **0b** | **CAR-191 · Candado de ambiente:** fuera de app.opai.cl, SimpleAPI solo en certificación y Octava sin ceder de verdad; y arreglo de la cesión anulada | Hoy nada impide que test.opai.cl emita en el SII real si una empresa elige producción (al 4-nov ninguna lo tiene en Neon `main`) |
 | 1 | Flujo A: cerrar CAR-181 (#246) sobre main e implementar CAR-184 | Base ya hecha, en conflicto |
 | 2 | Flujo B: reglas de §3 (criterio único, cartola completa, saldo del banco, factoring, IVA/PPM, umbral único) y la prueba de la conciliación tardía | La prioridad de Carlos |
-| 3 | Facturación A: ND 56, editar y descartar borradores, NC por borrador, emisión fuera de la transacción | Paridad que Gard usa |
+| 3 | **CAR-196 · Emisión real en certificación:** SimpleAPI de punta a punta y luego cesión con Octava, XML en ISO-8859-1 sin transcodificar (ADR-075), llamada externa fuera de la transacción | Gard necesita facturar y ceder desde 2.0; requiere el candado |
+| 3b | Facturación A: ND 56, editar y descartar borradores, NC por borrador | Paridad que Gard usa |
 | 4 | Facturación B: PDF con el diseño oficial del SII (PDF417, cedible) | Sin esto no se manda a un cliente real |
 | 5 | Envíos A: plantillas por empresa (factura, NC/ND, proforma, estado de pago, cobranza), elegir destinatarios, registro único de envíos | Base de lo automático |
 | 6 | Envíos B: en cada programación, fecha pactada para proforma o estado de pago, envío automático, OK del cliente por enlace; referencias y destinatarios de 1.0 | Cierra el ciclo de facturación |

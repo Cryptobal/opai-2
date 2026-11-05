@@ -15,7 +15,7 @@ import { LinkMenu } from "./link-menu";
 import { empresasShell } from "./empresas-shell";
 import { usePendiente } from "./navegacion-pendiente";
 import { useAgenteShell } from "./agente/use-agente-shell";
-import { useBusquedaShell } from "./busqueda-mas-shell";
+import { AccesosProveedor, useBusquedaShell } from "./busqueda-mas-shell";
 import { PinFichaContexto, pinDeFicha } from "./pin-ficha-contexto";
 import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
@@ -142,7 +142,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         onNavegar={(href) => router.push(href)}
         Link={LinkMenu}
       >
-        {children}
+        <AccesosProveedor enErp={enErp} preferencias={preferencias} recientes={busqueda.recientes} acciones={datos.acciones} ruta={rutaActual} onNavegar={router.push}>{children}</AccesosProveedor>
         {enErp ? (
           <Preferencias
             datos={datos}
