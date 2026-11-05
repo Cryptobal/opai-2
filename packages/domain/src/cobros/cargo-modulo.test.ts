@@ -1,19 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  aClp,
-  cargoDelMes,
-  type CondicionCobro,
-  limitesDelPeriodo,
-  ufDesdeTexto,
-} from "./cargo-modulo";
+import { aClp, cargoDelMes, ufDesdeTexto } from "./cargo-modulo";
+import { type CondicionCobro, limitesDelPeriodo } from "./catalogo";
 
 const base: CondicionCobro = {
   moneda: "CLP",
-  precioMensual: 300_000,
+  forma: "fijo",
+  unidad: null,
+  precio: 300_000,
+  minimoMensual: null,
   cobroDesde: "2026-01-01",
   pruebaHasta: null,
+  pasaACobro: false,
   descuentoPct: 0,
+};
+const porUnidad: CondicionCobro = {
+  ...base,
+  moneda: "UF",
+  forma: "por_unidad",
+  unidad: "trabajador_activo",
+  precio: 1_000, // 0,1 UF por trabajador
+  minimoMensual: 50_000, // 5 UF
 };
 
 describe("limitesDelPeriodo", () => {
@@ -28,13 +35,13 @@ describe("limitesDelPeriodo", () => {
   });
 });
 
-describe("cargoDelMes", () => {
+describe("cargoDelMes · precio fijo", () => {
   it("cobra el mes completo cuando el cobro empezó antes", () => {
     expect(cargoDelMes(base, "activo", "2026-10")).toMatchObject({
       facturable: true,
-      motivo: "factura",
       desde: "2026-10-01",
       diasCobrados: 31,
+      cantidad: null,
       monto: 300_000,
     });
   });
@@ -42,12 +49,8 @@ describe("cargoDelMes", () => {
   it("prorratea el primer mes por días, con redondeo mitad hacia arriba", () => {
     const r = cargoDelMes({ ...base, cobroDesde: "2026-11-16" }, "activo", "2026-11");
     expect(r).toMatchObject({ desde: "2026-11-16", diasCobrados: 15, diasMes: 30, monto: 150_000 });
-    const impar = cargoDelMes(
-      { ...base, precioMensual: 100_001, cobroDesde: "2026-11-16" },
-      "activo",
-      "2026-11",
-    );
-    expect(impar.monto).toBe(50_001); // 50.000,5 → 50.001
+    const impar = { ...base, precio: 100_001, cobroDesde: "2026-11-16" };
+    expect(cargoDelMes(impar, "activo", "2026-11").monto).toBe(50_001); // 50.000,5 → 50.001
   });
 
   it("aplica el descuento sobre el bruto", () => {
@@ -61,47 +64,52 @@ describe("cargoDelMes", () => {
     expect(cargoDelMes(null, "activo", "2026-10").motivo).toBe("sin_condicion");
   });
 
-  it("en prueba sin fecha de fin no factura; con prueba vencida factura desde el día siguiente", () => {
-    expect(cargoDelMes({ ...base, pruebaHasta: null }, "trial", "2026-10").motivo).toBe(
+  it("un cobro que empieza el mes siguiente no factura; precio 0 queda como bonificado", () => {
+    const futuro = { ...base, cobroDesde: "2026-11-01" };
+    expect(cargoDelMes(futuro, "activo", "2026-10").motivo).toBe("cobro_futuro");
+    expect(cargoDelMes({ ...base, precio: 0 }, "activo", "2026-10").motivo).toBe("bonificado");
+  });
+});
+
+describe("cargoDelMes · pruebas (adenda ADR-071)", () => {
+  const prueba = { ...base, cobroDesde: null, pruebaHasta: "2026-10-20" };
+  it("en prueba no factura; al vencer con «pasa a cobro» factura desde el día siguiente", () => {
+    expect(cargoDelMes({ ...prueba, pruebaHasta: "2026-10-31" }, "trial", "2026-10").motivo).toBe(
       "en_prueba",
     );
-    const r = cargoDelMes({ ...base, pruebaHasta: "2026-10-20" }, "trial", "2026-10");
+    const r = cargoDelMes({ ...prueba, pasaACobro: true }, "trial", "2026-10");
     expect(r).toMatchObject({ facturable: true, desde: "2026-10-21", diasCobrados: 11 });
-    expect(cargoDelMes({ ...base, pruebaHasta: "2026-10-31" }, "trial", "2026-10").motivo).toBe(
-      "en_prueba",
-    );
   });
 
-  it("sin inicio explícito parte al terminar la prueba; sin ninguno de los dos no parte", () => {
-    const r = cargoDelMes(
-      { ...base, cobroDesde: null, pruebaHasta: "2026-09-30" },
-      "activo",
-      "2026-10",
-    );
-    expect(r).toMatchObject({ facturable: true, diasCobrados: 31 });
-    expect(cargoDelMes({ ...base, cobroDesde: null }, "activo", "2026-10").motivo).toBe(
-      "sin_inicio",
-    );
+  it("sin «pasa a cobro» la prueba vencida no factura (solo lectura)", () => {
+    expect(cargoDelMes(prueba, "trial", "2026-10").motivo).toBe("prueba_vencida");
+    expect(cargoDelMes(prueba, "trial", "2026-12").motivo).toBe("prueba_vencida");
   });
 
-  it("un cobro que empieza el mes siguiente no factura", () => {
-    expect(cargoDelMes({ ...base, cobroDesde: "2026-11-01" }, "activo", "2026-10").motivo).toBe(
-      "cobro_futuro",
-    );
+  it("un inicio explícito manda, pero nunca antes de que termine la prueba", () => {
+    const r = cargoDelMes({ ...prueba, cobroDesde: "2026-10-01" }, "activo", "2026-10");
+    expect(r).toMatchObject({ desde: "2026-10-21", diasCobrados: 11 });
+  });
+});
+
+describe("cargoDelMes · por unidad", () => {
+  it("cobra cantidad × precio y guarda la cantidad", () => {
+    const r = cargoDelMes(porUnidad, "activo", "2026-10", 80);
+    expect(r).toMatchObject({ facturable: true, cantidad: 80, mensual: 80_000, monto: 80_000 });
   });
 
-  it("precio 0 o descuento total queda como bonificado", () => {
-    expect(cargoDelMes({ ...base, precioMensual: 0 }, "activo", "2026-10").motivo).toBe(
-      "bonificado",
-    );
-    expect(cargoDelMes({ ...base, descuentoPct: 1_000_000 }, "activo", "2026-10").facturable).toBe(
-      false,
-    );
+  it("aplica el mínimo y después el descuento", () => {
+    const r = cargoDelMes({ ...porUnidad, descuentoPct: 100_000 }, "activo", "2026-10", 10);
+    expect(r).toMatchObject({ cantidad: 10, mensual: 50_000, descuento: 5_000, monto: 45_000 });
   });
 
-  it("calcula en UF escalada", () => {
-    const r = cargoDelMes({ ...base, moneda: "UF", precioMensual: 25_000 }, "activo", "2026-10");
-    expect(r.monto).toBe(25_000); // 2,5 UF
+  it("sin cantidad contada no factura; con cero y sin mínimo queda bonificado", () => {
+    expect(cargoDelMes(porUnidad, "activo", "2026-10").motivo).toBe("sin_cantidad");
+    const sinMinimo = { ...porUnidad, minimoMensual: null };
+    expect(cargoDelMes(sinMinimo, "activo", "2026-10", 0)).toMatchObject({
+      motivo: "bonificado",
+      cantidad: 0,
+    });
   });
 });
 

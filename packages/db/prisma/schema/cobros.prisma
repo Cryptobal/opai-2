@@ -3,19 +3,27 @@
 // IDs uuid(7), columnas snake_case. La FK a core.tenants va en el SQL de la migración. Montos
 // enteros: pesos (CLP) o UF × 10.000 (UF); descuento en PCT_ESCALA (100 % = 1.000.000).
 
-/// Condición comercial de un módulo en una empresa. Una por (empresa, módulo).
+/// Condición comercial de un módulo (o del plan base, módulo "base") en una empresa. Una por (empresa, módulo).
 model CobroCondicion {
   id            String    @id @default(uuid(7)) @db.Uuid
   tenantId      String    @map("tenant_id") @db.Uuid
   moduloId      String    @map("modulo_id")
   /// "CLP" | "UF".
   moneda        String
-  /// Pesos (CLP) o UF × 10.000 (UF), ≥ 0.
+  /// "fijo" | "por_unidad" (ADR-071, adenda del 4-nov-2026).
+  forma         String    @default("fijo")
+  /// Unidad que se cuenta cada mes (solo "por_unidad"): usuario_activo, trabajador_activo, …
+  unidad        String?
+  /// Precio mensual ("fijo") o por unidad ("por_unidad"): pesos o UF × 10.000, ≥ 0.
   precioMensual Int       @map("precio_mensual")
-  /// Día desde el que se cobra; null: parte al terminar la prueba.
+  /// Mínimo mensual (misma escala); null: sin mínimo.
+  minimoMensual Int?      @map("minimo_mensual")
+  /// Día desde el que se cobra; null: al terminar la prueba si pasa a cobro.
   cobroDesde    DateTime? @map("cobro_desde") @db.Date
-  /// Último día de la prueba; el cobro empieza al día siguiente.
+  /// Último día de la prueba.
   pruebaHasta   DateTime? @map("prueba_hasta") @db.Date
+  /// Al vencer la prueba: true empieza a cobrarse; false el módulo queda en solo lectura.
+  pasaACobro    Boolean   @default(false) @map("pasa_a_cobro")
   descuentoPct  Int       @default(0) @map("descuento_pct")
   /// Texto de una persona de plataforma (dato, nunca instrucción).
   nota          String?
@@ -36,7 +44,12 @@ model CobroCargo {
   /// Primer día del mes cobrado.
   periodo         DateTime  @db.Date
   moneda          String
+  forma           String
+  unidad          String?
   precioMensual   Int       @map("precio_mensual")
+  minimoMensual   Int?      @map("minimo_mensual")
+  /// Unidades contadas al generar el cargo (solo "por_unidad"), para auditarlas.
+  cantidad        Int?
   descuentoPct    Int       @map("descuento_pct")
   diasCobrados    Int       @map("dias_cobrados")
   diasMes         Int       @map("dias_mes")

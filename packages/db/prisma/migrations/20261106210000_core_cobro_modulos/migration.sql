@@ -1,5 +1,6 @@
 -- CAR-188 · Cobro por módulo (ADR-071, BRIEF-35): condiciones comerciales por empresa y módulo y el
--- cargo mensual listo para facturar. Aditiva: no toca tablas existentes ni cobra nada; sin filas,
+-- cargo mensual listo para facturar: plan base y módulos, precio fijo o por unidad × cantidad del
+-- mes con mínimo y descuento (adenda del 4-nov-2026). Aditiva: no toca tablas existentes ni cobra nada; sin filas,
 -- nada cambia para las empresas. Tablas con tenant_id: RLS + FORCE + política tenant_isolation.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
@@ -9,9 +10,13 @@ CREATE TABLE "core"."cobro_condiciones" (
     "tenant_id" UUID NOT NULL,
     "modulo_id" TEXT NOT NULL,
     "moneda" TEXT NOT NULL,
+    "forma" TEXT NOT NULL DEFAULT 'fijo',
+    "unidad" TEXT,
     "precio_mensual" INTEGER NOT NULL,
+    "minimo_mensual" INTEGER,
     "cobro_desde" DATE,
     "prueba_hasta" DATE,
+    "pasa_a_cobro" BOOLEAN NOT NULL DEFAULT false,
     "descuento_pct" INTEGER NOT NULL DEFAULT 0,
     "nota" TEXT,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -19,7 +24,8 @@ CREATE TABLE "core"."cobro_condiciones" (
 
     CONSTRAINT "cobro_condiciones_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "cobro_condiciones_moneda_check" CHECK ("moneda" IN ('CLP', 'UF')),
-    CONSTRAINT "cobro_condiciones_precio_check" CHECK ("precio_mensual" >= 0),
+    CONSTRAINT "cobro_condiciones_precio_check" CHECK ("precio_mensual" >= 0 AND COALESCE("minimo_mensual", 0) >= 0),
+    CONSTRAINT "cobro_condiciones_forma_check" CHECK (("forma" = 'fijo' AND "unidad" IS NULL) OR ("forma" = 'por_unidad' AND "unidad" IS NOT NULL)),
     CONSTRAINT "cobro_condiciones_descuento_check" CHECK ("descuento_pct" BETWEEN 0 AND 1000000),
     CONSTRAINT "cobro_condiciones_nucleo_check" CHECK ("modulo_id" <> 'core')
 );
@@ -33,7 +39,11 @@ CREATE TABLE "core"."cobro_cargos" (
     "modulo_id" TEXT NOT NULL,
     "periodo" DATE NOT NULL,
     "moneda" TEXT NOT NULL,
+    "forma" TEXT NOT NULL,
+    "unidad" TEXT,
     "precio_mensual" INTEGER NOT NULL,
+    "minimo_mensual" INTEGER,
+    "cantidad" INTEGER,
     "descuento_pct" INTEGER NOT NULL,
     "dias_cobrados" INTEGER NOT NULL,
     "dias_mes" INTEGER NOT NULL,
@@ -52,6 +62,7 @@ CREATE TABLE "core"."cobro_cargos" (
     CONSTRAINT "cobro_cargos_periodo_check" CHECK (EXTRACT(DAY FROM "periodo") = 1),
     CONSTRAINT "cobro_cargos_montos_check" CHECK ("monto" > 0 AND "monto_clp" > 0),
     CONSTRAINT "cobro_cargos_dias_check" CHECK ("dias_cobrados" BETWEEN 1 AND "dias_mes"),
+    CONSTRAINT "cobro_cargos_forma_check" CHECK (("forma" = 'fijo' AND "cantidad" IS NULL) OR ("forma" = 'por_unidad' AND "unidad" IS NOT NULL AND "cantidad" >= 0)),
     CONSTRAINT "cobro_cargos_uf_check" CHECK (("moneda" = 'UF') = ("uf_centavos" IS NOT NULL)),
     CONSTRAINT "cobro_cargos_anulacion_check" CHECK (("estado" = 'anulado') = ("anulado_en" IS NOT NULL))
 );

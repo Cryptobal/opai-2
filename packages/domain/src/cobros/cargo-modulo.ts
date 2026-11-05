@@ -1,129 +1,87 @@
 /**
- * Cobro por módulo (ADR-071, BRIEF-35). Decide si el módulo de una empresa se factura en un mes y
- * cuánto, con aritmética entera: CLP en pesos, UF en diezmilésimas (`UF_ESCALA`) y el descuento en
- * `PCT_ESCALA`. Sin base de datos ni fechas del sistema: el período y las fechas llegan como texto.
+ * Cobro por módulo (ADR-071 y adenda del 4-nov-2026, BRIEF-35): decide si un módulo (o el plan base)
+ * de una empresa se factura en un mes y cuánto. Aritmética entera: CLP en pesos, UF en diezmilésimas
+ * (`UF_ESCALA`) y el descuento en `PCT_ESCALA`. Orden: precio fijo, o cantidad × precio por unidad;
+ * luego el mínimo; luego el prorrateo del primer mes por días; y al final el descuento.
  */
 import { PCT_ESCALA, redondearRazonCLP, UF_ESCALA } from "../dinero";
+import {
+  type CargoCalculado,
+  type CondicionCobro,
+  diaSiguiente,
+  limitesDelPeriodo,
+  type MonedaCobro,
+  type MotivoCobro,
+} from "./catalogo";
 
-export const MONEDAS_COBRO = ["CLP", "UF"] as const;
-export type MonedaCobro = (typeof MONEDAS_COBRO)[number];
-
-export type CondicionCobro = {
-  moneda: MonedaCobro;
-  /** Pesos (CLP) o UF × 10.000 (UF). */
-  precioMensual: number;
-  /** Día (aaaa-mm-dd) desde el que se cobra; null: no se cobra. */
-  cobroDesde: string | null;
-  /** Último día de la prueba (aaaa-mm-dd); el cobro empieza al día siguiente. */
-  pruebaHasta: string | null;
-  /** Descuento en `PCT_ESCALA` (100 % = 1.000.000). */
-  descuentoPct: number;
-};
-
-/** Por qué un módulo se factura o no en un mes. */
-export const MOTIVOS_COBRO = {
-  factura: "Se factura",
-  sin_condicion: "Sin condición comercial",
-  sin_inicio: "Sin fecha de inicio del cobro",
-  modulo_inactivo: "Módulo no contratado o suspendido",
-  en_prueba: "En prueba",
-  cobro_futuro: "El cobro empieza después",
-  bonificado: "Sin costo (precio 0 o descuento total)",
-} as const;
-export type MotivoCobro = keyof typeof MOTIVOS_COBRO;
-
-export type CargoCalculado = {
-  facturable: boolean;
-  motivo: MotivoCobro;
-  /** Primer día cobrado del mes, si se factura. */
-  desde: string | null;
-  diasCobrados: number;
-  diasMes: number;
-  /** Monto bruto del mes antes del descuento, en la moneda de la condición. */
-  bruto: number;
-  descuento: number;
-  /** Monto a facturar en la moneda de la condición (pesos o UF × 10.000). */
-  monto: number;
-};
-
-const PERIODO = /^(\d{4})-(0[1-9]|1[0-2])$/;
-
-/** Primer y último día (aaaa-mm-dd) de un período aaaa-mm, y sus días. */
-export function limitesDelPeriodo(periodo: string) {
-  const m = PERIODO.exec(periodo);
-  if (!m) throw new RangeError(`Período inválido: ${periodo}`);
-  const anio = Number(m[1]);
-  const mes = Number(m[2]);
-  const dias = new Date(Date.UTC(anio, mes, 0)).getUTCDate();
-  return { inicio: `${periodo}-01`, fin: `${periodo}-${String(dias).padStart(2, "0")}`, dias };
-}
-
-/** Día siguiente a una fecha aaaa-mm-dd. */
-export function diaSiguiente(fecha: string): string {
-  const d = new Date(`${fecha}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + 1);
-  return d.toISOString().slice(0, 10);
-}
-
-const sinCargo = (motivo: MotivoCobro, diasMes: number): CargoCalculado => ({
+const sinCargo = (motivo: MotivoCobro, diasMes: number, extra: Partial<CargoCalculado> = {}) => ({
   facturable: false,
   motivo,
   desde: null,
   diasCobrados: 0,
   diasMes,
+  cantidad: null,
+  mensual: 0,
   bruto: 0,
   descuento: 0,
   monto: 0,
+  ...extra,
 });
 
 /**
- * Cargo de un módulo en un mes. Se factura si el módulo está activo o en prueba, tiene condición
- * con inicio del cobro y el cobro empieza a más tardar el último día del mes. El primer mes es
- * proporcional a los días desde el inicio; los siguientes, completos. Una prueba vencida se cobra
- * desde el día siguiente aunque el módulo siga marcado «prueba»; una prueba sin fin no se cobra.
+ * Primer día del cobro: el más tardío entre el inicio explícito y el día siguiente a la prueba. Sin
+ * inicio explícito, una prueba vencida solo se cobra si Plataforma marcó «pasa a cobro».
+ */
+function inicioDelCobro(c: CondicionCobro): { desde: string | null; motivo: MotivoCobro | null } {
+  const trasPrueba = c.pruebaHasta ? diaSiguiente(c.pruebaHasta) : null;
+  if (trasPrueba && !c.pasaACobro && !c.cobroDesde)
+    return { desde: null, motivo: "prueba_vencida" };
+  const desde =
+    [c.cobroDesde, trasPrueba]
+      .filter((d): d is string => !!d)
+      .sort()
+      .at(-1) ?? null;
+  return desde ? { desde, motivo: null } : { desde: null, motivo: "sin_inicio" };
+}
+
+/**
+ * Cargo de un mes. `cantidad` son las unidades contadas (solo cobro `por_unidad`; null si aún no se
+ * contaron). Una prueba sin «pasa a cobro» no se cobra nunca: al vencer el módulo queda en solo
+ * lectura. Una prueba que vence dentro del mes se cobra desde el día siguiente.
  */
 export function cargoDelMes(
-  condicion: CondicionCobro | null,
+  c: CondicionCobro | null,
   estadoModulo: string | null,
   periodo: string,
+  cantidad: number | null = null,
 ): CargoCalculado {
   const { inicio, fin, dias } = limitesDelPeriodo(periodo);
   if (estadoModulo !== "activo" && estadoModulo !== "trial")
     return sinCargo("modulo_inactivo", dias);
-  if (!condicion) return sinCargo("sin_condicion", dias);
-  if (estadoModulo === "trial" && !condicion.pruebaHasta) return sinCargo("en_prueba", dias);
-  const trasPrueba = condicion.pruebaHasta ? diaSiguiente(condicion.pruebaHasta) : null;
-  // Sin inicio explícito, el cobro parte al terminar la prueba; sin ninguno de los dos, no parte.
-  let desde = condicion.cobroDesde ?? trasPrueba;
-  if (!desde) return sinCargo("sin_inicio", dias);
-  if (trasPrueba && trasPrueba > desde) desde = trasPrueba;
-  if (desde > fin)
-    return sinCargo(
-      condicion.pruebaHasta && condicion.pruebaHasta >= fin ? "en_prueba" : "cobro_futuro",
-      dias,
-    );
-  if (desde < inicio) desde = inicio;
+  if (!c) return sinCargo("sin_condicion", dias);
+  if (c.pruebaHasta && c.pruebaHasta >= fin) return sinCargo("en_prueba", dias);
+  const { desde: d, motivo } = inicioDelCobro(c);
+  if (!d) return sinCargo(motivo ?? "sin_inicio", dias);
+  if (d > fin) return sinCargo("cobro_futuro", dias);
+  if (c.forma === "por_unidad" && cantidad === null) return sinCargo("sin_cantidad", dias);
+  const desde = d < inicio ? inicio : d;
   const diasCobrados = Number(fin.slice(8)) - Number(desde.slice(8)) + 1;
-  const bruto = redondearRazonCLP(
-    BigInt(condicion.precioMensual) * BigInt(diasCobrados),
-    BigInt(dias),
-  );
-  const descuento = redondearRazonCLP(
-    BigInt(bruto) * BigInt(condicion.descuentoPct),
-    BigInt(PCT_ESCALA),
-  );
+  const base = c.forma === "por_unidad" ? c.precio * (cantidad ?? 0) : c.precio;
+  const mensual = Math.max(base, c.minimoMensual ?? 0);
+  const bruto = redondearRazonCLP(BigInt(mensual) * BigInt(diasCobrados), BigInt(dias));
+  const descuento = redondearRazonCLP(BigInt(bruto) * BigInt(c.descuentoPct), BigInt(PCT_ESCALA));
   const monto = bruto - descuento;
-  if (monto <= 0) return { ...sinCargo("bonificado", dias), desde, diasCobrados };
-  return {
-    facturable: true,
-    motivo: "factura",
+  const r = {
     desde,
     diasCobrados,
-    diasMes: dias,
+    cantidad: c.forma === "por_unidad" ? cantidad : null,
+    mensual,
     bruto,
     descuento,
     monto,
   };
+  if (monto <= 0) return sinCargo("bonificado", dias, r);
+  return { facturable: true, motivo: "factura", diasMes: dias, ...r };
 }
 
 /**

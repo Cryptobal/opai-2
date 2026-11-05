@@ -8,7 +8,11 @@ const condicion = {
   id: true,
   moduloId: true,
   moneda: true,
+  forma: true,
+  unidad: true,
   precioMensual: true,
+  minimoMensual: true,
+  pasaACobro: true,
   cobroDesde: true,
   pruebaHasta: true,
   descuentoPct: true,
@@ -21,7 +25,11 @@ const cargo = {
   moduloId: true,
   periodo: true,
   moneda: true,
+  forma: true,
+  unidad: true,
   precioMensual: true,
+  minimoMensual: true,
+  cantidad: true,
   descuentoPct: true,
   diasCobrados: true,
   diasMes: true,
@@ -36,7 +44,11 @@ const cargo = {
 
 export type DatosCondicionCobro = {
   moneda: string;
+  forma: string;
+  unidad: string | null;
   precioMensual: number;
+  minimoMensual: number | null;
+  pasaACobro: boolean;
   cobroDesde: Date | null;
   pruebaHasta: Date | null;
   descuentoPct: number;
@@ -47,7 +59,11 @@ export type NuevoCargoCobro = {
   moduloId: string;
   periodo: Date;
   moneda: string;
+  forma: string;
+  unidad: string | null;
   precioMensual: number;
+  minimoMensual: number | null;
+  cantidad: number | null;
   descuentoPct: number;
   diasCobrados: number;
   diasMes: number;
@@ -60,6 +76,30 @@ export type FiltroCargos = { periodo?: Date; estado?: string };
 
 export function operacionesCobros(db: TenantTx, tenantId: string) {
   return {
+    /**
+     * Lo que se cuenta para el cobro por unidad, sin datos personales: el acceso de cada membresía
+     * activa (rol, permisos de su rol personalizado y excepciones), los trabajadores con vínculo
+     * laboral vigente y las instalaciones activas.
+     */
+    unidadesCobro: async () => ({
+      miembros: await db.membership.findMany({
+        where: { tenantId, estado: "activa" },
+        select: {
+          rol: true,
+          roleId: true,
+          rolTenant: { select: { permisos: true } },
+          excepciones: { select: { permiso: true, conceder: true } },
+        },
+      }),
+      trabajadores: (
+        await db.vinculoLaboral.findMany({
+          where: { tenantId, estado: "vigente" },
+          distinct: ["personaId"],
+          select: { personaId: true },
+        })
+      ).length,
+      instalaciones: await db.instalacion.count({ where: { tenantId, estado: "activa" } }),
+    }),
     condicionesCobro: () =>
       db.cobroCondicion.findMany({
         where: { tenantId },
