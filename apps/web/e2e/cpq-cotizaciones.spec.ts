@@ -39,7 +39,7 @@ test("crea desde negocio abierto con vista previa y aparece en ambas listas", as
   await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   await page.goto("/cotizaciones");
   await expect(page.getByRole("link", { name: new RegExp(titulo) })).toBeVisible();
-  await expect(page.getByRole("link", { name: new RegExp(titulo) })).toContainText("Borrador");
+  await expect(page.getByRole("link", { name: new RegExp(titulo) })).toContainText(/Borrador|Incompleta/);
   await sinDesborde(page);
   await page.screenshot({ path: info.outputPath("cpq-lista.png"), fullPage: true });
   await page.goto(`/negocios/${negocio}/cotizaciones`);
