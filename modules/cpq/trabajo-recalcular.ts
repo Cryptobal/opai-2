@@ -30,7 +30,8 @@ export const trabajoCpqRecalcularAntiguos = defineTrabajo({
   payload: z.object({ dia: z.string().optional() }),
   periodicidad: "diaria",
   async handler(ctx) {
-    let recalculadas = 0;
+    const ids: string[] = [];
+    const errores: Record<string, number> = {};
     let fallidas = 0;
     let despues: string | undefined;
     for (let i = 0; i < MAX_LOTES; i++) {
@@ -44,14 +45,22 @@ export const trabajoCpqRecalcularAntiguos = defineTrabajo({
       despues = lote.at(-1)!.id;
       for (const v of lote.filter((x) => calculoAntiguo(x.calculoCongeladoJson))) {
         try {
-          if (await recalcularVersion(ctx, v.cotizacionId, v.numero, true)) recalculadas++;
-        } catch {
+          await recalcularVersion(ctx, v.cotizacionId, v.numero, true);
+          // Solo cuenta lo que quedó guardado: una versión que salió de borrador durante el cálculo no se escribe.
+          const ahora = await ctx.db.cpqVersion.findFirst({ where: { id: v.id }, select: { calculoCongeladoJson: true } });
+          if (ahora && !calculoAntiguo(ahora.calculoCongeladoJson)) ids.push(v.id);
+        } catch (e) {
+          // Solo la clase del error (categórica): ni mensaje ni datos de la cotización.
           fallidas++;
+          const clase = e instanceof Error ? e.name : "desconocido";
+          errores[clase] = (errores[clase] ?? 0) + 1;
         }
       }
       if (lote.length < LOTE) break;
     }
-    // Una traza por corrida con solo los conteos (sin IDs de cotizaciones ni contenido), en su propia transacción.
+    const recalculadas = ids.length;
+    // Una traza por corrida, en su propia transacción: conteos, clases de error e IDs de las versiones
+    // recalculadas (UUID, hasta 200; sin contenido de la cotización).
     if (recalculadas > 0 || fallidas > 0)
       await ctx.transaccion(async (tx) => {
         await ctx.auditoria.registrar(tx, {
@@ -59,7 +68,7 @@ export const trabajoCpqRecalcularAntiguos = defineTrabajo({
           capability: "cpq.cotizaciones.recalcular_antiguos",
           actor: ctx.actor,
           entityType: "cotizacion",
-          payload: { recalculadas, fallidas },
+          payload: { recalculadas, fallidas, errores, versionIds: ids.slice(0, 200) },
         });
       });
     return { recalculadas, fallidas };
