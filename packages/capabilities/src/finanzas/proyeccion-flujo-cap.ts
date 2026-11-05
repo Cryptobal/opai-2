@@ -43,7 +43,7 @@ export const ventasProyeccionFlujo = defineCapability({
     const hoy = hoyChile();
     const desde = lunesDe(hoy);
     const hasta = sumarDiasCobro(desde, 7 * (input.semanas - 1));
-    const todos = await ingresosEsperados(ctx, hoy);
+    const todos = await ingresosEsperados(ctx, hoy, hasta);
     return { items: todos.filter((i) => i.semanaCobro >= desde && i.semanaCobro <= hasta) };
   },
 });

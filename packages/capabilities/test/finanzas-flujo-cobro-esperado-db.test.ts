@@ -130,6 +130,29 @@ describe.skipIf(omitirSuiteDb())("flujo · fecha esperada de cobro (db)", () => 
     expect((await proyeccion()).find((i) => i.documentoEmitidoId === f.id)).toMatchObject({ origenFecha: "vencimiento", semanaCobro: mas(lunes, 35) });
   });
 
+  it("solo las facturas 33 y 34 entran: una boleta o guía no se puede cobrar y no se proyecta; una fecha inválida se rechaza", async () => {
+    const boleta = await factura(tenantA, clienteA, { tipoDte: 39, fechaEmision: fecha(hoy), fechaVencimiento: fecha(mas(lunes, 14)) });
+    const guia = await factura(tenantA, clienteA, { tipoDte: 52, fechaEmision: fecha(hoy), fechaVencimiento: fecha(mas(lunes, 14)) });
+    const items = await proyeccion();
+    expect(items.some((i) => i.documentoEmitidoId === boleta.id || i.documentoEmitidoId === guia.id)).toBe(false);
+    const sobreBoleta = await run(tenantA, "finanzas.cobros.fijar_fecha_esperada", { documentoId: boleta.id, fecha: mas(lunes, 14) });
+    expect(sobreBoleta.ok).toBe(false);
+    const f = await factura(tenantA, clienteA, { fechaEmision: fecha(hoy), fechaVencimiento: fecha(mas(lunes, 14)) });
+    for (const mala of ["2026-02-30", "2026-13-45", "9999-12-31"]) {
+      const r = await run(tenantA, "finanzas.cobros.fijar_fecha_esperada", { documentoId: f.id, fecha: mala });
+      expect(r.ok, mala).toBe(false);
+    }
+    expect(await e.admin.flujoCobroEsperado.count({ where: { documentoId: f.id } })).toBe(0);
+  });
+
+  it("un borrador con emisión y sin vencimiento se proyecta por su emisión; sin ninguna fecha no se proyecta", async () => {
+    const conEmision = await factura(tenantA, clienteA, { estadoDte: "borrador", fechaEmision: fecha(mas(lunes, 21)), fechaVencimiento: null });
+    const sinFechas = await factura(tenantA, clienteA, { estadoDte: "borrador", fechaEmision: null, fechaVencimiento: null });
+    const items = await proyeccion();
+    expect(items.find((i) => i.documentoEmitidoId === conEmision.id)).toMatchObject({ origenFecha: "emision", semanaCobro: mas(lunes, 21) });
+    expect(items.some((i) => i.documentoEmitidoId === sinFechas.id)).toBe(false);
+  });
+
   it("no hay doble conteo: una programación con borrador del período cuenta una sola vez", async () => {
     const items = await proyeccion();
     const ids = items.filter((i) => i.documentoEmitidoId).map((i) => i.documentoEmitidoId);

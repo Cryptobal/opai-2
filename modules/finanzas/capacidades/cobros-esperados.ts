@@ -31,7 +31,7 @@ export async function celdasCobrosEsperados(
   semanas: readonly string[],
 ): Promise<{ dominio: CeldaFlujo[]; vista: z.infer<typeof celdaSchema>[] }> {
   const enRango = new Set(semanas);
-  const items = (await ingresosEsperados(ctx, hoyChile())).filter((i) => enRango.has(i.semanaCobro));
+  const items = (await ingresosEsperados(ctx, hoyChile(), semanas.at(-1))).filter((i) => enRango.has(i.semanaCobro));
   const dominio: CeldaFlujo[] = [];
   const vista: z.infer<typeof celdaSchema>[] = [];
   for (const i of items) {

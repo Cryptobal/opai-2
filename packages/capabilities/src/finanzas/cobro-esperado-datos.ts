@@ -20,6 +20,8 @@ export function hoyChile(ahora: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(ahora);
 }
 
+/** Solo las facturas (33 y 34) se cobran y concilian contra el banco; boletas, guías, ND y NC no entran al flujo. */
+const TIPOS_COBRABLES = [33, 34];
 const iso = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
 /** Meses de historia de facturas pagadas que cuentan para el promedio de pago de un cliente. */
 const MESES_HISTORIA_PROMEDIO = 24;
@@ -37,7 +39,7 @@ export async function promediosDePagoPorCliente(ctx: Contexto, hoy: string): Pro
     where: {
       estadoCobro: "pagada",
       estadoDte: { in: ["enviado", "aceptado"] },
-      tipoDte: { notIn: [56, 61] },
+      tipoDte: { in: TIPOS_COBRABLES },
       fechaEmision: { gte: new Date(`${desde}T00:00:00Z`) },
     },
     select: { id: true, cuentaId: true, fechaEmision: true },
@@ -72,12 +74,17 @@ export async function promediosDePagoPorCliente(ctx: Contexto, hoy: string): Pro
  * y períodos de programaciones sin borrador. Las cedidas y las notas de débito no cuentan; lo vencido va a la semana en
  * curso. Devuelve todo; quien llama filtra por horizonte.
  */
-export async function ingresosEsperados(ctx: Contexto, hoy: string = hoyChile()): Promise<IngresoEsperado[]> {
+export async function ingresosEsperados(
+  ctx: Contexto,
+  hoy: string = hoyChile(),
+  /** Última semana (lunes) que le interesa a quien llama: acota las programaciones que se calculan. */
+  hastaSemana?: string,
+): Promise<IngresoEsperado[]> {
   const lunesActual = lunesDe(hoy);
   const filas = await ctx.db.documentoEmitido.findMany({
     where: {
       estadoDte: { in: ["borrador", "enviado", "aceptado"] },
-      tipoDte: { notIn: [56, 61] },
+      tipoDte: { in: TIPOS_COBRABLES },
       AND: [{ OR: [{ cesionEstado: null }, { cesionEstado: { not: "cedido" } }] }],
       NOT: { estadoCobro: { in: ["pagada", "cedida"] } },
     },
@@ -121,7 +128,7 @@ export async function ingresosEsperados(ctx: Contexto, hoy: string = hoyChile())
   }
   const programadas = await ingresosDeProgramaciones(
     ctx,
-    sumarDiasCobro(lunesActual, 7 * 53),
+    hastaSemana ? sumarDiasCobro(hastaSemana, 7) : sumarDiasCobro(lunesActual, 7 * 53),
     (emision, vencimiento, cuentaId) => {
       const prom = promedios.get(cuentaId);
       return prom != null ? sumarDiasCobro(emision, prom) : vencimiento;

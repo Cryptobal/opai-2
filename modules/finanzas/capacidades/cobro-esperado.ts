@@ -6,7 +6,11 @@ import { semanaDeCobroEsperado } from "@opai/domain";
 import { PERMISO_GESTIONAR } from "./permisos";
 import { aFecha, lunesHoy } from "./util";
 
-const fechaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe ser AAAA-MM-DD.");
+const fechaIso = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe ser AAAA-MM-DD.")
+  .refine((f) => new Date(`${f}T00:00:00Z`).toISOString().slice(0, 10) === f, "La fecha no existe en el calendario.")
+  .refine((f) => f >= "2000-01-01" && f <= "2100-12-31", "La fecha debe estar entre los años 2000 y 2100.");
 
 export const cobroEsperadoFijar = defineCapability({
   id: "finanzas.cobros.fijar_fecha_esperada",
@@ -31,7 +35,7 @@ export const cobroEsperadoFijar = defineCapability({
       select: { id: true, tipoDte: true, estadoDte: true, estadoCobro: true, cesionEstado: true },
     });
     if (!doc) throw noEncontrado("Factura");
-    if (doc.tipoDte === 56 || doc.tipoDte === 61) throw reglaDeNegocio("Solo las facturas tienen fecha esperada de cobro.");
+    if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Solo las facturas (33 y 34) tienen fecha esperada de cobro.");
     if (doc.estadoCobro === "pagada" || doc.estadoCobro === "cedida" || doc.cesionEstado === "cedido")
       throw reglaDeNegocio("La factura ya está pagada o cedida: no se proyecta en el flujo.");
     if (!["borrador", "enviado", "aceptado"].includes(doc.estadoDte))
@@ -51,7 +55,8 @@ export const cobroEsperadoFijar = defineCapability({
           update: { fecha: aFecha(input.fecha) },
         });
       } else {
-        await tx.flujoCobroEsperado.deleteMany({ where: { documentoId: doc.id } });
+        const { count } = await tx.flujoCobroEsperado.deleteMany({ where: { documentoId: doc.id } });
+        if (count === 0) return; // ya estaba automática: nada cambió, no se emite el evento
       }
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.flujo.cobro_esperado_cambiado",

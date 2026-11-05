@@ -16,7 +16,12 @@
 ## Pruebas
 Dominio (`cobro-esperado.test.ts`); base (`finanzas-flujo-cobro-esperado-db.test.ts`): vencida → semana actual, pendiente neto de NC parcial, ND y cedida fuera, promedio con 3 facturas pagadas, fijar con vista previa que no escribe, aparece en la planilla y vuelve a la automática, otra empresa recibe «no encontrado». Se comprobó que el test de ND/cedida falla si la ND vuelve a contar.
 
+## Corregido tras la autorrevisión
+- Solo las facturas 33 y 34 entran al flujo, al promedio de pago y a la fecha manual: son las únicas que se concilian contra el banco; una boleta o una guía quedaban «por cobrar» para siempre. Fechas manuales validadas (calendario real, años 2000 a 2100). Las programaciones se calculan solo hasta la última semana pedida. El evento de cambio no se emite si volver a la automática no cambió nada.
+
 ## Pendiente
+- Semana en curso: si un cliente depositó esta semana y el abono aún no está conciliado, el saldo del banco ya lo incluye y la factura sigue «por cobrar» en «Cobros esperados» (se cuenta dos veces hasta conciliar). La cartola de la semana en curso no entra al cálculo. Se mitiga con la conciliación automática (ADR-074, bloque 7); un aviso en pantalla va en el PR C.
+- Un borrador o factura sin emisión ni vencimiento no se proyecta (sin fecha no hay semana); se aviará en pantalla en el PR C.
 - La edición de la fecha desde la traza de la celda (pantalla) va en el PR C junto con el diseño v4; hoy se hace por la capacidad (API/MCP).
 - El cálculo de las programaciones por período puede ser pesado con muchas programaciones activas (se limita a 200 y 60 períodos); si la planilla se nota lenta se cachea por lectura.
 - «Diferencia factoring» no se resta del saldo (adenda a ADR-073 en PR C).
