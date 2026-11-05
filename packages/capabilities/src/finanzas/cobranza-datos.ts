@@ -57,5 +57,5 @@ export async function idsDeApertura(ctx: Contexto, docs: { id: string }[]): Prom
     where: { entidad: "documento_cobrar", id20: { in: docs.map((d) => d.id) }, importacion: { versionContrato: "finanzas-apertura@1" } },
     select: { id20: true },
   });
-  return new Set(filas.map((f) => f.id20));
+  return new Set(filas.flatMap((f) => (f.id20 ? [f.id20] : [])));
 }

@@ -44,7 +44,6 @@ describe.skipIf(!urlPropietario)("flujo de caja: aviso idempotente en base real"
       where: { tenantId, semana: new Date(`${semana}T00:00:00Z`) },
     });
 
-  let filaIng = "";
   let filaEgr = "";
 
   beforeAll(async () => {
@@ -65,13 +64,6 @@ describe.skipIf(!urlPropietario)("flujo de caja: aviso idempotente en base real"
       avisoActivo: true,
       umbral: 50_000,
     });
-    filaIng = (
-      await ok<{ id: string }>("finanzas.filas.crear", {
-        seccion: "ingreso",
-        etiqueta: "Ingreso test",
-        arrastre: true,
-      })
-    ).id;
     filaEgr = (
       await ok<{ id: string }>("finanzas.filas.crear", {
         seccion: "egreso",
