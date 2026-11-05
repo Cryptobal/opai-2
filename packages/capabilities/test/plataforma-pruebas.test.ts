@@ -59,6 +59,7 @@ const condicion = {
 function contexto(
   opts: {
     rut?: boolean;
+    sinCondicion?: boolean;
     cond?: Record<string, unknown>;
     modulo?: string;
     usuario?: typeof owner | typeof support;
