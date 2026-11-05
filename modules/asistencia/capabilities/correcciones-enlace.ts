@@ -11,7 +11,7 @@ export const hashDeToken = (t: string) => createHash("sha256").update(t).digest(
 
 async function porEnlace(ctx: Contexto, token: string, rut: string | undefined) {
   const e = await ctx.db.correccionEnlace.findUnique({ where: { tokenHash: hashDeToken(token) } });
-  if (!e) throw noEncontrado("El enlace");
+  if (!e || e.venceEn.getTime() < Date.now()) throw noEncontrado("El enlace");
   const c = await ctx.db.correccion.findUnique({ where: { id: e.correccionId } });
   const p = c ? await ctx.db.persona.findUnique({ where: { id: c.personaId }, select: { rut: true } }) : null;
   // El enlace es la credencial y el RUT confirma quién responde: un RUT distinto responde igual que un enlace inexistente.

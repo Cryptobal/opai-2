@@ -23,11 +23,13 @@ export async function contextoPublico(slug: string, token: string) {
   // Lectura en cada petición: ni el rate limit ni la base se evalúan durante el prerender.
   await connection();
   const ip = ipDeCabeceras(await headers());
-  const [porToken, porIp] = await Promise.all([
+  const [porToken, porIp, porTokenSolo] = await Promise.all([
     permitir(`correccion-publica:${ip}:${token.slice(0, 12)}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs, { fallarCerrado: true }),
     permitir(`correccion-publica-ip:${ip}`, LIMITES.verificar.maximo * 2, LIMITES.verificar.ventanaMs, { fallarCerrado: true }),
+    // Tope por enlace sin importar la IP: frena probar RUT rotando de dirección.
+    permitir(`correccion-publica-enlace:${token.slice(0, 24)}`, LIMITES.verificar.maximo, LIMITES.verificar.ventanaMs * 10, { fallarCerrado: true }),
   ]);
-  if (!porToken || !porIp) return "limitada" as const;
+  if (!porToken || !porIp || !porTokenSolo) return "limitada" as const;
   const tenant = await tenantPorSlug(slug);
   if (!tenant) return null;
   const modulos = await fuentesReales.modulosActivos(tenant.id);

@@ -16,17 +16,17 @@ const destino = (ctx: Contexto, eventoId: string | null) => ({
 
 /** Alerta (idempotente por clave) de que el trabajador no tiene correo personal: aviso al empleador. */
 export async function alertarSinCorreo(ctx: Contexto, personaId: string, nombre: string, dia: string) {
-  const r = await ctx.db.alerta.createMany({
-    data: [{ tenantId: ctx.tenantId, tipo: "sin_correo_personal", clave: `${personaId}:${dia}`, personaId, datos: { nombre } }],
-    skipDuplicates: true,
-  });
-  if (r.count === 0) return;
-  await ctx.transaccion((tx) =>
-    ctx.eventos.emitir(tx, {
+  await ctx.transaccion(async (tx) => {
+    const r = await tx.alerta.createMany({
+      data: [{ tenantId: ctx.tenantId, tipo: "sin_correo_personal", clave: `${personaId}:${dia}`, personaId, datos: { nombre } }],
+      skipDuplicates: true,
+    });
+    if (r.count === 0) return;
+    await ctx.eventos.emitir(tx, {
       tipo: "asistencia.alerta.sin_correo_personal", entidadTipo: "persona", entidadId: personaId,
       payload: { trabajador: { nombre }, url: `${ctx.servicios.urlBase}/personas/${personaId}` },
-    }),
-  );
+    });
+  });
 }
 
 /**

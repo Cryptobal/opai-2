@@ -20,13 +20,16 @@ async function emitir(
   ctx: Contexto, tipo: Tipo, clave: string, personaId: string,
   refs: { instalacionId?: string; turnoEsperadoId?: string }, datos: Record<string, unknown>,
 ): Promise<boolean> {
-  const r = await ctx.db.alerta.createMany({
-    data: [{ tenantId: ctx.tenantId, tipo, clave, personaId, datos: datos as never, ...refs }], skipDuplicates: true,
+  // La alerta y su evento van en la misma transacción: si falla el evento, la clave única no queda tomada.
+  const emitido = await ctx.transaccion(async (tx) => {
+    const r = await tx.alerta.createMany({
+      data: [{ tenantId: ctx.tenantId, tipo, clave, personaId, datos: datos as never, ...refs }], skipDuplicates: true,
+    });
+    if (r.count === 0) return false;
+    await ctx.eventos.emitir(tx, { tipo: EVENTO[tipo], entidadTipo: "persona", entidadId: personaId, payload: { personaId, tipo, clave, ...datos } });
+    return true;
   });
-  if (r.count === 0) return false;
-  await ctx.transaccion((tx) =>
-    ctx.eventos.emitir(tx, { tipo: EVENTO[tipo], entidadTipo: "persona", entidadId: personaId, payload: { personaId, tipo, clave, ...datos } }),
-  );
+  if (!emitido) return false;
   return true;
 }
 

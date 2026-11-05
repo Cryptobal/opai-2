@@ -43,6 +43,10 @@ export const correccionesProponer = defineCapability({
     const clave = idempotencyKey ?? randomUUID();
     return ctx.transaccion(async (tx) => {
       const { siguienteSeq, hashAnterior } = await bloquearCadena(tx, ctx.tenantId, "correcciones");
+      // Con la cadena bloqueada: dos propuestas simultáneas sobre la misma marca no pasan las dos.
+      const previas = await tx.correccion.findMany({ where: { marcaId: marca.id }, select: { id: true } });
+      if (previas.length && (await tx.correccionRespuesta.count({ where: { correccionId: { in: previas.map((c) => c.id) } } })) < previas.length)
+        throw conflicto("Esta marca ya tiene una corrección pendiente de respuesta.");
       const registro = {
         tenantId: ctx.tenantId, seq: siguienteSeq, marcaId: marca.id, personaId: marca.personaId,
         horaPropuesta, tipoPropuesto: i.tipoPropuesto, motivo: i.motivo, propuestaPorId: usuarioId(ctx),
