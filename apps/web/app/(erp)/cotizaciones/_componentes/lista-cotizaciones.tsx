@@ -5,10 +5,10 @@ import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { conBusqueda } from "@/lib/parametros";
-import { estadoCpqBadge } from "@/lib/cpq-presentacion";
+import { semaforoEtiqueta } from "@/lib/cpq-presentacion";
 
 import type { DatosCotizaciones } from "./datos";
-import { margenLista, ventaLista } from "./lista-cotizaciones-helpers";
+import { estadoLista, margenLista, pideRecalcular, ventaLista } from "./lista-cotizaciones-helpers";
 
 /** Columna izquierda del patrón lista y ficha (CAR-141). */
 export function ListaCotizaciones({
@@ -61,7 +61,7 @@ export function ListaCotizaciones({
         ) : undefined
       }
       filas={d.items.map((c) => {
-        const e = estadoCpqBadge(c.version?.estado ?? "borrador");
+        const e = estadoLista(c);
         const margen = margenLista(c, d.costos);
         return {
           id: c.id,
@@ -82,6 +82,7 @@ export function ListaCotizaciones({
             <span className="t-caption">
               v{c.version?.numero ?? "—"} · {ventaLista(c)}
               {margen ? ` · Margen ${margen}` : null}
+              {pideRecalcular(c, d.costos) ? " · Recalcular" : null}
             </span>
           ),
           fin: (
@@ -98,7 +99,7 @@ export function ListaCotizaciones({
                   }
                   punto
                 >
-                  {c.resumenCalculo.semaforo}
+                  {semaforoEtiqueta(c.resumenCalculo.semaforo)}
                 </Badge>
               ) : null}
             </div>

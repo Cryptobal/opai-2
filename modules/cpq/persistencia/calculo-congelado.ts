@@ -58,7 +58,7 @@ function fallbackCongelado(
   };
 }
 
-function esResultadoCalculoCompleto(parsed: unknown): parsed is ResultadoCalculo {
+export function esResultadoCalculoCompleto(parsed: unknown): parsed is ResultadoCalculo {
   if (!parsed || typeof parsed !== "object") return false;
   const o = parsed as Record<string, unknown>;
   return (

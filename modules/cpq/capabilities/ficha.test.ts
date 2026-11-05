@@ -266,7 +266,7 @@ describe("márgenes sin configurar en la ficha (CAR-192)", () => {
     const { ctx } = ctxGestor(true);
     for (const [clave, valor] of Object.entries(configurar ?? {}))
       await ctx.db.ajuste.create({
-        data: { modulo: "cpq", clave, ambito: "tenant", sujetoId: ctx.tenantId, valor },
+        data: { tenantId: ctx.tenantId, modulo: "cpq", clave, ambito: "tenant", sujetoId: ctx.tenantId, valor },
       });
     const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Márgenes" });
     if (!c.ok) throw new Error("fixture");

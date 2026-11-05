@@ -22,8 +22,12 @@ export type CotizacionFila = {
         semaforo?: "verde" | "amarillo" | "rojo";
         margenEfectivoPct?: number;
         costoPendiente: boolean;
+        /** Falso si el cálculo guardado es antiguo o dudoso: se pide recalcular en vez de mostrar un margen. */
+        calculoConfiable: boolean;
       }
     | undefined;
+  /** El mismo estado único de la ficha; null si el cálculo guardado no basta para decidirlo. */
+  estadoFicha: { estado: string; etiqueta: string } | null;
   version: {
     numero: number;
     estado: string;
@@ -73,6 +77,7 @@ export async function cargarCotizaciones(
           vigente: c.vigente,
           alternativaDeId: c.alternativaDeId,
           resumenCalculo: c.resumenCalculo ?? undefined,
+          estadoFicha: c.estadoFicha,
           version: c.version
             ? {
                 numero: c.version.numero,
