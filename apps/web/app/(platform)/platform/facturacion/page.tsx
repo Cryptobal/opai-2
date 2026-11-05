@@ -52,6 +52,7 @@ export default function Facturacion({ searchParams }: { searchParams: SearchPara
                   {
                     param: "mes",
                     etiqueta: "Mes",
+                    porDefecto: actual,
                     opciones: mesesRecientes(actual).map((m) => ({
                       valor: m,
                       etiqueta: m === actual ? `${nombreMes(m)} (en curso)` : nombreMes(m),

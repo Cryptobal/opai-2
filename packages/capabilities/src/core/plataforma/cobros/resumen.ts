@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_PLATAFORMA } from "@opai/domain";
+import { esParteFinanzas, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../../../define";
 import { noEncontrado } from "../../../errores";
@@ -22,15 +22,28 @@ import {
 const moduloSchema = z.object({
   moduloId: z.string(),
   nombre: z.string(),
+  incluidoEnBase: z
+    .boolean()
+    .describe("Viene en el plan base: no tiene precio aparte ni se factura por separado."),
   estado: z.string().nullable().describe("Estado del módulo en la empresa; null: no contratado."),
   condicion: condicionSchema.nullable(),
   calculo: calculoSchema,
   cargo: cargoSchema.nullable().describe("Cargo vigente del mes, si ya se generó."),
 });
 
-/** El plan base cuenta como contratado mientras la empresa no esté suspendida. */
-const esContratado = (m: { estado: string | null }) =>
-  m.estado === "activo" || m.estado === "trial";
+/**
+ * Contratado y cobrable: lo incluido en el plan base no cuenta, y una parte de Finanzas solo cuenta
+ * si tiene su propia condición (si no, heredaría el estado del módulo en las siete).
+ */
+const esContratado = (m: {
+  estado: string | null;
+  moduloId: string;
+  incluidoEnBase: boolean;
+  condicion: unknown;
+}) =>
+  (m.estado === "activo" || m.estado === "trial") &&
+  !m.incluidoEnBase &&
+  (!esParteFinanzas(m.moduloId) || m.condicion !== null);
 
 const pruebaSchema = z.object({
   moduloId: z.string(),

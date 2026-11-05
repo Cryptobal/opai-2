@@ -1,5 +1,6 @@
 import type { Capacidad } from "../../types";
 import { platformAuditoriaList } from "./auditoria-lista";
+import { capacidadesCatalogo } from "./catalogo";
 import { capacidadesCobros } from "./cobros";
 import { platformPreciosList, platformPreciosSet } from "./precios";
 import { platformTenantPanel } from "./tenant-panel";
@@ -24,4 +25,5 @@ export const capacidadesPlataforma: readonly Capacidad[] = [
   platformUsuariosBorrar,
   platformAuditoriaList,
   ...capacidadesCobros,
+  ...capacidadesCatalogo,
 ];

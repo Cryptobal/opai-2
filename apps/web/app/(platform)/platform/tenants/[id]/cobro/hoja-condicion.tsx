@@ -6,7 +6,11 @@ import { Alerta, avisar, Button, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { Calculo, ModuloCobro } from "../../../facturacion/_componentes/cobro";
+import type {
+  Calculo,
+  ModuloCobro,
+  PrecioListaVista,
+} from "../../../facturacion/_componentes/cobro";
 import { CamposCondicion } from "./campos-condicion";
 import { formulario, type Formulario, VistaPreviaCobro } from "./vista-previa-cobro";
 
@@ -39,12 +43,14 @@ const entrada = (tenantId: string, moduloId: string, f: Formulario | null) => ({
 export function HojaCondicion(props: {
   tenantId: string;
   modulo: ModuloCobro | null;
+  /** Precio de lista del catálogo: rellena la hoja si la empresa aún no tiene condición. */
+  lista?: PrecioListaVista | null;
   onCerrar: () => void;
 }) {
-  const { tenantId, modulo, onCerrar } = props;
+  const { tenantId, modulo, onCerrar, lista = null } = props;
   // Un solo hook: guardar y la vista previa comparten `ejecutar` (el gate de paridad lee su id literal).
   const { ejecutar, pendiente, error } = useCapacidad("platform");
-  const [f, setF] = useState<Formulario>(() => formulario(modulo?.condicion ?? null));
+  const [f, setF] = useState<Formulario>(() => formulario(modulo?.condicion ?? null, lista));
   const [calculo, setCalculo] = useState<Calculo | null>(null);
   const [quitar, setQuitar] = useState(false);
   const moduloId = modulo?.moduloId ?? "";
@@ -81,7 +87,7 @@ export function HojaCondicion(props: {
       abierto={Boolean(modulo)}
       onCerrar={onCerrar}
       titulo={modulo ? `Cobro de ${modulo.nombre}` : "Cobro"}
-      descripcion="Precio de este módulo para esta empresa: fijo al mes, o por unidad según lo que se cuente. No se emite ninguna factura."
+      descripcion={`Precio de este módulo para esta empresa: fijo al mes, o por unidad según lo que se cuente. No se emite ninguna factura.${!modulo?.condicion && lista ? " Parte del precio de lista; el de esta empresa manda." : ""}`}
       acciones={
         <>
           {modulo?.condicion ? (

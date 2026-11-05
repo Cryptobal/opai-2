@@ -8,6 +8,8 @@ export type Filtro = {
   param: string;
   etiqueta: string;
   opciones: readonly { valor: string; etiqueta: string }[];
+  /** Opción que rige cuando la URL no trae el parámetro: el disparador la nombra («Mes: …»). */
+  porDefecto?: string;
 };
 
 /** Chips de filtro por URL: activo como chip con quitar; inactivo como chip punteado con menú. */
@@ -40,7 +42,11 @@ export function ChipsFiltro({
             etiqueta={`Filtrar por ${f.etiqueta.toLowerCase()}`}
             lado="abajo-izquierda"
             claseDisparador="h-11 min-h-11 rounded-full md:h-8 md:min-h-8 border border-dashed border-border-strong bg-surface px-3 text-sm font-medium text-fg-muted"
-            disparador={f.etiqueta}
+            disparador={
+              f.porDefecto && f.opciones.some((o) => o.valor === f.porDefecto)
+                ? `${f.etiqueta}: ${f.opciones.find((o) => o.valor === f.porDefecto)?.etiqueta}`
+                : f.etiqueta
+            }
             items={f.opciones.map((o) => ({
               id: o.valor,
               etiqueta: o.etiqueta,

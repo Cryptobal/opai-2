@@ -62,10 +62,35 @@ export type Cargo = {
 export type ModuloCobro = {
   moduloId: string;
   nombre: string;
+  /** Viene en el plan base: sin precio aparte, se muestra «Incluido en el plan base». */
+  incluidoEnBase: boolean;
   estado: string | null;
   condicion: Condicion | null;
   calculo: Calculo;
   cargo: Cargo | null;
+};
+
+/** Precio de lista de un cobrable (`platform.catalogo.list`): rellena la hoja Cobro de una empresa. */
+export type PrecioListaVista = {
+  moneda: Moneda;
+  forma: Forma;
+  unidad: UnidadCobro | null;
+  precio: number;
+  minimoMensual: number | null;
+};
+
+export type EntradaCatalogo = {
+  id: string;
+  nombre: string;
+  incluye: string;
+  grupo: "base" | "modulo" | "finanzas" | "parte_finanzas";
+  incluidoEnBase: boolean;
+  formaSugerida: Forma | null;
+  unidadSugerida: UnidadCobro | null;
+  dependenciasTexto: string[];
+  precioLista: PrecioListaVista | null;
+  textoPrecio: string | null;
+  version: number;
 };
 
 export type PruebaCobro = {
@@ -138,6 +163,8 @@ export function textoCondicion(c: Condicion): string {
   if (c.descuentoPct) partes.push(`${formatearPorcentaje(c.descuentoPct)} de descuento`);
   return partes.join(" · ");
 }
+
+export const TEXTO_INCLUIDO_EN_BASE = "Incluido en el plan base";
 
 export const ESTADOS_MODULO: Record<string, string> = {
   activo: "Activo",

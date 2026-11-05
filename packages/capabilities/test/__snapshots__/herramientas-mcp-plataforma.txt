@@ -4,6 +4,8 @@ platform_ajustes_set
 platform_auditoria_estado
 platform_auditoria_list
 platform_bitacora_estado
+platform_catalogo_list
+platform_catalogo_precio_set
 platform_cobros_cargo_anular
 platform_cobros_cargos_generar
 platform_cobros_cargos_list
@@ -33,6 +35,7 @@ platform_users_list
 platform_users_set_role
 preview_platform_admins_invite
 preview_platform_ajustes_set
+preview_platform_catalogo_precio_set
 preview_platform_cobros_cargo_anular
 preview_platform_cobros_cargos_generar
 preview_platform_cobros_condiciones_set
