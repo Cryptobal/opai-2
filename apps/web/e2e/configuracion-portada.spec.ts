@@ -89,7 +89,7 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
     await expect(async () => {
       await campo.fill("");
       await campo.fill("feriados");
-      await expect(resultado.first()).toBeVisible();
+      await expect(resultado.first()).toBeVisible({ timeout: 3_000 });
     }).toPass({ timeout: 15_000 });
     await resultado.first().click();
     await page.waitForURL(/\/configuracion\/calendario$/);
@@ -98,7 +98,7 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
       const busqueda = page.getByRole("searchbox", { name: "Buscar un ajuste" });
       await busqueda.fill("");
       await busqueda.fill("zxqwk");
-      await expect(page.getByText(/No encontramos/)).toBeVisible();
+      await expect(page.getByText(/No encontramos/)).toBeVisible({ timeout: 3_000 });
     }).toPass({ timeout: 15_000 });
   });
 
