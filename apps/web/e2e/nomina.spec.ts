@@ -19,11 +19,18 @@ async function conPeriodo(page: Page) {
     page.getByText("Aún no hay períodos").or(page.getByRole("region", { name: "Lista de períodos" })).first(),
   ).toBeVisible();
   if (await page.getByText("Aún no hay períodos").isVisible()) {
-    const abrir = page.getByRole("button", { name: "Abrir período" }).first();
+    // En teléfono las acciones del shell no se muestran (solo `accionesTelefono`) y la base limpia del CI
+    // no trae período: se abre desde un ancho de iPad y se vuelve al ancho del proyecto.
+    const original = page.viewportSize();
+    const ancho = original !== null && original.width < 1024;
+    if (ancho) await page.setViewportSize({ width: 1024, height: 768 });
+    const abrir = page.getByRole("button", { name: "Abrir período" }).filter({ visible: true }).first();
+    await expect(abrir).toBeVisible();
     await hidratado(abrir);
     await abrir.click();
     await page.getByRole("dialog").getByRole("button", { name: "Abrir", exact: true }).click();
-    await expect(page.getByText("Abierto").first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Abierto").filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
+    if (ancho && original) await page.setViewportSize(original);
   }
 }
 
