@@ -9,6 +9,7 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { PERMISO_CONFIG, PERMISO_READ } from "./comun";
 import { configPlanSchema } from "./seguimiento-comun";
+import { validarEtapasDelPlan } from "./seguimiento-etapas";
 
 const DISPARADORES_V1 = ["cotizacion_enviada", "manual"] as const;
 const planSchema = z.object({
@@ -64,6 +65,7 @@ export const seguimientoPlanesGuardar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const errores = validarConfigPlan(input.config);
     if (errores.length) throw reglaDeNegocio(errores.join(" "));
+    await validarEtapasDelPlan(ctx, input.config);
     const actual = input.id ? await ctx.db.planSeguimiento.findUnique({ where: { id: input.id } }) : null;
     if (input.id && !actual) throw noEncontrado("El plan");
     const repetido = await ctx.db.planSeguimiento.findFirst({

@@ -19,4 +19,21 @@ describe("aplicarRespuesta · evento cliente_respondio", () => {
     expect(avisos).toHaveLength(1);
     expect((await ctx.db.seguimiento.findUnique({ where: { id: fila.id } }))?.estado).toBe("pausado");
   });
+
+  it("pausa manual antes de la primera respuesta: igual avisa una vez, y las siguientes no repiten", async () => {
+    const { ctx, tabla } = contextoDePrueba({ modulosActivos: ["comercial"] });
+    const fila = await ctx.db.seguimiento.create({
+      data: { tenantId: ctx.tenantId, negocioId: "n2", planId: "p1", planVersion: 1, estado: "pausado", motivo: "manual", ancla: new Date(), token: "tok-2" },
+    });
+    const config = { alResponder: "pausar" } as never;
+    for (const n of [1, 2, 3]) {
+      const s = (await ctx.db.seguimiento.findUnique({ where: { id: fila.id } }))!;
+      await ctx.transaccion((tx) => aplicarRespuesta(ctx, tx, s, config, { titulo: `Respuesta ${n}` }));
+    }
+    const avisos = tabla("evento").filter((e) => e["tipo"] === "comercial.seguimiento.cliente_respondio");
+    expect(avisos).toHaveLength(1);
+    const final = await ctx.db.seguimiento.findUnique({ where: { id: fila.id } });
+    expect(final?.estado).toBe("pausado");
+    expect(final?.motivo).toBe("cliente_respondio");
+  });
 });
