@@ -13,6 +13,7 @@
   "dependencies": {
     "@opai/capabilities": "workspace:*",
     "@opai/mod-agente": "workspace:*",
+    "@opai/mod-asistencia": "workspace:*",
     "@opai/mod-comercial": "workspace:*",
     "@opai/mod-cpq": "workspace:*",
     "@opai/mod-finanzas": "workspace:*",
