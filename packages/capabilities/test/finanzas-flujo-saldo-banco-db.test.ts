@@ -65,6 +65,10 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
     filaCliente = (await ok<{ id: string }>("finanzas.filas.crear", { seccion: "ingreso", etiqueta: "Cliente QA", arrastre: false })).id;
     const conSaldo = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco con saldo", numeroVisible: "0001", activa: true, saldoBanco: 10_000_000n } });
     const sinSaldo = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco sin saldo", numeroVisible: "0002", activa: true } });
+    // Saldo de ayer: un movimiento de hoy es posterior y ese saldo no lo incluye (no se resta de la apertura).
+    const desfasado = await e.admin.cuentaBancaria.create({
+      data: { tenantId, banco: "Banco desfasado", numeroVisible: "0004", activa: true, saldoBanco: 4_000_000n, saldoBancoEn: new Date(`${mas(hoyIso(), -1)}T15:00:00Z`) },
+    });
     const inactiva = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco inactivo", numeroVisible: "0003", activa: false, saldoBanco: 5_000_000n } });
     movTardio = (await mov(mas(semAnt, 2), 2_000_000, "Abono cliente", conSaldo.id)).id; // semana pasada, sin conciliar
     await mov(mas(semAnt2, 1), -500_000, "Pago varios", conSaldo.id); // dos semanas atrás
@@ -73,6 +77,7 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
     await mov(hoyIso(), -111_111, "Cargo cuenta sin saldo", sinSaldo.id);
     await mov(hoyIso(), -222_222, "Cargo cuenta inactiva", inactiva.id);
     await mov(mas(hoyIso(), 3), -777_777, "Cargo con fecha futura", conSaldo.id);
+    await mov(hoyIso(), -400_000, "Cargo posterior al saldo", desfasado.id);
     const cuenta = await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente QA", rut: "77000002-7" } });
     docId = (
       await e.admin.documentoEmitido.create({
@@ -87,11 +92,12 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
   it("el saldo parte del saldo del banco de hoy: hacia atrás con la cartola, y avisa la cuenta sin saldo", async () => {
     const p = await planilla();
     const porSemana = new Map(p.semanas.map((s) => [s.semana, s]));
-    // Apertura de la semana en curso = saldo del banco (10.000.000) − lo ya movido esta semana (−300.000).
-    expect(porSemana.get(lunes)?.saldoInicial).toBe(10_300_000);
-    expect(porSemana.get(semAnt)).toMatchObject({ ingresos: 2_000_000, egresos: 0, saldoFinal: 10_300_000, saldoInicial: 8_300_000, pasada: true });
-    expect(porSemana.get(semAnt2)).toMatchObject({ ingresos: 0, egresos: 500_000, saldoFinal: 8_300_000, saldoInicial: 8_800_000 });
-    expect(p.saldoBanco).toMatchObject({ fuente: "banco", saldo: 10_000_000 });
+    // Apertura de la semana en curso = Σ por cuenta de (saldo − lo movido esta semana hasta la fecha de ese saldo):
+    // (10.000.000 + 300.000) de la cuenta al día + 4.000.000 de la desfasada, cuyo saldo es de ayer y no incluye lo de hoy.
+    expect(porSemana.get(lunes)?.saldoInicial).toBe(14_300_000);
+    expect(porSemana.get(semAnt)).toMatchObject({ ingresos: 2_000_000, egresos: 0, saldoFinal: 14_300_000, saldoInicial: 12_300_000, pasada: true });
+    expect(porSemana.get(semAnt2)).toMatchObject({ ingresos: 0, egresos: 500_000, saldoFinal: 12_300_000, saldoInicial: 12_800_000 });
+    expect(p.saldoBanco).toMatchObject({ fuente: "banco", saldo: 14_000_000 });
     expect(p.saldoBanco.cuentasSinSaldo.map((c) => c.banco)).toEqual(["Banco sin saldo"]);
     // El saldo inicial manual de los ajustes (999) ya no manda.
     expect(p.semanas.every((s) => s.saldoInicial !== 999)).toBe(true);

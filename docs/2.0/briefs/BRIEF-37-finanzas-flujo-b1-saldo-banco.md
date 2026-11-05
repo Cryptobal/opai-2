@@ -14,8 +14,9 @@ Dominio y módulo existentes en verde; `finanzas-flujo-saldo-banco-db.test.ts` (
 ## Corregido tras la autorrevisión
 - La apertura de la semana resta solo los movimientos de las cuentas que suman en el saldo del banco (activas y con saldo) y solo hasta hoy; los de cuentas inactivas o sin saldo, y los de fecha futura, no la corren. Test con las tres situaciones (falla sin el filtro: 11.411.110 en vez de 10.300.000).
 
+- **Fecha del saldo por cuenta (N1 del Revisor).** Columna aditiva `finanzas.cuentas_bancarias.saldo_banco_en` (migración `20261107150000_finanzas_cuenta_bancaria_saldo_banco_en`, rellenada desde `ultima_sync_en`); la sincronización de Web4Leads la guarda con el `asOf` que informa el banco. `saldoDelBanco` toma, por cuenta, la fuente más reciente entre ese saldo y el saldo posterior del último movimiento de la cartola, y la apertura de la semana resta solo lo movido hasta la fecha de ese saldo: lo posterior no estaba en él. Test con una cuenta de saldo de ayer y un movimiento de hoy.
+
 ## Pendiente
-- `saldoDelBanco` prefiere el saldo de Web4Leads sobre el saldo posterior de la cartola sin comparar fechas: si el primero es anterior a movimientos de esta semana, la apertura resta movimientos que el saldo no incluía. Se resuelve cuando el saldo de cada cuenta lleve su fecha de corte.
 - `saldoDelBanco` hace una consulta por cuenta (pocas cuentas por empresa); se junta en una sola si molesta.
 - La migración no distingue un ajuste nunca tocado de uno donde alguien eligió umbral 0 con el aviso apagado a propósito: ese caso pasa a $15.000.000 con aviso activo. El bot toma el respaldo de Neon antes de aplicarla. Las excepciones por usuario que denegaban `finanzas:flujo.cerrar` también se borran (el permiso ya no existe).
 - Tests por agregar en B2: domingo y lunes con la hora de Chile, vista previa de «Reprogramar», movimientos «por_autorizar» y «sugerido», conciliación parcial.

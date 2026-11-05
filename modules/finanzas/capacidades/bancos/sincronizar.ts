@@ -64,6 +64,13 @@ function saldoReportado(i: SincronizarInput): number | null {
   return ordenados.at(-1)?.saldoDespues ?? null;
 }
 
+/** Cuándo corresponde ese saldo: el `al` que informa el banco o la fecha del movimiento que lo trae (null = ahora). */
+function fechaSaldoReportado(i: SincronizarInput): Date | null {
+  const crudo = i.saldoCuenta ? i.saldoCuenta.al : i.movimientos.filter((m) => m.saldoDespues != null).map((m) => m.fecha).sort().at(-1);
+  const fecha = crudo ? new Date(crudo) : null;
+  return fecha && !Number.isNaN(fecha.getTime()) ? fecha : null;
+}
+
 export async function sincronizarMovimientos(ctx: Contexto, input: SincronizarInput, dryRun: boolean): Promise<Salida> {
   const cuenta = await resolverCuenta(ctx, input.numeroCuenta, input.codigoBanco);
   if (!cuenta) return sinCuenta;
@@ -98,7 +105,7 @@ export async function sincronizarMovimientos(ctx: Contexto, input: SincronizarIn
   const saldoBanco = saldoReportado(input);
   const base = { reconocida: true, cuentaId: cuenta.id, duplicados, sospechosos, saldoBanco };
   if (dryRun) return { ...base, nuevos: nuevos.length };
-  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, duplicados, sospechosos, saldoBanco });
+  const insertados = await aplicarSincronizacion(ctx, { cuentaId: cuenta.id, nuevos, duplicados, sospechosos, saldoBanco, saldoBancoEn: fechaSaldoReportado(input) });
   return { ...base, nuevos: insertados };
 }
 

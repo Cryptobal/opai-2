@@ -448,6 +448,8 @@ model CuentaBancaria {
   ultimaSyncEn   DateTime? @map("ultima_sync_en") @db.Timestamptz(6)
   /// Saldo que reportó el banco en esa sincronización (CLP); el ledger de movimientos manda.
   saldoBanco     BigInt?  @map("saldo_banco")
+  /// Cuándo reportó el banco ese saldo; la apertura del flujo resta lo movido hasta esa fecha (ADR-073).
+  saldoBancoEn   DateTime? @map("saldo_banco_en") @db.Timestamptz(6)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

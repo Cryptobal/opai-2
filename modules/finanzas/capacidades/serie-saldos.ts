@@ -64,17 +64,21 @@ export async function serieSaldos(
     filas: [...cargado.dominio, ...FILAS_VIRTUALES_DOMINIO],
     celdas: celdasCalc,
   };
-  // Saldo al comenzar la semana en curso = saldo del banco − lo ya movido esta semana (hasta hoy) en las cuentas que
-  // suman en ese saldo: las inactivas o sin saldo no lo componen, y lo que lleve fecha futura aún no pasó.
+  // Saldo al comenzar la semana en curso: por cada cuenta que suma en el saldo del banco, su saldo menos lo movido
+  // esta semana hasta la fecha de ESE saldo (lo posterior no está en él) y no más allá de hoy.
   const movidos = await db.movimientoBancario.findMany({
     where: {
       estado: { not: "ignorado" },
-      cuentaId: { in: banco.cuentaIdsConSaldo },
+      cuentaId: { in: banco.cuentasConSaldo.map((c) => c.cuentaId) },
       fecha: { gte: aFecha(hoy), lte: aFecha(hoyIso()) },
     },
-    select: { monto: true },
+    select: { cuentaId: true, fecha: true, monto: true },
   });
-  const aperturaSemana = banco.saldo - movidos.reduce((t, m) => t + aNumeroSeguro(m.monto), 0);
+  const corte = new Map(banco.cuentasConSaldo.map((c) => [c.cuentaId, c.fecha] as const));
+  const yaIncluido = movidos
+    .filter((m) => aIso(m.fecha) <= (corte.get(m.cuentaId) ?? ""))
+    .reduce((t, m) => t + aNumeroSeguro(m.monto), 0);
+  const aperturaSemana = banco.saldo - yaIncluido;
   const inicialSinAncla = calcularPlanilla({ ...base, saldoInicial: 0 }).find((s) => s.semana === hoy)?.saldoInicial ?? 0;
   const calc = calcularPlanilla({ ...base, saldoInicial: aperturaSemana - inicialSinAncla });
 
