@@ -153,12 +153,14 @@ test.describe("fichas en un solo panel bajo 1024 px", () => {
       await expect(page.locator("header h1:visible")).toHaveCount(1, { timeout: 30_000 });
       await page.waitForLoadState("networkidle");
       // El título conserva su sitio (no lo aplasta la acción principal) y nada se pisa ni se corta.
-      // Se espera a que el título tome su ancho final (mientras carga la ficha puede verse más angosto).
+      // El título conserva su sitio: tiene ancho y su texto no queda cortado (un nombre corto mide poco, pero cabe).
       await expect
-        .poll(async () => (await page.locator("header h1:visible").boundingBox())?.width ?? 0, {
-          message: ruta,
-        })
-        .toBeGreaterThan(40);
+        .poll(
+          async () =>
+            page.locator("header h1:visible").evaluate((h) => h.getBoundingClientRect().width > 0 && h.scrollWidth <= h.clientWidth + 1),
+          { message: ruta },
+        )
+        .toBe(true);
       expect(await sinDesborde(page), ruta).toBe(true);
       expect(await fueraDeVentana(page), ruta).toEqual([]);
       expect(await solapes(page), ruta).toEqual([]);
