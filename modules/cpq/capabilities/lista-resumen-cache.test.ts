@@ -27,7 +27,9 @@ describe("calculoCongeladoJson en lista (C-1)", () => {
     const ficha = await executeCapability(h.ctx, "cpq.cotizaciones.ficha", { id });
     if (!ficha.ok) throw new Error("ficha");
     const sec = (ficha.data as { secciones: { id: string }[] }).secciones[0]!;
-    await executeCapability(h.ctx, "cpq.lineas.crear", {
+    // El sueldo solo se ingresa con cpq:costos.ver: sin él la línea quedaba con costo pendiente (margen 0).
+    const conCostos = { ...h.ctx, autorizar: (p: string) => GESTOR_COSTOS.includes(p) };
+    await executeCapability(conCostos, "cpq.lineas.crear", {
       seccionId: sec.id,
       tipo: "puesto",
       nombre: "Guardia",
@@ -41,11 +43,10 @@ describe("calculoCongeladoJson en lista (C-1)", () => {
       margenEfectivoPct?: number;
       advertencias?: unknown;
     };
-    expect(cache.semaforo).toMatch(/verde|amarillo|rojo/);
+    expect(cache.semaforo).toBe("verde");
     expect(typeof cache.margenEfectivoPct).toBe("number");
     expect(Array.isArray(cache.advertencias)).toBe(true);
 
-    const conCostos = { ...h.ctx, autorizar: (p: string) => GESTOR_COSTOS.includes(p) };
     const lista = await executeCapability(conCostos, "cpq.cotizaciones.list", { negocioId: NEGOCIO_1 });
     expect(lista).toMatchObject({
       ok: true,

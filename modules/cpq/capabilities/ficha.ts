@@ -97,6 +97,8 @@ export const cotizacionesFicha = defineCapability({
               mesesPactados: version.mesesContrato !== null,
               margenModo: version.margenModo,
               margenObjetivoPct: version.margenObjetivoPct ?? margenes?.objetivoPct ?? null,
+              margenMinimoPct: margenes?.minimoPct ?? 0,
+              margenAlertaPct: margenes?.alertaPct ?? 0,
               sobrescrito: version.instrumentosJson !== null,
               instrumentos: leerInstrumentos(version.instrumentosJson) ?? INSTRUMENTOS_DEFECTO,
             },
