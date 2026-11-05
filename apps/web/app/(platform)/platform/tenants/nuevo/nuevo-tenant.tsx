@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { VERTICALES, vocabulario } from "@opai/domain";
+import { formatearRut, VERTICALES, vocabulario } from "@opai/domain";
 import { Button, Campo, FormScreen, Input, Select } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -17,6 +17,8 @@ export function NuevoTenant() {
   const [datos, setDatos] = useState({
     slug: "",
     nombre: "",
+    razonSocial: "",
+    rut: "",
     vertical: "seguridad",
     timezone: "America/Santiago",
     adminEmail: "",
@@ -48,6 +50,23 @@ export function NuevoTenant() {
             <>
               <Campo etiqueta="Nombre" htmlFor="t-nombre">
                 <Input id="t-nombre" required {...campo("nombre")} />
+              </Campo>
+              <Campo etiqueta="Razón social" htmlFor="t-razon" ayuda="La que va en las facturas.">
+                <Input id="t-razon" required {...campo("razonSocial")} />
+              </Campo>
+              <Campo
+                etiqueta="RUT"
+                htmlFor="t-rut"
+                ayuda="Con guion y dígito verificador, por ejemplo 76.123.456-0. No puede estar en otra empresa."
+              >
+                <Input
+                  id="t-rut"
+                  required
+                  autoCapitalize="characters"
+                  value={datos.rut}
+                  onChange={(e) => setDatos({ ...datos, rut: e.target.value })}
+                  onBlur={() => setDatos((d) => ({ ...d, rut: formatearRut(d.rut) }))}
+                />
               </Campo>
               <Campo
                 etiqueta="Slug"
@@ -98,7 +117,7 @@ export function NuevoTenant() {
       ]}
       acciones={
         <>
-          {codigo === "CONFLICT" ? (
+          {codigo === "CONFLICT" && error?.includes("existente") ? (
             <Button variant="secondary" onClick={() => void crear(true)} disabled={enviando}>
               Usar la existente
             </Button>

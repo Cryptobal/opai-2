@@ -20,6 +20,8 @@ platform_tenants_create
 platform_tenants_get
 platform_tenants_list
 platform_tenants_panel
+platform_tenants_perfil_get
+platform_tenants_perfil_set
 platform_tenants_set_estado
 platform_tenants_update
 platform_trabajos_cancelar
@@ -36,6 +38,7 @@ preview_platform_cobros_condiciones_set
 preview_platform_modules_set
 preview_platform_precios_set
 preview_platform_tenants_create
+preview_platform_tenants_perfil_set
 preview_platform_tenants_set_estado
 preview_platform_tenants_update
 preview_platform_trabajos_cancelar

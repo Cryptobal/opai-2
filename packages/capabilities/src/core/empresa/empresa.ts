@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { normalizarRut, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import {
   definidos,
@@ -74,6 +75,13 @@ export const empresaUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const actual = await perfilDe(ctx);
+    // El RUT identifica a la empresa ante OPAI (facturas, pruebas, unicidad entre empresas): lo fija
+    // y corrige Plataforma con `platform.tenants.perfil_set`; la empresa puede reenviarlo igual (CAR-188).
+    const rutActual = actual?.rut ? (normalizarRut(actual.rut) ?? actual.rut) : null;
+    if (input.rut !== undefined && input.rut !== rutActual)
+      throw prohibido(
+        "El RUT de la empresa lo administra OPAI. Si hay que corregirlo, contacta a soporte.",
+      );
     const data = definidos(input);
     if (dryRun) return vista({ ...actual, ...data });
     const r = await escribirConEvento(

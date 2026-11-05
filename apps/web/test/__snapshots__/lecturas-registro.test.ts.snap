@@ -83,6 +83,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "platform.tenants.get",
   "platform.tenants.list",
   "platform.tenants.panel",
+  "platform.tenants.perfil_get",
   "platform.trabajos.list",
   "platform.usage.summary",
   "platform.users.list",
