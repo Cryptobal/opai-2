@@ -115,10 +115,48 @@ jobs:
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
           DB_URL_POOLED: ${{ steps.neon.outputs.db_url_pooled }}
+          RAMA_CREADA: ${{ steps.neon.outputs.created }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          # Si la rama Neon ya existía, NO se rota la contraseña de opai_app: rotarla deja a las
+          # previews ya desplegadas con una clave vieja (P1000) hasta el redespliegue. Se conserva
+          # solo si la DATABASE_URL de esta rama de Git apunta a esta rama Neon y la clave funciona.
+          if [ "$RAMA_CREADA" != "true" ]; then
+            ARCHIVO=$(mktemp)
+            trap 'rm -f "$ARCHIVO"' EXIT
+            ACTUAL=""
+            if npx --yes "$VERCEL_CLI" env pull "$ARCHIVO" --environment=preview --git-branch="$RAMA_GIT" --yes >/dev/null 2>&1; then
+              ACTUAL=$(sed -nE 's/^DATABASE_URL="?([^"]*)"?$/\1/p' "$ARCHIVO" | head -n1)
+            else
+              echo "No se pudo bajar la variable de $RAMA_GIT."
+            fi
+            # Una variable sensible se baja como un marcador (por ejemplo «[sensitive]»), no como URL.
+            case "$ACTUAL" in postgres*://*@*) ;; *) [ -n "$ACTUAL" ] && echo "La DATABASE_URL de $RAMA_GIT es sensible: Vercel no devuelve su valor."; ACTUAL="" ;; esac
+            if [ -n "$ACTUAL" ]; then
+              echo "::add-mask::$ACTUAL"
+              # Mismo host que la URL con pooler que entrega Neon para esta rama (se compara con la
+              # URL y no con db_host_pooled, que puede venir en otro formato).
+              HOST_RAMA=$(echo "$DB_URL_POOLED" | sed -E 's#^[a-z]+://[^@]+@([^/:?]+).*#\1#')
+              HOST_ACTUAL=$(echo "$ACTUAL" | sed -E 's#^[a-z]+://[^@]+@([^/:?]+).*#\1#')
+              if [ -z "$HOST_RAMA" ] || [ "$HOST_ACTUAL" != "$HOST_RAMA" ]; then
+                # El host (endpoint de Neon) no es un secreto; ayuda a ver de dónde viene la variable.
+                echo "La DATABASE_URL de $RAMA_GIT apunta a otra rama Neon (${HOST_ACTUAL%%.*} en vez de ${HOST_RAMA%%.*})."
+              elif ! timeout 20 psql "$ACTUAL" -tAc 'select 1' >/dev/null 2>&1; then
+                echo "La DATABASE_URL de $RAMA_GIT no conecta con la rama Neon."
+              else
+                echo "Rama Neon reutilizada y DATABASE_URL vigente: se conserva la contraseña de opai_app."
+                exit 0
+              fi
+            elif npx --yes "$VERCEL_CLI" env ls preview "$RAMA_GIT" 2>&1 | grep -F "DATABASE_URL" | grep -qF "$RAMA_GIT"; then
+              # Variable sensible (Vercel no devuelve su valor): existe para esta rama de Git y la
+              # escribió este workflow después de crear esta rama Neon (al cerrar se borran ambas).
+              echo "Rama Neon reutilizada y DATABASE_URL de $RAMA_GIT ya fijada (sensible): se conserva la contraseña de opai_app."
+              exit 0
+            fi
+            echo "Rama Neon reutilizada sin una DATABASE_URL válida para $RAMA_GIT: se fija una contraseña nueva."
+          fi
           # Hex: sin caracteres que rompan la URL. La clave solo vive en este paso y en Vercel.
           CLAVE=$(openssl rand -hex 32)
           echo "::add-mask::$CLAVE"
@@ -133,12 +171,28 @@ jobs:
           printf '%s' "$URL_APP" | npx --yes "$VERCEL_CLI" env add DATABASE_URL preview "$RAMA_GIT" >/dev/null
       - name: Redesplegar la preview con la base de su rama
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
-        # El despliegue automático de Vercel pudo partir antes de fijar la variable: se repite.
+        # El despliegue automático de Vercel pudo partir antes de fijar la variable: se repite. Se
+        # redespliega el despliegue de Git de ESTE commit (vercel redeploy conserva su rama), para
+        # que tome la DATABASE_URL de la rama del PR. Un `vercel deploy` desde el checkout (merge
+        # ref, HEAD suelto) no queda atado a la rama y toma las variables de preview genéricas.
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: npx --yes "$VERCEL_CLI" deploy --yes >/dev/null
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          URL=""
+          for intento in $(seq 1 30); do
+            URL=$(npx --yes "$VERCEL_CLI" ls -m githubCommitSha="$SHA" 2>&1 | grep -oE 'https://[A-Za-z0-9.-]+\.vercel\.app' | head -n1 || true)
+            [ -n "$URL" ] && break
+            echo "Esperando el despliegue de Git de $SHA ($intento/30)."
+            sleep 10
+          done
+          if [ -z "$URL" ]; then
+            echo "::error::No apareció el despliegue de Vercel del commit $SHA; no se redespliega para no usar la base equivocada."
+            exit 1
+          fi
+          npx --yes "$VERCEL_CLI" redeploy "$URL" --target preview >/dev/null
       - name: Borrar la rama Neon y la variable al cerrar
         if: steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
         env:
