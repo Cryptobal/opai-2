@@ -5,7 +5,7 @@ Diseño: `docs/2.0/diseño/export-rendiciones-v3/` («Rendiciones OPAI 2.0 — m
 ## Qué difería y qué se corrigió
 | Pantalla | Diseño | Construido (#332) | Corregido |
 |---|---|---|---|
-| Lista, tarjeta | Línea secundaria por estado: «Hoy · borrador», «Revisa Carolina Muñoz», «Devuelta/Aprobada/Pagada el dd-mm-aaaa» | «Compra · fecha · Revisa: X» igual en todas | Sí (`lineaEstado`) |
+| Lista, tarjeta | Línea secundaria por estado: «<fecha> · borrador» (el diseño dice «Hoy»), «Revisa Carolina Muñoz», «Devuelta/Aprobada/Pagada el dd-mm-aaaa» | «Compra · fecha · Revisa: X» igual en todas | Sí (`lineaEstado`) |
 | Devuelta | «Devuelta por Carolina Muñoz: «motivo.» Corrígela y reenvíala.» | «Te la devolvieron: motivo» | Sí |
 | Botón «Nueva rendición» (teléfono) | Botón flotante abajo a la derecha | En la cabecera | Sí (flotante en teléfono; en cabecera desde 768 px) |
 | Vacío | «Aún no has rendido gastos» / «Saca una foto de la boleta y envíala a aprobación.» | Texto distinto en la segunda línea | Sí |
@@ -13,7 +13,7 @@ Diseño: `docs/2.0/diseño/export-rendiciones-v3/` («Rendiciones OPAI 2.0 — m
 | Elegir tipo | «Compra con boleta» / «Kilometraje» (hoja con «Cancelar») | «Una compra» / «Kilometraje» (página) | Texto sí; sigue siendo página |
 | Aviso de duplicado | «**Esta boleta ya fue rendida en REN-12.** Puedes continuar si es otra compra; el aprobador verá el aviso.» | «…Puedes continuar, pero revisa…» | Sí |
 | Lista de gastos | «Gastos en esta rendición (n)», total y «+ Agregar otro gasto» | Sin título; «Agregar otro gasto» | Sí |
-| Aprobador | «Asignado por tu empresa. No puedes elegirte a ti mismo.» | «No puedes aprobar tus propias rendiciones.» | Sí (selector solo si hay más de uno) |
+| Aprobador | «Asignado por tu empresa. No puedes elegirte a ti mismo.» | «No puedes aprobar tus propias rendiciones.» | Sí (la nota «Asignado por tu empresa» sale si hay un solo aprobador; el selector se mantiene) |
 | Kilometraje | «Cómo se calculó», «Total a rendir», «El monto lo calcula el sistema; no se puede escribir a mano.» | «Total a reembolsar», sin la nota | Sí |
 | Confirmación de envío | «¿Enviar a aprobación?» con Aprobador, Total y Gastos; «Confirmar y enviar» / «Seguir editando» | Texto corrido; «Enviar a aprobación» / «Volver» | Sí |
 

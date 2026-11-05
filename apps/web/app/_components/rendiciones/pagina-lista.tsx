@@ -61,7 +61,7 @@ export function PaginaMisRendiciones({
           </EnlaceBoton>
         );
         return (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 pb-24 md:pb-0">
             <Cabecera titulo="Mis rendiciones" acciones={nueva} accionesSiempre />
             <PestanasRendiciones portal={portal} activa={pestana} rendiciones={todas} />
             <ListaRendiciones
@@ -73,7 +73,11 @@ export function PaginaMisRendiciones({
                   ? {
                       titulo: "Aún no has rendido gastos",
                       descripcion: "Saca una foto de la boleta y envíala a aprobación.",
-                      accion: <EnlaceBoton href={`${base}/nueva`}>Nueva rendición</EnlaceBoton>,
+                      accion: (
+                        <EnlaceBoton href={`${base}/nueva`} className="md:hidden">
+                          Nueva rendición
+                        </EnlaceBoton>
+                      ),
                     }
                   : {
                       titulo: `No tienes rendiciones ${def.etiqueta.toLowerCase()}`,

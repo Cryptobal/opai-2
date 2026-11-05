@@ -27,9 +27,9 @@ export function lineaEstado(
   const dia = (v: string | null) => (v ? fechaCorta(v) : "—");
   switch (r.estado) {
     case "borrador":
-      return "Hoy · borrador";
+      return `${dia(r.creadaEn)} · borrador`;
     case "enviada":
-      return revisaDe(r).replace("Revisa:", "Revisa");
+      return revisaDe(r).replace("Revisa: ", "Revisa ");
     case "devuelta":
       return `Devuelta el ${dia(r.decididaEn)}`;
     case "aprobada":
