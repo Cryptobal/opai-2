@@ -67,6 +67,12 @@ async function calentarConSesion(base: string) {
     const page = await contexto.newPage();
     await entrar(page);
     for (const ruta of RUTAS_CON_SESION) await page.goto(ruta, { timeout: 120_000 }).catch(() => undefined);
+    // La hoja de puestos es un fragmento diferido: se abre (con cualquier valor) en una instalación real.
+    const ficha = await page
+      .goto("/instalaciones", { timeout: 120_000 })
+      .then(() => page.locator('a[href^="/instalaciones/"][href*="-"]').first().getAttribute("href", { timeout: 20_000 }))
+      .catch(() => null);
+    if (ficha) await page.goto(`${ficha}/puestos?puesto=calentar`, { timeout: 120_000 }).catch(() => undefined);
   } catch {
     // Si no entra, que lo diga la prueba que lo necesite.
   } finally {
