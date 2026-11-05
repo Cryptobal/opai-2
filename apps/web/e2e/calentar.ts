@@ -68,6 +68,11 @@ async function calentarConSesion(base: string) {
     const page = await contexto.newPage();
     await entrar(page);
     for (const ruta of RUTAS_CON_SESION) await page.goto(ruta, { timeout: 120_000 }).catch(() => undefined);
+    // La API genérica (`/api/v1`) carga todo el registro de capacidades: su primera compilación es la más pesada
+    // y colgaba los `POST` de las pruebas más de 90 s. Se calienta con una llamada autenticada de propio origen.
+    await page.request
+      .post("/api/v1/core/buscar?portal=erp", { headers: { origin: base }, data: { input: { q: "a" }, portal: "erp" }, timeout: 180_000 })
+      .catch(() => undefined);
     // La hoja de puestos es un fragmento diferido: se abre (con cualquier valor) en una instalación real.
     const ficha = await page
       .goto("/instalaciones", { timeout: 120_000 })
