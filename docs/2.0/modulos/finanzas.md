@@ -1,6 +1,6 @@
 # Finanzas — Hoja de alcance
 
-**Estado:** **para comentarios de Carlos** (no se construye hasta que comente) · **Fecha:** 4-nov-2026 · **Autor:** Claude, Sesión 5 (dueña de Finanzas), CAR-189 · **Decisiones:** [ADR-072](../01-decisiones.md) (partes vendibles) y [ADR-073](../01-decisiones.md) (reglas del flujo de caja) · **Diagnóstico completo, parte por parte:** [finanzas-diagnostico.md](finanzas-diagnostico.md)
+**Estado:** **comentada por Carlos el 4-nov-2026** (respuestas a §5 en el comentario «DECISIÓN CARLOS» de #318, 21:22 CLT); se construye con esto · **Fecha:** 4-nov-2026 · **Autor:** Claude, Sesión 5 (dueña de Finanzas), CAR-189 · **Decisiones:** [ADR-072](../01-decisiones.md) (partes vendibles) y [ADR-073](../01-decisiones.md) (reglas del flujo de caja) · **Diagnóstico completo, parte por parte:** [finanzas-diagnostico.md](finanzas-diagnostico.md)
 
 1.0 es el piso, no el techo. Finanzas sigue siendo **un solo módulo**, con siete partes que se pueden contratar por separado.
 
@@ -22,11 +22,11 @@ Rendiciones es un módulo aparte (ADR-069) y lo lleva la Sesión 2. El precio y 
 
 - **Pasa:** todo lo que Gard usa a diario en 1.0: cartola y conciliación, emisión, NC y **ND**, borradores editables y descartables, recurrentes, cierre de mes con seguimiento, cesión con Octava, cobranza, compras con RCV, resultados y balance.
 - **No pasa:** el sellado semanal del flujo, el ajuste manual de ingresos, los recordatorios contados desde la proforma (se cuentan desde el vencimiento, ADR-062), Fintoc directo (va por Web4Leads, ADR-065).
-- **Se suma:** partes vendibles; un solo criterio de semana; IVA diferido y PPM proyectados; proforma y estado de pago enviados solos en la fecha pactada con el cliente; plantillas de correo por empresa con registro de cada envío; todo también por MCP con vista previa.
+- **Se suma:** partes vendibles; un solo criterio de semana; IVA y PPM proyectados, con postergación del IVA mes a mes; proforma y estado de pago enviados solos en la fecha pactada con el cliente; plantillas de correo por empresa con registro de cada envío; todo también por MCP con vista previa.
 
 ## 3. Flujo de caja (prioridad 1, ADR-073)
 
-No hay cierre ni sellado. Mandan la cartola y la proyección; no hay ajuste manual de ingresos (los egresos sí se planifican a mano). Semanas pasadas: todos los movimientos de la cartola por fecha del banco, conciliados o no, con fila «Sin conciliar». El saldo parte del banco de hoy. Futuro: un solo criterio, la fecha esperada de cobro; lo vencido pasa a la semana actual. Cedidas: el anticipo es ingreso y el costo va a «Costo factoring». IVA diferido 2 meses y movible a mano; PPM por empresa. Un solo umbral de saldo bajo, $15M, que avisa solo por la campana. Pendiente de una factura = monto − NC parciales (61) − cobrado; la ND (56) no es deuda; lo vencido importado de 1.0 no entra a los recordatorios.
+No hay cierre ni sellado. Mandan la cartola y la proyección; no hay ajuste manual de ingresos (los egresos sí se planifican a mano). Semanas pasadas: todos los movimientos de la cartola por fecha del banco, conciliados o no, con fila «Sin conciliar». El saldo parte del banco de hoy. Futuro: un solo criterio, la fecha esperada de cobro (promedio real de pago del cliente con 3 o más facturas pagadas; si no, el vencimiento; editable por factura); lo vencido pasa a la semana actual. Cedidas: el depósito del factor es el ingreso y la diferencia va a la cuenta configurable (por defecto «Diferencia factoring»); no hay remanente. IVA del mes M en M+1 junto con el PPM; cada mes se puede marcar la postergación del IVA a M+2 (el PPM no se posterga). Un solo umbral de saldo bajo, $15M, que avisa solo por la campana. Pendiente de una factura = monto − NC parciales (61) − cobrado; la ND (56) no es deuda; lo vencido importado de 1.0 no entra a los recordatorios.
 
 ## 4. Orden de construcción propuesto
 
@@ -39,13 +39,13 @@ No hay cierre ni sellado. Mandan la cartola y la proyección; no hay ajuste manu
 | 4 | Facturación B: PDF con el diseño oficial del SII (PDF417, cedible) | Sin esto no se manda a un cliente real |
 | 5 | Envíos A: plantillas por empresa (factura, NC/ND, proforma, estado de pago, cobranza), elegir destinatarios, registro único de envíos | Base de lo automático |
 | 6 | Envíos B: en cada programación, fecha pactada para proforma o estado de pago, envío automático, OK del cliente por enlace; referencias y destinatarios de 1.0 | Cierra el ciclo de facturación |
-| 7 | Bancos y factoring: revisión de movimientos, cuadrar saldo, conciliar el abono del factor, catálogo de factorings | Paridad con el MCP de 1.0 |
+| 7 | Bancos y factoring: pestaña de reglas de conciliación (ADR-074), revisión de movimientos, cuadrar saldo, conciliar el depósito del factor, catálogo de factorings | Paridad con el MCP de 1.0 |
 | 8 | Partes vendibles (con Plataforma) · Compras (RCV automático, NC recibidas) · Contabilidad e informes | Después de que Gard opere |
 
-## 5. Decisiones de Carlos
+## 5. Decisiones de Carlos (4-nov-2026, comentario en #318)
 
-1. **Partes:** ¿las siete de §1, con Conciliación dentro de Bancos? (Plataforma las listó separadas.)
-2. **IVA y PPM:** propongo IVA del mes M (débito − crédito) pagado el día de IVA del mes M+2, y PPM (tasa por empresa sobre ventas netas) el mismo día del mes M+1, porque el PPM no se posterga. ¿Correcto?
-3. **Fecha esperada de cobro:** el vencimiento de la factura (emisión + plazo del cliente). ¿O prefieres el promedio real de pago de cada cliente cuando exista historia?
-4. **Remanente del factor:** lo que el factor devuelve al vencimiento, ¿se proyecta como ingreso en esa fecha?
-5. **Reglas de conciliación** guardadas y no evaluadas (pregunta abierta desde CAR-169): ¿se evalúan al importar o se retiran?
+1. **Partes:** las siete de §1, con Conciliación dentro de Bancos. Rendiciones sigue aparte (ADR-072).
+2. **IVA y PPM:** el IVA del mes M se paga en M+1 junto con el PPM; Carlos marca o desmarca, mes a mes, la postergación del IVA a M+2; el PPM siempre en M+1 (ADR-073).
+3. **Fecha esperada de cobro:** promedio real de pago del cliente con 3 o más facturas pagadas; si no, el vencimiento; editable a mano por factura (ADR-073).
+4. **Factoring:** sin remanente; el depósito del factor es el ingreso y la diferencia va a una cuenta contable configurable por empresa (por defecto «Diferencia factoring» o «Gasto financiero») (ADR-073).
+5. **Reglas de conciliación:** se mantienen y funcionan; pestaña en Bancos para crearlas, editarlas, activarlas y desactivarlas; al importar la cartola concilian solas solo con monto y referencia exactos, si no quedan como sugerencia (ADR-074).

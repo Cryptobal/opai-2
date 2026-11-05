@@ -68,4 +68,4 @@ Hoy no se puede: `core.tenant_modules` tiene una fila por módulo y el permiso d
 
 ## Diseño
 
-Hay diseño aprobado para casi todo (`diseño/export-finanzas-ventas-banca-v3`, `export-flujo-caja-v3`, `export-finanzas-compras`). El del flujo trae «Cierre semanal» y «Metas», que salen con ADR-073: los bloques del flujo usarán ese diseño sin esas pantallas y con las filas nuevas (Sin conciliar, IVA, PPM, Costo factoring). Proforma, estado de pago y plantillas de correo no tienen diseño propio: se usarán «Programación y cierre» y Configuración › Comunicaciones, y se reportará en cada brief.
+Hay diseño aprobado para casi todo (`diseño/export-finanzas-ventas-banca-v3`, `export-flujo-caja-v3`, `export-finanzas-compras`). El del flujo trae «Cierre semanal» y «Metas», que salen con ADR-073: los bloques del flujo usarán ese diseño sin esas pantallas y con las filas nuevas (Sin conciliar, IVA con postergación por mes, PPM, Diferencia factoring). Proforma, estado de pago y plantillas de correo no tienen diseño propio: se usarán «Programación y cierre» y Configuración › Comunicaciones, y se reportará en cada brief.
