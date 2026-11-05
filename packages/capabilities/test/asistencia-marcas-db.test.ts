@@ -11,7 +11,13 @@ import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/ent
 import type * as ModuloCapacidades from "../src";
 
 type Capacidades = typeof ModuloCapacidades;
-type Res = { ok: boolean; data?: Record<string, any>; error?: { code: string; message: string } };
+type Dato = {
+  marca: { id: string; seq: number; tipo: string; gpsEstado: string; desfaseS: number; distanciaM: number; metodo: string };
+  repetida: boolean;
+  items: unknown[];
+  valida: boolean;
+};
+type Res = { ok: boolean; data: Dato; error?: { code: string; message: string } };
 
 describe.skipIf(!urlPropietario)("Asistencia · marca legal (Postgres real)", () => {
   let e: Entorno;
