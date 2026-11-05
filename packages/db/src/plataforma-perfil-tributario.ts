@@ -11,9 +11,14 @@ const campos = { rut: true, razonSocial: true } as const;
 export type PerfilTributario = { rut: string | null; razonSocial: string | null };
 export type DatosTributarios = { rut: string; razonSocial: string };
 
-/** true si el error es el de la restricción única del RUT (otra empresa ya lo tiene). */
+/** Nombre del índice único del RUT (migración 20261107120000_core_rut_empresa_unico). */
+export const INDICE_RUT_UNICO = "perfil_empresa_rut_unico";
+
+/** true solo si el error es la restricción única del RUT (no otra colisión única, como el slug). */
 export function esRutRepetido(e: unknown): boolean {
-  return typeof e === "object" && e !== null && (e as { code?: unknown }).code === "P2002";
+  if (typeof e !== "object" || e === null || (e as { code?: unknown }).code !== "P2002")
+    return false;
+  return JSON.stringify((e as { meta?: unknown }).meta ?? {}).includes(INDICE_RUT_UNICO);
 }
 
 /** Operaciones sobre UNA empresa; `db` es `forTenant(tenantId)` y cada consulta filtra por `tenantId`. */
