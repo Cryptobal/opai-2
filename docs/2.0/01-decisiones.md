@@ -1352,6 +1352,23 @@ identidad de servicio en main.
 **Adenda del 5-nov-2026 (Sesión 2, pendientes del Revisor de #303).** (1) El aviso de boleta duplicada solo mira las rendiciones que el actor puede ver: las propias, las que le asignaron para aprobar y, con `rendiciones:ver_todas`, las de toda la empresa. Por eso el aprobador ve los duplicados de lo que aprueba, y es intencional (necesita ese dato para decidir). (2) Quien no puede ver todas las rendiciones solo adjunta respaldos que él mismo subió; con `ver_todas` puede usar los de la empresa.
 
 
+## ADR-071 · Cobro por módulo en Plataforma, para todos los módulos
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (comentario «DECISIÓN CARLOS» en #313, 20:24 CLT, y encargo a la Sesión 6 del mismo día), registrada por Claude (Sesión 6, CAR-187). · Completa ADR-003 y ADR-058.
+
+**Decisión.** El cobro por módulo **no** se construye dentro de cada módulo: vive en **Plataforma** y sirve para todos (Comercial, CPQ, Rendiciones y, a futuro, las partes de Finanzas que se vendan por separado). Por empresa y por módulo se guarda el **precio mensual (UF o CLP)**, el **inicio del cobro**, el **fin de la prueba** y un **descuento opcional**. Cada mes se genera un **cargo listo para facturar**, **sin emitir facturas reales ni usar SimpleAPI**. Plataforma muestra de un vistazo qué módulos se facturan y cuáles no, por empresa y en total. El **catálogo de módulos** declara nombre comercial, dependencias y si se vende solo, preparado para separar Finanzas en partes (bancos, conciliación, ventas, compras, cobranza, factoring, flujo de caja) sin rehacerlo.
+
+**Relación con ADR-058.** ADR-058 fija la estructura (capas y unidades) sin montos. Este ADR permite **montos por empresa** (condiciones comerciales pactadas), no una lista de precios global. La unidad de B es un monto mensual fijo; el cobro por trabajador o por instalación de ADR-058 queda para después, con el modelo preparado. Las preguntas abiertas están en `modulos/plataforma-hoja-alcance.md` §6.
+
+**Consecuencias.** Rendiciones no tiene cobro propio y solo usa el estado del módulo (prueba, activo o suspendido). Hoja de alcance de Plataforma: `docs/2.0/modulos/plataforma-hoja-alcance.md`.
+
+**Adenda del 4-nov-2026 (Carlos, «DECISIÓN CARLOS» en CAR-188 a las 20:29 y en #314 a las 20:37 y 20:45 CLT).**
+
+1. **Forma de cobro por módulo.** Cada empresa paga un **plan base mensual fijo en UF** y cada módulo contratado tiene su propio precio en UF con su unidad. El motor soporta **precio fijo mensual** o **precio por unidad × cantidad del mes**, con **mínimo mensual opcional** y **después el descuento**; la **cantidad del mes queda guardada en el cargo** para auditarla. Referencia de unidades: Finanzas, fijo mensual (sin tramos, 26-oct); Rendiciones, por usuario activo habilitado para rendir (los aprobadores no se cobran); Asistencia, Nómina y Cumplimiento DT, por trabajador o guardia activo, con mínimo; Operaciones/puestos, por instalación activa; Comercial (CRM) y CPQ, por usuario con licencia; firma, por uso. Los montos los fija Carlos en Plataforma.
+2. **Primer mes proporcional** a los días desde el inicio del cobro; los siguientes, completos. **UF del cargo:** la del último día del mes que se cobra.
+3. **Pruebas.** No hay registro abierto ni autoservicio. Plataforma abre la prueba a una empresa ya validada (con RUT), por módulo y con fecha de término. Siete días antes del vencimiento llega un aviso a Plataforma. Al vencer, si Plataforma marcó **«pasa a cobro»**, empieza a cobrarse; si no, el módulo queda en **solo lectura** (ve sus datos, no crea nada nuevo, nada se borra).
+4. **Plan base** (reemplaza el punto 3 de ADR-058): empresa, usuarios, roles y permisos, ajustes, auditoría, notificaciones, documentos, tickets y portal. El motor de sueldos va dentro de Nómina y la firma se cobra por uso. Se refleja en el catálogo de módulos (bloque C).
+
 ---
 
 ## ADR-072 · Finanzas es un módulo con siete partes contratables por separado
