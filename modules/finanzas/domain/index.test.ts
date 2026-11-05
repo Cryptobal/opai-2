@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   calcularPlanilla,
-  evaluarCierre,
   esLunes,
   lunesDe,
   planificarMovimiento,
@@ -101,12 +100,5 @@ describe("planificarMovimiento", () => {
     });
     expect(m({ semanas: [s3] })).toMatchObject({ ok: false });
     expect(m({ por: 0 })).toMatchObject({ ok: false });
-  });
-});
-
-describe("evaluarCierre", () => {
-  it("exige motivo solo sobre la tolerancia", () => {
-    expect(evaluarCierre(1_000_000, 1_000_900)).toEqual({ diferencia: 900, exigeMotivo: false });
-    expect(evaluarCierre(1_000_000, 990_000)).toEqual({ diferencia: -10_000, exigeMotivo: true });
   });
 });

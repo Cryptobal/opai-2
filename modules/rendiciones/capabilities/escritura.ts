@@ -5,7 +5,7 @@ import { conflicto, defineCapability, prohibido, reglaDeNegocio } from "@opai/ca
 import { codigoVisible, esEditable, type EstadoRendicion } from "../domain";
 import { contenidoDe, guardarViaje, type Contenido, type TipoRendicion } from "./contenido";
 import { advertenciasSchema, cuerpoSchema, uuidSchema } from "./esquemas";
-import { PERMISO_RENDIR } from "./permisos";
+import { PERMISO_RENDIR, PORTALES_RENDIR } from "./permisos";
 import { anotarPaso, datosItems } from "./registro";
 import { actorId, ID_VISTA_PREVIA, rendicionDe, siguienteCodigo, validarAprobador, validarCentro } from "./util";
 import { calculoSchema } from "./viaje";
@@ -27,6 +27,7 @@ export const rendicionesCrear = defineCapability({
   descripcion:
     "Crea una rendición en borrador: de compra, con sus gastos (proveedor, folio, monto y boleta), o de kilometraje, con los datos del viaje (el monto lo calcula el servidor con el método de la empresa y no se puede editar a mano). Lleva el centro de costo (una instalación activa o Administración) y, si se quiere, el aprobador. Avisa si una boleta parece repetida.",
   permiso: PERMISO_RENDIR,
+  portales: PORTALES_RENDIR,
   input: cuerpoSchema,
   output: salidaSchema,
   efecto: "escritura",
@@ -49,7 +50,13 @@ export const rendicionesCrear = defineCapability({
       });
       await tx.rendicionItem.createMany({ data: datosItems(ctx.tenantId, creada.id, c.items) });
       if (c.viaje) await guardarViaje(tx, ctx.tenantId, creada.id, c.viaje.datos, c.viaje.calculo);
-      await anotarPaso(ctx, tx, creada, { tipo: "creada", actorId: yo, hasta: "borrador" }, { montoTotal: c.montoTotal, tipo });
+      await anotarPaso(
+        ctx,
+        tx,
+        creada,
+        { tipo: "creada", actorId: yo, hasta: "borrador" },
+        { montoTotal: c.montoTotal, tipo },
+      );
       return creada;
     });
     return salidaDe(r.id, codigoVisible(r.codigo), c);
@@ -61,6 +68,7 @@ export const rendicionesActualizar = defineCapability({
   descripcion:
     "Cambia una rendición propia mientras sea un borrador o esté devuelta: reemplaza sus datos y la lista completa de gastos (o, en kilometraje, el viaje: el monto se recalcula en el servidor). Una rendición enviada o decidida no se edita ni cambia de tipo.",
   permiso: PERMISO_RENDIR,
+  portales: PORTALES_RENDIR,
   input: cuerpoSchema.safeExtend({ id: uuidSchema }),
   output: salidaSchema,
   efecto: "escritura",
@@ -69,7 +77,8 @@ export const rendicionesActualizar = defineCapability({
     const yo = actorId(ctx);
     const r = await rendicionDe(ctx, input.id);
     if (r.solicitanteId !== yo) throw prohibido("Solo quien rinde edita su rendición.");
-    if (!esEditable(r.estado as EstadoRendicion)) throw reglaDeNegocio(`Una rendición «${r.estado}» no se edita.`);
+    if (!esEditable(r.estado as EstadoRendicion))
+      throw reglaDeNegocio(`Una rendición «${r.estado}» no se edita.`);
     await validarCentro(ctx, input.instalacionId);
     if (input.aprobadorId) await validarAprobador(ctx, input.aprobadorId, yo);
     if (input.tipo && input.tipo !== r.tipo) throw reglaDeNegocio("Una rendición no cambia de tipo.");
@@ -87,7 +96,13 @@ export const rendicionesActualizar = defineCapability({
       await tx.rendicionItem.deleteMany({ where: { rendicionId: r.id } });
       await tx.rendicionItem.createMany({ data: datosItems(ctx.tenantId, r.id, c.items) });
       if (c.viaje) await guardarViaje(tx, ctx.tenantId, r.id, c.viaje.datos, c.viaje.calculo);
-      await anotarPaso(ctx, tx, r, { tipo: "editada", actorId: yo, desde: r.estado, hasta: r.estado }, { montoTotal: c.montoTotal });
+      await anotarPaso(
+        ctx,
+        tx,
+        r,
+        { tipo: "editada", actorId: yo, desde: r.estado, hasta: r.estado },
+        { montoTotal: c.montoTotal },
+      );
     });
     return salidaDe(r.id, codigoVisible(r.codigo), c);
   },

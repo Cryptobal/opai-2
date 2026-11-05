@@ -52,6 +52,8 @@ model RendicionItem {
   proveedor        String
   /// Folio o número de la boleta/factura; con proveedor y monto detecta duplicados.
   folio            String?
+  /// "boleta" | "factura" (CAR-197): todo gasto se respalda con una de las dos.
+  tipoDocumento    String   @default("boleta") @map("tipo_documento")
   descripcion      String
   monto            Int
   /// Respaldo en `core.documentos`; sin él debe haber `sinRespaldoMotivo` (si la empresa lo exige).
