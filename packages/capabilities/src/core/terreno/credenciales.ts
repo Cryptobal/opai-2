@@ -52,6 +52,7 @@ export const credencialesTerrenoEstado = defineCapability({
   output: estadoSchema,
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (salida) => [salida.personaId],
   async handler(ctx, { personaId }) {
     const persona = await personaDeTerreno(ctx, personaId);
     const c = await ctx.db.credencialTerreno.findUnique({ where: { personaId } });
