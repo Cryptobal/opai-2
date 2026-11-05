@@ -7,7 +7,7 @@ import { requierePlataforma } from "../comun";
 import { tenantSchema } from "../esquemas";
 import { metricasDelMes, porLotes } from "./metricas";
 
-const ACTIVOS = ["activo", "trial"];
+const ACTIVOS = ["activo", "trial", "solo_lectura"];
 
 export const platformTenantsList = defineCapability({
   id: "platform.tenants.list",

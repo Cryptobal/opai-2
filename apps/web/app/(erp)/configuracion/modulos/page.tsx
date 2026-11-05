@@ -34,7 +34,7 @@ export default function Modulos() {
       cabecera={(m) => {
         const n = (e: string | null) => m.filter((x) => x.estado === e).length;
         return {
-          subtitulo: `${n("activo")} activos · ${n("trial")} en trial · ${n(null)} disponibles. Los activa OPAI; tú los solicitas.`,
+          subtitulo: `${n("activo")} activos · ${n("trial")} en trial · ${n("solo_lectura")} en solo lectura · ${n(null)} disponibles. Los activa OPAI; tú los solicitas.`,
         };
       }}
     >
