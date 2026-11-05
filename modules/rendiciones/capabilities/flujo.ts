@@ -4,7 +4,7 @@ import { conflicto, defineCapability, prohibido, reglaDeNegocio } from "@opai/ca
 
 import { puedeTransitar, type EstadoRendicion } from "../domain";
 import { estadoSchema, uuidSchema } from "./esquemas";
-import { PERMISO_RENDIR } from "./permisos";
+import { PERMISO_RENDIR, PORTALES_RENDIR } from "./permisos";
 import { anotarPaso } from "./registro";
 import { actorId, aprobadorEfectivo, rendicionDe, validarAprobador, validarItems } from "./util";
 
@@ -15,6 +15,7 @@ export const rendicionesEnviar = defineCapability({
   descripcion:
     "Envía a aprobación una rendición propia en borrador o devuelta. Revalida los gastos y exige un aprobador (el elegido o el de la empresa); nadie aprueba su propia rendición.",
   permiso: PERMISO_RENDIR,
+  portales: PORTALES_RENDIR,
   input: z.object({ id: uuidSchema, aprobadorId: uuidSchema.optional() }),
   output: salidaSchema,
   efecto: "escritura",
@@ -23,7 +24,8 @@ export const rendicionesEnviar = defineCapability({
     const yo = actorId(ctx);
     const r = await rendicionDe(ctx, input.id);
     if (r.solicitanteId !== yo) throw prohibido("Solo quien rinde envía su rendición.");
-    if (!puedeTransitar(r.estado as EstadoRendicion, "enviada")) throw reglaDeNegocio(`Una rendición «${r.estado}» no se envía.`);
+    if (!puedeTransitar(r.estado as EstadoRendicion, "enviada"))
+      throw reglaDeNegocio(`Una rendición «${r.estado}» no se envía.`);
     const aprobadorId = await aprobadorEfectivo(ctx, input.aprobadorId ?? r.aprobadorId);
     if (!aprobadorId) throw reglaDeNegocio("Elige quién aprueba esta rendición.");
     await validarAprobador(ctx, aprobadorId, yo);
@@ -35,7 +37,13 @@ export const rendicionesEnviar = defineCapability({
         data: { estado: "enviada", aprobadorId, enviadaEn: new Date(), motivoDecision: null },
       });
       if (n.count !== 1) throw conflicto("La rendición cambió de estado mientras tanto.");
-      await anotarPaso(ctx, tx, r, { tipo: "enviada", actorId: yo, desde: r.estado, hasta: "enviada" }, { aprobadorId, montoTotal: r.montoTotal });
+      await anotarPaso(
+        ctx,
+        tx,
+        r,
+        { tipo: "enviada", actorId: yo, desde: r.estado, hasta: "enviada" },
+        { aprobadorId, montoTotal: r.montoTotal },
+      );
     });
     return { id: r.id, estado: "enviada" as const };
   },
@@ -46,6 +54,7 @@ export const rendicionesAnular = defineCapability({
   descripcion:
     "Anula una rendición propia que aún no se decide (borrador, devuelta o enviada). Queda en el historial y su código no se reutiliza.",
   permiso: PERMISO_RENDIR,
+  portales: PORTALES_RENDIR,
   input: z.object({ id: uuidSchema, motivo: z.string().trim().min(3).max(300).optional() }),
   output: salidaSchema,
   efecto: "escritura",
@@ -54,12 +63,22 @@ export const rendicionesAnular = defineCapability({
     const yo = actorId(ctx);
     const r = await rendicionDe(ctx, input.id);
     if (r.solicitanteId !== yo) throw prohibido("Solo quien rinde anula su rendición.");
-    if (!puedeTransitar(r.estado as EstadoRendicion, "anulada")) throw reglaDeNegocio(`Una rendición «${r.estado}» no se anula.`);
+    if (!puedeTransitar(r.estado as EstadoRendicion, "anulada"))
+      throw reglaDeNegocio(`Una rendición «${r.estado}» no se anula.`);
     if (dryRun) return { id: r.id, estado: "anulada" as const };
     await ctx.transaccion(async (tx) => {
-      const n = await tx.rendicion.updateMany({ where: { id: r.id, estado: r.estado }, data: { estado: "anulada" } });
+      const n = await tx.rendicion.updateMany({
+        where: { id: r.id, estado: r.estado },
+        data: { estado: "anulada" },
+      });
       if (n.count !== 1) throw conflicto("La rendición cambió de estado mientras tanto.");
-      await anotarPaso(ctx, tx, r, { tipo: "anulada", actorId: yo, desde: r.estado, hasta: "anulada", comentario: input.motivo });
+      await anotarPaso(ctx, tx, r, {
+        tipo: "anulada",
+        actorId: yo,
+        desde: r.estado,
+        hasta: "anulada",
+        comentario: input.motivo,
+      });
     });
     return { id: r.id, estado: "anulada" as const };
   },
