@@ -126,7 +126,7 @@ export const manifest = defineModule({
     { id: "finanzas.banco.conciliacion_confirmada", descripcion: "Se confirmó una conciliación bancaria." },
     { id: "finanzas.banco.conciliacion_deshecha", descripcion: "Se deshizo una conciliación bancaria." },
     { id: "finanzas.banco.cobro_manual", descripcion: "Se registró un cobro manual sin movimiento bancario." },
-    { id: "finanzas.banco.saldo_bajo_avisado", descripcion: "El saldo de cartola quedó bajo el umbral (campana in-app)." },
+    { id: "finanzas.banco.saldo_bajo_avisado", descripcion: "La suma de las cuentas activas quedó bajo el umbral único de saldo bajo (campana in-app)." },
     { id: "finanzas.venta.borrador_creado", descripcion: "Se creó un borrador de factura o nota en el libro de ventas." },
     { id: "finanzas.venta.emitida", descripcion: "Se emitió un DTE con folio y firma." },
     { id: "finanzas.cierre.actualizado", descripcion: "Se registró un avance del cierre de mes de un borrador (proforma, OK u observación del cliente, OC/HES)." },
