@@ -1,4 +1,5 @@
 // Punto de entrada de @opai/db. El código de negocio solo necesita `forTenant`, `enTransaccion` y los tipos.
+export { bloquearCadena, avanzarCadena, type CadenaHechos } from "./cadenas";
 export { cerrarClientes, dbAdmin } from "./client";
 export { registrarObservadorConsultas } from "./metricas";
 export { leerInbox } from "./inbox";
