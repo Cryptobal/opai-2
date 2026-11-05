@@ -81,6 +81,24 @@ function semilla() {
     trabajo: [trabajo(TRABAJO_FALLIDO, "fallido"), trabajo(TRABAJO_PENDIENTE, "pendiente")],
     aprobacionPlataforma: [aprobacion(APROBACION_A), aprobacion(APROBACION_R)],
     cobroCargo: [cargoDePrueba(CARGO)],
+    perfilEmpresa: [{ tenantId: TENANT_DE_PRUEBA, rut: "11111111-1", razonSocial: "Gard SpA" }],
+    cobroCondicion: [
+      {
+        id: "c1",
+        tenantId: TENANT_DE_PRUEBA,
+        moduloId: "crm",
+        moneda: "UF",
+        forma: "fijo",
+        unidad: null,
+        precioMensual: 25_000,
+        minimoMensual: null,
+        cobroDesde: null,
+        pruebaHasta: null,
+        pasaACobro: false,
+        descuentoPct: 0,
+        nota: null,
+      },
+    ],
     propuestaIndicador: [
       {
         id: PROPUESTA,
