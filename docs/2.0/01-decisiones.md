@@ -1443,3 +1443,31 @@ identidad de servicio en main.
 **Decisión.** Para Finanzas, el paso «Design Prompt → Claude Design → diseño aprobado» se reemplaza por un **prototipo interactivo** que arma la sesión «Finanzas · Proyecto» en la misma conversación, sobre el Design System de OPAI 2.0 V2 (mismos tokens y clases que `packages/ds`). Carlos lo revisa ahí y lo aprueba. Al aprobarlo, su export se guarda en `docs/2.0/diseño/export-<pantalla>/` con un README, igual que los de Claude Design, y desde ese momento es el «diseño aprobado» que construye «Finanzas · Code». Se puede diseñar en paralelo a la construcción: un diseño no toca código.
 
 **Primer caso.** Flujo de caja v4 (CAR-193): planilla de escritorio con traza por celda, celular y ajustes; reemplaza `export-flujo-caja-v3` en lo que cambia por ADR-073 (sin cierre semanal ni metas; filas «Sin conciliar», IVA con postergación, PPM, depósito del factor y «Diferencia factoring» informativa; fecha esperada de cobro editable por factura; umbral único de $15M).
+
+---
+
+## ADR-077 · Asistencia legal: identidad de terreno, canal híbrido y dispositivos
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente (D-03 y D-04 pendientes) · **Autor:** Carlos (decisiones del chat «Operaciones · Auditoría», 5-nov-2026 12:37 CLT), registradas por «Operaciones · Base · Code» en CAR-78. · Completa ADR-023, ADR-033 y ADR-044; cierra D1, D2 y D4 del export de Terreno.
+
+**Decisiones de Carlos (5-nov-2026, 12:37 CLT).**
+
+- **D-01 · Canal híbrido.** El kiosco emparejado en la instalación es el canal principal de marcación. El teléfono personal del trabajador se habilita **por persona** y exige consentimiento escrito y costo a cargo del empleador. El supervisor usa Terreno en modo supervisor y su teléfono; no hay una app Supervisor aparte.
+- **D-02 · Identificación.** La principal es el rostro con prueba de vida. La secundaria es **RUT + PIN de 6 dígitos**, siempre disponible y sin biometría (Res. Ex. 38, art. 57).
+- **D-12 · Paralelismo.** Dos sesiones de Operaciones trabajan en paralelo: «Operaciones · Base · Code» (identidad de terreno, dispositivos, portal Terreno, cola sin conexión y adaptador de biometría) y «Asistencia · Núcleo legal · Code» (marcas, turnos esperados y reportes DT). El proveedor real de rostro lo construye después «Asistencia · Face ID · Code».
+- Fuera de alcance por decisión de Carlos: alertas de cobertura con oleadas por WhatsApp.
+
+**Decisión de arquitectura.**
+
+1. **Del núcleo, no de un módulo:** la identidad de terreno (RUT + PIN), los dispositivos emparejados a una instalación, la cola sin conexión y el adaptador de biometría. Asistencia, Rondas, Libro de novedades y Control de acceso los consumen; ninguno crea los suyos.
+2. **Un solo service worker**, el del núcleo (`apps/web/public/sw.js`). Los módulos no registran otro: declaran qué capacidades aceptan cola.
+3. **Biometría por empresa y 1:1.** Cada empresa tiene su colección; la verificación es siempre contra la referencia de una persona (1:1), nunca una búsqueda 1:N sobre la colección. La referencia del proveedor se guarda cifrada.
+4. **PIN (B1).** El PIN de 6 dígitos solo existe como hash scrypt (el formato de las contraseñas de Better Auth). RR. HH. lo asigna o lo restablece (con vista previa; el temporal se muestra una vez) y la persona debe cambiarlo en su primer ingreso. Rechaza los PIN más adivinables (repetidos, secuencias, últimos dígitos del RUT). Bloqueo por credencial tras 5 intentos durante 15 minutos (ajustes `terreno_pin_intentos_maximos` y `terreno_pin_bloqueo_minutos`, por empresa), más rate limit con fallo cerrado por RUT y por origen. La respuesta es la misma exista o no el RUT. **El PIN solo abre Trabajador y Terreno:** no entra quien tenga otros portales (ERP, Supervisor), segundo factor activo o rol de plataforma; ellos usan su correo. La sesión es una sesión normal de Better Auth del usuario vinculado a la persona. Ingreso, intento fallido y bloqueo quedan en la cadena `seguridad` de la auditoría global (`seguridad.pin.*`, sin IP en claro).
+5. **Teléfono personal (T-04, preparación).** `core.credenciales_terreno.telefono_personal_habilitado` existe, apagada por defecto. El flujo de consentimiento y de costo va con Face ID.
+
+**Pendientes de decisión de Carlos (no se asumen).**
+
+- **D-03** · Prueba de vida obligatoria desde la primera versión con rostro.
+- **D-04** · Guardar solo la plantilla del rostro, sin foto de referencia.
+
+Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría (B4) soporta ambos casos sin cambiar.
