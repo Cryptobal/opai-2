@@ -69,7 +69,7 @@ export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
       <ListScreen<FolioCaf>
         state={state}
         titulo="Folios"
-        subtitulo="Facturación · rangos autorizados por CAF"
+        sinCabecera
         accionPrincipal={
           puedeCargar ? (
             <Button variant="primary" onClick={() => setSubirAbierta(true)}>
@@ -103,7 +103,7 @@ export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
           error: { titulo: "No pudimos cargar los folios" },
           vacio: {
             titulo: "Sin folios cargados",
-            descripcion: "Suba el XML del CAF emitido por el SII para habilitar la emisión electrónica.",
+            descripcion: "Sube el XML del CAF emitido por el SII para habilitar la emisión electrónica.",
             accion: puedeCargar ? (
               <Button variant="primary" onClick={() => setSubirAbierta(true)}>
                 Subir CAF

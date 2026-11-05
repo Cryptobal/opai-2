@@ -39,6 +39,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36).",
   "platform.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36).",
+  "platform.indicadores.resolver":
+    "Solo personas: aprobar un indicador legal cambia el cálculo de todas las empresas y lo decide un humano (ADR-032, CAR-193).",
   "core.users.restablecer_mfa":
     "Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54).",
   "platform.usuarios.restablecer_mfa":
@@ -96,6 +98,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
   "core.anexos.rechazar":
     "Solo personas: rechazar el anexo de contrato es una decisión humana responsable (Brief 07b PR 4, ADR-032).",
+  "cpq.compartir.ver":
+    "Interna: la abre el cliente en /p/<slug>/<token> sin sesión, con el enlace revocable y con vencimiento como credencial; los agentes gestionan el enlace con cpq.compartir.crear y revocar.",
   "cpq.cotizaciones.aprobar":
     "Solo personas: es el control humano sobre lo que propone un agente (margen CPQ).",
   "cpq.cotizaciones.rechazar_aprobacion":
@@ -108,8 +112,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034).",
   "comercial.importar_1_0":
     "Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25).",
+  "finanzas.apertura.importar":
+    "Solo personas: carga de apertura contable y de cobranza desde 1.0 (saldos, facturas y folios); gobierno de datos del tenant (CAR-168).",
+  "finanzas.apertura.revertir":
+    "Solo personas: deshace una carga de apertura desde 1.0; gobierno de datos del tenant (CAR-168).",
   "comercial.solicitudes.recibir_formulario_web":
     "Interna: el endpoint público `/api/t/[slug]/solicitudes` valida la clave del canal antes de existir sesión (Brief 07 PR 2).",
+  "finanzas.bancos.recibir_web4leads":
+    "Interna: la ruta pública `/api/t/[slug]/banco/web4leads` la ejecuta tras leer el cuerpo; la capacidad verifica la firma HMAC con el secreto de la empresa (la entrada de agentes es finanzas.bancos.sincronizar).",
   "comercial.seguimientos.recibir_correo":
     "Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67).",
   "comercial.canales.rotar_token_formulario":

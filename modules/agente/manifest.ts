@@ -1,6 +1,7 @@
 import { defineModule } from "@opai/capabilities";
 import { z } from "zod";
 import { capacidades } from "./capacidades";
+import { RETENCION_DIAS, RETENCION_MAX, RETENCION_MIN } from "./conversaciones-guardado";
 
 /** Cliente del registro común, sin herramientas ni lógica de negocio propias (ADR-049). */
 export const manifest = defineModule({
@@ -25,6 +26,20 @@ export const manifest = defineModule({
         permiso: "agente:configurar",
         soloPersonas: true,
       }),
+    retencionConversacionesDias: z
+      .number()
+      .int()
+      .min(RETENCION_MIN)
+      .max(RETENCION_MAX)
+      .default(RETENCION_DIAS).meta({
+      etiqueta: "Retención de conversaciones (días)",
+      ayuda:
+        "Las conversaciones del agente sin actividad por más de este plazo se borran solas (Ley 21.719). Cada persona también puede borrar las suyas.",
+      ambito: "tenant",
+      permiso: "agente:configurar",
+      soloPersonas: true,
+      control: "numero",
+    }),
   }),
   eventos: [],
   capacidades,

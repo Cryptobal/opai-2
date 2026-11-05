@@ -24,7 +24,9 @@ export const configPlanSchema = z.object({
   hora: z.string(),
   ventana: z.object({ desde: z.string(), hasta: z.string() }),
   alResponder: z.enum(["pausar", "detener"]),
-  alTerminar: z.enum(["proponer_cierre", "solo_avisar"]),
+  etapaAlResponder: z.uuid().optional(),
+  alTerminar: z.enum(["proponer_cierre", "aplicar_cierre_propuesto", "solo_avisar"]),
+  noCerrarDesdeEtapa: z.uuid().optional(),
   pasos: z.array(pasoPlanSchema).max(MAX_PASOS),
 });
 

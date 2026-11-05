@@ -5,6 +5,7 @@ export * from "./catalogo";
 export * from "./email";
 export * from "./firma";
 export * from "./sii";
+export * from "./cesion";
 export * from "./dte/pdf";
 export * from "./geo/google";
 export * from "./ia/proveedores";

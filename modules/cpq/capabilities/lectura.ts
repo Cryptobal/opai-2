@@ -33,12 +33,13 @@ export const cotizacionesList = defineCapability({
   auditarLectura: (s) => s.items.flatMap((c) => [c.id, c.negocioId]),
   id: "cpq.cotizaciones.list",
   descripcion:
-    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio y por estado; las archivadas quedan fuera salvo que se pidan.",
+    "Lista las cotizaciones del tenant con su última versión (estado, moneda, validez y venta mensual), filtrables por negocio y por estado; las archivadas quedan fuera salvo que se pidan (todas o solo ellas).",
   permiso: PERMISO_READ,
   input: listaSchema.extend({
     negocioId: uuidSchema.optional(),
     estado: estadoSchema.optional(),
     incluirArchivadas: z.boolean().default(false),
+    soloArchivadas: z.boolean().default(false).describe("Solo las archivadas (filtro «Archivadas»)."),
   }),
   output: z.object({ items: z.array(itemSchema), siguiente: z.string().nullable() }),
   efecto: "lectura",
@@ -48,7 +49,11 @@ export const cotizacionesList = defineCapability({
     if (input.negocioId) filtro["negocioId"] = input.negocioId;
     // Filtro relacional: no carga todas las versiones del tenant solo para filtrar la página.
     if (input.estado) filtro["versiones"] = { some: { estado: input.estado } };
-    else if (!input.incluirArchivadas) filtro["versiones"] = { none: { estado: "archivada" } };
+    else if (!input.incluirArchivadas && !input.soloArchivadas)
+      filtro["versiones"] = { none: { estado: "archivada" } };
+    // Archivar (CPQ v4) es de la cotización: por defecto fuera de la lista; «Archivadas» muestra solo ellas.
+    if (input.soloArchivadas) filtro["archivadaEn"] = { not: null };
+    else if (!input.incluirArchivadas) filtro["archivadaEn"] = null;
     const filas = await ctx.db.cpqCotizacion.findMany({
       where: filtro,
       orderBy: [{ id: "desc" }],

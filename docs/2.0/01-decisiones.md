@@ -829,6 +829,14 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 ---
 
+## Adenda ADR-046 · Menú «Más» del teléfono: variante A, un solo buscador y barra superior sin solape (CAR-182)
+
+**Fecha:** 4-nov-2026 (20:29) · **Estado:** vigente · **Decisión:** Carlos (chat, 4-nov-2026: «para el Más de celular tomar la recomendada») · **Implementa:** Claude (constructor, Sesión 1). Diseño en `design/export-inicio-mas/`.
+
+**Decisión.** (1) El menú «Más» usa la **variante A** del diseño: lista compacta con filas de 48 px, áreas plegables (encabezado de 48 px con ícono, nombre, conteo y chevron), solo el área activa abierta por defecto y lo que el usuario abre se recuerda por usuario y empresa en el navegador (preferencia de interfaz, como los recientes; no es dato de negocio ni lleva herramienta MCP). (2) «Fijados y recientes» va una sola vez, en una fila de hasta cuatro accesos rápidos bajo la búsqueda; las entradas fijadas que también están en las áreas llevan un pin. (3) **Un solo buscador en el teléfono:** el campo de «Más» se escribe en su lugar y el ícono de buscar de la barra superior abre la misma hoja en modo búsqueda, con el texto «Buscar o ir a…» y los mismos resultados (`core.buscar`, sin capacidades nuevas). Escritorio e iPad no cambian. (4) Barra superior a 375 px: el selector de portal trunca el nombre de la empresa y «ERP» pasa al interior del selector. (5) Cada entrada del menú tiene su propio ícono (sin repetidos dentro de «Más»).
+
+**No cambia.** El mapa de áreas, la barra inferior, la barra lateral de escritorio y el riel de iPad, los permisos y las capacidades. **Inicio** no se implementa con esta decisión (lo pidió Carlos el 5-nov-2026 y se implementó en CAR-182 sobre las láminas 01 a 07; sin capacidades nuevas).
+
 ## ADR-047 · Especificación funcional aprobada antes de diseñar o construir un módulo
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (pedido de Carlos, 23-oct) · Completa ADR-012 y ADR-043.
@@ -1048,18 +1056,18 @@ identidad de servicio en main.
 
 ## ADR-054 · Flujo operativo del 28-oct-2026
 
-**Fecha:** 28-oct-2026 · **Estado:** vigente · **Reemplaza a ADR-043 v3 en lo que choque** (y, con él, a la «Segunda modificación de Carlos (24-oct)» en lo que toca a `ESTADO.md`). Lo que no choca de ADR-043 v3 sigue vigente: integra solo el bot «OPAI 2.0», con squash, sin force-push ni rebase; Carlos conserva el veto; el Revisor usa el modelo contrario al que construyó.
+**Fecha:** 28-oct-2026 · **Estado:** vigente · **Reemplaza a ADR-043 v3 en lo que choque** (y, con él, a la «Segunda modificación de Carlos (24-oct)» en lo que toca a `ESTADO.md`). Lo que no choca de ADR-043 v3 sigue vigente: squash, sin force-push ni rebase; Carlos conserva el veto; el Revisor usa el modelo contrario al que construyó. **Quién integra:** ADR-060 (3-nov-2026).
 
 **Contexto.** Flujo acordado con Carlos el 28-oct-2026 y reglas de revisión e integración t618u (27-oct-2026 17:30), más los mandatos t500u (26-oct) y t682u (28-oct), bajo los cuales el bot ya aplicaba migraciones con respaldo (por ejemplo, el #91). El detalle, las reglas permanentes, las decisiones por confirmar, los pendientes y las preguntas abiertas están en [`OPERACION-agentes.md`](OPERACION-agentes.md); este ADR no los copia.
 
 **Decisión.**
 
 1. **El repo es la fuente única** del flujo de trabajo (`docs/2.0/`); manda `OPERACION-agentes.md` ante un choque.
-2. **Claude escribe los briefs** y construye. **Carlos** aprueba una vez por módulo una hoja de alcance de una página (1.0 es el piso, no el techo). El **bot «OPAI 2.0»** opera la cola: avisa al Revisor y a QA, aplica migraciones, integra y toma capturas.
+2. **Claude escribe los briefs**, construye e integra cuando cumple las condiciones (ADR-060). **Carlos** aprueba una vez por módulo una hoja de alcance de una página (1.0 es el piso, no el techo). El **bot «OPAI 2.0»** opera la cola: avisa al Revisor y a QA, aplica migraciones, puede integrar y toma capturas.
 3. **Cada PR actualiza `ESTADO.md`** (qué entró, qué quedó pendiente, qué se decidió). Linear queda como referencia.
-4. **Migraciones:** las aplica el bot «OPAI 2.0» en Neon con respaldo previo, primero `dev` y después `main`, con `lock_timeout` corto y verificación posterior; luego quita `migracion-pendiente` e integra.
+4. **Migraciones:** las aplica el bot «OPAI 2.0» en Neon con respaldo previo, primero `dev` y después `main`, con `lock_timeout` corto y verificación posterior; luego quita `migracion-pendiente`. Integración (squash): Claude o el bot (ADR-060).
 5. **Revisor:** una sola pasada; solo bloquea por seguridad, migraciones o datos; lo demás va a un PR de pendientes. Tras un push, revisa solo el delta.
-6. **Integración:** con los checks obligatorios en verde y la rama al día con `main`, sin bloqueos del Revisor ni veto de Carlos y, si el PR trae migración, ya aplicada con respaldo en `dev` y `main`.
+6. **Integración:** con los cuatro checks obligatorios en verde sobre el head, sin conflictos con `main` (traer `main` con merge solo si hay conflicto; ADR-061), sin veto de Carlos y, si el PR trae migración, ya aplicada con respaldo en `dev` y `main`; Revisor obligatorio solo si trae migración o toca RLS, permisos o datos de tenants, con «Revisor OPAI 2.0: sin bloqueos» sobre el head (ADR-060).
 7. **QA en vivo** después de integrar, sin frenar; los hallazgos de seguridad o datos abren un arreglo inmediato.
 
 **Consecuencias.** Se ajustan `AGENTS.md`, `CONTEXTO-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` (Carlos debe pegarlas de nuevo en el proyecto de claude.ai) y la cabecera de `ESTADO.md`. Quedan por alinear la plantilla del PR, `checklists/revision.md`, `checklists/qa.md`, `ROADMAP.md`, `PLAN-desarrollo.md` y `00-documento-de-arranque.md`; mientras tanto, manda este ADR. El cuarto check obligatorio (`rendimiento`, ADR-045) está por confirmar en el ruleset (`OPERACION-agentes.md` E.4).
@@ -1175,3 +1183,246 @@ identidad de servicio en main.
 **CASCADE de `instalacion_id`.** La FK `dias_calendario_instalacion_id_fkey` es `ON DELETE CASCADE` (migración `20261030000000`): al borrar una instalación del tenant se borran también sus feriados propios acotados a esa instalación, que no tienen sentido sin ella. Los feriados globales del tenant (`instalacion_id` nulo) y los de plataforma no se ven afectados. El trigger `mismo_tenant` garantiza que la instalación de una fila del tenant es del mismo tenant.
 
 **Consecuencias.** Reemplaza el «[dato a confirmar]» del #139 sobre la fuente de feriados movibles por este cálculo con revisión anual. Sin impacto en otros ADR. Las fechas marcadas **[por verificar]** se listan en el PR y en `ESTADO.md` para el primer contraste oficial.
+
+---
+
+## ADR-060 · Claude integra a `main`; el bot «OPAI 2.0» aplica migraciones y da apoyo
+
+**Fecha:** 3-nov-2026 · **Estado:** vigente · **Autor:** Carlos (decisión 19:29 CLT) · **Modifica** ADR-043 v3, ADR-054 y ADR-035 en lo que toca a **quién integra**; el resto de esos ADR sigue vigente.
+
+**Contexto.** Desde ADR-043 v3 y ADR-054 solo el bot «OPAI 2.0» hacía squash a `main` cuando se cumplían las condiciones; Claude construía y abría el PR pero no integraba. Carlos quiere cerrar el ciclo en el mismo chat de construcción, con todo el contexto registrado en el repo, pantallas siempre basadas en Claude Design, y el bot como operador de migraciones Neon y apoyo operativo.
+
+**Decisión.**
+
+1. **Claude** (proyecto «OPAI 2.0» en claude.ai y Claude Code) **integra a `main` con squash** cuando se cumplen las condiciones de integración de `AGENTS.md` («Integración a `main`»); el bot «OPAI 2.0» puede hacerlo también — **quien llegue primero**.
+2. El **bot «OPAI 2.0»** sigue aplicando las migraciones en Neon **con respaldo** (primero `dev`, luego `main`), quitando `migracion-pendiente` tras el aviso en el PR, operando la cola (Revisor, QA en vivo, capturas) y **también puede integrar con squash** bajo las mismas condiciones.
+3. **Condiciones de merge:** los cuatro checks obligatorios del ruleset «Proteger main» en verde sobre el head; sin conflictos con `main` (traer `main` con merge solo si hay conflicto; ADR-061); sin `VETO` ni etiqueta `veto` de Carlos; si trae migración, comentario del bot de migración aplicada y etiqueta `migracion-pendiente` quitada. **Revisor:** obligatorio solo si el PR trae migración o toca RLS, permisos o aislamiento por tenant; su OK para integrar es el comentario «Revisor OPAI 2.0: sin bloqueos» sobre el head; si no toca eso, no hace falta esperarlo.
+4. **Apoyo al bot:** comentario en el PR que empiece con `@opai-2.0:` o correo a **carlos.irigoyen@mail.grokbot.com** (asunto `OPAI 2.0: <tema>`, con número de PR).
+5. **Registro:** decisiones, briefs, diseños aprobados y `ESTADO.md` siguen obligatorios en el repo; lo acordado en chat que cambie reglas o alcance se escribe en el repo antes de seguir.
+
+**Consecuencias.** Se actualizan `AGENTS.md`, `OPERACION-agentes.md`, `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md`, `checklists/revision.md` y la cabecera de la plantilla del PR. Carlos debe pegar de nuevo las instrucciones en el proyecto de claude.ai. Las reglas del ruleset sobre rama al día con `main` quedan reemplazadas por ADR-061 (4-nov-2026).
+
+---
+
+## ADR-061 · «Proteger main» sin exigir rama al día con `main`
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos · **Modifica** ADR-043 v3, ADR-054 y ADR-060 en lo que toca a **actualización de la rama** antes del squash.
+
+**Contexto.** Hasta el 3-nov-2026 la integración exigía traer `main` con merge y comprobar que la rama no estuviera «behind» justo antes del squash. Eso frenaba PRs listos cuando `main` avanzaba por otros merges.
+
+**Decisión.**
+
+1. El ruleset «Proteger main» **ya no exige** que la rama esté al día con `main`. Basta con que **no tenga conflictos** con `main` y que los **cuatro checks obligatorios** estén en verde sobre el head: `typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos` y `migración pendiente`.
+2. **Traer `main` con merge** solo hace falta si GitHub reporta conflicto (o para resolverlo en local). Sin rebase ni force-push.
+3. **Justo antes del squash** quien integra **no** comprueba «behind»; comprueba checks en verde sobre el head y, cuando corresponde Revisor, «Revisor OPAI 2.0: sin bloqueos» sobre ese head.
+
+**Consecuencias.** Se alinean `AGENTS.md`, `OPERACION-agentes.md`, `01-decisiones.md` (ADR-054 §6), `checklists/revision.md`, `INSTRUCCIONES-proyecto-claude.md` y la plantilla del PR.
+
+---
+
+## Adenda ADR-019 · Explorador central de Documentos (CAR-182 · PR 4)
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude (constructor), puntos 2, 4 y 5 confirmados por Carlos el 4-nov-2026 (chat, «ok» a la recomendación) · **Complementa** ADR-019, ADR-022 y NÚCLEO-H.
+
+1. El explorador (`/documentos`, diseño v4 · 01 aprobado el 30-oct-2026) lee con `core.documentos.explorar`, una lectura nueva: `list` queda para las fichas. Alcance del supervisor y exclusión de documentos sensibles van en la consulta; la lectura se audita con los ids de la página (y de las personas cuyo nombre se muestra).
+2. **La fila «Documento restringido» del diseño no se implementa.** Mostrarla revelaría que existe un documento que el actor no puede ver. Ni filas ni contadores de lo excluido. *Confirmado por Carlos (4-nov-2026).* Si más adelante hace falta pedir acceso, será un botón «Solicitar acceso» que no revele nada.
+3. El nombre de la entidad propietaria solo se devuelve si el actor puede leer ese tipo de entidad; sin permiso viaja solo su tipo y su id.
+4. La búsqueda cubre nombre de archivo, título y etiquetas; no el RUT ni el contenido del archivo. *Confirmado por Carlos (4-nov-2026).* El RUT se encuentra por la ficha de la persona (datos personales, Ley 21.719); la búsqueda dentro del texto de los archivos queda como proyecto aparte, solo si Gard lo pide.
+5. Subir desde el explorador es a nivel empresa; subir a una persona, cuenta o instalación se hace desde su ficha hasta que exista el selector «Vincular a». *Confirmado por Carlos (4-nov-2026), en dos pasos:* ahora, empresa; en un PR siguiente, el selector «Vincular a», que solo ofrece entidades dentro del alcance de quien sube (el servidor lo valida igual), con lo que los supervisores podrán subir a sus instalaciones; ese PR pasa por el Revisor porque toca permisos y alcance.
+
+**Segundo paso del punto 5 (CAR-182 · «Vincular a»).** *Decisiones de Carlos, 5-nov-2026:* (a) el selector «Vincular a» del explorador ofrece la empresa (por defecto), una cuenta, una instalación o una persona, con los tipos de documento de la capa elegida; (b) los candidatos salen de las capacidades de listar existentes, con alcance y permiso en la consulta, y la persona se muestra solo por nombre (sin RUT); (c) el servidor sigue decidiendo (`verificarEntidad`, `tipoParaEntidad`): la UI no repite esa lógica; (d) **no se amplían permisos**: `core:documentos.manage` sigue siendo de owner, admin y gerente, y el caso «el supervisor sube a sus instalaciones desde el explorador» queda como decisión de permisos aparte (permiso nuevo acotado, pasa por el Revisor). Hoy el supervisor sube desde la ficha de su instalación o persona.
+
+---
+
+## Adenda ADR-019 y ADR-022 · El supervisor sube documentos a sus instalaciones (CAR-182)
+
+**Fecha:** 4-nov-2026 (17:10) · **Estado:** vigente · **Autor de la decisión:** Carlos (chat, 4-nov-2026) · **Implementa:** Claude (constructor), [brief](briefs/BRIEF-CAR-182-supervisor-sube-documentos.md) · **Cierra** el punto pendiente de la adenda del explorador de Documentos (punto 5 y «Segundo paso»: «decisión de permisos aparte») · **Complementa** ADR-016, ADR-019 y ADR-022.
+
+1. **Decisión de Carlos.** Los supervisores pueden subir documentos, **solo vinculados a instalaciones que tienen a su cargo**.
+2. **Permiso nuevo y estrecho:** `core:documentos.subir_alcance`, concedido al rol supervisor en `PATRONES_POR_ROL` (owner, admin y gerente lo cubren por comodín; viewer no). **No se amplía `core:documentos.manage`**, que sigue siendo de owner, admin y gerente. Se eligió este nombre porque el alcance (qué filas) es una dimensión aparte del permiso (qué acción) en ADR-022, y el sufijo `_alcance` dice que solo vale dentro del alcance del actor.
+3. **Mecanismo.** Las capacidades `core.documentos.iniciar_subida` y `core.documentos.confirmar_subida` aceptan el permiso nuevo como alternativa a `documentos.manage` (`Capacidad.permisosAlternos`: la autorización y la visibilidad en el MCP aceptan uno u otro; el handler acota). Quien tiene `manage` conserva todo igual. Quien solo tiene el permiso nuevo: (a) sube únicamente a una instalación dentro de `ctx.alcance.instalaciones`, comprobado en el servidor; (b) nunca a la empresa, una cuenta, una persona o un puesto, ni versiona un documento; (c) el documento queda con visibilidad en portales vacía (la más restrictiva), aunque el tipo traiga portales por defecto, y no puede cambiarla después (`core.documentos.update` exige `manage`); (d) confirma solo lo que subió él. Cualquier otro intento recibe el rechazo que ya daba el sistema (`FORBIDDEN` sin detalles, o `NOT_FOUND` idéntico para instalación fuera de alcance e inexistente).
+4. **Interfaz.** En `/documentos`, «Subir» aparece con el permiso nuevo y alcance por filas; «Vincular a» ofrece solo «Instalación» (candidatos de `core.instalaciones.list`, ya acotados); la hoja no muestra «Visible en portal». La UI solo ofrece; la capacidad decide.
+5. **Sin migración ni capacidad nueva**: los roles base son código y la herramienta MCP es la misma. Pasa por el Revisor (toca permisos y alcance).
+
+## ADR-062 · Cobranza de ventas: vencimiento derivado y recordatorios en días hábiles
+
+**Fecha:** 4-nov-2026 · **Estado:** propuesto (reglas por confirmar por Carlos) · **Origen:** CAR-166 (F4), auditoría de Finanzas §2.1, construido por Claude.
+
+**Contexto.** 1.0 materializa «vencida» con un cron que cambia `paymentStatus`, pierde de vista la factura con abono vencida y solo recuerda la confirmación de la proforma (+3, +7 y +12 días hábiles sin feriados), no el cobro de la factura. 2.0 no tenía cobranza.
+
+**Decisión.**
+
+1. **Vencida se deriva**, sin columna ni cron: documento 33/34 en estado `enviado` o `aceptado`, no cedido, con saldo y `fecha_vencimiento` (o emisión + plazo de cobro por defecto) anterior a hoy en la zona del tenant. El día del vencimiento no está vencido. Un abono parcial no saca la factura de la cobranza.
+2. **Tramos** 1-30, 31-60 y 61+ días vencidos, más «por vencer». El diseño dice «0-30 / 31-60 / 60+», que se solapa en 60.
+3. **Secuencia de recordatorios** configurable por empresa: hasta 3 pasos en días hábiles después del vencimiento (por defecto 3, 7 y 12), con los feriados del calendario del núcleo. Sale un paso por factura y por ejecución. Se detiene al pagar, al pausar la factura o al agotar los pasos.
+4. **Silencio por defecto (ADR-020):** el envío automático viene apagado; el envío manual existe siempre, es irreversible y pide aprobación a los agentes.
+5. **Historial de gestiones** (`finanzas.cobranza_gestiones`) con índice único parcial por documento y paso para que la secuencia no se repita.
+6. **WhatsApp:** solo enlace manual por ahora; el envío automático requiere aprobación por lote y queda para una etapa posterior.
+
+**Por confirmar (Carlos):** pasos contados desde el vencimiento (en 1.0, desde el envío de la proforma), tramos sin solape y WhatsApp solo manual.
+
+**Fuera de alcance:** seguimiento de proforma y estado de pago (F5), cesión y factoring.
+
+---
+
+## ADR-063 · Claude avanza sin esperar: integra y aplica migraciones
+
+**Fecha:** 4-nov-2026 (10:39 CLT) · **Estado:** vigente · **Autor:** Carlos · **Modifica** ADR-054 y ADR-060 en lo que toca a quién aplica migraciones y a qué se espera.
+
+**Decisión.**
+
+1. **Claude no espera al bot «OPAI 2.0» ni a nadie para avanzar.** Con los cuatro checks obligatorios en verde sobre el head y sin conflicto, integra con squash. Si hay conflicto, trae `main` con merge, nunca rebase.
+2. **Claude aplica las migraciones** de sus PR: antes saca el respaldo de `main` en Neon (proyecto `steep-wildflower-90764475`), migra primero `dev` y luego `main`, quita `migracion-pendiente`, deja un comentario en el PR con lo aplicado y el respaldo, e integra. El bot puede seguir haciéndolo si llega primero.
+3. **Claude verifica por sí mismo** en Neon, GitHub y `test.opai.cl` que algo quedó aplicado; no se lo pregunta a Carlos.
+4. **Revisor:** solo se espera si el PR toca migraciones, permisos, RLS o datos de tenants. Lo demás se integra sin él.
+5. **Claude solo se detiene** ante lo que debe hacer Carlos: claves, 2FA, aprobaciones en 1Password o cambios en 1.0. Nunca maneja ni imprime secretos; si no tiene acceso a Neon en la sesión, lo reporta como bloqueo de acceso.
+6. Al terminar una tarea, sigue con la próxima de `ESTADO.md` sin preguntar.
+
+**Sin cambios:** Claude no escribe `VETO`; el veto de Carlos se respeta; `migracion-pendiente` la sigue poniendo quien abre el PR con migración.
+
+**Consecuencias.** `AGENTS.md` (roles y «Prohibido») queda alineado con esta decisión.
+
+## ADR-066 · Agente interno: conversaciones sin pisarse, retención por empresa y contexto revalidado
+
+**Fecha:** 5-nov-2026 · **Decide:** Claude (constructor, PR 5c de CAR-120), dentro de la spec del agente (R9, R19, R20); sin cambio de alcance de negocio.
+
+1. **Concurrencia.** `core.agente_conversaciones.version` y escritura condicional (`updateMany ... WHERE version`) con hasta 4 reintentos; si se agotan, `CONFLICT`. Se eligió esto sobre `SELECT ... FOR UPDATE` porque las reglas prohíben SQL crudo fuera de `enTransaccion`.
+2. **Idempotencia.** `turnoId` marca los dos mensajes del turno; el cliente lo usa también como `idempotencyKey`. Un turno ya guardado no se repite.
+3. **Retención.** Ajuste `agente.retencionConversacionesDias` (7 a 365, defecto 90) fijado solo por una persona con `agente:configurar`. Se aplica al listar, al abrir, al guardar y en el trabajo diario `agente.conversaciones.vencidas`, que corre por empresa con su RLS (nunca `dbAdmin`).
+4. **Contexto de ficha.** El navegador no es fuente de verdad: antes de guardar o usar `contexto`, el servidor lee la ficha (`core.cuentas.get`, `core.instalaciones.get`, `comercial.negocios.get` o `core.personas.get`) con la identidad delegada de la persona; si no la ve, responde «no existe».
+5. **Fuera de este PR:** adjuntos (dependen de `core.documentos`, ADR-019).
+
+---
+
+## ADR-064 · Apertura de Finanzas desde 1.0: sin migración, corrida reversible y entrada por capacidad
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude, con las respuestas de Carlos del 4-nov (sin fecha de corte, todas las facturas, export con key READ).
+
+**Decisión.** La apertura (saldos de banco, facturas con su saldo y último folio usado por tipo) se carga con `finanzas.apertura.importar` (solo personas, `dryRun`) y se deshace con `finanzas.apertura.revertir`. Cada carga es una corrida de `core.importaciones` (`versionContrato = finanzas-apertura@1`) con una fila por saldo, documento y folio. Nunca pisa: un documento con el mismo tipo y folio queda «sin cambio», un RUT sin cuenta en 2.0 o una cuenta bancaria inexistente se rechaza con motivo, y el folio solo avanza. Compara sumas de control 1.0 vs 2.0 (saldos, documentos, monto total, por cobrar). No hay migración: los saldos usan origen `manual` con `claveDedupe` `apertura:<corrida>`.
+
+**Pendiente de 1.0.** El exportador `opai1-export/v1` aún no trae `documentos` ni `saldos_bancarios`; hasta que Opai Producto los agregue, la entrada se entrega a la capacidad directamente.
+
+## ADR-065 · Movimientos bancarios por Web4Leads, no por Fintoc directo
+**Fecha:** 4-nov-2026 · **Decide:** Carlos (instrucción en el chat) · **Registra:** Claude
+
+**Decisión.** OPAI 2.0 recibe los movimientos del banco en línea por el webhook firmado de Web4Leads (que administra Carlos y ya usa Fintoc), en `/api/t/<slug>/banco/web4leads`, con la misma carga y firma HMAC-SHA256 que usa 1.0. No se construye un adaptador Fintoc propio ni se guardan credenciales del banco.
+
+**Por qué.** Web4Leads ya está operativo y probado con las cuentas de Gard; evita custodiar llaves bancarias y retrasar Finanzas.
+
+**Reglas.** El secreto de firma es por empresa, se ingresa en Configuración › Integraciones › «Banco (Web4Leads)» y se guarda cifrado (ADR-027). La deduplicación reutiliza la huella de la cartola para que ambas vías convivan. Las cuentas no reconocidas se ignoran con 200 (pendiente avisar al administrador).
+
+**Consecuencias.** Si más adelante se ofrece conexión bancaria como producto de plataforma, se reevalúa un adaptador Fintoc propio.
+
+## ADR-067 · Cierre de mes: seguimiento por borrador y emisión en lote todo o nada
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Claude (CAR-167 · F5), sobre el diseño aprobado «Programación y cierre».
+
+**Decisión.** La etapa de un borrador del cierre se **deriva** (`etapaCierre`) de su estado de documento y de una fila de seguimiento (`finanzas.ventas_cierre_seguimientos`); no hay un campo de etapa que pueda desincronizarse. La emisión en lote (`finanzas.cierre.emitir_lote`) es irreversible, exige aprobación humana a los agentes y corre en **una sola transacción**: si una emisión falla, no se emite ninguna, porque un parcial dejaría folios consumidos sin documento. Los elementos no listos o ya emitidos se omiten con motivo, y repetir el lote no duplica nada.
+
+**Fuera de este corte.** El enlace público donde el cliente aprueba u observa la proforma y el envío automático de la proforma quedan como pendiente: hoy una persona registra la respuesta del cliente.
+
+## ADR-070 · Frente único: las sesiones de Claude integran, el bot vigila y migra
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (instrucción directa en el chat del 4-nov-2026), registrada por Claude (Sesión 4).
+
+**Decisión.** Las sesiones de Claude planifican, construyen e integran sus propios PRs. El bot «OPAI 2.0» no integra ni escribe encargos o briefs: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:`, toma capturas) y aplica las migraciones de Neon, con respaldo previo y en `dev` antes que `main`, cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos» sobre el head del PR.
+
+**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. `AGENTS.md` (encabezado, «Tareas (Linear)» regla 4, «Prohibido», tabla de roles y «Integración a `main`») se alineó el 4-nov-2026 (CAR-162, Sesión 4): integra la sesión de Claude que construyó el PR, el bot solo vigila y aplica migraciones.
+
+## ADR-068 · El pendiente de una factura descuenta sus notas de crédito parciales
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (regla de negocio, dada directamente en el chat del 4-nov-2026), implementada por Claude (CAR-170). Cierra el N1 de #289.
+
+**Decisión.** El pendiente de una factura emitida es `monto − notas de crédito parciales (tipo 61) − cobrado`, nunca negativo. Ejemplo: factura de $1.000.000 con NC parcial de $200.000, pendiente $800.000. Solo restan las NC emitidas (`enviado` o `aceptado`) y monetarias (CodRef 1 anula, 3 corrige montos, como `montoNcAcumuladoMonetario`; la CodRef 2 «corrige texto» y las legadas sin código no restan); un borrador, una NC rechazada o anulada no restan. La **nota de débito (56) no suma deuda**.
+
+**Dónde rige.** Una sola fórmula en el dominio (`saldoPendiente`) y un lector en el servidor (`notasCreditoPorDocumento`, `pendienteFacturaEmitida`): tope de conciliación (`topes-conciliacion.ts`, que ahora toma el candado y recién después lee el documento), pago manual (también en la vista previa), candidatos de conciliación, cobranza y aging por cliente, «Hoy en Finanzas», y la ficha y búsqueda de ventas (`montoNotasCredito`, `montoPendiente`). `sincronizarCobroDocumento` salda la factura con `monto − NC`.
+
+**No cambia.** El flujo de caja ya trata cada NC como su propia celda negativa; restarla además de la factura la contaría dos veces.
+
+**Fuera de este corte.** Las facturas de compra (documentos recibidos) mantienen `total − conciliado`: las NC recibidas no se descuentan todavía.
+
+## ADR-069 · Rendiciones: módulo propio, un nivel de aprobación y el solicitante nunca decide lo suyo
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (decisiones del 4-nov-2026), implementadas por Claude (CAR-175, R1).
+
+**Decisión.** Rendiciones es un módulo vendible con su schema `rendiciones` y sin dependencia de Finanzas (ADR-048). (1) Rinden solo usuarios del ERP con permiso `rendiciones:rendir`; guardias y supervisores sin usuario, en un bloque posterior. (2) Hay **un solo nivel de aprobación con aprobador asignado**; el solicitante nunca aprueba, rechaza, devuelve ni paga lo suyo (regla en el dominio, en las capacidades y en un CHECK de la base). (3) «Pagada» se marca al confirmar el lote de pago (R3). (4) El kilometraje es **configurable por empresa** (por consumo, por tarifa por km o monto fijo por tramo) como configuración versionada evaluada en `packages/domain` (ADR-021); llega en R2. (5) «Devuelta» (se corrige y se reenvía) es distinto de «Rechazada» (definitiva). Aprobar y rechazar son irreversibles para los agentes (aprobación humana).
+
+**Consecuencias.** R1 entrega el modelo y las 9 capacidades por MCP sin pantallas; el código REN-n es correlativo por empresa con bloqueo; la boleta repetida (proveedor + folio + monto) solo avisa.
+
+**Adenda del 5-nov-2026 (Sesión 2, pendientes del Revisor de #303).** (1) El aviso de boleta duplicada solo mira las rendiciones que el actor puede ver: las propias, las que le asignaron para aprobar y, con `rendiciones:ver_todas`, las de toda la empresa. Por eso el aprobador ve los duplicados de lo que aprueba, y es intencional (necesita ese dato para decidir). (2) Quien no puede ver todas las rendiciones solo adjunta respaldos que él mismo subió; con `ver_todas` puede usar los de la empresa.
+
+
+## ADR-071 · Cobro por módulo en Plataforma, para todos los módulos
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (comentario «DECISIÓN CARLOS» en #313, 20:24 CLT, y encargo a la Sesión 6 del mismo día), registrada por Claude (Sesión 6, CAR-187). · Completa ADR-003 y ADR-058.
+
+**Decisión.** El cobro por módulo **no** se construye dentro de cada módulo: vive en **Plataforma** y sirve para todos (Comercial, CPQ, Rendiciones y, a futuro, las partes de Finanzas que se vendan por separado). Por empresa y por módulo se guarda el **precio mensual (UF o CLP)**, el **inicio del cobro**, el **fin de la prueba** y un **descuento opcional**. Cada mes se genera un **cargo listo para facturar**, **sin emitir facturas reales ni usar SimpleAPI**. Plataforma muestra de un vistazo qué módulos se facturan y cuáles no, por empresa y en total. El **catálogo de módulos** declara nombre comercial, dependencias y si se vende solo, preparado para separar Finanzas en partes (bancos, conciliación, ventas, compras, cobranza, factoring, flujo de caja) sin rehacerlo.
+
+**Relación con ADR-058.** ADR-058 fija la estructura (capas y unidades) sin montos. Este ADR permite **montos por empresa** (condiciones comerciales pactadas), no una lista de precios global. La unidad de B es un monto mensual fijo; el cobro por trabajador o por instalación de ADR-058 queda para después, con el modelo preparado. Las preguntas abiertas están en `modulos/plataforma-hoja-alcance.md` §6.
+
+**Consecuencias.** Rendiciones no tiene cobro propio y solo usa el estado del módulo (prueba, activo o suspendido). Hoja de alcance de Plataforma: `docs/2.0/modulos/plataforma-hoja-alcance.md`.
+
+**Adenda del 4-nov-2026 (Carlos, «DECISIÓN CARLOS» en CAR-188 a las 20:29 y en #314 a las 20:37 y 20:45 CLT).**
+
+1. **Forma de cobro por módulo.** Cada empresa paga un **plan base mensual fijo en UF** y cada módulo contratado tiene su propio precio en UF con su unidad. El motor soporta **precio fijo mensual** o **precio por unidad × cantidad del mes**, con **mínimo mensual opcional** y **después el descuento**; la **cantidad del mes queda guardada en el cargo** para auditarla. Referencia de unidades: Finanzas, fijo mensual (sin tramos, 26-oct); Rendiciones, por usuario activo habilitado para rendir (los aprobadores no se cobran); Asistencia, Nómina y Cumplimiento DT, por trabajador o guardia activo, con mínimo; Operaciones/puestos, por instalación activa; Comercial (CRM) y CPQ, por usuario con licencia; firma, por uso. Los montos los fija Carlos en Plataforma.
+2. **Primer mes proporcional** a los días desde el inicio del cobro; los siguientes, completos. **UF del cargo:** la del último día del mes que se cobra.
+3. **Pruebas.** No hay registro abierto ni autoservicio. Plataforma abre la prueba a una empresa ya validada (con RUT), por módulo y con fecha de término. Siete días antes del vencimiento llega un aviso a Plataforma. Al vencer, si Plataforma marcó **«pasa a cobro»**, empieza a cobrarse; si no, el módulo queda en **solo lectura** (ve sus datos, no crea nada nuevo, nada se borra).
+4. **Plan base** (reemplaza el punto 3 de ADR-058): empresa, usuarios, roles y permisos, ajustes, auditoría, notificaciones, documentos, tickets y portal. El motor de sueldos va dentro de Nómina y la firma se cobra por uso. Se refleja en el catálogo de módulos (bloque C).
+
+---
+
+## ADR-072 · Finanzas es un módulo con siete partes contratables por separado
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente (confirmado por Carlos en #318, 4-nov-2026 21:22 CLT) · **Autor:** Carlos (encargo a la Sesión 5 del 4-nov-2026: «Finanzas sigue siendo un solo módulo, pero con sus partes definidas, para poder vender una sola»), redactada por Claude (Sesión 5, CAR-189). · Completa ADR-071 (cobro por módulo en Plataforma; viene en el PR #314 de la Sesión 6, CAR-187).
+
+**Decisión.** Finanzas sigue siendo **un solo módulo** (`finanzas`, mismo prefijo de capacidades, mismo esquema de base). Se divide en siete **partes**: Bancos (incluye conciliación), Flujo de caja, Ventas y facturación, Cobranza, Factoring, Compras, y Contabilidad e informes. Dependencias: Flujo de caja necesita Bancos; Cobranza y Factoring necesitan Ventas; Contabilidad necesita Ventas o Compras. Rendiciones sigue siendo un módulo aparte (ADR-069).
+
+**Cómo.** Cada capacidad, entrada de menú y permiso de Finanzas declara su `parte`. Las partes contratadas se guardan junto al módulo de la empresa y se filtran en la autorización de capacidades, el menú, `core.me` y la lista de herramientas MCP. Lo que cruza partes (conciliar una factura, proyectar ventas en el flujo, la cobranza que mira el banco, «Hoy en Finanzas») solo aparece si ambas partes están contratadas; si no, se degrada sin error. No se renombran ids ni cambia la instantánea del MCP para una empresa con todo contratado. Sin partes declaradas, la empresa tiene todas (Gard no cambia).
+
+**Por qué así.** Partir Finanzas en módulos propios obligaría a renombrar las 77 capacidades y choca con el acoplamiento que dejó diferido F8b. Los permisos por submódulo que ya existen (`finanzas:bancos.ver`, `finanzas:compras.manage`) sirven por rol, no para vender.
+
+**Reparto.** El precio, el cobro y el catálogo comercial de cada parte los hace Plataforma (ADR-071, CAR-188); la Sesión 5 hace la declaración de partes en Finanzas y el filtro.
+
+**Confirmación de Carlos (4-nov-2026, #318).** Las siete partes, con Conciliación dentro de Bancos; Rendiciones sigue como módulo aparte. El catálogo de Plataforma (ADR-071) usa esta lista.
+
+---
+
+## ADR-073 · Flujo de caja: mandan la cartola y la proyección
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente, con las respuestas de Carlos del 4-nov-2026 21:22 CLT en #318 · **Autor:** Carlos (reglas dadas en el encargo a la Sesión 5 del 4-nov-2026), registrada por Claude (Sesión 5, CAR-189). · Ajusta ADR-026 y la cláusula «No cambia» de ADR-068.
+
+**Reglas de Carlos.**
+
+1. No se cierran ni se sellan semanas. Siempre mandan la cartola y las proyecciones. No hay ajuste manual de ingresos.
+2. Semanas pasadas: todos los movimientos de la cartola, por fecha del banco, estén conciliados o no; lo no conciliado va a una fila «Sin conciliar». El saldo parte del banco de hoy.
+3. Proyecciones: un solo criterio de semana, la fecha esperada de cobro: el promedio real de pago del cliente cuando tiene 3 o más facturas pagadas; si no, el vencimiento (emisión + plazo del cliente); editable a mano por factura (unifica `semanaComprometidoDte` de `packages/domain/src/finanzas/derivadas-dte.ts`, que hoy usa la emisión, con `proyeccion-flujo-cap.ts`, que usa el vencimiento). Las facturas vencidas pasan a la semana actual.
+4. Facturas cedidas: el depósito del factor es el ingreso (el factor deposita de una vez el monto menos su descuento; no hay remanente ni ingreso posterior) y la diferencia va a una cuenta contable configurable por empresa en Configuración, por defecto «Diferencia factoring» (o «Gasto financiero»); en el flujo aparece como egreso en esa fila.
+5. IVA y PPM: el IVA del mes M (débito − crédito) se paga en M+1 junto con el PPM (tasa configurada por empresa). Carlos marca o desmarca en el flujo, mes a mes, la postergación del IVA de ese mes a M+2; el PPM se paga siempre en M+1 aunque el IVA se postergue.
+6. Un solo umbral de saldo bajo, $15.000.000, que avisa solo por la campana.
+7. Pendiente de una factura = monto − notas de crédito parciales (61) − cobrado. La nota de débito (56) no es deuda. Las facturas vencidas importadas de 1.0 no entran en los recordatorios de cobranza.
+8. Cada factura programada o recurrente alimenta la proyección con su fecha esperada de cobro, sin contarse dos veces con su borrador o su factura (CAR-184).
+9. Una conciliación tardía no cambia los totales de semanas pasadas; lo prueba un test.
+
+**Cómo se lee.** Los ingresos se derivan siempre (cartola en el pasado; facturas, programaciones y recurrentes en el futuro); los egresos se siguen planificando a mano (sueldos, proveedores, impuestos movidos). La NC parcial deja de ser una celda negativa propia: se descuenta del pendiente de su factura (reemplaza la cláusula «No cambia» de ADR-068). Se retiran del flujo los restos del sellado (tabla `FlujoCierre`, tolerancia, permiso de cierre y eventos de sellado) con migración aditiva cuando corresponda, sin borrar datos.
+
+**Respuestas de Carlos (4-nov-2026, #318).** Quedaron incorporadas en las reglas 3, 4 y 5: promedio real de pago con 3 o más facturas pagadas, factoring sin remanente con la diferencia a una cuenta configurable, e IVA en M+1 con postergación opcional por mes.
+
+---
+
+## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (respuesta 5 del comentario «DECISIÓN CARLOS» en #318, 21:22 CLT), registrada por Claude (Sesión 5, CAR-189). · Cierra la pregunta abierta desde CAR-169 (#287).
+
+**Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
+
+---
+
+## ADR-075 · El XML firmado de un DTE se maneja en ISO-8859-1, como bytes que no se transcodifican
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude («Finanzas · Proyecto», Sesión 5), por encargo de Carlos del 4-nov 21:30 («define el encoding del XML»). · CAR-196.
+
+**Decisión.** El XML de un DTE (y el AEC de una cesión) se trata en **ISO-8859-1**, que es la codificación que exige el esquema del SII y sobre la que se calcula la firma. Desde que SimpleAPI lo devuelve firmado, el XML se maneja como **bytes opacos**: se guarda tal cual en el almacenamiento, el SHA-256 se calcula sobre esos bytes, y se envía igual al SII, a Octava y al cliente. Nunca se pasa por un `string` de JavaScript con UTF-8 ni se reescribe la declaración `encoding`. Solo para mostrar o leer campos se decodifica como ISO-8859-1. Si una API exige el XML como texto (por ejemplo, `STRINGXML` de Octava), se decodifica en ISO-8859-1 en ese borde y se verifica con un caso de prueba que la cesión acepta el documento.
+
+**Por qué.** Hoy el código lo lee y lo vuelve a codificar en UTF-8 (`ventas-xml.ts`, `octava.ts`). Con una razón social o una glosa con ñ o tildes, eso cambia los bytes firmados, invalida la firma y el SII o el RPETC lo rechazan.
+
+**Prueba obligatoria.** Una emisión y una cesión en certificación con «Compañía Ñuñoa» en la razón social y tildes en la glosa: el hash del XML guardado coincide con el que devolvió SimpleAPI y la cesión lo acepta.

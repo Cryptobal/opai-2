@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 import type { EventoPublicado } from "../../eventos/consumidores";
 import type { Contexto } from "../../types";
 import { datosDocumento, datosTarea, fechaCl } from "./variables-entidades";
@@ -64,6 +65,13 @@ export async function variablesDe(
       empresa,
       url: typeof p["url"] === "string" ? p["url"] : `${base}/solicitudes`,
     };
+  }
+  if (ev.tipo === "comercial.seguimiento.cliente_respondio" || ev.tipo === "comercial.seguimiento.cierre_aplicado") {
+    const n = ev.entidadId
+      ? await ctx.db.negocio.findUnique({ where: { id: ev.entidadId }, select: { titulo: true } })
+      : null;
+    const ruta = ev.tipo === "comercial.seguimiento.cierre_aplicado" ? "" : "/seguimiento";
+    return { negocio: { titulo: n?.titulo ?? "" }, empresa, url: `${base}/negocios/${ev.entidadId ?? ""}${ruta}` };
   }
   return { ...p, empresa };
 }

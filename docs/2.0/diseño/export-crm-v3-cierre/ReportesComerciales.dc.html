@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="neg" title="Negocios" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 4 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<a href="Negocios.dc.html" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Negocios</a>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Reportes comerciales" subtitle="Octubre 2026 · todo el equipo · actualizado hoy 10:30" hint-size="100%,80px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Exportar</x-import></sc-if>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ perOpts }}" value="{{ per }}" on-change="{{ setPer }}" label="Período" hint-size="240px,36px"></x-import>
+<div class="chip-row" style="max-width:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" label="Responsable" value="Todos" on-remove="{{ noop }}" hint-size="150px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" hint-size="100px,32px">Origen</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" hint-size="100px,32px">Etiqueta</x-import>
+</div>
+</div>
+<sc-if value="{{ stOk }}" hint-placeholder-val="{{ true }}">
+<div class="kpi-grid" style="margin-bottom:16px">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="{{ k.l }}" value="{{ k.v }}" delta="{{ k.d }}" direction="{{ k.dir }}" tone="{{ k.tone }}" hint-size="100%,96px"></x-import></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;align-items:start">
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><h2 class="t-subheading m0">Embudo y conversión</h2><span class="t-caption">Negocios abiertos hoy</span></div>
+<sc-for list="{{ funnel }}" as="f" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-body-sm" style="font-weight:500">{{ f.name }}</span><span class="t-body-sm t-numeric">{{ f.n }} · {{ f.val }}</span></div>
+<div style="height:8px;border-radius:999px;background:var(--ds-fill);overflow:hidden"><div style="height:100%;width:{{ f.w }};background:var(--ds-fg);border-radius:999px"></div></div>
+<span class="t-caption t-numeric">{{ f.meta }}</span>
+</div>
+</sc-for>
+</section>
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><h2 class="t-subheading m0">Ganados y perdidos</h2><span class="t-caption">Valor mensual del período</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+<div style="padding:12px;border-radius:10px;background:var(--ds-fill);display:flex;flex-direction:column;gap:2px"><span class="t-caption">Ganados · 2</span><span class="t-numeric" style="font:600 20px/26px var(--font-sans);color:var(--ds-success-fg)">$ 9.880.000</span></div>
+<div style="padding:12px;border-radius:10px;background:var(--ds-fill);display:flex;flex-direction:column;gap:2px"><span class="t-caption">Perdidos · 3</span><span class="t-numeric" style="font:600 20px/26px var(--font-sans);color:var(--ds-danger-fg)">$ 23.330.000</span></div>
+</div>
+<span class="t-label">Motivos de pérdida · últimos 12 meses</span>
+<sc-for list="{{ motivos }}" as="m" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 28px;gap:8px;align-items:center">
+<span class="t-body-sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.name }}</span>
+<div style="height:8px;border-radius:999px;background:var(--ds-fill);overflow:hidden"><div style="height:100%;width:{{ m.w }};background:var(--ds-danger);border-radius:999px"></div></div>
+<span class="t-body-sm t-numeric" style="text-align:right">{{ m.n }}</span>
+</div>
+</sc-for>
+<span class="t-caption" style="text-wrap:pretty">Competidores en «Eligió a la competencia»: Prosegur 4 · G4S 3 · Seguridad Bío Bío 2.</span>
+</section>
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><h2 class="t-subheading m0">Solicitudes por canal</h2><span class="t-caption">Y su conversión a negocio</span></div>
+<sc-for list="{{ canales }}" as="c" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-body-sm" style="font-weight:500">{{ c.name }}</span><span class="t-body-sm t-numeric">{{ c.sol }} solicitudes · {{ c.neg }} negocios · {{ c.pct }}</span></div>
+<div style="height:8px;border-radius:999px;background:var(--ds-fill);overflow:hidden;display:flex"><div style="height:100%;width:{{ c.wNeg }};background:var(--ds-accent)"></div><div style="height:100%;width:{{ c.wRest }};background:var(--ds-border-strong)"></div></div>
+</div>
+</sc-for>
+<span class="t-caption">Índigo: convertidas en negocio · gris: descartadas o en revisión.</span>
+</section>
+<section class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><h2 class="t-subheading m0">Pronóstico ponderado</h2><span class="t-caption">Por mes de cierre estimado</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end;height:160px">
+<sc-for list="{{ forecast }}" as="f" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch;justify-content:flex-end;height:100%">
+<span class="t-caption t-numeric" style="text-align:center">{{ f.v }}</span>
+<div style="height:{{ f.h }};border-radius:6px 6px 0 0;background:var(--ds-fg)"></div>
+<span class="t-body-sm" style="text-align:center">{{ f.m }}</span>
+</div>
+</sc-for>
+</div>
+<span class="t-caption t-numeric">Total ponderado $ 70.418.500 · valor por probabilidad de la etapa</span>
+</section>
+</div>
+<section style="display:flex;flex-direction:column;gap:12px;margin-top:24px">
+<h2 class="t-label m0">Por responsable</h2>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ repCols }}" rows="{{ repRows }}" cards="{{ true }}" to-card="{{ repCard }}" hint-size="100%,220px"></x-import></div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ repCols }}" rows="{{ repRows }}" hint-size="100%,220px"></x-import></sc-if>
+</section>
+</sc-if>
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="kpis" count="{{ 4 }}" hint-size="100%,96px"></x-import>
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;margin-top:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 280 }}" radius="{{ 16 }}" hint-size="100%,280px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 280 }}" radius="{{ 16 }}" hint-size="100%,280px"></x-import></div>
+</sc-if>
+<sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="chart" title="Sin negocios en este período" description="Cambia el período o quita filtros para ver datos." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a los reportes del equipo" description="Los ve el jefe comercial. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos calcular los reportes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="REP-500 · 29-10-2026 10:31" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;sinPermisos&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { per: "mes" };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const estado = this.props.estado ?? "ok";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, stOk: true };
+    if (!C || !NS.Badge) return base;
+    const open = C.stages.slice(0, 6).map((s) => { const ds = C.deals.filter((d) => d.stage === s.id); return { s, n: ds.length, v: ds.reduce((a, d) => a + d.val, 0) }; });
+    const maxV = Math.max(...open.map((o) => o.v));
+    const conv = ["68 %", "61 %", "72 %", "54 %", "81 %", "88 %"];
+    const days = [6, 8, 11, 15, 12, 7];
+    const mot = [["Precio", 14], ["Eligió a la competencia", 9], ["Sin presupuesto", 6], ["Cliente postergó la decisión", 5], ["Sin respuesta del cliente", 5]];
+    const can = [["Web", 42, 9], ["Agente", 18, 6], ["Correo", 11, 4], ["Manual", 7, 5]];
+    const fc = [["Oct", 6480000 * 0.9 + 8940000 * 0.9], ["Nov", 38400000], ["Dic", 15200000], ["Ene", 8100000]];
+    const fMax = Math.max(...fc.map((f) => f[1]));
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups, noop: () => {},
+      perOpts: [{ value: "mes", label: "Mes" }, { value: "tri", label: "Trimestre" }, { value: "ano", label: "Año" }],
+      per: this.state.per, setPer: (v) => this.setState({ per: v }),
+      stOk: estado === "ok", stLoading: estado === "cargando", stEmpty: estado === "vacio", stForbidden: estado === "sinPermisos", stError: estado === "error",
+      emptyAction: h(NS.Button, { variant: "secondary" }, "Ver el trimestre"),
+      gridCols: device === "desktop" ? "repeat(2,minmax(0,1fr))" : device === "tablet" ? "repeat(2,minmax(0,1fr))" : "minmax(0,1fr)",
+      kpis: [
+        { l: "En curso", v: C.fmt(open.reduce((a, o) => a + o.v, 0)), d: "+8 % vs sep", dir: "up", tone: "success" },
+        { l: "Ganado en octubre", v: "$ 9.880.000", d: "2 negocios", dir: "up", tone: "success" },
+        { l: "Conversión", v: "18 %", d: "−3 pts vs sep", dir: "down", tone: "danger" },
+        { l: "Ciclo promedio", v: "41 días", d: "−4 días", dir: "down", tone: "success" },
+      ],
+      funnel: open.map((o, i) => ({ name: o.s.name, n: o.n, val: C.fmt(o.v), w: Math.max(4, Math.round((o.v / maxV) * 100)) + "%", meta: days[i] + " días promedio · " + conv[i] + " pasa a la siguiente" })),
+      motivos: mot.map(([name, n]) => ({ name, n, w: Math.round((n / 14) * 100) + "%" })),
+      canales: can.map(([name, sol, neg]) => ({ name, sol, neg, pct: Math.round((neg / sol) * 100) + " %", wNeg: Math.round((neg / 42) * 100) + "%", wRest: Math.round(((sol - neg) / 42) * 100) + "%" })),
+      forecast: fc.map(([m, v]) => ({ m, v: "$ " + (v / 1e6).toFixed(1).replace(".", ",") + " M", h: Math.round((v / fMax) * 110) + "px" })),
+      repCols: [
+        { key: "name", label: "Responsable", render: (r) => h("span", { style: { display: "flex", gap: 8, alignItems: "center" } }, h(NS.Avatar, { initials: r.ini, size: 24 }), h("span", { style: { fontWeight: 500 } }, r.name)) },
+        { key: "ab", label: "Abiertos", align: "right" },
+        { key: "pipe", label: "En curso", align: "right", render: (r) => h("span", { className: "t-numeric" }, C.fmt(r.pipe)) },
+        { key: "pond", label: "Ponderado", align: "right", render: (r) => h("span", { className: "t-numeric" }, C.fmt(r.pond)) },
+        { key: "gan", label: "Ganado oct", align: "right", render: (r) => h("span", { className: "t-numeric" }, C.fmt(r.gan)) },
+        { key: "conv", label: "Conversión", align: "right" },
+        { key: "ciclo", label: "Ciclo", align: "right" },
+      ],
+      repRows: [
+        { id: 1, ini: "CR", name: "Camila Rojas", ab: 13, pipe: 93225000, pond: 52416000, gan: 5120000, conv: "22 %", ciclo: "38 d" },
+        { id: 2, ini: "MF", name: "Matías Fuentes", ab: 2, pipe: 20480000, pond: 7228000, gan: 4760000, conv: "15 %", ciclo: "44 d" },
+        { id: 3, ini: "FS", name: "Francisca Soto", ab: 2, pipe: 9630000, pond: 6147000, gan: 0, conv: "12 %", ciclo: "47 d" },
+      ],
+      repCard: (r) => ({ initials: r.ini, title: r.name, subtitle: r.ab + " abiertos · " + C.fmt(r.pipe), meta: "Conv. " + r.conv }),
+    };
+  }
+}
+</script>
+</body>
+</html>

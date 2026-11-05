@@ -44,6 +44,8 @@ export const bancosCuentasGuardar = defineCapability({
         ...data,
         flujoFilaId: data.flujoFilaId,
         activa: input.activa ?? true,
+        ultimaSyncEn: null,
+        saldoBanco: null,
       };
     }
     const guardado = await ctx.transaccion(async (tx) => {
@@ -67,6 +69,8 @@ export const bancosCuentasGuardar = defineCapability({
       moneda: guardado.moneda,
       flujoFilaId: guardado.flujoFilaId,
       activa: guardado.activa,
+      ultimaSyncEn: guardado.ultimaSyncEn?.toISOString() ?? null,
+      saldoBanco: guardado.saldoBanco === null ? null : Number(guardado.saldoBanco),
     };
   },
 });

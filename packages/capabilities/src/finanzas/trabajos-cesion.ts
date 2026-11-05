@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineTrabajo } from "../trabajos/registro";
 import { adaptadorCesionDe } from "./adaptador-cesion";
+import { sincronizarCobroDocumento } from "./cobros";
 
 export const trabajoConsultarCesionesRpetc = defineTrabajo({
   tipo: "finanzas.cesion.consultar_rpetc",
@@ -16,14 +17,44 @@ export const trabajoConsultarCesionesRpetc = defineTrabajo({
       take: 30,
     });
     let actualizadas = 0;
+    let fallidas = 0;
     for (const c of pendientes) {
       if (!c.operacionExternaId) continue;
-      const r = await adaptador.consultar(c.operacionExternaId);
-      if (r.estado === c.estado) continue;
-      await ctx.db.cesion.update({ where: { id: c.id }, data: { estado: r.estado } });
-      actualizadas += 1;
+      try {
+        const r = await adaptador.consultar(c.operacionExternaId);
+        if (r.estado === c.estado) continue;
+        if (r.estado === "anulada") {
+          // CAR-191: el RPETC anuló la cesión; la factura vuelve a ser cobrable y se puede ceder de nuevo.
+          await ctx.transaccion(async (tx) => {
+            // Guard contra doble ejecución: solo la primera anula y emite el evento.
+            const { count } = await tx.cesion.updateMany({
+              where: { id: c.id, estado: { not: "anulada" } },
+              data: { estado: "anulada" },
+            });
+            if (count !== 1) return;
+            // Solo se libera el documento si todavía apunta a esta cesión (no pisa una cesión más nueva).
+            await tx.documentoEmitido.updateMany({
+              where: { id: c.documentoId, cesionOperacionId: c.id },
+              data: { cesionEstado: "no_cedido", cesionOperacionId: null, cesionProveedor: null },
+            });
+            await sincronizarCobroDocumento(tx, c.documentoId);
+            await ctx.eventos.emitir(tx, {
+              tipo: "finanzas.venta.cesion_anulada",
+              entidadTipo: "documento_emitido",
+              entidadId: c.documentoId,
+              payload: { cesionId: c.id },
+            });
+          });
+        } else {
+          await ctx.db.cesion.update({ where: { id: c.id }, data: { estado: r.estado } });
+        }
+        actualizadas += 1;
+      } catch {
+        // Una consulta caída (Octava, token) no frena a las demás; se reintenta en la próxima hora.
+        fallidas += 1;
+      }
     }
-    return { actualizadas };
+    return { actualizadas, fallidas };
   },
 });
 

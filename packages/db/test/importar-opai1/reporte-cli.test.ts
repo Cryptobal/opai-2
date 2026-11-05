@@ -54,6 +54,8 @@ function deps(estado = estadoVacio()) {
 
 const ARGS = ["--dry-run", "--tenant", "gard", "--origen", `fixtures:${RUTA_FIXTURE}`];
 
+const T = "2026-11-01T09:00:00.000Z";
+
 describe("reporte y CLI de la simulación", () => {
   it("se niega sin --dry-run (y con --aplicar) y no lee nada", async () => {
     for (const argv of [ARGS.slice(1), [...ARGS, "--aplicar"]]) {
@@ -105,17 +107,12 @@ describe("reporte y CLI de la simulación", () => {
     ).toBe(1);
     await expect(
       ejecutar(["--dry-run", "--tenant", "gard", "--origen", "opai1"], d),
-    ).rejects.toThrow(/no configurado/);
+    ).rejects.toThrow(/OPAI1_EXPORT/);
   });
 
-  it("un origen inválido se rechaza sin mostrar valores", () => {
-    expect(() =>
-      validarDatos({ accounts: [{ id: "x", name: "Persona Secreta", rut: 5 }] }),
-    ).toThrow(/accounts\.0\.rut/);
-    try {
-      validarDatos({ accounts: [{ id: "x", name: "Persona Secreta", rut: 5 }] });
-    } catch (e) {
-      expect(String(e)).not.toContain("Persona Secreta");
-    }
+  it("un dato inválido ya no detiene la carga ni muestra valores", () => {
+    const d = validarDatos({ accounts: [{ id: "x", name: "Persona Secreta", rut: 5, createdAt: T, updatedAt: T }] });
+    expect(d.accounts).toHaveLength(1);
+    expect(JSON.stringify(d.advertencias)).not.toContain("Persona Secreta");
   });
 });

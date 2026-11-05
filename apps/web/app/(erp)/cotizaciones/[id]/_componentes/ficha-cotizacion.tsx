@@ -15,19 +15,11 @@ import { hayBarraFijaCpq, bloqueoEnvioCpq } from "./acciones-cotizacion-logica";
 import { AccionesCotizacion } from "./acciones-cotizacion";
 import { FichaCotizacionCuerpo } from "./ficha-cotizacion-cuerpo";
 import { FichaCotizacionModales, useModalesFichaCotizacion } from "./ficha-cotizacion-modales";
+import type { MetaFicha } from "./meta-ficha";
 import { ResumenCotizacion } from "./resumen-cotizacion";
 
-type MetaFicha = {
-  fechaCalculo?: string;
-  validaHastaContrato?: string | null;
-  avisoRecalculo?: { mensaje: string } | null;
-  puedeEnviar?: boolean;
-  puedeAprobarMargen?: boolean;
-  motivoNoAprobarMargen?: string | null;
-  autoaprobacionMargen?: boolean | null;
-  aprobacion?: { bandejaId?: string } | null;
-  requiereConfirmarMutual?: boolean;
-};
+const puestosDe = (secciones: { lineas: { id: string; nombre: string; tipo: string }[] }[]) =>
+  secciones.flatMap((s) => s.lineas.filter((l) => l.tipo === "puesto").map((l) => ({ id: l.id, nombre: l.nombre })));
 
 export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
   const router = useRouter();
@@ -65,6 +57,9 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
       {...(meta !== undefined ? { meta } : {})}
       verCostos={datos.costos}
       {...editarLinea}
+      {...(editable && datos.costos
+        ? { costos: { versionId: d.version.id, onGuardado: recargar, puestos: puestosDe(d.secciones) } }
+        : {})}
     />
   );
 
@@ -143,18 +138,7 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           </AccionFijaTelefono>
         ) : null}
       </DetailScreen>
-      <FichaCotizacionModales
-        modales={modales}
-        cotizacionId={d.cotizacion.id}
-        codigo={d.cotizacion.codigo}
-        versionNumero={d.version.numero}
-        cuentaId={d.cuentaId}
-        requiereAprobacion={Boolean(c.requiereAprobacion)}
-        estadoVersion={d.version.estado}
-        enviada={d.version.estado === "enviada" || d.version.estado === "aceptada"}
-        verCostos={datos.costos}
-        recargar={recargar}
-      />
+      <FichaCotizacionModales modales={modales} d={d} calculo={c} meta={meta} verCostos={datos.costos} recargar={recargar} />
     </>
   );
 }

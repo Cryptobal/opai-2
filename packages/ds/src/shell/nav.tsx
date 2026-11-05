@@ -1,11 +1,12 @@
 import { Ellipsis as IconoMenu } from "lucide-react";
+import { useCallback } from "react";
 
 import { cn } from "../cn";
 import type { ItemMenu } from "../components/menu";
 import { Contador, Punto } from "./contador";
 import { MenuMas } from "./menu-mas";
 import type { ItemFijado } from "./fijados";
-import { esActivo, LinkPorDefecto, type LinkComponent, type NavItem } from "./types";
+import { type BusquedaMasRender, esActivo, LinkPorDefecto, type LinkComponent, type NavItem } from "./types";
 
 export type NavProps = {
   items: readonly NavItem[];
@@ -28,6 +29,12 @@ type InferiorProps = NavProps & {
   errorFijados?: boolean;
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
+  onFijar?: (item: ItemFijado) => void;
+  /** Usuario y empresa: «Más» recuerda por ellos qué áreas deja abiertas. */
+  epoca?: string;
+  /** Resultados de búsqueda de «Más»: sin ellos, la hoja no trae campo de búsqueda. */
+  busqueda?: BusquedaMasRender | undefined;
+  recientes?: () => readonly ItemFijado[];
 };
 
 /**
@@ -45,6 +52,10 @@ export function BottomNav({
   errorFijados,
   reintentarFijados,
   onDesfijar,
+  onFijar,
+  epoca,
+  busqueda,
+  recientes,
 }: InferiorProps) {
   // "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del riel ni de la barra lateral.
   const principales = elegidas ?? items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
@@ -61,6 +72,12 @@ export function BottomNav({
         ...principales.slice(visibles.length),
         ...items.filter((i) => i.pie || i.soloAmplio || i.fueraInferior),
       ];
+  const hrefsInferior = visibles.map((v) => v.href).join("\n");
+  // «Más» no repite lo que ya está en la barra inferior: tampoco entre los recientes.
+  const recientesMas = useCallback(
+    () => (recientes?.() ?? []).filter((r) => !hrefsInferior.split("\n").includes(r.href)),
+    [recientes, hrefsInferior],
+  );
   const enResto = !visibles.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn));
   return (
     <nav
@@ -71,7 +88,7 @@ export function BottomNav({
         {visibles.map((item) => {
           const activo = esActivo(rutaActual, item.href, item.exacta, item.activoEn);
           return (
-            <li key={item.href} className="relative min-w-0 flex-1">
+            <li key={item.href} className="relative min-w-fit flex-1">
               <Link
                 href={item.href}
                 title={item.etiqueta}
@@ -105,6 +122,10 @@ export function BottomNav({
               {...(errorFijados ? { errorFijados } : {})}
               {...(reintentarFijados ? { reintentarFijados } : {})}
               {...(onDesfijar ? { onDesfijar } : {})}
+              {...(onFijar ? { onFijar } : {})}
+              {...(epoca ? { epoca } : {})}
+              {...(busqueda ? { busqueda } : {})}
+              {...(recientes ? { recientes: recientesMas } : {})}
               extras={[]}
               {...(onNavegar ? { onNavegar } : {})}
               disparador={

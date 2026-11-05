@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import { Alerta, Button, Cabecera, Estado, avisar, type EstadoPantalla } from "@opai/ds";
+import { Alerta, Button, Estado, avisar, type EstadoPantalla } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -45,24 +45,14 @@ export function PantallaConfigDte({ state, cfg, esOwner }: Props) {
 
   if (state !== "ready" || !cfg) {
     return (
-      <section>
-        <Cabecera titulo="Configuración DTE" subtitulo="Facturación electrónica" />
-        <Estado state={state} variante="formulario">
-          <></>
-        </Estado>
-      </section>
+      <Estado state={state} variante="formulario">
+        <></>
+      </Estado>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 md:p-6">
-      <div>
-        <h1 className="t-title m-0">Configuración DTE</h1>
-        <p className="t-body-sm text-fg-muted m-0 mt-1">
-          Ambiente SII, conector de emisión y resolución del emisor. Las credenciales SimpleAPI y el certificado se
-          cargan en Configuración › Integraciones.
-        </p>
-      </div>
+    <div className="flex flex-col gap-6">
       {!esOwner ? (
         <Alerta tono="info" titulo="Solo lectura">
           Solo el owner puede cambiar el ambiente de producción o activar SimpleAPI.

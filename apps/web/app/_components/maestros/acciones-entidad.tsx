@@ -6,6 +6,8 @@ import { useState } from "react";
 
 import { avisar, type ItemMenu, Menu } from "@opai/ds";
 
+import { abrirAgente, useAgenteListo } from "../agente/abrir-agente";
+import type { Contexto } from "../agente/tipos";
 import { useBajoLg, usePinFicha } from "../pin-ficha-contexto";
 import { useCapacidad } from "../use-capacidad";
 import type { Confirmacion } from "./dialogo-confirmar";
@@ -32,10 +34,14 @@ export type AccionEntidad = {
 export function AccionesEntidad({
   acciones,
   etiqueta,
+  agente,
 }: {
   acciones: AccionEntidad[];
   etiqueta: string;
+  /** La ficha ofrece «Preguntar a OPAI sobre esta …» (cuenta, instalación, negocio o persona). */
+  agente?: { contexto: Contexto; nombre: string; articulo: string };
 }) {
+  const hayAgente = useAgenteListo();
   const { fijar } = useParametros();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [confirmando, setConfirmando] = useState<AccionEntidad | null>(null);
@@ -65,6 +71,14 @@ export function AccionesEntidad({
       else void correr(a);
     },
   }));
+  if (agente && hayAgente) {
+    items.push({
+      id: "preguntar-agente",
+      etiqueta: `Preguntar a OPAI sobre ${agente.articulo}`,
+      separador: true,
+      onSelect: () => abrirAgente({ contexto: agente.contexto, etiqueta: agente.nombre }),
+    });
+  }
   // Bajo 1024 px «Fijar» deja la cabecera y va aquí, tras la primera acción (CAR-65): así no cae bajo
   // el encabezado de un grupo («Cambiar estado») ni junto a lo destructivo.
   if (pin && bajoLg) {

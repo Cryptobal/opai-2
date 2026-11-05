@@ -77,6 +77,35 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["finanzas.ventas_programaciones"],
     valores: () => ({ precio_unitario_clp: 1, precio_unitario_uf: null }),
   },
+  // Rendiciones (CAR-175): CHECK de tipo, estado, centro de costo (administración sin instalación),
+  // aprobador distinto del solicitante y monto positivo en los gastos.
+  "rendiciones.rendiciones": {
+    valores: (ctx) => ({
+      tipo: "compra",
+      estado: "borrador",
+      centro_costo: "administracion",
+      instalacion_id: null,
+      solicitante_id: ctx.usuario,
+      aprobador_id: null,
+      decidida_por_id: null,
+      monto_total: 0,
+    }),
+  },
+  "rendiciones.rendicion_items": { valores: () => ({ monto: 1 }) },
+  // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
+  "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
+  // Finanzas · cobranza (CAR-166): CHECKs de canal, origen y resultado.
+  "finanzas.cobranza_gestiones": {
+    dependencias: ["finanzas.documentos_emitidos", "core.cuentas"],
+    valores: (ctx) => ({
+      documento_id: id(ctx, "finanzas.documentos_emitidos"),
+      cuenta_id: id(ctx, "core.cuentas"),
+      canal: "correo",
+      origen: "manual",
+      resultado: "enviado",
+      paso: null,
+    }),
+  },
   // CPQ (CAR-119): CHECK de tipo de línea (lineas_tipo_check).
   "cpq.lineas": { valores: () => ({ tipo: "item" }) },
   // CPQ (CAR-135): CHECK tipo/base; `copia` no debe regenerar `tipo` (índice único parcial por tenant+tipo).
@@ -143,6 +172,16 @@ export const AJUSTES: Record<string, Ajuste> = {
       estado: "pendiente_aprobacion",
       destinatarios_json: '[{"email":"envio@test.qa"}]',
       snapshot_json: "{}",
+    }),
+  },
+  // Enlace público (CPQ v4): el CHECK pide un hash de 64 hex; el uuid de la empresa sin guiones lo es.
+  "cpq.enlaces_compartidos": {
+    dependencias: ["cpq.cotizaciones", "cpq.versiones"],
+    fijas: ["token_hash"],
+    valores: (ctx) => ({
+      cotizacion_id: id(ctx, "cpq.cotizaciones"),
+      version_id: id(ctx, "cpq.versiones"),
+      token_hash: ctx.tenant.replaceAll("-", "").repeat(2),
     }),
   },
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
@@ -257,6 +296,26 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.etiqueta_asignaciones": {
     dependencias: ["core.etiquetas", "core.cuentas"],
     valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas") }),
+  },
+  // CAR-157: vocabularios cerrados en corrida y fila de registro.
+  "core.importaciones": {
+    valores: () => ({
+      sistema: "opai1",
+      origen: "fixtures",
+      version_contrato: "opai1-export/v1",
+      modo: "simular",
+      estado: "completada",
+      conteos: "{}",
+    }),
+  },
+  "core.importaciones_filas": {
+    dependencias: ["core.importaciones"],
+    valores: (ctx) => ({
+      importacion_id: id(ctx, "core.importaciones"),
+      entidad: "cuenta",
+      id_1_0: "acc-prueba-dos-empresas",
+      accion: "omitido",
+    }),
   },
   "core.valores_tenant": {
     valores: () => ({

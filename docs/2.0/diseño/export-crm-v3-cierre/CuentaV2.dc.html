@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cue" title="Cuentas" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" notifications="{{ 4 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0;z-index:3"><a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Cuentas</a><span style="flex:1"></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" on-click="{{ toggleMenu }}" hint-size="44px,44px"></x-import></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Cuentas</a>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Prospecto · Providencia" title="Clínica Los Leones S.A." subtitle="RUT 76.418.552-K · 1 negocio abierto · responsable Camila Rojas" badge="{{ factBadge }}" hint-size="100%,80px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="150px,40px">Nuevo negocio</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" on-click="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;height:0;z-index:10"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ menuItems }}" on-select="{{ pickMenu }}" style="position:absolute;right:0;top:-16px;width:240px" hint-size="240px,150px"></x-import></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="res" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:24px;margin-top:20px">
+<section style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 class="t-label m0">Etiquetas</h2><span class="t-caption">Se filtran en Cuentas, Negocios y Contactos</span></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ tagGroups }}" as="g" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;min-height:44px">
+<span class="t-body-sm muted" style="width:88px;flex:none">{{ g.name }}</span>
+<div class="chip-row" style="flex-wrap:wrap;flex:1;min-width:0">
+<sc-for list="{{ g.tags }}" as="t" hint-placeholder-count="1"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" value="{{ t }}" on-remove="{{ noop }}" hint-size="120px,32px"></x-import></sc-for>
+<sc-if value="{{ g.canAdd }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" on-click="{{ openTag }}" hint-size="110px,32px">Etiqueta</x-import></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ tagOpen }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:360px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Agregar etiqueta libre" options="{{ tagOpts }}" value="{{ tagVals }}" multiple="{{ true }}" default-query="estrat" default-open="{{ true }}" on-change="{{ setTags }}" on-create="{{ noop }}" create-label="Crear" placeholder="Buscar o crear" hint-size="100%,260px"></x-import></div>
+</sc-if>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-label m0">Datos tributarios</h2><span class="t-caption">{{ factNote }}</span></div>
+</div>
+<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+<div style="flex:1 1 220px;max-width:320px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" value="{{ rut }}" mono="{{ true }}" error="{{ rutError }}" hint-size="100%,70px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="search" on-click="{{ openSii }}" disabled="{{ rutBad }}" hint-size="150px,40px">Consultar SII</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="" rows="{{ taxRows }}" hint-size="100%,220px"></x-import>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Cuenta" rows="{{ accRows }}" hint-size="100%,200px"></x-import>
+</div>
+</x-import>
+</div>
+</x-import>
+<sc-if value="{{ siiOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Datos del SII" description="RUT 76.418.552-K · consultado hoy 10:58" actions="{{ siiActions }}" on-close="{{ closeAll }}" hint-size="440px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ siiLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:12px"><span class="t-body-sm muted">Consultando al SII…</span><sc-for list="{{ skel }}" as="s" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" radius="{{ 10 }}" hint-size="100%,44px"></x-import></sc-for></div>
+</sc-if>
+<sc-if value="{{ siiNoResp }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="El SII no responde" description="Su servicio tardó más de 20 segundos. Tus datos no cambiaron; reintenta en unos minutos." code="SII-TIMEOUT · 29-10-2026 10:58" on-retry="{{ noop }}" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ siiSinInicio }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">Contribuyente sin inicio de actividades</b><span>«El RUT 77.902.115-3 existe pero no registra inicio de actividades. No se pueden emitir facturas a su nombre.»</span></span></div>
+<span class="t-body-sm muted">Pide al cliente que inicie actividades o factura a otra razón social del grupo.</span>
+</sc-if>
+<sc-if value="{{ siiOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:10px;align-items:center;padding:12px;border-radius:10px;background:{{ readyBg }};color:{{ readyFg }};font:500 14px/20px var(--font-sans)"><span class="ic sm {{ readyIcon }}" aria-hidden="true"></span><span>{{ readyLabel }}</span></div>
+<div style="display:flex;flex-direction:column;gap:0">
+<sc-for list="{{ cmp }}" as="c" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="t-body-sm" style="font-weight:600">{{ c.label }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="70px,22px">{{ c.st }}</x-import></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-caption">En la ficha</span><span class="t-body-sm" style="text-wrap:pretty">{{ c.mine }}</span></span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-caption">En el SII</span><span class="t-body-sm" style="text-wrap:pretty">{{ c.sii }}</span></span>
+</div>
+<sc-if value="{{ c.choose }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ choiceOpts }}" value="{{ c.pick }}" on-change="{{ c.setPick }}" label="{{ c.label }}" hint-size="100%,36px"></x-import></sc-if>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">Vista previa: cambian {{ changeCount }} campos al aplicar. El resto queda como está.</span>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ mergeOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Fusionar cuentas" description="{{ mergeDesc }}" actions="{{ mergeActions }}" on-close="{{ closeAll }}" hint-size="480px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<ol style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px" aria-label="Pasos">
+<sc-for list="{{ mSteps }}" as="s" hint-placeholder-count="4"><li style="display:flex;flex-direction:column;gap:6px"><span style="height:4px;border-radius:999px;background:{{ s.bar }}"></span><span style="font:{{ s.font }};color:{{ s.color }}">{{ s.label }}</span></li></sc-for>
+</ol>
+<sc-if value="{{ mPick }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar cuenta por nombre o RUT" hint-size="100%,44px"></x-import>
+<span class="t-label">Sugeridos</span>
+<sc-for list="{{ dupes }}" as="u" hint-placeholder-count="2">
+<div role="radio" aria-checked="{{ u.on }}" tabindex="0" style="display:flex;gap:12px;padding:14px;border-radius:16px;border:1px solid {{ u.border }};background:{{ u.bg }};align-items:flex-start;cursor:pointer"><span aria-hidden="true" style="width:20px;height:20px;border-radius:999px;flex:none;box-sizing:border-box;border:{{ u.dot }};background:var(--ds-surface)"></span><span style="display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="font-weight:600">{{ u.name }}</span><span class="t-caption">{{ u.why }}</span><span class="t-caption">{{ u.meta }}</span></span></div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ mCompare }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:96px minmax(0,1fr) minmax(0,1fr);gap:0;font:400 13px/18px var(--font-sans)">
+<span class="t-caption" style="padding:8px 0;border-bottom:1px solid var(--ds-border)">Campo</span><span class="t-caption" style="padding:8px;border-bottom:1px solid var(--ds-border)">Esta cuenta</span><span class="t-caption" style="padding:8px;border-bottom:1px solid var(--ds-border)">Duplicado</span>
+<sc-for list="{{ cmpRows }}" as="r" hint-placeholder-count="6">
+<span style="padding:10px 0;border-bottom:1px solid var(--ds-border);color:var(--ds-fg-muted)">{{ r.f }}</span>
+<span role="radio" aria-checked="{{ r.aOn }}" style="padding:10px 8px;border-bottom:1px solid var(--ds-border);background:{{ r.aBg }};display:flex;gap:8px;align-items:flex-start;cursor:pointer"><span aria-hidden="true" style="width:16px;height:16px;border-radius:999px;flex:none;box-sizing:border-box;border:{{ r.aDot }};margin-top:1px"></span><span style="min-width:0;overflow-wrap:anywhere">{{ r.a }}</span></span>
+<span role="radio" aria-checked="{{ r.bOn }}" style="padding:10px 8px;border-bottom:1px solid var(--ds-border);background:{{ r.bBg }};display:flex;gap:8px;align-items:flex-start;cursor:pointer"><span aria-hidden="true" style="width:16px;height:16px;border-radius:999px;flex:none;box-sizing:border-box;border:{{ r.bDot }};margin-top:1px"></span><span style="min-width:0;overflow-wrap:anywhere">{{ r.b }}</span></span>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ mSummary }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm">Se mueven a «Clínica Los Leones S.A.» y «Clinica Los Leones» se elimina:</span>
+<div style="display:flex;flex-direction:column"><sc-for list="{{ moves }}" as="m" hint-placeholder-count="6"><div class="pg-kv"><span class="l">{{ m.l }}</span><span class="v t-numeric">{{ m.v }}</span></div></sc-for></div>
+<div role="alert" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-danger-muted);color:var(--ds-danger-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-alert" aria-hidden="true" style="flex:none;margin-top:2px"></span><span>Fusionar no se puede deshacer. El duplicado deja de existir; su historial queda en esta cuenta.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Entiendo que es irreversible" hint-size="100%,44px"></x-import>
+</sc-if>
+<sc-if value="{{ mAgent }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg);font:400 14px/20px var(--font-sans)"><span class="ic sm i-bot" aria-hidden="true" style="flex:none;margin-top:2px"></span><span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">Esperando aprobación humana</b><span>El agente de datos propuso esta fusión hoy a las 08:30 por RUT idéntico. No se aplica hasta que una persona la apruebe.</span></span></div>
+<div style="display:flex;flex-direction:column"><sc-for list="{{ moves }}" as="m" hint-placeholder-count="6"><div class="pg-kv"><span class="l">{{ m.l }}</span><span class="v t-numeric">{{ m.v }}</span></div></sc-for></div>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;etiquetas&quot;,&quot;sii&quot;,&quot;fusionar&quot;],&quot;default&quot;:&quot;etiquetas&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;cargando&quot;,&quot;aplicado&quot;,&quot;rutInvalido&quot;,&quot;sinRespuesta&quot;,&quot;sinInicio&quot;,&quot;menu&quot;,&quot;elegir&quot;,&quot;comparar&quot;,&quot;resumen&quot;,&quot;agente&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { dlg: null, tagOpen: null, tags: ["Licitación pública"], picks: { giro: "sii", dir: "sii", act: "sii" }, menu: false };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "etiquetas";
+    const estado = this.props.estado ?? "ok";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, siiOk: true, mPick: true };
+    if (!C || !NS.Badge) return base;
+    const dlg = this.state.dlg ?? ({ sii: estado === "rutInvalido" || estado === "aplicado" ? "none" : "sii", fusionar: "merge" }[screen] || "none");
+    const close = () => this.setState({ dlg: "none" });
+    const btn = (p, t) => h(NS.Button, p, t);
+    const picks = this.state.picks;
+    const applied = estado === "aplicado";
+    const cmp = [
+      { k: "rs", label: "Razón social", mine: "Clínica Los Leones S.A.", sii: "CLINICA LOS LEONES S.A.", st: "Igual", tone: "success" },
+      { k: "giro", label: "Giro", mine: "Servicios de salud", sii: "Actividades de hospitales y clínicas privadas", st: "Distinto", tone: "warning", choose: true },
+      { k: "act", label: "Actividades económicas", mine: "—", sii: "861010 · Hospitales y clínicas · 862010 · Consultas médicas", st: "Vacío", tone: "neutral", choose: true },
+      { k: "dir", label: "Dirección tributaria", mine: "—", sii: "Av. Providencia 2330, of. 1201, Providencia", st: "Vacío", tone: "neutral", choose: true },
+      { k: "est", label: "Estado", mine: "—", sii: "Activo · inicio de actividades 14-03-2011", st: "Al día", tone: "success" },
+    ].map((c) => ({ ...c, pick: picks[c.k] || "sii", setPick: (v) => this.setState((s) => ({ picks: { ...s.picks, [c.k]: v } })) }));
+    const changeCount = cmp.filter((c) => c.choose && c.pick === "sii").length;
+    const ready = applied || (picks.giro === "sii" && picks.dir === "sii");
+    const rutBad = estado === "rutInvalido";
+    const mStep = { elegir: 0, comparar: 1, resumen: 2, agente: 3 }[estado] ?? 0;
+    const radio = (on) => ({ border: on ? "var(--ds-accent)" : "var(--ds-border)", bg: on ? "var(--ds-accent-muted)" : "var(--ds-surface)", dot: on ? "6px solid var(--ds-accent)" : "1.5px solid var(--ds-border-strong)" });
+    const cr = (f, a, b, pickB) => ({ f, a, b, aOn: !pickB, bOn: !!pickB, aBg: !pickB ? "var(--ds-accent-muted)" : "transparent", bBg: pickB ? "var(--ds-accent-muted)" : "transparent", aDot: !pickB ? "5px solid var(--ds-accent)" : "1.5px solid var(--ds-border-strong)", bDot: pickB ? "5px solid var(--ds-accent)" : "1.5px solid var(--ds-border-strong)" });
+    const moves = [{ l: "Contactos", v: "1 · Fernanda Navarro (correo distinto)" }, { l: "Instalaciones", v: "0" }, { l: "Negocios", v: "1 · NEG-0122 perdido" }, { l: "Cotizaciones", v: "1 · CPQ-2026-061" }, { l: "Documentos", v: "2" }, { l: "Actividad", v: "7 registros" }];
+    const mergeActions = mStep === 0 ? [btn({ key: "c", variant: "secondary", onClick: close }, "Cancelar"), btn({ key: "n" }, "Comparar")]
+      : mStep === 1 ? [btn({ key: "c", variant: "secondary" }, "Atrás"), btn({ key: "n" }, "Revisar resumen")]
+      : mStep === 2 ? [btn({ key: "c", variant: "secondary" }, "Atrás"), btn({ key: "n", variant: "destructive" }, "Fusionar")]
+      : [btn({ key: "c", variant: "secondary", onClick: close }, "Rechazar"), btn({ key: "n", variant: "destructive" }, "Aprobar y fusionar")];
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups, noop: () => {},
+      user: { name: "Camila Rojas", initials: "CR", role: "Ejecutiva comercial" },
+      factBadge: h(NS.Badge, { tone: ready && applied ? "success" : "warning" }, applied ? "Lista para facturar" : "Faltan 2 datos para facturar"),
+      factNote: applied ? "Lista para facturar · datos del SII aplicados el 29-10-2026" : "Faltan 2 datos para facturar: giro y dirección tributaria",
+      menuOpen: this.state.menu || estado === "menu", toggleMenu: () => this.setState((s) => ({ menu: !s.menu })),
+      menuItems: [{ label: "Editar cuenta", icon: "file" }, { label: "Fusionar con…", icon: "merge" }, { label: "Exportar", icon: "download" }, { divider: true }, { label: "Archivar cuenta", icon: "archive" }],
+      pickMenu: (it) => this.setState({ menu: false, dlg: it.label === "Fusionar con…" ? "merge" : "none" }),
+      tabItems: [{ id: "res", label: "Resumen" }, { id: "ins", label: "Instalaciones" }, { id: "con", label: "Contactos", count: 2 }, { id: "neg", label: "Negocios", count: 1 }, { id: "act", label: "Actividad" }, { id: "mail", label: "Correos", count: 4 }],
+      tagGroups: [
+        { name: "Rubro", tags: ["Salud"] }, { name: "Segmento", tags: ["Corporativo"] }, { name: "Tamaño", tags: ["Mediano · 5 a 19"] },
+        { name: "Libres", tags: this.state.tags, canAdd: true },
+      ],
+      tagOpen: this.state.tagOpen ?? (screen === "etiquetas"), openTag: () => this.setState({ tagOpen: true }),
+      tagOpts: ["Licitación pública", "Cliente estratégico", "Referido por cliente", "Riesgo de fuga"],
+      tagVals: this.state.tags, setTags: (v) => this.setState({ tags: v }),
+      rut: rutBad ? "76.418.552-7" : "76.418.552-K",
+      rutError: rutBad ? "El dígito verificador no corresponde. Revisa el RUT." : undefined,
+      rutBad,
+      openSii: () => this.setState({ dlg: "sii" }),
+      taxRows: [{ label: "Razón social", value: "Clínica Los Leones S.A." }, { label: "Giro", value: applied ? "Actividades de hospitales y clínicas privadas" : "Servicios de salud" }, { label: "Dirección tributaria", value: applied ? "Av. Providencia 2330, of. 1201, Providencia" : "Falta" }, { label: "Correo de facturación", value: "facturas@clinicalosleones.cl" }],
+      accRows: [{ label: "Estado", value: "Prospecto" }, { label: "Dirección", value: "Av. Providencia 2330, Providencia" }, { label: "Responsable", value: "Camila Rojas" }, { label: "Creada", value: "18-08-2026 · desde una licitación", numeric: true }],
+      siiOpen: dlg === "sii", mergeOpen: dlg === "merge", closeAll: close,
+      sheetSide: isPhone ? "bottom" : "right",
+      siiLoading: estado === "cargando", siiNoResp: estado === "sinRespuesta", siiSinInicio: estado === "sinInicio", siiOk: estado === "ok" || estado === "aplicado",
+      skel: [1, 2, 3, 4, 5],
+      readyBg: ready ? "var(--ds-success-muted)" : "var(--ds-warning-muted)", readyFg: ready ? "var(--ds-success-fg)" : "var(--ds-warning-fg)", readyIcon: ready ? "i-check-circle" : "i-alert",
+      readyLabel: ready ? "Lista para facturar al aplicar" : "Faltan 2 datos para facturar: giro y dirección tributaria",
+      cmp, changeCount,
+      choiceOpts: [{ value: "sii", label: "Aplicar el del SII" }, { value: "mio", label: "Mantener lo mío" }],
+      siiActions: estado === "sinRespuesta" || estado === "sinInicio" ? [btn({ key: "c", variant: "secondary", onClick: close }, "Cerrar")] : [btn({ key: "c", variant: "secondary", onClick: close }, "Mantener todo lo mío"), btn({ key: "a", onClick: close, disabled: estado === "cargando" }, "Aplicar " + changeCount + " cambios")],
+      mergeDesc: "Clínica Los Leones S.A. con un duplicado",
+      mSteps: ["Elegir", "Comparar", "Resumen", "Confirmar"].map((label, i) => ({ label, bar: i <= mStep ? "var(--ds-fg)" : "var(--ds-border)", color: i === mStep ? "var(--ds-fg)" : "var(--ds-fg-subtle)", font: i === mStep ? "500 12px/16px var(--font-sans)" : "400 12px/16px var(--font-sans)" })),
+      mPick: mStep === 0, mCompare: mStep === 1, mSummary: mStep === 2, mAgent: mStep === 3,
+      dupes: [
+        { name: "Clinica Los Leones", why: "Mismo RUT 76.418.552-K", meta: "Creada desde el sitio web el 02-09-2026 · 1 contacto · 1 negocio", on: true },
+        { name: "Clínica Los Leones Oriente", why: "Nombre parecido", meta: "RUT 76.990.214-1 · 2 contactos · cliente activo", on: false },
+      ].map((u) => ({ ...u, ...radio(u.on) })),
+      cmpRows: [cr("Nombre", "Clínica Los Leones S.A.", "Clinica Los Leones"), cr("RUT", "76.418.552-K", "76.418.552-K"), cr("Giro", "Servicios de salud", "Hospitales y clínicas", true), cr("Dirección", "Av. Providencia 2330", "Providencia 2330"), cr("Teléfono", "+56 2 2710 4400", "—"), cr("Responsable", "Camila Rojas", "Matías Fuentes")],
+      moves, mergeActions,
+    };
+  }
+}
+</script>
+</body>
+</html>

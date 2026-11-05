@@ -9,6 +9,15 @@ import {
 import { z } from "zod";
 
 import { prepararTurno } from "./bucle";
+import { lineaContexto, revalidarContexto } from "./conversaciones-contexto";
+import { contextoSchema, guardarTurno } from "./conversaciones-guardado";
+import {
+  conversacionesArchivar,
+  conversacionesBorrar,
+  conversacionesRenombrar,
+} from "./conversaciones-escritura";
+import { conversacionesGet, conversacionesList } from "./conversaciones";
+import { historialList } from "./historial";
 import { confirmarPlan, firmarPlan } from "./planes";
 
 export const modeloSchema = z.object({
@@ -46,8 +55,14 @@ export const turnoPreparar = defineCapability({
     mensaje: z.string().trim().min(1).max(6_000),
     modelo: modeloSchema,
     nivel: z.enum(["aprobar_todo", "paso_a_paso"]),
+    /** Retoma esta conversación; sin id se crea una nueva (R19). */
+    conversacionId: z.string().uuid().optional(),
+    contexto: contextoSchema.optional(),
+    /** Identifica el turno: un reintento con el mismo id no se vuelve a guardar. */
+    turnoId: z.string().uuid().optional(),
   }),
   output: z.object({
+    conversacionId: z.string().uuid().nullable(),
     token: z.string().nullable(),
     texto: externo(z.string()),
     pasos: z.array(z.unknown()),
@@ -59,15 +74,31 @@ export const turnoPreparar = defineCapability({
     const delegado = comoAgenteInterno(ctx);
     if (modo.dryRun)
       return {
+        conversacionId: null,
         token: null,
         texto: "Solicitará un plan sin ejecutar escrituras.",
         pasos: [],
         tokens: 0,
       };
     const firma = secreto();
+    // El contexto lo manda el navegador: se revalida con el alcance de la persona antes de usarlo.
+    if (input.contexto) await revalidarContexto(delegado, input.contexto);
     const ia = await iaElegidaDelAgente(delegado, input.modelo);
-    const plan = await prepararTurno(delegado, input.mensaje, ia);
+    const consulta = input.contexto
+      ? `${lineaContexto(input.contexto)}\n${input.mensaje}`
+      : input.mensaje;
+    const plan = await prepararTurno(delegado, consulta, ia);
+    // Guardar corre en la misma transacción que la auditoría (ADR-052): si falla, el turno falla cerrado.
+    const conversacionId = await guardarTurno(ctx, {
+      conversacionId: input.conversacionId,
+      turnoId: input.turnoId,
+      contexto: input.contexto,
+      mensaje: input.mensaje,
+      texto: plan.texto,
+      pasos: plan.pasos.map((p) => p.capacidad),
+    });
     return {
+      conversacionId,
       token: plan.pasos.length ? firmarPlan(delegado, plan, input.nivel, firma) : null,
       texto: plan.texto,
       pasos: plan.pasos,
@@ -92,32 +123,14 @@ export const planConfirmar = defineCapability({
     confirmarPlan(ctx, comoAgenteInterno(ctx), input.token, input.aceptar, secreto(), modo.dryRun),
 });
 
-export const historialList = defineCapability({
-  id: "agente.historial.list",
-  permiso: "agente:usar",
-  descripcion:
-    "Lista metadatos de las acciones del agente interno vía el usuario actual; no guarda conversaciones ni memoria.",
-  input: z.object({ limite: z.number().int().min(1).max(50).default(20) }),
-  output: z.array(z.object({ capacidad: z.string(), fecha: z.string() })),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx, input) {
-    if (!ctx.usuario) throw prohibido("Requiere usuario.");
-    // Un servicio no hereda el historial personal de su responsable (ADR-051).
-    if (ctx.principal?.tipo === "servicio") return [];
-    const filas = await ctx.db.auditEvent.findMany({
-      where: {
-        tenantId: ctx.tenantId,
-        actorType: "agent",
-        actorId: `agente-interno:${ctx.usuario.id}`,
-        viaUserId: ctx.usuario.id,
-      },
-      orderBy: { createdAt: "desc" },
-      take: input.limite,
-      select: { capability: true, createdAt: true },
-    });
-    return filas.map((f) => ({ capacidad: f.capability, fecha: f.createdAt.toISOString() }));
-  },
-});
-
-export const capacidades = [modelosList, turnoPreparar, planConfirmar, historialList];
+export const capacidades = [
+  modelosList,
+  turnoPreparar,
+  planConfirmar,
+  historialList,
+  conversacionesList,
+  conversacionesGet,
+  conversacionesRenombrar,
+  conversacionesArchivar,
+  conversacionesBorrar,
+];

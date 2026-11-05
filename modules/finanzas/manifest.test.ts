@@ -22,23 +22,23 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "finanzas:bancos.gestionar",
       "finanzas:bancos.autorizar",
     ]);
+    // Configuración DTE, Folios y Plan de cuentas salieron del menú: van en Configuración (CAR-182).
     expect(manifest.navegacion.map((n) => n.href)).toEqual([
-      "/finanzas/configuracion-dte",
-      "/finanzas/folios",
+      "/finanzas",
       "/finanzas/ventas",
       "/finanzas/compras",
+      "/finanzas/cobranza",
       "/finanzas/bancos",
-      "/finanzas/plan-de-cuentas",
       "/finanzas/flujo",
     ]);
-    expect(manifest.eventos).toHaveLength(33);
-    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(33);
+    expect(manifest.eventos).toHaveLength(44);
+    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(44);
     expect(manifest.configuracion).toBe(ajustesFinanzas);
   });
 
-  it("tiene 55 capacidades con ids únicos", () => {
+  it("tiene 77 capacidades con ids únicos", () => {
     const ids = manifest.capacidades.map((c) => c.id);
-    expect(ids).toHaveLength(55);
-    expect(new Set(ids).size).toBe(55);
+    expect(ids).toHaveLength(77);
+    expect(new Set(ids).size).toBe(77);
   });
 });

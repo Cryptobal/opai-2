@@ -92,7 +92,11 @@ export function HojaEnviarFirma() {
     >
       <div className="flex flex-col gap-4">
         {error ? <p className="t-caption text-danger-fg">{error}</p> : null}
-        <Campo etiqueta="Documento" htmlFor="ef-clase" ayuda="El tipo de documento según la política de firma.">
+        <Campo
+          etiqueta="Documento"
+          htmlFor="ef-clase"
+          ayuda="El tipo de documento según la política de firma."
+        >
           <Select id="ef-clase" opciones={CLASES} valor={clase} onCambiar={setClase} />
         </Campo>
         <div className="grid grid-cols-2 gap-3">
@@ -114,7 +118,11 @@ export function HojaEnviarFirma() {
             placeholder="Nombre completo"
           />
         </Campo>
-        <Campo etiqueta="Correo del firmante" htmlFor="ef-email" ayuda="Recibe el enlace personal de firma.">
+        <Campo
+          etiqueta="Correo del firmante"
+          htmlFor="ef-email"
+          ayuda="Recibe el enlace personal de firma."
+        >
           <Input
             id="ef-email"
             type="email"

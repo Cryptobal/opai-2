@@ -1,3 +1,5 @@
+import { produccionTributariaHabilitada } from "@opai/integrations";
+
 import type { Contexto } from "../types";
 import { chequeosCredencialesEmision } from "./ventas-preflight-credenciales";
 
@@ -34,6 +36,15 @@ export async function itemsPreflightEmision(
       : `Conector de emisión: ${proveedor}.`,
     proveedor === "simulado",
   );
+
+  if (cfg?.ambiente === "produccion" && !produccionTributariaHabilitada()) {
+    push(
+      "ambiente_acotado",
+      true,
+      "La empresa quedó en «producción», pero la producción del SII solo está disponible en app.opai.cl: aquí se usa certificación.",
+      false,
+    );
+  }
 
   await chequeosCredencialesEmision(ctx, proveedor, cfg, push);
 

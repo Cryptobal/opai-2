@@ -5,9 +5,11 @@ import { refDe } from "../core/crm/comun";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { reglaDeNegocio } from "../errores";
+import { aplicarEtapa } from "./transiciones-util";
+import { validarEntrada } from "./validaciones";
 
 type Tx = Parameters<Parameters<Contexto["transaccion"]>[0]>[0];
-type Seg = { id: string; negocioId: string; token: string; contactoId: string | null; estado: string };
+type Seg = { id: string; negocioId: string; token: string; contactoId: string | null; estado: string; motivo?: string | null };
 
 /** Registra en la ficha del negocio lo que pasó con un paso (nota, correo, llamada, whatsapp o tarea). */
 export async function actividadDePaso(
@@ -39,17 +41,54 @@ export async function enviarCorreoSeguimiento(ctx: Contexto, s: Seg, asunto: str
 }
 
 /**
+ * R13: al responder el cliente el negocio pasa a la etapa configurada, nunca hacia atrás y solo si
+ * cumple los requisitos de entrada de esa etapa. Devuelve `true` si se movió.
+ */
+export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: string, etapaId: string | undefined): Promise<boolean> {
+  if (!etapaId) return false;
+  const negocio = await tx.negocio.findUnique({ where: { id: negocioId } });
+  if (!negocio || negocio.estado !== "abierto") return false;
+  const [destino, actual] = await Promise.all([
+    tx.etapa.findUnique({ where: { id: etapaId } }),
+    tx.etapa.findUnique({ where: { id: negocio.etapaId } }),
+  ]);
+  if (!destino || !actual || destino.tipo !== "abierta" || !destino.activa) return false;
+  if (destino.embudoId !== negocio.embudoId || destino.orden <= actual.orden) return false;
+  try {
+    await validarEntrada(ctx, negocio, destino);
+  } catch {
+    return false;
+  }
+  await aplicarEtapa(ctx, tx, negocio, destino, { evento: "comercial.negocio.etapa_cambiada", motivo: "El cliente respondió" });
+  return true;
+}
+
+/**
  * El cliente respondió: según el plan, pausa o detiene el seguimiento (R: pausa y espera a la persona)
  * y deja una nota en la ficha. `texto` es de un tercero: se guarda como dato, nunca se interpreta.
  */
 export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: ConfigPlan, nota: { titulo: string; detalle?: string | null }): Promise<string> {
   const destino = transicionSeguimiento(s.estado as Parameters<typeof transicionSeguimiento>[0], config.alResponder === "detener" ? "cancelar" : "pausar");
-  const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: nota.detalle ?? null, negocioId: s.negocioId });
+  const movido = await avanzarPorRespuesta(ctx, tx, s.negocioId, config.etapaAlResponder);
+  const detalle = [nota.detalle, movido ? "El negocio pasó a la etapa configurada en el plan." : null].filter(Boolean).join(" ");
+  const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: detalle || null, negocioId: s.negocioId });
   if (destino) {
     await tx.seguimiento.update({ where: { id: s.id }, data: { estado: destino, motivo: "cliente_respondio" } });
     if (destino === "cancelado")
       await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
   }
-  await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
+  // Una sola vez por seguimiento: la primera respuesta registrada avisa al vendedor, haya o no cambio
+  // de estado (una pausa manual previa no la silencia). El motivo `cliente_respondio` marca «ya avisado»
+  // y se reserva con un UPDATE condicional: si dos correos llegan a la vez, solo uno modifica la fila y avisa.
+  let avisar = Boolean(destino);
+  if (!destino && s.motivo !== "cliente_respondio") {
+    const reservado = await tx.seguimiento.updateMany({
+      where: { id: s.id, OR: [{ motivo: null }, { motivo: { not: "cliente_respondio" } }] },
+      data: { motivo: "cliente_respondio" },
+    });
+    avisar = reservado.count > 0;
+  }
+  if (avisar)
+    await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
   return actividadId;
 }

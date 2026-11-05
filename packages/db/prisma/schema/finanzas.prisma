@@ -299,6 +299,8 @@ model DocumentoEmitido {
   cesionEstado          String?   @map("cesion_estado")
   cesionProveedor       String?   @map("cesion_proveedor")
   cesionOperacionId     String?   @map("cesion_operacion_id")
+  /// Pausa manual de la cobranza de este documento (BRIEF-29).
+  cobranzaPausada       Boolean   @default(false) @map("cobranza_pausada")
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -306,10 +308,14 @@ model DocumentoEmitido {
   referencias DocumentoEmitidoReferencia[]
   enviosSii   DteEnvio[]
   cesiones    Cesion[]
+  gestionesCobranza CobranzaGestion[]
 
   @@index([tenantId, estadoDte, fechaEmision])
   @@index([tenantId, cuentaId])
   @@index([tenantId, cotizacionId])
+  corridasProgramacion VentasProgramacionCorrida[]
+  enviosCliente        DocumentoEmitidoEnvio[]
+  seguimientoCierre    VentasCierreSeguimiento?
   @@map("documentos_emitidos")
   @@schema("finanzas")
 }
@@ -438,6 +444,10 @@ model CuentaBancaria {
   /// Mapeo de columnas para importación genérica CSV/XLSX (guardado por cuenta).
   mapeoColumnas  Json?    @map("mapeo_columnas")
   activa         Boolean  @default(true)
+  /// Última sincronización automática (Web4Leads); null si la cuenta solo recibe cartolas.
+  ultimaSyncEn   DateTime? @map("ultima_sync_en") @db.Timestamptz(6)
+  /// Saldo que reportó el banco en esa sincronización (CLP); el ledger de movimientos manda.
+  saldoBanco     BigInt?  @map("saldo_banco")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -487,6 +497,8 @@ model MovimientoBancario {
   sucursal      String?
   saldoDespues  BigInt?   @map("saldo_despues")
   claveDedupe   String    @map("clave_dedupe")
+  /// Id del movimiento en el sistema de origen (Web4Leads); null en cartola y manual.
+  idExterno     String?   @map("id_externo")
   /// pendiente | sugerido | conciliado | por_autorizar | ignorado
   estado        String    @default("pendiente")
   /// cartola | manual | web4leads
@@ -499,6 +511,7 @@ model MovimientoBancario {
   conciliaciones ConciliacionBanco[]
 
   @@unique([tenantId, cuentaId, claveDedupe])
+  @@unique([tenantId, cuentaId, idExterno])
   @@index([tenantId, cuentaId, estado, fecha])
   @@map("movimientos_bancarios")
   @@schema("finanzas")
@@ -675,12 +688,96 @@ model VentasProgramacionCorrida {
   tenantId       String   @map("tenant_id") @db.Uuid
   programacionId String   @map("programacion_id") @db.Uuid
   periodo        String
+  /// Borrador generado para el período (BRIEF-26).
+  documentoId     String?   @map("documento_id") @db.Uuid
+  fechaGeneracion DateTime? @map("fecha_generacion") @db.Date
+  /// UF usada (centavos de CLP), si la programación es en UF.
+  ufCentavos      BigInt?   @map("uf_centavos")
+  montoTotal      BigInt?   @map("monto_total")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
+  documento    DocumentoEmitido?  @relation(fields: [documentoId], references: [id], onDelete: Restrict)
 
   @@unique([programacionId, periodo], map: "ventas_programaciones_corridas_programacion_periodo_key")
   @@index([tenantId])
+  @@index([documentoId])
   @@map("ventas_programaciones_corridas")
+  @@schema("finanzas")
+}
+
+/// Envío de un documento emitido al cliente por correo, con PDF y XML (BRIEF-28 · CAR-155).
+model DocumentoEmitidoEnvio {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  documentoId   String   @map("documento_id") @db.Uuid
+  /// Primer correo = destinatario; el resto va en copia.
+  destinatarios String[]
+  /// "pdf" | "xml"
+  adjuntos      String[]
+  /// "enviado" | "fallido"
+  estado        String
+  error         String?
+  enviadoPor    String?  @map("enviado_por") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, documentoId, createdAt], map: "documentos_emitidos_envios_tenant_documento_idx")
+  @@map("documentos_emitidos_envios")
+  @@schema("finanzas")
+}
+
+/// Gestión de cobranza sobre un documento emitido: recordatorio (automático o manual) o nota (BRIEF-29).
+model CobranzaGestion {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  documentoId String   @map("documento_id") @db.Uuid
+  cuentaId    String   @map("cuenta_id") @db.Uuid
+  /// "correo" | "whatsapp_manual" | "nota"
+  canal       String
+  /// "manual" | "automatico"
+  origen      String
+  /// Número del paso de la secuencia (1 = primer recordatorio); nulo en gestiones manuales.
+  paso        Int?
+  /// "enviado" | "fallido" | "omitido"
+  resultado   String
+  detalle     String?
+  creadoPor   String?  @map("creado_por") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, documentoId, createdAt], map: "cobranza_gestiones_tenant_documento_idx")
+  @@index([tenantId, cuentaId, createdAt], map: "cobranza_gestiones_tenant_cuenta_idx")
+  @@map("cobranza_gestiones")
+  @@schema("finanzas")
+}
+
+/// Seguimiento del cierre de mes de un borrador: proforma enviada, OK u observación del cliente y OC/HES (BRIEF-33 · CAR-167).
+model VentasCierreSeguimiento {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  documentoId      String    @unique @map("documento_id") @db.Uuid
+  /// pendiente | enviada | observada | ok
+  estado           String    @default("pendiente")
+  requiereOcHes    Boolean   @default(false) @map("requiere_oc_hes")
+  ordenCompra      String?   @map("orden_compra")
+  hes              String?
+  observacion      String?
+  enviadaEn        DateTime? @map("enviada_en") @db.Timestamptz(6)
+  recordadaEn      DateTime? @map("recordada_en") @db.Timestamptz(6)
+  okEn             DateTime? @map("ok_en") @db.Timestamptz(6)
+  observadaEn      DateTime? @map("observada_en") @db.Timestamptz(6)
+  actualizadoPorId String?   @map("actualizado_por_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, estado])
+  @@map("ventas_cierre_seguimientos")
   @@schema("finanzas")
 }

@@ -33,6 +33,20 @@ export type EntidadDocumento = {
   id: string;
 };
 
+/** Entidades a las que se puede vincular un documento desde el explorador. */
+export type EntidadVinculable = "tenant" | "cuenta" | "instalacion" | "persona";
+
+/**
+ * Capa de tipos de documento de cada entidad vinculable: solo para OFRECER los tipos que calzan.
+ * El servidor decide (`tipoParaEntidad`, `CAPA_DE`); una prueba compara ambas tablas.
+ */
+export const CAPA_DE_ENTIDAD: Record<EntidadVinculable, string> = {
+  tenant: "empresa",
+  cuenta: "cuenta",
+  instalacion: "instalacion",
+  persona: "persona",
+};
+
 export const diasHasta = (vence: string | null) =>
   vence
     ? Math.round(

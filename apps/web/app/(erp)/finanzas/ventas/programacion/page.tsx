@@ -1,6 +1,6 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { LinkNext } from "@/app/_components/link-next";
-import { Badge, ListScreen, type EstadoPantalla } from "@opai/ds";
+import { Badge, estilosBoton, ListScreen, Tabs, type EstadoPantalla } from "@opai/ds";
 
 import { pesos } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
@@ -14,10 +14,22 @@ type Programacion = {
   instalacionNombre: string | null;
   tipoDte: 33 | 34;
   diaGeneracion: number;
+  frecuencia: string;
   moneda: string;
   montoTotal: number;
   proximaEjecucionEn: string | null;
 };
+
+const FRECUENCIA: Record<string, string> = {
+  mensual: "Mensual",
+  quincenal: "Quincenal",
+  semanal: "Semanal",
+  anual: "Anual",
+};
+const agenda = (p: Programacion) =>
+  `${FRECUENCIA[p.frecuencia] ?? p.frecuencia}, ${p.diaGeneracion === -1 ? "último día" : `día ${p.diaGeneracion}`}`;
+const monto = (p: Programacion) =>
+  `${pesos(p.montoTotal)}${p.moneda === "UF" ? " (UF, estimado)" : ""}`;
 
 async function cargar() {
   await requerirIdentidad("/finanzas/ventas/programacion");
@@ -31,12 +43,12 @@ async function cargar() {
 
 export const metadata = { title: "Programación recurrente" };
 
-/** Plantillas de facturación recurrente (CAR-25). */
+/** Programaciones de facturación recurrente (CAR-25, BRIEF-26). */
 export default function ProgramacionVentasPage() {
   return (
     <PaginaPortal
       portal="erp"
-      titulo="Ventas (DTE)"
+      titulo="Programación recurrente"
       ruta="/finanzas/ventas/programacion"
       cargar={cargar}
     >
@@ -51,10 +63,26 @@ function Contenido({ state, items }: { state: EstadoPantalla; items: Programacio
       <LinkNext href="/finanzas/ventas" className="text-sm text-fg-muted">
         ← Libro de ventas
       </LinkNext>
+      <Tabs
+        Link={LinkNext}
+        activa="plantillas"
+        tabs={[
+          { id: "plantillas", etiqueta: "Plantillas", href: "/finanzas/ventas/programacion" },
+          { id: "tablero", etiqueta: "Tablero del mes", href: "/finanzas/ventas/programacion/cierre" },
+        ]}
+      />
       <ListScreen<Programacion>
         state={state}
         titulo="Programación recurrente"
-        subtitulo="Plantillas que generan borradores (el cron no emite al SII)."
+        subtitulo="Cada período se genera un borrador para revisar; nada se envía al SII sin tu revisión."
+        accionPrincipal={
+          <LinkNext
+            href="/finanzas/ventas/programacion/nueva"
+            className={estilosBoton({ variant: "primary" })}
+          >
+            Nueva programación
+          </LinkNext>
+        }
         items={items}
         clave={(p) => p.id}
         href={(p) => `/finanzas/ventas/programacion/${p.id}`}
@@ -62,17 +90,23 @@ function Contenido({ state, items }: { state: EstadoPantalla; items: Programacio
         columnas={[
           { id: "nombre", etiqueta: "Plantilla", render: (p) => p.nombre },
           { id: "cliente", etiqueta: "Cliente", render: (p) => p.cuentaNombre },
+          { id: "monto", etiqueta: "Neto por período", render: monto },
+          { id: "agenda", etiqueta: "Agenda", render: agenda },
           {
-            id: "monto",
-            etiqueta: "Monto ref.",
-            render: (p) => (p.moneda === "CLP" ? pesos(p.montoTotal) : `${p.montoTotal} ${p.moneda}`),
+            id: "estado",
+            etiqueta: "Estado",
+            render: (p) => (
+              <Badge tono={p.activa ? "success" : "neutro"}>
+                {p.activa ? "Activa" : "Pausada"}
+              </Badge>
+            ),
           },
-          { id: "dia", etiqueta: "Día borrador", render: (p) => String(p.diaGeneracion) },
         ]}
         textos={{
           vacio: {
-            titulo: "Sin plantillas",
-            descripcion: "Importa desde OPAI 1.0 o crea plantillas cuando esté disponible la edición.",
+            titulo: "Sin programaciones",
+            descripcion:
+              "Crea una programación para facturar todos los meses al mismo cliente sin volver a digitar.",
           },
         }}
         tarjeta={(p) => (
@@ -86,8 +120,7 @@ function Contenido({ state, items }: { state: EstadoPantalla; items: Programacio
               {p.instalacionNombre ? ` · ${p.instalacionNombre}` : ""}
             </p>
             <p className="text-sm">
-              {p.moneda === "CLP" ? pesos(p.montoTotal) : `${p.montoTotal} ${p.moneda}`} · día{" "}
-              {p.diaGeneracion}
+              <span className="t-numeric">{monto(p)}</span> · {agenda(p)}
             </p>
           </>
         )}

@@ -96,7 +96,9 @@ async function correr(
     // El handler terminó: la escritura ya ocurrió. Nunca se libera la clave (duplicaría).
     await ctx.idempotencia.completar(
       reservaId,
-      salida.success ? salida.data : { [SALIDA_INVALIDA]: true },
+      salida.success
+        ? (c.salidaIdempotente?.(salida.data as never) ?? salida.data)
+        : { [SALIDA_INVALIDA]: true },
     );
   }
 

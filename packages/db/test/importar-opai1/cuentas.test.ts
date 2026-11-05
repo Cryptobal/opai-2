@@ -58,8 +58,8 @@ describe("plan de cuentas", () => {
       accion: "actualizar",
       motivo: "vincula_por_rut",
       destinoId: "c-1",
-      campos: ["razonSocial"],
     });
+    expect(por(plan, "acc-a1")?.campos).toEqual(expect.arrayContaining(["razonSocial"]));
     expect(por(plan, "acc-a6")).toMatchObject({ accion: "conflicto", motivo: "rut_ya_mapeado" });
     expect(por(plan, "acc-a5")).toMatchObject({
       accion: "conflicto",

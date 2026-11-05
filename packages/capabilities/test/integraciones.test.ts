@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { z } from "zod";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -268,5 +269,18 @@ describe("fallas de Google Maps visibles (autocompletar)", () => {
     ).find((i) => i.proveedor === "google_maps");
     expect(fila?.estado).toBe("error");
     expect(fila?.ultimoError).toMatch(/PERMISSION_DENIED/);
+  });
+});
+
+describe("secretos opcionales del catálogo", () => {
+  it("un secreto marcado opcional no impide que la integración quede configurada", async () => {
+    const { estadoIntegracion } = await import("../src/integraciones/resolver");
+    const def = {
+      id: "x", nombre: "X", categoria: "factoring" as const, modalidades: ["propia"] as const,
+      secretos: [{ nombre: "a", etiqueta: "A" }, { nombre: "b", etiqueta: "B", opcional: true }],
+      config: z.object({}), disponible: true,
+    };
+    expect(estadoIntegracion(def, null, ["a"])).toBe("configurada");
+    expect(estadoIntegracion(def, null, [])).toBe("no_configurada");
   });
 });

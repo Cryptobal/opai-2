@@ -4,7 +4,7 @@ import { lazy, type ReactNode, Suspense, useRef, useState } from "react";
 
 import { Button } from "../components/button";
 import type { ItemMenu } from "../components/menu";
-import type { NavItem } from "./types";
+import type { BusquedaMasRender, NavItem } from "./types";
 import type { ItemFijado } from "./fijados";
 
 type Props = {
@@ -17,10 +17,14 @@ type Props = {
   errorFijados?: boolean;
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
+  onFijar?: (item: ItemFijado) => void;
+  epoca?: string;
+  busqueda?: BusquedaMasRender | undefined;
+  recientes?: () => readonly ItemFijado[];
 };
 const Contenido = lazy(() => import("./contenido-mas").then((m) => ({ default: m.ContenidoMas })));
 
-/** Hoja por áreas del diseño aprobado (16–18), sobre el Sheet Radix del DS. */
+/** Menú «Más» del teléfono, variante A del diseño aprobado (CAR-182): hoja inferior con áreas plegables. */
 export function MenuMas({ items, extras, disparador, onNavegar, ...otros }: Props) {
   const [abierto, setAbierto] = useState(false);
   const [montado, setMontado] = useState(false);

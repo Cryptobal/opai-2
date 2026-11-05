@@ -76,13 +76,15 @@ export const catalogoItemsCreate = defineCapability({
 
 export const catalogoItemsUpdate = defineCapability({
   id: "cpq.catalogo_items.update",
-  descripcion: "Edita costo, recurrencia u otros campos de un ítem del catálogo CPQ.",
+  descripcion: "Edita nombre, categoría, costo, recurrencia u otros campos de un ítem del catálogo CPQ, o lo restaura si estaba archivado.",
   permiso: PERMISO_MODELO,
   input: z.object({
     id: uuidSchema,
     nombre: z.string().trim().min(1).max(120).optional(),
     categoriaId: uuidSchema.optional(),
+    unidad: z.string().trim().min(1).max(40).optional(),
     costoUnitarioClp: z.number().int().min(0).optional(),
+    activo: z.boolean().optional().describe("true restaura un ítem archivado."),
     recurrencia: z.enum(["mensual", "unico"]).optional(),
     visibleCliente: z.boolean().optional(),
     porDefecto: z.boolean().optional(),

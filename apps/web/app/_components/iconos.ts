@@ -1,5 +1,11 @@
 import {
+  Banknote,
   CalendarDays,
+  FolderOpen,
+  HandCoins,
+  Landmark,
+  LayoutDashboard,
+  ShoppingCart,
   ChartLine,
   Wallet,
   Ticket,
@@ -9,6 +15,7 @@ import {
   BookOpen,
   IdCard,
   Bell,
+  BellRing,
   Briefcase,
   Building2,
   Clock,
@@ -38,7 +45,13 @@ import {
 
 /** Iconos nombrados en manifests y navegación. Un nombre desconocido usa LayoutGrid. */
 const ICONOS: Record<string, LucideIcon> = {
+  Banknote,
   CalendarDays,
+  FolderOpen,
+  HandCoins,
+  Landmark,
+  LayoutDashboard,
+  ShoppingCart,
   ChartLine,
   Wallet,
   Ticket,
@@ -48,6 +61,7 @@ const ICONOS: Record<string, LucideIcon> = {
   BookOpen,
   IdCard,
   Bell,
+  BellRing,
   Briefcase,
   Building2,
   Clock,

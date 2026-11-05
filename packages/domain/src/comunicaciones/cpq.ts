@@ -59,4 +59,25 @@ export const COMUNICABLES_CPQ: readonly EventoComunicable[] = [
       },
     },
   },
+  {
+    evento: "cpq.cotizacion.enviada_cliente",
+    nombre: "Cotización enviada al cliente",
+    descripcion:
+      "Correo que recibe el contacto del cliente al enviarle una cotización. Lleva el enlace a su Portal Cliente, donde ve lo que la empresa le comparte.",
+    transaccional: true,
+    variables: [
+      COTIZACION,
+      v("cotizacion.titulo", "texto", "Guardias planta norte", "Título de la cotización."),
+      v("mensaje", "texto", "Adjuntamos nuestra propuesta.", "Mensaje del vendedor, si escribió uno."),
+      EMPRESA,
+      URL("Portal Cliente de la empresa."),
+    ],
+    plantillas: {
+      correo: {
+        asunto: "Propuesta {{cotizacion.codigo}} · {{empresa.nombre}}",
+        cuerpo:
+          "Te enviamos la propuesta {{cotizacion.codigo}} ({{cotizacion.titulo}}).\n\n{{mensaje}}\n\nPuedes revisarla en tu Portal Cliente:\n{{url}}",
+      },
+    },
+  },
 ];

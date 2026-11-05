@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { AFP } from "@opai/domain";
-import { Alerta, Campo, Input, Select, Segmentado } from "@opai/ds";
+import { Alerta, Campo, Input, InputMonto, Select, Segmentado, SelectorHora } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
@@ -57,10 +57,10 @@ export function CamposPuesto({
         </Campo>
         <span />
         <Campo etiqueta="Entrada" htmlFor="cpq-p-hi">
-          <Input id="cpq-p-hi" placeholder="08:00" value={e.horaInicio} onChange={(x) => set({ horaInicio: x.target.value })} />
+          <SelectorHora id="cpq-p-hi" valor={e.horaInicio} onCambiar={(v) => set({ horaInicio: v })} />
         </Campo>
         <Campo etiqueta="Salida" htmlFor="cpq-p-hf">
-          <Input id="cpq-p-hf" placeholder="20:00" value={e.horaFin} onChange={(x) => set({ horaFin: x.target.value })} />
+          <SelectorHora id="cpq-p-hf" valor={e.horaFin} onCambiar={(v) => set({ horaFin: v })} />
         </Campo>
       </div>
       {verCostos ? (
@@ -79,11 +79,11 @@ export function CamposPuesto({
               htmlFor="cpq-p-sueldo"
               ayuda={ref != null ? `Vacío usa la referencia del cargo: ${pesos(ref)}.` : "Vacío deja el costo pendiente."}
             >
-              <Input id="cpq-p-sueldo" inputMode="numeric" value={e.sueldo} onChange={(x) => num("sueldo")(x.target.value)} />
+              <InputMonto id="cpq-p-sueldo" valor={e.sueldo} onCambiar={num("sueldo")} />
             </Campo>
           ) : (
             <Campo etiqueta="Líquido objetivo (CLP)" htmlFor="cpq-p-liq" ayuda="El bruto se calcula con el motor de costo empleador.">
-              <Input id="cpq-p-liq" inputMode="numeric" value={e.liquido} onChange={(x) => num("liquido")(x.target.value)} />
+              <InputMonto id="cpq-p-liq" valor={e.liquido} onCambiar={num("liquido")} />
             </Campo>
           )}
           {ref != null && e.modo === "bruto" && !e.sueldo ? (
@@ -91,10 +91,10 @@ export function CamposPuesto({
           ) : null}
           <div className="grid grid-cols-2 gap-3">
             <Campo etiqueta="Colación (CLP)" htmlFor="cpq-p-col" ayuda="Vacío usa el defecto.">
-              <Input id="cpq-p-col" inputMode="numeric" value={e.colacion} onChange={(x) => num("colacion")(x.target.value)} />
+              <InputMonto id="cpq-p-col" valor={e.colacion} onCambiar={num("colacion")} />
             </Campo>
             <Campo etiqueta="Movilización (CLP)" htmlFor="cpq-p-mov" ayuda="Vacío usa el defecto.">
-              <Input id="cpq-p-mov" inputMode="numeric" value={e.movilizacion} onChange={(x) => num("movilizacion")(x.target.value)} />
+              <InputMonto id="cpq-p-mov" valor={e.movilizacion} onCambiar={num("movilizacion")} />
             </Campo>
           </div>
         </>

@@ -18,6 +18,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes).",
   "app/_acciones/validar-fichas-nav.ts#revisarFichasNav":
     "Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP.",
+  "app/_acciones/candidatos-documento.ts#buscarCandidatosDocumento":
+    "Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre.",
   "app/api/geo/mapa/route.ts":
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
   "app/api/pauta/export/route.ts":
@@ -64,6 +66,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
   "app/api/t/[slug]/solicitudes/route.ts":
     "Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2).",
+  "app/api/t/[slug]/banco/web4leads/route.ts":
+    "Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna).",
   "app/api/webhooks/resend/entrante/route.ts":
     "Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna).",
   // Infraestructura: sin datos de negocio.

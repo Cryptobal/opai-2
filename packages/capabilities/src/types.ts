@@ -174,6 +174,12 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   descripcion: string;
   /** `null` = solo requiere actor autenticado (no `system` en producción, salvo internas). */
   permiso: string | null;
+  /**
+   * Otros permisos que también dejan ejecutar la capacidad (basta uno, o `permiso`). El handler
+   * debe acotar lo que puede hacer quien solo tiene uno de estos (p. ej. subir a lo que tiene a
+   * cargo). Quien tiene `permiso` conserva todo igual.
+   */
+  permisosAlternos?: readonly string[];
   input: I;
   output: O;
   efecto: Efecto;
@@ -195,6 +201,12 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   sensibles?: readonly string[];
   /** Identificadores revelados por una lectura; nunca contenido personal ni input sin validar. */
   auditarLectura?: false | ((salida: z.output<O>, entrada: z.output<I>) => readonly string[]);
+  /**
+   * Versión de la salida que se guarda en la reserva de idempotencia (24 h). Para salidas con un
+   * secreto de un solo uso (el token de un enlace): la repetición con la misma clave devuelve esta
+   * versión, no el secreto. La respuesta de la primera ejecución no cambia.
+   */
+  salidaIdempotente?: (salida: z.output<O>) => z.output<O>;
   /** Revalida el acceso vigente a una respuesta idempotente sin repetir sus efectos. */
   autorizarRepeticion?: (ctx: Contexto, input: z.output<I>, salida: unknown) => Promise<void>;
   /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */

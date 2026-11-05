@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "NODE_OPTIONS=--max-old-space-size=4096 tsc -p tsconfig.json",
     "lint": "eslint .",
     "test": "vitest run",
     "e2e": "playwright test"

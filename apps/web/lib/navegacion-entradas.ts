@@ -9,22 +9,22 @@ const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  *  no tiene entradas visibles, `entradasAreaPrincipal` cae a la primera disponible, sin error (§10). */
 export function areaPrincipalPorRol(rol: Rol): AreaNav {
   if (rol === "supervisor") return "operaciones";
-  if (rol === "viewer") return "clientes";
   return "comercial";
 }
 
-/** Entradas del núcleo (Brief 05, §4.3): Inicio suelta, Clientes y Personas con sus permisos. */
+/** Entradas del núcleo (Brief 05, §4.3): Inicio suelta, Cuentas (en Comercial desde CAR-182) y
+ *  Personas con sus permisos. Cargos es un catálogo: vive en Configuración › Operación (CAR-182). */
 export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
   return [
     { area: "inicio", href: "/", etiqueta: "Inicio", icono: "Home", modulo: "core" },
     {
-      area: "clientes",
+      area: "comercial",
       href: "/cuentas",
       etiqueta: "Cuentas",
       icono: "Building2",
       modulo: "core",
       permiso: PERMISOS_CORE.cuentasRead,
-      orden: 1,
+      orden: 4,
     },
     {
       area: "operaciones",
@@ -45,13 +45,15 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       orden: 1,
     },
     {
-      area: "personas",
-      href: "/cargos",
-      etiqueta: "Cargos",
-      icono: "Briefcase",
+      area: "documentos",
+      href: "/documentos",
+      etiqueta: "Explorador",
+      icono: "FolderOpen",
       modulo: "core",
-      permiso: PERMISOS_CORE.estructurasRead,
-      orden: 2,
+      permiso: PERMISOS_CORE.documentosRead,
+      orden: 1,
+      // `/documentos/firmas` es otra entrada: el explorador solo se marca en su propia ruta.
+      exacta: true,
     },
     {
       area: "documentos",
@@ -60,7 +62,7 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       icono: "PenLine",
       modulo: "core",
       permiso: PERMISOS_CORE.firmasRead,
-      orden: 1,
+      orden: 2,
     },
   ];
 }

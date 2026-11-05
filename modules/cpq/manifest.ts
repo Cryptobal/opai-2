@@ -32,6 +32,10 @@ export const manifest = defineModule({
       descripcion: "Editar biblioteca de bloques y plantilla de propuesta técnica",
     },
     { id: "cpq:envios.aprobar", descripcion: "Aprobar envíos conjuntos cotización/propuesta técnica" },
+    {
+      id: "cpq:puestos.confirmar",
+      descripcion: "Confirmar los puestos que ofrece una cotización aceptada y crearlos (RRHH)",
+    },
   ],
   navegacion: [
     {
@@ -39,7 +43,7 @@ export const manifest = defineModule({
       area: "comercial",
       href: "/cotizaciones",
       etiqueta: "Cotizaciones",
-      icono: "FileText",
+      icono: "ReceiptText",
       orden: 3,
       permiso: "cpq:cotizaciones.read",
     },
@@ -52,6 +56,7 @@ export const manifest = defineModule({
     { id: "cpq.cotizacion.aprobacion_rechazada", descripcion: "Se rechazó la aprobación de margen." },
     { id: "cpq.cotizacion.enviada", descripcion: "Se envió una cotización al cliente." },
     { id: "cpq.cotizacion.aceptada", descripcion: "La cotización vigente quedó aceptada al ganar el negocio." },
+    { id: "cpq.puestos.confirmados", descripcion: "RRHH confirmó y creó los puestos de una cotización aceptada." },
     { id: "cpq.envio_propuesta.solicitado", descripcion: "Se solicitó un envío conjunto cotización/propuesta." },
     { id: "cpq.envio_propuesta.aprobado", descripcion: "Se aprobó y registró un envío conjunto." },
     { id: "cpq.envio_propuesta.rechazado", descripcion: "Se rechazó un envío conjunto pendiente." },

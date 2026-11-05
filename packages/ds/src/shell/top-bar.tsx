@@ -29,6 +29,11 @@ export type ComunesBarra = {
   empresas?: readonly ItemMenu[];
   /** Campana de notificaciones (isla de la app con `Popover`). */
   campana?: ReactNode;
+  /**
+   * Agente interno (ADR-049, D11): su icono va siempre a la izquierda de la campana. Sin agente
+   * construido no se pasa y no aparece ningún botón vacío.
+   */
+  agente?: ReactNode;
   /** Abre la búsqueda global (⌘K). Sin ella, no hay búsqueda. */
   onBuscar?: () => void;
   busquedaCompacta?: boolean;
@@ -67,7 +72,7 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
             portalActual={portalActual}
             {...(tenant ? { tenant } : {})}
             {...(props.empresas ? { extra: props.empresas } : {})}
-            className="min-w-0"
+            className="min-w-0 flex-1"
           />
         )}
         <div className="ml-auto flex flex-none items-center gap-0.5">
@@ -79,6 +84,7 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
               <Search className="size-5" />
             </Button>
           ) : null}
+          {props.agente}
           {campana}
           {usuario && menuUsuario ? (
             <UserMenu usuario={usuario} items={menuUsuario} lado="abajo-derecha" />
@@ -155,6 +161,7 @@ export function AppBar(props: AppBarProps) {
             <AtajoBusqueda className="hidden xl:inline-flex" />
           </button>
         ) : null}
+        {props.agente}
         {campana}
         {usuario ? (
           // El usuario va aquí en iPad (768–1023, D9) y al pie de la barra lateral desde 1024 px.

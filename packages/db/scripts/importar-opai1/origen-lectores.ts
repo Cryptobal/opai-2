@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 import type { DatosOpai1 } from "./origen";
-import { datosOpai1 } from "./origen";
+import { validarTolerante } from "./origen-tolerante";
 
 /** Fuente de las filas de 1.0. La simulación y la carga real usan la misma interfaz. */
 export interface LectorOrigen {
@@ -9,12 +9,9 @@ export interface LectorOrigen {
   leer(): Promise<DatosOpai1>;
 }
 
-/** Valida un objeto ya parseado. El error nombra solo rutas y tipos, nunca valores (Ley 21.719). */
+/** Valida un objeto ya parseado, sin detenerse por datos malos (ver `origen-tolerante.ts`). Nunca muestra valores. */
 export function validarDatos(crudo: unknown): DatosOpai1 {
-  const r = datosOpai1.safeParse(crudo);
-  if (r.success) return r.data;
-  const rutas = r.error.issues.slice(0, 10).map((i) => `${i.path.join(".")} (${i.code})`);
-  throw new Error(`Origen inválido: ${rutas.join("; ")}`);
+  return validarTolerante(crudo);
 }
 
 /** Fixtures JSON locales (datos ficticios). */
@@ -33,16 +30,4 @@ export function lectorFixtures(ruta: string): LectorOrigen {
   };
 }
 
-/** Lector por API/MCP de OPAI 1.0: pendiente (ADR-027). */
-export function lectorApiOpai1(): LectorOrigen {
-  return {
-    descripcion: "opai1",
-    leer() {
-      return Promise.reject(
-        new Error(
-          "Lector de OPAI 1.0 no configurado: falta la key dedicada de 1.0 en el almacén cifrado del tenant. Usa --origen fixtures:<ruta>.",
-        ),
-      );
-    },
-  };
-}
+export { lectorApiOpai1, lectorContratoFixtures } from "./origen-api";

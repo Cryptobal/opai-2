@@ -17,7 +17,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   const segunRol = page.getByRole("radio", { name: /^Según mi rol/ });
   await segunRol.click();
   await expect(segunRol).toHaveAttribute("data-state", "checked");
-  await page.goto("/");
+  // La Bandeja vive solo en /bandeja (CAR-182): Inicio ya no la repite.
+  await page.goto("/bandeja");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   const nav = page
     .getByRole("navigation", { name: "Principal", exact: true })
@@ -27,9 +28,9 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(nav.getByRole("link", { name: "Personas", exact: true })).toBeVisible();
     await nav.getByRole("button", { name: "Más opciones" }).click();
     const mas = page.getByRole("dialog", { name: "Más", exact: true });
-    await expect(mas.getByText("Fijados", { exact: true })).toBeVisible();
-    await expect(mas.getByRole("button", { name: "Instalaciones", exact: true })).toBeVisible();
-    await expect(mas.getByRole("button", { name: "Configuración", exact: true })).toBeVisible();
+    await expect(mas.getByText("Recientes y fijados", { exact: true })).toBeVisible();
+    await expect(mas.getByRole("button", { name: "Instalaciones", exact: true }).last()).toBeVisible();
+    await expect(mas.getByRole("button", { name: "Configuración", exact: true }).last()).toBeVisible();
     await expect(mas.getByText("Cuenta", { exact: true })).toHaveCount(0);
     await expect(mas.getByRole("button", { name: "Cerrar sesión" })).toHaveCount(0);
     await page.keyboard.press("Escape");
@@ -41,7 +42,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await page.keyboard.press("Escape");
     await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
   } else {
-    const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
+    const clientes = nav.getByRole("button", { name: "Comercial", exact: true });
     if ((await clientes.getAttribute("aria-expanded")) !== "true") await clientes.click();
     await expect(clientes).toHaveAttribute("aria-expanded", "true");
     const personas = nav.getByRole("button", { name: "Personas", exact: true });
@@ -54,11 +55,11 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     const pin = fila.getByRole("button");
     if ((await pin.getAttribute("aria-label")) === "Desfijar") await pin.click();
     await expect(pin).toHaveAttribute("aria-label", "Fijar");
-    const filaInstalaciones = nav.getByRole("link", { name: "Instalaciones", exact: true }).last().locator("..");
-    await filaInstalaciones.hover();
-    const pinInstalaciones = filaInstalaciones.getByRole("button");
-    if ((await pinInstalaciones.getAttribute("aria-label")) === "Desfijar") await pinInstalaciones.click();
-    await expect(pinInstalaciones).toHaveAttribute("aria-label", "Fijar");
+    const filaNegocios = nav.getByRole("link", { name: "Negocios", exact: true }).last().locator("..");
+    await filaNegocios.hover();
+    const pinNegocios = filaNegocios.getByRole("button");
+    if ((await pinNegocios.getAttribute("aria-label")) === "Desfijar") await pinNegocios.click();
+    await expect(pinNegocios).toHaveAttribute("aria-label", "Fijar");
     let liberar = () => {};
     const demora = new Promise<void>((resolve) => {
       liberar = resolve;
@@ -80,15 +81,15 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     );
     await pin.click();
     await guardado;
-    await pinInstalaciones.click();
+    await pinNegocios.click();
     liberar();
     await expect(pin).toHaveAttribute("aria-label", "Desfijar");
-    await expect(pinInstalaciones).toHaveAttribute("aria-label", "Desfijar");
+    await expect(pinNegocios).toHaveAttribute("aria-label", "Desfijar");
     await page.unrouteAll({ behavior: "wait" });
     await page.reload();
     await expect(nav.getByText("Fijados", { exact: true })).toBeVisible();
     await expect(nav.getByRole("link", { name: "Cuentas", exact: true }).first()).toBeVisible();
-    await expect(nav.getByRole("link", { name: "Instalaciones", exact: true }).first()).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Negocios", exact: true }).first()).toBeVisible();
   }
   await nav.evaluate((el) => el.setAttribute("data-prueba-persistencia", "mismo-shell"));
   if (info.project.name === "telefono") {
@@ -127,7 +128,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(nav.getByRole("link", { name: "Bandeja", exact: true })).toBeVisible();
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
-  await page.goto("/");
+  // La Bandeja vive solo en /bandeja (CAR-182): Inicio ya no la repite.
+  await page.goto("/bandeja");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   await page.locator("header").getByRole("button", { name: /Notificaciones/ }).click();
   await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible();
@@ -135,7 +137,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const tema of ["light", "dark"]) {
     await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), tema);
-    await comprobarContrasteNavegacion(page, 'header.sticky, nav[aria-label="Principal"], #bandeja');
+    await comprobarContrasteNavegacion(page, 'header.sticky, nav[aria-label="Principal"]');
     await page.screenshot({ path: info.outputPath(`navegacion-${tema}.png`), fullPage: true });
     await page.keyboard.press("Control+k");
     await expect(page.getByRole("dialog")).toBeVisible();

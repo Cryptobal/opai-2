@@ -41,9 +41,9 @@ describe("datos tributarios de cuenta", () => {
     expect(cuentaListaParaFacturar(d)).toBe(true);
   });
 
-  it("razón social cae al nombre comercial si legalName viene vacío", () => {
+  it("razón social queda vacía si legalName falta (no usa nombre de fantasía)", () => {
     const d = datosCuenta(cuentaCompleta({ legalName: null, name: "Marca visible" }));
-    expect(d.razonSocial).toBe("Marca visible");
+    expect(d.razonSocial).toBeNull();
   });
 
   it("dry-run marca faltantes sin inventar defaults", () => {

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="tar" title="Tareas" count="{{ 8 }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" notifications="{{ 5 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Mis tareas" subtitle="{{ subtitle }}" hint-size="100%,80px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="140px,40px">Nueva tarea</x-import></sc-if>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ whoOpts }}" value="{{ who }}" on-change="{{ setWho }}" label="Responsable" hint-size="200px,36px"></x-import>
+<div class="chip-row" style="max-width:100%">
+<sc-for list="{{ typeChips }}" as="c" hint-placeholder-count="3"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="{{ c.label }}" selected="{{ c.on }}" on-click="{{ c.toggle }}" hint-size="100px,32px"></x-import></sc-for>
+</div>
+</div>
+<sc-if value="{{ stOk }}" hint-placeholder-val="{{ true }}">
+<div class="card" style="overflow:visible;padding:0">
+<sc-for list="{{ tgroups }}" as="g" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" count="{{ g.count }}" style="border-radius:{{ g.rad }}" hint-size="100%,33px">{{ g.label }}</x-import>
+<sc-for list="{{ g.items }}" as="t" hint-placeholder-count="2">
+<div style="display:flex;gap:4px;align-items:flex-start;padding:4px 8px 8px 4px;border-bottom:1px solid var(--ds-border);position:relative">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ t.done }}" on-change="{{ t.toggle }}" label="" hint-size="44px,44px"></x-import>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;padding-top:10px">
+<span style="font:500 14px/20px var(--font-sans);text-decoration:{{ t.strike }};color:{{ t.titleColor }}">{{ t.title }}</span>
+<div style="display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center">
+<span style="display:flex;gap:6px;align-items:center;font:500 13px/18px var(--font-sans);color:{{ t.color }}"><span class="ic sm i-clock" aria-hidden="true"></span>{{ t.due }}</span>
+<span style="display:flex;gap:4px;align-items:center;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)"><span class="ic sm i-flag" aria-hidden="true"></span>{{ t.prio }}</span>
+<a href="NegocioV2.dc.html" style="font:400 13px/18px var(--font-sans);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">{{ t.link }}</a>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:2px;padding-top:4px;flex:none">
+<sc-for list="{{ t.owners }}" as="o" hint-placeholder-count="1"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ o }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-for>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="clock" label="Posponer" on-click="{{ t.openMenu }}" hint-size="44px,44px"></x-import>
+</div>
+<sc-if value="{{ t.menuOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ postMenu }}" on-select="{{ closeMenu }}" style="position:absolute;right:8px;top:48px;width:220px;z-index:10" hint-size="220px,150px"></x-import>
+</sc-if>
+</div>
+</sc-for>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}">
+<div class="card" aria-busy="true" style="padding:0;overflow:hidden">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6"><div style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 20 }}" radius="{{ 5 }}" hint-size="20px,20px"></x-import><div style="flex:1;display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 14 }}" hint-size="70%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 12 }}" hint-size="45%,12px"></x-import></div></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="check-circle" title="No tienes tareas pendientes" description="Crea una desde cualquier ficha o con «Nueva tarea»." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar tus tareas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TAR-500 · 29-10-2026 10:41" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ stForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver las tareas de tu equipo" description="Solo el jefe comercial ve las tareas de otros vendedores. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+<sc-if value="{{ phoneFab }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:6"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="plus" hint-size="150px,48px">Nueva tarea</x-import></div>
+</sc-if>
+<sc-if value="{{ notifBell }}" hint-placeholder-val="{{ false }}">
+<div class="overlay" role="dialog" aria-label="Notificaciones" style="position:absolute;top:56px;right:{{ bellRight }};width:360px;max-width:calc(100% - 32px);z-index:30;padding:8px;display:flex;flex-direction:column">
+<span class="t-label" style="padding:8px 8px 4px">Notificaciones</span>
+<sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3">
+<a href="#" style="display:flex;gap:10px;padding:10px 8px;border-radius:10px;text-decoration:none;color:var(--ds-fg);background:{{ n.bg }}">
+<span style="width:32px;height:32px;border-radius:10px;background:{{ n.iconBg }};color:{{ n.iconFg }};display:flex;align-items:center;justify-content:center;flex:none"><span class="ic sm {{ n.icon }}" aria-hidden="true"></span></span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-body-sm" style="font-weight:500;text-wrap:pretty">{{ n.t }}</span><span class="t-caption">{{ n.d }}</span></span>
+</a>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ notifPush }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position:absolute;top:52px;left:8px;right:8px;z-index:30;display:flex;gap:12px;padding:12px 14px;border-radius:20px;background:var(--ds-surface-raised);box-shadow:var(--ds-shadow-overlay);border:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="AS" hint-size="32px,32px"></x-import>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1"><span style="display:flex;justify-content:space-between;gap:8px"><span class="t-body-sm" style="font-weight:600">OPAI · Tarea vencida</span><span class="t-caption">ahora</span></span><span class="t-body-sm" style="text-wrap:pretty">«Enviar certificados OS-10 a Rodrigo Álvarez» venció. Seguridad 24/7 · CD Lampa.</span></span>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;posponer&quot;,&quot;notificacion&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;sinPermisos&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { done: {}, who: "yo", types: {}, menu: null };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.CRM.tasks && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const estado = this.props.estado ?? "ok";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, stOk: true };
+    if (!C || !C.tasks) return base;
+    const who = estado === "sinPermisos" ? "eq" : this.state.who;
+    const menu = this.state.menu ?? (estado === "posponer" ? "t3" : null);
+    const tg = C.tasks.map((g, gi) => {
+      const items = g.items.filter((t) => who === "eq" || t.owners.includes("CR")).map((t) => {
+        const done = !!this.state.done[t.id];
+        return { ...t, done, strike: done ? "line-through" : "none", titleColor: done ? "var(--ds-fg-subtle)" : "var(--ds-fg)", color: C.toneFg(t.tone), prio: "Prioridad " + t.prio.toLowerCase(), toggle: () => this.setState((s) => ({ done: { ...s.done, [t.id]: !s.done[t.id] } })), openMenu: () => this.setState({ menu: menu === t.id ? "none" : t.id }), menuOpen: menu === t.id };
+      });
+      return { ...g, items, count: items.length, rad: gi === 0 ? "16px 16px 0 0" : "0" };
+    }).filter((g) => g.items.length);
+    const total = tg.reduce((a, g) => a + g.count, 0);
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups, noop: () => {},
+      user: { name: "Camila Rojas", initials: "CR", role: "Ejecutiva comercial" },
+      subtitle: estado === "vacio" ? "Sin tareas pendientes" : total + " pendientes · 2 vencidas · " + C.TODAY,
+      whoOpts: [{ value: "yo", label: "Yo" }, { value: "eq", label: "Mi equipo" }],
+      who, setWho: (v) => this.setState({ who: v }),
+      typeChips: [["neg", "Con negocio"], ["alta", "Prioridad alta"], ["hoy", "Vencen hoy"]].map(([k, label]) => ({ label, on: !!this.state.types[k], toggle: () => this.setState((s) => ({ types: { ...s.types, [k]: !s.types[k] } })) })),
+      stOk: ["ok", "posponer", "notificacion"].includes(estado), stLoading: estado === "cargando", stEmpty: estado === "vacio", stError: estado === "error", stForbidden: estado === "sinPermisos",
+      skel: [1, 2, 3, 4, 5, 6],
+      emptyAction: NS.Button ? React.createElement(NS.Button, { icon: "plus" }, "Nueva tarea") : null,
+      tgroups: tg,
+      postMenu: [{ label: "Mañana", icon: "clock", meta: "vie 30-10" }, { label: "En 3 días", icon: "clock", meta: "mar 03-11" }, { label: "Elegir fecha", icon: "calendar" }],
+      closeMenu: () => this.setState({ menu: "none" }),
+      phoneFab: isPhone && estado !== "vacio",
+      notifBell: estado === "notificacion" && !isPhone, notifPush: estado === "notificacion" && isPhone,
+      bellRight: device === "tablet" ? "64px" : "72px",
+      notifs: [
+        { icon: "i-clock", iconBg: "var(--ds-danger-muted)", iconFg: "var(--ds-danger-fg)", t: "Venció «Enviar certificados OS-10 a Rodrigo Álvarez»", d: "Seguridad 24/7 · CD Lampa · hace 2 días", bg: "var(--ds-fill)" },
+        { icon: "i-clock", iconBg: "var(--ds-warning-muted)", iconFg: "var(--ds-warning-fg)", t: "Vence hoy a las 12:00 «Llamar a Fernanda Navarro por la propuesta»", d: "Seguridad · Clínica Los Leones · hace 1 h", bg: "transparent" },
+        { icon: "i-message", iconBg: "var(--ds-fill)", iconFg: "var(--ds-fg-muted)", t: "Patricia Valdés respondió · elige el próximo paso", d: "Seguridad 24/7 · CD Lampa · 10:42", bg: "transparent" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

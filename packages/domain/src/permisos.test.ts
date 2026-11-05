@@ -21,6 +21,7 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
   "cpq:modelo.manage": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   "cpq:biblioteca.manage": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   "cpq:envios.aprobar": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
+  "cpq:puestos.confirmar": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   // Leads (BRIEF-07-leads): solicitudes para owner/admin/gerente; canales solo owner/admin.
   "comercial:solicitudes.read": {
     owner: true,

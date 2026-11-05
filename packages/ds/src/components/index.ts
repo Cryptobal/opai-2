@@ -12,6 +12,8 @@ export { Chip, ChipAgregar, ChipToggle } from "./chip";
 export { Combobox, type ComboboxProps } from "./combobox";
 export { type OpcionCombobox, Resaltado } from "./resaltado";
 export { CommandPalette, type GrupoPaleta, type ItemPaleta } from "./command-palette";
+export { BusquedaHoja } from "./busqueda-hoja";
+export { TEXTO_BUSQUEDA } from "./hoja-busqueda";
 export { Dialog, Sheet } from "./dialog";
 export { Cerrar } from "./dialog-partes";
 export { claseEnlace, Enlace } from "./enlace";
@@ -20,6 +22,8 @@ export { Campo, Input, Textarea } from "./input";
 export { InputBusqueda } from "./input-busqueda";
 export { InputFecha, InputHora } from "./input-fecha";
 export { InputFechaRango } from "./input-fecha-rango";
+export { InputMonto } from "./input-monto";
+export { SelectorHora } from "./selector-hora";
 export { MapaEstatico } from "./mapa-estatico";
 export { type ItemMenu, Menu } from "./menu";
 export { Popover } from "./popover";
@@ -44,4 +48,5 @@ export {
   type TipoCompositor,
 } from "./compositor-actividad";
 export { TareaFila, type TonoVencimientoTarea } from "./tarea-fila";
+export { ChipsEtiquetas, type EtiquetaChip, type TonoEtiqueta } from "./chips-etiquetas";
 export { campoElegible, type CampoDatosSii, DatosSii, type EstadoDatosSii } from "./datos-sii";

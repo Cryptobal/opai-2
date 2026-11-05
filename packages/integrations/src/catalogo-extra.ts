@@ -9,7 +9,6 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
   ...(
     [
       ["whatsapp", "WhatsApp", "whatsapp"],
-      ["fintoc", "Banco (Fintoc)", "banco"],
       ["factoring", "Factoring", "factoring"],
       ["biometria", "Biometría", "biometria"],
       ["slack", "Slack", "slack"],
@@ -24,6 +23,17 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     config: sinConfig,
     disponible: false,
   })),
+  {
+    // Movimientos del banco en línea: Web4Leads (que se conecta a Fintoc) empuja un webhook firmado por
+    // empresa a `/api/t/<slug>/banco/web4leads`. OPAI no guarda credenciales del banco (CAR-bancos).
+    id: "web4leads",
+    nombre: "Banco (Web4Leads)",
+    categoria: "banco",
+    modalidades: ["propia"] as const,
+    secretos: [{ nombre: "api_key", etiqueta: "Secreto de firma del webhook de Web4Leads" }],
+    config: sinConfig,
+    disponible: true,
+  },
   {
     id: "dte_emision",
     nombre: "Emisión DTE (SII)",
@@ -66,10 +76,19 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     categoria: "factoring",
     modalidades: ["propia"] as const,
     secretos: [
-      { nombre: "usuario", etiqueta: "Usuario Octava" },
-      { nombre: "clave", etiqueta: "Clave Octava" },
+      { nombre: "usuario", etiqueta: "RUT de acceso a la API de Octava" },
+      { nombre: "clave", etiqueta: "Contraseña de acceso a la API de Octava" },
     ],
-    config: z.object({ proveedor: z.enum(["octava"]).default("octava") }).strict(),
+    config: z
+      .object({
+        proveedor: z.enum(["octava"]).default("octava"),
+        /** Datos del cedente que Octava exige en CedeDte (CAR-154); sin ellos se usa el usuario que cede. */
+        emailCedente: z.string().trim().email().max(40).optional(),
+        direccionCedente: z.string().trim().min(3).max(70).optional(),
+        contactoNombre: z.string().trim().min(2).max(40).optional(),
+        contactoEmail: z.string().trim().email().max(40).optional(),
+      })
+      .strict(),
     disponible: true,
   },
 ];

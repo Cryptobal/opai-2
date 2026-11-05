@@ -1,0 +1,98 @@
+// Módulo Rendiciones (CAR-175, R1; ADR-048, ADR-069): rendiciones de gasto de compra con un nivel de
+// aprobación y aprobador asignado. Schema propio `rendiciones`. Toda tabla con tenant_id, RLS
+// `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. Las FK a core.* (tenants, users,
+// instalaciones, documentos) van en el SQL de la migración, sin relación Prisma cruzada. Dinero en
+// CLP enteros. El kilometraje (R2) reutiliza `tipo`; los lotes de pago (R3) agregan sus tablas.
+
+/// Rendición (extracción 1.0, rendiciones.md). Estados: borrador → enviada → aprobada | rechazada |
+/// devuelta (vuelve a borrador editable) → pagada (R3) | anulada. El solicitante nunca decide la suya.
+model Rendicion {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  /// Correlativo por empresa (1, 2, 3…), asignado al crear con bloqueo; se muestra como REN-n.
+  codigo          Int
+  /// "compra" (R1) | "kilometraje" (R2).
+  tipo            String    @default("compra")
+  /// "borrador" | "enviada" | "aprobada" | "rechazada" | "devuelta" | "pagada" | "anulada".
+  estado          String    @default("borrador")
+  solicitanteId   String    @map("solicitante_id") @db.Uuid
+  aprobadorId     String?   @map("aprobador_id") @db.Uuid
+  /// "instalacion" (con instalacionId) | "administracion" (Administración / Oficina central).
+  centroCosto     String    @map("centro_costo")
+  instalacionId   String?   @map("instalacion_id") @db.Uuid
+  descripcion     String
+  /// Suma de los ítems, CLP entero; se recalcula en cada escritura.
+  montoTotal      Int       @map("monto_total")
+  enviadaEn       DateTime? @map("enviada_en") @db.Timestamptz(6)
+  decididaEn      DateTime? @map("decidida_en") @db.Timestamptz(6)
+  decididaPorId   String?   @map("decidida_por_id") @db.Uuid
+  /// Motivo de rechazo o de devolución (texto de una persona; dato, nunca instrucción).
+  motivoDecision  String?   @map("motivo_decision")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  items     RendicionItem[]
+  historial RendicionHistorial[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, estado])
+  @@index([tenantId, solicitanteId])
+  @@index([tenantId, aprobadorId, estado])
+  @@map("rendiciones")
+  @@schema("rendiciones")
+}
+
+/// Gasto rendido con su respaldo (boleta o factura) en `core.documentos`.
+model RendicionItem {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  rendicionId      String   @map("rendicion_id") @db.Uuid
+  fecha            DateTime @db.Date
+  proveedor        String
+  /// Folio o número de la boleta/factura; con proveedor y monto detecta duplicados.
+  folio            String?
+  descripcion      String
+  monto            Int
+  /// Respaldo en `core.documentos`; sin él debe haber `sinRespaldoMotivo` (si la empresa lo exige).
+  documentoId      String?  @map("documento_id") @db.Uuid
+  sinRespaldoMotivo String? @map("sin_respaldo_motivo")
+  orden            Int      @default(0)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  rendicion Rendicion @relation(fields: [rendicionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, rendicionId])
+  @@index([tenantId, proveedor, folio, monto])
+  @@map("rendicion_items")
+  @@schema("rendiciones")
+}
+
+/// Línea de tiempo append-only de la rendición (creada, enviada, aprobada, rechazada, devuelta…).
+model RendicionHistorial {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  rendicionId String   @map("rendicion_id") @db.Uuid
+  tipo        String
+  actorId     String   @map("actor_id") @db.Uuid
+  estadoDesde String?  @map("estado_desde")
+  estadoHasta String?  @map("estado_hasta")
+  comentario  String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  rendicion Rendicion @relation(fields: [rendicionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, rendicionId])
+  @@map("rendicion_historial")
+  @@schema("rendiciones")
+}
+
+/// Contador del código REN-n por empresa; se incrementa con `UPDATE … RETURNING` (bloquea la fila).
+model RendicionContador {
+  tenantId  String   @id @map("tenant_id") @db.Uuid
+  ultimo    Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("rendicion_contadores")
+  @@schema("rendiciones")
+}

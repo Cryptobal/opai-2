@@ -36,7 +36,7 @@ export function VistaPreviaCafUi({ vista }: { vista: VistaPreviaCaf }) {
         </div>
       </dl>
       {vista.alerta ? (
-        <Badge tono="warning">Revise avisos de folios bajos o CAF por vencer</Badge>
+        <Badge tono="warning">Revisa los avisos de folios bajos o CAF por vencer</Badge>
       ) : (
         <Badge tono="success">Listo para cargar</Badge>
       )}

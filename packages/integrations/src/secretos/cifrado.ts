@@ -49,7 +49,11 @@ export function kekDelEntorno(env: Record<string, string | undefined> = process.
 
 /** Secretos tipo contraseña: no se persiste sufijo ni se filtra por MCP/API. */
 export function secretoOcultaSufijo(nombre: string): boolean {
-  return nombre === "certificado_clave" || nombre === "clave";
+  return (
+    nombre === "certificado_clave" ||
+    nombre === "clave" ||
+    nombre === "token_sesion"
+  );
 }
 
 /** "re_AbCd…wxyz" → "••••••••wxyz"; sin sufijo → "••••••••". Lo único que una capacidad devuelve de un secreto. */

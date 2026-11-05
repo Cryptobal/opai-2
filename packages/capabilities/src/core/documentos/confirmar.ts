@@ -9,6 +9,7 @@ import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { consumoBase } from "../../integraciones/adaptadores";
 import { uuidSchema } from "../esquemas";
 import { hoy } from "../maestros/comun";
+import { subidaAcotada } from "./subida-acotada";
 import { documentoSchema, vistaDocumento } from "./vista";
 
 export const documentosConfirmarSubida = defineCapability({
@@ -16,6 +17,8 @@ export const documentosConfirmarSubida = defineCapability({
   descripcion:
     "Segundo paso de la subida: verifica que el archivo llegó con el tamaño, formato y huella SHA-256 declarados, lo deja disponible, lo registra en la bitácora encadenada y, si es una nueva versión, reemplaza a la anterior.",
   permiso: PERMISOS_CORE.documentosManage,
+  // Quien solo puede subir a lo que tiene a cargo confirma únicamente lo que subió él.
+  permisosAlternos: [PERMISOS_CORE.documentosSubirAlcance],
   portales: ["erp", "supervisor"],
   input: z.object({ id: uuidSchema }),
   output: documentoSchema.extend({ bitacoraSeq: z.number().nullable() }),
@@ -31,6 +34,8 @@ export const documentosConfirmarSubida = defineCapability({
       },
     });
     if (!d) throw noEncontrado("El documento");
+    if (subidaAcotada(ctx) && (!d.creadoPorId || d.creadoPorId !== ctx.actor.id))
+      throw noEncontrado("El documento");
     if (d.estado !== "pendiente") throw reglaDeNegocio("El documento ya fue confirmado.");
     const tipo = d.tipoId
       ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } })

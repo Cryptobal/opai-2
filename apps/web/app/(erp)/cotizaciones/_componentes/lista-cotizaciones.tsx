@@ -33,20 +33,27 @@ export function ListaCotizaciones({
       titulo="Cotizaciones"
       accion={nueva}
       buscar="Buscar cotización"
+      filtros={[
+        { param: "ver", etiqueta: "Mostrar", opciones: [{ valor: "archivadas", etiqueta: "Archivadas" }] },
+      ]}
       meta={{
-        izquierda: `${d.items.length} cotizaciones`,
+        izquierda: `${d.items.length} ${d.archivadas ? "archivadas" : "cotizaciones"}`,
         derecha: "Más recientes",
       }}
       seleccionada={seleccionada}
-      vacio={{
-        titulo: "Aún no hay cotizaciones",
-        descripcion: "Crea una cotización ligada a un negocio abierto.",
-        accion: nueva,
-      }}
+      vacio={
+        d.archivadas
+          ? { titulo: "No hay cotizaciones archivadas", descripcion: "Las que archives aparecen aquí y se pueden restaurar." }
+          : {
+              titulo: "Aún no hay cotizaciones",
+              descripcion: "Crea una cotización ligada a un negocio abierto.",
+              accion: nueva,
+            }
+      }
       pie={
         d.siguiente ? (
           <LinkNext
-            href={conBusqueda(`${base}?cursor=${d.siguiente}`, q)}
+            href={conBusqueda(`${base}?cursor=${d.siguiente}${d.archivadas ? "&ver=archivadas" : ""}`, q)}
             className="t-label text-accent"
           >
             Siguiente página
@@ -58,7 +65,7 @@ export function ListaCotizaciones({
         const margen = margenLista(c, d.costos);
         return {
           id: c.id,
-          href: conBusqueda(`${base}/${c.id}`, q),
+          href: d.archivadas ? `${base}/${c.id}?ver=archivadas` : conBusqueda(`${base}/${c.id}`, q),
           titulo: (
             <>
               <span className="t-mono text-[13px]">{c.codigo}</span>

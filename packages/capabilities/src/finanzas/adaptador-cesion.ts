@@ -1,31 +1,44 @@
-import {
-  adaptadorCesionSimulado,
-  adaptadorOctava,
-  type AdaptadorCesion,
-  type CredencialesOctava,
-} from "@opai/integrations";
+import { adaptadorCesionSimulado, adaptadorOctava, ambienteTributarioEfectivo, type AdaptadorCesion, type AlmacenSesionOctava } from "@opai/integrations";
 
-import { leerSecreto } from "../integraciones/secretos";
 import type { Contexto } from "../types";
+import { accesoOctava, almacenSesionOctava, cedenteOctava, type ConfigCesion } from "./adaptador-cesion-octava";
 
-async function credencialesOctava(ctx: Contexto): Promise<CredencialesOctava | null> {
-  const integ = await ctx.db.integracion.findUnique({
-    where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_cesion" } },
-  });
-  if (!integ) return null;
-  const [usuario, clave] = await Promise.all([
-    leerSecreto(ctx, integ.id, "usuario"),
-    leerSecreto(ctx, integ.id, "clave"),
-  ]);
-  if (!usuario || !clave) return null;
-  return { usuario, clave };
-}
+const ALMACEN_VACIO: AlmacenSesionOctava = {
+  leerToken: async () => null,
+  guardarToken: async () => {},
+};
 
+/**
+ * Adaptador de cesión efectivo del tenant: simulado en test o sin proveedor; Octava (API real, CAR-154)
+ * con el RUT y la contraseña de acceso cifrados en la integración `dte_cesion` (ObtenerToken, token de 6 h).
+ */
 export async function adaptadorCesionDe(ctx: Contexto): Promise<AdaptadorCesion> {
   if (process.env.NODE_ENV === "test" || process.env.CESION_ADAPTADOR === "simulado") {
     return adaptadorCesionSimulado();
   }
   const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
   if (cfg?.cesionProveedor !== "octava") return adaptadorCesionSimulado();
-  return adaptadorOctava(await credencialesOctava(ctx));
+  // Candado de ambiente (CAR-191): fuera de app.opai.cl, Octava solo en certificación.
+  const ambiente = ambienteTributarioEfectivo(cfg.ambiente);
+  const rutEmisor = cfg.rutEmisor ?? "";
+  const integ = await ctx.db.integracion.findUnique({
+    where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_cesion" } },
+  });
+  const acceso = integ ? await accesoOctava(ctx, integ.id) : null;
+  if (!integ || !acceso) {
+    // Sin credenciales queda no disponible; quien llama pide configurar la integración.
+    return adaptadorOctava({
+      acceso: null,
+      cedente: await cedenteOctava(ctx, {}, rutEmisor),
+      almacen: ALMACEN_VACIO,
+      ambiente,
+    });
+  }
+  const config = (integ.config ?? {}) as ConfigCesion;
+  return adaptadorOctava({
+    acceso,
+    cedente: await cedenteOctava(ctx, config, rutEmisor),
+    almacen: almacenSesionOctava(ctx, integ.id),
+    ambiente,
+  });
 }

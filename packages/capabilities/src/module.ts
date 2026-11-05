@@ -79,6 +79,15 @@ export function defineModule(manifest: ModuleManifest): ModuleManifest {
       );
     }
   }
+  for (const capacidad of manifest.capacidades) {
+    for (const alterno of capacidad.permisosAlternos ?? []) {
+      if (!manifest.permisos.some((p) => p.id === alterno)) {
+        throw new Error(
+          `La capacidad "${capacidad.id}" usa un permiso alterno no declarado: "${alterno}".`,
+        );
+      }
+    }
+  }
   for (const evento of manifest.eventos) {
     if (!evento.id.startsWith(`${id}.`)) {
       throw new Error(`El evento "${evento.id}" del módulo "${id}" debe empezar con "${id}.".`);

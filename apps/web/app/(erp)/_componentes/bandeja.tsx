@@ -1,10 +1,10 @@
 "use client";
-
-import Link from "next/link";
+/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
 
 import { Alerta, Button, SeccionTarjeta, Skeleton } from "@opai/ds";
 
 import { ListaAvisos } from "@/app/_components/lista-avisos";
+import { AprobacionesPendientes } from "./aprobaciones-pendientes";
 import { BandejaCorta } from "./bandeja-corta";
 import { useBandeja } from "./use-bandeja";
 
@@ -32,22 +32,8 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
         ) : (
           <div className="flex flex-col gap-3">
             {aprobaciones !== null && aprobaciones > 0 ? (
-              <Link
-                href="/configuracion/aprobaciones"
-                className="flex min-h-11 items-center text-accent"
-              >
-                {aprobaciones} aprobaciones pendientes
-              </Link>
+              <AprobacionesPendientes total={aprobaciones} decisiones={decisiones} />
             ) : null}
-            {decisiones.map((d) => (
-              <Link
-                key={d.id}
-                href={`/configuracion/aprobaciones?ver=${encodeURIComponent(d.id)}`}
-                className="flex min-h-11 items-center text-fg"
-              >
-                {d.resumen}
-              </Link>
-            ))}
             <ListaAvisos avisos={avisos} portal="erp" onLeida={() => void cargar()} />
             {avisos.length < noLeidas ? (
               <Button variant="secondary" disabled={cargandoMas} onClick={() => void cargarMas()}>

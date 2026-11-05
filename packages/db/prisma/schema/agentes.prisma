@@ -371,3 +371,31 @@ model AuditoriaGlobal {
   @@map("auditoria_global")
   @@schema("core")
 }
+
+/// Conversaciones del agente interno (CAR-120 PR 5b, spec agente R19). Privadas de la persona que las
+/// tiene: el alcance por `user_id` se aplica en cada capacidad (ni owner ni admin las leen). Los
+/// mensajes se guardan sin el token firmado del plan ni datos de terceros fuera del texto mostrado.
+model AgenteConversacion {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  titulo          String
+  /// Entidad desde la que se abrió ("cuenta" | "instalacion" | "negocio" | "persona"); sin contexto: null.
+  contextoTipo    String?   @map("contexto_tipo")
+  contextoId      String?   @map("contexto_id") @db.Uuid
+  /// Lista ordenada de `{ rol: "usuario" | "agente", texto, pasos?, fecha }`; tope en la capacidad.
+  mensajes        Json      @default("[]")
+  /// Control de concurrencia optimista: cada guardado sube la versión y solo escribe si no cambió.
+  version         Int       @default(0)
+  archivadaEn     DateTime? @map("archivada_en") @db.Timestamptz(6)
+  ultimaActividad DateTime  @default(now()) @map("ultima_actividad") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, userId, ultimaActividad(sort: Desc)])
+  @@index([tenantId, ultimaActividad])
+  @@map("agente_conversaciones")
+  @@schema("core")
+}

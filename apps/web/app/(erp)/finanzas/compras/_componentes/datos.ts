@@ -28,6 +28,7 @@ export async function cargarLibro(sp: SearchParams) {
   const identidad = await requerirIdentidad("/finanzas/compras");
   const puede = puedeDeIdentidad(identidad);
   const gestiona = puede("finanzas:compras.manage");
+  const puedeCrearProveedores = puede("finanzas:proveedores.manage");
   const [libro, centros, proveedores] = await Promise.all([
     ejecutarComoUsuario<Libro>("erp", "finanzas.compras.listar", {
       limite: 100,
@@ -46,6 +47,7 @@ export async function cargarLibro(sp: SearchParams) {
     centros: centros.ok ? centros.data : [],
     proveedores: proveedores?.ok ? proveedores.data.items : [],
     gestiona,
+    puedeCrearProveedores,
     filtrado: Boolean(p["periodo"] || p["q"] || p["sin_centro"]),
   };
 }
