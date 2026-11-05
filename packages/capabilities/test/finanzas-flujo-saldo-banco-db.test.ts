@@ -64,10 +64,15 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
     await ok("finanzas.ajustes.actualizar", { saldoInicial: 999, desde: mas(lunes, -56) });
     filaCliente = (await ok<{ id: string }>("finanzas.filas.crear", { seccion: "ingreso", etiqueta: "Cliente QA", arrastre: false })).id;
     const conSaldo = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco con saldo", numeroVisible: "0001", activa: true, saldoBanco: 10_000_000n } });
-    await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco sin saldo", numeroVisible: "0002", activa: true } });
+    const sinSaldo = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco sin saldo", numeroVisible: "0002", activa: true } });
+    const inactiva = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco inactivo", numeroVisible: "0003", activa: false, saldoBanco: 5_000_000n } });
     movTardio = (await mov(mas(semAnt, 2), 2_000_000, "Abono cliente", conSaldo.id)).id; // semana pasada, sin conciliar
     await mov(mas(semAnt2, 1), -500_000, "Pago varios", conSaldo.id); // dos semanas atrás
     await mov(hoyIso(), -300_000, "Cargo de hoy", conSaldo.id); // semana en curso, ya movido
+    // No deben correr la apertura: cuenta sin saldo, cuenta inactiva y un movimiento con fecha futura.
+    await mov(hoyIso(), -111_111, "Cargo cuenta sin saldo", sinSaldo.id);
+    await mov(hoyIso(), -222_222, "Cargo cuenta inactiva", inactiva.id);
+    await mov(mas(hoyIso(), 3), -777_777, "Cargo con fecha futura", conSaldo.id);
     const cuenta = await e.admin.cuenta.create({ data: { tenantId, nombre: "Cliente QA", rut: "77000002-7" } });
     docId = (
       await e.admin.documentoEmitido.create({

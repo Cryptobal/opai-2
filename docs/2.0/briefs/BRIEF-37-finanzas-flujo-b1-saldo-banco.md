@@ -11,6 +11,13 @@
 ## Pruebas
 Dominio y módulo existentes en verde; `finanzas-flujo-saldo-banco-db.test.ts` (saldo anclado con una cuenta sin saldo, «Sin conciliar», conciliación tardía); el test de Paridad 4 de bancos ahora exige «Sin conciliar».
 
+## Corregido tras la autorrevisión
+- La apertura de la semana resta solo los movimientos de las cuentas que suman en el saldo del banco (activas y con saldo) y solo hasta hoy; los de cuentas inactivas o sin saldo, y los de fecha futura, no la corren. Test con las tres situaciones (falla sin el filtro: 11.411.110 en vez de 10.300.000).
+
 ## Pendiente
+- `saldoDelBanco` prefiere el saldo de Web4Leads sobre el saldo posterior de la cartola sin comparar fechas: si el primero es anterior a movimientos de esta semana, la apertura resta movimientos que el saldo no incluía. Se resuelve cuando el saldo de cada cuenta lleve su fecha de corte.
+- `saldoDelBanco` hace una consulta por cuenta (pocas cuentas por empresa); se junta en una sola si molesta.
+- La migración no distingue un ajuste nunca tocado de uno donde alguien eligió umbral 0 con el aviso apagado a propósito: ese caso pasa a $15.000.000 con aviso activo. El bot toma el respaldo de Neon antes de aplicarla. Las excepciones por usuario que denegaban `finanzas:flujo.cerrar` también se borran (el permiso ya no existe).
+- Tests por agregar en B2: domingo y lunes con la hora de Chile, vista previa de «Reprogramar», movimientos «por_autorizar» y «sugerido», conciliación parcial.
 - `ajustes.saldoInicial` y `ajustes.desde` quedan como respaldo; su retiro y el de las columnas huérfanas se deciden después.
 - La semana en curso mezcla lo ya movido (cartola) con la proyección completa de la semana: la apertura resta lo ya movido para no contarlo dos veces.

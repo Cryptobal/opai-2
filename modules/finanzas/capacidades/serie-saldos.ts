@@ -6,7 +6,7 @@ import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { FILAS_VIRTUALES_DOMINIO } from "./filas-virtuales";
 import { aNumeroSeguro } from "./esquemas";
-import { aFecha, aIso, cargarFlujo, lunesHoy } from "./util";
+import { aFecha, aIso, cargarFlujo, hoyIso, lunesHoy } from "./util";
 import type { ajustesDe } from "./util";
 
 /** Semanas de historia que la planilla de escritorio muestra antes de la semana en curso. */
@@ -64,9 +64,14 @@ export async function serieSaldos(
     filas: [...cargado.dominio, ...FILAS_VIRTUALES_DOMINIO],
     celdas: celdasCalc,
   };
-  // Saldo al comenzar la semana en curso = saldo del banco − lo ya movido esta semana (la cartola llega hasta hoy).
+  // Saldo al comenzar la semana en curso = saldo del banco − lo ya movido esta semana (hasta hoy) en las cuentas que
+  // suman en ese saldo: las inactivas o sin saldo no lo componen, y lo que lleve fecha futura aún no pasó.
   const movidos = await db.movimientoBancario.findMany({
-    where: { estado: { not: "ignorado" }, fecha: { gte: aFecha(hoy) } },
+    where: {
+      estado: { not: "ignorado" },
+      cuentaId: { in: banco.cuentaIdsConSaldo },
+      fecha: { gte: aFecha(hoy), lte: aFecha(hoyIso()) },
+    },
     select: { monto: true },
   });
   const aperturaSemana = banco.saldo - movidos.reduce((t, m) => t + aNumeroSeguro(m.monto), 0);

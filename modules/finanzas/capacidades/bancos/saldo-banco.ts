@@ -5,6 +5,8 @@ export type SaldoBanco = {
   saldo: number | null;
   /** Cuentas activas sin saldo conocido: no suman y la pantalla lo avisa (ADR-073). */
   cuentasSinSaldo: { cuentaId: string; banco: string }[];
+  /** Cuentas que sí suman en `saldo`: la apertura de la semana solo resta los movimientos de estas. */
+  cuentaIdsConSaldo: string[];
 };
 
 /**
@@ -24,6 +26,7 @@ export async function saldoDelBanco(
   let total = 0;
   let alguno = false;
   const cuentasSinSaldo: SaldoBanco["cuentasSinSaldo"] = [];
+  const cuentaIdsConSaldo: string[] = [];
   for (const c of cuentas) {
     let saldo: number | null = actual && c.id === actual.cuentaId ? actual.saldo : null;
     if (saldo == null && c.saldoBanco != null) saldo = Number(c.saldoBanco);
@@ -41,6 +44,7 @@ export async function saldoDelBanco(
     }
     total += saldo;
     alguno = true;
+    cuentaIdsConSaldo.push(c.id);
   }
-  return { saldo: alguno ? total : null, cuentasSinSaldo };
+  return { saldo: alguno ? total : null, cuentasSinSaldo, cuentaIdsConSaldo };
 }
