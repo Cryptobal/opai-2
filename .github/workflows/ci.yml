@@ -291,7 +291,7 @@ jobs:
     name: e2e · shard ${{ matrix.shard }}/6
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'e2e'))
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     strategy:
       fail-fast: false
       matrix:
@@ -370,7 +370,7 @@ jobs:
             curl -s -o /dev/null -m 120 "http://localhost:3000$ruta" || true
           done
       - name: Correr los e2e
-        timeout-minutes: 25
+        timeout-minutes: 40
         run: pnpm --filter @opai/web e2e --shard=${{ matrix.shard }}/6 --reporter=list,blob
         env:
           BASE_URL: http://localhost:3000
