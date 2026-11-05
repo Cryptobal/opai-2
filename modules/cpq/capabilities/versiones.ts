@@ -8,7 +8,8 @@ import {
   reglaDeNegocio,
 } from "@opai/capabilities";
 
-import { anioEnZona, formatearCodigo, validaHastaPorDefecto } from "../domain";
+import { anioEnZona, formatearCodigo, validaHastaPorDefecto, type EstadoCotizacion } from "../domain";
+import { sePuedeCrearVersionNueva } from "../domain/estado-ficha";
 import { copiarSeccionesYLineas, datosVersionDesde } from "../persistencia/version-copiar";
 import { versionParaFicha } from "../persistencia/version";
 import { uuidSchema } from "./esquemas";
@@ -104,6 +105,13 @@ export const versionesCrear = defineCapability({
     if (!ultima) throw noEncontrado("La versión");
     if (ultima.estado === "borrador")
       throw reglaDeNegocio("Ya hay una versión en borrador: edítala o envíala antes de crear otra.");
+    if (!sePuedeCrearVersionNueva(ultima.estado as EstadoCotizacion))
+      throw reglaDeNegocio(
+        ultima.estado === "lista"
+          ? "La cotización está lista: usa «Reabrir para editar» o envíala; no hace falta una versión nueva."
+          : "La versión actual todavía no salió: espera la decisión o retira el pedido antes de crear otra.",
+        { codigo: "version_editable_existente" },
+      );
     const numero = ultima.numero + 1;
     if (dryRun) return { versionId: ID_VISTA_PREVIA, numero };
     const validaHasta = validaHastaPorDefecto(new Date());

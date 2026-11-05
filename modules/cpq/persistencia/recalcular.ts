@@ -7,14 +7,11 @@ import { mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { aplicarAvisos, avisosCalculo } from "./avisos-calculo";
 import { juegoParaFecha, mutualParaCalculo, proveedorDesdeLineas } from "./proveedor";
-import { supuestosTenant } from "./supuestos";
+import { margenesTenant, supuestosTenant } from "./supuestos";
 import { sincronizarSecciones } from "./secciones-sync";
 import { mesesContrato, versionParaFicha } from "./version";
 
 export const AVISO_FALTA_UF = "Falta valor UF del día o del período.";
-
-const MINIMO = 100_000;
-const ALERTA = 30_000;
 
 function puedeEscribirVersion(version: { estado: string }, escribir: boolean) {
   return escribir && version.estado === "borrador";
@@ -81,8 +78,14 @@ export async function recalcularVersion(
     await supuestosTenant(ctx),
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
-  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo, costos);
-  const resultado = calcular(entrada, modelo, { fecha, uf, minimoPct: MINIMO, alertaPct: ALERTA }, proveedor);
+  const margenes = await margenesTenant(ctx);
+  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo, costos, margenes.objetivoPct);
+  const resultado = calcular(
+    entrada,
+    modelo,
+    { fecha, uf, minimoPct: margenes.minimoPct, alertaPct: margenes.alertaPct },
+    proveedor,
+  );
   const advertenciasExtra = [
     ...(resuelto.pendiente ? [resuelto.pendiente] : []),
     ...(!uf && juego ? [AVISO_FALTA_UF] : []),

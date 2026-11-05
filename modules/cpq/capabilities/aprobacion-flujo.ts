@@ -2,9 +2,14 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
-import { marcarLista, solicitarAprobacionMargen } from "../persistencia/aprobacion-margen";
+import { marcarLista, reabrirParaEditar, solicitarAprobacionMargen } from "../persistencia/aprobacion-margen";
 import { cargarFilasVersion, recalcularVersion } from "../persistencia/recalcular";
-import { exigirEditable } from "../persistencia/version";
+import {
+  entradaEstadoFicha,
+  exigirParaMarcarLista,
+  exigirParaPedirAprobacion,
+} from "../persistencia/requisitos";
+import { exigirBorrador, exigirEditable } from "../persistencia/version";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE } from "./permisos";
 import { cotizacionDe } from "./util";
@@ -27,13 +32,8 @@ export const cotizacionesSolicitarAprobacion = defineCapability({
     exigirEditable(pack.version);
     const resultado = await recalcularVersion(ctx, input.id, undefined, false);
     if (!resultado) throw noEncontrado("La versión");
-    if (dryRun) {
-      if (resultado.noEnviable)
-        throw reglaDeNegocio("Completa los costos pendientes antes de pedir aprobación.");
-      if (!resultado.requiereAprobacion)
-        throw reglaDeNegocio("El margen no requiere aprobación; puedes dejarla lista o enviar.");
-      return { estado: "en_aprobacion" as const, aprobacionId: pack.version.id };
-    }
+    exigirParaPedirAprobacion(await entradaEstadoFicha(ctx, pack.version, pack.lineas, resultado));
+    if (dryRun) return { estado: "en_aprobacion" as const, aprobacionId: pack.version.id };
     const r = await solicitarAprobacionMargen(ctx, pack.version.id, resultado, input.comentario);
     return r;
   },
@@ -42,7 +42,7 @@ export const cotizacionesSolicitarAprobacion = defineCapability({
 export const cotizacionesMarcarLista = defineCapability({
   id: "cpq.cotizaciones.marcar_lista",
   descripcion:
-    "Deja la versión editable en estado lista cuando el margen cumple el mínimo y no hay costos pendientes.",
+    "Deja la versión en borrador en estado lista (congelada) cuando tiene líneas, no hay costos pendientes, los valores legales están al día y el margen cumple el mínimo.",
   permiso: PERMISO_MANAGE,
   input: z.object({ id: uuidSchema }),
   output: z.object({ estado: z.literal("lista") }),
@@ -52,16 +52,31 @@ export const cotizacionesMarcarLista = defineCapability({
     await cotizacionDe(ctx, input.id);
     const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
     if (!pack) throw noEncontrado("La versión");
-    exigirEditable(pack.version);
+    exigirBorrador(pack.version);
     const resultado = await recalcularVersion(ctx, input.id, undefined, false);
     if (!resultado) throw noEncontrado("La versión");
-    if (dryRun) {
-      if (resultado.noEnviable)
-        throw reglaDeNegocio("La cotización no está lista: hay costos o UF pendientes.");
-      if (resultado.requiereAprobacion)
-        throw reglaDeNegocio("El margen requiere aprobación; usa «Pedir aprobación».");
-      return { estado: "lista" as const };
-    }
+    exigirParaMarcarLista(await entradaEstadoFicha(ctx, pack.version, pack.lineas, resultado));
+    if (dryRun) return { estado: "lista" as const };
     return marcarLista(ctx, pack.version.id, resultado);
+  },
+});
+
+export const cotizacionesReabrir = defineCapability({
+  id: "cpq.cotizaciones.reabrir",
+  descripcion:
+    "Reabre para editar una cotización que está lista: vuelve a borrador y se recalcula. Si el margen queda bajo el mínimo, hay que pedir aprobación de nuevo.",
+  permiso: PERMISO_MANAGE,
+  input: z.object({ id: uuidSchema }),
+  output: z.object({ estado: z.literal("borrador") }),
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
+    await cotizacionDe(ctx, input.id);
+    const pack = await cargarFilasVersion(ctx, input.id, undefined, false);
+    if (!pack) throw noEncontrado("La versión");
+    if (pack.version.estado !== "lista")
+      throw reglaDeNegocio("Solo se reabre una cotización que está lista; las demás se editan o se versionan.");
+    if (dryRun) return { estado: "borrador" as const };
+    return reabrirParaEditar(ctx, pack.version.id);
   },
 });

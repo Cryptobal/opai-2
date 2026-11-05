@@ -54,6 +54,7 @@ export const manifest = defineModule({
     { id: "cpq.cotizacion.aprobacion_solicitada", descripcion: "Una cotización pasó a aprobación por margen." },
     { id: "cpq.cotizacion.aprobada", descripcion: "Se aprobó el margen de una cotización." },
     { id: "cpq.cotizacion.aprobacion_rechazada", descripcion: "Se rechazó la aprobación de margen." },
+    { id: "cpq.cotizacion.reabierta", descripcion: "Una cotización lista volvió a borrador para editarla." },
     { id: "cpq.cotizacion.enviada", descripcion: "Se envió una cotización al cliente." },
     { id: "cpq.cotizacion.aceptada", descripcion: "La cotización vigente quedó aceptada al ganar el negocio." },
     { id: "cpq.puestos.confirmados", descripcion: "RRHH confirmó y creó los puestos de una cotización aceptada." },

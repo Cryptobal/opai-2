@@ -1,4 +1,4 @@
-import { Copy, Eye, GitBranch } from "lucide-react";
+import { Copy, Eye, GitBranch, Pencil } from "lucide-react";
 
 import type { ItemMenu } from "@opai/ds";
 
@@ -9,6 +9,7 @@ export function itemsMenuCotizacion(p: {
   cotizacionId: string;
   gestionar: boolean;
   puedeNuevaVersion: boolean;
+  puedeReabrir: boolean;
   onVistaPrevia?: (() => void) | undefined;
   ejecutar: Ejecutar;
   limpiarError: () => void;
@@ -35,6 +36,17 @@ export function itemsMenuCotizacion(p: {
         .then((r) => r != null && p.onHecho());
     },
   });
+  if (p.puedeReabrir) {
+    items.push({
+      id: "reabrir",
+      etiqueta: "Reabrir para editar",
+      icono: Pencil,
+      onSelect: () => {
+        p.limpiarError();
+        void p.ejecutar("cpq.cotizaciones.reabrir", { id: p.cotizacionId }).then((r) => r != null && p.onHecho());
+      },
+    });
+  }
   if (p.puedeNuevaVersion) {
     items.push({
       id: "nueva-version",

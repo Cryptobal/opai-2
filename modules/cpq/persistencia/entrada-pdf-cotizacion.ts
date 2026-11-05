@@ -2,9 +2,9 @@
 import type { Contexto } from "@opai/capabilities";
 
 import type { ResultadoCalculo } from "../domain/motor";
-import { calculoCongelado } from "./calculo-congelado";
+import { calculoVigente } from "./calculo-vigente";
 import { type EntradaPdfCotizacion, type LineaPdfCotizacion } from "./documento-pdf";
-import { cargarFilasVersion, recalcularVersion } from "./recalcular";
+import { cargarFilasVersion } from "./recalcular";
 
 export { entradaPdfConBorradorMarca, entradaPdfMuestra } from "./entrada-pdf-muestra";
 
@@ -27,10 +27,7 @@ export async function entradaPdfDesdeCotizacion(
   const pack = await cargarFilasVersion(ctx, cotizacionId, undefined, false);
   if (!pack) return null;
   const { version, secciones, lineas } = pack;
-  const resultado =
-    version.estado === "borrador"
-      ? await recalcularVersion(ctx, cotizacionId, undefined, false)
-      : calculoCongelado(ctx, version, lineas);
+  const resultado = await calculoVigente(ctx, cotizacionId, version, lineas);
   if (!resultado) return null;
 
   const neg = await ctx.db.negocio.findFirst({

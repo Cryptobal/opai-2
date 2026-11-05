@@ -93,9 +93,9 @@ describe("reglas de edición y versiones", () => {
       "reemplazada",
     ]);
   });
-  it("lista y posteriores se muestran congeladas; borrador y en aprobación no", () => {
+  it("solo el borrador se recalcula; desde en aprobación se muestra lo congelado", () => {
     expect(esCongelada("borrador")).toBe(false);
-    expect(esCongelada("en_aprobacion")).toBe(false);
+    expect(esCongelada("en_aprobacion")).toBe(true);
     expect(esCongelada("lista")).toBe(true);
     expect(esCongelada("enviada")).toBe(true);
   });

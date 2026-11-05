@@ -61,8 +61,10 @@ export function AccionesCotizacion({
   const bloqueoMutual = bloqueoMutualCpq(params);
   const bloqueo = bloqueoEnvioCpq(params) ?? bloqueoMutual;
   const bloqueoCalculoBarra = bloqueoCalculoEnBarraFija(params);
-  const puedeNuevaVersion =
-    gestionar && version.estado !== "borrador" && version.estado !== "en_aprobacion";
+  // Solo se ofrece lo que la capacidad acepta (CAR-192): versión nueva con la última ya enviada; reabrir
+  // desde lista. Editar una versión lista pide primero «Reabrir para editar».
+  const puedeNuevaVersion = gestionar && Boolean(meta?.puedeCrearVersion);
+  const puedeReabrir = gestionar && Boolean(meta?.puedeReabrir);
   const ocultar = Boolean(ocultarPrimariaEnTelefono);
   const despues = (r: unknown) => void (r != null && (limpiarError(), onHecho()));
   // Recalcular informa qué cambió o qué falta (CAR-162), no solo recarga.
@@ -122,7 +124,7 @@ export function AccionesCotizacion({
     );
   }
 
-  const comunes = { cotizacionId, gestionar, puedeNuevaVersion, onVistaPrevia, ejecutar, limpiarError, onHecho };
+  const comunes = { cotizacionId, gestionar, puedeNuevaVersion, puedeReabrir, onVistaPrevia, ejecutar, limpiarError, onHecho };
 
   return (
     <AccionesCotizacionCabecera

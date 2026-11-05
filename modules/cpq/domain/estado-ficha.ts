@@ -51,7 +51,7 @@ export type SalidaEstadoFicha = {
 
 export const MENSAJE_BLOQUEO: Record<CodigoBloqueo, string> = {
   sin_lineas: "Agrega al menos un puesto antes de dejar la cotización lista.",
-  costos_pendientes: "Faltan costos o datos para calcular: completa lo pendiente.",
+  costos_pendientes: "Hay costos o UF pendientes: completa lo que falta antes de continuar.",
   desactualizada: "Los valores legales cambiaron desde el último cálculo: recalcula antes de continuar.",
   margen_bajo: "El margen quedó bajo el mínimo: pide aprobación antes de dejarla lista.",
 };
@@ -130,9 +130,9 @@ export function estadoFicha(e: EntradaEstadoFicha): SalidaEstadoFicha {
   };
 }
 
-/** `lista` y posteriores se muestran congeladas: la ficha no recalcula. */
+/** Solo el borrador se recalcula en vivo; desde «en aprobación» la ficha muestra lo congelado. */
 export function esCongelada(estado: EstadoCotizacion): boolean {
-  return estado !== "borrador" && estado !== "en_aprobacion" && estado !== "archivada";
+  return estado !== "borrador";
 }
 
 /** Editar exige borrador; desde `lista` se pide «Reabrir para editar». */
