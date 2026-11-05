@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 import { entrar } from "./sesion";
-import { sinDesborde } from "./negocios-ayuda";
+import { sinDesborde, irANuevaCotizacion } from "./negocios-ayuda";
 
 const numeros: Record<string, number> = { telefono: 1, ipad: 2, desktop: 3 };
 test.setTimeout(180_000);
@@ -19,7 +19,7 @@ test("ficha CPQ muestra resumen en español y patrón lista+ficha", async ({ pag
   const negocio = `00000000-0000-7000-8000-00000000132${numero}`;
   await entrar(page, "cpq-gestor@example.test");
   await page.goto(`/negocios/${negocio}`);
-  await page.getByRole("link", { name: "Nueva cotización", exact: true }).click();
+  await irANuevaCotizacion(page);
   const titulo = `Ficha visual ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
@@ -44,7 +44,7 @@ test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({
   const negocio = `00000000-0000-7000-8000-00000000132${numero}`;
   await entrar(page, "cpq-gestor@example.test");
   await page.goto(`/negocios/${negocio}`);
-  await page.getByRole("link", { name: "Nueva cotización", exact: true }).click();
+  await irANuevaCotizacion(page);
   const titulo = `Error costos ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();

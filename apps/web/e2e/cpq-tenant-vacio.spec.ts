@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { expect, test, type Page } from "@playwright/test";
 
 import { entrar } from "./sesion";
-import { sinDesborde } from "./negocios-ayuda";
+import { sinDesborde, irANuevaCotizacion } from "./negocios-ayuda";
 
 // CAR-162: primera cotización en un tenant sin mutual confirmada (el seed e2e no la siembra).
 const numeros: Record<string, number> = { telefono: 1, ipad: 2, desktop: 3 };
@@ -31,7 +31,7 @@ test("tenant vacío: de la cotización nueva al costo calculado y la vista previ
   const numero = numeros[info.project.name] ?? 1;
   await entrar(page, "cpq-costos@example.test");
   await page.goto(`/negocios/00000000-0000-7000-8000-00000000132${numero}`);
-  await page.getByRole("link", { name: "Nueva cotización", exact: true }).click();
+  await irANuevaCotizacion(page);
   await page.getByLabel("Título", { exact: true }).fill(`Tenant vacío ${info.project.name} ${Date.now()}`);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();

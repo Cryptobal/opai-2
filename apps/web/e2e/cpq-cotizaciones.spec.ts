@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 import { hidratado } from "./hidratacion";
 import { entrar } from "./sesion";
-import { sinDesborde } from "./negocios-ayuda";
+import { sinDesborde, irANuevaCotizacion } from "./negocios-ayuda";
 
 const numeros: Record<string, number> = { telefono: 1, ipad: 2, desktop: 3 };
 test.setTimeout(180_000);
@@ -23,7 +23,7 @@ test("crea desde negocio abierto con vista previa y aparece en ambas listas", as
   const titulo = `Cotización ficticia ${info.project.name} ${Date.now()}`;
   await entrar(page, "cpq-gestor@example.test");
   await page.goto(`/negocios/${negocio}`);
-  await page.getByRole("link", { name: "Nueva cotización", exact: true }).click();
+  await irANuevaCotizacion(page);
   await expect(page.getByRole("button", { name: "Revisar cotización" })).toBeDisabled();
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByLabel("Válida hasta").fill("2020-01-01");
