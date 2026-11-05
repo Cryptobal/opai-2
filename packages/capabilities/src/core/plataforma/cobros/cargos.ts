@@ -34,23 +34,57 @@ export const platformCobrosCargosGenerar = defineCapability({
     empresas: z.array(resultadoEmpresa),
     creados: z.number().int(),
     montoClp: z.number().int(),
+    fallidas: z
+      .array(z.object({ tenantId: z.string(), motivo: z.string() }))
+      .describe("Empresas que fallaron en una generación global; las demás quedaron generadas."),
   }),
   efecto: "escritura",
   dryRun: true,
   tenantObjetivo: (input) => input.tenantId,
+  // En una generación global la auditoría de plataforma deja el resultado por empresa.
+  cambio: (s) => ({
+    antes: null,
+    despues: {
+      periodo: s.periodo,
+      empresas: s.empresas.map((e) => ({
+        tenantId: e.tenantId,
+        creados: e.creados,
+        montoClp: e.montoClp,
+      })),
+      fallidas: s.fallidas,
+    },
+  }),
   async handler(ctx, input, { dryRun }) {
     if (input.periodo >= periodoDe(hoy()))
       throw reglaDeNegocio("Solo se generan cargos de meses cerrados.");
     const p = requierePlataforma(ctx);
     const tenants = await p.globales.listarTenants(input.tenantId);
     if (input.tenantId && tenants.length === 0) throw noEncontrado("La empresa");
-    const empresas = await porLotes(tenants, async (t) => ({
-      tenantId: t.id,
-      ...(await generarCargosDeEmpresa(p.empresa(t.id), input.periodo, p.globales.ufAlDia, dryRun)),
-    }));
+    const fallidas: { tenantId: string; motivo: string }[] = [];
+    const resultados = await porLotes(tenants, async (t) => {
+      try {
+        const r = await generarCargosDeEmpresa(
+          p.empresa(t.id),
+          input.periodo,
+          p.globales.ufAlDia,
+          dryRun,
+        );
+        return { tenantId: t.id, ...r };
+      } catch (e) {
+        // Una empresa concreta falla de forma visible; en una global, las demás siguen.
+        if (input.tenantId) throw e;
+        fallidas.push({
+          tenantId: t.id,
+          motivo: "No se pudo generar; se reintenta en la próxima corrida.",
+        });
+        return null;
+      }
+    });
+    const empresas = resultados.filter((r) => r !== null);
     return {
       periodo: input.periodo,
       empresas,
+      fallidas,
       creados: empresas.reduce((s, e) => s + e.creados, 0),
       montoClp: empresas.reduce((s, e) => s + e.montoClp, 0),
     };

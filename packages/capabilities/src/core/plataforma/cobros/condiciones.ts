@@ -60,10 +60,6 @@ export const platformCobrosCondicionesSet = defineCapability({
       : null;
     if (datos && !datos.cobroDesde && !datos.pruebaHasta)
       throw reglaDeNegocio("Indica desde cuándo se cobra o hasta cuándo dura la prueba.");
-    if (!dryRun) {
-      if (datos) await e.fijarCondicionCobro(input.moduloId, datos);
-      else await e.quitarCondicionCobro(input.moduloId);
-    }
     const despues = datos ? aCondicionVista(datos) : null;
     // Lo que verá el resumen: se calcula sobre lo guardado, o sobre lo propuesto en la vista previa.
     const periodo = periodoDe(hoy());
@@ -78,6 +74,11 @@ export const platformCobrosCondicionesSet = defineCapability({
     );
     const fila = r.filas.find((f) => f.moduloId === input.moduloId);
     if (!fila) throw noEncontrado(`El módulo "${input.moduloId}"`);
+    // La respuesta se calcula primero: si algo falla, no queda nada escrito sin auditar.
+    if (!dryRun) {
+      if (datos) await e.fijarCondicionCobro(input.moduloId, datos);
+      else await e.quitarCondicionCobro(input.moduloId);
+    }
     return {
       moduloId: input.moduloId,
       antes: actual ? aCondicionVista(actual) : null,

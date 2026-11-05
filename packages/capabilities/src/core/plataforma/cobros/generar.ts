@@ -23,10 +23,19 @@ export async function generarCargosDeEmpresa(
     r.ufUsada,
     new Set(r.vigentes.keys()),
   );
-  const creados = dryRun ? nuevos.length : await e.crearCargosCobro(nuevos);
-  return {
-    creados,
-    montoClp: nuevos.reduce((s, c) => s + c.montoClp, 0),
-    omitidos,
-  };
+  if (dryRun)
+    return {
+      creados: nuevos.length,
+      montoClp: nuevos.reduce((s, c) => s + c.montoClp, 0),
+      omitidos,
+    };
+  // Uno a uno: ante una carrera, el monto cuenta solo lo que de verdad se insertó.
+  let creados = 0;
+  let montoClp = 0;
+  for (const c of nuevos)
+    if ((await e.crearCargosCobro([c])) > 0) {
+      creados += 1;
+      montoClp += c.montoClp;
+    }
+  return { creados, montoClp, omitidos };
 }
