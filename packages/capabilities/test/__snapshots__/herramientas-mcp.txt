@@ -97,6 +97,7 @@ core_contactos_restaurar
 core_contactos_set_roles
 core_contactos_update
 core_contactos_vincular
+core_credenciales_terreno_estado
 core_cuentas_aplicar_sii
 core_cuentas_archive
 core_cuentas_consultar_sii

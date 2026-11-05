@@ -124,4 +124,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67).",
   "comercial.canales.rotar_token_formulario":
     "Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant.",
+  "core.credenciales_terreno.asignar_pin":
+    "Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02).",
+  "core.credenciales_terreno.restablecer":
+    "Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02).",
+  "core.credenciales_terreno.cambiar_pin":
+    "Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02).",
 };
