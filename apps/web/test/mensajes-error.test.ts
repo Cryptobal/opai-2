@@ -24,5 +24,9 @@ describe("mensajes de error (B7)", () => {
     const largo = `Este anexo no se puede aprobar todavía: ${"la plantilla tiene texto de ejemplo. ".repeat(5)}`.trim();
     expect(largo.length).toBeGreaterThan(220);
     expect(mensajeDeError("UNPROCESSABLE", largo)).toBe(largo);
+    // Lo técnico sigue sin salir aunque abra con «.
+    expect(mensajeDeError("UNPROCESSABLE", "«Cuenta» falló en prisma al leer el tenant.")).toMatch(
+      /No se puede hacer en este momento/,
+    );
   });
 });

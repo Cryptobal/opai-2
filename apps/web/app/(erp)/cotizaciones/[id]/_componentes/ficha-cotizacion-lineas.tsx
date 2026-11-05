@@ -30,7 +30,7 @@ export function FichaCotizacionLineas({
   // Solo las secciones con puestos o con instalación: la sección «Común» vacía no es una tarjeta más.
   const secciones = d.secciones.filter((s) => s.lineas.length > 0 || s.instalacionId);
   // Sin puestos ni instalación no hay tarjeta, pero el primero se agrega en la sección común.
-  const primera = d.secciones[0];
+  const primera = d.secciones.find((s) => !s.instalacionId) ?? d.secciones[0];
   return (
     <div className="space-y-4">
       {secciones.length === 0 ? (
