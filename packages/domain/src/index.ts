@@ -20,6 +20,7 @@ export * from "./estructuras-conceptos";
 export * from "./plantillas";
 export * from "./presupuesto";
 export * from "./rut";
+export * from "./terreno-pin";
 export * from "./telefono";
 export * from "./turnos";
 export * from "./vigencia";

@@ -52,6 +52,12 @@ export { resolverTokenSeguimiento } from "./seguimiento-token";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";
 export { consumirRateLimit, purgarVentanasRateLimit, type ResultadoRateLimit } from "./rate-limit";
+export {
+  credencialesTerrenoPorRut,
+  hashPin,
+  HASH_PIN_SIN_PERSONA,
+  verificarPin,
+} from "./pin-terreno";
 export { enTransaccion, type OpcionesTransaccion, type TenantTx } from "./transaccion";
 export { enTransaccionCapturaSii } from "./transaccion-captura-sii";
 export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
