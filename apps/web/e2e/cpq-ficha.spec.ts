@@ -52,6 +52,10 @@ test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({
   await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   await page.getByRole("button", { name: "Agregar puesto" }).click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
+  // Sin puestos la cotización ya es «Incompleta»: lo que prueba el guardado es que la hoja se cierre
+  // (abierta, el resto de la página queda aria-hidden y los botones no se encuentran por rol). En el
+  // runner el primer guardado compila su ruta y tarda.
+  await expect(page.getByRole("dialog")).toHaveCount(0, { timeout: 60_000 });
   // Con el puesto sin costear la cotización queda «Incompleta»: la única acción es completar los datos.
   await expect(page.getByText("Incompleta", { exact: true }).filter({ visible: true }).first()).toBeVisible({
     timeout: 15_000,
