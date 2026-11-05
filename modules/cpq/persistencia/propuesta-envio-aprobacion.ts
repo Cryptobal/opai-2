@@ -62,7 +62,11 @@ export async function exigirGatesEnvioCpq(
   // La huella es lo que el usuario vio: se toma antes de calcular y validar, de modo que cualquier cambio
   // posterior (una edición, un refresco del caché) haga fallar el envío en vez de quedar dentro de la huella.
   const versionEsperada = await leerVersionEsperada(ctx.db, pack.version.id);
-  if (!versionEsperada || versionEsperada.estado !== pack.version.estado)
+  if (
+    !versionEsperada ||
+    versionEsperada.estado !== pack.version.estado ||
+    versionEsperada.revision !== pack.version.revision
+  )
     throw reglaDeNegocio("La cotización cambió mientras se preparaba el envío; vuelve a cargar la ficha.");
   const resultado = await calculoVigente(ctx, cotizacionId, pack.version, pack.lineas);
   if (!resultado) throw reglaDeNegocio("No se pudo calcular la cotización.");
