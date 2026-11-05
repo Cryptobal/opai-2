@@ -112,6 +112,10 @@
     {
       "archivo": "lib/metricas-navegacion.ts",
       "motivo": "Instrumentación de rendimiento (ADR-045): registra en @opai/db el observador que cuenta las consultas a Neon por request; no es una pantalla."
+    },
+    {
+      "archivo": "lib/dispositivo.ts",
+      "motivo": "Reconoce al dispositivo de terreno por su token (HMAC) en cada petición con dispositivoPorToken; el dispositivo no tiene sesión de usuario (CAR-78 B2)."
     }
   ]
 }
