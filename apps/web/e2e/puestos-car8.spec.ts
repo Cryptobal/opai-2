@@ -155,10 +155,14 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
       fullPage: true,
     });
     // Navegable: al abrir una posición aparece la hoja de edición.
-    await filas.first().click();
-    await expect(page.getByRole("dialog", { name: "Editar puesto" })).toBeVisible({
-      timeout: 20_000,
-    });
+    // Un clic antes de hidratar (o durante un repintado de `next dev`) no abre la hoja: se reintenta.
+    // La hoja es diferida: tras un clic válido puede tardar en compilarse, y con ella abierta la lista
+    // queda inerte, así que solo se vuelve a pulsar mientras no esté a la vista.
+    const hoja = page.getByRole("dialog", { name: "Editar puesto" });
+    await expect(async () => {
+      if (!(await hoja.isVisible())) await filas.first().click({ timeout: 3_000 });
+      await expect(hoja).toBeVisible({ timeout: 8_000 });
+    }).toPass({ timeout: 40_000 });
 
     // Estado vacío: una instalación sin puestos invita a crear el primero.
     await page.goto(`/instalaciones/${vaciaId}/puestos`);
