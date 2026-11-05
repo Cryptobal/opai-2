@@ -27,6 +27,10 @@ const moduloSchema = z.object({
   cargo: cargoSchema.nullable().describe("Cargo vigente del mes, si ya se generó."),
 });
 
+/** El plan base cuenta como contratado mientras la empresa no esté suspendida. */
+const esContratado = (m: { estado: string | null }) =>
+  m.estado === "activo" || m.estado === "trial";
+
 const empresaSchema = z.object({
   tenantId: z.string(),
   nombre: z.string(),
@@ -35,12 +39,13 @@ const empresaSchema = z.object({
   modulos: z.array(moduloSchema),
   totalClp: z.number().int(),
   facturables: z.number().int(),
+  noFacturables: z.number().int().describe("Contratados que este mes no se facturan."),
 });
 
 export const platformCobrosResumen = defineCapability({
   id: "platform.cobros.resumen",
   descripcion:
-    "Plataforma: qué factura cada empresa por cada módulo en un mes (por defecto el actual): condición comercial, si se factura y por qué, monto en CLP (UF del último día del mes) y el cargo si ya se generó, con totales.",
+    "Plataforma: qué factura cada empresa por el plan base y cada módulo (forma, unidad, cantidad del mes, mensual y monto) en un mes (por defecto el actual): condición comercial, si se factura y por qué, monto en CLP (UF del último día del mes) y el cargo si ya se generó, con totales.",
   permiso: PERMISOS_PLATAFORMA.tenantsRead,
   sinTenant: true,
   input: z.object({
@@ -75,6 +80,7 @@ export const platformCobrosResumen = defineCapability({
       uf ??= r.uf;
       const modulos = r.filas.map((f) => ({ ...f, cargo: r.vigentes.get(f.moduloId) ?? null }));
       const cobra = modulos.filter((m) => m.calculo.facturable);
+      const noCobra = modulos.filter(esContratado).filter((m) => !m.calculo.facturable);
       return {
         tenantId: t.id,
         nombre: t.nombre,
@@ -82,11 +88,12 @@ export const platformCobrosResumen = defineCapability({
         estado: t.estado,
         modulos,
         facturables: cobra.length,
+        noFacturables: noCobra.length,
         totalClp: cobra.reduce((s, m) => s + (m.cargo?.montoClp ?? m.calculo.montoClp ?? 0), 0),
       };
     });
     const todos = empresas.flatMap((e) => e.modulos);
-    const contratados = todos.filter((m) => m.estado === "activo" || m.estado === "trial");
+    const contratados = todos.filter(esContratado);
     const porMoneda = (["CLP", "UF"] as const).map((moneda) => ({
       moneda,
       monto: todos

@@ -76,6 +76,10 @@ export type FiltroCargos = { periodo?: Date; estado?: string };
 
 export function operacionesCobros(db: TenantTx, tenantId: string) {
   return {
+    /** Estado de la empresa (trial | activo | suspendido): el plan base no se cobra si está suspendida. */
+    estadoEmpresa: async () =>
+      (await db.tenant.findFirst({ where: { id: tenantId }, select: { estado: true } }))?.estado ??
+      null,
     /**
      * Lo que se cuenta para el cobro por unidad, sin datos personales: el acceso de cada membresía
      * activa (rol, permisos de su rol personalizado y excepciones), los trabajadores con vínculo

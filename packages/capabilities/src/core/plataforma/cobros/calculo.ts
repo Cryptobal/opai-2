@@ -3,7 +3,9 @@ import {
   cargoDelMes,
   limitesDelPeriodo,
   MOTIVOS_COBRO,
+  PLAN_BASE,
   type CondicionCobro,
+  type UnidadCobro,
 } from "@opai/domain";
 import type { NuevoCargoCobro } from "@opai/db";
 
@@ -42,23 +44,37 @@ export const modulosCobrables = () =>
 
 const aCondicion = (c: CondicionVista): CondicionCobro => ({
   moneda: c.moneda,
-  precioMensual: c.precioMensual,
+  forma: c.forma,
+  unidad: c.unidad,
+  precio: c.precio,
+  minimoMensual: c.minimoMensual,
   cobroDesde: c.cobroDesde,
   pruebaHasta: c.pruebaHasta,
+  pasaACobro: c.pasaACobro,
   descuentoPct: c.descuentoPct,
 });
 
-/** Estado de cobro de cada módulo de una empresa en un mes. */
+/** Cuenta las unidades de una condición `por_unidad` (null si no aplica). */
+export type Contador = (unidad: UnidadCobro, moduloId: string) => number;
+
+/**
+ * Estado de cobro del plan base y de cada módulo de una empresa en un mes. El plan base (`base`) no
+ * es un módulo del registro: se cobra mientras la empresa no esté suspendida.
+ */
 export function filasDeCobro(
   condiciones: ReadonlyMap<string, CondicionVista>,
   estados: ReadonlyMap<string, string>,
   periodo: string,
   ufCentavos: number | null,
+  contar: Contador,
 ) {
-  return modulosCobrables().map((m) => {
+  const items = [{ id: PLAN_BASE, nombre: "Plan base" }, ...modulosCobrables()];
+  return items.map((m) => {
     const condicion = condiciones.get(m.id) ?? null;
     const estado = estados.get(m.id) ?? null;
-    const r = cargoDelMes(condicion ? aCondicion(condicion) : null, estado, periodo);
+    const c = condicion ? aCondicion(condicion) : null;
+    const cantidad = c?.forma === "por_unidad" && c.unidad ? contar(c.unidad, m.id) : null;
+    const r = cargoDelMes(c, estado, periodo, cantidad);
     const montoClp = r.facturable && condicion ? aClp(r.monto, condicion.moneda, ufCentavos) : null;
     return {
       moduloId: m.id,
@@ -72,6 +88,9 @@ export function filasDeCobro(
         desde: r.desde,
         diasCobrados: r.diasCobrados,
         diasMes: r.diasMes,
+        cantidad: r.cantidad,
+        mensual: r.mensual,
+        descuento: r.descuento,
         monto: r.monto,
         montoClp,
       },
@@ -105,7 +124,11 @@ export function cargosPorGenerar(
         moduloId: f.moduloId,
         periodo: aFechaPeriodo(periodo),
         moneda: f.condicion.moneda,
-        precioMensual: f.condicion.precioMensual,
+        forma: f.condicion.forma,
+        unidad: f.condicion.forma === "por_unidad" ? f.condicion.unidad : null,
+        precioMensual: f.condicion.precio,
+        minimoMensual: f.condicion.minimoMensual,
+        cantidad: f.calculo.cantidad,
         descuentoPct: f.condicion.descuentoPct,
         diasCobrados: f.calculo.diasCobrados,
         diasMes: f.calculo.diasMes,
