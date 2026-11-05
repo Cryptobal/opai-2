@@ -20,6 +20,10 @@ type Props = {
   /** Variante compacta (logos de Marca): solo el botón. */
   compacto?: boolean;
   disabled?: boolean;
+  /** Avisa al quitar un archivo de la lista (para que quien lo usa también lo suelte). */
+  onQuitar?: (archivo: File) => void;
+  /** Texto del botón de teléfono; por defecto «Agregar archivo». */
+  etiquetaBoton?: string;
 };
 
 let secuencia = 0;
@@ -30,7 +34,17 @@ let secuencia = 0;
  * con reintentar. La subida va directo al almacenamiento con la URL firmada (ADR-039).
  */
 export function Uploader(props: Props) {
-  const { procesar, accept, tipos, tamanoMaximoMb = 50, multiple, compacto, disabled } = props;
+  const {
+    procesar,
+    accept,
+    tipos,
+    tamanoMaximoMb = 50,
+    multiple,
+    compacto,
+    disabled,
+    onQuitar,
+    etiquetaBoton,
+  } = props;
   const [archivos, setArchivos] = useState<ArchivoEnProceso[]>([]);
   const [arrastrando, setArrastrando] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -94,7 +108,7 @@ export function Uploader(props: Props) {
           disabled={disabled}
           onClick={() => input.current?.click()}
         >
-          <Plus className="size-5" aria-hidden /> Agregar archivo
+          <Plus className="size-5" aria-hidden /> {etiquetaBoton ?? "Agregar archivo"}
         </Button>
         <p className="t-caption text-center">Cámara, galería o archivos · {ayuda}</p>
       </div>
@@ -138,7 +152,10 @@ export function Uploader(props: Props) {
         <FilaArchivo
           key={a.clave}
           a={a}
-          onQuitar={() => setArchivos((l) => l.filter((x) => x.clave !== a.clave))}
+          onQuitar={() => {
+            setArchivos((l) => l.filter((x) => x.clave !== a.clave));
+            onQuitar?.(a.archivo);
+          }}
           onReintentar={() => void iniciar(a)}
         />
       ))}

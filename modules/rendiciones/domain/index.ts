@@ -1,7 +1,19 @@
 // Dominio puro de Rendiciones (CAR-175, R1): estados, transiciones y reglas sin base de datos.
 // No importa next, react ni @opai/db (REGLAS-codigo).
 
-export const ESTADOS = ["borrador", "enviada", "aprobada", "rechazada", "devuelta", "pagada", "anulada"] as const;
+/** Tipos de documento que respaldan un gasto (decisión de Carlos del 5-nov-2026). */
+export const TIPOS_DOCUMENTO = ["boleta", "factura"] as const;
+export type TipoDocumento = (typeof TIPOS_DOCUMENTO)[number];
+
+export const ESTADOS = [
+  "borrador",
+  "enviada",
+  "aprobada",
+  "rechazada",
+  "devuelta",
+  "pagada",
+  "anulada",
+] as const;
 export type EstadoRendicion = (typeof ESTADOS)[number];
 
 /** Transiciones válidas. «Pagada» la marca el lote de pago confirmado (R3), no una capacidad de R1. */
@@ -50,7 +62,8 @@ export function totalRendicion(items: readonly { monto: number }[]): number {
 export function claveDuplicado(i: { proveedor: string; folio?: string | null | undefined; monto: number }): string | null {
   const folio = (i.folio ?? "").trim();
   if (folio === "") return null;
-  const norm = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/g, " ").trim();
+  const norm = (t: string) =>
+    t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/g, " ").trim();
   return `${norm(i.proveedor)}|${norm(folio)}|${i.monto}`;
 }
 

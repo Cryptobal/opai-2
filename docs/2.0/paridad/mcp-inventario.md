@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 583 pares pantalla→capacidad · 527 con herramienta · 56 excepciones justificadas · 0 faltantes.
+**Resumen:** 592 pares pantalla→capacidad · 536 con herramienta · 56 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -89,6 +89,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
+| compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
+| compartido | `app/_components` | `rendiciones.opciones.obtener` | `rendiciones_opciones_obtener` | existe |
+| compartido | `app/_components` | `rendiciones.rendiciones.actualizar` | `rendiciones_rendiciones_actualizar` | existe |
+| compartido | `app/_components` | `rendiciones.rendiciones.anular` | `rendiciones_rendiciones_anular` | existe |
+| compartido | `app/_components` | `rendiciones.rendiciones.crear` | `rendiciones_rendiciones_crear` | existe |
+| compartido | `app/_components` | `rendiciones.rendiciones.enviar` | `rendiciones_rendiciones_enviar` | existe |
+| compartido | `app/_components` | `rendiciones.rendiciones.listar` | `rendiciones_rendiciones_listar` | existe |
+| compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
@@ -841,15 +850,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.users.set_role`
 - `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
-- `rendiciones.kilometraje.calcular`
-- `rendiciones.rendiciones.actualizar`
-- `rendiciones.rendiciones.anular`
 - `rendiciones.rendiciones.aprobar`
-- `rendiciones.rendiciones.crear`
 - `rendiciones.rendiciones.devolver`
-- `rendiciones.rendiciones.enviar`
-- `rendiciones.rendiciones.listar`
-- `rendiciones.rendiciones.obtener`
 - `rendiciones.rendiciones.rechazar`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.reasignar`
