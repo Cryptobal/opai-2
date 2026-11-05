@@ -1,6 +1,6 @@
 # Contexto para agentes — OPAI 2.0
 
-> **Flujo operativo vigente desde el 28-oct-2026:** [`OPERACION-agentes.md`](OPERACION-agentes.md) (ADR-054). Es la fuente del flujo de trabajo (quién hace qué, migraciones, revisión, integración, QA y capturas); ante un choque con este archivo, manda ese.
+> **Flujo operativo vigente desde el 28-oct-2026; ajuste del 5-nov-2026 (ADR-077):** [`OPERACION-agentes.md`](OPERACION-agentes.md) sección **A2** (ADR-054). Es la fuente del flujo de trabajo (quién hace qué, migraciones, revisión, integración, QA y capturas); ante un choque con este archivo, manda ese.
 
 Para pegar en la configuración o memoria de Grokbot o de cualquier agente que trabaje con OPAI. Versión vigente: la de este archivo en el repositorio.
 
@@ -18,13 +18,13 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Cómo se trabaja
 
-- Flujo con bots (ADR-043 v3, ajustado por ADR-054 y `OPERACION-agentes.md` desde el 28-oct-2026):
-  - **Bot «OPAI 2.0»** (Cursor; vigila GitHub y Linear): **no escribe briefs ni encargos y no integra** (frente único, ADR-070, 4-nov-2026). Cada 15 minutos revisa los PRs abiertos y pasa cada PR nuevo o con head nuevo al Revisor y a QA (avisos); **aplica las migraciones en Neon cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos»**, con respaldo previo, primero en `dev` y después en `main`, y quita la etiqueta `migracion-pendiente`; toma las capturas que Carlos pida en `test.opai.cl`, y avisa en español al migrar.
-  - **Sesiones de Claude** (una por frente, con su número en el título del PR): planifican, escriben la especificación y **los briefs**, construyen en su rama, abren el PR e **integran a `main` con squash sus propios PRs** cuando los checks obligatorios están en verde, la rama está al día con `main`, el Revisor no dejó bloqueos de seguridad, migraciones o datos, la migración ya está aplicada por el bot y no hay veto vigente de Carlos. NÚCLEO-H `nucleo-h-1112-oc` autoriza explícitamente OpenCode / openai/gpt-6.1-sol por falta de cupo de Claude y seguridad; continúa el PR existente, sin crear otro. No es una autorización general a los agentes operativos.
-  - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó, en **una sola pasada** (tras un push, solo el delta); solo **bloquea** por seguridad, migraciones o datos (RLS, permisos, pérdida o mezcla de datos entre tenants); lo demás va a un PR de pendientes; **no integra**.
+- Flujo con bots (ADR-043 v3, ajustado por ADR-054, ADR-070 y **ADR-077 / `OPERACION-agentes.md` A2 desde el 5-nov-2026**):
+  - **Bot «OPAI 2.0» / Grok Bot** coordina el avance completo: vigila GitHub y Linear en horarios fijos (09, 12, 15, 18 y 20 h America/Santiago), responde señales `DECISIÓN CARLOS:` / `BLOQUEO OPAI:` / `MIGRACIÓN LISTA:` y `@opai-2.0:`, **aplica las migraciones en Neon** tras la revisión final sin bloqueos de la sesión (respaldo previo, `dev` → `main`, quita `migracion-pendiente`), toma capturas que pida Carlos; **no integra ni escribe briefs** (ADR-070).
+  - **Sesiones de Claude Code** (una por frente): planifican, escriben briefs, construyen, hacen la **revisión final** del PR (SHA + «sin bloqueos» o bloqueos concretos en seguridad, RLS, permisos, migraciones y datos) e **integran con squash** cuando los cuatro checks obligatorios están en verde, no hay veto y la migración ya la aplicó el bot. No esperan al bot para otros frentes independientes. NÚCLEO-H `nucleo-h-1112-oc` autoriza OpenCode / openai/gpt-6.1-sol en el PR existente; no es autorización general a agentes operativos.
+  - **Revisor Grok Bot («Revisor OPAI 2.0»):** **no corre en el flujo normal**; solo si Carlos lo pide o hay riesgo grave sin resolver.
   - **Bot de Paridad**: compara 1.0 y 2.0 en solo lectura y reporta brechas (`docs/2.0/checklists/paridad.md`).
-  - **Bot «Diseño y QA OPAI 2.0»**: después de integrar, prueba las pantallas en `test.opai.cl` en celular y escritorio; **no frena nada**: sus hallazgos van al PR de pendientes, salvo los de seguridad o datos, que abren un arreglo inmediato.
-  - **Carlos**: decide el negocio; aprueba **una vez por módulo** la hoja de alcance (qué pasa de 1.0 a 2.0, qué no y qué mejoras se suman; 1.0 es el piso, no el techo), las especificaciones (`docs/2.0/modulos/`), los diseños y lo irreversible; puede vetar cualquier PR (comentario «VETO» o etiqueta `veto`).
+  - **Diseño y QA OPAI 2.0:** solo **bajo demanda** o cierre de módulo importante; la sesión hace QA funcional de lo que construye.
+  - **Carlos**: decide el negocio; aprueba **una vez por módulo** la hoja de alcance, las especificaciones, los diseños y lo irreversible; puede vetar cualquier PR (comentario «VETO» o etiqueta `veto`). Issues nuevos en Linear se derivan a sesión sin pedir OK para construir; solo se pregunta si falta decisión de negocio. **Todo cambio visual** (A2.10): se le presenta primero con enlace usable, qué cambió y puntos de usabilidad; en PR no desplegado, señal **`REVISIÓN VISUAL CARLOS:`**.
 - Contrato completo de roles y reglas: `AGENTS.md` en la raíz del repositorio.
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → merge con squash (la sesión de Claude que lleva el PR) → QA.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, revisa `ESTADO.md` (y, como referencia, las tareas en Linear); no te fíes de lo que viste ayer.
