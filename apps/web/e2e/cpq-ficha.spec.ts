@@ -25,9 +25,12 @@ test("ficha CPQ muestra resumen en español y patrón lista+ficha", async ({ pag
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
   await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
-  await expect(page.getByRole("heading", { level: 1, name: /^CPQ-/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
-  await expect(page.getByText("Mano de obra", { exact: true })).toBeVisible();
+  // Ficha por pasos (#325): el código es el título (en teléfono lo muestra el patrón) y el resumen es una región.
+  await expect(page.getByRole("heading", { name: /^CPQ-/ }).first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "Resumen de la cotización" })).toBeVisible();
+  // El gestor sin permiso de costos no ve el bloque de costos (#325): aviso en español, sin claves técnicas.
+  await page.getByRole("button", { name: /Costos y margen/ }).click();
+  await expect(page.getByText("No tienes permiso para ver costos ni margen.")).toBeVisible();
   await expect(page.getByText("mano_obra")).toHaveCount(0);
   await sinDesborde(page);
   await page.screenshot({
@@ -49,7 +52,9 @@ test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({
   await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
   await page.getByRole("button", { name: "Agregar puesto" }).click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
-  await expect(page.getByText("No enviable")).toBeVisible({ timeout: 15_000 });
+  // Con el puesto sin costear la cotización queda «Incompleta»: la única acción es completar los datos.
+  await expect(page.getByText("Incompleta", { exact: true })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: "Completar los datos" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Dejar lista" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Pedir aprobación" })).toHaveCount(0);
   if (info.project.name === "telefono") {
