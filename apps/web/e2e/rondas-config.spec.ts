@@ -37,7 +37,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     // Esperamos su respuesta antes de comprobar el aviso y la persistencia. Se reconoce por la cabecera
     // `Next-Action` que Next pone a toda Server Action y por la ruta de la ficha, no por el cuerpo, cuyo
     // formato (FormData o JSON serializado) es un detalle de Next que puede cambiar.
-    const guardar = async (boton: string) => {
+    const guardar = async (boton: string, aviso: string) => {
       const respuesta = page.waitForResponse(
         (r) =>
           r.request().method() === "POST" &&
@@ -49,6 +49,9 @@ test.describe("Rondas · configuración de la instalación", () => {
       // 200 solo dice que la acción respondió: un error de la capacidad viaja en el cuerpo. El éxito lo
       // prueban el cierre del diálogo, el aviso exacto y la recarga que sigue.
       expect(recibida.ok()).toBe(true);
+      // El aviso dura pocos segundos: se comprueba nada más responder la acción, antes de esperar el
+      // cierre del diálogo (que en `next dev` puede tardar más que el propio aviso).
+      await expect(page.getByText(aviso, { exact: true })).toBeVisible({ timeout: 10_000 });
       // El cierre ocurre solo cuando la acción devuelve éxito, tras procesar su respuesta.
       await expect(page.getByRole("dialog")).toBeHidden({ timeout: 30_000 });
     };
@@ -60,8 +63,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.getByRole("link", { name: "Nuevo punto" }).first().click();
     await page.getByLabel("Nombre del punto").fill(punto);
     await page.getByRole("radio", { name: "QR", exact: true }).check();
-    await guardar("Guardar");
-    await expect(page.getByText("Punto creado", { exact: true })).toBeVisible();
+    await guardar("Guardar", "Punto creado");
     await page.goto(`${base}/rondas?sub=puntos`);
     await visible(punto);
 
@@ -70,8 +72,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.getByRole("link", { name: "Nueva plantilla" }).first().click();
     await page.getByLabel("Nombre de la plantilla").fill(plantilla);
     await page.getByRole("checkbox", { name: punto }).check();
-    await guardar("Guardar plantilla");
-    await expect(page.getByText("Plantilla creada", { exact: true })).toBeVisible();
+    await guardar("Guardar plantilla", "Plantilla creada");
     await page.goto(`${base}/rondas?sub=plantillas`);
     await visible(plantilla);
 
@@ -79,8 +80,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.goto(`${base}/rondas?sub=programacion`);
     await page.getByRole("link", { name: "Nueva programación" }).first().click();
     await page.getByLabel("Nombre", { exact: true }).fill(programacion);
-    await guardar("Guardar");
-    await expect(page.getByText("Programación creada", { exact: true })).toBeVisible();
+    await guardar("Guardar", "Programación creada");
     await page.goto(`${base}/rondas?sub=programacion`);
     await visible(programacion);
 
