@@ -33,7 +33,7 @@ export async function cicloDe(ctx: Contexto, patronId: string | null, texto: str
 /**
  * Función, tramo de noche y horas semanales de un puesto por crear. La función viene del catálogo
  * del núcleo y el tramo de noche del encargo de RR. HH.; las horas salen del cálculo único del
- * dominio (turnos.ts), el mismo de la Pauta y de Asistencia (ADR-077).
+ * dominio (turnos.ts), el mismo de la Pauta y de Asistencia (ADR-078).
  */
 export async function atributosPuesto(
   ctx: Contexto,

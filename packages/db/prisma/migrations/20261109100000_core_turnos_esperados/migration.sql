@@ -1,4 +1,4 @@
--- CAR-201, P1 de Asistencia (ADR-048, ADR-077): `core.turnos_esperados`, el turno esperado por persona
+-- CAR-201, P1 de Asistencia (ADR-048, ADR-078): `core.turnos_esperados`, el turno esperado por persona
 -- y día, materializado en el núcleo desde la Pauta o desde la jornada pactada. Migración ADITIVA: solo
 -- crea una tabla nueva. Lleva RLS `tenant_isolation` (ENABLE + FORCE) para opai_app, el trigger
 -- `mismo_tenant` (persona, instalación y puesto de la misma empresa) y un índice único parcial: una

@@ -1444,12 +1444,25 @@ identidad de servicio en main.
 
 **Primer caso.** Flujo de caja v4 (CAR-193): planilla de escritorio con traza por celda, celular y ajustes; reemplaza `export-flujo-caja-v3` en lo que cambia por ADR-073 (sin cierre semanal ni metas; filas «Sin conciliar», IVA con postergación, PPM, depósito del factor y «Diferencia factoring» informativa; fecha esperada de cobro editable por factura; umbral único de $15M).
 
+---
+
+## ADR-077 · Flujo operativo Grok Bot: coordinación, revisión final y señales (5-nov-2026)
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Carlos (autorización explícita en chat para registrar el flujo en el repo vía PR solo de documentación) · **Modifica** ADR-054, ADR-070 y la rutina del Revisor en `AGENTS.md` **en lo operativo** (la alineación literal de `AGENTS.md` puede ir en un PR aparte).
+
+**Decisión (resumen).** OPAI 2.0 / Grok Bot **coordina** el avance completo; **Claude Code** construye, prueba, deja **revisión final** en el PR (SHA del head + «sin bloqueos» o bloqueos concretos en seguridad, RLS/tenant, permisos, migraciones e integridad de datos) e **integra** con squash. El **Revisor Grok Bot no se lanza** salvo petición expresa de Carlos o riesgo grave sin resolver. **Diseño/QA** solo bajo demanda. **Migraciones:** las aplica **solo OPAI 2.0** después de revisión final sin bloqueos y CI verde; las sesiones no las aplican. **Señales 24 h** en comentarios de PR (`DECISIÓN CARLOS:`, `BLOQUEO OPAI:`, `MIGRACIÓN LISTA:`), una por situación. Sesiones siguen otros frentes sin esperar al bot; nunca integran con bloqueos ni tocan 1.0. Bot revisa avance **09:00, 12:00, 15:00, 18:00 y 20:00** America/Santiago. **Claude Proyectos:** al terminar encargo iniciado por OPAI 2.0, correo desde Gmail de Carlos solo a `carlos.irigoyen+claude@mail.grokbot.com` con asunto `OPAI 2.0 | [sesión] | [LISTO/BLOQUEO/DECISIÓN]`; si no hay Gmail, la misma señal en el PR. **Linear:** issues nuevos de Carlos se clasifican y derivan a sesión sin confirmación extra para construir. **Diseño:** Claude Design entrega en chat/PR; QA visual de la sesión; Diseño/QA bajo demanda.
+
+**Detalle normativo.** `docs/2.0/OPERACION-agentes.md` sección **A2**; contexto resumido en `CONTEXTO-agentes.md`.
+
+**Adenda del 5-nov-2026 (Carlos, tras el PR de documentación).** **Revisión visual:** todo cambio visual, por menor que sea, se presenta primero a Carlos con enlace usable, qué cambió y puntos concretos de usabilidad; Claude Code no hace ese chequeo por él salvo petición expresa para ese cambio; Diseño/QA no sustituye el primer vistazo. En PR no desplegado: comentario **`REVISIÓN VISUAL CARLOS:`** con preview verificado, rutas y qué revisar; Carlos aprueba, pide cambios o delega a Claude; no se frenan frentes independientes. Detalle en **A2.10**.
 
 ---
 
-## ADR-077 · Turno esperado en el núcleo y cálculo único de horas
+---
 
-**Fecha:** 5-nov-2026 · **Estado:** vigente · **Origen:** encargo de Carlos del 5-nov-2026 a «Asistencia · Núcleo legal · Code» (CAR-201; la asistencia legal se construye vendible por separado, ADR-048). Si otra sesión registra el mismo número, el segundo en integrar toma el siguiente y lo resuelve con merge.
+## ADR-078 · Turno esperado en el núcleo y cálculo único de horas
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Origen:** encargo de Carlos del 5-nov-2026 a «Asistencia · Núcleo legal · Code» (CAR-201; la asistencia legal se construye vendible por separado, ADR-048). (El número 077 lo tomó antes el ADR del flujo operativo de Grok Bot.)
 
 **Contexto.** La celda de la Pauta se calcula al leer; no existe «el turno de la persona X el día Y». Asistencia necesitaba ese dato para marcar, calcular atraso y sobretiempo y alertar, y no debía recalcularlo ni depender de que la empresa tenga Pauta. Había además tres cálculos de horas (`turnos.ts`, `alertas-horas.ts`, `reemplazos.ts`) y el tope semanal fijo en 42 h.
 

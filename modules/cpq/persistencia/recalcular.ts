@@ -103,17 +103,20 @@ export async function recalcularVersion(
   }
   aplicarAvisos(resultado, avisosCalculo(lineas, resuelto, mutual));
   if (puedeEscribirVersion(version, escribir)) {
-    await ctx.db.cpqVersion.update({
-      where: { id: version.id },
+    // Condicionado al estado: si la versión salió de «borrador» mientras se calculaba (la dejaron lista o
+    // pidieron aprobación), su cálculo congelado no se pisa ni se tocan las huellas de sus líneas.
+    const escrita = await ctx.db.cpqVersion.updateMany({
+      where: { id: version.id, tenantId: ctx.tenantId, estado: "borrador" },
       data: {
         ventaMensualClp: resultado.ventaMensual,
         calculoCongeladoJson: JSON.stringify(resultado),
       },
     });
-    for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
-      const d = proveedor.obtener({ lineaId: l.id, fecha });
-      if (d) await ctx.db.cpqLinea.update({ where: { id: l.id }, data: { huellaJuegoValores: d.origen } });
-    }
+    if (escrita.count > 0)
+      for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
+        const d = proveedor.obtener({ lineaId: l.id, fecha });
+        if (d) await ctx.db.cpqLinea.update({ where: { id: l.id }, data: { huellaJuegoValores: d.origen } });
+      }
   }
   return resultado;
 }

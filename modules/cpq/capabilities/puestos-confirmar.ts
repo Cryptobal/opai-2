@@ -22,7 +22,7 @@ export const puestoConfirmadoSchema = z.object({
  * nace como un puesto en PPC «Sin asignar» (core.puestos). Es irreversible para los agentes (quedan
  * en aprobación humana) y nunca se crea nada sin esta confirmación. Idempotente: lo ya creado no se
  * repite (`cpq.puestos_creados`, único por línea y posición). Puede ajustar instalación, cargo,
- * nombre, función, patrón, horario y tramo de noche antes de crear. Copia al puesto la función, el tramo de noche y las horas semanales (calculadas con el mismo cálculo que usan la Pauta y Asistencia, ADR-077). El sueldo cotizado no se copia al puesto: la estructura
+ * nombre, función, patrón, horario y tramo de noche antes de crear. Copia al puesto la función, el tramo de noche y las horas semanales (calculadas con el mismo cálculo que usan la Pauta y Asistencia, ADR-078). El sueldo cotizado no se copia al puesto: la estructura
  * de sueldo es de Nómina (07b) y se fija ahí.
  */
 export const puestosConfirmar = defineCapability({

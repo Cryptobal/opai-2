@@ -2,6 +2,8 @@ import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
+import type * as RecalcularMod from "./recalcular";
+
 import { ACTIVOS, CON_COSTOS, GESTOR, NEGOCIO_1, semilla } from "../capabilities/fixtures";
 import { capacidades } from "../capabilities/index";
 import { mockMotorLegal } from "./mock-motor-legal";
@@ -14,6 +16,19 @@ vi.mock("../capabilities/enviar-validar", () => ({
     await cambioDuranteValidacion.hacer?.();
   },
 }));
+
+const tras = vi.hoisted(() => ({ cargar: null as null | (() => Promise<void>) }));
+vi.mock("./recalcular", async (importOriginal) => {
+  const m = await importOriginal<typeof RecalcularMod>();
+  return {
+    ...m,
+    cargarFilasVersion: async (...a: Parameters<typeof m.cargarFilasVersion>) => {
+      const r = await m.cargarFilasVersion(...a);
+      await tras.cargar?.();
+      return r;
+    },
+  };
+});
 
 beforeAll(() => registrarCapacidades(capacidades));
 
@@ -40,5 +55,20 @@ describe("huella del envío (CAR-192 N2)", () => {
 
     expect(r.versionEsperada.huella).toBe(antes.huella);
     await expect(exigirVersionEsperada(ctx.db, v.id, r.versionEsperada)).rejects.toThrow(/cambió/);
+  });
+
+  it("falla si la revisión cambió entre cargar la versión y tomar la huella (reabrir y volver a dejar lista)", async () => {
+    mockMotorLegal();
+    const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS, permisos: [...GESTOR, ...CON_COSTOS] });
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Revisión" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const v = (await ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id } }))!;
+    await ctx.db.cpqVersion.updateMany({ where: { id: v.id }, data: { estado: "lista" } });
+    tras.cargar = async () => {
+      await ctx.db.cpqVersion.updateMany({ where: { id: v.id }, data: { revision: v.revision + 1 } });
+    };
+    await expect(exigirGatesEnvioCpq(ctx, id, undefined, true)).rejects.toThrow(/cambió/);
+    tras.cargar = null;
   });
 });
