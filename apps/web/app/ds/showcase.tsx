@@ -17,6 +17,7 @@ import { Bloque, BloqueFormulario, BloquePlanillaYDashboard } from "./bloques";
 const ESTADOS: EstadoPantalla[] = ["ready", "loading", "empty", "error", "forbidden"];
 // Demostración bajo el primer viewport: no incorpora fijados y sus controles al arranque de /ds.
 const MuestraNavegacion = dynamic(() => import("./componentes-nuevos/navegacion").then((m) => m.MuestraNavegacion), { ssr: false });
+const MuestraMas = dynamic(() => import("./componentes-nuevos/mas").then((m) => m.MuestraMas), { ssr: false });
 const MuestraPwa = dynamic(() => import("./componentes-nuevos/pwa").then((m) => m.MuestraPwa), { ssr: false });
 
 function alternarTema(): void {
@@ -53,6 +54,9 @@ export function DsShowcase() {
       <BloqueNuevos state={state} />
       <Bloque titulo="Navegación por áreas · acordeón, fijados y área principal">
         <MuestraNavegacion />
+      </Bloque>
+      <Bloque titulo="Menú «Más» del teléfono · variante A (CAR-182)">
+        <MuestraMas />
       </Bloque>
       <Bloque titulo="PWA · sin conexión, versión nueva e instalar">
         <MuestraPwa />

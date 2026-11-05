@@ -829,6 +829,14 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 ---
 
+## Adenda ADR-046 · Menú «Más» del teléfono: variante A, un solo buscador y barra superior sin solape (CAR-182)
+
+**Fecha:** 4-nov-2026 (20:29) · **Estado:** vigente · **Decisión:** Carlos (chat, 4-nov-2026: «para el Más de celular tomar la recomendada») · **Implementa:** Claude (constructor, Sesión 1). Diseño en `design/export-inicio-mas/`.
+
+**Decisión.** (1) El menú «Más» usa la **variante A** del diseño: lista compacta con filas de 48 px, áreas plegables (encabezado de 48 px con ícono, nombre, conteo y chevron), solo el área activa abierta por defecto y lo que el usuario abre se recuerda por usuario y empresa en el navegador (preferencia de interfaz, como los recientes; no es dato de negocio ni lleva herramienta MCP). (2) «Fijados y recientes» va una sola vez, en una fila de hasta cuatro accesos rápidos bajo la búsqueda; las entradas fijadas que también están en las áreas llevan un pin. (3) **Un solo buscador en el teléfono:** el campo de «Más» se escribe en su lugar y el ícono de buscar de la barra superior abre la misma hoja en modo búsqueda, con el texto «Buscar o ir a…» y los mismos resultados (`core.buscar`, sin capacidades nuevas). Escritorio e iPad no cambian. (4) Barra superior a 375 px: el selector de portal trunca el nombre de la empresa y «ERP» pasa al interior del selector. (5) Cada entrada del menú tiene su propio ícono (sin repetidos dentro de «Más»).
+
+**No cambia.** El mapa de áreas, la barra inferior, la barra lateral de escritorio y el riel de iPad, los permisos y las capacidades. **Inicio** no se implementa con esta decisión.
+
 ## ADR-047 · Especificación funcional aprobada antes de diseñar o construir un módulo
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (pedido de Carlos, 23-oct) · Completa ADR-012 y ADR-043.
@@ -1319,7 +1327,7 @@ identidad de servicio en main.
 
 **Decisión.** Las sesiones de Claude planifican, construyen e integran sus propios PRs. El bot «OPAI 2.0» no integra ni escribe encargos o briefs: solo vigila GitHub y Linear (avisa a los revisores y a QA, responde `@opai-2.0:`, toma capturas) y aplica las migraciones de Neon, con respaldo previo y en `dev` antes que `main`, cuando el Revisor deja «Revisor OPAI 2.0: sin bloqueos» sobre el head del PR.
 
-**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. **Pendiente:** `AGENTS.md` (tabla de roles, «Integración a `main`» y «Prohibido») todavía nombra al bot como integrador y a Claude como quien aplica migraciones; ante el choque, `OPERACION-agentes.md` manda y `AGENTS.md` se corrige en un PR aparte.
+**Qué corrige.** La parte de ADR-060 que permitía integrar también al bot y la parte de ADR-063 que permitía a Claude aplicar migraciones. Se actualizan `OPERACION-agentes.md` (A.2, A.5, A.6, B.6) y `CONTEXTO-agentes.md`. `AGENTS.md` (encabezado, «Tareas (Linear)» regla 4, «Prohibido», tabla de roles y «Integración a `main`») se alineó el 4-nov-2026 (CAR-162, Sesión 4): integra la sesión de Claude que construyó el PR, el bot solo vigila y aplica migraciones.
 
 ## ADR-068 · El pendiente de una factura descuenta sus notas de crédito parciales
 
@@ -1353,3 +1361,68 @@ identidad de servicio en main.
 **Relación con ADR-058.** ADR-058 fija la estructura (capas y unidades) sin montos. Este ADR permite **montos por empresa** (condiciones comerciales pactadas), no una lista de precios global. La unidad de B es un monto mensual fijo; el cobro por trabajador o por instalación de ADR-058 queda para después, con el modelo preparado. Las preguntas abiertas están en `modulos/plataforma-hoja-alcance.md` §6.
 
 **Consecuencias.** Rendiciones no tiene cobro propio y solo usa el estado del módulo (prueba, activo o suspendido). Hoja de alcance de Plataforma: `docs/2.0/modulos/plataforma-hoja-alcance.md`.
+
+**Adenda del 4-nov-2026 (Carlos, «DECISIÓN CARLOS» en CAR-188 a las 20:29 y en #314 a las 20:37 y 20:45 CLT).**
+
+1. **Forma de cobro por módulo.** Cada empresa paga un **plan base mensual fijo en UF** y cada módulo contratado tiene su propio precio en UF con su unidad. El motor soporta **precio fijo mensual** o **precio por unidad × cantidad del mes**, con **mínimo mensual opcional** y **después el descuento**; la **cantidad del mes queda guardada en el cargo** para auditarla. Referencia de unidades: Finanzas, fijo mensual (sin tramos, 26-oct); Rendiciones, por usuario activo habilitado para rendir (los aprobadores no se cobran); Asistencia, Nómina y Cumplimiento DT, por trabajador o guardia activo, con mínimo; Operaciones/puestos, por instalación activa; Comercial (CRM) y CPQ, por usuario con licencia; firma, por uso. Los montos los fija Carlos en Plataforma.
+2. **Primer mes proporcional** a los días desde el inicio del cobro; los siguientes, completos. **UF del cargo:** la del último día del mes que se cobra.
+3. **Pruebas.** No hay registro abierto ni autoservicio. Plataforma abre la prueba a una empresa ya validada (con RUT), por módulo y con fecha de término. Siete días antes del vencimiento llega un aviso a Plataforma. Al vencer, si Plataforma marcó **«pasa a cobro»**, empieza a cobrarse; si no, el módulo queda en **solo lectura** (ve sus datos, no crea nada nuevo, nada se borra).
+4. **Plan base** (reemplaza el punto 3 de ADR-058): empresa, usuarios, roles y permisos, ajustes, auditoría, notificaciones, documentos, tickets y portal. El motor de sueldos va dentro de Nómina y la firma se cobra por uso. Se refleja en el catálogo de módulos (bloque C).
+
+---
+
+## ADR-072 · Finanzas es un módulo con siete partes contratables por separado
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente (confirmado por Carlos en #318, 4-nov-2026 21:22 CLT) · **Autor:** Carlos (encargo a la Sesión 5 del 4-nov-2026: «Finanzas sigue siendo un solo módulo, pero con sus partes definidas, para poder vender una sola»), redactada por Claude (Sesión 5, CAR-189). · Completa ADR-071 (cobro por módulo en Plataforma; viene en el PR #314 de la Sesión 6, CAR-187).
+
+**Decisión.** Finanzas sigue siendo **un solo módulo** (`finanzas`, mismo prefijo de capacidades, mismo esquema de base). Se divide en siete **partes**: Bancos (incluye conciliación), Flujo de caja, Ventas y facturación, Cobranza, Factoring, Compras, y Contabilidad e informes. Dependencias: Flujo de caja necesita Bancos; Cobranza y Factoring necesitan Ventas; Contabilidad necesita Ventas o Compras. Rendiciones sigue siendo un módulo aparte (ADR-069).
+
+**Cómo.** Cada capacidad, entrada de menú y permiso de Finanzas declara su `parte`. Las partes contratadas se guardan junto al módulo de la empresa y se filtran en la autorización de capacidades, el menú, `core.me` y la lista de herramientas MCP. Lo que cruza partes (conciliar una factura, proyectar ventas en el flujo, la cobranza que mira el banco, «Hoy en Finanzas») solo aparece si ambas partes están contratadas; si no, se degrada sin error. No se renombran ids ni cambia la instantánea del MCP para una empresa con todo contratado. Sin partes declaradas, la empresa tiene todas (Gard no cambia).
+
+**Por qué así.** Partir Finanzas en módulos propios obligaría a renombrar las 77 capacidades y choca con el acoplamiento que dejó diferido F8b. Los permisos por submódulo que ya existen (`finanzas:bancos.ver`, `finanzas:compras.manage`) sirven por rol, no para vender.
+
+**Reparto.** El precio, el cobro y el catálogo comercial de cada parte los hace Plataforma (ADR-071, CAR-188); la Sesión 5 hace la declaración de partes en Finanzas y el filtro.
+
+**Confirmación de Carlos (4-nov-2026, #318).** Las siete partes, con Conciliación dentro de Bancos; Rendiciones sigue como módulo aparte. El catálogo de Plataforma (ADR-071) usa esta lista.
+
+---
+
+## ADR-073 · Flujo de caja: mandan la cartola y la proyección
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente, con las respuestas de Carlos del 4-nov-2026 21:22 CLT en #318 · **Autor:** Carlos (reglas dadas en el encargo a la Sesión 5 del 4-nov-2026), registrada por Claude (Sesión 5, CAR-189). · Ajusta ADR-026 y la cláusula «No cambia» de ADR-068.
+
+**Reglas de Carlos.**
+
+1. No se cierran ni se sellan semanas. Siempre mandan la cartola y las proyecciones. No hay ajuste manual de ingresos.
+2. Semanas pasadas: todos los movimientos de la cartola, por fecha del banco, estén conciliados o no; lo no conciliado va a una fila «Sin conciliar». El saldo parte del banco de hoy.
+3. Proyecciones: un solo criterio de semana, la fecha esperada de cobro: el promedio real de pago del cliente cuando tiene 3 o más facturas pagadas; si no, el vencimiento (emisión + plazo del cliente); editable a mano por factura (unifica `semanaComprometidoDte` de `packages/domain/src/finanzas/derivadas-dte.ts`, que hoy usa la emisión, con `proyeccion-flujo-cap.ts`, que usa el vencimiento). Las facturas vencidas pasan a la semana actual.
+4. Facturas cedidas: el depósito del factor es el ingreso (el factor deposita de una vez el monto menos su descuento; no hay remanente ni ingreso posterior) y la diferencia va a una cuenta contable configurable por empresa en Configuración, por defecto «Diferencia factoring» (o «Gasto financiero»); en el flujo aparece como egreso en esa fila.
+5. IVA y PPM: el IVA del mes M (débito − crédito) se paga en M+1 junto con el PPM (tasa configurada por empresa). Carlos marca o desmarca en el flujo, mes a mes, la postergación del IVA de ese mes a M+2; el PPM se paga siempre en M+1 aunque el IVA se postergue.
+6. Un solo umbral de saldo bajo, $15.000.000, que avisa solo por la campana.
+7. Pendiente de una factura = monto − notas de crédito parciales (61) − cobrado. La nota de débito (56) no es deuda. Las facturas vencidas importadas de 1.0 no entran en los recordatorios de cobranza.
+8. Cada factura programada o recurrente alimenta la proyección con su fecha esperada de cobro, sin contarse dos veces con su borrador o su factura (CAR-184).
+9. Una conciliación tardía no cambia los totales de semanas pasadas; lo prueba un test.
+
+**Cómo se lee.** Los ingresos se derivan siempre (cartola en el pasado; facturas, programaciones y recurrentes en el futuro); los egresos se siguen planificando a mano (sueldos, proveedores, impuestos movidos). La NC parcial deja de ser una celda negativa propia: se descuenta del pendiente de su factura (reemplaza la cláusula «No cambia» de ADR-068). Se retiran del flujo los restos del sellado (tabla `FlujoCierre`, tolerancia, permiso de cierre y eventos de sellado) con migración aditiva cuando corresponda, sin borrar datos.
+
+**Respuestas de Carlos (4-nov-2026, #318).** Quedaron incorporadas en las reglas 3, 4 y 5: promedio real de pago con 3 o más facturas pagadas, factoring sin remanente con la diferencia a una cuenta configurable, e IVA en M+1 con postergación opcional por mes.
+
+---
+
+## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (respuesta 5 del comentario «DECISIÓN CARLOS» en #318, 21:22 CLT), registrada por Claude (Sesión 5, CAR-189). · Cierra la pregunta abierta desde CAR-169 (#287).
+
+**Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
+
+---
+
+## ADR-075 · El XML firmado de un DTE se maneja en ISO-8859-1, como bytes que no se transcodifican
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude («Finanzas · Proyecto», Sesión 5), por encargo de Carlos del 4-nov 21:30 («define el encoding del XML»). · CAR-196.
+
+**Decisión.** El XML de un DTE (y el AEC de una cesión) se trata en **ISO-8859-1**, que es la codificación que exige el esquema del SII y sobre la que se calcula la firma. Desde que SimpleAPI lo devuelve firmado, el XML se maneja como **bytes opacos**: se guarda tal cual en el almacenamiento, el SHA-256 se calcula sobre esos bytes, y se envía igual al SII, a Octava y al cliente. Nunca se pasa por un `string` de JavaScript con UTF-8 ni se reescribe la declaración `encoding`. Solo para mostrar o leer campos se decodifica como ISO-8859-1. Si una API exige el XML como texto (por ejemplo, `STRINGXML` de Octava), se decodifica en ISO-8859-1 en ese borde y se verifica con un caso de prueba que la cesión acepta el documento.
+
+**Por qué.** Hoy el código lo lee y lo vuelve a codificar en UTF-8 (`ventas-xml.ts`, `octava.ts`). Con una razón social o una glosa con ñ o tildes, eso cambia los bytes firmados, invalida la firma y el SII o el RPETC lo rechazan.
+
+**Prueba obligatoria.** Una emisión y una cesión en certificación con «Compañía Ñuñoa» en la razón social y tildes en la glosa: el hash del XML guardado coincide con el que devolvió SimpleAPI y la cesión lo acepta.

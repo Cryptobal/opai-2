@@ -1,5 +1,11 @@
 import {
+  Banknote,
   CalendarDays,
+  FolderOpen,
+  HandCoins,
+  Landmark,
+  LayoutDashboard,
+  ShoppingCart,
   ChartLine,
   Wallet,
   Ticket,
@@ -39,7 +45,13 @@ import {
 
 /** Iconos nombrados en manifests y navegación. Un nombre desconocido usa LayoutGrid. */
 const ICONOS: Record<string, LucideIcon> = {
+  Banknote,
   CalendarDays,
+  FolderOpen,
+  HandCoins,
+  Landmark,
+  LayoutDashboard,
+  ShoppingCart,
   ChartLine,
   Wallet,
   Ticket,

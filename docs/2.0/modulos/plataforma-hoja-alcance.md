@@ -33,7 +33,7 @@ Base sólida: toda escritura `platform.*` se audita en `core.auditoria_global`, 
 
 ## 3. Qué falta
 
-- **Cobro por módulo** (decisión de Carlos del 4-nov, #313): hoy `tenant_modules` solo guarda estado; no hay precio, inicio de cobro, fin de prueba ni cargo mensual. «Prueba» no vence nunca.
+- **Cobro por módulo** (decisiones de Carlos del 4-nov: #313, CAR-188 y §6): hoy `tenant_modules` solo guarda estado; no hay plan base, precio, unidad, inicio de cobro, fin de prueba ni cargo mensual. «Prueba» no vence nunca y no existe el estado «solo lectura».
 - **Catálogo de módulos:** solo existe el manifest técnico (id, nombre, dependencias). Falta nombre comercial, descripción, si se vende solo o como parte, capa de cobro (ADR-058) y una forma de partir Finanzas en partes sin rehacerlo.
 - **Usuarios de plataforma:** no hay pantalla para ver usuarios de toda la plataforma ni cambiar el rol de plataforma; la pestaña Usuarios solo muestra owners y admins (sin el resto de miembros, sin reenviar ni revocar invitaciones).
 - **Editar empresa** (nombre, vertical, zona horaria): existe la capacidad, no la pantalla.
@@ -53,18 +53,21 @@ Paridad pantalla → MCP en verde (0 faltantes); la brecha es al revés: hay cap
 
 ## 5. Qué se construye (orden de PRs, uno por bloque)
 
+Orden fijado por Carlos el 4-nov-2026. Los construye la sesión **Plataforma · Code** con un prompt por bloque; la sesión **Plataforma · Proyecto** (esta) revisa código y diseño y verifica en `test.opai.cl` tras cada integración.
+
 | PR | Bloque | Contenido |
 |---|---|---|
-| 1 | **A** (este) | Esta hoja |
-| 2 | **B · Cobro por módulo** | Condiciones comerciales por empresa y módulo (precio mensual en UF o CLP, inicio del cobro, fin de la prueba, descuento %), cargo mensual idempotente «listo para facturar» (sin emitir ni SimpleAPI), vista «Facturación» por empresa y total; capacidades con MCP, `preview_`, auditoría y prueba entre empresas |
-| 3 | **C · Catálogo** | Nombre comercial, descripción, se vende solo o como parte de otro, dependencias visibles con su estado, partes de Finanzas (bancos, conciliación, ventas, compras, cobranza, factoring, flujo de caja) |
-| 4 | **Arreglos** | Puntos 1 a 9 de §2 (la seguridad del punto 9 va primero) |
-| 5 | **D · Diseño** | Design Prompt de Plataforma completo; luego títulos, nombres legibles, vista previa en pantalla y 375/1024/1280 |
-| 6 | **E · Brechas** | Editar empresa, usuarios de plataforma, auditoría, miembros e invitaciones |
+| 1 | **A** (#314) | Esta hoja y ADR-071 con su adenda |
+| 2 | **B · Cobro por módulo** (CAR-188, #317) | Plan base mensual fijo en UF; por módulo precio fijo o por unidad × cantidad del mes, con mínimo y después descuento, y la cantidad guardada en el cargo; pruebas abiertas solo por Plataforma, con fecha de término, aviso 7 días antes y, al vencer, pasa a cobro o queda en solo lectura; primer mes proporcional; UF del último día del mes; cargo mensual idempotente listo para facturar (sin emitir ni SimpleAPI); vista Facturación por empresa y total; capacidades con MCP, `preview_`, auditoría y prueba entre empresas |
+| 3 | **C · Catálogo** | Nombre comercial, descripción, unidad de cobro por defecto, se vende solo o como parte de otro, dependencias visibles con su estado, plan base (empresa, usuarios, roles y permisos, ajustes, auditoría, notificaciones, documentos, tickets y portal) y partes de Finanzas (bancos, conciliación, ventas, compras, cobranza, factoring, flujo de caja) sin rehacer |
+| 4 | **D · Diseño** | Design Prompt de Plataforma completo y luego aplicarlo: títulos, nombres legibles, vista previa en pantalla, 375/1024/1280 |
+| 5 | **E · Paridad MCP y brechas** | Editar empresa, usuarios de plataforma, auditoría, miembros e invitaciones en pantalla; seguridad del punto 9 de §2; arreglos de §2 |
 
-## 6. Decisiones de Carlos
+## 6. Decisiones de Carlos (respondidas el 4-nov-2026, ADR-071 adenda)
 
-1. **Unidad del precio:** el cobro de B es un **monto mensual fijo por módulo** (UF o CLP). ADR-058 prevé por trabajador (Nómina) o por instalación (Rondas); eso queda para después, con el modelo preparado. ¿De acuerdo?
-2. **Fin de la prueba:** al vencer, ¿el módulo pasa solo a «activo» y empieza a cobrarse, o queda en prueba hasta que Plataforma lo active? (Propuesta: pasa a cobrarse, no se apaga.)
-3. **Cargo del mes:** ¿mes completo o proporcional a los días desde el inicio del cobro? (Propuesta: proporcional el primer mes, completo después.)
-4. **UF del cargo:** ¿se fija con la UF del último día del mes o del día que se emite? (Propuesta: último día del mes, como dato del cargo.)
+1. **Unidad:** plan base mensual fijo en UF por empresa y, por módulo, precio fijo o por unidad × cantidad del mes, con mínimo opcional y después descuento; la cantidad queda en el cargo.
+2. **Fin de la prueba:** la abre Plataforma por módulo con fecha de término; aviso 7 días antes; al vencer, con «pasa a cobro» se cobra, sin él el módulo queda en solo lectura.
+3. **Primer mes:** proporcional; los siguientes, completos.
+4. **UF del cargo:** la del último día del mes que se cobra.
+
+**Pendiente de aprobación:** esta hoja de alcance como plan del módulo.

@@ -33,7 +33,7 @@ export const manifest = defineModule({
       area: "personas",
       href: "/remuneraciones",
       etiqueta: "Remuneraciones",
-      icono: "Wallet",
+      icono: "Banknote",
       orden: 5,
       permiso: "nomina:read",
     },
