@@ -3,13 +3,15 @@
 import { Command } from "cmdk";
 import { type LucideIcon, Search } from "lucide-react";
 import { Dialog as RadixDialog } from "radix-ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { iniciales } from "./avatar";
 import { Resaltado } from "./resaltado";
 import { PieTeclas } from "./command-palette-pie";
 import { claseScrim } from "./dialog-partes";
+import { HojaBusqueda } from "./hoja-busqueda";
 import { Kbd } from "./segmentado";
+import { useBusqueda, useEsTelefono } from "./use-busqueda";
 
 export type ItemPaleta = {
   id: string;
@@ -33,35 +35,19 @@ type Props = {
 };
 
 /**
- * Búsqueda global y "buscar un ajuste" (⌘K): diálogo de 640 px (pantalla completa en teléfono),
- * grupos Ir a, Cuentas, Instalaciones, Personas y Ajustes; navegación con teclado.
+ * Búsqueda global y "buscar un ajuste" (⌘K): diálogo de 640 px en iPad y desktop, con grupos Ir a,
+ * Cuentas, Instalaciones, Personas y Ajustes y navegación con teclado. En teléfono es la hoja inferior
+ * compartida con el menú «Más» (un solo flujo de búsqueda, CAR-182).
  */
-export function CommandPalette({ abierto, onCerrar, buscar, onElegir, ...p }: Props) {
+export function CommandPalette(props: Props) {
+  const telefono = useEsTelefono();
+  return telefono ? <HojaBusqueda {...props} /> : <PaletaEscritorio {...props} />;
+}
+
+function PaletaEscritorio({ abierto, onCerrar, buscar, onElegir, ...p }: Props) {
   const [q, setQ] = useState("");
-  const [grupos, setGrupos] = useState<readonly GrupoPaleta[]>(p.iniciales ?? []);
-  const [cargando, setCargando] = useState(false);
-  useEffect(() => {
-    if (!abierto) return;
-    if (q.trim().length < 2) {
-      setGrupos(p.iniciales ?? []);
-      return;
-    }
-    let vigente = true;
-    setCargando(true);
-    const t = setTimeout(
-      () =>
-        void buscar(q.trim()).then((g) => {
-          if (!vigente) return;
-          setGrupos(g);
-          setCargando(false);
-        }),
-      200,
-    );
-    return () => {
-      vigente = false;
-      clearTimeout(t);
-    };
-  }, [q, abierto, buscar, p.iniciales]);
+  const b = useBusqueda(q, abierto, buscar, p.iniciales ?? []);
+  const { grupos, cargando } = b;
   return (
     <RadixDialog.Root open={abierto} onOpenChange={(a) => !a && onCerrar()}>
       <RadixDialog.Portal>
@@ -95,7 +81,7 @@ export function CommandPalette({ abierto, onCerrar, buscar, onElegir, ...p }: Pr
                   Buscando…
                 </Command.Loading>
               ) : null}
-              {!cargando && q.trim().length >= 2 ? (
+              {!cargando && b.buscando ? (
                 <Command.Empty className="px-3 py-6 text-center text-base text-fg-muted">
                   Sin resultados para “{q}”
                 </Command.Empty>
