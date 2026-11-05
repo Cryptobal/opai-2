@@ -110,8 +110,12 @@ test("evidencia de navegación clara y oscura", async ({ page }, info) => {
             "Revisa la dirección /configuracion/grupo/noexiste o vuelve a Configuración.",
           ),
         ).toBeVisible();
-        await page.locator("main").getByRole("link", { name: "Volver a Configuración", exact: true }).click();
-        await expect(page).toHaveURL(/\/configuracion$/);
+        // El 404 llega reenviado por el proxy y React regenera el árbol al hidratar: un clic en esa
+        // ventana se pierde, así que se reintenta hasta que navega.
+        await expect(async () => {
+          await page.locator("main").getByRole("link", { name: "Volver a Configuración", exact: true }).click();
+          await expect(page).toHaveURL(/\/configuracion$/, { timeout: 3_000 });
+        }).toPass({ timeout: 30_000 });
         await page.goto(ruta!);
       }
       await expect(page.locator("main")).toBeVisible();
