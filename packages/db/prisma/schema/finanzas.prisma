@@ -76,14 +76,14 @@ model FlujoAjustes {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @unique @map("tenant_id") @db.Uuid
   saldoInicial BigInt   @default(0) @map("saldo_inicial")
-  /// Saldo bajo el cual la planilla marca la semana (0 = solo alerta bajo cero).
-  umbral       BigInt   @default(0)
+  /// Umbral único de saldo bajo (planilla, aviso semanal y aviso de banco; ADR-073). Defecto 15.000.000.
+  umbral       BigInt   @default(15000000)
   /// Semana (lunes) desde la que parte el saldo inicial.
   desde        DateTime @db.Date
   toleranciaCierre     BigInt   @default(1000) @map("tolerancia_cierre")
   horizonteSemanas     Int      @default(12) @map("horizonte_semanas")
   calendarioPagos      Json     @default("{}") @map("calendario_pagos")
-  avisoActivo          Boolean  @default(false) @map("aviso_activo")
+  avisoActivo          Boolean  @default(true) @map("aviso_activo")
   avisoUmbral          BigInt   @default(0) @map("aviso_umbral")
   metaCeldaMs          Int      @default(100) @map("meta_celda_ms")
   metaGuardadoP95Ms    Int      @default(1000) @map("meta_guardado_p95_ms")

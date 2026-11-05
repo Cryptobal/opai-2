@@ -3,6 +3,7 @@ import { randomUUID, randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { capacidades } from "../../../modules/finanzas/capacidades";
+import { FILA_SIN_CONCILIAR_INGRESO } from "../../../modules/finanzas/capacidades/filas-virtuales";
 import { claveDedupeCartola } from "@opai/domain";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 
@@ -392,7 +393,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     expect(mal).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 
-  it("Paridad 4 · la cartola completa entra a lo real; lo no conciliado va a «Sin clasificar», no a Cobros", async () => {
+  it("Paridad 4 · la cartola completa entra a lo real; lo no conciliado va a «Sin conciliar», no a Cobros", async () => {
     const filaCobros = (
       await e.admin.flujoFila.create({
         data: {
@@ -457,7 +458,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · bancos (db)", () => {
     }>("finanzas.derivadas.listar", { semana });
     const banco = derivadas.fuentes.find((f) => f.id === "banco")?.celdas ?? [];
     expect(banco.some((c) => c.id === movConc.id && c.filaId === filaCobros && c.monto === 33_333)).toBe(true);
-    expect(banco.some((c) => c.id === movAuth.id && c.filaId !== filaCobros)).toBe(true);
+    expect(banco.some((c) => c.id === movAuth.id && c.filaId === FILA_SIN_CONCILIAR_INGRESO)).toBe(true);
   });
 
   it("Paridad 5 · saldo sugerido avisa cuentas sin saldo en cartola", async () => {
