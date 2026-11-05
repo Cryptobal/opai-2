@@ -28,6 +28,14 @@ export const ajustesRendiciones = z.object({
     permiso: PERMISO_CONFIG,
     control: "texto",
   }),
+  aprobadores_elegibles_ids: z.array(z.string()).max(50).default([]).meta({
+    etiqueta: "Quiénes pueden aprobar (elegibles)",
+    ayuda: "Lista de usuarios que quien rinde puede elegir como aprobador, además del aprobador por defecto. Vacío = solo el aprobador por defecto. No se lista a todos los usuarios.",
+    grupo: "Aprobación",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "json",
+  }),
   km_metodo: z.enum(["", ...METODOS_KM]).default("").meta({
     ...kilometraje,
     etiqueta: "Cómo se calcula el kilometraje",

@@ -26,3 +26,6 @@ ERP: área Finanzas (queda en 7 entradas, el máximo). Supervisor: «Rendiciones
 
 ## 6. Verificación
 `pnpm typecheck && pnpm lint && pnpm test` (instantánea MCP, inventario de paridad, auditoría de lecturas) y `pnpm test:db` (`rendiciones-r2b-db.test.ts`); build y presupuesto de JS; Playwright a 375, 1024 y 1280 (`apps/web/e2e/rendiciones-r2b.spec.ts`).
+
+## 7. Adenda R2c (CAR-200)
+`rendiciones.opciones.obtener` ya no lista a todos los aprobadores: solo los elegibles que define la empresa (`aprobadores_elegibles_ids`), el aprobador por defecto y el asignado a la rendición que se corrige (`rendicionId`). Sin ninguno, quien rinde solo guarda borrador. El servidor sigue aceptando a cualquier miembro que pueda aprobar si se le indica por id (API/MCP); lo que se restringe es lo que se lista. Pendiente: selector de usuarios en Configuración (hoy el ajuste es JSON de ids).

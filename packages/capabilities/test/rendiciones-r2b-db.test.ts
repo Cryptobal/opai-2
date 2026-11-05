@@ -19,6 +19,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R2b (db)", () => {
   const rinde = randomUUID();
   const aprueba = randomUUID();
   const ajeno = randomUUID();
+  const otroJefe = randomUUID();
 
   type Rol = "supervisor" | "gerente" | "viewer";
   const ctx = (uid: string, rol: Rol, tid: string, alcance: readonly string[] | null) =>
@@ -94,6 +95,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R2b (db)", () => {
     for (const [id, nombre, rol, tid, portal] of [
       [rinde, "Rita Rinde", "supervisor", tenantA, "supervisor"],
       [aprueba, "Ana Aprueba", "gerente", tenantA, "erp"],
+      [otroJefe, "Otro Jefe", "gerente", tenantA, "erp"],
       [ajeno, "Otro Tenant", "gerente", tenantB, "erp"],
     ] as const) {
       await e.admin.user.create({
@@ -152,7 +154,11 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R2b (db)", () => {
     }>(await supervisor("rendiciones.opciones.obtener", {}));
     expect(o.instalaciones.map((i) => i.id)).toEqual([instA]); // dentro de su alcance
     expect(o.instalaciones[0]?.lat).toBeCloseTo(-33.45);
-    expect(o.aprobadores).toEqual([{ id: aprueba, nombre: "Ana Aprueba" }]);
+    expect(o.aprobadores).toEqual([]); // sin aprobador por defecto ni elegibles no se lista a nadie
+    await e.admin.ajuste.createMany({ data: [{ tenantId: tenantA, ambito: "tenant", sujetoId: tenantA, modulo: "rendiciones", clave: "aprobador_defecto_id", valor: aprueba }] });
+    const conDefecto = await dato<{ aprobadores: { id: string; nombre: string }[]; aprobadorPorDefectoId: string | null }>(await supervisor("rendiciones.opciones.obtener", {}));
+    expect(conDefecto.aprobadores).toEqual([{ id: aprueba, nombre: "Ana Aprueba" }]);
+    expect(conDefecto.aprobadorPorDefectoId).toBe(aprueba);
     expect(o.aprobadores.some((a) => a.id === rinde)).toBe(false);
     expect(o.destinoRespaldo).toEqual({ tipo: "instalacion", id: instA }); // subida acotada: a una instalación a su cargo
     expect(o.kilometraje).toBeNull(); // la empresa aún no configuró el kilometraje
@@ -169,6 +175,31 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R2b (db)", () => {
       mod.executeCapability(ctx(randomUUID(), "viewer", tenantA, null), id, input);
     expect(await viewer("rendiciones.opciones.obtener", {})).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(await viewer("rendiciones.rendiciones.listar", { alcance: "propias" })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("un respaldo de OTRA empresa se rechaza; con ver_todas se acepta el de un colega de la misma empresa", async () => {
+    const doc = (tenantId: string, por: string) =>
+      e.admin.documento
+        .create({ data: { tenantId, nombre: "b.pdf", mime: "application/pdf", tamano: 1_000, storageKey: `k-${randomUUID()}`, estado: "disponible", creadoPorTipo: "user", creadoPorId: por } })
+        .then((d) => d.id);
+    const conDoc = (documentoId: string, folio: string) => cuerpo({ items: [item({ documentoId, sinRespaldoMotivo: undefined, folio })] });
+    const deOtraEmpresa = await doc(tenantB, ajeno);
+    expect(await supervisor("rendiciones.rendiciones.crear", conDoc(deOtraEmpresa, "X-1"))).toMatchObject({ ok: false });
+    expect(await jefe("rendiciones.rendiciones.crear", conDoc(deOtraEmpresa, "X-2"))).toMatchObject({ ok: false }); // ni siquiera con ver_todas
+    const colega = await doc(tenantA, rinde);
+    expect(await jefe("rendiciones.rendiciones.crear", { ...conDoc(colega, "X-3"), aprobadorId: otroJefe })).toMatchObject({ ok: true }); // ver_todas: el de otra persona de su empresa
+  });
+
+  it("opciones suma los elegibles de la empresa y el aprobador asignado a la rendición que se corrige", async () => {
+    await e.admin.ajuste.createMany({ data: [{ tenantId: tenantA, ambito: "tenant", sujetoId: tenantA, modulo: "rendiciones", clave: "aprobadores_elegibles_ids", valor: [otroJefe, ajeno] }] });
+    const o = await dato<{ aprobadores: { id: string }[] }>(await supervisor("rendiciones.opciones.obtener", {}));
+    expect(o.aprobadores.map((a) => a.id).sort()).toEqual([aprueba, otroJefe].sort()); // el elegible de OTRA empresa no aparece
+    await e.admin.ajuste.deleteMany({ where: { tenantId: tenantA, modulo: "rendiciones", clave: { in: ["aprobadores_elegibles_ids", "aprobador_defecto_id"] } } });
+    const r = await dato<{ id: string }>(await supervisor("rendiciones.rendiciones.crear", cuerpo({ aprobadorId: otroJefe })));
+    const sin = await dato<{ aprobadores: { id: string }[] }>(await supervisor("rendiciones.opciones.obtener", {}));
+    expect(sin.aprobadores).toEqual([]);
+    const con = await dato<{ aprobadores: { id: string }[] }>(await supervisor("rendiciones.opciones.obtener", { rendicionId: r.id }));
+    expect(con.aprobadores.map((a) => a.id)).toEqual([otroJefe]);
   });
 
   it("opciones no cruza empresas", async () => {

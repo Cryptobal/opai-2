@@ -23,9 +23,16 @@ export async function cargarMias(portal: PortalRendicion): Promise<ResumenRendic
   return exigirDatos(r).rendiciones;
 }
 
-export async function cargarOpciones(portal: PortalRendicion): Promise<OpcionesRendicion> {
+export async function cargarOpciones(
+  portal: PortalRendicion,
+  rendicionId?: string,
+): Promise<OpcionesRendicion> {
   return exigirDatos(
-    await ejecutarComoUsuario<OpcionesRendicion>(portal, "rendiciones.opciones.obtener", {}),
+    await ejecutarComoUsuario<OpcionesRendicion>(
+      portal,
+      "rendiciones.opciones.obtener",
+      rendicionId ? { rendicionId } : {},
+    ),
   );
 }
 

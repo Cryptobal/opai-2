@@ -77,7 +77,7 @@ export function CamposEnvio({
         error={
           errores?.aprobadorId ??
           (sinAprobadores
-            ? "Tu empresa aún no tiene aprobadores. Puedes guardar el borrador y pedirle a un administrador que asigne uno."
+            ? "Tu empresa aún no define quién aprueba. Puedes guardar el borrador y pedirle a un administrador que defina el aprobador por defecto."
             : undefined)
         }
         ayuda="No puedes aprobar tus propias rendiciones."

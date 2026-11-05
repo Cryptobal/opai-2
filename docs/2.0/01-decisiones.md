@@ -1351,6 +1351,8 @@ identidad de servicio en main.
 
 **Adenda del 5-nov-2026 (Sesión 2, pendientes del Revisor de #303).** (1) El aviso de boleta duplicada solo mira las rendiciones que el actor puede ver: las propias, las que le asignaron para aprobar y, con `rendiciones:ver_todas`, las de toda la empresa. Por eso el aprobador ve los duplicados de lo que aprueba, y es intencional (necesita ese dato para decidir). (2) Quien no puede ver todas las rendiciones solo adjunta respaldos que él mismo subió; con `ver_todas` puede usar los de la empresa.
 
+**Adenda del 5-nov-2026 (CAR-200, R2c, decisión de Carlos en el chat).** En el kilometraje por monto fijo por tramo, «ida y vuelta» **duplica** el monto del tramo, igual que en consumo y tarifa por km; el peaje se suma una sola vez. Reemplaza la nota de R2a que lo dejaba sin duplicar.
+
 
 ## ADR-071 · Cobro por módulo en Plataforma, para todos los módulos
 
