@@ -1409,6 +1409,11 @@ identidad de servicio en main.
 
 ---
 
+**Adenda del 5-nov-2026 (Carlos, al revisar el prototipo del flujo v4; registrada por «Finanzas · Proyecto»).**
+- **Ingresos por cliente e instalación.** «Cobros de clientes» se abre por cuenta (cliente). Si una cuenta tiene dos o más instalaciones, debajo aparece una línea por instalación, desplegable: cerrada se ve el total de la cuenta y abierta su apertura. Una cuenta con una sola instalación es una línea.
+- **Centros de costo = instalaciones activas.** Solo las instalaciones en estado «activa» (más el centro general «Administración / Oficina central»); las prospecto e inactivas no se ofrecen. Precisa la decisión del 30-oct-2026 (CAR-198).
+- **Cómo un cargo del banco llega a su fila de egresos** (propuesta de «Finanzas · Proyecto», mostrada en el prototipo): (1) por una regla de conciliación (ADR-074), que concilia sola solo si el monto y la referencia calzan exacto; (2) al conciliarlo con una factura de proveedor, toma la fila por defecto del proveedor; (3) eligiendo la fila a mano al conciliar, con la opción de crear la regla en el mismo paso. Mientras no se concilia, queda en «Sin conciliar (cargos)» de su semana, y conciliarlo después solo lo cambia de fila.
+
 ## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
 
 **Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (respuesta 5 del comentario «DECISIÓN CARLOS» en #318, 21:22 CLT), registrada por Claude (Sesión 5, CAR-189). · Cierra la pregunta abierta desde CAR-169 (#287).
