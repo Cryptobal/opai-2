@@ -47,10 +47,16 @@ export function BloquePlegable(p: BloquePlegableProps) {
       <Collapsible.Trigger
         className={cn("group flex w-full items-center gap-3 py-2 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus", fila ? "min-h-11 rounded-md px-1" : "min-h-14 rounded-lg px-4")}
       >
-        <span className={cn("flex-1 text-fg", fila ? "t-label" : "t-subheading")}>
+        <span className={cn("min-w-0 flex-1 text-fg", fila ? "t-label" : "t-subheading")}>
           {p.paso ? <span className="mr-2 text-fg-subtle">{p.paso}.</span> : null}
           {p.titulo}
           {p.resumen ? <span className="t-caption ml-2 hidden font-normal text-fg-subtle sm:inline">{p.resumen}</span> : null}
+          {/* Teléfono en vertical: el resumen del paso va en una segunda línea (CAR-192). */}
+          {p.resumen ? (
+            <span className="t-caption block truncate font-normal text-fg-subtle sm:hidden" data-resumen-telefono>
+              {p.resumen}
+            </span>
+          ) : null}
         </span>
         {p.derecha !== undefined ? (
           <span className="t-numeric t-label">{p.derecha}</span>
