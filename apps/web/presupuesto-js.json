@@ -7,6 +7,7 @@
     "/(erp)/tareas": 172,
     "/(erp)/agente/historial": 173,
     "/(erp)/finanzas/ventas/programacion/*": 175,
+    "/(erp)/finanzas/flujo": 169,
     "/(erp)/negocios/[id]/actividad": 179,
     "/(erp)/instalaciones/[id]/actividad": 178,
     "/(auth)/*": 153,
