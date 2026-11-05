@@ -7,7 +7,7 @@ import { conflicto, type Contexto } from "@opai/capabilities";
  * nada enviado. Las ediciones de líneas no incrementan `revision`, así que la huella suma `revision`
  * (que sube al reabrir) y las marcas de tiempo de la versión, sus secciones y sus líneas, y cuántas hay.
  */
-export type VersionEsperada = { estado: string; huella: string };
+export type VersionEsperada = { estado: string; huella: string; revision: number };
 
 type Lector = Pick<Contexto["db"], "cpqVersion" | "cpqSeccion" | "cpqLinea">;
 
@@ -31,7 +31,7 @@ export async function leerVersionEsperada(db: Lector, versionId: string): Promis
     `${secciones.length}:${iso(maximo(secciones))}`,
     `${lineas.length}:${iso(maximo(lineas))}`,
   ].join("|");
-  return { estado: v.estado, huella };
+  return { estado: v.estado, huella, revision: v.revision };
 }
 
 /** Falla con conflicto si la versión ya no es la que se validó; se llama dentro de la transacción del envío. */

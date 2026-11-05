@@ -55,7 +55,7 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
       // enviada con un cálculo y un documento que ya no corresponden (CAR-192).
       await exigirVersionEsperada(tx, pack.versionId, pack.versionEsperada);
       const marcada = await tx.cpqVersion.updateMany({
-        where: { id: pack.versionId, tenantId: ctx.tenantId, estado: pack.versionEsperada.estado },
+        where: { id: pack.versionId, tenantId: ctx.tenantId, estado: pack.versionEsperada.estado, revision: pack.versionEsperada.revision },
         data: {
           estado: "enviada",
           enviadaEn: ahora,

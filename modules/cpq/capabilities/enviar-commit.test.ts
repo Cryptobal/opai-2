@@ -40,7 +40,7 @@ async function listaConPuesto() {
   return { ctx, id, versionId: v!.id, seccionId: sec.id };
 }
 
-function pack(f: Awaited<ReturnType<typeof listaConPuesto>>, versionEsperada: { estado: string; huella: string }) {
+function pack(f: Awaited<ReturnType<typeof listaConPuesto>>, versionEsperada: { estado: string; huella: string; revision: number }) {
   return {
     cotizacionId: f.id,
     codigo: "CPQ-1",
