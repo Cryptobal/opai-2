@@ -8,7 +8,7 @@ import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
-import { estadoCpqBadge } from "@/lib/cpq-presentacion";
+import { estadoCpqBadge, tonoEstadoFicha } from "@/lib/cpq-presentacion";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
 import { hayBarraFijaCpq, bloqueoEnvioCpq } from "./acciones-cotizacion-logica";
@@ -36,7 +36,9 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
   const editable = datos.gestionar && d.version.editable;
   const c = d.calculo as Parameters<typeof ResumenCotizacion>[0]["calculo"];
   const meta = d.meta as MetaFicha | undefined;
-  const badge = estadoCpqBadge(d.version.estado);
+  const badge = meta?.estadoFicha
+    ? { etiqueta: meta.estadoFicha.etiqueta, tono: tonoEstadoFicha(meta.estadoFicha.estado) }
+    : estadoCpqBadge(d.version.estado);
   const recargar = () => router.refresh();
   // Sin `cpq:costos.ver` no se ingresa sueldo: el aviso no ofrece abrir la hoja (CAR-162).
   const editarLinea =

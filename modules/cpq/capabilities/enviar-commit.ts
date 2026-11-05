@@ -1,5 +1,5 @@
 import type { Contexto } from "@opai/capabilities";
-import { enviarCorreo } from "@opai/capabilities";
+import { conflicto, enviarCorreo } from "@opai/capabilities";
 
 import { datosCorreoCliente, EVENTO_CORREO_CLIENTE } from "../persistencia/correo-cliente";
 import { moverNegocioPropuestaEnviada } from "../persistencia/enviar-negocio";
@@ -47,8 +47,10 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
         cotizacionId: pack.cotizacionId,
         codigo: pack.codigo,
       });
-      await tx.cpqVersion.update({
-        where: { id: pack.versionId },
+      // Condicionado al estado: si alguien reabrió o cambió la versión mientras se armaba el PDF, no se
+      // marca enviada con un cálculo y un documento que ya no corresponden (CAR-192).
+      const marcada = await tx.cpqVersion.updateMany({
+        where: { id: pack.versionId, tenantId: ctx.tenantId, estado: { in: ["borrador", "lista"] } },
         data: {
           estado: "enviada",
           enviadaEn: ahora,
@@ -59,6 +61,8 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
           plantillaDocumentoVersion: pack.pdfPack.plantillaVersion,
         },
       });
+      if (marcada.count === 0)
+        throw conflicto("La cotización cambió mientras se preparaba el envío; vuelve a cargar la ficha.");
       if (pack.resultado.ventaMensual != null) {
         await tx.negocio.update({
           where: { id: pack.negocioId },

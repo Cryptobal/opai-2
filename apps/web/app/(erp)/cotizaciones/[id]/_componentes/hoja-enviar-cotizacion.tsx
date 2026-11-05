@@ -93,7 +93,7 @@ export function HojaEnviarCotizacion(p: {
         <EnviarBloqueos
           mutualPendiente={mutualPendiente}
           onConfirmarMutual={() => setMutualAbierta(true)}
-          requiereAprobacion={p.requiereAprobacion}
+          requiereAprobacion={pedirAprobacion}
           margenTexto={p.margenTexto}
         />
         <EnviarVistaPrevia cotizacionId={p.cotizacionId} conPropuesta={conPropuesta} hayPropuesta={propuestaId !== null} onConPropuesta={setConPropuesta} />

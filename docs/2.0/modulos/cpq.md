@@ -78,7 +78,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | Moneda de presentación | `CLP` o `UF` | Sí | Ajuste por defecto del tenant | `manage` | Sí |
 | UF usada | Valor y fecha | Si hay montos en UF o se presenta en UF | Del servicio de indicadores del núcleo; se congela al enviar (R30) | Sistema | Sí |
 | Válida hasta | Fecha | Sí | ≥ hoy; por defecto hoy + validez del tenant (30 días, pregunta 10) | `manage` | Sí |
-| Margen objetivo y modo | Porcentaje escalado; `margen_sobre_venta` (por defecto **[decidido (7)]**), `markup`, `margen_sobre_mano_de_obra` | Sí | 0 ≤ m < 100 % en pantalla, API y MCP (la guarda `m ≥ 100 %` de R31 queda en el dominio) | `manage` | No |
+| Margen objetivo y modo | Porcentaje escalado (sin valor propio nace con el objetivo por defecto de la empresa, nunca 0 %); `margen_sobre_venta` (por defecto **[decidido (7)]**), `markup`, `margen_sobre_mano_de_obra` | Sí | 0 ≤ m < 100 % en pantalla, API y MCP (la guarda `m ≥ 100 %` de R31 queda en el dominio) | `manage` | No |
 | Precio manual | CLP o UF por mes | No | Si se fija, el margen se calcula al revés y se muestra (R36) | `manage` | Sí (es el precio) |
 | Condiciones comerciales | Estructuradas (§2) | Sí | Valores por defecto de la pestaña Pólizas y finanzas (R58); reajuste polinómico: pesos que suman 100 % | `manage` | Sí |
 | Totales | Costo, venta mensual, únicos, margen efectivo, instrumentos | — | Calculados; nunca se editan | Sistema | Solo venta y únicos |
@@ -286,6 +286,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | borrador | en_aprobacion | `manage`; agente con vista previa | Margen < mínimo o `k ≥ 0,35` | `cpq.cotizacion.aprobacion_solicitada` | Sí (retirar el pedido) |
 | en_aprobacion | lista | `cpq:aprobar` (persona) | R42 | `cpq.cotizacion.aprobada` | Sí, editar vuelve a borrador (R41) |
 | en_aprobacion | borrador | `cpq:aprobar` (rechaza con motivo) o quien pidió (retira) | Motivo | `cpq.cotizacion.aprobacion_rechazada` | — |
+| lista | borrador | `manage`; agente con vista previa | «Reabrir para editar» (CAR-192) | `cpq.cotizacion.reabierta` | Sí; si el margen sigue bajo se pide aprobación otra vez |
 | lista | enviada | `manage`; agente **solo con aprobación humana** | Formato de salida elegido (CAR-68) | Congela (R43); informa al negocio (R46) | **No** |
 | enviada | (v+1) borrador | `manage`; agente con vista previa | — | Nueva versión | — |
 | enviada | vencida | Sistema (diario) | Pasó «válida hasta» | `cpq.cotizacion.vencida` | Renovar crea versión nueva |
@@ -345,7 +346,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 | `cpq_cotizaciones_marcar_vigente` | Elegir la vigente del negocio (R46) | Escritura | ✓ | — |
 | `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, cambiar el rateo de una línea (R56), activar, desactivar o editar el detalle de pólizas, RC o costo financiero y volverlos al valor por defecto (R57, R60), fijar margen o precio objetivo, cambiar condiciones y reajuste con «sobrescrito»/«volver al valor por defecto» (R63), cambiar la moneda de presentación (R62), renombrar la cotización (R67), mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
 | `cpq_cotizaciones_nueva_version` / `renovar` / `actualizar_modelo` / `duplicar` / `archivar` | R27, R43, R44, R23 | Escritura | ✓ | — |
-| `cpq_cotizaciones_marcar_lista` / `solicitar_aprobacion` / `retirar_aprobacion` | R40, R42 | Escritura | ✓ | — |
+| `cpq_cotizaciones_marcar_lista` / `solicitar_aprobacion` / `retirar_aprobacion` / `reabrir` | R40, R41, R42 | Escritura | ✓ | — |
 | *(sin herramienta)* `cpq.cotizaciones.aprobar` / `rechazar_aprobacion` | Decisión de margen. `soloPersonas`, en `paridad-excepciones.ts` con el motivo «es el control humano sobre lo que propone un agente» | — | — | Solo personas |
 | `cpq_cotizaciones_enviar` | Congela y envía en el formato elegido (CAR-68) | **Irreversible** | ✓ | **Sí** |
 | `cpq_puestos_ofrecer` / `confirmar` | Arma la oferta de puestos (R2) / RRHH la confirma | Escritura / irreversible | ✓ | Confirmar: **sí** (decide RRHH) |

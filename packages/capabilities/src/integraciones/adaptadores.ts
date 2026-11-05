@@ -5,7 +5,7 @@ import { consumoBase } from "./consumo-base";
 import { credencialDe, integracionDe } from "./resolver";
 
 export { consumoBase } from "./consumo-base";
-export { geoDe } from "./geo";
+export { distanciaDe, geoDe } from "./geo";
 export { iaDe } from "./ia";
 export { selloDe } from "./sello";
 

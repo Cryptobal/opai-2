@@ -14,7 +14,7 @@ export type ConfigPlan = {
   alResponder: "pausar" | "detener"; etapaAlResponder?: string | undefined;
   alTerminar: "proponer_cierre" | "aplicar_cierre_propuesto" | "solo_avisar"; noCerrarDesdeEtapa?: string | undefined; pasos: PasoConfig[];
 };
-export type PlanConfig = { id: string; nombre: string; disparador: string; porDefecto: boolean; activo: boolean; version: number; config: ConfigPlan; enCurso: number };
+export type PlanConfig = { id: string; nombre: string; disparador: string; porDefecto: boolean; activo: boolean; version: number; config: ConfigPlan; enCurso: number; etapasInvalidas?: string[] };
 
 const PLAN_VACIO: ConfigPlan = {
   conteo: "habiles", desde: "inicio", hora: "09:00", ventana: { desde: "08:00", hasta: "19:00" }, alResponder: "pausar", alTerminar: "proponer_cierre",
@@ -54,6 +54,12 @@ export function PlanesSeguimiento({ planes, etapas }: { planes: PlanConfig[]; et
                 <span className="t-caption">
                   {p.config.pasos.length} pasos · {p.config.conteo === "habiles" ? "días hábiles" : "días corridos"} · versión {p.version} · {p.enCurso} en curso
                 </span>
+                {p.etapasInvalidas?.length ? (
+                  <span className="flex flex-wrap items-center gap-2">
+                    <Badge tono="warning">Revisa las etapas</Badge>
+                    <span className="t-caption">{p.etapasInvalidas.join(" ")} Edita el plan para elegir otra.</span>
+                  </span>
+                ) : null}
               </div>
               <Button variant="secondary" onClick={() => setEditando(p)}>Editar</Button>
             </li>

@@ -52,12 +52,13 @@ export async function exigirGatesEnvioCpq(
   dryRun: boolean,
 ) {
   const { exigirEnviable } = await import("./version");
-  const { cargarFilasVersion, recalcularVersion } = await import("./recalcular");
+  const { cargarFilasVersion } = await import("./recalcular");
+  const { calculoVigente } = await import("./calculo-vigente");
   const { validarEnvioCpq } = await import("../capabilities/enviar-validar");
   const pack = await cargarFilasVersion(ctx, cotizacionId, undefined, false);
   if (!pack) throw reglaDeNegocio("No hay versión para enviar.");
   exigirEnviable(pack.version);
-  const resultado = await recalcularVersion(ctx, cotizacionId, undefined, false);
+  const resultado = await calculoVigente(ctx, cotizacionId, pack.version, pack.lineas);
   if (!resultado) throw reglaDeNegocio("No se pudo calcular la cotización.");
   await validarEnvioCpq(
     ctx,

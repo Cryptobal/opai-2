@@ -117,6 +117,6 @@ describe("calculoCongeladoJson por estado (C-2)", () => {
     const r = await executeCapability(ctx, "cpq.cotizaciones.marcar_lista", { id });
     expect(r.ok).toBe(false);
     if (r.ok) throw new Error("esperaba fallo");
-    expect(r.error.message).toContain("hay costos o UF pendientes");
+    expect(r.error.message).toContain("costos o UF pendientes");
   });
 });

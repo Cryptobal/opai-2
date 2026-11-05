@@ -4,6 +4,14 @@ import type { Contexto } from "@opai/capabilities";
 import { defineAjustes, valoresEfectivos } from "@opai/capabilities";
 import { AFP, type AdministradoraAFP } from "@opai/domain";
 
+import {
+  MARGEN_ALERTA_DEFECTO_PUNTOS,
+  MARGEN_MINIMO_DEFECTO_PCT,
+  MARGEN_OBJETIVO_DEFECTO_PCT,
+  margenesEscalados,
+  type MargenesTenant,
+} from "../domain/margenes-defecto";
+
 /**
  * Supuestos previsionales por defecto del tenant para cotizar (R12: AFP y salud de referencia son del
  * tenant). Se declaran en el manifest y se editan en Configuración › CPQ › Ajustes (ADR-018); la línea
@@ -33,6 +41,30 @@ export const ajustesCpq = z.object({
     ambito: "tenant",
     permiso: "cpq:modelo.manage",
     control: "seleccion",
+  }),
+  margen_objetivo_defecto_pct: z.number().int().min(1).max(99).default(MARGEN_OBJETIVO_DEFECTO_PCT).meta({
+    etiqueta: "Margen objetivo por defecto (%)",
+    ayuda: "Margen sobre la venta con el que nace cada cotización nueva. Se puede cambiar en cada cotización.",
+    grupo: "Márgenes",
+    ambito: "tenant",
+    permiso: "cpq:modelo.manage",
+    control: "numero",
+  }),
+  margen_minimo_pct: z.number().int().min(0).max(99).default(MARGEN_MINIMO_DEFECTO_PCT).meta({
+    etiqueta: "Margen mínimo (%)",
+    ayuda: "Bajo este margen la cotización pide aprobación antes de dejarla lista o enviarla.",
+    grupo: "Márgenes",
+    ambito: "tenant",
+    permiso: "cpq:modelo.manage",
+    control: "numero",
+  }),
+  margen_alerta_puntos: z.number().int().min(0).max(50).default(MARGEN_ALERTA_DEFECTO_PUNTOS).meta({
+    etiqueta: "Alerta sobre el mínimo (puntos)",
+    ayuda: "El semáforo pasa a «Cerca del mínimo» cuando el margen supera el mínimo por menos de estos puntos.",
+    grupo: "Márgenes",
+    ambito: "tenant",
+    permiso: "cpq:modelo.manage",
+    control: "numero",
   }),
   enlace_publico: z.boolean().default(false).meta({
     etiqueta: "Compartir cotizaciones por enlace público",
@@ -64,4 +96,18 @@ export async function supuestosTenant(ctx: Contexto): Promise<SupuestosTenant> {
     salud: leer("supuestos_salud", SUPUESTOS_DEFECTO.salud),
     contrato: leer("supuestos_contrato", SUPUESTOS_DEFECTO.contrato),
   };
+}
+
+/** Márgenes de la empresa (objetivo por defecto, mínimo y alerta) como enteros escalados del motor. */
+export async function margenesTenant(ctx: Contexto): Promise<MargenesTenant> {
+  const v = await valoresEfectivos(ctx, CAMPOS_CPQ);
+  const leer = (clave: string, defecto: number) => {
+    const x = v.get(`cpq.${clave}`)?.valor;
+    return typeof x === "number" && Number.isFinite(x) ? x : defecto;
+  };
+  return margenesEscalados({
+    objetivo: leer("margen_objetivo_defecto_pct", MARGEN_OBJETIVO_DEFECTO_PCT),
+    minimo: leer("margen_minimo_pct", MARGEN_MINIMO_DEFECTO_PCT),
+    alerta: leer("margen_alerta_puntos", MARGEN_ALERTA_DEFECTO_PUNTOS),
+  });
 }

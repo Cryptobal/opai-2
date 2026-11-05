@@ -5,7 +5,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { idBandejaCpq } from "../persistencia/aprobaciones-bandeja-id";
 import { mockMotorLegal } from "../persistencia/mock-motor-legal";
-import { ACTIVOS, NEGOCIO_1, semilla } from "./fixtures";
+import { ACTIVOS, fijarMargenBajo, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 
 const USUARIO_ADMIN = {
@@ -35,8 +35,9 @@ async function cotizacionMargenBajo(ctx: ReturnType<typeof contextoDePrueba>["ct
     seccionId: sec.id,
     tipo: "puesto",
     nombre: "Turno",
-    sueldoBaseClp: 400_000,
+    sueldoBaseClp: 600_000,
   });
+  await fijarMargenBajo(ctx, id);
   await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
   await executeCapability(ctx, "cpq.cotizaciones.solicitar_aprobacion", { id });
   return { id, bandejaId: idBandejaCpq("margen", id) };

@@ -11,6 +11,7 @@ import {
 import { anioEnZona, formatearCodigo, validaHastaPorDefecto } from "../domain";
 import { ensurePlantillaCatalogo } from "../persistencia/catalogo-seed";
 import { sincronizarSecciones } from "../persistencia/secciones-sync";
+import { margenesTenant } from "../persistencia/supuestos";
 import { monedaSchema, uuidSchema } from "./esquemas";
 import { PERMISO_MANAGE } from "./permisos";
 import { ID_VISTA_PREVIA } from "./util";
@@ -52,6 +53,7 @@ export const cotizacionesCreate = defineCapability({
     const validaHasta = input.validaHasta ?? validaHastaPorDefecto(ahora);
     if (validaHasta < hoy) throw reglaDeNegocio("«Válida hasta» no puede ser anterior a hoy.");
     const anio = anioEnZona(ahora);
+    const { objetivoPct } = await margenesTenant(ctx);
     const vigenteActual = await ctx.db.cpqCotizacion.findFirst({
       where: { negocioId: negocio.id, vigente: true },
     });
@@ -95,7 +97,7 @@ export const cotizacionesCreate = defineCapability({
             moneda: input.moneda,
             validaHasta: new Date(`${validaHasta}T00:00:00Z`),
             margenModo: "margen_sobre_venta",
-            margenObjetivoPct: null,
+            margenObjetivoPct: objetivoPct,
             ventaMensualClp: null,
             enviadaEn: null,
             revision: 1,

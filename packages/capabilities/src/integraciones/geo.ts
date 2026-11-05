@@ -1,6 +1,10 @@
 import {
+  type Distancia,
+  distanciaLineaRecta,
   ErrorGoogle,
   geoGoogle,
+  type Punto,
+  puntoValido,
   type OpcionesMapa,
   variantesDeBusqueda,
 } from "@opai/integrations";
@@ -66,6 +70,22 @@ export async function geoDe(ctx: Contexto, modulo = "core") {
       await medir("geo.mapa", "imagen");
       return r;
     },
+    /**
+     * Km entre dos puntos (CAR-194). Se mide `geo.ruta` solo si respondió Google; si falló, o la
+     * empresa no tiene clave de mapas, devuelve la línea recta con su origen y no consume.
+     */
+    async distancia(origen: Punto, destino: Punto): Promise<Distancia> {
+      const r = await geo.distancia(origen, destino);
+      if (r.origenDistancia === "google") await medir("geo.ruta");
+      return r;
+    },
     urlMapa: geo.urlMapa,
   };
+}
+
+/** Distancia medida entre dos puntos; sin credencial de Google responde en línea recta. */
+export async function distanciaDe(ctx: Contexto, origen: Punto, destino: Punto, modulo = "core"): Promise<Distancia> {
+  if (!puntoValido(origen) || !puntoValido(destino)) throw reglaDeNegocio("Las coordenadas del viaje no son válidas.");
+  const geo = await geoDe(ctx, modulo);
+  return geo ? geo.distancia(origen, destino) : distanciaLineaRecta(origen, destino);
 }

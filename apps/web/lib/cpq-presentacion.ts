@@ -36,6 +36,16 @@ export function estadoCpqBadge(estado: string) {
   return ESTADO_BADGE[estado] ?? { etiqueta: estado, tono: "neutro" as const };
 }
 
+/** Tono del chip del estado único de la ficha (CAR-192). */
+export function tonoEstadoFicha(estado: string): "neutro" | "success" | "warning" | "danger" | "info" {
+  if (estado === "incompleta" || estado === "desactualizada" || estado === "margen_bajo") return "warning";
+  if (estado === "en_aprobacion") return "warning";
+  if (estado === "por_dejar_lista" || estado === "lista_para_enviar") return "info";
+  if (estado === "enviada" || estado === "aceptada") return "success";
+  if (estado === "rechazada") return "danger";
+  return "neutro";
+}
+
 export function etiquetaCategoria(id: string) {
   return ETIQUETA_CATEGORIA_CPQ[id] ?? id.replaceAll("_", " ");
 }

@@ -3,10 +3,13 @@
 // sirve por un proxy del núcleo. Toda falla de Google se informa con su estado y mensaje (sin la
 // clave) en `ErrorGoogle` y en el log del servidor.
 
-import { errorDeRespuesta, fallaDeGoogle } from "./error-google";
+import { cuerpoRoutes, distanciaLineaRecta, kmDeRoutes, URL_ROUTES } from "./distancia";
+import { ErrorGoogle, errorDeRespuesta, fallaDeGoogle } from "./error-google";
 import { imagenDeRespuesta, urlMapaGoogle } from "./mapa";
 import { type Componente, componentes, type Geo } from "./tipos";
 
+export { distanciaLineaRecta, puntoValido } from "./distancia";
+export type { Distancia, OrigenDistancia, Punto } from "./distancia";
 export { ErrorGoogle } from "./error-google";
 export type { ImagenMapa, OpcionesMapa } from "./mapa";
 export type { DireccionGeo, Geo, Sugerencia } from "./tipos";
@@ -128,6 +131,21 @@ export function geoGoogle(apiKey: string): Geo {
       const r = await llamar("Static Maps", urlMapaGoogle(apiKey, lat, lng, o));
       if (!r.ok) throw await errorDeRespuesta(r, "Static Maps", apiKey);
       return imagenDeRespuesta(r);
+    },
+    async distancia(origen, destino) {
+      try {
+        const r = await llamar("Routes", URL_ROUTES, {
+          method: "POST",
+          headers: { ...cabeceras, "X-Goog-FieldMask": "routes.distanceMeters" },
+          body: JSON.stringify(cuerpoRoutes(origen, destino)),
+        });
+        const km = kmDeRoutes(await json<{ routes?: { distanceMeters?: number }[] }>(r, "Routes"));
+        if (km !== null) return { km, origenDistancia: "google" as const };
+      } catch (e) {
+        // La falla ya quedó en el log (sin clave): se cae a línea recta y se informa el origen.
+        if (!(e instanceof ErrorGoogle)) throw e;
+      }
+      return distanciaLineaRecta(origen, destino);
     },
   };
 }
