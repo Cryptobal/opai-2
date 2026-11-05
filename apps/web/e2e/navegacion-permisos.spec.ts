@@ -23,15 +23,21 @@ for (const conceder of [false, true]) {
     const nav = page
       .getByRole("navigation", { name: "Principal", exact: true })
       .filter({ visible: true });
+    const personas = nav.getByRole("link", { name: "Personas", exact: true });
     if (conceder && info.project.name !== "telefono") {
       const area = nav.getByRole("button", { name: "Personas", exact: true });
-      if ((await area.count()) && (await area.getAttribute("aria-expanded")) !== "true") {
-        // Un clic antes de hidratar el riel no despliega el área.
-        await hidratado(area);
-        await area.click();
-      }
+      // El riel llega por streaming y en `next dev` se hidrata tarde: se reintenta hasta que el
+      // área (o ya su enlace) exista y el clic haya desplegado el área.
+      await expect(async () => {
+        if (await personas.first().isVisible()) return;
+        await expect(area).toBeVisible({ timeout: 2_000 });
+        if ((await area.getAttribute("aria-expanded")) !== "true") {
+          await hidratado(area);
+          await area.click();
+        }
+        await expect(personas.first()).toBeVisible({ timeout: 2_000 });
+      }).toPass({ timeout: 45_000 });
     }
-    const personas = nav.getByRole("link", { name: "Personas", exact: true });
     if (conceder) await expect(personas.first()).toBeVisible();
     else await expect(personas).toHaveCount(0);
     await page.screenshot({ path: info.outputPath(`permisos-${conceder}.png`), fullPage: true });
