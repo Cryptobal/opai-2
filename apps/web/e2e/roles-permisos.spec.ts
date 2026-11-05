@@ -83,7 +83,7 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
     await nuevo.getByLabel("Nombre del rol").fill(nombre);
     await nuevo.getByLabel("Descripción (opcional)").fill("Monitoreo de instalaciones");
     for (const p of ["Ver Instalaciones", "Ver Personas", "Ver Documentos"])
-      await nuevo.getByRole("checkbox", { name: p }).click();
+      await nuevo.getByRole("checkbox", { name: p, exact: true }).click();
     await captura(page, "nuevo", info);
     await nuevo.getByRole("button", { name: "Crear rol" }).click();
     await expect(page.getByText("Rol creado")).toBeVisible();
