@@ -3,14 +3,16 @@ import { z } from "zod";
 import { defineCapability, prohibido } from "@opai/capabilities";
 
 import { estadoSchema, rendicionSchema, resumenSchema, uuidSchema } from "./esquemas";
-import { PERMISO_APROBAR, PERMISO_RENDIR, PERMISO_VER_TODAS } from "./permisos";
-import { actorId, rendicionDe, resumenDe, vistaDe } from "./util";
+import { PERMISO_APROBAR, PERMISO_RENDIR, PORTALES_RENDIR, PERMISO_VER_TODAS } from "./permisos";
+import { actorId, rendicionDe } from "./util";
+import { nombresDe, resumenDe, vistaDe } from "./vista";
 
 export const rendicionesListar = defineCapability({
   id: "rendiciones.rendiciones.listar",
   descripcion:
     "Lista rendiciones según el alcance pedido: «propias» (las que rindió quien consulta), «por_aprobar» (enviadas y asignadas a quien consulta) o «todas» (solo con permiso de ver todas). Filtra por estado.",
   permiso: PERMISO_RENDIR,
+  portales: PORTALES_RENDIR,
   input: z.object({
     alcance: z.enum(["propias", "por_aprobar", "todas"]).default("propias"),
     estado: estadoSchema.optional(),
@@ -33,7 +35,11 @@ export const rendicionesListar = defineCapability({
       orderBy: { codigo: "desc" },
       take: input.limite,
     });
-    return { rendiciones: filas.map(resumenDe) };
+    const nombres = await nombresDe(
+      ctx,
+      filas.map((f) => f.aprobadorId),
+    );
+    return { rendiciones: filas.map((f) => resumenDe(f, nombres)) };
   },
 });
 
@@ -42,6 +48,7 @@ export const rendicionesObtener = defineCapability({
   descripcion:
     "Devuelve una rendición con todos sus gastos. La ve quien la rindió, el aprobador asignado o quien puede ver todas las de la empresa; para el resto no existe.",
   permiso: PERMISO_RENDIR,
+  portales: PORTALES_RENDIR,
   input: z.object({ id: uuidSchema }),
   output: z.object({ rendicion: rendicionSchema }),
   efecto: "lectura",
@@ -49,6 +56,7 @@ export const rendicionesObtener = defineCapability({
   auditarLectura: (s) => [s.rendicion.id],
   async handler(ctx, input) {
     actorId(ctx);
-    return { rendicion: vistaDe(await rendicionDe(ctx, input.id)) };
+    const r = await rendicionDe(ctx, input.id);
+    return { rendicion: vistaDe(r, await nombresDe(ctx, [r.aprobadorId])) };
   },
 });

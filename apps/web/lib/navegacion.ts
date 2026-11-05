@@ -1,10 +1,4 @@
-import {
-  type AreaNav,
-  PERMISOS_CORE,
-  PERMISOS_PLATAFORMA,
-  type Rol,
-  type Vocabulario,
-} from "@opai/domain";
+import { type AreaNav, PERMISOS_PLATAFORMA, type Rol, type Vocabulario } from "@opai/domain";
 
 import { armarNavegacion, type EntradaArea, type GrupoArea } from "./navegacion-areas";
 import {
@@ -13,6 +7,7 @@ import {
   entradasModulos,
   entradasNucleo,
 } from "./navegacion-entradas";
+import { navegacionSupervisor } from "./navegacion-supervisor";
 
 /** Ítem de navegación serializable (el icono se nombra; el cliente lo resuelve). */
 export type ItemNav = {
@@ -34,6 +29,8 @@ export type ItemNav = {
   /** Muestra el pin al pasar el mouse o con foco (D3). Falso para Inicio y Configuración. */
   fijable?: boolean;
   alerta?: boolean;
+  /** Fuera de la barra inferior del teléfono: va a «Más» (sigue en el riel y la barra lateral). */
+  fueraInferior?: boolean;
 };
 
 /** Conteos de `core.resumen.contadores` (null sin permiso). Los usan Inicio y las listas, no la barra lateral. */
@@ -153,17 +150,7 @@ export function navegacionPortal(
   modulosActivos: readonly string[] = [],
 ): ItemNav[] {
   if (portal === "platform") return puede(PERMISOS_PLATAFORMA.tenantsRead) ? NAV_PLATAFORMA : [];
-  if (portal === "supervisor")
-    return [
-      // «Hoy» solo en `/supervisor`, pero la ficha de persona (`/supervisor/personas/:id`) cuelga de
-      // «Hoy» (se llega por «Atrás → Hoy»), así que `activoEn` la mantiene marcada (H6, t365u/t366u).
-      ...(puede(PERMISOS_CORE.documentosRead) && puede(PERMISOS_CORE.personasRead)
-        ? [{ href, etiqueta: "Hoy", icono: "Home", exacta: true, activoEn: "/supervisor/personas" }]
-        : []),
-      ...(puede(PERMISOS_CORE.instalacionesRead)
-        ? [{ href: "/supervisor/instalaciones", etiqueta: "Instalaciones", icono: "MapPin" }]
-        : []),
-    ];
+  if (portal === "supervisor") return navegacionSupervisor(href, puede, modulosActivos);
   if (portal === "trabajador") {
     const mas = { href: `${href}/mas`, etiqueta: "Más", icono: "Ellipsis", activoEn: `${href}/privacidad` };
     if (!modulosActivos.includes("portal_trabajador")) {
