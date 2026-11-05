@@ -4,6 +4,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
 [
   "agente.historial.list",
   "agente.modelos.list",
+  "asistencia.marcas.verificar",
   "comercial.config.get",
   "core.bitacora.verificar",
   "core.calendario.listar",
