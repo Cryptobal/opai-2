@@ -76,7 +76,13 @@ test.describe("Comercial · tablero y hojas", () => {
           timeout: 8_000,
         });
       }).toPass({ timeout: 90_000 });
-    } else await tarjeta.dragTo(columna(page, "Calificado"));
+    } else {
+      // Igual que en teléfono: un arrastre antes de hidratar el tablero se pierde; soltar en la misma etapa es inocuo.
+      await expect(async () => {
+        await tarjeta.dragTo(columna(page, "Calificado"), { timeout: 8_000 });
+        await expect(columna(page, "Calificado").getByRole("article", { name: titulo })).toBeAttached({ timeout: 8_000 });
+      }).toPass({ timeout: 90_000 });
+    }
     await expect(columna(page, "Calificado").getByRole("article", { name: titulo })).toBeAttached();
     await foto("tablero-movido");
 
