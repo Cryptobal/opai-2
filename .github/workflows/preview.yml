@@ -127,15 +127,27 @@ jobs:
           if [ "$RAMA_CREADA" != "true" ]; then
             ARCHIVO=$(mktemp)
             trap 'rm -f "$ARCHIVO"' EXIT
+            ACTUAL=""
             if npx --yes "$VERCEL_CLI" env pull "$ARCHIVO" --environment=preview --git-branch="$RAMA_GIT" --yes >/dev/null 2>&1; then
               ACTUAL=$(sed -nE 's/^DATABASE_URL="?([^"]*)"?$/\1/p' "$ARCHIVO" | head -n1)
-              if [ -n "$ACTUAL" ]; then
-                echo "::add-mask::$ACTUAL"
-                if [[ "$ACTUAL" == *"@${DB_HOST_POOLED}"* ]] && timeout 20 psql "$ACTUAL" -tAc 'select 1' >/dev/null 2>&1; then
-                  echo "Rama Neon reutilizada y DATABASE_URL vigente: se conserva la contraseña de opai_app."
-                  exit 0
-                fi
+            else
+              echo "No se pudo bajar la variable de $RAMA_GIT."
+            fi
+            if [ -n "$ACTUAL" ]; then
+              echo "::add-mask::$ACTUAL"
+              if [[ "$ACTUAL" != *"@${DB_HOST_POOLED}"* ]]; then
+                echo "La DATABASE_URL de $RAMA_GIT apunta a otra rama Neon."
+              elif ! timeout 20 psql "$ACTUAL" -tAc 'select 1' >/dev/null 2>&1; then
+                echo "La DATABASE_URL de $RAMA_GIT no conecta con la rama Neon."
+              else
+                echo "Rama Neon reutilizada y DATABASE_URL vigente: se conserva la contraseña de opai_app."
+                exit 0
               fi
+            elif npx --yes "$VERCEL_CLI" env ls preview "$RAMA_GIT" 2>&1 | grep -F "DATABASE_URL" | grep -qF "$RAMA_GIT"; then
+              # Variable sensible (Vercel no devuelve su valor): existe para esta rama de Git y la
+              # escribió este workflow después de crear esta rama Neon (al cerrar se borran ambas).
+              echo "Rama Neon reutilizada y DATABASE_URL de $RAMA_GIT ya fijada (sensible): se conserva la contraseña de opai_app."
+              exit 0
             fi
             echo "Rama Neon reutilizada sin una DATABASE_URL válida para $RAMA_GIT: se fija una contraseña nueva."
           fi
