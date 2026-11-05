@@ -7,6 +7,9 @@ import { capturarConfiguracion, prepararConfiguracionTest } from "./configuracio
 
 test.beforeAll(prepararConfiguracionTest);
 
+// Recorre cuatro grupos con dos cargas completas cada uno: en el runner de CI pasa de los 90 s por defecto.
+test.setTimeout(240_000);
+
 test("tarjetas abren grupos y el teléfono vuelve por la jerarquía", async ({ page }, info) => {
   await ocultarIndicadorDev(page);
   await entrar(page);
