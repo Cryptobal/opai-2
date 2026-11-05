@@ -47,7 +47,7 @@ export function montoEntero(moneda: "CLP" | "UF", texto: string): number {
   const n =
     moneda === "UF"
       ? ufDesdeTexto(texto)
-      : /^\d+$/.test(texto.replace(/\./g, ""))
+      : /^\d{1,3}(\.\d{3})+$|^\d+$/.test(texto)
         ? Number(texto.replace(/\./g, ""))
         : null;
   if (n === null || !Number.isSafeInteger(n) || n > 2_000_000_000)

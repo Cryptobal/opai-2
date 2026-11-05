@@ -22,9 +22,7 @@ export type ResultadoRateLimit = {
  * `BETTER_AUTH_SECRET` (ya presente y estable). El valor por defecto solo sirve a dev/test.
  */
 const SAL_RATE_LIMIT =
-  process.env["RATE_LIMIT_SALT"] ??
-  process.env["BETTER_AUTH_SECRET"] ??
-  "opai::rate-limit::sal-dev";
+  process.env["RATE_LIMIT_SALT"] ?? process.env["BETTER_AUTH_SECRET"] ?? "opai::rate-limit::sal-dev";
 
 /**
  * HMAC-SHA256 en hex de la clave en claro: es lo único que viaja a la base y se guarda como PK. Con sal

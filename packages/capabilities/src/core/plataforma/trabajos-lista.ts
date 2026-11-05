@@ -42,10 +42,7 @@ export const platformTrabajosList = defineCapability({
   async handler(ctx, input) {
     const p = requierePlataforma(ctx);
     const tenants = await p.globales.listarTenants(input.tenantId);
-    const filtro = {
-      conProblemas: input.conProblemas,
-      ...(input.estado ? { estado: input.estado } : {}),
-    };
+    const filtro = { conProblemas: input.conProblemas, ...(input.estado ? { estado: input.estado } : {}) };
     const listas = await porLotes(tenants, async (t) => {
       const filas = await p.empresa(t.id).trabajos(filtro, input.limite);
       return filas.map((f) => ({

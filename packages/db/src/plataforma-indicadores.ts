@@ -27,11 +27,7 @@ export function operacionesIndicadoresPlataforma() {
         where: { estado: "propuesto", indicador: { clave: { in: CLAVES } } },
         orderBy: { createdAt: "asc" },
         select: {
-          id: true,
-          valorJson: true,
-          vigenteDesde: true,
-          fuente: true,
-          consultadaEl: true,
+          id: true, valorJson: true, vigenteDesde: true, fuente: true, consultadaEl: true,
           indicador: { select: { id: true, clave: true, nombre: true } },
         },
       });
@@ -55,10 +51,7 @@ export function operacionesIndicadoresPlataforma() {
         orderBy: { capturadoEn: "desc" },
         take: 50,
         select: {
-          capturadoEn: true,
-          resultado: true,
-          diferencia: true,
-          alertaEmitida: true,
+          capturadoEn: true, resultado: true, diferencia: true, alertaEmitida: true,
           indicador: { select: { clave: true } },
         },
       });
