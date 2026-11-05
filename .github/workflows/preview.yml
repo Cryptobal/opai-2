@@ -139,7 +139,8 @@ jobs:
               HOST_RAMA=$(echo "$DB_URL_POOLED" | sed -E 's#^[a-z]+://[^@]+@([^/:?]+).*#\1#')
               HOST_ACTUAL=$(echo "$ACTUAL" | sed -E 's#^[a-z]+://[^@]+@([^/:?]+).*#\1#')
               if [ -z "$HOST_RAMA" ] || [ "$HOST_ACTUAL" != "$HOST_RAMA" ]; then
-                echo "La DATABASE_URL de $RAMA_GIT apunta a otra rama Neon."
+                # El host (endpoint de Neon) no es un secreto; ayuda a ver de dónde viene la variable.
+                echo "La DATABASE_URL de $RAMA_GIT apunta a otra rama Neon (${HOST_ACTUAL%%.*} en vez de ${HOST_RAMA%%.*})."
               elif ! timeout 20 psql "$ACTUAL" -tAc 'select 1' >/dev/null 2>&1; then
                 echo "La DATABASE_URL de $RAMA_GIT no conecta con la rama Neon."
               else
