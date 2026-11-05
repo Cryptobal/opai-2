@@ -58,7 +58,7 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
       return !!contenedor && el.getBoundingClientRect().right <= contenedor.getBoundingClientRect().right;
     })).toBe(true);
   } else {
-    await page.getByRole("banner").getByRole("link", { name: "Instalaciones", exact: true }).click();
+    await page.getByRole("banner").getByRole("link", { name: "Volver a Instalaciones", exact: true }).click();
     await expect(page).toHaveURL(/\/instalaciones\?/);
     await expect(page).toHaveURL(/q=Planta/);
     await expect(page).toHaveURL(/estado=activa/);
