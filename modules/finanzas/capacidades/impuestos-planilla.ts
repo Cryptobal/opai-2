@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
 
 import type { Contexto } from "@opai/capabilities";
-import { ajusteFinanzas, hoyChile, pagosImpuestosEsperados } from "@opai/capabilities";
-import { lunesDe } from "@opai/domain";
+import { ajusteFinanzas, type DiferenciaFactoring, hoyChile, pagosImpuestosEsperados } from "@opai/capabilities";
 
 import type { CeldaFlujo } from "../domain";
 import type { celdaSchema } from "./esquemas";
@@ -47,20 +46,20 @@ export async function celdasImpuestos(
 export const cuentaDiferenciaFactoring = (ctx: Contexto) => ajusteFinanzas(ctx, "flujo_cuenta_diferencia_factoring");
 
 /**
- * Diferencia del factoring (descuento del factor) por cesión, solo informativa: va a la vista y NO a la suma de la
- * planilla (el depósito del factor ya es el ingreso; sumarla descontaría dos veces el descuento).
+ * Diferencia del factoring (monto de la factura − depósito del factor) por cesión, solo informativa: va a la vista y NO a
+ * la suma de la planilla (el depósito del factor ya es el ingreso; sumarla descontaría dos veces el descuento).
  */
-export async function celdasDiferenciaFactoring(ctx: Contexto, semanas: readonly string[]): Promise<Vista[]> {
-  const enRango = new Set(semanas);
-  const cesiones = await ctx.db.cesion.findMany({
-    where: { estado: { notIn: ["simulada", "anulada"] }, merma: { gt: 0 } },
-    select: { id: true, merma: true, createdAt: true, factorNombre: true, documento: { select: { folio: true } } },
-  });
+export async function celdasDiferenciaFactoring(ctx: Contexto, diferencias: readonly DiferenciaFactoring[]): Promise<Vista[]> {
+  if (!diferencias.length) return [];
   const cuenta = await cuentaDiferenciaFactoring(ctx);
-  return cesiones.flatMap((c) => {
-    const semana = lunesDe(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(c.createdAt));
-    if (!enRango.has(semana)) return [];
-    const folio = c.documento.folio != null ? ` folio ${c.documento.folio}` : "";
-    return [{ id: c.id, filaId: FILA_DIFERENCIA_FACTORING, semana, capa: "real" as const, monto: c.merma, nota: `${cuenta} · descuento de ${c.factorNombre ?? "el factor"}${folio} (informativo, no suma al saldo)` }];
-  });
+  return diferencias
+    .filter((d) => d.monto > 0)
+    .map((d) => ({
+      id: d.cesionId,
+      filaId: FILA_DIFERENCIA_FACTORING,
+      semana: d.semana,
+      capa: "real" as const,
+      monto: d.monto,
+      nota: `${cuenta} · descuento de ${d.factorNombre ?? "el factor"}${d.folio != null ? ` folio ${d.folio}` : ""} (informativo, no suma al saldo)`,
+    }));
 }

@@ -14,7 +14,9 @@ export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanz
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
 export { pagosImpuestosEsperados, type PagoImpuestoEsperado } from "./finanzas/impuestos-esperados-datos";
-export { ingresosEsperados, hoyChile, type IngresoEsperado } from "./finanzas/cobro-esperado-datos";
+export { hoyChile, type IngresoEsperado } from "./finanzas/cobro-esperado-datos";
+export { proyeccionDeIngresos, ingresosEsperados, type AvisoFlujo, type ProyeccionIngresos } from "./finanzas/proyeccion-ingresos";
+export type { DiferenciaFactoring } from "./finanzas/factoring-esperado-datos";
 export { ajuste, defineAjustes, valoresEfectivos, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,

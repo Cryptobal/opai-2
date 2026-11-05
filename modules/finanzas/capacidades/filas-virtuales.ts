@@ -15,6 +15,8 @@ export const FILA_SIN_CONCILIAR_EGRESO = "00000000-0000-4000-8000-000000000004";
 /** Cobros esperados de las facturas por cobrar, con la fecha esperada de cobro (ADR-073). */
 export const FILA_COBROS_ESPERADOS = "00000000-0000-4000-8000-000000000005";
 
+/** Depósito neto que se espera del factor por las facturas cedidas (ADR-073, regla 4). */
+export const FILA_DEPOSITO_FACTORING = "00000000-0000-4000-8000-000000000009";
 /** Egresos proyectados de impuestos: IVA a pagar y PPM (ADR-073, regla 5). */
 export const FILA_IVA = "00000000-0000-4000-8000-000000000006";
 export const FILA_PPM = "00000000-0000-4000-8000-000000000007";
@@ -27,6 +29,7 @@ export const FILAS_VIRTUALES_DOMINIO: FilaFlujo[] = [
   { id: FILA_SIN_CONCILIAR_INGRESO, seccion: "ingreso", arrastre: false },
   { id: FILA_SIN_CONCILIAR_EGRESO, seccion: "egreso", arrastre: false },
   { id: FILA_COBROS_ESPERADOS, seccion: "ingreso", arrastre: false },
+  { id: FILA_DEPOSITO_FACTORING, seccion: "ingreso", arrastre: false },
   { id: FILA_IVA, seccion: "egreso", arrastre: false },
   { id: FILA_PPM, seccion: "egreso", arrastre: false },
 ];
@@ -77,6 +80,7 @@ export const FILAS_VIRTUALES_VISTA: z.infer<typeof filaSchema>[] = [
     orden: 9990,
     activa: true,
   },
+  { id: FILA_DEPOSITO_FACTORING, seccion: "ingreso", etiqueta: "Depósitos del factor (facturas cedidas)", vinculo: "finanzas:factoring", arrastre: false, orden: 9989, activa: true },
   { id: FILA_IVA, seccion: "egreso", etiqueta: "IVA a pagar", vinculo: "finanzas:impuestos", arrastre: false, orden: 9991, activa: true },
   { id: FILA_PPM, seccion: "egreso", etiqueta: "PPM", vinculo: "finanzas:impuestos", arrastre: false, orden: 9992, activa: true },
 ];

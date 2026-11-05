@@ -7,7 +7,7 @@ import { PERMISO_GESTIONAR } from "./permisos";
 const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "El mes debe ser AAAA-MM.");
 
 export const impuestosPostergarIva = defineCapability({
-  id: "finanzas.impuestos.postergar_iva",
+  id: "finanzas.flujo.postergar_iva",
   descripcion:
     "Marca o desmarca, para un mes, la postergación del pago del IVA de ese mes de M+1 a M+2 en el flujo de caja. El PPM no se posterga y se paga siempre en M+1. Con vista previa.",
   permiso: PERMISO_GESTIONAR,

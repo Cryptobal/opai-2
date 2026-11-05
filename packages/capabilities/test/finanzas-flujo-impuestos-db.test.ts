@@ -104,11 +104,11 @@ describe.skipIf(omitirSuiteDb())("flujo · IVA, PPM y diferencia del factoring (
   });
 
   it("postergar el IVA lo lleva a M+2 y el PPM sigue en M+1; la vista previa no escribe; otra empresa no se ve afectada", async () => {
-    const vista = await run(tenantA, "finanzas.impuestos.postergar_iva", { periodo: mesActual, postergar: true }, { dryRun: true });
+    const vista = await run(tenantA, "finanzas.flujo.postergar_iva", { periodo: mesActual, postergar: true }, { dryRun: true });
     expect(vista.ok && vista.data).toMatchObject({ postergado: true, cambio: true });
     expect(await e.admin.flujoIvaPostergado.count({ where: { tenantId: tenantA } })).toBe(0);
 
-    await ok(tenantA, "finanzas.impuestos.postergar_iva", { periodo: mesActual, postergar: true });
+    await ok(tenantA, "finanzas.flujo.postergar_iva", { periodo: mesActual, postergar: true });
     const p = await planilla();
     expect(total(p, FILA_IVA, lunesDe(pagoM1))).toBe(0);
     expect(total(p, FILA_IVA, lunesDe(pagoM2))).toBe(114_000);
@@ -116,7 +116,7 @@ describe.skipIf(omitirSuiteDb())("flujo · IVA, PPM y diferencia del factoring (
     expect(p.celdas.find((c) => c.filaId === FILA_IVA)?.nota).toContain("postergado");
     expect(await e.admin.flujoIvaPostergado.count({ where: { tenantId: tenantB } })).toBe(0);
 
-    await ok(tenantA, "finanzas.impuestos.postergar_iva", { periodo: mesActual, postergar: false });
+    await ok(tenantA, "finanzas.flujo.postergar_iva", { periodo: mesActual, postergar: false });
     expect(total(await planilla(), FILA_IVA, lunesDe(pagoM1))).toBe(114_000);
   });
 

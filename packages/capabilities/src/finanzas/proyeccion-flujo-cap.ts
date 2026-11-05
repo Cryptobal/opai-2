@@ -4,7 +4,8 @@ import { lunesDe, sumarDiasCobro } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { PERMISO_READ } from "./comun";
-import { hoyChile, ingresosEsperados } from "./cobro-esperado-datos";
+import { hoyChile } from "./cobro-esperado-datos";
+import { ingresosEsperados } from "./proyeccion-ingresos";
 
 const ingresoSchema = z.object({
   documentoEmitidoId: z.string().nullable(),
@@ -17,7 +18,7 @@ const ingresoSchema = z.object({
   capa: z.enum(["real", "comprometido"]),
   fechaEsperada: z.string().nullable().describe("Día esperado del cobro; null en las programaciones sin borrador."),
   origenFecha: z
-    .enum(["manual", "promedio", "vencimiento", "emision", "programacion"])
+    .enum(["manual", "promedio", "vencimiento", "emision", "programacion", "cesion"])
     .nullable()
     .describe("De dónde sale la fecha: fijada a mano, promedio real de pago del cliente, vencimiento o emisión."),
 });

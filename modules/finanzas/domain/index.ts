@@ -8,7 +8,7 @@ export type FilaFlujo = { id: string; seccion: Seccion; arrastre: boolean };
 export type CeldaFlujo = { filaId: string; semana: string; capa: Capa; monto: number };
 
 /** Umbral único de saldo bajo por defecto (CLP): planilla, aviso semanal y aviso de banco (ADR-073). */
-export const UMBRAL_SALDO_BAJO_DEFECTO = 15_000_000;
+export const UMBRAL_SALDO_BAJO_DEFECTO = 10_000_000;
 
 const DIA_MS = 86_400_000;
 const aMs = (iso: string) => Date.parse(`${iso}T00:00:00Z`);

@@ -63,7 +63,7 @@ export async function serieSaldos(
   const cobros = await celdasCobrosEsperados(ctx, listaCalc);
   const impuestos = await celdasImpuestos(ctx, listaCalc);
   const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, listaCalc))];
+  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,
@@ -97,6 +97,7 @@ export async function serieSaldos(
     extraVista: extraVista.filter((c) => enVentana.has(c.semana)),
     ...cargado,
     celdas: cargado.celdas.filter((c) => enVentana.has(aIso(c.semana))),
+    avisos: cobros.avisos,
     banco: { ...banco, fuente: "banco" as FuenteSaldo },
   };
 }
@@ -139,7 +140,7 @@ async function serieDesdeAjustes(
   const cobros = await celdasCobrosEsperados(ctx, lista);
   const impuestos = await celdasImpuestos(ctx, lista);
   const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, lista))];
+  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const calculo = calcularPlanilla({
     saldoInicial: saldoPrevio,
     umbral: ajustes.umbral,
@@ -147,5 +148,5 @@ async function serieDesdeAjustes(
     filas: [...cargado.dominio, ...FILAS_VIRTUALES_DOMINIO],
     celdas: celdasCalc,
   });
-  return { hoy, lista, calculo, extraVista, ...cargado, banco: { ...banco, fuente: "ajustes" as FuenteSaldo } };
+  return { hoy, lista, calculo, extraVista, ...cargado, avisos: cobros.avisos, banco: { ...banco, fuente: "ajustes" as FuenteSaldo } };
 }

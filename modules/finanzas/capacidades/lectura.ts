@@ -75,6 +75,9 @@ export const planillaObtener = defineCapability({
     semanas: z.array(semanaCalculadaSchema),
     aviso: avisoSchema,
     saldoBanco: saldoBancoSchema,
+    avisos: z
+      .array(z.object({ tipo: z.enum(["posible_cobro_recibido"]), mensaje: z.string(), abonoId: z.string(), monto: z.number().int() }))
+      .describe("Avisos de la proyección, p. ej. un abono sin conciliar que podría ser el cobro de una factura aún proyectada."),
     columnaHoy: semanaSchema.nullable(),
   }),
   efecto: "lectura",
@@ -86,7 +89,7 @@ export const planillaObtener = defineCapability({
       ? 4
       : (input.semanas ?? ajustes.horizonteSemanas + SEMANAS_HISTORIA);
     const desde = input.movil ? hoy : desdeVentana(ajustes, input.desde, hoy);
-    const { lista, calculo, extraVista, filas, celdas, banco } = await serieSaldos(
+    const { lista, calculo, extraVista, filas, celdas, banco, avisos } = await serieSaldos(
       ctx,
       ajustes,
       desde,
@@ -128,6 +131,7 @@ export const planillaObtener = defineCapability({
       celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,
       aviso: { activo: ajustes.avisoActivo, umbral: ajustes.umbral, semanas: avisoSemanas },
+      avisos,
       saldoBanco: { fuente: banco.fuente, saldo: banco.saldo, cuentasSinSaldo: banco.cuentasSinSaldo },
       columnaHoy: lista.includes(hoy) ? hoy : null,
     };

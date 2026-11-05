@@ -29,7 +29,7 @@ const MESES_HISTORIA_PROMEDIO = 24;
 export type IngresoEsperado = IngresoProyectadoDesdeDte & {
   /** Día exacto esperado del cobro y de dónde sale (manual, promedio del cliente, vencimiento o emisión). */
   fechaEsperada: string | null;
-  origenFecha: "manual" | "promedio" | "vencimiento" | "emision" | "programacion" | null;
+  origenFecha: "manual" | "promedio" | "vencimiento" | "emision" | "programacion" | "cesion" | null;
 };
 
 /** Días promedio de pago por cliente (cuentaId): solo con 3 o más facturas pagadas con cobro conciliado. */
@@ -70,11 +70,12 @@ export async function promediosDePagoPorCliente(ctx: Contexto, hoy: string): Pro
 }
 
 /**
- * Ingresos por cobrar con su semana esperada: facturas emitidas (pendiente = monto − NC parciales − cobrado), borradores
+ * Ingresos por cobrar con su semana esperada (sin descontar abonos del banco aún sin conciliar; eso lo hace
+ * `proyeccion-ingresos.ts`): facturas emitidas (pendiente = monto − NC parciales − cobrado), borradores
  * y períodos de programaciones sin borrador. Las cedidas y las notas de débito no cuentan; lo vencido va a la semana en
  * curso. Devuelve todo; quien llama filtra por horizonte.
  */
-export async function ingresosEsperados(
+export async function ingresosDeFacturas(
   ctx: Contexto,
   hoy: string = hoyChile(),
   /** Última semana (lunes) que le interesa a quien llama: acota las programaciones que se calculan. */
