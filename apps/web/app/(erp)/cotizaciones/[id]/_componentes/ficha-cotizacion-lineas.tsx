@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, SeccionTarjeta } from "@opai/ds";
+import { Button } from "@opai/ds";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
 import type { LineaEditable } from "../../_componentes/puesto-tipos";
@@ -27,33 +27,29 @@ export function FichaCotizacionLineas({
   onQuitar: (id: string) => void;
   onTraza: (lineaId: string) => void;
 }) {
+  // Solo las secciones con puestos o con instalación: la sección «Común» vacía no es una tarjeta más.
+  const secciones = d.secciones.filter((s) => s.lineas.length > 0 || s.instalacionId);
   return (
-    <>
-      {d.secciones.map((s) => (
-        <SeccionTarjeta
-          key={s.id}
-          titulo={s.nombre}
-          accion={
-            editable ? (
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                className="max-md:min-h-11 max-md:text-sm"
-                onClick={() => onAgregar(s.id)}
-              >
+    <div className="space-y-4">
+      {secciones.length === 0 ? (
+        <p className="t-body text-fg-muted">Todavía no hay puestos. Agrega el primero para calcular el precio.</p>
+      ) : null}
+      {secciones.map((s) => (
+        <section key={s.id} aria-label={s.nombre} className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="t-label">{s.nombre}</h3>
+            {editable ? (
+              <Button type="button" variant="secondary" size="md" onClick={() => onAgregar(s.id)}>
                 Agregar puesto
               </Button>
-            ) : undefined
-          }
-          sinRelleno
-        >
-          <ul className="divide-y divide-border">
+            ) : null}
+          </div>
+          <ul className="divide-y divide-border rounded-md border border-border">
             {s.lineas.length === 0 ? (
-              <li className="p-4 t-caption text-fg-muted">Sin líneas en esta sección</li>
+              <li className="p-4 t-caption text-fg-muted">Sin puestos en esta instalación</li>
             ) : (
               s.lineas.map((l) => (
-                <li key={l.id} className="px-4 py-3.5 md:py-4">
+                <li key={l.id} className="px-4 py-3.5">
                   <LineaCotizacion
                     linea={l}
                     editable={editable}
@@ -67,8 +63,8 @@ export function FichaCotizacionLineas({
               ))
             )}
           </ul>
-        </SeccionTarjeta>
+        </section>
       ))}
-    </>
+    </div>
   );
 }

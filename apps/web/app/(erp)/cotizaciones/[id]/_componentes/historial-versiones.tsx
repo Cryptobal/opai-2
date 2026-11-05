@@ -1,7 +1,5 @@
 "use client";
 
-import { Button, SeccionTarjeta } from "@opai/ds";
-
 import { estadoCpqBadge } from "@/lib/cpq-presentacion";
 import { pesos } from "@/lib/fechas";
 
@@ -18,7 +16,8 @@ export function HistorialVersionesCpq({
 }) {
   if (versiones.length === 0) return null;
   return (
-    <SeccionTarjeta titulo="Historial de versiones">
+    <div className="space-y-3 border-t border-border pt-3">
+      <h3 className="t-label">Historial de versiones</h3>
       <ol className="space-y-4">
         {versiones.map((v) => {
           const e = estadoCpqBadge(v.estado);
@@ -50,39 +49,6 @@ export function HistorialVersionesCpq({
           );
         })}
       </ol>
-    </SeccionTarjeta>
-  );
-}
-
-export function PanelDocumentoPdf({
-  codigo,
-  version,
-  estado,
-  onVistaPrevia,
-}: {
-  codigo: string;
-  version: number;
-  estado: string;
-  onVistaPrevia: () => void;
-}) {
-  const borrador = estado === "borrador" || estado === "en_aprobacion" || estado === "lista";
-  return (
-    <SeccionTarjeta
-      titulo="Documento PDF"
-      accion={
-        <Button type="button" variant="secondary" size="md" className="max-md:min-h-11" onClick={onVistaPrevia}>
-          Vista previa
-        </Button>
-      }
-    >
-      <p className="t-body-sm text-fg-muted">
-        Usa la plantilla y la marca definidas en Configuración › CPQ › Marca y plantillas (Clásica, Moderna o
-        Compacta).
-      </p>
-      <p className="t-caption mt-2 text-fg-subtle">
-        {codigo} · versión {version}
-        {borrador ? " · vista previa con marca de borrador" : " · documento enviado al contacto"}
-      </p>
-    </SeccionTarjeta>
+    </div>
   );
 }

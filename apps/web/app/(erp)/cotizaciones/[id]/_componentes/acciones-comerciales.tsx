@@ -60,7 +60,7 @@ export function AccionesComerciales(p: {
   const compartible = ["enviada", "aceptada"].includes(p.estado);
   if (!e && !error) return null;
   return (
-    <section aria-label="Compartir y cierre" className="flex flex-col gap-3 rounded-md border border-border p-4">
+    <section aria-label="Compartir y cierre" className="flex flex-col gap-3 border-t border-border pt-3">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="t-label">Compartir y cierre</h3>
         {e?.archivada ? <Badge tono="neutro">Archivada</Badge> : null}

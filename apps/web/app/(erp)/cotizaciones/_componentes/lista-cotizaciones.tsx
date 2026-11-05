@@ -23,8 +23,8 @@ export function ListaCotizaciones({
   base?: string;
 }) {
   const nueva = d.crear ? (
-    <EnlaceBotonHoja href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`} icono={Plus}>
-      Nueva
+    <EnlaceBotonHoja href={`${base === "/cotizaciones" ? "/cotizaciones/nueva" : `${base}/nueva`}`} icono={Plus} className="lg:hidden">
+      Nueva cotización
     </EnlaceBotonHoja>
   ) : undefined;
   return (
