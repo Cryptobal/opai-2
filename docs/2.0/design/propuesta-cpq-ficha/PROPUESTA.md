@@ -1,6 +1,6 @@
 # Propuesta: rediseño de la ficha de cotización CPQ (4-nov-2026)
 
-Estado: **Propuesta para Carlos.** No se toca código hasta que él elija con un comentario «DECISIÓN CARLOS:» en el PR. Mockups navegables (3 alternativas, escritorio y teléfono, claro y oscuro): `index.html` en esta carpeta.
+Estado: **Decidido: alternativa B (Carlos, 4-nov-2026, 21:23 y 21:24; registrada en el PR #319).** La construcción la hace «Comercial · Code» en dos partes: 1) reglas de estado, 2) pantalla B. Mockups navegables (3 alternativas, escritorio y teléfono, claro y oscuro): `index.html` en esta carpeta.
 
 ## Qué pidió Carlos (4-nov, 20:48)
 Un solo estado claro con un único siguiente paso; no poder marcar «Lista para enviar» con margen bajo el mínimo o valores desactualizados; sin botones duplicados ni tarjetas sueltas; flujo guiado (cliente e instalación, puestos, costos y margen, documento y envío); arriba siempre precio mensual, margen contra objetivo con semáforo explicado y estado con su acción; costos agrupados y plegables, solo con monto; mensajes simples; que funcione en el teléfono.
