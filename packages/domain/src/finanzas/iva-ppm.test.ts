@@ -23,6 +23,10 @@ describe("impuestosPorPeriodo", () => {
     });
     expect(r).toEqual([{ periodo: "2026-10", debito: 266_000 - 0, credito: 76_000, iva: 190_000, ppm: 14_000 }]);
   });
+  it("la nota de débito (56) suma al débito igual que una factura", () => {
+    const r = impuestosPorPeriodo({ ventas: [v("2026-10-05", 1_000_000), v("2026-10-06", 100_000, 56)], compras: [], tasaPpmBps: 0 });
+    expect(r[0]).toMatchObject({ debito: 209_000, iva: 209_000 });
+  });
   it("con más crédito que débito no hay IVA a pagar", () => {
     const r = impuestosPorPeriodo({ ventas: [v("2026-10-05", 100_000)], compras: [{ fecha: "2026-10-10", tipoDte: 33, montoNeto: 400_000, montoExento: 0, montoIva: 76_000 }], tasaPpmBps: 0 });
     expect(r[0]).toMatchObject({ iva: 0, ppm: 0 });

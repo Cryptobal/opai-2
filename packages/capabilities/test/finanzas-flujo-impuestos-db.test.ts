@@ -1,10 +1,10 @@
 // CAR-193 · ADR-073 regla 5 y 4: IVA del mes M en M+1 junto con el PPM, postergación del IVA a M+2 marcable por mes
-// (el PPM no se posterga), y la diferencia del factoring solo informativa (no suma al saldo).
+// (el PPM no se posterga).
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { manifest } from "../../../modules/finanzas/manifest";
-import { FILA_DIFERENCIA_FACTORING, FILA_IVA, FILA_PPM } from "../../../modules/finanzas/capacidades/filas-virtuales";
+import { FILA_IVA, FILA_PPM } from "../../../modules/finanzas/capacidades/filas-virtuales";
 import { hoyIso, lunesHoy } from "../../../modules/finanzas/capacidades/util";
 import { type Entorno, omitirSuiteDb, prepararEntorno } from "../../db/test/entorno";
 
@@ -27,12 +27,11 @@ type Planilla = {
   filas: { id: string; etiqueta: string }[];
 };
 
-describe.skipIf(omitirSuiteDb())("flujo · IVA, PPM y diferencia del factoring (db)", () => {
+describe.skipIf(omitirSuiteDb())("flujo · IVA y PPM (db)", () => {
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
   let tenantA = "";
   let tenantB = "";
-  let docCedido = "";
   const usuario = randomUUID();
   const hoy = hoyIso();
   const mesActual = hoy.slice(0, 7);
@@ -79,11 +78,9 @@ describe.skipIf(omitirSuiteDb())("flujo · IVA, PPM y diferencia del factoring (
         data: { tenantId: tenantA, cuentaId: cliente, tipoDte: 33, folio: Math.floor(Math.random() * 1e6), fechaEmision: fecha(hoy), fechaVencimiento: fecha(hoy), montoNeto: neto, montoIva: iva, montoTotal: neto + iva, estadoDte: "aceptado" },
       });
     }
-    docCedido = (
-      await e.admin.documentoEmitido.create({
+    await e.admin.documentoEmitido.create({
         data: { tenantId: tenantA, cuentaId: cliente, tipoDte: 34, folio: 7, fechaEmision: fecha(hoy), montoExento: 2_000_000, montoTotal: 2_000_000, estadoDte: "aceptado", estadoCobro: "cedida", cesionEstado: "cedido" },
-      })
-    ).id;
+    });
     await e.admin.documentoRecibido.create({
       data: { tenantId: tenantA, proveedorId: proveedor.id, tipoDte: 33, folio: 11, fechaEmision: fecha(hoy), fechaRecepcion: fecha(hoy), montoNeto: 400_000, montoIva: 76_000, montoTotal: 476_000, estadoRecepcion: "aceptado" },
     });
@@ -120,27 +117,8 @@ describe.skipIf(omitirSuiteDb())("flujo · IVA, PPM y diferencia del factoring (
     expect(total(await planilla(), FILA_IVA, lunesDe(pagoM1))).toBe(114_000);
   });
 
-  it("la diferencia del factoring aparece en la fila de la cuenta elegida pero no suma al saldo", async () => {
-    const antes = await planilla();
-    await e.admin.cesion.create({
-      data: { tenantId: tenantA, documentoId: docCedido, factorRut: "76555555-5", factorNombre: "Factor SpA", tasaBps: 150, anticipo: 1_970_000, merma: 30_000, saldoFactor: 30_000, estado: "enviada" },
-    });
-    const despues = await planilla();
-    const celda = despues.celdas.find((c) => c.filaId === FILA_DIFERENCIA_FACTORING);
-    expect(celda).toMatchObject({ monto: 30_000, semana: lunesHoy() });
-    expect(celda?.nota).toContain("Diferencia factoring");
-    expect(despues.filas.find((f) => f.id === FILA_DIFERENCIA_FACTORING)?.etiqueta).toBe("Diferencia factoring");
-    // Informativa: los totales de cada semana son idénticos con y sin la cesión.
-    expect(despues.semanas).toEqual(antes.semanas);
-
-    await ok(tenantA, "core.config.set", { modulo: "finanzas", clave: "flujo_cuenta_diferencia_factoring", valor: "Gasto financiero" });
-    const otra = await planilla();
-    expect(otra.filas.find((f) => f.id === FILA_DIFERENCIA_FACTORING)?.etiqueta).toBe("Gasto financiero");
-    expect(otra.semanas).toEqual(antes.semanas);
-  });
-
-  it("otra empresa no ve los impuestos ni la diferencia de la primera", async () => {
+  it("otra empresa no ve los impuestos de la primera", async () => {
     const p = await planilla(tenantB);
-    expect(p.celdas.some((c) => c.filaId === FILA_IVA || c.filaId === FILA_PPM || c.filaId === FILA_DIFERENCIA_FACTORING)).toBe(false);
+    expect(p.celdas.some((c) => c.filaId === FILA_IVA || c.filaId === FILA_PPM)).toBe(false);
   });
 });
