@@ -1397,3 +1397,15 @@ identidad de servicio en main.
 **Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (respuesta 5 del comentario «DECISIÓN CARLOS» en #318, 21:22 CLT), registrada por Claude (Sesión 5, CAR-189). · Cierra la pregunta abierta desde CAR-169 (#287).
 
 **Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
+
+---
+
+## ADR-075 · El XML firmado de un DTE se maneja en ISO-8859-1, como bytes que no se transcodifican
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Claude («Finanzas · Proyecto», Sesión 5), por encargo de Carlos del 4-nov 21:30 («define el encoding del XML»). · CAR-196.
+
+**Decisión.** El XML de un DTE (y el AEC de una cesión) se trata en **ISO-8859-1**, que es la codificación que exige el esquema del SII y sobre la que se calcula la firma. Desde que SimpleAPI lo devuelve firmado, el XML se maneja como **bytes opacos**: se guarda tal cual en el almacenamiento, el SHA-256 se calcula sobre esos bytes, y se envía igual al SII, a Octava y al cliente. Nunca se pasa por un `string` de JavaScript con UTF-8 ni se reescribe la declaración `encoding`. Solo para mostrar o leer campos se decodifica como ISO-8859-1. Si una API exige el XML como texto (por ejemplo, `STRINGXML` de Octava), se decodifica en ISO-8859-1 en ese borde y se verifica con un caso de prueba que la cesión acepta el documento.
+
+**Por qué.** Hoy el código lo lee y lo vuelve a codificar en UTF-8 (`ventas-xml.ts`, `octava.ts`). Con una razón social o una glosa con ñ o tildes, eso cambia los bytes firmados, invalida la firma y el SII o el RPETC lo rechazan.
+
+**Prueba obligatoria.** Una emisión y una cesión en certificación con «Compañía Ñuñoa» en la razón social y tildes en la glosa: el hash del XML guardado coincide con el que devolvió SimpleAPI y la cesión lo acepta.
