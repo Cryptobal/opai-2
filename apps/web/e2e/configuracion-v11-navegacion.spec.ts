@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { entrar } from "./sesion";
 import { ocultarIndicadorDev } from "./indicador-dev";
 import { abrirMenuUsuario } from "./menu-usuario";
@@ -6,6 +6,15 @@ import { abrirMenuUsuario } from "./menu-usuario";
 import { capturarConfiguracion, prepararConfiguracionTest } from "./configuracion-v11-fixture";
 
 test.beforeAll(prepararConfiguracionTest);
+
+/** Pulsa un enlace y espera la URL; reintenta si el clic llegó antes de hidratar y no navegó. */
+async function pulsarYLlegar(page: Page, enlace: Locator, url: RegExp) {
+  await expect(async () => {
+    await enlace.click({ timeout: 3_000 });
+    await expect(page).toHaveURL(url, { timeout: 4_000 });
+  }).toPass({ timeout: 45_000 });
+}
+
 
 // Recorre cuatro grupos con dos cargas completas cada uno: en el runner de CI pasa de los 90 s por defecto.
 test.setTimeout(240_000);
@@ -18,22 +27,25 @@ test("tarjetas abren grupos y el teléfono vuelve por la jerarquía", async ({ p
     await page.goto(`/configuracion/grupo/${id}`);
     await expect(page.getByRole("heading", { name: etiqueta, exact: true })).toBeVisible();
     await page.goto("/configuracion");
-    await page.locator(`main a[href="/configuracion/grupo/${id}"]`).filter({ visible: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/configuracion/grupo/${id}$`));
+    await pulsarYLlegar(
+      page,
+      page.locator(`main a[href="/configuracion/grupo/${id}"]`).filter({ visible: true }),
+      new RegExp(`/configuracion/grupo/${id}$`),
+    );
     await expect(page.getByRole("heading", { name: etiqueta, exact: true })).toBeVisible();
     await page.goto("/configuracion");
   }
-  await page
-    .locator('main a[href="/configuracion/grupo/operacion"]')
-    .filter({ visible: true })
-    .click();
-  await expect(page).toHaveURL(/\/configuracion\/grupo\/operacion$/);
+  await pulsarYLlegar(
+    page,
+    page.locator('main a[href="/configuracion/grupo/operacion"]').filter({ visible: true }),
+    /\/configuracion\/grupo\/operacion$/,
+  );
   await expect(page.getByRole("heading", { name: "Operación", exact: true })).toBeVisible();
-  await page
-    .getByRole("link", { name: /Calendario/ })
-    .first()
-    .click();
-  await expect(page).toHaveURL(/\/configuracion\/calendario$/);
+  await pulsarYLlegar(
+    page,
+    page.getByRole("link", { name: /Calendario/ }).first(),
+    /\/configuracion\/calendario$/,
+  );
   if (info.project.name === "telefono") {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.getByRole("link", { name: "Volver a Operación", exact: true }).click();
@@ -42,11 +54,11 @@ test("tarjetas abren grupos y el teléfono vuelve por la jerarquía", async ({ p
     await expect(page).toHaveURL(/\/configuracion$/);
   }
   await page.goto("/configuracion");
-  await page
-    .locator('main a[href="/configuracion/grupo/agentes"]')
-    .filter({ visible: true })
-    .click();
-  await expect(page).toHaveURL(/\/configuracion\/grupo\/agentes$/);
+  await pulsarYLlegar(
+    page,
+    page.locator('main a[href="/configuracion/grupo/agentes"]').filter({ visible: true }),
+    /\/configuracion\/grupo\/agentes$/,
+  );
   const lista = page.getByRole("navigation", { name: "Entradas de Agentes", exact: true });
   await expect(lista.getByRole("link")).toHaveText([
     /Agentes y API keys/,
