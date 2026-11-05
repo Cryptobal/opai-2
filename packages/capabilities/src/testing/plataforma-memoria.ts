@@ -25,6 +25,17 @@ export function globalesEnMemoria(delegado: (m: string) => Delegado): Globales {
     listarTenants: (id?: string) =>
       delegado("tenant").findMany({ where: id ? { id } : {}, orderBy: { nombre: "asc" } }),
     crearTenant: (data: Fila) => delegado("tenant").create({ data }),
+    // Empresa + perfil tributario; el RUT repetido falla como la restricción única real (P2002).
+    crearTenantConPerfil: async (data: Fila, datos: Fila) => {
+      if (await delegado("perfilEmpresa").findFirst({ where: { rut: datos["rut"] } }))
+        throw Object.assign(new Error("Unique constraint failed"), {
+          code: "P2002",
+          meta: { constraint: "perfil_empresa_rut_unico" },
+        });
+      const tenant = await delegado("tenant").create({ data });
+      await delegado("perfilEmpresa").create({ data: { tenantId: tenant["id"], ...datos } });
+      return tenant;
+    },
     actualizarTenant: (id: string, data: Fila) =>
       delegado("tenant").update({ where: { id }, data }),
     usuariosDePlataforma: async () =>

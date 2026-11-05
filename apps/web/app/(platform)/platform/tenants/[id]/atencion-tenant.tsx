@@ -3,16 +3,45 @@ import { Badge, SeccionTarjeta } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 import { usd } from "../../_componentes/formato";
+import { type Resumen, textoVence } from "../../facturacion/_componentes/cobro";
 import type { PanelTenant, Trabajo } from "./tipos";
 
-type Props = { problemas: Trabajo[]; keys: PanelTenant["keys"] };
+type Props = {
+  problemas: Trabajo[];
+  keys: PanelTenant["keys"];
+  faltaRut: boolean;
+  pruebas: Resumen["pruebasPorVencer"];
+};
 
 /** "Atención" (49): trabajos fallidos o reintentando y keys sobre el 80 % de su presupuesto. */
-export function AtencionTenant({ problemas, keys: keysAlerta }: Props) {
+export function AtencionTenant({ problemas, keys: keysAlerta, faltaRut, pruebas }: Props) {
   return (
     <SeccionTarjeta titulo="Atención" sinRelleno>
-      {problemas.length || keysAlerta.length ? (
+      {problemas.length || keysAlerta.length || faltaRut || pruebas.length ? (
         <ul>
+          {faltaRut ? (
+            <li className="flex items-center gap-2 border-b border-border px-4 py-2.5 last:border-b-0">
+              <Badge tono="warning">Falta el RUT</Badge>
+              <span className="min-w-0 flex-1 truncate text-base text-fg">
+                Sin RUT no se puede abrir una prueba ni facturar a esta empresa.
+              </span>
+            </li>
+          ) : null}
+          {pruebas.map((p) => (
+            <li
+              key={p.moduloId}
+              className="flex items-center gap-2 border-b border-border px-4 py-2.5 last:border-b-0"
+            >
+              <Badge tono="warning">{textoVence(p.diasRestantes)}</Badge>
+              <span className="min-w-0 flex-1 truncate text-base text-fg">
+                Prueba de {p.nombre} ·{" "}
+                {p.pasaACobro ? "luego se cobra" : "luego queda en solo lectura"}
+              </span>
+              <EnlaceBoton href={`/platform/tenants/${p.tenantId}/cobro`} variante="ghost">
+                Abrir
+              </EnlaceBoton>
+            </li>
+          ))}
           {problemas.map((p) => (
             <li
               key={p.id}

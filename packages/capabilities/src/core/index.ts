@@ -47,7 +47,7 @@ import { me } from "./me";
 import { mePortalInicio } from "./portal-inicio";
 import { indicadoresUfUtm } from "./indicadores-uf-utm";
 import { ping } from "./ping";
-import { platformTenantsCreate } from "./platform-escritura";
+import { capacidadesTenantsEscritura } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
 import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
 import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
@@ -55,6 +55,7 @@ import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
 import { usersRestablecerMfa } from "./users-mfa";
+import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
 export const capacidadesDelNucleo: readonly Capacidad[] = [
@@ -83,7 +84,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usageSummary,
   platformTenantsList,
   platformTenantsGet,
-  platformTenantsCreate,
+  ...capacidadesTenantsEscritura,
   platformTenantsUpdate,
   platformTenantsSetEstado,
   platformModulesSet,
@@ -126,7 +127,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesCumplimiento,
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
-  ...capacidadesAgentes,
+  ...capacidadesAgentes, ...capacidadesTurnos,
   ...capacidadesPlataforma,
 ];
 
@@ -139,7 +140,7 @@ export const consumidoresDelNucleo = [
   consumidorTareaVencida,
   consumidorSeguimientoAviso,
   consumidorNegocioGanado,
-  consumidorCpqGanado,
+  consumidorCpqGanado, consumidorTurnosEsperados,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
@@ -152,5 +153,5 @@ export const trabajosDelNucleo = [
   ...trabajosMaestros,
   trabajoCapturaIndicadoresSii,
   trabajoCapturaPrevisional,
-  trabajoTareasVencidas,
+  trabajoTareasVencidas, trabajoExtenderTurnos,
 ];

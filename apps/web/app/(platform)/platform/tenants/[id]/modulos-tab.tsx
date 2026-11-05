@@ -23,7 +23,7 @@ export function Modulos({ detalle }: { detalle: DetalleTenant }) {
     <div className="divide-y divide-border">
       {error ? <p className="py-2 text-sm font-medium text-danger-fg">{error}</p> : null}
       {detalle.modulos.map((m) => {
-        const activo = m.estado === "activo" || m.estado === "trial";
+        const activo = m.estado === "activo" || m.estado === "trial" || m.estado === "solo_lectura";
         return (
           <div key={m.id} className="py-1">
             <Switch
@@ -31,7 +31,9 @@ export function Modulos({ detalle }: { detalle: DetalleTenant }) {
               descripcion={
                 m.dependencias.length
                   ? `Requiere ${m.dependencias.join(", ")}`
-                  : (m.estado ?? "No contratado")
+                  : m.estado === "solo_lectura"
+                    ? "Solo lectura: se ve y se lee, no se escribe"
+                    : (m.estado ?? "No contratado")
               }
               activo={activo}
               onCambiar={(on) => set(m.id, on ? "activo" : "suspendido")}

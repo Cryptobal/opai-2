@@ -8,6 +8,7 @@ const ESTADO: Record<
 > = {
   activo: { etiqueta: "Activo", tono: "success" },
   trial: { etiqueta: "Trial", tono: "info" },
+  solo_lectura: { etiqueta: "Solo lectura", tono: "warning" },
   suspendido: { etiqueta: "Suspendido", tono: "warning" },
 };
 

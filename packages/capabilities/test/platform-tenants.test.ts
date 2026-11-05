@@ -12,6 +12,8 @@ const nuevo = {
   nombre: "Aseos del Sur",
   vertical: "aseo",
   adminEmail: "jefa@aseos.cl",
+  razonSocial: "Aseos del Sur SpA",
+  rut: "76.123.456-0",
 };
 
 beforeEach(() => {

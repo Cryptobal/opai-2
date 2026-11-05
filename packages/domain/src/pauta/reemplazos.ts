@@ -1,7 +1,8 @@
 import { detectarDoblaje, turnosDeSerie, type PuestoTurnos } from "./doblar";
-import { LIMITE_SEMANAL_HORAS } from "./alertas-horas";
+import { limiteSemanalEn, type VigenciaJornada } from "../jornada-legal";
+import { intervaloTurno } from "../turnos";
 import { serieVigente } from "./expandir";
-import { diaNumero, minutosDeHora } from "./fechas";
+import { diaNumero } from "./fechas";
 import type { PatronPauta, SeriePauta } from "./tipos";
 
 export type GuardiaReemplazo = {
@@ -34,12 +35,8 @@ export type SugerenciaReemplazo = {
   conflictos: string[];
 };
 
-function horasDeTurno(horaInicio: string, horaFin: string): number {
-  const ini = minutosDeHora(horaInicio);
-  let fin = minutosDeHora(horaFin);
-  if (fin <= ini) fin += 1440;
-  return (fin - ini) / 60;
-}
+const horasDeTurno = (horaInicio: string, horaFin: string): number =>
+  intervaloTurno(horaInicio, horaFin).duracionMin / 60;
 
 function inicioSemanaIso(fecha: string): string {
   const n = diaNumero(fecha);
@@ -87,8 +84,9 @@ function turnosPersonaEnSemana(g: GuardiaReemplazo, fecha: string, extra?: Puest
 export function sugerirReemplazos(
   guardias: readonly GuardiaReemplazo[],
   objetivo: ObjetivoReemplazo,
-  limiteSemanalHoras = LIMITE_SEMANAL_HORAS,
+  vigencias?: readonly VigenciaJornada[],
 ): SugerenciaReemplazo[] {
+  const limiteSemanalHoras = limiteSemanalEn(objetivo.fecha, vigencias);
   const propuesto: PuestoTurnos = {
     etiqueta: "turno a cubrir",
     patron: objetivo.patron,

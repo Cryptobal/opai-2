@@ -1,5 +1,6 @@
 import {
   capacidadesDelNucleo,
+  consumidorAvisoPrueba,
   consumidorSeguimientoCierre,
   consumidoresDelNucleo,
   limpiarConsumidores,
@@ -11,11 +12,12 @@ import {
   registrarModulos,
   registrarTrabajos,
   trabajoCobrosMesAnterior,
+  trabajoCobrosPruebas,
   trabajosComercial,
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
-import { consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente } from "@opai/modules";
+import { consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente, trabajosAsistencia, trabajosCpq } from "@opai/modules";
 
 let hecho = false;
 
@@ -37,13 +39,17 @@ export function asegurarRegistro(): void {
     ...trabajosFinanzas,
     ...trabajosComercial,
     ...trabajosAgente,
+    ...trabajosAsistencia,
+    ...trabajosCpq,
     trabajoCobrosMesAnterior,
+    trabajoCobrosPruebas,
   ]);
   registrarConsumidores([
     ...consumidoresDelNucleo,
     consumidorCpqBandeja,
     consumidorCpqEnlace,
     consumidorSeguimientoCierre,
+    consumidorAvisoPrueba,
   ]);
   hecho = true;
 }

@@ -1,4 +1,5 @@
 // Punto de entrada de @opai/db. El código de negocio solo necesita `forTenant`, `enTransaccion` y los tipos.
+export { bloquearCadena, avanzarCadena, type CadenaHechos } from "./cadenas";
 export { cerrarClientes, dbAdmin } from "./client";
 export { registrarObservadorConsultas } from "./metricas";
 export { leerInbox } from "./inbox";
@@ -23,6 +24,11 @@ export type {
   NuevoCargoCobro,
 } from "./plataforma-empresa-cobros";
 export { leerUfAlDia } from "./plataforma-indicadores";
+export {
+  type DatosTributarios,
+  esRutRepetido,
+  type PerfilTributario,
+} from "./plataforma-perfil-tributario";
 export type { HechoPlataforma } from "./plataforma-aprobaciones";
 // La auditoría global solo se escribe por operaciones con nombre: `accesoPlataforma()` (ámbito
 // `plataforma`) y `registrarEventoSeguridad` (ámbito `seguridad`, CAR-42). No se exporta el append.

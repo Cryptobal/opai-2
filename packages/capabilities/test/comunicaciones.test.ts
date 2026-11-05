@@ -184,10 +184,9 @@ describe("empresa y marca", () => {
       nombreComercial: "Gard",
     });
     expect(m.urls["logoPrincipalId"]).toBe("https://test.opai.cl/api/marca/gard/logoPrincipal");
-    const e = await dato<{ rut: string }>(ctx, "core.empresa.update", {
+    const e = await dato<{ rut: string | null }>(ctx, "core.empresa.update", {
       razonSocial: "Gard Security SpA",
-      rut: "76.543.210-3",
     });
-    expect(e.rut).toBe("76543210-3");
+    expect(e.rut).toBeNull();
   });
 });

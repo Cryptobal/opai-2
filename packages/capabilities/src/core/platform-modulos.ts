@@ -10,23 +10,27 @@ import { emailSchema, uuidSchema } from "./esquemas";
 import { invitacionCreadaSchema } from "./invitations";
 import { invitarAdministrador } from "./platform-escritura";
 
-const ACTIVOS = new Set(["activo", "trial"]);
+// «solo_lectura» cuenta como activo para las dependencias: sus datos se ven y se leen (CAR-188).
+const ACTIVOS = new Set(["activo", "trial", "solo_lectura"]);
 
 export const platformModulesSet = defineCapability({
   id: "platform.modules.set",
   descripcion:
-    "Plataforma: activa, pone en trial o suspende un módulo de una empresa. Valida dependencias del manifest en ambos sentidos.",
+    "Plataforma: activa, pone en trial, en solo lectura (se ve y se lee, no se escribe) o suspende un módulo de una empresa. Valida dependencias del manifest en ambos sentidos. Cambia lo que la empresa puede hacer y lo que se le cobra: un agente con key de plataforma queda en aprobación humana.",
   permiso: PERMISOS_PLATAFORMA.modulesManage,
   sinTenant: true,
   input: z.object({
     tenantId: uuidSchema,
     moduloId: z.string().min(1),
-    estado: z.enum(["activo", "trial", "suspendido"]),
+    estado: z.enum(["activo", "trial", "solo_lectura", "suspendido"]),
   }),
   output: z.object({ moduloId: z.string(), estado: z.string(), anterior: z.string().nullable() }),
-  efecto: "escritura",
+  // Irreversible para agentes (CAR-188, hoja de Plataforma §2.9): suspender o dejar en solo lectura
+  // un módulo corta lo que un cliente puede hacer; un agente con key de plataforma pide aprobación.
+  efecto: "irreversible",
   dryRun: true,
   tenantObjetivo: (input) => input.tenantId,
+  cambio: (s) => ({ antes: s.anterior, despues: s.estado }),
   async handler(ctx, input, { dryRun }) {
     if (input.moduloId === "core") throw reglaDeNegocio("El núcleo siempre está activo.");
     const manifest = obtenerModulo(input.moduloId);

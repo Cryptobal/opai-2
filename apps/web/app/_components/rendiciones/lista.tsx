@@ -3,7 +3,7 @@ import { Badge, Card, Estado, type EstadoPantalla, Table, Td, Th, Tr } from "@op
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { fechaDe, pesos, revisaDe } from "./formato";
+import { fechaDe, lineaEstado, pesos, revisaDe } from "./formato";
 import {
   BASE,
   ETIQUETA_ESTADO,
@@ -23,8 +23,11 @@ function Motivo({ r }: { r: ResumenRendicion }) {
   const devuelta = r.estado === "devuelta";
   return (
     <p className="rounded-md bg-warning-muted px-3 py-2 text-base text-warning-fg" role="note">
-      <span className="font-semibold">{devuelta ? "Te la devolvieron: " : "La rechazaron: "}</span>
-      {r.motivoDecision}
+      <span className="font-semibold">
+        {devuelta ? "Devuelta" : "Rechazada"}
+        {r.aprobadorNombre ? ` por ${r.aprobadorNombre}` : ""}:
+      </span>{" "}
+      «{r.motivoDecision}»{devuelta ? " Corrígela y reenvíala." : ""}
     </p>
   );
 }
@@ -59,9 +62,7 @@ function Tarjeta({ r, portal }: { r: ResumenRendicion; portal: PortalRendicion }
         </span>
         <span className="text-md font-medium text-fg">{r.descripcion}</span>
         <span className="t-title text-fg">{pesos(r.montoTotal)}</span>
-        <span className="text-base text-fg-muted">
-          {ETIQUETA_TIPO[r.tipo] ?? r.tipo} · {fechaDe(r)} · {revisaDe(r)}
-        </span>
+        <span className="text-base text-fg-muted">{lineaEstado(r)}</span>
       </LinkNext>
       <Motivo r={r} />
       <Corregir r={r} portal={portal} className="w-full" />
@@ -129,7 +130,9 @@ export function ListaRendiciones({
                 <Td>
                   <span className="block">{r.descripcion}</span>
                   <span className="text-sm text-fg-muted">{ETIQUETA_TIPO[r.tipo] ?? r.tipo}</span>
-                  <span className="block text-sm text-fg-muted xl:hidden">{fechaDe(r)} · {revisaDe(r)}</span>
+                  <span className="block text-sm text-fg-muted xl:hidden">
+                    {fechaDe(r)} · {revisaDe(r)}
+                  </span>
                   {r.estado === "devuelta" && r.motivoDecision ? (
                     <span className="mt-1 block text-sm text-warning-fg">
                       Devuelta: {r.motivoDecision}

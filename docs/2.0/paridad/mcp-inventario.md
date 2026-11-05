@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 595 pares pantalla→capacidad · 536 con herramienta · 59 excepciones justificadas · 0 faltantes.
+**Resumen:** 600 pares pantalla→capacidad · 540 con herramienta · 60 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -25,6 +25,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/firmar/[slug]/[token]` | `core.firmas.rechazar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.ver_firmante` | — | excepción |
 | — | `/p/[slug]/[token]` | `cpq.compartir.ver` | — | excepción |
+| — | `/verificar/marca/[slug]/[hash]` | `asistencia.marcas.verificar` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
@@ -580,12 +581,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargo_anular` | `platform_cobros_cargo_anular` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargos_list` | `platform_cobros_cargos_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.condiciones_set` | `platform_cobros_condiciones_set` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.cobros.prueba_abrir` | `platform_cobros_prueba_abrir` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/tenants/[id]/integraciones` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
 | platform | `/platform/tenants/[id]` | `platform.admins.invite` | `platform_admins_invite` | existe |
+| platform | `/platform/tenants/[id]` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/tenants/[id]` | `platform.modules.set` | `platform_modules_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.get` | `platform_tenants_get` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.panel` | `platform_tenants_panel` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.perfil_get` | `platform_tenants_perfil_get` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.perfil_set` | `platform_tenants_perfil_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.set_estado` | `platform_tenants_set_estado` | existe |
 | platform | `/platform/tenants/[id]` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform/tenants/nuevo` | `platform.tenants.create` | `platform_tenants_create` | existe |
@@ -660,6 +665,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | --- | --- |
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
+| `asistencia.marcas.registrar` | Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador. |
+| `asistencia.marcas.verificar` | Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante. |
 | `comercial.canales.rotar_token_formulario` | Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant. |
 | `comercial.importar_1_0` | Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25). |
 | `comercial.seguimientos.recibir_correo` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67). |
@@ -734,6 +741,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente`, `app/_components` | no | reservada a personas |
+| `asistencia.marcas.registrar` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
@@ -789,6 +797,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `asistencia.marcas.listar`
+- `asistencia.marcas.obtener`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
 - `comercial.negocios.alertas`
@@ -820,6 +830,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.prevision_actualizar`
 - `core.ping`
 - `core.puestos.get`
+- `core.turnos_esperados.listar`
+- `core.turnos_esperados.regenerar`
 - `core.usage.summary`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`

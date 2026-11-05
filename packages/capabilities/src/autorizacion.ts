@@ -44,6 +44,14 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   if (!SIEMPRE_ACTIVOS.has(c.modulo) && !ctx.modulosActivos.includes(c.modulo)) {
     return falla("FORBIDDEN", `Módulo inactivo: "${c.modulo}".`);
   }
+  // Prueba vencida sin «pasa a cobro» (ADR-071): el módulo se ve y se lee, pero no se crea ni se
+  // cambia nada. Rige igual para pantalla, `/api/v1` y MCP (todas pasan por aquí) y no borra datos.
+  if (c.efecto !== "lectura" && ctx.modulosSoloLectura.includes(c.modulo)) {
+    return falla(
+      "FORBIDDEN",
+      `El módulo "${c.modulo}" está en solo lectura: puedes ver tus datos, pero no crear ni cambiar nada. Pide a OPAI activarlo.`,
+    );
+  }
   if (!enScope(ctx, c.modulo)) {
     return falla("FORBIDDEN", `La API key no tiene el scope "${c.modulo}".`);
   }

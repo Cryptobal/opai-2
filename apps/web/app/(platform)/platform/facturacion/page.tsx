@@ -9,6 +9,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { Superadmin } from "../_componentes/formato";
 import { clp, enMoneda, mesesRecientes, nombreMes, type Resumen } from "./_componentes/cobro";
 import { GenerarCargos } from "./_componentes/generar-cargos";
+import { PruebasPorVencer } from "./_componentes/pruebas-por-vencer";
 import { TablaEmpresas } from "./_componentes/tabla-empresas";
 
 export const metadata = { title: "Facturación" };
@@ -97,6 +98,7 @@ export default function Facturacion({ searchParams }: { searchParams: SearchPara
                 valor={`${resumen.empresas.filter((e) => e.facturables > 0).length} de ${resumen.empresas.length}`}
               />
             </div>
+            <PruebasPorVencer pruebas={resumen.pruebasPorVencer} />
             <TablaEmpresas resumen={resumen} />
           </div>
         );

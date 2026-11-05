@@ -1,10 +1,14 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
-export { trabajoCobrosMesAnterior } from "./core/plataforma/cobros";
+export {
+  consumidorAvisoPrueba,
+  trabajoCobrosMesAnterior,
+  trabajoCobrosPruebas,
+} from "./core/plataforma/cobros";
 export { ajustesComercial, capacidadesComercial } from "./comercial";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
-export { capacidadesPauta } from "./pauta";
+export { ajustesPauta, capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
@@ -54,7 +58,7 @@ export {
   type Permiso,
   registrarModulos,
 } from "./module";
-export { portalesDe } from "./autorizacion";
+export { portalesDe, restriccion } from "./autorizacion";
 export {
   type Consumidor,
   consumidoresDe,

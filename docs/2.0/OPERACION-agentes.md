@@ -1,7 +1,7 @@
 # OPERACIÓN de los agentes — OPAI 2.0
 
 > **Fuente única.** Este archivo y el resto de `docs/2.0/` son la única fuente de verdad del flujo de trabajo. No se usan Notion ni Obsidian para esto.
-> **Vigencia:** desde el 28-oct-2026. Ante un choque con otro documento del repo, manda la regla más reciente y la de este archivo, y el otro documento se corrige. Las contradicciones conocidas están marcadas con **⚠** al final de la sección A.
+> **Vigencia:** desde el 28-oct-2026; **ajuste operativo del 5-nov-2026 (ADR-077)** en la sección **A2**. Ante un choque con otro documento del repo, manda la regla más reciente y la de este archivo, y el otro documento se corrige. Las contradicciones conocidas están marcadas con **⚠** al final de la sección A.
 > **Relación con otros documentos:** las reglas de código, revisión y merge siguen en `AGENTS.md`, `REGLAS-codigo.md`, `checklists/` y `01-decisiones.md` (ADR-043 v3, ADR-047). Este archivo no las copia: solo fija el flujo operativo y lo que cambió.
 
 ---
@@ -33,6 +33,99 @@
 9. **Avisos:** siempre en español, al integrar y al migrar.
 10. **Agent-first: ninguna funcionalidad nueva se integra sin su herramienta MCP** (regla de Carlos del 28-oct-2026, ADR-055), **incluida Plataforma**. El gate `packages/capabilities/test/paridad-inventario.test.ts` corre en `pnpm test` (check obligatorio `typecheck · lint · test · test:db`) y falla si una pantalla invoca una capacidad sin herramienta MCP, si aparece una acción de servidor o ruta sin declarar, o si `docs/2.0/paridad/mcp-inventario.md` quedó desactualizado. Las únicas excepciones son capacidades `interna` o `soloPersonas` con motivo (`paridad-excepciones.ts`) y entradas de identidad o infraestructura con motivo (`paridad-entradas.ts`). El Revisor trata una excepción nueva sin motivo convincente como bloqueo de permisos.
 
+---
+
+## A2. Flujo operativo Grok Bot (5-nov-2026, Carlos · ADR-077)
+
+> **Autorización explícita de Carlos el 5-nov-2026** para dejar estas instrucciones en el repo. Donde choque con A.4, A.5, A.6 o con la rutina «cada 15 minutos» al Revisor, **rige A2**. Ante duda operativa, manda este archivo (incluido sobre `AGENTS.md` hasta que un PR posterior diga lo contrario).
+
+### A2.1 Roles y coordinación
+
+- **OPAI 2.0 / Grok Bot** coordina el avance completo del proyecto (cola, migraciones, señales, revisión de avance en horarios fijos, respuesta a `@opai-2.0:`).
+- **Claude Code** (sesiones del proyecto «OPAI 2.0»): construye, prueba, hace la **revisión final** del PR que lleva e **integra a `main` con squash** cuando se cumplen las condiciones (sin veto, CI en verde, migración aplicada por el bot si corresponde).
+- **Revisor Grok Bot («Revisor OPAI 2.0»)** **no se lanza** en el flujo normal. Solo si Carlos lo pide **expresamente** o queda un **riesgo grave sin resolver** que la sesión no puede cerrar en la revisión final.
+- **Diseño y QA OPAI 2.0:** solo **bajo demanda** de Carlos o al cierre de un módulo importante; no vigilancia continua ni freno previo al merge.
+
+### A2.2 Revisión final (antes de migración e integración)
+
+Cuando un PR está **listo para revisión** (constructor terminó, `ESTADO.md` actualizado si aplica):
+
+1. Los **cuatro checks obligatorios** del ruleset «Proteger main» deben estar **en verde sobre el head exacto** del PR (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`, `migración pendiente`; ADR-061).
+2. La **sesión de Claude Code que construyó el PR** deja un **comentario nuevo** en el PR con:
+   - el **SHA completo** del commit revisado;
+   - **`sin bloqueos`** si no hay impedimentos en **seguridad, RLS/tenant, permisos, migraciones e integridad de datos**; o **bloqueos concretos** numerados si los hay (misma checklist que `docs/2.0/checklists/revision.md` en esos ejes).
+3. Esa revisión final **reemplaza** la pasada obligatoria del Revisor Grok Bot salvo las excepciones de A2.1.
+
+### A2.3 Migraciones
+
+- Las aplican **solo OPAI 2.0**, **después** de la revisión final **sin bloqueos** sobre el head y con CI verde, con el procedimiento de A.5 (respaldo, `dev` → `main`, aviso en español, quitar `migracion-pendiente`).
+- Las **sesiones no aplican** migraciones en Neon; piden al bot con `@opai-2.0:` si hace falta.
+
+### A2.4 Señales en PR (escalado 24 h)
+
+Los pushes y avances normales **no escalan**. Solo se usa **un comentario nuevo por situación**; si la situación cambia, se **actualiza** con otro comentario (no spam por cada push).
+
+La **primera línea** del comentario es exactamente una de:
+
+| Señal | Cuándo |
+|---|---|
+| **`DECISIÓN CARLOS:`** | Falta una decisión de negocio que solo Carlos puede tomar. |
+| **`BLOQUEO OPAI:`** | Bloqueo operativo que la sesión no puede resolver (infra, cola, migración, permisos de bot, etc.). |
+| **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, cuatro checks verdes y migración pendiente de aplicar por el bot. |
+| **`REVISIÓN VISUAL CARLOS:`** | El PR incluye **cambio visual** aún no desplegado en `test.opai.cl`: hay enlace de **preview verificado**, rutas, qué cambió y puntos concretos de usabilidad a revisar. |
+
+En el cuerpo (breve): resumen mínimo, enlace a Linear (`CAR-n`) si existe, qué se intentó y qué se necesita. **Sin secretos ni datos personales.** En **`REVISIÓN VISUAL CARLOS:`** incluir siempre preview usable, rutas y checklist de usabilidad.
+
+OPAI 2.0 actúa **24 h** ante estas señales (no repite la revisión técnica de la sesión).
+
+### A2.5 Sesiones en paralelo
+
+- Las sesiones **no esperan** a OPAI 2.0 para seguir construyendo **otros frentes independientes**.
+- **Nunca** integran con bloqueos pendientes (revisión final, veto, `migracion-pendiente` sin retirar) ni **tocan datos de OPAI 1.0** (`Cryptobal/opai`, opai.gard.cl).
+
+### A2.6 Vigilancia de avance (OPAI 2.0)
+
+Todos los días, **America/Santiago**, OPAI 2.0 **revisa el avance** a las **09:00, 12:00, 15:00, 18:00 y 20:00** y actúa según cola, señales A2.4 y `@opai-2.0:`. **No** vuelve a hacer la revisión técnica del PR (eso es de la sesión en A2.2).
+
+La rutina de A.4 («cada 15 minutos» pasando PRs al Revisor y a QA) queda **suspendida** salvo petición expresa de Carlos.
+
+### A2.7 Claude Proyectos y correo al bot
+
+Cuando OPAI 2.0 envíe un **prompt por el chat** de una sesión de Claude Proyectos y la sesión **termine**, la sesión envía **desde el Gmail conectado de Carlos** un solo correo a **`carlos.irigoyen+claude@mail.grokbot.com`**:
+
+- **Asunto:** `OPAI 2.0 | [nombre sesión] | [LISTO/BLOQUEO/DECISIÓN]`
+- **Cuerpo:** breve; enlace al chat; enlace al PR o issue si existe; resultado; acción requerida.
+
+**Prohibido:** correos a terceros, secretos y contenido innecesario.
+
+Si **Gmail no está disponible**, la misma señal va en un **comentario de PR** (formato A2.4 si aplica) y **no se afirma** que se envió correo.
+
+### A2.8 Linear
+
+Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y derivan** a la sesión correspondiente **sin pedir confirmación adicional** para construir. Solo se pregunta a Carlos si falta una **decisión de negocio**.
+
+### A2.9 Diseño
+
+- **Claude Design** entrega diseño, enlace o export en el **chat o PR** que corresponda; **sin vigilancia continua** por bots.
+- **QA visual funcional** de ingeniería la puede hacer la sesión constructora para no romper flujos; **no sustituye** el primer vistazo de Carlos (A2.10). **Diseño y QA OPAI 2.0** solo bajo demanda o cierre de módulo importante (coherente con A2.1).
+
+### A2.10 Revisión visual de Carlos (regla explícita post-ADR-077)
+
+**Todo cambio visual en OPAI**, por menor que sea, se **presenta primero a Carlos** con:
+
+1. **Enlace usable** (preview de Vercel del PR, `test.opai.cl` tras merge, o prototipo acordado).
+2. **Qué cambió** (pantallas, rutas, componentes visibles).
+3. **Puntos concretos de usabilidad** a revisar (qué mirar a 375 / 1024 / 1280 px, estados vacío/error, contraste, etc.).
+
+- **Claude Code no hace el chequeo visual por Carlos** salvo que él lo **pida expresamente** para ese cambio concreto.
+- **Diseño y QA OPAI 2.0** tampoco sustituye ese **primer vistazo** de Carlos.
+
+**PR con cambio visual aún no desplegado:** la sesión deja un comentario nuevo cuya primera línea es **`REVISIÓN VISUAL CARLOS:`**, con enlace de **preview verificado**, rutas, qué cambió y qué revisar. Carlos puede **aprobar**, **pedir cambios** o **delegar** el chequeo visual a Claude para ese PR. **No se frenan** otros frentes independientes mientras espera.
+
+**Integración con cambio visual:** no integrar hasta que Carlos aprobó el aspecto visual o delegó explícitamente el chequeo a Claude para ese PR (la revisión final técnica A2.2 sigue aparte).
+
+---
+
 ### ⚠ Contradicciones con el repo (se resuelven a favor de esta sección)
 
 | # | Dónde | Qué dice hoy | Qué rige desde el 28-oct |
@@ -46,6 +139,8 @@
 | 7 | `CONTEXTO-agentes.md` (rol del bot) | El bot «prepara los prompts de cada encargo». | **Claude escribe los briefs** (A.2). El bot opera la cola. |
 | 8 | Memoria del 26-oct (flujo acelerado) | «No se abren PRs de solo documentos: el brief va dentro del PR que construye». | Sigue vigente para los briefs. El PR que sube este archivo es una excepción pedida por Carlos el 28-oct. |
 | 9 | Memoria del 24-oct (regla de merge) | «Un PR con migración pendiente no entra hasta que Carlos la aplique». | Reemplazada por t500u, t682u y A.5. |
+| 10 | A.4, `AGENTS.md`, plantilla del PR | Cada 15 min el bot pasa PRs al Revisor; integración exige «Revisor OPAI 2.0: sin bloqueos». | **A2 (5-nov-2026):** revisión final de la sesión con SHA + «sin bloqueos» o bloqueos concretos; Revisor solo bajo demanda o riesgo grave; vigilancia del bot a las 09/12/15/18/20 Santiago. |
+| 11 | Definición de terminado antigua / QA obligatoria pre-merge | Constructor «certifica» visual con checklist QA; Revisor obligatorio en migración/RLS. | **A2.10:** primer vistazo visual siempre de Carlos (señal `REVISIÓN VISUAL CARLOS:` en PR con preview); Claude no sustituye salvo delegación; alineado en PR #342. |
 
 ---
 

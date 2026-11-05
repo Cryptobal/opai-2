@@ -51,6 +51,11 @@ export type Planilla = {
     umbral: number;
     semanas: { semana: string; saldoFinal: number; emitido: boolean }[];
   };
+  saldoBanco: {
+    fuente: "banco" | "ajustes";
+    saldo: number | null;
+    cuentasSinSaldo: { cuentaId: string; banco: string }[];
+  };
   columnaHoy: string | null;
 };
 

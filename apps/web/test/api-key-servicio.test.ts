@@ -98,4 +98,16 @@ describe("principal de la API key", () => {
     if (niega instanceof Response) throw new Error("No autenticado");
     expect(niega.autorizar("core:instalaciones.manage")).toBe(false);
   });
+  it("la key de un módulo en solo lectura lo ve activo pero no puede escribir en él (CAR-188)", async () => {
+    const { contextoDeApiKey } = await import("../lib/api-key");
+    const { fuentes, secreto } = fuentesFalsas({
+      modulosActivos: ["crm", "cpq"],
+      modulosSoloLectura: ["crm"],
+      key: { heredaPermisos: true },
+    });
+    const ctx = await contextoDeApiKey(secreto, fuentes);
+    if (ctx instanceof Response) throw new Error("No autenticado");
+    expect(ctx.modulosActivos).toEqual(["crm", "cpq"]);
+    expect(ctx.modulosSoloLectura).toEqual(["crm"]);
+  });
 });
