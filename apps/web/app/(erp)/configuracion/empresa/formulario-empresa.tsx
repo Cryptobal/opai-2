@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Alerta, avisar, Campo, SeccionTarjeta } from "@opai/ds";
-import { rutValido } from "@opai/domain";
+import { formatearRut, rutValido } from "@opai/domain";
 
 import { DireccionOpai } from "@/app/_components/maestros/direccion";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -32,14 +32,17 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
   const set = (k: keyof DatosEmpresa["textos"]) => (v: string) =>
     setD((x) => ({ ...x, textos: { ...x.textos, [k]: v } }));
   const invalido = Boolean(
-    rutMalo(t.rut) ||
     rutMalo(t.representanteRut) ||
     correoMalo(t.representanteEmail) ||
     CONTACTOS.some(([k, , tipo]) => tipo === "email" && correoMalo(t[k])),
   );
   async function guardar() {
     if (invalido) return;
-    const textos = Object.fromEntries(Object.entries(t).map(([k, v]) => [k, v.trim() || null]));
+    // El RUT de la empresa lo administra Plataforma: no se envía desde aquí (CAR-188).
+    const { rut: _rut, ...editables } = t;
+    const textos = Object.fromEntries(
+      Object.entries(editables).map(([k, v]) => [k, v.trim() || null]),
+    );
     const ok = await ejecutar("core.empresa.update", {
       ...textos,
       calle: d.direccion?.calle ?? null,
@@ -77,15 +80,9 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
             placeholder="Razón social de la empresa"
             disabled={dis}
           />
-          <CampoTexto
-            id="e-rut"
-            etiqueta="RUT"
-            valor={t.rut}
-            onCambiar={set("rut")}
-            placeholder="12.345.678-9"
-            mono
-            disabled={dis}
-            error={rutMalo(t.rut)}
+          <DatoLectura
+            etiqueta="RUT (lo administra OPAI)"
+            valor={t.rut ? formatearRut(t.rut) : null}
           />
           <CampoTexto
             id="e-giro"

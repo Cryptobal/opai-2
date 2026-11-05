@@ -47,7 +47,7 @@ import { me } from "./me";
 import { mePortalInicio } from "./portal-inicio";
 import { indicadoresUfUtm } from "./indicadores-uf-utm";
 import { ping } from "./ping";
-import { platformTenantsCreate } from "./platform-escritura";
+import { capacidadesTenantsEscritura } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
 import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
 import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
@@ -84,7 +84,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usageSummary,
   platformTenantsList,
   platformTenantsGet,
-  platformTenantsCreate,
+  ...capacidadesTenantsEscritura,
   platformTenantsUpdate,
   platformTenantsSetEstado,
   platformModulesSet,

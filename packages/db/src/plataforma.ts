@@ -2,6 +2,7 @@ import { clienteApp } from "./client";
 import type { Prisma } from "./generated/prisma/client";
 import { operacionesAprobacionesPlataforma } from "./plataforma-aprobaciones";
 import { operacionesIndicadoresPlataforma } from "./plataforma-indicadores";
+import { crearTenantConPerfil, type DatosTributarios } from "./plataforma-perfil-tributario";
 import type { TenantTx } from "./transaccion";
 
 // Perfil que devuelve tenantSchema. No expone datos legales, DPO ni otros ajustes del tenant.
@@ -47,6 +48,19 @@ export function accesoPlataforma() {
       timezone: string;
       estado: string;
     }) => db.tenant.create({ data, select: perfil }),
+    /** Empresa + perfil tributario en una transacción (RUT repetido: no queda nada, ver `esRutRepetido`). */
+    crearTenantConPerfil: (
+      data: { slug: string; nombre: string; vertical: string; timezone: string; estado: string },
+      datos: DatosTributarios,
+    ) =>
+      crearTenantConPerfil<{
+        id: string;
+        slug: string;
+        nombre: string;
+        vertical: string;
+        timezone: string;
+        estado: string;
+      }>(data, datos, perfil),
     actualizarTenant: (
       id: string,
       data: {
