@@ -127,8 +127,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesCumplimiento,
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
-  ...capacidadesAgentes,
-  ...capacidadesTurnos,
+  ...capacidadesAgentes, ...capacidadesTurnos,
   ...capacidadesPlataforma,
 ];
 
@@ -141,8 +140,7 @@ export const consumidoresDelNucleo = [
   consumidorTareaVencida,
   consumidorSeguimientoAviso,
   consumidorNegocioGanado,
-  consumidorCpqGanado,
-  consumidorTurnosEsperados,
+  consumidorCpqGanado, consumidorTurnosEsperados,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
@@ -155,6 +153,5 @@ export const trabajosDelNucleo = [
   ...trabajosMaestros,
   trabajoCapturaIndicadoresSii,
   trabajoCapturaPrevisional,
-  trabajoTareasVencidas,
-  trabajoExtenderTurnos,
+  trabajoTareasVencidas, trabajoExtenderTurnos,
 ];

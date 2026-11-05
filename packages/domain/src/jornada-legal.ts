@@ -1,6 +1,6 @@
 // Topes de jornada legal con vigencia (Ley 21.561, ADR-056). La fuente de verdad es el indicador
 // «jornada» del motor de sueldos (por empresa, con vigencia); esta tabla es solo el respaldo cuando
-// el motor aún no trae valores, y se reemplaza entera por los del indicador cuando existen.
+// el motor aún no trae valores; los valores del indicador, cuando existen, mandan encima de ella.
 
 export type VigenciaJornada = {
   /** Primer día de vigencia (inclusive), "aaaa-mm-dd". */
