@@ -127,7 +127,8 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
     await abrirMenuUsuario(page, pref);
     await pref.click();
     await page.waitForURL(/\/mi-cuenta\/preferencias$/);
-    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible();
+    // La página carga bajo Suspense y en el runner compite con la compilación de la ruta: más margen que el global.
+    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible({ timeout: 45_000 });
   });
 
   test("la URL antigua de Preferencias redirige a /mi-cuenta/preferencias", async ({ page }) => {
