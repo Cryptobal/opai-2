@@ -20,6 +20,8 @@ export type Indicadores = {
 export type Tarjeta = {
   id: string;
   etiqueta: string;
+  /** Lista a la que lleva la tarjeta (el indicador es un enlace, diseño de Inicio §4.1.4). */
+  href: string;
   valor: string;
   variacion?: { texto: string; tono: "success" | "danger" | "warning" | "neutro" };
 };
@@ -42,6 +44,7 @@ export function armarIndicadores(d: Indicadores, ufEscala: number): Tarjeta[] {
     const c = d.cobertura;
     t.push({
       id: "cobertura",
+      href: "/pauta",
       etiqueta: "Cobertura hoy",
       valor: c.cobertura === null ? "—" : `${numero.format(c.cobertura)} %`,
       variacion:
@@ -61,6 +64,7 @@ export function armarIndicadores(d: Indicadores, ufEscala: number): Tarjeta[] {
       partes.push(`${plural(aprobar, "cotización", "cotizaciones")} por aprobar`);
     t.push({
       id: "negocios",
+      href: "/negocios",
       etiqueta: "Negocios abiertos",
       valor:
         n.valorMensualUf === null
@@ -74,6 +78,7 @@ export function armarIndicadores(d: Indicadores, ufEscala: number): Tarjeta[] {
     const dif = f.netoClp - f.netoMesAnteriorClp;
     t.push({
       id: "facturado",
+      href: "/finanzas/ventas",
       etiqueta: "Facturado del mes",
       valor: clp.format(f.netoClp),
       variacion:
@@ -89,6 +94,7 @@ export function armarIndicadores(d: Indicadores, ufEscala: number): Tarjeta[] {
     const k = d.tickets;
     t.push({
       id: "tickets",
+      href: "/tickets",
       etiqueta: "Tickets",
       valor: `${entero.format(k.asignadosAMi)} para ti`,
       ...(k.abiertos === null

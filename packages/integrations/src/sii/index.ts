@@ -2,6 +2,11 @@ export * from "./tipos";
 export * from "./simulado";
 export * from "./simpleapi";
 export * from "./certificado-pfx";
-export { adaptadorSiiDesdeEntorno } from "./entorno";
 export * from "./contribuyente";
 export * from "./contribuyente-simpleapi";
+export {
+  HOST_PRODUCCION_TRIBUTARIA,
+  ambienteTributarioEfectivo,
+  produccionTributariaHabilitada,
+  type AmbienteTributario,
+} from "./entorno";
