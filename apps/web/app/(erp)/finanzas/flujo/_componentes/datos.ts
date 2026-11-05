@@ -33,11 +33,9 @@ export type AjustesFlujo = {
   saldoInicial: number;
   umbral: number;
   desde: string;
-  toleranciaCierre: number;
   horizonteSemanas: number;
   calendarioPagos: Record<string, number | undefined>;
   avisoActivo: boolean;
-  avisoUmbral: number;
   metaCeldaMs: number;
   metaGuardadoP95Ms: number;
   metaCargaInicialS: number;

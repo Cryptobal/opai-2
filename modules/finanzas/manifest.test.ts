@@ -16,7 +16,6 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "finanzas:ventas.configure",
       "finanzas:flujo.ver",
       "finanzas:flujo.gestionar",
-      "finanzas:flujo.cerrar",
       "finanzas:flujo.configurar",
       "finanzas:bancos.ver",
       "finanzas:bancos.gestionar",
@@ -31,8 +30,8 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
       "/finanzas/bancos",
       "/finanzas/flujo",
     ]);
-    expect(manifest.eventos).toHaveLength(44);
-    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(44);
+    expect(manifest.eventos).toHaveLength(42);
+    expect(new Set(manifest.eventos.map((e) => e.id)).size).toBe(42);
     expect(manifest.configuracion).toBe(ajustesFinanzas);
   });
 
