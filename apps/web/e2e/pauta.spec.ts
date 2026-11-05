@@ -43,16 +43,19 @@ test.describe("pauta · mensual", () => {
     await page.goto(`/pauta?inst=${INST}&vista=diaria&fecha=${HOY}`);
     await expect(page.getByLabel("Fecha de la pauta")).toBeVisible();
     await expect(page.getByText("Asistencia no activada: sin marcas para cruzar.")).toBeVisible();
+    // La fila del puesto solo existe si ya hay serie: en una base limpia la fija el caso siguiente
+    // («fija la serie…»), así que aquí es opcional. Si existe, abre la hoja del turno.
     const fila = page.getByRole("link", { name: /Portería Día:/ }).first();
-    await expect(fila).toBeVisible();
-    await fila.click();
-    await expect(page).toHaveURL(/dia=/);
-    // La hoja del turno es modal: mientras está abierta deja el resto de la página inerte
-    // (aria-hidden), así que se cierra antes de usar el filtro de la barra.
-    const hoja = page.getByRole("dialog").filter({ has: page.getByRole("heading", { name: /Portería Día/ }) });
-    await expect(hoja).toBeVisible();
-    await hoja.getByRole("button", { name: "Cerrar" }).first().click();
-    await expect(hoja).toBeHidden();
+    if (await fila.isVisible()) {
+      await fila.click();
+      await expect(page).toHaveURL(/dia=/);
+      // La hoja del turno es modal: mientras está abierta deja el resto de la página inerte
+      // (aria-hidden), así que se cierra antes de usar el filtro de la barra.
+      const hoja = page.getByRole("dialog").filter({ has: page.getByRole("heading", { name: /Portería Día/ }) });
+      await expect(hoja).toBeVisible();
+      await hoja.getByRole("button", { name: "Cerrar" }).first().click();
+      await expect(hoja).toBeHidden();
+    }
     const sinCubrir = page.getByRole("button", { name: "Sin cubrir" });
     await hidratado(sinCubrir);
     await sinCubrir.click();
