@@ -1,7 +1,6 @@
 -- CAR-188 · Cobro por módulo (ADR-071, BRIEF-35): condiciones comerciales por empresa y módulo y el
--- cargo mensual listo para facturar. Aditiva y reversible:
---   DROP TABLE "core"."cobro_cargos"; DROP TABLE "core"."cobro_condiciones";
--- No toca tablas existentes ni cobra nada: sin filas, nada cambia para las empresas.
+-- cargo mensual listo para facturar. Aditiva: no toca tablas existentes ni cobra nada; sin filas,
+-- nada cambia para las empresas. Tablas con tenant_id: RLS + FORCE + política tenant_isolation.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
@@ -76,3 +75,6 @@ CREATE POLICY tenant_isolation ON "core"."cobro_cargos" AS PERMISSIVE FOR ALL TO
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 COMMIT;
+
+-- Reversión: DROP TABLE "core"."cobro_cargos"; DROP TABLE "core"."cobro_condiciones"; (solo guardan el
+-- cobro por módulo; ninguna otra tabla depende de ellas).

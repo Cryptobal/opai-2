@@ -13,6 +13,9 @@ import {
   entradasModulos,
   entradasNucleo,
 } from "./navegacion-entradas";
+import { NAV_PLATAFORMA } from "./navegacion-plataforma";
+
+export { NAV_PLATAFORMA };
 
 /** Ítem de navegación serializable (el icono se nombra; el cliente lo resuelve). */
 export type ItemNav = {
@@ -66,7 +69,13 @@ const esDesarrollo = process.env.NODE_ENV !== "production";
 
 function itemDe(e: EntradaArea, extra: Partial<ItemNav> = {}): ItemNav {
   const exacta = e.exacta ? { exacta: true } : {};
-  return { href: e.href, etiqueta: e.etiqueta, icono: ICONOS_RUTA[e.href] ?? e.icono, ...exacta, ...extra };
+  return {
+    href: e.href,
+    etiqueta: e.etiqueta,
+    icono: ICONOS_RUTA[e.href] ?? e.icono,
+    ...exacta,
+    ...extra,
+  };
 }
 
 /**
@@ -129,22 +138,6 @@ export function navegacionErp(
   return { nav, grupos, navInferior, acciones };
 }
 
-export const NAV_PLATAFORMA: ItemNav[] = [
-  // «Empresas» cubre el índice (`/platform`) y el detalle de un tenant (`/platform/tenants/:id`),
-  // pero no las demás secciones (`exacta` evita marcarlo en Trabajos, Consumos y Ajustes) (H5).
-  {
-    href: "/platform",
-    etiqueta: "Empresas",
-    icono: "Building2",
-    exacta: true,
-    activoEn: "/platform/tenants",
-  },
-  { href: "/platform/trabajos", etiqueta: "Trabajos", icono: "Clock" },
-  { href: "/platform/indicadores", etiqueta: "Valores legales", icono: "FileText" },
-  { href: "/platform/consumos", etiqueta: "Consumos", icono: "Gauge" },
-  { href: "/platform/ajustes", etiqueta: "Ajustes", icono: "SlidersHorizontal", pie: true },
-];
-
 /** Portales sin módulos todavía (fase 3): su inicio; Supervisor suma las vistas de terreno (55/56). */
 export function navegacionPortal(
   href: string,
@@ -165,12 +158,14 @@ export function navegacionPortal(
         : []),
     ];
   if (portal === "trabajador") {
-    const mas = { href: `${href}/mas`, etiqueta: "Más", icono: "Ellipsis", activoEn: `${href}/privacidad` };
+    const mas = {
+      href: `${href}/mas`,
+      etiqueta: "Más",
+      icono: "Ellipsis",
+      activoEn: `${href}/privacidad`,
+    };
     if (!modulosActivos.includes("portal_trabajador")) {
-      return [
-        { href, etiqueta: "Inicio", icono: "Home", exacta: true },
-        mas,
-      ];
+      return [{ href, etiqueta: "Inicio", icono: "Home", exacta: true }, mas];
     }
     return [
       { href, etiqueta: "Inicio", icono: "Home", exacta: true },
