@@ -32,7 +32,7 @@ export function PaginaCorregir({
         const r = await cargarRendicion(portal, id);
         // Solo un borrador o una devuelta se edita; las demás vuelven a su ficha.
         if (r.estado !== "borrador" && r.estado !== "devuelta") redirect(`${base}/${id}`);
-        return { r, o: await cargarOpciones(portal) };
+        return { r, o: await cargarOpciones(portal, id) };
       }}
     >
       {({ r, o }) =>

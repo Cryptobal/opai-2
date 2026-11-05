@@ -6,7 +6,8 @@ import { rendicionesAprobar, rendicionesDevolver, rendicionesRechazar } from "./
 import { rendicionesActualizar, rendicionesCrear } from "./escritura";
 import { rendicionesAnular, rendicionesEnviar } from "./flujo";
 import { rendicionesListar, rendicionesObtener } from "./lectura";
-import { rendicionesDuplicados, rendicionesOpciones } from "./opciones";
+import { rendicionesDuplicados } from "./duplicados";
+import { rendicionesOpciones } from "./opciones";
 
 export { ajustesRendiciones } from "./ajustes";
 

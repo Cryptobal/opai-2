@@ -34,7 +34,7 @@ export function PaginaDetalle({
       volver={{ href: base, etiqueta: "Mis rendiciones" }}
       cargar={async () => {
         const { id } = await params;
-        return { r: await cargarRendicion(portal, id), o: await cargarOpciones(portal) };
+        return { r: await cargarRendicion(portal, id), o: await cargarOpciones(portal, id) };
       }}
     >
       {({ r, o }) => {
