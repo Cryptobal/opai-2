@@ -11,7 +11,7 @@ type Props = {
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant | undefined;
-  /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra
+  /** `compacto`: monograma y empresa con elipsis; el portal va dentro del menú (teléfono, CAR-182). `monograma`: solo el monograma (barra
    *  lateral). `riel`: monograma sobre el portal (abreviado) y ⇅, en un botón de 64 px (riel de iPad, ShellTablet).
    *  `tarjeta`: monograma, portal y empresa con ⇅ en una tarjeta de 44 px (barra lateral, ShellDesktop). */
   variante?: "compacto" | "monograma" | "riel" | "tarjeta";
@@ -24,7 +24,7 @@ type Props = {
 const VARIANTES = {
   compacto: {
     lado: "abajo-izquierda",
-    clase: "min-w-0 justify-start px-1",
+    clase: "w-full min-w-0 justify-start px-1",
     estatica: "flex min-h-11 min-w-0 items-center px-1",
   },
   monograma: {
@@ -87,7 +87,6 @@ export function PortalSwitcher(props: Props) {
       <span className="flex min-w-0 items-center gap-2">
         <Monograma nombre={nombre} />
         <span className="truncate text-[15px] leading-5 font-semibold text-fg">{nombre}</span>
-        <span className="flex-none text-sm text-fg-muted">{actual?.etiqueta}</span>
         {conMenu ? <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden /> : null}
       </span>
     );
@@ -105,7 +104,9 @@ export function PortalSwitcher(props: Props) {
   return (
     <Menu
       etiqueta={`${nombre} · portal ${actual?.etiqueta ?? ""}. Cambiar de portal o empresa`}
-      {...(variante === "riel" ? { titulo: `${nombre} · ${actual?.etiqueta ?? ""}` } : {})}
+      {...(variante === "riel" || variante === "compacto"
+        ? { titulo: `${nombre} · ${actual?.etiqueta ?? ""}` }
+        : {})}
       items={items}
       lado={v.lado}
       disparador={visual}

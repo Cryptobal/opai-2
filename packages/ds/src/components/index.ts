@@ -12,6 +12,8 @@ export { Chip, ChipAgregar, ChipToggle } from "./chip";
 export { Combobox, type ComboboxProps } from "./combobox";
 export { type OpcionCombobox, Resaltado } from "./resaltado";
 export { CommandPalette, type GrupoPaleta, type ItemPaleta } from "./command-palette";
+export { BusquedaHoja } from "./busqueda-hoja";
+export { TEXTO_BUSQUEDA } from "./hoja-busqueda";
 export { Dialog, Sheet } from "./dialog";
 export { Cerrar } from "./dialog-partes";
 export { claseEnlace, Enlace } from "./enlace";

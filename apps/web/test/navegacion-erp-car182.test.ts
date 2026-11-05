@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { vocabulario } from "@opai/domain";
 
 import { SECCIONES } from "@/app/(erp)/configuracion/_centro/secciones";
+import { icono } from "@/app/_components/iconos";
 import { navegacionErp } from "@/lib/navegacion";
 import { asegurarRegistro } from "@/lib/registro";
 
@@ -116,5 +117,33 @@ describe("menú del ERP sin duplicados ni ítems fuera de su área (CAR-182)", (
     const { nav, navInferior } = armar();
     for (const n of navInferior) expect(nav.some((x) => x.href === n.href), n.href).toBe(true);
     expect(navInferior.filter((n) => n.href === "/bandeja")).toHaveLength(1);
+  });
+  it("cada entrada del menú tiene su propio ícono y ninguno es el de un área de «Más» (CAR-182)", () => {
+    const { nav } = armar();
+    const iconos = nav.map((n) => n.icono);
+    expect(iconos.filter((x, i) => iconos.indexOf(x) !== i)).toEqual([]);
+    const esperados: Record<string, string> = {
+      "/finanzas": "LayoutDashboard",
+      "/finanzas/ventas": "FileText",
+      "/finanzas/compras": "ShoppingCart",
+      "/finanzas/cobranza": "HandCoins",
+      "/remuneraciones": "Banknote",
+      "/finanzas/bancos": "Landmark",
+      "/finanzas/flujo": "ChartLine",
+      "/negocios/seguimiento": "BellRing",
+      "/solicitudes": "NotebookPen",
+      "/cotizaciones": "ReceiptText",
+      "/contactos": "ContactRound",
+      "/cuentas": "Building2",
+      "/negocios": "Briefcase",
+      "/tareas": "ListChecks",
+    };
+    for (const [href, icono] of Object.entries(esperados))
+      expect(nav.find((n) => n.href === href)?.icono, href).toBe(icono);
+  });
+
+  it("todos los íconos del menú existen en el catálogo del shell (ninguno cae en el genérico)", () => {
+    const generico = icono("__desconocido");
+    for (const n of armar().nav) expect(icono(n.icono), `${n.href} (${n.icono})`).not.toBe(generico);
   });
 });
