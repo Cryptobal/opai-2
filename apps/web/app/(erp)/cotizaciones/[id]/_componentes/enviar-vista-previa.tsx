@@ -2,6 +2,8 @@
 
 import { Alerta, Button, Segmentado } from "@opai/ds";
 
+import { VisorPdf } from "@/app/_components/visor-pdf";
+
 import { useVistaPreviaPdf } from "./use-vista-previa-pdf";
 
 /** Vista previa del PDF dentro de la hoja de envío, con los adjuntos que saldrán (cotización y, si existe, propuesta técnica). */
@@ -35,7 +37,7 @@ export function EnviarVistaPrevia({
           {mensaje}
         </Alerta>
       ) : estado.fase === "listo" ? (
-        <iframe title="Vista previa del PDF" src={estado.pdfUrl} className="h-72 w-full rounded-md border border-border" />
+        <VisorPdf pdfUrl={estado.pdfUrl} titulo="Vista previa del PDF" nombreArchivo="cotizacion.pdf" alto="h-72" />
       ) : (
         <p role="status" className="t-body-sm text-fg-muted">
           Generando PDF…
