@@ -62,6 +62,8 @@ for (const portal of [
 ]) {
   test.describe(portal.nombre, () => {
     test("mis rendiciones, compra con total corriente, duplicado, borrador y envío", async ({ page }, info) => {
+      // Dos gastos, duplicado, borrador y envío con rutas en frío: pasa de 1,2 min y roza los 90 s por defecto.
+      test.setTimeout(180_000);
       const errores = vigilarConsola(page);
       const sello = `${info.project.name}-${portal.nombre}-${Date.now()}`;
       await entrar(page);
