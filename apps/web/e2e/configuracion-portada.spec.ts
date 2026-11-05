@@ -104,8 +104,12 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
 
   test("404 de un grupo inexistente, con el shell del ERP", async ({ page }) => {
     await entrar(page);
-    const r = await page.goto("/configuracion/grupo/inventado");
-    expect(r?.status()).toBe(404);
+    // El proxy fuerza el 404 con un `fetch` interno de 4 s; si el runner está lento ese `fetch` vence y
+    // sale 200. Se reintenta la carga hasta ver el 404 real (el contrato que protege esta prueba).
+    await expect(async () => {
+      const r = await page.goto("/configuracion/grupo/inventado");
+      expect(r?.status()).toBe(404);
+    }).toPass({ timeout: 60_000 });
   });
 
   test("Preferencias se abre desde el menú de usuario y no está en la portada", async ({
