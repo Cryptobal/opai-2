@@ -121,7 +121,8 @@ for (const portal of [
       await page.goto(`${portal.base}/nueva/kilometraje`);
       await elegir(page, "Origen", "Planta Quilicura");
       await elegir(page, "Destino", "CD Pudahuel");
-      await expect(page.getByText("Total a rendir")).toBeVisible({ timeout: 20_000 });
+      // El desglose lo calcula el servidor y su ruta compila en frío la primera vez en el runner.
+      await expect(page.getByText("Total a rendir")).toBeVisible({ timeout: 60_000 });
       await expect(page.getByLabel(/monto/i)).toHaveCount(0);
       await page.getByLabel("Peaje (opcional)").fill("2000");
       await page.getByRole("switch", { name: /Ida y vuelta/ }).click();
