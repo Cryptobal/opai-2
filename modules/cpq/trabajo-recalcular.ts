@@ -51,6 +51,17 @@ export const trabajoCpqRecalcularAntiguos = defineTrabajo({
       }
       if (lote.length < LOTE) break;
     }
+    // Una traza por corrida con solo los conteos (sin IDs de cotizaciones ni contenido), en su propia transacción.
+    if (recalculadas > 0 || fallidas > 0)
+      await ctx.transaccion(async (tx) => {
+        await ctx.auditoria.registrar(tx, {
+          tenantId: ctx.tenantId,
+          capability: "cpq.cotizaciones.recalcular_antiguos",
+          actor: ctx.actor,
+          entityType: "cotizacion",
+          payload: { recalculadas, fallidas },
+        });
+      });
     return { recalculadas, fallidas };
   },
 });

@@ -28,7 +28,9 @@ export function FichaCotizacionLineas({
   onTraza: (lineaId: string) => void;
 }) {
   // Solo las secciones con puestos o con instalación: la sección «Común» vacía no es una tarjeta más.
-  const secciones = d.secciones.filter((s) => s.lineas.length > 0 || s.instalacionId);
+  // Sin instalaciones ni puestos solo existe «Común» vacía: se muestra igual, porque es la única que ofrece «Agregar puesto».
+  const conContenido = d.secciones.filter((s) => s.lineas.length > 0 || s.instalacionId);
+  const secciones = conContenido.length > 0 ? conContenido : d.secciones;
   return (
     <div className="space-y-4">
       {secciones.length === 0 ? (

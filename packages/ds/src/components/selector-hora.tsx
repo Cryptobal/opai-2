@@ -74,7 +74,7 @@ export function SelectorHora({ valor, onCambiar, invalido, className, ...props }
         onCambiar={setAbierto}
         etiqueta="Elegir hora"
         alinear="end"
-        className="w-auto p-2"
+        className="w-auto max-h-[var(--radix-popover-content-available-height)] overflow-y-auto p-2"
         disparador={
           <button
             type="button"
@@ -87,7 +87,7 @@ export function SelectorHora({ valor, onCambiar, invalido, className, ...props }
         }
       >
         <div className="flex gap-2">
-          <ul aria-label="Horas" className="grid max-h-56 grid-cols-4 gap-1 overflow-y-auto">
+          <ul aria-label="Horas" className="grid max-h-[min(14rem,calc(var(--radix-popover-content-available-height)-1.5rem))] grid-cols-4 gap-1 overflow-y-auto">
             {HORAS.map((h) => (
               <li key={h}>
                 <button
@@ -101,7 +101,7 @@ export function SelectorHora({ valor, onCambiar, invalido, className, ...props }
               </li>
             ))}
           </ul>
-          <ul aria-label="Minutos" className="grid max-h-56 grid-cols-2 gap-1 overflow-y-auto border-l border-border pl-2">
+          <ul aria-label="Minutos" className="grid max-h-[min(14rem,calc(var(--radix-popover-content-available-height)-1.5rem))] grid-cols-2 gap-1 overflow-y-auto border-l border-border pl-2">
             {MINUTOS.map((m) => (
               <li key={m}>
                 <button
