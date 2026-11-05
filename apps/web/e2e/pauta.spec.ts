@@ -44,11 +44,18 @@ test.describe("pauta · mensual", () => {
     await expect(page.getByLabel("Fecha de la pauta")).toBeVisible();
     await expect(page.getByText("Asistencia no activada: sin marcas para cruzar.")).toBeVisible();
     const fila = page.getByRole("link", { name: /Portería Día:/ }).first();
-    if (await fila.isVisible()) {
-      await fila.click();
-      await expect(page).toHaveURL(/dia=/);
-    }
-    await page.getByRole("button", { name: "Sin cubrir" }).click();
+    await expect(fila).toBeVisible();
+    await fila.click();
+    await expect(page).toHaveURL(/dia=/);
+    // La hoja del turno es modal: mientras está abierta deja el resto de la página inerte
+    // (aria-hidden), así que se cierra antes de usar el filtro de la barra.
+    const hoja = page.getByRole("dialog").filter({ has: page.getByRole("heading", { name: /Portería Día/ }) });
+    await expect(hoja).toBeVisible();
+    await hoja.getByRole("button", { name: "Cerrar" }).first().click();
+    await expect(hoja).toBeHidden();
+    const sinCubrir = page.getByRole("button", { name: "Sin cubrir" });
+    await hidratado(sinCubrir);
+    await sinCubrir.click();
     await expect(page).toHaveURL(/ver=ppc/);
     await page.getByRole("button", { name: "Mensual" }).click();
     await expect(page.getByRole("button", { name: "Mes siguiente" })).toBeVisible();
