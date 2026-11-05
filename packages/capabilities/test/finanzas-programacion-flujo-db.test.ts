@@ -5,7 +5,8 @@ import { cafXmlSintetico } from "./finanzas-caf-fixture";
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
 
 const urlPropietario = process.env.DATABASE_URL_TEST;
-const mesActual = new Date().toISOString().slice(0, 7);
+// Mes en hora de Chile: la proyección usa la fecha de Chile, no la de UTC (cambio de mes).
+const mesActual = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date()).slice(0, 7);
 
 type Item = {
   documentoEmitidoId: string | null;
