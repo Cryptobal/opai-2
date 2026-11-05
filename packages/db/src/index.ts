@@ -17,6 +17,12 @@ export {
   usuarioEnOtrasEmpresas,
 } from "./identidad";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
+export type {
+  DatosCondicionCobro,
+  FiltroCargos,
+  NuevoCargoCobro,
+} from "./plataforma-empresa-cobros";
+export { leerUfAlDia } from "./plataforma-indicadores";
 export type { HechoPlataforma } from "./plataforma-aprobaciones";
 // La auditoría global solo se escribe por operaciones con nombre: `accesoPlataforma()` (ámbito
 // `plataforma`) y `registrarEventoSeguridad` (ámbito `seguridad`, CAR-42). No se exporta el append.
