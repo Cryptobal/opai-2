@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 
 import { type Browser, expect, type Page, test, type TestInfo } from "@playwright/test";
 
+import { diagnosticarSiFalla } from "./diagnostico";
 import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
@@ -49,6 +50,7 @@ async function comoUsuario(browser: Browser, ruta: string) {
 
 test.describe("configuración · roles y permisos (CAR-37)", () => {
   test.skip(!E2E_PASSWORD, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  test.afterEach(({ page }, info) => diagnosticarSiFalla(page, info));
   test.beforeEach(({ page }) => page.emulateMedia({ reducedMotion: "reduce" }));
 
   test("pestaña Roles, equivalencia 1.0 y matriz de un rol del sistema", async ({ page }, info) => {

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { diagnosticarSiFalla } from "./diagnostico";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // Brief 14 · Rondas PR 1b — flujo de configuración en la ficha de instalación: crear un punto,
@@ -10,6 +11,7 @@ test.setTimeout(180_000);
 
 test.describe("Rondas · configuración de la instalación", () => {
   test.skip(!E2E_PASSWORD, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  test.afterEach(({ page }, info) => diagnosticarSiFalla(page, info));
 
   test("crear punto, plantilla y programación", async ({ page }, info) => {
     const sello = Date.now().toString().slice(-6);
