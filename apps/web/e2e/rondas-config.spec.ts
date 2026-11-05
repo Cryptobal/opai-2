@@ -53,7 +53,7 @@ test.describe("Rondas · configuración de la instalación", () => {
       expect(recibida.ok()).toBe(true);
       // El aviso dura pocos segundos: se comprueba nada más responder la acción, antes de esperar el
       // cierre del diálogo (que en `next dev` puede tardar más que el propio aviso).
-      await expect(page.getByText(aviso, { exact: true })).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText(aviso, { exact: true })).toBeVisible({ timeout: 60_000 });
       // El cierre ocurre solo cuando la acción devuelve éxito, tras procesar su respuesta.
       await expect(page.getByRole("dialog")).toBeHidden({ timeout: 30_000 });
     };

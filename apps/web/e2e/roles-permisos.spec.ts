@@ -90,7 +90,8 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
     for (const p of ["Ver Instalaciones", "Ver Personas", "Ver Documentos"]) await nuevo.getByRole("checkbox", { name: p, exact: true }).click();
     await captura(page, "nuevo", info);
     await nuevo.getByRole("button", { name: "Crear rol" }).click();
-    await expect(page.getByText("Rol creado")).toBeVisible();
+    // La primera escritura de la capacidad compila su ruta en frío en el runner (el aviso puede tardar más de 15 s).
+    await expect(page.getByText("Rol creado")).toBeVisible({ timeout: 60_000 });
 
     // 2. Editar la matriz: contador de cambios y guardar (A2).
     const rol = hoja(page, nombre);

@@ -37,7 +37,8 @@ test.describe("Comercial · Actividad y tareas", () => {
     await expect(tipoTarea).toHaveAttribute("aria-pressed", "true");
     await compositor.getByRole("textbox").first().fill(titulo);
     await compositor.getByRole("button", { name: "Crear tarea" }).click();
-    await expect(page.getByText(titulo).first()).toBeVisible();
+    // La primera escritura de la capacidad compila su ruta en frío en el runner.
+    await expect(page.getByText(titulo).first()).toBeVisible({ timeout: 60_000 });
 
     for (const ancho of ANCHOS) {
       await page.setViewportSize({ width: ancho, height: 900 });
@@ -47,7 +48,7 @@ test.describe("Comercial · Actividad y tareas", () => {
     await page.goto("/tareas?ver=equipo");
     await expect(page.getByRole("heading", { name: /Mis tareas/ }).first()).toBeVisible();
     const fila = page.getByText(titulo).first();
-    await expect(fila).toBeVisible();
+    await expect(fila).toBeVisible({ timeout: 45_000 });
     for (const ancho of ANCHOS) {
       await page.setViewportSize({ width: ancho, height: 900 });
       await page.screenshot({ path: info.outputPath(`mis-tareas-${ancho}.png`), fullPage: true });
