@@ -113,6 +113,8 @@ export interface Contexto {
   portalesMembresia: readonly string[];
   /** Módulos activos (o en trial) del tenant. `core` y `platform` siempre lo están. */
   modulosActivos: readonly string[];
+  /** Módulos activos en «solo lectura»: rechazan toda escritura (CAR-188). Subconjunto de `modulosActivos`. */
+  modulosSoloLectura: readonly string[];
   /** Módulos permitidos para un agente (scopes de la key); null = sin restricción. */
   scopes: readonly string[] | null;
   /** Principal de la API key (ADR-033). null en sesiones humanas y procesos del sistema. */

@@ -29,6 +29,7 @@ export function fuentesFalsas(
     membresias?: MembresiaConTenant[];
     acceso?: AccesoFila;
     modulosActivos?: string[];
+    modulosSoloLectura?: string[];
     platformRole?: "owner" | "support" | null;
   } = {},
 ) {
@@ -54,6 +55,10 @@ export function fuentesFalsas(
   const fuentes: Fuentes = {
     membresiasDe: async () => membresias,
     modulosActivos: async () => o.modulosActivos ?? ["crm"],
+    modulosConEstado: async () => ({
+      activos: o.modulosActivos ?? ["crm"],
+      soloLectura: o.modulosSoloLectura ?? [],
+    }),
     usuario: async (id) =>
       id === USUARIO.id ? { ...USUARIO, platformRole: o.platformRole ?? null } : null,
     tenantPorSlug: async (slug) => (slug === "gard" ? { id: TENANT, estado: "activo" } : null),

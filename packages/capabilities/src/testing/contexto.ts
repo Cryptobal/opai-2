@@ -38,6 +38,7 @@ export type OpcionesPrueba = {
   portal?: string | null;
   portalesMembresia?: readonly string[];
   modulosActivos?: readonly string[];
+  modulosSoloLectura?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
   /** Alcance por filas del actor (null = ve todo). ADR-022 · Brief 07c B3. */
@@ -77,6 +78,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     portal: o.portal === undefined ? "erp" : o.portal,
     portalesMembresia: o.portalesMembresia ?? ["erp"],
     modulosActivos: o.modulosActivos ?? [],
+    modulosSoloLectura: o.modulosSoloLectura ?? [],
     scopes: o.scopes ?? null,
     principal: o.principal ?? null,
     alcance: o.alcance ?? null,

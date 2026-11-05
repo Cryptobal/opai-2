@@ -63,6 +63,11 @@ export type ParametrosContexto = {
   /** Solo servidor: membresía activa del usuario en este tenant; ausente = sin acceso. */
   portalesMembresia?: readonly string[];
   modulosActivos?: readonly string[];
+  /**
+   * Módulos activos que están en «solo lectura» (CAR-188, ADR-071): se ven y se leen, pero rechazan
+   * toda escritura. Siempre es un subconjunto de `modulosActivos`.
+   */
+  modulosSoloLectura?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
   /**
@@ -162,6 +167,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     portal: params.portal ?? null,
     portalesMembresia: params.portalesMembresia ?? [],
     modulosActivos: params.modulosActivos ?? [],
+    modulosSoloLectura: params.modulosSoloLectura ?? [],
     scopes: params.scopes ?? null,
     principal: params.principal ?? null,
     alcance: params.alcance ?? null,

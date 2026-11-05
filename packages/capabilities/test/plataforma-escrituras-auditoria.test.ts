@@ -81,6 +81,24 @@ function semilla() {
     trabajo: [trabajo(TRABAJO_FALLIDO, "fallido"), trabajo(TRABAJO_PENDIENTE, "pendiente")],
     aprobacionPlataforma: [aprobacion(APROBACION_A), aprobacion(APROBACION_R)],
     cobroCargo: [cargoDePrueba(CARGO)],
+    perfilEmpresa: [{ tenantId: TENANT_DE_PRUEBA, rut: "11111111-1", razonSocial: "Gard SpA" }],
+    cobroCondicion: [
+      {
+        id: "c1",
+        tenantId: TENANT_DE_PRUEBA,
+        moduloId: "crm",
+        moneda: "UF",
+        forma: "fijo",
+        unidad: null,
+        precioMensual: 25_000,
+        minimoMensual: null,
+        cobroDesde: null,
+        pruebaHasta: null,
+        pasaACobro: false,
+        descuentoPct: 0,
+        nota: null,
+      },
+    ],
     propuestaIndicador: [
       {
         id: PROPUESTA,
@@ -132,6 +150,7 @@ const CASOS: Record<string, Record<string, unknown>> = {
     condicion: { moneda: "CLP", precio: "100000", cobroDesde: "2026-01-01" },
   },
   "platform.cobros.cargos_generar": { tenantId: t, periodo: "2026-01" },
+  "platform.cobros.prueba_abrir": { tenantId: t, moduloId: "crm", pruebaHasta: "2099-12-31" },
   "platform.cobros.cargo_anular": { tenantId: t, cargoId: CARGO, motivo: "precio mal cargado" },
 };
 

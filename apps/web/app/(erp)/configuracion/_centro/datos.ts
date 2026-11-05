@@ -49,7 +49,7 @@ export async function cargarIndice() {
   ]);
   const conAjustes = new Set(datosSiHayPermiso(esquema, []).map((c) => c.modulo));
   const activos = datosSiHayPermiso(mods, []).filter(
-    (m) => m.estado === "activo" || m.estado === "trial",
+    (m) => m.estado === "activo" || m.estado === "trial" || m.estado === "solo_lectura",
   );
   const idsActivos = new Set(activos.map((m) => m.id));
   const modulos = activos

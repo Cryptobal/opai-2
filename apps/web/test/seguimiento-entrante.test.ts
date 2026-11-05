@@ -57,6 +57,7 @@ describe("POST /api/webhooks/resend/entrante", () => {
     vi.doMock("@opai/capabilities", () => ({ crearContexto: () => ({}), executeCapability: ejecutar }));
     vi.doMock("@/lib/registro", () => ({ asegurarRegistro: () => undefined }));
     vi.doMock("@/lib/medidor", () => ({ medidorDiferido: {} }));
+    vi.doMock("@/lib/solo-lectura", () => ({ soloLecturaDe: async () => [] }));
     vi.doMock("@/lib/rate-limit", () => ({ permitir: async () => true }));
   });
   const pedir = async (cuerpo: string, firmaValida = true) => {

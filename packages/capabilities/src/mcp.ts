@@ -61,6 +61,8 @@ function describir(c: Capacidad, preview: boolean): string {
 export function herramientasMcp(ctx: Contexto): HerramientaMcp[] {
   return listarCapacidades()
     .filter((c) => esVisible(ctx, c))
+    // Un módulo en solo lectura (CAR-188) no ofrece sus herramientas que escriben ni su preview.
+    .filter((c) => c.efecto === "lectura" || !ctx.modulosSoloLectura.includes(c.modulo))
     .flatMap((c) => {
       const real = {
         nombre: nombreHerramienta(c.id),

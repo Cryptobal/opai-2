@@ -4,6 +4,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
 
 import { cantidad, usd } from "../../_componentes/formato";
+import type { Resumen } from "../../facturacion/_componentes/cobro";
 import { AtencionTenant } from "./atencion-tenant";
 import { DatosTributarios, type PerfilTributario } from "./datos-tributarios";
 import type { DetalleTenant, PanelTenant, Trabajo } from "./tipos";
@@ -11,6 +12,7 @@ import type { DetalleTenant, PanelTenant, Trabajo } from "./tipos";
 const ESTADO_MODULO = {
   activo: { etiqueta: "Activo", tono: "success" },
   trial: { etiqueta: "Trial", tono: "info" },
+  solo_lectura: { etiqueta: "Solo lectura", tono: "warning" },
   suspendido: { etiqueta: "Suspendido", tono: "warning" },
 } as const;
 
@@ -19,10 +21,11 @@ type Props = {
   panel: PanelTenant | null;
   problemas: Trabajo[];
   perfil: PerfilTributario | null;
+  pruebas: Resumen["pruebasPorVencer"];
 };
 
 /** Resumen de la empresa (49): consumo del mes, módulos, lo que necesita atención y datos. */
-export function ResumenTenant({ d, panel, problemas, perfil }: Props) {
+export function ResumenTenant({ d, panel, problemas, perfil, pruebas }: Props) {
   const base = `/platform/tenants/${d.tenant.id}`;
   const m = panel?.mes;
   const t = panel?.trabajos;
@@ -97,7 +100,12 @@ export function ResumenTenant({ d, panel, problemas, perfil }: Props) {
           </ul>
         </SeccionTarjeta>
         <div className="flex flex-col gap-4">
-          <AtencionTenant problemas={problemas} keys={keysAlerta} faltaRut={!perfil?.rut} />
+          <AtencionTenant
+            problemas={problemas}
+            keys={keysAlerta}
+            faltaRut={!perfil?.rut}
+            pruebas={pruebas}
+          />
           <DatosTributarios tenantId={d.tenant.id} perfil={perfil} />
           <SeccionTarjeta titulo="Datos">
             <ParesGrid

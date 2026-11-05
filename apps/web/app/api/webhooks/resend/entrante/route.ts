@@ -4,6 +4,7 @@ import { resolverTokenSeguimiento } from "@opai/db";
 import { leerEventoEntrante, leerTextoCorreo, tokenDeDestinatarios } from "@/lib/correo-entrante";
 import { verificarFirmaSvix } from "@/lib/firma-svix";
 import { medidorDiferido } from "@/lib/medidor";
+import { soloLecturaDe } from "@/lib/solo-lectura";
 import { permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
 
@@ -39,11 +40,12 @@ export async function POST(req: Request): Promise<Response> {
   const apiKey = process.env["RESEND_API_KEY"];
   const texto = apiKey ? await leerTextoCorreo(ev.emailId, apiKey) : null;
 
-  const ctx = crearContexto({ tenantId: dueno.tenantId, actor: { tipo: "system" }, medidor: medidorDiferido, modulosActivos: ["comercial"] });
+  const ctx = crearContexto({ tenantId: dueno.tenantId, actor: { tipo: "system" }, medidor: medidorDiferido, modulosActivos: ["comercial"],
+    modulosSoloLectura: await soloLecturaDe(dueno.tenantId, "comercial") });
   const r = await executeCapability(ctx, "comercial.seguimientos.recibir_correo", {
     seguimientoId: dueno.seguimientoId, mensajeId: ev.emailId, remitente: ev.desde.slice(0, 320),
     asunto: ev.asunto, texto: texto ?? "(Resend no entregó el contenido del correo.)", recibidoEn: ev.recibidoEn,
   });
   // Un fallo transitorio pide reintento a Resend; un rechazo de negocio (seguimiento borrado) se descarta.
-  return r.ok || r.error.code === "NOT_FOUND" ? descartar() : new Response(null, { status: 500 });
+  return r.ok || r.error.code === "NOT_FOUND" || r.error.code === "FORBIDDEN" ? descartar() : new Response(null, { status: 500 });
 }

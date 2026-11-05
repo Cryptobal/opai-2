@@ -2,6 +2,7 @@ import { crearContexto, executeCapability } from "@opai/capabilities";
 import { tenantPorSlug } from "@opai/db";
 
 import { medidorDiferido } from "@/lib/medidor";
+import { soloLecturaDe } from "@/lib/solo-lectura";
 import { ipDe, permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
 
@@ -38,12 +39,14 @@ export async function POST(req: Request, { params }: Params): Promise<Response> 
     actor: { tipo: "system" },
     medidor: medidorDiferido,
     modulosActivos: ["finanzas"],
+    modulosSoloLectura: await soloLecturaDe(tenant.id, "finanzas"),
   });
   const r = await executeCapability(ctx, "finanzas.bancos.recibir_web4leads", { cuerpo, timestamp, firma });
   if (!r.ok) {
     if (r.error.code === "UNAUTHENTICATED") return json(401, { success: false, error: "Firma inválida." });
+    if (r.error.code === "FORBIDDEN") return json(403, { success: false, error: r.error.message });
     // Un fallo no previsto no puede quedar mudo: se registra solo la categoría, nunca el cuerpo ni la firma.
-    if (r.error.code !== "INVALID_INPUT" && r.error.code !== "UNPROCESSABLE") {
+    if (!["INVALID_INPUT", "UNPROCESSABLE", "FORBIDDEN"].includes(r.error.code)) {
       console.error("[web4leads] rechazo inesperado", { codigo: r.error.code });
     }
     return r.error.code === "INVALID_INPUT" || r.error.code === "UNPROCESSABLE"

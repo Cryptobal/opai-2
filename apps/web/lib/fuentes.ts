@@ -49,6 +49,8 @@ export type AccesoFila = {
 export type Fuentes = {
   membresiasDe(userId: string): Promise<MembresiaConTenant[]>;
   modulosActivos(tenantId: string): Promise<string[]>;
+  /** Módulos activos y, entre ellos, los que están en solo lectura (una sola consulta; CAR-188). */
+  modulosConEstado?(tenantId: string): Promise<{ activos: string[]; soloLectura: string[] }>;
   usuario(userId: string): Promise<UsuarioFila | null>;
   tenantPorSlug(slug: string): Promise<{ id: string; estado: string } | null>;
   keyPorHash(tenantId: string, hash: string): Promise<ApiKeyFila | null>;
@@ -59,11 +61,13 @@ export type Fuentes = {
   accesoConModulos?(
     tenantId: string,
     userId: string,
-  ): Promise<{ acceso: AccesoFila; modulosActivos: string[] }>;
+  ): Promise<{ acceso: AccesoFila; modulosActivos: string[]; modulosSoloLectura?: string[] }>;
   marcarUsoKey(tenantId: string, id: string): Promise<void>;
 };
 
-const ACTIVOS = ["activo", "trial"];
+/** «solo_lectura» sigue activo para ver y leer; las escrituras las frena `restriccion` (CAR-188). */
+const ACTIVOS = ["activo", "trial", "solo_lectura"];
+const SOLO_LECTURA = "solo_lectura";
 
 export const fuentesReales: Fuentes = {
   membresiasDe: (userId) =>
@@ -76,6 +80,15 @@ export const fuentesReales: Fuentes = {
       where: { estado: { in: ACTIVOS } },
     });
     return filas.map((f) => f.moduloId);
+  },
+  async modulosConEstado(tenantId) {
+    const filas = await forTenant(tenantId).tenantModule.findMany({
+      where: { estado: { in: ACTIVOS } },
+    });
+    return {
+      activos: filas.map((f) => f.moduloId),
+      soloLectura: filas.filter((f) => f.estado === SOLO_LECTURA).map((f) => f.moduloId),
+    };
   },
   usuario: usuarioPorId,
   tenantPorSlug,
@@ -99,7 +112,9 @@ async function accesoConModulos(tenantId: string, userId: string) {
       rolTenant: true,
       excepciones: true,
       tenant: {
-        select: { modules: { where: { estado: { in: ACTIVOS } }, select: { moduloId: true } } },
+        select: {
+          modules: { where: { estado: { in: ACTIVOS } }, select: { moduloId: true, estado: true } },
+        },
       },
     },
   });
@@ -128,5 +143,10 @@ async function accesoConModulos(tenantId: string, userId: string) {
     })),
     instalaciones,
   };
-  return { acceso, modulosActivos: m?.tenant.modules.map((f) => f.moduloId) ?? [] };
+  const modulos = m?.tenant.modules ?? [];
+  return {
+    acceso,
+    modulosActivos: modulos.map((f) => f.moduloId),
+    modulosSoloLectura: modulos.filter((f) => f.estado === SOLO_LECTURA).map((f) => f.moduloId),
+  };
 }

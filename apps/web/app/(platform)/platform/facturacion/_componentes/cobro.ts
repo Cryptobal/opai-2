@@ -68,6 +68,14 @@ export type ModuloCobro = {
   cargo: Cargo | null;
 };
 
+export type PruebaCobro = {
+  moduloId: string;
+  nombre: string;
+  pruebaHasta: string;
+  diasRestantes: number;
+  pasaACobro: boolean;
+};
+
 export type EmpresaCobro = {
   tenantId: string;
   nombre: string;
@@ -77,12 +85,14 @@ export type EmpresaCobro = {
   totalClp: number;
   facturables: number;
   noFacturables: number;
+  pruebas: PruebaCobro[];
 };
 
 export type Resumen = {
   periodo: string;
   uf: { centavos: number; exacta: boolean } | null;
   empresas: EmpresaCobro[];
+  pruebasPorVencer: (PruebaCobro & { tenantId: string; empresa: string })[];
   totales: {
     totalClp: number;
     facturables: number;
@@ -96,6 +106,14 @@ export { mesesRecientes, nombreMes } from "./meses";
 export const clp = (n: number | null | undefined) => (n == null ? "—" : formatearClp(n));
 export const enMoneda = (monto: number, moneda: Moneda) =>
   moneda === "UF" ? formatearUf(monto) : formatearClp(monto);
+
+/** «vence hoy», «vence en 3 días» o «venció». */
+export const textoVence = (dias: number) =>
+  dias < 0
+    ? "venció"
+    : dias === 0
+      ? "vence hoy"
+      : `vence en ${dias} ${dias === 1 ? "día" : "días"}`;
 
 /** «5 usuarios activos» / «1 instalación activa». */
 export function textoCantidad(cantidad: number, unidad: UnidadCobro | null): string {
@@ -124,5 +142,6 @@ export function textoCondicion(c: Condicion): string {
 export const ESTADOS_MODULO: Record<string, string> = {
   activo: "Activo",
   trial: "En prueba",
+  solo_lectura: "Solo lectura",
   suspendido: "Suspendido",
 };
