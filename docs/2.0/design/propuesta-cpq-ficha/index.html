@@ -1,0 +1,241 @@
+<title>Cotización CPQ, 3 alternativas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: página de revisión con pestañas A/B/C; cada alternativa muestra escritorio y teléfono con los tokens del DS 2.0 (índigo OPAI, neutros fríos, semáforo success/warning/danger). */
+:root{
+  --bg:#fafafa;--surface:#fff;--fill:#f4f4f5;--border:#e7e7ea;--border2:#d4d4d8;
+  --fg:#111113;--muted:#52525b;--subtle:#6b6b74;
+  --accent:#4a3fd8;--accent-fg:#fff;--accent-muted:#eeedfc;
+  --ok:#16a34a;--ok-fg:#166534;--ok-bg:#ebf7ef;
+  --warn:#d97706;--warn-fg:#92400e;--warn-bg:#fdf4e3;
+  --bad:#dc2626;--bad-fg:#b42318;--bad-bg:#fdecec;
+  --info-fg:#075985;--info-bg:#e8f4fa;
+  --sans:"Inter",ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --shadow:0 12px 32px -8px rgba(17,17,19,.18),0 2px 6px rgba(17,17,19,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b0b0c;--surface:#151517;--fill:#202023;--border:#2c2c30;--border2:#3f3f46;
+  --fg:#f4f4f5;--muted:#c0c0c8;--subtle:#9a9aa4;
+  --accent:#8b83f5;--accent-fg:#0b0b0c;--accent-muted:#25224a;
+  --ok:#4ade80;--ok-fg:#86efac;--ok-bg:#12281a;
+  --warn:#fbbf24;--warn-fg:#fcd34d;--warn-bg:#2d2108;
+  --bad:#f87171;--bad-fg:#fca5a5;--bad-bg:#2f1414;
+  --info-fg:#7dd3fc;--info-bg:#0e2230;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b0b0c;--surface:#151517;--fill:#202023;--border:#2c2c30;--border2:#3f3f46;
+  --fg:#f4f4f5;--muted:#c0c0c8;--subtle:#9a9aa4;
+  --accent:#8b83f5;--accent-fg:#0b0b0c;--accent-muted:#25224a;
+  --ok:#4ade80;--ok-fg:#86efac;--ok-bg:#12281a;
+  --warn:#fbbf24;--warn-fg:#fcd34d;--warn-bg:#2d2108;
+  --bad:#f87171;--bad-fg:#fca5a5;--bad-bg:#2f1414;
+  --info-fg:#7dd3fc;--info-bg:#0e2230;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 var(--sans);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-size:22px;line-height:1.25;margin:0;text-wrap:balance}
+h2{font-size:16px;margin:0}h3{font-size:13px;margin:0}
+p{margin:0}.muted{color:var(--muted)}.sub{color:var(--subtle);font-size:12px}
+.mono,.num{font-variant-numeric:tabular-nums}.mono{font-family:var(--mono)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{min-height:44px;padding:8px 14px;border:1px solid var(--border2);background:var(--surface);color:var(--fg);border-radius:10px;font:inherit;font-weight:600;cursor:pointer;text-align:left}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.tab small{display:block;font-weight:400;opacity:.85}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.panel{display:flex;flex-direction:column;gap:14px}
+.pitch{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
+.box ul{margin:6px 0 0;padding-left:18px}.box li{margin:2px 0}
+.stage{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.dev{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dev>.lbl{font-size:12px;color:var(--subtle);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.desk{width:760px;max-width:100%;overflow-x:auto;border:1px solid var(--border2);border-radius:12px;background:var(--bg);box-shadow:var(--shadow)}
+.desk>.in{min-width:760px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.phone{width:340px;max-width:100%;border:8px solid var(--fg);border-radius:30px;background:var(--bg);overflow:hidden;box-shadow:var(--shadow)}
+.phone>.in{padding:10px 10px 0;display:flex;flex-direction:column;gap:10px;min-height:560px}
+.app{font-size:13px}
+.hdr{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.hdr b{font-size:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.sum{display:grid;gap:10px;grid-template-columns:1.1fr 1.4fr 1.5fr}
+.phone .sum{grid-template-columns:1fr 1fr}.phone .sum .st{grid-column:1/-1}
+.k{font-size:11px;color:var(--subtle);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.big{font-size:22px;font-weight:700;line-height:1.1}
+.phone .big{font-size:18px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-weight:600;font-size:12px;width:fit-content}
+.chip.bad{background:var(--bad-bg);color:var(--bad-fg)}.chip.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.chip.ok{background:var(--ok-bg);color:var(--ok-fg)}.chip.info{background:var(--info-bg);color:var(--info-fg)}
+.chip.neu{background:var(--fill);color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.bar{position:relative;height:10px;border-radius:99px;background:var(--fill);overflow:visible}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--bad)}
+.bar u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--fg);text-decoration:none}
+.btn{min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--fg);font:inherit;font-weight:600;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.step{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--surface);min-height:44px;flex:1 1 130px;min-width:0}
+.step b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--fill);color:var(--muted);flex:none}
+.step.on{border-color:var(--accent);background:var(--accent-muted)}.step.on b{background:var(--accent);color:var(--accent-fg)}
+.step.done b{background:var(--ok-bg);color:var(--ok-fg)}
+.step span{min-width:0;overflow-wrap:anywhere}
+.phone .step{flex:1 1 0;padding:6px;justify-content:center}.phone .step span{display:none}.phone .stepname{font-weight:600;font-size:12px;color:var(--muted)}
+details.g{border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+details.g>summary{list-style:none;cursor:pointer;min-height:44px;padding:8px 12px;display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:600}
+details.g>summary::-webkit-details-marker{display:none}
+details.g>div{padding:0 12px 10px;display:flex;flex-direction:column;gap:6px}
+.li{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
+.fixed{position:sticky;bottom:0;margin:0 -10px;padding:10px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.fixed .btn{flex:1}
+.split{display:grid;grid-template-columns:1fr 250px;gap:12px}
+.rail{display:flex;flex-direction:column;gap:10px}
+.cmp{width:100%;border-collapse:collapse;font-size:13px}
+.cmp th,.cmp td{border-bottom:1px solid var(--border);padding:8px;text-align:left;vertical-align:top}
+.tw{overflow-x:auto}
+.states{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.phoneonly{display:none}.phone .phoneonly{display:block}.desk .phoneonly{display:none}
+.note{background:var(--info-bg);color:var(--info-fg);border-radius:10px;padding:10px 12px}
+</style>
+
+<div class="wrap">
+  <header class="panel">
+    <h1>Cotización CPQ-2026-001: tres formas de rediseñarla</h1>
+    <p class="muted">Propuesta para decidir antes de construir. Las tres usan el mismo estado único, el mismo resumen siempre visible y los costos plegados. Cambia cómo se recorre la cotización. Los datos son de ejemplo.</p>
+  </header>
+
+  <section class="panel" aria-label="Qué falla hoy">
+    <h2>Qué falla hoy y por qué</h2>
+    <div class="pitch">
+      <div class="box"><h3>Estados que se contradicen</h3><ul>
+        <li>Margen objetivo sin definir se calcula como 0 %: por eso sale rojo y «Requiere aprobación».</li>
+        <li>«Lista para enviar» se puede marcar con margen bajo o valores desactualizados: solo revisa sueldo y valores legales.</li>
+        <li>Una cotización ya aprobada igual vuelve a mostrar «Requiere aprobación».</li></ul></div>
+      <div class="box"><h3>Acciones y tarjetas de más</h3><ul>
+        <li>«Nueva cotización» y «Nueva» a la vez; «Vista previa PDF» en tres sitios.</li>
+        <li>Editar, Quitar y Agregar puesto aparecen en «Lista» pero fallan: solo se edita un borrador.</li>
+        <li>Seis tarjetas antes del primer puesto; ocho categorías de costo, casi todas en $0.</li></ul></div>
+      <div class="box"><h3>Lo que hace bien 1.0</h3><ul>
+        <li>Un solo botón «Enviar», con el motivo cuando no se puede.</li>
+        <li>Total, margen y dotación siempre visibles en una barra.</li>
+        <li>Pero solo 4 estados, sin aprobación por margen ni versiones: 2.0 sí los necesita.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Estado único">
+    <h2>Un solo estado y un solo siguiente paso (vale para las tres)</h2>
+    <div class="tw"><table class="cmp">
+      <tr><th>Estado que ve la persona</th><th>Cuándo</th><th>Único botón principal</th></tr>
+      <tr><td><span class="chip neu">Borrador</span> incompleto</td><td>Falta cliente, un puesto o un valor legal</td><td>Completar lo que falta (abre el primer pendiente)</td></tr>
+      <tr><td><span class="chip warn">Revisa</span></td><td>Valores desactualizados o mutual sin confirmar</td><td>Recalcular (y guarda el cálculo)</td></tr>
+      <tr><td><span class="chip bad">Margen bajo</span></td><td>Margen menor al mínimo y sin aprobación</td><td>Pedir aprobación</td></tr>
+      <tr><td><span class="chip info">En aprobación</span></td><td>Pedida y sin respuesta</td><td>Esperar (retirar pedido como acción secundaria)</td></tr>
+      <tr><td><span class="chip ok">Lista para enviar</span></td><td>Todo lo anterior resuelto; si necesitó aprobación, ya la tiene</td><td>Enviar al cliente</td></tr>
+      <tr><td><span class="chip neu">Enviada</span></td><td>El cliente ya la recibió</td><td>Registrar respuesta / Nueva versión</td></tr>
+    </table></div>
+    <p class="note">Regla nueva: no se puede marcar «Lista para enviar» con margen bajo el mínimo (sin aprobación), valores desactualizados, mutual sin confirmar o sin puestos. Un solo cálculo decide el chip, la lista de pendientes y el botón. «Nueva versión» solo aparece cuando la versión actual está enviada.</p>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Alternativas">
+    <button class="tab" role="tab" id="t-A" aria-selected="true" data-k="A">A. Un paso a la vez<small>Asistente guiado</small></button>
+    <button class="tab" role="tab" id="t-B" aria-selected="false" data-k="B">B. Ficha con pasos plegables<small>Todo en una página</small></button>
+    <button class="tab" role="tab" id="t-C" aria-selected="false" data-k="C">C. Tablero con panel fijo<small>Pensada para escritorio e iPad</small></button>
+  </div>
+
+  <section class="panel" id="alt" aria-live="polite"></section>
+
+  <section class="panel">
+    <h2>Cómo decidir</h2>
+    <div class="tw"><table class="cmp">
+      <tr><th></th><th>A. Un paso a la vez</th><th>B. Ficha plegable</th><th>C. Tablero con panel fijo</th></tr>
+      <tr><td>Mejor para</td><td>Quien cotiza poco y quiere que lo lleven de la mano; teléfono</td><td>Quien cotiza seguido y salta entre secciones</td><td>Quien arma cotizaciones largas con muchos puestos en pantalla grande</td></tr>
+      <tr><td>Teléfono</td><td>Excelente: una pantalla, un botón</td><td>Muy bueno: secciones plegables</td><td>Aceptable: el panel pasa a una barra inferior</td></tr>
+      <tr><td>Riesgo</td><td>Más clics para revisar todo</td><td>Puede volver a verse denso si se abre todo</td><td>Es la pantalla más distinta de lo actual</td></tr>
+      <tr><td>Esfuerzo de construcción</td><td>Medio</td><td>Menor (reordena lo existente)</td><td>Mayor</td></tr>
+      <tr><td>Recomendación</td><td>Para cotización nueva</td><td><b>Mi elección</b>: abre en el primer pendiente y se puede saltar libremente</td><td>Para una segunda etapa</td></tr>
+    </table></div>
+    <p class="muted">Para decidir, comenta en el PR: <b>DECISIÓN CARLOS:</b> A, B o C (y lo que quieras cambiar).</p>
+  </section>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const clp=n=>'$'+n.toLocaleString('es-CL');
+const STEPS=['Cliente e instalación','Puestos','Costos y margen','Documento y envío'];
+
+function steps(cur){return `<div class="steps">${STEPS.map((s,i)=>`<div class="step ${i<cur?'done':''} ${i===cur?'on':''}"><b>${i<cur?'✓':i+1}</b><span>${s}</span></div>`).join('')}</div><div class="stepname phoneonly">Paso ${cur+1} de 4 · ${STEPS[cur]}</div>`}
+
+function summary(){return `<div class="sum">
+  <div class="card"><span class="k">Precio mensual</span><span class="big num">${clp(3640000)}</span><span class="sub">IVA no incluido · 2 puestos</span></div>
+  <div class="card"><span class="k">Margen vs. objetivo</span><div class="row"><span class="big num">0,0 %</span><span class="chip bad"><i class="dot"></i>Muy bajo</span></div>
+    <div class="bar" role="img" aria-label="Margen 0 por ciento, mínimo 10, objetivo 12"><i style="width:2%"></i><u style="left:50%"></u><u style="left:60%;background:var(--accent)"></u></div>
+    <span class="sub">Hoy ganas $0. El mínimo es 10 % y el objetivo 12 %.</span></div>
+  <div class="card st"><span class="k">Estado</span><span class="chip bad">Margen bajo</span><span class="sub">No se puede enviar sin definir el margen.</span><button class="btn pri" type="button">Definir margen</button></div>
+</div>`}
+
+function costos(){return `<details class="g" open><summary><span>Costos del mes</span><span class="num">${clp(3640000)}</span></summary><div>
+  <details class="g"><summary><span>Mano de obra · 2 puestos</span><span class="num">${clp(3120000)}</span></summary><div><div class="li"><span>Sueldos y cargas</span><span class="num">${clp(2860000)}</span></div><div class="li"><span>Colación y movilización</span><span class="num">${clp(260000)}</span></div></div></details>
+  <details class="g"><summary><span>Uniformes y exámenes</span><span class="num">${clp(180000)}</span></summary><div><div class="li"><span>Uniformes</span><span class="num">${clp(120000)}</span></div><div class="li"><span>Exámenes</span><span class="num">${clp(60000)}</span></div></div></details>
+  <details class="g"><summary><span>Feriados</span><span class="num">${clp(340000)}</span></summary><div><div class="li"><span>Provisión mensual</span><span class="num">${clp(340000)}</span></div></div></details>
+  <div class="row sub"><span>4 categorías sin monto (vehículos, equipamiento…)</span><button class="btn ghost" type="button">Agregar costo</button></div>
+</div></details>`}
+
+function puesto(n,nom,t,gu){return `<div class="card"><div class="row"><b>${nom}</b><button class="btn" type="button">Editar</button></div>
+  <span class="muted">${t}</span><span class="sub">${gu}</span></div>`}
+
+function puestos(){return puesto(1,'Portería principal','Turno 4x4 · 08:00 a 20:00 · todos los días','Se necesitan 4 guardias para cubrirlo · ' + clp(1820000)) + puesto(2,'Ronda nocturna','Turno 4x4 · 20:00 a 08:00 · todos los días','Se necesitan 4 guardias para cubrirlo · ' + clp(1820000))}
+
+function menu(){return `<div class="row"><span class="sub">Otras acciones</span><button class="btn" type="button" aria-label="Más acciones">⋯ Más</button></div>`}
+
+const ALT={
+A:{
+ pitch:['Una pantalla por paso, con «Atrás» y «Siguiente». Arriba siempre el resumen. Al terminar, el último paso revisa todo y envía.','El botón principal cambia según lo que falta; si falta algo, el paso lo explica en una línea.','Acciones raras (clonar, ver detalle del cálculo, archivar) van en «⋯ Más».'],
+ desk:()=>`<div class="hdr"><div><b>CPQ-2026-001</b> <span class="sub">· Versión 1 · Condominio Los Alerces</span></div>${menu()}</div>${summary()}${steps(2)}
+  <div class="card"><h3>Paso 3 de 4 · Costos y margen</h3><p class="muted">Define cuánto quieres ganar. Con tu objetivo de 12 % el precio sube a ${clp(4136000)}.</p><div class="row"><label for="m1">Margen objetivo</label><input id="m1" value="12 %" style="min-height:44px;width:120px;border:1px solid var(--border2);border-radius:10px;padding:0 10px;background:var(--surface);color:var(--fg);font:inherit"></div></div>
+  ${costos()}<div class="row"><button class="btn" type="button">Atrás</button><button class="btn pri" type="button">Siguiente: documento y envío</button></div>`,
+ phone:()=>`<div class="hdr"><b>CPQ-2026-001</b>${menu()}</div>${steps(2)}${summary()}
+  <div class="card"><h3>Costos y margen</h3><p class="muted">Define cuánto quieres ganar.</p></div>${costos()}
+  <div class="fixed"><button class="btn" type="button">Atrás</button><button class="btn pri" type="button">Definir margen</button></div>`},
+B:{
+ pitch:['Una sola página con cuatro bloques plegables, uno por paso. Cada bloque dice cuántos pendientes tiene.','Abre solo el primer bloque con pendientes. Se puede saltar a cualquiera sin perder el hilo.','El resumen queda pegado arriba al desplazarse. En teléfono, el botón principal queda fijo abajo.'],
+ desk:()=>`<div class="hdr"><div><b>CPQ-2026-001</b> <span class="sub">· Versión 1 · Condominio Los Alerces</span></div>${menu()}</div>${summary()}
+  <details class="g"><summary><span>1. Cliente e instalación</span><span class="chip ok">Completo</span></summary><div><span class="muted">Condominio Los Alerces · Av. Apoquindo 4500, Las Condes</span></div></details>
+  <details class="g"><summary><span>2. Puestos (2)</span><span class="chip ok">Completo</span></summary><div>${puestos()}<button class="btn ghost" type="button">Agregar puesto</button></div></details>
+  <details class="g" open><summary><span>3. Costos y margen</span><span class="chip bad">1 pendiente</span></summary><div><p class="muted">Falta el margen objetivo. Hoy se calcula en 0 %.</p>${costos()}</div></details>
+  <details class="g"><summary><span>4. Documento y envío</span><span class="chip neu">Bloqueado hasta el paso 3</span></summary><div><span class="muted">Vista previa del PDF, enlace para compartir y envío.</span></div></details>`,
+ phone:()=>`<div class="hdr"><b>CPQ-2026-001</b>${menu()}</div>${summary()}
+  <details class="g"><summary><span>1. Cliente</span><span class="chip ok">✓</span></summary></details>
+  <details class="g"><summary><span>2. Puestos (2)</span><span class="chip ok">✓</span></summary></details>
+  <details class="g" open><summary><span>3. Costos y margen</span><span class="chip bad">1</span></summary><div>${costos()}</div></details>
+  <details class="g"><summary><span>4. Envío</span><span class="chip neu">Pendiente</span></summary></details>
+  <div class="fixed"><button class="btn pri" type="button">Definir margen</button></div>`},
+C:{
+ pitch:['Dos zonas: a la izquierda los puestos y costos como planilla; a la derecha un panel fijo con precio, margen, estado y el único botón.','El panel acompaña al desplazarse y no tapa nada. Los pendientes se listan ahí, cada uno lleva a su lugar.','En teléfono el panel baja a una barra inferior con precio, margen y botón; al tocarla se abre el detalle.'],
+ desk:()=>`<div class="hdr"><div><b>CPQ-2026-001</b> <span class="sub">· Versión 1 · Condominio Los Alerces</span></div>${menu()}</div>${steps(2)}
+  <div class="split"><div class="rail">${puestos()}${costos()}</div>
+   <div class="rail"><div class="card"><span class="k">Precio mensual</span><span class="big num">${clp(3640000)}</span>
+     <span class="k">Margen vs. objetivo</span><div class="row"><span class="big num">0,0 %</span><span class="chip bad">Muy bajo</span></div>
+     <div class="bar"><i style="width:2%"></i><u style="left:50%"></u><u style="left:60%;background:var(--accent)"></u></div><span class="sub">Mínimo 10 % · objetivo 12 %</span>
+     <span class="k">Estado</span><span class="chip bad">Margen bajo</span>
+     <button class="btn pri" type="button">Definir margen</button></div>
+    <div class="card"><h3>Pendientes (1)</h3><div class="li"><span>Definir el margen objetivo</span><button class="btn ghost" type="button">Ir</button></div></div></div></div>`,
+ phone:()=>`<div class="hdr"><b>CPQ-2026-001</b>${menu()}</div>${steps(2)}${puestos()}${costos()}
+  <div class="fixed" style="flex-wrap:wrap"><div style="flex:1 1 120px"><span class="k">Precio mensual</span><div class="big num">${clp(3640000)}</div></div><div style="flex:1 1 90px"><span class="k">Margen</span><div class="row"><b class="num">0,0 %</b><span class="chip bad">Bajo</span></div></div><button class="btn pri" type="button" style="flex:1 1 100%">Definir margen</button></div>`}
+};
+
+function render(k){
+  const a=ALT[k];
+  $('#alt').innerHTML=`<div class="pitch">${a.pitch.map(p=>`<div class="box">${p}</div>`).join('')}</div>
+  <div class="stage">
+    <div class="dev"><span class="lbl">Escritorio · 1280</span><div class="desk app"><div class="in">${a.desk()}</div></div></div>
+    <div class="dev"><span class="lbl">Teléfono · 375</span><div class="phone app"><div class="in">${a.phone()}</div></div></div>
+  </div>`;
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.k===k));
+  try{history.replaceState(null,'','#alt-'+k)}catch(e){}
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>render(t.dataset.k)));
+const h=(location.hash||'').replace('#alt-','');render(['A','B','C'].includes(h)?h:'A');
+</script>
