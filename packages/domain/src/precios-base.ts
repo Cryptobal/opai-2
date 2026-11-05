@@ -17,6 +17,8 @@ export const PRECIOS_RECURSOS_BASE: readonly PrecioBase[] = [
   { recurso: "geo.autocompletado", unidad: "consulta", costoUnitarioMicro: 2_830 },
   { recurso: "geo.geocodificacion", unidad: "consulta", costoUnitarioMicro: 5_000 },
   { recurso: "geo.mapa", unidad: "imagen", costoUnitarioMicro: 2_000 },
+  // Routes API · Compute Routes Basic, US$ 5 por mil (CAR-194, kilometraje).
+  { recurso: "geo.ruta", unidad: "consulta", costoUnitarioMicro: 5_000 },
   { recurso: "correo.enviado", unidad: "correo", costoUnitarioMicro: 400 },
   { recurso: "almacenamiento.subida", unidad: "mb", costoUnitarioMicro: 15 },
   { recurso: "almacenamiento.descarga", unidad: "url", costoUnitarioMicro: 0 },
