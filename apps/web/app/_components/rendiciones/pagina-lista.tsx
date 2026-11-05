@@ -41,18 +41,27 @@ export function PaginaMisRendiciones({
         if (empresa)
           return (
             <Forbidden
-              titulo="No puedes rendir gastos"
-              descripcion={`Tu rol no tiene el permiso para rendir gastos. Pídele acceso al administrador de ${empresa}.`}
+              titulo="No tienes acceso a Rendiciones"
+              descripcion={`Necesitas el permiso Rendir. Pídele acceso al administrador de ${empresa}.`}
             />
           );
         const items = todas.filter((r) => r.estado === def.estado);
         const nueva = (
-          <EnlaceBoton href={`${base}/nueva`} className="w-full md:w-auto">
+          <EnlaceBoton href={`${base}/nueva`} className="hidden md:inline-flex">
+            Nueva rendición
+          </EnlaceBoton>
+        );
+        // Teléfono: botón flotante abajo a la derecha, como en el diseño aprobado.
+        const flotante = (
+          <EnlaceBoton
+            href={`${base}/nueva`}
+            className="fixed right-4 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 shadow-overlay md:hidden"
+          >
             Nueva rendición
           </EnlaceBoton>
         );
         return (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 pb-24 md:pb-0">
             <Cabecera titulo="Mis rendiciones" acciones={nueva} accionesSiempre />
             <PestanasRendiciones portal={portal} activa={pestana} rendiciones={todas} />
             <ListaRendiciones
@@ -63,9 +72,12 @@ export function PaginaMisRendiciones({
                 todas.length === 0
                   ? {
                       titulo: "Aún no has rendido gastos",
-                      descripcion:
-                        "Sube la boleta o la factura de lo que pagaste y envíala a aprobación.",
-                      accion: nueva,
+                      descripcion: "Saca una foto de la boleta y envíala a aprobación.",
+                      accion: (
+                        <EnlaceBoton href={`${base}/nueva`} className="md:hidden">
+                          Nueva rendición
+                        </EnlaceBoton>
+                      ),
                     }
                   : {
                       titulo: `No tienes rendiciones ${def.etiqueta.toLowerCase()}`,
@@ -73,6 +85,7 @@ export function PaginaMisRendiciones({
                     }
               }
             />
+            {todas.length > 0 ? flotante : null}
           </div>
         );
       }}

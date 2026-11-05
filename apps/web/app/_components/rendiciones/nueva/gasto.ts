@@ -31,7 +31,7 @@ export const gastoVacio = (hoy: string): Gasto => ({
   folio: "",
   proveedor: "",
   descripcion: "",
-    sinRespaldoMotivo: "",
+  sinRespaldoMotivo: "",
 });
 
 export const gastoDe = (i: ItemRendicion): Gasto => ({
@@ -80,3 +80,16 @@ export const itemDe = (g: Gasto) => ({
 
 export const totalDe = (gastos: readonly Gasto[]) =>
   gastos.reduce((s, g) => s + (Number(g.monto) || 0), 0);
+
+export type Paso = "documento" | "datos" | "resumen";
+export const TITULO: Record<Paso, string> = {
+  documento: "Paso 1 de 2 · Boleta o factura",
+  datos: "Paso 2 de 2 · Datos del gasto",
+  resumen: "Resumen y envío",
+};
+
+/** Agrega el gasto a la lista o, si ya estaba (se editó), lo reemplaza en su lugar. */
+export const conGasto = (lista: readonly Gasto[], g: Gasto): Gasto[] =>
+  lista.some((x) => x.clave === g.clave)
+    ? lista.map((x) => (x.clave === g.clave ? g : x))
+    : [...lista, g];

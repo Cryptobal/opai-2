@@ -17,7 +17,8 @@ UPDATE core.instalaciones SET lat = -33.44, lng = -70.76 WHERE nombre = 'CD Puda
 INSERT INTO core.ajustes (id, tenant_id, ambito, sujeto_id, modulo, clave, valor, updated_at)
 SELECT gen_random_uuid(), t.id, 'tenant', t.id, 'rendiciones', a.clave, a.valor::jsonb, now()
 FROM core.tenants t, (VALUES ('exigir_respaldo','false'),('km_metodo','"consumo"'),('km_rendimiento_km_l','10'),
-  ('km_precio_litro_clp','1500'),('km_recargo_desgaste_pct','10')) AS a(clave, valor)
+  ('km_precio_litro_clp','1500'),('km_recargo_desgaste_pct','10'),
+  ('aprobador_defecto_id', to_jsonb((SELECT id::text FROM core.users WHERE email = 'mfa-pendiente-e2e@opai.cl'))::text)) AS a(clave, valor)
 WHERE t.slug = 'gard'
 ON CONFLICT (tenant_id, ambito, sujeto_id, modulo, clave) DO UPDATE SET valor = EXCLUDED.valor;`;
 
@@ -70,7 +71,7 @@ for (const portal of [
 
       await page.getByRole("link", { name: "Nueva rendición" }).first().click();
       await page.waitForURL(`**${portal.base}/nueva`);
-      await page.getByRole("link", { name: /Una compra/ }).click();
+      await page.getByRole("link", { name: /Compra con boleta/ }).click();
       await page.waitForURL(`**${portal.base}/nueva/compra`);
       await expect(page.getByText("Paso 1 de 2")).toBeVisible();
       await page.getByText("Factura", { exact: true }).click();
@@ -104,7 +105,7 @@ for (const portal of [
       await elegir(page, "Quién aprueba", /./);
       await page.getByRole("button", { name: "Enviar a aprobación" }).first().click();
       await expect(page.getByRole("dialog")).toContainText(/\$\s?20\.000/);
-      await page.getByRole("dialog").getByRole("button", { name: "Enviar a aprobación" }).click();
+      await page.getByRole("dialog").getByRole("button", { name: "Confirmar y enviar" }).click();
       await page.waitForURL(`**${portal.base}/enviadas`);
       await expect(page.getByText(`Compras ${sello}`).filter({ visible: true }).first()).toBeVisible();
       expect(errores.filter((e) => !/Failed to load resource|favicon|uncached data during prerendering/.test(e))).toEqual([]);
@@ -116,7 +117,7 @@ for (const portal of [
       await page.goto(`${portal.base}/nueva/kilometraje`);
       await elegir(page, "Origen", "Planta Quilicura");
       await elegir(page, "Destino", "CD Pudahuel");
-      await expect(page.getByText("Total a reembolsar")).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByText("Total a rendir")).toBeVisible({ timeout: 20_000 });
       await expect(page.getByLabel(/monto/i)).toHaveCount(0);
       await page.getByLabel("Peaje (opcional)").fill("2000");
       await page.getByRole("switch", { name: /Ida y vuelta/ }).click();

@@ -16,6 +16,7 @@ export function AccionesEnvio({
   aprobadorId,
   aprobador,
   total,
+  gastos,
 }: {
   g: ReturnType<typeof useGuardado>;
   cuerpo: () => Cuerpo;
@@ -24,6 +25,7 @@ export function AccionesEnvio({
   aprobadorId: string;
   aprobador: string;
   total: number;
+  gastos: number;
 }) {
   const [confirmando, setConfirmando] = useState(false);
   return (
@@ -41,10 +43,7 @@ export function AccionesEnvio({
         >
           {g.ocupado === "guardar" ? "Guardando…" : "Guardar borrador"}
         </Button>
-        <Button
-          disabled={g.ocupado !== null}
-          onClick={() => validar(true) && setConfirmando(true)}
-        >
+        <Button disabled={g.ocupado !== null} onClick={() => validar(true) && setConfirmando(true)}>
           Enviar a aprobación
         </Button>
       </BarraAcciones>
@@ -53,6 +52,7 @@ export function AccionesEnvio({
         onCerrar={() => setConfirmando(false)}
         aprobador={aprobador}
         total={total}
+        gastos={gastos}
         ocupado={g.ocupado === "enviar"}
         error={g.error}
         onConfirmar={() => void g.enviar(cuerpo(), aprobadorId).then(() => setConfirmando(false))}
