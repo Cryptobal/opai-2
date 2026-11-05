@@ -19,6 +19,9 @@ async function main() {
       const permisos = [
         "comercial:negocios.read",
         "core:cuentas.read",
+        // Lo que necesita la hoja de puesto: los patrones y los cargos con su sueldo de referencia.
+        "core:patrones.read",
+        "core:cargos.read",
         ...(tipo !== "sin-lectura" ? ["cpq:cotizaciones.read"] : []),
         ...(tipo === "gestor" || tipo === "costos" ? ["cpq:cotizaciones.manage"] : []),
         ...(tipo === "costos" ? ["cpq:costos.ver"] : []),

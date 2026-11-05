@@ -91,8 +91,10 @@ export function PasoDatos({
           role="status"
           className="rounded-md bg-warning-muted px-3 py-2 text-base text-warning-fg"
         >
-          Esta {doc} ya fue rendida en {repetido}. Puedes continuar, pero revisa que no la estés
-          rindiendo dos veces.
+          <strong>
+            Esta {doc} ya fue rendida en {repetido}.
+          </strong>{" "}
+          Puedes continuar si es otra compra; el aprobador verá el aviso.
         </p>
       ) : null}
       <Campo etiqueta="Proveedor" htmlFor="gasto-proveedor" error={errores.proveedor}>

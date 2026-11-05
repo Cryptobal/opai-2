@@ -22,7 +22,7 @@ export function PaginaNueva({ portal }: { portal: PortalRendicion }) {
           <FilaSeleccionable
             href={`${base}/nueva/compra`}
             Link={LinkNext}
-            titulo="Una compra"
+            titulo="Compra con boleta"
             secundario="Sube la boleta o factura de lo que pagaste."
           />
           <FilaSeleccionable
