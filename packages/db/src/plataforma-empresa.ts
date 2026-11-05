@@ -1,4 +1,5 @@
 import { operacionesCobros } from "./plataforma-empresa-cobros";
+import { operacionesPerfilTributario } from "./plataforma-perfil-tributario";
 import type { TenantTx } from "./transaccion";
 
 // Lo que Plataforma puede leer y cambiar DENTRO de una empresa (CAR-40): operaciones con nombre y
@@ -33,6 +34,7 @@ export function operacionesEmpresa(db: TenantTx, tenantId: string) {
   });
   return {
     ...operacionesCobros(db, tenantId),
+    ...operacionesPerfilTributario(db, tenantId),
     cabezaAuditoria: () => db.auditoriaCabeza.findUnique({ where: { tenantId }, select: cabeza }),
     cabezaBitacora: () => db.bitacoraCabeza.findUnique({ where: { tenantId }, select: cabeza }),
     trabajo: (id: string) => db.trabajo.findUnique({ where: { id }, select: trabajo }),

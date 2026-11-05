@@ -5,6 +5,7 @@ import { ETIQUETA_ROL } from "@/app/_components/portales";
 
 import { cantidad, usd } from "../../_componentes/formato";
 import { AtencionTenant } from "./atencion-tenant";
+import { DatosTributarios, type PerfilTributario } from "./datos-tributarios";
 import type { DetalleTenant, PanelTenant, Trabajo } from "./tipos";
 
 const ESTADO_MODULO = {
@@ -13,10 +14,15 @@ const ESTADO_MODULO = {
   suspendido: { etiqueta: "Suspendido", tono: "warning" },
 } as const;
 
-type Props = { d: DetalleTenant; panel: PanelTenant | null; problemas: Trabajo[] };
+type Props = {
+  d: DetalleTenant;
+  panel: PanelTenant | null;
+  problemas: Trabajo[];
+  perfil: PerfilTributario | null;
+};
 
 /** Resumen de la empresa (49): consumo del mes, módulos, lo que necesita atención y datos. */
-export function ResumenTenant({ d, panel, problemas }: Props) {
+export function ResumenTenant({ d, panel, problemas, perfil }: Props) {
   const base = `/platform/tenants/${d.tenant.id}`;
   const m = panel?.mes;
   const t = panel?.trabajos;
@@ -91,7 +97,8 @@ export function ResumenTenant({ d, panel, problemas }: Props) {
           </ul>
         </SeccionTarjeta>
         <div className="flex flex-col gap-4">
-          <AtencionTenant problemas={problemas} keys={keysAlerta} />
+          <AtencionTenant problemas={problemas} keys={keysAlerta} faltaRut={!perfil?.rut} />
+          <DatosTributarios tenantId={d.tenant.id} perfil={perfil} />
           <SeccionTarjeta titulo="Datos">
             <ParesGrid
               items={[

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
+import { AvisoSaldoBanco } from "./aviso-saldo-banco";
 import { celdaEditable, type Planilla } from "./datos";
 import type { ArmadoPlanilla } from "./datos";
 
@@ -47,6 +48,7 @@ export function PlanillaFlujoEscritorio({
           Revisa la semana en la planilla. El aviso se muestra solo dentro de OPAI, sin enviar correos.
         </Alerta>
       ) : null}
+      <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
       <PlanillaScreen
         state={state}
         titulo="Flujo de caja"

@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { armarPlanilla, celdaEditable, clp, type Planilla } from "./datos";
+import { AvisoSaldoBanco } from "./aviso-saldo-banco";
 import { PlanillaFlujoEscritorio } from "./planilla-flujo-escritorio";
 
 const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
@@ -53,6 +54,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
             El aviso se muestra solo dentro de OPAI y no envía correos.
           </Alerta>
         ) : null}
+        <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
         <VistaMovilFlujo planilla={p} gestiona={gestiona} onCelda={(filaId, semana) => setSeleccion({ filaId, semana })} />
         {gestiona ? (
           <HojaCelda

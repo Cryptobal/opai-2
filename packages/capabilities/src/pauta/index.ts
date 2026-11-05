@@ -16,6 +16,7 @@ import { reemplazosSugerir } from "./reemplazos-sugerir";
 import { refuerzosAgregar } from "./refuerzos-agregar";
 import { seriesFijar } from "./series";
 
+export { ajustesPauta } from "./ajustes";
 export const capacidadesPauta: readonly Capacidad[] = [
   mesLeer,
   resumenLeer,

@@ -16,6 +16,8 @@ export type CeldaRealBanco = {
   monto: number;
   movimientoId: string;
   nota: string;
+  /** El movimiento no está conciliado: va a la fila «Sin conciliar», no a la de un documento (ADR-073). */
+  sinConciliar: boolean;
 };
 
 type CobroFacturaReal = { filaEtiqueta: string; monto: number };
@@ -35,21 +37,22 @@ type MovimientoReal = {
 };
 
 /**
- * Capa real desde la cartola de la semana. Nunca descarta un movimiento (hallazgo 3, CAR-181):
- * lo que no tiene fila propia va a «Otros ingresos» u «Otros egresos» según su signo, de modo
- * que Σ celdas con signo = Σ movimientos con signo.
+ * Capa real desde la cartola de la semana. Nunca descarta un movimiento (hallazgo 3, CAR-181): Σ celdas con
+ * signo = Σ movimientos con signo. Lo conciliado va a la fila de su documento; lo no conciliado se marca
+ * `sinConciliar` para la fila «Sin conciliar»; lo conciliado sin fila propia cae en «Otros ingresos/egresos».
  */
 export function celdasRealesDesdeMovimientos(movs: MovimientoReal[]): CeldaRealBanco[] {
   const out: CeldaRealBanco[] = [];
   for (const m of movs) {
     const semana = lunesIso(m.fecha);
     const abs = Math.abs(m.monto);
-    const poner = (filaEtiqueta: string, monto = abs) =>
-      out.push({ semana, filaEtiqueta, monto, movimientoId: m.id, nota: m.glosa });
+    const poner = (filaEtiqueta: string, monto = abs, sinConciliar = false) =>
+      out.push({ semana, filaEtiqueta, monto, movimientoId: m.id, nota: m.glosa, sinConciliar });
     const otros = (monto = abs) =>
       poner(m.monto > 0 ? ETIQUETAS_FLUJO.otrosIngresos : ETIQUETAS_FLUJO.otrosEgresos, monto);
     if (!m.conciliado) {
-      otros();
+      // Lo que no está conciliado nunca se pierde ni se disfraza de otra fila: va a «Sin conciliar» (ADR-073).
+      poner(m.monto > 0 ? ETIQUETAS_FLUJO.otrosIngresos : ETIQUETAS_FLUJO.otrosEgresos, abs, true);
     } else if (m.esFactoringMerma) {
       // El abono del factoring entra como ingreso; solo la comisión es costo.
       poner(m.monto > 0 ? ETIQUETAS_FLUJO.abonoFactoring : ETIQUETAS_FLUJO.costoFactoring);
