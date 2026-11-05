@@ -37,7 +37,7 @@ describe("trabajo cpq.cotizaciones.recalcular_antiguos (CAR-192)", () => {
     // Deja una traza de auditoría con solo los conteos.
     const traza = await ctx.db.auditEvent.findMany({ where: { capability: "cpq.cotizaciones.recalcular_antiguos" } });
     expect(traza).toHaveLength(1);
-    expect(JSON.stringify(traza[0]!.payload)).toBe(JSON.stringify({ recalculadas: 1, fallidas: 0 }));
+    expect(traza[0]!.payload).toEqual({ recalculadas: 1, fallidas: 0, errores: {}, versionIds: [antiguo] });
     // Idempotente: el borrador ya recalculado deja de ser candidato.
     expect(await trabajoCpqRecalcularAntiguos.ejecutar(ctx, {})).toEqual({ recalculadas: 0, fallidas: 0 });
     expect(trabajoCpqRecalcularAntiguos.periodicidad).toBe("diaria");
@@ -67,9 +67,39 @@ describe("recálculo condicionado al estado (CAR-192)", () => {
       }
       return original(args);
     }) as typeof ctx.db.cpqVersion.updateMany;
-    expect(await trabajoCpqRecalcularAntiguos.ejecutar(ctx, {})).toEqual({ recalculadas: 1, fallidas: 0 });
+    // La versión salió de borrador durante el cálculo: no se escribió, así que no cuenta como recalculada.
+    expect(await trabajoCpqRecalcularAntiguos.ejecutar(ctx, {})).toEqual({ recalculadas: 0, fallidas: 0 });
     const despues = (await ctx.db.cpqVersion.findFirst({ where: { id: v.id } }))!;
     expect(despues.estado).toBe("lista");
+    expect(despues.calculoCongeladoJson).toBe(ANTIGUO);
+  });
+
+  it("una versión reabierta (revisión distinta) durante el cálculo conserva su cálculo", async () => {
+    mockMotorLegal();
+    const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS, permisos: [...GESTOR, ...CON_COSTOS] });
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Carrera revisión" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    if (!f.ok) throw new Error("ficha");
+    const sec = (f.data as { secciones: { id: string }[] }).secciones[0]!;
+    await executeCapability(ctx, "cpq.lineas.crear", { seccionId: sec.id, tipo: "puesto", nombre: "Turno", sueldoBaseClp: 650_000 });
+    const v = (await ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id } }))!;
+    await ctx.db.cpqVersion.updateMany({ where: { id: v.id }, data: { calculoCongeladoJson: ANTIGUO } });
+    // Simula que la dejan lista entre la lectura de las filas y la escritura del cálculo.
+    const original = ctx.db.cpqVersion.updateMany.bind(ctx.db.cpqVersion);
+    let primera = true;
+    ctx.db.cpqVersion.updateMany = (async (args: Parameters<typeof original>[0]) => {
+      if (primera) {
+        primera = false;
+        await original({ where: { id: v.id }, data: { revision: v.revision + 1 } });
+      }
+      return original(args);
+    }) as typeof ctx.db.cpqVersion.updateMany;
+    // La versión salió de borrador durante el cálculo: no se escribió, así que no cuenta como recalculada.
+    expect(await trabajoCpqRecalcularAntiguos.ejecutar(ctx, {})).toEqual({ recalculadas: 0, fallidas: 0 });
+    const despues = (await ctx.db.cpqVersion.findFirst({ where: { id: v.id } }))!;
+    expect(despues.revision).toBe(v.revision + 1);
     expect(despues.calculoCongeladoJson).toBe(ANTIGUO);
   });
 });

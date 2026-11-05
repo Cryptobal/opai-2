@@ -106,7 +106,7 @@ export async function recalcularVersion(
     // Condicionado al estado: si la versión salió de «borrador» mientras se calculaba (la dejaron lista o
     // pidieron aprobación), su cálculo congelado no se pisa ni se tocan las huellas de sus líneas.
     const escrita = await ctx.db.cpqVersion.updateMany({
-      where: { id: version.id, tenantId: ctx.tenantId, estado: "borrador" },
+      where: { id: version.id, tenantId: ctx.tenantId, estado: "borrador", revision: version.revision },
       data: {
         ventaMensualClp: resultado.ventaMensual,
         calculoCongeladoJson: JSON.stringify(resultado),

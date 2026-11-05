@@ -116,6 +116,7 @@ export const manifest = defineModule({
     { id: "finanzas.flujo.celda_fijada", descripcion: "Se fijó la cifra de una celda del flujo." },
     { id: "finanzas.flujo.celdas_movidas", descripcion: "Se reprogramaron celdas de una fila del flujo." },
     { id: "finanzas.flujo.celda_cumplida", descripcion: "Se dio por cumplida una celda del flujo." },
+    { id: "finanzas.flujo.cobro_esperado_cambiado", descripcion: "Se fijó o se quitó a mano la fecha esperada de cobro de una factura en el flujo." },
     { id: "finanzas.flujo.ajustes_cambiados", descripcion: "Cambiaron los ajustes del flujo." },
     { id: "finanzas.flujo.saldo_negativo_avisado", descripcion: "Una semana futura quedó bajo el umbral del aviso in-app." },
     { id: "finanzas.flujo.importado", descripcion: "Se importó un lote de celdas al flujo." },

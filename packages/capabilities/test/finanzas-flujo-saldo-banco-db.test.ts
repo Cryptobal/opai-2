@@ -113,7 +113,13 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
     const antes = await planilla();
     await ok("finanzas.conciliaciones.confirmar", { movimientoId: movTardio, enlaces: [{ tipo: "documento_emitido", id: docId, monto: 2_000_000 }] });
     const despues = await planilla();
-    expect(despues.semanas).toEqual(antes.semanas); // totales, saldos iniciales y finales de todas las semanas
+    // Semanas pasadas: totales, saldos iniciales y finales idénticos; la apertura de la semana en curso tampoco cambia.
+    const pasadas = (p: Planilla) => p.semanas.filter((s) => s.pasada);
+    const actual = (p: Planilla) => p.semanas.find((s) => !s.pasada);
+    expect(pasadas(despues)).toEqual(pasadas(antes));
+    expect(actual(despues)?.saldoInicial).toBe(actual(antes)?.saldoInicial);
+    // Lo único que cambia hacia adelante: la factura ya cobrada deja de esperarse (su depósito ya estaba en el saldo del banco).
+    expect((actual(antes)?.ingresos ?? 0) - (actual(despues)?.ingresos ?? 0)).toBe(2_000_000);
     const celda = despues.celdas.find((c) => c.id === movTardio);
     expect(celda).toMatchObject({ filaId: filaCliente, semana: semAnt, monto: 2_000_000 });
     expect(celda?.filaId).not.toBe(FILA_SIN_CONCILIAR_INGRESO);
