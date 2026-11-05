@@ -32,6 +32,7 @@ const RUTAS_CON_SESION = [
   "/configuracion/grupo/inventado",
   "/sin-conexion",
   "/no-encontrado",
+  "/supervisor/personas/00000000-0000-7000-8000-000000000001",
   "/",
   "/negocios",
   "/cotizaciones",

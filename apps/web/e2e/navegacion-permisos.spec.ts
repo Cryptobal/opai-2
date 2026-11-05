@@ -49,16 +49,18 @@ for (const conceder of [false, true]) {
     page,
   }) => {
     await entrar(page, `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`);
-    await page.goto("/supervisor/personas/00000000-0000-7000-8000-000000000078");
-    await expect(
-      page.getByRole("heading", { name: "No encontrado · Portal Supervisor" }),
-    ).toBeVisible();
+    // El 404 real lo arma el proxy con un fetch de 4 s: si la ruta compila en frío, cae a 200 y se recarga.
+    const noEncontrado = async (id: string) => {
+      const titulo = page.getByRole("heading", { name: "No encontrado · Portal Supervisor" });
+      await expect(async () => {
+        await page.goto(`/supervisor/personas/${id}`);
+        await expect(titulo).toBeVisible({ timeout: 8_000 });
+      }).toPass({ timeout: 45_000 });
+    };
+    await noEncontrado("00000000-0000-7000-8000-000000000078");
     await expect(page.getByRole("link", { name: "Subir documento" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Pedir" })).toHaveCount(0);
-    await page.goto("/supervisor/personas/00000000-0000-7000-8000-000000000079");
-    await expect(
-      page.getByRole("heading", { name: "No encontrado · Portal Supervisor" }),
-    ).toBeVisible();
+    await noEncontrado("00000000-0000-7000-8000-000000000079");
   });
 }
 
