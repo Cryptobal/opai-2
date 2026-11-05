@@ -42,25 +42,27 @@ export async function enviarCorreoSeguimiento(ctx: Contexto, s: Seg, asunto: str
 
 /**
  * R13: al responder el cliente el negocio pasa a la etapa configurada, nunca hacia atrás y solo si
- * cumple los requisitos de entrada de esa etapa. Devuelve `true` si se movió.
+ * cumple los requisitos de entrada de esa etapa. Devuelve `"movido"`, `"sin_cambio"` o, si la etapa del
+ * plan se borró o se desactivó después de guardarlo, `"etapa_invalida"` (el trabajo sigue; se avisa).
  */
-export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: string, etapaId: string | undefined): Promise<boolean> {
-  if (!etapaId) return false;
+export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: string, etapaId: string | undefined): Promise<"movido" | "sin_cambio" | "etapa_invalida"> {
+  if (!etapaId) return "sin_cambio";
   const negocio = await tx.negocio.findUnique({ where: { id: negocioId } });
-  if (!negocio || negocio.estado !== "abierto") return false;
+  if (!negocio || negocio.estado !== "abierto") return "sin_cambio";
   const [destino, actual] = await Promise.all([
     tx.etapa.findUnique({ where: { id: etapaId } }),
     tx.etapa.findUnique({ where: { id: negocio.etapaId } }),
   ]);
-  if (!destino || !actual || destino.tipo !== "abierta" || !destino.activa) return false;
-  if (destino.embudoId !== negocio.embudoId || destino.orden <= actual.orden) return false;
+  if (!destino || !destino.activa) return "etapa_invalida";
+  if (!actual || destino.tipo !== "abierta") return "sin_cambio";
+  if (destino.embudoId !== negocio.embudoId || destino.orden <= actual.orden) return "sin_cambio";
   try {
     await validarEntrada(ctx, negocio, destino);
   } catch {
-    return false;
+    return "sin_cambio";
   }
   await aplicarEtapa(ctx, tx, negocio, destino, { evento: "comercial.negocio.etapa_cambiada", motivo: "El cliente respondió" });
-  return true;
+  return "movido";
 }
 
 /**
@@ -83,7 +85,11 @@ export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: Co
   });
   const destino = transicionSeguimiento(actual.estado as Parameters<typeof transicionSeguimiento>[0], config.alResponder === "detener" ? "cancelar" : "pausar");
   const movido = await avanzarPorRespuesta(ctx, tx, actual.negocioId, config.etapaAlResponder);
-  const detalle = [nota.detalle, movido ? "El negocio pasó a la etapa configurada en el plan." : null].filter(Boolean).join(" ");
+  const detalle = [
+    nota.detalle,
+    movido === "movido" ? "El negocio pasó a la etapa configurada en el plan." : null,
+    movido === "etapa_invalida" ? "El negocio no cambió de etapa: la etapa «al responder» del plan ya no existe o está inactiva. Revisa el plan." : null,
+  ].filter(Boolean).join(" ");
   const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: detalle || null, negocioId: actual.negocioId });
   if (destino) {
     await tx.seguimiento.update({ where: { id: s.id }, data: { estado: destino, motivo: "cliente_respondio" } });

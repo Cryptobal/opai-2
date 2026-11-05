@@ -3,6 +3,7 @@
 import type { ConfigPlan } from "@opai/domain";
 
 import type { Contexto } from "../types";
+import { etapasInvalidasDelPlan } from "./seguimiento-etapas";
 import { actividadDePaso } from "./seguimiento-ejecucion";
 import { aplicarEtapa } from "./transiciones-util";
 
@@ -11,7 +12,8 @@ type Seg = { id: string; negocioId: string; planVersion: number };
 /**
  * Devuelve `true` si perdió el negocio. Nunca cierra: un negocio que ya no está abierto, uno en la
  * etapa «no cerrar desde» o más adelante, uno con una respuesta del cliente, ni si falta la etapa
- * perdida o el motivo «sin_respuesta» en el catálogo.
+ * perdida o el motivo «sin_respuesta» en el catálogo. Si la etapa «no cerrar desde» del plan se borró o
+ * se desactivó después de guardarlo, falla cerrado: no cierra y deja una nota que lo explica.
  */
 export async function cerrarSinRespuesta(ctx: Contexto, s: Seg, config: ConfigPlan): Promise<boolean> {
   if (config.alTerminar !== "aplicar_cierre_propuesto") return false;
@@ -25,6 +27,20 @@ export async function cerrarSinRespuesta(ctx: Contexto, s: Seg, config: ConfigPl
     ctx.db.motivoPerdida.findFirst({ where: { codigo: "sin_respuesta", activo: true } }),
   ]);
   if (!perdida || !motivo || !actual) return false;
+  if (config.noCerrarDesdeEtapa) {
+    const invalidas = await etapasInvalidasDelPlan(ctx, { ...config, etapaAlResponder: undefined });
+    if (invalidas.length || !tope) {
+      await ctx.transaccion((tx) =>
+        actividadDePaso(ctx, tx, {
+          tipo: "nota",
+          titulo: "OPAI automático no cerró el negocio",
+          detalle: `La etapa «no cerrar desde» del plan (v${s.planVersion}) ya no existe o está inactiva. Revisa el plan de seguimiento.`,
+          negocioId: s.negocioId,
+        }),
+      );
+      return false;
+    }
+  }
   if (tope && actual.orden >= tope.orden) return false;
   const detalle = `Cerrado por la cadencia sin respuesta (plan v${s.planVersion}).`;
   await ctx.transaccion(async (tx) => {

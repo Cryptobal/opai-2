@@ -9,12 +9,14 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { PERMISO_CONFIG, PERMISO_READ } from "./comun";
 import { configPlanSchema } from "./seguimiento-comun";
-import { validarEtapasDelPlan } from "./seguimiento-etapas";
+import { etapasInvalidasDelPlan, validarEtapasDelPlan } from "./seguimiento-etapas";
 
 const DISPARADORES_V1 = ["cotizacion_enviada", "manual"] as const;
 const planSchema = z.object({
   id: z.string(), nombre: z.string(), disparador: z.string(), porDefecto: z.boolean(),
   activo: z.boolean(), version: z.number(), config: configPlanSchema, enCurso: z.number(),
+  /** Etapas que el plan nombra y que ya no existen o están inactivas (se revalidan al leer). */
+  etapasInvalidas: z.array(z.string()),
 });
 
 async function planes(ctx: Contexto): Promise<z.input<typeof planSchema>[]> {
@@ -25,9 +27,11 @@ async function planes(ctx: Contexto): Promise<z.input<typeof planSchema>[]> {
         ctx.db.planSeguimientoVersion.findUnique({ where: { planId_version: { planId: p.id, version: p.versionActual } } }),
         ctx.db.seguimiento.count({ where: { planId: p.id, estado: { in: ["activo", "pausado"] } } }),
       ]);
+      const config = configPlanSchema.parse(v?.config);
       return {
         id: p.id, nombre: p.nombre, disparador: p.disparador, porDefecto: p.porDefecto, activo: p.activo,
-        version: p.versionActual, config: configPlanSchema.parse(v?.config), enCurso,
+        version: p.versionActual, config, enCurso,
+        etapasInvalidas: (await etapasInvalidasDelPlan(ctx, config)).map((e) => e.mensaje),
       };
     }),
   );
@@ -78,7 +82,7 @@ export const seguimientoPlanesGuardar = defineCapability({
     const cambia = !previa || JSON.stringify(configPlanSchema.parse(previa.config)) !== JSON.stringify(input.config);
     const version = actual ? actual.versionActual + (cambia ? 1 : 0) : 1;
     const vista = { nombre: input.nombre, disparador: input.disparador, porDefecto: input.porDefecto, activo: input.activo };
-    if (dryRun) return { id: actual?.id ?? "", ...vista, version, config: input.config, enCurso: 0 };
+    if (dryRun) return { id: actual?.id ?? "", ...vista, version, config: input.config, enCurso: 0, etapasInvalidas: [] };
     const id = await ctx.transaccion(async (tx) => {
       if (input.porDefecto)
         await tx.planSeguimiento.updateMany({ where: { disparador: input.disparador, id: { not: actual?.id ?? "" } }, data: { porDefecto: false } });
