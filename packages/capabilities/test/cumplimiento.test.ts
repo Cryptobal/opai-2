@@ -190,6 +190,7 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
       "personas_uniforme",
       "personas_jornada_dt",
       "personas_os10",
+      "credenciales_terreno",
       "personas_contacto_laboral",
     ]);
     // Datos legibles, nunca nombres de columna.

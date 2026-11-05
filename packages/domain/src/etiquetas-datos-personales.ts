@@ -32,6 +32,7 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   isapre_nombre: "ISAPRE",
   afp: "AFP",
   regimen: "régimen previsional",
+  telefono_personal_habilitado: "habilitación del teléfono personal para marcar",
   talla_camisa: "talla de camisa",
   talla_pantalon: "talla de pantalón",
   talla_chaqueta: "talla de chaqueta",
