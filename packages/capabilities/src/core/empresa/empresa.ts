@@ -1,10 +1,9 @@
 import { z } from "zod";
 
-import { esRutRepetido } from "@opai/db";
-import { PERMISOS_CORE } from "@opai/domain";
+import { normalizarRut, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { conflicto } from "../../errores";
+import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import {
   definidos,
@@ -76,6 +75,13 @@ export const empresaUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const actual = await perfilDe(ctx);
+    // El RUT identifica a la empresa ante OPAI (facturas, pruebas, unicidad entre empresas): lo fija
+    // y corrige Plataforma con `platform.tenants.perfil_set`; la empresa puede reenviarlo igual (CAR-188).
+    const rutActual = actual?.rut ? (normalizarRut(actual.rut) ?? actual.rut) : null;
+    if (input.rut !== undefined && input.rut !== rutActual)
+      throw prohibido(
+        "El RUT de la empresa lo administra OPAI. Si hay que corregirlo, contacta a soporte.",
+      );
     const data = definidos(input);
     if (dryRun) return vista({ ...actual, ...data });
     const r = await escribirConEvento(
@@ -91,14 +97,7 @@ export const empresaUpdate = defineCapability({
           create: { ...data, tenantId: ctx.tenantId },
           update: data,
         }),
-    ).catch((e: unknown) => {
-      // El RUT es único entre empresas (CAR-188): el mensaje no dice cuál otra empresa lo tiene.
-      throw esRutRepetido(e)
-        ? conflicto(
-            "Ese RUT ya está registrado en otra empresa. Si es el tuyo, contacta a soporte.",
-          )
-        : e;
-    });
+    );
     return vista(r);
   },
 });

@@ -23,9 +23,7 @@ import { integracionesGuardarCertificadoDte } from "./integraciones-certificado-
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
 import {
-  capacidadesRemuneraciones,
-  trabajoCapturaIndicadoresSii,
-  trabajoCapturaPrevisional,
+  capacidadesRemuneraciones, trabajoCapturaIndicadoresSii, trabajoCapturaPrevisional,
 } from "./remuneraciones";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";

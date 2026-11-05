@@ -113,7 +113,7 @@ describe.skipIf(!urlPropietario)("RUT de la empresa en Plataforma (base real)", 
     });
   });
 
-  it("si la propia empresa escribe en su Configuración un RUT ajeno, recibe CONFLICT claro", async () => {
+  it("la empresa no puede cambiar ni ocupar un RUT desde su Configuración (lo administra Plataforma)", async () => {
     const ctxEmpresa = mod.crearContexto({
       tenantId: y,
       actor: { tipo: "user", id: plat },
@@ -123,8 +123,40 @@ describe.skipIf(!urlPropietario)("RUT de la empresa en Plataforma (base real)", 
       rol: "owner",
       medidor: { registrar: async () => undefined },
     });
-    const r = await mod.executeCapability(ctxEmpresa, "core.empresa.update", { rut: rutA });
-    expect(r).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
-    expect(JSON.stringify(r)).not.toContain(x);
+    for (const rut of [rutA, rutC, null])
+      expect(await mod.executeCapability(ctxEmpresa, "core.empresa.update", { rut })).toMatchObject(
+        {
+          ok: false,
+          error: { code: "FORBIDDEN" },
+        },
+      );
+    // Reenviar el mismo RUT (y cambiar otros datos) sí se permite.
+    expect(
+      await mod.executeCapability(ctxEmpresa, "core.empresa.update", {
+        rut: rutB,
+        giro: "Seguridad",
+      }),
+    ).toMatchObject({ ok: true });
+    expect(await e.admin.perfilEmpresa.findFirst({ where: { tenantId: y } })).toMatchObject({
+      rut: rutB,
+    });
+  });
+
+  it("el RUT con puntos o en otro formato cuenta como el mismo (índice sobre la forma normalizada)", async () => {
+    const tenant = (slug: string) =>
+      e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "seguridad" } });
+    const z = (await tenant(`rut-z-${s}`)).id;
+    const w = (await tenant(`rut-w-${s}`)).id;
+    const c = cuerpo();
+    const dv = digitoVerificador(c);
+    const conPuntos = `${c.slice(0, 2)}.${c.slice(2, 5)}.${c.slice(5)}-${dv.toLowerCase()}`;
+    await e.admin.perfilEmpresa.create({ data: { tenantId: z, rut: conPuntos } });
+    expect(await set(w, `${c}-${dv}`)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    // Un perfil con RUT vacío no choca con otro vacío.
+    await e.admin.perfilEmpresa.create({ data: { tenantId: w, rut: "" } });
+    const v = (await tenant(`rut-v-${s}`)).id;
+    await expect(
+      e.admin.perfilEmpresa.create({ data: { tenantId: v, rut: "" } }),
+    ).resolves.toBeTruthy();
   });
 });
