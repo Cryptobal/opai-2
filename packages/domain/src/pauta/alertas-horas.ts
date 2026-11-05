@@ -1,19 +1,22 @@
-import { diaNumero, minutosDeHora } from "./fechas";
+import {
+  avisoSemanalEn,
+  DESCANSO_MINIMO_HORAS_DEFECTO,
+  LIMITE_MENSUAL_HORAS_DEFECTO,
+  limiteSemanalEn,
+  type VigenciaJornada,
+} from "../jornada-legal";
+import { intervaloTurno } from "../turnos";
+import { diaNumero } from "./fechas";
 
-/** Ley 21.561: jornada ordinaria máxima 42 h semanales; vigente desde 2026-04-26 (BCN). */
-export const LIMITE_SEMANAL_HORAS = 42;
-export const LIMITE_SEMANAL_FUENTE = "Ley 21.561";
-export const LIMITE_SEMANAL_VIGENTE_DESDE = "2026-04-26";
-// TODO: hacer configurable por empresa con vigencias (PR posterior).
-
-/** Como 1.0: alerta amarilla por encima de esta carga semanal; roja al superar LIMITE_SEMANAL_HORAS. */
-export const UMBRAL_AVISO_AMARILLO_SEMANAL_H = 40;
-
-export const LIMITE_MENSUAL = 180;
-export const LIMITE_MENSUAL_HORAS = LIMITE_MENSUAL;
-
-const MIN_DESCANSO_HORAS = 12;
 const MS_DIA = 86_400_000;
+
+/** Parámetros de las alertas: tope semanal con vigencia (indicador «jornada», ADR-056) y ajustes de Pauta. */
+export type OpcionesAlertasHoras = {
+  /** Vigencias de la jornada legal; por defecto la tabla de la Ley 21.561. */
+  vigencias?: readonly VigenciaJornada[];
+  limiteMensualHoras?: number;
+  descansoMinimoHoras?: number;
+};
 
 export type SeveridadAlertaHoras = "advertencia" | "critica";
 
@@ -33,12 +36,8 @@ export type AlertaHoras = {
   limite?: number;
 };
 
-function horasTurno(horaInicio: string, horaFin: string): number {
-  const ini = minutosDeHora(horaInicio);
-  let fin = minutosDeHora(horaFin);
-  if (fin <= ini) fin += 1440;
-  return (fin - ini) / 60;
-}
+const horasTurno = (horaInicio: string, horaFin: string): number =>
+  intervaloTurno(horaInicio, horaFin).duracionMin / 60;
 
 function inicioSemana(fecha: string): string {
   const n = diaNumero(fecha);
@@ -57,9 +56,6 @@ function finMes(fecha: string): string {
   return `${y}-${String(m).padStart(2, "0")}-${String(ultimo).padStart(2, "0")}`;
 }
 
-function minutosAbsolutos(fecha: string, hora: string): number {
-  return diaNumero(fecha) * 1440 + minutosDeHora(hora);
-}
 
 function sumarHorasSemana(turnos: readonly TurnoAlerta[], personaId: string, anchor: string): number {
   const desde = inicioSemana(anchor);
@@ -89,63 +85,63 @@ function sumarHorasMes(turnos: readonly TurnoAlerta[], personaId: string, anchor
 export function calcularAlertasHoras(
   turnos: readonly TurnoAlerta[],
   semanaAnchor?: string,
+  opciones: OpcionesAlertasHoras = {},
 ): AlertaHoras[] {
   const alertas: AlertaHoras[] = [];
   const personas = [...new Set(turnos.map((t) => t.personaId))];
   const anchor = semanaAnchor ?? turnos[0]?.fecha ?? inicioSemana(new Date().toISOString().slice(0, 10));
+  const limiteSemanal = limiteSemanalEn(anchor, opciones.vigencias);
+  const avisoSemanal = avisoSemanalEn(anchor, opciones.vigencias);
+  const limiteMensual = opciones.limiteMensualHoras ?? LIMITE_MENSUAL_HORAS_DEFECTO;
+  const descansoMinimo = opciones.descansoMinimoHoras ?? DESCANSO_MINIMO_HORAS_DEFECTO;
+  const redondeo = (h: number) => Math.round(h * 10) / 10;
 
   for (const personaId of personas) {
     const sem = sumarHorasSemana(turnos, personaId, anchor);
-    if (sem > UMBRAL_AVISO_AMARILLO_SEMANAL_H) {
-      const supera = sem > LIMITE_SEMANAL_HORAS;
+    if (sem > avisoSemanal) {
+      const supera = sem > limiteSemanal;
       alertas.push({
         personaId,
         tipo: "semanal",
         severidad: supera ? "critica" : "advertencia",
-        horas: Math.round(sem * 10) / 10,
-        limite: LIMITE_SEMANAL_HORAS,
+        horas: redondeo(sem),
+        limite: limiteSemanal,
         mensaje: supera
-          ? `Supera el límite semanal de ${LIMITE_SEMANAL_HORAS} h (${Math.round(sem * 10) / 10} h).`
-          : `Cerca del límite semanal de ${LIMITE_SEMANAL_HORAS} h (${Math.round(sem * 10) / 10} h).`,
+          ? `Supera el límite semanal de ${limiteSemanal} h (${redondeo(sem)} h).`
+          : `Cerca del límite semanal de ${limiteSemanal} h (${redondeo(sem)} h).`,
       });
     }
 
     const mes = sumarHorasMes(turnos, personaId, anchor);
-    if (mes > LIMITE_MENSUAL_HORAS) {
+    if (mes > limiteMensual) {
       alertas.push({
         personaId,
         tipo: "mensual",
         severidad: "critica",
-        horas: Math.round(mes * 10) / 10,
-        limite: LIMITE_MENSUAL_HORAS,
-        mensaje: `Supera el límite mensual de ${LIMITE_MENSUAL_HORAS} h (${Math.round(mes * 10) / 10} h).`,
+        horas: redondeo(mes),
+        limite: limiteMensual,
+        mensaje: `Supera el límite mensual de ${limiteMensual} h (${redondeo(mes)} h).`,
       });
     }
 
     const propios = turnos
       .filter((t) => t.personaId === personaId)
-      .map((t) => ({
-        inicio: minutosAbsolutos(t.fecha, t.horaInicio),
-        fin: (() => {
-          let fin = minutosDeHora(t.horaFin);
-          const ini = minutosDeHora(t.horaInicio);
-          if (fin <= ini) fin += 1440;
-          return diaNumero(t.fecha) * 1440 + fin;
-        })(),
-        fecha: t.fecha,
-      }))
+      .map((t) => {
+        const inicio = diaNumero(t.fecha) * 1440 + intervaloTurno(t.horaInicio, t.horaFin).inicioMin;
+        return { inicio, fin: inicio + intervaloTurno(t.horaInicio, t.horaFin).duracionMin, fecha: t.fecha };
+      })
       .sort((a, b) => a.inicio - b.inicio);
 
     for (let i = 1; i < propios.length; i++) {
       const prev = propios[i - 1]!;
       const cur = propios[i]!;
       const descanso = (cur.inicio - prev.fin) / 60;
-      if (descanso < MIN_DESCANSO_HORAS) {
+      if (descanso < descansoMinimo) {
         alertas.push({
           personaId,
           tipo: "descanso",
           severidad: "critica",
-          mensaje: `Menos de ${MIN_DESCANSO_HORAS} h de descanso entre turnos (${Math.round(descanso * 10) / 10} h entre ${prev.fecha} y ${cur.fecha}).`,
+          mensaje: `Menos de ${descansoMinimo} h de descanso entre turnos (${redondeo(descanso)} h entre ${prev.fecha} y ${cur.fecha}).`,
         });
         break;
       }

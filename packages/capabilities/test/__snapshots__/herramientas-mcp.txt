@@ -5,6 +5,8 @@ agente_conversaciones_list
 agente_conversaciones_renombrar
 agente_historial_list
 agente_modelos_list
+asistencia_marcas_listar
+asistencia_marcas_obtener
 comercial_canales_get
 comercial_canales_update
 comercial_config_actualizar_etapa
@@ -235,6 +237,8 @@ core_supervisores_list
 core_supervisores_quitar
 core_tenant_get
 core_tenant_update
+core_turnos_esperados_listar
+core_turnos_esperados_regenerar
 core_usage_summary
 core_users_list
 core_users_remove
@@ -548,6 +552,7 @@ preview_core_puestos_update
 preview_core_supervisores_asignar
 preview_core_supervisores_quitar
 preview_core_tenant_update
+preview_core_turnos_esperados_regenerar
 preview_core_users_remove
 preview_core_users_update
 preview_core_vinculos_create

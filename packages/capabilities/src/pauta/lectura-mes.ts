@@ -92,7 +92,7 @@ export const mesLeer = defineCapability({
       instalacion: inst.nombre,
       anio: input.anio,
       mes: input.mes,
-      hoy: hoy(),
+      hoy: await hoy(ctx),
       feriados: [...(m.feriados.get(inst.id) ?? [])].map(([fecha, nombre]) => ({ fecha, nombre })),
       personas: [...nombres].map(([id, nombre]) => ({ id, nombre })),
       puestos: puestos.map((p) => {

@@ -5,17 +5,15 @@ import { diaNumero, rangoDias } from "@opai/domain";
 import { fechaCivilSchema } from "../core/calendario/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+import { hoyEn, zonaDelTenant } from "../core/turnos/comun";
 import { dondePuesto } from "../core/maestros/alcance";
 
 export const PERMISO_READ = "pauta:read";
 export const PERMISO_WRITE = "pauta:write";
 
-/** Zona civil por defecto de Gard hasta que el tenant fije la suya: decide qué día es «hoy». */
-const ZONA = "America/Santiago";
-
-/** Hoy como fecha civil "aaaa-mm-dd" en la zona del negocio. */
-export function hoy(ahora: Date = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(ahora);
+/** Hoy como fecha civil "aaaa-mm-dd" en la zona horaria de la empresa (decide qué día es «hoy»). */
+export async function hoy(ctx: Contexto, ahora: Date = new Date()): Promise<string> {
+  return hoyEn(await zonaDelTenant(ctx), ahora);
 }
 
 export const mesSchema = z.object({
