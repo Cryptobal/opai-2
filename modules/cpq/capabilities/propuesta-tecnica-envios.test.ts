@@ -10,7 +10,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockMotorLegal } from "../persistencia/mock-motor-legal";
 import * as ejecutarEnvio from "../persistencia/propuesta-envio-ejecutar";
 import { reclamarAprobacionEnvioPropuesta } from "../persistencia/propuesta-envio-finalizar";
-import { ACTIVOS, CONTACTO_1, NEGOCIO_1, semilla } from "./fixtures";
+import { ACTIVOS, CONTACTO_1, fijarMargenBajo, NEGOCIO_1, semilla } from "./fixtures";
 import { capacidades } from "./index";
 import { prepararEnvio } from "./preparar-envio.test-helper";
 
@@ -97,8 +97,9 @@ async function cotizacionConAprobacionMargen(ctx: Contexto) {
     seccionId: sec.id,
     tipo: "puesto",
     nombre: "Turno bajo",
-    sueldoBaseClp: 400_000,
+    sueldoBaseClp: 600_000,
   });
+  await fijarMargenBajo(ctx, id);
   await prepararEnvio(ctx, id);
   const v = await ctx.db.cpqVersion.findFirst({ where: { cotizacionId: id } });
   const aprobada = await ctx.db.cpqAprobacion.findFirst({

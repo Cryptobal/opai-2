@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Eye, GitBranch } from "lucide-react";
+import { Copy, Eye, GitBranch, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { avisar, Button } from "@opai/ds";
@@ -10,6 +10,7 @@ type Ejecutar = (id: string, input: unknown) => Promise<unknown | null>;
 export function AccionesCotizacionExtras({
   cotizacionId,
   puedeNuevaVersion,
+  puedeReabrir,
   gestionar = true,
   pendiente,
   ejecutar,
@@ -19,6 +20,7 @@ export function AccionesCotizacionExtras({
 }: {
   cotizacionId: string;
   puedeNuevaVersion: boolean;
+  puedeReabrir: boolean;
   /** Sin gestión solo queda la vista previa. */
   gestionar?: boolean;
   pendiente: boolean;
@@ -54,6 +56,25 @@ export function AccionesCotizacionExtras({
         >
           <Copy className="size-4" aria-hidden />
           Clonar
+        </Button>
+      ) : null}
+      {gestionar && puedeReabrir ? (
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={pendiente}
+          onClick={() => {
+            limpiarError();
+            void ejecutar("cpq.cotizaciones.reabrir", { id: cotizacionId }).then((r) => {
+              if (r != null) {
+                avisar.exito("La cotización volvió a borrador");
+                onHecho();
+              }
+            });
+          }}
+        >
+          <Pencil className="size-4" aria-hidden />
+          Reabrir para editar
         </Button>
       ) : null}
       {gestionar && puedeNuevaVersion ? (

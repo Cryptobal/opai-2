@@ -27,9 +27,18 @@ export async function versionDeCotizacion(ctx: Contexto, versionId: string) {
   return v;
 }
 
+const MENSAJE_NO_BORRADOR: Record<string, string> = {
+  en_aprobacion: "La cotización está en aprobación: espera la decisión o retira el pedido para editarla.",
+  lista: "La cotización está lista: usa «Reabrir para editar» si necesitas cambiarla.",
+  enviada: "La cotización ya fue enviada: crea una versión nueva para cambiarla.",
+};
+
 export function exigirBorrador(v: { estado: string }) {
   if (v.estado !== "borrador")
-    throw reglaDeNegocio("Solo se editan versiones en borrador; esta ya fue enviada o aprobada.");
+    throw reglaDeNegocio(
+      MENSAJE_NO_BORRADOR[v.estado] ?? "Solo se editan versiones en borrador; esta ya no se puede editar.",
+      { codigo: "no_es_borrador" },
+    );
 }
 
 export function exigirEditable(v: { estado: string }) {

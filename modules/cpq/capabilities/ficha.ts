@@ -4,49 +4,18 @@ import { defineCapability, noEncontrado } from "@opai/capabilities";
 
 import { PERMISO_COSTOS, PERMISO_READ } from "./permisos";
 import { cotizacionDe } from "./util";
-import { cargarFilasVersion, proyectarCalculo, recalcularVersion } from "../persistencia/recalcular";
-import { calculoCongelado } from "../persistencia/calculo-congelado";
+import { cargarFilasVersion, proyectarCalculo } from "../persistencia/recalcular";
+import { calculoVigente } from "../persistencia/calculo-vigente";
 import { metaFicha } from "../persistencia/ficha-meta";
 import { mesesContrato, versionParaFicha } from "../persistencia/version";
 import { INSTRUMENTOS_DEFECTO } from "../domain/motor/plantilla";
-import { instrumentosSchema, leerInstrumentos } from "../persistencia/instrumentos-version";
+import { margenesTenant } from "../persistencia/supuestos";
+import { leerInstrumentos } from "../persistencia/instrumentos-version";
+import { metaSchema, parametrosSchema } from "./ficha-esquemas";
 import { motorOutputSchema } from "./motor-esquemas";
 import { lineaDeFicha } from "./ficha-lineas";
 import type { CostoLineaFicha } from "../persistencia/costo-puesto-ficha";
 import { uuidSchema } from "./esquemas";
-
-const metaSchema = z.object({
-  fechaCalculo: z.string(),
-  validaHastaContrato: z.string().nullable(),
-  editable: z.boolean(),
-  avisoRecalculo: z
-    .object({ mensaje: z.string(), huellaActual: z.string().nullable() })
-    .nullable(),
-  aprobacion: z
-    .object({
-      id: uuidSchema,
-      bandejaId: z.string(),
-      estado: z.string(),
-      solicitadaPorId: uuidSchema,
-    })
-    .nullable(),
-  puedeEnviar: z.boolean(),
-  puedeAprobarMargen: z.boolean(),
-  motivoNoAprobarMargen: z.string().nullable(),
-  autoaprobacionMargen: z.boolean().nullable(),
-  requiereConfirmacionValoresViejos: z.boolean(),
-  requiereConfirmarMutual: z.boolean(),
-  costosLinea: z.record(z.string(), z.unknown()).optional(),
-});
-
-const parametrosSchema = z.object({
-  mesesContrato: z.number().int(),
-  mesesPactados: z.boolean(),
-  margenModo: z.string(),
-  margenObjetivoPct: z.number().int().nullable(),
-  sobrescrito: z.boolean(),
-  instrumentos: instrumentosSchema,
-});
 
 export const cotizacionesFicha = defineCapability({
   auditarLectura: (s) => [s.cotizacion.id],
@@ -98,13 +67,11 @@ export const cotizacionesFicha = defineCapability({
       where: { id: c.negocioId },
       select: { titulo: true, cuentaId: true },
     });
-    const r =
-      version.estado === "borrador" || version.estado === "en_aprobacion" || version.estado === "lista"
-        ? await recalcularVersion(ctx, input.id, input.version, false)
-        : calculoCongelado(ctx, version, lineas);
+    const r = await calculoVigente(ctx, input.id, version, lineas);
     if (!r) throw noEncontrado("La versión");
     const meta = await metaFicha(ctx, c.id, c.creadoPorId, version, lineas, r);
     const verCostos = ctx.autorizar(PERMISO_COSTOS);
+    const margenes = verCostos ? await margenesTenant(ctx) : null;
     return {
       cotizacion: {
         id: c.id,
@@ -129,7 +96,7 @@ export const cotizacionesFicha = defineCapability({
               mesesContrato: version.mesesContrato ?? mesesContrato(version.validaHasta),
               mesesPactados: version.mesesContrato !== null,
               margenModo: version.margenModo,
-              margenObjetivoPct: version.margenObjetivoPct,
+              margenObjetivoPct: version.margenObjetivoPct ?? margenes?.objetivoPct ?? null,
               sobrescrito: version.instrumentosJson !== null,
               instrumentos: leerInstrumentos(version.instrumentosJson) ?? INSTRUMENTOS_DEFECTO,
             },

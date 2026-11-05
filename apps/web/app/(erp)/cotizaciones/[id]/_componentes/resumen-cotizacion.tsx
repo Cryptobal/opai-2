@@ -8,7 +8,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
 import { avisosResumenCpq } from "@/lib/cpq-avisos-compactos";
 import { type AvisoServidorCpq } from "@/lib/cpq-avisos";
-import { estadoCpqBadge, ventaMensualTexto } from "@/lib/cpq-presentacion";
+import { estadoCpqBadge, tonoEstadoFicha, ventaMensualTexto } from "@/lib/cpq-presentacion";
 
 import { SemaforoMargenCpq } from "../../_componentes/semaforo-margen-cpq";
 import { type CostosEditables, PanelCostosCategoria } from "./panel-costos-categoria";
@@ -36,6 +36,7 @@ export function ResumenCotizacion({
   };
   meta?:
     | {
+        estadoFicha?: { estado: string; etiqueta: string };
         fechaCalculo?: string;
         validaHastaContrato?: string | null;
         avisoRecalculo?: { mensaje: string } | null;
@@ -51,15 +52,17 @@ export function ResumenCotizacion({
   const costoPendiente = !calculo.ventaMensual || Boolean(calculo.noEnviable);
   const ventaTxt = ventaMensualTexto(calculo.ventaMensual, costoPendiente);
   const ventaMostrar = typeof ventaTxt === "number" ? pesos(ventaTxt) : ventaTxt;
-  const badge = estadoCpqBadge(version.estado);
+  // Un solo estado visible (CAR-192): nada de «Requiere aprobación» junto a «Lista».
+  const estadoUnico = meta?.estadoFicha;
+  const badge = estadoUnico
+    ? { etiqueta: estadoUnico.etiqueta, tono: tonoEstadoFicha(estadoUnico.estado) }
+    : estadoCpqBadge(version.estado);
   const avisos = avisosResumenCpq(calculo);
   return (
     <SeccionTarjeta titulo="Resumen">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tono={badge.tono}>{badge.etiqueta}</Badge>
-          {calculo.requiereAprobacion ? <Badge tono="warning">Requiere aprobación</Badge> : null}
-          {calculo.noEnviable ? <Badge tono="warning">No enviable</Badge> : null}
         </div>
 
         <div>

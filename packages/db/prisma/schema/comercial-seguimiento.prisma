@@ -61,6 +61,9 @@ model Seguimiento {
   /// Token aleatorio de 128 bits de la dirección de respuesta (<token>@respuestas.opai.cl); único.
   token         String    @unique
   creadoPorId   String?   @map("creado_por_id") @db.Uuid
+  /// Cuándo se avisó al vendedor de la primera respuesta del cliente (una vez por seguimiento). Es campo
+  /// propio para no pisar el motivo de la pausa («manual», etc.).
+  avisadoEn     DateTime? @map("avisado_en") @db.Timestamptz(6)
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 

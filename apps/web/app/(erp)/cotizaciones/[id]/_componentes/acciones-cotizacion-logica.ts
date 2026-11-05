@@ -13,6 +13,8 @@ export type MetaAccionesCpq = {
   puedeAprobarMargen?: boolean;
   motivoNoAprobarMargen?: string | null;
   requiereConfirmarMutual?: boolean;
+  puedeReabrir?: boolean;
+  puedeCrearVersion?: boolean;
 };
 
 export type AccionPrimariaCpq = {

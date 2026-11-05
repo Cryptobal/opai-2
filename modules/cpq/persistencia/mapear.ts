@@ -1,4 +1,5 @@
 import type { Item, LineaItem, ModeloCosteo, Puesto, Rateo, VersionCalculo } from "../domain/motor/tipos";
+import { MARGENES_DEFECTO } from "../domain/margenes-defecto";
 import { instrumentosDeVersion } from "./instrumentos-version";
 import { mesesContrato, type VersionCtx } from "./version";
 
@@ -42,6 +43,7 @@ export function mapearVersionCalculo(
   lineas: FilaLinea[],
   modelo: ModeloCosteo,
   costos: readonly FilaCosto[] = [],
+  objetivoDefectoPct: number = MARGENES_DEFECTO.objetivoPct,
 ): VersionCalculo {
   const porSeccion = new Map(secciones.map((s) => [s.id, s]));
   const margenesSeccion = secciones
@@ -101,7 +103,8 @@ export function mapearVersionCalculo(
     modeloId: "seguridad",
     modeloVersion: 1,
     meses: version.mesesContrato ?? mesesContrato(version.validaHasta),
-    margenPct: version.margenObjetivoPct ?? 0,
+    // Un objetivo vacío nunca es 0 %: se usa el de la empresa (CAR-192).
+    margenPct: version.margenObjetivoPct ?? objetivoDefectoPct,
     margenModo: version.margenModo as VersionCalculo["margenModo"],
     ...(margenesSeccion.length ? { margenesSeccion } : {}),
     variables: {},
