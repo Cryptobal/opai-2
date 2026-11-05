@@ -28,7 +28,10 @@ export function pasosDeFicha(e: EntradaPasos): PasosFicha {
   const puestos = sinPuestos + e.avisosBloqueantes;
   // Sin puestos o con datos pendientes el margen no se puede juzgar: no cuenta como pendiente de Costos.
   const sinDatos = e.bloqueos.includes("sin_lineas") || e.bloqueos.includes("costos_pendientes");
-  const costos = sinDatos ? 0 : e.bloqueos.filter((b) => b === "desactualizada" || b === "margen_bajo").length;
+  const ajustes = sinDatos ? 0 : e.bloqueos.filter((b) => b === "desactualizada" || b === "margen_bajo").length;
+  // Datos pendientes que no son del puesto (p. ej. un valor legal que falta) se resuelven en Costos.
+  const faltaFuera = e.puestos > 0 && e.bloqueos.includes("costos_pendientes") && e.avisosBloqueantes === 0 ? 1 : 0;
+  const costos = ajustes + faltaFuera;
   // Documento y envío: «Dejar lista» (o pedir aprobación) y confirmar la mutual son lo que falta.
   const listo = e.estado === "lista_para_enviar" || CERRADAS.has(e.estado) || e.estado === "en_aprobacion";
   const delDocumento = (listo ? 0 : 1) + (e.mutualPendiente ? 1 : 0);

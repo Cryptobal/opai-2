@@ -38,8 +38,10 @@ export function ContenidoCostos(p: {
         </Alerta>
       ) : null}
       {estado === "margen_bajo" ? (
-        <Alerta tono="warning" titulo="Margen bajo el mínimo">
-          Sube el margen objetivo o pide aprobación para poder dejar la cotización lista.
+        <Alerta tono="warning" titulo={d.parametros ? "Margen bajo el mínimo" : "Necesita aprobación"}>
+          {d.parametros
+            ? "Sube el margen objetivo o pide aprobación para poder dejar la cotización lista."
+            : "Esta cotización necesita aprobación antes de dejarla lista."}
         </Alerta>
       ) : null}
       {avisos.map((a) => (
@@ -52,12 +54,14 @@ export function ContenidoCostos(p: {
           ) : null}
         </Alerta>
       ))}
-      <CostosAgrupados
-        calculo={calculo}
-        nombres={nombres}
-        pendiente={!calculo.ventaMensual || Boolean(calculo.noEnviable)}
-        {...(p.costos ? { costos: p.costos } : {})}
-      />
+      {d.parametros ? (
+        <CostosAgrupados
+          calculo={calculo}
+          nombres={nombres}
+          pendiente={!calculo.ventaMensual || Boolean(calculo.noEnviable)}
+          {...(p.costos ? { costos: p.costos } : {})}
+        />
+      ) : null}
       {d.parametros ? (
         <TarjetaMargenFinanzas parametros={d.parametros} editable={p.editable} onEditar={() => p.modales.setMargenAbierto(true)} />
       ) : null}

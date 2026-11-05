@@ -31,6 +31,12 @@ describe("pasosDeFicha", () => {
     expect(pend({ estado: "incompleta", puestos: 0, bloqueos: ["sin_lineas", "costos_pendientes", "margen_bajo"] })).toMatchObject({ puestos: 1, costos: 0 });
   });
 
+  it("un valor legal que falta (sin aviso de puesto) es pendiente de Costos", () => {
+    const r = pasosDeFicha({ ...base, estado: "incompleta", bloqueos: ["costos_pendientes"] });
+    expect(r.pasos.find((p) => p.bloque === "costos")?.pendientes).toBe(1);
+    expect(r.primeroAbierto).toBe("costos");
+  });
+
   it("abre el primer bloque con pendientes, en orden", () => {
     const r = pasosDeFicha({ ...base, tieneCuenta: false, puestos: 0, bloqueos: ["margen_bajo"] });
     expect(r.primeroAbierto).toBe("cliente");
