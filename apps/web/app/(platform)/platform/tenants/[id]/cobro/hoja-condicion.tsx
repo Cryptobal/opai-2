@@ -18,7 +18,11 @@ const entrada = (tenantId: string, moduloId: string, f: Formulario | null) => ({
   condicion: f
     ? {
         moneda: f.moneda,
-        precioMensual: f.precio,
+        forma: f.forma,
+        unidad: f.forma === "por_unidad" ? f.unidad || null : null,
+        precio: f.precio,
+        minimoMensual: f.minimo || null,
+        pasaACobro: f.pasaACobro,
         cobroDesde: f.cobroDesde || null,
         pruebaHasta: f.pruebaHasta || null,
         descuentoPorcentaje: Number(f.descuento.replace(",", ".") || "0"),
@@ -44,7 +48,9 @@ export function HojaCondicion(props: {
   const [calculo, setCalculo] = useState<Calculo | null>(null);
   const [quitar, setQuitar] = useState(false);
   const moduloId = modulo?.moduloId ?? "";
-  const listo = Boolean(moduloId && f.precio && (f.cobroDesde || f.pruebaHasta));
+  const listo = Boolean(
+    moduloId && f.precio && (f.forma === "fijo" || f.unidad) && (f.cobroDesde || f.pruebaHasta),
+  );
 
   useEffect(() => {
     if (!listo) return;
@@ -75,7 +81,7 @@ export function HojaCondicion(props: {
       abierto={Boolean(modulo)}
       onCerrar={onCerrar}
       titulo={modulo ? `Cobro de ${modulo.nombre}` : "Cobro"}
-      descripcion="Precio mensual de este módulo para esta empresa. No se emite ninguna factura."
+      descripcion="Precio de este módulo para esta empresa: fijo al mes, o por unidad según lo que se cuente. No se emite ninguna factura."
       acciones={
         <>
           {modulo?.condicion ? (
@@ -99,6 +105,7 @@ export function HojaCondicion(props: {
         <VistaPreviaCobro
           calculo={listo ? calculo : null}
           moneda={f.moneda}
+          unidad={f.forma === "por_unidad" && f.unidad ? f.unidad : null}
           pendiente={pendiente}
           listo={listo}
         />

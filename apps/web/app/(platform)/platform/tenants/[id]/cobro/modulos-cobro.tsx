@@ -9,6 +9,7 @@ import {
   clp,
   ESTADOS_MODULO,
   type ModuloCobro,
+  textoCantidad,
   textoCondicion,
 } from "../../../facturacion/_componentes/cobro";
 import { HojaCondicion } from "./hoja-condicion";
@@ -46,6 +47,11 @@ export function ModulosCobro({ tenantId, modulos }: { tenantId: string; modulos:
                   <span className="t-numeric text-base font-semibold text-fg">
                     {clp(m.calculo.montoClp)}
                   </span>
+                  {m.calculo.cantidad !== null ? (
+                    <span className="t-caption">
+                      {textoCantidad(m.calculo.cantidad, m.condicion?.unidad ?? null)}
+                    </span>
+                  ) : null}
                   <span className="t-caption">
                     {m.calculo.diasCobrados < m.calculo.diasMes
                       ? `${m.calculo.diasCobrados} de ${m.calculo.diasMes} días`

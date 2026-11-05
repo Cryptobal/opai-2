@@ -9,8 +9,8 @@ import { ModulosCobro } from "./modulos-cobro";
 export const metadata = { title: "Cobro de la empresa" };
 
 /**
- * Plataforma → empresa · Cobro (CAR-188, ADR-071): condición comercial de cada módulo (precio
- * mensual en CLP o UF, inicio del cobro, fin de la prueba y descuento), si se factura este mes y por
+ * Plataforma → empresa · Cobro (CAR-188, ADR-071): plan base y condición comercial de cada módulo
+ * (precio fijo o por unidad con mínimo, inicio del cobro, prueba y descuento), si se factura este mes y por
  * qué, y los cargos listos para facturar de meses anteriores.
  */
 export default function Pagina({ params }: { params: Promise<{ id: string }> }) {
@@ -33,7 +33,7 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
           <div className="flex flex-col gap-6">
             <section className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between gap-3">
-                <h3 className="t-subheading text-fg">Módulos</h3>
+                <h3 className="t-subheading text-fg">Plan base y módulos</h3>
                 <span className="t-caption">
                   {nombreMes(periodo)}: {empresa?.facturables ?? 0} se facturan
                 </span>

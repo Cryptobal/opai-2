@@ -90,8 +90,8 @@ export default function Facturacion({ searchParams }: { searchParams: SearchPara
                     }
                   : {})}
               />
-              <KpiTile etiqueta="Módulos que se facturan" valor={String(t.facturables)} />
-              <KpiTile etiqueta="Contratados sin facturar" valor={String(t.noFacturables)} />
+              <KpiTile etiqueta="Se facturan" valor={String(t.facturables)} />
+              <KpiTile etiqueta="No se facturan" valor={String(t.noFacturables)} />
               <KpiTile
                 etiqueta="Empresas que facturan"
                 valor={`${resumen.empresas.filter((e) => e.facturables > 0).length} de ${resumen.empresas.length}`}

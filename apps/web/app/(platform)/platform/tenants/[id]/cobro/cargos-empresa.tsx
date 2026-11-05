@@ -6,7 +6,13 @@ import { Alerta, avisar, Badge, Button, Campo, Empty, Input, Sheet } from "@opai
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { type Cargo, clp, enMoneda, nombreMes } from "../../../facturacion/_componentes/cobro";
+import {
+  type Cargo,
+  clp,
+  enMoneda,
+  nombreMes,
+  textoCantidad,
+} from "../../../facturacion/_componentes/cobro";
 
 /** Cargos de la empresa, del más reciente al más antiguo; un cargo listo se puede anular con motivo. */
 export function CargosEmpresa(props: {
@@ -50,6 +56,7 @@ export function CargosEmpresa(props: {
                 {nombres[c.moduloId] ?? c.moduloId} · {nombreMes(c.periodo)}
               </span>
               <span className="t-caption">
+                {c.cantidad !== null ? `${textoCantidad(c.cantidad, c.unidad)} · ` : ""}
                 {c.moneda === "UF" ? `${enMoneda(c.monto, "UF")} · ` : ""}
                 {c.diasCobrados < c.diasMes
                   ? `${c.diasCobrados} de ${c.diasMes} días`
