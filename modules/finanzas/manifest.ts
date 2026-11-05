@@ -141,6 +141,7 @@ export const manifest = defineModule({
     { id: "finanzas.cobranza.gestion_registrada", descripcion: "Se anotó una gestión de cobranza hecha fuera del sistema." },
     { id: "finanzas.venta.nota_credito_emitida", descripcion: "Se emitió una nota de crédito con referencia." },
     { id: "finanzas.venta.cedida", descripcion: "Se registró una cesión de factoring sobre una factura." },
+    { id: "finanzas.venta.cesion_anulada", descripcion: "El RPETC anuló una cesión: la factura vuelve a ser cobrable y se puede ceder de nuevo (aviso solo por campana)." },
     { id: "finanzas.programacion.creada", descripcion: "Se creó una programación de facturación recurrente." },
     { id: "finanzas.programacion.actualizada", descripcion: "Cambió una programación de facturación recurrente." },
     { id: "finanzas.programacion.activada", descripcion: "Se activó una programación de facturación recurrente." },

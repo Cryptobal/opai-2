@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 import {
-  AMBIENTES_SII,
   type AmbienteSii,
   ivaDesdeNeto,
   type MontosDteVenta,
 } from "@opai/domain";
+import { ambienteTributarioEfectivo } from "@opai/integrations";
 
 import { uuidSchema } from "../core/esquemas";
 import { noEncontrado, reglaDeNegocio } from "../errores";
@@ -124,9 +124,8 @@ export async function cotizacionDe(ctx: Contexto, id: string, cuentaId: string) 
 
 export async function ambienteDe(ctx: Contexto): Promise<AmbienteSii> {
   const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
-  const amb = cfg?.ambiente ?? "certificacion";
-  if (!(AMBIENTES_SII as readonly string[]).includes(amb)) return "certificacion";
-  return amb as AmbienteSii;
+  // Candado de ambiente (CAR-191): «produccion» solo rige en app.opai.cl con la variable habilitada.
+  return ambienteTributarioEfectivo(cfg?.ambiente);
 }
 
 export async function rutEmisorDe(ctx: Contexto): Promise<string> {
