@@ -134,6 +134,8 @@ jobs:
             fi
             if [ -n "$ACTUAL" ]; then
               echo "::add-mask::$ACTUAL"
+              case "$ACTUAL" in postgres*://*@*) FORMA="url";; *) FORMA="otra (largo ${#ACTUAL})";; esac
+              echo "Forma de la DATABASE_URL bajada: $FORMA."
               # Mismo host que la URL con pooler que entrega Neon para esta rama (se compara con la
               # URL y no con db_host_pooled, que puede venir en otro formato).
               HOST_RAMA=$(echo "$DB_URL_POOLED" | sed -E 's#^[a-z]+://[^@]+@([^/:?]+).*#\1#')
