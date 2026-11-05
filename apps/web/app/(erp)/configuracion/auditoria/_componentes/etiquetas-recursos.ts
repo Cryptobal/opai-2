@@ -26,7 +26,7 @@ export const RECURSOS: Record<string, string> = {
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
   planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja",
   derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios",
-  cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", reglas_banco: "Reglas del banco",
+  cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", impuestos: "Impuestos", reglas_banco: "Reglas del banco",
   tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", compartir: "Compartir cotización", lineas: "Líneas",
   versiones: "Versiones", secciones: "Secciones", correlativos: "Correlativos",
   catalogo_categorias: "Categorías del catálogo", catalogo_items: "Ítems del catálogo", sueldos_referencia: "Sueldos de referencia", costos_categoria: "Costos por categoría",

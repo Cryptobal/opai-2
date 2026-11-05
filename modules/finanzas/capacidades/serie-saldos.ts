@@ -5,6 +5,7 @@ import { calcularPlanilla, semanasDesde, sumarSemanas, type CeldaFlujo } from ".
 import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { celdasCobrosEsperados } from "./cobros-esperados";
+import { celdasDiferenciaFactoring, celdasImpuestos } from "./impuestos-planilla";
 import { FILAS_VIRTUALES_DOMINIO } from "./filas-virtuales";
 import { aNumeroSeguro } from "./esquemas";
 import { aFecha, aIso, cargarFlujo, hoyIso, lunesHoy } from "./util";
@@ -60,8 +61,9 @@ export async function serieSaldos(
     tx,
   );
   const cobros = await celdasCobrosEsperados(ctx, listaCalc);
-  const celdasCalc = [...pasada.dominio, ...cobros.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista];
+  const impuestos = await celdasImpuestos(ctx, listaCalc);
+  const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio];
+  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, listaCalc))];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,
@@ -135,8 +137,9 @@ async function serieDesdeAjustes(
     tx,
   );
   const cobros = await celdasCobrosEsperados(ctx, lista);
-  const celdasCalc = [...pasada.dominio, ...cobros.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista];
+  const impuestos = await celdasImpuestos(ctx, lista);
+  const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio];
+  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, lista))];
   const calculo = calcularPlanilla({
     saldoInicial: saldoPrevio,
     umbral: ajustes.umbral,

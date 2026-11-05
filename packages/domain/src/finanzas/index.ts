@@ -9,6 +9,7 @@ export * from "./ventas-nc";
 export * from "./proyeccion-flujo";
 export * from "./flujo-semana";
 export * from "./cobro-esperado";
+export * from "./iva-ppm";
 export * from "./dte-consulta-sii";
 export * from "./cesion-calculo";
 export * from "./bancos";

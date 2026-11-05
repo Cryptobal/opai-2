@@ -348,6 +348,7 @@ finanzas_filas_listar
 finanzas_flujo_importar
 finanzas_folios_listar
 finanzas_hoy_resumen
+finanzas_impuestos_postergar_iva
 finanzas_movimientos_bancarios_listar
 finanzas_plan_actualizar
 finanzas_plan_crear
@@ -622,6 +623,7 @@ preview_finanzas_filas_actualizar
 preview_finanzas_filas_archivar
 preview_finanzas_filas_crear
 preview_finanzas_flujo_importar
+preview_finanzas_impuestos_postergar_iva
 preview_finanzas_plan_actualizar
 preview_finanzas_plan_crear
 preview_finanzas_plan_inicializar

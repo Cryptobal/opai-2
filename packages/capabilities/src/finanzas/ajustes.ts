@@ -66,4 +66,31 @@ export const ajustesFinanzas = z.object({
       // Lo que sale solo al cliente lo enciende una persona, nunca un agente (revisión de #263).
       soloPersonas: true,
     }),
+  flujo_tasa_ppm_bps: z
+    .number()
+    .int()
+    .min(0)
+    .max(1_000)
+    .default(0)
+    .meta({
+      etiqueta: "Tasa de PPM sobre las ventas (puntos base)",
+      ayuda:
+        "100 = 1 %. Se aplica a las ventas netas y exentas de cada mes y se proyecta en el flujo de caja el mes siguiente, junto con el IVA. 0 desactiva la proyección del PPM.",
+      grupo: "Flujo de caja",
+      ambito: "tenant",
+      permiso: "finanzas:flujo.configurar",
+      control: "numero",
+    }),
+  flujo_cuenta_diferencia_factoring: z
+    .enum(["Diferencia factoring", "Gasto financiero"])
+    .default("Diferencia factoring")
+    .meta({
+      etiqueta: "Cuenta de la diferencia del factoring",
+      ayuda:
+        "Cuando una factura se cede, el factor deposita el monto menos su descuento; la diferencia se muestra en el flujo bajo esta cuenta, solo como información (no suma al saldo).",
+      grupo: "Flujo de caja",
+      ambito: "tenant",
+      permiso: "finanzas:flujo.configurar",
+      control: "seleccion",
+    }),
 });

@@ -6,7 +6,8 @@ import { ajustesSchema, aNumeroSeguro, celdaSchema, filaSchema, saldoSchema, sem
 import type { capaSchema } from "./esquemas";
 import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
-import { FILAS_VIRTUALES_VISTA } from "./filas-virtuales";
+import { FILA_DIFERENCIA_FACTORING, FILAS_VIRTUALES_VISTA, filaDiferenciaFactoringVista } from "./filas-virtuales";
+import { cuentaDiferenciaFactoring } from "./impuestos-planilla";
 import { desdeVentana, SEMANAS_HISTORIA, serieSaldos } from "./serie-saldos";
 import { aIso, ajustesDe, lunesHoy } from "./util";
 
@@ -122,6 +123,7 @@ export const planillaObtener = defineCapability({
       filas: [
         ...filas.map(vistaFila),
         ...FILAS_VIRTUALES_VISTA.filter((f) => extraVista.some((c) => c.filaId === f.id)),
+        ...(extraVista.some((c) => c.filaId === FILA_DIFERENCIA_FACTORING) ? [filaDiferenciaFactoringVista(await cuentaDiferenciaFactoring(ctx))] : []),
       ],
       celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,

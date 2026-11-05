@@ -5,6 +5,7 @@ import { configSet } from "./set";
 
 export { defineAjustes, type CampoAjuste, type MetaAjuste } from "./registro";
 export { ajuste, valoresEfectivos } from "./valores";
+export { campoAjuste } from "./catalogo";
 
 export const capacidadesConfig: readonly Capacidad[] = [
   configSchema,

@@ -89,6 +89,21 @@ model FlujoCobroEsperado {
   @@schema("finanzas")
 }
 
+/// Meses cuyo IVA se posterga de M+1 a M+2 en el flujo (ADR-073, regla 5). Sin fila rige M+1.
+model FlujoIvaPostergado {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  /// Mes del IVA, «aaaa-mm».
+  periodo     String
+  createdById String?  @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, periodo])
+  @@map("flujo_iva_postergado")
+  @@schema("finanzas")
+}
+
 /// Ajustes del flujo por empresa (una fila por tenant): saldo inicial del horizonte y umbral de alerta.
 model FlujoAjustes {
   id           String   @id @default(uuid(7)) @db.Uuid
