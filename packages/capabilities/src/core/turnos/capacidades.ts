@@ -58,9 +58,9 @@ export const turnosEsperadosListar = defineCapability({
       where: {
         fecha: { gte: new Date(`${input.desde}T00:00:00.000Z`), lte: new Date(`${input.hasta}T00:00:00.000Z`) },
         ...(input.incluirNoVigentes ? {} : { vigente: true }),
-        ...(input.instalacionId ? { instalacionId: input.instalacionId } : {}),
+        // El alcance del supervisor se combina con el filtro pedido (AND), nunca lo reemplaza.
+        AND: [dondeInstalacionId(ctx), input.instalacionId ? { instalacionId: input.instalacionId } : {}],
         ...(input.personaId ? { personaId: input.personaId } : {}),
-        ...dondeInstalacionId(ctx),
       },
       orderBy: [{ inicio: "asc" }, { version: "asc" }],
       take: LIMITE + 1,

@@ -155,4 +155,28 @@ describe.skipIf(!urlPropietario)("Turnos esperados · núcleo (Postgres real)", 
       }),
     ).rejects.toThrow();
   });
+
+  it("el alcance del supervisor se combina con la instalación pedida", async () => {
+    const sup = (instalaciones: readonly string[]) =>
+      mod.crearContexto({
+        tenantId: t.A, actor: { tipo: "user", id: randomUUID() }, portal: "erp", portalesMembresia: ["erp"],
+        rol: "supervisor", alcance: { instalaciones }, modulosActivos: [], medidor,
+      });
+    const otra = (await e.admin.instalacion.create({ data: { tenantId: t.A, cuentaId: (await e.admin.cuenta.findFirstOrThrow({ where: { tenantId: t.A } })).id, nombre: "Otra planta" } })).id;
+    const pedir = (c: ReturnType<typeof sup>, instalacionId: string) =>
+      ejecutar(c, "core.turnos_esperados.listar", { instalacionId, ...RANGO });
+    const propia = await pedir(sup([inst.A]), inst.A);
+    expect(propia.ok && (propia.data as { items: unknown[] }).items.length).toBeGreaterThan(0);
+    const ajena = await pedir(sup([inst.A]), otra);
+    expect(ajena.ok && (ajena.data as { items: unknown[] }).items).toEqual([]);
+    const sinAlcance = await pedir(sup([]), inst.A);
+    expect(sinAlcance.ok && (sinAlcance.data as { items: unknown[] }).items).toEqual([]);
+  });
+
+  it("quien deja de tener vínculo vigente pierde sus turnos de jornada pactada", async () => {
+    await e.admin.vinculoLaboral.updateMany({ where: { tenantId: t.C, personaId: persona.otra }, data: { estado: "terminado" } });
+    const r = await ejecutar(ctx(t.C, []), "core.turnos_esperados.regenerar", RANGO);
+    expect(r.ok && r.data).toMatchObject({ anulados: DIAS_HABILES });
+    expect(await listar(t.C, inst.C)).toHaveLength(0);
+  });
 });

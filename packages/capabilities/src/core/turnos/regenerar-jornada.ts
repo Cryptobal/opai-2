@@ -1,4 +1,4 @@
-import { derivarTurnosDeJornada, type JornadaPactada } from "@opai/domain";
+import { derivarTurnosDeJornada, type JornadaPactada, type TurnoEsperadoDerivado } from "@opai/domain";
 
 import type { Contexto } from "../../types";
 import { feriadosDelMes } from "../../pauta/feriados";
@@ -61,12 +61,30 @@ export async function regenerarJornada(
   }
 
   const salida = { ...resumenVacio(), avisos: [] as { personaId: string; motivo: string }[] };
-  // Una persona a la vez: cada una tiene su propia jornada y sus propios feriados por instalación.
+  // Una vez por persona: con dos vínculos vigentes se juntan sus turnos para no anularse entre sí.
+  const turnosPorPersona = new Map<string, TurnoEsperadoDerivado[]>();
   for (const j of jornadas) {
     const r = derivarTurnosDeJornada([j], desde, hasta, zona, (f) => feriados.get(j.instalacionId)?.has(f) ?? false);
     salida.avisos.push(...r.avisos);
+    const acumulado = turnosPorPersona.get(j.personaId) ?? [];
+    for (const t of r.turnos)
+      if (!acumulado.some((x) => x.inicio.getTime() === t.inicio.getTime())) acumulado.push(t);
+    turnosPorPersona.set(j.personaId, acumulado);
+  }
+  // Quien tenía turnos de jornada pactada y ya no tiene vínculo vigente: se anulan (sin fantasmas).
+  const huerfanos = await ctx.db.turnoEsperado.findMany({
+    where: {
+      vigente: true, origen: "jornada_pactada",
+      fecha: { gte: new Date(`${desde}T00:00:00.000Z`), lte: new Date(`${hasta}T00:00:00.000Z`) },
+      ...(personaIds ? { personaId: { in: [...personaIds] } } : {}),
+    },
+    select: { personaId: true },
+    distinct: ["personaId"],
+  });
+  for (const h of huerfanos) if (!turnosPorPersona.has(h.personaId)) turnosPorPersona.set(h.personaId, []);
+  for (const [personaId, turnos] of turnosPorPersona) {
     const resumen = await ctx.transaccion((tx) =>
-      reconciliar(tx, ctx.tenantId, { origen: "jornada_pactada", personaIds: [j.personaId], desde, hasta }, r.turnos, simular),
+      reconciliar(tx, ctx.tenantId, { origen: "jornada_pactada", personaIds: [personaId], desde, hasta }, turnos, simular),
     );
     Object.assign(salida, sumar(salida, resumen));
   }
