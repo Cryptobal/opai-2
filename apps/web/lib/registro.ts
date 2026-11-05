@@ -10,11 +10,12 @@ import {
   registrarConsumidores,
   registrarModulos,
   registrarTrabajos,
+  trabajoCobrosMesAnterior,
   trabajosComercial,
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
-import { consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente } from "@opai/modules";
+import { consumidorCpqBandeja, consumidorCpqEnlace, modulos, trabajosAgente, trabajosCpq } from "@opai/modules";
 
 let hecho = false;
 
@@ -36,6 +37,8 @@ export function asegurarRegistro(): void {
     ...trabajosFinanzas,
     ...trabajosComercial,
     ...trabajosAgente,
+    ...trabajosCpq,
+    trabajoCobrosMesAnterior,
   ]);
   registrarConsumidores([
     ...consumidoresDelNucleo,

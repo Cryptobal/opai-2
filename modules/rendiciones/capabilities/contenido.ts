@@ -25,7 +25,11 @@ const kmTexto = (n: number) => n.toLocaleString("es-CL", { maximumFractionDigits
 function gastoDeViaje(v: Viaje, c: CalculoViaje): Gasto {
   const km = c.calculo.kmEfectivos;
   return {
-    fecha: v.fecha, proveedor: "Kilometraje", monto: c.calculo.montoClp,
+    fecha: v.fecha,
+    proveedor: "Kilometraje",
+    monto: c.calculo.montoClp,
+    tipoDocumento: "boleta",
+    ...(v.peajeDocumentoId && v.peajeClp > 0 ? { documentoId: v.peajeDocumentoId } : {}),
     descripcion: `Viaje: ${v.origen.texto} → ${v.destino.texto} (${kmTexto(km)} km)`.slice(0, 200),
     sinRespaldoMotivo: "Kilometraje calculado por el sistema",
   };
@@ -34,11 +38,20 @@ function gastoDeViaje(v: Viaje, c: CalculoViaje): Gasto {
 /** Valida y arma el contenido; cualquier monto que mande el cliente en un viaje se descarta. */
 export async function contenidoDe(ctx: Contexto, input: CuerpoEntrada, tipo: TipoRendicion, propiaId?: string): Promise<Contenido> {
   if (tipo === "kilometraje") {
-    if (!input.viaje) throw reglaDeNegocio("Una rendición de kilometraje necesita los datos del viaje.");
+    if (!input.viaje)
+      throw reglaDeNegocio("Una rendición de kilometraje necesita los datos del viaje.");
     if (input.viaje.fecha > hoyChile()) throw reglaDeNegocio("El viaje tiene fecha futura.");
     const calculo = await calcularViaje(ctx, input.viaje);
     const items = [gastoDeViaje(input.viaje, calculo)];
-    return { tipo, items, montoTotal: calculo.calculo.montoClp, advertencias: calculo.calculo.advertencias, viaje: { datos: input.viaje, calculo } };
+    // La foto del peaje, si hay, debe ser un documento propio ya subido (la regla de siempre).
+    await validarItems(ctx, items);
+    return {
+      tipo,
+      items,
+      montoTotal: calculo.calculo.montoClp,
+      advertencias: calculo.calculo.advertencias,
+      viaje: { datos: input.viaje, calculo },
+    };
   }
   if (!input.items || input.items.length === 0) throw reglaDeNegocio("Agrega al menos un gasto.");
   await validarItems(ctx, input.items);
@@ -55,5 +68,7 @@ export async function guardarViaje(tx: Contexto["db"], tenantId: string, rendici
     montoCalculado: c.calculo.montoClp,
     configSnapshot: { config: c.config, tramo: v.tramo ?? null, desglose: c.calculo.desglose },
   };
-  await tx.rendicionViaje.upsert({ where: { rendicionId }, create: { ...datos, rendicionId }, update: datos });
+  // tenantId explícito también al buscar: nunca se toca el viaje de otra empresa, aunque la RLS ya lo impide.
+  const n = await tx.rendicionViaje.updateMany({ where: { rendicionId, tenantId }, data: datos });
+  if (n.count === 0) await tx.rendicionViaje.create({ data: { ...datos, rendicionId } });
 }

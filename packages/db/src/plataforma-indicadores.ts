@@ -5,6 +5,19 @@ import type { TenantTx } from "./transaccion";
 
 const CLAVES = ["imm", "topes", "afp", "sis", "cesantia"];
 
+/** UF vigente a un día: centavos de CLP y el día desde el que rige; null si no hay. Global, sin RLS. */
+export async function leerUfAlDia(db: Pick<TenantTx, "valorPublicado">, dia: Date) {
+  const fila = await db.valorPublicado.findFirst({
+    where: { estado: "vigente", vigenteDesde: { lte: dia }, indicador: { clave: "uf" } },
+    orderBy: { vigenteDesde: "desc" },
+    select: { valorJson: true, vigenteDesde: true },
+  });
+  const n = Number(fila?.valorJson);
+  return fila && Number.isSafeInteger(n) && n > 0
+    ? { centavos: n, desde: fila.vigenteDesde }
+    : null;
+}
+
 export function operacionesIndicadoresPlataforma() {
   const db = clienteApp();
   return {
@@ -29,6 +42,8 @@ export function operacionesIndicadoresPlataforma() {
         }),
       );
     },
+    /** UF publicada vigente a un día (centavos de CLP), con el día desde el que rige (CAR-188). */
+    ufAlDia: (dia: Date) => leerUfAlDia(db, dia),
     /** Última captura de cada indicador previsional, para el aviso de «fuente caída». */
     capturasPrevisionales: async () => {
       const filas = await db.capturaIndicador.findMany({

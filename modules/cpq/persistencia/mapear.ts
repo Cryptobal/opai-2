@@ -44,6 +44,7 @@ export function mapearVersionCalculo(
   modelo: ModeloCosteo,
   costos: readonly FilaCosto[] = [],
   objetivoDefectoPct: number = MARGENES_DEFECTO.objetivoPct,
+  patrones: ReadonlyMap<string, NonNullable<Puesto["patronDef"]>> = new Map(),
 ): VersionCalculo {
   const porSeccion = new Map(secciones.map((s) => [s.id, s]));
   const margenesSeccion = secciones
@@ -64,6 +65,7 @@ export function mapearVersionCalculo(
           tipo: "puesto",
           posiciones: l.posiciones,
           patron: l.patron ?? "4x4",
+          patronDef: patrones.get(claveDePatron(l.patron ?? "4x4")),
           horaInicio: l.horaInicio ?? "08:00",
           horaFin: l.horaFin ?? "20:00",
           diasCobertura: l.diasSemana?.length ? l.diasSemana.length : (l.diasCobertura ?? 7),
@@ -115,3 +117,6 @@ export function mapearVersionCalculo(
 }
 
 export { slugSeccion };
+
+/** Misma comparación que el motor: «4×4» y «4x4» son el mismo patrón. */
+export const claveDePatron = (nombre: string) => nombre.replace("×", "x");

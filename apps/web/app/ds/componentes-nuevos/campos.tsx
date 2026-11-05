@@ -54,6 +54,9 @@ export function MuestraCampos() {
         <Campo etiqueta="Monto CLP" htmlFor="m1" ayuda={`Valor guardado: ${monto || "vacío"}`}>
           <InputMonto id="m1" valor={monto} onCambiar={setMonto} placeholder="0" />
         </Campo>
+        <Campo etiqueta="Hora · cuartos (00, 15, 30, 45)" htmlFor="h3" ayuda="La lista ofrece horas 00 a 23 y minutos de 15 en 15; otro minuto se escribe con la máscara.">
+          <SelectorHora id="h3" valor="08:15" onCambiar={() => undefined} />
+        </Campo>
         <Campo etiqueta="Hora · inválida" htmlFor="h2">
           <SelectorHora id="h2" valor="" onCambiar={() => undefined} invalido />
         </Campo>

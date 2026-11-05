@@ -63,11 +63,14 @@ export const VERBOS: Record<string, string> = {
   registrar_respuesta: "Registrar respuesta del cliente", registrar_paso: "Registrar paso",
   enviar_paso: "Enviar paso", recibir_correo: "Recibir correo del cliente",
   cumplir: "Cumplir", guardar: "Guardar", saldo_sugerido: "Saldo sugerido", manual: "Manual",
-  comentar: "Comentar", reasignar: "Reasignar", simular: "Simular", clonar: "Clonar", calcular: "Calcular",
+  comentar: "Comentar", reasignar: "Reasignar", simular: "Simular", clonar: "Clonar", calcular: "Calcular", consultar: "Consultar",
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
   preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
   resultados: "Resultado por mes", uf_utm: "UF y UTM",
+  // Cobro por módulo (CAR-188).
+  condiciones_set: "Fijar condición comercial", cargos_generar: "Generar cargos del mes",
+  cargos_list: "Listar cargos", cargo_anular: "Anular cargo",
 };

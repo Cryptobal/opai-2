@@ -30,9 +30,14 @@ export function AccionesFicha(p: {
   onEnviar: () => void;
   onVistaPrevia: () => void;
   onCompletar: () => void;
+  /** «fija»: solo la acción principal, para la barra fija de abajo en teléfono. */
+  modo?: "resumen" | "fija";
 }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const { meta, cotizacionId } = p;
+  const fija = p.modo === "fija";
+  // En teléfono la acción principal va fija abajo; en el resumen solo se ve desde md.
+  const clase = fija ? "w-full" : "hidden md:inline-flex";
   const accion = meta?.estadoFicha?.siguiente.accion ?? "ninguna";
   const despues = (r: unknown) => void (r != null && (limpiarError(), p.onHecho()));
 
@@ -55,17 +60,17 @@ export function AccionesFicha(p: {
   let primaria: React.ReactNode = null;
   if (p.gestionar && meta?.estadoFicha) {
     const etiqueta = meta.estadoFicha.siguiente.etiqueta;
-    if (accion === "completar") primaria = <Button type="button" onClick={p.onCompletar}>{etiqueta}</Button>;
-    else if (accion === "recalcular") primaria = <Button type="button" disabled={pendiente} onClick={recalcular}>{etiqueta}</Button>;
+    if (accion === "completar") primaria = <Button type="button" className={clase} onClick={p.onCompletar}>{etiqueta}</Button>;
+    else if (accion === "recalcular") primaria = <Button type="button" className={clase} disabled={pendiente} onClick={recalcular}>{etiqueta}</Button>;
     else if (accion === "pedir_aprobacion")
-      primaria = <Button type="button" disabled={pendiente} onClick={pedirAprobacion}>{etiqueta}</Button>;
+      primaria = <Button type="button" className={clase} disabled={pendiente} onClick={pedirAprobacion}>{etiqueta}</Button>;
     else if (accion === "dejar_lista")
-      primaria = <Button type="button" disabled={pendiente} onClick={dejarLista}>{etiqueta}</Button>;
+      primaria = <Button type="button" className={clase} disabled={pendiente} onClick={dejarLista}>{etiqueta}</Button>;
     else if (accion === "enviar")
       primaria = meta.requiereConfirmarMutual ? (
-        <EnlaceBoton href={RUTA_CONFIRMAR_MUTUAL}>Confirmar mutual para enviar</EnlaceBoton>
+        <EnlaceBoton href={RUTA_CONFIRMAR_MUTUAL} className={clase}>Confirmar mutual para enviar</EnlaceBoton>
       ) : (
-        <Button type="button" disabled={pendiente} onClick={p.onEnviar}>
+        <Button type="button" className={clase} disabled={pendiente} onClick={p.onEnviar}>
           <Send className="size-4" aria-hidden />
           {etiqueta}
         </Button>
@@ -81,6 +86,13 @@ export function AccionesFicha(p: {
     limpiarError,
     onHecho: p.onHecho,
   });
+  if (fija)
+    return primaria ? (
+      <div className="space-y-2">
+        {primaria}
+        {error ? <Alerta tono="danger" titulo={error} /> : null}
+      </div>
+    ) : null;
   const decide = p.aprobar && accion === "esperar" && Boolean(meta?.puedeAprobarMargen || meta?.motivoNoAprobarMargen);
   return (
     <div className="flex min-w-0 flex-col gap-2">

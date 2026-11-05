@@ -2,7 +2,7 @@ import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { ACTIVOS, FILA_ING, S0, semilla } from "./fixtures";
+import { ACTIVOS, FILA_EGR, S0, semilla } from "./fixtures";
 import { MONTO_FLUJO_MAX } from "./esquemas";
 import { capacidades } from "./index";
 
@@ -17,13 +17,13 @@ describe("finanzas flujo · saldos acumulados grandes", () => {
   it("planilla.obtener sigue sin INVALID_OUTPUT con dos celdas al tope", async () => {
     const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS });
     const creada = await executeCapability(ctx, "finanzas.filas.crear", {
-      seccion: "ingreso",
-      etiqueta: "TEST QA Cliente B",
+      seccion: "egreso",
+      etiqueta: "TEST QA Proveedor B",
       arrastre: false,
     });
     if (!creada.ok) throw new Error(JSON.stringify(creada));
     const filaExtra = (creada as { ok: true; data: { id: string } }).data.id;
-    for (const filaId of [FILA_ING, filaExtra]) {
+    for (const filaId of [FILA_EGR, filaExtra]) {
       const f = await executeCapability(ctx, "finanzas.celdas.fijar", {
         filaId,
         semana: S0,
@@ -31,7 +31,8 @@ describe("finanzas flujo · saldos acumulados grandes", () => {
       });
       expect(f).toMatchObject({ ok: true });
     }
-    const saldoEsperado = 100 + MONTO_FLUJO_MAX + MONTO_FLUJO_MAX - 300;
+    // Ingreso planificado 1000 de la semilla; dos egresos al tope reemplazan o se suman.
+    const saldoEsperado = 100 + 1000 - MONTO_FLUJO_MAX - MONTO_FLUJO_MAX;
     const planilla = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 1 });
     if (!planilla.ok) throw new Error(JSON.stringify(planilla));
     const sem = (planilla.data as { semanas: { saldoFinal: number }[] }).semanas;

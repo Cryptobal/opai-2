@@ -7,3 +7,6 @@ export const PERMISO_APROBAR = "rendiciones:aprobar";
 export const PERMISO_VER_TODAS = "rendiciones:ver_todas";
 /** Cambiar la configuración del módulo (respaldo obligatorio, aprobador por defecto). */
 export const PERMISO_CONFIG = "rendiciones:config.manage";
+
+/** Portales donde se rinde (ADR-033): el ERP y el portal Supervisor (CAR-197). Aprobar sigue solo en el ERP. */
+export const PORTALES_RENDIR = ["erp", "supervisor"] as const;

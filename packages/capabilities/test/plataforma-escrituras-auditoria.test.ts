@@ -9,6 +9,7 @@ import { executeCapability } from "../src/execute";
 import { defineModule, limpiarModulos, registrarModulos } from "../src/module";
 import { limpiarRegistro, listarCapacidades, registrarCapacidades } from "../src/registry";
 import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
+import { cargoDePrueba } from "./plataforma-cobros-semilla";
 import { semillaTenant, U2 } from "./semilla";
 
 beforeEach(() => {
@@ -36,6 +37,7 @@ const TRABAJO_PENDIENTE = "0192f3a0-0000-7000-8000-0000000000f2";
 const APROBACION_A = "0192f3a0-0000-7000-8000-0000000000f3";
 const APROBACION_R = "0192f3a0-0000-7000-8000-0000000000f4";
 const PROPUESTA = "0192f3a0-0000-7000-8000-0000000000f5";
+const CARGO = "0192f3a0-0000-7000-8000-0000000000f6";
 const manana = () => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
 
 function semilla() {
@@ -78,6 +80,7 @@ function semilla() {
     ],
     trabajo: [trabajo(TRABAJO_FALLIDO, "fallido"), trabajo(TRABAJO_PENDIENTE, "pendiente")],
     aprobacionPlataforma: [aprobacion(APROBACION_A), aprobacion(APROBACION_R)],
+    cobroCargo: [cargoDePrueba(CARGO)],
     propuestaIndicador: [
       {
         id: PROPUESTA,
@@ -120,6 +123,13 @@ const CASOS: Record<string, Record<string, unknown>> = {
   "platform.aprobaciones.aprobar": { id: APROBACION_A },
   "platform.aprobaciones.rechazar": { id: APROBACION_R, motivo: "no corresponde" },
   "platform.indicadores.resolver": { propuestaId: PROPUESTA, aprobar: true },
+  "platform.cobros.condiciones_set": {
+    tenantId: t,
+    moduloId: "crm",
+    condicion: { moneda: "CLP", precio: "100000", cobroDesde: "2026-01-01" },
+  },
+  "platform.cobros.cargos_generar": { tenantId: t, periodo: "2026-01" },
+  "platform.cobros.cargo_anular": { tenantId: t, cargoId: CARGO, motivo: "precio mal cargado" },
 };
 
 describe("auditoría global de las escrituras de plataforma (CAR-41)", () => {

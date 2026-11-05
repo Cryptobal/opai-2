@@ -67,7 +67,7 @@ export const enviosPropuestaAprobar = defineCapability({
     const row = await ctx.db.cpqPropuestaEnvio.findFirst({ where: { id: input.envioId } });
     if (!row) throw noEncontrado("El envío");
     if (row.estado !== "pendiente_aprobacion") throw reglaDeNegocio("El envío no está pendiente.");
-    const { resultado } = await exigirGatesEnvioCpq(
+    const { resultado, versionEsperada } = await exigirGatesEnvioCpq(
       ctx,
       row.cotizacionId,
       input.confirmarValoresViejos,
@@ -84,6 +84,7 @@ export const enviosPropuestaAprobar = defineCapability({
       autoaprobacion: evaluacion.autoaprobacion,
       envioDirectoDentroMargen: false,
       resultado,
+      versionEsperada,
     });
     return { envioId: row.id, estado: "enviado" as const, autoaprobacion: evaluacion.autoaprobacion };
   },

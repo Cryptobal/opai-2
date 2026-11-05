@@ -117,7 +117,7 @@ export const planillaObtener = defineCapability({
       ],
       celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,
-      aviso: { activo: ajustes.avisoActivo, umbral: ajustes.avisoUmbral, semanas: avisoSemanas },
+      aviso: { activo: ajustes.avisoActivo, umbral: ajustes.umbral, semanas: avisoSemanas },
       columnaHoy: lista.includes(hoy) ? hoy : null,
     };
   },

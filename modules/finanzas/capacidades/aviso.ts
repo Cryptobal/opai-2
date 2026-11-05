@@ -33,7 +33,7 @@ export async function avisoLeido(
 ) {
   if (!ajustes.avisoActivo) return [];
   const hoy = lunesHoy();
-  const umbral = ajustes.avisoUmbral;
+  const umbral = ajustes.umbral;
   const candidatas = semanasOut.filter((s) => s.semana >= hoy && s.saldoFinal < umbral);
   const emitidos = new Set(
     (
@@ -61,7 +61,7 @@ export async function sincronizarAvisosEnTx(
   const ajustes = vistaAjustes(row);
   const semanas = await semanasProyectadas(ctx, ajustes, tx);
   const hoy = lunesHoy();
-  const umbral = ajustes.avisoUmbral;
+  const umbral = ajustes.umbral;
   const candidatas = semanas.filter((x) => x.semana >= hoy && x.saldoFinal < umbral);
   // Re-aviso (hallazgo 14): si la semana se recuperó, se libera el registro para que pueda avisar de nuevo.
   const vigentes = await tx.flujoAvisoEmitido.findMany({ where: { semana: { gte: aFecha(hoy) } } });

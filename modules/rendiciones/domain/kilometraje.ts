@@ -63,7 +63,14 @@ export function calcularKilometraje(config: ConfigKilometraje, viaje: EntradaVia
     if (config.tramos.length === 0) return falla("config_incompleta", "El kilometraje por tramos no tiene tramos configurados.");
     if (!tramo) return falla("tramo_invalido", "Elige uno de los tramos configurados por tu empresa.");
     if (!entero(tramo.montoClp) || tramo.montoClp <= 0) return falla("config_incompleta", `El tramo «${tramo.nombre}» no tiene un monto válido.`);
-    lineas.push({ concepto: "Tramo fijo", montoClp: tramo.montoClp, detalle: tramo.nombre });
+    // Ida y vuelta duplica el monto del tramo, igual que en consumo y tarifa por km (decisión de Carlos, 5-nov-2026).
+    const veces = viaje.idaYVuelta ? 2 : 1;
+    const pesos = (n: number) => `$${n.toLocaleString("es-CL")}`;
+    lineas.push({
+      concepto: "Tramo fijo",
+      montoClp: tramo.montoClp * veces,
+      detalle: viaje.idaYVuelta ? `${tramo.nombre}: ${pesos(tramo.montoClp)} × 2 = ${pesos(tramo.montoClp * 2)}` : tramo.nombre,
+    });
   } else {
     if (kmd <= 0) return falla("km_invalido", "El viaje debe tener más de 0 km.");
     if (config.metodo === "tarifa_km") {
