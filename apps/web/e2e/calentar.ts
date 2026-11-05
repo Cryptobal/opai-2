@@ -53,6 +53,7 @@ const RUTAS_CON_SESION = [
   "/mi-cuenta/preferencias",
   "/configuracion",
   "/configuracion/grupo/operacion",
+  "/configuracion/modulo/agente",
   "/configuracion/modulo/comercial?seccion=embudo",
 ];
 

@@ -74,7 +74,8 @@ test("tarjetas abren grupos y el teléfono vuelve por la jerarquía", async ({ p
     /Agente interno/,
   ]);
   await page.goto("/configuracion/modulo/agente");
-  await expect(page).toHaveURL(/\/configuracion\/grupo\/agentes\/agente-interno$/);
+  // La redirección llega tras el streaming de una ruta que compila en frío.
+  await expect(page).toHaveURL(/\/configuracion\/grupo\/agentes\/agente-interno$/, { timeout: 45_000 });
   await expect(page.getByRole("heading", { name: "Agente interno", exact: true })).toBeVisible();
   await page.goto("/configuracion/grupo/modulos");
   await expect(
