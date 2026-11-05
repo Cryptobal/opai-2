@@ -8,7 +8,7 @@ import { METODOS_KM } from "../domain";
 import { puedeAprobarMembresia } from "./aprobadores";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_RENDIR, PORTALES_RENDIR } from "./permisos";
-import { actorId, duplicadosDe } from "./util";
+import { actorId, rendicionDe } from "./util";
 import { configDeEmpresa } from "./viaje";
 
 const personaSchema = z.object({
@@ -38,10 +38,12 @@ function destinoDeRespaldo(ctx: Contexto) {
 export const rendicionesOpciones = defineCapability({
   id: "rendiciones.opciones.obtener",
   descripcion:
-    "Entrega lo que necesita quien rinde para llenar una rendición: los centros de costo (instalaciones activas y Administración), quién puede aprobar (nunca él mismo), el aprobador por defecto de la empresa, si se exige respaldo y cómo configuró la empresa el kilometraje (método y tramos).",
+    "Entrega lo que necesita quien rinde para llenar una rendición: los centros de costo (instalaciones activas y Administración), quién puede aprobar entre los elegibles que definió la empresa y el aprobador por defecto (nunca él mismo ni toda la lista de usuarios), si se exige respaldo y cómo configuró la empresa el kilometraje (método y tramos).",
   permiso: PERMISO_RENDIR,
   portales: PORTALES_RENDIR,
-  input: z.object({}),
+  input: z.object({
+    rendicionId: uuidSchema.optional().describe("La rendición que se corrige: suma a su aprobador asignado a las opciones."),
+  }),
   output: z.object({
     instalaciones: z
       .array(instalacionSchema)
@@ -71,9 +73,9 @@ export const rendicionesOpciones = defineCapability({
   dryRun: false,
   // Nombres de colegas: se registran solo los IDs revelados (NÚCLEO-H).
   auditarLectura: (s) => s.aprobadores.map((a) => a.id),
-  async handler(ctx, _input) {
+  async handler(ctx, input) {
     const yo = actorId(ctx);
-    const [instalaciones, membresias, porDefecto, exigirRespaldo, km] = await Promise.all([
+    const [instalaciones, porDefecto, elegibles, exigirRespaldo, km] = await Promise.all([
       ctx.db.instalacion.findMany({
         // Alcance (ADR-022): quien solo ve instalaciones a su cargo solo recibe esas.
         where: { estado: "activa", ...(ctx.alcance ? { id: { in: [...ctx.alcance.instalaciones] } } : {}) },
@@ -81,15 +83,20 @@ export const rendicionesOpciones = defineCapability({
         orderBy: { nombre: "asc" },
         take: 300,
       }),
-      ctx.db.membership.findMany({
-        where: { tenantId: ctx.tenantId, estado: "activa", userId: { not: yo } },
-        include: { rolTenant: true, excepciones: true },
-        take: 500,
-      }),
       ajuste<string>(ctx, "rendiciones", "aprobador_defecto_id"),
+      ajuste<string[]>(ctx, "rendiciones", "aprobadores_elegibles_ids"),
       ajuste<boolean>(ctx, "rendiciones", "exigir_respaldo"),
       configDeEmpresa(ctx),
     ]);
+    // Solo lo necesario: los elegibles de la empresa, el aprobador por defecto y el ya asignado a la rendición que se corrige.
+    const asignado = input.rendicionId ? (await rendicionDe(ctx, input.rendicionId)).aprobadorId : null;
+    const candidatos = [...new Set([...elegibles, porDefecto, asignado ?? ""])].filter((id) => uuidSchema.safeParse(id).success && id !== yo);
+    const membresias = candidatos.length
+      ? await ctx.db.membership.findMany({
+          where: { tenantId: ctx.tenantId, estado: "activa", userId: { in: candidatos } },
+          include: { rolTenant: true, excepciones: true },
+        })
+      : [];
     const ids = membresias.filter(puedeAprobarMembresia).map((m) => m.userId);
     const usuarios = ids.length
       ? await ctx.db.user.findMany({
@@ -116,43 +123,5 @@ export const rendicionesOpciones = defineCapability({
         ? { metodo, tramos: km.tramos.map((t) => ({ nombre: t.nombre, montoClp: t.montoClp })) }
         : null,
     };
-  },
-});
-
-export const rendicionesDuplicados = defineCapability({
-  id: "rendiciones.duplicados.consultar",
-  descripcion:
-    "Avisa, sin guardar nada, si una boleta o factura (mismo proveedor, folio y monto) ya fue rendida en otra rendición vigente. Solo mira las rendiciones que quien consulta puede ver; no bloquea.",
-  permiso: PERMISO_RENDIR,
-  portales: PORTALES_RENDIR,
-  input: z.object({
-    gastos: z
-      .array(
-        z.object({
-          proveedor: z.string().trim().min(1).max(120),
-          folio: z.string().trim().min(1).max(40),
-          monto: z.number().int().min(1).max(50_000_000),
-        }),
-      )
-      .min(1)
-      .max(50),
-    excluirRendicionId: uuidSchema
-      .optional()
-      .describe("La rendición que se está corrigiendo, para no avisar contra sí misma."),
-  }),
-  output: z.object({
-    repetidos: z.array(
-      z.object({
-        gasto: z.number().int().describe("Posición (desde 1) del gasto repetido."),
-        codigoVisible: z.string(),
-      }),
-    ),
-  }),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx, input) {
-    actorId(ctx);
-    const items = input.gastos.map((g) => ({ ...g, fecha: "", descripcion: "" }));
-    return { repetidos: await duplicadosDe(ctx, items, input.excluirRendicionId) };
   },
 });

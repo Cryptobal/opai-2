@@ -52,7 +52,7 @@ async function planear(ctx: Contexto, i: Entrada) {
   }
   const previas = await ctx.db.seriePauta.count({ where: { puestoId: i.puestoId } });
   // «No modifica días pasados» (R11): con serie previa, el cambio rige desde hoy en adelante.
-  if (previas > 0 && i.desde < hoy())
+  if (previas > 0 && i.desde < (await hoy(ctx)))
     throw reglaDeNegocio("La nueva serie no puede empezar antes de hoy: no se modifican los días pasados.");
   if (i.titularPersonaId)
     await validarNoDoblar(ctx, {

@@ -7,6 +7,7 @@
     ".": "./manifest.ts",
     "./consumidor-bandeja": "./consumidor-bandeja.ts",
     "./consumidor-enlace": "./consumidor-enlace.ts",
+    "./trabajos": "./trabajo-recalcular.ts",
     "./motor": {
       "browser": null,
       "default": "./domain/motor/index.ts"

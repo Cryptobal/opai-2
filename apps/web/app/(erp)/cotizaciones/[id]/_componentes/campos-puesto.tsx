@@ -8,6 +8,7 @@ import { Alerta, Campo, Input, InputMonto, Select, Segmentado, SelectorHora } fr
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
+import { CampoPatron } from "./campo-patron";
 import type { EstadoPuesto } from "./puesto-form";
 
 type Cargo = { cargoId: string; cargo: string; sueldoBaseClp?: number | null };
@@ -52,10 +53,9 @@ export function CamposPuesto({
         />
       </Campo>
       <div className="grid grid-cols-2 gap-3">
-        <Campo etiqueta="Patrón de turno" htmlFor="cpq-p-patron">
-          <Input id="cpq-p-patron" placeholder="Ej. 4x4" value={e.patron} onChange={(x) => set({ patron: x.target.value })} />
-        </Campo>
-        <span />
+        <div className="col-span-2">
+          <CampoPatron valor={e.patron} onCambiar={(patron) => set({ patron })} />
+        </div>
         <Campo etiqueta="Entrada" htmlFor="cpq-p-hi">
           <SelectorHora id="cpq-p-hi" valor={e.horaInicio} onCambiar={(v) => set({ horaInicio: v })} />
         </Campo>
@@ -79,7 +79,7 @@ export function CamposPuesto({
               htmlFor="cpq-p-sueldo"
               ayuda={ref != null ? `Vacío usa la referencia del cargo: ${pesos(ref)}.` : "Vacío deja el costo pendiente."}
             >
-              <InputMonto id="cpq-p-sueldo" valor={e.sueldo} onCambiar={num("sueldo")} />
+              <InputMonto id="cpq-p-sueldo" valor={e.sueldo} onCambiar={num("sueldo")} {...(ref != null ? { placeholder: pesos(ref) } : {})} />
             </Campo>
           ) : (
             <Campo etiqueta="Líquido objetivo (CLP)" htmlFor="cpq-p-liq" ayuda="El bruto se calcula con el motor de costo empleador.">

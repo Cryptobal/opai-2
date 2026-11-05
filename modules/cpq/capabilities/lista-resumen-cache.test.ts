@@ -47,6 +47,10 @@ describe("calculoCongeladoJson en lista (C-1)", () => {
     expect(typeof cache.margenEfectivoPct).toBe("number");
     expect(Array.isArray(cache.advertencias)).toBe(true);
 
+    // El semáforo de la lista exige un mínimo que la empresa haya configurado (CAR-192).
+    await h.ctx.db.ajuste.create({
+      data: { tenantId: h.ctx.tenantId, modulo: "cpq", clave: "margen_minimo_pct", ambito: "tenant", sujetoId: h.ctx.tenantId, valor: 10 },
+    });
     const lista = await executeCapability(conCostos, "cpq.cotizaciones.list", { negocioId: NEGOCIO_1 });
     expect(lista).toMatchObject({
       ok: true,
@@ -58,6 +62,7 @@ describe("calculoCongeladoJson en lista (C-1)", () => {
               semaforo: cache.semaforo,
               margenEfectivoPct: cache.margenEfectivoPct,
               costoPendiente: false,
+              calculoConfiable: true,
             },
           },
         ],

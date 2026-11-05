@@ -1,7 +1,8 @@
 import { type Contexto, conflicto, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
-import { horaValida, patronValido } from "@opai/domain";
+import { horaValida } from "@opai/domain";
 
 import type { LineaOferta } from "./puestos-oferta";
+import { atributosPuesto, cicloDe } from "./puestos-atributos";
 
 export type PedidoPuesto = {
   lineaId: string;
@@ -12,6 +13,9 @@ export type PedidoPuesto = {
   patronId?: string | undefined;
   horaInicio?: string | undefined;
   horaFin?: string | undefined;
+  funcionId?: string | undefined;
+  horaInicioNoche?: string | undefined;
+  horaFinNoche?: string | undefined;
 };
 
 export type PlanPuesto = {
@@ -27,6 +31,10 @@ export type PlanPuesto = {
     diasDescanso: number;
     horaInicio: string;
     horaFin: string;
+    funcionId: string | null;
+    horaInicioNoche: string | null;
+    horaFinNoche: string | null;
+    horasSemanales: number;
     jornada: string;
     dotacion: number;
     estado: string;
@@ -34,21 +42,6 @@ export type PlanPuesto = {
     coberturaMotivo: string;
   };
 };
-
-/** Ciclo del puesto: el patrón elegido o del catálogo; si no, el «NxM» escrito en la línea. */
-async function cicloDe(ctx: Contexto, patronId: string | null, texto: string | null, linea: string) {
-  if (patronId) {
-    const p = await ctx.db.patronTurno.findUnique({ where: { id: patronId } });
-    if (!p) throw noEncontrado("El patrón de turno");
-    if (!p.activo) throw reglaDeNegocio(`El patrón "${p.nombre}" está desactivado.`);
-    return { patronId: p.id, diasTrabajo: p.diasTrabajo, diasDescanso: p.diasDescanso };
-  }
-  const m = texto ? /^(\d{1,2})\s*[x×]\s*(\d{1,2})$/i.exec(texto.trim()) : null;
-  const [t, d] = m ? [Number(m[1]), Number(m[2])] : [0, 0];
-  if (!m || !patronValido(t, d))
-    throw reglaDeNegocio(`Elige el patrón de turno de «${linea}»: la cotización no trae uno válido.`);
-  return { patronId: null, diasTrabajo: t, diasDescanso: d };
-}
 
 /**
  * Convierte lo que RRHH confirmó en puestos por crear: valida instalación, cargo, patrón y horario
@@ -84,7 +77,8 @@ export async function resolverPuestos(ctx: Contexto, items: LineaOferta[], pedid
     const horaFin = p.horaFin ?? l.horaFin;
     if (!horaInicio || !horaFin || !horaValida(horaInicio) || !horaValida(horaFin))
       throw reglaDeNegocio(`Falta el horario de «${l.linea}» (de 00:00 a 23:59).`);
-    const ciclo = await cicloDe(ctx, p.patronId ?? l.patronId, l.patron, l.linea);
+    const { definicion, ...ciclo } = await cicloDe(ctx, p.patronId ?? l.patronId, l.patron, l.linea);
+    const { funcionId, noche, horasSemanales } = await atributosPuesto(ctx, p, l, definicion, horaInicio, horaFin);
     const base = p.nombre ?? cargo.nombre;
     for (let i = 0; i < cantidad; i++) {
       const posicion = l.creados + i + 1;
@@ -100,6 +94,10 @@ export async function resolverPuestos(ctx: Contexto, items: LineaOferta[], pedid
           nombre,
           horaInicio,
           horaFin,
+          funcionId,
+          horaInicioNoche: noche?.ini ?? null,
+          horaFinNoche: noche?.fin ?? null,
+          horasSemanales,
           jornada: horaFin <= horaInicio ? "noche" : "dia",
           dotacion: 1,
           estado: "activo",

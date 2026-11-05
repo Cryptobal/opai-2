@@ -17,6 +17,7 @@ export function ResumenGastos({
 }) {
   return (
     <div className="flex flex-col gap-3">
+      <h3 className="t-label text-fg">Gastos en esta rendición ({gastos.length})</h3>
       <ul className="flex flex-col gap-2">
         {gastos.map((g, n) => (
           <li

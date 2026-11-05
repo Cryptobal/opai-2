@@ -235,6 +235,8 @@ core_supervisores_list
 core_supervisores_quitar
 core_tenant_get
 core_tenant_update
+core_turnos_esperados_listar
+core_turnos_esperados_regenerar
 core_usage_summary
 core_users_list
 core_users_remove
@@ -549,6 +551,7 @@ preview_core_puestos_update
 preview_core_supervisores_asignar
 preview_core_supervisores_quitar
 preview_core_tenant_update
+preview_core_turnos_esperados_regenerar
 preview_core_users_remove
 preview_core_users_update
 preview_core_vinculos_create

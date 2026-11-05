@@ -3,7 +3,7 @@ import type { Contexto } from "@opai/capabilities";
 import { calcular, resultadoSinCostos, type ResultadoCalculo } from "../domain/motor";
 import { cotizacionDe } from "../capabilities/util";
 import { modeloDesdeCatalogo } from "./catalogo-modelo";
-import { mapearVersionCalculo } from "./mapear";
+import { claveDePatron, mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { aplicarAvisos, avisosCalculo } from "./avisos-calculo";
 import { juegoParaFecha, mutualParaCalculo, proveedorDesdeLineas } from "./proveedor";
@@ -79,7 +79,14 @@ export async function recalcularVersion(
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
   const margenes = await margenesTenant(ctx);
-  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo, costos, margenes.objetivoPct);
+  // Los patrones que la empresa configuró en Operaciones (CAR-192): el motor ya no solo conoce los de fábrica.
+  const patrones = new Map(
+    (await ctx.db.patronTurno.findMany({ where: { activo: true } })).map((p) => [
+      claveDePatron(p.nombre),
+      { clase: p.clase, diasTrabajo: p.diasTrabajo, diasDescanso: p.diasDescanso, diasSemana: p.diasSemana },
+    ]),
+  );
+  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo, costos, margenes.objetivoPct, patrones);
   const resultado = calcular(
     entrada,
     modelo,
@@ -96,17 +103,20 @@ export async function recalcularVersion(
   }
   aplicarAvisos(resultado, avisosCalculo(lineas, resuelto, mutual));
   if (puedeEscribirVersion(version, escribir)) {
-    await ctx.db.cpqVersion.update({
-      where: { id: version.id },
+    // Condicionado al estado: si la versión salió de «borrador» mientras se calculaba (la dejaron lista o
+    // pidieron aprobación), su cálculo congelado no se pisa ni se tocan las huellas de sus líneas.
+    const escrita = await ctx.db.cpqVersion.updateMany({
+      where: { id: version.id, tenantId: ctx.tenantId, estado: "borrador" },
       data: {
         ventaMensualClp: resultado.ventaMensual,
         calculoCongeladoJson: JSON.stringify(resultado),
       },
     });
-    for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
-      const d = proveedor.obtener({ lineaId: l.id, fecha });
-      if (d) await ctx.db.cpqLinea.update({ where: { id: l.id }, data: { huellaJuegoValores: d.origen } });
-    }
+    if (escrita.count > 0)
+      for (const l of lineas.filter((x) => x.tipo === "puesto" && x.sueldoBaseClp)) {
+        const d = proveedor.obtener({ lineaId: l.id, fecha });
+        if (d) await ctx.db.cpqLinea.update({ where: { id: l.id }, data: { huellaJuegoValores: d.origen } });
+      }
   }
   return resultado;
 }

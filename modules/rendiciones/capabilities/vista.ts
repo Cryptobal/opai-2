@@ -38,7 +38,8 @@ export async function nombresDe(
   const unicos = [...new Set(ids.filter((x): x is string => !!x))];
   if (unicos.length === 0) return new Map();
   const u = await ctx.db.user.findMany({
-    where: { id: { in: unicos } },
+    // Solo personas con membresía en esta empresa: nunca el nombre de un usuario de otra.
+    where: { id: { in: unicos }, memberships: { some: { tenantId: ctx.tenantId } } },
     select: { id: true, name: true },
   });
   return new Map(u.map((x) => [x.id, x.name]));

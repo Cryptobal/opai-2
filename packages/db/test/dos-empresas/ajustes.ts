@@ -96,6 +96,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   "rendiciones.rendicion_viajes": {
     valores: () => ({ metodo: "consumo", origen_distancia: "linea_recta", monto_calculado: 1, km: 1, peaje_clp: 0 }),
   },
+  // Núcleo · turnos esperados (CAR-201): CHECK de origen y de intervalo (fin > inicio).
+  "core.turnos_esperados": {
+    valores: () => ({ origen: "pauta", inicio: "2026-12-01T12:00:00Z", fin: "2026-12-01T20:00:00Z" }),
+  },
   // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
   "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
   // Finanzas · cobranza (CAR-166): CHECKs de canal, origen y resultado.

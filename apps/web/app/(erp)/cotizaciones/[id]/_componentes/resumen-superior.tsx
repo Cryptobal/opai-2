@@ -54,6 +54,8 @@ export function ResumenSuperior(p: {
   const venta = ventaMensualTexto(c.ventaMensual, sinCalculo);
   const estado = meta?.estadoFicha;
   const semaforo = c.semaforo === "verde" || c.semaforo === "amarillo" || c.semaforo === "rojo" ? c.semaforo : null;
+  // Sin mínimo configurado no hay contra qué juzgar el margen: se muestra solo el margen (CAR-192).
+  const minimo = par?.margenMinimoPct ?? null;
   const aprobado = estado?.estado === "lista_para_enviar" || estado?.estado === "enviada";
   return (
     <section
@@ -73,17 +75,25 @@ export function ResumenSuperior(p: {
             <p className="t-overline text-fg-muted">Margen contra el objetivo</p>
             <p className="flex flex-wrap items-center gap-2">
               <span className="t-heading t-numeric">{sinCalculo ? "—" : margenPctTexto(c.margenEfectivoPct)}</span>
-              {semaforo && !sinCalculo ? (
+              {semaforo && !sinCalculo && minimo !== null ? (
                 <Badge tono={TONO[semaforo]} punto>
                   {aprobado && semaforo === "rojo" ? "Bajo el mínimo, aprobado" : semaforoEtiqueta(semaforo)}
                 </Badge>
               ) : null}
             </p>
-            {!sinCalculo && c.margenEfectivoPct != null ? <BarraMargen margen={c.margenEfectivoPct} minimo={par.margenMinimoPct ?? 0} objetivo={par.margenObjetivoPct} /> : null}
-            <p className="t-caption text-fg-subtle">
-              Mínimo {pct(par.margenMinimoPct ?? 0)}
-              {par.margenObjetivoPct != null ? ` · objetivo ${pct(par.margenObjetivoPct)}` : ""}
-            </p>
+            {!sinCalculo && c.margenEfectivoPct != null && minimo !== null ? (
+              <BarraMargen margen={c.margenEfectivoPct} minimo={minimo} objetivo={par.margenObjetivoPct} />
+            ) : null}
+            {minimo !== null || par.margenObjetivoPct != null ? (
+              <p className="t-caption text-fg-subtle">
+                {[
+                  minimo !== null ? `Mínimo ${pct(minimo)}` : null,
+                  par.margenObjetivoPct != null ? `objetivo ${pct(par.margenObjetivoPct)}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            ) : null}
           </div>
         ) : null}
       </div>

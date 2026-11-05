@@ -68,5 +68,7 @@ export async function guardarViaje(tx: Contexto["db"], tenantId: string, rendici
     montoCalculado: c.calculo.montoClp,
     configSnapshot: { config: c.config, tramo: v.tramo ?? null, desglose: c.calculo.desglose },
   };
-  await tx.rendicionViaje.upsert({ where: { rendicionId }, create: { ...datos, rendicionId }, update: datos });
+  // tenantId explícito también al buscar: nunca se toca el viaje de otra empresa, aunque la RLS ya lo impide.
+  const n = await tx.rendicionViaje.updateMany({ where: { rendicionId, tenantId }, data: datos });
+  if (n.count === 0) await tx.rendicionViaje.create({ data: { ...datos, rendicionId } });
 }

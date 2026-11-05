@@ -77,10 +77,10 @@ export function CamposEnvio({
         error={
           errores?.aprobadorId ??
           (sinAprobadores
-            ? "Tu empresa aún no tiene aprobadores. Puedes guardar el borrador y pedirle a un administrador que asigne uno."
+            ? "Tu empresa aún no define quién aprueba. Puedes guardar el borrador y pedirle a un administrador que defina el aprobador por defecto."
             : undefined)
         }
-        ayuda="No puedes aprobar tus propias rendiciones."
+        ayuda={`${opciones.aprobadores.length <= 1 ? "Asignado por tu empresa. " : ""}No puedes elegirte a ti mismo.`}
       >
         <Select
           id="rend-aprobador"
@@ -110,8 +110,9 @@ export function envioDe(o: OpcionesRendicion, r?: DetalleRendicion): DatosEnvio 
 export type ErroresEnvio = Partial<Record<keyof DatosEnvio, string>>;
 
 /** Errores del motivo y del aprobador (este solo al enviar). */
-export function erroresDeEnvio(d: DatosEnvio, enviar: boolean): ErroresEnvio {
+export function erroresDeEnvio(d: DatosEnvio, enviar: boolean, gastos = 1): ErroresEnvio {
   return {
+    ...(gastos === 0 ? { motivo: "Agrega al menos un gasto." } : {}),
     ...(d.motivo.trim().length < 3 ? { motivo: "Cuenta el motivo en pocas palabras." } : {}),
     ...(enviar && !d.aprobadorId ? { aprobadorId: "Elige a quien aprueba." } : {}),
   };

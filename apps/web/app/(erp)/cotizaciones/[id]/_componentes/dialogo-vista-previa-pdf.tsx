@@ -1,9 +1,10 @@
 "use client";
 
-import { Download } from "lucide-react";
-
 import { Alerta, Button, Dialog } from "@opai/ds";
 
+import { VisorPdf } from "@/app/_components/visor-pdf";
+
+import { textoPaginas } from "./texto-paginas";
 import { useVistaPreviaPdf } from "./use-vista-previa-pdf";
 
 export function DialogoVistaPreviaPdf({
@@ -25,9 +26,9 @@ export function DialogoVistaPreviaPdf({
 
   return (
     <Dialog abierto titulo={`Vista previa · ${codigo} v${version}`} onCerrar={onCerrar} tamano="grande">
-      <div className="space-y-3 p-1">
+      <div className="min-w-0 max-w-full space-y-3 p-3">
         <p className="t-caption text-fg-muted">
-          {paginas ? `${paginas} páginas A4 · ` : null}
+          {paginas ? `${textoPaginas(paginas)} · ` : null}
           {!enviada ? "Marca de agua BORRADOR hasta que se envíe" : "Sin marca de agua"}
         </p>
         {mensaje ? (
@@ -44,32 +45,24 @@ export function DialogoVistaPreviaPdf({
           </Alerta>
         ) : null}
         {pdfUrl ? (
-          <iframe title="Vista previa PDF" src={pdfUrl} className="h-[70vh] w-full rounded-md border border-border" />
-        ) : estado.fase === "generando" ? (
-          <p role="status" className="t-body-sm text-fg-muted">
-            Generando PDF…
-          </p>
-        ) : null}
-        <div className="flex justify-end gap-2">
-          {pdfUrl ? (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                const a = document.createElement("a");
-                a.href = pdfUrl;
-                a.download = `${codigo}-v${version}.pdf`;
-                a.click();
-              }}
-            >
-              <Download className="size-4" aria-hidden />
-              Descargar PDF
+          <VisorPdf
+            pdfUrl={pdfUrl}
+            titulo="Vista previa PDF"
+            nombreArchivo={`${codigo}-v${version}.pdf`}
+            onCerrar={onCerrar}
+          />
+        ) : (
+          <>
+            {estado.fase === "generando" ? (
+              <p role="status" className="t-body-sm text-fg-muted">
+                Generando PDF…
+              </p>
+            ) : null}
+            <Button type="button" variant="secondary" onClick={onCerrar}>
+              Cerrar
             </Button>
-          ) : null}
-          <Button type="button" variant="secondary" onClick={onCerrar}>
-            Cerrar
-          </Button>
-        </div>
+          </>
+        )}
       </div>
     </Dialog>
   );

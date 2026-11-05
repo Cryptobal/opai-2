@@ -56,7 +56,7 @@ export const cotizacionesEnviar = defineCapability({
     if (!contacto.email?.trim()) {
       throw reglaDeNegocio("El contacto debe tener correo para enviar la propuesta.");
     }
-    const { pack, resultado } = await exigirGatesEnvioCpq(
+    const { pack, resultado, versionEsperada } = await exigirGatesEnvioCpq(
       ctx,
       input.id,
       input.confirmarValoresViejos,
@@ -89,6 +89,7 @@ export const cotizacionesEnviar = defineCapability({
         destinatarios,
         creadoPorId: c.creadoPorId,
         resultado,
+        versionEsperada,
         ...(input.mensaje !== undefined ? { mensaje: input.mensaje } : {}),
       },
       dryRun,

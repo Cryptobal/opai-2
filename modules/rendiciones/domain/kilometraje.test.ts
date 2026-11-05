@@ -44,9 +44,15 @@ describe("kilometraje · tarifa por km y tramo fijo", () => {
   it("tarifa con decimal de km: 12,5 km × 250 = 3.125", () => {
     expect(monto(tarifa, { ...viaje, km: 12.5 }).montoClp).toBe(3125);
   });
-  it("tramo fijo → monto del tramo (sin multiplicar por ida y vuelta) + peaje", () => {
+  it("tramo fijo: ida y vuelta duplica el tramo y el peaje se suma una sola vez ($18.000 + $2.000 = $20.000; ida y vuelta $38.000)", () => {
     const t = { ...base, metodo: "tramo_fijo" };
-    expect(monto(t, { ...viaje, tramo: "Santiago–Rancagua", idaYVuelta: true, peajeClp: 500 }).montoClp).toBe(18_500);
+    const tramo = "Santiago–Rancagua";
+    expect(monto(t, { ...viaje, tramo, peajeClp: 2000 }).montoClp).toBe(20_000);
+    const r = monto(t, { ...viaje, tramo, idaYVuelta: true, peajeClp: 2000 });
+    expect(r.montoClp).toBe(38_000);
+    expect(r.lineas.map((l) => [l.concepto, l.montoClp])).toEqual([["Tramo fijo", 36_000], ["Peaje", 2000]]);
+    expect(r.lineas[0]?.detalle).toBe("Santiago–Rancagua: $18.000 × 2 = $36.000");
+    expect(monto(t, { ...viaje, tramo, idaYVuelta: true }).montoClp).toBe(36_000);
   });
 });
 

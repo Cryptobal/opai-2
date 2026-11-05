@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 
-import {
-  Cabecera,
-  Campo,
-  InputFecha,
-  Select,
-  Switch,
-} from "@opai/ds";
+import { Cabecera, Campo, InputFecha, Select, Switch } from "@opai/ds";
 
 import type { DetalleRendicion, OpcionesRendicion, PortalRendicion } from "../tipos";
 import { DesgloseKm, SinKilometraje, useCalculoKm } from "./calculo-km";
@@ -147,6 +141,7 @@ export function FormKm({
         aprobadorId={envio.aprobadorId}
         aprobador={aprobador}
         total={calculo?.montoClp ?? 0}
+        gastos={1}
       />
     </div>
   );
