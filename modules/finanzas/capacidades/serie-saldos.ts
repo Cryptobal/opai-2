@@ -4,6 +4,7 @@ import type { TenantTx } from "@opai/db";
 import { calcularPlanilla, semanasDesde, sumarSemanas, type CeldaFlujo } from "../domain";
 import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
+import { celdasCobrosEsperados } from "./cobros-esperados";
 import { FILAS_VIRTUALES_DOMINIO } from "./filas-virtuales";
 import { aNumeroSeguro } from "./esquemas";
 import { aFecha, aIso, cargarFlujo, hoyIso, lunesHoy } from "./util";
@@ -51,13 +52,16 @@ export async function serieSaldos(
   const finCalc = fin < hoy ? hoy : fin;
   const listaCalc = semanasDesde(inicio, semanasEntre(inicio, finCalc) + 1);
   const cargado = await cargarFlujo(ctx, inicio, finCalc, tx);
-  const { dominio: celdasCalc, extraVista } = await celdasDominioConCartolaPasada(
+  const pasada = await celdasDominioConCartolaPasada(
     ctx,
     transformar ? transformar(cargado.celdasDom) : cargado.celdasDom,
     hoy,
     listaCalc,
     tx,
   );
+  const cobros = await celdasCobrosEsperados(ctx, listaCalc);
+  const celdasCalc = [...pasada.dominio, ...cobros.dominio];
+  const extraVista = [...pasada.extraVista, ...cobros.vista];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,
@@ -123,13 +127,16 @@ async function serieDesdeAjustes(
     });
     saldoPrevio = previo.at(-1)?.saldoFinal ?? ajustes.saldoInicial;
   }
-  const { dominio: celdasCalc, extraVista } = await celdasDominioConCartolaPasada(
+  const pasada = await celdasDominioConCartolaPasada(
     ctx,
     transformar ? transformar(cargado.celdasDom) : cargado.celdasDom,
     hoy,
     lista,
     tx,
   );
+  const cobros = await celdasCobrosEsperados(ctx, lista);
+  const celdasCalc = [...pasada.dominio, ...cobros.dominio];
+  const extraVista = [...pasada.extraVista, ...cobros.vista];
   const calculo = calcularPlanilla({
     saldoInicial: saldoPrevio,
     umbral: ajustes.umbral,

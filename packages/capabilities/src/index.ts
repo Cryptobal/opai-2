@@ -8,6 +8,7 @@ export { capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
+export { ingresosEsperados, hoyChile, type IngresoEsperado } from "./finanzas/cobro-esperado-datos";
 export { ajuste, defineAjustes, valoresEfectivos, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,

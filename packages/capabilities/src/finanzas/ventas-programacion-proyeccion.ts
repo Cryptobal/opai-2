@@ -15,6 +15,8 @@ import { ufCentavosUltima } from "./ventas-programacion-uf";
 export async function ingresosDeProgramaciones(
   ctx: Contexto,
   hasta: string,
+  /** Fecha esperada del cobro de un período: (emisión, vencimiento, cliente) → aaaa-mm-dd. */
+  fechaCobro: (emision: string, vencimiento: string, cuentaId: string) => string,
   semanaDe: (iso: string) => string,
 ): Promise<IngresoProyectadoDesdeDte[]> {
   const progs = await ctx.db.ventasProgramacion.findMany({
@@ -55,7 +57,7 @@ export async function ingresosDeProgramaciones(
         programacionId: p.id,
         cuentaId: p.cuentaId!,
         instalacionId: p.instalacionId,
-        semanaCobro: semanaDe(vencimientoPago(per.fecha, p.plazoPagoDias)),
+        semanaCobro: semanaDe(fechaCobro(per.fecha, vencimientoPago(per.fecha, p.plazoPagoDias), p.cuentaId!)),
         monto: c.calc.montos.total,
         etiqueta: `Programación · ${p.nombre} · ${per.periodo}`,
         capa: "comprometido",

@@ -71,6 +71,24 @@ model FlujoCierre {
   @@schema("finanzas")
 }
 
+/// Fecha esperada de cobro fijada a mano para una factura (ADR-073). Sin fila rige la automática:
+/// promedio real de pago del cliente (3 o más pagadas) o el vencimiento.
+model FlujoCobroEsperado {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  documentoId String   @unique @map("documento_id") @db.Uuid
+  fecha       DateTime @db.Date
+  createdById String?  @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("flujo_cobro_esperado")
+  @@schema("finanzas")
+}
+
 /// Ajustes del flujo por empresa (una fila por tenant): saldo inicial del horizonte y umbral de alerta.
 model FlujoAjustes {
   id           String   @id @default(uuid(7)) @db.Uuid
@@ -316,6 +334,7 @@ model DocumentoEmitido {
   corridasProgramacion VentasProgramacionCorrida[]
   enviosCliente        DocumentoEmitidoEnvio[]
   seguimientoCierre    VentasCierreSeguimiento?
+  cobroEsperado        FlujoCobroEsperado?
   @@map("documentos_emitidos")
   @@schema("finanzas")
 }
