@@ -314,6 +314,17 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
+      # Los shards se cortaban a media corrida con «The runner has received a shutdown signal». El runner
+      # trae ~7 GB y `next dev` + Chromium + Postgres crecen con las rutas compiladas (hipótesis: falta de
+      # memoria); se amplía el swap como en los demás jobs.
+      - name: Ampliar swap (runner ~7 GB)
+        run: |
+          sudo swapoff -a 2>/dev/null || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
