@@ -75,10 +75,13 @@ export const ventasCesionCeder = defineCapability({
         data: { cesionEstado: "emitido" },
       });
       if (count !== 1) throw conflicto("La factura ya está en cesión o fue cedida.");
+      // Una cesión anulada deja su fila: la nueva toma la secuencia siguiente (UNIQUE tenant+documento+secuencia).
+      const ultima = await tx.cesion.aggregate({ where: { documentoId: doc.id }, _max: { secuencia: true } });
       const cesion = await tx.cesion.create({
         data: {
           tenantId: ctx.tenantId,
           documentoId: doc.id,
+          secuencia: (ultima._max.secuencia ?? 0) + 1,
           factorRut: input.factorRut,
           factorNombre: input.factorNombre ?? null,
           tasaBps: input.tasaBps,
