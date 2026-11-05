@@ -81,7 +81,9 @@ test.describe("pauta · mensual", () => {
     await registrar.click();
     await expect(page.getByText(/Excepción registrada/)).toBeVisible();
 
-    await page.getByRole("link", { name: /Portería Día:/ }).first().click();
+    // Tras registrar, la hoja se cierra y queda la grilla mensual, cuyas celdas se nombran
+    // «Puesto, fecha: estado» (la vista diaria usa «Puesto: estado»).
+    await page.getByRole("link", { name: `Portería Día, ${HOY}: Sin cubrir · Ausencia · excepción` }).click();
     await expect(page).toHaveURL(/dia=/);
     await expect(page.getByRole("heading", { name: /Portería Día/ })).toBeVisible();
     await expect(page.getByRole("button", { name: "Anular excepción" })).toBeVisible();
