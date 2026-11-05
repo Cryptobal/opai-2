@@ -19,9 +19,6 @@ export function urlDePdf(base64: string): string {
   return URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
 }
 
-/** «1 página A4», «3 páginas A4». */
-export const textoPaginas = (n: number) => `${n} ${n === 1 ? "página" : "páginas"} A4`;
-
 export type EstadoVistaPrevia =
   | { fase: "generando" }
   | { fase: "listo"; pdfUrl: string; paginas: number | null }

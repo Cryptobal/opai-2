@@ -4,7 +4,8 @@ import { Alerta, Button, Dialog } from "@opai/ds";
 
 import { VisorPdf } from "@/app/_components/visor-pdf";
 
-import { textoPaginas, useVistaPreviaPdf } from "./use-vista-previa-pdf";
+import { textoPaginas } from "./texto-paginas";
+import { useVistaPreviaPdf } from "./use-vista-previa-pdf";
 
 export function DialogoVistaPreviaPdf({
   cotizacionId,

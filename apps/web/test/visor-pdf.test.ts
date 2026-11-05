@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { textoPaginas } from "@/app/(erp)/cotizaciones/[id]/_componentes/use-vista-previa-pdf";
+import { textoPaginas } from "@/app/(erp)/cotizaciones/[id]/_componentes/texto-paginas";
 import { VisorPdf } from "@/app/_components/visor-pdf";
 
 describe("vista previa del PDF (CAR-192)", () => {

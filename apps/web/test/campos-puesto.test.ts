@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { HORAS_SELECTOR, MINUTOS_SELECTOR } from "@opai/ds";
 
-import { mismoPatron, opcionesPatron } from "@/app/(erp)/cotizaciones/[id]/_componentes/campo-patron";
+import { mismoPatron, opcionesPatron } from "@/app/(erp)/cotizaciones/[id]/_componentes/patron-opciones";
 
 const patrones = [
   { id: "1", nombre: "4×4", resumen: "Ciclo de 8" },
