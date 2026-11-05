@@ -53,8 +53,9 @@ export function CamposPuesto({
         />
       </Campo>
       <div className="grid grid-cols-2 gap-3">
-        <CampoPatron valor={e.patron} onCambiar={(patron) => set({ patron })} />
-        <span />
+        <div className="col-span-2">
+          <CampoPatron valor={e.patron} onCambiar={(patron) => set({ patron })} />
+        </div>
         <Campo etiqueta="Entrada" htmlFor="cpq-p-hi">
           <SelectorHora id="cpq-p-hi" valor={e.horaInicio} onCambiar={(v) => set({ horaInicio: v })} />
         </Campo>
