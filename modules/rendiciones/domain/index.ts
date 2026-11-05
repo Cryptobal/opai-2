@@ -69,3 +69,4 @@ export function esFechaFutura(fecha: string, hoy: string): boolean {
 export function puedeDecidir(solicitanteId: string, actorId: string, aprobadorId: string | null): boolean {
   return actorId !== solicitanteId && aprobadorId === actorId;
 }
+export * from "./kilometraje";
