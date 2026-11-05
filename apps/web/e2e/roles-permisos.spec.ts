@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 
 import { type Browser, expect, type Page, test, type TestInfo } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // Configuración → Usuarios y permisos, bloque 6 del Brief 07c (CAR-37): roles personalizados, matriz
@@ -80,6 +81,8 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
     // 1. Nuevo rol con permisos de lectura (A3).
     await page.goto("/configuracion/usuarios/roles?nuevo=1");
     const nuevo = hoja(page, "Nuevo rol");
+    // Con el formulario sin hidratar, lo que se escribe y marca se pierde al hidratar (y el aviso no llega).
+    await hidratado(nuevo.getByRole("button", { name: "Crear rol" }));
     await nuevo.getByLabel("Nombre del rol").fill(nombre);
     await nuevo.getByLabel("Descripción (opcional)").fill("Monitoreo de instalaciones");
     for (const p of ["Ver Instalaciones", "Ver Personas", "Ver Documentos"])
