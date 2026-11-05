@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { AVISO_CAF_DIAS_DEFECTO, AMBIENTES_SII, UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO } from "@opai/domain";
+import { produccionTributariaHabilitada } from "@opai/integrations";
 
 import { defineCapability } from "../define";
 import { dia, diaSchema, escribirConEvento, rutSchema } from "../core/maestros/comun";
@@ -59,6 +60,10 @@ export const dteConfigActualizar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    // Candado de ambiente (CAR-191): también en vista previa.
+    if (input.ambiente === "produccion" && !produccionTributariaHabilitada()) {
+      throw reglaDeNegocio("La producción del SII solo está disponible en app.opai.cl.");
+    }
     const tocaSensibles =
       input.ambiente === "produccion"
       || input.emisionProveedor !== undefined
