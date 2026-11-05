@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Badge, Button, Empty } from "@opai/ds";
@@ -12,7 +13,8 @@ import {
   textoCantidad,
   textoCondicion,
 } from "../../../facturacion/_componentes/cobro";
-import { HojaCondicion } from "./hoja-condicion";
+// La hoja (Radix, formulario y vista previa) se descarga al abrirla: no pesa en la ruta (ADR-037).
+const HojaCondicion = dynamic(() => import("./hoja-condicion").then((m) => m.HojaCondicion));
 
 /** Cada módulo con su estado, su condición comercial y si se factura este mes (o por qué no). */
 export function ModulosCobro({ tenantId, modulos }: { tenantId: string; modulos: ModuloCobro[] }) {
@@ -69,12 +71,14 @@ export function ModulosCobro({ tenantId, modulos }: { tenantId: string; modulos:
           </li>
         ))}
       </ul>
-      <HojaCondicion
-        key={editando?.moduloId ?? "ninguno"}
-        tenantId={tenantId}
-        modulo={editando}
-        onCerrar={() => setEditando(null)}
-      />
+      {editando ? (
+        <HojaCondicion
+          key={editando.moduloId}
+          tenantId={tenantId}
+          modulo={editando}
+          onCerrar={() => setEditando(null)}
+        />
+      ) : null}
     </>
   );
 }

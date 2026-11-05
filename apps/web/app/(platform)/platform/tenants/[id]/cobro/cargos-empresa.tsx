@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Badge, Button, Campo, Empty, Input, Sheet } from "@opai/ds";
+import dynamic from "next/dynamic";
+
+import { avisar, Badge, Button, Empty } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -13,6 +15,8 @@ import {
   nombreMes,
   textoCantidad,
 } from "../../../facturacion/_componentes/cobro";
+
+const HojaAnular = dynamic(() => import("./hoja-anular").then((m) => m.HojaAnular));
 
 /** Cargos de la empresa, del más reciente al más antiguo; un cargo listo se puede anular con motivo. */
 export function CargosEmpresa(props: {
@@ -90,40 +94,18 @@ export function CargosEmpresa(props: {
           </li>
         ))}
       </ul>
-      <Sheet
-        abierto={Boolean(anular)}
-        onCerrar={() => setAnular(null)}
-        titulo="Anular cargo"
-        descripcion={
-          anular
-            ? `${nombres[anular.moduloId] ?? anular.moduloId} · ${nombreMes(anular.periodo)} · ${clp(anular.montoClp)}`
-            : ""
-        }
-        acciones={
-          <>
-            <Button variant="secondary" onClick={() => setAnular(null)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={pendiente || motivo.trim().length < 3}
-              onClick={() => void confirmar()}
-            >
-              Anular cargo
-            </Button>
-          </>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          {error ? <Alerta tono="danger" titulo={error} /> : null}
-          <p className="text-base text-fg">
-            El cargo deja de estar listo para facturar. Después puedes volver a generar el mes.
-          </p>
-          <Campo etiqueta="Motivo" htmlFor="motivo">
-            <Input id="motivo" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-          </Campo>
-        </div>
-      </Sheet>
+      {anular ? (
+        <HojaAnular
+          anular={anular}
+          nombre={nombres[anular.moduloId] ?? anular.moduloId}
+          motivo={motivo}
+          setMotivo={setMotivo}
+          pendiente={pendiente}
+          error={error}
+          onConfirmar={() => void confirmar()}
+          onCerrar={() => setAnular(null)}
+        />
+      ) : null}
     </>
   );
 }
