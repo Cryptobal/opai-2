@@ -1,4 +1,4 @@
-import { FileSignature, FileText, Mail, Plug, UserCheck } from "lucide-react";
+import { CircleCheck, FileSignature, FileText, Mail, Plug, UserCheck } from "lucide-react";
 
 import { cn, FilaSeleccionable, SeccionTarjeta } from "@opai/ds";
 
@@ -13,6 +13,8 @@ export type Pendiente = {
   href: string;
   accion: string;
 };
+
+const MAXIMO = 5;
 
 const ICONO: Record<Pendiente["tipo"], typeof UserCheck> = {
   aprobaciones: UserCheck,
@@ -40,19 +42,27 @@ function Icono({ p }: { p: Pendiente }) {
 }
 
 /** "Requiere tu decisión hoy" (46/47): una fila por tema con su acción; en teléfono, filas tocables. */
-export function PendientesInicio({ items }: { items: Pendiente[] }) {
+export function PendientesInicio({ items: todos }: { items: Pendiente[] }) {
+  const items = todos.slice(0, MAXIMO);
   return (
     <SeccionTarjeta
       titulo="Requiere tu decisión hoy"
       accion={
-        <span className="t-caption">
-          {items.length ? `${items.length} ${items.length === 1 ? "tema" : "temas"}` : ""}
-        </span>
+        todos.length > MAXIMO ? (
+          <EnlaceBoton href="/bandeja" variante="ghost">
+            Ver todo ({todos.length})
+          </EnlaceBoton>
+        ) : (
+          <span className="t-caption">
+            {todos.length ? `${todos.length} ${todos.length === 1 ? "tema" : "temas"}` : ""}
+          </span>
+        )
       }
       sinRelleno
     >
       {items.length === 0 ? (
-        <p className="px-4 py-6 text-base text-fg-muted">
+        <p className="flex items-center gap-2 px-4 py-6 text-base text-fg-muted">
+          <CircleCheck className="size-5 flex-none text-success-fg" aria-hidden />
           Nada pendiente. Lo urgente aparecerá aquí.
         </p>
       ) : (
