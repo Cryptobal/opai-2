@@ -72,7 +72,7 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
             portalActual={portalActual}
             {...(tenant ? { tenant } : {})}
             {...(props.empresas ? { extra: props.empresas } : {})}
-            className="min-w-0"
+            className="min-w-0 flex-1"
           />
         )}
         <div className="ml-auto flex flex-none items-center gap-0.5">

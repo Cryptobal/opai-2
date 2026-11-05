@@ -43,7 +43,7 @@ export const manifest = defineModule({
       area: "comercial",
       href: "/cotizaciones",
       etiqueta: "Cotizaciones",
-      icono: "FileText",
+      icono: "ReceiptText",
       orden: 3,
       permiso: "cpq:cotizaciones.read",
     },

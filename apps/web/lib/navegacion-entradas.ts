@@ -48,7 +48,7 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       area: "documentos",
       href: "/documentos",
       etiqueta: "Explorador",
-      icono: "FileText",
+      icono: "FolderOpen",
       modulo: "core",
       permiso: PERMISOS_CORE.documentosRead,
       orden: 1,
