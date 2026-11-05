@@ -38,6 +38,7 @@ const RUTAS_CON_SESION = [
   "/personas",
   "/cuentas",
   "/instalaciones",
+  "/cargos",
   "/configuracion/usuarios",
   "/rendiciones",
   "/negocios",
