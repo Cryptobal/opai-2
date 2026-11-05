@@ -2,7 +2,7 @@
 // aprobación y aprobador asignado. Schema propio `rendiciones`. Toda tabla con tenant_id, RLS
 // `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. Las FK a core.* (tenants, users,
 // instalaciones, documentos) van en el SQL de la migración, sin relación Prisma cruzada. Dinero en
-// CLP enteros. El kilometraje (R2) reutiliza `tipo`; los lotes de pago (R3) agregan sus tablas.
+// CLP enteros. El kilometraje (R2a) reutiliza `tipo` y suma `rendicion_viajes`; los lotes de pago (R3) agregan sus tablas.
 
 /// Rendición (extracción 1.0, rendiciones.md). Estados: borrador → enviada → aprobada | rechazada |
 /// devuelta (vuelve a borrador editable) → pagada (R3) | anulada. El solicitante nunca decide la suya.
@@ -33,6 +33,7 @@ model Rendicion {
 
   items     RendicionItem[]
   historial RendicionHistorial[]
+  viaje     RendicionViaje?
 
   @@unique([tenantId, codigo])
   @@index([tenantId, estado])
@@ -94,5 +95,39 @@ model RendicionContador {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("rendicion_contadores")
+  @@schema("rendiciones")
+}
+
+/// Viaje de una rendición de kilometraje (CAR-194, R2a): una fila por rendición. El monto lo calcula el
+/// servidor con la configuración de la empresa; `configSnapshot` guarda los parámetros usados, así
+/// que cambiar los ajustes después no recalcula viajes ya rendidos (R-REN-12).
+model RendicionViaje {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  rendicionId     String   @unique @map("rendicion_id") @db.Uuid
+  origenTexto     String   @map("origen_texto")
+  origenLat       Decimal  @map("origen_lat") @db.Decimal(9, 6)
+  origenLng       Decimal  @map("origen_lng") @db.Decimal(9, 6)
+  destinoTexto    String   @map("destino_texto")
+  destinoLat      Decimal  @map("destino_lat") @db.Decimal(9, 6)
+  destinoLng      Decimal  @map("destino_lng") @db.Decimal(9, 6)
+  /// Km del trayecto (sin duplicar por ida y vuelta), 1 decimal.
+  km              Decimal  @db.Decimal(8, 1)
+  idaYVuelta      Boolean  @default(false) @map("ida_y_vuelta")
+  peajeClp        Int      @default(0) @map("peaje_clp")
+  /// "consumo" | "tarifa_km" | "tramo_fijo".
+  metodo          String
+  /// Parámetros de la empresa usados (versionados) y el tramo elegido, tal como se evaluaron.
+  configSnapshot  Json     @map("config_snapshot")
+  /// "google" (por ruta) | "linea_recta" (subestima la ruta real).
+  origenDistancia String   @map("origen_distancia")
+  montoCalculado  Int      @map("monto_calculado")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  rendicion Rendicion @relation(fields: [rendicionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("rendicion_viajes")
   @@schema("rendiciones")
 }
