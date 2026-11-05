@@ -1,0 +1,1 @@
+export { trabajosAsistencia } from "./capabilities";

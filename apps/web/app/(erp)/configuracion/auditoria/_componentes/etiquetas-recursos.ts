@@ -34,5 +34,5 @@ export const RECURSOS: Record<string, string> = {
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
   propuestas_tecnica: "Propuestas técnicas", envios_propuesta: "Envíos de propuesta",
   cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0",
-  informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados",
+  informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia",
 };

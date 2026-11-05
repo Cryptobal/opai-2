@@ -5,6 +5,8 @@ agente_conversaciones_list
 agente_conversaciones_renombrar
 agente_historial_list
 agente_modelos_list
+asistencia_marcas_listar
+asistencia_marcas_obtener
 comercial_canales_get
 comercial_canales_update
 comercial_config_actualizar_etapa

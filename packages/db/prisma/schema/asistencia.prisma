@@ -1,0 +1,142 @@
+// Asistencia legal (CAR-89, ADR-023, ADR-048): marcas inmutables y encadenadas por empresa. El schema
+// `asistencia` lo usa solo este módulo. Las marcas y las correcciones SOLO se agregan: triggers de la
+// migración impiden UPDATE, DELETE y TRUNCATE para todos los roles, también el dueño. La FK a tenants,
+// la política `tenant_isolation`, los triggers y los CHECK van en la migración (Prisma no los modela).
+// Las referencias a personas, instalaciones y turnos se validan con el trigger `mismo_tenant`, sin FK:
+// una FK con cascada permitiría borrar marcas al borrar una persona.
+
+/// Hecho regulado: una marca de asistencia. Hash SHA-256 sobre el registro canónico completo.
+model Marca {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  /// Secuencia por empresa de la cadena de marcas.
+  seq              Int
+  personaId        String   @map("persona_id") @db.Uuid
+  /// entrada | salida | inicio_colacion | fin_colacion
+  tipo             String
+  horaServidor     DateTime @map("hora_servidor") @db.Timestamptz(6)
+  horaDispositivo  DateTime? @map("hora_dispositivo") @db.Timestamptz(6)
+  desfaseS         Int?     @map("desfase_s")
+  /// en_linea | offline_queue | contingencia | importacion
+  origen           String
+  /// rostro | rut_pin | pin_respaldo | manual_contingencia
+  metodo           String
+  motivoRespaldo   String?  @map("motivo_respaldo")
+  confianza        Decimal? @db.Decimal(5, 4)
+  pruebaVida       Boolean? @map("prueba_vida")
+  dispositivoId    String?  @map("dispositivo_id") @db.Uuid
+  /// kiosco | telefono_personal
+  canal            String?
+  instalacionId    String   @map("instalacion_id") @db.Uuid
+  lat              Decimal? @db.Decimal(9, 6)
+  lng              Decimal? @db.Decimal(9, 6)
+  precisionM       Decimal? @map("precision_m") @db.Decimal(8, 2)
+  /// dentro | fuera | sin_gps (nunca bloquea la marca)
+  gpsEstado        String   @map("gps_estado")
+  distanciaM       Decimal? @map("distancia_m") @db.Decimal(10, 2)
+  turnoEsperadoId  String?  @map("turno_esperado_id") @db.Uuid
+  turnoInicio      DateTime? @map("turno_inicio") @db.Timestamptz(6)
+  turnoFin         DateTime? @map("turno_fin") @db.Timestamptz(6)
+  /// Empleador, RUT, establecimiento, mandante o EST y resolución; nunca se recalcula desde los maestros.
+  snapshot         Json
+  idempotencyKey   String   @map("idempotency_key")
+  hash             String
+  hashAnterior     String   @map("hash_anterior")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, seq])
+  @@unique([tenantId, idempotencyKey])
+  @@unique([hash])
+  @@index([tenantId, personaId, horaServidor])
+  @@index([tenantId, instalacionId, horaServidor])
+  @@map("marcas")
+  @@schema("asistencia")
+}
+
+/// Cabeza de cada cadena (marcas, correcciones) por empresa: se bloquea con FOR UPDATE al agregar.
+model CadenaCabeza {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  /// marcas | correcciones
+  cadena     String
+  ultimoSeq  Int      @default(0) @map("ultimo_seq")
+  ultimoHash String   @map("ultimo_hash")
+  verificadaEn   DateTime? @map("verificada_en") @db.Timestamptz(6)
+  verificacionOk Boolean?  @map("verificacion_ok")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, cadena])
+  @@map("cadenas_cabeza")
+  @@schema("asistencia")
+}
+
+/// Corrección propuesta sobre una marca: un hecho nuevo que la referencia; el original no se toca.
+/// También solo se agrega y se encadena (el estado y la respuesta del trabajador llegan en A2).
+model Correccion {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  seq            Int
+  marcaId        String   @map("marca_id") @db.Uuid
+  personaId      String   @map("persona_id") @db.Uuid
+  /// Valor propuesto: hora y tipo de la marca corregida.
+  horaPropuesta  DateTime @map("hora_propuesta") @db.Timestamptz(6)
+  tipoPropuesto  String   @map("tipo_propuesto")
+  motivo         String
+  propuestaPorId String   @map("propuesta_por_id") @db.Uuid
+  horaServidor   DateTime @map("hora_servidor") @db.Timestamptz(6)
+  idempotencyKey String   @map("idempotency_key")
+  hash           String
+  hashAnterior   String   @map("hash_anterior")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, seq])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, marcaId])
+  @@map("correcciones")
+  @@schema("asistencia")
+}
+
+/// Marca de contingencia: la registra RR. HH. con autor, motivo y evidencia; no cuenta hasta aceptarse.
+model Contingencia {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  personaId     String   @map("persona_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  tipo          String
+  horaDeclarada DateTime @map("hora_declarada") @db.Timestamptz(6)
+  motivo        String
+  autorId       String   @map("autor_id") @db.Uuid
+  /// pendiente | aceptada | rechazada
+  estado        String   @default("pendiente")
+  /// Documento de evidencia en core.documentos.
+  evidenciaDocumentoId String? @map("evidencia_documento_id") @db.Uuid
+  marcaId       String?  @map("marca_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, estado])
+  @@map("contingencias")
+  @@schema("asistencia")
+}
+
+/// Incidente técnico (proveedor caído, cola atrasada, cadena rota): a mano o automático.
+model IncidenteTecnico {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  /// proveedor_caido | cola_atrasada | cadena_rota | otro
+  tipo       String
+  /// baja | media | alta
+  severidad  String
+  inicio     DateTime @db.Timestamptz(6)
+  fin        DateTime? @db.Timestamptz(6)
+  detalle    String?
+  /// manual | automatico
+  origen     String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, inicio])
+  @@map("incidentes_tecnicos")
+  @@schema("asistencia")
+}

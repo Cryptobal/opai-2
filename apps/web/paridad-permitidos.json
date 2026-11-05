@@ -36,6 +36,10 @@
     {
       "archivo": "app/api/webhooks/resend/entrante/route.ts",
       "motivo": "Receptor del correo entrante de Resend (CAR-67): ocurre sin sesión; resuelve el tenant del token de la dirección con una función SECURITY DEFINER (resolverTokenSeguimiento), verifica la firma Svix y ejecuta la capacidad interna."
+    },
+    {
+      "archivo": "app/verificar/marca/[slug]/[hash]/ver.ts",
+      "motivo": "Verificación pública de una marca por hash (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.marcas.verificar (interna) con el hash de 256 bits como credencial, con rate limit que falla cerrado."
     }
   ],
   "internasPermitidas": [
@@ -66,6 +70,10 @@
     {
       "archivo": "app/api/webhooks/resend/entrante/route.ts",
       "motivo": "comercial.seguimientos.recibir_correo es interna por diseño: solo este receptor la ejecuta, con firma Svix y token como credencial."
+    },
+    {
+      "archivo": "app/verificar/marca/[slug]/[hash]/ver.ts",
+      "motivo": "Ejecuta asistencia.marcas.verificar (interna) para la página pública de verificación del comprobante de una marca."
     }
   ],
   "infraestructuraLibConDb": [
