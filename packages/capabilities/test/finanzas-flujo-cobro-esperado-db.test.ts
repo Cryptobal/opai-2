@@ -49,7 +49,7 @@ describe.skipIf(omitirSuiteDb())("flujo · fecha esperada de cobro (db)", () => 
   const factura = (tenantId: string, cuentaId: string, o: Record<string, unknown>) =>
     e.admin.documentoEmitido.create({
       // Exento: el total es el monto del documento (el CHECK pide neto + exento + IVA + otros = total).
-      data: { tenantId, cuentaId, tipoDte: 33, folio: folio++, montoTotal: 100_000, montoExento: o.montoTotal ?? 100_000, estadoDte: "aceptado", ...o },
+      data: { tenantId, cuentaId, tipoDte: 33, folio: folio++, montoTotal: 100_000, montoExento: Number(o.montoTotal ?? 100_000), estadoDte: "aceptado", ...o },
     });
 
   beforeAll(async () => {
