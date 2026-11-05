@@ -57,10 +57,10 @@ describe.skipIf(!urlPropietario)("flujo de caja: dos empresas en base real", () 
   let fila = "";
 
   it("crea una fila y fija una cifra; la planilla deriva el saldo", async () => {
-    fila = (await ok<{ id: string }>(t.a, "finanzas.filas.crear", { seccion: "ingreso", etiqueta: "Cliente 1", arrastre: true })).id;
+    fila = (await ok<{ id: string }>(t.a, "finanzas.filas.crear", { seccion: "egreso", etiqueta: "Proveedor 1", arrastre: true })).id;
     await ok(t.a, "finanzas.celdas.fijar", { filaId: fila, semana: futura, monto: 500 });
     const p = await ok<{ semanas: { semana: string; saldoFinal: number }[] }>(t.a, "finanzas.planilla.obtener", { desde, semanas: 6 });
-    expect(p.semanas.find((s) => s.semana === futura)?.saldoFinal).toBe(1500);
+    expect(p.semanas.find((s) => s.semana === futura)?.saldoFinal).toBe(500);
   });
 
   it("dry_run no escribe nada", async () => {

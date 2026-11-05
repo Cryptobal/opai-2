@@ -1396,7 +1396,7 @@ identidad de servicio en main.
 1. No se cierran ni se sellan semanas. Siempre mandan la cartola y las proyecciones. No hay ajuste manual de ingresos.
 2. Semanas pasadas: todos los movimientos de la cartola, por fecha del banco, estén conciliados o no; lo no conciliado va a una fila «Sin conciliar». El saldo parte del banco de hoy.
 3. Proyecciones: un solo criterio de semana, la fecha esperada de cobro: el promedio real de pago del cliente cuando tiene 3 o más facturas pagadas; si no, el vencimiento (emisión + plazo del cliente); editable a mano por factura (unifica `semanaComprometidoDte` de `packages/domain/src/finanzas/derivadas-dte.ts`, que hoy usa la emisión, con `proyeccion-flujo-cap.ts`, que usa el vencimiento). Las facturas vencidas pasan a la semana actual.
-4. Facturas cedidas: el depósito del factor es el ingreso (el factor deposita de una vez el monto menos su descuento; no hay remanente ni ingreso posterior) y la diferencia va a una cuenta contable configurable por empresa en Configuración, por defecto «Diferencia factoring» (o «Gasto financiero»); en el flujo aparece como egreso en esa fila.
+4. Facturas cedidas: el depósito del factor es el ingreso (el factor deposita de una vez el monto menos su descuento; no hay remanente ni ingreso posterior) y la diferencia va a una cuenta contable configurable por empresa en Configuración, por defecto «Diferencia factoring» (o «Gasto financiero»). Como no es un movimiento del banco, en el flujo esa fila es **informativa y no suma al saldo** (adenda del 5-nov-2026, «Finanzas · Proyecto», al diseñar el flujo v4: sumarla descontaría dos veces el descuento y rompería «semana pasada = cartola»).
 5. IVA y PPM: el IVA del mes M (débito − crédito) se paga en M+1 junto con el PPM (tasa configurada por empresa). Carlos marca o desmarca en el flujo, mes a mes, la postergación del IVA de ese mes a M+2; el PPM se paga siempre en M+1 aunque el IVA se postergue.
 6. Un solo umbral de saldo bajo, $15.000.000, que avisa solo por la campana.
 7. Pendiente de una factura = monto − notas de crédito parciales (61) − cobrado. La nota de débito (56) no es deuda. Las facturas vencidas importadas de 1.0 no entran en los recordatorios de cobranza.
@@ -1408,6 +1408,11 @@ identidad de servicio en main.
 **Respuestas de Carlos (4-nov-2026, #318).** Quedaron incorporadas en las reglas 3, 4 y 5: promedio real de pago con 3 o más facturas pagadas, factoring sin remanente con la diferencia a una cuenta configurable, e IVA en M+1 con postergación opcional por mes.
 
 ---
+
+**Adenda del 5-nov-2026 (Carlos, al revisar el prototipo del flujo v4; registrada por «Finanzas · Proyecto»).**
+- **Ingresos por cliente e instalación.** «Cobros de clientes» se abre por cuenta (cliente). Si una cuenta tiene dos o más instalaciones, debajo aparece una línea por instalación, desplegable: cerrada se ve el total de la cuenta y abierta su apertura. Una cuenta con una sola instalación es una línea.
+- **Centros de costo = instalaciones activas.** Solo las instalaciones en estado «activa» (más el centro general «Administración / Oficina central»); las prospecto e inactivas no se ofrecen. Precisa la decisión del 30-oct-2026 (CAR-198).
+- **Cómo un cargo del banco llega a su fila de egresos** (propuesta de «Finanzas · Proyecto», mostrada en el prototipo): (1) por una regla de conciliación (ADR-074), que concilia sola solo si el monto y la referencia calzan exacto; (2) al conciliarlo con una factura de proveedor, toma la fila por defecto del proveedor; (3) eligiendo la fila a mano al conciliar, con la opción de crear la regla en el mismo paso. Mientras no se concilia, queda en «Sin conciliar (cargos)» de su semana, y conciliarlo después solo lo cambia de fila.
 
 ## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
 
@@ -1426,3 +1431,13 @@ identidad de servicio en main.
 **Por qué.** Hoy el código lo lee y lo vuelve a codificar en UTF-8 (`ventas-xml.ts`, `octava.ts`). Con una razón social o una glosa con ñ o tildes, eso cambia los bytes firmados, invalida la firma y el SII o el RPETC lo rechazan.
 
 **Prueba obligatoria.** Una emisión y una cesión en certificación con «Compañía Ñuñoa» en la razón social y tildes en la glosa: el hash del XML guardado coincide con el que devolvió SimpleAPI y la cesión lo acepta.
+
+---
+
+## ADR-076 · Los diseños de Finanzas se hacen como prototipo interactivo en la misma sesión
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Carlos (chat con «Finanzas · Proyecto», 5-nov-2026 08:12 CLT: «me gustaría que los diseños los hicieras tú acá interactivos para yo verlo en la misma sesión para no cambiar a Claude Design»), registrada por Claude. · Ajusta, para Finanzas, el paso de diseño de ADR-047.
+
+**Decisión.** Para Finanzas, el paso «Design Prompt → Claude Design → diseño aprobado» se reemplaza por un **prototipo interactivo** que arma la sesión «Finanzas · Proyecto» en la misma conversación, sobre el Design System de OPAI 2.0 V2 (mismos tokens y clases que `packages/ds`). Carlos lo revisa ahí y lo aprueba. Al aprobarlo, su export se guarda en `docs/2.0/diseño/export-<pantalla>/` con un README, igual que los de Claude Design, y desde ese momento es el «diseño aprobado» que construye «Finanzas · Code». Se puede diseñar en paralelo a la construcción: un diseño no toca código.
+
+**Primer caso.** Flujo de caja v4 (CAR-193): planilla de escritorio con traza por celda, celular y ajustes; reemplaza `export-flujo-caja-v3` en lo que cambia por ADR-073 (sin cierre semanal ni metas; filas «Sin conciliar», IVA con postergación, PPM, depósito del factor y «Diferencia factoring» informativa; fecha esperada de cobro editable por factura; umbral único de $15M).

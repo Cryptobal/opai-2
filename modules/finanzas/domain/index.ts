@@ -7,8 +7,8 @@ export type Capa = "plan" | "comprometido" | "real";
 export type FilaFlujo = { id: string; seccion: Seccion; arrastre: boolean };
 export type CeldaFlujo = { filaId: string; semana: string; capa: Capa; monto: number };
 
-/** Diferencia (CLP) entre el saldo sugerido y el del banco que se acepta sin motivo al sellar. */
-export const TOLERANCIA_CIERRE_CLP = 1000;
+/** Umbral único de saldo bajo por defecto (CLP): planilla, aviso semanal y aviso de banco (ADR-073). */
+export const UMBRAL_SALDO_BAJO_DEFECTO = 15_000_000;
 
 const DIA_MS = 86_400_000;
 const aMs = (iso: string) => Date.parse(`${iso}T00:00:00Z`);
@@ -132,14 +132,4 @@ export function planificarMovimiento(o: {
       return { ok: false, motivo: "La semana de destino ya tiene una cifra comprometida o real." };
   }
   return { ok: true, movimientos };
-}
-
-/** Diferencia entre el banco y lo sugerido, y si exige motivo para sellar. */
-export function evaluarCierre(
-  saldoSugerido: number,
-  saldoBanco: number,
-  tolerancia = TOLERANCIA_CIERRE_CLP,
-) {
-  const diferencia = saldoBanco - saldoSugerido;
-  return { diferencia, exigeMotivo: Math.abs(diferencia) > tolerancia };
 }

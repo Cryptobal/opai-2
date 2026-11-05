@@ -44,7 +44,7 @@ describe.skipIf(!urlPropietario)("importación CSV del flujo: consultas constant
       transaccion: <R>(fn: Parameters<typeof base.transaccion>[0]) =>
         base.transaccion((tx) => fn(contado(tx, contar))) as Promise<R>,
     };
-    const csv = ["seccion,etiqueta,semana,monto", ...Array.from({ length: n }, (_, i) => `ingreso,${prefijo}${i},${futura},${1000 + i}`)].join("\n");
+    const csv = ["seccion,etiqueta,semana,monto", ...Array.from({ length: n }, (_, i) => `egreso,${prefijo}${i},${futura},${1000 + i}`)].join("\n");
     const cap = capacidades.find((c) => c.id === "finanzas.flujo.importar");
     if (!cap) throw new Error("falta la capacidad");
     const r = (await cap.handler(ctx as never, { formato: "csv", contenido: csv }, { dryRun })) as { aplicadas: number };

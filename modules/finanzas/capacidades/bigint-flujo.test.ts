@@ -2,7 +2,7 @@ import { executeCapability, registrarCapacidades } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { ACTIVOS, FILA_ING, S0, semilla } from "./fixtures";
+import { ACTIVOS, FILA_ING, FILA_EGR, S0, semilla } from "./fixtures";
 import { MONTO_FLUJO_MAX, aNumeroSeguro } from "./esquemas";
 import { capacidades } from "./index";
 
@@ -24,7 +24,7 @@ describe("finanzas flujo · BIGINT (CAR-139 §1)", () => {
   it("fijar acepta una celda al tope MONTO_FLUJO_MAX", async () => {
     const { ctx } = contextoDePrueba({ semilla: semilla(), modulosActivos: ACTIVOS });
     const r = await executeCapability(ctx, "finanzas.celdas.fijar", {
-      filaId: FILA_ING,
+      filaId: FILA_EGR,
       semana: S0,
       monto: TOPE_CELDA,
     });

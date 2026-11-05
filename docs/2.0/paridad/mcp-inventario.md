@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 584 pares pantalla→capacidad · 528 con herramienta · 56 excepciones justificadas · 0 faltantes.
+**Resumen:** 590 pares pantalla→capacidad · 534 con herramienta · 56 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -459,6 +459,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.rechazar` | `tickets_tickets_rechazar` | existe |
 | compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.ajustes.set` | `platform_ajustes_set` | existe |
 | compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.precios.set` | `platform_precios_set` | existe |
+| compartido | `app/(platform)/platform/facturacion/_componentes` | `platform.cobros.cargos_generar` | `platform_cobros_cargos_generar` | existe |
 | compartido | `app/(platform)/platform/indicadores/_componentes` | `platform.indicadores.resolver` | — | excepción |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.documentos.list` | `core_documentos_list` | existe |
@@ -569,7 +570,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
 | platform | `/platform/consumos` | `platform.consumos.summary` | `platform_consumos_summary` | existe |
+| platform | `/platform/facturacion` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/indicadores` | `platform.indicadores.propuestas` | `platform_indicadores_propuestas` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargo_anular` | `platform_cobros_cargo_anular` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargos_list` | `platform_cobros_cargos_list` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.cobros.condiciones_set` | `platform_cobros_condiciones_set` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/tenants/[id]/integraciones` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
 | platform | `/platform/tenants/[id]` | `platform.admins.invite` | `platform_admins_invite` | existe |
 | platform | `/platform/tenants/[id]` | `platform.modules.set` | `platform_modules_set` | existe |

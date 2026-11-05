@@ -46,6 +46,12 @@ export function globalesEnMemoria(delegado: (m: string) => Delegado): Globales {
     propuestasIndicadores: () => delegado("propuestaIndicador").findMany({}),
     capturasPrevisionales: async () => [],
     resolverPropuestaIndicador: async () => "aprobado",
+    // UF (CAR-188): filas `ufPublicada` { desde: Date, centavos } de la semilla; la última ≤ día.
+    ufAlDia: async (dia: Date) => {
+      const filas = await delegado("ufPublicada").findMany({ orderBy: { desde: "desc" } });
+      const f = filas.find((x) => (x["desde"] as Date) <= dia);
+      return f ? { centavos: f["centavos"] as number, desde: f["desde"] as Date } : null;
+    },
   };
   return globales as Globales;
 }

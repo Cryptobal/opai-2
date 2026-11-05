@@ -2,7 +2,7 @@ import type { Contexto } from "@opai/capabilities";
 import { noEncontrado } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 
-import { lunesDe, type Capa, type CeldaFlujo, type FilaFlujo, type Seccion } from "../domain";
+import { lunesDe, UMBRAL_SALDO_BAJO_DEFECTO, type Capa, type CeldaFlujo, type FilaFlujo, type Seccion } from "../domain";
 
 import { aNumeroSeguro } from "./esquemas";
 
@@ -28,11 +28,9 @@ type AjustesDb = {
   saldoInicial: bigint | number;
   umbral: bigint | number;
   desde: Date;
-  toleranciaCierre: bigint | number;
   horizonteSemanas: number;
   calendarioPagos: unknown;
   avisoActivo: boolean;
-  avisoUmbral: bigint | number;
   metaCeldaMs: number;
   metaGuardadoP95Ms: number;
   metaCargaInicialS: number;
@@ -47,7 +45,6 @@ export function vistaAjustes(a: AjustesDb) {
     saldoInicial: aNumeroSeguro(a.saldoInicial),
     umbral: aNumeroSeguro(a.umbral),
     desde: aIso(a.desde),
-    toleranciaCierre: aNumeroSeguro(a.toleranciaCierre),
     horizonteSemanas: a.horizonteSemanas,
     calendarioPagos: {
       ...(cal.remuneraciones != null ? { remuneraciones: cal.remuneraciones } : {}),
@@ -56,7 +53,6 @@ export function vistaAjustes(a: AjustesDb) {
       ...(cal.iva != null ? { iva: cal.iva } : {}),
     },
     avisoActivo: a.avisoActivo,
-    avisoUmbral: aNumeroSeguro(a.avisoUmbral),
     metaCeldaMs: a.metaCeldaMs,
     metaGuardadoP95Ms: a.metaGuardadoP95Ms,
     metaCargaInicialS: a.metaCargaInicialS,
@@ -64,19 +60,17 @@ export function vistaAjustes(a: AjustesDb) {
   };
 }
 
-/** Ajustes del tenant; si aún no hay, los de partida (saldo 0, umbral 0, desde la semana actual). */
+/** Ajustes del tenant; si aún no hay, los de partida (saldo 0, umbral de saldo bajo por defecto, desde la semana actual). */
 export async function ajustesDe(ctx: Contexto) {
   const a = await ctx.db.flujoAjustes.findFirst({});
   if (a) return vistaAjustes(a);
   return vistaAjustes({
     saldoInicial: 0,
-    umbral: 0,
+    umbral: UMBRAL_SALDO_BAJO_DEFECTO,
     desde: aFecha(lunesHoy()),
-    toleranciaCierre: 1000,
     horizonteSemanas: 12,
     calendarioPagos: calendarioDefecto(),
-    avisoActivo: false,
-    avisoUmbral: 0,
+    avisoActivo: true,
     metaCeldaMs: 100,
     metaGuardadoP95Ms: 1000,
     metaCargaInicialS: 2,

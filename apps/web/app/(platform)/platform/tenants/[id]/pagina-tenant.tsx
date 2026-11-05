@@ -12,7 +12,14 @@ import { cargarTenant } from "./datos";
 import type { DetalleTenant, PanelTenant } from "./tipos";
 
 export type TabTenant =
-  "resumen" | "modulos" | "usuarios" | "consumos" | "trabajos" | "agentes" | "integraciones";
+  | "resumen"
+  | "modulos"
+  | "cobro"
+  | "usuarios"
+  | "consumos"
+  | "trabajos"
+  | "agentes"
+  | "integraciones";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -79,6 +86,7 @@ export function PaginaTenant({ params, searchParams, tab, children }: Props) {
                     .length ?? 0,
                 href: `${base}/modulos`,
               },
+              { id: "cobro", etiqueta: "Cobro", href: `${base}/cobro` },
               {
                 id: "usuarios",
                 etiqueta: "Usuarios",
