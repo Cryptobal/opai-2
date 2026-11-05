@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { conflicto, reglaDeNegocio } from "@opai/capabilities";
 
-import { esLunes, UMBRAL_SALDO_BAJO_DEFECTO } from "../domain";
+import { esLunes } from "../domain";
 
 /** Traduce la violación de un índice único (carrera entre dos escrituras) a CONFLICT. */
 export async function sinDuplicado<T>(p: Promise<T>, mensaje: string): Promise<T> {
@@ -66,23 +66,22 @@ export const celdaSchema = z.object({
 
 export const ajustesSchema = z.object({
   saldoInicial: saldoSchema,
-  /** Un solo umbral de saldo bajo (planilla, aviso semanal y aviso de banco). */
-  umbral: saldoSchema.default(UMBRAL_SALDO_BAJO_DEFECTO),
+  /** Un solo umbral de saldo bajo (planilla, aviso semanal y aviso de banco); su valor por defecto vive en `ajustesDe`. */
+  umbral: saldoSchema,
   desde: semanaSchema,
-  horizonteSemanas: z.number().int().min(1).max(52).default(12),
+  horizonteSemanas: z.number().int().min(1).max(52),
   calendarioPagos: z
     .object({
       remuneraciones: z.number().int().min(1).max(28).optional(),
       imposiciones: z.number().int().min(1).max(28).optional(),
       anticipos: z.number().int().min(1).max(28).optional(),
       iva: z.number().int().min(1).max(28).optional(),
-    })
-    .default({}),
-  avisoActivo: z.boolean().default(true),
-  metaCeldaMs: z.number().int().min(1).max(10_000).default(100),
-  metaGuardadoP95Ms: z.number().int().min(1).max(60_000).default(1000),
-  metaCargaInicialS: z.number().int().min(1).max(120).default(2),
-  metasVisibles: z.boolean().default(false),
+    }),
+  avisoActivo: z.boolean(),
+  metaCeldaMs: z.number().int().min(1).max(10_000),
+  metaGuardadoP95Ms: z.number().int().min(1).max(60_000),
+  metaCargaInicialS: z.number().int().min(1).max(120),
+  metasVisibles: z.boolean(),
 });
 
 type FilaDb = {

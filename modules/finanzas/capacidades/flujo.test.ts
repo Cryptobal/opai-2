@@ -103,18 +103,18 @@ describe("finanzas.flujo.celdas", () => {
 
   it("mover: vista previa con saldos, luego escritura real que cambia la semana", async () => {
     const { ctx } = nuevo();
-    const entrada = { filaId: FILA_ING, semanas: [S0], por: 2 };
+    const entrada = { filaId: FILA_EGR, semanas: [S0], por: 1 };
     const vp = await executeCapability(ctx, "finanzas.celdas.mover", entrada, { dryRun: true });
     expect(vp).toMatchObject({ ok: true });
     expect(
-      (await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_ING } }))
+      (await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_EGR } }))
         .map((c) => c.monto)
         .sort(),
-    ).toEqual([1000, 500]);
+    ).toEqual([200, 300]);
     const r = await executeCapability(ctx, "finanzas.celdas.mover", entrada);
     expect(r).toMatchObject({ ok: true });
-    const celdas = await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_ING } });
-    expect(celdas.some((c) => c.semana.toISOString().startsWith(S2) && Number(c.monto) === 1000)).toBe(
+    const celdas = await ctx.db.flujoCelda.findMany({ where: { filaId: FILA_EGR } });
+    expect(celdas.some((c) => c.semana.toISOString().startsWith(S1) && Number(c.monto) === 300)).toBe(
       true,
     );
   });
@@ -142,13 +142,31 @@ describe("finanzas.flujo.celdas", () => {
   });
 
   it("mover no toca lo comprometido", async () => {
-    const { ctx } = nuevo();
-    const r = await executeCapability(ctx, "finanzas.celdas.mover", {
-      filaId: FILA_ING,
-      semanas: [S1],
-      por: 1,
-    });
+    const comprometida = {
+      id: "0192f3a0-0000-7000-8000-000000000151",
+      tenantId: TENANT_DE_PRUEBA,
+      filaId: FILA_EGR,
+      semana: aFecha(S1),
+      capa: "comprometido",
+      monto: 50,
+      nota: null,
+    };
+    const { ctx } = nuevo({ flujoCelda: [...semilla().flujoCelda, comprometida] });
+    const r = await executeCapability(ctx, "finanzas.celdas.mover", { filaId: FILA_EGR, semanas: [S1], por: 1 });
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("mover rechaza filas de ingresos (ADR-073)", async () => {
+    const { ctx } = nuevo();
+    const r = await executeCapability(ctx, "finanzas.celdas.mover", { filaId: FILA_ING, semanas: [S0], por: 2 });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const previa = await executeCapability(
+      ctx,
+      "finanzas.celdas.mover",
+      { filaId: FILA_ING, semanas: [S0], por: 2 },
+      { dryRun: true },
+    );
+    expect(previa).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 
   it("cumplir pasa la celda a real y exige estar en plan", async () => {
@@ -252,5 +270,25 @@ describe("finanzas.filas.archivar", () => {
     expect(vp).toMatchObject({ ok: true, data: { activa: false } });
     const r = await executeCapability(ctx, "finanzas.filas.archivar", { id: FILA_EGR, archivar: true });
     expect(r).toMatchObject({ ok: true, data: { activa: false } });
+  });
+});
+
+describe("finanzas.ajustes.actualizar · actualización parcial", () => {
+  it("no pisa el umbral ni el aviso ya guardados cuando solo cambia otro campo", async () => {
+    const { ctx } = nuevo({
+      flujoAjustes: [{ ...semilla().flujoAjustes[0]!, umbral: 2_000_000, avisoActivo: false }],
+    });
+    const r = await executeCapability(ctx, "finanzas.ajustes.actualizar", { saldoInicial: 777 });
+    expect(r).toMatchObject({ ok: true, data: { saldoInicial: 777, umbral: 2_000_000, avisoActivo: false } });
+    const guardado = await executeCapability(ctx, "finanzas.ajustes.obtener", {});
+    expect(guardado).toMatchObject({ ok: true, data: { umbral: 2_000_000, avisoActivo: false, horizonteSemanas: 12 } });
+  });
+
+  it("sin ajustes guardados parte del umbral único de 15 millones y el aviso activo", async () => {
+    const { ctx } = nuevo({ flujoAjustes: [] });
+    const r = await executeCapability(ctx, "finanzas.ajustes.obtener", {});
+    expect(r).toMatchObject({ ok: true, data: { umbral: 15_000_000, avisoActivo: true } });
+    const planilla = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 2 });
+    expect(planilla).toMatchObject({ ok: true, data: { aviso: { umbral: 15_000_000 } } });
   });
 });
