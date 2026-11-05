@@ -29,10 +29,19 @@ export function FichaCotizacionLineas({
 }) {
   // Solo las secciones con puestos o con instalación: la sección «Común» vacía no es una tarjeta más.
   const secciones = d.secciones.filter((s) => s.lineas.length > 0 || s.instalacionId);
+  // Sin puestos ni instalación no hay tarjeta, pero el primero se agrega en la sección común.
+  const primera = d.secciones[0];
   return (
     <div className="space-y-4">
       {secciones.length === 0 ? (
-        <p className="t-body text-fg-muted">Todavía no hay puestos. Agrega el primero para calcular el precio.</p>
+        <div className="space-y-3">
+          <p className="t-body text-fg-muted">Todavía no hay puestos. Agrega el primero para calcular el precio.</p>
+          {editable && primera ? (
+            <Button type="button" variant="secondary" size="md" onClick={() => onAgregar(primera.id)}>
+              Agregar puesto
+            </Button>
+          ) : null}
+        </div>
       ) : null}
       {secciones.map((s) => (
         <section key={s.id} aria-label={s.nombre} className="space-y-2">
