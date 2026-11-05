@@ -11,3 +11,5 @@ SET LOCAL lock_timeout = '5s';
 ALTER TABLE "comercial"."seguimientos" ADD COLUMN "avisado_en" TIMESTAMPTZ(6);
 
 COMMIT;
+
+-- Reversión: ALTER TABLE "comercial"."seguimientos" DROP COLUMN "avisado_en"; (solo guarda cuándo se avisó la primera respuesta; sin ella, el código vuelve a tratar `motivo = 'cliente_respondio'` como «ya avisado» y a lo sumo repite un aviso por seguimiento).
