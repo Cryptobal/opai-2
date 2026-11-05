@@ -73,14 +73,22 @@ test("tenant vacío: de la cotización nueva al costo calculado y la vista previ
   await page.screenshot({ path: info.outputPath("cpq-tenant-vacio-calculado.png"), fullPage: true });
 
   // Vista previa del PDF: termina en menos de 20 s con el documento o con un error y «Reintentar».
-  if (info.project.name === "telefono") {
-    await page.getByRole("button", { name: "Más acciones de la cotización" }).click();
-    await page.getByRole("menuitem", { name: "Vista previa PDF" }).click();
-  } else {
-    await visible(page, "Vista previa PDF").click();
-  }
   const pdf = page.locator('iframe[title="Vista previa PDF"]');
   const error = page.getByText("No se pudo mostrar la vista previa");
+  const generando = page.getByText("Generando PDF…");
+  const abrirVistaPrevia = async () => {
+    if (info.project.name === "telefono") {
+      await page.getByRole("button", { name: "Más acciones de la cotización" }).click();
+      await page.getByRole("menuitem", { name: "Vista previa PDF" }).click();
+    } else {
+      await visible(page, "Vista previa PDF").click();
+    }
+  };
+  // Un clic antes de hidratar se pierde y el diálogo no se abre: se reintenta hasta verlo abierto.
+  await expect(async () => {
+    if (!(await generando.or(pdf).or(error).first().isVisible())) await abrirVistaPrevia();
+    await expect(generando.or(pdf).or(error).first()).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 45_000 });
   // La primera generación del PDF compila su ruta en `next dev` y en el runner tarda más de 21 s.
   await expect(pdf.or(error)).toBeVisible({ timeout: 60_000 });
   if (await error.isVisible()) await expect(page.getByRole("button", { name: "Reintentar" })).toBeVisible();
