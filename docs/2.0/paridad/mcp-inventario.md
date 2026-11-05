@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 580 pares pantalla→capacidad · 524 con herramienta · 56 excepciones justificadas · 0 faltantes.
+**Resumen:** 575 pares pantalla→capacidad · 519 con herramienta · 56 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -218,12 +218,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.archivar` | `cpq_cotizaciones_archivar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.clonar` | `cpq_cotizaciones_clonar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.estado_comercial` | `cpq_cotizaciones_estado_comercial` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.explicar` | `cpq_cotizaciones_explicar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.marcar_lista` | `cpq_cotizaciones_marcar_lista` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.preview_pdf` | `cpq_cotizaciones_preview_pdf` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.reabrir` | `cpq_cotizaciones_reabrir` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.restaurar` | `cpq_cotizaciones_restaurar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.solicitar_aprobacion` | `cpq_cotizaciones_solicitar_aprobacion` | existe |
@@ -232,10 +229,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.solicitar` | `cpq_envios_propuesta_solicitar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.quitar` | `cpq_lineas_quitar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.sueldos_referencia.list` | `cpq_sueldos_referencia_list` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.crear` | `cpq_versiones_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.parametros` | `cpq_versiones_parametros` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.inicializar` | `cpq_propuestas_tecnica_inicializar` | existe |
@@ -803,13 +798,18 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
 - `cpq.correlativos.fijar`
+- `cpq.cotizaciones.clonar`
+- `cpq.cotizaciones.explicar`
+- `cpq.cotizaciones.reabrir`
 - `cpq.cotizaciones.retirar_aprobacion`
 - `cpq.envios_propuesta.list`
+- `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
 - `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
+- `cpq.versiones.crear`
 - `cpq.versiones.margen`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
