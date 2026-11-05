@@ -53,7 +53,9 @@ test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({
   await page.getByRole("button", { name: "Agregar puesto" }).click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
   // Con el puesto sin costear la cotización queda «Incompleta»: la única acción es completar los datos.
-  await expect(page.getByText("Incompleta", { exact: true }).first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText("Incompleta", { exact: true }).filter({ visible: true }).first()).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(page.getByRole("button", { name: "Completar los datos" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Dejar lista" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Pedir aprobación" })).toHaveCount(0);
