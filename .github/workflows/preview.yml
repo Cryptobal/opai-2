@@ -115,7 +115,6 @@ jobs:
         env:
           DB_URL: ${{ steps.neon.outputs.db_url }}
           DB_URL_POOLED: ${{ steps.neon.outputs.db_url_pooled }}
-          DB_HOST_POOLED: ${{ steps.neon.outputs.db_host_pooled }}
           RAMA_CREADA: ${{ steps.neon.outputs.created }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -135,7 +134,11 @@ jobs:
             fi
             if [ -n "$ACTUAL" ]; then
               echo "::add-mask::$ACTUAL"
-              if [[ "$ACTUAL" != *"@${DB_HOST_POOLED}"* ]]; then
+              # Mismo host que la URL con pooler que entrega Neon para esta rama (se compara con la
+              # URL y no con db_host_pooled, que puede venir en otro formato).
+              HOST_RAMA=$(echo "$DB_URL_POOLED" | sed -E 's#^[a-z]+://[^@]+@([^/:?]+).*#\1#')
+              HOST_ACTUAL=$(echo "$ACTUAL" | sed -E 's#^[a-z]+://[^@]+@([^/:?]+).*#\1#')
+              if [ -z "$HOST_RAMA" ] || [ "$HOST_ACTUAL" != "$HOST_RAMA" ]; then
                 echo "La DATABASE_URL de $RAMA_GIT apunta a otra rama Neon."
               elif ! timeout 20 psql "$ACTUAL" -tAc 'select 1' >/dev/null 2>&1; then
                 echo "La DATABASE_URL de $RAMA_GIT no conecta con la rama Neon."
