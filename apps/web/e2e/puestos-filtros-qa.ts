@@ -42,8 +42,11 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   // que la foto «antes» no difiera de la de «después» solo por eso (CAR-60).
   if (proyecto !== "telefono") await expect(lista.getByText("Región", { exact: true })).toBeVisible();
   const antes = proyecto === "telefono" ? "" : await lista.innerText();
-  await buscador.fill("Guardia posición 1");
-  await expect(page).toHaveURL(/pq=Guardia/);
+  // Un `fill` antes de que el buscador hidrate no llega a la URL: se repite hasta que `pq` aparece.
+  await expect(async () => {
+    await buscador.fill("Guardia posición 1");
+    await expect(page).toHaveURL(/pq=Guardia/, { timeout: 4_000 });
+  }).toPass({ timeout: 40_000 });
   await detalle.getByRole("button", { name: "Filtrar por estado" }).click();
   await page.getByRole("menuitem", { name: "Activo", exact: true }).click();
   await expect(page).toHaveURL(/pestado=activo/);
