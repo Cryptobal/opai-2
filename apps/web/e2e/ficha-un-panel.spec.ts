@@ -157,9 +157,10 @@ test.describe("fichas en un solo panel bajo 1024 px", () => {
         .poll(async () => page.locator("header h1:visible").evaluate((h) => h.getBoundingClientRect().width > 0 && h.scrollWidth <= h.clientWidth + 1))
         .toBe(true)
         .catch(async (error) => {
-          const hojas = await page.locator("header").first().evaluate((h) =>
-            [...h.querySelectorAll("*")].filter((n) => n.children.length === 0 && n.textContent?.trim())
-              .map((n) => `${n.tagName}:${n.textContent?.trim().slice(0, 28)}:${Math.round(n.getBoundingClientRect().width)}`).join(" | "));
+          const hojas = await page.locator("header h1:visible").evaluate((h1) =>
+            `h1=${h1.textContent}:${Math.round(h1.getBoundingClientRect().width)} (${h1.scrollWidth}/${h1.clientWidth}) | ` +
+            [...(h1.closest("header")?.querySelectorAll("*") ?? [])].filter((n) => n.getBoundingClientRect().width > 0 && (n.children.length === 0 || n.tagName === "BUTTON" || n.tagName === "A"))
+              .map((n) => `${n.tagName}${n.getAttribute("aria-label") ? "[" + n.getAttribute("aria-label") + "]" : ""}:${(n.textContent ?? "").trim().slice(0, 24)}:${Math.round(n.getBoundingClientRect().width)}`).join(" | "));
           throw new Error(`${ruta}: título cortado. Encabezado: ${hojas}`, { cause: error });
         });
       expect(await sinDesborde(page), ruta).toBe(true);
