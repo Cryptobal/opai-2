@@ -1,7 +1,8 @@
 import { type Contexto, conflicto, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
-import { horaValida, horasSemanalesSugeridas, patronValido, type DefinicionPatron } from "@opai/domain";
+import { horaValida } from "@opai/domain";
 
 import type { LineaOferta } from "./puestos-oferta";
+import { atributosPuesto, cicloDe } from "./puestos-atributos";
 
 export type PedidoPuesto = {
   lineaId: string;
@@ -42,31 +43,6 @@ export type PlanPuesto = {
   };
 };
 
-/** Ciclo del puesto: el patrón elegido o del catálogo; si no, el «NxM» escrito en la línea. */
-async function cicloDe(ctx: Contexto, patronId: string | null, texto: string | null, linea: string) {
-  if (patronId) {
-    const p = await ctx.db.patronTurno.findUnique({ where: { id: patronId } });
-    if (!p) throw noEncontrado("El patrón de turno");
-    if (!p.activo) throw reglaDeNegocio(`El patrón "${p.nombre}" está desactivado.`);
-    const definicion: DefinicionPatron = {
-      nombre: p.nombre,
-      clase: p.clase === "semanal" ? "semanal" : "ciclico",
-      diasTrabajo: p.diasTrabajo,
-      diasDescanso: p.diasDescanso,
-      diasSemana: p.diasSemana,
-    };
-    return { patronId: p.id, diasTrabajo: p.diasTrabajo, diasDescanso: p.diasDescanso, definicion };
-  }
-  const m = texto ? /^(\d{1,2})\s*[x×]\s*(\d{1,2})$/i.exec(texto.trim()) : null;
-  const [t, d] = m ? [Number(m[1]), Number(m[2])] : [0, 0];
-  if (!m || !patronValido(t, d))
-    throw reglaDeNegocio(`Elige el patrón de turno de «${linea}»: la cotización no trae uno válido.`);
-  const definicion: DefinicionPatron = {
-    nombre: `${t}×${d}`, clase: "ciclico", diasTrabajo: t, diasDescanso: d, diasSemana: [],
-  };
-  return { patronId: null, diasTrabajo: t, diasDescanso: d, definicion };
-}
-
 /**
  * Convierte lo que RRHH confirmó en puestos por crear: valida instalación, cargo, patrón y horario
  * (de la línea o del ajuste), numera las posiciones pendientes y comprueba que los nombres no choquen
@@ -102,24 +78,7 @@ export async function resolverPuestos(ctx: Contexto, items: LineaOferta[], pedid
     if (!horaInicio || !horaFin || !horaValida(horaInicio) || !horaValida(horaFin))
       throw reglaDeNegocio(`Falta el horario de «${l.linea}» (de 00:00 a 23:59).`);
     const { definicion, ...ciclo } = await cicloDe(ctx, p.patronId ?? l.patronId, l.patron, l.linea);
-    // Función y tramo de noche vienen del catálogo y del encargo de RR. HH.; las horas semanales
-    // salen del cálculo único del dominio (turnos.ts), el mismo de la Pauta y de Asistencia.
-    let funcionId: string | null = null;
-    if (p.funcionId) {
-      const f = await ctx.db.funcionPuesto.findUnique({ where: { id: p.funcionId } });
-      if (!f) throw noEncontrado("La función del puesto");
-      if (!f.activo) throw reglaDeNegocio(`La función "${f.nombre}" está desactivada.`);
-      funcionId = f.id;
-    }
-    const noche = p.horaInicioNoche || p.horaFinNoche ? { ini: p.horaInicioNoche, fin: p.horaFinNoche } : null;
-    if (noche && (!noche.ini || !noche.fin || !horaValida(noche.ini) || !horaValida(noche.fin)))
-      throw reglaDeNegocio(`El tramo de noche de «${l.linea}» necesita hora de inicio y de término (de 00:00 a 23:59).`);
-    const horasSemanales = horasSemanalesSugeridas({
-      patron: definicion,
-      tramos: [{ horaInicio, horaFin }, ...(noche ? [{ horaInicio: noche.ini!, horaFin: noche.fin! }] : [])],
-      colacionMin: 0,
-      colacionFuera: false,
-    });
+    const { funcionId, noche, horasSemanales } = await atributosPuesto(ctx, p, l, definicion, horaInicio, horaFin);
     const base = p.nombre ?? cargo.nombre;
     for (let i = 0; i < cantidad; i++) {
       const posicion = l.creados + i + 1;

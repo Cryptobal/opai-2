@@ -50,7 +50,7 @@ export async function listarInstalaciones(tx: TenantTx, f: FiltroInstalaciones) 
       c.nombre AS "cuentaNombre", p.puestos, p.puestos::float8 AS dotacion
     FROM pagina i LEFT JOIN core.cuentas c ON c.id = i.cuenta_id AND c.tenant_id = i.tenant_id
     CROSS JOIN LATERAL (
-      -- `dotacion` está deprecada (cada posición es un puesto, ADR-036): se cuentan puestos, no se suma.
+      -- La dotación está deprecada (cada posición es un puesto, ADR-036): se cuentan puestos, no se suma.
       SELECT count(*)::int AS puestos
       FROM core.puestos WHERE tenant_id = i.tenant_id AND instalacion_id = i.id AND estado = 'activo'
     ) p ORDER BY i.nombre, i.id

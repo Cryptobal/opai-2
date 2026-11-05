@@ -19,7 +19,7 @@ export const VERBOS: Record<string, string> = {
   montos_por_instalacion: "Montos por instalación", panel: "Panel", anular: "Anular", efectiva: "Vigente",
   cuentas: "Cuentas", contactos: "Contactos", vincular: "Vincular", set_roles: "Definir roles",
   desvincular: "Desvincular", completar: "Completar", delete: "Eliminar", timeline: "Línea de tiempo",
-  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar",
+  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar", regenerar: "Regenerar",
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   estado_comercial: "Estado comercial", revocar: "Revocar", ver: "Ver", ofrecer: "Ofrecer",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
