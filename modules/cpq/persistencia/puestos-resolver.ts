@@ -1,5 +1,5 @@
 import { type Contexto, conflicto, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
-import { horaValida, patronValido } from "@opai/domain";
+import { horaValida, horasSemanalesSugeridas, patronValido, type DefinicionPatron } from "@opai/domain";
 
 import type { LineaOferta } from "./puestos-oferta";
 
@@ -12,6 +12,9 @@ export type PedidoPuesto = {
   patronId?: string | undefined;
   horaInicio?: string | undefined;
   horaFin?: string | undefined;
+  funcionId?: string | undefined;
+  horaInicioNoche?: string | undefined;
+  horaFinNoche?: string | undefined;
 };
 
 export type PlanPuesto = {
@@ -27,6 +30,10 @@ export type PlanPuesto = {
     diasDescanso: number;
     horaInicio: string;
     horaFin: string;
+    funcionId: string | null;
+    horaInicioNoche: string | null;
+    horaFinNoche: string | null;
+    horasSemanales: number;
     jornada: string;
     dotacion: number;
     estado: string;
@@ -41,13 +48,23 @@ async function cicloDe(ctx: Contexto, patronId: string | null, texto: string | n
     const p = await ctx.db.patronTurno.findUnique({ where: { id: patronId } });
     if (!p) throw noEncontrado("El patrón de turno");
     if (!p.activo) throw reglaDeNegocio(`El patrón "${p.nombre}" está desactivado.`);
-    return { patronId: p.id, diasTrabajo: p.diasTrabajo, diasDescanso: p.diasDescanso };
+    const definicion: DefinicionPatron = {
+      nombre: p.nombre,
+      clase: p.clase === "semanal" ? "semanal" : "ciclico",
+      diasTrabajo: p.diasTrabajo,
+      diasDescanso: p.diasDescanso,
+      diasSemana: p.diasSemana,
+    };
+    return { patronId: p.id, diasTrabajo: p.diasTrabajo, diasDescanso: p.diasDescanso, definicion };
   }
   const m = texto ? /^(\d{1,2})\s*[x×]\s*(\d{1,2})$/i.exec(texto.trim()) : null;
   const [t, d] = m ? [Number(m[1]), Number(m[2])] : [0, 0];
   if (!m || !patronValido(t, d))
     throw reglaDeNegocio(`Elige el patrón de turno de «${linea}»: la cotización no trae uno válido.`);
-  return { patronId: null, diasTrabajo: t, diasDescanso: d };
+  const definicion: DefinicionPatron = {
+    nombre: `${t}×${d}`, clase: "ciclico", diasTrabajo: t, diasDescanso: d, diasSemana: [],
+  };
+  return { patronId: null, diasTrabajo: t, diasDescanso: d, definicion };
 }
 
 /**
@@ -84,7 +101,25 @@ export async function resolverPuestos(ctx: Contexto, items: LineaOferta[], pedid
     const horaFin = p.horaFin ?? l.horaFin;
     if (!horaInicio || !horaFin || !horaValida(horaInicio) || !horaValida(horaFin))
       throw reglaDeNegocio(`Falta el horario de «${l.linea}» (de 00:00 a 23:59).`);
-    const ciclo = await cicloDe(ctx, p.patronId ?? l.patronId, l.patron, l.linea);
+    const { definicion, ...ciclo } = await cicloDe(ctx, p.patronId ?? l.patronId, l.patron, l.linea);
+    // Función y tramo de noche vienen del catálogo y del encargo de RR. HH.; las horas semanales
+    // salen del cálculo único del dominio (turnos.ts), el mismo de la Pauta y de Asistencia.
+    let funcionId: string | null = null;
+    if (p.funcionId) {
+      const f = await ctx.db.funcionPuesto.findUnique({ where: { id: p.funcionId } });
+      if (!f) throw noEncontrado("La función del puesto");
+      if (!f.activo) throw reglaDeNegocio(`La función "${f.nombre}" está desactivada.`);
+      funcionId = f.id;
+    }
+    const noche = p.horaInicioNoche || p.horaFinNoche ? { ini: p.horaInicioNoche, fin: p.horaFinNoche } : null;
+    if (noche && (!noche.ini || !noche.fin || !horaValida(noche.ini) || !horaValida(noche.fin)))
+      throw reglaDeNegocio(`El tramo de noche de «${l.linea}» necesita hora de inicio y de término (de 00:00 a 23:59).`);
+    const horasSemanales = horasSemanalesSugeridas({
+      patron: definicion,
+      tramos: [{ horaInicio, horaFin }, ...(noche ? [{ horaInicio: noche.ini!, horaFin: noche.fin! }] : [])],
+      colacionMin: 0,
+      colacionFuera: false,
+    });
     const base = p.nombre ?? cargo.nombre;
     for (let i = 0; i < cantidad; i++) {
       const posicion = l.creados + i + 1;
@@ -100,6 +135,10 @@ export async function resolverPuestos(ctx: Contexto, items: LineaOferta[], pedid
           nombre,
           horaInicio,
           horaFin,
+          funcionId,
+          horaInicioNoche: noche?.ini ?? null,
+          horaFinNoche: noche?.fin ?? null,
+          horasSemanales,
           jornada: horaFin <= horaInicio ? "noche" : "dia",
           dotacion: 1,
           estado: "activo",

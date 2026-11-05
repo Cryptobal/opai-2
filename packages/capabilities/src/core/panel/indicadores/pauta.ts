@@ -22,7 +22,7 @@ export async function coberturaHoy(ctx: Contexto): Promise<CoberturaHoy | null> 
     !ctx.autorizar("pauta:read")
   )
     return null;
-  const fecha = hoyPauta();
+  const fecha = await hoyPauta(ctx);
   const [anio, mes] = fecha.split("-").map(Number) as [number, number];
   const instalaciones = await ctx.db.instalacion.findMany({
     where: { archivadaEn: null, ...dondeInstalacion(ctx) },

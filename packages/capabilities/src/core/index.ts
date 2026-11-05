@@ -55,6 +55,7 @@ import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
 import { usersRestablecerMfa } from "./users-mfa";
+import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
 export const capacidadesDelNucleo: readonly Capacidad[] = [
@@ -127,6 +128,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
   ...capacidadesAgentes,
+  ...capacidadesTurnos,
   ...capacidadesPlataforma,
 ];
 
@@ -140,6 +142,7 @@ export const consumidoresDelNucleo = [
   consumidorSeguimientoAviso,
   consumidorNegocioGanado,
   consumidorCpqGanado,
+  consumidorTurnosEsperados,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
@@ -153,4 +156,5 @@ export const trabajosDelNucleo = [
   trabajoCapturaIndicadoresSii,
   trabajoCapturaPrevisional,
   trabajoTareasVencidas,
+  trabajoExtenderTurnos,
 ];

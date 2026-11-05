@@ -52,7 +52,7 @@ export const inicioIndicadores = defineCapability({
       coberturaHoy(ctx),
       negociosAbiertos(ctx),
       cotizacionesPorAprobar(ctx),
-      facturadoDelMes(ctx, hoy()),
+      facturadoDelMes(ctx, await hoy(ctx)),
       ticketsInicio(ctx),
     ]);
     return { cobertura, negocios, cotizacionesPorAprobar: porAprobar, facturado, tickets };

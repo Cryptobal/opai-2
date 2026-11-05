@@ -1,6 +1,4 @@
-import { z } from "zod";
-
-import { capacidadesPauta, defineModule } from "@opai/capabilities";
+import { ajustesPauta, capacidadesPauta, defineModule } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Pauta (Operaciones, Brief 11b · PR 1). El núcleo deriva navegación, permisos,
@@ -29,7 +27,7 @@ export const manifest = defineModule({
       orden: 40,
       permiso: "pauta:read",
     }],
-  configuracion: z.object({}),
+  configuracion: ajustesPauta,
   eventos: [
     { id: "pauta.serie.fijada", descripcion: "Se fijó o cambió la serie de un puesto." },
     {

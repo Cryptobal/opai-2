@@ -2,6 +2,9 @@ import { z } from "zod";
 
 import { calcularAlertasHoras, serieVigente, trabajaEn } from "@opai/domain";
 
+import { ajuste } from "../core/config";
+import { vigenciasJornada } from "../core/turnos/comun";
+
 import { uuidSchema } from "../core/esquemas";
 import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { defineCapability } from "../define";
@@ -53,7 +56,7 @@ export const alertasListar = defineCapability({
       where: { instalacionId: inst.id, estado: "activo", AND: [dondePuesto(ctx)] },
       select: { id: true, horaInicio: true, horaFin: true },
     });
-    const anchor = input.semana ?? hoy();
+    const anchor = input.semana ?? (await hoy(ctx));
     const semanaDesde = inicioSemana(anchor);
     const semanaFin = new Date(Date.parse(`${semanaDesde}T00:00:00Z`) + 6 * 86_400_000).toISOString().slice(0, 10);
     const turnos: { personaId: string; fecha: string; horaInicio: string; horaFin: string }[] = [];
@@ -90,7 +93,12 @@ export const alertasListar = defineCapability({
           turnos.push({ personaId: vig.titularId, fecha: d, horaInicio: p.horaInicio, horaFin: p.horaFin });
       }
     }
-    const alertas = calcularAlertasHoras(turnos, anchor);
+    const [vigencias, limiteMensualHoras, descansoMinimoHoras] = await Promise.all([
+      vigenciasJornada(ctx),
+      ajuste<number>(ctx, "pauta", "limite_mensual_horas"),
+      ajuste<number>(ctx, "pauta", "descanso_minimo_horas"),
+    ]);
+    const alertas = calcularAlertasHoras(turnos, anchor, { vigencias, limiteMensualHoras, descansoMinimoHoras });
     const nombres = await nombresDePersonas(ctx, alertas.map((a) => a.personaId));
     return {
       instalacionId: inst.id,
