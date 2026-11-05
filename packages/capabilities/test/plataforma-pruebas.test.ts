@@ -12,6 +12,7 @@ import {
 } from "../src/core/plataforma/cobros/pruebas";
 import { restriccion } from "../src/autorizacion";
 import { executeCapability } from "../src/execute";
+import { defineCapability } from "../src/define";
 import { defineModule, limpiarModulos, registrarModulos } from "../src/module";
 import { limpiarRegistro, listarCapacidades, registrarCapacidades } from "../src/registry";
 import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
@@ -247,5 +248,49 @@ describe("módulo en solo lectura", () => {
     expect(
       restriccion(ctx, { id: "core.x", modulo: "core", efecto: "escritura" } as never),
     ).toBeNull();
+  });
+});
+
+describe("módulo en solo lectura en el MCP y aviso a 7 días", () => {
+  it("el MCP oculta las herramientas que escriben (y su preview) del módulo en solo lectura", async () => {
+    const { herramientasMcp } = await import("../src/mcp");
+    const crm = defineCapability({
+      id: "crm.negocios.crear",
+      descripcion: "Crea un negocio del CRM (prueba de solo lectura).",
+      permiso: "crm:write",
+      input: z.object({}),
+      output: z.object({}),
+      efecto: "escritura",
+      dryRun: true,
+      handler: async () => ({}),
+    });
+    const lee = defineCapability({
+      id: "crm.negocios.list",
+      descripcion: "Lista los negocios del CRM (prueba de solo lectura).",
+      permiso: "crm:read",
+      input: z.object({}),
+      output: z.array(z.string()),
+      efecto: "lectura",
+      dryRun: false,
+      handler: async () => [],
+    });
+    registrarCapacidades([crm, lee]);
+    const agente = { tipo: "agent" as const, id: "k1", viaUserId: USUARIO_DE_PRUEBA.id };
+    const nombres = (soloLectura: string[]) =>
+      herramientasMcp(
+        contextoDePrueba({
+          rol: "owner",
+          actor: agente,
+          scopes: ["*"],
+          modulosActivos: ["crm"],
+          modulosSoloLectura: soloLectura,
+        }).ctx,
+      ).map((h) => h.nombre);
+    expect(nombres([])).toEqual(
+      expect.arrayContaining(["crm_negocios_crear", "preview_crm_negocios_crear"]),
+    );
+    const en = nombres(["crm"]);
+    expect(en).toContain("crm_negocios_list");
+    expect(en.filter((n) => n.includes("negocios_crear"))).toEqual([]);
   });
 });

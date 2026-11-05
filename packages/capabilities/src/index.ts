@@ -1,5 +1,9 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
-export { trabajoCobrosMesAnterior, trabajoCobrosPruebas } from "./core/plataforma/cobros";
+export {
+  consumidorAvisoPrueba,
+  trabajoCobrosMesAnterior,
+  trabajoCobrosPruebas,
+} from "./core/plataforma/cobros";
 export { ajustesComercial, capacidadesComercial } from "./comercial";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
