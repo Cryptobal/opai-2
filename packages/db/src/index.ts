@@ -23,6 +23,11 @@ export type {
   NuevoCargoCobro,
 } from "./plataforma-empresa-cobros";
 export { leerUfAlDia } from "./plataforma-indicadores";
+export {
+  type DatosTributarios,
+  esRutRepetido,
+  type PerfilTributario,
+} from "./plataforma-perfil-tributario";
 export type { HechoPlataforma } from "./plataforma-aprobaciones";
 // La auditoría global solo se escribe por operaciones con nombre: `accesoPlataforma()` (ámbito
 // `plataforma`) y `registrarEventoSeguridad` (ámbito `seguridad`, CAR-42). No se exporta el append.
