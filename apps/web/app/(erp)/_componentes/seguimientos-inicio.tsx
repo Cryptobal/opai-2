@@ -4,6 +4,8 @@ import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
+import { esFalloReal, FalloBloque } from "./fallo-bloque";
+
 type Fila = {
   id: string;
   negocioId: string;
@@ -27,8 +29,14 @@ export async function SeguimientosInicio() {
     estado: "activo",
     asignadoId: identidad.usuario.id,
   });
-  if (!r.ok || r.data.length === 0) return null;
-  const atrasados = r.data.filter((s) => s.estadoVisible === "con_atrasos" || s.estadoVisible === "con_fallos").length;
+  if (!r.ok)
+    return esFalloReal(r.error.code) ? (
+      <FalloBloque titulo="No pudimos cargar tus seguimientos" />
+    ) : null;
+  if (r.data.length === 0) return null;
+  const atrasados = r.data.filter(
+    (s) => s.estadoVisible === "con_atrasos" || s.estadoVisible === "con_fallos",
+  ).length;
   return (
     <SeccionTarjeta
       titulo={`Seguimientos por hacer (${r.data.length})`}
@@ -41,7 +49,11 @@ export async function SeguimientosInicio() {
     >
       {atrasados ? (
         <p className="t-caption px-4 pt-3">
-          {atrasados} {atrasados === 1 ? "negocio con un paso atrasado o con fallo" : "negocios con pasos atrasados o con fallo"}.
+          {atrasados}{" "}
+          {atrasados === 1
+            ? "negocio con un paso atrasado o con fallo"
+            : "negocios con pasos atrasados o con fallo"}
+          .
         </p>
       ) : null}
       <ul className="divide-y divide-border">

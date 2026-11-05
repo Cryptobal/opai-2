@@ -8,6 +8,9 @@ import { fecha, haceCuanto, hora, hoyIso } from "@/lib/fechas";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Actividad } from "@/lib/tipos-maestros";
 
+import { esFalloReal, FalloBloque } from "./fallo-bloque";
+import { FilasPlegables } from "./filas-plegables";
+
 const diaDe = (iso: string) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date(iso));
 const cuando = (iso: string) =>
@@ -20,7 +23,10 @@ export async function ActividadInicio({ actor }: { actor: string | undefined }) 
     limite: 6,
     ...(filtro ? { actor: filtro } : {}),
   });
-  if (!r.ok) return null;
+  if (!r.ok)
+    return esFalloReal(r.error.code) ? (
+      <FalloBloque titulo="No pudimos cargar la actividad" />
+    ) : null;
   return (
     <SeccionTarjeta
       titulo="Actividad"
@@ -40,7 +46,7 @@ export async function ActividadInicio({ actor }: { actor: string | undefined }) 
       {r.data.items.length === 0 ? (
         <p className="text-base text-fg-muted">Sin actividad todavía.</p>
       ) : (
-        <ul className="flex flex-col">
+        <FilasPlegables visibles={3}>
           {r.data.items.map((i) => (
             <li
               key={i.id}
@@ -67,10 +73,10 @@ export async function ActividadInicio({ actor }: { actor: string | undefined }) 
               </span>
             </li>
           ))}
-        </ul>
+        </FilasPlegables>
       )}
       <EnlaceBoton href="/configuracion/auditoria" variante="ghost" className="mt-2 -ml-3">
-        Ver toda la auditoría
+        Ver más en la auditoría
       </EnlaceBoton>
     </SeccionTarjeta>
   );
