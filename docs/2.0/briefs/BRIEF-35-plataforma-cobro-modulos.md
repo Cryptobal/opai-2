@@ -1,84 +1,47 @@
 # BRIEF-35 · Plataforma: cobro por módulo (CAR-188)
 
-**Sesión 6 · 4-nov-2026 · rama `brief/car-188-plataforma-cobro-modulos` · ADR-071 · hoja: `modulos/plataforma-hoja-alcance.md`**
+**Plataforma · Code · 5-nov-2026 · rama `brief/car-188-plataforma-cobro-modulos` · ADR-071 y su adenda · hoja: `modulos/plataforma-hoja-alcance.md`**
+
+Dos PRs, uno a la vez: **PR 1 Cobro** (#317) y **PR 2 Pruebas y solo lectura** (después de integrar el 1).
 
 ## 1. Objetivo
 
-Que Plataforma sepa cuánto cobrarle a cada empresa por cada módulo y deje cada mes un **cargo listo para facturar**, sin emitir facturas ni usar SimpleAPI. Ver de un vistazo qué se factura y qué no, por empresa y en total. Sirve para todos los módulos (decisión de Carlos del 4-nov, #313).
+Que Plataforma sepa cuánto cobrarle a cada empresa y deje cada mes un **cargo listo para facturar**, sin emitir facturas ni usar SimpleAPI. Ver de un vistazo qué se factura y qué no (con su motivo), por empresa y en total.
 
-## 2. Estado actual (verificado en `main` `7f9a8f9`)
+## 2. Decisiones de Carlos que rigen (ADR-071 y adenda, 4-nov-2026)
 
-`core.tenant_modules` guarda solo `estado` (`trial`, `activo`, `suspendido`); «prueba» no vence y funciona igual que «activo». No hay precio, condición comercial ni cargo en ningún lado. La UF diaria vive en `remuneraciones.valores_publicados` (indicador `uf`, en centavos de CLP).
+1. **Plan base mensual fijo en UF** por empresa: el «módulo» reservado `base` (`PLAN_BASE`). Siempre aparece; se cobra si la empresa no está suspendida.
+2. **Cada módulo tiene su precio y su unidad.** Forma de cobro: **fijo mensual**, o **por unidad × cantidad del mes**, con **mínimo mensual opcional** y **después el descuento**. La cantidad del mes queda guardada en el cargo. Moneda por defecto: UF (CLP permitido).
+3. **Unidades de referencia** (los montos los fija Carlos en Plataforma; no se siembran precios): Finanzas fijo; Rendiciones por usuario que rinde (`rendiciones:rendir`; los aprobadores no se cobran); Asistencia, Nómina y Cumplimiento DT por trabajador activo con mínimo; Operaciones/Pauta por instalación activa; Comercial y CPQ por usuario con licencia; firma por uso (fuera de este brief).
+4. **Pruebas** (PR 2): no hay autoservicio; las abre Plataforma a una empresa validada (con RUT), por módulo y con fecha de término. Aviso 7 días antes. Al vencer: con «pasa a cobro» se cobra desde el día siguiente; sin él, el módulo queda en **solo lectura** (nada se borra).
+5. **Primer mes proporcional** por días; los siguientes, completos.
+6. **UF del cargo:** la del último día del mes cobrado. Sin ella, el cargo en UF se omite con motivo y se reintenta al día siguiente.
+7. **Sin facturas reales ni SimpleAPI.**
 
-## 3. Alcance
+## 3. PR 1 · Cobro
 
-**Entra:** condiciones comerciales por empresa y módulo; cálculo del cargo del mes en el dominio; generación idempotente de cargos de un mes cerrado (a mano y con un trabajo diario); anular un cargo; vista «Facturación» de Plataforma (por empresa y total, mes a mes); pestaña «Cobro» en la ficha de la empresa con editor y vista previa del cargo; capacidades con MCP y `preview_`.
+- **Dominio** (`packages/domain/src/cobros/`): `cargoDelMes(condicion, estadoModulo, periodo, cantidad)`. Orden: fijo o cantidad × precio → mínimo → prorrateo del primer mes → descuento. Aritmética entera (CLP en pesos, UF × 10.000, descuento en `PCT_ESCALA`). Cantidad 0 sin mínimo: no se factura (`bonificado`).
+- **Datos** (migración `20261106210000_core_cobro_modulos`, aún sin aplicar, aditiva): `core.cobro_condiciones` y `core.cobro_cargos` con `forma`, `unidad`, `minimo_mensual`, `pasa_a_cobro` y `cantidad`; RLS + FORCE + `tenant_isolation`; único parcial del cargo vigente.
+- **Conteo de unidades** (`unidadesCobro()` + `contarUnidades`, sin datos personales en la salida), al calcular y al generar (el trabajo corre el día 1): `usuario_activo` (membresías activas), `usuario_rinde` (con `rendiciones:rendir` efectivo: rol base o personalizado más excepciones), `usuario_licencia` (algún permiso efectivo del módulo; **propuesta, DECISIÓN CARLOS**), `trabajador_activo` (personas con vínculo vigente), `instalacion_activa`.
+- **Capacidades** `platform.cobros.*`: `resumen` (plan base y módulos con forma, unidad, cantidad, mensual, monto y motivo; totales «se facturan» / «no se facturan»), `condiciones_set` (irreversible, `dryRun` con el mes en curso y la cantidad de hoy; acepta `moduloId: "base"`), `cargos_generar` (idempotente), `cargos_list`, `cargo_anular`. Trabajo diario `core.cobros.generar_mes_anterior`.
+- **Pantallas** (DS 2.0; sin diseño aprobado de Facturación ni Cobro, base: Plataforma de `export-maestros` 48–51): `/platform/facturacion` separa «Se facturan» y «No se facturan» con su motivo; pestaña «Cobro» de la empresa edita la condición con vista previa.
 
-**No entra:** emitir facturas o DTE; cobro por trabajador o por instalación (ADR-058, después); catálogo comercial de módulos (bloque C); pasar un módulo de «prueba» a «activo» solo al vencer (lo cobra igual, ver §10).
+## 4. PR 2 · Pruebas y solo lectura
 
-## 4. Arquitectura
+`platform.cobros.prueba_abrir`; trabajo diario de aviso a 7 días (ficha de empresa «Atención» y «Pruebas por vencer» en Facturación); al vencer, `activo` (pasa a cobro) o estado nuevo `solo_lectura` (`executeCapability` rechaza escrituras e irreversibles del módulo y deja pasar lecturas); `platform.modules.set` acepta `solo_lectura` y pasa a `irreversible` (hallazgo §2.9). Toca permisos: pide «Revisor OPAI 2.0: sin bloqueos».
 
-- **Dominio** (`packages/domain/src/cobros/`): `cargoDelMes(condicion, estadoModulo, periodo)` decide si se factura, desde qué día, cuántos días y el monto, con aritmética entera (CLP en pesos, UF en diezmilésimas, descuento en `PCT_ESCALA`). `aClp(monto, moneda, ufCentavos)` convierte con la UF del último día del mes.
-- **Datos** (schema `core`, RLS por empresa): `cobro_condiciones` (una por empresa y módulo) y `cobro_cargos` (uno vigente por empresa, módulo y mes; índice único parcial sobre los no anulados).
-- **Acceso:** operaciones con nombre en `operacionesEmpresa` (CAR-40), siempre sobre `forTenant(tenantId)` y filtrando además por `tenantId`; la UF por una operación global con nombre.
-- **Capacidades** `platform.cobros.*` (`sinTenant`, `tenantObjetivo`, auditoría global y en la empresa objetivo).
+## 5. Seguridad y tenant
 
-## 5. Archivos
+Solo `platformRole` (`platform:tenants.read` / `.manage`). Toda escritura y lectura queda en la auditoría global y las escrituras también en la empresa objetivo, con antes y después en `condiciones_set`. Las operaciones filtran por `tenantId` además de la RLS. Lo irreversible pide aprobación humana a un agente.
 
-`packages/domain/src/cobros/*` · `packages/db/prisma/schema/cobros.prisma` · `packages/db/prisma/migrations/20261106210000_core_cobro_modulos/` · `packages/db/src/plataforma-empresa-cobros.ts` · `packages/db/src/plataforma.ts` · `packages/capabilities/src/core/plataforma/cobros/*` · `apps/web/app/(platform)/platform/facturacion/*` · `apps/web/app/(platform)/platform/tenants/[id]/cobro/*` · `apps/web/lib/navegacion.ts` · tests e instantáneas.
+## 6. Tests
 
-## 6. Modelo de datos y migración (aditiva)
+Dominio (fijo, por unidad, mínimo, descuento, proporcional, UF del último día, prueba con y sin «pasa a cobro», cantidad 0); capacidades en memoria (permisos, `dryRun`, idempotencia, cantidad en el cargo, plan base, auditoría); `test:db` con dos empresas sobre RLS real, incluido el conteo de unidades; Playwright de las dos pantallas a 375, 1024 y 1280 px.
 
-`core.cobro_condiciones`: `tenant_id`, `modulo_id`, `moneda` (`CLP`|`UF`), `precio_mensual` (entero: pesos o UF × 10.000, ≥ 0), `cobro_desde` y `prueba_hasta` (fechas opcionales), `descuento_pct` (0 a 1.000.000), `nota`; único `(tenant_id, modulo_id)`.
+## 7. Riesgos y rollback
 
-`core.cobro_cargos`: `tenant_id`, `modulo_id`, `periodo` (primer día del mes), copia de la condición usada (`moneda`, `precio_mensual`, `descuento_pct`), `dias_cobrados`, `dias_mes`, `monto` (en la moneda), `uf_centavos` (si es UF), `monto_clp`, `estado` (`listo`|`anulado`), `motivo_anulacion`, `anulado_en`. Único parcial `(tenant_id, modulo_id, periodo) WHERE estado = 'listo'`.
+Migración aditiva (`DROP TABLE`). Nada se cobra ni se emite. Los precios no se siembran: sin condición, nada se factura.
 
-Ambas con RLS `tenant_isolation`, FORCE, `SET LOCAL lock_timeout`. Reversible con `DROP TABLE`.
+## 8. Reporte de ejecución
 
-## 7. Capacidades
-
-| Id | Efecto | Qué hace |
-|---|---|---|
-| `platform.cobros.resumen` | lectura | Mes (por defecto el actual) por empresa y módulo: estado, condición, si se factura y por qué, monto estimado en CLP y el cargo si existe; totales |
-| `platform.cobros.condiciones_set` | irreversible (aprobación humana para agentes), `dryRun` | Fija o quita la condición de un módulo; la vista previa devuelve el cargo del mes con la condición nueva |
-| `platform.cobros.cargos_generar` | escritura, `dryRun` | Genera los cargos de un mes cerrado, idempotente (no duplica); omite con motivo lo que no se factura o no tiene UF |
-| `platform.cobros.cargos_list` | lectura | Cargos por mes, empresa y estado |
-| `platform.cobros.cargo_anular` | irreversible, `dryRun` | Anula un cargo listo con motivo; se puede volver a generar |
-
-Trabajo diario `platform.cobros.generar_mes_anterior` por empresa: genera el mes anterior si falta (idempotente).
-
-## 8. Interfaz y responsive
-
-Diseño aprobado más cercano: Plataforma en `export-maestros` (pantallas 48–51: lista de empresas, ficha, ajustes). No hay diseño propio de Facturación: se usa `ListScreen`, `KpiTile`, `Table` y `Sheet` del DS con el mismo patrón que la ficha; se reporta y entra al Design Prompt del bloque D. `/platform/facturacion`: selector de mes, 4 indicadores (total del mes en CLP, módulos que se facturan, que no, empresas), tabla por empresa con chips de módulos (se factura / no y por qué), total, y «Generar cargos» de un mes cerrado con vista previa. Ficha › «Cobro»: módulos con su condición y su estado de cobro, hoja «Editar condición» con el cargo del mes en vivo, historial de cargos con «Anular». Verificar a 375, 1024 y 1280 px.
-
-## 9. Seguridad y tenant
-
-Solo `platformRole` (`platform:tenants.read` para leer, `platform:tenants.manage` para escribir). Toda escritura y lectura queda en la auditoría global y las escrituras también en la empresa objetivo. Las tablas tienen RLS; las operaciones filtran además por `tenantId`. Test entre empresas: lo de una empresa nunca aparece ni se escribe en otra. Lo irreversible pide aprobación humana a un agente.
-
-## 10. Casos límite
-
-Prueba sin fecha de fin: no se factura. Prueba vencida: se factura desde el día siguiente aunque el módulo siga marcado «prueba» (propuesta, decisión de Carlos pendiente). Inicio a mitad de mes: proporcional por días (propuesta). Módulo suspendido o no contratado: no se factura. UF del último día del mes no publicada: el cargo se omite con motivo y se reintenta. Mes en curso: no se generan cargos (solo estimación). Precio 0 o descuento 100 %: no se factura («bonificado»). Módulo `core`: no se cobra aparte.
-
-## 11. Plan por bloques (un commit cada uno)
-
-1. Dominio y tests. 2. Schema, migración y operaciones de datos. 3. Capacidades, trabajo y tests (incluido entre empresas). 4. Pantallas y navegación. 5. Instantáneas MCP, inventario de paridad, ESTADO.
-
-## 12. Tests
-
-Dominio (proporcional, prueba, descuento, UF, redondeo); capacidades en memoria (permisos, dry run, idempotencia, auditoría, empresa equivocada → NOT_FOUND); `test:db` con dos empresas sobre RLS real.
-
-## 13. Validación
-
-Gate completo; Playwright local en `/platform/facturacion` y la pestaña Cobro a 375, 1024 y 1280 px con capturas; herramientas `platform_cobros_*` y `preview_*` en la instantánea MCP.
-
-## 14. Criterios de aceptación
-
-Fijar la condición de un módulo y ver en el mismo momento si se factura y cuánto; ver por empresa y en total qué se factura y qué no; generar los cargos de octubre dos veces y obtener los mismos cargos; anular uno y regenerarlo; todo igual por MCP.
-
-## 15. Riesgos y rollback
-
-Migración aditiva (`DROP TABLE`). Sin efecto en las empresas: nada se cobra ni se emite. Riesgo: reglas de §10 marcadas como propuesta; se ajustan en el dominio sin migración.
-
-## 16. Reporte de ejecución
-
-Se completa al cerrar el PR.
+Ver el PR.
