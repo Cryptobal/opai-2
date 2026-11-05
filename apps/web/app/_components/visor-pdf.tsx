@@ -2,8 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 
-import { Download, ExternalLink } from "lucide-react";
-
 import { Button } from "@opai/ds";
 
 const TACTIL = "(hover: none) and (pointer: coarse)";
@@ -56,11 +54,9 @@ export function VisorPdf({
           Este dispositivo no muestra el PDF dentro de la página. Ábrelo en el visor o descárgalo.
         </p>
         <Button type="button" size="lg" block onClick={() => window.open(pdfUrl, "_blank", "noopener")}>
-          <ExternalLink className="size-4" aria-hidden />
           Abrir PDF
         </Button>
         <Button type="button" variant="secondary" size="lg" block onClick={() => descargarPdf(pdfUrl, nombreArchivo)}>
-          <Download className="size-4" aria-hidden />
           Descargar PDF
         </Button>
         {onCerrar ? (
@@ -76,7 +72,6 @@ export function VisorPdf({
       <iframe title={titulo} src={pdfUrl} className={`${alto} w-full max-w-full rounded-md border border-border`} />
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="secondary" onClick={() => descargarPdf(pdfUrl, nombreArchivo)}>
-          <Download className="size-4" aria-hidden />
           Descargar PDF
         </Button>
         {onCerrar ? (
