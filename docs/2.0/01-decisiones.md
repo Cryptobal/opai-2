@@ -1353,3 +1353,11 @@ identidad de servicio en main.
 **Relación con ADR-058.** ADR-058 fija la estructura (capas y unidades) sin montos. Este ADR permite **montos por empresa** (condiciones comerciales pactadas), no una lista de precios global. La unidad de B es un monto mensual fijo; el cobro por trabajador o por instalación de ADR-058 queda para después, con el modelo preparado. Las preguntas abiertas están en `modulos/plataforma-hoja-alcance.md` §6.
 
 **Consecuencias.** Rendiciones no tiene cobro propio y solo usa el estado del módulo (prueba, activo o suspendido). Hoja de alcance de Plataforma: `docs/2.0/modulos/plataforma-hoja-alcance.md`.
+
+**Adenda del 4-nov-2026 (Carlos, «DECISIÓN CARLOS» en CAR-188 a las 20:29 y en #314 a las 20:37 y 20:45 CLT).**
+
+1. **Forma de cobro por módulo.** Cada empresa paga un **plan base mensual fijo en UF** y cada módulo contratado tiene su propio precio en UF con su unidad. El motor soporta **precio fijo mensual** o **precio por unidad × cantidad del mes**, con **mínimo mensual opcional** y **después el descuento**; la **cantidad del mes queda guardada en el cargo** para auditarla. Referencia de unidades: Finanzas, fijo mensual (sin tramos, 26-oct); Rendiciones, por usuario activo habilitado para rendir (los aprobadores no se cobran); Asistencia, Nómina y Cumplimiento DT, por trabajador o guardia activo, con mínimo; Operaciones/puestos, por instalación activa; Comercial (CRM) y CPQ, por usuario con licencia; firma, por uso. Los montos los fija Carlos en Plataforma.
+2. **Primer mes proporcional** a los días desde el inicio del cobro; los siguientes, completos. **UF del cargo:** la del último día del mes que se cobra.
+3. **Pruebas.** No hay registro abierto ni autoservicio. Plataforma abre la prueba a una empresa ya validada (con RUT), por módulo y con fecha de término. Siete días antes del vencimiento llega un aviso a Plataforma. Al vencer, si Plataforma marcó **«pasa a cobro»**, empieza a cobrarse; si no, el módulo queda en **solo lectura** (ve sus datos, no crea nada nuevo, nada se borra).
+4. **Plan base** (reemplaza el punto 3 de ADR-058): empresa, usuarios, roles y permisos, ajustes, auditoría, notificaciones, documentos, tickets y portal. El motor de sueldos va dentro de Nómina y la firma se cobra por uso. Se refleja en el catálogo de módulos (bloque C).
+

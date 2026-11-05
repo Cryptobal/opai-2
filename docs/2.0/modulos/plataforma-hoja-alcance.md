@@ -62,9 +62,11 @@ Paridad pantalla → MCP en verde (0 faltantes); la brecha es al revés: hay cap
 | 5 | **D · Diseño** | Design Prompt de Plataforma completo; luego títulos, nombres legibles, vista previa en pantalla y 375/1024/1280 |
 | 6 | **E · Brechas** | Editar empresa, usuarios de plataforma, auditoría, miembros e invitaciones |
 
-## 6. Decisiones de Carlos
+## 6. Decisiones de Carlos (respondidas el 4-nov-2026, ADR-071 adenda)
 
-1. **Unidad del precio:** el cobro de B es un **monto mensual fijo por módulo** (UF o CLP). ADR-058 prevé por trabajador (Nómina) o por instalación (Rondas); eso queda para después, con el modelo preparado. ¿De acuerdo?
-2. **Fin de la prueba:** al vencer, ¿el módulo pasa solo a «activo» y empieza a cobrarse, o queda en prueba hasta que Plataforma lo active? (Propuesta: pasa a cobrarse, no se apaga.)
-3. **Cargo del mes:** ¿mes completo o proporcional a los días desde el inicio del cobro? (Propuesta: proporcional el primer mes, completo después.)
-4. **UF del cargo:** ¿se fija con la UF del último día del mes o del día que se emite? (Propuesta: último día del mes, como dato del cargo.)
+1. **Unidad:** plan base mensual fijo en UF por empresa y, por módulo, precio fijo o por unidad × cantidad del mes, con mínimo opcional y después descuento; la cantidad queda en el cargo.
+2. **Fin de la prueba:** la abre Plataforma por módulo con fecha de término; aviso 7 días antes; al vencer, con «pasa a cobro» se cobra, sin él el módulo queda en solo lectura.
+3. **Primer mes:** proporcional; los siguientes, completos.
+4. **UF del cargo:** la del último día del mes que se cobra.
+
+**Pendiente de aprobación:** esta hoja de alcance como plan del módulo.
