@@ -15,15 +15,38 @@ export default async function calentar() {
   ]) {
     await fetch(`${base}${ruta}`, { signal: AbortSignal.timeout(120_000) }).catch(() => undefined);
   }
-  await calentarPaginas404(base);
+  await calentarConSesion(base);
 }
 
 /**
- * Páginas a las que el proxy reescribe un 404 (`respuesta404` hace un `fetch` interno con tope de 4 s).
- * Exigen sesión, así que se visitan una vez con el owner de e2e: si su primera compilación cae dentro
- * de una prueba, el `fetch` vence, el proxy cede a la página y el 404 sale como 200 (CAR-199).
+ * Rutas con sesión que se visitan una vez antes de las pruebas. Exigen sesión, así que entra el owner
+ * de e2e y las recorre:
+ *  - las páginas a las que el proxy reescribe un 404 (`respuesta404` hace un `fetch` interno con tope
+ *    de 4 s): si su primera compilación cae dentro de una prueba, el `fetch` vence y el 404 sale 200;
+ *  - las rutas más pesadas que usan las pruebas: en `next dev` la primera visita de cada ruta compila
+ *    (varios segundos en el runner) y se comía los 5 s del `expect` o los 30 s de la hidratación.
+ * Calentar no es una prueba: una ruta que falla o tarda se salta (CAR-199).
  */
-async function calentarPaginas404(base: string) {
+const RUTAS_CON_SESION = [
+  "/configuracion/no-encontrado?ruta=%2Fconfiguracion%2Fgrupo%2Fx",
+  "/no-encontrado",
+  "/",
+  "/negocios",
+  "/cotizaciones",
+  "/cotizaciones/nueva",
+  "/solicitudes",
+  "/tareas",
+  "/pauta",
+  "/remuneraciones",
+  "/finanzas/flujo",
+  "/personas?nueva=1",
+  "/mi-cuenta/preferencias",
+  "/configuracion",
+  "/configuracion/grupo/operacion",
+  "/configuracion/modulo/comercial?seccion=embudo",
+];
+
+async function calentarConSesion(base: string) {
   if (!E2E_PASSWORD) return;
   const navegador = await chromium.launch().catch(() => null);
   if (!navegador) return;
@@ -31,10 +54,9 @@ async function calentarPaginas404(base: string) {
     const contexto = await navegador.newContext({ baseURL: base });
     const page = await contexto.newPage();
     await entrar(page);
-    for (const ruta of ["/configuracion/no-encontrado?ruta=%2Fconfiguracion%2Fgrupo%2Fx", "/no-encontrado"])
-      await page.goto(ruta, { timeout: 120_000 });
+    for (const ruta of RUTAS_CON_SESION) await page.goto(ruta, { timeout: 120_000 }).catch(() => undefined);
   } catch {
-    // Calentar no es una prueba: si falla, que lo diga la prueba que lo necesite.
+    // Si no entra, que lo diga la prueba que lo necesite.
   } finally {
     await navegador.close();
   }

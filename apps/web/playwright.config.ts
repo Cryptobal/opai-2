@@ -11,6 +11,8 @@ export default defineConfig({
   testDir: "./e2e",
   globalSetup: "./e2e/calentar.ts",
   timeout: 90_000,
+  // `next dev` compila cada ruta en su primera visita y en el runner eso pasa de los 5 s por defecto.
+  expect: { timeout: 15_000 },
   use: {
     baseURL: process.env["BASE_URL"] ?? "http://localhost:3000",
     trace: process.env["CI"] ? "retain-on-failure" : "off",
