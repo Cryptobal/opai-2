@@ -15,7 +15,9 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   use: {
     baseURL: process.env["BASE_URL"] ?? "http://localhost:3000",
-    trace: process.env["CI"] ? "retain-on-failure" : "off",
+    // La traza se escribe sin parar en `test-results`, dentro del árbol que vigila `next dev`: cada escritura
+    // lo hace recompilar y recargar páginas aún sin hidratar (bucle en `/login`). Se activa solo a pedido.
+    trace: process.env["E2E_TRACE"] ? "retain-on-failure" : "off",
     screenshot: "only-on-failure",
   },
   ...(process.env["BASE_URL"]
