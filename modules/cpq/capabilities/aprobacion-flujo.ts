@@ -2,7 +2,8 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
-import { marcarLista, reabrirParaEditar, solicitarAprobacionMargen } from "../persistencia/aprobacion-margen";
+import { marcarLista, solicitarAprobacionMargen } from "../persistencia/aprobacion-margen";
+import { reabrirParaEditar } from "../persistencia/reabrir";
 import { cargarFilasVersion, recalcularVersion } from "../persistencia/recalcular";
 import {
   entradaEstadoFicha,
