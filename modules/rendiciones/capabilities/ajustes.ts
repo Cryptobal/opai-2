@@ -1,8 +1,16 @@
 import { z } from "zod";
 
+import { METODOS_KM, MAX_MONTO_KM } from "../domain";
 import { PERMISO_CONFIG } from "./permisos";
 
-/** Ajustes del módulo Rendiciones (ADR-018): los lee `ajuste()` y los cambia `core.config.set`. */
+const kilometraje = { grupo: "Kilometraje", ambito: "tenant", permiso: PERMISO_CONFIG } as const;
+const tramoSchema = z.object({ nombre: z.string().trim().min(1).max(80), montoClp: z.number().int().min(1).max(MAX_MONTO_KM) });
+
+/**
+ * Ajustes del módulo Rendiciones (ADR-018): los lee `ajuste()` y los cambia `core.config.set`.
+ * El kilometraje (CAR-194) usa campos planos, no un objeto: el centro de configuración renderiza
+ * un control por campo. «Sin configurar» (método vacío) bloquea crear viajes con un mensaje claro.
+ */
 export const ajustesRendiciones = z.object({
   exigir_respaldo: z.boolean().default(true).meta({
     etiqueta: "Exigir boleta o factura en cada gasto",
@@ -19,5 +27,41 @@ export const ajustesRendiciones = z.object({
     ambito: "tenant",
     permiso: PERMISO_CONFIG,
     control: "texto",
+  }),
+  km_metodo: z.enum(["", ...METODOS_KM]).default("").meta({
+    ...kilometraje,
+    etiqueta: "Cómo se calcula el kilometraje",
+    ayuda: "Consumo de combustible, tarifa por km o tramo fijo. Vacío = la empresa aún no configura el kilometraje.",
+    control: "seleccion",
+  }),
+  km_rendimiento_km_l: z.number().min(0).max(100).default(10).meta({
+    ...kilometraje,
+    etiqueta: "Rendimiento del vehículo (km por litro)",
+    ayuda: "Solo para el método de consumo. Hasta 1 decimal.",
+    control: "numero",
+  }),
+  km_precio_litro_clp: z.number().int().min(0).max(100_000).default(1500).meta({
+    ...kilometraje,
+    etiqueta: "Precio del litro de combustible (CLP)",
+    ayuda: "Solo para el método de consumo.",
+    control: "numero",
+  }),
+  km_recargo_desgaste_pct: z.number().int().min(0).max(100).default(10).meta({
+    ...kilometraje,
+    etiqueta: "Recargo por desgaste del vehículo (%)",
+    ayuda: "Porcentaje sobre el combustible. Solo para el método de consumo.",
+    control: "numero",
+  }),
+  km_tarifa_por_km_clp: z.number().int().min(0).max(100_000).default(0).meta({
+    ...kilometraje,
+    etiqueta: "Tarifa por kilómetro (CLP)",
+    ayuda: "Solo para el método de tarifa por km.",
+    control: "numero",
+  }),
+  km_tramos: z.array(tramoSchema).max(50).default([]).meta({
+    ...kilometraje,
+    etiqueta: "Tramos con monto fijo",
+    ayuda: "Lista de {nombre, montoClp}. Solo para el método de tramo fijo.",
+    control: "json",
   }),
 });

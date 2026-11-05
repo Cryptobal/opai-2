@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ErrorGoogle, geoGoogle } from "./google";
+import { distanciaLineaRecta, ErrorGoogle, geoGoogle, puntoValido } from "./google";
 
 describe("geolocalización Google", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -125,5 +125,37 @@ describe("fallas de Google Maps (estado y mensaje, nunca la clave)", () => {
     expect(e).toBeInstanceOf(ErrorGoogle);
     expect(e.message).toContain("fetch failed");
     expect(e.message).not.toContain("SECRETA");
+  });
+});
+
+describe("geolocalización Google · distancia (CAR-194)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const stgo = { lat: -33.4489, lng: -70.6693 };
+  const rancagua = { lat: -34.1708, lng: -70.7444 };
+
+  it("pide la ruta a Routes API (TRAFFIC_UNAWARE, CL) y devuelve km con origen google", async () => {
+    const f = vi.fn(async (_u: URL | string, _i?: RequestInit) => Response.json({ routes: [{ distanceMeters: 87_432 }] }));
+    vi.stubGlobal("fetch", f);
+    expect(await geoGoogle("k").distancia(stgo, rancagua)).toEqual({ km: 87.4, origenDistancia: "google" });
+    expect(String(f.mock.calls[0]?.[0])).toBe("https://routes.googleapis.com/directions/v2:computeRoutes");
+    const init = f.mock.calls[0]?.[1];
+    expect(JSON.parse(String(init?.body))).toMatchObject({ travelMode: "DRIVE", routingPreference: "TRAFFIC_UNAWARE", regionCode: "CL" });
+    expect((init?.headers as Record<string, string>)["X-Goog-FieldMask"]).toBe("routes.distanceMeters");
+  });
+
+  it("si Google rechaza o no devuelve ruta cae a línea recta y lo informa (nunca 0)", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("x", { status: 403 })));
+    const a = await geoGoogle("k").distancia(stgo, rancagua);
+    expect(a.origenDistancia).toBe("linea_recta");
+    expect(a.km).toBeGreaterThan(70);
+    expect(a.km).toBeLessThan(85);
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({})));
+    expect((await geoGoogle("k").distancia(stgo, rancagua)).origenDistancia).toBe("linea_recta");
+  });
+
+  it("puntos distintos muy cercanos no dan 0; el mismo punto da 0 honesto", () => {
+    expect(distanciaLineaRecta(stgo, { lat: stgo.lat + 0.00001, lng: stgo.lng }).km).toBe(0.1);
+    expect(distanciaLineaRecta(stgo, stgo).km).toBe(0);
+    expect(puntoValido({ lat: 91, lng: 0 })).toBe(false);
   });
 });

@@ -83,7 +83,7 @@ export {
 } from "./trabajos/runner";
 export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./comprobantes";
 export { camposExternos, externo } from "./externo";
-export { correoDe, geoDe, iaDe } from "./integraciones/adaptadores";
+export { correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
 export { comoAgenteInterno } from "./agentes/interno";
 export {
