@@ -55,6 +55,7 @@ const RUTAS_CON_SESION = [
   "/configuracion",
   "/configuracion/grupo/operacion",
   "/configuracion/modulo/agente",
+  "/configuracion/api-keys",
   "/configuracion/modulo/comercial?seccion=embudo",
 ];
 
