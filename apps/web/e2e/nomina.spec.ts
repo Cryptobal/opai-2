@@ -16,7 +16,7 @@ async function conPeriodo(page: Page) {
   await page.goto("/remuneraciones");
   await expect(page.getByRole("group", { name: "Secciones de Remuneraciones" })).toBeVisible();
   await expect(
-    page.getByText("Aún no hay períodos").or(page.getByRole("region", { name: "Lista de períodos" })),
+    page.getByText("Aún no hay períodos").or(page.getByRole("region", { name: "Lista de períodos" })).first(),
   ).toBeVisible();
   if (await page.getByText("Aún no hay períodos").isVisible()) {
     const abrir = page.getByRole("button", { name: "Abrir período" }).first();
