@@ -10,7 +10,7 @@ export async function reabrirParaEditar(ctx: Contexto, versionId: string) {
   await ctx.transaccion(async (tx) => {
     const r = await tx.cpqVersion.updateMany({
       where: { id: versionId, tenantId: ctx.tenantId, estado: "lista" },
-      data: { estado: "borrador" },
+      data: { estado: "borrador", revision: { increment: 1 } },
     });
     if (r.count === 0) throw conflicto("La versión cambió de estado mientras tanto; vuelve a cargar la ficha.");
     await ctx.eventos.emitir(tx, {

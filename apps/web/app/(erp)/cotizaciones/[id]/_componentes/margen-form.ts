@@ -4,9 +4,9 @@ export type ParametrosVersion = {
   mesesPactados: boolean;
   margenModo: string;
   margenObjetivoPct: number | null;
-  /** Mínimo y alerta de la empresa (enteros escalados). */
-  margenMinimoPct?: number;
-  margenAlertaPct?: number;
+  /** Mínimo y alerta que la empresa configuró (enteros escalados); `null` si no los fijó. */
+  margenMinimoPct?: number | null;
+  margenAlertaPct?: number | null;
   sobrescrito: boolean;
   instrumentos: {
     financiero: { habilitado: boolean; tasaPct: number };

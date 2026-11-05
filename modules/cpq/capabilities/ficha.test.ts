@@ -259,3 +259,54 @@ describe("paridad CPQ (CAR-134)", () => {
     expect(data.noEnviable).toBe(true);
   });
 });
+
+describe("márgenes sin configurar en la ficha (CAR-192)", () => {
+  async function parametros(configurar?: Record<string, number>) {
+    mockMotorLegal();
+    const { ctx } = ctxGestor(true);
+    for (const [clave, valor] of Object.entries(configurar ?? {}))
+      await ctx.db.ajuste.create({
+        data: { tenantId: ctx.tenantId, modulo: "cpq", clave, ambito: "tenant", sujetoId: ctx.tenantId, valor },
+      });
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Márgenes" });
+    if (!c.ok) throw new Error("fixture");
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id: (c.data as { id: string }).id });
+    if (!f.ok) throw new Error("ficha");
+    return (f.data as { parametros: { margenMinimoPct: number | null; margenAlertaPct: number | null } }).parametros;
+  }
+
+  it("mínimo y alerta son null (no 0) si la empresa no los configuró", async () => {
+    const p = await parametros();
+    expect(p.margenMinimoPct).toBeNull();
+    expect(p.margenAlertaPct).toBeNull();
+  });
+
+  it("devuelven lo configurado, escalado, y puede ser solo uno", async () => {
+    const p = await parametros({ margen_minimo_pct: 12 });
+    expect(p.margenMinimoPct).toBe(120_000);
+    expect(p.margenAlertaPct).toBeNull();
+  });
+});
+
+describe("patrones de turno de la empresa en el cálculo (CAR-192)", () => {
+  it("un patrón creado en Operaciones se calcula; sin él, el motor no lo reconoce", async () => {
+    mockMotorLegal();
+    const { ctx } = ctxGestor(true);
+    const c = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: NEGOCIO_1, titulo: "Patrón propio" });
+    if (!c.ok) throw new Error("fixture");
+    const id = (c.data as { id: string }).id;
+    const f = await executeCapability(ctx, "cpq.cotizaciones.ficha", { id });
+    if (!f.ok) throw new Error("ficha");
+    const sec = (f.data as { secciones: { id: string }[] }).secciones[0]!;
+    await ctx.db.patronTurno.create({
+      data: { tenantId: ctx.tenantId, nombre: "6x1", clase: "ciclico", diasTrabajo: 6, diasDescanso: 1, diasSemana: [], activo: true, orden: 9 },
+    });
+    const l = await executeCapability(ctx, "cpq.lineas.crear", {
+      seccionId: sec.id, tipo: "puesto", nombre: "Turno", sueldoBaseClp: 650_000, patron: "6x1",
+    });
+    expect(l.ok).toBe(true);
+    const r = await executeCapability(ctx, "cpq.cotizaciones.calcular", { id });
+    expect(r.ok).toBe(true);
+    expect((r as { data: { ventaMensual: number | null } }).data.ventaMensual).toBeGreaterThan(0);
+  });
+});

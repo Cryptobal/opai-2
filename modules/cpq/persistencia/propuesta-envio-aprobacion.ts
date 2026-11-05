@@ -7,6 +7,7 @@ import {
   fueraDeMargenesEnvioConjunto,
 } from "../domain/documento/propuesta-envio-reglas";
 import { usuarioReal } from "./aprobacion-reglas";
+import { leerVersionEsperada } from "./version-esperada";
 
 export type EvaluacionAprobacionEnvio = EvaluacionAprobacionEnvioPropuesta;
 
@@ -69,5 +70,8 @@ export async function exigirGatesEnvioCpq(
     dryRun,
     cotizacionId,
   );
-  return { pack, resultado };
+  // Después del cálculo (que puede refrescar el caché de la versión): lo que se valida es lo que se envía.
+  const versionEsperada = await leerVersionEsperada(ctx.db, pack.version.id);
+  if (!versionEsperada) throw reglaDeNegocio("No hay versión para enviar.");
+  return { pack, resultado, versionEsperada: { ...versionEsperada, estado: pack.version.estado } };
 }

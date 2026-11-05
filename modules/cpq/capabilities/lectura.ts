@@ -10,7 +10,9 @@ import {
   uuidSchema,
   versionSchema,
 } from "./esquemas";
-import { PERMISO_READ } from "./permisos";
+import { PERMISO_COSTOS, PERMISO_READ } from "./permisos";
+import { estadosDeLista } from "../persistencia/lista-estado";
+import { margenesConfigurados } from "../persistencia/supuestos";
 import { resumenListaDesdeVersion } from "./lista-resumen";
 import { cotizacionDe, vistaCotizacion, vistaVersion } from "./util";
 
@@ -19,6 +21,8 @@ const resumenListaSchema = z
     semaforo: z.enum(["verde", "amarillo", "rojo"]).optional(),
     margenEfectivoPct: z.number().int().optional(),
     costoPendiente: z.boolean(),
+    /** Falso si el cálculo guardado es antiguo o dudoso: la lista no muestra margen, pide recalcular. */
+    calculoConfiable: z.boolean(),
   })
   .optional();
 
@@ -26,6 +30,8 @@ const itemSchema = cotizacionSchema.extend({
   negocioTitulo: z.string().nullable(),
   cuentaTitulo: z.string().nullable(),
   resumenCalculo: resumenListaSchema,
+  /** El mismo estado único de la ficha; null si el cálculo guardado no basta para decidirlo. */
+  estadoFicha: z.object({ estado: z.string(), etiqueta: z.string() }).nullable(),
   version: versionSchema.nullable(),
 });
 
@@ -72,15 +78,20 @@ export const cotizacionesList = defineCapability({
     const negocioMeta = new Map(
       negocios.map((n) => [n.id, { titulo: n.titulo, cuenta: n.cuenta?.nombre ?? null }]),
     );
+    const ultimas = items.flatMap((c) => versiones.find((v) => v.cotizacionId === c.id) ?? []);
+    const estados = await estadosDeLista(ctx, ultimas);
+    const minimoConfigurado = ctx.autorizar(PERMISO_COSTOS) && (await margenesConfigurados(ctx)).minimoPct !== null;
     return {
       items: items.map((c) => {
         const ultima = versiones.find((v) => v.cotizacionId === c.id);
+        const est = ultima ? estados.get(ultima.id) : undefined;
         const meta = negocioMeta.get(c.negocioId);
         return {
           ...vistaCotizacion(c),
           negocioTitulo: meta?.titulo ?? null,
           cuentaTitulo: meta?.cuenta ?? null,
-          resumenCalculo: ultima ? resumenListaDesdeVersion(ctx, ultima) : undefined,
+          resumenCalculo: ultima ? resumenListaDesdeVersion(ctx, ultima, est, minimoConfigurado) : undefined,
+          estadoFicha: est?.estadoFicha ?? null,
           version: ultima ? vistaVersion(ctx, ultima) : null,
         };
       }),

@@ -11,7 +11,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { textoAprobacionMargenN6 } from "@/lib/cpq-aprobacion-presentacion";
 import { avisosCpq } from "@/lib/cpq-avisos";
 import { type BloqueFicha, pasosDeFicha } from "@/lib/cpq-ficha-pasos";
-import { conteo } from "@/lib/cpq-presentacion";
+import { conteo, margenPctTexto } from "@/lib/cpq-presentacion";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
 import { AccionesFicha } from "./acciones-ficha";
@@ -86,6 +86,8 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
     onVistaPrevia: () => modales.setPreviewAbierto(true),
     onCompletar: () => abrir(pasos.primeroAbierto)(true),
   };
+  const resumenCostos =
+    c.ventaMensual && !c.noEnviable && c.margenEfectivoPct != null ? `Margen ${margenPctTexto(c.margenEfectivoPct)}` : undefined;
   const bloque = (b: BloqueFicha, paso: number, titulo: string, resumen: string | undefined, contenido: React.ReactNode) => (
     <BloquePlegable
       paso={paso}
@@ -131,9 +133,9 @@ export function FichaCotizacion({ datos }: { datos: DatosFichaCotizacion }) {
           {bloque("cliente", 1, "Cliente e instalación", d.negocioTitulo ?? undefined, <ContenidoCliente d={d} />)}
           {bloque("puestos", 2, "Puestos", conteo(puestosHabilitados.length, "puesto"),
             <ContenidoPuestos d={d} verCostos={datos.costos} editable={editable} pendiente={pendiente} ejecutar={ejecutar} limpiarError={limpiarError} recargar={recargar} modales={modales} />)}
-          {bloque("costos", 3, "Costos y margen", undefined,
+          {bloque("costos", 3, "Costos y margen", resumenCostos,
             <ContenidoCostos d={d} calculo={c} meta={meta} editable={editable} modales={modales} {...(costos ? { costos } : {})} />)}
-          {bloque("documento", 4, "Documento y envío", undefined,
+          {bloque("documento", 4, "Documento y envío", meta?.estadoFicha?.etiqueta,
             <ContenidoDocumento d={d} datos={datos} meta={meta} calculo={c} onVistaPrevia={() => modales.setPreviewAbierto(true)} />)}
         </div>
         {datos.gestionar && meta?.estadoFicha && !["esperar", "ninguna"].includes(meta.estadoFicha.siguiente.accion) ? (

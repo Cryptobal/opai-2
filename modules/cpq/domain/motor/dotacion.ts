@@ -4,7 +4,8 @@ import type { Puesto } from "./tipos";
 
 /** Cobertura semanal / jornada media del patrón. Un tramo representa una posición de servicio. */
 export function personasPorPosicion(linea: Puesto): Numero {
-  const patron = PATRONES_FABRICA.find((p) => p.nombre.replace("×", "x") === linea.patron.replace("×", "x"));
+  const patron =
+    linea.patronDef ?? PATRONES_FABRICA.find((p) => p.nombre.replace("×", "x") === linea.patron.replace("×", "x"));
   if (!patron) throw new Error(`Patrón no reconocido: ${linea.patron}`);
   const minutos = intervaloTurno(linea.horaInicio, linea.horaFin).duracionMin;
   const trabajo = patron.clase === "semanal"

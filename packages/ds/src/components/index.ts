@@ -24,7 +24,7 @@ export { InputBusqueda } from "./input-busqueda";
 export { InputFecha, InputHora } from "./input-fecha";
 export { InputFechaRango } from "./input-fecha-rango";
 export { InputMonto } from "./input-monto";
-export { SelectorHora } from "./selector-hora";
+export { HORAS_SELECTOR, MINUTOS_SELECTOR, SelectorHora } from "./selector-hora";
 export { MapaEstatico } from "./mapa-estatico";
 export { type ItemMenu, Menu } from "./menu";
 export { Popover } from "./popover";

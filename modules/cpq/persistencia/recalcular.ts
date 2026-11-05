@@ -3,7 +3,7 @@ import type { Contexto } from "@opai/capabilities";
 import { calcular, resultadoSinCostos, type ResultadoCalculo } from "../domain/motor";
 import { cotizacionDe } from "../capabilities/util";
 import { modeloDesdeCatalogo } from "./catalogo-modelo";
-import { mapearVersionCalculo } from "./mapear";
+import { claveDePatron, mapearVersionCalculo } from "./mapear";
 import { fechaCalculoHoy } from "./fecha-calculo";
 import { aplicarAvisos, avisosCalculo } from "./avisos-calculo";
 import { juegoParaFecha, mutualParaCalculo, proveedorDesdeLineas } from "./proveedor";
@@ -79,7 +79,14 @@ export async function recalcularVersion(
   );
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: escribir });
   const margenes = await margenesTenant(ctx);
-  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo, costos, margenes.objetivoPct);
+  // Los patrones que la empresa configuró en Operaciones (CAR-192): el motor ya no solo conoce los de fábrica.
+  const patrones = new Map(
+    (await ctx.db.patronTurno.findMany({ where: { activo: true } })).map((p) => [
+      claveDePatron(p.nombre),
+      { clase: p.clase, diasTrabajo: p.diasTrabajo, diasDescanso: p.diasDescanso, diasSemana: p.diasSemana },
+    ]),
+  );
+  const entrada = mapearVersionCalculo(version, secciones, lineas, modelo, costos, margenes.objetivoPct, patrones);
   const resultado = calcular(
     entrada,
     modelo,

@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 
-import { Button, Dialog } from "@opai/ds";
+import { Dialog } from "@opai/ds";
+
+import { VisorPdf } from "@/app/_components/visor-pdf";
 
 /** Vista previa del PDF de la propuesta técnica: iframe sobre una URL `blob:` (la CSP bloquea `data:`). */
 export function DialogoPdfPropuesta({
@@ -20,20 +22,16 @@ export function DialogoPdfPropuesta({
   useEffect(() => () => URL.revokeObjectURL(pdfUrl), [pdfUrl]);
   return (
     <Dialog abierto titulo={`Vista previa · Propuesta técnica ${codigo}`} onCerrar={onCerrar} tamano="grande">
-      <div className="space-y-3 p-1">
+      <div className="min-w-0 max-w-full space-y-3 p-3">
         <p className="t-caption text-fg-muted">
           {borrador ? "Marca de agua BORRADOR hasta que se envíe" : "Sin marca de agua"}
         </p>
-        <iframe
-          title="Vista previa de la propuesta técnica"
-          src={pdfUrl}
-          className="h-[70vh] w-full rounded-md border border-border"
+        <VisorPdf
+          pdfUrl={pdfUrl}
+          titulo="Vista previa de la propuesta técnica"
+          nombreArchivo={`${codigo}-propuesta-tecnica.pdf`}
+          onCerrar={onCerrar}
         />
-        <div className="flex justify-end">
-          <Button type="button" variant="secondary" onClick={onCerrar}>
-            Cerrar
-          </Button>
-        </div>
       </div>
     </Dialog>
   );

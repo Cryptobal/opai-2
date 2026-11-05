@@ -32,6 +32,8 @@ export type BaseLinea = { id: string; seccion: string; habilitada: boolean; vari
 export type Puesto = BaseLinea & {
   tipo: "puesto"; posiciones: number; patron: string; horaInicio: string; horaFin: string;
   diasCobertura: number;
+  /** Definición del patrón configurado por la empresa; sin ella se busca entre los de fábrica. */
+  patronDef?: { clase: string; diasTrabajo: number; diasDescanso: number; diasSemana: readonly number[] } | undefined;
   personasPorPosicionEscaladas?: number | undefined; motivoPersonas?: string | undefined;
 };
 export type LineaItem = BaseLinea & {
