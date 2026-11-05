@@ -8,7 +8,12 @@ import { aFecha, aIso } from "../util";
 import type { z } from "zod";
 
 import { montoDe } from "../bancos/esquemas";
-import { FILA_SIN_CLASIFICAR_EGRESO, FILA_SIN_CLASIFICAR_INGRESO } from "../filas-virtuales";
+import {
+  FILA_SIN_CLASIFICAR_EGRESO,
+  FILA_SIN_CLASIFICAR_INGRESO,
+  FILA_SIN_CONCILIAR_EGRESO,
+  FILA_SIN_CONCILIAR_INGRESO,
+} from "../filas-virtuales";
 
 /**
  * Capa real del flujo: TODA la cartola del rango (CAR-97, CAR-181). Una sola consulta por rango,
@@ -98,9 +103,13 @@ export async function derivadasBanco(
   for (const c of celdas) {
     const fila = porEtiqueta.get(c.filaEtiqueta.toLowerCase());
     const ingreso = (signoDe.get(c.movimientoId) ?? 1) > 0;
-    // La fila debe ser de la sección del signo; si no existe o no calza, va a «Sin clasificar».
-    const filaId =
-      fila && (fila.seccion === "ingreso") === ingreso
+    // Lo no conciliado va siempre a «Sin conciliar»; lo conciliado, a la fila de su documento si es de la sección
+    // del signo, y si no existe o no calza, a «Sin clasificar».
+    const filaId = c.sinConciliar
+      ? ingreso
+        ? FILA_SIN_CONCILIAR_INGRESO
+        : FILA_SIN_CONCILIAR_EGRESO
+      : fila && (fila.seccion === "ingreso") === ingreso
         ? fila.id
         : ingreso
           ? FILA_SIN_CLASIFICAR_INGRESO

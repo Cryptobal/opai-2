@@ -40,5 +40,5 @@ export function celdaAgregada(
   };
 }
 
-/** Las filas «Sin clasificar» son del sistema: no se planifican, mueven ni archivan. */
+/** Las filas «Sin clasificar» y «Sin conciliar» son del sistema: no se planifican, mueven ni archivan. */
 export const esFilaVirtual = (filaId: string) => filaId.startsWith("00000000-0000-4000-8000-00000000000");

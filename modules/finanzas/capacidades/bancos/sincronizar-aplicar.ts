@@ -21,7 +21,7 @@ export type MovimientoNuevo = {
  */
 export async function aplicarSincronizacion(
   ctx: Contexto,
-  p: { cuentaId: string; nuevos: MovimientoNuevo[]; duplicados: number; sospechosos: number; saldoBanco: number | null },
+  p: { cuentaId: string; nuevos: MovimientoNuevo[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null },
 ): Promise<number> {
   return ctx.transaccion(async (tx) => {
     const { count } = p.nuevos.length
@@ -47,7 +47,10 @@ export async function aplicarSincronizacion(
     const saldo = p.saldoBanco != null && (count > 0 || previo?.saldoBanco == null) ? p.saldoBanco : null;
     await tx.cuentaBancaria.update({
       where: { id: p.cuentaId },
-      data: { ultimaSyncEn: new Date(), ...(saldo != null ? { saldoBanco: BigInt(saldo) } : {}) },
+      data: {
+        ultimaSyncEn: new Date(),
+        ...(saldo != null ? { saldoBanco: BigInt(saldo), saldoBancoEn: p.saldoBancoEn ?? new Date() } : {}),
+      },
     });
     await sincronizarAvisoSaldoBajo(ctx, tx, p.cuentaId, saldo);
     await ctx.eventos.emitir(tx, {
