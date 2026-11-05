@@ -57,7 +57,7 @@ Pantalla 08 de v2 ampliada, mobile first: **Aprobación** (aprobador por defecto
 
 ## 5. Plataforma: Rendiciones como módulo activable (solo Carlos y el equipo de plataforma)
 
-**Decisión de Carlos (4-nov-2026 20:24 CLT, comentario en el PR #313):** el cobro por módulo (precio mensual por empresa, inicio del cobro, fin de la prueba y cargo mensual listo para facturar) **no se construye dentro de Rendiciones**. Va en una sesión aparte de Plataforma y sirve para todos los módulos. Rendiciones solo usa el **estado del módulo** (prueba, activo o suspendido). Este diseño muestra únicamente eso; las condiciones comerciales las diseña esa otra sesión.
+**Decisión de Carlos (4-nov-2026 20:24 CLT, comentario en el PR #313):** el cobro por módulo (precio mensual por empresa, inicio del cobro, fin de la prueba y cargo mensual listo para facturar) **no se construye dentro de Rendiciones**. Va en una sesión aparte de Plataforma (CAR-188) y sirve para todos los módulos. Rendiciones solo usa el **estado del módulo** (prueba, activo o suspendido). Este diseño muestra únicamente eso; las condiciones comerciales las diseña esa otra sesión.
 
 ### 5.1 Ficha del módulo en una empresa (Plataforma › Empresas › Módulos)
 - Fila «Rendiciones» con **estado**: Prueba · Activo · Suspendido, y un **interruptor** de activar/desactivar con confirmación que explica qué pasa al apagar (se ocultan menú, pantallas y herramientas MCP; **los datos se conservan**).
@@ -84,4 +84,4 @@ Dos variantes del Lote de pago y del Detalle: **sin Finanzas** (solo estado y co
 `01 Mis rendiciones` · `02 Nueva rendicion compra` · `03 Nueva rendicion kilometraje` · `04 Bandeja del aprobador` · `05 Detalle de rendicion` · `06 Lotes de pago` · `07 Reporte` · `08 Configuracion rendiciones` · `09 Plataforma ficha del modulo` · `10 Plataforma uso` · `11 Sin permiso y estados` · `FlujoCompletoRendiciones` (prototipo) · `Índice`.
 
 ## 9. Fuera de alcance de este diseño
-Extracción de la boleta por IA, rendir desde el portal del guardia (sin usuario), anticipos y descuento por liquidación, asiento contable (Contabilidad C1) y todo lo de precio y cobro por módulo (sesión aparte de Plataforma).
+Extracción de la boleta por IA, rendir desde el portal del guardia (sin usuario), anticipos y descuento por liquidación, asiento contable (Contabilidad C1) y todo lo de precio y cobro por módulo (CAR-188, sesión aparte de Plataforma).
