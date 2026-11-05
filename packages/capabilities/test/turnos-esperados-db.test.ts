@@ -179,4 +179,28 @@ describe.skipIf(!urlPropietario)("Turnos esperados · núcleo (Postgres real)", 
     expect(r.ok && r.data).toMatchObject({ anulados: DIAS_HABILES });
     expect(await listar(t.C, inst.C)).toHaveLength(0);
   });
+
+  it("regenerar respeta el alcance del supervisor (ADR-022)", async () => {
+    const otra = (await e.admin.instalacion.create({ data: { tenantId: t.A, cuentaId: (await e.admin.cuenta.findFirstOrThrow({ where: { tenantId: t.A } })).id, nombre: "Planta ajena" } })).id;
+    const sup = mod.crearContexto({
+      tenantId: t.A, actor: { tipo: "user", id: randomUUID() }, portal: "erp", portalesMembresia: ["erp"],
+      rol: "supervisor", alcance: { instalaciones: [otra] }, modulosActivos: ["pauta"], medidor,
+    });
+    const antes = await e.admin.turnoEsperado.count({ where: { tenantId: t.A } });
+    const puntual = await ejecutar(sup, "core.turnos_esperados.regenerar", { puestoId: puesto.A, ...RANGO });
+    expect(puntual.ok).toBe(false);
+    const global = await ejecutar(sup, "core.turnos_esperados.regenerar", RANGO);
+    if (global.ok) expect(global.data).toMatchObject({ creados: 0, reemplazados: 0, anulados: 0 });
+    expect(await e.admin.turnoEsperado.count({ where: { tenantId: t.A } })).toBe(antes);
+  });
+
+  it("un vínculo terminado conserva los días esperados hasta su término", async () => {
+    await e.admin.vinculoLaboral.updateMany({ where: { tenantId: t.C, personaId: persona.otra }, data: { estado: "vigente", termino: new Date("2026-12-10") } });
+    await ejecutar(ctx(t.C, []), "core.turnos_esperados.regenerar", RANGO);
+    await e.admin.vinculoLaboral.updateMany({ where: { tenantId: t.C, personaId: persona.otra }, data: { estado: "terminado" } });
+    await ejecutar(ctx(t.C, []), "core.turnos_esperados.regenerar", RANGO);
+    const filas = await listar(t.C, inst.C);
+    expect(filas.length).toBeGreaterThan(0);
+    expect(filas.every((x) => x.fecha <= "2026-12-10")).toBe(true);
+  });
 });

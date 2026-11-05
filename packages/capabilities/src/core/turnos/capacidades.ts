@@ -3,11 +3,13 @@ import { z } from "zod";
 import { horasDeTurnoEsperado, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { noEncontrado } from "../../errores";
+import { dondePuesto } from "../maestros/alcance";
 import { uuidSchema } from "../esquemas";
 import { fechaCivilSchema, dondeInstalacionId } from "../calendario/comun";
 import { horizonte, hoyEn, pautaActiva, zonaDelTenant } from "./comun";
 import { regenerarJornada } from "./regenerar-jornada";
-import { regenerarPuesto, regenerarPuestos } from "./regenerar-pauta";
+import { regenerarPuestos } from "./regenerar-pauta";
 
 const MAX_DIAS = 62;
 const dias = (d: string, h: string) => Math.round((Date.parse(h) - Date.parse(d)) / 86_400_000) + 1;
@@ -109,13 +111,29 @@ export const turnosEsperadosRegenerar = defineCapability({
     const desde = input.desde ?? base.desde;
     const hasta = input.hasta ?? base.hasta;
     if (await pautaActiva(ctx)) {
-      const r = input.puestoId
-        ? await regenerarPuesto(ctx, input.puestoId, desde, hasta, zona, dryRun)
-        : await regenerarPuestos(
-            ctx,
-            (await ctx.db.seriePauta.findMany({ select: { puestoId: true }, distinct: ["puestoId"] })).map((s) => s.puestoId),
-            desde, hasta, dryRun,
-          );
+      // Con alcance (ADR-022) solo se regeneran puestos de las instalaciones a cargo; uno fuera de
+      // alcance responde como si no existiera.
+      const dentro = { AND: [dondePuesto(ctx)] };
+      let ids: string[];
+      if (input.puestoId) {
+        const p = await ctx.db.puesto.findFirst({ where: { id: input.puestoId, ...dentro }, select: { id: true } });
+        if (!p) throw noEncontrado("El puesto");
+        ids = [p.id];
+      } else {
+        const series = await ctx.db.seriePauta.findMany({
+          where: {
+            vigenteDesde: { lte: new Date(`${hasta}T00:00:00.000Z`) },
+            OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: new Date(`${desde}T00:00:00.000Z`) } }],
+          },
+          select: { puestoId: true },
+          distinct: ["puestoId"],
+        });
+        const visibles = await ctx.db.puesto.findMany({
+          where: { id: { in: series.map((s) => s.puestoId) }, ...dentro }, select: { id: true },
+        });
+        ids = visibles.map((p) => p.id);
+      }
+      const r = await regenerarPuestos(ctx, ids, desde, hasta, dryRun);
       return { modo: "pauta" as const, ...r, avisos: 0 };
     }
     const j = await regenerarJornada(ctx, desde, hasta, undefined, dryRun);

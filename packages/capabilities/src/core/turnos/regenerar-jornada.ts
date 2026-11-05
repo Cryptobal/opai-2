@@ -1,9 +1,10 @@
 import { derivarTurnosDeJornada, type JornadaPactada, type TurnoEsperadoDerivado } from "@opai/domain";
 
 import type { Contexto } from "../../types";
+import { instalacionesEnAlcance } from "../maestros/alcance";
 import { feriadosDelMes } from "../../pauta/feriados";
 import { reconciliar, resumenVacio, sumar, type Resumen } from "./reconciliar";
-import { zonaDelTenant } from "./comun";
+import { hoyEn, zonaDelTenant } from "./comun";
 
 const fecha = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -18,12 +19,17 @@ export async function regenerarJornada(
   ctx: Contexto, desde: string, hasta: string, personaIds?: readonly string[], simular = false,
 ): Promise<ResultadoJornada> {
   const zona = await zonaDelTenant(ctx);
+  const enAlcance = instalacionesEnAlcance(ctx);
   const vinculos = await ctx.db.vinculoLaboral.findMany({
     where: {
-      estado: "vigente",
-      instalacionId: { not: null },
+      instalacionId: enAlcance ? { in: [...enAlcance] } : { not: null },
       inicio: { lte: new Date(`${hasta}T00:00:00.000Z`) },
-      OR: [{ termino: null }, { termino: { gte: new Date(`${desde}T00:00:00.000Z`) } }],
+      // Los vínculos terminados que se solapan con el rango también cuentan: sus días trabajados
+      // antes del término no se pierden (la derivación respeta `termino`).
+      OR: [
+        { estado: "vigente", OR: [{ termino: null }, { termino: { gte: new Date(`${desde}T00:00:00.000Z`) } }] },
+        { estado: { not: "vigente" }, termino: { gte: new Date(`${desde}T00:00:00.000Z`) } },
+      ],
       ...(personaIds ? { personaId: { in: [...personaIds] } } : {}),
     },
     select: {
@@ -72,19 +78,24 @@ export async function regenerarJornada(
     turnosPorPersona.set(j.personaId, acumulado);
   }
   // Quien tenía turnos de jornada pactada y ya no tiene vínculo vigente: se anulan (sin fantasmas).
+  // Solo de hoy en adelante: lo ya esperado en días pasados no se borra.
+  const hoyLocal = hoyEn(zona);
+  const desdeHuerfanos = hoyLocal > desde ? hoyLocal : desde;
   const huerfanos = await ctx.db.turnoEsperado.findMany({
     where: {
       vigente: true, origen: "jornada_pactada",
-      fecha: { gte: new Date(`${desde}T00:00:00.000Z`), lte: new Date(`${hasta}T00:00:00.000Z`) },
+      ...(enAlcance ? { instalacionId: { in: [...enAlcance] } } : {}),
+      fecha: { gte: new Date(`${desdeHuerfanos}T00:00:00.000Z`), lte: new Date(`${hasta}T00:00:00.000Z`) },
       ...(personaIds ? { personaId: { in: [...personaIds] } } : {}),
     },
     select: { personaId: true },
     distinct: ["personaId"],
   });
-  for (const h of huerfanos) if (!turnosPorPersona.has(h.personaId)) turnosPorPersona.set(h.personaId, []);
+  const sinVinculo = new Set<string>();
+  for (const h of huerfanos) if (!turnosPorPersona.has(h.personaId)) { turnosPorPersona.set(h.personaId, []); sinVinculo.add(h.personaId); }
   for (const [personaId, turnos] of turnosPorPersona) {
     const resumen = await ctx.transaccion((tx) =>
-      reconciliar(tx, ctx.tenantId, { origen: "jornada_pactada", personaIds: [personaId], desde, hasta }, turnos, simular),
+      reconciliar(tx, ctx.tenantId, { origen: "jornada_pactada", personaIds: [personaId], desde: sinVinculo.has(personaId) ? desdeHuerfanos : desde, hasta }, turnos, simular),
     );
     Object.assign(salida, sumar(salida, resumen));
   }

@@ -22,6 +22,9 @@ export async function reconciliar(
   simular = false,
 ): Promise<Resumen> {
   const r = resumenVacio();
+  // Un solo reconciliador a la vez por puesto o persona (consumidor, trabajo diario y capacidad).
+  if (!simular)
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`turnos:${tenantId}:${alcance.puestoId ?? alcance.personaIds?.join(",") ?? "todos"}`}, 0))::text`;
   const rango = { gte: aFecha(alcance.desde), lte: aFecha(alcance.hasta) };
   const filas = await tx.turnoEsperado.findMany({
     where: {
