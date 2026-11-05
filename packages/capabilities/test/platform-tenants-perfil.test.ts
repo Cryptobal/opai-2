@@ -18,7 +18,7 @@ const nueva = {
   razonSocial: "Aseos del Sur SpA",
   rut: "76.123.456-0",
 };
-const contexto = (usuario = owner) =>
+const contexto = (usuario: typeof owner | typeof support = owner) =>
   contextoDePrueba({ rol: null, usuario, conTenant: false, semilla: semillaTenant() });
 
 beforeEach(() => {

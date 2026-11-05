@@ -1,8 +1,10 @@
 import { z } from "zod";
 
+import { esRutRepetido } from "@opai/db";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { conflicto } from "../../errores";
 import type { Contexto } from "../../types";
 import {
   definidos,
@@ -89,7 +91,14 @@ export const empresaUpdate = defineCapability({
           create: { ...data, tenantId: ctx.tenantId },
           update: data,
         }),
-    );
+    ).catch((e: unknown) => {
+      // El RUT es único entre empresas (CAR-188): el mensaje no dice cuál otra empresa lo tiene.
+      throw esRutRepetido(e)
+        ? conflicto(
+            "Ese RUT ya está registrado en otra empresa. Si es el tuyo, contacta a soporte.",
+          )
+        : e;
+    });
     return vista(r);
   },
 });

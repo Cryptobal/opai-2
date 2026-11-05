@@ -112,4 +112,19 @@ describe.skipIf(!urlPropietario)("RUT de la empresa en Plataforma (base real)", 
       razonSocial: "Nueva SpA",
     });
   });
+
+  it("si la propia empresa escribe en su Configuración un RUT ajeno, recibe CONFLICT claro", async () => {
+    const ctxEmpresa = mod.crearContexto({
+      tenantId: y,
+      actor: { tipo: "user", id: plat },
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      usuario: { id: plat, nombre: "Olivia", email: `plat-${s}@prueba.cl`, platformRole: null },
+      rol: "owner",
+      medidor: { registrar: async () => undefined },
+    });
+    const r = await mod.executeCapability(ctxEmpresa, "core.empresa.update", { rut: rutA });
+    expect(r).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    expect(JSON.stringify(r)).not.toContain(x);
+  });
 });
