@@ -62,6 +62,7 @@ export const dispositivosListar = defineCapability({
   output: z.object({ items: z.array(dispositivoSchema) }),
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (salida) => salida.items.map((d) => d.id),
   async handler(ctx, { instalacionId }) {
     await instalacionVisible(ctx, instalacionId);
     const filas = await ctx.db.dispositivo.findMany({
@@ -82,6 +83,7 @@ export const dispositivosEstado = defineCapability({
   output: dispositivoSchema,
   efecto: "lectura",
   dryRun: false,
+  auditarLectura: (salida) => [salida.id],
   async handler(ctx, { dispositivoId }) {
     return vista(await dispositivoVisible(ctx, dispositivoId));
   },
