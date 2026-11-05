@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { hidratado } from "./hidratacion";
 import { entrar } from "./sesion";
 import { ocultarIndicadorDev } from "./indicador-dev";
 
@@ -14,6 +15,8 @@ async function irAPreferencias(page: Page) {
   const tema = page.getByRole("radiogroup", { name: "Tema" });
   // Hidratado: los radios del tema dejan de estar deshabilitados.
   await expect(tema.getByRole("radio", { name: "Claro", exact: true })).toBeEnabled();
+  // Un clic antes de que React hidrate el radio no guarda nada (y el tema no cambia).
+  await hidratado(tema.getByRole("radio", { name: "Claro", exact: true }));
   return tema;
 }
 
