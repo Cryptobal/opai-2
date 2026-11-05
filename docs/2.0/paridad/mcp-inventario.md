@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 581 pares pantalla→capacidad · 525 con herramienta · 56 excepciones justificadas · 0 faltantes.
+**Resumen:** 583 pares pantalla→capacidad · 527 con herramienta · 56 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -572,6 +572,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]` | `platform.modules.set` | `platform_modules_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.get` | `platform_tenants_get` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.panel` | `platform_tenants_panel` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.perfil_get` | `platform_tenants_perfil_get` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.perfil_set` | `platform_tenants_perfil_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.set_estado` | `platform_tenants_set_estado` | existe |
 | platform | `/platform/tenants/[id]` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform/tenants/nuevo` | `platform.tenants.create` | `platform_tenants_create` | existe |
