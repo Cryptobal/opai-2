@@ -85,7 +85,7 @@ export async function proxy(request: NextRequest) {
   };
   // Antes estaban fuera del matcher; siguen públicas, pero ahora reciben nonce de servidor.
   const publica =
-    /^\/(?:login|mfa|recuperar|invitacion|verificar|p|ds|sin-conexion)(?:\/|$)/.test(
+    /^\/(?:login|mfa|recuperar|invitacion|verificar|correccion|p|ds|sin-conexion)(?:\/|$)/.test(
       request.nextUrl.pathname,
     ) || ["/trabajador/login", "/cliente/login"].includes(request.nextUrl.pathname);
   if (publica) return responder(NextResponse.next({ request: { headers } }));

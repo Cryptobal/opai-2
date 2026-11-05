@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 596 pares pantalla→capacidad · 539 con herramienta · 57 excepciones justificadas · 0 faltantes.
+**Resumen:** 598 pares pantalla→capacidad · 539 con herramienta · 59 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -20,6 +20,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
+| — | `/correccion/[slug]/[token]` | `asistencia.correcciones.responder_enlace` | — | excepción |
+| — | `/correccion/[slug]/[token]` | `asistencia.correcciones.ver_enlace` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.firmar` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.rechazar` | — | excepción |
@@ -649,6 +651,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna). |
+| `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
 | `app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace` | Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5). |
@@ -660,6 +663,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | --- | --- |
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
+| `asistencia.correcciones.responder` | Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
+| `asistencia.correcciones.responder_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
+| `asistencia.correcciones.ver_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial. |
 | `asistencia.marcas.registrar` | Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador. |
 | `asistencia.marcas.verificar` | Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante. |
 | `comercial.canales.rotar_token_formulario` | Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant. |
@@ -733,6 +739,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente`, `app/_components` | no | reservada a personas |
+| `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.marcas.registrar` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
@@ -786,6 +793,14 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `asistencia.contingencias.listar`
+- `asistencia.contingencias.registrar`
+- `asistencia.contingencias.resolver`
+- `asistencia.correcciones.listar`
+- `asistencia.correcciones.proponer`
+- `asistencia.incidentes.cerrar`
+- `asistencia.incidentes.listar`
+- `asistencia.incidentes.registrar`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
 - `comercial.informes.cierre`
