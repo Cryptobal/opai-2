@@ -1351,3 +1351,49 @@ identidad de servicio en main.
 
 **Adenda del 5-nov-2026 (Sesión 2, pendientes del Revisor de #303).** (1) El aviso de boleta duplicada solo mira las rendiciones que el actor puede ver: las propias, las que le asignaron para aprobar y, con `rendiciones:ver_todas`, las de toda la empresa. Por eso el aprobador ve los duplicados de lo que aprueba, y es intencional (necesita ese dato para decidir). (2) Quien no puede ver todas las rendiciones solo adjunta respaldos que él mismo subió; con `ver_todas` puede usar los de la empresa.
 
+
+---
+
+## ADR-072 · Finanzas es un módulo con siete partes contratables por separado
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente (confirmado por Carlos en #318, 4-nov-2026 21:22 CLT) · **Autor:** Carlos (encargo a la Sesión 5 del 4-nov-2026: «Finanzas sigue siendo un solo módulo, pero con sus partes definidas, para poder vender una sola»), redactada por Claude (Sesión 5, CAR-189). · Completa ADR-071 (cobro por módulo en Plataforma; viene en el PR #314 de la Sesión 6, CAR-187).
+
+**Decisión.** Finanzas sigue siendo **un solo módulo** (`finanzas`, mismo prefijo de capacidades, mismo esquema de base). Se divide en siete **partes**: Bancos (incluye conciliación), Flujo de caja, Ventas y facturación, Cobranza, Factoring, Compras, y Contabilidad e informes. Dependencias: Flujo de caja necesita Bancos; Cobranza y Factoring necesitan Ventas; Contabilidad necesita Ventas o Compras. Rendiciones sigue siendo un módulo aparte (ADR-069).
+
+**Cómo.** Cada capacidad, entrada de menú y permiso de Finanzas declara su `parte`. Las partes contratadas se guardan junto al módulo de la empresa y se filtran en la autorización de capacidades, el menú, `core.me` y la lista de herramientas MCP. Lo que cruza partes (conciliar una factura, proyectar ventas en el flujo, la cobranza que mira el banco, «Hoy en Finanzas») solo aparece si ambas partes están contratadas; si no, se degrada sin error. No se renombran ids ni cambia la instantánea del MCP para una empresa con todo contratado. Sin partes declaradas, la empresa tiene todas (Gard no cambia).
+
+**Por qué así.** Partir Finanzas en módulos propios obligaría a renombrar las 77 capacidades y choca con el acoplamiento que dejó diferido F8b. Los permisos por submódulo que ya existen (`finanzas:bancos.ver`, `finanzas:compras.manage`) sirven por rol, no para vender.
+
+**Reparto.** El precio, el cobro y el catálogo comercial de cada parte los hace Plataforma (ADR-071, CAR-188); la Sesión 5 hace la declaración de partes en Finanzas y el filtro.
+
+**Confirmación de Carlos (4-nov-2026, #318).** Las siete partes, con Conciliación dentro de Bancos; Rendiciones sigue como módulo aparte. El catálogo de Plataforma (ADR-071) usa esta lista.
+
+---
+
+## ADR-073 · Flujo de caja: mandan la cartola y la proyección
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente, con las respuestas de Carlos del 4-nov-2026 21:22 CLT en #318 · **Autor:** Carlos (reglas dadas en el encargo a la Sesión 5 del 4-nov-2026), registrada por Claude (Sesión 5, CAR-189). · Ajusta ADR-026 y la cláusula «No cambia» de ADR-068.
+
+**Reglas de Carlos.**
+
+1. No se cierran ni se sellan semanas. Siempre mandan la cartola y las proyecciones. No hay ajuste manual de ingresos.
+2. Semanas pasadas: todos los movimientos de la cartola, por fecha del banco, estén conciliados o no; lo no conciliado va a una fila «Sin conciliar». El saldo parte del banco de hoy.
+3. Proyecciones: un solo criterio de semana, la fecha esperada de cobro: el promedio real de pago del cliente cuando tiene 3 o más facturas pagadas; si no, el vencimiento (emisión + plazo del cliente); editable a mano por factura (unifica `semanaComprometidoDte` de `packages/domain/src/finanzas/derivadas-dte.ts`, que hoy usa la emisión, con `proyeccion-flujo-cap.ts`, que usa el vencimiento). Las facturas vencidas pasan a la semana actual.
+4. Facturas cedidas: el depósito del factor es el ingreso (el factor deposita de una vez el monto menos su descuento; no hay remanente ni ingreso posterior) y la diferencia va a una cuenta contable configurable por empresa en Configuración, por defecto «Diferencia factoring» (o «Gasto financiero»); en el flujo aparece como egreso en esa fila.
+5. IVA y PPM: el IVA del mes M (débito − crédito) se paga en M+1 junto con el PPM (tasa configurada por empresa). Carlos marca o desmarca en el flujo, mes a mes, la postergación del IVA de ese mes a M+2; el PPM se paga siempre en M+1 aunque el IVA se postergue.
+6. Un solo umbral de saldo bajo, $15.000.000, que avisa solo por la campana.
+7. Pendiente de una factura = monto − notas de crédito parciales (61) − cobrado. La nota de débito (56) no es deuda. Las facturas vencidas importadas de 1.0 no entran en los recordatorios de cobranza.
+8. Cada factura programada o recurrente alimenta la proyección con su fecha esperada de cobro, sin contarse dos veces con su borrador o su factura (CAR-184).
+9. Una conciliación tardía no cambia los totales de semanas pasadas; lo prueba un test.
+
+**Cómo se lee.** Los ingresos se derivan siempre (cartola en el pasado; facturas, programaciones y recurrentes en el futuro); los egresos se siguen planificando a mano (sueldos, proveedores, impuestos movidos). La NC parcial deja de ser una celda negativa propia: se descuenta del pendiente de su factura (reemplaza la cláusula «No cambia» de ADR-068). Se retiran del flujo los restos del sellado (tabla `FlujoCierre`, tolerancia, permiso de cierre y eventos de sellado) con migración aditiva cuando corresponda, sin borrar datos.
+
+**Respuestas de Carlos (4-nov-2026, #318).** Quedaron incorporadas en las reglas 3, 4 y 5: promedio real de pago con 3 o más facturas pagadas, factoring sin remanente con la diferencia a una cuenta configurable, e IVA en M+1 con postergación opcional por mes.
+
+---
+
+## ADR-074 · Reglas de conciliación bancaria: se evalúan al importar la cartola
+
+**Fecha:** 4-nov-2026 · **Estado:** vigente · **Autor:** Carlos (respuesta 5 del comentario «DECISIÓN CARLOS» en #318, 21:22 CLT), registrada por Claude (Sesión 5, CAR-189). · Cierra la pregunta abierta desde CAR-169 (#287).
+
+**Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
