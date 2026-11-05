@@ -126,7 +126,7 @@ const CASOS: Record<string, Record<string, unknown>> = {
   "platform.cobros.condiciones_set": {
     tenantId: t,
     moduloId: "crm",
-    condicion: { moneda: "CLP", precioMensual: "100000", cobroDesde: "2026-01-01" },
+    condicion: { moneda: "CLP", precio: "100000", cobroDesde: "2026-01-01" },
   },
   "platform.cobros.cargos_generar": { tenantId: t, periodo: "2026-01" },
   "platform.cobros.cargo_anular": { tenantId: t, cargoId: CARGO, motivo: "precio mal cargado" },

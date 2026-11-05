@@ -28,26 +28,27 @@ describe.skipIf(!urlPropietario)("cobro por módulo entre empresas", () => {
     mod.limpiarModulos();
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
     mod.registrarModulos([
-      mod.defineModule({
-        id: "rendiciones",
-        nombre: "Rendiciones",
-        version: "0.1.0",
-        dependencias: [],
-        permisos: [],
-        navegacion: [],
-        configuracion: z.object({}),
-        eventos: [],
-        capacidades: [],
-      }),
+      ...["rendiciones", "crm"].map((id) =>
+        mod.defineModule({
+          id,
+          nombre: id,
+          version: "0.1.0",
+          dependencias: [],
+          permisos: [],
+          navegacion: [],
+          configuracion: z.object({}),
+          eventos: [],
+          capacidades: [],
+        }),
+      ),
     ]);
     const tenant = (slug: string) =>
       e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "seguridad" } });
     x = (await tenant(`car188-x-${s}`)).id;
     y = (await tenant(`car188-y-${s}`)).id;
     for (const t of [x, y])
-      await e.admin.tenantModule.create({
-        data: { tenantId: t, moduloId: "rendiciones", estado: "activo" },
-      });
+      for (const moduloId of ["rendiciones", "crm"])
+        await e.admin.tenantModule.create({ data: { tenantId: t, moduloId, estado: "activo" } });
     plat = (
       await e.admin.user.create({
         data: {
@@ -80,7 +81,7 @@ describe.skipIf(!urlPropietario)("cobro por módulo entre empresas", () => {
     const fijar = await mod.executeCapability(ctx, "platform.cobros.condiciones_set", {
       tenantId: x,
       moduloId: "rendiciones",
-      condicion: { moneda: "CLP", precioMensual: "150000", cobroDesde: "2026-01-01" },
+      condicion: { moneda: "CLP", precio: "150000", cobroDesde: "2026-01-01" },
     });
     expect(fijar).toMatchObject({ ok: true });
     const gen = { periodo: "2026-10", tenantId: x };
@@ -116,5 +117,81 @@ describe.skipIf(!urlPropietario)("cobro por módulo entre empresas", () => {
     });
     expect(cruzado).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await e.admin.cobroCargo.count({ where: { tenantId: x, estado: "listo" } })).toBe(1);
+  });
+
+  it("el conteo de unidades de una empresa no incluye usuarios, trabajadores ni instalaciones de otra", async () => {
+    const ctx = persona();
+    // X: 3 usuarios, 2 trabajadores, 2 instalaciones activas. Y: 1, 1 y 1.
+    const poblar = async (
+      t: string,
+      usuarios: number,
+      trabajadores: number,
+      instalaciones: number,
+    ) => {
+      for (let i = 0; i < usuarios; i++) {
+        const u = await e.admin.user.create({
+          data: {
+            name: `u${i}`,
+            email: `u${i}-${t}@prueba.cl`,
+            emailVerified: true,
+          },
+        });
+        await e.admin.membership.create({
+          data: { tenantId: t, userId: u.id, rol: "viewer", portales: ["erp"], estado: "activa" },
+        });
+      }
+      const cargo = await e.admin.cargo.create({ data: { tenantId: t, nombre: "Guardia" } });
+      for (let i = 0; i < trabajadores; i++) {
+        const p = await e.admin.persona.create({
+          data: { tenantId: t, nombres: `P${i}`, apellidos: "Prueba", rut: `1${i}.000.000-${i}` },
+        });
+        await e.admin.vinculoLaboral.create({
+          data: {
+            tenantId: t,
+            personaId: p.id,
+            cargoId: cargo.id,
+            tipo: "indefinido",
+            inicio: new Date("2026-01-05"),
+          },
+        });
+      }
+      const cuenta = await e.admin.cuenta.create({ data: { tenantId: t, nombre: "Cuenta" } });
+      for (let i = 0; i < instalaciones; i++)
+        await e.admin.instalacion.create({
+          data: { tenantId: t, cuentaId: cuenta.id, nombre: `I${i}`, estado: "activa" },
+        });
+    };
+    await poblar(x, 3, 2, 2);
+    await poblar(y, 1, 1, 1);
+    const unidades = {
+      base: "usuario_activo",
+      rendiciones: "trabajador_activo",
+      crm: "instalacion_activa",
+    };
+    for (const t of [x, y])
+      for (const [moduloId, unidad] of Object.entries(unidades)) {
+        const r = await mod.executeCapability(ctx, "platform.cobros.condiciones_set", {
+          tenantId: t,
+          moduloId,
+          condicion: { forma: "por_unidad", unidad, precio: "1", cobroDesde: "2026-01-01" },
+        });
+        expect(r).toMatchObject({ ok: true });
+      }
+    const cantidades = async (t: string) => {
+      const r = await mod.executeCapability(ctx, "platform.cobros.resumen", {
+        periodo: "2026-10",
+        tenantId: t,
+      });
+      if (!r.ok) throw new Error(r.error.message);
+      const filas = (r.data as Resumen).empresas[0]?.modulos ?? [];
+      return Object.fromEntries(
+        Object.keys(unidades).map((m) => [
+          m,
+          filas.find((f) => f.moduloId === m)?.calculo.cantidad,
+        ]),
+      );
+    };
+    expect(await cantidades(x)).toEqual({ base: 3, rendiciones: 2, crm: 2 });
+    expect(await cantidades(y)).toEqual({ base: 1, rendiciones: 1, crm: 1 });
   });
 });

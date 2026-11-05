@@ -74,7 +74,7 @@ describe("platform.cobros", () => {
     const { ctx, tabla } = contexto();
     const entrada = fijar(TENANT_DE_PRUEBA, "crm", {
       moneda: "UF",
-      precioMensual: "2,5",
+      precio: "2,5",
       cobroDesde: "2026-10-16",
       descuentoPorcentaje: 10,
     });
@@ -83,7 +83,7 @@ describe("platform.cobros", () => {
     });
     expect(previa).toMatchObject({
       ok: true,
-      data: { antes: null, despues: { precioMensual: 25_000 } },
+      data: { antes: null, despues: { precio: 25_000, forma: "fijo" } },
     });
     expect(tabla("cobroCondicion")).toHaveLength(0);
     expect(await executeCapability(ctx, "platform.cobros.condiciones_set", entrada)).toMatchObject({
@@ -106,7 +106,7 @@ describe("platform.cobros", () => {
     );
     expect((r.data as Resumen).totales).toMatchObject({
       facturables: 1,
-      noFacturables: 2,
+      noFacturables: 4, // cpq, crm de la otra empresa y el plan base de las dos (sin condición)
       totalClp: 45_291,
     });
   });
@@ -118,7 +118,7 @@ describe("platform.cobros", () => {
       "platform.cobros.condiciones_set",
       fijar(TENANT_DE_PRUEBA, "crm", {
         moneda: "CLP",
-        precioMensual: "300.000",
+        precio: "300.000",
         cobroDesde: "2026-01-01",
       }),
     );
@@ -163,7 +163,7 @@ describe("platform.cobros", () => {
       "platform.cobros.condiciones_set",
       fijar(TENANT_DE_PRUEBA, "crm", {
         moneda: "UF",
-        precioMensual: "1",
+        precio: "1",
         cobroDesde: "2026-01-01",
       }),
     );

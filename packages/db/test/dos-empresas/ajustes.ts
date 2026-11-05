@@ -335,6 +335,7 @@ export const AJUSTES: Record<string, Ajuste> = {
     valores: () => ({
       periodo: "2026-01-01",
       moneda: "CLP",
+      forma: "fijo",
       precio_mensual: 100000,
       descuento_pct: 0,
       dias_cobrados: 31,
