@@ -24,7 +24,7 @@ test("ficha CPQ muestra resumen en español y patrón lista+ficha", async ({ pag
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   // Ficha por pasos (#325): el código es el título (en teléfono lo muestra el patrón) y el resumen es una región.
   await expect(page.getByRole("heading", { name: /^CPQ-/ }).first()).toBeVisible();
   await expect(page.getByRole("region", { name: "Resumen de la cotización" })).toBeVisible();
@@ -49,7 +49,7 @@ test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   await page.getByRole("button", { name: "Agregar puesto" }).click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
   // Con el puesto sin costear la cotización queda «Incompleta»: la única acción es completar los datos.

@@ -35,11 +35,11 @@ test("tenant vacío: de la cotización nueva al costo calculado y la vista previ
   await page.getByLabel("Título", { exact: true }).fill(`Tenant vacío ${info.project.name} ${Date.now()}`);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   const ficha = page.url();
 
   // Sin cálculo: margen «—», sin semáforo rojo ni «0,0 %».
-  await expect(page.getByText("Margen efectivo").filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText("Margen contra el objetivo").filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByText("Bajo el mínimo")).toHaveCount(0);
   await expect(page.getByText(/^0[.,]0 %$/)).toHaveCount(0);
 
