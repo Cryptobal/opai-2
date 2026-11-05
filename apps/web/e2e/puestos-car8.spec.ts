@@ -150,14 +150,10 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     await expect(ultimo).toContainText("A Guardia retirada");
     await expect(ultimo).toContainText("Inactivo");
     await ocultarDev(page);
-    await page.screenshot({
-      path: `e2e/__screenshots__/puestos-${info.project.name}.png`,
-      fullPage: true,
-    });
+    await page.screenshot({ path: `e2e/__screenshots__/puestos-${info.project.name}.png`, fullPage: true });
     // Navegable: al abrir una posición aparece la hoja de edición.
-    // Un clic antes de hidratar (o durante un repintado de `next dev`) no abre la hoja: se reintenta.
-    // La hoja es diferida: tras un clic válido puede tardar en compilarse, y con ella abierta la lista
-    // queda inerte, así que solo se vuelve a pulsar mientras no esté a la vista.
+    // Un clic antes de hidratar no abre la hoja diferida: se reintenta, y solo mientras no esté a la
+    // vista (abierta, la lista queda inerte).
     const hoja = page.getByRole("dialog", { name: "Editar puesto" });
     await expect(async () => {
       if (!(await hoja.isVisible())) await filas.first().click({ timeout: 3_000 });
