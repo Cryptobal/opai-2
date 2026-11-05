@@ -67,8 +67,16 @@ test.describe("Comercial · tablero y hojas", () => {
     // Mover: arrastrando en iPad y escritorio; con «Mover a…» en el teléfono.
     await page.goto("/negocios");
     const tarjeta = page.getByRole("article", { name: titulo });
-    if (info.project.name === "telefono") await moverA(page, titulo, "Calificado");
-    else await tarjeta.dragTo(columna(page, "Calificado"));
+    if (info.project.name === "telefono") {
+      // Un clic antes de hidratar el tablero no mueve nada: se repite (mover a la misma etapa es inocuo).
+      await expect(async () => {
+        await page.keyboard.press("Escape");
+        await moverA(page, titulo, "Calificado");
+        await expect(columna(page, "Calificado").getByRole("article", { name: titulo })).toBeAttached({
+          timeout: 8_000,
+        });
+      }).toPass({ timeout: 90_000 });
+    } else await tarjeta.dragTo(columna(page, "Calificado"));
     await expect(columna(page, "Calificado").getByRole("article", { name: titulo })).toBeAttached();
     await foto("tablero-movido");
 
