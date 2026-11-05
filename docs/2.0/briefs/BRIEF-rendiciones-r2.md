@@ -1,6 +1,6 @@
 # BRIEF DE IMPLEMENTACIÓN — Rendiciones R2b: pantallas de quien rinde
 
-Rama `claude/rendiciones-r2-quien-rinde-abxb3f` · `Fixes CAR-197` (hijo de CAR-163). Diseño aprobado por Carlos el 5-nov-2026 en Claude Design («Rendiciones OPAI 2.0 — módulo completo», «Teléfono · quien rinde» y «Mis rendiciones» de escritorio). **El export no está aún en `docs/2.0/design/export-rendiciones-v3/`:** se construyó con la descripción del encargo y se pidió el export (comentario `@opai-2.0:` en el PR) para comparar capturas. Fuentes: [BRIEF R1](BRIEF-rendiciones-r1.md), [BRIEF R2a](BRIEF-rendiciones-r2a.md), ADR-044/045, ADR-069.
+Rama `claude/rendiciones-r2-quien-rinde-abxb3f` · `Fixes CAR-197` (hijo de CAR-163). Diseño aprobado por Carlos el 5-nov-2026 en Claude Design («Rendiciones OPAI 2.0 — módulo completo», «Teléfono · quien rinde» y «Mis rendiciones» de escritorio). **El export no está aún en `docs/2.0/diseño/export-rendiciones-v3/`:** se construyó con la descripción del encargo y se pidió el export (comentario `@opai-2.0:` en el PR) para comparar capturas. Fuentes: [BRIEF R1](BRIEF-rendiciones-r1.md), [BRIEF R2a](BRIEF-rendiciones-r2a.md), ADR-044/045, ADR-069.
 
 ## 1. Alcance
 Solo interfaz de quien rinde, sobre las capacidades de R1 y R2a. **No** incluye bandeja del aprobador, lotes de pago, reporte, configuración, Plataforma/CAR-188 ni «No tengo documento» (excepciones de turno extra y dinero a terceros: etapa posterior, decisión del 5-nov-2026).
@@ -26,3 +26,6 @@ ERP: área Finanzas (queda en 7 entradas, el máximo). Supervisor: «Rendiciones
 
 ## 6. Verificación
 `pnpm typecheck && pnpm lint && pnpm test` (instantánea MCP, inventario de paridad, auditoría de lecturas) y `pnpm test:db` (`rendiciones-r2b-db.test.ts`); build y presupuesto de JS; Playwright a 375, 1024 y 1280 (`apps/web/e2e/rendiciones-r2b.spec.ts`).
+
+## 7. Adenda R2c (CAR-200)
+`rendiciones.opciones.obtener` ya no lista a todos los aprobadores: solo los elegibles que define la empresa (`aprobadores_elegibles_ids`), el aprobador por defecto y el asignado a la rendición que se corrige (`rendicionId`). Sin ninguno, quien rinde solo guarda borrador. El servidor sigue aceptando a cualquier miembro que pueda aprobar si se le indica por id (API/MCP); lo que se restringe es lo que se lista. Pendiente: selector de usuarios en Configuración (hoy el ajuste es JSON de ids).

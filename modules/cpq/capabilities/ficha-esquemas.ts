@@ -43,8 +43,8 @@ export const parametrosSchema = z.object({
   margenModo: z.string(),
   margenObjetivoPct: z.number().int().nullable(),
   /** Mínimo y alerta de la empresa (enteros escalados), para explicar el semáforo en la ficha. */
-  margenMinimoPct: z.number().int(),
-  margenAlertaPct: z.number().int(),
+  margenMinimoPct: z.number().int().nullable(),
+  margenAlertaPct: z.number().int().nullable(),
   sobrescrito: z.boolean(),
   instrumentos: instrumentosSchema,
 });

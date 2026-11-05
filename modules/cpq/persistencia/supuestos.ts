@@ -10,6 +10,7 @@ import {
   MARGEN_OBJETIVO_DEFECTO_PCT,
   margenesEscalados,
   type MargenesTenant,
+  PCT_A_ESCALADO,
 } from "../domain/margenes-defecto";
 
 /**
@@ -110,4 +111,24 @@ export async function margenesTenant(ctx: Contexto): Promise<MargenesTenant> {
     minimo: leer("margen_minimo_pct", MARGEN_MINIMO_DEFECTO_PCT),
     alerta: leer("margen_alerta_puntos", MARGEN_ALERTA_DEFECTO_PUNTOS),
   });
+}
+
+/**
+ * Mínimo y alerta de margen solo si la empresa los configuró (CAR-192): `null` mientras valgan el defecto
+ * del producto. La ficha no debe mostrar un mínimo que nadie fijó; el motor sigue usando `margenesTenant`.
+ */
+export async function margenesConfigurados(
+  ctx: Contexto,
+): Promise<{ minimoPct: number | null; alertaPct: number | null }> {
+  const v = await valoresEfectivos(ctx, CAMPOS_CPQ);
+  const leer = (clave: string, escala: number) => {
+    const x = v.get(`cpq.${clave}`);
+    return x && x.origen !== "defecto" && typeof x.valor === "number" && Number.isFinite(x.valor)
+      ? x.valor * escala
+      : null;
+  };
+  return {
+    minimoPct: leer("margen_minimo_pct", PCT_A_ESCALADO),
+    alertaPct: leer("margen_alerta_puntos", PCT_A_ESCALADO),
+  };
 }

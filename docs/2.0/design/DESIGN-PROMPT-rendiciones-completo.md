@@ -49,7 +49,7 @@ Resultado esperado: export HTML standalone, **una pantalla por archivo**, captur
 
 ### 3.3 Nueva rendición de kilometraje
 - Origen y destino (instalaciones o dirección), **ruta calculada** (distancia), ida y vuelta, peaje opcional con foto.
-- Muestra **cómo se calculó** según el método de la empresa: *por consumo* (litros × precio del litro + recargo), *por tarifa por km* (km × tarifa) o *monto fijo por tramo*. Siempre el desglose, nunca solo el total.
+- Muestra **cómo se calculó** según el método de la empresa: *por consumo* (litros × precio del litro + recargo), *por tarifa por km* (km × tarifa) o *monto fijo por tramo*. «Ida y vuelta» duplica el cálculo en los tres métodos, también el tramo fijo (decisión de Carlos, 5-nov-2026): el desglose dice «Tramo X: $18.000 × 2 = $36.000» y el peaje se suma una sola vez. Siempre el desglose, nunca solo el total.
 - Si la empresa no configuró el método: estado «Tu empresa aún no configura el kilometraje» con aviso al administrador.
 
 ## 4. Configuración del módulo (administrador de la empresa)

@@ -9,7 +9,7 @@ import { calculoVigente } from "../persistencia/calculo-vigente";
 import { metaFicha } from "../persistencia/ficha-meta";
 import { mesesContrato, versionParaFicha } from "../persistencia/version";
 import { INSTRUMENTOS_DEFECTO } from "../domain/motor/plantilla";
-import { margenesTenant } from "../persistencia/supuestos";
+import { margenesConfigurados, margenesTenant } from "../persistencia/supuestos";
 import { leerInstrumentos } from "../persistencia/instrumentos-version";
 import { metaSchema, parametrosSchema } from "./ficha-esquemas";
 import { motorOutputSchema } from "./motor-esquemas";
@@ -72,6 +72,7 @@ export const cotizacionesFicha = defineCapability({
     const meta = await metaFicha(ctx, c.id, c.creadoPorId, version, lineas, r);
     const verCostos = ctx.autorizar(PERMISO_COSTOS);
     const margenes = verCostos ? await margenesTenant(ctx) : null;
+    const configurados = verCostos ? await margenesConfigurados(ctx) : null;
     return {
       cotizacion: {
         id: c.id,
@@ -97,8 +98,8 @@ export const cotizacionesFicha = defineCapability({
               mesesPactados: version.mesesContrato !== null,
               margenModo: version.margenModo,
               margenObjetivoPct: version.margenObjetivoPct ?? margenes?.objetivoPct ?? null,
-              margenMinimoPct: margenes?.minimoPct ?? 0,
-              margenAlertaPct: margenes?.alertaPct ?? 0,
+              margenMinimoPct: configurados?.minimoPct ?? null,
+              margenAlertaPct: configurados?.alertaPct ?? null,
               sobrescrito: version.instrumentosJson !== null,
               instrumentos: leerInstrumentos(version.instrumentosJson) ?? INSTRUMENTOS_DEFECTO,
             },

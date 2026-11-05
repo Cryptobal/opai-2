@@ -105,9 +105,10 @@ export function DesgloseKm({
         ))}
       </ul>
       <p className="flex items-baseline justify-between border-t border-border pt-2 text-fg">
-        <span className="t-label">Total a reembolsar</span>
+        <span className="t-label">Total a rendir</span>
         <span className="t-title tabular-nums">{pesos(calculo.montoClp)}</span>
       </p>
+      <p className="t-caption">El monto lo calcula el sistema; no se puede escribir a mano.</p>
       {calculo.advertencias.map((a) => (
         <p key={a} className="text-sm text-warning-fg">
           {a}

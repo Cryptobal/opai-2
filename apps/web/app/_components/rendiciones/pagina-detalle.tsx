@@ -34,7 +34,7 @@ export function PaginaDetalle({
       volver={{ href: base, etiqueta: "Mis rendiciones" }}
       cargar={async () => {
         const { id } = await params;
-        return { r: await cargarRendicion(portal, id), o: await cargarOpciones(portal) };
+        return { r: await cargarRendicion(portal, id), o: await cargarOpciones(portal, id) };
       }}
     >
       {({ r, o }) => {
@@ -53,9 +53,10 @@ export function PaginaDetalle({
                 className="rounded-md bg-warning-muted px-3 py-2 text-base text-warning-fg"
               >
                 <span className="font-semibold">
-                  {r.estado === "devuelta" ? "Te la devolvieron: " : "La rechazaron: "}
-                </span>
-                {r.motivoDecision}
+                  {r.estado === "devuelta" ? "Devuelta" : "Rechazada"}
+                  {r.aprobadorNombre ? ` por ${r.aprobadorNombre}` : ""}:
+                </span>{" "}
+                «{r.motivoDecision}»{r.estado === "devuelta" ? " Corrígela y reenvíala." : ""}
               </p>
             ) : null}
             <SeccionTarjeta titulo="Resumen">

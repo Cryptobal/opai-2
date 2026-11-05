@@ -10,6 +10,7 @@ import { fueraDeMargenesEnvio } from "./propuesta-envio-aprobacion";
 import { ejecutarEnvioPropuestaAprobado } from "./propuesta-envio-ejecutar";
 import { registrarEnvioPropuesta } from "./propuesta-envio";
 import { snapshotEnvioPendiente } from "./propuesta-envio-snapshot";
+import type { VersionEsperada } from "./version-esperada";
 import type { ResultadoCalculo } from "../domain/motor";
 
 type InputSolicitud = {
@@ -22,6 +23,7 @@ type InputSolicitud = {
   mensaje?: string;
   creadoPorId: string;
   resultado: ResultadoCalculo;
+  versionEsperada: VersionEsperada;
 };
 
 export async function registrarOEnviarSolicitudEnvioPropuesta(
@@ -89,6 +91,7 @@ export async function registrarOEnviarSolicitudEnvioPropuesta(
     autoaprobacion,
     envioDirectoDentroMargen: !fueraDeMargenes,
     resultado: input.resultado,
+    versionEsperada: input.versionEsperada,
   });
   return { envioId: envio.id, estado: "enviado" as const, destinatarios: input.destinatarios };
 }

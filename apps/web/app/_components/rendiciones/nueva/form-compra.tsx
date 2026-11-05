@@ -7,7 +7,14 @@ import { Button, Cabecera } from "@opai/ds";
 import { type DetalleRendicion, type OpcionesRendicion, type PortalRendicion } from "../tipos";
 import { AccionesEnvio } from "./acciones-envio";
 import { BarraAcciones } from "./barra-acciones";
-import { CamposEnvio, cuerpoComun, type DatosEnvio, envioDe, type ErroresEnvio, erroresDeEnvio } from "./datos-envio";
+import {
+  CamposEnvio,
+  cuerpoComun,
+  type DatosEnvio,
+  envioDe,
+  type ErroresEnvio,
+  erroresDeEnvio,
+} from "./datos-envio";
 import {
   type ErroresGasto,
   type Gasto,
@@ -15,19 +22,15 @@ import {
   gastoVacio,
   itemDe,
   totalDe,
+  conGasto,
+  type Paso,
+  TITULO,
   validarGasto,
 } from "./gasto";
 import { useGuardado } from "./guardado";
 import { PasoDatos } from "./paso-datos";
 import { PasoDocumento } from "./paso-documento";
 import { ResumenGastos } from "./resumen-gastos";
-
-type Paso = "documento" | "datos" | "resumen";
-const TITULO: Record<Paso, string> = {
-  documento: "Paso 1 de 2 · Boleta o factura",
-  datos: "Paso 2 de 2 · Datos del gasto",
-  resumen: "Resumen y envío",
-};
 
 /** Nueva rendición de compra (o corrección de una devuelta): foto, datos, varios gastos con total corriente y envío con confirmación. */
 export function FormCompra({
@@ -57,11 +60,7 @@ export function FormCompra({
     if (Object.keys(aMostrar).length > 0) return setErrores(aMostrar);
     setErrores({});
     if (a === "resumen") {
-      setGastos((l) =>
-        l.some((x) => x.clave === actual.clave)
-          ? l.map((x) => (x.clave === actual.clave ? actual : x))
-          : [...l, actual],
-      );
+      setGastos((l) => conGasto(l, actual));
       setActual(null);
     }
     setPaso(a);
@@ -74,8 +73,7 @@ export function FormCompra({
 
   const cuerpo = () => ({ tipo: "compra", ...cuerpoComun(envio), items: gastos.map(itemDe) });
   const validarEnvio = (enviar: boolean) => {
-    const e = erroresDeEnvio(envio, enviar);
-    if (gastos.length === 0) e.motivo = e.motivo ?? "Agrega al menos un gasto.";
+    const e = erroresDeEnvio(envio, enviar, gastos.length);
     setErroresEnvio(e);
     return Object.keys(e).length === 0;
   };
@@ -136,7 +134,7 @@ export function FormCompra({
             onQuitar={(k) => setGastos((l) => l.filter((x) => x.clave !== k))}
           />
           <Button variant="secondary" onClick={otro}>
-            Agregar otro gasto
+            + Agregar otro gasto
           </Button>
           <CamposEnvio
             valor={envio}
@@ -151,6 +149,7 @@ export function FormCompra({
             aprobadorId={envio.aprobadorId}
             aprobador={aprobador}
             total={totalDe(gastos)}
+            gastos={gastos.length}
           />
         </>
       ) : null}

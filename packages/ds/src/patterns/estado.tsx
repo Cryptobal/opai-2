@@ -89,7 +89,7 @@ export function Cabecera(props: CabeceraProps) {
     <div
       className={cn(
         "mb-4 flex gap-x-3 gap-y-2",
-        apilada ? "flex-col md:flex-row md:items-start md:justify-between" : "items-start justify-between",
+        apilada ? "flex-col md:flex-row md:items-start md:justify-between" : "flex-wrap items-start justify-between",
         props.soloTelefono && "md:hidden",
       )}
     >

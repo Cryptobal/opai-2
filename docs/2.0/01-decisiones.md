@@ -1351,6 +1351,8 @@ identidad de servicio en main.
 
 **Adenda del 5-nov-2026 (Sesión 2, pendientes del Revisor de #303).** (1) El aviso de boleta duplicada solo mira las rendiciones que el actor puede ver: las propias, las que le asignaron para aprobar y, con `rendiciones:ver_todas`, las de toda la empresa. Por eso el aprobador ve los duplicados de lo que aprueba, y es intencional (necesita ese dato para decidir). (2) Quien no puede ver todas las rendiciones solo adjunta respaldos que él mismo subió; con `ver_todas` puede usar los de la empresa.
 
+**Adenda del 5-nov-2026 (CAR-200, R2c, decisión de Carlos en el chat).** En el kilometraje por monto fijo por tramo, «ida y vuelta» **duplica** el monto del tramo, igual que en consumo y tarifa por km; el peaje se suma una sola vez. Reemplaza la nota de R2a que lo dejaba sin duplicar.
+
 
 ## ADR-071 · Cobro por módulo en Plataforma, para todos los módulos
 
@@ -1441,3 +1443,15 @@ identidad de servicio en main.
 **Decisión.** Para Finanzas, el paso «Design Prompt → Claude Design → diseño aprobado» se reemplaza por un **prototipo interactivo** que arma la sesión «Finanzas · Proyecto» en la misma conversación, sobre el Design System de OPAI 2.0 V2 (mismos tokens y clases que `packages/ds`). Carlos lo revisa ahí y lo aprueba. Al aprobarlo, su export se guarda en `docs/2.0/diseño/export-<pantalla>/` con un README, igual que los de Claude Design, y desde ese momento es el «diseño aprobado» que construye «Finanzas · Code». Se puede diseñar en paralelo a la construcción: un diseño no toca código.
 
 **Primer caso.** Flujo de caja v4 (CAR-193): planilla de escritorio con traza por celda, celular y ajustes; reemplaza `export-flujo-caja-v3` en lo que cambia por ADR-073 (sin cierre semanal ni metas; filas «Sin conciliar», IVA con postergación, PPM, depósito del factor y «Diferencia factoring» informativa; fecha esperada de cobro editable por factura; umbral único de $15M).
+
+---
+
+## ADR-077 · Flujo operativo Grok Bot: coordinación, revisión final y señales (5-nov-2026)
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Carlos (autorización explícita en chat para registrar el flujo en el repo vía PR solo de documentación) · **Modifica** ADR-054, ADR-070 y la rutina del Revisor en `AGENTS.md` **en lo operativo** (la alineación literal de `AGENTS.md` puede ir en un PR aparte).
+
+**Decisión (resumen).** OPAI 2.0 / Grok Bot **coordina** el avance completo; **Claude Code** construye, prueba, deja **revisión final** en el PR (SHA del head + «sin bloqueos» o bloqueos concretos en seguridad, RLS/tenant, permisos, migraciones e integridad de datos) e **integra** con squash. El **Revisor Grok Bot no se lanza** salvo petición expresa de Carlos o riesgo grave sin resolver. **Diseño/QA** solo bajo demanda. **Migraciones:** las aplica **solo OPAI 2.0** después de revisión final sin bloqueos y CI verde; las sesiones no las aplican. **Señales 24 h** en comentarios de PR (`DECISIÓN CARLOS:`, `BLOQUEO OPAI:`, `MIGRACIÓN LISTA:`), una por situación. Sesiones siguen otros frentes sin esperar al bot; nunca integran con bloqueos ni tocan 1.0. Bot revisa avance **09:00, 12:00, 15:00, 18:00 y 20:00** America/Santiago. **Claude Proyectos:** al terminar encargo iniciado por OPAI 2.0, correo desde Gmail de Carlos solo a `carlos.irigoyen+claude@mail.grokbot.com` con asunto `OPAI 2.0 | [sesión] | [LISTO/BLOQUEO/DECISIÓN]`; si no hay Gmail, la misma señal en el PR. **Linear:** issues nuevos de Carlos se clasifican y derivan a sesión sin confirmación extra para construir. **Diseño:** Claude Design entrega en chat/PR; QA visual de la sesión; Diseño/QA bajo demanda.
+
+**Detalle normativo.** `docs/2.0/OPERACION-agentes.md` sección **A2**; contexto resumido en `CONTEXTO-agentes.md`.
+
+**Adenda del 5-nov-2026 (Carlos, tras el PR de documentación).** **Revisión visual:** todo cambio visual, por menor que sea, se presenta primero a Carlos con enlace usable, qué cambió y puntos concretos de usabilidad; Claude Code no hace ese chequeo por él salvo petición expresa para ese cambio; Diseño/QA no sustituye el primer vistazo. En PR no desplegado: comentario **`REVISIÓN VISUAL CARLOS:`** con preview verificado, rutas y qué revisar; Carlos aprueba, pide cambios o delega a Claude; no se frenan frentes independientes. Detalle en **A2.10**.
