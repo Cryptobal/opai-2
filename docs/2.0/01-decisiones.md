@@ -1455,3 +1455,32 @@ identidad de servicio en main.
 **Detalle normativo.** `docs/2.0/OPERACION-agentes.md` sección **A2**; contexto resumido en `CONTEXTO-agentes.md`.
 
 **Adenda del 5-nov-2026 (Carlos, tras el PR de documentación).** **Revisión visual:** todo cambio visual, por menor que sea, se presenta primero a Carlos con enlace usable, qué cambió y puntos concretos de usabilidad; Claude Code no hace ese chequeo por él salvo petición expresa para ese cambio; Diseño/QA no sustituye el primer vistazo. En PR no desplegado: comentario **`REVISIÓN VISUAL CARLOS:`** con preview verificado, rutas y qué revisar; Carlos aprueba, pide cambios o delega a Claude; no se frenan frentes independientes. Detalle en **A2.10**.
+
+---
+
+---
+
+## ADR-078 · Turno esperado en el núcleo y cálculo único de horas
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Origen:** encargo de Carlos del 5-nov-2026 a «Asistencia · Núcleo legal · Code» (CAR-201; la asistencia legal se construye vendible por separado, ADR-048). (El número 077 lo tomó antes el ADR del flujo operativo de Grok Bot.)
+
+**Contexto.** La celda de la Pauta se calcula al leer; no existe «el turno de la persona X el día Y». Asistencia necesitaba ese dato para marcar, calcular atraso y sobretiempo y alertar, y no debía recalcularlo ni depender de que la empresa tenga Pauta. Había además tres cálculos de horas (`turnos.ts`, `alertas-horas.ts`, `reemplazos.ts`) y el tope semanal fijo en 42 h.
+
+**Decisión.**
+
+1. **Tabla `core.turnos_esperados`** (núcleo, RLS `tenant_isolation`): persona, día operativo, `[inicio, fin)` en `timestamptz`, instalación, puesto (nulo si el origen es la jornada pactada), `origen` (`pauta` | `jornada_pactada` | `manual`), referencia (serie o excepción), colación, feriado, `version` y `vigente`. Va en el núcleo para que los módulos solo dependan del núcleo y Asistencia se venda sola. Un cambio nunca pisa: anula la fila anterior (`vigente = false`) y escribe una versión nueva, de modo que se puede saber qué turno regía al momento de marcar. Índice único parcial: una persona no tiene dos turnos vigentes que arranquen en el mismo instante.
+2. **Escritura desde la Pauta: consumidor idempotente del outbox, no la misma transacción.** `core.turnos_esperados.pauta` escucha `pauta.serie.fijada`, `pauta.excepcion.creada` y `pauta.excepcion.anulada` y regenera solo los días afectados con la misma expansión que muestra la Pauta (`expandirMes`). Se eligió así porque regenerar relee serie, excepciones y feriados y vuelve al mismo resultado cuantas veces se reintente; la escritura de la Pauta no se alarga ni falla por esto; no se tocan las seis capacidades de Pauta; y el trabajo diario corrige cualquier desfase. El reemplazo mueve el turno al reemplazante; ausencia, licencia, vacaciones y permiso lo dejan no vigente; un refuerzo se suma al turno del titular si este trabaja.
+3. **Horizonte y jornada pactada.** El trabajo diario `core.turnos_esperados.extender` mantiene el mes en curso y el siguiente. Con Pauta activa vuelve a derivar los puestos con serie; sin ella genera desde el vínculo laboral y la jornada DT (texto `5x2`, `4x4 08:00-20:00`, con el horario del puesto como respaldo). **Sin datos suficientes no inventa**: devuelve un aviso por persona.
+4. **Un solo cálculo de horas.** Duración e intervalos salen de `packages/domain/src/turnos.ts`; la conversión hora civil → instante respeta el cambio de hora (un nocturno dura 7 o 9 h el día del cambio). `alertas-horas.ts` y `reemplazos.ts` ya no tienen su propio `horasTurno`.
+5. **Topes con vigencia (ADR-056).** El tope semanal sale del indicador «jornada» del motor de sueldos, con la tabla de la Ley 21.561 como base cuando el motor no trae valores: 45 h, 44 h desde el 26-abr-2024, 42 h desde el 26-abr-2026, 40 h desde el 26-abr-2028. El tope mensual (180 h) y el descanso mínimo (12 h) son ajustes del manifest de Pauta (`limite_mensual_horas`, `descanso_minimo_horas`).
+6. **Zona horaria del tenant** (`core.tenants.timezone`) en lugar de la fija de `pauta/comun.ts`.
+7. **Puesto.** `cpq.puestos.confirmar` copia además función, tramo de noche y horas semanales (calculadas con `turnos.ts`); es el único cambio en `modules/cpq`. El listado de instalaciones cuenta puestos y deja de sumar la dotación deprecada.
+
+**Frontera Núcleo / CPQ / Operaciones.**
+- El catálogo de patrones, funciones, cargos y jornada legal es **uno solo, del núcleo**.
+- **CPQ guarda la intención de servicio y los supuestos de costo.**
+- **Operaciones es dueño de la programación** (series, excepciones y los turnos esperados que de ellas salen).
+- El único paso entre ambos es `cpq.puestos.confirmar`.
+- Queda para «Comercial · Code» (PR propio): `patron_id` en las líneas de CPQ y el sueldo cotizado como borrador de capa.
+
+**Consecuencias.** Asistencia (CAR-89) lee `core.turnos_esperados.listar` y no recalcula. Nómina toma los días trabajados de Asistencia (ADR-048), no de aquí. Un cambio en las horas o el horario del puesto se refleja en el siguiente evento de Pauta o en el trabajo diario. Capacidades: `core.turnos_esperados.listar` (lectura, alcance ADR-022, auditada) y `core.turnos_esperados.regenerar` (`dryRun` e `idempotencyKey`).

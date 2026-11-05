@@ -85,7 +85,7 @@ describe.skipIf(!urlPropietario)(
         expect(filas[0]).toMatchObject({
           id: a.instalacionId,
           puestos: 3,
-          dotacion: 6,
+          dotacion: 3, // la dotación deprecada ya no se suma: se cuentan puestos (ADR-078)
           cuentaNombre: "Lectura cuenta",
         });
         expect(filas[1]).toMatchObject({ id: segunda, puestos: 0, dotacion: 0 });
