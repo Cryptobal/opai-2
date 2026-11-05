@@ -2,37 +2,8 @@ import type { Contexto } from "@opai/capabilities";
 import type { TenantTx } from "@opai/db";
 
 import { ajustesDe, hoyIso } from "../util";
+import { saldoDelBanco } from "./saldo-banco";
 import { aFecha } from "./util";
-
-/**
- * Saldo del banco de hoy: suma de las cuentas activas, cada una con su último saldo conocido. La cuenta que se
- * acaba de sincronizar aporta el saldo recién recibido; las demás, el que dejó Web4Leads o, si no hay, el saldo
- * posterior de su último movimiento de cartola. Las cuentas sin saldo no suman (ADR-073).
- */
-export async function saldoBancoDeHoy(
-  tx: TenantTx,
-  actual: { cuentaId: string; saldo: number | null },
-): Promise<number | null> {
-  const cuentas = await tx.cuentaBancaria.findMany({ where: { activa: true }, select: { id: true, saldoBanco: true } });
-  let total = 0;
-  let alguno = false;
-  for (const c of cuentas) {
-    let saldo: number | null = c.id === actual.cuentaId ? actual.saldo : null;
-    if (saldo == null && c.saldoBanco != null) saldo = Number(c.saldoBanco);
-    if (saldo == null) {
-      const ultimo = await tx.movimientoBancario.findFirst({
-        where: { cuentaId: c.id, saldoDespues: { not: null } },
-        orderBy: [{ fecha: "desc" }, { id: "desc" }],
-        select: { saldoDespues: true },
-      });
-      if (ultimo?.saldoDespues != null) saldo = Number(ultimo.saldoDespues);
-    }
-    if (saldo == null) continue;
-    total += saldo;
-    alguno = true;
-  }
-  return alguno ? total : null;
-}
 
 /**
  * Emite aviso in-app (campana) si la suma de las cuentas activas queda bajo el umbral único de saldo bajo
@@ -46,7 +17,7 @@ export async function sincronizarAvisoSaldoBajo(
 ): Promise<void> {
   const ajustes = await ajustesDe(ctx);
   if (!ajustes.avisoActivo) return;
-  const total = await saldoBancoDeHoy(tx, { cuentaId, saldo: saldoCuenta });
+  const { saldo: total } = await saldoDelBanco(tx, { cuentaId, saldo: saldoCuenta });
   if (total == null || total >= ajustes.umbral) return;
   const dia = aFecha(hoyIso());
   if (await tx.bancoAvisoEmitido.findFirst({ where: { dia }, select: { id: true } })) return;

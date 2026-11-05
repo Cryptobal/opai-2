@@ -1,0 +1,37 @@
+// Turno esperado por persona y día (ADR-078): qué turno le toca a cada persona, materializado en el
+// núcleo para que Pauta, Asistencia, Nómina y CPQ no lo recalculen. Vive en `core` porque los módulos
+// solo dependen del núcleo y Asistencia se vende sola (ADR-048). Semántica [inicio, fin): el fin es
+// exclusivo. Una fila nueva por cada cambio (version + 1); la anterior queda `vigente = false`, así
+// Asistencia puede pedir «el turno esperado de aquel día» tal como se conocía al marcar. La FK a
+// tenants y la política `tenant_isolation` van en la migración, y el índice único parcial de filas
+// vigentes por (tenant, persona, inicio) también (Prisma no modela índices parciales).
+
+model TurnoEsperado {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  personaId     String   @map("persona_id") @db.Uuid
+  /// Día operativo: la fecha civil, en la zona del tenant, en que arranca el turno.
+  fecha         DateTime @db.Date
+  inicio        DateTime @db.Timestamptz(6)
+  fin           DateTime @db.Timestamptz(6)
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  /// Nulo cuando el origen es la jornada pactada de una persona sin puesto.
+  puestoId      String?  @map("puesto_id") @db.Uuid
+  /// "pauta" | "jornada_pactada" | "manual". CHECK en la migración.
+  origen        String
+  /// Serie, excepción o jornada de la que sale el turno (para regenerar solo lo afectado).
+  referencia    String?
+  /// Minutos de colación dentro de la jornada; se descuentan de las horas esperadas.
+  colacionMin   Int      @default(0) @map("colacion_min")
+  feriado       Boolean  @default(false)
+  version       Int      @default(1)
+  vigente       Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, personaId, fecha], map: "turnos_esperados_persona_fecha_idx")
+  @@index([tenantId, instalacionId, fecha], map: "turnos_esperados_instalacion_fecha_idx")
+  @@index([tenantId, puestoId, fecha], map: "turnos_esperados_puesto_fecha_idx")
+  @@map("turnos_esperados")
+  @@schema("core")
+}

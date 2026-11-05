@@ -811,6 +811,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.prevision_actualizar`
 - `core.ping`
 - `core.puestos.get`
+- `core.turnos_esperados.listar`
+- `core.turnos_esperados.regenerar`
 - `core.usage.summary`
 - `cpq.aprobaciones.contar`
 - `cpq.aprobaciones.get`

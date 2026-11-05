@@ -95,6 +95,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     expect(filas.every((f) => f.origen === "web4leads" && f.estado === "pendiente")).toBe(true);
     const c = await e.admin.cuentaBancaria.findUniqueOrThrow({ where: { id: cuentaA } });
     expect(c.saldoBanco).toBe(1_020_000n);
+    expect(c.saldoBancoEn).not.toBeNull(); // la fecha del saldo se guarda junto con el saldo
     expect(c.ultimaSyncEn).not.toBeNull();
     expect(await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaB } })).toBe(0);
   });
@@ -106,6 +107,7 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     await recibir(tenantA, vieja);
     const c = await e.admin.cuentaBancaria.findUniqueOrThrow({ where: { id: cuentaA } });
     expect(c.saldoBanco).toBe(1_019_000n);
+    expect(c.saldoBancoEn?.toISOString()).toBe("2026-11-02T11:00:00.000Z"); // la fecha es la que informa el banco; la entrega vieja no la pisa
     // Misma fecha, monto y glosa con ids y saldos distintos, entregadas a la vez: ambas deben quedar.
     const antes = await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaA } });
     await Promise.all([

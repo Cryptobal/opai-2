@@ -32,6 +32,13 @@ const avisoSchema = z.object({
   ),
 });
 
+/** De dónde sale el saldo de la planilla y qué cuentas activas no tienen saldo (ADR-073). */
+const saldoBancoSchema = z.object({
+  fuente: z.enum(["banco", "ajustes"]),
+  saldo: saldoSchema.nullable(),
+  cuentasSinSaldo: z.array(z.object({ cuentaId: z.string(), banco: z.string() })),
+});
+
 export const filasListar = defineCapability({
   id: "finanzas.filas.listar",
   descripcion:
@@ -53,7 +60,7 @@ export const filasListar = defineCapability({
 export const planillaObtener = defineCapability({
   id: "finanzas.planilla.obtener",
   descripcion:
-    "Entrega la planilla del flujo de caja por semana: filas y celdas por capa, saldos, semanas pasadas según cartola y aviso in-app de saldo bajo umbral.",
+    "Entrega la planilla del flujo de caja por semana: filas y celdas por capa, saldos, semanas pasadas según cartola (lo no conciliado en «Sin conciliar»), el saldo anclado al saldo del banco de hoy con las cuentas que no tienen saldo, y el aviso in-app de saldo bajo el umbral único.",
   permiso: PERMISO_VER,
   input: z.object({
     desde: semanaSchema.optional(),
@@ -66,6 +73,7 @@ export const planillaObtener = defineCapability({
     celdas: z.array(celdaSchema),
     semanas: z.array(semanaCalculadaSchema),
     aviso: avisoSchema,
+    saldoBanco: saldoBancoSchema,
     columnaHoy: semanaSchema.nullable(),
   }),
   efecto: "lectura",
@@ -77,7 +85,7 @@ export const planillaObtener = defineCapability({
       ? 4
       : (input.semanas ?? ajustes.horizonteSemanas + SEMANAS_HISTORIA);
     const desde = input.movil ? hoy : desdeVentana(ajustes, input.desde, hoy);
-    const { lista, calculo, extraVista, filas, celdas } = await serieSaldos(
+    const { lista, calculo, extraVista, filas, celdas, banco } = await serieSaldos(
       ctx,
       ajustes,
       desde,
@@ -118,6 +126,7 @@ export const planillaObtener = defineCapability({
       celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,
       aviso: { activo: ajustes.avisoActivo, umbral: ajustes.umbral, semanas: avisoSemanas },
+      saldoBanco: { fuente: banco.fuente, saldo: banco.saldo, cuentasSinSaldo: banco.cuentasSinSaldo },
       columnaHoy: lista.includes(hoy) ? hoy : null,
     };
   },
