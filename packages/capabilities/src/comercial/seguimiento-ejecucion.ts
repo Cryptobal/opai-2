@@ -66,29 +66,31 @@ export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: stri
 /**
  * El cliente respondió: según el plan, pausa o detiene el seguimiento (R: pausa y espera a la persona)
  * y deja una nota en la ficha. `texto` es de un tercero: se guarda como dato, nunca se interpreta.
+ * No hace nada sobre un seguimiento ya terminado o cancelado (ganado, perdido, sin respuesta): no pisa
+ * su motivo, no deja nota ni avisa; devuelve `null`. El estado se relee dentro de la transacción: el
+ * que recibe `s` pudo leerse antes de que otro proceso lo cerrara.
  */
-export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: ConfigPlan, nota: { titulo: string; detalle?: string | null }): Promise<string> {
-  const destino = transicionSeguimiento(s.estado as Parameters<typeof transicionSeguimiento>[0], config.alResponder === "detener" ? "cancelar" : "pausar");
-  const movido = await avanzarPorRespuesta(ctx, tx, s.negocioId, config.etapaAlResponder);
+export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: ConfigPlan, nota: { titulo: string; detalle?: string | null }): Promise<string | null> {
+  const actual = await tx.seguimiento.findUnique({ where: { id: s.id } });
+  if (!actual || (actual.estado !== "activo" && actual.estado !== "pausado")) return null;
+  // «Ya avisado» tiene su propio campo (`avisadoEn`): el motivo de la pausa (p. ej. «manual») no se pisa.
+  // Se reserva con un UPDATE condicional antes de cambiar el estado: si dos correos llegan a la vez,
+  // solo uno modifica la fila y avisa. Los registros anteriores a `avisadoEn` que ya pausó una respuesta
+  // (motivo `cliente_respondio`) cuentan como avisados.
+  const reservado = await tx.seguimiento.updateMany({
+    where: { id: s.id, tenantId: ctx.tenantId, avisadoEn: null, OR: [{ motivo: null }, { motivo: { not: "cliente_respondio" } }] },
+    data: { avisadoEn: new Date() },
+  });
+  const destino = transicionSeguimiento(actual.estado as Parameters<typeof transicionSeguimiento>[0], config.alResponder === "detener" ? "cancelar" : "pausar");
+  const movido = await avanzarPorRespuesta(ctx, tx, actual.negocioId, config.etapaAlResponder);
   const detalle = [nota.detalle, movido ? "El negocio pasó a la etapa configurada en el plan." : null].filter(Boolean).join(" ");
-  const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: detalle || null, negocioId: s.negocioId });
+  const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: detalle || null, negocioId: actual.negocioId });
   if (destino) {
     await tx.seguimiento.update({ where: { id: s.id }, data: { estado: destino, motivo: "cliente_respondio" } });
     if (destino === "cancelado")
       await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
   }
-  // Una sola vez por seguimiento: la primera respuesta registrada avisa al vendedor, haya o no cambio
-  // de estado (una pausa manual previa no la silencia). El motivo `cliente_respondio` marca «ya avisado»
-  // y se reserva con un UPDATE condicional: si dos correos llegan a la vez, solo uno modifica la fila y avisa.
-  let avisar = Boolean(destino);
-  if (!destino && s.motivo !== "cliente_respondio") {
-    const reservado = await tx.seguimiento.updateMany({
-      where: { id: s.id, OR: [{ motivo: null }, { motivo: { not: "cliente_respondio" } }] },
-      data: { motivo: "cliente_respondio" },
-    });
-    avisar = reservado.count > 0;
-  }
-  if (avisar)
-    await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });
+  if (reservado.count > 0)
+    await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: actual.negocioId, payload: { seguimientoId: s.id } });
   return actividadId;
 }
