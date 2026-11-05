@@ -38,10 +38,12 @@ function vigilarConsola(page: Page): string[] {
 
 async function elegir(page: Page, etiqueta: string | RegExp, opcion: string | RegExp) {
   const sel = page.getByRole("button", { name: etiqueta });
+  const op = page.getByRole("option", { name: opcion }).first();
+  // Si la lista ya quedó abierta de un intento anterior, otro clic en el botón la cerraría.
   await expect(async () => {
-    await sel.click();
-    await page.getByRole("option", { name: opcion }).first().click({ timeout: 3_000 });
-  }).toPass({ timeout: 20_000 });
+    if (!(await op.isVisible())) await sel.click({ timeout: 3_000 });
+    await op.click({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
 }
 
 async function gasto(page: Page, p: { folio: string; monto: string; proveedor: string }) {
