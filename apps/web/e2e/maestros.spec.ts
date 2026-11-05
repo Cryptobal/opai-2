@@ -47,7 +47,8 @@ test.describe("maestros con sesión", () => {
     await entrar(page);
     await page.goto("/personas?nueva=1");
     const dialogo = page.getByRole("dialog", { name: "Agregar persona" });
-    await expect(dialogo).toBeVisible();
+    // La hoja se carga aparte (`hojaDiferida`): en `next dev` su primera compilación pasa de 5 s.
+    await expect(dialogo).toBeVisible({ timeout: 30_000 });
     await dialogo.getByLabel("Nombres").fill("Prueba");
     await dialogo.getByLabel("Apellidos").fill(`E2E ${Date.now()}`);
     await dialogo.getByLabel("RUT").fill(rutNuevo());
