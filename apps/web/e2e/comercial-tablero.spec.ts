@@ -110,7 +110,8 @@ test.describe("Comercial · tablero y hojas", () => {
 
   test("editar una etapa del embudo", async ({ page }, info) => {
     await entrar(page);
-    await page.goto("/configuracion/modulo/comercial");
+    // Configuración del módulo abre en «Importar 1.0»; el embudo es la sección `embudo`.
+    await page.goto("/configuracion/modulo/comercial?seccion=embudo");
     const fila = page.getByRole("listitem", { name: "Calificado" });
     await expect(fila).toBeVisible();
     await page.screenshot({ path: info.outputPath("config-embudo.png"), fullPage: true });
