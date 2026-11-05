@@ -29,12 +29,13 @@ const sinCargo = (motivo: MotivoCobro, diasMes: number, extra: Partial<CargoCalc
 });
 
 /**
- * Primer día del cobro: el más tardío entre el inicio explícito y el día siguiente a la prueba. Sin
- * inicio explícito, una prueba vencida solo se cobra si Plataforma marcó «pasa a cobro».
+ * Primer día del cobro: el más tardío entre el inicio explícito y el día siguiente a la prueba. Una
+ * prueba vencida solo se cobra si Plataforma marcó «pasa a cobro»; si no, el módulo queda en solo
+ * lectura aunque haya un inicio explícito (coherente con lo que hace el módulo al vencer).
  */
 function inicioDelCobro(c: CondicionCobro): { desde: string | null; motivo: MotivoCobro | null } {
   const trasPrueba = c.pruebaHasta ? diaSiguiente(c.pruebaHasta) : null;
-  if (trasPrueba && !c.pasaACobro && !c.cobroDesde)
+  if (trasPrueba && !c.pasaACobro)
     return { desde: null, motivo: "prueba_vencida" };
   const desde =
     [c.cobroDesde, trasPrueba]

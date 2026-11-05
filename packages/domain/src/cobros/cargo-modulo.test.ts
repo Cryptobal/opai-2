@@ -87,8 +87,14 @@ describe("cargoDelMes · pruebas (adenda ADR-071)", () => {
   });
 
   it("un inicio explícito manda, pero nunca antes de que termine la prueba", () => {
-    const r = cargoDelMes({ ...prueba, cobroDesde: "2026-10-01" }, "activo", "2026-10");
-    expect(r).toMatchObject({ desde: "2026-10-21", diasCobrados: 11 });
+    const con = { ...prueba, pasaACobro: true, cobroDesde: "2026-10-01" };
+    expect(cargoDelMes(con, "activo", "2026-10")).toMatchObject({
+      desde: "2026-10-21",
+      diasCobrados: 11,
+    });
+    // Sin «pasa a cobro» el inicio explícito no la cobra: queda en solo lectura.
+    const sin = { ...prueba, cobroDesde: "2026-10-01" };
+    expect(cargoDelMes(sin, "activo", "2026-10").motivo).toBe("prueba_vencida");
   });
 });
 
