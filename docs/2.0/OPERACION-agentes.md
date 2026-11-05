@@ -37,7 +37,7 @@
 
 ## A2. Flujo operativo Grok Bot (5-nov-2026, Carlos · ADR-077)
 
-> **Autorización explícita de Carlos el 5-nov-2026** para dejar estas instrucciones en el repo. Donde choque con A.4, A.5, A.6 o con la rutina «cada 15 minutos» al Revisor, **rige A2**. `AGENTS.md` y el resto del repo se alinean en PRs posteriores; ante duda operativa, manda este archivo.
+> **Autorización explícita de Carlos el 5-nov-2026** para dejar estas instrucciones en el repo. Donde choque con A.4, A.5, A.6 o con la rutina «cada 15 minutos» al Revisor, **rige A2**. Ante duda operativa, manda este archivo (incluido sobre `AGENTS.md` hasta que un PR posterior diga lo contrario).
 
 ### A2.1 Roles y coordinación
 
@@ -72,8 +72,9 @@ La **primera línea** del comentario es exactamente una de:
 | **`DECISIÓN CARLOS:`** | Falta una decisión de negocio que solo Carlos puede tomar. |
 | **`BLOQUEO OPAI:`** | Bloqueo operativo que la sesión no puede resolver (infra, cola, migración, permisos de bot, etc.). |
 | **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, cuatro checks verdes y migración pendiente de aplicar por el bot. |
+| **`REVISIÓN VISUAL CARLOS:`** | El PR incluye **cambio visual** aún no desplegado en `test.opai.cl`: hay enlace de **preview verificado**, rutas, qué cambió y puntos concretos de usabilidad a revisar. |
 
-En el cuerpo (breve): resumen mínimo, enlace a Linear (`CAR-n`) si existe, qué se intentó y qué se necesita. **Sin secretos ni datos personales.**
+En el cuerpo (breve): resumen mínimo, enlace a Linear (`CAR-n`) si existe, qué se intentó y qué se necesita. **Sin secretos ni datos personales.** En **`REVISIÓN VISUAL CARLOS:`** incluir siempre preview usable, rutas y checklist de usabilidad.
 
 OPAI 2.0 actúa **24 h** ante estas señales (no repite la revisión técnica de la sesión).
 
@@ -106,7 +107,22 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 ### A2.9 Diseño
 
 - **Claude Design** entrega diseño, enlace o export en el **chat o PR** que corresponda; **sin vigilancia continua** por bots.
-- **QA visual funcional** la hace la **sesión constructora**; **Diseño y QA OPAI 2.0** solo bajo demanda o cierre de módulo importante (coherente con A2.1).
+- **QA visual funcional** de ingeniería la puede hacer la sesión constructora para no romper flujos; **no sustituye** el primer vistazo de Carlos (A2.10). **Diseño y QA OPAI 2.0** solo bajo demanda o cierre de módulo importante (coherente con A2.1).
+
+### A2.10 Revisión visual de Carlos (regla explícita post-ADR-077)
+
+**Todo cambio visual en OPAI**, por menor que sea, se **presenta primero a Carlos** con:
+
+1. **Enlace usable** (preview de Vercel del PR, `test.opai.cl` tras merge, o prototipo acordado).
+2. **Qué cambió** (pantallas, rutas, componentes visibles).
+3. **Puntos concretos de usabilidad** a revisar (qué mirar a 375 / 1024 / 1280 px, estados vacío/error, contraste, etc.).
+
+- **Claude Code no hace el chequeo visual por Carlos** salvo que él lo **pida expresamente** para ese cambio concreto.
+- **Diseño y QA OPAI 2.0** tampoco sustituye ese **primer vistazo** de Carlos.
+
+**PR con cambio visual aún no desplegado:** la sesión deja un comentario nuevo cuya primera línea es **`REVISIÓN VISUAL CARLOS:`**, con enlace de **preview verificado**, rutas, qué cambió y qué revisar. Carlos puede **aprobar**, **pedir cambios** o **delegar** el chequeo visual a Claude para ese PR. **No se frenan** otros frentes independientes mientras espera.
+
+**Integración con cambio visual:** no integrar hasta que Carlos aprobó el aspecto visual o delegó explícitamente el chequeo a Claude para ese PR (la revisión final técnica A2.2 sigue aparte).
 
 ---
 
@@ -124,6 +140,7 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 | 8 | Memoria del 26-oct (flujo acelerado) | «No se abren PRs de solo documentos: el brief va dentro del PR que construye». | Sigue vigente para los briefs. El PR que sube este archivo es una excepción pedida por Carlos el 28-oct. |
 | 9 | Memoria del 24-oct (regla de merge) | «Un PR con migración pendiente no entra hasta que Carlos la aplique». | Reemplazada por t500u, t682u y A.5. |
 | 10 | A.4, `AGENTS.md`, plantilla del PR | Cada 15 min el bot pasa PRs al Revisor; integración exige «Revisor OPAI 2.0: sin bloqueos». | **A2 (5-nov-2026):** revisión final de la sesión con SHA + «sin bloqueos» o bloqueos concretos; Revisor solo bajo demanda o riesgo grave; vigilancia del bot a las 09/12/15/18/20 Santiago. |
+| 11 | Definición de terminado antigua / QA obligatoria pre-merge | Constructor «certifica» visual con checklist QA; Revisor obligatorio en migración/RLS. | **A2.10:** primer vistazo visual siempre de Carlos (señal `REVISIÓN VISUAL CARLOS:` en PR con preview); Claude no sustituye salvo delegación; alineado en PR #342. |
 
 ---
 

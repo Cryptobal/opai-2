@@ -24,7 +24,7 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
   - **Revisor Grok Bot («Revisor OPAI 2.0»):** **no corre en el flujo normal**; solo si Carlos lo pide o hay riesgo grave sin resolver.
   - **Bot de Paridad**: compara 1.0 y 2.0 en solo lectura y reporta brechas (`docs/2.0/checklists/paridad.md`).
   - **Diseño y QA OPAI 2.0:** solo **bajo demanda** o cierre de módulo importante; la sesión hace QA funcional de lo que construye.
-  - **Carlos**: decide el negocio; aprueba **una vez por módulo** la hoja de alcance, las especificaciones, los diseños y lo irreversible; puede vetar cualquier PR (comentario «VETO» o etiqueta `veto`). Issues nuevos en Linear se derivan a sesión sin pedir OK para construir; solo se pregunta si falta decisión de negocio.
+  - **Carlos**: decide el negocio; aprueba **una vez por módulo** la hoja de alcance, las especificaciones, los diseños y lo irreversible; puede vetar cualquier PR (comentario «VETO» o etiqueta `veto`). Issues nuevos en Linear se derivan a sesión sin pedir OK para construir; solo se pregunta si falta decisión de negocio. **Todo cambio visual** (A2.10): se le presenta primero con enlace usable, qué cambió y puntos de usabilidad; en PR no desplegado, señal **`REVISIÓN VISUAL CARLOS:`**.
 - Contrato completo de roles y reglas: `AGENTS.md` en la raíz del repositorio.
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → merge con squash (la sesión de Claude que lleva el PR) → QA.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, revisa `ESTADO.md` (y, como referencia, las tareas en Linear); no te fíes de lo que viste ayer.
