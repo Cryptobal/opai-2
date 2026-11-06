@@ -55,7 +55,7 @@ test.describe("Leads · solicitudes", () => {
     await foto("convertida");
     await dialogo(page).getByRole("link", { name: /Abrir el negocio/ }).click();
     await page.waitForURL(/\/negocios\/[0-9a-f-]{36}/);
-    await expect(page.getByText(empresa).first()).toBeVisible();
+    await expect(page.getByText(empresa).filter({ visible: true }).first()).toBeVisible();
   });
 
   test("la configuración muestra los canales sin conectar", async ({ page }, info) => {

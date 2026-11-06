@@ -60,7 +60,7 @@ export function FichaSolicitud(p: {
             posibles={f.posiblesDuplicadas}
             accionesAgente={p.accionesAgente ?? []}
           />
-          {p.gestiona && abierta ? <HojaConvertir s={s} /> : null}
+          {p.gestiona && (abierta || s.estado === "convertida") ? <HojaConvertir s={s} /> : null}
         </div>
       ) : null}
     </DetailScreen>

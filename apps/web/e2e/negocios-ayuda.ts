@@ -46,3 +46,12 @@ export async function crearNegocio(page: Page, titulo: string, instalaciones: st
   await crear.click();
   await page.waitForURL(/\/negocios\/[0-9a-f-]{36}/);
 }
+
+/** «Nueva cotización» desde un negocio: un clic antes de hidratar se pierde, así que se repite hasta llegar. */
+export async function irANuevaCotizacion(page: Page) {
+  const enlace = page.getByRole("link", { name: "Nueva cotización", exact: true });
+  await base(async () => {
+    if (!/\/cotizaciones\/nueva/.test(page.url())) await enlace.click({ timeout: 3_000 });
+    await base(page).toHaveURL(/\/cotizaciones\/nueva/, { timeout: 5_000 });
+  }).toPass({ timeout: 40_000 });
+}

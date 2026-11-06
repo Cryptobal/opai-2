@@ -28,9 +28,9 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(nav.getByRole("link", { name: "Personas", exact: true })).toBeVisible();
     await nav.getByRole("button", { name: "Más opciones" }).click();
     const mas = page.getByRole("dialog", { name: "Más", exact: true });
-    await expect(mas.getByText("Recientes y fijados", { exact: true })).toBeVisible();
-    await expect(mas.getByRole("button", { name: "Instalaciones", exact: true }).last()).toBeVisible();
-    await expect(mas.getByRole("button", { name: "Configuración", exact: true }).last()).toBeVisible();
+    await expect(mas.getByRole("heading", { name: "Fijados y recientes", exact: true })).toBeVisible();
+    await expect(mas.getByRole("link", { name: "Instalaciones", exact: true }).last()).toBeVisible();
+    await expect(mas.getByRole("link", { name: "Configuración", exact: true }).last()).toBeVisible();
     await expect(mas.getByText("Cuenta", { exact: true })).toHaveCount(0);
     await expect(mas.getByRole("button", { name: "Cerrar sesión" })).toHaveCount(0);
     await page.keyboard.press("Escape");
@@ -39,7 +39,11 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(mas).toBeVisible();
     await page.keyboard.press("Tab");
     await expect.poll(() => mas.evaluate((el) => el.contains(document.activeElement))).toBe(true);
-    await page.keyboard.press("Escape");
+    // Con el foco en el buscador el primer Escape solo cancela la búsqueda (CAR-182); el siguiente cierra.
+    await expect(async () => {
+      if (await mas.isVisible()) await page.keyboard.press("Escape");
+      await expect(mas).toBeHidden({ timeout: 1_000 });
+    }).toPass();
     await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
   } else {
     const clientes = nav.getByRole("button", { name: "Comercial", exact: true });
@@ -94,10 +98,10 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await nav.evaluate((el) => el.setAttribute("data-prueba-persistencia", "mismo-shell"));
   if (info.project.name === "telefono") {
     await nav.getByRole("button", { name: "Más opciones" }).click();
-    await page
-      .getByRole("dialog", { name: "Más", exact: true })
-      .getByRole("button", { name: "Cuentas", exact: true })
-      .click();
+    // En Más las áreas con varias entradas son acordeones plegados (CAR-182): se abre Comercial.
+    const masMovil = page.getByRole("dialog", { name: "Más", exact: true });
+    await masMovil.getByRole("button", { name: /^Comercial/ }).click();
+    await masMovil.getByRole("link", { name: "Cuentas", exact: true }).first().click();
   } else await nav.getByRole("link", { name: "Cuentas", exact: true }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/cuentas$/);
   await expect(nav).toHaveAttribute("data-prueba-persistencia", "mismo-shell");
@@ -124,8 +128,11 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   expect(errores).toEqual([]);
   await page.getByRole("radio", { name: /^Personas/ }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
-  if (info.project.name === "telefono")
-    await expect(nav.getByRole("link", { name: "Bandeja", exact: true })).toBeVisible();
+  // La barra inferior sigue el área elegida: Inicio · Personas · Remuneraciones · Más (CAR-182).
+  if (info.project.name === "telefono") {
+    await expect(nav.getByRole("link", { name: "Remuneraciones", exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Solicitudes", exact: true })).toHaveCount(0);
+  }
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   // La Bandeja vive solo en /bandeja (CAR-182): Inicio ya no la repite.

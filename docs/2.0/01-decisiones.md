@@ -837,6 +837,8 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 **No cambia.** El mapa de áreas, la barra inferior, la barra lateral de escritorio y el riel de iPad, los permisos y las capacidades. **Inicio** no se implementa con esta decisión (lo pidió Carlos el 5-nov-2026 y se implementó en CAR-182 sobre las láminas 01 a 07; sin capacidades nuevas).
 
+**Adenda (5-nov-2026, decisión de Carlos, CAR-199): las áreas abiertas de «Más» se guardan en el navegador.** Las áreas que la persona abre en el menú «Más» se guardan **en el navegador**, con la clave `opai_mas_areas_<época>` (por usuario y empresa), igual que los recientes. Es una preferencia de interfaz, no un dato de negocio: **no lleva herramienta MCP** (ADR-055) y **no pasa a preferencia de servidor**. Queda confirmado; si algún día se quiere que siga a la persona entre dispositivos, es una decisión nueva.
+
 ## ADR-047 · Especificación funcional aprobada antes de diseñar o construir un módulo
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (pedido de Carlos, 23-oct) · Completa ADR-012 y ADR-043.

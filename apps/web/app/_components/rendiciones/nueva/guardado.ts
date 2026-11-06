@@ -27,7 +27,11 @@ export function useGuardado(portal: PortalRendicion, idInicial?: string) {
   const [ocupado, setOcupado] = useState<"guardar" | "enviar" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function escribir(cuerpo: Cuerpo): Promise<Salida | null> {
+  /**
+   * Al guardar, la lista de borradores debe verse al volver (la caché del navegador dura 5 min): la
+   * escritura revalida. Al enviar, `enviar` revalida después, así que la creación previa no lo repite.
+   */
+  async function escribir(cuerpo: Cuerpo, modo: "guardar" | "enviar"): Promise<Salida | null> {
     const r = id.current
       ? await ejecutarCapacidad(portal, "rendiciones.rendiciones.actualizar", {
           ...cuerpo,
@@ -38,7 +42,7 @@ export function useGuardado(portal: PortalRendicion, idInicial?: string) {
           "rendiciones.rendiciones.crear",
           cuerpo,
           false,
-          "ninguna",
+          modo === "guardar" ? "layout" : "ninguna",
           clave.current,
         );
     if (!r.ok) {
@@ -54,7 +58,7 @@ export function useGuardado(portal: PortalRendicion, idInicial?: string) {
     setOcupado(modo);
     setError(null);
     try {
-      const s = await escribir(cuerpo);
+      const s = await escribir(cuerpo, modo);
       if (!s) return;
       if (modo === "enviar") {
         const e = await ejecutarCapacidad(

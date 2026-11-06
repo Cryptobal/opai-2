@@ -5,9 +5,11 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Pulido post-#25 (QA 24-oct), en iPad y escritorio (en celular la ficha ocupa la pantalla):
 //  - D1: al cambiar de pestaña con clic, la lista queda en pantalla y solo el panel derecho muestra la carga.
-// El lock ACCESS EXCLUSIVE sobre audit_events exige UPDATE/DELETE/TRUNCATE o MAINTAIN; desde el
-// Brief 07d opai_app ya no tiene UPDATE/DELETE sobre la auditoría (append-only, §6), así que el
-// lock se toma con el rol propietario (DATABASE_URL_MIGRATE), nunca con el rol de la app (DATABASE_URL).
+// El lock ACCESS EXCLUSIVE se toma con el rol propietario (DATABASE_URL_MIGRATE), nunca con el rol de
+// la app (DATABASE_URL). Se retiene `core.api_keys` y no `core.audit_events`: desde NÚCLEO-H las
+// lecturas de la ficha y de la lista (`core.*.get/list`) anexan su auditoría a `audit_events`, así que
+// bloquearla frena toda la ruta y Next conserva la pantalla anterior en vez del esqueleto del panel.
+// `core.api_keys` solo la lee `core.actividad.list` (nombres de los agentes), o sea la pestaña Actividad.
 const baseLock = process.env["DATABASE_URL_MIGRATE"] ?? "";
 // El bloqueo de la tabla solo se hace contra una base local o efímera, nunca contra Neon.
 const baseLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(baseLock);
@@ -15,14 +17,14 @@ const baseLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(baseLock);
 // silencioso dejaría este spec sin cubrir y escondería la regresión. Fuera de CI sí puede faltar.
 const enCI = !!process.env["CI"];
 
-/** Retiene la auditoría (la lee solo la pestaña Actividad): frena el contenido del panel, no la lista. */
-async function retenerAuditoria() {
+/** Retiene `core.api_keys` (la lee solo la pestaña Actividad): frena el contenido del panel, no la lista. */
+async function retenerActividad() {
   const psql: ChildProcessWithoutNullStreams = spawn("psql", [baseLock, "-q", "-X", "-A", "-t"]);
   let salida = "";
   psql.stdout.on("data", (d: Buffer) => (salida += d.toString()));
   psql.on("error", () => undefined); // sin psql, la espera de abajo vence y el test falla con su mensaje
   psql.stdin.write(
-    "BEGIN;\nLOCK TABLE core.audit_events IN ACCESS EXCLUSIVE MODE;\nSELECT 'retenida';\n",
+    "BEGIN;\nLOCK TABLE core.api_keys IN ACCESS EXCLUSIVE MODE;\nSELECT 'retenida';\n",
   );
   const liberar = () => {
     psql.stdin.end("ROLLBACK;\n");
@@ -75,11 +77,13 @@ test.describe("la lista queda a la vista mientras la ficha carga", () => {
       // viewports en paralelo (iPad y escritorio) chocan y uno vence su espera. Al calentarla antes,
       // el lock solo se sostiene durante la consulta (lo que la prueba sí quiere medir), no la build.
       await page.goto(`${urlFicha}/actividad`);
-      await expect(page.getByText("Últimos 30 días").first()).toBeVisible();
+      // El filtro de la pestaña es común a todas las fichas (Cuentas e Instalaciones usan el panel de
+      // actividad de CAR-162; Personas, la ficha clásica, con la tarjeta «Últimos 30 días»).
+      await expect(page.getByRole("group", { name: "Filtrar actividad" })).toBeVisible();
       await page.goto(urlFicha);
       const ficha = page.getByRole("region", { name: "Detalle" });
       await expect(ficha.getByRole("link", { name: /^Actividad/ }).first()).toBeVisible();
-      const liberar = await retenerAuditoria();
+      const liberar = await retenerActividad();
       try {
         await ficha
           .getByRole("link", { name: /^Actividad/ })
@@ -95,7 +99,7 @@ test.describe("la lista queda a la vista mientras la ficha carga", () => {
       } finally {
         liberar();
       }
-      await expect(ficha.getByText("Últimos 30 días")).toBeVisible();
+      await expect(ficha.getByRole("group", { name: "Filtrar actividad" })).toBeVisible();
       await expect(lista).toBeVisible();
     });
   }

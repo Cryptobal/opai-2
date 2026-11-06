@@ -13,6 +13,8 @@ test.describe("configuración de plataforma del tenant", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
   test("integraciones, comunicaciones, consumos y auditoría", async ({ page }, info) => {
+    // Siete pantallas con captura completa; cada una compila en frío en `next dev`: pasa de los 90 s.
+    test.setTimeout(240_000);
     const p = info.project.name;
     await entrar(page);
     const visible = (texto: string | RegExp) =>

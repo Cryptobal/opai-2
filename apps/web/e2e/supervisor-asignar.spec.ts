@@ -61,6 +61,8 @@ test("asignar, ver solo lo asignado en el portal, quitar y volver a vacío", asy
   page,
   browser,
 }, info) => {
+  // Cinco pasos con dos sesiones y varias rutas que compilan en frío en el runner: pasa de los 90 s por defecto.
+  test.setTimeout(240_000);
   const proyecto = info.project.name;
   const email = `supervisor-asignar-${proyecto}@opai.cl`;
   const nombre = `Supervisor asignable ${proyecto}`;

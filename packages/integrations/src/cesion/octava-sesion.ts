@@ -58,5 +58,5 @@ export async function asegurarToken(d: DepsSesion, forzar = false): Promise<stri
   }
   // TDUP sin token nuevo: Octava no devuelve el activo; si aún lo tenemos, se reutiliza.
   if (res.DescripcionResultado === "TDUP" && previo && !forzar) return previo.token;
-  throw new Error(`Octava ObtenerToken falló (${res.DescripcionResultado ?? "?"}): ${res.message ?? "sin mensaje"}`);
+  throw new Error(`Octava ObtenerToken falló (${res.DescripcionResultado ?? "?"}): ${limitarTexto(res.message, 200, "sin mensaje")}`);
 }
