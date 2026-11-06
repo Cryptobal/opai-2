@@ -17,7 +17,7 @@ export const trabajoSuprimirBiometria = defineTrabajo({
   periodicidad: "diaria",
   async handler(ctx) {
     const activos = await ctx.db.enrolamientoFacial.findMany({
-      where: { estado: "activo" }, take: 500, select: { id: true, personaId: true, referencia: true },
+      where: { estado: "activo" }, orderBy: { updatedAt: "asc" }, take: 500, select: { id: true, personaId: true, referencia: true },
     });
     const personas = new Map(
       (await ctx.db.persona.findMany({ where: { id: { in: activos.map((a) => a.personaId) } }, select: { id: true, archivadaEn: true, anonimizadaEn: true } }))

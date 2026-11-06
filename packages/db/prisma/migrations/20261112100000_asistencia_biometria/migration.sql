@@ -1,5 +1,5 @@
 -- CAR-89 · B4 (Face ID, D-02, D-03, D-05): enrolamiento facial y consentimientos versionados de Asistencia.
--- Migración ADITIVA: dos tablas nuevas con RLS `tenant_isolation` (ENABLE + FORCE). No toca datos existentes.
+-- Migración ADITIVA: tres tablas nuevas con RLS `tenant_isolation` (ENABLE + FORCE). No toca datos existentes.
 -- Se guarda solo la referencia del proveedor, cifrada por la aplicación; nunca una foto (D-04).
 
 BEGIN;
@@ -51,6 +51,25 @@ CREATE INDEX "consentimientos_personas_tenant_id_persona_id_tipo_idx" ON "asiste
 -- Un solo consentimiento vigente por persona y tipo.
 CREATE UNIQUE INDEX "consentimientos_personas_vigente_key" ON "asistencia"."consentimientos_personas"("tenant_id", "persona_id", "tipo") WHERE "revocado_en" IS NULL;
 
+CREATE TABLE "asistencia"."sesiones_vida" (
+    "id" UUID NOT NULL,
+    "tenant_id" UUID NOT NULL,
+    "sesion_hash" TEXT NOT NULL,
+    "actor_id" UUID NOT NULL,
+    "usada_en" TIMESTAMPTZ(6),
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "sesiones_vida_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX "sesiones_vida_tenant_id_sesion_hash_key" ON "asistencia"."sesiones_vida"("tenant_id", "sesion_hash");
+CREATE INDEX "sesiones_vida_created_at_idx" ON "asistencia"."sesiones_vida"("created_at");
+ALTER TABLE "asistencia"."sesiones_vida" ADD CONSTRAINT "sesiones_vida_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+GRANT SELECT, INSERT, UPDATE ON "asistencia"."sesiones_vida" TO opai_app;
+ALTER TABLE "asistencia"."sesiones_vida" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "asistencia"."sesiones_vida" FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation ON "asistencia"."sesiones_vida" AS PERMISSIVE FOR ALL TO opai_app
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+
 DO $$
 DECLARE t text;
 BEGIN
@@ -74,5 +93,5 @@ CREATE TRIGGER mismo_tenant_consentimiento BEFORE INSERT OR UPDATE ON "asistenci
 
 COMMIT;
 
--- Reversión: migración aditiva. Antes de usarla: DROP TABLE "asistencia"."enrolamientos_faciales", "asistencia"."consentimientos_personas";
+-- Reversión: migración aditiva. Antes de usarla: DROP TABLE "asistencia"."sesiones_vida", "asistencia"."enrolamientos_faciales", "asistencia"."consentimientos_personas";
 -- Los consentimientos son evidencia legal (Ley 21.719): con filas reales se restauran desde el snapshot de Neon, no se borran.

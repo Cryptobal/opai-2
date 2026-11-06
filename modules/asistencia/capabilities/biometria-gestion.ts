@@ -83,6 +83,10 @@ export const biometriaDarDeBaja = defineCapability({
   async handler(ctx, i, { dryRun }) {
     const e = await ctx.db.enrolamientoFacial.findFirst({ where: { personaId: i.personaId, estado: "activo" } });
     if (dryRun || !e) return { borrada: false };
+    // La baja revoca también el consentimiento: si el proveedor falla, el rostro deja de usarse y el trabajo diario reintenta.
+    await ctx.transaccion((tx) => tx.consentimientoPersona.updateMany({
+      where: { personaId: i.personaId, tipo: "biometria_facial", revocadoEn: null }, data: { revocadoEn: new Date() },
+    }));
     await darDeBaja(ctx, e, "rrhh");
     return { borrada: true };
   },

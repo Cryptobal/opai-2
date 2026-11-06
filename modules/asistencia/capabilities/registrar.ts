@@ -17,7 +17,7 @@ export const marcasRegistrar = defineCapability({
   permiso: null,
   portales: ["terreno", "trabajador"],
   soloPersonas: true,
-  sensibles: ["credencial"],
+  sensibles: ["credencial", "sesionVidaId"],
   input: z.object({
     personaId: uuid,
     instalacionId: uuid,
@@ -60,10 +60,13 @@ export const marcasRegistrar = defineCapability({
     await exigirCanal(ctx, instalacion.id, persona.id, i.canal);
     if (i.metodo === "pin_respaldo" && !i.motivoRespaldo && (await ajuste<boolean>(ctx, "asistencia", "pin_respaldo_exige_motivo")))
       throw reglaDeNegocio("Indica por qué marcas con el PIN de respaldo.");
-    const id = await (await verificadorDe(ctx)).verificar({
-      personaId: persona.id, metodo: i.metodo, credencial: i.credencial, motivoRespaldo: i.motivoRespaldo,
-      sesionVidaId: i.sesionVidaId,
-    });
+    // La vista previa no consume la prueba de vida (es de un solo uso): el rostro solo se verifica al marcar de verdad.
+    const id = dryRun && i.metodo === "rostro"
+      ? ({ ok: true, metodo: "rostro", motivoRespaldo: null, confianza: null, pruebaVida: null } as const)
+      : await (await verificadorDe(ctx)).verificar({
+          personaId: persona.id, metodo: i.metodo, credencial: i.credencial, motivoRespaldo: i.motivoRespaldo,
+          sesionVidaId: i.sesionVidaId,
+        });
     if (!id.ok) throw prohibido(MENSAJE_IDENTIDAD[id.motivo]);
     const jornada = await ctx.db.personaJornadaDt.findUnique({
       where: { personaId: persona.id }, select: { resolucion: true, resolucionVigenteDesde: true },

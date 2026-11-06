@@ -41,12 +41,12 @@ type Enrolamiento = { id: string; personaId: string; referencia: string | null }
 export async function darDeBaja(ctx: Contexto, e: Enrolamiento, motivo: MotivoBaja): Promise<void> {
   if (e.referencia) {
     const bio = await biometriaDe(ctx);
-    if (bio) {
-      const ref = await cifradoDeCampos(ctx).descifrar("enrolamientos_faciales", "referencia", e.referencia);
-      await bio.eliminarRostro(ref).catch(() => {
-        throw reglaDeNegocio("No se pudo borrar el rostro en el proveedor. Se reintentará; mientras tanto no se usa.");
-      });
-    }
+    // Sin proveedor no se puede borrar la plantilla: no se pierde la referencia (quedaría viva sin forma de borrarla).
+    if (!bio) throw reglaDeNegocio("La biometría no está configurada: no se puede borrar el rostro en el proveedor todavía.");
+    const ref = await cifradoDeCampos(ctx).descifrar("enrolamientos_faciales", "referencia", e.referencia);
+    await bio.eliminarRostro(ref).catch(() => {
+      throw reglaDeNegocio("No se pudo borrar el rostro en el proveedor. Se reintentará; mientras tanto no se usa.");
+    });
   }
   await ctx.transaccion(async (tx: TenantTx) => {
     await tx.enrolamientoFacial.update({

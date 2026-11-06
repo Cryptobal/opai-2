@@ -3,6 +3,7 @@ import { z } from "zod";
 import { biometriaDe, defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { exigirBiometriaPermitida } from "./biometria-comun";
+import { registrarSesionVida } from "./sesion-vida";
 
 export const biometriaIniciarVida = defineCapability({
   id: "asistencia.biometria.iniciar_vida",
@@ -24,6 +25,8 @@ export const biometriaIniciarVida = defineCapability({
     if (!bio) throw reglaDeNegocio("La biometría no está configurada en esta empresa.");
     if (dryRun) return { sesionVidaId: "", proveedor: bio.nombre };
     await bio.asegurarColeccion();
-    return { sesionVidaId: (await bio.iniciarVida({ simulacion: i.simulacion })).sesionId, proveedor: bio.nombre };
+    const { sesionId } = await bio.iniciarVida({ simulacion: i.simulacion });
+    await registrarSesionVida(ctx, sesionId);
+    return { sesionVidaId: sesionId, proveedor: bio.nombre };
   },
 });

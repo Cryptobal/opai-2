@@ -29,7 +29,7 @@ export function biometriaRekognition(c: CredencialesRekognition, fetchFn: typeof
   });
   const url = `https://rekognition.${c.region}.amazonaws.com/`;
 
-  async function llamar<T>(operacion: string, cuerpo: Record<string, unknown>): Promise<T> {
+  async function llamar<T>(operacion: string, cuerpo: Record<string, unknown>, borrado = false): Promise<T> {
     let r: Response;
     try {
       const firmada = await cliente.sign(url, {
@@ -44,6 +44,8 @@ export function biometriaRekognition(c: CredencialesRekognition, fetchFn: typeof
     if (r.ok) return (await r.json()) as T;
     const tipo = String(((await r.json().catch(() => ({}))) as { __type?: string }).__type ?? "").split("#").pop() ?? "";
     if (tipo === "ResourceAlreadyExistsException") return {} as T;
+    // Borrar lo que ya no existe (colección o rostro) cumple el objetivo: la biometría no está.
+    if (borrado && tipo === "ResourceNotFoundException") return {} as T;
     if (tipo === "InvalidParameterException" || tipo === "ImageTooLargeException" || tipo === "InvalidImageFormatException")
       throw new ErrorBiometria("sin_rostro", "No se detectó un rostro utilizable en la imagen.");
     if (r.status === 400 && /UnrecognizedClient|InvalidSignature|AccessDenied/.test(tipo))
@@ -58,7 +60,7 @@ export function biometriaRekognition(c: CredencialesRekognition, fetchFn: typeof
       await llamar("CreateCollection", { CollectionId: coleccionId });
     },
     async eliminarColeccion(coleccionId) {
-      await llamar("DeleteCollection", { CollectionId: coleccionId });
+      await llamar("DeleteCollection", { CollectionId: coleccionId }, true);
     },
     async iniciarVida(_opciones) {
       const r = await llamar<{ SessionId: string }>("CreateFaceLivenessSession", {});
@@ -101,7 +103,7 @@ export function biometriaRekognition(c: CredencialesRekognition, fetchFn: typeof
       return { coincide: propio !== undefined && similitud >= umbral, similitud };
     },
     async eliminarRostro(coleccionId, rostroId) {
-      await llamar("DeleteFaces", { CollectionId: coleccionId, FaceIds: [rostroId] });
+      await llamar("DeleteFaces", { CollectionId: coleccionId, FaceIds: [rostroId] }, true);
     },
   };
 }

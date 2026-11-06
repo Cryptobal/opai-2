@@ -21,8 +21,12 @@ export const biometriaSimuladaDelProceso = (): BiometriaSimulada => simulado;
 async function proveedorDe(ctx: Contexto): Promise<{ p: ProveedorBiometria; propio: boolean } | null> {
   const fila = await integracionDe(ctx, "biometria");
   const proveedor = (fila?.config as { proveedor?: string } | null)?.proveedor ?? "simulado";
-  if (proveedor === "simulado") return { p: simulado, propio: false };
-  if (!fila) return null;
+  // El simulado acepta cualquier rostro de prueba: solo existe en empresas de prueba (slug `qa-…`), nunca en una real.
+  if (proveedor === "simulado") {
+    const t = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { slug: true } });
+    return t?.slug.startsWith("qa-") ? { p: simulado, propio: false } : null;
+  }
+  if (!fila || proveedor !== "rekognition") return null;
   const [accessKeyId, secretAccessKey, region] = await Promise.all(
     ["access_key_id", "secret_access_key", "region"].map((n) => leerSecreto(ctx, fila.id, n)),
   );

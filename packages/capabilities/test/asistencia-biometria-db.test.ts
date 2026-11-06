@@ -215,4 +215,43 @@ describe.skipIf(!urlPropietario)("Asistencia · Face ID (Postgres real, proveedo
     const ok = await tel();
     expect(ok.ok, JSON.stringify(ok)).toBe(true);
   });
+
+  it("una prueba de vida sirve una sola vez, solo a quien la abrió y solo en su empresa", async () => {
+    await run(ctx(A, "terreno"), "asistencia.consentimientos.aceptar", { tipo: "biometria_facial" });
+    const enr = await run(ctx(A, "terreno"), "asistencia.biometria.enrolar", { sesionVidaId: await vida(A, "ana") });
+    expect(enr.ok, JSON.stringify(enr)).toBe(true);
+    const sesion = await vida(A, "ana");
+    const primera = await marcar(A, { metodo: "rostro", sesionVidaId: sesion });
+    expect(primera.ok, JSON.stringify(primera)).toBe(true);
+    const repetida = await marcar(A, { metodo: "rostro", sesionVidaId: sesion });
+    expect(repetida.ok).toBe(false);
+    // La sesión de A no sirve en B, ni otro usuario de A puede usarla.
+    const deA = await vida(A, "ana");
+    const enB = await run(ctx(B, "terreno"), "asistencia.biometria.enrolar", { sesionVidaId: deA });
+    expect(enB.ok).toBe(false);
+    const otro = await run(ctx(A, "erp", "rrhh"), "asistencia.biometria.enrolar_rrhh", { personaId: A.persona, sesionVidaId: deA });
+    expect(otro.ok).toBe(false);
+    // La vista previa no gasta la sesión.
+    const s2 = await vida(A, "ana");
+    const previa = await marcar(A, { metodo: "rostro", sesionVidaId: s2 });
+    await run(ctx(A, "terreno"), "asistencia.marcas.registrar", { personaId: A.persona, instalacionId: A.inst, claveDispositivo: randomUUID(), metodo: "rostro", sesionVidaId: await vida(A, "ana") }, { dryRun: true });
+    expect(previa.ok).toBe(true);
+  });
+
+  it("los PIN equivocados en paralelo cuentan todos y bloquean la credencial", async () => {
+    await e.admin.credencialTerreno.update({ where: { personaId: A.persona }, data: { intentosFallidos: 0, bloqueadoHasta: null } });
+    await Promise.all(Array.from({ length: 6 }, () => marcar(A, { metodo: "rut_pin", credencial: "000000" })));
+    const c = await e.admin.credencialTerreno.findUniqueOrThrow({ where: { personaId: A.persona } });
+    expect(c.bloqueadoHasta).not.toBeNull();
+    const bloqueado = await marcar(A, { metodo: "rut_pin", credencial: PIN });
+    expect(bloqueado.error?.message).toMatch(/Demasiados intentos/);
+    await e.admin.credencialTerreno.update({ where: { personaId: A.persona }, data: { intentosFallidos: 0, bloqueadoHasta: null } });
+  });
+
+  it("el simulado no existe en una empresa real y la baja sin proveedor no pierde la referencia", async () => {
+    const real = await e.admin.tenant.create({ data: { slug: `gard-${randomUUID().slice(0, 6)}`, nombre: "Real", vertical: "seguridad" } });
+    await e.admin.ajuste.create({ data: { tenantId: real.id, ambito: "tenant", sujetoId: real.id, modulo: "asistencia", clave: "biometria_empresas_reales", valor: true as never } }).catch(() => undefined);
+    const sistema = mod.crearContexto({ tenantId: real.id, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor });
+    expect(await mod.biometriaDe(sistema)).toBeNull();
+  });
 });

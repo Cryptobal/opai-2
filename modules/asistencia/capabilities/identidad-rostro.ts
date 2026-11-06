@@ -1,5 +1,6 @@
 import { ajuste, biometriaDe, cifradoDeCampos, type Contexto } from "@opai/capabilities";
 
+import { consumirSesionVida } from "./sesion-vida";
 import { consentimientoVigente, decidirRostro, umbralSeguro, type ResultadoIdentidad } from "../domain";
 
 /** ¿Puede esta empresa usar el rostro ahora? (interruptor propio, plataforma y empresas de prueba, D-02). */
@@ -25,7 +26,7 @@ export async function verificarRostro(
   ]);
   const consentido = consentimientoVigente(consentimientos.map((c) => ({ ...c, tipo: "biometria_facial" as const })), "biometria_facial");
   if (!enrol || enrol.estado !== "activo" || !enrol.referencia || !consentido) return { ok: false, motivo: "sin_enrolamiento" };
-  if (!sesionVidaId) return { ok: false, motivo: "vida_fallida" };
+  if (!sesionVidaId || !(await consumirSesionVida(ctx, sesionVidaId))) return { ok: false, motivo: "vida_fallida" };
   const vida = await bio.resultadoVida(sesionVidaId).catch(() => null);
   if (!vida?.viva || !vida.imagen) return { ok: false, motivo: "vida_fallida" };
   const referencia = await cifradoDeCampos(ctx).descifrar("enrolamientos_faciales", "referencia", enrol.referencia);

@@ -1,6 +1,6 @@
 import { ajuste, type Contexto } from "@opai/capabilities";
 import { verificarPin } from "@opai/db";
-import { estaBloqueada, PIN_BLOQUEO_MINUTOS_DEFECTO, PIN_INTENTOS_MAXIMOS_DEFECTO, trasFallo } from "@opai/domain";
+import { estaBloqueada, PIN_BLOQUEO_MINUTOS_DEFECTO, PIN_INTENTOS_MAXIMOS_DEFECTO } from "@opai/domain";
 
 import type { ResultadoIdentidad } from "../domain";
 
@@ -25,14 +25,16 @@ export async function verificarPinDePersona(
     ajuste<number>(ctx, "core", "terreno_pin_intentos_maximos").catch(() => PIN_INTENTOS_MAXIMOS_DEFECTO),
     ajuste<number>(ctx, "core", "terreno_pin_bloqueo_minutos").catch(() => PIN_BLOQUEO_MINUTOS_DEFECTO),
   ]);
-  await ctx.transaccionIndependiente((tx) =>
-    tx.credencialTerreno.update({
-      where: { personaId },
-      data: trasFallo(
-        { intentosFallidos: c.intentosFallidos, bloqueadoHasta: c.bloqueadoHasta }, ahora,
-        { intentosMaximos: intentos, bloqueoMinutos: minutos },
-      ),
-    }),
-  );
+  // Incremento atómico: N intentos en paralelo cuentan N veces (no leen todos el mismo contador).
+  await ctx.transaccionIndependiente(async (tx) => {
+    const { intentosFallidos } = await tx.credencialTerreno.update({
+      where: { personaId }, data: { intentosFallidos: { increment: 1 } }, select: { intentosFallidos: true },
+    });
+    if (intentosFallidos >= intentos)
+      await tx.credencialTerreno.updateMany({
+        where: { personaId, intentosFallidos: { gte: intentos } },
+        data: { intentosFallidos: 0, bloqueadoHasta: new Date(ahora.getTime() + minutos * 60_000) },
+      });
+  });
   return { ok: false, motivo: "credencial_invalida" };
 }

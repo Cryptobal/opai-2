@@ -283,3 +283,19 @@ model ConsentimientoPersona {
   @@map("consentimientos_personas")
   @@schema("asistencia")
 }
+
+/// Sesión de prueba de vida (CAR-89 · B4): se ata a la empresa y al usuario que la abrió y se consume UNA vez
+/// (enrolar o marcar). Solo guarda la huella del identificador del proveedor, nunca el identificador.
+model SesionVida {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  sesionHash String    @map("sesion_hash")
+  actorId    String    @map("actor_id") @db.Uuid
+  usadaEn    DateTime? @map("usada_en") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, sesionHash])
+  @@index([createdAt])
+  @@map("sesiones_vida")
+  @@schema("asistencia")
+}

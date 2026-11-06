@@ -111,6 +111,9 @@ export const AJUSTES: Record<string, Ajuste> = {
   "asistencia.incidentes_tecnicos": {
     valores: () => ({ tipo: "otro", severidad: "baja", origen: "manual" }),
   },
+  // Asistencia · Face ID (CAR-89 B4): CHECK de tipo/medio/canal y de referencia (activo exige referencia).
+  "asistencia.consentimientos_personas": { fijas: ["tipo", "medio"], valores: () => ({ tipo: "biometria_facial", medio: "erp" }) },
+  "asistencia.enrolamientos_faciales": { fijas: ["canal", "estado", "referencia"], valores: () => ({ canal: "erp", estado: "activo", referencia: "enc:v2:prueba" }) },
   // Núcleo · turnos esperados (CAR-201): CHECK de origen y de intervalo (fin > inicio).
   "core.turnos_esperados": {
     valores: () => ({ origen: "pauta", inicio: "2026-12-01T12:00:00Z", fin: "2026-12-01T20:00:00Z" }),
