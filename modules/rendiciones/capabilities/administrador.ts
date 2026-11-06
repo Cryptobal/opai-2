@@ -28,7 +28,7 @@ export const rendicionesAdministrador = defineCapability({
     actorId(ctx);
     for (const rol of ["owner", "admin"] as const) {
       const m = await ctx.db.membership.findFirst({
-        where: { tenantId: ctx.tenantId, estado: "activa", rol, roleId: null },
+        where: { tenantId: ctx.tenantId, estado: "activa", rol },
         orderBy: { createdAt: "asc" },
         select: { user: { select: { name: true } } },
       });

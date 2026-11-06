@@ -113,6 +113,17 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R2d (db)", () => {
     expect(await como(u.rinde, "supervisor", t.a, [instA])("rendiciones.respaldos.url_descarga", { rendicionId: rendId, documentoId: ajeno })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 
+  it("un documento de un colega adjuntado por quien ve todas no se abre (podría ser sensible)", async () => {
+    const colega = (await e.admin.documento.create({ data: { tenantId: t.a, nombre: "anexo.pdf", mime: "application/pdf", tamano: 10, storageKey: `k-${randomUUID()}`, estado: "disponible", creadoPorTipo: "user", creadoPorId: u.otroSup } })).id;
+    const r = await como(u.aprueba, "gerente", t.a)("rendiciones.rendiciones.crear", {
+      descripcion: "Con documento ajeno", centroCosto: "administracion", aprobadorId: u.duenaA,
+      items: [{ fecha: "2026-11-02", proveedor: "X", folio: "D-2", descripcion: "x", monto: 1_000, documentoId: colega }],
+    });
+    if (!r.ok) throw new Error(r.error.message);
+    const rid = (r.data as { id: string }).id;
+    expect(await como(u.aprueba, "gerente", t.a)("rendiciones.respaldos.url_descarga", { rendicionId: rid, documentoId: colega })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
   it("la lectura del respaldo queda auditada solo con el ID del documento", async () => {
     const filas = await e.admin.auditEvent.findMany({ where: { tenantId: t.a, capability: "rendiciones.respaldos.url_descarga" } });
     expect(filas.length).toBeGreaterThan(0);

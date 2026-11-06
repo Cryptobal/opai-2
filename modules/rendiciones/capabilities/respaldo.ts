@@ -26,8 +26,14 @@ export const respaldoDescargar = defineCapability({
     const r = await rendicionDe(ctx, input.rendicionId);
     // Solo un respaldo que pertenece a un gasto de esa rendición (nunca un documento suelto).
     if (!r.items.some((i) => i.documentoId === input.documentoId)) throw noEncontrado("El respaldo");
+    // Solo un respaldo que subió el propio solicitante (o su agente): quien tiene ver_todas puede adjuntar el
+    // documento de un colega al crear, y eso no abre por aquí un anexo de sueldo ni un documento de cumplimiento.
     const d = await ctx.db.documento.findFirst({
-      where: { id: input.documentoId, estado: "disponible" },
+      where: {
+        id: input.documentoId,
+        estado: "disponible",
+        OR: [{ creadoPorId: r.solicitanteId }, { viaUserId: r.solicitanteId }],
+      },
       select: { storageKey: true, nombre: true, mime: true },
     });
     if (!d) throw noEncontrado("El respaldo");
