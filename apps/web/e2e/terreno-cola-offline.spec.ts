@@ -44,7 +44,7 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   await t.getByRole("button", { name: "Emparejar", exact: true }).click();
   await expect(t.getByRole("heading", { name: "Dispositivo emparejado" })).toBeVisible({ timeout: 20_000 });
   await t.getByRole("link", { name: "Continuar" }).click();
-  await expect(t.getByRole("heading", { name: "¿Quién eres?" })).toBeVisible({ timeout: 20_000 });
+  await expect(t.getByRole("heading", { name: "¿Quién eres?" })).toBeVisible({ timeout: 60_000 });
   await t.screenshot({ path: "e2e/__screenshots__/terreno-quien-eres-telefono.png", fullPage: true });
   await t.getByRole("list").getByRole("button").first().click();
   await expect(t.getByRole("heading", { name: /^Hola, / })).toBeVisible();

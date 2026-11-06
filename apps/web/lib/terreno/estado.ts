@@ -27,6 +27,26 @@ function poner(parcial: Partial<EstadoTerreno>) {
   oyentes.forEach((f) => f());
 }
 
+// Sin Background Sync (iOS Safari, Firefox) o con la red recién reconectada, el primer envío puede fallar:
+// la página lo reintenta sola con espera creciente (5 s, 15 s, 45 s… hasta 5 min) mientras haya pendientes.
+// Un equipo revocado o sin dispositivo no se reintenta: lo resuelve el emparejamiento.
+let temporizador: ReturnType<typeof setTimeout> | null = null;
+let intentos = 0;
+
+function programarReintento() {
+  if (temporizador) clearTimeout(temporizador);
+  temporizador = null;
+  const { pendientes, enLinea, error } = estado;
+  if (pendientes === 0 || !enLinea) {
+    intentos = 0;
+    return;
+  }
+  if (error === null || error === "revocado" || error === "sin_dispositivo") return;
+  const espera = Math.min(5_000 * 3 ** intentos, 300_000);
+  intentos += 1;
+  temporizador = setTimeout(() => void pedirEnvio().then(refrescar), espera);
+}
+
 async function refrescar() {
   const [cola, ultimo] = await Promise.all([
     leerCola().catch(() => []),
@@ -37,6 +57,7 @@ async function refrescar() {
     sincronizando: cola.length > 0 && estado.enLinea && ultimo?.ok !== false,
     error: cola.length > 0 && ultimo?.ok === false ? (ultimo.error ?? null) : null,
   });
+  programarReintento();
 }
 
 /** Un latido (el equipo avisa que estuvo activo) como mucho cada 5 minutos, con o sin conexión. */
