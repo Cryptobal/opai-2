@@ -4,12 +4,14 @@ import { useState } from "react";
 
 import { Alerta, avisar, Button, Sheet } from "@opai/ds";
 
-import { DialogoConfirmar } from "@/app/_components/maestros/dialogo-confirmar";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { FuncionPuestoOpcion, PatronTurnoOpcion, Puesto } from "@/lib/tipos-maestros";
 
 import { CamposPuesto, inicialPuesto, puestoAInput } from "./campos-puesto";
+import { EstadoPuesto } from "./estado-puesto";
+import { SeccionTitular } from "./seccion-titular";
+import type { TitularesPuesto } from "./titular-tipos";
 
 type Props = {
   instalacionId: string;
@@ -21,6 +23,9 @@ type Props = {
   patrones: PatronTurnoOpcion[];
   /** true si no se pudieron cargar los catálogos de patrones o funciones (se avisa en la hoja). */
   catalogosError: boolean;
+  /** Titulares del puesto abierto (null si Pauta no está activa o no hay permiso de lectura). */
+  titulares: TitularesPuesto | null;
+  puedeAsignar: boolean;
 };
 
 /** Nuevo o editar puesto (09) en Sheet, abierto por `?puesto=nuevo|<id>`. */
@@ -32,6 +37,8 @@ export function HojaPuesto({
   funciones,
   patrones,
   catalogosError,
+  titulares,
+  puedeAsignar,
 }: Props) {
   const hoja = useHojaUrl("puesto");
   if (!hoja.abierta) return null;
@@ -46,6 +53,8 @@ export function HojaPuesto({
       funciones={funciones}
       patrones={patrones}
       catalogosError={catalogosError}
+      titulares={titulares?.puestoId === actual?.id ? titulares : null}
+      puedeAsignar={puedeAsignar}
       onCerrar={hoja.cerrar}
     />
   );
@@ -59,6 +68,8 @@ function Formulario({
   funciones,
   patrones,
   catalogosError,
+  titulares,
+  puedeAsignar,
   onCerrar,
 }: {
   instalacionId: string;
@@ -68,11 +79,12 @@ function Formulario({
   funciones: FuncionPuestoOpcion[];
   patrones: PatronTurnoOpcion[];
   catalogosError: boolean;
+  titulares: TitularesPuesto | null;
+  puedeAsignar: boolean;
   onCerrar: () => void;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [d, setD] = useState(() => inicialPuesto(actual));
-  const [confirmar, setConfirmar] = useState(false);
   async function guardar() {
     const input = puestoAInput(d);
     const r = await ejecutar(
@@ -84,15 +96,6 @@ function Formulario({
       onCerrar();
     }
   }
-  async function cambiarEstado(estado: "activo" | "inactivo") {
-    if (!actual) return;
-    const r = await ejecutar("core.puestos.set_estado", { id: actual.id, estado });
-    if (r) {
-      avisar.exito(estado === "inactivo" ? "Puesto desactivado" : "Puesto reactivado");
-      onCerrar();
-    }
-  }
-  const activo = actual?.estado === "activo";
   return (
     <Sheet
       abierto
@@ -120,33 +123,17 @@ function Formulario({
             Vuelve a entrar a la pestaña. Sin cargo o patrón no se puede crear el puesto.
           </Alerta>
         ) : null}
-        <CamposPuesto d={d} setD={setD} cargos={cargos} funciones={funciones} patrones={patrones} />
-        {actual ? (
-          <Button
-            variant={activo ? "destructive" : "secondary"}
-            block
-            disabled={pendiente}
-            onClick={() => (activo ? setConfirmar(true) : void cambiarEstado("activo"))}
-          >
-            {activo ? "Desactivar puesto" : "Reactivar puesto"}
-          </Button>
+        {actual && titulares ? (
+          <SeccionTitular
+            puestoId={actual.id}
+            activo={actual.estado === "activo"}
+            titulares={titulares}
+            puedeAsignar={puedeAsignar}
+          />
         ) : null}
+        <CamposPuesto d={d} setD={setD} cargos={cargos} funciones={funciones} patrones={patrones} />
+        {actual ? <EstadoPuesto puesto={actual} onCerrar={onCerrar} /> : null}
       </div>
-      {confirmar && actual ? (
-        <DialogoConfirmar
-          confirmacion={{
-            titulo: `¿Desactivar «${actual.nombre}»?`,
-            descripcion:
-              "Dejará de aparecer en la pauta y la persona asignada quedará sin puesto. Podrás reactivarlo cuando quieras.",
-            boton: "Desactivar puesto",
-            peligro: true,
-          }}
-          pendiente={pendiente}
-          error={error}
-          onCerrar={() => setConfirmar(false)}
-          onConfirmar={() => void cambiarEstado("inactivo")}
-        />
-      ) : null}
     </Sheet>
   );
 }

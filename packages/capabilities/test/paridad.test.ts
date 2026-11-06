@@ -86,6 +86,7 @@ describe("paridad: la UI solo invoca capacidades existentes y públicas", () => 
       "lib/servidor.ts",
       "app/(auth)/invitacion/[slug]/[token]/invitacion.tsx",
       "app/(platform)/platform/_componentes/hoja-trabajo.tsx",
+      "lib/terreno-servidor.ts", // pasarela del equipo emparejado: recibe el id literal de sus llamadores
       "app/_components/maestros/acciones-entidad.tsx",
     ]);
     const nuevas = llamadas.filter((l) => l.ids.length === 0 && !conocidas.has(l.archivo));

@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 611 pares pantalla→capacidad · 549 con herramienta · 62 excepciones justificadas · 0 faltantes.
+**Resumen:** 613 pares pantalla→capacidad · 551 con herramienta · 62 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -346,6 +346,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.actualizar` | `rondas_plantillas_actualizar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.crear` | `rondas_plantillas_crear` | existe |
@@ -571,6 +572,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/[id]/puestos` | `core.cargos.list` | `core_cargos_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.funciones.list` | `core_funciones_list` | existe |
 | erp | `/instalaciones/[id]/puestos` | `core.patrones.list` | `core_patrones_list` | existe |
+| erp | `/instalaciones/[id]/puestos` | `pauta.titulares.listar` | `pauta_titulares_listar` | existe |
 | erp | `/instalaciones/nueva` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | erp | `/instalaciones/nueva` | `core.instalaciones.create` | `core_instalaciones_create` | existe |
 | erp | `/instalaciones/nueva` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
@@ -665,6 +667,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
+| `app/api/terreno/lote/route.ts` | Recibe el lote de hechos del equipo de terreno emparejado (CAR-78 B3): cookie de dispositivo y mismo origen, sin sesión; ejecuta core.hechos_terreno.recibir (interna con motivo en EXCEPCIONES_PARIDAD). Su lectura por MCP es core.hechos_terreno.listar. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna). |
 | `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
@@ -721,12 +724,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.firmas.rechazar` | Interna y solo personas: rechazar es un acto personal del firmante con su enlace como credencial; un agente nunca rechaza por nadie (firma.md R9, R19, §10). |
 | `core.firmas.ver_firmante` | Interna: se mira antes de existir sesión con el enlace personal como credencial, igual que core.invitations.peek (firma.md §5). |
 | `core.geo.mapa` | Interna: entrega la imagen del mapa al proxy `/api/geo/mapa` con la clave del tenant; una imagen no sirve a un agente y la clave nunca sale. |
+| `core.hechos_terreno.recibir` | Interna: el equipo de terreno emparejado la ejecuta sin sesión (su cookie de dispositivo es la credencial) al enviar su cola; un agente no registra hechos de terreno por el equipo. Su lectura es core.hechos_terreno.listar (CAR-78 B3). |
 | `core.integraciones.configurar` | Solo personas: credenciales del tenant; nunca salen ni se cambian por API ni MCP (ADR-027). |
 | `core.integraciones.guardar_certificado_dte` | Solo personas: certificado .pfx cifrado del tenant; nunca sale ni se cambia por API ni MCP (ADR-027, CAR-149). |
 | `core.integraciones.set_secreto` | Solo personas: secretos cifrados del tenant; nunca salen ni se cambian por API ni MCP (ADR-027). |
 | `core.invitations.accept` | Interna: crea la membresía de quien acepta el enlace; un agente no acepta invitaciones por nadie. |
 | `core.invitations.peek` | Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial). |
 | `core.invitations.request_new` | Interna: la pide quien aún no tiene sesión (token vencido o usado). |
+| `core.personas_terreno.listar` | Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3). |
 | `core.remuneraciones.confirmar` | Solo personas: confirmar un valor legal del tenant es un acto humano responsable; deja constancia de quién confirmó (CAR-142, ADR-034). |
 | `core.remuneraciones.confirmar_mutual` | Solo personas: registrar la mutual adicional del tenant es un acto humano responsable (CAR-142, ADR-034). |
 | `core.roles.archive` | Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034). |
@@ -853,6 +858,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.firmas.verificar`
 - `core.funciones.get`
 - `core.geo.geocodificar`
+- `core.hechos_terreno.listar`
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
