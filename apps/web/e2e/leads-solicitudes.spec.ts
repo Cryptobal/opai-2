@@ -58,6 +58,27 @@ test.describe("Leads · solicitudes", () => {
     await expect(page.getByText(empresa).filter({ visible: true }).first()).toBeVisible();
   });
 
+  test("pasar a cotización desde la ficha convierte y abre la cotización sin error de carga (CAR-209)", async ({ page }, info) => {
+    const sufijo = Date.now().toString(36);
+    await entrar(page);
+    await page.goto("/solicitudes?nueva=1");
+    await dialogo(page).getByLabel("Mensaje").fill("Cotizar guardias 24/7 para una planta.");
+    await dialogo(page).getByLabel("Empresa").fill(`Planta E2E ${info.project.name} ${sufijo}`);
+    await dialogo(page).getByLabel("Nombre").fill("Marta Lagos");
+    await dialogo(page).getByLabel("Correo").fill(`marta-${sufijo}@planta.example`);
+    await dialogo(page).getByRole("button", { name: "Registrar solicitud" }).click();
+    await page.waitForURL(/\/solicitudes\/[0-9a-f-]{36}/);
+    const sinError = page.getByText("No pudimos cargar esta información");
+    await page.getByRole("link", { name: "Procesar y convertir" }).filter({ visible: true }).first().click();
+    await expect(dialogo(page).getByText("Qué pasa al convertir")).toBeVisible();
+    await expect(sinError).toHaveCount(0);
+    await dialogo(page).getByRole("button", { name: "Pasar a cotización" }).click();
+    await expect(dialogo(page).getByText("Cotización creada").first()).toBeVisible();
+    await expect(sinError).toHaveCount(0);
+    await dialogo(page).getByRole("link", { name: "Abrir la cotización" }).click();
+    await page.waitForURL(/\/cotizaciones\/[0-9a-f-]{36}/);
+  });
+
   test("la configuración muestra los canales sin conectar", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/modulo/comercial?seccion=canales");
