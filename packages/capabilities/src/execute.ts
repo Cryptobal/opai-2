@@ -1,3 +1,4 @@
+import { ocultarSensibles } from "./idempotencia-sensibles";
 import { auditarRechazoSensible } from "./execute-rechazo";
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
@@ -48,7 +49,9 @@ async function correr(
     !dryRun && c.efecto !== "lectura" && ctx.conTenant && c.modulo !== "platform"
       ? opciones.idempotencyKey
       : undefined;
-  const reserva = clave ? await ctx.idempotencia.reservar(c.id, clave, entrada.data) : null;
+  const reserva = clave
+    ? await ctx.idempotencia.reservar(c.id, clave, ocultarSensibles(entrada.data, c.sensibles))
+    : null;
   if (reserva && reserva.estado !== "nueva") {
     const resultado = repeticion(reserva);
     if (resultado.ok) await c.autorizarRepeticion?.(ctx, entrada.data, resultado.data);

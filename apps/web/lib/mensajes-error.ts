@@ -23,7 +23,7 @@ const MENSAJES: Record<CodigoError, string> = {
 const TECNICO = /capacidad|scope|input|zod|prisma|payload|tenant|undefined|null|\bP\d{4}\b|\bid\b|"/i;
 
 export function esMensajeDeNegocio(m: string): boolean {
-  return m.length >= 8 && m.length <= 220 && /^[A-ZÁÉÍÓÚÑ¿¡]/.test(m) && !TECNICO.test(m);
+  return m.length >= 8 && m.length <= 300 && /^[A-ZÁÉÍÓÚÑ¿¡«]/.test(m) && !TECNICO.test(m);
 }
 
 /** Texto que ve la persona. Solo las reglas de negocio y conflictos conservan su mensaje de origen. */

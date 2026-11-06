@@ -66,4 +66,27 @@ describe.skipIf(omitirSuiteDb())("Finanzas · sesión de Octava (db)", () => {
     const almacen = almacenSesionOctava(ctx(), integ!.id);
     expect((await almacen.leerToken())?.token).toBe("TOKEN-A");
   });
+
+  it("otra empresa no lee el token, y cambiar las credenciales descarta el token guardado", async () => {
+    const c = ctx();
+    const integ = await c.db.integracion.findUnique({ where: { tenantId_proveedor: { tenantId: tenant, proveedor: "dte_cesion" } } });
+    const otro = (await e.admin.tenant.create({ data: { slug: `oc-${randomUUID().slice(0, 8)}`, nombre: "Otra", vertical: "seguridad" } })).id;
+    const ctxOtro = mod.crearContexto({ tenantId: otro, actor: { tipo: "system" }, modulosActivos: ["finanzas"], medidor: { registrar: async () => undefined } });
+    expect(await almacenSesionOctava(ctxOtro, integ!.id).leerToken()).toBeNull();
+
+    mod.limpiarRegistro();
+    mod.registrarCapacidades(mod.capacidadesDelNucleo.filter((x) => x.id === "core.integraciones.set_secreto"));
+    const uid = (await e.admin.user.create({ data: { name: "U", email: `u-${randomUUID().slice(0, 8)}@x.cl`, emailVerified: true } })).id;
+    await e.admin.membership.create({ data: { tenantId: tenant, userId: uid, rol: "owner", portales: ["erp"] } });
+    const cu = mod.crearContexto({
+      tenantId: tenant, rol: "owner", actor: { tipo: "user", id: uid }, portal: "erp", portalesMembresia: ["erp"],
+      usuario: { id: uid, nombre: "U", email: "u@x.cl", platformRole: null },
+      modulosActivos: ["finanzas"], medidor: { registrar: async () => undefined },
+    });
+    const r = await mod.executeCapability(cu, "core.integraciones.set_secreto", {
+      proveedor: "dte_cesion", nombre: "clave", valor: "otra-clave-123",
+    });
+    expect(JSON.stringify(r)).toContain('"ok":true');
+    expect(await almacenSesionOctava(ctx(), integ!.id).leerToken()).toBeNull();
+  });
 });

@@ -10,6 +10,7 @@ import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
 import { marcaMfaSesion } from "./mfa-sesion";
+import { sesionPin } from "./sesion-pin";
 import { rastroLoginPausado, rastroRestablecimiento, rastroSeguridad } from "./rastro-seguridad";
 import {
   CLAVE_INTENTO,
@@ -177,6 +178,7 @@ export const auth = betterAuth({
       },
     }),
     marcaMfaSesion,
+    sesionPin,
     // Después de twoFactor y de marcaMfaSesion: ve la respuesta final (p. ej. el desafío del MFA).
     rastroSeguridad,
     nextCookies(),

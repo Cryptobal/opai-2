@@ -16,6 +16,9 @@ type Resultado = { plan: Plan; negocioId: string | null };
 /** Procesar y convertir (diseño 04): datos revisados, qué se reutiliza y qué se crea; negocio o cotización CPQ. */
 export function HojaConvertir({ s }: { s: SolicitudDato }) {
   const hoja = useHojaUrl("convertir");
+  // Convertir revalida la ficha y la solicitud deja de estar abierta: la hoja sigue montada (la
+  // ficha la conserva si está convertida) para mostrar el resultado, pero sin resultado no abre.
+  const convertible = s.estado === "nueva" || s.estado === "en_revision";
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [d, setD] = useState({
     nombre: s.nombre ?? "",
@@ -38,7 +41,7 @@ export function HojaConvertir({ s }: { s: SolicitudDato }) {
     ),
   });
   useEffect(() => {
-    if (!hoja.abierta) return;
+    if (!hoja.abierta || !convertible) return;
     let vigente = true;
     const t = setTimeout(() => {
       void ejecutar<Resultado>("comercial.solicitudes.convertir", entrada(), true, "ninguna").then(
@@ -54,7 +57,7 @@ export function HojaConvertir({ s }: { s: SolicitudDato }) {
       clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [d, hoja.abierta]);
+  }, [d, hoja.abierta, convertible]);
   async function convertir() {
     const r = await ejecutar<Resultado>("comercial.solicitudes.convertir", entrada());
     if (!r) return;
@@ -79,7 +82,7 @@ export function HojaConvertir({ s }: { s: SolicitudDato }) {
   });
   return (
     <Sheet
-      abierto={hoja.abierta}
+      abierto={hoja.abierta && (convertible || hecho !== null)}
       onCerrar={hoja.cerrar}
       titulo="Procesar y convertir"
       descripcion="Revisa los datos. Se reutiliza lo que ya existe (por RUT o correo) y se crea lo que falta."

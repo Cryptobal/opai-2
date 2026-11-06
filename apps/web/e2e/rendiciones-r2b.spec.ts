@@ -38,10 +38,12 @@ function vigilarConsola(page: Page): string[] {
 
 async function elegir(page: Page, etiqueta: string | RegExp, opcion: string | RegExp) {
   const sel = page.getByRole("button", { name: etiqueta });
+  const op = page.getByRole("option", { name: opcion }).first();
+  // Si la lista ya quedó abierta de un intento anterior, otro clic en el botón la cerraría.
   await expect(async () => {
-    await sel.click();
-    await page.getByRole("option", { name: opcion }).first().click({ timeout: 3_000 });
-  }).toPass({ timeout: 20_000 });
+    if (!(await op.isVisible())) await sel.click({ timeout: 3_000 });
+    await op.click({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
 }
 
 async function gasto(page: Page, p: { folio: string; monto: string; proveedor: string }) {
@@ -60,6 +62,8 @@ for (const portal of [
 ]) {
   test.describe(portal.nombre, () => {
     test("mis rendiciones, compra con total corriente, duplicado, borrador y envío", async ({ page }, info) => {
+      // Dos gastos, duplicado, borrador y envío con rutas en frío: pasa de 1,2 min y roza los 90 s por defecto.
+      test.setTimeout(180_000);
       const errores = vigilarConsola(page);
       const sello = `${info.project.name}-${portal.nombre}-${Date.now()}`;
       await entrar(page);
@@ -117,7 +121,8 @@ for (const portal of [
       await page.goto(`${portal.base}/nueva/kilometraje`);
       await elegir(page, "Origen", "Planta Quilicura");
       await elegir(page, "Destino", "CD Pudahuel");
-      await expect(page.getByText("Total a rendir")).toBeVisible({ timeout: 20_000 });
+      // El desglose lo calcula el servidor y su ruta compila en frío la primera vez en el runner.
+      await expect(page.getByText("Total a rendir")).toBeVisible({ timeout: 60_000 });
       await expect(page.getByLabel(/monto/i)).toHaveCount(0);
       await page.getByLabel("Peaje (opcional)").fill("2000");
       await page.getByRole("switch", { name: /Ida y vuelta/ }).click();

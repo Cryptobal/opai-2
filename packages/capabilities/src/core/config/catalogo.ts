@@ -5,6 +5,7 @@ import { AJUSTES_NUCLEO } from "./nucleo";
 import { AJUSTES_ACTIVIDADES } from "./nucleo-actividades";
 import { AJUSTES_PERSONAS } from "./nucleo-personas";
 import { AJUSTES_RETENCION } from "./nucleo-retencion";
+import { AJUSTES_TERRENO } from "./nucleo-terreno";
 import { type CampoAjuste, defineAjustes } from "./registro";
 
 /** Ajustes del núcleo más los de cada módulo registrado con `configuracion` no vacía. */
@@ -14,7 +15,7 @@ export function listarAjustes(): CampoAjuste[] {
       ? defineAjustes(m.id, m.configuracion)
       : [],
   );
-  return [...AJUSTES_NUCLEO, ...AJUSTES_RETENCION, ...AJUSTES_PERSONAS, ...AJUSTES_ACTIVIDADES, ...modulos];
+  return [...AJUSTES_NUCLEO, ...AJUSTES_RETENCION, ...AJUSTES_PERSONAS, ...AJUSTES_ACTIVIDADES, ...AJUSTES_TERRENO, ...modulos];
 }
 
 export function campoAjuste(modulo: string, clave: string): CampoAjuste | undefined {

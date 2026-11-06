@@ -53,6 +53,7 @@
     "/ds": 234,
     "/(supervisor)/supervisor/personas/[id]": 165,
     "/(trabajador)/trabajador/mis-datos": 166,
+    "/(trabajador)/trabajador/cambiar-pin": 166,
     "/(trabajador)/trabajador/notificaciones": 167,
     "/(erp)/finanzas/ventas/programacion/[id]/editar": 178,
     "/(erp)/finanzas/ventas/programacion/nueva": 177,
