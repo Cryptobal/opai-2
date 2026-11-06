@@ -10,10 +10,12 @@ export function HojaExcepcion({
   mes,
   puedeEditar,
   diaria,
+  asistenciaActiva = false,
 }: {
   mes: MesPauta;
   puedeEditar: boolean;
   diaria?: boolean;
+  asistenciaActiva?: boolean;
 }) {
   const hoja = useHojaUrl("dia");
   if (!hoja.abierta || !hoja.valor) return null;
@@ -32,6 +34,7 @@ export function HojaExcepcion({
       celda={celda}
       puedeEditar={puedeEditar}
       diaria={diaria ?? false}
+      asistenciaActiva={asistenciaActiva}
       onCerrar={hoja.cerrar}
     />
   );

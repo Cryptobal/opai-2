@@ -293,6 +293,8 @@ model VinculoLaboral {
   puestoId String? @map("puesto_id") @db.Uuid
   horasSemanales Int? @map("horas_semanales")
   distribucion String?
+  /// ordinaria | excepcional | parcial | teletrabajo (Asistencia define los descansos de cada tipo)
+  tipoJornada String @default("ordinaria") @map("tipo_jornada")
   instalacion Instalacion? @relation(fields: [instalacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_instalacion_fkey")
   puesto Puesto? @relation(fields: [puestoId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_puesto_fkey")
   id            String    @id @default(uuid(7)) @db.Uuid

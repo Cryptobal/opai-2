@@ -50,4 +50,13 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "switch",
   }),
+  correo_copia_est: z.string().trim().email().or(z.literal("")).default("").meta({
+    etiqueta: "Correo del EST para copia del comprobante",
+    ayuda:
+      "Cuando el trabajador presta servicios a una empresa usuaria (EST o subcontrato), el comprobante de sus marcas se copia a este correo. Vacío: sin copia.",
+    grupo: "Comprobante",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "texto",
+  }),
 });
