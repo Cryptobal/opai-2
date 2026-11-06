@@ -81,6 +81,8 @@ core_apikeys_list
 core_aprobaciones_get
 core_aprobaciones_list
 core_audit_list
+core_biometria_borrar
+core_biometria_estado
 core_bitacora_verificar
 core_buscar
 core_calendario_actualizar
@@ -500,6 +502,7 @@ preview_core_actividades_create
 preview_core_actividades_delete
 preview_core_actividades_update
 preview_core_anexos_generar
+preview_core_biometria_borrar
 preview_core_calendario_actualizar
 preview_core_calendario_archivar
 preview_core_calendario_crear_feriado

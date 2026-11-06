@@ -146,4 +146,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: el equipo de terreno emparejado la ejecuta sin sesión (su cookie de dispositivo es la credencial) al enviar su cola; un agente no registra hechos de terreno por el equipo. Su lectura es core.hechos_terreno.listar (CAR-78 B3).",
   "core.personas_terreno.listar":
     "Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3).",
+  "core.biometria.enrolar":
+    "Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4).",
+  "core.biometria.verificar":
+    "Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4).",
 };
