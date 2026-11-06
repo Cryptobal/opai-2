@@ -356,6 +356,7 @@ jobs:
           pnpm --filter @opai/db exec tsx scripts/fixture-vencimientos-e2e.ts
           DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/db seed:pauta-e2e
           pnpm --filter @opai/auth seed:multiempresa-e2e
+          DATABASE_URL="postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" pnpm --filter @opai/auth seed:rendiciones-r3-e2e
           SEED_OWNER_EMAIL=e2e-selector@opai.cl pnpm --filter @opai/auth seed:e2e-mfa
           SEED_OWNER_EMAIL=e2e-multiempresa@opai.cl pnpm --filter @opai/auth seed:e2e-mfa
       - name: Versión de Playwright
