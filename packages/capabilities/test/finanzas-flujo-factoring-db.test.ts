@@ -110,7 +110,8 @@ describe.skipIf(omitirSuiteDb())("flujo · factoring y doble conteo (db)", () =>
     await abono(9_800, "ABONO FACTOR 99.999.999-9 OPERACION");
     const despues = await planilla();
     expect(total(despues, FILA_DEPOSITO_FACTORING)).toBe(0);
-    expect(semanaActual(despues).ingresos).toBe(semanaActual(antes).ingresos - 9_800);
+    // El depósito ya no se proyecta, pero el abono entra a la semana como ingreso real: cuenta una sola vez.
+    expect(semanaActual(despues).ingresos).toBe(semanaActual(antes).ingresos);
     expect(despues.avisos).toEqual([]);
     // La diferencia sigue visible aunque el depósito ya llegó.
     expect(total(despues, FILA_DIFERENCIA_FACTORING)).toBe(200);
