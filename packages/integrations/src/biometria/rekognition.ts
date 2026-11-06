@@ -60,7 +60,7 @@ export function biometriaRekognition(c: CredencialesRekognition, fetchFn: typeof
     async eliminarColeccion(coleccionId) {
       await llamar("DeleteCollection", { CollectionId: coleccionId });
     },
-    async iniciarVida() {
+    async iniciarVida(_opciones) {
       const r = await llamar<{ SessionId: string }>("CreateFaceLivenessSession", {});
       return { sesionId: r.SessionId };
     },

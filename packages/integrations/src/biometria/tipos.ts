@@ -18,6 +18,8 @@ export type ResultadoRostro = {
   similitud: number;
 };
 
+export type OpcionesVidaSimulada = { simulacion?: { rostro: string; viva: boolean } | undefined };
+
 export type CodigoErrorBiometria = "sin_rostro" | "calidad" | "credenciales" | "proveedor";
 
 /** Falla del proveedor. El mensaje es genérico: nunca lleva la respuesta cruda ni las credenciales. */
@@ -38,7 +40,8 @@ export interface ProveedorBiometria {
   /** Borra la colección entera (baja de la empresa). */
   eliminarColeccion(coleccionId: string): Promise<void>;
   /** Abre una sesión de prueba de vida; el dispositivo la completa con la cámara. */
-  iniciarVida(): Promise<{ sesionId: string }>;
+  /** `simulacion` solo la entiende el proveedor simulado (pruebas y QA): fija el «rostro» y si la vida pasa. */
+  iniciarVida(opciones?: OpcionesVidaSimulada): Promise<{ sesionId: string }>;
   resultadoVida(sesionId: string): Promise<ResultadoVida>;
   /** Registra un rostro en la colección y devuelve la referencia del proveedor. */
   enrolar(coleccionId: string, externalId: string, imagen: ImagenRostro): Promise<{ rostroId: string }>;

@@ -3,7 +3,8 @@ import { z } from "zod";
 import { ajuste, defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai/capabilities";
 import { avanzarCadena, bloquearCadena } from "@opai/db";
 
-import { CANALES, hashDeMarca, METODOS } from "../domain";
+import { CANALES, hashDeMarca, METODOS, MOTIVOS_RESPALDO } from "../domain";
+import { exigirCanal, MENSAJE_IDENTIDAD } from "./canal";
 import { armarRegistro } from "./armar-registro";
 import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
 import { verificadorDe } from "./identidad-registro";
@@ -23,7 +24,10 @@ export const marcasRegistrar = defineCapability({
     metodo: z.enum(METODOS),
     /** PIN u otro secreto del método; nunca se guarda. */
     credencial: z.string().max(64).optional(),
-    motivoRespaldo: z.string().trim().max(200).optional(),
+    /** Obligatorio al marcar con `pin_respaldo` (si la empresa lo exige): por qué no se usó el rostro. */
+    motivoRespaldo: z.enum(MOTIVOS_RESPALDO).optional(),
+    /** Sesión de prueba de vida ya completada (con el método `rostro`). */
+    sesionVidaId: z.string().min(8).max(128).optional(),
     /** Solo para pedir una colación; entrada y salida las decide el sistema (resolverTipo). */
     tipo: z.enum(["inicio_colacion", "fin_colacion"]).optional(),
     /** Clave que genera el dispositivo: reintentar no duplica (T-06). */
@@ -53,12 +57,14 @@ export const marcasRegistrar = defineCapability({
     if (i.canal === "telefono_personal" && (await personaPropia(ctx)).id !== persona.id)
       throw prohibido("Desde tu teléfono solo puedes marcar por ti.");
 
-    const verificador = await verificadorDe(ctx);
-    if (!verificador) throw reglaDeNegocio("La verificación de identidad aún no está conectada en esta empresa.");
-    const id = await verificador.verificar({
+    await exigirCanal(ctx, instalacion.id, persona.id, i.canal);
+    if (i.metodo === "pin_respaldo" && !i.motivoRespaldo && (await ajuste<boolean>(ctx, "asistencia", "pin_respaldo_exige_motivo")))
+      throw reglaDeNegocio("Indica por qué marcas con el PIN de respaldo.");
+    const id = await (await verificadorDe(ctx)).verificar({
       personaId: persona.id, metodo: i.metodo, credencial: i.credencial, motivoRespaldo: i.motivoRespaldo,
+      sesionVidaId: i.sesionVidaId,
     });
-    if (!id.ok) throw prohibido("No se pudo verificar tu identidad. Usa tu PIN o pide ayuda a RR. HH.");
+    if (!id.ok) throw prohibido(MENSAJE_IDENTIDAD[id.motivo]);
     const jornada = await ctx.db.personaJornadaDt.findUnique({
       where: { personaId: persona.id }, select: { resolucion: true, resolucionVigenteDesde: true },
     });

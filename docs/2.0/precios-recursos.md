@@ -17,6 +17,9 @@ Son valores **referenciales al 23-10-2026**, pensados para mostrar costo aproxim
 | `geo.geocodificacion` | consulta | 5.000 | US$ 5 por 1.000 | Google Geocoding |
 | `geo.mapa` | imagen | 2.000 | US$ 2 por 1.000 | Google Static Maps |
 | `correo.enviado` | correo | 400 | US$ 0,40 por 1.000 | Resend |
+| `biometria.vida` | sesión | 15.000 | US$ 0,015 por sesión | AWS Rekognition Face Liveness (CAR-89 · B4) |
+| `biometria.enrolamiento` | imagen | 1.000 | US$ 0,001 por imagen | AWS Rekognition IndexFaces (CAR-89 · B4) |
+| `biometria.verificacion` | imagen | 1.000 | US$ 0,001 por imagen | AWS Rekognition SearchFacesByImage (CAR-89 · B4) |
 | `almacenamiento.subida` | MB | 15 | US$ 0,015 por GB | Cloudflare R2 (almacenamiento del primer mes) |
 | `almacenamiento.descarga` | URL | 0 | sin costo | R2 no cobra egreso |
 

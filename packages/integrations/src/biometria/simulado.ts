@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   ErrorBiometria,
   type ImagenRostro,
+  type OpcionesVidaSimulada,
   type ProveedorBiometria,
   type ResultadoRostro,
   type ResultadoVida,
@@ -43,9 +44,13 @@ export class BiometriaSimulada implements ProveedorBiometria {
     this.colecciones.delete(coleccionId);
   }
 
-  async iniciarVida(): Promise<{ sesionId: string }> {
+  async iniciarVida(opciones?: OpcionesVidaSimulada): Promise<{ sesionId: string }> {
     const sesionId = `sim-${randomUUID()}`;
-    this.vidas.set(sesionId, this.siguienteVida ?? { viva: true, confianza: 0.99, imagen: null });
+    const sim = opciones?.simulacion;
+    const porOpciones: ResultadoVida | null = sim
+      ? { viva: sim.viva, confianza: sim.viva ? 0.99 : 0.2, imagen: new TextEncoder().encode(`rostro:${sim.rostro}`) }
+      : null;
+    this.vidas.set(sesionId, this.siguienteVida ?? porOpciones ?? { viva: true, confianza: 0.99, imagen: new TextEncoder().encode("rostro:prueba") });
     this.siguienteVida = null;
     return { sesionId };
   }

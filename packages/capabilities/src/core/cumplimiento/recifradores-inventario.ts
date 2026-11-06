@@ -51,4 +51,16 @@ export const recifradoresInventarioNucleo: Readonly<Record<string, Recifrador>> 
       recifrar,
     );
   },
+  // Referencia del rostro enrolado (CAR-89 · B4): módulo Asistencia, mismo mecanismo de rotación.
+  "enrolamientos_faciales.referencia": async (tx, recifrar) => {
+    const filas = await tx.enrolamientoFacial.findMany({
+      where: { referencia: { not: null } },
+      select: { id: true, referencia: true },
+    });
+    return recifrarStringColumna(
+      filas.map((f) => ({ id: f.id, valor: f.referencia })),
+      (id, valor) => tx.enrolamientoFacial.update({ where: { id }, data: { referencia: valor } }).then(() => undefined),
+      recifrar,
+    );
+  },
 };

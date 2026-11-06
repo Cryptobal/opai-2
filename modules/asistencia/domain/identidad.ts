@@ -11,6 +11,8 @@ export type SolicitudIdentidad = {
   credencial?: string | undefined;
   /** Si cae al respaldo, por qué (proveedor caído, rostro no reconocido…). */
   motivoRespaldo?: string | undefined;
+  /** Sesión de prueba de vida ya completada con la cámara; obligatoria con el método rostro (D-03). */
+  sesionVidaId?: string | undefined;
 };
 
 export type ResultadoIdentidad =
@@ -20,10 +22,19 @@ export type ResultadoIdentidad =
       motivoRespaldo: string | null;
       /** Similitud 0–1; nula si no hubo rostro. */
       confianza: number | null;
-      /** Resultado de la prueba de vida; nulo si no aplica (D-03 pendiente). */
+      /** Resultado de la prueba de vida; nulo si no aplica (con PIN). */
       pruebaVida: boolean | null;
     }
-  | { ok: false; motivo: "credencial_invalida" | "metodo_no_disponible" | "bloqueado" };
+  | {
+      ok: false;
+      motivo:
+        | "credencial_invalida"
+        | "metodo_no_disponible"
+        | "bloqueado"
+        | "rostro_no_coincide"
+        | "vida_fallida"
+        | "sin_enrolamiento";
+    };
 
 export interface VerificadorIdentidad {
   verificar(s: SolicitudIdentidad): Promise<ResultadoIdentidad>;
