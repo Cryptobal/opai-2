@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { capacidadesDelNucleo } from "../src/core";
+import { modulesPruebas } from "../src/core/pruebas-gratis";
 import { executeCapability } from "../src/execute";
 import { defineModule, limpiarModulos, registrarModulos } from "../src/module";
 import { limpiarRegistro, registrarCapacidades } from "../src/registry";
@@ -31,6 +32,13 @@ beforeEach(() => {
   registrarCapacidades(capacidadesDelNucleo);
   registrarModulos([modulo("cpq"), modulo("finanzas"), modulo("tickets")]);
 });
+
+/** Ejecuta la lectura y valida la salida con su propio esquema (el resultado llega sin tipo). */
+async function leer(ctx: Parameters<typeof executeCapability>[0]) {
+  const r = await executeCapability(ctx, "core.modules.pruebas", {});
+  if (!r.ok) throw new Error(r.error.message);
+  return modulesPruebas.output.parse(r.data);
+}
 
 const prueba = (moduloId: string, hasta: Date) => ({
   id: `p-${moduloId}`,
@@ -63,16 +71,14 @@ describe("core.modules.pruebas", () => {
         ],
       },
     });
-    const r = await executeCapability(ctx, "core.modules.pruebas", {});
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    expect(r.data).toMatchObject({ dias: 10, rutCompleto: true });
-    const ids = r.data.items.map((i) => i.id);
+    const d = await leer(ctx);
+    expect(d).toMatchObject({ dias: 10, rutCompleto: true });
+    const ids = d.items.map((i) => i.id);
     expect(ids).toContain("cpq");
     expect(ids).toContain("finanzas.bancos");
     expect(ids).not.toContain("tickets");
     expect(ids).not.toContain("base");
-    expect(r.data.items.find((i) => i.id === "cpq")).toMatchObject({
+    expect(d.items.find((i) => i.id === "cpq")).toMatchObject({
       estado: "disponible",
       textoPrecio: expect.stringContaining("UF"),
     });
@@ -89,15 +95,14 @@ describe("core.modules.pruebas", () => {
         pruebaGratis: [prueba("cpq", fecha(2))],
       },
     });
-    const r = await executeCapability(ctx, "core.modules.pruebas", {});
-    if (!r.ok) throw new Error(r.error.message);
-    expect(r.data.rutCompleto).toBe(false);
-    expect(r.data.items.find((i) => i.id === "cpq")).toMatchObject({
+    const d = await leer(ctx);
+    expect(d.rutCompleto).toBe(false);
+    expect(d.items.find((i) => i.id === "cpq")).toMatchObject({
       estado: "en_prueba",
       diasRestantes: 3,
     });
     // Finanzas activo ya incluye todas sus partes.
-    expect(r.data.items.find((i) => i.id === "finanzas.bancos")).toMatchObject({
+    expect(d.items.find((i) => i.id === "finanzas.bancos")).toMatchObject({
       estado: "no_disponible",
       motivo: expect.stringContaining("incluye todas"),
     });
@@ -114,9 +119,8 @@ describe("core.modules.pruebas", () => {
         pruebaGratis: [prueba("cpq", fecha(-1))],
       },
     });
-    const r = await executeCapability(ctx, "core.modules.pruebas", {});
-    if (!r.ok) throw new Error(r.error.message);
-    expect(r.data.items.find((i) => i.id === "cpq")).toMatchObject({
+    const d = await leer(ctx);
+    expect(d.items.find((i) => i.id === "cpq")).toMatchObject({
       estado: "vencida",
       diasRestantes: 0,
       motivo: expect.stringContaining("OPAI"),
