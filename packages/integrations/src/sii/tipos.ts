@@ -33,6 +33,8 @@ export type PayloadEmisionDte = {
   tipoDte: TipoDteVentaSii;
   folio: number;
   fechaEmision: string;
+  /** Vencimiento contable (AAAA-MM-DD); si no se conoce, no se informa. */
+  fechaVencimiento?: string;
   rutEmisor: string;
   rutReceptor: string;
   razonSocialReceptor: string;
