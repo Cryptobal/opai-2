@@ -89,13 +89,28 @@ model FlujoCobroEsperado {
   @@schema("finanzas")
 }
 
+/// Meses cuyo IVA se posterga de M+1 a M+2 en el flujo (ADR-073, regla 5). Sin fila rige M+1.
+model FlujoIvaPostergado {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  /// Mes del IVA, «aaaa-mm».
+  periodo     String
+  createdById String?  @map("created_by_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, periodo])
+  @@map("flujo_iva_postergado")
+  @@schema("finanzas")
+}
+
 /// Ajustes del flujo por empresa (una fila por tenant): saldo inicial del horizonte y umbral de alerta.
 model FlujoAjustes {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @unique @map("tenant_id") @db.Uuid
   saldoInicial BigInt   @default(0) @map("saldo_inicial")
-  /// Umbral único de saldo bajo (planilla, aviso semanal y aviso de banco; ADR-073). Defecto 15.000.000.
-  umbral       BigInt   @default(15000000)
+  /// Umbral único de saldo bajo (planilla, aviso semanal y aviso de banco; ADR-073). Defecto 10.000.000, configurable por empresa (decisión de Carlos del 5-nov-2026).
+  umbral       BigInt   @default(10000000)
   /// Semana (lunes) desde la que parte el saldo inicial.
   desde        DateTime @db.Date
   toleranciaCierre     BigInt   @default(1000) @map("tolerancia_cierre")

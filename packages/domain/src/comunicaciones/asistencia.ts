@@ -2,7 +2,7 @@ import { EMPRESA, type EventoComunicable, URL, v } from "./tipos";
 
 // Eventos comunicables de Asistencia (ADR-020, ORD 770/2025). El comprobante y los avisos al trabajador
 // son transaccionales: van directo a su correo PERSONAL (nunca al corporativo), sin reglas ni silencio.
-const TRABAJADOR = v("trabajador.nombre", "texto", "Ana Pérez", "Nombre completo del trabajador.");
+export const TRABAJADOR = v("trabajador.nombre", "texto", "Ana Pérez", "Nombre completo del trabajador.");
 
 export const COMUNICABLES_ASISTENCIA: readonly EventoComunicable[] = [
   {

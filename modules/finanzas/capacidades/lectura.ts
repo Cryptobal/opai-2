@@ -6,7 +6,8 @@ import { ajustesSchema, aNumeroSeguro, celdaSchema, filaSchema, saldoSchema, sem
 import type { capaSchema } from "./esquemas";
 import { avisoLeido } from "./aviso";
 import { PERMISO_VER } from "./permisos";
-import { FILAS_VIRTUALES_VISTA } from "./filas-virtuales";
+import { FILA_DIFERENCIA_FACTORING, FILAS_VIRTUALES_VISTA, filaDiferenciaFactoringVista } from "./filas-virtuales";
+import { cuentaDiferenciaFactoring } from "./impuestos-planilla";
 import { desdeVentana, SEMANAS_HISTORIA, serieSaldos } from "./serie-saldos";
 import { aIso, ajustesDe, lunesHoy } from "./util";
 
@@ -74,6 +75,9 @@ export const planillaObtener = defineCapability({
     semanas: z.array(semanaCalculadaSchema),
     aviso: avisoSchema,
     saldoBanco: saldoBancoSchema,
+    avisos: z
+      .array(z.object({ tipo: z.enum(["posible_cobro_recibido"]), mensaje: z.string(), abonoId: z.string(), monto: z.number().int() }))
+      .describe("Avisos de la proyección, p. ej. un abono sin conciliar que podría ser el cobro de una factura aún proyectada."),
     columnaHoy: semanaSchema.nullable(),
   }),
   efecto: "lectura",
@@ -85,7 +89,7 @@ export const planillaObtener = defineCapability({
       ? 4
       : (input.semanas ?? ajustes.horizonteSemanas + SEMANAS_HISTORIA);
     const desde = input.movil ? hoy : desdeVentana(ajustes, input.desde, hoy);
-    const { lista, calculo, extraVista, filas, celdas, banco } = await serieSaldos(
+    const { lista, calculo, extraVista, filas, celdas, banco, avisos } = await serieSaldos(
       ctx,
       ajustes,
       desde,
@@ -122,10 +126,12 @@ export const planillaObtener = defineCapability({
       filas: [
         ...filas.map(vistaFila),
         ...FILAS_VIRTUALES_VISTA.filter((f) => extraVista.some((c) => c.filaId === f.id)),
+        ...(extraVista.some((c) => c.filaId === FILA_DIFERENCIA_FACTORING) ? [filaDiferenciaFactoringVista(await cuentaDiferenciaFactoring(ctx))] : []),
       ],
       celdas: [...celdasDbVista, ...extraVista, ...planesPasadaVista],
       semanas: semanasOut,
       aviso: { activo: ajustes.avisoActivo, umbral: ajustes.umbral, semanas: avisoSemanas },
+      avisos,
       saldoBanco: { fuente: banco.fuente, saldo: banco.saldo, cuentasSinSaldo: banco.cuentasSinSaldo },
       columnaHoy: lista.includes(hoy) ? hoy : null,
     };

@@ -32,6 +32,8 @@ export const AJUSTES: Record<string, Ajuste> = {
     }),
   },
   "comercial.seguimiento_pasos": { valores: () => ({ canal: "interno", ejecutor: "persona" }) },
+  // Finanzas · flujo (CAR-193): CHECK del formato «aaaa-mm» del mes.
+  "finanzas.flujo_iva_postergado": { fijas: ["periodo"], valores: () => ({ periodo: "2026-11" }) },
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },
@@ -104,6 +106,7 @@ export const AJUSTES: Record<string, Ajuste> = {
   "asistencia.correcciones": { valores: () => ({ tipo_propuesto: "entrada", seq: 1 }) },
   "asistencia.contingencias": { valores: () => ({ tipo: "entrada", estado: "pendiente" }) },
   "asistencia.correcciones_respuestas": { fijas: ["resultado", "canal"], valores: () => ({ resultado: "aceptada", canal: "portal" }) },
+  "asistencia.dias": { fijas: ["estado", "tipo_jornada"], valores: () => ({ estado: "presente", tipo_jornada: "ordinaria" }) },
   "asistencia.alertas": { fijas: ["tipo"], valores: () => ({ tipo: "compensables" }) },
   "asistencia.incidentes_tecnicos": {
     valores: () => ({ tipo: "otro", severidad: "baja", origen: "manual" }),

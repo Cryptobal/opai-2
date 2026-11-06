@@ -67,7 +67,7 @@ export function sugerirConciliacion(
   return out.sort((a, b) => b.confianza - a.confianza || a.diferencia - b.diferencia);
 }
 
-function rutEnGlosa(glosa: string): string | null {
+export function rutEnGlosa(glosa: string): string | null {
   const m =
     glosa.match(/\b(\d{1,2}\.?\d{3}\.?\d{3}-[\dkK])\b/i) ?? glosa.match(/\b(\d{7,8}-[\dkK])\b/i);
   return m?.[1] ? normalizarRut(m[1].replace(/\./g, "")) : null;

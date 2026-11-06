@@ -25,10 +25,16 @@ export default function Pauta({ searchParams }: Props) {
       cargar={async () => {
         const identidad = await requerirIdentidad("/pauta");
         const puedeEditar = puedeDeIdentidad(identidad)("pauta:write");
-        return { d: await cargarPauta(await leerParametros(searchParams)), puedeEditar };
+        return {
+          d: await cargarPauta(await leerParametros(searchParams)),
+          puedeEditar,
+          asistenciaActiva: identidad.modulosActivos.includes("asistencia"),
+        };
       }}
     >
-      {({ d, puedeEditar }) => <ContenidoPauta d={d} puedeEditar={puedeEditar} />}
+      {({ d, puedeEditar, asistenciaActiva }) => (
+        <ContenidoPauta d={d} puedeEditar={puedeEditar} asistenciaActiva={asistenciaActiva} />
+      )}
     </PaginaPortal>
   );
 }
