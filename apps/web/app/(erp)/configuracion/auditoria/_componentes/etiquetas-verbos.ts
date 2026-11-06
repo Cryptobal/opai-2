@@ -62,7 +62,7 @@ export const VERBOS: Record<string, string> = {
   crear_base: "Crear plan base", iniciar: "Iniciar", controlar: "Pausar, reanudar o cancelar",
   registrar_respuesta: "Registrar respuesta del cliente", registrar_paso: "Registrar paso",
   enviar_paso: "Enviar paso", recibir_correo: "Recibir correo del cliente",
-  cumplir: "Cumplir", guardar: "Guardar", saldo_sugerido: "Saldo sugerido", manual: "Manual",
+  cargar_predefinidos: "Cargar costos predefinidos", cumplir: "Cumplir", guardar: "Guardar", saldo_sugerido: "Saldo sugerido", manual: "Manual",
   comentar: "Comentar", reasignar: "Reasignar", simular: "Simular", clonar: "Clonar", calcular: "Calcular", consultar: "Consultar",
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
