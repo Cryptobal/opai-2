@@ -12,6 +12,7 @@ platform_cobros_cargos_list
 platform_cobros_condiciones_set
 platform_cobros_prueba_abrir
 platform_cobros_prueba_gratis_extender
+platform_cobros_pruebas_gratis_list
 platform_cobros_resumen
 platform_consumos_summary
 platform_eventos_list

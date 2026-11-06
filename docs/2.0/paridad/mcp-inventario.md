@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 629 pares pantalla→capacidad · 566 con herramienta · 63 excepciones justificadas · 0 faltantes.
+**Resumen:** 633 pares pantalla→capacidad · 570 con herramienta · 63 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -546,6 +546,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/marca` | `core.marca.get` | `core_marca_get` | existe |
 | erp | `/configuracion/marca` | `core.marca.update` | `core_marca_update` | existe |
 | erp | `/configuracion/modulos` | `core.modules.list` | `core_modules_list` | existe |
+| erp | `/configuracion/modulos` | `core.modules.probar` | `core_modules_probar` | existe |
+| erp | `/configuracion/modulos` | `core.modules.pruebas` | `core_modules_pruebas` | existe |
 | erp | `/configuracion/modulos` | `core.modules.solicitar` | `core_modules_solicitar` | existe |
 | erp | `/configuracion/operaciones` | `core.funciones.create` | `core_funciones_create` | existe |
 | erp | `/configuracion/operaciones` | `core.funciones.list` | `core_funciones_list` | existe |
@@ -611,6 +613,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargos_list` | `platform_cobros_cargos_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.condiciones_set` | `platform_cobros_condiciones_set` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.prueba_abrir` | `platform_cobros_prueba_abrir` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.cobros.prueba_gratis_extender` | `platform_cobros_prueba_gratis_extender` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.cobros.pruebas_gratis_list` | `platform_cobros_pruebas_gratis_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/tenants/[id]/integraciones` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
 | platform | `/platform/tenants/[id]` | `platform.admins.invite` | `platform_admins_invite` | existe |
@@ -887,7 +891,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
-- `core.modules.probar`
 - `core.patrones.get`
 - `core.personas.laboral_actualizar`
 - `core.personas.pago_solicitar_cambio`
@@ -929,7 +932,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`
-- `platform.cobros.prueba_gratis_extender`
 - `platform.eventos.list`
 - `platform.tenants.update`
 - `platform.trabajos.cancelar`
