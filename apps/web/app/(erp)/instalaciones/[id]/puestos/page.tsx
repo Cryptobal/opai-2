@@ -3,7 +3,8 @@ import { Plus } from "lucide-react";
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import type { Parametros, SearchParams } from "@/lib/parametros";
-import { ejecutarComoUsuario } from "@/lib/servidor";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
+import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import type {
   Cargo,
   FuncionPuestoOpcion,
@@ -12,8 +13,9 @@ import type {
 } from "@/lib/tipos-maestros";
 
 import { ChipsPuestosDiferido } from "../../_componentes/chips-puestos-diferido";
-import { HojaPuesto } from "../../_componentes/diferidas";
+import { HojaPuesto, HojaTitular } from "../../_componentes/diferidas";
 import { ListaPuestos } from "../../_componentes/lista-puestos";
+import type { TitularesPuesto } from "../../_componentes/titular-tipos";
 import { PaginaInstalacion } from "../../_componentes/pagina-instalacion";
 import {
   conteosPuestos,
@@ -31,6 +33,13 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
     ejecutarComoUsuario<FuncionPuestoOpcion[]>("erp", "core.funciones.list", {}),
     ejecutarComoUsuario<PatronTurnoOpcion[]>("erp", "core.patrones.list", {}),
   ]);
+  // Titulares del puesto abierto (ficha o «Asignar titular»); sin Pauta activa o sin permiso, la ficha no los muestra.
+  const abierto = i.puestos.find((x) => x.id === (p["titular"] ?? p["puesto"]));
+  const rt = abierto
+    ? await ejecutarComoUsuario<TitularesPuesto>("erp", "pauta.titulares.listar", { puestoId: abierto.id })
+    : null;
+  const titulares = rt?.ok ? rt.data : null;
+  const puedeAsignar = puedeDeIdentidad(await requerirIdentidad(`/instalaciones/${i.id}/puestos`))("pauta:write");
   const cargos = rc.ok ? rc.data.filter((c) => c.activo) : [];
   const funciones = rf.ok ? rf.data : [];
   const patrones = rp.ok ? rp.data : [];
@@ -49,8 +58,11 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
       funciones={funciones}
       patrones={patrones}
       catalogosError={!rc.ok || !rf.ok || !rp.ok}
+      titulares={titulares}
+      puedeAsignar={puedeAsignar}
     />
   );
+  const hojaTitular = <HojaTitular puestos={i.puestos} subtitulo={subtitulo} titulares={titulares} />;
   const conteos = conteosPuestos(i.puestos);
   const filtradas = filtrarPuestos(i.puestos, p);
   return (
@@ -69,6 +81,7 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
         accionVacio={i.puestos.length === 0 ? nuevo : null}
       />
       {hoja}
+      {hojaTitular}
     </div>
   );
 }

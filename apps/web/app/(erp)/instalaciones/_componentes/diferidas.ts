@@ -9,3 +9,6 @@ export const HojaInstalacion = hojaDiferida(["editar"], () =>
 export const HojaPuesto = hojaDiferida(["puesto"], () =>
   import("./hoja-puesto").then((m) => m.HojaPuesto),
 );
+export const HojaTitular = hojaDiferida(["titular"], () =>
+  import("./hoja-titular").then((m) => m.HojaTitular),
+);
