@@ -22,7 +22,7 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   // En dev la ficha puede volver a pintarse mientras compila: si el clic cae en ese momento no navega,
   // así que se reintenta hasta llegar a la pestaña (CAR-60).
   await expect(async () => {
-    await page.getByRole("link", { name: /Puestos/i }).first().click({ timeout: 2_000 });
+    await page.getByRole("link", { name: /Puestos/i }).filter({ visible: true }).first().click({ timeout: 2_000 });
     await expect(page).toHaveURL(new RegExp(`/instalaciones/${id}/puestos`), { timeout: 2_000 });
   }).toPass({ timeout: 30_000 });
   await expect(page).toHaveURL(/estado=activa/);
