@@ -1,51 +1,40 @@
 import { z } from "zod";
 
-import { validarMontosVenta, type TipoDteVenta } from "@opai/domain";
 import { adaptadorSiiDe } from "./adaptador-sii";
-import { guardarXmlFirmadoDte } from "./ventas-xml";
-import { payloadEmisionDteDe } from "./ventas-payload-emision";
 
 import { defineCapability } from "../define";
-import { aFecha, escribirConEvento, hoy } from "../core/maestros/comun";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { aFecha, escribirConEvento } from "../core/maestros/comun";
+import { reglaDeNegocio } from "../errores";
 import { vistaDeDocumento } from "./ventas-consulta";
-import {
-  PERMISO_VENTAS,
-  ambienteDe,
-  consumirFolio,
-  cuentaDe,
-  documentoEmitidoIdSchema,
-  marcarBorradorEmitido,
-  rutEmisorDe,
-} from "./ventas-comun";
+import { PERMISO_VENTAS, consumirFolio, documentoEmitidoIdSchema, marcarBorradorEmitido } from "./ventas-comun";
+import { cargarBorradorEmitible, prepararEmision, type EmisionPreparada } from "./ventas-emision-preparar";
 import { ventaSchema } from "./vistas-venta";
 import type { Contexto } from "../types";
 
-/** Emite un borrador (también lo usa el cierre de mes, que emite en lote). */
-export async function emitirBorrador(ctx: Contexto, documentoId: string, dryRun: boolean) {
-  const doc = await ctx.db.documentoEmitido.findFirst({
-    where: { id: documentoId },
-    include: { lineas: { orderBy: { orden: "asc" } }, referencias: true },
-  });
-  if (!doc) throw noEncontrado("El documento");
-  if (doc.estadoDte !== "borrador") throw reglaDeNegocio("Solo se emiten borradores.");
-  if (doc.folio != null) throw reglaDeNegocio("El borrador ya tiene folio asignado.");
-  if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
-  const cuenta = await cuentaDe(ctx, doc.cuentaId);
-  const rutReceptor = cuenta.rut;
-  if (!rutReceptor) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");
-  const tipo = doc.tipoDte as TipoDteVenta;
-  const error = validarMontosVenta(tipo, {
-    neto: doc.montoNeto,
-    exento: doc.montoExento,
-    iva: doc.montoIva,
-    otros: doc.montoOtros,
-    total: doc.montoTotal,
-  });
-  if (error) throw reglaDeNegocio(error);
-  const ambiente = await ambienteDe(ctx);
-  const rutEmisor = await rutEmisorDe(ctx);
-  const emision = doc.fechaEmision?.toISOString().slice(0, 10) ?? hoy();
+const preparadaSchema = z.object({
+  documentoId: z.string(),
+  folio: z.number().int(),
+  fechaEmision: z.string(),
+  timbrePdf417: z.string(),
+});
+
+export const leerEmisionPreparada = (preparado: unknown): EmisionPreparada | null => {
+  const r = preparadaSchema.safeParse(preparado);
+  return r.success ? r.data : null;
+};
+
+/**
+ * Emite un borrador (también lo usa el cierre de mes, que emite en lote). En la ejecución real el DTE llega ya
+ * firmado (`prepararEmision`, fuera de la transacción): aquí solo se reclama el folio, se marca emitido y se
+ * emite el evento, todo atómico y sin llamadas remotas.
+ */
+export async function emitirBorrador(
+  ctx: Contexto,
+  documentoId: string,
+  dryRun: boolean,
+  preparada?: EmisionPreparada | null,
+) {
+  const { doc, cuenta, tipo } = await cargarBorradorEmitible(ctx, documentoId);
   const adaptador = await adaptadorSiiDe(ctx);
   if (!adaptador.disponible) throw reglaDeNegocio("El adaptador SII no está disponible.");
   if (dryRun) {
@@ -58,42 +47,25 @@ export async function emitirBorrador(ctx: Contexto, documentoId: string, dryRun:
       monto: l.monto,
     })));
   }
-  let folioEmitido = 0;
+  if (!preparada || preparada.documentoId !== doc.id) {
+    throw reglaDeNegocio("El documento no llegó firmado a la emisión; reintente.");
+  }
   await escribirConEvento(
     ctx,
     {
       tipo: "finanzas.venta.emitida",
       entidadTipo: "documento_emitido",
-      payload: () => ({ folio: folioEmitido, tipoDte: doc.tipoDte }),
+      payload: () => ({ folio: preparada.folio, tipoDte: doc.tipoDte }),
     },
     async (tx) => {
-      folioEmitido = await consumirFolio(ctx, tipo, false, tx);
-      const payload = await payloadEmisionDteDe(ctx, {
-        ambiente,
-        rutEmisor,
-        cuenta: { ...cuenta, rut: rutReceptor },
-        doc: {
-          tipoDte: doc.tipoDte,
-          folio: folioEmitido,
-          fechaEmision: emision,
-          glosa: doc.glosa,
-          montoNeto: doc.montoNeto,
-          montoExento: doc.montoExento,
-          montoIva: doc.montoIva,
-          montoTotal: doc.montoTotal,
-          lineas: doc.lineas,
-          referencias: doc.referencias,
-        },
-        incluirCaf: adaptador.nombre !== "simulado",
-      });
-      const firmado = await adaptador.firmar(payload);
-      if (adaptador.nombre !== "simulado") {
-        await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml);
+      const folio = await consumirFolio(ctx, tipo, false, tx);
+      if (folio !== preparada.folio) {
+        throw reglaDeNegocio("El folio cambió mientras se firmaba el documento; reintente la emisión.");
       }
       await marcarBorradorEmitido(tx, doc.id, {
-        folio: folioEmitido,
-        fechaEmision: aFecha(emision),
-        timbrePdf417: firmado.timbrePdf417,
+        folio,
+        fechaEmision: aFecha(preparada.fechaEmision),
+        timbrePdf417: preparada.timbrePdf417,
       });
       return { id: doc.id };
     },
@@ -111,7 +83,9 @@ export const ventasEmitir = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
-  async handler(ctx, input, { dryRun }) {
-    return emitirBorrador(ctx, input.documentoId, dryRun);
+  // La firma (llamada remota) va antes de la transacción de la escritura.
+  preparar: (ctx, input) => prepararEmision(ctx, input.documentoId),
+  async handler(ctx, input, { dryRun, preparado }) {
+    return emitirBorrador(ctx, input.documentoId, dryRun, leerEmisionPreparada(preparado));
   },
 });

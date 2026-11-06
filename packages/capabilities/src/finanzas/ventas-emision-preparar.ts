@@ -1,0 +1,76 @@
+// Firma del DTE FUERA de la transacción de base (CAR-196): la llamada a SimpleAPI es remota y lenta, y no debe
+// retener la conexión ni los locks de la escritura. Se firma con el folio que se asignaría (sin consumirlo) y la
+// transacción de `emitirBorrador` revalida que ese siguiera siendo el folio disponible (ver `foliosPrevistos`).
+import { validarMontosVenta, type TipoDteVenta } from "@opai/domain";
+
+import { hoy } from "../core/maestros/comun";
+import { noEncontrado, reglaDeNegocio } from "../errores";
+import type { Contexto } from "../types";
+import { adaptadorSiiDe } from "./adaptador-sii";
+import { ambienteDe, cuentaDe, rutEmisorDe } from "./ventas-comun";
+import { foliosPrevistos } from "./ventas-folios-logica";
+import { payloadEmisionDteDe } from "./ventas-payload-emision";
+import { guardarXmlFirmadoDte } from "./ventas-xml";
+
+export type EmisionPreparada = {
+  documentoId: string;
+  folio: number;
+  fechaEmision: string;
+  timbrePdf417: string;
+};
+
+/** Carga el borrador y valida que pueda emitirse; lo comparten la vista previa y la firma. */
+export async function cargarBorradorEmitible(ctx: Contexto, documentoId: string) {
+  const doc = await ctx.db.documentoEmitido.findFirst({
+    where: { id: documentoId },
+    include: { lineas: { orderBy: { orden: "asc" } }, referencias: true },
+  });
+  if (!doc) throw noEncontrado("El documento");
+  if (doc.estadoDte !== "borrador") throw reglaDeNegocio("Solo se emiten borradores.");
+  if (doc.folio != null) throw reglaDeNegocio("El borrador ya tiene folio asignado.");
+  if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
+  const cuenta = await cuentaDe(ctx, doc.cuentaId);
+  if (!cuenta.rut) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");
+  const tipo = doc.tipoDte as TipoDteVenta;
+  const error = validarMontosVenta(tipo, {
+    neto: doc.montoNeto,
+    exento: doc.montoExento,
+    iva: doc.montoIva,
+    otros: doc.montoOtros,
+    total: doc.montoTotal,
+  });
+  if (error) throw reglaDeNegocio(error);
+  return { doc, cuenta: { ...cuenta, rut: cuenta.rut }, tipo };
+}
+
+/** Firma un borrador con el folio indicado (o el próximo disponible) y guarda el XML. No toca la base. */
+export async function prepararEmision(ctx: Contexto, documentoId: string, folioAsignado?: number): Promise<EmisionPreparada> {
+  const { doc, cuenta, tipo } = await cargarBorradorEmitible(ctx, documentoId);
+  const adaptador = await adaptadorSiiDe(ctx);
+  if (!adaptador.disponible) throw reglaDeNegocio("El adaptador SII no está disponible.");
+  const folio = folioAsignado ?? (await foliosPrevistos(ctx, tipo, 1))[0];
+  if (folio == null) throw reglaDeNegocio(`No hay folios disponibles para el DTE ${tipo}. Cargue un CAF.`);
+  const emision = doc.fechaEmision?.toISOString().slice(0, 10) ?? hoy();
+  const payload = await payloadEmisionDteDe(ctx, {
+    ambiente: await ambienteDe(ctx),
+    rutEmisor: await rutEmisorDe(ctx),
+    cuenta,
+    doc: {
+      tipoDte: doc.tipoDte,
+      folio,
+      fechaEmision: emision,
+      glosa: doc.glosa,
+      montoNeto: doc.montoNeto,
+      montoExento: doc.montoExento,
+      montoIva: doc.montoIva,
+      montoTotal: doc.montoTotal,
+      lineas: doc.lineas,
+      referencias: doc.referencias,
+      ...(doc.fechaVencimiento ? { fechaVencimiento: doc.fechaVencimiento.toISOString().slice(0, 10) } : {}),
+    },
+    incluirCaf: adaptador.nombre !== "simulado",
+  });
+  const firmado = await adaptador.firmar(payload);
+  if (adaptador.nombre !== "simulado") await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml);
+  return { documentoId: doc.id, folio, fechaEmision: emision, timbrePdf417: firmado.timbrePdf417 };
+}
