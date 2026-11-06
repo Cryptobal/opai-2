@@ -15,6 +15,9 @@ export default defineConfig({
   // como cambios, recompila y deja el servidor sin responder por decenas de segundos. En CI van fuera del árbol.
   outputDir: process.env["CI"] ? join(tmpdir(), "opai-e2e-resultados") : "test-results",
   globalSetup: "./e2e/calentar.ts",
+  // Los rojos que quedan en CI son de arranque en frío de `next dev` y cambian de spec en cada run (CAR-199). Un
+  // reintento los absorbe sin ocultarlos: Playwright los informa como «flaky», y un fallo real falla las dos veces.
+  retries: process.env["CI"] ? 1 : 0,
   timeout: 90_000,
   // `next dev` compila cada ruta en su primera visita y en el runner eso pasa de los 5 s por defecto.
   expect: { timeout: 15_000 },
