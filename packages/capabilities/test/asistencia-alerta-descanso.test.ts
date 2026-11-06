@@ -21,21 +21,21 @@ function ctxFalso(creados: number) {
 describe("alertarDescanso", () => {
   it("teletrabajo con descanso insuficiente: crea la alerta y emite el evento una vez", async () => {
     const { ctx, emitir, createMany } = ctxFalso(1);
-    expect(await alertarDescanso(ctx, dia(), "America/Santiago")).toBe(true);
+    expect(await alertarDescanso(ctx, dia(), "America/Santiago", new Date("2026-11-05T15:00:00Z"))).toBe(true);
     expect(createMany).toHaveBeenCalledWith(expect.objectContaining({ skipDuplicates: true, data: [expect.objectContaining({ tipo: "descanso_insuficiente", clave: "descanso:p1:2026-11-05" })] }));
     expect(emitir).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ tipo: "asistencia.alerta.descanso_insuficiente", entidadId: "p1" }));
   });
 
   it("si la alerta ya existía (clave única) no repite el evento", async () => {
     const { ctx, emitir } = ctxFalso(0);
-    expect(await alertarDescanso(ctx, dia(), "America/Santiago")).toBe(false);
+    expect(await alertarDescanso(ctx, dia(), "America/Santiago", new Date("2026-11-05T15:00:00Z"))).toBe(false);
     expect(emitir).not.toHaveBeenCalled();
   });
 
   it("sin descanso insuficiente, sin entrada o en una jornada sin mínimo, no alerta", async () => {
-    for (const d of [dia({ descansoInsuficiente: false }), dia({ entrada: null }), dia({ tipoJornada: "ordinaria" })]) {
+    for (const d of [dia({ descansoInsuficiente: false }), dia({ entrada: null }), dia({ tipoJornada: "ordinaria" }), dia({ fecha: "2026-10-01" })]) {
       const { ctx, createMany } = ctxFalso(1);
-      expect(await alertarDescanso(ctx, d, "America/Santiago")).toBe(false);
+      expect(await alertarDescanso(ctx, d, "America/Santiago", new Date("2026-11-05T15:00:00Z"))).toBe(false);
       expect(createMany).not.toHaveBeenCalled();
     }
   });

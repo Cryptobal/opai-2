@@ -32,7 +32,7 @@ export async function calcularDia(ctx: Contexto, personaId: string, fecha: strin
   const zona = zonaDada ?? (await tenantBasico(ctx)).zona;
   const { desde, hasta } = limitesDelDia(fecha, zona);
   const fechaDia = new Date(`${fecha}T00:00:00Z`);
-  const turnos = await ctx.db.turnoEsperado.findMany({ where: { personaId, vigente: true, fecha: new Date(`${fecha}T00:00:00Z`), ...(instalaciones ? { instalacionId: { in: [...instalaciones] } } : {}) }, orderBy: { inicio: "asc" } });
+  const turnos = await ctx.db.turnoEsperado.findMany({ where: { personaId, vigente: true, fecha: fechaDia, ...(instalaciones ? { instalacionId: { in: [...instalaciones] } } : {}) }, orderBy: { inicio: "asc" } });
   const turno = turnos.length ? { inicio: turnos[0]!.inicio, fin: turnos.at(-1)!.fin } : null;
   const ventana = turno ? { gte: new Date(turno.inicio.getTime() - 8 * H), lt: new Date(turno.fin.getTime() + 8 * H) } : { gte: desde, lt: hasta };
   // Una contingencia aceptada cuenta en la hora que se declaró, no en la que se aceptó (puede ser días después).
