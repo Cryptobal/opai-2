@@ -87,7 +87,7 @@ export async function proxy(request: NextRequest) {
   const publica =
     /^\/(?:login|mfa|recuperar|invitacion|verificar|correccion|p|ds|sin-conexion)(?:\/|$)/.test(
       request.nextUrl.pathname,
-    ) || ["/trabajador/login", "/cliente/login", "/terreno/emparejar"].includes(request.nextUrl.pathname);
+    ) || ["/trabajador/login", "/cliente/login", "/terreno/emparejar", "/terreno", "/terreno/cola"].includes(request.nextUrl.pathname);
   if (publica) return responder(NextResponse.next({ request: { headers } }));
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
     // La cabecera se fija en el servidor y sobrescribe cualquier `x-opai-t0` del cliente: en ninguna
