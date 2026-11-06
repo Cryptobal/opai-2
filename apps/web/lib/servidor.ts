@@ -8,6 +8,7 @@ import { getSession } from "@opai/auth";
 import { contextoDeIdentidad, identidadDe, type Identidad } from "./actor";
 import { medirFase } from "./metricas-navegacion";
 import { asegurarRegistro } from "./registro";
+import { loginDe } from "./login-destino";
 import { COOKIE_TENANT } from "./tenant-actual";
 import { tieneAccesoAPortal } from "./acceso-portal";
 import { estadoMfaDe, verificarMfaDe } from "./mfa";
@@ -28,10 +29,10 @@ export const identidadActual = cache(async (): Promise<Identidad | null> => {
   return identidad;
 });
 
-/** Identidad o redirección a /login. */
+/** Identidad o redirección al ingreso que corresponde (`/trabajador/login` o `/login`). */
 export async function requerirIdentidad(destino?: string): Promise<Identidad> {
   const identidad = await identidadActual();
-  if (!identidad) redirect(destino ? `/login?next=${encodeURIComponent(destino)}` : "/login");
+  if (!identidad) redirect(loginDe(destino));
   return identidad;
 }
 

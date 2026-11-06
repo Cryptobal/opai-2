@@ -1,0 +1,1 @@
+export { capacidadesCredencialesTerreno } from "./credenciales";
