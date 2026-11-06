@@ -13,6 +13,9 @@ export const entradaTraslado = z.object({
   desde: diaSchema,
   inicioCiclo: diaSchema,
   motivo: z.string().trim().min(5).max(500),
+  /** Solo si el vínculo actual no tiene jornada pactada y el traslado es a otra instalación: el vínculo nuevo la exige. */
+  horasSemanales: z.number().int().min(1).max(168).optional(),
+  distribucion: z.string().trim().min(1).max(200).optional(),
 });
 
 export const salidaTraslado = z.object({
@@ -21,6 +24,8 @@ export const salidaTraslado = z.object({
   puestosOrigen: z.array(z.object({ puestoId: z.string(), puesto: z.string(), serieHasta: z.string() })),
   vinculoTerminado: z.object({ id: z.string(), termino: z.string() }).nullable(),
   vinculoNuevo: z.boolean(),
+  /** true si el vínculo nuevo necesita la jornada pactada (horas y distribución) y el actual no la tiene: la vista previa se muestra, pero no se puede confirmar sin ella. */
+  faltaJornada: z.boolean(),
   /** Titular del puesto de destino que deja de serlo con este traslado; null si estaba sin titular. */
   titularDesplazado: z.object({ id: z.string(), nombre: z.string() }).nullable(),
   serie: salidaSerieSchema.shape.serie,

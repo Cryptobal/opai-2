@@ -11,6 +11,7 @@ export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
+export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
@@ -24,7 +25,7 @@ export {
   estaCifrado,
   type CifradoDeCampos,
 } from "./core/cumplimiento/cifrado-campos";
-export { enviarCorreo } from "./core/comunicaciones";
+export { enviarCorreo, previsualizarCorreo } from "./core/comunicaciones";
 export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";
 export { plataformaVigente } from "./core/apikey-scopes";
 export { catalogoPermisos } from "./core/me";

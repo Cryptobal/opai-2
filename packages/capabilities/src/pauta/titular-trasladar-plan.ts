@@ -29,13 +29,17 @@ export async function planificarTraslado(ctx: Contexto, i: Entrada, tx: TenantTx
   const destino = await puestoParaPauta(ctx, i.puestoDestinoId);
   if (!destino.patronId) throw reglaDeNegocio("El puesto de destino no tiene patrón de turno: elígelo en su ficha antes de trasladar.");
   const misma = v0.instalacionId === destino.instalacionId;
+  const horas = i.horasSemanales ?? v0.horasSemanales;
+  const distribucion = i.distribucion ?? v0.distribucion;
+  const faltaJornada = !misma && (!horas || !distribucion);
+  // La vista previa se muestra igual; solo la ejecución real exige la jornada del vínculo nuevo.
+  if (faltaJornada && tx) throw reglaDeNegocio("El vínculo actual no tiene jornada pactada: indica las horas semanales y la distribución del vínculo nuevo.");
   const hoyCivil = await hoy(ctx);
   if (i.desde < hoyCivil) throw reglaDeNegocio("El traslado no puede regir antes de hoy: no se modifican los días pasados.");
   if (!misma) {
     exigirEdicionVinculo(ctx);
     // El vínculo cambia al dar la orden: con otra fecha el guardia quedaría sin vínculo en su instalación hasta entonces.
     if (i.desde !== hoyCivil) throw reglaDeNegocio("El traslado a otra instalación rige desde hoy: el vínculo cambia al confirmarlo.");
-    if (!v0.horasSemanales || !v0.distribucion) throw reglaDeNegocio("El vínculo actual no tiene jornada pactada: complétala antes de trasladar.");
     const i2 = await ctx.db.instalacion.findFirst({ where: { id: destino.instalacionId, AND: [dondeInstalacion(ctx)], archivadaEn: null }, select: { id: true } });
     if (!i2) throw noEncontrado("La instalación de destino");
   }
@@ -59,7 +63,7 @@ export async function planificarTraslado(ctx: Contexto, i: Entrada, tx: TenantTx
   const salida = (serie: Salida["serie"]): Salida => ({
     personaId: i.personaId, mismaInstalacion: misma,
     puestosOrigen: cerrar.map((s) => ({ puestoId: s.puestoId, puesto: origenes.get(s.puestoId) ?? "", serieHasta: termino })),
-    vinculoTerminado: misma ? null : { id: v0.id, termino }, vinculoNuevo: !misma, titularDesplazado: desplazado, serie,
+    vinculoTerminado: misma ? null : { id: v0.id, termino }, vinculoNuevo: !misma, faltaJornada, titularDesplazado: desplazado, serie,
     primerosDias: primerosDias(patron, i.inicioCiclo, i.desde),
   });
   if (!tx) {
@@ -74,7 +78,7 @@ export async function planificarTraslado(ctx: Contexto, i: Entrada, tx: TenantTx
   for (const s of cerrar) await cierre(ctx, s, false);
   if (!misma) {
     const creado = await crearVinculo(ctx, tx, i.personaId, {
-      cargoId: v0.cargoId, instalacionId: destino.instalacionId, puestoId: destino.id, horasSemanales: v0.horasSemanales!, distribucion: v0.distribucion!,
+      cargoId: v0.cargoId, instalacionId: destino.instalacionId, puestoId: destino.id, horasSemanales: horas!, distribucion: distribucion!,
       tipo: v0.tipo as "indefinido" | "plazo_fijo" | "por_obra" | "honorarios", inicio: i.desde, ...(v0.termino ? { termino: fechaIso(v0.termino) } : {}),
     });
     // El cambio de instalación sí cambia las condiciones: borrador de anexo para RR. HH. (consumidor de anexos).
