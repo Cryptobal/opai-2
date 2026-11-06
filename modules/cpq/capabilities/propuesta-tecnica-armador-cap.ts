@@ -4,12 +4,11 @@ import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabiliti
 
 import { BASES_PLANTILLA } from "../domain/documento/bloques";
 import {
-  aperturaEfectiva,
   parseBloquesArmadorPropuesta,
   type BloqueArmadorPropuesta,
 } from "../domain/documento/propuesta-tecnica";
 import { vistaMarcaDocumento } from "../persistencia/marca-documento";
-import { renderPdfPropuestaTecnica } from "../persistencia/pdf-propuesta-tecnica";
+import { pdfPropuestaVista } from "../persistencia/pdf-propuesta-vista";
 import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
 import {
   actualizarPropuestaArmador,
@@ -138,16 +137,17 @@ export const propuestaTecnicaPreviewPdf = defineCapability({
     const plantilla = vistaPlantillaPropuesta(plantillaRow);
     const marca = await vistaMarcaDocumento(ctx);
     const servicio = servicioDesdeFilas(packServicioCotizacion(c, pack));
-    const bytes = renderPdfPropuestaTecnica({
+    const bytes = await pdfPropuestaVista(ctx, {
+      cotizacionId: input.cotizacionId,
       codigo: c.codigo,
       titulo: c.titulo,
+      fecha: calculo.fecha,
       borrador: prop.estado !== "congelada",
       bloquesJson: prop.bloquesJson,
       plantilla,
       marca,
       servicio,
       netoTotalClp: calculo.ventaMensual ?? 0,
-      apertura: aperturaEfectiva(plantilla.aperturaMaxima, plantilla.aperturaMaxima),
     });
     return { pdfBase64: Buffer.from(bytes).toString("base64"), bytes: bytes.byteLength, borrador: prop.estado !== "congelada" };
   },

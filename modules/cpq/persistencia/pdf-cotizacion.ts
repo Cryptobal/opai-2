@@ -1,6 +1,7 @@
 import type { Contexto } from "@opai/capabilities";
 
 import { renderPdfCotizacion, type EntradaPdfCotizacion } from "./documento-pdf";
+import { cargarLogoMarca } from "./pdf/logo";
 import { marcaDocumentoEnVersion, vistaMarcaDocumento } from "./marca-documento";
 import {
   plantillaActivaCotizacion,
@@ -22,17 +23,24 @@ export async function pdfCotizacionConMarca(
   const siembra = opciones?.siembraDocumento ?? false;
   const marca =
     refs?.marcaDocumentoVersion != null
-      ? (await marcaDocumentoEnVersion(ctx, refs.marcaDocumentoVersion)) ?? (await vistaMarcaDocumento(ctx))
+      ? ((await marcaDocumentoEnVersion(ctx, refs.marcaDocumentoVersion)) ??
+        (await vistaMarcaDocumento(ctx)))
       : await vistaMarcaDocumento(ctx);
   let plantilla = siembra
     ? vistaPlantilla(await plantillaActivaCotizacion(ctx))
     : await plantillaActivaCotizacionLectura(ctx);
   if (refs?.plantillaDocumentoId && refs.plantillaDocumentoVersion != null) {
-    const hist = await plantillaEnVersion(ctx, refs.plantillaDocumentoId, refs.plantillaDocumentoVersion);
+    const hist = await plantillaEnVersion(
+      ctx,
+      refs.plantillaDocumentoId,
+      refs.plantillaDocumentoVersion,
+    );
     if (hist) plantilla = hist;
   }
   return {
-    bytes: renderPdfCotizacion(entrada, marca, plantilla),
+    bytes: await renderPdfCotizacion(entrada, marca, plantilla, {
+      logo: await cargarLogoMarca(ctx),
+    }),
     marcaVersion: marca.version,
     plantillaId: plantilla.id,
     plantillaVersion: plantilla.version,

@@ -7,7 +7,7 @@ export function buildPdfPropuesta(input: {
   negocio: string;
   secciones: readonly { nombre: string; lineas: readonly { nombre: string; tipo?: string }[] }[];
   calculo: { ventaMensual: number | null; fecha: string; borradorSinPrecio?: boolean };
-}): Uint8Array {
+}): Promise<Uint8Array> {
   const marca = {
     version: 1,
     tipografia: "inter" as const,
@@ -44,7 +44,9 @@ export function buildPdfPropuesta(input: {
           tipo: l.tipo ?? "puesto",
           posiciones: 1,
           ventaMensualClp:
-            input.calculo.ventaMensual != null ? Math.round(input.calculo.ventaMensual / Math.max(1, s.lineas.length)) : null,
+            input.calculo.ventaMensual != null
+              ? Math.round(input.calculo.ventaMensual / Math.max(1, s.lineas.length))
+              : null,
         })),
       })),
       calculo: {
