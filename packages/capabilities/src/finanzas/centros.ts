@@ -14,7 +14,7 @@ import { centroVistaSchema } from "./vistas";
 export const centrosListar = defineCapability({
   id: "finanzas.centros_costo.listar",
   descripcion:
-    "Lista los centros de costo del tenant: el general «Administración / Oficina central» y una entrada por cada instalación activa. Sirve para asignar compras y para elegir el centro por defecto de un proveedor.",
+    "Lista los centros de costo del tenant: el general «Administración / Oficina central» y una entrada por cada instalación activa (no los prospectos ni las inactivas). Sirve para asignar compras y para elegir el centro por defecto de un proveedor.",
   permiso: PERMISO_READ,
   input: z.object({}),
   output: z.array(centroVistaSchema),
@@ -23,7 +23,9 @@ export const centrosListar = defineCapability({
   async handler(ctx) {
     const [instalaciones, centros] = await Promise.all([
       ctx.db.instalacion.findMany({
-        where: { archivadaEn: null },
+        // Solo las instalaciones activas (CAR-198/CAR-220): ni prospectos ni inactivas ni archivadas se ofrecen para asignar.
+        // Lo ya asignado a una que pasó a inactiva conserva su centro; aquí solo se lista lo que se puede elegir.
+        where: { estado: "activa", archivadaEn: null },
         select: { id: true, nombre: true },
         orderBy: { nombre: "asc" },
       }),

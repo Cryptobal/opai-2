@@ -98,7 +98,8 @@ describe.skipIf(omitirSuiteDb())("Finanzas · corrección del flujo (db)", () =>
   });
 
   it("la cartola de la semana pasada suma exactamente los movimientos, aun con filas archivadas", async () => {
-    const fila = await ok<{ id: string }>("finanzas.filas.crear", { seccion: "ingreso", etiqueta: "ACME SpA" });
+    // Los ingresos no se crean por la capacidad (solo egresos planificados): la fila de ingreso se siembra directo.
+    const fila = await e.admin.flujoFila.create({ data: { tenantId, seccion: "ingreso", etiqueta: "ACME SpA", arrastre: false, orden: 0, activa: true } });
     await movimiento("2026-10-14", 100_000, "Abono sin conciliar");
     await movimiento("2026-10-15", -300_000, "Pago sin conciliar");
     const conc = await movimiento("2026-10-16", 50_000, "Cobro ACME");

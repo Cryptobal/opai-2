@@ -30,7 +30,7 @@ function profundidades(cuentas: readonly Cuenta[]) {
   return new Map(cuentas.map((c) => [c.id, nivel(c)]));
 }
 
-function Fila({ c, nivel, alertas, gestiona }: { c: Cuenta; nivel: number; alertas: AlertaPlan[]; gestiona: boolean }) {
+function Fila({ c, nivel, alertas, gestiona, prefijo }: { c: Cuenta; nivel: number; alertas: AlertaPlan[]; gestiona: boolean; prefijo: string }) {
   const errores = alertas.filter((a) => a.cuenta === c.codigo && a.severidad === "error");
   return (
     <li className={`flex min-h-11 items-center gap-3 border-b border-border py-2 last:border-b-0 ${SANGRIA[Math.min(nivel, 3)]}`}>
@@ -55,7 +55,7 @@ function Fila({ c, nivel, alertas, gestiona }: { c: Cuenta; nivel: number; alert
         ))}
       </span>
       {gestiona ? (
-        <EnlaceBotonHoja href={`?editar=${c.id}`} variante="ghost" icono={Pencil} etiqueta={`Editar ${c.nombre}`}>
+        <EnlaceBotonHoja href={`${prefijo}editar=${c.id}`} variante="ghost" icono={Pencil} etiqueta={`Editar ${c.nombre}`}>
           <span className="sr-only">Editar</span>
         </EnlaceBotonHoja>
       ) : null}
@@ -70,12 +70,17 @@ export function ArbolPlan(p: {
   alertas: AlertaPlan[];
   inicializado: boolean;
   gestiona: boolean;
+  /** Inicio de los enlaces de la hoja: «?» en su pantalla, «?seccion=plan-cuentas&» dentro de Configuración. */
+  prefijo?: string;
+  /** Sin título propio cuando lo pone la pestaña que lo contiene. */
+  sinTitulo?: boolean;
 }) {
+  const prefijo = p.prefijo ?? "?";
   const nivel = profundidades(p.cuentas);
   const vacio = p.state === "ready" && !p.inicializado ? "empty" : p.state;
   return (
     <div>
-      <Cabecera titulo="Plan de cuentas" />
+      {p.sinTitulo ? null : <Cabecera titulo="Plan de cuentas" />}
       <Estado
         state={vacio}
         variante="lista"
@@ -95,7 +100,7 @@ export function ArbolPlan(p: {
               <SeccionTarjeta key={tipo} titulo={titulo}>
                 <ul>
                   {filas.map((c) => (
-                    <Fila key={c.id} c={c} nivel={nivel.get(c.id) ?? 0} alertas={p.alertas} gestiona={p.gestiona} />
+                    <Fila key={c.id} c={c} nivel={nivel.get(c.id) ?? 0} alertas={p.alertas} gestiona={p.gestiona} prefijo={prefijo} />
                   ))}
                 </ul>
               </SeccionTarjeta>
