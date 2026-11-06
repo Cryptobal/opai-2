@@ -88,6 +88,8 @@ model Correccion {
   /// Plazo vigente al proponer (parámetro con vigencia, ADR-021) y su vencimiento: se guardan en el hecho.
   plazoHoras     Int      @default(48) @map("plazo_horas")
   venceEn        DateTime? @map("vence_en") @db.Timestamptz(6)
+  /// Documento (núcleo) que respalda la corrección manual.
+  evidenciaDocumentoId String? @map("evidencia_documento_id") @db.Uuid
   idempotencyKey String   @map("idempotency_key")
   hash           String
   hashAnterior   String   @map("hash_anterior")
@@ -197,5 +199,37 @@ model Alerta {
   @@unique([tenantId, tipo, clave])
   @@index([tenantId, personaId, tipo, createdAt])
   @@map("alertas")
+  @@schema("asistencia")
+}
+
+/// Día consolidado de una persona (recalculable desde las marcas efectivas): fuente de Nómina y de «Asistencia de hoy».
+model Dia {
+  id                       String    @id @default(uuid(7)) @db.Uuid
+  tenantId                 String    @map("tenant_id") @db.Uuid
+  personaId                String    @map("persona_id") @db.Uuid
+  fecha                    DateTime  @db.Date
+  turnoEsperadoId          String?   @map("turno_esperado_id") @db.Uuid
+  instalacionId            String?   @map("instalacion_id") @db.Uuid
+  /// ordinaria | excepcional | parcial | teletrabajo
+  tipoJornada              String    @map("tipo_jornada")
+  /// presente | sin_marca | ausente | sin_turno | incompleto
+  estado                   String
+  sigla                    String?
+  minutosTrabajados        Int       @default(0) @map("minutos_trabajados")
+  segundosAtraso           Int       @default(0) @map("segundos_atraso")
+  segundosExtra            Int       @default(0) @map("segundos_extra")
+  segundosSalidaAnticipada Int       @default(0) @map("segundos_salida_anticipada")
+  descansoInsuficiente     Boolean   @default(false) @map("descanso_insuficiente")
+  correccionPendiente      Boolean   @default(false) @map("correccion_pendiente")
+  entrada                  DateTime? @db.Timestamptz(6)
+  salida                   DateTime? @db.Timestamptz(6)
+  calculadoEn              DateTime  @map("calculado_en") @db.Timestamptz(6)
+  createdAt                DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, personaId, fecha])
+  @@index([tenantId, fecha])
+  @@index([tenantId, instalacionId, fecha])
+  @@map("dias")
   @@schema("asistencia")
 }

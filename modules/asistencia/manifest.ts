@@ -19,13 +19,17 @@ export const manifest = defineModule({
     { id: "asistencia:configurar", descripcion: "Configurar Asistencia: canales, geocerca, plazos y alertas" },
     { id: "asistencia:reportes", descripcion: "Ver y exportar los reportes de asistencia" },
   ],
-  navegacion: [],
+  navegacion: [
+    { portal: "erp", href: "/asistencia", etiqueta: "Asistencia", icono: "UserCheck", area: "operaciones", orden: 50, permiso: "asistencia:ver" },
+  ],
   configuracion: ajustesAsistencia,
   eventos: [
     { id: "asistencia.marca.registrada", descripcion: "Se registró una marca legal de asistencia." },
     { id: "asistencia.cadena.rota", descripcion: "La verificación diaria encontró la cadena de marcas rota." },
     { id: "asistencia.correccion.propuesta", descripcion: "Se propuso corregir una marca; se avisa al trabajador." },
     { id: "asistencia.correccion.respondida", descripcion: "El trabajador aceptó u objetó una corrección, o venció el plazo." },
+    { id: "asistencia.contingencia.propuesta", descripcion: "Se propuso una marca de contingencia; se avisa al trabajador." },
+    { id: "asistencia.contingencia.respondida", descripcion: "El trabajador aceptó u objetó una marca de contingencia." },
     { id: "asistencia.alerta.sin_marca_inicio", descripcion: "Pasaron 30 minutos del inicio del turno sin marca de entrada." },
     { id: "asistencia.alerta.sin_marca_termino", descripcion: "El turno terminó sin marca de salida." },
     { id: "asistencia.aviso.compensables", descripcion: "Aviso de horas compensables cada 30 días." },

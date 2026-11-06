@@ -25,7 +25,7 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
   const medidor = { registrar: async () => undefined };
   const T = { a: "", b: "", inst: "", persona: "", userPersona: randomUUID() };
 
-  const ctx = (tenantId: string, portal = "erp", id = randomUUID()) =>
+  const ctx = (tenantId: string, portal = "erp", id: string = randomUUID()) =>
     mod.crearContexto({ tenantId, actor: { tipo: "user", id }, usuario: { id, nombre: "Rrhh", email: "rrhh@empresa.cl", platformRole: null }, portal, portalesMembresia: [portal], rol: "owner", modulosActivos: ["asistencia"], medidor });
   const run = (c: ReturnType<typeof ctx>, id: string, input: unknown, o = {}) => mod.executeCapability(c, id, input, o) as Promise<Res>;
   const sistema = (tenantId: string) => mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor });
@@ -44,6 +44,9 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     run(ctx(tenant, "terreno"), "asistencia.marcas.registrar", { personaId: persona, instalacionId: inst, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID() });
   const enlace = async (tenant: string, correccionId: string, token: string) =>
     e.admin.correccionEnlace.create({ data: { tenantId: tenant, correccionId, tokenHash: sha(token), venceEn: new Date(Date.now() + 86_400_000) } });
+
+  const evidencia = async (tenant: string) =>
+    (await e.admin.documento.create({ data: { tenantId: tenant, nombre: "evidencia.pdf", mime: "application/pdf", tamano: 10, storageKey: `qa/${randomUUID()}`, creadoPorTipo: "user" } })).id;
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -64,14 +67,14 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     const m = await marcar(T.a, T.persona, T.inst);
     marcaId = m.data.marca.id;
     const hora = new Date(Date.now() - 3_600_000).toISOString();
-    const r = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId, horaPropuesta: hora, tipoPropuesto: "entrada", motivo: "El reloj del equipo estaba atrasado" });
+    const r = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId, horaPropuesta: hora, tipoPropuesto: "entrada", motivo: "El reloj del equipo estaba atrasado", evidenciaDocumentoId: await evidencia(T.a) });
     expect(r.ok, JSON.stringify(r)).toBe(true);
     correccionId = r.data.correccionId;
     expect(await e.admin.marca.count({ where: { id: marcaId } })).toBe(1);
-    const otra = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId, horaPropuesta: hora, tipoPropuesto: "entrada", motivo: "Otra propuesta distinta" });
+    const otra = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId, horaPropuesta: hora, tipoPropuesto: "entrada", motivo: "Otra propuesta distinta", evidenciaDocumentoId: await evidencia(T.a) });
     expect(otra.ok).toBe(false);
     expect(otra.error?.code).toBe("CONFLICT");
-    const sinMotivo = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId, horaPropuesta: hora, tipoPropuesto: "entrada", motivo: "no" });
+    const sinMotivo = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId, horaPropuesta: hora, tipoPropuesto: "entrada", motivo: "no", evidenciaDocumentoId: await evidencia(T.a) });
     expect(sinMotivo.ok).toBe(false);
   });
 
@@ -103,7 +106,7 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
 
   it("sin respuesta en el plazo la corrección vence (una sola vez, con reloj simulado)", async () => {
     const m2 = await marcar(T.a, T.persona, T.inst);
-    const r = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId: m2.data.marca.id, horaPropuesta: new Date(Date.now() - 7_200_000).toISOString(), tipoPropuesto: "salida", motivo: "Se olvidó marcar la salida a tiempo" });
+    const r = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId: m2.data.marca.id, horaPropuesta: new Date(Date.now() - 7_200_000).toISOString(), tipoPropuesto: "salida", motivo: "Se olvidó marcar la salida a tiempo", evidenciaDocumentoId: await evidencia(T.a) });
     expect(r.ok, JSON.stringify(r)).toBe(true);
     const antes = (await trabajoVencerCorrecciones.ejecutar(sistema(T.a), {})) as { vencidas: number };
     expect(antes.vencidas).toBe(0);
@@ -115,20 +118,33 @@ describe.skipIf(!urlPropietario)("Asistencia · correcciones, contingencia y ale
     expect(await e.admin.correccionRespuesta.count({ where: { tenantId: T.a, resultado: "vencida" } })).toBe(1);
   });
 
-  it("contingencia: no cuenta hasta que otra persona la acepta; quien la registró no la resuelve", async () => {
+  it("la corrección sin evidencia se rechaza", async () => {
+    const m = await marcar(T.a, T.persona, T.inst);
+    const r = await run(ctx(T.a), "asistencia.correcciones.proponer", { marcaId: m.data.marca.id, horaPropuesta: new Date().toISOString(), tipoPropuesto: "salida", motivo: "Sin evidencia adjunta" });
+    expect(r.ok).toBe(false);
+  });
+
+  it("contingencia: RR. HH. propone con evidencia; solo el trabajador la acepta y recién ahí cuenta", async () => {
     const autor = randomUUID();
-    const reg = await run(ctx(T.a, "erp", autor), "asistencia.contingencias.registrar", {
-      personaId: T.persona, instalacionId: T.inst, tipo: "salida", horaDeclarada: new Date(Date.now() - 600_000).toISOString(), motivo: "Caída del sistema durante el turno",
-    });
+    const base = { personaId: T.persona, instalacionId: T.inst, tipo: "salida", horaDeclarada: new Date(Date.now() - 600_000).toISOString(), motivo: "Caída del sistema durante el turno" };
+    const sin = await run(ctx(T.a, "erp", autor), "asistencia.contingencias.registrar", base);
+    expect(sin.ok).toBe(false);
+    const reg = await run(ctx(T.a, "erp", autor), "asistencia.contingencias.registrar", { ...base, evidenciaDocumentoId: await evidencia(T.a) });
     expect(reg.ok, JSON.stringify(reg)).toBe(true);
-    const antes = await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia" } });
-    expect(antes).toBe(0);
-    const mismo = await run(ctx(T.a, "erp", autor), "asistencia.contingencias.resolver", { contingenciaId: reg.data.id, decision: "aceptada" });
-    expect(mismo.ok).toBe(false);
-    const otro = await run(ctx(T.a), "asistencia.contingencias.resolver", { contingenciaId: reg.data.id, decision: "aceptada" });
-    expect(otro.ok, JSON.stringify(otro)).toBe(true);
+    expect(await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia" } })).toBe(0);
+    // RR. HH. ya no resuelve: la capacidad no existe para ellos.
+    const rrhh = await run(ctx(T.a), "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "aceptada" });
+    expect(rrhh.ok).toBe(false);
+    const u = await e.admin.user.create({ data: { name: "Pía", email: `pia-${randomUUID().slice(0, 8)}@prueba.cl` } });
+    await e.admin.membership.create({ data: { tenantId: T.a, userId: u.id, rol: "viewer", portales: ["trabajador"], estado: "activa" } });
+    await e.admin.persona.update({ where: { id: T.persona }, data: { usuarioId: u.id } });
+    const trabajador = ctx(T.a, "trabajador", u.id);
+    const sinComentario = await run(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "rechazada" });
+    expect(sinComentario.ok).toBe(false);
+    const ok = await run(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "aceptada" });
+    expect(ok.ok, JSON.stringify(ok)).toBe(true);
     expect(await e.admin.marca.count({ where: { tenantId: T.a, origen: "contingencia" } })).toBe(1);
-    const dos = await run(ctx(T.a), "asistencia.contingencias.resolver", { contingenciaId: reg.data.id, decision: "rechazada" });
+    const dos = await run(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "rechazada", comentario: "Ya no" });
     expect(dos.ok).toBe(false);
   });
 

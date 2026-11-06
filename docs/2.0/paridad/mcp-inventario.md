@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 605 pares pantalla→capacidad · 543 con herramienta · 62 excepciones justificadas · 0 faltantes.
+**Resumen:** 606 pares pantalla→capacidad · 544 con herramienta · 62 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -480,6 +480,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
+| erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.set_autonomia` | — | excepción |
@@ -671,6 +672,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | --- | --- |
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
+| `asistencia.contingencias.responder` | Solo personas: aceptar u objetar una contingencia propuesta a su nombre es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder` | Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
 | `asistencia.correcciones.ver_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial. |
@@ -750,6 +752,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente`, `app/_components` | no | reservada a personas |
+| `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.marcas.registrar` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
@@ -809,12 +812,15 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
-- `asistencia.contingencias.resolver`
 - `asistencia.correcciones.listar`
 - `asistencia.correcciones.proponer`
+- `asistencia.dias.listar`
+- `asistencia.dias.recalcular`
+- `asistencia.dias.resumen_periodo`
 - `asistencia.incidentes.cerrar`
 - `asistencia.incidentes.listar`
 - `asistencia.incidentes.registrar`
+- `asistencia.jornadas.fijar_tipo`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
 - `comercial.informes.cierre`
@@ -874,6 +880,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.cobros.fijar_fecha_esperada`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
+- `finanzas.flujo.postergar_iva`
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
 - `finanzas.reportes.resultados`

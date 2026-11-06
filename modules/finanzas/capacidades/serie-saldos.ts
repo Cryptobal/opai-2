@@ -5,9 +5,11 @@ import { calcularPlanilla, semanasDesde, sumarSemanas, type CeldaFlujo } from ".
 import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { celdasCobrosEsperados } from "./cobros-esperados";
+import { celdasAbonosSemana } from "./abonos-semana";
+import { movidosDeLaSemana } from "./semana-en-curso";
+import { celdasDiferenciaFactoring, celdasImpuestos } from "./impuestos-planilla";
 import { FILAS_VIRTUALES_DOMINIO } from "./filas-virtuales";
-import { aNumeroSeguro } from "./esquemas";
-import { aFecha, aIso, cargarFlujo, hoyIso, lunesHoy } from "./util";
+import { aIso, cargarFlujo, lunesHoy } from "./util";
 import type { ajustesDe } from "./util";
 
 /** Semanas de historia que la planilla de escritorio muestra antes de la semana en curso. */
@@ -60,8 +62,12 @@ export async function serieSaldos(
     tx,
   );
   const cobros = await celdasCobrosEsperados(ctx, listaCalc);
-  const celdasCalc = [...pasada.dominio, ...cobros.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista];
+  const impuestos = await celdasImpuestos(ctx, listaCalc);
+  // Lo movido esta semana que el saldo del banco ya incluye: la apertura lo resta y los abonos vuelven como ingreso real.
+  const movidos = await movidosDeLaSemana(db, banco, hoy);
+  const abonos = await celdasAbonosSemana(ctx, hoy, movidos, tx);
+  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio];
+  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,
@@ -70,18 +76,7 @@ export async function serieSaldos(
   };
   // Saldo al comenzar la semana en curso: por cada cuenta que suma en el saldo del banco, su saldo menos lo movido
   // esta semana hasta la fecha de ESE saldo (lo posterior no está en él) y no más allá de hoy.
-  const movidos = await db.movimientoBancario.findMany({
-    where: {
-      estado: { not: "ignorado" },
-      cuentaId: { in: banco.cuentasConSaldo.map((c) => c.cuentaId) },
-      fecha: { gte: aFecha(hoy), lte: aFecha(hoyIso()) },
-    },
-    select: { cuentaId: true, fecha: true, monto: true },
-  });
-  const corte = new Map(banco.cuentasConSaldo.map((c) => [c.cuentaId, c.fecha] as const));
-  const yaIncluido = movidos
-    .filter((m) => aIso(m.fecha) <= (corte.get(m.cuentaId) ?? ""))
-    .reduce((t, m) => t + aNumeroSeguro(m.monto), 0);
+  const yaIncluido = movidos.reduce((t, m) => t + m.monto, 0);
   const aperturaSemana = banco.saldo - yaIncluido;
   const inicialSinAncla = calcularPlanilla({ ...base, saldoInicial: 0 }).find((s) => s.semana === hoy)?.saldoInicial ?? 0;
   const calc = calcularPlanilla({ ...base, saldoInicial: aperturaSemana - inicialSinAncla });
@@ -95,6 +90,7 @@ export async function serieSaldos(
     extraVista: extraVista.filter((c) => enVentana.has(c.semana)),
     ...cargado,
     celdas: cargado.celdas.filter((c) => enVentana.has(aIso(c.semana))),
+    avisos: cobros.avisos,
     banco: { ...banco, fuente: "banco" as FuenteSaldo },
   };
 }
@@ -135,8 +131,9 @@ async function serieDesdeAjustes(
     tx,
   );
   const cobros = await celdasCobrosEsperados(ctx, lista);
-  const celdasCalc = [...pasada.dominio, ...cobros.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista];
+  const impuestos = await celdasImpuestos(ctx, lista);
+  const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio];
+  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const calculo = calcularPlanilla({
     saldoInicial: saldoPrevio,
     umbral: ajustes.umbral,
@@ -144,5 +141,5 @@ async function serieDesdeAjustes(
     filas: [...cargado.dominio, ...FILAS_VIRTUALES_DOMINIO],
     celdas: celdasCalc,
   });
-  return { hoy, lista, calculo, extraVista, ...cargado, banco: { ...banco, fuente: "ajustes" as FuenteSaldo } };
+  return { hoy, lista, calculo, extraVista, ...cargado, avisos: cobros.avisos, banco: { ...banco, fuente: "ajustes" as FuenteSaldo } };
 }
