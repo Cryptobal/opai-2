@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 606 pares pantalla→capacidad · 544 con herramienta · 62 excepciones justificadas · 0 faltantes.
+**Resumen:** 619 pares pantalla→capacidad · 548 con herramienta · 71 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -48,6 +48,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `agente.modelos.list` | `agente_modelos_list` | existe |
 | compartido | `app/_components` | `agente.plan.confirmar` | — | excepción |
 | compartido | `app/_components` | `agente.turno.preparar` | — | excepción |
+| compartido | `app/_components` | `asistencia.biometria.enrolar` | — | excepción |
+| compartido | `app/_components` | `asistencia.biometria.iniciar_vida` | — | excepción |
+| compartido | `app/_components` | `asistencia.biometria.mi_estado` | `asistencia_biometria_mi_estado` | existe |
+| compartido | `app/_components` | `asistencia.consentimientos.aceptar` | — | excepción |
+| compartido | `app/_components` | `asistencia.consentimientos.revocar` | — | excepción |
+| compartido | `app/_components` | `asistencia.consentimientos.textos` | `asistencia_consentimientos_textos` | existe |
+| compartido | `app/_components` | `asistencia.marcas.registrar` | — | excepción |
 | compartido | `app/_components` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | compartido | `app/_components` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/_components` | `core.actividades.completar` | `core_actividades_completar` | existe |
@@ -403,6 +410,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.refuerzos.agregar` | `pauta_refuerzos_agregar` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.resumen.leer` | `pauta_resumen_leer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `asistencia.biometria.dar_de_baja` | — | excepción |
+| compartido | `app/(erp)/personas/_componentes` | `asistencia.biometria.enrolar_rrhh` | — | excepción |
+| compartido | `app/(erp)/personas/_componentes` | `asistencia.biometria.estado` | `asistencia_biometria_estado` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `asistencia.consentimientos.registrar` | — | excepción |
+| compartido | `app/(erp)/personas/_componentes` | `asistencia.consentimientos.textos` | `asistencia_consentimientos_textos` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `asistencia.telefono.habilitar` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.asignar_pin` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.estado` | `core_credenciales_terreno_estado` | existe |
@@ -674,12 +687,20 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | --- | --- |
 | `agente.plan.confirmar` | Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo. |
 | `agente.turno.preparar` | Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente. |
+| `asistencia.biometria.dar_de_baja` | Solo personas: destruye datos biométricos de forma irreversible (L-14, L-15); la baja la decide RR. HH. o el propio trabajador, no un agente. |
+| `asistencia.biometria.enrolar` | Solo personas: el rostro es un dato biométrico sensible (Ley 21.719); un agente nunca enrola a un trabajador. Lo hace la propia persona con prueba de vida. |
+| `asistencia.biometria.enrolar_rrhh` | Solo personas: enrolar un rostro exige a la persona presente frente a la cámara con prueba de vida; un agente no puede hacerlo. |
+| `asistencia.biometria.iniciar_vida` | Solo personas: la prueba de vida la completa la cámara del dispositivo de quien marca o se enrola, y cada sesión tiene costo (CAR-89 · B4). |
+| `asistencia.consentimientos.aceptar` | Solo personas: el consentimiento expreso lo da el propio trabajador (L-13, T-04); un agente nunca consiente por él. |
+| `asistencia.consentimientos.registrar` | Solo personas: registra un consentimiento escrito que firmó el trabajador; un agente no puede atestiguarlo. |
+| `asistencia.consentimientos.revocar` | Solo personas: la revocación es un derecho personal del trabajador y borra su biometría (L-14). |
 | `asistencia.contingencias.responder` | Solo personas: aceptar u objetar una contingencia propuesta a su nombre es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder` | Solo personas: aceptar u objetar una corrección es un acto del propio trabajador; un agente nunca responde por él (ADR-023). |
 | `asistencia.correcciones.responder_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; exige el token y el RUT del trabajador, y falla cerrada. |
 | `asistencia.correcciones.ver_enlace` | Interna: la página pública `/correccion/<slug>/<token>` la ejecuta sin sesión; el token de un solo uso del correo personal del trabajador es la credencial. |
 | `asistencia.marcas.registrar` | Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador. |
 | `asistencia.marcas.verificar` | Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante. |
+| `asistencia.telefono.habilitar` | Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes. |
 | `comercial.canales.rotar_token_formulario` | Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant. |
 | `comercial.importar_1_0` | Solo personas: carga masiva desde un export JSON de 1.0; gobierno de datos del tenant (CAR-25). |
 | `comercial.seguimientos.recibir_correo` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67). |
@@ -754,9 +775,17 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | --- | --- | --- | --- |
 | `agente.plan.confirmar` | `/api/agente`, `app/_components` | no | reservada a personas |
 | `agente.turno.preparar` | `/api/agente`, `app/_components` | no | reservada a personas |
+| `asistencia.biometria.dar_de_baja` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `asistencia.biometria.enrolar` | `app/_components` | no | reservada a personas |
+| `asistencia.biometria.enrolar_rrhh` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `asistencia.biometria.iniciar_vida` | `app/_components` | no | reservada a personas |
+| `asistencia.consentimientos.aceptar` | `app/_components` | no | reservada a personas |
+| `asistencia.consentimientos.registrar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `asistencia.consentimientos.revocar` | `app/_components` | no | reservada a personas |
 | `asistencia.contingencias.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
 | `asistencia.correcciones.responder` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
-| `asistencia.marcas.registrar` | sin pantalla todavía · CAR-89 · desde 2026-11-10 | no | reservada a personas |
+| `asistencia.marcas.registrar` | `app/_components` | no | reservada a personas |
+| `asistencia.telefono.habilitar` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `comercial.canales.rotar_token_formulario` | `app/(erp)/configuracion/_leads` | no | reservada a personas |
 | `comercial.importar_1_0` | `app/(erp)/configuracion/_comercial` | no | reservada a personas |
 | `core.anexos.aprobar` | `app/_components` | no | reservada a personas |

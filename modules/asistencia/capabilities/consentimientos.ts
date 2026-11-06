@@ -102,3 +102,16 @@ export const consentimientosRevocar = defineCapability({
     return { revocado: true, biometriaBorrada: borrada };
   },
 });
+
+export const consentimientosTextos = defineCapability({
+  id: "asistencia.consentimientos.textos",
+  descripcion:
+    "Textos vigentes de los consentimientos de Asistencia (uso del rostro y del teléfono personal) con su versión, tal como se muestran y se aceptan. Sirve para que la persona los lea antes de consentir.",
+  permiso: null,
+  portales: ["erp", "terreno", "trabajador"],
+  input: z.object({}),
+  output: z.array(z.object({ tipo: z.enum(TIPOS_CONSENTIMIENTO), version: z.string(), texto: z.string() })),
+  efecto: "lectura",
+  dryRun: false,
+  handler: async () => TIPOS_CONSENTIMIENTO.map((tipo) => ({ tipo, version: VERSION_CONSENTIMIENTO[tipo], texto: TEXTO_CONSENTIMIENTO[tipo] })),
+});

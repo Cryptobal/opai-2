@@ -17,7 +17,7 @@ import { biometriaEnrolar, biometriaEnrolarRrhh } from "./biometria-enrolar";
 import { biometriaDarDeBaja, biometriaEstado, biometriaMiEstado } from "./biometria-gestion";
 import { trabajoSuprimirBiometria } from "./biometria-trabajo";
 import { biometriaIniciarVida } from "./biometria-vida";
-import { consentimientosAceptar, consentimientosRegistrar, consentimientosRevocar } from "./consentimientos";
+import { consentimientosAceptar, consentimientosRegistrar, consentimientosRevocar, consentimientosTextos } from "./consentimientos";
 import { telefonoHabilitar } from "./telefono";
 import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incidentes";
 import { marcasObtener, marcasListar } from "./lecturas";
@@ -34,6 +34,6 @@ export const capacidades = [
   contingenciasRegistrar, contingenciasListar, contingenciasResponder,
   incidentesRegistrar, incidentesCerrar, incidentesListar,
   biometriaIniciarVida, biometriaEnrolar, biometriaEnrolarRrhh, biometriaDarDeBaja, biometriaEstado, biometriaMiEstado,
-  consentimientosAceptar, consentimientosRegistrar, consentimientosRevocar, telefonoHabilitar,
+  consentimientosAceptar, consentimientosRegistrar, consentimientosRevocar, consentimientosTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
 ];

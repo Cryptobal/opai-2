@@ -13,6 +13,8 @@ const estadoSchema = z.object({
   enroladoEn: z.string().nullable(),
   consentimientos: z.array(z.object({ tipo: z.enum(TIPOS_CONSENTIMIENTO), vigente: z.boolean(), version: z.string().nullable() })),
   telefonoPersonalHabilitado: z.boolean(),
+  /** Solo en `mi_estado`: la propia persona y su instalación, para marcar. */
+  yo: z.object({ personaId: z.string(), instalacionId: z.string().nullable(), instalacionNombre: z.string().nullable() }).nullable(),
 });
 
 async function estadoDe(ctx: Contexto, personaId: string) {
@@ -29,6 +31,7 @@ async function estadoDe(ctx: Contexto, personaId: string) {
       return { tipo, vigente: !!c && c.version === VERSION_CONSENTIMIENTO[tipo], version: c?.version ?? null };
     }),
     telefonoPersonalHabilitado: cred?.telefonoPersonalHabilitado ?? false,
+    yo: null as { personaId: string; instalacionId: string | null; instalacionNombre: string | null } | null,
   };
 }
 
@@ -58,7 +61,12 @@ export const biometriaMiEstado = defineCapability({
   output: estadoSchema,
   efecto: "lectura",
   dryRun: false,
-  handler: async (ctx) => estadoDe(ctx, (await personaPropia(ctx)).id),
+  async handler(ctx) {
+    const p = await personaPropia(ctx);
+    const v = await ctx.db.vinculoLaboral.findFirst({ where: { personaId: p.id, estado: "vigente" }, select: { instalacionId: true } });
+    const inst = v?.instalacionId ? await ctx.db.instalacion.findUnique({ where: { id: v.instalacionId }, select: { id: true, nombre: true } }) : null;
+    return { ...(await estadoDe(ctx, p.id)), yo: { personaId: p.id, instalacionId: inst?.id ?? null, instalacionNombre: inst?.nombre ?? null } };
+  },
 });
 
 export const biometriaDarDeBaja = defineCapability({
