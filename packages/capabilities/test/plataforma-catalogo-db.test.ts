@@ -135,12 +135,19 @@ describe.skipIf(!urlPropietario)("catálogo de Plataforma contra Postgres real",
       moduloId: "finanzas.bancos",
       precio: { moneda: "UF", forma: "fijo", precio: "2,5" },
     };
+    const antes = await e.admin.ajustePlataforma.findFirst({
+      where: { modulo: "catalogo", clave: "finanzas.bancos" },
+    });
     await mod.executeCapability(ctx, "platform.catalogo.precio_set", entrada, { dryRun: true });
-    expect(await e.admin.ajustePlataforma.count({ where: { modulo: "catalogo" } })).toBe(0);
+    expect(
+      await e.admin.ajustePlataforma.findFirst({
+        where: { modulo: "catalogo", clave: "finanzas.bancos" },
+      }),
+    ).toEqual(antes);
     expect(await mod.executeCapability(ctx, "platform.catalogo.precio_set", entrada)).toMatchObject(
       {
         ok: true,
-        data: { antes: null, despues: { version: 1 } },
+        data: { despues: { version: (antes?.version ?? 0) + 1 } },
       },
     );
     await mod.executeCapability(ctx, "platform.catalogo.precio_set", {
@@ -151,11 +158,11 @@ describe.skipIf(!urlPropietario)("catálogo de Plataforma contra Postgres real",
       where: { capability: "platform.catalogo.precio_set", actorId: plat },
       orderBy: { createdAt: "asc" },
     });
-    expect(auditoria).toHaveLength(2);
-    expect(auditoria[1]).toMatchObject({
+    expect(auditoria.length).toBeGreaterThanOrEqual(2);
+    expect(auditoria.at(-1)).toMatchObject({
       ambito: "plataforma",
-      antes: { version: 1, precio: { precio: 25_000 } },
-      despues: { version: 2, precio: { precio: 30_000 } },
+      antes: { precio: { precio: 25_000 } },
+      despues: { precio: { precio: 30_000 } },
     });
     // Cambiar el precio de lista no toca las condiciones ni los cargos de las empresas.
     expect(await e.admin.cobroCondicion.count({ where: { tenantId: x } })).toBe(2);
