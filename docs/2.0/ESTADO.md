@@ -257,3 +257,5 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 - Comercial actividad y seguimiento PR 2 (presupuesto de JS, 4-nov): sube el tope de 42 rutas, casi todas entre 0,1 y 1,5 KB (la mayor, +8,9 KB, en las fichas de cuenta/negocio que ahora cargan etiquetas, tarjetas de actividad y la hoja de seguimiento). Cada tope queda en lo medido, redondeado hacia arriba. Pendiente: medir qué parte del aumento común viene del menú «Pendientes» y de `ChipsEtiquetas`, y cargar en diferido lo que no se usa al abrir la pantalla.
 
 - CAR-154: «Probar conexión» de la integración de cesión (Octava) pide el token con el RUT y la contraseña guardados (`core.integraciones.probar`); no cede ni emite nada.
+
+- CAR-154 (pendientes de Octava): guardar usuario o clave de `dte_cesion` descarta `token_sesion` (la prueba ya no da falso positivo); el error de ObtenerToken se recorta a 200 caracteres; test de aislamiento entre empresas del token.

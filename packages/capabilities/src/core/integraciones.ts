@@ -132,6 +132,12 @@ export const integracionesSetSecreto = defineCapability({
       update: { modalidad: "propia", estado: "configurada", ultimoError: null },
     });
     await guardarSecreto(ctx, fila.id, input.nombre, input.valor);
+    // Con otras credenciales de Octava, el token guardado ya no vale: se descarta para revalidar.
+    if (def.id === "dte_cesion") {
+      await ctx.db.secreto.deleteMany({
+        where: { tenantId: ctx.tenantId, integracionId: fila.id, nombre: "token_sesion" },
+      });
+    }
     return { proveedor: def.id, nombre: input.nombre, mascara };
   },
 });
