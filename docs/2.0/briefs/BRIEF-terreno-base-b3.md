@@ -9,7 +9,7 @@ Un equipo de terreno ya emparejado (B2) abre Terreno, el guardia elige su nombre
 ## Qué entra
 
 - **`core.hechos_terreno`** (append-only para `opai_app`: solo `SELECT` e `INSERT`): lo que el equipo envía, con `clave` (idempotencia), `tipo`, `payload`, `hora_hecho` (reloj del dispositivo), `hora_envio` (reloj del dispositivo al enviar), `recibido_en` (servidor), `desfase_ms`, `hora_corregida`, la persona elegida en «¿Quién eres?» y el dispositivo. Único por `(tenant_id, dispositivo_id, clave)`.
-- **Tipos encolables (lista blanca) en `packages/domain`:** cada módulo de terreno declara los suyos con su esquema en su propio PR (Rondas, Asistencia, Novedades, Acceso). B3 trae solo `terreno.latido` (el equipo avisa que estuvo activo, sin datos personales) para probar de punta a punta. Un tipo que no está en la lista se rechaza y el resto del lote sigue.
+- **Tipos encolables (lista blanca) en `packages/capabilities`:** cada módulo de terreno declara los suyos con su esquema en su propio PR (Rondas, Asistencia, Novedades, Acceso). B3 trae solo `terreno.latido` (el equipo avisa que estuvo activo, sin datos personales) para probar de punta a punta. Un tipo que no está en la lista se rechaza y el resto del lote sigue.
 - **Capacidades:** `core.hechos_terreno.recibir` (interna: el equipo no tiene sesión; su cookie es la credencial) y `core.hechos_terreno.listar` (con herramienta MCP, alcance por instalación, lectura auditada). `core.personas_terreno.listar` (interna) alimenta «¿Quién eres?» con nombre y cargo de quienes tienen vínculo activo en la instalación del equipo.
 - **Ruta `POST /api/terreno/lote`:** cookie del dispositivo, hasta 50 hechos y 256 KB por lote, tope por dispositivo (fallo cerrado). Responde por hecho: `recibido`, `duplicado` o `rechazado` (con motivo). Un equipo revocado recibe 401 y no escribe nada.
 - **Cola local:** IndexedDB `opai-terreno` y envío desde `public/sw.js` (Background Sync `opai-terreno-lote`, mensaje de la página y evento `online`), con reintento y espera creciente. Los hechos viajan con su `clave`; reenviar es seguro.
@@ -26,5 +26,10 @@ Un equipo de terreno ya emparejado (B2) abre Terreno, el guardia elige su nombre
 
 ## Criterios
 
-- Pruebas: dominio (lista blanca, desfase), `hechos-terreno-db.test.ts` (capacidades; dos empresas, idempotencia, equipo revocado, tipo no permitido, append-only), e2e en modo avión (el hecho llega una vez al recuperar la señal), presupuesto de JS por ruta.
+- Pruebas: dominio (desfase, plausibilidad), lista blanca, `hechos-terreno-db.test.ts` (capacidades; dos empresas, idempotencia, equipo revocado, tipo no permitido, append-only), e2e en modo avión (el hecho llega una vez al recuperar la señal), presupuesto de JS por ruta.
 - Paridad: instantánea MCP e inventario regenerados; las capacidades internas con su motivo.
+
+## Pendientes abiertos (registrados al construir)
+
+- **Arranque en frío sin conexión:** el HTML de Terreno lleva nombres de personas y no se precachea (ADR-044 R4); sin señal y sin la página en memoria se ve `/sin-conexion`. Una vez abierto con señal, la cola y el inicio siguen funcionando.
+- **Presupuesto de JS:** las rutas de Terreno pesan 162–166 KB (piso común del shell ~130 KB); el objetivo de 150 KB necesita un recorte del shell, fuera de B3.
