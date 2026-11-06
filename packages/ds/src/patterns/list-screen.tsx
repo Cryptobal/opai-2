@@ -51,7 +51,10 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
   const filaBase = "flex w-full items-start gap-3 px-4 py-3.5 text-left";
   return (
     <section>
-      {props.sinCabecera ? null : (
+      {props.sinCabecera ? (
+        // Sin cabecera de título la acción principal igual se ve: va sola, alineada a la derecha.
+        accionPrincipal ? <div className="mb-3 flex justify-end">{accionPrincipal}</div> : null
+      ) : (
         <Cabecera
           titulo={titulo}
           {...(subtitulo ? { subtitulo } : {})}
