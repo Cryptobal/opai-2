@@ -5,7 +5,7 @@ import { identidadActual } from "@/lib/servidor";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
-import { cargarMias } from "./datos";
+import { cargarAdministrador, cargarMias } from "./datos";
 import { ListaRendiciones } from "./lista";
 import { PestanasRendiciones } from "./pestanas";
 import { BASE, PESTANAS, type PestanaId, type PortalRendicion } from "./tipos";
@@ -27,22 +27,27 @@ export function PaginaMisRendiciones({
       ruta={`${base}${def.segmento}`}
       cargar={async () => {
         try {
-          return { todas: await cargarMias(portal), empresa: null };
+          return { todas: await cargarMias(portal), empresa: null, admin: null };
         } catch (e) {
           if (!(e instanceof CargaFallida) || e.code !== "FORBIDDEN") throw e;
           return {
             todas: [],
             empresa: (await identidadActual())?.actual?.tenant.nombre ?? "tu empresa",
+            admin: await cargarAdministrador(portal),
           };
         }
       }}
     >
-      {({ todas, empresa }) => {
+      {({ todas, empresa, admin }) => {
         if (empresa)
           return (
             <Forbidden
               titulo="No tienes acceso a Rendiciones"
-              descripcion={`Necesitas el permiso Rendir. Pídele acceso al administrador de ${empresa}.`}
+              descripcion={
+                admin
+                  ? `Necesitas el permiso Rendir. Pídele acceso a ${admin}, administrador de ${empresa}.`
+                  : `Necesitas el permiso Rendir. Pídele acceso al administrador de ${empresa}.`
+              }
             />
           );
         const items = todas.filter((r) => r.estado === def.estado);

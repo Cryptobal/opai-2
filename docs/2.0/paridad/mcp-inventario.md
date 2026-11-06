@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 596 pares pantalla→capacidad · 539 con herramienta · 57 excepciones justificadas · 0 faltantes.
+**Resumen:** 598 pares pantalla→capacidad · 541 con herramienta · 57 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -90,6 +90,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
 | compartido | `app/_components` | `rendiciones.opciones.obtener` | `rendiciones_opciones_obtener` | existe |
@@ -99,6 +100,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.rendiciones.enviar` | `rendiciones_rendiciones_enviar` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.listar` | `rendiciones_rendiciones_listar` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
+| compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
