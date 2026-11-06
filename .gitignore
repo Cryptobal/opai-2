@@ -32,3 +32,5 @@ apps/web/playwright-report/
 
 # respaldos locales de scripts de datos (ids internos)
 respaldo-dividir-dotacion-*.json
+
+respaldo-cobertura-*.json

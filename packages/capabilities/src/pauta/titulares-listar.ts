@@ -34,6 +34,8 @@ export const titularesListar = defineCapability({
     titularActualId: z.string().nullable(),
     items: z.array(itemSchema),
     candidatos: z.array(z.object({ id: z.string(), nombre: z.string() })),
+    /** Puestos activos con patrón a los que se puede trasladar al titular (de cualquier instalación en alcance). */
+    destinos: z.array(z.object({ id: z.string(), etiqueta: z.string() })),
   }),
   auditarLectura: (s) => [
     ...new Set([...s.items.map((i) => i.titularId), ...s.candidatos.map((c) => c.id)].filter((i): i is string => !!i)),
@@ -47,7 +49,7 @@ export const titularesListar = defineCapability({
       select: { id: true, instalacionId: true, patronId: true, estado: true },
     });
     if (!puesto) throw noEncontrado("El puesto");
-    const [series, lineas, candidatos, hoyCivil] = await Promise.all([
+    const [series, lineas, candidatos, hoyCivil, destinos] = await Promise.all([
       ctx.db.seriePauta.findMany({
         where: { puestoId },
         orderBy: { vigenteDesde: "desc" },
@@ -60,6 +62,14 @@ export const titularesListar = defineCapability({
       }),
       puesto.estado === "activo" ? candidatosDeInstalacion(ctx, puesto.instalacionId) : Promise.resolve([]),
       hoy(ctx),
+      puesto.estado === "activo"
+        ? ctx.db.puesto.findMany({
+            where: { estado: "activo", patronId: { not: null }, id: { not: puestoId }, AND: [dondePuesto(ctx)] },
+            select: { id: true, nombre: true, instalacion: { select: { nombre: true } } },
+            orderBy: [{ instalacion: { nombre: "asc" } }, { nombre: "asc" }],
+            take: 300,
+          })
+        : Promise.resolve([]),
     ]);
     const nombres = await nombresDePersonas(ctx, series.map((s) => s.titularPersonaId));
     const patrones = new Map(
@@ -96,6 +106,7 @@ export const titularesListar = defineCapability({
       titularActualId: vigente?.titularId ?? null,
       items,
       candidatos,
+      destinos: destinos.map((d) => ({ id: d.id, etiqueta: `${d.nombre} · ${d.instalacion.nombre}` })),
     };
   },
 });
