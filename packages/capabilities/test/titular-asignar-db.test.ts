@@ -197,6 +197,31 @@ describe.skipIf(!urlPropietario)("Pauta · asignar titular (Postgres real)", () 
     expect(puestoDe(await e.admin.vinculoLaboral.findMany({ where: { tenantId: t.A, personaId: per.b } }))).toEqual([]);
   });
 
+  it("alcance: un supervisor sin la instalación no ve ni asigna (no encontrado)", async () => {
+    const inst = (await e.admin.puesto.findUniqueOrThrow({ where: { id: p.dia } })).instalacionId;
+    const sup = (alcance: string[]) =>
+      mod.crearContexto({ tenantId: t.A, actor: { tipo: "user", id: randomUUID() }, portal: "erp", portalesMembresia: ["erp"], rol: "supervisor", alcance: { instalaciones: alcance }, modulosActivos: ["pauta"], medidor });
+    const fuera = sup([randomUUID()]);
+    expect(await run(fuera, "pauta.titulares.listar", { puestoId: p.dia })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await run(fuera, "pauta.titular.asignar", { puestoId: p.dia, titularPersonaId: null, desde: dia(50) })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect((await run(sup([inst]), "pauta.titulares.listar", { puestoId: p.dia })).ok).toBe(true);
+  });
+
+  it("quitar no exige patrón activo y pauta.series.fijar deja vínculo y cobertura al día", async () => {
+    const base = await e.admin.puesto.findUniqueOrThrow({ where: { id: p.dia } });
+    const pat = await e.admin.patronTurno.create({ data: { tenantId: t.A, nombre: "6x1 viejo", diasTrabajo: 6, diasDescanso: 1 } });
+    const q = (await e.admin.puesto.create({ data: { tenantId: t.A, instalacionId: base.instalacionId, cargoId: base.cargoId, nombre: "Vía serie", diasTrabajo: 6, diasDescanso: 1, horaInicio: "08:00", horaFin: "20:00", patronId: pat.id } })).id;
+    const y = (await e.admin.persona.create({ data: { tenantId: t.A, nombres: "Serie", apellidos: "Prueba", rut: "18.181.818-1", estado: "activa" } })).id;
+    await e.admin.vinculoLaboral.create({ data: { tenantId: t.A, personaId: y, cargoId: base.cargoId, instalacionId: base.instalacionId, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
+    const f = await run(ctx(t.A), "pauta.series.fijar", { puestoId: q, patronId: pat.id, inicioCiclo: dia(60), titularPersonaId: y, desde: dia(60) });
+    expect(f.ok, JSON.stringify(f)).toBe(true);
+    expect((await vinculoDe(y)).puestoId).toBe(q);
+    expect((await e.admin.puesto.findUniqueOrThrow({ where: { id: q } })).cobertura).toBe("cubierto");
+    await e.admin.patronTurno.update({ where: { id: pat.id }, data: { activo: false } });
+    expect(await asignar(q, null, dia(61), { inicioCiclo: undefined })).toMatchObject({ ok: true });
+    expect((await vinculoDe(y)).puestoId).toBeNull();
+  });
+
   it("la escritura real queda en la auditoría", async () => {
     const n = await e.admin.auditEvent.count({ where: { tenantId: t.A, capability: "pauta.titular.asignar" } });
     expect(n).toBeGreaterThan(3);

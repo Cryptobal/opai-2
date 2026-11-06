@@ -41,17 +41,23 @@ export type OpcionesSerie = {
   /** Reglas extra; se corren después de las de la serie, fuera y dentro de la transacción. */
   validar?: (ctx: Contexto) => Promise<void>;
   /** Escrituras extra en la MISMA transacción, con el puesto y la persona ya bloqueados. */
-  enTransaccion?: (tx: TenantTx, ctx: Contexto, serieId: string) => Promise<void>;
+  enTransaccion?: (
+    tx: TenantTx,
+    ctx: Contexto,
+    r: { serieId: string; puestoId: string; instalacionId: string; titularId: string | null },
+  ) => Promise<void>;
+  /** Quitar al titular no exige que el patrón siga activo. */
+  quitar?: boolean;
   /** Datos extra (sin personas ni texto libre) para la línea del historial. */
   detalle?: Record<string, string | number | null>;
 };
 
 /** Valida todo lo que no depende de la escritura y devuelve lo necesario para armar la vista. */
-async function planear(ctx: Contexto, i: EntradaSerie) {
+async function planear(ctx: Contexto, i: EntradaSerie, quitar = false) {
   const puesto = await puestoParaPauta(ctx, i.puestoId);
   const patron = await ctx.db.patronTurno.findUnique({ where: { id: i.patronId } });
   if (!patron) throw noEncontrado("El patrón de turno");
-  if (!patron.activo) throw reglaDeNegocio(`El patrón «${patron.nombre}» está desactivado.`);
+  if (!patron.activo && !quitar) throw reglaDeNegocio(`El patrón «${patron.nombre}» está desactivado.`);
   if (i.titularPersonaId) {
     const ok = await ctx.db.persona.findFirst({
       where: {
@@ -95,20 +101,11 @@ export async function fijarSerieInterna(
   input: EntradaSerie,
   op: OpcionesSerie,
 ): Promise<SalidaSerie> {
-  const { puesto, patron } = await planear(ctx, input);
+  const { puesto, patron } = await planear(ctx, input, op.quitar);
   await op.validar?.(ctx);
   const nombres = await nombresDePersonas(ctx, [input.titularPersonaId]);
   const titular = input.titularPersonaId ? (nombres.get(input.titularPersonaId) ?? null) : null;
-  const vista = (id: string) => ({
-    id,
-    patronId: patron.id,
-    patron: patron.nombre,
-    inicioCiclo: input.inicioCiclo,
-    titularId: input.titularPersonaId,
-    titular,
-    desde: input.desde,
-    hasta: null,
-  });
+  const vista = (id: string) => ({ id, patronId: patron.id, patron: patron.nombre, inicioCiclo: input.inicioCiclo, titularId: input.titularPersonaId, titular, desde: input.desde, hasta: null });
   const anteriorHasta = sumarDias(input.desde, -1);
   if (op.dryRun) return { serie: vista(""), serieAnteriorHasta: anteriorHasta, avisarA: titular };
   const fila = await ctx.transaccion(async (tx) => {
@@ -118,7 +115,7 @@ export async function fijarSerieInterna(
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`pauta:${ctx.tenantId}:${input.titularPersonaId}`}, 0))::text`;
     await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${puesto.id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
     const dentro = { ...ctx, db: tx };
-    await planear(dentro, input);
+    await planear(dentro, input, op.quitar);
     await op.validar?.(dentro);
     const desde = aFechaDb(input.desde);
     // Las series futuras que esta reemplaza se descartan; el historial deja constancia de cuántas.
@@ -140,7 +137,12 @@ export async function fijarSerieInterna(
         creadaPor: ctx.usuario?.id ?? null,
       },
     });
-    await op.enTransaccion?.(tx, dentro, nueva.id);
+    await op.enTransaccion?.(tx, dentro, {
+      serieId: nueva.id,
+      puestoId: puesto.id,
+      instalacionId: puesto.instalacionId,
+      titularId: input.titularPersonaId,
+    });
     await anotar(tx, ctx, {
       instalacionId: puesto.instalacionId,
       puestoId: puesto.id,

@@ -1,18 +1,16 @@
 import { z } from "zod";
 
-import type { TenantTx } from "@opai/db";
 import { rangoDias, sumarDias, trabajaEn } from "@opai/domain";
 
 import { uuidSchema } from "../core/esquemas";
-import { bloquearNoAnonimizado } from "../core/maestros/anonimizado";
 import { dondePuesto } from "../core/maestros/alcance";
-import { vistaVinculo } from "../core/maestros/vinculos-vista";
 import { defineCapability } from "../define";
-import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
+import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { aFechaDb, diaSchema, fechaIso, PERMISO_WRITE, puestoParaPauta } from "./comun";
 import { nombresDePersonas } from "./nombres";
 import { fijarSerieInterna, salidaSerieSchema } from "./series-nucleo";
+import { sincronizarTitular } from "./titular-sincronizar";
 
 const DIAS_VISTA_PREVIA = 14;
 
@@ -61,39 +59,6 @@ async function exigirSinOtroPuesto(ctx: Contexto, puestoId: string, personaId: s
   );
 }
 
-/** Mueve el puesto del vínculo (nuevo titular, o los que apuntaban al puesto) y avisa por evento. */
-async function moverVinculos(
-  tx: TenantTx,
-  ctx: Contexto,
-  p: { puestoId: string; instalacionId: string; titularId: string | null },
-) {
-  const cambiar = async (id: string, puestoId: string | null) => {
-    const antes = await tx.vinculoLaboral.findUniqueOrThrow({ where: { id } });
-    if (antes.puestoId === puestoId) return;
-    const despues = await tx.vinculoLaboral.update({ where: { id }, data: { puestoId } });
-    // Mismo evento que `core.vinculos.update`: el cambio de puesto puede mover la capa de sueldo (R11).
-    await ctx.eventos.emitir(tx, {
-      tipo: "core.vinculo.actualizado",
-      entidadTipo: "vinculo",
-      entidadId: id,
-      payload: { personaId: antes.personaId, antes: vistaVinculo(antes), despues: vistaVinculo(despues), campos: ["puestoId"] },
-    });
-  };
-  const salientes = await tx.vinculoLaboral.findMany({
-    where: { puestoId: p.puestoId, estado: "vigente", ...(p.titularId ? { personaId: { not: p.titularId } } : {}) },
-    select: { id: true },
-  });
-  for (const s of salientes) await cambiar(s.id, null);
-  if (!p.titularId) return;
-  await bloquearNoAnonimizado(tx, "persona", p.titularId);
-  const propios = await tx.vinculoLaboral.findMany({
-    where: { personaId: p.titularId, estado: "vigente", instalacionId: p.instalacionId },
-    select: { id: true },
-  });
-  if (propios.length !== 1) throw conflicto("El vínculo de la persona cambió: vuelve a abrir el puesto.");
-  await cambiar(propios[0]!.id, p.puestoId);
-}
-
 /** Asigna (o quita) el titular de un puesto desde una fecha, en una sola transacción con su serie y su vínculo. */
 export const titularAsignar = defineCapability({
   id: "pauta.titular.asignar",
@@ -126,13 +91,8 @@ export const titularAsignar = defineCapability({
         validar: async (c) => {
           if (titularId) await exigirSinOtroPuesto(c, puesto.id, titularId, input.desde);
         },
-        enTransaccion: async (tx, c) => {
-          await moverVinculos(tx, c, { puestoId: puesto.id, instalacionId: puesto.instalacionId, titularId });
-          await tx.puesto.update({
-            where: { id: puesto.id },
-            data: { cobertura: titularId ? "cubierto" : "ppc", coberturaMotivo: titularId ? null : "sin_asignar" },
-          });
-        },
+        quitar: !titularId,
+        enTransaccion: (tx, c, r) => sincronizarTitular(tx, c, r),
       },
     );
     const patronPauta = {

@@ -26,7 +26,12 @@ export function HojaTitular({ puestos, subtitulo, titulares }: Props) {
       subtitulo={subtitulo}
       titulares={titulares}
       quitar={valor("quitar") === "1"}
-      onCerrar={hoja.cerrar}
+      onCerrar={() => {
+        const u = new URL(location.href);
+        u.searchParams.delete("quitar");
+        history.replaceState(null, "", u);
+        hoja.cerrar();
+      }}
     />
   );
 }

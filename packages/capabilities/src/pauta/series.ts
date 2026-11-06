@@ -1,5 +1,6 @@
 import { defineCapability } from "../define";
 import { PERMISO_WRITE } from "./comun";
+import { sincronizarTitular } from "./titular-sincronizar";
 import { entradaSerieSchema, fijarSerieInterna, salidaSerieSchema } from "./series-nucleo";
 
 /** Fija la serie de un puesto (patrón, inicio de ciclo y titular) desde una fecha. */
@@ -12,5 +13,10 @@ export const seriesFijar = defineCapability({
   output: salidaSerieSchema,
   efecto: "escritura",
   dryRun: true,
-  handler: (ctx, input, { dryRun }) => fijarSerieInterna(ctx, input, { dryRun }),
+  handler: (ctx, input, { dryRun }) =>
+    fijarSerieInterna(ctx, input, {
+      dryRun,
+      // El vínculo y la cobertura del puesto acompañan siempre a la serie (ADR-081).
+      enTransaccion: (tx, c, r) => sincronizarTitular(tx, c, r),
+    }),
 });

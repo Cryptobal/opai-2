@@ -49,6 +49,10 @@ Sin diseño aprobado para «Asignar»: se usa el patrón **Sheet** del DS con lo
 - **Anexos de contrato:** cambiar `puestoId` del vínculo emite `core.vinculo.actualizado` (igual que `core.vinculos.update`), así que el consumidor de anexos puede generar un **borrador** para RR. HH. (R11: el puesto puede mover la capa de sueldo). Es el comportamiento vigente del núcleo; no se suprime.
 - El `puestoId` del vínculo y la cobertura del puesto se actualizan al dar la orden, aunque «Rige desde» sea futuro; la Pauta y los turnos esperados siempre respetan la fecha.
 
+- **`pauta.series.fijar` también sincroniza** vínculo y cobertura (helper `sincronizarTitular`), para que Pauta y Puestos no se desalineen.
+- **Pendiente, sin backfill:** los puestos que ya tenían serie antes de este PR siguen en «Por cubrir» hasta su próxima asignación; no hay migración ni script. Se propone un script `dbAdmin` solo para `dev` si Carlos lo pide.
+- **Anexos:** el borrador se emite aunque no exista capa de sueldo a nivel puesto (como `core.vinculos.update`); filtrarlo queda a decisión de Carlos.
+
 ## 10. Casos límite
 Titular que dobla con otro puesto → error con detalle. «Rige desde» anterior a hoy con serie previa → se rechaza (R11). Dos asignaciones simultáneas al mismo puesto → los locks las serializan: queda una serie abierta y un vínculo apuntándole. Puesto inactivo → «no encontrado». Sin patrón → regla de negocio. Quitar en el mismo día en que se asignó → la serie de ese día se reemplaza. Quitar sin titular → «el puesto ya está sin titular».
 
