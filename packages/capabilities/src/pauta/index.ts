@@ -15,6 +15,8 @@ import { reemplazosAsignar } from "./reemplazos-asignar";
 import { reemplazosSugerir } from "./reemplazos-sugerir";
 import { refuerzosAgregar } from "./refuerzos-agregar";
 import { seriesFijar } from "./series";
+import { titularAsignar } from "./titular-asignar";
+import { titularesListar } from "./titulares-listar";
 
 export { ajustesPauta } from "./ajustes";
 export const capacidadesPauta: readonly Capacidad[] = [
@@ -23,6 +25,8 @@ export const capacidadesPauta: readonly Capacidad[] = [
   ppcListar,
   historialListar,
   seriesFijar,
+  titularAsignar,
+  titularesListar,
   excepcionesCrear,
   excepcionesAnular,
   coberturaConfirmar,
