@@ -18,6 +18,8 @@ export const correccionesProponer = defineCapability({
     horaPropuesta: z.string().datetime(),
     tipoPropuesto: z.enum(TIPOS_MARCA),
     motivo: z.string().trim().min(5).max(500),
+    /** Documento del núcleo que respalda la corrección: obligatorio (decisión de Carlos del 5-nov-2026). */
+    evidenciaDocumentoId: uuid,
   }),
   output: z.object({ correccionId: z.string(), seq: z.number().int(), venceEn: z.string(), hash: z.string() }),
   efecto: "escritura",
@@ -33,6 +35,8 @@ export const correccionesProponer = defineCapability({
       });
       if (respondidas < pendiente.length) throw conflicto("Esta marca ya tiene una corrección pendiente de respuesta.");
     }
+    if (!(await ctx.db.documento.findUnique({ where: { id: i.evidenciaDocumentoId }, select: { id: true } })))
+      throw noEncontrado("El documento de evidencia");
     const horaPropuesta = new Date(i.horaPropuesta);
     if (Math.abs(horaPropuesta.getTime() - marca.horaServidor.getTime()) > 3 * 86_400_000)
       throw reglaDeNegocio("La hora propuesta debe estar a menos de 3 días de la marca original.");
@@ -51,6 +55,7 @@ export const correccionesProponer = defineCapability({
         tenantId: ctx.tenantId, seq: siguienteSeq, marcaId: marca.id, personaId: marca.personaId,
         horaPropuesta, tipoPropuesto: i.tipoPropuesto, motivo: i.motivo, propuestaPorId: usuarioId(ctx),
         horaServidor: ahora, plazoHoras, venceEn: vence, idempotencyKey: clave,
+        evidenciaDocumentoId: i.evidenciaDocumentoId,
       };
       const hash = await hashDeCorreccion(hashAnterior, registro);
       const fila = await tx.correccion.create({ data: { ...registro, hash, hashAnterior } });

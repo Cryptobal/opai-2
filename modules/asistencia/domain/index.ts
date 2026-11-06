@@ -7,3 +7,5 @@ export * from "./tipos";
 export * from "./alertas";
 export * from "./correcciones";
 export * from "./hash-correccion";
+export * from "./jornadas";
+export * from "./consolidar";

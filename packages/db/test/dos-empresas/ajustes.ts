@@ -104,6 +104,7 @@ export const AJUSTES: Record<string, Ajuste> = {
   "asistencia.correcciones": { valores: () => ({ tipo_propuesto: "entrada", seq: 1 }) },
   "asistencia.contingencias": { valores: () => ({ tipo: "entrada", estado: "pendiente" }) },
   "asistencia.correcciones_respuestas": { fijas: ["resultado", "canal"], valores: () => ({ resultado: "aceptada", canal: "portal" }) },
+  "asistencia.dias": { fijas: ["estado", "tipo_jornada"], valores: () => ({ estado: "presente", tipo_jornada: "ordinaria" }) },
   "asistencia.alertas": { fijas: ["tipo"], valores: () => ({ tipo: "compensables" }) },
   "asistencia.incidentes_tecnicos": {
     valores: () => ({ tipo: "otro", severidad: "baja", origen: "manual" }),

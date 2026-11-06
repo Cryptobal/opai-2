@@ -22,6 +22,7 @@ export function HojaExcepcionFormulario({
   celda,
   puedeEditar,
   diaria,
+  asistenciaActiva,
   onCerrar,
 }: {
   mes: MesPauta;
@@ -32,6 +33,7 @@ export function HojaExcepcionFormulario({
   celda: CeldaDia;
   puedeEditar: boolean;
   diaria: boolean;
+  asistenciaActiva: boolean;
   onCerrar: () => void;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -98,6 +100,7 @@ export function HojaExcepcionFormulario({
               fecha={fecha}
               celda={celda}
               puedeEditar={puedeEditar}
+              asistenciaActiva={asistenciaActiva}
               clave={clave}
               pendiente={pendiente}
               ejecutar={ejecutar}
