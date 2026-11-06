@@ -1,6 +1,6 @@
 # BRIEF · Terreno base · B2 · Dispositivos emparejados (CAR-78)
 
-**Sesión:** «Operaciones · Base · Code». **ADR:** 077. **Migración:** `20261108110000_core_dispositivos` (aditiva, con RLS; la aplica el bot «OPAI 2.0»). **Apilado sobre B1** (#339).
+**Sesión:** «Operaciones · Base · Code». **ADR:** 079. **Migración:** `20261108110000_core_dispositivos` (aditiva, con RLS; la aplica el bot «OPAI 2.0»). **Sobre `main` tras integrar B1** (#339).
 
 ## Objetivo
 
