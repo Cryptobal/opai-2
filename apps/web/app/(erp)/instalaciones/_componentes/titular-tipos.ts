@@ -52,6 +52,7 @@ export type PrevisualizacionTraslado = {
   puestosOrigen: { puestoId: string; puesto: string; serieHasta: string }[];
   vinculoTerminado: { id: string; termino: string } | null;
   vinculoNuevo: boolean;
+  faltaJornada: boolean;
   titularDesplazado: { id: string; nombre: string } | null;
   serie: { patron: string; desde: string };
   primerosDias: { fecha: string; trabaja: boolean }[];
