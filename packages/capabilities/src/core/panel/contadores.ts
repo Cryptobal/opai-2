@@ -14,12 +14,13 @@ const CAMPOS = [
   "personas",
   "aprobacionesPendientes",
   "notificacionesNoLeidas",
+  "solicitudesNuevas",
 ] as const;
 
 export const resumenContadores = defineCapability({
   id: "core.resumen.contadores",
   descripcion:
-    "Conteos para la navegación: cuentas, instalaciones y personas activas, aprobaciones de agentes pendientes y avisos sin leer del usuario. null donde el actor no tiene permiso o donde no se pidió el conteo.",
+    "Conteos para la navegación: cuentas, instalaciones y personas activas, aprobaciones de agentes pendientes, avisos sin leer del usuario y solicitudes nuevas por revisar. null donde el actor no tiene permiso, el módulo no está activo o no se pidió el conteo.",
   permiso: null,
   input: z.object({
     campos: z
@@ -33,6 +34,7 @@ export const resumenContadores = defineCapability({
     personas: n,
     aprobacionesPendientes: n,
     notificacionesNoLeidas: n,
+    solicitudesNuevas: n,
   }),
   efecto: "lectura",
   dryRun: false,
@@ -44,8 +46,14 @@ export const resumenContadores = defineCapability({
         ? f()
         : Promise.resolve(null);
     const usuario = ctx.actor.tipo === "user" ? ctx.actor.id : null;
-    const [cuentas, instalaciones, personas, aprobacionesPendientes, notificacionesNoLeidas] =
-      await Promise.all([
+    const [
+      cuentas,
+      instalaciones,
+      personas,
+      aprobacionesPendientes,
+      notificacionesNoLeidas,
+      solicitudesNuevas,
+    ] = await Promise.all([
         si("cuentas", PERMISOS_CORE.cuentasRead, () =>
           ctx.db.cuenta.count({ where: { archivadaEn: null, AND: [dondeCuenta(ctx)] } }),
         ),
@@ -80,7 +88,20 @@ export const resumenContadores = defineCapability({
               ctx.db.notificacion.count({ where: { usuarioId: usuario, leidaEn: null } }),
             )
           : Promise.resolve(null),
+        // Solicitudes «nuevas» (sin derivar ni convertir): lo que espera revisión en la bandeja.
+        ctx.modulosActivos.includes("comercial")
+          ? si("solicitudesNuevas", "comercial:solicitudes.read", () =>
+              ctx.db.solicitud.count({ where: { estado: "nueva" } }),
+            )
+          : Promise.resolve(null),
       ]);
-    return { cuentas, instalaciones, personas, aprobacionesPendientes, notificacionesNoLeidas };
+    return {
+      cuentas,
+      instalaciones,
+      personas,
+      aprobacionesPendientes,
+      notificacionesNoLeidas,
+      solicitudesNuevas,
+    };
   },
 });
