@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { digitoVerificador } from "@opai/domain";
 import { entrar } from "./sesion";
 
 // CAR-78 · B3: un equipo de terreno emparejado captura sin señal y el hecho llega UNA sola vez al volver la
@@ -9,8 +10,24 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   page,
 }) => {
   test.setTimeout(180_000);
-  // 1) ERP: código de emparejamiento de una instalación con personas.
+  // 1) ERP: una persona con vínculo en la instalación (los datos de demostración no traen vínculos) y el
+  // código de emparejamiento de esa instalación.
   await entrar(page);
+  await page.goto("/personas?nueva=1");
+  const dialogo = page.getByRole("dialog", { name: "Agregar persona" });
+  await expect(dialogo).toBeVisible({ timeout: 30_000 });
+  const cuerpo = String(20_000_000 + (Date.now() % 9_000_000));
+  await dialogo.getByLabel("Nombres").fill("Prueba");
+  await dialogo.getByLabel("Apellidos").fill(`Terreno ${Date.now()}`);
+  await dialogo.getByLabel("RUT").fill(`${cuerpo}-${digitoVerificador(cuerpo)}`);
+  await dialogo.getByLabel("Cargo").click();
+  await page.getByRole("option").first().click();
+  await dialogo.getByRole("button", { name: "Instalación obligatoria" }).click();
+  await page.getByRole("option", { name: /Planta Quilicura/ }).click();
+  await dialogo.getByLabel("Horas semanales").fill("45");
+  await dialogo.getByLabel("Distribución").fill("Lunes a sábado");
+  await dialogo.getByRole("button", { name: "Crear persona" }).click();
+  await page.waitForURL(/\/personas\/[0-9a-f-]{36}$/);
   await page.goto("/instalaciones");
   await page.getByRole("link", { name: /Planta Quilicura/ }).first().click();
   await page.waitForURL(/\/instalaciones\/[0-9a-f-]{36}/);
