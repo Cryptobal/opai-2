@@ -35,7 +35,9 @@ export const modulesProbar = defineCapability({
     hasta: z.string().describe("Último día de la prueba (aaaa-mm-dd)."),
     dias: z.number().int(),
   }),
-  efecto: "escritura",
+  // Irreversible para agentes (decisión de Carlos, 6-nov-2026): activar la única prueba pide aprobación
+  // humana; una key con solo `core:tenant.manage` no puede gastarla.
+  efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const e = entradaCatalogo(input.moduloId);
@@ -47,6 +49,10 @@ export const modulesProbar = defineCapability({
     const modulo = parte ? MODULO_FINANZAS : e.id;
     if (!obtenerModulo(modulo)) throw noEncontrado(`El módulo "${modulo}"`);
     const tenantId = ctx.tenantId;
+    // Sin RUT no hay a quién facturar cuando la prueba pase a cobro (ADR-071, adenda).
+    const perfil = await ctx.db.perfilEmpresa.findFirst({ where: { tenantId } });
+    if (!perfil?.rut)
+      throw reglaDeNegocio("Completa el RUT de la empresa antes de activar una prueba.");
     const previa = await ctx.db.pruebaGratis.findFirst({ where: { tenantId, moduloId: e.id } });
     if (previa)
       throw reglaDeNegocio(
