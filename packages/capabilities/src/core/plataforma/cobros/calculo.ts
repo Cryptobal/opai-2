@@ -1,6 +1,8 @@
 import {
   aClp,
   cargoDelMes,
+  ENTRADAS_CATALOGO,
+  esIncluidoEnBase,
   limitesDelPeriodo,
   MOTIVOS_COBRO,
   PLAN_BASE,
@@ -36,11 +38,19 @@ export async function ufDelPeriodo(periodo: string, buscar: (d: Date) => Promise
   return { centavos: uf.centavos, exacta: uf.desde.toISOString().slice(0, 10) === fin };
 }
 
-/** Módulos que se pueden cobrar: los registrados, sin el núcleo. */
-export const modulosCobrables = () =>
-  listarModulos()
+/**
+ * Lo que aparece en el cobro: los módulos registrados (sin el núcleo) y las siete partes de Finanzas
+ * (CAR-204, ADR-072). Los incluidos en el plan base se listan, pero no tienen precio aparte.
+ */
+export const modulosCobrables = () => [
+  ...listarModulos()
     .filter((m) => m.id !== "core")
-    .map((m) => ({ id: m.id, nombre: m.nombre }));
+    .map((m) => ({ id: m.id, nombre: m.nombre })),
+  ...ENTRADAS_CATALOGO.filter((e) => e.grupo === "parte_finanzas").map((e) => ({
+    id: e.id,
+    nombre: `Finanzas · ${e.nombre}`,
+  })),
+];
 
 const aCondicion = (c: CondicionVista): CondicionCobro => ({
   moneda: c.moneda,
@@ -72,13 +82,18 @@ export function filasDeCobro(
   return items.map((m) => {
     const condicion = condiciones.get(m.id) ?? null;
     const estado = estados.get(m.id) ?? null;
-    const c = condicion ? aCondicion(condicion) : null;
+    const incluidoEnBase = esIncluidoEnBase(m.id);
+    const c = condicion && !incluidoEnBase ? aCondicion(condicion) : null;
     const cantidad = c?.forma === "por_unidad" && c.unidad ? contar(c.unidad, m.id) : null;
-    const r = cargoDelMes(c, estado, periodo, cantidad);
+    // Lo incluido en el plan base nunca se cobra aparte, aunque quede una condición de antes.
+    const r = incluidoEnBase
+      ? { ...cargoDelMes(null, null, periodo), motivo: "incluido_en_base" as const }
+      : cargoDelMes(c, estado, periodo, cantidad);
     const montoClp = r.facturable && condicion ? aClp(r.monto, condicion.moneda, ufCentavos) : null;
     return {
       moduloId: m.id,
       nombre: m.nombre,
+      incluidoEnBase,
       estado,
       condicion,
       calculo: {

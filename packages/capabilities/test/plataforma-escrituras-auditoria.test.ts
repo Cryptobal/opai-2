@@ -117,6 +117,10 @@ const t = TENANT_DE_PRUEBA;
 /** Un caso por escritura `platform.*`: su input mínimo válido sobre la semilla. */
 const CASOS: Record<string, Record<string, unknown>> = {
   "platform.ajustes.set": { modulo: "core", clave: "remuneraciones_imm", valor: 560_000 },
+  "platform.catalogo.precio_set": {
+    moduloId: "cpq",
+    precio: { moneda: "UF", forma: "fijo", precio: "3" },
+  },
   "platform.precios.set": {
     recurso: "ia.economica",
     unidad: "token",

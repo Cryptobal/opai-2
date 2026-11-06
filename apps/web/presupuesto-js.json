@@ -61,7 +61,6 @@
     "/(erp)/contactos/[id]": 178,
     "/(erp)/cotizaciones/nueva": 169,
     "/(erp)/finanzas/configuracion-dte": 169,
-    "/(erp)/finanzas/bancos": 169,
     "/(erp)/finanzas/ventas/[id]": 170,
     "/(platform)/platform/tenants/[id]/cobro": 169,
     "/(erp)/instalaciones/[id]/negocios": 169,

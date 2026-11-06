@@ -9,6 +9,7 @@ import {
   enMoneda,
   type Forma,
   type Moneda,
+  type PrecioListaVista,
   textoCantidad,
 } from "../../../facturacion/_componentes/cobro";
 
@@ -28,15 +29,18 @@ export type Formulario = {
 const aTexto = (n: number, moneda: Moneda) =>
   moneda === "UF" ? String(n / 10_000).replace(".", ",") : String(n);
 
-/** Valores del formulario desde la condición guardada (UF con coma decimal, como se escribe). */
-export function formulario(c: Condicion | null): Formulario {
+/**
+ * Valores del formulario desde la condición guardada (UF con coma decimal, como se escribe). Sin
+ * condición parte del precio de lista, si lo hay; el precio de la empresa siempre manda.
+ */
+export function formulario(c: Condicion | null, lista: PrecioListaVista | null = null): Formulario {
   if (!c)
     return {
-      moneda: "UF",
-      forma: "fijo",
-      unidad: "",
-      precio: "",
-      minimo: "",
+      moneda: lista?.moneda ?? "UF",
+      forma: lista?.forma ?? "fijo",
+      unidad: lista?.unidad ?? "",
+      precio: lista ? aTexto(lista.precio, lista.moneda) : "",
+      minimo: lista?.minimoMensual ? aTexto(lista.minimoMensual, lista.moneda) : "",
       cobroDesde: "",
       pruebaHasta: "",
       pasaACobro: false,
@@ -90,7 +94,8 @@ export function VistaPreviaCobro(props: {
           </p>
           {calculo.cantidad !== null ? (
             <p className="t-caption">
-              Hoy se cuentan {textoCantidad(calculo.cantidad, unidad)}; mes completo{" "}
+              {calculo.cantidad === 1 ? "Hoy se cuenta" : "Hoy se cuentan"}{" "}
+              {textoCantidad(calculo.cantidad, unidad)}; mes completo{" "}
               {enMoneda(calculo.mensual, moneda)}
             </p>
           ) : null}

@@ -1,7 +1,12 @@
 import { exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { type Cargo, nombreMes, type Resumen } from "../../../facturacion/_componentes/cobro";
+import {
+  type Cargo,
+  type EntradaCatalogo,
+  nombreMes,
+  type Resumen,
+} from "../../../facturacion/_componentes/cobro";
 import { PaginaTenant } from "../pagina-tenant";
 import { CargosEmpresa } from "./cargos-empresa";
 import { ModulosCobro } from "./modulos-cobro";
@@ -18,7 +23,7 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
     <PaginaTenant params={params} tab="cobro">
       {async (d) => {
         const periodo = new Date().toISOString().slice(0, 7);
-        const [resumen, cargos] = await Promise.all([
+        const [resumen, cargos, catalogo] = await Promise.all([
           ejecutarComoUsuario<Resumen>("platform", "platform.cobros.resumen", {
             periodo,
             tenantId: d.tenant.id,
@@ -26,7 +31,16 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
           ejecutarComoUsuario<Cargo[]>("platform", "platform.cobros.cargos_list", {
             tenantId: d.tenant.id,
           }),
+          ejecutarComoUsuario<EntradaCatalogo[]>("platform", "platform.catalogo.list", {}),
         ]);
+        // El precio de lista solo rellena la hoja: si no carga, el cobro sigue funcionando.
+        const listas = Object.fromEntries(
+          (catalogo.ok ? catalogo.data : []).flatMap((e) =>
+            e.precioLista && e.textoPrecio
+              ? [[e.id, { precio: e.precioLista, texto: e.textoPrecio }]]
+              : [],
+          ),
+        );
         const empresa = exigirDatos(resumen).empresas[0];
         const modulos = empresa?.modulos ?? [];
         return (
@@ -38,7 +52,7 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
                   {nombreMes(periodo)}: {empresa?.facturables ?? 0} se facturan
                 </span>
               </div>
-              <ModulosCobro tenantId={d.tenant.id} modulos={modulos} />
+              <ModulosCobro tenantId={d.tenant.id} modulos={modulos} listas={listas} />
             </section>
             <section className="flex flex-col gap-2">
               <h3 className="t-subheading text-fg">Cargos listos para facturar</h3>

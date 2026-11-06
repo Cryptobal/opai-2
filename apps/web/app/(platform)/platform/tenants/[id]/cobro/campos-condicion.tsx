@@ -1,7 +1,7 @@
 "use client";
 
 import { Campo, Checkbox, Input, InputFecha, InputMonto, Segmentado, Select } from "@opai/ds";
-import { UNIDADES_COBRO, type UnidadCobro } from "@opai/domain";
+import { etiquetaUnidad, UNIDADES_COBRO, type UnidadCobro } from "@opai/domain";
 
 import type { Forma, Moneda } from "../../../facturacion/_componentes/cobro";
 import type { Formulario } from "./vista-previa-cobro";
@@ -10,9 +10,12 @@ import type { Formulario } from "./vista-previa-cobro";
 export function CamposCondicion({
   f,
   setF,
+  soloPrecio = false,
 }: {
   f: Formulario;
   setF: (cambio: (x: Formulario) => Formulario) => void;
+  /** Precio de lista del catálogo: sin inicio, prueba, descuento ni nota (son de cada empresa). */
+  soloPrecio?: boolean;
 }) {
   const fijar =
     (
@@ -32,7 +35,7 @@ export function CamposCondicion({
   const forma = (m: Forma) => () => setF((x) => ({ ...x, forma: m }));
   const unidades = (Object.keys(UNIDADES_COBRO) as UnidadCobro[]).map((u) => ({
     valor: u,
-    etiqueta: UNIDADES_COBRO[u].singular,
+    etiqueta: etiquetaUnidad(u),
   }));
   const monto = (id: "precio" | "minimo", placeholder: string) =>
     f.moneda === "UF" ? (
@@ -95,6 +98,19 @@ export function CamposCondicion({
           {monto("minimo", "4")}
         </Campo>
       ) : null}
+      {soloPrecio ? null : <Resto f={f} setF={setF} fijar={fijar} />}
+    </>
+  );
+}
+
+function Resto(props: {
+  f: Formulario;
+  setF: (cambio: (x: Formulario) => Formulario) => void;
+  fijar: (k: "cobroDesde" | "pruebaHasta" | "descuento" | "nota") => (v: string) => void;
+}) {
+  const { f, setF, fijar } = props;
+  return (
+    <>
       <div className="grid gap-4 md:grid-cols-2">
         <Campo etiqueta="Inicio del cobro" htmlFor="desde" ayuda="Vacío: al terminar la prueba">
           <InputFecha id="desde" valor={f.cobroDesde} onCambiar={fijar("cobroDesde")} />

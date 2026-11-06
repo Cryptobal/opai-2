@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_PLATAFORMA } from "@opai/domain";
+import { esParteFinanzas, MODULO_FINANZAS, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../../../define";
 import { noEncontrado, reglaDeNegocio } from "../../../errores";
@@ -8,6 +8,7 @@ import { obtenerModulo } from "../../../module";
 import { requierePlataforma } from "../../comun";
 import { uuidSchema } from "../../esquemas";
 import { aFecha, diaSchema, hoy } from "../../maestros/comun";
+import { exigirCobrable, validarPartes } from "./partes";
 import { diasEntre } from "./pruebas";
 
 const ACTIVOS = new Set(["activo", "trial", "solo_lectura"]);
@@ -46,7 +47,10 @@ export const platformCobrosPruebaAbrir = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const p = requierePlataforma(ctx);
     if (!(await p.globales.tenantPorId(input.tenantId))) throw noEncontrado("La empresa");
-    const manifest = obtenerModulo(input.moduloId);
+    exigirCobrable(input.moduloId);
+    // Una parte de Finanzas se prueba dentro del módulo: su prueba vive en su condición (ADR-072).
+    const parte = esParteFinanzas(input.moduloId);
+    const manifest = obtenerModulo(parte ? MODULO_FINANZAS : input.moduloId);
     if (!manifest) throw noEncontrado(`El módulo "${input.moduloId}"`);
     const e = p.empresa(input.tenantId);
     // Sin RUT no hay a quién facturar: la prueba exige una empresa validada (ADR-071, adenda).
@@ -59,8 +63,11 @@ export const platformCobrosPruebaAbrir = defineCapability({
       throw reglaDeNegocio("Fija primero el precio del módulo en la pestaña Cobro de la empresa.");
     if (input.pruebaHasta <= hoy()) throw reglaDeNegocio("La prueba debe terminar después de hoy.");
     const estados = new Map((await e.modulos()).map((m) => [m.moduloId, m.estado]));
-    const anterior = estados.get(input.moduloId) ?? null;
-    if (anterior === "activo")
+    const anterior = estados.get(parte ? MODULO_FINANZAS : input.moduloId) ?? null;
+    if (parte) {
+      if (!ACTIVOS.has(anterior ?? "")) throw reglaDeNegocio(`Activa antes: ${MODULO_FINANZAS}.`);
+      await validarPartes(e, input.moduloId);
+    } else if (anterior === "activo")
       throw reglaDeNegocio(
         "El módulo ya está activo: una prueba es para uno que aún no se contrata.",
       );
@@ -73,8 +80,10 @@ export const platformCobrosPruebaAbrir = defineCapability({
         pruebaHasta: aFecha(input.pruebaHasta),
         pasaACobro: input.pasaACobro,
       });
-      await e.fijarModulo(input.moduloId, "trial");
-      await e.sembrarModulo(input.moduloId);
+      if (!parte) {
+        await e.fijarModulo(input.moduloId, "trial");
+        await e.sembrarModulo(input.moduloId);
+      }
     }
     return {
       moduloId: input.moduloId,
