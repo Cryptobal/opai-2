@@ -23,7 +23,7 @@ Carlos: la activa cada empresa una vez desde su ERP, dura 10 días, se desactiva
 `DIAS_PRUEBA_GRATIS`, `finDePruebaGratis`, `estadoPruebaGratis`, `extenderPruebaGratis` y `motivoSinPrueba`, con pruebas. Reutiliza `sumarDias` del calendario.
 
 ## 5. Capacidades
-- `core.modules.probar` (tenant, `core:tenant.manage`, escritura, `dryRun`, `idempotencyKey`): crea la prueba, pone el módulo en prueba (siembra su catálogo) y emite `core.prueba_gratis.activada`. Un doble clic o dos pestañas dan «ya se activó» (la unicidad), no un error interno.
+- `core.modules.probar` (tenant, `core:tenant.manage`, **irreversible**, `dryRun`, `idempotencyKey`; exige el RUT de la empresa): crea la prueba, pone el módulo en prueba (siembra su catálogo) y emite `core.prueba_gratis.activada`. Un doble clic o dos pestañas dan «ya se activó» (la unicidad), no un error interno.
 - `platform.cobros.prueba_gratis_extender` (`platform:tenants.manage`, **irreversible** para agentes, `dryRun`, auditoría global con antes y después): exige que la empresa ya la haya activado; rechaza un módulo suspendido o activo.
 - Trabajo diario `core.pruebas_gratis.cerrar`: cierra las vencidas y deja el módulo en solo lectura, salvo que Plataforma ya le haya puesto precio o que otra parte de Finanzas siga en prueba. Idempotente.
 
@@ -39,8 +39,11 @@ Dominio; capacidades en memoria (activar, vista previa, una sola vez, plan base,
 ## 9. Riesgos y rollback
 Migración aditiva (`DROP TABLE`). Riesgo principal: la prueba de una parte sin Finanzas contratado abre todo el módulo hasta que la Sesión 5 filtre por partes. Mitigación: 10 días, una vez, auditado, y se cierra sola.
 
-## 10. Pendiente de decisión de Carlos
-¿Una prueba terminada debe poder pedirse de nuevo a OPAI desde el ERP (hoy solo «extiende OPAI»)?
+## 10. Decisiones de Carlos (6-nov-2026, vía OPAI 2.0)
+1. Activar la única prueba pide **aprobación humana**: `core.modules.probar` es **irreversible**; los agentes reciben `APPROVAL_REQUIRED` y una key con solo `core:tenant.manage` no puede gastarla.
+2. El **RUT** de la empresa es obligatorio antes de activar («Completa el RUT de la empresa antes de activar una prueba»), según la adenda de ADR-071.
+3. Carlos **acepta temporalmente** que probar una parte abra todo Finanzas en escritura durante 10 días, hasta el filtro por partes; no elimina las condiciones 1 y 2.
+4. Una prueba terminada no se re-pide sola desde el ERP: solo extiende o reactiva OPAI (default conservador, reversible).
 
 ## 11. Reporte de ejecución
 Ver el PR.
