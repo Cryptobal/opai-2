@@ -72,4 +72,20 @@ export const ajustesRendiciones = z.object({
     ayuda: "Lista de {nombre, montoClp}. Solo para el método de tramo fijo.",
     control: "json",
   }),
+  nomina_cuenta_origen: z.string().trim().max(30).default("").meta({
+    etiqueta: "Cuenta de origen de la nómina (Santander)",
+    ayuda: "Cuenta de la empresa desde la que se paga el lote. Es un dato de la empresa, no de una persona. Vacío = no se puede generar la nómina.",
+    grupo: "Pagos",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "texto",
+  }),
+  nomina_formato_confirmado: z.boolean().default(false).meta({
+    etiqueta: "Formato de nómina Santander confirmado",
+    ayuda: "Se enciende solo cuando Carlos entrega la especificación del formato. Mientras esté apagado no se genera el archivo de nómina (DECISIÓN CARLOS, CAR-208).",
+    grupo: "Pagos",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "switch",
+  }),
 });

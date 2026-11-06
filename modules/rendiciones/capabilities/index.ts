@@ -10,6 +10,11 @@ import { rendicionesAnular, rendicionesEnviar } from "./flujo";
 import { rendicionesListar, rendicionesObtener } from "./lectura";
 import { rendicionesDuplicados } from "./duplicados";
 import { rendicionesOpciones } from "./opciones";
+import { bandejaListar, bandejaObtener } from "./bandeja";
+import { lotesCrear } from "./lotes-crear";
+import { lotesAnular, lotesAprobar } from "./lotes-flujo";
+import { lotesCandidatas, lotesListar, lotesObtener } from "./lotes-lectura";
+import { lotesDescargarNomina, lotesGenerarNomina, lotesMarcarPagado } from "./lotes-pago";
 
 export { ajustesRendiciones } from "./ajustes";
 
@@ -28,4 +33,15 @@ export const capacidades: readonly Capacidad[] = [
   rendicionesAprobar,
   rendicionesRechazar,
   rendicionesDevolver,
+  bandejaListar,
+  bandejaObtener,
+  lotesCandidatas,
+  lotesListar,
+  lotesObtener,
+  lotesCrear,
+  lotesAprobar,
+  lotesGenerarNomina,
+  lotesDescargarNomina,
+  lotesMarcarPagado,
+  lotesAnular,
 ];

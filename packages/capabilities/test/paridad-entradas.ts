@@ -24,6 +24,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
   "app/api/pauta/export/route.ts":
     "Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar.",
+  "app/api/rendiciones/lotes/[id]/nomina/route.ts":
+    "Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208).",
   "app/api/marca/[slug]/[asset]/route.ts":
     "URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP.",
   "app/api/existe/route.ts":
