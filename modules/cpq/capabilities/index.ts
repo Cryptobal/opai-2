@@ -38,6 +38,7 @@ import { cotizacionesFicha } from "./ficha";
 import { cotizacionesExplicar } from "./ficha-explicar";
 import { cotizacionesGet, cotizacionesList } from "./lectura";
 import { lineasActualizar, lineasCrear } from "./lineas";
+import { portalCotizacionesDescargar, portalCotizacionesGet, portalCotizacionesList } from "./portal-cotizaciones";
 import { lineasQuitar } from "./lineas-quitar";
 import { lineasReordenar } from "./lineas-reordenar";
 import { marcaDocumentoGet, marcaDocumentoUpdate } from "./marca-documento";
@@ -93,6 +94,9 @@ export const capacidades: readonly Capacidad[] = [
   cotizacionesEnviar,
   cotizacionesPreviewPdf,
   lineasCrear,
+  portalCotizacionesList,
+  portalCotizacionesGet,
+  portalCotizacionesDescargar,
   lineasActualizar,
   lineasQuitar,
   lineasReordenar,
