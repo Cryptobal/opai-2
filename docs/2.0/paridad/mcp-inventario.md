@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 606 pares pantalla→capacidad · 544 con herramienta · 62 excepciones justificadas · 0 faltantes.
+**Resumen:** 611 pares pantalla→capacidad · 549 con herramienta · 62 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -92,6 +92,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.duplicados.consultar` | `rendiciones_duplicados_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.kilometraje.calcular` | `rendiciones_kilometraje_calcular` | existe |
 | compartido | `app/_components` | `rendiciones.opciones.obtener` | `rendiciones_opciones_obtener` | existe |
@@ -101,6 +102,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.rendiciones.enviar` | `rendiciones_rendiciones_enviar` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.listar` | `rendiciones_rendiciones_listar` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
+| compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
@@ -469,6 +471,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.rechazar` | `tickets_tickets_rechazar` | existe |
 | compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.ajustes.set` | `platform_ajustes_set` | existe |
 | compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.precios.set` | `platform_precios_set` | existe |
+| compartido | `app/(platform)/platform/catalogo/_componentes` | `platform.catalogo.precio_set` | `platform_catalogo_precio_set` | existe |
 | compartido | `app/(platform)/platform/facturacion/_componentes` | `platform.cobros.cargos_generar` | `platform_cobros_cargos_generar` | existe |
 | compartido | `app/(platform)/platform/indicadores/_componentes` | `platform.indicadores.resolver` | — | excepción |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
@@ -581,9 +584,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
 | platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
+| platform | `/platform/catalogo` | `platform.catalogo.list` | `platform_catalogo_list` | existe |
 | platform | `/platform/consumos` | `platform.consumos.summary` | `platform_consumos_summary` | existe |
 | platform | `/platform/facturacion` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/indicadores` | `platform.indicadores.propuestas` | `platform_indicadores_propuestas` | existe |
+| platform | `/platform/tenants/[id]/cobro` | `platform.catalogo.list` | `platform_catalogo_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargo_anular` | `platform_cobros_cargo_anular` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargos_list` | `platform_cobros_cargos_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.condiciones_set` | `platform_cobros_condiciones_set` | existe |

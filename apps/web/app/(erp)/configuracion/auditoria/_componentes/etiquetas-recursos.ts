@@ -1,6 +1,6 @@
 /** Recurso (segunda parte de «modulo.recurso.verbo») → nombre de negocio. Lo vigila `etiquetas-capacidad.test.ts`. */
 export const RECURSOS: Record<string, string> = {
-  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", invitations: "Invitaciones",
+  ping: "Conexión", rendiciones: "Rendiciones", kilometraje: "Kilometraje", opciones: "Opciones de rendición", duplicados: "Boletas repetidas", administrador: "Administrador de la empresa", respaldos: "Respaldos de rendición", me: "Mi sesión", tenant: "Empresa", users: "Usuarios", invitations: "Invitaciones",
   modules: "Módulos", apikeys: "API keys", audit: "Auditoría", usage: "Uso", tenants: "Empresas",
   admins: "Administradores", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",
@@ -13,7 +13,7 @@ export const RECURSOS: Record<string, string> = {
   documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", personas_terreno: "Personas de terreno", config: "Ajustes", ajustes: "Ajustes",
   cumplimiento: "Cumplimiento", empresa: "Empresa", marca: "Marca", comunicaciones: "Comunicaciones",
   plantillas: "Plantillas", notificacion_reglas: "Reglas de aviso", notificaciones: "Notificaciones",
-  aprobaciones: "Aprobaciones", indicadores: "Indicadores legales", precios: "Precios", usuarios: "Usuarios", modelos: "Modelos",
+  aprobaciones: "Aprobaciones", indicadores: "Indicadores legales", precios: "Precios", catalogo: "Catálogo", usuarios: "Usuarios", modelos: "Modelos",
   turno: "Turnos", plan: "Plan", historial: "Historial", negocios: "Negocios", solicitudes: "Solicitudes",
   seguimiento_planes: "Planes de seguimiento", seguimientos: "Seguimientos", canales: "Canales", importar_1_0: "Importación desde OPAI 1.0", puntos: "Puntos de ronda",
   programaciones: "Programaciones", incidentes_tipo: "Tipos de incidente", mis_datos: "Mis datos",

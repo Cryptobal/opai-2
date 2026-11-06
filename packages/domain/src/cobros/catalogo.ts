@@ -39,6 +39,7 @@ export const MOTIVOS_COBRO = {
   cobro_futuro: "El cobro empieza después",
   sin_cantidad: "Falta contar las unidades del mes",
   bonificado: "Sin costo este mes",
+  incluido_en_base: "Incluido en el plan base",
 } as const;
 export type MotivoCobro = keyof typeof MOTIVOS_COBRO;
 

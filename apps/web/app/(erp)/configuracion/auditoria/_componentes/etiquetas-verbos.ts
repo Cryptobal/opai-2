@@ -73,4 +73,6 @@ export const VERBOS: Record<string, string> = {
   // Cobro por módulo (CAR-188).
   condiciones_set: "Fijar condición comercial", cargos_generar: "Generar cargos del mes",
   cargos_list: "Listar cargos", cargo_anular: "Anular cargo",
+  // Catálogo de Plataforma (CAR-204).
+  precio_set: "Fijar precio de lista",
 };
