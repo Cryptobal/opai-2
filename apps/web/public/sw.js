@@ -1,3 +1,4 @@
+/* global vaciarCola */
 /* OPAI · service worker base (ADR-044, Brief 04; D2 b: propio y sin dependencias).
    - Precache: una LISTA EXPLÍCITA de activos públicos (la página offline neutra y los íconos). Nunca
      HTML ni RSC con sesión, ni un patrón amplio (§4.4, CA8). El HTML y el RSC llevan datos de la
