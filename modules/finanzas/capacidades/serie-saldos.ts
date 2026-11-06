@@ -5,6 +5,8 @@ import { calcularPlanilla, semanasDesde, sumarSemanas, type CeldaFlujo } from ".
 import { saldoDelBanco, type SaldoBanco } from "./bancos/saldo-banco";
 import { celdasDominioConCartolaPasada } from "./cartola-planilla";
 import { celdasCobrosEsperados } from "./cobros-esperados";
+import { celdasAbonosSemana } from "./abonos-semana";
+import { movidosDeLaSemana } from "./semana-en-curso";
 import { celdasDiferenciaFactoring, celdasImpuestos } from "./impuestos-planilla";
 import { FILAS_VIRTUALES_DOMINIO } from "./filas-virtuales";
 import { aNumeroSeguro } from "./esquemas";
@@ -62,8 +64,11 @@ export async function serieSaldos(
   );
   const cobros = await celdasCobrosEsperados(ctx, listaCalc);
   const impuestos = await celdasImpuestos(ctx, listaCalc);
-  const celdasCalc = [...pasada.dominio, ...cobros.dominio, ...impuestos.dominio];
-  const extraVista = [...pasada.extraVista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
+  // Lo movido esta semana que el saldo del banco ya incluye: la apertura lo resta y los abonos vuelven como ingreso real.
+  const movidos = await movidosDeLaSemana(db, banco, hoy);
+  const abonos = await celdasAbonosSemana(ctx, hoy, movidos, tx);
+  const celdasCalc = [...pasada.dominio, ...abonos.dominio, ...cobros.dominio, ...impuestos.dominio];
+  const extraVista = [...pasada.extraVista, ...abonos.vista, ...cobros.vista, ...impuestos.vista, ...(await celdasDiferenciaFactoring(ctx, cobros.diferencias))];
   const base = {
     umbral: ajustes.umbral,
     semanas: listaCalc,
@@ -72,18 +77,7 @@ export async function serieSaldos(
   };
   // Saldo al comenzar la semana en curso: por cada cuenta que suma en el saldo del banco, su saldo menos lo movido
   // esta semana hasta la fecha de ESE saldo (lo posterior no está en él) y no más allá de hoy.
-  const movidos = await db.movimientoBancario.findMany({
-    where: {
-      estado: { not: "ignorado" },
-      cuentaId: { in: banco.cuentasConSaldo.map((c) => c.cuentaId) },
-      fecha: { gte: aFecha(hoy), lte: aFecha(hoyIso()) },
-    },
-    select: { cuentaId: true, fecha: true, monto: true },
-  });
-  const corte = new Map(banco.cuentasConSaldo.map((c) => [c.cuentaId, c.fecha] as const));
-  const yaIncluido = movidos
-    .filter((m) => aIso(m.fecha) <= (corte.get(m.cuentaId) ?? ""))
-    .reduce((t, m) => t + aNumeroSeguro(m.monto), 0);
+  const yaIncluido = movidos.reduce((t, m) => t + m.monto, 0);
   const aperturaSemana = banco.saldo - yaIncluido;
   const inicialSinAncla = calcularPlanilla({ ...base, saldoInicial: 0 }).find((s) => s.semana === hoy)?.saldoInicial ?? 0;
   const calc = calcularPlanilla({ ...base, saldoInicial: aperturaSemana - inicialSinAncla });
