@@ -206,6 +206,7 @@ core_marca_update
 core_me
 core_me_portal_inicio
 core_modules_list
+core_modules_probar
 core_modules_solicitar
 core_notificacion_reglas_list
 core_notificacion_reglas_set
@@ -558,6 +559,7 @@ preview_core_integraciones_probar
 preview_core_invitations_revoke
 preview_core_marca_update
 preview_core_me_portal_inicio
+preview_core_modules_probar
 preview_core_modules_solicitar
 preview_core_notificacion_reglas_set
 preview_core_notificaciones_marcar_leida
