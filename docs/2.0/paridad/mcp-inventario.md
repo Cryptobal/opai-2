@@ -862,6 +862,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
+- `core.modules.probar`
 - `core.patrones.get`
 - `core.personas.laboral_actualizar`
 - `core.personas.pago_solicitar_cambio`
@@ -903,6 +904,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`
+- `platform.cobros.prueba_gratis_extender`
 - `platform.eventos.list`
 - `platform.tenants.update`
 - `platform.trabajos.cancelar`

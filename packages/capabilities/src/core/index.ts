@@ -3,7 +3,7 @@ import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./ace
 import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
-import { modulesSolicitar } from "./modulos-solicitar";
+import { capacidadesModulos } from "./modulos-acciones";
 import {
   bitacoraVerificar,
   platformBitacoraEstado,
@@ -76,7 +76,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   invitationsAccept,
   invitationsRequestNew,
   modulesList,
-  modulesSolicitar,
+  ...capacidadesModulos,
   apikeysList,
   apikeysCreate,
   apikeysRevoke,

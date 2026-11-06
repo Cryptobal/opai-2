@@ -75,4 +75,6 @@ export const VERBOS: Record<string, string> = {
   cargos_list: "Listar cargos", cargo_anular: "Anular cargo",
   // Catálogo de Plataforma (CAR-204).
   precio_set: "Fijar precio de lista",
+  // Prueba gratis por empresa (CAR-222).
+  prueba_gratis_extender: "Extender prueba gratis",
 };
