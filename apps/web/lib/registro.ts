@@ -13,6 +13,7 @@ import {
   registrarTrabajos,
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
+  trabajoPruebasGratis,
   trabajosComercial,
   trabajosDelNucleo,
   trabajosFinanzas,
@@ -43,6 +44,7 @@ export function asegurarRegistro(): void {
     ...trabajosCpq,
     trabajoCobrosMesAnterior,
     trabajoCobrosPruebas,
+  trabajoPruebasGratis,
   ]);
   registrarConsumidores([
     ...consumidoresDelNucleo,

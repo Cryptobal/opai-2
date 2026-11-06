@@ -19,7 +19,7 @@ export const VERBOS: Record<string, string> = {
   montos_por_instalacion: "Montos por instalación", panel: "Panel", perfil_get: "Ver datos tributarios", prueba_abrir: "Abrir prueba", perfil_set: "Fijar datos tributarios", anular: "Anular", efectiva: "Vigente",
   cuentas: "Cuentas", contactos: "Contactos", vincular: "Vincular", set_roles: "Definir roles",
   desvincular: "Desvincular", completar: "Completar", delete: "Eliminar", timeline: "Línea de tiempo",
-  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar", recibir: "Recibir", regenerar: "Regenerar",
+  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar", recibir: "Recibir", enrolar: "Enrolar", regenerar: "Regenerar",
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   estado_comercial: "Estado comercial", revocar: "Revocar", ver: "Ver", ofrecer: "Ofrecer",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
@@ -75,4 +75,6 @@ export const VERBOS: Record<string, string> = {
   cargos_list: "Listar cargos", cargo_anular: "Anular cargo",
   // Catálogo de Plataforma (CAR-204).
   precio_set: "Fijar precio de lista",
+  // Prueba gratis por empresa (CAR-222).
+  prueba_gratis_extender: "Extender prueba gratis",
 };

@@ -717,6 +717,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.apikeys.update` | Solo personas: cambiar alcances de una key es gobernar agentes (ADR-032). |
 | `core.aprobaciones.aprobar` | Solo personas: lo irreversible lo aprueba un humano (ADR-032). |
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
+| `core.biometria.enrolar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4). |
+| `core.biometria.verificar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4). |
 | `core.credenciales_terreno.asignar_pin` | Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02). |
 | `core.credenciales_terreno.cambiar_pin` | Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02). |
 | `core.credenciales_terreno.restablecer` | Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02). |
@@ -795,6 +797,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `core.biometria.enrolar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
+| `core.biometria.verificar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
@@ -863,6 +867,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.anexos.generar`
 - `core.aprobaciones.get`
 - `core.audit.list`
+- `core.biometria.borrar`
+- `core.biometria.estado`
 - `core.bitacora.verificar`
 - `core.consumos.por_recurso`
 - `core.dispositivos.estado`
@@ -881,6 +887,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
+- `core.modules.probar`
 - `core.patrones.get`
 - `core.personas.laboral_actualizar`
 - `core.personas.pago_solicitar_cambio`
@@ -922,6 +929,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`
+- `platform.cobros.prueba_gratis_extender`
 - `platform.eventos.list`
 - `platform.tenants.update`
 - `platform.trabajos.cancelar`

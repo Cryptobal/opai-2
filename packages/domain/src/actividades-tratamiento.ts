@@ -72,6 +72,7 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
   { id: 10, actividad: "Consentimientos de fines accesorios", categoriaPrincipal: "Identificación", baseLicitud: "consentimiento", tablas: ["consentimientos"] },
   { id: 11, actividad: "Solicitudes del titular (ARCO+) e incidentes de brecha", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["solicitudes_arco", "incidentes"] },
   { id: 12, actividad: "Confirmación y consumo de agentes", categoriaPrincipal: "Identificación", baseLicitud: "interes_legitimo", tablas: ["idempotencias", "aprobaciones", "aprobaciones_plataforma", "gasto_agente_mes"] },
+  { id: 13, actividad: "Reconocimiento facial de terreno", categoriaPrincipal: "Sensible", baseLicitud: "consentimiento", tablas: ["enrolamientos_biometricos"] },
 ];
 
 /** Fila del RAT por actividad, en lenguaje de negocio. */
