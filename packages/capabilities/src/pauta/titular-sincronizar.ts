@@ -1,28 +1,16 @@
 import type { TenantTx } from "@opai/db";
 
-import { vistaVinculo } from "../core/maestros/vinculos-vista";
 import { bloquearNoAnonimizado } from "../core/maestros/anonimizado";
 import { conflicto } from "../errores";
 import type { Contexto } from "../types";
 
-/** Mueve el puesto del vínculo (nuevo titular, o los que apuntaban al puesto) y avisa por evento. */
+/** Mueve el puesto del vínculo (nuevo titular, o los que apuntaban al puesto). Un cambio solo de puesto no genera anexo (decisión de Carlos, 6-nov-2026). */
 async function moverVinculos(
   tx: TenantTx,
-  ctx: Contexto,
   p: { puestoId: string; instalacionId: string; titularId: string | null },
 ) {
-  const cambiar = async (id: string, puestoId: string | null) => {
-    const antes = await tx.vinculoLaboral.findUniqueOrThrow({ where: { id } });
-    if (antes.puestoId === puestoId) return;
-    const despues = await tx.vinculoLaboral.update({ where: { id }, data: { puestoId } });
-    // Mismo evento que `core.vinculos.update`: el cambio de puesto puede mover la capa de sueldo (R11).
-    await ctx.eventos.emitir(tx, {
-      tipo: "core.vinculo.actualizado",
-      entidadTipo: "vinculo",
-      entidadId: id,
-      payload: { personaId: antes.personaId, antes: vistaVinculo(antes), despues: vistaVinculo(despues), campos: ["puestoId"] },
-    });
-  };
+  const cambiar = (id: string, puestoId: string | null) =>
+    tx.vinculoLaboral.update({ where: { id }, data: { puestoId } });
   const salientes = await tx.vinculoLaboral.findMany({
     where: { puestoId: p.puestoId, estado: "vigente", ...(p.titularId ? { personaId: { not: p.titularId } } : {}) },
     select: { id: true },
@@ -45,10 +33,10 @@ async function moverVinculos(
  */
 export async function sincronizarTitular(
   tx: TenantTx,
-  ctx: Contexto,
+  _ctx: Contexto,
   r: { puestoId: string; instalacionId: string; titularId: string | null },
 ) {
-  await moverVinculos(tx, ctx, r);
+  await moverVinculos(tx, r);
   await tx.puesto.update({
     where: { id: r.puestoId },
     data: { cobertura: r.titularId ? "cubierto" : "ppc", coberturaMotivo: r.titularId ? null : "sin_asignar" },

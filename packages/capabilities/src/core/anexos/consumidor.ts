@@ -111,9 +111,9 @@ async function porCambioDeVinculo(ctx: Contexto, ev: EventoPublicado) {
     campos?: string[];
   };
   if (!p.personaId || !ev.entidadId) return;
-  // Solo instalación o puesto cambian la capa que rige (R11); la jornada pactada por sí sola no
-  // genera anexo.
-  if (!p.campos?.some((c) => c === "instalacionId" || c === "puestoId")) return;
+  // Solo la instalación cambia las condiciones (R11); ni la jornada pactada ni un simple cambio de
+  // puesto del vínculo generan anexo (decisión de Carlos, 6-nov-2026).
+  if (!p.campos?.some((c) => c === "instalacionId")) return;
   await ctx.transaccion((tx) =>
     crearBorrador(ctx, tx, {
       personaId: p.personaId as string,
