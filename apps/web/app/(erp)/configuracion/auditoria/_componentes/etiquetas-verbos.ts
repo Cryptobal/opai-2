@@ -25,7 +25,7 @@ export const VERBOS: Record<string, string> = {
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
   aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
-  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", vencimientos: "Vencimientos", explorar: "Explorar",
+  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
   politica_set: "Definir política", firmante_empresa_set: "Definir firmante de la empresa",
   firma_automatica_autorizar: "Autorizar firma automática", firma_automatica_revocar: "Revocar firma automática",
