@@ -123,7 +123,8 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
     expect(r.ok, JSON.stringify(r)).toBe(true);
     const antiguo = await e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona, fecha: new Date("2024-06-03T00:00:00Z") } });
     expect(antiguo.tipoJornada).toBe("parcial");
-    expect((await dia()).tipoJornada).toBe("teletrabajo");
+    const hoy = await e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona, fecha: new Date(`${fecha}T00:00:00Z`) } });
+    expect(hoy.tipoJornada).toBe("teletrabajo");
   });
 
   it("una contingencia aceptada días después cuenta en la hora que se declaró", async () => {
