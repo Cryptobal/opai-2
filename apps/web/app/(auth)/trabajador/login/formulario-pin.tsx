@@ -9,9 +9,15 @@ import { accionEntrarConPin, type EstadoPin } from "@/app/_acciones/ingreso-pin"
 import { LinkNext } from "@/app/_components/link-next";
 
 /** Login Trabajador según el diseño aprobado (export-acceso 06 y 07): RUT con formato y PIN con teclado. */
-export function FormularioPin({ inicial }: { inicial?: EstadoPin }) {
+export function FormularioPin({
+  inicial,
+  destino = "",
+}: {
+  inicial?: EstadoPin;
+  destino?: string;
+}) {
   const [estado, entrar, pendiente] = useActionState(
-    accionEntrarConPin,
+    accionEntrarConPin.bind(null, destino),
     inicial ?? ({ tipo: "inicial" } as EstadoPin),
   );
   const [rut, setRut] = useState("");

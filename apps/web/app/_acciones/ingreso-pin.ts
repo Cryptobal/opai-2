@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { entrarConPin } from "@opai/auth";
 import { normalizarRut } from "@opai/domain";
 
+import { destinoSeguro } from "@/app/(auth)/destino";
 import { ipDeCabeceras, permitir } from "@/lib/rate-limit";
 
 /**
@@ -20,6 +21,12 @@ export type EstadoPin =
   | { tipo: "pausado"; n: number }
   /** PIN temporal correcto: falta elegir el propio. No hay sesión hasta entonces (B3 del Revisor). */
   | { tipo: "cambiar"; n: number; mensaje?: string };
+
+/** Tras ingresar con PIN solo se vuelve a una ruta del Portal Trabajador; si no, a su inicio. */
+const destinoTrabajador = (d: string): string => {
+  const seguro = destinoSeguro(d);
+  return seguro === "/trabajador" || seguro.startsWith("/trabajador/") ? seguro : "/trabajador";
+};
 
 const VENTANA_MS = 15 * 60_000;
 const INTENTOS_RUT = 5;
@@ -48,7 +55,7 @@ export async function accionEntrarConPin(previo: EstadoPin, form: FormData): Pro
   ];
   if (!porOrigen || !porRut) return { tipo: "pausado", n };
   const r = await entrarConPin(rutEscrito, pin, nuevo);
-  if (r.ok) redirect(`/elegir-empresa?next=${encodeURIComponent("/trabajador")}`);
+  if (r.ok) redirect(`/elegir-empresa?next=${encodeURIComponent(destinoTrabajador(destino))}`);
   if (r.fallo === "cambiar") return { tipo: "cambiar", n };
   if (r.fallo === "nuevo_invalido") return { tipo: "cambiar", n, mensaje: r.mensaje };
   return { tipo: "error", n };

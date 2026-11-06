@@ -28,10 +28,19 @@ export const identidadActual = cache(async (): Promise<Identidad | null> => {
   return identidad;
 });
 
-/** Identidad o redirección a /login. */
+/** Entrada sin sesión: el Portal Trabajador tiene su propio ingreso (RUT + PIN); el resto, el de correo. */
+export function loginDe(destino?: string): string {
+  const base =
+    destino === "/trabajador" || destino?.startsWith("/trabajador/")
+      ? "/trabajador/login"
+      : "/login";
+  return destino ? `${base}?next=${encodeURIComponent(destino)}` : base;
+}
+
+/** Identidad o redirección al ingreso que corresponde (`/trabajador/login` o `/login`). */
 export async function requerirIdentidad(destino?: string): Promise<Identidad> {
   const identidad = await identidadActual();
-  if (!identidad) redirect(destino ? `/login?next=${encodeURIComponent(destino)}` : "/login");
+  if (!identidad) redirect(loginDe(destino));
   return identidad;
 }
 

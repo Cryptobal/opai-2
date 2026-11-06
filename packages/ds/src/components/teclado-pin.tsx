@@ -74,7 +74,7 @@ export function TecladoPin({
                   : "border-accent bg-accent"
                 : error
                   ? "border-danger"
-                  : "border-border-strong",
+                  : "border-fg-muted",
             )}
           />
         ))}
