@@ -1519,3 +1519,9 @@ identidad de servicio en main.
 - **D-04** · Guardar solo la plantilla del rostro, sin foto de referencia.
 
 Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría (B4) soporta ambos casos sin cambiar.
+
+## ADR-080 · CPQ: se aceptan los dos límites de concurrencia de CAR-192 y no se construye el contador de revisión
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Carlos, registrado por «Comercial · Code»
+
+**Decisión.** Se aceptan dos límites de concurrencia del recálculo de cotizaciones en borrador (#336, #337, #344): las huellas de línea se escriben fuera de la transacción del `updateMany` de la versión, y editar líneas no sube `revision`, de modo que una edición durante el cálculo puede dejar en un borrador un cálculo de las líneas anteriores. Ambos se corrigen al recalcular o al enviar (el envío valida la huella). **No se construye** un contador de revisión por líneas. Sin cambio de producto, migración ni tests.
