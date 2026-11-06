@@ -132,7 +132,7 @@ export function folioVista(
 export async function marcarBorradorEmitido(
   tx: TenantTx,
   documentoId: string,
-  data: { folio: number; fechaEmision: Date; timbrePdf417: string },
+  data: { folio: number; fechaEmision: Date; timbrePdf417: string; xmlStorageKey?: string },
 ): Promise<void> {
   const { count } = await tx.documentoEmitido.updateMany({
     where: { id: documentoId, estadoDte: "borrador", folio: null },
@@ -141,7 +141,7 @@ export async function marcarBorradorEmitido(
       fechaEmision: data.fechaEmision,
       estadoDte: "enviado",
       timbrePdf417: data.timbrePdf417,
-      xmlStorageKey: `dte/${documentoId}.xml`,
+      xmlStorageKey: data.xmlStorageKey ?? `dte/${documentoId}.xml`,
       cesionEstado: "no_cedido",
     },
   });

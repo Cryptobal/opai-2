@@ -9,11 +9,16 @@ export function claveXmlDte(documentoId: string): string {
   return `dte/${documentoId}.xml`;
 }
 
-export async function guardarXmlFirmadoDte(ctx: Contexto, documentoId: string, xml: string): Promise<void> {
+/** `clave` opcional: una clave provisional única por intento, para no pisar el XML de un documento ya emitido. */
+export async function guardarXmlFirmadoDte(
+  ctx: Contexto,
+  documentoId: string,
+  xml: string,
+  clave: string = claveXmlDte(documentoId),
+): Promise<void> {
   if (!ctx.servicios.almacenamiento.disponible) {
     throw reglaDeNegocio("Configure el almacenamiento para guardar el XML firmado del DTE.");
   }
-  const clave = claveXmlDte(documentoId);
   // ADR-075: el XML firmado es ISO-8859-1 y se guarda como esos mismos bytes; el SHA-256 se calcula sobre ellos.
   const bytes = bytesDeXml(xml);
   const sha256 = createHash("sha256").update(bytes).digest("hex");
@@ -51,4 +56,10 @@ export async function xmlBase64ParaCesion(
       : await leerXmlFirmadoDte(ctx, doc.xmlStorageKey);
   // Los mismos bytes del XML firmado (latin1 ↔ bytes sin pérdida), nunca recodificados a UTF-8 (ADR-075).
   return bytesDeXml(xml).toString("base64");
+}
+
+/** Borra, sin fallar, el XML de un intento que no llegó a confirmarse (contiene datos del receptor, Ley 21.719). */
+export async function descartarXmlPreparado(ctx: Contexto, clave: string | null): Promise<void> {
+  if (!clave || !ctx.servicios.almacenamiento.disponible) return;
+  await ctx.servicios.almacenamiento.eliminar(clave).catch(() => undefined);
 }

@@ -9,6 +9,7 @@ import { montoSchema } from "./comun";
 import { vistaDeDocumento } from "./ventas-consulta";
 import { bloquearYValidarNotaCredito, notasCreditoPreviasDe, validarNotaCreditoEmision } from "./ventas-nc-comun";
 import { persistirNotaCredito } from "./ventas-nc-escritura";
+import { claveXmlDte, descartarXmlPreparado } from "./ventas-xml";
 import { leerNcPreparada, prepararNotaCredito } from "./ventas-nc-preparar";
 import { previewNotaCreditoDryRun } from "./ventas-nc-preview";
 import {
@@ -99,7 +100,11 @@ export const ventasEmitirNotaCredito = defineCapability({
         folioEmitido = folio;
         return doc;
       },
-    );
+    ).catch(async (e: unknown) => {
+      // El XML ya subido de un intento que no se confirmó contiene datos del receptor: se borra.
+      await descartarXmlPreparado(ctx, claveXmlDte(preparada.documentoId));
+      throw e;
+    });
     return vistaDeDocumento(ctx, creado.id);
   },
 });

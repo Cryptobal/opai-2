@@ -1,6 +1,8 @@
 // Firma del DTE FUERA de la transacción de base (CAR-196): la llamada a SimpleAPI es remota y lenta, y no debe
 // retener la conexión ni los locks de la escritura. Se firma con el folio que se asignaría (sin consumirlo) y la
 // transacción de `emitirBorrador` revalida que ese siguiera siendo el folio disponible (ver `foliosPrevistos`).
+import { createHash, randomUUID } from "node:crypto";
+
 import { validarMontosVenta, type TipoDteVenta } from "@opai/domain";
 
 import { hoy } from "../core/maestros/comun";
@@ -17,7 +19,34 @@ export type EmisionPreparada = {
   folio: number;
   fechaEmision: string;
   timbrePdf417: string;
+  /** Clave provisional única de este intento; la transacción la fija como `xmlStorageKey` (null si no hay XML). */
+  xmlStorageKey: string | null;
+  /** Huella del borrador firmado: si cambió antes de la transacción, no se emite. */
+  huella: string;
 };
+
+type DocHuella = {
+  cuentaId: string;
+  fechaEmision: Date | null;
+  glosa: string | null;
+  montoNeto: number;
+  montoExento: number;
+  montoIva: number;
+  montoOtros: number;
+  montoTotal: number;
+  lineas: readonly { orden: number; glosa: string; monto: number }[];
+  referencias: readonly { tipoDteRef: number; folioRef: number; codigoRef: number; razonRef: string | null }[];
+};
+
+export function huellaBorrador(d: DocHuella): string {
+  const contenido = JSON.stringify([
+    d.cuentaId, d.fechaEmision?.toISOString().slice(0, 10) ?? null, d.glosa,
+    d.montoNeto, d.montoExento, d.montoIva, d.montoOtros, d.montoTotal,
+    d.lineas.map((l) => [l.orden, l.glosa, l.monto]),
+    d.referencias.map((r) => [r.tipoDteRef, r.folioRef, r.codigoRef, r.razonRef]),
+  ]);
+  return createHash("sha256").update(contenido).digest("hex");
+}
 
 /** Carga el borrador y valida que pueda emitirse; lo comparten la vista previa y la firma. */
 export async function cargarBorradorEmitible(ctx: Contexto, documentoId: string) {
@@ -71,6 +100,16 @@ export async function prepararEmision(ctx: Contexto, documentoId: string, folioA
     incluirCaf: adaptador.nombre !== "simulado",
   });
   const firmado = await adaptador.firmar(payload);
-  if (adaptador.nombre !== "simulado") await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml);
-  return { documentoId: doc.id, folio, fechaEmision: emision, timbrePdf417: firmado.timbrePdf417 };
+  // Clave única por intento: dos firmas concurrentes del mismo borrador no se pisan el XML (el de un documento
+  // ya emitido nunca se sobrescribe); la transacción que gana fija su clave.
+  const xmlStorageKey = adaptador.nombre === "simulado" ? null : `dte/${doc.id}/${randomUUID()}.xml`;
+  if (xmlStorageKey) await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml, xmlStorageKey);
+  return {
+    documentoId: doc.id,
+    folio,
+    fechaEmision: emision,
+    timbrePdf417: firmado.timbrePdf417,
+    xmlStorageKey,
+    huella: huellaBorrador(doc),
+  };
 }
