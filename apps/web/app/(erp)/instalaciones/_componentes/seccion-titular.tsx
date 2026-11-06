@@ -29,6 +29,7 @@ export function SeccionTitular({ puestoId, activo, titulares, puedeAsignar }: Pr
   const actual = titulares.items.find((i) => i.titularId && i.titularId === titulares.titularActualId);
   const sinPatron = !titulares.patronId;
   const abrir = (quitar: boolean) => fijar({ puesto: null, titular: puestoId, quitar: quitar ? "1" : null });
+  const trasladar = () => fijar({ puesto: null, trasladar: puestoId });
   return (
     <section aria-labelledby="titular-titulo" className="flex flex-col gap-3 border-b border-border pb-4">
       <div className="flex flex-col gap-1">
@@ -49,9 +50,14 @@ export function SeccionTitular({ puestoId, activo, titulares, puedeAsignar }: Pr
             {actual ? "Cambiar titular" : "Asignar titular"}
           </Button>
           {actual ? (
-            <Button variant="secondary" onClick={() => abrir(true)}>
-              Quitar titular
-            </Button>
+            <>
+              <Button variant="secondary" onClick={trasladar}>
+                Trasladar
+              </Button>
+              <Button variant="secondary" onClick={() => abrir(true)}>
+                Quitar titular
+              </Button>
+            </>
           ) : null}
         </div>
       ) : null}

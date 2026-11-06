@@ -21,6 +21,8 @@ export type Candidata = {
   desde: string;
   horaInicio: string;
   horaFin: string;
+  /** Vista previa: series de otros puestos que se cerrarán antes (puesto → último día de vigencia). */
+  cierres?: Readonly<Record<string, string>> | undefined;
 };
 
 /**
@@ -76,7 +78,9 @@ export async function validarNoDoblar(ctx: Contexto, c: Candidata): Promise<void
     const patron = patrones.find((p) => p.id === s.patronId);
     if (!puesto || !patron) continue;
     const desde = fechaIso(s.vigenteDesde) > ini ? fechaIso(s.vigenteDesde) : ini;
-    const hasta = s.vigenteHasta && fechaIso(s.vigenteHasta) < fin ? fechaIso(s.vigenteHasta) : fin;
+    const cierre = c.cierres?.[s.puestoId];
+    const tope = cierre && (!s.vigenteHasta || cierre < fechaIso(s.vigenteHasta)) ? cierre : s.vigenteHasta ? fechaIso(s.vigenteHasta) : null;
+    const hasta = tope && tope < fin ? tope : fin;
     const ajenos = turnosDeSerie(
       {
         etiqueta: puesto.nombre,
