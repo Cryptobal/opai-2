@@ -70,6 +70,6 @@ Registradas desde la pasada de OPAI 2.0 de las 13:07 CLT (comentario del PR #365
 3. **Brief:** aprobado. **Pasa a Claude Design antes de cualquier código** (pantallas de registro, «Por aprobar» y ficha del externo).
 4. **Externo:** se crea en el tenant **sin contrato**, con nombre, RUT, correo y datos bancarios (para la transferencia). Solo «Activo» tiene vínculo laboral. Es **la misma ficha a lo largo del tiempo**, con historial. Implica un estado de persona nuevo («externo») en el núcleo y datos bancarios cifrados en el almacén de campos (Ley 21.719, ADR-027); se diseña en el PR de código, con su migración.
 5. **Transiciones decididas:** Postulante → Rechazado | Externo | Contratado (Activo); Externo → Contratado (Activo); Activo → Inactivo al terminar el vínculo.
-6. **Transición propuesta, pendiente del OK de Carlos:** Inactivo → Activo | Externo.
+6. **Transición decidida (Carlos, 6-nov-2026, 15:22 Santiago: «Sí, Inactivo puede pasar a Activo o a Externo»):** Inactivo → Activo | Externo. Con esto el modelo de estados de Personas de CAR-96 queda cerrado y entra tal cual al encargo de diseño.
 
-**Trabajo pendiente antes del código:** diseño en Claude Design (DS 2.0), OK visual de Carlos (A2.10), y confirmar la transición 6. Este brief no empieza código ni migración.
+**Trabajo pendiente antes del código:** diseño en Claude Design (DS 2.0) y OK visual de Carlos (A2.10). Este brief no empieza código ni migración.
