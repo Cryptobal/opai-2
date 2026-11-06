@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<DTE version="1.0">
+    <Documento ID="T_638167772855621057">
+        <Encabezado>
+            <IdDoc>
+                <TipoDTE>33</TipoDTE>
+                <Folio>101</Folio>
+                <FchEmis>2023-04-11</FchEmis>
+                <FmaPago>1</FmaPago>
+                <FchVenc>2023-05-11</FchVenc>
+            </IdDoc>
+            <Emisor>
+                <RUTEmisor>76269769-6</RUTEmisor>
+                <RznSoc>RAZÓN SOCIAL</RznSoc>
+                <GiroEmis>GIRO GLOSA DESCRIPTIVA</GiroEmis>
+                <Acteco>620200</Acteco>
+                <Acteco>631100</Acteco>
+                <DirOrigen>DIRECCION 787</DirOrigen>
+                <CmnaOrigen>Santiago</CmnaOrigen>
+            </Emisor>
+            <Receptor>
+                <RUTRecep>66666666-6</RUTRecep>
+                <RznSocRecep>Razón Social de Cliente</RznSocRecep>
+                <GiroRecep>Giro de Cliente</GiroRecep>
+                <Contacto>Telefono Receptor</Contacto>
+                <DirRecep>Dirección de Cliente</DirRecep>
+                <CmnaRecep>Comuna de Cliente</CmnaRecep>
+            </Receptor>
+            <Totales>
+                <MntNeto>17328</MntNeto>
+                <TasaIVA>19</TasaIVA>
+                <IVA>3292</IVA>
+                <MntTotal>20620</MntTotal>
+            </Totales>
+        </Encabezado>
+        <Detalle>
+            <NroLinDet>1</NroLinDet>
+            <NmbItem>Producto_1</NmbItem>
+            <DscItem>Descripcion de items</DscItem>
+            <QtyItem>1</QtyItem>
+            <UnmdItem>un</UnmdItem>
+            <PrcItem>19327.731092</PrcItem>
+            <MontoItem>19328</MontoItem>
+        </Detalle>
+        <DscRcgGlobal>
+            <NroLinDR>1</NroLinDR>
+            <TpoMov>D</TpoMov>
+            <GlosaDR>DESCUENTO GLOBAL APLICADO</GlosaDR>
+            <TpoValor>$</TpoValor>
+            <ValorDR>2000</ValorDR>
+        </DscRcgGlobal>
+        <TED version="1.0">
+            <DD>
+                <RE>76269769-6</RE>
+                <TD>33</TD>
+                <F>101</F>
+                <FE>2023-04-11</FE>
+                <RR>66666666-6</RR>
+                <RSR>Razón Social de Cliente</RSR>
+                <MNT>20620</MNT>
+                <IT1>Producto_1</IT1>
+                <CAF version="1.0">
+                    <DA>
+                        <RE>76269769-6</RE>
+                        <RS>SERVICIOS INFORMATICOS GONZALO ALEJANDRO</RS>
+                        <TD>33</TD>
+                        <RNG>
+                            <D>101</D>
+                            <H>150</H>
+                        </RNG>
+                        <FA>2021-02-09</FA>
+                        <RSAPK>
+                            <M>FICTICIO</M>
+                            <E>FICTICIO</E>
+                        </RSAPK>
+                        <IDK>100</IDK>
+                    </DA>
+                    <FRMA algoritmo="SHA1withRSA">FICTICIO</FRMA>
+                </CAF>
+                <TSTED>2023-04-11T02:34:45</TSTED>
+            </DD>
+            <FRMT algoritmo="SHA1withRSA">FICTICIO</FRMT>
+        </TED>
+        <TmstFirma>2023-04-11T02:34:45</TmstFirma>
+    </Documento>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+        <SignedInfo>
+            <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+            <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+            <Reference URI="#T_638167772855621057">
+                <Transforms>
+                    <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                </Transforms>
+                <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+                <DigestValue>FICTICIO</DigestValue>
+            </Reference>
+        </SignedInfo>
+        <SignatureValue>FICTICIO</SignatureValue>
+        <KeyInfo>
+            <KeyValue>
+                <RSAKeyValue>
+                    <Modulus>FICTICIO</Modulus>
+                    <Exponent>FICTICIO</Exponent>
+                </RSAKeyValue>
+            </KeyValue>
+            <X509Data>
+                <X509Certificate>FICTICIO</X509Certificate>
+            </X509Data>
+        </KeyInfo>
+    </Signature>
+</DTE>

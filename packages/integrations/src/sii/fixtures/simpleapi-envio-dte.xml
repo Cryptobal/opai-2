@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<EnvioDTE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sii.cl/SiiDte EnvioDTE_v10.xsd" version="1.0" xmlns="http://www.sii.cl/SiiDte">
+    <SetDTE ID="ENVIO_12_04_2023_10_53">
+        <Caratula version="1.0">
+            <RutEmisor>76269769-6</RutEmisor>
+            <RutEnvia>17096073-4</RutEnvia>
+            <RutReceptor>60803000-K</RutReceptor>
+            <FchResol>2023-01-10</FchResol>
+            <NroResol>0</NroResol>
+            <TmstFirmaEnv>2023-04-12T10:53:13</TmstFirmaEnv>
+            <SubTotDTE>
+                <TpoDTE>33</TpoDTE>
+                <NroDTE>1</NroDTE>
+            </SubTotDTE>
+        </Caratula>
+        <DTE version="1.0">
+            <Documento ID="DTE_33_155_637679139595498625">
+                <Encabezado>
+                    <IdDoc>
+                        <TipoDTE>33</TipoDTE>
+                        <Folio>155</Folio>
+                        <FchEmis>2020-12-17</FchEmis>
+                    </IdDoc>
+                    <Emisor>
+                        <RUTEmisor>76269769-6</RUTEmisor>
+                        <RznSoc>Razón Social</RznSoc>
+                        <GiroEmis>Giro</GiroEmis>
+                        <Telefono>962212767</Telefono>
+                        <Acteco>474100</Acteco>
+                        <Acteco>465100</Acteco>
+                        <Acteco>582000</Acteco>
+                        <Acteco>620900</Acteco>
+                        <DirOrigen>Dirección</DirOrigen>
+                        <CmnaOrigen>Comuna</CmnaOrigen>
+                    </Emisor>
+                    <Receptor>
+                        <RUTRecep>66666666-6</RUTRecep>
+                        <RznSocRecep>Receptor</RznSocRecep>
+                        <GiroRecep>Giro</GiroRecep>
+                        <DirRecep>Direccion</DirRecep>
+                        <CmnaRecep>Comuna</CmnaRecep>
+                        <CiudadRecep>Ciudad</CiudadRecep>
+                    </Receptor>
+                    <Totales>
+                        <MntNeto>2010259</MntNeto>
+                        <MntExe>13634</MntExe>
+                        <TasaIVA>19</TasaIVA>
+                        <IVA>381949</IVA>
+                        <MntTotal>2405842</MntTotal>
+                    </Totales>
+                </Encabezado>
+                <Detalle>
+                    <NroLinDet>1</NroLinDet>
+                    <NmbItem>Producto 1</NmbItem>
+                    <QtyItem>334</QtyItem>
+                    <PrcItem>4891</PrcItem>
+                    <MontoItem>1633594</MontoItem>
+                </Detalle>
+                <Detalle>
+                    <NroLinDet>2</NroLinDet>
+                    <NmbItem>Producto 2</NmbItem>
+                    <QtyItem>141</QtyItem>
+                    <PrcItem>5801</PrcItem>
+                    <MontoItem>817941</MontoItem>
+                </Detalle>
+                <Detalle>
+                    <NroLinDet>3</NroLinDet>
+                    <IndExe>1</IndExe>
+                    <NmbItem>Servicio exento</NmbItem>
+                    <QtyItem>2</QtyItem>
+                    <PrcItem>6817</PrcItem>
+                    <MontoItem>13634</MontoItem>
+                </Detalle>
+                <DscRcgGlobal>
+                    <NroLinDR>1</NroLinDR>
+                    <TpoMov>D</TpoMov>
+                    <GlosaDR>Descuento Comercial</GlosaDR>
+                    <TpoValor>%</TpoValor>
+                    <ValorDR>18</ValorDR>
+                </DscRcgGlobal>
+                <Referencia>
+                    <NroLinRef>1</NroLinRef>
+                    <TpoDocRef>39</TpoDocRef>
+                    <FolioRef>1</FolioRef>
+                    <FchRef>2020-12-17</FchRef>
+                    <RazonRef>Referencia de prueba</RazonRef>
+                </Referencia>
+                <TED version="1.0">
+                    <DD>
+                        <RE>76269769-6</RE>
+                        <TD>33</TD>
+                        <F>155</F>
+                        <FE>2020-12-17</FE>
+                        <RR>66666666-6</RR>
+                        <RSR>Receptor</RSR>
+                        <MNT>2405842</MNT>
+                        <IT1>Producto 1</IT1>
+                        <CAF version="1.0">
+                            <DA>
+                                <RE>76269769-6</RE>
+                                <RS>SERVICIOS INFORMATICOS GONZALO ALEJANDRO</RS>
+                                <TD>33</TD>
+                                <RNG>
+                                    <D>151</D>
+                                    <H>165</H>
+                                </RNG>
+                                <FA>2021-06-18</FA>
+                                <RSAPK>
+                                    <M>FICTICIO</M>
+                                    <E>FICTICIO</E>
+                                </RSAPK>
+                                <IDK>100</IDK>
+                            </DA>
+                            <FRMA algoritmo="SHA1withRSA">FICTICIO</FRMA>
+                        </CAF>
+                        <TSTED>2021-09-22T13:26:00</TSTED>
+                    </DD>
+                    <FRMT algoritmo="SHA1withRSA">FICTICIO</FRMT>
+                </TED>
+                <TmstFirma>2021-09-22T13:26:00</TmstFirma>
+            </Documento>
+            <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <SignedInfo>
+                    <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                    <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+                    <Reference URI="#DTE_33_155_637679139595498625">
+                        <Transforms>
+                            <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                        </Transforms>
+                        <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+                        <DigestValue>FICTICIO</DigestValue>
+                    </Reference>
+                </SignedInfo>
+                <SignatureValue>FICTICIO</SignatureValue>
+                <KeyInfo>
+                    <KeyValue>
+                        <RSAKeyValue>
+                            <Modulus>FICTICIO</Modulus>
+                            <Exponent>FICTICIO</Exponent>
+                        </RSAKeyValue>
+                    </KeyValue>
+                    <X509Data>
+                        <X509Certificate>FICTICIO</X509Certificate>
+                    </X509Data>
+                </KeyInfo>
+            </Signature>
+        </DTE>
+    </SetDTE>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+        <SignedInfo>
+            <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+            <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+            <Reference URI="#ENVIO_12_04_2023_10_53">
+                <Transforms>
+                    <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                </Transforms>
+                <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+                <DigestValue>FICTICIO</DigestValue>
+            </Reference>
+        </SignedInfo>
+        <SignatureValue>FICTICIO</SignatureValue>
+        <KeyInfo>
+            <KeyValue>
+                <RSAKeyValue>
+                    <Modulus>FICTICIO</Modulus>
+                    <Exponent>FICTICIO</Exponent>
+                </RSAKeyValue>
+            </KeyValue>
+            <X509Data>
+                <X509Certificate>FICTICIO</X509Certificate>
+            </X509Data>
+        </KeyInfo>
+    </Signature>
+</EnvioDTE>
