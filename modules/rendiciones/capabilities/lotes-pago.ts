@@ -57,9 +57,10 @@ export const lotesDescargarNomina = defineCapability({
   // Revela cuentas de personas: audita solo los IDs de las personas, sin copiar datos.
   auditarLectura: (s) => s.personaIds,
   async handler(ctx, input) {
-    actorId(ctx);
     await exigirFormatoConfirmado(ctx);
-    const { lote } = await loteConSolicitantes(ctx, input.id);
+    const yo = actorId(ctx);
+    const { lote, solicitantes } = await loteConSolicitantes(ctx, input.id);
+    if (!sinRendicionPropia(yo, solicitantes)) throw prohibido("Nadie descarga la nómina de un lote con una rendición propia.");
     if (lote.estado !== "generado" && lote.estado !== "pagado") throw reglaDeNegocio("La nómina se descarga con el lote ya generado.");
     const n = await armarNomina(ctx, lote.items, codigoLote(lote.codigo));
     if (n.huella !== lote.nominaHuella) throw conflicto("La nómina cambió respecto de la que se generó: anula el lote y arma otro.");

@@ -54,7 +54,7 @@ export const lotesAprobar = defineCapability({
 export const lotesAnular = defineCapability({
   id: "rendiciones.lotes.anular",
   descripcion:
-    "Anula un lote de pago que aún no se pagó (borrador, aprobado o generado), con el motivo. Sus rendiciones quedan libres para otro lote. Un lote pagado no se anula.",
+    "Anula un lote de pago que aún no se pagó (borrador, aprobado o generado), con el motivo. Sus rendiciones quedan libres para otro lote. Ojo: si la nómina de un lote «generado» ya se subió al banco, anularlo y rearmarlo puede pagar dos veces; confírmalo antes. Un lote pagado no se anula.",
   permiso: PERMISO_PAGAR,
   portales: ["erp"],
   input: z.object({ id: uuidSchema, motivo: z.string().trim().min(3).max(300) }),

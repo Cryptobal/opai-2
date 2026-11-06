@@ -36,7 +36,7 @@ export const bandejaListar = defineCapability({
     rendiciones: z.array(filaSchema),
     porRevisar: z.number().int().describe("Rendiciones enviadas que esperan su decisión."),
     montoPorRevisar: z.number().int().describe("Suma en CLP entero de lo que espera su decisión."),
-    aprobadasSinPagar: z.number().int().describe("Rendiciones aprobadas que aún no están en un lote pagado."),
+    aprobadasSinPagar: z.number().int().describe("Rendiciones aprobadas que todavía no están en ningún lote activo."),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -60,7 +60,7 @@ export const bandejaListar = defineCapability({
     });
     const [pendientes, aprobadas] = await Promise.all([
       ctx.db.rendicion.aggregate({ where: { ...base, estado: "enviada" }, _count: true, _sum: { montoTotal: true } }),
-      ctx.db.rendicion.count({ where: { ...base, estado: "aprobada" } }),
+      ctx.db.rendicion.count({ where: { ...base, estado: "aprobada", lotes: { none: { activo: true } } } }),
     ]);
     const nombres = await nombresDe(ctx, [...filas.map((f) => f.aprobadorId), ...filas.map((f) => f.solicitanteId)]);
     return {

@@ -171,6 +171,12 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R3 (db)", () => {
     expect(await como(u.paga, "gerente", t.a)("rendiciones.lotes.marcar_pagado", entrada)).toMatchObject({ ok: false });
   });
 
+  it("la base protege los estados finales y el historial", async () => {
+    await expect(e.admin.lotePago.update({ where: { id: rend["lote"]! }, data: { estado: "borrador" } })).rejects.toThrow();
+    await expect(e.admin.lotePagoHistorial.deleteMany({ where: { loteId: rend["lote"]! } })).rejects.toThrow();
+    await expect(e.admin.lotePagoItem.updateMany({ where: { loteId: rend["lote"]! }, data: { montoClp: 1 } })).rejects.toThrow();
+  });
+
   it("otra empresa no ve ni toca los lotes", async () => {
     const b = como(u.duenoB, "owner", t.b);
     expect((ok(await b("rendiciones.lotes.listar"))["lotes"] as unknown[]).length).toBe(0);

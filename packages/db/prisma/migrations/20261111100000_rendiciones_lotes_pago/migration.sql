@@ -115,6 +115,43 @@ END $$;
 CREATE TRIGGER "lote_pago_item_inmutable" BEFORE UPDATE ON "rendiciones"."lote_pago_items"
   FOR EACH ROW EXECUTE FUNCTION "rendiciones"."lote_pago_item_inmutable"();
 
+-- Referencias dentro del mismo tenant (core.users no lleva tenant_id: identidad global, ADR-015).
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "rendiciones"."lotes_pago"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('comprobante_documento_id', 'core.documentos');
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "rendiciones"."lote_pago_items"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('lote_id', 'rendiciones.lotes_pago', 'rendicion_id', 'rendiciones.rendiciones', 'persona_id', 'core.personas');
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "rendiciones"."lote_pago_historial"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('lote_id', 'rendiciones.lotes_pago');
+
+-- Estados finales y línea de tiempo: «pagado» y «anulado» no se mueven; un ítem liberado no se reactiva;
+-- el historial es append-only (sin UPDATE ni DELETE, ni siquiera por cascada desde la aplicación).
+CREATE FUNCTION "rendiciones"."lote_pago_estado_final"() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF OLD.estado IN ('pagado', 'anulado') AND NEW.estado IS DISTINCT FROM OLD.estado THEN
+    RAISE EXCEPTION 'Un lote % no cambia de estado', OLD.estado USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER "lote_pago_estado_final" BEFORE UPDATE ON "rendiciones"."lotes_pago"
+  FOR EACH ROW EXECUTE FUNCTION "rendiciones"."lote_pago_estado_final"();
+
+CREATE FUNCTION "rendiciones"."lote_pago_item_no_reactivar"() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF OLD.activo = false AND NEW.activo = true THEN
+    RAISE EXCEPTION 'Un ítem liberado de un lote no se reactiva' USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER "lote_pago_item_no_reactivar" BEFORE UPDATE ON "rendiciones"."lote_pago_items"
+  FOR EACH ROW EXECUTE FUNCTION "rendiciones"."lote_pago_item_no_reactivar"();
+
+CREATE FUNCTION "rendiciones"."lote_pago_historial_append_only"() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'El historial de un lote de pago es append-only' USING ERRCODE = 'check_violation';
+END $$;
+CREATE TRIGGER "lote_pago_historial_append_only" BEFORE UPDATE OR DELETE ON "rendiciones"."lote_pago_historial"
+  FOR EACH ROW EXECUTE FUNCTION "rendiciones"."lote_pago_historial_append_only"();
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "rendiciones" TO opai_app;
 
 ALTER TABLE "rendiciones"."lotes_pago" ENABLE ROW LEVEL SECURITY;
@@ -146,5 +183,6 @@ COMMIT;
 -- Reversión: migración aditiva; si hace falta deshacerla antes de usarla:
 -- DROP TABLE "rendiciones"."lote_pago_items", "rendiciones"."lote_pago_historial",
 --   "rendiciones"."lote_pago_contadores", "rendiciones"."lotes_pago"; DROP FUNCTION
---   "rendiciones"."lote_pago_proteger_total"(), "rendiciones"."lote_pago_item_inmutable"().
+--   "rendiciones"."lote_pago_proteger_total"(), "rendiciones"."lote_pago_item_inmutable"(),
+--   "rendiciones"."lote_pago_estado_final"(), "rendiciones"."lote_pago_item_no_reactivar"(), "rendiciones"."lote_pago_historial_append_only"().
 -- Con lotes ya guardados no se borra: se restaura desde el snapshot previo de Neon.
