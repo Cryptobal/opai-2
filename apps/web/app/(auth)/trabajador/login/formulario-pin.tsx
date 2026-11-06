@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Alerta, AuthCard, Button, Campo, Input, TecladoPin } from "@opai/ds";
-import { formatearRut } from "@opai/domain";
+import { formatearRut, rutValido } from "@opai/domain";
 
 import { accionEntrarConPin, type EstadoPin } from "@/app/_acciones/ingreso-pin";
 import { LinkNext } from "@/app/_components/link-next";
@@ -30,7 +30,13 @@ export function FormularioPin({
     setVistoN(nActual);
     if (estado.tipo === "error" || estado.tipo === "pausado") setPin("");
   }
-  const listo = pin.length === 6 && rut.replace(/[^0-9kK]/g, "").length >= 7;
+  // El dígito verificador (módulo 11) se comprueba en el navegador: no revela si la persona existe y evita
+  // gastar un intento por un RUT mal escrito. El aviso sale al salir del campo o con 8 o más caracteres.
+  const [tocado, setTocado] = useState(false);
+  const rutOk = rutValido(rut);
+  const largoRut = rut.replace(/[^0-9kK]/g, "").length;
+  const errorRut = !rutOk && rut !== "" && (tocado || largoRut >= 8);
+  const listo = pin.length === 6 && rutOk;
   return (
     <AuthCard
       sufijo="Trabajador"
@@ -65,7 +71,11 @@ export function FormularioPin({
         </Alerta>
       ) : null}
       <form action={entrar} className="flex flex-col gap-5">
-        <Campo etiqueta="RUT" htmlFor="rut">
+        <Campo
+          etiqueta="RUT"
+          htmlFor="rut"
+          {...(errorRut ? { error: "RUT inválido, revisa el dígito verificador" } : {})}
+        >
           <Input
             id="rut"
             name="rut"
@@ -75,6 +85,8 @@ export function FormularioPin({
             className="t-mono text-center text-lg"
             value={rut}
             onChange={(e) => setRut(formatearRut(e.target.value))}
+            onBlur={() => setTocado(true)}
+            {...(errorRut ? { "aria-invalid": true, "aria-describedby": "rut-error" } : {})}
             disabled={pendiente}
             required
           />

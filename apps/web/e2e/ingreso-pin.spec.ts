@@ -48,9 +48,37 @@ for (const tema of ["light", "dark"] as const) {
   });
 }
 
+test("el RUT con dígito verificador malo avisa y no deja entrar; el que termina en K sí", async ({
+  page,
+}) => {
+  await page.goto("/trabajador/login");
+  const entrar = page.getByRole("button", { name: "Entrar" });
+  const rut = page.getByLabel("RUT");
+  const teclear = async () => {
+    for (const d of "482915") await page.getByRole("button", { name: d, exact: true }).click();
+  };
+  await teclear();
+  // DV malo: 12.345.678-0 (el correcto es 5). Con 8 o más caracteres avisa sin salir del campo.
+  await rut.fill("123456780");
+  await expect(page.getByText("RUT inválido, revisa el dígito verificador")).toBeVisible();
+  await expect(entrar).toBeDisabled();
+  // DV correcto: se limpia el aviso y se habilita.
+  await rut.fill("123456785");
+  await expect(page.getByText("RUT inválido, revisa el dígito verificador")).toBeHidden();
+  await expect(entrar).toBeEnabled();
+  // Un RUT válido que termina en K (6.000.000-K): se acepta, y la k se escribe en mayúscula.
+  await rut.fill("6000000k");
+  await expect(rut).toHaveValue("6.000.000-K");
+  await expect(entrar).toBeEnabled();
+  // Mientras escribe (menos de 8 caracteres y sin salir del campo) todavía no se le reprocha.
+  await rut.fill("1234");
+  await expect(page.getByText("RUT inválido, revisa el dígito verificador")).toBeHidden();
+  await expect(entrar).toBeDisabled();
+});
+
 test("datos incorrectos muestran el mismo aviso, exista o no el RUT", async ({ page }, info) => {
   await page.goto("/trabajador/login");
-  await page.getByLabel("RUT").fill("99999999-9");
+  await page.getByLabel("RUT").fill("99999999-9"); // dígito verificador válido de un RUT sin cuenta
   for (const d of "111112") await page.getByRole("button", { name: d, exact: true }).click();
   await page.getByRole("button", { name: "Entrar" }).click();
   await expect(page.getByText("RUT o PIN incorrectos")).toBeVisible();

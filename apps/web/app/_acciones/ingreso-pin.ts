@@ -32,7 +32,11 @@ const VENTANA_MS = 15 * 60_000;
 const INTENTOS_RUT = 5;
 const INTENTOS_ORIGEN = 30;
 
-export async function accionEntrarConPin(previo: EstadoPin, form: FormData): Promise<EstadoPin> {
+export async function accionEntrarConPin(
+  destino: string,
+  previo: EstadoPin,
+  form: FormData,
+): Promise<EstadoPin> {
   const n = ("n" in previo ? previo.n : 0) + 1;
   const rutEscrito = String(form.get("rut") ?? "");
   const pin = String(form.get("pin") ?? "");
