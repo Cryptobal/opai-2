@@ -116,6 +116,18 @@ describe.skipIf(omitirSuiteDb())("flujo · factoring y doble conteo (db)", () =>
     expect(total(despues, FILA_DIFERENCIA_FACTORING)).toBe(200);
   });
 
+  it("una cesión ya financiada no proyecta otro depósito (el dinero ya está en el banco): solo queda su diferencia", async () => {
+    const antes = await planilla();
+    const cedida = await factura({ montoTotal: 2_000_000, montoExento: 2_000_000, estadoCobro: "cedida", cesionEstado: "cedido" });
+    await e.admin.cesion.create({
+      data: { tenantId, documentoId: cedida.id, factorRut: "11111111-1", factorNombre: "Otro Factor", tasaBps: 150, anticipo: 1_970_000, merma: 30_000, saldoFactor: 30_000, estado: "financiada" },
+    });
+    const despues = await planilla();
+    expect(total(despues, FILA_DEPOSITO_FACTORING)).toBe(total(antes, FILA_DEPOSITO_FACTORING)); // sin depósito proyectado nuevo
+    expect(semanaActual(despues).ingresos).toBe(semanaActual(antes).ingresos);
+    expect(total(despues, FILA_DIFERENCIA_FACTORING) - total(antes, FILA_DIFERENCIA_FACTORING)).toBe(30_000);
+  });
+
   it("abono sin conciliar igual al pendiente y con el RUT del cliente: la factura no se cuenta dos veces", async () => {
     const antes = await planilla();
     const f = await factura({ montoTotal: 321_000, montoExento: 321_000 });
@@ -137,6 +149,25 @@ describe.skipIf(omitirSuiteDb())("flujo · factoring y doble conteo (db)", () =>
     expect(despues.avisos).toEqual([
       expect.objectContaining({ tipo: "posible_cobro_recibido", monto: 654_000, mensaje: "Posible cobro ya recibido: concilia el abono de $ 654.000" }),
     ]);
+  });
+
+  it("un abono con el RUT del factor no lo gasta una factura ajena del mismo monto", async () => {
+    const antes = await planilla();
+    const otro = await e.admin.cuenta.create({ data: { tenantId, nombre: "Otro cliente", rut: "11111111-1" } });
+    const f = await e.admin.documentoEmitido.create({
+      data: { tenantId, cuentaId: otro.id, tipoDte: 34, folio: folio++, fechaEmision: fecha(hoy), fechaVencimiento: fecha(hoy), montoTotal: 4_444_000, montoExento: 4_444_000, estadoDte: "aceptado" },
+    });
+    const cedida = await factura({ montoTotal: 4_500_000, montoExento: 4_500_000, estadoCobro: "cedida", cesionEstado: "cedido" });
+    await e.admin.cesion.create({
+      data: { tenantId, documentoId: cedida.id, factorRut: "99999999-9", factorNombre: "Factor SpA", tasaBps: 100, anticipo: 4_444_000, merma: 56_000, saldoFactor: 56_000, estado: "enviada" },
+    });
+    await abono(4_444_000, "ABONO 99.999.999-9");
+    const despues = await planilla();
+    // El depósito del factor se oculta por RUT; la factura ajena (mismo monto) sigue proyectada y no avisa.
+    expect(total(despues, FILA_DEPOSITO_FACTORING)).toBe(total(antes, FILA_DEPOSITO_FACTORING));
+    expect(total(despues, FILA_COBROS_ESPERADOS) - total(antes, FILA_COBROS_ESPERADOS)).toBe(4_444_000);
+    expect(despues.avisos.some((a) => a.monto === 4_444_000)).toBe(false);
+    await e.admin.documentoEmitido.update({ where: { id: f.id }, data: { estadoCobro: "pagada", montoCobrado: 4_444_000 } });
   });
 
   it("un abono de otro monto no oculta nada ni avisa", async () => {

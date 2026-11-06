@@ -36,16 +36,15 @@ export async function proyeccionDeIngresos(ctx: Contexto, hoy: string = hoyChile
   });
   const abonos = movs.map((m) => ({ id: m.id, monto: Number(m.monto), glosa: m.glosa, fecha: m.fecha.toISOString().slice(0, 10) }));
 
-  const deFacturas = emparejarAbonosConCobros({
-    abonos: abonos.filter((a) => a.fecha >= lunesActual),
-    cobros: reales.map((i) => ({ id: i.documentoEmitidoId!, monto: i.monto, rut: rutDe.get(i.cuentaId) ?? null })),
+  // Una sola pasada: las coincidencias seguras de facturas y depósitos van antes que cualquier «posible».
+  const emparejados = emparejarAbonosConCobros({
+    abonos,
+    cobros: [
+      ...reales.map((i) => ({ id: `f:${i.documentoEmitidoId}`, monto: i.monto, rut: rutDe.get(i.cuentaId) ?? null, desde: lunesActual })),
+      ...depositos.map((d) => ({ id: `d:${d.cesionId}`, monto: d.monto, rut: d.rutFactor })),
+    ],
   });
-  const gastados = new Set([...deFacturas.seguros.values(), ...deFacturas.posibles.map((p) => p.abonoId)]);
-  const deDepositos = emparejarAbonosConCobros({
-    abonos: abonos.filter((a) => !gastados.has(a.id)),
-    cobros: depositos.map((d) => ({ id: d.cesionId, monto: d.monto, rut: d.rutFactor })),
-  });
-  const avisos = [...deFacturas.posibles, ...deDepositos.posibles].map((p) => ({
+  const avisos = emparejados.posibles.map((p) => ({
     tipo: "posible_cobro_recibido" as const,
     mensaje: `Posible cobro ya recibido: concilia el abono de ${clp(p.monto)}`,
     abonoId: p.abonoId,
@@ -53,8 +52,8 @@ export async function proyeccionDeIngresos(ctx: Contexto, hoy: string = hoyChile
   }));
   return {
     items: [
-      ...facturas.filter((i) => !i.documentoEmitidoId || !deFacturas.seguros.has(i.documentoEmitidoId)),
-      ...depositos.filter((d) => !deDepositos.seguros.has(d.cesionId)),
+      ...facturas.filter((i) => !i.documentoEmitidoId || !emparejados.seguros.has(`f:${i.documentoEmitidoId}`)),
+      ...depositos.filter((d) => !emparejados.seguros.has(`d:${d.cesionId}`)),
     ],
     avisos,
     diferenciasFactoring: diferencias,
