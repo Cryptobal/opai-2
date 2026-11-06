@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Alerta, avisar, Button, Checkbox, Campo, Input, Select } from "@opai/ds";
+import { Alerta, avisar, Button, Checkbox, Campo, Input } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -18,22 +18,30 @@ export function EditorFlujoCaja({
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [etiqueta, setEtiqueta] = useState("");
-  const [seccion, setSeccion] = useState<"ingreso" | "egreso">("ingreso");
   const [aj, setAj] = useState(ajustes);
+  // La lista se actualiza al instante con lo que devuelve cada capacidad y se vuelve a alinear cuando el
+  // servidor revalida la página (CAR-198/CAR-220).
+  const [lista, setLista] = useState(filas);
+  useEffect(() => setLista(filas), [filas]);
+  const ingresos = lista.filter((f) => f.seccion === "ingreso");
+  const egresos = lista.filter((f) => f.seccion === "egreso");
+
+  const poner = (f: FilaFlujo) =>
+    setLista((l) => (l.some((x) => x.id === f.id) ? l.map((x) => (x.id === f.id ? f : x)) : [...l, f]));
 
   async function crearFila() {
-    const r = await ejecutar("finanzas.filas.crear", { seccion, etiqueta, arrastre: false });
+    const r = await ejecutar<FilaFlujo>("finanzas.filas.crear", { seccion: "egreso", etiqueta, arrastre: false });
     if (!r) return;
-    avisar.exito("Fila creada");
+    poner(r);
+    avisar.exito("Egreso creado");
     setEtiqueta("");
   }
 
-  async function archivarFila(id: string) {
-    const r = await ejecutar("finanzas.filas.archivar", { id, archivar: true }, true);
+  async function archivarFila(id: string, archivar: boolean) {
+    const r = await ejecutar<FilaFlujo>("finanzas.filas.archivar", { id, archivar });
     if (!r) return;
-    const ok = await ejecutar("finanzas.filas.archivar", { id, archivar: true });
-    if (!ok) return;
-    avisar.exito("Fila archivada");
+    poner(r);
+    avisar.exito(archivar ? "Fila archivada" : "Fila restaurada");
   }
 
   async function guardarAjustes() {
@@ -46,36 +54,44 @@ export function EditorFlujoCaja({
     <div className="flex flex-col gap-8">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium text-fg">Filas</h2>
+        <h2 className="text-lg font-medium text-fg">Ingresos</h2>
+        <p className="text-sm text-fg-muted">
+          Los ingresos salen solos de lo facturado y cobrado; no se crean a mano.
+        </p>
         <ul className="text-sm text-fg-muted">
-          {filas.map((f) => (
+          {ingresos.map((f) => (
             <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-1">
-              <span>
-                {f.etiqueta} · {f.seccion} {f.activa ? "" : "· inactiva"}
-              </span>
-              {f.activa ? (
-                <Button variant="ghost" disabled={pendiente} onClick={() => void archivarFila(f.id)}>
-                  Archivar
+              <span>{f.etiqueta}{f.activa ? "" : " · archivada"}</span>
+              {f.activa ? null : (
+                <Button variant="ghost" disabled={pendiente} onClick={() => void archivarFila(f.id, false)}>
+                  Restaurar
                 </Button>
-              ) : null}
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-medium text-fg">Egresos planificados</h2>
+        <p className="text-sm text-fg-muted">
+          Archivar deja la fila de mostrarse; no borra lo registrado. Puedes restaurarla cuando quieras.
+        </p>
+        <ul className="text-sm text-fg-muted">
+          {egresos.map((f) => (
+            <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-1">
+              <span>{f.etiqueta}{f.activa ? "" : " · archivada"}</span>
+              <Button variant="ghost" disabled={pendiente} onClick={() => void archivarFila(f.id, f.activa)}>
+                {f.activa ? "Archivar" : "Restaurar"}
+              </Button>
             </li>
           ))}
         </ul>
         <div className="flex flex-col gap-2 md:flex-row md:items-end">
-          <Campo etiqueta="Nueva fila" htmlFor="ff-etiq">
+          <Campo etiqueta="Nuevo egreso (p. ej. Arriendo)" htmlFor="ff-etiq">
             <Input id="ff-etiq" value={etiqueta} onChange={(e) => setEtiqueta(e.target.value)} />
           </Campo>
-          <Select
-            aria-label="Sección de la fila"
-            valor={seccion}
-            onCambiar={(v) => setSeccion(v as "ingreso" | "egreso")}
-            opciones={[
-              { valor: "ingreso", etiqueta: "Ingreso" },
-              { valor: "egreso", etiqueta: "Egreso" },
-            ]}
-          />
           <Button disabled={pendiente || etiqueta.trim().length < 2} onClick={() => void crearFila()}>
-            Agregar fila
+            Agregar egreso
           </Button>
         </div>
       </section>
