@@ -16,10 +16,10 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   await page.goto("/personas?nueva=1");
   const dialogo = page.getByRole("dialog", { name: "Agregar persona" });
   await expect(dialogo).toBeVisible({ timeout: 30_000 });
-  const cuerpo = String(20_000_000 + (Date.now() % 9_000_000));
+  const base = String(20_000_000 + (Date.now() % 9_000_000));
   await dialogo.getByLabel("Nombres").fill("Prueba");
   await dialogo.getByLabel("Apellidos").fill(`Terreno ${Date.now()}`);
-  await dialogo.getByLabel("RUT").fill(`${cuerpo}-${digitoVerificador(cuerpo)}`);
+  await dialogo.getByLabel("RUT").fill(`${base}-${digitoVerificador(base)}`);
   await dialogo.getByLabel("Cargo").click();
   await page.getByRole("option").first().click();
   await dialogo.getByRole("button", { name: "Instalación obligatoria" }).click();
