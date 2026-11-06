@@ -116,6 +116,16 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
     expect(mal.ok).toBe(false);
   });
 
+  it("un recálculo histórico usa el tipo de jornada del vínculo de esa fecha, no el de hoy", async () => {
+    const cargoId = (await e.admin.cargo.findFirstOrThrow({ where: { tenantId: T.a } })).id;
+    await e.admin.vinculoLaboral.create({ data: { tenantId: T.a, personaId: T.persona, cargoId, tipo: "plazo_fijo", inicio: new Date("2024-01-01"), termino: new Date("2024-12-31"), estado: "terminado", tipoJornada: "parcial" } });
+    const r = await run(ctx(T.a), "asistencia.dias.recalcular", { personaId: T.persona, desde: "2024-06-03", hasta: "2024-06-03" });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const antiguo = await e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona, fecha: new Date("2024-06-03T00:00:00Z") } });
+    expect(antiguo.tipoJornada).toBe("parcial");
+    expect((await dia()).tipoJornada).toBe("teletrabajo");
+  });
+
   it("una contingencia aceptada días después cuenta en la hora que se declaró", async () => {
     const ayer = new Date(Date.now() - 36 * 3_600_000);
     const fechaAyer = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(ayer);

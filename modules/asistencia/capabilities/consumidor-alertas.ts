@@ -14,7 +14,7 @@ const payload = z.object({ personaId: z.string().uuid(), tipo: z.string() }).pas
 export const consumidorAlertas = defineConsumidor({
   id: "asistencia.alertas",
   descripcion: "Envía al trabajador las alertas de falta de marca y el aviso de horas compensables, con copia al empleador.",
-  eventos: ["asistencia.alerta.sin_marca_inicio", "asistencia.alerta.sin_marca_termino", "asistencia.aviso.compensables"],
+  eventos: ["asistencia.alerta.sin_marca_inicio", "asistencia.alerta.sin_marca_termino", "asistencia.aviso.compensables", "asistencia.alerta.descanso_insuficiente"],
   async handler(ctx, evento) {
     const p = payload.safeParse(evento.payload);
     if (!p.success) return;
