@@ -71,7 +71,7 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
   });
 
   test("crear un rol, asignarlo con una excepción y archivarlo", async ({ page, browser }, info) => {
-    test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
+    test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)"); test.setTimeout(240_000); // Varios pasos con rutas en frío: pasa de los 90 s.
     execFileSync("pnpm", ["--filter", "@opai/auth", "exec", "tsx", "scripts/seed-roles-e2e.ts"], {
       cwd: new URL("../../..", import.meta.url),
       env: { ...process.env, E2E_PASSWORD: E2E_PASSWORD ?? "" },
