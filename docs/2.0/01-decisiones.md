@@ -1554,3 +1554,18 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 2. **Anexos:** solo se genera borrador de anexo si cambian el sueldo o las condiciones. Un simple cambio de puesto del vínculo **no** genera anexo; el cambio de instalación sí (y el traslado a otra instalación lo emite).
 3. **Backfill** único de la cobertura de los puestos con serie anterior a CAR-206, con vista previa, dentro del PR de CAR-207.
 4. Orden de los encargos de la sesión: CAR-207, luego CAR-96; los menores de UI de CAR-206 van a un PR de pendientes.
+
+## ADR-083 · Turnos extra y estado único de persona (CAR-96)
+
+**Fecha:** 6-nov-2026 · **Estado:** vigente · **Autor:** Carlos (chat, 6-nov-2026; transferido en las pasadas de OPAI 2.0 de 13:07, 15:04 y 18:06 CLT), registrado por «Operaciones · Auditoría». Número 083 porque ADR-081 está en `main` y #360 propone otro ADR-081/082.
+
+**Decisión.**
+
+1. **Externos:** el guardia externo se crea en la empresa **sin contrato**, con nombre, RUT, correo y datos bancarios (cifrados, ADR-027). Al vincularse queda como guardia inactivo, que puede contratarse o no.
+2. **Quién aprueba los turnos extra:** owner, admin, gerente y el rol Operaciones (permiso `pauta:aprobar_extra`). Nadie aprueba lo que él mismo registró.
+3. **Supervisor:** registra el monto sugerido y **no** lo edita; quien aprueba lo edita con motivo y auditoría.
+4. **Brief aprobado** (#365): pasa a Claude Design antes de cualquier código.
+5. **Un solo estado por persona** (Carlos, 15:22 Santiago): Postulante → Rechazado | Externo | Activo; Externo → Activo; Activo → Inactivo; Inactivo → Activo | Externo. Cualquier otra transición se rechaza. Solo «Activo» tiene vínculo laboral.
+
+**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`).
+
