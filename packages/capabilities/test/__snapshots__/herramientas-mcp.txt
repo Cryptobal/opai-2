@@ -440,6 +440,7 @@ pauta_refuerzos_agregar
 pauta_resumen_leer
 pauta_series_fijar
 pauta_titular_asignar
+pauta_titular_trasladar
 pauta_titulares_listar
 portal_cliente_accesos_actualizar
 portal_cliente_accesos_candidatos
@@ -694,6 +695,7 @@ preview_pauta_reemplazos_asignar
 preview_pauta_refuerzos_agregar
 preview_pauta_series_fijar
 preview_pauta_titular_asignar
+preview_pauta_titular_trasladar
 preview_portal_cliente_accesos_actualizar
 preview_portal_cliente_accesos_vincular
 preview_portal_cliente_config_actualizar

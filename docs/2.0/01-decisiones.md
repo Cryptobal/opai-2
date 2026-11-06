@@ -1545,3 +1545,10 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - Asignar o quitar al titular de un puesto es una sola operación: fija la serie de la Pauta, deja el puesto en el vínculo del guardia, suelta al titular anterior, pasa el puesto a «cubierto» o PPC, deja la bitácora con quién lo hizo y emite `pauta.serie.fijada`, todo en la misma transacción. `pauta.series.fijar` sigue disponible para fijar o corregir el ciclo desde la Pauta.
 - Un guardia no puede quedar como titular de dos puestos a la vez por esta vía (un vínculo tiene un solo puesto): el traslado entre puestos va por su propio flujo (CAR-207), que reutiliza `fijarSerieInterna`.
 - No se crea tabla ni migración: el historial de titulares se arma con `pauta.series` y la bitácora de la Pauta.
+
+**Adenda (6-nov-2026, 13:05 CLT, Carlos vía OPAI 2.0; registrada en CAR-207).**
+
+1. Un guardia que ya es titular de otro puesto **se rechaza** al asignarlo: el traslado (`pauta.titular.trasladar`) es la vía.
+2. **Anexos:** solo se genera borrador de anexo si cambian el sueldo o las condiciones. Un simple cambio de puesto del vínculo **no** genera anexo; el cambio de instalación sí (y el traslado a otra instalación lo emite).
+3. **Backfill** único de la cobertura de los puestos con serie anterior a CAR-206, con vista previa, dentro del PR de CAR-207.
+4. Orden de los encargos de la sesión: CAR-207, luego CAR-96; los menores de UI de CAR-206 van a un PR de pendientes.

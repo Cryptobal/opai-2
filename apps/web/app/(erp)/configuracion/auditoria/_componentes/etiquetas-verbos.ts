@@ -69,7 +69,7 @@ export const VERBOS: Record<string, string> = {
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
   preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
-  resultados: "Resultado por mes", uf_utm: "UF y UTM",
+  resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar",
   // Cobro por módulo (CAR-188).
   condiciones_set: "Fijar condición comercial", cargos_generar: "Generar cargos del mes",
   cargos_list: "Listar cargos", cargo_anular: "Anular cargo",

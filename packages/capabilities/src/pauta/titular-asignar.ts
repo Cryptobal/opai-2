@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { rangoDias, sumarDias, trabajaEn } from "@opai/domain";
 
 import { uuidSchema } from "../core/esquemas";
 import { dondePuesto } from "../core/maestros/alcance";
@@ -11,8 +10,7 @@ import { aFechaDb, diaSchema, fechaIso, PERMISO_WRITE, puestoParaPauta } from ".
 import { nombresDePersonas } from "./nombres";
 import { fijarSerieInterna, salidaSerieSchema } from "./series-nucleo";
 import { sincronizarTitular } from "./titular-sincronizar";
-
-const DIAS_VISTA_PREVIA = 14;
+import { primerosDias } from "./titular-vista";
 
 const entradaSchema = z.object({
   puestoId: uuidSchema,
@@ -95,22 +93,13 @@ export const titularAsignar = defineCapability({
         enTransaccion: (tx, c, r) => sincronizarTitular(tx, c, r),
       },
     );
-    const patronPauta = {
-      clase: patron.clase === "semanal" ? ("semanal" as const) : ("ciclico" as const),
-      diasTrabajo: patron.diasTrabajo,
-      diasDescanso: patron.diasDescanso,
-      diasSemana: patron.diasSemana,
-    };
     const anteriorId = anterior?.titularPersonaId ?? null;
     return {
       ...base,
       // Sin serie previa no se cierra nada: el campo solo dice lo que cambió.
       serieAnteriorHasta: anterior ? base.serieAnteriorHasta : null,
       titularAnterior: anteriorId ? { id: anteriorId, nombre: nombres.get(anteriorId) ?? "Titular anterior" } : null,
-      primerosDias: rangoDias(input.desde, sumarDias(input.desde, DIAS_VISTA_PREVIA - 1)).map((fecha) => ({
-        fecha,
-        trabaja: trabajaEn(patronPauta, inicioCiclo, fecha),
-      })),
+      primerosDias: primerosDias(patron, inicioCiclo, input.desde),
     };
   },
 });

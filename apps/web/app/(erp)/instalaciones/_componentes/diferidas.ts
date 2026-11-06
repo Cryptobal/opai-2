@@ -12,3 +12,6 @@ export const HojaPuesto = hojaDiferida(["puesto"], () =>
 export const HojaTitular = hojaDiferida(["titular"], () =>
   import("./hoja-titular").then((m) => m.HojaTitular),
 );
+export const HojaTrasladar = hojaDiferida(["trasladar"], () =>
+  import("./hoja-trasladar").then((m) => m.HojaTrasladar),
+);

@@ -15,6 +15,7 @@ export type TitularesPuesto = {
     fijadaEn: string | null;
   }[];
   candidatos: { id: string; nombre: string }[];
+  destinos: { id: string; etiqueta: string }[];
 };
 
 export type PrevisualizacionTitular = {
@@ -45,3 +46,13 @@ export const cuandoCl = (iso: string) =>
     .replaceAll("/", "-");
 /** Hoy en la zona de Chile (aaaa-mm-dd). */
 export const hoyCl = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
+
+export type PrevisualizacionTraslado = {
+  mismaInstalacion: boolean;
+  puestosOrigen: { puestoId: string; puesto: string; serieHasta: string }[];
+  vinculoTerminado: { id: string; termino: string } | null;
+  vinculoNuevo: boolean;
+  titularDesplazado: { id: string; nombre: string } | null;
+  serie: { patron: string; desde: string };
+  primerosDias: { fecha: string; trabaja: boolean }[];
+};
