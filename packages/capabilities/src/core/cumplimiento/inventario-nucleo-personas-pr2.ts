@@ -93,4 +93,15 @@ export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
     ],
     baseLicitud: "relacion_laboral",
   },
+  {
+    tabla: "enrolamientos_biometricos",
+    finalidad:
+      "Referencia cifrada del rostro enrolado de la persona para el reconocimiento facial de terreno; no se guarda la imagen ni la plantilla.",
+    categorias: ["identificacion", "sensible"],
+    campos: ["referencia_cifrada", "proveedor"],
+    camposSensibles: ["referencia_cifrada"],
+    baseLicitud: "consentimiento",
+    retencion:
+      "Mientras el consentimiento biometria_asistencia esté vigente; revocarlo borra la referencia aquí y en el proveedor.",
+  },
 ]);
