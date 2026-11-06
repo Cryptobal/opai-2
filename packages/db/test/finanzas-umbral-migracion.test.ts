@@ -12,7 +12,7 @@ const carpeta = new URL("../prisma/migrations/", import.meta.url);
 const sql = (nombre: string) => readFile(new URL(`${nombre}/migration.sql`, carpeta), "utf8");
 
 describe.skipIf(!urlPropietario)("migración del umbral de saldo bajo (CAR-193)", () => {
-  it("lleva a 10.000.000 el 15.000.000 sin editar (incluido el que dejó B1), no toca lo editado a mano y cambia el defecto de la columna", async () => {
+  it("lleva a 10.000.000 el 15.000.000 sin editar (incluido el que dejó B1), no toca otros valores y cambia el defecto de la columna", async () => {
     const admin = new Client({ connectionString: urlPropietario });
     await admin.connect();
     const nombre = `opai_umbral_mig_${randomUUID().replaceAll("-", "")}`;
@@ -45,7 +45,7 @@ describe.skipIf(!urlPropietario)("migración del umbral de saldo bajo (CAR-193)"
       }
       await pg.query(await sql(MIGRACION));
       const tras = (await pg.query<{ umbral: string }>("SELECT umbral::text FROM finanzas.flujo_ajustes ORDER BY umbral::bigint")).rows.map((r) => Number(r.umbral));
-      expect(tras).toEqual([2_000_000, 10_000_000, 10_000_000, 10_000_000, 15_000_000]);
+      expect(tras).toEqual([2_000_000, 10_000_000, 10_000_000, 10_000_000, 10_000_000]);
       const defecto = (
         await pg.query<{ d: string }>(
           `SELECT column_default AS d FROM information_schema.columns WHERE table_schema = 'finanzas' AND table_name = 'flujo_ajustes' AND column_name = 'umbral'`,

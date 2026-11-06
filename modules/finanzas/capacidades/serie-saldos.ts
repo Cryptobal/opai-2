@@ -9,8 +9,7 @@ import { celdasAbonosSemana } from "./abonos-semana";
 import { movidosDeLaSemana } from "./semana-en-curso";
 import { celdasDiferenciaFactoring, celdasImpuestos } from "./impuestos-planilla";
 import { FILAS_VIRTUALES_DOMINIO } from "./filas-virtuales";
-import { aNumeroSeguro } from "./esquemas";
-import { aFecha, aIso, cargarFlujo, hoyIso, lunesHoy } from "./util";
+import { aIso, cargarFlujo, lunesHoy } from "./util";
 import type { ajustesDe } from "./util";
 
 /** Semanas de historia que la planilla de escritorio muestra antes de la semana en curso. */
