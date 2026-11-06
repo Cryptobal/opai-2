@@ -111,6 +111,14 @@ describe("correo al cliente (CAR-192)", () => {
     expect(await ctx.db.accesoCliente.count()).toBe(1);
   });
 
+  it("si el destinatario no es el correo del contacto, no se crea ni se menciona acceso", async () => {
+    const { ctx, correos } = escenario();
+    const r = await enviarCorreoCliente(ctx, { ...solicitud([pdf("cotizacion", 10)]), para: "otro@cliente.cl" });
+    expect(r.acceso).toBe("no_aplica");
+    expect(await ctx.db.invitation.count()).toBe(0);
+    expect(correos[0]?.texto).not.toContain("Portal Cliente");
+  });
+
   it("no toca a un usuario interno ni a una cuenta ajena", async () => {
     const { ctx } = escenario({
       user: [{ id: USUARIO_CLIENTE, email: "marta@cliente.cl", name: "Marta" }],

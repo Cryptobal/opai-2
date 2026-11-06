@@ -59,6 +59,12 @@ async function datosBase(ctx: Contexto, s: SolicitudCorreoCliente) {
 async function accesoDelContacto(ctx: Contexto, s: SolicitudCorreoCliente, dryRun: boolean) {
   if (!s.contactoId || !s.cuentaId) return "no_aplica" as EstadoAccesoContacto;
   try {
+    // El acceso se da al correo del contacto: si el destinatario es otro correo, no se le habla de un acceso ajeno.
+    const c = await ctx.db.contacto.findFirst({
+      where: { id: s.contactoId, tenantId: ctx.tenantId },
+      select: { email: true },
+    });
+    if (texto(c?.email).toLowerCase() !== s.para.trim().toLowerCase()) return "no_aplica" as EstadoAccesoContacto;
     const r = await asegurarAccesoContacto(ctx, { cuentaId: s.cuentaId, contactoId: s.contactoId }, dryRun);
     if (!dryRun && (r.estado === "invitado" || r.estado === "vinculado")) {
       await ctx.transaccion(async (tx) => {
