@@ -7,7 +7,7 @@ for (const tema of ["light", "dark"] as const) {
   test.describe(`tema ${tema}`, () => {
     test.use({ colorScheme: tema });
 
-    test("pide el código y avisa si no existe", async ({ page }, info) => {
+    test("pide el código y deja el botón a 44 px", async ({ page }, info) => {
       await page.goto("/terreno/emparejar");
       await expect(page.getByRole("heading", { name: "Emparejar este dispositivo" })).toBeVisible();
       await page.screenshot({
@@ -16,12 +16,19 @@ for (const tema of ["light", "dark"] as const) {
       });
       const boton = page.getByRole("button", { name: "Emparejar", exact: true });
       expect((await boton.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
-      await page.getByLabel("Código").fill("ZZZZZZ");
-      await boton.click();
-      await expect(page.getByText("El código no existe o venció")).toBeVisible();
     });
   });
 }
+
+// El canje cuenta 3 intentos por origen cada 10 minutos (fallo cerrado): un código falso se envía una
+// sola vez en toda la corrida (solo en escritorio, sin reintento que lo repita).
+test("un código que no existe avisa lo mismo que uno vencido", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "un solo envío por corrida: el límite es de 3 intentos");
+  await page.goto("/terreno/emparejar");
+  await page.getByLabel("Código").fill("ZZZZZZ");
+  await page.getByRole("button", { name: "Emparejar", exact: true }).click();
+  await expect(page.getByText("El código no existe o venció")).toBeVisible();
+});
 
 test("el código del QR llega precargado", async ({ page }) => {
   await page.goto("/terreno/emparejar?c=ABC234");
