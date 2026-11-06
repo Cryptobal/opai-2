@@ -25,6 +25,8 @@ export type DiaConsolidado = {
   segundosExtra: number;
   segundosSalidaAnticipada: number;
   descansoInsuficiente: boolean;
+  /** Hay marcas ese día pero ninguna cuenta para el turno (p. ej. una entrada después de su fin). */
+  marcaFueraDeTurno: boolean;
   entrada: Date | null;
   salida: Date | null;
 };
@@ -36,7 +38,8 @@ export function consolidarDia(e: EntradaConsolidar): DiaConsolidado {
   const orden = [...e.marcas].sort(porHora);
   // Una entrada marcada cuando el turno ya terminó no cuenta para ese turno: llegar después del fin no es estar presente.
   const entrada = orden.find((m) => m.tipo === "entrada" && (!e.turno || m.hora < e.turno.fin))?.hora ?? null;
-  const salida = [...orden].reverse().find((m) => m.tipo === "salida" && (!entrada || m.hora > entrada))?.hora ?? null;
+  // Sin entrada válida no hay salida que cuente: queda señalada como marca fuera de turno.
+  const salida = entrada ? ([...orden].reverse().find((m) => m.tipo === "salida" && m.hora > entrada)?.hora ?? null) : null;
   const atraso = e.turno && entrada ? atrasoSegundos(e.turno.inicio, entrada) : 0;
   const extra = e.turno && salida ? sobretiempoSegundos(e.turno.fin, salida) : 0;
   const anticipada = e.turno && salida ? salidaAnticipadaSegundos(e.turno.fin, salida) : 0;
@@ -52,6 +55,7 @@ export function consolidarDia(e: EntradaConsolidar): DiaConsolidado {
     segundosExtra: extra,
     segundosSalidaAnticipada: anticipada,
     descansoInsuficiente: entrada ? descansoInsuficiente(e.tipoJornada, e.salidaPrevia, entrada) : false,
+    marcaFueraDeTurno: !entrada && orden.length > 0,
     entrada,
     salida,
   };

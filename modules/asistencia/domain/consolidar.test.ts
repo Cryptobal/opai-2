@@ -26,7 +26,7 @@ describe("consolidarDia", () => {
   });
   it("una entrada después del fin del turno no cuenta: el día queda ausente, sin atraso", () => {
     const d = consolidarDia({ ...base, ahora: t("23:00"), marcas: [{ tipo: "entrada", hora: new Date("2026-12-01T22:11:00Z") }, { tipo: "salida", hora: new Date("2026-12-01T22:11:30Z") }] });
-    expect(d).toMatchObject({ estado: "ausente", sigla: "S.A.", segundosAtraso: 0, minutosTrabajados: 0 });
+    expect(d).toMatchObject({ estado: "ausente", sigla: "S.A.", segundosAtraso: 0, minutosTrabajados: 0, marcaFueraDeTurno: true, salida: null });
   });
   it("sin turno ni marcas el día no existe", () => {
     expect(consolidarDia({ ...base, turno: null, ahora: t("21:00"), marcas: [] }).estado).toBe("sin_turno");

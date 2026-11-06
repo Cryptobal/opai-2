@@ -12,7 +12,7 @@ type Props = { searchParams: SearchParams };
 type Item = {
   personaId: string; nombre: string; instalacion: string | null; turnoInicio: string | null; turnoFin: string | null;
   entrada: string | null; salida: string | null; estado: string; atrasoMin: number; tipoJornada: string;
-  correccionPendiente: boolean; descansoInsuficiente: boolean;
+  correccionPendiente: boolean; descansoInsuficiente: boolean; marcaFueraDeTurno: boolean;
 };
 type Datos = {
   fecha: string; zona: string; truncado: boolean;
@@ -102,6 +102,7 @@ export default function AsistenciaHoy({ searchParams }: Props) {
                     {x.instalacion ?? "Sin instalación"} · Turno {h(x.turnoInicio)}–{h(x.turnoFin)} · Entrada {h(x.entrada)}
                     {x.atrasoMin > 0 ? ` · Atraso ${duracion(x.atrasoMin)}` : ""}
                     {x.correccionPendiente ? " · Corrección pendiente" : ""}
+                    {x.marcaFueraDeTurno ? " · Marca fuera de turno" : ""}
                   </span>
                 </span>
               )}
@@ -119,6 +120,7 @@ export default function AsistenciaHoy({ searchParams }: Props) {
                       <Badge tono={ESTADOS[x.estado]?.tono ?? "neutro"}>{ESTADOS[x.estado]?.etiqueta ?? x.estado}</Badge>
                       {x.correccionPendiente ? <Badge tono="info">Corrección pendiente</Badge> : null}
                       {x.descansoInsuficiente ? <Badge tono="warning">Descanso insuficiente</Badge> : null}
+                      {x.marcaFueraDeTurno ? <Badge tono="warning">Marca fuera de turno</Badge> : null}
                     </span>
                   ),
                 },

@@ -16,7 +16,7 @@ const itemSchema = z.object({
   personaId: z.string(), nombre: z.string(), instalacionId: z.string().nullable(), instalacion: z.string().nullable(),
   turnoInicio: z.string().nullable(), turnoFin: z.string().nullable(), entrada: z.string().nullable(), salida: z.string().nullable(),
   estado: z.enum(ESTADOS), sigla: z.string().nullable(), atrasoMin: z.number().int(), tipoJornada: z.enum(TIPOS_JORNADA),
-  correccionPendiente: z.boolean(), descansoInsuficiente: z.boolean(),
+  correccionPendiente: z.boolean(), descansoInsuficiente: z.boolean(), marcaFueraDeTurno: z.boolean(),
 });
 
 /** «Asistencia de hoy»: presentes, sin marca, atrasos y correcciones pendientes de los turnos del día. */
@@ -62,7 +62,7 @@ export const hoyListar = defineCapability({
         personaId: t.personaId, nombre: nombre.get(t.personaId) ?? "", instalacionId: d.instalacionId, instalacion: d.instalacionId ? (instalacion.get(d.instalacionId) ?? null) : null,
         turnoInicio: d.turno?.inicio.toISOString() ?? null, turnoFin: d.turno?.fin.toISOString() ?? null,
         entrada: d.entrada?.toISOString() ?? null, salida: d.salida?.toISOString() ?? null, estado: d.estado, sigla: d.sigla,
-        atrasoMin: Math.floor(d.segundosAtraso / 60), tipoJornada: d.tipoJornada, correccionPendiente: d.correccionPendiente, descansoInsuficiente: d.descansoInsuficiente,
+        atrasoMin: Math.floor(d.segundosAtraso / 60), tipoJornada: d.tipoJornada, correccionPendiente: d.correccionPendiente, descansoInsuficiente: d.descansoInsuficiente, marcaFueraDeTurno: d.marcaFueraDeTurno,
       });
     }
     const filtrados = i.estado ? items.filter((x) => x.estado === i.estado) : items;
