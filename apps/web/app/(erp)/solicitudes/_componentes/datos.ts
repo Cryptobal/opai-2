@@ -23,6 +23,8 @@ export type SolicitudDato = {
   notasAgente: string | null;
   camposPropuestosAgente: string[];
   responsableId: string | null;
+  /** Quien la revisa (el responsable asignado al derivarla); null sin responsable. */
+  responsableNombre?: string | null;
   registradaPorTipo: string;
   motivoDescarte: string | null;
   duplicadaDeId: string | null;
