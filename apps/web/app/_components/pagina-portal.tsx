@@ -11,6 +11,7 @@ import { medirFase } from "@/lib/metricas-navegacion";
 import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
 import { type OpcionesPagina } from "./cabecera-contexto";
+import { CuentaDeEmpresaEnPortalCliente } from "./cuenta-de-empresa";
 import { CabeceraPagina } from "./cabecera-pagina";
 import { ErrorCarga } from "./error-carga";
 import { MarcadorMetricas } from "./marcador-metricas";
@@ -70,10 +71,13 @@ async function Contenido<T>({
   // El esqueleto acompaña al contenido (lo intercambia el CSS en navegaciones lentas, ver `EstadoEnlace`);
   // el resto de las opciones son la cabecera que la página fija en el shell persistente del layout.
   const { esqueleto, insignia, ...cabecera } = { ...pagina, ...extra };
+  // Sesión de la empresa (ERP o Plataforma) en el Portal Cliente: aviso propio, no el «sin permisos» genérico.
+  const esCuentaDeEmpresa =
+    !acceso && portal === "cliente" && (tieneAccesoAPortal(identidad, "erp") || tieneAccesoAPortal(identidad, "platform"));
   return (
     <>
       <CabeceraPagina
-        {...(acceso ? { ...cabecera, insignia } : { titulo: "Sin permisos" })}
+        {...(acceso ? { ...cabecera, insignia } : { titulo: esCuentaDeEmpresa ? "Portal Cliente" : "Sin permisos" })}
         generado={marcaGenerado()}
         epoca={epocaDeIdentidad(identidad)}
       />
@@ -86,6 +90,8 @@ async function Contenido<T>({
           ) : (
             children
           )
+        ) : esCuentaDeEmpresa ? (
+          <CuentaDeEmpresaEnPortalCliente rutaErp="/" />
         ) : (
           <Forbidden
             descripcion={
