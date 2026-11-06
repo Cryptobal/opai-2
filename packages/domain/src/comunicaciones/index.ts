@@ -1,6 +1,7 @@
 import { COMUNICABLES_ACTIVIDADES } from "./actividades";
 import { COMUNICABLES_ASISTENCIA } from "./asistencia";
 import { COMUNICABLES_CONTINGENCIA } from "./asistencia-contingencia";
+import { COMUNICABLES_DESCANSO } from "./asistencia-descanso";
 import { COMUNICABLES_CUMPLIMIENTO } from "./cumplimiento";
 import { COMUNICABLES_COMERCIAL } from "./comercial";
 import { COMUNICABLES_CPQ } from "./cpq";
@@ -30,6 +31,7 @@ export const COMUNICABLES_NUCLEO: readonly EventoComunicable[] = [
   ...COMUNICABLES_ACTIVIDADES,
   ...COMUNICABLES_ASISTENCIA,
   ...COMUNICABLES_CONTINGENCIA,
+  ...COMUNICABLES_DESCANSO,
 ];
 
 /** Datos de ejemplo anidados a partir de las rutas declaradas ("documento.tipo" → { documento: { tipo } }). */
