@@ -128,12 +128,7 @@ export default function Laboral(props: {
               />
             ) : null}
             {gestionar && !actual ? (
-              <HojaVinculo
-                personaId={p.id}
-                hoy={hoyIso()}
-                cargos={opcionesCargo}
-                {...opciones}
-              />
+              <HojaVinculo personaId={p.id} hoy={hoyIso()} cargos={opcionesCargo} {...opciones} />
             ) : null}
             <MarcadorMetricas id="opai-metricas-laboral" />
           </div>

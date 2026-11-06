@@ -41,7 +41,8 @@ export function HojaEditarVinculo({ actual, cargos, ...opciones }: Props) {
   const input = {
     id: actual.id,
     ...(actual.updatedAt ? { versionEsperada: actual.updatedAt } : {}),
-    cargoId: v.cargoId,
+    // Solo si cambió: un cargo ya desactivado no se puede reenviar (core.vinculos.update lo rechaza).
+    ...(v.cargoId !== actual.cargoId ? { cargoId: v.cargoId } : {}),
     tipo: v.tipo,
     inicio: v.inicio,
     termino: termino || null,

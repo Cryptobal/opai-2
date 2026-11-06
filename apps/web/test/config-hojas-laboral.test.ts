@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import { obtenerCapacidad } from "@opai/capabilities";
 
 import {
-  cambiosDe,
-  faltantes,
   SECCIONES_LABORAL,
   type SeccionLaboral,
-  valorDeCampo,
 } from "@/app/(erp)/personas/_componentes/config-hojas-laboral";
+import {
+  cambiosDe,
+  faltantes,
+  valorDeCampo,
+} from "@/app/(erp)/personas/_componentes/valores-hoja-laboral";
 import { asegurarRegistro } from "../lib/registro";
 
 asegurarRegistro();
@@ -35,7 +37,12 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
   it("la cuenta de pago envía todos los campos y exige los obligatorios", () => {
     const v = { bancoCodigo: "", tipoCuenta: "", numeroCuenta: "", rutTitular: "" };
     expect(faltantes(cfg.pago, v)).toBe(true);
-    const ok = { bancoCodigo: "012", tipoCuenta: "Vista", numeroCuenta: "12345678", rutTitular: "" };
+    const ok = {
+      bancoCodigo: "012",
+      tipoCuenta: "Vista",
+      numeroCuenta: "12345678",
+      rutTitular: "",
+    };
     expect(faltantes(cfg.pago, ok)).toBe(false);
     expect(cambiosDe(cfg.pago, v, ok)).toEqual({ ...ok, rutTitular: null });
   });
@@ -43,6 +50,15 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
   it("rechaza texto no numérico en los campos enteros", () => {
     expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "dos" })).toBe(true);
     expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "2" })).toBe(false);
+  });
+
+  it("valida decimales y rangos antes de enviar", () => {
+    expect(faltantes(cfg.prevision, { planUf: "abc" })).toBe(true);
+    expect(faltantes(cfg.prevision, { planUf: "12,5" })).toBe(false);
+    expect(valorDeCampo("decimal", "12,5")).toBe("12.5");
+    expect(faltantes(cfg["jornada-dt"], { plazoFijoPeriodo: "4" })).toBe(true);
+    expect(faltantes(cfg["jornada-dt"], { avisoTerminoDias: "400" })).toBe(true);
+    expect(faltantes(cfg["jornada-dt"], { avisoTerminoDias: "30" })).toBe(false);
   });
 
   it.each(Object.keys(cfg) as SeccionLaboral[])(
@@ -54,7 +70,15 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
       const valores: Record<string, string> = Object.fromEntries(
         c.campos.map((f) => [
           f.clave,
-          f.tipo === "fecha" ? "2026-12-31" : f.tipo === "entero" ? "2" : f.tipo === "si_no" ? "si" : "12345678",
+          f.tipo === "fecha"
+            ? "2026-12-31"
+            : f.tipo === "entero"
+              ? "2"
+              : f.tipo === "decimal"
+                ? "12.5"
+                : f.tipo === "si_no"
+                  ? "si"
+                  : "12345678",
         ]),
       );
       if (seccion === "contacto-laboral")

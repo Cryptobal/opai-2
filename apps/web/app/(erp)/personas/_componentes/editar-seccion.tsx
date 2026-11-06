@@ -6,7 +6,13 @@ import { SECCIONES_LABORAL, type SeccionLaboral } from "./config-hojas-laboral";
 import { HojaLaboral } from "./diferidas";
 
 /** Botón «Editar» de la cabecera de una sección de Laboral (solo con permiso de escritura). */
-export function BotonEditarSeccion({ seccion, etiqueta = "Editar" }: { seccion: SeccionLaboral; etiqueta?: string }) {
+export function BotonEditarSeccion({
+  seccion,
+  etiqueta = "Editar",
+}: {
+  seccion: SeccionLaboral;
+  etiqueta?: string;
+}) {
   return (
     <EnlaceBotonHoja
       variante="secondary"
@@ -25,9 +31,7 @@ export function HojaEditarSeccion(props: {
   inicial: Record<string, string | null | undefined>;
   bloqueo?: string;
 }) {
-  const inicial = Object.fromEntries(
-    Object.entries(props.inicial).map(([k, v]) => [k, v ?? ""]),
-  );
+  const inicial = Object.fromEntries(Object.entries(props.inicial).map(([k, v]) => [k, v ?? ""]));
   return (
     <HojaLaboral
       seccion={props.seccion}

@@ -1,19 +1,17 @@
 /** Secciones editables de Laboral: campos y armado del input de cada capacidad (CAR-223). */
-export type TipoCampo = "texto" | "fecha" | "entero" | "si_no";
+export type TipoCampo = "texto" | "fecha" | "entero" | "decimal" | "si_no";
 export type CampoLaboral = {
   clave: string;
   etiqueta: string;
   tipo: TipoCampo;
   max?: number;
   requerido?: boolean;
+  /** Rango de un entero. */
+  min?: number;
+  maxValor?: number;
 };
 export type SeccionLaboral =
-  | "prevision"
-  | "uniforme"
-  | "jornada-dt"
-  | "os10"
-  | "contacto-laboral"
-  | "pago";
+  "prevision" | "uniforme" | "jornada-dt" | "os10" | "contacto-laboral" | "pago";
 export type ConfigSeccion = {
   param: string;
   titulo: string;
@@ -47,8 +45,8 @@ export const SECCIONES_LABORAL: Record<SeccionLaboral, ConfigSeccion> = {
       t("sistemaSalud", "Sistema de salud", 40),
       t("isapreNombre", "ISAPRE", 120),
       t("planIsapre", "Plan ISAPRE", 500),
-      t("planUf", "Plan (UF)", 20),
-      t("cotizacionUfPct", "Cotización UF", 20),
+      { clave: "planUf", etiqueta: "Plan (UF)", tipo: "decimal", max: 20 },
+      { clave: "cotizacionUfPct", etiqueta: "Cotización UF", tipo: "decimal", max: 20 },
     ],
     armar: (id, c) => ({ id, ...c }),
   },
@@ -79,9 +77,21 @@ export const SECCIONES_LABORAL: Record<SeccionLaboral, ConfigSeccion> = {
       t("horasSemanales", "Horas semanales", 10),
       t("distribucion", "Distribución", 200),
       { clave: "articulo22", etiqueta: "Artículo 22", tipo: "si_no" },
-      { clave: "plazoFijoPeriodo", etiqueta: "Plazo fijo (período 1 a 3)", tipo: "entero" },
+      {
+        clave: "plazoFijoPeriodo",
+        etiqueta: "Plazo fijo (período 1 a 3)",
+        tipo: "entero",
+        min: 1,
+        maxValor: 3,
+      },
       { clave: "terminoPlazoFijo", etiqueta: "Término plazo fijo", tipo: "fecha" },
-      { clave: "avisoTerminoDias", etiqueta: "Aviso de término (días)", tipo: "entero" },
+      {
+        clave: "avisoTerminoDias",
+        etiqueta: "Aviso de término (días)",
+        tipo: "entero",
+        min: 0,
+        maxValor: 365,
+      },
     ],
     armar: (id, c) => ({ id, jornadaDt: c }),
   },
@@ -91,7 +101,10 @@ export const SECCIONES_LABORAL: Record<SeccionLaboral, ConfigSeccion> = {
     capacidad: "core.personas.laboral_actualizar",
     exito: "OS-10 actualizado",
     boton: "Guardar",
-    campos: [t("credencial", "Credencial", 80), { clave: "venceEn", etiqueta: "Vence", tipo: "fecha" }],
+    campos: [
+      t("credencial", "Credencial", 80),
+      { clave: "venceEn", etiqueta: "Vence", tipo: "fecha" },
+    ],
     armar: (id, c) => ({ id, os10: c }),
   },
   "contacto-laboral": {
@@ -125,34 +138,3 @@ export const SECCIONES_LABORAL: Record<SeccionLaboral, ConfigSeccion> = {
     armar: (id, c) => ({ id, ...c }),
   },
 };
-
-/** Texto del formulario → valor del input de la capacidad. */
-export function valorDeCampo(tipo: TipoCampo, texto: string): string | number | boolean | null {
-  const v = texto.trim();
-  if (tipo === "si_no") return v === "si";
-  if (!v) return null;
-  return tipo === "entero" ? Number(v) : v;
-}
-
-/** Campos a enviar: los cambiados (o todos, si la capacidad lo exige). */
-export function cambiosDe(
-  cfg: ConfigSeccion,
-  inicial: Readonly<Record<string, string>>,
-  actual: Readonly<Record<string, string>>,
-): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const c of cfg.campos) {
-    const nuevo = actual[c.clave] ?? "";
-    if (!cfg.todos && nuevo === (inicial[c.clave] ?? "")) continue;
-    out[c.clave] = valorDeCampo(c.tipo, nuevo);
-  }
-  return out;
-}
-
-export function faltantes(cfg: ConfigSeccion, actual: Readonly<Record<string, string>>): boolean {
-  return cfg.campos.some(
-    (c) =>
-      (c.requerido && !(actual[c.clave] ?? "").trim()) ||
-      (c.tipo === "entero" && !/^\d*$/.test((actual[c.clave] ?? "").trim())),
-  );
-}

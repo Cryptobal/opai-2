@@ -64,7 +64,16 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
   return (
     <SeccionTarjeta
       titulo="Pago y bancos"
-      {...(puede ? { accion: <BotonEditarSeccion seccion="pago" etiqueta="Solicitar cambio" /> } : {})}
+      {...(puede
+        ? {
+            accion: (
+              <BotonEditarSeccion
+                seccion="pago"
+                etiqueta={d.solicitudPendiente ? "Ver solicitud" : "Solicitar cambio"}
+              />
+            ),
+          }
+        : {})}
     >
       {d.solicitudPendiente ? (
         <Alerta tono="warning" titulo="Cambio de cuenta pendiente de RRHH">

@@ -3,13 +3,8 @@ import { useState } from "react";
 import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
-import {
-  cambiosDe,
-  type CampoLaboral,
-  faltantes,
-  SECCIONES_LABORAL,
-  type SeccionLaboral,
-} from "./config-hojas-laboral";
+import { type CampoLaboral, SECCIONES_LABORAL, type SeccionLaboral } from "./config-hojas-laboral";
+import { cambiosDe, errorDeCampo, faltantes } from "./valores-hoja-laboral";
 
 type Props = {
   seccion: SeccionLaboral;
@@ -20,10 +15,19 @@ type Props = {
   bloqueo?: string;
 };
 
-function Entrada({ c, valor, onCambiar }: { c: CampoLaboral; valor: string; onCambiar: (v: string) => void }) {
+function Entrada({
+  c,
+  valor,
+  onCambiar,
+}: {
+  c: CampoLaboral;
+  valor: string;
+  onCambiar: (v: string) => void;
+}) {
   const id = `laboral-${c.clave}`;
+  const error = valor ? errorDeCampo(c, valor) : null;
   return (
-    <Campo etiqueta={c.etiqueta} htmlFor={id}>
+    <Campo etiqueta={c.etiqueta} htmlFor={id} {...(error ? { error } : {})}>
       {c.tipo === "fecha" ? (
         <InputFecha id={id} valor={valor} onCambiar={onCambiar} />
       ) : c.tipo === "si_no" ? (
@@ -41,7 +45,7 @@ function Entrada({ c, valor, onCambiar }: { c: CampoLaboral; valor: string; onCa
           id={id}
           value={valor}
           maxLength={c.max}
-          inputMode={c.tipo === "entero" ? "numeric" : undefined}
+          inputMode={c.tipo === "entero" ? "numeric" : c.tipo === "decimal" ? "decimal" : undefined}
           onChange={(e) => onCambiar(e.target.value)}
         />
       )}
