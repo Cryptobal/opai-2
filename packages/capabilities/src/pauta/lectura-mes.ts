@@ -6,6 +6,7 @@ import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { dondeInstalacion, dondePuesto } from "../core/maestros/alcance";
 import { noEncontrado } from "../errores";
+import { candidatosDeInstalacion } from "./candidatos";
 import { cargarMes } from "./cargar";
 import { PERMISO_READ, hoy, mesSchema } from "./comun";
 import { nombresDePersonas, vistaSerie } from "./nombres";
@@ -71,16 +72,7 @@ export const mesLeer = defineCapability({
         orderBy: [{ orden: "asc" }, { nombre: "asc" }],
         select: { id: true, nombre: true, clase: true, diasTrabajo: true, diasDescanso: true },
       }),
-      ctx.db.persona.findMany({
-        where: {
-          estado: "activa",
-          archivadaEn: null,
-          vinculos: { some: { estado: "vigente", instalacionId: inst.id } },
-        },
-        select: { id: true, nombres: true, apellidos: true },
-        orderBy: [{ apellidos: "asc" }, { nombres: "asc" }],
-        take: 300,
-      }),
+      candidatosDeInstalacion(ctx, inst.id),
     ]);
     const todas = puestos.flatMap((p) => m.celdas.get(p.id) ?? []);
     const nombres = await nombresDePersonas(
@@ -115,7 +107,7 @@ export const mesLeer = defineCapability({
         nombre: p.nombre,
         ciclo: p.clase === "semanal" ? "Días fijos de la semana" : `${p.diasTrabajo} de turno y ${p.diasDescanso} libres`,
       })),
-      candidatos: candidatos.map((c) => ({ id: c.id, nombre: `${c.nombres} ${c.apellidos}` })),
+      candidatos,
     };
   },
 });

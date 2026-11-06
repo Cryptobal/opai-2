@@ -183,6 +183,7 @@ core_funciones_update
 core_geo_autocompletar
 core_geo_detalle
 core_geo_geocodificar
+core_hechos_terreno_listar
 core_ia_probar
 core_indicadores_uf_utm
 core_inicio_indicadores
@@ -437,6 +438,8 @@ pauta_reemplazos_sugerir
 pauta_refuerzos_agregar
 pauta_resumen_leer
 pauta_series_fijar
+pauta_titular_asignar
+pauta_titulares_listar
 portal_cliente_accesos_actualizar
 portal_cliente_accesos_candidatos
 portal_cliente_accesos_listar
@@ -688,6 +691,7 @@ preview_pauta_marca_registrar
 preview_pauta_reemplazos_asignar
 preview_pauta_refuerzos_agregar
 preview_pauta_series_fijar
+preview_pauta_titular_asignar
 preview_portal_cliente_accesos_actualizar
 preview_portal_cliente_accesos_vincular
 preview_portal_cliente_config_actualizar
