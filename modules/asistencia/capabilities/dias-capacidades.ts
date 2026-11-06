@@ -49,8 +49,9 @@ export const diasListar = defineCapability({
     const alcance = await alcanceMarcas(ctx);
     const filas = await ctx.db.dia.findMany({
       where: { fecha: { gte: dia(i.desde), lte: dia(i.hasta) }, AND: [alcance, i.personaId ? { personaId: i.personaId } : {}, i.instalacionId ? { instalacionId: i.instalacionId } : {}] },
-      orderBy: [{ fecha: "asc" }, { personaId: "asc" }], take: 1000,
+      orderBy: [{ fecha: "asc" }, { personaId: "asc" }], take: 1001,
     });
+    if (filas.length > 1000) throw reglaDeNegocio("Hay más de 1000 días: acota el rango o filtra por persona o instalación.");
     return { items: filas.map(vista) };
   },
 });

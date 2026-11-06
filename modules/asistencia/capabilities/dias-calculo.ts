@@ -28,22 +28,28 @@ export function limitesDelDia(fecha: string, zona: string): { desde: Date; hasta
  * con su valor propuesto; pendiente u objetada, con el original (L-24 y L-27). Un día puede tener varios turnos:
  * se toma el span entre el primero y el último.
  */
-export async function calcularDia(ctx: Contexto, personaId: string, fecha: string, ahora = new Date(), zonaDada?: string): Promise<DiaCalculado> {
+export async function calcularDia(ctx: Contexto, personaId: string, fecha: string, ahora = new Date(), zonaDada?: string, instalaciones?: readonly string[]): Promise<DiaCalculado> {
   const zona = zonaDada ?? (await tenantBasico(ctx)).zona;
   const { desde, hasta } = limitesDelDia(fecha, zona);
-  const turnos = await ctx.db.turnoEsperado.findMany({ where: { personaId, vigente: true, fecha: new Date(`${fecha}T00:00:00Z`) }, orderBy: { inicio: "asc" } });
+  const turnos = await ctx.db.turnoEsperado.findMany({ where: { personaId, vigente: true, fecha: new Date(`${fecha}T00:00:00Z`), ...(instalaciones ? { instalacionId: { in: [...instalaciones] } } : {}) }, orderBy: { inicio: "asc" } });
   const turno = turnos.length ? { inicio: turnos[0]!.inicio, fin: turnos.at(-1)!.fin } : null;
   const ventana = turno ? { gte: new Date(turno.inicio.getTime() - 8 * H), lt: new Date(turno.fin.getTime() + 8 * H) } : { gte: desde, lt: hasta };
-  const [marcas, vinculo, previas] = await Promise.all([
-    ctx.db.marca.findMany({ where: { personaId, horaServidor: ventana }, orderBy: { horaServidor: "asc" } }),
+  // Una contingencia aceptada cuenta en la hora que se declaró, no en la que se aceptó (puede ser días después).
+  const efectiva = (m: { origen: string; horaServidor: Date; horaDispositivo: Date | null }) => (m.origen === "contingencia" && m.horaDispositivo ? m.horaDispositivo : m.horaServidor);
+  const [marcasBrutas, vinculo, previas] = await Promise.all([
+    ctx.db.marca.findMany({
+      where: { personaId, OR: [{ origen: { not: "contingencia" }, horaServidor: ventana }, { origen: "contingencia", horaDispositivo: ventana }] },
+      orderBy: { horaServidor: "asc" },
+    }),
     ctx.db.vinculoLaboral.findFirst({ where: { personaId, estado: "vigente" }, select: { tipoJornada: true }, orderBy: { inicio: "desc" } }),
     ctx.db.marca.findMany({ where: { personaId, tipo: "salida", horaServidor: { gte: new Date((turno?.inicio ?? desde).getTime() - 48 * H), lt: ventana.gte } }, orderBy: { horaServidor: "desc" }, take: 1 }),
   ]);
+  const marcas = marcasBrutas.sort((a, b) => efectiva(a).getTime() - efectiva(b).getTime());
   const correcciones = marcas.length ? await correccionesVista(ctx, { marcaId: { in: marcas.map((m) => m.id) } }, ahora) : [];
   const porMarca = new Map(correcciones.map((c) => [c.marcaId, c]));
   const efectivas: MarcaEfectiva[] = marcas.map((m) => {
     const c = porMarca.get(m.id);
-    return c?.rige === "propuesta" ? { tipo: c.propuesta.tipo as TipoMarca, hora: new Date(c.propuesta.hora) } : { tipo: m.tipo as TipoMarca, hora: m.horaServidor };
+    return c?.rige === "propuesta" ? { tipo: c.propuesta.tipo as TipoMarca, hora: new Date(c.propuesta.hora) } : { tipo: m.tipo as TipoMarca, hora: efectiva(m) };
   });
   const tipoJornada = esTipoJornada(vinculo?.tipoJornada) ? vinculo.tipoJornada : "ordinaria";
   const dia = consolidarDia({

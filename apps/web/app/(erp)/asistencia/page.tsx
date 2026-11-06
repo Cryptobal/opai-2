@@ -15,7 +15,7 @@ type Item = {
   correccionPendiente: boolean; descansoInsuficiente: boolean;
 };
 type Datos = {
-  fecha: string; truncado: boolean;
+  fecha: string; zona: string; truncado: boolean;
   resumen: { turnos: number; presentes: number; sinMarca: number; ausentes: number; incompletos: number; atrasos: number };
   items: Item[];
 };
@@ -28,8 +28,7 @@ const ESTADOS: Record<string, { etiqueta: string; tono: "success" | "warning" | 
   sin_turno: { etiqueta: "Sin turno", tono: "neutro" },
 };
 const OPCIONES = Object.entries(ESTADOS).filter(([k]) => k !== "sin_turno").map(([valor, e]) => ({ valor, etiqueta: e.etiqueta }));
-const hora = new Intl.DateTimeFormat("es-CL", { timeStyle: "short", hourCycle: "h23", timeZone: "America/Santiago" });
-const h = (v: string | null) => (v ? hora.format(new Date(v)) : "—");
+const formatoHora = (zona: string) => new Intl.DateTimeFormat("es-CL", { timeStyle: "short", hourCycle: "h23", timeZone: zona });
 
 /** «Asistencia de hoy» (A3): presentes, sin marca, atrasos y correcciones pendientes de los turnos del día. */
 export default function AsistenciaHoy({ searchParams }: Props) {
@@ -41,11 +40,13 @@ export default function AsistenciaHoy({ searchParams }: Props) {
       completo
       cargar={async () => {
         const p = await leerParametros(searchParams);
-        return ejecutarComoUsuario<Datos>("erp", "asistencia.hoy.listar", p["estado"] ? { estado: p["estado"] } : {});
+        return ejecutarComoUsuario<Datos>("erp", "asistencia.dias.hoy", p["estado"] ? { estado: p["estado"] } : {});
       }}
     >
       {(r) => {
         const d = r.ok ? r.data : null;
+        const hora = formatoHora(d?.zona ?? "America/Santiago");
+        const h = (v: string | null) => (v ? hora.format(new Date(v)) : "—");
         return (
           <div className="flex flex-col gap-4">
             {d ? (

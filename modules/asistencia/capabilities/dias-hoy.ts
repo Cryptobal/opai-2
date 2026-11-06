@@ -9,7 +9,7 @@ import { uuid } from "./esquemas";
 import { tenantBasico, nombreCompleto } from "./formato";
 import { alcanceMarcas } from "./lecturas";
 
-const LIMITE = 300;
+const LIMITE = 150;
 const ESTADOS = ["presente", "sin_marca", "ausente", "sin_turno", "incompleto"] as const;
 
 const itemSchema = z.object({
@@ -21,14 +21,14 @@ const itemSchema = z.object({
 
 /** «Asistencia de hoy»: presentes, sin marca, atrasos y correcciones pendientes de los turnos del día. */
 export const hoyListar = defineCapability({
-  id: "asistencia.hoy.listar",
+  id: "asistencia.dias.hoy",
   descripcion:
     "Muestra la asistencia de hoy de los turnos esperados: quién está presente, quién no marcó, atrasos al segundo, jornadas incompletas y correcciones pendientes, con el resumen del día. El supervisor ve solo sus instalaciones.",
   permiso: null,
   portales: PORTALES,
   input: z.object({ instalacionId: uuid.optional(), estado: z.enum(ESTADOS).optional() }),
   output: z.object({
-    fecha: z.string(),
+    fecha: z.string(), zona: z.string(),
     resumen: z.object({ turnos: z.number().int(), presentes: z.number().int(), sinMarca: z.number().int(), ausentes: z.number().int(), incompletos: z.number().int(), atrasos: z.number().int() }),
     items: z.array(itemSchema), truncado: z.boolean(),
   }),
@@ -57,7 +57,7 @@ export const hoyListar = defineCapability({
     for (const t of visibles) {
       if (vistos.has(t.personaId)) continue;
       vistos.add(t.personaId);
-      const d = await calcularDia(ctx, t.personaId, hoy, ahora, zona);
+      const d = await calcularDia(ctx, t.personaId, hoy, ahora, zona, ctx.alcance ? [...ctx.alcance.instalaciones] : undefined);
       items.push({
         personaId: t.personaId, nombre: nombre.get(t.personaId) ?? "", instalacionId: d.instalacionId, instalacion: d.instalacionId ? (instalacion.get(d.instalacionId) ?? null) : null,
         turnoInicio: d.turno?.inicio.toISOString() ?? null, turnoFin: d.turno?.fin.toISOString() ?? null,
@@ -68,7 +68,7 @@ export const hoyListar = defineCapability({
     const filtrados = i.estado ? items.filter((x) => x.estado === i.estado) : items;
     const cuenta = (e: (typeof ESTADOS)[number]) => items.filter((x) => x.estado === e).length;
     return {
-      fecha: hoy,
+      fecha: hoy, zona,
       resumen: { turnos: items.length, presentes: cuenta("presente"), sinMarca: cuenta("sin_marca"), ausentes: cuenta("ausente"), incompletos: cuenta("incompleto"), atrasos: items.filter((x) => x.atrasoMin > 0).length },
       items: filtrados, truncado: turnos.length > LIMITE,
     };

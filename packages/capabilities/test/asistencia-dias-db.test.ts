@@ -62,7 +62,7 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
   afterAll(async () => { await e?.cerrar(); });
 
   it("«hoy»: antes de marcar, el turno sale sin marca; con la entrada, incompleto con su atraso al segundo", async () => {
-    const antes = await run(ctx(T.a), "asistencia.hoy.listar", {});
+    const antes = await run(ctx(T.a), "asistencia.dias.hoy", {});
     expect(antes.ok, JSON.stringify(antes)).toBe(true);
     expect(antes.data.items[0]).toMatchObject({ estado: "sin_marca" });
     await marcar(T.a);
@@ -72,7 +72,7 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
     expect(fila.estado).toBe("incompleto");
     expect(fila.segundosAtraso).toBeGreaterThanOrEqual(7195);
     expect(fila.segundosAtraso).toBeLessThanOrEqual(7260);
-    const hoy = await run(ctx(T.a), "asistencia.hoy.listar", {});
+    const hoy = await run(ctx(T.a), "asistencia.dias.hoy", {});
     expect(hoy.data.resumen).toMatchObject({ turnos: 1, incompletos: 1, atrasos: 1 });
   });
 
@@ -116,6 +116,27 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
     expect(mal.ok).toBe(false);
   });
 
+  it("una contingencia aceptada días después cuenta en la hora que se declaró", async () => {
+    const ayer = new Date(Date.now() - 36 * 3_600_000);
+    const fechaAyer = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(ayer);
+    const doc = (await e.admin.documento.create({ data: { tenantId: T.a, nombre: "ev.pdf", mime: "application/pdf", tamano: 5, storageKey: `qa/${randomUUID()}`, creadoPorTipo: "user" } })).id;
+    const reg = await run(ctx(T.a), "asistencia.contingencias.registrar", { personaId: T.persona, instalacionId: T.inst, tipo: "entrada", horaDeclarada: ayer.toISOString(), motivo: "Caída del sistema durante el turno", evidenciaDocumentoId: doc });
+    expect(reg.ok, JSON.stringify(reg)).toBe(true);
+    const u = await e.admin.user.create({ data: { name: "Pía", email: `pia-${randomUUID().slice(0, 8)}@prueba.cl` } });
+    await e.admin.membership.create({ data: { tenantId: T.a, userId: u.id, rol: "viewer", portales: ["trabajador"], estado: "activa" } });
+    await e.admin.persona.update({ where: { id: T.persona }, data: { usuarioId: u.id } });
+    const trabajador = mod.crearContexto({ tenantId: T.a, actor: { tipo: "user", id: u.id }, portal: "trabajador", portalesMembresia: ["trabajador"], rol: "viewer", modulosActivos: ["asistencia"], medidor });
+    const ok = (await mod.executeCapability(trabajador, "asistencia.contingencias.responder", { contingenciaId: reg.data.id, decision: "aceptada" })) as Res;
+    expect(ok.ok, JSON.stringify(ok)).toBe(true);
+    const r = await run(ctx(T.a), "asistencia.dias.recalcular", { personaId: T.persona, desde: fechaAyer, hasta: fechaAyer });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const ayerFila = await e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona, fecha: new Date(`${fechaAyer}T00:00:00Z`) } });
+    expect(ayerFila.entrada?.toISOString()).toBe(ayer.toISOString());
+    // y hoy no se entera de esa marca
+    const hoyFila = await e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona, fecha: new Date(`${fecha}T00:00:00Z`) } });
+    expect(hoyFila.entrada?.getTime()).not.toBe(ayer.getTime());
+  });
+
   it("el trabajo horario deja el día de quien no marcó como ausente cuando su turno terminó", async () => {
     const p2 = (await e.admin.persona.create({ data: { tenantId: T.a, nombres: "Sin", apellidos: "Marca", rut: "12.222.222-2", estado: "activa" } })).id;
     await e.admin.turnoEsperado.create({ data: { tenantId: T.a, personaId: p2, fecha: new Date(`${fecha}T00:00:00Z`), inicio: new Date(Date.now() - 10 * 3_600_000), fin: new Date(Date.now() - 2 * 3_600_000), instalacionId: T.inst, origen: "pauta" } });
@@ -129,7 +150,7 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
     expect(l.data.items).toEqual([]);
     const s = await run(ctx(T.b), "asistencia.dias.resumen_periodo", { desde: fecha, hasta: fecha });
     expect(s.data.items).toEqual([]);
-    const hoy = await run(ctx(T.b), "asistencia.hoy.listar", {});
+    const hoy = await run(ctx(T.b), "asistencia.dias.hoy", {});
     expect(hoy.data.items).toEqual([]);
   });
 });

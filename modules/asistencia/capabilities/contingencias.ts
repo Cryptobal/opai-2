@@ -100,7 +100,8 @@ export const contingenciasResponder = defineCapability({
     if (dryRun) return vista(i.decision, null);
     return ctx.transaccion(async (tx) => {
       const marcaId = i.decision === "aceptada" ? await agregarMarcaDeContingencia(ctx, tx, c) : null;
-      await tx.contingencia.update({ where: { id: c.id }, data: { estado: i.decision, marcaId, resueltaPorId: yoId, resueltaEn: new Date(), motivoResolucion: i.comentario ?? null } });
+      const hecho = await tx.contingencia.updateMany({ where: { id: c.id, estado: "pendiente" }, data: { estado: i.decision, marcaId, resueltaPorId: yoId, resueltaEn: new Date(), motivoResolucion: i.comentario ?? null } });
+      if (hecho.count !== 1) throw conflicto("Esta contingencia ya fue respondida.");
       await ctx.bitacora.registrar(tx, { tipo: "asistencia.contingencia.respondida", entidadTipo: "contingencia", entidadId: c.id, payload: { decision: i.decision, marcaId } });
       await ctx.eventos.emitir(tx, { tipo: "asistencia.contingencia.respondida", entidadTipo: "contingencia", entidadId: c.id, payload: { contingenciaId: c.id, personaId: c.personaId, decision: i.decision } });
       return vista(i.decision, marcaId);

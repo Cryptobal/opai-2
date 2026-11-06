@@ -7,17 +7,17 @@ import { tenantBasico } from "./formato";
 
 /** Fecha del día al que cuenta una marca: la del turno esperado si lo tiene; si no, la de su hora en la zona de la empresa. */
 async function fechaDeMarca(ctx: Contexto, marcaId: string, zona: string): Promise<{ personaId: string; fechas: string[] } | null> {
-  const m = await ctx.db.marca.findUnique({ where: { id: marcaId }, select: { personaId: true, horaServidor: true, turnoEsperadoId: true } });
+  const m = await ctx.db.marca.findUnique({ where: { id: marcaId }, select: { personaId: true, horaServidor: true, horaDispositivo: true, origen: true, turnoEsperadoId: true } });
   if (!m) return null;
   const turno = m.turnoEsperadoId ? await ctx.db.turnoEsperado.findUnique({ where: { id: m.turnoEsperadoId }, select: { fecha: true } }) : null;
-  return { personaId: m.personaId, fechas: [turno ? turno.fecha.toISOString().slice(0, 10) : fechaDe(m.horaServidor, zona)] };
+  return { personaId: m.personaId, fechas: [turno ? turno.fecha.toISOString().slice(0, 10) : fechaDe(m.origen === "contingencia" && m.horaDispositivo ? m.horaDispositivo : m.horaServidor, zona)] };
 }
 
 /** Mantiene `asistencia.dias` al día cuando cambia una marca o la respuesta a una corrección. Idempotente. */
 export const consumidorDias = defineConsumidor({
   id: "asistencia.dias.actualizar",
   descripcion: "Recalcula el día consolidado de la persona cuando se registra una marca o se responde una corrección.",
-  eventos: ["asistencia.marca.registrada", "asistencia.correccion.respondida"],
+  eventos: ["asistencia.marca.registrada", "asistencia.correccion.propuesta", "asistencia.correccion.respondida"],
   async handler(ctx, evento) {
     const p = z.object({ marcaId: z.string().uuid().optional(), correccionId: z.string().uuid().optional() }).safeParse(evento.payload);
     if (!p.success) return;

@@ -4,7 +4,7 @@ export const VERBOS: Record<string, string> = {
   remove: "Quitar", restablecer_mfa: "Restablecer segundo factor", revoke: "Revocar", peek: "Revisar",
   accept: "Aceptar", request_new: "Pedir uno nuevo", solicitar: "Solicitar", create: "Crear",
   summary: "Resumen", set_estado: "Cambiar estado", set: "Configurar", resumen: "Resumen",
-  por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado",
+  por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado",
   reintentar: "Reintentar", cancelar: "Cancelar", configurar: "Configurar", set_secreto: "Guardar clave",
   guardar_certificado_dte: "Guardar certificado", probar: "Probar", autocompletar: "Autocompletar",
   detalle: "Detalle", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar",
