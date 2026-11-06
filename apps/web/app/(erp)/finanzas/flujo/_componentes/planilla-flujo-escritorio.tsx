@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { AccionesFlujoEscritorio, AccionesFlujoMovil } from "./acciones-flujo-toolbar";
-import { AvisoSaldoBanco } from "./aviso-saldo-banco";
+import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
 import { celdaEditable, type Planilla } from "./datos";
 import type { ArmadoPlanilla } from "./datos";
 
@@ -49,6 +49,7 @@ export function PlanillaFlujoEscritorio({
         </Alerta>
       ) : null}
       <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
+      <AvisosProyeccion avisos={p.avisos} />
       <PlanillaScreen
         state={state}
         titulo="Flujo de caja"

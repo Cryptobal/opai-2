@@ -32,6 +32,8 @@ export const AJUSTES: Record<string, Ajuste> = {
     }),
   },
   "comercial.seguimiento_pasos": { valores: () => ({ canal: "interno", ejecutor: "persona" }) },
+  // Finanzas · flujo (CAR-193): CHECK del formato «aaaa-mm» del mes.
+  "finanzas.flujo_iva_postergado": { fijas: ["periodo"], valores: () => ({ periodo: "2026-11" }) },
   // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
   "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
   "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },

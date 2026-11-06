@@ -56,6 +56,8 @@ export type Planilla = {
     saldo: number | null;
     cuentasSinSaldo: { cuentaId: string; banco: string }[];
   };
+  /** Avisos de la proyección (p. ej. un abono sin conciliar que podría ser un cobro ya recibido). */
+  avisos: { tipo: "posible_cobro_recibido"; mensaje: string; abonoId: string; monto: number }[];
   columnaHoy: string | null;
 };
 

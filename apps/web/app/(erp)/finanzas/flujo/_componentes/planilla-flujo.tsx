@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { Alerta, PlanillaScreen, type EstadoPantalla } from "@opai/ds";
 
 import { armarPlanilla, celdaEditable, clp, type Planilla } from "./datos";
-import { AvisoSaldoBanco } from "./aviso-saldo-banco";
+import { AvisoSaldoBanco, AvisosProyeccion } from "./aviso-saldo-banco";
 import { PlanillaFlujoEscritorio } from "./planilla-flujo-escritorio";
 
 const HojaCelda = dynamic(() => import("./hoja-celda").then((m) => ({ default: m.HojaCelda })));
@@ -55,6 +55,7 @@ export function PlanillaFlujo({ state, planilla, gestiona, configura, movil }: P
           </Alerta>
         ) : null}
         <AvisoSaldoBanco saldoBanco={p.saldoBanco} />
+        <AvisosProyeccion avisos={p.avisos} />
         <VistaMovilFlujo planilla={p} gestiona={gestiona} onCelda={(filaId, semana) => setSeleccion({ filaId, semana })} />
         {gestiona ? (
           <HojaCelda
