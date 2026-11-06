@@ -17,8 +17,14 @@ export const personasListarTerreno = defineCapability({
   interna: true,
   input: z.object({ dispositivoId: uuidSchema }),
   output: z.object({
+    instalacion: z.string(),
     items: z.array(
-      z.object({ id: z.string(), nombre: z.string(), iniciales: z.string(), cargo: z.string().nullable() }),
+      z.object({
+        id: z.string(),
+        nombre: z.string(),
+        iniciales: z.string(),
+        cargo: z.string().nullable(),
+      }),
     ),
   }),
   efecto: "lectura",
@@ -26,6 +32,10 @@ export const personasListarTerreno = defineCapability({
   auditarLectura: (salida) => salida.items.map((p) => p.id),
   async handler(ctx, { dispositivoId }) {
     const disp = await dispositivoActivo(ctx, dispositivoId);
+    const instalacion = await ctx.db.instalacion.findFirst({
+      where: { id: disp.instalacionId },
+      select: { nombre: true },
+    });
     const vinculos = await ctx.db.vinculoLaboral.findMany({
       where: {
         instalacionId: disp.instalacionId,
@@ -47,7 +57,7 @@ export const personasListarTerreno = defineCapability({
       const iniciales = `${nombres[0] ?? ""}${apellidos[0] ?? ""}`.toUpperCase();
       return [{ id, nombre: `${nombres} ${apellidos}`.trim(), iniciales, cargo: v.cargo.nombre }];
     });
-    return { items };
+    return { instalacion: instalacion?.nombre ?? "", items };
   },
 });
 

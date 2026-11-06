@@ -233,6 +233,7 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
     const d = await dato<{
       items: { id: string; nombre: string; iniciales: string; cargo: string | null }[];
     }>(t.A, "core.personas_terreno.listar", { dispositivoId: disp.A });
+    expect(d.instalacion).toBe("Planta A");
     expect(d.items.map((p) => p.id)).toEqual([personaA]);
     expect(d.items[0]).toMatchObject({ nombre: "Ana Prueba", iniciales: "AP" });
     const sinNadie = await dato<{ items: unknown[] }>(t.B, "core.personas_terreno.listar", {
