@@ -34,6 +34,7 @@ model Rendicion {
   items     RendicionItem[]
   historial RendicionHistorial[]
   viaje     RendicionViaje?
+  lotes     LotePagoItem[]
 
   @@unique([tenantId, codigo])
   @@index([tenantId, estado])
@@ -131,5 +132,99 @@ model RendicionViaje {
 
   @@index([tenantId])
   @@map("rendicion_viajes")
+  @@schema("rendiciones")
+}
+
+/// Lote de pago (CAR-208, R3). Estados: borrador → aprobado → generado → pagado | anulado. Agrupa
+/// rendiciones aprobadas; el total y la cantidad se fijan al crear y no cambian (trigger en la
+/// migración). Marcar pagado es manual (fecha y referencia): OPAI no transmite nada al banco.
+/// Decisión de Carlos del 6-nov-2026: solo en test.opai.cl, con datos ficticios.
+model LotePago {
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
+  /// Correlativo por empresa; se muestra como LP-n.
+  codigo               Int
+  /// "borrador" | "aprobado" | "generado" | "pagado" | "anulado".
+  estado               String    @default("borrador")
+  totalClp             Int       @map("total_clp")
+  cantidad             Int
+  creadoPorId          String    @map("creado_por_id") @db.Uuid
+  aprobadoPorId        String?   @map("aprobado_por_id") @db.Uuid
+  aprobadoEn           DateTime? @map("aprobado_en") @db.Timestamptz(6)
+  generadoPorId        String?   @map("generado_por_id") @db.Uuid
+  generadoEn           DateTime? @map("generado_en") @db.Timestamptz(6)
+  /// Huella SHA-256 de la nómina generada (el contenido no se guarda: la cuenta sale de la ficha al descargar).
+  nominaHuella         String?   @map("nomina_huella")
+  pagadoPorId          String?   @map("pagado_por_id") @db.Uuid
+  pagadoEn             DateTime? @map("pagado_en") @db.Timestamptz(6)
+  fechaPago            DateTime? @map("fecha_pago") @db.Date
+  /// Número de nómina o comprobante bancario (evidencia del pago, escrita por una persona).
+  referenciaPago       String?   @map("referencia_pago")
+  comprobanteDocumentoId String? @map("comprobante_documento_id") @db.Uuid
+  anuladoPorId         String?   @map("anulado_por_id") @db.Uuid
+  anuladoEn            DateTime? @map("anulado_en") @db.Timestamptz(6)
+  motivoAnulacion      String?   @map("motivo_anulacion")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  items     LotePagoItem[]
+  historial LotePagoHistorial[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, estado])
+  @@map("lotes_pago")
+  @@schema("rendiciones")
+}
+
+/// Rendición incluida en un lote. No copia la cuenta bancaria (dato personal, Ley 21.719): guarda la
+/// versión de la ficha (`cuentaVersion` = `updated_at` de `core.personas_pago`) para detectar que
+/// cambió. Una rendición no puede estar en dos lotes activos (índice único parcial en la migración).
+model LotePagoItem {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  loteId        String   @map("lote_id") @db.Uuid
+  rendicionId   String   @map("rendicion_id") @db.Uuid
+  personaId     String   @map("persona_id") @db.Uuid
+  montoClp      Int      @map("monto_clp")
+  cuentaVersion DateTime @map("cuenta_version") @db.Timestamptz(6)
+  /// false cuando el lote se anula: la rendición queda libre para otro lote.
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  lote      LotePago  @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  rendicion Rendicion @relation(fields: [rendicionId], references: [id])
+
+  @@index([tenantId, loteId])
+  @@index([tenantId, rendicionId])
+  @@map("lote_pago_items")
+  @@schema("rendiciones")
+}
+
+/// Línea de tiempo append-only del lote.
+model LotePagoHistorial {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  loteId     String   @map("lote_id") @db.Uuid
+  tipo       String
+  actorId    String   @map("actor_id") @db.Uuid
+  estadoDesde String? @map("estado_desde")
+  estadoHasta String? @map("estado_hasta")
+  comentario String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  lote LotePago @relation(fields: [loteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, loteId])
+  @@map("lote_pago_historial")
+  @@schema("rendiciones")
+}
+
+/// Contador del código LP-n por empresa (mismo patrón que `rendicion_contadores`).
+model LotePagoContador {
+  tenantId  String   @id @map("tenant_id") @db.Uuid
+  ultimo    Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("lote_pago_contadores")
   @@schema("rendiciones")
 }

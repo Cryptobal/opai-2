@@ -72,4 +72,20 @@ export const ajustesRendiciones = z.object({
     ayuda: "Lista de {nombre, montoClp}. Solo para el método de tramo fijo.",
     control: "json",
   }),
+  nomina_cuenta_origen_id: z.string().default("").meta({
+    etiqueta: "Cuenta de origen de la nómina",
+    ayuda: "Se elige entre las cuentas bancarias ya ingresadas en Bancos de la empresa (no es texto libre). Vacío = no se puede generar la nómina.",
+    grupo: "Pagos",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "texto",
+  }),
+  nomina_formato_confirmado: z.boolean().default(false).meta({
+    etiqueta: "Activar la nómina Santander (solo empresa de pruebas)",
+    ayuda: "El formato Santander está confirmado (Carlos, 6-nov-2026), pero R3 está autorizado solo en la empresa de pruebas: se enciende únicamente allí. Apagado = no se genera ni se descarga la nómina.",
+    grupo: "Pagos",
+    ambito: "tenant",
+    permiso: PERMISO_CONFIG,
+    control: "switch",
+  }),
 });
