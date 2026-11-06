@@ -231,6 +231,7 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
 
   it("«¿Quién eres?» lista a quienes tienen vínculo vigente en la instalación del equipo", async () => {
     const d = await dato<{
+      instalacion: string;
       items: { id: string; nombre: string; iniciales: string; cargo: string | null }[];
     }>(t.A, "core.personas_terreno.listar", { dispositivoId: disp.A });
     expect(d.instalacion).toBe("Planta A");
