@@ -38,7 +38,7 @@ export function ColaPendiente() {
         <LinkNext href="/terreno" className="text-sm text-fg-muted underline">
           Volver al inicio
         </LinkNext>
-        <h1 className="t-h1 mt-1 text-fg">Cola sin conexión</h1>
+        <h1 className="t-title mt-1 text-fg">Cola sin conexión</h1>
         <p className="text-base text-fg-muted">
           {e.pendientes === 1 ? "1 hecho por enviar" : `${e.pendientes} hechos por enviar`}
         </p>

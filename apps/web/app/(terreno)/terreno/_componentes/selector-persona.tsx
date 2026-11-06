@@ -16,7 +16,7 @@ export function SelectorPersona({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="t-h1 text-fg">¿Quién eres?</h1>
+        <h1 className="t-title text-fg">¿Quién eres?</h1>
         <p className="mt-1 text-base text-fg-muted">
           Este teléfono está asignado a {instalacion || "tu instalación"}. Elige tu nombre para
           empezar.

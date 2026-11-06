@@ -19,7 +19,7 @@ export function InicioEquipo({
       <header className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm text-fg-muted">Terreno · {instalacion}</p>
-          <h1 className="t-h1 text-fg">Hola, {persona.nombre.split(" ")[0]}</h1>
+          <h1 className="t-title text-fg">Hola, {persona.nombre.split(" ")[0]}</h1>
         </div>
         <Button variant="secondary" onClick={() => elegirPersona(null)}>
           Cambiar
