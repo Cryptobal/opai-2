@@ -5,6 +5,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { fechaCorta } from "@/lib/formato";
 
 import { BotonAnular } from "./boton-anular";
+import { BotonRespaldo } from "./boton-respaldo";
 import { cargarOpciones, cargarRendicion } from "./datos";
 import { diaIso, kmTexto, pesos, revisaDe } from "./formato";
 import {
@@ -101,7 +102,16 @@ export function PaginaDetalle({
                           {i.descripcion} · {diaIso(i.fecha)}
                         </p>
                       </div>
-                      <span className="shrink-0 tabular-nums">{pesos(i.monto)}</span>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <span className="tabular-nums">{pesos(i.monto)}</span>
+                        {i.documentoId ? (
+                          <BotonRespaldo
+                            portal={portal}
+                            rendicionId={r.id}
+                            documentoId={i.documentoId}
+                          />
+                        ) : null}
+                      </div>
                     </li>
                   ))}
                 </ul>
