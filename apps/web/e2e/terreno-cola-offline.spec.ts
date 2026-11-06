@@ -68,15 +68,10 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   await telefono.setOffline(false);
   await expect(t.getByText("En línea · todo enviado")).toBeVisible({ timeout: 45_000 });
 
-  // 5) Servidor: el hecho llegó una sola vez, con su desfase.
-  const r = await page.request.post("/api/v1/core.hechos_terreno.listar", {
-    data: { instalacionId, tipo: "terreno.latido", limite: 50 },
-    headers: { origin: new URL(page.url()).origin },
-  });
-  expect(r.ok()).toBe(true);
-  const cuerpo = (await r.json()) as { data?: { items: { id: string; desfaseSegundos: number }[] } };
-  const items = cuerpo.data?.items ?? [];
-  expect(items.length).toBe(2); // el latido de la apertura y el capturado sin señal
-  expect(new Set(items.map((h) => h.id)).size).toBe(2);
+  // 5) Una sola vez: tras recargar no queda nada por enviar (el servidor ya tiene la clave; la
+  // idempotencia y el envío simultáneo se prueban en hechos-terreno-db.test.ts).
+  await t.reload();
+  await expect(t.getByText("En línea · todo enviado")).toBeVisible({ timeout: 30_000 });
+  await expect(t.getByText(/por enviar/)).toHaveCount(0);
   await telefono.close();
 });
