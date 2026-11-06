@@ -1,6 +1,6 @@
 # BRIEF — CAR-96 · Turnos extra: registro y aprobación (PR 1, mínimo)
 
-**Estado: propuesta para aprobar (solo documentación).** Alcance elegido por Carlos el 6-nov-2026: «Registro + aprobación mínimos». No hay especificación ni diseño aprobados de turnos extra (`AGENTS.md`: especificación → diseño → código), y el PR 1 necesita una migración y un permiso nuevo; por eso este PR deja el brief para su OK y el código va en el PR siguiente. Decisiones de origen: A5–A10 y C13–C15 (29-oct-2026, Linear CAR-96). Depende de: Pauta diaria y reemplazos (CAR-86), titular y series (CAR-206 y CAR-207, ADR-081).
+**Estado: brief aprobado por Carlos el 6-nov-2026; pasa a Claude Design antes de cualquier código (solo documentación).** Alcance elegido por Carlos el 6-nov-2026: «Registro + aprobación mínimos». No hay especificación ni diseño aprobados de turnos extra (`AGENTS.md`: especificación → diseño → código), y el PR 1 necesita una migración y un permiso nuevo; por eso este PR deja el brief para su OK y el código va en el PR siguiente. Decisiones de origen: A5–A10 y C13–C15 (29-oct-2026, Linear CAR-96). Depende de: Pauta diaria y reemplazos (CAR-86), titular y series (CAR-206 y CAR-207, ADR-081).
 
 ## 1. Objetivo
 Que todo reemplazo o refuerzo pagado sea un **turno extra** registrado por el supervisor y aprobado por Operaciones o RR. HH., con su monto y su tipo de trabajador (propio o externo), sin tocar la nómina.
@@ -34,9 +34,9 @@ Que todo reemplazo o refuerzo pagado sea un **turno extra** registrado por el su
 | Capacidad | Permiso | Efecto |
 |---|---|---|
 | `pauta.turnos_extra.registrar` | `pauta:write` | escritura, `dryRun`, `idempotencyKey` |
-| `pauta.turnos_extra.aprobar` / `.rechazar` | `pauta:aprobar_extra` (nuevo: owner, admin, gerente; no supervisor) | irreversible: pide aprobación humana a los agentes |
+| `pauta.turnos_extra.aprobar` / `.rechazar` | `pauta:aprobar_extra` (nuevo: owner, admin, gerente y un **rol Operaciones** nuevo; no supervisor) | irreversible: pide aprobación humana a los agentes |
 | `pauta.turnos_extra.listar` | `pauta:read` | lectura auditada por IDs |
-| `pauta.turnos_extra.monto_fijar` | `pauta:write` (instalación o puesto) | escritura (ajuste) |
+| `pauta.turnos_extra.monto_fijar` | `pauta:write` (instalación o puesto) | escritura (ajuste); el supervisor **no** edita el monto de un turno: registra el sugerido |
 Un supervisor solo ve y registra en sus instalaciones (ADR-022); nadie aprueba lo que él mismo registró.
 
 ## 8. Interfaz y responsive
@@ -46,7 +46,7 @@ Sin diseño aprobado: **primero la especificación y el diseño en Claude Design
 Tenant de la sesión; persona con vínculo vigente en la instalación; el monto nunca lo ve el cliente ni el portal del guardia; el motivo de edición del monto es texto de negocio, no se copia a la bitácora general. El responsable de la key agente hereda los permisos.
 
 ## 10. Casos límite
-Reemplazo ya aprobado y luego anulado: el turno extra pasa a `rechazado` con motivo. Cambio de instalación del guardia entre registro y aprobación: se valida al registrar, no al aprobar. Monto en cero (turno sin pago): permitido con motivo. Externo sin vínculo: fuera de alcance hasta definir el alta de externos (ver «Decide Carlos»).
+Reemplazo ya aprobado y luego anulado: el turno extra pasa a `rechazado` con motivo. Cambio de instalación del guardia entre registro y aprobación: se valida al registrar, no al aprobar. Monto en cero (turno sin pago): permitido con motivo. El externo se crea sin contrato (ver sección 16).
 
 ## 11. Plan por bloques
 1. Dominio (monto, reglas) con tests. 2. Esquema y migración. 3. Capacidades y permiso. 4. Pantalla. 5. Paridad, e2e y `ESTADO.md`.
@@ -63,8 +63,13 @@ Gate completo, e2e a 375/1024/1280, subagente revisor, revisión final (A2.2) y 
 ## 15. Riesgos y rollback
 Migración aditiva: se revierte con el revert del PR y la tabla sin uso. Riesgo: confundir «aprobado» con «pagado» (no hay estado de pago hasta el PR 2).
 
-## 16. Decide Carlos
-1. **Externos:** ¿se registran como persona sin vínculo (alta mínima) o solo con nombre y RUT en el turno? Afecta datos personales (Ley 21.719).
-2. **Permiso de aprobación:** ¿owner, admin y gerente, o también un rol «Operaciones» propio?
-3. **¿Puede el supervisor editar el monto de un turno** o solo registrarlo con el monto sugerido?
-4. **Orden:** ¿aprobamos este brief y el diseño en Claude Design antes de construir?
+## 16. Decisiones de Carlos (6-nov-2026) y trabajo pendiente
+Registradas desde la pasada de OPAI 2.0 de las 13:07 CLT (comentario del PR #365). **No se piden de nuevo.**
+1. **Quién aprueba:** owner, admin, gerente y un **rol Operaciones** (permiso `pauta:aprobar_extra`; el rol se define en `packages/domain`, ADR-016, y en la matriz de roles del PR de código).
+2. **Supervisor:** solo registra el monto sugerido; no lo edita. La edición con motivo y auditoría queda para quien aprueba.
+3. **Brief:** aprobado. **Pasa a Claude Design antes de cualquier código** (pantallas de registro, «Por aprobar» y ficha del externo).
+4. **Externo:** se crea en el tenant **sin contrato**, con nombre, RUT, correo y datos bancarios (para la transferencia). Solo «Activo» tiene vínculo laboral. Es **la misma ficha a lo largo del tiempo**, con historial. Implica un estado de persona nuevo («externo») en el núcleo y datos bancarios cifrados en el almacén de campos (Ley 21.719, ADR-027); se diseña en el PR de código, con su migración.
+5. **Transiciones decididas:** Postulante → Rechazado | Externo | Contratado (Activo); Externo → Contratado (Activo); Activo → Inactivo al terminar el vínculo.
+6. **Transición propuesta, pendiente del OK de Carlos:** Inactivo → Activo | Externo.
+
+**Trabajo pendiente antes del código:** diseño en Claude Design (DS 2.0), OK visual de Carlos (A2.10), y confirmar la transición 6. Este brief no empieza código ni migración.
