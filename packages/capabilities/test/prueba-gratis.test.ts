@@ -7,7 +7,7 @@ import { capacidadesDelNucleo } from "../src/core";
 import { trabajoPruebasGratis } from "../src/core/pruebas-gratis";
 import { executeCapability } from "../src/execute";
 import { defineModule, limpiarModulos, registrarModulos } from "../src/module";
-import { limpiarRegistro, registrarCapacidades } from "../src/registry";
+import { limpiarRegistro, obtenerCapacidad, registrarCapacidades } from "../src/registry";
 import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
 import { semillaTenant } from "./semilla";
 
@@ -35,8 +35,9 @@ beforeEach(() => {
   registrarModulos([modulo("cpq"), modulo("finanzas"), modulo("tickets")]);
 });
 
+const conRut = [{ tenantId: TENANT_DE_PRUEBA, rut: "76123456-0", razonSocial: "Gard SpA" }];
 const contexto = (extra: Record<string, unknown[]> = {}, opts: Record<string, unknown> = {}) =>
-  contextoDePrueba({ semilla: { ...semillaTenant(), ...extra }, ...opts });
+  contextoDePrueba({ semilla: { ...semillaTenant(), perfilEmpresa: conRut, ...extra }, ...opts });
 const probar = (moduloId: string) => ({ moduloId });
 const mod = (moduloId: string, estado: string) => ({
   id: `m-${moduloId}`,
@@ -109,6 +110,16 @@ describe("core.modules.probar", () => {
       ok: false,
       error: { message: expect.stringContaining("incluye todas") },
     });
+  });
+
+  it("exige el RUT de la empresa antes de activar y pide aprobación a los agentes", async () => {
+    const { ctx, tabla } = contexto({ perfilEmpresa: [] });
+    expect(await executeCapability(ctx, "core.modules.probar", probar("cpq"))).toMatchObject({
+      ok: false,
+      error: { message: "Completa el RUT de la empresa antes de activar una prueba." },
+    });
+    expect(tabla("pruebaGratis")).toHaveLength(0);
+    expect(obtenerCapacidad("core.modules.probar")?.efecto).toBe("irreversible");
   });
 
   it("exige el permiso de administrar la empresa", async () => {
