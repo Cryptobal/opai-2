@@ -8,6 +8,7 @@ import { getSession } from "@opai/auth";
 import { contextoDeIdentidad, identidadDe, type Identidad } from "./actor";
 import { medirFase } from "./metricas-navegacion";
 import { asegurarRegistro } from "./registro";
+import { loginDe } from "./login-destino";
 import { COOKIE_TENANT } from "./tenant-actual";
 import { tieneAccesoAPortal } from "./acceso-portal";
 import { estadoMfaDe, verificarMfaDe } from "./mfa";
@@ -27,15 +28,6 @@ export const identidadActual = cache(async (): Promise<Identidad | null> => {
   identidad.mfaVerificada = sesion.session.mfaVerified === true;
   return identidad;
 });
-
-/** Entrada sin sesión: el Portal Trabajador tiene su propio ingreso (RUT + PIN); el resto, el de correo. */
-export function loginDe(destino?: string): string {
-  const base =
-    destino === "/trabajador" || destino?.startsWith("/trabajador/")
-      ? "/trabajador/login"
-      : "/login";
-  return destino ? `${base}?next=${encodeURIComponent(destino)}` : base;
-}
 
 /** Identidad o redirección al ingreso que corresponde (`/trabajador/login` o `/login`). */
 export async function requerirIdentidad(destino?: string): Promise<Identidad> {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { loginDe } from "@/lib/servidor";
+import { loginDe } from "@/lib/login-destino";
 
 // Sin sesión, cada portal manda a su ingreso: el Portal Trabajador a RUT + PIN, el resto al de correo.
 describe("ingreso al que redirige una ruta sin sesión (CAR-78 B1)", () => {
