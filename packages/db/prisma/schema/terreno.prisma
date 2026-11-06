@@ -107,3 +107,24 @@ model HechoTerreno {
   @@map("hechos_terreno")
   @@schema("core")
 }
+
+/// Rostro enrolado de una persona (CAR-78 · B4, D-02: el rostro es el mecanismo principal y el PIN el
+/// secundario). OPAI no guarda la imagen ni la plantilla: solo la referencia opaca del proveedor, cifrada con
+/// la DEK de la empresa (campo sensible). Una por persona. Existe mientras el consentimiento
+/// `biometria_asistencia` esté vigente: revocarlo borra la referencia aquí y en el proveedor.
+model EnrolamientoBiometrico {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  personaId          String   @unique @map("persona_id") @db.Uuid
+  /// Consentimiento (hecho "otorgado") que habilitó este enrolamiento.
+  consentimientoId   String   @map("consentimiento_id") @db.Uuid
+  proveedor          String
+  referenciaCifrada  String   @map("referencia_cifrada")
+  enroladoPor        String?  @map("enrolado_por")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId])
+  @@map("enrolamientos_biometricos")
+  @@schema("core")
+}
