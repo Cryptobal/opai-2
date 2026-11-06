@@ -13,7 +13,7 @@ import type {
 } from "@/lib/tipos-maestros";
 
 import { ChipsPuestosDiferido } from "../../_componentes/chips-puestos-diferido";
-import { HojaPuesto, HojaTitular } from "../../_componentes/diferidas";
+import { HojaPuesto, HojaTitular, HojaTrasladar } from "../../_componentes/diferidas";
 import { ListaPuestos } from "../../_componentes/lista-puestos";
 import type { TitularesPuesto } from "../../_componentes/titular-tipos";
 import { PaginaInstalacion } from "../../_componentes/pagina-instalacion";
@@ -34,7 +34,7 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
     ejecutarComoUsuario<PatronTurnoOpcion[]>("erp", "core.patrones.list", {}),
   ]);
   // Titulares del puesto abierto (ficha o «Asignar titular»); sin Pauta activa o sin permiso, la ficha no los muestra.
-  const abierto = i.puestos.find((x) => x.id === (p["titular"] ?? p["puesto"]));
+  const abierto = i.puestos.find((x) => x.id === (p["titular"] ?? p["trasladar"] ?? p["puesto"]));
   const rt = abierto
     ? await ejecutarComoUsuario<TitularesPuesto>("erp", "pauta.titulares.listar", { puestoId: abierto.id })
     : null;
@@ -62,7 +62,12 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
       puedeAsignar={puedeAsignar}
     />
   );
-  const hojaTitular = <HojaTitular puestos={i.puestos} subtitulo={subtitulo} titulares={titulares} />;
+  const hojaTitular = (
+    <>
+      <HojaTitular puestos={i.puestos} subtitulo={subtitulo} titulares={titulares} />
+      <HojaTrasladar puestos={i.puestos} subtitulo={subtitulo} titulares={titulares} />
+    </>
+  );
   const conteos = conteosPuestos(i.puestos);
   const filtradas = filtrarPuestos(i.puestos, p);
   return (
