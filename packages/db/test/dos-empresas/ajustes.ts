@@ -105,6 +105,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   "asistencia.cadenas_cabeza": { fijas: ["cadena"], valores: () => ({ cadena: "marcas" }) },
   "asistencia.correcciones": { valores: () => ({ tipo_propuesto: "entrada", seq: 1 }) },
   "asistencia.contingencias": { valores: () => ({ tipo: "entrada", estado: "pendiente" }) },
+  "asistencia.correcciones_respuestas": { fijas: ["resultado", "canal"], valores: () => ({ resultado: "aceptada", canal: "portal" }) },
+  "asistencia.alertas": { fijas: ["tipo"], valores: () => ({ tipo: "compensables" }) },
   "asistencia.incidentes_tecnicos": {
     valores: () => ({ tipo: "otro", severidad: "baja", origen: "manual" }),
   },

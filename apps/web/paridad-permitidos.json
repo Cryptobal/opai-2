@@ -40,6 +40,10 @@
     {
       "archivo": "app/verificar/marca/[slug]/[hash]/ver.ts",
       "motivo": "Verificación pública de una marca por hash (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.marcas.verificar (interna) con el hash de 256 bits como credencial, con rate limit que falla cerrado."
+    },
+    {
+      "archivo": "app/correccion/[slug]/[token]/ver.ts",
+      "motivo": "Respuesta pública a una corrección de marca (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) con el token del correo personal como credencial y el RUT como confirmación, con rate limit que falla cerrado."
     }
   ],
   "internasPermitidas": [
@@ -74,6 +78,10 @@
     {
       "archivo": "app/verificar/marca/[slug]/[hash]/ver.ts",
       "motivo": "Ejecuta asistencia.marcas.verificar (interna) para la página pública de verificación del comprobante de una marca."
+    },
+    {
+      "archivo": "app/correccion/[slug]/[token]/ver.ts",
+      "motivo": "Ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) para la página pública donde el trabajador acepta u objeta una corrección."
     }
   ],
   "infraestructuraLibConDb": [
