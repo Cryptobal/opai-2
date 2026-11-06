@@ -1,8 +1,17 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { entrar } from "./sesion";
 import { ocultarIndicadorDev } from "./indicador-dev";
 
 test.beforeEach(async ({ page }) => ocultarIndicadorDev(page));
+
+/** Abre la campana: un clic antes de hidratar el encabezado no abre el panel, así que se repite hasta verlo. */
+async function abrirCampana(page: Page) {
+  const panel = page.getByRole("dialog", { name: "Notificaciones" });
+  await expect(async () => {
+    if (!(await panel.isVisible())) await page.locator("header:visible").getByRole("button", { name: /Notificaciones/ }).click({ timeout: 3_000 });
+    await expect(panel).toBeVisible({ timeout: 5_000 });
+  }).toPass({ timeout: 45_000 });
+}
 
 test("vencimientos conserva el origen y la campana abre avisos", async ({ page }) => {
   await entrar(page);
@@ -11,11 +20,7 @@ test("vencimientos conserva el origen y la campana abre avisos", async ({ page }
   const volver = page.locator("header:visible").getByRole("link", { name: /Inicio/ });
   await volver.click();
   await expect(page).toHaveURL(/\/$/);
-  await page
-    .locator("header:visible")
-    .getByRole("button", { name: /Notificaciones/ })
-    .click();
-  await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible();
+  await abrirCampana(page);
   await expect(
     page.getByRole("dialog", { name: "Notificaciones" }).getByRole("link", { name: "Ver todo" }),
   ).toHaveAttribute("href", "/bandeja");
@@ -42,11 +47,7 @@ test("Inicio y Vencimientos concuerdan y registran las vistas", async ({ page },
       path: `../../docs/2.0/design/fix-inicio-vencimientos/${info.project.name}-${tema}-inicio.png`,
       fullPage: true,
     });
-    await page
-      .locator("header:visible")
-      .getByRole("button", { name: /Notificaciones/ })
-      .click();
-    await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible();
+    await abrirCampana(page);
     await page.screenshot({
       path: `../../docs/2.0/design/fix-inicio-vencimientos/${info.project.name}-${tema}-campana.png`,
     });
