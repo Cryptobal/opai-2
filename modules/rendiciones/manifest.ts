@@ -16,11 +16,14 @@ export const manifest = defineModule({
     { id: "rendiciones:rendir", descripcion: "Crear, editar, enviar y anular las rendiciones propias" },
     { id: "rendiciones:aprobar", descripcion: "Aprobar, rechazar o devolver las rendiciones asignadas" },
     { id: "rendiciones:ver_todas", descripcion: "Ver todas las rendiciones de la empresa" },
+    { id: "rendiciones:pagar", descripcion: "Armar lotes de pago, generar la nómina, marcar el lote pagado y anularlo" },
+    { id: "rendiciones:pagar.aprobar", descripcion: "Aprobar un lote de pago (quien lo creó no es el único que lo aprueba)" },
     { id: "rendiciones:config.manage", descripcion: "Configurar el módulo Rendiciones" },
   ],
   navegacion: [
     // ERP: bajo Finanzas (NAVEGACION.md §2), pero el módulo se vende solo y funciona con o sin Finanzas.
     { portal: "erp", area: "finanzas", href: "/rendiciones", etiqueta: "Rendiciones", icono: "ReceiptText", orden: 12, permiso: "rendiciones:rendir" },
+    // R3 (CAR-208): la bandeja y los lotes se abren desde «Rendiciones» (el área Finanzas ya tiene 7 entradas, D2 del Brief 05).
     // Supervisor: dentro de «Más» en el teléfono (fueraInferior); sigue en la barra lateral y el riel.
     { portal: "supervisor", href: "/supervisor/rendiciones", etiqueta: "Rendiciones", icono: "ReceiptText", orden: 10, permiso: "rendiciones:rendir" },
   ],
@@ -33,6 +36,12 @@ export const manifest = defineModule({
     { id: "rendiciones.rendicion.rechazada", descripcion: "Una rendición fue rechazada." },
     { id: "rendiciones.rendicion.devuelta", descripcion: "Una rendición fue devuelta a quien rinde." },
     { id: "rendiciones.rendicion.anulada", descripcion: "Una rendición fue anulada." },
+    { id: "rendiciones.rendicion.pagada", descripcion: "Una rendición pasó a pagada al marcar su lote como pagado." },
+    { id: "rendiciones.lote.creado", descripcion: "Se armó un lote de pago en borrador." },
+    { id: "rendiciones.lote.aprobado", descripcion: "Un lote de pago fue aprobado." },
+    { id: "rendiciones.lote.generado", descripcion: "Se generó la nómina de transferencias de un lote." },
+    { id: "rendiciones.lote.pagado", descripcion: "Un lote de pago se marcó como pagado." },
+    { id: "rendiciones.lote.anulado", descripcion: "Un lote de pago fue anulado." },
   ],
   capacidades,
 });

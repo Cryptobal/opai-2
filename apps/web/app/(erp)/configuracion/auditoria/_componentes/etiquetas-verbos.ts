@@ -19,13 +19,13 @@ export const VERBOS: Record<string, string> = {
   montos_por_instalacion: "Montos por instalación", panel: "Panel", perfil_get: "Ver datos tributarios", prueba_abrir: "Abrir prueba", perfil_set: "Fijar datos tributarios", anular: "Anular", efectiva: "Vigente",
   cuentas: "Cuentas", contactos: "Contactos", vincular: "Vincular", set_roles: "Definir roles",
   desvincular: "Desvincular", completar: "Completar", delete: "Eliminar", timeline: "Línea de tiempo",
-  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar", recibir: "Recibir", regenerar: "Regenerar",
+  tareas: "Tareas", asignar: "Asignar", quitar: "Quitar", de_entidad: "De la entidad", listar: "Listar", recibir: "Recibir", enrolar: "Enrolar", regenerar: "Regenerar",
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   estado_comercial: "Estado comercial", revocar: "Revocar", ver: "Ver", ofrecer: "Ofrecer",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
   aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
-  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", vencimientos: "Vencimientos", explorar: "Explorar",
+  confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
   politica_set: "Definir política", firmante_empresa_set: "Definir firmante de la empresa",
   firma_automatica_autorizar: "Autorizar firma automática", firma_automatica_revocar: "Revocar firma automática",
@@ -75,4 +75,6 @@ export const VERBOS: Record<string, string> = {
   cargos_list: "Listar cargos", cargo_anular: "Anular cargo",
   // Catálogo de Plataforma (CAR-204).
   precio_set: "Fijar precio de lista",
+  // Prueba gratis por empresa (CAR-222).
+  prueba_gratis_extender: "Extender prueba gratis",
 };

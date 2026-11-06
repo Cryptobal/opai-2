@@ -32,6 +32,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: el XML del CAF incluye la llave privada; un agente no lo encola en aprobaciones (CAR-143).",
   "core.integraciones.guardar_certificado_dte":
     "Solo personas: certificado .pfx cifrado del tenant; nunca sale ni se cambia por API ni MCP (ADR-027, CAR-149).",
+  "rendiciones.lotes.nomina_descargar":
+    "Solo personas: el archivo de la nómina Santander contiene cuentas bancarias de personas (Ley 21.719); lo baja una persona con sesión por /api/rendiciones/lotes/[id]/nomina y no sale por MCP. El agente ve el lote con rendiciones.lotes.obtener y lo genera con rendiciones.lotes.generar_nomina, que no devuelve cuentas (CAR-208).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
@@ -146,4 +148,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: el equipo de terreno emparejado la ejecuta sin sesión (su cookie de dispositivo es la credencial) al enviar su cola; un agente no registra hechos de terreno por el equipo. Su lectura es core.hechos_terreno.listar (CAR-78 B3).",
   "core.personas_terreno.listar":
     "Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3).",
+  "core.biometria.enrolar":
+    "Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4).",
+  "core.biometria.verificar":
+    "Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4).",
 };
