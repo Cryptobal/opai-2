@@ -4,9 +4,7 @@ import { etiquetaFlujoRemuneracion } from "./remuneracion";
 export const ETIQUETAS_FLUJO = {
   otrosIngresos: "Otros ingresos",
   otrosEgresos: "Otros egresos",
-  costoFactoring: "Costo factoring",
   cobrosSinFila: "Cobros",
-  abonoFactoring: "Abono factoring",
   pagoProveedores: "Pago a proveedores",
 } as const;
 
@@ -30,7 +28,6 @@ type MovimientoReal = {
   conciliado: boolean;
   filaCliente?: string | null;
   cobrosFactura?: CobroFacturaReal[];
-  esFactoringMerma?: boolean;
   esRemuneracion?: boolean;
   /** Pago a un documento recibido (egreso a proveedores). */
   esPagoProveedor?: boolean;
@@ -53,9 +50,6 @@ export function celdasRealesDesdeMovimientos(movs: MovimientoReal[]): CeldaRealB
     if (!m.conciliado) {
       // Lo que no está conciliado nunca se pierde ni se disfraza de otra fila: va a «Sin conciliar» (ADR-073).
       poner(m.monto > 0 ? ETIQUETAS_FLUJO.otrosIngresos : ETIQUETAS_FLUJO.otrosEgresos, abs, true);
-    } else if (m.esFactoringMerma) {
-      // El abono del factoring entra como ingreso; solo la comisión es costo.
-      poner(m.monto > 0 ? ETIQUETAS_FLUJO.abonoFactoring : ETIQUETAS_FLUJO.costoFactoring);
     } else if (m.esRemuneracion) {
       poner(etiquetaFlujoRemuneracion(m.glosa));
     } else if (m.cobrosFactura?.length) {

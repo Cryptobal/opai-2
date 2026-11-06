@@ -15,6 +15,7 @@ export function AccionesDiaPauta({
   fecha,
   celda,
   puedeEditar,
+  asistenciaActiva,
   clave,
   pendiente,
   ejecutar,
@@ -25,6 +26,8 @@ export function AccionesDiaPauta({
   fecha: string;
   celda: CeldaDia;
   puedeEditar: boolean;
+  /** Con Asistencia activa la presencia sale de las marcas legales: no se confirma ni se marca a mano. */
+  asistenciaActiva: boolean;
   clave: string;
   pendiente: boolean;
   ejecutar: EjecutarCap;
@@ -51,18 +54,22 @@ export function AccionesDiaPauta({
 
   return (
     <div className="flex flex-col gap-3 rounded-md border border-border p-3">
-      <p className="t-caption text-fg-muted">Asistencia no activada: sin marcas para cruzar.</p>
-      {celda.estado === "cubierto" && !celda.confirmado ? (
+      <p className="t-caption text-fg-muted">
+        {asistenciaActiva
+          ? "La presencia sale de las marcas de Asistencia: aquí no se confirma ni se marca a mano."
+          : "Asistencia no activada: sin marcas para cruzar."}
+      </p>
+      {!asistenciaActiva && celda.estado === "cubierto" && !celda.confirmado ? (
         <Button onClick={() => void confirmarCobertura()} cargando={pendiente}>
           Confirmar cobertura
         </Button>
       ) : null}
-      {celda.confirmado ? (
+      {!asistenciaActiva && celda.confirmado ? (
         <Button variant="secondary" onClick={onDeshacerConfirmacion} cargando={pendiente}>
           Deshacer confirmación
         </Button>
       ) : null}
-      {!celda.marcaManual ? (
+      {!asistenciaActiva && !celda.marcaManual ? (
         <>
           <Campo etiqueta="Motivo de la marca" htmlFor="marca-motivo">
             <Input

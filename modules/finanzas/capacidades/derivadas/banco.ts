@@ -89,7 +89,6 @@ export async function derivadasBanco(
       glosa: m.glosa,
       conciliado,
       filaCliente,
-      esFactoringMerma: /MERMA|FACTORING/i.test(m.glosa),
       esRemuneracion: /REMUNERACI|PREVIRED/i.test(m.glosa),
       esPagoProveedor: m.conciliaciones.some((c) => c.tipoEnlace === "documento_recibido"),
     };

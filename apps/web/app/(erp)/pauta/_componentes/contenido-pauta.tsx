@@ -34,7 +34,15 @@ function Resumen({ r }: { r: ResumenCobertura }) {
 }
 
 /** Pauta · Mensual: barra, resumen y la vista elegida (P05 todas, P01 instalación, P06 sin cubrir). */
-export function ContenidoPauta({ d, puedeEditar }: { d: DatosPauta; puedeEditar: boolean }) {
+export function ContenidoPauta({
+  d,
+  puedeEditar,
+  asistenciaActiva = false,
+}: {
+  d: DatosPauta;
+  puedeEditar: boolean;
+  asistenciaActiva?: boolean;
+}) {
   const resumen = d.mensual?.resumen ?? d.todas?.resumen;
   const sinDatos = d.mensual ? d.mensual.puestos.length === 0 : (d.todas?.instalaciones.length ?? 0) === 0;
   return (
@@ -64,7 +72,7 @@ export function ContenidoPauta({ d, puedeEditar }: { d: DatosPauta; puedeEditar:
         {d.mensual ? (
           <>
             <HojaSerie mes={d.mensual} puedeEditar={puedeEditar} />
-            <HojaExcepcion mes={d.mensual} puedeEditar={puedeEditar} diaria={d.diaria} />
+            <HojaExcepcion mes={d.mensual} puedeEditar={puedeEditar} diaria={d.diaria} asistenciaActiva={asistenciaActiva} />
             <HojaReemplazo mes={d.mensual} puedeEditar={puedeEditar} />
             <HojaRefuerzo mes={d.mensual} puedeEditar={puedeEditar} />
             <AlertasPauta

@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 
 import type { Contexto } from "@opai/capabilities";
-import { hoyChile, ingresosEsperados } from "@opai/capabilities";
+import { type AvisoFlujo, type DiferenciaFactoring, hoyChile, proyeccionDeIngresos } from "@opai/capabilities";
 
 import type { CeldaFlujo } from "../domain";
 import type { celdaSchema } from "./esquemas";
-import { FILA_COBROS_ESPERADOS } from "./filas-virtuales";
+import { FILA_COBROS_ESPERADOS, FILA_DEPOSITO_FACTORING } from "./filas-virtuales";
 import type { z } from "zod";
 
 /** Id estable (UUID v5-like) para una celda proyectada que no tiene fila propia en la base. */
@@ -29,22 +29,24 @@ const ORIGEN: Record<string, string> = {
 export async function celdasCobrosEsperados(
   ctx: Contexto,
   semanas: readonly string[],
-): Promise<{ dominio: CeldaFlujo[]; vista: z.infer<typeof celdaSchema>[] }> {
+): Promise<{ dominio: CeldaFlujo[]; vista: z.infer<typeof celdaSchema>[]; avisos: AvisoFlujo[]; diferencias: DiferenciaFactoring[] }> {
   const enRango = new Set(semanas);
-  const items = (await ingresosEsperados(ctx, hoyChile(), semanas.at(-1))).filter((i) => enRango.has(i.semanaCobro));
+  const proy = await proyeccionDeIngresos(ctx, hoyChile(), semanas.at(-1));
+  const items = proy.items.filter((i) => enRango.has(i.semanaCobro));
   const dominio: CeldaFlujo[] = [];
   const vista: z.infer<typeof celdaSchema>[] = [];
   for (const i of items) {
-    dominio.push({ filaId: FILA_COBROS_ESPERADOS, semana: i.semanaCobro, capa: "comprometido", monto: i.monto });
-    const cuando = i.fechaEsperada ? ` · cobro esperado ${i.fechaEsperada} (${ORIGEN[i.origenFecha ?? "vencimiento"]})` : ` · ${ORIGEN.programacion}`;
+    const filaId = i.origenFecha === "cesion" ? FILA_DEPOSITO_FACTORING : FILA_COBROS_ESPERADOS;
+    dominio.push({ filaId, semana: i.semanaCobro, capa: "comprometido", monto: i.monto });
+    const cuando = i.origenFecha === "cesion" ? " · depósito esperado del factor" : i.fechaEsperada ? ` · cobro esperado ${i.fechaEsperada} (${ORIGEN[i.origenFecha ?? "vencimiento"]})` : ` · ${ORIGEN.programacion}`;
     vista.push({
       id: i.documentoEmitidoId ?? idEstable(`${i.programacionId}|${i.semanaCobro}|${i.etiqueta}`),
-      filaId: FILA_COBROS_ESPERADOS,
+      filaId,
       semana: i.semanaCobro,
       capa: "comprometido",
       monto: i.monto,
       nota: `${i.etiqueta}${cuando}`,
     });
   }
-  return { dominio, vista };
+  return { dominio, vista, avisos: proy.avisos, diferencias: proy.diferenciasFactoring.filter((d) => enRango.has(d.semana)) };
 }

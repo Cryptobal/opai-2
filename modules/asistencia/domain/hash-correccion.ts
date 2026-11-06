@@ -18,6 +18,8 @@ export type RegistroCorreccion = {
   plazoHoras: number;
   venceEn: Date;
   idempotencyKey: string;
+  /** Documento de evidencia; solo entra al canon cuando existe (las correcciones previas conservan su hash). */
+  evidenciaDocumentoId?: string;
 };
 
 export const canonDeCorreccion = (r: RegistroCorreccion): string => jsonCanonico({ v: 1, ...r });

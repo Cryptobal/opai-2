@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 
-import { defineConsumidor, enviarCorreo, type Contexto } from "@opai/capabilities";
+import { ajuste, defineConsumidor, enviarCorreo, type Contexto } from "@opai/capabilities";
 
 import { codigoVerificacion, type SnapshotMarca } from "../domain";
 import { hashDeToken } from "./correcciones-enlace";
@@ -52,6 +52,8 @@ export const consumidorComprobante = defineConsumidor({
     const ya = await ctx.db.envio.count({ where: { eventoId: evento.id, plantillaEvento: "asistencia.marca.comprobante", estado: "enviado" } });
     if (ya > 0) return;
     const s = marca.snapshot as unknown as SnapshotMarca;
+    // Con empresa usuaria (EST o subcontrato) el comprobante se copia al correo del EST, si la empresa lo configuró.
+    const est = s.mandanteRazonSocial ? (await ajuste<string>(ctx, "asistencia", "correo_copia_est")).trim() : "";
     const enviado = await enviarCorreo(destino(ctx, evento.id), "asistencia.marca.comprobante", correo, {
       trabajador: { nombre: nombreCompleto(persona) },
       marca: {
@@ -66,7 +68,7 @@ export const consumidorComprobante = defineConsumidor({
       },
       empresa: { nombre: t.nombre },
       url: `${ctx.servicios.urlBase}/verificar/marca/${t.slug}/${marca.hash}`,
-    });
+    }, est ? { cc: [est] } : undefined);
     if (!enviado) throw new Error("No se pudo enviar el comprobante; se reintenta.");
   },
 });

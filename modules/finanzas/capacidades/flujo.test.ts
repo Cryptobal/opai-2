@@ -284,11 +284,11 @@ describe("finanzas.ajustes.actualizar · actualización parcial", () => {
     expect(guardado).toMatchObject({ ok: true, data: { umbral: 2_000_000, avisoActivo: false, horizonteSemanas: 12 } });
   });
 
-  it("sin ajustes guardados parte del umbral único de 15 millones y el aviso activo", async () => {
+  it("sin ajustes guardados parte del umbral único de 10 millones y el aviso activo", async () => {
     const { ctx } = nuevo({ flujoAjustes: [] });
     const r = await executeCapability(ctx, "finanzas.ajustes.obtener", {});
-    expect(r).toMatchObject({ ok: true, data: { umbral: 15_000_000, avisoActivo: true } });
+    expect(r).toMatchObject({ ok: true, data: { umbral: 10_000_000, avisoActivo: true } });
     const planilla = await executeCapability(ctx, "finanzas.planilla.obtener", { semanas: 2 });
-    expect(planilla).toMatchObject({ ok: true, data: { aviso: { umbral: 15_000_000 } } });
+    expect(planilla).toMatchObject({ ok: true, data: { aviso: { umbral: 10_000_000 } } });
   });
 });
