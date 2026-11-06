@@ -62,7 +62,8 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo desde el banco y conciliación 
     tenantId = (await e.admin.tenant.create({ data: { slug: `saldo-${randomUUID().slice(0, 8)}`, nombre: "S", vertical: "seguridad" } })).id;
     await e.admin.user.create({ data: { id: usuario, email: `u-${randomUUID().slice(0, 8)}@saldo.test`, name: "u" } });
     await ok("finanzas.ajustes.actualizar", { saldoInicial: 999, desde: mas(lunes, -56) });
-    filaCliente = (await ok<{ id: string }>("finanzas.filas.crear", { seccion: "ingreso", etiqueta: "Cliente QA", arrastre: false })).id;
+    // Los ingresos no se crean por la capacidad (solo egresos planificados): la fila se siembra directo.
+    filaCliente = (await e.admin.flujoFila.create({ data: { tenantId, seccion: "ingreso", etiqueta: "Cliente QA", arrastre: false, orden: 0, activa: true } })).id;
     const conSaldo = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco con saldo", numeroVisible: "0001", activa: true, saldoBanco: 10_000_000n } });
     const sinSaldo = await e.admin.cuentaBancaria.create({ data: { tenantId, banco: "Banco sin saldo", numeroVisible: "0002", activa: true } });
     // Saldo de ayer: un movimiento de hoy es posterior y ese saldo no lo incluye (no se resta de la apertura).
