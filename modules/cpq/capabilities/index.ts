@@ -37,7 +37,9 @@ import { cotizacionesCalcular } from "./ficha-calcular";
 import { cotizacionesFicha } from "./ficha";
 import { cotizacionesExplicar } from "./ficha-explicar";
 import { cotizacionesGet, cotizacionesList } from "./lectura";
+import { esquemasCoberturaGuardar, esquemasCoberturaList } from "./esquemas-cobertura";
 import { lineasActualizar, lineasCrear } from "./lineas";
+import { lineasAgregarEsquema } from "./lineas-esquema";
 import { lineasQuitar } from "./lineas-quitar";
 import { lineasReordenar } from "./lineas-reordenar";
 import { marcaDocumentoGet, marcaDocumentoUpdate } from "./marca-documento";
@@ -93,6 +95,9 @@ export const capacidades: readonly Capacidad[] = [
   cotizacionesEnviar,
   cotizacionesPreviewPdf,
   lineasCrear,
+  lineasAgregarEsquema,
+  esquemasCoberturaList,
+  esquemasCoberturaGuardar,
   lineasActualizar,
   lineasQuitar,
   lineasReordenar,
