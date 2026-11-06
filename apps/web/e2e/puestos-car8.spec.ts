@@ -150,15 +150,15 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     await expect(ultimo).toContainText("A Guardia retirada");
     await expect(ultimo).toContainText("Inactivo");
     await ocultarDev(page);
-    await page.screenshot({
-      path: `e2e/__screenshots__/puestos-${info.project.name}.png`,
-      fullPage: true,
-    });
+    await page.screenshot({ path: `e2e/__screenshots__/puestos-${info.project.name}.png`, fullPage: true });
     // Navegable: al abrir una posición aparece la hoja de edición.
-    await filas.first().click();
-    await expect(page.getByRole("dialog", { name: "Editar puesto" })).toBeVisible({
-      timeout: 20_000,
-    });
+    // Un clic antes de hidratar no abre la hoja diferida: se reintenta, y solo mientras no esté a la
+    // vista (abierta, la lista queda inerte).
+    const hoja = page.getByRole("dialog", { name: "Editar puesto" });
+    await expect(async () => {
+      if (!(await hoja.isVisible())) await filas.first().click({ timeout: 3_000 });
+      await expect(hoja).toBeVisible({ timeout: 8_000 });
+    }).toPass({ timeout: 40_000 });
 
     // Estado vacío: una instalación sin puestos invita a crear el primero.
     await page.goto(`/instalaciones/${vaciaId}/puestos`);

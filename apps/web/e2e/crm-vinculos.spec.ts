@@ -1,5 +1,6 @@
 import { expect as base, type Page, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 const expect = base.configure({ timeout: 30_000 });
@@ -82,20 +83,24 @@ test("CRM: segunda cuenta, roles por vínculo y principal", async ({ page }, inf
     fullPage: true,
   });
   await page.goto(contacto);
-  await cuentas
+  const desvincular = cuentas
     .getByRole("listitem")
     .filter({ hasText: nombreB })
-    .getByRole("button", { name: `Desvincular de ${nombreB}`, exact: true })
-    .click();
+    .getByRole("button", { name: `Desvincular de ${nombreB}`, exact: true });
+  // Un clic antes de hidratar se pierde y la confirmación no se abre (next dev compilando).
+  await hidratado(desvincular);
+  await desvincular.click();
   const confirmar = page.getByRole("dialog", { name: "Desvincular contacto", exact: true });
   await expect(confirmar.getByText(/Esta acción es irreversible/)).toBeVisible();
   await confirmar.getByRole("button", { name: "Cancelar", exact: true }).click();
   await expect(cuentas.getByRole("listitem")).toHaveCount(2);
-  await cuentas
+  const desvincularOtra = cuentas
     .getByRole("listitem")
     .filter({ hasText: nombreB })
-    .getByRole("button", { name: `Desvincular de ${nombreB}`, exact: true })
-    .click();
+    .getByRole("button", { name: `Desvincular de ${nombreB}`, exact: true });
+  // Un clic antes de hidratar se pierde y la confirmación no se abre (next dev compilando).
+  await hidratado(desvincularOtra);
+  await desvincularOtra.click();
   await confirmar.getByRole("button", { name: "Desvincular", exact: true }).click();
   await expect(confirmar).toHaveCount(0);
   await expect(cuentas.getByRole("listitem")).toHaveCount(1);

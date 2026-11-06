@@ -18,7 +18,8 @@ test.describe("configuración · acceso", () => {
     await expect(page.getByRole("link", { name: "Roles", exact: true })).toBeVisible();
     await captura(page, "config-usuarios", p);
     await page.goto("/configuracion/api-keys");
-    await expect(page).toHaveURL(/\/configuracion\/agentes$/);
+    // La redirección llega tras el streaming de una ruta que compila en frío.
+    await expect(page).toHaveURL(/\/configuracion\/agentes$/, { timeout: 45_000 });
     await expect(page.getByRole("link", { name: "Conectar tu IA", exact: true })).toBeVisible();
     await captura(page, "config-agentes", p);
     await page.goto("/configuracion/agentes/conectar");
@@ -47,7 +48,7 @@ test.describe("configuración · acceso", () => {
     await expect(page.getByLabel("Tope en US$")).toHaveValue("15", { timeout: 30_000 });
     await page.getByLabel("Tope en US$").fill("20");
     await page.getByRole("button", { name: "Guardar" }).first().click();
-    await expect(page.getByText("Cambios guardados")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Cambios guardados")).toBeVisible({ timeout: 60_000 });
     await captura(page, "config-agente", "ipad");
     await page.getByRole("button", { name: "Revocar key" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Revocar" }).click();

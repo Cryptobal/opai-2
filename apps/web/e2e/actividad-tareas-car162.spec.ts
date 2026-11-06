@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-162 · Actividad y tareas: registrar una tarea en un negocio, verla en la línea de tiempo y en
@@ -29,10 +30,15 @@ test.describe("Comercial · Actividad y tareas", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     const compositor = page.getByRole("region", { name: "Registrar actividad" });
     await expect(compositor).toBeVisible();
-    await compositor.getByRole("button", { name: "Tarea" }).click();
+    const tipoTarea = compositor.getByRole("button", { name: "Tarea", exact: true });
+    // El compositor se carga aparte: un clic antes de hidratar se pierde y el texto queda como nota.
+    await hidratado(tipoTarea);
+    await tipoTarea.click();
+    await expect(tipoTarea).toHaveAttribute("aria-pressed", "true");
     await compositor.getByRole("textbox").first().fill(titulo);
     await compositor.getByRole("button", { name: "Crear tarea" }).click();
-    await expect(page.getByText(titulo).first()).toBeVisible();
+    // La primera escritura de la capacidad compila su ruta en frío en el runner.
+    await expect(page.getByText(titulo).first()).toBeVisible({ timeout: 60_000 });
 
     for (const ancho of ANCHOS) {
       await page.setViewportSize({ width: ancho, height: 900 });
@@ -42,7 +48,7 @@ test.describe("Comercial · Actividad y tareas", () => {
     await page.goto("/tareas?ver=equipo");
     await expect(page.getByRole("heading", { name: /Mis tareas/ }).first()).toBeVisible();
     const fila = page.getByText(titulo).first();
-    await expect(fila).toBeVisible();
+    await expect(fila).toBeVisible({ timeout: 45_000 });
     for (const ancho of ANCHOS) {
       await page.setViewportSize({ width: ancho, height: 900 });
       await page.screenshot({ path: info.outputPath(`mis-tareas-${ancho}.png`), fullPage: true });

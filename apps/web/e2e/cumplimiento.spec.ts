@@ -51,7 +51,8 @@ test.describe("datos personales (Ley 21.719)", () => {
     for (const [ruta, pestana] of PESTANAS) {
       await page.goto(`/configuracion/cumplimiento${ruta}`);
       await expect(page.getByRole("heading", { name: "Datos personales" }).first()).toBeVisible();
-      await expect(page.getByRole("link", { name: pestana, exact: true })).toHaveAttribute(
+      // Dentro de <main>: el menú lateral también tiene un enlace «Solicitudes» (Comercial).
+      await expect(page.getByRole("main").getByRole("link", { name: pestana, exact: true })).toHaveAttribute(
         "aria-current",
         "page",
       );

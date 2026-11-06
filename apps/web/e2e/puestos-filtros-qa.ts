@@ -22,7 +22,7 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   // En dev la ficha puede volver a pintarse mientras compila: si el clic cae en ese momento no navega,
   // así que se reintenta hasta llegar a la pestaña (CAR-60).
   await expect(async () => {
-    await page.getByRole("link", { name: /Puestos/i }).first().click({ timeout: 2_000 });
+    await page.getByRole("link", { name: /Puestos/i }).filter({ visible: true }).first().click({ timeout: 2_000 });
     await expect(page).toHaveURL(new RegExp(`/instalaciones/${id}/puestos`), { timeout: 2_000 });
   }).toPass({ timeout: 30_000 });
   await expect(page).toHaveURL(/estado=activa/);
@@ -42,8 +42,11 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   // que la foto «antes» no difiera de la de «después» solo por eso (CAR-60).
   if (proyecto !== "telefono") await expect(lista.getByText("Región", { exact: true })).toBeVisible();
   const antes = proyecto === "telefono" ? "" : await lista.innerText();
-  await buscador.fill("Guardia posición 1");
-  await expect(page).toHaveURL(/pq=Guardia/);
+  // Un `fill` antes de que el buscador hidrate no llega a la URL: se repite hasta que `pq` aparece.
+  await expect(async () => {
+    await buscador.fill("Guardia posición 1");
+    await expect(page).toHaveURL(/pq=Guardia/, { timeout: 4_000 });
+  }).toPass({ timeout: 40_000 });
   await detalle.getByRole("button", { name: "Filtrar por estado" }).click();
   await page.getByRole("menuitem", { name: "Activo", exact: true }).click();
   await expect(page).toHaveURL(/pestado=activo/);
@@ -58,7 +61,7 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
       return !!contenedor && el.getBoundingClientRect().right <= contenedor.getBoundingClientRect().right;
     })).toBe(true);
   } else {
-    await page.getByRole("banner").getByRole("link", { name: "Instalaciones", exact: true }).click();
+    await page.getByRole("banner").getByRole("link", { name: "Volver a Instalaciones", exact: true }).click();
     await expect(page).toHaveURL(/\/instalaciones\?/);
     await expect(page).toHaveURL(/q=Planta/);
     await expect(page).toHaveURL(/estado=activa/);
