@@ -34,7 +34,8 @@ const porHora = (a: MarcaEfectiva, b: MarcaEfectiva) => a.hora.getTime() - b.hor
 /** Primera entrada y última salida del día; sin redondeo (art. 44). */
 export function consolidarDia(e: EntradaConsolidar): DiaConsolidado {
   const orden = [...e.marcas].sort(porHora);
-  const entrada = orden.find((m) => m.tipo === "entrada")?.hora ?? null;
+  // Una entrada marcada cuando el turno ya terminó no cuenta para ese turno: llegar después del fin no es estar presente.
+  const entrada = orden.find((m) => m.tipo === "entrada" && (!e.turno || m.hora < e.turno.fin))?.hora ?? null;
   const salida = [...orden].reverse().find((m) => m.tipo === "salida" && (!entrada || m.hora > entrada))?.hora ?? null;
   const atraso = e.turno && entrada ? atrasoSegundos(e.turno.inicio, entrada) : 0;
   const extra = e.turno && salida ? sobretiempoSegundos(e.turno.fin, salida) : 0;
