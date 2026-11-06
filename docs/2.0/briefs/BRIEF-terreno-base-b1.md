@@ -1,0 +1,35 @@
+# BRIEF · Terreno base · B1 · Identidad de terreno (CAR-78)
+
+**Sesión:** «Operaciones · Base · Code». **ADR:** 077. **Migración:** `20261108100000_core_credenciales_terreno` (aditiva, con RLS; la aplica el bot «OPAI 2.0»).
+
+## Objetivo
+
+Un trabajador ingresa al Portal Trabajador con **RUT + PIN de 6 dígitos**, cambia su PIN y queda bloqueado tras los intentos permitidos, todo auditado (criterio 1 del frente). RR. HH. asigna o restablece el PIN desde la ficha de la persona.
+
+## Qué entra
+
+- `core.credenciales_terreno` (`packages/db/prisma/schema/terreno.prisma`): hash del PIN, intentos fallidos, `bloqueado_hasta`, `pin_cambiado_en`, `debe_cambiar`, bandera `telefono_personal_habilitado` (T-04, solo la columna). RLS `tenant_isolation`. Función `SECURITY DEFINER` `core.credenciales_terreno_por_rut` (solo ids) para encontrar la empresa antes de que exista una.
+- Dominio puro `terreno-pin.ts` (formato, PIN débiles, bloqueo) con pruebas.
+- `@opai/auth`: `entrarConPin` + `pin-verificacion.ts` (evaluar sin escribir y después registrar) + endpoint **solo servidor** `abrirSesionPin` (plugin). Rechaza usuarios con MFA o rol de plataforma.
+- Capacidades `core.credenciales_terreno.{estado, asignar_pin, restablecer, cambiar_pin}` con `dryRun` e `idempotencyKey`. `asignar_pin`, `restablecer` y `cambiar_pin` son `soloPersonas` (motivo en `paridad-excepciones.ts`); `estado` va por MCP. La acción de ingreso, en `paridad-entradas.ts`.
+- Ajustes del núcleo `terreno_pin_intentos_maximos` (5) y `terreno_pin_bloqueo_minutos` (15), por empresa.
+- Pantallas: login Trabajador (RUT con formato + `TecladoPin`, componente nuevo del DS con caso en `/ds`), «Cambiar PIN» (Portal Trabajador › Más) y «PIN de terreno» en ERP › Persona › Laboral.
+
+## Decisiones de diseño
+
+1. **Sin enumeración.** El tope (5 por RUT, 30 por origen, 15 min, fallo cerrado) se aplica antes de mirar si el RUT existe. RUT inexistente, mal escrito, sin PIN, PIN incorrecto, portal no admitido y credencial bloqueada devuelven el mismo aviso.
+2. **El mismo RUT en dos empresas.** El ingreso evalúa todas las empresas candidatas sin escribir; si una coincide entra por ella y solo se cuentan fallos cuando ninguna coincidió (un trabajador de dos empresas no se bloquea una al ingresar a la otra).
+3. **El intento fallido de «Cambiar PIN» persiste** (`transaccionIndependiente`), porque el error revierte la transacción de la capacidad.
+4. **Sesión.** La del usuario vinculado a la persona, con la duración y renovación normales de Better Auth (7 días, renovada con el uso). «Sesión larga» más allá de eso es una decisión pendiente.
+5. **Cambio obligatorio del PIN asignado (Revisor B3).** Con un PIN temporal correcto NO se abre sesión: el login pide elegir el PIN propio y el cambio ocurre antes de que exista la sesión, así que el servidor lo exige.
+6. **El PIN solo vale si todas las membresías del usuario son de Trabajador o Terreno (Revisor B2),** en cualquier empresa y estado; así la sesión no puede abrir ERP ni Supervisor en otra empresa.
+7. **La huella de idempotencia no guarda secretos (Revisor B1).** Los campos `sensibles` entran a la huella como HMAC con secreto del servidor (`idempotencia-sensibles.ts`).
+
+## Criterios
+
+- Pruebas: `pnpm test` (dominio), `credenciales-terreno-db.test.ts` (capacidades; dos empresas) y `pin-verificacion-db.test.ts` (ingreso; bloqueo, ajustes, portales, dos empresas, endpoint no expuesto por HTTP).
+- Paridad: instantánea MCP e inventario regenerados.
+
+## Aviso de bloqueo (decisión de Carlos, F5, 5-nov-2026)
+
+Al pasar la credencial a «pausada» (ingreso o «Cambiar PIN») se registra `seguridad.pin.bloqueo` y se avisa **una vez por bloqueo**: campana a la persona y a RR. HH. (owner, admin, gerente; con enlace a la ficha) y correo a la persona (`core.usuario.pin_bloqueado`, transaccional). Lo hace `registrarBloqueoPin` (`packages/db/src/pin-bloqueo.ts`), llamado desde `pin-registro.ts` y `credenciales-cambiar.ts`. Mientras dura la pausa no se vuelve a contar ni a avisar, así que nadie puede inundar a nadie. Sin migración nueva. Pruebas: `pin-verificacion-db` y `credenciales-terreno-db`.

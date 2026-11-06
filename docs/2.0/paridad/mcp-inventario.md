@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 601 pares pantalla→capacidad · 542 con herramienta · 59 excepciones justificadas · 0 faltantes.
+**Resumen:** 605 pares pantalla→capacidad · 543 con herramienta · 62 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -401,6 +401,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.resumen.leer` | `pauta_resumen_leer` | existe |
 | compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.asignar_pin` | — | excepción |
+| compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.estado` | `core_credenciales_terreno_estado` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.credenciales_terreno.restablecer` | — | excepción |
 | compartido | `app/(erp)/personas/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.estructuras.efectiva` | `core_estructuras_efectiva` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
@@ -472,6 +475,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(trabajador)/trabajador/_componentes` | `core.credenciales_terreno.cambiar_pin` | — | excepción |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.arco.solicitar` | `portal_trabajador_arco_solicitar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
@@ -628,6 +632,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/candidatos-documento.ts#buscarCandidatosDocumento` | Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre. |
 | `app/_acciones/capacidad.ts#cambiarTenant` | Sesión humana: elige la empresa de la cookie; una key ya pertenece a una empresa. |
 | `app/_acciones/capacidad.ts#ejecutarCapacidad` | Pasarela de la UI: ejecuta cualquier capacidad no interna (su herramienta MCP es la de esa capacidad). |
+| `app/_acciones/ingreso-pin.ts#accionEntrarConPin` | Identidad: ingreso del Portal Trabajador con RUT + PIN (CAR-78, D-02); abre una sesión, no es una operación de negocio. Tope por RUT y origen con fallo cerrado; bloqueo y auditoría en @opai/auth. |
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
 | `app/_acciones/mfa.ts#accionDesactivarMfa` | Identidad: desactiva el segundo factor propio. |
 | `app/_acciones/mfa.ts#accionIniciarMfa` | Identidad: enrola el segundo factor propio. |
@@ -683,6 +688,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.apikeys.update` | Solo personas: cambiar alcances de una key es gobernar agentes (ADR-032). |
 | `core.aprobaciones.aprobar` | Solo personas: lo irreversible lo aprueba un humano (ADR-032). |
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
+| `core.credenciales_terreno.asignar_pin` | Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02). |
+| `core.credenciales_terreno.cambiar_pin` | Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02). |
+| `core.credenciales_terreno.restablecer` | Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02). |
 | `core.cumplimiento.consentimiento_registrar` | Solo personas: registrar el consentimiento de un titular es un acto responsable del tenant (Ley 21.719, §16.2). |
 | `core.cumplimiento.consentimiento_revocar` | Solo personas: dejar constancia de la revocación de un consentimiento es un acto responsable (Ley 21.719). |
 | `core.cumplimiento.dpa_aceptar` | Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034). |
@@ -754,6 +762,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
+| `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.consentimiento_revocar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.dpa_aceptar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |

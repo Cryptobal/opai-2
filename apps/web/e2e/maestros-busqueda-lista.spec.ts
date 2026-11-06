@@ -28,11 +28,12 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
     /** Espera al enlace visible y habilitado, lo pulsa y espera la URL esperada; reintenta si la página aún se hidrataba. */
     const pulsar = (enlace: Locator, url: (u: URL) => boolean) =>
       expect(async () => {
-        await expect(enlace).toBeVisible();
-        await expect(enlace).toBeEnabled();
-        await enlace.click();
+        // Topes cortos por intento (el `expect` global es de 15 s): así `toPass` sí reintenta.
+        await expect(enlace).toBeVisible({ timeout: 3_000 });
+        await expect(enlace).toBeEnabled({ timeout: 3_000 });
+        await enlace.click({ timeout: 3_000 });
         await page.waitForURL((u) => url(u), { timeout: 5_000 });
-      }).toPass({ timeout: 30_000 });
+      }).toPass({ timeout: 45_000 });
     /** En pantalla: el campo de búsqueda sigue con «a» y la lista sigue filtrada por ella. */
     const busquedaVisible = async (donde: string) => {
       await page.reload();

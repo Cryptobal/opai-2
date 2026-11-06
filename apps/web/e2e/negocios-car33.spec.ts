@@ -142,8 +142,12 @@ test.describe("Negocios · CAR-33", () => {
     await page.goto("/negocios");
     const tarjeta = page.getByRole("article", { name: sinInst });
     if (info.project.name === "telefono") {
-      await page.getByRole("button", { name: `Mover ${sinInst} a…` }).click();
-      await page.getByRole("menuitem", { name: "Calificado" }).click();
+      // Un clic antes de hidratar el tablero no abre el menú: se repite hasta poder elegir la etapa.
+      const etapa = page.getByRole("menuitem", { name: "Calificado" });
+      await expect(async () => {
+        if (!(await etapa.isVisible())) await page.getByRole("button", { name: `Mover ${sinInst} a…` }).click({ timeout: 3_000 });
+        await etapa.click({ timeout: 3_000 });
+      }).toPass({ timeout: 45_000 });
     } else {
       await tarjeta.dragTo(columna(page, "Calificado"));
     }

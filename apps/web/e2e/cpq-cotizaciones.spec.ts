@@ -1,8 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { entrar } from "./sesion";
-import { sinDesborde } from "./negocios-ayuda";
+import { sinDesborde, irANuevaCotizacion } from "./negocios-ayuda";
 
 const numeros: Record<string, number> = { telefono: 1, ipad: 2, desktop: 3 };
 test.setTimeout(180_000);
@@ -22,7 +23,7 @@ test("crea desde negocio abierto con vista previa y aparece en ambas listas", as
   const titulo = `Cotización ficticia ${info.project.name} ${Date.now()}`;
   await entrar(page, "cpq-gestor@example.test");
   await page.goto(`/negocios/${negocio}`);
-  await page.getByRole("link", { name: "Nueva cotización", exact: true }).click();
+  await irANuevaCotizacion(page);
   await expect(page.getByRole("button", { name: "Revisar cotización" })).toBeDisabled();
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByLabel("Válida hasta").fill("2020-01-01");
@@ -30,19 +31,20 @@ test("crea desde negocio abierto con vista previa y aparece en ambas listas", as
   await expect(page.getByText("«Válida hasta» no puede ser anterior a hoy.")).toBeVisible();
   await page.getByLabel("Válida hasta").fill("");
   await page.getByRole("button", { name: "Revisar cotización" }).click();
-  await expect(page.getByRole("status")).toContainText(/Se creará CPQ-\d{4}-\d+/);
+  await expect(page.getByText(/Se creará CPQ-\d{4}-\d+/)).toBeVisible();
   await expect(page.getByLabel("Título", { exact: true })).toBeDisabled();
   await sinDesborde(page);
   await page.screenshot({ path: info.outputPath("cpq-preview.png"), fullPage: true });
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   await page.goto("/cotizaciones");
   await expect(page.getByRole("link", { name: new RegExp(titulo) })).toBeVisible();
-  await expect(page.getByRole("link", { name: new RegExp(titulo) })).toContainText("Pendiente");
+  await expect(page.getByRole("link", { name: new RegExp(titulo) })).toContainText(/Borrador|Incompleta/);
   await sinDesborde(page);
   await page.screenshot({ path: info.outputPath("cpq-lista.png"), fullPage: true });
   await page.goto(`/negocios/${negocio}/cotizaciones`);
-  await expect(page.getByText(titulo, { exact: true }).filter({ visible: true })).toBeVisible();
+  // La pestaña del negocio antepone el código al título («CPQ-… · título»).
+  await expect(page.getByText(titulo).filter({ visible: true })).toBeVisible();
   await sinDesborde(page);
   await page.screenshot({ path: info.outputPath("cpq-negocio.png"), fullPage: true });
 });
@@ -52,7 +54,10 @@ test("desde lista elige un negocio abierto; editar invalida la vista previa", as
 }, info) => {
   await entrar(page, "cpq-gestor@example.test");
   await page.goto("/cotizaciones/nueva");
-  await page.getByRole("button", { name: "Negocio abierto", exact: true }).click();
+  const selector = page.getByRole("button", { name: "Negocio abierto", exact: true });
+  // Un clic antes de hidratar se pierde y el buscador no se abre (servidor de desarrollo compilando).
+  await hidratado(selector);
+  await selector.click();
   await page
     .getByRole("combobox")
     .last()
@@ -71,7 +76,7 @@ test("desde lista elige un negocio abierto; editar invalida la vista previa", as
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   await page.goto("/cotizaciones");
   await expect(page.getByRole("link", { name: new RegExp(titulo) })).toBeVisible();
 });
@@ -79,7 +84,7 @@ test("desde lista elige un negocio abierto; editar invalida la vista previa", as
 test("sin lectura no muestra entrada ni pestaña; lector no puede crear", async ({ page }) => {
   await entrar(page, "cpq-sin-lectura@example.test");
   await page.goto("/cotizaciones");
-  await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
+  await expect(page.getByText("No tienes acceso a esta sección")).toBeVisible();
   await expect(page.locator('nav a[href="/cotizaciones"]')).toHaveCount(0);
   await page.goto("/negocios/00000000-0000-7000-8000-000000001321");
   await expect(page.getByRole("link", { name: "Cotizaciones", exact: true })).toHaveCount(0);
@@ -89,5 +94,5 @@ test("sin lectura no muestra entrada ni pestaña; lector no puede crear", async 
   await page.goto("/cotizaciones");
   await expect(page.getByRole("link", { name: "Nueva cotización", exact: true })).toHaveCount(0);
   await page.goto("/cotizaciones/nueva");
-  await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
+  await expect(page.getByText("No tienes acceso a esta sección")).toBeVisible();
 });

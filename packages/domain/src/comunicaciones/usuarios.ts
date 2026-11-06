@@ -74,4 +74,22 @@ export const COMUNICABLES_USUARIOS: readonly EventoComunicable[] = [
       },
     },
   },
+  {
+    evento: "core.usuario.pin_bloqueado",
+    nombre: "PIN de terreno en pausa",
+    descripcion:
+      "Avisa a la persona que su ingreso con PIN quedó en pausa por intentos fallidos, para que avise si no fue ella.",
+    transaccional: true,
+    variables: [
+      v("usuario.nombre", "texto", "Ana Rojas", "Nombre de la persona."),
+      v("minutos", "numero", "15", "Minutos que dura la pausa."),
+    ],
+    plantillas: {
+      correo: {
+        asunto: "Tu ingreso con PIN quedó en pausa",
+        cuerpo:
+          "Hola {{usuario.nombre}}:\n\nHubo varios intentos fallidos con tu PIN de terreno y pausamos el ingreso con PIN por {{minutos}} minutos.\n\nSi fuiste tú, espera ese tiempo y vuelve a intentarlo. Si no fuiste tú, avisa de inmediato a RR. HH. de tu empresa para que restablezca tu PIN.",
+      },
+    },
+  },
 ];

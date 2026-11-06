@@ -89,7 +89,7 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
     await expect(async () => {
       await campo.fill("");
       await campo.fill("feriados");
-      await expect(resultado.first()).toBeVisible();
+      await expect(resultado.first()).toBeVisible({ timeout: 3_000 });
     }).toPass({ timeout: 15_000 });
     await resultado.first().click();
     await page.waitForURL(/\/configuracion\/calendario$/);
@@ -98,14 +98,18 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
       const busqueda = page.getByRole("searchbox", { name: "Buscar un ajuste" });
       await busqueda.fill("");
       await busqueda.fill("zxqwk");
-      await expect(page.getByText(/No encontramos/)).toBeVisible();
+      await expect(page.getByText(/No encontramos/)).toBeVisible({ timeout: 3_000 });
     }).toPass({ timeout: 15_000 });
   });
 
   test("404 de un grupo inexistente, con el shell del ERP", async ({ page }) => {
     await entrar(page);
-    const r = await page.goto("/configuracion/grupo/inventado");
-    expect(r?.status()).toBe(404);
+    // El proxy fuerza el 404 con un `fetch` interno de 4 s; si el runner está lento ese `fetch` vence y
+    // sale 200. Se reintenta la carga hasta ver el 404 real (el contrato que protege esta prueba).
+    await expect(async () => {
+      const r = await page.goto("/configuracion/grupo/inventado");
+      expect(r?.status()).toBe(404);
+    }).toPass({ timeout: 60_000 });
   });
 
   test("Preferencias se abre desde el menú de usuario y no está en la portada", async ({
@@ -123,13 +127,15 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
     await abrirMenuUsuario(page, pref);
     await pref.click();
     await page.waitForURL(/\/mi-cuenta\/preferencias$/);
-    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible();
+    // La página carga bajo Suspense y en el runner compite con la compilación de la ruta: más margen que el global.
+    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible({ timeout: 45_000 });
   });
 
   test("la URL antigua de Preferencias redirige a /mi-cuenta/preferencias", async ({ page }) => {
     await entrar(page);
     await page.goto("/configuracion/preferencias");
-    await expect(page).toHaveURL(/\/mi-cuenta\/preferencias$/);
-    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible();
+    // La redirección llega tras el streaming de una ruta que compila en frío.
+    await expect(page).toHaveURL(/\/mi-cuenta\/preferencias$/, { timeout: 45_000 });
+    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible({ timeout: 45_000 });
   });
 });

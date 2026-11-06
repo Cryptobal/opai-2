@@ -138,7 +138,8 @@ export function AppBar(props: AppBarProps) {
             aria-label="Buscar o ir a"
             className={cn(
               "flex h-11 min-w-0 items-center gap-2 rounded-md border border-border bg-surface px-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9",
-              props.busquedaCompacta ? "w-auto" : "w-[280px] xl:w-80",
+              // En iPad (768–1023 px) la caja más angosta deja sitio al título aun con el botón del agente a la vista.
+              props.busquedaCompacta ? "w-auto" : "w-[200px] lg:w-[280px] xl:w-80",
             )}
           >
             <Search className="size-4 flex-none" aria-hidden />

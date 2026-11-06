@@ -837,6 +837,8 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 **No cambia.** El mapa de áreas, la barra inferior, la barra lateral de escritorio y el riel de iPad, los permisos y las capacidades. **Inicio** no se implementa con esta decisión (lo pidió Carlos el 5-nov-2026 y se implementó en CAR-182 sobre las láminas 01 a 07; sin capacidades nuevas).
 
+**Adenda (5-nov-2026, decisión de Carlos, CAR-199): las áreas abiertas de «Más» se guardan en el navegador.** Las áreas que la persona abre en el menú «Más» se guardan **en el navegador**, con la clave `opai_mas_areas_<época>` (por usuario y empresa), igual que los recientes. Es una preferencia de interfaz, no un dato de negocio: **no lleva herramienta MCP** (ADR-055) y **no pasa a preferencia de servidor**. Queda confirmado; si algún día se quiere que siga a la persona entre dispositivos, es una decisión nueva.
+
 ## ADR-047 · Especificación funcional aprobada antes de diseñar o construir un módulo
 
 **Fecha:** 23-oct-2026 · **Estado:** vigente (pedido de Carlos, 23-oct) · Completa ADR-012 y ADR-043.
@@ -1486,3 +1488,31 @@ identidad de servicio en main.
 - Queda para «Comercial · Code» (PR propio): `patron_id` en las líneas de CPQ y el sueldo cotizado como borrador de capa.
 
 **Consecuencias.** Asistencia (CAR-89) lee `core.turnos_esperados.listar` y no recalcula. Nómina toma los días trabajados de Asistencia (ADR-048), no de aquí. Un cambio en las horas o el horario del puesto se refleja en el siguiente evento de Pauta o en el trabajo diario. Capacidades: `core.turnos_esperados.listar` (lectura, alcance ADR-022, auditada) y `core.turnos_esperados.regenerar` (`dryRun` e `idempotencyKey`).
+
+---
+
+## ADR-079 · Asistencia legal: identidad de terreno, canal híbrido y dispositivos
+
+**Fecha:** 5-nov-2026 · **Estado:** vigente (D-03 y D-04 pendientes) · **Autor:** Carlos (decisiones del chat «Operaciones · Auditoría», 5-nov-2026 12:37 CLT), registradas por «Operaciones · Base · Code» en CAR-78. · Completa ADR-023, ADR-033 y ADR-044; cierra D1, D2 y D4 del export de Terreno.
+
+**Decisiones de Carlos (5-nov-2026, 12:37 CLT).**
+
+- **D-01 · Canal híbrido.** El kiosco emparejado en la instalación es el canal principal de marcación. El teléfono personal del trabajador se habilita **por persona** y exige consentimiento escrito y costo a cargo del empleador. El supervisor usa Terreno en modo supervisor y su teléfono; no hay una app Supervisor aparte.
+- **D-02 · Identificación.** La principal es el rostro con prueba de vida. La secundaria es **RUT + PIN de 6 dígitos**, siempre disponible y sin biometría (Res. Ex. 38, art. 57).
+- **D-12 · Paralelismo.** Dos sesiones de Operaciones trabajan en paralelo: «Operaciones · Base · Code» (identidad de terreno, dispositivos, portal Terreno, cola sin conexión y adaptador de biometría) y «Asistencia · Núcleo legal · Code» (marcas, turnos esperados y reportes DT). El proveedor real de rostro lo construye después «Asistencia · Face ID · Code».
+- Fuera de alcance por decisión de Carlos: alertas de cobertura con oleadas por WhatsApp.
+
+**Decisión de arquitectura.**
+
+1. **Del núcleo, no de un módulo:** la identidad de terreno (RUT + PIN), los dispositivos emparejados a una instalación, la cola sin conexión y el adaptador de biometría. Asistencia, Rondas, Libro de novedades y Control de acceso los consumen; ninguno crea los suyos.
+2. **Un solo service worker**, el del núcleo (`apps/web/public/sw.js`). Los módulos no registran otro: declaran qué capacidades aceptan cola.
+3. **Biometría por empresa y 1:1.** Cada empresa tiene su colección; la verificación es siempre contra la referencia de una persona (1:1), nunca una búsqueda 1:N sobre la colección. La referencia del proveedor se guarda cifrada.
+4. **PIN (B1).** El PIN de 6 dígitos solo existe como hash scrypt (el formato de las contraseñas de Better Auth). RR. HH. lo asigna o lo restablece (con vista previa; el temporal se muestra una vez) y la persona debe cambiarlo en su primer ingreso. Rechaza los PIN más adivinables (repetidos, secuencias, últimos dígitos del RUT). Bloqueo por credencial tras 5 intentos durante 15 minutos (ajustes `terreno_pin_intentos_maximos` y `terreno_pin_bloqueo_minutos`, por empresa), más rate limit con fallo cerrado por RUT y por origen. La respuesta es la misma exista o no el RUT. **El PIN solo abre Trabajador y Terreno:** no entra quien tenga, en cualquier empresa, membresías con otros portales (ERP, Supervisor), ni quien tenga segundo factor activo o rol de plataforma; ellos usan su correo. Con un PIN temporal de RR. HH. no se abre sesión hasta que la persona elige el suyo. La sesión es una sesión normal de Better Auth del usuario vinculado a la persona. Ingreso, intento fallido y bloqueo quedan en la cadena `seguridad` de la auditoría global (`seguridad.pin.*`, sin IP en claro). **Aviso de bloqueo (decisión de Carlos del 5-nov-2026, ~21:44 CLT):** se mantiene el bloqueo de 15 minutos, pero al bloquearse se avisa una sola vez por bloqueo a la persona (campana y correo, con «si no fuiste tú, avisa a RR. HH.») y a RR. HH. de la empresa (owner, admin y gerente; campana con enlace a la ficha para restablecer el PIN), y queda el evento `seguridad.pin.bloqueo`; mientras dura la pausa no se cuenta ni se avisa de nuevo.
+5. **Teléfono personal (T-04, preparación).** `core.credenciales_terreno.telefono_personal_habilitado` existe, apagada por defecto. El flujo de consentimiento y de costo va con Face ID.
+
+**Pendientes de decisión de Carlos (no se asumen).**
+
+- **D-03** · Prueba de vida obligatoria desde la primera versión con rostro.
+- **D-04** · Guardar solo la plantilla del rostro, sin foto de referencia.
+
+Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría (B4) soporta ambos casos sin cambiar.

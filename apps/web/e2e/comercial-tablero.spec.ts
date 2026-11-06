@@ -67,8 +67,22 @@ test.describe("Comercial · tablero y hojas", () => {
     // Mover: arrastrando en iPad y escritorio; con «Mover a…» en el teléfono.
     await page.goto("/negocios");
     const tarjeta = page.getByRole("article", { name: titulo });
-    if (info.project.name === "telefono") await moverA(page, titulo, "Calificado");
-    else await tarjeta.dragTo(columna(page, "Calificado"));
+    if (info.project.name === "telefono") {
+      // Un clic antes de hidratar el tablero no mueve nada: se repite (mover a la misma etapa es inocuo).
+      await expect(async () => {
+        await page.keyboard.press("Escape");
+        await moverA(page, titulo, "Calificado");
+        await expect(columna(page, "Calificado").getByRole("article", { name: titulo })).toBeAttached({
+          timeout: 8_000,
+        });
+      }).toPass({ timeout: 90_000 });
+    } else {
+      // Igual que en teléfono: un arrastre antes de hidratar el tablero se pierde; soltar en la misma etapa es inocuo.
+      await expect(async () => {
+        await tarjeta.dragTo(columna(page, "Calificado"), { timeout: 8_000 });
+        await expect(columna(page, "Calificado").getByRole("article", { name: titulo })).toBeAttached({ timeout: 8_000 });
+      }).toPass({ timeout: 90_000 });
+    }
     await expect(columna(page, "Calificado").getByRole("article", { name: titulo })).toBeAttached();
     await foto("tablero-movido");
 
@@ -110,7 +124,8 @@ test.describe("Comercial · tablero y hojas", () => {
 
   test("editar una etapa del embudo", async ({ page }, info) => {
     await entrar(page);
-    await page.goto("/configuracion/modulo/comercial");
+    // Configuración del módulo abre en «Importar 1.0»; el embudo es la sección `embudo`.
+    await page.goto("/configuracion/modulo/comercial?seccion=embudo");
     const fila = page.getByRole("listitem", { name: "Calificado" });
     await expect(fila).toBeVisible();
     await page.screenshot({ path: info.outputPath("config-embudo.png"), fullPage: true });
