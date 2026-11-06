@@ -1,6 +1,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
+import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { telefono } from "@/lib/fechas";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
@@ -21,8 +22,12 @@ export async function SeccionContactoLaboral({ personaId }: { personaId: string 
   const r = await ejecutarComoUsuario<Laboral>("erp", "core.personas.laboral_ver", { id: personaId });
   if (!r.ok) return null;
   const c = r.data.contacto;
+  const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
   return (
-    <SeccionTarjeta titulo="Contacto laboral">
+    <SeccionTarjeta
+      titulo="Contacto laboral"
+      {...(puede ? { accion: <BotonEditarSeccion seccion="contacto-laboral" /> } : {})}
+    >
       <ParesGrid
         items={[
           { etiqueta: "Estado civil", valor: c?.estadoCivil },
@@ -38,6 +43,19 @@ export async function SeccionContactoLaboral({ personaId }: { personaId: string 
           },
         ]}
       />
+      {puede ? (
+        <HojaEditarSeccion
+          seccion="contacto-laboral"
+          personaId={personaId}
+          inicial={{
+            estadoCivil: c?.estadoCivil,
+            telefonoSecundario: c?.telefonoSecundario,
+            emergenciaNombre: c?.emergenciaNombre,
+            emergenciaRelacion: c?.emergenciaRelacion,
+            emergenciaTelefono: c?.emergenciaTelefono,
+          }}
+        />
+      ) : null}
     </SeccionTarjeta>
   );
 }
