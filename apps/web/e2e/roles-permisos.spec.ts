@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process";
 
 import { type Browser, expect, type Page, test, type TestInfo } from "@playwright/test";
 
+import { diagnosticarSiFalla } from "./diagnostico";
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // Configuración → Usuarios y permisos, bloque 6 del Brief 07c (CAR-37): roles personalizados, matriz
@@ -48,6 +50,7 @@ async function comoUsuario(browser: Browser, ruta: string) {
 
 test.describe("configuración · roles y permisos (CAR-37)", () => {
   test.skip(!E2E_PASSWORD, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  test.afterEach(({ page }, info) => diagnosticarSiFalla(page, info));
   test.beforeEach(({ page }) => page.emulateMedia({ reducedMotion: "reduce" }));
 
   test("pestaña Roles, equivalencia 1.0 y matriz de un rol del sistema", async ({ page }, info) => {
@@ -68,7 +71,7 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
   });
 
   test("crear un rol, asignarlo con una excepción y archivarlo", async ({ page, browser }, info) => {
-    test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
+    test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)"); test.setTimeout(240_000); // Varios pasos con rutas en frío: pasa de los 90 s.
     execFileSync("pnpm", ["--filter", "@opai/auth", "exec", "tsx", "scripts/seed-roles-e2e.ts"], {
       cwd: new URL("../../..", import.meta.url),
       env: { ...process.env, E2E_PASSWORD: E2E_PASSWORD ?? "" },
@@ -80,13 +83,15 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
     // 1. Nuevo rol con permisos de lectura (A3).
     await page.goto("/configuracion/usuarios/roles?nuevo=1");
     const nuevo = hoja(page, "Nuevo rol");
+    // Con el formulario sin hidratar, lo que se escribe y marca se pierde al hidratar (y el aviso no llega).
+    await hidratado(nuevo.getByRole("button", { name: "Crear rol" }));
     await nuevo.getByLabel("Nombre del rol").fill(nombre);
     await nuevo.getByLabel("Descripción (opcional)").fill("Monitoreo de instalaciones");
-    for (const p of ["Ver Instalaciones", "Ver Personas", "Ver Documentos"])
-      await nuevo.getByRole("checkbox", { name: p }).click();
+    for (const p of ["Ver Instalaciones", "Ver Personas", "Ver Documentos"]) await nuevo.getByRole("checkbox", { name: p, exact: true }).click();
     await captura(page, "nuevo", info);
     await nuevo.getByRole("button", { name: "Crear rol" }).click();
-    await expect(page.getByText("Rol creado")).toBeVisible();
+    // La primera escritura de la capacidad compila su ruta en frío en el runner (el aviso puede tardar más de 15 s).
+    await expect(page.getByText("Rol creado")).toBeVisible({ timeout: 60_000 });
 
     // 2. Editar la matriz: contador de cambios y guardar (A2).
     const rol = hoja(page, nombre);

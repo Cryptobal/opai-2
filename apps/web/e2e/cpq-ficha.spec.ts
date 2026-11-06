@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 import { entrar } from "./sesion";
-import { sinDesborde } from "./negocios-ayuda";
+import { sinDesborde, irANuevaCotizacion } from "./negocios-ayuda";
 
 const numeros: Record<string, number> = { telefono: 1, ipad: 2, desktop: 3 };
 test.setTimeout(180_000);
@@ -19,15 +19,18 @@ test("ficha CPQ muestra resumen en español y patrón lista+ficha", async ({ pag
   const negocio = `00000000-0000-7000-8000-00000000132${numero}`;
   await entrar(page, "cpq-gestor@example.test");
   await page.goto(`/negocios/${negocio}`);
-  await page.getByRole("link", { name: "Nueva cotización", exact: true }).click();
+  await irANuevaCotizacion(page);
   const titulo = `Ficha visual ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
-  await expect(page.getByRole("heading", { level: 1, name: /^CPQ-/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
-  await expect(page.getByText("Mano de obra", { exact: true })).toBeVisible();
+  await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
+  // Ficha por pasos (#325): el código es el título (en teléfono lo muestra el patrón) y el resumen es una región.
+  await expect(page.getByRole("heading", { name: /^CPQ-/ }).first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "Resumen de la cotización" })).toBeVisible();
+  // El gestor sin permiso de costos no ve el bloque de costos (#325): aviso en español, sin claves técnicas.
+  await page.getByRole("button", { name: /Costos y margen/ }).click();
+  await expect(page.getByText("No tienes permiso para ver costos ni margen.")).toBeVisible();
   await expect(page.getByText("mano_obra")).toHaveCount(0);
   await sinDesborde(page);
   await page.screenshot({
@@ -41,22 +44,27 @@ test("con costos pendientes no ofrece Dejar lista y avisa no enviable", async ({
   const negocio = `00000000-0000-7000-8000-00000000132${numero}`;
   await entrar(page, "cpq-gestor@example.test");
   await page.goto(`/negocios/${negocio}`);
-  await page.getByRole("link", { name: "Nueva cotización", exact: true }).click();
+  await irANuevaCotizacion(page);
   const titulo = `Error costos ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Título", { exact: true }).fill(titulo);
   await page.getByRole("button", { name: "Revisar cotización" }).click();
   await page.getByRole("button", { name: "Confirmar creación" }).click();
-  await page.waitForURL(/\/cotizaciones\/[^/?#]+$/);
+  await page.waitForURL(/\/cotizaciones\/(?!nueva)[^/?#]+$/);
   await page.getByRole("button", { name: "Agregar puesto" }).click();
   await page.getByRole("button", { name: "Agregar", exact: true }).click();
-  await expect(page.getByText("No enviable")).toBeVisible({ timeout: 15_000 });
+  // Sin puestos la cotización ya es «Incompleta»: lo que prueba el guardado es que la hoja se cierre
+  // (abierta, el resto de la página queda aria-hidden y los botones no se encuentran por rol). En el
+  // runner el primer guardado compila su ruta y tarda.
+  await expect(page.getByRole("dialog")).toHaveCount(0, { timeout: 60_000 });
+  // Con el puesto sin costear la cotización queda «Incompleta»: la única acción es completar los datos.
+  await expect(page.getByText("Incompleta", { exact: true }).filter({ visible: true }).first()).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("button", { name: "Completar los datos" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Dejar lista" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Pedir aprobación" })).toHaveCount(0);
-  if (info.project.name === "telefono") {
-    await page.getByRole("button", { name: "Más acciones de la cotización" }).click();
-    await expect(page.getByRole("menuitem", { name: "Vista previa PDF" })).toBeVisible();
-  } else {
-    await expect(page.getByRole("button", { name: "Vista previa PDF" })).toBeVisible();
-  }
+  // «Vista previa PDF» vive en el menú «Más acciones» en todos los anchos.
+  await page.getByRole("button", { name: "Más acciones de la cotización" }).click();
+  await expect(page.getByRole("menuitem", { name: "Vista previa PDF" })).toBeVisible();
   await sinDesborde(page);
 });

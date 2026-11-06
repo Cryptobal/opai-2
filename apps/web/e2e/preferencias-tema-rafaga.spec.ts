@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { hidratado } from "./hidratacion";
 import { entrar } from "./sesion";
 import { ocultarIndicadorDev } from "./indicador-dev";
 
@@ -14,11 +15,18 @@ async function irAPreferencias(page: Page) {
   const tema = page.getByRole("radiogroup", { name: "Tema" });
   // Hidratado: los radios del tema dejan de estar deshabilitados.
   await expect(tema.getByRole("radio", { name: "Claro", exact: true })).toBeEnabled();
+  // Un clic antes de que React hidrate el radio no guarda nada (y el tema no cambia).
+  await hidratado(tema.getByRole("radio", { name: "Claro", exact: true }));
   return tema;
 }
 
 test("ráfaga de tema: gana el último clic y el servidor lo guarda", async ({ page }) => {
   const tema = await irAPreferencias(page);
+  // Marca el último guardado terminado: `networkidle` se cumple en el hueco entre dos guardados lentos.
+  let ultimoGuardado = 0;
+  page.on("response", (r) => {
+    if (r.request().method() === "POST" && (r.request().postData() ?? "").includes("preferencias_tema")) ultimoGuardado = Date.now();
+  });
   // Tres clics seguidos terminando en Oscuro; el DS aplica el tema al instante (data-theme en <html>).
   await tema.getByRole("radio", { name: "Claro", exact: true }).click();
   await tema.getByRole("radio", { name: /^Sistema/ }).click();
@@ -26,7 +34,7 @@ test("ráfaga de tema: gana el último clic y el servidor lo guarda", async ({ p
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   // Tras asentarse los guardados y recargar, el radio marcado viene del valor del servidor: se guardó
   // el último (Oscuro), no un clic anterior.
-  await page.waitForLoadState("networkidle");
+  await expect.poll(() => ultimoGuardado > 0 && Date.now() - ultimoGuardado > 2_000, { timeout: 60_000 }).toBe(true);
   await page.reload();
   await expect(
     page.getByRole("radiogroup", { name: "Tema" }).getByRole("radio", { name: "Oscuro", exact: true }),

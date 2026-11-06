@@ -1,3 +1,5 @@
+import { execFileSync } from "node:child_process";
+
 import { expect, type Page, test } from "@playwright/test";
 
 import { hidratado } from "./hidratacion";
@@ -6,6 +8,23 @@ import { entrar } from "./sesion";
 // Regresión de CAR-182 en el SHELL REAL (no solo /ds): la hoja «Más» del teléfono trae su campo de
 // búsqueda y los recientes, y Inicio muestra sus bloques. Si alguien corta la cadena de props
 // marco-shell → AppShell → BottomNav → MenuMas → ContenidoMas, estas pruebas fallan.
+
+// «Inicio con un rol limitado» entra con `nav-deniega@opai.cl`, que crea `seed-nav-permisos-e2e` (el
+// mismo que usa navegacion-permisos). Sin sembrarlo aquí, en una base limpia esta prueba corre antes
+// que esa (orden alfabético) y el login nunca navega (CAR-199).
+test.beforeAll(() => {
+  const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
+  if (!password) throw new Error("Falta contraseña E2E");
+  execFileSync(
+    "pnpm",
+    ["--filter", "@opai/auth", "exec", "tsx", "scripts/seed-nav-permisos-e2e.ts"],
+    {
+      cwd: new URL("../../..", import.meta.url),
+      env: { ...process.env, E2E_PASSWORD: password },
+      stdio: "inherit",
+    },
+  );
+});
 
 async function abrirMas(page: Page) {
   const boton = page.getByRole("button", { name: "Más opciones" });

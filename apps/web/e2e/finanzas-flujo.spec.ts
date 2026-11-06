@@ -11,7 +11,12 @@ test.describe("Finanzas · flujo de caja", () => {
     await entrar(page);
     await page.goto("/finanzas/flujo");
     await expect(page.getByRole("heading", { name: "Flujo de caja" })).toBeVisible();
-    await hidratado(page.locator("table").first());
+    // En una base sin filas del flujo (CI) no hay planilla, solo el aviso «Sin filas en el flujo»: la
+    // ausencia de scroll horizontal se mide igual, y la hidratación solo se espera si hay tabla.
+    const tabla = page.locator("table").first();
+    const sinFilas = page.getByText("Sin filas en el flujo");
+    await expect(tabla.or(sinFilas).first()).toBeVisible();
+    if (await tabla.count()) await hidratado(tabla);
     const ancho = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

@@ -39,7 +39,11 @@ test("la cabecera y el riel marcan el destino durante una navegación lenta", as
     await hidratado(area);
     await area.click();
   }
-  await menu.getByRole("link", { name: /^Personas$/ }).first().click();
+  // El clic durante la hidratación se cuelga (carrera prefetch↔navegación): se espera a que el enlace
+  // hidrate. En CI, más lenta, los 500 ms de arriba no bastan.
+  const destino = menu.getByRole("link", { name: /^Personas$/ }).first();
+  await hidratado(destino);
+  await destino.click();
 
   // Señal de pendiente inmediata (antes de que llegue el contenido): el ítem del riel/menú marca
   // Personas de inmediato (estado optimista), aún sin contenido nuevo.
