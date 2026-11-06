@@ -70,8 +70,9 @@ export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
         state={state}
         titulo="Folios"
         sinCabecera
+        // Con folios cargados el botón va arriba; sin ninguno lo ofrece el estado vacío (no se duplica).
         accionPrincipal={
-          puedeCargar ? (
+          puedeCargar && items.length > 0 ? (
             <Button variant="primary" onClick={() => setSubirAbierta(true)}>
               <Plus className="size-4" aria-hidden />
               Subir CAF
