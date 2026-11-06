@@ -44,6 +44,10 @@
     {
       "archivo": "app/correccion/[slug]/[token]/ver.ts",
       "motivo": "Respuesta pública a una corrección de marca (sin sesión): resuelve el tenant por slug con tenantPorSlug() y ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) con el token del correo personal como credencial y el RUT como confirmación, con rate limit que falla cerrado."
+    },
+    {
+      "archivo": "app/_acciones/dispositivos.ts",
+      "motivo": "Terreno › Emparejar ocurre antes de existir sesión o empresa: canjea el código de 6 caracteres por el token del dispositivo con la operación con nombre emparejarDispositivo (función SECURITY DEFINER); tope por origen con fallo cerrado (CAR-78 B2)."
     }
   ],
   "internasPermitidas": [
@@ -108,6 +112,10 @@
     {
       "archivo": "lib/metricas-navegacion.ts",
       "motivo": "Instrumentación de rendimiento (ADR-045): registra en @opai/db el observador que cuenta las consultas a Neon por request; no es una pantalla."
+    },
+    {
+      "archivo": "lib/dispositivo.ts",
+      "motivo": "Reconoce al dispositivo de terreno por su token (HMAC) en cada petición con dispositivoPorToken; el dispositivo no tiene sesión de usuario (CAR-78 B2)."
     }
   ]
 }

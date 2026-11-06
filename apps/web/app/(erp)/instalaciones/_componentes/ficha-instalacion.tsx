@@ -15,7 +15,7 @@ import { accionesInstalacion } from "./acciones-instalacion";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 export type TabInstalacion =
-  "resumen" | "puestos" | "sueldo" | "negocios" | "rondas" | "documentos" | "actividad";
+  "resumen" | "puestos" | "sueldo" | "negocios" | "rondas" | "dispositivos" | "documentos" | "actividad";
 
 /** Ficha de instalación (07/08): estado y vigencia, nombre, cuenta; tabs con "Personas" deshabilitada. */
 export function FichaInstalacion(p: {
@@ -112,6 +112,11 @@ export function FichaInstalacion(p: {
             etiqueta: p.persona,
             href: base,
             deshabilitada: "Disponible con Operaciones",
+          },
+          {
+            id: "dispositivos",
+            etiqueta: "Dispositivos",
+            href: conFiltrosInstalaciones(`${base}/dispositivos`, p.parametros),
           },
           {
             id: "documentos",

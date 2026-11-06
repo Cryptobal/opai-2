@@ -1,1 +1,4 @@
-export { capacidadesCredencialesTerreno } from "./credenciales";
+import { capacidadesDispositivos } from "./dispositivos";
+import { capacidadesCredencialesTerreno } from "./credenciales";
+
+export const capacidadesTerreno = [...capacidadesCredencialesTerreno, ...capacidadesDispositivos];

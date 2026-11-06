@@ -68,6 +68,10 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
   "app/_acciones/ingreso-pin.ts#accionEntrarConPin":
     "Identidad: ingreso del Portal Trabajador con RUT + PIN (CAR-78, D-02); abre una sesión, no es una operación de negocio. Tope por RUT y origen con fallo cerrado; bloqueo y auditoría en @opai/auth.",
+  "app/_acciones/dispositivos.ts#accionEmparejar":
+    "Identidad de dispositivo: Terreno › Emparejar canjea el código de 6 caracteres (core.dispositivos.generar_codigo) por el token del equipo (CAR-78 B2); sin sesión, tope por origen con fallo cerrado.",
+  "app/_acciones/dispositivos.ts#qrDeEmparejamiento":
+    "Presentación: dibuja el QR del código que ya generó core.dispositivos.generar_codigo; no lee ni escribe datos.",
   "app/api/t/[slug]/solicitudes/route.ts":
     "Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2).",
   "app/api/t/[slug]/banco/web4leads/route.ts":

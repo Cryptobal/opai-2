@@ -32,3 +32,48 @@ model CredencialTerreno {
   @@map("credenciales_terreno")
   @@schema("core")
 }
+
+/// Dispositivo de terreno emparejado a UNA instalación (CAR-78 · B2, D-01: el kiosco es el canal
+/// principal). Es un principal propio: se identifica con un token aleatorio de 256 bits guardado solo como
+/// HMAC. Revocarlo corta el acceso en su siguiente petición.
+model Dispositivo {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  instalacionId  String    @map("instalacion_id") @db.Uuid
+  /// Identificador visible (DSP-0042), correlativo por empresa.
+  identificador  String
+  nombre         String?
+  /// "activo" | "revocado"
+  estado         String    @default("activo")
+  tokenHash      String    @unique @map("token_hash")
+  emparejadoEn   DateTime  @default(now()) @map("emparejado_en") @db.Timestamptz(6)
+  emparejadoPor  String?   @map("emparejado_por") @db.Uuid
+  revocadoEn     DateTime? @map("revocado_en") @db.Timestamptz(6)
+  revocadoPor    String?   @map("revocado_por") @db.Uuid
+  ultimoContacto DateTime? @map("ultimo_contacto") @db.Timestamptz(6)
+  versionApp     String?   @map("version_app")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, identificador])
+  @@index([tenantId, instalacionId])
+  @@map("dispositivos")
+  @@schema("core")
+}
+
+/// Código de 6 caracteres que genera el ERP para emparejar un dispositivo: vence a los 10 minutos y es de
+/// un solo uso. Solo se guarda su HMAC.
+model CodigoEmparejamiento {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  instalacionId String    @map("instalacion_id") @db.Uuid
+  codigoHash    String    @unique @map("codigo_hash")
+  venceEn       DateTime  @map("vence_en") @db.Timestamptz(6)
+  usadoEn       DateTime? @map("usado_en") @db.Timestamptz(6)
+  creadoPor     String?   @map("creado_por") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, instalacionId])
+  @@map("codigos_emparejamiento")
+  @@schema("core")
+}
