@@ -1,6 +1,7 @@
 import { Cabecera, Forbidden } from "@opai/ds";
 
 import { CargaFallida } from "@/lib/carga";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { identidadActual } from "@/lib/servidor";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -26,19 +27,23 @@ export function PaginaMisRendiciones({
       titulo="Rendiciones"
       ruta={`${base}${def.segmento}`}
       cargar={async () => {
+        const i = portal === "erp" ? await identidadActual() : null;
+        const puede = i ? puedeDeIdentidad(i) : () => false;
+        const accesos = { aprobar: puede("rendiciones:aprobar"), pagar: puede("rendiciones:pagar") };
         try {
-          return { todas: await cargarMias(portal), empresa: null, admin: null };
+          return { todas: await cargarMias(portal), empresa: null, admin: null, accesos };
         } catch (e) {
           if (!(e instanceof CargaFallida) || e.code !== "FORBIDDEN") throw e;
           return {
             todas: [],
             empresa: (await identidadActual())?.actual?.tenant.nombre ?? "tu empresa",
             admin: await cargarAdministrador(portal),
+            accesos,
           };
         }
       }}
     >
-      {({ todas, empresa, admin }) => {
+      {({ todas, empresa, admin, accesos }) => {
         if (empresa)
           return (
             <Forbidden
@@ -52,9 +57,13 @@ export function PaginaMisRendiciones({
           );
         const items = todas.filter((r) => r.estado === def.estado);
         const nueva = (
-          <EnlaceBoton href={`${base}/nueva`} className="hidden md:inline-flex">
-            Nueva rendición
-          </EnlaceBoton>
+          <>
+            {accesos.aprobar ? <EnlaceBoton href="/rendiciones/bandeja" variante="secondary">Bandeja del aprobador</EnlaceBoton> : null}
+            {accesos.pagar ? <EnlaceBoton href="/rendiciones/lotes" variante="secondary">Lotes de pago</EnlaceBoton> : null}
+            <EnlaceBoton href={`${base}/nueva`} className="hidden md:inline-flex">
+              Nueva rendición
+            </EnlaceBoton>
+          </>
         );
         // Teléfono: botón flotante abajo a la derecha, como en el diseño aprobado.
         const flotante = (
