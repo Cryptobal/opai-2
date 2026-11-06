@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  agruparPorBeneficiario, codigoLote, COLUMNAS_NOMINA, filasDeNomina, puedeAprobarLote, puedeTransitarLote,
-  sinRendicionPropia, textoPlano, totalLote, totalNomina, validarFilasNomina, validarSeleccion, type FilaNomina,
+  agruparPorBeneficiario, codigoLote, codigoSbif, COLUMNAS_NOMINA, filasDeNomina, HOJA_NOMINA, nombreArchivoNomina, puedeAprobarLote,
+  puedeTransitarLote, sinRendicionPropia, totalLote, totalNomina, validarFilasNomina, validarSeleccion, type FilaNomina,
 } from "./index";
 
 const r = (id: string, extra = {}) => ({ id, estado: "aprobada", montoTotal: 1000, solicitanteId: "u1", conCuenta: true, ...extra });
@@ -66,33 +66,39 @@ describe("lote de pago · segregación", () => {
 });
 
 const fila = (extra: Partial<FilaNomina> = {}): FilaNomina => ({
-  cuentaDestino: "00012345678", codigoBanco: "037", rut: "11.111.111-1", nombre: "Ana Núñez Pérez", montoClp: 18_000, correo: "ana@ejemplo.test", ...extra,
+  cuentaDestino: "12345678901", codigoBanco: "037", rut: "11.111.111-1", nombre: "Pérez Gómez Ana", montoClp: 45_000, correo: "ana.perez.demo@example.com", ...extra,
 });
-const par = { cuentaOrigen: "000-0412-9", glosa: "Rendiciones LP-7" };
+const par = { cuentaOrigen: "99998888", glosa: "LOTE-2026-0099" };
 
-describe("nómina Santander (estructura provisoria)", () => {
-  it("tiene 13 columnas y cada fila las completa", () => {
-    expect(COLUMNAS_NOMINA).toHaveLength(13);
+describe("nómina Santander (formato confirmado por Carlos, 6-nov-2026)", () => {
+  it("13 columnas con los encabezados exactos, en orden", () => {
+    expect(COLUMNAS_NOMINA).toEqual([
+      "Cuenta origen", "Moneda origen", "Cuenta destino", "Moneda destino", "Codigo banco destino", "RUT beneficiario",
+      "Nombre beneficiario", "Monto transferencia", "Glosa personalizada transferencia", "Correo beneficiario",
+      "Mensaje correo beneficiario", "Glosa cartola originador", "Glosa cartola beneficiario",
+    ]);
+    expect(HOJA_NOMINA).toBe("Santander");
+    expect(nombreArchivoNomina("LP-7")).toBe("LP-7-santander.xlsx");
+  });
+  it("reproduce la fila del ejemplo ficticio: sin relleno, con tildes y K, L y M vacías", () => {
     const [f] = filasDeNomina([fila()], par);
+    expect(f).toEqual(["99998888", "CLP", "12345678901", "CLP", "037", "11.111.111-1", "Pérez Gómez Ana", 45000, "LOTE-2026-0099", "ana.perez.demo@example.com", "", "", ""]);
     expect(f).toHaveLength(13);
-    expect(f?.[7]).toBe(18_000);
-    expect(f?.[1]).toBe("CLP");
   });
-  it("normaliza caracteres y recorta largos", () => {
-    expect(textoPlano("Ñandú Ópera — «x»", 45)).toBe("Nandu Opera x");
-    expect(textoPlano("a".repeat(100), 20)).toHaveLength(20);
-    const [f] = filasDeNomina([fila({ nombre: "Ñ".repeat(80) })], par);
-    expect(String(f?.[6]).length).toBeLessThanOrEqual(45);
+  it("códigos SBIF de la lista de Carlos, por nombre o por código", () => {
+    const casos: [string, string][] = [["Banco de Chile", "001"], ["BancoEstado", "012"], ["Banco Estado", "012"], ["Scotiabank", "014"], ["BCI", "016"], ["MACH", "016"], ["Santander", "037"], ["Itaú", "039"], ["Banco Falabella", "051"], ["Mercado Pago", "299"], ["Edwards-Citi", "504"], ["Coopeuch", "672"], ["Tenpo", "730"], ["Prex", "743"], ["037", "037"]];
+    for (const [banco, sbif] of casos) expect(codigoSbif(banco)).toBe(sbif);
+    expect(codigoSbif("Banco Inexistente")).toBeNull();
+    expect(codigoSbif("999")).toBeNull();
+    expect(codigoSbif(null)).toBeNull();
   });
-  it("valida RUT, cuenta, banco, monto, nombre y cuenta de origen", () => {
+  it("valida y dice qué le falta a cada beneficiario, incluido el dígito verificador y el monto", () => {
     expect(validarFilasNomina([fila()], par)).toEqual([]);
-    const malos = validarFilasNomina([fila({ rut: "11.111.111-9", codigoBanco: "BCI", cuentaDestino: "", montoClp: 0, nombre: "" })], { ...par, cuentaOrigen: "" });
-    expect(malos.join(" ")).toMatch(/cuenta de origen/);
-    expect(malos.join(" ")).toMatch(/RUT inválido/);
-    expect(malos.join(" ")).toMatch(/cuenta destino/);
-    expect(malos.join(" ")).toMatch(/3 dígitos/);
-    expect(malos.join(" ")).toMatch(/monto/);
-    expect(malos.join(" ")).toMatch(/nombre/);
+    const e = validarFilasNomina([fila({ rut: "11.111.111-9" }), fila({ rut: "", cuentaDestino: "", codigoBanco: "", nombre: "Luis Soto" }), fila({ montoClp: 0 })], { ...par, cuentaOrigen: "" });
+    expect(e[0]).toMatch(/cuenta de origen/);
+    expect(e).toContain("Beneficiario 1 (Pérez Gómez Ana): falta RUT válido (dígito verificador).");
+    expect(e).toContain("Beneficiario 2 (Luis Soto): falta RUT, cuenta destino, código SBIF del banco.");
+    expect(e).toContain("Beneficiario 3 (Pérez Gómez Ana): falta monto mayor que cero.");
     expect(validarFilasNomina([], par)).toContain("El lote no tiene beneficiarios.");
   });
   it("una transferencia por persona y el total coincide con el del lote", () => {

@@ -11,6 +11,7 @@ import { rendicionesListar, rendicionesObtener } from "./lectura";
 import { rendicionesDuplicados } from "./duplicados";
 import { rendicionesOpciones } from "./opciones";
 import { bandejaListar, bandejaObtener } from "./bandeja";
+import { nominaCuentasOrigen } from "./nomina-cuentas";
 import { lotesCrear } from "./lotes-crear";
 import { lotesAnular, lotesAprobar } from "./lotes-flujo";
 import { lotesCandidatas, lotesListar, lotesObtener } from "./lotes-lectura";
@@ -44,4 +45,5 @@ export const capacidades: readonly Capacidad[] = [
   lotesDescargarNomina,
   lotesMarcarPagado,
   lotesAnular,
+  nominaCuentasOrigen,
 ];

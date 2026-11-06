@@ -26,4 +26,4 @@ export type LoteDetalle = LoteResumen & {
 };
 
 /** Qué botones ve la persona (visibilidad; las capacidades vuelven a autorizar en servidor). */
-export type PermisosLote = { pagar: boolean; aprobar: boolean; yoId: string };
+export type PermisosLote = { pagar: boolean; aprobar: boolean; configurar: boolean; yoId: string };

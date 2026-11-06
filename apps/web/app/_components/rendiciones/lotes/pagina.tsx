@@ -9,13 +9,14 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { pesos } from "../formato";
 import { AccionesLote } from "./acciones-lote";
 import { ArmarLote } from "./armar-lote";
-import { cargarCandidatas, cargarLote, cargarLotes } from "./datos";
+import { SelectorCuentaOrigen } from "./cuenta-origen";
+import { cargarCandidatas, cargarCuentasOrigen, cargarLote, cargarLotes } from "./datos";
 import { ETIQUETA_LOTE, type PermisosLote, RUTA_LOTES, TONO_LOTE } from "./tipos";
 
 async function permisosDe(): Promise<PermisosLote> {
   const i = await identidadActual();
   const puede = i ? puedeDeIdentidad(i) : () => false;
-  return { pagar: puede("rendiciones:pagar"), aprobar: puede("rendiciones:pagar.aprobar"), yoId: i?.usuario.id ?? "" };
+  return { pagar: puede("rendiciones:pagar"), aprobar: puede("rendiciones:pagar.aprobar"), configurar: puede("rendiciones:config.manage"), yoId: i?.usuario.id ?? "" };
 }
 
 /** «Lotes de pago»: aprobadas listas para pagar (arriba, solo quien paga) y los lotes de la empresa. */
@@ -27,13 +28,18 @@ export function PaginaLotes() {
       ruta={RUTA_LOTES}
       cargar={async () => {
         const permisos = await permisosDe();
-        const [candidatas, lotes] = await Promise.all([cargarCandidatas(permisos.pagar), cargarLotes()]);
-        return { candidatas, lotes, permisos };
+        const [candidatas, lotes, origen] = await Promise.all([cargarCandidatas(permisos.pagar), cargarLotes(), cargarCuentasOrigen(permisos.configurar)]);
+        return { candidatas, lotes, permisos, origen };
       }}
     >
-      {({ candidatas, lotes, permisos }) => (
+      {({ candidatas, lotes, permisos, origen }) => (
         <div className="flex flex-col gap-4">
           <Cabecera titulo="Lotes de pago" subtitulo="Agrupa rendiciones aprobadas, genera la nómina y marca el pago." />
+          {permisos.configurar ? (
+            <SeccionTarjeta titulo="Nómina Santander">
+              <SelectorCuentaOrigen cuentas={origen.cuentas} seleccionadaId={origen.seleccionadaId} />
+            </SeccionTarjeta>
+          ) : null}
           {permisos.pagar ? (
             <SeccionTarjeta titulo="Aprobadas listas para pagar">
               <Estado state={candidatas.length === 0 ? "empty" : "ready"} variante="lista" textos={{ vacio: { titulo: "No hay rendiciones aprobadas por pagar", descripcion: "Cuando se aprueben, aparecerán aquí para armar un lote." } }}>

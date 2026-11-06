@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 625 pares pantalla→capacidad · 562 con herramienta · 63 excepciones justificadas · 0 faltantes.
+**Resumen:** 626 pares pantalla→capacidad · 563 con herramienta · 63 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -106,6 +106,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.lotes.listar` | `rendiciones_lotes_listar` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.marcar_pagado` | `rendiciones_lotes_marcar_pagado` | existe |
 | compartido | `app/_components` | `rendiciones.lotes.obtener` | `rendiciones_lotes_obtener` | existe |
+| compartido | `app/_components` | `rendiciones.nomina.cuentas_origen` | `rendiciones_nomina_cuentas_origen` | existe |
 | compartido | `app/_components` | `rendiciones.opciones.obtener` | `rendiciones_opciones_obtener` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.actualizar` | `rendiciones_rendiciones_actualizar` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.anular` | `rendiciones_rendiciones_anular` | existe |

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { conflicto, defineCapability, prohibido, reglaDeNegocio } from "@opai/capabilities";
 
-import { codigoLote, codigoVisible, sinRendicionPropia } from "../domain";
+import { codigoLote, codigoVisible, nombreArchivoNomina, sinRendicionPropia } from "../domain";
 import { uuidSchema } from "./esquemas";
 import { loteSalidaSchema } from "./lotes-esquemas";
 import { loteConSolicitantes, pasoPermitido } from "./lotes-flujo";
@@ -65,7 +65,7 @@ export const lotesDescargarNomina = defineCapability({
     const n = await armarNomina(ctx, lote.items, codigoLote(lote.codigo));
     if (n.huella !== lote.nominaHuella) throw conflicto("La nómina cambió respecto de la que se generó: anula el lote y arma otro.");
     return {
-      nombre: `nomina-santander-${codigoLote(lote.codigo)}.xlsx`,
+      nombre: nombreArchivoNomina(codigoLote(lote.codigo)),
       mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       base64: await xlsxDeNomina(n.matriz),
       personaIds: [...new Set(lote.items.map((i) => i.personaId))],

@@ -12,7 +12,8 @@ Fuente: `docs/2.0/diseño/export-rendiciones-v3/Rendiciones OPAI 2.0 — módulo
 | «Las cuentas de destino se copiaron de la Ficha al lote» | El lote **no copia** la cuenta: guarda la versión de la ficha y falla si cambió | Evita duplicar un dato personal cifrado (Ley 21.719); se avisa al anular y rearmar |
 | Cuenta de destino con los últimos dígitos | Banco y tipo de cuenta, sin número | Las listas no revelan cuentas; el número solo está en el archivo |
 | «Confirmar lote y marcar como pagadas» en un paso | Tres pasos: crear (borrador) → aprobar (otra persona) → marcar pagado con fecha y referencia | Regla de negocio de R3: crear y aprobar son personas distintas; pagar exige evidencia |
-| Descargar nómina disponible siempre | Detrás del ajuste `nomina_formato_confirmado` | **DECISIÓN CARLOS:** el formato no está documentado |
+| Descargar nómina disponible siempre | Detrás del ajuste `nomina_formato_confirmado` (interruptor de la empresa de pruebas) | R3 está autorizado solo en test; el formato ya está confirmado (decisión de Carlos del 6-nov-2026) |
+| «Cuenta de origen» como campo de texto en Configuración › Pagos | Selector entre las cuentas de Bancos, en «Lotes de pago» (para quien configura) | Decisión de Carlos: no es texto libre; la pantalla de Configuración es R4 |
 | Aviso de boleta duplicada en el detalle | No incluido | Queda para el seguimiento; la capacidad `rendiciones.duplicados.consultar` existe |
 | «Conciliado con el movimiento del banco» | No incluido | Fuera de alcance (conciliación) |
 | Filtros de la bandeja no aparecen en el diseño | Se agregaron estado, quien rinde y fechas | Pedido en el encargo |

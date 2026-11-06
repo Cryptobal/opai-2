@@ -144,13 +144,19 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R3 (db)", () => {
   });
 
   it("con el formato confirmado genera la nómina con una fila por persona y total exacto, y detecta que la ficha cambió", async () => {
-    for (const [clave, valor] of [["nomina_formato_confirmado", true], ["nomina_cuenta_origen", "000-0412-9"]] as const)
-      ok(await como(u.paga, "gerente", t.a)("core.config.set", { modulo: "rendiciones", clave, valor }));
+    const banco = await e.admin.cuentaBancaria.create({ data: { tenantId: t.a, banco: "Santander", numeroVisible: "99998888" } });
+    const cuentas = ok(await como(u.paga, "gerente", t.a)("rendiciones.nomina.cuentas_origen"));
+    expect((cuentas["cuentas"] as { id: string }[]).map((c) => c.id)).toEqual([banco.id]);
+    expect(await como(u.viewer, "viewer", t.a)("rendiciones.nomina.cuentas_origen")).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    // Sin la cuenta de origen elegida la generación falla diciendo qué falta.
+    ok(await como(u.paga, "gerente", t.a)("core.config.set", { modulo: "rendiciones", clave: "nomina_formato_confirmado", valor: true }));
+    expect(await como(u.paga, "gerente", t.a)("rendiciones.lotes.generar_nomina", { id: rend["lote"] })).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    ok(await como(u.paga, "gerente", t.a)("core.config.set", { modulo: "rendiciones", clave: "nomina_cuenta_origen_id", valor: banco.id }));
     const g = ok(await como(u.paga, "gerente", t.a)("rendiciones.lotes.generar_nomina", { id: rend["lote"] }));
     expect(g).toMatchObject({ estado: "generado", totalClp: 19_990, beneficiarios: 2 });
     expect(JSON.stringify(g)).not.toContain("000111222333");
     const d = ok(await como(u.paga, "gerente", t.a)("rendiciones.lotes.nomina_descargar", { id: rend["lote"] }));
-    expect(String(d["nombre"])).toMatch(/^nomina-santander-LP-\d+\.xlsx$/);
+    expect(String(d["nombre"])).toMatch(/^LP-\d+-santander\.xlsx$/);
     expect((await e.admin.auditEvent.findMany({ where: { tenantId: t.a, capability: "rendiciones.lotes.nomina_descargar" } })).length).toBeGreaterThan(0);
     await e.admin.personaPago.updateMany({ where: { tenantId: t.a, persona: { usuarioId: u.rinde } }, data: { rutTitular: "11111111-1", tipoCuenta: "vista" } });
     expect(await como(u.paga, "gerente", t.a)("rendiciones.lotes.nomina_descargar", { id: rend["lote"] })).toMatchObject({ ok: false, error: { code: "CONFLICT" } });

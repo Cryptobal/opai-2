@@ -1,22 +1,46 @@
-// Nómina de transferencias Santander (CAR-208, R3). **El formato NO está confirmado**: la extracción de
-// 1.0 (R-REN-43) solo lista las 13 columnas; faltan encabezados exactos, anchos, el catálogo de
-// códigos de banco y la validación del banco. Esta estructura es PROVISORIA y la capacidad que la usa
-// queda detrás del ajuste `nomina_formato_confirmado` hasta que Carlos entregue la especificación o
-// un archivo de ejemplo (DECISIÓN CARLOS en el PR). OPAI solo genera el archivo: no transmite nada.
+// Nómina de transferencias Santander (CAR-208, R3). Formato confirmado por Carlos el 6-nov-2026 (DECISIÓN
+// CARLOS en el PR #361), tomado de OPAI 1.0 (`export-santander/route.ts`): XLSX con hoja «Santander», fila 1
+// de encabezado en negrita y congelada, una fila por beneficiario, sin anchos fijos ni relleno. OPAI solo
+// genera y descarga el archivo: no transmite nada al banco. Dominio puro (sin exceljs ni base de datos).
 
 import { formatearRut, rutValido } from "@opai/domain";
 
-/** Columnas en el orden de la extracción de 1.0 (R-REN-43). «Glosas de cartola» son dos columnas. */
+export const HOJA_NOMINA = "Santander";
+
+/** Las 13 columnas, en este orden y con estos encabezados exactos («Codigo» va sin tilde). */
 export const COLUMNAS_NOMINA = [
-  "Cuenta origen", "Moneda origen", "Cuenta destino", "Moneda destino", "Código banco destino",
-  "RUT", "Nombre", "Monto", "Glosa", "Correo", "Mensaje", "Glosa cartola origen", "Glosa cartola destino",
+  "Cuenta origen", "Moneda origen", "Cuenta destino", "Moneda destino", "Codigo banco destino",
+  "RUT beneficiario", "Nombre beneficiario", "Monto transferencia", "Glosa personalizada transferencia",
+  "Correo beneficiario", "Mensaje correo beneficiario", "Glosa cartola originador", "Glosa cartola beneficiario",
 ] as const;
 
-/** Largos máximos PROVISORIOS (sin especificación): se ajustan con el formato confirmado. */
-export const LARGOS_NOMINA = { nombre: 45, glosa: 20, mensaje: 60, correo: 60, cuenta: 20, glosaCartola: 20 } as const;
+/** Nombre del archivo: `{códigoLote}-santander.xlsx`. */
+export const nombreArchivoNomina = (codigoLote: string): string => `${codigoLote}-santander.xlsx`;
+
+const sinTildes = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+
+/** Códigos SBIF de 3 dígitos (lista de Carlos, 6-nov-2026). El tipo de cuenta no va en el archivo. */
+const SBIF: Readonly<Record<string, string>> = {
+  "chile": "001", "internacional": "009", "estado": "012", "bancoestado": "012", "scotiabank": "014",
+  "bci": "016", "mach": "016", "bice": "028", "hsbc": "031", "santander": "037", "itau": "039",
+  "security": "049", "falabella": "051", "ripley": "053", "consorcio": "055", "mercado pago": "299",
+  "edwards citi": "504", "edwards": "504", "citi": "504", "coopeuch": "672", "tenpo": "730", "prex": "743",
+};
+
+/**
+ * Código SBIF del banco de la ficha: acepta el código de 3 dígitos o el nombre («Banco de Chile», «BancoEstado»).
+ * null si no se reconoce (el beneficiario queda con «falta el código SBIF»).
+ */
+export function codigoSbif(banco: string | null | undefined): string | null {
+  const b = (banco ?? "").trim();
+  if (/^\d{3}$/.test(b)) return Object.values(SBIF).includes(b) ? b : null;
+  const n = sinTildes(b).replace(/^banco de /, "").replace(/^banco /, "");
+  return SBIF[n] ?? SBIF[sinTildes(b)] ?? null;
+}
 
 export type FilaNomina = {
   cuentaDestino: string;
+  /** Código SBIF de 3 dígitos (nunca el código interno de la ficha). */
   codigoBanco: string;
   rut: string;
   nombre: string;
@@ -27,37 +51,30 @@ export type FilaNomina = {
 
 export type ParametrosNomina = { cuentaOrigen: string; glosa: string };
 
-/** Sin tildes, ñ ni símbolos: los archivos bancarios suelen aceptar solo ASCII (provisorio). */
-export function textoPlano(t: string, max: number): string {
-  return t.normalize("NFD").replace(/\p{M}/gu, "").replace(/[^\x20-\x7E]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
-}
-
 const soloDigitos = (t: string) => t.replace(/\D/g, "");
 
-/** Errores por beneficiario (índice base 0); sin errores = archivo generable. */
+/** Qué le falta a cada beneficiario (mínimo de 1.0 + dígito verificador del RUT y monto > 0). Vacío = generable. */
 export function validarFilasNomina(filas: readonly FilaNomina[], p: ParametrosNomina): string[] {
   const errores: string[] = [];
-  if (!soloDigitos(p.cuentaOrigen)) errores.push("Falta la cuenta de origen de la empresa.");
+  if (!soloDigitos(p.cuentaOrigen)) errores.push("Falta configurar la cuenta de origen de la nómina.");
   if (filas.length === 0) errores.push("El lote no tiene beneficiarios.");
   filas.forEach((f, i) => {
-    const n = i + 1;
-    if (!rutValido(f.rut)) errores.push(`Beneficiario ${n}: RUT inválido.`);
-    const cuenta = soloDigitos(f.cuentaDestino);
-    if (!cuenta || cuenta.length > LARGOS_NOMINA.cuenta) errores.push(`Beneficiario ${n}: cuenta destino inválida.`);
-    if (!/^\d{3}$/.test(f.codigoBanco)) errores.push(`Beneficiario ${n}: el banco no tiene código de 3 dígitos.`);
-    if (!Number.isInteger(f.montoClp) || f.montoClp <= 0) errores.push(`Beneficiario ${n}: monto inválido.`);
-    if (!textoPlano(f.nombre, LARGOS_NOMINA.nombre)) errores.push(`Beneficiario ${n}: falta el nombre.`);
+    const faltan: string[] = [];
+    if (!f.rut.trim()) faltan.push("RUT");
+    else if (!rutValido(f.rut)) faltan.push("RUT válido (dígito verificador)");
+    if (!soloDigitos(f.cuentaDestino)) faltan.push("cuenta destino");
+    if (!/^\d{3}$/.test(f.codigoBanco)) faltan.push("código SBIF del banco");
+    if (!Number.isInteger(f.montoClp) || f.montoClp <= 0) faltan.push("monto mayor que cero");
+    if (faltan.length > 0) errores.push(`Beneficiario ${i + 1} (${f.nombre.trim() || "sin nombre"}): falta ${faltan.join(", ")}.`);
   });
   return errores;
 }
 
-/** Filas del archivo (matriz de celdas): CLP entero como número, texto plano recortado a los largos. */
+/** Filas del archivo (matriz de celdas): monto como número entero; K, L y M van vacías. */
 export function filasDeNomina(filas: readonly FilaNomina[], p: ParametrosNomina): (string | number)[][] {
   return filas.map((f) => [
     soloDigitos(p.cuentaOrigen), "CLP", soloDigitos(f.cuentaDestino), "CLP", f.codigoBanco,
-    formatearRut(f.rut), textoPlano(f.nombre, LARGOS_NOMINA.nombre), f.montoClp,
-    textoPlano(p.glosa, LARGOS_NOMINA.glosa), (f.correo ?? "").trim().slice(0, LARGOS_NOMINA.correo), "",
-    textoPlano(p.glosa, LARGOS_NOMINA.glosaCartola), textoPlano(p.glosa, LARGOS_NOMINA.glosaCartola),
+    formatearRut(f.rut), f.nombre.trim(), f.montoClp, p.glosa, (f.correo ?? "").trim(), "", "", "",
   ]);
 }
 
