@@ -166,7 +166,12 @@ export type OpcionesEjecucion = {
 };
 
 /** Lo que recibe el handler además del input: si es vista previa y la clave de idempotencia. */
-export type ModoEjecucion = { dryRun: boolean; idempotencyKey?: string };
+export type ModoEjecucion = {
+  dryRun: boolean;
+  idempotencyKey?: string;
+  /** Lo que devolvió `preparar` de la capacidad (fuera de la transacción), si lo declara. */
+  preparado?: unknown;
+};
 
 export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType = z.ZodType> {
   /** `<modulo>.<entidad>.<verbo>` o `<modulo>.<verbo>`, en minúsculas. */
@@ -232,6 +237,14 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   tenantObjetivo?: (input: z.output<I>, output: z.output<O> | undefined) => string | undefined;
   /** Campos extra en el payload de auditoría de escrituras (sin revelar la salida completa). */
   auditoriaPayload?: (ctx: Contexto, entrada: z.output<I>, salida: z.output<O>) => Record<string, unknown>;
+  /**
+   * Trabajo previo que llama a un servicio externo (p. ej. firmar un DTE con SimpleAPI) y por eso NO puede
+   * correr dentro de la transacción de la escritura (una llamada remota lenta retendría la conexión y los
+   * locks). Se ejecuta solo en la ejecución real, antes de abrir la transacción, con el contexto de la
+   * solicitud (cada consulta abre su propia transacción corta). Su resultado llega al handler en
+   * `modo.preparado`; el handler revalida lo que dependa de la base dentro de su transacción.
+   */
+  preparar?: (ctx: Contexto, input: z.output<I>) => Promise<unknown>;
   handler: (ctx: Contexto, input: z.output<I>, modo: ModoEjecucion) => Promise<z.input<O>>;
 }
 

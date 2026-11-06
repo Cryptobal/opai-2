@@ -9,6 +9,8 @@ import { montoSchema } from "./comun";
 import { vistaDeDocumento } from "./ventas-consulta";
 import { bloquearYValidarNotaCredito, notasCreditoPreviasDe, validarNotaCreditoEmision } from "./ventas-nc-comun";
 import { persistirNotaCredito } from "./ventas-nc-escritura";
+import { claveXmlDte, descartarXmlPreparado } from "./ventas-xml";
+import { leerNcPreparada, prepararNotaCredito } from "./ventas-nc-preparar";
 import { previewNotaCreditoDryRun } from "./ventas-nc-preview";
 import {
   PERMISO_VENTAS,
@@ -40,7 +42,9 @@ export const ventasEmitirNotaCredito = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
-  async handler(ctx, input, { dryRun }) {
+  // La firma (llamada remota) va antes de la transacción de la escritura (CAR-196).
+  preparar: (ctx, input) => prepararNotaCredito(ctx, input),
+  async handler(ctx, input, { dryRun, preparado }) {
     const ref = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoReferenciaId } });
     if (!ref) throw noEncontrado("El documento de referencia");
     if (ref.estadoDte !== "aceptado" && ref.estadoDte !== "enviado") {
@@ -59,6 +63,8 @@ export const ventasEmitirNotaCredito = defineCapability({
       if (error) throw reglaDeNegocio(error);
       return previewNotaCreditoDryRun(ctx, { ref, montos, motivo: input.motivo, monto, cuenta });
     }
+    const preparada = leerNcPreparada(preparado);
+    if (!preparada) throw reglaDeNegocio("La nota de crédito no llegó firmada a la emisión; reintente.");
     const ambiente = await ambienteDe(ctx);
     const rutEmisor = await rutEmisorDe(ctx);
     let folioEmitido = 0;
@@ -89,11 +95,16 @@ export const ventasEmitirNotaCredito = defineCapability({
             restante: prep.restante,
           },
           tx,
+          preparada,
         );
         folioEmitido = folio;
         return doc;
       },
-    );
+    ).catch(async (e: unknown) => {
+      // El XML ya subido de un intento que no se confirmó contiene datos del receptor: se borra.
+      await descartarXmlPreparado(ctx, claveXmlDte(preparada.documentoId));
+      throw e;
+    });
     return vistaDeDocumento(ctx, creado.id);
   },
 });
