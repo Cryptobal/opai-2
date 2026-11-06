@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 import { exigirDestinatariosEnvio } from "../domain/documento/propuesta-tecnica";
+import { previsualizarCorreoCliente } from "../persistencia/correo-cliente";
 import { exigirGatesEnvioCpq } from "../persistencia/propuesta-envio-aprobacion";
 import {
   exigirVersionDeCotizacion,
@@ -32,6 +33,19 @@ export const enviosPropuestaSolicitar = defineCapability({
     envioId: z.string(),
     estado: z.enum(["pendiente_aprobacion", "enviado"]),
     destinatarios: z.array(destinatarioSchema),
+    correos: z
+      .array(
+        z.object({
+          para: z.string(),
+          asunto: z.string(),
+          texto: z.string(),
+          adjuntos: z.array(z.string()),
+          enlazados: z.array(z.string()),
+          acceso: z.enum(["ya_tiene_acceso", "vinculado", "invitado", "invitacion_pendiente", "no_aplica"]),
+        }),
+      )
+      .optional()
+      .describe("Solo en la vista previa: el correo que recibiría cada destinatario y qué pasaría con su acceso al portal."),
   }),
   efecto: "irreversible",
   dryRun: true,
@@ -66,7 +80,7 @@ export const enviosPropuestaSolicitar = defineCapability({
       dryRun,
     );
     exigirVersionDeCotizacion(pack.version, c.id);
-    return registrarOEnviarSolicitudEnvioPropuesta(
+    const resultadoEnvio = await registrarOEnviarSolicitudEnvioPropuesta(
       ctx,
       {
         cotizacionId: c.id,
@@ -82,5 +96,30 @@ export const enviosPropuestaSolicitar = defineCapability({
       },
       dryRun,
     );
+    if (!dryRun || !neg?.cuentaId) return resultadoEnvio;
+    const pdfs = [
+      ...(input.incluyeCotizacion
+        ? [{ clave: "cotizacion" as const, nombre: `Cotizacion-${c.codigo}.pdf`, bytes: 0, contenido: null, storageKey: null }]
+        : []),
+      ...(input.incluyePropuesta
+        ? [{ clave: "propuesta" as const, nombre: `Propuesta-tecnica-${c.codigo}.pdf`, bytes: 0, contenido: null, storageKey: null }]
+        : []),
+    ];
+    const correos = [];
+    for (const d of destinatarios) {
+      correos.push(
+        await previsualizarCorreoCliente(ctx, {
+          para: d.email,
+          contactoId: d.contactoId ?? null,
+          cuentaId: neg.cuentaId,
+          codigo: c.codigo,
+          titulo: c.titulo,
+          version: pack.version.numero,
+          mensaje: input.mensaje ?? "",
+          pdfs,
+        }),
+      );
+    }
+    return { ...resultadoEnvio, correos };
   },
 });
