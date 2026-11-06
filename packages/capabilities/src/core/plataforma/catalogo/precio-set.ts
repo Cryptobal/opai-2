@@ -71,10 +71,11 @@ export const platformCatalogoPrecioSet = defineCapability({
       precio: montoEntero(x.moneda, x.precio),
       minimoMensual: x.minimoMensual ? montoEntero(x.moneda, x.minimoMensual) : null,
     };
-    const version = (previo?.version ?? 0) + 1;
+    // La versión nunca retrocede: se lee de la fila, que tras quitar el precio queda con valor vacío.
+    const where = { modulo_clave: { modulo: MODULO_AJUSTE_CATALOGO, clave: e.id } };
+    const version = ((await p.globales.ajustePorClave(where))?.version ?? 0) + 1;
     const despues = nuevo && { precio: nuevo, texto: textoDe(nuevo) ?? "", version };
     if (!dryRun) {
-      const where = { modulo_clave: { modulo: MODULO_AJUSTE_CATALOGO, clave: e.id } };
       if (nuevo) {
         await p.globales.guardarAjuste(
           {

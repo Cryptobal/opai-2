@@ -129,6 +129,14 @@ describe("platform.catalogo.precio_set", () => {
     ).toBe("UF 0,12 por usuario con licencia · mínimo UF 5");
   });
 
+  it("la versión del precio de lista no retrocede al quitarlo y volver a fijarlo", async () => {
+    const { ctx } = contexto();
+    await executeCapability(ctx, "platform.catalogo.precio_set", lista);
+    await executeCapability(ctx, "platform.catalogo.precio_set", { moduloId: "cpq", precio: null });
+    const r = await executeCapability(ctx, "platform.catalogo.precio_set", lista);
+    expect(r).toMatchObject({ ok: true, data: { despues: { version: 3 } } });
+  });
+
   it("rechaza lo incluido en el plan base, lo desconocido y por unidad sin unidad", async () => {
     const { ctx, tabla } = contexto();
     const precio = { moneda: "UF", forma: "fijo", precio: "1" };
