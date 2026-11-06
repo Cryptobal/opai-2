@@ -1,7 +1,7 @@
 import type { Contexto } from "@opai/capabilities";
-import { conflicto, enviarCorreo } from "@opai/capabilities";
+import { conflicto } from "@opai/capabilities";
 
-import { datosCorreoCliente, EVENTO_CORREO_CLIENTE } from "../persistencia/correo-cliente";
+import { enviarCorreoCliente } from "../persistencia/correo-cliente";
 import { moverNegocioPropuestaEnviada } from "../persistencia/enviar-negocio";
 import {
   eliminarPdfPropuestaAlmacenamiento,
@@ -94,16 +94,26 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
   }
   const para = pack.correoPreview.para;
   if (pack.enviarCorreo !== false && ctx.actor.tipo !== "agent" && para) {
-    try {
-      await enviarCorreo(
-        { db: ctx.db, tenantId: ctx.tenantId, correo: ctx.servicios.correo, urlBase: ctx.servicios.urlBase },
-        EVENTO_CORREO_CLIENTE,
-        para,
-        await datosCorreoCliente(ctx, pack.correoPreview.datos),
-      );
-    } catch {
-      /* best-effort */
-    }
+    const neg = await ctx.db.negocio.findFirst({ where: { id: pack.negocioId }, select: { cuentaId: true } });
+    const texto = (k: string) => (typeof pack.correoPreview.datos[k] === "string" ? (pack.correoPreview.datos[k] as string) : "");
+    await enviarCorreoCliente(ctx, {
+      para,
+      contactoId: pack.contactoId,
+      cuentaId: neg?.cuentaId ?? null,
+      codigo: pack.codigo,
+      titulo: texto("titulo"),
+      version: pack.versionNumero,
+      mensaje: texto("mensaje"),
+      pdfs: [
+        {
+          clave: "cotizacion",
+          nombre: `Cotizacion-${pack.codigo}.pdf`,
+          bytes: pack.pdf.byteLength,
+          contenido: pack.pdf,
+          storageKey: subido.storageKey,
+        },
+      ],
+    });
   }
   return documentoId;
 }

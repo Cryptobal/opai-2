@@ -61,6 +61,7 @@ export const manifest = defineModule({
     { id: "cpq.envio_propuesta.solicitado", descripcion: "Se solicitó un envío conjunto cotización/propuesta." },
     { id: "cpq.envio_propuesta.aprobado", descripcion: "Se aprobó y registró un envío conjunto." },
     { id: "cpq.envio_propuesta.rechazado", descripcion: "Se rechazó un envío conjunto pendiente." },
+    { id: "cpq.envio_propuesta.acceso_cliente", descripcion: "Al enviar una propuesta se invitó o vinculó al contacto a su Portal Cliente." },
   ],
   capacidades,
 });
