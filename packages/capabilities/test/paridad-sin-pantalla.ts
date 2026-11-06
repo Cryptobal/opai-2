@@ -66,4 +66,10 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Marcar desde Terreno (Marcación, diseño aprobado) y el botón «Marcar» del Portal Trabajador: dependen de la identidad de terreno (RUT + PIN, dispositivos y cola sin conexión) de «Operaciones · Base» y de la biometría. Hasta entonces solo registra una empresa de prueba, por la capacidad.",
   },
+  "asistencia.correcciones.responder": {
+    encargo: "CAR-89",
+    desde: "2026-11-10",
+    motivo:
+      "Aceptar u objetar una corrección desde el Portal Trabajador: la pantalla entra con el diseño aprobado del portal (A3). Mientras tanto responde por el enlace del correo personal (página pública, capacidad interna).",
+  },
 };
