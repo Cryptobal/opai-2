@@ -58,6 +58,7 @@ describe.skipIf(!urlPropietario)("ingreso con RUT + PIN (CAR-78 B1)", () => {
   }
 
   beforeAll(async () => {
+    process.env["BETTER_AUTH_SECRET"] ??= randomUUID() + randomUUID();
     e = await prepararEntorno();
     ({ auth } = await import("../src/auth"));
     for (const k of ["A", "B"] as const) {
