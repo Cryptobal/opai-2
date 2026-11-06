@@ -71,6 +71,23 @@ export async function anonimizarPersona(
   if (count !== 1) return false;
   // Los ids de otros sistemas llevan de vuelta a la identidad: se sueltan.
   await tx.idExterno.deleteMany({ where: { entidadTipo: "persona", entidadId: id } });
+  // Un rostro enrolado es un dato biométrico: se borra también (aquí y en el proveedor, que no se llama
+  // dentro de esta transacción). El consumidor de la biometría lo hace al recibir este aviso (Ley 21.719).
+  const rostro = await tx.enrolamientoBiometrico.findUnique({
+    where: { personaId: id },
+    select: { tenantId: true },
+  });
+  if (rostro)
+    await tx.evento.create({
+      data: {
+        tenantId: rostro.tenantId,
+        tipo: "core.biometria.anonimizacion_pendiente",
+        entidadTipo: "persona",
+        entidadId: id,
+        actorTipo: "system",
+        payload: {},
+      },
+    });
   return true;
 }
 

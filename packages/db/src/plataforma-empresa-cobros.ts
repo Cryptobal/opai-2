@@ -1,3 +1,4 @@
+import { operacionesPruebasGratis } from "./plataforma-empresa-pruebas-gratis";
 import type { TenantTx } from "./transaccion";
 
 // Cobro por módulo (CAR-188, ADR-071): operaciones con nombre de Plataforma sobre las condiciones y
@@ -155,5 +156,6 @@ export function operacionesCobros(db: TenantTx, tenantId: string) {
           data: { estado: "anulado", motivoAnulacion: motivo, anuladoEn: new Date() },
         })
       ).count,
+    ...operacionesPruebasGratis(db, tenantId),
   };
 }
