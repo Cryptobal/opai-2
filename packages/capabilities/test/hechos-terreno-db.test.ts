@@ -25,6 +25,7 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
   const disp = { A: "", B: "", revocado: "" };
   let personaA = "";
   let personaB = "";
+  let personaSinPuesto = "";
 
   const ctx = (tenantId: string) =>
     mod.crearContexto({
@@ -97,6 +98,7 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
       e.admin.persona.create({ data: { tenantId, rut, nombres, apellidos: "Prueba" } });
     personaA = (await persona(t.A, `1${sufijo.slice(0, 7)}-9`, "Ana")).id;
     personaB = (await persona(t.B, `2${sufijo.slice(0, 7)}-9`, "Beto")).id;
+    personaSinPuesto = (await persona(t.A, `3${sufijo.slice(0, 7)}-9`, "Sara")).id;
     await e.admin.vinculoLaboral.create({
       data: {
         tenantId: t.A,
@@ -192,6 +194,20 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
     ).toBe(0);
   });
 
+  it("un hecho mal formado se rechaza solo: los demás del lote se reciben", async () => {
+    const bueno = latido();
+    const d = (
+      (await recibir(disp.A, [bueno, { clave: "no-es-uuid", tipo: "terreno.latido" }])) as {
+        data: Recepcion;
+      }
+    ).data;
+    expect(d.resultados.map((r) => [r.estado, r.motivo])).toEqual([
+      ["recibido", null],
+      ["rechazado", "payload_invalido"],
+    ]);
+    expect(await e.admin.hechoTerreno.count({ where: { clave: bueno.clave } })).toBe(1);
+  });
+
   it("la vista previa valida el lote sin guardar nada", async () => {
     const hecho = latido();
     const r = await run(
@@ -210,9 +226,14 @@ describe.skipIf(!urlPropietario)("hechos de terreno en base real (CAR-78 B3)", (
     const propia = latido({ personaId: personaA });
     const ajena = latido({ personaId: personaB });
     const inexistente = latido({ personaId: randomUUID() });
-    const d = ((await recibir(disp.A, [propia, ajena, inexistente])) as { data: Recepcion }).data;
+    // De la empresa, pero sin vínculo vigente en la instalación de este equipo.
+    const sinPuesto = latido({ personaId: personaSinPuesto });
+    const d = (
+      (await recibir(disp.A, [propia, ajena, inexistente, sinPuesto])) as { data: Recepcion }
+    ).data;
     expect(d.resultados.map((r) => r.motivo)).toEqual([
       null,
+      "persona_no_valida",
       "persona_no_valida",
       "persona_no_valida",
     ]);

@@ -41,13 +41,19 @@ export function evaluarLote(p: {
   const nuevos: HechoEntrada[] = [];
   const vistas = new Set<string>();
   const resultados = p.hechos.map((h): ResultadoHecho => {
-    const r = (estado: ResultadoHecho["estado"], motivo: Motivo | null = null) => ({ clave: h.clave, estado, motivo });
+    const r = (estado: ResultadoHecho["estado"], motivo: Motivo | null = null) => ({
+      clave: h.clave,
+      estado,
+      motivo,
+    });
     if (p.yaGuardadas.has(h.clave) || vistas.has(h.clave)) return r("duplicado");
     if (!tipoPermitido(h.tipo)) return r("rechazado", "tipo_no_permitido");
-    if (!TIPOS_HECHO_TERRENO[h.tipo].safeParse(h.payload).success) return r("rechazado", "payload_invalido");
+    if (!TIPOS_HECHO_TERRENO[h.tipo].safeParse(h.payload).success)
+      return r("rechazado", "payload_invalido");
     const plausible = hechoPlausible(new Date(h.horaHecho), p.envio);
     if (!plausible.ok) return r("rechazado", plausible.motivo);
-    if (h.personaId && !p.personasValidas.has(h.personaId)) return r("rechazado", "persona_no_valida");
+    if (h.personaId && !p.personasValidas.has(h.personaId))
+      return r("rechazado", "persona_no_valida");
     vistas.add(h.clave);
     nuevos.push(h);
     return r("recibido");
