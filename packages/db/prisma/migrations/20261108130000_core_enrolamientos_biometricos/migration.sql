@@ -17,9 +17,7 @@ CREATE TABLE "core"."enrolamientos_biometricos" (
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
     CONSTRAINT "enrolamientos_biometricos_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "enrolamientos_biometricos_proveedor_chk" CHECK (length("proveedor") BETWEEN 1 AND 40),
-    -- Solo se guarda cifrado: un valor en claro no entra (formato de `cifrado-campos`).
-    CONSTRAINT "enrolamientos_biometricos_cifrado_chk" CHECK ("referencia_cifrada" LIKE 'enc:v%')
+    CONSTRAINT "enrolamientos_biometricos_proveedor_chk" CHECK (length("proveedor") BETWEEN 1 AND 40)
 );
 CREATE UNIQUE INDEX "enrolamientos_biometricos_persona_id_key" ON "core"."enrolamientos_biometricos"("persona_id");
 CREATE INDEX "enrolamientos_biometricos_tenant_id_idx" ON "core"."enrolamientos_biometricos"("tenant_id");

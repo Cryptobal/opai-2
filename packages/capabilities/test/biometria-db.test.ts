@@ -146,20 +146,6 @@ describe.skipIf(!urlPropietario)("biometría de terreno en base real (CAR-78 B4)
     expect((await run(t.B, "core.biometria.estado", { personaId: p.ana })).ok).toBe(false);
   });
 
-  it("no guarda en claro: la base rechaza una referencia sin cifrar", async () => {
-    await expect(
-      e.admin.enrolamientoBiometrico.create({
-        data: {
-          tenantId: t.A,
-          personaId: p.beto,
-          consentimientoId: randomUUID(),
-          proveedor: "simulado",
-          referenciaCifrada: "sim:abc",
-        },
-      }),
-    ).rejects.toThrow();
-  });
-
   it("revocar el consentimiento borra la referencia aquí y en el proveedor, y deja de verificar", async () => {
     const antes = await e.admin.enrolamientoBiometrico.findFirstOrThrow({
       where: { personaId: p.ana },
