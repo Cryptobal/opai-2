@@ -163,6 +163,43 @@ describe.skipIf(!urlPropietario)("ingreso con RUT + PIN (CAR-78 B1)", () => {
     expect(hechos.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("al bloquearse avisa una sola vez a la persona y a RR. HH., y deja el rastro (F5)", async () => {
+    const tenant = (
+      await e.admin.tenant.create({
+        data: { slug: `pinv-f5-${sufijo}`, nombre: "F5", vertical: "seguridad" },
+      })
+    ).id;
+    const rrhh = await e.admin.user.create({
+      data: { name: "RRHH", email: `rrhh-${randomUUID().slice(0, 8)}@prueba.opai.cl` },
+    });
+    await e.admin.membership.create({
+      data: { tenantId: tenant, userId: rrhh.id, rol: "admin", portales: ["erp"] },
+    });
+    const rut = rutDe(String(BASE + 8));
+    const { userId, personaId } = await persona(tenant, rut, PIN_B);
+    const ahora = new Date("2026-11-08T12:00:00Z");
+    // Cuatro fallos: todavía sin bloqueo ni avisos.
+    for (let i = 0; i < 4; i++) await verificarRutYPin(rut, "111112", null, ahora);
+    expect(await e.admin.notificacion.count({ where: { tenantId: tenant } })).toBe(0);
+    // El quinto bloquea: un aviso a la persona y uno a RR. HH.
+    await verificarRutYPin(rut, "111112", null, ahora);
+    const avisos = await e.admin.notificacion.findMany({ where: { tenantId: tenant } });
+    expect(avisos).toHaveLength(2);
+    const alTrabajador = avisos.find((a) => a.usuarioId === userId);
+    expect(alTrabajador?.titulo).toBe("Tu ingreso con PIN quedó en pausa");
+    const aRrhh = avisos.find((a) => a.usuarioId === rrhh.id);
+    expect(aRrhh?.enlace).toBe(`/personas/${personaId}/laboral`);
+    expect(JSON.stringify(avisos)).not.toContain(PIN_B);
+    const eventos = await e.admin.auditoriaGlobal.findMany({
+      where: { capability: "seguridad.pin.bloqueo", entityId: userId },
+    });
+    expect(eventos).toHaveLength(1);
+    // Intentos durante la pausa: ni cuentan ni avisan de nuevo.
+    for (let i = 0; i < 6; i++)
+      await verificarRutYPin(rut, "111112", null, new Date("2026-11-08T12:05:00Z"));
+    expect(await e.admin.notificacion.count({ where: { tenantId: tenant } })).toBe(2);
+  });
+
   it("respeta los ajustes de la empresa (3 intentos, 30 minutos)", async () => {
     const tenant = (
       await e.admin.tenant.create({

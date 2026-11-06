@@ -1,6 +1,12 @@
-import { enTransaccion, registrarEventoSeguridad, type TenantTx } from "@opai/db";
+import {
+  enTransaccion,
+  registrarBloqueoPin,
+  registrarEventoSeguridad,
+  type TenantTx,
+} from "@opai/db";
 import { PIN_BLOQUEO_MINUTOS_DEFECTO, PIN_INTENTOS_MAXIMOS_DEFECTO, trasFallo } from "@opai/domain";
 
+import { enviarCorreoBloqueo } from "./pin-aviso-correo";
 import { red } from "./rastro-seguridad";
 import type { Evaluacion } from "./pin-verificacion";
 
@@ -62,9 +68,9 @@ export async function registrarFallo(
   h: Headers | null,
   ahora: Date,
 ) {
-  await enTransaccion(e.tenantId, async (tx) => {
+  const aviso = await enTransaccion(e.tenantId, async (tx) => {
     const cred = await tx.credencialTerreno.findUnique({ where: { personaId: e.personaId } });
-    if (!cred) return;
+    if (!cred) return null;
     const politica = await leerPolitica(tx, e.tenantId);
     const nuevo = trasFallo(
       { intentosFallidos: cred.intentosFallidos, bloqueadoHasta: cred.bloqueadoHasta },
@@ -72,19 +78,30 @@ export async function registrarFallo(
       politica,
     );
     await tx.credencialTerreno.update({ where: { personaId: e.personaId }, data: nuevo });
+    if (nuevo.bloqueadoHasta) {
+      // Una vez por bloqueo: rastro + avisos internos a la persona y a RR. HH. (decisión de Carlos, F5).
+      return registrarBloqueoPin(tx, {
+        tenantId: e.tenantId,
+        personaId: e.personaId,
+        userId: e.userId,
+        minutos: politica.bloqueoMinutos,
+        ...datosRed(h),
+      });
+    }
     await registrarEventoSeguridad(
       {
-        tipo: nuevo.bloqueadoHasta ? "seguridad.pin.bloqueo" : "seguridad.pin.ingreso",
+        tipo: "seguridad.pin.ingreso",
         userId: e.userId,
         tenantId: e.tenantId,
-        detalle: nuevo.bloqueadoHasta
-          ? { resultado: "bloqueado", minutos: politica.bloqueoMinutos }
-          : { resultado: "fallido", motivo: e.causa },
+        detalle: { resultado: "fallido", motivo: e.causa },
         ...datosRed(h),
       },
       tx,
     );
+    return null;
   });
+  // Después del COMMIT y sin romper el ingreso: el correo es best-effort.
+  if (aviso) await enviarCorreoBloqueo(aviso);
 }
 
 const datosRed = (h: Headers | null) => (h ? red(h) : { ipHmac: null, userAgent: null });

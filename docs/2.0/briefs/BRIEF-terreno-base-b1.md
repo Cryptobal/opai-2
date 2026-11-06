@@ -29,3 +29,7 @@ Un trabajador ingresa al Portal Trabajador con **RUT + PIN de 6 dígitos**, camb
 
 - Pruebas: `pnpm test` (dominio), `credenciales-terreno-db.test.ts` (capacidades; dos empresas) y `pin-verificacion-db.test.ts` (ingreso; bloqueo, ajustes, portales, dos empresas, endpoint no expuesto por HTTP).
 - Paridad: instantánea MCP e inventario regenerados.
+
+## Aviso de bloqueo (decisión de Carlos, F5, 5-nov-2026)
+
+Al pasar la credencial a «pausada» (ingreso o «Cambiar PIN») se registra `seguridad.pin.bloqueo` y se avisa **una vez por bloqueo**: campana a la persona y a RR. HH. (owner, admin, gerente; con enlace a la ficha) y correo a la persona (`core.usuario.pin_bloqueado`, transaccional). Lo hace `registrarBloqueoPin` (`packages/db/src/pin-bloqueo.ts`), llamado desde `pin-registro.ts` y `credenciales-cambiar.ts`. Mientras dura la pausa no se vuelve a contar ni a avisar, así que nadie puede inundar a nadie. Sin migración nueva. Pruebas: `pin-verificacion-db` y `credenciales-terreno-db`.

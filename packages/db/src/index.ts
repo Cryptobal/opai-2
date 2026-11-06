@@ -93,3 +93,4 @@ export {
   type ClavePrevisional,
   type ProponerPrevisionalInput,
 } from "./remuneraciones-previsional";
+export { type AvisoCorreoBloqueo, type EntradaBloqueo, registrarBloqueoPin } from "./pin-bloqueo";

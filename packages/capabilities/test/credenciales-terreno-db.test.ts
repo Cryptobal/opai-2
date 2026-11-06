@@ -181,6 +181,40 @@ describe.skipIf(!urlPropietario)("PIN de terreno en base real (CAR-78 B1)", () =
     expect(tarde.ok).toBe(false);
   });
 
+  it("al bloquearse desde «cambiar PIN» deja el rastro y avisa una sola vez a la persona y a RR. HH. (F5, N5)", async () => {
+    const rrhhId = randomUUID();
+    await e.admin.user.create({
+      data: { id: rrhhId, name: "RRHH", email: `rrhh-${randomUUID().slice(0, 8)}@example.test` },
+    });
+    await e.admin.membership.create({
+      data: { tenantId: t.A, userId: rrhhId, rol: "admin", portales: ["erp"] },
+    });
+    await e.admin.credencialTerreno.update({
+      where: { personaId: persona.A },
+      data: { intentosFallidos: 0, bloqueadoHasta: null },
+    });
+    const antes = await e.admin.notificacion.count({ where: { tenantId: t.A } });
+    const yo = ctx(t.A, "viewer", userA);
+    for (let i = 0; i < 6; i++) {
+      await ejecutar(yo, "core.credenciales_terreno.cambiar_pin", {
+        pinActual: "111112",
+        pinNuevo: "846201",
+      });
+    }
+    const nuevos = await e.admin.notificacion.findMany({
+      where: { tenantId: t.A },
+      orderBy: { createdAt: "desc" },
+      take: 2,
+    });
+    expect(await e.admin.notificacion.count({ where: { tenantId: t.A } })).toBe(antes + 2);
+    expect(nuevos.map((n) => n.usuarioId).sort()).toEqual([rrhhId, userA].sort());
+    expect(
+      await e.admin.auditoriaGlobal.count({
+        where: { capability: "seguridad.pin.bloqueo", entityId: userA },
+      }),
+    ).toBeGreaterThanOrEqual(1);
+  });
+
   it("una empresa no ve ni toca la credencial de otra (criterio 5)", async () => {
     const b = ctx(t.B);
     for (const [id, input] of [
