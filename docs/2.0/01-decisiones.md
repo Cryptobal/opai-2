@@ -1527,3 +1527,19 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Carlos, registrado por «Comercial · Code»
 
 **Decisión.** Se aceptan dos límites de concurrencia del recálculo de cotizaciones en borrador (#336, #337, #344): las huellas de línea se escriben fuera de la transacción del `updateMany` de la versión, y editar líneas no sube `revision`, de modo que una edición durante el cálculo puede dejar en un borrador un cálculo de las líneas anteriores. Ambos se corrigen al recalcular o al enviar (el envío valida la huella). **No se construye** un contador de revisión por líneas. Sin cambio de producto, migración ni tests.
+
+## ADR-081 · Orden de trabajo de Operaciones: Personas → Instalaciones › Puestos → Pauta
+
+**Fecha:** 6-nov-2026 · **Estado:** vigente · **Autor:** Carlos (6-nov-2026, 08:17 CLT), registrado por «Operaciones · Puestos · Code» en CAR-206 · Adenda a ADR-048 (series de la Pauta) y al Brief 11 (Puestos).
+
+**Decisión.** El orden en que se arma la operación es:
+
+1. **Personas:** el guardia tiene un **vínculo laboral vigente con la instalación**.
+2. **Instalaciones › Puestos:** se **crean los puestos** y se define su **ciclo (patrón), turno y horario**. **Los guardias se asignan aquí**, desde la ficha del puesto (`pauta.titular.asignar`).
+3. **Pauta:** se **ve** el resultado y se **pinta**. El titular ya está elegido; la Pauta sugiere solo a los guardias vinculados a la instalación (el mismo criterio con que se valida la asignación).
+
+**Consecuencias.**
+
+- Asignar o quitar al titular de un puesto es una sola operación: fija la serie de la Pauta, deja el puesto en el vínculo del guardia, suelta al titular anterior, pasa el puesto a «cubierto» o PPC, deja la bitácora con quién lo hizo y emite `pauta.serie.fijada`, todo en la misma transacción. `pauta.series.fijar` sigue disponible para fijar o corregir el ciclo desde la Pauta.
+- Un guardia no puede quedar como titular de dos puestos a la vez por esta vía (un vínculo tiene un solo puesto): el traslado entre puestos va por su propio flujo (CAR-207), que reutiliza `fijarSerieInterna`.
+- No se crea tabla ni migración: el historial de titulares se arma con `pauta.series` y la bitácora de la Pauta.
