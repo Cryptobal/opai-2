@@ -6,6 +6,7 @@ import { Alerta, AuthCard, Button, Campo, Input } from "@opai/ds";
 
 import { accionEmparejar, type EstadoEmparejar } from "@/app/_acciones/dispositivos";
 import { LinkNext } from "@/app/_components/link-next";
+import { borrarColaLocal } from "@/lib/terreno/cola";
 
 type Props = {
   estado: "codigo" | "listo" | "revocado";
@@ -18,9 +19,10 @@ export function PantallaEmparejar({ estado, identificador, codigoInicial }: Prop
   const [r, emparejar, pendiente] = useActionState(accionEmparejar, {
     tipo: "inicial",
   } as EstadoEmparejar);
-  // Un equipo revocado borra los datos locales de la instalación (cola y cachés llegan con B3).
+  // Un equipo revocado borra los datos locales de la instalación (la cola de hechos y los datos guardados).
   useEffect(() => {
     if (estado !== "revocado") return;
+    void borrarColaLocal(); // Los hechos pendientes de un equipo revocado ya no se enviarían: se descartan.
     try {
       localStorage.clear();
       sessionStorage.clear();

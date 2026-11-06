@@ -77,3 +77,33 @@ model CodigoEmparejamiento {
   @@map("codigos_emparejamiento")
   @@schema("core")
 }
+
+/// Hecho que un equipo de terreno capturó (posiblemente sin señal) y envió en lote (CAR-78 · B3). Solo
+/// inserción: nada se edita ni se borra, una corrección es un hecho nuevo (ADR-023). La hora del servidor
+/// (`recibido_en`) manda; `hora_corregida` lleva la hora del equipo a la del servidor con el desfase del envío.
+model HechoTerreno {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  dispositivoId    String   @map("dispositivo_id") @db.Uuid
+  instalacionId    String   @map("instalacion_id") @db.Uuid
+  /// Clave de idempotencia que genera el equipo: reenviar el mismo hecho no lo duplica.
+  clave            String   @db.Uuid
+  /// Tipo de la lista blanca (`terreno.latido`, y los que declaren Rondas, Asistencia, Novedades y Acceso).
+  tipo             String
+  payload          Json
+  /// Persona elegida en «¿Quién eres?»: declarada, no autenticada.
+  personaId        String?  @map("persona_id") @db.Uuid
+  horaHecho        DateTime @map("hora_hecho") @db.Timestamptz(6)
+  horaEnvio        DateTime @map("hora_envio") @db.Timestamptz(6)
+  recibidoEn       DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
+  /// recibido_en − hora_envio, en segundos (positivo: el equipo va atrasado).
+  desfaseSegundos  Int      @map("desfase_segundos")
+  horaCorregida    DateTime @map("hora_corregida") @db.Timestamptz(6)
+  desfaseAlto      Boolean  @default(false) @map("desfase_alto")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, dispositivoId, clave])
+  @@index([tenantId, instalacionId, horaCorregida(sort: Desc)])
+  @@map("hechos_terreno")
+  @@schema("core")
+}

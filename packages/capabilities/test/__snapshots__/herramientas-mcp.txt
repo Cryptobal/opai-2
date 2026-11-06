@@ -183,6 +183,7 @@ core_funciones_update
 core_geo_autocompletar
 core_geo_detalle
 core_geo_geocodificar
+core_hechos_terreno_listar
 core_ia_probar
 core_indicadores_uf_utm
 core_inicio_indicadores
