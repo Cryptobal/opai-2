@@ -1,12 +1,14 @@
 // Factoring en el flujo (ADR-073, regla 4): el ingreso de una factura cedida es el depósito neto del factor, no la
 // factura; la diferencia (monto − depósito) es solo informativa. Solo lectura.
-import { lunesDe } from "@opai/domain";
+import { lunesDe, sumarDiasCobro } from "@opai/domain";
 
 import type { Contexto } from "../types";
 import { hoyChile, type IngresoEsperado } from "./cobro-esperado-datos";
 
 const fechaChile = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(d);
 const iso = (d: Date) => d.toISOString().slice(0, 10);
+/** Cuánto tiempo se sigue mostrando la diferencia de una cesión ya financiada. */
+const DIAS_HISTORIA_FINANCIADA = 56;
 
 export type DiferenciaFactoring = { cesionId: string; semana: string; monto: number; factorNombre: string | null; folio: number | null };
 
@@ -21,9 +23,16 @@ export async function cesionesEsperadas(
 ): Promise<{ depositos: (IngresoEsperado & { rutFactor: string; cesionId: string })[]; diferencias: DiferenciaFactoring[] }> {
   const lunesActual = lunesDe(hoy);
   const cesiones = await ctx.db.cesion.findMany({
-    where: { estado: { notIn: ["simulada", "anulada"] } },
+    // Vigentes: enviada y aprobada esperan el depósito; financiada ya lo recibió (solo se muestra su diferencia, y
+    // solo mientras es reciente). simulada, anulada y cualquier estado final distinto no proyectan nada.
+    where: {
+      OR: [
+        { estado: { in: ["enviada", "aprobada"] } },
+        { estado: "financiada", updatedAt: { gte: new Date(`${sumarDiasCobro(lunesActual, -DIAS_HISTORIA_FINANCIADA)}T00:00:00Z`) } },
+      ],
+    },
     select: {
-      id: true, anticipo: true, createdAt: true, factorRut: true, factorNombre: true,
+      id: true, estado: true, updatedAt: true, anticipo: true, createdAt: true, factorRut: true, factorNombre: true,
       documento: { select: { id: true, montoTotal: true, folio: true, cuentaId: true, instalacionId: true } },
     },
   });
@@ -41,6 +50,11 @@ export async function cesionesEsperadas(
       const real = propias.reduce((t, x) => t + Number(x.monto), 0);
       const fecha = propias.map((x) => iso(x.movimiento.fecha)).sort().at(-1) ?? hoy;
       diferencias.push({ cesionId: c.id, semana: lunesDe(fecha), monto: Math.max(0, c.documento.montoTotal - real), factorNombre: c.factorNombre, folio });
+      continue;
+    }
+    if (c.estado === "financiada") {
+      // El factor ya depositó: el ingreso lo trae la cartola (y el saldo del banco); no se proyecta otro.
+      diferencias.push({ cesionId: c.id, semana: lunesDe(fechaChile(c.updatedAt)), monto: Math.max(0, c.documento.montoTotal - c.anticipo), factorNombre: c.factorNombre, folio });
       continue;
     }
     const semana = lunesDe(fechaChile(c.createdAt)) < lunesActual ? lunesActual : lunesDe(fechaChile(c.createdAt));

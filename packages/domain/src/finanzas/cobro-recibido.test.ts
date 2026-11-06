@@ -41,4 +41,20 @@ describe("emparejarAbonosConCobros", () => {
     expect([...r.seguros.keys()]).toEqual(["f2"]);
     expect(r.posibles).toEqual([]);
   });
+
+  it("un abono con el RUT del factor no lo gasta una factura ajena de igual monto (seguros antes que posibles, entre conjuntos)", () => {
+    const r = emparejarAbonosConCobros({
+      abonos: [abono("a1", 5_000_000, "ABONO 99.999.999-9")],
+      cobros: [cobro("factura-otro-cliente", 5_000_000, "76123456-0"), cobro("deposito-factor", 5_000_000, "99999999-9")],
+    });
+    expect([...r.seguros.entries()]).toEqual([["deposito-factor", "a1"]]);
+    expect(r.posibles).toEqual([]);
+  });
+  it("un cobro con ventana no empareja abonos anteriores a su fecha", () => {
+    const r = emparejarAbonosConCobros({
+      abonos: [{ ...abono("a1", 100_000, "DE 76.123.456-0"), fecha: "2026-11-02" }],
+      cobros: [{ ...cobro("f1", 100_000, "76123456-0"), desde: "2026-11-09" }],
+    });
+    expect(r.seguros.size + r.posibles.length).toBe(0);
+  });
 });
