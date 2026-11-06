@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Alerta, avisar, Button, Checkbox, Campo, Input } from "@opai/ds";
 
@@ -22,7 +22,11 @@ export function EditorFlujoCaja({
   // La lista se actualiza al instante con lo que devuelve cada capacidad y se vuelve a alinear cuando el
   // servidor revalida la página (CAR-198/CAR-220).
   const [lista, setLista] = useState(filas);
-  useEffect(() => setLista(filas), [filas]);
+  const [filasPrevias, setFilasPrevias] = useState(filas);
+  if (filas !== filasPrevias) {
+    setFilasPrevias(filas);
+    setLista(filas);
+  }
   const ingresos = lista.filter((f) => f.seccion === "ingreso");
   const egresos = lista.filter((f) => f.seccion === "egreso");
 
