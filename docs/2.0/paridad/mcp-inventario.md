@@ -330,6 +330,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/cierre/_componentes` | `finanzas.cierre.tablero` | `finanzas_cierre_tablero` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.generar_codigo` | `core_dispositivos_generar_codigo` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.listar` | `core_dispositivos_listar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.dispositivos.revocar` | `core_dispositivos_revocar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
@@ -633,6 +636,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/candidatos-documento.ts#buscarCandidatosDocumento` | Selector «Vincular a» del explorador de Documentos: lee con core.{cuentas,instalaciones,personas}.list (herramientas MCP existentes, alcance en la consulta) y devuelve solo id y nombre. |
 | `app/_acciones/capacidad.ts#cambiarTenant` | Sesión humana: elige la empresa de la cookie; una key ya pertenece a una empresa. |
 | `app/_acciones/capacidad.ts#ejecutarCapacidad` | Pasarela de la UI: ejecuta cualquier capacidad no interna (su herramienta MCP es la de esa capacidad). |
+| `app/_acciones/dispositivos.ts#accionEmparejar` | Identidad de dispositivo: Terreno › Emparejar canjea el código de 6 caracteres (core.dispositivos.generar_codigo) por el token del equipo (CAR-78 B2); sin sesión, tope por origen con fallo cerrado. |
+| `app/_acciones/dispositivos.ts#qrDeEmparejamiento` | Presentación: dibuja el QR del código que ya generó core.dispositivos.generar_codigo; no lee ni escribe datos. |
 | `app/_acciones/ingreso-pin.ts#accionEntrarConPin` | Identidad: ingreso del Portal Trabajador con RUT + PIN (CAR-78, D-02); abre una sesión, no es una operación de negocio. Tope por RUT y origen con fallo cerrado; bloqueo y auditoría en @opai/auth. |
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
 | `app/_acciones/mfa.ts#accionDesactivarMfa` | Identidad: desactiva el segundo factor propio. |
@@ -834,6 +839,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.audit.list`
 - `core.bitacora.verificar`
 - `core.consumos.por_recurso`
+- `core.dispositivos.estado`
 - `core.documentos.desvincular`
 - `core.documentos.vencimientos`
 - `core.documentos.vincular`

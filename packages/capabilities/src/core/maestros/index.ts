@@ -62,13 +62,13 @@ import { personasLaboralActualizar, personasLaboralVer } from "./personas-labora
 import { cargosMontosPorInstalacion } from "./cargos-montos-instalacion";
 import { puestosCreate, puestosUpdate } from "./puestos-escritura";
 import { puestosSetEstado } from "./puestos-estado";
-import { capacidadesCredencialesTerreno } from "../terreno";
+import { capacidadesTerreno } from "../terreno";
 import { puestosGet, puestosList } from "./puestos";
 import { vinculosCreate, vinculosList, vinculosTerminar, vinculosUpdate } from "./vinculos";
 
 /** Maestros del núcleo (Brief 02, sesión B, bloque 6): una sola declaración para UI, API y MCP. */
 export const capacidadesMaestros: readonly Capacidad[] = [
-  ...capacidadesCredencialesTerreno,
+  ...capacidadesTerreno,
   cuentasList,
   cuentasGet,
   cuentasCreate,

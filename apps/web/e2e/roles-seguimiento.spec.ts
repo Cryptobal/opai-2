@@ -25,6 +25,8 @@ async function capturar(page: Page, info: TestInfo, nombre: string) {
 test("Inspector con base supervisor: menú efectivo y dirección de Empresa de solo lectura", async ({
   page,
 }, info) => {
+  // Login y ocho rutas en frío bajo `next dev` en un runner de 2 vCPU: no caben en los 90 s por defecto (CAR-199).
+  test.setTimeout(240_000);
   const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
   if (!password) throw new Error("Falta contraseña E2E");
   await page.goto("/login");

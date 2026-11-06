@@ -9,6 +9,7 @@ import {
   sinDesborde,
   vista,
 } from "./negocios-ayuda";
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-33 a 375, 1024 y 1280 px (y 384 px en teléfono): cambio Tablero/Lista que conserva filtros y
@@ -105,6 +106,8 @@ test.describe("Negocios · CAR-33", () => {
   }, info) => {
     const id = `${info.project.name} ${Date.now().toString(36)}`;
     const foto = (n: string) => page.screenshot({ path: info.outputPath(`${n}.png`) });
+    // El indicador de Next (dev) tapa «Cancelar» del diálogo a 375 px y el clic agota el tiempo (CAR-199).
+    await ocultarIndicadorDev(page);
     await entrar(page);
 
     // El botón deshabilitado explica qué falta.

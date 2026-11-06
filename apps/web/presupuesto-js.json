@@ -35,6 +35,7 @@
     "/(erp)/personas/[id]/actividad": 170,
     "/(erp)/instalaciones/[id]/documentos": 170,
     "/(erp)/instalaciones/[id]/rondas": 170,
+    "/(erp)/instalaciones/[id]/dispositivos": 170,
     "/(erp)/remuneraciones/calendario": 175,
     "/(erp)/remuneraciones/novedades": 174,
     "/(erp)/remuneraciones/[id]": 170,

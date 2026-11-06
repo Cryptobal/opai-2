@@ -94,3 +94,14 @@ export {
   type ProponerPrevisionalInput,
 } from "./remuneraciones-previsional";
 export { type AvisoCorreoBloqueo, type EntradaBloqueo, registrarBloqueoPin } from "./pin-bloqueo";
+export {
+  dispositivoPorToken,
+  emparejarDispositivo,
+  hmacDispositivo,
+  LARGO_CODIGO,
+  normalizarCodigo,
+  nuevoCodigoEmparejamiento,
+  VIGENCIA_CODIGO_MIN,
+  type DispositivoEmparejado,
+  type DispositivoReconocido,
+} from "./dispositivos";

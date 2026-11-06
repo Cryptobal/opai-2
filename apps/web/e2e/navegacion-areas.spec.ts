@@ -20,6 +20,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   // La Bandeja vive solo en /bandeja (CAR-182): Inicio ya no la repite.
   await page.goto("/bandeja");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
+  // Navegar antes de que la Bandeja termine de hidratar deja a React hidratando /cuentas contra el HTML de /bandeja.
+  await page.waitForLoadState("networkidle");
   const nav = page
     .getByRole("navigation", { name: "Principal", exact: true })
     .filter({ visible: true });
