@@ -48,17 +48,23 @@ export type OpcionesSerie = {
   ) => Promise<void>;
   /** Quitar al titular no exige que el patrón siga activo. */
   quitar?: boolean;
+  /**
+   * Solo para vistas previas de operaciones compuestas (traslado): `cierres` son series de la persona
+   * que la operación real cerrará antes (puesto → último día) y `sinVinculo` que su vínculo en la
+   * instalación aún no existe. No tiene efecto en la escritura real.
+   */
+  simular?: { cierres?: Record<string, string>; sinVinculo?: boolean };
   /** Datos extra (sin personas ni texto libre) para la línea del historial. */
   detalle?: Record<string, string | number | null>;
 };
 
 /** Valida todo lo que no depende de la escritura y devuelve lo necesario para armar la vista. */
-async function planear(ctx: Contexto, i: EntradaSerie, quitar = false) {
+async function planear(ctx: Contexto, i: EntradaSerie, quitar = false, sim?: OpcionesSerie["simular"]) {
   const puesto = await puestoParaPauta(ctx, i.puestoId);
   const patron = await ctx.db.patronTurno.findUnique({ where: { id: i.patronId } });
   if (!patron) throw noEncontrado("El patrón de turno");
   if (!patron.activo && !quitar) throw reglaDeNegocio(`El patrón «${patron.nombre}» está desactivado.`);
-  if (i.titularPersonaId) {
+  if (i.titularPersonaId && !sim?.sinVinculo) {
     const ok = await ctx.db.persona.findFirst({
       where: {
         id: i.titularPersonaId,
@@ -87,6 +93,7 @@ async function planear(ctx: Contexto, i: EntradaSerie, quitar = false) {
       desde: i.desde,
       horaInicio: puesto.horaInicio,
       horaFin: puesto.horaFin,
+      cierres: sim?.cierres,
     });
   return { puesto, patron };
 }
@@ -101,7 +108,7 @@ export async function fijarSerieInterna(
   input: EntradaSerie,
   op: OpcionesSerie,
 ): Promise<SalidaSerie> {
-  const { puesto, patron } = await planear(ctx, input, op.quitar);
+  const { puesto, patron } = await planear(ctx, input, op.quitar, op.simular);
   await op.validar?.(ctx);
   const nombres = await nombresDePersonas(ctx, [input.titularPersonaId]);
   const titular = input.titularPersonaId ? (nombres.get(input.titularPersonaId) ?? null) : null;

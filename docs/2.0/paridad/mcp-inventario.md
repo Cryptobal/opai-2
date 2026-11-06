@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 628 pares pantalla→capacidad · 565 con herramienta · 63 excepciones justificadas · 0 faltantes.
+**Resumen:** 629 pares pantalla→capacidad · 566 con herramienta · 63 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -362,6 +362,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.asignar` | `pauta_titular_asignar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `pauta.titular.trasladar` | `pauta_titular_trasladar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.actualizar` | `rondas_plantillas_actualizar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.crear` | `rondas_plantillas_crear` | existe |

@@ -122,6 +122,11 @@ describe.skipIf(!urlPropietario)("Pauta · asignar titular (Postgres real)", () 
     expect(items.items[1]!.hasta).toBe(dia(9));
     expect(items.items.every((i) => i.fijadaEn)).toBe(true);
     expect(items.candidatos.map((c) => c.id)).not.toContain(per.lejos);
+    const destinos = (lista as { data: { destinos: { id: string }[] } }).data.destinos.map((d) => d.id);
+    expect(destinos).toContain(p.otro);
+    expect(destinos).not.toContain(p.dia);
+    expect(destinos).not.toContain(p.sinPatron);
+    expect(destinos).not.toContain(p.b);
     await mod.despacharPendientes(ctx(t.A));
     const turnos = await e.admin.turnoEsperado.findMany({ where: { tenantId: t.A, puestoId: p.dia, vigente: true } });
     expect(turnos.filter((x) => x.fecha.toISOString().slice(0, 10) >= desde).every((x) => x.personaId === per.luis)).toBe(true);
