@@ -120,6 +120,20 @@ describe("core.modules.probar", () => {
   });
 });
 
+describe("core.modules.probar · dependencias de un módulo", () => {
+  it("no abre un módulo con su dependencia sin contratar", async () => {
+    limpiarModulos();
+    const dependiente = defineModule({ ...modulo("cpq"), dependencias: ["comercial"] });
+    registrarModulos([dependiente, modulo("comercial")]);
+    const { ctx, tabla } = contexto();
+    expect(await executeCapability(ctx, "core.modules.probar", probar("cpq"))).toMatchObject({
+      ok: false,
+      error: { message: expect.stringContaining("activa antes comercial") },
+    });
+    expect(tabla("pruebaGratis")).toHaveLength(0);
+  });
+});
+
 describe("platform.cobros.prueba_gratis_extender", () => {
   const prueba = (hasta: string, estado = "trial", extensiones = 0) => ({
     pruebaGratis: [
@@ -229,6 +243,17 @@ describe("trabajo core.pruebas_gratis.cerrar", () => {
     expect(await trabajoPruebasGratis.ejecutar(ctx, { dia: hoyStr() })).toMatchObject({
       cerradas: [],
     });
+  });
+
+  it("no cierra una prueba que Plataforma ya extendió", async () => {
+    const { ctx, tabla } = contexto({
+      pruebaGratis: [fila("cpq", enDias(5))],
+      tenantModule: [mod("cpq", "trial")],
+    });
+    expect(await trabajoPruebasGratis.ejecutar(ctx, { dia: hoyStr() })).toMatchObject({
+      cerradas: [],
+    });
+    expect(tabla("tenantModule")).toMatchObject([{ estado: "trial" }]);
   });
 
   it("el último día todavía vale", async () => {

@@ -70,11 +70,13 @@ export const platformCobrosPruebaGratisExtender = defineCapability({
       estadoModulo: "trial",
     };
     if (!dryRun) {
-      await e.actualizarPruebaGratis(input.moduloId, aFecha(hasta), salida.extensiones);
+      // El módulo primero (idempotente) y la fecha al final: si algo falla a medias, reintentar no
+      // extiende dos veces.
       if (estado !== "trial") {
         await e.fijarModulo(modulo, "trial");
         await e.sembrarModulo(modulo);
       }
+      await e.actualizarPruebaGratis(input.moduloId, aFecha(hasta), salida.extensiones);
     }
     return salida;
   },

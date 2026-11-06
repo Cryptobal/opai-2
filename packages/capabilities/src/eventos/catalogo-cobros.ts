@@ -18,8 +18,4 @@ export const EVENTOS_COBROS: readonly EventoDeDominio[] = [
     id: "core.prueba_gratis.vencida",
     descripcion: "Terminó la prueba gratis de una empresa: el módulo quedó en solo lectura.",
   },
-  {
-    id: "core.prueba_gratis.extendida",
-    descripcion: "Plataforma extendió o reactivó la prueba gratis de una empresa.",
-  },
 ];

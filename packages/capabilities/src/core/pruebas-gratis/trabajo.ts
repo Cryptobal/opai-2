@@ -22,11 +22,13 @@ export const trabajoPruebasGratis = defineTrabajo({
     });
     const cerradas: string[] = [];
     for (const p of vencidas) {
-      await ctx.transaccion(async (tx) => {
-        await tx.pruebaGratis.updateMany({
-          where: { tenantId, moduloId: p.moduloId, cerradaEn: null },
+      const cerrada = await ctx.transaccion(async (tx) => {
+        // Solo si sigue vencida: Plataforma pudo extenderla entre la lectura y aquí.
+        const { count } = await tx.pruebaGratis.updateMany({
+          where: { tenantId, moduloId: p.moduloId, cerradaEn: null, hasta: { lt: aFecha(dia) } },
           data: { cerradaEn: new Date() },
         });
+        if (!count) return false;
         const modulo = esParteFinanzas(p.moduloId) ? MODULO_FINANZAS : p.moduloId;
         const ids = modulo === MODULO_FINANZAS ? [MODULO_FINANZAS, ...PARTES_FINANZAS] : [modulo];
         const abiertas = await tx.pruebaGratis.count({
@@ -50,8 +52,9 @@ export const trabajoPruebasGratis = defineTrabajo({
           entidadTipo: "modulo",
           payload: { moduloId: p.moduloId },
         });
+        return true;
       });
-      cerradas.push(p.moduloId);
+      if (cerrada) cerradas.push(p.moduloId);
     }
     return { cerradas };
   },

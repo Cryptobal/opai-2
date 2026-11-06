@@ -74,6 +74,12 @@ export const modulesProbar = defineCapability({
       const falta = dependenciaFaltante(e.id, partesConPrecio(ids));
       if (falta) throw reglaDeNegocio(`${falta}: actívalo primero.`);
     }
+    // Un módulo completo respeta sus dependencias, como la prueba que abre Plataforma.
+    const faltan = (obtenerModulo(modulo)?.dependencias ?? []).filter(
+      (d) => !["activo", "trial", "solo_lectura"].includes(estados.get(d) ?? ""),
+    );
+    if (!parte && faltan.length)
+      throw reglaDeNegocio(`${e.nombre}: activa antes ${faltan.join(", ")}.`);
     const inicio = hoy();
     const hasta = finDePruebaGratis(inicio);
     const salida = { moduloId: e.id, nombre: e.nombre, inicio, hasta, dias: DIAS_PRUEBA_GRATIS };
@@ -90,13 +96,13 @@ export const modulesProbar = defineCapability({
           },
         });
         // Sin el módulo contratado, la prueba lo pone «en prueba»; con uno ya en prueba (otra parte), no cambia.
+        // Crear solo si falta: si Plataforma lo activó o suspendió entre la lectura y aquí, no se degrada.
         if (!estados.get(modulo)) {
-          await tx.tenantModule.upsert({
-            where: { tenantId_moduloId: { tenantId, moduloId: modulo } },
-            update: { estado: "trial" },
-            create: { tenantId, moduloId: modulo, estado: "trial" },
+          const { count } = await tx.tenantModule.createMany({
+            data: [{ tenantId, moduloId: modulo, estado: "trial" }],
+            skipDuplicates: true,
           });
-          await sembrarModulo(modulo, tx, tenantId);
+          if (count) await sembrarModulo(modulo, tx, tenantId);
         }
         await ctx.eventos.emitir(tx, {
           tipo: "core.prueba_gratis.activada",
