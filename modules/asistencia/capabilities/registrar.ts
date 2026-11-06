@@ -59,8 +59,14 @@ export const marcasRegistrar = defineCapability({
       personaId: persona.id, metodo: i.metodo, credencial: i.credencial, motivoRespaldo: i.motivoRespaldo,
     });
     if (!id.ok) throw prohibido("No se pudo verificar tu identidad. Usa tu PIN o pide ayuda a RR. HH.");
+    const jornada = await ctx.db.personaJornadaDt.findUnique({
+      where: { personaId: persona.id }, select: { resolucion: true, resolucionVigenteDesde: true },
+    });
     const datos = {
       tenantId: ctx.tenantId, personaId: persona.id, instalacion,
+      resolucion: jornada?.resolucion
+        ? { numero: jornada.resolucion, fecha: jornada.resolucionVigenteDesde?.toISOString().slice(0, 10) ?? "" }
+        : null,
       radioM: instalacion.geocercaM ?? (await ajuste<number>(ctx, "asistencia", "geocerca_radio_m")),
       identidad: { metodo: id.metodo, motivoRespaldo: id.motivoRespaldo, confianza: id.confianza, pruebaVida: id.pruebaVida },
     };
