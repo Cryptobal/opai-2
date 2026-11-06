@@ -29,6 +29,8 @@ export interface Almacenamiento {
   urlDescarga(clave: string, nombre: string, segundos?: number): Promise<string>;
   /** Lee el objeto como texto UTF-8; null si no existe. */
   leerTexto(clave: string): Promise<string | null>;
+  /** Lee el objeto como bytes exactos, sin decodificar (XML firmado ISO-8859-1, ADR-075); null si no existe. */
+  leerBytes(clave: string): Promise<Buffer | null>;
   head(clave: string): Promise<ObjetoAlmacenado | null>;
   eliminar(clave: string): Promise<void>;
 }
@@ -101,6 +103,12 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
       if (!r.ok) throw new Error(`R2 respondió ${r.status} al leer el archivo.`);
       return r.text();
     },
+    async leerBytes(clave) {
+      const r = await cliente.fetch(`${base}/${codificar(clave)}`, { method: "GET" });
+      if (r.status === 404) return null;
+      if (!r.ok) throw new Error(`R2 respondió ${r.status} al leer el archivo.`);
+      return Buffer.from(await r.arrayBuffer());
+    },
     async head(clave) {
       const r = await cliente.fetch(`${base}/${codificar(clave)}`, {
         method: "HEAD",
@@ -129,6 +137,7 @@ export const almacenamientoNoDisponible: Almacenamiento = {
   subir: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
   urlDescarga: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
   leerTexto: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
+  leerBytes: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
   head: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
   eliminar: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
 };

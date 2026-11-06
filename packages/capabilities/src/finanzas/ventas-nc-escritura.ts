@@ -1,13 +1,13 @@
 import { CESION_DEFECTO_EMITIDO } from "@opai/domain";
 
-import { aFecha, hoy } from "../core/maestros/comun";
+import { aFecha } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { adaptadorSiiDe } from "./adaptador-sii";
-import { consumirFolio, cuentaDe } from "./ventas-comun";
-import { payloadEmisionDteDe } from "./ventas-payload-emision";
+import { consumirFolio } from "./ventas-comun";
+import type { NcPreparada } from "./ventas-nc-preparar";
 import { debeAnularDocumentoOriginal } from "./ventas-nc-comun";
-import { guardarXmlFirmadoDte, claveXmlDte } from "./ventas-xml";
+import { claveXmlDte } from "./ventas-xml";
 
 type RefDoc = {
   id: string;
@@ -42,41 +42,22 @@ export async function persistirNotaCredito(
     restante: number;
   },
   tx: Contexto["db"],
+  preparada: NcPreparada,
 ) {
   const folioEmitido = await consumirFolio(ctx, 61, false, tx);
-  const emision = hoy();
+  if (folioEmitido !== preparada.folio) {
+    throw reglaDeNegocio("El folio cambió mientras se firmaba la nota de crédito; reintente la emisión.");
+  }
+  const m = p.montos;
+  const f = preparada.montos;
+  if (m.neto !== f.neto || m.exento !== f.exento || m.iva !== f.iva || m.total !== f.total) {
+    throw reglaDeNegocio("Los montos cambiaron mientras se firmaba la nota de crédito; reintente la emisión.");
+  }
+  const emision = preparada.fechaEmision;
   const adaptador = await adaptadorSiiDe(ctx);
-  const cuenta = await cuentaDe(ctx, p.ref.cuentaId);
-  const rutReceptor = cuenta.rut;
-  if (!rutReceptor) throw reglaDeNegocio("El cliente debe tener RUT para emitir la nota de crédito.");
-  const payload = await payloadEmisionDteDe(ctx, {
-    ambiente: p.ambiente,
-    rutEmisor: p.rutEmisor,
-    cuenta: { ...cuenta, rut: rutReceptor },
-    doc: {
-      tipoDte: 61,
-      folio: folioEmitido,
-      fechaEmision: emision,
-      glosa: p.motivo,
-      montoNeto: p.montos.neto,
-      montoExento: p.montos.exento,
-      montoIva: p.montos.iva,
-      montoTotal: p.montos.total,
-      lineas: [{ orden: 0, glosa: p.motivo, monto: p.montoLinea }],
-      referencias: [
-        {
-          tipoDteRef: p.ref.tipoDte,
-          folioRef: p.folioRef,
-          codigoRef: p.codigoReferencia,
-          razonRef: p.motivo,
-        },
-      ],
-    },
-    incluirCaf: adaptador.nombre !== "simulado",
-  });
-  const firmado = await adaptador.firmar(payload);
   const doc = await tx.documentoEmitido.create({
     data: {
+      id: preparada.documentoId,
       tenantId: ctx.tenantId,
       cuentaId: p.ref.cuentaId,
       instalacionId: p.ref.instalacionId,
@@ -92,7 +73,7 @@ export async function persistirNotaCredito(
       montoTotal: p.montos.total,
       estadoDte: "enviado",
       glosa: p.motivo,
-      timbrePdf417: firmado.timbrePdf417,
+      timbrePdf417: preparada.timbrePdf417,
       documentoReferenciaId: p.ref.id,
       codigoReferencia: p.codigoReferencia,
       motivoNc: p.motivo,
@@ -112,7 +93,6 @@ export async function persistirNotaCredito(
     },
   });
   if (adaptador.nombre !== "simulado") {
-    await guardarXmlFirmadoDte(ctx, doc.id, firmado.xml);
     await tx.documentoEmitido.update({
       where: { id: doc.id },
       data: { xmlStorageKey: claveXmlDte(doc.id) },

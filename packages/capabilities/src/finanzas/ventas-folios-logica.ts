@@ -63,6 +63,29 @@ export async function consumirFolio(
   return ctx.transaccion((t) => reservarFolioEnTx(t, tipoDte, dryRun));
 }
 
+/**
+ * Los próximos `cantidad` folios que se asignarían, sin consumirlos (lectura corta fuera de la transacción de
+ * la escritura). Sirven para firmar antes de abrirla: dentro, `consumirFolio` debe devolver los mismos; si otro
+ * proceso se adelantó, la emisión pide reintentar y el XML firmado se descarta sin haber enviado nada al SII.
+ */
+export async function foliosPrevistos(ctx: TxLike, tipoDte: TipoDteVenta, cantidad: number): Promise<number[]> {
+  const hoyIso = hoy();
+  const rangos = await ctx.db.dteFolio.findMany({
+    where: { tipoDte, activo: true },
+    orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
+  });
+  const folios: number[] = [];
+  for (const r of rangos) {
+    if (cafVencido(r.cafVenceEn?.toISOString().slice(0, 10) ?? null, hoyIso)) continue;
+    for (let f = r.folioActual; f <= r.folioHasta && folios.length < cantidad; f++) folios.push(f);
+    if (folios.length >= cantidad) break;
+  }
+  if (folios.length < cantidad) {
+    throw reglaDeNegocio(`No hay folios disponibles para el DTE ${tipoDte}. Cargue un CAF.`);
+  }
+  return folios;
+}
+
 export type OpcionesFolioVista = {
   umbralFoliosPct: number;
   avisoCafDias: number;
@@ -109,7 +132,7 @@ export function folioVista(
 export async function marcarBorradorEmitido(
   tx: TenantTx,
   documentoId: string,
-  data: { folio: number; fechaEmision: Date; timbrePdf417: string },
+  data: { folio: number; fechaEmision: Date; timbrePdf417: string; xmlStorageKey?: string },
 ): Promise<void> {
   const { count } = await tx.documentoEmitido.updateMany({
     where: { id: documentoId, estadoDte: "borrador", folio: null },
@@ -118,7 +141,7 @@ export async function marcarBorradorEmitido(
       fechaEmision: data.fechaEmision,
       estadoDte: "enviado",
       timbrePdf417: data.timbrePdf417,
-      xmlStorageKey: `dte/${documentoId}.xml`,
+      xmlStorageKey: data.xmlStorageKey ?? `dte/${documentoId}.xml`,
       cesionEstado: "no_cedido",
     },
   });

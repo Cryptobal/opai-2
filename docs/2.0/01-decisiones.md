@@ -1443,6 +1443,8 @@ identidad de servicio en main.
 
 **Prueba obligatoria.** Una emisión y una cesión en certificación con «Compañía Ñuñoa» en la razón social y tildes en la glosa: el hash del XML guardado coincide con el que devolvió SimpleAPI y la cesión lo acepta.
 
+**Adenda del 6-nov-2026 (decisión de Carlos, CAR-196).** La emisión real con SimpleAPI se hace **primero en certificación y después en producción**; la producción queda fuera de CAR-196 y detrás del candado de CAR-191 (solo `app.opai.cl`, solo con su habilitación expresa). Se usa SimpleAPI por REST con API key, que Carlos carga en Integraciones. Implementación (BRIEF-40): el XML firmado se guarda, hashea y lee como bytes ISO-8859-1 (`Almacenamiento.leerBytes`, `xml-iso.ts`) con prueba con ñ y tildes, y **la llamada a SimpleAPI va fuera de la transacción de base** (gancho `Capacidad.preparar` con el folio previsto; la transacción reclama el mismo folio o pide reintentar, sin quemar folios).
+
 ---
 
 ## ADR-076 · Los diseños de Finanzas se hacen como prototipo interactivo en la misma sesión

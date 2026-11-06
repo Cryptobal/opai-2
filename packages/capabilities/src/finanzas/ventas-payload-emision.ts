@@ -11,6 +11,7 @@ type DocEmision = {
   tipoDte: number;
   folio: number;
   fechaEmision: string;
+  fechaVencimiento?: string;
   glosa: string | null;
   montoNeto: number;
   montoExento: number;
@@ -70,6 +71,7 @@ export async function payloadEmisionDteDe(
     tipoDte: tipo,
     folio: p.doc.folio,
     fechaEmision: p.doc.fechaEmision,
+    ...(p.doc.fechaVencimiento ? { fechaVencimiento: p.doc.fechaVencimiento } : {}),
     rutEmisor: p.rutEmisor,
     rutReceptor: p.cuenta.rut!,
     ...camposReceptorDteEnPayload(p.cuenta),
