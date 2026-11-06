@@ -29,6 +29,7 @@ export {
   VIGENCIA_ENLACE_SEGUNDOS,
   VIGENCIA_RECUPERACION_SEGUNDOS,
 } from "./opciones";
+export { entrarConPin, type ResultadoPin } from "./pin";
 export { correoDeRecuperacion } from "./recuperacion";
 export { getSession, requireSession, sesionDeRequest, type Sesion } from "./session";
 export { crearUsuarioConPassword } from "./usuarios";

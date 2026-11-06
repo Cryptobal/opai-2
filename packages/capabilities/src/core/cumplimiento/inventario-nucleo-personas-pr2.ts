@@ -66,6 +66,14 @@ export const INVENTARIO_PERSONAS_PR2 = defineDatosPersonales("core", [
     reguladoNoBorrable: true,
   },
   {
+    tabla: "credenciales_terreno",
+    finalidad:
+      "PIN de terreno de la persona (solo su hash) como identificación secundaria sin biometría; el RUT es copia del de la persona para el ingreso.",
+    categorias: ["identificacion", "laboral"],
+    campos: ["rut", "telefono_personal_habilitado"],
+    baseLicitud: "relacion_laboral",
+  },
+  {
     tabla: "personas_os10",
     finalidad: "Credencial OS-10 y su vencimiento para la persona.",
     categorias: ["laboral"],

@@ -1,4 +1,4 @@
-import { Bell, ShieldCheck, UserRound } from "lucide-react";
+import { Bell, KeyRound, ShieldCheck, UserRound } from "lucide-react";
 
 import { FilaSeleccionable } from "@opai/ds";
 
@@ -10,6 +10,7 @@ export const metadata = { title: tituloPagina("trabajador", "Más") };
 
 const ENTRADAS = [
   { href: "/trabajador/mis-datos", titulo: "Mis datos", detalle: "Teléfono, correo y dirección", Icono: UserRound },
+  { href: "/trabajador/cambiar-pin", titulo: "Cambiar mi PIN", detalle: "El PIN de 6 dígitos de terreno", Icono: KeyRound },
   { href: "/trabajador/notificaciones", titulo: "Notificaciones", detalle: "Qué avisos recibes y cuándo", Icono: Bell },
   { href: "/trabajador/privacidad", titulo: "Privacidad", detalle: "Tus derechos sobre tus datos", Icono: ShieldCheck },
 ] as const;

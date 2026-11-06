@@ -1,5 +1,6 @@
 export { Avatar, type AvatarProps, iniciales, Monograma } from "./avatar";
 export { Badge, type BadgeProps } from "./badge";
+export { TecladoPin, type TecladoPinProps } from "./teclado-pin";
 export { BloquePlegable, type BloquePlegableProps } from "./bloque-plegable";
 export { Banda } from "./banda";
 export { BarraProgreso, tonoUso } from "./barra-progreso";

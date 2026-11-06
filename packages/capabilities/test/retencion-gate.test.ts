@@ -57,6 +57,7 @@ describe("ajustes de la política", () => {
     expect(reglasPendientes().map((r) => r.clave).sort()).toEqual(
       [
         "aprobaciones",
+        "credenciales_terreno",
         "cuentas",
         "documentos",
         "gasto_agente_mes",

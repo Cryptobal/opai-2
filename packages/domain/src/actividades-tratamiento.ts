@@ -58,6 +58,7 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
     "personas_uniforme",
     "personas_jornada_dt",
     "personas_os10",
+    "credenciales_terreno",
     "personas_contacto_laboral",
   ] },
   { id: 2, actividad: "Sueldos y estructuras", categoriaPrincipal: "Económica", baseLicitud: "relacion_laboral", tablas: ["estructuras_sueldo"] },

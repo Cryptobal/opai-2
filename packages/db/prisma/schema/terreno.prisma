@@ -1,0 +1,34 @@
+// Terreno (CAR-78, Operaciones · Base · Code). Identidad de terreno: RUT + PIN de 6 dígitos como
+// mecanismo secundario siempre disponible y sin biometría (D-02, Res. Ex. 38 art. 57). Las FKs a
+// `core.tenants` y `core.personas` viven en la migración (como en `rendiciones`): no se toca
+// `maestros.prisma` para declarar la relación inversa.
+
+/// Credencial de terreno de una persona: el PIN solo existe como hash scrypt (mismo formato que las
+/// contraseñas de Better Auth), nunca en claro. Una por persona y empresa. `rut` es una copia canónica
+/// del RUT de la persona para que el ingreso la encuentre sin tenant fijado (función SECURITY DEFINER);
+/// el ingreso la contrasta con la persona dentro de la empresa antes de aceptarla.
+model CredencialTerreno {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  personaId       String    @unique @map("persona_id") @db.Uuid
+  rut             String
+  pinHash         String    @map("pin_hash")
+  intentosFallidos Int      @default(0) @map("intentos_fallidos")
+  bloqueadoHasta  DateTime? @map("bloqueado_hasta") @db.Timestamptz(6)
+  pinCambiadoEn   DateTime? @map("pin_cambiado_en") @db.Timestamptz(6)
+  /// El PIN lo fijó RR. HH.: el trabajador debe cambiarlo en su primer ingreso.
+  debeCambiar     Boolean   @default(true) @map("debe_cambiar")
+  /// Usuario (RR. HH.) que lo asignó o restableció por última vez.
+  asignadoPor     String?   @map("asignado_por") @db.Uuid
+  asignadoEn      DateTime? @map("asignado_en") @db.Timestamptz(6)
+  /// Preparación de T-04 (D-01): el teléfono personal se habilita por persona. El flujo de
+  /// consentimiento y su costo van con Face ID; aquí solo existe la bandera, apagada por defecto.
+  telefonoPersonalHabilitado Boolean @default(false) @map("telefono_personal_habilitado")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId])
+  @@index([rut])
+  @@map("credenciales_terreno")
+  @@schema("core")
+}
