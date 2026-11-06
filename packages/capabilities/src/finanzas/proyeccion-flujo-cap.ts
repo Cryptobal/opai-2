@@ -1,27 +1,10 @@
 import { z } from "zod";
 
-import {
-  type IngresoProyectadoDesdeDte,
-  ingresosEnHorizonte,
-  notasCreditoConReferenciaVigente,
-} from "@opai/domain";
+import { lunesDe, sumarDiasCobro } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { hoy } from "../core/maestros/comun";
 import { PERMISO_READ } from "./comun";
-import { ingresosDeProgramaciones } from "./ventas-programacion-proyeccion";
-
-const DIA_MS = 86_400_000;
-
-function lunesDe(iso: string): string {
-  const ms = Date.parse(`${iso}T00:00:00Z`);
-  const dia = (new Date(ms).getUTCDay() + 6) % 7;
-  return new Date(ms - dia * DIA_MS).toISOString().slice(0, 10);
-}
-
-function sumarSemanas(lunes: string, n: number): string {
-  return new Date(Date.parse(`${lunes}T00:00:00Z`) + n * 7 * DIA_MS).toISOString().slice(0, 10);
-}
+import { hoyChile, ingresosEsperados } from "./cobro-esperado-datos";
 
 const ingresoSchema = z.object({
   documentoEmitidoId: z.string().nullable(),
@@ -32,12 +15,17 @@ const ingresoSchema = z.object({
   monto: z.number().int(),
   etiqueta: z.string(),
   capa: z.enum(["real", "comprometido"]),
+  fechaEsperada: z.string().nullable().describe("Día esperado del cobro; null en las programaciones sin borrador."),
+  origenFecha: z
+    .enum(["manual", "promedio", "vencimiento", "emision", "programacion"])
+    .nullable()
+    .describe("De dónde sale la fecha: fijada a mano, promedio real de pago del cliente, vencimiento o emisión."),
 });
 
 export const ventasProyeccionFlujo = defineCapability({
   id: "finanzas.ventas.proyeccion_flujo",
   descripcion:
-    "Proyecta ingresos de cobro hacia el flujo de caja: borradores y programaciones recurrentes activas como comprometido, documentos enviados o aceptados como real, por semana de vencimiento. Una NC total deja la factura en cero.",
+    "Proyecta los ingresos de cobro hacia el flujo de caja con un solo criterio: la fecha esperada de cobro de cada factura (la fijada a mano, el promedio real de pago del cliente con 3 o más facturas pagadas, o el vencimiento). Lo vencido va a la semana en curso; cuenta lo pendiente (monto menos notas de crédito parciales y cobrado) y no las cedidas ni las notas de débito.",
   permiso: PERMISO_READ,
   input: z.object({
     semanas: z
@@ -52,42 +40,10 @@ export const ventasProyeccionFlujo = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const desde = lunesDe(hoy());
-    const hasta = sumarSemanas(desde, input.semanas - 1);
-    const filas = await ctx.db.documentoEmitido.findMany({
-      where: {
-        estadoDte: { in: ["borrador", "enviado", "aceptado"] },
-        fechaVencimiento: { not: null },
-        AND: [{ OR: [{ cesionEstado: null }, { cesionEstado: { not: "cedido" } }] }],
-      },
-      select: {
-        id: true,
-        cuentaId: true,
-        instalacionId: true,
-        tipoDte: true,
-        folio: true,
-        fechaVencimiento: true,
-        montoTotal: true,
-        estadoDte: true,
-        glosa: true,
-        documentoReferenciaId: true,
-      },
-    });
-    const items: IngresoProyectadoDesdeDte[] = notasCreditoConReferenciaVigente(filas).map((d) => {
-      const vence = d.fechaVencimiento!.toISOString().slice(0, 10);
-      const capa = d.estadoDte === "borrador" ? "comprometido" : "real";
-      const folio = d.folio != null ? ` folio ${d.folio}` : "";
-      return {
-        documentoEmitidoId: d.id,
-        cuentaId: d.cuentaId,
-        instalacionId: d.instalacionId,
-        semanaCobro: lunesDe(vence),
-        monto: d.tipoDte === 61 ? -d.montoTotal : d.montoTotal,
-        etiqueta: `DTE ${d.tipoDte}${folio}${d.glosa ? ` · ${d.glosa}` : ""}`,
-        capa,
-      };
-    });
-    const programadas = await ingresosDeProgramaciones(ctx, sumarSemanas(hasta, 1), lunesDe);
-    return { items: ingresosEnHorizonte([...items, ...programadas], desde, hasta) };
+    const hoy = hoyChile();
+    const desde = lunesDe(hoy);
+    const hasta = sumarDiasCobro(desde, 7 * (input.semanas - 1));
+    const todos = await ingresosEsperados(ctx, hoy, hasta);
+    return { items: todos.filter((i) => i.semanaCobro >= desde && i.semanaCobro <= hasta) };
   },
 });

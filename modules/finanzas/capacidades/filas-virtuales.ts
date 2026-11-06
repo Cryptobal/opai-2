@@ -12,11 +12,15 @@ export const FILA_SIN_CLASIFICAR_EGRESO = "00000000-0000-4000-8000-000000000002"
 export const FILA_SIN_CONCILIAR_INGRESO = "00000000-0000-4000-8000-000000000003";
 export const FILA_SIN_CONCILIAR_EGRESO = "00000000-0000-4000-8000-000000000004";
 
+/** Cobros esperados de las facturas por cobrar, con la fecha esperada de cobro (ADR-073). */
+export const FILA_COBROS_ESPERADOS = "00000000-0000-4000-8000-000000000005";
+
 export const FILAS_VIRTUALES_DOMINIO: FilaFlujo[] = [
   { id: FILA_SIN_CLASIFICAR_INGRESO, seccion: "ingreso", arrastre: false },
   { id: FILA_SIN_CLASIFICAR_EGRESO, seccion: "egreso", arrastre: false },
   { id: FILA_SIN_CONCILIAR_INGRESO, seccion: "ingreso", arrastre: false },
   { id: FILA_SIN_CONCILIAR_EGRESO, seccion: "egreso", arrastre: false },
+  { id: FILA_COBROS_ESPERADOS, seccion: "ingreso", arrastre: false },
 ];
 
 export const FILAS_VIRTUALES_VISTA: z.infer<typeof filaSchema>[] = [
@@ -54,6 +58,15 @@ export const FILAS_VIRTUALES_VISTA: z.infer<typeof filaSchema>[] = [
     vinculo: null,
     arrastre: false,
     orden: 9997,
+    activa: true,
+  },
+  {
+    id: FILA_COBROS_ESPERADOS,
+    seccion: "ingreso",
+    etiqueta: "Cobros esperados (facturas)",
+    vinculo: "finanzas:ventas",
+    arrastre: false,
+    orden: 9990,
     activa: true,
   },
 ];

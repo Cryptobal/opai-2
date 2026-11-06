@@ -85,6 +85,9 @@ model Correccion {
   motivo         String
   propuestaPorId String   @map("propuesta_por_id") @db.Uuid
   horaServidor   DateTime @map("hora_servidor") @db.Timestamptz(6)
+  /// Plazo vigente al proponer (parámetro con vigencia, ADR-021) y su vencimiento: se guardan en el hecho.
+  plazoHoras     Int      @default(48) @map("plazo_horas")
+  venceEn        DateTime? @map("vence_en") @db.Timestamptz(6)
   idempotencyKey String   @map("idempotency_key")
   hash           String
   hashAnterior   String   @map("hash_anterior")
@@ -112,6 +115,10 @@ model Contingencia {
   /// Documento de evidencia en core.documentos.
   evidenciaDocumentoId String? @map("evidencia_documento_id") @db.Uuid
   marcaId       String?  @map("marca_id") @db.Uuid
+  /// Quién la acepta o rechaza (distinto de quien la registró) y cuándo.
+  resueltaPorId String?  @map("resuelta_por_id") @db.Uuid
+  resueltaEn    DateTime? @map("resuelta_en") @db.Timestamptz(6)
+  motivoResolucion String? @map("motivo_resolucion")
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -138,5 +145,57 @@ model IncidenteTecnico {
 
   @@index([tenantId, inicio])
   @@map("incidentes_tecnicos")
+  @@schema("asistencia")
+}
+
+/// Respuesta a una corrección (aceptada | objetada | vencida): un hecho nuevo, solo se agrega. A lo más una
+/// por corrección. Objetar exige comentario. La respuesta del trabajador llega por el portal o por el enlace.
+model CorreccionRespuesta {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  correccionId  String   @map("correccion_id") @db.Uuid
+  resultado     String
+  comentario    String?
+  /// portal | enlace | sistema
+  canal         String
+  horaServidor  DateTime @map("hora_servidor") @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, correccionId])
+  @@map("correcciones_respuestas")
+  @@schema("asistencia")
+}
+
+/// Enlace personal para responder una corrección sin sesión (con la identificación por RUT): solo el hash.
+model CorreccionEnlace {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  correccionId String   @map("correccion_id") @db.Uuid
+  tokenHash    String   @unique @map("token_hash")
+  venceEn      DateTime @map("vence_en") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, correccionId])
+  @@map("correcciones_enlaces")
+  @@schema("asistencia")
+}
+
+/// Alerta emitida (art. 45 y correo personal): la clave única por (empresa, tipo, clave) hace idempotentes
+/// los trabajos: una alerta no se repite aunque el trabajo corra dos veces.
+model Alerta {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  /// sin_marca_inicio | sin_marca_termino | compensables | sin_correo_personal
+  tipo          String
+  clave         String
+  personaId     String   @map("persona_id") @db.Uuid
+  instalacionId String?  @map("instalacion_id") @db.Uuid
+  turnoEsperadoId String? @map("turno_esperado_id") @db.Uuid
+  datos         Json
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, tipo, clave])
+  @@index([tenantId, personaId, tipo, createdAt])
+  @@map("alertas")
   @@schema("asistencia")
 }
