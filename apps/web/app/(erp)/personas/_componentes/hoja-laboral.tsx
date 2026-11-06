@@ -59,7 +59,17 @@ export function HojaLaboral({ seccion, personaId, inicial, bloqueo }: Props) {
   const sinCambios = Object.keys(cambios).length === 0;
   const invalido = faltantes(cfg, v);
   async function guardar() {
-    if (!(await ejecutar(cfg.capacidad, cfg.armar(personaId, cambios)))) return;
+    const input = cfg.armar(personaId, cambios);
+    // Ids literales: el gate de paridad exige ver qué capacidad invoca la pantalla.
+    const r = await ejecutar(
+      seccion === "pago"
+        ? "core.personas.pago_solicitar_cambio"
+        : seccion === "prevision"
+          ? "core.personas.prevision_actualizar"
+          : "core.personas.laboral_actualizar",
+      input,
+    );
+    if (!r) return;
     avisar.exito(cfg.exito);
     hoja.cerrar();
   }
