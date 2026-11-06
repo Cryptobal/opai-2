@@ -16,6 +16,14 @@ export function FormularioPin({ inicial }: { inicial?: EstadoPin }) {
   );
   const [rut, setRut] = useState("");
   const [pin, setPin] = useState("");
+  // Tras un PIN incorrecto o una pausa se limpia el teclado; en el paso «elegir tu PIN» el PIN temporal
+  // debe quedarse: viaja otra vez con el PIN nuevo.
+  const [vistoN, setVistoN] = useState(0);
+  const nActual = "n" in estado ? estado.n : 0;
+  if (nActual !== vistoN) {
+    setVistoN(nActual);
+    if (estado.tipo === "error" || estado.tipo === "pausado") setPin("");
+  }
   const listo = pin.length === 6 && rut.replace(/[^0-9kK]/g, "").length >= 7;
   return (
     <AuthCard
@@ -50,13 +58,7 @@ export function FormularioPin({ inicial }: { inicial?: EstadoPin }) {
             "RR. HH. te dio un PIN temporal. Elige uno nuevo que solo tú conozcas."}
         </Alerta>
       ) : null}
-      <form
-        action={(form) => {
-          entrar(form);
-          if (estado.tipo !== "cambiar") setPin("");
-        }}
-        className="flex flex-col gap-5"
-      >
+      <form action={entrar} className="flex flex-col gap-5">
         <Campo etiqueta="RUT" htmlFor="rut">
           <Input
             id="rut"

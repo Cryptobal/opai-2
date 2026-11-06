@@ -240,6 +240,16 @@ describe.skipIf(!urlPropietario)("ingreso con RUT + PIN (CAR-78 B1)", () => {
     ).toBe(1);
   });
 
+  it("sin membresía activa en la empresa de la credencial no entra (F6)", async () => {
+    const rut = rutDe(String(BASE + 7));
+    const a = await persona(t.A, rut, PIN_B);
+    await e.admin.membership.updateMany({
+      where: { tenantId: t.A, userId: a.userId },
+      data: { estado: "suspendida" },
+    });
+    expect(await verificarRutYPin(rut, PIN_B, null)).toBeNull();
+  });
+
   it("el endpoint de sesión es solo servidor y no abre sesión con MFA ni plataforma", async () => {
     const http = await auth.handler(
       new Request("http://localhost:3000/api/auth/opai/sesion-pin", {

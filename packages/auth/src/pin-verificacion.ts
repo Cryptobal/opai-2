@@ -19,7 +19,15 @@ import { registrarExito, registrarFallo } from "./pin-registro";
 /** Verificación de RUT + PIN contra la base (sin sesión): ver `pin.ts` para las garantías. */
 const PORTALES_PIN = ["trabajador", "terreno"] as const;
 export type Evaluacion =
-  | { tipo: "ok"; tenantId: string; personaId: string; userId: string; debeCambiar: boolean }
+  | {
+      tipo: "ok";
+      tenantId: string;
+      personaId: string;
+      userId: string;
+      debeCambiar: boolean;
+      /** Hash que se verificó: el registro del éxito solo vale si no cambió entretanto (F4). */
+      pinHashLeido: string;
+    }
   /** PIN o portal incorrectos en una credencial viva: cuenta como intento fallido. */
   | { tipo: "fallo"; tenantId: string; personaId: string; userId: string; causa: "pin" | "portal" }
   /** Sin credencial viva, bloqueada o mal vinculada: no verifica nada ni cuenta. */
@@ -51,10 +59,16 @@ async function evaluar(
     // B2 (Revisor): la sesión del PIN es una sesión normal y luego puede elegir cualquier empresa del
     // usuario. Por eso el PIN solo vale si TODAS sus membresías (de cualquier empresa y estado) admiten
     // únicamente Trabajador o Terreno: ninguna le abriría ERP ni Supervisor en otra empresa.
+    // F6 (revisión independiente): además, la membresía en la empresa de ESTA credencial debe estar activa.
+    const activa = await tx.membership.findFirst({
+      where: { tenantId, userId: persona.usuarioId, estado: "activa" },
+      select: { id: true },
+    });
     const membresias = await forUser(persona.usuarioId).membership.findMany({
       select: { portales: true },
     });
     const soloTerreno =
+      !!activa &&
       membresias.length > 0 &&
       membresias.every(
         (m) =>
@@ -63,7 +77,8 @@ async function evaluar(
       );
     const correcto = await verificarPin(pin, cred.pinHash);
     const base = { tenantId, personaId, userId: persona.usuarioId };
-    if (correcto && soloTerreno) return { tipo: "ok", ...base, debeCambiar: cred.debeCambiar };
+    if (correcto && soloTerreno)
+      return { tipo: "ok", ...base, debeCambiar: cred.debeCambiar, pinHashLeido: cred.pinHash };
     return { tipo: "fallo", ...base, causa: correcto ? "portal" : "pin" };
   });
 }
@@ -112,7 +127,9 @@ export async function verificarRutYPin(
         return { estado: "nuevo_invalido", mensaje: "Elige un PIN distinto del temporal." };
       nuevoHash = await hashPin(nuevoPin);
     }
-    await registrarExito(ok, h, nuevoHash, ahora);
+    // F4: si la credencial cambió entre evaluar y registrar (otro envío o un restablecimiento de RR. HH.),
+    // no se abre sesión.
+    if (!(await registrarExito(ok, h, nuevoHash, ahora))) return null;
     return { estado: "ok", userId: ok.userId };
   }
   for (const f of evaluaciones) if (f.tipo === "fallo") await registrarFallo(f, h, ahora);

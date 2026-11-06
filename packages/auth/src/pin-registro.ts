@@ -32,16 +32,17 @@ export async function registrarExito(
   h: Headers | null,
   nuevoHash: string | null,
   ahora: Date,
-) {
-  await enTransaccion(e.tenantId, async (tx) => {
-    await tx.credencialTerreno.update({
-      where: { personaId: e.personaId },
+): Promise<boolean> {
+  return enTransaccion(e.tenantId, async (tx) => {
+    const r = await tx.credencialTerreno.updateMany({
+      where: { personaId: e.personaId, pinHash: e.pinHashLeido },
       data: {
         intentosFallidos: 0,
         bloqueadoHasta: null,
         ...(nuevoHash ? { pinHash: nuevoHash, debeCambiar: false, pinCambiadoEn: ahora } : {}),
       },
     });
+    if (r.count !== 1) return false;
     await registrarEventoSeguridad(
       {
         tipo: "seguridad.pin.ingreso",
@@ -52,6 +53,7 @@ export async function registrarExito(
       },
       tx,
     );
+    return true;
   });
 }
 
