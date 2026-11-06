@@ -35,12 +35,11 @@ describe.skipIf(!urlPropietario)("Asistencia · Face ID (Postgres real, proveedo
     });
   };
   const run = (c: ReturnType<typeof ctx>, id: string, input: unknown, o = {}) => mod.executeCapability(c, id, input, o) as Promise<Res>;
-  const setAjuste = (t: string, clave: string, valor: unknown, ambito: "tenant" | "plataforma" = "tenant") =>
-    e.admin.ajuste.upsert({
-      where: { tenantId_ambito_sujetoId_modulo_clave: { tenantId: ambito === "tenant" ? t : null as never, ambito, sujetoId: ambito === "tenant" ? t : "plataforma", modulo: "asistencia", clave } } as never,
-      create: { tenantId: ambito === "tenant" ? t : null, ambito, sujetoId: ambito === "tenant" ? t : "plataforma", modulo: "asistencia", clave, valor } as never,
-      update: { valor } as never,
-    }).catch(async () => e.admin.ajuste.create({ data: { tenantId: t, ambito: "tenant", sujetoId: t, modulo: "asistencia", clave, valor } }));
+  const setAjuste = async (t: string, clave: string, valor: unknown) => {
+    const v = valor as never;
+    await e.admin.ajuste.deleteMany({ where: { tenantId: t, modulo: "asistencia", clave } });
+    await e.admin.ajuste.create({ data: { tenantId: t, ambito: "tenant", sujetoId: t, modulo: "asistencia", clave, valor: v } });
+  };
 
   async function empresa(slug: string): Promise<Emp> {
     const tenant = (await e.admin.tenant.create({ data: { slug: `qa-${slug}-${randomUUID().slice(0, 6)}`, nombre: slug, vertical: "seguridad" } })).id;

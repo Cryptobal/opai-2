@@ -1525,3 +1525,19 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Fecha:** 5-nov-2026 · **Estado:** vigente · **Autor:** Carlos, registrado por «Comercial · Code»
 
 **Decisión.** Se aceptan dos límites de concurrencia del recálculo de cotizaciones en borrador (#336, #337, #344): las huellas de línea se escriben fuera de la transacción del `updateMany` de la versión, y editar líneas no sube `revision`, de modo que una edición durante el cálculo puede dejar en un borrador un cálculo de las líneas anteriores. Ambos se corrigen al recalcular o al enviar (el envío valida la huella). **No se construye** un contador de revisión por líneas. Sin cambio de producto, migración ni tests.
+
+## ADR-081 · Face ID: biometría detrás del adaptador del núcleo, 1:1 y con guardia para empresas reales (6-nov-2026)
+
+**Contexto.** CAR-89 (D-02, D-03, D-05). El rostro con prueba de vida es el método principal y RUT + PIN el secundario; la biometría es dato sensible (Ley 21.719, desde el 1-dic-2026). Carlos decidió (6-nov-2026) que el adaptador biométrico (B4) va en el mismo PR.
+
+**Decisión.**
+1. Adaptador `ProveedorBiometria` en `@opai/integrations` (Rekognition por HTTP firmado, sin SDK; simulado para pruebas y CI). Una colección por empresa (`opai-<tenant>`); credenciales y región en el almacén cifrado (integración `biometria`); consumo medido (`biometria.vida`, `.enrolamiento`, `.verificacion`).
+2. Verificación 1:1: Rekognition no ofrece comparación 1:1 contra una plantilla guardada, así que se consulta la colección de la empresa y solo se acepta el rostro esperado de la persona del RUT; el resto se descarta sin devolverse ni registrarse.
+3. Se guarda solo la referencia del proveedor, cifrada (inventario del módulo, recifrador para rotar la DEK). Sin foto de referencia ni foto por marca (D-04); V-06 no se construyó, por lo que no hay parámetro de foto.
+4. Umbral de similitud: ajuste de **plataforma** (`biometria_umbral_similitud`, 0,95 por defecto). La prueba de vida es obligatoria con el método rostro.
+5. Guardia: `biometria_empresas_reales` (plataforma) apagado; solo empresas `qa-…` enrolan o verifican hasta que Carlos confirme la evaluación de impacto y el DPA.
+6. Revocar borra en el proveedor y en la base; si el proveedor falla, el consentimiento revocado inhabilita el rostro y el trabajo diario reintenta. El mismo trabajo destruye la biometría de desvinculados.
+7. Teléfono personal (D-01): interruptor de la empresa + canal por instalación + habilitación por persona + consentimiento propio.
+
+**Pendiente.** Widget de AWS Face Liveness en el navegador (credenciales temporales y dependencia nueva) y prueba contra el entorno de AWS; ambos requieren decisión de Carlos.
+
