@@ -78,6 +78,9 @@ describe.skipIf(!urlPropietario)("biometría de terreno en base real (CAR-78 B4)
   }, 120_000);
 
   afterAll(async () => {
+    // La DEK de estas empresas se cifró con una KEK propia de esta prueba: si quedara, la rotación de KEK de
+    // `secretos-db` (que recorre todas las DEK) no podría descifrarla.
+    await e?.admin.claveTenant.deleteMany({ where: { tenantId: { in: [t.A, t.B] } } });
     await e?.cerrar?.();
   });
 
