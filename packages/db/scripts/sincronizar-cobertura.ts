@@ -25,6 +25,9 @@ async function main(): Promise<void> {
   const aplicar = process.argv.includes("--apply");
   const clave = argumento("--tenant");
   if (!clave) throw new Error("Indica --tenant <id|slug>.");
+  // Con FORCE RLS y un rol sin BYPASSRLS las lecturas devuelven 0 filas sin error: se aborta antes de parecer exitoso.
+  const [rol] = await db.$queryRaw<{ ok: boolean }[]>`SELECT (rolbypassrls OR rolsuper) AS ok FROM pg_roles WHERE rolname = current_user`;
+  if (!rol?.ok) throw new Error("El rol de la base no tiene BYPASSRLS: usa el rol propietario (DATABASE_URL_MIGRATE).");
   const tenant = await db.tenant.findFirst({ where: UUID.test(clave) ? { id: clave } : { slug: clave } });
   if (!tenant) throw new Error(`No existe el tenant "${clave}".`);
   const ruta = argumento("--respaldo") ?? `respaldo-cobertura-${tenant.slug}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;

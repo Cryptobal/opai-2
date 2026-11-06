@@ -130,7 +130,7 @@ async function porCambioDeVinculo(ctx: Contexto, ev: EventoPublicado) {
 
 /**
  * Genera el borrador del anexo cuando cambia la capa de sueldo que rige, el monto de una versión o
- * la instalación/puesto del vínculo (R11, ADR-029). El disparo no depende del orden de merge de los
+ * la instalación del vínculo (R11, ADR-029). El disparo no depende del orden de merge de los
  * PR: antes de este consumidor, los eventos se publican sin efecto (§15 del brief).
  */
 export const consumidorAnexos = defineConsumidor({

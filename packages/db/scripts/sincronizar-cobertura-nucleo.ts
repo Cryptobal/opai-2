@@ -1,8 +1,8 @@
 // Backfill único de CAR-207 (decisión de Carlos del 6-nov-2026): la cobertura de un puesto
 // («cubierto» o PPC «sin asignar») no se actualizaba al fijar la serie de la Pauta, así que los
 // puestos con serie anterior a CAR-206 siguen «Por cubrir». Este núcleo la recalcula desde la serie
-// que rige hoy: con titular → «cubierto»; sin serie o sin titular → PPC. Solo de UN tenant, solo
-// puestos activos, y solo escribe donde la cobertura difiere. Simula por defecto.
+// que rige hoy o empieza después: con titular → «cubierto»; sin serie o sin titular → PPC. Solo de UN tenant, solo
+// puestos activos, y solo escribe donde la cobertura difiere (nunca toca un PPC existente). Simula por defecto.
 import type { PrismaClient } from "../src/generated/prisma/client";
 
 export type CambioCobertura = {
@@ -38,7 +38,7 @@ export async function sincronizarCobertura(
   const series = await db.seriePauta.findMany({
     where: {
       tenantId: o.tenantId,
-      vigenteDesde: { lte: fecha },
+      // También las series que empiezan en el futuro: asignar con «Rige desde» futuro ya deja el puesto «cubierto».
       OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: fecha } }],
     },
     select: { puestoId: true, titularPersonaId: true },
@@ -51,6 +51,8 @@ export async function sincronizarCobertura(
       ? { cobertura: "cubierto" as const, coberturaMotivo: null }
       : { cobertura: "ppc" as const, coberturaMotivo: "sin_asignar" };
     if (p.cobertura === despues.cobertura && p.coberturaMotivo === despues.coberturaMotivo) continue;
+    // Un PPC con motivo propio (p. ej. una ausencia) no se reescribe a «sin asignar».
+    if (!cubierto && p.cobertura === "ppc") continue;
     cambios.push({ puestoId: p.id, nombre: p.nombre, antes: { cobertura: p.cobertura, coberturaMotivo: p.coberturaMotivo }, despues });
   }
   const r: ResultadoCobertura = { tenantId: o.tenantId, hoy, aplicado: o.aplicar, revisados: puestos.length, cambios };

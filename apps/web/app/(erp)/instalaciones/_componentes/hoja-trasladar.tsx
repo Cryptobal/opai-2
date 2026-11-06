@@ -74,7 +74,7 @@ function Formulario({ puesto, subtitulo, titulares, onCerrar }: { puesto: Puesto
         <Campo etiqueta="Puesto de destino" htmlFor="tr-destino" ayuda="Puestos activos con patrón, de esta u otra instalación.">
           <Combobox id="tr-destino" opciones={titulares.destinos.map((d) => ({ valor: d.id, etiqueta: d.etiqueta }))} valor={destino} onCambiar={([v]) => setDestino(v ?? "")} placeholder="Elegir puesto" />
         </Campo>
-        <Campo etiqueta="Rige desde" htmlFor="tr-desde" ayuda="No puede ser anterior a hoy: no se cambian días pasados.">
+        <Campo etiqueta="Rige desde" htmlFor="tr-desde" ayuda="No puede ser anterior a hoy. Para otra instalación rige desde hoy.">
           <InputFecha id="tr-desde" valor={desde} onCambiar={(v) => { setDesde(v); if (!propio) setInicio(v); }} />
         </Campo>
         <Campo etiqueta="Inicio de ciclo" htmlFor="tr-inicio">
@@ -88,6 +88,7 @@ function Formulario({ puesto, subtitulo, titulares, onCerrar }: { puesto: Puesto
             <p className="t-label">Vista previa</p>
             <ul className="t-body-sm flex flex-col gap-1 text-fg-muted">
               {previa.puestosOrigen.map((o) => <li key={o.puestoId}>Su serie en «{o.puesto}» se cierra el {fechaCl(o.serieHasta)}.</li>)}
+              {previa.titularDesplazado ? <li>Deja de ser titular del puesto de destino {previa.titularDesplazado.nombre}: ese puesto pasa a ser suyo.</li> : null}
               {previa.vinculoNuevo && previa.vinculoTerminado ? (
                 <li>Su vínculo actual termina el {fechaCl(previa.vinculoTerminado.termino)} y se crea uno nuevo en la otra instalación, con borrador de anexo para RR. HH.</li>
               ) : (

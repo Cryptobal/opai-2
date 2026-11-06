@@ -8,6 +8,7 @@ import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/ent
 import type * as ModuloCapacidades from "../src";
 
 type Capacidades = typeof ModuloCapacidades;
+const hoyCl = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
 const dia = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
 
 describe.skipIf(!urlPropietario)("Pauta · trasladar guardia (Postgres real)", () => {
@@ -15,7 +16,7 @@ describe.skipIf(!urlPropietario)("Pauta · trasladar guardia (Postgres real)", (
   let mod: Capacidades;
   const t = { A: "", B: "" };
   const p = { a1: "", a2: "", a3: "", b1: "", sinPatron: "", otraInst: "", pb: "" };
-  const per = { ana: "", luis: "", rosa: "", pb: "" };
+  const per = { ana: "", luis: "", rosa: "", mario: "", nora: "", carla: "", pb: "" };
   let instA = "";
   let instA2 = "";
   const medidor = { registrar: async () => undefined };
@@ -68,8 +69,11 @@ describe.skipIf(!urlPropietario)("Pauta · trasladar guardia (Postgres real)", (
     per.ana = await persona(t.A, a.cargo, instA, "Ana", "11.111.111-1");
     per.luis = await persona(t.A, a.cargo, instA, "Luis", "12.121.212-1");
     per.rosa = await persona(t.A, a.cargo, instA, "Rosa", "13.131.313-1");
+    per.mario = await persona(t.A, a.cargo, instA, "Mario", "14.141.414-1");
+    per.nora = await persona(t.A, a.cargo, instA, "Nora", "15.151.515-1");
+    per.carla = await persona(t.A, a.cargo, instA, "Carla", "16.161.616-1");
     per.pb = await persona(t.B, b.cargo, b.inst, "Beta", "22.222.222-2");
-    expect(await asignar(p.a3, per.ana, dia(1))).toMatchObject({ ok: true });
+    expect(await asignar(p.a3, per.ana, dia(-5))).toMatchObject({ ok: true });
     expect(await asignar(p.a1, per.luis, dia(1))).toMatchObject({ ok: true });
   });
 
@@ -106,15 +110,15 @@ describe.skipIf(!urlPropietario)("Pauta · trasladar guardia (Postgres real)", (
 
   it("otra instalación: termina el vínculo el día antes, crea el nuevo, cierra y abre las series, y deja un borrador de anexo", async () => {
     const v0 = await vigente(per.ana);
-    const r = await trasladar(per.ana, p.otraInst, dia(12), { inicioCiclo: dia(12), motivo: "Traslado por necesidad del servicio" });
-    expect(r, JSON.stringify(r)).toMatchObject({ ok: true, data: { mismaInstalacion: false, vinculoNuevo: true, vinculoTerminado: { id: v0.id, termino: dia(11) } } });
+    const r = await trasladar(per.ana, p.otraInst, hoyCl(), { inicioCiclo: hoyCl(), motivo: "Traslado por necesidad del servicio" });
+    expect(r, JSON.stringify(r)).toMatchObject({ ok: true, data: { mismaInstalacion: false, vinculoNuevo: true, vinculoTerminado: { id: v0.id, termino: new Date(Date.parse(hoyCl()) - 86_400_000).toISOString().slice(0, 10) } } });
     const viejo = await e.admin.vinculoLaboral.findUniqueOrThrow({ where: { id: v0.id } });
     expect(viejo).toMatchObject({ estado: "terminado", motivoTermino: "Traslado por necesidad del servicio" });
-    expect(viejo.termino?.toISOString().slice(0, 10)).toBe(dia(11));
+    expect(viejo.termino?.toISOString().slice(0, 10)).toBe(new Date(Date.parse(hoyCl()) - 86_400_000).toISOString().slice(0, 10));
     const nuevo = await vigente(per.ana);
     expect(nuevo).toMatchObject({ instalacionId: instA2, puestoId: p.otraInst, cargoId: v0.cargoId, horasSemanales: 44 });
-    expect(nuevo.inicio.toISOString().slice(0, 10)).toBe(dia(12));
-    expect((await e.admin.seriePauta.findFirstOrThrow({ where: { puestoId: p.a3, titularPersonaId: per.ana } })).vigenteHasta?.toISOString().slice(0, 10)).toBe(dia(11));
+    expect(nuevo.inicio.toISOString().slice(0, 10)).toBe(hoyCl());
+    expect((await e.admin.seriePauta.findFirstOrThrow({ where: { puestoId: p.a3, titularPersonaId: per.ana } })).vigenteHasta?.toISOString().slice(0, 10)).toBe(new Date(Date.parse(hoyCl()) - 86_400_000).toISOString().slice(0, 10));
     expect((await e.admin.seriePauta.findFirstOrThrow({ where: { puestoId: p.otraInst, vigenteHasta: null } })).titularPersonaId).toBe(per.ana);
     expect(await e.admin.puesto.findUniqueOrThrow({ where: { id: p.a3 } })).toMatchObject({ cobertura: "ppc" });
     expect(await e.admin.puesto.findUniqueOrThrow({ where: { id: p.otraInst } })).toMatchObject({ cobertura: "cubierto" });
@@ -137,11 +141,33 @@ describe.skipIf(!urlPropietario)("Pauta · trasladar guardia (Postgres real)", (
     expect(await trasladar(per.rosa, p.a2, dia(20), {}, {}, ctx(t.A, "supervisor", [randomUUID()]))).toMatchObject({ ok: false });
   });
 
+  it("otra instalación con fecha futura se rechaza; el vínculo nuevo hereda el término del plazo fijo; avisa si desplaza al titular del destino", async () => {
+    expect(await trasladar(per.rosa, p.otraInst, dia(40))).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    const v = await vigente(per.rosa);
+    await e.admin.vinculoLaboral.update({ where: { id: v.id }, data: { tipo: "plazo_fijo", termino: new Date("2027-03-01") } });
+    const previa = await trasladar(per.rosa, p.otraInst, hoyCl(), {}, { dryRun: true });
+    expect(previa, JSON.stringify(previa)).toMatchObject({ ok: true, data: { titularDesplazado: { id: per.ana } } });
+    expect(await trasladar(per.rosa, p.otraInst, hoyCl())).toMatchObject({ ok: true });
+    expect((await vigente(per.rosa)).termino?.toISOString().slice(0, 10)).toBe("2027-03-01");
+    expect(await e.admin.seriePauta.findFirst({ where: { puestoId: p.otraInst, titularPersonaId: per.rosa, vigenteHasta: null } })).not.toBeNull();
+    expect((await vigente(per.ana)).puestoId).toBeNull();
+  });
+
+  it("supervisor con alcance sobre ambos puestos traslada dentro de la instalación", async () => {
+    expect(await asignar(p.a2, per.nora, dia(2))).toMatchObject({ ok: true });
+    expect(await trasladar(per.nora, p.a1, dia(30), { inicioCiclo: dia(30) }, {}, ctx(t.A, "supervisor", [instA]))).toMatchObject({ ok: true, data: { mismaInstalacion: true } });
+  });
+
+  it("traslados cruzados al mismo tiempo no se bloquean entre sí (se serializan por los locks)", async () => {
+    const [x, y] = await Promise.all([trasladar(per.luis, p.a3, dia(50), { inicioCiclo: dia(50) }), trasladar(per.nora, p.a2, dia(50), { inicioCiclo: dia(50) })]);
+    for (const r of [x, y]) expect(r.ok || (!r.ok && r.error.code !== "INTERNAL"), JSON.stringify(r)).toBe(true);
+  });
+
   it("dos traslados simultáneos de la misma persona: uno solo gana y no queda doble titularidad", async () => {
-    const r = await Promise.all([trasladar(per.rosa, p.a1, dia(30)), trasladar(per.rosa, p.a2, dia(30))]);
+    const r = await Promise.all([trasladar(per.carla, p.a1, dia(30)), trasladar(per.carla, p.a2, dia(30))]);
     expect(r.filter((x) => x.ok).length).toBeGreaterThanOrEqual(1);
-    const abiertas = await e.admin.seriePauta.findMany({ where: { titularPersonaId: per.rosa, vigenteHasta: null } });
+    const abiertas = await e.admin.seriePauta.findMany({ where: { titularPersonaId: per.carla, vigenteHasta: null } });
     expect(abiertas.length).toBe(1);
-    expect((await vigente(per.rosa)).puestoId).toBe(abiertas[0]!.puestoId);
+    expect((await vigente(per.carla)).puestoId).toBe(abiertas[0]!.puestoId);
   });
 });
