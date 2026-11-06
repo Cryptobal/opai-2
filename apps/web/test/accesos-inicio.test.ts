@@ -13,6 +13,17 @@ describe("Inicio · tus accesos", () => {
     );
     expect(r.map((x) => x.href)).toEqual(["/a", "/b", "/c", "/d", "/e"]);
   });
+  it("Inicio comparte la regla de «Más»: no repite destino ni nombre (CAR-224)", () => {
+    const r = juntarAccesos(
+      [{ href: "/cotizaciones", etiqueta: "Cotizaciones" }],
+      [
+        { href: "/cotizaciones/", etiqueta: "Cotizaciones" },
+        { href: "/cotizaciones/abc", etiqueta: "Cotizaciones" },
+        { href: "/solicitudes", etiqueta: "Solicitudes" },
+      ],
+    );
+    expect(r.map((x) => x.etiqueta)).toEqual(["Cotizaciones", "Solicitudes"]);
+  });
   it("sin nada, lista vacía", () => {
     expect(juntarAccesos([], [])).toEqual([]);
   });
