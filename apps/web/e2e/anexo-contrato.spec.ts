@@ -111,12 +111,17 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
 });
 
 test("29: rechazar pide motivo obligatorio (D14)", async ({ page }, info) => {
+  // Siembra, acceso y la primera compilación en frío de la ruta del anexo no caben en los 90 s por defecto (CAR-199).
+  test.setTimeout(180_000);
   const rechazo = anexoRechazo[info.project.name] ?? anexoRechazo["telefono"]!;
   seed("seed-anexo-e2e.ts", rechazo);
   await entrar(page);
-  await page.goto(`/personas/${persona}/anexos/${rechazo}`);
-  await ocultarDev(page);
-  await hidratado(page.getByRole("button", { name: "Rechazar", exact: true }));
+  // Si el botón no hidrata en la primera visita (compilación en frío), se recarga ya con la ruta compilada.
+  await expect(async () => {
+    await page.goto(`/personas/${persona}/anexos/${rechazo}`);
+    await ocultarDev(page);
+    await hidratado(page.getByRole("button", { name: "Rechazar", exact: true }));
+  }).toPass({ timeout: 120_000 });
   await page.getByRole("button", { name: "Rechazar", exact: true }).click();
   const dialogo = page.getByRole("dialog", { name: "Rechazar el anexo", exact: true });
   await expect(dialogo).toBeVisible();

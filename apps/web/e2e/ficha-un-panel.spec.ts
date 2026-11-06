@@ -129,43 +129,40 @@ test.describe("fichas en un solo panel bajo 1024 px", () => {
     });
   }
 
-  test("todas las pestañas de las fichas y Vencimientos a 768 sin cortes ni solapes", async ({
-    page,
-  }) => {
-    await entrar(page);
-    await page.setViewportSize({ width: 768, height: 1000 });
-    const rutas = ["/personas/vencimientos"];
-    const pestanas = {
-      "/personas": ["", "/laboral", "/sueldo", "/documentos", "/actividad"],
-      "/cuentas": ["", "/instalaciones", "/contactos", "/documentos", "/actividad"],
-      "/instalaciones": ["", "/puestos", "/documentos", "/actividad"],
-    } as const;
-    for (const [lista, sufijos] of Object.entries(pestanas)) {
+  // Un test por ficha: cada ruta compila en frío bajo `next dev` y las 15 juntas no caben en un presupuesto (CAR-199).
+  const pestanas = {
+    "/personas": ["", "/laboral", "/sueldo", "/documentos", "/actividad"],
+    "/cuentas": ["", "/instalaciones", "/contactos", "/documentos", "/actividad"],
+    "/instalaciones": ["", "/puestos", "/documentos", "/actividad"],
+  } as const;
+  for (const [lista, sufijos] of Object.entries(pestanas)) {
+    test(`pestañas de ${lista} a 768 sin cortes ni solapes`, async ({ page }) => {
+      await entrar(page);
+      await page.setViewportSize({ width: 768, height: 1000 });
       await page.goto(lista);
-      const href = await page
-        .locator(`a[href^="${lista}/"][href*="-"]`)
-        .first()
-        .getAttribute("href");
-      for (const sufijo of sufijos) rutas.push(`${href}${sufijo}`);
-    }
-    for (const ruta of rutas) {
-      await page.goto(ruta);
-      await expect(page.locator("header h1:visible")).toHaveCount(1, { timeout: 30_000 });
-      await page.waitForLoadState("networkidle");
-      // El título conserva su sitio: tiene ancho y su texto no queda cortado (un nombre corto mide poco, pero cabe).
-      await expect
-        .poll(async () => page.locator("header h1:visible").evaluate((h) => h.getBoundingClientRect().width > 0 && h.scrollWidth <= h.clientWidth + 1))
-        .toBe(true)
-        .catch(async (error) => {
-          const hojas = await page.locator("header h1:visible").evaluate((h1) =>
-            `h1=${h1.textContent}:${Math.round(h1.getBoundingClientRect().width)} (${h1.scrollWidth}/${h1.clientWidth}) | ` +
-            [...(h1.closest("header")?.querySelectorAll("*") ?? [])].filter((n) => n.getBoundingClientRect().width > 0 && (n.children.length === 0 || n.tagName === "BUTTON" || n.tagName === "A"))
-              .map((n) => `${n.tagName}${n.getAttribute("aria-label") ? "[" + n.getAttribute("aria-label") + "]" : ""}:${(n.textContent ?? "").trim().slice(0, 24)}:${Math.round(n.getBoundingClientRect().width)}`).join(" | "));
-          throw new Error(`${ruta}: título cortado. Encabezado: ${hojas}`, { cause: error });
-        });
-      expect(await sinDesborde(page), ruta).toBe(true);
-      expect(await fueraDeVentana(page), ruta).toEqual([]);
-      expect(await solapes(page), ruta).toEqual([]);
-    }
-  });
+      const enlace = page.locator(`a[href^="${lista}/"][href*="-"]`).first();
+      const href = await enlace.getAttribute("href");
+      const rutas = sufijos.map((sufijo) => `${href}${sufijo}`);
+      if (lista === "/personas") rutas.push("/personas/vencimientos");
+      for (const ruta of rutas) {
+        await page.goto(ruta);
+        await expect(page.locator("header h1:visible")).toHaveCount(1, { timeout: 30_000 });
+        await page.waitForLoadState("networkidle");
+        // El título conserva su sitio: tiene ancho y su texto no queda cortado (un nombre corto mide poco, pero cabe).
+        await expect
+          .poll(async () => page.locator("header h1:visible").evaluate((h) => h.getBoundingClientRect().width > 0 && h.scrollWidth <= h.clientWidth + 1))
+          .toBe(true)
+          .catch(async (error) => {
+            const hojas = await page.locator("header h1:visible").evaluate((h1) =>
+              `h1=${h1.textContent}:${Math.round(h1.getBoundingClientRect().width)} (${h1.scrollWidth}/${h1.clientWidth}) | ` +
+              [...(h1.closest("header")?.querySelectorAll("*") ?? [])].filter((n) => n.getBoundingClientRect().width > 0 && (n.children.length === 0 || n.tagName === "BUTTON" || n.tagName === "A"))
+                .map((n) => `${n.tagName}${n.getAttribute("aria-label") ? "[" + n.getAttribute("aria-label") + "]" : ""}:${(n.textContent ?? "").trim().slice(0, 24)}:${Math.round(n.getBoundingClientRect().width)}`).join(" | "));
+            throw new Error(`${ruta}: título cortado. Encabezado: ${hojas}`, { cause: error });
+          });
+        expect(await sinDesborde(page), ruta).toBe(true);
+        expect(await fueraDeVentana(page), ruta).toEqual([]);
+        expect(await solapes(page), ruta).toEqual([]);
+      }
+    });
+  }
 });
