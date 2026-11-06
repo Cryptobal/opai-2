@@ -4,12 +4,13 @@ import { biometriaDelEntorno } from "@opai/integrations";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { conflicto, noEncontrado } from "../../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
 import { bloquearDekLectura } from "../cumplimiento/cifrado-campos";
 import { actorLegible } from "../cumplimiento/comunes";
 import { uuidSchema } from "../esquemas";
 import { dondePersona } from "../maestros/alcance";
 import {
+  bloquearPersona,
   cifrarReferencia,
   conProveedor,
   consentimientoVigente,
@@ -48,18 +49,29 @@ export const biometriaEnrolar = defineCapability({
       throw conflicto(
         "La persona ya tiene su rostro enrolado. Bórralo antes de enrolarla de nuevo.",
       );
-    if (dryRun)
-      return {
-        personaId,
-        proveedor: biometriaDelEntorno().nombre,
-        enroladoEn: new Date().toISOString(),
-      };
-
     const biometria = biometriaDelEntorno();
+    if (!biometria.disponible)
+      throw reglaDeNegocio(
+        "El reconocimiento facial no está disponible en este entorno: no hay proveedor contratado.",
+      );
+    if (dryRun)
+      return { personaId, proveedor: biometria.nombre, enroladoEn: new Date().toISOString() };
+
     const r = await conProveedor(() => biometria.enrolar({ sujetoId: personaId, muestra }));
     await medir(ctx, "biometria.enrolar", r.proveedor);
+    // Si la falla es «ya estaba enrolada», la referencia del proveedor es la del enrolamiento vigente: no se retira.
+    let retirar = true;
     try {
       const fila = await ctx.transaccion(async (tx) => {
+        // Con la persona bloqueada se revalida todo: una revocación o un enrolamiento concurrente ya están confirmados.
+        await bloquearPersona(tx, personaId);
+        if (!(await consentimientoVigente(tx, personaId))) throw sinConsentimiento();
+        if (await tx.enrolamientoBiometrico.findUnique({ where: { personaId } })) {
+          retirar = false;
+          throw conflicto(
+            "La persona ya tiene su rostro enrolado. Bórralo antes de enrolarla de nuevo.",
+          );
+        }
         await bloquearDekLectura(tx, ctx.tenantId);
         const f = await tx.enrolamientoBiometrico.create({
           data: {
@@ -82,7 +94,7 @@ export const biometriaEnrolar = defineCapability({
       return { personaId, proveedor: fila.proveedor, enroladoEn: fila.createdAt.toISOString() };
     } catch (e) {
       // Si no quedó guardada, el rostro no puede quedar enrolado en el proveedor: se retira.
-      await biometria.borrar(r.referencia).catch(() => undefined);
+      if (retirar) await biometria.borrar(r.referencia).catch(() => undefined);
       throw e;
     }
   },

@@ -17,4 +17,9 @@ export const EVENTOS_TERRENO: readonly EventoDeDominio[] = [
     descripcion:
       "Se borró el rostro enrolado de una persona (a pedido o por revocar su consentimiento); trae el motivo.",
   },
+  {
+    id: "core.biometria.anonimizacion_pendiente",
+    descripcion:
+      "Se anonimizó a una persona con el rostro enrolado: hay que borrar su rostro en el proveedor y la referencia local.",
+  },
 ];

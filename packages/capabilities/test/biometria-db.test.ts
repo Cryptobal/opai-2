@@ -201,4 +201,32 @@ describe.skipIf(!urlPropietario)("biometría de terreno en base real (CAR-78 B4)
         .borrado,
     ).toBe(false);
   });
+
+  it("si el consentimiento cambió desde el enrolamiento, verificar exige enrolar de nuevo y el aviso tardío borra el rostro viejo", async () => {
+    await consentimiento(p.beto, "otorgado");
+    expect((await enrolar(p.beto, "rostro:beto")).ok).toBe(true);
+    await consentimiento(p.beto, "revocado");
+    await consentimiento(p.beto, "otorgado"); // un consentimiento nuevo antes de que el aviso se despache
+    const r = await verificar(p.beto, "rostro:beto");
+    expect(r.ok).toBe(false);
+    expect(JSON.stringify(r)).toContain("enrólalo de nuevo");
+    await mod.despacharPendientes(ctx(t.A));
+    expect(await e.admin.enrolamientoBiometrico.count({ where: { personaId: p.beto } })).toBe(0);
+    expect((await enrolar(p.beto, "rostro:beto")).ok).toBe(true); // vuelve a enrolarse con el consentimiento vigente
+  });
+
+  it("anonimizar a la persona borra también su rostro enrolado", async () => {
+    expect(await e.admin.enrolamientoBiometrico.count({ where: { personaId: p.beto } })).toBe(1);
+    await dato(t.A, "core.cumplimiento.titular_anonimizar", {
+      titular: { tipo: "persona", id: p.beto },
+      motivo: "Solicitud de cancelación del titular",
+    });
+    await mod.despacharPendientes(ctx(t.A));
+    expect(await e.admin.enrolamientoBiometrico.count({ where: { personaId: p.beto } })).toBe(0);
+    const ev = await e.admin.evento.findFirst({
+      where: { tenantId: t.A, tipo: "core.biometria.borrado", entidadId: p.beto },
+      orderBy: { id: "desc" },
+    });
+    expect(ev?.payload).toEqual({ motivo: "persona_anonimizada" });
+  });
 });

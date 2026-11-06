@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { BiometriaError, BiometriaNoConfigurada, type Biometria } from "@opai/integrations";
+import {
+  type Biometria,
+  BiometriaError,
+  biometriaDelEntorno,
+  BiometriaNoConfigurada,
+} from "@opai/integrations";
 import type { TenantTx } from "@opai/db";
 
 import { reglaDeNegocio } from "../../errores";
@@ -10,6 +15,9 @@ import { cifradoDeCampos, cifradoDeCamposTx } from "../cumplimiento/cifrado-camp
 
 /** Finalidad del consentimiento que habilita el reconocimiento facial (07d, Ley 21.719). */
 export const PROPOSITO_BIOMETRIA = "biometria_asistencia";
+
+/** Lo emite la anonimización de una persona que tiene su rostro enrolado (retención o pedido del titular). */
+export const EVENTO_ANONIMIZACION = "core.biometria.anonimizacion_pendiente";
 
 export const TABLA = "enrolamientos_biometricos";
 export const CAMPO = "referencia_cifrada";
@@ -72,3 +80,22 @@ export const cifrarReferencia = (ctx: Contexto, tx: TenantTx, referencia: string
 
 export const descifrarReferencia = (ctx: Contexto, guardado: string) =>
   cifradoDeCampos(ctx).descifrar(TABLA, CAMPO, guardado);
+
+/**
+ * Bloquea la fila de la persona (`FOR UPDATE`) dentro de la transacción. Enrolar, borrar, revocar y
+ * anonimizar toman el mismo bloqueo, así que se serializan: o el enrolamiento queda confirmado antes de que
+ * el borrado lo busque, o el borrado/la revocación ya están confirmados cuando el enrolamiento revalida.
+ */
+export async function bloquearPersona(tx: TenantTx, personaId: string): Promise<void> {
+  await tx.$queryRaw`/* 07d:bloqueo-biometria */ SELECT id FROM core.personas WHERE id = ${personaId}::uuid FOR UPDATE`;
+}
+
+/** Adaptador del proveedor con que se enroló. Si el entorno usa otro, no se manda la referencia al equivocado. */
+export function proveedorDe(nombre: string): Biometria {
+  const b = biometriaDelEntorno();
+  if (b.nombre !== nombre)
+    throw reglaDeNegocio(
+      `El rostro se enroló con el proveedor «${nombre}» y este entorno usa «${b.nombre}»; no se puede operar hasta alinearlos.`,
+    );
+  return b;
+}

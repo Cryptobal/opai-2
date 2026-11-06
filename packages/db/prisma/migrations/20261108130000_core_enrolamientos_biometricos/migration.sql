@@ -24,9 +24,11 @@ ALTER TABLE "core"."enrolamientos_biometricos" ADD CONSTRAINT "enrolamientos_bio
 ALTER TABLE "core"."enrolamientos_biometricos" ADD CONSTRAINT "enrolamientos_biometricos_persona_id_fkey" FOREIGN KEY ("persona_id") REFERENCES "core"."personas"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "core"."enrolamientos_biometricos" ADD CONSTRAINT "enrolamientos_biometricos_consentimiento_id_fkey" FOREIGN KEY ("consentimiento_id") REFERENCES "core"."consentimientos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- UPDATE solo lo usa la rotación de la DEK de la empresa (recifra la referencia); DELETE es la supresión al
--- revocar el consentimiento. Sin TRUNCATE.
-GRANT SELECT, INSERT, UPDATE, DELETE ON "core"."enrolamientos_biometricos" TO opai_app;
+-- UPDATE solo de la referencia cifrada: lo usa la rotación de la DEK de la empresa (recifra el valor) y no
+-- puede cambiar la persona, el consentimiento ni el proveedor (el trigger de mismo tenant es solo de INSERT).
+-- DELETE es la supresión al revocar el consentimiento. Sin TRUNCATE.
+GRANT SELECT, INSERT, DELETE ON "core"."enrolamientos_biometricos" TO opai_app;
+GRANT UPDATE ("referencia_cifrada", "updated_at") ON "core"."enrolamientos_biometricos" TO opai_app;
 REVOKE TRUNCATE ON "core"."enrolamientos_biometricos" FROM opai_app;
 
 ALTER TABLE "core"."enrolamientos_biometricos" ENABLE ROW LEVEL SECURITY;

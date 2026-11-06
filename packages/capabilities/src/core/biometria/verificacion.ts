@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { biometriaDelEntorno } from "@opai/integrations";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
@@ -12,6 +11,7 @@ import {
   consentimientoVigente,
   descifrarReferencia,
   medir,
+  proveedorDe,
   muestraSchema,
   sinConsentimiento,
 } from "./comun";
@@ -45,11 +45,18 @@ export const biometriaVerificar = defineCapability({
       select: { id: true },
     });
     if (!persona) throw noEncontrado("La persona");
-    if (!(await consentimientoVigente(ctx.db, personaId))) throw sinConsentimiento();
+    const consentimiento = await consentimientoVigente(ctx.db, personaId);
+    if (!consentimiento) throw sinConsentimiento();
     const fila = await ctx.db.enrolamientoBiometrico.findUnique({ where: { personaId } });
     if (!fila) throw reglaDeNegocio("La persona no tiene su rostro enrolado. Marca con RUT y PIN.");
+    if (fila.consentimientoId !== consentimiento.id)
+      throw reglaDeNegocio(
+        "El consentimiento cambió desde que se enroló el rostro: enrólalo de nuevo.",
+      );
     const referencia = await descifrarReferencia(ctx, fila.referenciaCifrada);
-    const r = await conProveedor(() => biometriaDelEntorno().verificar({ referencia, muestra }));
+    const r = await conProveedor(() =>
+      proveedorDe(fila.proveedor).verificar({ referencia, muestra }),
+    );
     await medir(ctx, "biometria.verificar", r.proveedor);
     return {
       personaId,
