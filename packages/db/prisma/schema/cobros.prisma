@@ -69,3 +69,29 @@ model CobroCargo {
   @@map("cobro_cargos")
   @@schema("core")
 }
+
+/// Prueba gratis de un módulo (o de una parte de Finanzas, `finanzas.bancos`…) de una empresa
+/// (CAR-222, decisión de Carlos del 6-nov-2026): la activa la empresa UNA vez desde su ERP, dura 10
+/// días y se desactiva sola. Plataforma puede extenderla o reactivarla. No es una condición de cobro:
+/// no tiene precio ni genera cargos. Una fila por (empresa, módulo): la unicidad es la regla «una vez».
+model PruebaGratis {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  moduloId    String    @map("modulo_id")
+  /// Primer día de la prueba.
+  inicio      DateTime  @db.Date
+  /// Último día de la prueba; Plataforma lo mueve al extender o reactivar.
+  hasta       DateTime  @db.Date
+  /// Cuántas veces Plataforma la extendió o reactivó.
+  extensiones Int       @default(0)
+  /// Persona de la empresa que la activó.
+  activadaPor String?   @map("activada_por") @db.Uuid
+  /// Cuándo el trabajo diario la dio por terminada (módulo a solo lectura); null: vigente.
+  cerradaEn   DateTime? @map("cerrada_en") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, moduloId])
+  @@map("pruebas_gratis")
+  @@schema("core")
+}

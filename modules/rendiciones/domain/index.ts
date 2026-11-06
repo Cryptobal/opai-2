@@ -83,3 +83,5 @@ export function puedeDecidir(solicitanteId: string, actorId: string, aprobadorId
   return actorId !== solicitanteId && aprobadorId === actorId;
 }
 export * from "./kilometraje";
+export * from "./lotes";
+export * from "./nomina";
