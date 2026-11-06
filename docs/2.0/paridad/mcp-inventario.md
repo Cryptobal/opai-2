@@ -475,7 +475,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.actualizar` | `portal_trabajador_mis_datos_actualizar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.mis_datos.exportar` | `portal_trabajador_mis_datos_exportar` | existe |
 | compartido | `app/(trabajador)/trabajador/_componentes` | `portal_trabajador.preferencias_notificacion.actualizar` | `portal_trabajador_preferencias_notificacion_actualizar` | existe |
-| erp | `/asistencia` | `asistencia.hoy.listar` | `asistencia_hoy_listar` | existe |
+| erp | `/asistencia` | `asistencia.dias.hoy` | `asistencia_dias_hoy` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.revoke` | — | excepción |
 | erp | `/configuracion/agentes/[id]` | `core.apikeys.set_autonomia` | — | excepción |
