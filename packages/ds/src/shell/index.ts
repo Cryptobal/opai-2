@@ -11,6 +11,7 @@ export { PortalSwitcher } from "./portal-switcher";
 export { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
 export { MenuMas } from "./menu-mas";
 export { AccesoRapido } from "./acceso-rapido";
+export { canonicalizarReciente, normalizarHref, unirAccesos } from "./unir-accesos";
 export { EncabezadoAreaMas } from "./encabezado-area-mas";
 export { EntradaMas } from "./entrada-mas";
 export { PanelLateral } from "./panel-lateral";
