@@ -61,6 +61,12 @@ describe.skipIf(!urlPropietario)("prueba gratis entre empresas", () => {
     plat = await user("plat", "owner");
     userA = await user("admin-a");
     userB = await user("admin-b");
+    // El RUT de la empresa es obligatorio para activar una prueba.
+    for (const [tenantId, rut] of [
+      [a, `7${s.replace(/\D/g, "1")}-1`],
+      [b, `8${s.replace(/\D/g, "2")}-2`],
+    ] as const)
+      await e.admin.perfilEmpresa.create({ data: { tenantId, rut, razonSocial: "Prueba SpA" } });
   });
 
   afterAll(async () => {
