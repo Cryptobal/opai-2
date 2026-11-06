@@ -50,8 +50,8 @@ Dominio (22 con cobros): incluido no cobrable, dependencias, sin partes = todas,
 ## 14. Riesgos y rollback
 Sin migración: revertir el PR basta; los precios de lista quedan en `ajustes_plataforma` sin efecto. Riesgo: la dependencia se valida contra las partes con precio en la empresa, hasta que la Sesión 5 guarde las partes declaradas.
 
-## 15. Decisiones pendientes de Carlos
-Agente interno: ¿incluido en el plan base? (una línea). ¿Forma y unidad sugeridas del Agente interno y de Rondas (propuestas mías)?
+## 15. Decisiones de Carlos (6-nov-2026, vía OPAI 2.0)
+Agente interno cobrable aparte; no se exige Finanzas contratado para fijar precio; `PARTES_FINANZAS` en este PR; prueba gratis de una parte de 10 días que se desactiva sola. **Pendiente en otro PR:** default de 10 días y «Pasa a cobro» apagado en la hoja «Abrir prueba», y la prueba de una parte sin Finanzas contratado (hoy `prueba_abrir` exige el módulo activo, en prueba o en solo lectura).
 
 ## 16. Reporte de ejecución
 Ver el PR (capturas a 375, 1024 y 1280 px en `docs/2.0/qa/plataforma-catalogo-car204/`).
