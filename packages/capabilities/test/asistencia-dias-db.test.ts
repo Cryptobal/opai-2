@@ -12,7 +12,7 @@ import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/ent
 import type * as ModuloCapacidades from "../src";
 
 type Dato = {
-  marca: { id: string }; correccionId: string; dias: number; tipoJornada: string; fecha: string;
+  marca: { id: string }; id: string; correccionId: string; dias: number; tipoJornada: string; fecha: string;
   resumen: { turnos: number; presentes: number; sinMarca: number; ausentes: number; incompletos: number; atrasos: number };
   items: { estado: string; segundosAtraso?: number; atrasoMin?: number; presentes?: number; provisorio?: boolean; correccionPendiente?: boolean; tipoJornada?: string; minutosTrabajados?: number; personaId: string }[];
 };
