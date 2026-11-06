@@ -1,6 +1,7 @@
 import { listarModulos, type EventoDeDominio } from "../module";
 import { EVENTOS_COBROS } from "./catalogo-cobros";
 import { EVENTOS_CRM } from "./catalogo-crm";
+import { EVENTOS_TERRENO } from "./catalogo-terreno";
 
 /**
  * Eventos que emite el núcleo (ADR-029). Con los `eventos` de los manifests forman el catálogo al
@@ -19,6 +20,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.contacto.actualizado", descripcion: "Cambiaron los datos de un contacto." },
   ...EVENTOS_CRM,
   ...EVENTOS_COBROS,
+  ...EVENTOS_TERRENO,
   { id: "core.instalacion.creada", descripcion: "Se creó una instalación de una cuenta." },
   { id: "core.instalacion.actualizada", descripcion: "Cambiaron los datos de una instalación." },
   { id: "core.instalacion.estado_cambiado", descripcion: "Una instalación cambió de estado." },
