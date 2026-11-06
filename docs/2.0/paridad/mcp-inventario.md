@@ -779,8 +779,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
-| `core.biometria.enrolar` | — | no | reservada a personas |
-| `core.biometria.verificar` | — | no | reservada a personas |
+| `core.biometria.enrolar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
+| `core.biometria.verificar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
