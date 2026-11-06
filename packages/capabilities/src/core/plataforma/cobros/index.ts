@@ -7,6 +7,7 @@ import {
 import { platformCobrosCondicionesSet } from "./condiciones";
 import { platformCobrosPruebaAbrir } from "./prueba";
 import { platformCobrosPruebaGratisExtender } from "./prueba-gratis";
+import { platformCobrosPruebasGratisList } from "./pruebas-gratis-list";
 import { platformCobrosResumen } from "./resumen";
 
 export { trabajoCobrosMesAnterior } from "./trabajo";
@@ -22,4 +23,5 @@ export const capacidadesCobros: readonly Capacidad[] = [
   platformCobrosCargoAnular,
   platformCobrosPruebaAbrir,
   platformCobrosPruebaGratisExtender,
+  platformCobrosPruebasGratisList,
 ];

@@ -16,10 +16,12 @@ type Props = {
   funciones: string[];
   pie: ReactNode;
   accion?: ReactNode;
+  /** Precio de lista y estado de la prueba gratis. */
+  detalle?: ReactNode;
 };
 
 /** Tarjeta de un módulo (42/43): nombre, estado, funciones como chips, versión y dependencias. */
-export function TarjetaModulo({ nombre, estado, funciones, pie, accion }: Props) {
+export function TarjetaModulo({ nombre, estado, funciones, pie, accion, detalle }: Props) {
   const e = estado && estado !== "siempre" ? ESTADO_MODULO[estado] : null;
   return (
     <article className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
@@ -44,6 +46,7 @@ export function TarjetaModulo({ nombre, estado, funciones, pie, accion }: Props)
           ))}
         </ul>
       ) : null}
+      {detalle}
       <div className="mt-auto flex items-end justify-between gap-3">
         <p className="t-caption">{pie}</p>
         {accion}

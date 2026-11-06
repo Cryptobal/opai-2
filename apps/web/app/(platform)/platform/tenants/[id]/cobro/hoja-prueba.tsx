@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { DIAS_PRUEBA_GRATIS, finDePruebaGratis } from "@opai/domain";
 import { Alerta, avisar, Button, Checkbox, Campo, InputFecha, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -14,7 +15,9 @@ export function HojaPrueba(props: { tenantId: string; modulo: ModuloCobro; onCer
   const { tenantId, modulo, onCerrar } = props;
   const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("platform");
-  const [hasta, setHasta] = useState(modulo.condicion?.pruebaHasta ?? "");
+  const [hasta, setHasta] = useState(
+    modulo.condicion?.pruebaHasta ?? finDePruebaGratis(new Date().toISOString().slice(0, 10)),
+  );
   const [pasa, setPasa] = useState(modulo.condicion?.pasaACobro ?? false);
 
   async function abrir() {
@@ -36,7 +39,7 @@ export function HojaPrueba(props: { tenantId: string; modulo: ModuloCobro; onCer
       abierto
       onCerrar={onCerrar}
       titulo={`Abrir prueba de ${modulo.nombre}`}
-      descripcion="La empresa usa el módulo hasta la fecha. Siete días antes, Plataforma recibe un aviso."
+      descripcion={`La empresa usa el módulo hasta la fecha (por defecto ${DIAS_PRUEBA_GRATIS} días desde hoy). Siete días antes, Plataforma recibe un aviso.`}
       acciones={
         <>
           <Button variant="secondary" onClick={onCerrar}>

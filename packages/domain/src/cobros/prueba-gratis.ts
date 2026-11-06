@@ -18,6 +18,14 @@ export type EstadoPruebaGratis = "vigente" | "vencida";
 export const estadoPruebaGratis = (hasta: string, hoy: string): EstadoPruebaGratis =>
   hasta >= hoy ? "vigente" : "vencida";
 
+/** Días que le quedan a una prueba vigente contando hoy (último día = 1); 0 si ya venció. */
+export function diasRestantesPrueba(hasta: string, hoy: string): number {
+  if (hasta < hoy) return 0;
+  return (
+    Math.round((Date.parse(`${hasta}T00:00:00Z`) - Date.parse(`${hoy}T00:00:00Z`)) / 86_400_000) + 1
+  );
+}
+
 /**
  * Nuevo último día al extender o reactivar: `dias` desde el último día actual si aún está vigente, o
  * desde hoy si ya venció (reactivarla no regala los días que pasaron).

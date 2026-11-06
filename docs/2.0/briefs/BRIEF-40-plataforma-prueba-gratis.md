@@ -46,4 +46,7 @@ Migración aditiva (`DROP TABLE`). Riesgo principal: la prueba de una parte sin 
 4. Una prueba terminada no se re-pide sola desde el ERP: solo extiende o reactiva OPAI (default conservador, reversible).
 
 ## 11. Reporte de ejecución
-Ver el PR.
+**PR 2 (`brief/car-222-plataforma-prueba-gratis-pantallas`):**
+- ERP → Configuración → Módulos: lectura nueva `core.modules.pruebas` (precio de lista, estado de la prueba, días que quedan o por qué no se puede). Cada módulo muestra su precio de lista y, si se puede, «Probar 10 días» (hoja de confirmación: gratis, una sola vez, solo lectura al terminar). Sin RUT, el botón queda desactivado con enlace a Datos de la empresa. Nueva sección «Partes de Finanzas» con el aviso temporal de que probar una parte abre todo Finanzas.
+- Plataforma → empresa → Cobro: lectura `platform.cobros.pruebas_gratis_list` y sección «Pruebas gratis» con «Extender 10 días» / «Reactivar 10 días» (`platform.cobros.prueba_gratis_extender`, ya irreversible para agentes). La hoja «Abrir prueba» propone ahora 10 días desde hoy.
+- Sin migración. No activa pruebas reales: solo pantallas y lecturas.
