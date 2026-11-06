@@ -18,4 +18,15 @@ describe("mensajes de error (B7)", () => {
     expect(mensajeDeError("CONFLICT", 'Ya existe "abc" en la tabla')).toMatch(/cambió mientras/);
     expect(esMensajeDeNegocio("x")).toBe(false);
   });
+  it("muestra las reglas que abren con comillas angulares o son largas (CAR-199)", () => {
+    const campo = "«Válida hasta» no puede ser anterior a hoy.";
+    expect(mensajeDeError("UNPROCESSABLE", campo)).toBe(campo);
+    const largo = `Este anexo no se puede aprobar todavía: ${"la plantilla tiene texto de ejemplo. ".repeat(5)}`.trim();
+    expect(largo.length).toBeGreaterThan(220);
+    expect(mensajeDeError("UNPROCESSABLE", largo)).toBe(largo);
+    // Lo técnico sigue sin salir aunque abra con «.
+    expect(mensajeDeError("UNPROCESSABLE", "«Cuenta» falló en prisma al leer el tenant.")).toMatch(
+      /No se puede hacer en este momento/,
+    );
+  });
 });

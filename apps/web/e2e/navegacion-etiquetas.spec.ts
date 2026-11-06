@@ -5,8 +5,10 @@ import { entrar } from "./sesion";
 async function comprobarPalabras(nav: Locator) {
   const etiquetas = nav.locator("a > span:last-child");
   expect(await etiquetas.count()).toBeGreaterThan(0);
-  for (const etiqueta of await etiquetas.all()) {
-    const resultado = await etiqueta.evaluate((elemento) => {
+  // Una sola evaluación sobre todas las etiquetas: con `all()` + `evaluate` una etiqueta que se re-renderiza
+  // entre medias dejaba la espera colgada 90 s.
+  const resultados = await etiquetas.evaluateAll((elementos) =>
+    elementos.map((elemento) => {
       const texto = elemento.firstChild;
       if (!texto || texto.nodeType !== Node.TEXT_NODE) return null;
       const palabras = [...(texto.textContent ?? "").matchAll(/\S+/g)];
@@ -30,7 +32,9 @@ async function comprobarPalabras(nav: Locator) {
           )
         );
       });
-    });
+    }),
+  );
+  for (const resultado of resultados) {
     expect(resultado).not.toBeNull();
     expect(resultado).not.toContain(false);
   }

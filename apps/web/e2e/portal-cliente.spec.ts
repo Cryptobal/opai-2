@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // Brief 16 · Portal Cliente PR 1 (CAR-88): configuración del portal y gestión de accesos en el ERP,
@@ -26,7 +27,10 @@ test.describe("Portal Cliente · PR 1", () => {
     // Cambia el RUT en reportes y guarda; al recargar queda como se dejó.
     const rut = page.getByRole("switch", { name: "Incluir el RUT en los reportes descargables" });
     const antes = await rut.getAttribute("aria-checked");
+    // En `pnpm dev` el interruptor se pinta antes de hidratarse y un clic en esa ventana se pierde.
+    await hidratado(rut);
     await rut.click();
+    await expect(rut).toHaveAttribute("aria-checked", antes === "true" ? "false" : "true");
     const respuesta = page.waitForResponse(
       (r) => r.request().method() === "POST" && (r.request().postData() ?? "").includes("portal_cliente.config.actualizar"),
     );
@@ -38,7 +42,10 @@ test.describe("Portal Cliente · PR 1", () => {
     ).toHaveAttribute("aria-checked", antes === "true" ? "false" : "true");
 
     // Deja la configuración como estaba para no ensuciar la siguiente corrida (esperando el guardado).
-    await page.getByRole("switch", { name: "Incluir el RUT en los reportes descargables" }).click();
+    const rutRecargado = page.getByRole("switch", { name: "Incluir el RUT en los reportes descargables" });
+    await hidratado(rutRecargado);
+    await rutRecargado.click();
+    await expect(rutRecargado).toHaveAttribute("aria-checked", antes ?? "false");
     const restaurada = page.waitForResponse(
       (r) => r.request().method() === "POST" && (r.request().postData() ?? "").includes("portal_cliente.config.actualizar"),
     );
@@ -56,7 +63,9 @@ test.describe("Portal Cliente · PR 1", () => {
   test("vincular contacto abre la hoja y explica qué falta si no hay candidatos", async ({ page }) => {
     await entrar(page);
     await page.goto("/configuracion/modulo/portal_cliente");
-    await page.getByRole("button", { name: "Vincular contacto" }).click();
+    const vincular = page.getByRole("button", { name: "Vincular contacto" });
+    await hidratado(vincular);
+    await vincular.click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByRole("dialog").getByText(/Invítalos primero|Contacto/).first()).toBeVisible();
   });

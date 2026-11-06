@@ -3,7 +3,8 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { conEtiqueta, etiquetasDeFilas, etiquetasFilaSchema, filtroEtiqueta } from "../crm/etiquetas-filas";
+import type { TONOS_ETIQUETA } from "../crm/comun";
+import { conEtiqueta, etiquetasFilaSchema, filtroEtiqueta } from "../crm/etiquetas-filas";
 import { dondeCuenta, dondeInstalacion } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { cuentaSchema, ESTADOS_CUENTA, vistaCuenta } from "./cuentas-vista";
@@ -60,10 +61,15 @@ export const cuentasList = defineCapability({
           select: { nombres: true, apellidos: true },
           take: 1,
         },
+        // Etiquetas activas de la fila en la misma operación: una consulta menos por navegación (ADR-045).
+        etiquetaAsignaciones: {
+          where: { etiqueta: { activa: true } },
+          select: { etiqueta: { select: { id: true, nombre: true, tono: true } } },
+          orderBy: { etiqueta: { nombre: "asc" } },
+        },
       },
     });
     const p = pagina(filas, input.limite);
-    const etiquetas = await etiquetasDeFilas(ctx, "cuenta", p.items.map((c) => c.id));
     return {
       items: p.items.map((c) => {
         const principal = c.contactos[0];
@@ -71,7 +77,11 @@ export const cuentasList = defineCapability({
           ...vistaCuenta(c),
           instalaciones: c._count.instalaciones,
           contactoPrincipal: principal ? `${principal.nombres} ${principal.apellidos}` : null,
-          etiquetas: etiquetas(c.id),
+          etiquetas: c.etiquetaAsignaciones.map((a) => ({
+            id: a.etiqueta.id,
+            nombre: a.etiqueta.nombre,
+            tono: a.etiqueta.tono as (typeof TONOS_ETIQUETA)[number],
+          })),
         };
       }),
       siguiente: p.siguiente,

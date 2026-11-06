@@ -1,5 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
+
+/** Pulsa un radio de Preferencias cuando ya hidrató: un clic antes no dispara el guardado (dev). */
+async function pulsarRadio(page: Page, name: string | RegExp) {
+  const radio = page.getByRole("radio", { name });
+  await hidratado(radio);
+  await radio.click();
+}
 
 // Configuración (Brief 02, sesión C, bloque 12): Empresa, Marca, Documentos y Módulos a 375, 1024 y
 // 1280, con capturas en e2e/__screenshots__/. Preferencias es ahora una página propia de la cuenta
@@ -43,14 +51,14 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     // Normaliza por la misma UI y espera la escritura concreta, sin tocar datos fuera del tenant.
     if (await page.getByRole("radio", { name: "Oscuro" }).isChecked()) {
       const normalizado = guardado();
-      await page.getByRole("radio", { name: /Sistema/ }).click();
+      await pulsarRadio(page, /Sistema/);
       await normalizado;
       await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
       await page.reload();
       await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
     }
     let respuesta = guardado();
-    await page.getByRole("radio", { name: "Oscuro" }).click();
+    await pulsarRadio(page, "Oscuro");
     await respuesta;
     await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -60,7 +68,7 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
       await expect(page.getByRole("radio", { name: "Oscuro" })).toBeChecked({ timeout: 2_000 });
     }).toPass({ timeout: 20_000 });
     respuesta = guardado();
-    await page.getByRole("radio", { name: /Sistema/ }).click();
+    await pulsarRadio(page, /Sistema/);
     await respuesta;
     await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
     await expect(page.locator("html")).not.toHaveAttribute("data-theme", "dark");
@@ -86,7 +94,7 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     // Parte de Sistema confirmado por el servidor (la base local persiste entre corridas).
     if (!(await page.getByRole("radio", { name: /Sistema/ }).isChecked())) {
       const normalizado = guardado();
-      await page.getByRole("radio", { name: /Sistema/ }).click();
+      await pulsarRadio(page, /Sistema/);
       await normalizado;
     }
     await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
@@ -103,7 +111,7 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
       }
       await ruta.continue();
     });
-    await page.getByRole("radio", { name: "Oscuro" }).click();
+    await pulsarRadio(page, "Oscuro");
     await expect(
       page.getByRole("alert").filter({ hasText: "No pudimos guardar el tema; volvimos a Sistema" }),
     ).toBeVisible();

@@ -284,7 +284,14 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
   });
 
   it("PR2: confirma cobertura en día cubierto y deshace", async () => {
-    const dia = sumar(21);
+    // La serie de puestoDia es 5x2 de lunes a viernes: el día a confirmar tiene que ser hábil. Con «mañana + 21»
+    // en fin de semana la prueba fallaba todos los viernes y sábados.
+    const habil = (f: string) => {
+      const d = new Date(`${f}T00:00:00Z`);
+      while ([0, 6].includes(d.getUTCDay())) d.setUTCDate(d.getUTCDate() + 1);
+      return d.toISOString().slice(0, 10);
+    };
+    const dia = habil(sumar(21));
     const conf = await ejecutar(ctxOwner(tenantA), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: dia });
     expect(conf.ok).toBe(true);
     expect(
