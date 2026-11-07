@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Alerta, Button } from "@opai/ds";
@@ -10,9 +9,17 @@ import { leerResumen, pedirEnvio, type ResumenCola } from "@/lib/terreno/cola";
 const cuenta = (n: number, uno: string, varios: string) =>
   n === 1 ? `1 ${uno}` : `${n} ${varios}`;
 
+/**
+ * Vuelve a Terreno con una navegación COMPLETA: esta página se sirvió del caché del service worker y el router de
+ * Next no navega bien desde un cascarón sin red; la carga completa trae el HTML y el JS vigentes.
+ */
+function volverATerreno() {
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- carga completa a propósito (ver arriba)
+  window.location.assign("/terreno");
+}
+
 /** Qué hay guardado en este teléfono mientras no hay señal, y reintento al volver. Sin nombres ni datos personales. */
 export function ResumenSinConexion() {
-  const router = useRouter();
   const [r, setR] = useState<ResumenCola | null | "error">(null);
   useEffect(() => {
     let vivo = true;
@@ -23,14 +30,14 @@ export function ResumenSinConexion() {
     void leer();
     const alVolver = () => {
       void pedirEnvio().then(leer);
-      router.push("/terreno");
+      volverATerreno();
     };
     window.addEventListener("online", alVolver);
     return () => {
       vivo = false;
       window.removeEventListener("online", alVolver);
     };
-  }, [router]);
+  }, []);
 
   if (r === "error")
     return (
@@ -57,7 +64,7 @@ export function ResumenSinConexion() {
           con señal: por seguridad esta pantalla no muestra personas ni datos de la instalación.
         </p>
       </section>
-      <Button variant="secondary" onClick={() => router.push("/terreno")}>
+      <Button variant="secondary" onClick={volverATerreno}>
         Reintentar
       </Button>
     </>
