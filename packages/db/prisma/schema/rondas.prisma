@@ -196,3 +196,33 @@ model Novedad {
   @@map("novedades")
   @@schema("rondas")
 }
+
+/// Marca de un punto de control que un equipo de terreno capturó (CAR-78 · E3). Hecho inmutable: solo
+/// inserción, una corrección es un hecho nuevo (R28, ADR-023). Nace en la misma transacción que su hecho
+/// `rondas.marca` de `core.hechos_terreno` (clave del equipo + dispositivo) y NO infiere presencia laboral.
+model MarcaRonda {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  puntoId       String   @map("punto_id") @db.Uuid
+  dispositivoId String   @map("dispositivo_id") @db.Uuid
+  /// Clave de idempotencia del hecho (la misma de `core.hechos_terreno`).
+  clave         String   @db.Uuid
+  /// Persona declarada en «¿Quién eres?» (no autenticada); nunca una visita.
+  personaId     String?  @map("persona_id") @db.Uuid
+  /// Hora del hecho llevada a la del servidor con el desfase del envío.
+  horaCorregida DateTime @map("hora_corregida") @db.Timestamptz(6)
+  /// "dentro" | "dudosa" | "fuera" | "sin_gps" (R3).
+  geocerca      String
+  distanciaM    Decimal? @map("distancia_m") @db.Decimal(9, 1)
+  precisionM    Decimal? @map("precision_m") @db.Decimal(9, 1)
+  /// "fuera_de_geocerca" | "qr_lejos_de_su_punto" | "etiqueta_reemplazada".
+  anomalias     String[] @default([])
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, dispositivoId, clave])
+  @@index([tenantId, puntoId, horaCorregida(sort: Desc)])
+  @@index([tenantId, instalacionId, horaCorregida(sort: Desc)])
+  @@map("marcas_ronda")
+  @@schema("rondas")
+}

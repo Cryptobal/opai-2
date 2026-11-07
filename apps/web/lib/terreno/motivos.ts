@@ -1,6 +1,7 @@
 /** Textos de la cola de Terreno en lenguaje de negocio (CAR-78 · E1). */
 export const ETIQUETA_TIPO: Record<string, string> = {
   "terreno.latido": "Aviso de que el teléfono estuvo activo",
+  "rondas.marca": "Marca de un punto de ronda",
 };
 
 export const etiquetaTipo = (tipo: string): string => ETIQUETA_TIPO[tipo] ?? "Registro de terreno";
@@ -12,6 +13,8 @@ export const MOTIVO_RECHAZO: Record<string, string> = {
   posterior_al_envio: "La hora del teléfono estaba adelantada. Revisa la fecha y hora del equipo.",
   muy_antiguo: "Pasaron más de 14 días sin poder enviarlo.",
   persona_no_valida: "La persona ya no está asignada a esta instalación.",
+  qr_invalido: "No se reconoce este código QR. Pide al supervisor revisar la etiqueta.",
+  qr_ajeno: "Este código QR es de otra instalación.",
   lote_invalido: "El envío no era válido y el servidor lo devolvió.",
 };
 

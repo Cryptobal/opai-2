@@ -12,6 +12,7 @@ import {
   type ResultadoHecho,
   resultadoHecho,
 } from "./hechos-evaluar";
+import { resolverMarcas } from "./rondas-marca";
 
 export const hechosRecibir = defineCapability({
   id: "core.hechos_terreno.recibir",
@@ -66,7 +67,11 @@ export const hechosRecibir = defineCapability({
           })
         : Promise.resolve([] as { id: string }[]),
     ]);
+    const marcas = await resolverMarcas(ctx, disp.instalacionId, hechos);
     const { resultados, nuevos } = evaluarLote({
+      marcasRechazadas: new Map(
+        [...marcas].flatMap(([clave, m]) => ("motivo" in m ? [[clave, m.motivo] as const] : [])),
+      ),
       hechos,
       envio,
       yaGuardadas: new Set(existentes.map((e) => e.clave)),
@@ -93,6 +98,30 @@ export const hechosRecibir = defineCapability({
             desfaseAlto: alto,
           })),
         });
+        // Marcas de ronda: su proyección inmutable nace con el hecho (sin inferir presencia laboral).
+        const filasMarca = nuevos.flatMap((h) => {
+          const m = marcas.get(h.clave);
+          if (!m || !("marca" in m)) return [];
+          const { puntoId, geocerca, distanciaM, precisionM, anomalias } = m.marca;
+          return [
+            {
+              tenantId: ctx.tenantId,
+              instalacionId: disp.instalacionId,
+              dispositivoId: disp.id,
+              clave: h.clave,
+              personaId: h.personaId ?? null,
+              horaCorregida: horaCorregida(new Date(h.horaHecho), desfaseMs),
+              puntoId,
+              geocerca,
+              distanciaM,
+              precisionM,
+              anomalias,
+            },
+          ];
+        });
+        if (filasMarca.length > 0) {
+          await tx.marcaRonda.createMany({ skipDuplicates: true, data: filasMarca });
+        }
         // Si otra petición ganó la carrera no se insertó nada: tampoco se anuncia.
         if (count === 0) return;
         // Un evento por lote (no por hecho): los módulos de terreno leen sus hechos por tipo en la tabla.
