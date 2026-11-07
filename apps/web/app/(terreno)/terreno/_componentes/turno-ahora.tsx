@@ -107,6 +107,11 @@ export function TurnoAhora({ personaId }: { personaId: string }) {
         ) : null}
       </section>
       {c?.modulos.rondas ? <MarcarPunto personaId={personaId} /> : null}
+      {c?.modulos.rondas ? (
+        <LinkNext href="/terreno/rondas" className="font-medium underline">
+          Ir a Mis rondas
+        </LinkNext>
+      ) : null}
       {c?.modulos.acceso ? (
         <LinkNext href="/terreno/porteria" className="font-medium underline">
           Ir a la portería

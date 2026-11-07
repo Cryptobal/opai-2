@@ -222,4 +222,39 @@ describe.skipIf(!urlPropietario)("ejecución de rondas en base real (CAR-78 E3d)
       await e.admin.hechoTerreno.count({ where: { clave: { in: [i.clave, m.clave, c.clave] } } }),
     ).toBe(0);
   });
+
+  it("«Mis rondas» entrega las plantillas con sus puntos (sin QR) y las rondas abiertas del equipo", async () => {
+    const estado = async (k: "A" | "B", modulos: string[] = ["rondas"]) => {
+      const ctx = mod.crearContexto({
+        tenantId: t[k],
+        actor: { tipo: "system" },
+        rol: "owner",
+        alcance: null,
+        medidor: { registrar: async () => undefined },
+        modulosActivos: modulos,
+      });
+      const r = await mod.executeCapability(ctx, "core.terreno.rondas", { dispositivoId: disp[k] });
+      if (!r.ok) throw new Error(JSON.stringify(r.error));
+      return r.data as {
+        activo: boolean;
+        plantillas: { id: string; puntos: { nombre: string }[] }[];
+        abiertas: { clave: string; marcados: string[] }[];
+      };
+    };
+    const i = inicio(plantillaA);
+    await recibir("A", [i, marca(cod.p1, i.clave)]);
+    const a = await estado("A");
+    expect(a.plantillas.map((p) => p.id)).toContain(plantillaA);
+    expect(a.plantillas.find((p) => p.id === plantillaA)?.puntos.map((p) => p.nombre)).toEqual([
+      "P1",
+      "P2",
+      "P3",
+    ]);
+    expect(JSON.stringify(a)).not.toContain(cod.p1);
+    expect(a.abiertas.find((x) => x.clave === i.clave)?.marcados).toHaveLength(1);
+    await recibir("A", [cierre(i.clave)]);
+    expect((await estado("A")).abiertas.map((x) => x.clave)).not.toContain(i.clave);
+    expect((await estado("B")).plantillas.map((p) => p.id)).not.toContain(plantillaA);
+    expect(await estado("A", [])).toEqual({ activo: false, plantillas: [], abiertas: [] });
+  });
 });

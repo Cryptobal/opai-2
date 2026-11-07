@@ -29,7 +29,14 @@ function leerGps(): Promise<Lectura | null> {
  * Se dice «guardada» solo cuando la cola releyó el hecho del disco; el servidor decide a qué punto
  * corresponde y rechaza el QR de otra instalación (se ve en la cola). No marca presencia laboral.
  */
-export function MarcarPunto({ personaId }: { personaId: string }) {
+export function MarcarPunto({
+  personaId,
+  ejecucionClave,
+}: {
+  personaId: string;
+  /** Clave del inicio de la ronda a la que pertenece la marca (opcional: sin ella la marca queda suelta). */
+  ejecucionClave?: string;
+}) {
   const [codigo, setCodigo] = useState("");
   // Este componente solo se monta en el navegador (carga diferida sin servidor): se puede consultar de una vez.
   const camara = "BarcodeDetector" in window && !!navigator.mediaDevices;
@@ -43,7 +50,11 @@ export function MarcarPunto({ personaId }: { personaId: string }) {
       const lectura = await leerGps();
       await encolarHecho({
         tipo: "rondas.marca",
-        payload: { codigo: c, ...(lectura ? { lectura } : {}) },
+        payload: {
+          codigo: c,
+          ...(ejecucionClave ? { ejecucionClave } : {}),
+          ...(lectura ? { lectura } : {}),
+        },
         personaId,
       });
       setCodigo("");

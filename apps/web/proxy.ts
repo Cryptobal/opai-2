@@ -103,6 +103,7 @@ export async function proxy(request: NextRequest) {
       "/terreno",
       "/terreno/cola",
       "/terreno/porteria",
+      "/terreno/rondas",
     ].includes(request.nextUrl.pathname);
   if (publica) return responder(NextResponse.next({ request: { headers } }));
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {

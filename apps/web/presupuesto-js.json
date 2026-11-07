@@ -84,6 +84,7 @@
     "/(terreno)/terreno": 167,
     "/(terreno)/terreno/[...ruta]": 163,
     "/(terreno)/terreno/cola": 166,
-    "/(terreno)/terreno/porteria": 164
+    "/(terreno)/terreno/porteria": 164,
+    "/(terreno)/terreno/rondas": 164
   }
 }
