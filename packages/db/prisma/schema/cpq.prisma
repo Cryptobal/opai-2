@@ -189,6 +189,27 @@ model CpqCostoCategoria {
   @@schema("cpq")
 }
 
+/// Costo predefinido por empresa (CAR-213): categoría de costo que se carga sola en cada cotización,
+/// una vez para toda la cotización (`global`) o por cada puesto (`por_puesto`). CLP mensual entero.
+model CpqCostoPredefinido {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  /// Id de categoría del modelo de costeo (nunca «feriados», que se calcula).
+  categoria String
+  montoClp  Int      @map("monto_clp")
+  /// "global" | "por_puesto"
+  alcance   String   @default("global")
+  activo    Boolean  @default(true)
+  orden     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, categoria, alcance])
+  @@index([tenantId, activo])
+  @@map("costos_predefinidos")
+  @@schema("cpq")
+}
+
 /// Pedido y decisión de aprobación de margen sobre una versión (R41, R42).
 model CpqAprobacion {
   id             String    @id @default(uuid(7)) @db.Uuid

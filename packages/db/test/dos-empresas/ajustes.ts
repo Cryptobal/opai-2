@@ -131,6 +131,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // CPQ (CAR-119): CHECK de tipo de línea (lineas_tipo_check).
   "cpq.lineas": { valores: () => ({ tipo: "item" }) },
+  // CPQ (CAR-213): CHECK de alcance (global | por_puesto) en los costos predefinidos.
+  "cpq.costos_predefinidos": { fijas: ["alcance"], valores: () => ({ alcance: "global" }) },
   // CPQ (CAR-135): CHECK tipo/base; `copia` no debe regenerar `tipo` (índice único parcial por tenant+tipo).
   "cpq.plantillas_documento": {
     fijas: ["tipo", "base"],
