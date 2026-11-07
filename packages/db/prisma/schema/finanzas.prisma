@@ -378,6 +378,8 @@ model DocumentoEmitidoReferencia {
   folioRef    Int    @map("folio_ref")
   codigoRef   Int    @map("codigo_ref")
   razonRef    String? @map("razon_ref")
+  /// Fecha del documento referenciado (FchRef del SII); null en referencias anteriores a CAR-221.
+  fechaRef    DateTime? @map("fecha_ref") @db.Date
 
   documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
 
