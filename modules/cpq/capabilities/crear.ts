@@ -8,6 +8,7 @@ import {
   reglaDeNegocio,
 } from "@opai/capabilities";
 
+import { aplicarCostosPredefinidos } from "../persistencia/costos-predefinidos";
 import { anioEnZona, formatearCodigo, validaHastaPorDefecto } from "../domain";
 import { ensurePlantillaCatalogo } from "../persistencia/catalogo-seed";
 import { sincronizarSecciones } from "../persistencia/secciones-sync";
@@ -114,6 +115,7 @@ export const cotizacionesCreate = defineCapability({
       });
       await ensurePlantillaCatalogo(ctx);
       await sincronizarSecciones(ctx, creado.versionId, negocio.id);
+      await aplicarCostosPredefinidos(ctx, creado.versionId);
       return creado;
     } catch (e) {
       // Carrera por «una vigente por negocio»: la otra transacción llegó primero.
