@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, Button, Empty, Loading } from "@opai/ds";
@@ -7,8 +8,16 @@ import { LinkNext } from "@/app/_components/link-next";
 
 import { usePersonaElegida } from "@/lib/terreno/persona";
 
-import { FormularioEntrada } from "./formulario-entrada";
-import { ListaEnSitio, type EnSitio } from "./lista-en-sitio";
+import type { EnSitio } from "./lista-en-sitio";
+
+// El formulario y la lista se cargan aparte para no pesar en el JS inicial de la ruta (presupuesto de JS, ADR-037).
+const FormularioEntrada = dynamic(
+  () => import("./formulario-entrada").then((m) => m.FormularioEntrada),
+  { ssr: false },
+);
+const ListaEnSitio = dynamic(() => import("./lista-en-sitio").then((m) => m.ListaEnSitio), {
+  ssr: false,
+});
 
 type Sitio = { activo: boolean; items: EnSitio[] };
 
