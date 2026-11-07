@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 629 pares pantalla→capacidad · 566 con herramienta · 63 excepciones justificadas · 0 faltantes.
+**Resumen:** 632 pares pantalla→capacidad · 569 con herramienta · 63 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -434,13 +434,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.create` | `core_personas_create` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.desbloquear` | `core_personas_desbloquear` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.laboral_actualizar` | `core_personas_laboral_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.laboral_ver` | `core_personas_laboral_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.marcar_no_recontratar` | `core_personas_marcar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.no_recontratar_ver` | `core_personas_no_recontratar_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_aprobar_cambio` | `core_personas_pago_aprobar_cambio` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_rechazar_cambio` | `core_personas_pago_rechazar_cambio` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_solicitar_cambio` | `core_personas_pago_solicitar_cambio` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_ver` | `core_personas_pago_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
@@ -889,9 +892,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.invitations.revoke`
 - `core.modules.probar`
 - `core.patrones.get`
-- `core.personas.laboral_actualizar`
-- `core.personas.pago_solicitar_cambio`
-- `core.personas.prevision_actualizar`
 - `core.ping`
 - `core.puestos.get`
 - `core.turnos_esperados.listar`

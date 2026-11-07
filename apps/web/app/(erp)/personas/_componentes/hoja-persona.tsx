@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -97,6 +98,16 @@ export function HojaPersona({ persona, cargos, hoy }: Props) {
     >
       <div className="flex flex-col gap-5">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
+        {persona ? (
+          <Alerta tono="info" titulo="Aquí se edita solo la identidad y el contacto">
+            Cargo, contrato, instalación, jornada, previsión y demás datos laborales se editan en la
+            pestaña{" "}
+            <Link href={`/personas/${persona.id}/laboral`} className="font-medium underline">
+              Laboral
+            </Link>
+            . El sueldo está en la pestaña Sueldo.
+          </Alerta>
+        ) : null}
         <CamposPersona d={d} setD={setD} />
         {cargos ? <CamposVinculo v={v} onCambiar={setV} cargos={cargos} /> : null}
       </div>

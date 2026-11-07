@@ -1,6 +1,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
+import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
@@ -23,8 +24,12 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
   const r = await ejecutarComoUsuario<Laboral>("erp", "core.personas.laboral_ver", { id: personaId });
   if (!r.ok) return null;
   const j = r.data.jornadaDt;
+  const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
   return (
-    <SeccionTarjeta titulo="Jornada DT">
+    <SeccionTarjeta
+      titulo="Jornada DT"
+      {...(puede ? { accion: <BotonEditarSeccion seccion="jornada-dt" /> } : {})}
+    >
       <ParesGrid
         items={[
           { etiqueta: "Resolución", valor: j?.resolucion },
@@ -37,6 +42,22 @@ export async function SeccionJornadaDt({ personaId }: { personaId: string }) {
           { etiqueta: "Aviso término (días)", valor: j?.avisoTerminoDias?.toString() ?? null },
         ]}
       />
+      {puede ? (
+        <HojaEditarSeccion
+          seccion="jornada-dt"
+          personaId={personaId}
+          inicial={{
+            resolucion: j?.resolucion,
+            resolucionVigenteDesde: j?.resolucionVigenteDesde,
+            horasSemanales: j?.horasSemanales,
+            distribucion: j?.distribucion,
+            articulo22: j?.articulo22 ? "si" : "no",
+            plazoFijoPeriodo: j?.plazoFijoPeriodo?.toString(),
+            terminoPlazoFijo: j?.terminoPlazoFijo,
+            avisoTerminoDias: j?.avisoTerminoDias?.toString(),
+          }}
+        />
+      ) : null}
     </SeccionTarjeta>
   );
 }
