@@ -27,7 +27,9 @@ describe("desfase del reloj del equipo", () => {
     expect(horaCorregida(t("2026-11-06T10:00:00Z"), 300_000).toISOString()).toBe(
       "2026-11-06T10:05:00.000Z",
     );
-    expect(horaCorregida(t("2026-11-06T10:00:00Z"), 0).toISOString()).toBe("2026-11-06T10:00:00.000Z");
+    expect(horaCorregida(t("2026-11-06T10:00:00Z"), 0).toISOString()).toBe(
+      "2026-11-06T10:00:00.000Z",
+    );
   });
 
   it("marca como alto el desfase de más de 10 minutos, en cualquier sentido", () => {
@@ -45,7 +47,9 @@ describe("plausibilidad de un hecho", () => {
   });
 
   it("tolera un minuto de redondeo del reloj, no más", () => {
-    expect(hechoPlausible(new Date(envio.getTime() + TOLERANCIA_FUTURO_MS), envio)).toEqual({ ok: true });
+    expect(hechoPlausible(new Date(envio.getTime() + TOLERANCIA_FUTURO_MS), envio)).toEqual({
+      ok: true,
+    });
     expect(hechoPlausible(new Date(envio.getTime() + TOLERANCIA_FUTURO_MS + 1), envio)).toEqual({
       ok: false,
       motivo: "posterior_al_envio",
@@ -53,7 +57,9 @@ describe("plausibilidad de un hecho", () => {
   });
 
   it("rechaza lo de hace más de 14 días", () => {
-    expect(hechoPlausible(new Date(envio.getTime() - ANTIGUEDAD_MAXIMA_MS), envio)).toEqual({ ok: true });
+    expect(hechoPlausible(new Date(envio.getTime() - ANTIGUEDAD_MAXIMA_MS), envio)).toEqual({
+      ok: true,
+    });
     expect(hechoPlausible(new Date(envio.getTime() - ANTIGUEDAD_MAXIMA_MS - 1), envio)).toEqual({
       ok: false,
       motivo: "muy_antiguo",
@@ -64,7 +70,8 @@ describe("plausibilidad de un hecho", () => {
 describe("política de la cola sin conexión por operación", () => {
   it("solo se encola lo declarado: el latido sí, lo desconocido no", () => {
     expect(esTipoEncolable("terreno.latido")).toBe(true);
-    expect(esTipoEncolable("rondas.marca")).toBe(false); // aún no declarado por su módulo
+    expect(esTipoEncolable("rondas.marca")).toBe(true); // lo declara Rondas (CAR-78 E3)
+    expect(esTipoEncolable("acceso.entrada")).toBe(false); // aún no declarado por su módulo
     expect(esTipoEncolable("")).toBe(false);
   });
 

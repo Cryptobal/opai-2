@@ -63,3 +63,4 @@ export * from "./cobros";
 export * from "./terreno-hechos";
 export * from "./terreno-contexto";
 export * from "./campos";
+export * from "./acceso";
