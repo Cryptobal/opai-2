@@ -1,7 +1,7 @@
 // Adaptador SII para emisión DTE (CAR-137). Interfaz única; certificado y CAF viven cifrados fuera del repo.
 
 export type AmbienteSii = "certificacion" | "produccion";
-export type TipoDteVentaSii = 33 | 34 | 61;
+export type TipoDteVentaSii = 33 | 34 | 56 | 61;
 
 export type DteXmlFirmado = {
   xml: string;
