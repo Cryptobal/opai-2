@@ -24,16 +24,8 @@ import {
   cotizacionesRechazarAprobacion,
   cotizacionesRetirarAprobacion,
 } from "./aprobacion-decidir";
-import {
-  cpqAprobacionesContar,
-  cpqAprobacionesGet,
-  cpqAprobacionesList,
-} from "./aprobaciones-bandeja";
-import {
-  cotizacionesMarcarLista,
-  cotizacionesReabrir,
-  cotizacionesSolicitarAprobacion,
-} from "./aprobacion-flujo";
+import { cpqAprobacionesContar, cpqAprobacionesGet, cpqAprobacionesList } from "./aprobaciones-bandeja";
+import { cotizacionesMarcarLista, cotizacionesReabrir, cotizacionesSolicitarAprobacion } from "./aprobacion-flujo";
 import { cotizacionesCalcular } from "./ficha-calcular";
 import { cotizacionesFicha } from "./ficha";
 import { cotizacionesExplicar } from "./ficha-explicar";
