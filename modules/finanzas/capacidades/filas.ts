@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability } from "@opai/capabilities";
+import { defineCapability, reglaDeNegocio } from "@opai/capabilities";
 
 import { sincronizarAvisosEnTx } from "./aviso";
 import { filaSchema, seccionSchema, sinDuplicado, uuidSchema, vistaFila } from "./esquemas";
@@ -24,7 +24,7 @@ const datosFila = {
 export const filasCrear = defineCapability({
   id: "finanzas.filas.crear",
   descripcion:
-    "Agrega una fila de ingreso o egreso a la planilla del flujo de caja, con el origen de su cifra y si arrastra las semanas siguientes al reprogramar.",
+    "Agrega una fila de egreso planificado a la planilla del flujo de caja, con el origen de su cifra y si arrastra las semanas siguientes al reprogramar. Los ingresos no se crean a mano: salen solos de lo facturado y cobrado.",
   permiso: PERMISO_CONFIGURAR,
   input: z.object({
     seccion: seccionSchema,
@@ -35,6 +35,11 @@ export const filasCrear = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    // Decisión de Carlos (6-nov-2026, CAR-198/CAR-220, ADR-073): los ingresos salen de lo facturado y cobrado; a mano
+    // solo se crean egresos planificados.
+    if (input.seccion === "ingreso") {
+      throw reglaDeNegocio("Los ingresos no se crean a mano: salen de lo facturado y cobrado. Crea un egreso planificado.");
+    }
     const data = {
       seccion: input.seccion,
       etiqueta: input.etiqueta,

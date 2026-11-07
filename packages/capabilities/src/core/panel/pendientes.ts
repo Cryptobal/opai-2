@@ -7,9 +7,10 @@ import { obtenerCapacidad } from "../../registry";
 import { documentosMatriz } from "../documentos/matriz";
 import { dondePersona } from "../maestros/alcance";
 import { SIN_PLATAFORMA } from "../../agentes/plataforma";
+import { pendientesSolicitudes } from "./pendientes-solicitudes";
 
 const pendienteSchema = z.object({
-  tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones", "anexos"]),
+  tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones", "anexos", "solicitudes"]),
   titulo: z.string(),
   detalle: z.string(),
   tono: z.enum(["warning", "danger", "neutro"]),
@@ -23,7 +24,7 @@ export const inicioPendientes = defineCapability({
   auditarLectura: false, // Solo contadores/estado, sin correos ni contenido personal de terceros.
   id: "core.inicio.pendientes",
   descripcion:
-    "Lo que requiere una decisión hoy en la empresa: aprobaciones de agentes por vencer, documentos vencidos o por vencer, invitaciones sin aceptar e integraciones con error, según los permisos del actor.",
+    "Lo que requiere una decisión hoy en la empresa: aprobaciones de agentes por vencer, documentos vencidos o por vencer, invitaciones sin aceptar, integraciones con error y solicitudes nuevas o en revisión a su cargo, según los permisos del actor.",
   permiso: null,
   input: z.object({}),
   output: z.array(pendienteSchema),
@@ -135,6 +136,7 @@ export const inicioPendientes = defineCapability({
             accion: "Revisar",
           });
       }
+      items.push(...(await pendientesSolicitudes(ctx)));
       return items;
     });
   },

@@ -60,10 +60,9 @@ describe.skipIf(omitirSuiteDb())("Finanzas · flujo sin cierre (db)", () => {
       data: { id: usuarioId, email: `u-${randomUUID().slice(0, 8)}@flujo.test`, name: "u" },
     });
     await ok("finanzas.ajustes.actualizar", { saldoInicial: 0, desde: "2026-10-26" });
-    await ok("finanzas.filas.crear", {
-      seccion: "ingreso",
-      etiqueta: ETIQUETAS_FLUJO.cobrosSinFila,
-      arrastre: true,
+    // Los ingresos no se crean por la capacidad (solo egresos planificados): la fila se siembra directo.
+    await e.admin.flujoFila.create({
+      data: { tenantId, seccion: "ingreso", etiqueta: ETIQUETAS_FLUJO.cobrosSinFila, arrastre: true, orden: 0, activa: true },
     });
     const cuentaId = (
       await ok<{ id: string }>("finanzas.bancos.guardar", {

@@ -22,6 +22,8 @@ export type EntradaPdfCotizacion = {
     pagosUnicos?: number;
     borradorSinPrecio?: boolean;
     uf?: { valorClpEscalado: number; fecha: string } | null;
+    /** Tasa de IVA de venta del tenant (`PCT_ESCALA`); por defecto 19 %. */
+    tasaIvaPct?: number;
   };
   condiciones?: string | null;
   validaHasta?: string | null;

@@ -19,3 +19,9 @@ export const ESTADO: Record<
   convertida: { etiqueta: "Convertida", tono: "success" },
   descartada: { etiqueta: "Descartada", tono: "neutro" },
 };
+
+/** Quién revisa una solicitud «en revisión» (CAR-211); null en los demás estados. */
+export function quienRevisa(s: { estado: string; responsableNombre?: string | null }): string | null {
+  if (s.estado !== "en_revision") return null;
+  return s.responsableNombre ? `Revisa: ${s.responsableNombre}` : "Sin responsable";
+}
