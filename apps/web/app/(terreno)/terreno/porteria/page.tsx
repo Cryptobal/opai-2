@@ -5,7 +5,7 @@ import { Loading } from "@opai/ds";
 
 import { dispositivoActual } from "@/lib/dispositivo";
 
-import { PantallaPorteria } from "./pantalla-porteria";
+import { CargadorPorteria } from "./cargador";
 
 export const metadata = { title: "Portería" };
 
@@ -13,7 +13,7 @@ export const metadata = { title: "Portería" };
 async function Contenido() {
   const equipo = await dispositivoActual();
   if (equipo?.estado !== "activo") redirect("/terreno");
-  return <PantallaPorteria />;
+  return <CargadorPorteria />;
 }
 
 export default function Pagina() {
