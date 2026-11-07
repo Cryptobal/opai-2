@@ -21,6 +21,7 @@ import {
   ventasCrearBorrador,
   ventasEmitir,
   ventasEmitirNotaCredito,
+  ventasEmitirNotaDebito,
   ventasEnviarSii,
 } from "./ventas-escritura";
 import { reporteResultados } from "./reportes-resultados";
@@ -99,6 +100,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasPreflightEmision,
   ventasEnviarSii,
   ventasEmitirNotaCredito,
+  ventasEmitirNotaDebito,
   ventasProyeccionFlujo,
   ventasCesionSimular,
   ventasCesionCeder,
