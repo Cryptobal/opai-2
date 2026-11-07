@@ -68,6 +68,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
     permitir: [
       "ops:*",
       "rondas:*",
+      "acceso:read",
       "pauta:*",
       "asistencia:ver",
       "asistencia:corregir",

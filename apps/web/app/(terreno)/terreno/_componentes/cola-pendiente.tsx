@@ -7,7 +7,7 @@ import { Button, Empty } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import type { ResumenCola } from "@/lib/terreno/cola";
-import { TIPOS_SILENCIOSOS } from "@/lib/terreno/motivos";
+import { TIPOS_SILENCIOSOS } from "@/lib/terreno/silenciosos";
 import { instantanea, instantaneaServidor, refrescarEstado, suscribir } from "@/lib/terreno/estado";
 
 import { BannerConexion } from "./banner-conexion";

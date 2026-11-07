@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@opai/capabilities": "workspace:*",
+    "@opai/mod-acceso": "workspace:*",
     "@opai/mod-agente": "workspace:*",
     "@opai/mod-asistencia": "workspace:*",
     "@opai/mod-comercial": "workspace:*",
