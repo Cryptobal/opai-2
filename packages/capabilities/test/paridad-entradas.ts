@@ -76,6 +76,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Presentación: dibuja el QR del código que ya generó core.dispositivos.generar_codigo; no lee ni escribe datos.",
   "app/api/terreno/contexto/route.ts":
     "Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
+  "app/api/terreno/porteria/sitio/route.ts":
+    "Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada.",
   "app/api/terreno/lote/route.ts":
     "Recibe el lote de hechos del equipo de terreno emparejado (CAR-78 B3): cookie de dispositivo y mismo origen, sin sesión; ejecuta core.hechos_terreno.recibir (interna con motivo en EXCEPCIONES_PARIDAD). Su lectura por MCP es core.hechos_terreno.listar.",
   "app/api/t/[slug]/solicitudes/route.ts":

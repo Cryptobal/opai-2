@@ -1,10 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Alerta, Button, Campo, Input } from "@opai/ds";
 
 import { encolarHecho } from "@/lib/terreno/cola";
+
+// El lector de la cámara se carga solo si el navegador lo soporta, para no pesar en el JS inicial.
+const EscanearQr = dynamic(() => import("./escanear-qr").then((m) => m.EscanearQr), { ssr: false });
 
 type Lectura = { lat: number; lng: number; precisionM: number };
 
@@ -27,6 +31,8 @@ function leerGps(): Promise<Lectura | null> {
  */
 export function MarcarPunto({ personaId }: { personaId: string }) {
   const [codigo, setCodigo] = useState("");
+  // Este componente solo se monta en el navegador (carga diferida sin servidor): se puede consultar de una vez.
+  const camara = "BarcodeDetector" in window && !!navigator.mediaDevices;
   const [estado, setEstado] = useState<"libre" | "guardando" | "guardada" | "error">("libre");
 
   const marcar = async () => {
@@ -50,6 +56,14 @@ export function MarcarPunto({ personaId }: { personaId: string }) {
   return (
     <section aria-label="Marcar punto" className="flex flex-col gap-2">
       <h2 className="t-heading text-fg">Marcar punto</h2>
+      {camara ? (
+        <EscanearQr
+          alLeer={(c) => {
+            setCodigo(c);
+            setEstado("libre");
+          }}
+        />
+      ) : null}
       <Campo etiqueta="Código del punto (QR)" htmlFor="m-codigo">
         <Input
           id="m-codigo"

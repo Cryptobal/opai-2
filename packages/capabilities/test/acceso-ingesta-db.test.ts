@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { normalizarDocumento } from "@opai/domain";
+import { digitoVerificador, momentoLocal, normalizarDocumento } from "@opai/domain";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import { huellaVigente } from "../src/acceso/huella";
@@ -196,5 +196,55 @@ describe.skipIf(!urlPropietario)("ingesta de portería en base real (CAR-78 E4b-
     expect(Array.isArray(r)).toBe(false);
     expect(await e.admin.hechoTerreno.count({ where: { clave: h.clave } })).toBe(0);
     vi.stubEnv("ACCESO_HUELLA_SECRET", CLAVE_PRUEBA);
+  });
+
+  it("los horarios de la lista se evalúan en la zona horaria de la empresa", async () => {
+    const run = `13000000-${digitoVerificador("13000000")}`;
+    const ahora = momentoLocal(new Date(), "America/Santiago").minutos;
+    await lista("B", run, "autorizada", {
+      desdeMin: Math.max(0, ahora - 120),
+      hastaMin: Math.min(1439, ahora + 120),
+    });
+    const antes = entrada(run);
+    expect(((await recibir("B", [antes])) as Res[])[0]?.estado).toBe("recibido");
+    expect(await e.admin.registroAcceso.count({ where: { clave: antes.clave } })).toBe(1);
+    await e.admin.tenant.update({ where: { id: t.B }, data: { timezone: "Pacific/Auckland" } });
+    const despues = entrada(run);
+    await recibir("B", [despues]);
+    expect(
+      (await e.admin.intentoDenegado.findFirstOrThrow({ where: { clave: despues.clave } })).motivo,
+    ).toBe("fuera_de_horario");
+    await e.admin.tenant.update({ where: { id: t.B }, data: { timezone: "America/Santiago" } });
+  });
+
+  it("la portería ve quién sigue en sitio de su instalación, con documento enmascarado, y no ve la otra empresa", async () => {
+    const dentro = entrada(RUN, { nombre: "Visita En Sitio" });
+    await recibir("A", [dentro]);
+    const leer = async (k: "A" | "B", modulos: string[] = ["acceso"]) => {
+      const ctx = mod.crearContexto({
+        tenantId: t[k],
+        actor: { tipo: "system" },
+        rol: "owner",
+        alcance: null,
+        medidor: { registrar: async () => undefined },
+        modulosActivos: modulos,
+      });
+      const r = await mod.executeCapability(ctx, "core.terreno.en_sitio", {
+        dispositivoId: disp[k],
+      });
+      if (!r.ok) throw new Error(JSON.stringify(r.error));
+      return r.data as {
+        activo: boolean;
+        items: { clave: string; nombre: string; documento: string }[];
+      };
+    };
+    const a = await leer("A");
+    expect(a.items.map((x) => x.clave)).toContain(dentro.clave);
+    expect(JSON.stringify(a)).not.toContain("12345678");
+    expect(a.items.find((x) => x.clave === dentro.clave)?.documento).toBe("12.3••.•••-5");
+    expect((await recibir("A", [salida(dentro.clave)])) as Res[]).toHaveLength(1);
+    expect((await leer("A")).items.map((x) => x.clave)).not.toContain(dentro.clave);
+    expect(JSON.stringify(await leer("B"))).not.toContain(dentro.clave);
+    expect(await leer("A", [])).toEqual({ activo: false, items: [] });
   });
 });

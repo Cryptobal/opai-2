@@ -154,4 +154,6 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4).",
   "core.terreno.contexto":
     "Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2).",
+  "core.terreno.en_sitio":
+    "Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d).",
 };

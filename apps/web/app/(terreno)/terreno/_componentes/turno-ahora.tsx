@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 import { Alerta, Button, Loading } from "@opai/ds";
 
+import { LinkNext } from "@/app/_components/link-next";
+
 const MarcarPunto = dynamic(() => import("./marcar-punto").then((m) => m.MarcarPunto), {
   ssr: false,
 });
@@ -20,7 +22,7 @@ type Turno = {
 type Contexto = {
   instalacion: { nombre: string };
   turnos: Turno[];
-  modulos: { rondas: boolean };
+  modulos: { rondas: boolean; acceso: boolean };
 };
 
 const ETIQUETA = { en_curso: "En turno", proximo: "Entra después", terminado: "Terminó" } as const;
@@ -105,6 +107,11 @@ export function TurnoAhora({ personaId }: { personaId: string }) {
         ) : null}
       </section>
       {c?.modulos.rondas ? <MarcarPunto personaId={personaId} /> : null}
+      {c?.modulos.acceso ? (
+        <LinkNext href="/terreno/porteria" className="font-medium underline">
+          Ir a la portería
+        </LinkNext>
+      ) : null}
     </>
   );
 }

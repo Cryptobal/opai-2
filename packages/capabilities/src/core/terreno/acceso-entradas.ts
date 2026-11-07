@@ -7,11 +7,10 @@ import {
 
 import { huellasCandidatas } from "../../acceso/huella";
 import type { Contexto } from "../../types";
+import { tenantActual } from "../comun";
 import type { Equipo, FilaIntento, FilaRegistro, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
 import type { TIPOS_HECHO_TERRENO } from "./hechos-tipos";
 
-/** Zona horaria de días y horarios de las listas (V1: la del país; la de la instalación llega con su ajuste). */
-const ZONA = "America/Santiago";
 /** Una entrada que llega con más de 2 minutos de retraso respecto de su hora se marca como diferida (R20). */
 const DIFERIDO_MS = 120_000;
 
@@ -30,6 +29,8 @@ export async function evaluarEntradas(
     instalacionId: equipo.instalacionId,
     dispositivoId: equipo.id,
   };
+  // Días y horarios de las listas se evalúan en la zona horaria de la empresa (`core.tenants.timezone`).
+  const { timezone: zonaTenant } = await tenantActual(ctx);
   const registros: FilaRegistro[] = [];
   const intentos: FilaIntento[] = [];
   const docs = entradas.flatMap((e) => {
@@ -86,7 +87,7 @@ export async function evaluarEntradas(
         modo: hayAutorizadas ? "solo_autorizados" : "permitir_fuera_de_lista",
         entradas: propias.map(dominio),
         ahora: hora,
-        zona: ZONA,
+        zona: zonaTenant,
       });
       const comun = {
         ...base,

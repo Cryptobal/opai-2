@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { digitoVerificador } from "@opai/domain";
 import { entrar } from "./sesion";
+import { porteriaEntradaYSalida } from "./terreno-porteria-apoyo";
 import { capturasDeInicioYCola, inyectarRechazado, marcarQrDesconocido } from "./terreno-apoyo";
 
 // CAR-78 · B3: un equipo de terreno emparejado captura sin señal y el hecho llega UNA sola vez al volver la
@@ -124,6 +125,8 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
 
   // E3b · una marca de ronda con un QR desconocido vuelve rechazada, con su motivo (si Rondas está activo).
   await marcarQrDesconocido(t);
+  // E4d · portería: entrada, «En sitio» y salida (si Control de acceso está activo en la empresa).
+  await porteriaEntradaYSalida(t);
 
   await capturasDeInicioYCola(t);
 
