@@ -5,9 +5,6 @@ agente_conversaciones_list
 agente_conversaciones_renombrar
 agente_historial_list
 agente_modelos_list
-asistencia_biometria_estado
-asistencia_biometria_mi_estado
-asistencia_consentimientos_textos
 asistencia_contingencias_listar
 asistencia_contingencias_registrar
 asistencia_correcciones_listar
@@ -22,6 +19,7 @@ asistencia_incidentes_registrar
 asistencia_jornadas_fijar_tipo
 asistencia_marcas_listar
 asistencia_marcas_obtener
+asistencia_rostro_textos
 comercial_canales_get
 comercial_canales_update
 comercial_config_actualizar_etapa

@@ -5,7 +5,7 @@ import {
   registrarHechoConsentimiento, type Contexto,
 } from "@opai/capabilities";
 
-import { PROPOSITO_TELEFONO, PROPOSITOS, VERSION_AVISO } from "../domain";
+import { PROPOSITO_TELEFONO, PROPOSITOS, TEXTO_CONSENTIMIENTO, VERSION_AVISO } from "../domain";
 import { autorizarPersona, quienSchema } from "./rostro-comun";
 
 const proposito = z.enum(PROPOSITOS as [string, ...string[]]);
@@ -13,6 +13,7 @@ const ultimoConsentimiento = (ctx: Contexto, personaId: string, p: string) =>
   ctx.db.consentimiento.findFirst({ where: { titularTipo: "persona", titularId: personaId, proposito: p }, orderBy: { id: "desc" }, select: { estado: true } });
 
 const estadoSchema = z.object({
+  personaId: z.string(),
   rostroEnrolado: z.boolean(),
   consentimientoRostro: z.boolean(),
   consentimientoTelefono: z.boolean(),
@@ -33,16 +34,16 @@ export const rostroEstado = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, i) {
-    const { instalacionId } = await autorizarPersona(ctx, i, false);
+    const { personaId, instalacionId } = await autorizarPersona(ctx, i, false);
     const [enrol, rostro, tel, cred, inst] = await Promise.all([
-      ctx.db.enrolamientoBiometrico.findUnique({ where: { personaId: i.personaId }, select: { id: true } }),
-      ultimoConsentimiento(ctx, i.personaId, PROPOSITO_BIOMETRIA),
-      ultimoConsentimiento(ctx, i.personaId, PROPOSITO_TELEFONO),
-      ctx.db.credencialTerreno.findUnique({ where: { personaId: i.personaId }, select: { telefonoPersonalHabilitado: true } }),
+      ctx.db.enrolamientoBiometrico.findUnique({ where: { personaId }, select: { id: true } }),
+      ultimoConsentimiento(ctx, personaId, PROPOSITO_BIOMETRIA),
+      ultimoConsentimiento(ctx, personaId, PROPOSITO_TELEFONO),
+      ctx.db.credencialTerreno.findUnique({ where: { personaId }, select: { telefonoPersonalHabilitado: true } }),
       instalacionId ? ctx.db.instalacion.findUnique({ where: { id: instalacionId }, select: { nombre: true } }) : null,
     ]);
     return {
-      rostroEnrolado: enrol !== null, consentimientoRostro: rostro?.estado === "otorgado", consentimientoTelefono: tel?.estado === "otorgado",
+      personaId, rostroEnrolado: enrol !== null, consentimientoRostro: rostro?.estado === "otorgado", consentimientoTelefono: tel?.estado === "otorgado",
       telefonoHabilitado: cred?.telefonoPersonalHabilitado ?? false, instalacionId, instalacionNombre: inst?.nombre ?? null,
     };
   },
@@ -84,19 +85,19 @@ function consentimiento(estado: "otorgado" | "revocado") {
     efecto: "escritura",
     dryRun: true,
     async handler(ctx, i, { dryRun }) {
-      await autorizarPersona(ctx, i, true);
-      const ultimo = await ultimoConsentimiento(ctx, i.personaId, i.proposito);
+      const { personaId } = await autorizarPersona(ctx, i, true);
+      const ultimo = await ultimoConsentimiento(ctx, personaId, i.proposito);
       if (estado === "otorgado" && ultimo?.estado === "otorgado") return { proposito: i.proposito, estado };
       if (estado === "revocado" && ultimo?.estado !== "otorgado") return { proposito: i.proposito, estado: "sin_consentimiento" };
       if (dryRun) return { proposito: i.proposito, estado };
       await ctx.transaccion((tx) =>
-        registrarHechoConsentimiento(ctx, tx, { tipo: "persona", id: i.personaId }, {
+        registrarHechoConsentimiento(ctx, tx, { tipo: "persona", id: personaId }, {
           proposito: i.proposito, versionAviso: VERSION_AVISO, estado, nota: ctx.actor.tipo === "system" ? "kiosco" : "portal",
         }),
       );
       // Revocar borra el rostro ya (el despacho del evento lo reintenta si el proveedor falla); sin consentimiento no se usa.
       if (estado === "revocado" && i.proposito === PROPOSITO_BIOMETRIA)
-        await borrarEnrolamiento(ctx, i.personaId, "consentimiento_revocado").catch(() => false);
+        await borrarEnrolamiento(ctx, personaId, "consentimiento_revocado").catch(() => false);
       return { proposito: i.proposito, estado };
     },
   });
@@ -117,9 +118,22 @@ export const rostroEnrolar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
-    await autorizarPersona(ctx, i, true);
-    if (i.reemplazar && !dryRun) await borrarEnrolamiento(ctx, i.personaId, "manual");
-    const r = await enrolarRostro(ctx, i.personaId, i.muestra, dryRun);
+    const { personaId } = await autorizarPersona(ctx, i, true);
+    if (i.reemplazar && !dryRun) await borrarEnrolamiento(ctx, personaId, "manual");
+    const r = await enrolarRostro(ctx, personaId, i.muestra, dryRun);
     return { proveedor: r.proveedor, enroladoEn: r.enroladoEn };
   },
+});
+
+export const rostroTextos = defineCapability({
+  id: "asistencia.rostro.textos",
+  descripcion:
+    "Textos vigentes de los consentimientos de Asistencia (uso del rostro y del teléfono personal) con su versión, tal como se muestran y se aceptan. Sirve para que la persona los lea antes de consentir.",
+  permiso: null,
+  portales: ["erp", "terreno", "trabajador"],
+  input: z.object({}),
+  output: z.array(z.object({ proposito: z.string(), version: z.string(), texto: z.string() })),
+  efecto: "lectura",
+  dryRun: false,
+  handler: async () => PROPOSITOS.map((p) => ({ proposito: p, version: VERSION_AVISO, texto: TEXTO_CONSENTIMIENTO[p] })),
 });

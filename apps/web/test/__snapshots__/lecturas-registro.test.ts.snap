@@ -4,11 +4,10 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
 [
   "agente.historial.list",
   "agente.modelos.list",
-  "asistencia.biometria.estado",
-  "asistencia.biometria.mi_estado",
-  "asistencia.consentimientos.textos",
   "asistencia.correcciones.ver_enlace",
   "asistencia.marcas.verificar",
+  "asistencia.rostro.estado",
+  "asistencia.rostro.textos",
   "comercial.config.get",
   "core.bitacora.verificar",
   "core.calendario.listar",

@@ -5,7 +5,7 @@ import { FilaSeleccionable } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
-import { cargarMiBiometria } from "@/app/_components/biometria/cargar";
+import { cargarAsistenciaPropia } from "@/app/_components/asistencia/cargar";
 
 export const metadata = { title: tituloPagina("trabajador", "Más") };
 
@@ -20,8 +20,8 @@ const ENTRADAS = [
 /** Pantalla 06 · Más: solo lo que existe; las entradas pendientes no se dibujan. */
 export default async function Pagina() {
   // «Marcar» solo existe para quien RR. HH. habilitó en el canal teléfono personal (D-01).
-  const { estado } = await cargarMiBiometria("trabajador");
-  const entradas = estado?.telefonoPersonalHabilitado
+  const { estado } = await cargarAsistenciaPropia();
+  const entradas = estado?.telefonoHabilitado
     ? [{ href: "/trabajador/marcar", titulo: "Marcar asistencia", detalle: "Desde tu teléfono personal", Icono: Smartphone }, ...ENTRADAS]
     : ENTRADAS;
   return (

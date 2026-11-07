@@ -14,7 +14,7 @@ import { correccionesProponer } from "./correcciones-proponer";
 import { correccionesResponder } from "./correcciones-responder";
 import { trabajoVencerCorrecciones } from "./correcciones-trabajo";
 import { trabajoSuprimirBiometria } from "./biometria-trabajo";
-import { rostroConsentir, rostroEnrolar, rostroEstado, rostroIniciarVida, rostroRevocar } from "./rostro";
+import { rostroConsentir, rostroEnrolar, rostroEstado, rostroIniciarVida, rostroRevocar, rostroTextos } from "./rostro";
 import { telefonoHabilitar } from "./telefono";
 import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incidentes";
 import { marcasObtener, marcasListar } from "./lecturas";
@@ -30,6 +30,6 @@ export const capacidades = [
   correccionesProponer, correccionesListar, correccionesResponder, correccionesVerEnlace, correccionesResponderEnlace,
   contingenciasRegistrar, contingenciasListar, contingenciasResponder,
   incidentesRegistrar, incidentesCerrar, incidentesListar,
-  rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, telefonoHabilitar,
+  rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, rostroTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
 ];
