@@ -4,6 +4,8 @@ import { uuidSchema } from "../core/esquemas";
 
 export const PERMISO_READ = "acceso:read";
 export const PERMISO_LISTAS = "acceso:listas.manage";
+/** Ver la patente completa de un registro (decisión de Carlos, 7-nov-2026): acceso restringido. */
+export const PERMISO_PATENTE = "acceso:datos.ver_patente";
 
 export const TIPOS_LISTA = ["autorizada", "bloqueada"] as const;
 export const TIPOS_REGISTRO = [

@@ -212,4 +212,47 @@ describe.skipIf(!urlPropietario)("listas y registros de acceso en base real (CAR
     const deB = await ok<unknown[]>("B", "acceso.registros.listar", { instalacionId: inst.B });
     expect(deB).toHaveLength(0);
   });
+
+  it("la patente completa solo la ve quien tiene el permiso restringido", async () => {
+    await ok("A", "acceso.listas.agregar", {
+      instalacionId: inst.A,
+      tipo: "autorizada",
+      documento: { tipo: "run", numero: "10.000.000-8" },
+    });
+    const h = {
+      clave: randomUUID(),
+      tipo: "acceso.entrada",
+      payload: {
+        tipoRegistro: "vehiculo",
+        documento: { tipo: "run", numero: "10.000.000-8" },
+        nombre: "Conductor",
+        patente: "bb-cc 12",
+      },
+      horaHecho: new Date(Date.now() - 20_000).toISOString(),
+    };
+    await run("A", "core.hechos_terreno.recibir", {
+      dispositivoId: disp.A,
+      horaEnvio: new Date().toISOString(),
+      hechos: [h],
+    });
+    const patentes = (items: { nombre: string; patente: string | null }[]) =>
+      items.find((x) => x.nombre === "Conductor")?.patente;
+    type Item = { nombre: string; patente: string | null };
+    expect(
+      patentes(await ok<Item[]>("A", "acceso.registros.listar", { instalacionId: inst.A })),
+    ).toBe("BBCC12");
+    const supervisor = mod.crearContexto({
+      tenantId: t.A,
+      actor: { tipo: "system" },
+      rol: "supervisor",
+      alcance: null,
+      medidor: { registrar: async () => undefined },
+      modulosActivos: ["acceso"],
+    });
+    const r = await mod.executeCapability(supervisor, "acceso.registros.listar", {
+      instalacionId: inst.A,
+    });
+    expect(r.ok).toBe(true);
+    expect(patentes((r as { data: Item[] }).data)).toBeNull();
+  });
 });

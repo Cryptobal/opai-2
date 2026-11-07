@@ -21,6 +21,10 @@ export const manifest = defineModule({
       id: "acceso:listas.manage",
       descripcion: "Gestionar las listas autorizada y bloqueada de una instalación",
     },
+    {
+      id: "acceso:datos.ver_patente",
+      descripcion: "Ver la patente completa de los vehículos registrados (acceso restringido)",
+    },
   ],
   navegacion: [],
   configuracion: z.object({}),
