@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { digitoVerificador } from "@opai/domain";
 import { entrar } from "./sesion";
-import { capturasDeInicioYCola, inyectarRechazado } from "./terreno-apoyo";
+import { capturasDeInicioYCola, inyectarRechazado, marcarQrDesconocido } from "./terreno-apoyo";
 
 // CAR-78 · B3: un equipo de terreno emparejado captura sin señal y el hecho llega UNA sola vez al volver la
 // conexión, con la hora del servidor y el desfase del reloj. Recorre todo con las pantallas reales: el
@@ -121,6 +121,9 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   await expect(t.getByText(/No se envió\. Este tipo de registro ya no se acepta/)).toBeVisible();
   await t.getByRole("button", { name: "Quitar de la lista" }).click();
   await expect(t.getByRole("heading", { name: /^No se enviaron/ })).toHaveCount(0);
+
+  // E3b · una marca de ronda con un QR desconocido vuelve rechazada, con su motivo (si Rondas está activo).
+  await marcarQrDesconocido(t);
 
   await capturasDeInicioYCola(t);
 

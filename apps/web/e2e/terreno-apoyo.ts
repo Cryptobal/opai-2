@@ -54,3 +54,24 @@ export async function capturasDeInicioYCola(t: Page) {
   await t.setViewportSize({ width: 375, height: 812 });
   await t.emulateMedia({ colorScheme: "light" });
 }
+
+/**
+ * E3b · Marca un QR que el servidor no conoce: queda guardada en el teléfono, se envía y vuelve rechazada con
+ * su motivo (nunca se pierde en silencio). Devuelve false si el módulo Rondas no está activo en la empresa.
+ */
+export async function marcarQrDesconocido(t: Page): Promise<boolean> {
+  await t.goto("/terreno");
+  const seccion = t.getByRole("region", { name: "Marcar punto" });
+  if (!(await seccion.isVisible({ timeout: 20_000 }).catch(() => false))) return false;
+  await seccion.getByLabel("Código del punto (QR)").fill(`QR-DESCONOCIDO-${Date.now()}`);
+  await seccion.getByRole("button", { name: "Marcar" }).click();
+  await expect(seccion.getByText("Marca guardada en el teléfono")).toBeVisible();
+  await t.goto("/terreno/cola");
+  await expect(t.getByRole("heading", { name: /^No se enviaron \(1\)/ })).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(t.getByText(/No se reconoce este código QR/)).toBeVisible();
+  await t.getByRole("button", { name: "Quitar de la lista" }).click();
+  await expect(t.getByRole("heading", { name: /^No se enviaron/ })).toHaveCount(0);
+  return true;
+}

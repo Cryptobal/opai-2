@@ -35,7 +35,7 @@ export function PantallaEquipo({
       {elegida === undefined ? null : persona ? (
         <>
           <InicioEquipo instalacion={instalacion} persona={persona} />
-          <TurnoAhora />
+          <TurnoAhora personaId={persona.id} />
         </>
       ) : (
         <SelectorPersona instalacion={instalacion} personas={personas} />
