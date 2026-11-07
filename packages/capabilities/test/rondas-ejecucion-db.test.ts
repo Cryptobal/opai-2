@@ -205,4 +205,21 @@ describe.skipIf(!urlPropietario)("ejecución de rondas en base real (CAR-78 E3d)
     ).rejects.toThrow();
     expect((await recibir("A", [inicio(plantillaA)], []))[0]?.motivo).toBe("modulo_inactivo");
   });
+
+  it("si el inicio cae por otra regla, su marca y su cierre del mismo lote también caen (no se pierde el cierre)", async () => {
+    const i = { ...inicio(plantillaA), personaId: randomUUID() };
+    const m = marca(cod.p1, i.clave);
+    const c = cierre(i.clave);
+    const r = await recibir("A", [i, m, c]);
+    expect(r.map((x) => x.motivo)).toEqual([
+      "persona_no_valida",
+      "ejecucion_desconocida",
+      "ejecucion_desconocida",
+    ]);
+    expect(await e.admin.ejecucionRonda.count({ where: { clave: i.clave } })).toBe(0);
+    expect(await e.admin.cierreRonda.count({ where: { clave: c.clave } })).toBe(0);
+    expect(
+      await e.admin.hechoTerreno.count({ where: { clave: { in: [i.clave, m.clave, c.clave] } } }),
+    ).toBe(0);
+  });
 });

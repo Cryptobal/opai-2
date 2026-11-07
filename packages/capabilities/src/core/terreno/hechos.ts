@@ -9,6 +9,7 @@ import {
   evaluarLote,
   type HechoEntrada,
   hechoEntrada,
+  type MotivoRechazo,
   type ResultadoHecho,
   resultadoHecho,
 } from "./hechos-evaluar";
@@ -71,13 +72,21 @@ export const hechosRecibir = defineCapability({
       recibidoEn,
       corregir: (h) => horaCorregida(h, desfaseMs),
     });
-    const { resultados, nuevos } = evaluarLote({
-      proyeccionesRechazadas: proyecciones.rechazos,
-      hechos,
-      envio,
-      yaGuardadas: new Set(existentes.map((e) => e.clave)),
-      personasValidas: new Set(personas.map((p) => p.id)),
-    });
+    const evaluar = (rechazadas: ReadonlyMap<string, MotivoRechazo>) =>
+      evaluarLote({
+        proyeccionesRechazadas: rechazadas,
+        hechos,
+        envio,
+        yaGuardadas: new Set(existentes.map((e) => e.clave)),
+        personasValidas: new Set(personas.map((p) => p.id)),
+      });
+    let { resultados, nuevos } = evaluar(proyecciones.rechazos);
+    // Un cierre o una marca no se aceptan si el inicio de su ronda, en este mismo lote, cayó por otra regla.
+    const caidas = new Set(resultados.filter((r) => r.estado === "rechazado").map((r) => r.clave));
+    const dependientes = proyecciones.dependientesDe(caidas);
+    if (dependientes.size > 0) {
+      ({ resultados, nuevos } = evaluar(new Map([...proyecciones.rechazos, ...dependientes])));
+    }
     if (!dryRun && nuevos.length > 0) {
       await ctx.transaccion(async (tx) => {
         // Doble envío simultáneo (la página y el service worker): la clave única lo deja pasar una sola vez.

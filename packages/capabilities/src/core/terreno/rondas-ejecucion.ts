@@ -1,5 +1,6 @@
 import type { Contexto } from "../../types";
 import type { Equipo, Hecho, Rechazos, Tiempo } from "./acceso-tipos";
+import type { MotivoRechazo } from "./hechos-evaluar";
 import { escribirCierres } from "./rondas-cierre";
 import {
   cierresDe,
@@ -12,6 +13,8 @@ import {
 export type EjecucionesResueltas = {
   rechazos: Rechazos;
   /** Inserta los inicios aceptados y devuelve clave de la ronda → id. */
+  /** Marcas y cierres de este lote cuyo inicio (nuevo en este lote) terminó rechazado por otra regla. */
+  dependientesDe: (caidas: ReadonlySet<string>) => Map<string, MotivoRechazo>;
   iniciar: (tx: Contexto["db"], aceptadas: ReadonlySet<string>) => Promise<Map<string, string>>;
   /** Inserta los cierres aceptados (después de las marcas de la misma transacción). */
   cerrar: (
@@ -39,6 +42,7 @@ export async function resolverEjecuciones(
   const mar = marcasConRondaDe(hechos);
   const ninguno: EjecucionesResueltas = {
     rechazos,
+    dependientesDe: () => new Map(),
     iniciar: async () => new Map(),
     cerrar: async () => undefined,
   };
@@ -105,6 +109,15 @@ export async function resolverEjecuciones(
     }
   }
 
+  // Lo que depende de un inicio nuevo de este lote: si ese inicio cae por otra regla, también debe caer (no se
+  // acepta «recibido» un cierre o una marca sin ronda donde escribirse).
+  const nuevosEnLote = new Set(
+    iniciosOk.filter((i) => !previas.some((e) => e.clave === i.h.clave)).map((i) => i.h.clave),
+  );
+  const dependen = new Map<string, string>();
+  for (const x of [...mar, ...cie])
+    if (nuevosEnLote.has(x.ejecucionClave)) dependen.set(x.h.clave, x.ejecucionClave);
+
   const base = {
     tenantId: ctx.tenantId,
     instalacionId: equipo.instalacionId,
@@ -112,6 +125,12 @@ export async function resolverEjecuciones(
   };
   return {
     rechazos,
+    dependientesDe(caidas) {
+      const r = new Map<string, MotivoRechazo>();
+      for (const [dependiente, inicio] of dependen)
+        if (caidas.has(inicio)) r.set(dependiente, "ejecucion_desconocida");
+      return r;
+    },
     async iniciar(tx, aceptadas) {
       const nuevos = iniciosOk.filter((i) => aceptadas.has(i.h.clave));
       if (nuevos.length > 0) {

@@ -8,6 +8,8 @@ import { resolverMarcas } from "./rondas-marca";
 export type Proyecciones = {
   /** Hechos que el servidor no puede resolver (QR ajeno, documento inválido, módulo inactivo…). */
   rechazos: ReadonlyMap<string, MotivoRechazo>;
+  /** Hechos que dependen de un hecho del mismo lote que terminó rechazado (p. ej. el cierre de un inicio caído). */
+  dependientesDe: (caidas: ReadonlySet<string>) => Map<string, MotivoRechazo>;
   /** Escribe, dentro de la transacción del lote, lo que nace de cada hecho aceptado. */
   escribir: (
     tx: Contexto["db"],
@@ -34,6 +36,7 @@ export async function prepararProyecciones(
   for (const [clave, m] of marcas) if ("motivo" in m) rechazos.set(clave, m.motivo);
   return {
     rechazos,
+    dependientesDe: (caidas) => rondas.dependientesDe(caidas),
     async escribir(tx, nuevos, _desfaseMs, aceptadas) {
       const ids = await rondas.iniciar(tx, aceptadas);
       const filas = nuevos.flatMap((h) => {
