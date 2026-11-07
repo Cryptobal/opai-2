@@ -1,6 +1,7 @@
 "use client";
 
-import { encolarHecho, leerEstadoEnvio, leerResumen, pedirEnvio } from "./cola";
+// La cola (IndexedDB) se carga cuando hace falta: así no pesa en el JS inicial de las rutas de Terreno.
+const cola = () => import("./cola");
 
 /**
  * Estado de Terreno en el teléfono, como almacén externo (`useSyncExternalStore`): conexión, hechos por
@@ -54,13 +55,23 @@ function programarReintento() {
   if (error === null || error === "revocado" || error === "sin_dispositivo") return;
   const espera = Math.min(5_000 * 3 ** intentos, 300_000);
   intentos += 1;
-  temporizador = setTimeout(() => void pedirEnvio().then(refrescar), espera);
+  temporizador = setTimeout(
+    () =>
+      void cola()
+        .then((c) => c.pedirEnvio())
+        .then(refrescar),
+    espera,
+  );
 }
 
 async function refrescar() {
   const [resumen, ultimo] = await Promise.all([
-    leerResumen().catch(() => ({ pendientes: [], sincronizados: [], rechazados: [] })),
-    leerEstadoEnvio().catch(() => null),
+    cola()
+      .then((c) => c.leerResumen())
+      .catch(() => ({ pendientes: [], sincronizados: [], rechazados: [] })),
+    cola()
+      .then((c) => c.leerEstadoEnvio())
+      .catch(() => null),
   ]);
   const pendientes = resumen.pendientes.length;
   poner({
@@ -79,7 +90,9 @@ export async function latidoSiCorresponde(personaId: string | null): Promise<voi
   if (Date.now() - ultimo < CADA_LATIDO_MS) return;
   localStorage.setItem(CLAVE_LATIDO, String(Date.now()));
   try {
-    await encolarHecho({ tipo: "terreno.latido", payload: { version: VERSION_APP }, personaId });
+    await (
+      await cola()
+    ).encolarHecho({ tipo: "terreno.latido", payload: { version: VERSION_APP }, personaId });
   } catch {
     // No quedó guardado: no cuenta como enviado ni como hecho; se vuelve a intentar en el próximo aviso.
     localStorage.removeItem(CLAVE_LATIDO);
@@ -94,7 +107,9 @@ function iniciar() {
   estado = { ...estado, enLinea: navigator.onLine };
   window.addEventListener("online", () => {
     poner({ enLinea: true });
-    void pedirEnvio().then(refrescar);
+    void cola()
+      .then((c) => c.pedirEnvio())
+      .then(refrescar);
   });
   window.addEventListener("offline", () => poner({ enLinea: false, sincronizando: false }));
   navigator.serviceWorker?.addEventListener("message", (e: MessageEvent) => {

@@ -1,10 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { Alerta, Button, Loading } from "@opai/ds";
 
-import { MarcarPunto } from "./marcar-punto";
+const MarcarPunto = dynamic(() => import("./marcar-punto").then((m) => m.MarcarPunto), {
+  ssr: false,
+});
 
 type Turno = {
   personaId: string;

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect } from "react";
 
 import { latidoSiCorresponde } from "@/lib/terreno/estado";
@@ -8,7 +9,7 @@ import type { PersonaDeLista } from "@/lib/terreno-servidor";
 
 import { InicioEquipo } from "./inicio-equipo";
 import { SelectorPersona } from "./selector-persona";
-import { TurnoAhora } from "./turno-ahora";
+const TurnoAhora = dynamic(() => import("./turno-ahora").then((m) => m.TurnoAhora), { ssr: false });
 
 /** Terreno en un equipo emparejado: «¿Quién eres?» hasta que alguien elige, y después el inicio. */
 export function PantallaEquipo({

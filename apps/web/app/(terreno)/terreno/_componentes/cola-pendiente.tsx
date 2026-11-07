@@ -1,16 +1,31 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 import { Button, Empty } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { descartarRechazado, leerResumen, pedirEnvio, type ResumenCola } from "@/lib/terreno/cola";
+import type { ResumenCola } from "@/lib/terreno/cola";
 import { TIPOS_SILENCIOSOS } from "@/lib/terreno/motivos";
 import { instantanea, instantaneaServidor, refrescarEstado, suscribir } from "@/lib/terreno/estado";
 
 import { BannerConexion } from "./banner-conexion";
-import { ListaPendientes, ListaRechazados, ListaSincronizados, SeccionCola } from "./cola-lista";
+// Las listas se cargan aparte para no pesar en el JS inicial de la ruta (presupuesto de JS, ADR-037/044).
+// La cola local se carga aparte, igual que las listas, para no pesar en el JS inicial.
+const cola = () => import("@/lib/terreno/cola");
+const ListaPendientes = dynamic(() => import("./cola-lista").then((m) => m.ListaPendientes), {
+  ssr: false,
+});
+const ListaRechazados = dynamic(() => import("./cola-lista").then((m) => m.ListaRechazados), {
+  ssr: false,
+});
+const ListaSincronizados = dynamic(() => import("./cola-lista").then((m) => m.ListaSincronizados), {
+  ssr: false,
+});
+const SeccionCola = dynamic(() => import("./cola-lista").then((m) => m.SeccionCola), {
+  ssr: false,
+});
 
 /**
  * Cola sin conexión (g6): lo capturado en este teléfono con sus tres estados. Pendiente: guardado, falta
@@ -19,7 +34,13 @@ import { ListaPendientes, ListaRechazados, ListaSincronizados, SeccionCola } fro
 export function ColaPendiente() {
   const e = useSyncExternalStore(suscribir, instantanea, instantaneaServidor);
   const [resumen, setResumen] = useState<ResumenCola | null>(null);
-  const cargar = useCallback(() => leerResumen().then(setResumen), []);
+  const cargar = useCallback(
+    () =>
+      cola()
+        .then((c) => c.leerResumen())
+        .then(setResumen),
+    [],
+  );
   useEffect(() => {
     void cargar();
   }, [cargar, e.pendientes, e.rechazados, e.sincronizados]);
@@ -44,7 +65,10 @@ export function ColaPendiente() {
           <ListaRechazados
             hechos={resumen.rechazados}
             onDescartar={(clave) => {
-              void descartarRechazado(clave).then(cargar).then(refrescarEstado);
+              void cola()
+                .then((c) => c.descartarRechazado(clave))
+                .then(cargar)
+                .then(refrescarEstado);
             }}
           />
         </SeccionCola>
@@ -71,7 +95,9 @@ export function ColaPendiente() {
       </p>
       <Button
         onClick={() => {
-          void pedirEnvio().then(refrescarEstado);
+          void cola()
+            .then((c) => c.pedirEnvio())
+            .then(refrescarEstado);
         }}
         disabled={e.pendientes === 0 || !e.enLinea}
       >
