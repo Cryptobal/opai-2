@@ -900,6 +900,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
 - `cpq.correlativos.fijar`
+- `cpq.costos_categoria.cargar_predefinidos`
+- `cpq.costos_predefinidos.guardar`
+- `cpq.costos_predefinidos.list`
 - `cpq.cotizaciones.clonar`
 - `cpq.cotizaciones.explicar`
 - `cpq.cotizaciones.reabrir`

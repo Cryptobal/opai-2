@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
+import { aplicarCostosPredefinidos } from "../persistencia/costos-predefinidos";
 import { exigirBorrador, versionDeCotizacion } from "../persistencia/version";
 import { recalcularVersion } from "../persistencia/recalcular";
 import { cotizacionDe } from "./util";
@@ -65,6 +66,7 @@ export const lineasCrear = defineCapability({
       return { id: ID_VISTA_PREVIA, ventaMensualClp: r?.ventaMensual ?? null };
     }
     const linea = await ctx.db.cpqLinea.create({ data });
+    if (puesto) await aplicarCostosPredefinidos(ctx, version.id, { lineaIds: [linea.id] });
     await recalcularVersion(ctx, cot.id, undefined, true);
     const v = await ctx.db.cpqVersion.findFirst({ where: { id: version.id } });
     if (!v) throw noEncontrado("La versión");

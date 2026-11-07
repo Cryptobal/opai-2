@@ -29,7 +29,7 @@ export const RECURSOS: Record<string, string> = {
   cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", reglas_banco: "Reglas del banco",
   tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", compartir: "Compartir cotización", lineas: "Líneas",
   versiones: "Versiones", secciones: "Secciones", correlativos: "Correlativos",
-  catalogo_categorias: "Categorías del catálogo", catalogo_items: "Ítems del catálogo", sueldos_referencia: "Sueldos de referencia", costos_categoria: "Costos por categoría", esquemas_cobertura: "Esquemas de cobertura", portal_cotizaciones: "Cotizaciones del portal del cliente",
+  catalogo_categorias: "Categorías del catálogo", catalogo_items: "Ítems del catálogo", sueldos_referencia: "Sueldos de referencia", costos_categoria: "Costos por categoría", costos_predefinidos: "Costos predefinidos", esquemas_cobertura: "Esquemas de cobertura", portal_cotizaciones: "Cotizaciones del portal del cliente",
   marca_documento: "Marca de documentos", plantillas_documento: "Plantillas de documento",
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
   propuestas_tecnica: "Propuestas técnicas", envios_propuesta: "Envíos de propuesta",
