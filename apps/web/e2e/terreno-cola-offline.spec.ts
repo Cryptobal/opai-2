@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { digitoVerificador } from "@opai/domain";
 import { entrar } from "./sesion";
+import { capturasDeInicioYCola, inyectarRechazado } from "./terreno-apoyo";
 
 // CAR-78 · B3: un equipo de terreno emparejado captura sin señal y el hecho llega UNA sola vez al volver la
 // conexión, con la hora del servidor y el desfase del reloj. Recorre todo con las pantallas reales: el
@@ -103,41 +104,25 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   await expect(t.getByText("En línea · todo enviado")).toBeVisible({ timeout: 30_000 });
   await expect(t.getByText(/por enviar/)).toHaveCount(0);
 
-  // 6) E1 · Tres estados visibles: lo que llegó figura como «Ya enviados».
+  // 6) E1 · Tres estados visibles: los avisos técnicos del teléfono ya llegaron y no se listan (no le dicen nada al
+  // guardia); «Ya enviados» aparece cuando lleguen hechos de operación (rondas, accesos…).
   await t.goto("/terreno/cola");
-  await expect(t.getByRole("heading", { name: /^Ya enviados/ })).toBeVisible({ timeout: 20_000 });
+  await expect(t.getByText("Nada capturado")).toBeVisible({ timeout: 20_000 });
+  await expect(
+    t.getByText("1 hecho por enviar").or(t.getByText("0 hechos por enviar")),
+  ).toBeVisible();
 
   // 7) E1 · Un rechazado no se pierde en silencio: un tipo que el servidor ya no acepta queda a la vista,
   // con su motivo, hasta que la persona lo quita.
-  await t.evaluate(async () => {
-    const bd = await new Promise<IDBDatabase>((ok, mal) => {
-      const r = indexedDB.open("opai-terreno", 2);
-      r.onsuccess = () => ok(r.result);
-      r.onerror = () => mal(r.error);
-    });
-    await new Promise<void>((ok, mal) => {
-      const tx = bd.transaction("cola", "readwrite");
-      tx.objectStore("cola").put({
-        clave: crypto.randomUUID(),
-        tipo: "terreno.tipo_retirado",
-        payload: {},
-        personaId: null,
-        horaHecho: new Date(Date.now() - 60_000).toISOString(),
-        creadoEn: Date.now(),
-      });
-      tx.oncomplete = () => ok();
-      tx.onerror = () => mal(tx.error);
-    });
-    bd.close();
-    const reg = await navigator.serviceWorker.ready;
-    reg.active?.postMessage({ type: "VACIAR_COLA" });
-  });
+  await inyectarRechazado(t);
   await expect(t.getByRole("heading", { name: /^No se enviaron \(1\)/ })).toBeVisible({
     timeout: 30_000,
   });
   await expect(t.getByText(/No se envió\. Este tipo de registro ya no se acepta/)).toBeVisible();
   await t.getByRole("button", { name: "Quitar de la lista" }).click();
   await expect(t.getByRole("heading", { name: /^No se enviaron/ })).toHaveCount(0);
+
+  await capturasDeInicioYCola(t);
 
   // 8) E1 · Arranque en frío sin señal: página neutra (sin nombres ni datos de la instalación) que lee la cola
   // del teléfono, sin mostrar éxito; al volver la señal vuelve sola a Terreno.

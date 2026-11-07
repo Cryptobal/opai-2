@@ -6,6 +6,7 @@ import { Button, Empty } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { descartarRechazado, leerResumen, pedirEnvio, type ResumenCola } from "@/lib/terreno/cola";
+import { TIPOS_SILENCIOSOS } from "@/lib/terreno/motivos";
 import { instantanea, instantaneaServidor, refrescarEstado, suscribir } from "@/lib/terreno/estado";
 
 import { BannerConexion } from "./banner-conexion";
@@ -23,9 +24,9 @@ export function ColaPendiente() {
     void cargar();
   }, [cargar, e.pendientes, e.rechazados, e.sincronizados]);
 
+  const sincronizados = resumen?.sincronizados.filter((h) => !TIPOS_SILENCIOSOS.has(h.tipo)) ?? [];
   const vacio =
-    resumen &&
-    resumen.pendientes.length + resumen.sincronizados.length + resumen.rechazados.length === 0;
+    resumen && resumen.pendientes.length + sincronizados.length + resumen.rechazados.length === 0;
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pt-safe pb-safe py-6">
       <header>
@@ -53,9 +54,9 @@ export function ColaPendiente() {
           <ListaPendientes hechos={resumen.pendientes} />
         </SeccionCola>
       ) : null}
-      {resumen && resumen.sincronizados.length > 0 ? (
-        <SeccionCola titulo="Ya enviados" cuenta={resumen.sincronizados.length}>
-          <ListaSincronizados hechos={resumen.sincronizados} />
+      {sincronizados.length > 0 ? (
+        <SeccionCola titulo="Ya enviados" cuenta={sincronizados.length}>
+          <ListaSincronizados hechos={sincronizados} />
         </SeccionCola>
       ) : null}
       {vacio ? (
