@@ -146,7 +146,7 @@ describe.skipIf(!urlPropietario)("Asistencia · Face ID sobre B4 (Postgres real)
     const sinRostro = await marcarKiosco(B, { metodo: "rostro", muestra: "rostro:ana" });
     expect(sinRostro.ok).toBe(false); // B no tiene a Ana enrolada aunque A sí
     expect((await kiosco(B, "asistencia.rostro.enrolar", { muestra: "rostro:ana" })).ok).toBe(true);
-    const refs = await e.admin.enrolamientoBiometrico.findMany({ select: { tenantId: true, referenciaCifrada: true } });
+    const refs = await e.admin.enrolamientoBiometrico.findMany({ where: { tenantId: { in: [A.tenant, B.tenant] } }, select: { tenantId: true, referenciaCifrada: true } });
     expect(new Set(refs.map((r) => r.tenantId)).size).toBe(2);
     expect(new Set(refs.map((r) => r.referenciaCifrada)).size).toBe(2);
     expect((await e.admin.marca.count({ where: { tenantId: B.tenant } }))).toBe(0);
