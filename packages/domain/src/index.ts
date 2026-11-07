@@ -61,4 +61,5 @@ export * from "./actividades-tareas";
 export * from "./actividades-contacto-real";
 export * from "./cobros";
 export * from "./terreno-hechos";
+export * from "./terreno-contexto";
 export * from "./campos";

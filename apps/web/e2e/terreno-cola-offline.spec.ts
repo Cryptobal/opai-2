@@ -65,6 +65,15 @@ test("cola sin conexión: el hecho capturado en modo avión llega una vez al rec
   });
   await t.getByRole("list").getByRole("button").first().click();
   await expect(t.getByRole("heading", { name: /^Hola, / })).toBeVisible();
+  // E2 · el inicio trae el turno de ahora de la instalación (con turnos o con el aviso de que no hay).
+  await expect(t.getByRole("heading", { name: "Turno de ahora" })).toBeVisible({ timeout: 20_000 });
+  await expect(
+    t
+      .getByRole("listitem")
+      .filter({ hasText: /Prueba Terreno/ })
+      .or(t.getByText(/No hay turnos cargados/))
+      .first(),
+  ).toBeVisible({ timeout: 20_000 });
   // El service worker debe controlar la página para enviar la cola.
   await t.evaluate(async () => {
     await navigator.serviceWorker.ready;
