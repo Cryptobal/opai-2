@@ -172,7 +172,7 @@ Al 3-nov-2026 todas las migraciones integradas en `main` están aplicadas en Neo
 | Estado | Migraciones |
 |---|---|
 | Aplicadas en `dev` y `main` | Las 76 de `main` y `20261103140000_finanzas_ventas_programacion` |
-| **Pendiente de aplicar (etiqueta `migracion-pendiente`)** | `20261108100000_core_credenciales_terreno` (CAR-78 B1, en PR; y `20261111120000_cpq_costos_predefinidos`, CAR-213, en PR; la aplica el bot tras el «sin bloqueos» del Revisor). Lo demás: verificado en Neon `main` el 4-nov-2026: las migraciones desde `20261103000000` hasta `20261105150000` (incluida `20261105140000_agente_historial`, aplicada con respaldo en `dev` y `main`) figuran aplicadas (`finished_at` no nulo) |
+| **Pendiente de aplicar (etiqueta `migracion-pendiente`)** | `20261108100000_core_credenciales_terreno` (CAR-78 B1, en PR; y `20261111130000_cpq_costos_predefinidos`, CAR-213, en PR; la aplica el bot tras el «sin bloqueos» del Revisor). Lo demás: verificado en Neon `main` el 4-nov-2026: las migraciones desde `20261103000000` hasta `20261105150000` (incluida `20261105140000_agente_historial`, aplicada con respaldo en `dev` y `main`) figuran aplicadas (`finished_at` no nulo) |
 
 Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de ADR-054 para cada PR nuevo con migración: el operador respalda, aplica `dev` → `main`, deja el aviso en el PR y retira la etiqueta.
 
