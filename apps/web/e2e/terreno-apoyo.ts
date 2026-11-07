@@ -36,6 +36,8 @@ export async function capturasDeInicioYCola(t: Page) {
     for (const tema of ["light", "dark"] as const) {
       await t.setViewportSize({ width: ancho, height: alto });
       await t.emulateMedia({ colorScheme: tema });
+      // Las transiciones de color duran 150-200 ms: la captura espera a que el tema termine de aplicarse.
+      await t.waitForTimeout(400);
       for (const [ruta, nombre] of [
         ["/terreno", "inicio"],
         ["/terreno/cola", "cola"],
