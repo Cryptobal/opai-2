@@ -35,7 +35,7 @@ Migraciones: solo se proponen, aditivas, para ejecución por el responsable auto
 
 ## PR 1 — alcance y archivos
 
-Nuevos (todos ≤150 líneas): `packages/domain/src/campos/{tipos,catalogo-comercial,catalogo-lugares,catalogo-personas,catalogo,plantilla,render,index}.ts` y sus pruebas. Modificado: `packages/domain/src/index.ts` (una línea de exportación), `ESTADO.md`.
+Nuevos (todos ≤150 líneas) en `packages/domain/src/campos/`: `tipos`, `grupos`, `catalogo-{empresa,cuenta,contacto,personas,lugares,negocio}`, `catalogo` (índice, alias y versión), `formatos` (sobre `formato.ts`), `plantilla` (analizador), `validar`, `render` e `index`, más `catalogo.test.ts` y `render.test.ts`. Modificado: `packages/domain/src/index.ts` (una línea de exportación), `ESTADO.md`.
 
 Reglas del contrato:
 - Cada campo declara `clave` (`entidad.campo`), alias, tipo y formato, fuente, **sensibilidad** y **finalidades** permitidas (`propuesta`, `contrato`, `documento`, `correo`). Un campo sensible permitido en `contrato` no se resuelve en `propuesta`.
