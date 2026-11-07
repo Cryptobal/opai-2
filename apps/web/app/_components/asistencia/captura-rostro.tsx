@@ -1,11 +1,15 @@
 "use client";
 
 import { ScanFace } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-import { Alerta, Button, Campo, Checkbox, Input } from "@opai/ds";
+import { Alerta, Button } from "@opai/ds";
 
 import type { useEjecutorAsistencia } from "./use-ejecutor";
+
+// Los controles del proveedor simulado (solo pruebas y QA) no pesan en el JS de la pantalla de producción.
+const ControlesSimulado = dynamic(() => import("./controles-simulado").then((m) => m.ControlesSimulado));
 
 type Ejecutor = ReturnType<typeof useEjecutorAsistencia>["ejecutar"];
 
@@ -55,15 +59,7 @@ export function CapturaRostro({
           Mientras tanto marca con tu RUT y PIN.
         </Alerta>
       ) : null}
-      {proveedor === "simulado" ? (
-        <div className="flex flex-col gap-2 rounded-md border border-dashed border-border-control p-3">
-          <span className="t-caption text-fg-muted">Proveedor simulado (solo pruebas): elige el rostro que «ve» la cámara.</span>
-          <Campo etiqueta="Rostro de prueba" htmlFor="rostro-prueba">
-            <Input id="rostro-prueba" value={token} onChange={(e) => setToken(e.target.value.replace(/[^\p{L}\p{N}_-]/gu, ""))} maxLength={40} />
-          </Campo>
-          <Checkbox marcado={foto} onCambiar={setFoto} etiqueta="Simular una foto (sin prueba de vida)" />
-        </div>
-      ) : null}
+      {proveedor === "simulado" ? <ControlesSimulado token={token} onToken={setToken} foto={foto} onFoto={setFoto} /> : null}
       <Button
         size="lg"
         block
