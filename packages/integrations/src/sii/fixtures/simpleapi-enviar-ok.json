@@ -1,0 +1,12 @@
+{
+    "rutEnvia": "17096073-4",
+    "rutEmpresa": "76269769-6",
+    "file": "archivo_envio_638169164741485820.xml",
+    "fecha": "2023-04-12T17:14:35",
+    "estado": "0",
+    "ok": true,
+    "glosa": "Upload OK",
+    "errores": null,
+    "trackId": 183061986,
+    "responseXml": "<?xml version=\"1.0\"?>\n<RECEPCIONDTE>\n <RUTSENDER>17096073-4</RUTSENDER>\n <RUTCOMPANY>76269769-6</RUTCOMPANY>\n <FILE>archivo_envio_638169164741485820.xml</FILE>\n <TIMESTAMP>2023-04-12 17:14:35</TIMESTAMP>\n <STATUS>0</STATUS>\n\n\n <TRACKID>0183061986</TRACKID>\n\n</RECEPCIONDTE>"
+}

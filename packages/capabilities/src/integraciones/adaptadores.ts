@@ -4,7 +4,7 @@ import type { Contexto } from "../types";
 import { consumoBase } from "./consumo-base";
 import { credencialDe, integracionDe } from "./resolver";
 
-export { biometriaDe, biometriaSimuladaDelProceso } from "./biometria";
+export { biometriaDe, type BiometriaDeEmpresa } from "./biometria";
 export { consumoBase } from "./consumo-base";
 export { distanciaDe, geoDe } from "./geo";
 export { iaDe } from "./ia";

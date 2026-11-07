@@ -1,3 +1,4 @@
+/* global vaciarCola */
 /* OPAI · service worker base (ADR-044, Brief 04; D2 b: propio y sin dependencias).
    - Precache: una LISTA EXPLÍCITA de activos públicos (la página offline neutra y los íconos). Nunca
      HTML ni RSC con sesión, ni un patrón amplio (§4.4, CA8). El HTML y el RSC llevan datos de la
@@ -45,6 +46,11 @@ self.addEventListener("message", (evento) => {
   if (!data) return;
   if (data.type === "SKIP_WAITING") {
     self.skipWaiting();
+    return;
+  }
+  // La página pide enviar la cola de Terreno ahora (volvió la señal, abrió la app o «Reintentar ahora»).
+  if (data.type === "VACIAR_COLA") {
+    evento.waitUntil(vaciarCola().catch(() => undefined));
     return;
   }
   // Al cerrar sesión o cambiar de empresa, la app pide borrar TODAS las cachés (defensa en
@@ -96,6 +102,9 @@ async function navegacion(request) {
     return offline ?? Response.error();
   }
 }
+
+importScripts("/sw-cola.js");
+
 
 self.addEventListener("fetch", (evento) => {
   const { request } = evento;

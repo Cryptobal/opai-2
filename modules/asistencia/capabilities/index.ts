@@ -13,11 +13,8 @@ import { correccionesListar } from "./correcciones-listar";
 import { correccionesProponer } from "./correcciones-proponer";
 import { correccionesResponder } from "./correcciones-responder";
 import { trabajoVencerCorrecciones } from "./correcciones-trabajo";
-import { biometriaEnrolar, biometriaEnrolarRrhh } from "./biometria-enrolar";
-import { biometriaDarDeBaja, biometriaEstado, biometriaMiEstado } from "./biometria-gestion";
 import { trabajoSuprimirBiometria } from "./biometria-trabajo";
-import { biometriaIniciarVida } from "./biometria-vida";
-import { consentimientosAceptar, consentimientosRegistrar, consentimientosRevocar, consentimientosTextos } from "./consentimientos";
+import { rostroConsentir, rostroEnrolar, rostroEstado, rostroIniciarVida, rostroRevocar } from "./rostro";
 import { telefonoHabilitar } from "./telefono";
 import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incidentes";
 import { marcasObtener, marcasListar } from "./lecturas";
@@ -33,7 +30,6 @@ export const capacidades = [
   correccionesProponer, correccionesListar, correccionesResponder, correccionesVerEnlace, correccionesResponderEnlace,
   contingenciasRegistrar, contingenciasListar, contingenciasResponder,
   incidentesRegistrar, incidentesCerrar, incidentesListar,
-  biometriaIniciarVida, biometriaEnrolar, biometriaEnrolarRrhh, biometriaDarDeBaja, biometriaEstado, biometriaMiEstado,
-  consentimientosAceptar, consentimientosRegistrar, consentimientosRevocar, consentimientosTextos, telefonoHabilitar,
+  rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
 ];

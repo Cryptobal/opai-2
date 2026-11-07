@@ -1,6 +1,7 @@
 import type { FiltroCargos } from "@opai/db";
-import { PLAN_BASE } from "@opai/domain";
+import { MODULO_FINANZAS, PARTES_FINANZAS, PLAN_BASE } from "@opai/domain";
 
+import { hoy } from "../../maestros/comun";
 import { contarUnidades, type DatosUnidades } from "./unidades";
 import { aFechaPeriodo, type Contador, filasDeCobro, ufDelPeriodo, type UfDelDia } from "./calculo";
 import { aCargoVista, aCondicionVista, type FilaCargo, type FilaCondicion } from "./esquemas";
@@ -34,6 +35,13 @@ export async function cobroDeEmpresa(
   const porModulo = new Map(condiciones.map((c) => [c.moduloId, aCondicionVista(c)]));
   const estados = new Map(modulos.map((m) => [m.moduloId, m.estado]));
   estados.set(PLAN_BASE, estadoEmpresa === "suspendido" ? "suspendido" : "activo");
+  // Una parte de Finanzas sigue el estado del módulo; su prueba vive en su condición (CAR-204).
+  const finanzas = estados.get(MODULO_FINANZAS);
+  if (finanzas)
+    for (const parte of PARTES_FINANZAS) {
+      const hasta = porModulo.get(parte)?.pruebaHasta;
+      estados.set(parte, finanzas === "activo" && hasta && hasta >= hoy() ? "trial" : finanzas);
+    }
   // Las unidades se cuentan solo si alguna condición cobra por unidad, y una sola vez.
   const unidades = [...porModulo.values()].some((c) => c.forma === "por_unidad")
     ? await e.unidadesCobro()

@@ -61,7 +61,6 @@
     "/(erp)/contactos/[id]": 178,
     "/(erp)/cotizaciones/nueva": 169,
     "/(erp)/finanzas/configuracion-dte": 169,
-    "/(erp)/finanzas/bancos": 169,
     "/(erp)/finanzas/ventas/[id]": 170,
     "/(platform)/platform/tenants/[id]/cobro": 169,
     "/(erp)/instalaciones/[id]/negocios": 169,
@@ -73,6 +72,8 @@
     "/(supervisor)/supervisor/rendiciones/nueva/compra": 187,
     "/(supervisor)/supervisor/rendiciones/nueva/kilometraje": 184,
     "/(supervisor)/supervisor/rendiciones/[id]/corregir": 194,
+    "/(erp)/rendiciones/lotes": 173,
+    "/(erp)/rendiciones/lotes/[id]": 173,
     "/(erp)/rendiciones/nueva/compra": 187,
     "/(erp)/rendiciones/nueva/kilometraje": 184,
     "/(erp)/rendiciones/[id]/corregir": 194,
@@ -80,7 +81,8 @@
     "/(supervisor)/supervisor/[...ruta]": 163,
     "/(supervisor)/supervisor/instalaciones": 163,
     "/(supervisor)/supervisor/instalaciones/[id]": 164,
-    "/(terreno)/terreno": 163,
-    "/(terreno)/terreno/[...ruta]": 163
+    "/(terreno)/terreno": 167,
+    "/(terreno)/terreno/[...ruta]": 163,
+    "/(terreno)/terreno/cola": 166
   }
 }

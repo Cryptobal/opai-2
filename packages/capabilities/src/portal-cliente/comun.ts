@@ -13,6 +13,9 @@ import {
 import { noEncontrado, prohibido } from "../errores";
 import type { Contexto } from "../types";
 
+/** Estado de cuenta que suspende el Portal Cliente de sus contactos. */
+export const ESTADO_CUENTA_INACTIVA = "cliente_inactivo";
+
 export const PERMISO_PORTAL = "portal_cliente:read";
 export const PERMISO_ACCESOS_READ = "portal_cliente:accesos.read";
 export const PERMISO_ACCESOS_MANAGE = "portal_cliente:accesos.manage";
@@ -77,7 +80,7 @@ export type AccesoResuelto = {
 /**
  * Resuelve el acceso del actor al portal (FAIL-CLOSED, ADR-022): solo una persona con membresía de
  * contacto de cliente (rol viewer con «cliente» como único portal) y un acceso `activo` entra. Todo
- * lo demás (key sin usuario, membresía interna, sin fila, suspendido, revocado) es FORBIDDEN con el
+ * lo demás (key sin usuario, membresía interna, sin fila, suspendido, revocado, cuenta inactiva) es FORBIDDEN con el
  * mismo mensaje, sin revelar cuál fue la causa.
  */
 export async function accesoDelActor(ctx: Contexto): Promise<AccesoResuelto> {
@@ -95,9 +98,11 @@ export async function accesoDelActor(ctx: Contexto): Promise<AccesoResuelto> {
   if (!fila || fila.estado !== "activo") throw negado();
   const cuenta = await ctx.db.cuenta.findFirst({
     where: { id: fila.cuentaId },
-    select: { id: true, nombre: true },
+    select: { id: true, nombre: true, estado: true },
   });
-  if (!cuenta) throw negado();
+  // Cuenta inactiva = portal suspendido (CAR-217). No se toca la fila de acceso: al reactivar la
+  // cuenta, los contactos recuperan el acceso solos.
+  if (!cuenta || cuenta.estado === ESTADO_CUENTA_INACTIVA) throw negado();
   const instalaciones = await instalacionesDeCuenta(ctx, cuenta.id);
   const base: AccesoBase = {
     estado: fila.estado,

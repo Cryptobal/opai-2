@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 import {
-  CANALES, MINUTOS_ALERTA_INICIO_DEFECTO, PLAZO_CORRECCION_HORAS_DEFECTO, UMBRAL_SIMILITUD_DEFECTO, UMBRAL_SIMILITUD_MAX,
-  UMBRAL_SIMILITUD_MIN,
+  CANALES, MINUTOS_ALERTA_INICIO_DEFECTO, PLAZO_CORRECCION_HORAS_DEFECTO,
 } from "../domain";
 
 // Ajustes del módulo Asistencia (ADR-018): los lee el centro de configuración del núcleo desde el
@@ -62,21 +61,6 @@ export const ajustesAsistencia = z.object({
     grupo: "Identificación",
     ambito: "tenant",
     permiso: PERMISO,
-    control: "switch",
-  }),
-  biometria_umbral_similitud: z.number().min(UMBRAL_SIMILITUD_MIN).max(UMBRAL_SIMILITUD_MAX).default(UMBRAL_SIMILITUD_DEFECTO).meta({
-    etiqueta: "Umbral de similitud facial (0 a 1)",
-    ayuda: "Similitud mínima para aceptar un rostro. Lo fija la plataforma, no cada empresa (T-03).",
-    grupo: "Identificación",
-    ambito: "plataforma",
-    control: "numero",
-  }),
-  biometria_empresas_reales: z.boolean().default(false).meta({
-    etiqueta: "Permitir Face ID en empresas reales",
-    ayuda:
-      "Apagado: solo las empresas de prueba (slug «qa-…») pueden enrolar y verificar rostros. Se enciende solo cuando Carlos confirma la evaluación de impacto y el DPA (Ley 21.719, datos biométricos sensibles desde el 1-dic-2026).",
-    grupo: "Identificación",
-    ambito: "plataforma",
     control: "switch",
   }),
   plazo_correccion_horas: z.number().int().min(1).max(720).default(PLAZO_CORRECCION_HORAS_DEFECTO).meta({

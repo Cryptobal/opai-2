@@ -1,4 +1,4 @@
-import { CircleCheck, FileSignature, FileText, Mail, Plug, UserCheck } from "lucide-react";
+import { CircleCheck, FileSignature, FileText, Mail, NotebookPen, Plug, UserCheck } from "lucide-react";
 
 import { cn, FilaSeleccionable, SeccionTarjeta } from "@opai/ds";
 
@@ -6,7 +6,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 export type Pendiente = {
-  tipo: "aprobaciones" | "documentos" | "invitaciones" | "integraciones" | "anexos";
+  tipo: "aprobaciones" | "documentos" | "invitaciones" | "integraciones" | "anexos" | "solicitudes";
   titulo: string;
   detalle: string;
   tono: "warning" | "danger" | "neutro";
@@ -22,6 +22,7 @@ const ICONO: Record<Pendiente["tipo"], typeof UserCheck> = {
   invitaciones: Mail,
   integraciones: Plug,
   anexos: FileSignature,
+  solicitudes: NotebookPen,
 };
 const FONDO = {
   warning: "bg-warning-muted text-warning-fg",

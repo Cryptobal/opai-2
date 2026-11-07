@@ -1,61 +1,62 @@
-// Contrato neutral de biometría facial (CAR-89 · B4, D-05). Ningún módulo importa un SDK de proveedor:
-// el núcleo resuelve el adaptador por empresa y mide cada llamada en `core.consumos`.
+// Contrato del adaptador de biometría (CAR-78 · B4, ADR-079). Enrolar, verificar 1:1 con prueba de vida y
+// borrar. OPAI nunca guarda la imagen ni la plantilla: el proveedor devuelve una referencia opaca, y esa
+// referencia es lo único que se conserva (cifrada) mientras el consentimiento esté vigente (Ley 21.719).
 
-/** Bytes de una imagen JPEG o PNG. Nunca se guarda: viaja del dispositivo al proveedor y se descarta. */
-export type ImagenRostro = Uint8Array;
+/** Muestra capturada por la cámara del equipo, ya codificada. Se envía al proveedor y se descarta. */
+export type Muestra = string;
 
-export type ResultadoVida = {
-  viva: boolean;
-  /** 0–1. */
-  confianza: number;
-  /** Cuadro de referencia de la sesión de vida; sirve para enrolar o verificar y se descarta. */
-  imagen: ImagenRostro | null;
+export type ResultadoEnrolamientoFacial = {
+  /** Referencia opaca del proveedor. Nunca la imagen ni la plantilla biométrica. */
+  referencia: string;
+  proveedor: string;
 };
 
-export type ResultadoRostro = {
+export type ResultadoVerificacionFacial = {
+  /** La cara de la muestra corresponde a la enrolada (1:1). */
   coincide: boolean;
-  /** Similitud 0–1 contra el rostro esperado; 0 si el esperado no apareció. */
-  similitud: number;
+  /** La muestra es de una persona presente, no de una foto o pantalla. */
+  vivo: boolean;
+  /** Similitud entre 0 y 100. */
+  puntaje: number;
+  proveedor: string;
 };
 
-export type OpcionesVidaSimulada = { simulacion?: { rostro: string; viva: boolean } | undefined };
+export type MotivoBiometria = "muestra_invalida" | "sin_prueba_de_vida" | "referencia_inexistente";
 
-export type CodigoErrorBiometria = "sin_rostro" | "calidad" | "credenciales" | "proveedor";
-
-/** Falla del proveedor. El mensaje es genérico: nunca lleva la respuesta cruda ni las credenciales. */
-export class ErrorBiometria extends Error {
+/** Falla esperable del proveedor (muestra ilegible, sin prueba de vida, referencia ya borrada). */
+export class BiometriaError extends Error {
   constructor(
-    readonly codigo: CodigoErrorBiometria,
+    readonly motivo: MotivoBiometria,
     mensaje: string,
   ) {
     super(mensaje);
-    this.name = "ErrorBiometria";
+    this.name = "BiometriaError";
   }
 }
 
-export interface ProveedorBiometria {
-  readonly nombre: "rekognition" | "simulado";
-  /** Crea la colección de la empresa si no existe (idempotente). */
-  asegurarColeccion(coleccionId: string): Promise<void>;
-  /** Borra la colección entera (baja de la empresa). */
-  eliminarColeccion(coleccionId: string): Promise<void>;
-  /** Abre una sesión de prueba de vida; el dispositivo la completa con la cámara. */
-  /** `simulacion` solo la entiende el proveedor simulado (pruebas y QA): fija el «rostro» y si la vida pasa. */
-  iniciarVida(opciones?: OpcionesVidaSimulada): Promise<{ sesionId: string }>;
-  resultadoVida(sesionId: string): Promise<ResultadoVida>;
-  /** Registra un rostro en la colección y devuelve la referencia del proveedor. */
-  enrolar(coleccionId: string, externalId: string, imagen: ImagenRostro): Promise<{ rostroId: string }>;
+export interface Biometria {
+  readonly nombre: string;
+  readonly disponible: boolean;
+  /** Enrola al sujeto. Falla con `sin_prueba_de_vida` si la muestra no es de una persona presente. */
+  enrolar(s: {
+    sujetoId: string;
+    muestra: Muestra;
+    /** Colección de la empresa (una por empresa, D-05); el simulado la ignora. */
+    coleccion?: string;
+  }): Promise<ResultadoEnrolamientoFacial>;
+  /** Verifica 1:1 contra la referencia enrolada, con prueba de vida. */
+  verificar(s: {
+    referencia: string;
+    muestra: Muestra;
+    coleccion?: string;
+  }): Promise<ResultadoVerificacionFacial>;
+  /** Borra la referencia en el proveedor. Idempotente: borrar lo ya borrado no falla. */
+  borrar(referencia: string, coleccion?: string): Promise<void>;
   /**
-   * Verificación 1:1: solo decide contra el rostro esperado de la persona del RUT. Cualquier otro
-   * rostro de la colección se descarta sin devolverse ni registrarse; nunca identifica a nadie.
+   * Abre una prueba de vida que la cámara completa antes de enrolar o verificar. Su identificador viaja como
+   * muestra (`vida:<id>`). El simulado no la necesita: su muestra es `rostro:<token>`.
    */
-  verificar(
-    coleccionId: string,
-    rostroEsperado: string,
-    imagen: ImagenRostro,
-    umbral: number,
-  ): Promise<ResultadoRostro>;
-  eliminarRostro(coleccionId: string, rostroId: string): Promise<void>;
+  iniciarVida?(): Promise<{ sesionId: string }>;
 }
 
 /** Nombre de la colección de una empresa: una por empresa, nunca compartida (D-05). */

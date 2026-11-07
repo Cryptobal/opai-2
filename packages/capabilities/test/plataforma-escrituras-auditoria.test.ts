@@ -99,6 +99,17 @@ function semilla() {
         nota: null,
       },
     ],
+    pruebaGratis: [
+      {
+        id: "pg1",
+        tenantId: TENANT_DE_PRUEBA,
+        moduloId: "cpq",
+        inicio: new Date("2026-11-01T00:00:00Z"),
+        hasta: new Date("2026-11-10T00:00:00Z"),
+        extensiones: 0,
+        cerradaEn: null,
+      },
+    ],
     propuestaIndicador: [
       {
         id: PROPUESTA,
@@ -117,6 +128,11 @@ const t = TENANT_DE_PRUEBA;
 /** Un caso por escritura `platform.*`: su input mínimo válido sobre la semilla. */
 const CASOS: Record<string, Record<string, unknown>> = {
   "platform.ajustes.set": { modulo: "core", clave: "remuneraciones_imm", valor: 560_000 },
+  "platform.cobros.prueba_gratis_extender": { tenantId: t, moduloId: "cpq", dias: 10 },
+  "platform.catalogo.precio_set": {
+    moduloId: "cpq",
+    precio: { moneda: "UF", forma: "fijo", precio: "3" },
+  },
   "platform.precios.set": {
     recurso: "ia.economica",
     unidad: "token",

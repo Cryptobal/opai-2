@@ -58,3 +58,17 @@ export async function enviarCorreo(
     return false;
   }
 }
+
+/** Renderiza el correo de un evento con la plantilla vigente y la marca, sin enviarlo ni registrar nada. */
+export async function previsualizarCorreo(
+  d: Pick<DestinoCorreo, "db" | "tenantId" | "urlBase">,
+  evento: string,
+  datos: Record<string, unknown>,
+) {
+  const e = comunicableDe(evento);
+  if (!e) throw new Error(`Evento no comunicable: ${evento}`);
+  const plantilla = await plantillaVigente(d.db, e, "correo");
+  if (!plantilla) return null;
+  const r = renderizarCorreo(e, plantilla, datos, await marcaDe(d.db, d.tenantId, d.urlBase));
+  return { asunto: r.asunto, texto: r.texto };
+}

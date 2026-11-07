@@ -23,9 +23,7 @@ export const telefonoHabilitar = defineCapability({
     if (dryRun) return { habilitado: i.habilitado };
     await ctx.transaccion(async (tx) => {
       await tx.credencialTerreno.update({ where: { personaId: i.personaId }, data: { telefonoPersonalHabilitado: i.habilitado } });
-      await ctx.bitacora.registrar(tx, {
-        tipo: "asistencia.telefono.habilitacion", entidadTipo: "persona", entidadId: i.personaId, payload: { habilitado: i.habilitado },
-      });
+      await ctx.bitacora.registrar(tx, { tipo: "asistencia.telefono.habilitacion", entidadTipo: "persona", entidadId: i.personaId, payload: { habilitado: i.habilitado } });
     });
     return { habilitado: i.habilitado };
   },

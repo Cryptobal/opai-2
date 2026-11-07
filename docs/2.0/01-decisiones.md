@@ -1373,6 +1373,10 @@ identidad de servicio en main.
 3. **Pruebas.** No hay registro abierto ni autoservicio. Plataforma abre la prueba a una empresa ya validada (con RUT), por módulo y con fecha de término. Siete días antes del vencimiento llega un aviso a Plataforma. Al vencer, si Plataforma marcó **«pasa a cobro»**, empieza a cobrarse; si no, el módulo queda en **solo lectura** (ve sus datos, no crea nada nuevo, nada se borra).
 4. **Plan base** (reemplaza el punto 3 de ADR-058): empresa, usuarios, roles y permisos, ajustes, auditoría, notificaciones, documentos, tickets y portal. El motor de sueldos va dentro de Nómina y la firma se cobra por uso. Se refleja en el catálogo de módulos (bloque C).
 
+5. **Catálogo de módulos (CAR-204, 5-nov-2026).** Hay un catálogo en `@opai/domain` con una entrada por cobrable: plan base, módulos y las siete partes de Finanzas (ADR-072), cada una con lo que incluye, forma y unidad sugeridas y dependencias. **Incluidos en el plan base, sin precio aparte:** Tickets, Portal Trabajador y Portal Cliente (decisión de Carlos del 4-nov 20:45); el Agente interno queda cobrable hasta que Carlos decida (se cambia en `MODULOS_INCLUIDOS_EN_BASE`). El motor de sueldos va dentro de Remuneraciones (Nómina) y la firma se cobra por uso: no están en el catálogo. El precio de lista por cobrable es configuración versionada de plataforma (`core.ajustes_plataforma`, módulo `catalogo`, auditada con antes y después; ADR-021), solo rellena la hoja «Cobro» y no cambia condiciones ni cargos existentes. Las partes se cobran con `modulo_id` `finanzas.bancos`, `.flujo`, `.ventas`, `.cobranza`, `.factoring`, `.compras` y `.contabilidad`; fijar precio o abrir prueba valida las dependencias, y no se mezcla Finanzas entero con partes. Ver BRIEF-36.
+
+6. **Prueba gratis por empresa (CAR-222, 6-nov-2026).** Cada empresa activa **una sola vez**, desde su ERP, la prueba gratis de un módulo o de una parte de Finanzas; dura **10 días** (el primero cuenta) y **se desactiva sola**: el módulo queda en solo lectura, sin borrar nada. Plataforma puede extenderla o reactivarla. No es un cobro: no tiene precio ni genera cargos (`core.pruebas_gratis`, único por empresa y módulo). Una parte de Finanzas se prueba aunque Finanzas no esté contratado; hasta que la Sesión 5 filtre por partes, eso abre todo el módulo durante la prueba (riesgo aceptado, acotado a 10 días). Ver BRIEF-40.
+
 ---
 
 ## ADR-072 · Finanzas es un módulo con siete partes contratables por separado
@@ -1440,6 +1444,8 @@ identidad de servicio en main.
 **Por qué.** Hoy el código lo lee y lo vuelve a codificar en UTF-8 (`ventas-xml.ts`, `octava.ts`). Con una razón social o una glosa con ñ o tildes, eso cambia los bytes firmados, invalida la firma y el SII o el RPETC lo rechazan.
 
 **Prueba obligatoria.** Una emisión y una cesión en certificación con «Compañía Ñuñoa» en la razón social y tildes en la glosa: el hash del XML guardado coincide con el que devolvió SimpleAPI y la cesión lo acepta.
+
+**Adenda del 6-nov-2026 (decisión de Carlos, CAR-196).** La emisión real con SimpleAPI se hace **primero en certificación y después en producción**; la producción queda fuera de CAR-196 y detrás del candado de CAR-191 (solo `app.opai.cl`, solo con su habilitación expresa). Se usa SimpleAPI por REST con API key, que Carlos carga en Integraciones. Implementación (BRIEF-40): el XML firmado se guarda, hashea y lee como bytes ISO-8859-1 (`Almacenamiento.leerBytes`, `xml-iso.ts`) con prueba con ñ y tildes, y **la llamada a SimpleAPI va fuera de la transacción de base** (gancho `Capacidad.preparar` con el folio previsto; la transacción reclama el mismo folio o pide reintentar, sin quemar folios).
 
 ---
 
@@ -1541,3 +1547,26 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Pendiente.** Widget de AWS Face Liveness en el navegador (credenciales temporales y dependencia nueva) y prueba contra el entorno de AWS; ambos requieren decisión de Carlos.
 
+
+## ADR-081 · Orden de trabajo de Operaciones: Personas → Instalaciones › Puestos → Pauta
+
+**Fecha:** 6-nov-2026 · **Estado:** vigente · **Autor:** Carlos (6-nov-2026, 08:17 CLT), registrado por «Operaciones · Puestos · Code» en CAR-206 · Adenda a ADR-048 (series de la Pauta) y al Brief 11 (Puestos).
+
+**Decisión.** El orden en que se arma la operación es:
+
+1. **Personas:** el guardia tiene un **vínculo laboral vigente con la instalación**.
+2. **Instalaciones › Puestos:** se **crean los puestos** y se define su **ciclo (patrón), turno y horario**. **Los guardias se asignan aquí**, desde la ficha del puesto (`pauta.titular.asignar`).
+3. **Pauta:** se **ve** el resultado y se **pinta**. El titular ya está elegido; la Pauta sugiere solo a los guardias vinculados a la instalación (el mismo criterio con que se valida la asignación).
+
+**Consecuencias.**
+
+- Asignar o quitar al titular de un puesto es una sola operación: fija la serie de la Pauta, deja el puesto en el vínculo del guardia, suelta al titular anterior, pasa el puesto a «cubierto» o PPC, deja la bitácora con quién lo hizo y emite `pauta.serie.fijada`, todo en la misma transacción. `pauta.series.fijar` sigue disponible para fijar o corregir el ciclo desde la Pauta.
+- Un guardia no puede quedar como titular de dos puestos a la vez por esta vía (un vínculo tiene un solo puesto): el traslado entre puestos va por su propio flujo (CAR-207), que reutiliza `fijarSerieInterna`.
+- No se crea tabla ni migración: el historial de titulares se arma con `pauta.series` y la bitácora de la Pauta.
+
+**Adenda (6-nov-2026, 13:05 CLT, Carlos vía OPAI 2.0; registrada en CAR-207).**
+
+1. Un guardia que ya es titular de otro puesto **se rechaza** al asignarlo: el traslado (`pauta.titular.trasladar`) es la vía.
+2. **Anexos:** solo se genera borrador de anexo si cambian el sueldo o las condiciones. Un simple cambio de puesto del vínculo **no** genera anexo; el cambio de instalación sí (y el traslado a otra instalación lo emite).
+3. **Backfill** único de la cobertura de los puestos con serie anterior a CAR-206, con vista previa, dentro del PR de CAR-207.
+4. Orden de los encargos de la sesión: CAR-207, luego CAR-96; los menores de UI de CAR-206 van a un PR de pendientes.

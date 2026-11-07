@@ -9,6 +9,7 @@ import { uuidSchema } from "../../esquemas";
 import { aFecha, hoy } from "../../maestros/comun";
 import { modulosCobrables, periodoDe } from "./calculo";
 import { cobroDeEmpresa } from "./datos";
+import { exigirCobrable, validarPartes } from "./partes";
 import { aCondicionVista, calculoSchema, condicionSchema } from "./esquemas";
 import { condicionInput, montoEntero } from "./precio";
 
@@ -42,6 +43,8 @@ export const platformCobrosCondicionesSet = defineCapability({
     const e = p.empresa(input.tenantId);
     const actual = await e.condicionCobro(input.moduloId);
     const c = input.condicion;
+    if (c) exigirCobrable(input.moduloId);
+    await validarPartes(e, input.moduloId, !c);
     if (c?.forma === "por_unidad" && !c.unidad)
       throw reglaDeNegocio("El cobro por unidad necesita la unidad que se cuenta.");
     const datos = c

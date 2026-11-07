@@ -21,6 +21,7 @@ import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
 import { padreConfiguracion } from "./padre-configuracion";
 import { menuCuentaShell } from "./menu-cuenta-shell";
+import { conContadores } from "./nav-contadores";
 import { propsPreferenciasShell } from "./shell-props-preferencias";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
@@ -120,9 +121,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         titulo={tituloEfectivo}
         busquedaCompacta={enConfiguracion}
         {...(padre ? { volver: padre, volverSoloTelefono: true } : {})}
-        nav={nav.map((n) =>
-          n.href === "/bandeja" ? { ...n, contador: preferencias?.bandejaContador ?? 0 } : n,
-        )}
+        nav={conContadores(nav, preferencias)}
         {...(navInferiorResuelto ? { navInferior: navInferiorResuelto } : {})}
         portales={datos.portales}
         portalActual={datos.portal}

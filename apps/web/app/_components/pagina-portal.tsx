@@ -8,9 +8,11 @@ import { falloDeCarga } from "@/lib/carga";
 import { epocaDeIdentidad, marcaGenerado } from "@/lib/epoca-sesion";
 import { verificarMfaDe } from "@/lib/mfa";
 import { medirFase } from "@/lib/metricas-navegacion";
+import { esCuentaDeEmpresa } from "@/lib/acceso-portal";
 import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
 import { type OpcionesPagina } from "./cabecera-contexto";
+import { CuentaDeEmpresaEnPortalCliente } from "./cuenta-de-empresa";
 import { CabeceraPagina } from "./cabecera-pagina";
 import { ErrorCarga } from "./error-carga";
 import { MarcadorMetricas } from "./marcador-metricas";
@@ -49,6 +51,9 @@ async function Contenido<T>({
   if (!acceso && portal === "erp" && !identidad.actual && tieneAccesoAPortal(identidad, "platform")) {
     redirect("/platform");
   }
+  // Sesión de la empresa en el Portal Cliente: aviso propio, sin cargar datos ni caer en el `Forbidden`
+  // desnudo de `ErrorCarga`, también si su membresía incluye «cliente» por error (CAR-192).
+  const empresaEnCliente = portal === "cliente" && esCuentaDeEmpresa(identidad);
   const sinEmpresa = !identidad.actual && portal !== "platform";
   const puedeElegir = identidad.membresias.some(
     (m) => m.estado === "activa" && m.tenant.estado !== "suspendido",
@@ -61,24 +66,28 @@ async function Contenido<T>({
   let fallo: "forbidden" | "error" | null = null;
   try {
     datos = await medirFase("datos", () =>
-      acceso && cargar ? cargar() : Promise.resolve(undefined as T),
+      acceso && !empresaEnCliente && cargar ? cargar() : Promise.resolve(undefined as T),
     );
   } catch (e) {
     fallo = falloDeCarga(e);
   }
-  const extra = acceso && cargar && opciones && !fallo ? opciones(datos) : {};
+  const extra = acceso && !empresaEnCliente && cargar && opciones && !fallo ? opciones(datos) : {};
   // El esqueleto acompaña al contenido (lo intercambia el CSS en navegaciones lentas, ver `EstadoEnlace`);
   // el resto de las opciones son la cabecera que la página fija en el shell persistente del layout.
   const { esqueleto, insignia, ...cabecera } = { ...pagina, ...extra };
   return (
     <>
       <CabeceraPagina
-        {...(acceso ? { ...cabecera, insignia } : { titulo: "Sin permisos" })}
+        {...(acceso && !empresaEnCliente
+          ? { ...cabecera, insignia }
+          : { titulo: empresaEnCliente ? "Portal Cliente" : "Sin permisos" })}
         generado={marcaGenerado()}
         epoca={epocaDeIdentidad(identidad)}
       />
       <div data-contenido className="contents">
-        {acceso && fallo ? (
+        {empresaEnCliente ? (
+          <CuentaDeEmpresaEnPortalCliente rutaErp="/" />
+        ) : acceso && fallo ? (
           <ErrorCarga fallo={fallo} ruta={ruta} />
         ) : acceso ? (
           typeof children === "function" ? (

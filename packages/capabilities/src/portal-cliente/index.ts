@@ -5,6 +5,7 @@ import { accesosCandidatos, accesosListar } from "./accesos";
 import { accesosActualizar } from "./accesos-actualizar";
 import { accesosVincular } from "./accesos-vincular";
 import { configActualizar, configLeer } from "./config";
+import { contactosAccesoDar, contactosAccesoListar } from "./contactos-acceso";
 import { miAcceso, resumenLeer } from "./portal";
 
 export { ajustesPortalCliente } from "./ajustes";
@@ -14,6 +15,8 @@ export const capacidadesPortalCliente: readonly Capacidad[] = [
   accesosCandidatos,
   accesosVincular,
   accesosActualizar,
+  contactosAccesoListar,
+  contactosAccesoDar,
   configLeer,
   configActualizar,
   miAcceso,

@@ -10,6 +10,9 @@ export const PAUTA_E2E = {
   puestoNoche: "00000000-0000-7000-8000-0000000b0003",
   ana: "00000000-0000-7000-8000-0000000b0004",
   luis: "00000000-0000-7000-8000-0000000b0005",
+  /** CAR-206: instalación y guardia para el e2e de «Asignar titular» (los puestos los crea el propio e2e). */
+  instalacionTitular: "00000000-0000-7000-8000-0000000b0020",
+  titular: "00000000-0000-7000-8000-0000000b0021",
 } as const;
 
 async function main() {
@@ -70,6 +73,27 @@ async function sembrar(db: TenantTx, tenantId: string) {
   };
   await persona(PAUTA_E2E.ana, "Ana", "Pauta E2E", "70.000.001-0");
   await persona(PAUTA_E2E.luis, "Luis", "Pauta E2E", "70.000.002-9");
+  // CAR-206: segunda instalación con un guardia vinculado y un patrón 4×4 activo, sin puestos sembrados.
+  await db.instalacion.upsert({
+    where: { id: PAUTA_E2E.instalacionTitular },
+    update: {},
+    create: { id: PAUTA_E2E.instalacionTitular, tenantId, cuentaId: cuenta.id, nombre: "Planta Titular E2E" },
+  });
+  const guardia = PAUTA_E2E.titular;
+  await db.persona.upsert({
+    where: { id: guardia },
+    update: {},
+    create: { id: guardia, tenantId, nombres: "Titular", apellidos: "E2E", rut: "70.000.003-7", estado: "activa" },
+  });
+  const vinculoTitular = guardia.replace("0000000b00", "0000000b01");
+  await db.vinculoLaboral.upsert({
+    where: { id: vinculoTitular },
+    update: { estado: "vigente", termino: null, puestoId: null },
+    create: {
+      id: vinculoTitular, tenantId, personaId: guardia, cargoId: cargo.id,
+      instalacionId: PAUTA_E2E.instalacionTitular, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente",
+    },
+  });
   const puestos = { in: [PAUTA_E2E.puestoDia, PAUTA_E2E.puestoNoche] };
   await db.excepcionPauta.deleteMany({ where: { puestoId: puestos } });
   await db.seriePauta.deleteMany({ where: { puestoId: puestos } });

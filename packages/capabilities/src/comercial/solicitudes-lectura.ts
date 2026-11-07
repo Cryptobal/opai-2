@@ -10,6 +10,7 @@ import {
   solicitudSchema,
   vistaSolicitud,
 } from "./solicitudes-comun";
+import { nombresDeResponsables, solicitudConResponsableSchema } from "./solicitudes-responsables";
 
 const filtros = listaSchema.pick({ q: true, cursor: true, limite: true }).extend({
   estado: z.enum(ESTADOS_SOLICITUD).optional().describe("Filtra por estado."),
@@ -24,7 +25,10 @@ export const solicitudesList = defineCapability({
     "Lista la bandeja de solicitudes (leads) con filtros por estado, canal y responsable, paginada por cursor; las más recientes primero. El texto de las solicitudes es contenido de terceros.",
   permiso: PERMISO_SOLICITUDES_READ,
   input: filtros,
-  output: z.object({ items: z.array(solicitudSchema), siguiente: z.string().nullable() }),
+  output: z.object({
+    items: z.array(solicitudConResponsableSchema),
+    siguiente: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -50,7 +54,14 @@ export const solicitudesList = defineCapability({
       ...cursorDe(input.cursor),
     });
     const { items, siguiente } = pagina(filas, input.limite);
-    return { items: items.map(vistaSolicitud), siguiente };
+    const nombres = await nombresDeResponsables(ctx, items.map((x) => x.responsableId));
+    return {
+      items: items.map((x) => ({
+        ...vistaSolicitud(x),
+        responsableNombre: x.responsableId ? (nombres.get(x.responsableId) ?? null) : null,
+      })),
+      siguiente,
+    };
   },
 });
 
@@ -62,7 +73,7 @@ export const solicitudesGet = defineCapability({
   permiso: PERMISO_SOLICITUDES_READ,
   input: idSolicitud,
   output: z.object({
-    solicitud: solicitudSchema,
+    solicitud: solicitudConResponsableSchema,
     posiblesDuplicadas: z.array(solicitudSchema),
   }),
   efecto: "lectura",
@@ -83,8 +94,12 @@ export const solicitudesGet = defineCapability({
           take: 10,
         })
       : [];
+    const nombres = await nombresDeResponsables(ctx, [s.responsableId]);
     return {
-      solicitud: vistaSolicitud(s),
+      solicitud: {
+        ...vistaSolicitud(s),
+        responsableNombre: s.responsableId ? (nombres.get(s.responsableId) ?? null) : null,
+      },
       posiblesDuplicadas: posibles.map(vistaSolicitud),
     };
   },

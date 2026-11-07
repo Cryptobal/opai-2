@@ -1,4 +1,5 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
+export { trabajoPruebasGratis } from "./core/pruebas-gratis";
 export {
   consumidorAvisoPrueba,
   trabajoCobrosMesAnterior,
@@ -10,6 +11,8 @@ export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
+export { accesoDelActor } from "./portal-cliente/comun";
+export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
@@ -23,7 +26,17 @@ export {
   estaCifrado,
   type CifradoDeCampos,
 } from "./core/cumplimiento/cifrado-campos";
-export { enviarCorreo } from "./core/comunicaciones";
+export { enviarCorreo, previsualizarCorreo } from "./core/comunicaciones";
+export {
+  borrarEnrolamiento,
+  consentimientoBiometricoVigente,
+  enrolarRostro,
+  evaluarRostro,
+  PROPOSITO_BIOMETRIA,
+  type ResultadoRostro,
+  verificarRostro,
+} from "./core/biometria";
+export { anotar as registrarHechoConsentimiento } from "./core/cumplimiento/consentimientos";
 export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";
 export { plataformaVigente } from "./core/apikey-scopes";
 export { catalogoPermisos } from "./core/me";
@@ -93,7 +106,7 @@ export {
 } from "./trabajos/runner";
 export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./comprobantes";
 export { camposExternos, externo } from "./externo";
-export { biometriaDe, biometriaSimuladaDelProceso, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
+export { biometriaDe, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
 export { comoAgenteInterno } from "./agentes/interno";
 export {

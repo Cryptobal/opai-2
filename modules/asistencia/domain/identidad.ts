@@ -11,8 +11,8 @@ export type SolicitudIdentidad = {
   credencial?: string | undefined;
   /** Si cae al respaldo, por qué (proveedor caído, rostro no reconocido…). */
   motivoRespaldo?: string | undefined;
-  /** Sesión de prueba de vida ya completada con la cámara; obligatoria con el método rostro (D-03). */
-  sesionVidaId?: string | undefined;
+  /** Muestra del rostro con su prueba de vida (la entrega la cámara); obligatoria con el método rostro (D-03). */
+  muestra?: string | undefined;
 };
 
 export type ResultadoIdentidad =
@@ -33,7 +33,8 @@ export type ResultadoIdentidad =
         | "bloqueado"
         | "rostro_no_coincide"
         | "vida_fallida"
-        | "sin_enrolamiento";
+        | "sin_enrolamiento"
+        | "proveedor_caido";
     };
 
 export interface VerificadorIdentidad {

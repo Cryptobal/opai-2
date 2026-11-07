@@ -1,0 +1,21 @@
+{
+    "estados": [
+        {
+            "tipoDocumento": 33,
+            "cantidadInformados": 1,
+            "cantidadAceptados": 1,
+            "cantidadRechazados": 0,
+            "cantidadReparos": 0
+        }
+    ],
+    "responseXml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<SII:RESPUESTA xmlns:SII=\"http://www.sii.cl/XMLSchema\">\r\n    <SII:RESP_BODY>\r\n        <TIPO_DOCTO>33</TIPO_DOCTO>\r\n        <INFORMADOS>1</INFORMADOS>\r\n        <ACEPTADOS>1</ACEPTADOS>\r\n        <RECHAZADOS>0</RECHAZADOS>\r\n        <REPAROS>0</REPAROS>\r\n    </SII:RESP_BODY>\r\n    <SII:RESP_HDR>\r\n        <TRACKID>183060352</TRACKID>\r\n        <ESTADO>EPR</ESTADO>\r\n        <GLOSA>Envio Procesado</GLOSA>\r\n        <NUM_ATENCION>65284   ( 2023/04/13 09:06:45)</NUM_ATENCION>\r\n    </SII:RESP_HDR>\r\n</SII:RESPUESTA>\r\n",
+    "trackId": 183060352,
+    "estado": "EPR",
+    "ok": true,
+    "numeroAtencion": 65284,
+    "fechaAtencion": "2023-04-13T09:06:45",
+    "srV_CODE": null,
+    "sqL_CODE": null,
+    "erR_CODE": null,
+    "glosa": "Envio Procesado"
+}

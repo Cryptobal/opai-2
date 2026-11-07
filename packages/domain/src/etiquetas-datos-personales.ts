@@ -32,6 +32,8 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   isapre_nombre: "ISAPRE",
   afp: "AFP",
   regimen: "régimen previsional",
+  referencia_cifrada: "referencia cifrada del rostro enrolado",
+  proveedor: "proveedor de reconocimiento facial",
   telefono_personal_habilitado: "habilitación del teléfono personal para marcar",
   talla_camisa: "talla de camisa",
   talla_pantalon: "talla de pantalón",
@@ -117,16 +119,6 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   resuelta_por: "persona que decidió",
   api_key_id: "identidad del agente externo",
   gastado_micro: "consumo acumulado",
-  // identificación facial (CAR-89 · B4)
-  referencia: "referencia del rostro en el proveedor biométrico (cifrada)",
-  proveedor: "proveedor biométrico",
-  canal: "canal de enrolamiento",
-  enrolado_en: "fecha de enrolamiento",
-  revocado_en: "fecha de revocación",
-  motivo_baja: "motivo de la baja de la biometría",
-  version: "versión del texto aceptado",
-  medio: "medio por el que se aceptó",
-  aceptado_en: "fecha de aceptación",
 };
 
 /** Etiqueta legible de un campo; si falta, devuelve el nombre crudo (un test impide que ocurra). */

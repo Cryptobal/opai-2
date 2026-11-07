@@ -4,7 +4,7 @@ import { ajuste, defineCapability, noEncontrado, prohibido, reglaDeNegocio } fro
 import { avanzarCadena, bloquearCadena } from "@opai/db";
 
 import { CANALES, hashDeMarca, METODOS, MOTIVOS_RESPALDO } from "../domain";
-import { exigirCanal, MENSAJE_IDENTIDAD } from "./canal";
+import { exigirCanal, exigirEquipo, MENSAJE_IDENTIDAD } from "./canal";
 import { armarRegistro } from "./armar-registro";
 import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
 import { verificadorDe } from "./identidad-registro";
@@ -17,7 +17,7 @@ export const marcasRegistrar = defineCapability({
   permiso: null,
   portales: ["terreno", "trabajador"],
   soloPersonas: true,
-  sensibles: ["credencial", "sesionVidaId"],
+  sensibles: ["credencial", "muestra"],
   input: z.object({
     personaId: uuid,
     instalacionId: uuid,
@@ -26,8 +26,8 @@ export const marcasRegistrar = defineCapability({
     credencial: z.string().max(64).optional(),
     /** Obligatorio al marcar con `pin_respaldo` (si la empresa lo exige): por qué no se usó el rostro. */
     motivoRespaldo: z.enum(MOTIVOS_RESPALDO).optional(),
-    /** Sesión de prueba de vida ya completada (con el método `rostro`). */
-    sesionVidaId: z.string().min(8).max(128).optional(),
+    /** Muestra del rostro con su prueba de vida, tal como la entrega la cámara (método `rostro`). No se guarda. */
+    muestra: z.string().min(8).max(2_000_000).optional(),
     /** Solo para pedir una colación; entrada y salida las decide el sistema (resolverTipo). */
     tipo: z.enum(["inicio_colacion", "fin_colacion"]).optional(),
     /** Clave que genera el dispositivo: reintentar no duplica (T-06). */
@@ -57,6 +57,7 @@ export const marcasRegistrar = defineCapability({
     if (i.canal === "telefono_personal" && (await personaPropia(ctx)).id !== persona.id)
       throw prohibido("Desde tu teléfono solo puedes marcar por ti.");
 
+    await exigirEquipo(ctx, i.dispositivoId, instalacion.id);
     await exigirCanal(ctx, instalacion.id, persona.id, i.canal);
     if (i.metodo === "pin_respaldo" && !i.motivoRespaldo && (await ajuste<boolean>(ctx, "asistencia", "pin_respaldo_exige_motivo")))
       throw reglaDeNegocio("Indica por qué marcas con el PIN de respaldo.");
@@ -65,7 +66,7 @@ export const marcasRegistrar = defineCapability({
       ? ({ ok: true, metodo: "rostro", motivoRespaldo: null, confianza: null, pruebaVida: null } as const)
       : await (await verificadorDe(ctx)).verificar({
           personaId: persona.id, metodo: i.metodo, credencial: i.credencial, motivoRespaldo: i.motivoRespaldo,
-          sesionVidaId: i.sesionVidaId,
+          muestra: i.muestra,
         });
     if (!id.ok) throw prohibido(MENSAJE_IDENTIDAD[id.motivo]);
     const jornada = await ctx.db.personaJornadaDt.findUnique({

@@ -22,8 +22,8 @@ export const PRECIOS_RECURSOS_BASE: readonly PrecioBase[] = [
   // Biometría facial (CAR-89 · B4): AWS Rekognition, tarifas públicas referenciales (Face Liveness
   // US$ 0,015 por sesión; IndexFaces y SearchFacesByImage US$ 0,001 por imagen).
   { recurso: "biometria.vida", unidad: "sesion", costoUnitarioMicro: 15_000 },
-  { recurso: "biometria.enrolamiento", unidad: "imagen", costoUnitarioMicro: 1_000 },
-  { recurso: "biometria.verificacion", unidad: "imagen", costoUnitarioMicro: 1_000 },
+  { recurso: "biometria.enrolar", unidad: "operacion", costoUnitarioMicro: 1_000 },
+  { recurso: "biometria.verificar", unidad: "operacion", costoUnitarioMicro: 1_000 },
   { recurso: "correo.enviado", unidad: "correo", costoUnitarioMicro: 400 },
   { recurso: "almacenamiento.subida", unidad: "mb", costoUnitarioMicro: 15 },
   { recurso: "almacenamiento.descarga", unidad: "url", costoUnitarioMicro: 0 },

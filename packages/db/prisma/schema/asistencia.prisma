@@ -187,7 +187,7 @@ model CorreccionEnlace {
 model Alerta {
   id            String   @id @default(uuid(7)) @db.Uuid
   tenantId      String   @map("tenant_id") @db.Uuid
-  /// sin_marca_inicio | sin_marca_termino | compensables | sin_correo_personal
+  /// sin_marca_inicio | sin_marca_termino | compensables | sin_correo_personal | descanso_insuficiente
   tipo          String
   clave         String
   personaId     String   @map("persona_id") @db.Uuid
@@ -231,71 +231,5 @@ model Dia {
   @@index([tenantId, fecha])
   @@index([tenantId, instalacionId, fecha])
   @@map("dias")
-  @@schema("asistencia")
-}
-
-/// Rostro enrolado de una persona (CAR-89 · B4, D-02, Res. Ex. 38 art. 57). Guarda SOLO la referencia que
-/// el proveedor devuelve (cifrada con la DEK de la empresa), nunca una foto ni la plantilla (D-04, P-03).
-/// Una por persona: revocar o suprimir deja `referencia` en null y cambia el estado; el hecho queda en la
-/// bitácora. `estado`: activo | revocado | suprimido.
-model EnrolamientoFacial {
-  id                 String    @id @default(uuid(7)) @db.Uuid
-  tenantId           String    @map("tenant_id") @db.Uuid
-  personaId          String    @map("persona_id") @db.Uuid
-  proveedor          String
-  referencia         String?
-  consentimientoId   String    @map("consentimiento_id") @db.Uuid
-  /// kiosco | erp | telefono_personal
-  canal              String
-  enroladoPor        String?   @map("enrolado_por") @db.Uuid
-  estado             String    @default("activo")
-  enroladoEn         DateTime  @map("enrolado_en") @db.Timestamptz(6)
-  revocadoEn         DateTime? @map("revocado_en") @db.Timestamptz(6)
-  /// trabajador | rrhh | consentimiento | desvinculacion
-  motivoBaja         String?   @map("motivo_baja")
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@unique([tenantId, personaId])
-  @@index([tenantId, estado])
-  @@map("enrolamientos_faciales")
-  @@schema("asistencia")
-}
-
-/// Consentimiento versionado de una persona (L-13, T-04, P-01): texto (por su huella), versión y fecha. Uno
-/// vigente por persona y tipo (índice único parcial en la migración); revocarlo pone `revocado_en`.
-/// `tipo`: biometria_facial | telefono_personal. `medio`: kiosco | erp | portal.
-model ConsentimientoPersona {
-  id           String    @id @default(uuid(7)) @db.Uuid
-  tenantId     String    @map("tenant_id") @db.Uuid
-  personaId    String    @map("persona_id") @db.Uuid
-  tipo         String
-  version      String
-  textoHash    String    @map("texto_hash")
-  medio        String
-  aceptadoEn   DateTime  @map("aceptado_en") @db.Timestamptz(6)
-  registradoPor String?  @map("registrado_por") @db.Uuid
-  revocadoEn   DateTime? @map("revocado_en") @db.Timestamptz(6)
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@index([tenantId, personaId, tipo])
-  @@map("consentimientos_personas")
-  @@schema("asistencia")
-}
-
-/// Sesión de prueba de vida (CAR-89 · B4): se ata a la empresa y al usuario que la abrió y se consume UNA vez
-/// (enrolar o marcar). Solo guarda la huella del identificador del proveedor, nunca el identificador.
-model SesionVida {
-  id         String    @id @default(uuid(7)) @db.Uuid
-  tenantId   String    @map("tenant_id") @db.Uuid
-  sesionHash String    @map("sesion_hash")
-  actorId    String    @map("actor_id") @db.Uuid
-  usadaEn    DateTime? @map("usada_en") @db.Timestamptz(6)
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  @@unique([tenantId, sesionHash])
-  @@index([createdAt])
-  @@map("sesiones_vida")
   @@schema("asistencia")
 }

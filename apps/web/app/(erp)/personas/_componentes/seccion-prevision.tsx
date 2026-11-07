@@ -1,6 +1,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
+import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
@@ -23,8 +24,12 @@ export async function SeccionPrevision({ personaId }: { personaId: string }) {
   });
   if (!r.ok) return null;
   const d = r.data;
+  const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPrevisionManage);
   return (
-    <SeccionTarjeta titulo="Previsión">
+    <SeccionTarjeta
+      titulo="Previsión"
+      {...(puede ? { accion: <BotonEditarSeccion seccion="prevision" /> } : {})}
+    >
       <ParesGrid
         items={[
           { etiqueta: "AFP", valor: d.afp },
@@ -36,6 +41,21 @@ export async function SeccionPrevision({ personaId }: { personaId: string }) {
           { etiqueta: "Cotización UF", valor: d.cotizacionUfPct },
         ]}
       />
+      {puede ? (
+        <HojaEditarSeccion
+          seccion="prevision"
+          personaId={personaId}
+          inicial={{
+            afp: d.afp,
+            regimen: d.regimen,
+            sistemaSalud: d.sistemaSalud,
+            isapreNombre: d.isapreNombre,
+            planIsapre: d.planIsapre,
+            planUf: d.planUf,
+            cotizacionUfPct: d.cotizacionUfPct,
+          }}
+        />
+      ) : null}
     </SeccionTarjeta>
   );
 }

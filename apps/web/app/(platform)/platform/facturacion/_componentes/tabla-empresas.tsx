@@ -1,69 +1,17 @@
-import { Badge, Empty, Monograma, Table, Td, Th, Tr } from "@opai/ds";
+import { Empty, Monograma, Table, Td, Th, Tr } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
-import { clp, type EmpresaCobro, type ModuloCobro, type Resumen, textoCantidad } from "./cobro";
-
-/** Módulos contratados o con condición: los demás no aportan a la vista. */
-const relevantes = (e: EmpresaCobro) =>
-  e.modulos.filter((m) => m.condicion || m.estado === "activo" || m.estado === "trial");
-const seFacturan = (e: EmpresaCobro) => relevantes(e).filter((m) => m.calculo.facturable);
-const noSeFacturan = (e: EmpresaCobro) => relevantes(e).filter((m) => !m.calculo.facturable);
-
-function ChipSeFactura({ m }: { m: ModuloCobro }) {
-  const cant =
-    m.calculo.cantidad !== null
-      ? ` · ${textoCantidad(m.calculo.cantidad, m.condicion?.unidad ?? null)}`
-      : "";
-  return (
-    <Badge tono="success" title={m.cargo ? "Cargo generado" : "Se factura este mes"}>
-      {m.nombre}
-      {cant} · {clp(m.cargo?.montoClp ?? m.calculo.montoClp)}
-      {m.cargo ? " ✓" : ""}
-    </Badge>
-  );
-}
-
-function ChipNoSeFactura({ m }: { m: ModuloCobro }) {
-  return (
-    <Badge
-      tono={m.calculo.motivo === "en_prueba" ? "info" : "neutro"}
-      title={m.calculo.motivoTexto}
-    >
-      {m.nombre} · {m.calculo.motivoTexto}
-    </Badge>
-  );
-}
-
-function Grupo(props: { titulo: string; vacio: string; hijos: React.ReactNode[] }) {
-  return (
-    <span className="flex flex-col gap-1">
-      <span className="t-label-sm text-fg-muted">{props.titulo}</span>
-      <span className="flex flex-wrap gap-1.5">
-        {props.hijos.length ? props.hijos : <span className="t-caption">{props.vacio}</span>}
-      </span>
-    </span>
-  );
-}
-
-const grupos = (e: EmpresaCobro) => [
-  <Grupo
-    key="si"
-    titulo="Se facturan"
-    vacio="Nada este mes"
-    hijos={seFacturan(e).map((m) => (
-      <ChipSeFactura key={m.moduloId} m={m} />
-    ))}
-  />,
-  <Grupo
-    key="no"
-    titulo="No se facturan"
-    vacio="Todo se factura"
-    hijos={noSeFacturan(e).map((m) => (
-      <ChipNoSeFactura key={m.moduloId} m={m} />
-    ))}
-  />,
-];
+import { clp, type Resumen, TEXTO_INCLUIDO_EN_BASE } from "./cobro";
+import {
+  ChipIncluido,
+  ChipNoSeFactura,
+  ChipSeFactura,
+  grupos,
+  incluidos,
+  noSeFacturan,
+  seFacturan,
+} from "./chips-cobro";
 
 /** Empresas del mes con lo que se factura y lo que no (con su motivo), y el total. */
 export function TablaEmpresas({ resumen }: { resumen: Resumen }) {
@@ -128,6 +76,12 @@ export function TablaEmpresas({ resumen }: { resumen: Resumen }) {
                   <span className="flex flex-wrap gap-1.5">
                     {noSeFacturan(e).map((m) => (
                       <ChipNoSeFactura key={m.moduloId} m={m} />
+                    ))}
+                    {incluidos(e).length ? (
+                      <span className="t-caption w-full">{TEXTO_INCLUIDO_EN_BASE}:</span>
+                    ) : null}
+                    {incluidos(e).map((m) => (
+                      <ChipIncluido key={m.moduloId} m={m} />
                     ))}
                   </span>
                 </Td>

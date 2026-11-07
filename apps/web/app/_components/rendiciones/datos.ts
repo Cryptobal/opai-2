@@ -49,3 +49,13 @@ export async function cargarRendicion(
   if (!r.ok && (r.error.code === "NOT_FOUND" || r.error.code === "INVALID_INPUT")) notFound();
   return exigirDatos(r).rendicion;
 }
+
+/** Nombre del administrador de la empresa para el «sin permiso»; si falla o no hay, null (texto genérico). */
+export async function cargarAdministrador(portal: PortalRendicion): Promise<string | null> {
+  const r = await ejecutarComoUsuario<{ nombre: string | null }>(
+    portal,
+    "rendiciones.administrador.consultar",
+    {},
+  );
+  return r.ok ? r.data.nombre : null;
+}

@@ -12,6 +12,7 @@ export const NAV_PLATAFORMA: ItemNav[] = [
     activoEn: "/platform/tenants",
   },
   { href: "/platform/facturacion", etiqueta: "Facturación", icono: "ReceiptText" },
+  { href: "/platform/catalogo", etiqueta: "Catálogo", icono: "BookOpen" },
   { href: "/platform/trabajos", etiqueta: "Trabajos", icono: "Clock" },
   { href: "/platform/indicadores", etiqueta: "Valores legales", icono: "FileText" },
   { href: "/platform/consumos", etiqueta: "Consumos", icono: "Gauge" },

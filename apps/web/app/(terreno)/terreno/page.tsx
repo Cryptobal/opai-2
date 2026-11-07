@@ -1,27 +1,33 @@
-import { UserCheck } from "lucide-react";
+import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-import { Empty, FilaSeleccionable } from "@opai/ds";
+import { Loading } from "@opai/ds";
 
-import { LinkNext } from "@/app/_components/link-next";
-import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { PortalPlaceholder } from "@/app/_components/portal-placeholder";
+import { dispositivoActual } from "@/lib/dispositivo";
+import { loginDe } from "@/lib/login-destino";
+import { identidadActual } from "@/lib/servidor";
+import { personasDelEquipo } from "@/lib/terreno-servidor";
+
+import { PantallaEquipo } from "./_componentes/pantalla-equipo";
 
 export const metadata = { title: "Terreno" };
 
-/** Inicio de Terreno: el resto del portal llega con sus briefs; mientras tanto, la marcación de asistencia. */
+/** Con sesión, el portal de siempre; sin sesión pero con un equipo emparejado (B2), Terreno del equipo (B3). */
+async function Contenido() {
+  if (await identidadActual())
+    return <PortalPlaceholder portal="terreno" titulo="Terreno" ruta="/terreno" />;
+  const equipo = await dispositivoActual();
+  if (!equipo) redirect(loginDe("/terreno"));
+  if (equipo.estado !== "activo") redirect("/terreno/emparejar");
+  const { instalacion, personas } = await personasDelEquipo(equipo);
+  return <PantallaEquipo instalacion={instalacion} personas={personas} />;
+}
+
 export default function Pagina() {
   return (
-    <PaginaPortal portal="terreno" titulo="Terreno" ruta="/terreno">
-      <h2 className="t-title mb-4 text-fg md:hidden">Terreno</h2>
-      <div className="mb-4 border-y border-border bg-surface md:rounded-lg md:border">
-        <FilaSeleccionable
-          href="/terreno/marcar"
-          Link={LinkNext}
-          titulo="Marcar asistencia"
-          secundario="Con tu rostro o con tu RUT y PIN"
-          inicio={<UserCheck aria-hidden className="size-5 flex-none text-fg-muted" />}
-        />
-      </div>
-      <Empty titulo="Terreno: en construcción" descripcion="El resto de Terreno se habilita en la fase de portales." />
-    </PaginaPortal>
+    <Suspense fallback={<Loading variante="lista" className="p-4" />}>
+      <Contenido />
+    </Suspense>
   );
 }

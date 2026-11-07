@@ -47,6 +47,7 @@ export async function puestoParaPauta(ctx: Contexto, id: string) {
       id: true,
       nombre: true,
       instalacionId: true,
+      patronId: true,
       horaInicio: true,
       horaFin: true,
       jornada: true,

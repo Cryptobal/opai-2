@@ -1,10 +1,11 @@
-/* eslint-disable max-lines -- integrado sin lint por la caída de memoria del CI (CAR-181); dividir en el PR de pendientes */
+ 
 import type { Contexto } from "@opai/capabilities";
 
 import type { ResultadoCalculo } from "../domain/motor";
 import { calculoVigente } from "./calculo-vigente";
 import { type EntradaPdfCotizacion, type LineaPdfCotizacion } from "./documento-pdf";
 import { cargarFilasVersion } from "./recalcular";
+import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
 
 export { entradaPdfConBorradorMarca, entradaPdfMuestra } from "./entrada-pdf-muestra";
 
@@ -61,21 +62,23 @@ export async function entradaPdfDesdeCotizacion(
       })
     : null;
 
-  const ventaPorLinea = ctx.autorizar("cpq:costos.ver")
-    ? mapVentaLineas(resultado, lineas.map((l) => l.id))
-    : new Map<string, number>();
+  const ventaPorLinea =
+    opts?.enviada || ctx.autorizar("cpq:costos.ver")
+      ? mapVentaLineas(
+          resultado,
+          lineas.map((l) => l.id),
+        )
+      : new Map<string, number>();
   const seccionesVista = secciones.map((s) => ({
     nombre: s.nombre,
     lineas: lineas
       .filter((l) => l.seccionId === s.id)
-      .map(
-        (l): LineaPdfCotizacion => ({
-          nombre: l.nombre,
-          tipo: l.tipo,
-          posiciones: l.posiciones,
-          ventaMensualClp: ventaPorLinea.get(l.id) ?? null,
-        }),
-      ),
+      .map((l): LineaPdfCotizacion => ({
+        nombre: l.nombre,
+        tipo: l.tipo,
+        posiciones: l.posiciones,
+        ventaMensualClp: ventaPorLinea.get(l.id) ?? null,
+      })),
   }));
 
   const dirCli = [cuenta?.calle, cuenta?.comuna, cuenta?.ciudad ?? cuenta?.region]
@@ -97,6 +100,7 @@ export async function entradaPdfDesdeCotizacion(
       pagosUnicos: resultado.pagosUnicos,
       borradorSinPrecio,
       uf: resultado.uf,
+      tasaIvaPct: await tasaIvaVentaTenant(ctx),
     },
     validaHasta: version.validaHasta?.toISOString().slice(0, 10) ?? null,
     cliente: cuenta
@@ -114,14 +118,19 @@ export async function entradaPdfDesdeCotizacion(
   };
 }
 
-function mapVentaLineas(r: ResultadoCalculo, idsDb: string[]): Map<string, number> {
+/** Venta por línea (reparto por costo) cuya suma es exactamente la venta mensual: el resto va a la línea mayor. */
+export function mapVentaLineas(r: ResultadoCalculo, idsDb: string[]): Map<string, number> {
   const m = new Map<string, number>();
   const totalCosto = r.lineas.reduce((s, l) => s + l.costoMensual, 0);
   if (r.ventaMensual != null && totalCosto > 0) {
-    for (const l of r.lineas) {
-      const share = Math.round((l.costoMensual / totalCosto) * r.ventaMensual);
-      m.set(l.id, share);
-    }
+    for (const l of r.lineas)
+      m.set(l.id, Math.round((l.costoMensual / totalCosto) * r.ventaMensual));
+    const resto = r.ventaMensual - [...m.values()].reduce((a, v) => a + v, 0);
+    const mayor = r.lineas.reduce(
+      (a, l) => (l.costoMensual > (a?.costoMensual ?? -1) ? l : a),
+      r.lineas[0],
+    );
+    if (resto !== 0 && mayor) m.set(mayor.id, (m.get(mayor.id) ?? 0) + resto);
     return m;
   }
   for (const l of r.lineas) {

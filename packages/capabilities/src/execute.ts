@@ -10,7 +10,7 @@ import { auditaConElHandler, auditarSiPlataforma, eventoDeEscritura } from "./ex
 import { repeticion, tenantDe } from "./execute-util";
 import { SALIDA_INVALIDA } from "./idempotencia";
 import { obtenerCapacidad } from "./registry";
-import type { Capacidad, Contexto, FinalizarConsumo, OpcionesEjecucion, Resultado } from "./types";
+import type { Capacidad, Contexto, FinalizarConsumo, ModoEjecucion, OpcionesEjecucion, Resultado } from "./types";
 
 async function correr(
   ctx: Contexto,
@@ -38,7 +38,7 @@ async function correr(
       entrada: entrada.data,
     };
   }
-  const modo = opciones.idempotencyKey
+  let modo: ModoEjecucion = opciones.idempotencyKey
     ? { dryRun, idempotencyKey: opciones.idempotencyKey }
     : { dryRun };
   const bloqueo = await controlAgente(ctx, c, entrada.data, opciones);
@@ -66,6 +66,8 @@ async function correr(
   let crudo: unknown;
   let lecturaValidada: ReturnType<Capacidad["output"]["safeParse"]> | undefined;
   try {
+    // Trabajo con servicios externos: antes de la transacción de la escritura (ver `Capacidad.preparar`).
+    if (c.preparar && !dryRun) modo = { ...modo, preparado: await c.preparar(ctx, entrada.data) };
     // Lecturas con empresa: una sola transacción con el tenant fijado una vez (ADR-045). Sin empresa
     // (plataforma) no se envuelve: la RLS no devuelve filas para un handler que no consulta la base.
     if (c.auditarLectura && ctx.conTenant) {

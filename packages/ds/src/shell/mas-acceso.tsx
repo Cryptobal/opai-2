@@ -6,24 +6,17 @@ import { useState } from "react";
 import { AccesoRapido } from "./acceso-rapido";
 import type { ItemFijado } from "./fijados";
 import { esActivo } from "./types";
+import { unirAccesos } from "./unir-accesos";
 
 const MAXIMO_ACCESOS = 4;
 const MAXIMO_FIJADOS = 5;
 
-/** Fijados primero y luego recientes, sin repetir la ruta y hasta cuatro accesos (diseño «Más», CAR-182). */
+/** Fijados primero y luego recientes, sin repetir destino ni nombre y hasta cuatro accesos (CAR-224). */
 export function baldosasDeAcceso(
   fijados: readonly ItemFijado[],
   recientes: readonly ItemFijado[],
 ): ItemFijado[] {
-  const vistos = new Set<string>();
-  const lista: ItemFijado[] = [];
-  for (const item of [...fijados, ...recientes]) {
-    if (vistos.has(item.href)) continue;
-    vistos.add(item.href);
-    lista.push(item);
-    if (lista.length === MAXIMO_ACCESOS) break;
-  }
-  return lista;
+  return unirAccesos(fijados, recientes, MAXIMO_ACCESOS);
 }
 
 type Props = {

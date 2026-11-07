@@ -1,39 +1,24 @@
-import { ajuste, biometriaDe, cifradoDeCampos, type Contexto } from "@opai/capabilities";
+import { evaluarRostro, type Contexto } from "@opai/capabilities";
 
-import { consumirSesionVida } from "./sesion-vida";
-import { consentimientoVigente, decidirRostro, umbralSeguro, type ResultadoIdentidad } from "../domain";
-
-/** ¿Puede esta empresa usar el rostro ahora? (interruptor propio, plataforma y empresas de prueba, D-02). */
-export async function rostroPermitido(ctx: Contexto): Promise<boolean> {
-  if (!(await ajuste<boolean>(ctx, "asistencia", "rostro_habilitado"))) return false;
-  if (await ajuste<boolean>(ctx, "asistencia", "biometria_empresas_reales")) return true;
-  const t = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { slug: true } });
-  return !!t?.slug.startsWith("qa-");
-}
+import type { ResultadoIdentidad } from "../domain";
 
 /**
- * Verificación 1:1 del rostro de la persona (T-03): exige consentimiento vigente, enrolamiento activo y una
- * prueba de vida superada; solo entonces compara contra SU referencia en la colección de SU empresa.
+ * Verificación 1:1 del rostro de la persona (T-03) con la biometría del núcleo (B4): consentimiento vigente,
+ * enrolamiento activo, prueba de vida y similitud sobre el umbral de la plataforma. Cualquier falla devuelve
+ * un motivo para caer a RUT + PIN; nunca se marca por rostro sin todo eso (denegación segura).
  */
-export async function verificarRostro(
-  ctx: Contexto, personaId: string, sesionVidaId: string | undefined,
-): Promise<ResultadoIdentidad> {
-  const bio = (await rostroPermitido(ctx)) ? await biometriaDe(ctx) : null;
-  if (!bio) return { ok: false, motivo: "metodo_no_disponible" };
-  const [enrol, consentimientos] = await Promise.all([
-    ctx.db.enrolamientoFacial.findUnique({ where: { tenantId_personaId: { tenantId: ctx.tenantId, personaId } } }),
-    ctx.db.consentimientoPersona.findMany({ where: { personaId, tipo: "biometria_facial" } }),
-  ]);
-  const consentido = consentimientoVigente(consentimientos.map((c) => ({ ...c, tipo: "biometria_facial" as const })), "biometria_facial");
-  if (!enrol || enrol.estado !== "activo" || !enrol.referencia || !consentido) return { ok: false, motivo: "sin_enrolamiento" };
-  if (!sesionVidaId || !(await consumirSesionVida(ctx, sesionVidaId))) return { ok: false, motivo: "vida_fallida" };
-  const vida = await bio.resultadoVida(sesionVidaId).catch(() => null);
-  if (!vida?.viva || !vida.imagen) return { ok: false, motivo: "vida_fallida" };
-  const referencia = await cifradoDeCampos(ctx).descifrar("enrolamientos_faciales", "referencia", enrol.referencia);
-  const umbral = umbralSeguro(await ajuste<number>(ctx, "asistencia", "biometria_umbral_similitud"));
-  const r = await bio.verificar(referencia, vida.imagen, umbral);
-  const d = decidirRostro({ viva: true, coincide: r.coincide, similitud: r.similitud }, umbral);
-  return d.ok
-    ? { ok: true, metodo: "rostro", motivoRespaldo: null, confianza: d.similitud, pruebaVida: true }
-    : { ok: false, motivo: d.motivo };
+export async function verificarRostro(ctx: Contexto, personaId: string, muestra: string | undefined): Promise<ResultadoIdentidad> {
+  if (!muestra) return { ok: false, motivo: "vida_fallida" };
+  const r = await evaluarRostro(ctx, personaId, muestra);
+  switch (r.tipo) {
+    case "sin_enrolamiento": return { ok: false, motivo: "sin_enrolamiento" };
+    case "no_disponible": return { ok: false, motivo: "metodo_no_disponible" };
+    case "proveedor_caido": return { ok: false, motivo: "proveedor_caido" };
+    case "muestra_invalida": return { ok: false, motivo: "vida_fallida" };
+    case "resultado":
+      if (!r.vivo) return { ok: false, motivo: "vida_fallida" };
+      if (!r.verificado) return { ok: false, motivo: "rostro_no_coincide" };
+      return { ok: true, metodo: "rostro", motivoRespaldo: null, confianza: r.puntaje / 100, pruebaVida: true };
+  }
+  return { ok: false, motivo: "metodo_no_disponible" };
 }

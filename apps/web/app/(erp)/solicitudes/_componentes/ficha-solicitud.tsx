@@ -8,7 +8,7 @@ import { fecha } from "@/lib/fechas";
 
 import { accionesSolicitud, nombreDe } from "./acciones-solicitud";
 import type { AccionAgenteDato, SolicitudDato } from "./datos";
-import { CANAL, ESTADO } from "./etiquetas";
+import { CANAL, ESTADO, quienRevisa } from "./etiquetas";
 import { CuerpoSolicitud } from "./cuerpo-solicitud";
 import { HojaConvertir } from "./hojas-solicitud";
 
@@ -36,7 +36,7 @@ export function FichaSolicitud(p: {
                 {ESTADO[s.estado].etiqueta}
               </Badge>
             ),
-            subtitulo: `${CANAL[s.canal].etiqueta} · ${fecha(s.creadaEn)}`,
+            subtitulo: [CANAL[s.canal].etiqueta, fecha(s.creadaEn), quienRevisa(s)].filter(Boolean).join(" · "),
             acciones: p.gestiona ? (
               <>
                 {abierta ? (

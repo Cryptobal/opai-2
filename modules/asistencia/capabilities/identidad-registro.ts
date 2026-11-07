@@ -24,7 +24,7 @@ export async function verificadorDe(ctx: Contexto): Promise<VerificadorIdentidad
   const esPrueba = !!t?.slug.startsWith("qa-");
   return {
     async verificar(s) {
-      if (s.metodo === "rostro") return verificarRostro(ctx, s.personaId, s.sesionVidaId);
+      if (s.metodo === "rostro") return verificarRostro(ctx, s.personaId, s.muestra);
       if (s.metodo === "manual_contingencia") return { ok: false, motivo: "metodo_no_disponible" };
       const tienePin = (await ctx.db.credencialTerreno.count({ where: { personaId: s.personaId } })) > 0;
       if (!tienePin && esPrueba) return verificadorPinSimulado(new Map([[s.personaId, PIN_SIMULADO]])).verificar(s);

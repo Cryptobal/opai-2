@@ -1,5 +1,4 @@
 import { defineModule } from "@opai/capabilities";
-import { defineDatosPersonales } from "@opai/domain";
 
 import { ajustesAsistencia, capacidades } from "./capabilities";
 
@@ -33,31 +32,9 @@ export const manifest = defineModule({
     { id: "asistencia.contingencia.respondida", descripcion: "El trabajador aceptó u objetó una marca de contingencia." },
     { id: "asistencia.alerta.sin_marca_inicio", descripcion: "Pasaron 30 minutos del inicio del turno sin marca de entrada." },
     { id: "asistencia.alerta.sin_marca_termino", descripcion: "El turno terminó sin marca de salida." },
+    { id: "asistencia.alerta.descanso_insuficiente", descripcion: "El descanso entre dos jornadas fue menor al mínimo de su tipo de jornada (teletrabajo: 12 horas)." },
     { id: "asistencia.aviso.compensables", descripcion: "Aviso de horas compensables cada 30 días." },
-    { id: "asistencia.biometria.enrolada", descripcion: "Se enroló el rostro de una persona (solo su identificador, sin datos biométricos)." },
-    { id: "asistencia.biometria.suprimida", descripcion: "Se destruyó la biometría de una persona (revocación, baja de RR. HH. o desvinculación)." },
     { id: "asistencia.alerta.sin_correo_personal", descripcion: "Un trabajador marcó y no tiene correo personal para recibir el comprobante." },
   ],
   capacidades,
-  datosPersonales: defineDatosPersonales("asistencia", [
-    {
-      tabla: "enrolamientos_faciales",
-      finalidad:
-        "Referencia cifrada del rostro enrolado en el proveedor biométrico, solo para verificar la identidad al marcar asistencia (1:1). No se guarda foto ni plantilla (D-04).",
-      categorias: ["sensible"],
-      campos: ["referencia", "proveedor", "canal", "enrolado_en", "revocado_en", "motivo_baja"],
-      camposSensibles: ["referencia"],
-      baseLicitud: "consentimiento",
-      destinatarios: ["AWS Rekognition"],
-      retencion: "Se destruye al revocar el consentimiento o al terminar la relación laboral (Res. Ex. 38 art. 57).",
-    },
-    {
-      tabla: "consentimientos_personas",
-      finalidad: "Evidencia versionada del consentimiento para el uso del rostro y del teléfono personal al marcar asistencia.",
-      categorias: ["laboral"],
-      campos: ["tipo", "version", "medio", "aceptado_en", "revocado_en"],
-      baseLicitud: "obligacion_legal",
-      retencion: "Se conserva como evidencia del consentimiento mientras dure la relación y el plazo legal posterior.",
-    },
-  ]),
 });
