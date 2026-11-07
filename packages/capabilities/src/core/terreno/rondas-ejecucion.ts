@@ -4,6 +4,7 @@ import type { MotivoRechazo } from "./hechos-evaluar";
 import { escribirCierres } from "./rondas-cierre";
 import {
   cierresDe,
+  dependenciasDe,
   comoPlantilla,
   iniciosDe,
   marcasConRondaDe,
@@ -109,14 +110,7 @@ export async function resolverEjecuciones(
     }
   }
 
-  // Lo que depende de un inicio nuevo de este lote: si ese inicio cae por otra regla, también debe caer (no se
-  // acepta «recibido» un cierre o una marca sin ronda donde escribirse).
-  const nuevosEnLote = new Set(
-    iniciosOk.filter((i) => !previas.some((e) => e.clave === i.h.clave)).map((i) => i.h.clave),
-  );
-  const dependen = new Map<string, string>();
-  for (const x of [...mar, ...cie])
-    if (nuevosEnLote.has(x.ejecucionClave)) dependen.set(x.h.clave, x.ejecucionClave);
+  const dependen = dependenciasDe(iniciosOk, previas, [...mar, ...cie]);
 
   const base = {
     tenantId: ctx.tenantId,
