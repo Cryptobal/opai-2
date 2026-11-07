@@ -1,6 +1,6 @@
 // Genera el borrador de un período de una programación (BRIEF-26 · CAR-159). Una sola transacción:
 // documento + corrida (UNIQUE programación + período) + evento. Nunca emite al SII.
-import { vencimientoPago } from "@opai/domain";
+import { marcadoresDeGlosa, renderGlosa, vencimientoPago } from "@opai/domain";
 
 import { aFecha } from "../core/maestros/comun";
 import { conflicto } from "../errores";
@@ -11,6 +11,7 @@ import {
   type ProgramacionGenerable,
   type ResultadoPeriodo,
 } from "./ventas-programacion-calculo";
+import { ufCentavosDelDia } from "./ventas-programacion-uf";
 
 export type { ProgramacionGenerable, ResultadoPeriodo };
 
@@ -43,6 +44,11 @@ export async function generarPeriodo(
   };
   if (dryRun) return { ...base, estado: "generado", documentoId: null };
   try {
+    // Marcadores en las glosas de las líneas. La UF del día de emisión solo se consulta si alguna la pide.
+    const pideUfDia = c.calc.lineas.some((l) => marcadoresDeGlosa(l.glosa).includes("uf_al_dia"));
+    const ufDia = pideUfDia ? await ufCentavosDelDia(ctx.db, fecha) : null;
+    const glosaLinea = (g: string) =>
+      renderGlosa(g, { periodo, ufCentavos: c.uf, ufDiaCentavos: ufDia, montoClp: c.calc.montos.total });
     const documentoId = await ctx.transaccion(async (tx) => {
       const m = c.calc.montos;
       const doc = await tx.documentoEmitido.create({
@@ -63,7 +69,7 @@ export async function generarPeriodo(
             create: c.calc.lineas.map((l, orden) => ({
               tenantId: ctx.tenantId,
               orden,
-              glosa: l.glosa,
+              glosa: glosaLinea(l.glosa),
               monto: l.monto,
             })),
           },
