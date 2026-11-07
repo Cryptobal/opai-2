@@ -911,6 +911,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
+- `cpq.portal_cotizaciones.descargar`
+- `cpq.portal_cotizaciones.get`
+- `cpq.portal_cotizaciones.list`
 - `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
