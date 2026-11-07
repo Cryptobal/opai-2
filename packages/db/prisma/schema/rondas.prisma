@@ -87,6 +87,7 @@ model PlantillaRonda {
 
   puntos         PlantillaPunto[]
   programaciones Programacion[]
+  ejecuciones    EjecucionRonda[]
 
   @@index([tenantId, instalacionId])
   @@map("plantillas")
@@ -220,9 +221,65 @@ model MarcaRonda {
   anomalias     String[] @default([])
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
+  /// Ronda a la que pertenece la marca (opcional: una marca suelta sigue valiendo).
+  ejecucionId   String?  @map("ejecucion_id") @db.Uuid
+
+  ejecucion EjecucionRonda? @relation(fields: [ejecucionId], references: [id], onDelete: Restrict, map: "marcas_ronda_ejecucion_fkey")
+
   @@unique([tenantId, dispositivoId, clave])
   @@index([tenantId, puntoId, horaCorregida(sort: Desc)])
   @@index([tenantId, instalacionId, horaCorregida(sort: Desc)])
+  @@index([tenantId, ejecucionId], map: "marcas_ronda_ejecucion_idx")
   @@map("marcas_ronda")
+  @@schema("rondas")
+}
+
+/// Inicio de una ronda ejecutada desde Terreno (CAR-78 · E3d). Hecho inmutable: solo inserción. Sin cierre, la
+/// ronda está «en curso»; el estado se deriva (R28, ADR-023).
+model EjecucionRonda {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  plantillaId   String   @map("plantilla_id") @db.Uuid
+  dispositivoId String   @map("dispositivo_id") @db.Uuid
+  clave         String   @db.Uuid
+  personaId     String?  @map("persona_id") @db.Uuid
+  adhoc         Boolean  @default(true)
+  horaInicio    DateTime @map("hora_inicio") @db.Timestamptz(6)
+  recibidoEn    DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  plantilla PlantillaRonda @relation(fields: [plantillaId], references: [id], onDelete: Restrict, map: "ejecuciones_plantilla_fkey")
+  marcas    MarcaRonda[]
+  cierre    CierreRonda?
+
+  @@unique([tenantId, dispositivoId, clave], map: "ejecuciones_clave_key")
+  @@index([tenantId, instalacionId, horaInicio(sort: Desc)], map: "ejecuciones_instalacion_idx")
+  @@map("ejecuciones")
+  @@schema("rondas")
+}
+
+/// Cierre de una ronda (uno por ejecución). Hecho inmutable: solo inserción.
+model CierreRonda {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  instalacionId      String   @map("instalacion_id") @db.Uuid
+  ejecucionId        String   @unique(map: "cierres_ronda_ejecucion_key") @map("ejecucion_id") @db.Uuid
+  dispositivoId      String   @map("dispositivo_id") @db.Uuid
+  clave              String   @db.Uuid
+  personaId          String?  @map("persona_id") @db.Uuid
+  /// "completada" | "incompleta" (el guardia cierra); más adelante "cerrada_auto" y "cerrada_admin".
+  estado             String
+  motivo             String?
+  puntosObligatorios Int      @map("puntos_obligatorios")
+  puntosMarcados     Int      @map("puntos_marcados")
+  horaCierre         DateTime @map("hora_cierre") @db.Timestamptz(6)
+  recibidoEn         DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  ejecucion EjecucionRonda @relation(fields: [ejecucionId], references: [id], onDelete: Restrict, map: "cierres_ronda_ejecucion_fkey")
+
+  @@unique([tenantId, dispositivoId, clave], map: "cierres_ronda_clave_key")
+  @@map("cierres_ronda")
   @@schema("rondas")
 }

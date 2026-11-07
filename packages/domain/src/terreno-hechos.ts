@@ -44,7 +44,7 @@ export function hechoPlausible(
  * en línea (prueba facial, prueba de vida, PIN) NO se puede encolar: se verificaría fuera de su momento.
  * Cada módulo de terreno agrega aquí los tipos que sí admite, en su propio PR.
  */
-export const TIPOS_ENCOLABLES_OFFLINE = ["terreno.latido", "rondas.marca", "acceso.entrada", "acceso.salida"] as const;
+export const TIPOS_ENCOLABLES_OFFLINE = ["terreno.latido", "rondas.marca", "rondas.inicio", "rondas.cierre", "acceso.entrada", "acceso.salida"] as const;
 
 /** Partes del nombre de un tipo que delatan una verificación de identidad en línea. */
 const PARTES_SOLO_EN_LINEA = ["facial", "rostro", "biometria", "prueba_vida", "pin"];

@@ -2,6 +2,8 @@
 export const ETIQUETA_TIPO: Record<string, string> = {
   "terreno.latido": "Aviso de que el teléfono estuvo activo",
   "rondas.marca": "Marca de un punto de ronda",
+  "rondas.inicio": "Inicio de una ronda",
+  "rondas.cierre": "Cierre de una ronda",
   "acceso.entrada": "Entrada a la instalación",
   "acceso.salida": "Salida de la instalación",
 };
@@ -21,6 +23,10 @@ export const MOTIVO_RECHAZO: Record<string, string> = {
   patente_invalida: "La patente no es válida.",
   modulo_inactivo: "Este módulo no está activo para la empresa.",
   entrada_desconocida: "No se encontró la entrada de esta salida.",
+  plantilla_invalida: "La ronda ya no existe en esta instalación.",
+  ronda_no_permitida: "Esta instalación no permite iniciar rondas no programadas.",
+  ejecucion_desconocida: "No se encontró la ronda de este registro.",
+  ronda_ya_cerrada: "Esta ronda ya estaba cerrada.",
   salida_repetida: "Esta entrada ya tenía su salida registrada.",
   lote_invalido: "El envío no era válido y el servidor lo devolvió.",
 };

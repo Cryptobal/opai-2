@@ -2,6 +2,7 @@ import type { Contexto } from "../../types";
 import { resolverAcceso } from "./acceso-ingesta";
 import type { Equipo, Hecho, Tiempo } from "./acceso-tipos";
 import type { MotivoRechazo } from "./hechos-evaluar";
+import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
 
 export type Proyecciones = {
@@ -28,11 +29,13 @@ export async function prepararProyecciones(
 ): Promise<Proyecciones> {
   const marcas = await resolverMarcas(ctx, equipo.instalacionId, hechos);
   const acceso = await resolverAcceso(ctx, equipo, hechos, t);
-  const rechazos = new Map<string, MotivoRechazo>(acceso.rechazos);
+  const rondas = await resolverEjecuciones(ctx, equipo, hechos, t);
+  const rechazos = new Map<string, MotivoRechazo>([...acceso.rechazos, ...rondas.rechazos]);
   for (const [clave, m] of marcas) if ("motivo" in m) rechazos.set(clave, m.motivo);
   return {
     rechazos,
     async escribir(tx, nuevos, _desfaseMs, aceptadas) {
+      const ids = await rondas.iniciar(tx, aceptadas);
       const filas = nuevos.flatMap((h) => {
         const m = marcas.get(h.clave);
         if (!m || !("marca" in m)) return [];
@@ -50,10 +53,12 @@ export async function prepararProyecciones(
             distanciaM,
             precisionM,
             anomalias,
+            ejecucionId: m.marca.ejecucionClave ? (ids.get(m.marca.ejecucionClave) ?? null) : null,
           },
         ];
       });
       if (filas.length > 0) await tx.marcaRonda.createMany({ skipDuplicates: true, data: filas });
+      await rondas.cerrar(tx, aceptadas, ids);
       await acceso.escribir(tx, aceptadas);
     },
   };

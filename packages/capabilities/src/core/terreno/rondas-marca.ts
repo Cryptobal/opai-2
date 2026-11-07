@@ -12,6 +12,8 @@ export type MarcaResuelta = {
   distanciaM: number | null;
   precisionM: number | null;
   anomalias: string[];
+  /** Clave de la ronda a la que pertenece la marca, si vino. */
+  ejecucionClave: string | null;
 };
 export type ResolucionMarca = { motivo: "qr_invalido" | "qr_ajeno" } | { marca: MarcaResuelta };
 
@@ -100,6 +102,7 @@ export async function resolverMarcas(
         distanciaM: r.distanciaM,
         precisionM: lectura ? lectura.precisionM : null,
         anomalias: r.anomalias,
+        ejecucionClave: p.ejecucionClave ?? null,
       },
     });
   }

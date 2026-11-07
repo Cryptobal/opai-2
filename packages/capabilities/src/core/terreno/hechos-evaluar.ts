@@ -28,6 +28,10 @@ export const MOTIVOS_RECHAZO = [
   "modulo_inactivo",
   "entrada_desconocida",
   "salida_repetida",
+  "plantilla_invalida",
+  "ronda_no_permitida",
+  "ejecucion_desconocida",
+  "ronda_ya_cerrada",
 ] as const;
 export type MotivoRechazo = (typeof MOTIVOS_RECHAZO)[number];
 type Motivo = MotivoRechazo;

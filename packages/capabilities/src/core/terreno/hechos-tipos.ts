@@ -18,6 +18,8 @@ export const TIPOS_HECHO_TERRENO = {
     .object({
       codigo: z.string().min(1).max(200).optional(),
       puntoId: z.string().uuid().optional(),
+      /** Clave del hecho `rondas.inicio` de la ronda a la que pertenece la marca (opcional). */
+      ejecucionClave: z.string().uuid().optional(),
       lectura: z
         .object({
           lat: z.number().min(-90).max(90),
@@ -29,6 +31,10 @@ export const TIPOS_HECHO_TERRENO = {
     })
     .strict()
     .refine((p) => p.codigo !== undefined || p.puntoId !== undefined),
+  /** Inicio de una ronda de una plantilla de la instalación del equipo (CAR-78 · E3d). No marca presencia. */
+  "rondas.inicio": z.object({ plantillaId: z.string().uuid() }).strict(),
+  /** Cierre de una ronda iniciada: el servidor calcula si quedó completa o incompleta. */
+  "rondas.cierre": z.object({ ejecucionClave: z.string().uuid() }).strict(),
   /**
    * Entrada a una instalación (portería, CAR-78 · E4b-2). Del documento solo se guardan su huella y su máscara:
    * el número completo no se persiste (decisión de Carlos, 7-nov-2026). El servidor cruza con las listas.
