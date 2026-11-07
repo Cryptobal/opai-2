@@ -16,3 +16,15 @@ export const HojaVinculo = hojaDiferida(["vinculo"], () =>
 export const HojaEditarVinculo = hojaDiferida(["editar-vinculo"], () =>
   import("./hoja-editar-vinculo").then((m) => m.HojaEditarVinculo),
 );
+
+export const HojaLaboral = hojaDiferida(
+  [
+    "editar-prevision",
+    "editar-uniforme",
+    "editar-jornada-dt",
+    "editar-os10",
+    "editar-contacto-laboral",
+    "cambiar-pago",
+  ],
+  () => import("./hoja-laboral").then((m) => m.HojaLaboral),
+);

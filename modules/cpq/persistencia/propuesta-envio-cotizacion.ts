@@ -64,7 +64,7 @@ export async function documentoCotizacionEnvioConjunto(
     },
     { siembraDocumento: false },
   );
-  return commitEnviarCotizacion(ctx, {
+  const documentoId = await commitEnviarCotizacion(ctx, {
     cotizacionId: input.cotizacionId,
     codigo: input.codigo,
     negocioId: input.negocioId,
@@ -88,4 +88,5 @@ export async function documentoCotizacionEnvioConjunto(
       },
     },
   });
+  return { documentoId, pdf: pdfCotPack.bytes };
 }

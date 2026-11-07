@@ -63,12 +63,17 @@ export const COMUNICABLES_CPQ: readonly EventoComunicable[] = [
     evento: "cpq.cotizacion.enviada_cliente",
     nombre: "Cotización enviada al cliente",
     descripcion:
-      "Correo que recibe el contacto del cliente al enviarle una cotización. Lleva el enlace a su Portal Cliente, donde ve lo que la empresa le comparte.",
+      "Correo que recibe el contacto del cliente al enviarle una cotización: lleva los PDF adjuntos (o su enlace de descarga si no caben) y, si corresponde, cómo entrar por primera vez a su Portal Cliente.",
     transaccional: true,
     variables: [
       COTIZACION,
       v("cotizacion.titulo", "texto", "Guardias planta norte", "Título de la cotización."),
+      v("cotizacion.version", "numero", "1", "Número de la versión que se envía."),
+      v("saludo", "texto", "Hola Ana,", "Saludo con el nombre del contacto, si lo tiene."),
       v("mensaje", "texto", "Adjuntamos nuestra propuesta.", "Mensaje del vendedor, si escribió uno."),
+      v("adjuntos", "texto", "Qué incluye este envío:\n- Cotización CPQ-2026-042.pdf (adjunto)", "Qué documentos van adjuntos o enlazados."),
+      v("acceso", "texto", "Cómo entrar a tu Portal Cliente la primera vez: …", "Cómo entrar al Portal Cliente; vacío si el contacto no tiene acceso."),
+      v("comercial.correo", "texto", "ventas@empresa.cl", "Correo comercial de la empresa, para quien no pueda entrar."),
       EMPRESA,
       URL("Portal Cliente de la empresa."),
     ],
@@ -76,7 +81,7 @@ export const COMUNICABLES_CPQ: readonly EventoComunicable[] = [
       correo: {
         asunto: "Propuesta {{cotizacion.codigo}} · {{empresa.nombre}}",
         cuerpo:
-          "Te enviamos la propuesta {{cotizacion.codigo}} ({{cotizacion.titulo}}).\n\n{{mensaje}}\n\nPuedes revisarla en tu Portal Cliente:\n{{url}}",
+          "{{saludo}}\n\nTe enviamos la propuesta {{cotizacion.codigo}} (versión {{cotizacion.version}}): {{cotizacion.titulo}}.\n\n{{mensaje}}\n\n{{adjuntos}}\n\n{{acceso}}\n\nSaludos,\n{{empresa.nombre}}",
       },
     },
   },

@@ -1,7 +1,7 @@
 // Adaptador SII para emisión DTE (CAR-137). Interfaz única; certificado y CAF viven cifrados fuera del repo.
 
 export type AmbienteSii = "certificacion" | "produccion";
-export type TipoDteVentaSii = 33 | 34 | 61;
+export type TipoDteVentaSii = 33 | 34 | 56 | 61;
 
 export type DteXmlFirmado = {
   xml: string;
@@ -33,6 +33,8 @@ export type PayloadEmisionDte = {
   tipoDte: TipoDteVentaSii;
   folio: number;
   fechaEmision: string;
+  /** Vencimiento contable (AAAA-MM-DD); si no se conoce, no se informa. */
+  fechaVencimiento?: string;
   rutEmisor: string;
   rutReceptor: string;
   razonSocialReceptor: string;
@@ -46,7 +48,8 @@ export type PayloadEmisionDte = {
   lineas?: readonly LineaEmisionDte[];
   /** XML del CAF del rango (obligatorio con SimpleAPI real). */
   cafXml?: string;
-  referencias?: readonly { tipoDte: number; folio: number; codigo: number; razon?: string }[];
+  /** `fecha` = fecha del documento referenciado (FchRef); `codigo` (CodRef 1/2/3) solo en NC y ND. */
+  referencias?: readonly { tipoDte: number; folio: number; fecha?: string; codigo?: number; razon?: string }[];
 };
 
 export interface AdaptadorSii {

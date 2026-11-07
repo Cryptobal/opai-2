@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineConsumidor, defineTrabajo, type Contexto } from "@opai/capabilities";
 
+import { alertarDescanso } from "./alertas-descanso";
 import { consolidarYGuardar, fechaDe } from "./dias-calculo";
 import { tenantBasico } from "./formato";
 
@@ -29,7 +30,7 @@ export const consumidorDias = defineConsumidor({
       objetivo = base && c ? { personaId: base.personaId, fechas: [...new Set([...base.fechas, fechaDe(c.horaPropuesta, zona)])] } : null;
     }
     if (!objetivo) return;
-    for (const f of objetivo.fechas) await consolidarYGuardar(ctx, objetivo.personaId, f, new Date(), zona);
+    for (const f of objetivo.fechas) await alertarDescanso(ctx, await consolidarYGuardar(ctx, objetivo.personaId, f, new Date(), zona), zona);
   },
 });
 
@@ -56,7 +57,7 @@ export const trabajoRecalcularDias = defineTrabajo({
     const claves = [...new Set(turnos.map((t) => `${t.personaId}|${t.fecha.toISOString().slice(0, 10)}`))];
     for (const k of claves) {
       const [personaId, fecha] = k.split("|") as [string, string];
-      await consolidarYGuardar(ctx, personaId, fecha, ahora, zona);
+      await alertarDescanso(ctx, await consolidarYGuardar(ctx, personaId, fecha, ahora, zona), zona);
     }
     return { dias: claves.length };
   },

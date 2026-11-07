@@ -152,6 +152,12 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 
+  // puestoDia es 5x2 de lunes a viernes: los días a confirmar tienen que ser hábiles (si no, la prueba depende de la fecha).
+  const habil = (f: string) => {
+    const d = new Date(`${f}T00:00:00Z`);
+    while ([0, 6].includes(d.getUTCDay())) d.setUTCDate(d.getUTCDate() + 1);
+    return d.toISOString().slice(0, 10);
+  };
   const sumar = (n: number) => new Date(new Date(`${manana}T00:00:00Z`).getTime() + n * 86_400_000).toISOString().slice(0, 10);
 
   it("no doblar mira también el turno de noche que empezó el día anterior a la serie nueva", async () => {
@@ -268,7 +274,7 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
   });
 
   it("PR2: dry_run no escribe confirmación ni reemplazo", async () => {
-    const dia = sumar(20);
+    const dia = habil(sumar(20));
     const prevConf = await ejecutar(ctxOwner(tenantA), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: dia }, { dryRun: true });
     expect(prevConf.ok).toBe(true);
     expect(await e.admin.registroOperativoPauta.count({ where: { puestoId: puestoDia, fecha: new Date(`${dia}T00:00:00.000Z`) } })).toBe(0);
@@ -286,11 +292,6 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
   it("PR2: confirma cobertura en día cubierto y deshace", async () => {
     // La serie de puestoDia es 5x2 de lunes a viernes: el día a confirmar tiene que ser hábil. Con «mañana + 21»
     // en fin de semana la prueba fallaba todos los viernes y sábados.
-    const habil = (f: string) => {
-      const d = new Date(`${f}T00:00:00Z`);
-      while ([0, 6].includes(d.getUTCDay())) d.setUTCDate(d.getUTCDate() + 1);
-      return d.toISOString().slice(0, 10);
-    };
     const dia = habil(sumar(21));
     const conf = await ejecutar(ctxOwner(tenantA), "pauta.cobertura.confirmar", { puestoId: puestoDia, fecha: dia });
     expect(conf.ok).toBe(true);

@@ -54,6 +54,7 @@ export function ContenidoDocumento(p: {
         </Alerta>
       ))}
       <PropuestaTecnicaFicha
+        codigo={d.cotizacion.codigo}
         cotizacionId={d.cotizacion.id}
         cuentaId={d.cuentaId}
         gestionar={datos.gestionar}

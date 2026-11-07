@@ -50,7 +50,7 @@ export const dteConfigActualizar = defineCapability({
     rutEmisor: rutSchema.optional(),
     emisionProveedor: proveedorEmisionSchema.optional(),
     cesionProveedor: proveedorCesionSchema.optional(),
-    resolucionSiiNumero: z.number().int().min(1).max(999_999).nullable().optional(),
+    resolucionSiiNumero: z.number().int().min(0).max(999_999).nullable().optional(),
     resolucionSiiFecha: diaSchema.nullable().optional(),
     umbralFoliosPct: z.number().int().min(1).max(100).optional(),
     avisoCafDias: z.number().int().min(1).max(365).optional(),
@@ -102,7 +102,10 @@ export const dteConfigActualizar = defineCapability({
     if (next.ambiente === "produccion" && !next.rutEmisor) {
       throw reglaDeNegocio("Producción requiere RUT emisor configurado.");
     }
-    if (next.emisionProveedor === "simpleapi" && (!next.resolucionSiiNumero || !next.resolucionSiiFecha)) {
+    if (next.ambiente === "produccion" && next.resolucionSiiNumero === 0) {
+      throw reglaDeNegocio("La resolución 0 solo existe en certificación; en producción indique la resolución vigente.");
+    }
+    if (next.emisionProveedor === "simpleapi" && (next.resolucionSiiNumero == null || !next.resolucionSiiFecha)) {
       throw reglaDeNegocio("SimpleAPI requiere número y fecha de resolución SII del emisor.");
     }
     const fechaCorteAnterior = dia(prev?.fechaCorte1_0 ?? null);

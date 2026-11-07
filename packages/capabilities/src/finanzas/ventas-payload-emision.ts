@@ -11,6 +11,7 @@ type DocEmision = {
   tipoDte: number;
   folio: number;
   fechaEmision: string;
+  fechaVencimiento?: string;
   glosa: string | null;
   montoNeto: number;
   montoExento: number;
@@ -20,6 +21,7 @@ type DocEmision = {
   referencias?: readonly {
     tipoDteRef: number;
     folioRef: number;
+    fechaRef?: Date | null;
     codigoRef: number;
     razonRef: string | null;
   }[];
@@ -61,7 +63,10 @@ export async function payloadEmisionDteDe(
     p.doc.referencias?.map((r) => ({
       tipoDte: r.tipoDteRef,
       folio: r.folioRef,
-      codigo: r.codigoRef,
+      ...(r.fechaRef ? { fecha: r.fechaRef.toISOString().slice(0, 10) } : {}),
+      // CodRef (anula / corrige texto / corrige monto) solo aplica a una NC o ND; en una factura las referencias
+      // 801-804 y 52 no lo llevan.
+      ...(p.doc.tipoDte === 61 || p.doc.tipoDte === 56 ? { codigo: r.codigoRef } : {}),
       ...(r.razonRef ? { razon: r.razonRef } : {}),
     })) ?? [];
   const cafXml = p.incluirCaf ? await leerCafXmlDe(ctx, tipo, p.doc.folio) : undefined;
@@ -70,6 +75,7 @@ export async function payloadEmisionDteDe(
     tipoDte: tipo,
     folio: p.doc.folio,
     fechaEmision: p.doc.fechaEmision,
+    ...(p.doc.fechaVencimiento ? { fechaVencimiento: p.doc.fechaVencimiento } : {}),
     rutEmisor: p.rutEmisor,
     rutReceptor: p.cuenta.rut!,
     ...camposReceptorDteEnPayload(p.cuenta),

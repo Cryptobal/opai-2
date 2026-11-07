@@ -9,7 +9,7 @@ import {
 import { notificacionReglasList, notificacionReglasSet } from "./reglas";
 
 export { consumidorComunicaciones } from "./consumidor";
-export { enviarCorreo } from "./envio";
+export { enviarCorreo, previsualizarCorreo } from "./envio";
 
 export const capacidadesComunicaciones: readonly Capacidad[] = [
   comunicacionesEventos,

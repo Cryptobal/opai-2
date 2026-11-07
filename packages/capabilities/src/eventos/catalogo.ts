@@ -1,6 +1,7 @@
 import { listarModulos, type EventoDeDominio } from "../module";
 import { EVENTOS_COBROS } from "./catalogo-cobros";
 import { EVENTOS_CRM } from "./catalogo-crm";
+import { EVENTOS_TERRENO } from "./catalogo-terreno";
 
 /**
  * Eventos que emite el núcleo (ADR-029). Con los `eventos` de los manifests forman el catálogo al
@@ -19,6 +20,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.contacto.actualizado", descripcion: "Cambiaron los datos de un contacto." },
   ...EVENTOS_CRM,
   ...EVENTOS_COBROS,
+  ...EVENTOS_TERRENO,
   { id: "core.instalacion.creada", descripcion: "Se creó una instalación de una cuenta." },
   { id: "core.instalacion.actualizada", descripcion: "Cambiaron los datos de una instalación." },
   { id: "core.instalacion.estado_cambiado", descripcion: "Una instalación cambió de estado." },
@@ -35,7 +37,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.persona.desbloqueada", descripcion: "Se desbloqueó a una persona." },
   { id: "core.persona.archivada", descripcion: "Se archivó a una persona sin vínculo vigente." },
   { id: "core.persona.no_recontratar_vencida", descripcion: "Venció una marca P1 «No recontratar» y se limpió." },
-  { id: "core.vinculo.actualizado", descripcion: "Cambió el contrato; snapshot para el borrador de anexo del PR 4." },
+  { id: "core.vinculo.actualizado", descripcion: "Cambió el contrato; snapshot para el borrador de anexo del PR 4 (solo si cambia la instalación)." },
   { id: "core.vinculo.creado", descripcion: "Comenzó un vínculo laboral." },
   { id: "core.vinculo.terminado", descripcion: "Terminó un vínculo laboral." },
   { id: "core.cargo.creado", descripcion: "Se creó un cargo." },

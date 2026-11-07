@@ -1,6 +1,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
+import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
@@ -20,8 +21,12 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
   const r = await ejecutarComoUsuario<Laboral>("erp", "core.personas.laboral_ver", { id: personaId });
   if (!r.ok) return null;
   const u = r.data.uniforme;
+  const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasLaboralManage);
   return (
-    <SeccionTarjeta titulo="Uniforme">
+    <SeccionTarjeta
+      titulo="Uniforme"
+      {...(puede ? { accion: <BotonEditarSeccion seccion="uniforme" /> } : {})}
+    >
       <ParesGrid
         items={[
           { etiqueta: "Camisa", valor: u?.tallaCamisa },
@@ -31,6 +36,19 @@ export async function SeccionUniforme({ personaId }: { personaId: string }) {
           { etiqueta: "Notas", valor: u?.notas },
         ]}
       />
+      {puede ? (
+        <HojaEditarSeccion
+          seccion="uniforme"
+          personaId={personaId}
+          inicial={{
+            tallaCamisa: u?.tallaCamisa,
+            tallaPantalon: u?.tallaPantalon,
+            tallaChaqueta: u?.tallaChaqueta,
+            tallaZapato: u?.tallaZapato,
+            notas: u?.notas,
+          }}
+        />
+      ) : null}
     </SeccionTarjeta>
   );
 }

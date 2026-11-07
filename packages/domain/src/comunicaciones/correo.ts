@@ -47,6 +47,7 @@ export function renderizarCorreo(
 ) {
   const rutas = e.variables.map((v) => v.ruta);
   const asunto = renderizar(plantilla.asunto, datos, rutas);
-  const texto = renderizar(plantilla.cuerpo, datos, rutas);
+  // Una variable vacía (p. ej. un mensaje no escrito) no deja párrafos en blanco de más.
+  const texto = renderizar(plantilla.cuerpo, datos, rutas).replace(/\n{3,}/g, "\n\n");
   return { asunto, texto, html: layoutCorreo(marca, textoAHtml(texto)) };
 }

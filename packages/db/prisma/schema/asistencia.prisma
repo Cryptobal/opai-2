@@ -187,7 +187,7 @@ model CorreccionEnlace {
 model Alerta {
   id            String   @id @default(uuid(7)) @db.Uuid
   tenantId      String   @map("tenant_id") @db.Uuid
-  /// sin_marca_inicio | sin_marca_termino | compensables | sin_correo_personal
+  /// sin_marca_inicio | sin_marca_termino | compensables | sin_correo_personal | descanso_insuficiente
   tipo          String
   clave         String
   personaId     String   @map("persona_id") @db.Uuid

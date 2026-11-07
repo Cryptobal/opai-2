@@ -1,14 +1,24 @@
-import { clp, ivaCLP, IVA_PCT } from "@opai/domain/dinero";
+import { IVA_PCT } from "@opai/domain/dinero";
 
 import type { BasePlantilla } from "./bloques";
-import type { AperturaPropuesta, DestinatarioEnvio, ServicioDesdeCotizacion } from "./propuesta-tecnica-tipos";
+import { totalesDocumento } from "./totales";
+import type {
+  AperturaPropuesta,
+  DestinatarioEnvio,
+  ServicioDesdeCotizacion,
+} from "./propuesta-tecnica-tipos";
 
 export * from "./propuesta-tecnica-tipos";
-export { parseBloquesArmadorPropuesta, parseBloquesPlantillaPropuesta } from "./propuesta-tecnica-parse";
+export {
+  parseBloquesArmadorPropuesta,
+  parseBloquesPlantillaPropuesta,
+} from "./propuesta-tecnica-parse";
 
 const emailOk = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
-export function normalizarDestinatariosEnvio(entrada: readonly DestinatarioEnvio[]): DestinatarioEnvio[] {
+export function normalizarDestinatariosEnvio(
+  entrada: readonly DestinatarioEnvio[],
+): DestinatarioEnvio[] {
   const vistos = new Set<string>();
   const out: DestinatarioEnvio[] = [];
   for (const d of entrada) {
@@ -71,15 +81,13 @@ export function proyectarResumenEconomico(input: {
   }));
   const neto = input.netoTotalClp;
   const gg = input.apertura === "por_item" ? (input.gastosGeneralesYUtilidadClp ?? null) : null;
-  const baseIva = neto + (gg ?? 0);
-  const tasa = input.tasaIvaPct ?? IVA_PCT;
-  const iva = ivaCLP(clp(baseIva), tasa);
+  const t = totalesDocumento(neto, input.tasaIvaPct ?? IVA_PCT, gg ?? 0);
   return {
     lineas,
     gastosGeneralesYUtilidadClp: gg,
     netoTotalClp: neto,
-    ivaClp: iva,
-    totalClp: baseIva + iva,
+    ivaClp: t.ivaClp,
+    totalClp: t.totalClp,
   };
 }
 
@@ -87,7 +95,10 @@ export function huellaServicioCotizacion(servicio: ServicioDesdeCotizacion): str
   return JSON.stringify(servicio);
 }
 
-export function cotizacionServicioCambio(guardada: string | null | undefined, actual: ServicioDesdeCotizacion) {
+export function cotizacionServicioCambio(
+  guardada: string | null | undefined,
+  actual: ServicioDesdeCotizacion,
+) {
   if (!guardada) return false;
   return guardada !== huellaServicioCotizacion(actual);
 }

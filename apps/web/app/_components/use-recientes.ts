@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { normalizarHref } from "@opai/ds";
+
 export type Reciente = { href: string; etiqueta: string };
 
 const MAXIMO = 10;
@@ -45,7 +47,9 @@ function escribirRecientes(epoca: string, lista: Reciente[]): void {
   }
 }
 
-export function registrarReciente(epoca: string, item: Reciente): void {
+export function registrarReciente(epoca: string, entrada: Reciente): void {
+  // Sin barra final, query ni hash: `/cotizaciones/` y `/cotizaciones` son el mismo reciente.
+  const item = { ...entrada, href: normalizarHref(entrada.href) };
   const previos = leerRecientes(epoca).filter((r) => r.href !== item.href);
   escribirRecientes(epoca, [item, ...previos].slice(0, MAXIMO));
 }
