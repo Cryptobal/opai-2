@@ -75,14 +75,14 @@ export const lineasCrear = defineCapability({
 });
 
 /** Quita las claves `undefined` (exactOptionalPropertyTypes de Prisma): solo se escribe lo pedido. */
-function sinIndefinidos<T extends object>(o: T): { [K in keyof T]: Exclude<T[K], undefined> } {
+export function sinIndefinidos<T extends object>(o: T): { [K in keyof T]: Exclude<T[K], undefined> } {
   const r: Partial<Record<keyof T, unknown>> = {};
   for (const k of Object.keys(o) as (keyof T)[]) if (o[k] !== undefined) r[k] = o[k];
   return r as { [K in keyof T]: Exclude<T[K], undefined> };
 }
 
 /** Columnas nulas de una línea nueva para la vista previa en memoria. */
-function nuevaVacia() {
+export function nuevaVacia() {
   return {
     grupo: null, recurrencia: "mensual", visibleCliente: true, personasPorPosicionEscaladas: null, personasMotivo: null,
     sueldoBaseClp: null, rateoJson: null, precioUnitarioClp: null, margenPropioPct: null, alcanceDotacion: null,

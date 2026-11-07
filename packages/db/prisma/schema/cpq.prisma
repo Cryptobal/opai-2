@@ -189,6 +189,51 @@ model CpqCostoCategoria {
   @@schema("cpq")
 }
 
+/// Esquema de cobertura por tenant (CAR-212): la unidad de cotización es el patrón completo (p. ej. «24/7» =
+/// 2 puestos 4x4 de día + 2 4x4 de noche). Cada tramo apunta a un ciclo de `core.patrones_turno`; el cargo y
+/// el sueldo se eligen al cotizar. No duplica patrones ni cargos.
+model CpqEsquemaCobertura {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  nombre      String
+  descripcion String?
+  activo      Boolean  @default(true)
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tramos CpqEsquemaCoberturaTramo[]
+
+  @@unique([tenantId, nombre])
+  @@index([tenantId, activo])
+  @@map("esquemas_cobertura")
+  @@schema("cpq")
+}
+
+/// Tramo de un esquema de cobertura: ciclo (`patronId` de `core.patrones_turno`), horario, días y puestos.
+model CpqEsquemaCoberturaTramo {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  esquemaId  String   @map("esquema_id") @db.Uuid
+  /// Nombre del tramo en la cotización («Día», «Noche»).
+  nombre     String
+  patronId   String   @map("patron_id") @db.Uuid
+  horaInicio String   @map("hora_inicio")
+  horaFin    String   @map("hora_fin")
+  /// Días de la semana cubiertos (1 = lunes … 7 = domingo).
+  diasSemana Int[]    @default([]) @map("dias_semana")
+  posiciones Int      @default(1)
+  orden      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  esquema CpqEsquemaCobertura @relation(fields: [esquemaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, esquemaId])
+  @@map("esquemas_cobertura_tramos")
+  @@schema("cpq")
+}
+
 /// Costo predefinido por empresa (CAR-213): categoría de costo que se carga sola en cada cotización,
 /// una vez para toda la cotización (`global`) o por cada puesto (`por_puesto`). CLP mensual entero.
 model CpqCostoPredefinido {

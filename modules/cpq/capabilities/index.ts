@@ -24,21 +24,15 @@ import {
   cotizacionesRechazarAprobacion,
   cotizacionesRetirarAprobacion,
 } from "./aprobacion-decidir";
-import {
-  cpqAprobacionesContar,
-  cpqAprobacionesGet,
-  cpqAprobacionesList,
-} from "./aprobaciones-bandeja";
-import {
-  cotizacionesMarcarLista,
-  cotizacionesReabrir,
-  cotizacionesSolicitarAprobacion,
-} from "./aprobacion-flujo";
+import { cpqAprobacionesContar, cpqAprobacionesGet, cpqAprobacionesList } from "./aprobaciones-bandeja";
+import { cotizacionesMarcarLista, cotizacionesReabrir, cotizacionesSolicitarAprobacion } from "./aprobacion-flujo";
 import { cotizacionesCalcular } from "./ficha-calcular";
 import { cotizacionesFicha } from "./ficha";
 import { cotizacionesExplicar } from "./ficha-explicar";
 import { cotizacionesGet, cotizacionesList } from "./lectura";
+import { esquemasCoberturaGuardar, esquemasCoberturaList } from "./esquemas-cobertura";
 import { lineasActualizar, lineasCrear } from "./lineas";
+import { lineasAgregarEsquema } from "./lineas-esquema";
 import { portalCotizacionesDescargar, portalCotizacionesGet, portalCotizacionesList } from "./portal-cotizaciones";
 import { lineasQuitar } from "./lineas-quitar";
 import { lineasReordenar } from "./lineas-reordenar";
@@ -95,6 +89,9 @@ export const capacidades: readonly Capacidad[] = [
   cotizacionesEnviar,
   cotizacionesPreviewPdf,
   lineasCrear,
+  lineasAgregarEsquema,
+  esquemasCoberturaList,
+  esquemasCoberturaGuardar,
   portalCotizacionesList,
   portalCotizacionesGet,
   portalCotizacionesDescargar,
