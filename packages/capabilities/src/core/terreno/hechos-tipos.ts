@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { esTipoSoloEnLinea } from "@opai/domain";
+
 /**
  * Lista blanca de hechos que un equipo de terreno puede encolar sin conexión (CAR-78 · B3). Un tipo que no
  * está aquí se rechaza y el resto del lote sigue. Cada módulo de terreno (Rondas, Asistencia, Novedades,
@@ -12,5 +14,6 @@ export const TIPOS_HECHO_TERRENO = {
 
 export type TipoHechoTerreno = keyof typeof TIPOS_HECHO_TERRENO;
 
+/** Lo que exige sesión en línea (rostro, prueba de vida, PIN) tampoco entra por la cola, aunque se declare. */
 export const tipoPermitido = (tipo: string): tipo is TipoHechoTerreno =>
-  Object.hasOwn(TIPOS_HECHO_TERRENO, tipo);
+  Object.hasOwn(TIPOS_HECHO_TERRENO, tipo) && !esTipoSoloEnLinea(tipo);

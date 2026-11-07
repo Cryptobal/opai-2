@@ -16,9 +16,12 @@
 const VERSION = "v1";
 const CACHE = `opai-${VERSION}`;
 const OFFLINE = "/sin-conexion";
+// Terreno sin señal: página neutra (sin personas ni datos de la empresa) que solo lee la cola del teléfono.
+const OFFLINE_TERRENO = "/terreno/sin-conexion";
 // Activos públicos, sin datos de ningún tenant. Los íconos los declara el manifest y la meta.
 const PRECACHE = [
   OFFLINE,
+  OFFLINE_TERRENO,
   "/icono-192.png",
   "/icono-512.png",
   "/icono-maskable-192.png",
@@ -98,8 +101,9 @@ async function navegacion(request) {
     // el navegador se quedaba en la URL de origen (rompía la salida y el /entrar de D1).
     return await fetch(request);
   } catch {
-    const offline = await caches.match(OFFLINE);
-    return offline ?? Response.error();
+    const esTerreno = new URL(request.url).pathname.startsWith("/terreno");
+    const offline = await caches.match(esTerreno ? OFFLINE_TERRENO : OFFLINE);
+    return offline ?? (esTerreno ? await caches.match(OFFLINE) : null) ?? Response.error();
   }
 }
 

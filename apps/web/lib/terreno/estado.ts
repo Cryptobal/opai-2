@@ -1,6 +1,6 @@
 "use client";
 
-import { encolarHecho, leerCola, leerEstadoEnvio, pedirEnvio } from "./cola";
+import { encolarHecho, leerEstadoEnvio, leerResumen, pedirEnvio } from "./cola";
 
 /**
  * Estado de Terreno en el teléfono, como almacén externo (`useSyncExternalStore`): conexión, hechos por
@@ -9,11 +9,21 @@ import { encolarHecho, leerCola, leerEstadoEnvio, pedirEnvio } from "./cola";
 export type EstadoTerreno = {
   enLinea: boolean;
   pendientes: number;
+  /** Rechazados por el servidor que la persona aún no descartó (se ven en «Cola»). */
+  rechazados: number;
+  sincronizados: number;
   sincronizando: boolean;
   error: string | null;
 };
 
-const INICIAL: EstadoTerreno = { enLinea: true, pendientes: 0, sincronizando: false, error: null };
+const INICIAL: EstadoTerreno = {
+  enLinea: true,
+  pendientes: 0,
+  rechazados: 0,
+  sincronizados: 0,
+  sincronizando: false,
+  error: null,
+};
 const CLAVE_LATIDO = "opai.terreno.ultimoLatido";
 const CADA_LATIDO_MS = 5 * 60_000;
 export const VERSION_APP = "terreno-web-1";
@@ -48,14 +58,17 @@ function programarReintento() {
 }
 
 async function refrescar() {
-  const [cola, ultimo] = await Promise.all([
-    leerCola().catch(() => []),
+  const [resumen, ultimo] = await Promise.all([
+    leerResumen().catch(() => ({ pendientes: [], sincronizados: [], rechazados: [] })),
     leerEstadoEnvio().catch(() => null),
   ]);
+  const pendientes = resumen.pendientes.length;
   poner({
-    pendientes: cola.length,
-    sincronizando: cola.length > 0 && estado.enLinea && ultimo?.ok !== false,
-    error: cola.length > 0 && ultimo?.ok === false ? (ultimo.error ?? null) : null,
+    pendientes,
+    rechazados: resumen.rechazados.length,
+    sincronizados: resumen.sincronizados.length,
+    sincronizando: pendientes > 0 && estado.enLinea && ultimo?.ok !== false,
+    error: pendientes > 0 && ultimo?.ok === false ? (ultimo.error ?? null) : null,
   });
   programarReintento();
 }
@@ -65,7 +78,13 @@ export async function latidoSiCorresponde(personaId: string | null): Promise<voi
   const ultimo = Number(localStorage.getItem(CLAVE_LATIDO) ?? 0);
   if (Date.now() - ultimo < CADA_LATIDO_MS) return;
   localStorage.setItem(CLAVE_LATIDO, String(Date.now()));
-  await encolarHecho({ tipo: "terreno.latido", payload: { version: VERSION_APP }, personaId });
+  try {
+    await encolarHecho({ tipo: "terreno.latido", payload: { version: VERSION_APP }, personaId });
+  } catch {
+    // No quedó guardado: no cuenta como enviado ni como hecho; se vuelve a intentar en el próximo aviso.
+    localStorage.removeItem(CLAVE_LATIDO);
+    return;
+  }
   await refrescar();
 }
 

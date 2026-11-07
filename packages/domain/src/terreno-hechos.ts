@@ -37,3 +37,27 @@ export function hechoPlausible(
   if (antesDelEnvio > ANTIGUEDAD_MAXIMA_MS) return { ok: false, motivo: "muy_antiguo" };
   return { ok: true };
 }
+
+/**
+ * Política de la cola sin conexión por operación (orden de Carlos, 7-nov-2026): solo se encola lo que es
+ * seguro e idempotente. Un hecho lleva su `clave`, así que reenviarlo no duplica; pero lo que exige una sesión
+ * en línea (prueba facial, prueba de vida, PIN) NO se puede encolar: se verificaría fuera de su momento.
+ * Cada módulo de terreno agrega aquí los tipos que sí admite, en su propio PR.
+ */
+export const TIPOS_ENCOLABLES_OFFLINE = ["terreno.latido"] as const;
+
+/** Partes del nombre de un tipo que delatan una verificación de identidad en línea. */
+const PARTES_SOLO_EN_LINEA = ["facial", "rostro", "biometria", "prueba_vida", "pin"];
+
+/** ¿El tipo exige estar en línea (rostro, prueba de vida, PIN)? Nunca se encola, aunque alguien lo declare. */
+export function esTipoSoloEnLinea(tipo: string): boolean {
+  return tipo
+    .toLowerCase()
+    .split(/[.:/-]/)
+    .some((parte) => PARTES_SOLO_EN_LINEA.some((p) => parte === p || parte.startsWith(`${p}_`)));
+}
+
+/** ¿Se puede guardar en el teléfono y enviar después? Solo los tipos declarados y que no exijan línea. */
+export function esTipoEncolable(tipo: string): boolean {
+  return (TIPOS_ENCOLABLES_OFFLINE as readonly string[]).includes(tipo) && !esTipoSoloEnLinea(tipo);
+}

@@ -5,6 +5,9 @@ import {
   calcularDesfaseMs,
   DESFASE_ALTO_MS,
   desfaseAlto,
+  esTipoEncolable,
+  esTipoSoloEnLinea,
+  TIPOS_ENCOLABLES_OFFLINE,
   hechoPlausible,
   horaCorregida,
   TOLERANCIA_FUTURO_MS,
@@ -55,5 +58,34 @@ describe("plausibilidad de un hecho", () => {
       ok: false,
       motivo: "muy_antiguo",
     });
+  });
+});
+
+describe("política de la cola sin conexión por operación", () => {
+  it("solo se encola lo declarado: el latido sí, lo desconocido no", () => {
+    expect(esTipoEncolable("terreno.latido")).toBe(true);
+    expect(esTipoEncolable("rondas.marca")).toBe(false); // aún no declarado por su módulo
+    expect(esTipoEncolable("")).toBe(false);
+  });
+
+  it("nada que exija sesión en línea se encola: rostro, prueba de vida, PIN, biometría", () => {
+    for (const t of [
+      "asistencia.marca.facial",
+      "asistencia.rostro",
+      "asistencia.prueba_vida",
+      "asistencia.pin",
+      "asistencia.biometria_enrolar",
+      "ASISTENCIA.MARCA.FACIAL",
+      "asistencia:marca-facial",
+    ])
+      expect(esTipoSoloEnLinea(t), t).toBe(true);
+    expect(esTipoSoloEnLinea("rondas.marca")).toBe(false);
+    expect(esTipoSoloEnLinea("acceso.salida")).toBe(false);
+    // «pin» es una parte completa: no atrapa palabras que solo la contienen.
+    expect(esTipoSoloEnLinea("acceso.pinche")).toBe(false);
+  });
+
+  it("un tipo solo en línea nunca es encolable, aunque se declare por error", () => {
+    expect(TIPOS_ENCOLABLES_OFFLINE.every((t) => !esTipoSoloEnLinea(t))).toBe(true);
   });
 });
