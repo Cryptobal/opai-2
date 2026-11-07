@@ -19,7 +19,7 @@ const costoSchema = z.object({
 const filaSchema = costoSchema.extend({ id: uuidSchema });
 
 /** Categorías que admiten costo manual: todas las del modelo salvo feriados. */
-async function categoriasAjustables(ctx: Parameters<typeof modeloDesdeCatalogo>[0]) {
+export async function categoriasAjustables(ctx: Parameters<typeof modeloDesdeCatalogo>[0]) {
   const modelo = await modeloDesdeCatalogo(ctx, { persistirCatalogo: false });
   return modelo.categorias.filter((c) => c.id !== "feriados").map((c) => ({ id: c.id, nombre: c.nombre }));
 }
