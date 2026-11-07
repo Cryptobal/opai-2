@@ -57,6 +57,7 @@ describe.skipIf(!urlPropietario)("Asistencia · Face ID sobre B4 (Postgres real)
     const equipo = (await e.admin.dispositivo.create({ data: { tenantId: tenant, instalacionId: inst, identificador: "DSP-0001", tokenHash: randomBytes(16).toString("hex"), estado: "activo" } })).id;
     const puesto = (await e.admin.puesto.create({ data: { tenantId: tenant, instalacionId: inst, cargoId: cargo, nombre: "Portería", diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00" } })).id;
     await setAjuste(tenant, "marcas_habilitadas", true);
+    await setAjuste(tenant, "rostro_habilitado", true);
     return { tenant, inst, persona, usuario, equipo, puesto };
   }
 
@@ -223,5 +224,31 @@ describe.skipIf(!urlPropietario)("Asistencia · Face ID sobre B4 (Postgres real)
     // Nunca sobre otra persona.
     const otra = await run(usuarioCtx(A), "asistencia.rostro.estado", { personaId: B.persona });
     expect(otra.ok).toBe(false);
+  });
+
+  it("una sesión de usuario no evade el canal: ni declarando kiosco, ni con un equipo ajeno, ni por otra persona", async () => {
+    const C = await empresa("c");
+    const ses = (extra: Record<string, unknown>) =>
+      run(usuarioCtx(C, "trabajador"), "asistencia.marcas.registrar", { personaId: C.persona, instalacionId: C.inst, metodo: "rut_pin", credencial: PIN, claveDispositivo: randomUUID(), ...extra });
+    // Sin canal o declarando kiosco, la sesión es el teléfono personal: B no lo habilitó.
+    expect((await ses({})).error?.message).toMatch(/no permite marcar desde el teléfono/);
+    expect((await ses({ canal: "kiosco" })).error?.message).toMatch(/no permite marcar desde el teléfono/);
+    // Con el id de un equipo (no es secreto) tampoco: el equipo solo entra por el kiosco, no por una sesión.
+    expect((await ses({ dispositivoId: C.equipo })).ok).toBe(false);
+    // Marcar por otra persona conociendo su PIN.
+    const cargo = (await e.admin.cargo.findFirstOrThrow({ where: { tenantId: C.tenant } })).id;
+    const otra = (await e.admin.persona.create({ data: { tenantId: C.tenant, nombres: "Otra", apellidos: "Persona", rut: "9.999.999-3", estado: "activa" } })).id;
+    await e.admin.vinculoLaboral.create({ data: { tenantId: C.tenant, personaId: otra, cargoId: cargo, instalacionId: C.inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
+    await e.admin.credencialTerreno.create({ data: { tenantId: C.tenant, personaId: otra, rut: "9999999-3", pinHash: await hashPin(PIN), debeCambiar: false } });
+    const otraPersona = await run(usuarioCtx(C, "trabajador"), "asistencia.marcas.registrar", { personaId: otra, instalacionId: C.inst, metodo: "rut_pin", credencial: PIN, claveDispositivo: randomUUID() });
+    expect(otraPersona.ok).toBe(false);
+  });
+
+  it("con el rostro apagado en la empresa, nadie enrola ni marca por rostro y todos marcan con RUT + PIN", async () => {
+    const D = await empresa("d");
+    await setAjuste(D.tenant, "rostro_habilitado", false);
+    expect((await kiosco(D, "asistencia.rostro.iniciar_vida", {})).ok).toBe(false);
+    expect((await marcarKiosco(D, { metodo: "rostro", muestra: "rostro:ana" })).ok).toBe(false);
+    expect((await marcarKiosco(D, { metodo: "rut_pin", credencial: PIN })).ok).toBe(true);
   });
 });

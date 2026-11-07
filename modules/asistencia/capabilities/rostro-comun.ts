@@ -1,4 +1,4 @@
-import { type Contexto, prohibido, reglaDeNegocio } from "@opai/capabilities";
+import { ajuste, type Contexto, prohibido, reglaDeNegocio } from "@opai/capabilities";
 import { z } from "zod";
 
 import { uuid } from "./esquemas";
@@ -43,4 +43,13 @@ export async function autorizarPersona(ctx: Contexto, i: Quien, exigirPin: boole
     if (!r.ok) throw prohibido(MENSAJE_IDENTIDAD[r.motivo]);
   }
   return { personaId, instalacionId: d.instalacionId };
+}
+
+/** Interruptor de la empresa para el rostro (apagado por defecto): apagado, todos marcan con RUT y PIN. */
+export async function rostroHabilitado(ctx: Contexto): Promise<boolean> {
+  return ajuste<boolean>(ctx, "asistencia", "rostro_habilitado");
+}
+
+export async function exigirRostroHabilitado(ctx: Contexto): Promise<void> {
+  if (!(await rostroHabilitado(ctx))) throw reglaDeNegocio("Tu empresa aún no activó el reconocimiento facial. Marca con RUT y PIN.");
 }

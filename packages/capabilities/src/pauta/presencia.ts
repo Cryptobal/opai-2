@@ -15,31 +15,34 @@ export async function agregarPresencia(
   primero: Date,
   ultimo: Date,
 ): Promise<void> {
-  if (!ctx.modulosActivos.includes("asistencia") || celdas.size === 0) return;
+  // La presencia sale de las marcas: solo la ve quien puede ver Asistencia (no basta leer la Pauta).
+  if (!ctx.modulosActivos.includes("asistencia") || !ctx.autorizar("asistencia:ver") || celdas.size === 0) return;
   const turnos = await ctx.db.turnoEsperado.findMany({
     where: { puestoId: { in: [...celdas.keys()] }, vigente: true, fecha: { gte: primero, lte: ultimo } },
-    select: { puestoId: true, personaId: true, fecha: true },
+    select: { puestoId: true, personaId: true, fecha: true, instalacionId: true },
   });
   if (turnos.length === 0) return;
   const personas = [...new Set(turnos.map((t) => t.personaId))];
   const dias = await ctx.db.dia.findMany({
     where: { personaId: { in: personas }, fecha: { gte: primero, lte: ultimo } },
-    select: { personaId: true, fecha: true, estado: true, entrada: true, salida: true, segundosAtraso: true },
+    select: { personaId: true, fecha: true, estado: true, entrada: true, salida: true, segundosAtraso: true, instalacionId: true },
   });
   const diaDe = new Map(dias.map((d) => [`${d.personaId}|${fechaIso(d.fecha)}`, d]));
-  const turnosDe = new Map<string, string[]>();
+  const turnosDe = new Map<string, { personaId: string; instalacionId: string }[]>();
   for (const t of turnos) {
     const k = `${t.puestoId}|${fechaIso(t.fecha)}`;
-    turnosDe.set(k, [...(turnosDe.get(k) ?? []), t.personaId]);
+    turnosDe.set(k, [...(turnosDe.get(k) ?? []), { personaId: t.personaId, instalacionId: t.instalacionId }]);
   }
   for (const [puestoId, lista] of celdas) {
     for (const c of lista) {
       const candidatas = turnosDe.get(`${puestoId}|${c.fecha}`);
       if (!candidatas?.length) continue;
       const cubre = c.cubiertoPorId ?? c.titularId;
-      const personaId = (cubre && candidatas.includes(cubre) ? cubre : candidatas[0])!;
+      const turno = candidatas.find((t) => t.personaId === cubre) ?? candidatas[0]!;
+      const personaId = turno.personaId;
       const d = diaDe.get(`${personaId}|${c.fecha}`);
-      if (!d) continue;
+      // El día consolidado debe ser de la instalación de este turno (una persona puede tener otro turno ese día).
+      if (!d || (d.instalacionId && d.instalacionId !== turno.instalacionId)) continue;
       c.presencia = {
         personaId,
         estado: d.estado as EstadoPresencia,

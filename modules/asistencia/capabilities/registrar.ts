@@ -4,11 +4,10 @@ import { ajuste, defineCapability, noEncontrado, prohibido, reglaDeNegocio } fro
 import { avanzarCadena, bloquearCadena } from "@opai/db";
 
 import { CANALES, hashDeMarca, METODOS, MOTIVOS_RESPALDO } from "../domain";
-import { exigirCanal, exigirEquipo, MENSAJE_IDENTIDAD } from "./canal";
+import { MENSAJE_IDENTIDAD, resolverCanal } from "./canal";
 import { armarRegistro } from "./armar-registro";
 import { marcaVistaSchema, uuid, vistaDeMarca } from "./esquemas";
 import { verificadorDe } from "./identidad-registro";
-import { personaPropia } from "./persona-propia";
 
 export const marcasRegistrar = defineCapability({
   id: "asistencia.marcas.registrar",
@@ -53,12 +52,12 @@ export const marcasRegistrar = defineCapability({
     if (!persona || !instalacion) throw noEncontrado("La persona o la instalación");
     const vinculo = await ctx.db.vinculoLaboral.findFirst({ where: { personaId: persona.id, estado: "vigente" } });
     if (!vinculo) throw reglaDeNegocio("La persona no tiene un vínculo laboral vigente.");
-    // En el teléfono personal la sesión ES la persona: no se puede marcar por otra. El kiosco compartido sí elige.
-    if (i.canal === "telefono_personal" && (await personaPropia(ctx)).id !== persona.id)
-      throw prohibido("Desde tu teléfono solo puedes marcar por ti.");
-
-    await exigirEquipo(ctx, i.dispositivoId, instalacion.id);
-    await exigirCanal(ctx, instalacion.id, persona.id, i.canal);
+    // Un reintento de red tras una marca ya hecha devuelve esa marca sin volver a verificar (ni gastar al proveedor).
+    const previa = dryRun ? null : await ctx.db.marca.findUnique({ where: { tenantId_idempotencyKey: { tenantId: ctx.tenantId, idempotencyKey: i.claveDispositivo } } });
+    if (previa?.personaId === persona.id) return { marca: vistaDeMarca(previa), repetida: true };
+    // El canal lo decide quién llama (equipo o sesión), no el cliente.
+    const canal = await resolverCanal(ctx, i, persona.id, instalacion.id);
+    i = { ...i, canal };
     if (i.metodo === "pin_respaldo" && !i.motivoRespaldo && (await ajuste<boolean>(ctx, "asistencia", "pin_respaldo_exige_motivo")))
       throw reglaDeNegocio("Indica por qué marcas con el PIN de respaldo.");
     // La vista previa no consume la prueba de vida (es de un solo uso): el rostro solo se verifica al marcar de verdad.

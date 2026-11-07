@@ -1,5 +1,7 @@
 import { ajuste, type Contexto, prohibido } from "@opai/capabilities";
 
+import { personaPropia } from "./persona-propia";
+
 import { type Canal, PROPOSITO_TELEFONO, type ResultadoIdentidad } from "../domain";
 
 /**
@@ -51,3 +53,26 @@ export const MENSAJE_IDENTIDAD: Record<Fallo, string> = {
   sin_enrolamiento: "No tienes tu rostro enrolado. Usa tu PIN.",
   proveedor_caido: "El reconocimiento facial no respondió. Usa tu PIN.",
 };
+
+/**
+ * Por dónde se marca, decidido por QUIÉN llama y no por lo que declare el cliente (denegación segura):
+ *  - el equipo del kiosco (actor sistema, con su dispositivo resuelto en el servidor) marca en el kiosco, solo a
+ *    personas asignadas a su instalación;
+ *  - una sesión de usuario es el teléfono personal de la propia persona: solo marca por sí misma y siempre pasa
+ *    por los controles del canal (empresa, instalación, habilitación y consentimiento).
+ */
+export async function resolverCanal(
+  ctx: Contexto, i: { dispositivoId?: string | undefined }, personaId: string, instalacionId: string,
+): Promise<Canal> {
+  if (ctx.actor.tipo === "system") {
+    await exigirEquipo(ctx, i.dispositivoId, instalacionId);
+    const v = await ctx.db.vinculoLaboral.findFirst({ where: { personaId, instalacionId, estado: "vigente" }, select: { id: true } });
+    if (!v) throw prohibido("La persona no está asignada a la instalación de este equipo.");
+    await exigirCanal(ctx, instalacionId, personaId, "kiosco");
+    return "kiosco";
+  }
+  if (i.dispositivoId) throw prohibido("Desde tu sesión no se marca con un equipo del kiosco.");
+  if ((await personaPropia(ctx)).id !== personaId) throw prohibido("Desde tu teléfono solo puedes marcar por ti.");
+  await exigirCanal(ctx, instalacionId, personaId, "telefono_personal");
+  return "telefono_personal";
+}

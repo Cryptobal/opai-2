@@ -6,7 +6,7 @@ import {
 } from "@opai/capabilities";
 
 import { PROPOSITO_TELEFONO, PROPOSITOS, TEXTO_CONSENTIMIENTO, VERSION_AVISO } from "../domain";
-import { autorizarPersona, quienSchema } from "./rostro-comun";
+import { autorizarPersona, exigirRostroHabilitado, quienSchema } from "./rostro-comun";
 
 const proposito = z.enum(PROPOSITOS as [string, ...string[]]);
 const ultimoConsentimiento = (ctx: Contexto, personaId: string, p: string) =>
@@ -29,6 +29,7 @@ export const rostroEstado = defineCapability({
   permiso: null,
   portales: ["terreno", "trabajador"],
   soloPersonas: true,
+  sensibles: ["credencial"],
   input: z.object(quienSchema),
   output: estadoSchema,
   efecto: "lectura",
@@ -56,12 +57,14 @@ export const rostroIniciarVida = defineCapability({
   permiso: null,
   portales: ["terreno", "trabajador"],
   soloPersonas: true,
+  sensibles: ["credencial"],
   input: z.object(quienSchema),
   output: z.object({ proveedor: z.string(), sesionId: z.string().nullable() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
     await autorizarPersona(ctx, i, false);
+    await exigirRostroHabilitado(ctx);
     const prov = await biometriaDe(ctx);
     if (!prov) throw reglaDeNegocio("El reconocimiento facial no está disponible en esta empresa. Marca con RUT y PIN.");
     if (dryRun || !prov.b.iniciarVida) return { proveedor: prov.b.nombre, sesionId: null };
@@ -119,6 +122,7 @@ export const rostroEnrolar = defineCapability({
   dryRun: true,
   async handler(ctx, i, { dryRun }) {
     const { personaId } = await autorizarPersona(ctx, i, true);
+    await exigirRostroHabilitado(ctx);
     if (i.reemplazar && !dryRun) await borrarEnrolamiento(ctx, personaId, "manual");
     const r = await enrolarRostro(ctx, personaId, i.muestra, dryRun);
     return { proveedor: r.proveedor, enroladoEn: r.enroladoEn };

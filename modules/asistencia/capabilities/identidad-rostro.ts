@@ -1,6 +1,7 @@
 import { evaluarRostro, type Contexto } from "@opai/capabilities";
 
 import type { ResultadoIdentidad } from "../domain";
+import { rostroHabilitado } from "./rostro-comun";
 
 /**
  * Verificación 1:1 del rostro de la persona (T-03) con la biometría del núcleo (B4): consentimiento vigente,
@@ -8,6 +9,7 @@ import type { ResultadoIdentidad } from "../domain";
  * un motivo para caer a RUT + PIN; nunca se marca por rostro sin todo eso (denegación segura).
  */
 export async function verificarRostro(ctx: Contexto, personaId: string, muestra: string | undefined): Promise<ResultadoIdentidad> {
+  if (!(await rostroHabilitado(ctx))) return { ok: false, motivo: "metodo_no_disponible" };
   if (!muestra) return { ok: false, motivo: "vida_fallida" };
   const r = await evaluarRostro(ctx, personaId, muestra);
   switch (r.tipo) {
