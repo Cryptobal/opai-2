@@ -8,7 +8,9 @@ describe("codigoDeBase (log de errores inesperados)", () => {
   });
   it("busca en la causa del adaptador de pg", () => {
     const causa = { originalCode: "57P01", kind: "postgres" };
-    expect(codigoDeBase(Object.assign(new Error("DriverAdapterError"), { cause: causa }))).toBe("57P01");
+    expect(codigoDeBase(Object.assign(new Error("DriverAdapterError"), { cause: causa }))).toBe(
+      "57P01",
+    );
   });
   it("sin código, null; nunca devuelve mensajes con espacios", () => {
     expect(codigoDeBase(new Error("boom"))).toBeNull();

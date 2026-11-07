@@ -3,10 +3,6 @@ import { ErrorCapacidad } from "./errores";
 import type { Capacidad, Contexto, Resultado } from "./types";
 
 /**
- * Log estructurado de un error inesperado (INTERNAL, CAR-49): solo lo necesario para ubicarlo con
- * la correlación que recibe el usuario o el agente. Nunca el input ni el payload del handler.
- */
-/**
  * Código categórico del error de base de datos (`P2024`, `P2034`, `08006`, `57P01`…), sin mensaje ni
  * valores: lo mínimo para distinguir un pool agotado, un conflicto de escritura o una conexión cortada.
  * Prisma lo deja en `code`; el adaptador de pg lo deja en `cause.originalCode` o `cause.kind`.
@@ -23,6 +19,10 @@ export function codigoDeBase(error: unknown): string | null {
   return typeof hallado === "string" ? hallado : null;
 }
 
+/**
+ * Log estructurado de un error inesperado (INTERNAL, CAR-49): solo lo necesario para ubicarlo con
+ * la correlación que recibe el usuario o el agente. Nunca el input ni el payload del handler.
+ */
 function registrarErrorInesperado(
   ctx: Contexto,
   c: Capacidad,
