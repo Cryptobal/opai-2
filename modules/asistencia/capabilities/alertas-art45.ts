@@ -8,15 +8,16 @@ import {
 import { fechaHora, tenantBasico } from "./formato";
 
 const H = 3_600_000;
-type Tipo = "sin_marca_inicio" | "sin_marca_termino" | "compensables";
+export type Tipo = "sin_marca_inicio" | "sin_marca_termino" | "compensables" | "descanso_insuficiente";
 const EVENTO: Record<Tipo, string> = {
   sin_marca_inicio: "asistencia.alerta.sin_marca_inicio",
   sin_marca_termino: "asistencia.alerta.sin_marca_termino",
   compensables: "asistencia.aviso.compensables",
+  descanso_insuficiente: "asistencia.alerta.descanso_insuficiente",
 };
 
 /** Crea la alerta si no existía (clave única) y, solo entonces, emite el evento que la envía: idempotente. */
-async function emitir(
+export async function emitir(
   ctx: Contexto, tipo: Tipo, clave: string, personaId: string,
   refs: { instalacionId?: string; turnoEsperadoId?: string }, datos: Record<string, unknown>,
 ): Promise<boolean> {

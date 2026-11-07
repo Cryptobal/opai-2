@@ -40,6 +40,7 @@ import { cotizacionesGet, cotizacionesList } from "./lectura";
 import { esquemasCoberturaGuardar, esquemasCoberturaList } from "./esquemas-cobertura";
 import { lineasActualizar, lineasCrear } from "./lineas";
 import { lineasAgregarEsquema } from "./lineas-esquema";
+import { portalCotizacionesDescargar, portalCotizacionesGet, portalCotizacionesList } from "./portal-cotizaciones";
 import { lineasQuitar } from "./lineas-quitar";
 import { lineasReordenar } from "./lineas-reordenar";
 import { marcaDocumentoGet, marcaDocumentoUpdate } from "./marca-documento";
@@ -98,6 +99,9 @@ export const capacidades: readonly Capacidad[] = [
   lineasAgregarEsquema,
   esquemasCoberturaList,
   esquemasCoberturaGuardar,
+  portalCotizacionesList,
+  portalCotizacionesGet,
+  portalCotizacionesDescargar,
   lineasActualizar,
   lineasQuitar,
   lineasReordenar,
