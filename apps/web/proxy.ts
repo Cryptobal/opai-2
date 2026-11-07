@@ -7,7 +7,9 @@ import { cabecerasConNonce } from "./lib/nonce";
 
 /** Carga completa del documento (no una navegación RSC del cliente, que no lee el estado HTTP). */
 function esDocumento(request: NextRequest): boolean {
-  return Boolean(request.headers.get("accept")?.includes("text/html")) && !request.headers.has("rsc");
+  return (
+    Boolean(request.headers.get("accept")?.includes("text/html")) && !request.headers.has("rsc")
+  );
 }
 
 /** Pregunta a `/api/existe` si la ficha o el slug existen; ante cualquier falla, que decida la página. */
@@ -29,7 +31,12 @@ async function noExiste(request: NextRequest): Promise<boolean> {
   }
 }
 
-const CABECERAS_SIN_REENVIAR = ["content-length", "content-encoding", "transfer-encoding", "connection"];
+const CABECERAS_SIN_REENVIAR = [
+  "content-length",
+  "content-encoding",
+  "transfer-encoding",
+  "connection",
+];
 
 /**
  * 404 real de una ficha/slug/grupo inexistente. Un `NextResponse.rewrite()` no cambia el estado HTTP
@@ -87,7 +94,16 @@ export async function proxy(request: NextRequest) {
   const publica =
     /^\/(?:login|mfa|recuperar|invitacion|verificar|correccion|p|ds|sin-conexion)(?:\/|$)/.test(
       request.nextUrl.pathname,
-    ) || ["/trabajador/login", "/cliente/login", "/terreno/emparejar", "/terreno/sin-conexion", "/terreno", "/terreno/cola"].includes(request.nextUrl.pathname);
+    ) ||
+    [
+      "/trabajador/login",
+      "/cliente/login",
+      "/terreno/emparejar",
+      "/terreno/sin-conexion",
+      "/terreno",
+      "/terreno/cola",
+      "/terreno/porteria",
+    ].includes(request.nextUrl.pathname);
   if (publica) return responder(NextResponse.next({ request: { headers } }));
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
     // La cabecera se fija en el servidor y sobrescribe cualquier `x-opai-t0` del cliente: en ninguna
