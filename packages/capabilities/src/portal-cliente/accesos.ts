@@ -5,7 +5,11 @@ import { esMembresiaDeCliente, type Rol } from "@opai/domain";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { accesoVistaSchema, candidatoSchema, type AccesoVista } from "./accesos-vista";
-import { PERMISO_ACCESOS_READ, cuentaDe, estadoAccesoSchema } from "./comun";
+import { ESTADO_CUENTA_INACTIVA, PERMISO_ACCESOS_READ, cuentaDe, estadoAccesoSchema } from "./comun";
+
+function estadoEfectivo<E extends string>(estado: E, cuentaInactiva: boolean): E | "suspendido" {
+  return cuentaInactiva && estado === "activo" ? "suspendido" : estado;
+}
 
 /** Accesos al portal de una cuenta, con el usuario y las instalaciones que cada uno ve. */
 export async function accesosDeCuenta(
@@ -18,6 +22,10 @@ export async function accesosDeCuenta(
     orderBy: { createdAt: "asc" },
   });
   if (filas.length === 0) return [];
+  // Cuenta inactiva: los accesos activos se muestran suspendidos (CAR-217); la fila no cambia.
+  const cuentaInactiva =
+    (await ctx.db.cuenta.findFirst({ where: { id: cuentaId }, select: { estado: true } }))?.estado ===
+    ESTADO_CUENTA_INACTIVA;
   const [membresias, instalaciones] = await Promise.all([
     ctx.db.membership.findMany({
       where: { id: { in: filas.map((f) => f.membershipId) } },
@@ -39,7 +47,7 @@ export async function accesosDeCuenta(
         email: m.user.email,
         cuentaId: f.cuentaId,
         contactoId: f.contactoId,
-        estado: estadoAccesoSchema.catch("revocado").parse(f.estado),
+        estado: estadoEfectivo(estadoAccesoSchema.catch("revocado").parse(f.estado), cuentaInactiva),
         todasInstalaciones: f.todasInstalaciones,
         instalaciones: f.instalaciones.flatMap((i) => {
           const nombre = nombreInst.get(i.instalacionId);
