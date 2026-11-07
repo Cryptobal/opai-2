@@ -102,4 +102,22 @@ describe.skipIf(!urlPropietario)("cpq · esquemas de cobertura en base real", ()
       ["24/7 · Noche", 2, "4x4", "20:00"],
     ]);
   });
+
+  it("los puestos del esquema reciben los costos predefinidos por puesto de la empresa (CAR-213)", async () => {
+    const esquemaId = (await e.admin.cpqEsquemaCobertura.findFirstOrThrow({ where: { tenantId: a.tenantId } })).id;
+    await e.admin.cpqCostoPredefinido.create({ data: { tenantId: a.tenantId, categoria: "uniformes", montoClp: 15_000, alcance: "por_puesto" } });
+    await e.admin.cpqCostoPredefinido.create({ data: { tenantId: a.tenantId, categoria: "examenes", montoClp: 40_000, alcance: "global" } });
+    const previo = await e.admin.cpqCostoCategoria.count({ where: { tenantId: a.tenantId } });
+    // La vista previa no escribe ningún costo.
+    await run(a.tenantId, "cpq.lineas.agregar_esquema", { seccionId: a.seccionId, esquemaId }, true);
+    expect(await e.admin.cpqCostoCategoria.count({ where: { tenantId: a.tenantId } })).toBe(previo);
+    const r = await run<{ ids: string[] }>(a.tenantId, "cpq.lineas.agregar_esquema", { seccionId: a.seccionId, esquemaId });
+    const ids = r.ok ? r.data.ids : [];
+    expect(ids).toHaveLength(2);
+    const costos = await e.admin.cpqCostoCategoria.findMany({ where: { tenantId: a.tenantId } });
+    // Un "uniformes" por cada puesto nuevo; el global ("examenes") no se carga al agregar puestos sueltos.
+    expect(costos.filter((c) => c.categoria === "uniformes").map((c) => c.lineaId).sort()).toEqual([...ids].sort());
+    expect(costos.some((c) => c.categoria === "examenes")).toBe(false);
+    expect(costos.find((c) => c.categoria === "uniformes")?.montoClp).toBe(15_000);
+  });
 });
