@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
+import { aplicarCostosPredefinidos } from "../persistencia/costos-predefinidos";
 import { recalcularVersion } from "../persistencia/recalcular";
 import { exigirBorrador, versionDeCotizacion } from "../persistencia/version";
 import { tramosDe } from "./esquemas-cobertura";
@@ -90,6 +91,8 @@ export const lineasAgregarEsquema = defineCapability({
     }
     const ids: string[] = [];
     for (const f of filas) ids.push((await ctx.db.cpqLinea.create({ data: f })).id);
+    // Costos predefinidos por puesto de la empresa (CAR-213), como al crear un puesto suelto.
+    await aplicarCostosPredefinidos(ctx, version.id, { lineaIds: ids });
     await recalcularVersion(ctx, cot.id, undefined, true);
     const v = await ctx.db.cpqVersion.findFirst({ where: { id: version.id } });
     if (!v) throw noEncontrado("La versión");
