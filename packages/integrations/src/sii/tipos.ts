@@ -48,7 +48,8 @@ export type PayloadEmisionDte = {
   lineas?: readonly LineaEmisionDte[];
   /** XML del CAF del rango (obligatorio con SimpleAPI real). */
   cafXml?: string;
-  referencias?: readonly { tipoDte: number; folio: number; codigo: number; razon?: string }[];
+  /** `fecha` = fecha del documento referenciado (FchRef); `codigo` (CodRef 1/2/3) solo en NC y ND. */
+  referencias?: readonly { tipoDte: number; folio: number; fecha?: string; codigo?: number; razon?: string }[];
 };
 
 export interface AdaptadorSii {
