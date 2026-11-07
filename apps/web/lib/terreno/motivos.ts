@@ -2,6 +2,8 @@
 export const ETIQUETA_TIPO: Record<string, string> = {
   "terreno.latido": "Aviso de que el teléfono estuvo activo",
   "rondas.marca": "Marca de un punto de ronda",
+  "acceso.entrada": "Entrada a la instalación",
+  "acceso.salida": "Salida de la instalación",
 };
 
 export const etiquetaTipo = (tipo: string): string => ETIQUETA_TIPO[tipo] ?? "Registro de terreno";
@@ -15,6 +17,11 @@ export const MOTIVO_RECHAZO: Record<string, string> = {
   persona_no_valida: "La persona ya no está asignada a esta instalación.",
   qr_invalido: "No se reconoce este código QR. Pide al supervisor revisar la etiqueta.",
   qr_ajeno: "Este código QR es de otra instalación.",
+  documento_invalido: "El documento no es válido. Revísalo y vuelve a registrar.",
+  patente_invalida: "La patente no es válida.",
+  modulo_inactivo: "Este módulo no está activo para la empresa.",
+  entrada_desconocida: "No se encontró la entrada de esta salida.",
+  salida_repetida: "Esta entrada ya tenía su salida registrada.",
   lote_invalido: "El envío no era válido y el servidor lo devolvió.",
 };
 

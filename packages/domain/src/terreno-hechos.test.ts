@@ -71,7 +71,8 @@ describe("política de la cola sin conexión por operación", () => {
   it("solo se encola lo declarado: el latido sí, lo desconocido no", () => {
     expect(esTipoEncolable("terreno.latido")).toBe(true);
     expect(esTipoEncolable("rondas.marca")).toBe(true); // lo declara Rondas (CAR-78 E3)
-    expect(esTipoEncolable("acceso.entrada")).toBe(false); // aún no declarado por su módulo
+    expect(esTipoEncolable("acceso.entrada")).toBe(true); // lo declara Control de acceso (CAR-78 E4b-2)
+    expect(esTipoEncolable("acceso.desconocido")).toBe(false);
     expect(esTipoEncolable("")).toBe(false);
   });
 

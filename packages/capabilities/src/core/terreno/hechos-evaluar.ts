@@ -23,8 +23,14 @@ export const MOTIVOS_RECHAZO = [
   "persona_no_valida",
   "qr_invalido",
   "qr_ajeno",
+  "documento_invalido",
+  "patente_invalida",
+  "modulo_inactivo",
+  "entrada_desconocida",
+  "salida_repetida",
 ] as const;
-type Motivo = (typeof MOTIVOS_RECHAZO)[number];
+export type MotivoRechazo = (typeof MOTIVOS_RECHAZO)[number];
+type Motivo = MotivoRechazo;
 
 export const resultadoHecho = z.object({
   clave: z.string(),
@@ -39,8 +45,8 @@ export function evaluarLote(p: {
   envio: Date;
   yaGuardadas: ReadonlySet<string>;
   personasValidas: ReadonlySet<string>;
-  /** Marcas de ronda que el servidor no pudo resolver a un punto de la instalación del equipo. */
-  marcasRechazadas?: ReadonlyMap<string, "qr_invalido" | "qr_ajeno">;
+  /** Hechos de módulos (marca de ronda, acceso) que el servidor no pudo resolver; ver `proyecciones.ts`. */
+  proyeccionesRechazadas?: ReadonlyMap<string, MotivoRechazo>;
 }): { resultados: ResultadoHecho[]; nuevos: HechoEntrada[] } {
   const nuevos: HechoEntrada[] = [];
   const vistas = new Set<string>();
@@ -58,7 +64,7 @@ export function evaluarLote(p: {
     if (!plausible.ok) return r("rechazado", plausible.motivo);
     if (h.personaId && !p.personasValidas.has(h.personaId))
       return r("rechazado", "persona_no_valida");
-    const motivoMarca = p.marcasRechazadas?.get(h.clave);
+    const motivoMarca = p.proyeccionesRechazadas?.get(h.clave);
     if (motivoMarca) return r("rechazado", motivoMarca);
     vistas.add(h.clave);
     nuevos.push(h);
