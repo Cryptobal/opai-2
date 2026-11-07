@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Alerta, Button } from "@opai/ds";
@@ -11,6 +12,7 @@ const cuenta = (n: number, uno: string, varios: string) =>
 
 /** Qué hay guardado en este teléfono mientras no hay señal, y reintento al volver. Sin nombres ni datos personales. */
 export function ResumenSinConexion() {
+  const router = useRouter();
   const [r, setR] = useState<ResumenCola | null | "error">(null);
   useEffect(() => {
     let vivo = true;
@@ -21,14 +23,14 @@ export function ResumenSinConexion() {
     void leer();
     const alVolver = () => {
       void pedirEnvio().then(leer);
-      window.location.href = "/terreno"; // recarga completa a propósito: sale de la página precacheada
+      router.push("/terreno");
     };
     window.addEventListener("online", alVolver);
     return () => {
       vivo = false;
       window.removeEventListener("online", alVolver);
     };
-  }, []);
+  }, [router]);
 
   if (r === "error")
     return (
@@ -55,7 +57,7 @@ export function ResumenSinConexion() {
           con señal: por seguridad esta pantalla no muestra personas ni datos de la instalación.
         </p>
       </section>
-      <Button variant="secondary" onClick={() => (window.location.href = "/terreno")}>
+      <Button variant="secondary" onClick={() => router.push("/terreno")}>
         Reintentar
       </Button>
     </>
