@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { vistaDeCarga } from "../app/(erp)/finanzas/ventas/programacion/_componentes/cargar-cuentas";
+import { vistaDeCarga } from "../app/(erp)/finanzas/ventas/programacion/_componentes/vista-carga";
 
 describe("Programación · nueva: nunca una pantalla en blanco (CAR-221 B)", () => {
   it("lista y sin clientes muestran el formulario", () => {

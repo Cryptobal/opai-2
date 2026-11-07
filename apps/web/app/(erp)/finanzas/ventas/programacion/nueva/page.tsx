@@ -1,7 +1,8 @@
 import { ErrorCarga } from "@/app/_components/error-carga";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
-import { cargarCuentasProgramacion, vistaDeCarga } from "../_componentes/cargar-cuentas";
+import { cargarCuentasProgramacion } from "../_componentes/cargar-cuentas";
+import { vistaDeCarga } from "../_componentes/vista-carga";
 import { FormularioProgramacion } from "../_componentes/formulario-programacion";
 
 export const metadata = { title: "Nueva programación" };
