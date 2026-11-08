@@ -42,4 +42,10 @@ describe("Button", () => {
     expect(html).not.toContain("opacity-0");
     expect(html).toContain(">Enviar</button>");
   });
+
+  it("el secundario usa el borde de control (3:1), no el separador suave (CAR-216)", () => {
+    const html = renderToStaticMarkup(createElement(Button, { variant: "secondary", children: "Modificar" }));
+    expect(html).toContain("border-border-control");
+    expect(html).not.toContain("border-border-strong");
+  });
 });

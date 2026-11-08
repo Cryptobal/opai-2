@@ -97,6 +97,7 @@ export async function ejecutarEnvioPropuestaAprobado(
     if (row.incluyePropuesta) {
       if (!row.propuestaTecnicaId) throw reglaDeNegocio("Falta la propuesta técnica del envío.");
       const pdfPropBytes = await pdfPropuestaDesdeSnapshot(ctx, snapshot, {
+        cotizacionId: c.id,
         codigo: c.codigo,
         titulo: c.titulo,
         servicio,

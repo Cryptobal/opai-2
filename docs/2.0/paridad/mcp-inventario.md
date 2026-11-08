@@ -260,6 +260,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.sueldos_referencia.list` | `cpq_sueldos_referencia_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.versiones.parametros` | `cpq_versiones_parametros` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/propuesta-tecnica/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
@@ -433,13 +434,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.create` | `core_personas_create` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.desbloquear` | `core_personas_desbloquear` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.get` | `core_personas_get` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.laboral_actualizar` | `core_personas_laboral_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.laboral_ver` | `core_personas_laboral_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.marcar_no_recontratar` | `core_personas_marcar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.no_recontratar_ver` | `core_personas_no_recontratar_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_aprobar_cambio` | `core_personas_pago_aprobar_cambio` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_rechazar_cambio` | `core_personas_pago_rechazar_cambio` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_solicitar_cambio` | `core_personas_pago_solicitar_cambio` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.pago_ver` | `core_personas_pago_ver` | existe |
+| compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_actualizar` | `core_personas_prevision_actualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.prevision_ver` | `core_personas_prevision_ver` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.quitar_no_recontratar` | `core_personas_quitar_no_recontratar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.personas.update` | `core_personas_update` | existe |
@@ -891,9 +895,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
 - `core.patrones.get`
-- `core.personas.laboral_actualizar`
-- `core.personas.pago_solicitar_cambio`
-- `core.personas.prevision_actualizar`
 - `core.ping`
 - `core.puestos.get`
 - `core.turnos_esperados.listar`
@@ -903,14 +904,23 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
 - `cpq.correlativos.fijar`
+- `cpq.costos_categoria.cargar_predefinidos`
+- `cpq.costos_predefinidos.guardar`
+- `cpq.costos_predefinidos.list`
 - `cpq.cotizaciones.clonar`
 - `cpq.cotizaciones.explicar`
 - `cpq.cotizaciones.reabrir`
 - `cpq.cotizaciones.retirar_aprobacion`
 - `cpq.envios_propuesta.list`
+- `cpq.esquemas_cobertura.guardar`
+- `cpq.esquemas_cobertura.list`
+- `cpq.lineas.agregar_esquema`
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
+- `cpq.portal_cotizaciones.descargar`
+- `cpq.portal_cotizaciones.get`
+- `cpq.portal_cotizaciones.list`
 - `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
@@ -926,6 +936,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
 - `finanzas.reportes.resultados`
+- `finanzas.ventas.emitir_nota_debito`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`
@@ -938,6 +949,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
+- `portal_cliente.contactos.dar_acceso`
+- `portal_cliente.contactos.listar`
 - `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`

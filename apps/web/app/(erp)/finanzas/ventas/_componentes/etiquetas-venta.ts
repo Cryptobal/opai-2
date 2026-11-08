@@ -8,6 +8,7 @@ const ESTADO_DTE: Record<string, { etiqueta: string; tono: Tono }> = {
   aceptado_sii: { etiqueta: "Aceptada por el SII", tono: "success" },
   rechazado: { etiqueta: "Rechazada por el SII", tono: "danger" },
   anulado_nc: { etiqueta: "Anulada por nota de crédito", tono: "warning" },
+  anulado_nd: { etiqueta: "Nota de crédito anulada por nota de débito", tono: "warning" },
 };
 
 const ESTADO_COBRO: Record<string, { etiqueta: string; tono: Tono }> = {

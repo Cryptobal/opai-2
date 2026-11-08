@@ -14,7 +14,7 @@ const estilos = cva(
     variants: {
       variant: {
         primary: "bg-accent text-accent-fg hover:brightness-95 active:brightness-90",
-        secondary: "border-border-strong bg-surface text-fg hover:bg-fill",
+        secondary: "border-border-control bg-surface text-fg hover:bg-fill",
         ghost: "text-fg hover:bg-fill",
         destructive: "bg-destructive-bg text-destructive-fg hover:brightness-95",
       },

@@ -77,7 +77,7 @@ export async function prepararNotaCredito(
       montoTotal: montos.total,
       lineas: [{ orden: 0, glosa: input.motivo, monto }],
       referencias: [
-        { tipoDteRef: ref.tipoDte, folioRef: ref.folio, codigoRef: input.codigoReferencia, razonRef: input.motivo },
+        { tipoDteRef: ref.tipoDte, folioRef: ref.folio, fechaRef: ref.fechaEmision, codigoRef: input.codigoReferencia, razonRef: input.motivo },
       ],
     },
     incluirCaf: adaptador.nombre !== "simulado",

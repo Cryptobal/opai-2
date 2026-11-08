@@ -92,7 +92,7 @@ export function LineaCotizacion({
           <p className="font-semibold leading-snug">{aviso.titulo}</p>
           {aviso.detalle ? <p className="mt-1 text-warning-fg/90">{aviso.detalle}</p> : null}
           {aviso.accion && editable ? (
-            <Button type="button" variant="ghost" size="md" className="mt-2 px-0" disabled={pendiente} onClick={payloadEditar}>
+            <Button type="button" variant="secondary" size="md" className="mt-2" disabled={pendiente} onClick={payloadEditar}>
               {aviso.accion.etiqueta}
             </Button>
           ) : aviso.enlace ? (

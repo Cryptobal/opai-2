@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado } from "@opai/capabilities";
 
+import { aplicarCostosPredefinidos } from "../persistencia/costos-predefinidos";
 import { exigirBorrador, versionDeCotizacion } from "../persistencia/version";
 import { recalcularVersion } from "../persistencia/recalcular";
 import { cotizacionDe } from "./util";
@@ -65,6 +66,7 @@ export const lineasCrear = defineCapability({
       return { id: ID_VISTA_PREVIA, ventaMensualClp: r?.ventaMensual ?? null };
     }
     const linea = await ctx.db.cpqLinea.create({ data });
+    if (puesto) await aplicarCostosPredefinidos(ctx, version.id, { lineaIds: [linea.id] });
     await recalcularVersion(ctx, cot.id, undefined, true);
     const v = await ctx.db.cpqVersion.findFirst({ where: { id: version.id } });
     if (!v) throw noEncontrado("La versión");
@@ -73,14 +75,14 @@ export const lineasCrear = defineCapability({
 });
 
 /** Quita las claves `undefined` (exactOptionalPropertyTypes de Prisma): solo se escribe lo pedido. */
-function sinIndefinidos<T extends object>(o: T): { [K in keyof T]: Exclude<T[K], undefined> } {
+export function sinIndefinidos<T extends object>(o: T): { [K in keyof T]: Exclude<T[K], undefined> } {
   const r: Partial<Record<keyof T, unknown>> = {};
   for (const k of Object.keys(o) as (keyof T)[]) if (o[k] !== undefined) r[k] = o[k];
   return r as { [K in keyof T]: Exclude<T[K], undefined> };
 }
 
 /** Columnas nulas de una línea nueva para la vista previa en memoria. */
-function nuevaVacia() {
+export function nuevaVacia() {
   return {
     grupo: null, recurrencia: "mensual", visibleCliente: true, personasPorPosicionEscaladas: null, personasMotivo: null,
     sueldoBaseClp: null, rateoJson: null, precioUnitarioClp: null, margenPropioPct: null, alcanceDotacion: null,
