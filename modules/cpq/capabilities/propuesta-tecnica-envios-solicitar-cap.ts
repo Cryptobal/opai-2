@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
 import { exigirDestinatariosEnvio } from "../domain/documento/propuesta-tecnica";
+import { contratoCamposPropuesta } from "../persistencia/propuesta-campos";
 import { previsualizarCorreoCliente } from "../persistencia/correo-cliente";
 import { exigirGatesEnvioCpq } from "../persistencia/propuesta-envio-aprobacion";
 import {
@@ -72,6 +73,11 @@ export const enviosPropuestaSolicitar = defineCapability({
         where: { id: input.propuestaTecnicaId, cotizacionId: c.id },
       });
       if (!prop) throw noEncontrado("La propuesta técnica");
+      // Falla temprano (también en la vista previa) si los campos no validan o faltan datos.
+      if (input.incluyePropuesta) {
+        const { bloquesJson: propuestaBloquesJson } = prop;
+        await contratoCamposPropuesta(ctx, { cotizacionId: c.id, propuestaBloquesJson, bloquesBiblioteca: {}, destinatarios });
+      }
     }
     const { pack, resultado, versionEsperada } = await exigirGatesEnvioCpq(
       ctx,

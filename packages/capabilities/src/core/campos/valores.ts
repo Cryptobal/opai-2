@@ -1,38 +1,11 @@
 import { z } from "zod";
 
-import {
-  PERMISOS_CORE,
-  VERSION_CATALOGO_CAMPOS,
-  clasificarCampos,
-  soloAutorizados,
-  valoresContacto,
-  valoresCuenta,
-  valoresInstalacion,
-  type ValorCampo,
-} from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { dondeInstalacion } from "../maestros/alcance";
-import { cuentaDe } from "../maestros/cuentas-acceso";
 import { finalidadSchema } from "./comun";
-
-const MAX_INSTALACIONES = 50;
-const valorSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-const registroSchema = z.record(z.string(), valorSchema);
-
-/** Fechas como `AAAA-MM-DD`; el formato de presentación lo aplica `renderizarPlantillaCampos`. */
-function serializable(
-  v: Record<string, ValorCampo>,
-): Record<string, string | number | boolean | null> {
-  return Object.fromEntries(
-    Object.entries(v).map(([k, x]) => [
-      k,
-      x instanceof Date ? x.toISOString().slice(0, 10) : (x ?? null),
-    ]),
-  );
-}
+import { MAX_INSTALACIONES, registroSchema, resolverCamposDocumento } from "./valores-resolver";
 
 export const camposValores = defineCapability({
   // Revela datos de personas (contacto): se audita cada entidad entregada, sin copiar valores.
@@ -68,68 +41,6 @@ export const camposValores = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const clases = clasificarCampos(input.finalidad, (p) => ctx.autorizar(p));
-    const permitidas = new Set(clases.autorizados.map((c) => c.clave));
-    const cuenta = await cuentaDe(ctx, input.cuentaId);
-
-    // El contacto puede ser de la cuenta de origen o estar vinculado a ella (N–N); el alcance ya se
-    // aplicó al exigir la cuenta. Con vínculo, el cargo es el que tiene en esa cuenta.
-    const [contacto, vinculo] = input.contactoId
-      ? await Promise.all([
-          ctx.db.contacto.findFirst({
-            where: { id: input.contactoId, archivadoEn: null, anonimizadoEn: null },
-          }),
-          ctx.db.contactoCuenta.findFirst({
-            where: { contactoId: input.contactoId, cuentaId: cuenta.id },
-          }),
-        ])
-      : [null, null];
-    if (input.contactoId && (!contacto || (contacto.cuentaId !== cuenta.id && !vinculo))) {
-      throw noEncontrado("El contacto");
-    }
-
-    const instalaciones = await ctx.db.instalacion.findMany({
-      where: {
-        cuentaId: cuenta.id,
-        archivadaEn: null,
-        ...(input.instalacionIds ? { id: { in: input.instalacionIds } } : {}),
-        AND: [dondeInstalacion(ctx)],
-      },
-      orderBy: { nombre: "asc" },
-      take: MAX_INSTALACIONES + 1,
-    });
-    if (!input.instalacionIds && instalaciones.length > MAX_INSTALACIONES) {
-      throw reglaDeNegocio(
-        `La cuenta tiene más de ${MAX_INSTALACIONES} instalaciones: elige cuáles incluir en el documento.`,
-      );
-    }
-    const pedidas = new Set(input.instalacionIds ?? []);
-    if (pedidas.size > 0 && instalaciones.length !== pedidas.size) {
-      throw noEncontrado("La instalación");
-    }
-
-    const campos = {
-      ...valoresCuenta(cuenta),
-      ...(contacto
-        ? valoresContacto({ ...contacto, cargo: vinculo?.cargo ?? contacto.cargo })
-        : {}),
-    };
-    return {
-      version: VERSION_CATALOGO_CAMPOS,
-      finalidad: input.finalidad,
-      campos: serializable(soloAutorizados(campos, permitidas)),
-      colecciones: {
-        instalaciones: instalaciones.map((i) =>
-          serializable(soloAutorizados(valoresInstalacion(i), permitidas)),
-        ),
-      },
-      origen: {
-        cuentaId: cuenta.id,
-        contactoId: contacto?.id ?? null,
-        instalacionIds: instalaciones.map((i) => i.id),
-      },
-      sinPermiso: clases.sinPermiso.map((c) => c.clave),
-      sinResolvedor: clases.sinResolvedor.map((c) => c.clave),
-    };
+    return resolverCamposDocumento(ctx, input);
   },
 });
