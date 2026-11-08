@@ -14,6 +14,7 @@ export {
   clienteBloqueoLogin,
   type ResultadoBorrado,
   restablecerSegundoFactor,
+  estadoSesionEnTransaccion,
   ultimosAccesos,
   usuarioEnOtrasEmpresas,
 } from "./identidad";

@@ -30,6 +30,7 @@ export function entornoBucle(efecto: "lectura" | "escritura" | "irreversible") {
     ...comoAgenteInterno(e.ctx),
     medidor: e.ctx.medidor,
     eventos: e.ctx.eventos,
+    revalidarAccesoSolicitud: async () => "acceso-ficticio",
   };
   return { ...e, ctx, sesion: e.ctx, escrituras: () => escrituras };
 }

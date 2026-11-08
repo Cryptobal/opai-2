@@ -31,5 +31,5 @@ export {
 } from "./opciones";
 export { entrarConPin, type ResultadoPin } from "./pin";
 export { correoDeRecuperacion } from "./recuperacion";
-export { getSession, requireSession, sesionDeRequest, type Sesion } from "./session";
+export { getSession, requireSession, sesionDeRequest, sesionVigente, type Sesion } from "./session";
 export { crearUsuarioConPassword } from "./usuarios";
