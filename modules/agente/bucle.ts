@@ -78,7 +78,8 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     plan.tokens += r.uso.tokensEntrada + r.uso.tokensSalida;
     plan.texto = r.texto;
     if (plan.tokens > MAX_TOKENS) throw prohibido("Se alcanzó el límite de tokens del turno.");
-    mensajes.push({ rol: "asistente", texto: r.texto, llamadas: r.llamadas });
+    mensajes.push({ rol: "asistente", texto: r.texto, llamadas: r.llamadas,
+      ...(r.continuidad ? { continuidad: r.continuidad } : {}) });
     if (!r.llamadas.length) return plan;
     for (const llamada of r.llamadas) {
       await revalidarAccesoDelTurno(ctx);

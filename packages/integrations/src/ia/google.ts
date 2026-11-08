@@ -1,5 +1,6 @@
 // Adaptador de Google (generateContent) con functionDeclarations y stream SSE. Salida estructurada:
 // responseMimeType + responseSchema (Gemini no necesita una herramienta). Sin SDK.
+import { rechazarContinuidad } from "./anthropic-continuidad";
 import type {
   EventoStream,
   LlamadaHerramienta,
@@ -82,6 +83,7 @@ export function google(apiKey: string): ProveedorIa {
   const self: ProveedorIa = {
     id: "ia_google",
     async conversar(modelo, s) {
+      rechazarContinuidad(s);
       const url = `${base}/${encodeURIComponent(modelo)}:generateContent`;
       const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(s)) }, "Google");
       const d = await cuerpo<RespG>(r, "Google", apiKey);
@@ -107,6 +109,7 @@ async function* streamGoogle(
   modelo: string,
   s: SolicitudConversacion,
 ): AsyncGenerator<EventoStream> {
+  rechazarContinuidad(s);
   const url = `${base}/${encodeURIComponent(modelo)}:streamGenerateContent?alt=sse`;
   const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(s)) }, "Google");
   let texto = "";
