@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 632 pares pantalla→capacidad · 569 con herramienta · 63 excepciones justificadas · 0 faltantes.
+**Resumen:** 634 pares pantalla→capacidad · 571 con herramienta · 63 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -336,8 +336,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.libro_resumen` | `finanzas_ventas_libro_resumen` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.pdf` | `finanzas_ventas_pdf` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
-| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.actualizar` | `finanzas_ventas_programacion_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.cambiar_estado` | `finanzas_ventas_programacion_cambiar_estado` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.crear` | `finanzas_ventas_programacion_crear` | existe |
@@ -629,6 +630,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/trabajos` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/trabajos` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform` | `platform.tenants.list` | `platform_tenants_list` | existe |
+| servidor | `lib/cuentas-paginadas.ts` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.cargos.get` | `core_cargos_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |

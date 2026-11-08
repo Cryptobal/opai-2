@@ -1,6 +1,8 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { LinkNext } from "@/app/_components/link-next";
-import { Badge, estilosBoton, ListScreen, Tabs, type EstadoPantalla } from "@opai/ds";
+import { Badge, estilosBoton, ListScreen, type EstadoPantalla } from "@opai/ds";
+
+import { PestanasVentas } from "../../_componentes/pestanas-ventas";
 
 import { pesos } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
@@ -60,17 +62,7 @@ export default function ProgramacionVentasPage() {
 function Contenido({ state, items }: { state: EstadoPantalla; items: Programacion[] }) {
   return (
     <div className="flex flex-col gap-3">
-      <LinkNext href="/finanzas/ventas" className="text-sm text-fg-muted">
-        ← Libro de ventas
-      </LinkNext>
-      <Tabs
-        Link={LinkNext}
-        activa="plantillas"
-        tabs={[
-          { id: "plantillas", etiqueta: "Plantillas", href: "/finanzas/ventas/programacion" },
-          { id: "tablero", etiqueta: "Tablero del mes", href: "/finanzas/ventas/programacion/cierre" },
-        ]}
-      />
+      <PestanasVentas activa="plantillas" />
       <ListScreen<Programacion>
         state={state}
         titulo="Programación recurrente"
