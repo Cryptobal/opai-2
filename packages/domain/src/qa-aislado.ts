@@ -89,3 +89,33 @@ export type UsuarioQa = { slug: string; rol: RolQa; correo: string };
 export function planUsuariosQa(): UsuarioQa[] {
   return QA_AISLADO.tenants.flatMap((slug) => ROLES_QA.map((rol) => ({ slug, rol, correo: correoQa(slug, rol) })));
 }
+
+export type EstadoBaseQa = {
+  /** `current_database()` de la conexión del propietario. */
+  baseActual: string;
+  /** Esquemas de usuario de la base (sin los del sistema ni `public`). */
+  esquemas: readonly string[];
+  /** Slugs de `core.tenants`; null si la tabla no existe. */
+  slugs: readonly string[] | null;
+};
+
+export type DiagnosticoBaseQa = { estado: "vacia" | "con_qa" | "ajena"; problemas: string[] };
+
+/**
+ * Preflight de SOLO LECTURA antes de escribir nada: ¿esta base es el QA aislado vacío (o ya sembrado solo con empresas
+ * `qa-*`)? Todo lo demás es «ajena» y el procedimiento no sigue: base con otro nombre, esquemas sin el núcleo de OPAI
+ * (no está vacía) o cualquier empresa que no sea de QA (por ejemplo `gard`).
+ */
+export function diagnosticoBaseQa(e: EstadoBaseQa): DiagnosticoBaseQa {
+  const problemas: string[] = [];
+  if (e.baseActual !== QA_AISLADO.base) problemas.push(`La base conectada no se llama ${QA_AISLADO.base}.`);
+  if (e.esquemas.length === 0) {
+    return problemas.length > 0 ? { estado: "ajena", problemas } : { estado: "vacia", problemas };
+  }
+  if (e.slugs === null) problemas.push("La base tiene esquemas pero no el núcleo de OPAI: no es la base vacía del QA.");
+  else {
+    const ajenas = e.slugs.filter((s) => !/^qa-[a-z0-9-]+$/.test(s));
+    if (ajenas.length > 0) problemas.push(`La base tiene ${ajenas.length} empresa(s) que no son de QA: no es el QA aislado.`);
+  }
+  return problemas.length > 0 ? { estado: "ajena", problemas } : { estado: "con_qa", problemas };
+}

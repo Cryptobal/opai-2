@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { correoQa, planUsuariosQa, exigirDestinoQa, exigirSoloEmpresasQa, exigirTenantQaAislado, problemasDestinoQa } from "./qa-aislado";
+import { correoQa, diagnosticoBaseQa, planUsuariosQa, exigirDestinoQa, exigirSoloEmpresasQa, exigirTenantQaAislado, problemasDestinoQa } from "./qa-aislado";
 
 const ok = {
   OPAI_ENTORNO: "qa-aislado",
@@ -53,5 +53,26 @@ describe("QA aislado · guarda del destino (CAR-221)", () => {
     expect(new Set(plan.map((u) => u.correo)).size).toBe(10);
     expect(plan.filter((u) => u.slug === "qa-finanzas-b").map((u) => u.rol)).toEqual(["owner", "admin", "gerente", "supervisor", "viewer"]);
     expect(plan.every((u) => u.correo.endsWith("@qa.opai.test"))).toBe(true);
+  });
+});
+
+describe("diagnosticoBaseQa (preflight de solo lectura)", () => {
+  it("una base vacía con el nombre correcto es el QA vacío", () => {
+    expect(diagnosticoBaseQa({ baseActual: "opai2_qa", esquemas: [], slugs: null })).toEqual({ estado: "vacia", problemas: [] });
+  });
+  it("con empresas solo qa-* es el QA ya sembrado", () => {
+    const r = diagnosticoBaseQa({ baseActual: "opai2_qa", esquemas: ["core", "finanzas"], slugs: ["qa-finanzas-a", "qa-finanzas-b"] });
+    expect(r.estado).toBe("con_qa");
+  });
+  it("rechaza otra base, aunque esté vacía", () => {
+    expect(diagnosticoBaseQa({ baseActual: "opai", esquemas: [], slugs: null }).estado).toBe("ajena");
+  });
+  it("rechaza una base con esquemas pero sin el núcleo de OPAI", () => {
+    expect(diagnosticoBaseQa({ baseActual: "opai2_qa", esquemas: ["otro"], slugs: null }).estado).toBe("ajena");
+  });
+  it("rechaza cualquier empresa que no sea de QA (gard)", () => {
+    const r = diagnosticoBaseQa({ baseActual: "opai2_qa", esquemas: ["core"], slugs: ["qa-finanzas-a", "gard"] });
+    expect(r.estado).toBe("ajena");
+    expect(r.problemas.join(" ")).not.toContain("gard");
   });
 });

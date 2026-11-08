@@ -44,6 +44,7 @@ export OPAI_ENTORNO=qa-aislado OPAI_QA_DESTINO=opai2-qa-aislado SII_ADAPTADOR=si
 # DATABASE_URL (opai_app), DATABASE_URL_MIGRATE (opai2_qa_owner), OPAI_APP_DB_PASSWORD y OPAI_SECRETS_KEY: del canal seguro
 ```
 
+0. **Preflight de solo lectura (antes de migrar o sembrar):** `pnpm --filter @opai/capabilities qa:preflight`. Confirma por el entorno (`OPAI_ENTORNO`, `OPAI_QA_DESTINO`, base `opai2_qa`, rol `opai_app` y propietario distintos, SII y Octava simulados, sin `RESEND_API_KEY`) y por la base (`current_database()`, sin esquemas ajenos y ninguna empresa que no sea `qa-*`) que el destino es el QA aislado vacío, o ya sembrado solo con `qa-*`. No escribe nada, no imprime URLs ni claves y sale con código 1 ante la menor duda (otra base, esquemas sin el núcleo de OPAI o una empresa como `gard`). **Si falla, no se sigue.** Límite conocido: la conexión de Neon no trae el ID del proyecto, así que el preflight no puede probar que la base `opai2_qa` sea la del proyecto `hidden-credit-29118258` y no otra con el mismo nombre; esa confirmación la hace OPAI 2.0 al entregar las credenciales (misma persona que fija `OPAI_QA_DESTINO`).
 1. **Migraciones** al QA vacío (con el propietario): `pnpm db:deploy`. Crea el esquema completo y el rol `opai_app`.
 2. **Clave del rol de aplicación:** `pnpm --filter @opai/db role:password` (usa `OPAI_APP_DB_PASSWORD`, mínimo 16 caracteres).
 3. **Datos de Finanzas**, una vez por empresa; primero simulación y luego escritura:
