@@ -28,7 +28,7 @@ Precondiciones que **no** crea la semilla y que se cargan solo en la empresa A, 
 | # | Quién | Acción (capacidad) | Resultado esperado |
 | --- | --- | --- | --- |
 | 1 | Ana | Bandeja: listar y abrir REN-910001 y REN-910002 (`rendiciones.bandeja.listar/obtener`) | Ve ambas con «Ver respaldo»; Sofía no ve la bandeja ajena; Vera, «sin permiso». |
-| 2 | Ana | Aprobar las dos (`rendiciones.aprobar`), probar además devolver y rechazar sin motivo | Aprobadas; devolver y rechazar sin motivo se rechazan por validación. Sofía no puede aprobar lo suyo. |
+| 2 | Ana | Aprobar las dos (`rendiciones.rendiciones.aprobar`, `…devolver`, `…rechazar`), probar además devolver y rechazar sin motivo | Aprobadas; devolver y rechazar sin motivo se rechazan por validación. Sofía no puede aprobar lo suyo. |
 | 3 | Gabriel | Crear lote con las tres (`rendiciones.lotes.crear`, antes `preview_…`) | Lote `LP-1` en borrador, total $38.000 calculado por el servidor. Una rendición ya en un lote activo no entra en otro. |
 | 4 | Gabriel | Intentar aprobar su propio lote | Rechazado (quien crea no es el único que aprueba). |
 | 5 | Greta | Aprobar el lote (`rendiciones.lotes.aprobar`) | Estado aprobado; total, cantidad e ítems ya no cambian (trigger). |
