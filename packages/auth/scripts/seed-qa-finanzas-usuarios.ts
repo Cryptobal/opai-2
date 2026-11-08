@@ -13,8 +13,8 @@
 //   pnpm --filter @opai/auth seed:qa-finanzas-usuarios [--confirmar --salida /ruta/segura/credenciales.json] [--rotar-claves]
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
-import { chmodSync, existsSync, writeFileSync } from "node:fs";
-import { isAbsolute, relative, resolve } from "node:path";
+import { closeSync, existsSync, openSync, realpathSync, unlinkSync, writeSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { hashPassword } from "better-auth/crypto";
 
@@ -23,16 +23,39 @@ import { QA_AISLADO, exigirDestinoQa, exigirSoloEmpresasQa, planUsuariosQa } fro
 
 const RAIZ_REPO = resolve(import.meta.dirname, "../../..");
 
-/** El archivo de credenciales no puede quedar dentro del repositorio (se podría commitear por error). */
+/** ¿`ruta` está dentro de `base`? (`..` solo cuenta como componente, no como inicio del nombre: «..cred.json» es un archivo). */
+function estaDentro(base: string, ruta: string): boolean {
+  const rel = relative(base, ruta);
+  return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
+}
+
+/**
+ * El archivo de credenciales no puede quedar dentro del repositorio (se podría commitear por error). Se resuelve el
+ * directorio padre FÍSICAMENTE (symlinks incluidos), que debe existir, y se compara con la raíz real del repositorio.
+ */
 function exigirSalidaFueraDelRepo(ruta: string): string {
-  if (!isAbsolute(ruta)) throw new Error("--salida debe ser una ruta absoluta fuera del repositorio.");
-  const destino = resolve(ruta);
-  const rel = relative(RAIZ_REPO, destino);
-  if (rel === "" || (!rel.startsWith("..") && !isAbsolute(rel))) {
+  if (!isAbsolute(ruta))
+    throw new Error("--salida debe ser una ruta absoluta fuera del repositorio.");
+  const pedido = resolve(ruta);
+  if (!existsSync(dirname(pedido))) throw new Error("--salida: el directorio padre no existe.");
+  const destino = join(realpathSync(dirname(pedido)), basename(pedido));
+  if (estaDentro(realpathSync(RAIZ_REPO), destino)) {
     throw new Error("--salida está dentro del repositorio: usa una ruta fuera de él.");
   }
-  if (existsSync(destino)) throw new Error("--salida ya existe: no se sobreescribe un archivo de credenciales.");
+  if (existsSync(destino))
+    throw new Error("--salida ya existe: no se sobreescribe un archivo de credenciales.");
   return destino;
+}
+
+/** Reserva el archivo (creación exclusiva, 0600) ANTES de tocar cuentas: si no se puede escribir, no se cambia nada. */
+function reservarSalida(destino: string): number {
+  try {
+    return openSync(destino, "wx", 0o600);
+  } catch {
+    throw new Error(
+      "--salida no se puede crear (permisos o directorio): no se modificó ninguna cuenta.",
+    );
+  }
 }
 
 async function main(): Promise<void> {
@@ -49,50 +72,94 @@ async function main(): Promise<void> {
   exigirSoloEmpresasQa(empresas.map((t) => t.slug));
   const porSlug = new Map(empresas.map((t) => [t.slug, t.id]));
   for (const slug of QA_AISLADO.tenants) {
-    if (!porSlug.has(slug)) throw new Error(`Falta la empresa ${slug}: corre primero seed:finanzas-qa para cada empresa.`);
+    if (!porSlug.has(slug))
+      throw new Error(
+        `Falta la empresa ${slug}: corre primero seed:finanzas-qa para cada empresa.`,
+      );
   }
   // Con FORCE RLS el propietario solo ve las filas de todas las empresas si puede saltarse la RLS.
-  const [rol] = await db.$queryRaw<{ ok: boolean }[]>`SELECT rolbypassrls AS ok FROM pg_roles WHERE rolname = current_user`;
-  if (!rol?.ok) throw new Error("DATABASE_URL_MIGRATE debe ser un propietario con BYPASSRLS (rol del proyecto de QA).");
+  const [rol] = await db.$queryRaw<
+    { ok: boolean }[]
+  >`SELECT rolbypassrls AS ok FROM pg_roles WHERE rolname = current_user`;
+  if (!rol?.ok)
+    throw new Error(
+      "DATABASE_URL_MIGRATE debe ser un propietario con BYPASSRLS (rol del proyecto de QA).",
+    );
 
   const plan = planUsuariosQa();
   if (!confirmar) {
-    console.log(`Simulación: se crearían/verificarían ${plan.length} usuarios (5 roles × ${QA_AISLADO.tenants.length} empresas) con membresía ERP. Repite con --confirmar --salida <ruta fuera del repo>.`);
+    console.log(
+      `Simulación: se crearían/verificarían ${plan.length} usuarios (5 roles × ${QA_AISLADO.tenants.length} empresas) con membresía ERP. Repite con --confirmar --salida <ruta fuera del repo>.`,
+    );
     return;
   }
 
   const credenciales: { correo: string; empresa: string; rol: string; password: string }[] = [];
   let existentes = 0;
-  for (const u of plan) {
-    const tenantId = porSlug.get(u.slug) as string;
-    let usuario = await db.user.findUnique({ where: { email: u.correo } });
-    if (usuario && !rotar) {
-      existentes += 1;
-    } else {
-      const password = randomBytes(18).toString("base64url");
-      const hash = await hashPassword(password);
-      if (usuario) {
-        await db.account.updateMany({ where: { userId: usuario.id, providerId: "credential" }, data: { password: hash } });
-      } else {
-        const creado = await db.user.create({ data: { email: u.correo, name: `QA ${u.rol} ${u.slug}`, emailVerified: true } });
-        await db.account.create({ data: { userId: creado.id, providerId: "credential", accountId: creado.id, password: hash } });
-        usuario = creado;
+  const fd = reservarSalida(destinoArchivo as string);
+  let cambios = false;
+  try {
+    // Se calculan las claves y los hashes antes; los cambios de cuentas van en UNA transacción cuyo último paso escribe
+    // el archivo: si la escritura falla, se revierte todo y no quedan cuentas con claves que nadie recibió.
+    const nuevos = new Map<string, { password: string; hash: string }>();
+    for (const u of plan) {
+      const existe = await db.user.findUnique({ where: { email: u.correo }, select: { id: true } });
+      if (!existe || rotar) {
+        const password = randomBytes(18).toString("base64url");
+        nuevos.set(u.correo, { password, hash: await hashPassword(password) });
       }
-      credenciales.push({ correo: u.correo, empresa: u.slug, rol: u.rol, password });
     }
-    await db.membership.upsert({
-      where: { tenantId_userId: { tenantId, userId: usuario.id } },
-      update: { rol: u.rol, portales: ["erp"], estado: "activa" },
-      create: { tenantId, userId: usuario.id, rol: u.rol, portales: ["erp"] },
-    });
-  }
-  if (credenciales.length > 0 && destinoArchivo) {
-    writeFileSync(destinoArchivo, `${JSON.stringify(credenciales, null, 2)}\n`, { mode: 0o600 });
-    chmodSync(destinoArchivo, 0o600);
+    await db.$transaction(
+      async (tx) => {
+        for (const u of plan) {
+          const tenantId = porSlug.get(u.slug) as string;
+          let usuario = await tx.user.findUnique({ where: { email: u.correo } });
+          const nuevo = nuevos.get(u.correo);
+          if (!nuevo) {
+            existentes += 1;
+          } else {
+            const { password, hash } = nuevo;
+            if (usuario) {
+              await tx.account.updateMany({
+                where: { userId: usuario.id, providerId: "credential" },
+                data: { password: hash },
+              });
+            } else {
+              const creado = await tx.user.create({
+                data: { email: u.correo, name: `QA ${u.rol} ${u.slug}`, emailVerified: true },
+              });
+              await tx.account.create({
+                data: {
+                  userId: creado.id,
+                  providerId: "credential",
+                  accountId: creado.id,
+                  password: hash,
+                },
+              });
+              usuario = creado;
+            }
+            credenciales.push({ correo: u.correo, empresa: u.slug, rol: u.rol, password });
+          }
+          await tx.membership.upsert({
+            where: { tenantId_userId: { tenantId, userId: usuario.id } },
+            update: { rol: u.rol, portales: ["erp"], estado: "activa" },
+            create: { tenantId, userId: usuario.id, rol: u.rol, portales: ["erp"] },
+          });
+        }
+        if (credenciales.length > 0) writeSync(fd, `${JSON.stringify(credenciales, null, 2)}\n`);
+      },
+      { timeout: 60_000 },
+    );
+    cambios = true;
+  } finally {
+    closeSync(fd);
+    if (!cambios || credenciales.length === 0) unlinkSync(destinoArchivo as string);
   }
   console.log(
     `Listo: ${plan.length} membresías (${credenciales.length} cuentas con clave nueva, ${existentes} ya existían sin tocar su clave). ` +
-      (credenciales.length > 0 ? "Credenciales en el archivo --salida (0600): entrégalas por el canal seguro y bórralo." : "Sin credenciales nuevas."),
+      (credenciales.length > 0
+        ? "Credenciales en el archivo --salida (0600): entrégalas por el canal seguro y bórralo."
+        : "Sin credenciales nuevas."),
   );
 }
 
