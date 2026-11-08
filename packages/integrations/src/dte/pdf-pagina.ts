@@ -85,7 +85,8 @@ function detalle(p: PDFPage, d: PdfDteInput, r: Recursos) {
     arriba += 22;
   });
   p.drawLine({ start: { x: 30, y: y(arriba) }, end: { x: 582, y: y(arriba) }, thickness: 0.6, color: GRIS });
-  if (d.glosa) renglones(d.glosa, 110).slice(0, 3).forEach((t, k) => texto(p, t, 30, arriba + 6 + k * 10, r.normal, 8));
+  const glosaRepetida = d.lineas.some((l) => limpio(l.descripcion) === limpio(d.glosa));
+  if (d.glosa && !glosaRepetida) renglones(d.glosa, 110).slice(0, 3).forEach((t, k) => texto(p, t, 30, arriba + 6 + k * 10, r.normal, 8));
 }
 
 function totales(p: PDFPage, d: PdfDteInput, r: Recursos) {
@@ -103,7 +104,7 @@ function totales(p: PDFPage, d: PdfDteInput, r: Recursos) {
 function pie(p: PDFPage, d: PdfDteInput, r: Recursos) {
   p.drawImage(r.timbre, { x: 28, y: y(738), width: 200, height: 76 });
   texto(p, "Timbre Electrónico SII", 30, 744, r.normal, 8);
-  const res = d.resolucion ? `Res. N° ${d.resolucion.numero} de ${fechaLarga(d.resolucion.fecha)}` : "Resolución: —";
+  const res = d.resolucion ? `Res. N° ${d.resolucion.numero} de ${fechaLarga(d.resolucion.fecha)}` : "Resolución: sin datos";
   texto(p, `${res} - Verifique Documento: www.sii.cl`, 30, 755, r.normal, 8);
 }
 

@@ -43,6 +43,11 @@ describe("PDF del DTE", () => {
     };
     expect(await paginas(await generarPdfDte(nc))).toBe(1);
   });
+  it("sin resolución imprime un texto legible y no un signo de interrogación", async () => {
+    const { resolucion: _omitida, ...sinRes } = base;
+    const bytes = await generarPdfDte(sinRes);
+    expect(await paginas(bytes)).toBe(2);
+  });
   it("caracteres fuera de Latin-1 no rompen el PDF", async () => {
     const bytes = await generarPdfDte({ ...base, glosa: "Servicio ✓ 日本 con ñ y tildes áéíóú" });
     expect(await paginas(bytes)).toBe(2);
