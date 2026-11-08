@@ -40,6 +40,21 @@ export type DestinatarioEnvio = {
   nombre?: string;
 };
 
+/**
+ * Contrato de campos congelado al enviar (CAR-138): versión del catálogo, claves usadas y los valores
+ * ya resueltos con los que se generó el PDF. Ausente en envíos anteriores o sin tokens.
+ */
+export type ContratoCamposEnvio = {
+  versionCatalogo: number;
+  finalidad: "propuesta";
+  usados: string[];
+  valores: {
+    campos: Record<string, string | number | boolean | null>;
+    colecciones: { instalaciones: Record<string, string | number | boolean | null>[] };
+  };
+  faltantes: string[];
+};
+
 export type SnapshotEnvioPropuesta = {
   marcaDocumentoVersion: number;
   plantillaDocumentoId: string;
@@ -47,6 +62,7 @@ export type SnapshotEnvioPropuesta = {
   bloquesBiblioteca: Record<string, number>;
   propuestaBloquesJson: string;
   destinatarios: DestinatarioEnvio[];
+  camposContrato?: ContratoCamposEnvio;
 };
 
 export const PLANTILLA_PROPUESTA_DEFECTO: BloquePlantillaPropuesta[] = [

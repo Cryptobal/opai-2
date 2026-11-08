@@ -29,3 +29,11 @@ export async function requireSession(): Promise<Sesion> {
 export async function sesionDeRequest(req: Request): Promise<Sesion | null> {
   return auth.api.getSession({ headers: req.headers });
 }
+
+/** Revalida una operación larga contra la base, sin caché de cookie ni renovar la sesión. */
+export async function sesionVigente(cabeceras?: Headers): Promise<Sesion | null> {
+  return auth.api.getSession({
+    headers: cabeceras ?? (await headers()),
+    query: { disableCookieCache: true, disableRefresh: true },
+  });
+}
