@@ -24,7 +24,10 @@ export const recifradoresInventarioNucleo: Readonly<Record<string, Recifrador>> 
     });
     return recifrarStringColumna(
       filas.map((f) => ({ id: f.id, valor: f.planIsapre })),
-      (id, valor) => tx.personaPrevision.update({ where: { id }, data: { planIsapre: valor } }).then(() => undefined),
+      (id, valor) =>
+        tx.personaPrevision
+          .update({ where: { id }, data: { planIsapre: valor } })
+          .then(() => undefined),
       recifrar,
     );
   },
@@ -35,7 +38,10 @@ export const recifradoresInventarioNucleo: Readonly<Record<string, Recifrador>> 
     });
     return recifrarStringColumna(
       filas.map((f) => ({ id: f.id, valor: f.numeroCuenta })),
-      (id, valor) => tx.personaPago.update({ where: { id }, data: { numeroCuenta: valor } }).then(() => undefined),
+      (id, valor) =>
+        tx.personaPago
+          .update({ where: { id }, data: { numeroCuenta: valor } })
+          .then(() => undefined),
       recifrar,
     );
   },
@@ -47,7 +53,22 @@ export const recifradoresInventarioNucleo: Readonly<Record<string, Recifrador>> 
     return recifrarStringColumna(
       filas.map((f) => ({ id: f.id, valor: f.numeroCuenta })),
       (id, valor) =>
-        tx.personaPagoSolicitud.update({ where: { id }, data: { numeroCuenta: valor } }).then(() => undefined),
+        tx.personaPagoSolicitud
+          .update({ where: { id }, data: { numeroCuenta: valor } })
+          .then(() => undefined),
+      recifrar,
+    );
+  },
+  "enrolamientos_biometricos.referencia_cifrada": async (tx, recifrar) => {
+    const filas = await tx.enrolamientoBiometrico.findMany({
+      select: { id: true, referenciaCifrada: true },
+    });
+    return recifrarStringColumna(
+      filas.map((f) => ({ id: f.id, valor: f.referenciaCifrada })),
+      (id, valor) =>
+        tx.enrolamientoBiometrico
+          .update({ where: { id }, data: { referenciaCifrada: valor } })
+          .then(() => undefined),
       recifrar,
     );
   },

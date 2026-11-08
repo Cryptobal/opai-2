@@ -14,6 +14,8 @@
     "seed:platform-owner": "tsx scripts/seed-platform-owner.ts",
     "seed:e2e-mfa": "tsx scripts/seed-e2e-mfa.ts",
     "seed:multiempresa-e2e": "tsx scripts/seed-multiempresa-e2e.ts",
+    "seed:qa-finanzas-usuarios": "tsx scripts/seed-qa-finanzas-usuarios.ts",
+    "seed:rendiciones-r3-e2e": "tsx scripts/seed-rendiciones-r3-e2e.ts",
     "test": "vitest run"
   },
   "dependencies": {

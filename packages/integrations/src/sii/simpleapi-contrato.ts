@@ -64,9 +64,10 @@ export function jsonInputGenerarDte(
     MontoItem: l.monto,
   }));
   const referencias = (payload.referencias ?? []).map((r) => ({
-    FechaDocumentoReferencia: fechaSii(payload.fechaEmision),
+    // FchRef es la fecha del documento referenciado, no la de este DTE; sin dato, la de emisión (filas antiguas).
+    FechaDocumentoReferencia: fechaSii(r.fecha ?? payload.fechaEmision),
     TipoDocumento: String(r.tipoDte),
-    CodigoReferencia: r.codigo,
+    ...(r.codigo != null ? { CodigoReferencia: r.codigo } : {}),
     ...(r.razon ? { RazonReferencia: r.razon } : {}),
     FolioReferencia: String(r.folio),
   }));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Combobox, Input, InputFecha, Sheet } from "@opai/ds";
 
@@ -29,26 +29,33 @@ function Formulario({ puesto, subtitulo, titulares, onCerrar }: { puesto: Puesto
   const [inicio, setInicio] = useState(hoy);
   const [propio, setPropio] = useState(false);
   const [motivo, setMotivo] = useState("");
+  const [horas, setHoras] = useState("");
+  const [distribucion, setDistribucion] = useState("");
+  const [pedirJornada, setPedirJornada] = useState(false);
   const [calculada, setCalculada] = useState<{ clave: string; datos: PrevisualizacionTraslado } | null>(null);
   const listo = Boolean(destino && desde && inicio && motivo.trim().length >= 5);
-  const input = { personaId: titulares.titularActualId, puestoDestinoId: destino, desde, inicioCiclo: inicio, motivo: motivo.trim() };
+  const nHoras = Number(horas);
+  const input = {
+    personaId: titulares.titularActualId, puestoDestinoId: destino, desde, inicioCiclo: inicio, motivo: motivo.trim(),
+    ...(horas.trim() !== "" && Number.isInteger(nHoras) ? { horasSemanales: nHoras } : {}),
+    ...(distribucion.trim() ? { distribucion: distribucion.trim() } : {}),
+  };
   const clave = JSON.stringify(input);
   const previa = listo && calculada?.clave === clave ? calculada.datos : null;
 
-  // Vista previa en vivo (dryRun): series que se cierran, vínculo y primeros días.
+  // Vista previa en vivo (dryRun) al elegir destino y motivo; el botón principal la repite si falló.
+  const calcular = useCallback(async (c: string) => {
+    const r = await ejecutar<PrevisualizacionTraslado>("pauta.titular.trasladar", JSON.parse(c), true);
+    if (!r) return;
+    setCalculada({ clave: c, datos: r });
+    if (r.faltaJornada) setPedirJornada(true);
+  }, [ejecutar]);
   useEffect(() => {
     if (!listo) return;
-    let vigente = true;
-    const t = setTimeout(() => {
-      void ejecutar<PrevisualizacionTraslado>("pauta.titular.trasladar", JSON.parse(clave), true).then((r) => {
-        if (vigente && r) setCalculada({ clave, datos: r });
-      });
-    }, 300);
-    return () => {
-      vigente = false;
-      clearTimeout(t);
-    };
-  }, [clave, listo, ejecutar]);
+    const t = setTimeout(() => void calcular(clave), 300);
+    return () => clearTimeout(t);
+  }, [clave, listo, calcular]);
+  const faltaJornada = previa?.faltaJornada ?? false;
 
   async function confirmar() {
     if (await ejecutar("pauta.titular.trasladar", input)) {
@@ -65,12 +72,16 @@ function Formulario({ puesto, subtitulo, titulares, onCerrar }: { puesto: Puesto
       acciones={
         <>
           <Button variant="secondary" onClick={onCerrar}>Cancelar</Button>
-          <Button disabled={!previa || pendiente} cargando={pendiente && Boolean(previa)} onClick={() => void confirmar()}>Trasladar</Button>
+          {previa ? (
+            <Button disabled={pendiente || faltaJornada} cargando={pendiente} onClick={() => void confirmar()}>Trasladar</Button>
+          ) : (
+            <Button disabled={!listo || pendiente} cargando={pendiente} onClick={() => void calcular(clave)}>Ver vista previa</Button>
+          )}
         </>
       }
     >
       <div className="flex flex-col gap-4">
-        {error && listo ? <Alerta tono="danger" titulo="No se puede trasladar">{error}</Alerta> : null}
+        {error ? <Alerta tono="danger" titulo="No se puede trasladar">{error}</Alerta> : null}
         <Campo etiqueta="Puesto de destino" htmlFor="tr-destino" ayuda="Puestos activos con patrón, de esta u otra instalación.">
           <Combobox id="tr-destino" opciones={titulares.destinos.map((d) => ({ valor: d.id, etiqueta: d.etiqueta }))} valor={destino} onCambiar={([v]) => setDestino(v ?? "")} placeholder="Elegir puesto" />
         </Campo>
@@ -83,6 +94,13 @@ function Formulario({ puesto, subtitulo, titulares, onCerrar }: { puesto: Puesto
         <Campo etiqueta="Motivo" htmlFor="tr-motivo" ayuda="Queda en la auditoría y en el vínculo anterior (mínimo 5 caracteres).">
           <Input id="tr-motivo" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
         </Campo>
+        {pedirJornada ? (
+          <>
+            <Alerta tono="warning" titulo="Falta la jornada pactada">El vínculo actual no la tiene y el vínculo nuevo la exige: indica las horas semanales y la distribución.</Alerta>
+            <Campo etiqueta="Horas semanales" htmlFor="tr-horas"><Input id="tr-horas" inputMode="numeric" value={horas} onChange={(e) => setHoras(e.target.value)} /></Campo>
+            <Campo etiqueta="Distribución" htmlFor="tr-distribucion" ayuda="Por ejemplo: 4x4, 12 horas."><Input id="tr-distribucion" value={distribucion} onChange={(e) => setDistribucion(e.target.value)} /></Campo>
+          </>
+        ) : null}
         {previa ? (
           <div className="flex flex-col gap-3" aria-live="polite">
             <p className="t-label">Vista previa</p>

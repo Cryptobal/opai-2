@@ -4,6 +4,7 @@ export * from "./almacenamiento/r2";
 export * from "./catalogo";
 export * from "./email";
 export * from "./firma";
+export * from "./biometria";
 export * from "./sii";
 export * from "./cesion";
 export * from "./dte/pdf";

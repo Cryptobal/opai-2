@@ -1,4 +1,5 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
+export { trabajoPruebasGratis } from "./core/pruebas-gratis";
 export {
   consumidorAvisoPrueba,
   trabajoCobrosMesAnterior,
@@ -10,6 +11,8 @@ export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
+export { accesoDelActor } from "./portal-cliente/comun";
+export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
@@ -23,7 +26,7 @@ export {
   estaCifrado,
   type CifradoDeCampos,
 } from "./core/cumplimiento/cifrado-campos";
-export { enviarCorreo } from "./core/comunicaciones";
+export { enviarCorreo, previsualizarCorreo } from "./core/comunicaciones";
 export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";
 export { plataformaVigente } from "./core/apikey-scopes";
 export { catalogoPermisos } from "./core/me";
@@ -63,7 +66,8 @@ export {
   type Permiso,
   registrarModulos,
 } from "./module";
-export { portalesDe, restriccion } from "./autorizacion";
+export { portalesDe, restriccion, tienePermisoDeCapacidad } from "./autorizacion";
+export { dondeCuenta, dondeInstalacion, dondePersona } from "./core/maestros/alcance";
 export {
   type Consumidor,
   consumidoresDe,
@@ -111,3 +115,8 @@ export {
   mutualAdicionalTenant,
   publicacionesParaFecha,
 } from "./core/remuneraciones";
+export {
+  resolverCamposDocumento,
+  type EntradaValoresCampos,
+  type ValoresCamposResueltos,
+} from "./core/campos/valores-resolver";

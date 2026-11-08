@@ -20,6 +20,7 @@ vi.mock("@/app/_components/cabecera-pagina", () => ({
   CabeceraPagina: ({ insignia }: { insignia?: ReactNode }) => insignia ?? null,
 }));
 vi.mock("@/app/_components/marcador-metricas", () => ({ MarcadorMetricas: () => null }));
+vi.mock("@/app/_acciones/auth", () => ({ accionSalir: vi.fn() }));
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
 vi.stubEnv("DATABASE_URL", "postgresql://opai_app:x@localhost:5432/opai");

@@ -56,8 +56,8 @@ test.describe("Finanzas · Compras", () => {
     const sinScrollHorizontal = async () =>
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 
-    // 06 · Plan de cuentas: carga la plantilla si el tenant aún no la tiene.
-    await page.goto("/finanzas/plan-de-cuentas");
+    // 06 · Plan de cuentas (en Configuración › Finanzas): carga la plantilla si el tenant aún no la tiene.
+    await page.goto("/configuracion/modulo/finanzas?seccion=plan-cuentas");
     const cargar = page.getByRole("button", { name: "Cargar plantilla chilena" });
     // La página carga bajo Suspense: espera el botón o el plan ya cargado antes de decidir.
     await cargar.or(page.getByText("Deudores por venta").first()).first().waitFor({ timeout: 30_000 });

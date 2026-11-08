@@ -78,4 +78,16 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Aceptar u objetar una corrección desde el Portal Trabajador: la pantalla entra con el diseño aprobado del portal (A3). Mientras tanto responde por el enlace del correo personal (página pública, capacidad interna).",
   },
+  "core.biometria.enrolar": {
+    encargo: "CAR-78",
+    desde: "2026-11-10",
+    motivo:
+      "El enrolamiento del rostro necesita la cámara y la pantalla de Face ID de Asistencia (frente «Face ID»); B4 deja el adaptador, la base y la capacidad. Mientras tanto no hay quién enrole: nadie queda con reconocimiento facial y se marca con RUT y PIN.",
+  },
+  "core.biometria.verificar": {
+    encargo: "CAR-78",
+    desde: "2026-11-10",
+    motivo:
+      "La verificación con prueba de vida se invoca desde la marcación de Asistencia (frente «Face ID»), que aporta la cámara; B4 deja el adaptador y la capacidad.",
+  },
 };

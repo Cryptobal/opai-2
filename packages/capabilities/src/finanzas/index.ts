@@ -21,11 +21,13 @@ import {
   ventasCrearBorrador,
   ventasEmitir,
   ventasEmitirNotaCredito,
+  ventasEmitirNotaDebito,
   ventasEnviarSii,
 } from "./ventas-escritura";
 import { reporteResultados } from "./reportes-resultados";
 import { ventasBuscar } from "./ventas-buscar";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
+import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
 import { ventasEnvios } from "./ventas-envios";
 import { ventasPdf } from "./ventas-pdf";
@@ -99,11 +101,14 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasPreflightEmision,
   ventasEnviarSii,
   ventasEmitirNotaCredito,
+  ventasEmitirNotaDebito,
   ventasProyeccionFlujo,
   ventasCesionSimular,
   ventasCesionCeder,
   ventasCesionListar,
   ventasPdf,
+  ventasDestinatariosSugeridos,
+  ventasGuardarDestinatarios,
   ventasEnviarCliente,
   ventasEnvios,
   foliosListar,

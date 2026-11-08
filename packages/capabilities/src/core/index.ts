@@ -1,9 +1,12 @@
+/* eslint-disable max-lines -- registro único del núcleo: una línea por capacidad y consumidor (CAR-78 B4 suma biometría) */
 import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { capacidadesAnexos, consumidorAnexos } from "./anexos";
+import { capacidadesCampos } from "./campos";
+import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
-import { modulesSolicitar } from "./modulos-solicitar";
+import { capacidadesModulos } from "./modulos-acciones";
 import {
   bitacoraVerificar,
   platformBitacoraEstado,
@@ -76,7 +79,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   invitationsAccept,
   invitationsRequestNew,
   modulesList,
-  modulesSolicitar,
+  ...capacidadesModulos,
   apikeysList,
   apikeysCreate,
   apikeysRevoke,
@@ -119,6 +122,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesCalendario,
   ...capacidadesRemuneraciones,
   ...capacidadesAnexos,
+  ...capacidadesCampos,
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesDocumentos,
@@ -141,6 +145,7 @@ export const consumidoresDelNucleo = [
   consumidorSeguimientoAviso,
   consumidorNegocioGanado,
   consumidorCpqGanado, consumidorTurnosEsperados,
+  consumidorRevocacionBiometria,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */

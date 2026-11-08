@@ -1,4 +1,11 @@
-import { forTenant, forUser, tenantPorSlug, usuarioPorId } from "@opai/db";
+import {
+  forTenant,
+  forUser,
+  tenantPorSlug,
+  usuarioPorId,
+  estadoSesionEnTransaccion,
+  type TenantTx,
+} from "@opai/db";
 import type { Excepcion } from "@opai/domain";
 
 import { instalacionesDeContactoCliente } from "./fuentes-cliente";
@@ -69,6 +76,10 @@ export type Fuentes = {
 const ACTIVOS = ["activo", "trial", "solo_lectura"];
 const SOLO_LECTURA = "solo_lectura";
 
+/** Fuente estrecha de identidad: sesión ya autenticada, misma conexión del guardado. */
+export const sesionEnTransaccion = (tx: TenantTx, id: string, usuario: string) =>
+  estadoSesionEnTransaccion(tx, id, usuario);
+
 export const fuentesReales: Fuentes = {
   membresiasDe: (userId) =>
     forUser(userId).membership.findMany({
@@ -105,8 +116,12 @@ export const fuentesReales: Fuentes = {
   },
 };
 
-async function accesoConModulos(tenantId: string, userId: string) {
-  const m = await forTenant(tenantId).membership.findUnique({
+export async function accesoConModulos(
+  tenantId: string,
+  userId: string,
+  db: TenantTx = forTenant(tenantId),
+) {
+  const m = await db.membership.findUnique({
     where: { tenantId_userId: { tenantId, userId } },
     include: {
       rolTenant: true,
@@ -125,13 +140,13 @@ async function accesoConModulos(tenantId: string, userId: string) {
   const instalaciones =
     m?.rol === "supervisor"
       ? (
-          await forTenant(tenantId).supervisorInstalacion.findMany({
+          await db.supervisorInstalacion.findMany({
             where: { membershipId: m.id },
             select: { instalacionId: true },
           })
         ).map((s) => s.instalacionId)
       : m
-        ? await instalacionesDeContactoCliente(tenantId, m)
+        ? await instalacionesDeContactoCliente(tenantId, m, db)
         : null;
   const acceso: AccesoFila = {
     // Sin rol personalizado (roleId null) manda el rol base. Con un rol personalizado archivado se
