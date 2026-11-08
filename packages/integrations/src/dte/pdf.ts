@@ -14,6 +14,10 @@ export async function generarPdfDte(input: PdfDteInput): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   doc.setTitle(`DTE ${input.tipoDte} N° ${input.folio}`);
   doc.setProducer("OPAI 2.0");
+  // Fechas fijas (la de emisión): el mismo documento da siempre los mismos bytes, útil para evidencia reproducible.
+  const fechaDoc = new Date(`${input.fechaEmision || "1970-01-01"}T00:00:00Z`);
+  doc.setCreationDate(fechaDoc);
+  doc.setModificationDate(fechaDoc);
   const recursos = {
     normal: await doc.embedFont(StandardFonts.Helvetica),
     negrita: await doc.embedFont(StandardFonts.HelveticaBold),

@@ -2,6 +2,7 @@ import { PDFDocument } from "pdf-lib";
 import { describe, expect, it } from "vitest";
 
 import { generarPdfDte, type PdfDteInput } from "./pdf";
+import { FIXTURE_FACTURA, FIXTURE_NC } from "./pdf-fixtures";
 
 const base: PdfDteInput = {
   tipoDte: 33,
@@ -27,6 +28,11 @@ async function paginas(bytes: Uint8Array) {
 }
 
 describe("PDF del DTE", () => {
+  it("el mismo fixture da siempre los mismos bytes (evidencia reproducible)", async () => {
+    const [a, b] = [await generarPdfDte(FIXTURE_FACTURA), await generarPdfDte(FIXTURE_FACTURA)];
+    expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true);
+    expect(await paginas(await generarPdfDte(FIXTURE_NC))).toBe(1);
+  });
   it("la factura trae el original y la copia CEDIBLE", async () => {
     const bytes = await generarPdfDte(base);
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");

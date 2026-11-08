@@ -79,7 +79,7 @@ function detalle(p: PDFPage, d: PdfDteInput, r: Recursos) {
   d.lineas.slice(0, 22).forEach((l, i) => {
     texto(p, String(i + 1), 34, arriba, r.normal, 8);
     renglones(l.descripcion, 62).slice(0, 2).forEach((t, k) => texto(p, t, 58, arriba + k * 10, r.normal, 8));
-    alDerecha(p, l.cantidad ?? "1", 416, arriba, r.normal);
+    if (l.cantidad !== undefined) alDerecha(p, l.cantidad, 416, arriba, r.normal);
     if (l.precio !== undefined) alDerecha(p, pesos(l.precio), 480, arriba, r.normal);
     alDerecha(p, pesos(l.monto), 578, arriba, r.normal);
     arriba += 22;

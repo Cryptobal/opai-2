@@ -18,6 +18,25 @@ type DocPdf = {
   glosa: string | null;
 };
 
+type Perfil = { razonSocial: string | null; giro: string | null; calle: string | null; comuna: string | null; telefono: string | null } | null;
+
+/** Datos del emisor desde el perfil de la empresa (ADR-028); lo que no esté cargado no se inventa ni se imprime. */
+export function emisorDePerfil(perfil: Perfil, nombreTenant: string | undefined, rut: string) {
+  const limpio = (v: string | null | undefined) => v?.trim() || undefined;
+  const giro = limpio(perfil?.giro);
+  const direccion = limpio(perfil?.calle);
+  const comuna = limpio(perfil?.comuna);
+  const fono = limpio(perfil?.telefono);
+  return {
+    razon: limpio(perfil?.razonSocial) ?? nombreTenant ?? "Emisor",
+    rut,
+    ...(giro ? { giro } : {}),
+    ...(direccion ? { direccion } : {}),
+    ...(comuna ? { comuna } : {}),
+    ...(fono ? { fono } : {}),
+  };
+}
+
 const dia = (d: Date | null | undefined) => d?.toISOString().slice(0, 10) ?? "";
 
 /** Representación impresa (PDF) de un documento emitido y firmado; la usan la ficha y el envío al cliente. */
@@ -25,10 +44,11 @@ export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8A
   if (doc.folio == null || !doc.timbrePdf417) {
     throw reglaDeNegocio("Solo hay PDF para documentos emitidos y firmados.");
   }
-  const [cuenta, rutEmisor, tenant, lineas, referencias, cfg] = await Promise.all([
+  const [cuenta, rutEmisor, tenant, perfil, lineas, referencias, cfg] = await Promise.all([
     cuentaDe(ctx, doc.cuentaId),
     rutEmisorDe(ctx),
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
+    ctx.db.perfilEmpresa.findUnique({ where: { tenantId: ctx.tenantId } }),
     ctx.db.documentoEmitidoLinea.findMany({ where: { documentoId: doc.id }, orderBy: { orden: "asc" } }),
     ctx.db.documentoEmitidoReferencia.findMany({ where: { documentoId: doc.id }, orderBy: { id: "asc" } }),
     ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } }),
@@ -38,7 +58,7 @@ export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8A
     tipoDte: doc.tipoDte,
     folio: doc.folio,
     fechaEmision: dia(doc.fechaEmision),
-    emisor: { razon: tenant?.nombre ?? "Emisor", rut: rutEmisor },
+    emisor: emisorDePerfil(perfil, tenant?.nombre, rutEmisor),
     receptor: {
       razon: r.razonSocialReceptor,
       rut: cuenta.rut ?? "66000000-0",
