@@ -36,7 +36,7 @@ export default async function EmitirVentaPage() {
         };
       }}
       opciones={() => ({
-        titulo: "Emitir factura electrónica",
+        titulo: "Emitir documento electrónico",
         volver: { href: "/finanzas/ventas", etiqueta: "Ventas (DTE)" },
       })}
     >
