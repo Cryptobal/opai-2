@@ -3,6 +3,23 @@ import { ErrorCapacidad } from "./errores";
 import type { Capacidad, Contexto, Resultado } from "./types";
 
 /**
+ * Código categórico del error de base de datos (`P2024`, `P2034`, `08006`, `57P01`…), sin mensaje ni
+ * valores: lo mínimo para distinguir un pool agotado, un conflicto de escritura o una conexión cortada.
+ * Prisma lo deja en `code`; el adaptador de pg lo deja en `cause.originalCode` o `cause.kind`.
+ */
+export function codigoDeBase(error: unknown): string | null {
+  const codigo = /^[A-Za-z0-9_]{3,40}$/;
+  const candidatos: unknown[] = [];
+  for (let e: unknown = error, i = 0; e && typeof e === "object" && i < 4; i += 1) {
+    const o = e as { code?: unknown; originalCode?: unknown; kind?: unknown; cause?: unknown };
+    candidatos.push(o.code, o.originalCode, o.kind);
+    e = o.cause;
+  }
+  const hallado = candidatos.find((c) => typeof c === "string" && codigo.test(c));
+  return typeof hallado === "string" ? hallado : null;
+}
+
+/**
  * Log estructurado de un error inesperado (INTERNAL, CAR-49): solo lo necesario para ubicarlo con
  * la correlación que recibe el usuario o el agente. Nunca el input ni el payload del handler.
  */
@@ -18,6 +35,7 @@ function registrarErrorInesperado(
     tenantId: ctx.conTenant ? ctx.tenantId : null,
     code: "INTERNAL",
     errorName: error instanceof Error ? error.name : typeof error,
+    codigoBase: codigoDeBase(error),
     correlacion,
   });
 }

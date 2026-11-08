@@ -18,6 +18,7 @@ import {
 } from "./conversaciones-escritura";
 import { conversacionesGet, conversacionesList } from "./conversaciones";
 import { historialList } from "./historial";
+import { conErroresIa } from "./errores-ia";
 import { confirmarPlan, firmarPlan } from "./planes";
 
 export const modeloSchema = z.object({
@@ -83,11 +84,13 @@ export const turnoPreparar = defineCapability({
     const firma = secreto();
     // El contexto lo manda el navegador: se revalida con el alcance de la persona antes de usarlo.
     if (input.contexto) await revalidarContexto(delegado, input.contexto);
-    const ia = await iaElegidaDelAgente(delegado, input.modelo);
     const consulta = input.contexto
       ? `${lineaContexto(input.contexto)}\n${input.mensaje}`
       : input.mensaje;
-    const plan = await prepararTurno(delegado, consulta, ia);
+    const plan = await conErroresIa(async () => {
+      const ia = await iaElegidaDelAgente(delegado, input.modelo);
+      return prepararTurno(delegado, consulta, ia);
+    });
     // Guardar corre en la misma transacción que la auditoría (ADR-052): si falla, el turno falla cerrado.
     const conversacionId = await guardarTurno(ctx, {
       conversacionId: input.conversacionId,
