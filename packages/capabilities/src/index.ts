@@ -114,3 +114,8 @@ export {
   mutualAdicionalTenant,
   publicacionesParaFecha,
 } from "./core/remuneraciones";
+export {
+  resolverCamposDocumento,
+  type EntradaValoresCampos,
+  type ValoresCamposResueltos,
+} from "./core/campos/valores-resolver";
