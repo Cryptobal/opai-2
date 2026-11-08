@@ -70,17 +70,21 @@ export function EmitirNota({ tipo, cuentaId }: { tipo: "61" | "56"; cuentaId: st
         : { notaCreditoId: origenId, motivo: motivo.trim() },
     [esNc, origenId, valor, motivo, codigo],
   );
-  const id = esNc ? "finanzas.ventas.emitir_nota_credito" : "finanzas.ventas.emitir_nota_debito";
 
   async function revisar() {
     limpiarError();
-    const r = await ejecutar<Venta>(id, input, true);
+    const r = esNc
+      ? await ejecutar<Venta>("finanzas.ventas.emitir_nota_credito", input, true)
+      : await ejecutar<Venta>("finanzas.ventas.emitir_nota_debito", input, true);
     if (r) setVista(r);
   }
 
   async function emitir() {
     limpiarError();
-    const r = await ejecutar<Venta>(id, input, false, "layout", `${tipo}-${origenId}-${intento}`);
+    const clave = `${tipo}-${origenId}-${intento}`;
+    const r = esNc
+      ? await ejecutar<Venta>("finanzas.ventas.emitir_nota_credito", input, false, "layout", clave)
+      : await ejecutar<Venta>("finanzas.ventas.emitir_nota_debito", input, false, "layout", clave);
     if (!r) return;
     avisar.exito(esNc ? "Nota de crédito emitida" : "Nota de débito emitida");
     router.push(`/finanzas/ventas/${r.id}`);
