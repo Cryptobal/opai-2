@@ -873,6 +873,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.biometria.borrar`
 - `core.biometria.estado`
 - `core.bitacora.verificar`
+- `core.campos.catalogo`
+- `core.campos.valores`
 - `core.consumos.por_recurso`
 - `core.dispositivos.estado`
 - `core.documentos.desvincular`
