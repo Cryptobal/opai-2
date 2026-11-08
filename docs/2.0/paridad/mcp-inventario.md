@@ -861,6 +861,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.jornadas.fijar_tipo`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
+- `comercial.contexto.agregar`
+- `comercial.contexto.archivar`
+- `comercial.contexto.confirmar`
+- `comercial.contexto.listar`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
 - `comercial.negocios.alertas`
