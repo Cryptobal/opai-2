@@ -15,6 +15,7 @@ export * from "./dte-consulta-sii";
 export * from "./cesion-calculo";
 export * from "./bancos";
 export * from "./programacion";
+export * from "./programacion-facturacion";
 export * from "./programacion-montos";
 export * from "./cobranza";
 export * from "./apertura";
