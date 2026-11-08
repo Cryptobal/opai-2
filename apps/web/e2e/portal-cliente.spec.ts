@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { esperarCuentaDeEmpresa } from "./portal-cliente-denegacion";
 import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
@@ -56,7 +57,7 @@ test.describe("Portal Cliente · PR 1", () => {
   test("el portal del cliente es fail-closed: quien no es contacto no entra", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/cliente");
-    await expect(page.getByText(/No tienes acceso a esta sección|No tienes acceso a este portal/i).first()).toBeVisible();
+    await esperarCuentaDeEmpresa(page);
     await page.screenshot({ path: info.outputPath("portal-cliente-sin-acceso.png"), fullPage: true });
   });
 

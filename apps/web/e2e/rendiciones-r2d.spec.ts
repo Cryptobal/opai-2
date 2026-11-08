@@ -1,10 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
-import { entrar } from "./sesion";
+import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-205 · Rendiciones R2d: «sin permiso» que nombra al administrador de la empresa y «Ver respaldo»
-// en la ficha. El viewer (`roles-e2e@opai.cl`, fixture `seed:roles-e2e`) no tiene el permiso de rendir.
+// en la ficha. El viewer propio se prepara aquí: no depende de roles-permisos ni del orden de shards.
 // Los códigos 900001 a 900003 quedan fuera del contador de la empresa (no colisiona con las rendiciones reales).
 // El almacenamiento de archivos no existe en e2e: se comprueba que el botón aparece y que, al pedir la
 // URL firmada sin almacenamiento, la pantalla avisa sin romperse.
@@ -28,8 +28,16 @@ WITH t AS (SELECT id FROM core.tenants WHERE slug = 'gard'),
 INSERT INTO rendiciones.rendicion_items (id, tenant_id, rendicion_id, fecha, proveedor, descripcion, monto, documento_id, orden, updated_at)
 SELECT gen_random_uuid(), r.tenant_id, r.id, current_date, '${motivo}', 'Insumos', 5000, d.id, 0, now() FROM r, d;`;
 
+test.beforeAll(() => {
+  execFileSync("pnpm", ["--filter", "@opai/auth", "exec", "tsx", "scripts/seed-rendiciones-r2d-e2e.ts"], {
+    cwd: new URL("../../..", import.meta.url),
+    env: { ...process.env, E2E_PASSWORD: E2E_PASSWORD ?? "" },
+    stdio: "pipe",
+  });
+});
+
 test("sin permiso: nombra al administrador de la empresa", async ({ page }, info) => {
-  await entrar(page, "roles-e2e@opai.cl");
+  await entrar(page, "r2d-viewer@prueba.invalid");
   await page.goto("/rendiciones");
   await expect(page.getByText("No tienes acceso a Rendiciones")).toBeVisible();
   await expect(
