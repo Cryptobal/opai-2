@@ -30,10 +30,14 @@ async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleA
     return null;
   }
   if (!certificadoRut) return null;
-  const tenant = await ctx.db.tenant.findUnique({
-    where: { id: ctx.tenantId },
-    select: { nombre: true },
-  });
+  const [tenant, perfil] = await Promise.all([
+    ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
+    ctx.db.perfilEmpresa.findUnique({
+      where: { tenantId: ctx.tenantId },
+      select: { razonSocial: true, giro: true, calle: true, comuna: true, ciudad: true },
+    }),
+  ]);
+  const razonSocial = perfil?.razonSocial?.trim() || tenant?.nombre;
   return {
     apiKey,
     certificadoPfxBase64: certificadoPfx,
@@ -42,7 +46,12 @@ async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleA
     rutEmpresa: cfg.rutEmisor.replace(/\./g, "").toUpperCase(),
     resolucionNumero: cfg.resolucionSiiNumero,
     resolucionFecha: cfg.resolucionSiiFecha.toISOString().slice(0, 10),
-    ...(tenant?.nombre ? { razonSocialEmisor: tenant.nombre } : {}),
+    ...(razonSocial ? { razonSocialEmisor: razonSocial } : {}),
+    ...(perfil?.giro?.trim() ? { giroEmisor: perfil.giro.trim() } : {}),
+    ...(cfg.acteco ? { actecoEmisor: cfg.acteco } : {}),
+    ...(perfil?.calle?.trim() ? { direccionEmisor: perfil.calle.trim() } : {}),
+    ...(perfil?.comuna?.trim() ? { comunaEmisor: perfil.comuna.trim() } : {}),
+    ...(perfil?.ciudad?.trim() ? { ciudadEmisor: perfil.ciudad.trim() } : {}),
   };
 }
 

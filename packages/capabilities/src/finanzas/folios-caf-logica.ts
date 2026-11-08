@@ -1,4 +1,5 @@
 import {
+  ambienteCafDesdeLectura,
   esCafMarcadoSintetico,
   folioActualInicialCaf,
   foliosRestantes,
@@ -140,6 +141,7 @@ export async function persistirCafCargado(
         cafVenceEn: lectura.venceEn ? aFecha(lectura.venceEn) : null,
         cafAutorizadoEn: aFecha(lectura.autorizadoEn),
         cafIdk: lectura.idk,
+        cafAmbiente: ambienteCafDesdeLectura(lectura),
         umbralAviso: avisos.umbralFoliosPct,
         activo: true,
       },

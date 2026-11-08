@@ -20,7 +20,8 @@ describe("consumirFolio", () => {
     };
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const findMany = vi.fn().mockResolvedValue([rango]);
-    const tx = { dteFolio: { findMany, updateMany } };
+    const tx = { dteConfig: { findUnique: async () => null },
+      dteFolio: { findMany, updateMany } };
     const ctx = {
       tenantId: "t1",
       db: tx,
@@ -38,6 +39,7 @@ describe("consumirFolio", () => {
   it("dryRun no incrementa", async () => {
     const updateMany = vi.fn();
     const tx = {
+      dteConfig: { findUnique: async () => null },
       dteFolio: {
         findMany: vi.fn().mockResolvedValue([
           {
@@ -60,6 +62,7 @@ describe("consumirFolio", () => {
 
   it("falla si updateMany no actualiza (carrera)", async () => {
     const tx = {
+      dteConfig: { findUnique: async () => null },
       dteFolio: {
         findMany: vi.fn().mockResolvedValue([
           {
@@ -81,6 +84,7 @@ describe("consumirFolio", () => {
 
   it("rechaza CAF vencido si no hay otro rango", async () => {
     const tx = {
+      dteConfig: { findUnique: async () => null },
       dteFolio: {
         findMany: vi.fn().mockResolvedValue([
           {
@@ -103,6 +107,7 @@ describe("consumirFolio", () => {
   it("N15: salta un rango con CAF vencido y usa el siguiente", async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const tx = {
+      dteConfig: { findUnique: async () => null },
       dteFolio: {
         findMany: vi.fn().mockResolvedValue([
           {

@@ -5,6 +5,7 @@ export * from "./centro-costo";
 export * from "./compras";
 export * from "./ventas";
 export * from "./caf";
+export * from "./caf-ambiente";
 export * from "./ventas-nc";
 export * from "./proyeccion-flujo";
 export * from "./flujo-semana";
