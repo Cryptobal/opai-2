@@ -23,6 +23,8 @@ export type FormProgramacion = {
   fechaInicio: string;
   fechaFin: string;
   notas: string;
+  autoEnvioProforma: boolean;
+  autoEnvioEstadoPago: boolean;
   lineas: LineaForm[];
   destinatarioIds: string[];
 };
@@ -46,6 +48,8 @@ export type DetalleProgramacion = {
   fechaInicio: string | null;
   fechaFin: string | null;
   notas: string | null;
+  autoEnvioProforma: boolean;
+  autoEnvioEstadoPago: boolean;
   montoTotal: number;
   proximaEjecucionEn: string | null;
   ultimoPeriodo10: string | null;
@@ -89,6 +93,8 @@ export const FORM_VACIO: FormProgramacion = {
   fechaInicio: "",
   fechaFin: "",
   notas: "",
+  autoEnvioProforma: false,
+  autoEnvioEstadoPago: false,
   lineas: [LINEA_VACIA],
   destinatarioIds: [],
 };
