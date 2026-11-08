@@ -1,15 +1,14 @@
 import {
   comoAgenteInterno,
   defineCapability,
-  iaElegidaDelAgente,
   modelosDelAgente,
   prohibido,
   externo,
 } from "@opai/capabilities";
 import { z } from "zod";
 
-import { prepararTurno } from "./bucle";
-import { lineaContexto, revalidarContexto } from "./conversaciones-contexto";
+import { revalidarAccesoDelTurno, type Plan } from "./bucle";
+import { revalidarContexto } from "./conversaciones-contexto";
 import { contextoSchema, guardarTurno } from "./conversaciones-guardado";
 import {
   conversacionesArchivar,
@@ -18,7 +17,7 @@ import {
 } from "./conversaciones-escritura";
 import { conversacionesGet, conversacionesList } from "./conversaciones";
 import { historialList } from "./historial";
-import { conErroresIa } from "./errores-ia";
+import { autorizarRepeticionTurno, prepararSolicitud } from "./turno-preparacion";
 import { confirmarPlan, firmarPlan } from "./planes";
 
 export const modeloSchema = z.object({
@@ -68,9 +67,16 @@ export const turnoPreparar = defineCapability({
     texto: externo(z.string()),
     pasos: z.array(z.unknown()),
     tokens: z.number(),
+    /** Huella opaca del acceso que produjo la salida; protege su repetición idempotente. */
+    accesoSolicitud: z.string().nullable(),
   }),
   efecto: "escritura",
   dryRun: true,
+  autorizarRepeticion: autorizarRepeticionTurno,
+  async preparar(ctx, input) {
+    secreto(); // Falla antes de incurrir en consumo si no se puede firmar.
+    return prepararSolicitud(ctx, input);
+  },
   async handler(ctx, input, modo) {
     const delegado = comoAgenteInterno(ctx);
     if (modo.dryRun)
@@ -80,17 +86,15 @@ export const turnoPreparar = defineCapability({
         texto: "Solicitará un plan sin ejecutar escrituras.",
         pasos: [],
         tokens: 0,
+        accesoSolicitud: null,
       };
     const firma = secreto();
+    const accesoSolicitud = await revalidarAccesoDelTurno(ctx);
     // El contexto lo manda el navegador: se revalida con el alcance de la persona antes de usarlo.
     if (input.contexto) await revalidarContexto(delegado, input.contexto);
-    const consulta = input.contexto
-      ? `${lineaContexto(input.contexto)}\n${input.mensaje}`
-      : input.mensaje;
-    const plan = await conErroresIa(async () => {
-      const ia = await iaElegidaDelAgente(delegado, input.modelo);
-      return prepararTurno(delegado, consulta, ia);
-    });
+    // Solo el hook de servidor produce este valor; no se recibe del usuario ni del modelo.
+    const plan = modo.preparado as Plan | undefined;
+    if (!plan) throw prohibido("No se preparó el turno.");
     // Guardar corre en la misma transacción que la auditoría (ADR-052): si falla, el turno falla cerrado.
     const conversacionId = await guardarTurno(ctx, {
       conversacionId: input.conversacionId,
@@ -100,12 +104,14 @@ export const turnoPreparar = defineCapability({
       texto: plan.texto,
       pasos: plan.pasos.map((p) => p.capacidad),
     });
+    await revalidarAccesoDelTurno(ctx);
     return {
       conversacionId,
       token: plan.pasos.length ? firmarPlan(delegado, plan, input.nivel, firma) : null,
       texto: plan.texto,
       pasos: plan.pasos,
       tokens: plan.tokens,
+      accesoSolicitud,
     };
   },
 });
