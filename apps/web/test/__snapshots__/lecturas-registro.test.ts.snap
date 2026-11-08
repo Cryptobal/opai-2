@@ -9,6 +9,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "comercial.config.get",
   "core.bitacora.verificar",
   "core.calendario.listar",
+  "core.campos.catalogo",
   "core.cargos.get",
   "core.cargos.list",
   "core.comunicaciones.eventos",

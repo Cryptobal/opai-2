@@ -2,6 +2,7 @@
 import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { capacidadesAnexos, consumidorAnexos } from "./anexos";
+import { capacidadesCampos } from "./campos";
 import { consumidorRevocacionBiometria } from "./biometria";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
@@ -121,6 +122,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesCalendario,
   ...capacidadesRemuneraciones,
   ...capacidadesAnexos,
+  ...capacidadesCampos,
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesDocumentos,
