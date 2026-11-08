@@ -1,12 +1,13 @@
 // Libro de ventas · emisión DTE (CAR-137, Brief 22). Lógica pura; sin Prisma ni red.
 
-/** Tipos de DTE que emite Ventas en PR 1 (nota de débito 56 queda para PR posterior). */
-export const TIPOS_DTE_VENTA = [33, 34, 61] as const;
+/** Tipos de DTE que emite Ventas: facturas 33 y 34, nota de débito 56 (anula una NC; CAR-221 · A2) y nota de crédito 61. */
+export const TIPOS_DTE_VENTA = [33, 34, 56, 61] as const;
 export type TipoDteVenta = (typeof TIPOS_DTE_VENTA)[number];
 
 export const NOMBRE_TIPO_DTE_VENTA: Readonly<Record<TipoDteVenta, string>> = {
   33: "Factura electrónica",
   34: "Factura exenta electrónica",
+  56: "Nota de débito electrónica",
   61: "Nota de crédito electrónica",
 };
 
@@ -17,6 +18,8 @@ export const ESTADOS_DTE_EMITIDO = [
   "aceptado",
   "rechazado",
   "anulado_nc",
+  /** Nota de crédito anulada por una nota de débito (56): vuelve a ser deuda lo que esa NC había descontado. */
+  "anulado_nd",
 ] as const;
 export type EstadoDteEmitido = (typeof ESTADOS_DTE_EMITIDO)[number];
 
@@ -59,6 +62,7 @@ export function validarMontosVenta(tipo: TipoDteVenta, m: MontosDteVenta): strin
   if (tipo === 33 && m.iva !== ivaDesdeNeto(m.neto))
     return `El IVA debe ser 19 % del neto (${ivaDesdeNeto(m.neto)}).`;
   if (tipo === 61 && m.total <= 0) return "La nota de crédito debe tener un monto positivo.";
+  if (tipo === 56 && m.total <= 0) return "La nota de débito debe tener un monto positivo.";
   return null;
 }
 
@@ -69,9 +73,9 @@ export function puedeTransicionDte(de: EstadoDteEmitido, a: EstadoDteEmitido): b
     case "borrador":
       return a === "enviado";
     case "enviado":
-      return a === "aceptado" || a === "rechazado";
+      return a === "aceptado" || a === "rechazado" || a === "anulado_nd";
     case "aceptado":
-      return a === "anulado_nc";
+      return a === "anulado_nc" || a === "anulado_nd";
     default:
       return false;
   }

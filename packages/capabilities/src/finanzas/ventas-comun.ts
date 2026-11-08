@@ -24,8 +24,8 @@ export const PERMISO_VENTAS = "finanzas:ventas.manage";
 export const PERMISO_VENTAS_CONFIGURE = "finanzas:ventas.configure";
 
 export const tipoDteVentaSchema = z
-  .union([z.literal(33), z.literal(34), z.literal(61)])
-  .describe("Tipo de DTE de venta: 33 factura, 34 exenta, 61 nota de crédito.");
+  .union([z.literal(33), z.literal(34), z.literal(56), z.literal(61)])
+  .describe("Tipo de DTE de venta: 33 factura, 34 exenta, 56 nota de débito, 61 nota de crédito.");
 
 export function montosDesdeLineas(tipo: 33 | 34, lineas: readonly { monto: number }[]): MontosDteVenta {
   const bruto = lineas.reduce((a, l) => a + l.monto, 0);
