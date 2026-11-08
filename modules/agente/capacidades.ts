@@ -7,8 +7,8 @@ import {
 } from "@opai/capabilities";
 import { z } from "zod";
 
-import { revalidarAccesoDelTurno, type Plan } from "./bucle";
-import { revalidarContexto } from "./conversaciones-contexto";
+import type { Plan } from "./bucle";
+import { validarContextoAlGuardar } from "./conversaciones-contexto-guardado";
 import { contextoSchema, guardarTurno } from "./conversaciones-guardado";
 import {
   conversacionesArchivar,
@@ -89,9 +89,11 @@ export const turnoPreparar = defineCapability({
         accesoSolicitud: null,
       };
     const firma = secreto();
-    const accesoSolicitud = await revalidarAccesoDelTurno(ctx);
+    if (!ctx.revalidarAccesoEnTransaccion)
+      throw prohibido("No se puede revalidar el acceso al guardar el turno.");
+    const accesoSolicitud = await ctx.revalidarAccesoEnTransaccion(ctx.db);
     // El contexto lo manda el navegador: se revalida con el alcance de la persona antes de usarlo.
-    if (input.contexto) await revalidarContexto(delegado, input.contexto);
+    if (input.contexto) await validarContextoAlGuardar(delegado, input.contexto);
     // Solo el hook de servidor produce este valor; no se recibe del usuario ni del modelo.
     const plan = modo.preparado as Plan | undefined;
     if (!plan) throw prohibido("No se preparó el turno.");
@@ -104,7 +106,7 @@ export const turnoPreparar = defineCapability({
       texto: plan.texto,
       pasos: plan.pasos.map((p) => p.capacidad),
     });
-    await revalidarAccesoDelTurno(ctx);
+    await ctx.revalidarAccesoEnTransaccion(ctx.db);
     return {
       conversacionId,
       token: plan.pasos.length ? firmarPlan(delegado, plan, input.nivel, firma) : null,

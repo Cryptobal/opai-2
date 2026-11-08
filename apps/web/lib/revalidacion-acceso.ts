@@ -36,6 +36,7 @@ export function crearRevalidacionAcceso(
   inicial: Identidad,
   portal: string | null,
   leerActual: () => Promise<Identidad | null>,
+  verificarMfa: typeof verificarMfaDe = verificarMfaDe,
 ): () => Promise<string> {
   const esperada = huella(inicial, portal);
   const tenantId = inicial.actual?.tenantId;
@@ -49,7 +50,7 @@ export function crearRevalidacionAcceso(
       actual.actual.tenant.estado === "suspendido" ||
       (portal !== null && !tieneAccesoAPortal(actual, portal)) ||
       huella(actual, portal) !== esperada ||
-      (await verificarMfaDe(actual))
+      (await verificarMfa(actual))
     ) {
       throw prohibido("Tu acceso cambió durante la solicitud. Vuelve a abrir el agente.");
     }

@@ -36,6 +36,7 @@ const entrada = {
 const entorno = () => {
   const e = contextoDePrueba({ modulosActivos: ["agente"] });
   e.ctx.revalidarAccesoSolicitud = vi.fn(async () => "huella-ficticia");
+  e.ctx.revalidarAccesoEnTransaccion = vi.fn(async () => "huella-ficticia");
   return e;
 };
 beforeEach(() => {
@@ -74,6 +75,15 @@ it("llama IA antes de abrir la transacción de guardado y audita una sola vez", 
     expect(dentro).toBe(false);
     return respuesta();
   });
+  e.ctx.revalidarAccesoSolicitud = async () => {
+    expect(dentro).toBe(false);
+    return "huella-ficticia";
+  };
+  e.ctx.revalidarAccesoEnTransaccion = async (tx) => {
+    expect(dentro).toBe(true);
+    expect(tx).toBeDefined();
+    return "huella-ficticia";
+  };
   const resultado = await executeCapability(e.ctx, turnoPreparar.id, entrada);
   expect(resultado, JSON.stringify(resultado)).toMatchObject({ ok: true });
   expect(e.tabla("agenteConversacion")).toHaveLength(1);
@@ -108,6 +118,18 @@ it("rechaza revocación durante IA sin guardar ni devolver respuesta", async () 
     ok: false,
     error: { code: "FORBIDDEN" },
   });
+  expect(e.tabla("agenteConversacion")).toHaveLength(0);
+});
+
+it("sin callback transaccional deniega antes de resolver proveedor o cobrar IA", async () => {
+  const e = entorno();
+  delete e.ctx.revalidarAccesoEnTransaccion;
+  expect(await executeCapability(e.ctx, turnoPreparar.id, entrada)).toMatchObject({
+    ok: false,
+    error: { code: "FORBIDDEN" },
+  });
+  expect(elegir).not.toHaveBeenCalled();
+  expect(conversar).not.toHaveBeenCalled();
   expect(e.tabla("agenteConversacion")).toHaveLength(0);
 });
 

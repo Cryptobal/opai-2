@@ -100,6 +100,8 @@ export type Plataforma = {
 export interface Contexto {
   /** Borde: relee sesión y acceso de la solicitud; rechaza cambios sin sustituir la transacción. */
   revalidarAccesoSolicitud?: () => Promise<string>;
+  /** Revalida usando exclusivamente la transacción de guardado, sin pedir otra conexión. */
+  revalidarAccesoEnTransaccion?: (tx: TenantTx) => Promise<string>;
   /** Garantía de MFA comprobada en el borde; nunca procede del input de una capacidad. */
   mfa?: EstadoMfa;
   /** Tenant actual. Si `conTenant` es false (plataforma sin empresa elegida) es un id nulo. */

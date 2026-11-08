@@ -6,8 +6,9 @@ vi.mock("@opai/capabilities", async (original) => ({
   ...(await original<typeof Capacidades>()),
   iaElegidaDelAgente: elegir,
 }));
-import { executeCapability, limpiarModulos, registrarModulos } from "../src";
+import { executeCapability, limpiarModulos, registrarModulos, registrarCapacidades } from "../src";
 import { prepararEntorno, urlPropietario, type Entorno } from "../../db/test/entorno";
+import { cuentasGet } from "../src/core/maestros/cuentas-get";
 import { manifest } from "../../../modules/agente/manifest";
 import { crearFixture, conFalloAuditoria, cap, respuesta } from "./agente-latencia-fixture";
 describe.skipIf(!urlPropietario)("agente: latencia y revalidación con DB real", () => {
@@ -21,9 +22,11 @@ describe.skipIf(!urlPropietario)("agente: latencia y revalidación con DB real",
     );
     vi.stubEnv("BETTER_AUTH_SECRET", randomUUID() + randomUUID());
     vi.stubEnv("DATABASE_TX_TIMEOUT_MS", "15000");
+    vi.stubEnv("DATABASE_POOL_MAX", "1");
     e = await prepararEntorno();
     limpiarModulos();
     registrarModulos([manifest]);
+    registrarCapacidades([cuentasGet]);
   }, 120_000);
   beforeEach(() => {
     conversar.mockReset().mockResolvedValue(respuesta);
@@ -86,23 +89,50 @@ describe.skipIf(!urlPropietario)("agente: latencia y revalidación con DB real",
       expect(conversar).toHaveBeenCalledOnce();
     },
   );
-  it("revocación DB en quinta revalidación (después de guardar) revierte la transacción", async () => {
+  it("revocación DB en segunda revalidación transaccional (después de guardar) revierte la transacción", async () => {
     const f = await crearFixture(e);
     const ctx = await f.contexto();
-    const validar = ctx.revalidarAccesoSolicitud!;
+    const validar = ctx.revalidarAccesoEnTransaccion!;
     let validaciones = 0;
-    ctx.revalidarAccesoSolicitud = async () => {
-      if (++validaciones === 5)
+    ctx.revalidarAccesoEnTransaccion = async (tx) => {
+      if (++validaciones === 2)
         await e.admin.membership.update({ where: { id: f.m.id }, data: { estado: "suspendida" } });
-      return validar();
+      return validar(tx);
     };
     const r = await executeCapability(ctx, cap, f.input, { idempotencyKey: randomUUID() });
-    expect(validaciones).toBe(5);
+    expect(validaciones).toBe(2);
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(r).not.toHaveProperty("data");
     expect(await f.counts()).toEqual({ conversaciones: 0, auditorias: 0 });
     expect(await f.consumos()).toMatchObject([{ ok: true, cantidad: 1 }]);
   });
+  it.each(["durante IA", "después de guardar"])(
+    "revoca sesión real %s y conserva consumo",
+    async (momento) => {
+      const f = await crearFixture(e);
+      const ctx = await f.contexto();
+      const revocar = () => e.admin.session.delete({ where: { id: f.sesion.id } });
+      if (momento === "durante IA")
+        conversar.mockImplementation(async () => {
+          await revocar();
+          return respuesta;
+        });
+      else {
+        const validar = ctx.revalidarAccesoEnTransaccion!;
+        let n = 0;
+        ctx.revalidarAccesoEnTransaccion = async (tx) => {
+          if (++n === 2) await revocar();
+          return validar(tx);
+        };
+      }
+      expect(await executeCapability(ctx, cap, f.input)).toMatchObject({
+        ok: false,
+        error: { code: "FORBIDDEN" },
+      });
+      expect(await f.counts()).toEqual({ conversaciones: 0, auditorias: 0 });
+      expect(await f.consumos()).toMatchObject([{ ok: true, cantidad: 1 }]);
+    },
+  );
   it("presupuesto real agotado bloquea IA y no guarda", async () => {
     const f = await crearFixture(e);
     const now = new Date();
@@ -132,6 +162,64 @@ describe.skipIf(!urlPropietario)("agente: latencia y revalidación con DB real",
     expect(conversar).not.toHaveBeenCalled();
     expect(await f.counts()).toEqual({ conversaciones: 0, auditorias: 0 });
     expect(await f.consumos()).toEqual([]);
+  });
+  it.each([false, true])("ficha con pool1: cambio de alcance de fila=%s", async (revocar) => {
+    const f = await crearFixture(e);
+    const cuenta = await e.admin.cuenta.create({
+      data: { tenantId: f.t.id, nombre: "Ficha sintética" },
+    });
+    const otra = await e.admin.cuenta.create({
+      data: { tenantId: f.t.id, nombre: "Otra ficha sintética" },
+    });
+    const instalacion = await e.admin.instalacion.create({
+      data: {
+        tenantId: f.t.id,
+        cuentaId: cuenta.id,
+        nombre: "Instalación sintética",
+      },
+    });
+    const ctx = await f.contexto();
+    ctx.alcance = { instalaciones: [instalacion.id] };
+    conversar.mockImplementation(async () => {
+      if (revocar)
+        await e.admin.instalacion.update({
+          where: { id: instalacion.id },
+          data: { cuentaId: otra.id },
+        });
+      return respuesta;
+    });
+    const resultado = await executeCapability(ctx, cap, {
+      ...f.input,
+      contexto: { tipo: "cuenta", id: cuenta.id },
+    });
+    expect(resultado).toMatchObject(
+      revocar
+        ? { ok: false, error: { code: "NOT_FOUND" } }
+        : { ok: true, data: { texto: respuesta.texto } },
+    );
+    expect(await f.counts()).toEqual({
+      conversaciones: revocar ? 0 : 1,
+      auditorias: revocar ? 0 : 1,
+    });
+    expect(conversar).toHaveBeenCalledOnce();
+    // La lectura de preparación conserva auditoría y consumo; el guard ID-only no la duplica.
+    expect(
+      await e.admin.auditEvent.count({
+        where: {
+          tenantId: f.t.id,
+          capability: "core.cuentas.get",
+        },
+      }),
+    ).toBe(1);
+    expect(
+      await e.admin.consumo.count({
+        where: {
+          tenantId: f.t.id,
+          capability: "core.cuentas.get",
+          actorTipo: "agent",
+        },
+      }),
+    ).toBe(1);
   });
   it("fallo real de auditoría revierte historial conservando consumo", async () => {
     const f = await crearFixture(e);

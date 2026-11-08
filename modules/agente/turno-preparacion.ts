@@ -19,6 +19,8 @@ type Entrada = {
 
 /** Fuera de la transacción de guardado; las herramientas conservan sus propias transacciones. */
 export async function prepararSolicitud(ctx: Contexto, input: Entrada) {
+  if (!ctx.revalidarAccesoEnTransaccion)
+    throw prohibido("No se puede revalidar el acceso al guardar el turno.");
   await revalidarAccesoDelTurno(ctx);
   const delegado = comoAgenteInterno(ctx);
   if (input.contexto) await revalidarContexto(delegado, input.contexto);

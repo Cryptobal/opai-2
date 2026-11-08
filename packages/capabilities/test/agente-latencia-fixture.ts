@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { estadoSesionEnTransaccion, type TenantTx } from "@opai/db";
 import { crearContexto, prohibido } from "../src";
 import type { Entorno } from "../../db/test/entorno";
 export const respuesta = {
@@ -16,20 +17,35 @@ export async function crearFixture(e: Entorno) {
   const u = await e.admin.user.create({
     data: { name: "Sintético", email: `${suffix}@prueba.invalid`, emailVerified: true },
   });
+  const sesion = await e.admin.session.create({
+    data: {
+      userId: u.id,
+      token: `fixture-${randomUUID()}`,
+      expiresAt: new Date(Date.now() + 600_000),
+    },
+  });
   const m = await e.admin.membership.create({
     data: { tenantId: t.id, userId: u.id, rol: "owner", portales: ["erp"] },
   });
   await e.admin.tenantModule.create({
     data: { tenantId: t.id, moduloId: "agente", estado: "activo" },
   });
-  const leer = async () => {
-    const membership = await e.forTenant(t.id).membership.findUnique({
+  const leer = async (tx?: TenantTx) => {
+    const db = tx ?? e.forTenant(t.id);
+    const vigente = tx
+      ? await estadoSesionEnTransaccion(tx, sesion.id, u.id)
+      : await e.admin.session.findFirst({
+          where: { id: sesion.id, userId: u.id, expiresAt: { gt: new Date() } },
+          select: { id: true },
+        });
+    const membership = await db.membership.findUnique({
       where: { id: m.id },
       include: { excepciones: true, rolTenant: true },
     });
-    const tenant = await e.admin.tenant.findUniqueOrThrow({ where: { id: t.id } });
-    const modules = await e.forTenant(t.id).tenantModule.findMany({ orderBy: { moduloId: "asc" } });
+    const tenant = await db.tenant.findUniqueOrThrow({ where: { id: t.id } });
+    const modules = await db.tenantModule.findMany({ orderBy: { moduloId: "asc" } });
     return {
+      sesionVigente: vigente !== null,
       tenant: t.id,
       user: u.id,
       estadoTenant: tenant.estado,
@@ -56,9 +72,10 @@ export async function crearFixture(e: Entorno) {
       portalesMembresia: ["erp"],
       modulosActivos: ["agente"],
     });
-    ctx.revalidarAccesoSolicitud = async () => {
-      const actual = await leer();
+    const validar = async (tx?: TenantTx) => {
+      const actual = await leer(tx);
       if (
+        !actual.sesionVigente ||
         actual.estadoTenant !== "activo" ||
         actual.membership?.estado !== "activa" ||
         !actual.membership.portales.includes("erp") ||
@@ -68,6 +85,8 @@ export async function crearFixture(e: Entorno) {
         throw prohibido("Acceso sintético revocado");
       return hash(actual);
     };
+    ctx.revalidarAccesoSolicitud = () => validar();
+    ctx.revalidarAccesoEnTransaccion = (tx) => validar(tx);
     return ctx;
   };
   const counts = async () => ({
@@ -82,7 +101,7 @@ export async function crearFixture(e: Entorno) {
     nivel: "paso_a_paso",
     turnoId: randomUUID(),
   };
-  return { t, u, m, contexto, counts, consumos, input };
+  return { t, u, m, sesion, contexto, counts, consumos, input };
 }
 
 /** Falla real de Postgres, acotada al tenant fixture; conserva auditoría y tx reales. */

@@ -66,7 +66,8 @@ export {
   type Permiso,
   registrarModulos,
 } from "./module";
-export { portalesDe, restriccion } from "./autorizacion";
+export { portalesDe, restriccion, tienePermisoDeCapacidad } from "./autorizacion";
+export { dondeCuenta, dondeInstalacion, dondePersona } from "./core/maestros/alcance";
 export {
   type Consumidor,
   consumidoresDe,

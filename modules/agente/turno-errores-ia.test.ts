@@ -48,6 +48,7 @@ afterEach(() => {
 it.each([400, 401, 429])("el turno entrega un error accionable para HTTP %i", async (estado) => {
   const { ctx, tabla } = contextoDePrueba({ modulosActivos: ["agente"] });
   ctx.revalidarAccesoSolicitud = async () => "acceso-ficticio";
+  ctx.revalidarAccesoEnTransaccion = async () => "acceso-ficticio";
   conversar.mockRejectedValue(new ErrorIa("privado", estado, "cuerpo privado: token simulado"));
   const r = await executeCapability(ctx, "agente.turno.preparar", entrada);
   expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
@@ -60,6 +61,7 @@ it.each([400, 401, 429])("el turno entrega un error accionable para HTTP %i", as
 it("también clasifica un error tipado al resolver el proveedor", async () => {
   const { ctx } = contextoDePrueba({ modulosActivos: ["agente"] });
   ctx.revalidarAccesoSolicitud = async () => "acceso-ficticio";
+  ctx.revalidarAccesoEnTransaccion = async () => "acceso-ficticio";
   elegir.mockRejectedValue(new ErrorIa("privado", 401, "cuerpo privado"));
   expect(await executeCapability(ctx, "agente.turno.preparar", entrada)).toMatchObject({
     ok: false,

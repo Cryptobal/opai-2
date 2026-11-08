@@ -8,7 +8,7 @@ import { noAutenticado } from "./respuestas";
 import { COOKIE_TENANT, elegirMembresia, leerCookie } from "./tenant-actual";
 import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
 import { estadoMfaDe, verificarMfaDe } from "./mfa";
-import { crearRevalidacionAcceso } from "./revalidacion-acceso";
+import { conectarRevalidacion } from "./revalidacion-transaccion";
 
 export type UsuarioSesion = {
   id: string;
@@ -100,23 +100,19 @@ export function contextoDeIdentidad(
     diferir: diferirConAfter,
     ...(actual ? { despacharEventos: despacharDiferido(actual.tenantId) } : {}),
   });
-  ctx.revalidarAccesoSolicitud = crearRevalidacionAcceso(
-    identidad,
-    opciones.portalRevalidacion ?? portal,
-    async () => {
-      const s = await (opciones.obtenerSesion ?? sesionVigente)();
-      if (!s) return null;
-      const vigente = await identidadDe(s.user, actual?.tenantId, opciones.fuentes);
-      vigente.mfaVerificada = s.session?.mfaVerified === true;
-      return vigente;
-    },
-  );
+  conectarRevalidacion(ctx, identidad, opciones.portalRevalidacion ?? portal, async () => {
+    const s = await (opciones.obtenerSesion ?? sesionVigente)();
+    if (!s) return null;
+    const vigente = await identidadDe(s.user, actual?.tenantId, opciones.fuentes);
+    vigente.mfaVerificada = s.session?.mfaVerified === true;
+    return { identidad: vigente, sesionId: s.session?.id };
+  });
   return ctx;
 }
 
 type Sesionador = (
   req: Request,
-) => Promise<{ user: UsuarioSesion; session?: { mfaVerified?: boolean } } | null>;
+) => Promise<{ user: UsuarioSesion; session?: { id?: string; mfaVerified?: boolean } } | null>;
 
 /**
  * API key o cookie; sin ambas, 401. Sesión devuelve `portal: null`: `/api/v1` fija ERP solo para
