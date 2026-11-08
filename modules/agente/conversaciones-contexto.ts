@@ -7,7 +7,7 @@ import type { contextoSchema } from "./conversaciones-guardado";
 type ContextoFicha = z.infer<typeof contextoSchema>;
 
 /** Lectura de cada ficha: la misma capacidad que usa la pantalla, con su permiso y su alcance. */
-const FICHA = {
+export const FICHA = {
   cuenta: "core.cuentas.get",
   instalacion: "core.instalaciones.get",
   negocio: "comercial.negocios.get",

@@ -15,7 +15,8 @@ import { montosNotaCredito } from "./ventas-comun";
 
 export async function notasCreditoPreviasDe(ctx: Pick<Contexto, "db">, refId: string) {
   return ctx.db.documentoEmitido.findMany({
-    where: { documentoReferenciaId: refId, tipoDte: 61 },
+    // Una NC anulada por nota de débito (56) ya no cuenta: el documento vuelve a poder anularse o corregirse.
+    where: { documentoReferenciaId: refId, tipoDte: 61, estadoDte: { not: "anulado_nd" } },
     select: { montoTotal: true, codigoReferencia: true },
   });
 }
@@ -62,6 +63,7 @@ export async function bloquearYValidarNotaCredito(
       cotizacionId: true,
       tipoDte: true,
       folio: true,
+      fechaEmision: true,
       fechaVencimiento: true,
       montoNeto: true,
       montoExento: true,

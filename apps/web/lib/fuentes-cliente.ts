@@ -1,4 +1,4 @@
-import { forTenant } from "@opai/db";
+import { forTenant, type TenantTx } from "@opai/db";
 import { esMembresiaDeCliente, instalacionesVisibles, type Rol } from "@opai/domain";
 
 /**
@@ -10,9 +10,9 @@ import { esMembresiaDeCliente, instalacionesVisibles, type Rol } from "@opai/dom
 export async function instalacionesDeContactoCliente(
   tenantId: string,
   m: { id: string; rol: string; portales: string[] },
+  db: TenantTx = forTenant(tenantId),
 ): Promise<string[] | null> {
   if (!esMembresiaDeCliente(m.rol as Rol, m.portales)) return null;
-  const db = forTenant(tenantId);
   const acceso = await db.accesoCliente.findUnique({
     where: { tenantId_membershipId: { tenantId, membershipId: m.id } },
     include: { instalaciones: { select: { instalacionId: true } } },

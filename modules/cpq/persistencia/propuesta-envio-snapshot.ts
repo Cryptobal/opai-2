@@ -6,6 +6,7 @@ import {
   type SnapshotEnvioPropuesta,
 } from "../domain/documento/propuesta-tecnica";
 import { asegurarMarcaDocumento } from "./marca-documento";
+import { contratoCamposPropuesta } from "./propuesta-campos";
 import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "./plantilla-propuesta";
 
 export async function construirSnapshotEnvioPropuesta(
@@ -19,7 +20,9 @@ export async function construirSnapshotEnvioPropuesta(
   const marcaRow = await asegurarMarcaDocumento(ctx);
   const plantillaRow = await plantillaActivaPropuestaLectura(ctx);
   if (!plantillaRow) {
-    throw reglaDeNegocio("Falta la plantilla activa de propuesta técnica; configúrala antes de enviar.");
+    throw reglaDeNegocio(
+      "Falta la plantilla activa de propuesta técnica; configúrala antes de enviar.",
+    );
   }
   const plantilla = vistaPlantillaPropuesta(plantillaRow);
   let propuestaBloquesJson = "[]";
@@ -33,9 +36,7 @@ export async function construirSnapshotEnvioPropuesta(
     const bloques = parseBloquesArmadorPropuesta(prop.bloquesJson);
     const claves = [
       ...new Set(
-        bloques
-          .map((b) => b.bibliotecaClave)
-          .filter((c): c is string => Boolean(c?.trim())),
+        bloques.map((b) => b.bibliotecaClave).filter((c): c is string => Boolean(c?.trim())),
       ),
     ];
     if (claves.length) {
@@ -48,6 +49,14 @@ export async function construirSnapshotEnvioPropuesta(
       }
     }
   }
+  const camposContrato = input.propuestaTecnicaId
+    ? await contratoCamposPropuesta(ctx, {
+        cotizacionId: input.cotizacionId,
+        propuestaBloquesJson,
+        bloquesBiblioteca,
+        destinatarios: input.destinatarios,
+      })
+    : undefined;
   return {
     marcaDocumentoVersion: marcaRow.version,
     plantillaDocumentoId: plantilla.id,
@@ -55,6 +64,7 @@ export async function construirSnapshotEnvioPropuesta(
     bloquesBiblioteca,
     propuestaBloquesJson,
     destinatarios: input.destinatarios,
+    ...(camposContrato ? { camposContrato } : {}),
   };
 }
 

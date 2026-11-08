@@ -117,6 +117,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   },
   // Finanzas · envío del documento al cliente (CAR-155): CHECK de estado (enviado | fallido).
   "finanzas.documentos_emitidos_envios": { valores: () => ({ estado: "enviado" }) },
+  // Finanzas · destinatarios del documento (CAR-221 · A3b): CHECK de tipo (PARA | CC | BCC), origen y correo en minúsculas.
+  "finanzas.documentos_emitidos_destinatarios": {
+    dependencias: ["finanzas.documentos_emitidos"],
+    valores: () => ({ orden: 0, tipo: "PARA", origen: "manual", email: "destino@prueba.cl" }),
+  },
   // Finanzas · cobranza (CAR-166): CHECKs de canal, origen y resultado.
   "finanzas.cobranza_gestiones": {
     dependencias: ["finanzas.documentos_emitidos", "core.cuentas"],

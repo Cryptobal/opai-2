@@ -21,3 +21,5 @@ export * from "./apertura";
 export * from "./rcv";
 export * from "./prorrateo";
 export * from "./cierre";
+export * from "./referencias-sii";
+export * from "./destinatarios";

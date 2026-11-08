@@ -339,6 +339,7 @@ model DocumentoEmitido {
 
   lineas      DocumentoEmitidoLinea[]
   referencias DocumentoEmitidoReferencia[]
+  destinatarios DocumentoEmitidoDestinatario[]
   enviosSii   DteEnvio[]
   cesiones    Cesion[]
   gestionesCobranza CobranzaGestion[]
@@ -378,11 +379,36 @@ model DocumentoEmitidoReferencia {
   folioRef    Int    @map("folio_ref")
   codigoRef   Int    @map("codigo_ref")
   razonRef    String? @map("razon_ref")
+  /// Fecha del documento referenciado (FchRef del SII); null en referencias anteriores a CAR-221.
+  fechaRef    DateTime? @map("fecha_ref") @db.Date
 
   documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
 
   @@index([tenantId, documentoId])
   @@map("documentos_emitidos_referencias")
+  @@schema("finanzas")
+}
+
+/// Destinatarios del correo de un DTE de venta (CAR-221 · A3b): exactamente uno PARA; el resto CC o BCC.
+model DocumentoEmitidoDestinatario {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  documentoId String   @map("documento_id") @db.Uuid
+  orden       Int
+  /// PARA | CC | BCC
+  tipo        String
+  /// Siempre en minúsculas.
+  email       String
+  /// casilla_dte | contacto_facturacion | manual
+  origen      String
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@unique([documentoId, email])
+  @@index([tenantId, documentoId])
+  @@map("documentos_emitidos_destinatarios")
   @@schema("finanzas")
 }
 
