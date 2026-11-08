@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { defineCapability, noEncontrado, reglaDeNegocio } from "@opai/capabilities";
 
+import { snapshotParaLectura } from "../domain/documento/propuesta-campos";
 import { listarEnviosPropuesta } from "../persistencia/propuesta-envio";
 import {
   exigirDecisorEnvioPropuesta,
@@ -42,7 +43,7 @@ export const enviosPropuestaList = defineCapability({
         incluyeCotizacion: r.incluyeCotizacion,
         incluyePropuesta: r.incluyePropuesta,
         enviadoEn: r.enviadoEn?.toISOString() ?? null,
-        snapshotJson: r.snapshotJson,
+        snapshotJson: snapshotParaLectura(r.snapshotJson),
       })),
     };
   },

@@ -1,5 +1,9 @@
 import { reglaDeNegocio, type Contexto } from "@opai/capabilities";
 
+import {
+  aplicarContratoABloques,
+  textosBibliotecaConContrato,
+} from "../domain/documento/propuesta-campos";
 import { aperturaEfectiva } from "../domain/documento/propuesta-tecnica";
 import type { SnapshotEnvioPropuesta } from "../domain/documento/propuesta-tecnica";
 import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
@@ -44,7 +48,7 @@ export async function pdfPropuestaDesdeSnapshot(
     codigo: input.codigo,
     titulo: input.titulo,
     borrador: false,
-    bloquesJson: snapshot.propuestaBloquesJson,
+    bloquesJson: aplicarContratoABloques(snapshot.propuestaBloquesJson, snapshot.camposContrato),
     marca,
     servicio: input.servicio,
     economia: {
@@ -59,10 +63,9 @@ export async function pdfPropuestaDesdeSnapshot(
     netoTotalClp: input.netoTotalClp,
     apertura: aperturaEfectiva(plantilla.aperturaMaxima, plantilla.aperturaMaxima),
     tasaIvaPct: tasaIva,
-    textosBiblioteca: await textosBiblioteca(
-      ctx,
-      snapshot.propuestaBloquesJson,
-      snapshot.bloquesBiblioteca,
+    textosBiblioteca: textosBibliotecaConContrato(
+      await textosBiblioteca(ctx, snapshot.propuestaBloquesJson, snapshot.bloquesBiblioteca),
+      snapshot.camposContrato,
     ),
     logo: await cargarLogoMarca(ctx),
   });
