@@ -12,9 +12,9 @@ import {
 } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado } from "../../errores";
+import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { dondeContacto, dondeInstalacion } from "../maestros/alcance";
+import { dondeInstalacion } from "../maestros/alcance";
 import { cuentaDe } from "../maestros/cuentas-acceso";
 import { finalidadSchema } from "./comun";
 
@@ -72,18 +72,21 @@ export const camposValores = defineCapability({
     const permitidas = new Set(clases.autorizados.map((c) => c.clave));
     const cuenta = await cuentaDe(ctx, input.cuentaId);
 
-    const contacto = input.contactoId
-      ? await ctx.db.contacto.findFirst({
-          where: {
-            id: input.contactoId,
-            cuentaId: cuenta.id,
-            archivadoEn: null,
-            anonimizadoEn: null,
-            AND: [dondeContacto(ctx)],
-          },
-        })
-      : null;
-    if (input.contactoId && !contacto) throw noEncontrado("El contacto");
+    // El contacto puede ser de la cuenta de origen o estar vinculado a ella (N–N); el alcance ya se
+    // aplicó al exigir la cuenta. Con vínculo, el cargo es el que tiene en esa cuenta.
+    const [contacto, vinculo] = input.contactoId
+      ? await Promise.all([
+          ctx.db.contacto.findFirst({
+            where: { id: input.contactoId, archivadoEn: null, anonimizadoEn: null },
+          }),
+          ctx.db.contactoCuenta.findFirst({
+            where: { contactoId: input.contactoId, cuentaId: cuenta.id },
+          }),
+        ])
+      : [null, null];
+    if (input.contactoId && (!contacto || (contacto.cuentaId !== cuenta.id && !vinculo))) {
+      throw noEncontrado("El contacto");
+    }
 
     const instalaciones = await ctx.db.instalacion.findMany({
       where: {
@@ -93,8 +96,13 @@ export const camposValores = defineCapability({
         AND: [dondeInstalacion(ctx)],
       },
       orderBy: { nombre: "asc" },
-      take: MAX_INSTALACIONES,
+      take: MAX_INSTALACIONES + 1,
     });
+    if (!input.instalacionIds && instalaciones.length > MAX_INSTALACIONES) {
+      throw reglaDeNegocio(
+        `La cuenta tiene más de ${MAX_INSTALACIONES} instalaciones: elige cuáles incluir en el documento.`,
+      );
+    }
     const pedidas = new Set(input.instalacionIds ?? []);
     if (pedidas.size > 0 && instalaciones.length !== pedidas.size) {
       throw noEncontrado("La instalación");
@@ -102,7 +110,9 @@ export const camposValores = defineCapability({
 
     const campos = {
       ...valoresCuenta(cuenta),
-      ...(contacto ? valoresContacto(contacto) : {}),
+      ...(contacto
+        ? valoresContacto({ ...contacto, cargo: vinculo?.cargo ?? contacto.cargo })
+        : {}),
     };
     return {
       version: VERSION_CATALOGO_CAMPOS,

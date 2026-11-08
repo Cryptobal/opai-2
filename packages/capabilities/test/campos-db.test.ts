@@ -58,7 +58,12 @@ describe.skipIf(!urlPropietario)("Campos · resolvedor autorizado en base real",
     tB = await tenant("cmp-b");
     cuenta = (
       await e.admin.cuenta.create({
-        data: { tenantId: tA, nombre: "Logística Andina SpA", rut: "77.000.000-0", giro: "Logística" },
+        data: {
+          tenantId: tA,
+          nombre: "Logística Andina SpA",
+          rut: "77.000.000-0",
+          giro: "Logística",
+        },
       })
     ).id;
     ana = (
@@ -124,7 +129,9 @@ describe.skipIf(!urlPropietario)("Campos · resolvedor autorizado en base real",
   });
 
   it("un supervisor solo recibe las instalaciones a su cargo", async () => {
-    const r = await resolver(tA, { finalidad: "propuesta", cuentaId: cuenta }, "supervisor", [norte]);
+    const r = await resolver(tA, { finalidad: "propuesta", cuentaId: cuenta }, "supervisor", [
+      norte,
+    ]);
     const d = r.ok ? (r.data as Salida) : ({} as Salida);
     expect(d.origen?.instalacionIds).toEqual([norte]);
     const ajena = await resolver(
@@ -134,7 +141,12 @@ describe.skipIf(!urlPropietario)("Campos · resolvedor autorizado en base real",
       [norte],
     );
     expect(ajena.ok).toBe(false);
-    const sinAlcance = await resolver(tA, { finalidad: "propuesta", cuentaId: cuenta }, "supervisor", []);
+    const sinAlcance = await resolver(
+      tA,
+      { finalidad: "propuesta", cuentaId: cuenta },
+      "supervisor",
+      [],
+    );
     expect(sinAlcance.ok).toBe(false);
   });
 
@@ -149,8 +161,48 @@ describe.skipIf(!urlPropietario)("Campos · resolvedor autorizado en base real",
     expect(cruzado.ok).toBe(false);
   });
 
+  it("resuelve un contacto vinculado a otra cuenta con el cargo de esa cuenta y rechaza uno sin vínculo", async () => {
+    const otra = (
+      await e.admin.cuenta.create({ data: { tenantId: tA, nombre: "Cuenta Vinculada" } })
+    ).id;
+    const ajena = (
+      await e.admin.cuenta.create({ data: { tenantId: tA, nombre: "Cuenta Sin Vínculo" } })
+    ).id;
+    await e.admin.contactoCuenta.create({
+      data: { tenantId: tA, contactoId: ana, cuentaId: otra, cargo: "Gerente de Operaciones" },
+    });
+    const ok = await resolver(tA, { finalidad: "propuesta", cuentaId: otra, contactoId: ana });
+    expect(ok.ok && (ok.data as Salida).campos["contacto.cargo"]).toBe("Gerente de Operaciones");
+    const no = await resolver(tA, { finalidad: "propuesta", cuentaId: ajena, contactoId: ana });
+    expect(no.ok).toBe(false);
+  });
+
+  it("con más de 50 instalaciones exige elegir cuáles incluir en vez de truncar en silencio", async () => {
+    const grande = (
+      await e.admin.cuenta.create({ data: { tenantId: tA, nombre: "Cuenta Grande" } })
+    ).id;
+    await e.admin.instalacion.createMany({
+      data: Array.from({ length: 51 }, (_, i) => ({
+        tenantId: tA,
+        cuentaId: grande,
+        nombre: `Sitio ${String(i).padStart(2, "0")}`,
+      })),
+    });
+    const sin = await resolver(tA, { finalidad: "propuesta", cuentaId: grande });
+    expect(sin.ok).toBe(false);
+    const una = await e.admin.instalacion.findFirst({ where: { cuentaId: grande } });
+    const con = await resolver(tA, {
+      finalidad: "propuesta",
+      cuentaId: grande,
+      instalacionIds: [una?.id ?? ""],
+    });
+    expect(con.ok && (con.data as Salida).colecciones.instalaciones).toHaveLength(1);
+  });
+
   it("el catálogo se filtra por permiso y se ve completo para el dueño", async () => {
-    const r = await mod.executeCapability(ctx(tA), "core.campos.catalogo", { finalidad: "contrato" });
+    const r = await mod.executeCapability(ctx(tA), "core.campos.catalogo", {
+      finalidad: "contrato",
+    });
     const d = r.ok ? (r.data as { campos: { clave: string }[]; sinResolvedor: string[] }) : null;
     expect(d?.campos.map((c) => c.clave)).toContain("cuenta.rut");
     expect(d?.sinResolvedor.some((c) => c.startsWith("persona."))).toBe(true);
