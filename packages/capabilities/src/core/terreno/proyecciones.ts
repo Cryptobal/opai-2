@@ -4,6 +4,7 @@ import type { Equipo, Hecho, Tiempo } from "./acceso-tipos";
 import type { MotivoRechazo } from "./hechos-evaluar";
 import { resolverEjecuciones } from "./rondas-ejecucion";
 import { resolverMarcas } from "./rondas-marca";
+import { resolverNovedades } from "./rondas-novedades";
 
 export type Proyecciones = {
   /** Hechos que el servidor no puede resolver (QR ajeno, documento inválido, módulo inactivo…). */
@@ -32,7 +33,12 @@ export async function prepararProyecciones(
   const marcas = await resolverMarcas(ctx, equipo.instalacionId, hechos);
   const acceso = await resolverAcceso(ctx, equipo, hechos, t);
   const rondas = await resolverEjecuciones(ctx, equipo, hechos, t);
-  const rechazos = new Map<string, MotivoRechazo>([...acceso.rechazos, ...rondas.rechazos]);
+  const novedades = await resolverNovedades(ctx, equipo, hechos);
+  const rechazos = new Map<string, MotivoRechazo>([
+    ...acceso.rechazos,
+    ...rondas.rechazos,
+    ...novedades.rechazos,
+  ]);
   for (const [clave, m] of marcas) if ("motivo" in m) rechazos.set(clave, m.motivo);
   return {
     rechazos,
@@ -62,6 +68,7 @@ export async function prepararProyecciones(
       });
       if (filas.length > 0) await tx.marcaRonda.createMany({ skipDuplicates: true, data: filas });
       await rondas.cerrar(tx, aceptadas, ids);
+      await novedades.escribir(tx, aceptadas, ids);
       await acceso.escribir(tx, aceptadas);
     },
   };

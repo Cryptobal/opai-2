@@ -36,6 +36,22 @@ export const TIPOS_HECHO_TERRENO = {
   /** Cierre de una ronda iniciada: el servidor calcula si quedó completa o incompleta. */
   "rondas.cierre": z.object({ ejecucionClave: z.string().uuid() }).strict(),
   /**
+   * Novedad o incidente de una ronda (CAR-78 · E5a): texto, gravedad y, si se reporta desde un punto, el punto. Va
+   * al libro de novedades (`rondas.novedades`); no bloquea la marca ni marca presencia laboral. La evidencia
+   * (fotos) exige línea y sube aparte por `core.documentos`.
+   */
+  "rondas.novedad": z
+    .object({
+      resumen: z.string().trim().min(3).max(200),
+      detalle: z.string().trim().max(2000).optional(),
+      gravedad: z.enum(["baja", "media", "alta"]).optional(),
+      tipoIncidenteId: z.string().uuid().optional(),
+      puntoId: z.string().uuid().optional(),
+      /** Clave del hecho `rondas.inicio` de la ronda en curso (opcional). */
+      ejecucionClave: z.string().uuid().optional(),
+    })
+    .strict(),
+  /**
    * Entrada a una instalación (portería, CAR-78 · E4b-2). Del documento solo se guardan su huella y su máscara:
    * el número completo no se persiste (decisión de Carlos, 7-nov-2026). El servidor cruza con las listas.
    */

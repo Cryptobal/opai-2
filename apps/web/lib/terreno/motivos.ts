@@ -4,6 +4,7 @@ export const ETIQUETA_TIPO: Record<string, string> = {
   "rondas.marca": "Marca de un punto de ronda",
   "rondas.inicio": "Inicio de una ronda",
   "rondas.cierre": "Cierre de una ronda",
+  "rondas.novedad": "Novedad de ronda",
   "acceso.entrada": "Entrada a la instalación",
   "acceso.salida": "Salida de la instalación",
 };
@@ -27,6 +28,8 @@ export const MOTIVO_RECHAZO: Record<string, string> = {
   ronda_no_permitida: "Esta instalación no permite iniciar rondas no programadas.",
   ejecucion_desconocida: "No se encontró la ronda de este registro.",
   ronda_ya_cerrada: "Esta ronda ya estaba cerrada.",
+  punto_invalido: "El punto de la novedad no existe en esta instalación.",
+  tipo_incidente_invalido: "El tipo de incidente ya no está disponible.",
   salida_repetida: "Esta entrada ya tenía su salida registrada.",
   lote_invalido: "El envío no era válido y el servidor lo devolvió.",
 };
