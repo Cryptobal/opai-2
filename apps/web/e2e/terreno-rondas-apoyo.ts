@@ -38,6 +38,13 @@ export async function rondaIniciarMarcarYCerrar(
   await marcar(codigos[1]);
   await confirmados(2);
 
+  // E5a: una novedad de gravedad alta desde la ronda queda en el teléfono y llega al libro de novedades.
+  const novedad = enCurso.getByRole("region", { name: "Reportar novedad" });
+  await novedad.getByLabel("¿Qué pasó?").fill("Puerta del bodegón forzada (e2e)");
+  await novedad.getByRole("button", { name: "Alta" }).click();
+  await novedad.getByRole("button", { name: "Enviar novedad" }).click();
+  await expect(novedad.getByText("Novedad guardada")).toBeVisible();
+
   // El formulario de marcado se carga aparte: la captura espera a que esté.
   await expect(enCurso.getByLabel("Código del punto (QR)")).toBeVisible();
   for (const [ancho, alto] of [

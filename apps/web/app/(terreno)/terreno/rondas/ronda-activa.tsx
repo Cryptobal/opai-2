@@ -14,6 +14,11 @@ const MarcarPunto = dynamic(
   { ssr: false },
 );
 
+const ReportarNovedad = dynamic(
+  () => import("../_componentes/reportar-novedad").then((m) => m.ReportarNovedad),
+  { ssr: false },
+);
+
 /**
  * La ronda en curso (CAR-78 · E3e): sus puntos con lo que el servidor ya confirmó, marcar el siguiente (cámara o
  * código) y cerrar. El cierre lo evalúa el servidor; aquí solo se dice «guardado» cuando la cola lo releyó.
@@ -65,6 +70,7 @@ export function RondaActiva({
         ))}
       </ul>
       <MarcarPunto personaId={personaId} ejecucionClave={clave} />
+      <ReportarNovedad personaId={personaId} ejecucionClave={clave} />
       {error ? (
         <Alerta tono="danger" titulo="No se pudo guardar el cierre">
           No quedó en el teléfono. Vuelve a intentarlo.
