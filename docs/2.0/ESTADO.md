@@ -201,6 +201,8 @@ Los avisos escritos de «aplicada con respaldo» siguen siendo el requisito de A
 
 ## Pendientes
 
+**Auditoría de salud del Núcleo (6-nov-2026, CAR-225, `docs/2.0/auditoria-nucleo-2026-11-06.md`):** sin brechas de RLS (194 tablas con FORCE y `tenant_isolation`). **1 bloqueante por permisos (C-01):** `core.personas.pago_aprobar_cambio` y `pago_rechazar_cambio` no son `soloPersonas`; PR-1 propuesto (sin migración). 23 hallazgos no bloqueantes y 12 PR propuestos en orden de riesgo; el bot «OPAI 2.0» los ordena con Linear. Además: CAR-50 figura Done pero no hay `error.tsx` en `apps/web`; este `ESTADO.md` tiene filas repetidas y datos viejos (cabecera, conteo de migraciones, código muerto ya borrado), que corrige el PR de pendientes (PR-12). No se ejecutaron `test:db`, e2e ni se consultó Neon.
+
 **Bot operativo (BRIEF-31), pendientes por prioridad:**
 - **Alta:** editar líneas, destinatarios y referencias de un borrador de factura (`update_invoice_draft_*` de 1.0; sin capacidad en 2.0, sin migración); rentabilidad por instalación y cliente (exige imputar costos a instalación; probable migración y diseño).
 - **Media:** descartar un borrador; nota de débito (56); informe de embudo por canal y SLA de solicitudes; cierre del mes de facturación; enlace de cotización con PIN; leer el texto de un documento; balance (requiere asientos); rendiciones; ampliar `core_buscar` a negocios, cotizaciones y DTE (toca la paleta ⌘K).
