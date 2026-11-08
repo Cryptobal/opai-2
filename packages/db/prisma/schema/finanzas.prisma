@@ -362,6 +362,11 @@ model DocumentoEmitidoLinea {
   orden        Int      @default(0)
   glosa        String
   monto        Int
+  /// Cantidad, unidad, precio unitario (CLP) y descuento de la línea; nulos en documentos anteriores (CAR-221).
+  cantidad       Decimal? @db.Decimal(14, 4)
+  unidad         String?
+  precioUnitario Int?     @map("precio_unitario")
+  descuentoPct   Int?     @map("descuento_pct")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
@@ -426,6 +431,9 @@ model DteConfig {
   /// Resolución de autorización del SII (requerida con SimpleAPI real).
   resolucionSiiNumero Int?   @map("resolucion_sii_numero")
   resolucionSiiFecha  DateTime? @map("resolucion_sii_fecha") @db.Date
+  /// Código de actividad económica del emisor (ACTECO, 1 a 6 dígitos) y oficina del SII (CAR-221).
+  acteco              Int?
+  oficinaSii          String?  @map("oficina_sii")
   certificadoSecretoId   String? @map("certificado_secreto_id") @db.Uuid
   emisionApiKeySecretoId String? @map("emision_api_key_secreto_id") @db.Uuid
   /// Porcentaje del rango CAF bajo el cual avisar folios bajos (R-FIN-038).

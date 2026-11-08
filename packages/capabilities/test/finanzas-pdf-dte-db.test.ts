@@ -32,10 +32,13 @@ describe.skipIf(!urlPropietario)("PDF de factura y nota de crédito · base real
     const b = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
       cuentaId: s.cuentaId,
       tipoDte: 33,
-      lineas: [{ glosa: "Servicio de guardias noviembre", monto: 400_000 }],
+      lineas: [{ glosa: "Servicio de guardias noviembre", monto: 400_000, cantidad: "2,5", unidad: "turno", precioUnitario: 160_000, descuentoPct: 0 }],
     });
     const factura = await s.dato<Doc>("finanzas.ventas.emitir", { documentoId: b.id });
     expect(await paginasDe(factura.id)).toBe(2);
+    // La línea conserva cantidad, unidad y precio (CAR-221); el PDF los imprime desde ahí.
+    const l = await s.e.admin.documentoEmitidoLinea.findFirstOrThrow({ where: { documentoId: factura.id } });
+    expect([l.cantidad?.toString(), l.unidad, l.precioUnitario, l.descuentoPct]).toEqual(["2.5", "turno", 160_000, 0]);
 
     const nc = await s.dato<Doc>("finanzas.ventas.emitir_nota_credito", {
       documentoReferenciaId: factura.id,

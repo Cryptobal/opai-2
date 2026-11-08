@@ -139,6 +139,15 @@ export async function rutEmisorDe(ctx: Contexto): Promise<string> {
 export const lineaInputSchema = z.object({
   glosa: z.string().trim().min(1).max(300),
   monto: z.number().int().min(1).max(2_000_000_000),
+  cantidad: z
+    .string()
+    .trim()
+    .regex(/^\d{1,10}([.,]\d{1,4})?$/, "Cantidad con hasta 4 decimales.")
+    .optional()
+    .describe("Cantidad decimal como texto («2», «0,5»). Opcional: si falta, el PDF no imprime cantidad."),
+  unidad: z.string().trim().min(1).max(20).optional(),
+  precioUnitario: z.number().int().min(0).max(2_000_000_000).optional().describe("Precio unitario en pesos, antes del descuento."),
+  descuentoPct: z.number().int().min(0).max(10_000).optional().describe("Descuento en centésimas de punto (1550 = 15,50 %)."),
 });
 
 export const documentoEmitidoIdSchema = uuidSchema;

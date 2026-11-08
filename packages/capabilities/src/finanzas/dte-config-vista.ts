@@ -16,6 +16,8 @@ export const configDteSchema = z.object({
   cesionProveedor: proveedorCesionSchema,
   resolucionSiiNumero: z.number().int().min(1).max(999_999).nullable(),
   resolucionSiiFecha: z.string().nullable(),
+  acteco: z.number().int().nullable(),
+  oficinaSii: z.string().nullable(),
   umbralFoliosPct: z.number().int().min(1).max(100),
   avisoCafDias: z.number().int().min(1).max(365),
   fechaCorte1_0: z.string().nullable(),
@@ -28,6 +30,8 @@ export function vistaCfgDte(cfg: {
   cesionProveedor: string | null;
   resolucionSiiNumero: number | null;
   resolucionSiiFecha: Date | null;
+  acteco?: number | null;
+  oficinaSii?: string | null;
   umbralFoliosPct: number;
   avisoCafDias: number;
   fechaCorte1_0?: Date | null;
@@ -39,6 +43,8 @@ export function vistaCfgDte(cfg: {
     cesionProveedor: cfg.cesionProveedor as z.infer<typeof proveedorCesionSchema>,
     resolucionSiiNumero: cfg.resolucionSiiNumero ?? null,
     resolucionSiiFecha: dia(cfg.resolucionSiiFecha ?? null),
+    acteco: cfg.acteco ?? null,
+    oficinaSii: cfg.oficinaSii ?? null,
     umbralFoliosPct: cfg.umbralFoliosPct,
     avisoCafDias: cfg.avisoCafDias,
     fechaCorte1_0: dia(cfg.fechaCorte1_0 ?? null),

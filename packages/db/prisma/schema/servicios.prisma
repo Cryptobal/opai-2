@@ -11,6 +11,7 @@ model PerfilEmpresa {
   giro                String?
   calle               String?
   comuna              String?
+  ciudad              String?
   region              String?
   pais                String   @default("CL")
   representanteNombre String?  @map("representante_nombre")
