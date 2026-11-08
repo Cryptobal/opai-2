@@ -5,6 +5,7 @@
 export * from "./contrato";
 export * from "./http";
 export * from "./red-segura";
+export { errorContinuidad } from "./anthropic-continuidad";
 export { anthropic } from "./anthropic";
 export { google } from "./google";
 export { openai, openaiCompatible } from "./openai";

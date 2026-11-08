@@ -47,7 +47,7 @@ describe("conversación con herramientas por HTTP (ADR-049)", () => {
     const r2 = await prov.conversar("m", {
       mensajes: [
         { rol: "usuario", texto: "hola" },
-        { rol: "asistente", texto: "busco", llamadas: r1.llamadas },
+        { rol: "asistente", texto: "busco", llamadas: r1.llamadas, continuidad: r1.continuidad! },
         { rol: "herramienta", id: "t1", nombre: "buscar", resultado: '{"hits":1}' },
       ],
       herramientas,

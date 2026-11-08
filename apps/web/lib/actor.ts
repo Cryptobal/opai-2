@@ -1,5 +1,5 @@
 import { crearContexto, type Contexto, type UsuarioContexto } from "@opai/capabilities";
-import { sesionDeRequest } from "@opai/auth";
+import { sesionDeRequest, sesionVigente } from "@opai/auth";
 import { esRol, esRolPlataforma } from "@opai/domain";
 
 import { contextoDeApiKey, keyDeCabecera } from "./api-key";
@@ -8,6 +8,7 @@ import { noAutenticado } from "./respuestas";
 import { COOKIE_TENANT, elegirMembresia, leerCookie } from "./tenant-actual";
 import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
 import { estadoMfaDe, verificarMfaDe } from "./mfa";
+import { conectarRevalidacion } from "./revalidacion-transaccion";
 
 export type UsuarioSesion = {
   id: string;
@@ -72,9 +73,17 @@ export async function identidadDe(
 }
 
 /** Contexto de ejecución de un usuario con sesión, en el tenant actual (o sin tenant). */
-export function contextoDeIdentidad(identidad: Identidad, portal: string | null): Contexto {
+export function contextoDeIdentidad(
+  identidad: Identidad,
+  portal: string | null,
+  opciones: {
+    fuentes?: Fuentes;
+    obtenerSesion?: () => ReturnType<Sesionador>;
+    portalRevalidacion?: string;
+  } = {},
+): Contexto {
   const { usuario, actual, acceso } = identidad;
-  return crearContexto({
+  const ctx = crearContexto({
     tenantId: actual?.tenantId ?? null,
     actor: { tipo: "user", id: usuario.id },
     usuario,
@@ -91,18 +100,24 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
     diferir: diferirConAfter,
     ...(actual ? { despacharEventos: despacharDiferido(actual.tenantId) } : {}),
   });
+  conectarRevalidacion(ctx, identidad, opciones.portalRevalidacion ?? portal, async () => {
+    const s = await (opciones.obtenerSesion ?? sesionVigente)();
+    if (!s) return null;
+    const vigente = await identidadDe(s.user, actual?.tenantId, opciones.fuentes);
+    vigente.mfaVerificada = s.session?.mfaVerified === true;
+    return { identidad: vigente, sesionId: s.session?.id };
+  });
+  return ctx;
 }
 
 type Sesionador = (
   req: Request,
-) => Promise<{ user: UsuarioSesion; session?: { mfaVerified?: boolean } } | null>;
+) => Promise<{ user: UsuarioSesion; session?: { id?: string; mfaVerified?: boolean } } | null>;
 
 /**
- * Resuelve el actor de un request a la API: API key (`Authorization: Bearer`) o sesión
- * (cookie de Better Auth). Sin ninguna de las dos responde 401. Con sesión devuelve siempre
- * `portal: null` (no acepta uno del cliente); `/api/v1` fija después `erp` en servidor solo para las
- * capacidades de su lista (`lib/api-v1-sesion.ts`, CAR-37) y el resto lo deniega `restriccion`;
- * toda escritura con sesión exige además el propio `Origin` (CAR-38).
+ * API key o cookie; sin ambas, 401. Sesión devuelve `portal: null`: `/api/v1` fija ERP solo para
+ * su lista (`lib/api-v1-sesion.ts`, CAR-37); el resto lo deniega `restriccion`. Las escrituras con
+ * sesión exigen además el propio `Origin` (CAR-38).
  */
 export async function resolverActor(
   req: Request,
@@ -121,7 +136,11 @@ export async function resolverActor(
       { status: 403 },
     );
   }
-  const ctx = contextoDeIdentidad(identidad, null);
+  const ctx = contextoDeIdentidad(identidad, null, {
+    fuentes,
+    portalRevalidacion: "erp", // Las rutas con sesión fijan ERP después; ctx.portal sigue null.
+    obtenerSesion: () => sesionVigente(req.headers),
+  });
   ctx.mfa = await estadoMfaDe(identidad);
   return ctx;
 }
