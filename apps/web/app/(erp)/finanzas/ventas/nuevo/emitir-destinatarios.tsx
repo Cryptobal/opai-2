@@ -57,7 +57,7 @@ export function EmitirDestinatarios({
   const repetido = lista.some((d) => correoNormalizado(d.email) === correo);
 
   function agregar() {
-    if (!esCorreoValido(nuevo) || repetido) return;
+    if (pendiente || !esCorreoValido(nuevo) || repetido) return;
     const tipo: TipoDestinatario = lista.some((d) => d.tipo === "PARA") ? "CC" : "PARA";
     cambiar([...lista, { tipo, email: correo, origen: "manual" }]);
     setNuevo("");
@@ -92,6 +92,7 @@ export function EmitirDestinatarios({
           d={d}
           onTipo={(tipo) => cambiar(lista.map((x, k) => (k === i ? { ...x, tipo } : x)))}
           onQuitar={() => cambiar(lista.filter((_, k) => k !== i))}
+          deshabilitado={pendiente}
         />
       ))}
       <div className="flex flex-wrap items-center gap-2">
@@ -99,12 +100,17 @@ export function EmitirDestinatarios({
           aria-label="Agregar un correo"
           type="email"
           placeholder="otro@empresa.cl"
+          disabled={pendiente}
           value={nuevo}
           onChange={(e) => setNuevo(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && agregar()}
           className="min-w-0 flex-1"
         />
-        <Button variant="secondary" disabled={!esCorreoValido(nuevo) || repetido} onClick={agregar}>
+        <Button
+          variant="secondary"
+          disabled={pendiente || !esCorreoValido(nuevo) || repetido}
+          onClick={agregar}
+        >
           <Plus className="size-4" aria-hidden />
           Agregar
         </Button>

@@ -15,10 +15,12 @@ export function FilaDestinatario({
   d,
   onTipo,
   onQuitar,
+  deshabilitado,
 }: {
   d: DestinatarioDoc;
   onTipo: (tipo: TipoDestinatario) => void;
   onQuitar: () => void;
+  deshabilitado: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
@@ -26,13 +28,19 @@ export function FilaDestinatario({
       <Badge tono="neutro">{ORIGEN[d.origen]}</Badge>
       <div className="w-28 shrink-0">
         <Select
+          disabled={deshabilitado}
           aria-label={`Tipo de ${d.email}`}
           valor={d.tipo}
           onCambiar={(v) => onTipo(v as TipoDestinatario)}
           opciones={TIPOS}
         />
       </div>
-      <Button variant="ghost" aria-label={`Quitar ${d.email}`} onClick={onQuitar}>
+      <Button
+        variant="ghost"
+        disabled={deshabilitado}
+        aria-label={`Quitar ${d.email}`}
+        onClick={onQuitar}
+      >
         <Trash2 className="size-4" aria-hidden />
       </Button>
     </div>
