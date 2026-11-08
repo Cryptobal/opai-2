@@ -90,7 +90,7 @@ core_calendario_archivar
 core_calendario_crear_feriado
 core_calendario_listar
 core_campos_catalogo
-core_campos_resolver
+core_campos_valores
 core_cargos_create
 core_cargos_get
 core_cargos_list

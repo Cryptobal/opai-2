@@ -52,7 +52,7 @@ Documentos (CAR-127) no tiene código ni PR abierto sobre campos (solo la rama d
 |---|---|---|
 | Catálogo, sintaxis, validador y render (contrato) | Comercial · Code (CAR-138); Documentos y CPQ lo consumen y proponen cambios por PR | `packages/domain/src/campos/**` |
 | Autorización por finalidad y permiso, mapeo de maestros | Comercial · Code (PR 2) | `campos/autorizacion.ts`, `campos/mapeo-maestros.ts` |
-| Capacidades `core.campos.catalogo` y `core.campos.resolver` | Comercial · Code (PR 2); Núcleo revisa permisos y auditoría | `packages/capabilities/src/core/campos/**` |
+| Capacidades `core.campos.catalogo` y `core.campos.valores` | Comercial · Code (PR 2); Núcleo revisa permisos y auditoría | `packages/capabilities/src/core/campos/**` |
 | Fuentes aún sin resolvedor (empresa/marca, persona, negocio, cotización) | Se suman por entidad, cada una por quien es dueño del dato: marca = Núcleo, persona = Personas (solo contrato), negocio = CRM, cotización = CPQ | un archivo por entidad en `core/campos/` o en el módulo dueño |
 
-Un campo nuevo o un cambio de clave sube `VERSION_CATALOGO_CAMPOS` y mantiene el alias antiguo. Documentos v4 debe consumir `core.campos.resolver`; no leer cuentas, contactos ni instalaciones por su cuenta para llenar variables.
+Un campo nuevo o un cambio de clave sube `VERSION_CATALOGO_CAMPOS` y mantiene el alias antiguo. Documentos v4 debe consumir `core.campos.valores`; no leer cuentas, contactos ni instalaciones por su cuenta para llenar variables.

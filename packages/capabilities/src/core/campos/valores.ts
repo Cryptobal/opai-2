@@ -34,13 +34,13 @@ function serializable(
   );
 }
 
-export const camposResolver = defineCapability({
+export const camposValores = defineCapability({
   // Revela datos de personas (contacto): se audita cada entidad entregada, sin copiar valores.
   auditarLectura: (s) =>
     [s.origen.cuentaId, s.origen.contactoId, ...s.origen.instalacionIds].filter(
       (id): id is string => typeof id === "string",
     ),
-  id: "core.campos.resolver",
+  id: "core.campos.valores",
   descripcion:
     "Entrega los valores del catálogo único de campos para un documento (propuesta, contrato, documento o correo) de una cuenta, su contacto e instalaciones. Solo devuelve campos que la finalidad permite y que el actor puede leer; lo que falta queda nulo y no se inventa.",
   permiso: PERMISOS_CORE.cuentasRead,

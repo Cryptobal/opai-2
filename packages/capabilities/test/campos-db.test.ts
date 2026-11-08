@@ -41,7 +41,7 @@ describe.skipIf(!urlPropietario)("Campos · resolvedor autorizado en base real",
       ...(instalaciones ? { alcance: { instalaciones } } : {}),
     });
   const resolver = (t: string, input: unknown, rol: Rol = "owner", inst?: string[]) =>
-    mod.executeCapability(ctx(t, rol, inst), "core.campos.resolver", input);
+    mod.executeCapability(ctx(t, rol, inst), "core.campos.valores", input);
 
   beforeAll(async () => {
     e = await prepararEntorno();
