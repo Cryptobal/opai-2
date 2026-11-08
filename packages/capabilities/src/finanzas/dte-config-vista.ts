@@ -14,7 +14,7 @@ export const configDteSchema = z.object({
   rutEmisor: z.string().nullable(),
   emisionProveedor: proveedorEmisionSchema,
   cesionProveedor: proveedorCesionSchema,
-  resolucionSiiNumero: z.number().int().min(1).max(999_999).nullable(),
+  resolucionSiiNumero: z.number().int().min(0).max(999_999).nullable(),
   resolucionSiiFecha: z.string().nullable(),
   acteco: z.number().int().nullable(),
   oficinaSii: z.string().nullable(),

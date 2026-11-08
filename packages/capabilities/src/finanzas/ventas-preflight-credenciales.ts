@@ -1,13 +1,19 @@
 import { dia } from "../core/maestros/comun";
 import type { Contexto } from "../types";
 import { adaptadorSiiDe } from "./adaptador-sii";
+import { resolucionSiiValida } from "./resolucion-sii";
 
 type Push = (codigo: string, ok: boolean, mensaje: string, bloqueante: boolean) => void;
 
 export async function chequeosCredencialesEmision(
   ctx: Contexto,
   proveedor: string,
-  cfg: { rutEmisor: string | null; resolucionSiiNumero: number | null; resolucionSiiFecha: Date | null } | null,
+  cfg: {
+    ambiente?: string | null;
+    rutEmisor: string | null;
+    resolucionSiiNumero: number | null;
+    resolucionSiiFecha: Date | null;
+  } | null,
   push: Push,
 ) {
   if (cfg?.rutEmisor) {
@@ -16,12 +22,19 @@ export async function chequeosCredencialesEmision(
     push("rut_emisor", false, "Falta el RUT emisor en la configuración DTE.", true);
   }
 
-  if (cfg?.resolucionSiiNumero && cfg?.resolucionSiiFecha) {
+  if (cfg?.resolucionSiiFecha && resolucionSiiValida(cfg.ambiente, cfg.resolucionSiiNumero)) {
     push(
       "resolucion_sii",
       true,
       `Resolución SII N° ${cfg.resolucionSiiNumero} del ${dia(cfg.resolucionSiiFecha)}.`,
       false,
+    );
+  } else if (proveedor !== "simulado" && cfg?.ambiente === "produccion" && cfg.resolucionSiiNumero === 0) {
+    push(
+      "resolucion_sii",
+      false,
+      "La resolución 0 solo existe en certificación; en producción indique la resolución vigente.",
+      true,
     );
   } else if (proveedor !== "simulado") {
     push("resolucion_sii", false, "Indique número y fecha de resolución SII del emisor.", true);
