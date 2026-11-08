@@ -1,28 +1,22 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
   correoNormalizado,
   esCorreoValido,
   type DestinatarioDoc,
-  type OrigenDestinatario,
   type TipoDestinatario,
   validarDestinatarios,
 } from "@opai/domain";
-import { avisar, Badge, Button, Card, Input, Select } from "@opai/ds";
+import { avisar, Button, Card, Input } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-type Sugerencia = { sugeridos: DestinatarioDoc[]; guardados: DestinatarioDoc[] };
+import { FilaDestinatario } from "./fila-destinatario";
 
-const ORIGEN: Record<OrigenDestinatario, string> = {
-  casilla_dte: "Casilla DTE",
-  contacto_facturacion: "Facturación",
-  manual: "Manual",
-};
-const TIPOS = (["PARA", "CC", "BCC"] as const).map((t) => ({ valor: t, etiqueta: t }));
+type Sugerencia = { sugeridos: DestinatarioDoc[]; guardados: DestinatarioDoc[] };
 
 /** Destinatarios del correo del DTE: sugeridos desde la cuenta, ajustables, con un PARA y copias CC/BCC; se guardan por documento. */
 export function EmitirDestinatarios({
@@ -93,28 +87,12 @@ export function EmitirDestinatarios({
         </p>
       ) : null}
       {lista.map((d, i) => (
-        <div
+        <FilaDestinatario
           key={d.email}
-          className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2"
-        >
-          <span className="min-w-0 flex-1 break-all text-sm">{d.email}</span>
-          <Badge tono="neutro">{ORIGEN[d.origen]}</Badge>
-          <Select
-            aria-label={`Tipo de ${d.email}`}
-            valor={d.tipo}
-            onCambiar={(v) =>
-              cambiar(lista.map((x, k) => (k === i ? { ...x, tipo: v as TipoDestinatario } : x)))
-            }
-            opciones={TIPOS}
-          />
-          <Button
-            variant="ghost"
-            aria-label={`Quitar ${d.email}`}
-            onClick={() => cambiar(lista.filter((_, k) => k !== i))}
-          >
-            <Trash2 className="size-4" aria-hidden />
-          </Button>
-        </div>
+          d={d}
+          onTipo={(tipo) => cambiar(lista.map((x, k) => (k === i ? { ...x, tipo } : x)))}
+          onQuitar={() => cambiar(lista.filter((_, k) => k !== i))}
+        />
       ))}
       <div className="flex flex-wrap items-center gap-2">
         <Input
