@@ -14,6 +14,7 @@ import { hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { exigirCafDelAmbiente } from "./caf-ambiente";
+import { seleccionarFoliosPrevistos } from "./folios-previstos";
 
 export async function avisosDteDe(ctx: Pick<Contexto, "db" | "tenantId">) {
   const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
@@ -82,18 +83,7 @@ export async function foliosPrevistos(ctx: TxLike, tipoDte: TipoDteVenta, cantid
     ctx.db.dteFolio.findMany({ where: { tipoDte, activo: true }, orderBy: [{ folioDesde: "asc" }, { id: "asc" }] }),
     ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } }),
   ]);
-  const folios: number[] = [];
-  for (const r of rangos) {
-    if (cafVencido(r.cafVenceEn?.toISOString().slice(0, 10) ?? null, hoyIso)) continue;
-    if (r.folioActual > r.folioHasta) continue;
-    exigirCafDelAmbiente(cfg, r);
-    for (let f = r.folioActual; f <= r.folioHasta && folios.length < cantidad; f++) folios.push(f);
-    if (folios.length >= cantidad) break;
-  }
-  if (folios.length < cantidad) {
-    throw reglaDeNegocio(`No hay folios disponibles para el DTE ${tipoDte}. Cargue un CAF.`);
-  }
-  return folios;
+  return seleccionarFoliosPrevistos(rangos, cfg, hoyIso, tipoDte, cantidad);
 }
 
 export type OpcionesFolioVista = {

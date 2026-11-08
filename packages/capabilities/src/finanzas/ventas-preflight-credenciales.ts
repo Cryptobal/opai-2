@@ -1,7 +1,7 @@
 import { dia } from "../core/maestros/comun";
 import type { Contexto } from "../types";
 import { adaptadorSiiDe } from "./adaptador-sii";
-import { resolucionSiiValida } from "./resolucion-sii";
+import { chequeoResolucionSii } from "./resolucion-sii";
 
 type Push = (codigo: string, ok: boolean, mensaje: string, bloqueante: boolean) => void;
 
@@ -22,25 +22,7 @@ export async function chequeosCredencialesEmision(
     push("rut_emisor", false, "Falta el RUT emisor en la configuración DTE.", true);
   }
 
-  if (cfg?.resolucionSiiFecha && resolucionSiiValida(cfg.ambiente, cfg.resolucionSiiNumero)) {
-    push(
-      "resolucion_sii",
-      true,
-      `Resolución SII N° ${cfg.resolucionSiiNumero} del ${dia(cfg.resolucionSiiFecha)}.`,
-      false,
-    );
-  } else if (proveedor !== "simulado" && cfg?.ambiente === "produccion" && cfg.resolucionSiiNumero === 0) {
-    push(
-      "resolucion_sii",
-      false,
-      "La resolución 0 solo existe en certificación; en producción indique la resolución vigente.",
-      true,
-    );
-  } else if (proveedor !== "simulado") {
-    push("resolucion_sii", false, "Indique número y fecha de resolución SII del emisor.", true);
-  } else {
-    push("resolucion_sii", true, "Resolución SII no requerida en modo simulado.", false);
-  }
+  chequeoResolucionSii(proveedor, cfg, dia, push);
 
   const integ = await ctx.db.integracion.findUnique({
     where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_emision" } },

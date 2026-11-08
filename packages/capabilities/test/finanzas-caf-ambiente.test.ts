@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { exigirCafDelAmbiente, mensajeCafAmbiente } from "../src/finanzas/caf-ambiente";
-import { foliosPrevistos } from "../src/finanzas/ventas-folios-logica";
-import type { Contexto } from "../src/types";
+import { seleccionarFoliosPrevistos } from "../src/finanzas/folios-previstos";
 
 const rango = (idk: string | null, cafAmbiente: string | null = null) => ({
   folioDesde: 2064,
@@ -47,14 +46,10 @@ describe("ambiente del CAF vs ambiente de emisión (CAR-196)", () => {
     expect(() => exigirCafDelAmbiente({ ambiente: "certificacion", emisionProveedor: "simulado" }, rango("300"))).not.toThrow();
   });
 
-  it("foliosPrevistos no entrega folios de un CAF de otro ambiente", async () => {
-    const ctx = {
-      tenantId: "t",
-      db: {
-        dteFolio: { findMany: async () => [{ id: "a", ...rango("300") }] },
-        dteConfig: { findUnique: async () => cfgCert },
-      },
-    } as unknown as Contexto;
-    await expect(foliosPrevistos(ctx, 33, 1)).rejects.toThrow(/otro ambiente/);
+  it("la selección de folios previstos no entrega folios de un CAF de otro ambiente", () => {
+    const r = { id: "a", ...rango("300") };
+    expect(() => seleccionarFoliosPrevistos([r], cfgCert, "2026-11-08", 33, 1)).toThrow(/otro ambiente/);
+    expect(seleccionarFoliosPrevistos([{ ...r, cafIdk: "100" }], cfgCert, "2026-11-08", 33, 2)).toEqual([2064, 2065]);
+    expect(() => seleccionarFoliosPrevistos([{ ...r, cafIdk: "100" }], cfgCert, "2026-11-08", 33, 9)).toThrow(/No hay folios/);
   });
 });
