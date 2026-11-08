@@ -27,6 +27,7 @@ import {
 import { reporteResultados } from "./reportes-resultados";
 import { ventasBuscar } from "./ventas-buscar";
 import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectura";
+import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
 import { ventasEnvios } from "./ventas-envios";
 import { ventasPdf } from "./ventas-pdf";
@@ -106,6 +107,8 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasCesionCeder,
   ventasCesionListar,
   ventasPdf,
+  ventasDestinatariosSugeridos,
+  ventasGuardarDestinatarios,
   ventasEnviarCliente,
   ventasEnvios,
   foliosListar,

@@ -79,4 +79,16 @@ describe("mailer", () => {
     expect(cuerpo["cc"]).toEqual(["c@d.cl"]);
     expect(cuerpo["attachments"]).toEqual([{ filename: "factura-123.pdf", content: "QUJD" }]);
   });
+
+  it("Resend manda la copia oculta (bcc) solo cuando se pide", async () => {
+    const fetch = vi.fn(async (_url: string, _init: RequestInit) => new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetch);
+    const mailer = mailerDelEntorno({ RESEND_API_KEY: "re_x", EMAIL_FROM: "OPAI <a@opai.cl>" });
+    await mailer.enviar({ para: "a@b.cl", bcc: ["o@d.cl"], asunto: "Factura 124", texto: "Adjuntamos." });
+    await mailer.enviar({ para: "a@b.cl", asunto: "Factura 125", texto: "Adjuntamos." });
+    const con = JSON.parse(String(fetch.mock.calls[0]?.[1].body)) as Record<string, unknown>;
+    const sin = JSON.parse(String(fetch.mock.calls[1]?.[1].body)) as Record<string, unknown>;
+    expect(con["bcc"]).toEqual(["o@d.cl"]);
+    expect("bcc" in sin).toBe(false);
+  });
 });

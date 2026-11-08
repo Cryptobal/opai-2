@@ -21,7 +21,7 @@ export async function enviarCorreo(
   evento: string,
   para: string,
   datos: Record<string, unknown>,
-  extra: { cc?: readonly string[]; adjuntos?: readonly AdjuntoCorreo[] } = {},
+  extra: { cc?: readonly string[]; bcc?: readonly string[]; adjuntos?: readonly AdjuntoCorreo[] } = {},
 ) {
   const e = comunicableDe(evento);
   if (!e) throw new Error(`Evento no comunicable: ${evento}`);
@@ -48,6 +48,7 @@ export async function enviarCorreo(
       texto: r.texto,
       html: r.html,
       ...(extra.cc?.length ? { cc: extra.cc } : {}),
+      ...(extra.bcc?.length ? { bcc: extra.bcc } : {}),
       ...(extra.adjuntos?.length ? { adjuntos: extra.adjuntos } : {}),
     });
     await d.db.envio.create({ data: { ...base, estado: "enviado" } });
