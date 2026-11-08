@@ -70,7 +70,7 @@ export default async function ProgramacionDetallePage({
                 d.puedeEditar ? <AccionesProgramacion id={item.id} activa={item.activa} /> : null
               }
             />
-            {item.activa ? <Proximos periodos={d.periodos} /> : null}
+            {item.activa ? <Proximos periodos={d.periodos} moneda={item.moneda} /> : null}
             <Lineas item={item} />
             <Historial item={item} />
           </div>
