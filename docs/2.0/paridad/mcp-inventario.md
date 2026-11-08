@@ -339,7 +339,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
-| compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.actualizar` | `finanzas_ventas_programacion_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.cambiar_estado` | `finanzas_ventas_programacion_cambiar_estado` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `finanzas.ventas_programacion.crear` | `finanzas_ventas_programacion_crear` | existe |
@@ -631,6 +630,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/trabajos` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/trabajos` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform` | `platform.tenants.list` | `platform_tenants_list` | existe |
+| servidor | `lib/cuentas-paginadas.ts` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.apikeys.get` | `core_apikeys_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.cargos.get` | `core_cargos_get` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
