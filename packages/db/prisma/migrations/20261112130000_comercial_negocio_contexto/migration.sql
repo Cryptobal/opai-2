@@ -13,7 +13,7 @@ CREATE TABLE "comercial"."negocio_contexto" (
     "fuente" TEXT NOT NULL,
     "fecha_fuente" DATE NOT NULL,
     "estado" TEXT NOT NULL DEFAULT 'inferido',
-    "creado_por_tipo" TEXT NOT NULL,
+    "creado_por_tipo" TEXT NOT NULL DEFAULT 'user',
     "creado_por_id" UUID,
     "confirmado_por_id" UUID,
     "confirmado_en" TIMESTAMPTZ(6),

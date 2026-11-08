@@ -162,7 +162,7 @@ model NegocioContexto {
   /// "confirmado" | "inferido"
   estado         String    @default("inferido")
   /// "user" | "agent" | "system"
-  creadoPorTipo  String    @map("creado_por_tipo")
+  creadoPorTipo  String    @default("user") @map("creado_por_tipo")
   creadoPorId    String?   @map("creado_por_id") @db.Uuid
   confirmadoPorId String?  @map("confirmado_por_id") @db.Uuid
   confirmadoEn   DateTime? @map("confirmado_en") @db.Timestamptz(6)
