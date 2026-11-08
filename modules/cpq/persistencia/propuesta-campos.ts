@@ -54,7 +54,7 @@ export async function contratoCamposPropuesta(
     cuentaId: neg.cuentaId,
     contactoId,
   });
-  const contrato = contratoCamposDeEnvio(textos, v.usados, {
+  const contrato = contratoCamposDeEnvio(textos, v.usados, v.colecciones, {
     campos: r.campos,
     colecciones: r.colecciones,
   });

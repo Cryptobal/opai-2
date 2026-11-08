@@ -4,6 +4,7 @@ import {
   aplicarContratoABloques,
   aplicarContratoATexto,
   contratoCamposDeEnvio,
+  snapshotParaLectura,
   textosConTokens,
   validarTextosPropuesta,
 } from "./propuesta-campos";
@@ -19,22 +20,23 @@ const valores = {
 };
 
 describe("tokens de la propuesta", () => {
-  it("reúne ediciones manuales y bloques de biblioteca", () => {
+  it("reúne solo lo que sale en el PDF: bloques activos y el texto manual manda sobre la biblioteca", () => {
+    const b = (o: object) => ({ activo: true, fijo: false, opcional: true, ...o });
     const bloques = JSON.stringify([
-      {
-        id: "a",
+      b({ id: "a", tipo: "texto_libre", contenidoOverride: "Hola {{cuenta.nombre}}" }),
+      b({ id: "b", tipo: "condiciones", bibliotecaClave: "x", contenidoOverride: "Manual" }),
+      b({ id: "c", tipo: "metodologia", bibliotecaClave: "y" }),
+      b({
+        id: "d",
         tipo: "texto_libre",
-        activo: true,
-        fijo: false,
-        opcional: true,
-        contenidoOverride: "Hola {{cuenta.nombre}}",
-      },
-      { id: "b", tipo: "portada", activo: true, fijo: true, opcional: false },
+        activo: false,
+        contenidoOverride: "Apagado {{cuenta.giro}}",
+      }),
+      b({ id: "e", tipo: "portada" }),
     ]);
-    expect(textosConTokens(bloques, { x: "Otro texto" })).toEqual([
-      "Hola {{cuenta.nombre}}",
-      "Otro texto",
-    ]);
+    expect(
+      textosConTokens(bloques, { x: "Biblioteca X", y: "Biblioteca Y", z: "Sin usar" }),
+    ).toEqual(["Hola {{cuenta.nombre}}", "Manual", "Biblioteca Y"]);
   });
 
   it("rechaza tokens desconocidos y los de contrato (RUT, persona) en una propuesta", () => {
@@ -64,15 +66,21 @@ describe("tokens de la propuesta", () => {
     const c = contratoCamposDeEnvio(
       ["{{cuenta.nombre}} {{cuenta.giro}}"],
       ["cuenta.nombre", "cuenta.giro"],
+      [],
       valores,
     );
     expect(c.versionCatalogo).toBe(1);
     expect(c.faltantes).toEqual(["cuenta.giro"]);
-    expect(c.valores).toBe(valores);
+    expect(c.valores.campos).toEqual({ "cuenta.nombre": "Cliente Ficticio SpA" });
   });
 
   it("aplica los valores congelados a textos y a las ediciones manuales", () => {
-    const c = contratoCamposDeEnvio([], [], valores);
+    const c = contratoCamposDeEnvio(
+      [],
+      ["cuenta.nombre", "instalacion.nombre"],
+      ["instalaciones"],
+      valores,
+    );
     expect(
       aplicarContratoATexto(
         "Para {{cuenta.nombre}}: {{#cada instalaciones}}[{{instalacion.nombre}}]{{/cada}}",
@@ -92,6 +100,44 @@ describe("tokens de la propuesta", () => {
     expect(JSON.parse(aplicarContratoABloques(json, c))[0].contenidoOverride).toBe(
       "Cliente Ficticio SpA",
     );
+  });
+
+  it("congela solo las claves usadas, sin instalaciones si no hay repetición", () => {
+    const grande = {
+      campos: { "cuenta.nombre": "Cliente Ficticio SpA", "cuenta.giro": "Logística" },
+      colecciones: {
+        instalaciones: [
+          { "instalacion.nombre": "Planta Norte", "instalacion.direccion": "Calle 1" },
+        ],
+      },
+    };
+    const sin = contratoCamposDeEnvio(["{{cuenta.nombre}}"], ["cuenta.nombre"], [], grande);
+    expect(sin.valores).toEqual({
+      campos: { "cuenta.nombre": "Cliente Ficticio SpA" },
+      colecciones: { instalaciones: [] },
+    });
+    const con = contratoCamposDeEnvio(
+      ["{{#cada instalaciones}}{{instalacion.nombre}}{{/cada}}"],
+      ["instalacion.nombre"],
+      ["instalaciones"],
+      grande,
+    );
+    expect(con.valores.colecciones.instalaciones).toEqual([
+      { "instalacion.nombre": "Planta Norte" },
+    ]);
+  });
+
+  it("el historial no devuelve los valores resueltos, solo versión, claves y faltantes", () => {
+    const c = contratoCamposDeEnvio(["{{cuenta.nombre}}"], ["cuenta.nombre"], [], valores);
+    const json = JSON.stringify({ destinatarios: [], camposContrato: c });
+    const leido = JSON.parse(snapshotParaLectura(json));
+    expect(leido.camposContrato.valores).toEqual({
+      campos: {},
+      colecciones: { instalaciones: [] },
+    });
+    expect(leido.camposContrato.usados).toEqual(["cuenta.nombre"]);
+    expect(snapshotParaLectura('{"destinatarios":[]}')).toBe('{"destinatarios":[]}');
+    expect(snapshotParaLectura("no es json")).toBe("no es json");
   });
 
   it("sin contrato deja los textos intactos", () => {
