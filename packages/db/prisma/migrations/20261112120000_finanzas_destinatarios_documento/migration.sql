@@ -36,6 +36,9 @@ ALTER TABLE "finanzas"."documentos_emitidos_destinatarios" FORCE ROW LEVEL SECUR
 CREATE POLICY tenant_isolation ON "finanzas"."documentos_emitidos_destinatarios" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+-- La FK no pasa por RLS: sin este trigger una fila de la empresa A podría apuntar a un documento de la B.
+CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "finanzas"."documentos_emitidos_destinatarios"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('documento_id', 'finanzas.documentos_emitidos');
 
 COMMIT;
 

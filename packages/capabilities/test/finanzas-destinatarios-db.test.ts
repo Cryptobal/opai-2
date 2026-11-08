@@ -126,6 +126,15 @@ describe.skipIf(!urlPropietario)("Finanzas · destinatarios del documento (db)",
     expect(await s.e.admin.documentoEmitidoDestinatario.count({ where: { documentoId: emitidoId, email: "intruso@x.cl" } })).toBe(0);
   });
 
+  it("la base rechaza un destinatario de la empresa B sobre un documento de la A (trigger mismo_tenant)", async () => {
+    await expect(
+      s.e.admin.documentoEmitidoDestinatario.create({
+        data: { tenantId: s.tenantB, documentoId: emitidoId, orden: 9, tipo: "CC", email: "cruce@x.cl", origen: "manual" },
+      }),
+    ).rejects.toThrow(/otra empresa|Foreign key|mismo/i);
+    expect(await s.e.admin.documentoEmitidoDestinatario.count({ where: { email: "cruce@x.cl" } })).toBe(0);
+  });
+
   it("rol sin permiso de ventas no puede sugerir ni guardar", async () => {
     const r = await s.mod.executeCapability(
       s.mod.crearContexto({
