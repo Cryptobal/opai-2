@@ -43,6 +43,7 @@ export async function revertirApertura(ctx: Contexto, importacionId: string, dry
       if (f.entidad === "documento_cobrar") {
         await tx.documentoEmitidoLinea.deleteMany({ where: { documentoId: f.id20 } });
         await tx.documentoEmitidoReferencia.deleteMany({ where: { documentoId: f.id20 } });
+        await tx.documentoEmitidoDestinatario.deleteMany({ where: { documentoId: f.id20 } });
         await tx.documentoEmitido.delete({ where: { id: f.id20 } });
       } else if (f.entidad === "saldo_banco") await tx.movimientoBancario.delete({ where: { id: f.id20 } });
       // El folio NO se devuelve: lo que 1.0 emitió ante el SII sigue usado (la apertura solo lo hace avanzar).

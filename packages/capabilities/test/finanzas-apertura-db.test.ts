@@ -125,8 +125,14 @@ describe.skipIf(!urlPropietario)("finanzas.apertura · carga desde 1.0", () => {
     const ap = await mod.executeCapability(ctx(tB), "finanzas.apertura.importar", { fechaCorte: "2026-10-31", entrada: entradaB });
     const id = (ap as { data: { importacionId: string } }).data.importacionId;
     expect((await e.admin.dteFolio.findFirst({ where: { tenantId: tB } }))?.folioActual).toBe(101);
+    // Un destinatario guardado sobre el documento importado no debe impedir la reversión (FK RESTRICT).
+    const docB = await e.admin.documentoEmitido.findFirst({ where: { tenantId: tB } });
+    await e.admin.documentoEmitidoDestinatario.create({
+      data: { tenantId: tB, documentoId: docB?.id ?? "", orden: 0, tipo: "PARA", email: "destino@prueba.cl", origen: "manual" },
+    });
     const r = await mod.executeCapability(ctx(tB), "finanzas.apertura.revertir", { importacionId: id });
     expect(r).toMatchObject({ ok: true, data: { revertida: true } });
+    expect(await e.admin.documentoEmitidoDestinatario.count({ where: { tenantId: tB } })).toBe(0);
     expect(await e.admin.documentoEmitido.count({ where: { tenantId: tB } })).toBe(0);
     expect(await e.admin.movimientoBancario.count({ where: { tenantId: tB } })).toBe(0);
   });

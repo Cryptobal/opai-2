@@ -23,3 +23,4 @@ export * from "./prorrateo";
 export * from "./cierre";
 export * from "./programacion-glosa";
 export * from "./referencias-sii";
+export * from "./destinatarios";
