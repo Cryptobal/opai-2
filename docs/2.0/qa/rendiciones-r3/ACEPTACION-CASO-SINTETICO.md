@@ -16,20 +16,21 @@ Empresa A `qa-rendiciones-r3` y empresa B `qa-rendiciones-r3-b` (aislamiento), s
 | Aprueba el lote | Greta Gerente (QA) | `rendiciones:pagar.aprobar` |
 | Sin permisos | Vera Viewer (QA) | ninguno |
 
-Rendiciones de la semilla: REN-910001 $12.500 (enviada), REN-910002 $7.490 (enviada), REN-910003 $18.000 (aprobada). Total del lote esperado: **$38.000** (CLP entero, una sola fila de nómina porque las tres son de la misma persona).
+Rendiciones de la semilla: REN-910001 $12.500 (enviada), REN-910002 $7.490 (enviada), REN-910003 $18.000 (aprobada). Total del lote esperado: **$37.990** (CLP entero, una sola fila de nómina porque las tres son de la misma persona).
 
 Precondiciones que **no** crea la semilla y que se cargan solo en la empresa A, con datos inventados:
 - Ficha de pago de Sofía: banco «Banco de Chile» (SBIF `001`), RUT titular `11.111.111-1` (dígito verificador válido), cuenta destino `000000000001`.
 - Una cuenta de Bancos de la empresa A (cuenta de origen ficticia, p. ej. `9990000001`, banco ficticio, activa).
+- Para comprobar «Ver respaldo» (opcional): crear en la empresa A una rendición nueva de Sofía con una foto ficticia de boleta subida por el flujo normal (documento del núcleo); la semilla no sube documentos.
 - Ajustes del módulo en la empresa A: `nomina_formato_confirmado` = encendido y `nomina_cuenta_origen_id` = la cuenta anterior. Los enciende quien administra la empresa QA; el apagado es el estado por defecto y debe verificarse primero.
 
 ## 2. Recorrido y resultado esperado
 
 | # | Quién | Acción (capacidad) | Resultado esperado |
 | --- | --- | --- | --- |
-| 1 | Ana | Bandeja: listar y abrir REN-910001 y REN-910002 (`rendiciones.bandeja.listar/obtener`) | Ve ambas con «Ver respaldo»; Sofía no ve la bandeja ajena; Vera, «sin permiso». |
+| 1 | Ana | Bandeja: listar y abrir REN-910001 y REN-910002 (`rendiciones.bandeja.listar/obtener`) | Ve ambas; la semilla las crea con motivo «Dato de prueba» y **sin respaldo**, así que «Ver respaldo» no aparece (ver precondición de respaldo); Sofía no ve la bandeja ajena; Vera, «sin permiso». |
 | 2 | Ana | Aprobar las dos (`rendiciones.rendiciones.aprobar`, `…devolver`, `…rechazar`), probar además devolver y rechazar sin motivo | Aprobadas; devolver y rechazar sin motivo se rechazan por validación. Sofía no puede aprobar lo suyo. |
-| 3 | Gabriel | Crear lote con las tres (`rendiciones.lotes.crear`, antes `preview_…`) | Lote `LP-1` en borrador, total $38.000 calculado por el servidor. Una rendición ya en un lote activo no entra en otro. |
+| 3 | Gabriel | Crear lote con las tres (`rendiciones.lotes.crear`, antes `preview_…`) | Lote `LP-1` en borrador, total $37.990 calculado por el servidor. Una rendición ya en un lote activo no entra en otro. |
 | 4 | Gabriel | Intentar aprobar su propio lote | Rechazado (quien crea no es el único que aprueba). |
 | 5 | Greta | Aprobar el lote (`rendiciones.lotes.aprobar`) | Estado aprobado; total, cantidad e ítems ya no cambian (trigger). |
 | 6 | Gabriel | Generar nómina (`rendiciones.lotes.generar_nomina`) | Estado generado; no devuelve cuentas. Con el ajuste apagado: rechazo explícito. |
