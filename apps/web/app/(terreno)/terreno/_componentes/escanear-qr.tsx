@@ -26,8 +26,8 @@ export function EscanearQr({ alLeer }: { alLeer: (codigo: string) => void }) {
     let vivo = true;
     let flujo: MediaStream | null = null;
     let reloj = 0;
-    const Detector = (window as unknown as { BarcodeDetector: ConstructorDetector })
-      .BarcodeDetector;
+    const Detector: ConstructorDetector | undefined = Reflect.get(window, "BarcodeDetector");
+    if (!Detector) return;
     const detector = new Detector({ formats: ["qr_code"] });
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "environment" }, audio: false })
