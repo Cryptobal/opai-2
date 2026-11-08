@@ -39,4 +39,4 @@ Datos inventados, dos empresas, sin pagos. No duplican `puestos-aceptacion-db.te
 | H8 | Puesto de un día vencido. | Queda inactivo; no genera cobertura ni cobro después. |
 
 ## Dependencias y siguiente paso
-CAR-96 (diseño aprobado) → CAR-100 (esta propuesta decidida) → brief de CAR-100 como adenda del de CAR-96 → Finanzas > Ventas (facturación). **Siguiente paso concreto:** que Carlos u OPAI 2.0 confirmen por comentario los puntos 1 a 3 (recomendados arriba); con eso se escribe el brief.
+CAR-96 (diseño aprobado) → CAR-100 (esta propuesta decidida) → brief de CAR-100 como adenda del de CAR-96 → Finanzas > Ventas (facturación). **Siguiente paso concreto:** que Carlos confirme por comentario los puntos 1 a 3 (recomendados arriba); OPAI 2.0 puede coordinar la consulta, pero no aprueba decisiones de negocio (AGENTS.md, roles); con eso se escribe el brief.
