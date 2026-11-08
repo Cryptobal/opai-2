@@ -116,6 +116,7 @@ async function main(): Promise<void> {
           let usuario = await tx.user.findUnique({ where: { email: u.correo } });
           const nuevo = nuevos.get(u.correo);
           if (!nuevo) {
+            if (!usuario) throw new Error(`Falta el usuario ${u.correo} y no se preparó su clave.`);
             existentes += 1;
           } else {
             const { password, hash } = nuevo;
