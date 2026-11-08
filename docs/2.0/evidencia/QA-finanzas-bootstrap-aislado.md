@@ -94,7 +94,13 @@ Ensayado en un Postgres local con las migraciones reales y el rol `opai_app` rea
 - Con una empresa `gard` presente en la base, tanto `seed:finanzas-qa` como `seed:qa-finanzas-usuarios` abortan.
 - Pruebas automáticas: `qa-aislado.test.ts` (8) y `seed-finanzas-qa-guardas.test.ts` (5).
 
-## 7. Qué no cubre
+## 7. Lo que se descubrió al usar la base (ensayo local)
+
+- **Solo `owner` y `admin` ven Finanzas** (`finanzas:*` está vedado a gerente, supervisor y viewer: verificado en `permisos.test.ts`), y **owner y admin tienen segundo factor obligatorio**. Entrar a Finanzas en el QA web exige enrolar TOTP la primera vez (`/activar-mfa`: contraseña, clave manual, código de 6 dígitos). Gerente, supervisor y viewer sirven para comprobar que **no** ven Finanzas.
+- **Sin `seed:finanzas-qa` el QA no tiene clientes facturables** y Emitir mostraba «No hay clientes para facturar». El paso 3 del procedimiento es obligatorio por empresa.
+- La revisión con esta base destapó un error real, corregido en #397: Emitir y Programación pedían `limite: 200` a `core.cuentas.list` (tope 100) y la pantalla quedaba sin clientes.
+
+## 8. Qué no cubre
 
 - No prueba el despliegue web contra el QA (la configuración del §5 la aplica OPAI 2.0) ni el recorrido visual; eso lo valida OPAI 2.0 en el preview.
 - No hay emisión real: el SII, la factoring y el correo quedan simulados por diseño.
