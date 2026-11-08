@@ -28,4 +28,20 @@ describe("seed:finanzas-qa · guardas", () => {
     expect(() => leerDestino(["--tenant", "qa-x"], otra)).toThrow(/misma base/);
     expect(() => leerDestino(["--tenant", "qa-x"], { ...ok, DATABASE_URL: undefined })).toThrow(/Falta/);
   });
+
+  it("destino qa-aislado: solo con la guarda completa y solo las dos empresas de QA", () => {
+    const aislado = {
+      OPAI_ENTORNO: "qa-aislado",
+      OPAI_QA_DESTINO: "opai2-qa-aislado",
+      DATABASE_URL: "postgresql://opai_app:b@h1:5432/opai2_qa",
+      DATABASE_URL_MIGRATE: "postgresql://dueno:d@h1:5432/opai2_qa",
+      SII_ADAPTADOR: "simulado",
+      CESION_ADAPTADOR: "simulado",
+    };
+    expect(leerDestino(["--tenant", "qa-finanzas-a"], aislado)).toEqual({ slug: "qa-finanzas-a", confirmar: false });
+    expect(() => leerDestino(["--tenant", "qa-finanzas-a"], { ...aislado, OPAI_QA_DESTINO: undefined })).toThrow(/no autorizado/);
+    expect(() => leerDestino(["--tenant", "qa-finanzas-a"], { ...aislado, DATABASE_URL: "postgresql://opai_app:b@h1:5432/neondb", DATABASE_URL_MIGRATE: "postgresql://dueno:d@h1:5432/neondb" })).toThrow(/opai2_qa/);
+    expect(() => leerDestino(["--tenant", "qa-otra"], aislado)).toThrow(/no es una empresa del QA aislado/);
+    expect(() => leerDestino(["--tenant", "gard"], aislado)).toThrow();
+  });
 });
