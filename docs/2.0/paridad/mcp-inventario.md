@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 667 pares pantalla→capacidad · 595 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 668 pares pantalla→capacidad · 596 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -616,6 +616,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.guardar_destinatarios` | `finanzas_ventas_guardar_destinatarios` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preflight_emision` | `finanzas_ventas_preflight_emision` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preview_pdf` | `finanzas_ventas_preview_pdf` | existe |
 | erp | `/finanzas/ventas/programacion/[id]/editar` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.vista_previa` | `finanzas_ventas_programacion_vista_previa` | existe |
