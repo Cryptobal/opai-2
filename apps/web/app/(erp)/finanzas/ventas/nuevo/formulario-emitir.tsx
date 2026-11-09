@@ -113,6 +113,7 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
           setPlazoPagoDias={setPlazoPagoDias}
           glosa={glosa}
           setGlosa={setGlosa}
+          hoyIso={hoyIso}
         />
         <EmitirLineasDetalle documentoId={documentoId} lineas={lineas} setLineas={setLineas} />
       </div>

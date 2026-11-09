@@ -1,11 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Plus, Trash2 } from "lucide-react";
 
 import { Button, Campo, Card, Checkbox, Combobox, Input } from "@opai/ds";
 
-import { SelectorPlantilla } from "./selector-plantilla";
+import { DescripcionLinea } from "./descripcion-linea";
+import { precioClpTexto, precioUfTexto } from "./formato-precio";
 import { LINEA_VACIA, type FormProgramacion, type LineaForm } from "./tipos";
+
+// Las plantillas de glosa no hacen falta en el primer pintado: se cargan aparte (presupuesto de JS, ADR-037).
+const SelectorPlantilla = dynamic(() =>
+  import("./selector-plantilla").then((m) => m.SelectorPlantilla),
+);
 
 type Props = {
   f: FormProgramacion;
@@ -18,19 +25,18 @@ export function CamposLineas({ f, set, contactos }: Props) {
   const cambiar = (i: number, c: Partial<LineaForm>) =>
     set({ lineas: f.lineas.map((l, j) => (j === i ? { ...l, ...c } : l)) });
   const quitar = (i: number) => set({ lineas: f.lineas.filter((_, j) => j !== i) });
+  const fmt = f.moneda === "UF" ? precioUfTexto : precioClpTexto;
   const precioEtiqueta = f.moneda === "UF" ? "Precio unitario (UF)" : "Precio unitario (CLP)";
   return (
     <Card className="flex flex-col gap-4 p-4">
       <h2 className="t-label text-fg">Líneas</h2>
       {f.lineas.map((l, i) => (
         <div key={i} className="flex flex-col gap-3 rounded-md border border-border p-3">
-          <Campo etiqueta="Descripción" htmlFor={`linea-glosa-${i}`}>
-            <Input
-              id={`linea-glosa-${i}`}
-              value={l.glosa}
-              onChange={(e) => cambiar(i, { glosa: e.target.value })}
-            />
-          </Campo>
+          <DescripcionLinea
+            id={`linea-glosa-${i}`}
+            valor={l.glosa}
+            onCambiar={(glosa) => cambiar(i, { glosa })}
+          />
           <SelectorPlantilla
             glosaActual={l.glosa}
             onAplicar={(texto) => cambiar(i, { glosa: texto })}
@@ -49,9 +55,9 @@ export function CamposLineas({ f, set, contactos }: Props) {
                 id={`linea-precio-${i}`}
                 inputMode="decimal"
                 className="t-numeric"
-                value={l.precio}
+                value={fmt(l.precio)}
                 placeholder={f.moneda === "UF" ? "12,5" : "1.500.000"}
-                onChange={(e) => cambiar(i, { precio: e.target.value })}
+                onChange={(e) => cambiar(i, { precio: fmt(e.target.value) })}
               />
             </Campo>
             <Campo etiqueta="Descuento (%)" htmlFor={`linea-desc-${i}`}>
