@@ -72,4 +72,5 @@ export const recifradoresInventarioNucleo: Readonly<Record<string, Recifrador>> 
       recifrar,
     );
   },
+
 };

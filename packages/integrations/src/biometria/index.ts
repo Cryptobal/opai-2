@@ -10,6 +10,8 @@ export type {
 } from "./tipos";
 export { BiometriaError } from "./tipos";
 export { biometriaSimulada } from "./simulado";
+export { biometriaRekognition, ErrorProveedorBiometria, type CredencialesRekognition } from "./rekognition";
+export { coleccionDe } from "./tipos";
 
 /** Pruebas y desarrollo local son los únicos entornos que admiten el proveedor simulado. */
 export function entornoAdmiteBiometriaSimulada(env: Record<string, string | undefined>): boolean {
@@ -40,6 +42,9 @@ export function biometriaNoConfigurada(): Biometria {
 
 // El simulado es único por proceso: lo enrolado en una llamada se verifica en la siguiente.
 const simulado = biometriaSimulada();
+
+/** El simulado compartido del proceso, para una empresa de prueba fuera de desarrollo (QA aislada). */
+export const biometriaSimuladaCompartida = (): Biometria => simulado;
 
 /**
  * Biometría del entorno. Sin proveedor contratado (D-03/D-04 abiertas) solo pruebas y desarrollo usan el

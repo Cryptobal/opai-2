@@ -15,6 +15,7 @@ import { SeccionOs10 } from "../../_componentes/seccion-os10";
 import { SeccionPago } from "../../_componentes/seccion-pago";
 import { SeccionPrevision } from "../../_componentes/seccion-prevision";
 import { SeccionPinTerreno } from "../../_componentes/seccion-pin-terreno";
+import { SeccionRostro } from "../../_componentes/seccion-rostro";
 import { SeccionUniforme } from "../../_componentes/seccion-uniforme";
 
 export const metadata = { title: "Laboral" };
@@ -117,6 +118,7 @@ export default function Laboral(props: {
               <SeccionJornadaDt personaId={p.id} />
               <SeccionOs10 personaId={p.id} />
               <SeccionPinTerreno personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
+              <SeccionRostro personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
               <SeccionContactoLaboral personaId={p.id} />
             </div>
             {gestionar && actual ? (

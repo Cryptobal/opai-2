@@ -38,9 +38,26 @@ export interface Biometria {
   readonly nombre: string;
   readonly disponible: boolean;
   /** Enrola al sujeto. Falla con `sin_prueba_de_vida` si la muestra no es de una persona presente. */
-  enrolar(s: { sujetoId: string; muestra: Muestra }): Promise<ResultadoEnrolamientoFacial>;
+  enrolar(s: {
+    sujetoId: string;
+    muestra: Muestra;
+    /** Colección de la empresa (una por empresa, D-05); el simulado la ignora. */
+    coleccion?: string;
+  }): Promise<ResultadoEnrolamientoFacial>;
   /** Verifica 1:1 contra la referencia enrolada, con prueba de vida. */
-  verificar(s: { referencia: string; muestra: Muestra }): Promise<ResultadoVerificacionFacial>;
+  verificar(s: {
+    referencia: string;
+    muestra: Muestra;
+    coleccion?: string;
+  }): Promise<ResultadoVerificacionFacial>;
   /** Borra la referencia en el proveedor. Idempotente: borrar lo ya borrado no falla. */
-  borrar(referencia: string): Promise<void>;
+  borrar(referencia: string, coleccion?: string): Promise<void>;
+  /**
+   * Abre una prueba de vida que la cámara completa antes de enrolar o verificar. Su identificador viaja como
+   * muestra (`vida:<id>`). El simulado no la necesita: su muestra es `rostro:<token>`.
+   */
+  iniciarVida?(): Promise<{ sesionId: string }>;
 }
+
+/** Nombre de la colección de una empresa: una por empresa, nunca compartida (D-05). */
+export const coleccionDe = (tenantId: string): string => `opai-${tenantId}`;

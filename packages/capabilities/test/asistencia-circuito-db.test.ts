@@ -3,7 +3,7 @@
 // permisos. La identificación de hoy es RUT + PIN simulado; el rostro (#360) entra por la MISMA capacidad
 // `asistencia.marcas.registrar`, así que estos casos le aplican sin cambios. La presencia en Pauta (#360) tiene su
 // manifiesto en docs/2.0/checklists/asistencia-circuito-casos.md.
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { PIN_SIMULADO } from "../../../modules/asistencia/capabilities";
@@ -21,7 +21,7 @@ describe.skipIf(!urlPropietario)("Asistencia · circuito de marca idempotente (P
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
   const medidor = { registrar: async () => undefined };
-  type E = { tenant: string; inst: string; persona: string };
+  type E = { tenant: string; inst: string; persona: string; equipo: string };
   let A: E;
   let B: E;
   // Noche sintética fija (Chile en verano, UTC-3): turno del 3-nov 22:00 al 4-nov 06:00. La hora del servidor se simula
@@ -38,8 +38,11 @@ describe.skipIf(!urlPropietario)("Asistencia · circuito de marca idempotente (P
     return mod.crearContexto({ tenantId, actor: { tipo: "user", id }, usuario: { id, nombre: "Rrhh", email: "rrhh@empresa.cl", platformRole: null }, portal, portalesMembresia: [portal], rol, modulosActivos: ["asistencia"], medidor });
   };
   const run = (c: ReturnType<typeof ctx>, id: string, input: unknown) => mod.executeCapability(c, id, input) as Promise<Res>;
+  // Desde #360 (Face ID) la marca entra por el kiosco (equipo emparejado, sin sesión) o por el teléfono propio de la persona:
+  // una sesión de usuario ya no marca por otra persona aunque conozca su PIN.
+  const kiosco = (tenantId: string) => mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor });
   const marcar = (t: E, clave: string, extra: Record<string, unknown> = {}) =>
-    run(ctx(t.tenant, "terreno"), "asistencia.marcas.registrar", { personaId: t.persona, instalacionId: t.inst, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: clave, ...extra });
+    run(kiosco(t.tenant), "asistencia.marcas.registrar", { personaId: t.persona, instalacionId: t.inst, dispositivoId: t.equipo, canal: "kiosco", metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: clave, ...extra });
   const recalcular = (t: E) => run(ctx(t.tenant), "asistencia.dias.recalcular", { personaId: t.persona, desde: FECHA_TURNO, hasta: FECHA_SALIDA });
 
   async function empresa(slug: string): Promise<E> {
@@ -51,7 +54,8 @@ describe.skipIf(!urlPropietario)("Asistencia · circuito de marca idempotente (P
     await e.admin.vinculoLaboral.create({ data: { tenantId: tenant, personaId: persona, cargoId: cargo, instalacionId: inst, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente", horasSemanales: 40, distribucion: "5x2" } });
     await e.admin.ajuste.create({ data: { tenantId: tenant, ambito: "tenant", sujetoId: tenant, modulo: "asistencia", clave: "marcas_habilitadas", valor: true } });
     await e.admin.turnoEsperado.create({ data: { tenantId: tenant, personaId: persona, fecha: new Date(`${FECHA_TURNO}T00:00:00Z`), inicio: INICIO, fin: FIN, instalacionId: inst, origen: "pauta", colacionMin: 0 } });
-    return { tenant, inst, persona };
+    const equipo = (await e.admin.dispositivo.create({ data: { tenantId: tenant, instalacionId: inst, identificador: "DSP-0001", tokenHash: randomBytes(16).toString("hex"), estado: "activo" } })).id;
+    return { tenant, inst, persona, equipo };
   }
 
   beforeAll(async () => {
@@ -120,7 +124,7 @@ describe.skipIf(!urlPropietario)("Asistencia · circuito de marca idempotente (P
     expect(verA.ok && verB.ok).toBe(true);
     expect(verA.data.items.every((d: { personaId: string }) => d.personaId === A.persona)).toBe(true);
     expect(verB.data.items.every((d: { personaId: string }) => d.personaId === B.persona)).toBe(true);
-    const cruzada = await run(ctx(B.tenant, "terreno"), "asistencia.marcas.registrar", { personaId: A.persona, instalacionId: A.inst, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID() });
+    const cruzada = await run(kiosco(B.tenant), "asistencia.marcas.registrar", { personaId: A.persona, instalacionId: A.inst, dispositivoId: B.equipo, canal: "kiosco", metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID() });
     expect(cruzada).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await e.admin.marca.count({ where: { tenantId: B.tenant, personaId: A.persona } })).toBe(0);
   });

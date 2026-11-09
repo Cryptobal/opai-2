@@ -19,7 +19,7 @@ import { bloquearPersona, conProveedor, descifrarReferencia, proveedorDe } from 
 export async function borrarEnrolamiento(
   ctx: Contexto,
   personaId: string,
-  motivo: "manual" | "consentimiento_revocado" | "persona_anonimizada",
+  motivo: "manual" | "consentimiento_revocado" | "persona_anonimizada" | "desvinculacion",
   antesDe?: string,
 ): Promise<boolean> {
   return ctx.transaccion(async (tx) => {
@@ -27,7 +27,8 @@ export async function borrarEnrolamiento(
     const fila = await tx.enrolamientoBiometrico.findUnique({ where: { personaId } });
     if (!fila || (antesDe !== undefined && fila.consentimientoId >= antesDe)) return false;
     const referencia = await descifrarReferencia(ctx, fila.referenciaCifrada);
-    await conProveedor(() => proveedorDe(fila.proveedor).borrar(referencia));
+    const prov = await proveedorDe(ctx, fila.proveedor);
+    await conProveedor(() => prov.b.borrar(referencia, prov.coleccion));
     await tx.enrolamientoBiometrico.deleteMany({ where: { id: fila.id } });
     await ctx.eventos.emitir(tx, {
       tipo: "core.biometria.borrado",
