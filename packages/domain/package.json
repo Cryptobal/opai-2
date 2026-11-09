@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./dinero": "./src/dinero.ts",
+    "./ventas-lineas": "./src/finanzas/ventas-lineas.ts",
     "./terreno-hechos": "./src/terreno-hechos.ts",
     "./acceso-documento": "./src/acceso/documento.ts"
   },

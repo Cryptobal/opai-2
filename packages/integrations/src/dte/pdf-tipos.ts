@@ -1,6 +1,6 @@
 // Datos de la representación impresa del DTE (CAR-221). Layout tomado de la factura de OPAI 1.0 como referencia.
 
-export type PdfLinea = { descripcion: string; cantidad?: string; precio?: number; monto: number };
+export type PdfLinea = { descripcion: string; cantidad?: string; precio?: number; descuentoPct?: number; monto: number };
 
 export type PdfReferencia = {
   tipoDteRef: number;
@@ -22,7 +22,8 @@ export type PdfParte = {
 
 export type PdfDteInput = {
   tipoDte: number;
-  folio: number;
+  /** `null` solo en un borrador: aún no tiene folio. */
+  folio: number | null;
   fechaEmision: string;
   emisor: PdfParte;
   receptor: PdfParte;
@@ -32,7 +33,10 @@ export type PdfDteInput = {
   exento: number;
   iva: number;
   total: number;
-  timbrePdf417: string;
+  /** `null` solo en un borrador: el timbre nace al firmar. */
+  timbrePdf417: string | null;
+  /** Vista previa sin valor tributario: lleva marca «BORRADOR», sin folio, timbre ni copia cedible. */
+  borrador?: boolean;
   glosa?: string;
   resolucion?: { numero: number; fecha: string };
   /** Oficina del SII del emisor; si falta no se imprime. */

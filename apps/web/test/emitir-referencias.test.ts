@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { construirInputBorrador, mensajeReferencias, problemaReferencias, type RefForm } from "../app/(erp)/finanzas/ventas/nuevo/emitir-util";
+import { construirInputBorrador, mensajeReferencias, montoDeLinea, problemaReferencias, type RefForm } from "../app/(erp)/finanzas/ventas/nuevo/emitir-util";
 
+const LINEA = { glosa: "x", cantidad: "1", precio: "1.000", descuento: "0" };
 const ref = (p: Partial<RefForm> = {}): RefForm => ({ tipo: "801", folioTexto: "4500", fecha: "2026-10-15", razon: "", ...p });
 
 describe("referencias en Emitir (CAR-221 · A3)", () => {
   it("sin referencias no hay problema y el input no las trae", () => {
     expect(problemaReferencias([], "2026-11-07")).toBeNull();
-    const i = construirInputBorrador({ cuentaId: "c", tipoDte: "33", plazo: 30, lineas: [{ glosa: "x", montoTexto: "1000" }], glosa: "", dryRun: true });
+    const i = construirInputBorrador({ cuentaId: "c", tipoDte: "33", plazo: 30, fechaEmision: "2026-11-07", lineas: [LINEA], glosa: "", dryRun: true });
     expect(i).not.toHaveProperty("referencias");
   });
 
@@ -21,7 +22,7 @@ describe("referencias en Emitir (CAR-221 · A3)", () => {
 
   it("arma las referencias del borrador con folio, fecha y razón opcional", () => {
     const i = construirInputBorrador({
-      cuentaId: "c", tipoDte: "33", plazo: 30, lineas: [{ glosa: "x", montoTexto: "1000" }], glosa: "",
+      cuentaId: "c", tipoDte: "33", plazo: 30, fechaEmision: "2026-11-07", lineas: [LINEA], glosa: "",
       referencias: [ref(), ref({ tipo: "802", folioTexto: "88", razon: " HES octubre " })], dryRun: false,
     });
     expect(i.referencias).toEqual([
@@ -53,7 +54,27 @@ describe("referencias en Emitir (CAR-221 · A3)", () => {
   });
 
   it("la marca de fila tocada no viaja al borrador", () => {
-    const i = construirInputBorrador({ cuentaId: "c", tipoDte: "33", plazo: 30, lineas: [{ glosa: "x", montoTexto: "1000" }], glosa: "", referencias: [ref({ tocada: true })], dryRun: true });
+    const i = construirInputBorrador({ cuentaId: "c", tipoDte: "33", plazo: 30, fechaEmision: "2026-11-07", lineas: [LINEA], glosa: "", referencias: [ref({ tocada: true })], dryRun: true });
     expect(JSON.stringify(i)).not.toContain("tocada");
+  });
+});
+
+describe("línea del borrador: cantidad × precio − descuento (CAR-228)", () => {
+  it("monto neto con descuento y decimales", () => {
+    expect(montoDeLinea({ glosa: "x", cantidad: "2", precio: "1.000.000", descuento: "10" })).toBe(1_800_000);
+    expect(montoDeLinea({ glosa: "x", cantidad: "0,5", precio: "1.001", descuento: "0" })).toBe(501);
+  });
+  it("sin precio, con cantidad rara o con descuento imposible no hay monto", () => {
+    expect(montoDeLinea({ ...LINEA, precio: "" })).toBeNull();
+    expect(montoDeLinea({ ...LINEA, cantidad: "abc" })).toBeNull();
+    expect(montoDeLinea({ ...LINEA, descuento: "101" })).toBeNull();
+    expect(montoDeLinea({ ...LINEA, descuento: "100" })).toBeNull();
+  });
+  it("el input trae fecha, cantidad, precio y descuento solo si lo hay", () => {
+    const sin = construirInputBorrador({ cuentaId: "c", tipoDte: "33", plazo: 30, fechaEmision: "2026-11-05", lineas: [LINEA], glosa: "", dryRun: true });
+    expect(sin.fechaEmision).toBe("2026-11-05");
+    expect(sin.lineas).toEqual([{ glosa: "x", monto: 1000, cantidad: "1", precioUnitario: 1000 }]);
+    const con = construirInputBorrador({ cuentaId: "c", tipoDte: "33", plazo: 30, fechaEmision: "2026-11-05", lineas: [{ ...LINEA, descuento: "15,5" }], glosa: "", dryRun: true });
+    expect(con.lineas[0]).toMatchObject({ monto: 845, descuentoPct: 1550 });
   });
 });

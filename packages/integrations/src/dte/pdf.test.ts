@@ -38,6 +38,15 @@ describe("PDF del DTE", () => {
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
     expect(await paginas(bytes)).toBe(2);
   });
+  it("el borrador va en una sola página, sin folio, timbre ni copia cedible", async () => {
+    const bytes = await generarPdfDte({ ...base, folio: null, timbrePdf417: null, borrador: true });
+    expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
+    expect(await paginas(bytes)).toBe(1);
+  });
+  it("una línea con descuento imprime el PDF sin romperse", async () => {
+    const lineas = [{ descripcion: "Servicio", cantidad: "2", precio: 1_000_000, descuentoPct: 1550, monto: 1_690_000 }];
+    expect(await paginas(await generarPdfDte({ ...base, lineas }))).toBe(2);
+  });
   it("la factura exenta también es cedible", async () => {
     expect(await paginas(await generarPdfDte({ ...base, tipoDte: 34, iva: 0, exento: 1_100_000, total: 1_100_000 }))).toBe(2);
   });
