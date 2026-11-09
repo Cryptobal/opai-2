@@ -1601,9 +1601,9 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
   - asigna el reemplazo desde el celular y el turno extra queda por aprobar (compatible con el punto 3 de este ADR).
 - **Turnos pedidos (CAR-100; A11, A12, C16, C17):**
   - solo se cobra al cliente lo que pide fuera de su pauta; los reemplazos por faltas los asume la empresa;
-  - un guardia adicional por un día entra como solicitud que crea un puesto temporal con cobro;
+  - un guardia adicional por un día entra como solicitud que crea un puesto temporal con cobro (**reemplazado por la adenda del 9-nov**, más abajo);
   - la tarifa sale de la línea «guardia adicional» de la cotización vigente en CPQ, y Finanzas factura desde ese registro.
-  - **Conciliación:** el pago al guardia vive en el turno extra; el cobro al cliente vive en el puesto temporal de la solicitud. La línea de CPQ queda por definir en el brief de CAR-100, porque hoy `adicional` es un ítem de catálogo y no una tarifa diaria.
+  - **Conciliación (corregida el 9-nov):** el pago al guardia vive en el turno extra. El cobro al cliente sigue la adenda del 9-nov: no hay un puesto temporal separado. La línea de CPQ queda por definir en el brief de CAR-100, porque hoy `adicional` es un ítem de catálogo y no una tarifa diaria.
 - **Pago por lote (CAR-101; A8, C13–C14):**
   - Finanzas arma y concilia el lote semanal o quincenal de los turnos extra aprobados;
   - Nómina lo informa en el LRE si corresponde;
@@ -1612,6 +1612,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
   - turnos extra, aprobación y lote requieren una **revisión legal y contable escrita** antes de construir;
   - sin pagos reales;
   - el código de CAR-96 espera el diseño aprobado **y** esa revisión.
+
+**Adenda (9-nov-2026) · Cobro al cliente del turno extra.** Decisión cerrada de Carlos, textual:
+
+> El turno extra no se cobra, salvo un turno de refuerzo ingresado desde la pauta diaria cuando un guardia no va. El puesto temporal es ese mismo refuerzo. No es un puesto de un día ni un objeto nuevo.
+
+- Reemplaza el «puesto temporal con cobro creado por una solicitud» del 29-oct (A12) y la conciliación que ponía el cobro en un puesto temporal separado.
+- No cambia lo demás de este ADR: quién aprueba, que el supervisor no edita el monto, los externos, el estado único por persona y la condición previa de revisión legal y contable escrita, que sigue pendiente.
+- El bloque B (Design Prompt en Claude Design) no tiene OK.
 
 ## ADR-084 · «Comercial · Proyecto» construye el PR 6 de CAR-138 por orden expresa de Carlos (9-nov-2026)
 
