@@ -18,7 +18,14 @@ type DocPdf = {
   glosa: string | null;
 };
 
-type Perfil = { razonSocial: string | null; giro: string | null; calle: string | null; comuna: string | null; telefono: string | null } | null;
+type Perfil = {
+  razonSocial: string | null;
+  giro: string | null;
+  calle: string | null;
+  comuna: string | null;
+  ciudad?: string | null;
+  telefono: string | null;
+} | null;
 
 /** Datos del emisor desde el perfil de la empresa (ADR-028); lo que no esté cargado no se inventa ni se imprime. */
 export function emisorDePerfil(perfil: Perfil, nombreTenant: string | undefined, rut: string) {
@@ -26,6 +33,7 @@ export function emisorDePerfil(perfil: Perfil, nombreTenant: string | undefined,
   const giro = limpio(perfil?.giro);
   const direccion = limpio(perfil?.calle);
   const comuna = limpio(perfil?.comuna);
+  const ciudad = limpio(perfil?.ciudad);
   const fono = limpio(perfil?.telefono);
   return {
     razon: limpio(perfil?.razonSocial) ?? nombreTenant ?? "Emisor",
@@ -33,9 +41,13 @@ export function emisorDePerfil(perfil: Perfil, nombreTenant: string | undefined,
     ...(giro ? { giro } : {}),
     ...(direccion ? { direccion } : {}),
     ...(comuna ? { comuna } : {}),
+    ...(ciudad ? { ciudad } : {}),
     ...(fono ? { fono } : {}),
   };
 }
+
+/** «2.0000» → «2», «0.5000» → «0.5», «10» → «10». */
+export const cantidadTexto = (t: string) => (t.includes(".") ? t.replace(/\.?0+$/, "") : t);
 
 const dia = (d: Date | null | undefined) => d?.toISOString().slice(0, 10) ?? "";
 
@@ -67,7 +79,13 @@ export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8A
       ...(r.comunaReceptor ? { comuna: r.comunaReceptor } : {}),
       ...(r.ciudadReceptor ? { ciudad: r.ciudadReceptor } : {}),
     },
-    lineas: lineas.map((l) => ({ descripcion: l.glosa, monto: l.monto })),
+    lineas: lineas.map((l) => ({
+      descripcion: l.glosa,
+      monto: l.monto,
+      // Solo lo que el documento guardó: los emitidos antes de CAR-221 no traen cantidad ni precio y no se inventan.
+      ...(l.cantidad ? { cantidad: cantidadTexto(l.cantidad.toString()) } : {}),
+      ...(l.precioUnitario !== null ? { precio: l.precioUnitario } : {}),
+    })),
     referencias: referencias.map((x) => ({
       tipoDteRef: x.tipoDteRef,
       folioRef: x.folioRef,
@@ -81,6 +99,7 @@ export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8A
     total: doc.montoTotal,
     timbrePdf417: doc.timbrePdf417,
     ...(doc.glosa ? { glosa: doc.glosa } : {}),
+    ...(cfg?.oficinaSii ? { oficinaSii: cfg.oficinaSii } : {}),
     ...(cfg?.resolucionSiiNumero != null && cfg.resolucionSiiFecha
       ? { resolucion: { numero: cfg.resolucionSiiNumero, fecha: dia(cfg.resolucionSiiFecha) } }
       : {}),

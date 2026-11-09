@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { emisorDePerfil } from "../src/finanzas/ventas-pdf-doc";
+import { cantidadTexto, emisorDePerfil } from "../src/finanzas/ventas-pdf-doc";
+
+describe("cantidad impresa", () => {
+  it("quita ceros decimales y no toca enteros", () => {
+    expect([cantidadTexto("2.0000"), cantidadTexto("0.5000"), cantidadTexto("10"), cantidadTexto("100.0")]).toEqual(["2", "0.5", "10", "100"]);
+  });
+});
 
 describe("emisor del PDF desde el perfil de la empresa", () => {
   it("usa los datos cargados y recorta espacios", () => {
