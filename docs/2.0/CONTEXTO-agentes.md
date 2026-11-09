@@ -32,6 +32,13 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 - **Cada PR actualiza `docs/2.0/ESTADO.md` (qué entró, qué quedó pendiente, qué se decidió).** Sin esa actualización, el PR no está listo. Linear (equipo CAR, IDs `CAR-n`, `Fixes CAR-n` en el PR) sigue como referencia, pero no reemplaza a `ESTADO.md`. El plan, en `docs/2.0/ROADMAP.md`; la etapa de cada módulo, en `docs/2.0/PLAN-desarrollo.md`.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 
+## Notion: guía checklist y registro
+
+1. **Notion es solo capa legible.** La fuente de verdad es el repositorio (código + `docs/2.0/ESTADO.md`) y Linear. Si Notion y el repo discrepan, se corrige Notion, nunca al revés.
+2. **Antes de tomar trabajo:** abre el checklist [Plan OPAI 2.0 · Checklist](https://app.notion.com/p/12a852a462a146e08b6f421207e07e0d) (vista «Siguiente para tomar» o la de tu módulo). Página madre: [OPAI 2.0 · Hoja de ruta](https://app.notion.com/p/41336e74ce4581bc8d15c4430cc17392).
+3. **Al cerrar** (PR integrado, migración aplicada, falla detectada, cambio de estado): actualiza la fila CAR (estado, PR, en producción / con falla / bloqueado) y añade una fila en la base [Registro de cambios](https://app.notion.com/p/ece890234480473eb738601bde45fc43) (Fecha, Quién, Módulo, Qué cambió, Enlace, Tipo).
+4. **Decisiones:** van a la subpágina Log de Decisiones; no crees páginas sueltas.
+
 ## Qué va a cambiar para ti
 
 - 2.0 nace agent-first: cada capacidad de negocio se declara una vez y se expone igual en pantalla, en API `/api/v1/` y como herramienta MCP, con los mismos permisos y auditoría. Las escrituras tendrán `dry_run` (vista previa) antes de ejecutar y aceptarán clave de idempotencia.

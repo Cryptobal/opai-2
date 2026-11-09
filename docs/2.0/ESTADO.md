@@ -4,6 +4,8 @@
 
 **Decisión registrada (5-nov-2026, ADR-077):** Carlos autorizó un PR solo de documentación con el flujo operativo Grok Bot (coordinación OPAI 2.0, revisión final de Claude Code, señales en PR, horarios de vigilancia, correo a `carlos.irigoyen+claude@mail.grokbot.com`, Linear y diseño bajo demanda). **Adenda:** revisión visual obligatoria para Carlos en todo cambio de UI (A2.10; señal `REVISIÓN VISUAL CARLOS:` en PR con preview). Texto completo en `OPERACION-agentes.md` A2; `AGENTS.md` y plantilla del PR alineados en el mismo PR #342.
 
+**Documentación (9-nov-2026, PR [#446](https://github.com/Cryptobal/opai-2/pull/446)):** regla de Notion para agentes (capa legible; fuente de verdad repo + Linear); checklist antes de tomar trabajo; fila CAR y «Registro de cambios» al cerrar; decisiones solo en el Log de Decisiones. Sección [`CONTEXTO-agentes.md`](CONTEXTO-agentes.md) § «Notion: guía checklist y registro»; puntero en `AGENTS.md`.
+
 ## En curso
 
 | PR | Qué | Estado | Migración |
