@@ -8,6 +8,8 @@ import { Alerta, avisar, Button, Campo, Input, Segmentado, Sheet } from "@opai/d
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
+import { erroresValores } from "@/lib/instrumentos-valores";
+
 import { MargenInstrumentos } from "./margen-instrumentos";
 import {
   entradaParametros,
@@ -43,9 +45,12 @@ export function HojaMargenFinanzas({
   const [res, setRes] = useState<{ clave: string; venta: number | null; fallo: boolean } | null>(null);
   const turno = useRef(0);
   const set = (c: Partial<EstadoMargen>) => setE((p) => ({ ...p, ...c }));
-  const mesesOk = mesesValidos(e.meses) !== null;
+  // Solo cuentan los errores de los instrumentos encendidos: uno apagado vale $ 0 y no se edita.
+  const activos: Record<string, boolean> = { garantia: e.garantia, rc: e.rc, financiero: e.financiero };
+  const valoresOk = Object.keys(erroresValores(e.valores)).every((k) => !activos[k.split(".")[0] ?? ""]);
+  const mesesOk = mesesValidos(e.meses) !== null && valoresOk;
   const cambios = hayCambios(e, parametros);
-  const clave = cambios && mesesOk ? JSON.stringify(entradaParametros(versionId, e)) : null;
+  const clave = cambios && mesesOk ? JSON.stringify(entradaParametros(versionId, e, parametros)) : null;
   // La vista previa solo vale para el estado que la pidió; si cambias algo, vuelve a «venta actual».
   const vigente = clave !== null && res?.clave === clave ? res : null;
 
@@ -61,7 +66,7 @@ export function HojaMargenFinanzas({
   }, [clave, ejecutar]);
 
   async function guardar() {
-    const r = await ejecutar("cpq.versiones.parametros", entradaParametros(versionId, e));
+    const r = await ejecutar("cpq.versiones.parametros", entradaParametros(versionId, e, parametros));
     if (r != null) {
       avisar.exito("Margen y finanzas actualizados");
       onListo();
@@ -103,7 +108,7 @@ export function HojaMargenFinanzas({
           activa={e.modo}
           opciones={MODOS_MARGEN.map((m) => ({ id: m.id, etiqueta: m.etiqueta, onClick: () => set({ modo: m.id }) }))}
         />
-        <MargenInstrumentos e={e} p={parametros} set={set} deshabilitado={pendiente} />
+        <MargenInstrumentos e={e} p={parametros} set={set} deshabilitado={pendiente} versionId={versionId} onRestablecido={() => { onListo(); onCerrar(); }} />
         <Campo etiqueta="Meses de contrato" htmlFor="cpq-meses" error={mesesOk ? undefined : "Entre 1 y 120 meses."}>
           <Input id="cpq-meses" inputMode="numeric" value={e.meses} onChange={(x) => set({ meses: x.target.value.replace(/\D/g, "") })} />
         </Campo>
