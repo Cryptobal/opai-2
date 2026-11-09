@@ -670,6 +670,14 @@ model VentasProgramacion {
   montoVariable          Boolean   @default(false) @map("monto_variable")
   autoEnvioProforma      Boolean   @default(false) @map("auto_envio_proforma")
   autoEnvioEstadoPago    Boolean   @default(false) @map("auto_envio_estado_pago")
+  /// El OK del cliente es condición para emitir. Apagado: el OK solo se informa y queda en la traza.
+  esperarOk              Boolean   @default(false) @map("esperar_ok")
+  /// Cada factura exige una orden de compra (referencia 801) antes de emitirse.
+  exigeOc                Boolean   @default(false) @map("exige_oc")
+  /// generar | fecha_acordada: cuándo salen la proforma y el estado de pago.
+  previoCuando           String    @default("generar") @map("previo_cuando")
+  /// Día del mes acordado con el cliente (1–31) cuando `previoCuando` es fecha_acordada.
+  previoDia              Int?      @map("previo_dia")
   notas                  String?
   referenciasAdicionales Json      @default("[]") @map("referencias_adicionales")
   proximaEjecucionEn     DateTime? @map("proxima_ejecucion_en") @db.Timestamptz(6)
@@ -766,6 +774,10 @@ model VentasProgramacionCorrida {
   /// UF usada (centavos de CLP), si la programación es en UF.
   ufCentavos      BigInt?   @map("uf_centavos")
   montoTotal      BigInt?   @map("monto_total")
+  /// Día en que salen la proforma y el estado de pago; el trabajo diario los manda cuando llega.
+  previosEnviarEn   DateTime? @map("previos_enviar_en") @db.Date
+  /// Cuándo salieron todos. Nulo mientras falte alguno (se reintenta unos días).
+  previosEnviadosEn DateTime? @map("previos_enviados_en") @db.Timestamptz(6)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
@@ -836,6 +848,8 @@ model VentasCierreSeguimiento {
   /// pendiente | enviada | observada | ok
   estado           String    @default("pendiente")
   requiereOcHes    Boolean   @default(false) @map("requiere_oc_hes")
+  /// El OK del cliente es condición para emitir. Por defecto sí (lo anterior a la opción por programación).
+  requiereOk       Boolean   @default(true) @map("requiere_ok")
   ordenCompra      String?   @map("orden_compra")
   hes              String?
   observacion      String?

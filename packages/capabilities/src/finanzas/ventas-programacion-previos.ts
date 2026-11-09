@@ -3,6 +3,8 @@
 // ni deuda fiscal. Cada envío queda en el historial del borrador y la proforma marca el cierre como «enviada».
 import { mesYAnio } from "@opai/domain";
 
+import { hoy } from "../core/maestros/comun";
+
 import { enviarCorreo } from "../core/comunicaciones";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
@@ -82,4 +84,47 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
     salida.push({ tipo, estado, destinatarios: correos });
   }
   return salida;
+}
+
+const DIAS_REINTENTO = 7;
+
+/**
+ * Trabajo diario: manda los previos cuyo día acordado ya llegó y todavía no salieron completos. Un correo caído o un borrador
+ * sin destinatarios se reintenta cada día durante una semana desde el día acordado; después queda en el historial como fallido.
+ */
+export async function enviarPreviosPendientes(ctx: Contexto): Promise<{ revisados: number; enviados: number }> {
+  const h = hoy();
+  const desde = new Date(`${h}T00:00:00Z`);
+  desde.setUTCDate(desde.getUTCDate() - DIAS_REINTENTO);
+  const pendientes = await ctx.db.ventasProgramacionCorrida.findMany({
+    where: { previosEnviadosEn: null, previosEnviarEn: { gte: desde, lte: new Date(`${h}T00:00:00Z`) }, documentoId: { not: null } },
+    select: {
+      id: true,
+      documentoId: true,
+      programacion: { select: { autoEnvioProforma: true, autoEnvioEstadoPago: true, cuentaId: true } },
+      documento: { select: { estadoDte: true, fechaEmision: true, montoTotal: true } },
+    },
+    orderBy: { previosEnviarEn: "asc" },
+    take: 200,
+  });
+  let enviados = 0;
+  for (const c of pendientes) {
+    if (!c.documento?.fechaEmision || !c.documentoId) continue;
+    // Un documento ya emitido o descartado no recibe una proforma: se da por cerrado.
+    if (c.documento.estadoDte !== "borrador" || !c.programacion.cuentaId) {
+      await ctx.db.ventasProgramacionCorrida.update({ where: { id: c.id }, data: { previosEnviadosEn: new Date() } });
+      continue;
+    }
+    const resultado = await enviarPrevios(ctx, c.programacion, {
+      documentoId: c.documentoId,
+      cuentaId: c.programacion.cuentaId,
+      fechaFactura: c.documento.fechaEmision.toISOString().slice(0, 10),
+      montoTotal: c.documento.montoTotal,
+    });
+    if (resultado.every((r) => r.estado === "enviado")) {
+      await ctx.db.ventasProgramacionCorrida.update({ where: { id: c.id }, data: { previosEnviadosEn: new Date() } });
+      enviados += resultado.length;
+    }
+  }
+  return { revisados: pendientes.length, enviados };
 }

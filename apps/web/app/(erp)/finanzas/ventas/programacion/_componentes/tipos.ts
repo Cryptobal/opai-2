@@ -29,6 +29,9 @@ export type FormProgramacion = {
   mesRelativoFactura: "MES_ACTUAL" | "MES_SIGUIENTE";
   autoEnvioProforma: boolean;
   autoEnvioEstadoPago: boolean;
+  previoCuando: "generar" | "fecha_acordada";
+  previoDia: string;
+  esperarOk: boolean; exigeOc: boolean;
   lineas: LineaForm[];
   destinatarioIds: string[];
 };
@@ -58,6 +61,9 @@ export type DetalleProgramacion = {
   mesRelativoFactura: string;
   autoEnvioProforma: boolean;
   autoEnvioEstadoPago: boolean;
+  previoCuando: string;
+  previoDia: number | null;
+  esperarOk: boolean; exigeOc: boolean;
   montoTotal: number;
   proximaEjecucionEn: string | null;
   ultimoPeriodo10: string | null;
@@ -118,6 +124,10 @@ export const FORM_VACIO: FormProgramacion = {
   mesRelativoFactura: "MES_SIGUIENTE",
   autoEnvioProforma: false,
   autoEnvioEstadoPago: false,
+  previoCuando: "generar",
+  previoDia: "1",
+  esperarOk: false,
+  exigeOc: false,
   lineas: [LINEA_VACIA],
   destinatarioIds: [],
 };

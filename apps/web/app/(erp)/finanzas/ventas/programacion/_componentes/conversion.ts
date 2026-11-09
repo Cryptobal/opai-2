@@ -27,6 +27,10 @@ export function aInput(
   const diasF = entero(f.diasFacturacion);
   if (f.facturaModo === "dias" && (diasF === null || diasF < 0 || diasF > 120))
     return { ok: false, error: "Los días hasta la factura van de 0 a 120." };
+  const previoDia = entero(f.previoDia);
+  const conPrevios = f.autoEnvioProforma || f.autoEnvioEstadoPago;
+  if (conPrevios && f.previoCuando === "fecha_acordada" && (previoDia === null || previoDia < 1 || previoDia > 31))
+    return { ok: false, error: "El día acordado de envío debe estar entre 1 y 31." };
   const diaF = entero(f.diaFactura);
   if (f.facturaModo === "dia_fijo" && (diaF === null || !(diaF === -1 || (diaF >= 1 && diaF <= 31))))
     return { ok: false, error: "El día de la factura va de 1 a 31, o «Último día»." };
@@ -73,6 +77,10 @@ export function aInput(
       mesRelativoFactura: f.mesRelativoFactura,
       autoEnvioProforma: f.autoEnvioProforma,
       autoEnvioEstadoPago: f.autoEnvioEstadoPago,
+      previoCuando: conPrevios ? f.previoCuando : "generar",
+      previoDia: conPrevios && f.previoCuando === "fecha_acordada" ? previoDia : null,
+      esperarOk: f.esperarOk,
+      exigeOc: f.exigeOc,
       lineas,
       destinatarioIds: f.destinatarioIds,
     },
@@ -106,6 +114,10 @@ export function desdeDetalle(d: DetalleProgramacion): FormProgramacion {
     mesRelativoFactura: d.mesRelativoFactura === "MES_ACTUAL" ? "MES_ACTUAL" : "MES_SIGUIENTE",
     autoEnvioProforma: d.autoEnvioProforma,
     autoEnvioEstadoPago: d.autoEnvioEstadoPago,
+    previoCuando: d.previoCuando === "fecha_acordada" ? "fecha_acordada" : "generar",
+    previoDia: String(d.previoDia ?? 1),
+    esperarOk: d.esperarOk,
+    exigeOc: d.exigeOc,
     lineas: d.lineasEditables.map((l) => ({
       glosa: l.glosa,
       cantidad: l.cantidad.includes(".") ? l.cantidad.replace(/\.?0+$/, "") : l.cantidad,
