@@ -139,7 +139,7 @@ describe.skipIf(!urlPropietario)("cpq · capítulo por instalación de la propue
     expect((await run(b.tenantId, "cpq.propuestas_tecnica.capitulos_list", { propuestaId: a.propuestaId })).ok).toBe(false);
     expect((await guardar(b.tenantId, a.propuestaId, a.instalacionId, "alcance", "intruso")).ok).toBe(false);
     expect((await guardar(b.tenantId, b.propuestaId, a.instalacionId, "alcance", "otra empresa")).ok).toBe(false);
-    expect(await e.admin.cpqPropuestaCapitulo.count()).toBe(0);
+    expect(await e.admin.cpqPropuestaCapitulo.count({ where: { tenantId: { in: [a.tenantId, b.tenantId] } } })).toBe(0);
     // El disparador de misma empresa frena un capítulo de B colgado de la propuesta de A, aun con el rol propietario.
     await expect(
       e.admin.cpqPropuestaCapitulo.create({
