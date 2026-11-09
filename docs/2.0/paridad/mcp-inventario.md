@@ -878,6 +878,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `comercial.contexto.archivar`
 - `comercial.contexto.confirmar`
 - `comercial.contexto.listar`
+- `comercial.contexto.sugerir_seccion`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
 - `comercial.negocios.alertas`
