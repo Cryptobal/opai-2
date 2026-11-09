@@ -77,7 +77,7 @@ export function HojaCobertura({
               valor={b.esquemaId || undefined}
               placeholder="Elige un esquema"
               opciones={(esquemas ?? []).map((e) => ({ valor: e.id, etiqueta: e.nombre, descripcion: `${e.totalPuestos} puestos` }))}
-              onCambiar={(v) => setB((x) => ({ ...x, esquemaId: v }))}
+              onCambiar={(v) => setB((x) => ({ ...x, esquemaId: v, porTramo: {} }))}
             />
           </Campo>
         )}
