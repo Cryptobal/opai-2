@@ -83,7 +83,7 @@ function columnas(tono: Grupo["tono"], puedeSubir: boolean): Columna<Fila>[] {
 export function GrupoVencimientos({ grupo, puedeSubir }: { grupo: Grupo; puedeSubir: boolean }) {
   return (
     <section aria-labelledby={`g-${grupo.id}`} className="flex flex-col gap-2">
-      <h2 id={`g-${grupo.id}`} className="t-h3 flex items-center gap-2">
+      <h2 id={`g-${grupo.id}`} className="t-subheading flex items-center gap-2">
         {grupo.titulo}
         <span className="t-caption">({grupo.items.length})</span>
       </h2>
