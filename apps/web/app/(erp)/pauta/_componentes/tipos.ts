@@ -14,6 +14,17 @@ export type CeldaDia = {
   marcaManual?: boolean;
   cubiertoPorId?: string | null;
   variante?: VarianteCelda;
+  /** Presencia real según las marcas de Asistencia (solo con el módulo activo y permiso `asistencia:ver`). */
+  presencia?: PresenciaCelda;
+};
+
+export type EstadoPresencia = "presente" | "sin_marca" | "ausente" | "incompleto" | "sin_turno";
+export type PresenciaCelda = {
+  personaId: string;
+  estado: EstadoPresencia;
+  entrada: string | null;
+  salida: string | null;
+  atrasoMin: number;
 };
 
 export type ResumenCobertura = {

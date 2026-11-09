@@ -1,9 +1,10 @@
 import { z } from "zod";
 
-import { biometriaDelEntorno } from "@opai/integrations";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import type { Contexto } from "../../types";
+import { biometriaDe } from "../../integraciones/biometria";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
 import { bloquearDekLectura } from "../cumplimiento/cifrado-campos";
 import { actorLegible } from "../cumplimiento/comunes";
@@ -37,65 +38,73 @@ export const biometriaEnrolar = defineCapability({
   output: vista,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, { personaId, muestra }, { dryRun }) {
-    const persona = await ctx.db.persona.findFirst({
-      where: { id: personaId, ...dondePersona(ctx), archivadaEn: null, anonimizadaEn: null },
-      select: { id: true },
-    });
-    if (!persona) throw noEncontrado("La persona");
-    const consentimiento = await consentimientoVigente(ctx.db, personaId);
-    if (!consentimiento) throw sinConsentimiento();
-    if (await ctx.db.enrolamientoBiometrico.findUnique({ where: { personaId } }))
-      throw conflicto(
-        "La persona ya tiene su rostro enrolado. Bórralo antes de enrolarla de nuevo.",
-      );
-    const biometria = biometriaDelEntorno();
-    if (!biometria.disponible)
-      throw reglaDeNegocio(
-        "El reconocimiento facial no está disponible en este entorno: no hay proveedor contratado.",
-      );
-    if (dryRun)
-      return { personaId, proveedor: biometria.nombre, enroladoEn: new Date().toISOString() };
-
-    const r = await conProveedor(() => biometria.enrolar({ sujetoId: personaId, muestra }));
-    await medir(ctx, "biometria.enrolar", r.proveedor);
-    // Si la falla es «ya estaba enrolada», la referencia del proveedor es la del enrolamiento vigente: no se retira.
-    let retirar = true;
-    try {
-      const fila = await ctx.transaccion(async (tx) => {
-        // Con la persona bloqueada se revalida todo: una revocación o un enrolamiento concurrente ya están confirmados.
-        await bloquearPersona(tx, personaId);
-        if (!(await consentimientoVigente(tx, personaId))) throw sinConsentimiento();
-        if (await tx.enrolamientoBiometrico.findUnique({ where: { personaId } })) {
-          retirar = false;
-          throw conflicto(
-            "La persona ya tiene su rostro enrolado. Bórralo antes de enrolarla de nuevo.",
-          );
-        }
-        await bloquearDekLectura(tx, ctx.tenantId);
-        const f = await tx.enrolamientoBiometrico.create({
-          data: {
-            tenantId: ctx.tenantId,
-            personaId,
-            consentimientoId: consentimiento.id,
-            proveedor: r.proveedor,
-            referenciaCifrada: await cifrarReferencia(ctx, tx, r.referencia),
-            enroladoPor: actorLegible(ctx),
-          },
-        });
-        await ctx.eventos.emitir(tx, {
-          tipo: "core.biometria.enrolado",
-          entidadTipo: "persona",
-          entidadId: personaId,
-          payload: { proveedor: r.proveedor },
-        });
-        return f;
-      });
-      return { personaId, proveedor: fila.proveedor, enroladoEn: fila.createdAt.toISOString() };
-    } catch (e) {
-      // Si no quedó guardada, el rostro no puede quedar enrolado en el proveedor: se retira.
-      if (retirar) await biometria.borrar(r.referencia).catch(() => undefined);
-      throw e;
-    }
-  },
+  handler: (ctx, { personaId, muestra }, { dryRun }) => enrolarRostro(ctx, personaId, muestra, dryRun),
 });
+
+/**
+ * Enrola el rostro de una persona ya autorizada por quien llama (RR. HH. o la propia persona con su PIN):
+ * consentimiento vigente, proveedor de la empresa, referencia cifrada y evento, todo en una transacción con la
+ * persona bloqueada. No guarda la imagen.
+ */
+export async function enrolarRostro(ctx: Contexto, personaId: string, muestra: string, dryRun: boolean) {
+  const persona = await ctx.db.persona.findFirst({
+    where: { id: personaId, ...dondePersona(ctx), archivadaEn: null, anonimizadaEn: null },
+    select: { id: true },
+  });
+  if (!persona) throw noEncontrado("La persona");
+  const consentimiento = await consentimientoVigente(ctx.db, personaId);
+  if (!consentimiento) throw sinConsentimiento();
+  if (await ctx.db.enrolamientoBiometrico.findUnique({ where: { personaId } }))
+    throw conflicto(
+      "La persona ya tiene su rostro enrolado. Bórralo antes de enrolarla de nuevo.",
+    );
+  const prov = await biometriaDe(ctx);
+  if (!prov)
+    throw reglaDeNegocio(
+      "El reconocimiento facial no está disponible en esta empresa: falta proveedor o autorización.",
+    );
+  const biometria = prov.b;
+  if (dryRun)
+    return { personaId, proveedor: biometria.nombre, enroladoEn: new Date().toISOString() };
+
+  const r = await conProveedor(() => biometria.enrolar({ sujetoId: personaId, muestra, coleccion: prov.coleccion }));
+  await medir(ctx, "biometria.enrolar", r.proveedor);
+  // Si la falla es «ya estaba enrolada», la referencia del proveedor es la del enrolamiento vigente: no se retira.
+  let retirar = true;
+  try {
+    const fila = await ctx.transaccion(async (tx) => {
+      // Con la persona bloqueada se revalida todo: una revocación o un enrolamiento concurrente ya están confirmados.
+      await bloquearPersona(tx, personaId);
+      if (!(await consentimientoVigente(tx, personaId))) throw sinConsentimiento();
+      if (await tx.enrolamientoBiometrico.findUnique({ where: { personaId } })) {
+        retirar = false;
+        throw conflicto(
+          "La persona ya tiene su rostro enrolado. Bórralo antes de enrolarla de nuevo.",
+        );
+      }
+      await bloquearDekLectura(tx, ctx.tenantId);
+      const f = await tx.enrolamientoBiometrico.create({
+        data: {
+          tenantId: ctx.tenantId,
+          personaId,
+          consentimientoId: consentimiento.id,
+          proveedor: r.proveedor,
+          referenciaCifrada: await cifrarReferencia(ctx, tx, r.referencia),
+          enroladoPor: actorLegible(ctx),
+        },
+      });
+      await ctx.eventos.emitir(tx, {
+        tipo: "core.biometria.enrolado",
+        entidadTipo: "persona",
+        entidadId: personaId,
+        payload: { proveedor: r.proveedor },
+      });
+      return f;
+    });
+    return { personaId, proveedor: fila.proveedor, enroladoEn: fila.createdAt.toISOString() };
+  } catch (e) {
+    // Si no quedó guardada, el rostro no puede quedar enrolado en el proveedor: se retira.
+    if (retirar) await biometria.borrar(r.referencia, prov.coleccion).catch(() => undefined);
+    throw e;
+  }
+}
