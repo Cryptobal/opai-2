@@ -8,6 +8,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 import { margenPctTexto } from "@/lib/cpq-presentacion";
 
+import { BotonCargarPredefinidos } from "./boton-cargar-predefinidos";
 import { FilaCostoCategoria, GLOBAL, type FilaCosto, type PuestoOpcion } from "./costos-categoria-fila";
 
 type Lista = {
@@ -82,6 +83,7 @@ export function EditorCostosCategoria({
         <p className="t-caption text-fg-subtle">
           Suma un costo mensual a una categoría y elige si es de un puesto o de toda la cotización. Los totales y el margen se recalculan.
         </p>
+        <BotonCargarPredefinidos versionId={versionId} onListo={() => { onGuardado(); onCerrar(); }} />
         {!lista ? (
           <Skeleton className="h-40 w-full" />
         ) : (

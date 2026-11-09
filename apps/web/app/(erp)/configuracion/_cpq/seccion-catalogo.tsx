@@ -6,6 +6,7 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 
 import { CatalogoEditable } from "./catalogo-editable";
 import type { CategoriaCatalogo, ItemCatalogo } from "./catalogo-tipos";
+import { SeccionCostosPredefinidos } from "./seccion-costos-predefinidos";
 import { type FilaReferencia, SueldosReferenciaCpq } from "./sueldos-referencia-cpq";
 
 /** Pestaña Catálogo de Configuración → Módulos → CPQ: ítems y categorías editables y sueldos de referencia. */
@@ -27,6 +28,7 @@ export async function SeccionCatalogoCpq() {
             Ítems y categorías del catálogo CPQ de la empresa. Editar o archivar no cambia las cotizaciones ya armadas ni las enviadas.
           </p>
           <CatalogoEditable items={r.data.items} categorias={cats.data.items} editable={editable} />
+          <SeccionCostosPredefinidos />
           {ref.ok && verReferencias ? <SueldosReferenciaCpq filas={ref.data.items} /> : null}
         </div>
       ) : null}
