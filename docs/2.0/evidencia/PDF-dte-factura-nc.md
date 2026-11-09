@@ -38,3 +38,16 @@ El timbre de los fixtures es un texto de pruebas (no un TED firmado del SII). **
 3. Forma de pago y observaciones del documento: no hay campos. Hoy solo se imprime la glosa.
 
 Ninguna de las dos migraciones se hizo en este PR: las aplica el bot «OPAI 2.0» con respaldo (ADR-070) y esperan la decisión de Carlos sobre los campos obligatorios.
+
+## Corte A4 (mandato del 8-nov-2026): hoja A4, detalle paginado, proforma y estado de pago
+
+La hoja pasa de Carta a **A4** (595,28 × 841,89 pt). El detalle ya no se recorta ni pisa los totales: cada línea crece en alto según su texto (hasta 6 renglones), el detalle se reparte en páginas de continuación y los totales, el timbre y el acuse quedan en la última página. La copia CEDIBLE repite el documento completo. Las referencias crecen hasta 6 y el resto se resume. Se agregan los PDF previos, sin valor tributario y sin folio del SII:
+
+| Archivo | Fixture | Contenido |
+|---|---|---|
+| `pdf-dte/factura-33-larga-fixture.pdf` | `FIXTURE_FACTURA_LARGA` | 45 líneas: 3 páginas del original y 3 de la copia CEDIBLE |
+| `pdf-dte/proforma-fixture.pdf` | `FIXTURE_PROFORMA` | Proforma `PF-2026-12-000042`, UF estimada rotulada |
+| `pdf-dte/estado-pago-fixture.pdf` | `FIXTURE_ESTADO_PAGO` | Estado de pago `EP-2026-12-000042`, con firmas y «aprobado en línea» |
+
+Los PDF anteriores (`factura-33-fixture`, `nota-credito-61-fixture`) se regeneraron en A4. Número interno, versión y UF son datos del fixture: el cableado al correo de la programación va en otro corte. **No es una aceptación del SII.**
+

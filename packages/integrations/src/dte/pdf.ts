@@ -1,15 +1,17 @@
-// PDF del DTE (factura 33/34, notas 56/61) en Carta, con timbre PDF417 gráfico y copia CEDIBLE (CAR-221).
+// PDF del DTE (factura 33/34, notas 56/61) en A4, con timbre PDF417 gráfico, detalle paginado y copia CEDIBLE (CAR-221).
 import { PDFDocument, StandardFonts } from "pdf-lib";
 
-import { dibujarPagina } from "./pdf-pagina";
+import { A4 } from "./pdf-base";
+import { capacidad, medirFila, paginar } from "./pdf-detalle";
+import { altoReferencias, dibujarPagina } from "./pdf-pagina";
 import { timbrePng } from "./pdf-timbre";
 import { llevaCedible, type PdfDteInput } from "./pdf-tipos";
 
 export type { PdfDteInput, PdfLinea, PdfParte, PdfReferencia } from "./pdf-tipos";
+export { generarPdfPrevio } from "./pdf-previo";
+export type { PdfPrevioInput } from "./pdf-previo";
 
-const CARTA: [number, number] = [612, 792];
-
-/** Genera los bytes del PDF: una página y, si el tipo se puede ceder, la copia CEDIBLE. */
+/** Genera los bytes del PDF: el original (una o más páginas) y, si el tipo se puede ceder, la copia CEDIBLE completa. */
 export async function generarPdfDte(input: PdfDteInput): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   doc.setTitle(`DTE ${input.tipoDte} N° ${input.folio}`);
@@ -23,7 +25,12 @@ export async function generarPdfDte(input: PdfDteInput): Promise<Uint8Array> {
     negrita: await doc.embedFont(StandardFonts.HelveticaBold),
     timbre: await doc.embedPng(await timbrePng(input.timbrePdf417)),
   };
-  dibujarPagina(doc.addPage(CARTA), input, recursos, false);
-  if (llevaCedible(input.tipoDte)) dibujarPagina(doc.addPage(CARTA), input, recursos, true);
+  const filas = input.lineas.map((l, i) => medirFila(l, i + 1));
+  const paginas = paginar(filas, capacidad(253 + altoReferencias(input) + 8), capacidad(70));
+  for (const conCedible of llevaCedible(input.tipoDte) ? [false, true] : [false]) {
+    paginas.forEach((fp, i) =>
+      dibujarPagina(doc.addPage(A4), input, recursos, { numero: i + 1, total: paginas.length, filas: fp, conCedible }),
+    );
+  }
   return doc.save();
 }
