@@ -83,14 +83,22 @@ export function EntradaArea({ item, rutaActual, Link, onFijar, fijado }: ItemPro
 export function Pie({
   usuario,
   menu,
+  aviso,
 }: {
   usuario: Usuario;
   menu?: readonly ItemMenu[] | undefined;
+  aviso?: boolean;
 }) {
   return (
     <div className="flex-none border-t border-border px-3 py-2">
       {menu ? (
-        <UserMenu usuario={usuario} items={menu} lado="arriba-izquierda" conNombre />
+        <UserMenu
+          usuario={usuario}
+          items={menu}
+          lado="arriba-izquierda"
+          conNombre
+          {...(aviso ? { aviso: true } : {})}
+        />
       ) : (
         <span className="flex items-center gap-2.5 px-2 py-1">
           <Avatar nombre={usuario.nombre} />

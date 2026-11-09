@@ -75,6 +75,7 @@ export function AppShell(props: AppShellProps) {
         empresas={props.empresas}
         usuario={props.usuario}
         menuUsuario={props.menuUsuario}
+        {...(props.avisoNovedades ? { avisoNovedades: true } : {})}
         {...(props.fijados ? { fijados: props.fijados } : {})}
         {...(props.errorFijados ? { errorFijados: true } : {})}
         {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}

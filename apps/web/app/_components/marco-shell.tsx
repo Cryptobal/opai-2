@@ -109,7 +109,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     [navInferiorBase, bandejaPendiente],
   );
   const empresas = empresasShell(datos.empresas, Building2);
-  const menu = useMenuShell(
+  const { menuUsuario: menu, avisoNovedades } = useMenuShell(
     datos,
     enErp,
     router,
@@ -137,6 +137,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         {...(empresas.length ? { empresas } : {})}
         usuario={datos.usuario}
         menuUsuario={menu}
+        avisoNovedades={avisoNovedades}
         {...(agente.lanzador ? { agente: agente.lanzador } : {})}
         campana={
           datos.tenant ? (
