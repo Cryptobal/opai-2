@@ -1,13 +1,15 @@
 // Genera el borrador de un período de una programación (BRIEF-26 · CAR-159). Una sola transacción:
 // documento + corrida (UNIQUE programación + período) + evento. Nunca emite al SII.
 import {
+  type CuandoPrevios,
+  fechaEnvioPrevios,
   fechaFacturaProyectada,
   marcadoresDeGlosa,
   renderGlosa,
   vencimientoPago,
 } from "@opai/domain";
 
-import { aFecha } from "../core/maestros/comun";
+import { aFecha, hoy } from "../core/maestros/comun";
 import { conflicto } from "../errores";
 import type { Contexto } from "../types";
 import {
@@ -48,6 +50,7 @@ export async function generarPeriodo(
     diaFijo: p.facturaDia,
     mesRelativo: p.facturaMesRelativo,
   });
+  const previosEn = fechaEnvioPrevios(fecha, p.previoCuando as CuandoPrevios, p.previoDia);
   const base = {
     periodo,
     fecha,
@@ -85,6 +88,9 @@ export async function generarPeriodo(
               orden,
               glosa: glosaLinea(l.glosa),
               monto: l.monto,
+              cantidad: l.cantidad,
+              precioUnitario: l.precioUnitario,
+              descuentoPct: l.descuentoPct,
             })),
           },
         },
@@ -100,7 +106,12 @@ export async function generarPeriodo(
           fechaGeneracion: aFecha(fecha),
           ufCentavos: c.uf,
           montoTotal: BigInt(m.total),
+          previosEnviarEn: aFecha(previosEn),
         },
+      });
+      // El OK del cliente y la OC son opciones de la programación: el borrador las hereda y no cambian si ella cambia después.
+      await tx.ventasCierreSeguimiento.create({
+        data: { tenantId: ctx.tenantId, documentoId: doc.id, requiereOk: p.esperarOk, requiereOcHes: p.exigeOc },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "finanzas.venta.borrador_creado",
@@ -110,13 +121,22 @@ export async function generarPeriodo(
       });
       return doc.id;
     });
-    // Fuera de la transacción: el correo no debe retener la base ni revertir el borrador si falla.
-    await enviarPrevios(ctx, p, {
-      documentoId,
-      cuentaId: p.cuentaId!,
-      fechaFactura: factura.fecha,
-      montoTotal: c.calc.montos.total,
-    });
+    // Fuera de la transacción: el correo no debe retener la base ni revertir el borrador si falla. Con día acordado
+    // posterior, los previos los manda el trabajo diario ese día.
+    if (previosEn <= hoy()) {
+      const salida = await enviarPrevios(ctx, p, {
+        documentoId,
+        cuentaId: p.cuentaId!,
+        fechaFactura: factura.fecha,
+        montoTotal: c.calc.montos.total,
+      });
+      if (salida.every((r) => r.estado === "enviado")) {
+        await ctx.db.ventasProgramacionCorrida.updateMany({
+          where: { documentoId },
+          data: { previosEnviadosEn: new Date() },
+        });
+      }
+    }
     return { ...base, estado: "generado", documentoId };
   } catch (e) {
     // Dos ejecuciones a la vez: el UNIQUE de la corrida decide y la transacción perdedora se revierte.

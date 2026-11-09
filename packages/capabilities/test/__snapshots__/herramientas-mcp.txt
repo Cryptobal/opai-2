@@ -215,6 +215,7 @@ core_me
 core_me_portal_inicio
 core_modules_list
 core_modules_probar
+core_modules_pruebas
 core_modules_solicitar
 core_notificacion_reglas_list
 core_notificacion_reglas_set

@@ -21,6 +21,7 @@ const campos = {
   giro: textoOpcional(200),
   calle: textoOpcional(200),
   comuna: textoOpcional(80),
+  ciudad: textoOpcional(80),
   region: textoOpcional(80),
   representanteNombre: textoOpcional(160),
   representanteRut: rutSchema.nullable().optional(),

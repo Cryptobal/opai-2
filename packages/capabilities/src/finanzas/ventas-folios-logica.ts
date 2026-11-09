@@ -13,6 +13,8 @@ import type { TenantTx } from "@opai/db";
 import { hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+import { exigirCafDelAmbiente } from "./caf-ambiente";
+import { seleccionarFoliosPrevistos } from "./folios-previstos";
 
 export async function avisosDteDe(ctx: Pick<Contexto, "db" | "tenantId">) {
   const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
@@ -24,8 +26,14 @@ export async function avisosDteDe(ctx: Pick<Contexto, "db" | "tenantId">) {
 
 type TxLike = Pick<Contexto, "db" | "transaccion" | "tenantId">;
 
-async function reservarFolioEnTx(tx: TenantTx, tipoDte: TipoDteVenta, dryRun: boolean): Promise<number> {
+async function reservarFolioEnTx(
+  tx: TenantTx,
+  tenantId: string,
+  tipoDte: TipoDteVenta,
+  dryRun: boolean,
+): Promise<number> {
   const hoyIso = hoy();
+  const cfg = await tx.dteConfig.findUnique({ where: { tenantId } });
   const rangos = await tx.dteFolio.findMany({
     where: { tipoDte, activo: true },
     orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
@@ -34,6 +42,7 @@ async function reservarFolioEnTx(tx: TenantTx, tipoDte: TipoDteVenta, dryRun: bo
     if (rango.folioActual > rango.folioHasta) continue;
     const venceIso = rango.cafVenceEn?.toISOString().slice(0, 10) ?? null;
     if (cafVencido(venceIso, hoyIso)) continue;
+    exigirCafDelAmbiente(cfg, rango);
     const folio = rango.folioActual;
     if (dryRun) return folio;
     const { count } = await tx.dteFolio.updateMany({
@@ -59,8 +68,8 @@ export async function consumirFolio(
   dryRun: boolean,
   tx?: TenantTx,
 ): Promise<number> {
-  if (tx) return reservarFolioEnTx(tx, tipoDte, dryRun);
-  return ctx.transaccion((t) => reservarFolioEnTx(t, tipoDte, dryRun));
+  if (tx) return reservarFolioEnTx(tx, ctx.tenantId, tipoDte, dryRun);
+  return ctx.transaccion((t) => reservarFolioEnTx(t, ctx.tenantId, tipoDte, dryRun));
 }
 
 /**
@@ -70,20 +79,11 @@ export async function consumirFolio(
  */
 export async function foliosPrevistos(ctx: TxLike, tipoDte: TipoDteVenta, cantidad: number): Promise<number[]> {
   const hoyIso = hoy();
-  const rangos = await ctx.db.dteFolio.findMany({
-    where: { tipoDte, activo: true },
-    orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
-  });
-  const folios: number[] = [];
-  for (const r of rangos) {
-    if (cafVencido(r.cafVenceEn?.toISOString().slice(0, 10) ?? null, hoyIso)) continue;
-    for (let f = r.folioActual; f <= r.folioHasta && folios.length < cantidad; f++) folios.push(f);
-    if (folios.length >= cantidad) break;
-  }
-  if (folios.length < cantidad) {
-    throw reglaDeNegocio(`No hay folios disponibles para el DTE ${tipoDte}. Cargue un CAF.`);
-  }
-  return folios;
+  const [rangos, cfg] = await Promise.all([
+    ctx.db.dteFolio.findMany({ where: { tipoDte, activo: true }, orderBy: [{ folioDesde: "asc" }, { id: "asc" }] }),
+    ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } }),
+  ]);
+  return seleccionarFoliosPrevistos(rangos, cfg, hoyIso, tipoDte, cantidad);
 }
 
 export type OpcionesFolioVista = {

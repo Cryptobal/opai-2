@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 import {
+  CUANDO_PREVIOS,
   DIAS_FACTURACION_MAX,
   FRECUENCIAS_PROGRAMACION,
   MESES_RELATIVOS_FACTURA,
@@ -104,6 +105,26 @@ export const programacionBaseSchema = z.object({
     .describe(
       "Modalidad: la programación manda al cliente un estado de pago antes de facturar. Es solo la marca; no es un DTE ni una deuda fiscal.",
     ),
+  previoCuando: z
+    .enum(CUANDO_PREVIOS)
+    .default("generar")
+    .describe("Cuándo salen la proforma y el estado de pago: al generar el borrador o en el día acordado con el cliente."),
+  previoDia: z
+    .number()
+    .int()
+    .min(1)
+    .max(31)
+    .nullable()
+    .optional()
+    .describe("Día del mes acordado con el cliente (1–31; un día que el mes no tiene cae en su último día). Obligatorio con fecha_acordada."),
+  esperarOk: z
+    .boolean()
+    .default(false)
+    .describe("Apagado (por defecto): el OK del cliente solo se informa. Encendido: no se puede emitir hasta que el cliente dé su OK."),
+  exigeOc: z
+    .boolean()
+    .default(false)
+    .describe("Cada factura exige una orden de compra (referencia 801) antes de emitirse."),
   fechaInicio: fechaIso.nullable().optional(),
   fechaFin: fechaIso.nullable().optional(),
   notas: textoOpcional(1000),

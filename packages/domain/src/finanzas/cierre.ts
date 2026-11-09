@@ -9,14 +9,18 @@ export type EstadoSeguimientoCierre = (typeof ESTADOS_SEGUIMIENTO_CIERRE)[number
 
 export type SeguimientoCierre = {
   estado: EstadoSeguimientoCierre;
+  /** true: el OK del cliente es condición para emitir. false: el OK solo se informa y se deja en la traza. */
+  requiereOk: boolean;
   requiereOcHes: boolean;
   ordenCompra: string | null;
   hes: string | null;
   observacion: string | null;
 };
 
+/** Sin fila de seguimiento se exige el OK, como antes de que la programación pudiera dispensarlo. */
 export const SEGUIMIENTO_CIERRE_INICIAL: SeguimientoCierre = {
   estado: "pendiente",
+  requiereOk: true,
   requiereOcHes: false,
   ordenCompra: null,
   hes: null,
@@ -80,8 +84,21 @@ export function aplicarAccionCierre(
   }
 }
 
-/** Un documento se puede emitir en lote solo si el cliente dio su OK y no le falta OC/HES. */
-export const emitibleEnLote = (estadoDte: string, seg: SeguimientoCierre | null) => etapaCierre(estadoDte, seg) === "listo";
+/**
+ * Por qué un borrador no se puede emitir todavía, o null si se puede. Falta OC/HES y una observación del cliente
+ * bloquean siempre; el OK solo bloquea si la programación lo pidió (`requiereOk`).
+ */
+export function motivoNoEmitible(estadoDte: string, seg: SeguimientoCierre | null): string | null {
+  const etapa = etapaCierre(estadoDte, seg);
+  if (etapa === "emitido") return "El documento ya no es un borrador.";
+  if (etapa === "falta_oc_hes") return "Falta la orden de compra o la HES que exige la programación.";
+  if (etapa === "observado") return "El cliente observó el documento: resuélvelo antes de emitir.";
+  if ((seg ?? SEGUIMIENTO_CIERRE_INICIAL).requiereOk && etapa !== "listo") return "Esperando el OK del cliente.";
+  return null;
+}
+
+/** Un borrador se emite en lote si nada lo bloquea (ver `motivoNoEmitible`). */
+export const emitibleEnLote = (estadoDte: string, seg: SeguimientoCierre | null) => motivoNoEmitible(estadoDte, seg) === null;
 
 export type ResumenEtapa = { etapa: EtapaCierre; cantidad: number; total: number };
 

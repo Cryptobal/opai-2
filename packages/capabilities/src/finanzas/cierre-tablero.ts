@@ -1,7 +1,7 @@
 // Tablero del cierre de mes: los borradores que generaron las programaciones, por etapa (BRIEF-33 · CAR-167).
 import { z } from "zod";
 
-import { ETAPAS_CIERRE, etapaCierre, resumirEtapas } from "@opai/domain";
+import { emitibleEnLote, ETAPAS_CIERRE, etapaCierre, resumirEtapas } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { PERMISO_READ } from "./comun";
@@ -55,6 +55,8 @@ export const cierreTablero = defineCapability({
           etapa: etapaCierre(d.estadoDte, aSeguimiento(seg)),
           estado: (seg?.estado ?? "pendiente") as ItemCierre["estado"],
           requiereOcHes: seg?.requiereOcHes ?? false,
+          requiereOk: seg?.requiereOk ?? true,
+          emitible: emitibleEnLote(d.estadoDte, aSeguimiento(seg)),
           ordenCompra: seg?.ordenCompra ?? null,
           hes: seg?.hes ?? null,
           observacion: seg?.observacion ?? null,

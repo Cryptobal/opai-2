@@ -46,6 +46,10 @@ export type ProgramacionGenerable = {
   facturaMesRelativo: string;
   autoEnvioProforma: boolean;
   autoEnvioEstadoPago: boolean;
+  previoCuando: string;
+  previoDia: number | null;
+  esperarOk: boolean;
+  exigeOc: boolean;
   lineas: LineaFila[];
 };
 
