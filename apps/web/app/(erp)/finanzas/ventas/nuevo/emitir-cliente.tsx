@@ -4,6 +4,7 @@ import { Campo, Card, Combobox, Input, Select, Textarea } from "@opai/ds";
 
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
+import { EmitirFechaEmision } from "./emitir-fecha";
 import type { TipoEmision } from "./emitir-util";
 
 function filaTributaria(etiqueta: string, valor: string | null | undefined) {
@@ -27,6 +28,7 @@ type Props = {
   setPlazoPagoDias: (v: string) => void;
   glosa: string;
   setGlosa: (v: string) => void;
+  hoyIso?: string;
 };
 
 export function EmitirClienteTipo({
@@ -37,6 +39,7 @@ export function EmitirClienteTipo({
   tipoDte,
   setTipoDte,
   plazoPagoDias,
+  hoyIso,
   setPlazoPagoDias,
   glosa,
   setGlosa,
@@ -100,6 +103,7 @@ export function EmitirClienteTipo({
           />
         </Campo>
       )}
+      {esNota || !hoyIso ? null : <EmitirFechaEmision hoyIso={hoyIso} />}
       {esNota ? null : (
         <Campo etiqueta="Glosa (opcional)" htmlFor="emit-glosa">
           <Textarea

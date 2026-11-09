@@ -3,7 +3,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
-import { Button, Campo, Card, Input } from "@opai/ds";
+import { Button, Campo, Card, Input, InputMonto } from "@opai/ds";
 
 type LineaForm = { glosa: string; montoTexto: string };
 
@@ -44,16 +44,13 @@ export function EmitirLineasDetalle({ documentoId, lineas, setLineas }: Props) {
             />
           </Campo>
           <Campo etiqueta={i === 0 ? "Monto" : " "} htmlFor={`emit-l-m-${i}`}>
-            <Input
+            <InputMonto
               id={`emit-l-m-${i}`}
-              inputMode="numeric"
               className="t-numeric"
               disabled={Boolean(documentoId)}
-              value={l.montoTexto}
-              onChange={(e) =>
-                setLineas((rows) =>
-                  rows.map((r, j) => (j === i ? { ...r, montoTexto: e.target.value } : r)),
-                )
+              valor={l.montoTexto}
+              onCambiar={(montoTexto) =>
+                setLineas((rows) => rows.map((r, j) => (j === i ? { ...r, montoTexto } : r)))
               }
             />
           </Campo>

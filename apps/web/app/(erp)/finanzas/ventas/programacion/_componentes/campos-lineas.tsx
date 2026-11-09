@@ -4,6 +4,8 @@ import { Plus, Trash2 } from "lucide-react";
 
 import { Button, Campo, Card, Checkbox, Combobox, Input } from "@opai/ds";
 
+import { DescripcionLinea } from "./descripcion-linea";
+import { precioTexto } from "./formato-precio";
 import { SelectorPlantilla } from "./selector-plantilla";
 import { LINEA_VACIA, type FormProgramacion, type LineaForm } from "./tipos";
 
@@ -24,13 +26,11 @@ export function CamposLineas({ f, set, contactos }: Props) {
       <h2 className="t-label text-fg">Líneas</h2>
       {f.lineas.map((l, i) => (
         <div key={i} className="flex flex-col gap-3 rounded-md border border-border p-3">
-          <Campo etiqueta="Descripción" htmlFor={`linea-glosa-${i}`}>
-            <Input
-              id={`linea-glosa-${i}`}
-              value={l.glosa}
-              onChange={(e) => cambiar(i, { glosa: e.target.value })}
-            />
-          </Campo>
+          <DescripcionLinea
+            id={`linea-glosa-${i}`}
+            valor={l.glosa}
+            onCambiar={(glosa) => cambiar(i, { glosa })}
+          />
           <SelectorPlantilla
             glosaActual={l.glosa}
             onAplicar={(texto) => cambiar(i, { glosa: texto })}
@@ -49,9 +49,9 @@ export function CamposLineas({ f, set, contactos }: Props) {
                 id={`linea-precio-${i}`}
                 inputMode="decimal"
                 className="t-numeric"
-                value={l.precio}
+                value={precioTexto(f.moneda, l.precio)}
                 placeholder={f.moneda === "UF" ? "12,5" : "1.500.000"}
-                onChange={(e) => cambiar(i, { precio: e.target.value })}
+                onChange={(e) => cambiar(i, { precio: precioTexto(f.moneda, e.target.value) })}
               />
             </Campo>
             <Campo etiqueta="Descuento (%)" htmlFor={`linea-desc-${i}`}>
