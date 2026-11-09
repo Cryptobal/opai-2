@@ -16,15 +16,14 @@ export function useMenuShell(
   router: AppRouterInstance,
   onPassword: () => void,
   onPortalInicio?: () => void,
-): readonly ItemMenu[] {
+): { menuUsuario: readonly ItemMenu[]; avisoNovedades: boolean } {
   const novedadesNoLeidas = useConteoNovedades(
     datos.portal,
     datos.epoca,
     Boolean(datos.acceso && datos.tenant),
   );
-  return useMemo(
-    () =>
-      menuCuentaShell(
+  return useMemo(() => {
+    const menuUsuario = menuCuentaShell(
         enErp,
         (href) => router.push(href),
         onPassword,
@@ -34,8 +33,9 @@ export function useMenuShell(
         datos.acceso && datos.tenant
           ? { href: rutaNovedades(datos.portal), noLeidas: novedadesNoLeidas }
           : undefined,
-      ),
-    [
+    );
+    return { menuUsuario, avisoNovedades: novedadesNoLeidas > 0 };
+  }, [
       datos.acceso,
       datos.iconos,
       datos.portal,

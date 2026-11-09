@@ -1,9 +1,9 @@
-import { readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { PARTES_FINANZAS } from "../cobros/catalogo-modulos";
-import { RUTAS_ENTRADAS_NOVEDADES } from "./entradas/rutas";
+import { NOVEDADES_MARKDOWN } from "./entradas/embed";
 import { parsearNovedadMarkdown, type EntradaNovedad } from "./parser";
 
 export { parsearNovedadMarkdown, type EntradaNovedad, type FrontmatterNovedad } from "./parser";
@@ -26,9 +26,7 @@ export const ETIQUETA_MODULO_NOVEDAD: Readonly<Record<string, string>> = {
 };
 
 function cargarCatalogo(): EntradaNovedad[] {
-  const entradas = RUTAS_ENTRADAS_NOVEDADES.map((ruta) =>
-    parsearNovedadMarkdown(readFileSync(fileURLToPath(ruta), "utf8")),
-  );
+  const entradas = NOVEDADES_MARKDOWN.map((texto) => parsearNovedadMarkdown(texto));
   const ids = new Set<string>();
   for (const e of entradas) {
     if (ids.has(e.id)) throw new Error(`id de novedad duplicado: ${e.id}`);

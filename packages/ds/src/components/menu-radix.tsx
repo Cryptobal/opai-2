@@ -5,6 +5,7 @@ import { DropdownMenu } from "radix-ui";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { cn } from "../cn";
+import { Punto } from "../shell/contador";
 import { claseDisparadorMenu, claseOverlay, type ItemMenu, LADO } from "./menu";
 
 export type MenuProps = {
@@ -74,7 +75,12 @@ export function MenuRadix(props: MenuProps) {
                   item.peligro ? "text-danger-fg" : "text-fg",
                 )}
               >
-                {item.icono ? <item.icono className="size-4 text-fg-muted" aria-hidden /> : null}
+                {item.icono ? (
+                  <span className="relative size-4 flex-none">
+                    <item.icono className="size-4 text-fg-muted" aria-hidden />
+                    {item.punto ? <Punto visible peligro /> : null}
+                  </span>
+                ) : null}
                 <span className="min-w-0 flex-1">
                   <span className="block">{item.etiqueta}</span>
                   {item.descripcion ? (

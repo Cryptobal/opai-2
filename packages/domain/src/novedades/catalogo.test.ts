@@ -8,7 +8,7 @@ import {
   novedadesVisibles,
   parsearNovedadMarkdown,
 } from "./catalogo";
-import { RUTAS_ENTRADAS_NOVEDADES } from "./entradas/rutas";
+import { NOVEDADES_MARKDOWN } from "./entradas/embed";
 
 describe("novedades", () => {
   it("parsea frontmatter y cuerpo", () => {
@@ -31,14 +31,11 @@ Descripción para el usuario.
     });
   });
 
-  it("cada .md en entradas/ está referenciado en rutas.ts (bundle Vercel)", () => {
+  it("embed.ts está al día con los .md de entradas/ (pnpm gen:novedades-embed)", () => {
     const enDisco = readdirSync(directorioEntradasNovedades())
       .filter((f) => f.endsWith(".md"))
       .sort();
-    const registradas = RUTAS_ENTRADAS_NOVEDADES.map((u) => u.pathname.split("/").pop()!)
-      .filter(Boolean)
-      .sort();
-    expect(registradas).toEqual(enDisco);
+    expect(NOVEDADES_MARKDOWN).toHaveLength(enDisco.length);
   });
 
   it("el catálogo del repositorio tiene entradas con id único", () => {

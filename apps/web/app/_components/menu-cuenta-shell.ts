@@ -44,6 +44,7 @@ export function menuCuentaShell(
           {
             id: "novedades",
             etiqueta: "Novedades",
+            punto: novedades.noLeidas > 0,
             ...(novedades.noLeidas > 0
               ? { descripcion: `${novedades.noLeidas} sin leer` }
               : {}),

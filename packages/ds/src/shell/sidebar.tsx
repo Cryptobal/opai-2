@@ -28,6 +28,7 @@ type SidebarProps = {
   empresas?: readonly ItemMenu[] | undefined;
   usuario?: Usuario | undefined;
   menuUsuario?: readonly ItemMenu[] | undefined;
+  avisoNovedades?: boolean;
   fijados?: readonly ItemFijado[] | undefined;
   errorFijados?: boolean | undefined;
   reintentarFijados?: (() => void) | undefined;
@@ -101,7 +102,13 @@ export function Sidebar(props: SidebarProps) {
             <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}
       </div>
-      {props.usuario ? <Pie usuario={props.usuario} menu={props.menuUsuario} /> : null}
+      {props.usuario ? (
+        <Pie
+          usuario={props.usuario}
+          menu={props.menuUsuario}
+          {...(props.avisoNovedades ? { aviso: true } : {})}
+        />
+      ) : null}
     </nav>
   );
 }

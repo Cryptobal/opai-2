@@ -4,7 +4,6 @@ import { ChevronLeft, Search } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
-import { Avatar } from "../components/avatar";
 import { Button } from "../components/button";
 import type { ItemMenu } from "../components/menu";
 import { AtajoBusqueda } from "../components/atajo-busqueda";
@@ -18,7 +17,7 @@ import {
   type Usuario,
   type Volver,
 } from "./types";
-import { UserMenu } from "./user-menu";
+import { MenuUsuarioBarra } from "./user-menu";
 
 export type ComunesBarra = {
   portales: readonly Portal[];
@@ -29,6 +28,8 @@ export type ComunesBarra = {
   empresas?: readonly ItemMenu[];
   /** Campana de notificaciones (isla de la app con `Popover`). */
   campana?: ReactNode;
+  /** Punto rojo en el avatar del menú de usuario (novedades sin leer). */
+  avisoNovedades?: boolean;
   /**
    * Agente interno (ADR-049, D11): su icono va siempre a la izquierda de la campana. Sin agente
    * construido no se pasa y no aparece ningún botón vacío.
@@ -52,7 +53,7 @@ export type ComunesBarra = {
  * constantes entre vistas, también con "Atrás" (CAR-12).
  */
 export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
-  const { portales, portalActual, tenant, campana, volver, acciones, usuario, menuUsuario } = props;
+  const { portales, portalActual, tenant, campana, volver, acciones } = props;
   const Link = props.Link ?? LinkPorDefecto;
   return (
     <header className="pt-safe sticky top-0 z-20 bg-bg/95 backdrop-blur md:hidden">
@@ -86,11 +87,7 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
           ) : null}
           {props.agente}
           {campana}
-          {usuario && menuUsuario ? (
-            <UserMenu usuario={usuario} items={menuUsuario} lado="abajo-derecha" />
-          ) : usuario ? (
-            <Avatar nombre={usuario.nombre} />
-          ) : null}
+          <MenuUsuarioBarra {...props} lado="abajo-derecha" />
         </div>
       </div>
     </header>
@@ -112,7 +109,7 @@ type AppBarProps = ComunesBarra & {
  * formulario necesita acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
  */
 export function AppBar(props: AppBarProps) {
-  const { titulo, insignia, acciones, usuario, menuUsuario, campana, onBuscar } = props;
+  const { titulo, insignia, acciones, usuario, campana, onBuscar } = props;
   const bajoLg = Boolean(props.volverSoloTelefono && props.volverBajoLg);
   const volver = props.volverSoloTelefono && !bajoLg ? undefined : props.volver;
   const Link = props.Link ?? LinkPorDefecto;
@@ -165,13 +162,8 @@ export function AppBar(props: AppBarProps) {
         {props.agente}
         {campana}
         {usuario ? (
-          // El usuario va aquí en iPad (768–1023, D9) y al pie de la barra lateral desde 1024 px.
           <div className="lg:hidden">
-            {menuUsuario ? (
-              <UserMenu usuario={usuario} items={menuUsuario} />
-            ) : (
-              <Avatar nombre={usuario.nombre} />
-            )}
+            <MenuUsuarioBarra {...props} />
           </div>
         ) : null}
       </div>

@@ -30,7 +30,7 @@ En la app, cada ítem aparece como **tarjeta en la página Novedades** (fecha, m
 
 ## Flujo
 
-1. El PR que integra el cambio visible **añade o actualiza** el `.md` en el mismo PR.
+1. El PR que integra el cambio visible **añade o actualiza** el `.md` en el mismo PR y corre `pnpm --filter @opai/domain gen:novedades-embed` (actualiza `entradas/embed.ts` para el despliegue en Vercel).
 2. Al desplegar, las entradas aparecen solas; el estado «leído» es por usuario en base de datos.
 3. El gate de tests valida ids únicos y frontmatter mínimo.
 

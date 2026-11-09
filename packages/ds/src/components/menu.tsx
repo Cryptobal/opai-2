@@ -18,6 +18,8 @@ export type ItemMenu = {
   deshabilitado?: boolean;
   /** Encabezado de grupo encima de este ítem. */
   grupo?: string;
+  /** Punto de aviso en el ícono (p. ej. novedades sin leer). */
+  punto?: boolean;
   onSelect: () => void;
 };
 
