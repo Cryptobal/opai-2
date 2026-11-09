@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 666 pares pantalla→capacidad · 594 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 667 pares pantalla→capacidad · 595 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -604,6 +604,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
+| erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
@@ -941,6 +942,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.campos.valores`
 - `core.consumos.por_recurso`
 - `core.dispositivos.estado`
+- `core.documento_plantillas.create`
+- `core.documento_plantillas.get`
+- `core.documento_plantillas.update`
 - `core.documentos.desvincular`
 - `core.documentos.vincular`
 - `core.estructuras.get`
