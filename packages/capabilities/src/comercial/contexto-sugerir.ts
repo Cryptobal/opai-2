@@ -39,8 +39,8 @@ const salidaSchema = z.object({
 const SIN_CONTEXTO = "No hay notas de contexto para este negocio: registra lo conversado con el cliente para poder sugerir.";
 
 export const contextoSugerirSeccion = defineCapability({
-  // Cada nota que alimentó la sugerencia queda auditada por su ID, sin copiar su contenido.
-  auditarLectura: (s) => s.fuentes.map((f) => f.id),
+  // Sin `auditarLectura`: ese modo envuelve el handler en una transacción de 15 s y la IA puede tardar más.
+  // La auditoría de las notas usadas va en una transacción corta aparte, antes de revelar el borrador.
   id: "comercial.contexto.sugerir_seccion",
   descripcion:
     "Sugiere un borrador de una sección de la propuesta a partir del contexto comercial del negocio, con IA. Devuelve el borrador, las notas usadas (confirmadas o inferidas) y los datos que faltaron. No guarda nada ni toca lo escrito a mano; no usa montos ni dotación, que vienen del CPQ.",
@@ -58,7 +58,8 @@ export const contextoSugerirSeccion = defineCapability({
   async handler(ctx, input) {
     const negocio = await negocioDe(ctx, input.negocioId);
     const filas = await ctx.db.negocioContexto.findMany({
-      where: { negocioId: negocio.id, archivadoEn: null },
+      // El filtro de estado va en la consulta, antes del límite: si no, 50 inferidas recientes taparían lo confirmado.
+      where: { negocioId: negocio.id, archivadoEn: null, ...(input.incluirInferido ? {} : { estado: "confirmado" }) },
       orderBy: [{ fechaFuente: "desc" }, { createdAt: "desc" }],
       take: 50,
     });
@@ -85,6 +86,15 @@ export const contextoSugerirSeccion = defineCapability({
       // El detalle del proveedor no sale al usuario; el consumo ya se midió en el adaptador.
       throw reglaDeNegocio("No pudimos generar la sugerencia ahora. Puedes reintentar o seguir editando a mano.");
     }
+    // Transacción corta: revalida que las notas siguen vigentes y audita sus IDs. Si algo falla no se revela nada.
+    await ctx.transaccion(async (tx) => {
+      const ids = fuentes.map((f) => f.id);
+      const vigentes = await tx.negocioContexto.findMany({ where: { id: { in: ids }, negocioId: negocio.id, archivadoEn: null }, select: { id: true, estado: true } });
+      const estadoActual = new Map(vigentes.map((v) => [v.id, v.estado]));
+      if (fuentes.some((f) => estadoActual.get(f.id) !== f.estado))
+        throw reglaDeNegocio("El contexto del negocio cambió mientras se generaba la sugerencia. Vuelve a intentarlo.");
+      await ctx.auditoria.registrar(tx, { tenantId: ctx.tenantId, capability: "comercial.contexto.sugerir_seccion", actor: ctx.actor, payload: { ids } });
+    });
     const { borrador, faltantes } = separarSugerencia(texto);
     return { disponible: true, borrador: borrador === "" ? null : borrador, fuentes, faltantes, aviso: null };
   },

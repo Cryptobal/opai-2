@@ -29,8 +29,27 @@ const NOTAS = [
   fila("n2", "inferido", "Posible segunda instalación.", "2026-11-07"),
   fila("n1", "confirmado", "Pidió control de acceso y cobertura 24/7.", "2026-11-05"),
 ];
-// Contexto falso mínimo: la capacidad solo lee `ctx.db.negocioContexto`.
-const ctx = (filas = NOTAS) => ({ db: { negocioContexto: { findMany: async () => filas } } }) as unknown as Ctx;
+type Donde = { estado?: string; id?: { in: string[] } };
+// Contexto falso mínimo: la capacidad lee `ctx.db.negocioContexto`, abre una transacción corta y audita.
+function armar(filas = NOTAS, tras: (filas: typeof NOTAS) => typeof NOTAS = (f) => f) {
+  let llamadas = 0;
+  const findMany = vi.fn(async (a: { where: Donde }) => {
+    llamadas += 1;
+    const base = llamadas === 1 ? filas : tras(filas);
+    return base.filter((f) => (!a.where.estado || f.estado === a.where.estado) && (!a.where.id || a.where.id.in.includes(f.id)));
+  });
+  const registrar = vi.fn(async (_tx: unknown, _e: unknown) => ({ seq: 1, hash: "h" }));
+  const nc = { findMany };
+  const ctx = {
+    tenantId: "t1",
+    actor: { tipo: "user", id: "u1" },
+    db: { negocioContexto: nc },
+    transaccion: async <T,>(fn: (tx: { negocioContexto: typeof nc }) => Promise<T>) => fn({ negocioContexto: nc }),
+    auditoria: { registrar },
+  } as unknown as Ctx;
+  return { ctx, findMany, registrar };
+}
+const ctx = (filas = NOTAS) => armar(filas).ctx;
 const entrada = { negocioId: "00000000-0000-4000-8000-000000000001", seccion: "Comprensión del servicio", incluirInferido: true };
 const ejecutar = (c: Ctx, input: Partial<typeof entrada> = {}) =>
   contextoSugerirSeccion.handler(c, { ...entrada, ...input }, { dryRun: false } as never);
@@ -79,5 +98,36 @@ describe("comercial.contexto.sugerir_seccion", () => {
     dobles.iaDe.mockResolvedValue({ completar: async () => { throw new Error("401 clave sk-secreta inválida"); } });
     await expect(ejecutar(ctx())).rejects.toThrow(/No pudimos generar la sugerencia/);
     await expect(ejecutar(ctx())).rejects.not.toThrow(/sk-secreta/);
+  });
+
+  it("audita los IDs de las notas usadas en una transacción corta, después de la IA", async () => {
+    const orden: string[] = [];
+    dobles.iaDe.mockResolvedValue({ completar: async () => { orden.push("ia"); return { texto: "Texto." }; } });
+    const { ctx: c, registrar } = armar();
+    registrar.mockImplementation(async () => { orden.push("auditoria"); return { seq: 1, hash: "h" }; });
+    await ejecutar(c);
+    expect(orden).toEqual(["ia", "auditoria"]);
+    expect(registrar).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ capability: "comercial.contexto.sugerir_seccion", payload: { ids: ["n2", "n1"] } }));
+  });
+
+  it("con incluirInferido en falso el filtro de estado va en la consulta, antes del límite", async () => {
+    dobles.iaDe.mockResolvedValue({ completar: async () => ({ texto: "Texto." }) });
+    const { ctx: c, findMany } = armar();
+    await ejecutar(c, { incluirInferido: false });
+    expect(findMany.mock.calls[0]![0].where).toMatchObject({ estado: "confirmado" });
+  });
+
+  it("si una nota cambió mientras la IA generaba, no revela nada ni audita", async () => {
+    dobles.iaDe.mockResolvedValue({ completar: async () => ({ texto: "Texto." }) });
+    const { ctx: c, registrar } = armar(NOTAS, (f) => f.filter((x) => x.id !== "n1"));
+    await expect(ejecutar(c)).rejects.toThrow(/cambió mientras se generaba/);
+    expect(registrar).not.toHaveBeenCalled();
+  });
+
+  it("si falla el append de auditoría, no se revela el borrador", async () => {
+    dobles.iaDe.mockResolvedValue({ completar: async () => ({ texto: "Texto." }) });
+    const { ctx: c, registrar } = armar();
+    registrar.mockRejectedValue(new Error("auditoría caída"));
+    await expect(ejecutar(c)).rejects.toThrow(/auditoría caída/);
   });
 });
