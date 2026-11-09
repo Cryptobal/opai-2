@@ -3,6 +3,7 @@
 import { Campo, Card, Combobox, Input, InputFecha, Select, Switch } from "@opai/ds";
 
 import { CamposFactura } from "./campos-factura";
+import { CamposPrevios } from "./campos-previos";
 import { CamposUf } from "./campos-uf";
 import { DIAS, MESES, SEMANA } from "./opciones-agenda";
 import type { FormProgramacion } from "./tipos";
@@ -129,6 +130,7 @@ export function CamposGenerales({ f, set, cuentas, editando }: Props) {
           activo={f.autoEnvioEstadoPago}
           onCambiar={(v) => set({ autoEnvioEstadoPago: v })}
         />
+        <CamposPrevios f={f} set={set} />
         <Campo etiqueta="Desde (opcional)" htmlFor="prog-inicio">
           <InputFecha
             id="prog-inicio"

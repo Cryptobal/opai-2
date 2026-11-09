@@ -42,10 +42,19 @@ export function Resumen({
         {FRECUENCIA[item.frecuencia] ?? item.frecuencia}, {diaTexto(item.diaGeneracion)} · cobro a{" "}
         {item.plazoPagoDias} días
       </p>
+      {item.esperarOk || item.exigeOc ? (
+        <p className="flex flex-wrap gap-2 text-sm">
+          {item.esperarOk ? <Badge tono="info">Espera el OK del cliente</Badge> : null}
+          {item.exigeOc ? <Badge tono="info">Exige orden de compra</Badge> : null}
+        </p>
+      ) : null}
       {item.autoEnvioProforma || item.autoEnvioEstadoPago ? (
         <p className="flex flex-wrap gap-2 text-sm">
           {item.autoEnvioProforma ? <Badge tono="info">Proforma antes de facturar</Badge> : null}
           {item.autoEnvioEstadoPago ? <Badge tono="info">Estado de pago antes de facturar</Badge> : null}
+          <span className="text-fg-muted">
+            {item.previoCuando === "fecha_acordada" && item.previoDia ? `Se envía el día ${item.previoDia} acordado con el cliente` : "Se envía al generar el borrador"}
+          </span>
         </p>
       ) : null}
       <p className="text-sm">

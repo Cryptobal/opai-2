@@ -19,6 +19,8 @@ export const itemCierreSchema = z.object({
   etapa: z.enum(ETAPAS_CIERRE),
   estado: z.enum(ESTADOS_SEGUIMIENTO_CIERRE),
   requiereOcHes: z.boolean(),
+  requiereOk: z.boolean(),
+  emitible: z.boolean().describe("Nada bloquea emitirlo hoy: sin OC/HES pendiente ni observación y, si la programación espera el OK, con su OK."),
   ordenCompra: z.string().nullable(),
   hes: z.string().nullable(),
   observacion: z.string().nullable(),
@@ -31,6 +33,7 @@ export type ItemCierre = z.infer<typeof itemCierreSchema>;
 
 type FilaSeg = {
   estado: string;
+  requiereOk: boolean;
   requiereOcHes: boolean;
   ordenCompra: string | null;
   hes: string | null;
@@ -41,6 +44,7 @@ export const aSeguimiento = (s: FilaSeg | null | undefined): SeguimientoCierre |
   s
     ? {
         estado: s.estado as SeguimientoCierre["estado"],
+        requiereOk: s.requiereOk,
         requiereOcHes: s.requiereOcHes,
         ordenCompra: s.ordenCompra,
         hes: s.hes,

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { defineTrabajo } from "../trabajos/registro";
 import { generarProgramacion } from "./ventas-programacion-generar";
+import { enviarPreviosPendientes } from "./ventas-programacion-previos";
 
 export const trabajoGenerarProgramaciones = defineTrabajo({
   tipo: "finanzas.ventas_programacion.generar_pendientes",
@@ -32,6 +33,8 @@ export const trabajoGenerarProgramaciones = defineTrabajo({
         fallidas += 1;
       }
     }
-    return { programaciones: activas.length, generados, omitidos, fallidas };
+    // Los previos con día acordado salen aquí, el día que corresponde; los del mismo día de la generación ya salieron.
+    const previos = await enviarPreviosPendientes(ctx).catch(() => ({ revisados: 0, enviados: 0 }));
+    return { programaciones: activas.length, generados, omitidos, fallidas, previos };
   },
 });
