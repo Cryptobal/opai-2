@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 651 pares pantalla→capacidad · 579 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 656 pares pantalla→capacidad · 584 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -600,7 +600,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir` | `finanzas_ventas_emitir` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir_nota_debito` | `finanzas_ventas_emitir_nota_debito` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.guardar_destinatarios` | `finanzas_ventas_guardar_destinatarios` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preflight_emision` | `finanzas_ventas_preflight_emision` | existe |
 | erp | `/finanzas/ventas/programacion/[id]/editar` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
@@ -967,9 +972,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
 - `finanzas.reportes.resultados`
-- `finanzas.ventas.destinatarios_sugeridos`
-- `finanzas.ventas.emitir_nota_debito`
-- `finanzas.ventas.guardar_destinatarios`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { aEscalado, aTexto, erroresValores, type InstrumentosCompletos, parcialInstrumentos, valoresIniciales } from "@/lib/instrumentos-valores";
+import { aEscalado, aTexto, camposSobrescritos, erroresValores, type InstrumentosCompletos, parcialInstrumentos, reponerCampo, valoresIniciales } from "@/lib/instrumentos-valores";
 
 const base: InstrumentosCompletos = {
   financiero: { habilitado: true, tasaPct: 12_000 },
@@ -34,5 +34,15 @@ describe("valores de instrumentos", () => {
     // La tasa y el gasto administrativo de la garantía y la asignación de la RC valen en todos los modos.
     const rotos = { ...v, garantiaModo: "fija" as const, rcModo: "tasa" as const, garantia: { ...v.garantia, tasaAnualPct: "x", administracionPct: "y" }, rc: { ...v.rc, asignacionPct: "z" } };
     expect(Object.keys(erroresValores(rotos))).toEqual(expect.arrayContaining(["garantia.tasaAnualPct", "garantia.administracionPct", "rc.asignacionPct"]));
+  });
+  it("marca solo los campos distintos del valor por defecto y repone uno sin tocar el resto", () => {
+    const defecto = valoresIniciales(base);
+    expect(camposSobrescritos(defecto, defecto).size).toBe(0);
+    const editado = { ...defecto, garantia: { ...defecto.garantia, tasaAnualPct: "2,4", meses: "36" }, rcModo: "tasa" as const };
+    expect([...camposSobrescritos(editado, defecto)].sort()).toEqual(["garantia.meses", "garantia.tasaAnualPct", "rc.modo"]);
+    const repuesto = reponerCampo(editado, defecto, "garantia.tasaAnualPct");
+    expect(repuesto.garantia.tasaAnualPct).toBe(defecto.garantia.tasaAnualPct);
+    expect(repuesto.garantia.meses).toBe("36");
+    expect(reponerCampo(repuesto, defecto, "rc.modo").rcModo).toBe("prima");
   });
 });

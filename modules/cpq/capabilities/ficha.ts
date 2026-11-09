@@ -102,6 +102,7 @@ export const cotizacionesFicha = defineCapability({
               margenAlertaPct: configurados?.alertaPct ?? null,
               sobrescrito: version.instrumentosJson !== null,
               instrumentos: leerInstrumentos(version.instrumentosJson) ?? INSTRUMENTOS_DEFECTO,
+              instrumentosDefecto: INSTRUMENTOS_DEFECTO,
             },
           }
         : {}),
