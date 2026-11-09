@@ -70,6 +70,7 @@ export const VERBOS: Record<string, string> = {
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
   preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
+  prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
   resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar",
   // Cobro por módulo (CAR-188).
