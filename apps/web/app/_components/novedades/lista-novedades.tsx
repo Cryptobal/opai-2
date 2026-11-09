@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
 import { Alerta, Badge, Button, Empty, Enlace, SeccionTarjeta, Skeleton } from "@opai/ds";
@@ -128,14 +127,9 @@ export function ListaNovedades({ portal }: { portal: string }) {
                   </p>
                   <p className="t-body whitespace-pre-wrap text-fg">{item.descripcion}</p>
                   {item.imagen ? (
-                    <div className="relative mt-3 aspect-video w-full max-w-md overflow-hidden rounded-md border border-border">
-                      <Image
-                        src={item.imagen}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                      />
+                    <div className="mt-3 max-w-md overflow-hidden rounded-md border border-border">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- URLs opcionales en /public/changelog */}
+                      <img src={item.imagen} alt="" className="aspect-video w-full object-cover" />
                     </div>
                   ) : null}
                   {item.ruta ? (

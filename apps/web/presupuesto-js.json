@@ -88,6 +88,12 @@
     "/(terreno)/terreno/rondas": 164,
     "/(terreno)/terreno/marcar": 178,
     "/(trabajador)/trabajador/marcar": 177,
-    "/(trabajador)/trabajador/mi-rostro": 175
+    "/(trabajador)/trabajador/mi-rostro": 175,
+    "/(erp)/novedades": 172,
+    "/(platform)/platform/novedades": 172,
+    "/(supervisor)/supervisor/novedades": 172,
+    "/(terreno)/terreno/novedades": 172,
+    "/(trabajador)/trabajador/novedades": 172,
+    "/(cliente)/cliente/novedades": 172
   }
 }
