@@ -3,19 +3,27 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { avisar } from "@opai/ds";
-
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
 import type { Venta } from "../_componentes/tipos";
 import { AccionesEmitir, AlertasEmitir } from "./acciones-emitir";
+import { EmitirDestinatarios } from "./emitir-destinatarios";
+import { FormularioNota } from "./formulario-nota";
 import { EmitirReferencias } from "./emitir-referencias";
 import { EmitirSinClientes } from "./emitir-sin-clientes";
-import { construirInputBorrador, type LineaForm, mensajeReferencias, parseMonto, problemaReferencias, type RefForm } from "./emitir-util";
+import {
+  type LineaForm,
+  mensajeReferencias,
+  parseMonto,
+  problemaReferencias,
+  type RefForm,
+  type TipoEmision,
+} from "./emitir-util";
 import { BloqueEmisionGuardada, EmitirDialogos } from "./emitir-secciones";
 import { EmitirClienteTipo } from "./emitir-cliente";
 import { EmitirLineasDetalle } from "./emitir-lineas";
+import { useBorrador } from "./use-borrador";
 import { useEmision } from "./use-emision";
 
 /** Emisión DTE 33/34: borrador con vista previa (dryRun) y emisión con aprobación para agentes. */
@@ -23,7 +31,7 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
   const router = useRouter();
   const { ejecutar, pendiente, error, codigo } = useCapacidad("erp");
   const [cuentaId, setCuentaId] = useState<string | null>(null);
-  const [tipoDte, setTipoDte] = useState<"33" | "34">("33");
+  const [tipoDte, setTipoDte] = useState<TipoEmision>("33");
   const [plazoPagoDias, setPlazoPagoDias] = useState("30");
   const [glosa, setGlosa] = useState("");
   const [lineas, setLineas] = useState<LineaForm[]>([{ glosa: "", montoTexto: "" }]);
@@ -31,10 +39,19 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
   const [previewBorrador, setPreviewBorrador] = useState<Venta | null>(null);
   const [documentoId, setDocumentoId] = useState<string | null>(null);
   const [dialogo, setDialogo] = useState<"borrador" | "emitir" | null>(null);
-  const { previewEmitir, preflightBloqueante, revisarEmision, emitir } = useEmision({ ejecutar, codigo, documentoId, setDialogo });
+  const { previewEmitir, preflightBloqueante, revisarEmision, emitir } = useEmision({
+    ejecutar,
+    codigo,
+    documentoId,
+    setDialogo,
+  });
 
   const cuenta = cuentas.find((c) => c.id === cuentaId);
-  const lineasValidas = lineas.every((l) => l.glosa.trim().length > 0 && parseMonto(l.montoTexto) != null);
+  const tipoFactura = tipoDte === "34" ? "34" : "33";
+  const nota = tipoDte === "61" || tipoDte === "56" ? tipoDte : null;
+  const lineasValidas = lineas.every(
+    (l) => l.glosa.trim().length > 0 && parseMonto(l.montoTexto) != null,
+  );
   const plazo = Number(plazoPagoDias);
   const plazoOk = Number.isInteger(plazo) && plazo >= 0 && plazo <= 365;
   const hoyIso = new Date().toISOString().slice(0, 10);
@@ -42,27 +59,14 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
   const mensajeRefs = mensajeReferencias(refs, hoyIso);
   const formOk = Boolean(cuentaId && cuenta?.rut && lineasValidas && plazoOk && !problemaRefs);
 
-  const inputBorrador = (dryRun: boolean) =>
-    construirInputBorrador({ cuentaId: cuentaId!, tipoDte, plazo, lineas, glosa, referencias: refs, dryRun });
-
-  async function revisarBorrador() {
-    if (!formOk) return;
-    const r = await ejecutar<Venta>("finanzas.ventas.crear_borrador", inputBorrador(true), true);
-    if (r) {
-      setPreviewBorrador(r);
-      setDialogo("borrador");
-    }
-  }
-
-  async function guardarBorrador() {
-    if (!formOk) return;
-    const r = await ejecutar<Venta>("finanzas.ventas.crear_borrador", inputBorrador(false), false);
-    if (!r) return;
-    setDocumentoId(r.id);
-    setPreviewBorrador(null);
-    setDialogo(null);
-    avisar.exito("Borrador guardado");
-  }
+  const { revisarBorrador, guardarBorrador } = useBorrador({
+    ejecutar,
+    formOk,
+    datos: { cuentaId, tipoDte: tipoFactura, plazo, lineas, glosa, referencias: refs },
+    setPreviewBorrador,
+    setDocumentoId,
+    setDialogo,
+  });
 
   const accionesForm = (
     <AccionesEmitir
@@ -74,6 +78,19 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
       onGuardar={() => void guardarBorrador()}
     />
   );
+
+  if (nota) {
+    return (
+      <FormularioNota
+        cuentas={cuentas}
+        sinRut={sinRut}
+        tipoDte={nota}
+        setTipoDte={setTipoDte}
+        cuentaId={cuentaId}
+        setCuentaId={setCuentaId}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 pb-36 md:pb-0">
@@ -99,7 +116,13 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
         />
         <EmitirLineasDetalle documentoId={documentoId} lineas={lineas} setLineas={setLineas} />
       </div>
-      <EmitirReferencias refs={refs} setRefs={setRefs} bloqueado={Boolean(documentoId)} mensaje={mensajeRefs} />
+      <EmitirReferencias
+        refs={refs}
+        setRefs={setRefs}
+        bloqueado={Boolean(documentoId)}
+        mensaje={mensajeRefs}
+      />
+      {documentoId ? <EmitirDestinatarios documentoId={documentoId} cuentaId={cuentaId} /> : null}
       {documentoId ? (
         <BloqueEmisionGuardada
           pendiente={pendiente}
