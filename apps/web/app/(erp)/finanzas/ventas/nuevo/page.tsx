@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { cuentasPaginadas } from "@/lib/cuentas-paginadas";
 import { estadoPantalla } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
-import type { CuentaFila, Pagina } from "@/lib/tipos-maestros";
+import { requerirIdentidad } from "@/lib/servidor";
+import type { CuentaFila } from "@/lib/tipos-maestros";
 
 import { FormularioEmitirDiferido } from "./formulario-emitir-diferido";
 
@@ -25,10 +26,7 @@ export default async function EmitirVentaPage() {
         }
         // Clientes facturables: activos y con RUT (el DTE exige el RUT del receptor). Los activos sin RUT se cuentan
         // para explicar por qué no aparecen.
-        const cuentas = await ejecutarComoUsuario<Pagina<CuentaFila>>("erp", "core.cuentas.list", {
-          limite: 200,
-          estado: "cliente_activo",
-        });
+        const cuentas = await cuentasPaginadas({ estado: "cliente_activo" });
         const activas = cuentas.ok ? cuentas.data.items : [];
         const facturables = activas.filter((c) => Boolean(c.rut?.trim()));
         return { state: estadoPantalla(cuentas), cuentas: facturables, sinRut: activas.length - facturables.length };
