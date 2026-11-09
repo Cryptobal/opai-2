@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { forTenant } from "../src/for-tenant";
 import { forTenantUsuario } from "../src/for-tenant-usuario";
-import { omitirSuiteDb, prepararEntorno, urlPropietario } from "./entorno";
+import { omitirSuiteDb, prepararEntorno } from "./entorno";
 
 describe.skipIf(omitirSuiteDb())("RLS core.novedades_lectura", () => {
   let e: Awaited<ReturnType<typeof prepararEntorno>>;
