@@ -1,7 +1,9 @@
 import { Badge, Card } from "@opai/ds";
 
-import { fecha, pesos } from "@/lib/fechas";
+import { LinkNext } from "@/app/_components/link-next";
+import { fecha, hoyIso, pesos } from "@/lib/fechas";
 
+import { conversionTexto } from "./periodo-uf";
 import type { DetalleProgramacion } from "./tipos";
 
 export type PeriodoPrevio = {
@@ -10,6 +12,7 @@ export type PeriodoPrevio = {
   estado: string;
   motivo: string | null;
   montoTotal: number | null;
+  ufCentavos?: number | null;
 };
 
 const FRECUENCIA: Record<string, string> = {
@@ -97,7 +100,8 @@ export function Lineas({ item }: { item: DetalleProgramacion }) {
   );
 }
 
-export function Proximos({ periodos }: { periodos: PeriodoPrevio[] }) {
+export function Proximos({ periodos, moneda }: { periodos: PeriodoPrevio[]; moneda: string }) {
+  const hoy = hoyIso();
   return (
     <Card className="flex flex-col gap-2 p-4">
       <h2 className="t-label text-fg">Próximos períodos</h2>
@@ -109,6 +113,11 @@ export function Proximos({ periodos }: { periodos: PeriodoPrevio[] }) {
             <li key={p.periodo} className="flex justify-between gap-3 py-2">
               <span>
                 {p.periodo} · {fecha(p.fecha)}
+                {conversionTexto(moneda, p.ufCentavos ?? null, p.fecha, hoy) ? (
+                  <span className="block text-xs text-fg-muted">
+                    {conversionTexto(moneda, p.ufCentavos ?? null, p.fecha, hoy)}
+                  </span>
+                ) : null}
                 {p.motivo ? <span className="block text-warning-fg">{p.motivo}</span> : null}
               </span>
               <span className="t-numeric">{p.montoTotal !== null ? pesos(p.montoTotal) : "—"}</span>
