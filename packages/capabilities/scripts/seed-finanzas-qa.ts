@@ -35,7 +35,7 @@ async function main(): Promise<void> {
   const config = existente ? await admin.dteConfig.findUnique({ where: { tenantId: existente.id } }) : null;
   if (config?.ambiente === "produccion") throw new Error(`El tenant «${slug}» emite en producción: no es de QA.`);
   if (!confirmar) {
-    console.log(`Simulación en «${slug}»: ${existente ? "tenant existente" : "se crearía el tenant de QA"}; ${config ? "dte_config existente (no se toca)" : "se crearía dte_config de certificación"}; cliente, proveedor, cuenta Santander con 3 movimientos y CAF ficticio. Repite con --confirmar para aplicar.`);
+    console.log(`Simulación en «${slug}»: ${existente ? "tenant existente" : "se crearía el tenant de QA"}; ${config ? "dte_config existente (no se toca)" : "se crearía dte_config de certificación"}; cliente, proveedor, cuenta Santander con 3 movimientos, CAF ficticio y, solo con SII simulado, 3 facturas emitidas de prueba. Repite con --confirmar para aplicar.`);
     return;
   }
   const tenant = existente ?? (await admin.tenant.create({ data: { slug, nombre: "QA Finanzas (ficticio)", vertical: "seguridad" } }));
@@ -112,7 +112,23 @@ async function main(): Promise<void> {
       await ejecutar("finanzas.folios.cargar_caf", { cafXml: cafXmlSintetico({ tipoDte, folioDesde, folioHasta: folioDesde + 50 }) });
     }
   }
-  console.log("Datos de QA de Finanzas listos (módulo finanzas, proveedor, cuenta Santander con 3 movimientos, CAF ficticios 33/34/56/61, cliente).");
+  // Tres facturas emitidas de $1.190.000 (neto 1.000.000 + IVA) con el SII SIMULADO, para probar el circuito de caja:
+  // la transferencia de $1.190.000 concilia con una, y el abono de $2.380.000, con dos (N:M). Solo con SII simulado:
+  // con cualquier otro adaptador no se emite nada.
+  const MARCA_FACTURA = "Factura sintética de QA (circuito de caja)";
+  let facturas = 0;
+  if (process.env["SII_ADAPTADOR"] === "simulado") {
+    const cliente = await admin.cuenta.findFirst({ where: { tenantId, rut: "77234567-8" }, select: { id: true } });
+    const hechas = await admin.documentoEmitido.count({ where: { tenantId, glosa: MARCA_FACTURA } });
+    for (let i = hechas; i < 3 && cliente; i += 1) {
+      const borrador = (await ejecutar("finanzas.ventas.crear_borrador", {
+        cuentaId: cliente.id, tipoDte: 33, glosa: MARCA_FACTURA, lineas: [{ glosa: `Servicio de prueba ${i + 1}`, monto: 1_000_000 }],
+      })) as { id: string };
+      await ejecutar("finanzas.ventas.emitir", { documentoId: borrador.id });
+      facturas += 1;
+    }
+  }
+  console.log(`Datos de QA de Finanzas listos (módulo finanzas, proveedor, cuenta Santander con 3 movimientos, CAF ficticios 33/34/56/61, cliente${facturas > 0 ? `, ${facturas} factura(s) emitida(s) nueva(s) con SII simulado` : ""}).`);
 }
 
 main()

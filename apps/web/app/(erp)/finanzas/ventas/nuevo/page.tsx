@@ -21,15 +21,17 @@ export default async function EmitirVentaPage() {
       cargar={async () => {
         const identidad = await requerirIdentidad("/finanzas/ventas/nuevo");
         if (!puedeDeIdentidad(identidad)("finanzas:ventas.manage")) {
-          return { state: "forbidden" as const, cuentas: [] as CuentaFila[] };
+          return { state: "forbidden" as const, cuentas: [] as CuentaFila[], sinRut: 0 };
         }
+        // Clientes facturables: activos y con RUT (el DTE exige el RUT del receptor). Los activos sin RUT se cuentan
+        // para explicar por qué no aparecen.
         const cuentas = await ejecutarComoUsuario<Pagina<CuentaFila>>("erp", "core.cuentas.list", {
           limite: 200,
+          estado: "cliente_activo",
         });
-        return {
-          state: estadoPantalla(cuentas),
-          cuentas: cuentas.ok ? cuentas.data.items : [],
-        };
+        const activas = cuentas.ok ? cuentas.data.items : [];
+        const facturables = activas.filter((c) => Boolean(c.rut?.trim()));
+        return { state: estadoPantalla(cuentas), cuentas: facturables, sinRut: activas.length - facturables.length };
       }}
       opciones={() => ({
         titulo: "Emitir factura electrónica",
@@ -38,7 +40,7 @@ export default async function EmitirVentaPage() {
     >
       {(d) => {
         if (d.state === "forbidden") redirect("/finanzas/ventas");
-        return <FormularioEmitirDiferido cuentas={d.cuentas} />;
+        return <FormularioEmitirDiferido cuentas={d.cuentas} sinRut={d.sinRut} />;
       }}
     </PaginaPortal>
   );

@@ -4,7 +4,7 @@ import type { MovimientoBanco } from "./bancos-tipos";
 import { BuscarFactura } from "./buscar-factura";
 import { ListaSugerenciasReconocer, type SugerenciaReconocer } from "./lista-sugerencias-reconocer";
 import { PanelProrrateo } from "./panel-prorrateo";
-import type { Elegida } from "./seleccion-conciliacion";
+import { conMontoInicial, type Elegida } from "./seleccion-conciliacion";
 
 export function CuerpoHojaReconocer({
   movimiento,
@@ -23,7 +23,8 @@ export function CuerpoHojaReconocer({
   elegidas: Elegida[];
   onElegidas: (e: Elegida[]) => void;
 }) {
-  const agregar = (e: Elegida) => onElegidas([...elegidas, e]);
+  const agregar = (e: Elegida) =>
+    onElegidas(conMontoInicial(elegidas, e, Math.abs(movimiento.monto)));
   return (
     <div className="flex flex-col gap-4">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
@@ -38,7 +39,8 @@ export function CuerpoHojaReconocer({
       ) : (
         <>
           <Alerta tono="info" titulo="Un abono puede pagar varias facturas">
-            Agrega los documentos y reparte el monto. No se marca nada como pagado hasta que confirmes.
+            Agrega los documentos y reparte el monto. No se marca nada como pagado hasta que
+            confirmes.
           </Alerta>
           <ListaSugerenciasReconocer
             sugerencias={sugerencias}
@@ -48,7 +50,11 @@ export function CuerpoHojaReconocer({
             onQuitar={(id) => onElegidas(elegidas.filter((x) => x.id !== id))}
           />
           <BuscarFactura elegidas={elegidas} onAgregar={agregar} />
-          <PanelProrrateo abono={Math.abs(movimiento.monto)} elegidas={elegidas} onCambiar={onElegidas} />
+          <PanelProrrateo
+            abono={Math.abs(movimiento.monto)}
+            elegidas={elegidas}
+            onCambiar={onElegidas}
+          />
         </>
       )}
     </div>
