@@ -7,6 +7,7 @@ import { uuidSchema } from "../core/esquemas";
 import { aFecha, cursorDe, pagina } from "../core/maestros/comun";
 import { noEncontrado } from "../errores";
 import { PERMISO_READ } from "./comun";
+import { tipoDteVentaSchema } from "./ventas-comun";
 import { vistasDeVentas } from "./ventas-consulta";
 import { ventaSchema } from "./vistas-venta";
 
@@ -15,12 +16,15 @@ const periodoSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Período aaaa
 export const ventasListar = defineCapability({
   id: "finanzas.ventas.listar",
   descripcion:
-    "Lista el libro de ventas con facturas y notas de crédito emitidas o en borrador: cliente, folio, montos y estado ante el SII y de cobro. Filtra por período de emisión, estado DTE o texto (folio o nombre del cliente).",
+    "Lista el libro de ventas con facturas y notas de crédito emitidas o en borrador: cliente, folio, montos y estado ante el SII y de cobro. Filtra por período de emisión, estado DTE, cliente, tipo de documento, solo emitidos o texto (folio o nombre del cliente).",
   permiso: PERMISO_READ,
   input: z.object({
     periodo: periodoSchema.optional().describe("Mes de emisión, aaaa-mm."),
     estadoDte: z.enum(ESTADOS_DTE_EMITIDO).optional(),
     q: z.string().trim().max(120).optional().describe("Folio o nombre del cliente."),
+    cuentaId: uuidSchema.optional().describe("Solo los documentos de esta cuenta (cliente)."),
+    tipoDte: tipoDteVentaSchema.optional().describe("Solo este tipo de documento."),
+    soloEmitidos: z.boolean().optional().describe("Excluye los borradores: solo documentos con folio ante el SII."),
     cursor: uuidSchema.optional(),
     limite: z.number().int().min(1).max(100).default(50),
   }),
@@ -52,9 +56,14 @@ export const ventasListar = defineCapability({
             },
           }
         : {}),
-      ...(input.estadoDte ? { estadoDte: input.estadoDte } : {}),
+      ...(input.estadoDte ? { estadoDte: input.estadoDte } : input.soloEmitidos ? { estadoDte: { not: "borrador" as const } } : {}),
+      ...(input.tipoDte ? { tipoDte: input.tipoDte } : {}),
       ...(folio !== null ? { folio } : {}),
-      ...(cuentaIds ? { cuentaId: { in: cuentaIds } } : {}),
+      ...(input.cuentaId
+        ? { cuentaId: cuentaIds ? { in: cuentaIds.filter((id) => id === input.cuentaId) } : input.cuentaId }
+        : cuentaIds
+          ? { cuentaId: { in: cuentaIds } }
+          : {}),
     };
     const filas = await ctx.db.documentoEmitido.findMany({
       where,
