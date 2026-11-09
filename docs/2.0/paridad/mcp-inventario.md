@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 635 pares pantalla→capacidad · 570 con herramienta · 65 excepciones justificadas · 0 faltantes.
+**Resumen:** 638 pares pantalla→capacidad · 573 con herramienta · 65 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -146,6 +146,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.list` | `cpq_catalogo_categorias_list` | existe |
@@ -156,6 +157,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.update` | `cpq_catalogo_items_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.guardar` | `cpq_costos_predefinidos_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.list` | `cpq_costos_predefinidos_list` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.guardar` | `cpq_esquemas_cobertura_guardar` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.list` | `cpq_esquemas_cobertura_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.update` | `cpq_marca_documento_update` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.plantillas_documento.get` | `cpq_plantillas_documento_get` | existe |
@@ -915,8 +918,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.cotizaciones.reabrir`
 - `cpq.cotizaciones.retirar_aprobacion`
 - `cpq.envios_propuesta.list`
-- `cpq.esquemas_cobertura.guardar`
-- `cpq.esquemas_cobertura.list`
 - `cpq.lineas.agregar_esquema`
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
