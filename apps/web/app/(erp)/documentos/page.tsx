@@ -2,6 +2,7 @@ import { HojaSubir, VistaPrevia } from "@/app/_components/documentos/diferidas";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
+import { PestanasDocumentos } from "./_componentes/pestanas-documentos";
 import { cargarExplorador } from "./_componentes/datos";
 import { etiquetasEntidad } from "./_componentes/etiquetas";
 import { ListaDocumentos } from "./_componentes/lista-documentos";
@@ -28,6 +29,7 @@ export default function Documentos({ searchParams }: { searchParams: SearchParam
     >
       {(d) => (
         <>
+          <PestanasDocumentos activa="explorador" />
           <ListaDocumentos
             state={d.state}
             items={d.items}
