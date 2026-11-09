@@ -117,3 +117,26 @@ export function parcialInstrumentos(inicial: ValoresTexto, actual: ValoresTexto)
     ...(Object.keys(rc).length ? { rc } : {}),
   };
 }
+
+/** Claves («garantia.contratoPct», «rc.modo»…) cuyo valor difiere del valor por defecto, para marcarlas «Sobrescrito». */
+export function camposSobrescritos(actual: ValoresTexto, defecto: ValoresTexto): Set<string> {
+  const out = new Set<string>();
+  const grupo = (g: "financiero" | "garantia" | "rc") => {
+    for (const k of Object.keys(actual[g])) if (actual[g][k as never] !== defecto[g][k as never]) out.add(`${g}.${k}`);
+  };
+  grupo("financiero");
+  grupo("garantia");
+  grupo("rc");
+  if (actual.garantiaModo !== defecto.garantiaModo) out.add("garantia.modo");
+  if (actual.rcModo !== defecto.rcModo) out.add("rc.modo");
+  if (actual.rcPlazo !== defecto.rcPlazo) out.add("rc.plazo");
+  return out;
+}
+
+/** Repone un campo (o el modo/plazo) a su valor por defecto sin tocar los demás. */
+export function reponerCampo(actual: ValoresTexto, defecto: ValoresTexto, clave: string): ValoresTexto {
+  const [g, k] = clave.split(".") as ["financiero" | "garantia" | "rc", string];
+  if (k === "modo") return g === "garantia" ? { ...actual, garantiaModo: defecto.garantiaModo } : { ...actual, rcModo: defecto.rcModo };
+  if (k === "plazo") return { ...actual, rcPlazo: defecto.rcPlazo };
+  return { ...actual, [g]: { ...actual[g], [k]: (defecto[g] as Record<string, string>)[k] ?? "" } };
+}
