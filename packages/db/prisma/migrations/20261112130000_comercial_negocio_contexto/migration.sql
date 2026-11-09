@@ -42,6 +42,9 @@ CREATE POLICY tenant_isolation ON "comercial"."negocio_contexto" AS PERMISSIVE F
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
+CREATE TRIGGER mismo_tenant_contexto_negocio BEFORE INSERT OR UPDATE ON "comercial"."negocio_contexto"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('negocio_id', 'comercial.negocios');
+
 COMMIT;
 
 -- Reversión: DROP TABLE "comercial"."negocio_contexto"; (solo guarda notas de contexto del negocio; ninguna otra tabla depende de ella).

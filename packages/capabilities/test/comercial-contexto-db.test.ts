@@ -123,6 +123,25 @@ describe.skipIf(!urlPropietario)("comercial · contexto del negocio en base real
     expect(solo.ok && (solo.data as Nota[]).every((n) => n.estado === "confirmado")).toBe(true);
     const futura = await agregar(ctx(tA), { fechaFuente: "2999-01-01" });
     expect(futura.ok).toBe(false);
+    // Una fecha que no existe no se normaliza en silencio a otra: se rechaza.
+    expect((await agregar(ctx(tA), { fechaFuente: "2026-02-31" })).ok).toBe(false);
+    expect((await agregar(ctx(tA), { fechaFuente: "2026-00-10" })).ok).toBe(false);
+  });
+
+  it("la base impide asociar una nota de una empresa al negocio de otra", async () => {
+    await expect(
+      e.admin.negocioContexto.create({
+        data: {
+          tenantId: tB,
+          negocioId: negocio,
+          tipo: "nota",
+          resumen: "Cruzada",
+          fuente: "Prueba",
+          fechaFuente: new Date("2026-11-05T00:00:00Z"),
+          estado: "inferido",
+        },
+      }),
+    ).rejects.toThrow();
   });
 
   it("archivar la saca de la lista y otra empresa no ve el negocio ni sus notas", async () => {

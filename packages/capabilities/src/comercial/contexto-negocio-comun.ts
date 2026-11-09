@@ -2,11 +2,13 @@ import { z } from "zod";
 
 import { TIPOS_CONTEXTO } from "@opai/domain";
 
+import { externo } from "../externo";
+
 export const contextoSchema = z.object({
   id: z.string(),
   tipo: z.enum(TIPOS_CONTEXTO),
-  resumen: z.string(),
-  fuente: z.string(),
+  resumen: externo(z.string()),
+  fuente: externo(z.string()),
   fechaFuente: z.string(),
   estado: z.enum(["confirmado", "inferido"]),
   creadoPorTipo: z.string(),
@@ -32,4 +34,7 @@ export const vista = (f: Fila) => ({
   creadoPorTipo: f.creadoPorTipo,
   confirmadoEn: f.confirmadoEn?.toISOString() ?? null,
 });
-export const fecha = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD.");
+export const fecha = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD.")
+  .refine((s) => new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s, "Esa fecha no existe en el calendario.");
