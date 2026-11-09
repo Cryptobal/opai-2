@@ -13,8 +13,12 @@ const MAX_RENGLONES = 6;
 /** Espacio bajo la tabla para la glosa del documento (hasta 5 renglones). */
 export const RESERVA_GLOSA = 56;
 
+/** «15,5» % para 1550 centésimas; «10» para 1000. */
+const descuentoTexto = (c: number) => (c % 100 === 0 ? String(c / 100) : (c / 100).toFixed(2).replace(".", ","));
+
 export function medirFila(l: PdfLinea, n: number): FilaPdf {
-  const todos = renglones(l.descripcion, 62);
+  const dscto = l.descuentoPct ? ` (Dscto. ${descuentoTexto(l.descuentoPct)}%)` : "";
+  const todos = renglones(`${l.descripcion}${dscto}`, 62);
   const textos = todos.slice(0, MAX_RENGLONES);
   if (todos.length > MAX_RENGLONES) textos[MAX_RENGLONES - 1] = `${textos[MAX_RENGLONES - 1]}...`;
   return { n, linea: l, textos, alto: Math.max(ALTO_MIN, textos.length * INTERLINEA + 4) };

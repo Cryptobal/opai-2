@@ -28,6 +28,8 @@ type Props = {
   setPlazoPagoDias: (v: string) => void;
   glosa: string;
   setGlosa: (v: string) => void;
+  fechaEmision?: string;
+  setFechaEmision?: (v: string) => void;
   hoyIso?: string;
 };
 
@@ -39,6 +41,8 @@ export function EmitirClienteTipo({
   tipoDte,
   setTipoDte,
   plazoPagoDias,
+  fechaEmision,
+  setFechaEmision,
   hoyIso,
   setPlazoPagoDias,
   glosa,
@@ -103,7 +107,9 @@ export function EmitirClienteTipo({
           />
         </Campo>
       )}
-      {esNota || !hoyIso ? null : <EmitirFechaEmision hoyIso={hoyIso} />}
+      {esNota || !hoyIso || fechaEmision === undefined || !setFechaEmision ? null : (
+        <EmitirFechaEmision valor={fechaEmision} onCambiar={setFechaEmision} hoyIso={hoyIso} disabled={Boolean(documentoId)} />
+      )}
       {esNota ? null : (
         <Campo etiqueta="Glosa (opcional)" htmlFor="emit-glosa">
           <Textarea
