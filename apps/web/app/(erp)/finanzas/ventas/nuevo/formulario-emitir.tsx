@@ -12,7 +12,7 @@ import type { Venta } from "../_componentes/tipos";
 import { AccionesEmitir, AlertasEmitir } from "./acciones-emitir";
 import { EmitirReferencias } from "./emitir-referencias";
 import { EmitirSinClientes } from "./emitir-sin-clientes";
-import { construirInputBorrador, type LineaForm, parseMonto, problemaReferencias, type RefForm } from "./emitir-util";
+import { construirInputBorrador, type LineaForm, mensajeReferencias, parseMonto, problemaReferencias, type RefForm } from "./emitir-util";
 import { BloqueEmisionGuardada, EmitirDialogos } from "./emitir-secciones";
 import { EmitirClienteTipo } from "./emitir-cliente";
 import { EmitirLineasDetalle } from "./emitir-lineas";
@@ -37,7 +37,9 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
   const lineasValidas = lineas.every((l) => l.glosa.trim().length > 0 && parseMonto(l.montoTexto) != null);
   const plazo = Number(plazoPagoDias);
   const plazoOk = Number.isInteger(plazo) && plazo >= 0 && plazo <= 365;
-  const problemaRefs = problemaReferencias(refs, new Date().toISOString().slice(0, 10));
+  const hoyIso = new Date().toISOString().slice(0, 10);
+  const problemaRefs = problemaReferencias(refs, hoyIso);
+  const mensajeRefs = mensajeReferencias(refs, hoyIso);
   const formOk = Boolean(cuentaId && cuenta?.rut && lineasValidas && plazoOk && !problemaRefs);
 
   const inputBorrador = (dryRun: boolean) =>
@@ -97,7 +99,7 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
         />
         <EmitirLineasDetalle documentoId={documentoId} lineas={lineas} setLineas={setLineas} />
       </div>
-      <EmitirReferencias refs={refs} setRefs={setRefs} bloqueado={Boolean(documentoId)} problema={problemaRefs} />
+      <EmitirReferencias refs={refs} setRefs={setRefs} bloqueado={Boolean(documentoId)} mensaje={mensajeRefs} />
       {documentoId ? (
         <BloqueEmisionGuardada
           pendiente={pendiente}
