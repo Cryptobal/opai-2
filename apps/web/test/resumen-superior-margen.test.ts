@@ -15,8 +15,8 @@ const base: ParametrosVersion = {
   sobrescrito: false,
   instrumentos: {
     financiero: { habilitado: false, tasaPct: 0 },
-    garantia: { habilitada: false, meses: 0, tasaAnualPct: 0, contratoPct: 0 },
-    rc: { habilitada: false, tasaAnualPct: 0 },
+    garantia: { habilitada: false, modo: "porcentaje", meses: 0, tasaAnualPct: 0, contratoPct: 0, administracionPct: 0, montoUf: 0, incluirUnicos: false },
+    rc: { habilitada: false, modo: "prima", primaAnualUf: 0, aseguradoUf: 0, tasaAnualPct: 0, asignacionPct: 0, plazo: "anual", meses: 12 },
   },
 };
 
