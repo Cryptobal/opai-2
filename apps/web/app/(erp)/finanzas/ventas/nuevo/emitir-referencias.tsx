@@ -7,12 +7,17 @@ import { Button, Campo, Card, Input, Select } from "@opai/ds";
 
 import { REF_VACIA, type RefForm } from "./emitir-util";
 
-type Props = { refs: RefForm[]; setRefs: (r: RefForm[]) => void; bloqueado: boolean; problema: string | null };
+type Props = {
+  refs: RefForm[];
+  setRefs: (r: RefForm[]) => void;
+  bloqueado: boolean;
+  mensaje: { error: string | null; ayuda: string | null };
+};
 
 /** Referencias del DTE: solo el catálogo del SII, cada una con su folio y la fecha del documento referenciado. */
-export function EmitirReferencias({ refs, setRefs, bloqueado, problema }: Props) {
+export function EmitirReferencias({ refs, setRefs, bloqueado, mensaje }: Props) {
   const cambiar = (i: number, parte: Partial<RefForm>) =>
-    setRefs(refs.map((r, k) => (k === i ? { ...r, ...parte } : r)));
+    setRefs(refs.map((r, k) => (k === i ? { ...r, ...parte, tocada: true } : r)));
   return (
     <Card className="flex flex-col gap-3 p-4">
       <h2 className="t-label text-fg">Referencias (opcional)</h2>
@@ -41,7 +46,13 @@ export function EmitirReferencias({ refs, setRefs, bloqueado, problema }: Props)
           </Button>
         </div>
       ))}
-      {problema ? <p className="text-sm text-danger-fg">{problema}</p> : null}
+      {mensaje.error ? (
+        <p role="alert" className="text-sm text-danger-fg">
+          {mensaje.error}
+        </p>
+      ) : mensaje.ayuda ? (
+        <p className="text-sm text-fg-muted">{mensaje.ayuda}</p>
+      ) : null}
       <div>
         <Button variant="secondary" disabled={bloqueado || refs.length >= 10} onClick={() => setRefs([...refs, { ...REF_VACIA }])}>
           <Plus className="size-4" aria-hidden />
