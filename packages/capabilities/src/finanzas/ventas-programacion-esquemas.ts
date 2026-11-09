@@ -72,6 +72,18 @@ export const programacionBaseSchema = z.object({
     .describe("Qué UF se usa en las líneas en UF."),
   diaUf: z.number().int().min(1).max(31).nullable().optional(),
   plazoPagoDias: z.number().int().min(0).max(365).default(30),
+  autoEnvioProforma: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Modalidad: la programación manda al cliente una proforma antes de facturar. Es solo la marca; la proforma no es un DTE ni una deuda fiscal.",
+    ),
+  autoEnvioEstadoPago: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Modalidad: la programación manda al cliente un estado de pago antes de facturar. Es solo la marca; no es un DTE ni una deuda fiscal.",
+    ),
   fechaInicio: fechaIso.nullable().optional(),
   fechaFin: fechaIso.nullable().optional(),
   notas: textoOpcional(1000),
