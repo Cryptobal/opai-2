@@ -1,27 +1,16 @@
 "use client";
 
-import { useState } from "react";
-
 import { Button, Campo, Input } from "@opai/ds";
 
 /**
  * Marcadores de `PLACEHOLDERS_GLOSA` (@opai/domain), copiados aquí para no sumar el dominio al JS del cliente
  * (presupuesto, ADR-037); `test/formato-precio.test.ts` comprueba que coinciden.
  */
-export const MARCADORES_DESCRIPCION = {
-  periodo: "Período facturado",
-  uf_valor: "UF usada para el cálculo",
-  uf_al_dia: "UF del día de emisión",
-  monto: "Total del documento",
-} as const;
-const PLACEHOLDERS_GLOSA = Object.keys(MARCADORES_DESCRIPCION) as (keyof typeof MARCADORES_DESCRIPCION)[];
-
-/** «#» (con letras opcionales) justo antes del cursor: el fragmento que se reemplaza por el marcador. */
-const FRAGMENTO = /#[a-z_]*$/;
+export const MARCADORES_DESCRIPCION = ["periodo", "uf_valor", "uf_al_dia", "monto"] as const;
 
 /**
- * Descripción de la línea. Al escribir «#» se ofrecen los marcadores ({{periodo}}, {{uf_valor}}, {{uf_al_dia}},
- * {{monto}}); es opcional: sin marcadores la descripción se guarda igual, y uno desconocido queda tal cual.
+ * Descripción de la línea. Al escribir «#» al final del texto se ofrecen los marcadores; es opcional: sin
+ * marcadores la descripción se guarda igual, y uno desconocido queda tal cual.
  */
 export function DescripcionLinea({
   id,
@@ -32,52 +21,18 @@ export function DescripcionLinea({
   valor: string;
   onCambiar: (v: string) => void;
 }) {
-  const [cursor, setCursor] = useState(0);
-  const antes = valor.slice(0, cursor);
-  const fragmento = FRAGMENTO.exec(antes)?.[0] ?? null;
-  const filtro = fragmento ? fragmento.slice(1) : "";
-  const opciones = fragmento ? PLACEHOLDERS_GLOSA.filter((p) => p.startsWith(filtro)) : [];
-
-  function insertar(marcador: string) {
-    if (!fragmento) return;
-    const inicio = cursor - fragmento.length;
-    const texto = `{{${marcador}}}`;
-    onCambiar(valor.slice(0, inicio) + texto + valor.slice(cursor));
-    const nuevo = inicio + texto.length;
-    setCursor(nuevo);
-    requestAnimationFrame(() => {
-      const el = document.getElementById(id) as HTMLInputElement | null;
-      el?.focus();
-      el?.setSelectionRange(nuevo, nuevo);
-    });
-  }
-
+  const fragmento = /#[a-z_]*$/.exec(valor)?.[0];
   return (
-    <Campo
-      etiqueta="Descripción"
-      htmlFor={id}
-      ayuda="Escribe # para insertar un marcador (período, UF, monto). Es opcional."
-    >
-      <Input
-        id={id}
-        value={valor}
-        onChange={(e) => {
-          setCursor(e.target.selectionStart ?? e.target.value.length);
-          onCambiar(e.target.value);
-        }}
-        onSelect={(e) => setCursor(e.currentTarget.selectionStart ?? 0)}
-      />
-      {opciones.length > 0 ? (
-        <div role="listbox" aria-label="Marcadores" className="mt-2 flex flex-wrap gap-2">
-          {opciones.map((p) => (
+    <Campo etiqueta="Descripción" htmlFor={id} ayuda="Escribe # para insertar un marcador.">
+      <Input id={id} value={valor} onChange={(e) => onCambiar(e.target.value)} />
+      {fragmento ? (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {MARCADORES_DESCRIPCION.filter((p) => p.startsWith(fragmento.slice(1))).map((p) => (
             <Button
               key={p}
               variant="secondary"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => insertar(p)}
-            >
-              {`{{${p}}}`} · {MARCADORES_DESCRIPCION[p]}
-            </Button>
+              onClick={() => onCambiar(valor.slice(0, -fragmento.length) + `{{${p}}}`)}
+            >{`{{${p}}}`}</Button>
           ))}
         </div>
       ) : null}
