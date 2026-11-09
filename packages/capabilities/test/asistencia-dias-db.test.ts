@@ -34,7 +34,21 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
   };
   const run = (c: ReturnType<typeof ctx>, id: string, input: unknown) => mod.executeCapability(c, id, input) as Promise<Res>;
   const sistema = (tenantId: string) => mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor });
-  const marcar = (tenant: string) => run(ctx(tenant, "terreno"), "asistencia.marcas.registrar", { personaId: T.persona, instalacionId: T.inst, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID() });
+  // El kiosco: sin sesión, con su equipo emparejado a la instalación (la sesión de usuario es el teléfono personal).
+  const equipos = new Map<string, string>();
+  const equipoDe = async (tenantId: string, instalacionId: string) => {
+    const k = `${tenantId}|${instalacionId}`;
+    if (!equipos.has(k))
+      equipos.set(k, (await e.admin.dispositivo.create({ data: { tenantId, instalacionId, identificador: `DSP-${randomUUID().slice(0, 8)}`, tokenHash: randomUUID() + randomUUID(), estado: "activo" } })).id);
+    return equipos.get(k)!;
+  };
+  const comoEquipo = async (tenantId: string, input: Record<string, unknown>) =>
+    mod.executeCapability(
+      mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor }),
+      "asistencia.marcas.registrar",
+      { ...input, dispositivoId: await equipoDe(tenantId, String(input["instalacionId"])) },
+    ) as Promise<Res>;
+  const marcar = (tenant: string) => comoEquipo(tenant, { personaId: T.persona, instalacionId: T.inst, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID() });
   const recalcular = () => run(ctx(T.a), "asistencia.dias.recalcular", { personaId: T.persona, desde: fecha, hasta: fecha });
   const dia = () => e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona } });
 
