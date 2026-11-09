@@ -55,6 +55,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "cpq.marca_documento.get",
   "cpq.motor.simular",
   "cpq.plantillas_documento.get",
+  "cpq.propuestas_tecnica.prompt_exportable",
   "cpq.sueldos_referencia.list",
   "finanzas.ajustes.obtener",
   "finanzas.centros_costo.listar",
