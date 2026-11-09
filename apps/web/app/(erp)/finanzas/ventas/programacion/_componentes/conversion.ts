@@ -61,6 +61,8 @@ export function aInput(
       fechaInicio: f.fechaInicio || null,
       fechaFin: f.fechaFin || null,
       notas: f.notas.trim() || null,
+      autoEnvioProforma: f.autoEnvioProforma,
+      autoEnvioEstadoPago: f.autoEnvioEstadoPago,
       lineas,
       destinatarioIds: f.destinatarioIds,
     },
@@ -88,6 +90,8 @@ export function desdeDetalle(d: DetalleProgramacion): FormProgramacion {
     fechaInicio: d.fechaInicio ?? "",
     fechaFin: d.fechaFin ?? "",
     notas: d.notas ?? "",
+    autoEnvioProforma: d.autoEnvioProforma,
+    autoEnvioEstadoPago: d.autoEnvioEstadoPago,
     lineas: d.lineasEditables.map((l) => ({
       glosa: l.glosa,
       cantidad: l.cantidad.includes(".") ? l.cantidad.replace(/\.?0+$/, "") : l.cantidad,

@@ -45,6 +45,12 @@ export function Resumen({
         {FRECUENCIA[item.frecuencia] ?? item.frecuencia}, {diaTexto(item.diaGeneracion)} · cobro a{" "}
         {item.plazoPagoDias} días
       </p>
+      {item.autoEnvioProforma || item.autoEnvioEstadoPago ? (
+        <p className="flex flex-wrap gap-2 text-sm">
+          {item.autoEnvioProforma ? <Badge tono="info">Proforma antes de facturar</Badge> : null}
+          {item.autoEnvioEstadoPago ? <Badge tono="info">Estado de pago antes de facturar</Badge> : null}
+        </p>
+      ) : null}
       <p className="text-sm">
         Neto por período{item.moneda === "UF" ? " (estimado con la UF de hoy)" : ""}:{" "}
         <span className="t-numeric">{pesos(item.montoTotal)}</span>
