@@ -9,6 +9,9 @@ export type ItemCierre = {
   montoTotal: number;
   etapa: EtapaCierre;
   requiereOcHes: boolean;
+  requiereOk: boolean;
+  /** Nada bloquea emitirlo hoy (ver `emitibleEnLote`). */
+  emitible: boolean;
   ordenCompra: string | null;
   hes: string | null;
   observacion: string | null;

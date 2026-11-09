@@ -32,6 +32,7 @@ export const resultadoPeriodoSchema = z.object({
   documentoId: z.string().nullable(),
   montoTotal: z.number().int().nullable(),
   ufCentavos: z.number().int().nullable(),
+  fechaFactura: z.string().nullable().describe("Fecha proyectada de la factura; puede ser distinta del día de generación."),
 });
 
 export async function cargarGenerable(ctx: Contexto, id: string) {

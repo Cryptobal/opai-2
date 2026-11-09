@@ -1,8 +1,9 @@
 import { Badge, Card } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { fecha, pesos } from "@/lib/fechas";
+import { fecha, hoyIso, pesos } from "@/lib/fechas";
 
+import { conversionTexto } from "./periodo-uf";
 import type { DetalleProgramacion } from "./tipos";
 
 export type PeriodoPrevio = {
@@ -11,6 +12,7 @@ export type PeriodoPrevio = {
   estado: string;
   motivo: string | null;
   montoTotal: number | null;
+  ufCentavos?: number | null;
 };
 
 const FRECUENCIA: Record<string, string> = {
@@ -43,6 +45,21 @@ export function Resumen({
         {FRECUENCIA[item.frecuencia] ?? item.frecuencia}, {diaTexto(item.diaGeneracion)} · cobro a{" "}
         {item.plazoPagoDias} días
       </p>
+      {item.esperarOk || item.exigeOc ? (
+        <p className="flex flex-wrap gap-2 text-sm">
+          {item.esperarOk ? <Badge tono="info">Espera el OK del cliente</Badge> : null}
+          {item.exigeOc ? <Badge tono="info">Exige orden de compra</Badge> : null}
+        </p>
+      ) : null}
+      {item.autoEnvioProforma || item.autoEnvioEstadoPago ? (
+        <p className="flex flex-wrap gap-2 text-sm">
+          {item.autoEnvioProforma ? <Badge tono="info">Proforma antes de facturar</Badge> : null}
+          {item.autoEnvioEstadoPago ? <Badge tono="info">Estado de pago antes de facturar</Badge> : null}
+          <span className="text-fg-muted">
+            {item.previoCuando === "fecha_acordada" && item.previoDia ? `Se envía el día ${item.previoDia} acordado con el cliente` : "Se envía al generar el borrador"}
+          </span>
+        </p>
+      ) : null}
       <p className="text-sm">
         Neto por período{item.moneda === "UF" ? " (estimado con la UF de hoy)" : ""}:{" "}
         <span className="t-numeric">{pesos(item.montoTotal)}</span>
@@ -92,7 +109,8 @@ export function Lineas({ item }: { item: DetalleProgramacion }) {
   );
 }
 
-export function Proximos({ periodos }: { periodos: PeriodoPrevio[] }) {
+export function Proximos({ periodos, moneda }: { periodos: PeriodoPrevio[]; moneda: string }) {
+  const hoy = hoyIso();
   return (
     <Card className="flex flex-col gap-2 p-4">
       <h2 className="t-label text-fg">Próximos períodos</h2>
@@ -104,35 +122,14 @@ export function Proximos({ periodos }: { periodos: PeriodoPrevio[] }) {
             <li key={p.periodo} className="flex justify-between gap-3 py-2">
               <span>
                 {p.periodo} · {fecha(p.fecha)}
+                {conversionTexto(moneda, p.ufCentavos ?? null, p.fecha, hoy) ? (
+                  <span className="block text-xs text-fg-muted">
+                    {conversionTexto(moneda, p.ufCentavos ?? null, p.fecha, hoy)}
+                  </span>
+                ) : null}
                 {p.motivo ? <span className="block text-warning-fg">{p.motivo}</span> : null}
               </span>
               <span className="t-numeric">{p.montoTotal !== null ? pesos(p.montoTotal) : "—"}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
-  );
-}
-
-export function Historial({ item }: { item: DetalleProgramacion }) {
-  return (
-    <Card className="flex flex-col gap-2 p-4">
-      <h2 className="t-label text-fg">Borradores generados</h2>
-      {item.corridas.length === 0 ? (
-        <p className="text-sm text-fg-muted">Todavía no se genera ningún borrador.</p>
-      ) : (
-        <ul className="divide-y divide-border text-sm">
-          {item.corridas.map((c) => (
-            <li key={c.periodo} className="flex justify-between gap-3 py-2">
-              {c.documentoId ? (
-                <LinkNext href={`/finanzas/ventas/${c.documentoId}`} className="underline">
-                  {c.periodo}
-                </LinkNext>
-              ) : (
-                <span>{c.periodo} · importado de OPAI 1.0</span>
-              )}
-              <span className="t-numeric">{c.montoTotal !== null ? pesos(c.montoTotal) : "—"}</span>
             </li>
           ))}
         </ul>

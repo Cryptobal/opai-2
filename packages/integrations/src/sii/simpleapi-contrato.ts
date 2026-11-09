@@ -37,6 +37,11 @@ export type CredencialesSimpleApiV1 = {
   resolucionFecha: string;
   razonSocialEmisor?: string;
   giroEmisor?: string;
+  /** Código de actividad económica (ACTECO) del emisor; el SII lo exige en el encabezado del DTE. */
+  actecoEmisor?: number;
+  direccionEmisor?: string;
+  comunaEmisor?: string;
+  ciudadEmisor?: string;
 };
 
 const fechaSii = (iso: string) => iso.slice(0, 10);
@@ -50,7 +55,17 @@ const FORMA_PAGO_CREDITO = 2;
 /** JSON del campo `input` de POST /api/v1/dte/generar (esquema unificado de la documentación). */
 export function jsonInputGenerarDte(
   payload: PayloadEmisionDte,
-  creds: Pick<CredencialesSimpleApiV1, "certificadoRut" | "certificadoClave" | "razonSocialEmisor" | "giroEmisor">,
+  creds: Pick<
+    CredencialesSimpleApiV1,
+    | "certificadoRut"
+    | "certificadoClave"
+    | "razonSocialEmisor"
+    | "giroEmisor"
+    | "actecoEmisor"
+    | "direccionEmisor"
+    | "comunaEmisor"
+    | "ciudadEmisor"
+  >,
 ): string {
   const lineas = payload.lineas?.length
     ? payload.lineas
@@ -85,6 +100,11 @@ export function jsonInputGenerarDte(
           Rut: payload.rutEmisor,
           ...(creds.razonSocialEmisor ? { RazonSocial: creds.razonSocialEmisor } : {}),
           ...(creds.giroEmisor ? { Giro: creds.giroEmisor } : {}),
+          // Nombres y forma (lista de ACTECO) tomados del adaptador de OPAI 1.0, que ya emite con SimpleAPI.
+          ...(creds.actecoEmisor ? { ActividadEconomica: [creds.actecoEmisor] } : {}),
+          ...(creds.direccionEmisor ? { DireccionOrigen: creds.direccionEmisor } : {}),
+          ...(creds.comunaEmisor ? { ComunaOrigen: creds.comunaEmisor } : {}),
+          ...(creds.ciudadEmisor ? { CiudadOrigen: creds.ciudadEmisor } : {}),
         },
         Receptor: {
           Rut: payload.rutReceptor,

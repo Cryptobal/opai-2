@@ -10,6 +10,8 @@ import {
 import { PaginaTenant } from "../pagina-tenant";
 import { CargosEmpresa } from "./cargos-empresa";
 import { ModulosCobro } from "./modulos-cobro";
+import { PruebasGratis } from "./pruebas-gratis";
+import type { PruebaGratisVista } from "./tipos-prueba";
 
 export const metadata = { title: "Cobro de la empresa" };
 
@@ -23,7 +25,7 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
     <PaginaTenant params={params} tab="cobro">
       {async (d) => {
         const periodo = new Date().toISOString().slice(0, 7);
-        const [resumen, cargos, catalogo] = await Promise.all([
+        const [resumen, cargos, catalogo, pruebas] = await Promise.all([
           ejecutarComoUsuario<Resumen>("platform", "platform.cobros.resumen", {
             periodo,
             tenantId: d.tenant.id,
@@ -32,6 +34,13 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
             tenantId: d.tenant.id,
           }),
           ejecutarComoUsuario<EntradaCatalogo[]>("platform", "platform.catalogo.list", {}),
+          ejecutarComoUsuario<PruebaGratisVista[]>(
+            "platform",
+            "platform.cobros.pruebas_gratis_list",
+            {
+              tenantId: d.tenant.id,
+            },
+          ),
         ]);
         // El precio de lista solo rellena la hoja: si no carga, el cobro sigue funcionando.
         const listas = Object.fromEntries(
@@ -53,6 +62,10 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
                 </span>
               </div>
               <ModulosCobro tenantId={d.tenant.id} modulos={modulos} listas={listas} />
+            </section>
+            <section className="flex flex-col gap-2">
+              <h3 className="t-subheading text-fg">Pruebas gratis</h3>
+              <PruebasGratis tenantId={d.tenant.id} pruebas={pruebas.ok ? pruebas.data : []} />
             </section>
             <section className="flex flex-col gap-2">
               <h3 className="t-subheading text-fg">Cargos listos para facturar</h3>

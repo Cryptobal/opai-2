@@ -1,42 +1,43 @@
-# PROPUESTA — CAR-100 · cierre de los cuatro huecos (para decidir)
+# CAR-100 · cierre de los cuatro huecos (decidido por Carlos el 9-nov-2026)
 
-**Estado:** propuesta para decidir, solo documentación. No hay pantallas ni código: CAR-100 depende de CAR-96 (turnos extra), que espera su diseño aprobado en Claude Design. **Sin Gard real, sin migraciones, sin pagos ni facturación en esta etapa.** Parte de la revisión de CAR-100 contra el alcance aprobado (`referencias/revision-car-100-alcance.md`, PR #402) y no la repite.
+**Estado:** decisión de Carlos registrada, solo documentación. No hay pantallas ni código: CAR-100 depende de CAR-96 (turnos extra), que espera su diseño aprobado en Claude Design. **Sin Gard real, sin migraciones, sin pagos ni facturación en esta etapa.** Parte de la revisión de CAR-100 contra el alcance aprobado (`referencias/revision-car-100-alcance.md`) y no la repite.
 
-**Alcance aprobado (referencia):** un estado por persona; extras con aprobación; solo se cobra lo pedido por el cliente fuera de su pauta; el reemplazo de una ausencia lo asume Gard.
+**Decisión de Carlos (9-nov-2026, confirmada a esta sesión):** reemplaza las recomendaciones de la versión anterior de este documento.
+
+1. El turno extra **nunca se cobra**, salvo un **turno de refuerzo ingresado desde la pauta diaria cuando un guardia no va**.
+2. El **puesto temporal es ese mismo turno de refuerzo**. No es un puesto de un día ni un objeto nuevo.
+3. **No se integra este PR.** La frase «solo `solicitud_cliente` es cobrable; `ausencia` nunca» queda **rechazada**.
 
 ## 1. Pagable ≠ cobrable
-- **Problema.** CAR-96 paga al guardia todo reemplazo o refuerzo (A5); CAR-100 cobra solo lo pedido por el cliente fuera de pauta.
-- **Propuesta (recomendada).** Cada turno extra lleva `origen` (`ausencia` | `solicitud_cliente`). **Cobrable solo si `origen = solicitud_cliente`**; `ausencia` nunca, aunque se pague al guardia. `cobrable` se **deriva** del origen, no se digita (evita el cobro por error).
-- **Alternativa descartada.** Un check libre «cobrable»: permite cobrar una ausencia por descuido.
-- **Efecto.** Un campo y una regla de dominio en `pauta.turnos_extra` (brief de CAR-96); nada nuevo para CAR-206/207.
+- **Regla.** CAR-96 paga al guardia todo reemplazo o refuerzo (A5). Lo que se cobra al cliente es **únicamente el turno de refuerzo** ingresado desde la pauta diaria cuando un guardia no va. Todo otro turno extra se paga y **no se cobra**.
+- **Se descarta** el campo `origen` con `ausencia` | `solicitud_cliente` y la derivación de `cobrable` desde él. Qué marca exacta distingue al refuerzo en el registro (por ejemplo, un tipo de turno) se define en el brief de CAR-96/CAR-100, no aquí.
+- **Efecto.** Nada nuevo para CAR-206/207.
 
 ## 2. «Puesto temporal» (A12)
-- **Problema.** Un guardia adicional por un día «crea un puesto temporal con cobro»; el alcance aprobado no nombra ese objeto.
-- **Propuesta (recomendada).** **No crear un objeto nuevo:** la solicitud del cliente es un registro cobrable que **referencia un puesto existente con vigencia de un día** (el puesto ya tiene `vigente_desde/hasta`, un puesto = una posición). Se crea con la misma acción de Puestos y queda `inactivo` al vencer. Así Pauta y Asistencia lo tratan como cualquier puesto.
-- **Alternativa.** Registro cobrable sin puesto: más simple, pero la Pauta no lo vería como cobertura. Se descarta salvo que Carlos prefiera no tocar Puestos.
-- **Pendiente de Carlos.** Confirmar que «puesto temporal» = puesto de un día.
+- **Regla.** El puesto temporal **es** el turno de refuerzo. No se crea un puesto de un día con vigencia ni un objeto nuevo.
+- **Se descarta** la propuesta anterior de «puesto de un día con `vigente_desde/hasta`» y su caso de aceptación de vencimiento (antes H8).
 
 ## 3. Tarifa desde CPQ (C16)
 - **Hecho verificado.** CPQ tiene líneas `puesto`, `item` y `adicional` (`modules/cpq/capabilities/esquemas.ts`) con `recurrencia` `mensual` o `unico`; cada línea guarda la copia del ítem usado (R15) y el precio de una cotización no cambia después.
-- **Propuesta (recomendada).** Un **ítem de catálogo «Guardia adicional»** con unidad «día», usado como línea `adicional` de la cotización vigente. **La tarifa de CAR-100 es el precio de venta unitario de esa línea.** Sin línea en la cotización vigente, la solicitud **no se puede registrar como cobrable** (error claro), nunca se inventa una tarifa.
-- **Pendiente de Carlos.** Confirmar que sirve la línea `adicional` (con ítem en unidad día) y no un tipo nuevo.
+- **Sin decisión nueva.** Carlos no se pronunció sobre la tarifa. La idea anterior (precio unitario de una línea `adicional` «guardia adicional» de la cotización vigente) queda como **antecedente no decidido**, a resolver en el brief de CAR-100 antes de cobrar nada. No se inventa una tarifa.
 
 ## 4. Facturación posterior
-- **Propuesta.** Fuera de esta etapa. CAR-100 deja el registro **listo para facturar** (cliente, instalación, fecha, cantidad y tarifa congelada) y **nada más**: ni borrador de factura ni cobro. Finanzas > Ventas lo toma después, sin digitar. Se define en su propio brief con Finanzas.
+- Fuera de esta etapa, sin cambios. CAR-100 deja el registro del refuerzo **listo para facturar** y nada más: ni borrador de factura ni cobro. Finanzas > Ventas lo toma después, en su propio brief.
 
 ## Casos de aceptación sintéticos (para cuando existan CAR-96 y CAR-100)
 Datos inventados, dos empresas, sin pagos. No duplican `puestos-aceptacion-db.test.ts` (CAR-206/207).
 
 | Id | Caso | Resultado esperado |
 |---|---|---|
-| H1 | Reemplazo de una **ausencia** aprobado. | Se paga al guardia; **no es cobrable** y no aparece en lo facturable. |
-| H2 | **Solicitud del cliente** fuera de pauta, aprobada. | Cobrable, con la tarifa de la línea «guardia adicional» de la cotización vigente. |
-| H3 | Solicitud sin línea «guardia adicional» en la cotización vigente. | Se rechaza con mensaje claro; no se cobra nada. |
-| H4 | Cambia la cotización después. | La tarifa del turno ya registrado no cambia (queda congelada). |
-| H5 | El supervisor registra; Operaciones aprueba; nadie aprueba lo propio. | Solo aprobado es cobrable. |
+| H1 | Turno extra que **no** es un refuerzo de pauta diaria (por ejemplo, un reemplazo planificado). | Se paga al guardia; **no es cobrable** ni aparece en lo facturable. |
+| H2 | **Turno de refuerzo** ingresado desde la pauta diaria porque un guardia no va, aprobado. | Se paga al guardia y queda **cobrable**; se define su tarifa en el brief. |
+| H3 | Intento de marcar como cobrable un turno extra que no es refuerzo de pauta diaria. | Se rechaza; no se cobra nada. |
+| H4 | Cambia la cotización después de registrar el refuerzo. | La tarifa ya registrada no cambia (queda congelada), una vez definida su fuente. |
+| H5 | El supervisor registra; Operaciones aprueba; nadie aprueba lo propio. | Solo lo aprobado es cobrable. |
 | H6 | Otra empresa pide o lista esos registros. | «No encontrado»; ninguna ve datos de la otra. |
 | H7 | Viewer. | Lee, no escribe. |
-| H8 | Puesto de un día vencido. | Queda inactivo; no genera cobertura ni cobro después. |
+
+El antiguo H8 (puesto de un día vencido) se retira: el puesto temporal ya no es un puesto de un día.
 
 ## Dependencias y siguiente paso
-CAR-96 (diseño aprobado) → CAR-100 (esta propuesta decidida) → brief de CAR-100 como adenda del de CAR-96 → Finanzas > Ventas (facturación). **Siguiente paso concreto:** que Carlos confirme por comentario los puntos 1 a 3 (recomendados arriba); OPAI 2.0 puede coordinar la consulta, pero no aprueba decisiones de negocio (AGENTS.md, roles); con eso se escribe el brief.
+CAR-96 (diseño aprobado) → brief de CAR-100 como adenda del de CAR-96 (con la fuente de la tarifa y la marca del refuerzo) → Finanzas > Ventas (facturación). **Siguiente paso concreto:** el diseño de CAR-96 en Claude Design; este PR no se integra y no se escribe código.

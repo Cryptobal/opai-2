@@ -13,6 +13,9 @@ import { correccionesListar } from "./correcciones-listar";
 import { correccionesProponer } from "./correcciones-proponer";
 import { correccionesResponder } from "./correcciones-responder";
 import { trabajoVencerCorrecciones } from "./correcciones-trabajo";
+import { trabajoSuprimirBiometria } from "./biometria-trabajo";
+import { rostroConsentir, rostroEnrolar, rostroEstado, rostroIniciarVida, rostroRevocar, rostroTextos } from "./rostro";
+import { telefonoHabilitar } from "./telefono";
 import { incidentesCerrar, incidentesListar, incidentesRegistrar } from "./incidentes";
 import { marcasObtener, marcasListar } from "./lecturas";
 import { marcasRegistrar } from "./registrar";
@@ -20,12 +23,13 @@ import { marcasVerificar } from "./verificar";
 
 export { ajustesAsistencia } from "./ajustes";
 export { fijarVerificadorIdentidad, PIN_SIMULADO } from "./identidad-registro";
-export const trabajosAsistencia = [trabajoVerificarCadenaMarcas, trabajoVencerCorrecciones, trabajoAlertasArt45, trabajoAvisoCompensables, trabajoRecalcularDias];
+export const trabajosAsistencia = [trabajoVerificarCadenaMarcas, trabajoVencerCorrecciones, trabajoAlertasArt45, trabajoAvisoCompensables, trabajoRecalcularDias, trabajoSuprimirBiometria];
 export const consumidoresAsistencia = [consumidorComprobante, consumidorAvisoCorreccion, consumidorAvisoContingencia, consumidorDias, consumidorAlertas];
 export const capacidades = [
   marcasRegistrar, marcasListar, marcasObtener, marcasVerificar,
   correccionesProponer, correccionesListar, correccionesResponder, correccionesVerEnlace, correccionesResponderEnlace,
   contingenciasRegistrar, contingenciasListar, contingenciasResponder,
   incidentesRegistrar, incidentesCerrar, incidentesListar,
+  rostroEstado, rostroIniciarVida, rostroConsentir, rostroRevocar, rostroEnrolar, rostroTextos, telefonoHabilitar,
   diasListar, diasResumenPeriodo, diasRecalcular, jornadasFijarTipo, hoyListar,
 ];

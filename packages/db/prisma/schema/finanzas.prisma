@@ -290,6 +290,8 @@ model DteFolio {
   cafVenceEn    DateTime? @map("caf_vence_en") @db.Date
   cafAutorizadoEn DateTime? @map("caf_autorizado_en") @db.Date
   cafIdk        String?   @map("caf_idk")
+  /// certificacion | produccion, según el IDK del propio CAF; null = anterior a la columna o IDK desconocido.
+  cafAmbiente   String?   @map("caf_ambiente")
   umbralAviso   Int       @default(20) @map("umbral_aviso")
   activo        Boolean   @default(true)
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -362,6 +364,11 @@ model DocumentoEmitidoLinea {
   orden        Int      @default(0)
   glosa        String
   monto        Int
+  /// Cantidad, unidad, precio unitario (CLP) y descuento de la línea; nulos en documentos anteriores (CAR-221).
+  cantidad       Decimal? @db.Decimal(14, 4)
+  unidad         String?
+  precioUnitario Int?     @map("precio_unitario")
+  descuentoPct   Int?     @map("descuento_pct")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
@@ -426,6 +433,9 @@ model DteConfig {
   /// Resolución de autorización del SII (requerida con SimpleAPI real).
   resolucionSiiNumero Int?   @map("resolucion_sii_numero")
   resolucionSiiFecha  DateTime? @map("resolucion_sii_fecha") @db.Date
+  /// Código de actividad económica del emisor (ACTECO, 1 a 6 dígitos) y oficina del SII (CAR-221).
+  acteco              Int?
+  oficinaSii          String?  @map("oficina_sii")
   certificadoSecretoId   String? @map("certificado_secreto_id") @db.Uuid
   emisionApiKeySecretoId String? @map("emision_api_key_secreto_id") @db.Uuid
   /// Porcentaje del rango CAF bajo el cual avisar folios bajos (R-FIN-038).
@@ -660,6 +670,14 @@ model VentasProgramacion {
   montoVariable          Boolean   @default(false) @map("monto_variable")
   autoEnvioProforma      Boolean   @default(false) @map("auto_envio_proforma")
   autoEnvioEstadoPago    Boolean   @default(false) @map("auto_envio_estado_pago")
+  /// El OK del cliente es condición para emitir. Apagado: el OK solo se informa y queda en la traza.
+  esperarOk              Boolean   @default(false) @map("esperar_ok")
+  /// Cada factura exige una orden de compra (referencia 801) antes de emitirse.
+  exigeOc                Boolean   @default(false) @map("exige_oc")
+  /// generar | fecha_acordada: cuándo salen la proforma y el estado de pago.
+  previoCuando           String    @default("generar") @map("previo_cuando")
+  /// Día del mes acordado con el cliente (1–31) cuando `previoCuando` es fecha_acordada.
+  previoDia              Int?      @map("previo_dia")
   notas                  String?
   referenciasAdicionales Json      @default("[]") @map("referencias_adicionales")
   proximaEjecucionEn     DateTime? @map("proxima_ejecucion_en") @db.Timestamptz(6)
@@ -756,6 +774,10 @@ model VentasProgramacionCorrida {
   /// UF usada (centavos de CLP), si la programación es en UF.
   ufCentavos      BigInt?   @map("uf_centavos")
   montoTotal      BigInt?   @map("monto_total")
+  /// Día en que salen la proforma y el estado de pago; el trabajo diario los manda cuando llega.
+  previosEnviarEn   DateTime? @map("previos_enviar_en") @db.Date
+  /// Cuándo salieron todos. Nulo mientras falte alguno (se reintenta unos días).
+  previosEnviadosEn DateTime? @map("previos_enviados_en") @db.Timestamptz(6)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   programacion VentasProgramacion @relation(fields: [programacionId], references: [id], onDelete: Restrict)
@@ -826,6 +848,8 @@ model VentasCierreSeguimiento {
   /// pendiente | enviada | observada | ok
   estado           String    @default("pendiente")
   requiereOcHes    Boolean   @default(false) @map("requiere_oc_hes")
+  /// El OK del cliente es condición para emitir. Por defecto sí (lo anterior a la opción por programación).
+  requiereOk       Boolean   @default(true) @map("requiere_ok")
   ordenCompra      String?   @map("orden_compra")
   hes              String?
   observacion      String?

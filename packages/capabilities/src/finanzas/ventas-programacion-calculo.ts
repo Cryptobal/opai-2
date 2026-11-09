@@ -18,6 +18,7 @@ export type ResultadoPeriodo = {
   documentoId: string | null;
   montoTotal: number | null;
   ufCentavos: number | null;
+  fechaFactura: string | null;
 };
 
 type LineaFila = {
@@ -39,6 +40,16 @@ export type ProgramacionGenerable = {
   plazoPagoDias: number;
   politicaUf: string | null;
   diaUf: number | null;
+  diasFacturacion: number | null;
+  facturaTiming: string;
+  facturaDia: number | null;
+  facturaMesRelativo: string;
+  autoEnvioProforma: boolean;
+  autoEnvioEstadoPago: boolean;
+  previoCuando: string;
+  previoDia: number | null;
+  esperarOk: boolean;
+  exigeOc: boolean;
   lineas: LineaFila[];
 };
 
@@ -50,6 +61,7 @@ export const omitido = (periodo: string, fecha: string, motivo: string): Resulta
   documentoId: null,
   montoTotal: null,
   ufCentavos: null,
+  fechaFactura: null,
 });
 
 export const aLineaMonto = (l: LineaFila): LineaProgramacionMonto => ({

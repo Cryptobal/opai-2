@@ -3,6 +3,7 @@ import "server-only";
 import { executeCapability, type Resultado } from "@opai/capabilities";
 
 import type { dispositivoActual } from "@/lib/dispositivo";
+import { fuentesReales } from "@/lib/fuentes";
 import { contextoSistema } from "@/lib/medidor";
 
 export type EquipoDeTerreno = NonNullable<Awaited<ReturnType<typeof dispositivoActual>>>;
@@ -12,13 +13,14 @@ export type EquipoDeTerreno = NonNullable<Awaited<ReturnType<typeof dispositivoA
  * su cookie de dispositivo es la credencial y ya fue resuelta (activo o revocado) por `dispositivoActual`.
  * La capacidad vuelve a verificar que el dispositivo sea de la empresa y esté activo.
  */
-export function ejecutarComoEquipo(
+export async function ejecutarComoEquipo(
   equipo: EquipoDeTerreno,
   capacidad: string,
   entrada: Record<string, unknown>,
   opciones: { dryRun?: boolean } = {},
 ): Promise<Resultado> {
-  const ctx = contextoSistema(equipo.tenantId);
+  // Los módulos activos de la empresa: sin ellos, una capacidad de Rondas, Acceso o Asistencia se rechazaría.
+  const ctx = contextoSistema(equipo.tenantId, await fuentesReales.modulosActivos(equipo.tenantId));
   return executeCapability(
     ctx,
     capacidad,

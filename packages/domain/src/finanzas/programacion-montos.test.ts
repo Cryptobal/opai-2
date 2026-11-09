@@ -67,7 +67,12 @@ describe("programación · montos exactos", () => {
 
   it("descuento total en una línea la omite del borrador", () => {
     const r = montosProgramacion(33, [clp(100, "1", 10_000), clp(1000)], null);
-    expect(r.ok && r.lineas).toEqual([{ glosa: "Servicio", monto: 1000 }]);
+    expect(r.ok && r.lineas).toEqual([{ glosa: "Servicio", monto: 1000, cantidad: "1", precioUnitario: 1000, descuentoPct: 0 }]);
+  });
+
+  it("las líneas calculadas conservan cantidad, precio y descuento para imprimirlos", () => {
+    const r = montosProgramacion(33, [clp(500_000, "2,5", 1000)], null);
+    expect(r.ok && r.lineas[0]).toMatchObject({ cantidad: "2.5", precioUnitario: 500_000, descuentoPct: 1000 });
   });
 
   it("activación: cuenta, líneas y tipo", () => {

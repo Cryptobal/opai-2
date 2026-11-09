@@ -24,7 +24,9 @@ export function Diaria({ mes, fecha, sinCubrir }: { mes: MesPauta | null; fecha:
 
   return (
     <section aria-label="Turnos del día" className="flex flex-col gap-3">
-      <p className="text-sm text-fg-muted">Asistencia no activada: sin marcas para cruzar.</p>
+      {turnos.some(({ celda }) => celda.presencia) ? null : (
+        <p className="text-sm text-fg-muted">Sin marcas de asistencia para cruzar.</p>
+      )}
       <p className="text-sm">
         {ppc} sin cubrir · {turnos.length} turnos
       </p>

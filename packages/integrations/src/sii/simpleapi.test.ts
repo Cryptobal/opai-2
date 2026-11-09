@@ -75,6 +75,36 @@ describe("firmar (POST dte/generar)", () => {
     expect(r.timbrePdf417.endsWith("</TED>")).toBe(true);
   });
 
+  it("envía Acteco, dirección y comuna del emisor con los nombres de OPAI 1.0 (ActividadEconomica es lista)", async () => {
+    const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
+    await adaptadorSimpleApi({
+      ...creds,
+      razonSocialEmisor: "Emisora de Prueba SpA",
+      giroEmisor: "Servicios de seguridad",
+      actecoEmisor: 801000,
+      direccionEmisor: "Calle Falsa 123",
+      comunaEmisor: "Providencia",
+      ciudadEmisor: "Santiago",
+    }).firmar(payload);
+    const emisor = JSON.parse(String(llamadas[0]?.form.get("input"))).Documento.Encabezado.Emisor;
+    expect(emisor).toEqual({
+      Rut: "76269769-6",
+      RazonSocial: "Emisora de Prueba SpA",
+      Giro: "Servicios de seguridad",
+      ActividadEconomica: [801000],
+      DireccionOrigen: "Calle Falsa 123",
+      ComunaOrigen: "Providencia",
+      CiudadOrigen: "Santiago",
+    });
+  });
+
+  it("sin datos del emisor no inventa campos", async () => {
+    const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
+    await adaptadorSimpleApi(creds).firmar(payload);
+    const emisor = JSON.parse(String(llamadas[0]?.form.get("input"))).Documento.Encabezado.Emisor;
+    expect(emisor).toEqual({ Rut: "76269769-6" });
+  });
+
   it("ADR-075: el XML con ñ y tildes vuelve con los mismos bytes ISO-8859-1 y el mismo SHA-256", async () => {
     const original = fixture("simpleapi-generar-factura.xml").replace(
       "RAZÓN SOCIAL",

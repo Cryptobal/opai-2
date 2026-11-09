@@ -1,7 +1,7 @@
 // Vista previa de los próximos períodos de una programación (BRIEF-26 · CAR-159).
 import { z } from "zod";
 
-import { periodosProgramacion, sumarDiasIso } from "@opai/domain";
+import { fechaFacturaProyectada, periodosProgramacion, sumarDiasIso } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
@@ -58,6 +58,12 @@ export const ventasProgramacionVistaPrevia = defineCapability({
               documentoId: null,
               montoTotal: c.calc.montos.total,
               ufCentavos: c.uf === null ? null : Number(c.uf),
+              fechaFactura: fechaFacturaProyectada(per.fecha, {
+                diasFacturacion: p.diasFacturacion,
+                momento: p.facturaTiming,
+                diaFijo: p.facturaDia,
+                mesRelativo: p.facturaMesRelativo,
+              }).fecha,
             }
           : c.resultado,
       );

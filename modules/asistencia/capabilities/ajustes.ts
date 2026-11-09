@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { MINUTOS_ALERTA_INICIO_DEFECTO, PLAZO_CORRECCION_HORAS_DEFECTO } from "../domain";
+import {
+  CANALES, MINUTOS_ALERTA_INICIO_DEFECTO, PLAZO_CORRECCION_HORAS_DEFECTO,
+} from "../domain";
 
 // Ajustes del módulo Asistencia (ADR-018): los lee el centro de configuración del núcleo desde el
 // manifest; no hay página propia. A3 suma canales por instalación, plazo de corrección y alertas.
@@ -16,14 +18,50 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "switch",
   }),
-  geocerca_radio_m: z.number().int().min(10).max(5000).default(100).meta({
+  geocerca_radio_m: z.number().int().min(10).max(5000).default(300).meta({
     etiqueta: "Radio de la geocerca para alertar (m)",
     ayuda:
-      "Fuera de este radio la marca se registra igual y queda señalada: el GPS nunca bloquea una marca (Res. 38, arts. 38, 53 y 58 k).",
+      "Por defecto 300 m (D-13). Fuera de este radio la marca se registra igual y queda señalada: la geocerca solo alerta y el GPS nunca bloquea una marca (Res. 38, arts. 38, 53 y 58 k). Una instalación puede fijar su propio radio.",
     grupo: "Marcas",
     ambito: "tenant",
     permiso: PERMISO,
     control: "numero",
+  }),
+  canales_por_instalacion: z.record(z.string().uuid(), z.array(z.enum(CANALES)).min(1)).default({}).meta({
+    etiqueta: "Canales de marca por instalación",
+    ayuda:
+      "Para cada instalación (por su id), los canales con que se puede marcar: «kiosco» (dispositivo emparejado) y «telefono_personal». Sin entrada, la instalación marca solo en el kiosco (D-01).",
+    grupo: "Canales",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "json",
+  }),
+  telefono_personal_permitido: z.boolean().default(false).meta({
+    etiqueta: "Permitir marcar desde el teléfono personal",
+    ayuda:
+      "Interruptor general (D-01). Además cada persona debe estar habilitada por RR. HH. y haber aceptado el uso de su teléfono (T-04), y la instalación debe incluir el canal.",
+    grupo: "Canales",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "switch",
+  }),
+  rostro_habilitado: z.boolean().default(false).meta({
+    etiqueta: "Marcar con rostro (Face ID)",
+    ayuda:
+      "Apagado por defecto. Con el rostro apagado, todos marcan con RUT y PIN. Encenderlo exige además la integración de biometría de la empresa, el consentimiento de cada persona y que la plataforma lo permita para empresas reales (Ley 21.719).",
+    grupo: "Identificación",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "switch",
+  }),
+  pin_respaldo_exige_motivo: z.boolean().default(true).meta({
+    etiqueta: "Pedir el motivo al marcar con PIN de respaldo",
+    ayuda:
+      "RUT + PIN de 6 dígitos siempre está disponible como mecanismo secundario sin biometría (Res. 38 art. 57). Cuando la marca cae a PIN por una falla del rostro, se guarda el motivo.",
+    grupo: "Identificación",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "switch",
   }),
   plazo_correccion_horas: z.number().int().min(1).max(720).default(PLAZO_CORRECCION_HORAS_DEFECTO).meta({
     etiqueta: "Plazo para responder una corrección (horas)",

@@ -22,6 +22,12 @@ export async function validarProgramacion(ctx: Contexto, input: ProgramacionInpu
   if (input.frecuencia === "anual" && !input.mesDelAnio) {
     throw reglaDeNegocio("La programación anual necesita el mes de generación.");
   }
+  if (input.momentoFactura === "DIA_FIJO" && !input.diaFactura) {
+    throw reglaDeNegocio("Indica el día de la factura.");
+  }
+  if (input.previoCuando === "fecha_acordada" && !input.previoDia) {
+    throw reglaDeNegocio("Indica el día acordado con el cliente para el envío.");
+  }
   if (input.moneda === "UF" && input.politicaUf === "CUSTOM_DAY" && !input.diaUf) {
     throw reglaDeNegocio("Indica el día de la UF.");
   }
@@ -48,6 +54,16 @@ export function datosProgramacion(input: ProgramacionInput) {
     politicaUf: input.moneda === "UF" ? (input.politicaUf ?? "RUN_DAY") : null,
     diaUf: input.moneda === "UF" ? (input.diaUf ?? null) : null,
     plazoPagoDias: input.plazoPagoDias,
+    diasFacturacion: input.diasFacturacion ?? null,
+    facturaTiming: input.momentoFactura,
+    facturaDia: input.momentoFactura === "DIA_FIJO" ? (input.diaFactura ?? null) : null,
+    facturaMesRelativo: input.mesRelativoFactura,
+    autoEnvioProforma: input.autoEnvioProforma,
+    autoEnvioEstadoPago: input.autoEnvioEstadoPago,
+    previoCuando: input.previoCuando,
+    previoDia: input.previoCuando === "fecha_acordada" ? (input.previoDia ?? null) : null,
+    esperarOk: input.esperarOk,
+    exigeOc: input.exigeOc,
     fechaInicio: input.fechaInicio ? aFecha(input.fechaInicio) : null,
     fechaFin: input.fechaFin ? aFecha(input.fechaFin) : null,
     notas: input.notas ?? null,

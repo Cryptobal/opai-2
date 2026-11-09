@@ -5,43 +5,13 @@
    hecho viaja con su `clave` (uuid): reenviar es seguro y llega una sola vez. Aquí no se guarda nada en las
    cachés ni se toca al cerrar sesión: los hechos pendientes sobreviven. Equipo revocado (401): se descartan.
    Red caída, 429 o 5xx: se conservan y el navegador reintenta (Background Sync con espera creciente) o la
-   página vuelve a pedirlo. Lote mal formado (422): se descarta para no bloquear a los demás. */
+   página vuelve a pedirlo. E1: nada se borra en silencio. Lo que el servidor resuelve pasa de `cola` a
+   `resultados` en UNA transacción (sincronizado, o rechazado con su motivo); un lote mal formado (422) se
+   marca rechazado «lote_invalido». Los rechazados quedan hasta que la persona los descarta. */
+importScripts("/sw-cola-bd.js");
+/* global importScripts, abrirCola, pedido, avisarCola, resolverClaves, descartarTodo */
 const SYNC_TAG = "opai-terreno-lote";
 const LOTE_MAX = 50;
-
-function abrirCola() {
-  return new Promise((ok, mal) => {
-    const r = indexedDB.open("opai-terreno", 1);
-    r.onupgradeneeded = () => {
-      r.result.createObjectStore("cola", { keyPath: "clave" });
-      r.result.createObjectStore("meta");
-    };
-    r.onsuccess = () => ok(r.result);
-    r.onerror = () => mal(r.error);
-  });
-}
-const pedido = (req) =>
-  new Promise((ok, mal) => {
-    req.onsuccess = () => ok(req.result);
-    req.onerror = () => mal(req.error);
-  });
-
-async function avisarCola(db, parcial) {
-  const pendientes = await pedido(db.transaction("cola").objectStore("cola").count());
-  const estado = { pendientes, intentoEn: Date.now(), ...parcial };
-  await pedido(db.transaction("meta", "readwrite").objectStore("meta").put(estado, "estado"));
-  const ventanas = await self.clients.matchAll({ type: "window" });
-  ventanas.forEach((v) => v.postMessage({ type: "COLA", estado }));
-}
-
-async function borrarClaves(db, claves) {
-  const t = db.transaction("cola", "readwrite");
-  claves.forEach((c) => t.objectStore("cola").delete(c));
-  await new Promise((ok, mal) => {
-    t.oncomplete = ok;
-    t.onerror = () => mal(t.error);
-  });
-}
 
 let vaciando = null;
 function vaciarCola() {
@@ -85,19 +55,30 @@ async function vaciarUnaVez() {
       }
       if (r.status === 200) {
         const d = await r.json();
-        await borrarClaves(db, claves);
-        const rechazados = d.resultados.filter((x) => x.estado === "rechazado").length;
-        await avisarCola(db, { ok: true, desfaseSegundos: d.desfaseSegundos, rechazados });
+        const res = new Map(
+          d.resultados.map((x) => [
+            x.clave,
+            { estado: x.estado === "rechazado" ? "rechazado" : "sincronizado", motivo: x.motivo },
+          ]),
+        );
+        await resolverClaves(db, lote, res);
+        await avisarCola(db, { ok: true, desfaseSegundos: d.desfaseSegundos });
+        // Nada resuelto en este lote (respuesta sin sus claves): no se reintenta en bucle.
+        if (!lote.some((h) => res.has(h.clave))) return;
         continue;
       }
       if (r.status === 401) {
         const d = await r.json().catch(() => ({}));
-        if (d.revocado) await borrarClaves(db, todos.map((h) => h.clave));
+        if (d.revocado) await descartarTodo(db, todos.map((h) => h.clave));
         await avisarCola(db, { ok: false, error: d.revocado ? "revocado" : "sin_dispositivo" });
         return;
       }
       if (r.status === 422) {
-        await borrarClaves(db, claves);
+        await resolverClaves(
+          db,
+          lote,
+          new Map(claves.map((c) => [c, { estado: "rechazado", motivo: "lote_invalido" }])),
+        );
         await avisarCola(db, { ok: false, error: "lote_descartado" });
         continue;
       }

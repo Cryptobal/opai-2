@@ -1532,6 +1532,22 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Decisión.** Se aceptan dos límites de concurrencia del recálculo de cotizaciones en borrador (#336, #337, #344): las huellas de línea se escriben fuera de la transacción del `updateMany` de la versión, y editar líneas no sube `revision`, de modo que una edición durante el cálculo puede dejar en un borrador un cálculo de las líneas anteriores. Ambos se corrigen al recalcular o al enviar (el envío valida la huella). **No se construye** un contador de revisión por líneas. Sin cambio de producto, migración ni tests.
 
+## ADR-082 · Face ID sobre el B4 del núcleo: un solo contrato, consentimiento por Cumplimiento y la marca es la misma (7-nov-2026)
+
+**Contexto.** CAR-89 (D-02, D-03, D-05). Carlos ordenó (7-nov-2026 10:26 CLT) adaptar Face ID sobre el B4 de `main` (#367, ADR-079): reutilizar su contrato, sin uno paralelo, con el consentimiento por Cumplimiento. Criterio obligatorio: marcar significa que la persona **asistió a trabajar**, y eso debe verse igual en la Pauta diaria y mensual.
+
+**Decisión.**
+1. **Un solo contrato** `Biometria` (`@opai/integrations`), dueño: esta sesión. Se extiende sin romper B4: `coleccion` opcional (una por empresa, `opai-<tenant>`, D-05) e `iniciarVida?()`. El proveedor real es `biometriaRekognition` (HTTP firmado, sin SDK); la muestra es `vida:<sesión>` de Face Liveness. El simulado sigue siendo el de pruebas y CI.
+2. **Proveedor por empresa**, no por entorno: la integración «biometria» y sus secretos (`access_key_id`, `secret_access_key`, `region`) salen del almacén cifrado. El simulado solo existe en pruebas/desarrollo o en una empresa `qa-…`; un proveedor real en una empresa que no es de prueba exige el ajuste de **plataforma** `biometria_empresas_reales` (apagado hasta que Carlos confirme la evaluación de impacto y el DPA, Ley 21.719). Sin eso, falla cerrado.
+3. **Umbral** de similitud: ajuste de plataforma `biometria_umbral_similitud` (90 por defecto, 70–99,9), no de la empresa (T-03).
+4. **Verificación 1:1 sobre Rekognition:** no ofrece 1:1 contra una plantilla guardada; se consulta la colección de la empresa y solo se acepta el `FaceId` esperado de la persona; los demás resultados se descartan sin devolverse.
+5. **Consentimiento por Cumplimiento** (`biometria_asistencia`, B4) y, para T-04, `telefono_personal_asistencia`; la propia persona consiente y revoca (en el kiosco con su PIN). Revocar borra el rostro (consumidor del núcleo, y de inmediato desde la acción).
+6. **Una sola marca:** rostro y RUT + PIN llegan a `asistencia.marcas.registrar` (cadena auditable, idempotente por clave del dispositivo). Rostro: `evaluarRostro` del núcleo con prueba de vida; si cae a PIN, `motivo_respaldo`. El kiosco actúa como sistema con su dispositivo resuelto en el servidor (`ejecutarAsistenciaEquipo`, lista blanca).
+7. **Pauta:** `pauta.mes.leer` y `pauta.resumen.leer` agregan `presencia` a cada celda desde `asistencia.dias` (turno esperado → persona que cubre → día consolidado). La Pauta no calcula presencia.
+8. **Sin marcas sin conexión por ahora:** el rostro y el PIN se verifican en el servidor; no se encola `asistencia.marcas.registrar` en la cola sin conexión (queda para un brief propio, con su propio modelo de verificación diferida).
+
+**Pendiente (requiere intervención).** Widget de AWS Face Liveness en el navegador (credenciales temporales y dependencia nueva), configuración de la integración «biometria» por el bot con `@opai-2.0:` y prueba contra el entorno de AWS; la evaluación de impacto y el DPA; el diseño aprobado de las pantallas (D-11).
+
 ## ADR-081 · Orden de trabajo de Operaciones: Personas → Instalaciones › Puestos → Pauta
 
 **Fecha:** 6-nov-2026 · **Estado:** vigente · **Autor:** Carlos (6-nov-2026, 08:17 CLT), registrado por «Operaciones · Puestos · Code» en CAR-206 · Adenda a ADR-048 (series de la Pauta) y al Brief 11 (Puestos).
@@ -1554,3 +1570,46 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 2. **Anexos:** solo se genera borrador de anexo si cambian el sueldo o las condiciones. Un simple cambio de puesto del vínculo **no** genera anexo; el cambio de instalación sí (y el traslado a otra instalación lo emite).
 3. **Backfill** único de la cobertura de los puestos con serie anterior a CAR-206, con vista previa, dentro del PR de CAR-207.
 4. Orden de los encargos de la sesión: CAR-207, luego CAR-96; los menores de UI de CAR-206 van a un PR de pendientes.
+
+## ADR-083 · Turnos extra y estado único de persona (CAR-96)
+
+**Fecha:** 6-nov-2026 · **Estado:** vigente · **Autor:** Carlos (chat, 6-nov-2026; transferido en las pasadas de OPAI 2.0 de 13:07, 15:04 y 18:06 CLT), registrado por «Operaciones · Auditoría». Número 083 porque ADR-081 está en `main` y #360 propone otro ADR-081/082.
+
+**Decisión.**
+
+1. **Externos:** el guardia externo se crea en la empresa **sin contrato**, con nombre, RUT, correo y datos bancarios (cifrados, ADR-027). Al vincularse queda como guardia inactivo, que puede contratarse o no.
+2. **Quién aprueba los turnos extra:** owner, admin, gerente y el rol Operaciones (permiso `pauta:aprobar_extra`). Nadie aprueba lo que él mismo registró.
+3. **Supervisor:** registra el monto sugerido y **no** lo edita; quien aprueba lo edita con motivo y auditoría.
+4. **Brief aprobado** (#365): pasa a Claude Design antes de cualquier código.
+5. **Un solo estado por persona** (Carlos, 15:22 Santiago): Postulante → Rechazado | Externo | Activo; Externo → Activo; Activo → Inactivo; Inactivo → Activo | Externo. Cualquier otra transición se rechaza. Solo «Activo» tiene vínculo laboral.
+
+**Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`).
+
+**Adenda (8-nov-2026) · Decisiones de Operaciones II del 29-oct-2026, hasta ahora solo en Linear.** Registradas por «Operaciones · Auditoría» con su texto de Linear; ante choque manda lo más reciente de Carlos.
+
+- **Turnos extra (CAR-96; A5–A10, C13–C15):**
+  - todo reemplazo es turno extra: lo registra el supervisor;
+  - monto fijo por instalación, con excepción por puesto, editable en cada turno con motivo y auditoría;
+  - se pueden sumar horas extra en la pauta diaria;
+  - se paga a propios y a externos con boleta, marcando el tipo en cada turno;
+  - sin tope, pero nunca doblar (regla configurable);
+  - el cliente ve la cobertura, no el costo.
+  - **Quién aprueba:** el 29-oct decía «Operaciones o RR. HH.»; lo reemplaza el punto 2 de este ADR (owner, admin, gerente y el rol Operaciones).
+- **Supervisión y visitas (CAR-83; B6–B8):**
+  - el supervisor abre en «Hoy», con alertas de puestos sin cubrir, rondas atrasadas y faltas;
+  - la visita lleva check-in GPS, lista de revisión, fotos y firma del guardia;
+  - asigna el reemplazo desde el celular y el turno extra queda por aprobar (compatible con el punto 3 de este ADR).
+- **Turnos pedidos (CAR-100; A11, A12, C16, C17):**
+  - solo se cobra al cliente lo que pide fuera de su pauta; los reemplazos por faltas los asume la empresa;
+  - un guardia adicional por un día entra como solicitud que crea un puesto temporal con cobro;
+  - la tarifa sale de la línea «guardia adicional» de la cotización vigente en CPQ, y Finanzas factura desde ese registro.
+  - **Conciliación:** el pago al guardia vive en el turno extra; el cobro al cliente vive en el puesto temporal de la solicitud. La línea de CPQ queda por definir en el brief de CAR-100, porque hoy `adicional` es un ítem de catálogo y no una tarifa diaria.
+- **Pago por lote (CAR-101; A8, C13–C14):**
+  - Finanzas arma y concilia el lote semanal o quincenal de los turnos extra aprobados;
+  - Nómina lo informa en el LRE si corresponde;
+  - incluye propios y externos con boleta.
+- **Condición previa (indicación transmitida el 7-nov-2026 en la pasada de Operaciones):**
+  - turnos extra, aprobación y lote requieren una **revisión legal y contable escrita** antes de construir;
+  - sin pagos reales;
+  - el código de CAR-96 espera el diseño aprobado **y** esa revisión.
+

@@ -16,9 +16,12 @@
 const VERSION = "v1";
 const CACHE = `opai-${VERSION}`;
 const OFFLINE = "/sin-conexion";
+// Terreno sin señal: página neutra (sin personas ni datos de la empresa) que solo lee la cola del teléfono.
+const OFFLINE_TERRENO = "/terreno/sin-conexion";
 // Activos públicos, sin datos de ningún tenant. Los íconos los declara el manifest y la meta.
 const PRECACHE = [
   OFFLINE,
+  OFFLINE_TERRENO,
   "/icono-192.png",
   "/icono-512.png",
   "/icono-maskable-192.png",
@@ -26,8 +29,30 @@ const PRECACHE = [
   "/apple-touch-icon.png",
 ];
 
+/**
+ * Guarda también el JS y el CSS que la página neutra de Terreno necesita para hidratar sin red: sin ellos, la
+ * página cacheada carga pero falla al arrancar. Se leen del propio HTML guardado, así no dependen de cómo el
+ * empaquetador reparta los archivos. Mejor esfuerzo: si algo falla, el resto del cascarón sigue disponible.
+ */
+async function guardarActivosDeTerreno(cache) {
+  try {
+    const pagina = await cache.match(OFFLINE_TERRENO);
+    if (!pagina) return;
+    const html = await pagina.clone().text();
+    const urls = new Set(html.match(/\/_next\/static\/[^"'\\\s)<>]+\.(?:js|css)/g) ?? []);
+    await Promise.all([...urls].map((u) => cache.add(u).catch(() => undefined)));
+  } catch {
+    // Sin red o sin página: queda lo que hubiera.
+  }
+}
+
 self.addEventListener("install", (evento) => {
-  evento.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)));
+  evento.waitUntil(
+    caches.open(CACHE).then(async (c) => {
+      await c.addAll(PRECACHE);
+      await guardarActivosDeTerreno(c);
+    }),
+  );
   // Sin skipWaiting aquí: el nuevo service worker espera a que la persona acepte (R2).
 });
 
@@ -73,6 +98,7 @@ self.addEventListener("message", (evento) => {
         );
         try {
           await fresca.addAll(PRECACHE); // Refresca desde la red si la hay; si no, quedan los rescatados.
+          await guardarActivosDeTerreno(fresca);
         } catch {
           // Sin red al salir: se conservan los activos públicos rescatados.
         }
@@ -98,8 +124,9 @@ async function navegacion(request) {
     // el navegador se quedaba en la URL de origen (rompía la salida y el /entrar de D1).
     return await fetch(request);
   } catch {
-    const offline = await caches.match(OFFLINE);
-    return offline ?? Response.error();
+    const esTerreno = new URL(request.url).pathname.startsWith("/terreno");
+    const offline = await caches.match(esTerreno ? OFFLINE_TERRENO : OFFLINE);
+    return offline ?? (esTerreno ? await caches.match(OFFLINE) : null) ?? Response.error();
   }
 }
 

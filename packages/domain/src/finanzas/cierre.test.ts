@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { aplicarAccionCierre, emitibleEnLote, etapaCierre, resumirEtapas, SEGUIMIENTO_CIERRE_INICIAL } from "./cierre";
+import {
+  aplicarAccionCierre, emitibleEnLote, etapaCierre, motivoNoEmitible, resumirEtapas, SEGUIMIENTO_CIERRE_INICIAL,
+} from "./cierre";
 
 const seg = (p: Partial<typeof SEGUIMIENTO_CIERRE_INICIAL>) => ({ ...SEGUIMIENTO_CIERRE_INICIAL, ...p });
 
@@ -55,6 +57,20 @@ describe("emitibleEnLote y resumen", () => {
     expect(emitibleEnLote("borrador", seg({ estado: "ok" }))).toBe(true);
     expect(emitibleEnLote("borrador", seg({ estado: "enviada" }))).toBe(false);
     expect(emitibleEnLote("aceptado", seg({ estado: "ok" }))).toBe(false);
+  });
+  it("con el OK exigido, enviada no alcanza: se espera el OK del cliente", () => {
+    expect(motivoNoEmitible("borrador", seg({ estado: "enviada", requiereOk: true }))).toBe("Esperando el OK del cliente.");
+    expect(motivoNoEmitible("borrador", null)).toBe("Esperando el OK del cliente.");
+  });
+  it("con el OK dispensado (programación con «esperar OK» apagado) se emite sin él, y el OK solo se informa", () => {
+    for (const estado of ["pendiente", "enviada", "ok"] as const) {
+      expect(emitibleEnLote("borrador", seg({ estado, requiereOk: false }))).toBe(true);
+    }
+  });
+  it("faltar la OC/HES o una observación del cliente bloquea aunque el OK esté dispensado", () => {
+    expect(motivoNoEmitible("borrador", seg({ requiereOk: false, requiereOcHes: true }))).toMatch(/orden de compra/);
+    expect(motivoNoEmitible("borrador", seg({ requiereOk: false, estado: "observada", observacion: "monto" }))).toMatch(/observó/);
+    expect(motivoNoEmitible("aceptado", seg({ requiereOk: false }))).toMatch(/ya no es un borrador/);
   });
   it("resume cantidad y total por etapa en orden fijo", () => {
     const r = resumirEtapas([

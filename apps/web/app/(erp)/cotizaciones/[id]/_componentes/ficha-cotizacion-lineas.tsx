@@ -14,6 +14,7 @@ export function FichaCotizacionLineas({
   pendiente,
   verCostos,
   onAgregar,
+  onAgregarCobertura,
   onEditar,
   onQuitar,
   onTraza,
@@ -23,6 +24,7 @@ export function FichaCotizacionLineas({
   pendiente: boolean;
   verCostos: boolean;
   onAgregar: (seccionId: string) => void;
+  onAgregarCobertura: (seccionId: string) => void;
   onEditar: (linea: LineaEditable) => void;
   onQuitar: (id: string) => void;
   onTraza: (lineaId: string) => void;
@@ -41,9 +43,14 @@ export function FichaCotizacionLineas({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="t-label">{s.nombre}</h3>
             {editable ? (
-              <Button type="button" variant="secondary" size="md" onClick={() => onAgregar(s.id)}>
-                Agregar puesto
-              </Button>
+              <span className="flex flex-wrap gap-2">
+                <Button type="button" variant="secondary" size="md" onClick={() => onAgregar(s.id)}>
+                  Agregar puesto
+                </Button>
+                <Button type="button" variant="secondary" size="md" onClick={() => onAgregarCobertura(s.id)}>
+                  Agregar cobertura
+                </Button>
+              </span>
             ) : null}
           </div>
           <ul className="divide-y divide-border rounded-md border border-border">

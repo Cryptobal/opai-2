@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DIAS_PRUEBA_GRATIS,
+  diasRestantesPrueba,
   estadoPruebaGratis,
   extenderPruebaGratis,
   finDePruebaGratis,
@@ -40,5 +41,11 @@ describe("prueba gratis (CAR-222)", () => {
     expect(motivoSinPrueba("finanzas.flujo", "Flujo de caja", null, "trial")).toBeNull();
     expect(motivoSinPrueba("finanzas.bancos", "Bancos", null, "activo")).toContain("incluye todas");
     expect(motivoSinPrueba("finanzas.bancos", "Bancos", null, "suspendido")).toContain("Finanzas");
+  });
+
+  it("cuenta los días que quedan, con el último día incluido", () => {
+    expect(diasRestantesPrueba("2026-11-15", "2026-11-06")).toBe(10);
+    expect(diasRestantesPrueba("2026-11-06", "2026-11-06")).toBe(1);
+    expect(diasRestantesPrueba("2026-11-05", "2026-11-06")).toBe(0);
   });
 });

@@ -72,6 +72,10 @@ export const ventasCrearBorrador = defineCapability({
       orden,
       glosa: l.glosa,
       monto: l.monto,
+      ...(l.cantidad ? { cantidad: l.cantidad.replace(",", ".") } : {}),
+      ...(l.unidad ? { unidad: l.unidad } : {}),
+      ...(l.precioUnitario !== undefined ? { precioUnitario: l.precioUnitario } : {}),
+      ...(l.descuentoPct !== undefined ? { descuentoPct: l.descuentoPct } : {}),
     }));
     if (dryRun) {
       const { vistaVenta } = await import("./vistas-venta");
