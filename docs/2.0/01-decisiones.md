@@ -1629,3 +1629,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Decisión.** Carlos ordenó que esta sesión lo construya («Constrúyelo en esta sesión… Un solo PR»). Excepción acotada a ese PR: **no integra, no hace squash, no aplica migraciones, no cierra CAR-138**, no toca #400, #424 ni #409, no construye el editor en pantalla ni el PR 7, y no prepara Design Prompts. La migración la aplica el coordinador con respaldo; el PR lleva `migracion-pendiente`. Fuera de ese PR, el rol de «Comercial · Proyecto» no cambia.
 
+## ADR-085 · Prompt exportable de la propuesta: destino y forma (9-nov-2026)
+
+**Fecha:** 9-nov-2026 · **Estado:** vigente · **Autor:** Carlos, vía el coordinador OPAI 2.0; registrado por la sesión «Sesión Comercial».
+
+**Decisión.** El prompt exportable (CAR-138, PR 8) se genera en código desde el catálogo de campos y se entrega a Claude Design u otra IA; no se usa ningún producto de Google ni se promete Figma, PPT o PDF. Solo cita claves del catálogo de la finalidad «propuesta» que el actor puede leer. Es una lectura (`cpq.propuestas_tecnica.prompt_exportable`) sin migración. Importar HTML queda para el PR 9. Se abre en borrador por orden expresa de Carlos para este PR; la regla general de AGENTS.md (PR listos para revisión) sigue vigente para los demás.

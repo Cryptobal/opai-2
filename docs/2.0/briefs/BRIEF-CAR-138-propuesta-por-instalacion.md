@@ -57,6 +57,16 @@ Reglas del contrato:
 - **Capacidades (paridad MCP, dryRun, idempotencia, auditoría):** `cpq.propuestas_tecnica.capitulos_list` (lectura auditada por IDs) y `cpq.propuestas_tecnica.capitulo_guardar` (escritura; la instalación debe ser sección de la versión de la propuesta).
 - **Migración propuesta** `20261116100000_cpq_propuesta_capitulos`: tabla nueva `cpq.propuesta_capitulos`, vacía, con RLS ENABLE+FORCE, `tenant_isolation`, disparador de misma empresa y constraints de clave, origen y largo. Reversión: `DROP TABLE "cpq"."propuesta_capitulos"`. La aplica el coordinador con respaldo.
 
+## PR 8 — prompt exportable generado desde el catálogo
+
+**Alcance (encargo de Carlos vía el coordinador, 9-nov-2026 noche).** Solo `modules/cpq`; sin migración. No entran el PR 7, el PR 9 (importar HTML: el renderer de hoy es `pdf-lib`) ni el editor en pantalla.
+
+- **Qué es.** Un texto en español, generado en código desde `packages/domain/src/campos/`, para entregárselo a Claude Design u otra IA. Lleva la versión del catálogo (`VERSION_CATALOGO_CAMPOS`), las reglas (no inventar datos, certificados, SLA ni plazos; los montos y condiciones económicas los pone OPAI), la sintaxis real (`{{clave}}`, `{{clave | formato}}`, `{{#cada instalaciones}}`, `{{#si clave}}`, sin `#cada` anidado), la tabla de marcadores con tipo, formatos válidos, alias y ejemplo ficticio, un ejemplo de repetición que se valida y se renderiza con los ejemplos del catálogo, y la lista de claves de la finalidad sin valores todavía (para que no se usen).
+- **De dónde sale cada clave.** De `clasificarCampos("propuesta", ctx.autorizar)`: solo lo que la finalidad «propuesta» declara y lo que quien consulta puede leer. No hay lista escrita a mano; un test comprueba que toda clave citada existe en el catálogo y es de la finalidad.
+- **Qué no promete.** No promete archivos Figma, PPT ni PDF ni importación de HTML. El destino es Claude Design u otra IA; no se usa ningún producto de Google.
+- **Capacidad.** `cpq.propuestas_tecnica.prompt_exportable` (lectura, permiso `cpq:cotizaciones.read`, `dryRun: false` porque no escribe, paridad MCP). No devuelve datos de clientes ni de la empresa, por eso no lleva `auditarLectura`. El dryRun y la auditoría de escrituras no aplican a una lectura sin IDs revelados.
+- **Pruebas.** Dominio (6) y base real (2).
+
 ## Responsable y archivos del contrato transversal (autorizado por Carlos el 7-nov-2026 21:49)
 
 Documentos (CAR-127) no tiene código ni PR abierto sobre campos (solo la rama de diseño `docs/diseno-documentos-v4`) y Núcleo no tiene un catálogo propio: **el contrato vigente es el integrado en #387**. No se crea un catálogo alterno ni se espera una elección técnica adicional. Regla para evitar solapes:

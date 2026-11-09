@@ -983,6 +983,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.portal_cotizaciones.list`
 - `cpq.propuestas_tecnica.capitulo_guardar`
 - `cpq.propuestas_tecnica.capitulos_list`
+- `cpq.propuestas_tecnica.prompt_exportable`
 - `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`
