@@ -91,6 +91,19 @@ describe.skipIf(!urlPropietario)("programaciones recurrentes · base real", () =
     ).toBe(1);
   });
 
+  it("resuelve los marcadores de la glosa de la línea: período y monto (CAR-221 · B)", async () => {
+    const p = await s.dato<Res>("finanzas.ventas_programacion.crear", {
+      ...base(),
+      nombre: "Con marcadores",
+      lineas: [{ glosa: "Guardias {{periodo}} · total {{monto}} · {{no_existe}}", cantidad: "1", precioUnitario: 200_000 }],
+    });
+    await s.dato("finanzas.ventas_programacion.cambiar_estado", { programacionId: p.id, activa: true });
+    const r = await s.dato<Gen>("finanzas.ventas_programacion.generar", { programacionId: p.id });
+    const linea = await s.e.admin.documentoEmitidoLinea.findFirstOrThrow({ where: { documentoId: r.resultados[0]!.documentoId! } });
+    // 200.000 neto + 19 % de IVA = 238.000; un marcador desconocido nunca se inventa.
+    expect(linea.glosa).toBe(`Guardias ${mesActual} · total $238.000 · {{no_existe}}`);
+  });
+
   it("en UF exige la UF publicada de la fecha y no inventa otra", async () => {
     const p = await s.dato<Res>("finanzas.ventas_programacion.crear", {
       ...base(),

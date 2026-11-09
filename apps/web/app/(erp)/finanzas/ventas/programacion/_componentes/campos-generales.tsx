@@ -2,6 +2,7 @@
 
 import { Campo, Card, Combobox, Input, InputFecha, Select, Switch } from "@opai/ds";
 
+import { CamposFactura } from "./campos-factura";
 import { CamposUf } from "./campos-uf";
 import { DIAS, MESES, SEMANA } from "./opciones-agenda";
 import type { FormProgramacion } from "./tipos";
@@ -115,6 +116,7 @@ export function CamposGenerales({ f, set, cuentas, editando }: Props) {
           />
         </Campo>
         <CamposUf f={f} set={set} />
+        <CamposFactura f={f} set={set} />
         <Switch
           etiqueta="Proforma antes de facturar"
           descripcion="Marca la modalidad: el cliente recibe una proforma y da su OK antes de la factura. No es un documento tributario."

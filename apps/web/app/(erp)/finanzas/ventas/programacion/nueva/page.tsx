@@ -1,6 +1,8 @@
+import { ErrorCarga } from "@/app/_components/error-carga";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
 import { cargarCuentasProgramacion } from "../_componentes/cargar-cuentas";
+import { vistaDeCarga } from "../_componentes/vista-carga";
 import { FormularioProgramacion } from "../_componentes/formulario-programacion";
 
 export const metadata = { title: "Nueva programación" };
@@ -19,7 +21,11 @@ export default function NuevaProgramacionPage() {
         volver: { href: "/finanzas/ventas/programacion", etiqueta: "Programación" },
       })}
     >
-      {(d) => (d.state === "ready" ? <FormularioProgramacion cuentas={d.cuentas} /> : null)}
+      {(d) => {
+        const vista = vistaDeCarga(d.state);
+        if (vista === "formulario") return <FormularioProgramacion cuentas={d.cuentas} />;
+        return <ErrorCarga fallo={vista} ruta="/finanzas/ventas/programacion/nueva" />;
+      }}
     </PaginaPortal>
   );
 }

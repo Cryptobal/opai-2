@@ -5,9 +5,9 @@ import { estadoPantalla } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
+import { Historial } from "../_componentes/historial-corridas";
 import { AccionesProgramacion } from "../_componentes/acciones-programacion";
 import {
-  Historial,
   Lineas,
   type PeriodoPrevio,
   Proximos,
