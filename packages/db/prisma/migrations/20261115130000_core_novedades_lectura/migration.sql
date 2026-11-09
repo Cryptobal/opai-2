@@ -29,6 +29,13 @@ ALTER TABLE "core"."novedades_lectura" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "core"."novedades_lectura" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+-- Defensa en profundidad: lecturas/escrituras solo de la fila del usuario en sesión (`app.user_id`).
+CREATE POLICY usuario_propia ON "core"."novedades_lectura" AS RESTRICTIVE FOR ALL TO opai_app
+  USING (usuario_id = NULLIF(current_setting('app.user_id', true), '')::uuid)
+  WITH CHECK (usuario_id = NULLIF(current_setting('app.user_id', true), '')::uuid);
+
+CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "usuario_id", "tenant_id" ON "core"."novedades_lectura"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('usuario_id');
 
 COMMIT;
 

@@ -1,20 +1,25 @@
 "use client";
 
-import { Campo, Input } from "@opai/ds";
+import { Campo, InputFecha } from "@opai/ds";
 
-/**
- * Fecha de emisión de la factura. La capacidad la fija sola al emitir (el día de hoy), así que aquí solo se
- * muestra; no se puede elegir otra.
- */
-export function EmitirFechaEmision({ hoyIso }: { hoyIso: string }) {
-  const [a, m, d] = hoyIso.split("-");
+type Props = {
+  valor: string;
+  onCambiar: (v: string) => void;
+  hoyIso: string;
+  disabled: boolean;
+};
+
+/** Fecha de emisión de la factura: hoy o anterior, elegida con el calendario del DS; queda en el borrador y se usa al emitir. */
+export function EmitirFechaEmision({ valor, onCambiar, hoyIso, disabled }: Props) {
+  const futura = valor !== "" && valor > hoyIso;
   return (
     <Campo
       etiqueta="Fecha de emisión"
       htmlFor="emit-fecha"
-      ayuda="Se fija al emitir, con el día de hoy."
+      ayuda="Por defecto es hoy; puede ser una fecha anterior, no posterior."
+      {...(futura ? { error: "No puede ser posterior a hoy." } : {})}
     >
-      <Input id="emit-fecha" readOnly value={`${d}-${m}-${a}`} className="t-numeric" />
+      <InputFecha id="emit-fecha" valor={valor} onCambiar={onCambiar} disabled={disabled} invalido={futura || valor === ""} />
     </Campo>
   );
 }

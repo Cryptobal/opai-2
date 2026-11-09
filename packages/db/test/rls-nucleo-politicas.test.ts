@@ -77,6 +77,10 @@ describe.skipIf(!urlPropietario)("políticas y referencias del núcleo", () => {
         AND NOT (
           schemaname = 'core' AND tablename = 'dias_calendario' AND policyname = 'plataforma_lectura'
           AND cmd = 'SELECT' AND qual = '(tenant_id IS NULL)'
+        )
+        AND NOT (
+          schemaname = 'core' AND tablename = 'novedades_lectura' AND policyname = 'usuario_propia'
+          AND cmd = 'ALL' AND permissive = 'RESTRICTIVE'
         )`;
     expect(Number(extra[0]?.n)).toBe(0);
   });

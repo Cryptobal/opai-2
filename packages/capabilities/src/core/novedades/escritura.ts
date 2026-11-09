@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
-import { entradasPara, usuarioDe } from "./comun";
+import { dbLecturaNovedades, entradasPara, usuarioDe } from "./comun";
 
 const idsSchema = z.array(z.string().min(1).max(80)).min(1).max(50);
 
@@ -13,17 +13,12 @@ async function upsertLectura(
   novedadId: string,
   datos: { leidaEn?: Date; destacadaDescartadaEn?: Date },
 ) {
-  const existente = await ctx.db.novedadLectura.findUnique({
-    where: {
-      tenantId_usuarioId_novedadId: {
-        tenantId: ctx.tenantId,
-        usuarioId,
-        novedadId,
-      },
-    },
+  const db = dbLecturaNovedades(ctx);
+  const existente = await db.novedadLectura.findFirst({
+    where: { tenantId: ctx.tenantId, usuarioId, novedadId },
   });
   if (existente) {
-    await ctx.db.novedadLectura.update({
+    await db.novedadLectura.update({
       where: { id: existente.id },
       data: {
         ...(datos.leidaEn ? { leidaEn: datos.leidaEn } : {}),
@@ -32,7 +27,7 @@ async function upsertLectura(
     });
     return;
   }
-  await ctx.db.novedadLectura.create({
+  await db.novedadLectura.create({
     data: {
       tenantId: ctx.tenantId,
       usuarioId,

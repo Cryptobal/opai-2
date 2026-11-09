@@ -60,3 +60,29 @@ export async function enTransaccion<T>(
     },
   );
 }
+
+/** Igual que `enTransaccion`, fijando además `app.user_id` (RLS restrictiva por usuario). */
+export async function enTransaccionConUsuario<T>(
+  tenantId: string,
+  usuarioId: string,
+  fn: (tx: TenantTx) => Promise<T>,
+  opciones: OpcionesTransaccion = {},
+): Promise<T> {
+  const tid = validarTenantId(tenantId);
+  const uid = validarTenantId(usuarioId);
+  exigirSinLockAuditoria("Abrir otra transacción");
+  const defecto = configTransaccion(process.env);
+  return clienteApp().$transaction(
+    (tx) =>
+      comoTransaccion(async () => {
+        await tx.$executeRaw`SELECT set_config('app.tenant_id', ${tid}, true)`;
+        await tx.$executeRaw`SELECT set_config('app.user_id', ${uid}, true)`;
+        return fn(tx);
+      }),
+    {
+      timeout: opciones.timeoutMs ?? defecto.timeout,
+      maxWait: opciones.maxWaitMs ?? defecto.maxWait,
+      ...(opciones.aislamiento ? { isolationLevel: opciones.aislamiento } : {}),
+    },
+  );
+}

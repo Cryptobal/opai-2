@@ -22,7 +22,7 @@ function cabecera(p: PDFPage, d: PdfDteInput, r: Recursos) {
   centro(`R.U.T.: ${e.rut}`, 76, 11);
   const partes = renglones(NOMBRE_DTE[d.tipoDte] ?? `DTE ${d.tipoDte}`, 22);
   partes.forEach((l, i) => centro(l, 92 + i * 13, 11));
-  centro(`N° ${d.folio}`, 92 + partes.length * 13 + 4, 12);
+  centro(d.borrador ? "BORRADOR" : `N° ${d.folio}`, 92 + partes.length * 13 + 4, 12);
   if (d.oficinaSii) centro(`S.I.I. - ${d.oficinaSii}`, 128, 8);
   texto(p, `Fecha de emisión: ${fechaLarga(d.fechaEmision)}`, MARGEN, 156, r.normal, 9);
 }
@@ -75,6 +75,10 @@ function totales(p: PDFPage, d: PdfDteInput, r: Recursos) {
 }
 
 function pie(p: PDFPage, d: PdfDteInput, r: Recursos) {
+  if (d.borrador) {
+    texto(p, "BORRADOR · Sin valor tributario: no tiene folio ni timbre del SII.", MARGEN, ALTO - 48, r.negrita, 9, ROJO);
+    return;
+  }
   if (r.timbre) p.drawImage(r.timbre, { x: 28, y: 54, width: 200, height: 76 });
   texto(p, "Timbre Electrónico SII", MARGEN, ALTO - 48, r.normal);
   const res = d.resolucion ? `Res. N° ${d.resolucion.numero} de ${fechaLarga(d.resolucion.fecha)}` : "Resolución: sin datos";
@@ -114,7 +118,7 @@ export function dibujarPagina(p: PDFPage, d: PdfDteInput, r: Recursos, o: Opcion
     cabecera(p, d, r);
     receptor(p, d, r);
     referencias(p, d, r);
-  } else cabeceraContinuacion(p, `${NOMBRE_DTE[d.tipoDte] ?? `DTE ${d.tipoDte}`} N° ${d.folio}`, r);
+  } else cabeceraContinuacion(p, `${NOMBRE_DTE[d.tipoDte] ?? `DTE ${d.tipoDte}`} ${d.borrador ? "(borrador)" : `N° ${d.folio}`}`, r);
   numeroDePagina(p, o.numero, o.total, r);
   const cabTop = primera ? 253 + altoReferencias(d) + 8 : 70;
   const fin = dibujarDetalle(p, r, o.filas, cabTop);

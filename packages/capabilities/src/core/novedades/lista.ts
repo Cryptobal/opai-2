@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { defineCapability } from "../../define";
-import { entradasPara, etiquetaModulo, usuarioDe } from "./comun";
+import { dbLecturaNovedades, entradasPara, etiquetaModulo, usuarioDe } from "./comun";
 
 const itemSchema = z.object({
   id: z.string(),
@@ -37,8 +37,9 @@ export const novedadesList = defineCapability({
     const usuarioId = usuarioDe(ctx);
     const visibles = entradasPara(ctx);
     const ids = visibles.map((v) => v.id);
+    const db = dbLecturaNovedades(ctx);
     const lecturas = ids.length
-      ? await ctx.db.novedadLectura.findMany({
+      ? await db.novedadLectura.findMany({
           where: { usuarioId, novedadId: { in: ids } },
         })
       : [];

@@ -19,7 +19,9 @@ imagen: /changelog/ejemplo.png # opcional; archivo en apps/web/public/changelog/
 ---
 ```
 
-Debajo del cierre `---` va el texto para usuarios **no técnicos**: qué cambió y para qué les sirve.
+Debajo del cierre `---` va el texto para usuarios **no técnicos**: qué cambió y para qué les sirve (Markdown simple: párrafos y negritas; **no** hay una ficha aparte por entrada como en Notion).
+
+En la app, cada ítem aparece como **tarjeta en la página Novedades** (fecha, módulo, título y cuerpo completo). Si el frontmatter trae `ruta`, el botón **Ver en OPAI** lleva a esa pantalla; no se abre otra página de detalle.
 
 ## Qué no publicar
 
