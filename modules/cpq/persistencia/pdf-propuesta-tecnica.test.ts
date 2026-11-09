@@ -202,6 +202,13 @@ describe("PDF propuesta técnica A4 (CAR-192 PR 2)", () => {
       expect(enviado).not.toContain("Exclusiones");
     });
 
+    it("con capítulos y sin puestos en el detalle, igual se numeran e imprimen", async () => {
+      const sinPuestos = { ...base().servicio, secciones: [] };
+      const t = await texto(base({ servicio: sinPuestos, capitulos: [cap()] }));
+      expect(t).toContain("2.1. Planta Norte");
+      expect(t).not.toContain("0.1");
+    });
+
     it("sin capítulos el PDF no cambia: sin números en los títulos", async () => {
       const t = await texto(base());
       expect(t).toContain("DETALLE DEL SERVICIO");

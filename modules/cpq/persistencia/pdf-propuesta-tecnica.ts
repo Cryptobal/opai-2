@@ -73,7 +73,7 @@ export async function renderPdfPropuestaTecnica(i: EntradaPdfPropuesta): Promise
       case "salto_pagina":
         return false;
       case "detalle_servicio":
-        return i.servicio.secciones.some((s) => s.puestos.length > 0);
+        return i.servicio.secciones.some((s) => s.puestos.length > 0) || (i.capitulos?.length ?? 0) > 0;
       case "resumen_economico":
         return true;
       case "contacto_ejecutivo":
@@ -122,7 +122,7 @@ export async function renderPdfPropuestaTecnica(i: EntradaPdfPropuesta): Promise
         h.nueva();
         break;
       case "detalle_servicio":
-        if (tieneContenido(b)) detalleServicio(h, i.servicio, numero(b));
+        if (i.servicio.secciones.some((x) => x.puestos.length > 0)) detalleServicio(h, i.servicio, numero(b));
         capitulos.forEach((c, k) => capituloInstalacion(h, c, `${numero(b) ?? "0"}.${k + 1}`, i.borrador));
         break;
       case "resumen_economico":
