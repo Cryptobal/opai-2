@@ -11,6 +11,8 @@ export type ParametrosVersion = {
   margenAlertaPct?: number | null;
   sobrescrito: boolean;
   instrumentos: InstrumentosCompletos;
+  /** Valores por defecto del modelo (para marcar campos «Sobrescrito»). */
+  instrumentosDefecto: InstrumentosCompletos;
 };
 
 /** 1 % = 10.000 en la escala de porcentajes de CPQ (100.000 = 10 %). */
