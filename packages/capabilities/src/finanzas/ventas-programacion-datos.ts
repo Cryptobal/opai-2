@@ -48,6 +48,8 @@ export function datosProgramacion(input: ProgramacionInput) {
     politicaUf: input.moneda === "UF" ? (input.politicaUf ?? "RUN_DAY") : null,
     diaUf: input.moneda === "UF" ? (input.diaUf ?? null) : null,
     plazoPagoDias: input.plazoPagoDias,
+    autoEnvioProforma: input.autoEnvioProforma,
+    autoEnvioEstadoPago: input.autoEnvioEstadoPago,
     fechaInicio: input.fechaInicio ? aFecha(input.fechaInicio) : null,
     fechaFin: input.fechaFin ? aFecha(input.fechaFin) : null,
     notas: input.notas ?? null,
