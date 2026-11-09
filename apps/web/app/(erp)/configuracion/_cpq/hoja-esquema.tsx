@@ -52,6 +52,7 @@ export function HojaEsquema({
     const r = await ejecutar("cpq.esquemas_cobertura.guardar", {
       ...(esquema ? { id: esquema.id } : {}),
       nombre: nombre.trim(),
+      descripcion: esquema?.descripcion ?? null,
       activo: esquema?.activo ?? true,
       tramos: tramos.map(({ clave: _c, ...t }) => ({ ...t, nombre: t.nombre.trim() })),
     });

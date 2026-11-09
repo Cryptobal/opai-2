@@ -29,6 +29,7 @@ export function EsquemasEditable({
     const r = await ejecutar("cpq.esquemas_cobertura.guardar", {
       id: e.id,
       nombre: e.nombre,
+      descripcion: e.descripcion,
       activo: !e.activo,
       tramos: e.tramos.map(({ id: _i, patronNombre: _p, ...t }) => t),
     });
