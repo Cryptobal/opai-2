@@ -86,6 +86,8 @@ describe("paridad: la UI solo invoca capacidades existentes y públicas", () => 
       "lib/servidor.ts",
       "app/(auth)/invitacion/[slug]/[token]/invitacion.tsx",
       "app/(platform)/platform/_componentes/hoja-trabajo.tsx",
+      "app/_acciones/terreno-asistencia.ts", // pasarela del equipo para Asistencia: lista blanca de ids literales en el archivo
+      "app/_components/asistencia/use-ejecutor.ts", // ejecutor de la pantalla de marcación: recibe el id literal de su llamador
       "lib/terreno-servidor.ts", // pasarela del equipo emparejado: recibe el id literal de sus llamadores
       "app/_components/maestros/acciones-entidad.tsx",
     ]);

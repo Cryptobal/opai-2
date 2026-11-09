@@ -1,6 +1,7 @@
 import { cn } from "@opai/ds";
 
 import { etiquetaVariante, MOTIVO } from "./etiquetas";
+import { etiquetaPresencia } from "./presencia";
 import type { CeldaDia } from "./tipos";
 
 /** Códigos de turno del diseño: D info, N acento, L libre, X danger (puesto por cubrir). */
@@ -29,8 +30,10 @@ export function descripcionCelda(c: CeldaDia): string {
         : c.estado === "sin_serie"
           ? "Sin serie"
           : `Sin cubrir · ${c.motivo ? MOTIVO[c.motivo] : ""}`;
+  const pres = etiquetaPresencia(c);
   return [
     estado,
+    pres ? `${pres.texto}${pres.detalle ? ` (${pres.detalle})` : ""}` : null,
     c.marcaManual ? "marca manual" : null,
     c.excepcion && !variante ? "excepción" : null,
     c.feriado ? `feriado: ${c.feriado}` : null,

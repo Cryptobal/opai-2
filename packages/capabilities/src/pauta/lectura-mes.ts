@@ -48,7 +48,12 @@ export const mesLeer = defineCapability({
   permiso: PERMISO_READ,
   input: z.object({ instalacionId: uuidSchema }).extend(mesSchema.shape),
   output: mesSalidaSchema,
-  auditarLectura: (s) => [...new Set([...s.personas, ...s.candidatos].map((p) => p.id))],
+  auditarLectura: (s) => [
+    ...new Set([
+      ...[...s.personas, ...s.candidatos].map((p) => p.id),
+      ...s.puestos.flatMap((p) => p.celdas.flatMap((c) => (c.presencia ? [c.presencia.personaId] : []))),
+    ]),
+  ],
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {

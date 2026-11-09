@@ -45,14 +45,14 @@ Extracción de 1.0: `extraccion/dt-normativa.md`. ADR aplicables: ADR-023, ADR-0
 
 | ID | Requisito | Fuente | Diseño | Frente | Estado 2.0 | Evidencia esperada |
 |---|---|---|---|---|---|---|
-| L-12 | Al menos dos mecanismos de identificación (principal y secundario), uno **sin biometría** y definido en el RIOHS o el contrato | Art. 57 [S: Talana, Rex+, MLV]; número de artículo [?] | — | B (RUT+PIN) + F | ✗ | Configuración por empresa + texto para el RIOHS |
-| L-13 | La biometría requiere **consentimiento expreso y escrito** con finalidad, prohibición de ceder a terceros y revocable | Art. 57 [V ORD 91/2025]; ORD 1233/2023 | — | F | ✗ | Registro de consentimiento versionado (texto, fecha, firma) |
-| L-14 | Si el trabajador revoca o pide suprimir su biometría durante la relación laboral, se borra la plantilla y sigue marcando con el mecanismo secundario | Art. 57 [V ORD 91/2025] | — | F | ✗ | e2e: revocar → borrado en el proveedor → marca por PIN |
-| L-15 | Al terminar la relación laboral se destruyen los datos biométricos (sin perjuicio de los 5 años de las marcas) | Art. 57 [V] | R-11 | F | ✗ | Trabajo diario de purga + reporte |
+| L-12 | Al menos dos mecanismos de identificación (principal y secundario), uno **sin biometría** y definido en el RIOHS o el contrato | Art. 57 [S: Talana, Rex+, MLV]; número de artículo [?] | — | B (RUT+PIN) + F | ◐ (B1 PIN ✅, rostro ✅ en CAR-89 B4; falta el texto para el RIOHS) | Configuración por empresa + texto para el RIOHS |
+| L-13 | La biometría requiere **consentimiento expreso y escrito** con finalidad, prohibición de ceder a terceros y revocable | Art. 57 [V ORD 91/2025]; ORD 1233/2023 | — | F | ✅ CAR-89 B4 (consentimiento versionado con huella del texto; falta la firma manuscrita opcional) | Registro de consentimiento versionado (texto, fecha, firma) |
+| L-14 | Si el trabajador revoca o pide suprimir su biometría durante la relación laboral, se borra la plantilla y sigue marcando con el mecanismo secundario | Art. 57 [V ORD 91/2025] | — | F | ✅ CAR-89 B4 (`asistencia-biometria-db.test.ts`: revocar → borrado → marca por PIN) | e2e: revocar → borrado en el proveedor → marca por PIN |
+| L-15 | Al terminar la relación laboral se destruyen los datos biométricos (sin perjuicio de los 5 años de las marcas) | Art. 57 [V] | R-11 | F | ✅ CAR-89 B4 (trabajo diario `asistencia.biometria.suprimir`) | Trabajo diario de purga + reporte |
 | T-01 | Bloqueo tras intentos fallidos de PIN o rostro, con registro del intento | Diseño R-05; buena práctica | R-05 | B | ✗ | Rate limit cerrado + auditoría |
 | T-02 | PIN de 6 dígitos con hash (nunca en claro) y cambio por el trabajador | Hallazgo en 1.0 (PIN de 4) | — | B | ✗ | Test |
-| T-03 | Face ID con prueba de vida activa, umbral de similitud configurable por plataforma (no por empresa) y búsqueda **1:1** contra el rostro del RUT ingresado, nunca 1:N entre empresas | Hallazgo en 1.0 (colección compartida); ADR-044.5 | R-04 | F | ✗ | Test con proveedor simulado; colección por empresa |
-| T-04 | Uso del teléfono personal: consentimiento escrito y costo a cargo del empleador | [S] Rex+, MLV | — | B + Leg | ✗ | Cláusula modelo |
+| T-03 | Face ID con prueba de vida activa, umbral de similitud configurable por plataforma (no por empresa) y búsqueda **1:1** contra el rostro del RUT ingresado, nunca 1:N entre empresas | Hallazgo en 1.0 (colección compartida); ADR-044.5 | R-04 | F | ✅ CAR-89 B4 (1:1 con proveedor simulado y colección por empresa; Rekognition real sin probar) | Test con proveedor simulado; colección por empresa |
+| T-04 | Uso del teléfono personal: consentimiento escrito y costo a cargo del empleador | [S] Rex+, MLV | — | B + Leg | ◐ CAR-89 B4 (consentimiento y habilitación; la cláusula modelo de costo queda para el abogado) | Cláusula modelo |
 
 ## 3. Inalterabilidad, seguridad y respaldos
 
@@ -136,14 +136,14 @@ Extracción de 1.0: `extraccion/dt-normativa.md`. ADR aplicables: ADR-023, ADR-0
 
 | ID | Requisito | Fuente | Frente | Estado 2.0 | Evidencia esperada |
 |---|---|---|---|---|---|
-| P-01 | Los datos biométricos son datos sensibles: requieren base de licitud y consentimiento expreso | Arts. 2 g, 16 y 16 ter [V] | F + Leg | ✗ | Consentimiento versionado (L-13) |
-| P-02 | Informar al titular el sistema, la finalidad, el plazo y cómo ejercer sus derechos | Art. 16 ter [V] | F | ✗ | Pantalla de consentimiento + texto aprobado por el abogado |
-| P-03 | Minimización: guardar solo la **plantilla o el identificador** en el proveedor, no la foto de referencia; la foto de cada marca no es necesaria si hay prueba de vida | Criterio propuesto; sin pronunciamiento oficial [?] | F + Leg | ✗ | Decisión en un ADR (ver D-04) |
+| P-01 | Los datos biométricos son datos sensibles: requieren base de licitud y consentimiento expreso | Arts. 2 g, 16 y 16 ter [V] | F + Leg | ✅ CAR-89 B4 | Consentimiento versionado (L-13) |
+| P-02 | Informar al titular el sistema, la finalidad, el plazo y cómo ejercer sus derechos | Art. 16 ter [V] | F | ◐ CAR-89 B4 (pantalla lista; el texto lo aprueba el abogado) | Pantalla de consentimiento + texto aprobado por el abogado |
+| P-03 | Minimización: guardar solo la **plantilla o el identificador** en el proveedor, no la foto de referencia; la foto de cada marca no es necesaria si hay prueba de vida | Criterio propuesto; sin pronunciamiento oficial [?] | F + Leg | ✅ CAR-89 B4 (solo referencia cifrada; sin foto de referencia ni por marca) | Decisión en un ADR (ver D-04) |
 | P-04 | Evaluación de impacto obligatoria (tratamiento masivo de datos sensibles) | Art. 15 ter [V] | Leg | ✗ | EIPD firmada antes de activar en producción |
 | P-05 | Transferencia internacional: el proveedor biométrico y la base están fuera de Chile (AWS) y requieren cláusulas contractuales o garantías | Arts. 27 y 28 [V]; lista de países adecuados [?] | Leg + Carlos | ✗ | DPA con el proveedor y cláusulas tipo |
 | P-06 | Medidas de seguridad y aviso de vulneraciones (a la Agencia y, con datos sensibles, a los titulares) | Arts. 14 quinquies y sexies [V] | Ops + Leg | ◐ (07d ✅) | Procedimiento de incidentes |
 | P-07 | Derechos ARCO y portabilidad, con respuesta en 30 días | Arts. 4–11 [V] | ✅ núcleo (07d) | ◐ | Incluir la biometría en el inventario de datos |
-| P-08 | Datos personales cifrados en reposo; la biometría queda en el adaptador del núcleo y su consumo se mide | REGLAS-codigo; ADR-027; ADR-031 | F | ✗ | Revisión de seguridad del Revisor |
+| P-08 | Datos personales cifrados en reposo; la biometría queda en el adaptador del núcleo y su consumo se mide | REGLAS-codigo; ADR-027; ADR-031 | F | ✅ CAR-89 B4 (referencia cifrada con la DEK, rotación cubierta; consumo medido) | Revisión de seguridad del Revisor |
 | P-09 | Sin datos personales en Linear, PRs ni logs | AGENTS.md | Todos | ✅ regla | Revisión |
 
 ## 10. Evidencia y pruebas para la certificadora

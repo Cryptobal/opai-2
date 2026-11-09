@@ -60,12 +60,6 @@ export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> =
     motivo:
       "Confirmar un valor propuesto o retenido en Configuración › Remuneraciones: la acción por fila entra con el diseño aprobado del brief 07e M2.",
   },
-  "asistencia.marcas.registrar": {
-    encargo: "CAR-89",
-    desde: "2026-11-10",
-    motivo:
-      "Marcar desde Terreno (Marcación, diseño aprobado) y el botón «Marcar» del Portal Trabajador: dependen de la identidad de terreno (RUT + PIN, dispositivos y cola sin conexión) de «Operaciones · Base» y de la biometría. Hasta entonces solo registra una empresa de prueba, por la capacidad.",
-  },
   "asistencia.contingencias.responder": {
     encargo: "CAR-89",
     desde: "2026-11-10",
