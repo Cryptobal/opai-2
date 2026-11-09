@@ -3,7 +3,7 @@ import { validarReferenciaSii } from "@opai/domain";
 export type LineaForm = { glosa: string; montoTexto: string };
 
 /** Referencia del catálogo SII en el formulario (801 OC, 802 HES, 803 contrato, 804 resolución, 52 guía). */
-export type RefForm = { tipo: string; folioTexto: string; fecha: string; razon: string };
+export type RefForm = { tipo: string; folioTexto: string; fecha: string; razon: string; tocada?: boolean };
 
 export const REF_VACIA: RefForm = { tipo: "801", folioTexto: "", fecha: "", razon: "" };
 
@@ -15,6 +15,18 @@ export function problemaReferencias(refs: readonly RefForm[], hoyIso: string): s
     if (e) return e;
   }
   return null;
+}
+
+/**
+ * Qué decir de las referencias sin gritar antes de tiempo: el error (rojo) solo sale de una fila que la persona ya
+ * tocó; si el envío está bloqueado por una fila que aún no tocó (p. ej. recién agregada y vacía), se muestra una
+ * ayuda neutra. El bloqueo en sí lo decide `problemaReferencias`, que no cambia.
+ */
+export function mensajeReferencias(refs: readonly RefForm[], hoyIso: string): { error: string | null; ayuda: string | null } {
+  const error = problemaReferencias(refs.filter((r) => r.tocada), hoyIso);
+  if (error) return { error, ayuda: null };
+  const bloqueada = problemaReferencias(refs, hoyIso) !== null;
+  return { error: null, ayuda: bloqueada ? "Completa el folio y la fecha de cada referencia, o quita la fila vacía." : null };
 }
 
 export type ItemPreflight = { codigo: string; ok: boolean; mensaje: string; bloqueante: boolean };
