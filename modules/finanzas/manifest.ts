@@ -134,6 +134,8 @@ export const manifest = defineModule({
     { id: "finanzas.cierre.actualizado", descripcion: "Se registró un avance del cierre de mes de un borrador (proforma, OK u observación del cliente, OC/HES)." },
     { id: "finanzas.venta.enviada_sii", descripcion: "Se envió un DTE al SII." },
     { id: "finanzas.venta.enviada_cliente", descripcion: "Se envió por correo un documento emitido al cliente (PDF y XML)." },
+    { id: "finanzas.venta.proforma_enviada", descripcion: "La programación envió la proforma del período al cliente antes de facturar (no es un documento tributario)." },
+    { id: "finanzas.venta.estado_pago_enviado", descripcion: "La programación envió el estado de pago del período al cliente antes de facturar (no es un documento tributario)." },
     { id: "finanzas.cobranza.recordatorio", descripcion: "Se envió (o se intentó) un recordatorio de cobro de una factura vencida." },
     { id: "finanzas.cobranza.pausa_cambiada", descripcion: "Se pausó o reanudó la cobranza de una factura." },
     { id: "finanzas.cobranza.gestion_registrada", descripcion: "Se anotó una gestión de cobranza hecha fuera del sistema." },
