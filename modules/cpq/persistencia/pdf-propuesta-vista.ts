@@ -1,5 +1,6 @@
 import type { Contexto } from "@opai/capabilities";
 
+import type { CapituloVista } from "../domain/documento/capitulo-instalacion";
 import { aperturaEfectiva, type ServicioDesdeCotizacion } from "../domain/documento/propuesta-tecnica";
 import { entradaPdfDesdeCotizacion } from "./entrada-pdf-cotizacion";
 import type { MarcaDocumentoVista } from "./marca-documento";
@@ -23,6 +24,7 @@ export async function pdfPropuestaVista(
     marca: MarcaDocumentoVista;
     servicio: ServicioDesdeCotizacion;
     netoTotalClp: number;
+    capitulos?: readonly CapituloVista[];
   },
 ): Promise<Uint8Array> {
   const entrada = await entradaPdfDesdeCotizacion(ctx, d.cotizacionId);
@@ -47,5 +49,6 @@ export async function pdfPropuestaVista(
     tasaIvaPct: await tasaIvaVentaTenant(ctx),
     textosBiblioteca: await textosBiblioteca(ctx, d.bloquesJson),
     logo: await cargarLogoMarca(ctx),
+    capitulos: d.capitulos ?? [],
   });
 }

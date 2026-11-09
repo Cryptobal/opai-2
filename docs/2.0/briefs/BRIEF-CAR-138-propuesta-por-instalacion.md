@@ -44,6 +44,19 @@ Reglas del contrato:
 - Se rechazan: tokens desconocidos, no autorizados para la finalidad, formatos inválidos y estructuras mal cerradas. Los valores faltantes se informan, no se completan.
 - Versión del catálogo y mapa de alias para compatibilidad.
 
+## PR 6 — capítulo por instalación (servidor y PDF)
+
+**Alcance (autorizado por Carlos el 7-nov-2026; orden de construir en esta sesión el 9-nov-2026 19:17 UTC).** Solo `modules/cpq` y la migración propuesta. El editor en pantalla **no** entra (espera diseño aprobado); el PR 7 tampoco.
+
+- **Qué es el capítulo.** Uno por cada sección de la cotización que corresponde a una instalación (la «Común» no tiene). Lleva dirección y enlace de mapa **si el dato ya existe**, la tabla de puestos con **guardias simultáneos** y **dotación estimada**, y once secciones de texto: comprensión del servicio, alcance, exclusiones, turnos, accesos, rondas, protocolos, equipamiento, supervisión, reportes y arranque.
+- **Qué se calcula y qué se escribe.** Dirección y mapa salen de `resolverCamposDocumento` (finalidad «propuesta», con permisos y alcance del actor; sin otra lectura de maestros). Guardias simultáneos son las posiciones del CPQ; la dotación es `personasPorPosicion` del motor × posiciones. **Nada de eso se guarda** y nunca lo escribe una IA ni una persona. Solo se guarda el **texto narrativo**, que escribe una persona (`manual`) o es una sugerencia de la IA del PR 5 que ella aceptó (`ia_aceptada`).
+- **Faltantes.** Dirección, cada sección sin texto, puestos y dotación no calculable son un faltante verificable (`cpq.propuestas_tecnica.capitulos_list`). El PDF en borrador los avisa en una línea; el PDF enviado **no imprime relleno ni avisos**. No se inventan datos, certificados, SLA ni plazos.
+- **Supervisión.** Es un texto. No crea un ítem vendido ni promete un supervisor permanente por defecto: el costo se asume dentro de lo cotizado. Precio, moneda, dotación y condiciones económicas vienen del CPQ.
+- **PDF.** Con capítulos, el índice se numera (N por bloque, N.k por instalación) y los títulos de los bloques llevan su número; los capítulos se imprimen tras el detalle del servicio. Sin capítulos, el PDF no cambia.
+- **Congelado.** Una propuesta congelada rechaza guardar o quitar texto; el PDF enviado se genera con el capítulo vigente de esa propuesta congelada.
+- **Capacidades (paridad MCP, dryRun, idempotencia, auditoría):** `cpq.propuestas_tecnica.capitulos_list` (lectura auditada por IDs) y `cpq.propuestas_tecnica.capitulo_guardar` (escritura; la instalación debe ser sección de la versión de la propuesta).
+- **Migración propuesta** `20261116100000_cpq_propuesta_capitulos`: tabla nueva `cpq.propuesta_capitulos`, vacía, con RLS ENABLE+FORCE, `tenant_isolation`, disparador de misma empresa y constraints de clave, origen y largo. Reversión: `DROP TABLE "cpq"."propuesta_capitulos"`. La aplica el coordinador con respaldo.
+
 ## Responsable y archivos del contrato transversal (autorizado por Carlos el 7-nov-2026 21:49)
 
 Documentos (CAR-127) no tiene código ni PR abierto sobre campos (solo la rama de diseño `docs/diseno-documentos-v4`) y Núcleo no tiene un catálogo propio: **el contrato vigente es el integrado en #387**. No se crea un catálogo alterno ni se espera una elección técnica adicional. Regla para evitar solapes:

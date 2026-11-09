@@ -228,6 +228,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
   "finanzas.flujo_ajustes": { valores: () => ({ desde: "2026-01-05" }) },
   "finanzas.flujo_avisos_emitidos": { valores: () => ({ semana: "2026-01-05", saldo_proyectado: 0 }) },
+  // CAR-138 PR 6 · capítulo por instalación: CHECK de sección y origen.
+  "cpq.propuesta_capitulos": { fijas: ["seccion_clave", "origen"], valores: () => ({ seccion_clave: "alcance", origen: "manual", contenido: "x" }) },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },

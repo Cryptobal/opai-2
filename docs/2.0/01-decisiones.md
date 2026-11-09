@@ -1621,3 +1621,11 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - No cambia lo demás de este ADR: quién aprueba, que el supervisor no edita el monto, los externos, el estado único por persona y la condición previa de revisión legal y contable escrita, que sigue pendiente.
 - El bloque B (Design Prompt en Claude Design) no tiene OK.
 
+## ADR-084 · «Comercial · Proyecto» construye el PR 6 de CAR-138 por orden expresa de Carlos (9-nov-2026)
+
+**Fecha:** 9-nov-2026 19:17 UTC · **Estado:** vigente solo para este PR · **Autor:** Carlos (chat), registrado por la sesión «Comercial · Proyecto».
+
+**Contexto.** Desde el 4-nov-2026 «Comercial · Proyecto» responde, revisa y entrega prompts, y no construye ni integra. El 9-nov-2026 llegó el encargo del PR 6 de CAR-138 (capítulo por instalación, solo servidor y PDF con índice numerado) con las restricciones de superficie del brief.
+
+**Decisión.** Carlos ordenó que esta sesión lo construya («Constrúyelo en esta sesión… Un solo PR»). Excepción acotada a ese PR: **no integra, no hace squash, no aplica migraciones, no cierra CAR-138**, no toca #400, #424 ni #409, no construye el editor en pantalla ni el PR 7, y no prepara Design Prompts. La migración la aplica el coordinador con respaldo; el PR lleva `migracion-pendiente`. Fuera de ese PR, el rol de «Comercial · Proyecto» no cambia.
+
