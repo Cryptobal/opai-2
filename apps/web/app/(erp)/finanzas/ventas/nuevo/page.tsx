@@ -29,10 +29,14 @@ export default async function EmitirVentaPage() {
         const cuentas = await cuentasPaginadas({ estado: "cliente_activo" });
         const activas = cuentas.ok ? cuentas.data.items : [];
         const facturables = activas.filter((c) => Boolean(c.rut?.trim()));
-        return { state: estadoPantalla(cuentas), cuentas: facturables, sinRut: activas.length - facturables.length };
+        return {
+          state: estadoPantalla(cuentas),
+          cuentas: facturables,
+          sinRut: activas.length - facturables.length,
+        };
       }}
       opciones={() => ({
-        titulo: "Emitir factura electrónica",
+        titulo: "Emitir documento electrónico",
         volver: { href: "/finanzas/ventas", etiqueta: "Ventas (DTE)" },
       })}
     >
