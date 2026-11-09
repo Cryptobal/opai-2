@@ -36,7 +36,7 @@ const vigente = (tx: TenantTx, t: Suscriptor, proposito: string) =>
   });
 
 /** Anota un hecho (otorgar/revocar) y emite su evento en la misma transacción (outbox, ADR-029). */
-async function anotar(
+export async function anotar(
   ctx: Contexto,
   tx: TenantTx,
   t: Suscriptor,

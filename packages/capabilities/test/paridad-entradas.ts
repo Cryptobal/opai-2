@@ -70,6 +70,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
   "app/_acciones/ingreso-pin.ts#accionEntrarConPin":
     "Identidad: ingreso del Portal Trabajador con RUT + PIN (CAR-78, D-02); abre una sesión, no es una operación de negocio. Tope por RUT y origen con fallo cerrado; bloqueo y auditoría en @opai/auth.",
+  "app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo":
+    "Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado.",
   "app/_acciones/dispositivos.ts#accionEmparejar":
     "Identidad de dispositivo: Terreno › Emparejar canjea el código de 6 caracteres (core.dispositivos.generar_codigo) por el token del equipo (CAR-78 B2); sin sesión, tope por origen con fallo cerrado.",
   "app/_acciones/dispositivos.ts#qrDeEmparejamiento":

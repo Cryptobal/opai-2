@@ -83,6 +83,9 @@
     "/(supervisor)/supervisor/instalaciones/[id]": 164,
     "/(terreno)/terreno": 167,
     "/(terreno)/terreno/[...ruta]": 163,
-    "/(terreno)/terreno/cola": 166
+    "/(terreno)/terreno/cola": 166,
+    "/(terreno)/terreno/marcar": 178,
+    "/(trabajador)/trabajador/marcar": 177,
+    "/(trabajador)/trabajador/mi-rostro": 175
   }
 }
