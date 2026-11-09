@@ -1,5 +1,6 @@
 import type { SearchParams } from "@/lib/parametros";
 
+import { SeccionContactosAcceso } from "@/app/(erp)/configuracion/_portal_cliente/seccion-contactos-acceso";
 import { SeccionPortalCliente } from "@/app/(erp)/configuracion/_portal_cliente/seccion-portal-cliente";
 import { PaginaCuenta } from "../../_componentes/pagina-cuenta";
 
@@ -13,7 +14,12 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 export default function PortalCuenta(props: Props) {
   return (
     <PaginaCuenta {...props} tab="resumen">
-      {(c) => <SeccionPortalCliente cuentaId={c.id} />}
+      {(c) => (
+        <div className="space-y-6">
+          <SeccionContactosAcceso cuentaId={c.id} />
+          <SeccionPortalCliente cuentaId={c.id} />
+        </div>
+      )}
     </PaginaCuenta>
   );
 }
