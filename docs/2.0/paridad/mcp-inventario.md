@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 656 pares pantalla→capacidad · 584 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 658 pares pantalla→capacidad · 586 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
