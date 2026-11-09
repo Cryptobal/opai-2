@@ -43,3 +43,16 @@ Reglas del contrato:
 - Sintaxis compatible: `{{clave}}`, `{{clave | formato}}`, `{{#cada coleccion}}…{{/cada}}` y `{{#si clave}}…{{/si}}`.
 - Se rechazan: tokens desconocidos, no autorizados para la finalidad, formatos inválidos y estructuras mal cerradas. Los valores faltantes se informan, no se completan.
 - Versión del catálogo y mapa de alias para compatibilidad.
+
+## Responsable y archivos del contrato transversal (autorizado por Carlos el 7-nov-2026 21:49)
+
+Documentos (CAR-127) no tiene código ni PR abierto sobre campos (solo la rama de diseño `docs/diseno-documentos-v4`) y Núcleo no tiene un catálogo propio: **el contrato vigente es el integrado en #387**. No se crea un catálogo alterno ni se espera una elección técnica adicional. Regla para evitar solapes:
+
+| Pieza | Responsable | Archivos |
+|---|---|---|
+| Catálogo, sintaxis, validador y render (contrato) | Comercial · Code (CAR-138); Documentos y CPQ lo consumen y proponen cambios por PR | `packages/domain/src/campos/**` |
+| Autorización por finalidad y permiso, mapeo de maestros | Comercial · Code (PR 2) | `campos/autorizacion.ts`, `campos/mapeo-maestros.ts` |
+| Capacidades `core.campos.catalogo` y `core.campos.valores` | Comercial · Code (PR 2); Núcleo revisa permisos y auditoría | `packages/capabilities/src/core/campos/**` |
+| Fuentes aún sin resolvedor (empresa/marca, persona, negocio, cotización) | Se suman por entidad, cada una por quien es dueño del dato: marca = Núcleo, persona = Personas (solo contrato), negocio = CRM, cotización = CPQ | un archivo por entidad en `core/campos/` o en el módulo dueño |
+
+Un campo nuevo o un cambio de clave sube `VERSION_CATALOGO_CAMPOS` y mantiene el alias antiguo. Documentos v4 debe consumir `core.campos.valores`; no leer cuentas, contactos ni instalaciones por su cuenta para llenar variables.

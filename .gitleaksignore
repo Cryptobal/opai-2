@@ -1,0 +1,5 @@
+# Excepción de un solo hallazgo, aprobada directamente por Carlos Irigoyen el 8-nov-2026 08:49 (America/Santiago).
+# Falso positivo `generic-api-key` en un ejemplo de documentación (docs/2.0/modulos/comercial-formulario-web.md, línea 37,
+# commit 49cbd150 del PR #224). No es una credencial. El valor no se copia aquí ni en el PR.
+# Alcance: solo este fingerprint. No excluye archivos, rutas ni reglas. Cualquier otro hallazgo sigue fallando el job `secretos`.
+49cbd1502e870df84cd76a18605e3586b80789f2:docs/2.0/modulos/comercial-formulario-web.md:generic-api-key:37

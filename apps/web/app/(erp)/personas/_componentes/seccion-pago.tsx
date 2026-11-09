@@ -27,8 +27,18 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
   if (!identidad || !puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPagoRead)) return null;
   const r = await ejecutarComoUsuario<Pago>("erp", "core.personas.pago_ver", { id: personaId });
-  if (!r.ok) return null;
+  // CAR-124 (estado «error» del diseño): un fallo ya no deja la tarjeta en blanco.
+  if (!r.ok)
+    return (
+      <SeccionTarjeta titulo="Pago y bancos">
+        <Alerta tono="danger" titulo="No pudimos cargar los datos de pago">
+          Recarga la página. Si el problema sigue, avisa a soporte.
+        </Alerta>
+      </SeccionTarjeta>
+    );
   const d = r.data;
+  const v = d.vigente;
+  const sinCuenta = !v.bancoCodigo && !v.tipoCuenta && !v.numeroCuenta && !v.rutTitular;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPagoManage);
   const puedeAprobar = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPagoAprobar);
   const acciones: AccionEntidad[] =
@@ -79,6 +89,11 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
         <Alerta tono="warning" titulo="Cambio de cuenta pendiente de RRHH">
           La solicitud debe ser aprobada o rechazada por alguien distinto de quien la registró.
         </Alerta>
+      ) : null}
+      {sinCuenta && !d.solicitudPendiente ? (
+        <p className="t-caption mb-3">
+          Sin cuenta registrada.{puede ? " Usa «Solicitar cambio» para agregarla." : ""}
+        </p>
       ) : null}
       <ParesGrid
         items={[
