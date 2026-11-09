@@ -19,6 +19,7 @@ asistencia_incidentes_registrar
 asistencia_jornadas_fijar_tipo
 asistencia_marcas_listar
 asistencia_marcas_obtener
+asistencia_rostro_textos
 comercial_canales_get
 comercial_canales_update
 comercial_config_actualizar_etapa
@@ -31,6 +32,7 @@ comercial_contexto_agregar
 comercial_contexto_archivar
 comercial_contexto_confirmar
 comercial_contexto_listar
+comercial_contexto_sugerir_seccion
 comercial_informes_cierre
 comercial_informes_perdidos_por_motivo
 comercial_negocios_alertas

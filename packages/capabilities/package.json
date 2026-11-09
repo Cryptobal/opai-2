@@ -18,7 +18,8 @@
     "rotar-dek": "tsx scripts/rotar-dek.ts",
     "qa:preflight": "tsx scripts/qa-preflight.ts",
     "seed:finanzas-qa": "tsx scripts/seed-finanzas-qa.ts",
-    "seed:personas-qa": "tsx scripts/seed-personas-qa.ts"
+    "seed:personas-qa": "tsx scripts/seed-personas-qa.ts",
+    "seed:asistencia-qa": "tsx scripts/seed-asistencia-qa.ts"
   },
   "dependencies": {
     "@opai/db": "workspace:*",

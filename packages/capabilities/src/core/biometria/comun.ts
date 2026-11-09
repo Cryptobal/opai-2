@@ -3,12 +3,13 @@ import { z } from "zod";
 import {
   type Biometria,
   BiometriaError,
-  biometriaDelEntorno,
+  ErrorProveedorBiometria,
   BiometriaNoConfigurada,
 } from "@opai/integrations";
 import type { TenantTx } from "@opai/db";
 
 import { reglaDeNegocio } from "../../errores";
+import { biometriaDe, type BiometriaDeEmpresa } from "../../integraciones/biometria";
 import { consumoBase } from "../../integraciones/consumo-base";
 import type { Contexto } from "../../types";
 import { cifradoDeCampos, cifradoDeCamposTx } from "../cumplimiento/cifrado-campos";
@@ -55,8 +56,12 @@ export async function conProveedor<T>(llamada: () => Promise<T>): Promise<T> {
   try {
     return await llamada();
   } catch (e) {
-    if (e instanceof BiometriaError || e instanceof BiometriaNoConfigurada)
-      throw reglaDeNegocio(e.message);
+    if (e instanceof BiometriaError || e instanceof BiometriaNoConfigurada || e instanceof ErrorProveedorBiometria)
+      throw reglaDeNegocio(
+        e instanceof ErrorProveedorBiometria && e.codigo === "proveedor"
+          ? "El reconocimiento facial no respondió. Marca con RUT y PIN."
+          : e.message,
+      );
     throw e;
   }
 }
@@ -90,12 +95,16 @@ export async function bloquearPersona(tx: TenantTx, personaId: string): Promise<
   await tx.$queryRaw`/* 07d:bloqueo-biometria */ SELECT id FROM core.personas WHERE id = ${personaId}::uuid FOR UPDATE`;
 }
 
-/** Adaptador del proveedor con que se enroló. Si el entorno usa otro, no se manda la referencia al equivocado. */
-export function proveedorDe(nombre: string): Biometria {
-  const b = biometriaDelEntorno();
-  if (b.nombre !== nombre)
+/** Adaptador del proveedor con que se enroló. Si la empresa usa otro, no se manda la referencia al equivocado. */
+export async function proveedorDe(ctx: Contexto, nombre: string): Promise<BiometriaDeEmpresa> {
+  const r = await biometriaDe(ctx);
+  if (!r)
     throw reglaDeNegocio(
-      `El rostro se enroló con el proveedor «${nombre}» y este entorno usa «${b.nombre}»; no se puede operar hasta alinearlos.`,
+      "El reconocimiento facial no está disponible en esta empresa: falta proveedor o autorización.",
     );
-  return b;
+  if (r.b.nombre !== nombre)
+    throw reglaDeNegocio(
+      `El rostro se enroló con el proveedor «${nombre}» y esta empresa usa «${r.b.nombre}»; no se puede operar hasta alinearlos.`,
+    );
+  return r;
 }

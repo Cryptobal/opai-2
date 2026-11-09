@@ -68,4 +68,18 @@ export type CeldaPauta = {
   /** Quién cubre el turno (reemplazo/refuerzo o titular efectivo). */
   cubiertoPorId?: string | null;
   variante?: VarianteCelda;
+  /**
+   * Presencia real según las marcas legales de Asistencia (solo con el módulo activo): la persona que cubre el
+   * turno, su estado consolidado del día y la hora de entrada y salida. La Pauta no la calcula: la lee de `asistencia.dias`.
+   */
+  presencia?: PresenciaCelda;
+};
+
+export type EstadoPresencia = "presente" | "sin_marca" | "ausente" | "incompleto" | "sin_turno";
+export type PresenciaCelda = {
+  personaId: string;
+  estado: EstadoPresencia;
+  entrada: string | null;
+  salida: string | null;
+  atrasoMin: number;
 };
