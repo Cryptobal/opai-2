@@ -97,7 +97,8 @@ export function BloqueEmisionGuardada({
     <Card className="flex flex-col gap-3 p-4">
       <h2 className="t-label text-fg">Emisión al SII</h2>
       <p className="text-sm text-fg-muted">
-        Borrador guardado. Revisa la emisión antes de asignar folio y firmar. Si la pide un agente, queda en{" "}
+        Borrador guardado. Revisa la emisión antes de asignar folio y firmar. Si la pide un agente,
+        queda en{" "}
         <LinkNext href="/configuracion/aprobaciones" className="underline">
           aprobaciones pendientes
         </LinkNext>

@@ -37,7 +37,9 @@ export function EmitirLineasDetalle({ documentoId, lineas, setLineas }: Props) {
               disabled={Boolean(documentoId)}
               value={l.glosa}
               onChange={(e) =>
-                setLineas((rows) => rows.map((r, j) => (j === i ? { ...r, glosa: e.target.value } : r)))
+                setLineas((rows) =>
+                  rows.map((r, j) => (j === i ? { ...r, glosa: e.target.value } : r)),
+                )
               }
             />
           </Campo>
@@ -49,7 +51,9 @@ export function EmitirLineasDetalle({ documentoId, lineas, setLineas }: Props) {
               disabled={Boolean(documentoId)}
               value={l.montoTexto}
               onChange={(e) =>
-                setLineas((rows) => rows.map((r, j) => (j === i ? { ...r, montoTexto: e.target.value } : r)))
+                setLineas((rows) =>
+                  rows.map((r, j) => (j === i ? { ...r, montoTexto: e.target.value } : r)),
+                )
               }
             />
           </Campo>

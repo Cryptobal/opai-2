@@ -47,5 +47,7 @@ export const parametrosSchema = z.object({
   margenAlertaPct: z.number().int().nullable(),
   sobrescrito: z.boolean(),
   instrumentos: instrumentosSchema,
+  /** Valores por defecto del modelo, para marcar qué campo está sobrescrito y poder volver a él. */
+  instrumentosDefecto: instrumentosSchema,
 });
 

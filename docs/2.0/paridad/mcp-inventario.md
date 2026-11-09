@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 639 pares pantalla→capacidad · 574 con herramienta · 65 excepciones justificadas · 0 faltantes.
+**Resumen:** 646 pares pantalla→capacidad · 581 con herramienta · 65 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -189,6 +189,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.accesos.vincular` | `portal_cliente_accesos_vincular` | existe |
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.config.actualizar` | `portal_cliente_config_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.config.leer` | `portal_cliente_config_leer` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.contactos.dar_acceso` | `portal_cliente_contactos_dar_acceso` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.contactos.listar` | `portal_cliente_contactos_listar` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.actualizar` | `rondas_incidentes_tipo_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.crear` | `rondas_incidentes_tipo_crear` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.listar` | `rondas_incidentes_tipo_listar` | existe |
@@ -588,7 +590,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir` | `finanzas_ventas_emitir` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir_nota_debito` | `finanzas_ventas_emitir_nota_debito` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.guardar_destinatarios` | `finanzas_ventas_guardar_destinatarios` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preflight_emision` | `finanzas_ventas_preflight_emision` | existe |
 | erp | `/finanzas/ventas/programacion/[id]/editar` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
@@ -944,9 +951,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
 - `finanzas.reportes.resultados`
-- `finanzas.ventas.destinatarios_sugeridos`
-- `finanzas.ventas.emitir_nota_debito`
-- `finanzas.ventas.guardar_destinatarios`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`
@@ -960,8 +964,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
-- `portal_cliente.contactos.dar_acceso`
-- `portal_cliente.contactos.listar`
 - `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`
