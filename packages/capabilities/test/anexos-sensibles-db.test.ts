@@ -249,7 +249,15 @@ describe.skipIf(!urlPropietario)("anexo de contrato: pendientes del PR #91 en ba
       "core.inicio.pendientes",
       {},
     );
-    expect(pendientes.find((p) => p.tipo === "anexos")?.href).toBe("/personas?anexo=borrador");
+    // CAR-210: «Revisar» abre el anexo concreto (el borrador más antiguo), no la lista de Personas.
+    const masAntiguo = await e.admin.anexoContrato.findFirstOrThrow({
+      where: { tenantId, estado: "borrador" },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      select: { id: true, personaId: true },
+    });
+    expect(pendientes.find((p) => p.tipo === "anexos")?.href).toBe(
+      `/personas/${masAntiguo.personaId}/anexos/${masAntiguo.id}`,
+    );
   });
 
   it("matriz, vencimientos y versiones no muestran el documento del anexo sin anexos.read", async () => {

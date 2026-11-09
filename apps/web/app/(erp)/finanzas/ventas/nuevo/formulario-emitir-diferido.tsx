@@ -13,11 +13,11 @@ const FormularioEmitir = dynamic(
 );
 
 /** Formulario de emisión DTE: se monta aparte para no superar el presupuesto JS de la ruta (ADR-037). */
-export function FormularioEmitirDiferido({ cuentas }: { cuentas: CuentaFila[] }) {
+export function FormularioEmitirDiferido({ cuentas, sinRut }: { cuentas: CuentaFila[]; sinRut: number }) {
   const [montada, setMontada] = useState(false);
   useEffect(() => {
     void Promise.resolve().then(() => setMontada(true));
   }, []);
   if (!montada) return <Skeleton className="min-h-96 w-full" />;
-  return <FormularioEmitir cuentas={cuentas} />;
+  return <FormularioEmitir cuentas={cuentas} sinRut={sinRut} />;
 }
