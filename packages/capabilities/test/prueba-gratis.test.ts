@@ -203,6 +203,23 @@ describe("platform.cobros.prueba_gratis_extender", () => {
     expect(tabla("tenantModule")).toMatchObject([{ moduloId: "cpq", estado: "trial" }]);
   });
 
+  it("la lectura de Plataforma muestra días restantes, extensiones y si ya terminó", async () => {
+    const vigente = plataforma(prueba(enDias(3), "trial", 2));
+    const r = await executeCapability(vigente.ctx, "platform.cobros.pruebas_gratis_list", {
+      tenantId: TENANT_DE_PRUEBA,
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      data: [{ moduloId: "cpq", estado: "vigente", diasRestantes: 4, extensiones: 2 }],
+    });
+    const vencida = plataforma(prueba(enDias(-2), "solo_lectura"));
+    expect(
+      await executeCapability(vencida.ctx, "platform.cobros.pruebas_gratis_list", {
+        tenantId: TENANT_DE_PRUEBA,
+      }),
+    ).toMatchObject({ ok: true, data: [{ estado: "vencida", diasRestantes: 0 }] });
+  });
+
   it("no extiende lo que la empresa no activó, un módulo suspendido ni uno activo", async () => {
     const sin = plataforma({});
     expect(
