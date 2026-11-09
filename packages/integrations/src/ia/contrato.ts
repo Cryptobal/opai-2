@@ -5,12 +5,7 @@
 
 export type ClaseTarea = "economica" | "estandar" | "potente";
 export const CLASES_TAREA: readonly ClaseTarea[] = ["economica", "estandar", "potente"];
-export type ProveedorIaId =
-  | "ia_anthropic"
-  | "ia_openai"
-  | "ia_google"
-  | "ia_compatible"
-  | "ia_xai";
+export type ProveedorIaId = "ia_anthropic" | "ia_openai" | "ia_google" | "ia_compatible" | "ia_xai";
 
 /** Compatibilidad: un solo turno de texto (sin herramientas). */
 export type SolicitudIa = { sistema?: string; prompt: string; maxTokens?: number };
@@ -25,11 +20,20 @@ export type RespuestaIa = {
 /** Una llamada a herramienta que pide el modelo. `argumentos` es el JSON ya parseado. */
 export type LlamadaHerramienta = { id: string; nombre: string; argumentos: unknown };
 
+/** Referencia inerte, solo válida en memoria dentro del adaptador que la emitió. */
+declare const continuidadIa: unique symbol;
+export type ContinuidadIa = { readonly [continuidadIa]: true };
+
 /** Mensajes de la conversación. El resultado de herramienta viaja como texto (JSON serializado). */
 export type Mensaje =
   | { rol: "sistema"; texto: string }
   | { rol: "usuario"; texto: string }
-  | { rol: "asistente"; texto?: string; llamadas?: readonly LlamadaHerramienta[] }
+  | {
+      rol: "asistente";
+      texto?: string;
+      llamadas?: readonly LlamadaHerramienta[];
+      continuidad?: ContinuidadIa;
+    }
   | { rol: "herramienta"; id: string; nombre: string; resultado: string };
 
 /** Herramienta disponible: nombre, descripción y JSON Schema de la entrada. */
@@ -58,6 +62,7 @@ export type SolicitudConversacion = {
 };
 
 export type RespuestaConversacion = {
+  continuidad?: ContinuidadIa;
   texto: string;
   llamadas: readonly LlamadaHerramienta[];
   uso: Uso;
@@ -79,6 +84,8 @@ export type EventoStream =
 
 export interface ProveedorIa {
   readonly id: ProveedorIaId;
+  /** Preflight local y puro: detecta continuidad perdida incluso antes de elegir un respaldo. */
+  validarContinuacion?(modelo: string, s: SolicitudConversacion): void;
   conversar(modelo: string, s: SolicitudConversacion): Promise<RespuestaConversacion>;
   conversarStream(modelo: string, s: SolicitudConversacion): AsyncIterable<EventoStream>;
   completar(modelo: string, s: SolicitudIa): Promise<RespuestaIa>;

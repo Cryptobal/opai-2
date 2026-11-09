@@ -23,6 +23,12 @@ export type FormProgramacion = {
   fechaInicio: string;
   fechaFin: string;
   notas: string;
+  facturaModo: "mismo_dia" | "dias" | "dia_fijo";
+  diasFacturacion: string;
+  diaFactura: string;
+  mesRelativoFactura: "MES_ACTUAL" | "MES_SIGUIENTE";
+  autoEnvioProforma: boolean;
+  autoEnvioEstadoPago: boolean;
   lineas: LineaForm[];
   destinatarioIds: string[];
 };
@@ -46,6 +52,12 @@ export type DetalleProgramacion = {
   fechaInicio: string | null;
   fechaFin: string | null;
   notas: string | null;
+  diasFacturacion: number | null;
+  momentoFactura: string;
+  diaFactura: number | null;
+  mesRelativoFactura: string;
+  autoEnvioProforma: boolean;
+  autoEnvioEstadoPago: boolean;
   montoTotal: number;
   proximaEjecucionEn: string | null;
   ultimoPeriodo10: string | null;
@@ -63,7 +75,18 @@ export type DetalleProgramacion = {
     fechaGeneracion: string | null;
     documentoId: string | null;
     montoTotal: number | null;
+    traza: TrazaPeriodo | null;
   }[];
+};
+
+/** Seguimiento de un período: proforma y estado de pago, factura y cobro (CAR-221). */
+export type TrazaPeriodo = {
+  fechaFactura: string | null;
+  estadoDte: string | null;
+  folio: number | null;
+  proformaEstado: string | null;
+  previos: { tipo: "proforma" | "estado_pago"; estado: string }[];
+  estadoCobro: string | null;
 };
 
 export const LINEA_VACIA: LineaForm = {
@@ -89,6 +112,12 @@ export const FORM_VACIO: FormProgramacion = {
   fechaInicio: "",
   fechaFin: "",
   notas: "",
+  facturaModo: "mismo_dia",
+  diasFacturacion: "15",
+  diaFactura: "1",
+  mesRelativoFactura: "MES_SIGUIENTE",
+  autoEnvioProforma: false,
+  autoEnvioEstadoPago: false,
   lineas: [LINEA_VACIA],
   destinatarioIds: [],
 };

@@ -27,6 +27,16 @@ export {
   type CifradoDeCampos,
 } from "./core/cumplimiento/cifrado-campos";
 export { enviarCorreo, previsualizarCorreo } from "./core/comunicaciones";
+export {
+  borrarEnrolamiento,
+  consentimientoBiometricoVigente,
+  enrolarRostro,
+  evaluarRostro,
+  PROPOSITO_BIOMETRIA,
+  type ResultadoRostro,
+  verificarRostro,
+} from "./core/biometria";
+export { anotar as registrarHechoConsentimiento } from "./core/cumplimiento/consentimientos";
 export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";
 export { plataformaVigente } from "./core/apikey-scopes";
 export { catalogoPermisos } from "./core/me";
@@ -66,7 +76,8 @@ export {
   type Permiso,
   registrarModulos,
 } from "./module";
-export { portalesDe, restriccion } from "./autorizacion";
+export { portalesDe, restriccion, tienePermisoDeCapacidad } from "./autorizacion";
+export { dondeCuenta, dondeInstalacion, dondePersona } from "./core/maestros/alcance";
 export {
   type Consumidor,
   consumidoresDe,
@@ -96,7 +107,7 @@ export {
 } from "./trabajos/runner";
 export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./comprobantes";
 export { camposExternos, externo } from "./externo";
-export { correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
+export { biometriaDe, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
 export { comoAgenteInterno } from "./agentes/interno";
 export {
@@ -114,3 +125,8 @@ export {
   mutualAdicionalTenant,
   publicacionesParaFecha,
 } from "./core/remuneraciones";
+export {
+  resolverCamposDocumento,
+  type EntradaValoresCampos,
+  type ValoresCamposResueltos,
+} from "./core/campos/valores-resolver";

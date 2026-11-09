@@ -290,6 +290,8 @@ model DteFolio {
   cafVenceEn    DateTime? @map("caf_vence_en") @db.Date
   cafAutorizadoEn DateTime? @map("caf_autorizado_en") @db.Date
   cafIdk        String?   @map("caf_idk")
+  /// certificacion | produccion, según el IDK del propio CAF; null = anterior a la columna o IDK desconocido.
+  cafAmbiente   String?   @map("caf_ambiente")
   umbralAviso   Int       @default(20) @map("umbral_aviso")
   activo        Boolean   @default(true)
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -339,6 +341,7 @@ model DocumentoEmitido {
 
   lineas      DocumentoEmitidoLinea[]
   referencias DocumentoEmitidoReferencia[]
+  destinatarios DocumentoEmitidoDestinatario[]
   enviosSii   DteEnvio[]
   cesiones    Cesion[]
   gestionesCobranza CobranzaGestion[]
@@ -361,6 +364,11 @@ model DocumentoEmitidoLinea {
   orden        Int      @default(0)
   glosa        String
   monto        Int
+  /// Cantidad, unidad, precio unitario (CLP) y descuento de la línea; nulos en documentos anteriores (CAR-221).
+  cantidad       Decimal? @db.Decimal(14, 4)
+  unidad         String?
+  precioUnitario Int?     @map("precio_unitario")
+  descuentoPct   Int?     @map("descuento_pct")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
@@ -388,6 +396,29 @@ model DocumentoEmitidoReferencia {
   @@schema("finanzas")
 }
 
+/// Destinatarios del correo de un DTE de venta (CAR-221 · A3b): exactamente uno PARA; el resto CC o BCC.
+model DocumentoEmitidoDestinatario {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  documentoId String   @map("documento_id") @db.Uuid
+  orden       Int
+  /// PARA | CC | BCC
+  tipo        String
+  /// Siempre en minúsculas.
+  email       String
+  /// casilla_dte | contacto_facturacion | manual
+  origen      String
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documento DocumentoEmitido @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@unique([documentoId, email])
+  @@index([tenantId, documentoId])
+  @@map("documentos_emitidos_destinatarios")
+  @@schema("finanzas")
+}
+
 /// Ajustes DTE por tenant (ambiente SII; certificado vía integración dte).
 model DteConfig {
   id        String   @id @default(uuid(7)) @db.Uuid
@@ -402,6 +433,9 @@ model DteConfig {
   /// Resolución de autorización del SII (requerida con SimpleAPI real).
   resolucionSiiNumero Int?   @map("resolucion_sii_numero")
   resolucionSiiFecha  DateTime? @map("resolucion_sii_fecha") @db.Date
+  /// Código de actividad económica del emisor (ACTECO, 1 a 6 dígitos) y oficina del SII (CAR-221).
+  acteco              Int?
+  oficinaSii          String?  @map("oficina_sii")
   certificadoSecretoId   String? @map("certificado_secreto_id") @db.Uuid
   emisionApiKeySecretoId String? @map("emision_api_key_secreto_id") @db.Uuid
   /// Porcentaje del rango CAF bajo el cual avisar folios bajos (R-FIN-038).

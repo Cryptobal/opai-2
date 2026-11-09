@@ -9,7 +9,6 @@ import {
   ErrorIa,
   type EventoStream,
   type ProveedorIaId,
-  proveedorIa,
   type RespuestaConversacion,
   type SolicitudConversacion,
   type SolicitudIa,
@@ -19,6 +18,7 @@ import {
 import type { Contexto } from "../types";
 import { consumoBase } from "./consumo-base";
 import { candidatosIa } from "./ia-candidatos";
+import { adaptadoresDelTurno } from "./ia-continuidad";
 import {
   avisarTenantIaFallo,
   type Candidato,
@@ -49,9 +49,6 @@ function medir(ctx: Contexto, clase: ClaseTarea, modulo: string, c: Candidato, u
   ]).catch(() => undefined);
 }
 
-const adaptador = (c: Candidato) =>
-  proveedorIa(c.id, c.cred.valor, c.baseUrl !== undefined ? { baseUrl: c.baseUrl } : undefined);
-
 /** Stream con respaldo: solo cae al siguiente proveedor si falla antes del primer evento. */
 async function* streamConRespaldo(
   ctx: Contexto,
@@ -60,11 +57,12 @@ async function* streamConRespaldo(
   cands: readonly Candidato[],
   avisar: boolean,
   s: SolicitudConversacion,
+  adaptadores: ReturnType<typeof adaptadoresDelTurno>,
 ): AsyncGenerator<EventoStream> {
   const fallos: FalloProveedor[] = [];
   for (let i = 0; i < cands.length; i++) {
     const c = cands[i]!;
-    const it = adaptador(c).conversarStream(c.modelo, s)[Symbol.asyncIterator]();
+    const it = adaptadores.de(c).conversarStream(c.modelo, s)[Symbol.asyncIterator]();
     let actual: IteratorResult<EventoStream>;
     try {
       actual = await it.next();
@@ -81,7 +79,10 @@ async function* streamConRespaldo(
     try {
       while (!actual.done) {
         if (actual.value.tipo === "uso") uso = actual.value.uso;
-        else if (actual.value.tipo === "fin") uso = actual.value.respuesta.uso;
+        else if (actual.value.tipo === "fin") {
+          uso = actual.value.respuesta.uso;
+          adaptadores.registrar(c, actual.value.respuesta);
+        }
         yield actual.value;
         actual = await it.next();
       }
@@ -120,12 +121,13 @@ export async function iaDe(
     return null;
   }
   const conRetry = !solo;
+  const adaptadores = adaptadoresDelTurno(cands);
   // La selección de un proveedor no suprime el aviso; Probar lo gestiona por separado.
   const avisar = opciones.avisar !== false && cands.some((c) => c.cred.modalidad === "propia");
-  const ejecutar = async <T>(fn: (c: Candidato) => Promise<T>): Promise<T> => {
+  const ejecutar = async <T>(fn: (c: Candidato) => Promise<T>, cadena: readonly Candidato[] = cands): Promise<T> => {
     const fallos: FalloProveedor[] = [];
     try {
-      return await conRespaldo(cands, conRetry, fallos, fn);
+      return await conRespaldo(cadena, conRetry, fallos, fn);
     } catch (e) {
       throw await finDeCadena(ctx, avisar, fallos, e);
     }
@@ -135,17 +137,18 @@ export async function iaDe(
     modelo: cands[0]!.modelo,
     completar: (s: SolicitudIa) =>
       ejecutar(async (c) => {
-        const r = await adaptador(c).completar(c.modelo, s);
+        const r = await adaptadores.de(c).completar(c.modelo, s);
         await medir(ctx, clase, modulo, c, { tokensEntrada: r.tokensEntrada, tokensSalida: r.tokensSalida });
         return r;
       }),
-    conversar: (s: SolicitudConversacion): Promise<RespuestaConversacion> =>
+    conversar: async (s: SolicitudConversacion): Promise<RespuestaConversacion> =>
       ejecutar(async (c) => {
-        const r = await adaptador(c).conversar(c.modelo, s);
+        const r = await adaptadores.de(c).conversar(c.modelo, s);
+        adaptadores.registrar(c, r);
         await medir(ctx, clase, modulo, c, r.uso);
         return r;
-      }),
+      }, adaptadores.cadena(s)),
     conversarStream: (s: SolicitudConversacion): AsyncIterable<EventoStream> =>
-      streamConRespaldo(ctx, clase, modulo, cands, avisar, s),
+      streamConRespaldo(ctx, clase, modulo, adaptadores.cadena(s), avisar, s, adaptadores),
   };
 }

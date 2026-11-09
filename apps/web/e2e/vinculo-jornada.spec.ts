@@ -72,8 +72,8 @@ test("22–25: contrato, jornada, validación y cambio de capa con vista previa"
     fullPage: true,
     animations: "disabled",
   });
-  await page.getByRole("link", { name: "Editar vínculo", exact: true }).click();
-  const hoja = page.getByRole("dialog", { name: "Editar vínculo", exact: true });
+  await page.getByRole("link", { name: "Cambiar cargo, contrato, instalación o jornada", exact: true }).click();
+  const hoja = page.getByRole("dialog", { name: "Cambiar cargo, contrato, instalación o jornada", exact: true });
   await expect(hoja).toBeVisible();
   await expect(hoja.getByRole("button", { name: "Revisar cambio" })).toBeDisabled();
   await hoja.getByLabel("Horas semanales", { exact: true }).fill("0");
@@ -107,8 +107,8 @@ test("25: conflicto de edición visible y hoja accesible en oscuro", async ({ pa
   await entrar(page);
   await page.goto(`/personas/${persona}/laboral`);
   await ocultarDev(page);
-  await page.getByRole("link", { name: "Editar vínculo", exact: true }).click();
-  const hoja = page.getByRole("dialog", { name: "Editar vínculo", exact: true });
+  await page.getByRole("link", { name: "Cambiar cargo, contrato, instalación o jornada", exact: true }).click();
+  const hoja = page.getByRole("dialog", { name: "Cambiar cargo, contrato, instalación o jornada", exact: true });
   await expect(hoja).toBeVisible();
   await hoja.getByLabel("Horas semanales", { exact: true }).fill("43");
   actualizarVinculo("updated_at=clock_timestamp()");

@@ -16,15 +16,19 @@
     "test": "vitest run",
     "rotar-kek": "tsx scripts/rotar-kek.ts",
     "rotar-dek": "tsx scripts/rotar-dek.ts",
-    "seed:finanzas-qa": "tsx scripts/seed-finanzas-qa.ts"
+    "qa:preflight": "tsx scripts/qa-preflight.ts",
+    "seed:finanzas-qa": "tsx scripts/seed-finanzas-qa.ts",
+    "seed:personas-qa": "tsx scripts/seed-personas-qa.ts",
+    "seed:asistencia-qa": "tsx scripts/seed-asistencia-qa.ts"
   },
   "dependencies": {
     "@opai/db": "workspace:*",
-    "zod": "^4.6.7",
     "@opai/domain": "workspace:*",
-    "@opai/integrations": "workspace:*"
+    "@opai/integrations": "workspace:*",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "pdf-lib": "1.17.1",
     "typescript": "^5.9.3",
     "vitest": "^5.0.5"
   }

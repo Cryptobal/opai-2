@@ -5,9 +5,9 @@ import { estadoPantalla } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
+import { Historial } from "../_componentes/historial-corridas";
 import { AccionesProgramacion } from "../_componentes/acciones-programacion";
 import {
-  Historial,
   Lineas,
   type PeriodoPrevio,
   Proximos,
@@ -70,7 +70,7 @@ export default async function ProgramacionDetallePage({
                 d.puedeEditar ? <AccionesProgramacion id={item.id} activa={item.activa} /> : null
               }
             />
-            {item.activa ? <Proximos periodos={d.periodos} /> : null}
+            {item.activa ? <Proximos periodos={d.periodos} moneda={item.moneda} /> : null}
             <Lineas item={item} />
             <Historial item={item} />
           </div>

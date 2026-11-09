@@ -34,6 +34,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: certificado .pfx cifrado del tenant; nunca sale ni se cambia por API ni MCP (ADR-027, CAR-149).",
   "rendiciones.lotes.nomina_descargar":
     "Solo personas: el archivo de la nómina Santander contiene cuentas bancarias de personas (Ley 21.719); lo baja una persona con sesión por /api/rendiciones/lotes/[id]/nomina y no sale por MCP. El agente ve el lote con rendiciones.lotes.obtener y lo genera con rendiciones.lotes.generar_nomina, que no devuelve cuentas (CAR-208).",
+  "core.personas.pago_aprobar_cambio":
+    "Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01).",
+  "core.personas.pago_rechazar_cambio":
+    "Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
@@ -128,6 +132,18 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant.",
   "asistencia.marcas.registrar":
     "Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador.",
+  "asistencia.rostro.estado":
+    "Solo personas: lo consulta la propia persona (sesión) o el equipo del kiosco con su PIN; un agente no opera sobre la biometría de un trabajador (Ley 21.719).",
+  "asistencia.rostro.iniciar_vida":
+    "Solo personas: la prueba de vida la completa la cámara de quien marca o se enrola, y cada sesión tiene costo (CAR-89).",
+  "asistencia.rostro.consentir":
+    "Solo personas: el consentimiento expreso lo da el propio trabajador (L-13, T-04); un agente nunca consiente por él.",
+  "asistencia.rostro.revocar":
+    "Solo personas: la revocación es un derecho personal del trabajador y borra su biometría (L-14).",
+  "asistencia.rostro.enrolar":
+    "Solo personas: el rostro es un dato biométrico sensible (Ley 21.719); un agente nunca enrola a un trabajador. Lo hace la propia persona con prueba de vida.",
+  "asistencia.telefono.habilitar":
+    "Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes.",
   "asistencia.marcas.verificar":
     "Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante.",
   "asistencia.correcciones.responder":

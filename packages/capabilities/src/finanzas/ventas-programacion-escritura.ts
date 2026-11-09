@@ -56,8 +56,6 @@ export const ventasProgramacionCrear = defineCapability({
           tenantId: ctx.tenantId,
           ...datosProgramacion(input),
           activa: false,
-          facturaTiming: "AL_EMITIR",
-          facturaMesRelativo: "MES_SIGUIENTE",
         },
         select: { id: true },
       });

@@ -1532,6 +1532,22 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Decisión.** Se aceptan dos límites de concurrencia del recálculo de cotizaciones en borrador (#336, #337, #344): las huellas de línea se escriben fuera de la transacción del `updateMany` de la versión, y editar líneas no sube `revision`, de modo que una edición durante el cálculo puede dejar en un borrador un cálculo de las líneas anteriores. Ambos se corrigen al recalcular o al enviar (el envío valida la huella). **No se construye** un contador de revisión por líneas. Sin cambio de producto, migración ni tests.
 
+## ADR-082 · Face ID sobre el B4 del núcleo: un solo contrato, consentimiento por Cumplimiento y la marca es la misma (7-nov-2026)
+
+**Contexto.** CAR-89 (D-02, D-03, D-05). Carlos ordenó (7-nov-2026 10:26 CLT) adaptar Face ID sobre el B4 de `main` (#367, ADR-079): reutilizar su contrato, sin uno paralelo, con el consentimiento por Cumplimiento. Criterio obligatorio: marcar significa que la persona **asistió a trabajar**, y eso debe verse igual en la Pauta diaria y mensual.
+
+**Decisión.**
+1. **Un solo contrato** `Biometria` (`@opai/integrations`), dueño: esta sesión. Se extiende sin romper B4: `coleccion` opcional (una por empresa, `opai-<tenant>`, D-05) e `iniciarVida?()`. El proveedor real es `biometriaRekognition` (HTTP firmado, sin SDK); la muestra es `vida:<sesión>` de Face Liveness. El simulado sigue siendo el de pruebas y CI.
+2. **Proveedor por empresa**, no por entorno: la integración «biometria» y sus secretos (`access_key_id`, `secret_access_key`, `region`) salen del almacén cifrado. El simulado solo existe en pruebas/desarrollo o en una empresa `qa-…`; un proveedor real en una empresa que no es de prueba exige el ajuste de **plataforma** `biometria_empresas_reales` (apagado hasta que Carlos confirme la evaluación de impacto y el DPA, Ley 21.719). Sin eso, falla cerrado.
+3. **Umbral** de similitud: ajuste de plataforma `biometria_umbral_similitud` (90 por defecto, 70–99,9), no de la empresa (T-03).
+4. **Verificación 1:1 sobre Rekognition:** no ofrece 1:1 contra una plantilla guardada; se consulta la colección de la empresa y solo se acepta el `FaceId` esperado de la persona; los demás resultados se descartan sin devolverse.
+5. **Consentimiento por Cumplimiento** (`biometria_asistencia`, B4) y, para T-04, `telefono_personal_asistencia`; la propia persona consiente y revoca (en el kiosco con su PIN). Revocar borra el rostro (consumidor del núcleo, y de inmediato desde la acción).
+6. **Una sola marca:** rostro y RUT + PIN llegan a `asistencia.marcas.registrar` (cadena auditable, idempotente por clave del dispositivo). Rostro: `evaluarRostro` del núcleo con prueba de vida; si cae a PIN, `motivo_respaldo`. El kiosco actúa como sistema con su dispositivo resuelto en el servidor (`ejecutarAsistenciaEquipo`, lista blanca).
+7. **Pauta:** `pauta.mes.leer` y `pauta.resumen.leer` agregan `presencia` a cada celda desde `asistencia.dias` (turno esperado → persona que cubre → día consolidado). La Pauta no calcula presencia.
+8. **Sin marcas sin conexión por ahora:** el rostro y el PIN se verifican en el servidor; no se encola `asistencia.marcas.registrar` en la cola sin conexión (queda para un brief propio, con su propio modelo de verificación diferida).
+
+**Pendiente (requiere intervención).** Widget de AWS Face Liveness en el navegador (credenciales temporales y dependencia nueva), configuración de la integración «biometria» por el bot con `@opai-2.0:` y prueba contra el entorno de AWS; la evaluación de impacto y el DPA; el diseño aprobado de las pantallas (D-11).
+
 ## ADR-081 · Orden de trabajo de Operaciones: Personas → Instalaciones › Puestos → Pauta
 
 **Fecha:** 6-nov-2026 · **Estado:** vigente · **Autor:** Carlos (6-nov-2026, 08:17 CLT), registrado por «Operaciones · Puestos · Code» en CAR-206 · Adenda a ADR-048 (series de la Pauta) y al Brief 11 (Puestos).

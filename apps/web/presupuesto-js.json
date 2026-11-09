@@ -56,8 +56,8 @@
     "/(trabajador)/trabajador/mis-datos": 166,
     "/(trabajador)/trabajador/cambiar-pin": 166,
     "/(trabajador)/trabajador/notificaciones": 167,
-    "/(erp)/finanzas/ventas/programacion/[id]/editar": 178,
-    "/(erp)/finanzas/ventas/programacion/nueva": 177,
+    "/(erp)/finanzas/ventas/programacion/[id]/editar": 180,
+    "/(erp)/finanzas/ventas/programacion/nueva": 180,
     "/(erp)/contactos/[id]": 178,
     "/(erp)/cotizaciones/nueva": 169,
     "/(erp)/finanzas/configuracion-dte": 169,
@@ -83,6 +83,9 @@
     "/(supervisor)/supervisor/instalaciones/[id]": 164,
     "/(terreno)/terreno": 167,
     "/(terreno)/terreno/[...ruta]": 163,
-    "/(terreno)/terreno/cola": 166
+    "/(terreno)/terreno/cola": 166,
+    "/(terreno)/terreno/marcar": 178,
+    "/(trabajador)/trabajador/marcar": 177,
+    "/(trabajador)/trabajador/mi-rostro": 175
   }
 }

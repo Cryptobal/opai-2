@@ -1,6 +1,11 @@
 // Genera el borrador de un período de una programación (BRIEF-26 · CAR-159). Una sola transacción:
 // documento + corrida (UNIQUE programación + período) + evento. Nunca emite al SII.
-import { vencimientoPago } from "@opai/domain";
+import {
+  fechaFacturaProyectada,
+  marcadoresDeGlosa,
+  renderGlosa,
+  vencimientoPago,
+} from "@opai/domain";
 
 import { aFecha } from "../core/maestros/comun";
 import { conflicto } from "../errores";
@@ -11,6 +16,9 @@ import {
   type ProgramacionGenerable,
   type ResultadoPeriodo,
 } from "./ventas-programacion-calculo";
+import { copiarDestinatarios } from "./ventas-programacion-destinatarios";
+import { enviarPrevios } from "./ventas-programacion-previos";
+import { ufCentavosDelDia } from "./ventas-programacion-uf";
 
 export type { ProgramacionGenerable, ResultadoPeriodo };
 
@@ -34,15 +42,27 @@ export async function generarPeriodo(
     };
   const c = await calcularPeriodo(ctx, p, periodo, fecha);
   if (!c.ok) return c.resultado;
+  const factura = fechaFacturaProyectada(fecha, {
+    diasFacturacion: p.diasFacturacion,
+    momento: p.facturaTiming,
+    diaFijo: p.facturaDia,
+    mesRelativo: p.facturaMesRelativo,
+  });
   const base = {
     periodo,
     fecha,
+    fechaFactura: factura.fecha,
     motivo: null,
     montoTotal: c.calc.montos.total,
     ufCentavos: c.uf === null ? null : Number(c.uf),
   };
   if (dryRun) return { ...base, estado: "generado", documentoId: null };
   try {
+    // Marcadores en las glosas de las líneas. La UF del día de emisión solo se consulta si alguna la pide.
+    const pideUfDia = c.calc.lineas.some((l) => marcadoresDeGlosa(l.glosa).includes("uf_al_dia"));
+    const ufDia = pideUfDia ? await ufCentavosDelDia(ctx.db, fecha) : null;
+    const glosaLinea = (g: string) =>
+      renderGlosa(g, { periodo, ufCentavos: c.uf, ufDiaCentavos: ufDia, montoClp: c.calc.montos.total });
     const documentoId = await ctx.transaccion(async (tx) => {
       const m = c.calc.montos;
       const doc = await tx.documentoEmitido.create({
@@ -51,8 +71,8 @@ export async function generarPeriodo(
           cuentaId: p.cuentaId!,
           instalacionId: p.instalacionId,
           tipoDte: p.tipoDte,
-          fechaEmision: aFecha(fecha),
-          fechaVencimiento: aFecha(vencimientoPago(fecha, p.plazoPagoDias)),
+          fechaEmision: aFecha(factura.fecha),
+          fechaVencimiento: aFecha(vencimientoPago(factura.fecha, p.plazoPagoDias)),
           montoNeto: m.neto,
           montoExento: m.exento,
           montoIva: m.iva,
@@ -63,13 +83,17 @@ export async function generarPeriodo(
             create: c.calc.lineas.map((l, orden) => ({
               tenantId: ctx.tenantId,
               orden,
-              glosa: l.glosa,
+              glosa: glosaLinea(l.glosa),
               monto: l.monto,
+              cantidad: l.cantidad,
+              precioUnitario: l.precioUnitario,
+              descuentoPct: l.descuentoPct,
             })),
           },
         },
         select: { id: true },
       });
+      await copiarDestinatarios(tx, ctx.tenantId, p.id, doc.id);
       await tx.ventasProgramacionCorrida.create({
         data: {
           tenantId: ctx.tenantId,
@@ -88,6 +112,13 @@ export async function generarPeriodo(
         payload: { programacionId: p.id, periodo },
       });
       return doc.id;
+    });
+    // Fuera de la transacción: el correo no debe retener la base ni revertir el borrador si falla.
+    await enviarPrevios(ctx, p, {
+      documentoId,
+      cuentaId: p.cuentaId!,
+      fechaFactura: factura.fecha,
+      montoTotal: c.calc.montos.total,
     });
     return { ...base, estado: "generado", documentoId };
   } catch (e) {

@@ -1,7 +1,13 @@
 // Esquemas de entrada de las programaciones recurrentes (BRIEF-26 · CAR-159).
 import { z } from "zod";
 
-import { FRECUENCIAS_PROGRAMACION, POLITICAS_UF } from "@opai/domain";
+import {
+  DIAS_FACTURACION_MAX,
+  FRECUENCIAS_PROGRAMACION,
+  MESES_RELATIVOS_FACTURA,
+  MOMENTOS_FACTURA,
+  POLITICAS_UF,
+} from "@opai/domain";
 
 import { uuidSchema } from "../core/esquemas";
 import { textoOpcional } from "../core/maestros/comun";
@@ -72,6 +78,32 @@ export const programacionBaseSchema = z.object({
     .describe("Qué UF se usa en las líneas en UF."),
   diaUf: z.number().int().min(1).max(31).nullable().optional(),
   plazoPagoDias: z.number().int().min(0).max(365).default(30),
+  diasFacturacion: z
+    .number()
+    .int()
+    .min(0)
+    .max(DIAS_FACTURACION_MAX)
+    .nullable()
+    .optional()
+    .describe("Días entre el borrador y la factura (0–120). Si se indica, prevalece sobre el momento configurado."),
+  momentoFactura: z
+    .enum(MOMENTOS_FACTURA)
+    .default("AL_EMITIR")
+    .describe("AL_EMITIR: la factura se proyecta el día de generación. DIA_FIJO: el día `diaFactura` del mes relativo."),
+  diaFactura: z.number().int().min(-1).max(31).nullable().optional().describe("Día de la factura con DIA_FIJO; -1 = último día."),
+  mesRelativoFactura: z.enum(MESES_RELATIVOS_FACTURA).default("MES_SIGUIENTE"),
+  autoEnvioProforma: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Modalidad: la programación manda al cliente una proforma antes de facturar. Es solo la marca; la proforma no es un DTE ni una deuda fiscal.",
+    ),
+  autoEnvioEstadoPago: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Modalidad: la programación manda al cliente un estado de pago antes de facturar. Es solo la marca; no es un DTE ni una deuda fiscal.",
+    ),
   fechaInicio: fechaIso.nullable().optional(),
   fechaFin: fechaIso.nullable().optional(),
   notas: textoOpcional(1000),

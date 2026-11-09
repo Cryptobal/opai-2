@@ -24,6 +24,12 @@ export function aInput(
   const plazo = entero(f.plazoPagoDias);
   if (plazo === null || plazo < 0 || plazo > 365)
     return { ok: false, error: "El plazo de pago va de 0 a 365 días." };
+  const diasF = entero(f.diasFacturacion);
+  if (f.facturaModo === "dias" && (diasF === null || diasF < 0 || diasF > 120))
+    return { ok: false, error: "Los días hasta la factura van de 0 a 120." };
+  const diaF = entero(f.diaFactura);
+  if (f.facturaModo === "dia_fijo" && (diaF === null || !(diaF === -1 || (diaF >= 1 && diaF <= 31))))
+    return { ok: false, error: "El día de la factura va de 1 a 31, o «Último día»." };
   const lineas = [];
   for (const [i, l] of f.lineas.entries()) {
     const precio = f.moneda === "UF" ? parseUf(l.precio) : parseClp(l.precio);
@@ -61,6 +67,12 @@ export function aInput(
       fechaInicio: f.fechaInicio || null,
       fechaFin: f.fechaFin || null,
       notas: f.notas.trim() || null,
+      diasFacturacion: f.facturaModo === "dias" ? diasF : null,
+      momentoFactura: f.facturaModo === "dia_fijo" ? "DIA_FIJO" : "AL_EMITIR",
+      diaFactura: f.facturaModo === "dia_fijo" ? diaF : null,
+      mesRelativoFactura: f.mesRelativoFactura,
+      autoEnvioProforma: f.autoEnvioProforma,
+      autoEnvioEstadoPago: f.autoEnvioEstadoPago,
       lineas,
       destinatarioIds: f.destinatarioIds,
     },
@@ -88,6 +100,12 @@ export function desdeDetalle(d: DetalleProgramacion): FormProgramacion {
     fechaInicio: d.fechaInicio ?? "",
     fechaFin: d.fechaFin ?? "",
     notas: d.notas ?? "",
+    facturaModo: d.diasFacturacion !== null ? "dias" : d.momentoFactura === "DIA_FIJO" ? "dia_fijo" : "mismo_dia",
+    diasFacturacion: String(d.diasFacturacion ?? 15),
+    diaFactura: String(d.diaFactura ?? 1),
+    mesRelativoFactura: d.mesRelativoFactura === "MES_ACTUAL" ? "MES_ACTUAL" : "MES_SIGUIENTE",
+    autoEnvioProforma: d.autoEnvioProforma,
+    autoEnvioEstadoPago: d.autoEnvioEstadoPago,
     lineas: d.lineasEditables.map((l) => ({
       glosa: l.glosa,
       cantidad: l.cantidad.includes(".") ? l.cantidad.replace(/\.?0+$/, "") : l.cantidad,
