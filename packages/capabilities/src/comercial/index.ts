@@ -41,6 +41,7 @@ export { ajustesComercial } from "./ajustes";
 
 import { contextoAgregar, contextoListar } from "./contexto-negocio";
 import { contextoArchivar, contextoConfirmar } from "./contexto-negocio-estado";
+import { contextoSugerirSeccion } from "./contexto-sugerir";
 
 export const capacidadesComercial: readonly Capacidad[] = [
   negociosList,
@@ -64,6 +65,7 @@ export const capacidadesComercial: readonly Capacidad[] = [
   contextoAgregar,
   contextoConfirmar,
   contextoArchivar,
+  contextoSugerirSeccion,
   configGet,
   configActualizarEtapa,
   configGuardarCatalogo,
