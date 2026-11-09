@@ -4,7 +4,10 @@ import { cn } from "@opai/ds";
 
 import { CLASE_EXCEPCION, codigoCelda, descripcionCelda } from "./celda-turno";
 import { claveMes, diaSemana, esNoche } from "./etiquetas";
+import { etiquetaPresencia } from "./presencia";
 import type { MesPauta } from "./tipos";
+
+const PUNTO = { success: "bg-success", warning: "bg-warning", danger: "bg-danger", neutro: "bg-fg-subtle" } as const;
 
 /** P01 en 1024/1280: puestos × días con la primera columna fija; cada celda abre el día. */
 export function GrillaMes({ mes, puedeEditar }: { mes: MesPauta; puedeEditar: boolean }) {
@@ -50,6 +53,7 @@ export function GrillaMes({ mes, puedeEditar }: { mes: MesPauta; puedeEditar: bo
               </th>
               {p.celdas.map((c) => {
                 const k = codigoCelda(c, esNoche(p.horario));
+                const pres = etiquetaPresencia(c);
                 return (
                   <td key={c.fecha} className="border-b border-border p-0.5">
                     <Link
@@ -63,6 +67,7 @@ export function GrillaMes({ mes, puedeEditar }: { mes: MesPauta; puedeEditar: bo
                       )}
                     >
                       {k.texto}
+                      {pres ? <span aria-hidden className={cn("ml-0.5 size-1.5 rounded-full", PUNTO[pres.tono])} /> : null}
                     </Link>
                   </td>
                 );

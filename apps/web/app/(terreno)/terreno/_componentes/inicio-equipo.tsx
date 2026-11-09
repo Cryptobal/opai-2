@@ -1,6 +1,10 @@
 "use client";
 
-import { Button, Empty } from "@opai/ds";
+import { UserCheck } from "lucide-react";
+
+import { Button, Empty, FilaSeleccionable } from "@opai/ds";
+
+import { LinkNext } from "@/app/_components/link-next";
 
 import { elegirPersona, type PersonaElegida } from "@/lib/terreno/persona";
 
@@ -26,6 +30,15 @@ export function InicioEquipo({
         </Button>
       </header>
       <BannerConexion />
+      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+        <FilaSeleccionable
+          href="/terreno/marcar"
+          Link={LinkNext}
+          titulo="Marcar asistencia"
+          secundario="Con tu rostro o con tu RUT y PIN"
+          inicio={<UserCheck aria-hidden className="size-5 flex-none text-fg-muted" />}
+        />
+      </div>
       <Empty
         titulo="Aún no hay nada por hacer"
         descripcion="Tus rondas, novedades y accesos aparecerán aquí cuando tu empresa los active."

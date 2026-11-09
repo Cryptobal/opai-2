@@ -10,6 +10,7 @@ import {
 import type { Contexto } from "../types";
 import { aFechaDb, fechaIso } from "./comun";
 import { feriadosDelMes, type InstalacionBase } from "./feriados";
+import { agregarPresencia } from "./presencia";
 import { cargarRegistros } from "./registros-cargar";
 
 export { celdaDelDia } from "./celda-dia";
@@ -149,5 +150,6 @@ export async function cargarMes(
       }),
     );
   }
+  await agregarPresencia(ctx, celdas, primero, ultimo);
   return { celdas, series, feriados };
 }

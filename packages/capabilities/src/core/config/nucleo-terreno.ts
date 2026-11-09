@@ -43,5 +43,21 @@ export const AJUSTES_TERRENO = defineAjustes(
         permiso: PERMISOS_CORE.personasManage,
         control: "numero",
       }),
+    biometria_umbral_similitud: z.number().min(70).max(99.9).default(90).meta({
+      etiqueta: "Umbral de similitud facial (0 a 100)",
+      ayuda:
+        "Similitud mínima para aceptar un rostro al marcar. Lo fija la plataforma, no cada empresa (T-03). Un valor fuera de rango cae al defecto.",
+      grupo: "Biometría",
+      ambito: "plataforma",
+      control: "numero",
+    }),
+    biometria_empresas_reales: z.boolean().default(false).meta({
+      etiqueta: "Permitir Face ID en empresas reales",
+      ayuda:
+        "Apagado: solo las empresas de prueba (slug «qa-…») usan un proveedor real de rostro. Se enciende solo cuando Carlos confirma la evaluación de impacto y el DPA (Ley 21.719, datos biométricos sensibles desde el 1-dic-2026).",
+      grupo: "Biometría",
+      ambito: "plataforma",
+      control: "switch",
+    }),
   }),
 );

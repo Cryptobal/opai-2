@@ -64,4 +64,6 @@ export * from "./terreno-hechos";
 export * from "./terreno-contexto";
 export * from "./campos";
 export * from "./acceso";
+export * from "./contexto-comercial";
+export * from "./sugerencia-seccion";
 export * from "./qa-aislado";

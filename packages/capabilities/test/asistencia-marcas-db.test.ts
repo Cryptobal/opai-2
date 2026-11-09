@@ -33,11 +33,25 @@ describe.skipIf(!urlPropietario)("Asistencia · marca legal (Postgres real)", ()
     });
   const ejecutar = (c: ReturnType<typeof ctx>, id: string, input: unknown, o = {}) =>
     mod.executeCapability(c, id, input, o) as Promise<Res>;
-  const marcar = (c: ReturnType<typeof ctx>, personaId: string, instalacionId: string, extra: Record<string, unknown> = {}) =>
-    ejecutar(c, "asistencia.marcas.registrar", {
-      personaId, instalacionId, metodo: "rut_pin", credencial: PIN_SIMULADO,
-      claveDispositivo: randomUUID(), ...extra,
-    });
+  // El kiosco: sin sesión, con su equipo emparejado a la instalación (la sesión de usuario es el teléfono personal).
+  const equipos = new Map<string, string>();
+  const equipoDe = async (tenantId: string, instalacionId: string) => {
+    const k = `${tenantId}|${instalacionId}`;
+    if (!equipos.has(k))
+      equipos.set(k, (await e.admin.dispositivo.create({ data: { tenantId, instalacionId, identificador: `DSP-${randomUUID().slice(0, 8)}`, tokenHash: randomUUID() + randomUUID(), estado: "activo" } })).id);
+    return equipos.get(k)!;
+  };
+  const comoEquipo = async (tenantId: string, input: Record<string, unknown>) =>
+    mod.executeCapability(
+      mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor }),
+      "asistencia.marcas.registrar",
+      { ...input, dispositivoId: await equipoDe(tenantId, String(input["instalacionId"])) },
+    ) as Promise<Res>;
+  const marcar = (c: ReturnType<typeof ctx>, personaId: string, instalacionId: string, extra: Record<string, unknown> = {}) => {
+    const input = { personaId, instalacionId, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID(), ...extra };
+    // La sesión de usuario del portal Terreno de estas pruebas hace de kiosco; el resto conserva su contexto.
+    return c.actor.tipo === "user" && c.portal === "terreno" && !extra["canal"] ? comoEquipo(c.tenantId, input) : ejecutar(c, "asistencia.marcas.registrar", input);
+  };
 
   async function empresa(slug: string, personas: number) {
     const tenant = (await e.admin.tenant.create({ data: { slug: `qa-${slug}-${randomUUID().slice(0, 6)}`, nombre: `Empresa ${slug}`, vertical: "seguridad" } })).id;

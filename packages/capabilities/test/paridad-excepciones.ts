@@ -132,6 +132,18 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant.",
   "asistencia.marcas.registrar":
     "Solo personas: un agente nunca marca por un trabajador (la marca es un hecho regulado, ADR-023). Solo desde Terreno y Portal Trabajador.",
+  "asistencia.rostro.estado":
+    "Solo personas: lo consulta la propia persona (sesión) o el equipo del kiosco con su PIN; un agente no opera sobre la biometría de un trabajador (Ley 21.719).",
+  "asistencia.rostro.iniciar_vida":
+    "Solo personas: la prueba de vida la completa la cámara de quien marca o se enrola, y cada sesión tiene costo (CAR-89).",
+  "asistencia.rostro.consentir":
+    "Solo personas: el consentimiento expreso lo da el propio trabajador (L-13, T-04); un agente nunca consiente por él.",
+  "asistencia.rostro.revocar":
+    "Solo personas: la revocación es un derecho personal del trabajador y borra su biometría (L-14).",
+  "asistencia.rostro.enrolar":
+    "Solo personas: el rostro es un dato biométrico sensible (Ley 21.719); un agente nunca enrola a un trabajador. Lo hace la propia persona con prueba de vida.",
+  "asistencia.telefono.habilitar":
+    "Solo personas: habilitar el teléfono personal para marcar es una decisión de RR. HH. sobre el canal de una persona (T-04); gobierna la identificación y no se delega a agentes.",
   "asistencia.marcas.verificar":
     "Interna: la ruta pública `/verificar/marca/<slug>/<hash>` la ejecuta sin sesión; el hash de 256 bits es la credencial y solo muestra lo mínimo del comprobante.",
   "asistencia.correcciones.responder":

@@ -11,6 +11,16 @@ export const celdaSchema = z.object({
   marcaManual: z.boolean().optional(),
   cubiertoPorId: z.string().nullable().optional(),
   variante: z.enum(["reemplazo", "refuerzo", "refuerzo_extra"]).nullable().optional(),
+  /** Presencia real según las marcas de Asistencia (solo con el módulo activo). */
+  presencia: z
+    .object({
+      personaId: z.string(),
+      estado: z.enum(["presente", "sin_marca", "ausente", "incompleto", "sin_turno"]),
+      entrada: z.string().nullable(),
+      salida: z.string().nullable(),
+      atrasoMin: z.number().int(),
+    })
+    .optional(),
 });
 
 export const resumenSchema = z.object({
