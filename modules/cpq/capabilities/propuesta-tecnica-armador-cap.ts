@@ -7,6 +7,7 @@ import {
   parseBloquesArmadorPropuesta,
   type BloqueArmadorPropuesta,
 } from "../domain/documento/propuesta-tecnica";
+import { capitulosDePropuesta } from "../persistencia/propuesta-capitulos";
 import { vistaMarcaDocumento } from "../persistencia/marca-documento";
 import { pdfPropuestaVista } from "../persistencia/pdf-propuesta-vista";
 import { plantillaActivaPropuestaLectura, vistaPlantillaPropuesta } from "../persistencia/plantilla-propuesta";
@@ -148,6 +149,7 @@ export const propuestaTecnicaPreviewPdf = defineCapability({
       marca,
       servicio,
       netoTotalClp: calculo.ventaMensual ?? 0,
+      capitulos: await capitulosDePropuesta(ctx, prop),
     });
     return { pdfBase64: Buffer.from(bytes).toString("base64"), bytes: bytes.byteLength, borrador: prop.estado !== "congelada" };
   },
