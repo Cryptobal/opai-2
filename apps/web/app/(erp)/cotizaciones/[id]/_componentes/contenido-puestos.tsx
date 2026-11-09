@@ -27,6 +27,7 @@ export function ContenidoPuestos(p: {
         pendiente={p.pendiente}
         verCostos={p.verCostos}
         onAgregar={modales.setHojaSeccion}
+        onAgregarCobertura={modales.setCoberturaSeccion}
         onEditar={modales.setLineaEditar}
         onQuitar={(id) => void p.ejecutar("cpq.lineas.quitar", { id }).then((r) => r != null && p.recargar())}
         onTraza={(lineaId) => {
