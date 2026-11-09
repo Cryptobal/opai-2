@@ -1,3 +1,5 @@
+import { type InstrumentosCompletos, parcialInstrumentos, type ValoresTexto, valoresIniciales } from "@/lib/instrumentos-valores";
+
 /** Parámetros financieros de la versión tal como los entrega `cpq.cotizaciones.ficha` (solo con `cpq:costos.ver`). */
 export type ParametrosVersion = {
   mesesContrato: number;
@@ -8,11 +10,7 @@ export type ParametrosVersion = {
   margenMinimoPct?: number | null;
   margenAlertaPct?: number | null;
   sobrescrito: boolean;
-  instrumentos: {
-    financiero: { habilitado: boolean; tasaPct: number };
-    garantia: { habilitada: boolean; meses: number; tasaAnualPct: number; contratoPct: number };
-    rc: { habilitada: boolean; tasaAnualPct: number };
-  };
+  instrumentos: InstrumentosCompletos;
 };
 
 /** 1 % = 10.000 en la escala de porcentajes de CPQ (100.000 = 10 %). */
@@ -34,6 +32,7 @@ export type EstadoMargen = {
   garantia: boolean;
   rc: boolean;
   financiero: boolean;
+  valores: ValoresTexto;
 };
 
 export function estadoInicialMargen(p: ParametrosVersion): EstadoMargen {
@@ -44,6 +43,7 @@ export function estadoInicialMargen(p: ParametrosVersion): EstadoMargen {
     garantia: p.instrumentos.garantia.habilitada,
     rc: p.instrumentos.rc.habilitada,
     financiero: p.instrumentos.financiero.habilitado,
+    valores: valoresIniciales(p.instrumentos),
   };
 }
 
@@ -55,7 +55,8 @@ export function mesesValidos(texto: string): number | null {
 }
 
 /** Entrada de `cpq.versiones.parametros`: solo lo que cambia respecto de lo guardado. */
-export function entradaParametros(versionId: string, e: EstadoMargen) {
+export function entradaParametros(versionId: string, e: EstadoMargen, base: ParametrosVersion) {
+  const valores = parcialInstrumentos(valoresIniciales(base.instrumentos), e.valores);
   const meses = mesesValidos(e.meses);
   return {
     versionId,
@@ -63,14 +64,14 @@ export function entradaParametros(versionId: string, e: EstadoMargen) {
     margenObjetivoPct: e.margenPct,
     ...(meses !== null ? { mesesContrato: meses } : {}),
     instrumentos: {
-      garantia: { habilitada: e.garantia },
-      rc: { habilitada: e.rc },
-      financiero: { habilitado: e.financiero },
+      garantia: { ...valores.garantia, habilitada: e.garantia },
+      rc: { ...valores.rc, habilitada: e.rc },
+      financiero: { ...valores.financiero, habilitado: e.financiero },
     },
   };
 }
 
 export function hayCambios(e: EstadoMargen, base: ParametrosVersion): boolean {
   const i = estadoInicialMargen(base);
-  return (Object.keys(i) as (keyof EstadoMargen)[]).some((k) => i[k] !== e[k]);
+  return (Object.keys(i) as (keyof EstadoMargen)[]).some((k) => JSON.stringify(i[k]) !== JSON.stringify(e[k]));
 }
