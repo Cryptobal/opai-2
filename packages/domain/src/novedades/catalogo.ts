@@ -1,13 +1,14 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { PARTES_FINANZAS } from "../cobros/catalogo-modulos";
+import { RUTAS_ENTRADAS_NOVEDADES } from "./entradas/rutas";
 import { parsearNovedadMarkdown, type EntradaNovedad } from "./parser";
 
 export { parsearNovedadMarkdown, type EntradaNovedad, type FrontmatterNovedad } from "./parser";
 
-const dir = join(dirname(fileURLToPath(import.meta.url)), "entradas");
+const dirEntradas = join(dirname(fileURLToPath(import.meta.url)), "entradas");
 
 let cache: EntradaNovedad[] | null = null;
 
@@ -24,9 +25,10 @@ export const ETIQUETA_MODULO_NOVEDAD: Readonly<Record<string, string>> = {
   plataforma: "Plataforma",
 };
 
-function cargarDesdeDisco(): EntradaNovedad[] {
-  const archivos = readdirSync(dir).filter((f) => f.endsWith(".md"));
-  const entradas = archivos.map((f) => parsearNovedadMarkdown(readFileSync(join(dir, f), "utf8")));
+function cargarCatalogo(): EntradaNovedad[] {
+  const entradas = RUTAS_ENTRADAS_NOVEDADES.map((ruta) =>
+    parsearNovedadMarkdown(readFileSync(fileURLToPath(ruta), "utf8")),
+  );
   const ids = new Set<string>();
   for (const e of entradas) {
     if (ids.has(e.id)) throw new Error(`id de novedad duplicado: ${e.id}`);
@@ -37,8 +39,13 @@ function cargarDesdeDisco(): EntradaNovedad[] {
 
 /** Catálogo de novedades integradas en main (archivos en `entradas/`). */
 export function catalogoNovedades(): readonly EntradaNovedad[] {
-  cache ??= cargarDesdeDisco();
+  cache ??= cargarCatalogo();
   return cache;
+}
+
+/** Directorio de entradas en el árbol fuente (solo tests/desarrollo). */
+export function directorioEntradasNovedades(): string {
+  return dirEntradas;
 }
 
 /** Invalida el caché (solo tests). */
