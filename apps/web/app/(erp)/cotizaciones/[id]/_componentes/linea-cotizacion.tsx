@@ -7,6 +7,7 @@ import { Button, type ItemMenu, Menu } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
 import { avisoLineaPuesto } from "@/lib/cpq-avisos";
+import { textoDias, textoHorario } from "@/lib/cpq-puesto-detalle";
 import { subtituloLineaCpq } from "@/lib/cpq-presentacion";
 
 import type { LineaEditable } from "../../_componentes/puesto-tipos";
@@ -43,6 +44,11 @@ export function LineaCotizacion({
   const costo = linea.costo as CostoLinea | undefined;
   const aviso = avisoLineaPuesto(costo?.mensaje, linea);
   const subtitulo = subtituloLineaCpq(linea);
+  // Sin ciclo, el subtítulo ya muestra el horario: no se repite.
+  const horario = linea.tipo === "puesto" && linea.patron?.trim() ? textoHorario(linea.horaInicio, linea.horaFin) : null;
+  const dias = linea.tipo === "puesto" ? textoDias(linea.diasSemana) : null;
+  // El sueldo solo existe en los datos con `cpq:costos.ver`: sin él no se dibuja ni vacío (R59).
+  const sueldo = linea.tipo === "puesto" && verCostos ? linea.sueldoBaseClp : undefined;
 
   function payloadEditar() {
     onEditar(linea);
@@ -69,6 +75,12 @@ export function LineaCotizacion({
         <div className="min-w-0 space-y-1">
           <p className="t-label text-fg">{linea.nombre}</p>
           {subtitulo ? <p className="t-caption text-fg-muted">{subtitulo}</p> : null}
+          {horario || dias ? (
+            <p className="t-caption text-fg-muted tabular-nums">{[horario, dias].filter(Boolean).join(" · ")}</p>
+          ) : null}
+          {sueldo != null ? (
+            <p className="t-body-sm t-numeric text-fg-muted">Sueldo bruto: {pesos(sueldo)}/mes</p>
+          ) : null}
           {verCostos && costo?.estado === "ok" && costo.costoEmpresaMensualClp != null ? (
             <p className="t-body-sm t-numeric text-fg-muted">
               Costo empresa: {pesos(costo.costoEmpresaMensualClp)}/mes
