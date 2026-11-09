@@ -33,14 +33,13 @@ export function ValoresGarantia({ v, onCambiar }: { v: ValoresTexto; onCambiar: 
         ]}
       />
       {v.garantiaModo === "porcentaje" ? (
-        <>
-          <Num id="cpq-gar-pct" etiqueta="% garantizado del contrato" valor={v.garantia.contratoPct} error={err["garantia.contratoPct"]} onCambiar={(t) => g("contratoPct", t)} />
-          <Num id="cpq-gar-tasa" etiqueta="Tasa anual (%)" valor={v.garantia.tasaAnualPct} error={err["garantia.tasaAnualPct"]} onCambiar={(t) => g("tasaAnualPct", t)} />
-          <Num id="cpq-gar-adm" etiqueta="Gasto administrativo (%)" valor={v.garantia.administracionPct} error={err["garantia.administracionPct"]} onCambiar={(t) => g("administracionPct", t)} />
-        </>
+        <Num id="cpq-gar-pct" etiqueta="% garantizado del contrato" valor={v.garantia.contratoPct} error={err["garantia.contratoPct"]} onCambiar={(t) => g("contratoPct", t)} />
       ) : (
         <Num id="cpq-gar-uf" etiqueta="Monto fijo (UF)" valor={v.garantia.montoUf} error={err["garantia.montoUf"]} onCambiar={(t) => g("montoUf", t)} />
       )}
+      {/* El motor aplica la tasa anual y el gasto administrativo también al monto fijo: deben verse y editarse en ambos modos. */}
+      <Num id="cpq-gar-tasa" etiqueta="Tasa anual (%)" valor={v.garantia.tasaAnualPct} error={err["garantia.tasaAnualPct"]} onCambiar={(t) => g("tasaAnualPct", t)} />
+      <Num id="cpq-gar-adm" etiqueta="Gasto administrativo (%)" valor={v.garantia.administracionPct} error={err["garantia.administracionPct"]} onCambiar={(t) => g("administracionPct", t)} />
       <Num id="cpq-gar-meses" etiqueta="Meses de la póliza" valor={v.garantia.meses} error={err["garantia.meses"]} onCambiar={(t) => g("meses", t)} />
       <Badge tono="info" punto={false}>Fórmula provisional</Badge>
     </div>
@@ -62,16 +61,14 @@ export function ValoresRc({ v, onCambiar }: { v: ValoresTexto; onCambiar: Cambia
         ]}
       />
       {v.rcModo === "prima" ? (
-        <>
-          <Num id="cpq-rc-prima" etiqueta="Prima anual (UF)" valor={v.rc.primaAnualUf} error={err["rc.primaAnualUf"]} onCambiar={(t) => r("primaAnualUf", t)} />
-          <Num id="cpq-rc-asig" etiqueta="% asignado a esta cotización" valor={v.rc.asignacionPct} error={err["rc.asignacionPct"]} onCambiar={(t) => r("asignacionPct", t)} />
-        </>
+        <Num id="cpq-rc-prima" etiqueta="Prima anual (UF)" valor={v.rc.primaAnualUf} error={err["rc.primaAnualUf"]} onCambiar={(t) => r("primaAnualUf", t)} />
       ) : (
         <>
           <Num id="cpq-rc-aseg" etiqueta="Monto asegurado (UF)" valor={v.rc.aseguradoUf} error={err["rc.aseguradoUf"]} onCambiar={(t) => r("aseguradoUf", t)} />
           <Num id="cpq-rc-tasa" etiqueta="Tasa anual (%)" valor={v.rc.tasaAnualPct} error={err["rc.tasaAnualPct"]} onCambiar={(t) => r("tasaAnualPct", t)} />
         </>
       )}
+      <Num id="cpq-rc-asig" etiqueta="% asignado a esta cotización" valor={v.rc.asignacionPct} error={err["rc.asignacionPct"]} onCambiar={(t) => r("asignacionPct", t)} />
       <Segmentado
         etiqueta="Plazo"
         activa={v.rcPlazo}

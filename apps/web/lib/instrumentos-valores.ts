@@ -89,8 +89,8 @@ export function erroresValores(v: ValoresTexto): Record<string, string> {
     for (const k of activos) if (aEscalado(campos[k] ?? "", k) === null) e[`${grupo}.${k}`] = TIPO[k] === "meses" ? "Entre 1 y 120 meses." : "Escribe un número válido.";
   };
   revisar("financiero", v.financiero, ["tasaPct"]);
-  revisar("garantia", v.garantia, v.garantiaModo === "fija" ? ["montoUf", "meses"] : ["contratoPct", "tasaAnualPct", "administracionPct", "meses"]);
-  revisar("rc", v.rc, [...(v.rcModo === "prima" ? ["primaAnualUf", "asignacionPct"] : ["aseguradoUf", "tasaAnualPct"]), ...(v.rcPlazo === "meses" ? ["meses"] : [])]);
+  revisar("garantia", v.garantia, [...(v.garantiaModo === "fija" ? ["montoUf"] : ["contratoPct"]), "tasaAnualPct", "administracionPct", "meses"]);
+  revisar("rc", v.rc, [...(v.rcModo === "prima" ? ["primaAnualUf"] : ["aseguradoUf", "tasaAnualPct"]), "asignacionPct", ...(v.rcPlazo === "meses" ? ["meses"] : [])]);
   return e;
 }
 

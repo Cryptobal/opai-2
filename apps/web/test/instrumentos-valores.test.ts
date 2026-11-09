@@ -31,5 +31,8 @@ describe("valores de instrumentos", () => {
     const malo = { ...v, financiero: { tasaPct: "x" }, garantia: { ...v.garantia, montoUf: "zzz" } };
     expect(Object.keys(erroresValores(malo))).toEqual(["financiero.tasaPct"]);
     expect(Object.keys(erroresValores({ ...malo, garantiaModo: "fija" }))).toContain("garantia.montoUf");
+    // La tasa y el gasto administrativo de la garantía y la asignación de la RC valen en todos los modos.
+    const rotos = { ...v, garantiaModo: "fija" as const, rcModo: "tasa" as const, garantia: { ...v.garantia, tasaAnualPct: "x", administracionPct: "y" }, rc: { ...v.rc, asignacionPct: "z" } };
+    expect(Object.keys(erroresValores(rotos))).toEqual(expect.arrayContaining(["garantia.tasaAnualPct", "garantia.administracionPct", "rc.asignacionPct"]));
   });
 });
