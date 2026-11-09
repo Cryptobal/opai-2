@@ -217,6 +217,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
+  "core.novedades_lectura": {
+    dependencias: ["core.memberships"],
+    valores: (ctx) => ({ usuario_id: ctx.usuario, novedad_id: "dos-empresas-rls" }),
+  },
   // Nómina (Brief 25): los CHECK de unidad por tipo y de tipo/estado rechazan el texto genérico.
   "nomina.novedades": { valores: () => ({ tipo: "ausencia", cantidad: 1, monto_clp: null }) },
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },

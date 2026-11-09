@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 667 pares pantalla→capacidad · 595 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 670 pares pantalla→capacidad · 598 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -99,6 +99,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
+| compartido | `app/_components` | `core.novedades.descartar_destacada` | `core_novedades_descartar_destacada` | existe |
+| compartido | `app/_components` | `core.novedades.list` | `core_novedades_list` | existe |
+| compartido | `app/_components` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.listar` | `rendiciones_bandeja_listar` | existe |
@@ -956,6 +959,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
+- `core.novedades.marcar_leidas`
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`

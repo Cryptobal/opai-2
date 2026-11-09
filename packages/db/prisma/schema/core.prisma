@@ -64,6 +64,7 @@ model Tenant {
   plantillas              Plantilla[]
   notificacionReglas      NotificacionRegla[]
   notificaciones          Notificacion[]
+  novedadesLectura        NovedadLectura[]
   envios                  Envio[]
   integraciones           Integracion[]
   secretos                Secreto[]

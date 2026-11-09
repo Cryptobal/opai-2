@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable max-lines -- Shell persistente ADR-045; menú y contadores en hooks dedicados. */
 
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,7 +21,7 @@ import { PinFichaContexto, pinDeFicha } from "./pin-ficha-contexto";
 import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
 import { padreConfiguracion } from "./padre-configuracion";
-import { menuCuentaShell } from "./menu-cuenta-shell";
+import { useMenuShell } from "./use-menu-shell";
 import { conContadores } from "./nav-contadores";
 import { propsPreferenciasShell } from "./shell-props-preferencias";
 
@@ -108,9 +109,15 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     [navInferiorBase, bandejaPendiente],
   );
   const empresas = empresasShell(datos.empresas, Building2);
-  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true),
-    datos.portal === "erp" && datos.tenant !== null, datos.iconos,
-    datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal) ? () => setInicio(true) : undefined);
+  const menu = useMenuShell(
+    datos,
+    enErp,
+    router,
+    () => setPassword(true),
+    datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
+      ? () => setInicio(true)
+      : undefined,
+  );
   const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
     <PinFichaContexto.Provider value={pinMenu}>
