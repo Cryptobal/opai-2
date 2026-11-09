@@ -6,6 +6,7 @@ import { margenPctTexto } from "@/lib/cpq-presentacion";
 
 import type { DatosFichaCotizacion } from "../../_componentes/datos";
 import type { LineaEditable } from "../../_componentes/puesto-tipos";
+import { HojaCobertura } from "./hoja-cobertura";
 import { HojaPuesto } from "./hoja-puesto";
 import { HojaTrazaCalculo } from "./hoja-traza-calculo";
 import { DialogoVistaPreviaPdfLazy, HojaEnviarCotizacionLazy, HojaMargenFinanzasLazy } from "./ficha-cotizacion-modales-lazy";
@@ -13,6 +14,7 @@ import type { MetaFicha } from "./meta-ficha";
 
 export function useModalesFichaCotizacion() {
   const [hojaSeccion, setHojaSeccion] = useState<string | null>(null);
+  const [coberturaSeccion, setCoberturaSeccion] = useState<string | null>(null);
   const [lineaEditar, setLineaEditar] = useState<LineaEditable | null>(null);
   const [trazaAbierta, setTrazaAbierta] = useState<{ titulo: string; traza: Record<string, unknown>[] } | null>(
     null,
@@ -30,6 +32,8 @@ export function useModalesFichaCotizacion() {
     editarLineaDe,
     hojaSeccion,
     setHojaSeccion,
+    coberturaSeccion,
+    setCoberturaSeccion,
     lineaEditar,
     setLineaEditar,
     trazaAbierta,
@@ -65,6 +69,9 @@ export function FichaCotizacionModales(p: {
     <>
       {m.hojaSeccion ? (
         <HojaPuesto seccionId={m.hojaSeccion} verCostos={p.verCostos} onCerrar={() => m.setHojaSeccion(null)} onListo={p.recargar} />
+      ) : null}
+      {m.coberturaSeccion ? (
+        <HojaCobertura seccionId={m.coberturaSeccion} verCostos={p.verCostos} onCerrar={() => m.setCoberturaSeccion(null)} onListo={p.recargar} />
       ) : null}
       {m.lineaEditar ? (
         <HojaPuesto linea={m.lineaEditar} verCostos={p.verCostos} onCerrar={() => m.setLineaEditar(null)} onListo={p.recargar} />
