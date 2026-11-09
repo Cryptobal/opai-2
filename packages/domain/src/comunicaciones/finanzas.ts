@@ -46,4 +46,48 @@ export const COMUNICABLES_FINANZAS: readonly EventoComunicable[] = [
       },
     },
   },
+  {
+    evento: "finanzas.venta.proforma_enviada",
+    nombre: "Proforma enviada al cliente",
+    descripcion:
+      "Correo al cliente con la proforma del período, antes de facturar. Lo dispara la programación el día de generación del borrador. No es un documento tributario.",
+    transaccional: true,
+    variables: [
+      v("cliente.nombre", "texto", "Minera Los Andes SpA", "Razón social del cliente."),
+      v("periodo.mes", "texto", "Noviembre", "Mes del período que se factura."),
+      v("periodo.anio", "texto", "2026", "Año del período que se factura."),
+      v("documento.total", "texto", "$1.190.000", "Monto total estimado con IVA."),
+      v("documento.fecha_factura", "fecha", "30-11-2026", "Fecha proyectada de la factura."),
+      EMPRESA,
+    ],
+    plantillas: {
+      correo: {
+        asunto: "Proforma - {{cliente.nombre}} - {{periodo.mes}} - {{periodo.anio}}",
+        cuerpo:
+          "Estimados {{cliente.nombre}}:\n\nLes enviamos la proforma de {{periodo.mes}} {{periodo.anio}} por {{documento.total}}, con factura proyectada para el {{documento.fecha_factura}}. Esta proforma no es un documento tributario; avísennos si algo no calza antes de facturar.\n\nSaludos,\n{{empresa.nombre}}",
+      },
+    },
+  },
+  {
+    evento: "finanzas.venta.estado_pago_enviado",
+    nombre: "Estado de pago enviado al cliente",
+    descripcion:
+      "Correo al cliente con el estado de pago del período, antes de facturar. Lo dispara la programación el día de generación del borrador. No es un documento tributario.",
+    transaccional: true,
+    variables: [
+      v("cliente.nombre", "texto", "Minera Los Andes SpA", "Razón social del cliente."),
+      v("periodo.mes", "texto", "Noviembre", "Mes del período que se factura."),
+      v("periodo.anio", "texto", "2026", "Año del período que se factura."),
+      v("documento.total", "texto", "$1.190.000", "Monto total estimado con IVA."),
+      v("documento.fecha_factura", "fecha", "30-11-2026", "Fecha proyectada de la factura."),
+      EMPRESA,
+    ],
+    plantillas: {
+      correo: {
+        asunto: "Estado de pago - {{cliente.nombre}} - {{periodo.mes}} - {{periodo.anio}}",
+        cuerpo:
+          "Estimados {{cliente.nombre}}:\n\nLes enviamos el estado de pago de {{periodo.mes}} {{periodo.anio}} por {{documento.total}}, con factura proyectada para el {{documento.fecha_factura}}. Este estado de pago no es un documento tributario.\n\nSaludos,\n{{empresa.nombre}}",
+      },
+    },
+  },
 ];
