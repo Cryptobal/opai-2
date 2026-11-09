@@ -8,7 +8,7 @@
 import { randomUUID } from "node:crypto";
 
 import { cerrarClientes, dbAdmin } from "@opai/db";
-import { digitoVerificador } from "@opai/domain";
+import { QA_AISLADO, digitoVerificador, exigirSoloEmpresasQa } from "@opai/domain";
 
 import {
   capacidadesDelNucleo,
@@ -27,15 +27,25 @@ const dia = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 async function main(): Promise<void> {
   const { slug, confirmar } = leerDestino(process.argv.slice(2), process.env);
   const admin = dbAdmin();
+  if (process.env["OPAI_ENTORNO"] === QA_AISLADO.entorno) {
+    // Falla cerrado: si la base trae cualquier empresa que no sea de QA (p. ej. `gard`), no es el QA vacío.
+    exigirSoloEmpresasQa((await admin.tenant.findMany({ select: { slug: true } })).map((t) => t.slug));
+  }
   const existente = await admin.tenant.findUnique({ where: { slug } });
   const config = existente ? await admin.dteConfig.findUnique({ where: { tenantId: existente.id } }) : null;
   if (config?.ambiente === "produccion") throw new Error(`El tenant «${slug}» emite en producción: no es de QA.`);
   if (!confirmar) {
-    console.log(`Simulación en «${slug}»: ${existente ? "tenant existente" : "se crearía el tenant de QA"}; ${config ? "dte_config existente (no se toca)" : "se crearía dte_config de certificación"}; cliente, proveedor, cuenta Santander con 3 movimientos y CAF ficticio. Repite con --confirmar para aplicar.`);
+    console.log(`Simulación en «${slug}»: ${existente ? "tenant existente" : "se crearía el tenant de QA"}; ${config ? "dte_config existente (no se toca)" : "se crearía dte_config de certificación"}; cliente, proveedor, cuenta Santander con 3 movimientos, CAF ficticio y, solo con SII simulado, 3 facturas emitidas de prueba. Repite con --confirmar para aplicar.`);
     return;
   }
   const tenant = existente ?? (await admin.tenant.create({ data: { slug, nombre: "QA Finanzas (ficticio)", vertical: "seguridad" } }));
   const tenantId = tenant.id;
+  // Módulo mínimo para operar el circuito: sin él la navegación y las capacidades de Finanzas no responden.
+  await admin.tenantModule.upsert({
+    where: { tenantId_moduloId: { tenantId, moduloId: "finanzas" } },
+    update: {},
+    create: { tenantId, moduloId: "finanzas", estado: "activo" },
+  });
 
   registrarCapacidades([...capacidadesDelNucleo, ...capacidadesFinanzas]);
   const usuarioId = randomUUID();
@@ -96,10 +106,29 @@ async function main(): Promise<void> {
 
   // Emisión de certificación y CAF sintético (la capacidad rechaza CAF reales en el tenant QA).
   if (!config) await ejecutar("finanzas.dte_config.actualizar", { ambiente: "certificacion", rutEmisor: RUT_EMISOR });
-  if (!(await admin.dteFolio.count({ where: { tenantId, tipoDte: 33, folioDesde: 9000 } }))) {
-    await ejecutar("finanzas.folios.cargar_caf", { cafXml: cafXmlSintetico({ folioDesde: 9000, folioHasta: 9050 }) });
+  // CAF sintéticos por tipo: 33 factura, 34 exenta, 56 nota de débito y 61 nota de crédito (rangos distintos).
+  for (const [tipoDte, folioDesde] of [[33, 9000], [34, 9300], [56, 9200], [61, 9100]] as const) {
+    if (!(await admin.dteFolio.count({ where: { tenantId, tipoDte, folioDesde } }))) {
+      await ejecutar("finanzas.folios.cargar_caf", { cafXml: cafXmlSintetico({ tipoDte, folioDesde, folioHasta: folioDesde + 50 }) });
+    }
   }
-  console.log("Datos de QA de Finanzas listos (proveedor, cuenta Santander con 3 movimientos, CAF ficticio, cliente).");
+  // Tres facturas emitidas de $1.190.000 (neto 1.000.000 + IVA) con el SII SIMULADO, para probar el circuito de caja:
+  // la transferencia de $1.190.000 concilia con una, y el abono de $2.380.000, con dos (N:M). Solo con SII simulado:
+  // con cualquier otro adaptador no se emite nada.
+  const MARCA_FACTURA = "Factura sintética de QA (circuito de caja)";
+  let facturas = 0;
+  if (process.env["SII_ADAPTADOR"] === "simulado") {
+    const cliente = await admin.cuenta.findFirst({ where: { tenantId, rut: "77234567-8" }, select: { id: true } });
+    const hechas = await admin.documentoEmitido.count({ where: { tenantId, glosa: MARCA_FACTURA } });
+    for (let i = hechas; i < 3 && cliente; i += 1) {
+      const borrador = (await ejecutar("finanzas.ventas.crear_borrador", {
+        cuentaId: cliente.id, tipoDte: 33, glosa: MARCA_FACTURA, lineas: [{ glosa: `Servicio de prueba ${i + 1}`, monto: 1_000_000 }],
+      })) as { id: string };
+      await ejecutar("finanzas.ventas.emitir", { documentoId: borrador.id });
+      facturas += 1;
+    }
+  }
+  console.log(`Datos de QA de Finanzas listos (módulo finanzas, proveedor, cuenta Santander con 3 movimientos, CAF ficticios 33/34/56/61, cliente${facturas > 0 ? `, ${facturas} factura(s) emitida(s) nueva(s) con SII simulado` : ""}).`);
 }
 
 main()

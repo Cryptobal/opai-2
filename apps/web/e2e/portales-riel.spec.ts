@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { esperarCuentaDeEmpresa } from "./portal-cliente-denegacion";
 import { ocultarIndicadorDev } from "./indicador-dev";
 import { codigoTotp, E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -61,9 +62,11 @@ test.describe("acceso a portales", () => {
           } else {
             // H1: sin acceso el shell se monta igual, con el aviso dentro del marco y sin ningún ítem
             // de navegación del portal ajeno.
-            await expect(
-              page.getByText("No tienes acceso a este portal en la empresa actual."),
-            ).toBeVisible();
+            if (p.id === "cliente") await esperarCuentaDeEmpresa(page);
+            else
+              await expect(
+                page.getByText("No tienes acceso a este portal en la empresa actual."),
+              ).toBeVisible();
             await expect(nav.getByRole("link")).toHaveCount(0);
           }
           await expect(page).toHaveTitle(titulo);

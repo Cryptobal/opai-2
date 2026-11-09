@@ -11,3 +11,8 @@ export const capacidadesBiometria = [
   biometriaEstado,
   biometriaBorrar,
 ];
+
+export { borrarEnrolamiento } from "./borrado";
+export { enrolarRostro } from "./enrolamiento";
+export { evaluarRostro, verificarRostro, type ResultadoRostro } from "./verificacion";
+export { PROPOSITO_BIOMETRIA, consentimientoVigente as consentimientoBiometricoVigente } from "./comun";

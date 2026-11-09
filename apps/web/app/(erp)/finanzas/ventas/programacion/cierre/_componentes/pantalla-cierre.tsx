@@ -38,7 +38,7 @@ export function PantallaCierre({ state, periodo, tablero, gestiona }: Props) {
   const [dialogo, setDialogo] = useState<{ tipo: "oc_hes" | "observar"; item: ItemCierre } | null>(null);
   const [lote, setLote] = useState<ResultadoLote | null>(null);
   const items = tablero?.items ?? [];
-  const todosListos = items.filter((i) => i.etapa === "listo");
+  const todosListos = items.filter((i) => i.emitible);
   const listos = todosListos.slice(0, 50); // el lote admite hasta 50 por aprobación
 
   async function aplicar(item: ItemCierre, cambio: Record<string, unknown>, aviso: string) {

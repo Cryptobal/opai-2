@@ -39,6 +39,10 @@ import { negociosDesvincularInstalacion, negociosVincularInstalacion } from "./n
 
 export { ajustesComercial } from "./ajustes";
 
+import { contextoAgregar, contextoListar } from "./contexto-negocio";
+import { contextoArchivar, contextoConfirmar } from "./contexto-negocio-estado";
+import { contextoSugerirSeccion } from "./contexto-sugerir";
+
 export const capacidadesComercial: readonly Capacidad[] = [
   negociosList,
   negociosGet,
@@ -57,6 +61,11 @@ export const capacidadesComercial: readonly Capacidad[] = [
   negociosVincularInstalacion,
   negociosDesvincularInstalacion,
   negociosSetContactos,
+  contextoListar,
+  contextoAgregar,
+  contextoConfirmar,
+  contextoArchivar,
+  contextoSugerirSeccion,
   configGet,
   configActualizarEtapa,
   configGuardarCatalogo,

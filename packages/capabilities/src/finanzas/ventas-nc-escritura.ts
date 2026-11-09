@@ -16,6 +16,7 @@ type RefDoc = {
   cotizacionId: string | null;
   tipoDte: number;
   folio: number | null;
+  fechaEmision: Date | null;
   fechaVencimiento: Date | null;
   montoNeto: number;
   montoExento: number;
@@ -86,6 +87,7 @@ export async function persistirNotaCredito(
           tenantId: ctx.tenantId,
           tipoDteRef: p.ref.tipoDte,
           folioRef: p.folioRef,
+          fechaRef: p.ref.fechaEmision,
           codigoRef: p.codigoReferencia,
           razonRef: p.motivo,
         },

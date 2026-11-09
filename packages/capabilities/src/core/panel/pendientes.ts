@@ -5,11 +5,12 @@ import { tituloVencimientos, PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
 import { documentosMatriz } from "../documentos/matriz";
-import { dondePersona } from "../maestros/alcance";
 import { SIN_PLATAFORMA } from "../../agentes/plataforma";
+import { pendientesAnexos } from "./pendientes-anexos";
+import { pendientesSolicitudes } from "./pendientes-solicitudes";
 
 const pendienteSchema = z.object({
-  tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones", "anexos"]),
+  tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones", "anexos", "solicitudes"]),
   titulo: z.string(),
   detalle: z.string(),
   tono: z.enum(["warning", "danger", "neutro"]),
@@ -23,7 +24,7 @@ export const inicioPendientes = defineCapability({
   auditarLectura: false, // Solo contadores/estado, sin correos ni contenido personal de terceros.
   id: "core.inicio.pendientes",
   descripcion:
-    "Lo que requiere una decisión hoy en la empresa: aprobaciones de agentes por vencer, documentos vencidos o por vencer, invitaciones sin aceptar e integraciones con error, según los permisos del actor.",
+    "Lo que requiere una decisión hoy en la empresa: aprobaciones de agentes por vencer, documentos vencidos o por vencer, invitaciones sin aceptar, integraciones con error y solicitudes nuevas o en revisión a su cargo, según los permisos del actor.",
   permiso: null,
   input: z.object({}),
   output: z.array(pendienteSchema),
@@ -105,21 +106,7 @@ export const inicioPendientes = defineCapability({
           });
         }
       }
-      // Lleva a /personas?anexo=borrador, que exige anexos.read: el conteo usa el mismo alcance.
-      if (ctx.autorizar(PERMISOS_CORE.anexosManage) && ctx.autorizar(PERMISOS_CORE.anexosRead)) {
-        const n = await ctx.db.anexoContrato.count({
-          where: { estado: "borrador", persona: dondePersona(ctx) },
-        });
-        if (n)
-          items.push({
-            tipo: "anexos",
-            titulo: `${plural(n, "anexo de contrato", "anexos de contrato")} en borrador`,
-            detalle: "Revisa el cambio y apruébalo o recházalo con motivo",
-            tono: "warning",
-            href: "/personas?anexo=borrador",
-            accion: "Revisar",
-          });
-      }
+      items.push(...(await pendientesAnexos(ctx)));
       if (ctx.autorizar(PERMISOS_CORE.integracionesManage)) {
         const conError = await ctx.db.integracion.findMany({
           where: { estado: "error" },
@@ -135,6 +122,7 @@ export const inicioPendientes = defineCapability({
             accion: "Revisar",
           });
       }
+      items.push(...(await pendientesSolicitudes(ctx)));
       return items;
     });
   },

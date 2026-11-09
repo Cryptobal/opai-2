@@ -1,7 +1,9 @@
 "use client";
 
-import { Campo, Card, Combobox, Input, InputFecha, Select } from "@opai/ds";
+import { Campo, Card, Combobox, Input, InputFecha, Select, Switch } from "@opai/ds";
 
+import { CamposFactura } from "./campos-factura";
+import { CamposPrevios } from "./campos-previos";
 import { CamposUf } from "./campos-uf";
 import { DIAS, MESES, SEMANA } from "./opciones-agenda";
 import type { FormProgramacion } from "./tipos";
@@ -115,6 +117,20 @@ export function CamposGenerales({ f, set, cuentas, editando }: Props) {
           />
         </Campo>
         <CamposUf f={f} set={set} />
+        <CamposFactura f={f} set={set} />
+        <Switch
+          etiqueta="Proforma antes de facturar"
+          descripcion="Marca la modalidad: el cliente recibe una proforma y da su OK antes de la factura. No es un documento tributario."
+          activo={f.autoEnvioProforma}
+          onCambiar={(v) => set({ autoEnvioProforma: v })}
+        />
+        <Switch
+          etiqueta="Estado de pago antes de facturar"
+          descripcion="Marca la modalidad: el cliente recibe un estado de pago antes de la factura. No es un documento tributario."
+          activo={f.autoEnvioEstadoPago}
+          onCambiar={(v) => set({ autoEnvioEstadoPago: v })}
+        />
+        <CamposPrevios f={f} set={set} />
         <Campo etiqueta="Desde (opcional)" htmlFor="prog-inicio">
           <InputFecha
             id="prog-inicio"

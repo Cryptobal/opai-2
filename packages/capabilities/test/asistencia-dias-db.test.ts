@@ -34,7 +34,21 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
   };
   const run = (c: ReturnType<typeof ctx>, id: string, input: unknown) => mod.executeCapability(c, id, input) as Promise<Res>;
   const sistema = (tenantId: string) => mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor });
-  const marcar = (tenant: string) => run(ctx(tenant, "terreno"), "asistencia.marcas.registrar", { personaId: T.persona, instalacionId: T.inst, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID() });
+  // El kiosco: sin sesión, con su equipo emparejado a la instalación (la sesión de usuario es el teléfono personal).
+  const equipos = new Map<string, string>();
+  const equipoDe = async (tenantId: string, instalacionId: string) => {
+    const k = `${tenantId}|${instalacionId}`;
+    if (!equipos.has(k))
+      equipos.set(k, (await e.admin.dispositivo.create({ data: { tenantId, instalacionId, identificador: `DSP-${randomUUID().slice(0, 8)}`, tokenHash: randomUUID() + randomUUID(), estado: "activo" } })).id);
+    return equipos.get(k)!;
+  };
+  const comoEquipo = async (tenantId: string, input: Record<string, unknown>) =>
+    mod.executeCapability(
+      mod.crearContexto({ tenantId, actor: { tipo: "system" }, portal: null, modulosActivos: ["asistencia"], medidor }),
+      "asistencia.marcas.registrar",
+      { ...input, dispositivoId: await equipoDe(tenantId, String(input["instalacionId"])) },
+    ) as Promise<Res>;
+  const marcar = (tenant: string) => comoEquipo(tenant, { personaId: T.persona, instalacionId: T.inst, metodo: "rut_pin", credencial: PIN_SIMULADO, claveDispositivo: randomUUID() });
   const recalcular = () => run(ctx(T.a), "asistencia.dias.recalcular", { personaId: T.persona, desde: fecha, hasta: fecha });
   const dia = () => e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona } });
 
@@ -114,6 +128,17 @@ describe.skipIf(!urlPropietario)("Asistencia · día consolidado y «hoy» (Post
     expect((await dia()).tipoJornada).toBe("teletrabajo");
     const mal = await run(ctx(T.a), "asistencia.jornadas.fijar_tipo", { personaId: T.persona, tipoJornada: "inventada" });
     expect(mal.ok).toBe(false);
+  });
+
+  it("un recálculo histórico usa el tipo de jornada del vínculo de esa fecha, no el de hoy", async () => {
+    const cargoId = (await e.admin.cargo.findFirstOrThrow({ where: { tenantId: T.a } })).id;
+    await e.admin.vinculoLaboral.create({ data: { tenantId: T.a, personaId: T.persona, cargoId, tipo: "plazo_fijo", inicio: new Date("2024-01-01"), termino: new Date("2024-12-31"), estado: "terminado", tipoJornada: "parcial" } });
+    const r = await run(ctx(T.a), "asistencia.dias.recalcular", { personaId: T.persona, desde: "2024-06-03", hasta: "2024-06-03" });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const antiguo = await e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona, fecha: new Date("2024-06-03T00:00:00Z") } });
+    expect(antiguo.tipoJornada).toBe("parcial");
+    const hoy = await e.admin.dia.findFirstOrThrow({ where: { tenantId: T.a, personaId: T.persona, fecha: new Date(`${fecha}T00:00:00Z`) } });
+    expect(hoy.tipoJornada).toBe("teletrabajo");
   });
 
   it("una contingencia aceptada días después cuenta en la hora que se declaró", async () => {

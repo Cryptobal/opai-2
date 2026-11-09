@@ -32,6 +32,7 @@ export const manifest = defineModule({
     { id: "asistencia.contingencia.respondida", descripcion: "El trabajador aceptó u objetó una marca de contingencia." },
     { id: "asistencia.alerta.sin_marca_inicio", descripcion: "Pasaron 30 minutos del inicio del turno sin marca de entrada." },
     { id: "asistencia.alerta.sin_marca_termino", descripcion: "El turno terminó sin marca de salida." },
+    { id: "asistencia.alerta.descanso_insuficiente", descripcion: "El descanso entre dos jornadas fue menor al mínimo de su tipo de jornada (teletrabajo: 12 horas)." },
     { id: "asistencia.aviso.compensables", descripcion: "Aviso de horas compensables cada 30 días." },
     { id: "asistencia.alerta.sin_correo_personal", descripcion: "Un trabajador marcó y no tiene correo personal para recibir el comprobante." },
   ],

@@ -1,6 +1,7 @@
 import { produccionTributariaHabilitada } from "@opai/integrations";
 
 import type { Contexto } from "../types";
+import { emisionSimulada, ambienteEmisionDe, mensajeCafAmbiente } from "./caf-ambiente";
 import { chequeosCredencialesEmision } from "./ventas-preflight-credenciales";
 
 export type ItemPreflightEmision = {
@@ -73,6 +74,11 @@ export async function itemsPreflightEmision(
         : `El CAF del tipo ${tipo} está vencido; cargue uno nuevo.`,
       !cafOk,
     );
+    if (!emisionSimulada(cfg)) {
+      const ambiente = ambienteEmisionDe(cfg);
+      const msg = mensajeCafAmbiente(folioRango, ambiente);
+      push("caf_ambiente", msg == null, msg ?? `El CAF es del ambiente de emisión (${ambiente}).`, msg != null);
+    }
   } else {
     push("caf", false, `No hay folios disponibles para el DTE ${tipo}; cargue un CAF.`, true);
   }

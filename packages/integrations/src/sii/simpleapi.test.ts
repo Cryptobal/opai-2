@@ -75,6 +75,36 @@ describe("firmar (POST dte/generar)", () => {
     expect(r.timbrePdf417.endsWith("</TED>")).toBe(true);
   });
 
+  it("envía Acteco, dirección y comuna del emisor con los nombres de OPAI 1.0 (ActividadEconomica es lista)", async () => {
+    const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
+    await adaptadorSimpleApi({
+      ...creds,
+      razonSocialEmisor: "Emisora de Prueba SpA",
+      giroEmisor: "Servicios de seguridad",
+      actecoEmisor: 801000,
+      direccionEmisor: "Calle Falsa 123",
+      comunaEmisor: "Providencia",
+      ciudadEmisor: "Santiago",
+    }).firmar(payload);
+    const emisor = JSON.parse(String(llamadas[0]?.form.get("input"))).Documento.Encabezado.Emisor;
+    expect(emisor).toEqual({
+      Rut: "76269769-6",
+      RazonSocial: "Emisora de Prueba SpA",
+      Giro: "Servicios de seguridad",
+      ActividadEconomica: [801000],
+      DireccionOrigen: "Calle Falsa 123",
+      ComunaOrigen: "Providencia",
+      CiudadOrigen: "Santiago",
+    });
+  });
+
+  it("sin datos del emisor no inventa campos", async () => {
+    const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
+    await adaptadorSimpleApi(creds).firmar(payload);
+    const emisor = JSON.parse(String(llamadas[0]?.form.get("input"))).Documento.Encabezado.Emisor;
+    expect(emisor).toEqual({ Rut: "76269769-6" });
+  });
+
   it("ADR-075: el XML con ñ y tildes vuelve con los mismos bytes ISO-8859-1 y el mismo SHA-256", async () => {
     const original = fixture("simpleapi-generar-factura.xml").replace(
       "RAZÓN SOCIAL",
@@ -172,5 +202,30 @@ describe("disponibilidad", () => {
     }
     expect(llamadas).toHaveLength(0);
     expect(adaptadorSimpleApi(creds).disponible).toBe(true); // resolución 0 es válida en certificación
+  });
+});
+
+describe("referencias del DTE (CAR-221 · A1)", () => {
+  const entrada = async (p: typeof payload & { referencias?: unknown }) => {
+    const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
+    await adaptadorSimpleApi(creds).firmar(p as never);
+    const input = JSON.parse(String(llamadas[0]?.form.get("input")));
+    return input.Documento.Referencias as Record<string, unknown>[];
+  };
+
+  it("usa la fecha del documento referenciado y no pone CodRef en una factura (OC 801)", async () => {
+    const [ref] = await entrada({ ...payload, referencias: [{ tipoDte: 801, folio: 4500, fecha: "2026-10-15" }] });
+    expect(ref).toMatchObject({ TipoDocumento: "801", FolioReferencia: "4500", FechaDocumentoReferencia: "2026-10-15" });
+    expect(ref).not.toHaveProperty("CodigoReferencia");
+  });
+
+  it("en una nota de crédito conserva CodRef y la fecha de la factura anulada", async () => {
+    const [ref] = await entrada({ ...payload, referencias: [{ tipoDte: 33, folio: 77, fecha: "2026-09-30", codigo: 1, razon: "Anula" }] });
+    expect(ref).toMatchObject({ TipoDocumento: "33", FechaDocumentoReferencia: "2026-09-30", CodigoReferencia: 1, RazonReferencia: "Anula" });
+  });
+
+  it("sin fecha (filas anteriores) cae a la de emisión", async () => {
+    const [ref] = await entrada({ ...payload, referencias: [{ tipoDte: 801, folio: 1 }] });
+    expect(ref?.["FechaDocumentoReferencia"]).toBe("2026-11-06");
   });
 });

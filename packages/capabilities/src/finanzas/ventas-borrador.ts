@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { validarMontosVenta, vencimientoPago } from "@opai/domain";
+import { CODIGOS_REFERENCIA_SII, validarMontosVenta, validarReferenciaSii, vencimientoPago } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
@@ -20,14 +20,18 @@ import { ventaSchema } from "./vistas-venta";
 
 const tipoBorradorSchema = z.union([z.literal(33), z.literal(34)]);
 
+const diaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha AAAA-MM-DD.");
+
 const referenciaBorradorSchema = z.object({
   tipoDteRef: z
     .number()
     .int()
-    .min(1)
-    .max(999)
-    .describe("Tipo de referencia SII (por ejemplo 801 orden de compra, 802 hes)."),
-  folioRef: z.number().int().min(1),
+    .refine((n) => CODIGOS_REFERENCIA_SII.includes(n), {
+      message: `Referencia fuera del catálogo del SII (${CODIGOS_REFERENCIA_SII.join(", ")}).`,
+    })
+    .describe("Tipo de referencia del catálogo SII: 801 orden de compra, 802 HES, 803 contrato, 804 resolución, 52 guía."),
+  folioRef: z.number().int().min(1).describe("Folio o número del documento referenciado."),
+  fechaRef: diaIso.describe("Fecha del documento referenciado (FchRef)."),
   codigoRef: z.number().int().min(1).max(3).default(1),
   razonRef: textoOpcional(90),
 });
@@ -58,12 +62,20 @@ export const ventasCrearBorrador = defineCapability({
     const error = validarMontosVenta(input.tipoDte, montos);
     if (error) throw reglaDeNegocio(error);
     const emision = hoy();
+    for (const r of input.referencias ?? []) {
+      const errRef = validarReferenciaSii({ codigo: r.tipoDteRef, folio: r.folioRef, fecha: r.fechaRef }, emision);
+      if (errRef) throw reglaDeNegocio(errRef);
+    }
     const vencimiento = vencimientoPago(emision, input.plazoPagoDias);
     const lineasData = input.lineas.map((l, orden) => ({
       tenantId: ctx.tenantId,
       orden,
       glosa: l.glosa,
       monto: l.monto,
+      ...(l.cantidad ? { cantidad: l.cantidad.replace(",", ".") } : {}),
+      ...(l.unidad ? { unidad: l.unidad } : {}),
+      ...(l.precioUnitario !== undefined ? { precioUnitario: l.precioUnitario } : {}),
+      ...(l.descuentoPct !== undefined ? { descuentoPct: l.descuentoPct } : {}),
     }));
     if (dryRun) {
       const { vistaVenta } = await import("./vistas-venta");
@@ -121,6 +133,7 @@ export const ventasCrearBorrador = defineCapability({
                       tenantId: ctx.tenantId,
                       tipoDteRef: r.tipoDteRef,
                       folioRef: r.folioRef,
+                      fechaRef: aFecha(r.fechaRef),
                       codigoRef: r.codigoRef,
                       razonRef: r.razonRef ?? null,
                     })),

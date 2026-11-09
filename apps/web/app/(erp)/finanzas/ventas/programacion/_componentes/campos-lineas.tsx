@@ -4,6 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 
 import { Button, Campo, Card, Checkbox, Combobox, Input } from "@opai/ds";
 
+import { SelectorPlantilla } from "./selector-plantilla";
 import { LINEA_VACIA, type FormProgramacion, type LineaForm } from "./tipos";
 
 type Props = {
@@ -30,6 +31,10 @@ export function CamposLineas({ f, set, contactos }: Props) {
               onChange={(e) => cambiar(i, { glosa: e.target.value })}
             />
           </Campo>
+          <SelectorPlantilla
+            glosaActual={l.glosa}
+            onAplicar={(texto) => cambiar(i, { glosa: texto })}
+          />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             <Campo etiqueta="Cantidad" htmlFor={`linea-cant-${i}`}>
               <Input

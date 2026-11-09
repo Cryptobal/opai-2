@@ -10,7 +10,6 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     [
       ["whatsapp", "WhatsApp", "whatsapp"],
       ["factoring", "Factoring", "factoring"],
-      ["biometria", "Biometría", "biometria"],
       ["slack", "Slack", "slack"],
       ["webhooks", "Webhooks", "webhooks"],
     ] as const
@@ -23,6 +22,21 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     config: sinConfig,
     disponible: false,
   })),
+  {
+    // Biometría facial (CAR-89 · B4, D-05): AWS Rekognition con una colección por empresa. Región y
+    // credenciales viven en el almacén cifrado del tenant; "simulado" es el proveedor de pruebas y CI.
+    id: "biometria",
+    nombre: "Biometría facial (AWS Rekognition)",
+    categoria: "biometria",
+    modalidades: ["propia"] as const,
+    secretos: [
+      { nombre: "access_key_id", etiqueta: "Access key ID de AWS" },
+      { nombre: "secret_access_key", etiqueta: "Secret access key de AWS" },
+      { nombre: "region", etiqueta: "Región de AWS (por ejemplo sa-east-1)" },
+    ],
+    config: z.object({ proveedor: z.enum(["rekognition", "simulado"]).default("simulado") }).strict(),
+    disponible: true,
+  },
   {
     // Movimientos del banco en línea: Web4Leads (que se conecta a Fintoc) empuja un webhook firmado por
     // empresa a `/api/t/<slug>/banco/web4leads`. OPAI no guarda credenciales del banco (CAR-bancos).

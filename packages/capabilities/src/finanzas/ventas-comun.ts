@@ -24,8 +24,8 @@ export const PERMISO_VENTAS = "finanzas:ventas.manage";
 export const PERMISO_VENTAS_CONFIGURE = "finanzas:ventas.configure";
 
 export const tipoDteVentaSchema = z
-  .union([z.literal(33), z.literal(34), z.literal(61)])
-  .describe("Tipo de DTE de venta: 33 factura, 34 exenta, 61 nota de crédito.");
+  .union([z.literal(33), z.literal(34), z.literal(56), z.literal(61)])
+  .describe("Tipo de DTE de venta: 33 factura, 34 exenta, 56 nota de débito, 61 nota de crédito.");
 
 export function montosDesdeLineas(tipo: 33 | 34, lineas: readonly { monto: number }[]): MontosDteVenta {
   const bruto = lineas.reduce((a, l) => a + l.monto, 0);
@@ -139,6 +139,15 @@ export async function rutEmisorDe(ctx: Contexto): Promise<string> {
 export const lineaInputSchema = z.object({
   glosa: z.string().trim().min(1).max(300),
   monto: z.number().int().min(1).max(2_000_000_000),
+  cantidad: z
+    .string()
+    .trim()
+    .regex(/^\d{1,10}([.,]\d{1,4})?$/, "Cantidad con hasta 4 decimales.")
+    .optional()
+    .describe("Cantidad decimal como texto («2», «0,5»). Opcional: si falta, el PDF no imprime cantidad."),
+  unidad: z.string().trim().min(1).max(20).optional(),
+  precioUnitario: z.number().int().min(0).max(2_000_000_000).optional().describe("Precio unitario en pesos, antes del descuento."),
+  descuentoPct: z.number().int().min(0).max(10_000).optional().describe("Descuento en centésimas de punto (1550 = 15,50 %)."),
 });
 
 export const documentoEmitidoIdSchema = uuidSchema;

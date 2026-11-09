@@ -15,6 +15,7 @@ import { SeccionOs10 } from "../../_componentes/seccion-os10";
 import { SeccionPago } from "../../_componentes/seccion-pago";
 import { SeccionPrevision } from "../../_componentes/seccion-prevision";
 import { SeccionPinTerreno } from "../../_componentes/seccion-pin-terreno";
+import { SeccionRostro } from "../../_componentes/seccion-rostro";
 import { SeccionUniforme } from "../../_componentes/seccion-uniforme";
 
 export const metadata = { title: "Laboral" };
@@ -35,12 +36,26 @@ export default function Laboral(props: {
         const actual = panel.vinculos.find((v) => v.estado === "vigente");
         const opciones = { instalaciones: panel.instalaciones.items, puestos: panel.puestos };
         const cargos = panel.personas.cargos ?? [];
+        const retirado = panel.cargosRetirados.find((c) => c.cargoId === actual?.cargoId);
+        const opcionesCargo = [
+          ...cargos.map((c) => ({ valor: c.id, etiqueta: c.nombre })),
+          ...(retirado && !cargos.some((c) => c.id === retirado.cargoId)
+            ? [{ valor: retirado.cargoId, etiqueta: `${retirado.cargo} (retirado)` }]
+            : []),
+        ];
         return (
           <div className="flex flex-col gap-4">
             {gestionar ? (
-              <EnlaceBotonHoja href={actual ? "?editar-vinculo=1" : "?vinculo=1"}>
-                {actual ? "Editar vínculo" : "Nuevo vínculo"}
-              </EnlaceBotonHoja>
+              <div className="flex flex-col items-start gap-1.5">
+                <EnlaceBotonHoja href={actual ? "?editar-vinculo=1" : "?vinculo=1"}>
+                  {actual ? "Cambiar cargo, contrato, instalación o jornada" : "Nuevo vínculo"}
+                </EnlaceBotonHoja>
+                <p className="t-caption">
+                  {actual
+                    ? "Modifica el contrato vigente. Para terminarlo, usa «Terminar vínculo» del menú ⋯."
+                    : "La persona no tiene un contrato vigente."}
+                </p>
+              </div>
             ) : (
               <Alerta tono="neutral" titulo="Sin permiso para editar el vínculo">
                 Solo owner y admin modifican el contrato.
@@ -103,18 +118,19 @@ export default function Laboral(props: {
               <SeccionJornadaDt personaId={p.id} />
               <SeccionOs10 personaId={p.id} />
               <SeccionPinTerreno personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
+              <SeccionRostro personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
               <SeccionContactoLaboral personaId={p.id} />
             </div>
             {gestionar && actual ? (
-              <HojaEditarVinculo key={JSON.stringify(actual)} actual={actual} {...opciones} />
-            ) : null}
-            {gestionar && !actual ? (
-              <HojaVinculo
-                personaId={p.id}
-                hoy={hoyIso()}
-                cargos={cargos.map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
+              <HojaEditarVinculo
+                key={JSON.stringify(actual)}
+                actual={actual}
+                cargos={opcionesCargo}
                 {...opciones}
               />
+            ) : null}
+            {gestionar && !actual ? (
+              <HojaVinculo personaId={p.id} hoy={hoyIso()} cargos={opcionesCargo} {...opciones} />
             ) : null}
             <MarcadorMetricas id="opai-metricas-laboral" />
           </div>

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { marcadoresDesconocidos } from "@opai/domain";
+
 // Ajustes del módulo Finanzas (ADR-018, ADR-021). El centro de configuración del núcleo los dibuja en
 // Configuración › Módulos › Finanzas. Solo owner y admin los ven (Finanzas es bloqueo financiero).
 /** Paso de la secuencia de cobranza: días hábiles después del vencimiento; 0 lo desactiva. */
@@ -92,5 +94,27 @@ export const ajustesFinanzas = z.object({
       ambito: "tenant",
       permiso: "finanzas:flujo.configurar",
       control: "seleccion",
+    }),
+  plantillas_glosa_ventas: z
+    .array(
+      z.object({
+        nombre: z.string().trim().min(1).max(60),
+        texto: z.string().trim().min(1).max(300),
+      }),
+    )
+    .max(20)
+    .refine(
+      (lista) => lista.every((p) => marcadoresDesconocidos(p.texto).length === 0),
+      "Una plantilla trae un marcador que no existe: usa {{periodo}}, {{uf_valor}}, {{uf_al_dia}} o {{monto}}.",
+    )
+    .default([])
+    .meta({
+      etiqueta: "Plantillas de glosa de las facturas programadas",
+      ayuda:
+        "Descripciones reutilizables con marcadores: {{periodo}}, {{uf_valor}}, {{uf_al_dia}} y {{monto}}. Se eligen al armar una programación; hasta 20.",
+      grupo: "Facturación",
+      ambito: "tenant",
+      permiso: "finanzas:ventas.manage",
+      control: "json",
     }),
 });

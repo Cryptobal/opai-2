@@ -53,7 +53,14 @@ export const MOTIVO_TIPO_NO_GENERABLE =
 export const MOTIVO_SIN_MONTO = "El período no tiene monto a facturar.";
 export const MOTIVO_SIN_LINEAS = "La programación no tiene líneas.";
 
-export type LineaCalculada = { glosa: string; monto: number };
+export type LineaCalculada = {
+  glosa: string;
+  monto: number;
+  /** Datos de la línea de la programación para imprimirlos; el precio solo existe si la línea es en CLP. */
+  cantidad: string;
+  precioUnitario: number | null;
+  descuentoPct: number;
+};
 export type MontosProgramacion =
   | { ok: true; lineas: LineaCalculada[]; montos: MontosDteVenta }
   | { ok: false; motivo: string };
@@ -68,7 +75,13 @@ export function montosProgramacion(
   if (lineas.length === 0) return { ok: false, motivo: MOTIVO_SIN_LINEAS };
   if (tipoDte === 33 && lineas.some((l) => l.exento)) return { ok: false, motivo: MOTIVO_33_EXENTA };
   const calculadas = lineas
-    .map((l) => ({ glosa: l.glosa, monto: montoLineaProgramacion(l, ufCentavos) }))
+    .map((l) => ({
+      glosa: l.glosa,
+      monto: montoLineaProgramacion(l, ufCentavos),
+      cantidad: l.cantidad.trim().replace(",", "."),
+      precioUnitario: l.precioUnitarioClp === null ? null : Number(l.precioUnitarioClp),
+      descuentoPct: l.descuentoPct,
+    }))
     .filter((l) => l.monto > 0);
   const bruto = calculadas.reduce((a, l) => a + l.monto, 0);
   if (bruto <= 0) return { ok: false, motivo: MOTIVO_SIN_MONTO };

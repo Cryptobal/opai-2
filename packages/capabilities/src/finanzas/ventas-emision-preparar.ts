@@ -48,6 +48,25 @@ export function huellaBorrador(d: DocHuella): string {
   return createHash("sha256").update(contenido).digest("hex");
 }
 
+/**
+ * Condiciones que el borrador heredó de su programación al generarse: con «esperar OK» hace falta el OK del cliente y con
+ * «exige OC» una orden de compra (la del seguimiento o una referencia 801). Cambiar la programación después no las altera.
+ * Solo rigen los borradores generados con estas opciones (su corrida trae el día de envío de los previos); un borrador
+ * manual o anterior se emite como antes.
+ */
+async function condicionesHeredadas(ctx: Contexto, doc: { id: string; referencias: { tipoDteRef: number }[] }) {
+  const corrida = await ctx.db.ventasProgramacionCorrida.findFirst({
+    where: { documentoId: doc.id },
+    select: { previosEnviarEn: true },
+  });
+  if (!corrida?.previosEnviarEn) return;
+  const seg = await ctx.db.ventasCierreSeguimiento.findFirst({ where: { documentoId: doc.id } });
+  if (!seg) return;
+  if (seg.requiereOk && seg.estado !== "ok") throw reglaDeNegocio("Esperando el OK del cliente.");
+  const tieneOc = Boolean(seg.ordenCompra || seg.hes) || doc.referencias.some((r) => r.tipoDteRef === 801);
+  if (seg.requiereOcHes && !tieneOc) throw reglaDeNegocio("Falta la orden de compra que exige la programación.");
+}
+
 /** Carga el borrador y valida que pueda emitirse; lo comparten la vista previa y la firma. */
 export async function cargarBorradorEmitible(ctx: Contexto, documentoId: string) {
   const doc = await ctx.db.documentoEmitido.findFirst({
@@ -58,6 +77,7 @@ export async function cargarBorradorEmitible(ctx: Contexto, documentoId: string)
   if (doc.estadoDte !== "borrador") throw reglaDeNegocio("Solo se emiten borradores.");
   if (doc.folio != null) throw reglaDeNegocio("El borrador ya tiene folio asignado.");
   if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
+  await condicionesHeredadas(ctx, doc);
   const cuenta = await cuentaDe(ctx, doc.cuentaId);
   if (!cuenta.rut) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");
   const tipo = doc.tipoDte as TipoDteVenta;
