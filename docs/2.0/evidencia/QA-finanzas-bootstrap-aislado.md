@@ -17,7 +17,7 @@ Otro proyecto, base o rama **no** sirve: los scripts lo rechazan (ver §3). Este
 ## 2. Qué entrega el bootstrap
 
 - **Dos empresas ficticias** `qa-finanzas-a` y `qa-finanzas-b`, con el módulo `finanzas` activo (único módulo; Finanzas no declara dependencias).
-- **Datos de Finanzas por empresa** (`seed:finanzas-qa`): cliente con datos tributarios, proveedor, cuenta bancaria con 3 movimientos, configuración DTE de **certificación** y CAF **sintéticos** de 33, 34, 56 y 61. La capacidad de carga rechaza CAF reales en un tenant QA.
+- **Datos de Finanzas por empresa** (`seed:finanzas-qa`): cliente con datos tributarios, **tres facturas emitidas de $1.190.000 con el SII simulado** (la transferencia de $1.190.000 concilia con una y el abono de $2.380.000 con dos, para probar «Reconocer» uno a uno y N:M), proveedor, cuenta bancaria con 3 movimientos, configuración DTE de **certificación** y CAF **sintéticos** de 33, 34, 56 y 61. La capacidad de carga rechaza CAF reales en un tenant QA.
 - **Diez usuarios autenticables** (`seed:qa-finanzas-usuarios`): `owner`, `admin`, `gerente`, `supervisor` y `viewer` en cada empresa, con el mecanismo de credenciales existente (el mismo hash del login) y membresía al portal ERP. Correos `<rol>.<empresa>@qa.opai.test` (dominio `.test`: no existe ni recibe correo). Sin invitaciones.
 - **Runtime real sin BYPASSRLS:** la aplicación se conecta como `opai_app`; el propietario solo se usa para migrar y sembrar.
 

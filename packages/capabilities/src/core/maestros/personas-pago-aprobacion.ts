@@ -17,6 +17,8 @@ const motivoRechazo = z.string().trim().min(5).max(500);
 
 export const personasPagoAprobarCambio = defineCapability({
   id: "core.personas.pago_aprobar_cambio",
+  // Solo personas: la cuenta de pago de una persona la aprueba o rechaza un humano; la key de otro admin no (ADR-032, CAR-225 C-01).
+  soloPersonas: true,
   descripcion:
     "Aprueba la solicitud pendiente de cambio de cuenta bancaria de una persona. Quien la solicitó no puede aprobarla; la cuenta anterior queda reemplazada y queda auditado.",
   permiso: PERMISOS_CORE.personasPagoAprobar,
@@ -95,6 +97,8 @@ export const personasPagoAprobarCambio = defineCapability({
 
 export const personasPagoRechazarCambio = defineCapability({
   id: "core.personas.pago_rechazar_cambio",
+  // Solo personas: la cuenta de pago de una persona la aprueba o rechaza un humano; la key de otro admin no (ADR-032, CAR-225 C-01).
+  soloPersonas: true,
   descripcion:
     "Rechaza la solicitud pendiente de cambio de cuenta bancaria con un motivo obligatorio. La cuenta vigente no cambia.",
   permiso: PERMISOS_CORE.personasPagoAprobar,
