@@ -50,7 +50,8 @@ export function useEmision(p: {
     if (!documentoId) return;
     const r = await ejecutar<Venta>("finanzas.ventas.emitir", { documentoId }, false);
     if (!r) {
-      if (codigo === "APPROVAL_REQUIRED") avisar.info("La emisión quedó en la cola de aprobaciones de agentes.");
+      if (codigo === "APPROVAL_REQUIRED")
+        avisar.info("La emisión quedó en la cola de aprobaciones de agentes.");
       return;
     }
     avisar.exito("Documento emitido");

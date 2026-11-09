@@ -3,7 +3,16 @@ import { validarReferenciaSii } from "@opai/domain";
 export type LineaForm = { glosa: string; montoTexto: string };
 
 /** Referencia del catálogo SII en el formulario (801 OC, 802 HES, 803 contrato, 804 resolución, 52 guía). */
-export type RefForm = { tipo: string; folioTexto: string; fecha: string; razon: string; tocada?: boolean };
+/** Tipos que se pueden emitir desde esta pantalla: facturas (con borrador) y notas (se emiten directo). */
+export type TipoEmision = "33" | "34" | "61" | "56";
+
+export type RefForm = {
+  tipo: string;
+  folioTexto: string;
+  fecha: string;
+  razon: string;
+  tocada?: boolean;
+};
 
 export const REF_VACIA: RefForm = { tipo: "801", folioTexto: "", fecha: "", razon: "" };
 
@@ -11,7 +20,10 @@ export const REF_VACIA: RefForm = { tipo: "801", folioTexto: "", fecha: "", razo
 export function problemaReferencias(refs: readonly RefForm[], hoyIso: string): string | null {
   for (const r of refs) {
     const folio = Number(r.folioTexto);
-    const e = validarReferenciaSii({ codigo: Number(r.tipo), folio: Number.isInteger(folio) ? folio : 0, fecha: r.fecha }, hoyIso);
+    const e = validarReferenciaSii(
+      { codigo: Number(r.tipo), folio: Number.isInteger(folio) ? folio : 0, fecha: r.fecha },
+      hoyIso,
+    );
     if (e) return e;
   }
   return null;
@@ -22,11 +34,22 @@ export function problemaReferencias(refs: readonly RefForm[], hoyIso: string): s
  * tocó; si el envío está bloqueado por una fila que aún no tocó (p. ej. recién agregada y vacía), se muestra una
  * ayuda neutra. El bloqueo en sí lo decide `problemaReferencias`, que no cambia.
  */
-export function mensajeReferencias(refs: readonly RefForm[], hoyIso: string): { error: string | null; ayuda: string | null } {
-  const error = problemaReferencias(refs.filter((r) => r.tocada), hoyIso);
+export function mensajeReferencias(
+  refs: readonly RefForm[],
+  hoyIso: string,
+): { error: string | null; ayuda: string | null } {
+  const error = problemaReferencias(
+    refs.filter((r) => r.tocada),
+    hoyIso,
+  );
   if (error) return { error, ayuda: null };
   const bloqueada = problemaReferencias(refs, hoyIso) !== null;
-  return { error: null, ayuda: bloqueada ? "Completa el folio y la fecha de cada referencia, o quita la fila vacía." : null };
+  return {
+    error: null,
+    ayuda: bloqueada
+      ? "Completa el folio y la fecha de cada referencia, o quita la fila vacía."
+      : null,
+  };
 }
 
 export type ItemPreflight = { codigo: string; ok: boolean; mensaje: string; bloqueante: boolean };
