@@ -29,6 +29,7 @@ import {
   capacidadesRemuneraciones, trabajoCapturaIndicadoresSii, trabajoCapturaPrevisional,
 } from "./remuneraciones";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
+import { capacidadesNovedades } from "./novedades";
 import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
@@ -131,6 +132,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesCumplimiento,
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
+  ...capacidadesNovedades,
   ...capacidadesAgentes, ...capacidadesTurnos,
   ...capacidadesPlataforma,
 ];

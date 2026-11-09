@@ -199,6 +199,25 @@ model NotificacionRegla {
   @@schema("core")
 }
 
+model NovedadLectura {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  usuarioId             String    @map("usuario_id") @db.Uuid
+  /// Identificador estable de la entrada en `packages/domain/src/novedades/entradas/`.
+  novedadId             String    @map("novedad_id")
+  leidaEn               DateTime? @map("leida_en") @db.Timestamptz(6)
+  destacadaDescartadaEn DateTime? @map("destacada_descartada_en") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, usuarioId, novedadId])
+  @@index([tenantId, usuarioId, leidaEn])
+  @@map("novedades_lectura")
+  @@schema("core")
+}
+
 model Notificacion {
   id        String    @id @default(uuid(7)) @db.Uuid
   tenantId  String    @map("tenant_id") @db.Uuid
