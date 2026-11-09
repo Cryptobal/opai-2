@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 638 pares pantalla→capacidad · 573 con herramienta · 65 excepciones justificadas · 0 faltantes.
+**Resumen:** 639 pares pantalla→capacidad · 574 con herramienta · 65 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -155,6 +155,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.create` | `cpq_catalogo_items_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.list` | `cpq_catalogo_items_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.update` | `cpq_catalogo_items_update` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.guardar` | `cpq_costos_predefinidos_guardar` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.list` | `cpq_costos_predefinidos_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.guardar` | `cpq_esquemas_cobertura_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.list` | `cpq_esquemas_cobertura_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
@@ -246,6 +248,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.crear` | `cpq_compartir_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.revocar` | `cpq_compartir_revocar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.cargar_predefinidos` | `cpq_costos_categoria_cargar_predefinidos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.guardar` | `cpq_costos_categoria_guardar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.list` | `cpq_costos_categoria_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
@@ -917,9 +920,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
 - `cpq.correlativos.fijar`
-- `cpq.costos_categoria.cargar_predefinidos`
-- `cpq.costos_predefinidos.guardar`
-- `cpq.costos_predefinidos.list`
 - `cpq.cotizaciones.clonar`
 - `cpq.cotizaciones.explicar`
 - `cpq.cotizaciones.reabrir`
