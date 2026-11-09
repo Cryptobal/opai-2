@@ -14,6 +14,8 @@ export const detalleProgramacionSchema = programacionSchema.extend({
   fechaInicio: z.string().nullable(),
   fechaFin: z.string().nullable(),
   notas: z.string().nullable(),
+  autoEnvioProforma: z.boolean(),
+  autoEnvioEstadoPago: z.boolean(),
   ultimoPeriodo10: z.string().nullable(),
   lineasEditables: z.array(
     z.object({
@@ -43,6 +45,8 @@ type Fila = {
   fechaInicio: Date | null;
   fechaFin: Date | null;
   notas: string | null;
+  autoEnvioProforma: boolean;
+  autoEnvioEstadoPago: boolean;
   ultimoPeriodo10: string | null;
   lineas: {
     glosa: string;
@@ -69,6 +73,8 @@ export async function extrasDetalle(ctx: Contexto, f: Fila) {
     fechaInicio: dia(f.fechaInicio),
     fechaFin: dia(f.fechaFin),
     notas: f.notas,
+    autoEnvioProforma: f.autoEnvioProforma,
+    autoEnvioEstadoPago: f.autoEnvioEstadoPago,
     ultimoPeriodo10: f.ultimoPeriodo10,
     lineasEditables: f.lineas.map((l) => ({
       glosa: l.glosa,
