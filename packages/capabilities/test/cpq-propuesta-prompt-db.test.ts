@@ -20,7 +20,7 @@ describe.skipIf(!urlPropietario)("cpq · prompt exportable en base real", () => 
   let tenantId: string;
   const usuario = randomUUID();
   const medidor = { registrar: async () => undefined };
-  const run = (rol: string) =>
+  const run = (rol: "owner" | "supervisor") =>
     mod.executeCapability(
       mod.crearContexto({
         tenantId,
