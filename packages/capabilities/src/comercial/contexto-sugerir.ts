@@ -18,6 +18,8 @@ import { iaDe } from "../integraciones/ia";
 import { PERMISO_MANAGE, negocioDe } from "./comun";
 
 const MAX_NOTAS = 20;
+/** Margen bajo los 15 s de la transacción de la lectura auditada: deja tiempo al registro de auditoría. */
+export const ESPERA_IA_MS = 9_000;
 
 const fuenteSchema = z.object({
   id: z.string(),
@@ -39,8 +41,9 @@ const salidaSchema = z.object({
 const SIN_CONTEXTO = "No hay notas de contexto para este negocio: registra lo conversado con el cliente para poder sugerir.";
 
 export const contextoSugerirSeccion = defineCapability({
-  // Sin `auditarLectura`: ese modo envuelve el handler en una transacción de 15 s y la IA puede tardar más.
-  // La auditoría de las notas usadas va en una transacción corta aparte, antes de revelar el borrador.
+  // Cada nota que alimentó la sugerencia queda auditada por su ID, sin copiar su contenido. Una lectura auditada
+  // corre en una transacción con tope de 15 s (NÚCLEO-H): por eso la espera de la IA tiene su propio límite.
+  auditarLectura: (s) => s.fuentes.map((f) => f.id),
   id: "comercial.contexto.sugerir_seccion",
   descripcion:
     "Sugiere un borrador de una sección de la propuesta a partir del contexto comercial del negocio, con IA. Devuelve el borrador, las notas usadas (confirmadas o inferidas) y los datos que faltaron. No guarda nada ni toca lo escrito a mano; no usa montos ni dotación, que vienen del CPQ.",
@@ -80,21 +83,20 @@ export const contextoSugerirSeccion = defineCapability({
     const ia = await iaDe(ctx, "estandar", "comercial");
     if (!ia) return { disponible: false, borrador: null, fuentes: [], faltantes: [], aviso: "La IA no está configurada. Puedes seguir editando a mano." };
     let texto: string;
+    let reloj: ReturnType<typeof setTimeout> | undefined;
     try {
-      texto = (await ia.completar({ sistema: SISTEMA_SUGERENCIA, prompt: construirPromptSugerencia({ seccion: input.seccion, instruccion: input.instruccion, textoActual: input.textoActual, lineasContexto: lineas }), maxTokens: 1200 })).texto;
-    } catch {
+      const espera = new Promise<never>((_, rechazar) => {
+        reloj = setTimeout(() => rechazar(new Error("espera agotada")), ESPERA_IA_MS);
+      });
+      texto = (await Promise.race([ia.completar({ sistema: SISTEMA_SUGERENCIA, prompt: construirPromptSugerencia({ seccion: input.seccion, instruccion: input.instruccion, textoActual: input.textoActual, lineasContexto: lineas }), maxTokens: 1200 }), espera])).texto;
+    } catch (e) {
       // El detalle del proveedor no sale al usuario; el consumo ya se midió en el adaptador.
+      if (e instanceof Error && e.message === "espera agotada")
+        throw reglaDeNegocio("La IA tardó demasiado en responder. Puedes reintentar o seguir editando a mano.");
       throw reglaDeNegocio("No pudimos generar la sugerencia ahora. Puedes reintentar o seguir editando a mano.");
+    } finally {
+      clearTimeout(reloj);
     }
-    // Transacción corta: revalida que las notas siguen vigentes y audita sus IDs. Si algo falla no se revela nada.
-    await ctx.transaccion(async (tx) => {
-      const ids = fuentes.map((f) => f.id);
-      const vigentes = await tx.negocioContexto.findMany({ where: { id: { in: ids }, negocioId: negocio.id, archivadoEn: null }, select: { id: true, estado: true } });
-      const estadoActual = new Map(vigentes.map((v) => [v.id, v.estado]));
-      if (fuentes.some((f) => estadoActual.get(f.id) !== f.estado))
-        throw reglaDeNegocio("El contexto del negocio cambió mientras se generaba la sugerencia. Vuelve a intentarlo.");
-      await ctx.auditoria.registrar(tx, { tenantId: ctx.tenantId, capability: "comercial.contexto.sugerir_seccion", actor: ctx.actor, payload: { ids } });
-    });
     const { borrador, faltantes } = separarSugerencia(texto);
     return { disponible: true, borrador: borrador === "" ? null : borrador, fuentes, faltantes, aviso: null };
   },
