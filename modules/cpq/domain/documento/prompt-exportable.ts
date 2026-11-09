@@ -73,17 +73,18 @@ function ejemploRepeticion(disp: readonly CampoDef[], col: ColeccionDef | undefi
 
 export function generarPromptPropuesta(e: EntradaPrompt): PromptExportable {
   const disp = e.disponibles;
-  const col = e.colecciones[0];
+  // La repetición solo se explica si hay marcadores de la entidad que se repite.
+  const col = e.colecciones.find((c) => disp.some((d) => entidadDeCampo(d) === c.entidad));
   const lineas: string[] = [
     `# Prompt · Propuesta técnica OPAI (catálogo de campos v${VERSION_CATALOGO_CAMPOS})`,
     "",
     "Diseña el texto y la estructura de una propuesta técnica de servicios para una empresa de servicios intensivos en personal.",
-    "Los datos del cliente, de la instalación y de la cotización NO se escriben: se dejan como marcadores `{{…}}` que OPAI reemplaza al generar el documento.",
+    "Los datos que tienen marcador en este prompt NO se escriben: se dejan como marcadores `{{…}}` que OPAI reemplaza al generar el documento.",
     "",
     "## Reglas",
     "",
     "- Usa solo los marcadores de este prompt, tal como están escritos (minúsculas y guion bajo). Si un dato no tiene marcador, no lo escribas ni lo inventes.",
-    "- Precios, vigencia y condiciones económicas no se escriben: los toma OPAI de la cotización. Nunca calcules ni escribas montos; si no hay marcador para un dato económico, no lo menciones.",
+    "- Precios, vigencia y condiciones económicas no tienen marcador todavía: no los escribas, no los calcules y no dejes espacios para ellos. OPAI los incorpora desde la cotización por otra vía.",
     "- No inventes certificados, SLA, plazos, cantidades de personal ni nombres de personas.",
     "- Un marcador sin valor queda vacío y OPAI lo informa como faltante: no lo reemplaces por texto de relleno.",
     "- Los valores de ejemplo de este prompt son ficticios; no los copies al diseño final.",

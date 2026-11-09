@@ -65,7 +65,7 @@ Reglas del contrato:
 - **De dónde sale cada clave.** De `clasificarCampos("propuesta", ctx.autorizar)`: solo lo que la finalidad «propuesta» declara y lo que quien consulta puede leer. No hay lista escrita a mano; un test comprueba que toda clave citada existe en el catálogo y es de la finalidad.
 - **Qué no promete.** No promete archivos Figma, PPT ni PDF ni importación de HTML. El destino es Claude Design u otra IA; no se usa ningún producto de Google.
 - **Capacidad.** `cpq.propuestas_tecnica.prompt_exportable` (lectura, permiso `cpq:cotizaciones.read`, `dryRun: false` porque no escribe, paridad MCP). No devuelve datos de clientes ni de la empresa, por eso no lleva `auditarLectura`. El dryRun y la auditoría de escrituras no aplican a una lectura sin IDs revelados.
-- **Pruebas.** Dominio (6) y base real (2).
+- **Pruebas.** Dominio (7) y base real (2).
 
 ## Responsable y archivos del contrato transversal (autorizado por Carlos el 7-nov-2026 21:49)
 

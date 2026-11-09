@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   CATALOGO_CAMPOS,
   COLECCIONES_CAMPO,
+  PERMISOS_CORE,
   VERSION_CATALOGO_CAMPOS,
   campoPorClave,
   camposPara,
@@ -50,7 +51,7 @@ describe("prompt exportable de la propuesta", () => {
     const soloContrato = CATALOGO_CAMPOS.filter((c) => !c.finalidades.includes("propuesta"));
     expect(soloContrato.length).toBeGreaterThan(0);
     for (const c of soloContrato) expect(p.texto).not.toContain(c.clave);
-    for (const c of todos.sinResolvedor) expect(p.claves).not.toContain(c.clave);
+    for (const c of todos.sinResolvedor) expect(p.claves.includes(c.clave)).toBe(false);
   });
 
   it("respeta el permiso: sin lectura de maestros no aparecen sus campos", () => {
@@ -59,6 +60,15 @@ describe("prompt exportable de la propuesta", () => {
     expect(p.claves).toEqual([]);
     expect(p.texto).not.toContain("{{cuenta.nombre}}");
     expect(p.texto).not.toContain("Ejemplo de repetición");
+  });
+
+  it("con permiso parcial no explica la repetición de una entidad sin marcadores", () => {
+    const sinInstalaciones = clasificarCampos("propuesta", (p) => p !== PERMISOS_CORE.instalacionesRead);
+    const p = generarPromptPropuesta({ disponibles: sinInstalaciones.autorizados, colecciones: COLECCIONES_CAMPO });
+    expect(p.claves.some((k) => k.startsWith("instalacion."))).toBe(false);
+    expect(p.claves).toContain("cuenta.nombre");
+    expect(p.texto).not.toContain("#cada instalaciones");
+    expect(p.texto).not.toContain("instalacion.");
   });
 
   it("explica la repetición y la condición con la sintaxis real y un ejemplo que valida", () => {
@@ -75,5 +85,6 @@ describe("prompt exportable de la propuesta", () => {
     const t = prompt().texto.toLowerCase();
     for (const x of ["figma", "pptx", "powerpoint", "google cloud", "importa el html"]) expect(t).not.toContain(x);
     expect(t).toContain("no genera por sí solo archivos");
+    expect(t).toContain("no tienen marcador todavía");
   });
 });

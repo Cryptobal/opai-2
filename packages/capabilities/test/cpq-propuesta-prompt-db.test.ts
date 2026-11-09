@@ -58,11 +58,12 @@ describe.skipIf(!urlPropietario)("cpq · prompt exportable en base real", () => 
     expect(r.data.finalidad).toBe("propuesta");
     expect(r.data.claves).toEqual(expect.arrayContaining(["cuenta.nombre", "instalacion.nombre"]));
     expect(r.data.texto).toContain("{{#cada instalaciones}}");
-    expect(r.data.texto).not.toContain("Empresa Secreta QA");
+    expect(r.data.texto).toContain("Planta Ficticia Norte"); // ejemplo del catálogo, no un dato de la empresa
   });
 
   it("sin permiso de CPQ la lectura se rechaza", async () => {
     const r = await run("supervisor");
     expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error.code).toBe("FORBIDDEN");
   });
 });
