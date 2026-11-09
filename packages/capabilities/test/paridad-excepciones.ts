@@ -34,6 +34,10 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: certificado .pfx cifrado del tenant; nunca sale ni se cambia por API ni MCP (ADR-027, CAR-149).",
   "rendiciones.lotes.nomina_descargar":
     "Solo personas: el archivo de la nómina Santander contiene cuentas bancarias de personas (Ley 21.719); lo baja una persona con sesión por /api/rendiciones/lotes/[id]/nomina y no sale por MCP. El agente ve el lote con rendiciones.lotes.obtener y lo genera con rendiciones.lotes.generar_nomina, que no devuelve cuentas (CAR-208).",
+  "core.personas.pago_aprobar_cambio":
+    "Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01).",
+  "core.personas.pago_rechazar_cambio":
+    "Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01).",
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",

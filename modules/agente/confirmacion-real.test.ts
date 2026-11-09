@@ -26,7 +26,11 @@ async function prepararArchivo() {
       cuenta: [{ id, nombre: "Cuenta ficticia", estado: "prospecto", createdAt: new Date() }],
     },
   });
-  const ctx = { ...comoAgenteInterno(e.ctx), medidor: e.ctx.medidor };
+  const ctx = {
+    ...comoAgenteInterno(e.ctx),
+    medidor: e.ctx.medidor,
+    revalidarAccesoSolicitud: async () => "acceso-ficticio",
+  };
   let n = 0;
   const plan = await prepararTurno(ctx, "Archiva la cuenta", {
     conversar: async () =>
