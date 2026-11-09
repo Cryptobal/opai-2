@@ -1,10 +1,14 @@
+import { readdirSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
   catalogoNovedades,
+  directorioEntradasNovedades,
   novedadesVisibles,
   parsearNovedadMarkdown,
 } from "./catalogo";
+import { RUTAS_ENTRADAS_NOVEDADES } from "./entradas/rutas";
 
 describe("novedades", () => {
   it("parsea frontmatter y cuerpo", () => {
@@ -25,6 +29,16 @@ Descripción para el usuario.
       ruta: "/foo",
       descripcion: "Descripción para el usuario.",
     });
+  });
+
+  it("cada .md en entradas/ está referenciado en rutas.ts (bundle Vercel)", () => {
+    const enDisco = readdirSync(directorioEntradasNovedades())
+      .filter((f) => f.endsWith(".md"))
+      .sort();
+    const registradas = RUTAS_ENTRADAS_NOVEDADES.map((u) => u.pathname.split("/").pop()!)
+      .filter(Boolean)
+      .sort();
+    expect(registradas).toEqual(enDisco);
   });
 
   it("el catálogo del repositorio tiene entradas con id único", () => {
