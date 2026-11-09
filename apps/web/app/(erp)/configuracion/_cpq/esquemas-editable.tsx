@@ -7,7 +7,7 @@ import { Badge, avisar, Button, Switch } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { type CicloTurno, type EsquemaCobertura, resumenEsquema } from "./esquemas-tipos";
-import { HojaEsquema } from "./hoja-esquema";
+import { HojaEsquemaDiferida } from "./hoja-esquema-diferida";
 
 type Abierta = { esquema?: EsquemaCobertura } | null;
 
@@ -85,7 +85,7 @@ export function EsquemasEditable({
       </ul>
       <p className="t-caption text-fg-muted">Los esquemas se archivan, nunca se borran: las cotizaciones antiguas conservan su cobertura.</p>
       {abierta ? (
-        <HojaEsquema {...(abierta.esquema ? { esquema: abierta.esquema } : {})} esquemas={esquemas} ciclos={ciclos} onCerrar={() => setAbierta(null)} />
+        <HojaEsquemaDiferida {...(abierta.esquema ? { esquema: abierta.esquema } : {})} esquemas={esquemas} ciclos={ciclos} onCerrar={() => setAbierta(null)} />
       ) : null}
     </section>
   );
