@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 634 pares pantalla→capacidad · 569 con herramienta · 65 excepciones justificadas · 0 faltantes.
+**Resumen:** 646 pares pantalla→capacidad · 581 con herramienta · 65 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -155,6 +155,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.create` | `cpq_catalogo_items_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.list` | `cpq_catalogo_items_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_items.update` | `cpq_catalogo_items_update` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.guardar` | `cpq_costos_predefinidos_guardar` | existe |
+| compartido | `app/(erp)/configuracion/_cpq` | `cpq.costos_predefinidos.list` | `cpq_costos_predefinidos_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.guardar` | `cpq_esquemas_cobertura_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.esquemas_cobertura.list` | `cpq_esquemas_cobertura_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.marca_documento.get` | `cpq_marca_documento_get` | existe |
@@ -187,6 +189,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.accesos.vincular` | `portal_cliente_accesos_vincular` | existe |
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.config.actualizar` | `portal_cliente_config_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.config.leer` | `portal_cliente_config_leer` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.contactos.dar_acceso` | `portal_cliente_contactos_dar_acceso` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.contactos.listar` | `portal_cliente_contactos_listar` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.actualizar` | `rondas_incidentes_tipo_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.crear` | `rondas_incidentes_tipo_crear` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.listar` | `rondas_incidentes_tipo_listar` | existe |
@@ -246,6 +250,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.crear` | `cpq_compartir_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.revocar` | `cpq_compartir_revocar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.cargar_predefinidos` | `cpq_costos_categoria_cargar_predefinidos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.guardar` | `cpq_costos_categoria_guardar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.costos_categoria.list` | `cpq_costos_categoria_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.aprobar` | — | excepción |
@@ -260,7 +265,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.aprobar` | `cpq_envios_propuesta_aprobar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.cancelar` | `cpq_envios_propuesta_cancelar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.solicitar` | `cpq_envios_propuesta_solicitar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.esquemas_cobertura.list` | `cpq_esquemas_cobertura_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.agregar_esquema` | `cpq_lineas_agregar_esquema` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.crear` | `cpq_lineas_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.get` | `cpq_propuestas_tecnica_get` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.propuestas_tecnica.preview_pdf` | `cpq_propuestas_tecnica_preview_pdf` | existe |
@@ -583,7 +590,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
 | erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir` | `finanzas_ventas_emitir` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir_nota_debito` | `finanzas_ventas_emitir_nota_debito` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.guardar_destinatarios` | `finanzas_ventas_guardar_destinatarios` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preflight_emision` | `finanzas_ventas_preflight_emision` | existe |
 | erp | `/finanzas/ventas/programacion/[id]/editar` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
@@ -867,6 +879,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `asistencia.jornadas.fijar_tipo`
 - `asistencia.marcas.listar`
 - `asistencia.marcas.obtener`
+- `comercial.contexto.agregar`
+- `comercial.contexto.archivar`
+- `comercial.contexto.confirmar`
+- `comercial.contexto.listar`
 - `comercial.informes.cierre`
 - `comercial.informes.perdidos_por_motivo`
 - `comercial.negocios.alertas`
@@ -909,15 +925,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.aprobaciones.get`
 - `cpq.biblioteca_bloques.publicar`
 - `cpq.correlativos.fijar`
-- `cpq.costos_categoria.cargar_predefinidos`
-- `cpq.costos_predefinidos.guardar`
-- `cpq.costos_predefinidos.list`
 - `cpq.cotizaciones.clonar`
 - `cpq.cotizaciones.explicar`
 - `cpq.cotizaciones.reabrir`
 - `cpq.cotizaciones.retirar_aprobacion`
 - `cpq.envios_propuesta.list`
-- `cpq.lineas.agregar_esquema`
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
@@ -939,9 +951,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reglas_banco.guardar`
 - `finanzas.reglas_banco.listar`
 - `finanzas.reportes.resultados`
-- `finanzas.ventas.destinatarios_sugeridos`
-- `finanzas.ventas.emitir_nota_debito`
-- `finanzas.ventas.guardar_destinatarios`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
 - `platform.auditoria.estado`
@@ -955,8 +964,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
-- `portal_cliente.contactos.dar_acceso`
-- `portal_cliente.contactos.listar`
 - `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`

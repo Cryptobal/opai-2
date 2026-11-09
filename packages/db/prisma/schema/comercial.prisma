@@ -92,6 +92,7 @@ model Negocio {
   motivoPerdida MotivoPerdida?       @relation(fields: [motivoPerdidaId], references: [id])
   instalaciones NegocioInstalacion[]
   contactos     NegocioContacto[]
+  contexto      NegocioContexto[]
   historial     HistorialEtapa[]
   solicitudes   Solicitud[]
   actividadVinculos ActividadVinculo[]
@@ -143,6 +144,36 @@ model NegocioContacto {
   @@unique([tenantId, negocioId, contactoId])
   @@index([tenantId, contactoId])
   @@map("negocio_contactos")
+  @@schema("comercial")
+}
+
+/// Contexto comercial de un negocio (CAR-138): lo que se sabe del cliente y de su necesidad, con su fuente y
+/// su fecha. Lo «inferido» (p. ej. por una IA) no se confunde con lo «confirmado» por una persona.
+model NegocioContexto {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  negocioId      String    @map("negocio_id") @db.Uuid
+  /// "reunion" | "llamada" | "correo" | "visita" | "documento" | "nota"
+  tipo           String    @default("nota")
+  resumen        String
+  /// De dónde sale el dato (p. ej. «Reunión con gerencia»); texto libre corto.
+  fuente         String
+  fechaFuente    DateTime  @map("fecha_fuente") @db.Date
+  /// "confirmado" | "inferido"
+  estado         String    @default("inferido")
+  /// "user" | "agent" | "system"
+  creadoPorTipo  String    @default("user") @map("creado_por_tipo")
+  creadoPorId    String?   @map("creado_por_id") @db.Uuid
+  confirmadoPorId String?  @map("confirmado_por_id") @db.Uuid
+  confirmadoEn   DateTime? @map("confirmado_en") @db.Timestamptz(6)
+  archivadoEn    DateTime? @map("archivado_en") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  negocio Negocio @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, negocioId, fechaFuente])
+  @@map("negocio_contexto")
   @@schema("comercial")
 }
 
