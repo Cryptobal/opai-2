@@ -8,6 +8,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 import { margenPctTexto } from "@/lib/cpq-presentacion";
 
+import { BotonCargarPredefinidos } from "./boton-cargar-predefinidos";
 import { FilaCostoCategoria, GLOBAL, type FilaCosto, type PuestoOpcion } from "./costos-categoria-fila";
 
 type Lista = {
@@ -45,12 +46,15 @@ export function EditorCostosCategoria({
   const [lista, setLista] = useState<Lista | null>(null);
   const [filas, setFilas] = useState<FilaCosto[]>([]);
   const [previa, setPrevia] = useState<Previa | null>(null);
+  const [guardado, setGuardado] = useState<string | null>(null);
 
   useEffect(() => {
     void ejecutar<Lista>("cpq.costos_categoria.list", { versionId }, false, "ninguna").then((r) => {
       if (!r) return;
       setLista(r);
-      setFilas(r.items.map((i) => ({ clave: i.id, categoria: i.categoria, alcance: i.lineaId ?? GLOBAL, monto: String(i.montoClp) })));
+      const cargadas = r.items.map((i) => ({ clave: i.id, categoria: i.categoria, alcance: i.lineaId ?? GLOBAL, monto: String(i.montoClp) }));
+      setFilas(cargadas);
+      setGuardado(JSON.stringify(cargadas.map(({ clave: _c, ...f }) => f)));
     });
   }, [ejecutar, versionId]);
 
@@ -82,6 +86,11 @@ export function EditorCostosCategoria({
         <p className="t-caption text-fg-subtle">
           Suma un costo mensual a una categoría y elige si es de un puesto o de toda la cotización. Los totales y el margen se recalculan.
         </p>
+        <BotonCargarPredefinidos
+          versionId={versionId}
+          bloqueado={guardado !== null && JSON.stringify(filas.map(({ clave: _c, ...f }) => f)) !== guardado}
+          onListo={() => { onGuardado(); onCerrar(); }}
+        />
         {!lista ? (
           <Skeleton className="h-40 w-full" />
         ) : (
