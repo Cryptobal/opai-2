@@ -3,14 +3,18 @@
 import { useState } from "react";
 
 import { Button, Campo, Input } from "@opai/ds";
-import { PLACEHOLDERS_GLOSA } from "@opai/domain";
 
-const AYUDA: Record<(typeof PLACEHOLDERS_GLOSA)[number], string> = {
+/**
+ * Marcadores de `PLACEHOLDERS_GLOSA` (@opai/domain), copiados aquí para no sumar el dominio al JS del cliente
+ * (presupuesto, ADR-037); `test/formato-precio.test.ts` comprueba que coinciden.
+ */
+export const MARCADORES_DESCRIPCION = {
   periodo: "Período facturado",
   uf_valor: "UF usada para el cálculo",
   uf_al_dia: "UF del día de emisión",
   monto: "Total del documento",
-};
+} as const;
+const PLACEHOLDERS_GLOSA = Object.keys(MARCADORES_DESCRIPCION) as (keyof typeof MARCADORES_DESCRIPCION)[];
 
 /** «#» (con letras opcionales) justo antes del cursor: el fragmento que se reemplaza por el marcador. */
 const FRAGMENTO = /#[a-z_]*$/;
@@ -72,7 +76,7 @@ export function DescripcionLinea({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => insertar(p)}
             >
-              {`{{${p}}}`} · {AYUDA[p]}
+              {`{{${p}}}`} · {MARCADORES_DESCRIPCION[p]}
             </Button>
           ))}
         </div>

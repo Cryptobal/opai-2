@@ -1,5 +1,7 @@
+import { PLACEHOLDERS_GLOSA } from "@opai/domain";
 import { describe, expect, it } from "vitest";
 
+import { MARCADORES_DESCRIPCION } from "@/app/(erp)/finanzas/ventas/programacion/_componentes/descripcion-linea";
 import { precioClpTexto, precioTexto, precioUfTexto } from "@/app/(erp)/finanzas/ventas/programacion/_componentes/formato-precio";
 import { parseClp, parseUf } from "@/app/(erp)/finanzas/ventas/programacion/_componentes/tipos";
 
@@ -22,5 +24,8 @@ describe("precio de la programación al tipear", () => {
   it("elige por moneda", () => {
     expect(precioTexto("CLP", "2000")).toBe("2.000");
     expect(precioTexto("UF", "2000")).toBe("2000");
+  });
+  it("los marcadores del selector coinciden con los del dominio", () => {
+    expect(Object.keys(MARCADORES_DESCRIPCION)).toEqual([...PLACEHOLDERS_GLOSA]);
   });
 });
