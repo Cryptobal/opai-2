@@ -9,9 +9,11 @@ import {
   evaluarLote,
   type HechoEntrada,
   hechoEntrada,
+  type MotivoRechazo,
   type ResultadoHecho,
   resultadoHecho,
 } from "./hechos-evaluar";
+import { prepararProyecciones } from "./proyecciones";
 
 export const hechosRecibir = defineCapability({
   id: "core.hechos_terreno.recibir",
@@ -66,12 +68,25 @@ export const hechosRecibir = defineCapability({
           })
         : Promise.resolve([] as { id: string }[]),
     ]);
-    const { resultados, nuevos } = evaluarLote({
-      hechos,
-      envio,
-      yaGuardadas: new Set(existentes.map((e) => e.clave)),
-      personasValidas: new Set(personas.map((p) => p.id)),
+    const proyecciones = await prepararProyecciones(ctx, disp, hechos, {
+      recibidoEn,
+      corregir: (h) => horaCorregida(h, desfaseMs),
     });
+    const evaluar = (rechazadas: ReadonlyMap<string, MotivoRechazo>) =>
+      evaluarLote({
+        proyeccionesRechazadas: rechazadas,
+        hechos,
+        envio,
+        yaGuardadas: new Set(existentes.map((e) => e.clave)),
+        personasValidas: new Set(personas.map((p) => p.id)),
+      });
+    let { resultados, nuevos } = evaluar(proyecciones.rechazos);
+    // Un cierre o una marca no se aceptan si el inicio de su ronda, en este mismo lote, cayó por otra regla.
+    const caidas = new Set(resultados.filter((r) => r.estado === "rechazado").map((r) => r.clave));
+    const dependientes = proyecciones.dependientesDe(caidas);
+    if (dependientes.size > 0) {
+      ({ resultados, nuevos } = evaluar(new Map([...proyecciones.rechazos, ...dependientes])));
+    }
     if (!dryRun && nuevos.length > 0) {
       await ctx.transaccion(async (tx) => {
         // Doble envío simultáneo (la página y el service worker): la clave única lo deja pasar una sola vez.
@@ -93,6 +108,7 @@ export const hechosRecibir = defineCapability({
             desfaseAlto: alto,
           })),
         });
+        await proyecciones.escribir(tx, nuevos, desfaseMs, new Set(nuevos.map((h) => h.clave)));
         // Si otra petición ganó la carrera no se insertó nada: tampoco se anuncia.
         if (count === 0) return;
         // Un evento por lote (no por hecho): los módulos de terreno leen sus hechos por tipo en la tabla.

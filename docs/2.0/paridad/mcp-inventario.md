@@ -718,7 +718,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/rendiciones/lotes/[id]/nomina/route.ts` | Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208). |
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
 | `app/api/t/[slug]/solicitudes/route.ts` | Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2). |
+| `app/api/terreno/contexto/route.ts` | Lee el contexto del equipo de terreno emparejado (CAR-78 E2): cookie de dispositivo, sin sesión; ejecuta core.terreno.contexto (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/lote/route.ts` | Recibe el lote de hechos del equipo de terreno emparejado (CAR-78 B3): cookie de dispositivo y mismo origen, sin sesión; ejecuta core.hechos_terreno.recibir (interna con motivo en EXCEPCIONES_PARIDAD). Su lectura por MCP es core.hechos_terreno.listar. |
+| `app/api/terreno/porteria/sitio/route.ts` | Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
+| `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
 | `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna). |
 | `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
@@ -799,6 +802,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.assign` | Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034). |
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
+| `core.terreno.contexto` | Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2). |
+| `core.terreno.en_sitio` | Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d). |
+| `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 | `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
 | `cpq.compartir.ver` | Interna: la abre el cliente en /p/<slug>/<token> sin sesión, con el enlace revocable y con vencimiento como credencial; los agentes gestionan el enlace con cpq.compartir.crear y revocar. |
@@ -895,6 +901,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
+- `acceso.listas.agregar`
+- `acceso.listas.listar`
+- `acceso.listas.quitar`
+- `acceso.registros.listar`
 - `asistencia.contingencias.listar`
 - `asistencia.contingencias.registrar`
 - `asistencia.correcciones.listar`

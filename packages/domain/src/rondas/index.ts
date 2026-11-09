@@ -4,3 +4,5 @@ export * from "./geocerca";
 export * from "./confianza";
 export * from "./etiqueta";
 export * from "./importacion";
+export * from "./marca";
+export * from "./cierre";

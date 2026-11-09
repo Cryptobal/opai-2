@@ -1,0 +1,111 @@
+// Módulo Control de acceso (CAR-78 · E4b). Schema propio `acceso`. Del documento solo se guarda su HUELLA (HMAC con
+// la clave de plataforma ACCESO_HUELLA_SECRET, versionada por `huellaKid`) y su MÁSCARA; nunca el número completo
+// (decisión de Carlos del 7-nov-2026, Ley 21.719). El tenant_id no lleva @relation: la FK va en el SQL.
+
+/// Entrada de lista autorizada o bloqueada (editable). El motivo de un bloqueo solo lo ve quien gestiona listas.
+model EntradaLista {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  instalacionId String    @map("instalacion_id") @db.Uuid
+  /// "autorizada" | "bloqueada".
+  tipo          String
+  /// "run" | "pasaporte" | "otro" | "patente".
+  docTipo       String    @map("doc_tipo")
+  huella        String
+  huellaKid     String    @map("huella_kid")
+  mascara       String
+  nombre        String?
+  motivo        String?
+  tiposRegistro String[]  @default([]) @map("tipos_registro")
+  vigenteDesde  DateTime? @map("vigente_desde") @db.Timestamptz(6)
+  vigenteHasta  DateTime? @map("vigente_hasta") @db.Timestamptz(6)
+  dias          Int[]     @default([])
+  desdeMin      Int?      @map("desde_min")
+  hastaMin      Int?      @map("hasta_min")
+  usoUnico      Boolean   @default(false) @map("uso_unico")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  registros RegistroAcceso[]
+
+  @@index([tenantId, instalacionId, docTipo, huella], map: "entradas_lista_busqueda_idx")
+  @@map("entradas_lista")
+  @@schema("acceso")
+}
+
+/// Entrada de una persona o vehículo. Hecho inmutable: solo inserción (R24, ADR-023).
+model RegistroAcceso {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  instalacionId  String   @map("instalacion_id") @db.Uuid
+  dispositivoId  String   @map("dispositivo_id") @db.Uuid
+  clave          String   @db.Uuid
+  personaId      String?  @map("persona_id") @db.Uuid
+  tipoRegistro   String   @map("tipo_registro")
+  docTipo        String   @map("doc_tipo")
+  huella         String
+  huellaKid      String   @map("huella_kid")
+  mascara        String
+  nombre         String
+  empresa        String?
+  motivoVisita   String?  @map("motivo_visita")
+  patente        String?
+  entradaListaId String?  @map("entrada_lista_id") @db.Uuid
+  /// "en_linea" | "diferido".
+  origen         String   @default("en_linea")
+  horaCorregida  DateTime @map("hora_corregida") @db.Timestamptz(6)
+  recibidoEn     DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  entradaLista EntradaLista? @relation(fields: [entradaListaId], references: [id], onDelete: Restrict, map: "registros_acceso_lista_fkey")
+  salida       SalidaAcceso?
+
+  @@unique([tenantId, dispositivoId, clave], map: "registros_acceso_clave_key")
+  @@index([tenantId, instalacionId, horaCorregida(sort: Desc)], map: "registros_acceso_sitio_idx")
+  @@index([tenantId, docTipo, huella], map: "registros_acceso_huella_idx")
+  @@map("registros_acceso")
+  @@schema("acceso")
+}
+
+/// Salida de un registro (una por registro). Hecho inmutable.
+model SalidaAcceso {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  dispositivoId String   @map("dispositivo_id") @db.Uuid
+  registroId    String   @unique(map: "salidas_acceso_registro_key") @map("registro_id") @db.Uuid
+  clave         String   @db.Uuid
+  personaId     String?  @map("persona_id") @db.Uuid
+  horaCorregida DateTime @map("hora_corregida") @db.Timestamptz(6)
+  recibidoEn    DateTime @default(now()) @map("recibido_en") @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  registro RegistroAcceso @relation(fields: [registroId], references: [id], onDelete: Restrict, map: "salidas_acceso_registro_fkey")
+
+  @@unique([tenantId, dispositivoId, clave], map: "salidas_acceso_clave_key")
+  @@map("salidas_acceso")
+  @@schema("acceso")
+}
+
+/// Quien no pudo entrar y por qué. Hecho inmutable: solo inserción.
+model IntentoDenegado {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  dispositivoId String   @map("dispositivo_id") @db.Uuid
+  clave         String   @db.Uuid
+  personaId     String?  @map("persona_id") @db.Uuid
+  tipoRegistro  String   @map("tipo_registro")
+  docTipo       String   @map("doc_tipo")
+  huella        String
+  huellaKid     String   @map("huella_kid")
+  mascara       String
+  /// "bloqueado" | "fuera_de_lista" | "fuera_de_horario" | "uso_unico_consumido".
+  motivo        String
+  horaCorregida DateTime @map("hora_corregida") @db.Timestamptz(6)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, dispositivoId, clave], map: "intentos_denegados_clave_key")
+  @@map("intentos_denegados")
+  @@schema("acceso")
+}
