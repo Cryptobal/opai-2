@@ -5,6 +5,7 @@ import { formatearClp } from "@opai/domain";
 import { renderPdfCotizacion } from "./documento-pdf";
 import type { MarcaDocumentoVista } from "./marca-documento";
 import { leerPdf } from "./pdf/prueba-pdf";
+import { armarCapitulo, type CapituloVista } from "../domain/documento/capitulo-instalacion";
 import { renderPdfPropuestaTecnica, type EntradaPdfPropuesta } from "./pdf-propuesta-tecnica";
 
 const marca: MarcaDocumentoVista = {
@@ -165,5 +166,46 @@ describe("PDF propuesta técnica A4 (CAR-192 PR 2)", () => {
   it("marca BORRADOR solo mientras la propuesta no está congelada", async () => {
     expect(await texto(base({ borrador: true }))).toContain("BORRADOR");
     expect(await texto(base({ borrador: false }))).not.toContain("BORRADOR");
+  });
+
+  describe("capítulo por instalación (CAR-138 PR 6)", () => {
+    const cap = (over: Partial<CapituloVista> = {}): CapituloVista => ({
+      ...armarCapitulo({
+        instalacionId: "i1",
+        nombre: "Planta Norte",
+        direccion: "Av. Industrial 123, Quilicura",
+        mapaUrl: "https://www.google.com/maps/place/?q=place_id:abc",
+        puestos: [{ nombre: "Guardia 4x4 día", guardiasSimultaneos: 2, dotacion: 4.7, turno: "4x4 · 08:00–20:00" }],
+        textos: { alcance: "Control de accesos y rondas perimetrales.", supervision: "Visitas según lo cotizado." },
+      }),
+      ...over,
+    });
+
+    it("índice numerado N y N.k, capítulo con dirección, dotación y textos", async () => {
+      const t = await texto(base({ capitulos: [cap(), cap({ nombre: "Planta Sur" })] }));
+      expect(t).toContain("2. Detalle del servicio");
+      expect(t).toContain("2.1. Planta Norte");
+      expect(t).toContain("2.2. Planta Sur");
+      expect(t).toContain("Av. Industrial 123, Quilicura");
+      expect(t).toContain("Mapa: https://www.google.com/maps/place/?q=place_id:abc");
+      expect(t).toContain("4,7");
+      expect(t).toContain("Control de accesos y rondas perimetrales.");
+      expect(t).toContain("Visitas según lo cotizado.");
+    });
+
+    it("lo que falta solo se avisa en borrador y nunca se rellena", async () => {
+      const borrador = await texto(base({ borrador: true, capitulos: [cap()] }));
+      expect(borrador).toContain("Pendiente por completar");
+      expect(borrador).toContain("Exclusiones");
+      const enviado = await texto(base({ borrador: false, capitulos: [cap()] }));
+      expect(enviado).not.toContain("Pendiente por completar");
+      expect(enviado).not.toContain("Exclusiones");
+    });
+
+    it("sin capítulos el PDF no cambia: sin números en los títulos", async () => {
+      const t = await texto(base());
+      expect(t).toContain("DETALLE DEL SERVICIO");
+      expect(t).not.toMatch(/\d\. DETALLE DEL SERVICIO/);
+    });
   });
 });

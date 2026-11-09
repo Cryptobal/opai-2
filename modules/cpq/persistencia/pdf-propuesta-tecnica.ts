@@ -4,6 +4,8 @@ import type {
   AperturaPropuesta,
   ServicioDesdeCotizacion,
 } from "../domain/documento/propuesta-tecnica";
+import type { CapituloVista } from "../domain/documento/capitulo-instalacion";
+import { armarIndice } from "../domain/documento/indice-propuesta";
 import type { EntradaPdfCotizacion } from "./documento-pdf-tipos";
 import type { MarcaDocumentoVista } from "./marca-documento";
 import { acentoDeMarca } from "./pdf/colores";
@@ -19,6 +21,7 @@ import {
   textoSeccion,
   TITULOS_BLOQUE,
 } from "./pdf-propuesta-bloques";
+import { capituloInstalacion, itemIndice } from "./pdf-propuesta-capitulos";
 import { parseArmador } from "./propuesta-tecnica";
 
 export type EntradaPdfPropuesta = {
@@ -42,6 +45,8 @@ export type EntradaPdfPropuesta = {
   /** Texto de la biblioteca por `bibliotecaClave`, ya resuelto a la versión del envío. */
   textosBiblioteca?: Readonly<Record<string, string>>;
   logo?: LogoPdf | null;
+  /** Capítulos por instalación (se imprimen tras el detalle del servicio). */
+  capitulos?: readonly CapituloVista[];
 };
 
 export async function renderPdfPropuestaTecnica(i: EntradaPdfPropuesta): Promise<Uint8Array> {
@@ -79,7 +84,12 @@ export async function renderPdfPropuestaTecnica(i: EntradaPdfPropuesta): Promise
         return texto(b) !== "";
     }
   };
-  const titulos = bloques.filter(tieneContenido).map(titulo);
+  const conContenido = bloques.filter(tieneContenido);
+  const capitulos = i.capitulos ?? [];
+  const items = conContenido.map((b) => itemIndice(titulo(b), b.tipo, capitulos));
+  const numero = (b: (typeof bloques)[number]) =>
+    capitulos.length ? String(conContenido.indexOf(b) + 1) : undefined;
+  const conNum = (b: (typeof bloques)[number]) => (numero(b) ? `${numero(b)}. ${titulo(b)}` : titulo(b));
 
   for (const b of bloques) {
     switch (b.tipo) {
@@ -106,13 +116,14 @@ export async function renderPdfPropuestaTecnica(i: EntradaPdfPropuesta): Promise
         h.nueva();
         break;
       case "indice":
-        if (titulos.length) indice(h, titulos);
+        if (items.length) indice(h, armarIndice(items));
         break;
       case "salto_pagina":
         h.nueva();
         break;
       case "detalle_servicio":
-        if (tieneContenido(b)) detalleServicio(h, i.servicio);
+        if (tieneContenido(b)) detalleServicio(h, i.servicio, numero(b));
+        capitulos.forEach((c, k) => capituloInstalacion(h, c, `${numero(b) ?? "0"}.${k + 1}`, i.borrador));
         break;
       case "resumen_economico":
         resumenEconomico(h, {
@@ -123,16 +134,17 @@ export async function renderPdfPropuestaTecnica(i: EntradaPdfPropuesta): Promise
             ? { gastosGeneralesYUtilidadClp: i.gastosGeneralesYUtilidadClp }
             : {}),
           ...(i.tasaIvaPct !== undefined ? { tasaIvaPct: i.tasaIvaPct } : {}),
+          ...(numero(b) ? { numero: numero(b)! } : {}),
         });
         break;
       case "contacto_ejecutivo":
-        if (i.economia.ejecutivo) contactoEjecutivo(h, i.economia.ejecutivo, i.marca);
+        if (i.economia.ejecutivo) contactoEjecutivo(h, i.economia.ejecutivo, i.marca, numero(b));
         break;
       case "condiciones":
-        if (condiciones(b)) textoSeccion(h, titulo(b), condiciones(b));
+        if (condiciones(b)) textoSeccion(h, conNum(b), condiciones(b));
         break;
       default:
-        if (texto(b)) textoSeccion(h, titulo(b), texto(b));
+        if (texto(b)) textoSeccion(h, conNum(b), texto(b));
     }
   }
   h.cerrar({
