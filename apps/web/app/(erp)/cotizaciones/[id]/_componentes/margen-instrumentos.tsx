@@ -2,7 +2,9 @@
 
 import { Badge, Switch } from "@opai/ds";
 
-import { ValoresFinanciero, ValoresGarantia, ValoresRc, RestablecerInstrumentos } from "./margen-valores";
+import { valoresIniciales } from "@/lib/instrumentos-valores";
+
+import { DefectoCtx, ValoresFinanciero, ValoresGarantia, ValoresRc, RestablecerInstrumentos } from "./margen-valores";
 import { type EstadoMargen, type ParametrosVersion, pctTexto } from "./margen-form";
 
 /** Instrumentos financieros de la versión: un interruptor por instrumento con su tasa vigente (CPQ v4). */
@@ -27,6 +29,7 @@ export function MargenInstrumentos({
       <h3 id="cpq-instrumentos" className="t-label">
         Instrumentos
       </h3>
+      <DefectoCtx.Provider value={valoresIniciales(p.instrumentosDefecto)}>
       <div className="divide-y divide-border">
         <Switch
           etiqueta="Póliza de garantía"
@@ -53,6 +56,7 @@ export function MargenInstrumentos({
         />
         {e.financiero ? <div className="py-3"><ValoresFinanciero v={e.valores} onCambiar={(valores) => set({ valores })} /></div> : null}
       </div>
+      </DefectoCtx.Provider>
       <p className="t-caption text-fg-muted">Cambiar un valor afecta solo esta cotización: no cambia Configuración ni otras cotizaciones.</p>
       {p.sobrescrito ? (
         <div className="flex flex-wrap items-center gap-2">
