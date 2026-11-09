@@ -16,7 +16,7 @@ export default function PortalCuenta(props: Props) {
     <PaginaCuenta {...props} tab="resumen">
       {(c) => (
         <div className="space-y-6">
-          <SeccionContactosAcceso cuentaId={c.id} />
+          <SeccionContactosAcceso cuentaId={c.id} cuentaActiva={c.estado !== "cliente_inactivo"} />
           <SeccionPortalCliente cuentaId={c.id} />
         </div>
       )}

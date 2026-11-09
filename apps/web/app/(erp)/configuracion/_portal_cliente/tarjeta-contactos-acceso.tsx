@@ -6,12 +6,12 @@ import { Alerta, avisar, Badge, Button, Dialog, SeccionTarjeta } from "@opai/ds"
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { type ContactoAcceso, vistaEstado } from "./contactos-acceso";
+import { type ContactoAcceso, mensajeDarAcceso, type ResultadoDarAcceso, vistaEstado } from "./contactos-acceso";
 
 type Pendiente = { tipo: "dar" | "suspender" | "revocar"; contacto: ContactoAcceso } | null;
 
 /** Contactos de la cuenta con el estado de su acceso al Portal Cliente y las acciones que corresponden (CAR-218). */
-export function TarjetaContactosAcceso({ cuentaId, contactos, puedeGestionar }: { cuentaId: string; contactos: ContactoAcceso[]; puedeGestionar: boolean }) {
+export function TarjetaContactosAcceso({ cuentaId, contactos, puedeGestionar, cuentaActiva }: { cuentaId: string; contactos: ContactoAcceso[]; puedeGestionar: boolean; cuentaActiva: boolean }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [confirmar, setConfirmar] = useState<Pendiente>(null);
 
@@ -20,10 +20,13 @@ export function TarjetaContactosAcceso({ cuentaId, contactos, puedeGestionar }: 
     const { tipo, contacto } = confirmar;
     const r =
       tipo === "dar"
-        ? await ejecutar("portal_cliente.contactos.dar_acceso", { cuentaId, contactoId: contacto.contactoId })
+        ? await ejecutar<ResultadoDarAcceso>("portal_cliente.contactos.dar_acceso", { cuentaId, contactoId: contacto.contactoId })
         : await ejecutar("portal_cliente.accesos.actualizar", { accesoId: contacto.accesoId, estado: tipo === "suspender" ? "suspendido" : "revocado" });
     if (r != null) {
-      avisar.exito(tipo === "dar" ? "Invitación enviada" : tipo === "suspender" ? "Acceso suspendido" : "Acceso revocado");
+      if (tipo === "dar") {
+        const m = mensajeDarAcceso(r as ResultadoDarAcceso);
+        (m.exito ? avisar.exito : avisar.info)(m.texto);
+      } else avisar.exito(tipo === "suspender" ? "Acceso suspendido" : "Acceso revocado");
       setConfirmar(null);
     }
   }
@@ -34,7 +37,7 @@ export function TarjetaContactosAcceso({ cuentaId, contactos, puedeGestionar }: 
       {contactos.length === 0 ? <p className="t-body-sm p-4">La cuenta no tiene contactos: agrega uno para poder darle acceso.</p> : null}
       <ul className="divide-y divide-border">
         {contactos.map((c) => {
-          const v = vistaEstado(c);
+          const v = vistaEstado(c, cuentaActiva);
           return (
             <li key={c.contactoId} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
               <span className="min-w-0">
