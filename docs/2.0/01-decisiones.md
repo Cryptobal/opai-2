@@ -1585,3 +1585,31 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Consecuencias.** El PR de código de CAR-96 trae `pauta.turnos_extra`, el permiso nuevo y la migración de `core.personas.estado` (de `activa`/`inactiva` a los cinco estados), y empieza solo con el diseño aprobado (`design/DESIGN-PROMPT-turnos-extra.md`).
 
+**Adenda (8-nov-2026) · Decisiones de Operaciones II del 29-oct-2026, hasta ahora solo en Linear.** Registradas por «Operaciones · Auditoría» con su texto de Linear; ante choque manda lo más reciente de Carlos.
+
+- **Turnos extra (CAR-96; A5–A10, C13–C15):**
+  - todo reemplazo es turno extra: lo registra el supervisor;
+  - monto fijo por instalación, con excepción por puesto, editable en cada turno con motivo y auditoría;
+  - se pueden sumar horas extra en la pauta diaria;
+  - se paga a propios y a externos con boleta, marcando el tipo en cada turno;
+  - sin tope, pero nunca doblar (regla configurable);
+  - el cliente ve la cobertura, no el costo.
+  - **Quién aprueba:** el 29-oct decía «Operaciones o RR. HH.»; lo reemplaza el punto 2 de este ADR (owner, admin, gerente y el rol Operaciones).
+- **Supervisión y visitas (CAR-83; B6–B8):**
+  - el supervisor abre en «Hoy», con alertas de puestos sin cubrir, rondas atrasadas y faltas;
+  - la visita lleva check-in GPS, lista de revisión, fotos y firma del guardia;
+  - asigna el reemplazo desde el celular y el turno extra queda por aprobar (compatible con el punto 3 de este ADR).
+- **Turnos pedidos (CAR-100; A11, A12, C16, C17):**
+  - solo se cobra al cliente lo que pide fuera de su pauta; los reemplazos por faltas los asume la empresa;
+  - un guardia adicional por un día entra como solicitud que crea un puesto temporal con cobro;
+  - la tarifa sale de la línea «guardia adicional» de la cotización vigente en CPQ, y Finanzas factura desde ese registro.
+  - **Conciliación:** el pago al guardia vive en el turno extra; el cobro al cliente vive en el puesto temporal de la solicitud. La línea de CPQ queda por definir en el brief de CAR-100, porque hoy `adicional` es un ítem de catálogo y no una tarifa diaria.
+- **Pago por lote (CAR-101; A8, C13–C14):**
+  - Finanzas arma y concilia el lote semanal o quincenal de los turnos extra aprobados;
+  - Nómina lo informa en el LRE si corresponde;
+  - incluye propios y externos con boleta.
+- **Condición previa (indicación transmitida el 7-nov-2026 en la pasada de Operaciones):**
+  - turnos extra, aprobación y lote requieren una **revisión legal y contable escrita** antes de construir;
+  - sin pagos reales;
+  - el código de CAR-96 espera el diseño aprobado **y** esa revisión.
+
