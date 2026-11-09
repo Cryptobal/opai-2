@@ -128,29 +128,3 @@ export function Proximos({ periodos, moneda }: { periodos: PeriodoPrevio[]; mone
     </Card>
   );
 }
-
-export function Historial({ item }: { item: DetalleProgramacion }) {
-  return (
-    <Card className="flex flex-col gap-2 p-4">
-      <h2 className="t-label text-fg">Borradores generados</h2>
-      {item.corridas.length === 0 ? (
-        <p className="text-sm text-fg-muted">Todavía no se genera ningún borrador.</p>
-      ) : (
-        <ul className="divide-y divide-border text-sm">
-          {item.corridas.map((c) => (
-            <li key={c.periodo} className="flex justify-between gap-3 py-2">
-              {c.documentoId ? (
-                <LinkNext href={`/finanzas/ventas/${c.documentoId}`} className="underline">
-                  {c.periodo}
-                </LinkNext>
-              ) : (
-                <span>{c.periodo} · importado de OPAI 1.0</span>
-              )}
-              <span className="t-numeric">{c.montoTotal !== null ? pesos(c.montoTotal) : "—"}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
-  );
-}

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { dia } from "../core/maestros/comun";
 import type { Contexto } from "../types";
+import { trazaSchema, trazasDe } from "./ventas-programacion-trazabilidad";
 import { programacionSchema } from "./ventas-programacion-vistas";
 
 export const detalleProgramacionSchema = programacionSchema.extend({
@@ -14,6 +15,10 @@ export const detalleProgramacionSchema = programacionSchema.extend({
   fechaInicio: z.string().nullable(),
   fechaFin: z.string().nullable(),
   notas: z.string().nullable(),
+  diasFacturacion: z.number().int().nullable(),
+  momentoFactura: z.string(),
+  diaFactura: z.number().int().nullable(),
+  mesRelativoFactura: z.string(),
   autoEnvioProforma: z.boolean(),
   autoEnvioEstadoPago: z.boolean(),
   ultimoPeriodo10: z.string().nullable(),
@@ -32,6 +37,7 @@ export const detalleProgramacionSchema = programacionSchema.extend({
       fechaGeneracion: z.string().nullable(),
       documentoId: z.string().nullable(),
       montoTotal: z.number().int().nullable(),
+      traza: trazaSchema.nullable(),
     }),
   ),
 });
@@ -45,6 +51,10 @@ type Fila = {
   fechaInicio: Date | null;
   fechaFin: Date | null;
   notas: string | null;
+  diasFacturacion: number | null;
+  facturaTiming: string;
+  facturaDia: number | null;
+  facturaMesRelativo: string;
   autoEnvioProforma: boolean;
   autoEnvioEstadoPago: boolean;
   ultimoPeriodo10: string | null;
@@ -65,6 +75,10 @@ export async function extrasDetalle(ctx: Contexto, f: Fila) {
     take: 24,
     select: { periodo: true, fechaGeneracion: true, documentoId: true, montoTotal: true },
   });
+  const trazas = await trazasDe(
+    ctx,
+    corridas.map((c) => c.documentoId).filter((x): x is string => x !== null),
+  );
   return {
     diaSemana: f.diaSemana,
     mesDelAnio: f.mesDelAnio,
@@ -73,6 +87,10 @@ export async function extrasDetalle(ctx: Contexto, f: Fila) {
     fechaInicio: dia(f.fechaInicio),
     fechaFin: dia(f.fechaFin),
     notas: f.notas,
+    diasFacturacion: f.diasFacturacion,
+    momentoFactura: f.facturaTiming,
+    diaFactura: f.facturaDia,
+    mesRelativoFactura: f.facturaMesRelativo,
     autoEnvioProforma: f.autoEnvioProforma,
     autoEnvioEstadoPago: f.autoEnvioEstadoPago,
     ultimoPeriodo10: f.ultimoPeriodo10,
@@ -88,6 +106,7 @@ export async function extrasDetalle(ctx: Contexto, f: Fila) {
       fechaGeneracion: dia(c.fechaGeneracion),
       documentoId: c.documentoId,
       montoTotal: c.montoTotal === null ? null : Number(c.montoTotal),
+      traza: c.documentoId ? (trazas.get(c.documentoId) ?? null) : null,
     })),
   };
 }
