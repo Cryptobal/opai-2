@@ -136,6 +136,25 @@ export async function restablecerSegundoFactor(tx: TenantTx, userId: string) {
   });
 }
 
+/** Estado mínimo de una sesión ya autenticada, en la conexión del caller; nunca entrega tokens. */
+export async function estadoSesionEnTransaccion(tx: TenantTx, sesionId: string, userId: string) {
+  return conRolAuth(tx, async () => {
+    const [fila] = await tx.$queryRaw<
+      {
+        mfaVerificada: boolean;
+        mfaActiva: boolean;
+        platformRole: string | null;
+      }[]
+    >`
+      SELECT s.mfa_verified AS "mfaVerificada", u.two_factor_enabled AS "mfaActiva",
+             u.platform_role AS "platformRole"
+      FROM core.sessions s JOIN core.users u ON u.id = s.user_id
+      WHERE s.id = ${sesionId}::uuid AND s.user_id = ${userId}::uuid
+        AND s.expires_at > clock_timestamp()`;
+    return fila ?? null;
+  });
+}
+
 export type ResultadoBorrado = "borrado" | "inexistente" | "plataforma" | "con_referencias";
 
 /**

@@ -1,6 +1,7 @@
 // Adaptador "compatible con OpenAI" (/chat/completions) con herramientas, response_format
 // json_schema y stream. Cubre OpenAI, xAI (Grok), Vercel AI Gateway, OpenRouter y otros con solo
 // cambiar la base URL y el id; no hay código por proveedor. Sin SDK.
+import { rechazarContinuidad } from "./anthropic-continuidad";
 import type {
   EventoStream,
   LlamadaHerramienta,
@@ -28,6 +29,7 @@ export function openaiCompatible(
   const self: ProveedorIa = {
     id,
     async conversar(modelo, s) {
+      rechazarContinuidad(s);
       await verificar();
       const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, false)) }, "OpenAI");
       const d = await cuerpo<RespO>(r, "OpenAI", apiKey);
@@ -66,6 +68,7 @@ async function* streamOpenai(
   s: SolicitudConversacion,
   verificar: () => Promise<void>,
 ): AsyncGenerator<EventoStream> {
+  rechazarContinuidad(s);
   await verificar();
   const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, true)) }, "OpenAI");
   let texto = "";

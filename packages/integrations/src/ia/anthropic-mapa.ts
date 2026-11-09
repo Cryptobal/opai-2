@@ -10,18 +10,19 @@ export const cabeceras = (apiKey: string) => ({
 
 export type Bloque = { type: string; text?: string; id?: string; name?: string; input?: unknown };
 
-function mensajes(s: SolicitudConversacion) {
+function mensajes(s: SolicitudConversacion, originales: ReadonlyMap<number, Bloque[]>) {
   const system = s.mensajes
     .filter((m) => m.rol === "sistema")
     .map((m) => m.texto)
     .join("\n");
-  const messages = s.mensajes.flatMap((m): Record<string, unknown>[] => {
+  const messages = s.mensajes.flatMap((m, i): Record<string, unknown>[] => {
     if (m.rol === "usuario") return [{ role: "user", content: m.texto }];
     if (m.rol === "herramienta")
       return [
         { role: "user", content: [{ type: "tool_result", tool_use_id: m.id, content: m.resultado }] },
       ];
     if (m.rol === "asistente") {
+      if (originales.has(i)) return [{ role: "assistant", content: originales.get(i) }];
       const content: Bloque[] = [];
       if (m.texto) content.push({ type: "text", text: m.texto });
       for (const ll of m.llamadas ?? [])
@@ -59,12 +60,12 @@ function herramientas(s: SolicitudConversacion) {
   };
 }
 
-export function peticion(modelo: string, s: SolicitudConversacion, stream: boolean) {
+export function peticion(modelo: string, s: SolicitudConversacion, stream: boolean, originales: ReadonlyMap<number, Bloque[]> = new Map()) {
   return {
     model: modelo,
     max_tokens: s.maxTokens ?? 1024,
     ...(s.temperatura !== undefined ? { temperature: s.temperatura } : {}),
-    ...mensajes(s),
+    ...mensajes(s, originales),
     ...herramientas(s),
     stream,
   };

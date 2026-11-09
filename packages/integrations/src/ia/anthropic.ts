@@ -1,6 +1,7 @@
 // Adaptador de Anthropic (/v1/messages) con herramientas y stream SSE. Salida estructurada: una
 // herramienta forzada cuyo input es la salida (Anthropic no tiene response_format). Sin SDK.
 import { type RespA, URL, cabeceras, motivo, peticion } from "./anthropic-mapa";
+import { continuidadAnthropic, rechazarContinuidad } from "./anthropic-continuidad";
 import type {
   EventoStream,
   LlamadaHerramienta,
@@ -13,10 +14,14 @@ import { sanear } from "./error-proveedor";
 import { ErrorIa, completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
 
 export function anthropic(apiKey: string): ProveedorIa {
+  const continuidad = continuidadAnthropic();
   const self: ProveedorIa = {
     id: "ia_anthropic",
+    validarContinuacion: (modelo, s) => { continuidad.resolver(modelo, s, false); },
     async conversar(modelo, s) {
-      const r = await pedir(URL, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, false)) }, "Anthropic");
+      const originales = continuidad.resolver(modelo, s);
+      const prefijo = continuidad.fijar(s);
+      const r = await pedir(URL, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, false, originales)) }, "Anthropic");
       const d = await cuerpo<RespA>(r, "Anthropic", apiKey);
       let texto = "";
       const llamadas: LlamadaHerramienta[] = [];
@@ -27,7 +32,7 @@ export function anthropic(apiKey: string): ProveedorIa {
           else llamadas.push({ id: b.id, nombre: b.name, argumentos: b.input });
         }
       }
-      return {
+      const respuesta: RespuestaConversacion = {
         texto,
         llamadas,
         uso: { tokensEntrada: d.usage.input_tokens, tokensSalida: d.usage.output_tokens },
@@ -35,8 +40,25 @@ export function anthropic(apiKey: string): ProveedorIa {
         modelo,
         proveedor: "ia_anthropic",
       };
+      if (respuesta.llamadas.length) respuesta.continuidad = continuidad.guardar(modelo, prefijo, respuesta, d.content);
+      return respuesta;
     },
-    conversarStream: (modelo, s) => streamAnthropic(apiKey, modelo, s),
+    async *conversarStream(modelo, s) {
+      rechazarContinuidad(s);
+      continuidad.resolver(modelo, s);
+      const prefijo = continuidad.fijar(s);
+      let terminar: ((neutral: boolean, respuesta: RespuestaConversacion) => void) | undefined;
+      const estado = { privado: false, completo: false };
+      for await (const ev of streamAnthropic(apiKey, modelo, s, estado)) {
+        if (ev.tipo === "herramienta" && !terminar) terminar = continuidad.iniciarStream(prefijo);
+        if (ev.tipo === "fin") {
+          if ((estado.privado || !estado.completo) && ev.respuesta.llamadas.length)
+            ev.respuesta.continuidad = continuidad.guardar(modelo, prefijo, ev.respuesta, null);
+          if (estado.completo) terminar?.(!estado.privado, ev.respuesta);
+        }
+        yield ev;
+      }
+    },
     completar: (modelo, s) => completarDesdeConversar(self).call(self, modelo, s),
   };
   return self;
@@ -56,6 +78,7 @@ async function* streamAnthropic(
   apiKey: string,
   modelo: string,
   s: SolicitudConversacion,
+  estado: { privado: boolean; completo: boolean },
 ): AsyncGenerator<EventoStream> {
   const r = await pedir(URL, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, true)) }, "Anthropic");
   let texto = "";
@@ -67,6 +90,9 @@ async function* streamAnthropic(
   const bloques = new Map<number, { id: string; nombre: string; json: string }>();
   for await (const payload of leerSSE(r, "Anthropic", apiKey)) {
     const ev = JSON.parse(payload) as EventoSSE;
+    if (["thinking", "redacted_thinking"].includes(ev.content_block?.type ?? "") ||
+        ["thinking_delta", "signature_delta"].includes(ev.delta?.type ?? "")) estado.privado = true;
+    if (ev.type === "message_stop") estado.completo = true;
     if (ev.type === "error") {
       const detalle = ev.error?.message ? `: ${sanear(`${ev.error.type ?? "error"} · ${ev.error.message}`, apiKey)}` : ".";
       throw new ErrorIa("Anthropic", null, `Anthropic: el stream reportó un error${detalle}`);
