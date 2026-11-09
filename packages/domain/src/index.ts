@@ -27,6 +27,7 @@ export { intervaloEsperado, horasEntre, horasEsperadas, type IntervaloEsperado }
 export * from "./jornada-legal";
 export * from "./turnos-esperados";
 export * from "./turnos-jornada-pactada";
+export * from "./vencimientos-grupos";
 export * from "./vigencia";
 export * from "./calendario";
 export * from "./datos-personales";
