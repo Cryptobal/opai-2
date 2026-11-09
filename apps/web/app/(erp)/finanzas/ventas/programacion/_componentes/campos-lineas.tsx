@@ -6,13 +6,8 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button, Campo, Card, Checkbox, Combobox, Input } from "@opai/ds";
 
 import { DescripcionLinea } from "./descripcion-linea";
-import {
-  LINEA_VACIA,
-  precioClpTexto,
-  precioUfTexto,
-  type FormProgramacion,
-  type LineaForm,
-} from "./tipos";
+import { precioClpTexto, precioUfTexto } from "./formato-precio";
+import { LINEA_VACIA, type FormProgramacion, type LineaForm } from "./tipos";
 
 // Las plantillas de glosa no hacen falta en el primer pintado: se cargan aparte (presupuesto de JS, ADR-037).
 const SelectorPlantilla = dynamic(() =>
