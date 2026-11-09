@@ -2,8 +2,7 @@ import { PLACEHOLDERS_GLOSA } from "@opai/domain";
 import { describe, expect, it } from "vitest";
 
 import { MARCADORES_DESCRIPCION } from "@/app/(erp)/finanzas/ventas/programacion/_componentes/descripcion-linea";
-import { precioClpTexto, precioUfTexto } from "@/app/(erp)/finanzas/ventas/programacion/_componentes/formato-precio";
-import { parseClp, parseUf } from "@/app/(erp)/finanzas/ventas/programacion/_componentes/tipos";
+import { parseClp, parseUf, precioClpTexto, precioUfTexto } from "@/app/(erp)/finanzas/ventas/programacion/_componentes/tipos";
 
 describe("precio de la programación al tipear", () => {
   it("CLP con punto de miles", () => {

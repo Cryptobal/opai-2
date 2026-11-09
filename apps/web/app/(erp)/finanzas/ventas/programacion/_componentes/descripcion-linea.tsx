@@ -9,8 +9,8 @@ import { Button, Campo, Input } from "@opai/ds";
 export const MARCADORES_DESCRIPCION = ["periodo", "uf_valor", "uf_al_dia", "monto"] as const;
 
 /**
- * Descripción de la línea. Al escribir «#» al final del texto se ofrecen los marcadores; es opcional: sin
- * marcadores la descripción se guarda igual, y uno desconocido queda tal cual.
+ * Descripción de la línea. Al escribir «#» al final del texto se ofrecen los marcadores (un clic reemplaza el
+ * «#…» por el marcador); es opcional: sin marcadores la descripción se guarda igual, y uno desconocido queda tal cual.
  */
 export function DescripcionLinea({
   id,
@@ -27,7 +27,7 @@ export function DescripcionLinea({
       <Input id={id} value={valor} onChange={(e) => onCambiar(e.target.value)} />
       {fragmento ? (
         <div className="mt-2 flex flex-wrap gap-2">
-          {MARCADORES_DESCRIPCION.filter((p) => p.startsWith(fragmento.slice(1))).map((p) => (
+          {MARCADORES_DESCRIPCION.map((p) => (
             <Button
               key={p}
               variant="secondary"
