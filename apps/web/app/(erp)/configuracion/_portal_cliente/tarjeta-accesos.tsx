@@ -54,8 +54,8 @@ export function TarjetaAccesos({
       {error ? <Alerta tono="danger" titulo={error} className="m-4" /> : null}
       {accesos.length === 0 ? (
         <p className="t-body-sm p-4">
-          Aún nadie de este cliente entra a su portal. Invita al contacto desde Usuarios con el
-          portal «Cliente» y vincúlalo aquí a sus instalaciones.
+          Aún nadie de este cliente entra a su portal. Da acceso a un contacto de la cuenta desde
+          «Contactos y acceso al portal» y vincúlalo aquí a sus instalaciones.
         </p>
       ) : (
         <ul>
