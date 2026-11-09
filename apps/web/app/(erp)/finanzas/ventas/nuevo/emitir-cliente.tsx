@@ -4,6 +4,8 @@ import { Campo, Card, Combobox, Input, Select, Textarea } from "@opai/ds";
 
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
+import type { TipoEmision } from "./emitir-util";
+
 function filaTributaria(etiqueta: string, valor: string | null | undefined) {
   if (!valor?.trim()) return null;
   return (
@@ -19,8 +21,8 @@ type Props = {
   documentoId: string | null;
   cuentaId: string | null;
   setCuentaId: (id: string | null) => void;
-  tipoDte: "33" | "34";
-  setTipoDte: (v: "33" | "34") => void;
+  tipoDte: TipoEmision;
+  setTipoDte: (v: TipoEmision) => void;
   plazoPagoDias: string;
   setPlazoPagoDias: (v: string) => void;
   glosa: string;
@@ -41,6 +43,7 @@ export function EmitirClienteTipo({
 }: Props) {
   const cuenta = cuentas.find((c) => c.id === cuentaId);
   const razonDte = cuenta?.razonSocial?.trim() || cuenta?.nombre;
+  const esNota = tipoDte === "61" || tipoDte === "56";
 
   return (
     <Card className="flex flex-col gap-4 p-4">
@@ -77,30 +80,36 @@ export function EmitirClienteTipo({
           id="emit-tipo"
           disabled={Boolean(documentoId)}
           valor={tipoDte}
-          onCambiar={(v) => setTipoDte(v as "33" | "34")}
+          onCambiar={(v) => setTipoDte(v as TipoEmision)}
           opciones={[
             { valor: "33", etiqueta: "33 · Factura afecta" },
             { valor: "34", etiqueta: "34 · Factura exenta" },
+            { valor: "61", etiqueta: "61 · Nota de crédito (corrige una factura)" },
+            { valor: "56", etiqueta: "56 · Nota de débito (anula una nota de crédito)" },
           ]}
         />
       </Campo>
-      <Campo etiqueta="Plazo de pago (días)" htmlFor="emit-plazo">
-        <Input
-          id="emit-plazo"
-          inputMode="numeric"
-          disabled={Boolean(documentoId)}
-          value={plazoPagoDias}
-          onChange={(e) => setPlazoPagoDias(e.target.value)}
-        />
-      </Campo>
-      <Campo etiqueta="Glosa (opcional)" htmlFor="emit-glosa">
-        <Textarea
-          id="emit-glosa"
-          disabled={Boolean(documentoId)}
-          value={glosa}
-          onChange={(e) => setGlosa(e.target.value)}
-        />
-      </Campo>
+      {esNota ? null : (
+        <Campo etiqueta="Plazo de pago (días)" htmlFor="emit-plazo">
+          <Input
+            id="emit-plazo"
+            inputMode="numeric"
+            disabled={Boolean(documentoId)}
+            value={plazoPagoDias}
+            onChange={(e) => setPlazoPagoDias(e.target.value)}
+          />
+        </Campo>
+      )}
+      {esNota ? null : (
+        <Campo etiqueta="Glosa (opcional)" htmlFor="emit-glosa">
+          <Textarea
+            id="emit-glosa"
+            disabled={Boolean(documentoId)}
+            value={glosa}
+            onChange={(e) => setGlosa(e.target.value)}
+          />
+        </Campo>
+      )}
     </Card>
   );
 }
