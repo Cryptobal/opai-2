@@ -67,6 +67,28 @@ Reglas del contrato:
 - **Capacidad.** `cpq.propuestas_tecnica.prompt_exportable` (lectura, permiso `cpq:cotizaciones.read`, `dryRun: false` porque no escribe, paridad MCP). No devuelve datos de clientes ni de la empresa, por eso no lleva `auditarLectura`. El dryRun y la auditoría de escrituras no aplican a una lectura sin IDs revelados.
 - **Pruebas.** Dominio (7) y base real (2).
 
+## PR 9 — importación de HTML saneada y versionada por empresa
+
+**Encargo (10-nov-2026, coordinador OPAI 2.0 por Carlos).** Una sola entrega, desde `main`. No entran el PR 7 ni el editor en pantalla. Migración: **sí, aditiva y propuesta** (`20261117100000_cpq_propuesta_html`; la aplica el bot «OPAI 2.0» con respaldo; el PR lleva `migracion-pendiente`).
+
+**HTML de partida.** `docs/2.0/diseño/export-cpq/PropuestaCliente.dc.html` (export de Claude Design con tokens del DS v2). En esta sesión no hay un export más nuevo del mismo diseño.
+
+**Qué hace el PR.**
+- Saneador en código (`modules/cpq/domain/documento/sanear-html.ts`, con `parse5`): parsea, recorre contra una lista blanca y vuelve a serializar. Solo estructura y texto (`div`, `p`, `h1-h6`, listas, tablas, `a`, énfasis…); atributos `class`, `style` (propiedades y funciones CSS en lista blanca), `title`, `lang`, `href` (https, mailto, tel o `#`).
+- Los marcadores `{{…}}` se validan con `validarPlantillaCampos(…, "propuesta")` contra el catálogo real (`packages/domain/src/campos/`); un marcador desconocido, no autorizado, mal formado o con formato inválido rechaza la importación. Los marcadores solo van en el texto, nunca en atributos.
+- Capacidades: `cpq.propuestas_html.importar` (escritura, `dryRun`, permiso `cpq:biblioteca.manage`; el campo `html` no queda en la auditoría), `cpq.propuestas_html.list` y `cpq.propuestas_html.get` (lectura, `cpq:cotizaciones.read`). Paridad MCP.
+- Tabla `cpq.propuesta_html` (RLS ENABLE+FORCE, `tenant_isolation`): una fila por versión, con HTML saneado, hash SHA-256, versión del catálogo, marcadores usados y advertencias. Inmutable salvo `estado` (trigger). Una sola versión activa por nombre y empresa; importar un HTML distinto crea la versión siguiente y archiva la anterior; importar el mismo HTML no crea otra.
+
+**Qué se guarda.** Solo el HTML ya saneado (cuerpo, sin `<head>`, sin comentarios) y su metadato. Nunca el HTML original.
+
+**Qué se rechaza (no se guarda nada; el informe lista todos los problemas).** `script`, `iframe`, `object`, `embed`, formularios, `svg`/`math`, `template` y cualquier elemento activo; `link`, `style`, `base`, `img`, `video`/`audio` y todo lo que cargue o declare un recurso; elementos propios o no permitidos (`x-*`, `sc-if`, `helmet`…); atributos `on*`; `href` que no sea https, mailto, tel o `#`; `style` con `url(`, `expression`, `@import` o funciones fuera de la lista blanca; marcadores `{{…}}` en atributos o fuera del catálogo; HTML de más de 400.000 bytes, 48 niveles o 15.000 nodos. Se quitan con aviso (no rechazan): atributos no permitidos (`id`, `data-*`…), propiedades CSS fuera de la lista (p. ej. `position`), `<title>` y `<meta>`.
+
+**El export real de Claude Design NO se puede importar tal cual.** `PropuestaCliente.dc.html` usa el formato de componentes de Claude Design (`x-dc`, `sc-if`, `sc-for`, `x-import`, `helmet`), carga `support.js`, `cpq-data.js` y hojas de estilo del DS por ruta, y enlaza datos con `{{ theme }}`, `{{ publica }}`, etc., que no son campos del catálogo. Un test lo prueba: el saneador lo rechaza con esos motivos. Para importar un diseño hay que pedir a Claude Design un HTML estático con los marcadores del prompt exportable (PR 8). No se inventó otro diseño ni se escribió un conversor.
+
+**Qué sigue haciendo el PDF.** Lo mismo que hoy: `pdf-lib` arma el PDF desde los bloques, el capítulo por instalación y el envío congelado. **Ningún renderer lee `cpq.propuesta_html`**; el HTML importado no se convierte a PDF ni se usa en el envío. No se promete Figma, PPT ni PDF desde este HTML. Conectar una plantilla HTML a un renderer (navegador sin cabeza u otro) es una decisión de arquitectura aparte.
+
+**Pruebas.** Dominio (23), base real (6): versionado, rechazo sin guardar, aislamiento entre empresas, inmutabilidad y permiso.
+
 ## Responsable y archivos del contrato transversal (autorizado por Carlos el 7-nov-2026 21:49)
 
 Documentos (CAR-127) no tiene código ni PR abierto sobre campos (solo la rama de diseño `docs/diseno-documentos-v4`) y Núcleo no tiene un catálogo propio: **el contrato vigente es el integrado en #387**. No se crea un catálogo alterno ni se espera una elección técnica adicional. Regla para evitar solapes:
