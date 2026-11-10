@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento, sinDuplicado } from "../maestros/comun";
 import {
+  bloquearVigente,
   contarMiembros,
   descripcionGrupoSchema,
   exigeGestionDeGrupos,
@@ -14,7 +15,7 @@ import {
   grupoDe,
   grupoSchema,
   grupoVigente,
-  mensajeDuplicado,
+  MENSAJE_DUPLICADO,
   nombreGrupoSchema,
   vistaGrupo,
 } from "./comun";
@@ -43,7 +44,7 @@ export const gruposCreate = defineCapability({
         { tipo: "core.grupo.creado", entidadTipo: "grupo_usuarios" },
         (tx) => tx.grupoUsuarios.create({ data }),
       ),
-      mensajeDuplicado(input.nombre),
+      MENSAJE_DUPLICADO,
     );
     return vistaGrupo(g);
   },
@@ -76,9 +77,12 @@ export const gruposUpdate = defineCapability({
       escribirConEvento<GrupoFila>(
         ctx,
         { tipo: "core.grupo.actualizado", entidadTipo: "grupo_usuarios" },
-        (tx) => tx.grupoUsuarios.update({ where: { id: actual.id }, data }),
+        async (tx) => {
+          await bloquearVigente(tx, actual.id);
+          return tx.grupoUsuarios.update({ where: { id: actual.id }, data });
+        },
       ),
-      mensajeDuplicado(input.nombre ?? actual.nombre),
+      MENSAJE_DUPLICADO,
     );
     return vistaGrupo(g, miembros);
   },

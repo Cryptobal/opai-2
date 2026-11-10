@@ -12,10 +12,7 @@ import { EVENTOS_TERRENO } from "./catalogo-terreno";
 export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.cuenta.creada", descripcion: "Se creó una cuenta (cliente o prospecto)." },
   { id: "core.cuenta.actualizada", descripcion: "Cambiaron los datos de una cuenta." },
-  {
-    id: "core.cuenta.estado_cambiado",
-    descripcion: "Una cuenta pasó a cliente activo, inactivo o prospecto.",
-  },
+  { id: "core.cuenta.estado_cambiado", descripcion: "Una cuenta pasó a cliente activo, inactivo o prospecto." },
   { id: "core.cuenta.archivada", descripcion: "Se archivó una cuenta." },
   { id: "core.contacto.creado", descripcion: "Se agregó un contacto a una cuenta." },
   { id: "core.contacto.actualizado", descripcion: "Cambiaron los datos de un contacto." },

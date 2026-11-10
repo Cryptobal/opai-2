@@ -49,7 +49,11 @@ export function ArchivarGrupo({
           </>
         }
       >
-        {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
+        {error ? (
+          <p role="alert" className="text-sm font-medium text-danger-fg">
+            {error}
+          </p>
+        ) : null}
       </Dialog>
     </>
   );

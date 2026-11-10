@@ -67,6 +67,10 @@ CREATE POLICY tenant_isolation ON "core"."grupo_usuarios_miembros" AS PERMISSIVE
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
+-- Archivar, nunca borrar en duro (defensa en profundidad): la app no puede DELETE sobre el grupo.
+-- La membresía sí se borra al quitar a alguien (queda en core.audit_events).
+REVOKE DELETE ON "core"."grupos_usuarios" FROM opai_app;
+
 COMMIT;
 
 -- Reversión: DROP TABLE IF EXISTS "core"."grupo_usuarios_miembros";

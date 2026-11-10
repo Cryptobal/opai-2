@@ -22,7 +22,13 @@ const valoresDe = (g: GrupoVista): ValoresGrupo => ({
 /** Detalle de un grupo: datos, miembros y archivar. Sheet desde 1024, pantalla completa en teléfono. */
 export function HojaGrupo({ grupo, gestiona, onCerrar }: Props) {
   const { ejecutar, error, pendiente, limpiarError } = useCapacidad("erp");
-  const { detalle, usuarios, error: errorCarga, recargar } = useDetalleGrupo(grupo.id, gestiona);
+  const {
+    detalle,
+    usuarios,
+    error: errorCarga,
+    errorUsuarios,
+    recargar,
+  } = useDetalleGrupo(grupo.id, gestiona);
   const origen = valoresDe(grupo);
   const [v, setV] = useState<ValoresGrupo>(origen);
   const editable = gestiona && !grupo.archivado;
@@ -84,6 +90,7 @@ export function HojaGrupo({ grupo, gestiona, onCerrar }: Props) {
             grupo={detalle}
             usuarios={usuarios}
             editable={editable}
+            errorUsuarios={errorUsuarios}
             onCambio={recargar}
           />
         ) : errorCarga ? (

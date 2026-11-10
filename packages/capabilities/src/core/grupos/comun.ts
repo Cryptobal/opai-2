@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { TenantTx } from "@opai/db";
+
 import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 
@@ -81,17 +83,35 @@ export async function grupoVigente(ctx: Contexto, id: string): Promise<GrupoFila
 export const contarMiembros = (ctx: Contexto, grupoId: string) =>
   ctx.db.grupoUsuarioMiembro.count({ where: { grupoId } });
 
-/** Nombre libre entre los grupos vigentes de la empresa (sin distinguir mayúsculas). */
+/** Mensaje sin el nombre ni comillas: la UI lo muestra tal cual (no parece texto técnico). */
+export const MENSAJE_DUPLICADO = "Ya existe un grupo vigente con ese nombre.";
+
+/**
+ * Nombre libre entre los grupos vigentes de la empresa, sin distinguir mayúsculas. Se compara en JS
+ * (no con `mode: "insensitive"`, que en Postgres usa ILIKE y trataría `%` o `_` como comodines); el
+ * índice parcial único de la migración cubre la carrera (`sinDuplicado`).
+ */
 export async function exigeNombreLibre(ctx: Contexto, nombre: string, excepto?: string) {
-  const otro = await ctx.db.grupoUsuarios.findFirst({
-    where: {
-      nombre: { equals: nombre, mode: "insensitive" },
-      archivadoEn: null,
-      ...(excepto ? { id: { not: excepto } } : {}),
-    },
-    select: { id: true },
+  const vigentes = await ctx.db.grupoUsuarios.findMany({
+    where: { archivadoEn: null, ...(excepto ? { id: { not: excepto } } : {}) },
+    select: { nombre: true },
   });
-  if (otro) throw reglaDeNegocio(`Ya existe un grupo llamado "${nombre}".`);
+  const buscado = nombre.toLowerCase();
+  if (vigentes.some((g) => g.nombre.toLowerCase() === buscado)) {
+    throw reglaDeNegocio(MENSAJE_DUPLICADO);
+  }
 }
 
-export const mensajeDuplicado = (nombre: string) => `Ya existe un grupo llamado "${nombre}".`;
+/**
+ * Dentro de la transacción de escritura, toma el lock de la fila del grupo y confirma que sigue
+ * vigente: un archivado concurrente no deja editar ni cambiar miembros de un grupo ya archivado.
+ */
+export async function bloquearVigente(tx: TenantTx, id: string): Promise<void> {
+  const r = await tx.grupoUsuarios.updateMany({
+    where: { id, archivadoEn: null },
+    data: { updatedAt: new Date() },
+  });
+  if (r.count !== 1) {
+    throw reglaDeNegocio("El grupo está archivado: no se edita ni cambia de miembros.");
+  }
+}

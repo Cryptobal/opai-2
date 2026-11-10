@@ -11,12 +11,13 @@ Este frente crea solo los grupos y su membresía. El motor de políticas, el per
 ## Qué entra
 
 - **Tablas** en `core` (migración aditiva `20261119100000_core_grupos_usuarios`, con RLS `tenant_isolation`):
-  - `core.grupos_usuarios`: `id`, `tenant_id`, `nombre`, `descripcion`, `archivado_en`, fechas. Nombre único por empresa entre los grupos vigentes (índice parcial sobre `lower(nombre)` con `archivado_en IS NULL`). Se archiva, nunca se borra en duro.
+  - `core.grupos_usuarios`: `id`, `tenant_id`, `nombre`, `descripcion`, `archivado_en`, fechas. Nombre único por empresa entre los grupos vigentes (índice parcial sobre `lower(nombre)` con `archivado_en IS NULL`). Se archiva, nunca se borra en duro (`REVOKE DELETE` para `opai_app`).
   - `core.grupo_usuarios_miembros`: `id`, `tenant_id`, `grupo_id`, `user_id`, fechas. Único `(grupo_id, user_id)`.
   - **FK compuestas por tenant:** `(tenant_id, grupo_id) → grupos_usuarios(tenant_id, id)` y `(tenant_id, user_id) → memberships(tenant_id, user_id)`. La base impide sumar a un usuario que no es miembro de la misma empresa o colgar un miembro de un grupo de otra empresa, aunque alguien salte la capacidad.
 - **Capacidades** (`core.grupos.*`, módulo `core`, en UI, `/api/v1` y MCP):
   - Lectura (`core:users.read`): `core.grupos.list`, `core.grupos.get`.
   - Escritura (`core:users.manage` **y** rol base owner o admin, igual que roles personalizados, §16.2), todas con `dryRun` (`preview_…` en MCP) e `idempotencyKey`: `core.grupos.create`, `core.grupos.update`, `core.grupos.archive`, `core.grupos.agregar_miembros`, `core.grupos.quitar_miembro`.
+  - Miembros elegibles: membresía **activa** en la empresa con acceso al **ERP** (un contacto del portal cliente o un usuario suspendido no entra a un grupo que luego podrá aprobar).
   - Cada escritura real queda en `core.audit_events` (misma transacción, ADR-052) y emite su evento de dominio (`core.grupo.*`).
 - **Pantalla:** Configuración › Usuarios y permisos › pestaña **Grupos** (`/configuracion/usuarios/grupos`), con la lista y la hoja de detalle/edición del DS (mismo patrón que Roles).
 

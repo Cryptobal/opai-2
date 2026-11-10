@@ -42,6 +42,8 @@ model GrupoUsuarioMiembro {
   @@unique([grupoId, userId])
   /// Consulta inversa de CAR-252: grupos de un usuario en la empresa.
   @@index([tenantId, userId])
+  /// FK compuesta hacia el grupo: miembros por grupo y CASCADE.
+  @@index([tenantId, grupoId])
   @@map("grupo_usuarios_miembros")
   @@schema("core")
 }

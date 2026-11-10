@@ -14,11 +14,13 @@ type Props = {
   grupo: GrupoDetalle;
   usuarios: UsuarioEmpresa[];
   editable: boolean;
+  /** Error al cargar el directorio de usuarios (el selector no debe decir «no quedan»). */
+  errorUsuarios: string | null;
   onCambio: () => Promise<void>;
 };
 
 /** Miembros del grupo: lista con «Quitar» y selector múltiple para agregar (owner y admin). */
-export function MiembrosGrupo({ grupo, usuarios, editable, onCambio }: Props) {
+export function MiembrosGrupo({ grupo, usuarios, editable, errorUsuarios, onCambio }: Props) {
   const { ejecutar, error, pendiente } = useCapacidad("erp");
   const [elegidos, setElegidos] = useState<string[]>([]);
   const dentro = new Set(grupo.miembros.map((m) => m.userId));
@@ -27,7 +29,7 @@ export function MiembrosGrupo({ grupo, usuarios, editable, onCambio }: Props) {
     .map((u) => ({
       valor: u.userId,
       etiqueta: u.nombre,
-      detalle: u.estado === "activa" ? u.email : `${u.email} · suspendido`,
+      detalle: u.email,
     }));
 
   async function agregar() {
@@ -52,7 +54,11 @@ export function MiembrosGrupo({ grupo, usuarios, editable, onCambio }: Props) {
       <h3 id="miembros-titulo" className="t-label text-fg">
         Miembros ({grupo.miembros.length})
       </h3>
-      {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
+      {error || errorUsuarios ? (
+        <p role="alert" className="text-sm font-medium text-danger-fg">
+          {error ?? `No pudimos cargar los usuarios de la empresa: ${errorUsuarios}`}
+        </p>
+      ) : null}
       {editable ? (
         <div className="flex flex-col gap-2">
           <Campo etiqueta="Agregar personas" htmlFor="grupo-agregar">

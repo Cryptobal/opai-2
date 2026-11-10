@@ -47,6 +47,17 @@ describe("grupos de usuarios (CAR-251)", () => {
     expect(nombres).not.toContain("preview_core_grupos_list");
   });
 
+  it("una key de servicio (sin rol base) no escribe grupos", async () => {
+    const { ctx } = contextoDePrueba({ rol: null, actor: agente, scopes: ["*"] });
+    const r = await executeCapability(
+      ctx,
+      "core.grupos.create",
+      { nombre: "Ventas" },
+      { dryRun: true },
+    );
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
   it("sin rol base owner/admin se rechaza antes de tocar la base", async () => {
     const { ctx } = contextoDePrueba({
       rol: "gerente",
