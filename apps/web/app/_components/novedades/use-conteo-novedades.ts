@@ -14,11 +14,15 @@ export function useConteoNovedades(
   useEffect(() => {
     if (!activo) return;
     let vivo = true;
-    void ejecutarCapacidad(portal, "core.novedades.list", {}).then((r) => {
-      if (vivo && r.ok) setNoLeidas((r.data as { noLeidas: number }).noLeidas);
-    });
+    const cargar = () =>
+      void ejecutarCapacidad(portal, "core.novedades.list", {}).then((r) => {
+        if (vivo && r.ok) setNoLeidas((r.data as { noLeidas: number }).noLeidas);
+      });
+    cargar();
+    window.addEventListener("opai-novedades", cargar);
     return () => {
       vivo = false;
+      window.removeEventListener("opai-novedades", cargar);
     };
   }, [activo, epoca, portal]);
   return noLeidas;

@@ -37,7 +37,7 @@ export const novedadesList = defineCapability({
     const usuarioId = usuarioDe(ctx);
     const visibles = entradasPara(ctx);
     const ids = visibles.map((v) => v.id);
-    const db = dbLecturaNovedades(ctx);
+    const db = await dbLecturaNovedades(ctx);
     const lecturas = ids.length
       ? await db.novedadLectura.findMany({
           where: { usuarioId, novedadId: { in: ids } },
