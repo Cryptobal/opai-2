@@ -5,6 +5,7 @@ import type { AmbienteSii } from "@opai/domain";
 import { reglaDeNegocio } from "../errores";
 import { dekDe } from "../integraciones/secretos";
 import type { Contexto } from "../types";
+import { mensajeFaltantesReceptor } from "./receptor-tributario";
 import { camposReceptorDteEnPayload, type receptorDteDe } from "./ventas-comun";
 
 type DocEmision = {
@@ -60,6 +61,10 @@ export async function payloadEmisionDteDe(
     incluirCaf: boolean;
   },
 ): Promise<PayloadEmisionDte> {
+  // Con el proveedor real (el que lleva CAF) no se emite sin giro, dirección y comuna del receptor (CAR-240): se
+  // corta antes de firmar, así que el borrador sigue sin emitir y el folio no se usa.
+  const falta = p.incluirCaf ? mensajeFaltantesReceptor(p.cuenta) : null;
+  if (falta) throw reglaDeNegocio(`${falta} El documento sigue sin emitir y el folio no se usó.`);
   const tipo = p.doc.tipoDte as TipoDteVentaSii;
   const lineas = p.doc.lineas
     .slice()

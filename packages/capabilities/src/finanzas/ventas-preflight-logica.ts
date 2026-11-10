@@ -3,6 +3,7 @@ import { produccionTributariaHabilitada } from "@opai/integrations";
 import type { Contexto } from "../types";
 import { NOMBRE_AMBIENTE_CAF, ambienteCafRequerido } from "./caf-ambiente";
 import { rangosParaEmitir } from "./folios-previstos";
+import { mensajeFaltantesReceptor } from "./receptor-tributario";
 import { chequeosCredencialesEmision } from "./ventas-preflight-credenciales";
 
 export type ItemPreflightEmision = {
@@ -90,14 +91,12 @@ export async function itemsPreflightEmision(
       push("receptor_rut", false, "El cliente no tiene RUT; no se puede emitir.", true);
     } else {
       push("receptor_rut", true, "El cliente tiene RUT.", false);
-      const tributarioOk = Boolean(cuenta.giro?.trim() && cuenta.calle?.trim() && cuenta.comuna?.trim());
+      const falta = mensajeFaltantesReceptor(cuenta);
       push(
         "receptor_tributario",
-        tributarioOk,
-        tributarioOk
-          ? "Datos tributarios del receptor completos."
-          : "Complete giro, dirección y comuna del cliente antes de emitir al SII.",
-        proveedor !== "simulado" && !tributarioOk,
+        !falta,
+        falta ?? "Datos tributarios del receptor completos.",
+        proveedor !== "simulado" && Boolean(falta),
       );
     }
   }
