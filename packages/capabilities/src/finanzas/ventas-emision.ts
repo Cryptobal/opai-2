@@ -19,6 +19,7 @@ import {
   prepararEmision,
   type EmisionPreparada,
 } from "./ventas-emision-preparar";
+import { exigirOrigenNotaDebito } from "./ventas-nd-cargo";
 import { descartarXmlPreparado } from "./ventas-xml";
 import { ventaSchema } from "./vistas-venta";
 import type { Contexto } from "../types";
@@ -89,6 +90,12 @@ export async function emitirBorrador(
         payload: () => ({ folio: preparada.folio, tipoDte: doc.tipoDte }),
       },
       async (tx) => {
+        // ND de cargo: bloquea la factura de origen (como la NC que la anularía) y revalida que siga vigente antes de
+        // reclamar el folio (CAR-234).
+        if (doc.tipoDte === 56 && doc.documentoReferenciaId) {
+          await tx.$queryRaw`SELECT id FROM finanzas.documentos_emitidos WHERE id = ${doc.documentoReferenciaId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+        }
+        if (doc.tipoDte === 56) await exigirOrigenNotaDebito({ db: tx }, doc);
         const folio = await consumirFolio(ctx, tipo, false, tx);
         if (folio !== preparada.folio) {
           throw reglaDeNegocio(

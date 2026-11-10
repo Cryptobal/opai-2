@@ -70,9 +70,11 @@ export function jsonInputGenerarDte(
   const lineas = payload.lineas?.length
     ? payload.lineas
     : [{ orden: 0, glosa: payload.glosa ?? "Servicio", monto: payload.montos.total }];
+  const documentoExento = payload.tipoDte === 34 || (payload.montos.neto === 0 && payload.montos.exento > 0);
   const detalles = lineas.map((l) => ({
-    // Línea exenta o no afecta (documentación: IndicadorExento 0 afecto, 1 exento).
-    IndicadorExento: payload.tipoDte === 34 ? 1 : 0,
+    // Línea exenta o no afecta (documentación: IndicadorExento 0 afecto, 1 exento). Una NC o ND (61/56) sobre una
+    // factura exenta también es exenta: sus totales vienen sin neto ni IVA y las líneas deben cuadrar con eso (CAR-234).
+    IndicadorExento: documentoExento ? 1 : 0,
     Nombre: l.glosa,
     Cantidad: l.cantidad ?? 1,
     Precio: l.precioUnitario ?? l.monto,

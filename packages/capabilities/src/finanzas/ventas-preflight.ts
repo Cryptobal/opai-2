@@ -25,7 +25,7 @@ export const ventasPreflightEmision = defineCapability({
   input: z.object({
     documentoId: uuidSchema.optional(),
     cuentaId: uuidSchema.optional(),
-    tipoDte: z.union([z.literal(33), z.literal(34), z.literal(61)]).optional(),
+    tipoDte: z.union([z.literal(33), z.literal(34), z.literal(56), z.literal(61)]).optional(),
   }),
   output: outputSchema,
   efecto: "lectura",
