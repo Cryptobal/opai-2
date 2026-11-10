@@ -11,14 +11,15 @@ import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { PestanasDocumentos } from "../_componentes/pestanas-documentos";
 import { cargarVencimientos } from "./_componentes/datos";
+import { CAPA_DE_TIPO, esTipoVencimiento } from "./_componentes/entidades";
 import { GrupoVencimientos } from "./_componentes/lista-vencimientos";
 
 export const metadata = { title: "Vencimientos" };
 
 /**
- * Vencimientos de cuentas e instalaciones (Documentos v4 · 04): lo vencido y lo que vence en 30 y 60
- * días (B2), con «Subir renovación» que abre la hoja de subir sobre el documento que se reemplaza.
- * El alcance (supervisor: sus instalaciones) y los sensibles los aplica la capacidad en la consulta.
+ * Vencimientos (Documentos v4 · 04, CAR-232): lo vencido y lo que vence en 30 y 60 días (B2),
+ * del mismo dueño que muestra el explorador. «Subir renovación» abre la hoja sobre el documento
+ * que se reemplaza. El alcance y los sensibles los aplica la capacidad en la consulta.
  */
 export default function Vencimientos({ searchParams }: { searchParams: SearchParams }) {
   return (
@@ -39,20 +40,12 @@ export default function Vencimientos({ searchParams }: { searchParams: SearchPar
         const doc = puedeSubir
           ? datos.grupos.flatMap((g) => g.items).find((d) => d.id === reemplaza)
           : undefined;
-        const tipoEntidad =
-          doc?.entidad?.tipo === "cuenta" || doc?.entidad?.tipo === "instalacion"
-            ? doc.entidad.tipo
-            : null;
+        const tipo = doc?.entidad?.tipo;
         const entidad =
-          doc?.entidad && tipoEntidad
-            ? {
-                tipo: tipoEntidad === "cuenta" ? ("cuenta" as const) : ("instalacion" as const),
-                id: doc.entidad.id,
-              }
-            : null;
+          doc?.entidad && esTipoVencimiento(tipo) ? { tipo, id: doc.entidad.id } : null;
         const t = entidad
           ? await ejecutarComoUsuario<TipoDocumento[]>("erp", "core.documento_tipos.list", {
-              capa: entidad.tipo,
+              capa: CAPA_DE_TIPO[entidad.tipo],
             })
           : null;
         return { ...datos, puedeSubir, entidad, tipos: t?.ok ? t.data : [] };
@@ -73,8 +66,7 @@ export default function Vencimientos({ searchParams }: { searchParams: SearchPar
               textos={{
                 vacio: {
                   titulo: "Nada por vencer",
-                  descripcion:
-                    "Ningún documento de cuentas o instalaciones vence en los próximos 60 días.",
+                  descripcion: "Ningún documento vence en los próximos 60 días.",
                   accion: (
                     <LinkNext href="/documentos" className="text-accent hover:underline">
                       Ver explorador
@@ -86,7 +78,12 @@ export default function Vencimientos({ searchParams }: { searchParams: SearchPar
           ) : (
             <div className="flex flex-col gap-6">
               {d.grupos.map((g) => (
-                <GrupoVencimientos key={g.id} grupo={g} puedeSubir={d.puedeSubir} />
+                <GrupoVencimientos
+                  key={g.id}
+                  grupo={g}
+                  puedeSubir={d.puedeSubir}
+                  etiquetas={d.etiquetas}
+                />
               ))}
             </div>
           )}

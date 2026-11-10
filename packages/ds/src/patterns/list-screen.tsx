@@ -39,13 +39,18 @@ export type ListScreenProps<T> = {
   Link?: LinkComponent;
   /** Alternativa de cliente: fila como botón. */
   onSeleccionar?: (item: T) => void;
+  /**
+   * Acciones de la fila (menú, archivar). Van fuera del enlace estirado: si no, el clic
+   * abre el documento y no se puede elegir ni borrar.
+   */
+  acciones?: (item: T) => ReactNode;
   textos?: TextosEstado;
 };
 
 /** Lista: cabecera con acción principal, búsqueda, chips de filtro, filas en base y tabla en md+. */
 export function ListScreen<T>(props: ListScreenProps<T>) {
   const { state, titulo, subtitulo, accionPrincipal, buscador, filtros, paginacion, items } = props;
-  const { clave, tarjeta, columnas, href, onSeleccionar, textos, grupo } = props;
+  const { clave, tarjeta, columnas, href, onSeleccionar, acciones, textos, grupo } = props;
   const Link = props.Link ?? LinkPorDefecto;
   const vacio = state === "ready" && items.length === 0 ? "empty" : state;
   const filaBase = "flex w-full items-start gap-3 px-4 py-3.5 text-left";
@@ -53,7 +58,9 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
     <section>
       {props.sinCabecera ? (
         // Sin cabecera de título la acción principal igual se ve: va sola, alineada a la derecha.
-        accionPrincipal ? <div className="mb-3 flex justify-end">{accionPrincipal}</div> : null
+        accionPrincipal ? (
+          <div className="mb-3 flex justify-end">{accionPrincipal}</div>
+        ) : null
       ) : (
         <Cabecera
           titulo={titulo}
@@ -82,19 +89,22 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
                   {grupo(item)}
                 </p>
               ) : null}
-              {href ? (
-                <Link href={href(item)} className={cn(filaBase, "active:bg-fill")}>
-                  {tarjeta(item)}
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onSeleccionar ? () => onSeleccionar(item) : undefined}
-                  className={cn(filaBase, onSeleccionar && "active:bg-fill")}
-                >
-                  {tarjeta(item)}
-                </button>
-              )}
+              <div className="flex items-center">
+                {href ? (
+                  <Link href={href(item)} className={cn(filaBase, "min-w-0 flex-1 active:bg-fill")}>
+                    {tarjeta(item)}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onSeleccionar ? () => onSeleccionar(item) : undefined}
+                    className={cn(filaBase, "min-w-0 flex-1", onSeleccionar && "active:bg-fill")}
+                  >
+                    {tarjeta(item)}
+                  </button>
+                )}
+                {acciones ? <div className="shrink-0 pr-3">{acciones(item)}</div> : null}
+              </div>
             </li>
           ))}
         </ul>
@@ -107,6 +117,11 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
                     {c.etiqueta}
                   </Th>
                 ))}
+                {acciones ? (
+                  <Th className="w-px">
+                    <span className="sr-only">Acciones</span>
+                  </Th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -120,7 +135,14 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
                     <Td key={c.id} className={c.className}>
                       {href && i === 0 ? (
                         // Enlace "estirado": toda la fila navega y el nombre accesible es la primera celda.
-                        <Link href={href(item)} className="after:absolute after:inset-0">
+                        // Con acciones, el ::after no se come el clic: el menú y el nombre sí lo reciben.
+                        <Link
+                          href={href(item)}
+                          className={cn(
+                            "after:absolute after:inset-0",
+                            acciones && "after:pointer-events-none",
+                          )}
+                        >
                           {c.render(item)}
                         </Link>
                       ) : (
@@ -128,6 +150,7 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
                       )}
                     </Td>
                   ))}
+                  {acciones ? <Td className="relative z-10 text-right">{acciones(item)}</Td> : null}
                 </Tr>
               ))}
             </tbody>
