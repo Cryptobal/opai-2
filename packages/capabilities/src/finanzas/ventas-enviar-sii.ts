@@ -6,6 +6,7 @@ import { encolarConsultaSiPendiente } from "./trabajos-dte";
 import { xmlParaEnvioSii } from "./ventas-xml";
 
 import { defineCapability } from "../define";
+import { describirDocumento } from "./ventas-aprobacion-texto";
 import { escribirConEvento } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { PERMISO_VENTAS, ambienteDe, documentoEmitidoIdSchema } from "./ventas-comun";
@@ -22,6 +23,7 @@ export const ventasEnviarSii = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
+  describirAprobacion: describirDocumento((d) => `enviar al SII la ${d}`),
   async handler(ctx, input, { dryRun }) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");
