@@ -1,19 +1,11 @@
 "use client";
 
-import { type ComponentType, lazy, Suspense, useEffect } from "react";
+import { type ComponentType, lazy, Suspense } from "react";
 
 import { avisar } from "@opai/ds";
 
 import { cargaRepetible } from "./carga-repetible";
 import { useParametros } from "./maestros/use-url";
-
-/** Se muestra si el módulo de la hoja no se pudo descargar: avisa y no tumba la pantalla. */
-function HojaNoDescargada() {
-  useEffect(() => {
-    avisar.error("No se pudo abrir el panel. Revisa tu conexión y vuelve a intentarlo.");
-  }, []);
-  return null;
-}
 
 /**
  * Hoja (Sheet o Dialog abierto por URL) que se descarga solo cuando su parámetro está presente
@@ -34,7 +26,8 @@ export function hojaDiferida<P extends object>(
         (c) => ({ default: c }),
         () => {
           Hoja = nueva();
-          return { default: HojaNoDescargada as ComponentType<P> };
+          avisar.error("No se pudo abrir el panel. Revisa tu conexión y vuelve a intentarlo.");
+          return { default: (() => null) as ComponentType<P> };
         },
       ),
     );
