@@ -866,7 +866,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
-| `core.cuentas_referencias.otorgar` | — | no | reservada a personas |
+| `core.cuentas_referencias.otorgar` | sin pantalla todavía · CAR-138 · desde 2026-11-10 | no | reservada a personas |
 | `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.consentimiento_revocar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.dpa_aceptar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
