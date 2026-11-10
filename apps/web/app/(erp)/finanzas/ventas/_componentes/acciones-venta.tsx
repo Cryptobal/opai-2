@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 
 import { Alerta, avisar, Button, Dialog } from "@opai/ds";
@@ -10,6 +11,8 @@ import { HojaCeder } from "./hoja-ceder";
 import { HojaCobroManual } from "./hoja-cobro-manual";
 import { HojaNotaCredito } from "./hoja-nota-credito";
 import type { Venta } from "./tipos";
+
+const EmitirBorradorFicha = dynamic(() => import("./emitir-borrador-ficha").then((m) => ({ default: m.EmitirBorradorFicha })));
 
 function descargar(base64: string, nombre: string) {
   const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
@@ -56,6 +59,9 @@ export function AccionesVenta({ venta, enviosPrevios, montoPendiente }: { venta:
     if (r?.estado === "enviado") avisar.exito(`Enviado a ${r.para}`);
     else if (r) avisar.error("El correo no salió. Revisa el historial de envíos.");
   }
+
+  // Un borrador (factura o nota de débito de cargo) se revisa y emite desde su ficha (CAR-234).
+  if (venta.estadoDte === "borrador") return <EmitirBorradorFicha documentoId={venta.id} tipoDte={venta.tipoDte} />;
 
   return (
     <div className="flex flex-col gap-3">
