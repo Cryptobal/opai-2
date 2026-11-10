@@ -36,7 +36,7 @@ export function SeccionesDte({ f, set, esOwner, pendiente, errores }: Props) {
           <Campo
             etiqueta="ACTECO (actividad económica)"
             htmlFor="dte-acteco"
-            ayuda="Código del SII que va en cada factura. Sin él, el SII la rechaza."
+            ayuda="El ACTECO principal de la empresa. Va en cada factura."
             error={errores.acteco}
           >
             <Input

@@ -15,7 +15,7 @@ const base: FormDte = {
   avisoCaf: "30",
   fechaCorte: "",
 };
-const vigente = { emisionProveedor: "simulado" as const, cesionProveedor: null };
+const vigente = { emisionProveedor: "simulado" as const, cesionProveedor: null, acteco: null };
 
 describe("configuración DTE · formulario (CAR-240)", () => {
   it("SimpleAPI en certificación con resolución N° 0 y fecha es válido y envía 0, no vacío", () => {
@@ -43,10 +43,14 @@ describe("configuración DTE · formulario (CAR-240)", () => {
     expect(validarFormDte({ ...base, acteco: "0" }).acteco).toMatch(/6 dígitos/);
     const simulado = { ...base, emisionProveedor: "simulado" as const, acteco: " " };
     expect(validarFormDte(simulado).acteco).toBeUndefined();
-    expect(inputDteDesdeForm(simulado, vigente).acteco).toBeNull();
+    expect(inputDteDesdeForm(simulado, { ...vigente, acteco: 801000 }).acteco).toBeNull();
+  });
+  it("ACTECO (CAR-243): sin cambio no viaja, para no reescribir la lista de la empresa", () => {
+    expect(inputDteDesdeForm(base, { ...vigente, acteco: 801000 })).not.toHaveProperty("acteco");
+    expect(inputDteDesdeForm({ ...base, acteco: "" }, vigente)).not.toHaveProperty("acteco");
   });
   it("los conectores solo viajan si cambiaron (cambiarlos exige owner)", () => {
-    const sinCambio = inputDteDesdeForm(base, { emisionProveedor: "simpleapi", cesionProveedor: null });
+    const sinCambio = inputDteDesdeForm(base, { emisionProveedor: "simpleapi", cesionProveedor: null, acteco: null });
     expect(sinCambio).not.toHaveProperty("emisionProveedor");
     expect(sinCambio).not.toHaveProperty("cesionProveedor");
     expect(inputDteDesdeForm({ ...base, cesionProveedor: "octava" }, vigente).cesionProveedor).toBe("octava");
