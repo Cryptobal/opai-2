@@ -36,16 +36,40 @@ const firmarError = async () => (await adaptadorSimpleApi(creds).firmar(payload)
 afterEach(() => vi.unstubAllGlobals());
 
 describe("errores tipados de SimpleAPI (CAR-242)", () => {
-  it("HTTP 400 con mensaje JSON: estado y motivo legible, sin secretos ni CAF", async () => {
-    generar(() => new Response(JSON.stringify({ mensaje: "Rut receptor no valido" }), { status: 400 }));
+  it("HTTP 400 con mensaje JSON: estado fijo para el log y detalle legible solo para la persona", async () => {
+    generar(() => new Response(JSON.stringify({ mensaje: "Receptor 12.345.678-5 Juan Perez no autorizado" }), { status: 400 }));
     const e = await firmarError();
     expect(e).toBeInstanceOf(ErrorProveedorSii);
-    expect(e).toMatchObject({ paso: "generar", status: 400, motivo: "respondió HTTP 400 (Rut receptor no valido)" });
-    for (const s of [CLAVE_API, CLAVE_PFX, "caf-secreto", "<", '"']) expect(e.motivoSeguro).not.toContain(s);
+    expect(e).toMatchObject({ paso: "generar", status: 400, motivo: "respondió HTTP 400" });
+    expect(e.detalle).toBe("Receptor 12.345.678-5 Juan Perez no autorizado");
+    // El log (motivoSeguro y message) nunca lleva texto del proveedor ni datos del documento.
+    expect(e.motivoSeguro).toBe("SimpleAPI generar: respondió HTTP 400");
+    expect(e.message).toBe(e.motivoSeguro);
+  });
+  it("el detalle nunca trae los secretos propios ni caracteres de control", async () => {
+    const eco = `Autorizacion invalida ${CLAVE_API} clave ${CLAVE_PFX}\u202e\u0000 fin`;
+    generar(() => new Response(JSON.stringify({ mensaje: eco }), { status: 401 }));
+    const e = await firmarError();
+    for (const s of [CLAVE_API, CLAVE_PFX, "\u202e", "\u0000"]) expect(e.detalle ?? "").not.toContain(s);
+    expect(e.detalle).toBe("Autorizacion invalida clave fin");
+  });
+  it("un 5xx o una respuesta ilegible del envío quedan como inciertos (pudo haber llegado al SII)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        url.endsWith("/envio/generar")
+          ? new Response(bytesDeXml("<EnvioDTE/>"))
+          : new Response("Bad gateway", { status: 502 }),
+      ),
+    );
+    const xml = "<DTE><RUTEmisor>76000000-0</RUTEmisor></DTE>";
+    const e = (await adaptadorSimpleApi(creds).enviar(xml, "certificacion").catch((x: unknown) => x)) as ErrorProveedorSii;
+    expect(e).toMatchObject({ paso: "enviar", status: 502, incierto: true });
   });
   it("HTTP 500 con HTML o XML: solo el estado, nunca el cuerpo", async () => {
     generar(() => new Response("<html><body>Stack trace con datos</body></html>", { status: 500 }));
-    expect((await firmarError()).motivo).toBe("respondió HTTP 500");
+    const e = await firmarError();
+    expect([e.motivo, e.detalle]).toEqual(["respondió HTTP 500", null]);
   });
   it("un detalle con palabras técnicas o tokens largos se descarta", () => {
     expect(detalleSeguroDeRespuesta(JSON.stringify({ message: "Invalid input: Password null" }))).toBeNull();

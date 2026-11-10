@@ -31,23 +31,25 @@ export function blobXml(xmlLatin1: string): Blob {
  * Error tipado de una respuesta no 2xx (CAR-242): el estado HTTP y, si lo hay, un detalle corto y saneado del
  * mensaje del proveedor. Nunca el cuerpo completo (puede traer datos del documento) ni secretos.
  */
-async function errorHttp(res: Response, paso: PasoProveedorSii): Promise<ErrorProveedorSii> {
+async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readonly string[]): Promise<ErrorProveedorSii> {
   const cuerpo = await res.text().catch(() => "");
-  const detalle = detalleSeguroDeRespuesta(cuerpo);
-  return new ErrorProveedorSii(paso, `respondió HTTP ${res.status}${detalle ? ` (${detalle})` : ""}`, res.status);
+  const detalle = detalleSeguroDeRespuesta(cuerpo, secretos);
+  // Un 5xx del envío no prueba que el SII no lo haya recibido.
+  return new ErrorProveedorSii(paso, `respondió HTTP ${res.status}`, res.status, detalle, paso === "enviar" && res.status >= 500);
 }
 
-export async function leerJsonRespuesta<T>(res: Response, paso: PasoProveedorSii): Promise<T> {
-  if (!res.ok) throw await errorHttp(res, paso);
+/** `secretos`: valores propios (API key, clave del certificado) que nunca pueden salir en el detalle. */
+export async function leerJsonRespuesta<T>(res: Response, paso: PasoProveedorSii, secretos: readonly string[] = []): Promise<T> {
+  if (!res.ok) throw await errorHttp(res, paso, secretos);
   try {
     return (await res.json()) as T;
   } catch {
-    throw new ErrorProveedorSii(paso, "la respuesta no es un JSON válido", res.status);
+    throw new ErrorProveedorSii(paso, "la respuesta no es un JSON válido", res.status, null, paso === "enviar");
   }
 }
 
 /** Respuesta XML como bytes (ISO-8859-1): nunca pasa por `res.text()`, que decodificaría como UTF-8. */
-export async function leerBytesRespuesta(res: Response, paso: PasoProveedorSii): Promise<Buffer> {
-  if (!res.ok) throw await errorHttp(res, paso);
+export async function leerBytesRespuesta(res: Response, paso: PasoProveedorSii, secretos: readonly string[] = []): Promise<Buffer> {
+  if (!res.ok) throw await errorHttp(res, paso, secretos);
   return Buffer.from(await res.arrayBuffer());
 }

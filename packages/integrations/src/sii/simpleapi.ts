@@ -49,6 +49,9 @@ function rutEmisorDeXml(xml: string): string {
   return m[1].trim();
 }
 
+/** Valores propios que nunca pueden salir en el detalle de un error (CAR-242). */
+const secretosDe = (c: CredencialesSimpleApi) => [c.apiKey, c.certificadoClave];
+
 type RespuestaEnviar = { ok?: boolean; trackId?: number | string; glosa?: string; estado?: string; errores?: unknown };
 
 /** Adaptador SimpleAPI; sin credenciales completas queda no disponible. */
@@ -76,7 +79,7 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
         { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
         { nombre: "files2", valor: new Blob([payload.cafXml], { type: "application/xml" }), nombreArchivo: "caf.xml" },
       ]);
-      const xml = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(res, "generar")), "generar");
+      const xml = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(res, "generar", secretosDe(creds))), "generar");
       const ted = extraerTed(xml);
       if (!ted) throw new ErrorProveedorSii("generar", "el DTE generado no trae timbre electrónico");
       return { xml, timbrePdf417: ted };
@@ -94,17 +97,17 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
         { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
         { nombre: "files2", valor: blobXml(xmlFirmado), nombreArchivo: "dte.xml" },
       ]);
-      const xmlSobre = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(sobre, "sobre de envío")), "sobre de envío");
+      const xmlSobre = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(sobre, "sobre de envío", secretosDe(creds))), "sobre de envío");
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.envioEnviar, creds.apiKey, [
         { nombre: "input", valor: jsonInputEnviarSii(ambiente, creds) },
         { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
         { nombre: "files2", valor: blobXml(xmlSobre), nombreArchivo: "envio.xml" },
       ]);
-      const data = await leerJsonRespuesta<RespuestaEnviar>(res, "enviar");
+      const data = await leerJsonRespuesta<RespuestaEnviar>(res, "enviar", secretosDe(creds));
       const glosa = typeof data.glosa === "string" && data.glosa ? data.glosa : undefined;
       if (data.ok === false || data.trackId == null || String(data.trackId) === "0") {
-        const detalle = glosa ? detalleSeguroDeRespuesta(glosa) : null;
-        throw new ErrorProveedorSii("enviar", `el SII no recibió el envío${detalle ? ` (${detalle})` : ""}`);
+        const detalle = glosa ? detalleSeguroDeRespuesta(glosa, secretosDe(creds)) : null;
+        throw new ErrorProveedorSii("enviar", "el SII no recibió el envío", undefined, detalle);
       }
       return { trackId: String(data.trackId), estado: "enviado", ...(glosa ? { glosa } : {}) };
     },
@@ -114,7 +117,7 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
         { nombre: "input", valor: jsonInputConsultaEnvio(creds.rutEmpresa, trackId, ambiente, creds) },
         { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
       ]);
-      return mapearConsultaEnvio(await leerJsonRespuesta<RespuestaConsultaEnvio>(res, "consultar"));
+      return mapearConsultaEnvio(await leerJsonRespuesta<RespuestaConsultaEnvio>(res, "consultar", secretosDe(creds)));
     },
   };
 }
