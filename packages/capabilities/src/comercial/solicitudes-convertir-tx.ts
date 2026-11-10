@@ -2,6 +2,7 @@ import { sinDuplicado } from "../core/maestros/comun";
 import type { Contexto } from "../types";
 import { estadoDeTipo } from "./dominio";
 import type { Plan } from "./solicitudes-convertir-plan";
+import { resolverAvisosSolicitud } from "./solicitudes-avisos";
 import { partirNombre } from "./solicitudes-dominio";
 
 export type AplicarConversion = {
@@ -126,6 +127,7 @@ export async function aplicarConversion(ctx: Contexto, a: AplicarConversion) {
       entidadId: a.solicitud.id,
       payload: { negocioId: negocio.id, cuentaId, contactoId },
     });
+    await resolverAvisosSolicitud(tx, ctx.tenantId, a.solicitud.id);
     return { sol, negocioId: negocio.id, cuentaId, contactoId };
   });
 }

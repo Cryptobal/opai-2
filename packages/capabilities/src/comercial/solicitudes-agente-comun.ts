@@ -4,10 +4,7 @@ import type { Contexto } from "../types";
 /** Tope diario de escrituras de agente por solicitud (crear + enriquecer) por API key. */
 export const TOPE_ESCRITURAS_AGENTE_DIA = 500;
 
-const CAPS_CONTEO = [
-  "comercial.solicitudes.create",
-  "comercial.solicitudes.enriquecer",
-] as const;
+const CAPS_CONTEO = ["comercial.solicitudes.create", "comercial.solicitudes.enriquecer"] as const;
 
 /** Rechaza si la key de agente superó el tope de escrituras del día (zona UTC). */
 export async function exigirTopeEscriturasAgente(ctx: Contexto) {

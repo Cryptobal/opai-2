@@ -30,14 +30,6 @@ async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleA
     return null;
   }
   if (!certificadoRut) return null;
-  const [tenant, perfil] = await Promise.all([
-    ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
-    ctx.db.perfilEmpresa.findUnique({
-      where: { tenantId: ctx.tenantId },
-      select: { razonSocial: true, giro: true, calle: true, comuna: true, ciudad: true },
-    }),
-  ]);
-  const razonSocial = perfil?.razonSocial?.trim() || tenant?.nombre;
   return {
     apiKey,
     certificadoPfxBase64: certificadoPfx,
@@ -46,9 +38,29 @@ async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleA
     rutEmpresa: cfg.rutEmisor.replace(/\./g, "").toUpperCase(),
     resolucionNumero: cfg.resolucionSiiNumero,
     resolucionFecha: cfg.resolucionSiiFecha.toISOString().slice(0, 10),
+    ...(await datosEmisorSimpleApi(ctx)),
+  };
+}
+
+/**
+ * Datos del emisor para el encabezado del DTE: los del perfil de la empresa (Configuración › Empresa). El ACTECO es el
+ * principal de la empresa (CAR-243), no el de la configuración DTE. Solo van los que existen; nunca se inventan.
+ */
+export async function datosEmisorSimpleApi(ctx: Contexto): Promise<
+  Partial<Pick<CredencialesSimpleApi, "razonSocialEmisor" | "giroEmisor" | "actecoEmisor" | "direccionEmisor" | "comunaEmisor" | "ciudadEmisor">>
+> {
+  const [tenant, perfil] = await Promise.all([
+    ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
+    ctx.db.perfilEmpresa.findUnique({
+      where: { tenantId: ctx.tenantId },
+      select: { razonSocial: true, giro: true, calle: true, comuna: true, ciudad: true, actecoPrincipal: true },
+    }),
+  ]);
+  const razonSocial = perfil?.razonSocial?.trim() || tenant?.nombre;
+  return {
     ...(razonSocial ? { razonSocialEmisor: razonSocial } : {}),
     ...(perfil?.giro?.trim() ? { giroEmisor: perfil.giro.trim() } : {}),
-    ...(cfg.acteco ? { actecoEmisor: cfg.acteco } : {}),
+    ...(perfil?.actecoPrincipal ? { actecoEmisor: perfil.actecoPrincipal } : {}),
     ...(perfil?.calle?.trim() ? { direccionEmisor: perfil.calle.trim() } : {}),
     ...(perfil?.comuna?.trim() ? { comunaEmisor: perfil.comuna.trim() } : {}),
     ...(perfil?.ciudad?.trim() ? { ciudadEmisor: perfil.ciudad.trim() } : {}),

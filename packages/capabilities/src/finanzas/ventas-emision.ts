@@ -6,6 +6,7 @@ import { defineCapability } from "../define";
 import { describirDocumento } from "./ventas-aprobacion-texto";
 import { aFecha, escribirConEvento } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
+import { bloquearDocumento } from "./ventas-borrador-editable";
 import { vistaDeDocumento } from "./ventas-consulta";
 import {
   PERMISO_VENTAS,
@@ -91,6 +92,16 @@ export async function emitirBorrador(
         payload: () => ({ folio: preparada.folio, tipoDte: doc.tipoDte }),
       },
       async (tx) => {
+        // Bloquea el borrador y comprueba que siga idéntico a lo que se firmó: una edición (CAR-248) que se confirmó
+        // después de la comprobación de arriba no puede quedar con un XML firmado de otro contenido.
+        await bloquearDocumento(tx, ctx.tenantId, doc.id);
+        const actual = await tx.documentoEmitido.findFirst({
+          where: { id: doc.id },
+          include: { lineas: { orderBy: { orden: "asc" } }, referencias: true },
+        });
+        if (!actual || huellaBorrador(actual) !== preparada.huella) {
+          throw reglaDeNegocio("El borrador cambió mientras se firmaba; revíselo y reintente la emisión.");
+        }
         // ND de cargo: bloquea la factura de origen (como la NC que la anularía) y revalida que siga vigente antes de
         // reclamar el folio (CAR-234).
         if (doc.tipoDte === 56 && doc.documentoReferenciaId) {

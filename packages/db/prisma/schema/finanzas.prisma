@@ -433,7 +433,8 @@ model DteConfig {
   /// Resolución de autorización del SII (requerida con SimpleAPI real).
   resolucionSiiNumero Int?   @map("resolucion_sii_numero")
   resolucionSiiFecha  DateTime? @map("resolucion_sii_fecha") @db.Date
-  /// Código de actividad económica del emisor (ACTECO, 1 a 6 dígitos) y oficina del SII (CAR-221).
+  /// Oficina del SII (CAR-221). `acteco` es HEREDADA desde CAR-243: el ACTECO vive en `core.perfil_empresa`
+  /// (`actecos`, `acteco_principal`); la migración 20261119100000 lo copió. El código ya no lee ni escribe esta columna.
   acteco              Int?
   oficinaSii          String?  @map("oficina_sii")
   certificadoSecretoId   String? @map("certificado_secreto_id") @db.Uuid
