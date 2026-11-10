@@ -8,6 +8,8 @@ export class ErrorProveedorSii extends Error {
   override readonly name = "ErrorProveedorSii";
   /** Motivo fijo para el log (CAR-49): paso y estado, sin texto del proveedor ni datos del documento. */
   readonly motivoSeguro: string;
+  /** Headers de límite de uso de la respuesta (`x-rate-limit-*`, `retry-after`), saneados; van al log (CAR-240). */
+  limites: Readonly<Record<string, string>> = {};
 
   constructor(
     readonly paso: PasoProveedorSii,
@@ -22,6 +24,21 @@ export class ErrorProveedorSii extends Error {
     super(`SimpleAPI ${paso}: ${motivo}`);
     this.motivoSeguro = `SimpleAPI ${paso}: ${motivo}`;
   }
+}
+
+const HEADER_LIMITE = /^(x-rate-?limit-[a-z0-9-]{1,40}|retry-after)$/i;
+const VALOR_LIMITE = /^[\w.:+, -]{1,64}$/;
+
+/**
+ * Los headers de límite de uso de una respuesta (para el log; CAR-240): solo nombres `x-rate-limit-*`, `x-ratelimit-*`
+ * o `retry-after`, y solo valores cortos de números, fechas o palabras. Nunca otros headers ni nada que parezca secreto.
+ */
+export function limitesDeRespuesta(headers: Headers): Record<string, string> {
+  const out: Record<string, string> = {};
+  headers.forEach((valor, nombre) => {
+    if (HEADER_LIMITE.test(nombre) && VALOR_LIMITE.test(valor.trim())) out[nombre.toLowerCase()] = valor.trim();
+  });
+  return out;
 }
 
 /** Palabras que la UI trata como texto técnico (`esMensajeDeNegocio`): un detalle que las trae no se muestra. */
