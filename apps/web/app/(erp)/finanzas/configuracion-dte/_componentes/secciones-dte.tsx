@@ -1,4 +1,4 @@
-import { Campo, Input, InputFecha, Select, SeccionTarjeta } from "@opai/ds";
+import { Campo, Input, Select, SeccionTarjeta } from "@opai/ds";
 
 import type { ConfigDte } from "./tipos";
 import type { FormDte, SetFormDte } from "./use-form-dte";
@@ -61,12 +61,13 @@ export function SeccionesDte({ f, set, esOwner, pendiente, errores }: Props) {
             />
           </Campo>
           <Campo etiqueta="Fecha resolución SII" htmlFor="dte-res-f" error={errores.resolucionFecha}>
-            <InputFecha
+            <Input
               id="dte-res-f"
-              valor={f.resolucionFecha}
+              type="date"
+              aria-invalid={errores.resolucionFecha ? true : undefined}
+              value={f.resolucionFecha}
               disabled={pendiente}
-              invalido={Boolean(errores.resolucionFecha)}
-              onCambiar={(v) => set("resolucionFecha", v)}
+              onChange={(e) => set("resolucionFecha", e.target.value)}
             />
           </Campo>
         </div>
@@ -106,11 +107,12 @@ export function SeccionesDte({ f, set, esOwner, pendiente, errores }: Props) {
             />
           </Campo>
           <Campo etiqueta="Fecha de corte con OPAI 1.0" htmlFor="dte-corte">
-            <InputFecha
+            <Input
               id="dte-corte"
-              valor={f.fechaCorte}
+              type="date"
+              value={f.fechaCorte}
               disabled={pendiente}
-              onCambiar={(v) => set("fechaCorte", v)}
+              onChange={(e) => set("fechaCorte", e.target.value)}
             />
           </Campo>
         </div>
