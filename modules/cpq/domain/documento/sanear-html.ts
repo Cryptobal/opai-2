@@ -18,7 +18,7 @@ type Elemento = DefaultTreeAdapterMap["element"];
 
 export type CodigoHtml =
   | "elemento_activo" | "recurso_externo" | "elemento_no_permitido" | "manejador_evento" | "url_no_permitida"
-  | "estilo_no_permitido" | "token_en_atributo" | "token" | "limite" | "vacio";
+  | "estilo_no_permitido" | "token_en_atributo" | "token" | "marcador_movido" | "limite" | "vacio";
 export type ProblemaHtml = { codigo: CodigoHtml; mensaje: string; detalle?: string };
 export type AdvertenciaHtml = { codigo: "atributo_quitado" | "estilo_quitado"; mensaje: string; detalle?: string };
 
@@ -39,12 +39,16 @@ const esc = (s: string, attr = false) => {
 };
 const TIENE_TOKEN = /\{\{|\}\}/;
 
+const bytesDe = (t: string) => new TextEncoder().encode(t).length;
+const marcadores = (t: string) => [...t.matchAll(/\{\{[^{}]*\}\}/g)].map((m) => m[0].replace(/\s+/g, ""));
+
 function urlSegura(v: string): boolean {
   const t = v.trim();
   if (t.startsWith("#")) return /^#[\w-]*$/.test(t);
   if (/^(mailto|tel):[^\s<>"]+$/i.test(t)) return true;
   try {
-    return new URL(t).protocol === "https:";
+    const u = new URL(t);
+    return /^https:\/\/[^\s/]/i.test(t) && u.protocol === "https:" && !u.username && !u.password;
   } catch {
     return false;
   }
@@ -62,7 +66,7 @@ export function sanearHtml(entrada: string): ResultadoSaneado {
   const vacio = (): ResultadoSaneado => ({
     ok: false, html: "", problemas, advertencias, tokens: { usados: [], colecciones: [] }, catalogoVersion: VERSION_CATALOGO_CAMPOS,
   });
-  if (new TextEncoder().encode(entrada).length > LIMITES_HTML.bytes) {
+  if (bytesDe(entrada) > LIMITES_HTML.bytes) {
     problemas.push({ codigo: "limite", mensaje: `El HTML supera los ${LIMITES_HTML.bytes} bytes.` });
     return vacio();
   }
@@ -117,6 +121,12 @@ export function sanearHtml(entrada: string): ResultadoSaneado {
   const html = doc.childNodes.map((c) => recorrer(c, 0, true)).join("").trim();
   const texto = html.replace(/<[^>]*>/g, "").trim();
   if (!texto && problemas.length === 0) problemas.push({ codigo: "vacio", mensaje: "El HTML no tiene contenido." });
+  if (bytesDe(html) > LIMITES_HTML.bytes) marcar(problemas, { codigo: "limite", mensaje: `El HTML saneado supera los ${LIMITES_HTML.bytes} bytes.` });
+  // El parser HTML5 reubica el texto que no puede vivir donde está (p. ej. un marcador directo dentro de <table>):
+  // si el orden de los marcadores cambió, la plantilla ya no significa lo que escribió quien la diseñó.
+  const antes = marcadores(entrada.replace(/<!--[\s\S]*?-->/g, "")).join("\n");
+  if (problemas.length === 0 && antes !== marcadores(html).join("\n"))
+    marcar(problemas, { codigo: "marcador_movido", mensaje: "Algún marcador {{…}} cambió de lugar al leer el HTML (por ejemplo, está directo dentro de <table> o <tr>). Colócalo dentro de una celda (<td>) o de un contenedor." });
   const val = validarPlantillaCampos(html, "propuesta");
   for (const p of val.problemas) marcar(problemas, { codigo: "token", mensaje: p.mensaje, ...(p.token ? { detalle: p.token } : {}) });
   if (problemas.length > 0) return vacio();

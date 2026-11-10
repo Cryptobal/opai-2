@@ -45,11 +45,24 @@ describe("saneador de HTML de propuesta", () => {
     ["<p>{{cuenta.inventado}}</p>", "token"],
     ["<p>{{#cada instalaciones}} sin cerrar</p>", "token"],
     ["   ", "vacio"],
+    ["<a href='https://user:pw@evil.com/'>x</a>", "url_no_permitida"],
+    ["<a href='https:evil.com'>x</a>", "url_no_permitida"],
+    ["<p style='margin-top: -99999px'>x</p>", "estilo_no_permitido"],
+    ["<p style='width: 100vw'>x</p>", "estilo_no_permitido"],
+    ["<p style='display:grid; grid-template-columns: repeat(99999999, 1fr)'>x</p>", "estilo_no_permitido"],
+    ["<table><tbody>{{#cada instalaciones}}<tr><td>{{instalacion.nombre}}</td></tr>{{/cada}}</tbody></table>", "marcador_movido"],
+    ["<p>" + "&".repeat(399_000) + "</p>", "limite"],
   ])("rechaza %s", (html, codigo) => {
     const r = sanearHtml(html);
     expect(r.ok).toBe(false);
     expect(r.html).toBe("");
     expect(codigos(html)).toContain(codigo);
+  });
+
+  it("acepta los marcadores de bloque dentro de una celda o de un contenedor", () => {
+    const r = sanearHtml("<table><tbody><tr><td>{{#cada instalaciones}}<b>{{instalacion.nombre}}</b>{{/cada}}</td></tr></tbody></table>");
+    expect(r.ok).toBe(true);
+    expect(sanearHtml("<div>{{#cada instalaciones}}<p>{{instalacion.nombre}}</p>{{/cada}}</div><!-- {{inventado}} -->").ok).toBe(true);
   });
 
   it("quita sin rechazar los atributos y estilos no permitidos y lo informa", () => {

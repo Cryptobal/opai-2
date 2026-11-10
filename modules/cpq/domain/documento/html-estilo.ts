@@ -36,7 +36,9 @@ export function sanearEstilo(texto: string): ResultadoEstilo {
       salida.errores.push(`${prop}: la función «${mala}(» no está permitida`);
       continue;
     }
-    if (/javascript:|expression|behavior|-moz-binding|@import/i.test(valor)) {
+    const repetir = [...valor.matchAll(/repeat\(\s*(\d+)/gi)].some((m) => Number(m[1]) > 24);
+    const abuso = /\d(vw|vh|vmin|vmax)\b/i.test(valor) || (prop.startsWith("margin") && /(^|\s)-/.test(valor)) || repetir;
+    if (abuso || /javascript:|expression|behavior|-moz-binding|@import/i.test(valor)) {
       salida.errores.push(`${prop}: valor no permitido`);
       continue;
     }
