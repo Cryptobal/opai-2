@@ -13,7 +13,11 @@ import {
   solicitudSchema,
   vistaSolicitud,
 } from "./solicitudes-comun";
+import { resolverAvisosSolicitud } from "./solicitudes-avisos";
 import { estadoTras, type AccionSolicitud } from "./solicitudes-dominio";
+
+/** Acciones que sacan a la solicitud de «nueva»: su aviso deja de estar pendiente. */
+const AVISO_RESUELTO = new Set<AccionSolicitud>(["derivar", "descartar", "marcar_duplicada"]);
 
 type Fila = Awaited<ReturnType<typeof solicitudDe>>;
 
@@ -41,6 +45,7 @@ async function transicion(
       entidadId: id,
       payload: { desde: s.estado, hacia: n.estado },
     });
+    if (AVISO_RESUELTO.has(accion)) await resolverAvisosSolicitud(tx, ctx.tenantId, id);
     return n;
   });
   return vistaSolicitud(nueva);

@@ -32,15 +32,20 @@ export function validarFormDte(f: FormDte): ErroresDte {
 
 /**
  * Input de la capacidad. El N° 0 se envía como 0, nunca como vacío. Los conectores solo viajan si cambiaron: cambiarlos
- * exige owner humano, y un admin que solo ajusta umbrales no debe chocar con esa regla.
+ * exige owner humano, y un admin que solo ajusta umbrales no debe chocar con esa regla. El ACTECO también viaja solo si
+ * cambió: es el principal de la empresa (CAR-243) y guardar esta pantalla sin tocarlo no debe reescribir su lista.
  */
-export function inputDteDesdeForm(f: FormDte, vigente: Pick<ConfigDte, "emisionProveedor" | "cesionProveedor">) {
+export function inputDteDesdeForm(
+  f: FormDte,
+  vigente: Pick<ConfigDte, "emisionProveedor" | "cesionProveedor" | "acteco">,
+) {
   const numero = f.resolucionNumero.trim();
+  const acteco = f.acteco.trim() === "" ? null : Number(f.acteco.trim());
   const cesion = f.cesionProveedor === "octava" ? ("octava" as const) : null;
   return {
     ambiente: f.ambiente,
     rutEmisor: f.rutEmisor.trim() || undefined,
-    acteco: f.acteco.trim() === "" ? null : Number(f.acteco.trim()),
+    ...(acteco !== vigente.acteco ? { acteco } : {}),
     ...(f.emisionProveedor !== vigente.emisionProveedor ? { emisionProveedor: f.emisionProveedor } : {}),
     ...(cesion !== vigente.cesionProveedor ? { cesionProveedor: cesion } : {}),
     resolucionSiiNumero: numero === "" ? null : Number(numero),

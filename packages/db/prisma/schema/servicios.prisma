@@ -38,6 +38,10 @@ model PerfilEmpresa {
   logoOscuroId        String?  @map("logo_oscuro_id") @db.Uuid
   isotipoId           String?  @map("isotipo_id") @db.Uuid
   faviconId           String?  @map("favicon_id") @db.Uuid
+  /// CAR-243 · Actividades económicas del SII (ACTECO, CIIU4.CL): varios códigos y uno principal, que va en cada DTE.
+  /// CHECK `perfil_empresa_actecos_chk`: 1..999999, hasta 20, principal si y solo si hay códigos, y dentro de la lista.
+  actecos             Int[]    @default([])
+  actecoPrincipal     Int?     @map("acteco_principal")
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

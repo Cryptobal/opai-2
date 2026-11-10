@@ -16,7 +16,10 @@ export const solicitudesBuscarDuplicadas = defineCapability({
     .object({
       email: emailSchema.optional(),
       rut: rutSchema.optional(),
-      excluirId: z.uuid().optional().describe("Omite una solicitud (p. ej. la que acabas de crear)."),
+      excluirId: z
+        .uuid()
+        .optional()
+        .describe("Omite una solicitud (p. ej. la que acabas de crear)."),
     })
     .refine((v) => v.email || v.rut, { message: "Indica correo o RUT." }),
   output: z.object({ items: z.array(solicitudSchema) }),
@@ -29,7 +32,9 @@ export const solicitudesBuscarDuplicadas = defineCapability({
       where: {
         ...(input.excluirId ? { id: { not: input.excluirId } } : {}),
         OR: [
-          ...(input.email ? [{ email: { equals: input.email, mode: "insensitive" as const } }] : []),
+          ...(input.email
+            ? [{ email: { equals: input.email, mode: "insensitive" as const } }]
+            : []),
           ...(input.rut ? [{ rut: input.rut }] : []),
         ],
       },

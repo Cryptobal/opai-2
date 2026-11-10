@@ -8,6 +8,7 @@ import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos, rut } from "@/lib/fechas";
 
+import { AccionesFilaBorrador } from "./acciones-fila-borrador";
 import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "./etiquetas-venta";
 import type { LibroVentas, Venta } from "./tipos";
 
@@ -61,6 +62,7 @@ export function ListaVentas(p: {
       }
       items={items}
       clave={(v) => v.id}
+      {...(p.gestiona ? { acciones: (v: Venta) => (v.estadoDte === "borrador" ? <AccionesFilaBorrador venta={v} /> : null) } : {})}
       href={(v) => `/finanzas/ventas/${v.id}`}
       Link={LinkNext}
       textos={{

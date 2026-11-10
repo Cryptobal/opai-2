@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 672 pares pantalla→capacidad · 600 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 677 pares pantalla→capacidad · 605 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -351,8 +351,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.inicializar` | `finanzas_plan_inicializar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.cobros.manual` | `finanzas_cobros_manual` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.actualizar_borrador` | `finanzas_ventas_actualizar_borrador` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_ceder` | `finanzas_ventas_cesion_ceder` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_simular` | `finanzas_ventas_cesion_simular` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.descartar_borrador` | `finanzas_ventas_descartar_borrador` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_cliente` | `finanzas_ventas_enviar_cliente` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_sii` | `finanzas_ventas_enviar_sii` | existe |
@@ -564,6 +566,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/documentos` | `core.documento_tipos.create` | `core_documento_tipos_create` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.update` | `core_documento_tipos_update` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_buscar` | `core_empresa_acteco_buscar` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_get` | `core_empresa_acteco_get` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_set` | `core_empresa_acteco_set` | existe |
 | erp | `/configuracion/empresa` | `core.empresa.get` | `core_empresa_get` | existe |
 | erp | `/configuracion/empresa` | `core.empresa.update` | `core_empresa_update` | existe |
 | erp | `/configuracion/empresa` | `core.tenant.get` | `core_tenant_get` | existe |
