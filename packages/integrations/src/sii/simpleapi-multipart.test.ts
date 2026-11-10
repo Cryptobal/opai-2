@@ -43,4 +43,16 @@ describe("cuerpoMultipart", () => {
     const a = cuerpoMultipart([{ nombre: "input", texto: "{}" }]).contentType;
     expect(cuerpoMultipart([{ nombre: "input", texto: "{}" }]).contentType).not.toBe(a);
   });
+  it("un parser independiente (FormData de undici) lee las mismas partes y bytes", async () => {
+    const pfx = Uint8Array.from([0x00, 0xff, 0x0d, 0x0a, 0x2d, 0x2d, 0x41]);
+    const { cuerpo, contentType } = cuerpoMultipart([
+      { nombre: "input", texto: JSON.stringify({ a: "Ñ" }) },
+      { nombre: "file", bytes: pfx, tipo: "application/x-pkcs12", nombreArchivo: "certificado.pfx" },
+    ]);
+    const form = await new Response(new Uint8Array(cuerpo), { headers: { "content-type": contentType } }).formData();
+    expect([...form.keys()]).toEqual(["input", "file"]);
+    const archivo = form.get("file") as File;
+    expect([archivo.name, archivo.type]).toEqual(["certificado.pfx", "application/x-pkcs12"]);
+    expect(Buffer.from(await archivo.arrayBuffer()).equals(Buffer.from(pfx))).toBe(true);
+  });
 });

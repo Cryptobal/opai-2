@@ -28,6 +28,7 @@ import {
   postMultipartSimpleApi,
 } from "./simpleapi-http";
 import { detalleSeguroDeRespuesta, ErrorProveedorSii, type PasoProveedorSii } from "./error-proveedor";
+import { viajaIntactoEnLatin1 } from "./simpleapi-multipart";
 import { extraerTed, xmlDesdeBytes } from "./xml-iso";
 
 export type CredencialesSimpleApi = CredencialesSimpleApiV1;
@@ -66,7 +67,14 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       creds.resolucionNumero >= 0 &&
       creds.resolucionFecha,
   );
-  const certificado = (c: CredencialesSimpleApi) => archivoPfx(c.certificadoPfxBase64);
+  // El input viaja en ISO-8859-1 y saneado (como 1.0): una clave que el saneamiento cambiaría no abriría el .pfx en
+  // SimpleAPI, así que se rechaza con un motivo claro en vez de enviarla alterada.
+  const certificado = (c: CredencialesSimpleApi, paso: PasoProveedorSii) => {
+    if (!viajaIntactoEnLatin1(c.certificadoClave)) {
+      throw new ErrorProveedorSii(paso, "la clave del certificado tiene caracteres que SimpleAPI no admite (fuera de ISO-8859-1)");
+    }
+    return archivoPfx(c.certificadoPfxBase64);
+  };
   return {
     nombre: "simpleapi",
     disponible,
@@ -76,7 +84,7 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.generar, creds.apiKey, [
         // Como 1.0: input, luego el certificado y el CAF, ambos con el nombre de campo `file`; el CAF en sus bytes.
         { nombre: "input", texto: jsonInputGenerarDte(payload, creds) },
-        certificado(creds),
+        certificado(creds, "generar"),
         archivoXml(payload.cafXml, "caf.xml"),
       ]);
       const xml = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(res, "generar", secretosDe(creds))), "generar");
@@ -94,13 +102,13 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
             creds,
           ),
         },
-        certificado(creds),
+        certificado(creds, "sobre de envío"),
         archivoXml(xmlFirmado, "dte.xml"),
       ]);
       const xmlSobre = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(sobre, "sobre de envío", secretosDe(creds))), "sobre de envío");
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.envioEnviar, creds.apiKey, [
         { nombre: "input", texto: jsonInputEnviarSii(ambiente, creds) },
-        certificado(creds),
+        certificado(creds, "enviar"),
         archivoXml(xmlSobre, "envio.xml"),
       ]);
       const data = await leerJsonRespuesta<RespuestaEnviar>(res, "enviar", secretosDe(creds));
@@ -115,7 +123,7 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       if (!disponible || !creds) return sim.consultar(trackId, ambiente);
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.consultaEnvio, creds.apiKey, [
         { nombre: "input", texto: jsonInputConsultaEnvio(creds.rutEmpresa, trackId, ambiente, creds) },
-        certificado(creds),
+        certificado(creds, "consultar"),
       ]);
       return mapearConsultaEnvio(await leerJsonRespuesta<RespuestaConsultaEnvio>(res, "consultar", secretosDe(creds)));
     },

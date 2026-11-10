@@ -146,4 +146,20 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     generar(() => new Response("", { status: 400, headers: { "retry-after": "5" } }));
     expect((await firmarError()).motivo).toBe("respondió HTTP 400");
   });
+  it("un header x-rate-limit-* con un valor que no pasa el saneo igual cuenta como key reconocida", async () => {
+    generar(() => new Response("", { status: 401, headers: { "x-rate-limit-policy": "100;w=60" } }));
+    const e = await firmarError();
+    expect(e.motivo).toBe("rechazó el contenido (certificado, CAF o datos), HTTP 401");
+    expect(e.limites).toEqual({});
+  });
+  it("una clave de certificado que el saneamiento Latin-1 alteraría se rechaza sin llamar a SimpleAPI", async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    for (const clave of ["clave€1", "clave“x”", "a\u00a0b"]) {
+      const e = (await adaptadorSimpleApi({ ...creds, certificadoClave: clave }).firmar(payload).catch((x: unknown) => x)) as ErrorProveedorSii;
+      expect(e).toMatchObject({ paso: "generar", motivo: "la clave del certificado tiene caracteres que SimpleAPI no admite (fuera de ISO-8859-1)" });
+      expect(e.message).not.toContain(clave);
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });

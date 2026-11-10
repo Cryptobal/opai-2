@@ -32,6 +32,12 @@ export function sanitizarJsonLatin1(json: string): string {
   return out;
 }
 
+/** El texto viaja en ISO-8859-1 sin que el saneamiento lo cambie (p. ej. la clave del certificado). */
+export function viajaIntactoEnLatin1(texto: string): boolean {
+  const json = JSON.stringify(texto);
+  return sanitizarJsonLatin1(json) === json;
+}
+
 /** Arma el cuerpo y su Content-Type (con el boundary). */
 export function cuerpoMultipart(partes: readonly ParteMultipart[]): { cuerpo: Buffer; contentType: string } {
   const boundary = `----opai2-simpleapi-${randomUUID()}`;

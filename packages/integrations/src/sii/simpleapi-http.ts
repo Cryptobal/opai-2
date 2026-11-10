@@ -44,8 +44,12 @@ export function archivoXml(xmlLatin1: string, nombreArchivo: string): ParteMulti
  * reconocida como para un contenido rechazado. Solo cuando reconoce la key envía los headers `x-rate-limit-*`; con
  * ellos, el 401 es del contenido (certificado, CAF o datos), no de la key.
  */
-function motivoHttp(status: number, limites: Readonly<Record<string, string>>): string {
-  const keyReconocida = Object.keys(limites).some((h) => h.startsWith("x-rate-limit-") || h.startsWith("x-ratelimit-"));
+function motivoHttp(status: number, headers: Headers): string {
+  // Se miran los nombres crudos: un valor que no pasa el saneo de `limitesDeRespuesta` igual prueba que la key autenticó.
+  let keyReconocida = false;
+  headers.forEach((_v, h) => {
+    if (/^x-rate-?limit-/i.test(h)) keyReconocida = true;
+  });
   if ((status === 401 || status === 400 || status === 422) && keyReconocida) {
     return `rechazó el contenido (certificado, CAF o datos), HTTP ${status}`;
   }
@@ -62,7 +66,7 @@ async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readon
   const detalle = detalleSeguroDeRespuesta(cuerpo, secretos);
   const limites = limitesDeRespuesta(res.headers);
   // Un 5xx del envío no prueba que el SII no lo haya recibido.
-  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, limites), res.status, detalle, paso === "enviar" && res.status >= 500);
+  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, res.headers), res.status, detalle, paso === "enviar" && res.status >= 500);
   error.limites = limites;
   return error;
 }
