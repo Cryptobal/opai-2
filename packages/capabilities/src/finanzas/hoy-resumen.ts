@@ -33,7 +33,8 @@ export const hoyEnFinanzas = defineCapability({
     const [docs, borradores, programaciones, movimientos, gestiones] = await Promise.all([
       documentosCobrables(ctx),
       ctx.db.documentoEmitido.aggregate({
-        where: { estadoDte: "borrador", tipoDte: { in: [33, 34] } },
+        // Incluye la nota de débito de cargo (56): su borrador también se emite desde aquí (CAR-234).
+        where: { estadoDte: "borrador", tipoDte: { in: [33, 34, 56] } },
         _count: { _all: true },
         _sum: { montoTotal: true },
       }),
