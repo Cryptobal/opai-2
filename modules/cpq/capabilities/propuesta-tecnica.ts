@@ -16,4 +16,3 @@ export { enviosPropuestaSolicitar } from "./propuesta-tecnica-envios-solicitar-c
 export { enviosPropuestaCancelar } from "./propuesta-tecnica-envios-cancelar-cap";
 export { propuestaCapitulosList, propuestaCapitulosGuardar } from "./propuesta-capitulos-cap";
 export { propuestaPromptExportable } from "./propuesta-prompt-cap";
-export { propuestaHtmlImportar, propuestaHtmlList, propuestaHtmlGet } from "./propuesta-html-cap";

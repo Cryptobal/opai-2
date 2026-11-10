@@ -70,3 +70,6 @@ export const propuestaHtmlGet = defineCapability({
   dryRun: false,
   handler: (ctx, input) => obtenerHtml(ctx, input.id),
 });
+
+/** Las tres capacidades de la plantilla HTML, para registrarlas juntas. */
+export const capacidadesPropuestaHtml = [propuestaHtmlImportar, propuestaHtmlList, propuestaHtmlGet];
