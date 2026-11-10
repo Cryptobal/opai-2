@@ -11,6 +11,7 @@ import { Client } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client";
+import { migracionesAlDia } from "./migraciones-al-dia";
 
 export const urlPropietario = process.env["DATABASE_URL_TEST"];
 
@@ -62,11 +63,14 @@ export async function prepararEntorno() {
   if (!url) throw new Error("Falta DATABASE_URL_TEST: RLS requiere Postgres real.");
   const password = randomBytes(24).toString("base64url");
   const rol = `opai_test_${randomUUID().slice(0, 8).replace(/-/g, "")}`;
-  execFileSync("pnpm", ["exec", "prisma", "migrate", "deploy"], {
-    cwd: new URL("..", import.meta.url).pathname,
-    env: { ...process.env, DATABASE_URL_MIGRATE: url },
-    stdio: "pipe",
-  });
+  // Solo si falta o cambió alguna migración: el resto de los archivos de la corrida se ahorra el proceso de Prisma.
+  if (!(await migracionesAlDia(url))) {
+    execFileSync("pnpm", ["exec", "prisma", "migrate", "deploy"], {
+      cwd: new URL("..", import.meta.url).pathname,
+      env: { ...process.env, DATABASE_URL_MIGRATE: url },
+      stdio: "pipe",
+    });
+  }
   // Las políticas aplican "TO opai_app", que cubre a sus miembros.
   const pg = new Client({ connectionString: url });
   await pg.connect();

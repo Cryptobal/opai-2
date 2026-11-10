@@ -3,6 +3,7 @@ export * from "./simulado";
 export * from "./simpleapi";
 export * from "./error-proveedor";
 export * from "./xml-iso";
+export * from "./caf-bytes";
 export * from "./certificado-pfx";
 export * from "./contribuyente";
 export * from "./contribuyente-simpleapi";
