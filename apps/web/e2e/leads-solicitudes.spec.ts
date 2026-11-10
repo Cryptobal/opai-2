@@ -46,9 +46,17 @@ test.describe("Leads · solicitudes", () => {
     await expect(page.getByText("En revisión", { exact: true }).filter({ visible: true }).first()).toBeVisible();
 
     // Procesar y convertir: la vista previa dice qué se crea y «Pasar a negocio» lo hace.
+    // CAR-209: abrir la hoja es local (sin pedir la página al servidor): un fallo puntual de la
+    // base en esa carga ya no puede reemplazar la ficha por un error.
+    const paginasPedidas: string[] = [];
+    page.on("request", (r) => {
+      if (r.method() === "GET" && r.url().includes("_rsc=")) paginasPedidas.push(r.url());
+    });
     await page.getByRole("link", { name: "Procesar y convertir" }).filter({ visible: true }).first().click();
     await expect(dialogo(page).getByText("Qué pasa al convertir")).toBeVisible();
     await expect(dialogo(page).getByText("Se crea").first()).toBeVisible();
+    expect(paginasPedidas.filter((u) => u.includes("convertir=1"))).toEqual([]);
+    await expect(page).toHaveURL(/convertir=1/);
     await foto("hoja-convertir");
     await dialogo(page).getByRole("button", { name: "Pasar a negocio" }).click();
     await expect(dialogo(page).getByText("Solicitud convertida").first()).toBeVisible();
