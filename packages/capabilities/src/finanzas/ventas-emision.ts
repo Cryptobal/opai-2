@@ -8,6 +8,7 @@ import { reglaDeNegocio } from "../errores";
 import { vistaDeDocumento } from "./ventas-consulta";
 import {
   PERMISO_VENTAS,
+  ambienteDe,
   consumirFolio,
   documentoEmitidoIdSchema,
   marcarBorradorEmitido,
@@ -51,9 +52,15 @@ export async function emitirBorrador(
   const adaptador = await adaptadorSiiDe(ctx);
   if (!adaptador.disponible) throw reglaDeNegocio("El adaptador SII no está disponible.");
   if (dryRun) {
+    // La vista previa no firma ni llama al proveedor: muestra el folio que se asignaría, el proveedor y el ambiente.
     const folio = await consumirFolio(ctx, tipo, true);
     const { vistaVenta } = await import("./vistas-venta");
-    return vistaVenta(
+    // La emisión simulada solo usa CAF de certificación (CAR-240), así que ese es su ambiente.
+    const simpleapi = adaptador.nombre === "simpleapi";
+    const emisionPrevista = simpleapi
+      ? { proveedor: "simpleapi" as const, ambiente: await ambienteDe(ctx) }
+      : { proveedor: "simulado" as const, ambiente: "certificacion" as const };
+    const vista = vistaVenta(
       { ...doc, folio, estadoDte: "enviado" },
       cuenta,
       doc.lineas.map((l) => ({
@@ -63,6 +70,7 @@ export async function emitirBorrador(
         monto: l.monto,
       })),
     );
+    return { ...vista, emisionPrevista };
   }
   if (!preparada || preparada.documentoId !== doc.id) {
     throw reglaDeNegocio("El documento no llegó firmado a la emisión; reintente.");

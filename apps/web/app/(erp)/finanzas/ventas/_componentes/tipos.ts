@@ -12,6 +12,8 @@ export type Venta = {
   estadoDte: "borrador" | "enviado" | "aceptado" | "rechazado" | "anulado_nc";
   estadoCobro: "pendiente" | "pagada_parcial" | "pagada" | "cedida";
   cesionEstado: "emitido" | "cedido" | "no_cedido" | null;
+  /** Solo en la vista previa de emitir: con qué proveedor y en qué ambiente se firmaría (CAR-242). */
+  emisionPrevista?: { proveedor: "simulado" | "simpleapi"; ambiente: "certificacion" | "produccion" };
 };
 
 export type LibroVentas = {
