@@ -41,6 +41,8 @@ export const cuentasReferenciasOtorgar = defineCapability({
   descripcion:
     "Registra que un cliente dio su consentimiento explícito para ser referencia comercial en propuestas y documentos: fecha, evidencia, quién lo dio, hasta cuándo y qué se puede mostrar (su nombre o anonimizado, una descripción y una cita). Sin este registro el cliente nunca aparece como referencia.",
   permiso: PERMISOS_CORE.cuentasReferenciasAutorizar,
+  // Un agente no da por otorgado un consentimiento por su cuenta: siempre pasa por aprobación humana.
+  exigeAprobacion: () => true,
   portales: ["erp"],
   input: z.object({
     cuentaId: uuidSchema,

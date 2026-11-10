@@ -87,8 +87,16 @@ export function esVigente(f: FilaReferenciaDb, hoy: string): boolean {
   );
 }
 
-export function vistaReferencia(f: FilaReferenciaDb, hoy: string): VistaReferencia {
-  return {
+/**
+ * `verEvidencia` en false oculta lo que puede nombrar a una persona del cliente (detalle de la
+ * evidencia, motivo y contacto): solo lo ve quien gestiona cuentas o autoriza referencias.
+ */
+export function vistaReferencia(
+  f: FilaReferenciaDb,
+  hoy: string,
+  verEvidencia = true,
+): VistaReferencia {
+  const v: VistaReferencia = {
     id: f.id,
     cuentaId: f.cuentaId,
     cuentaNombre: f.cuenta.nombre,
@@ -107,6 +115,7 @@ export function vistaReferencia(f: FilaReferenciaDb, hoy: string): VistaReferenc
     registradoPorId: f.registradoPorId,
     registradoEn: f.createdAt.toISOString(),
   };
+  return verEvidencia ? v : { ...v, evidenciaDetalle: null, motivo: null, contactoId: null };
 }
 
 /**

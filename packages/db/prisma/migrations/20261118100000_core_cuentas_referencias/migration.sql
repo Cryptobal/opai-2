@@ -30,9 +30,9 @@ CREATE TABLE "core"."cuentas_referencias" (
     -- Otorgar exige fecha y evidencia con detalle; revocar exige motivo y no muestra nada.
     CONSTRAINT "cuentas_referencias_otorgado_check" CHECK (
       "estado" <> 'otorgado' OR ("otorgado_en" IS NOT NULL AND "evidencia" IS NOT NULL
-        AND char_length(btrim("evidencia_detalle")) BETWEEN 3 AND 300)),
+        AND "evidencia_detalle" IS NOT NULL AND char_length(btrim("evidencia_detalle")) BETWEEN 3 AND 300)),
     CONSTRAINT "cuentas_referencias_revocado_check" CHECK (
-      "estado" <> 'revocado' OR (char_length(btrim("motivo")) BETWEEN 3 AND 300
+      "estado" <> 'revocado' OR ("motivo" IS NOT NULL AND char_length(btrim("motivo")) BETWEEN 3 AND 300
         AND "mostrar_nombre" = false AND "descripcion" IS NULL AND "cita" IS NULL)),
     CONSTRAINT "cuentas_referencias_vigencia_check" CHECK (
       "vigente_hasta" IS NULL OR ("otorgado_en" IS NOT NULL AND "vigente_hasta" >= "otorgado_en")),

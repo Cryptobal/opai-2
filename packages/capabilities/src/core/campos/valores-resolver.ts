@@ -37,6 +37,8 @@ export type EntradaValoresCampos = {
   cuentaId: string;
   contactoId?: string | undefined;
   instalacionIds?: string[] | undefined;
+  /** `false` evita consultar referencias cuando el llamador no las usa (p. ej. capítulos). */
+  referencias?: boolean | undefined;
 };
 
 export type ValoresCamposResueltos = {
@@ -105,9 +107,10 @@ export async function resolverCamposDocumento(
   }
 
   // Sin permiso de lectura de referencias no se consulta nada (la clave no está autorizada).
-  const referencias = permitidas.has("referencia.cliente")
-    ? await referenciasParaDocumento(ctx, cuenta.id)
-    : [];
+  const referencias =
+    input.referencias !== false && permitidas.has("referencia.cliente")
+      ? await referenciasParaDocumento(ctx, cuenta.id)
+      : [];
 
   const campos = {
     ...valoresCuenta(cuenta),

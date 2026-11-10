@@ -22,7 +22,7 @@ export const cuentasReferenciasList = defineCapability({
   auditarLectura: (s) => [...new Set([...s.items, ...s.historial].map((r) => r.cuentaId))],
   id: "core.cuentas_referencias.list",
   descripcion:
-    "Lista los clientes que consintieron ser referencia comercial, con su estado (otorgado o revocado), si está vigente para documentos, cómo aparecen (nombre o anonimizado) y la evidencia del consentimiento. Con una cuenta, puede traer su historial completo.",
+    "Lista los clientes que consintieron ser referencia comercial, con su estado (otorgado o revocado), si está vigente para documentos, cómo aparecen (nombre o anonimizado) y la evidencia del consentimiento (el detalle, el motivo y el contacto solo para quien gestiona cuentas o autoriza referencias). Con una cuenta, puede traer su historial completo.",
   permiso: PERMISOS_CORE.cuentasRead,
   portales: ["erp"],
   input: z.object({
@@ -40,10 +40,13 @@ export const cuentasReferenciasList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const hoy = hoyReferencias();
+    const ver =
+      ctx.autorizar(PERMISOS_CORE.cuentasManage) ||
+      ctx.autorizar(PERMISOS_CORE.cuentasReferenciasAutorizar);
     if (input.cuentaId) await cuentaDe(ctx, input.cuentaId);
     const donde = { AND: [dondeCuenta(ctx)], ...(input.cuentaId ? { id: input.cuentaId } : {}) };
     const ultimas = (await ultimasReferencias(ctx, donde))
-      .map((f) => vistaReferencia(f, hoy))
+      .map((f) => vistaReferencia(f, hoy, ver))
       .filter((v) => !input.soloVigentes || v.vigente)
       .sort((a, b) => a.cuentaNombre.localeCompare(b.cuentaNombre, "es"));
     const historial =
@@ -55,7 +58,7 @@ export const cuentasReferenciasList = defineCapability({
               take: 100,
               include: { cuenta: cuentaDeReferencia },
             })
-          ).map((f) => vistaReferencia(f, hoy))
+          ).map((f) => vistaReferencia(f, hoy, ver))
         : [];
     return { items: ultimas, historial };
   },

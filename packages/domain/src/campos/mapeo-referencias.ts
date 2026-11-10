@@ -41,8 +41,8 @@ export type ConsentimientoReferencia = {
 };
 
 /**
- * Vigente: la última fila es un otorgamiento, ya empezó y no venció (`hoy` en `AAAA-MM-DD`, zona del
- * tenant). Sin fila, revocado o vencido: no hay referencia (opt-in, por defecto no aparece).
+ * Vigente: la última fila es un otorgamiento, ya empezó y no venció (`hoy` en `AAAA-MM-DD`, en la zona
+ * en que se presenta: America/Santiago). Sin fila, revocado o vencido: no hay referencia (opt-in, por defecto no aparece).
  */
 export function referenciaVigente(ultima: ConsentimientoReferencia | null, hoy: string): boolean {
   if (!ultima || ultima.estado !== "otorgado" || !ultima.otorgadoEn) return false;

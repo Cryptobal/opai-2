@@ -56,6 +56,8 @@ export async function contratoCamposPropuesta(
     finalidad: "propuesta",
     cuentaId: neg.cuentaId,
     contactoId,
+    // Solo se consultan (y se auditan) las referencias si el texto las repite.
+    referencias: v.colecciones.includes("referencias"),
   });
   const contrato = contratoCamposDeEnvio(textos, v.usados, v.colecciones, {
     campos: r.campos,

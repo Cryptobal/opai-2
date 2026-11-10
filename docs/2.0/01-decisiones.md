@@ -1657,4 +1657,6 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Pendiente (Carlos).** Quién autoriza. Se dejó configurable con el permiso `core:cuentas.referencias.autorizar`: por defecto solo owner y admin; cada empresa lo concede o quita con roles personalizados y excepciones por usuario. Revocar basta con `core:cuentas.manage` (dirección segura). Si Carlos decide otro default (p. ej. gerente comercial), es un cambio de una línea en `permisos-patrones.ts`.
 
-**Límites conocidos.** La evidencia y la cita son textos cortos (≤300 y ≤400) que pueden mencionar a una persona del cliente; al ser append-only, no los borra la anonimización de contactos (Ley 21.719). Sin pantalla hasta que haya diseño aprobado (se opera por MCP y `/api/v1`).
+**Agentes.** Un agente (API key) puede preparar el registro, pero otorgar siempre pasa por aprobación humana (`exigeAprobacion`), mientras quién autoriza siga pendiente.
+
+**Límites conocidos.** El consentimiento anónimo igual muestra rubro, comuna y fecha «cliente desde», que juntos pueden ayudar a identificarlo: quien registra debe tenerlo presente. Revocar no cambia lo ya enviado (PDF y enlace congelados). La evidencia y la cita son textos cortos (≤300 y ≤400) que pueden mencionar a una persona del cliente; al ser append-only, no los borra la anonimización de contactos (Ley 21.719). Sin pantalla hasta que haya diseño aprobado (se opera por MCP y `/api/v1`).

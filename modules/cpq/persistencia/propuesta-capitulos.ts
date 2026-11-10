@@ -69,7 +69,7 @@ export async function instalacionesDeVersion(ctx: Contexto, versionId: string) {
 async function direccionYMapa(ctx: Contexto, cuentaId: string | null, instalacionId: string) {
   if (!cuentaId) return { nombre: null, direccion: null, mapa: null };
   try {
-    const r = await resolverCamposDocumento(ctx, { finalidad: "propuesta", cuentaId, instalacionIds: [instalacionId] });
+    const r = await resolverCamposDocumento(ctx, { finalidad: "propuesta", cuentaId, instalacionIds: [instalacionId], referencias: false });
     const i = r.colecciones.instalaciones[0];
     const t = (k: string) => (typeof i?.[k] === "string" ? (i[k] as string) : null);
     return { nombre: t("instalacion.nombre"), direccion: t("instalacion.direccion"), mapa: t("instalacion.mapa_url") };

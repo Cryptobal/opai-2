@@ -20,11 +20,14 @@ describe.skipIf(!urlPropietario)("Referencias de clientes con opt-in · base rea
     tB: "",
     user: "",
     destino: "",
+    destinoB: "",
     uno: "",
     dos: "",
     inactiva: "",
     prospecto: "",
+    archivada: "",
     ajena: "",
+    contactoDos: "",
   };
 
   const ctx = (tenantId: string, rol = "owner", extra: Record<string, unknown> = {}) =>
@@ -91,6 +94,17 @@ describe.skipIf(!urlPropietario)("Referencias de clientes con opt-in · base rea
     ids.inactiva = await cuenta(ids.tA, "Ficticia Inactiva", "cliente_inactivo");
     ids.prospecto = await cuenta(ids.tA, "Ficticia Prospecto", "prospecto");
     ids.ajena = await cuenta(ids.tB, "Ajena Activa SpA", "cliente_activo");
+    ids.destinoB = await cuenta(ids.tB, "Destino B", "prospecto");
+    ids.archivada = await cuenta(ids.tA, "Ficticia Archivada", "cliente_activo");
+    await e.admin.cuenta.update({
+      where: { id: ids.archivada },
+      data: { archivadaEn: new Date() },
+    });
+    ids.contactoDos = (
+      await e.admin.contacto.create({
+        data: { tenantId: ids.tA, cuentaId: ids.dos, nombres: "Leo", apellidos: "Ficticio" },
+      })
+    ).id;
     await e.admin.cuentaReferencia.create({
       data: {
         tenantId: ids.tB,
@@ -235,8 +249,50 @@ describe.skipIf(!urlPropietario)("Referencias de clientes con opt-in · base rea
     expect(vig.ok && (vig.data as Lista).items.map((i) => i.cuentaId)).toEqual([ids.uno]);
   });
 
+  it("rechaza cuenta archivada, vigencia ya vencida y un contacto de otra cuenta", async () => {
+    const c = ctx(ids.tA);
+    const otorgarA = (input: Ref) => run(c, "core.cuentas_referencias.otorgar", input, true);
+    expect((await otorgarA(otorgar(ids.archivada))).ok).toBe(false);
+    expect((await otorgarA(otorgar(ids.uno, { vigenteHasta: "2026-01-01" }))).ok).toBe(false);
+    expect((await otorgarA(otorgar(ids.uno, { contactoId: ids.contactoDos }))).ok).toBe(false);
+    expect((await otorgarA(otorgar(ids.dos, { contactoId: ids.contactoDos }))).ok).toBe(true);
+  });
+
+  it("la base exige evidencia al otorgar y motivo al revocar, aunque el código no los mande", async () => {
+    const base = { tenantId: ids.tA, cuentaId: ids.uno, registradoPorId: ids.user };
+    await expect(
+      e.admin.cuentaReferencia.create({
+        data: {
+          ...base,
+          estado: "otorgado",
+          otorgadoEn: new Date("2026-11-01"),
+          evidencia: "correo",
+        },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      e.admin.cuentaReferencia.create({ data: { ...base, estado: "revocado" } }),
+    ).rejects.toThrow();
+  });
+
+  it("quien solo lee cuentas no ve el detalle de la evidencia ni el contacto", async () => {
+    const l = await run(ctx(ids.tA, "viewer"), "core.cuentas_referencias.list", {
+      cuentaId: ids.uno,
+    });
+    const item = l.ok ? (l.data as { items: Ref[] }).items[0] : undefined;
+    expect(item?.["evidencia"]).toBe("correo");
+    expect(item?.["evidenciaDetalle"]).toBeNull();
+    const o = await run(ctx(ids.tA), "core.cuentas_referencias.list", { cuentaId: ids.uno });
+    expect(o.ok && (o.data as { items: Ref[] }).items[0]?.["evidenciaDetalle"]).toBe(
+      "Correo ficticio de la gerencia",
+    );
+  });
+
   it("aislamiento: otra empresa no ve ni usa estas referencias, y el registro no se edita ni se borra", async () => {
-    expect((await referencias(ids.tB, ids.ajena)).colecciones.referencias).toEqual([]);
+    // Control positivo: en su empresa, la cuenta ajena sí sale; y ninguna de A se cuela.
+    expect((await referencias(ids.tB, ids.destinoB)).origen.referenciaCuentaIds).toEqual([
+      ids.ajena,
+    ]);
     expect((await referencias()).origen.referenciaCuentaIds).not.toContain(ids.ajena);
     const otra = await run(ctx(ids.tB), "core.cuentas_referencias.otorgar", otorgar(ids.uno), true);
     expect(otra.ok).toBe(false);
