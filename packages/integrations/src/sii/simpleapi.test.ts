@@ -24,6 +24,7 @@ const creds: CredencialesSimpleApi = {
   rutEmpresa: "76269769-6",
   resolucionNumero: 0, // en certificación el SII entrega la resolución número 0 (ejemplos de la documentación)
   resolucionFecha: "2023-01-10",
+  actecoEmisor: 801000, // sin ACTECO el adaptador no llama a dte/generar (CAR-240)
 };
 const payload = {
   ambiente: "certificacion" as const,
@@ -115,11 +116,11 @@ describe("firmar (POST dte/generar)", () => {
     });
   });
 
-  it("sin datos del emisor no inventa campos", async () => {
+  it("sin más datos del emisor no inventa campos (el ACTECO sí es obligatorio, CAR-240)", async () => {
     const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
     await adaptadorSimpleApi(creds).firmar(payload);
     const emisor = JSON.parse(String(llamadas[0]?.input)).Documento.Encabezado.Emisor;
-    expect(emisor).toEqual({ Rut: "76269769-6" });
+    expect(emisor).toEqual({ Rut: "76269769-6", ActividadEconomica: [801000] });
   });
 
   it("ADR-075: el XML con ñ y tildes vuelve con los mismos bytes ISO-8859-1 y el mismo SHA-256", async () => {

@@ -1,4 +1,11 @@
-import { detalleSeguroDeRespuesta, ErrorProveedorSii, limitesDeRespuesta, type PasoProveedorSii } from "./error-proveedor";
+import {
+  detalleSeguroDeRespuesta,
+  ErrorProveedorSii,
+  formaDeCuerpo,
+  limitesDeRespuesta,
+  type FormaCuerpo,
+  type PasoProveedorSii,
+} from "./error-proveedor";
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
 import { cuerpoMultipart, type ParteMultipart } from "./simpleapi-multipart";
 import { bytesDeXml } from "./xml-iso";
@@ -44,12 +51,16 @@ export function archivoXml(xmlLatin1: string, nombreArchivo: string): ParteMulti
  * reconocida como para un contenido rechazado. Solo cuando reconoce la key envía los headers `x-rate-limit-*`; con
  * ellos, el 401 es del contenido (certificado, CAF o datos), no de la key.
  */
-function motivoHttp(status: number, headers: Headers): string {
+function motivoHttp(status: number, headers: Headers, cuerpo: FormaCuerpo): string {
   // Se miran los nombres crudos: un valor que no pasa el saneo de `limitesDeRespuesta` igual prueba que la key autenticó.
   let keyReconocida = false;
   headers.forEach((_v, h) => {
     if (/^x-rate-?limit-/i.test(h)) keyReconocida = true;
   });
+  // La documentación de SimpleAPI: un 401 también es «falta de suscripción válida o token expirado» para esa API.
+  if ((status === 401 || status === 403) && cuerpo === "suscripcion") {
+    return `indicó que la API key no tiene suscripción vigente para este servicio o que venció, HTTP ${status}`;
+  }
   if ((status === 401 || status === 400 || status === 422) && keyReconocida) {
     return `rechazó el contenido (certificado, CAF o datos), HTTP ${status}`;
   }
@@ -65,9 +76,11 @@ async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readon
   const cuerpo = await res.text().catch(() => "");
   const detalle = detalleSeguroDeRespuesta(cuerpo, secretos);
   const limites = limitesDeRespuesta(res.headers);
+  const forma = formaDeCuerpo(cuerpo);
   // Un 5xx del envío no prueba que el SII no lo haya recibido.
-  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, res.headers), res.status, detalle, paso === "enviar" && res.status >= 500);
+  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, res.headers, forma), res.status, detalle, paso === "enviar" && res.status >= 500);
   error.limites = limites;
+  error.cuerpo = forma;
   return error;
 }
 

@@ -20,7 +20,7 @@ const outputSchema = z.object({
 export const ventasPreflightEmision = defineCapability({
   id: "finanzas.ventas.preflight_emision",
   descripcion:
-    "Revisa si el tenant puede emitir un DTE real: certificado, CAF, resolución SII, conector SimpleAPI y datos del receptor. Lectura previa al botón Emitir.",
+    "Revisa si el tenant puede emitir un DTE real: certificado, CAF, resolución SII, conector SimpleAPI y datos tributarios del emisor (ACTECO incluido) y del receptor. Lectura previa al botón Emitir.",
   permiso: PERMISO_VENTAS,
   input: z.object({
     documentoId: uuidSchema.optional(),
