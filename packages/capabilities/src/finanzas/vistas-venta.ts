@@ -16,6 +16,10 @@ export const lineaSchema = z.object({
   orden: z.number().int(),
   glosa: z.string(),
   monto: z.number().int(),
+  cantidad: z.string().nullish().describe("Cantidad de la línea, si se informó (CAR-248: para editar un borrador)."),
+  unidad: z.string().nullish(),
+  precioUnitario: z.number().int().nullish(),
+  descuentoPct: z.number().int().nullish(),
 });
 
 export const ventaSchema = z.object({
@@ -75,7 +79,16 @@ type FilaVenta = {
   glosa: string | null;
   trackIdSii: string | null;
   documentoReferenciaId: string | null;
-  lineas?: { id: string; orden: number; glosa: string; monto: number }[];
+  lineas?: {
+    id: string;
+    orden: number;
+    glosa: string;
+    monto: number;
+    cantidad?: { toString(): string } | null;
+    unidad?: string | null;
+    precioUnitario?: number | null;
+    descuentoPct?: number | null;
+  }[];
 };
 
 export function vistaVenta(

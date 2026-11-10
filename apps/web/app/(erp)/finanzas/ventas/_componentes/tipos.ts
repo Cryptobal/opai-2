@@ -16,6 +16,22 @@ export type Venta = {
   emisionPrevista?: { proveedor: "simulado" | "simpleapi"; ambiente: "certificacion" | "produccion" };
 };
 
+/** Línea de un borrador tal como la entrega `finanzas.ventas.obtener` (CAR-248: para poder editarla). */
+export type LineaBorrador = {
+  glosa: string;
+  monto: number;
+  cantidad?: string | null;
+  precioUnitario?: number | null;
+  descuentoPct?: number | null;
+};
+
+/** Lo que la ficha sabe de un borrador y la hoja de edición necesita. */
+export type DatosBorrador = {
+  montoIva?: number;
+  glosa?: string | null;
+  lineas?: LineaBorrador[];
+};
+
 export type LibroVentas = {
   items: Venta[];
   siguiente: string | null;
