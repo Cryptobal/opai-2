@@ -61,6 +61,10 @@ function motivoHttp(status: number, headers: Headers, cuerpo: FormaCuerpo): stri
   if ((status === 401 || status === 403) && cuerpo === "suscripcion") {
     return `indicó que la API key no tiene suscripción vigente para este servicio o que venció, HTTP ${status}`;
   }
+  // 401 vacío con la key reconocida (CAR-240): SimpleAPI no dice qué rechazó; la key no es el problema.
+  if (status === 401 && keyReconocida && cuerpo === "vacio") {
+    return "aceptó la API key pero rechazó el contenido sin decir el motivo (certificado, CAF o un dato del DTE; si el preflight marca el CAF dañado, vuelva a cargarlo), HTTP 401";
+  }
   if ((status === 401 || status === 400 || status === 422) && keyReconocida) {
     return `rechazó el contenido (certificado, CAF o datos), HTTP ${status}`;
   }

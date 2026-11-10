@@ -4,6 +4,7 @@
  * ejemplo de esa documentación; lo que ella no responde queda anotado como «DECISIÓN CARLOS» en el PR.
  */
 
+import { correoReceptor, rutSii, rutTitularSii } from "./simpleapi-formatos";
 import type { AmbienteSii, PayloadEmisionDte } from "./tipos";
 
 /** Host del ejemplo de autenticación de la documentación (`https://api.simpleapi.cl/{endpoint}`). */
@@ -95,6 +96,8 @@ export function jsonInputGenerarDte(
     ...(r.codigo != null ? { CodigoReferencia: r.codigo } : {}),
     ...(r.razon ? { RazonReferencia: r.razon } : {}),
   }));
+  const ciudadReceptor = payload.ciudadReceptor ?? payload.comunaReceptor;
+  const correo = correoReceptor(payload.emailReceptor);
   return JSON.stringify({
     Documento: {
       // ID del nodo Documento (atributo XML): fijo por tipo y folio, para que un reintento genere el mismo documento.
@@ -104,11 +107,12 @@ export function jsonInputGenerarDte(
           TipoDTE: payload.tipoDte,
           Folio: payload.folio,
           FechaEmisionString: fechaSii(payload.fechaEmision),
-          ...(payload.fechaVencimiento ? { FechaVencimiento: fechaSii(payload.fechaVencimiento) } : {}),
+          // Nombre del SDK de SimpleAPI (`FechaVencimientoString`; el DateTime `FechaVencimiento` es [XmlIgnore]).
+          ...(payload.fechaVencimiento ? { FechaVencimientoString: fechaSii(payload.fechaVencimiento) } : {}),
           FormaPago: FORMA_PAGO_CREDITO,
         },
         Emisor: {
-          Rut: payload.rutEmisor,
+          Rut: rutSii(payload.rutEmisor),
           ...(creds.razonSocialEmisor ? { RazonSocial: creds.razonSocialEmisor } : {}),
           ...(creds.giroEmisor ? { Giro: creds.giroEmisor } : {}),
           // Nombres y forma (lista de ACTECO) tomados del adaptador de OPAI 1.0, que ya emite con SimpleAPI.
@@ -118,12 +122,15 @@ export function jsonInputGenerarDte(
           ...(creds.ciudadEmisor ? { CiudadOrigen: creds.ciudadEmisor } : {}),
         },
         Receptor: {
-          Rut: payload.rutReceptor,
+          Rut: rutSii(payload.rutReceptor),
           RazonSocial: payload.razonSocialReceptor,
           ...(payload.direccionReceptor ? { Direccion: payload.direccionReceptor } : {}),
           ...(payload.comunaReceptor ? { Comuna: payload.comunaReceptor } : {}),
-          ...(payload.ciudadReceptor ? { Ciudad: payload.ciudadReceptor } : {}),
+          // OPAI 1.0 siempre informa la ciudad. Sin ciudad en la cuenta va su comuna real, nunca un valor fijo (Carlos,
+          // 10-nov-2026); sin comuna el preflight ya bloquea.
+          ...(ciudadReceptor ? { Ciudad: ciudadReceptor } : {}),
           ...(payload.giroReceptor ? { Giro: payload.giroReceptor } : {}),
+          ...(correo ? { CorreoRecep: correo } : {}),
         },
         // Como 1.0: MontoExento siempre; la tasa y el IVA solo en un documento afecto.
         Totales: {
@@ -136,7 +143,7 @@ export function jsonInputGenerarDte(
       Detalles: detalles,
       ...(referencias.length > 0 ? { Referencias: referencias } : {}),
     },
-    Certificado: { Rut: creds.certificadoRut, Password: creds.certificadoClave },
+    Certificado: { Rut: rutTitularSii(creds.certificadoRut), Password: creds.certificadoClave },
   });
 }
 
