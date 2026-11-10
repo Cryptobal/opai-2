@@ -40,7 +40,11 @@ async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number): Prom
     where: { id: rango.cafSecretoId, tenantId: ctx.tenantId },
   });
   if (!s) throw reglaDeNegocio("No se encontró el CAF guardado para este folio.");
-  return descifrar(await dekDe(ctx), { cifrado: s.cifrado, iv: s.iv, tag: s.tag }).toString("utf8");
+  try {
+    return descifrar(await dekDe(ctx), { cifrado: s.cifrado, iv: s.iv, tag: s.tag }).toString("utf8");
+  } catch {
+    throw reglaDeNegocio("No se pudo leer el CAF guardado de este folio; vuelva a cargar el CAF antes de emitir.");
+  }
 }
 
 /** Arma el payload completo para el adaptador SII (SimpleAPI v1 o simulado). */

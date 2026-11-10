@@ -20,6 +20,19 @@ export function codigoDeBase(error: unknown): string | null {
 }
 
 /**
+ * Motivo ya saneado que un error declara seguro de registrar (`motivoSeguro`, CAR-242): el de un proveedor SII o un
+ * `ErrorConMotivo`. Busca en la cadena de causas. Nunca se usa `error.message`, que puede traer Prisma o el input.
+ */
+export function motivoSeguroDe(error: unknown): string | null {
+  for (let e: unknown = error, i = 0; e && typeof e === "object" && i < 4; i += 1) {
+    const m = (e as { motivoSeguro?: unknown }).motivoSeguro;
+    if (typeof m === "string" && m.trim()) return m.trim().slice(0, 200);
+    e = (e as { cause?: unknown }).cause;
+  }
+  return null;
+}
+
+/**
  * Log estructurado de un error inesperado (INTERNAL, CAR-49): solo lo necesario para ubicarlo con
  * la correlación que recibe el usuario o el agente. Nunca el input ni el payload del handler.
  */
@@ -36,6 +49,7 @@ function registrarErrorInesperado(
     code: "INTERNAL",
     errorName: error instanceof Error ? error.name : typeof error,
     codigoBase: codigoDeBase(error),
+    motivo: motivoSeguroDe(error),
     correlacion,
   });
 }

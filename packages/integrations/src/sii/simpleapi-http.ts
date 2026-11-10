@@ -1,3 +1,4 @@
+import { detalleSeguroDeRespuesta, ErrorProveedorSii, type PasoProveedorSii } from "./error-proveedor";
 import { bytesDeXml } from "./xml-iso";
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
 
@@ -26,19 +27,27 @@ export function blobXml(xmlLatin1: string): Blob {
   return new Blob([new Uint8Array(bytesDeXml(xmlLatin1))], { type: "application/xml; charset=iso-8859-1" });
 }
 
-/** Mensaje de error sin el cuerpo completo (puede traer datos del documento) y sin secretos. */
-async function errorHttp(res: Response): Promise<Error> {
+/**
+ * Error tipado de una respuesta no 2xx (CAR-242): el estado HTTP y, si lo hay, un detalle corto y saneado del
+ * mensaje del proveedor. Nunca el cuerpo completo (puede traer datos del documento) ni secretos.
+ */
+async function errorHttp(res: Response, paso: PasoProveedorSii): Promise<ErrorProveedorSii> {
   const cuerpo = await res.text().catch(() => "");
-  return new Error(`SimpleAPI HTTP ${res.status}${cuerpo ? `: ${cuerpo.slice(0, 200)}` : ""}`);
+  const detalle = detalleSeguroDeRespuesta(cuerpo);
+  return new ErrorProveedorSii(paso, `respondió HTTP ${res.status}${detalle ? ` (${detalle})` : ""}`, res.status);
 }
 
-export async function leerJsonRespuesta<T>(res: Response): Promise<T> {
-  if (!res.ok) throw await errorHttp(res);
-  return (await res.json()) as T;
+export async function leerJsonRespuesta<T>(res: Response, paso: PasoProveedorSii): Promise<T> {
+  if (!res.ok) throw await errorHttp(res, paso);
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw new ErrorProveedorSii(paso, "la respuesta no es un JSON válido", res.status);
+  }
 }
 
 /** Respuesta XML como bytes (ISO-8859-1): nunca pasa por `res.text()`, que decodificaría como UTF-8. */
-export async function leerBytesRespuesta(res: Response): Promise<Buffer> {
-  if (!res.ok) throw await errorHttp(res);
+export async function leerBytesRespuesta(res: Response, paso: PasoProveedorSii): Promise<Buffer> {
+  if (!res.ok) throw await errorHttp(res, paso);
   return Buffer.from(await res.arrayBuffer());
 }

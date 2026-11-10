@@ -198,7 +198,7 @@ describe("disponibilidad", () => {
     for (const c of [null, { ...creds, apiKey: "" }, { ...creds, certificadoRut: "" }, { ...creds, rutEmpresa: "" }]) {
       const a = adaptadorSimpleApi(c);
       expect(a.disponible).toBe(false);
-      await expect(a.firmar(payload)).rejects.toThrow(/no configurado/);
+      await expect(a.firmar(payload)).rejects.toThrow(/no está configurada/);
     }
     expect(llamadas).toHaveLength(0);
     expect(adaptadorSimpleApi(creds).disponible).toBe(true); // resolución 0 es válida en certificación
