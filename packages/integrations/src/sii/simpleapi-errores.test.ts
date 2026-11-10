@@ -96,3 +96,32 @@ describe("errores tipados de SimpleAPI (CAR-242)", () => {
     expect(r.timbrePdf417).toBe(ted);
   });
 });
+
+describe("autenticación y límites de uso (CAR-240)", () => {
+  it("el header es Basic api:key con la key recortada, nunca la key cruda", async () => {
+    const { encabezadoAuthSimpleApi } = await import("./simpleapi-contrato");
+    const h = encabezadoAuthSimpleApi(`  ${CLAVE_API}\n`);
+    expect(h).toBe(`Basic ${Buffer.from(`api:${CLAVE_API}`, "utf8").toString("base64")}`);
+    expect(h).not.toContain(CLAVE_API);
+    expect(h).not.toBe(`Basic ${Buffer.from(`${CLAVE_API}:`, "utf8").toString("base64")}`);
+  });
+  it("un 401 lleva al error los headers x-rate-limit-* saneados, sin otros headers", async () => {
+    const headers = {
+      "x-rate-limit-limit": "1000",
+      "x-rate-limit-remaining": "0",
+      "x-rate-limit-reset": "2026-11-10T15:00:00Z",
+      "retry-after": "60",
+      "x-api-key-echo": CLAVE_API,
+      "set-cookie": "sesion=abc",
+    };
+    generar(() => new Response("no autorizado", { status: 401, headers }));
+    const e = await firmarError();
+    expect(e.limites).toEqual({
+      "x-rate-limit-limit": "1000",
+      "x-rate-limit-remaining": "0",
+      "x-rate-limit-reset": "2026-11-10T15:00:00Z",
+      "retry-after": "60",
+    });
+    expect(JSON.stringify(e.limites)).not.toContain(CLAVE_API);
+  });
+});

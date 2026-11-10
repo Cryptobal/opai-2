@@ -12,6 +12,8 @@ import { bytesDeXml, xmlDesdeBytes } from "./xml-iso";
 
 const fixture = (n: string) => readFileSync(new URL(`./fixtures/${n}`, import.meta.url), "utf8");
 const CLAVE_API = "secreto-de-prueba-de-al-menos-32-caracteres";
+/** Basic con usuario «api» y la key como contraseña (CAR-240): base64("api:" + key), nunca la key cruda ni base64(key + ":"). */
+const AUTH = `Basic ${Buffer.from(`api:${CLAVE_API}`, "utf8").toString("base64")}`;
 const CLAVE_PFX = "Clave-de-prueba-123";
 const creds: CredencialesSimpleApi = {
   apiKey: CLAVE_API,
@@ -57,11 +59,12 @@ const B = "https://api.simpleapi.cl/api/v1";
 afterEach(() => vi.unstubAllGlobals());
 
 describe("firmar (POST dte/generar)", () => {
-  it("manda la API key tal cual, el esquema documentado y los archivos en el orden pedido", async () => {
+  it("autentica con Basic api:key, el esquema documentado y los archivos en el orden pedido", async () => {
     const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
     const r = await adaptadorSimpleApi(creds).firmar(payload);
     const [l] = llamadas;
-    expect(l?.auth).toBe(CLAVE_API);
+    expect(l?.auth).toBe(AUTH);
+    expect(Buffer.from(String(l?.auth).replace(/^Basic /, ""), "base64").toString("utf8")).toBe(`api:${CLAVE_API}`);
     const entrada = JSON.parse(String(l?.form.get("input")));
     expect(entrada.Documento.Encabezado.IdentificacionDTE).toMatchObject({ TipoDTE: 33, Folio: 101, FechaEmision: "2026-11-06" });
     expect(entrada.Documento.Encabezado.Emisor.Rut).toBe("76269769-6");
@@ -152,7 +155,7 @@ describe("enviar (sobre de envío y envío al SII)", () => {
     expect(sobre.Caratula).toEqual({ RutEmisor: "76269769-6", RutReceptor: "60803000-K", FechaResolucion: "2023-01-10", NumeroResolucion: 0 });
     expect((await parte(llamadas[0]!.form, "files2")).equals(dte)).toBe(true); // los mismos bytes, sin transcodificar
     expect(JSON.parse(String(llamadas[1]?.form.get("input")))).toMatchObject({ Ambiente: 0, Tipo: 1 });
-    expect(llamadas.every((l) => l.auth === CLAVE_API)).toBe(true);
+    expect(llamadas.every((l) => l.auth === AUTH)).toBe(true); // /envio/generar y /envio/enviar
     expect(r).toMatchObject({ trackId: "183061986", estado: "enviado", glosa: "Upload OK" });
   });
 
@@ -173,6 +176,7 @@ describe("consultar (POST consulta/envio)", () => {
   it("consulta por TrackID con el RUT de la empresa y mapea la respuesta", async () => {
     const llamadas = simularFetch({ [`${B}/consulta/envio`]: () => json(consultaOk) });
     const r = await adaptadorSimpleApi(creds).consultar("183060352", "certificacion");
+    expect(llamadas[0]?.auth).toBe(AUTH);
     expect(JSON.parse(String(llamadas[0]?.form.get("input")))).toMatchObject({
       RutEmpresa: "76269769-6",
       TrackId: 183060352,

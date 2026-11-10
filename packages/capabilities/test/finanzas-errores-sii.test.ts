@@ -40,6 +40,13 @@ describe("comoReglaSiProveedorSii", () => {
     expect(r.message.endsWith(aviso)).toBe(true);
     expect(r.message).toContain("respondió HTTP 502 (Servicio");
   });
+  it("el log de rechazo incluye los límites de uso de SimpleAPI (CAR-240)", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const e = new ErrorProveedorSii("generar", "respondió HTTP 401", 401);
+    e.limites = { "x-rate-limit-remaining": "0" };
+    comoReglaSiProveedorSii(e, "El folio no se usó.");
+    expect(warn.mock.calls[0]?.[1]).toMatchObject({ status: 401, limites: { "x-rate-limit-remaining": "0" } });
+  });
   it("cualquier otro error se relanza tal cual (sigue siendo INTERNAL)", () => {
     const otro = new Error("fallo de base");
     expect(comoReglaSiProveedorSii(otro, "x")).toBe(otro);

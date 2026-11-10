@@ -20,9 +20,12 @@ export const SIMPLEAPI_RUTAS = {
 /** RUT del SII como receptor del sobre de envío (ejemplo de la documentación: `RutReceptor: "60803000-K"`). */
 export const RUT_SII = "60803000-K" as const;
 
-/** La API key va tal cual en el encabezado `Authorization` (documentación: «Key: Authorization · Value: ApiKey»). */
+/**
+ * Autenticación Basic con usuario «api» y la API key como contraseña: `Basic base64("api:" + key)` (CAR-240). Es lo que
+ * usan OPAI 1.0 (que sí emite) y nuestra consulta de contribuyentes; mandar la key cruda daba HTTP 401 en /dte/generar.
+ */
 export function encabezadoAuthSimpleApi(apiKey: string): string {
-  return apiKey;
+  return `Basic ${Buffer.from(`api:${apiKey.trim()}`, "utf8").toString("base64")}`;
 }
 
 export type CredencialesSimpleApiV1 = {

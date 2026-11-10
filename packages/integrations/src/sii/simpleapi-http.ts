@@ -1,4 +1,4 @@
-import { detalleSeguroDeRespuesta, ErrorProveedorSii, type PasoProveedorSii } from "./error-proveedor";
+import { detalleSeguroDeRespuesta, ErrorProveedorSii, limitesDeRespuesta, type PasoProveedorSii } from "./error-proveedor";
 import { bytesDeXml } from "./xml-iso";
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
 
@@ -35,7 +35,9 @@ async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readon
   const cuerpo = await res.text().catch(() => "");
   const detalle = detalleSeguroDeRespuesta(cuerpo, secretos);
   // Un 5xx del envío no prueba que el SII no lo haya recibido.
-  return new ErrorProveedorSii(paso, `respondió HTTP ${res.status}`, res.status, detalle, paso === "enviar" && res.status >= 500);
+  const error = new ErrorProveedorSii(paso, `respondió HTTP ${res.status}`, res.status, detalle, paso === "enviar" && res.status >= 500);
+  error.limites = limitesDeRespuesta(res.headers);
+  return error;
 }
 
 /** `secretos`: valores propios (API key, clave del certificado) que nunca pueden salir en el detalle. */
