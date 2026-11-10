@@ -2,7 +2,7 @@
 import type { ConfigDte } from "./tipos";
 import type { FormDte } from "./use-form-dte";
 
-export type CampoDte = "resolucionNumero" | "resolucionFecha" | "umbral" | "avisoCaf";
+export type CampoDte = "acteco" | "resolucionNumero" | "resolucionFecha" | "umbral" | "avisoCaf";
 export type ErroresDte = Partial<Record<CampoDte, string>>;
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -18,6 +18,10 @@ export function validarFormDte(f: FormDte): ErroresDte {
     e.resolucionNumero = "SimpleAPI requiere el N° de resolución (en certificación es 0).";
   else if (numero !== "" && +numero === 0 && f.ambiente === "produccion")
     e.resolucionNumero = "En producción indique la resolución vigente; el 0 solo existe en certificación.";
+  const acteco = f.acteco.trim();
+  if (acteco !== "" && !entero(acteco, 1, 999_999)) e.acteco = "Use el código de 6 dígitos del SII.";
+  else if (acteco === "" && f.emisionProveedor === "simpleapi")
+    e.acteco = "SimpleAPI requiere el ACTECO: sin él, el SII rechaza la factura.";
   if (fecha !== "" && !ISO.test(fecha)) e.resolucionFecha = "Indique una fecha válida (dd-mm-aaaa).";
   else if (fecha === "" && f.emisionProveedor === "simpleapi")
     e.resolucionFecha = "SimpleAPI requiere la fecha de la resolución.";
@@ -28,14 +32,20 @@ export function validarFormDte(f: FormDte): ErroresDte {
 
 /**
  * Input de la capacidad. El N° 0 se envía como 0, nunca como vacío. Los conectores solo viajan si cambiaron: cambiarlos
- * exige owner humano, y un admin que solo ajusta umbrales no debe chocar con esa regla.
+ * exige owner humano, y un admin que solo ajusta umbrales no debe chocar con esa regla. El ACTECO también viaja solo si
+ * cambió: es el principal de la empresa (CAR-243) y guardar esta pantalla sin tocarlo no debe reescribir su lista.
  */
-export function inputDteDesdeForm(f: FormDte, vigente: Pick<ConfigDte, "emisionProveedor" | "cesionProveedor">) {
+export function inputDteDesdeForm(
+  f: FormDte,
+  vigente: Pick<ConfigDte, "emisionProveedor" | "cesionProveedor" | "acteco">,
+) {
   const numero = f.resolucionNumero.trim();
+  const acteco = f.acteco.trim() === "" ? null : Number(f.acteco.trim());
   const cesion = f.cesionProveedor === "octava" ? ("octava" as const) : null;
   return {
     ambiente: f.ambiente,
     rutEmisor: f.rutEmisor.trim() || undefined,
+    ...(acteco !== vigente.acteco ? { acteco } : {}),
     ...(f.emisionProveedor !== vigente.emisionProveedor ? { emisionProveedor: f.emisionProveedor } : {}),
     ...(cesion !== vigente.cesionProveedor ? { cesionProveedor: cesion } : {}),
     resolucionSiiNumero: numero === "" ? null : Number(numero),

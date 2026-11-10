@@ -86,7 +86,7 @@ export const foliosCargarCaf = defineCapability({
       .string()
       .min(20)
       .max(500_000)
-      .describe("Contenido XML del CAF emitido por el SII (texto UTF-8)."),
+      .describe("Contenido XML del CAF emitido por el SII, un carácter por byte (ISO-8859-1), tal como viene en el archivo."),
   }),
   output: folioVistaSchema,
   efecto: "escritura",
