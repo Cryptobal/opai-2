@@ -72,6 +72,11 @@ describe("aprobación humana de lo irreversible", () => {
     expect(tabla("aprobacion")).toHaveLength(1);
     expect(tabla("vinculoLaboral")[0]?.["estado"]).toBe("vigente");
     expect(tabla("evento").map((e) => e["tipo"])).toContain("core.aprobacion.pendiente");
+    // CAR-250: la solicitud queda en texto humano, sin id de capacidad ni JSON.
+    const resumen = String(tabla("aprobacion")[0]?.["resumen"]);
+    expect(resumen).toMatch(/ pide aprobación: /);
+    expect(resumen).not.toContain("core.vinculos.terminar");
+    expect(resumen).not.toContain("{");
   });
 
   it("solo una persona aprueba; al aprobar se ejecuta y se audita con la aprobación", async () => {
