@@ -10,3 +10,5 @@ ruta: /finanzas/ventas?estado=borrador
 Al **revisar la emisión** de una factura o nota de débito, la vista previa ahora muestra también **cómo quedará el documento en PDF**, con la marca «BORRADOR», antes de que confirmes. Así ves las líneas, los montos y los datos del cliente tal como saldrán.
 
 Es solo una vista previa: no tiene folio ni timbre del SII, y no se envía nada hasta que confirmes la emisión. Si el PDF no se puede mostrar, igual puedes confirmar con los datos que aparecen arriba.
+
+En la **ficha del borrador** también hay una tarjeta «Vista previa del documento» con el botón «Ver PDF del borrador», para revisarlo sin abrir la emisión.

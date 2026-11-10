@@ -23,13 +23,13 @@ export function EmitirPdfPrevio({ documentoId }: { documentoId: string }) {
   return (
     <Card className="flex flex-col gap-3 p-4">
       <h2 className="t-label text-fg">Vista previa del documento</h2>
-      <p className="text-sm text-fg-muted">Así quedará la factura. Es solo una vista previa: no tiene folio ni valor tributario.</p>
+      <p className="text-sm text-fg-muted">Así quedará el documento. Es solo una vista previa: no tiene folio ni valor tributario.</p>
       <div>
         <Button variant="secondary" disabled={pendiente} onClick={() => void abrir()}>
           Ver PDF del borrador
         </Button>
       </div>
-      <Dialog abierto={url !== null} onCerrar={() => setUrl(null)} titulo="Borrador de la factura" tamano="grande">
+      <Dialog abierto={url !== null} onCerrar={() => setUrl(null)} titulo="Borrador del documento" tamano="grande">
         {url ? <iframe src={url} title="Vista previa del borrador en PDF" className="h-[75dvh] w-full rounded-md border border-border" /> : null}
       </Dialog>
     </Card>

@@ -6,6 +6,7 @@ import { Alerta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { EmitirPdfPrevio } from "../nuevo/emitir-pdf-previo";
 import { BloqueEmisionGuardada, EmitirDialogos } from "../nuevo/emitir-secciones";
 import { useEmision } from "../nuevo/use-emision";
 
@@ -29,6 +30,7 @@ export function EmitirBorradorFicha({ documentoId, tipoDte }: { documentoId: str
         revisarEmision={() => void emision.revisarEmision()}
         emitir={() => void emision.emitir()}
       />
+      <EmitirPdfPrevio documentoId={documentoId} />
       <EmitirDialogos
         dialogo={dialogo}
         setDialogo={setDialogo}
