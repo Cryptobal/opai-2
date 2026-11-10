@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { listaParaFacturar, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import type { TONOS_ETIQUETA } from "../crm/comun";
 import { conEtiqueta, etiquetasFilaSchema, filtroEtiqueta } from "../crm/etiquetas-filas";
 import { dondeCuenta, dondeInstalacion } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
+import { facturarSchema } from "./cuentas-sii-esquemas";
 import { cuentaSchema, ESTADOS_CUENTA, vistaCuenta } from "./cuentas-vista";
 export { cuentaDe } from "./cuentas-acceso";
 
@@ -14,7 +15,7 @@ export const cuentasList = defineCapability({
   auditarLectura: (s) => s.items.map((c) => c.id),
   id: "core.cuentas.list",
   descripcion:
-    "Lista las cuentas (clientes y prospectos) de la empresa, con búsqueda por nombre, razón social o RUT y filtro por estado. Paginada por cursor.",
+    "Lista las cuentas (clientes y prospectos) de la empresa, con búsqueda por nombre, razón social o RUT y filtro por estado. Cada fila dice si está lista para facturar o qué le falta (sin consultar al SII). Paginada por cursor.",
   permiso: PERMISOS_CORE.cuentasRead,
   input: listaSchema.extend({ estado: z.enum(ESTADOS_CUENTA).optional(), etiquetaId: filtroEtiqueta }),
   output: z.object({
@@ -23,6 +24,8 @@ export const cuentasList = defineCapability({
         instalaciones: z.number(),
         contactoPrincipal: z.string().nullable(),
         etiquetas: etiquetasFilaSchema,
+        /** «Lista para facturar» (CAR-156): mismo dominio que `core.cuentas.facturable`. */
+        facturar: facturarSchema,
       }),
     ),
     siguiente: z.string().nullable(),
@@ -54,7 +57,11 @@ export const cuentasList = defineCapability({
       ...cursorDe(input.cursor),
       include: {
         _count: {
-          select: { instalaciones: { where: { archivadaEn: null, AND: [dondeInstalacion(ctx)] } } },
+          select: {
+            instalaciones: { where: { archivadaEn: null, AND: [dondeInstalacion(ctx)] } },
+            // Destinatarios de facturación para «Lista para facturar», sin una consulta por fila.
+            contactoVinculos: { where: { roles: { has: "facturacion" } } },
+          },
         },
         contactos: {
           where: { esPrincipal: true, archivadoEn: null },
@@ -82,6 +89,7 @@ export const cuentasList = defineCapability({
             nombre: a.etiqueta.nombre,
             tono: a.etiqueta.tono as (typeof TONOS_ETIQUETA)[number],
           })),
+          facturar: listaParaFacturar({ ...c, contactosFacturacion: c._count.contactoVinculos }),
         };
       }),
       siguiente: p.siguiente,
