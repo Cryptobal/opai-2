@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 674 pares pantalla→capacidad · 602 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 677 pares pantalla→capacidad · 605 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -566,6 +566,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/documentos` | `core.documento_tipos.create` | `core_documento_tipos_create` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.update` | `core_documento_tipos_update` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_buscar` | `core_empresa_acteco_buscar` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_get` | `core_empresa_acteco_get` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_set` | `core_empresa_acteco_set` | existe |
 | erp | `/configuracion/empresa` | `core.empresa.get` | `core_empresa_get` | existe |
 | erp | `/configuracion/empresa` | `core.empresa.update` | `core_empresa_update` | existe |
 | erp | `/configuracion/empresa` | `core.tenant.get` | `core_tenant_get` | existe |

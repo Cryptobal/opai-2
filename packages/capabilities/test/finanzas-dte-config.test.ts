@@ -7,7 +7,8 @@ function ctx(partial: Pick<Contexto, "actor" | "rol">): Contexto {
   return {
     actor: partial.actor,
     rol: partial.rol,
-    db: { dteConfig: { findUnique: async () => null } },
+    // CAR-243: el ACTECO se lee del perfil de la empresa.
+    db: { dteConfig: { findUnique: async () => null }, perfilEmpresa: { findUnique: async () => null } },
   } as unknown as Contexto;
 }
 

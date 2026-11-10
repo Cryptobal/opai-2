@@ -171,6 +171,9 @@ core_documentos_update
 core_documentos_url_descarga
 core_documentos_vencimientos
 core_documentos_vincular
+core_empresa_acteco_buscar
+core_empresa_acteco_get
+core_empresa_acteco_set
 core_empresa_get
 core_empresa_update
 core_estructuras_anular
@@ -587,6 +590,7 @@ preview_core_documentos_iniciar_subida
 preview_core_documentos_pedir_renovacion
 preview_core_documentos_update
 preview_core_documentos_vincular
+preview_core_empresa_acteco_set
 preview_core_empresa_update
 preview_core_estructuras_anular
 preview_core_estructuras_create
