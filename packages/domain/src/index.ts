@@ -4,6 +4,7 @@ export * from "./catalogos";
 export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";
 export * from "./comercial/datos-sii";
+export * from "./comercial/consulta-sii-cache";
 export * from "./precios-base";
 export * from "./dinero";
 export * from "./formato";
