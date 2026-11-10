@@ -109,8 +109,8 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
     const falta =
-      "A la empresa emisora le faltan datos tributarios: ACTECO (actividad económica) y ciudad. " +
-      "Completa el ACTECO en Finanzas › Configuración DTE y lo demás en Configuración › Empresa antes de emitir al SII.";
+      "Faltan datos tributarios de tu empresa: ACTECO y ciudad. " +
+      "Complétalos en Finanzas › Configuración DTE (ACTECO) y en Configuración › Empresa.";
     await s.dato("finanzas.dte_config.actualizar", { ambiente: "certificacion", acteco: null });
     await s.e.admin.perfilEmpresa.update({ where: { tenantId: s.tenantId }, data: { ciudad: " " } });
     try {

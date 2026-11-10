@@ -176,6 +176,12 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     expect((await firmarError()).cuerpo).toBe("suscripcion");
     generar(() => new Response("Rut receptor no valido", { status: 401, headers }));
     expect((await firmarError()).cuerpo).toBe("otro");
+    for (const contenido of ["Certificado vencido", "CAF vencido", "Firma expirada"]) {
+      generar(() => new Response(contenido, { status: 401, headers }));
+      expect(await firmarError()).toMatchObject({ cuerpo: "otro", motivo: "rechazó el contenido (certificado, CAF o datos), HTTP 401" });
+    }
+    generar(() => new Response("El usuario no tiene acceso a la API de DTE", { status: 401, headers }));
+    expect((await firmarError()).cuerpo).toBe("suscripcion");
   });
   it("una clave de certificado que el saneamiento Latin-1 alteraría se rechaza sin llamar a SimpleAPI", async () => {
     const fetch = vi.fn();

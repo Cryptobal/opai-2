@@ -34,18 +34,31 @@ const lista = (xs: readonly string[]) =>
 /** Nombres legibles de lo que falta: primero el ACTECO, luego los datos del perfil. */
 export function faltantesEmisorTributario(e: EmisorTributario): string[] {
   const perfil = DEL_PERFIL.filter(([campo]) => !texto(e[campo])).map(([, nombre]) => nombre);
-  return [...(actecoValido(e.acteco) ? [] : ["ACTECO (actividad económica)"]), ...perfil];
+  return [...(actecoValido(e.acteco) ? [] : ["ACTECO"]), ...perfil];
 }
 
-/** Mensaje para la persona; null si no falta nada. Dice en qué pantalla se completa cada dato. */
+const PANTALLA_DTE = "Finanzas › Configuración DTE";
+const PANTALLA_EMPRESA = "Configuración › Empresa";
+
+/**
+ * Mensaje para la persona; null si no falta nada. Dice en qué pantalla se completa cada dato. Corto a propósito: el
+ * lote de cierre le antepone su contexto y la emisión le agrega qué quedó como estaba, y el total cabe en los 300
+ * caracteres que la UI muestra tal cual.
+ */
 export function mensajeFaltantesEmisor(e: EmisorTributario): string | null {
   const f = faltantesEmisorTributario(e);
   if (f.length === 0) return null;
-  const donde: string[] = [];
-  if (!actecoValido(e.acteco)) donde.push("el ACTECO en Finanzas › Configuración DTE");
-  if (f.length > (actecoValido(e.acteco) ? 0 : 1)) donde.push("lo demás en Configuración › Empresa");
-  const falta = f.length === 1 ? "le falta un dato tributario" : "le faltan datos tributarios";
-  return `A la empresa emisora ${falta}: ${lista(f)}. Completa ${lista(donde)} antes de emitir al SII.`;
+  const sinActeco = !actecoValido(e.acteco);
+  const delPerfil = f.length - (sinActeco ? 1 : 0);
+  const donde =
+    sinActeco && delPerfil > 0
+      ? `${PANTALLA_DTE} (ACTECO) y en ${PANTALLA_EMPRESA}`
+      : sinActeco
+        ? PANTALLA_DTE
+        : PANTALLA_EMPRESA;
+  const [falta, completa] =
+    f.length === 1 ? ["Falta un dato tributario", "Complétalo"] : ["Faltan datos tributarios", "Complétalos"];
+  return `${falta} de tu empresa: ${lista(f)}. ${completa} en ${donde}.`;
 }
 
 /**

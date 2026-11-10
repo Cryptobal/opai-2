@@ -20,14 +20,13 @@ describe("datos tributarios del emisor", () => {
   });
   it("sin ACTECO ni ciudad (el caso de test.opai.cl del 10-nov): dice ambos y dónde se completa cada uno", () => {
     expect(mensajeFaltantesEmisor({ ...completo, acteco: null, ciudad: " " })).toBe(
-      "A la empresa emisora le faltan datos tributarios: ACTECO (actividad económica) y ciudad. " +
-        "Completa el ACTECO en Finanzas › Configuración DTE y lo demás en Configuración › Empresa antes de emitir al SII.",
+      "Faltan datos tributarios de tu empresa: ACTECO y ciudad. " +
+        "Complétalos en Finanzas › Configuración DTE (ACTECO) y en Configuración › Empresa.",
     );
   });
   it("solo el ACTECO: singular y solo la pantalla de Configuración DTE", () => {
     expect(mensajeFaltantesEmisor({ ...completo, acteco: null })).toBe(
-      "A la empresa emisora le falta un dato tributario: ACTECO (actividad económica). " +
-        "Completa el ACTECO en Finanzas › Configuración DTE antes de emitir al SII.",
+      "Falta un dato tributario de tu empresa: ACTECO. Complétalo en Finanzas › Configuración DTE.",
     );
   });
   it("solo datos del perfil: en orden razón social, giro, dirección, comuna, ciudad", () => {
@@ -38,7 +37,14 @@ describe("datos tributarios del emisor", () => {
       "comuna",
       "ciudad",
     ]);
-    expect(mensajeFaltantesEmisor({ ...completo, comuna: null })).toMatch(/: comuna\. Completa lo demás en Configuración › Empresa/);
+    expect(mensajeFaltantesEmisor({ ...completo, comuna: null })).toBe(
+      "Falta un dato tributario de tu empresa: comuna. Complétalo en Configuración › Empresa.",
+    );
+  });
+  it("el peor caso cabe en 300 caracteres aun con el prefijo del lote de cierre y la consecuencia de la emisión", () => {
+    const nada = { razonSocial: null, giro: null, acteco: null, calle: null, comuna: null, ciudad: null };
+    const lote = `No se emitió ningún documento del lote: ${mensajeFaltantesEmisor(nada)} El documento sigue sin emitir y el folio no se usó.`;
+    expect(lote.length).toBeLessThanOrEqual(300);
   });
   it("ACTECO válido: entero de 1 a 999.999", () => {
     expect(actecoValido(801001)).toBe(true);

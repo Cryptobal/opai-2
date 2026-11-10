@@ -35,7 +35,9 @@ export class ErrorProveedorSii extends Error {
  */
 export type FormaCuerpo = "vacio" | "suscripcion" | "otro";
 
-const SUSCRIPCION = /api ?key|suscrip|subscri|token|vencid|expirad|expired|bloquead|blocked|cupo|l[ií]mite mensual|unauthori[sz]ed acces|no tiene acceso/i;
+// Solo frases sobre la key o el plan: «Certificado vencido» o «CAF vencido» son del contenido y quedan como «otro».
+const SUSCRIPCION =
+  /suscrip|subscri|api ?key (vencida|expirada|bloqueada|inv[aá]lida|no v[aá]lida)|token (vencido|expirado)|expired token|cupo|l[ií]mite mensual|no tiene acceso a la api/i;
 
 export function formaDeCuerpo(cuerpo: string): FormaCuerpo {
   const t = cuerpo.slice(0, 8 * 1024).trim();
