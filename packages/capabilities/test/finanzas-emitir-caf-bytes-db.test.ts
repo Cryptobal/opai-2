@@ -77,6 +77,10 @@ describe.skipIf(!urlPropietario)("CAF en bytes ISO-8859-1 hasta SimpleAPI (CAR-2
     const r = await s.mod.executeCapability(s.ctx(), "finanzas.folios.cargar_caf", { cafXml: danado });
     expect(r.ok ? null : r.error.code).toBe("UNPROCESSABLE");
     expect(r.ok ? "" : r.error.message).toMatch(/^El archivo CAF trae caracteres que no son ISO-8859-1/);
+    // Un archivo que un editor guardó como UTF-8 trae los bytes de U+FFFD, cada uno ≤ 0xFF: también se rechaza.
+    const reGuardado = Buffer.from(danado, "utf8").toString("latin1");
+    const r2 = await s.mod.executeCapability(s.ctx(), "finanzas.folios.cargar_caf", { cafXml: reGuardado });
+    expect(r2.ok ? "" : r2.error.message).toMatch(/^El archivo CAF trae caracteres que no son ISO-8859-1/);
     expect(await s.e.admin.dteFolio.count({ where: { tenantId: s.tenantId, folioDesde: 7000 } })).toBe(0);
   });
 

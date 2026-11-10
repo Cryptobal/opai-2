@@ -150,8 +150,11 @@ describe("firmar (POST dte/generar)", () => {
     expect(entrada.Documento.Encabezado.Emisor.Rut).toBe("76269769-6");
     expect(entrada.Documento.Encabezado.Receptor).toMatchObject({ Rut: "60803000-K", CorreoRecep: "dte@cliente.cl" });
     expect(entrada.Certificado.Rut).toBe("17096073-4");
+    // Sin borde izquierdo, un cuerpo de 9 dígitos no se recorta a sus últimos 8.
+    await adaptadorSimpleApi({ ...creds, certificadoRut: "123456789-0" }).firmar(payload);
+    expect(JSON.parse(String(llamadas[1]?.input)).Certificado.Rut).toBe("123456789-0");
     await adaptadorSimpleApi(creds).firmar({ ...payload, emailReceptor: "a@b.cl, c@d.cl" });
-    expect(JSON.parse(String(llamadas[1]?.input)).Documento.Encabezado.Receptor).not.toHaveProperty("CorreoRecep");
+    expect(JSON.parse(String(llamadas[2]?.input)).Documento.Encabezado.Receptor).not.toHaveProperty("CorreoRecep");
   });
 
   it("ADR-075: el XML con ñ y tildes vuelve con los mismos bytes ISO-8859-1 y el mismo SHA-256", async () => {

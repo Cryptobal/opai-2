@@ -2,7 +2,7 @@
 // bytes ISO-8859-1 (nunca como UTF-8) y comprueba que esté íntegro, que sea del RUT emisor y que cubra el tipo y el
 // folio, como el `checkCaf` de OPAI 1.0. Nunca devuelve ni registra el XML; solo dice qué falló.
 import { leerCafXml, normalizarRut } from "@opai/domain";
-import { bytesCafParaGuardar, cafXmlDesdeGuardado, descifrar } from "@opai/integrations";
+import { bytesCafParaGuardar, cafXmlDesdeGuardado, descifrar, diagnosticarCafGuardado } from "@opai/integrations";
 
 import { reglaDeNegocio } from "../errores";
 import { dekDe } from "../integraciones/secretos";
@@ -58,7 +58,8 @@ export async function cafGuardadoParaEmitir(
  */
 export function bytesCafOError(cafXml: string): Buffer {
   const b = bytesCafParaGuardar(cafXml);
-  if (!b) {
+  // También los bytes de U+FFFD (EF BF BD): un editor que abrió el CAF como UTF-8 y lo guardó ya perdió las tildes.
+  if (!b || diagnosticarCafGuardado(b).tieneReemplazo) {
     throw reglaDeNegocio(
       "El archivo CAF trae caracteres que no son ISO-8859-1 (tildes o eñes dañadas); cargue el archivo original que entregó el SII.",
     );

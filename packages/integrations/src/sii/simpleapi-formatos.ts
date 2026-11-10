@@ -11,7 +11,7 @@ export function rutSii(rut: string): string {
  * certificado, aunque venga con puntos o con un prefijo; si no aparece, el valor normalizado.
  */
 export function rutTitularSii(rut: string): string {
-  const m = /(\d{1,8}-[\dkK])\b/.exec(rut.replace(/[.\s]/g, ""));
+  const m = /(?<!\d)(\d{1,8}-[\dkK])\b/.exec(rut.replace(/[.\s]/g, ""));
   return m?.[1] ? m[1].toUpperCase() : rutSii(rut);
 }
 
