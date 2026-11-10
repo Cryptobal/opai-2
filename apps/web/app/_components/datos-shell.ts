@@ -63,6 +63,7 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
           "Settings2",
           "UserRound",
           "Sun",
+          "Sparkles",
           "LogOut",
         ]),
       ].map((nombre) => [nombre, createElement(icono(nombre))]),

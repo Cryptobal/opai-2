@@ -1,3 +1,4 @@
+export * from "./novedades/catalogo";
 export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./comercial/formulario-web";

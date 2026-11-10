@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 668 pares pantalla→capacidad · 596 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 671 pares pantalla→capacidad · 599 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -99,6 +99,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
+| compartido | `app/_components` | `core.novedades.descartar_destacada` | `core_novedades_descartar_destacada` | existe |
+| compartido | `app/_components` | `core.novedades.list` | `core_novedades_list` | existe |
+| compartido | `app/_components` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.listar` | `rendiciones_bandeja_listar` | existe |
@@ -960,6 +963,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
+- `core.novedades.marcar_leidas`
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`
@@ -981,6 +985,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.portal_cotizaciones.descargar`
 - `cpq.portal_cotizaciones.get`
 - `cpq.portal_cotizaciones.list`
+- `cpq.propuestas_tecnica.capitulo_guardar`
+- `cpq.propuestas_tecnica.capitulos_list`
+- `cpq.propuestas_tecnica.prompt_exportable`
 - `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`

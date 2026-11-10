@@ -3,11 +3,12 @@ import { Upload } from "lucide-react";
 import { ListScreen } from "@opai/ds";
 import type { Vocabulario } from "@opai/domain";
 
+import { MenuDocumento } from "@/app/_components/documentos/menu-documento-diferido";
+import type { TipoDocumento } from "@/app/_components/documentos/tipos";
+import { LinkNext } from "@/app/_components/link-next";
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { LinkNext } from "@/app/_components/link-next";
-import type { TipoDocumento } from "@/app/_components/documentos/tipos";
 import type { Parametros } from "@/lib/parametros";
 
 import { Paginacion } from "../../personas/_componentes/paginacion";
@@ -77,6 +78,7 @@ export function ListaDocumentos(x: Props) {
       }
       tarjeta={(d) => <TarjetaDocumento d={d} etiquetas={etiquetas} />}
       columnas={columnasDe(etiquetas)}
+      acciones={(d) => <MenuDocumento documento={d} />}
       textos={{
         vacio: filtrando
           ? {

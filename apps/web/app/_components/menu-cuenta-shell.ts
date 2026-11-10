@@ -11,10 +11,12 @@ export function menuCuentaShell(
   conCuenta = enErp,
   iconos?: Record<string, ReactNode>,
   portalInicio?: () => void,
+  novedades?: { href: string; noLeidas: number },
 ): ItemMenu[] {
   const Settings2 = iconoShell("Settings2", iconos);
   const UserRound = iconoShell("UserRound", iconos);
   const Sun = iconoShell("Sun", iconos);
+  const Sparkles = iconoShell("Sparkles", iconos);
   return [
     ...(conCuenta
       ? [
@@ -34,6 +36,20 @@ export function menuCuentaShell(
             descripcion: "Claro, oscuro o sistema",
             icono: Sun,
             onSelect: () => navegar("/mi-cuenta/preferencias"),
+          },
+        ]
+      : []),
+    ...(novedades
+      ? [
+          {
+            id: "novedades",
+            etiqueta: "Novedades",
+            punto: novedades.noLeidas > 0,
+            ...(novedades.noLeidas > 0
+              ? { descripcion: `${novedades.noLeidas} sin leer` }
+              : {}),
+            icono: Sparkles,
+            onSelect: () => navegar(novedades.href),
           },
         ]
       : []),

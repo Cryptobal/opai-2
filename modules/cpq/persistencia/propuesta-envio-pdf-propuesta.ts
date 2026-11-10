@@ -13,6 +13,7 @@ import { renderPdfPropuestaTecnica } from "./pdf-propuesta-tecnica";
 import { marcaDocumentoEnVersion, vistaMarcaDocumento } from "./marca-documento";
 import { vistaPlantillaPropuesta } from "./plantilla-propuesta";
 import type { ServicioDesdeCotizacion } from "../domain/documento/propuesta-tecnica";
+import { capitulosDeEnvio } from "./propuesta-capitulos";
 import { tasaIvaVentaTenant } from "./tasa-iva-tenant";
 
 export async function pdfPropuestaDesdeSnapshot(
@@ -24,6 +25,7 @@ export async function pdfPropuestaDesdeSnapshot(
     titulo: string;
     servicio: ServicioDesdeCotizacion;
     netoTotalClp: number;
+    propuestaTecnicaId?: string | null;
   },
 ) {
   const marca =
@@ -68,5 +70,6 @@ export async function pdfPropuestaDesdeSnapshot(
       snapshot.camposContrato,
     ),
     logo: await cargarLogoMarca(ctx),
+    capitulos: await capitulosDeEnvio(ctx, input.propuestaTecnicaId ?? null),
   });
 }

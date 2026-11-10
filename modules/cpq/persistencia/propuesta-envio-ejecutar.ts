@@ -102,6 +102,7 @@ export async function ejecutarEnvioPropuestaAprobado(
         titulo: c.titulo,
         servicio,
         netoTotalClp: calculoPublico.ventaMensual ?? 0,
+        propuestaTecnicaId: row.propuestaTecnicaId,
       });
       const sub = await subirPdfPropuestaAlmacenamiento(ctx, { codigo: `${c.codigo}-propuesta`, pdf: pdfPropBytes });
       propStorageKey = sub.storageKey;

@@ -10,11 +10,22 @@ export function Contador({ n }: { n?: number | undefined }) {
  * Punto de no leído, sin número (D5, D6 del Brief 05): en Inicio de la barra inferior y en la
  * campana. El número solo aparece dentro de la Bandeja.
  */
-export function Punto({ visible }: { visible?: boolean | undefined }) {
+export function Punto({
+  visible,
+  peligro,
+}: {
+  visible?: boolean | undefined;
+  /** Rojo de alerta (p. ej. novedades sin leer); por defecto acento. */
+  peligro?: boolean | undefined;
+}) {
   return visible ? (
     <span
       aria-hidden
-      className="absolute top-0 right-0 size-2 flex-none rounded-full bg-accent shadow-[0_0_0_2px_var(--ds-surface)]"
+      className={
+        peligro
+          ? "absolute top-0 right-0 size-2 flex-none rounded-full bg-danger-fg shadow-[0_0_0_2px_var(--ds-surface)] dark:bg-danger"
+          : "absolute top-0 right-0 size-2 flex-none rounded-full bg-accent shadow-[0_0_0_2px_var(--ds-surface)]"
+      }
     />
   ) : null;
 }

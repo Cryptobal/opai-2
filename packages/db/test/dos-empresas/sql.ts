@@ -15,10 +15,13 @@ export async function comoTenant(
   tenant: string,
   sql: string,
   params: unknown[] = [],
+  /** Fija `app.user_id` (tablas con política restrictiva por usuario, p. ej. `core.novedades_lectura`). */
+  usuarioId?: string,
 ): Promise<Resultado> {
   await pg.query("BEGIN");
   try {
     await pg.query("SELECT set_config('app.tenant_id', $1, true)", [tenant]);
+    if (usuarioId) await pg.query("SELECT set_config('app.user_id', $1, true)", [usuarioId]);
     const r = await pg.query(sql, params);
     return { filas: r.rowCount ?? 0 };
   } catch (error) {

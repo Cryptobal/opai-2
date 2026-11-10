@@ -11,7 +11,7 @@ describe("excepciones declarativas de lectura (#76, ADR-045)", () => {
         .filter((c) => c.auditarLectura === false)
         .map((c) => c.id)
         .sort(),
-    ).toEqual(["core.inicio.pendientes", "core.notificaciones.list"]);
+    ).toEqual(["core.inicio.pendientes", "core.notificaciones.list", "core.novedades.list"]);
   });
 
   it("no permite desactivarla en ninguna capacidad personal/documental del inventario", () => {

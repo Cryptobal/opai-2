@@ -40,7 +40,8 @@ export const VERBOS: Record<string, string> = {
   incidente_avanzar: "Avanzar incidente", incidente_notificar: "Notificar incidente",
   incidentes_listar: "Listar incidentes", retencion_politica: "Política de retención",
   titular_anonimizar: "Anonimizar titular", eventos: "Eventos", preview: "Vista previa",
-  enviar_prueba: "Enviar prueba", marcar_leida: "Marcar como leída", marcar_todas: "Marcar todas",
+  enviar_prueba: "Enviar prueba", marcar_leida: "Marcar como leída", marcar_leidas: "Marcar como leídas", marcar_todas: "Marcar todas",
+  descartar_destacada: "Descartar destacada",
   set_autonomia: "Definir autonomía", set_role: "Cambiar rol", borrar: "Borrar", preparar: "Preparar",
   embudo: "Embudo", mover: "Mover", ganar: "Marcar como ganado", perder: "Marcar como perdido",
   reabrir: "Reabrir", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
@@ -68,6 +69,8 @@ export const VERBOS: Record<string, string> = {
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
   preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
+  capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
+  prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
   resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar",
   // Cobro por módulo (CAR-188).

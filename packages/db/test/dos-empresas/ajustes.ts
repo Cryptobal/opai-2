@@ -221,6 +221,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
+  "core.novedades_lectura": {
+    dependencias: ["core.memberships"],
+    valores: (ctx) => ({ usuario_id: ctx.usuario, novedad_id: "dos-empresas-rls" }),
+  },
   // Nómina (Brief 25): los CHECK de unidad por tipo y de tipo/estado rechazan el texto genérico.
   "nomina.novedades": { valores: () => ({ tipo: "ausencia", cantidad: 1, monto_clp: null }) },
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
@@ -232,6 +236,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
   "finanzas.flujo_ajustes": { valores: () => ({ desde: "2026-01-05" }) },
   "finanzas.flujo_avisos_emitidos": { valores: () => ({ semana: "2026-01-05", saldo_proyectado: 0 }) },
+  // CAR-138 PR 6 · capítulo por instalación: CHECK de sección y origen.
+  "cpq.propuesta_capitulos": { fijas: ["seccion_clave", "origen"], valores: () => ({ seccion_clave: "alcance", origen: "manual", contenido: "x" }) },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
