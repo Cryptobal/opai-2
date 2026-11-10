@@ -152,6 +152,7 @@ export function EmitirNdCargo({ cuentaId }: { cuentaId: string | null }) {
         setDialogo={setDialogo}
         previewBorrador={null}
         previewEmitir={emision.previewEmitir}
+        documentoId={documentoId}
         guardarBorrador={() => undefined}
         emitir={() => void emision.emitir()}
       />

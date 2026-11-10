@@ -237,5 +237,17 @@ describe.skipIf(!urlPropietario)(
         (await s.e.admin.documentoEmitido.findUniqueOrThrow({ where: { id: b.id } })).estadoDte,
       ).toBe("borrador");
     });
+
+    it("la vista previa PDF de «Revisar emisión» también sale para el borrador de una nota de débito (CAR-249)", async () => {
+      const f = await factura(33);
+      const b = await s.dato<Vista>("finanzas.ventas.crear_borrador_nota_debito", {
+        facturaId: f.id,
+        motivo,
+        lineas: [{ glosa: "Cargo", monto: 1_000 }],
+      });
+      const pdf = await s.dato<{ mime: string; base64: string }>("finanzas.ventas.preview_pdf", { documentoId: b.id });
+      expect(pdf.mime).toBe("application/pdf");
+      expect(Buffer.from(pdf.base64, "base64").subarray(0, 5).toString()).toBe("%PDF-");
+    });
   },
 );
