@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 672 pares pantalla→capacidad · 600 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 680 pares pantalla→capacidad · 608 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -590,6 +590,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.confirmar_mutual` | — | excepción |
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.historial` | `core_remuneraciones_historial` | existe |
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.listar` | `core_remuneraciones_listar` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.agregar_miembros` | `core_grupos_agregar_miembros` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.archive` | `core_grupos_archive` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.create` | `core_grupos_create` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.get` | `core_grupos_get` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.list` | `core_grupos_list` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.quitar_miembro` | `core_grupos_quitar_miembro` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.update` | `core_grupos_update` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios/roles` | `core.roles.archive` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.create` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.update` | — | excepción |
@@ -964,13 +972,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.firmas.verificar`
 - `core.funciones.get`
 - `core.geo.geocodificar`
-- `core.grupos.agregar_miembros`
-- `core.grupos.archive`
-- `core.grupos.create`
-- `core.grupos.get`
-- `core.grupos.list`
-- `core.grupos.quitar_miembro`
-- `core.grupos.update`
 - `core.hechos_terreno.listar`
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
