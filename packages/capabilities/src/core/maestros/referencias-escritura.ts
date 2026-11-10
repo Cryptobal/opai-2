@@ -12,6 +12,7 @@ import { uuidSchema } from "../esquemas";
 import { aFecha, diaSchema, escribirConEvento, textoOpcional } from "./comun";
 import { cuentaDe } from "./cuentas-acceso";
 import {
+  bloquearCuenta,
   cuentaDeReferencia,
   EVIDENCIAS_REFERENCIA,
   hoyReferencias,
@@ -41,8 +42,9 @@ export const cuentasReferenciasOtorgar = defineCapability({
   descripcion:
     "Registra que un cliente dio su consentimiento explícito para ser referencia comercial en propuestas y documentos: fecha, evidencia, quién lo dio, hasta cuándo y qué se puede mostrar (su nombre o anonimizado, una descripción y una cita). Sin este registro el cliente nunca aparece como referencia.",
   permiso: PERMISOS_CORE.cuentasReferenciasAutorizar,
-  // Un agente no da por otorgado un consentimiento por su cuenta: siempre pasa por aprobación humana.
-  exigeAprobacion: () => true,
+  // Registrar un consentimiento es un acto de una persona: ninguna API key lo hace, ni con autonomía
+  // «directo» (que se salta la aprobación). Los agentes pueden listar y revocar (ADR-087).
+  soloPersonas: true,
   portales: ["erp"],
   input: z.object({
     cuentaId: uuidSchema,
@@ -114,7 +116,10 @@ export const cuentasReferenciasOtorgar = defineCapability({
           vigenteHasta: input.vigenteHasta ?? null,
         }),
       },
-      (tx) => tx.cuentaReferencia.create({ data, include: { cuenta: cuentaDeReferencia } }),
+      async (tx) => {
+        await bloquearCuenta(tx, ctx.tenantId, c.id);
+        return tx.cuentaReferencia.create({ data, include: { cuenta: cuentaDeReferencia } });
+      },
     );
     return vistaReferencia(r, hoy);
   },

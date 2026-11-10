@@ -54,7 +54,7 @@ export const cuentasReferenciasList = defineCapability({
         ? (
             await ctx.db.cuentaReferencia.findMany({
               where: { cuentaId: input.cuentaId },
-              orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+              orderBy: { seq: "desc" },
               take: 100,
               include: { cuenta: cuentaDeReferencia },
             })

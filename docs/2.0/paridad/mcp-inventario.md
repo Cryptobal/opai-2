@@ -774,6 +774,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.credenciales_terreno.asignar_pin` | Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02). |
 | `core.credenciales_terreno.cambiar_pin` | Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02). |
 | `core.credenciales_terreno.restablecer` | Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02). |
+| `core.cuentas_referencias.otorgar` | Solo personas: registrar el consentimiento de un cliente para ser referencia es un acto de una persona; ninguna key lo hace, ni con autonomía «directo» (CAR-138 PR 7, ADR-087). |
 | `core.cumplimiento.consentimiento_registrar` | Solo personas: registrar el consentimiento de un titular es un acto responsable del tenant (Ley 21.719, §16.2). |
 | `core.cumplimiento.consentimiento_revocar` | Solo personas: dejar constancia de la revocación de un consentimiento es un acto responsable (Ley 21.719). |
 | `core.cumplimiento.dpa_aceptar` | Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034). |
@@ -865,6 +866,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `core.cuentas_referencias.otorgar` | — | no | reservada a personas |
 | `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.consentimiento_revocar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.dpa_aceptar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
@@ -946,7 +948,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.campos.valores`
 - `core.consumos.por_recurso`
 - `core.cuentas_referencias.list`
-- `core.cuentas_referencias.otorgar`
 - `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
 - `core.documento_plantillas.create`

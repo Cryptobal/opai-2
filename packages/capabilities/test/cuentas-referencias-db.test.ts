@@ -288,6 +288,38 @@ describe.skipIf(!urlPropietario)("Referencias de clientes con opt-in · base rea
     );
   });
 
+  it("manda el orden real de escritura: una revocación posterior gana aunque su transacción empezara antes", async () => {
+    const base = { tenantId: ids.tA, cuentaId: ids.dos, registradoPorId: ids.user };
+    await e.admin.cuentaReferencia.create({
+      data: {
+        ...base,
+        estado: "otorgado",
+        otorgadoEn: new Date("2026-11-01"),
+        evidencia: "correo",
+        evidenciaDetalle: "ficticio",
+      },
+    });
+    expect((await referencias()).origen.referenciaCuentaIds).toContain(ids.dos);
+    await e.admin.cuentaReferencia.create({
+      data: {
+        ...base,
+        estado: "revocado",
+        motivo: "carrera simulada",
+        createdAt: new Date("2020-01-01"),
+      },
+    });
+    expect((await referencias()).origen.referenciaCuentaIds).not.toContain(ids.dos);
+  });
+
+  it("un agente no puede registrar un consentimiento", async () => {
+    const agente = ctx(ids.tA, "owner", {
+      actor: { tipo: "agent", id: "agente-ref", viaUserId: ids.user },
+    });
+    expect((await run(agente, "core.cuentas_referencias.otorgar", otorgar(ids.uno), true)).ok).toBe(
+      false,
+    );
+  });
+
   it("aislamiento: otra empresa no ve ni usa estas referencias, y el registro no se edita ni se borra", async () => {
     // Control positivo: en su empresa, la cuenta ajena sí sale; y ninguna de A se cuela.
     expect((await referencias(ids.tB, ids.destinoB)).origen.referenciaCuentaIds).toEqual([

@@ -91,12 +91,14 @@ model CuentaReferencia {
   /// Motivo de la revocación (obligatorio al revocar).
   motivo           String?
   registradoPorId  String    @map("registrado_por_id") @db.Uuid
+  /// Orden real de escritura (identity): la última fila de la cuenta es la de mayor `seq`.
+  seq              BigInt    @default(autoincrement())
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   cuenta Cuenta @relation(fields: [cuentaId], references: [id])
 
-  @@index([tenantId, cuentaId, createdAt])
+  @@index([tenantId, cuentaId, seq])
   @@map("cuentas_referencias")
   @@schema("core")
 }

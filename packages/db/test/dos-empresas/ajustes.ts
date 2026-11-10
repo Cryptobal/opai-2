@@ -330,6 +330,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   // Referencias de clientes (CAR-138 PR 7): CHECK de estado, evidencia, vigencia y largos.
   "core.cuentas_referencias": {
     dependencias: ["core.cuentas", "core.contactos"],
+    // `seq` es identity GENERATED ALWAYS: la base la asigna y rechaza un valor explícito.
+    omitir: ["seq"],
     valores: (ctx) => ({
       cuenta_id: id(ctx, "core.cuentas"), contacto_id: id(ctx, "core.contactos"), estado: "otorgado",
       otorgado_en: "2026-11-01", vigente_hasta: null, evidencia: "correo", evidencia_detalle: "ficticio",

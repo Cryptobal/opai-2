@@ -21,6 +21,8 @@ CREATE TABLE "core"."cuentas_referencias" (
     "evidencia_detalle" TEXT,
     "motivo" TEXT,
     "registrado_por_id" UUID NOT NULL,
+    -- Orden de escritura real (no el inicio de la transacción): la última fila de la cuenta es la de mayor seq.
+    "seq" BIGINT GENERATED ALWAYS AS IDENTITY,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "cuentas_referencias_pkey" PRIMARY KEY ("id"),
@@ -40,8 +42,8 @@ CREATE TABLE "core"."cuentas_referencias" (
       ("descripcion" IS NULL OR char_length("descripcion") <= 400)
       AND ("cita" IS NULL OR char_length("cita") <= 400))
 );
-CREATE INDEX "cuentas_referencias_tenant_id_cuenta_id_created_at_idx"
-  ON "core"."cuentas_referencias"("tenant_id", "cuenta_id", "created_at");
+CREATE INDEX "cuentas_referencias_tenant_id_cuenta_id_seq_idx"
+  ON "core"."cuentas_referencias"("tenant_id", "cuenta_id", "seq");
 
 ALTER TABLE "core"."cuentas_referencias" ADD CONSTRAINT "cuentas_referencias_tenant_id_fkey"
   FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

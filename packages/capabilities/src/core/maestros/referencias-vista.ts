@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 import { diaEnZona, nombreReferencia, referenciaVigente } from "@opai/domain";
-import type { Prisma } from "@opai/db";
+import type { Prisma, TenantTx } from "@opai/db";
 
 import type { Contexto } from "../../types";
 import { dia } from "./comun";
@@ -120,7 +120,8 @@ export function vistaReferencia(
 
 /**
  * Última fila de cada cuenta que cumple `dondeCuenta`. Se elige la última ANTES de mirar el estado: una
- * revocación posterior manda sobre un otorgamiento anterior.
+ * revocación posterior manda sobre un otorgamiento anterior. «Última» es la de mayor `seq` (orden real
+ * de inserción), no `created_at`, que en Postgres es el inicio de la transacción.
  */
 export async function ultimasReferencias(
   ctx: Pick<Contexto, "db">,
@@ -128,9 +129,19 @@ export async function ultimasReferencias(
 ): Promise<FilaReferenciaDb[]> {
   const filas = await ctx.db.cuentaReferencia.findMany({
     where: { cuenta: dondeCuenta },
-    orderBy: [{ cuentaId: "asc" }, { createdAt: "desc" }, { id: "desc" }],
+    orderBy: [{ cuentaId: "asc" }, { seq: "desc" }],
     include: { cuenta: cuentaDeReferencia },
   });
   const vistas = new Set<string>();
   return filas.filter((f) => (vistas.has(f.cuentaId) ? false : (vistas.add(f.cuentaId), true)));
+}
+
+/** Bloquea la cuenta durante la transacción: otorgar y revocar de una misma cuenta se serializan. */
+export async function bloquearCuenta(tx: TenantTx, tenantId: string, cuentaId: string) {
+  await tx.$queryRaw`SELECT id FROM core.cuentas WHERE id = ${cuentaId}::uuid AND tenant_id = ${tenantId}::uuid FOR UPDATE`;
+}
+
+/** Última fila de la cuenta dentro de la transacción (tras `bloquearCuenta`). */
+export function ultimaEnTx(tx: TenantTx, cuentaId: string) {
+  return tx.cuentaReferencia.findFirst({ where: { cuentaId }, orderBy: { seq: "desc" } });
 }

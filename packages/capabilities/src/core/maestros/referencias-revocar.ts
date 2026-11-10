@@ -11,12 +11,17 @@ import { escribirConEvento } from "./comun";
 import { cuentaDe } from "./cuentas-acceso";
 import { responsable } from "./referencias-escritura";
 import {
+  bloquearCuenta,
   cuentaDeReferencia,
   hoyReferencias,
   referenciaSchema,
+  ultimaEnTx,
   ultimasReferencias,
   vistaReferencia,
 } from "./referencias-vista";
+
+const sinConsentimiento = () =>
+  reglaDeNegocio("La cuenta no tiene un consentimiento de referencia que revocar.");
 
 export const cuentasReferenciasRevocar = defineCapability({
   id: "core.cuentas_referencias.revocar",
@@ -32,9 +37,7 @@ export const cuentasReferenciasRevocar = defineCapability({
     const registradoPorId = responsable(ctx);
     const c = await cuentaDe(ctx, input.cuentaId);
     const [ultima] = await ultimasReferencias(ctx, { id: c.id });
-    if (ultima?.estado !== "otorgado") {
-      throw reglaDeNegocio("La cuenta no tiene un consentimiento de referencia que revocar.");
-    }
+    if (ultima?.estado !== "otorgado") throw sinConsentimiento();
     const hoy = hoyReferencias();
     const data = {
       tenantId: ctx.tenantId,
@@ -59,7 +62,13 @@ export const cuentasReferenciasRevocar = defineCapability({
         entidadTipo: "cuenta_referencia",
         payload: () => ({ cuentaId: c.id }),
       },
-      (tx) => tx.cuentaReferencia.create({ data, include: { cuenta: cuentaDeReferencia } }),
+      async (tx) => {
+        // Se vuelve a mirar la última fila con la cuenta bloqueada: si entre tanto otra escritura la
+        // cambió, la revocación decide sobre el estado real.
+        await bloquearCuenta(tx, ctx.tenantId, c.id);
+        if ((await ultimaEnTx(tx, c.id))?.estado !== "otorgado") throw sinConsentimiento();
+        return tx.cuentaReferencia.create({ data, include: { cuenta: cuentaDeReferencia } });
+      },
     );
     return vistaReferencia(r, hoy);
   },
