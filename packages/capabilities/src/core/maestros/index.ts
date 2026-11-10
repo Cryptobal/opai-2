@@ -16,6 +16,7 @@ import { cuentasCreate, cuentasUpdate } from "./cuentas-escritura";
 import { cuentasArchive, cuentasSetEstado, cuentasSetRepresentantes } from "./cuentas-estado";
 import { capacidadesReferencias } from "./referencias";
 import { cuentasAplicarSii, cuentasConsultarSii, cuentasFacturable } from "./cuentas-sii";
+import { trabajoConsultarContribuyenteSii } from "./cuentas-sii-trabajo";
 import { estructurasGet, estructurasList } from "./estructuras";
 import { estructurasEfectiva } from "./estructuras-efectiva";
 import { estructurasAnular, estructurasCreate } from "./estructuras-escritura";
@@ -148,4 +149,4 @@ export const capacidadesMaestros: readonly Capacidad[] = [
 ];
 
 /** Trabajos diarios de los maestros, registrados por el borde (`apps/web/lib/registro.ts`). */
-export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer];
+export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer, trabajoConsultarContribuyenteSii];

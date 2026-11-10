@@ -24,8 +24,11 @@ export async function fuenteContribuyente(ctx: Contexto): Promise<ConsultaContri
   return cred ? contribuyenteSimpleApi(cred.valor) : contribuyenteNoConfigurado();
 }
 
-/** Consulta y mide la llamada (ADR-031) solo cuando de verdad salió al proveedor. */
-export async function consultarContribuyente(
+/**
+ * Sale al proveedor y mide la llamada (ADR-031) solo cuando de verdad salió. Nadie la llama directo:
+ * pasa por `consultarContribuyente` (caché, CAR-156) o por el trabajo encolado.
+ */
+export async function consultarProveedor(
   ctx: Contexto,
   rut: string,
 ): Promise<ResultadoContribuyente> {
