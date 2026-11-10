@@ -11,6 +11,18 @@ const ACCION: Record<PasoProveedorSii, string> = {
   consultar: "consultar el estado en el SII",
 };
 
+/** Tope de largo de un mensaje de negocio que la UI muestra tal cual (`esMensajeDeNegocio` en apps/web). */
+export const MAX_MENSAJE_NEGOCIO = 300;
+
+/** El detalle se recorta para que el mensaje completo quepa: la consecuencia (p. ej. «envío incierto») nunca se pierde. */
+function detalleQueCabe(detalle: string | null | undefined, largoSinDetalle: number): string {
+  if (!detalle) return "";
+  const disponible = MAX_MENSAJE_NEGOCIO - largoSinDetalle - 3; // « (» y «)»
+  if (disponible < 12) return "";
+  const corto = detalle.length <= disponible ? detalle : `${detalle.slice(0, disponible - 1).trimEnd()}…`;
+  return ` (${corto})`;
+}
+
 /**
  * `consecuencia` explica qué quedó como estaba (p. ej. que el folio no se usó); puede depender del error (un envío
  * incierto no invita a reenviar). El detalle del proveedor es texto externo: va en el mensaje para la persona y,
@@ -28,9 +40,9 @@ export function comoReglaSiProveedorSii(
     status: error.status ?? null,
     motivo: error.motivoSeguro,
   });
-  const detalle = error.detalle ? ` (${error.detalle})` : "";
   const despues = typeof consecuencia === "function" ? consecuencia(error) : consecuencia;
-  return reglaDeNegocio(`SimpleAPI no pudo ${ACCION[error.paso]}: ${error.motivo}${detalle}. ${despues}`, {
+  const base = (detalle: string) => `SimpleAPI no pudo ${ACCION[error.paso]}: ${error.motivo}${detalle}. ${despues}`;
+  return reglaDeNegocio(base(detalleQueCabe(error.detalle, base("").length)), {
     proveedor: "simpleapi",
     paso: error.paso,
     ...(error.status != null ? { status: error.status } : {}),

@@ -53,6 +53,11 @@ describe("errores tipados de SimpleAPI (CAR-242)", () => {
     for (const s of [CLAVE_API, CLAVE_PFX, "\u202e", "\u0000"]) expect(e.detalle ?? "").not.toContain(s);
     expect(e.detalle).toBe("Autorizacion invalida clave fin");
   });
+  it("redacta todo secreto no vacío, aunque sea corto o venga con caracteres invisibles intercalados", () => {
+    expect(detalleSeguroDeRespuesta(JSON.stringify({ mensaje: "Clave incorrecta 123" }), ["123"])).toBe("Clave incorrecta");
+    expect(detalleSeguroDeRespuesta(JSON.stringify({ mensaje: "Clave incorrecta x" }), ["x"])).toBe("Clave incorrecta");
+    expect(detalleSeguroDeRespuesta("Clave incorrecta 1\u200b23 rechazada", ["123"])).toBe("Clave incorrecta rechazada");
+  });
   it("un 5xx o una respuesta ilegible del envío quedan como inciertos (pudo haber llegado al SII)", async () => {
     vi.stubGlobal(
       "fetch",

@@ -30,6 +30,16 @@ describe("comoReglaSiProveedorSii", () => {
     const r = comoReglaSiProveedorSii(e, (x) => (x.incierto ? "Consulte el estado antes de reenviar." : "Reintente.")) as Error;
     expect(r.message).toMatch(/Consulte el estado antes de reenviar\.$/);
   });
+  it("con un detalle largo el mensaje cabe en el tope de la UI y conserva la advertencia de envío incierto", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { MAX_MENSAJE_NEGOCIO } = await import("../src/finanzas/errores-sii");
+    const e = new ErrorProveedorSii("enviar", "respondió HTTP 502", 502, "Servicio temporalmente no disponible ".repeat(4).trim().slice(0, 140), true);
+    const aviso = "El resultado es incierto: el SII pudo haberlo recibido. Consulte el estado del envío antes de reenviar.";
+    const r = comoReglaSiProveedorSii(e, () => aviso) as Error;
+    expect(r.message.length).toBeLessThanOrEqual(MAX_MENSAJE_NEGOCIO);
+    expect(r.message.endsWith(aviso)).toBe(true);
+    expect(r.message).toContain("respondió HTTP 502 (Servicio");
+  });
   it("cualquier otro error se relanza tal cual (sigue siendo INTERNAL)", () => {
     const otro = new Error("fallo de base");
     expect(comoReglaSiProveedorSii(otro, "x")).toBe(otro);

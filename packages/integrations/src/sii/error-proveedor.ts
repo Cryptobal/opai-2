@@ -53,11 +53,15 @@ function textoDeCuerpo(cuerpo: string): string | null {
  * un secreto propio (`secretos`: API key, clave del certificado); corta a 140 caracteres.
  */
 export function detalleSeguroDeRespuesta(cuerpo: string, secretos: readonly string[] = []): string | null {
-  const texto = textoDeCuerpo(cuerpo);
-  if (!texto) return null;
+  const crudo = textoDeCuerpo(cuerpo);
+  if (!crudo) return null;
+  // Todo secreto no vacío se quita antes de normalizar, sea cual sea su largo (una clave de certificado puede tener
+  // un solo carácter). Preferimos perder fidelidad del detalle antes que arriesgar un secreto.
+  // Antes, los caracteres de control y de formato: uno invisible intercalado no debe esconder un secreto.
+  const visible = crudo.replace(/[\p{Cf}]/gu, "").replace(/[\p{Cc}]/gu, " ");
+  const texto = secretos.filter((s) => s.length > 0).reduce((t, s) => t.split(s).join(" "), visible);
   const propios = secretos.filter((s) => s.length >= 4);
   const limpio = texto
-    .replace(/[\p{Cc}\p{Cf}]/gu, " ")
     .replace(/<[^>]*>/g, " ")
     .replace(/["'`{}[\]\\]/g, " ")
     .split(/\s+/)
