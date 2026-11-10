@@ -78,6 +78,26 @@ describe.skipIf(!urlPropietario)("grupos: miembros elegibles (CAR-251)", () => {
     expect(alta).toMatchObject({ entityType: "grupo", entityId: grupoId });
   });
 
+  it("dos altas simultáneas del mismo usuario: solo una lo informa y emite el evento", async () => {
+    const g = await mod.executeCapability(ctx(), "core.grupos.create", { nombre: "Concurrencia" });
+    if (!g.ok) throw new Error(JSON.stringify(g.error));
+    const grupoId = (g.data as { id: string }).id;
+    const input = { grupoId, userIds: [u.admin] };
+    const rs = await Promise.all([
+      mod.executeCapability(ctx(), "core.grupos.agregar_miembros", input),
+      mod.executeCapability(ctx(), "core.grupos.agregar_miembros", input),
+    ]);
+    expect(rs.every((r) => r.ok)).toBe(true);
+    const agregados = rs.flatMap((r) =>
+      r.ok ? (r.data as { agregados: string[] }).agregados : [],
+    );
+    expect(agregados).toEqual([u.admin]);
+    const eventos = await e.admin.evento.count({
+      where: { tenantId, tipo: "core.grupo.miembros_agregados", entidadId: grupoId },
+    });
+    expect(eventos).toBe(1);
+  });
+
   it("la app no borra grupos en duro (sin DELETE para opai_app)", async () => {
     await expect(e.forTenant(tenantId).grupoUsuarios.deleteMany({})).rejects.toThrow();
   });
