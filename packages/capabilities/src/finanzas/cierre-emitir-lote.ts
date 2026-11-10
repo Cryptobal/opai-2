@@ -42,7 +42,7 @@ async function prepararLote(ctx: Contexto, input: { documentoIds: string[] }): P
   const ids = [...new Set(input.documentoIds)];
   const emitibles = await emitiblesDelLote(ctx, ids);
   const folios = new Map<number, number[]>();
-  for (const tipo of [33, 34] as const) {
+  for (const tipo of [33, 34, 56] as const) {
     const n = emitibles.filter((d) => d.tipoDte === tipo).length;
     if (n > 0) folios.set(tipo, await foliosPrevistos(ctx, tipo, n));
   }
