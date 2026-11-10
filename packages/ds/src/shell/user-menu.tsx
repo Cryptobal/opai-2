@@ -2,7 +2,6 @@
 
 import { Avatar } from "../components/avatar";
 import { type ItemMenu, Menu } from "../components/menu";
-import { Punto } from "./contador";
 import type { Usuario } from "./types";
 
 type Props = {
@@ -11,28 +10,15 @@ type Props = {
   lado?: "abajo-derecha" | "arriba-izquierda";
   /** Muestra nombre y rol junto al avatar (barra lateral de desktop). */
   conNombre?: boolean;
-  /** Punto rojo en el avatar (novedades sin leer). */
-  aviso?: boolean;
 };
-
-/** Avatar con menú: nombre y correo, empresas (si hay más de una), perfil y cerrar sesión. */
-function AvatarAviso({ nombre, aviso }: { nombre: string; aviso?: boolean }) {
-  return (
-    <span className="relative inline-flex">
-      <Avatar nombre={nombre} />
-      {aviso ? <Punto visible peligro /> : null}
-    </span>
-  );
-}
 
 /** Avatar + menú en la barra superior (teléfono / iPad). */
 export function MenuUsuarioBarra(props: {
   usuario?: Usuario;
   menuUsuario?: readonly ItemMenu[];
-  avisoNovedades?: boolean;
   lado?: "abajo-derecha" | "arriba-izquierda";
 }) {
-  const { usuario, menuUsuario, avisoNovedades } = props;
+  const { usuario, menuUsuario } = props;
   if (!usuario) return null;
   if (!menuUsuario) return <Avatar nombre={usuario.nombre} />;
   return (
@@ -40,12 +26,12 @@ export function MenuUsuarioBarra(props: {
       usuario={usuario}
       items={menuUsuario}
       {...(props.lado ? { lado: props.lado } : {})}
-      {...(avisoNovedades ? { aviso: true } : {})}
     />
   );
 }
 
-export function UserMenu({ usuario, items, lado, conNombre, aviso }: Props) {
+/** Avatar con menú: nombre y correo, empresas (si hay más de una), perfil y cerrar sesión. */
+export function UserMenu({ usuario, items, lado, conNombre }: Props) {
   return (
     <Menu
       etiqueta="Menú de usuario"
@@ -55,7 +41,7 @@ export function UserMenu({ usuario, items, lado, conNombre, aviso }: Props) {
       {...(conNombre ? { className: "w-full", claseDisparador: "w-full justify-start" } : {})}
       cabecera={
         <div className="flex items-center gap-2">
-          <AvatarAviso nombre={usuario.nombre} {...(aviso ? { aviso: true } : {})} />
+          <Avatar nombre={usuario.nombre} />
           <div className="min-w-0">
             <p className="truncate text-base font-medium text-fg">{usuario.nombre}</p>
             {usuario.email ? (
@@ -67,7 +53,7 @@ export function UserMenu({ usuario, items, lado, conNombre, aviso }: Props) {
       disparador={
         conNombre ? (
           <span className="flex min-h-11 w-full items-center gap-2.5 px-2 py-1 text-left">
-            <AvatarAviso nombre={usuario.nombre} {...(aviso ? { aviso: true } : {})} />
+            <Avatar nombre={usuario.nombre} />
             <span className="min-w-0">
               <span className="block truncate text-base font-medium text-fg">{usuario.nombre}</span>
               {usuario.rol ? (
@@ -76,7 +62,7 @@ export function UserMenu({ usuario, items, lado, conNombre, aviso }: Props) {
             </span>
           </span>
         ) : (
-          <AvatarAviso nombre={usuario.nombre} {...(aviso ? { aviso: true } : {})} />
+          <Avatar nombre={usuario.nombre} />
         )
       }
     />
