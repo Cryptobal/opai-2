@@ -83,11 +83,13 @@ Reglas del contrato:
 
 **Qué se rechaza (no se guarda nada; el informe lista todos los problemas).** `script`, `iframe`, `object`, `embed`, formularios, `svg`/`math`, `template` y cualquier elemento activo; `link`, `style`, `base`, `img`, `video`/`audio` y todo lo que cargue o declare un recurso; elementos propios o no permitidos (`x-*`, `sc-if`, `helmet`…); atributos `on*`; `href` que no sea https, mailto, tel o `#`; `style` con `url(`, `expression`, `@import` o funciones fuera de la lista blanca; marcadores `{{…}}` en atributos o fuera del catálogo; HTML de más de 400.000 bytes, 48 niveles o 15.000 nodos. Se quitan con aviso (no rechazan): atributos no permitidos (`id`, `data-*`…), propiedades CSS fuera de la lista (p. ej. `position`), `<title>` y `<meta>`.
 
+**Reglas de forma que también rechazan.** (1) Los marcadores de bloque (`{{#cada …}}`, `{{#si …}}`) van dentro de una celda `<td>` o de un contenedor, nunca directo en `<table>`/`<tr>`: el parser HTML5 los reubicaría y la plantilla cambiaría de sentido (`marcador_movido`). (2) El HTML ya saneado no puede pasar de 400 000 bytes (`limite`). (3) Los enlaces son `https://host` sin usuario ni clave, `mailto:`, `tel:` o `#`. (4) El CSS en línea queda en una lista blanca de propiedades: se rechazan `url()`, `expression`, `@`, unidades `vw/vh`, márgenes negativos y `repeat()` con más de 24 repeticiones.
+
 **El export real de Claude Design NO se puede importar tal cual.** `PropuestaCliente.dc.html` usa el formato de componentes de Claude Design (`x-dc`, `sc-if`, `sc-for`, `x-import`, `helmet`), carga `support.js`, `cpq-data.js` y hojas de estilo del DS por ruta, y enlaza datos con `{{ theme }}`, `{{ publica }}`, etc., que no son campos del catálogo. Un test lo prueba: el saneador lo rechaza con esos motivos. Para importar un diseño hay que pedir a Claude Design un HTML estático con los marcadores del prompt exportable (PR 8). No se inventó otro diseño ni se escribió un conversor.
 
 **Qué sigue haciendo el PDF.** Lo mismo que hoy: `pdf-lib` arma el PDF desde los bloques, el capítulo por instalación y el envío congelado. **Ningún renderer lee `cpq.propuesta_html`**; el HTML importado no se convierte a PDF ni se usa en el envío. No se promete Figma, PPT ni PDF desde este HTML. Conectar una plantilla HTML a un renderer (navegador sin cabeza u otro) es una decisión de arquitectura aparte.
 
-**Pruebas.** Dominio (23), base real (6): versionado, rechazo sin guardar, aislamiento entre empresas, inmutabilidad y permiso.
+**Pruebas.** Dominio (31), base real (6): versionado, rechazo sin guardar, aislamiento entre empresas, inmutabilidad y permiso.
 
 ## Responsable y archivos del contrato transversal (autorizado por Carlos el 7-nov-2026 21:49)
 
