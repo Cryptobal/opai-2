@@ -5,6 +5,7 @@ import { z } from "zod";
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { reglaDeNegocio } from "../errores";
+import { describirDocumento } from "./ventas-aprobacion-texto";
 import { bloquearDocumento, cargarBorradorEditable } from "./ventas-borrador-editable";
 import { PERMISO_VENTAS } from "./ventas-comun";
 
@@ -17,6 +18,7 @@ export const ventasDescartarBorrador = defineCapability({
   output: z.object({ documentoId: uuidSchema, tipoDte: z.number().int(), descartado: z.boolean() }),
   efecto: "irreversible",
   dryRun: true,
+  describirAprobacion: describirDocumento((d) => `descartar el borrador de ${d}`),
   async handler(ctx, input, { dryRun }) {
     const doc = await cargarBorradorEditable(ctx, input.documentoId);
     if (dryRun) return { documentoId: doc.id, tipoDte: doc.tipoDte, descartado: false };
