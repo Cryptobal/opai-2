@@ -1,6 +1,6 @@
 # CAR-251 · capturas de Grupos (ingeniería)
 
-Tomadas en local (`pnpm dev`) sobre una base con la migración `20261119110000_core_grupos_usuarios`
+Tomadas en local (`pnpm dev`) sobre una base con la migración `20261119100000_core_grupos_usuarios`
 aplicada y una empresa **ficticia** («Empresa Demo», usuarios `@prueba.test`); sin datos de Gard.
 El globo «N» de las capturas es el indicador de desarrollo de Next.js (no existe en Vercel).
 No reemplazan la revisión visual de Carlos (A2.10).
