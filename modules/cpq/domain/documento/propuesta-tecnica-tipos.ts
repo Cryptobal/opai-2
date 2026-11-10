@@ -50,7 +50,11 @@ export type ContratoCamposEnvio = {
   usados: string[];
   valores: {
     campos: Record<string, string | number | boolean | null>;
-    colecciones: { instalaciones: Record<string, string | number | boolean | null>[] };
+    colecciones: {
+      instalaciones: Record<string, string | number | boolean | null>[];
+      /** Referencias con consentimiento vigente al enviar (CAR-138 PR 7); ausente en envíos anteriores. */
+      referencias?: Record<string, string | number | boolean | null>[];
+    };
   };
   faltantes: string[];
 };
