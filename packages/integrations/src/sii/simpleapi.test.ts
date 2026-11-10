@@ -123,6 +123,37 @@ describe("firmar (POST dte/generar)", () => {
     expect(emisor).toEqual({ Rut: "76269769-6", ActividadEconomica: [801000] });
   });
 
+  it("vencimiento como FechaVencimientoString y, sin ciudad, la comuna real del receptor (CAR-240)", async () => {
+    const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
+    const receptor = { giroReceptor: "SERVICIO PUBLICO", direccionReceptor: "Teatinos 120", comunaReceptor: "Santiago" };
+    await adaptadorSimpleApi(creds).firmar({ ...payload, ...receptor, fechaVencimiento: "2026-12-10" });
+    const doc = JSON.parse(String(llamadas[0]?.input)).Documento;
+    expect(doc.Encabezado.IdentificacionDTE).toMatchObject({ FechaVencimientoString: "2026-12-10", FormaPago: 2 });
+    expect(doc.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaVencimiento");
+    expect(doc.Encabezado.Receptor).toMatchObject({ Comuna: "Santiago", Ciudad: "Santiago", Giro: "SERVICIO PUBLICO" });
+    // Con ciudad propia va la ciudad; sin comuna ni ciudad no se inventa ninguna (el preflight ya bloquea).
+    await adaptadorSimpleApi(creds).firmar({ ...payload, ...receptor, comunaReceptor: "Providencia", ciudadReceptor: "Santiago" });
+    expect(JSON.parse(String(llamadas[1]?.input)).Documento.Encabezado.Receptor).toMatchObject({ Comuna: "Providencia", Ciudad: "Santiago" });
+    await adaptadorSimpleApi(creds).firmar(payload);
+    expect(JSON.parse(String(llamadas[2]?.input)).Documento.Encabezado.Receptor).not.toHaveProperty("Ciudad");
+  });
+
+  it("RUT en formato SII, el RUT del titular como lo extrae 1.0 y CorreoRecep solo con una dirección válida", async () => {
+    const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
+    await adaptadorSimpleApi({ ...creds, certificadoRut: "RUT 17.096.073-4" }).firmar({
+      ...payload,
+      rutEmisor: "76.269.769-6",
+      rutReceptor: "60.803.000-k",
+      emailReceptor: "dte@cliente.cl",
+    });
+    const entrada = JSON.parse(String(llamadas[0]?.input));
+    expect(entrada.Documento.Encabezado.Emisor.Rut).toBe("76269769-6");
+    expect(entrada.Documento.Encabezado.Receptor).toMatchObject({ Rut: "60803000-K", CorreoRecep: "dte@cliente.cl" });
+    expect(entrada.Certificado.Rut).toBe("17096073-4");
+    await adaptadorSimpleApi(creds).firmar({ ...payload, emailReceptor: "a@b.cl, c@d.cl" });
+    expect(JSON.parse(String(llamadas[1]?.input)).Documento.Encabezado.Receptor).not.toHaveProperty("CorreoRecep");
+  });
+
   it("ADR-075: el XML con ñ y tildes vuelve con los mismos bytes ISO-8859-1 y el mismo SHA-256", async () => {
     const original = fixture("simpleapi-generar-factura.xml").replace(
       "RAZÓN SOCIAL",
