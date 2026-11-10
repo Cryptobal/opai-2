@@ -36,6 +36,10 @@ const firmarError = async () => (await adaptadorSimpleApi(creds).firmar(payload)
 
 afterEach(() => vi.unstubAllGlobals());
 
+
+/** Motivo de un 401 con la key reconocida (x-rate-limit-*) y cuerpo vacío (CAR-240). */
+const MOTIVO_401_VACIO =
+  "aceptó la API key pero rechazó el contenido sin decir el motivo (certificado, CAF o un dato del DTE; si el preflight marca el CAF dañado, vuelva a cargarlo), HTTP 401";
 describe("errores tipados de SimpleAPI (CAR-242)", () => {
   it("HTTP 400 con mensaje JSON: estado fijo para el log y detalle legible solo para la persona", async () => {
     generar(() => new Response(JSON.stringify({ mensaje: "Receptor 12.345.678-5 Juan Perez no autorizado" }), { status: 400 }));
@@ -150,7 +154,7 @@ describe("autenticación y límites de uso (CAR-240)", () => {
   it("un header x-rate-limit-* con un valor que no pasa el saneo igual cuenta como key reconocida", async () => {
     generar(() => new Response("", { status: 401, headers: { "x-rate-limit-policy": "100;w=60" } }));
     const e = await firmarError();
-    expect(e.motivo).toBe("rechazó el contenido (certificado, CAF o datos), HTTP 401");
+    expect(e.motivo).toBe(MOTIVO_401_VACIO);
     expect(e.limites).toEqual({});
   });
   it("sin ACTECO del emisor no llama a SimpleAPI: el DTE saldría sin <Acteco> y lo rechazaría con 401", async () => {
@@ -164,7 +168,10 @@ describe("autenticación y límites de uso (CAR-240)", () => {
   it("forma del cuerpo de un 401, sin guardar su texto: vacío, de suscripción u otro", async () => {
     const headers = { "x-rate-limit-remaining": "39" };
     generar(() => new Response("", { status: 401, headers }));
-    expect(await firmarError()).toMatchObject({ cuerpo: "vacio", motivo: "rechazó el contenido (certificado, CAF o datos), HTTP 401" });
+    // CAR-240: la key autenticó y el cuerpo vino vacío; el motivo lo dice y nunca habla de una key inválida.
+    const vacio = await firmarError();
+    expect(vacio).toMatchObject({ cuerpo: "vacio", motivo: MOTIVO_401_VACIO });
+    expect(vacio.motivo).not.toMatch(/inv[aá]lida|no reconoci/);
     generar(() => new Response(JSON.stringify({ Mensaje: "Falta de suscripción válida o token expirado" }), { status: 401, headers }));
     const e = await firmarError();
     expect(e).toMatchObject({

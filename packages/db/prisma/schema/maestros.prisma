@@ -615,3 +615,26 @@ model IdExterno {
   @@map("ids_externos")
   @@schema("core")
 }
+
+/// Caché de la consulta de contribuyente al SII por (empresa, RUT) (CAR-156). Solo respuestas
+/// definitivas; los datos son contenido externo y nunca se aplican solos a una cuenta.
+model SiiContribuyente {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// RUT canónico "76543210-K".
+  rut          String
+  /// "ok" | "sin_inicio" | "no_encontrado" (CHECK en migración).
+  estado       String
+  /// Datos del SII proyectados (`DatosContribuyente`); null si el RUT no tiene registros.
+  datos        Json?
+  consultadoEn DateTime @map("consultado_en") @db.Timestamptz(6)
+  venceEn      DateTime @map("vence_en") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, rut])
+  @@map("sii_contribuyentes")
+  @@schema("core")
+}

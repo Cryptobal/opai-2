@@ -20,6 +20,8 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   giro: "giro",
   ciudad: "ciudad",
   email_dte: "correo de recepción de facturas",
+  // caché de la consulta al SII (CAR-156)
+  datos: "datos tributarios informados por el SII",
   // personas PR 2
   banco_codigo: "banco",
   tipo_cuenta: "tipo de cuenta",
