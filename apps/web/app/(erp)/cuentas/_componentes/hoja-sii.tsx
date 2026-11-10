@@ -2,79 +2,15 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  CAMPOS_SII,
-  ETIQUETA_CAMPO_SII,
-  textoFaltan,
-  type CampoSii,
-  type RequisitoFacturar,
-} from "@opai/domain";
-import {
-  Alerta,
-  avisar,
-  Button,
-  campoElegible,
-  DatosSii,
-  Sheet,
-  type EstadoDatosSii,
-} from "@opai/ds";
+import { CAMPOS_SII, ETIQUETA_CAMPO_SII } from "@opai/domain";
+import { Alerta, avisar, Button, campoElegible, DatosSii, Sheet } from "@opai/ds";
 
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { rut } from "@/lib/fechas";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
-type Facturar = { lista: boolean; faltan: RequisitoFacturar[] };
-type Consulta = {
-  estado: "ok" | "sin_inicio" | "no_encontrado" | "sin_respuesta" | "no_configurado";
-  mensaje: string | null;
-  campos: {
-    campo: CampoSii;
-    ficha: string | null;
-    sii: string | null;
-    estado: "igual" | "distinto" | "vacio_ficha" | "vacio_sii";
-  }[];
-  facturarAlAplicar: Facturar;
-};
-
-function estadoDe(
-  c: Consulta | null,
-  error: string | null,
-  reintentar: () => void,
-): EstadoDatosSii {
-  if (error)
-    return {
-      tipo: "error",
-      titulo: "No se pudo consultar al SII",
-      mensaje: error,
-      onReintentar: reintentar,
-    };
-  if (!c) return { tipo: "cargando" };
-  if (c.estado === "sin_respuesta")
-    return {
-      tipo: "error",
-      titulo: "El SII no responde",
-      mensaje: c.mensaje ?? "",
-      onReintentar: reintentar,
-    };
-  if (c.estado === "no_encontrado")
-    return { tipo: "error", titulo: "RUT sin registros en el SII", mensaje: c.mensaje ?? "" };
-  if (c.estado === "no_configurado") return { tipo: "no_configurado", mensaje: c.mensaje ?? "" };
-  const campos = c.campos.map((x) => ({ ...x, etiqueta: ETIQUETA_CAMPO_SII[x.campo] }));
-  if (c.estado === "sin_inicio")
-    return {
-      tipo: "sin_inicio",
-      mensaje:
-        "El RUT existe pero no registra inicio de actividades. No se pueden emitir facturas a su nombre.",
-    };
-  const lista = c.facturarAlAplicar.lista;
-  return {
-    tipo: "ok",
-    campos,
-    lista,
-    resumen: lista ? "Lista para facturar al aplicar" : textoFaltan(c.facturarAlAplicar.faltan),
-  };
-}
+import { ConsultadoEn, estadoDe, type Consulta } from "./hoja-sii-estado";
 
 /** «Datos del SII» (CuentaV2 · sii): consulta por RUT, compara y aplica campo por campo. */
 export function HojaSii({ cuenta }: { cuenta: CuentaDetalle }) {
@@ -91,13 +27,16 @@ export function HojaSii({ cuenta }: { cuenta: CuentaDetalle }) {
     setElegidos(new Set(conEtiqueta.filter(campoElegible).map((x) => x.campo)));
   };
   // La consulta (lectura) va con su propio estado de error; aplicar, con el de abajo.
-  const pedir = () => {
+  const pedir = (refrescar = false) => {
     const { ejecutar } = consulta;
-    return ejecutar<Consulta>("core.cuentas.consultar_sii", { id: cuenta.id });
+    return ejecutar<Consulta>("core.cuentas.consultar_sii", {
+      id: cuenta.id,
+      ...(refrescar ? { refrescar } : {}),
+    });
   };
-  const reintentar = () => {
+  const reintentar = (refrescar = false) => {
     setC(null);
-    void pedir().then(cargar);
+    void pedir(refrescar).then(cargar);
   };
   useEffect(() => {
     void pedir().then(cargar);
@@ -142,8 +81,11 @@ export function HojaSii({ cuenta }: { cuenta: CuentaDetalle }) {
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
+        {c?.consultadoEn ? (
+          <ConsultadoEn fecha={c.consultadoEn} onRefrescar={() => reintentar(true)} />
+        ) : null}
         <DatosSii
-          estado={estadoDe(c, consulta.error, reintentar)}
+          estado={estadoDe(c, consulta.error, () => reintentar())}
           elegidos={elegidos}
           onElegir={(campo, si) =>
             setElegidos((s) => {

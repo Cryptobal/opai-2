@@ -45,6 +45,7 @@ model Tenant {
   cuentas                 Cuenta[]
   cuentasRepresentantes   CuentaRepresentante[]
   cuentasReferencias      CuentaReferencia[]
+  siiContribuyentes       SiiContribuyente[]
   contactos               Contacto[]
   instalaciones           Instalacion[]
   cargos                  Cargo[]

@@ -1,52 +1,30 @@
 import { z } from "zod";
 
-import {
-  CAMPOS_SII,
-  compararConSii,
-  normalizarRut,
-  PERMISOS_CORE,
-  REQUISITOS_FACTURAR,
-} from "@opai/domain";
+import { CAMPOS_SII, compararConSii, normalizarRut, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { externo } from "../../externo";
 import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { cuentaDe } from "./cuentas";
-import { consultarContribuyente, facturableDe, valoresSii } from "./cuentas-sii-fuente";
-
-const facturarSchema = z.object({
-  lista: z.boolean(),
-  faltan: z.array(z.enum([...REQUISITOS_FACTURAR, "destinatario"])),
-});
-
-const campoSchema = z.object({
-  campo: z.enum(CAMPOS_SII),
-  ficha: z.string().nullable(),
-  sii: externo(z.string().nullable()),
-  estado: z.enum(["igual", "distinto", "vacio_ficha", "vacio_sii"]),
-});
+import { consultarContribuyente } from "./cuentas-sii-cache";
+import { consultaSiiSchema, facturarSchema } from "./cuentas-sii-esquemas";
+import { facturableDe, valoresSii } from "./cuentas-sii-fuente";
 
 export const cuentasConsultarSii = defineCapability({
   auditarLectura: (s, e) => [e.id],
   id: "core.cuentas.consultar_sii",
   descripcion:
-    "Consulta al SII los datos tributarios de una cuenta por su RUT (razón social, giro, actividades, dirección, correo DTE e inicio de actividades) y los compara campo por campo con la ficha. No cambia nada: para aplicarlos usa core.cuentas.aplicar_sii. Dice si la cuenta queda lista para facturar.",
+    "Consulta al SII los datos tributarios de una cuenta por su RUT (razón social, giro, actividades, dirección, correo DTE e inicio de actividades) y los compara campo por campo con la ficha. Reutiliza la respuesta guardada mientras esté vigente (dice de cuándo es); `refrescar` vuelve a preguntar si tiene más de 10 minutos. No cambia nada: para aplicarlos usa core.cuentas.aplicar_sii. Dice si la cuenta queda lista para facturar.",
   permiso: PERMISOS_CORE.cuentasRead,
-  input: z.object({ id: uuidSchema }),
-  output: z.object({
-    estado: z.enum(["ok", "sin_inicio", "no_encontrado", "sin_respuesta", "no_configurado"]),
-    mensaje: externo(z.string().nullable()),
-    rut: z.string(),
-    actividades: z.array(
-      z.object({ codigo: z.string(), descripcion: externo(z.string()), afectaIva: z.boolean() }),
-    ),
-    inicioActividades: z.string().nullable(),
-    campos: z.array(campoSchema),
-    facturar: facturarSchema,
-    /** «Lista para facturar» si se aplicaran todos los campos del SII. */
-    facturarAlAplicar: facturarSchema,
+  input: z.object({
+    id: uuidSchema,
+    refrescar: z
+      .boolean()
+      .optional()
+      .describe("Volver a preguntar al SII aunque haya una respuesta guardada vigente."),
   }),
+  output: consultaSiiSchema,
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -57,7 +35,7 @@ export const cuentasConsultarSii = defineCapability({
         "La cuenta no tiene un RUT válido; corrígelo antes de consultar al SII.",
       );
     const facturar = await facturableDe(ctx, c);
-    const r = await consultarContribuyente(ctx, rut);
+    const r = await consultarContribuyente(ctx, rut, { refrescar: input.refrescar ?? false });
     const datos = r.estado === "ok" || r.estado === "sin_inicio" ? r.datos : null;
     const sii = datos ? valoresSii(datos) : {};
     const campos = datos ? compararConSii(c, sii) : [];
@@ -76,6 +54,8 @@ export const cuentasConsultarSii = defineCapability({
       campos,
       facturar,
       facturarAlAplicar: alAplicar,
+      origen: r.origen,
+      consultadoEn: r.consultadoEn?.toISOString() ?? null,
     };
   },
 });
@@ -96,7 +76,7 @@ export const cuentasFacturable = defineCapability({
 export const cuentasAplicarSii = defineCapability({
   id: "core.cuentas.aplicar_sii",
   descripcion:
-    "Aplica a la ficha de una cuenta los datos del SII de los campos que se elijan (razón social, giro, dirección, comuna, ciudad, correo DTE), consultando de nuevo al SII; los demás quedan como están. La vista previa dice qué cambia sin guardar.",
+    "Aplica a la ficha de una cuenta los datos del SII de los campos que se elijan (razón social, giro, dirección, comuna, ciudad, correo DTE), tomados de la respuesta guardada del SII si está vigente o consultando de nuevo, nunca del input; los demás quedan como están. La vista previa dice qué cambia sin guardar.",
   permiso: PERMISOS_CORE.cuentasManage,
   input: z.object({
     id: uuidSchema,
@@ -121,8 +101,9 @@ export const cuentasAplicarSii = defineCapability({
       throw reglaDeNegocio(
         "La cuenta no tiene un RUT válido; corrígelo antes de consultar al SII.",
       );
-    // Se consulta de nuevo: nunca se aplica un valor que venga del input (es dato del SII, no del cliente).
-    const r = await consultarContribuyente(ctx, rut);
+    // Del SII (caché vigente o consulta nueva): nunca se aplica un valor que venga del input. La
+    // vista previa no escribe la caché.
+    const r = await consultarContribuyente(ctx, rut, { guardar: !dryRun });
     if (r.estado !== "ok" && r.estado !== "sin_inicio") throw reglaDeNegocio(r.mensaje);
     const sii = valoresSii(r.datos);
     const pedidos = new Set(input.campos);

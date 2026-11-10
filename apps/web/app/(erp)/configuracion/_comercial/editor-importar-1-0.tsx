@@ -6,6 +6,8 @@ import { Alerta, avisar, Button, Card, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { type ResumenSiiImport, textoResumenSii } from "./resumen-sii-importar";
+
 type ReporteImport = {
   modulosActivos: string[];
   tributario: {
@@ -23,6 +25,7 @@ type ResultadoImport = {
   aplicadas: { cuentas: number; contactos: number; instalaciones: number; omitidas: number } | null;
   usuariosResueltos: number;
   usuariosSinMembresia: string[];
+  sii?: ResumenSiiImport | null;
 };
 
 export function EditorImportar10() {
@@ -102,6 +105,9 @@ export function EditorImportar10() {
             tono="info"
             titulo={`Tributario: ${trib?.listasParaFacturar ?? 0} listas · ${trib?.incompletas ?? 0} incompletas · ${trib?.cuentasConsideradas ?? 0} consideradas`}
           />
+          {vista.sii ? (
+            <Alerta tono="info" titulo={textoResumenSii(vista.sii, !vista.dryRun)} />
+          ) : null}
           {vista.usuariosSinMembresia.length > 0 ? (
             <Alerta
               tono="warning"
