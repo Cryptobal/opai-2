@@ -69,7 +69,7 @@ describe("contrato de campos de la propuesta", () => {
     const p = await preparar("Para {{cuenta.nombre}}");
     const c = await contratoCamposPropuesta(p.ctx, p.entrada);
     expect(c?.usados).toEqual(["cuenta.nombre"]);
-    expect(c?.versionCatalogo).toBe(1);
+    expect(c?.versionCatalogo).toBe(2);
     expect(c?.valores.campos["cuenta.nombre"]).toBe("Cliente Ficticio SpA");
     expect(resolver.mock.calls[0]?.[1]).toMatchObject({ finalidad: "propuesta" });
   });
@@ -79,6 +79,27 @@ describe("contrato de campos de la propuesta", () => {
     const c = await preparar("Giro {{cuenta.giro}}");
     await expect(contratoCamposPropuesta(c.ctx, c.entrada)).rejects.toThrow(
       /Faltan datos.*cuenta\.giro/,
+    );
+  });
+
+  it("con referencias congela solo las autorizadas y sin ninguna no deja salir una sección vacía", async () => {
+    const texto = "{{#cada referencias}}- {{referencia.cliente}}\n{{/cada}}";
+    resolver.mockResolvedValue({
+      campos: {},
+      colecciones: {
+        instalaciones: [],
+        referencias: [{ "referencia.cliente": "Cliente de Logística en Quilicura" }],
+      },
+    });
+    const p = await preparar(texto);
+    const c = await contratoCamposPropuesta(p.ctx, p.entrada);
+    expect(c?.valores.colecciones.referencias).toEqual([
+      { "referencia.cliente": "Cliente de Logística en Quilicura" },
+    ]);
+    expect(c?.valores.colecciones.instalaciones).toEqual([]);
+    resolver.mockResolvedValue({ campos: {}, colecciones: { instalaciones: [], referencias: [] } });
+    await expect(contratoCamposPropuesta(p.ctx, p.entrada)).rejects.toThrow(
+      /ningún cliente activo tiene un consentimiento vigente/,
     );
   });
 });

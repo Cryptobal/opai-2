@@ -6,6 +6,8 @@ import { PERMISOS_CORE as P, type Rol, ROLES, tienePermiso } from "./permisos";
 const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolean]> = {
   [P.cuentasRead]: [true, true, true, true, true],
   [P.cuentasManage]: [true, true, true, false, false],
+  // CAR-138 PR 7: quién autoriza referencias lo decide Carlos; por defecto solo owner y admin.
+  [P.cuentasReferenciasAutorizar]: [true, true, false, false, false],
   // CRM PR 2a: el supervisor no entra a Comercial; el catálogo de etiquetas es de owner y admin.
   [P.actividadesRead]: [true, true, true, false, true],
   [P.actividadesManage]: [true, true, true, false, false],

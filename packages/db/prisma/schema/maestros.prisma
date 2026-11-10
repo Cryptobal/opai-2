@@ -38,6 +38,8 @@ model Cuenta {
   etiquetaAsignaciones EtiquetaAsignacion[]
   instalaciones  Instalacion[]
   representantes CuentaRepresentante[]
+  /// Consentimientos para usar la cuenta como referencia comercial (CAR-138 PR 7). Append-only.
+  referencias    CuentaReferencia[]
   // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocios.
   negocios       Negocio[]
 
@@ -62,6 +64,42 @@ model CuentaRepresentante {
 
   @@index([tenantId, cuentaId])
   @@map("cuentas_representantes")
+  @@schema("core")
+}
+
+/// Consentimiento del cliente para usarlo como referencia en propuestas y documentos (CAR-138 PR 7).
+/// Append-only: cada fila es un otorgamiento o una revocación y el estado vigente es la última fila
+/// de la cuenta. `opai_app` no tiene UPDATE ni DELETE. Sin fila vigente, la cuenta no aparece.
+model CuentaReferencia {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  cuentaId         String    @map("cuenta_id") @db.Uuid
+  /// "otorgado" | "revocado" (CHECK en migración).
+  estado           String
+  /// Si el cliente autorizó mostrar su nombre; si no, se muestra anonimizado (rubro y comuna).
+  mostrarNombre    Boolean   @default(false) @map("mostrar_nombre")
+  descripcion      String?
+  cita             String?
+  /// Fecha en que el cliente dio el consentimiento (obligatoria al otorgar).
+  otorgadoEn       DateTime? @map("otorgado_en") @db.Date
+  vigenteHasta     DateTime? @map("vigente_hasta") @db.Date
+  /// Contacto del cliente que lo dio (opcional).
+  contactoId       String?   @map("contacto_id") @db.Uuid
+  /// "correo" | "documento_firmado" | "contrato" | "acta" | "otro" (obligatoria al otorgar).
+  evidencia        String?
+  evidenciaDetalle String?   @map("evidencia_detalle")
+  /// Motivo de la revocación (obligatorio al revocar).
+  motivo           String?
+  registradoPorId  String    @map("registrado_por_id") @db.Uuid
+  /// Orden real de escritura (identity): la última fila de la cuenta es la de mayor `seq`.
+  seq              BigInt    @default(autoincrement())
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  cuenta Cuenta @relation(fields: [cuentaId], references: [id])
+
+  @@index([tenantId, cuentaId, seq])
+  @@map("cuentas_referencias")
   @@schema("core")
 }
 

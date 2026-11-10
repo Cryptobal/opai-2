@@ -9,6 +9,8 @@ export const PERMISO_POR_ENTIDAD: Readonly<Partial<Record<EntidadCampo, string>>
   cuenta: PERMISOS_CORE.cuentasRead,
   contacto: PERMISOS_CORE.cuentasRead,
   instalacion: PERMISOS_CORE.instalacionesRead,
+  // Las referencias son cuentas: las lee quien lee cuentas, con su alcance (CAR-138 PR 7).
+  referencia: PERMISOS_CORE.cuentasRead,
 };
 
 /** Entidad de un campo: el prefijo de su clave canónica. */

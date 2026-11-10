@@ -1,7 +1,18 @@
 import type { EventoDeDominio } from "../module";
 
-/** Eventos de CRM PR 2a (CAR-26): vínculo contacto–cuenta, actividad unificada y etiquetas. */
+/**
+ * Eventos de CRM PR 2a (CAR-26): vínculo contacto–cuenta, actividad unificada y etiquetas; y
+ * consentimiento de referencia de clientes (CAR-138 PR 7).
+ */
 export const EVENTOS_CRM: readonly EventoDeDominio[] = [
+  {
+    id: "core.cuenta.referencia_otorgada",
+    descripcion: "Un cliente consintió ser referencia comercial (o se renovó su consentimiento).",
+  },
+  {
+    id: "core.cuenta.referencia_revocada",
+    descripcion: "Se revocó el consentimiento de un cliente para ser referencia comercial.",
+  },
   { id: "core.contacto.vinculado", descripcion: "Se vinculó un contacto a otra cuenta." },
   {
     id: "core.contacto.vinculo_actualizado",

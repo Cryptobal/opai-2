@@ -134,6 +134,8 @@ core_cuentas_create
 core_cuentas_facturable
 core_cuentas_get
 core_cuentas_list
+core_cuentas_referencias_list
+core_cuentas_referencias_revocar
 core_cuentas_set_estado
 core_cuentas_set_representantes
 core_cuentas_update
@@ -566,6 +568,7 @@ preview_core_contactos_vincular
 preview_core_cuentas_aplicar_sii
 preview_core_cuentas_archive
 preview_core_cuentas_create
+preview_core_cuentas_referencias_revocar
 preview_core_cuentas_set_estado
 preview_core_cuentas_set_representantes
 preview_core_cuentas_update
