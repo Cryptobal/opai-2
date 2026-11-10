@@ -20,7 +20,7 @@ export async function itemsPreflightEmision(
   input: {
     documentoId?: string | undefined;
     cuentaId?: string | undefined;
-    tipoDte?: 33 | 34 | 61 | undefined;
+    tipoDte?: 33 | 34 | 56 | 61 | undefined;
   },
 ): Promise<ItemPreflightEmision[]> {
   const items: ItemPreflightEmision[] = [];
@@ -56,7 +56,7 @@ export async function itemsPreflightEmision(
       where: { id: input.documentoId },
       select: { tipoDte: true },
     });
-    if (doc) tipo = doc.tipoDte as 33 | 34 | 61;
+    if (doc) tipo = doc.tipoDte as 33 | 34 | 56 | 61;
   }
 
   // Misma regla que la emisión (CAR-240): CAF activos, vigentes, con folios y del ambiente requerido.

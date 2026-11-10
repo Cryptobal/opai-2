@@ -12,6 +12,7 @@ import { adaptadorSiiDe } from "./adaptador-sii";
 import { comoReglaSiProveedorSii } from "./errores-sii";
 import { ambienteDe, cuentaDe, rutEmisorDe } from "./ventas-comun";
 import { foliosPrevistos } from "./ventas-folios-logica";
+import { exigirOrigenNotaDebito } from "./ventas-nd-cargo";
 import { payloadEmisionDteDe } from "./ventas-payload-emision";
 import { guardarXmlFirmadoDte } from "./ventas-xml";
 
@@ -77,7 +78,8 @@ export async function cargarBorradorEmitible(ctx: Contexto, documentoId: string)
   if (!doc) throw noEncontrado("El documento");
   if (doc.estadoDte !== "borrador") throw reglaDeNegocio("Solo se emiten borradores.");
   if (doc.folio != null) throw reglaDeNegocio("El borrador ya tiene folio asignado.");
-  if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
+  if (doc.tipoDte === 56) await exigirOrigenNotaDebito(ctx, doc);
+  else if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
   await condicionesHeredadas(ctx, doc);
   const cuenta = await cuentaDe(ctx, doc.cuentaId);
   if (!cuenta.rut) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");

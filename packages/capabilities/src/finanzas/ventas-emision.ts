@@ -19,6 +19,7 @@ import {
   prepararEmision,
   type EmisionPreparada,
 } from "./ventas-emision-preparar";
+import { exigirOrigenNotaDebito } from "./ventas-nd-cargo";
 import { descartarXmlPreparado } from "./ventas-xml";
 import { ventaSchema } from "./vistas-venta";
 import type { Contexto } from "../types";
@@ -89,6 +90,8 @@ export async function emitirBorrador(
         payload: () => ({ folio: preparada.folio, tipoDte: doc.tipoDte }),
       },
       async (tx) => {
+        // ND de cargo: la factura de origen sigue vigente en el momento de reclamar el folio (CAR-234).
+        if (doc.tipoDte === 56) await exigirOrigenNotaDebito({ db: tx }, doc);
         const folio = await consumirFolio(ctx, tipo, false, tx);
         if (folio !== preparada.folio) {
           throw reglaDeNegocio(

@@ -19,6 +19,7 @@ import { trabajosCesion } from "./trabajos-cesion";
 import { trabajosDte } from "./trabajos-dte";
 import {
   ventasCrearBorrador,
+  ventasCrearBorradorNotaDebito,
   ventasEmitir,
   ventasEmitirNotaCredito,
   ventasEmitirNotaDebito,
@@ -104,6 +105,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasEnviarSii,
   ventasEmitirNotaCredito,
   ventasEmitirNotaDebito,
+  ventasCrearBorradorNotaDebito,
   ventasProyeccionFlujo,
   ventasCesionSimular,
   ventasCesionCeder,
