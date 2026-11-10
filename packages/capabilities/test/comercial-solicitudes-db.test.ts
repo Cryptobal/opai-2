@@ -205,4 +205,65 @@ describe("comercial · solicitudes contra Postgres real", () => {
     expect(fila.responsableId).toBe(u.id);
     expect(await e.admin.canalSolicitud.count({ where: { tenantId: b } })).toBe(0);
   });
+
+  it("el aviso de la solicitud queda leído para todos al derivar, descartar, duplicar o convertir", async () => {
+    const usuarios = [randomUUID(), randomUUID()];
+    for (const id of usuarios)
+      await e.admin.user.create({
+        data: { id, name: "Ficticio", email: `aviso-${id}@test.opai.cl` },
+      });
+    await e.admin.membership.createMany({
+      data: usuarios.map((userId) => ({ tenantId: a, userId, rol: "viewer", portales: ["erp"] })),
+    });
+    const sinLeer = (ids: string[]) =>
+      e.admin.notificacion.count({ where: { tenantId: a, eventoId: { in: ids }, leidaEn: null } });
+    // Crea una solicitud con su aviso no leído para dos destinatarios, ligado por el evento.
+    const conAviso = async (email: string) => {
+      const s = await crear(a, { email });
+      const ev = await e.admin.evento.findMany({
+        where: { tenantId: a, tipo: "comercial.solicitud.creada", entidadId: s.id },
+      });
+      expect(ev).toHaveLength(1);
+      const eventoId = ev[0]!.id;
+      for (const usuarioId of usuarios)
+        await e.admin.notificacion.create({
+          data: { tenantId: a, usuarioId, eventoId, titulo: "Nueva solicitud · Web" },
+        });
+      return { s, eventoId };
+    };
+    const otro = await conAviso("aviso-otro@atlas.example"); // no debe tocarse
+    const d = await conAviso("aviso-descartar@atlas.example");
+    // El dryRun no marca nada.
+    await dato(
+      ctx(a),
+      "comercial.solicitudes.descartar",
+      { id: d.s.id, motivo: "Es un proveedor" },
+      { dryRun: true },
+    );
+    expect(await sinLeer([d.eventoId])).toBe(2);
+    await dato(ctx(a), "comercial.solicitudes.descartar", {
+      id: d.s.id,
+      motivo: "Es un proveedor",
+    });
+    expect(await sinLeer([d.eventoId])).toBe(0);
+    expect(await sinLeer([otro.eventoId])).toBe(2);
+
+    const v = await conAviso("aviso-derivar@atlas.example");
+    await dato(ctx(a), "comercial.solicitudes.derivar", { id: v.s.id });
+    expect(await sinLeer([v.eventoId])).toBe(0);
+
+    const m = await conAviso("aviso-dup@atlas.example");
+    await dato(ctx(a), "comercial.solicitudes.marcar_duplicada", {
+      id: m.s.id,
+      originalId: otro.s.id,
+    });
+    expect(await sinLeer([m.eventoId])).toBe(0);
+
+    const c = await conAviso("aviso-convertir@atlas.example");
+    await dato(ctx(a), "comercial.solicitudes.convertir", { id: c.s.id }, { dryRun: true });
+    expect(await sinLeer([c.eventoId])).toBe(2);
+    await dato(ctx(a), "comercial.solicitudes.convertir", { id: c.s.id });
+    expect(await sinLeer([c.eventoId])).toBe(0);
+    expect(await sinLeer([otro.eventoId])).toBe(2);
+  });
 });

@@ -10,7 +10,7 @@ Este frente crea solo los grupos y su membresía. El motor de políticas, el per
 
 ## Qué entra
 
-- **Tablas** en `core` (migración aditiva `20261119100000_core_grupos_usuarios`, con RLS `tenant_isolation`):
+- **Tablas** en `core` (migración aditiva `20261119110000_core_grupos_usuarios`, con RLS `tenant_isolation`):
   - `core.grupos_usuarios`: `id`, `tenant_id`, `nombre`, `descripcion`, `archivado_en`, fechas. Nombre único por empresa entre los grupos vigentes (índice parcial sobre `lower(nombre)` con `archivado_en IS NULL`). Se archiva, nunca se borra en duro (`REVOKE DELETE` para `opai_app`).
   - `core.grupo_usuarios_miembros`: `id`, `tenant_id`, `grupo_id`, `user_id`, fechas. Único `(grupo_id, user_id)`.
   - **FK compuestas por tenant:** `(tenant_id, grupo_id) → grupos_usuarios(tenant_id, id)` y `(tenant_id, user_id) → memberships(tenant_id, user_id)`. La base impide sumar a un usuario que no es miembro de la misma empresa o colgar un miembro de un grupo de otra empresa, aunque alguien salte la capacidad.

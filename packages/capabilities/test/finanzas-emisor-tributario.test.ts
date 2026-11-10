@@ -18,15 +18,15 @@ describe("datos tributarios del emisor", () => {
     expect(faltantesEmisorTributario(completo)).toEqual([]);
     expect(mensajeFaltantesEmisor(completo)).toBeNull();
   });
-  it("sin ACTECO ni ciudad (el caso de test.opai.cl del 10-nov): dice ambos y dónde se completa cada uno", () => {
+  it("sin ACTECO ni ciudad (el caso de test.opai.cl del 10-nov): dice ambos y dónde se completan (CAR-243: todo en la empresa)", () => {
     expect(mensajeFaltantesEmisor({ ...completo, acteco: null, ciudad: " " })).toBe(
       "Faltan datos tributarios de tu empresa: ACTECO y ciudad. " +
-        "Complétalos en Finanzas › Configuración DTE (ACTECO) y en Configuración › Empresa.",
+        "Complétalos en Configuración › Empresa.",
     );
   });
-  it("solo el ACTECO: singular y solo la pantalla de Configuración DTE", () => {
+  it("solo el ACTECO: singular y en la pantalla de la empresa (CAR-243)", () => {
     expect(mensajeFaltantesEmisor({ ...completo, acteco: null })).toBe(
-      "Falta un dato tributario de tu empresa: ACTECO. Complétalo en Finanzas › Configuración DTE.",
+      "Falta un dato tributario de tu empresa: ACTECO. Complétalo en Configuración › Empresa.",
     );
   });
   it("solo datos del perfil: en orden razón social, giro, dirección, comuna, ciudad", () => {

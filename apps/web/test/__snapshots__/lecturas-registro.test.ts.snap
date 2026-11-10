@@ -27,6 +27,8 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.documento_plantillas.get",
   "core.documento_plantillas.list",
   "core.documento_tipos.list",
+  "core.empresa.acteco_buscar",
+  "core.empresa.acteco_get",
   "core.firmas.politica_get",
   "core.firmas.ver_firmante",
   "core.geo.autocompletar",
