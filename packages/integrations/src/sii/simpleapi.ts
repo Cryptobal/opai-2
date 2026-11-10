@@ -21,18 +21,18 @@ import {
 } from "./simpleapi-contrato";
 import { mapearConsultaEnvio, type RespuestaConsultaEnvio } from "./simpleapi-consulta";
 import {
-  blobBase64,
-  blobXml,
+  archivoPfx,
+  archivoXml,
   leerBytesRespuesta,
   leerJsonRespuesta,
   postMultipartSimpleApi,
 } from "./simpleapi-http";
 import { detalleSeguroDeRespuesta, ErrorProveedorSii, type PasoProveedorSii } from "./error-proveedor";
+import { viajaIntactoEnLatin1 } from "./simpleapi-multipart";
 import { extraerTed, xmlDesdeBytes } from "./xml-iso";
 
 export type CredencialesSimpleApi = CredencialesSimpleApiV1;
 
-const PFX = "application/x-pkcs12";
 
 /** Quita un BOM UTF-8 (EF BB BF, leído como latin1) que algunos servidores anteponen al XML. */
 const sinBom = (xml: string) => (xml.startsWith("\u00ef\u00bb\u00bf") ? xml.slice(3) : xml);
@@ -67,7 +67,14 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       creds.resolucionNumero >= 0 &&
       creds.resolucionFecha,
   );
-  const certificado = (c: CredencialesSimpleApi) => blobBase64(c.certificadoPfxBase64, PFX);
+  // El input viaja en ISO-8859-1 y saneado (como 1.0): una clave que el saneamiento cambiaría no abriría el .pfx en
+  // SimpleAPI, así que se rechaza con un motivo claro en vez de enviarla alterada.
+  const certificado = (c: CredencialesSimpleApi, paso: PasoProveedorSii) => {
+    if (!viajaIntactoEnLatin1(c.certificadoClave)) {
+      throw new ErrorProveedorSii(paso, "la clave del certificado tiene caracteres que SimpleAPI no admite (fuera de ISO-8859-1)");
+    }
+    return archivoPfx(c.certificadoPfxBase64);
+  };
   return {
     nombre: "simpleapi",
     disponible,
@@ -75,9 +82,10 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       if (!disponible || !creds) throw new ErrorProveedorSii("generar", "la integración no está configurada");
       if (!payload.cafXml) throw new ErrorProveedorSii("generar", "falta el CAF del folio");
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.generar, creds.apiKey, [
-        { nombre: "input", valor: jsonInputGenerarDte(payload, creds) },
-        { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
-        { nombre: "files2", valor: new Blob([payload.cafXml], { type: "application/xml" }), nombreArchivo: "caf.xml" },
+        // Como 1.0: input, luego el certificado y el CAF, ambos con el nombre de campo `file`; el CAF en sus bytes.
+        { nombre: "input", texto: jsonInputGenerarDte(payload, creds) },
+        certificado(creds, "generar"),
+        archivoXml(payload.cafXml, "caf.xml"),
       ]);
       const xml = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(res, "generar", secretosDe(creds))), "generar");
       const ted = extraerTed(xml);
@@ -89,19 +97,19 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       const sobre = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.envioGenerar, creds.apiKey, [
         {
           nombre: "input",
-          valor: jsonInputSobreEnvio(
+          texto: jsonInputSobreEnvio(
             { rutEmisor: rutEmisorDeXml(xmlFirmado), resolucionNumero: creds.resolucionNumero, resolucionFecha: creds.resolucionFecha },
             creds,
           ),
         },
-        { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
-        { nombre: "files2", valor: blobXml(xmlFirmado), nombreArchivo: "dte.xml" },
+        certificado(creds, "sobre de envío"),
+        archivoXml(xmlFirmado, "dte.xml"),
       ]);
       const xmlSobre = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(sobre, "sobre de envío", secretosDe(creds))), "sobre de envío");
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.envioEnviar, creds.apiKey, [
-        { nombre: "input", valor: jsonInputEnviarSii(ambiente, creds) },
-        { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
-        { nombre: "files2", valor: blobXml(xmlSobre), nombreArchivo: "envio.xml" },
+        { nombre: "input", texto: jsonInputEnviarSii(ambiente, creds) },
+        certificado(creds, "enviar"),
+        archivoXml(xmlSobre, "envio.xml"),
       ]);
       const data = await leerJsonRespuesta<RespuestaEnviar>(res, "enviar", secretosDe(creds));
       const glosa = typeof data.glosa === "string" && data.glosa ? data.glosa : undefined;
@@ -114,8 +122,8 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
     async consultar(trackId: string, ambiente: AmbienteSii): Promise<ConsultaSiiResultado> {
       if (!disponible || !creds) return sim.consultar(trackId, ambiente);
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.consultaEnvio, creds.apiKey, [
-        { nombre: "input", valor: jsonInputConsultaEnvio(creds.rutEmpresa, trackId, ambiente, creds) },
-        { nombre: "files", valor: certificado(creds), nombreArchivo: "certificado.pfx" },
+        { nombre: "input", texto: jsonInputConsultaEnvio(creds.rutEmpresa, trackId, ambiente, creds) },
+        certificado(creds, "consultar"),
       ]);
       return mapearConsultaEnvio(await leerJsonRespuesta<RespuestaConsultaEnvio>(res, "consultar", secretosDe(creds)));
     },

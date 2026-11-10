@@ -17,6 +17,8 @@ vi.mock("../src/finanzas/adaptador-sii", () => ({
 const MENSAJE_HTTP_400 =
   "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 400 (Rut receptor no valido). El borrador sigue sin emitir y el folio no se usó.";
 
+const tributarios = { giro: "Servicios de prueba", calle: "Calle Ficticia 123", comuna: "Comuna Ficticia" };
+
 const credsFicticias = {
   apiKey: "clave-api-ficticia-de-prueba-0000000000",
   certificadoPfxBase64: Buffer.from("pfx-ficticio").toString("base64"),
@@ -36,6 +38,8 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
     const real = adaptadorSimpleApi(credsFicticias);
     firmar.mockImplementation((p) => real.firmar(p));
     estado.adaptador = { ...real, firmar };
+    // Datos tributarios del receptor (CAR-240): sin ellos la emisión real se bloquea antes de llamar a SimpleAPI.
+    await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: tributarios });
     const b = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
       cuentaId: s.cuentaId,
       tipoDte: 33,
@@ -64,6 +68,34 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
     expect(fetch).not.toHaveBeenCalled();
     expect(r.folio).toBe(5000);
     expect(r.emisionPrevista).toEqual({ proveedor: "simpleapi", ambiente: "certificacion" });
+  });
+
+  it("sin giro ni comuna del cliente: bloquea con lo que falta, sin llamar a SimpleAPI ni usar folio (CAR-240)", async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { giro: null, comuna: " " } });
+    try {
+      const r = await s.mod.executeCapability(s.ctx(), "finanzas.ventas.emitir", { documentoId });
+      expect(r.ok ? null : r.error.code).toBe("UNPROCESSABLE");
+      expect(r.ok ? "" : r.error.message).toBe(
+        "Al cliente le faltan datos tributarios: giro y comuna. Complétalos en la ficha del cliente antes de emitir al SII. El documento sigue sin emitir y el folio no se usó.",
+      );
+      const pre = await s.dato<{ items: { codigo: string; ok: boolean; bloqueante: boolean; mensaje: string }[] }>(
+        "finanzas.ventas.preflight_emision",
+        { documentoId },
+      );
+      // La config de este tenant sigue en «simulado» (el adaptador está inyectado): el preflight dice qué falta,
+      // y bloquea solo con SimpleAPI configurado.
+      expect(pre.items.find((i) => i.codigo === "receptor_tributario")).toMatchObject({
+        ok: false,
+        mensaje: "Al cliente le faltan datos tributarios: giro y comuna. Complétalos en la ficha del cliente antes de emitir al SII.",
+      });
+    } finally {
+      await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: tributarios });
+    }
+    expect(firmar).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(await folioActual()).toBe(5000);
   });
 
   it("HTTP 400 de generar: UNPROCESSABLE con el motivo; borrador intacto, folio sin consumir y sin track ID", async () => {

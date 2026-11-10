@@ -74,30 +74,36 @@ export function jsonInputGenerarDte(
     ? payload.lineas
     : [{ orden: 0, glosa: payload.glosa ?? "Servicio", monto: payload.montos.total }];
   const documentoExento = payload.tipoDte === 34 || (payload.montos.neto === 0 && payload.montos.exento > 0);
-  const detalles = lineas.map((l) => ({
-    // Línea exenta o no afecta (documentación: IndicadorExento 0 afecto, 1 exento). Una NC o ND (61/56) sobre una
-    // factura exenta también es exenta: sus totales vienen sin neto ni IVA y las líneas deben cuadrar con eso (CAR-234).
-    IndicadorExento: documentoExento ? 1 : 0,
+  const detalles = lineas.map((l, i) => ({
+    NumeroLinea: i + 1,
+    // Como OPAI 1.0, que sí emite (CAR-240): la línea afecta no lleva IndicadorExento y la factura exenta (34) tampoco.
+    // Una NC o ND (61/56) sobre una factura exenta sí lo lleva en 1: sus totales vienen sin neto ni IVA y las líneas
+    // deben cuadrar con eso (CAR-234).
+    ...(documentoExento && payload.tipoDte !== 34 ? { IndicadorExento: 1 } : {}),
     Nombre: l.glosa,
     Cantidad: l.cantidad ?? 1,
     Precio: l.precioUnitario ?? l.monto,
     MontoItem: l.monto,
   }));
-  const referencias = (payload.referencias ?? []).map((r) => ({
-    // FchRef es la fecha del documento referenciado, no la de este DTE; sin dato, la de emisión (filas antiguas).
-    FechaDocumentoReferencia: fechaSii(r.fecha ?? payload.fechaEmision),
+  // Nombres JSON de OPAI 1.0 (`FechaDocumentoReferenciaString`, `Numero`): los del modelo C# de SimpleAPI.
+  const referencias = (payload.referencias ?? []).map((r, i) => ({
+    Numero: i + 1,
     TipoDocumento: String(r.tipoDte),
+    FolioReferencia: String(r.folio),
+    // FchRef es la fecha del documento referenciado, no la de este DTE; sin dato, la de emisión (filas antiguas).
+    FechaDocumentoReferenciaString: fechaSii(r.fecha ?? payload.fechaEmision),
     ...(r.codigo != null ? { CodigoReferencia: r.codigo } : {}),
     ...(r.razon ? { RazonReferencia: r.razon } : {}),
-    FolioReferencia: String(r.folio),
   }));
   return JSON.stringify({
     Documento: {
+      // ID del nodo Documento (atributo XML): fijo por tipo y folio, para que un reintento genere el mismo documento.
+      Id: `F${payload.folio}T${payload.tipoDte}`,
       Encabezado: {
         IdentificacionDTE: {
           TipoDTE: payload.tipoDte,
           Folio: payload.folio,
-          FechaEmision: fechaSii(payload.fechaEmision),
+          FechaEmisionString: fechaSii(payload.fechaEmision),
           ...(payload.fechaVencimiento ? { FechaVencimiento: fechaSii(payload.fechaVencimiento) } : {}),
           FormaPago: FORMA_PAGO_CREDITO,
         },
@@ -119,16 +125,16 @@ export function jsonInputGenerarDte(
           ...(payload.ciudadReceptor ? { Ciudad: payload.ciudadReceptor } : {}),
           ...(payload.giroReceptor ? { Giro: payload.giroReceptor } : {}),
         },
+        // Como 1.0: MontoExento siempre; la tasa y el IVA solo en un documento afecto.
         Totales: {
           MontoNeto: payload.montos.neto,
-          ...(payload.montos.exento ? { MontoExento: payload.montos.exento } : {}),
-          TasaIVA: payload.montos.iva > 0 ? 19 : 0,
-          IVA: payload.montos.iva,
+          MontoExento: payload.montos.exento,
+          ...(documentoExento ? {} : { TasaIVA: 19, IVA: payload.montos.iva }),
           MontoTotal: payload.montos.total,
         },
       },
       Detalles: detalles,
-      Referencias: referencias,
+      ...(referencias.length > 0 ? { Referencias: referencias } : {}),
     },
     Certificado: { Rut: creds.certificadoRut, Password: creds.certificadoClave },
   });
