@@ -43,9 +43,9 @@ describe("referencias · nombre y valores", () => {
     expect(nombreReferencia({ cuenta, mostrarNombre: false })).toBe(
       "Cliente de Logística en Quilicura",
     );
-    expect(nombreReferencia({ cuenta: { nombre: "X", comuna: "Maipú" }, mostrarNombre: false })).toBe(
-      "Cliente en Maipú",
-    );
+    expect(
+      nombreReferencia({ cuenta: { nombre: "X", comuna: "Maipú" }, mostrarNombre: false }),
+    ).toBe("Cliente en Maipú");
     expect(nombreReferencia({ cuenta: { nombre: "X" }, mostrarNombre: false })).toBe(
       "Cliente (reservado)",
     );
@@ -59,7 +59,11 @@ describe("referencias · nombre y valores", () => {
       { colecciones: { referencias: [v] } },
       { finalidad: "propuesta" },
     );
-    expect(r).toMatchObject({ ok: true, texto: "- Cliente de Logística en Quilicura\n", faltantes: [] });
+    expect(r).toMatchObject({
+      ok: true,
+      texto: "- Cliente de Logística en Quilicura\n",
+      faltantes: [],
+    });
   });
 
   it("sin referencias autorizadas, la repetición queda como faltante (no se rellena)", () => {

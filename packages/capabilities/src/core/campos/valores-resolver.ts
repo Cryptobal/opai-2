@@ -15,6 +15,7 @@ import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { dondeInstalacion } from "../maestros/alcance";
 import { cuentaDe } from "../maestros/cuentas-acceso";
+import { referenciasParaDocumento } from "../maestros/referencias-documento";
 
 export const MAX_INSTALACIONES = 50;
 export const valorSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
@@ -42,8 +43,14 @@ export type ValoresCamposResueltos = {
   version: number;
   finalidad: FinalidadCampo;
   campos: RegistroCampos;
-  colecciones: { instalaciones: RegistroCampos[] };
-  origen: { cuentaId: string; contactoId: string | null; instalacionIds: string[] };
+  colecciones: { instalaciones: RegistroCampos[]; referencias: RegistroCampos[] };
+  origen: {
+    cuentaId: string;
+    contactoId: string | null;
+    instalacionIds: string[];
+    /** Cuentas que salen como referencia (consentimiento vigente; CAR-138 PR 7). */
+    referenciaCuentaIds: string[];
+  };
   sinPermiso: string[];
   sinResolvedor: string[];
 };
@@ -97,6 +104,11 @@ export async function resolverCamposDocumento(
     throw noEncontrado("La instalación");
   }
 
+  // Sin permiso de lectura de referencias no se consulta nada (la clave no está autorizada).
+  const referencias = permitidas.has("referencia.cliente")
+    ? await referenciasParaDocumento(ctx, cuenta.id)
+    : [];
+
   const campos = {
     ...valoresCuenta(cuenta),
     ...(contacto ? valoresContacto({ ...contacto, cargo: vinculo?.cargo ?? contacto.cargo }) : {}),
@@ -109,11 +121,13 @@ export async function resolverCamposDocumento(
       instalaciones: instalaciones.map((i) =>
         serializable(soloAutorizados(valoresInstalacion(i), permitidas)),
       ),
+      referencias: referencias.map((r) => serializable(soloAutorizados(r.valores, permitidas))),
     },
     origen: {
       cuentaId: cuenta.id,
       contactoId: contacto?.id ?? null,
       instalacionIds: instalaciones.map((i) => i.id),
+      referenciaCuentaIds: referencias.map((r) => r.cuentaId),
     },
     sinPermiso: clases.sinPermiso.map((c) => c.clave),
     sinResolvedor: clases.sinResolvedor.map((c) => c.clave),

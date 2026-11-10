@@ -945,6 +945,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.campos.catalogo`
 - `core.campos.valores`
 - `core.consumos.por_recurso`
+- `core.cuentas_referencias.list`
+- `core.cuentas_referencias.otorgar`
+- `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
 - `core.documento_plantillas.create`
 - `core.documento_plantillas.get`
