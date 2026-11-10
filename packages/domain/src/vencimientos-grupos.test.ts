@@ -40,6 +40,12 @@ describe("agruparVencimientos", () => {
     expect(agruparVencimientos([], HOY)).toEqual([]);
   });
 
+  it("un documento que vence en 16 días entra en la banda de 30", () => {
+    const g = agruparVencimientos([doc("a", "2026-11-25")], HOY);
+    expect(g.map((x) => x.id)).toEqual(["hasta-30"]);
+    expect(g[0]?.items[0]?.dias).toBe(16);
+  });
+
   it("asigna tono: vencidos peligro, primera banda aviso, siguientes informativo", () => {
     const g = agruparVencimientos(
       [doc("a", "2026-11-01"), doc("b", "2026-11-20"), doc("c", "2026-12-20")],

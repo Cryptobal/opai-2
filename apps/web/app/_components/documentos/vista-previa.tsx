@@ -9,8 +9,9 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import { fecha } from "@/lib/fechas";
 
 import { useHojaUrl } from "../maestros/use-url";
-import { descargar } from "./menu-documento";
+import { descargar, MenuDocumento } from "./menu-documento";
 import { diasHasta, type Documento } from "./tipos";
+import { modoVista } from "./vista-modo";
 
 type Detalle = Documento & { versiones: Documento[] };
 
@@ -20,7 +21,11 @@ const imagenFirmada = (src: string, alt: string) => (
   <img src={src} alt={alt} className="max-h-[70dvh] max-w-full rounded-md object-contain" />
 );
 
-/** Vista previa (18): PDF en iframe aislado o imagen, con datos, vigencia y huella verificada. */
+/**
+ * Vista previa (18): PDF o imagen, con datos, vigencia y huella verificada. El PDF no usa
+ * `sandbox=""`: con el sandbox vacío Chrome no pinta el visor y la hoja queda en blanco, aunque la
+ * misma URL sí descarga. El archivo vive en R2, otro origen, y `frame-src` ya lo limita.
+ */
 export function VistaPrevia() {
   const hoja = useHojaUrl("ver");
   const [doc, setDoc] = useState<Detalle | null>(null);
@@ -42,7 +47,7 @@ export function VistaPrevia() {
       setUrl(null);
     };
   }, [hoja.valor]);
-  const imagen = doc?.mime.startsWith("image/");
+  const modo = doc ? modoVista(doc) : null;
   return (
     <Dialog
       abierto={hoja.abierta}
@@ -69,12 +74,9 @@ export function VistaPrevia() {
               className="hidden md:inline-flex"
             />
           ) : null}
+          {doc ? <MenuDocumento documento={doc} /> : null}
           {doc ? (
-            <Button
-              variant="secondary"
-              onClick={() => void descargar(doc.id)}
-              className="hidden md:inline-flex"
-            >
+            <Button variant="secondary" onClick={() => void descargar(doc.id)}>
               <Download className="size-4" aria-hidden /> Descargar
             </Button>
           ) : null}
@@ -85,15 +87,21 @@ export function VistaPrevia() {
       <div className="flex min-h-[60dvh] flex-1 items-center justify-center bg-fill p-4">
         {!doc || !url ? (
           <Skeleton className="h-[60dvh] w-full max-w-[640px]" />
-        ) : imagen ? (
+        ) : modo === "imagen" ? (
           imagenFirmada(url, doc.nombre)
-        ) : (
+        ) : modo === "pdf" ? (
           <iframe
             title={doc.nombre}
             src={url}
-            sandbox=""
             className="h-[70dvh] w-full max-w-[860px] rounded-md border border-border bg-surface"
           />
+        ) : (
+          <div className="flex max-w-md flex-col items-center gap-3 px-4 text-center">
+            <p className="text-base text-fg">Este formato no se muestra en el navegador.</p>
+            <Button variant="secondary" onClick={() => void descargar(doc.id)}>
+              <Download className="size-4" aria-hidden /> Descargar
+            </Button>
+          </div>
         )}
       </div>
       {doc ? (
