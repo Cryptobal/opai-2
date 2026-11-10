@@ -151,7 +151,8 @@ jobs:
   test-db:
     name: test:db
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Margen sobre lo que tarda hoy (~19 min en main el 10-nov-2026, antes de omitir `migrate deploy` por archivo).
+    timeout-minutes: 30
     env:
       TURBO_CACHE_DIR: .turbo
     services:
