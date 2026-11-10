@@ -75,6 +75,7 @@ describe("firmar (POST dte/generar)", () => {
     expect(entrada.Documento.Id).toBe("F101T33");
     expect(entrada.Documento.Encabezado.IdentificacionDTE).toMatchObject({ TipoDTE: 33, Folio: 101, FechaEmisionString: "2026-11-06" });
     expect(entrada.Documento.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaEmision");
+    expect(entrada.Documento.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaVencimiento"); // sin vencimiento
     expect(entrada.Documento.Detalles[0]).toMatchObject({ NumeroLinea: 1, Nombre: "Servicio de guardias - mes de noviembre" });
     expect(entrada.Documento).not.toHaveProperty("Referencias"); // sin referencias no va la lista vacía
     // input en ISO-8859-1: «ñ» es un byte (0xF1), no los dos de UTF-8.
