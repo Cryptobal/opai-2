@@ -21,6 +21,11 @@ export type Perfil = Record<
   string | null
 >;
 export type Tenant = { nombre: string; slug: string; vertical: string; timezone: string };
+/** ACTECO de `core.empresa.acteco_get` (CAR-243). */
+export type Actividades = {
+  principal: number | null;
+  actividades: { codigo: number; codigoSii: string; glosa: string | null; principal: boolean }[];
+};
 
 export type Textos = Omit<Perfil, "calle" | "comuna" | "region">;
 export type DatosEmpresa = {
