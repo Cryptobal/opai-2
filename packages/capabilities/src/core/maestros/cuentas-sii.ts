@@ -101,8 +101,9 @@ export const cuentasAplicarSii = defineCapability({
       throw reglaDeNegocio(
         "La cuenta no tiene un RUT válido; corrígelo antes de consultar al SII.",
       );
-    // Del SII (caché vigente o consulta nueva): nunca se aplica un valor que venga del input.
-    const r = await consultarContribuyente(ctx, rut);
+    // Del SII (caché vigente o consulta nueva): nunca se aplica un valor que venga del input. La
+    // vista previa no escribe la caché.
+    const r = await consultarContribuyente(ctx, rut, { guardar: !dryRun });
     if (r.estado !== "ok" && r.estado !== "sin_inicio") throw reglaDeNegocio(r.mensaje);
     const sii = valoresSii(r.datos);
     const pedidos = new Set(input.campos);

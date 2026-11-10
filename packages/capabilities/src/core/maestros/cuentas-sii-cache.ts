@@ -99,21 +99,23 @@ export async function guardarCacheSii(
 
 /**
  * Consulta con caché: si hay una respuesta vigente, la devuelve sin salir al proveedor; si no (o si
- * se pide `refrescar` y la guardada tiene más de 10 minutos), consulta y guarda la respuesta.
+ * se pide `refrescar` y la guardada tiene más de 10 minutos), consulta y guarda la respuesta. Si al
+ * refrescar el SII no responde, se devuelve la guardada vigente (no se pierde un dato válido). Con
+ * `guardar: false` (vista previa de una escritura) no escribe la caché.
  */
 export async function consultarContribuyente(
   ctx: Contexto,
   rut: string,
-  { refrescar = false }: { refrescar?: boolean } = {},
+  { refrescar = false, guardar = true }: { refrescar?: boolean; guardar?: boolean } = {},
 ): Promise<ConsultaSii> {
   const ahora = new Date();
   const fila = await filaDe(ctx, rut);
   const guardada = fila ? desdeFila(fila) : null;
-  if (guardada && fila && cacheSiiVigente(fila.venceEn, ahora)) {
-    if (!refrescar || !puedeRefrescarSii(fila.consultadoEn, ahora)) return guardada;
-  }
+  const vigente = guardada && fila && cacheSiiVigente(fila.venceEn, ahora) ? guardada : null;
+  if (vigente && fila && (!refrescar || !puedeRefrescarSii(fila.consultadoEn, ahora))) return vigente;
   const r = await consultarProveedor(ctx, rut);
-  await guardarCacheSii(ctx, rut, r, ahora);
-  const desdeSii = r.estado !== "no_configurado" && r.estado !== "sin_respuesta";
+  const desdeSii = esEstadoCacheSii(r.estado);
+  if (!desdeSii && vigente) return vigente;
+  if (guardar) await guardarCacheSii(ctx, rut, r, ahora);
   return { ...r, origen: desdeSii ? "sii" : null, consultadoEn: desdeSii ? ahora : null };
 }

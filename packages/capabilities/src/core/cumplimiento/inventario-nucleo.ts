@@ -44,16 +44,6 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     baseLicitud: "contrato",
   },
   {
-    tabla: "sii_contribuyentes",
-    finalidad:
-      "Caché de la consulta al SII por RUT (CAR-156) para completar los datos tributarios de las cuentas; si el contribuyente es persona natural, su RUT, nombre y domicilio tributario son personales.",
-    categorias: ["identificacion"],
-    campos: ["rut", "datos"],
-    baseLicitud: "contrato",
-    destinatarios: ["SimpleAPI RUT (consulta de contribuyente) — a confirmar por legal"],
-    retencion: "Se reemplaza al vencer (30 días con datos, 7 sin inicio de actividades, 1 sin registros); purga de filas vencidas pendiente.",
-  },
-  {
     tabla: "contactos",
     finalidad: "Contactos de las cuentas cliente para la relación comercial y operativa.",
     categorias: ["identificacion", "contacto"],

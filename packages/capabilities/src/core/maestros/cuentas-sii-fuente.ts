@@ -8,7 +8,7 @@ import {
 import { listaParaFacturar } from "@opai/domain";
 
 import { consumoBase } from "../../integraciones/consumo-base";
-import { credencialDe } from "../../integraciones/resolver";
+import { credencialDe, integracionDe } from "../../integraciones/resolver";
 import type { Contexto } from "../../types";
 
 /** Fuente de prueba (tests y e2e): reemplaza al proveedor real sin tocar el almacén de secretos. */
@@ -22,6 +22,18 @@ export async function fuenteContribuyente(ctx: Contexto): Promise<ConsultaContri
   if (fuenteFija) return fuenteFija;
   const cred = await credencialDe(ctx, "sii_contribuyente");
   return cred ? contribuyenteSimpleApi(cred.valor) : contribuyenteNoConfigurado();
+}
+
+/**
+ * Si hay proveedor configurado, sin descifrar la key (CAR-156): el alta y el importador solo necesitan
+ * saber si encolar. Misma regla que `credencialDe` para la modalidad propia (la única de esta integración).
+ */
+export async function contribuyenteConfigurado(ctx: Contexto): Promise<boolean> {
+  if (fuenteFija) return fuenteFija.disponible;
+  const fila = await integracionDe(ctx, "sii_contribuyente");
+  if (fila?.modalidad !== "propia") return false;
+  const n = await ctx.db.secreto.count({ where: { integracionId: fila.id, nombre: "api_key" } });
+  return n > 0;
 }
 
 /**

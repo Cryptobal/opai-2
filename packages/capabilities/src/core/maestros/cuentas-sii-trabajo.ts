@@ -8,21 +8,16 @@ import type { TenantTx } from "@opai/db";
 import { defineTrabajo } from "../../trabajos/registro";
 import type { Contexto } from "../../types";
 import { cacheSiiEnBloque, guardarCacheSii } from "./cuentas-sii-cache";
-import { consultarProveedor, fuenteContribuyente } from "./cuentas-sii-fuente";
+import { consultarProveedor, contribuyenteConfigurado } from "./cuentas-sii-fuente";
 
 export const TIPO_TRABAJO_SII = "core.sii.consultar_contribuyente";
 
 /**
- * Si hay proveedor de consulta (key de SimpleAPI RUT cargada o fuente de prueba). Un fallo al leer la
- * credencial cuenta como «no configurado»: el alta y el importador no se caen por el SII.
+ * Si hay proveedor de consulta (key de SimpleAPI RUT cargada o fuente de prueba), sin descifrar la key.
+ * Corre dentro de la transacción de quien llama: no atrapa errores de base (abortarían la transacción
+ * igual); un error de base hace fallar el alta o el importador como cualquier otra lectura.
  */
-export async function siiDisponible(ctx: Contexto): Promise<boolean> {
-  try {
-    return (await fuenteContribuyente(ctx)).disponible;
-  } catch {
-    return false;
-  }
-}
+export const siiDisponible = (ctx: Contexto) => contribuyenteConfigurado(ctx);
 
 /**
  * Encola (en `tx`) la consulta de un RUT: a lo más una por RUT y día. No llama al proveedor. Devuelve
@@ -76,3 +71,15 @@ export async function prepararSiiAlCrear(ctx: Contexto, rut: string | null | und
   if (!(await siiDisponible(ctx))) return { ...nada, sii: "no_configurado" as const };
   return { sii: "en_cola" as const, encolar: (tx: TenantTx) => encolarConsultaSii(ctx, tx, rut) };
 }
+
+/** Borra cada día las respuestas del SII vencidas de la empresa (retención, Ley 21.719). */
+export const trabajoPurgarCacheSii = defineTrabajo({
+  tipo: "core.sii.purgar_cache",
+  descripcion: "Borra las respuestas del SII guardadas que ya vencieron (caché de consulta por RUT).",
+  payload: z.object({ dia: z.string() }),
+  periodicidad: "diaria",
+  async handler(ctx) {
+    const r = await ctx.db.siiContribuyente.deleteMany({ where: { venceEn: { lte: new Date() } } });
+    return { borradas: r.count };
+  },
+});

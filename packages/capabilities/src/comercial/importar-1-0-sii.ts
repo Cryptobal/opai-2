@@ -1,7 +1,8 @@
 // Consulta al SII en lote del importador de 1.0 (CAR-156). Simular solo lee la caché (no escribe ni
 // llama al proveedor); aplicar encola la consulta de los RUT sin caché vigente. Nunca escribe datos del
 // SII en las cuentas (eso es `core.cuentas.aplicar_sii`) ni inventa datos: si el SII no está
-// configurado o la caché falla, lo reporta y el importador sigue igual.
+// configurado lo reporta y el importador sigue igual. Solo lee la caché y la integración (nunca llama
+// al proveedor), así que un SII caído no la afecta.
 import { z } from "zod";
 
 import { compararConSii, normalizarRut } from "@opai/domain";
@@ -77,8 +78,9 @@ export async function resumenSiiDelPlan(
       encoladas,
     };
   } catch {
-    // El lote del SII es un extra: si falla fuera de la base (p. ej. el proveedor), el importador no se
-    // cae ni inventa datos.
+    // El lote del SII es un extra: un error fuera de la base no tumba el importador ni inventa datos.
+    // (Un error de base dentro de la transacción del handler la aborta igual; aquí solo hay lecturas
+    // simples de la caché y la inserción en la cola.)
     return { ...vacio, estado: "error", porConsultar: porRut.size };
   }
 }

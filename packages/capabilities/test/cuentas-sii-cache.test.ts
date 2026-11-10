@@ -7,7 +7,10 @@ import {
 } from "@opai/integrations";
 
 import { fijarFuenteContribuyente } from "../src";
-import { trabajoConsultarContribuyenteSii } from "../src/core/maestros/cuentas-sii-trabajo";
+import {
+  trabajoConsultarContribuyenteSii,
+  trabajoPurgarCacheSii,
+} from "../src/core/maestros/cuentas-sii-trabajo";
 import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
 import { dato, reiniciar } from "./maestros-ayuda";
 
@@ -85,6 +88,35 @@ describe("consulta al SII con caché por (empresa, RUT)", () => {
   });
 });
 
+describe("caché · vista previa, refresco y proveedor sin configurar", () => {
+  it("la vista previa de aplicar no escribe la caché", async () => {
+    const c = ctx();
+    await dato(c.ctx, "core.cuentas.aplicar_sii", { id: CU, campos: ["calle"] }, { dryRun: true });
+    expect(c.tabla("siiContribuyente") ?? []).toHaveLength(0);
+    expect(c.tabla("cuenta")?.find((x) => x["id"] === CU)?.["calle"] ?? null).toBeNull();
+  });
+
+  it("al refrescar, si el SII no responde se conserva la respuesta guardada vigente", async () => {
+    const c = ctx();
+    await dato(c.ctx, "core.cuentas.consultar_sii", { id: CU });
+    const fila = (c.tabla("siiContribuyente") ?? [])[0];
+    if (fila) fila["consultadoEn"] = new Date(Date.now() - 20 * 60_000);
+    fijarFuenteContribuyente(
+      contribuyenteSimulado({ [RUT]: { estado: "sin_respuesta", mensaje: "caído" } }),
+    );
+    const r = await dato<Consulta>(c.ctx, "core.cuentas.consultar_sii", { id: CU, refrescar: true });
+    expect(r).toMatchObject({ estado: "ok", origen: "cache" });
+  });
+
+  it("sin fuente fija ni integración cargada, el alta no encola (sin descifrar nada)", async () => {
+    fijarFuenteContribuyente(null);
+    const c = ctx();
+    const r = await dato<{ sii: string }>(c.ctx, "core.cuentas.create", { nombre: "Sin key", rut: OTRO });
+    expect(r.sii).toBe("no_configurado");
+    expect(c.tabla("trabajo") ?? []).toHaveLength(0);
+  });
+});
+
 describe("consulta al crear la cuenta", () => {
   type Creada = { id: string; sii: string };
 
@@ -148,5 +180,16 @@ describe("trabajo core.sii.consultar_contribuyente", () => {
     await expect(trabajoConsultarContribuyenteSii.ejecutar(c.ctx, { rut: OTRO })).rejects.toThrow(
       /no respondió/,
     );
+  });
+
+  it("la purga diaria borra solo las respuestas vencidas", async () => {
+    const c = ctx();
+    await trabajoConsultarContribuyenteSii.ejecutar(c.ctx, { rut: RUT });
+    await trabajoConsultarContribuyenteSii.ejecutar(c.ctx, { rut: OTRO });
+    const filas = c.tabla("siiContribuyente") ?? [];
+    const vencida = filas.find((f) => f["rut"] === OTRO);
+    if (vencida) vencida["venceEn"] = new Date(Date.now() - 1000);
+    expect(await trabajoPurgarCacheSii.ejecutar(c.ctx, { dia: "2026-11-10" })).toEqual({ borradas: 1 });
+    expect((c.tabla("siiContribuyente") ?? []).map((f) => f["rut"])).toEqual([RUT]);
   });
 });
