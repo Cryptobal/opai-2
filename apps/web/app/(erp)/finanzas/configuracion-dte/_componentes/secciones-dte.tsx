@@ -33,6 +33,22 @@ export function SeccionesDte({ f, set, esOwner, pendiente, errores }: Props) {
               placeholder="76111222-8"
             />
           </Campo>
+          <Campo
+            etiqueta="ACTECO (actividad económica)"
+            htmlFor="dte-acteco"
+            ayuda="Código del SII que va en cada factura. Sin él, el SII la rechaza."
+            error={errores.acteco}
+          >
+            <Input
+              id="dte-acteco"
+              inputMode="numeric"
+              aria-invalid={errores.acteco ? true : undefined}
+              value={f.acteco}
+              disabled={pendiente}
+              onChange={(e) => set("acteco", e.target.value)}
+              placeholder="801000"
+            />
+          </Campo>
           <Campo etiqueta="Conector de emisión" htmlFor="dte-emision">
             <Select
               id="dte-emision"

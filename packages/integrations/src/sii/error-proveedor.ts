@@ -10,6 +10,8 @@ export class ErrorProveedorSii extends Error {
   readonly motivoSeguro: string;
   /** Headers de límite de uso de la respuesta (`x-rate-limit-*`, `retry-after`), saneados; van al log (CAR-240). */
   limites: Readonly<Record<string, string>> = {};
+  /** Forma del cuerpo de una respuesta no 2xx, sin su texto (CAR-240): distingue un 401 vacío de uno con motivo. */
+  cuerpo: FormaCuerpo | null = null;
 
   constructor(
     readonly paso: PasoProveedorSii,
@@ -24,6 +26,23 @@ export class ErrorProveedorSii extends Error {
     super(`SimpleAPI ${paso}: ${motivo}`);
     this.motivoSeguro = `SimpleAPI ${paso}: ${motivo}`;
   }
+}
+
+/**
+ * «vacio»: sin cuerpo (SimpleAPI rechaza así un contenido inválido); «suscripcion»: habla de la API key, la
+ * suscripción, el token o el cupo (la documentación de SimpleAPI usa 401 también para «falta de suscripción válida o
+ * token expirado»); «otro»: cualquier otro texto. Nunca se guarda el texto.
+ */
+export type FormaCuerpo = "vacio" | "suscripcion" | "otro";
+
+// Solo frases sobre la key o el plan: «Certificado vencido» o «CAF vencido» son del contenido y quedan como «otro».
+const SUSCRIPCION =
+  /suscrip|subscri|api ?key (vencida|expirada|bloqueada|inv[aá]lida|no v[aá]lida)|token (vencido|expirado)|expired token|cupo|l[ií]mite mensual|no tiene acceso a la api/i;
+
+export function formaDeCuerpo(cuerpo: string): FormaCuerpo {
+  const t = cuerpo.slice(0, 8 * 1024).trim();
+  if (!t) return "vacio";
+  return SUSCRIPCION.test(t) ? "suscripcion" : "otro";
 }
 
 const HEADER_LIMITE = /^(x-rate-?limit-[a-z0-9-]{1,40}|retry-after)$/i;
