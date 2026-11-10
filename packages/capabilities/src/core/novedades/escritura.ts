@@ -13,7 +13,7 @@ async function upsertLectura(
   novedadId: string,
   datos: { leidaEn?: Date; destacadaDescartadaEn?: Date },
 ) {
-  const db = dbLecturaNovedades(ctx);
+  const db = await dbLecturaNovedades(ctx);
   const existente = await db.novedadLectura.findFirst({
     where: { tenantId: ctx.tenantId, usuarioId, novedadId },
   });
@@ -22,7 +22,9 @@ async function upsertLectura(
       where: { id: existente.id },
       data: {
         ...(datos.leidaEn ? { leidaEn: datos.leidaEn } : {}),
-        ...(datos.destacadaDescartadaEn ? { destacadaDescartadaEn: datos.destacadaDescartadaEn } : {}),
+        ...(datos.destacadaDescartadaEn
+          ? { destacadaDescartadaEn: datos.destacadaDescartadaEn }
+          : {}),
       },
     });
     return;
