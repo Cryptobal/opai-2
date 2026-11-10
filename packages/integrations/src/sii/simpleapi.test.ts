@@ -161,7 +161,10 @@ describe("enviar (sobre de envío y envío al SII)", () => {
       [`${B}/envio/generar`]: () => xmlLatin1(fixture("simpleapi-envio-dte.xml")),
       [`${B}/envio/enviar`]: () => json({ ok: false, trackId: 0, glosa: "Error de firma" }),
     });
-    await expect(adaptadorSimpleApi(creds).enviar(xmlDesdeBytes(dte), "produccion")).rejects.toThrow(/Error de firma/);
+    await expect(adaptadorSimpleApi(creds).enviar(xmlDesdeBytes(dte), "produccion")).rejects.toMatchObject({
+      motivo: "el SII no recibió el envío",
+      detalle: "Error de firma",
+    });
     expect(JSON.parse(String(llamadas[1]?.form.get("input"))).Ambiente).toBe(1);
   });
 });
@@ -198,7 +201,7 @@ describe("disponibilidad", () => {
     for (const c of [null, { ...creds, apiKey: "" }, { ...creds, certificadoRut: "" }, { ...creds, rutEmpresa: "" }]) {
       const a = adaptadorSimpleApi(c);
       expect(a.disponible).toBe(false);
-      await expect(a.firmar(payload)).rejects.toThrow(/no configurado/);
+      await expect(a.firmar(payload)).rejects.toThrow(/no está configurada/);
     }
     expect(llamadas).toHaveLength(0);
     expect(adaptadorSimpleApi(creds).disponible).toBe(true); // resolución 0 es válida en certificación

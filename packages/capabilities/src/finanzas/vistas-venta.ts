@@ -46,6 +46,10 @@ export const ventaSchema = z.object({
   trackIdSii: z.string().nullable(),
   documentoReferenciaId: z.string().nullable(),
   lineas: z.array(lineaSchema),
+  emisionPrevista: z
+    .object({ proveedor: z.enum(["simulado", "simpleapi"]), ambiente: z.enum(["certificacion", "produccion"]) })
+    .optional()
+    .describe("Solo en la vista previa de emitir: proveedor y ambiente con que se firmaría (CAR-242)."),
 });
 
 type FilaVenta = {

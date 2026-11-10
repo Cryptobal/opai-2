@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import { bytesDeXml, xmlDesdeBytes, type AdaptadorCesion, type AdaptadorSii } from "@opai/integrations";
 
-import { reglaDeNegocio } from "../errores";
+import { ErrorConMotivo, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
 export function claveXmlDte(documentoId: string): string {
@@ -22,7 +22,11 @@ export async function guardarXmlFirmadoDte(
   // ADR-075: el XML firmado es ISO-8859-1 y se guarda como esos mismos bytes; el SHA-256 se calcula sobre ellos.
   const bytes = bytesDeXml(xml);
   const sha256 = createHash("sha256").update(bytes).digest("hex");
-  await ctx.servicios.almacenamiento.subir(clave, bytes, "application/xml; charset=ISO-8859-1", sha256);
+  try {
+    await ctx.servicios.almacenamiento.subir(clave, bytes, "application/xml; charset=ISO-8859-1", sha256);
+  } catch (cause) {
+    throw new ErrorConMotivo("almacenamiento: no se pudo guardar el XML firmado del DTE", { cause });
+  }
 }
 
 export async function leerXmlFirmadoDte(ctx: Contexto, xmlStorageKey: string | null): Promise<string> {

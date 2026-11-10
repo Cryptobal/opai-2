@@ -11,6 +11,7 @@ import { hoy } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { adaptadorSiiDe } from "./adaptador-sii";
+import { comoReglaSiProveedorSii } from "./errores-sii";
 import { ambienteDe, cuentaDe, montosNotaCredito, rutEmisorDe } from "./ventas-comun";
 import { foliosPrevistos } from "./ventas-folios-logica";
 import { notasCreditoPreviasDe, validarNotaCreditoEmision } from "./ventas-nc-comun";
@@ -82,7 +83,9 @@ export async function prepararNotaCredito(
     },
     incluirCaf: adaptador.nombre !== "simulado",
   });
-  const firmado = await adaptador.firmar(payload);
+  const firmado = await adaptador.firmar(payload).catch((e: unknown) => {
+    throw comoReglaSiProveedorSii(e, "La nota de crédito no se emitió y el folio no se usó.");
+  });
   if (adaptador.nombre !== "simulado") await guardarXmlFirmadoDte(ctx, documentoId, firmado.xml);
   return {
     documentoId,

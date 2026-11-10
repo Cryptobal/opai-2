@@ -9,6 +9,7 @@ import { hoy } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { adaptadorSiiDe } from "./adaptador-sii";
+import { comoReglaSiProveedorSii } from "./errores-sii";
 import { ambienteDe, cuentaDe, rutEmisorDe } from "./ventas-comun";
 import { foliosPrevistos } from "./ventas-folios-logica";
 import { payloadEmisionDteDe } from "./ventas-payload-emision";
@@ -119,7 +120,11 @@ export async function prepararEmision(ctx: Contexto, documentoId: string, folioA
     },
     incluirCaf: adaptador.nombre !== "simulado",
   });
-  const firmado = await adaptador.firmar(payload);
+  // Un fallo del proveedor llega a la persona como regla de negocio con su motivo (CAR-242). Nada se escribió:
+  // el folio solo se reclama después, dentro de la transacción de `emitirBorrador`.
+  const firmado = await adaptador.firmar(payload).catch((e: unknown) => {
+    throw comoReglaSiProveedorSii(e, "El borrador sigue sin emitir y el folio no se usó.");
+  });
   // Clave única por intento: dos firmas concurrentes del mismo borrador no se pisan el XML (el de un documento
   // ya emitido nunca se sobrescribe); la transacción que gana fija su clave.
   const xmlStorageKey = adaptador.nombre === "simulado" ? null : `dte/${doc.id}/${randomUUID()}.xml`;

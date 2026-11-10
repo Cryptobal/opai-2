@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { adaptadorSiiDe } from "./adaptador-sii";
+import { comoReglaSiProveedorSii } from "./errores-sii";
 import { encolarConsultaSiPendiente } from "./trabajos-dte";
 import { xmlParaEnvioSii } from "./ventas-xml";
 
@@ -30,7 +31,13 @@ export const ventasEnviarSii = defineCapability({
     const adaptador = await adaptadorSiiDe(ctx);
     const xml = await xmlParaEnvioSii(ctx, doc, adaptador);
     if (dryRun) return vistaDeDocumento(ctx, doc.id);
-    const envio = await adaptador.enviar(xml, ambiente);
+    const envio = await adaptador.enviar(xml, ambiente).catch((e: unknown) => {
+      throw comoReglaSiProveedorSii(e, (err) =>
+        err.incierto
+          ? "El resultado es incierto: el SII pudo haberlo recibido. Consulte el estado del envío antes de reenviar."
+          : "El documento sigue firmado y sin track ID; puede reintentar el envío.",
+      );
+    });
     let envioId = "";
     await escribirConEvento(
       ctx,

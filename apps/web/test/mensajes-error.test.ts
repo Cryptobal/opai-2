@@ -29,4 +29,13 @@ describe("mensajes de error (B7)", () => {
       /No se puede hacer en este momento/,
     );
   });
+  it("muestra el motivo de un fallo de SimpleAPI al emitir, no el INTERNAL genérico (CAR-242)", () => {
+    // Mismo texto que exige packages/capabilities/test/finanzas-emitir-simpleapi-fallo-db.test.ts.
+    const m =
+      "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 400 (Rut receptor no valido). El borrador sigue sin emitir y el folio no se usó.";
+    expect(mensajeDeError("UNPROCESSABLE", m)).toBe(m);
+    const sinXml =
+      "SimpleAPI no pudo generar ni firmar el DTE: la respuesta no es un XML de DTE. El borrador sigue sin emitir y el folio no se usó.";
+    expect(mensajeDeError("UNPROCESSABLE", sinXml)).toBe(sinXml);
+  });
 });
