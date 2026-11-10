@@ -956,6 +956,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.documento_plantillas.update`
 - `core.documentos.desvincular`
 - `core.documentos.vincular`
+- `core.empresa.acteco_buscar`
+- `core.empresa.acteco_get`
+- `core.empresa.acteco_set`
 - `core.estructuras.get`
 - `core.etiquetas.delete`
 - `core.etiquetas.update`
