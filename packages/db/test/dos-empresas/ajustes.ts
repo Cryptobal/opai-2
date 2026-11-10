@@ -338,6 +338,14 @@ export const AJUSTES: Record<string, Ajuste> = {
       motivo: null, descripcion: null, cita: null, mostrar_nombre: false,
     }),
   },
+  // Caché SII (CAR-156): CHECK de estado, formato de RUT, datos según estado y vencimiento posterior.
+  "core.sii_contribuyentes": {
+    fijas: ["rut"],
+    valores: () => ({
+      rut: "11111111-1", estado: "ok", datos: JSON.stringify({ razonSocial: "FICTICIA SPA" }),
+      consultado_en: "2026-11-01T00:00:00Z", vence_en: "2026-12-01T00:00:00Z",
+    }),
+  },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },
   "core.actividad_vinculos": {

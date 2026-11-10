@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 
+import { textoFaltan } from "@opai/domain";
 import { Badge, ChipsEtiquetas, type EstadoPantalla, MonoAv } from "@opai/ds";
 
 import { filtroDeEtiquetas, type OpcionEtiqueta } from "@/app/_components/etiquetas/opciones";
@@ -13,6 +14,22 @@ import type { CuentaFila } from "@/lib/tipos-maestros";
 
 const plural = (n: number) =>
   n === 0 ? "sin instalaciones" : `${n} ${n === 1 ? "instalación" : "instalaciones"}`;
+
+/**
+ * «Lista para facturar» o «Faltan N datos» (CAR-156), del mismo dominio que la ficha y sin llamar al
+ * SII. Falta algo en un cliente activo: aviso; en un prospecto o cliente inactivo: neutro.
+ */
+function Facturar({ c }: { c: CuentaFila }) {
+  const f = c.facturar;
+  if (!f) return null;
+  if (f.lista) return <Badge tono="success">Lista para facturar</Badge>;
+  const n = f.faltan.length;
+  return (
+    <Badge tono={c.estado === "cliente_activo" ? "warning" : "neutro"} title={textoFaltan(f.faltan)}>
+      {`Faltan ${n} ${n === 1 ? "dato" : "datos"} para facturar`}
+    </Badge>
+  );
+}
 
 /** Columna de cuentas (lista 01/02): monograma, nombre, "RUT · instalaciones" y estado. */
 export function ListaCuentas(p: {
@@ -79,6 +96,9 @@ export function ListaCuentas(p: {
           terciario: (
             <>
               <span className="md:hidden">{plural(c.instalaciones)}</span>
+              <span className="mt-1 flex">
+                <Facturar c={c} />
+              </span>
               <ChipsEtiquetas compacto etiquetas={c.etiquetas ?? []} className="mt-1" />
             </>
           ),

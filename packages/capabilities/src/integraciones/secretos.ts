@@ -93,6 +93,8 @@ export async function insertarSecretoConIdTx(
   integracionId: string,
   nombre: string,
   valor: string,
+  /** Bytes exactos a cifrar cuando el valor no es UTF-8 (el CAF, en ISO-8859-1; CAR-240). */
+  claro: Buffer = Buffer.from(valor, "utf8"),
 ): Promise<{ id: string; sufijo: string }> {
   await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
   const previo = await tx.secreto.findUnique({
@@ -102,7 +104,7 @@ export async function insertarSecretoConIdTx(
   if (previo) {
     throw reglaDeNegocio("Ya existe un secreto registrado para este rango de folios.");
   }
-  const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+  const c = cifrar(await dekDe({ ...ctx, db: tx }), claro);
   const datos = {
     cifrado: bytes(c.cifrado),
     iv: bytes(c.iv),

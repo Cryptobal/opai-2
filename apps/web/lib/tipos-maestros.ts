@@ -1,5 +1,6 @@
 // Formas de salida de las capacidades de maestros que usan las pantallas (subconjunto).
 import type { ConEtiquetas } from "./tipos-etiquetas";
+import type { ConFacturar } from "./tipos-facturar";
 
 export type Pagina<T> = { items: T[]; siguiente: string | null };
 
@@ -23,7 +24,7 @@ export type Cuenta = {
   clienteDesde: string | null;
   clienteHasta: string | null;
 };
-export type CuentaFila = ConEtiquetas<Cuenta & { instalaciones: number; contactoPrincipal: string | null }>;
+export type CuentaFila = ConEtiquetas<ConFacturar<Cuenta & { instalaciones: number; contactoPrincipal: string | null }>>;
 export type CuentaDetalle = Cuenta & {
   representantes: { id: string; nombre: string; rut: string; email: string | null }[];
   contactos: { id: string; nombre: string; email: string | null; esPrincipal: boolean }[];
