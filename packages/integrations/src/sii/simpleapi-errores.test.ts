@@ -124,4 +124,26 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     });
     expect(JSON.stringify(e.limites)).not.toContain(CLAVE_API);
   });
+  it("401 con x-rate-limit-*: la key autenticó y lo rechazado es el contenido (como 1.0), sin secretos", async () => {
+    const headers = { "x-rate-limit-remaining": "39" };
+    generar(() => new Response(JSON.stringify({ mensaje: `clave ${CLAVE_PFX}` }), { status: 401, headers }));
+    const e = await firmarError();
+    expect(e.motivo).toBe("rechazó el contenido (certificado, CAF o datos), HTTP 401");
+    expect(e.motivoSeguro).toBe("SimpleAPI generar: rechazó el contenido (certificado, CAF o datos), HTTP 401");
+    for (const s of [CLAVE_API, CLAVE_PFX]) expect(`${e.motivoSeguro} ${e.detalle ?? ""}`).not.toContain(s);
+  });
+  it("401 o 403 sin x-rate-limit-*: la key no fue reconocida", async () => {
+    for (const status of [401, 403]) {
+      generar(() => new Response("", { status }));
+      expect((await firmarError()).motivo).toBe(`no reconoció la API key, HTTP ${status}`);
+    }
+  });
+  it("400 o 422 con x-rate-limit-*: contenido rechazado; 400 sin ellos queda como estado HTTP", async () => {
+    for (const status of [400, 422]) {
+      generar(() => new Response("", { status, headers: { "x-ratelimit-remaining": "10" } }));
+      expect((await firmarError()).motivo).toBe(`rechazó el contenido (certificado, CAF o datos), HTTP ${status}`);
+    }
+    generar(() => new Response("", { status: 400, headers: { "retry-after": "5" } }));
+    expect((await firmarError()).motivo).toBe("respondió HTTP 400");
+  });
 });

@@ -1,30 +1,56 @@
 import { detalleSeguroDeRespuesta, ErrorProveedorSii, limitesDeRespuesta, type PasoProveedorSii } from "./error-proveedor";
-import { bytesDeXml } from "./xml-iso";
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
+import { cuerpoMultipart, type ParteMultipart } from "./simpleapi-multipart";
+import { bytesDeXml } from "./xml-iso";
 
-export type ParteMultipart = { nombre: string; valor: string | Blob; nombreArchivo?: string };
+export type { ParteMultipart } from "./simpleapi-multipart";
 
-/** POST multipart con la API key en `Authorization`. La llamada nunca corre dentro de una transacción de base. */
+/**
+ * POST multipart con Basic api:key en `Authorization` y el cuerpo armado como en OPAI 1.0 (CAR-240). La llamada nunca
+ * corre dentro de una transacción de base.
+ */
 export async function postMultipartSimpleApi(
   url: string,
   apiKey: string,
   partes: readonly ParteMultipart[],
 ): Promise<Response> {
-  const form = new FormData();
-  for (const p of partes) {
-    if (typeof p.valor === "string") form.append(p.nombre, p.valor);
-    else form.append(p.nombre, p.valor, p.nombreArchivo ?? "archivo.bin");
+  const { cuerpo, contentType } = cuerpoMultipart(partes);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: encabezadoAuthSimpleApi(apiKey),
+      "Content-Type": contentType,
+      Accept: "application/json, text/xml, text/plain",
+    },
+    body: new Uint8Array(cuerpo),
+  });
+}
+
+/** El certificado .pfx como archivo `file` (sus bytes, desde el base64 guardado). */
+export function archivoPfx(base64: string): ParteMultipart {
+  return { nombre: "file", bytes: Buffer.from(base64, "base64"), tipo: "application/x-pkcs12", nombreArchivo: "certificado.pfx" };
+}
+
+/**
+ * Un XML (CAF, DTE o sobre) como archivo `file`, en los mismos bytes ISO-8859-1 que se recibieron (ADR-075), nunca
+ * transcodificado a UTF-8: la firma del CAF y del DTE cubre esos bytes.
+ */
+export function archivoXml(xmlLatin1: string, nombreArchivo: string): ParteMultipart {
+  return { nombre: "file", bytes: bytesDeXml(xmlLatin1), tipo: "application/xml", nombreArchivo };
+}
+
+/**
+ * Motivo de un HTTP no 2xx (CAR-240, como `describeSimpleApiError` de 1.0): SimpleAPI usa 401 tanto para una key no
+ * reconocida como para un contenido rechazado. Solo cuando reconoce la key envía los headers `x-rate-limit-*`; con
+ * ellos, el 401 es del contenido (certificado, CAF o datos), no de la key.
+ */
+function motivoHttp(status: number, limites: Readonly<Record<string, string>>): string {
+  const keyReconocida = Object.keys(limites).some((h) => h.startsWith("x-rate-limit-") || h.startsWith("x-ratelimit-"));
+  if ((status === 401 || status === 400 || status === 422) && keyReconocida) {
+    return `rechazó el contenido (certificado, CAF o datos), HTTP ${status}`;
   }
-  return fetch(url, { method: "POST", headers: { Authorization: encabezadoAuthSimpleApi(apiKey) }, body: form });
-}
-
-export function blobBase64(base64: string, tipo: string): Blob {
-  return new Blob([Buffer.from(base64, "base64")], { type: tipo });
-}
-
-/** El XML de un DTE sale como los mismos bytes ISO-8859-1 que se recibieron (ADR-075), nunca como UTF-8. */
-export function blobXml(xmlLatin1: string): Blob {
-  return new Blob([new Uint8Array(bytesDeXml(xmlLatin1))], { type: "application/xml; charset=iso-8859-1" });
+  if ((status === 401 || status === 403) && !keyReconocida) return `no reconoció la API key, HTTP ${status}`;
+  return `respondió HTTP ${status}`;
 }
 
 /**
@@ -34,9 +60,10 @@ export function blobXml(xmlLatin1: string): Blob {
 async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readonly string[]): Promise<ErrorProveedorSii> {
   const cuerpo = await res.text().catch(() => "");
   const detalle = detalleSeguroDeRespuesta(cuerpo, secretos);
+  const limites = limitesDeRespuesta(res.headers);
   // Un 5xx del envío no prueba que el SII no lo haya recibido.
-  const error = new ErrorProveedorSii(paso, `respondió HTTP ${res.status}`, res.status, detalle, paso === "enviar" && res.status >= 500);
-  error.limites = limitesDeRespuesta(res.headers);
+  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, limites), res.status, detalle, paso === "enviar" && res.status >= 500);
+  error.limites = limites;
   return error;
 }
 
