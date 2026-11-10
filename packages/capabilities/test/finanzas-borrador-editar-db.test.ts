@@ -121,4 +121,14 @@ describe.skipIf(!urlPropietario)("Finanzas · editar y descartar borradores (CAR
     expect(await s.e.admin.documentoEmitidoReferencia.count({ where: { documentoId: nd.id } })).toBe(0);
   });
 
+  it("dos ediciones simultáneas se aplican una sobre otra: la de la glosa no restaura la fecha vieja", async () => {
+    const b = await borrador();
+    const [a, g] = await Promise.all([
+      s.mod.executeCapability(s.ctx(), "finanzas.ventas.actualizar_borrador", { documentoId: b.id, fechaEmision: "2026-10-01", plazoPagoDias: 15 }),
+      s.mod.executeCapability(s.ctx(), "finanzas.ventas.actualizar_borrador", { documentoId: b.id, glosa: "Mes de octubre" }),
+    ]);
+    expect([a.ok, g.ok]).toEqual([true, true]);
+    const doc = await s.e.admin.documentoEmitido.findUniqueOrThrow({ where: { id: b.id } });
+    expect([doc.fechaEmision?.toISOString().slice(0, 10), doc.fechaVencimiento?.toISOString().slice(0, 10), doc.glosa]).toEqual(["2026-10-01", "2026-10-16", "Mes de octubre"]);
+  });
 });

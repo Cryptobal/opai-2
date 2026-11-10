@@ -16,8 +16,8 @@ const base = {
   montoTotal: 1190,
   lineas: [{ orden: 0, glosa: "Servicio", monto: 1000 }],
   referencias: [
-    { tipoDteRef: 801, folioRef: 7, codigoRef: 1, razonRef: null },
-    { tipoDteRef: 802, folioRef: 9, codigoRef: 1, razonRef: null },
+    { tipoDteRef: 801, folioRef: 7, codigoRef: 1, razonRef: null, fechaRef: new Date("2026-10-01") },
+    { tipoDteRef: 802, folioRef: 9, codigoRef: 1, razonRef: null, fechaRef: null },
   ],
 };
 
@@ -27,6 +27,11 @@ describe("huellaBorrador", () => {
     expect(huellaBorrador({ ...base, fechaVencimiento: new Date("2026-12-31") })).not.toBe(h);
     expect(huellaBorrador({ ...base, lineas: [{ orden: 0, glosa: "Otro", monto: 1000 }] })).not.toBe(h);
     expect(huellaBorrador({ ...base, montoTotal: 1200 })).not.toBe(h);
+  });
+  it("cambia si cambia solo la fecha de una referencia (va en el XML firmado)", () => {
+    const [primera, ...resto] = base.referencias;
+    const otra = { ...primera!, fechaRef: new Date("2026-10-15") };
+    expect(huellaBorrador({ ...base, referencias: [otra, ...resto] })).not.toBe(huellaBorrador(base));
   });
   it("no depende del orden en que vengan las referencias", () => {
     expect(huellaBorrador({ ...base, referencias: [...base.referencias].reverse() })).toBe(huellaBorrador(base));

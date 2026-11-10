@@ -38,7 +38,7 @@ type DocHuella = {
   montoOtros: number;
   montoTotal: number;
   lineas: readonly { orden: number; glosa: string; monto: number }[];
-  referencias: readonly { tipoDteRef: number; folioRef: number; codigoRef: number; razonRef: string | null }[];
+  referencias: readonly { tipoDteRef: number; folioRef: number; codigoRef: number; razonRef: string | null; fechaRef: Date | null }[];
 };
 
 export function huellaBorrador(d: DocHuella): string {
@@ -47,7 +47,7 @@ export function huellaBorrador(d: DocHuella): string {
     d.montoNeto, d.montoExento, d.montoIva, d.montoOtros, d.montoTotal,
     d.lineas.map((l) => [l.orden, l.glosa, l.monto]),
     d.referencias
-      .map((r) => [r.tipoDteRef, r.folioRef, r.codigoRef, r.razonRef])
+      .map((r) => [r.tipoDteRef, r.folioRef, r.codigoRef, r.razonRef, r.fechaRef?.toISOString().slice(0, 10) ?? null])
       .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
   ]);
   return createHash("sha256").update(contenido).digest("hex");

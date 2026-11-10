@@ -5,7 +5,7 @@ import { z } from "zod";
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { reglaDeNegocio } from "../errores";
-import { bloquearDocumento, cargarBorradorEditable } from "./ventas-borrador-editable";
+import { bloquearDocumento } from "./ventas-borrador-editable";
 import { referenciaBorradorSchema } from "./ventas-borrador";
 import { calcularCambios } from "./ventas-borrador-cambios";
 import { vistaDeDocumento } from "./ventas-consulta";
@@ -36,15 +36,18 @@ export const ventasActualizarBorrador = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const c = await calcularCambios(ctx, input);
     if (dryRun) {
+      const c = await calcularCambios(ctx, input);
       const cuenta = await cuentaDe(ctx, c.doc.cuentaId);
       const lineas = (c.lineas ?? c.doc.lineas).map((l, i) => ({ id: `dry-${i}`, orden: l.orden, glosa: l.glosa, monto: l.monto }));
       return vistaVenta({ ...c.doc, ...c.fila } as Parameters<typeof vistaVenta>[0], cuenta, lineas);
     }
     await ctx.transaccion(async (tx) => {
-      await bloquearDocumento(tx, ctx.tenantId, c.doc.id);
-      await cargarBorradorEditable({ db: tx }, c.doc.id); // las condiciones se revisan de nuevo con el documento bloqueado
+      await bloquearDocumento(tx, ctx.tenantId, input.documentoId);
+      // Se calcula con el documento ya bloqueado: dos ediciones simultáneas se aplican una tras otra, cada una sobre lo
+      // que dejó la anterior (si no, una edición de la glosa restauraría fechas viejas). Esto revisa también que
+      // siga siendo editable.
+      const c = await calcularCambios({ ...ctx, db: tx }, input);
       const { count } = await tx.documentoEmitido.updateMany({
         where: { id: c.doc.id, estadoDte: "borrador", folio: null, trackIdSii: null, xmlStorageKey: null },
         data: c.fila,
@@ -60,6 +63,6 @@ export const ventasActualizarBorrador = defineCapability({
       }
       await ctx.eventos.emitir(tx, { tipo: "finanzas.venta.borrador_actualizado", entidadTipo: "documento_emitido", entidadId: c.doc.id, payload: {} });
     });
-    return vistaDeDocumento(ctx, c.doc.id);
+    return vistaDeDocumento(ctx, input.documentoId);
   },
 });
