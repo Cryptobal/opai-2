@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { Alerta, Button, Estado, avisar, type EstadoPantalla } from "@opai/ds";
 
@@ -9,6 +10,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { SeccionesDte } from "./secciones-dte";
 import type { ConfigDte } from "./tipos";
 import { useFormDte } from "./use-form-dte";
+import { type ErroresDte, inputDteDesdeForm, validarFormDte } from "./validar-dte";
 
 type Props = {
   state: EstadoPantalla;
@@ -18,21 +20,17 @@ type Props = {
 
 export function PantallaConfigDte({ state, cfg, esOwner }: Props) {
   const router = useRouter();
-  const { ejecutar, pendiente } = useCapacidad("erp");
+  const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
+  const [errores, setErrores] = useState<ErroresDte>({});
   const [f, set] = useFormDte(cfg);
 
   async function guardar(dryRun: boolean) {
-    const input = {
-      ambiente: f.ambiente,
-      rutEmisor: f.rutEmisor.trim() || undefined,
-      emisionProveedor: f.emisionProveedor,
-      cesionProveedor: f.cesionProveedor === "octava" ? ("octava" as const) : null,
-      resolucionSiiNumero: f.resolucionNumero.trim() ? Number(f.resolucionNumero) : null,
-      resolucionSiiFecha: f.resolucionFecha.trim() || null,
-      umbralFoliosPct: Number(f.umbral),
-      avisoCafDias: Number(f.avisoCaf),
-      fechaCorte1_0: f.fechaCorte.trim() || null,
-    };
+    limpiarError();
+    const e = validarFormDte(f);
+    setErrores(e);
+    if (Object.keys(e).length > 0) return;
+    if (!cfg) return;
+    const input = inputDteDesdeForm(f, cfg);
     const r = await ejecutar<ConfigDte>("finanzas.dte_config.actualizar", input, dryRun);
     if (!r) return;
     if (dryRun) {
@@ -58,7 +56,15 @@ export function PantallaConfigDte({ state, cfg, esOwner }: Props) {
           Solo el owner puede cambiar el ambiente de producción o activar SimpleAPI.
         </Alerta>
       ) : null}
-      <SeccionesDte f={f} set={set} esOwner={esOwner} pendiente={pendiente} />
+      {error ? (
+        <Alerta tono="danger" titulo="No se guardó la configuración DTE">
+          {error}
+        </Alerta>
+      ) : null}
+      {Object.keys(errores).length > 0 ? (
+        <Alerta tono="danger" titulo="Revise los campos marcados antes de guardar" />
+      ) : null}
+      <SeccionesDte f={f} set={set} esOwner={esOwner} pendiente={pendiente} errores={errores} />
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" disabled={pendiente} onClick={() => guardar(true)}>
           Vista previa

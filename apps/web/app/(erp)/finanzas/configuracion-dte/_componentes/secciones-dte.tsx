@@ -1,12 +1,13 @@
-import { Campo, Input, Select, SeccionTarjeta } from "@opai/ds";
+import { Campo, Input, InputFecha, Select, SeccionTarjeta } from "@opai/ds";
 
 import type { ConfigDte } from "./tipos";
 import type { FormDte, SetFormDte } from "./use-form-dte";
+import type { ErroresDte } from "./validar-dte";
 
-type Props = { f: FormDte; set: SetFormDte; esOwner: boolean; pendiente: boolean };
+type Props = { f: FormDte; set: SetFormDte; esOwner: boolean; pendiente: boolean; errores: ErroresDte };
 
 /** Secciones «Emisión al SII» y «Cesión y folios» del formulario de configuración DTE. */
-export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
+export function SeccionesDte({ f, set, esOwner, pendiente, errores }: Props) {
   return (
     <>
       <SeccionTarjeta titulo="Emisión al SII">
@@ -44,22 +45,28 @@ export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
               ]}
             />
           </Campo>
-          <Campo etiqueta="Resolución SII N°" htmlFor="dte-res-n">
+          <Campo
+            etiqueta="Resolución SII N°"
+            htmlFor="dte-res-n"
+            ayuda="En certificación es 0."
+            error={errores.resolucionNumero}
+          >
             <Input
               id="dte-res-n"
               inputMode="numeric"
+              aria-invalid={errores.resolucionNumero ? true : undefined}
               value={f.resolucionNumero}
               disabled={pendiente}
               onChange={(e) => set("resolucionNumero", e.target.value)}
             />
           </Campo>
-          <Campo etiqueta="Fecha resolución SII" htmlFor="dte-res-f">
-            <Input
+          <Campo etiqueta="Fecha resolución SII" htmlFor="dte-res-f" error={errores.resolucionFecha}>
+            <InputFecha
               id="dte-res-f"
-              type="date"
-              value={f.resolucionFecha}
+              valor={f.resolucionFecha}
               disabled={pendiente}
-              onChange={(e) => set("resolucionFecha", e.target.value)}
+              invalido={Boolean(errores.resolucionFecha)}
+              onCambiar={(v) => set("resolucionFecha", v)}
             />
           </Campo>
         </div>
@@ -78,18 +85,20 @@ export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
               ]}
             />
           </Campo>
-          <Campo etiqueta="Aviso folios bajos (%)" htmlFor="dte-umbral">
+          <Campo etiqueta="Aviso folios bajos (%)" htmlFor="dte-umbral" error={errores.umbral}>
             <Input
               id="dte-umbral"
+              aria-invalid={errores.umbral ? true : undefined}
               inputMode="numeric"
               value={f.umbral}
               disabled={pendiente}
               onChange={(e) => set("umbral", e.target.value)}
             />
           </Campo>
-          <Campo etiqueta="Aviso vencimiento CAF (días)" htmlFor="dte-caf-dias">
+          <Campo etiqueta="Aviso vencimiento CAF (días)" htmlFor="dte-caf-dias" error={errores.avisoCaf}>
             <Input
               id="dte-caf-dias"
+              aria-invalid={errores.avisoCaf ? true : undefined}
               inputMode="numeric"
               value={f.avisoCaf}
               disabled={pendiente}
@@ -97,12 +106,11 @@ export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
             />
           </Campo>
           <Campo etiqueta="Fecha de corte con OPAI 1.0" htmlFor="dte-corte">
-            <Input
+            <InputFecha
               id="dte-corte"
-              type="date"
-              value={f.fechaCorte}
+              valor={f.fechaCorte}
               disabled={pendiente}
-              onChange={(e) => set("fechaCorte", e.target.value)}
+              onCambiar={(v) => set("fechaCorte", v)}
             />
           </Campo>
         </div>
