@@ -68,6 +68,8 @@ export function mensajeRechazoDteConfig(error: unknown): string | null {
   const meta = (error as { meta?: { code?: string; message?: string } } | null)?.meta;
   const texto = `${meta?.code ?? ""} ${String(meta?.message ?? (error as Error)?.message ?? "")}`;
   if (!texto.includes("23514") && !texto.includes("check constraint")) return null;
+  // Solo los CHECK de dte_config; un CHECK de otra tabla (p. ej. el outbox) se relanza tal cual.
+  if (!texto.includes("dte_config")) return null;
   if (texto.includes("resolucion_sii_numero"))
     return "No se pudo guardar el N° de resolución SII: la base no lo aceptó. En certificación el N° es 0; si sigue fallando, avise a un administrador.";
   if (texto.includes("umbral_folios_pct")) return "El aviso de folios bajos debe estar entre 1 y 100 %.";

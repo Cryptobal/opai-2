@@ -12,5 +12,6 @@ describe("rechazo de la base en la configuración DTE (CAR-240)", () => {
   });
   it("un error que no es de CHECK no se traduce", () => {
     expect(mensajeRechazoDteConfig(new Error("connection reset"))).toBeNull();
+    expect(mensajeRechazoDteConfig(new Error('violates check constraint "eventos_outbox_tipo_chk"'))).toBeNull();
   });
 });

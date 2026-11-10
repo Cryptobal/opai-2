@@ -23,7 +23,8 @@ export async function aplicarApertura(
     ctx.db.cuenta.findMany({ where: { rut: { not: null } }, select: { id: true, rut: true } }),
     ctx.db.documentoEmitido.findMany({ where: { folio: { not: null } }, select: { tipoDte: true, folio: true, montoNeto: true, montoExento: true, montoIva: true, montoTotal: true, montoCobrado: true } }),
     ctx.db.cuentaBancaria.findMany({ select: { id: true, banco: true, numeroVisible: true, moneda: true } }),
-    ctx.db.dteFolio.findMany({ where: { activo: true }, select: { id: true, tipoDte: true, folioActual: true, folioHasta: true } }),
+    // Todos los CAF, también los pausados: al reactivarse no deben reusar folios ya emitidos en 1.0 (CAR-240).
+    ctx.db.dteFolio.findMany({ select: { id: true, tipoDte: true, folioActual: true, folioHasta: true } }),
     ctx.db.movimientoBancario.findMany({ where: { claveDedupe: { startsWith: "apertura:" } }, select: { cuentaId: true, monto: true } }),
   ]);
   const cuentasConApertura = new Map(conApertura.map((m) => [m.cuentaId, Number(m.monto)]));
@@ -56,7 +57,7 @@ export async function aplicarApertura(
   const foliosAplicar = validas.folios.flatMap((f) => {
     const filas = folios.filter((x) => x.tipoDte === f.tipoDte);
     if (filas.length === 0) {
-      rechazos.push({ entidad: "folio", clave: String(f.tipoDte), motivo: "no hay CAF activo de ese tipo en 2.0: no se puede proteger el folio" });
+      rechazos.push({ entidad: "folio", clave: String(f.tipoDte), motivo: "no hay CAF de ese tipo en 2.0: no se puede proteger el folio" });
       return [];
     }
     return filas.flatMap((fila) => {
