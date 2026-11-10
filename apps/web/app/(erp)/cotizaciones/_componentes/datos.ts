@@ -137,14 +137,11 @@ export async function cargarFichaCotizacion(id: string) {
       versiones: [],
     };
   }
-  let ficha = r.data;
-  // Con valores legales nuevos la versión queda «Desactualizada»: se recalcula con la acción explícita,
-  // no al abrir la ficha (CAR-192).
-  if (acceso.crear && ficha.version.editable && !(ficha.meta as { avisoRecalculo?: unknown } | undefined)?.avisoRecalculo) {
-    await ejecutarComoUsuario("erp", "cpq.cotizaciones.calcular", { id }, false);
-    const r2 = await ejecutarComoUsuario<FichaRespuesta>("erp", "cpq.cotizaciones.ficha", { id });
-    if (r2.ok) ficha = r2.data;
-  }
+  // Abrir la ficha solo lee (CAR-231). Antes, con una versión editable que NO estaba desactualizada, la
+  // carga ejecutaba `cpq.cotizaciones.calcular` (una escritura auditada) en cada entrada o precarga, y no
+  // lo hacía si estaba desactualizada: el cálculo guardado cambiaba según el estado y el momento. La
+  // ficha ya trae el cálculo proyectado; el guardado se actualiza con cada edición y con «Recalcular».
+  const ficha = r.data;
   const get = await ejecutarComoUsuario<{
     versiones: { numero: number; estado: string; enviadaEn: Date | null; ventaMensualClp: number | null }[];
   }>("erp", "cpq.cotizaciones.get", { id });
