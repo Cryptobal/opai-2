@@ -71,3 +71,4 @@ export * from "./acceso";
 export * from "./contexto-comercial";
 export * from "./sugerencia-seccion";
 export * from "./qa-aislado";
+export * from "./aprobaciones/resumen-humano";

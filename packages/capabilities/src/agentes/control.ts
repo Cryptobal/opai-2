@@ -1,4 +1,4 @@
-import { jsonCanonico } from "@opai/domain";
+import { frasePedido, jsonCanonico, resumenGenerico } from "@opai/domain";
 
 import { falla } from "../autorizacion";
 import { sinSensibles } from "../execute-util";
@@ -8,9 +8,22 @@ import { aprobacionDePlataforma } from "./control-plataforma";
 /** Una aprobación pendiente vence a las 72 horas (ADR-032). */
 export const VIGENCIA_APROBACION_MS = 72 * 3_600_000;
 
-function resumir(c: Capacidad, entrada: unknown): string {
-  const texto = JSON.stringify(sinSensibles(entrada, c.sensibles));
-  return `${c.id} ${texto.length > 240 ? `${texto.slice(0, 237)}…` : texto}`;
+/** Texto humano de la solicitud (CAR-250): «Grok pide emitir la factura 33, $ 11.900». Nunca falla. */
+async function resumir(
+  ctx: Contexto,
+  c: Capacidad,
+  entrada: unknown,
+  agente: string,
+): Promise<string> {
+  try {
+    const accion = c.describirAprobacion
+      ? await c.describirAprobacion(ctx, c.input.parse(entrada))
+      : null;
+    if (accion) return frasePedido(agente, accion);
+  } catch {
+    // Sin el texto propio de la capacidad, vale el genérico.
+  }
+  return resumenGenerico(agente, c.id, c.descripcion);
 }
 
 /** Lo irreversible sin autonomía "directo" no se ejecuta: queda en la cola de aprobaciones. */
@@ -36,7 +49,7 @@ async function aprobacion(
   if (!a || !exige) return null;
   if (ctx.actor.tipo !== "agent") return null;
   const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
-  const resumen = resumir(c, entrada);
+  const resumen = await resumir(ctx, c, entrada, a.nombre);
   // Lo `platform.*` va a la cola de plataforma, nunca a la de la empresa de la key (CAR-36).
   if (c.modulo === "platform")
     return aprobacionDePlataforma(ctx, c, entrada, opciones, a, { resumen, venceEn }, requerida);

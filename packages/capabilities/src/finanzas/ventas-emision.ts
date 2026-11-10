@@ -3,6 +3,7 @@ import { z } from "zod";
 import { adaptadorSiiDe } from "./adaptador-sii";
 
 import { defineCapability } from "../define";
+import { describirDocumento } from "./ventas-aprobacion-texto";
 import { aFecha, escribirConEvento } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import { vistaDeDocumento } from "./ventas-consulta";
@@ -128,6 +129,7 @@ export const ventasEmitir = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
+  describirAprobacion: describirDocumento((d, borrador) => `emitir ${borrador ? "el borrador de " : ""}${d}`),
   // La firma (llamada remota) va antes de la transacción de la escritura.
   preparar: (ctx, input) => prepararEmision(ctx, input.documentoId),
   async handler(ctx, input, { dryRun, preparado }) {
