@@ -12,20 +12,36 @@ const CATALOGO: ModuloCatalogo[] = [
     modulo: "core",
     activo: true,
     recursos: [
-      { recurso: "instalaciones", ver: "core:instalaciones.read", gestionar: "core:instalaciones.manage" },
+      {
+        recurso: "instalaciones",
+        ver: "core:instalaciones.read",
+        gestionar: "core:instalaciones.manage",
+      },
       { recurso: "personas", ver: "core:personas.read", gestionar: "core:personas.manage" },
     ],
     especiales: [{ id: "core:estructuras.read_sensible", accion: "estructuras.read_sensible" }],
   },
-  { modulo: "finanzas", activo: false, recursos: [{ recurso: "pagos", ver: "finanzas:pagos.read", gestionar: null }], especiales: [] },
+  {
+    modulo: "finanzas",
+    activo: false,
+    recursos: [{ recurso: "pagos", ver: "finanzas:pagos.read", gestionar: null }],
+    especiales: [],
+  },
 ];
 
 describe("etiquetas de la matriz de permisos (CAR-37)", () => {
   it("nombra los permisos como en la sábana", () => {
     expect(nombrePermiso("core:instalaciones.manage")).toBe("Gestionar Instalaciones");
     expect(nombrePermiso("core:personas.read")).toBe("Ver Personas");
-    expect(nombrePermiso("core:estructuras.read_sensible")).toBe("Ver sensible · Estructuras y sueldos");
-    expect(nombrePermiso("core:documentos.subir_alcance")).toBe("Subir documentos de sus instalaciones");
+    expect(nombrePermiso("core:estructuras.read_sensible")).toBe(
+      "Ver sensible · Estructuras y sueldos",
+    );
+    expect(nombrePermiso("core:documentos.subir_alcance")).toBe(
+      "Subir documentos de sus instalaciones",
+    );
+    expect(nombrePermiso("core:documentos.plantillas.manage")).toBe(
+      "Gestionar plantillas de documentos",
+    );
   });
 
   it("lista los ids del catálogo sin nulos", () => {

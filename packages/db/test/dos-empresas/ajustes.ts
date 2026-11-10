@@ -41,6 +41,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },
+  // Documentos · plantillas laborales (CAR-127): CHECK de clase y de nivel de firma (N1/N2).
+  "core.documento_plantillas": {
+    valores: () => ({ clase: "contrato_trabajo", nivel_firma: "N2" }),
+  },
   // Exactamente una identidad de agente: key o agente interno (CHECK *_identidad_agente).
   "core.aprobaciones": {
     dependencias: ["core.api_keys"],

@@ -85,7 +85,7 @@ Gate local `pnpm typecheck && pnpm lint && pnpm test` (y `test:db` si toca base)
 
 Rollback: cada PR se revierte por separado; las migraciones son aditivas.
 
-**Preguntas abiertas (el diseño no lo define; no se inventa):**
+**Preguntas abiertas (el diseño no lo define; no se inventa). RESUELTAS el 9-nov-2026: Carlos aceptó las nueve tal como están escritas abajo (adenda de `01-decisiones.md`). Sin número inventado: el tope del lote (punto 5) sigue sin definir y no se fija en código.**
 
 1. **Plantillas laborales vs. salidas comerciales.** El spec `modulos/documentos.md` describe plantillas de *salida comercial* (CPQ); el diseño v4 describe plantillas *laborales* (contrato, anexo, carta, recepción) con variables de persona. ¿Son dos sistemas distintos? Se asume que sí y que las comerciales siguen en CPQ.
 2. **Formato del contenido de la plantilla.** ¿Texto con variables `{persona.rut}` renderizado a PDF (se asume), o bloques? El editor del diseño es un documento con variables, sin bloques.

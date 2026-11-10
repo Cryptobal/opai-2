@@ -37,6 +37,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       ...DENEGAR_GERENTE_PERSONAS_PR2,
       PERMISOS_CORE.anexosRead,
       PERMISOS_CORE.anexosManage,
+      PERMISOS_CORE.documentosPlantillasManage,
       PERMISOS_CORE.configManage,
       PERMISOS_CORE.firmasConfig,
       PERMISOS_CORE.finiquitosManage,

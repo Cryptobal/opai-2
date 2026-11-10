@@ -24,6 +24,8 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.cumplimiento.dpa_texto",
   "core.cumplimiento.rat",
   "core.cumplimiento.retencion_politica",
+  "core.documento_plantillas.get",
+  "core.documento_plantillas.list",
   "core.documento_tipos.list",
   "core.firmas.politica_get",
   "core.firmas.ver_firmante",

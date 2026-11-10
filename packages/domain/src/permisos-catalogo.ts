@@ -48,6 +48,9 @@ export const PERMISOS_CORE = {
   anexosManage: "core:anexos.manage",
   documentosRead: "core:documentos.read",
   documentosManage: "core:documentos.manage",
+  // CAR-127 (decisión de Carlos, 9-nov-2026): ver y editar las plantillas laborales de Documentos.
+  // Solo owner y admin (el gerente lo tiene denegado); sin él la pestaña Plantillas se oculta.
+  documentosPlantillasManage: "core:documentos.plantillas.manage",
   // CAR-182 (decisión de Carlos, 4-nov-2026): subir documentos SOLO vinculados a una instalación a
   // cargo del actor (ADR-022). No gestiona nada más: quien tiene `documentos.manage` conserva todo.
   // La capacidad de subida lo acepta como alternativa y limita el destino y la visibilidad.

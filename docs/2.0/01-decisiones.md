@@ -1621,6 +1621,20 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - No cambia lo demás de este ADR: quién aprueba, que el supervisor no edita el monto, los externos, el estado único por persona y la condición previa de revisión legal y contable escrita, que sigue pendiente.
 - El bloque B (Design Prompt en Claude Design) no tiene OK.
 
+**Adenda (9-nov-2026) · Documentos v4: respuestas de Carlos a las nueve preguntas abiertas de CAR-127.** Carlos aceptó la §15 del brief `BRIEF-CAR-127-documentos-v4-pantallas-04-08.md` tal como estaba escrita; la registra la sesión «Personas · Code»:
+
+- **Dos sistemas.** Las plantillas laborales (contrato, anexo, recepción, carta) y las salidas comerciales son distintas; las comerciales siguen en CPQ.
+- **Contenido:** texto con variables `{persona.rut}` renderizado a PDF, no bloques.
+- **Firma:** N1 y N2 equivalen a la clase de `PoliticaFirma` (CAR-82) y no bajan del mínimo legal de la clase; N3·FEA queda deshabilitado (CAR-94 sin proveedor).
+- **PDF:** el núcleo usa un helper neutral en `packages/*`; no se difiere.
+- **Lote (B3):** corre en cola, con avance por persona. **El tope de personas no tiene número**: no se inventa ni se fija en código hasta que Carlos lo defina.
+- **Permisos:** `core:documentos.plantillas.manage` (owner y admin; denegado al gerente) y lectura sensible de `{sueldo.*}` al generar.
+- **Variables:** solo Persona, Vínculo, Instalación, Sueldo y Contrato (las 12 del diseño); no se agregan más en esta entrega.
+- **Pestaña Plantillas** sin permiso: se oculta.
+- **Importar Word o PDF** (09): deshabilitado, con aviso, hasta su propio encargo.
+- **CAR-58** (texto legal del anexo): no se arranca; el texto lo trae Carlos con el abogado. Las plantillas se crean vacías o con el texto que el usuario escriba; no se siembra texto legal.
+
+
 ## ADR-084 · «Comercial · Proyecto» construye el PR 6 de CAR-138 por orden expresa de Carlos (9-nov-2026)
 
 **Fecha:** 9-nov-2026 19:17 UTC · **Estado:** vigente solo para este PR · **Autor:** Carlos (chat), registrado por la sesión «Comercial · Proyecto».
