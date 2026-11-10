@@ -34,6 +34,7 @@ export function EmitirBorradorFicha({ documentoId, tipoDte }: { documentoId: str
         setDialogo={setDialogo}
         previewBorrador={null}
         previewEmitir={emision.previewEmitir}
+        documentoId={documentoId}
         guardarBorrador={() => undefined}
         emitir={() => void emision.emitir()}
       />
