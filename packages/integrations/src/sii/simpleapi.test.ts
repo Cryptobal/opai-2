@@ -75,6 +75,7 @@ describe("firmar (POST dte/generar)", () => {
     expect(entrada.Documento.Id).toBe("F101T33");
     expect(entrada.Documento.Encabezado.IdentificacionDTE).toMatchObject({ TipoDTE: 33, Folio: 101, FechaEmisionString: "2026-11-06" });
     expect(entrada.Documento.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaEmision");
+    expect(entrada.Documento.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaVencimiento"); // sin vencimiento
     expect(entrada.Documento.Detalles[0]).toMatchObject({ NumeroLinea: 1, Nombre: "Servicio de guardias - mes de noviembre" });
     expect(entrada.Documento).not.toHaveProperty("Referencias"); // sin referencias no va la lista vacía
     // input en ISO-8859-1: «ñ» es un byte (0xF1), no los dos de UTF-8.
@@ -123,13 +124,19 @@ describe("firmar (POST dte/generar)", () => {
     expect(emisor).toEqual({ Rut: "76269769-6", ActividadEconomica: [801000] });
   });
 
-  it("vencimiento como FechaVencimientoString y, sin ciudad, la comuna real del receptor (CAR-240)", async () => {
+  it("vencimiento como FechaVencimiento (doc oficial) y, sin ciudad, la comuna real del receptor (CAR-240)", async () => {
     const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
     const receptor = { giroReceptor: "SERVICIO PUBLICO", direccionReceptor: "Teatinos 120", comunaReceptor: "Santiago" };
     await adaptadorSimpleApi(creds).firmar({ ...payload, ...receptor, fechaVencimiento: "2026-12-10" });
     const doc = JSON.parse(String(llamadas[0]?.input)).Documento;
-    expect(doc.Encabezado.IdentificacionDTE).toMatchObject({ FechaVencimientoString: "2026-12-10", FormaPago: 2 });
-    expect(doc.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaVencimiento");
+    // Emisión con el nombre del SDK que 1.0 usa y emite; vencimiento con el nombre de la doc oficial de Generar - DTE.
+    expect(doc.Encabezado.IdentificacionDTE).toMatchObject({
+      FechaEmisionString: "2026-11-06",
+      FechaVencimiento: "2026-12-10",
+      FormaPago: 2,
+    });
+    expect(doc.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaVencimientoString");
+    expect(doc.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaEmision");
     expect(doc.Encabezado.Receptor).toMatchObject({ Comuna: "Santiago", Ciudad: "Santiago", Giro: "SERVICIO PUBLICO" });
     // Con ciudad propia va la ciudad; sin comuna ni ciudad no se inventa ninguna (el preflight ya bloquea).
     await adaptadorSimpleApi(creds).firmar({ ...payload, ...receptor, comunaReceptor: "Providencia", ciudadReceptor: "Santiago" });

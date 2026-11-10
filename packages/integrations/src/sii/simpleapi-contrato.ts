@@ -107,8 +107,9 @@ export function jsonInputGenerarDte(
           TipoDTE: payload.tipoDte,
           Folio: payload.folio,
           FechaEmisionString: fechaSii(payload.fechaEmision),
-          // Nombre del SDK de SimpleAPI (`FechaVencimientoString`; el DateTime `FechaVencimiento` es [XmlIgnore]).
-          ...(payload.fechaVencimiento ? { FechaVencimientoString: fechaSii(payload.fechaVencimiento) } : {}),
+          // Vencimiento con el nombre de la doc oficial de Generar - DTE (`FechaVencimiento`, AAAA-MM-DD). 1.0 no lo
+          // manda y `FechaVencimientoString` (solo en el SDK) no lo usa ningún emisor que funcione (CAR-240).
+          ...(payload.fechaVencimiento ? { FechaVencimiento: fechaSii(payload.fechaVencimiento) } : {}),
           FormaPago: FORMA_PAGO_CREDITO,
         },
         Emisor: {

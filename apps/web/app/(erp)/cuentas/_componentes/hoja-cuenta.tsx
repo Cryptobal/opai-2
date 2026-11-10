@@ -37,7 +37,7 @@ export function HojaCuenta({ cuenta }: { cuenta?: CuentaDetalle }) {
       escrituraFecha: d.escrituraFecha || null,
       escrituraNotaria: d.escrituraNotaria.trim() || null,
     };
-    const r = await ejecutar<{ id: string }>(
+    const r = await ejecutar<{ id: string; sii?: string }>(
       cuenta ? "core.cuentas.update" : "core.cuentas.create",
       cuenta ? { id: cuenta.id, ...campos } : campos,
     );
@@ -54,7 +54,10 @@ export function HojaCuenta({ cuenta }: { cuenta?: CuentaDetalle }) {
       await ejecutar("core.cuentas.set_estado", { id: r.id, estado: d.estado });
     avisar.exito(cuenta ? "Cuenta actualizada" : "Cuenta creada");
     hoja.cerrar();
-    if (!cuenta) router.push(`/cuentas/${r.id}`);
+    // Con RUT y el SII disponible, la ficha nueva abre «Datos del SII» para elegir campo por campo
+    // (CAR-156); nada se aplica sin esa elección.
+    const ofrecerSii = r.sii === "en_cache" || r.sii === "en_cola";
+    if (!cuenta) router.push(`/cuentas/${r.id}${ofrecerSii ? "?sii=1" : ""}`);
   }
   return (
     <Sheet
