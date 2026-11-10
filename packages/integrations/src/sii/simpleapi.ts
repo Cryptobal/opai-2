@@ -81,6 +81,8 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
     async firmar(payload: PayloadEmisionDte): Promise<DteXmlFirmado> {
       if (!disponible || !creds) throw new ErrorProveedorSii("generar", "la integración no está configurada");
       if (!payload.cafXml) throw new ErrorProveedorSii("generar", "falta el CAF del folio");
+      // Sin ACTECO el DTE sale sin <Acteco> (obligatorio en el XSD del SII) y SimpleAPI responde 401 (CAR-240).
+      if (!creds.actecoEmisor) throw new ErrorProveedorSii("generar", "falta el ACTECO del emisor, que el SII exige");
       const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.generar, creds.apiKey, [
         // Como 1.0: input, luego el certificado y el CAF, ambos con el nombre de campo `file`; el CAF en sus bytes.
         { nombre: "input", texto: jsonInputGenerarDte(payload, creds) },

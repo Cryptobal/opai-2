@@ -41,6 +41,8 @@ export function comoReglaSiProveedorSii(
     motivo: error.motivoSeguro,
     // Límites de uso que informó SimpleAPI (x-rate-limit-*, retry-after), saneados: ayudan a distinguir 401/429 (CAR-240).
     limites: error.limites,
+    // Forma del cuerpo sin su texto: «vacio» (contenido rechazado), «suscripcion» (la key no cubre el servicio) u «otro».
+    cuerpo: error.cuerpo,
   });
   const despues = typeof consecuencia === "function" ? consecuencia(error) : consecuencia;
   const base = (detalle: string) => `SimpleAPI no pudo ${ACCION[error.paso]}: ${error.motivo}${detalle}. ${despues}`;

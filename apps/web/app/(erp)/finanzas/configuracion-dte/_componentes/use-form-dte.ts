@@ -5,6 +5,7 @@ import type { ConfigDte } from "./tipos";
 export type FormDte = {
   ambiente: ConfigDte["ambiente"];
   rutEmisor: string;
+  acteco: string;
   emisionProveedor: ConfigDte["emisionProveedor"];
   cesionProveedor: string;
   resolucionNumero: string;
@@ -21,6 +22,7 @@ export function useFormDte(cfg: ConfigDte | null): [FormDte, SetFormDte] {
   const [f, setF] = useState<FormDte>({
     ambiente: cfg?.ambiente ?? "certificacion",
     rutEmisor: cfg?.rutEmisor ?? "",
+    acteco: cfg?.acteco != null ? String(cfg.acteco) : "",
     emisionProveedor: cfg?.emisionProveedor ?? "simulado",
     cesionProveedor: cfg?.cesionProveedor ?? "",
     resolucionNumero: cfg?.resolucionSiiNumero != null ? String(cfg.resolucionSiiNumero) : "",
