@@ -5,6 +5,7 @@ import type { AmbienteSii } from "@opai/domain";
 import { reglaDeNegocio } from "../errores";
 import { dekDe } from "../integraciones/secretos";
 import type { Contexto } from "../types";
+import { emisorTributarioDe, mensajeFaltantesEmisor } from "./emisor-tributario";
 import { mensajeFaltantesReceptor } from "./receptor-tributario";
 import { camposReceptorDteEnPayload, type receptorDteDe } from "./ventas-comun";
 
@@ -43,11 +44,18 @@ async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number): Prom
   if (!s) throw reglaDeNegocio("No se encontró el CAF guardado para este folio.");
   // La DEK queda fuera del try: una caída de base o una KEK ausente siguen siendo INTERNAL, no «recargue el CAF».
   const dek = await dekDe(ctx);
+  let caf: string;
   try {
-    return descifrar(dek, { cifrado: s.cifrado, iv: s.iv, tag: s.tag }).toString("utf8");
+    caf = descifrar(dek, { cifrado: s.cifrado, iv: s.iv, tag: s.tag }).toString("utf8");
   } catch {
     throw reglaDeNegocio("No se pudo leer el CAF guardado de este folio; vuelva a cargar el CAF antes de emitir.");
   }
+  // Un CAF ISO-8859-1 leído como UTF-8 al cargarlo (antes de CAR-240) perdió sus tildes y eñes en U+FFFD: su firma ya
+  // no calza y SimpleAPI lo rechaza. Un CAF íntegro nunca trae ese carácter.
+  if (caf.includes("\uFFFD")) {
+    throw reglaDeNegocio("El CAF de este folio se guardó dañado (perdió tildes o eñes al cargarlo); vuelva a cargar el archivo CAF antes de emitir.");
+  }
+  return caf;
 }
 
 /** Arma el payload completo para el adaptador SII (SimpleAPI v1 o simulado). */
@@ -61,6 +69,9 @@ export async function payloadEmisionDteDe(
     incluirCaf: boolean;
   },
 ): Promise<PayloadEmisionDte> {
+  // Con el proveedor real, sin los datos tributarios del emisor (ACTECO incluido) SimpleAPI rechaza el DTE (CAR-240).
+  const faltaEmisor = p.incluirCaf ? mensajeFaltantesEmisor(await emisorTributarioDe(ctx)) : null;
+  if (faltaEmisor) throw reglaDeNegocio(`${faltaEmisor} El documento sigue sin emitir y el folio no se usó.`);
   // Con el proveedor real (el que lleva CAF) no se emite sin giro, dirección y comuna del receptor (CAR-240): se
   // corta antes de firmar, así que el borrador sigue sin emitir y el folio no se usa.
   const falta = p.incluirCaf ? mensajeFaltantesReceptor(p.cuenta) : null;

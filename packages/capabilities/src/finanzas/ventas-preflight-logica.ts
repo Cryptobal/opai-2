@@ -2,6 +2,7 @@ import { produccionTributariaHabilitada } from "@opai/integrations";
 
 import type { Contexto } from "../types";
 import { NOMBRE_AMBIENTE_CAF, ambienteCafRequerido } from "./caf-ambiente";
+import { emisorTributarioDe, mensajeFaltantesEmisor } from "./emisor-tributario";
 import { rangosParaEmitir } from "./folios-previstos";
 import { mensajeFaltantesReceptor } from "./receptor-tributario";
 import { chequeosCredencialesEmision } from "./ventas-preflight-credenciales";
@@ -50,6 +51,10 @@ export async function itemsPreflightEmision(
   }
 
   await chequeosCredencialesEmision(ctx, proveedor, cfg, push);
+
+  // Sin ACTECO (u otro dato del emisor) SimpleAPI rechaza el DTE con HTTP 401 (CAR-240); bloquea solo con el real.
+  const faltaEmisor = mensajeFaltantesEmisor(await emisorTributarioDe(ctx));
+  push("emisor_tributario", !faltaEmisor, faltaEmisor ?? "Datos tributarios del emisor completos.", proveedor !== "simulado" && Boolean(faltaEmisor));
 
   let tipo = input.tipoDte ?? 33;
   if (input.documentoId) {

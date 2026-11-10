@@ -16,6 +16,7 @@ const creds: CredencialesSimpleApi = {
   rutEmpresa: "76000000-0",
   resolucionNumero: 0,
   resolucionFecha: "2024-01-01",
+  actecoEmisor: 801000,
 };
 const payload = {
   ambiente: "certificacion" as const,
@@ -151,6 +152,30 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     const e = await firmarError();
     expect(e.motivo).toBe("rechazó el contenido (certificado, CAF o datos), HTTP 401");
     expect(e.limites).toEqual({});
+  });
+  it("sin ACTECO del emisor no llama a SimpleAPI: el DTE saldría sin <Acteco> y lo rechazaría con 401", async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    const { actecoEmisor: _sin, ...sinActeco } = creds;
+    const e = (await adaptadorSimpleApi(sinActeco).firmar(payload).catch((x: unknown) => x)) as ErrorProveedorSii;
+    expect(e).toMatchObject({ paso: "generar", motivo: "falta el ACTECO del emisor, que el SII exige" });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("forma del cuerpo de un 401, sin guardar su texto: vacío, de suscripción u otro", async () => {
+    const headers = { "x-rate-limit-remaining": "39" };
+    generar(() => new Response("", { status: 401, headers }));
+    expect(await firmarError()).toMatchObject({ cuerpo: "vacio", motivo: "rechazó el contenido (certificado, CAF o datos), HTTP 401" });
+    generar(() => new Response(JSON.stringify({ Mensaje: "Falta de suscripción válida o token expirado" }), { status: 401, headers }));
+    const e = await firmarError();
+    expect(e).toMatchObject({
+      cuerpo: "suscripcion",
+      motivo: "indicó que la API key no tiene suscripción vigente para este servicio o que venció, HTTP 401",
+    });
+    expect(JSON.stringify(e)).not.toContain("token expirado");
+    generar(() => new Response("Apikey vencida", { status: 401 }));
+    expect((await firmarError()).cuerpo).toBe("suscripcion");
+    generar(() => new Response("Rut receptor no valido", { status: 401, headers }));
+    expect((await firmarError()).cuerpo).toBe("otro");
   });
   it("una clave de certificado que el saneamiento Latin-1 alteraría se rechaza sin llamar a SimpleAPI", async () => {
     const fetch = vi.fn();

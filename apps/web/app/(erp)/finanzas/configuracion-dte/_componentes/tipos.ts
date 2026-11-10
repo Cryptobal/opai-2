@@ -1,6 +1,7 @@
 export type ConfigDte = {
   ambiente: "certificacion" | "produccion";
   rutEmisor: string | null;
+  acteco: number | null;
   emisionProveedor: "simulado" | "simpleapi";
   cesionProveedor: "octava" | null;
   resolucionSiiNumero: number | null;
