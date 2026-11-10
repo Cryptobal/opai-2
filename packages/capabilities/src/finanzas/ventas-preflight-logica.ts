@@ -1,6 +1,7 @@
 import { produccionTributariaHabilitada } from "@opai/integrations";
 
 import type { Contexto } from "../types";
+import { cafGuardadoParaEmitir, MENSAJE_FALLO_CAF } from "./caf-guardado";
 import { NOMBRE_AMBIENTE_CAF, ambienteCafRequerido } from "./caf-ambiente";
 import { emisorTributarioDe, mensajeFaltantesEmisor } from "./emisor-tributario";
 import { rangosParaEmitir } from "./folios-previstos";
@@ -15,6 +16,29 @@ export type ItemPreflightEmision = {
 };
 
 type Push = (codigo: string, ok: boolean, mensaje: string, bloqueante: boolean) => void;
+
+/**
+ * El CAF del próximo folio, descifrado y leído en sus bytes ISO-8859-1 (CAR-240): íntegro, del RUT emisor y del tipo y
+ * folio. Lo que SimpleAPI rechazaría con un 401 vacío se ve aquí, sin mostrar nada del CAF.
+ */
+async function chequeoCafGuardado(
+  ctx: Contexto,
+  r: { cafSecretoId: string | null; folioActual: number },
+  rutEmisor: string | null,
+  tipo: number,
+  push: Push,
+) {
+  if (!rutEmisor) return; // «rut_emisor» ya bloquea
+  const caf = r.cafSecretoId
+    ? await cafGuardadoParaEmitir(ctx, { cafSecretoId: r.cafSecretoId, rutEmisor, tipoDte: tipo, folio: r.folioActual })
+    : ({ ok: false, fallo: "no_encontrado" } as const);
+  push(
+    "caf_integro",
+    caf.ok,
+    caf.ok ? "El CAF está íntegro y es del RUT emisor." : MENSAJE_FALLO_CAF[caf.fallo],
+    !caf.ok,
+  );
+}
 
 /** Chequeos previos a emitir un DTE real (SimpleAPI) o simulado. */
 export async function itemsPreflightEmision(
@@ -70,16 +94,20 @@ export async function itemsPreflightEmision(
     where: { tipoDte: tipo, activo: true },
     orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
   });
+  let rango: (typeof rangos)[number] | null = null;
   try {
     const r = rangosParaEmitir(rangos, cfg, new Date().toISOString().slice(0, 10), tipo)[0]!;
     push("caf", true, `Hay folios ${tipo} desde ${r.folioActual} (CAF ${r.folioDesde}–${r.folioHasta}).`, false);
     const nombre = NOMBRE_AMBIENTE_CAF[ambienteCafRequerido(cfg)];
     push("caf_ambiente", true, `El CAF es del ambiente de emisión (${nombre}).`, false);
+    rango = r;
   } catch (e) {
     const msg = e instanceof Error ? e.message : "No hay folios disponibles; cargue un CAF.";
     const deAmbiente = msg.startsWith("No hay un CAF activo de");
     push(deAmbiente ? "caf_ambiente" : "caf", false, msg, true);
   }
+  // Fuera del try: una caída al descifrar (KEK, base) no se disfraza de «no hay folios».
+  if (rango && proveedor !== "simulado") await chequeoCafGuardado(ctx, rango, cfg?.rutEmisor ?? null, tipo, push);
 
   const cuentaId =
     input.cuentaId

@@ -1,10 +1,9 @@
 import type { PayloadEmisionDte, TipoDteVentaSii } from "@opai/integrations";
-import { descifrar } from "@opai/integrations";
 import type { AmbienteSii } from "@opai/domain";
 
 import { reglaDeNegocio } from "../errores";
-import { dekDe } from "../integraciones/secretos";
 import type { Contexto } from "../types";
+import { cafGuardadoParaEmitir, MENSAJE_FALLO_CAF } from "./caf-guardado";
 import { emisorTributarioDe, mensajeFaltantesEmisor } from "./emisor-tributario";
 import { mensajeFaltantesReceptor } from "./receptor-tributario";
 import { camposReceptorDteEnPayload, type receptorDteDe } from "./ventas-comun";
@@ -29,7 +28,7 @@ type DocEmision = {
   }[];
 };
 
-async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number): Promise<string> {
+async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number, rutEmisor: string): Promise<string> {
   const rangos = await ctx.db.dteFolio.findMany({
     where: { tipoDte, activo: true },
     orderBy: [{ folioDesde: "asc" }],
@@ -38,24 +37,10 @@ async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number): Prom
   if (!rango?.cafSecretoId) {
     throw reglaDeNegocio("No hay CAF activo para este folio; cargue un CAF antes de emitir.");
   }
-  const s = await ctx.db.secreto.findFirst({
-    where: { id: rango.cafSecretoId, tenantId: ctx.tenantId },
-  });
-  if (!s) throw reglaDeNegocio("No se encontró el CAF guardado para este folio.");
-  // La DEK queda fuera del try: una caída de base o una KEK ausente siguen siendo INTERNAL, no «recargue el CAF».
-  const dek = await dekDe(ctx);
-  let caf: string;
-  try {
-    caf = descifrar(dek, { cifrado: s.cifrado, iv: s.iv, tag: s.tag }).toString("utf8");
-  } catch {
-    throw reglaDeNegocio("No se pudo leer el CAF guardado de este folio; vuelva a cargar el CAF antes de emitir.");
-  }
-  // Un CAF ISO-8859-1 leído como UTF-8 al cargarlo (antes de CAR-240) perdió sus tildes y eñes en U+FFFD: su firma ya
-  // no calza y SimpleAPI lo rechaza. Un CAF íntegro nunca trae ese carácter.
-  if (caf.includes("\uFFFD")) {
-    throw reglaDeNegocio("El CAF de este folio se guardó dañado (perdió tildes o eñes al cargarlo); vuelva a cargar el archivo CAF antes de emitir.");
-  }
-  return caf;
+  // Bytes ISO-8859-1 del CAF, nunca decodificados como UTF-8 (CAR-240): íntegro, del RUT emisor y del tipo y folio.
+  const caf = await cafGuardadoParaEmitir(ctx, { cafSecretoId: rango.cafSecretoId, rutEmisor, tipoDte, folio });
+  if (!caf.ok) throw reglaDeNegocio(MENSAJE_FALLO_CAF[caf.fallo]);
+  return caf.xml;
 }
 
 /** Arma el payload completo para el adaptador SII (SimpleAPI v1 o simulado). */
@@ -91,7 +76,7 @@ export async function payloadEmisionDteDe(
       ...(p.doc.tipoDte === 61 || p.doc.tipoDte === 56 ? { codigo: r.codigoRef } : {}),
       ...(r.razonRef ? { razon: r.razonRef } : {}),
     })) ?? [];
-  const cafXml = p.incluirCaf ? await leerCafXmlDe(ctx, tipo, p.doc.folio) : undefined;
+  const cafXml = p.incluirCaf ? await leerCafXmlDe(ctx, tipo, p.doc.folio, p.rutEmisor) : undefined;
   return {
     ambiente: p.ambiente,
     tipoDte: tipo,

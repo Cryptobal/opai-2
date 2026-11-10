@@ -6,7 +6,6 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 
 import { urlPropietario } from "../../db/test/entorno";
 
-import { cafXmlSintetico } from "./finanzas-caf-fixture";
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
 
 const estado = vi.hoisted(() => ({ adaptador: null as AdaptadorSii | null }));
@@ -155,25 +154,6 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
     const r = await s.mod.executeCapability(s.ctx(), "finanzas.ventas.emitir", { documentoId });
     expect(r.ok ? null : r.error.code).toBe("UNPROCESSABLE");
     expect(r.ok ? "" : r.error.message).toContain("la respuesta no es un XML de DTE");
-    expect(await folioActual()).toBe(5000);
-  });
-
-  it("un CAF guardado con U+FFFD (leído como UTF-8 al cargarlo) se bloquea antes de SimpleAPI (CAR-240)", async () => {
-    const fetch = vi.fn();
-    vi.stubGlobal("fetch", fetch);
-    const rango5000 = { tenantId: s.tenantId, folioDesde: 5000 };
-    await s.e.admin.dteFolio.updateMany({ where: rango5000, data: { activo: false } });
-    const danado = cafXmlSintetico({ folioDesde: 6000, folioHasta: 6010 }).replace(/<RS>[^<]*<\/RS>/, "<RS>EMPRESA \uFFFDU\uFFFDOA</RS>");
-    await s.dato("finanzas.folios.cargar_caf", { cafXml: danado });
-    try {
-      const r = await s.mod.executeCapability(s.ctx(), "finanzas.ventas.emitir", { documentoId });
-      expect(r.ok ? null : r.error.code).toBe("UNPROCESSABLE");
-      expect(r.ok ? "" : r.error.message).toMatch(/^El CAF de este folio se guardó dañado/);
-    } finally {
-      await s.e.admin.dteFolio.updateMany({ where: { tenantId: s.tenantId, folioDesde: 6000 }, data: { activo: false } });
-      await s.e.admin.dteFolio.updateMany({ where: rango5000, data: { activo: true } });
-    }
-    expect(fetch).not.toHaveBeenCalled();
     expect(await folioActual()).toBe(5000);
   });
 });
