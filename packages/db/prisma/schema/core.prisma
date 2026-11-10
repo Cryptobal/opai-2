@@ -44,6 +44,7 @@ model Tenant {
   // Brief 02: maestros, documentos y servicios del núcleo.
   cuentas                 Cuenta[]
   cuentasRepresentantes   CuentaRepresentante[]
+  cuentasReferencias      CuentaReferencia[]
   contactos               Contacto[]
   instalaciones           Instalacion[]
   cargos                  Cargo[]
