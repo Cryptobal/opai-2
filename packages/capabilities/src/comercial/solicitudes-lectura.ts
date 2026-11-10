@@ -54,7 +54,10 @@ export const solicitudesList = defineCapability({
       ...cursorDe(input.cursor),
     });
     const { items, siguiente } = pagina(filas, input.limite);
-    const nombres = await nombresDeResponsables(ctx, items.map((x) => x.responsableId));
+    const nombres = await nombresDeResponsables(
+      ctx,
+      items.map((x) => x.responsableId),
+    );
     return {
       items: items.map((x) => ({
         ...vistaSolicitud(x),
