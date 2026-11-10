@@ -31,4 +31,9 @@ describe("ACTECO desde la configuración DTE", () => {
     });
     expect(() => actecoDesdeDteConfig(dos, null)).toThrow(/Configuración › Empresa/);
   });
+  it("con 20 códigos, agregar uno más es un rechazo de negocio (no el CHECK de la base)", () => {
+    const veinte = { codigos: Array.from({ length: 20 }, (_, i) => 100_000 + i), principal: 100_000 };
+    expect(() => actecoDesdeDteConfig(veinte, 801001)).toThrow(/hasta 20/);
+    expect(actecoDesdeDteConfig(veinte, 100_005).codigos[0]).toBe(100_005);
+  });
 });

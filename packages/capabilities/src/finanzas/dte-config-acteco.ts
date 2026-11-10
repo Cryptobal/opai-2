@@ -1,6 +1,7 @@
 // CAR-243 · `finanzas.dte_config.actualizar` acepta todavía `acteco` (MCP y pantallas anteriores), pero el dato vive en la
 // configuración principal de la empresa (`core.perfil_empresa`): aquí se traduce a la lista de ACTECO de la empresa.
 import type { TenantTx } from "@opai/db";
+import { normalizarActividades } from "@opai/domain";
 
 import { reglaDeNegocio } from "../errores";
 
@@ -24,11 +25,23 @@ export function actecoDesdeDteConfig(
     }
     return { codigos: [], principal: null, cambia: true };
   }
-  return { codigos: [acteco, ...actual.codigos.filter((c) => c !== acteco)], principal: acteco, cambia: true };
+  // Misma regla que `core.empresa.acteco_set` (tope de 20 incluido): un rechazo es de negocio, nunca el CHECK de la base.
+  const n = normalizarActividades({ codigos: [acteco, ...actual.codigos], principal: acteco });
+  if (!n.ok) throw reglaDeNegocio(n.motivo);
+  return { ...n.valor, cambia: true };
 }
 
-/** Escribe la lista en el perfil de la empresa, en la misma transacción que la configuración DTE. */
-export async function escribirActecoDesdeDteConfig(tx: TenantTx, tenantId: string, a: Actividades) {
+/**
+ * Escribe la lista en el perfil de la empresa, en la misma transacción que la configuración DTE. Relee la lista dentro
+ * de la transacción (con bloqueo de la fila) para no pisar un `core.empresa.acteco_set` que haya entrado entre medio.
+ */
+export async function escribirActecoDesdeDteConfig(tx: TenantTx, tenantId: string, acteco: number | null) {
+  const filas = await tx.$queryRaw<{ actecos: number[]; acteco_principal: number | null }[]>`
+    SELECT actecos, acteco_principal FROM core.perfil_empresa WHERE tenant_id = ${tenantId}::uuid FOR UPDATE`;
+  const actual = { codigos: filas[0]?.actecos ?? [], principal: filas[0]?.acteco_principal ?? null };
+  const a = actecoDesdeDteConfig(actual, acteco);
+  if (!a.cambia) return a;
   const data = { actecos: a.codigos, actecoPrincipal: a.principal };
   await tx.perfilEmpresa.upsert({ where: { tenantId }, create: { ...data, tenantId }, update: data, select: { id: true } });
+  return a;
 }

@@ -6,6 +6,10 @@ import type { Actividades } from "./datos-empresa";
 
 export type ActecoElegido = { codigo: number; codigoSii: string; glosa: string | null };
 
+/** Igualdad sin importar el orden: el servidor deja el principal primero, así que el orden no es un cambio. */
+const clave = (codigos: readonly number[], principal: number | null) =>
+  JSON.stringify({ c: [...codigos].sort((a, b) => a - b), principal });
+
 /** Estado del ACTECO de la empresa (CAR-243): la lista elegida y cuál es el principal, que va en cada factura. */
 export function useActecos(guardadas: Actividades) {
   const [lista, setLista] = useState<ActecoElegido[]>(() =>
@@ -13,12 +17,11 @@ export function useActecos(guardadas: Actividades) {
   );
   const [principal, setPrincipal] = useState<number | null>(guardadas.principal);
   const input = { codigos: lista.map((a) => a.codigo), principal };
-  const enBase = { codigos: guardadas.actividades.map((a) => a.codigo), principal: guardadas.principal };
   return {
     lista,
     principal,
     input,
-    cambiado: JSON.stringify(input) !== JSON.stringify(enBase),
+    cambiado: clave(input.codigos, principal) !== clave(guardadas.actividades.map((a) => a.codigo), guardadas.principal),
     /** Agrega un código; el primero queda como principal. Un código repetido no se duplica. */
     agregar(a: ActecoElegido) {
       if (lista.some((x) => x.codigo === a.codigo)) return;

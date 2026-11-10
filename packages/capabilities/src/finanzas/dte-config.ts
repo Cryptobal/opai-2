@@ -111,8 +111,8 @@ export const dteConfigActualizar = defineCapability({
       avisoCafDias: input.avisoCafDias ?? prev?.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
       fechaCorte1_0: fechaCorteDb,
     };
-    const actividades = await actividadesEmpresaDe(ctx);
-    const acteco = actecoDesdeDteConfig(actividades, input.acteco);
+    // Valida y arma la vista previa con la lista vigente; la escritura la recalcula bajo bloqueo dentro de la transacción.
+    let acteco = actecoDesdeDteConfig(await actividadesEmpresaDe(ctx), input.acteco);
     if (dryRun) return vistaCfgDte({ ...next, acteco: acteco.principal });
     if (next.ambiente === "produccion" && !next.rutEmisor) {
       throw reglaDeNegocio("Producción requiere RUT emisor configurado.");
@@ -140,7 +140,7 @@ export const dteConfigActualizar = defineCapability({
         }),
       },
       async (tx) => {
-        if (acteco.cambia) await escribirActecoDesdeDteConfig(tx, ctx.tenantId, acteco);
+        if (input.acteco !== undefined) acteco = await escribirActecoDesdeDteConfig(tx, ctx.tenantId, input.acteco);
         return tx.dteConfig.upsert({
           where: { tenantId: ctx.tenantId },
           create: { tenantId: ctx.tenantId, ...next },

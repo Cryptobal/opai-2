@@ -20,12 +20,13 @@ async function buscar(q: string, limite = 20): Promise<Item[]> {
 
 /** Actividad económica de la empresa ante el SII (CAR-243): catálogo buscable, código a mano y uno principal. */
 export function SeccionActeco({ ac, dis }: { ac: EstadoActecos; dis: boolean }) {
-  const [vistos, setVistos] = useState<Item[]>([]);
+  // Todas las opciones vistas, acumuladas: una respuesta de búsqueda atrasada no hace perder la que se eligió.
+  const [vistos, setVistos] = useState<ReadonlyMap<number, Item>>(new Map());
   const [manual, setManual] = useState("");
   const [errorManual, setErrorManual] = useState<string | undefined>();
   const onBuscar = useCallback(async (q: string) => {
     const items = await buscar(q);
-    setVistos(items);
+    setVistos((m) => new Map([...m, ...items.map((i) => [i.codigo, i] as const)]));
     return items.map((i) => ({ valor: String(i.codigo), etiqueta: `${i.codigoSii} · ${i.glosa}` }));
   }, []);
   async function agregarManual() {
@@ -57,10 +58,10 @@ export function SeccionActeco({ ac, dis }: { ac: EstadoActecos; dis: boolean }) 
               <Combobox
                 id="e-acteco"
                 valor={null}
-                opciones={vistos.map((i) => ({ valor: String(i.codigo), etiqueta: `${i.codigoSii} · ${i.glosa}` }))}
+                opciones={[...vistos.values()].map((i) => ({ valor: String(i.codigo), etiqueta: `${i.codigoSii} · ${i.glosa}` }))}
                 onBuscar={onBuscar}
                 onCambiar={([v]) => {
-                  const i = vistos.find((x) => String(x.codigo) === v);
+                  const i = vistos.get(Number(v));
                   if (i) ac.agregar(i);
                 }}
                 placeholder="Código o actividad (p. ej. seguridad privada)"
@@ -106,7 +107,12 @@ function FilaActeco(p: { a: ActecoElegido; principal: boolean; dis: boolean; ac:
       {dis ? null : (
         <span className="flex items-center gap-1">
           {principal ? null : (
-            <Button type="button" variant="ghost" onClick={() => ac.marcarPrincipal(a.codigo)}>
+            <Button
+              type="button"
+              variant="ghost"
+              aria-label={`Hacer principal el ${a.codigoSii}`}
+              onClick={() => ac.marcarPrincipal(a.codigo)}
+            >
               Hacer principal
             </Button>
           )}
