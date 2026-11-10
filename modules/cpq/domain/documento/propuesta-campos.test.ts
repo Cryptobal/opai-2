@@ -69,7 +69,7 @@ describe("tokens de la propuesta", () => {
       [],
       valores,
     );
-    expect(c.versionCatalogo).toBe(1);
+    expect(c.versionCatalogo).toBe(2);
     expect(c.faltantes).toEqual(["cuenta.giro"]);
     expect(c.valores.campos).toEqual({ "cuenta.nombre": "Cliente Ficticio SpA" });
   });

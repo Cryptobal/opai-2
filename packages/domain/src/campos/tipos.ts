@@ -13,6 +13,7 @@ export const ENTIDADES_CAMPO = [
   "instalacion",
   "negocio",
   "cotizacion",
+  "referencia",
 ] as const;
 export type EntidadCampo = (typeof ENTIDADES_CAMPO)[number];
 

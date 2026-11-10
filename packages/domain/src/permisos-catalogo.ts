@@ -13,6 +13,10 @@ export const PERMISOS_CORE = {
   // Brief 02: maestros, documentos y servicios del núcleo.
   cuentasRead: "core:cuentas.read",
   cuentasManage: "core:cuentas.manage",
+  // CAR-138 PR 7: registrar que un cliente consintió ser referencia comercial. Quién lo tiene es una
+  // decisión pendiente de Carlos: por defecto solo owner y admin; cada empresa lo da o quita con roles
+  // personalizados y excepciones por usuario. Revocar es la dirección segura y basta `cuentas.manage`.
+  cuentasReferenciasAutorizar: "core:cuentas.referencias.autorizar",
   instalacionesRead: "core:instalaciones.read",
   instalacionesManage: "core:instalaciones.manage",
   // Puestos (Brief 11): catálogos de patrones de turno y funciones, con lectura, edición y
