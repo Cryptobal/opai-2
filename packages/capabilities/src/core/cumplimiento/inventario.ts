@@ -5,6 +5,7 @@ import { INVENTARIO_NUCLEO as INVENTARIO_BASE } from "./inventario-nucleo";
 import { INVENTARIO_PERSONAS_PR2 } from "./inventario-nucleo-personas-pr2";
 import { INVENTARIO_RETENCION } from "./inventario-retencion";
 import { INVENTARIO_AGENTES } from "./inventario-agentes";
+import { INVENTARIO_SII } from "./inventario-sii";
 
 // El inventario del Núcleo (RAT, §4.3) vive en `inventario-nucleo.ts` para no superar el límite de
 // líneas a medida que se declaran más tablas; aquí solo se consolida con lo de cada módulo.
@@ -13,6 +14,7 @@ export const INVENTARIO_NUCLEO: DatoPersonalDeclarado[] = [
   ...INVENTARIO_PERSONAS_PR2,
   ...INVENTARIO_RETENCION,
   ...INVENTARIO_AGENTES,
+  ...INVENTARIO_SII,
 ];
 
 /** Inventario consolidado: el Núcleo más lo que declara cada módulo en su manifest. */
