@@ -10,6 +10,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { urlPropietario } from "../../db/test/entorno";
 
 import { cafXmlSintetico } from "./finanzas-caf-fixture";
+import { registrarModuloFinanzas } from "./finanzas-modulo";
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
 
 const firmas = vi.hoisted(() => [] as PayloadEmisionDte[]);
@@ -57,6 +58,7 @@ describe.skipIf(!urlPropietario)(
 
     beforeAll(async () => {
       s = await prepararVentasDb();
+      registrarModuloFinanzas(); // ajustes del módulo que usa «Hoy en Finanzas»
       await s.dato("finanzas.folios.cargar_caf", {
         cafXml: cafXmlSintetico({ tipoDte: 34, folioDesde: 9300, folioHasta: 9320 }),
       });
@@ -142,6 +144,20 @@ describe.skipIf(!urlPropietario)(
       expect(
         (await s.dato<Vista>("finanzas.ventas.obtener", { documentoId: f.id })).montoPendiente,
       ).toBe(f.montoTotal);
+    });
+
+    it("«Hoy» cuenta el borrador de nota de débito entre lo que hay que emitir", async () => {
+      type Hoy = { emitir: { borradores: { cantidad: number; montoClp: number } } };
+      const f = await factura(33);
+      const antes = (await s.dato<Hoy>("finanzas.hoy.resumen", {})).emitir.borradores;
+      await s.dato("finanzas.ventas.crear_borrador_nota_debito", {
+        facturaId: f.id,
+        motivo,
+        lineas: [{ glosa: "Cargo", monto: 1_000 }],
+      });
+      const despues = (await s.dato<Hoy>("finanzas.hoy.resumen", {})).emitir.borradores;
+      expect(despues.cantidad).toBe(antes.cantidad + 1);
+      expect(despues.montoClp).toBe(antes.montoClp + 1_190);
     });
 
     it("sobre una factura exenta (34) la nota de débito también es exenta", async () => {
