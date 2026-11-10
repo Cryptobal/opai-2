@@ -4,7 +4,7 @@ import { montoLineaVenta } from "@opai/domain/ventas-lineas";
 import { parseDescuento } from "../programacion/_componentes/tipos";
 
 /** Línea del formulario: `precio` guarda solo dígitos (pesos), `cantidad` y `descuento` el texto tipeado. */
-export type LineaForm = { glosa: string; cantidad: string; precio: string; descuento: string };
+export type LineaForm = { glosa: string; cantidad: string; precio: string; descuento: string; unidad?: string };
 
 export const LINEA_NUEVA: LineaForm = { glosa: "", cantidad: "1", precio: "", descuento: "0" };
 

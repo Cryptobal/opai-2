@@ -98,4 +98,27 @@ describe.skipIf(!urlPropietario)("Finanzas · editar y descartar borradores (CAR
     expect((await falla("finanzas.ventas.descartar_borrador", { documentoId: b.id }))?.code).toBe("UNPROCESSABLE");
     expect((await falla("finanzas.ventas.actualizar_borrador", { documentoId: b.id, glosa: "x" }))?.code).toBe("UNPROCESSABLE");
   });
+
+  it("conserva la unidad de la línea al editar y no edita un borrador de otra empresa", async () => {
+    const b = await borrador();
+    await s.dato("finanzas.ventas.actualizar_borrador", { documentoId: b.id, lineas: [{ glosa: "Turno", monto: 1_000, unidad: "hora" }] });
+    const fila = await s.e.admin.documentoEmitidoLinea.findFirstOrThrow({ where: { documentoId: b.id } });
+    expect(fila.unidad).toBe("hora");
+    const otro = await s.e.admin.documentoEmitido.create({
+      data: { tenantId: s.tenantB, cuentaId: (await s.e.admin.cuenta.findFirstOrThrow({ where: { tenantId: s.tenantB } })).id, tipoDte: 33, estadoDte: "borrador" },
+    });
+    expect((await falla("finanzas.ventas.actualizar_borrador", { documentoId: otro.id, glosa: "x" }))?.code).toBe("NOT_FOUND");
+    expect((await falla("finanzas.ventas.descartar_borrador", { documentoId: otro.id }))?.code).toBe("NOT_FOUND");
+    expect(await filas(otro.id)).toBe(1);
+  });
+
+  it("descarta el borrador de una nota de débito sin tocar la factura de origen", async () => {
+    const f = await s.dato<Vista>("finanzas.ventas.emitir", { documentoId: (await borrador(100_000)).id });
+    const nd = await s.dato<Vista>("finanzas.ventas.crear_borrador_nota_debito", { facturaId: f.id, motivo: "Intereses", lineas: [{ glosa: "Cargo", monto: 1_000 }] });
+    await s.dato("finanzas.ventas.descartar_borrador", { documentoId: nd.id });
+    expect(await filas(nd.id)).toBe(0);
+    expect(await filas(f.id)).toBe(1);
+    expect(await s.e.admin.documentoEmitidoReferencia.count({ where: { documentoId: nd.id } })).toBe(0);
+  });
+
 });

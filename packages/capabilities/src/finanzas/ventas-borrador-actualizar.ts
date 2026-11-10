@@ -5,7 +5,7 @@ import { z } from "zod";
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { reglaDeNegocio } from "../errores";
-import { bloquearDocumento } from "./ventas-borrador-editable";
+import { bloquearDocumento, cargarBorradorEditable } from "./ventas-borrador-editable";
 import { referenciaBorradorSchema } from "./ventas-borrador";
 import { calcularCambios } from "./ventas-borrador-cambios";
 import { vistaDeDocumento } from "./ventas-consulta";
@@ -44,6 +44,7 @@ export const ventasActualizarBorrador = defineCapability({
     }
     await ctx.transaccion(async (tx) => {
       await bloquearDocumento(tx, ctx.tenantId, c.doc.id);
+      await cargarBorradorEditable({ db: tx }, c.doc.id); // las condiciones se revisan de nuevo con el documento bloqueado
       const { count } = await tx.documentoEmitido.updateMany({
         where: { id: c.doc.id, estadoDte: "borrador", folio: null, trackIdSii: null, xmlStorageKey: null },
         data: c.fila,

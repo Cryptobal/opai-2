@@ -21,6 +21,7 @@ export type LineaBorrador = {
   glosa: string;
   monto: number;
   cantidad?: string | null;
+  unidad?: string | null;
   precioUnitario?: number | null;
   descuentoPct?: number | null;
 };

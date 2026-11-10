@@ -22,6 +22,7 @@ export const ventasDescartarBorrador = defineCapability({
     if (dryRun) return { documentoId: doc.id, tipoDte: doc.tipoDte, descartado: false };
     await ctx.transaccion(async (tx) => {
       await bloquearDocumento(tx, ctx.tenantId, doc.id);
+      await cargarBorradorEditable({ db: tx }, doc.id); // las condiciones se revisan de nuevo con el documento bloqueado
       const where = { documentoId: doc.id };
       await tx.documentoEmitidoDestinatario.deleteMany({ where });
       await tx.documentoEmitidoLinea.deleteMany({ where });

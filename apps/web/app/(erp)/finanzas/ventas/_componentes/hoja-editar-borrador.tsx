@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Alerta, avisar, Button, Campo, Dialog, Input } from "@opai/ds";
 
@@ -20,6 +21,7 @@ const aForm = (l: LineaBorrador): LineaForm => ({
   cantidad: l.cantidad ?? "1",
   precio: String(l.precioUnitario ?? l.monto),
   descuento: l.descuentoPct ? descuentoTexto(l.descuentoPct) : "0",
+  ...(l.unidad ? { unidad: l.unidad } : {}), // viaja con su fila: quitar o agregar líneas no la descuadra
 });
 const DIA = 86_400_000;
 const plazoDe = (v: Borrador) =>
@@ -32,6 +34,7 @@ const plazoDe = (v: Borrador) =>
  * se descarta y se crea otro. Las referencias de una factura se conservan tal cual.
  */
 export function HojaEditarBorrador({ venta, onCerrar }: { venta: Borrador; onCerrar: () => void }) {
+  const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const esNd = venta.tipoDte === 56;
   const hoy = hoyIso();
@@ -55,6 +58,7 @@ export function HojaEditarBorrador({ venta, onCerrar }: { venta: Borrador; onCer
         const d = parseDescuento(l.descuento);
         return {
           glosa: l.glosa.trim(),
+          ...(l.unidad ? { unidad: l.unidad } : {}),
           monto: montoDeLinea(l)!,
           cantidad: l.cantidad.trim(),
           precioUnitario: parseMonto(l.precio)!,
@@ -64,6 +68,7 @@ export function HojaEditarBorrador({ venta, onCerrar }: { venta: Borrador; onCer
     });
     if (!r) return;
     avisar.exito("Borrador actualizado");
+    router.refresh(); // la ficha y esta hoja vuelven a leer lo guardado
     onCerrar();
   }
 

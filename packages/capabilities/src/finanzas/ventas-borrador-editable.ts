@@ -18,18 +18,20 @@ export async function cargarBorradorEditable(ctx: Pick<Contexto, "db">, document
   if (!(TIPOS_BORRADOR as readonly number[]).includes(doc.tipoDte)) {
     throw reglaDeNegocio("Este tipo de documento no tiene borrador editable.");
   }
-  const [corrida, cierre, envios, cesiones, enviosCliente] = await Promise.all([
+  const [corrida, cierre, envios, cesiones, enviosCliente, cobro, gestiones] = await Promise.all([
     ctx.db.ventasProgramacionCorrida.count({ where: { documentoId } }),
     ctx.db.ventasCierreSeguimiento.count({ where: { documentoId } }),
     ctx.db.dteEnvio.count({ where: { documentoId } }),
     ctx.db.cesion.count({ where: { documentoId } }),
     ctx.db.documentoEmitidoEnvio.count({ where: { documentoId } }),
+    ctx.db.flujoCobroEsperado.count({ where: { documentoId } }),
+    ctx.db.cobranzaGestion.count({ where: { documentoId } }),
   ]);
   if (corrida > 0 || cierre > 0) {
     throw reglaDeNegocio("Este borrador lo generó una programación o el cierre mensual; se gestiona desde ahí, no se edita ni se descarta aquí.");
   }
-  if (envios > 0 || cesiones > 0 || enviosCliente > 0) {
-    throw reglaDeNegocio("Este borrador ya tiene envíos registrados; no se puede cambiar ni descartar.");
+  if (envios > 0 || cesiones > 0 || enviosCliente > 0 || cobro > 0 || gestiones > 0) {
+    throw reglaDeNegocio("Este borrador ya tiene envíos, cobros o gestiones registrados; no se puede cambiar ni descartar.");
   }
   return doc;
 }

@@ -30,6 +30,7 @@ export type EmisionPreparada = {
 type DocHuella = {
   cuentaId: string;
   fechaEmision: Date | null;
+  fechaVencimiento: Date | null;
   glosa: string | null;
   montoNeto: number;
   montoExento: number;
@@ -42,10 +43,12 @@ type DocHuella = {
 
 export function huellaBorrador(d: DocHuella): string {
   const contenido = JSON.stringify([
-    d.cuentaId, d.fechaEmision?.toISOString().slice(0, 10) ?? null, d.glosa,
+    d.cuentaId, d.fechaEmision?.toISOString().slice(0, 10) ?? null, d.fechaVencimiento?.toISOString().slice(0, 10) ?? null, d.glosa,
     d.montoNeto, d.montoExento, d.montoIva, d.montoOtros, d.montoTotal,
     d.lineas.map((l) => [l.orden, l.glosa, l.monto]),
-    d.referencias.map((r) => [r.tipoDteRef, r.folioRef, r.codigoRef, r.razonRef]),
+    d.referencias
+      .map((r) => [r.tipoDteRef, r.folioRef, r.codigoRef, r.razonRef])
+      .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
   ]);
   return createHash("sha256").update(contenido).digest("hex");
 }
