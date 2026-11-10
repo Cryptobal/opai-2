@@ -23,7 +23,7 @@ const tipoBorradorSchema = z.union([z.literal(33), z.literal(34)]);
 
 const diaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha AAAA-MM-DD.");
 
-const referenciaBorradorSchema = z.object({
+export const referenciaBorradorSchema = z.object({
   tipoDteRef: z
     .number()
     .int()

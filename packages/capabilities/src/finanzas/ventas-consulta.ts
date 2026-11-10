@@ -4,7 +4,16 @@ import { notasCreditoPorDocumento } from "./cobros";
 import { vistaVenta } from "./vistas-venta";
 
 type Fila = Parameters<typeof vistaVenta>[0] & {
-  lineas?: { id: string; orden: number; glosa: string; monto: number }[];
+  lineas?: {
+    id: string;
+    orden: number;
+    glosa: string;
+    monto: number;
+    cantidad?: { toString(): string } | null;
+    unidad?: string | null;
+    precioUnitario?: number | null;
+    descuentoPct?: number | null;
+  }[];
 };
 
 export async function vistasDeVentas(ctx: Contexto, filas: readonly Fila[]) {
@@ -25,6 +34,10 @@ export async function vistasDeVentas(ctx: Contexto, filas: readonly Fila[]) {
       orden: l.orden,
       glosa: l.glosa,
       monto: l.monto,
+      cantidad: l.cantidad?.toString() ?? null,
+      unidad: l.unidad ?? null,
+      precioUnitario: l.precioUnitario ?? null,
+      descuentoPct: l.descuentoPct ?? null,
     }));
     return vistaVenta(f, c, lineas);
   });
