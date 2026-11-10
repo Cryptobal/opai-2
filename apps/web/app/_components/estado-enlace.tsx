@@ -4,7 +4,7 @@ import { useLinkStatus } from "next/link";
 import { useEffect } from "react";
 
 import { ESPERA_ESQUELETO_MS } from "@/lib/cache-navegador";
-import { volverArribaSiCorresponde } from "@/lib/scroll-tras-esqueleto";
+import { subirTrasEsqueleto } from "@/lib/scroll-tras-esqueleto";
 
 import { fijarPendiente, limpiarPendiente } from "./navegacion-pendiente";
 
@@ -37,11 +37,7 @@ export function EstadoEnlace({ href, conEsqueleto = false }: { href: string; con
       limpiarPendiente(href);
       if (marcado && --pendientes === 0) raiz.removeAttribute("data-navegando");
       // CAR-231: Next no sube el scroll si decidió con el esqueleto a la vista; se sube aquí.
-      volverArribaSiCorresponde(window, {
-        esqueletoVisible: marcado,
-        inicio,
-        actual: location.pathname + location.search,
-      });
+      subirTrasEsqueleto(window, marcado, inicio, location.pathname + location.search);
     };
   }, [pending, href, conEsqueleto]);
   return null;
