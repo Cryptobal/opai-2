@@ -10,6 +10,7 @@ import { PERMISO_READ, PERMISO_VENTAS_CONFIGURE } from "./comun";
 import {
   configDteSchema,
   exigeOwnerHumanoDte,
+  mensajeRechazoDteConfig,
   proveedorCesionSchema,
   proveedorEmisionSchema,
   vistaCfgDte,
@@ -136,7 +137,10 @@ export const dteConfigActualizar = defineCapability({
           create: { tenantId: ctx.tenantId, ...next },
           update: next,
         }),
-    );
+    ).catch((error: unknown) => {
+      const msg = mensajeRechazoDteConfig(error);
+      throw msg ? reglaDeNegocio(msg) : error;
+    });
     return vistaCfgDte(cfg);
   },
 });

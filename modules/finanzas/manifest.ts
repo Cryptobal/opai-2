@@ -150,6 +150,8 @@ export const manifest = defineModule({
     { id: "finanzas.programacion.pausada", descripcion: "Se pausó una programación de facturación recurrente." },
     { id: "finanzas.dte_config.actualizada", descripcion: "Cambió la configuración DTE (ambiente o conectores)." },
     { id: "finanzas.folios.caf_cargado", descripcion: "Se cargó un rango de folios autorizados (CAF)." },
+    { id: "finanzas.folios.caf_pausado", descripcion: "Se pausó un rango de folios (CAF): no se usa para emitir." },
+    { id: "finanzas.folios.caf_reactivado", descripcion: "Se reactivó un rango de folios (CAF) pausado." },
   ],
   capacidades: [...capacidadesFinanzas, ...capacidadesFlujo],
 });

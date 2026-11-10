@@ -17,7 +17,7 @@ import {
   vistaPreviaCafCargado,
 } from "./folios-caf-logica";
 
-const folioVistaSchema = z.object({
+export const folioVistaSchema = z.object({
   id: z.string(),
   tipoDte: z.number().int(),
   folioDesde: z.number().int(),
@@ -29,6 +29,10 @@ const folioVistaSchema = z.object({
   alerta: z.boolean(),
   cafVenceEn: z.string().nullable(),
   activo: z.boolean(),
+  ambiente: z
+    .enum(["certificacion", "produccion"])
+    .nullable()
+    .describe("Ambiente del CAF según su IDK: certificación o producción; null si no se pudo determinar."),
   lectura: z.string(),
 });
 

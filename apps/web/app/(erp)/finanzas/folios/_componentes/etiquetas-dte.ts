@@ -21,7 +21,7 @@ export function foliosUsados(f: { folioDesde: number; folioActual: number }): nu
 }
 
 export function estadoFolio(f: FolioEstadoInput, hoyIso: string): { etiqueta: string; tono: "success" | "warning" | "danger" | "neutro" } {
-  if (!f.activo) return { etiqueta: "Inactivo", tono: "neutro" };
+  if (!f.activo) return { etiqueta: f.restantes <= 0 ? "Agotado" : "Pausado", tono: "neutro" };
   if (f.cafVenceEn && cafVencido(f.cafVenceEn, hoyIso)) return { etiqueta: "CAF vencido", tono: "danger" };
   if (f.restantes <= 0) return { etiqueta: "Agotado", tono: "warning" };
   if (f.alerta) return { etiqueta: "Revisar", tono: "warning" };
@@ -34,3 +34,21 @@ type FolioEstadoInput = {
   restantes: number;
   alerta: boolean;
 };
+
+/** Ambiente del CAF para la UI (CAR-240). */
+export function etiquetaAmbienteCaf(a: "certificacion" | "produccion" | null | undefined): {
+  etiqueta: string;
+  tono: "info" | "warning" | "neutro";
+} {
+  if (a === "produccion") return { etiqueta: "Producción", tono: "warning" };
+  if (a === "certificacion") return { etiqueta: "Certificación", tono: "info" };
+  return { etiqueta: "Ambiente sin determinar", tono: "neutro" };
+}
+
+/** Qué se puede hacer con el CAF: pausar si está activo; reactivar si está pausado, con folios y sin vencer. */
+export function accionCaf(f: FolioEstadoInput, hoyIso: string): "pausar" | "reactivar" | null {
+  if (f.activo) return "pausar";
+  if (f.restantes <= 0) return null;
+  if (f.cafVenceEn && cafVencido(f.cafVenceEn, hoyIso)) return null;
+  return "reactivar";
+}

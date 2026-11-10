@@ -30,6 +30,7 @@ import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectur
 import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
 import { ventasEnvios } from "./ventas-envios";
+import { foliosSetActivo } from "./folios-activo";
 import { ventasPdf } from "./ventas-pdf";
 import { ventasPdfBorrador } from "./ventas-pdf-borrador";
 import { ventasPreflightEmision } from "./ventas-preflight";
@@ -115,6 +116,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasEnvios,
   foliosListar,
   foliosCargarCaf,
+  foliosSetActivo,
   dteConfigObtener,
   dteConfigActualizar,
 ];
