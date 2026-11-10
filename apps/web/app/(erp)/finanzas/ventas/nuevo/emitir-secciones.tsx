@@ -109,10 +109,12 @@ export function BloqueEmisionGuardada({
   pendiente,
   revisarEmision,
   emitir,
+  etiquetaEmitir = "Emitir factura",
 }: {
   pendiente: boolean;
   revisarEmision: () => void;
   emitir: () => void;
+  etiquetaEmitir?: string;
 }) {
   return (
     <Card className="flex flex-col gap-3 p-4">
@@ -130,7 +132,7 @@ export function BloqueEmisionGuardada({
           Revisar emisión
         </Button>
         <Button disabled={pendiente} onClick={() => void emitir()}>
-          Emitir factura
+          {etiquetaEmitir}
         </Button>
       </div>
     </Card>
