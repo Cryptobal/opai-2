@@ -80,6 +80,9 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
+      - name: Aviso de novedad in-app (CAR-260, no bloquea)
+        if: github.event_name == 'pull_request'
+        run: .github/scripts/ci-novedad-visual.sh
       - name: Ampliar swap (runner ~7 GB)
         if: steps.solo_docs.outputs.only_docs != 'true'
         run: |
