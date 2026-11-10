@@ -1,3 +1,4 @@
+import { resumenParaMostrar } from "@opai/domain";
 import { z } from "zod";
 
 import { obtenerCapacidad } from "../../registry";
@@ -64,7 +65,12 @@ export async function vistaAprobaciones(
         ? ("alto" as const)
         : ("medio" as const),
     capability: a.capability,
-    resumen: a.resumen,
+    resumen: resumenParaMostrar({
+      resumen: a.resumen,
+      capabilityId: a.capability,
+      agente: a.agenteInternoId ? "Agente interno" : (nombre.get(a.apiKeyId ?? "") ?? "Un agente"),
+      descripcion: obtenerCapacidad(a.capability)?.descripcion ?? null,
+    }),
     input: a.input,
     estado: a.estado as "pendiente",
     venceEn: a.venceEn.toISOString(),

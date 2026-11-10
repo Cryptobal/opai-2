@@ -229,6 +229,7 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
    * autonomía sea "aprobacion", que siempre la exige). Solo afecta a agentes; a las personas nunca.
    */
   exigeAprobacion?: (input: z.output<I>) => boolean;
+  describirAprobacion?: (ctx: Contexto, input: z.output<I>) => Promise<string | null>; // CAR-250: acción en texto humano, sin el agente
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
   portales?: readonly string[];
   /**
@@ -272,8 +273,6 @@ export type Resultado<T = unknown> =
       error: {
         code: CodigoError;
         message: string;
-        issues?: unknown;
-        aprobacionId?: string;
-        detalles?: unknown;
+        issues?: unknown; aprobacionId?: string; detalles?: unknown;
       };
     };
