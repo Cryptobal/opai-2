@@ -4,6 +4,7 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { periodosRecientes } from "../../compras/_componentes/datos";
+import { resumenLista } from "./resumen-lista";
 import type { LibroVentas } from "./tipos";
 
 /** Lista del libro de ventas con filtros de URL. */
@@ -24,23 +25,17 @@ export async function cargarVentas(sp: SearchParams) {
         ...(p["q"] ? { q: p["q"] } : {}),
       },
     ),
-    periodo
+    // El libro oficial solo vale cuando la lista no está recortada por estado ni por búsqueda.
+    periodo && !p["estado"] && !p["q"]
       ? ejecutarComoUsuario<LibroVentas["resumen"]>("erp", "finanzas.ventas.libro_resumen", { periodo })
       : Promise.resolve(null),
   ]);
-  const data =
-    libro.ok && resumen?.ok
-      ? { items: libro.data.items, siguiente: libro.data.siguiente, resumen: resumen.data }
-      : libro.ok
-        ? {
-            items: libro.data.items,
-            siguiente: libro.data.siguiente,
-            resumen: { documentos: libro.data.items.length, neto: 0, iva: 0, total: 0 },
-          }
-        : null;
+  const items = libro.ok ? libro.data.items : [];
+  const subtitulo = libro.ok ? resumenLista(items, libro.data.siguiente, resumen?.ok ? resumen.data : null) : null;
   return {
     state: estadoPantalla(libro),
-    libro: data,
+    libro: libro.ok ? { items, siguiente: libro.data.siguiente } : null,
+    subtitulo,
     gestiona,
     filtrado: Boolean(p["periodo"] || p["estado"] || p["q"]),
     periodos: periodosRecientes(),

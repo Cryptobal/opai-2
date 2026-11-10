@@ -17,6 +17,7 @@ export default function VentasPage({ searchParams }: { searchParams: SearchParam
           <ListaVentas
             state={d.state}
             libro={d.libro}
+            subtitulo={d.subtitulo}
             gestiona={d.gestiona}
             filtrado={d.filtrado}
             periodos={d.periodos}

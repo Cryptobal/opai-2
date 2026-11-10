@@ -20,22 +20,18 @@ function badgeEstado(v: Venta) {
 /** Libro de ventas (DTE): facturas 33/34, notas de crédito 61. */
 export function ListaVentas(p: {
   state: EstadoPantalla;
-  libro: LibroVentas | null;
+  libro: Pick<LibroVentas, "items" | "siguiente"> | null;
+  subtitulo: string | null;
   gestiona: boolean;
   filtrado: boolean;
   periodos: { valor: string; etiqueta: string }[];
 }) {
   const items = p.libro?.items ?? [];
-  const r = p.libro?.resumen;
   return (
     <ListScreen<Venta>
       state={p.state}
       titulo="Ventas (DTE)"
-      subtitulo={
-        r
-          ? `${r.documentos} documentos · Neto ${pesos(r.neto)} · Total ${pesos(r.total)}`
-          : "Facturas 33 y 34, notas de crédito 61"
-      }
+      subtitulo={p.subtitulo ?? "Facturas 33 y 34, notas de crédito 61"}
       accionPrincipal={
         p.gestiona ? (
           <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
@@ -79,9 +75,9 @@ export function ListaVentas(p: {
             <FileText className="size-4" aria-hidden />
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="truncate font-medium">{v.cuentaNombre}</span>
+            <span className="line-clamp-2 break-words font-medium">{v.cuentaNombre}</span>
             <span className="text-sm text-fg-muted">
-              {v.folio ? `Folio ${v.folio}` : "Borrador"} · {v.tipoDteNombre}
+              {v.folio ? `Folio ${v.folio} · ${v.tipoDteNombre}` : v.tipoDteNombre}
             </span>
           </span>
           <span className="flex flex-none flex-col items-end gap-1">

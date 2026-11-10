@@ -85,12 +85,14 @@ export function HojaEditarBorrador({ venta, onCerrar }: { venta: Borrador; onCer
         </>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         {error ? <Alerta tono="danger" titulo="No se pudo guardar">{error}</Alerta> : null}
-        <EmitirFechaEmision valor={fecha} onCambiar={setFecha} hoyIso={hoy} disabled={false} />
-        <Campo etiqueta="Plazo de pago (días)" htmlFor="edit-plazo" {...(plazo !== "" && !listo && !(plazoN >= 0 && plazoN <= 365) ? { error: "Entre 0 y 365 días." } : {})}>
-          <Input id="edit-plazo" inputMode="numeric" value={plazo} onChange={(e) => setPlazo(e.target.value)} />
-        </Campo>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <EmitirFechaEmision valor={fecha} onCambiar={setFecha} hoyIso={hoy} disabled={false} />
+          <Campo etiqueta="Plazo de pago (días)" htmlFor="edit-plazo" {...(plazo !== "" && !listo && !(plazoN >= 0 && plazoN <= 365) ? { error: "Entre 0 y 365 días." } : {})}>
+            <Input id="edit-plazo" inputMode="numeric" value={plazo} onChange={(e) => setPlazo(e.target.value)} />
+          </Campo>
+        </div>
         <Campo etiqueta={esNd ? "Motivo" : "Glosa (opcional)"} htmlFor="edit-texto">
           <Input id="edit-texto" value={texto} onChange={(e) => setTexto(e.target.value)} />
         </Campo>
