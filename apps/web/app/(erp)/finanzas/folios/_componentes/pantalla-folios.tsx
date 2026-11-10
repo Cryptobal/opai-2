@@ -7,7 +7,8 @@ import { Plus } from "lucide-react";
 import { Badge, Button, ListScreen, type Columna, type EstadoPantalla } from "@opai/ds";
 import { fecha, hoyIso } from "@/lib/fechas";
 
-import { estadoFolio, foliosUsados, nombreTipoDte } from "./etiquetas-dte";
+import { AccionCaf } from "./accion-caf";
+import { accionCaf, estadoFolio, etiquetaAmbienteCaf, foliosUsados, nombreTipoDte } from "./etiquetas-dte";
 import type { FolioCaf } from "./tipos";
 
 const HojaSubirCaf = dynamic(() => import("./hoja-subir-caf").then((m) => ({ default: m.HojaSubirCaf })));
@@ -22,6 +23,10 @@ type Props = {
 export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
   const [subirAbierta, setSubirAbierta] = useState(false);
   const hoy = hoyIso();
+  const accionDe = (f: FolioCaf) => {
+    const a = puedeCargar && f.id ? accionCaf(f, hoy) : null;
+    return a ? <AccionCaf folioId={f.id} accion={a} rango={`${f.folioDesde}–${f.folioHasta}`} /> : null;
+  };
   const columnas: Columna<FolioCaf>[] = [
     {
       id: "tipo",
@@ -50,6 +55,14 @@ export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
       render: (f) => <span className="t-numeric">{f.restantes}</span>,
     },
     {
+      id: "ambiente",
+      etiqueta: "Ambiente",
+      render: (f) => {
+        const a = etiquetaAmbienteCaf(f.ambiente);
+        return <Badge tono={a.tono}>{a.etiqueta}</Badge>;
+      },
+    },
+    {
       id: "vence",
       etiqueta: "Vence",
       render: (f) => (f.cafVenceEn ? fecha(f.cafVenceEn) : "—"),
@@ -61,6 +74,11 @@ export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
         const e = estadoFolio(f, hoy);
         return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
       },
+    },
+    {
+      id: "accion",
+      etiqueta: "",
+      render: (f) => accionDe(f),
     },
   ];
 
@@ -95,8 +113,12 @@ export function PantallaFolios({ state, items, acceso, puedeCargar }: Props) {
                 {f.cafVenceEn ? (
                   <span className="text-sm text-fg-muted">Vence {fecha(f.cafVenceEn)}</span>
                 ) : null}
+                <span className="text-sm text-fg-muted">{etiquetaAmbienteCaf(f.ambiente).etiqueta}</span>
               </span>
-              <Badge tono={e.tono}>{e.etiqueta}</Badge>
+              <span className="flex flex-col items-end gap-2">
+                <Badge tono={e.tono}>{e.etiqueta}</Badge>
+                {accionDe(f)}
+              </span>
             </>
           );
         }}

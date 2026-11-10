@@ -1,7 +1,8 @@
 import { produccionTributariaHabilitada } from "@opai/integrations";
 
 import type { Contexto } from "../types";
-import { emisionSimulada, ambienteEmisionDe, mensajeCafAmbiente } from "./caf-ambiente";
+import { NOMBRE_AMBIENTE_CAF, ambienteCafRequerido } from "./caf-ambiente";
+import { rangosParaEmitir } from "./folios-previstos";
 import { chequeosCredencialesEmision } from "./ventas-preflight-credenciales";
 
 export type ItemPreflightEmision = {
@@ -58,29 +59,20 @@ export async function itemsPreflightEmision(
     if (doc) tipo = doc.tipoDte as 33 | 34 | 61;
   }
 
-  const folioRango = await ctx.db.dteFolio.findFirst({
+  // Misma regla que la emisión (CAR-240): CAF activos, vigentes, con folios y del ambiente requerido.
+  const rangos = await ctx.db.dteFolio.findMany({
     where: { tipoDte: tipo, activo: true },
-    orderBy: { folioDesde: "asc" },
+    orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
   });
-  if (folioRango && folioRango.folioActual <= folioRango.folioHasta) {
-    const vence = folioRango.cafVenceEn?.toISOString().slice(0, 10);
-    const hoy = new Date().toISOString().slice(0, 10);
-    const cafOk = !vence || vence >= hoy;
-    push(
-      "caf",
-      cafOk,
-      cafOk
-        ? `Hay folios ${tipo} desde ${folioRango.folioActual} (CAF ${folioRango.folioDesde}–${folioRango.folioHasta}).`
-        : `El CAF del tipo ${tipo} está vencido; cargue uno nuevo.`,
-      !cafOk,
-    );
-    if (!emisionSimulada(cfg)) {
-      const ambiente = ambienteEmisionDe(cfg);
-      const msg = mensajeCafAmbiente(folioRango, ambiente);
-      push("caf_ambiente", msg == null, msg ?? `El CAF es del ambiente de emisión (${ambiente}).`, msg != null);
-    }
-  } else {
-    push("caf", false, `No hay folios disponibles para el DTE ${tipo}; cargue un CAF.`, true);
+  try {
+    const r = rangosParaEmitir(rangos, cfg, new Date().toISOString().slice(0, 10), tipo)[0]!;
+    push("caf", true, `Hay folios ${tipo} desde ${r.folioActual} (CAF ${r.folioDesde}–${r.folioHasta}).`, false);
+    const nombre = NOMBRE_AMBIENTE_CAF[ambienteCafRequerido(cfg)];
+    push("caf_ambiente", true, `El CAF es del ambiente de emisión (${nombre}).`, false);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "No hay folios disponibles; cargue un CAF.";
+    const deAmbiente = msg.startsWith("No hay un CAF activo de");
+    push(deAmbiente ? "caf_ambiente" : "caf", false, msg, true);
   }
 
   const cuentaId =

@@ -1,8 +1,8 @@
 import {
   AVISO_CAF_DIAS_DEFECTO,
   UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
+  ambienteCafDeRango,
   cafPorVencer,
-  cafVencido,
   foliosPorAgotarse,
   foliosRestantes,
   type TipoDteVenta,
@@ -13,8 +13,7 @@ import type { TenantTx } from "@opai/db";
 import { hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
-import { exigirCafDelAmbiente } from "./caf-ambiente";
-import { seleccionarFoliosPrevistos } from "./folios-previstos";
+import { rangosParaEmitir, seleccionarFoliosPrevistos } from "./folios-previstos";
 
 export async function avisosDteDe(ctx: Pick<Contexto, "db" | "tenantId">) {
   const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
@@ -38,27 +37,18 @@ async function reservarFolioEnTx(
     where: { tipoDte, activo: true },
     orderBy: [{ folioDesde: "asc" }, { id: "asc" }],
   });
-  for (const rango of rangos) {
-    if (rango.folioActual > rango.folioHasta) continue;
-    const venceIso = rango.cafVenceEn?.toISOString().slice(0, 10) ?? null;
-    if (cafVencido(venceIso, hoyIso)) continue;
-    exigirCafDelAmbiente(cfg, rango);
-    const folio = rango.folioActual;
-    if (dryRun) return folio;
-    const { count } = await tx.dteFolio.updateMany({
-      where: { id: rango.id, folioActual: folio, activo: true },
-      data: { folioActual: folio + 1 },
-    });
-    if (count !== 1) {
-      throw reglaDeNegocio("No se pudo reservar el folio; reintente la emisión.");
-    }
-    return folio;
+  // Solo CAF activos, vigentes, con folios y del ambiente requerido; los de otro ambiente se saltan (CAR-240).
+  const rango = rangosParaEmitir(rangos, cfg, hoyIso, tipoDte)[0]!;
+  const folio = rango.folioActual;
+  if (dryRun) return folio;
+  const { count } = await tx.dteFolio.updateMany({
+    where: { id: rango.id, folioActual: folio, activo: true },
+    data: { folioActual: folio + 1 },
+  });
+  if (count !== 1) {
+    throw reglaDeNegocio("No se pudo reservar el folio; reintente la emisión.");
   }
-  const hayActivos = rangos.some((r) => r.folioActual <= r.folioHasta);
-  if (!hayActivos) {
-    throw reglaDeNegocio(`No hay folios disponibles para el DTE ${tipoDte}. Cargue un CAF.`);
-  }
-  throw reglaDeNegocio("El CAF vigente está vencido; cargue un CAF nuevo antes de emitir.");
+  return folio;
 }
 
 /** Reserva el siguiente folio del rango activo (optimista con updateMany). */
@@ -102,6 +92,8 @@ export function folioVista(
     cafVenceEn: Date | null;
     umbralAviso: number;
     activo: boolean;
+    cafAmbiente?: string | null;
+    cafIdk?: string | null;
   },
   opts?: OpcionesFolioVista,
 ) {
@@ -125,6 +117,8 @@ export function folioVista(
     alerta: alertaFoliosBajos || alertaCafPorVencer,
     cafVenceEn: venceIso,
     activo: r.activo,
+    /** Ambiente del CAF (certificación o producción); null si no se pudo determinar por su IDK (CAR-240). */
+    ambiente: ambienteCafDeRango(r),
   };
 }
 
