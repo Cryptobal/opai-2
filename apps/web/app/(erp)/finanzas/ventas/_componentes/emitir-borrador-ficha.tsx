@@ -6,11 +6,13 @@ import { Alerta, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { EmitirPdfPrevio } from "../nuevo/emitir-pdf-previo";
+import { BloqueEmisionGuardada, EmitirDialogos } from "../nuevo/emitir-secciones";
+import { useEmision } from "../nuevo/use-emision";
+
 import { DescartarBorrador } from "./descartar-borrador";
 import { HojaEditarBorrador } from "./hoja-editar-borrador";
 import type { DatosBorrador, Venta } from "./tipos";
-import { BloqueEmisionGuardada, EmitirDialogos } from "../nuevo/emitir-secciones";
-import { useEmision } from "../nuevo/use-emision";
 
 /**
  * Emitir un borrador desde su ficha (CAR-234): la nota de débito de cargo (y la factura) guardada como borrador se
@@ -39,11 +41,13 @@ export function EmitirBorradorFicha({ venta, abrirEditar }: { venta: Venta & Dat
         <DescartarBorrador documentoId={documentoId} etiqueta={tipoDte === 56 ? "esta nota de débito" : "este borrador"} destino="/finanzas/ventas" />
       </div>
       {editando ? <HojaEditarBorrador venta={venta} onCerrar={() => setEditando(false)} /> : null}
+      <EmitirPdfPrevio documentoId={documentoId} />
       <EmitirDialogos
         dialogo={dialogo}
         setDialogo={setDialogo}
         previewBorrador={null}
         previewEmitir={emision.previewEmitir}
+        documentoId={documentoId}
         guardarBorrador={() => undefined}
         emitir={() => void emision.emitir()}
       />

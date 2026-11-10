@@ -6,6 +6,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { pesos } from "@/lib/fechas";
 
 import type { Venta } from "../_componentes/tipos";
+import { EmitirPdfEnVista } from "./emitir-pdf-en-vista";
 
 const AMBIENTE = { certificacion: "Certificación", produccion: "Producción" } as const;
 
@@ -26,6 +27,8 @@ type Props = {
   setDialogo: (v: "borrador" | "emitir" | null) => void;
   previewBorrador: Venta | null;
   previewEmitir: Venta | null;
+  /** Borrador guardado: si viene, la vista previa de emisión muestra también su PDF (CAR-249). */
+  documentoId?: string | null;
   guardarBorrador: () => void;
   emitir: () => void;
 };
@@ -35,6 +38,7 @@ export function EmitirDialogos({
   setDialogo,
   previewBorrador,
   previewEmitir,
+  documentoId,
   guardarBorrador,
   emitir,
 }: Props) {
@@ -73,6 +77,7 @@ export function EmitirDialogos({
         onCerrar={() => setDialogo(null)}
         titulo="Vista previa de emisión"
         descripcion={vista.descripcion}
+        {...(documentoId ? { tamano: "grande" as const } : {})}
         acciones={
           <>
             <Button variant="secondary" onClick={() => setDialogo(null)}>
@@ -99,6 +104,11 @@ export function EmitirDialogos({
               <dd className="t-numeric font-medium">{pesos(previewEmitir.montoTotal)}</dd>
             </div>
           </dl>
+        ) : null}
+        {previewEmitir && documentoId ? (
+          <div className="mt-4">
+            <EmitirPdfEnVista documentoId={documentoId} />
+          </div>
         ) : null}
       </Dialog>
     </>
