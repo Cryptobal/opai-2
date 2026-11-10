@@ -18,7 +18,9 @@ describe.skipIf(!urlPropietario)("grupos de usuarios: integridad (CAR-251)", () 
     const sufijo = randomUUID().slice(0, 8);
     for (const lado of ["a", "b"] as const) {
       const slug = `grp-${lado}-${sufijo}`;
-      t[lado] = (await e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "aseo" } })).id;
+      t[lado] = (
+        await e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "aseo" } })
+      ).id;
       u[lado] = (
         await e.admin.user.create({ data: { name: lado, email: `${slug}@prueba.test` } })
       ).id;
@@ -26,8 +28,12 @@ describe.skipIf(!urlPropietario)("grupos de usuarios: integridad (CAR-251)", () 
         data: { tenantId: t[lado], userId: u[lado], rol: "admin", portales: ["erp"] },
       });
     }
-    grupoA = (await e.admin.grupoUsuarios.create({ data: { tenantId: t.a, nombre: "Aprobadores" } })).id;
-    grupoB = (await e.admin.grupoUsuarios.create({ data: { tenantId: t.b, nombre: "Aprobadores" } })).id;
+    grupoA = (
+      await e.admin.grupoUsuarios.create({ data: { tenantId: t.a, nombre: "Aprobadores" } })
+    ).id;
+    grupoB = (
+      await e.admin.grupoUsuarios.create({ data: { tenantId: t.b, nombre: "Aprobadores" } })
+    ).id;
   });
 
   afterAll(async () => {
@@ -61,7 +67,10 @@ describe.skipIf(!urlPropietario)("grupos de usuarios: integridad (CAR-251)", () 
     await expect(
       e.admin.grupoUsuarios.create({ data: { tenantId: t.a, nombre: "aprobadores" } }),
     ).rejects.toThrow();
-    await e.admin.grupoUsuarios.update({ where: { id: grupoA }, data: { archivadoEn: new Date() } });
+    await e.admin.grupoUsuarios.update({
+      where: { id: grupoA },
+      data: { archivadoEn: new Date() },
+    });
     await expect(
       e.admin.grupoUsuarios.create({ data: { tenantId: t.a, nombre: "Aprobadores" } }),
     ).resolves.toMatchObject({ nombre: "Aprobadores" });

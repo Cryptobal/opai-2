@@ -964,6 +964,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.firmas.verificar`
 - `core.funciones.get`
 - `core.geo.geocodificar`
+- `core.grupos.agregar_miembros`
+- `core.grupos.archive`
+- `core.grupos.create`
+- `core.grupos.get`
+- `core.grupos.list`
+- `core.grupos.quitar_miembro`
+- `core.grupos.update`
 - `core.hechos_terreno.listar`
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
