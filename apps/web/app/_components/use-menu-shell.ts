@@ -23,7 +23,7 @@ export function useMenuShell(
   onPassword: () => void,
   onPortalInicio?: () => void,
   marco: Marco = "clasico",
-): { menuUsuario: readonly ItemMenu[] } {
+): { menuUsuario: readonly ItemMenu[]; novedadesNoLeidas: number } {
   const novedadesNoLeidas = useConteoNovedades(
     datos.portal,
     datos.epoca,
@@ -44,7 +44,7 @@ export function useMenuShell(
           ? { actual: marco, onCambiar: cambiarAlElegir(datos.portal) }
           : undefined,
     );
-    return { menuUsuario };
+    return { menuUsuario, novedadesNoLeidas };
   }, [
       datos.acceso,
       datos.iconos,
