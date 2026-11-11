@@ -29,6 +29,8 @@ export function errorDeCampo(c: ConfigSeccion["campos"][number], texto: string):
   const v = texto.trim();
   if (c.requerido && !v) return "Obligatorio";
   if (!v) return null;
+  if (c.tipo === "opcion" && !c.opciones?.some((o) => o.valor === v))
+    return "Elige una opción de la lista";
   if (c.tipo === "decimal" && !/^\d+([.,]\d+)?$/.test(v)) return "Usa solo números (ej. 12,5)";
   if (c.tipo === "entero") {
     if (!/^\d+$/.test(v)) return "Usa solo números";
