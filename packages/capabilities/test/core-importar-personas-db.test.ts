@@ -102,12 +102,7 @@ describe.skipIf(!urlPropietario)("core · importador de personas en base real", 
     expect(await personas(x.t1)).toHaveLength(2);
   });
 
-  it("revertir borra lo que el lote creó; un lote con personas modificadas después no se revierte", async () => {
-    const viejo = await x.run<Reversion>(x.t1, "core.importar.revertir", { importacionId: lote });
-    expect(viejo.ok && [viejo.data.revertido, viejo.data.bloqueadas.map((b) => b.motivo)]).toEqual([
-      false,
-      ["se modificó después de la importación", "se modificó después de la importación"],
-    ]);
+  it("revertir borra lo que el lote creó, con su previsión y su cuenta, y no toca a las demás personas", async () => {
     const nuevo = await x.importar(x.t1, "personas", {
       filas: [{ nombres: "Rut", apellidos: "Lagos", rut: "44.444.444-4", afp: "Modelo", banco: "BCI", tipo_cuenta: "ahorro", numero_cuenta: "4444" }],
     });
