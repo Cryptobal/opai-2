@@ -28,7 +28,7 @@ const credsFicticias = {
 };
 const emisor = { razonSocial: "Empresa Ficticia SpA", giro: "Servicios de prueba", calle: "Calle Ficticia 1", comuna: "Comuna Ficticia", ciudad: "Ciudad Ficticia" };
 const MENSAJE_401_VACIO =
-  "SimpleAPI no pudo generar ni firmar el DTE: aceptó la API key pero rechazó el contenido sin decir el motivo (certificado, CAF o un dato del DTE; si el preflight marca el CAF dañado, vuelva a cargarlo), HTTP 401. El borrador sigue sin emitir y el folio no se usó.";
+  "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE. El borrador sigue sin emitir y el folio no se usó.";
 
 /** CAF sintético con una «ñ» en la razón social: en el archivo es el byte 0xF1, un carácter por byte en el texto. */
 const cafConEne = (folioDesde: number) =>
@@ -84,7 +84,7 @@ describe.skipIf(!urlPropietario)("CAF en bytes ISO-8859-1 hasta SimpleAPI (CAR-2
     expect(await s.e.admin.dteFolio.count({ where: { tenantId: s.tenantId, folioDesde: 7000 } })).toBe(0);
   });
 
-  it("un 0xF1 se guarda en latin1 y llega a SimpleAPI en los mismos bytes; un 401 vacío dice que la key autenticó", async () => {
+  it("un 0xF1 se guarda en latin1 y llega a SimpleAPI en los mismos bytes; un 401 vacío apunta a la key (CAR-263)", async () => {
     const caf = cafConEne(7100);
     await s.dato("finanzas.folios.cargar_caf", { cafXml: caf });
     const original = Buffer.from(caf, "latin1");

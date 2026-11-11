@@ -13,6 +13,7 @@ import {
   MSG_SIN_LLAVE_PRIVADA,
   validarCertificadoPfx,
 } from "./certificado-pfx";
+import { abrirCertificadoPfx } from "./certificado-pfx-clave";
 
 function pfxDePrueba(opts?: {
   subject?: string;
@@ -41,7 +42,7 @@ function pfxDePrueba(opts?: {
   }
   const certfileArg = opts?.certfile ? `-certfile "${opts.certfile}"` : "";
   execSync(
-    `openssl pkcs12 -export -out "${pfx}" -inkey "${key}" -in "${cert}" ${certfileArg} -passout pass:${clave}`,
+    `openssl pkcs12 -export -out "${pfx}" -inkey "${key}" -in "${cert}" ${certfileArg} -passout "pass:${clave}"`,
     { stdio: "ignore" },
   );
   return { base64: readFileSync(pfx).toString("base64"), clave, dir };
@@ -110,7 +111,7 @@ describe("validarCertificadoPfx", () => {
         { stdio: "ignore" },
       );
       execSync(
-        `openssl pkcs12 -export -out "${pfx}" -in "${cert}" -nokeys -passout pass:${clave}`,
+        `openssl pkcs12 -export -out "${pfx}" -in "${cert}" -nokeys -passout "pass:${clave}"`,
         { stdio: "ignore" },
       );
       const base64 = readFileSync(pfx).toString("base64");
@@ -179,4 +180,47 @@ describe("validarCertificadoPfx", () => {
     expect(r.meta.rutTitular).toBe("11111111-1");
     expect(r.meta.titular).not.toMatch(/CA Intermedia/i);
   });
+});
+
+describe("RUT del titular y clave recortada (CAR-240, como extractRut de OPAI 1.0)", () => {
+  const conPfx = (opts: Parameters<typeof pfxDePrueba>[0], prueba: (p: ReturnType<typeof pfxDePrueba>) => void) => {
+    const p = pfxDePrueba(opts);
+    try {
+      prueba(p);
+    } finally {
+      rmSync(p.dir, { recursive: true, force: true });
+    }
+  };
+
+  it("serialNumber con puntos, prefijo y DV en minúscula: 12345678-K", () =>
+    conPfx({ subject: "/CN=Persona Demo/serialNumber=RUT 12.345.678-k/C=CL" }, ({ base64, clave }) => {
+      expect(validarCertificadoPfx(base64, clave).meta.rutTitular).toBe("12345678-K");
+    }));
+
+  it("sin RUT en el serialNumber, lo toma del CN; sin RUT en ninguno, null (nunca el texto crudo)", () => {
+    conPfx({ subject: "/CN=Persona Demo 9.876.543-2/serialNumber=ABC/C=CL" }, ({ base64, clave }) => {
+      expect(validarCertificadoPfx(base64, clave).meta.rutTitular).toBe("9876543-2");
+    });
+    conPfx({ subject: "/CN=Persona Demo/serialNumber=ABC-123/C=CL" }, ({ base64, clave }) => {
+      expect(validarCertificadoPfx(base64, clave).meta.rutTitular).toBeNull();
+    });
+  });
+
+  it("abre con la clave recortada y la devuelve recortada; la clave correcta sin espacios queda igual", () =>
+    conPfx({ clave: "clave-demo-123" }, ({ base64, clave }) => {
+      expect(abrirCertificadoPfx(base64, ` ${clave}\n`).clave).toBe(clave);
+      expect(abrirCertificadoPfx(base64, clave).clave).toBe(clave);
+      expect(() => abrirCertificadoPfx(base64, "otra")).toThrow("La clave del certificado no coincide con el archivo.");
+    }));
+
+  it("una clave con espacios a propósito se respeta si solo así abre el archivo", () =>
+    conPfx({ clave: "clave-con-espacio " }, ({ base64 }) => {
+      expect(abrirCertificadoPfx(base64, "clave-con-espacio ").clave).toBe("clave-con-espacio ");
+    }));
+
+  it("con la clave recortada correcta y el certificado vencido, informa el vencimiento (no «clave no coincide»)", () =>
+    conPfx({ days: 1, clave: "clave-demo-123" }, ({ base64 }) => {
+      const despues = new Date(Date.now() + 3 * 86_400_000);
+      expect(() => abrirCertificadoPfx(base64, " clave-demo-123\n", despues)).toThrow(MSG_CERTIFICADO_VENCIDO);
+    }));
 });

@@ -7,10 +7,14 @@ import {
   type PasoProveedorSii,
 } from "./error-proveedor";
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
+import { diagnosticoRespuestaSii } from "./simpleapi-diagnostico";
 import { cuerpoMultipart, type ParteMultipart } from "./simpleapi-multipart";
 import { bytesDeXml } from "./xml-iso";
 
 export type { ParteMultipart } from "./simpleapi-multipart";
+
+/** Una parte de archivo del multipart (sus bytes quedan a mano para el diagnóstico de un rechazo). */
+export type ArchivoMultipart = Extract<ParteMultipart, { bytes: Uint8Array }>;
 
 /**
  * POST multipart con Basic api:key en `Authorization` y el cuerpo armado como en OPAI 1.0 (CAR-240). La llamada nunca
@@ -34,7 +38,7 @@ export async function postMultipartSimpleApi(
 }
 
 /** El certificado .pfx como archivo `file` (sus bytes, desde el base64 guardado). */
-export function archivoPfx(base64: string): ParteMultipart {
+export function archivoPfx(base64: string): ArchivoMultipart {
   return { nombre: "file", bytes: Buffer.from(base64, "base64"), tipo: "application/x-pkcs12", nombreArchivo: "certificado.pfx" };
 }
 
@@ -42,34 +46,27 @@ export function archivoPfx(base64: string): ParteMultipart {
  * Un XML (CAF, DTE o sobre) como archivo `file`, en los mismos bytes ISO-8859-1 que se recibieron (ADR-075), nunca
  * transcodificado a UTF-8: la firma del CAF y del DTE cubre esos bytes.
  */
-export function archivoXml(xmlLatin1: string, nombreArchivo: string): ParteMultipart {
+export function archivoXml(xmlLatin1: string, nombreArchivo: string): ArchivoMultipart {
   return { nombre: "file", bytes: bytesDeXml(xmlLatin1), tipo: "application/xml", nombreArchivo };
 }
 
 /**
- * Motivo de un HTTP no 2xx (CAR-240, como `describeSimpleApiError` de 1.0): SimpleAPI usa 401 tanto para una key no
- * reconocida como para un contenido rechazado. Solo cuando reconoce la key envía los headers `x-rate-limit-*`; con
- * ellos, el 401 es del contenido (certificado, CAF o datos), no de la key.
+ * Motivo de un HTTP no 2xx (CAR-263). Los headers `x-rate-limit-*` NO prueban que la key autenticó: SimpleAPI los envía
+ * en todas sus respuestas, también sin `Authorization` o con una key inventada (verificado contra api.simpleapi.cl el
+ * 10-nov-2026; la regla contraria venía de `isApiKeyAuthenticated` de 1.0 y dio por buena una key sin comprobarla).
+ * Un 401 o 403 sin cuerpo es justamente su respuesta a una key que no reconoce.
  */
-function motivoHttp(status: number, headers: Headers, cuerpo: FormaCuerpo): string {
-  // Se miran los nombres crudos: un valor que no pasa el saneo de `limitesDeRespuesta` igual prueba que la key autenticó.
-  let keyReconocida = false;
-  headers.forEach((_v, h) => {
-    if (/^x-rate-?limit-/i.test(h)) keyReconocida = true;
-  });
+function motivoHttp(status: number, cuerpo: FormaCuerpo): string {
+  if (status !== 401 && status !== 403) return `respondió HTTP ${status}`;
   // La documentación de SimpleAPI: un 401 también es «falta de suscripción válida o token expirado» para esa API.
-  if ((status === 401 || status === 403) && cuerpo === "suscripcion") {
+  if (cuerpo === "suscripcion") {
     return `indicó que la API key no tiene suscripción vigente para este servicio o que venció, HTTP ${status}`;
   }
-  // 401 vacío con la key reconocida (CAR-240): SimpleAPI no dice qué rechazó; la key no es el problema.
-  if (status === 401 && keyReconocida && cuerpo === "vacio") {
-    return "aceptó la API key pero rechazó el contenido sin decir el motivo (certificado, CAF o un dato del DTE; si el preflight marca el CAF dañado, vuelva a cargarlo), HTTP 401";
+  if (cuerpo === "vacio") {
+    return `respondió HTTP ${status} sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE`;
   }
-  if ((status === 401 || status === 400 || status === 422) && keyReconocida) {
-    return `rechazó el contenido (certificado, CAF o datos), HTTP ${status}`;
-  }
-  if ((status === 401 || status === 403) && !keyReconocida) return `no reconoció la API key, HTTP ${status}`;
-  return `respondió HTTP ${status}`;
+  // Con texto del proveedor, el detalle saneado acompaña al estado; no se adivina la causa.
+  return `rechazó la petición, HTTP ${status}`;
 }
 
 /**
@@ -82,9 +79,10 @@ async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readon
   const limites = limitesDeRespuesta(res.headers);
   const forma = formaDeCuerpo(cuerpo);
   // Un 5xx del envío no prueba que el SII no lo haya recibido.
-  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, res.headers, forma), res.status, detalle, paso === "enviar" && res.status >= 500);
+  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, forma), res.status, detalle, paso === "enviar" && res.status >= 500);
   error.limites = limites;
   error.cuerpo = forma;
+  error.respuesta = diagnosticoRespuestaSii(res.headers, cuerpo, detalle);
   return error;
 }
 

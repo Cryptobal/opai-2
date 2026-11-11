@@ -11,13 +11,14 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { externo } from "../externo";
 import { correoDe, iaDe } from "../integraciones/adaptadores";
+import { probarEmisionDte } from "./integraciones-probar-dte";
 import { probarGeo } from "./integraciones-probar-geo";
 import { probarOctava } from "./integraciones-probar-octava";
 
 export const integracionesProbar = defineCapability({
   id: "core.integraciones.probar",
   descripcion:
-    "Prueba la conexión de una integración con su credencial vigente (correo, geolocalización, IA o cesión con Octava) y guarda el resultado en su estado.",
+    "Prueba la conexión de una integración con su credencial vigente (correo, geolocalización, IA, cesión con Octava o la API key de emisión DTE en SimpleAPI) y guarda el resultado en su estado.",
   permiso: PERMISOS_CORE.integracionesManage,
   input: z.object({ proveedor: z.string() }),
   // Ante un error, `mensaje` incluye el texto que devolvió el proveedor (saneado): dato externo.
@@ -46,6 +47,9 @@ export const integracionesProbar = defineCapability({
         mensaje = `Conexión correcta (${ia.proveedor}, ${ia.modelo}).`;
       } else if (def.id === "dte_cesion") {
         mensaje = await probarOctava(ctx);
+      } else if (def.id === "dte_emision") {
+        // Prueba real de la key contra SimpleAPI (CAR-263); antes caía en la prueba de correo.
+        mensaje = await probarEmisionDte(ctx);
       } else {
         const correo = await correoDe(ctx);
         if (!correo.remitente)

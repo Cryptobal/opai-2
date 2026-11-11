@@ -12,9 +12,9 @@ import type {
 } from "./tipos";
 import { adaptadorSiiSimulado } from "./simulado";
 import {
+  entradaGenerarDte,
   jsonInputConsultaEnvio,
   jsonInputEnviarSii,
-  jsonInputGenerarDte,
   jsonInputSobreEnvio,
   SIMPLEAPI_RUTAS,
   type CredencialesSimpleApiV1,
@@ -29,6 +29,7 @@ import {
 } from "./simpleapi-http";
 import { detalleSeguroDeRespuesta, ErrorProveedorSii, type PasoProveedorSii } from "./error-proveedor";
 import { viajaIntactoEnLatin1 } from "./simpleapi-multipart";
+import { diagnosticoPeticionSii } from "./simpleapi-diagnostico";
 import { extraerTed, xmlDesdeBytes } from "./xml-iso";
 
 export type CredencialesSimpleApi = CredencialesSimpleApiV1;
@@ -83,16 +84,25 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       if (!payload.cafXml) throw new ErrorProveedorSii("generar", "falta el CAF del folio");
       // Sin ACTECO el DTE sale sin <Acteco> (obligatorio en el XSD del SII) y SimpleAPI responde 401 (CAR-240).
       if (!creds.actecoEmisor) throw new ErrorProveedorSii("generar", "falta el ACTECO del emisor, que el SII exige");
-      const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.generar, creds.apiKey, [
-        // Como 1.0: input, luego el certificado y el CAF, ambos con el nombre de campo `file`; el CAF en sus bytes.
-        { nombre: "input", texto: jsonInputGenerarDte(payload, creds) },
-        certificado(creds, "generar"),
-        archivoXml(payload.cafXml, "caf.xml"),
-      ]);
-      const xml = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(res, "generar", secretosDe(creds))), "generar");
-      const ted = extraerTed(xml);
-      if (!ted) throw new ErrorProveedorSii("generar", "el DTE generado no trae timbre electrónico");
-      return { xml, timbrePdf417: ted };
+      const entrada = entradaGenerarDte(payload, creds);
+      // Como 1.0: input, luego el certificado y el CAF, ambos con el nombre de campo `file`; el CAF en sus bytes.
+      const pfx = certificado(creds, "generar");
+      const caf = archivoXml(payload.cafXml, "caf.xml");
+      try {
+        const res = await postMultipartSimpleApi(SIMPLEAPI_RUTAS.generar, creds.apiKey, [
+          { nombre: "input", texto: JSON.stringify(entrada) },
+          pfx,
+          caf,
+        ]);
+        const xml = exigirXml(xmlDesdeBytes(await leerBytesRespuesta(res, "generar", secretosDe(creds))), "generar");
+        const ted = extraerTed(xml);
+        if (!ted) throw new ErrorProveedorSii("generar", "el DTE generado no trae timbre electrónico");
+        return { xml, timbrePdf417: ted };
+      } catch (e) {
+        // Solo ante un rechazo: la forma de lo enviado (largos, 0x30, formato del CAF, nombres de claves), sin secretos.
+        if (e instanceof ErrorProveedorSii) e.peticion = diagnosticoPeticionSii(entrada, pfx.bytes, caf.bytes);
+        throw e;
+      }
     },
     async enviar(xmlFirmado: string, ambiente: AmbienteSii): Promise<EnvioSiiResultado> {
       if (!disponible || !creds) throw new ErrorProveedorSii("enviar", "la integración no está configurada");

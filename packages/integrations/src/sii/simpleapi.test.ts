@@ -124,18 +124,13 @@ describe("firmar (POST dte/generar)", () => {
     expect(emisor).toEqual({ Rut: "76269769-6", ActividadEconomica: [801000] });
   });
 
-  it("vencimiento como FechaVencimiento (doc oficial) y, sin ciudad, la comuna real del receptor (CAR-240)", async () => {
+  it("sin vencimiento aunque el borrador lo tenga (como 1.0) y, sin ciudad, la comuna real del receptor (CAR-240)", async () => {
     const llamadas = simularFetch({ [`${B}/dte/generar`]: () => xmlLatin1(fixture("simpleapi-generar-factura.xml")) });
     const receptor = { giroReceptor: "SERVICIO PUBLICO", direccionReceptor: "Teatinos 120", comunaReceptor: "Santiago" };
     await adaptadorSimpleApi(creds).firmar({ ...payload, ...receptor, fechaVencimiento: "2026-12-10" });
     const doc = JSON.parse(String(llamadas[0]?.input)).Documento;
-    // Emisión con el nombre del SDK que 1.0 usa y emite; vencimiento con el nombre de la doc oficial de Generar - DTE.
-    expect(doc.Encabezado.IdentificacionDTE).toMatchObject({
-      FechaEmisionString: "2026-11-06",
-      FechaVencimiento: "2026-12-10",
-      FormaPago: 2,
-    });
-    expect(doc.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaVencimientoString");
+    // Emisión con el nombre del SDK que 1.0 usa y emite; el vencimiento queda en OPAI (decisión de Carlos, 10-nov-2026).
+    expect(doc.Encabezado.IdentificacionDTE).toEqual({ TipoDTE: 33, Folio: 101, FechaEmisionString: "2026-11-06", FormaPago: 2 });
     expect(doc.Encabezado.IdentificacionDTE).not.toHaveProperty("FechaEmision");
     expect(doc.Encabezado.Receptor).toMatchObject({ Comuna: "Santiago", Ciudad: "Santiago", Giro: "SERVICIO PUBLICO" });
     // Con ciudad propia va la ciudad; sin comuna ni ciudad no se inventa ninguna (el preflight ya bloquea).
