@@ -7,6 +7,7 @@ import { Alerta, Button, Empty, Skeleton } from "@opai/ds";
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 import { TarjetaNovedad, type ItemNovedad } from "./tarjeta-novedad";
+import { LineaNovedad } from "./texto-novedad";
 import { useMarcarNovedades } from "./use-marcar-novedades";
 import { useMarcarUnaNovedad } from "./use-marcar-una-novedad";
 
@@ -85,7 +86,9 @@ export function ListaNovedades({ portal }: { portal: string }) {
             </Button>
           }
         >
-          <p className="t-body-sm whitespace-pre-wrap">{destacada.descripcion.split("\n")[0]}</p>
+          <p className="t-body-sm">
+            <LineaNovedad texto={destacada.descripcion} />
+          </p>
         </Alerta>
       ) : null}
       {error ? <Alerta tono="danger" titulo="No pudimos cargar las novedades" /> : null}
@@ -101,17 +104,22 @@ export function ListaNovedades({ portal }: { portal: string }) {
         />
       ) : (
         <>
-          {datos.noLeidas > 0 ? (
-            <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="t-body text-fg-muted" aria-live="polite">
+              {datos.noLeidas > 0
+                ? `${datos.noLeidas} ${datos.noLeidas === 1 ? "novedad sin leer" : "novedades sin leer"}`
+                : "Estás al día: leíste todas las novedades."}
+            </p>
+            {datos.noLeidas > 0 ? (
               <Button variant="secondary" onClick={marcarTodas}>
-                Marcar todas como leídas ({datos.noLeidas})
+                Marcar todas como leídas
               </Button>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
           <ul className="flex flex-col gap-3">
             {datos.items.map((item) => (
               <li key={item.id} onClickCapture={() => marcarUna(item.id)}>
-                <TarjetaNovedad item={item} />
+                <TarjetaNovedad item={item} onMarcar={marcarUna} />
               </li>
             ))}
           </ul>

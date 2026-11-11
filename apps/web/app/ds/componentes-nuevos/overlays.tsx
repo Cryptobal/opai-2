@@ -44,6 +44,8 @@ export function MuestraOverlays() {
             icono: Settings,
             onSelect: nada,
           },
+          // Fila con número de pendientes (CAR-316: Novedades sin leer en el menú de cuenta).
+          { id: "novedades", etiqueta: "Novedades", icono: Settings, contador: 3, onSelect: nada },
           { id: "salir", etiqueta: "Cerrar sesión", icono: LogOut, peligro: true, onSelect: nada },
         ]}
       />
