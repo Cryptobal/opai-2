@@ -12,6 +12,7 @@
     "generate": "prisma generate",
     "migrate": "prisma migrate dev --create-only",
     "deploy": "prisma migrate deploy",
+    "preview:huerfanas": "tsx scripts/preview-huerfanas.ts",
     "role:password": "tsx scripts/set-app-role-password.ts",
     "role:cron-sii-password": "tsx scripts/set-cron-sii-role-password.ts",
     "seed:dev-tenant": "tsx scripts/seed-dev-tenant.ts",
