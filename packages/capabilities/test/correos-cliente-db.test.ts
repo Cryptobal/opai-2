@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { resolverBuzonCorreo, sembrarComercial } from "@opai/db";
+import type { Rol } from "@opai/domain";
 import type { Correo } from "@opai/integrations";
 
 import { prepararEntorno, type Entorno } from "../../db/test/entorno";
@@ -17,7 +18,7 @@ type Pagina = { items: Item[]; siguiente: string | null };
 describe("core.correos · historial del cliente contra Postgres real", () => {
   let e: Entorno;
   const medidor = { registrar: async () => undefined };
-  const ctx = (tenantId: string, rol = "owner") =>
+  const ctx = (tenantId: string, rol: Rol = "owner") =>
     mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol, modulosActivos: ["comercial"], medidor });
   async function empresa(nombre: string, sitio: string) {
     const t = await e.admin.tenant.create({ data: { slug: `cor-${randomUUID().slice(0, 8)}`, nombre, vertical: "seguridad" } });

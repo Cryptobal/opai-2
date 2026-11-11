@@ -81,4 +81,6 @@ export const VERBOS: Record<string, string> = {
   precio_set: "Fijar precio de lista",
   // Prueba gratis por empresa (CAR-222).
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
+  // Historial de correos del cliente (CAR-233).
+  sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
 };
