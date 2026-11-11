@@ -47,7 +47,7 @@ export function FichaVenta({ state, venta, envios, editar }: { state: EstadoPant
             <dt className="text-fg-muted">Cesión</dt>
             <dd>
               {venta.cesionEstado && seCobra(venta) ? estadoCesionVenta(venta.cesionEstado).etiqueta : "—"}
-              {venta.cesionProveedor ? ` · ${venta.cesionProveedor}` : ""}
+              {venta.cesionFactor && seCobra(venta) ? ` · ${venta.cesionFactor}` : ""}
             </dd>
           </div>
           {venta.trackIdSii ? (

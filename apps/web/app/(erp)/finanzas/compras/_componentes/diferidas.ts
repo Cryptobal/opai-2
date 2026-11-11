@@ -12,3 +12,6 @@ export const HojaLote = hojaDiferida(["lote"], () =>
 export const HojaRcv = hojaDiferida(["rcv"], () =>
   import("./hoja-rcv").then((m) => m.HojaRcv),
 );
+export const HojaSii = hojaDiferida(["sii"], () =>
+  import("./hoja-sii").then((m) => m.HojaSii),
+);

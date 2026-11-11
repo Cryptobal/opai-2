@@ -47,10 +47,12 @@ export function LibroCompras(p: {
         {...(p.gestiona
           ? {
               accionPrincipal: (
-                <>
+                // Tres acciones: en el teléfono pasan a una segunda línea en vez de salirse de la pantalla.
+                <div className="flex max-w-full flex-wrap justify-end gap-2">
+                  <EnlaceBotonHoja href="?sii=1" variante="secondary">Sincronizar con el SII</EnlaceBotonHoja>
                   <EnlaceBotonHoja href="?rcv=1" variante="secondary">Importar RCV</EnlaceBotonHoja>
                   <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>Registrar documento</EnlaceBotonHoja>
-                </>
+                </div>
               ),
             }
           : {})}
@@ -71,12 +73,12 @@ export function LibroCompras(p: {
             ? { titulo: "Ningún documento coincide", descripcion: "Quita un filtro para ver más." }
             : {
                 titulo: "El libro de compras está vacío",
-                descripcion: "Registra un documento recibido o importa el archivo del RCV que descargas del SII.",
+                descripcion: "Sincroniza con el SII, importa el archivo del RCV o registra un documento recibido.",
                 ...(p.gestiona
                   ? {
                       accion: (
-                        <EnlaceBotonHoja href="?rcv=1" variante="secondary">
-                          Importar RCV
+                        <EnlaceBotonHoja href="?sii=1" variante="secondary">
+                          Sincronizar con el SII
                         </EnlaceBotonHoja>
                       ),
                     }
