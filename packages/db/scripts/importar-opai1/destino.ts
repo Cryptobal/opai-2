@@ -5,7 +5,7 @@ import type { TenantTx } from "../../src/transaccion";
 import type { EntidadImportada, EstadoDestino } from "./destino-tipos";
 import { SISTEMA_OPAI1 } from "./destino-tipos";
 
-const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion", "programacion_recurrente"]);
+const ENTIDADES = new Set<string>(["cuenta", "contacto", "instalacion", "programacion_recurrente", "negocio"]);
 const esEntidad = (t: string): t is EntidadImportada => ENTIDADES.has(t);
 const dia = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
 const numero = (d: { toNumber(): number } | null) => (d ? d.toNumber() : null);
