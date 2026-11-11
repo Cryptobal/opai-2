@@ -118,7 +118,9 @@ export const comercialImportar10 = defineCapability({
     }
     const sii =
       plan && (r.accion === "simular" || r.accion === "aplicar")
-        ? await resumenSiiDelPlan(ctx, plan, { encolar: r.accion === "aplicar" && !r.dryRun })
+        ? // Decisión de Carlos (11-nov-2026): importar no consulta el SII por su cuenta. Solo se informa
+          // cuántas cuentas podría completar; la consulta se pide a mano en cada cuenta.
+          await resumenSiiDelPlan(ctx, plan, { encolar: false })
         : null;
     const reporte = r.reporte
       ? { ...r.reporte, modulosActivos: [...r.reporte.modulosActivos] }
