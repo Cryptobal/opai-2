@@ -43,9 +43,11 @@ import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
 import { consumidorNegocioGanado } from "../comercial/consumidor-ganado";
 import { consumidorCpqGanado } from "../comercial/consumidor-ganado-cpq";
+import { capacidadesCorreos } from "./correos";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
+import { capacidadesGrupos } from "./grupos";
 import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
@@ -128,12 +130,14 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   platformIntegracionesEstado,
   ...capacidadesMaestros,
   ...capacidadesCrm,
+  ...capacidadesCorreos,
   ...capacidadesCalendario,
   ...capacidadesRemuneraciones,
   ...capacidadesAnexos,
   ...capacidadesCampos,
   ...capacidadesPanel,
   ...capacidadesPermisos,
+  ...capacidadesGrupos,
   ...capacidadesDocumentos,
   ...capacidadesFirmas,
   ...capacidadesConfig,

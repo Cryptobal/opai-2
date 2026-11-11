@@ -225,6 +225,13 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["core.memberships"],
     valores: (ctx) => ({ usuario_id: ctx.usuario, novedad_id: "dos-empresas-rls" }),
   },
+  // CAR-251: (tenant_id, grupo_id) → grupos y (tenant_id, user_id) → memberships.
+  "core.grupo_usuarios_miembros": {
+    dependencias: ["core.memberships", "core.grupos_usuarios"],
+    // Columnas de FK compuesta: el catálogo no las ve como referencia; no se regeneran en el control.
+    fijas: ["grupo_id", "user_id"],
+    valores: (ctx) => ({ user_id: ctx.usuario, grupo_id: id(ctx, "core.grupos_usuarios") }),
+  },
   // Nómina (Brief 25): los CHECK de unidad por tipo y de tipo/estado rechazan el texto genérico.
   "nomina.novedades": { valores: () => ({ tipo: "ausencia", cantidad: 1, monto_clp: null }) },
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
@@ -238,6 +245,11 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.flujo_avisos_emitidos": { valores: () => ({ semana: "2026-01-05", saldo_proyectado: 0 }) },
   // CAR-138 PR 6 · capítulo por instalación: CHECK de sección y origen.
   "cpq.propuesta_capitulos": { fijas: ["seccion_clave", "origen"], valores: () => ({ seccion_clave: "alcance", origen: "manual", contenido: "x" }) },
+  // CAR-138 PR 9 · plantilla HTML importada: CHECK de estado, hash y largo; el nombre/versión no se repiten por empresa.
+  "cpq.propuesta_html": {
+    fijas: ["estado", "hash_sha256", "html_saneado", "catalogo_version"],
+    valores: () => ({ estado: "archivada", hash_sha256: "a".repeat(64), html_saneado: "<p>x</p>", catalogo_version: 1, version: 1 }),
+  },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
@@ -346,6 +358,13 @@ export const AJUSTES: Record<string, Ajuste> = {
       consultado_en: "2026-11-01T00:00:00Z", vence_en: "2026-12-01T00:00:00Z",
     }),
   },
+  // Historial de correos (CAR-233): CHECK de sentido, origen y asociación; token «t» + 32 hex, único
+  // global (se deriva del id de la empresa para que A y B no choquen).
+  "core.correos_cliente": {
+    dependencias: ["core.cuentas"],
+    valores: (ctx) => ({ sentido: "recibido", origen: "buzon", asociacion: "dominio", cuenta_id: id(ctx, "core.cuentas"), contacto_id: null, negocio_id: null }),
+  },
+  "core.buzones_correo": { fijas: ["token"], valores: (ctx) => ({ token: `t${ctx.tenant.replace(/-/g, "")}` }) },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },
   "core.actividad_vinculos": {

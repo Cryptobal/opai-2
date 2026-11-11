@@ -102,7 +102,7 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/api/t/[slug]/banco/web4leads/route.ts":
     "Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna).",
   "app/api/webhooks/resend/entrante/route.ts":
-    "Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna).",
+    "Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas.",
   // Infraestructura: sin datos de negocio.
   "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
   "app/api/cron/programador/route.ts":

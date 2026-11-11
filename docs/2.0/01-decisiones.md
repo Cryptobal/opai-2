@@ -440,6 +440,8 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 **Nota del 26-oct-2026 (ADR-049, propuesto en PR #38).** Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07: OPAI sí tendrá un **agente interno** propio, en el celular y en el escritorio, que convive con los agentes externos. No contradice el fondo de este ADR: es un cliente más de las mismas capacidades y del MCP, sin lógica ni herramientas propias, actúa como «agente vía usuario» con los permisos del usuario conectado y pide confirmación antes de escribir y su consumo se mide como cualquier otro (ADR-031). Lo demás sigue igual: sin copilotos por módulo, sin clientes de correo, calendarios ni bases de conocimiento.
 
+**Nota del 11-nov-2026 (CAR-233, historial de correos del cliente; alcance de Carlos del 10-nov-2026 23:51 America/Santiago).** OPAI **sigue sin ser un cliente de correo**: no hay bandeja completa, ni redactar, responder o reenviar desde el sistema. Lo que sí hace desde la v1.0 es **registrar** en el historial de la cuenta, el contacto y el negocio (a) los correos que salen de OPAI (cotización, documento tributario y seguimiento) y (b) los que entran por el receptor de Resend: la respuesta del cliente a la **dirección de registro de la empresa** (`t<token>@respuestas.opai.cl`, reply-to de los salientes junto a la dirección que ya recibía las respuestas) y los correos que el vendedor envía desde su casilla con esa dirección en **CCO**. Asociación (decisión de Carlos): correo exacto del contacto; si no, dominio del `sitioWeb` de la cuenta; dominios genéricos solo por correo exacto; lo demás a una bandeja «sin asignar» que se asocia a mano. El texto es contenido externo (dato, nunca instrucción). Sin OAuth ni lectura de Gmail en la v1.0: eso es CAR-265. Esta nota precisa ADR-032; no lo invierte. En `modulos/comercial.md` §14, pregunta 10 («los correos no se registran solos en la v1») queda enmendada en este sentido.
+
 ---
 
 ## ADR-033 · Acceso agéntico para clientes y trabajadores desde sus portales
@@ -1651,6 +1653,12 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Decisión.** El prompt exportable (CAR-138, PR 8) se genera en código desde el catálogo de campos y se entrega a Claude Design u otra IA; no se usa ningún producto de Google ni se promete Figma, PPT o PDF. Solo cita claves del catálogo de la finalidad «propuesta» que el actor puede leer. Es una lectura (`cpq.propuestas_tecnica.prompt_exportable`) sin migración. Importar HTML queda para el PR 9. Se abre en borrador por orden expresa de Carlos para este PR; la regla general de AGENTS.md (PR listos para revisión) sigue vigente para los demás.
 
+## ADR-086 · Importación de HTML de propuesta: saneada, por empresa y sin renderer (10-nov-2026)
+
+**Fecha:** 10-nov-2026 · **Estado:** vigente · **Autor:** Carlos, vía el coordinador OPAI 2.0; registrado por la sesión «Sesión Comercial».
+
+**Decisión.** CAR-138 PR 9 permite importar HTML como plantilla de propuesta por empresa, saneado en el servidor con lista blanca (`parse5`), con marcadores validados contra el catálogo de campos y versionado (`cpq.propuesta_html`). Se rechaza, sin guardar, todo lo que ejecute código, use red o recursos remotos, o traiga marcadores fuera del catálogo. **No hay renderer de HTML:** el PDF sigue siendo `pdf-lib` y no consume esta tabla; no se promete Figma, PPT ni PDF desde el HTML. El export `PropuestaCliente.dc.html` de Claude Design no es importable tal cual (formato de componentes propio); no se inventó otro diseño ni un conversor. Conectar la plantilla a un renderer queda para una decisión de arquitectura aparte. Se abre en borrador por orden expresa de Carlos para este PR.
+
 ## ADR-087 · Referencias de clientes solo con consentimiento registrado (CAR-138 PR 7, 10-nov-2026)
 
 **Fecha:** 10-nov-2026 · **Estado:** vigente; **quién autoriza queda pendiente de Carlos** · **Autor:** Carlos (encargo vía el coordinador, 10-nov-2026 11:08), registrado por la «Sesión Comercial». (El número ADR-086 lo usa el PR #452, aún abierto.)
@@ -1736,3 +1744,17 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Plan.** Etapas H1 a H7 en [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md).
 
 **Pendiente de Carlos.** (1) Si los agentes de la empresa vienen incluidos con su módulo o se cobran aparte. (2) Inicio según rol: quien decide entra al hilo; quien opera todo el día entra a su pantalla de trabajo con el hilo plegado (propuesta). (3) Adelantar CAR-247, OAuth por usuario para el MCP, hoy «después de v1.0» (propuesta: es lo que deja conectar una IA externa como la persona, sin llaves). (4) Fecha de retiro del marco clásico. (5) Si la barra de Plataforma debe tener agente (hoy ADR-055 lo impide; propuesta: que solo busque). (6) El prototipo muestra que emitir, anular o ceder documentos tributarios y pagar nunca los hace un agente solo; ADR-032 permite que el dueño los autorice por capacidad. Mientras no decida endurecerlo, rige ADR-032.
+
+## ADR-092 · `preview-e2e` reemplaza el primer vistazo visual de Carlos (CAR-285, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (14:37, hora de Chile) · **Registra:** Claude («Sesión Comercial»). **Modifica** ADR-077 (adenda de revisión visual), `OPERACION-agentes.md` A2.10, `AGENTS.md` y la plantilla del PR.
+
+**Fuente.** «El primer vistazo visual ya no lo hace Carlos, lo reemplazan estas pruebas y sus capturas.» «Un PR se integra solo con el run de preview-e2e en verde y las capturas revisadas por la propia sesión.» «Las pruebas entran siempre como el usuario de qa-e2e. Nunca con Gard ni con datos reales, y sin mostrar ni loguear los secretos.»
+
+**Decisión.**
+1. El workflow `preview-e2e` corre en cada PR los e2e de Playwright marcados `@preview` contra la vista previa de Vercel del commit, a 375, 1024 y 1280 px, y sube las capturas como artefacto.
+2. Entra siempre con el usuario de la empresa ficticia `qa-e2e`. Los secretos (`E2E_EMAIL`, `E2E_PASSWORD`, `E2E_TOTP_SECRET`, `VERCEL_AUTOMATION_BYPASS_SECRET`) viven solo en GitHub Actions. La cabecera de protección de Vercel se envía únicamente al origen de la vista previa. Sin traza ni video.
+3. Un PR con cambio visual se integra solo con ese run en verde sobre el head y las capturas revisadas por la sesión que lo lleva. Carlos conserva el veto y puede pedir cambios.
+4. Si faltan los secretos, el check falla (falla cerrado). En PRs de forks se omite.
+
+**Pendiente de Carlos.** Agregar `preview-e2e` como check obligatorio del ruleset «Proteger main» (hoy lo exige el contrato, no GitHub).

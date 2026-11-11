@@ -72,7 +72,7 @@ La **primera línea** del comentario es exactamente una de:
 | **`DECISIÓN CARLOS:`** | Falta una decisión de negocio que solo Carlos puede tomar. |
 | **`BLOQUEO OPAI:`** | Bloqueo operativo que la sesión no puede resolver (infra, cola, migración, permisos de bot, etc.). |
 | **`MIGRACIÓN LISTA:`** | PR listo: revisión final **sin bloqueos** sobre el head, cuatro checks verdes y migración pendiente de aplicar por el bot. |
-| **`REVISIÓN VISUAL CARLOS:`** | El PR incluye **cambio visual** aún no desplegado en `test.opai.cl`: hay enlace de **preview verificado**, rutas, qué cambió y puntos concretos de usabilidad a revisar. |
+| ~~`REVISIÓN VISUAL CARLOS:`~~ | En desuso desde el 11-nov-2026 (ADR-092): el chequeo visual es el run `preview-e2e` y sus capturas (A2.10). |
 
 En el cuerpo (breve): resumen mínimo, enlace a Linear (`CAR-n`) si existe, qué se intentó y qué se necesita. **Sin secretos ni datos personales.** En **`REVISIÓN VISUAL CARLOS:`** incluir siempre preview usable, rutas y checklist de usabilidad.
 
@@ -109,20 +109,16 @@ Issues **nuevos** creados por Carlos en Linear (equipo CAR) se **clasifican y de
 - **Claude Design** entrega diseño, enlace o export en el **chat o PR** que corresponda; **sin vigilancia continua** por bots.
 - **QA visual funcional** de ingeniería la puede hacer la sesión constructora para no romper flujos; **no sustituye** el primer vistazo de Carlos (A2.10). **Diseño y QA OPAI 2.0** solo bajo demanda o cierre de módulo importante (coherente con A2.1).
 
-### A2.10 Revisión visual de Carlos (regla explícita post-ADR-077)
+### A2.10 Revisión visual: `preview-e2e` (Carlos, 11-nov-2026, ADR-092; reemplaza la regla post-ADR-077)
 
-**Todo cambio visual en OPAI**, por menor que sea, se **presenta primero a Carlos** con:
+**El primer vistazo visual ya no lo hace Carlos.** Lo reemplazan las pruebas visuales automáticas y sus capturas (CAR-285):
 
-1. **Enlace usable** (preview de Vercel del PR, `test.opai.cl` tras merge, o prototipo acordado).
-2. **Qué cambió** (pantallas, rutas, componentes visibles).
-3. **Puntos concretos de usabilidad** a revisar (qué mirar a 375 / 1024 / 1280 px, estados vacío/error, contraste, etc.).
-
-- **Claude Code no hace el chequeo visual por Carlos** salvo que él lo **pida expresamente** para ese cambio concreto.
-- **Diseño y QA OPAI 2.0** tampoco sustituye ese **primer vistazo** de Carlos.
-
-**PR con cambio visual aún no desplegado:** la sesión deja un comentario nuevo cuya primera línea es **`REVISIÓN VISUAL CARLOS:`**, con enlace de **preview verificado**, rutas, qué cambió y qué revisar. Carlos puede **aprobar**, **pedir cambios** o **delegar** el chequeo visual a Claude para ese PR. **No se frenan** otros frentes independientes mientras espera.
-
-**Integración con cambio visual:** no integrar hasta que Carlos aprobó el aspecto visual o delegó explícitamente el chequeo a Claude para ese PR (la revisión final técnica A2.2 sigue aparte).
+1. **Workflow `preview-e2e`** (`.github/workflows/preview-e2e.yml`): en cada PR corre los e2e de Playwright marcados **`@preview`** contra la vista previa de Vercel de ese commit, a **375, 1024 y 1280 px**, y sube las capturas como artefacto `preview-e2e-capturas`.
+2. **Usuario de pruebas:** siempre el de la empresa ficticia **`qa-e2e`** («QA E2E (ficticia)», 13 módulos activos, sin datos de Gard). **Nunca** Gard ni datos reales. Los secretos (`E2E_EMAIL`, `E2E_PASSWORD`, `E2E_TOTP_SECRET`, `VERCEL_AUTOMATION_BYPASS_SECRET`) solo existen en GitHub Actions; no se muestran ni se escriben en logs, capturas, PRs ni en el repo.
+3. **Cada PR con cambio visual** agrega o actualiza las pruebas `@preview` de sus pantallas (flujo principal y captura con `capturar` de `apps/web/e2e/preview.ts`). Las pruebas crean sus propios datos en `qa-e2e` y no dependen de datos sembrados de otra empresa.
+4. **Integración:** un PR se integra solo con el run de `preview-e2e` **en verde sobre el head** y las **capturas revisadas por la propia sesión** contra el diseño aprobado y `DISENO.md`. La sesión deja en el PR qué revisó. La revisión final técnica (A2.2) sigue aparte.
+5. La señal `REVISIÓN VISUAL CARLOS:` deja de usarse. Carlos puede pedir cambios o vetar cualquier PR como siempre.
+6. Las sesiones con PRs abiertos traen `main` (con merge, nunca rebase ni force-push) cuando este flujo esté en `main` y agregan sus pruebas `@preview`.
 
 ---
 
