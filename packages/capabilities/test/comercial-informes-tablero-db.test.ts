@@ -69,9 +69,13 @@ describe("comercial · tablero de reportes contra Postgres real", () => {
     expect((await tablero(b)).enCurso).toEqual({ cantidad: 1, montoMensualClp: 9_000_000 });
   });
 
-  it("acepta trimestre y año, filtra por responsable y es una lectura sin datos personales en auditoría", async () => {
+  it("acepta trimestre y año, filtra por responsable y respeta los permisos", async () => {
     expect((await tablero(a, { periodo: "anio" })).cierre.perdidos).toBe(1);
     expect((await tablero(a, { periodo: "trimestre", responsableId: randomUUID() })).enCurso.cantidad).toBe(0);
     expect(await codigo(ctx(a, "supervisor"), "comercial.informes.tablero", {})).toBe("FORBIDDEN");
+    // Quien ve negocios pero no solicitudes recibe el tablero sin la sección de canales.
+    const lector = await dato<Tablero>(ctx(a, "viewer"), "comercial.informes.tablero", {});
+    expect(lector.canales).toBeNull();
+    expect(lector.enCurso.cantidad).toBe(2);
   });
 });

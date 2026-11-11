@@ -1772,3 +1772,9 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 4. Si faltan los secretos, el check falla (falla cerrado). En PRs de forks se omite.
 
 **Pendiente de Carlos.** Agregar `preview-e2e` como check obligatorio del ruleset «Proteger main» (hoy lo exige el contrato, no GitHub).
+
+## ADR-093 · Toda respuesta a Carlos termina con «Decisión tuya» (11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:27, hora de Chile) · **Registra:** Claude («Sesión Comercial»).
+
+**Decisión.** Cada respuesta o reporte de una sesión a Carlos termina con un párrafo «Decisión tuya». Si hace falta una decisión suya, explica en lenguaje simple qué hay que decidir, por qué, el link que debe revisar y la sugerencia de la sesión; si hay varias, van numeradas de la más urgente a la menos urgente y se deja además un comentario «DECISIÓN CARLOS:» en el PR. Si no hay decisiones, termina con «Decisión tuya: ninguna, sigo». Queda en `AGENTS.md` § «Convenciones».

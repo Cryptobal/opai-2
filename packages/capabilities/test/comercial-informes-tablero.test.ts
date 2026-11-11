@@ -48,11 +48,10 @@ describe("tablero de reportes comerciales · cálculo", () => {
     expect(r.fueraDeRango).toEqual({ cantidad: 2, ponderadoClp: 1_000_000 });
     expect(r.totalPonderadoClp).toBe(1_600_000);
   });
-  it("pérdidas: motivos de mayor a menor, sin motivo aparte y tres competidores", () => {
+  it("pérdidas: motivos de mayor a menor con «sin motivo» como fila, y competidores sin distinguir mayúsculas", () => {
     const p = (m: string | null, c: string | null = null) => cerrado({ estado: "perdido", motivoPerdidaId: m, competidor: c });
-    const r = perdidasDe([p("precio", "Alfa"), p("precio", " Alfa "), p("plazo", "Beta"), p(null), cerrado({}), p("viejo", "Zeta")].map((c, i) => (i === 5 ? { ...c, cerradoEn: "2020-01-01" } : c)), "2025-11-01");
-    expect(r.motivos).toEqual([{ motivoId: "precio", cantidad: 2 }, { motivoId: "plazo", cantidad: 1 }]);
-    expect(r.sinMotivo).toBe(1);
+    const r = perdidasDe([p("precio", "Alfa"), p("precio", " alfa "), p("plazo", "Beta"), p(null), cerrado({}), p("viejo", "Zeta")].map((c, i) => (i === 5 ? { ...c, cerradoEn: "2020-01-01" } : c)), "2025-11-01");
+    expect(r.motivos).toEqual([{ motivoId: "precio", cantidad: 2 }, { motivoId: null, cantidad: 1 }, { motivoId: "plazo", cantidad: 1 }]);
     expect(r.competidores).toEqual([{ nombre: "Alfa", cantidad: 2 }, { nombre: "Beta", cantidad: 1 }]);
   });
   it("por responsable: cartera de hoy y cierres del período; «sin responsable» es una fila", () => {

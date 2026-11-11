@@ -90,23 +90,31 @@ export function pronosticoDe(abiertos: Abierto[], meses: string[]) {
   };
 }
 
-/** Motivos de pérdida y competidores más repetidos, de mayor a menor. */
+/** Motivos de pérdida (los sin motivo son una fila más) y competidores más repetidos, de mayor a menor. */
 export function perdidasDe(cerrados: Cerrado[], desde: string) {
-  const contar = (claves: (string | null)[]) => {
+  const contar = (claves: string[]) => {
     const m = new Map<string, number>();
-    for (const c of claves) if (c) m.set(c, (m.get(c) ?? 0) + 1);
+    for (const c of claves) m.set(c, (m.get(c) ?? 0) + 1);
     return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   };
   const perdidos = cerrados.filter((c) => c.estado === "perdido" && c.cerradoEn >= desde);
+  // Un mismo competidor escrito con otra mayúscula cuenta una vez; se muestra como se escribió primero.
+  const visto = new Map<string, string>();
+  const competidores = perdidos.flatMap((p) => {
+    const nombre = p.competidor?.trim();
+    if (!nombre) return [];
+    const clave = nombre.toLocaleLowerCase("es");
+    if (!visto.has(clave)) visto.set(clave, nombre);
+    return [clave];
+  });
   return {
     motivos: contar(perdidos.map((p) => p.motivoPerdidaId ?? "")).map(([motivoId, cantidad]) => ({
       motivoId: motivoId || null,
       cantidad,
     })),
-    sinMotivo: perdidos.filter((p) => !p.motivoPerdidaId).length,
-    competidores: contar(perdidos.map((p) => p.competidor?.trim() || null))
+    competidores: contar(competidores)
       .slice(0, 3)
-      .map(([nombre, cantidad]) => ({ nombre, cantidad })),
+      .map(([clave, cantidad]) => ({ nombre: visto.get(clave) ?? clave, cantidad })),
   };
 }
 

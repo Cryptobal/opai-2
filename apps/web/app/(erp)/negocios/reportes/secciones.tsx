@@ -29,7 +29,7 @@ export function Embudo({ t }: { t: Tablero }) {
             </div>
             <BarraProgreso valor={e.montoMensualClp / tope} tono="neutro" etiqueta={`${e.nombre}: ${pesos(e.montoMensualClp)}`} />
             <span className="t-caption t-numeric">
-              {e.diasPromedio === null ? "Sin movimientos en 12 meses" : `${plural(e.diasPromedio, "día", "días")} promedio · ${e.avanzaPct ?? 0} % avanza`}
+              {[e.diasPromedio === null ? null : `${plural(e.diasPromedio, "día", "días")} promedio`, e.avanzaPct === null ? null : `${e.avanzaPct} % avanza a una etapa posterior`].filter(Boolean).join(" · ") || "Sin movimientos en 12 meses"}
             </span>
           </li>
         ))}
@@ -43,7 +43,7 @@ export function GanadosPerdidos({ t }: { t: Tablero }) {
   const cifra = (titulo: string, monto: number, tono: string) => (
     <div className="flex flex-col gap-0.5 rounded-md bg-fill p-3">
       <span className="t-caption">{titulo}</span>
-      <span className={`t-numeric text-lg font-semibold ${tono}`}>{pesos(monto)}</span>
+      <span className={`t-subheading t-numeric ${tono}`}>{pesos(monto)}</span>
     </div>
   );
   return (

@@ -24,7 +24,7 @@ function kpis(t: Tablero): Kpi[] {
   const signo = (n: number) => (n > 0 ? `+${n}` : `${n}`.replace("-", "−"));
   return [
     { etiqueta: "En curso", valor: pesos(t.enCurso.montoMensualClp), variacion: { texto: `${t.enCurso.cantidad} ${t.enCurso.cantidad === 1 ? "negocio abierto" : "negocios abiertos"}`, tono: "neutro" } },
-    { etiqueta: `Ganado ${NOMBRE[t.periodo]}`, valor: pesos(c.montoGanadoMensualClp), variacion: { texto: `${c.ganados} ${c.ganados === 1 ? "negocio" : "negocios"} · ${pesos(a.montoGanadoMensualClp)} ${ANTERIOR[t.periodo]}`, tono: c.montoGanadoMensualClp === a.montoGanadoMensualClp ? "neutro" : c.montoGanadoMensualClp > a.montoGanadoMensualClp ? "success" : "danger" } },
+    { etiqueta: `Ganado ${NOMBRE[t.periodo]}`, valor: pesos(c.montoGanadoMensualClp), variacion: { texto: `${c.ganados} ${c.ganados === 1 ? "negocio" : "negocios"} · ${pesos(a.montoGanadoMensualClp)} en todo ${ANTERIOR[t.periodo]}`, tono: "neutro" } },
     { etiqueta: "Conversión", valor: c.conversionPct === null ? "—" : `${c.conversionPct} %`, ...(puntos === null ? {} : { variacion: { texto: `${signo(puntos)} pts vs ${ANTERIOR[t.periodo]}`, tono: puntos >= 0 ? "success" as const : "danger" as const } }) },
     { etiqueta: "Ciclo promedio", valor: c.cicloPromedioDias === null ? "—" : `${c.cicloPromedioDias} días`, ...(dias === null ? {} : { variacion: { texto: `${signo(dias)} días vs ${ANTERIOR[t.periodo]}`, tono: dias <= 0 ? "success" as const : "danger" as const } }) },
   ];
@@ -65,7 +65,13 @@ export default function ReportesComerciales({ searchParams }: Props) {
                 vacio: {
                   titulo: "Sin negocios en este período",
                   descripcion: "Cambia el período o quita el filtro de responsable para ver datos.",
-                  ...(d.responsableId ? { accion: <EnlaceBoton href={rutaReportes(d.periodo)} variante="secondary">Ver todo el equipo</EnlaceBoton> } : {}),
+                  accion: d.responsableId ? (
+                    <EnlaceBoton href={rutaReportes(d.periodo)} variante="secondary">Ver todo el equipo</EnlaceBoton>
+                  ) : d.periodo === "anio" ? (
+                    <EnlaceBoton href="/negocios" variante="secondary">Ir a Negocios</EnlaceBoton>
+                  ) : (
+                    <EnlaceBoton href={rutaReportes("anio")} variante="secondary">Ver el año</EnlaceBoton>
+                  ),
                 },
               }}
             >
