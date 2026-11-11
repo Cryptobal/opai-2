@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 677 pares pantalla→capacidad · 605 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 676 pares pantalla→capacidad · 604 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -252,8 +252,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.puestos.confirmar` | `cpq_puestos_confirmar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.get` | `comercial_seguimientos_get` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.iniciar` | `comercial_seguimientos_iniciar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.decidir_envio` | `comercial_seguimientos_decidir_envio` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.patrones.list` | `core_patrones_list` | existe |

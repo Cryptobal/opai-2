@@ -1,13 +1,14 @@
 // Trabajo horario del seguimiento (CAR-67, ADR-029): vence los pasos, crea tareas o envía el correo, y cierra el plan.
 import { z } from "zod";
 
-import { esPasoPendiente, type EstadoPaso } from "@opai/domain";
+import { asuntoSeguimiento, borradorCorreoPaso, detalleTareaPaso, esPasoPendiente, type EstadoPaso } from "@opai/domain";
 
 import { defineConsumidor } from "../eventos/consumidores";
 import { defineTrabajo } from "../trabajos/registro";
 import { configDeVersion } from "./seguimiento-comun";
 import { cerrarSinRespuesta } from "./seguimiento-cierre";
 import { actividadDePaso, enviarCorreoSeguimiento } from "./seguimiento-ejecucion";
+import { cancelarPasosPendientes, efectosPasoHecho } from "./seguimiento-tareas";
 
 const LOTE = 50;
 
@@ -34,18 +35,28 @@ export const trabajoVencerPasosSeguimiento = defineTrabajo({
       try {
         if (paso.ejecutor === "opai_automatico" && paso.canal === "correo") {
           if (!def?.guion) throw new Error("El paso automático no tiene texto en el plan.");
-          const asunto = `Seguimiento${s.cotizacionCodigo ? ` de la cotización ${s.cotizacionCodigo}` : ""}`;
+          const asunto = asuntoSeguimiento(s.cotizacionCodigo);
           const para = await enviarCorreoSeguimiento(ctx, s, asunto, def.guion, negocio?.responsableId ?? null);
           await ctx.transaccion(async (tx) => {
             const actividadId = await actividadDePaso(ctx, tx, { tipo: "correo", titulo: `Seguimiento: ${asunto}`, detalle: `Enviado a ${para}.`, negocioId: s.negocioId });
             await tx.seguimientoPaso.update({ where: { id: paso.id }, data: { estado: "hecho", asunto, cuerpo: def.guion!, hechoEn: new Date(), actividadId } });
+            const aviso = await efectosPasoHecho(ctx, tx, { tareaId: null, negocioId: s.negocioId, etapaDestino: def.etapaDestino });
+            if (aviso) await actividadDePaso(ctx, tx, { tipo: "nota", titulo: "Seguimiento: etapa sin cambio", detalle: aviso, negocioId: s.negocioId });
           });
         } else {
           const nuevo = paso.ejecutor === "agente" ? "por_preparar" : "por_hacer";
+          // R9: la tarea del vendedor lleva el borrador del correo; la hoja «Enviar correo» parte de él.
+          const borrador = paso.ejecutor === "agente" || !def ? null : borradorCorreoPaso(def, s.cotizacionCodigo);
           await ctx.transaccion(async (tx) => {
-            const actividadId = paso.ejecutor === "agente" || !paso.asignadoId ? null
-              : await actividadDePaso(ctx, tx, { tipo: "tarea", titulo, detalle: def?.guion ?? null, negocioId: s.negocioId, responsables: [paso.asignadoId], vencimiento: paso.programadoEn });
-            await tx.seguimientoPaso.update({ where: { id: paso.id }, data: { estado: nuevo, ...(actividadId ? { actividadId } : {}) } });
+            // Transición condicional: una corrida repetida o paralela no crea una segunda tarea.
+            const r = await tx.seguimientoPaso.updateMany({ where: { id: paso.id, estado: "programado" }, data: { estado: nuevo, ...(borrador ?? {}) } });
+            if (!r.count) return;
+            if (paso.ejecutor === "agente" || !paso.asignadoId) return;
+            const actividadId = await actividadDePaso(ctx, tx, {
+              tipo: "tarea", titulo, detalle: def ? detalleTareaPaso(def, borrador) : null, negocioId: s.negocioId,
+              responsables: [paso.asignadoId], vencimiento: paso.programadoEn,
+            });
+            await tx.seguimientoPaso.update({ where: { id: paso.id }, data: { actividadId } });
           });
         }
         activados += 1;
@@ -94,7 +105,7 @@ export const consumidorSeguimientoCierre = defineConsumidor({
     for (const s of vivos) {
       await ctx.transaccion(async (tx) => {
         await tx.seguimiento.update({ where: { id: s.id }, data: { estado: "terminado", motivo } });
-        await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
+        await cancelarPasosPendientes(ctx, tx, s.id);
         await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.terminado", entidadTipo: "negocio", entidadId: ev.entidadId!, payload: { seguimientoId: s.id, motivo } });
       });
     }
