@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Alerta, Button, Campo, Input, Sheet } from "@opai/ds";
 
@@ -25,8 +25,12 @@ export function HojaAgregarPasskey({ onCerrar }: { onCerrar: () => void }) {
   const [nombre, setNombre] = useState(nombreSugerido);
   const [pendiente, setPendiente] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Una ceremonia a la vez: el desafío vive en una sola cookie y un doble toque lo invalidaría.
+  const enCurso = useRef(false);
 
   async function agregar() {
+    if (enCurso.current) return;
+    enCurso.current = true;
     setError(null);
     setPendiente(true);
     try {
@@ -40,6 +44,7 @@ export function HojaAgregarPasskey({ onCerrar }: { onCerrar: () => void }) {
     } catch (e) {
       setError(mensajeWebAuthn(e));
     } finally {
+      enCurso.current = false;
       setPendiente(false);
     }
   }

@@ -10,7 +10,7 @@ import { E2E_PASSWORD } from "./sesion";
 // Seguridad, entra con ella sin contraseña, la contraseña sola ya no basta (pide la passkey), la
 // renombra y la quita confirmando con la contraseña (con aviso de que queda sin segundo factor). La
 // passkey es un autenticador virtual de Chromium (WebAuthn por CDP) con verificación del usuario.
-const OWNER = "mfa-pendiente-e2e@opai.cl";
+const OWNER = "passkeys-e2e@opai.cl";
 const CAPTURAS = "e2e/__screenshots__";
 
 test.use({ actionTimeout: 30_000 });
@@ -27,7 +27,7 @@ function psql(sql: string, vars: Record<string, string> = {}): string {
 async function autenticadorVirtual(page: Page) {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("WebAuthn.enable");
-  await cdp.send("WebAuthn.addVirtualAuthenticator", {
+  const { authenticatorId } = await cdp.send("WebAuthn.addVirtualAuthenticator", {
     options: {
       protocol: "ctap2",
       transport: "internal",
@@ -37,6 +37,9 @@ async function autenticadorVirtual(page: Page) {
       automaticPresenceSimulation: true,
     },
   });
+  // Sin presencia automática el autocompletado condicional del login no entra solo (paso 4).
+  return (enabled: boolean) =>
+    cdp.send("WebAuthn.setAutomaticPresenceSimulation", { authenticatorId, enabled });
 }
 
 async function capturar(page: Page, nombre: string) {
@@ -78,7 +81,7 @@ test.describe("passkeys y métodos de acceso (CAR-286)", () => {
       { e: OWNER },
     );
     await ocultarIndicadorDev(page);
-    await autenticadorVirtual(page);
+    const presencia = await autenticadorVirtual(page);
 
     // 1. Sin segundo factor: entra solo con contraseña y Mi cuenta avisa el riesgo.
     await conPassword(page);
@@ -111,8 +114,10 @@ test.describe("passkeys y métodos de acceso (CAR-286)", () => {
 
     // 4. Con contraseña, la passkey es el segundo paso.
     await salir(page);
+    await presencia(false);
     await conPassword(page);
     await page.waitForURL((u) => u.pathname === "/mfa");
+    await presencia(true);
     await expect(page.getByRole("button", { name: "Usar mi passkey" })).toBeVisible();
     await expect(page.getByLabel(/Código/)).toHaveCount(0);
     await capturar(page, "mfa-solo-passkey");

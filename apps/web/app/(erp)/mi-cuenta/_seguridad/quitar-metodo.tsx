@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Alerta, Button, Campo, Dialog, Input, InputPassword, RadioGroup } from "@opai/ds";
 
@@ -42,8 +42,11 @@ export function QuitarMetodo({
   const [pendiente, setPendiente] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ultimo = restantesAlQuitar(m) === 0;
+  const enCurso = useRef(false);
 
   async function confirmar() {
+    if (enCurso.current) return;
+    enCurso.current = true;
     setError(null);
     setPendiente(true);
     try {
@@ -59,6 +62,7 @@ export function QuitarMetodo({
     } catch (e) {
       setError(mensajeWebAuthn(e));
     } finally {
+      enCurso.current = false;
       setPendiente(false);
     }
   }
