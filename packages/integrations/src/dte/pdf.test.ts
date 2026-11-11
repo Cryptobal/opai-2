@@ -67,10 +67,9 @@ describe("PDF del DTE", () => {
     const bytes = await generarPdfDte({ ...base, glosa: "Servicio ✓ 日本 con ñ y tildes áéíóú" });
     expect(await paginas(bytes)).toBe(2);
   });
-  it("la hoja es A4 (595,28 × 841,89 pt), no Carta", async () => {
+  it("la hoja es Carta (612 × 792 pt), el tamaño SII de OPAI 1", async () => {
     const { width, height } = (await PDFDocument.load(await generarPdfDte(base))).getPage(0).getSize();
-    expect(width).toBeCloseTo(595.28, 1);
-    expect(height).toBeCloseTo(841.89, 1);
+    expect([width, height]).toEqual([612, 792]);
   });
   it("un detalle largo se reparte en varias páginas y la copia CEDIBLE repite el documento completo", async () => {
     const lineas = Array.from({ length: 45 }, (_, i) => ({
@@ -118,7 +117,7 @@ describe("PDF de proforma y estado de pago", () => {
     expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true);
     const pdf = await PDFDocument.load(a);
     expect(pdf.getPageCount()).toBe(1);
-    expect(pdf.getPage(0).getSize().width).toBeCloseTo(595.28, 1);
+    expect(pdf.getPage(0).getSize().width).toBe(612);
     expect(pdf.getTitle()).toBe("PROFORMA PF-2026-12-000042");
   });
   it("el estado de pago admite las firmas y la aprobación en línea", async () => {
