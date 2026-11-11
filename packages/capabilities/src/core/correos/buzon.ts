@@ -7,7 +7,12 @@ import { defineCapability } from "../../define";
 import { PERMISO_HISTORIAL, asegurarBuzon, direccionDelBuzon, tokenDelBuzon } from "./comun";
 
 const salida = z.object({
-  direccion: z.string().nullable().describe("Dirección para CCO; null si la empresa todavía no la tiene (se crea con core.correos.crear_direccion o con el primer envío)."),
+  direccion: z
+    .string()
+    .nullable()
+    .describe(
+      "Dirección para CCO; null si la empresa todavía no la tiene (se crea con core.correos.crear_direccion o con el primer envío).",
+    ),
 });
 
 export const correosDireccion = defineCapability({

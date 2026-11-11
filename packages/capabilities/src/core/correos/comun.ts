@@ -5,7 +5,9 @@ import { DOMINIO_RESPUESTAS, PERMISOS_CORE } from "@opai/domain";
 import { direccionBuzon, generarTokenBuzon } from "@opai/domain/correos";
 import { z } from "zod";
 
+import { enScope } from "../../autorizacion";
 import { externo } from "../../externo";
+import type { Contexto } from "../../types";
 
 /** Ver el historial de una ficha: el mismo permiso que su línea de tiempo de actividad. */
 export const PERMISO_HISTORIAL = PERMISOS_CORE.actividadesRead;
@@ -23,7 +25,9 @@ export type DbOTx = Pick<TenantTx, "buzonCorreo" | "correoCliente">;
 
 export const correoClienteSchema = z.object({
   id: z.string(),
-  fuente: z.enum(["historial", "seguimiento"]).describe("«seguimiento»: respuesta guardada por un seguimiento (CAR-67)."),
+  fuente: z
+    .enum(["historial", "seguimiento"])
+    .describe("«seguimiento»: respuesta guardada por un seguimiento (CAR-67)."),
   sentido: z.enum(SENTIDOS),
   origen: z.enum([...ORIGENES, "respuesta_seguimiento"]),
   ocurridoEn: z.string(),
@@ -39,8 +43,17 @@ export const correoClienteSchema = z.object({
 export type CorreoClienteVista = z.infer<typeof correoClienteSchema>;
 
 type Fila = {
-  id: string; sentido: string; origen: string; ocurridoEn: Date; remitente: string; destinatarios: string[];
-  asunto: string | null; texto: string; cuentaId: string | null; contactoId: string | null; negocioId: string | null;
+  id: string;
+  sentido: string;
+  origen: string;
+  ocurridoEn: Date;
+  remitente: string;
+  destinatarios: string[];
+  asunto: string | null;
+  texto: string;
+  cuentaId: string | null;
+  contactoId: string | null;
+  negocioId: string | null;
   asociacion: string | null;
 };
 
@@ -60,6 +73,18 @@ export const vistaCorreo = (f: Fila): CorreoClienteVista => ({
   asociacion: f.asociacion as CorreoClienteVista["asociacion"],
 });
 
+/** Ámbito de los correos de facturas y sus respuestas: bajo el bloqueo financiero (ADR-016). */
+export const AMBITO_FINANZAS = "finanzas";
+
+/** ¿Puede ver documentos de Finanzas (folio, monto, vencimiento)? Como en la ficha de Finanzas. */
+export const veFinanzas = (ctx: Contexto) =>
+  enScope(ctx, "finanzas") &&
+  ctx.modulosActivos.includes("finanzas") &&
+  ctx.autorizar("finanzas:read");
+
+/** Filtro que oculta el ámbito financiero a quien no ve Finanzas. */
+export const dondeAmbito = (ctx: Contexto) => (veFinanzas(ctx) ? {} : { ambito: null });
+
 /** Token del buzón de la empresa, o null si todavía no se creó. */
 export async function tokenDelBuzon(db: DbOTx): Promise<string | null> {
   return (await db.buzonCorreo.findFirst({ select: { token: true } }))?.token ?? null;
@@ -73,13 +98,17 @@ export async function tokenDelBuzon(db: DbOTx): Promise<string | null> {
 export async function asegurarBuzon(db: DbOTx, tenantId: string): Promise<string> {
   const previo = await tokenDelBuzon(db);
   if (previo) return previo;
-  await db.buzonCorreo.createMany({ data: [{ tenantId, token: generarTokenBuzon() }], skipDuplicates: true });
+  await db.buzonCorreo.createMany({
+    data: [{ tenantId, token: generarTokenBuzon() }],
+    skipDuplicates: true,
+  });
   const token = await tokenDelBuzon(db);
   if (!token) throw new Error("No se pudo crear la dirección de registro.");
   return token;
 }
 
-export const direccionDelBuzon = (token: string): string => direccionBuzon(token, DOMINIO_RESPUESTAS);
+export const direccionDelBuzon = (token: string): string =>
+  direccionBuzon(token, DOMINIO_RESPUESTAS);
 
 /** Recorta a los largos que acepta la tabla (CHECK de la migración). */
 export const recortar = (s: string, n: number): string => (s.length > n ? s.slice(0, n) : s);

@@ -176,6 +176,8 @@ model CorreoCliente {
   negocioId     String?   @map("negocio_id") @db.Uuid
   /// Cómo se asoció: "origen" | "contacto" | "dominio" | "manual"; null = nunca se asoció.
   asociacion    String?
+  /// Ámbito de acceso del hilo: "finanzas" en facturas y en las respuestas a ellas (ADR-016); null = sin restricción.
+  ambito        String?
   asociadoPorId String?   @map("asociado_por_id") @db.Uuid
   asociadoEn    DateTime? @map("asociado_en") @db.Timestamptz(6)
   ocurridoEn    DateTime  @map("ocurrido_en") @db.Timestamptz(6)

@@ -7,14 +7,24 @@ import { defineCapability } from "../../define";
 import type { Contexto } from "../../types";
 import { exigirEntidad } from "../crm/comun";
 import { uuidSchema } from "../esquemas";
-import { type CorreoClienteVista, PERMISO_HISTORIAL, correoClienteSchema, vistaCorreo } from "./comun";
+import {
+  type CorreoClienteVista,
+  PERMISO_HISTORIAL,
+  correoClienteSchema,
+  dondeAmbito,
+  vistaCorreo,
+} from "./comun";
 
 const ENTIDADES = ["cuenta", "contacto", "negocio"] as const;
 type Entidad = (typeof ENTIDADES)[number];
 type Cursor = { fecha: Date; id: string };
 
 const refDe = (tipo: Entidad, id: string) =>
-  tipo === "cuenta" ? { cuentaId: id } : tipo === "contacto" ? { contactoId: id } : { negocioId: id };
+  tipo === "cuenta"
+    ? { cuentaId: id }
+    : tipo === "contacto"
+      ? { contactoId: id }
+      : { negocioId: id };
 
 /** Cursor «fecha|id» del último elemento de la página anterior (orden: fecha desc, id desc). */
 function leerCursor(c: string | undefined): Cursor | null {
@@ -28,27 +38,45 @@ const antesDe = (campo: "ocurridoEn" | "recibidoEn", c: Cursor | null) =>
 
 /** ¿Puede ver lo que guarda Comercial (negocios y seguimientos)? */
 const veComercial = (ctx: Contexto) =>
-  enScope(ctx, "comercial") && ctx.modulosActivos.includes("comercial") && ctx.autorizar("comercial:negocios.read");
-
-/**
- * ¿Puede ver documentos de Finanzas? Los correos de facturas traen folio, monto y vencimiento: quedan
- * bajo el bloqueo financiero (ADR-016), como en la ficha de Finanzas.
- */
-const veFinanzas = (ctx: Contexto) =>
-  enScope(ctx, "finanzas") && ctx.modulosActivos.includes("finanzas") && ctx.autorizar("finanzas:read");
+  enScope(ctx, "comercial") &&
+  ctx.modulosActivos.includes("comercial") &&
+  ctx.autorizar("comercial:negocios.read");
 
 /** Respuestas de seguimiento (CAR-67) de la ficha, en la misma forma que el historial. */
-async function deSeguimientos(ctx: Contexto, tipo: Entidad, id: string, c: Cursor | null, take: number): Promise<CorreoClienteVista[]> {
+async function deSeguimientos(
+  ctx: Contexto,
+  tipo: Entidad,
+  id: string,
+  c: Cursor | null,
+  take: number,
+): Promise<CorreoClienteVista[]> {
   if (!veComercial(ctx)) return [];
-  const negocios = tipo === "cuenta" ? (await ctx.db.negocio.findMany({ where: { cuentaId: id }, select: { id: true } })).map((n) => n.id) : [];
-  const donde = tipo === "negocio" ? { negocioId: id } : tipo === "contacto" ? { contactoId: id } : { negocioId: { in: negocios } };
+  const negocios =
+    tipo === "cuenta"
+      ? (await ctx.db.negocio.findMany({ where: { cuentaId: id }, select: { id: true } })).map(
+          (n) => n.id,
+        )
+      : [];
+  const donde =
+    tipo === "negocio"
+      ? { negocioId: id }
+      : tipo === "contacto"
+        ? { contactoId: id }
+        : { negocioId: { in: negocios } };
   if (tipo === "cuenta" && !negocios.length) return [];
-  const segs = await ctx.db.seguimiento.findMany({ where: donde, select: { id: true, negocioId: true, contactoId: true } });
+  const segs = await ctx.db.seguimiento.findMany({
+    where: donde,
+    select: { id: true, negocioId: true, contactoId: true },
+  });
   if (!segs.length) return [];
   const porId = new Map(segs.map((s) => [s.id, s]));
   const cuentaDe = new Map(
-    (await ctx.db.negocio.findMany({ where: { id: { in: [...new Set(segs.map((s) => s.negocioId))] } }, select: { id: true, cuentaId: true } }))
-      .map((n) => [n.id, n.cuentaId]),
+    (
+      await ctx.db.negocio.findMany({
+        where: { id: { in: [...new Set(segs.map((s) => s.negocioId))] } },
+        select: { id: true, cuentaId: true },
+      })
+    ).map((n) => [n.id, n.cuentaId]),
   );
   const filas = await ctx.db.seguimientoEntrante.findMany({
     where: { seguimientoId: { in: segs.map((s) => s.id) }, ...antesDe("recibidoEn", c) },
@@ -58,10 +86,19 @@ async function deSeguimientos(ctx: Contexto, tipo: Entidad, id: string, c: Curso
   return filas.map((f) => {
     const s = porId.get(f.seguimientoId);
     return {
-      id: f.id, fuente: "seguimiento", sentido: "recibido", origen: "respuesta_seguimiento",
-      ocurridoEn: f.recibidoEn.toISOString(), remitente: f.remitente, destinatarios: [], asunto: f.asunto, texto: f.texto,
-      cuentaId: s ? (cuentaDe.get(s.negocioId) ?? null) : null, contactoId: s?.contactoId ?? null,
-      negocioId: s?.negocioId ?? null, asociacion: "origen",
+      id: f.id,
+      fuente: "seguimiento",
+      sentido: "recibido",
+      origen: "respuesta_seguimiento",
+      ocurridoEn: f.recibidoEn.toISOString(),
+      remitente: f.remitente,
+      destinatarios: [],
+      asunto: f.asunto,
+      texto: f.texto,
+      cuentaId: s ? (cuentaDe.get(s.negocioId) ?? null) : null,
+      contactoId: s?.contactoId ?? null,
+      negocioId: s?.negocioId ?? null,
+      asociacion: "origen",
     };
   });
 }
@@ -85,23 +122,30 @@ export const correosHistorial = defineCapability({
   async handler(ctx, input) {
     await exigirEntidad(ctx, input.entidadTipo, input.entidadId);
     // Un negocio es de Comercial: sin su permiso, exigirEntidad ya rechazó. En cuenta y contacto, los
-    // correos ligados a un negocio se ocultan a quien no puede ver negocios, y los de facturas a quien
-    // no puede ver Finanzas.
+    // correos ligados a un negocio se ocultan a quien no puede ver negocios, y los de facturas (y sus
+    // respuestas, ámbito «finanzas») a quien no puede ver Finanzas.
     const c = leerCursor(input.cursor);
     const propios = await ctx.db.correoCliente.findMany({
       where: {
         ...refDe(input.entidadTipo, input.entidadId),
         ...(veComercial(ctx) ? {} : { negocioId: null }),
-        ...(veFinanzas(ctx) ? {} : { origen: { not: "factura" } }),
+        ...dondeAmbito(ctx),
         ...antesDe("ocurridoEn", c),
       },
       orderBy: [{ ocurridoEn: "desc" }, { id: "desc" }],
       take: input.limite + 1,
     });
-    const todos = [...propios.map(vistaCorreo), ...(await deSeguimientos(ctx, input.entidadTipo, input.entidadId, c, input.limite + 1))]
-      .sort((a, b) => (a.ocurridoEn === b.ocurridoEn ? (a.id < b.id ? 1 : -1) : a.ocurridoEn < b.ocurridoEn ? 1 : -1));
+    const todos = [
+      ...propios.map(vistaCorreo),
+      ...(await deSeguimientos(ctx, input.entidadTipo, input.entidadId, c, input.limite + 1)),
+    ].sort((a, b) =>
+      a.ocurridoEn === b.ocurridoEn ? (a.id < b.id ? 1 : -1) : a.ocurridoEn < b.ocurridoEn ? 1 : -1,
+    );
     const items = todos.slice(0, input.limite);
     const ultimo = items.at(-1);
-    return { items, siguiente: todos.length > input.limite && ultimo ? `${ultimo.ocurridoEn}|${ultimo.id}` : null };
+    return {
+      items,
+      siguiente: todos.length > input.limite && ultimo ? `${ultimo.ocurridoEn}|${ultimo.id}` : null,
+    };
   },
 });

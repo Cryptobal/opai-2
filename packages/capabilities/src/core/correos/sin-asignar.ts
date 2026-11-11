@@ -6,7 +6,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { exigirEntidad } from "../crm/comun";
 import { uuidSchema } from "../esquemas";
-import { PERMISO_SIN_ASIGNAR, correoClienteSchema, vistaCorreo } from "./comun";
+import { PERMISO_SIN_ASIGNAR, correoClienteSchema, dondeAmbito, vistaCorreo } from "./comun";
 
 const SIN_REFS = { cuentaId: null, contactoId: null, negocioId: null };
 
@@ -26,7 +26,7 @@ export const correosSinAsignar = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.correoCliente.findMany({
-      where: SIN_REFS,
+      where: { ...SIN_REFS, ...dondeAmbito(ctx) },
       orderBy: [{ ocurridoEn: "desc" }, { id: "desc" }],
       take: input.limite + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
@@ -52,35 +52,58 @@ export const correosAsociar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const correo = await ctx.db.correoCliente.findFirst({ where: { id: input.correoId } });
+    const correo = await ctx.db.correoCliente.findFirst({
+      where: { id: input.correoId, ...dondeAmbito(ctx) },
+    });
     if (!correo) throw noEncontrado("El correo");
     // Un saliente cuya ficha se borró (SET NULL) vuelve a «sin asignar» y sí se puede reasociar.
     const conOrigen = correo.cuentaId || correo.contactoId || correo.negocioId;
     if (correo.asociacion === "origen" && conOrigen)
-      throw reglaDeNegocio("Este correo lo envió OPAI y ya está ligado a su cuenta, contacto o negocio.");
+      throw reglaDeNegocio(
+        "Este correo lo envió OPAI y ya está ligado a su cuenta, contacto o negocio.",
+      );
     await exigirEntidad(ctx, "cuenta", input.cuentaId);
     if (input.contactoId) {
       await exigirEntidad(ctx, "contacto", input.contactoId);
       const deLaCuenta = await ctx.db.contacto.count({
-        where: { id: input.contactoId, OR: [{ cuentaId: input.cuentaId }, { cuentaVinculos: { some: { cuentaId: input.cuentaId } } }] },
+        where: {
+          id: input.contactoId,
+          OR: [
+            { cuentaId: input.cuentaId },
+            { cuentaVinculos: { some: { cuentaId: input.cuentaId } } },
+          ],
+        },
       });
       if (!deLaCuenta) throw reglaDeNegocio("El contacto no pertenece a esa cuenta.");
     }
     if (input.negocioId) {
       await exigirEntidad(ctx, "negocio", input.negocioId);
-      const n = await ctx.db.negocio.findFirst({ where: { id: input.negocioId }, select: { cuentaId: true } });
+      const n = await ctx.db.negocio.findFirst({
+        where: { id: input.negocioId },
+        select: { cuentaId: true },
+      });
       if (n?.cuentaId !== input.cuentaId) throw reglaDeNegocio("El negocio no es de esa cuenta.");
     }
     const datos = {
-      cuentaId: input.cuentaId, contactoId: input.contactoId ?? null, negocioId: input.negocioId ?? null,
-      asociacion: "manual", asociadoPorId: ctx.usuario?.id ?? null, asociadoEn: new Date(),
+      cuentaId: input.cuentaId,
+      contactoId: input.contactoId ?? null,
+      negocioId: input.negocioId ?? null,
+      asociacion: "manual",
+      asociadoPorId: ctx.usuario?.id ?? null,
+      asociadoEn: new Date(),
     };
     if (dryRun) return vistaCorreo({ ...correo, ...datos });
     const fila = await ctx.transaccion(async (tx) => {
       const f = await tx.correoCliente.update({ where: { id: correo.id }, data: datos });
       await ctx.eventos.emitir(tx, {
-        tipo: "core.correo_cliente.asociado", entidadTipo: "correo_cliente", entidadId: f.id,
-        payload: { cuentaId: datos.cuentaId, contactoId: datos.contactoId, negocioId: datos.negocioId },
+        tipo: "core.correo_cliente.asociado",
+        entidadTipo: "correo_cliente",
+        entidadId: f.id,
+        payload: {
+          cuentaId: datos.cuentaId,
+          contactoId: datos.contactoId,
+          negocioId: datos.negocioId,
+        },
       });
       return f;
     });

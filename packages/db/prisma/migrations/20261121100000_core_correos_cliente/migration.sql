@@ -27,6 +27,8 @@ CREATE TABLE "core"."correos_cliente" (
     "contacto_id" UUID,
     "negocio_id" UUID,
     "asociacion" TEXT,
+    -- Ámbito de acceso del hilo: 'finanzas' en facturas y en sus respuestas (bloqueo financiero, ADR-016).
+    "ambito" TEXT,
     "asociado_por_id" UUID,
     "asociado_en" TIMESTAMPTZ(6),
     "ocurrido_en" TIMESTAMPTZ(6) NOT NULL,
@@ -36,6 +38,7 @@ CREATE TABLE "core"."correos_cliente" (
     CONSTRAINT "correos_cliente_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "correos_cliente_sentido_check" CHECK ("sentido" IN ('enviado', 'recibido')),
     CONSTRAINT "correos_cliente_origen_check" CHECK ("origen" IN ('cotizacion', 'factura', 'seguimiento', 'buzon')),
+    CONSTRAINT "correos_cliente_ambito_check" CHECK ("ambito" IS NULL OR "ambito" = 'finanzas'),
     CONSTRAINT "correos_cliente_asociacion_check"
       CHECK ("asociacion" IS NULL OR "asociacion" IN ('origen', 'contacto', 'dominio', 'manual')),
     -- «Sin asignar» = ninguna de las tres referencias. Sin asociación no puede haber referencias; al

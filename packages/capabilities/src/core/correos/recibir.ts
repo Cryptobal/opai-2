@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { defineCapability } from "../../define";
 import { LARGO_TEXTO, recortar } from "./comun";
+import { ambitoDelHilo } from "./hilo";
 import { asociarEntrante, sentidoYContrapartes } from "./registrar";
 
 /**
@@ -44,6 +45,7 @@ export const correosRecibir = defineCapability({
     if (previo) return { registrado: false, sentido, asociado: false };
     const a = await asociarEntrante(ctx, contrapartes, input.asunto);
     const asociado = a.asociacion !== null;
+    const ambito = await ambitoDelHilo(ctx, contrapartes, input.asunto);
     if (dryRun) return { registrado: true, sentido, asociado };
     // Dos entregas simultáneas del mismo correo: la única (tenant, mensaje_id) deja pasar una con
     // ON CONFLICT DO NOTHING; la otra responde «ya registrado» sin error (Resend no reintenta).
@@ -64,6 +66,7 @@ export const correosRecibir = defineCapability({
             contactoId: a.contactoId,
             negocioId: a.negocioId,
             asociacion: a.asociacion,
+            ambito,
             asociadoEn: asociado ? new Date() : null,
             ocurridoEn: new Date(input.recibidoEn),
           },
