@@ -1,6 +1,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 import type { DefinicionImportador } from "@opai/domain/importacion";
 
+import { bloquearNoAnonimizado } from "../maestros/anonimizado";
 import { ROLES_CONTACTO, unicoPrincipal } from "../maestros/contactos-vista";
 import { CAMPOS_CUENTA, CAMPO_ID_EXTERNO, idsExternos, norm, resolverCuentas, texto } from "./comun";
 import type { FilaPlan, Importador } from "./tipos";
@@ -67,6 +68,9 @@ export const importadorContactos: Importador<DatosContacto> = {
         (idExterno ? porId.get(externos.get(idExterno) ?? "") : undefined) ??
         (email ? deLaCuenta.find((c) => c.email?.toLowerCase() === email) : undefined) ??
         deLaCuenta.find((c) => (!email || !c.email) && norm(`${c.nombres} ${c.apellidos}`) === norm(etiqueta));
+      // El id de origen no puede llevar la fila a un contacto de OTRA cuenta: se cambiaría a quien no corresponde.
+      if (existente && existente.cuentaId !== r.cuenta.id)
+        return { fila: f.fila, clave: `fila:${f.fila}`, etiqueta, accion: "error", mensajes: ["El id de origen ya pertenece a un contacto de otra cuenta. Revisa la cuenta o el id de esta fila."] };
       // Ley 21.719: un contacto anonimizado no admite escrituras, tampoco por una importación.
       if (existente?.anonimizadoEn)
         return { fila: f.fila, clave: `fila:${f.fila}`, etiqueta, accion: "error", mensajes: ["Este contacto fue anonimizado y no se puede volver a cargar."] };
@@ -93,6 +97,8 @@ export const importadorContactos: Importador<DatosContacto> = {
     return c.id;
   },
   async actualizar(tx, id, { roles: _roles, cuentaId: _cuenta, ...cambios }) {
+    // Mismo bloqueo que `core.contactos.update`: si se anonimiza entre el plan y la escritura, no se vuelve a llenar.
+    await bloquearNoAnonimizado(tx, "contacto", id);
     await tx.contacto.update({ where: { id }, data: cambios });
   },
   actuales: (tx, ids) => tx.contacto.findMany({ where: { id: { in: [...ids] } } }),
