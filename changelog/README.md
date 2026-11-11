@@ -1,6 +1,6 @@
 # Novedades de producto (changelog in-app)
 
-Cada **cambio visible** que se integra a `main` debe traer un archivo Markdown en
+Cada **cambio visible o de diseño** que se integra a `main` —aunque todavía solo esté en `test.opai.cl` y no vaya a producción— debe traer un archivo Markdown en
 `packages/domain/src/novedades/entradas/`, con nombre `YYYY-MM-DD-slug.md`.
 
 ## Frontmatter obligatorio
@@ -32,6 +32,9 @@ En la app, cada ítem aparece como **tarjeta en la página Novedades** (fecha, m
 
 1. El PR que integra el cambio visible **añade o actualiza** el `.md` en el mismo PR y corre `pnpm --filter @opai/domain gen:novedades-embed` (actualiza `entradas/embed.ts` para el despliegue en Vercel).
 2. Al desplegar, las entradas aparecen solas; el estado «leído» es por usuario en base de datos.
-3. El gate de tests valida ids únicos y frontmatter mínimo.
+3. El gate de tests valida ids únicos y frontmatter mínimo. Dentro del mismo día las `destacada: true` salen arriba (la fecha no tiene hora).
+4. El CI (`.github/scripts/ci-novedad-visual.sh`) avisa, sin bloquear, si el PR toca pantallas o el DS y no agrega ni cambia un `.md` aquí. Si el cambio es solo interno, se ignora el aviso.
+
+El texto debe **describir el cambio visual**: qué botones, hojas o menús aparecen o cambian y dónde.
 
 Ver también `AGENTS.md` (convenciones) y `docs/2.0/CONTEXTO-agentes.md`.
