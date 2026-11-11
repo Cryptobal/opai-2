@@ -1,4 +1,5 @@
-import { esDireccionOpai, tokenBuzonDeDireccion, tokenDeDireccion } from "@opai/domain";
+import { tokenDeDireccion } from "@opai/domain";
+import { esDireccionOpai, tokenBuzonDeDireccion } from "@opai/domain/correos";
 
 export type EventoEntrante = {
   emailId: string;

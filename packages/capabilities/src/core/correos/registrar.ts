@@ -8,7 +8,7 @@ import {
   dominioDeCorreo,
   esDireccionOpai,
   esDominioGenerico,
-} from "@opai/domain";
+} from "@opai/domain/correos";
 
 import type { Contexto } from "../../types";
 import { type DbOTx, LARGO_TEXTO, type OrigenCorreo, recortar } from "./comun";

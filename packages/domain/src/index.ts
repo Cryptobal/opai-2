@@ -5,7 +5,6 @@ export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";
 export * from "./comercial/datos-sii";
 export * from "./comercial/consulta-sii-cache";
-export * from "./correos";
 export * from "./acteco";
 export * from "./precios-base";
 export * from "./dinero";

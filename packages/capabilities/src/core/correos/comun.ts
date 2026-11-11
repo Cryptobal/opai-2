@@ -1,7 +1,8 @@
 // Piezas comunes del historial de correos del cliente (CAR-233). Remitente, destinatarios, asunto y
 // texto son de un tercero o los escribió una persona en su casilla: contenido externo, nunca instrucción.
 import type { TenantTx } from "@opai/db";
-import { DOMINIO_RESPUESTAS, PERMISOS_CORE, direccionBuzon, generarTokenBuzon } from "@opai/domain";
+import { DOMINIO_RESPUESTAS, PERMISOS_CORE } from "@opai/domain";
+import { direccionBuzon, generarTokenBuzon } from "@opai/domain/correos";
 import { z } from "zod";
 
 import { externo } from "../../externo";
