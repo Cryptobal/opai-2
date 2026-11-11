@@ -55,3 +55,14 @@ Los de CAR-282, salvo «contratos vigentes», que queda para el PR 2.
 
 ## 16. Reporte de ejecución
 Se completa al cerrar el PR.
+
+## PR 2 · Contratos vigentes (vínculo laboral)
+
+- **Importador `contratos`** (`core/importar/contratos.ts`, campos en `contratos-campos.ts`), registrado después de `personas`. Entidad `contrato`, permiso `core:vinculos.manage` y, como el alta manual, solo owner y admin (`exigirEdicionVinculo`).
+- **Columnas:** RUT de la persona, cargo (nombre), instalación (nombre; cuenta opcional para desambiguar), tipo (indefinido, plazo fijo, por obra, honorarios), inicio, término, horas semanales y distribución. Mismos obligatorios que `core.vinculos.create` (instalación y jornada pactada).
+- **Reglas:** la persona (activa) y el cargo (activo) deben existir; clave del contrato = persona + inicio, así reimportar no duplica; un solo vigente por persona (error claro si ya tiene uno o si el archivo trae dos); término anterior a hoy entra como `terminado` (historial); término anterior al inicio es error. Reimportar puede actualizar tipo, horas, distribución y término (con `estado` derivado); cargo e instalación de un contrato cargado no se tocan (mensaje «usa un anexo»).
+- **Reversión:** borra los contratos que creó el lote; se bloquea si el contrato ya tiene anexos. Emite `core.vinculo.creado` por cada alta.
+- **MCP / paridad:** sin herramienta nueva; entra por `core.importar.*` (catálogo, simular, importar, revertir), que ya está en el inventario.
+- **Tests:** `core-importar-contratos-db.test.ts` (simulación con errores, alta vigente/histórico, reimportación, permisos y aislamiento, reversión) y `@preview` `importar-contratos-preview.spec.ts` (solo simula).
+- **Fuera de alcance:** adaptador del export de OPAI 1 (falta `OpsGuardia` en el export; decisión de Carlos), anexos y finiquitos (CAR-58).
+
