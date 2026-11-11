@@ -1,8 +1,8 @@
 // Discriminador del 401/403 sin cuerpo de SimpleAPI (CAR-263b). SimpleAPI usa ese mismo rechazo para una API key que
 // no reconoce y para un contenido que rechaza (certificado, CAF o JSON; lo documenta OPAI 1.0 en `simpleapi-http.ts`).
 // Los `x-rate-limit-*` no distinguen (vienen en toda respuesta; CAR-263). La sonda de `Suscripcion/status` sí: si
-// reconoce la key, el rechazo es del contenido; si no la reconoce con ningún esquema, es la key; si no responde, se
-// dicen las dos causas. Nunca se afirma que la key está mal solo por un 401 vacío.
+// reconoce la key en Basic (como la emisión), el rechazo es del contenido; si solo la reconoce cruda, puede ser el
+// esquema o el contenido; si no la reconoce con ningún esquema, es la key; si no responde, se dicen las dos causas. Nunca se afirma que la key está mal solo por un 401 vacío.
 
 import { ErrorProveedorSii } from "./error-proveedor";
 import { probarKeySimpleApi, type EsquemaAuthSimpleApi } from "./simpleapi-suscripcion";
@@ -16,6 +16,10 @@ export const motivoRechazoSinCuerpo = (status: number): string =>
 
 const motivoContenido = (status: number): string =>
   `respondió HTTP ${status} sin motivo, pero sí reconoce la API key: rechazó el contenido (certificado, CAF o JSON), no la key`;
+
+/** La key se reconoce solo cruda, pero `dte/generar` va en Basic: el 401 puede ser el esquema o el contenido. */
+const motivoSoloCruda = (status: number): string =>
+  `respondió HTTP ${status} sin motivo; SimpleAPI reconoce la API key solo enviada directa y la emisión la manda en Basic: puede ser esa forma de autenticar o el contenido (certificado, CAF o JSON)`;
 
 const motivoKey = (status: number): string =>
   `respondió HTTP ${status} sin motivo y tampoco reconoce la API key guardada (mal copiada, vencida o sin suscripción a SimpleAPI DTE); cópiala de nuevo en Integraciones › Emisión DTE`;
@@ -40,7 +44,11 @@ export async function discriminarRechazoSinCuerpo(error: unknown, apiKey: string
   const status = error.status;
   if (status !== 401 && status !== 403) return error;
   const r = await probarKeySimpleApi(apiKey).catch(() => null);
-  if (r?.estado === "reconocida") return conMotivo(error, motivoContenido(status), { estado: "reconocida", esquema: r.esquema });
+  if (r?.estado === "reconocida") {
+    // Solo con Basic (el esquema de la emisión) la sonda descarta la key; si solo aceptó la cruda, queda la duda.
+    const motivo = r.esquema === "basic" ? motivoContenido(status) : motivoSoloCruda(status);
+    return conMotivo(error, motivo, { estado: "reconocida", esquema: r.esquema });
+  }
   if (r?.estado === "no_reconocida") return conMotivo(error, motivoKey(status), { estado: "no_reconocida" });
   return conMotivo(error, error.motivo, { estado: "sin_respuesta" });
 }

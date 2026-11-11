@@ -148,23 +148,29 @@ describe("autenticación y límites de uso (CAR-240)", () => {
       }
     }
   });
-  it("401 vacío de generar con la key reconocida por la sonda (Basic o cruda): es el contenido, no la key (CAR-263b)", async () => {
-    const vacio = () => new Response("", { status: 401, headers: { "x-rate-limit-remaining": "39" } });
+  it("401 vacío de generar con la key reconocida en Basic (el esquema de la emisión): es el contenido, no la key (CAR-263b)", async () => {
+    const f = generar(() => new Response("", { status: 401, headers: { "x-rate-limit-remaining": "39" } }), () => Response.json({ ok: true }));
+    const e = await firmarError();
+    expect(e).toMatchObject({ paso: "generar", status: 401, cuerpo: "vacio", sondaKey: { estado: "reconocida", esquema: "basic" } });
+    expect(e.motivo).toBe("respondió HTTP 401 sin motivo, pero sí reconoce la API key: rechazó el contenido (certificado, CAF o JSON), no la key");
+    expect(e.motivo).not.toMatch(/cópiala|mal copiada/);
+    // La sonda es un GET sin cuerpo: nunca reenvía el certificado ni el CAF.
+    const sondas = f.mock.calls.filter(([url]) => String(url).endsWith("/Suscripcion/status"));
+    expect(sondas.length).toBe(1);
+    for (const [, init] of sondas) expect([init?.method, init?.body]).toEqual(["GET", undefined]);
+    // El diagnóstico de la petición rechazada se conserva.
+    expect(e.peticion).not.toBeNull();
+  });
+  it("401 vacío de generar con la key reconocida solo cruda: no afirma que sea el contenido, porque la emisión va en Basic", async () => {
     const basicNo = (init?: RequestInit) =>
       String((init?.headers as Record<string, string>)["Authorization"]).startsWith("Basic ") ? new Response("", { status: 401 }) : Response.json({ ok: true });
-    for (const [sonda, esquema] of [[() => Response.json({ ok: true }), "basic"], [basicNo, "raw"]] as const) {
-      const f = generar(vacio, sonda);
-      const e = await firmarError();
-      expect(e).toMatchObject({ paso: "generar", status: 401, cuerpo: "vacio", sondaKey: { estado: "reconocida", esquema } });
-      expect(e.motivo).toBe("respondió HTTP 401 sin motivo, pero sí reconoce la API key: rechazó el contenido (certificado, CAF o JSON), no la key");
-      expect(e.motivo).not.toMatch(/cópiala|mal copiada/);
-      // La sonda es un GET sin cuerpo: nunca reenvía el certificado ni el CAF.
-      const sondas = f.mock.calls.filter(([url]) => String(url).endsWith("/Suscripcion/status"));
-      expect(sondas.length).toBeGreaterThan(0);
-      for (const [, init] of sondas) expect([init?.method, init?.body]).toEqual(["GET", undefined]);
-      // El diagnóstico de la petición rechazada se conserva.
-      expect(e.peticion).not.toBeNull();
-    }
+    generar(() => new Response("", { status: 401 }), basicNo);
+    const e = await firmarError();
+    expect(e.sondaKey).toEqual({ estado: "reconocida", esquema: "raw" });
+    expect(e.motivo).toBe(
+      "respondió HTTP 401 sin motivo; SimpleAPI reconoce la API key solo enviada directa y la emisión la manda en Basic: puede ser esa forma de autenticar o el contenido (certificado, CAF o JSON)",
+    );
+    expect(e.motivo).not.toMatch(/no la key|cópiala/);
   });
   it("401 vacío de generar y la sonda tampoco reconoce la key con ningún esquema: ahí sí habla de la key", async () => {
     generar(() => new Response("", { status: 401 }), () => new Response("", { status: 401 }));
