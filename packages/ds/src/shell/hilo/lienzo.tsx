@@ -92,7 +92,7 @@ export function LienzoHilo(p: Props) {
           </>
         )}
       </header>
-      <main className={cn("min-h-0 flex-1 overflow-y-auto", SIN_BARRA)}>
+      <main data-lienzo className={cn("min-h-0 flex-1 overflow-y-auto", SIN_BARRA)}>
         {p.panel ? (
           <div className={cn("flex flex-col gap-7", PAD_CONTENIDO)}>{p.panel.contenido}</div>
         ) : null}
