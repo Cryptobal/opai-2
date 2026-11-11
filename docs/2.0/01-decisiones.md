@@ -1649,6 +1649,12 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Decisión.** El prompt exportable (CAR-138, PR 8) se genera en código desde el catálogo de campos y se entrega a Claude Design u otra IA; no se usa ningún producto de Google ni se promete Figma, PPT o PDF. Solo cita claves del catálogo de la finalidad «propuesta» que el actor puede leer. Es una lectura (`cpq.propuestas_tecnica.prompt_exportable`) sin migración. Importar HTML queda para el PR 9. Se abre en borrador por orden expresa de Carlos para este PR; la regla general de AGENTS.md (PR listos para revisión) sigue vigente para los demás.
 
+## ADR-086 · Importación de HTML de propuesta: saneada, por empresa y sin renderer (10-nov-2026)
+
+**Fecha:** 10-nov-2026 · **Estado:** vigente · **Autor:** Carlos, vía el coordinador OPAI 2.0; registrado por la sesión «Sesión Comercial».
+
+**Decisión.** CAR-138 PR 9 permite importar HTML como plantilla de propuesta por empresa, saneado en el servidor con lista blanca (`parse5`), con marcadores validados contra el catálogo de campos y versionado (`cpq.propuesta_html`). Se rechaza, sin guardar, todo lo que ejecute código, use red o recursos remotos, o traiga marcadores fuera del catálogo. **No hay renderer de HTML:** el PDF sigue siendo `pdf-lib` y no consume esta tabla; no se promete Figma, PPT ni PDF desde el HTML. El export `PropuestaCliente.dc.html` de Claude Design no es importable tal cual (formato de componentes propio); no se inventó otro diseño ni un conversor. Conectar la plantilla a un renderer queda para una decisión de arquitectura aparte. Se abre en borrador por orden expresa de Carlos para este PR.
+
 ## ADR-087 · Referencias de clientes solo con consentimiento registrado (CAR-138 PR 7, 10-nov-2026)
 
 **Fecha:** 10-nov-2026 · **Estado:** vigente; **quién autoriza queda pendiente de Carlos** · **Autor:** Carlos (encargo vía el coordinador, 10-nov-2026 11:08), registrado por la «Sesión Comercial». (El número ADR-086 lo usa el PR #452, aún abierto.)

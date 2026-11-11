@@ -8,11 +8,12 @@ import { Alerta, avisar, Button, Dialog } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { porTransmitir } from "./etiquetas-venta";
-import { HojaCeder } from "./hoja-ceder";
 import { HojaCobroManual } from "./hoja-cobro-manual";
 import { HojaNotaCredito } from "./hoja-nota-credito";
 import type { DatosBorrador, Venta } from "./tipos";
 
+// La hoja de cesión se carga al abrirla: no pesa en la ficha (presupuesto de JS, ADR-037).
+const HojaCeder = dynamic(() => import("./hoja-ceder").then((m) => ({ default: m.HojaCeder })));
 const EmitirBorradorFicha = dynamic(() => import("./emitir-borrador-ficha").then((m) => ({ default: m.EmitirBorradorFicha })));
 
 function descargar(base64: string, nombre: string) {
