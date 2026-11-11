@@ -183,8 +183,7 @@ export const auth = betterAuth({
     }),
     marcaMfaSesion,
     sesionPin,
-    // OAuth del MCP (CAR-247, ADR-098): Claude y otras apps entran con la cuenta de la persona.
-    proveedorOAuth(),
+    proveedorOAuth(), // OAuth del MCP (CAR-247, ADR-098): apps como Claude entran como la persona.
     // Después de twoFactor y de marcaMfaSesion: ve la respuesta final (p. ej. el desafío del MFA).
     rastroSeguridad,
     nextCookies(),
