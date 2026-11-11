@@ -1,68 +1,108 @@
-// CAR-263: prueba de la API key contra `Suscripcion/status`. `fetch` se simula y nunca sale a la red.
+// CAR-263 / CAR-240: medición de la API key contra `Suscripcion/status` por Basic y por token. `fetch` se simula.
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { formaDeKeySimpleApi, probarKeySimpleApi, SIMPLEAPI_RUTA_SUSCRIPCION } from "./simpleapi-suscripcion";
+import { postMultipartSimpleApi } from "./simpleapi-http";
+import { formaDeKeySimpleApi, medirKeySimpleApi, SIMPLEAPI_RUTA_SUSCRIPCION } from "./simpleapi-suscripcion";
+import { SIMPLEAPI_RUTA_TOKEN, tokenSimpleApi } from "./simpleapi-token";
 
 const KEY = "1111-AAAA-2222-BBBB";
-const responder = (r: () => Response) => {
-  const f = vi.fn(async (_url: unknown, _init?: RequestInit) => r());
-  vi.stubGlobal("fetch", f);
-  return f;
-};
+const TOKEN = "aaa.bbb.ccc";
+type Llamada = { url: string; auth: string | undefined; body: unknown };
+
+/** Simula SimpleAPI: `token` responde el POST de token; `resto` responde lo demás según su `Authorization`. */
+function simular(token: () => Response, resto: (auth: string) => Response) {
+  const llamadas: Llamada[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: unknown, init?: RequestInit) => {
+      const auth = (init?.headers as Record<string, string> | undefined)?.["Authorization"];
+      llamadas.push({ url: String(url), auth, body: init?.body });
+      return String(url) === SIMPLEAPI_RUTA_TOKEN ? token() : resto(auth ?? "");
+    }),
+  );
+  return llamadas;
+}
+const mudo = () => new Response("", { status: 401, headers: { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" } });
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("probarKeySimpleApi (CAR-263)", () => {
-  it("llama por GET a Suscripcion/status con Basic api:key, sin cuerpo ni la key cruda", async () => {
-    const f = responder(() => Response.json({ mensaje: "Suscripcion activa" }));
-    const r = await probarKeySimpleApi(`  ${KEY}\n`);
-    expect(r).toEqual({ estado: "reconocida", status: 200, detalle: "Suscripcion activa" });
-    const [url, init] = f.mock.calls[0] ?? [];
-    expect(url).toBe(SIMPLEAPI_RUTA_SUSCRIPCION);
-    expect(url).toBe("https://api.simpleapi.cl/api/v1/Suscripcion/status");
-    expect(init?.method).toBe("GET");
-    expect(init?.body).toBeUndefined();
-    const auth = (init?.headers as Record<string, string>)["Authorization"];
-    expect(auth).toBe(`Basic ${Buffer.from(`api:${KEY}`, "utf8").toString("base64")}`);
-    expect(auth).not.toContain(KEY);
+describe("tokenSimpleApi", () => {
+  it("pide el token con la key limpia en el cuerpo y solo acepta un JWT", async () => {
+    const llamadas = simular(() => new Response(TOKEN), mudo);
+    expect(await tokenSimpleApi(` ${KEY}\n`)).toBe(TOKEN);
+    expect(llamadas[0]).toMatchObject({ url: "https://api.simpleapi.cl/api/Auth/token", body: JSON.stringify({ apikey: KEY }) });
+    simular(() => new Response("<html>error</html>"), mudo);
+    expect(await tokenSimpleApi(KEY)).toBeNull();
+    simular(() => new Response("", { status: 500 }), mudo);
+    expect(await tokenSimpleApi(KEY)).toBeNull();
+    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("fetch failed"))));
+    expect(await tokenSimpleApi(KEY)).toBeNull();
   });
+});
 
-  it("401 vacío con x-rate-limit-* es key no reconocida: así responde SimpleAPI sin key (verificado 10-nov-2026)", async () => {
-    // Respuesta real de api.simpleapi.cl a una petición sin Authorization o con una key inventada.
-    const headers = { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" };
-    for (const status of [401, 403]) {
-      responder(() => new Response("", { status, headers }));
-      expect(await probarKeySimpleApi(KEY)).toEqual({ estado: "no_reconocida", status, detalle: null });
-    }
+describe("medirKeySimpleApi", () => {
+  it("key que SimpleAPI no conoce (respuesta real del 10-nov-2026): Basic 401 mudo, token 200 con lista vacía", async () => {
+    const llamadas = simular(() => new Response(TOKEN), (auth) => (auth.startsWith("Bearer ") ? Response.json([]) : mudo()));
+    expect(await medirKeySimpleApi(KEY)).toEqual({ basic: 401, bearer: 200, suscripciones: 0 });
+    expect(llamadas.map((l) => l.url)).toEqual([SIMPLEAPI_RUTA_SUSCRIPCION, SIMPLEAPI_RUTA_TOKEN, SIMPLEAPI_RUTA_SUSCRIPCION]);
+    expect(llamadas[0]?.auth).toBe(`Basic ${Buffer.from(`api:${KEY}`, "utf8").toString("base64")}`);
+    expect(llamadas[2]?.auth).toBe(`Bearer ${TOKEN}`);
   });
-
-  it("otros estados no dicen nada de la key", async () => {
-    for (const status of [404, 429, 500, 503]) {
-      responder(() => new Response("", { status }));
-      expect((await probarKeySimpleApi(KEY)).estado).toBe("sin_respuesta");
-    }
+  it("cuenta las suscripciones sin devolver su contenido", async () => {
+    simular(() => new Response(TOKEN), (auth) => (auth.startsWith("Bearer ") ? Response.json([{ plan: "x" }, { plan: "y" }]) : mudo()));
+    const m = await medirKeySimpleApi(KEY);
+    expect(m).toEqual({ basic: 401, bearer: 200, suscripciones: 2 });
+    expect(JSON.stringify(m)).not.toContain("plan");
   });
+  it("sin token ni conexión no afirma nada de la key", async () => {
+    simular(() => new Response("", { status: 500 }), mudo);
+    expect(await medirKeySimpleApi(KEY)).toEqual({ basic: 401, bearer: null, suscripciones: null });
+    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("fetch failed"))));
+    expect(await medirKeySimpleApi(KEY)).toEqual({ basic: 0, bearer: null, suscripciones: null });
+  });
+});
 
-  it("el detalle nunca trae la key aunque el proveedor la devuelva", async () => {
-    responder(() => Response.json({ mensaje: `Apikey ${KEY} vencida` }, { status: 401 }));
-    const r = await probarKeySimpleApi(KEY);
-    expect(r.estado).toBe("no_reconocida");
-    expect(JSON.stringify(r)).not.toContain(KEY);
+describe("postMultipartSimpleApi: reintento con token ante el rechazo mudo (CAR-240)", () => {
+  const partes = [{ nombre: "input", texto: "{}" }] as const;
+  it("401 sin cuerpo con Basic → repite una vez con Bearer y devuelve esa respuesta (con el motivo en texto)", async () => {
+    const llamadas = simular(() => new Response(TOKEN), (auth) =>
+      auth.startsWith("Bearer ") ? new Response("RUT de emisor  incorrecto", { status: 400 }) : mudo(),
+    );
+    const res = await postMultipartSimpleApi("https://api.simpleapi.cl/api/v1/dte/generar", KEY, partes);
+    expect(res.status).toBe(400);
+    expect(await res.text()).toBe("RUT de emisor  incorrecto");
+    expect(llamadas.map((l) => l.auth?.split(" ")[0])).toEqual(["Basic", undefined, "Bearer"]);
+  });
+  it("si Basic funciona o el rechazo trae texto, no hay segunda llamada; sin token queda el rechazo original", async () => {
+    let llamadas = simular(() => new Response(TOKEN), () => new Response("<DTE/>", { status: 200 }));
+    expect((await postMultipartSimpleApi("https://api.simpleapi.cl/x", KEY, partes)).status).toBe(200);
+    expect(llamadas).toHaveLength(1);
+    llamadas = simular(() => new Response(TOKEN), () => new Response("Apikey vencida", { status: 401 }));
+    expect((await postMultipartSimpleApi("https://api.simpleapi.cl/x", KEY, partes)).status).toBe(401);
+    expect(llamadas).toHaveLength(1);
+    llamadas = simular(() => new Response("", { status: 500 }), mudo);
+    expect((await postMultipartSimpleApi("https://api.simpleapi.cl/x", KEY, partes)).status).toBe(401);
+    expect(llamadas).toHaveLength(2);
   });
 });
 
 describe("formaDeKeySimpleApi", () => {
   it("cuenta el largo sin espacios ni invisibles y avisa de caracteres que no son letras, números ni guiones", () => {
-    expect(formaDeKeySimpleApi(` \u200B${KEY.slice(0, 4)} ${KEY.slice(4)}\n`)).toEqual({ largo: 19, caracteresExtranos: false });
+    expect(formaDeKeySimpleApi(`  ${KEY.slice(0, 4)} ${KEY.slice(4)}\n`)).toEqual({ largo: 19, caracteresExtranos: false });
     for (const rara of [`"${KEY}"`, KEY.replace("-", "_"), `${KEY}.x`]) {
       expect(formaDeKeySimpleApi(rara).caracteresExtranos).toBe(true);
     }
   });
 });
 
-describe("probarKeySimpleApi sin red (CAR-263)", () => {
-  it("un fallo de red o un tiempo agotado no culpa a la key", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("fetch failed"))));
-    expect(await probarKeySimpleApi(KEY)).toEqual({ estado: "sin_respuesta", status: 0, detalle: null });
+describe("«API KEY Incorrecta» de SimpleAPI (CAR-240)", () => {
+  it("el texto literal del proveedor llega al motivo, sin copiar el cuerpo ni la key", async () => {
+    const { leerBytesRespuesta } = await import("./simpleapi-http");
+    const res = new Response(JSON.stringify("API KEY Incorrecta. No es posible continuar"), { status: 401 });
+    const e = await leerBytesRespuesta(res, "generar", [KEY]).catch((x: unknown) => x as { motivo: string; status: number });
+    expect(e).toMatchObject({
+      status: 401,
+      motivo: "respondió «API KEY Incorrecta» (HTTP 401): no acepta la API key guardada en Integraciones › Emisión DTE",
+    });
   });
 });
