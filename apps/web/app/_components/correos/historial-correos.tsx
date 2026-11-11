@@ -1,3 +1,5 @@
+import dynamic from "next/dynamic";
+
 import { PERMISOS_CORE } from "@opai/domain";
 import { Alerta, SeccionTarjeta } from "@opai/ds";
 
@@ -6,8 +8,10 @@ import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import { AVISO_EXTERNO, CorreoItem } from "./correo-item";
 import { DireccionRegistro } from "./direccion-registro";
-import { MasCorreos } from "./mas-correos";
 import type { PaginaCorreos } from "./tipos";
+
+// Lo interactivo se carga aparte del primer JS de la ficha (ADR-037), como el compositor de actividad.
+const MasCorreos = dynamic(() => import("./mas-correos").then((m) => m.MasCorreos));
 
 /**
  * Historial de correos de una ficha (CAR-233): lo que salió de OPAI y lo que entró a la dirección de

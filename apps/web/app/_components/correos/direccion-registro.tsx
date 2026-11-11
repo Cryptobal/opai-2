@@ -1,6 +1,10 @@
-import { BotonCopiar } from "@/app/_components/boton-copiar";
+import dynamic from "next/dynamic";
 
-import { CrearDireccion } from "./crear-direccion";
+// Botones cargados aparte del primer JS de la ficha (ADR-037).
+const BotonCopiar = dynamic(() =>
+  import("@/app/_components/boton-copiar").then((m) => m.BotonCopiar),
+);
+const CrearDireccion = dynamic(() => import("./crear-direccion").then((m) => m.CrearDireccion));
 
 /**
  * Dirección de registro de la empresa para el CCO del vendedor (CAR-233). OPAI no es un cliente de

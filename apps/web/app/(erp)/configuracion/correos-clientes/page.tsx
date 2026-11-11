@@ -1,3 +1,5 @@
+import dynamic from "next/dynamic";
+
 import { Estado, SeccionTarjeta } from "@opai/ds";
 
 import { AVISO_EXTERNO, CorreoItem } from "@/app/_components/correos/correo-item";
@@ -7,9 +9,11 @@ import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
-import { AsociarCorreo } from "./asociar-correo";
 
 export const metadata = { title: "Correos de clientes" };
+
+// El diálogo de asociar se carga aparte del primer JS (ADR-037).
+const AsociarCorreo = dynamic(() => import("./asociar-correo").then((m) => m.AsociarCorreo));
 
 /**
  * Correos de clientes (CAR-233): la dirección de registro que el vendedor pone en CCO y la bandeja de
