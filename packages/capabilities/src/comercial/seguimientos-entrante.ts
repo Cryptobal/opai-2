@@ -17,6 +17,8 @@ export const seguimientosRecibirCorreo = defineCapability({
     "Registra la respuesta por correo de un cliente a un seguimiento: guarda el mensaje como contenido externo, deja una nota en el negocio y pausa o detiene el seguimiento según su plan. Idempotente por id del correo.",
   permiso: null,
   interna: true,
+  // El contenido del correo es de un tercero: no se copia a la auditoría (CAR-297).
+  sensibles: ["remitente", "asunto", "texto"],
   input: z.object({
     seguimientoId: z.uuid(),
     mensajeId: z.string().min(1).max(200),
