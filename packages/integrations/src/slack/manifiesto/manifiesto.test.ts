@@ -54,10 +54,8 @@ describe.each(CASOS)("manifiesto de Slack $archivo (ADR-093)", ({ archivo, host 
   });
 
   it("no contiene secretos ni identificadores de un espacio de Slack", () => {
-    expect(texto).not.toMatch(
-      /xox[abposr]-|xapp-|client_secret|signing_secret|verification_token/i,
-    );
-    expect(texto).not.toMatch(/\bT0[A-Z0-9]{8,}\b/);
+    expect(texto).not.toMatch(/xox[a-z]-|xapp-|client_secret|signing_secret|verification_token/i);
+    expect(texto).not.toMatch(/\b[TEAC][A-Z0-9]{8,}\b|"(team|enterprise|app)_id"/);
   });
 });
 

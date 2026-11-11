@@ -11,6 +11,8 @@ Los dos tienen los mismos scopes, eventos y ajustes; solo cambian el nombre y la
 
 ## Crear o actualizar la app (lo hace Carlos)
 
+Slack valida la URL de eventos (`url_verification`) al guardar el manifiesto: hay que esperar a que F1 (CAR-291) esté desplegado en el host del manifiesto.
+
 1. En api.slack.com › Your Apps › Create New App › From an app manifest, elegir el espacio que será dueño de la app y pegar el JSON. Para una app existente: App Manifest › pegar y guardar.
 2. **Solo para `opai.json`:** Manage Distribution › activar la distribución pública, para que otras empresas la puedan instalar con OAuth.
 3. Copiar de Basic Information el Client ID, el Client Secret y el Signing Secret a las variables de entorno de Vercel del entorno que corresponda: `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET` y `SLACK_SIGNING_SECRET`. **Nunca** al repositorio, a un PR, a Linear ni a un chat.

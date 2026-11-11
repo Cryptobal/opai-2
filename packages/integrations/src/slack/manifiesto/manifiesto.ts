@@ -20,7 +20,10 @@ export const SLACK_SCOPES_BOT = [
 /** Eventos del bot: respuestas en hilos de canales públicos y desinstalación o revocación del token. */
 export const SLACK_EVENTOS_BOT = ["app_uninstalled", "message.channels", "tokens_revoked"] as const;
 
-/** Rutas de OPAI que recibe la app (las crean F1, F4 y F5a en `apps/web/app/api/integraciones/slack/`). */
+/**
+ * Rutas de OPAI que recibe la app, en `apps/web/app/api/integraciones/slack/`: `oauth` y una `eventos` mínima
+ * (verificación de URL y desinstalación) en F1, `acciones` en F4 y las respuestas en hilos de `eventos` en F5a.
+ */
 export const SLACK_RUTAS = {
   oauth: "/api/integraciones/slack/oauth/callback",
   eventos: "/api/integraciones/slack/eventos",
