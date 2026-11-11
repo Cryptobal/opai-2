@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { avisar, Campo, CampoSecreto, SeccionTarjeta } from "@opai/ds";
@@ -16,7 +15,6 @@ type Secreto = Integracion["secretos"][number];
  * la rechaza con 401); el motivo queda bajo el campo, que conserva lo escrito para corregirlo.
  */
 export function ApiKeySimpleApi({ proveedor, apiKey }: { proveedor: string; apiKey: Secreto }) {
-  const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [fallo, setFallo] = useState(false);
 
@@ -42,7 +40,6 @@ export function ApiKeySimpleApi({ proveedor, apiKey }: { proveedor: string; apiK
               return false;
             }
             avisar.exito("Credencial guardada cifrada");
-            router.refresh();
             return true;
           }}
         />
