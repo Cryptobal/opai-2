@@ -1,0 +1,44 @@
+{
+  "display_information": {
+    "name": "OPAI",
+    "description": "Avisos de terreno de OPAI: solo anomalías, con acciones que quedan registradas en OPAI."
+  },
+  "features": {
+    "app_home": {
+      "home_tab_enabled": false,
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": true
+    },
+    "bot_user": {
+      "display_name": "opai",
+      "always_online": false
+    }
+  },
+  "oauth_config": {
+    "redirect_urls": ["https://app.opai.cl/api/integraciones/slack/oauth/callback"],
+    "scopes": {
+      "bot": [
+        "channels:history",
+        "channels:read",
+        "chat:write",
+        "files:write",
+        "im:write",
+        "users:read",
+        "users:read.email"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "request_url": "https://app.opai.cl/api/integraciones/slack/eventos",
+      "bot_events": ["app_uninstalled", "message.channels", "tokens_revoked"]
+    },
+    "interactivity": {
+      "is_enabled": true,
+      "request_url": "https://app.opai.cl/api/integraciones/slack/acciones"
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false
+  }
+}
