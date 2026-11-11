@@ -125,6 +125,8 @@ export const ventasEnviarCliente = defineCapability({
       {
         cc,
         bcc,
+        // CAR-233: queda en el historial de correos de la cuenta, con reply-to a la dirección de registro.
+        historial: { origen: "factura", cuentaId: doc.cuentaId },
         adjuntos: [
           { nombre: `${etiqueta}.pdf`, contenidoBase64: Buffer.from(pdf).toString("base64"), mime: "application/pdf" },
           ...(xml

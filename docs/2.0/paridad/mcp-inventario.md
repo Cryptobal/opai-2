@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 680 pares pantalla→capacidad · 608 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 689 pares pantalla→capacidad · 616 con herramienta · 73 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -21,6 +21,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
+| — | `/api/webhooks/resend/entrante` | `core.correos.recibir` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.responder_enlace` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.ver_enlace` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
@@ -72,6 +73,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/_components` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/_components` | `core.config.set` | `core_config_set` | existe |
+| compartido | `app/_components` | `core.correos.crear_direccion` | `core_correos_crear_direccion` | existe |
+| compartido | `app/_components` | `core.correos.direccion` | `core_correos_direccion` | existe |
+| compartido | `app/_components` | `core.correos.historial` | `core_correos_historial` | existe |
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_registrar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_revocar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimientos_listar` | `core_cumplimiento_consentimientos_listar` | existe |
@@ -566,6 +570,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones` | `core.notificacion_reglas.list` | `core_notificacion_reglas_list` | existe |
+| erp | `/configuracion/correos-clientes` | `core.correos.asociar` | `core_correos_asociar` | existe |
+| erp | `/configuracion/correos-clientes` | `core.correos.direccion` | `core_correos_direccion` | existe |
+| erp | `/configuracion/correos-clientes` | `core.correos.sin_asignar` | `core_correos_sin_asignar` | existe |
+| erp | `/configuracion/correos-clientes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
+| erp | `/configuracion/correos-clientes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | erp | `/configuracion/cumplimiento/retencion` | `core.cumplimiento.retencion_politica` | `core_cumplimiento_retencion_politica` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.create` | `core_documento_tipos_create` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
@@ -741,7 +750,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/terreno/porteria/sitio/route.ts` | Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
-| `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna). |
+| `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas. |
 | `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
@@ -780,6 +789,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
 | `core.biometria.enrolar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4). |
 | `core.biometria.verificar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4). |
+| `core.correos.recibir` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el tenant por la dirección de registro t<token>@respuestas.opai.cl (CAR-233). |
 | `core.credenciales_terreno.asignar_pin` | Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02). |
 | `core.credenciales_terreno.cambiar_pin` | Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02). |
 | `core.credenciales_terreno.restablecer` | Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02). |
