@@ -72,4 +72,7 @@ Bajo: solo el marco Hilo, que es optativo por usuario. Se revierte el PR.
 
 ## 16 · Reporte de ejecución
 
-Ver la fila de CAR-317 en `ESTADO.md` y la descripción del PR.
+- Gate local: typecheck y lint (45 tareas), `pnpm test` (618 archivos, 3955 pruebas), build y `pnpm presupuesto`, e2e del Hilo 12/12 a 375, 1024 y 1280 px.
+- **Presupuesto de JS:** cinco rutas quedaron a menos de 0,05 KB sobre su tope (`agente/historial`, `supervisor`, `supervisor/[...ruta]`, `supervisor/instalaciones`, `terreno/[...ruta]`) por el ajuste del scroll en el enlace del menú, que va en todas las rutas. Se sube 1 KB cada tope, como en H1.
+- **Autorrevisión (subagente):** sin bloqueos. Se corrigieron tres hallazgos: el refresco de Actividad y Agenda quedó en una función probada (`refrescoDeSegmentos`), descarta respuestas viejas y muestra «sin permiso» en vez de conservar la lista. Quedan como menores: el selector no declara `aria-expanded` (tampoco lo hacía el botón «Portales»; va con H4) y dos radios con valores sueltos (`rounded-[14px]`, `px-[7px]`) iguales a los que ya usa el marco.
+- **Intermitente de H1:** dos veces, en iPad, elegir «Hilo» en Preferencias no cambió el marco en 60 s (el reintento pasó). Se sigue con la traza de Playwright si vuelve a aparecer.
