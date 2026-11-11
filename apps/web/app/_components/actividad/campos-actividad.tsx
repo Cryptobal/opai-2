@@ -15,6 +15,8 @@ export type Borrador = {
   asistentes: string;
   acuerdos: string;
   resultado: "contesto" | "no_contesto" | "volver_a_llamar";
+  /** El cliente respondió (CAR-160): pausa el seguimiento del negocio. No aplica a tareas. */
+  respuestaCliente: boolean;
 };
 
 const ETIQUETA_TEXTO: Record<TipoCompositor, string> = {
