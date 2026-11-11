@@ -15,6 +15,10 @@ test.describe("@preview editor de plantillas", () => {
 
   test("variables sin accesos repetidos y niveles de firma explicados", async ({ page }, info) => {
     await entrar(page);
+    // «Nueva plantilla» solo existe desde 768 px (en el teléfono la plantilla es de solo lectura): se crea
+    // con la pantalla ancha y después se vuelve al tamaño de la prueba para revisar y capturar el editor.
+    const tamano = page.viewportSize() ?? { width: 1280, height: 860 };
+    await page.setViewportSize({ width: 1280, height: 860 });
     await page.goto("/documentos/plantillas");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     const nueva = page.getByRole("button", { name: "Nueva plantilla" }).filter({ visible: true }).first();
@@ -24,6 +28,8 @@ test.describe("@preview editor de plantillas", () => {
     await dialogo.getByLabel("Nombre").fill(`Plantilla de prueba ${info.project.name} ${Date.now()}`);
     await dialogo.getByRole("button", { name: "Crear y editar" }).click();
     await page.waitForURL(/\/documentos\/plantillas\/[0-9a-f-]{36}$/);
+    await page.setViewportSize(tamano);
+    await page.reload();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
 
     const insertar = page.getByRole("button", { name: "Insertar variable" });
