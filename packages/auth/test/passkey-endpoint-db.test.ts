@@ -75,6 +75,13 @@ describe.skipIf(!urlPropietario)("passkey: segundo factor pendiente (CAR-286)", 
     expect((await pedir("/two-factor/enable", "POST", { password: "x" })).status).toBe(403);
   });
 
+  it("con la sesión pendiente no cambia la contraseña ni ve o cierra otras sesiones", async () => {
+    const pw = { currentPassword: "x", newPassword: "otra-clave-123" };
+    expect((await pedir("/change-password", "POST", pw)).status).toBe(403);
+    expect((await pedir("/list-sessions")).status).toBe(403);
+    expect((await pedir("/revoke-other-sessions", "POST", {})).status).toBe(403);
+  });
+
   it("los endpoints genéricos de gestión del plugin están apagados", async () => {
     for (const ruta of ["/passkey/list-user-passkeys", "/passkey/delete-passkey"])
       expect((await pedir(ruta, ruta.endsWith("delete-passkey") ? "POST" : "GET")).status).toBe(

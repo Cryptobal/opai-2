@@ -158,14 +158,14 @@ describe("core.metodos_acceso.*", () => {
     expect(tabla("passkey").some((p) => p["id"] === PK1)).toBe(true);
   });
 
-  it("un agente no quita métodos sin aprobación humana", async () => {
+  it("un agente nunca quita métodos (solo personas)", async () => {
     const { ctx, tabla } = contextoDePrueba({ semilla: semilla(), ...agente });
     tabla("reautenticacion").push({ userId: YO });
     const r = await executeCapability(ctx, "core.metodos_acceso.quitar", {
       metodo: "passkey",
       id: PK1,
     });
-    expect(r).toMatchObject({ ok: false, error: { code: "APPROVAL_REQUIRED" } });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(tabla("passkey")).toHaveLength(3);
   });
 });

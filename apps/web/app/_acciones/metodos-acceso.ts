@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { type Confirmacion, confirmarIdentidad, opcionesConfirmarConPasskey } from "@opai/auth";
 
+import { verificarMfaDe } from "@/lib/mfa";
 import { LIMITES, permitir } from "@/lib/rate-limit";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
@@ -38,6 +39,8 @@ export async function accionQuitarMetodo(
 ): Promise<ResultadoMetodo> {
   const identidad = await identidadActual();
   if (!identidad) return { ok: false, error: "Inicia sesión." };
+  // Antes de confirmar: así no queda una marca de confirmación viva si la capacidad iba a rechazar.
+  if (await verificarMfaDe(identidad)) return { ok: false, error: "Completa el segundo factor." };
   const { maximo, ventanaMs } = LIMITES.confirmarIdentidad;
   if (!(await permitir(`confirmar-identidad:${identidad.usuario.id}`, maximo, ventanaMs)))
     return { ok: false, error: "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos." };

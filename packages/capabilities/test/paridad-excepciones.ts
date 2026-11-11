@@ -21,6 +21,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: la pide quien aún no tiene sesión (token vencido o usado).",
   "core.cuentas_referencias.otorgar":
     "Solo personas: registrar el consentimiento de un cliente para ser referencia es un acto de una persona; ninguna key lo hace, ni con autonomía «directo» (CAR-138 PR 7, ADR-087).",
+  "core.metodos_acceso.quitar":
+    "Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP.",
   "core.apikeys.create": "Solo personas: una key no se crea keys ni ve secretos (ADR-032).",
   "core.apikeys.revoke": "Solo personas: gobierno de keys y credenciales (ADR-032).",
   "core.apikeys.update":

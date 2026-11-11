@@ -39,6 +39,7 @@ export {
   type Confirmacion,
   confirmarIdentidad,
   opcionesConfirmarConPasskey,
+  purgarVerificacionesVencidas,
 } from "./reautenticacion";
 export { entrarConPin, type ResultadoPin } from "./pin";
 export { correoDeRecuperacion } from "./recuperacion";

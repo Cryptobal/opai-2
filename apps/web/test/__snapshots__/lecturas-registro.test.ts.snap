@@ -41,6 +41,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.invitations.peek",
   "core.marca.get",
   "core.me",
+  "core.metodos_acceso.list",
   "core.modules.list",
   "core.modules.pruebas",
   "core.notificacion_reglas.list",

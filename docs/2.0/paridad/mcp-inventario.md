@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 675 pares pantalla→capacidad · 603 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 678 pares pantalla→capacidad · 605 con herramienta · 73 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -38,6 +38,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_acciones` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/_acciones` | `core.metodos_acceso.quitar` | — | excepción |
+| compartido | `app/_acciones` | `core.metodos_acceso.renombrar_passkey` | `core_metodos_acceso_renombrar_passkey` | existe |
 | compartido | `app/_acciones` | `core.personas.get` | `core_personas_get` | existe |
 | compartido | `app/_acciones` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/_components` | `agente.conversaciones.archivar` | `agente_conversaciones_archivar` | existe |
@@ -638,6 +640,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/nueva` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | erp | `/instalaciones/nueva` | `core.puestos.create` | `core_puestos_create` | existe |
 | erp | `/mi-cuenta/preferencias` | `core.config.set` | `core_config_set` | existe |
+| erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
@@ -705,10 +708,16 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/dispositivos.ts#accionEmparejar` | Identidad de dispositivo: Terreno › Emparejar canjea el código de 6 caracteres (core.dispositivos.generar_codigo) por el token del equipo (CAR-78 B2); sin sesión, tope por origen con fallo cerrado. |
 | `app/_acciones/dispositivos.ts#qrDeEmparejamiento` | Presentación: dibuja el QR del código que ya generó core.dispositivos.generar_codigo; no lee ni escribe datos. |
 | `app/_acciones/ingreso-pin.ts#accionEntrarConPin` | Identidad: ingreso del Portal Trabajador con RUT + PIN (CAR-78, D-02); abre una sesión, no es una operación de negocio. Tope por RUT y origen con fallo cerrado; bloqueo y auditoría en @opai/auth. |
+| `app/_acciones/metodos-acceso.ts#accionOpcionesConfirmarPasskey` | Identidad: desafío WebAuthn para confirmar la identidad antes de quitar un método. |
+| `app/_acciones/metodos-acceso.ts#accionQuitarMetodo` | Confirma la identidad y luego invoca core.metodos_acceso.quitar (herramienta MCP existente). |
+| `app/_acciones/metodos-acceso.ts#accionRenombrarPasskey` | Invoca core.metodos_acceso.renombrar_passkey (herramienta MCP existente). |
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
-| `app/_acciones/mfa.ts#accionDesactivarMfa` | Identidad: desactiva el segundo factor propio. |
 | `app/_acciones/mfa.ts#accionIniciarMfa` | Identidad: enrola el segundo factor propio. |
 | `app/_acciones/mfa.ts#accionVerificar` | Identidad: segundo factor de la sesión humana. |
+| `app/_acciones/passkeys.ts#accionEntrarConPasskey` | Identidad: login con passkey, solo personas. |
+| `app/_acciones/passkeys.ts#accionGuardarPasskey` | Identidad: guarda la passkey propia verificada por el dispositivo (CAR-286). |
+| `app/_acciones/passkeys.ts#accionOpcionesEntrarPasskey` | Identidad: desafío para entrar con passkey (sesión humana). |
+| `app/_acciones/passkeys.ts#accionOpcionesNuevaPasskey` | Identidad: ceremonia WebAuthn para registrar una passkey propia (exige el dispositivo). |
 | `app/_acciones/terreno-asistencia.ts#ejecutarAsistenciaEquipo` | Pasarela del equipo del kiosco (CAR-89): ejecuta SOLO las capacidades de marcación y de rostro de una lista blanca, con el dispositivo resuelto en el servidor desde su cookie; cada capacidad verifica de nuevo equipo, persona y PIN. Tope por equipo con fallo cerrado. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
@@ -807,6 +816,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.invitations.accept` | Interna: crea la membresía de quien acepta el enlace; un agente no acepta invitaciones por nadie. |
 | `core.invitations.peek` | Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial). |
 | `core.invitations.request_new` | Interna: la pide quien aún no tiene sesión (token vencido o usado). |
+| `core.metodos_acceso.quitar` | Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP. |
 | `core.personas_terreno.listar` | Interna: alimenta «¿Quién eres?» en el equipo emparejado sin sesión; un agente consulta personas con core.personas.list y su alcance (CAR-78 B3). |
 | `core.personas.pago_aprobar_cambio` | Solo personas: cambia la cuenta bancaria de pago de una persona; lo aprueba un humano y no una key de otro administrador (ADR-032, CAR-225 C-01). |
 | `core.personas.pago_rechazar_cambio` | Solo personas: la decisión sobre la cuenta bancaria de pago de una persona es humana (ADR-032, CAR-225 C-01). |
@@ -892,6 +902,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.guardar_certificado_dte` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
+| `core.metodos_acceso.quitar` | `app/_acciones` | no | reservada a personas |
 | `core.personas.pago_aprobar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.personas.pago_rechazar_cambio` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.remuneraciones.confirmar` | sin pantalla todavía · CAR-142 · desde 2026-11-02 | no | reservada a personas |
@@ -971,9 +982,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
-- `core.metodos_acceso.list`
-- `core.metodos_acceso.quitar`
-- `core.metodos_acceso.renombrar_passkey`
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`

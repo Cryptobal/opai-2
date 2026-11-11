@@ -42,13 +42,16 @@ export function pluginPasskey(env: Record<string, string | undefined> = process.
 }
 
 /**
- * Listar, renombrar y borrar passkeys van por las capacidades `core.metodos_acceso.*` (con auditoría y
+ * Listar, renombrar y borrar passkeys (y desactivar el TOTP) van por las capacidades `core.metodos_acceso.*` (con auditoría y
  * confirmación de identidad), no por los endpoints genéricos del plugin.
  */
 export const RUTAS_PASSKEY_DESACTIVADAS = [
   "/passkey/list-user-passkeys",
   "/passkey/update-passkey",
   "/passkey/delete-passkey",
+  // Desactivar el TOTP también va por `core.metodos_acceso.quitar` (regla de plataforma, marca de
+  // confirmación y auditoría de la empresa).
+  "/two-factor/disable",
 ];
 
 /** Clave del contexto donde el `before` deja el token de una sesión previa (MFA pendiente). */
@@ -67,6 +70,16 @@ export const marcaPasskey = {
   id: "opai-passkey",
   hooks: {
     before: [
+      {
+        // El plugin acepta cualquier largo de nombre por el POST directo: mismo tope que la pantalla.
+        matcher: (ctx) => ctx.path === "/passkey/verify-registration",
+        handler: createAuthMiddleware(async (ctx) => {
+          const nombre: unknown =
+            ctx.body && typeof ctx.body === "object" ? Reflect.get(ctx.body, "name") : undefined;
+          if (typeof nombre === "string" && nombre.trim().length > 60)
+            throw new APIError("BAD_REQUEST", { message: "El nombre admite hasta 60 caracteres." });
+        }),
+      },
       {
         matcher: (ctx) => ctx.path === "/passkey/verify-authentication",
         handler: createAuthMiddleware(async (ctx) => {

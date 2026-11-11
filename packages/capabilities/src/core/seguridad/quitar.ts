@@ -13,16 +13,18 @@ const inputSchema = z.discriminatedUnion("metodo", [
 ]);
 
 /**
- * Quita uno de mis métodos (CAR-286). Irreversible: un agente siempre pasa por la aprobación humana.
- * Una persona debe haber confirmado su identidad hace menos de 5 minutos (contraseña, código o
+ * Quita uno de mis métodos (CAR-286). Irreversible y solo personas. La persona debe haber confirmado su identidad hace menos de 5 minutos (contraseña, código o
  * passkey vigente, en Mi cuenta › Seguridad): la marca se consume aquí, en la misma transacción que
  * el cambio y su auditoría. Si queda sin segundo factor se avisa, sin bloquear; las cuentas de
  * plataforma no pueden quedar sin él.
  */
 export const seguridadMetodosQuitar = defineCapability({
   id: "core.metodos_acceso.quitar",
+  // Solo personas: gobierna las credenciales propias (REGLAS-codigo). Por aprobación correría como
+  // quien aprueba (sobre SUS métodos) y un agente no puede confirmar la identidad de la persona.
+  soloPersonas: true,
   descripcion:
-    "IRREVERSIBLE: quita una de mis passkeys o desactiva mi app autenticadora. Requiere haber confirmado mi identidad (contraseña o un método vigente) en los últimos 5 minutos; avisa si mi cuenta queda solo con contraseña.",
+    "IRREVERSIBLE · solo personas: quita una de mis passkeys o desactiva mi app autenticadora. Requiere haber confirmado mi identidad (contraseña o un método vigente) en los últimos 5 minutos; avisa si mi cuenta queda solo con contraseña.",
   permiso: null,
   portales: ["erp", "supervisor"],
   input: inputSchema,

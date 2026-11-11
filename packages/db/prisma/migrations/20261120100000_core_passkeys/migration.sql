@@ -40,20 +40,23 @@ ALTER TABLE "core"."users" ADD COLUMN IF NOT EXISTS "passkey_enabled" BOOLEAN NO
 
 -- La marca se recalcula en cada cambio de core.passkeys. SECURITY INVOKER: corre con el rol que
 -- escribe (opai_auth, o el dueño de core.borrar_usuario en una baja en cascada, cuando el usuario
--- ya no existe y el UPDATE no toca filas).
+-- ya no existe y el UPDATE no toca filas). Primero bloquea la fila del usuario y después recalcula en
+-- otra sentencia (otra foto en READ COMMITTED): así un alta y una baja simultáneas del mismo usuario
+-- no dejan la marca desfasada.
 CREATE OR REPLACE FUNCTION "core"."passkeys_sincronizar_usuario"() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, core AS $$
+DECLARE
+  v_user uuid;
 BEGIN
-  IF TG_OP IN ('DELETE', 'UPDATE') THEN
+  FOREACH v_user IN ARRAY (CASE TG_OP
+      WHEN 'INSERT' THEN ARRAY[NEW.user_id]
+      WHEN 'DELETE' THEN ARRAY[OLD.user_id]
+      ELSE ARRAY[OLD.user_id, NEW.user_id] END) LOOP
+    PERFORM 1 FROM core.users WHERE id = v_user FOR UPDATE;
     UPDATE core.users u
        SET passkey_enabled = EXISTS (SELECT 1 FROM core.passkeys p WHERE p.user_id = u.id)
-     WHERE u.id = OLD.user_id;
-  END IF;
-  IF TG_OP IN ('INSERT', 'UPDATE') THEN
-    UPDATE core.users u
-       SET passkey_enabled = EXISTS (SELECT 1 FROM core.passkeys p WHERE p.user_id = u.id)
-     WHERE u.id = NEW.user_id;
-  END IF;
+     WHERE u.id = v_user;
+  END LOOP;
   RETURN NULL;
 END
 $$;

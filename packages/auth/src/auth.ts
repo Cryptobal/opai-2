@@ -102,7 +102,12 @@ export const auth = betterAuth({
     window: 60,
     max: 100,
     // Primera barrera barata en memoria (5 cada 15 min); el tope real vive en la base (B1).
-    customRules: { "/sign-in/email": { window: 15 * 60, max: 5 } },
+    customRules: {
+      "/sign-in/email": { window: 15 * 60, max: 5 },
+      // Desafío de passkey (CAR-286): el login lo pide al cargar; tope por IP contra el llenado de
+      // `core.verifications` por el endpoint directo (la Server Action ya limita en la base).
+      "/passkey/generate-authenticate-options": { window: 15 * 60, max: 200 },
+    },
   },
   databaseHooks: {
     session: {

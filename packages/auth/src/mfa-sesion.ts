@@ -32,6 +32,21 @@ const RUTAS_CON_FACTOR_COMPLETO = [
   "/two-factor/view-backup-codes",
   "/passkey/generate-register-options",
   "/passkey/verify-registration",
+  // Cuenta y sesiones (CAR-286, autorrevisión): con solo la contraseña de una cuenta protegida por
+  // passkey queda una sesión pendiente; no debe cambiar la contraseña, el perfil ni ver o cerrar
+  // otras sesiones hasta completar el segundo factor.
+  "/change-password",
+  "/set-password",
+  "/update-user",
+  "/change-email",
+  "/delete-user",
+  "/list-sessions",
+  "/revoke-session",
+  "/revoke-sessions",
+  "/revoke-other-sessions",
+  "/list-accounts",
+  "/link-social",
+  "/unlink-account",
 ];
 
 /**

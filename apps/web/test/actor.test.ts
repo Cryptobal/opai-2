@@ -32,16 +32,27 @@ function esContexto(r: Contexto | Response): Contexto {
 }
 
 describe("resolverActor", () => {
-  it("la API con cookie rechaza owner sin enrolar o sesión Google sin segundo factor", async () => {
-    for (const twoFactorEnabled of [false, true]) {
+  it("la API con cookie rechaza una sesión con segundo factor (TOTP o passkey) sin verificar", async () => {
+    for (const factor of [{ twoFactorEnabled: true }, { passkeyEnabled: true }]) {
       const r = await actor.resolverActor(
         new Request("http://x/api/v1/core/me"),
         fuentesFalsas().fuentes,
-        async () => ({ user: { ...USUARIO, twoFactorEnabled }, session: { mfaVerified: false } }),
+        async () => ({ user: { ...USUARIO, ...factor }, session: { mfaVerified: false } }),
       );
       expect(r).toBeInstanceOf(Response);
       expect((r as Response).status).toBe(403);
     }
+  });
+  it("un owner sin segundo factor ya no queda obligado a enrolarse (CAR-286)", async () => {
+    const r = await actor.resolverActor(
+      new Request("http://x/api/v1/core/me"),
+      fuentesFalsas().fuentes,
+      async () => ({
+        user: { ...USUARIO, twoFactorEnabled: false },
+        session: { mfaVerified: false },
+      }),
+    );
+    expect(r).not.toBeInstanceOf(Response);
   });
   it("sin sesión ni key: 401", async () => {
     const r = await actor.resolverActor(
