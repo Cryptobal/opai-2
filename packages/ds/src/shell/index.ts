@@ -1,4 +1,5 @@
 export { AppShell, type AppShellProps } from "./app-shell";
+export * from "./hilo";
 export { AreaGrupo } from "./area-grupo";
 export { BotonFijar } from "./boton-fijar";
 export { PinDiferido } from "./pin-diferido";
