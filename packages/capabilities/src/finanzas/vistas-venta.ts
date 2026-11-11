@@ -46,6 +46,7 @@ export const ventaSchema = z.object({
   montoPendiente: z.number().int().describe("Monto − notas de crédito parciales − cobrado; nunca negativo. La nota de débito no suma deuda."),
   cesionEstado: z.enum(ESTADOS_CESION).nullable(),
   cesionProveedor: z.string().nullable(),
+  cesionFactor: z.string().nullable().describe("A quién se cedió (nombre del factor o su RUT); el proveedor es solo el integrador."),
   glosa: z.string().nullable(),
   trackIdSii: z.string().nullable(),
   documentoReferenciaId: z.string().nullable(),
@@ -76,6 +77,7 @@ type FilaVenta = {
   montoNotasCredito?: number;
   cesionEstado?: string | null;
   cesionProveedor?: string | null;
+  cesionFactor?: string | null;
   glosa: string | null;
   trackIdSii: string | null;
   documentoReferenciaId: string | null;
@@ -121,6 +123,7 @@ export function vistaVenta(
     montoPendiente: saldoPendiente(d),
     cesionEstado: (d.cesionEstado as (typeof ESTADOS_CESION)[number] | null) ?? null,
     cesionProveedor: d.cesionProveedor ?? null,
+    cesionFactor: d.cesionFactor ?? null,
     glosa: d.glosa,
     trackIdSii: d.trackIdSii,
     documentoReferenciaId: d.documentoReferenciaId,

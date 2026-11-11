@@ -20,6 +20,7 @@ const ESTADO_COBRO: Record<string, { etiqueta: string; tono: Tono }> = {
 };
 
 const ESTADO_CESION: Record<string, { etiqueta: string; tono: Tono }> = {
+  no_cedido: { etiqueta: "Sin ceder", tono: "neutro" },
   simulado: { etiqueta: "Simulada", tono: "neutro" },
   emitido: { etiqueta: "En curso", tono: "info" },
   solicitado: { etiqueta: "Solicitada", tono: "info" },

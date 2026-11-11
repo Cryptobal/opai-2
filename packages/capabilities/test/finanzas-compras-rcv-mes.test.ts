@@ -14,3 +14,15 @@ describe("mes del RCV en hora de Chile", () => {
     expect(mesDelTrabajo(new Date("2027-01-02T15:00:00Z"))).toEqual({ anio: 2026, mes: 12 });
   });
 });
+
+describe("frecuencia del trabajo de compras del SII (CAR-273)", () => {
+  it("diaria siempre, manual nunca, semanal solo los lunes en Chile", async () => {
+    const { tocaHoy } = await import("../src/finanzas/compras-rcv");
+    const lunes = new Date("2026-11-09T15:00:00Z");
+    const martes = new Date("2026-11-10T15:00:00Z");
+    expect(tocaHoy("diaria", martes)).toBe(true);
+    expect(tocaHoy("manual", lunes)).toBe(false);
+    expect(tocaHoy("semanal", lunes)).toBe(true);
+    expect(tocaHoy("semanal", martes)).toBe(false);
+  });
+});
