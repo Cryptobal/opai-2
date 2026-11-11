@@ -66,6 +66,13 @@ export function MuestraCampos() {
         <Campo etiqueta="Clave propia · ingresando" htmlFor="sec1">
           <CampoSecreto id="sec1" onGuardar={() => undefined} />
         </Campo>
+        <Campo etiqueta="Clave propia · con error" htmlFor="sec3">
+          <CampoSecreto
+            id="sec3"
+            onGuardar={() => false}
+            error="La API key va con guiones (24 caracteres): XXXX-XXXX-XXXX-XXXX-XXXX."
+          />
+        </Campo>
         <Campo etiqueta="Clave propia · guardada" htmlFor="sec2">
           <CampoSecreto id="sec2" guardado="1234" onGuardar={() => undefined} />
         </Campo>
