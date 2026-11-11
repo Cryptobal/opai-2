@@ -39,8 +39,10 @@ export async function registrarSaliente(db: DbOTx, tenantId: string, s: Saliente
 }
 
 /**
- * Saliente de un negocio (seguimiento): toma la cuenta del negocio. Nunca lanza: el correo ya salió y
- * un fallo del historial no debe marcar el paso como fallido ni reenviarlo.
+ * Saliente de un negocio (seguimiento): toma la cuenta del negocio. No lanza errores de JS: el correo ya
+ * salió y un fallo del historial no debe marcar el paso como fallido. La fila no puede violar una
+ * restricción (largos recortados, referencias del mismo tenant); un error de Postgres dentro de una
+ * transacción la abortaría igual (pendiente: savepoint, ver ESTADO).
  */
 export async function registrarSalienteDeNegocio(ctx: Contexto, negocioId: string, s: Omit<Saliente, "cuentaId" | "negocioId">) {
   try {

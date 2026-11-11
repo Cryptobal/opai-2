@@ -65,19 +65,17 @@ export async function tokenDelBuzon(db: DbOTx): Promise<string | null> {
 }
 
 /**
- * Token del buzón de la empresa; lo crea la primera vez (aleatorio de 128 bits). Idempotente ante
- * carreras: si otra transacción lo creó a la vez, se relee el suyo.
+ * Token del buzón de la empresa; lo crea la primera vez (aleatorio de 128 bits). Sin error ante
+ * carreras (ON CONFLICT DO NOTHING): corre dentro de la transacción de envíos irreversibles, donde un
+ * error de Postgres la abortaría entera; si otra transacción lo creó a la vez, se relee el suyo.
  */
 export async function asegurarBuzon(db: DbOTx, tenantId: string): Promise<string> {
   const previo = await tokenDelBuzon(db);
   if (previo) return previo;
-  try {
-    return (await db.buzonCorreo.create({ data: { tenantId, token: generarTokenBuzon() } })).token;
-  } catch (e) {
-    const otro = await tokenDelBuzon(db);
-    if (otro) return otro;
-    throw e;
-  }
+  await db.buzonCorreo.createMany({ data: [{ tenantId, token: generarTokenBuzon() }], skipDuplicates: true });
+  const token = await tokenDelBuzon(db);
+  if (!token) throw new Error("No se pudo crear la dirección de registro.");
+  return token;
 }
 
 export const direccionDelBuzon = (token: string): string => direccionBuzon(token, DOMINIO_RESPUESTAS);

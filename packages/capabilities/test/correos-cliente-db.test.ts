@@ -1,35 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { resolverBuzonCorreo, sembrarComercial } from "@opai/db";
-import type { Rol } from "@opai/domain";
+import { resolverBuzonCorreo } from "@opai/db";
 import type { Correo } from "@opai/integrations";
 
 import { prepararEntorno, type Entorno } from "../../db/test/entorno";
 import * as mod from "../src";
 import { capacidadesComercial } from "../src/comercial";
 import { enviarCorreoSeguimiento } from "../src/comercial/seguimiento-ejecucion";
+import { type ItemCorreo as Item, type PaginaCorreos as Pagina, ctxPrueba as ctx, empresaCorreos, medidorPrueba as medidor } from "./correos-ayuda";
 import { codigo, dato } from "./maestros-ayuda";
 
 // CAR-233: historial de correos del cliente contra Postgres real, con dos empresas ficticias.
-type Item = { id: string; sentido: string; origen: string; cuentaId: string | null; contactoId: string | null; negocioId: string | null; asociacion: string | null; texto: string };
-type Pagina = { items: Item[]; siguiente: string | null };
-
 describe("core.correos · historial del cliente contra Postgres real", () => {
   let e: Entorno;
-  const medidor = { registrar: async () => undefined };
-  const ctx = (tenantId: string, rol: Rol = "owner") =>
-    mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol, modulosActivos: ["comercial"], medidor });
-  async function empresa(nombre: string, sitio: string) {
-    const t = await e.admin.tenant.create({ data: { slug: `cor-${randomUUID().slice(0, 8)}`, nombre, vertical: "seguridad" } });
-    await sembrarComercial(e.admin.$extends({}), t.id);
-    const c = ctx(t.id);
-    const cuenta = await dato<{ id: string }>(c, "core.cuentas.create", { nombre: `Cliente ${nombre}` });
-    await e.admin.cuenta.update({ where: { id: cuenta.id }, data: { sitioWeb: sitio } });
-    const contacto = await dato<{ id: string }>(c, "core.contactos.create", { cuentaId: cuenta.id, nombres: "Ana", apellidos: "Prueba", email: `ana@${sitio.replace(/^https?:\/\/(www\.)?/, "")}` });
-    const negocio = await dato<{ id: string }>(c, "comercial.negocios.create", { cuentaId: cuenta.id, titulo: `Negocio ${nombre}` });
-    return { tenantId: t.id, c, cuentaId: cuenta.id, contactoId: contacto.id, negocioId: negocio.id };
-  }
+  const empresa = (nombre: string, sitio: string) => empresaCorreos(e, nombre, sitio);
   let A: Awaited<ReturnType<typeof empresa>>;
   let B: Awaited<ReturnType<typeof empresa>>;
   const enviados: Correo[] = [];
@@ -138,6 +123,12 @@ describe("core.correos · historial del cliente contra Postgres real", () => {
     expect(await codigo(ctx(A.tenantId, "gerente"), "core.correos.sin_asignar", {})).toBe("FORBIDDEN");
     expect((await historial(ctx(A.tenantId, "viewer"), "cuenta", A.cuentaId)).items.length).toBeGreaterThan(0);
     expect(await codigo(ctx(A.tenantId, "supervisor"), "core.correos.historial", { entidadTipo: "cuenta", entidadId: A.cuentaId })).toBe("FORBIDDEN");
+    // Bloqueo financiero (ADR-016): el correo de una factura no se ve sin Finanzas.
+    await mod.enviarCorreo({ db: A.c.db, tenantId: A.tenantId, correo: mailer, urlBase: "https://x.test" }, "finanzas.venta.enviada_cliente", "ana@cliente-alfa.cl",
+      { cliente: { nombre: "C" }, documento: { tipo: "Factura", folio: 7, total: "$1", vencimiento: "" }, empresa: { nombre: "Alfa" } }, { historial: { origen: "factura", cuentaId: A.cuentaId } });
+    const conFinanzas = ctx(A.tenantId, "owner", ["comercial", "finanzas"]);
+    expect((await historial(conFinanzas, "cuenta", A.cuentaId)).items.some((i) => i.origen === "factura")).toBe(true);
+    expect((await historial(A.c, "cuenta", A.cuentaId)).items.some((i) => i.origen === "factura")).toBe(false);
   });
 
   it("el correo del seguimiento queda registrado y su respuesta (CAR-67) se ve en el historial sin duplicarse", async () => {

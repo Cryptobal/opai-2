@@ -30,6 +30,13 @@ const antesDe = (campo: "ocurridoEn" | "recibidoEn", c: Cursor | null) =>
 const veComercial = (ctx: Contexto) =>
   enScope(ctx, "comercial") && ctx.modulosActivos.includes("comercial") && ctx.autorizar("comercial:negocios.read");
 
+/**
+ * ¿Puede ver documentos de Finanzas? Los correos de facturas traen folio, monto y vencimiento: quedan
+ * bajo el bloqueo financiero (ADR-016), como en la ficha de Finanzas.
+ */
+const veFinanzas = (ctx: Contexto) =>
+  enScope(ctx, "finanzas") && ctx.modulosActivos.includes("finanzas") && ctx.autorizar("finanzas:read");
+
 /** Respuestas de seguimiento (CAR-67) de la ficha, en la misma forma que el historial. */
 async function deSeguimientos(ctx: Contexto, tipo: Entidad, id: string, c: Cursor | null, take: number): Promise<CorreoClienteVista[]> {
   if (!veComercial(ctx)) return [];
@@ -78,12 +85,14 @@ export const correosHistorial = defineCapability({
   async handler(ctx, input) {
     await exigirEntidad(ctx, input.entidadTipo, input.entidadId);
     // Un negocio es de Comercial: sin su permiso, exigirEntidad ya rechazó. En cuenta y contacto, los
-    // correos ligados a un negocio se ocultan a quien no puede ver negocios.
+    // correos ligados a un negocio se ocultan a quien no puede ver negocios, y los de facturas a quien
+    // no puede ver Finanzas.
     const c = leerCursor(input.cursor);
     const propios = await ctx.db.correoCliente.findMany({
       where: {
         ...refDe(input.entidadTipo, input.entidadId),
         ...(veComercial(ctx) ? {} : { negocioId: null }),
+        ...(veFinanzas(ctx) ? {} : { origen: { not: "factura" } }),
         ...antesDe("ocurridoEn", c),
       },
       orderBy: [{ ocurridoEn: "desc" }, { id: "desc" }],

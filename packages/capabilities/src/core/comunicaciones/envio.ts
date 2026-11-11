@@ -84,7 +84,9 @@ export async function enviarCorreo(
     });
     await d.db.envio.create({ data: { ...base, estado: "enviado" } });
     if (extra.historial) {
-      // El correo ya salió: si el historial falla, no se reporta como envío fallido (no se reintenta).
+      // El correo ya salió. La fila no tiene cómo violar una restricción (largos recortados, referencias
+      // del mismo tenant que trae quien envía): el catch cubre fallas fuera de Postgres. Un error de la
+      // base dentro de la transacción del envío la abortaría igual (pendiente: savepoint, ver ESTADO).
       await registrarSaliente(d.db, d.tenantId, {
         ...extra.historial, remitente: remitenteDe(d.correo), destinatarios: [para, ...(extra.cc ?? [])],
         asunto: r.asunto, texto: r.texto,

@@ -54,7 +54,9 @@ export const correosAsociar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const correo = await ctx.db.correoCliente.findFirst({ where: { id: input.correoId } });
     if (!correo) throw noEncontrado("El correo");
-    if (correo.asociacion === "origen")
+    // Un saliente cuya ficha se borró (SET NULL) vuelve a «sin asignar» y sí se puede reasociar.
+    const conOrigen = correo.cuentaId || correo.contactoId || correo.negocioId;
+    if (correo.asociacion === "origen" && conOrigen)
       throw reglaDeNegocio("Este correo lo envió OPAI y ya está ligado a su cuenta, contacto o negocio.");
     await exigirEntidad(ctx, "cuenta", input.cuentaId);
     if (input.contactoId) {
