@@ -9,6 +9,7 @@ ruta: /negocios
 ---
 **Qué verás distinto en pantalla:**
 
+- La cotización tiene **un solo botón «Enviar»**, el de arriba de la ficha. Abre la hoja «Enviar cotización», donde eliges a quién enviarla, si va la propuesta técnica y qué pasa con el seguimiento. El formulario de envío que estaba más abajo, en «Documento y envío», ya no aparece.
 - Al **enviar una cotización**, además de «Iniciar seguimiento» y «Solo enviar», hay una tercera opción: **«Mover sin seguimiento»**. Eliges la etapa a la que pasa el negocio (no viene ninguna elegida) y la hoja te dice cuántos pasos pendientes se cancelan si ya había un seguimiento.
 - En el **tablero de Negocios**, cada tarjeta muestra en corto cómo va su seguimiento: «Seguimiento 2 de 4 · hoy», «Vencido», «Pausado» o «Con fallos».
 - La **Bandeja** muestra ahora tus **tareas asignadas** vencidas o de hoy, entre ellas los pasos de seguimiento que te tocan. El paso por correo trae el borrador ya escrito.
