@@ -111,6 +111,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.anexosRead,
       ...DENEGAR_VIEWER_PERSONAS_PR2,
       "comercial:solicitudes.read",
+      // ADR-094: el comodín `*:*.read` no alcanza a los resultados de gestión de otras personas.
+      PERMISOS_CORE.indicadoresGestionRead,
     ],
   },
 };
