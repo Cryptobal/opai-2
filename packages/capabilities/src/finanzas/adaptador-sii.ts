@@ -9,7 +9,7 @@ import {
 import { leerSecreto } from "../integraciones/secretos";
 import type { Contexto } from "../types";
 
-async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleApi | null> {
+export async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleApi | null> {
   const integ = await ctx.db.integracion.findUnique({
     where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_emision" } },
   });
