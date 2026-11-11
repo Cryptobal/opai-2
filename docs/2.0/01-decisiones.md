@@ -1660,3 +1660,22 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Agentes.** Otorgar es solo para personas (`soloPersonas`): ninguna API key registra un consentimiento, ni con autonomía «directo», que se salta la aprobación. Los agentes pueden listar y revocar. **Consecuencia:** hasta que exista la pantalla en la ficha de la cuenta (espera diseño aprobado), nadie puede otorgar y ningún cliente aparece como referencia; si Carlos prefiere habilitarlo antes por API, hace falta una regla de aprobación que la autonomía «directo» no pueda saltarse. **Orden:** la última fila de una cuenta es la de mayor `seq` (identity, orden real de inserción), no `created_at` (inicio de la transacción); otorgar y revocar bloquean la fila de la cuenta, así que se serializan.
 
 **Límites conocidos.** El consentimiento anónimo igual muestra rubro, comuna y fecha «cliente desde», que juntos pueden ayudar a identificarlo: quien registra debe tenerlo presente. Revocar no cambia lo ya enviado (PDF y enlace congelados). La evidencia y la cita son textos cortos (≤300 y ≤400) que pueden mencionar a una persona del cliente; al ser append-only, no los borra la anonimización de contactos (Ley 21.719). Sin pantalla hasta que haya diseño aprobado (se opera por MCP y `/api/v1`).
+
+## ADR-088 · SimpleAPI: un 401 sin cuerpo se trata como key no reconocida; la key se comprueba con `Suscripcion/status` (CAR-263, 10-nov-2026)
+
+**Fecha:** 10-nov-2026 · **Estado:** vigente · **Autor:** sesión del proyecto «OPAI 2.0» (Claude), por encargo de Carlos del 10-nov-2026 22:01 («contrastar 1.0 con 2.0, los PR, Linear y la documentación de SimpleAPI, decir cuál es el error y solucionarlo»).
+
+**Contexto.** El 10-nov hubo nueve intentos de emitir la factura 33 de certificación (CAR-240) y todos terminaron en `dte/generar` con HTTP 401, cuerpo vacío y `x-rate-limit-remaining: 39`. Los PR #460, #465, #471, #476 y #477 trabajaron sobre la regla «si vienen `x-rate-limit-*`, la key autenticó y lo rechazado es el contenido», tomada de `isApiKeyAuthenticated` de OPAI 1.0.
+
+**Evidencia.** Llamadas reales a `api.simpleapi.cl` desde esta sesión, sin credenciales de Gard: sin `Authorization`, con `Basic api:` + una key inventada y con la key inventada cruda, `POST /api/v1/dte/generar` responde 401, cuerpo vacío y los mismos `x-rate-limit-limit: 1m` / `x-rate-limit-remaining: 39`. Una ruta inexistente responde 404 con esos mismos encabezados. La regla era falsa: los encabezados salen en toda respuesta.
+
+**Decisión.**
+1. Los encabezados `x-rate-limit-*` no se usan para decidir si la key autenticó. Se siguen registrando en el log solo como límites de uso.
+2. Un 401 o 403 **sin cuerpo** se informa como «la respuesta de SimpleAPI a una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE)» y envía a «Probar conexión». No se afirma que el contenido fue rechazado.
+3. La key se comprueba con `GET https://api.simpleapi.cl/api/v1/Suscripcion/status` (publicado en `https://api.simpleapi.cl/swagger`), con el mismo `Basic api:key` del SDK oficial. Es lo que ejecuta «Probar conexión» de Emisión DTE (`core.integraciones.probar`, también por MCP). No emite, no usa folios y no envía el certificado ni el CAF.
+4. Se mantiene el formato de la petición (Basic `api:key`; multipart `input` + `file` + `file`): coincide con `DTEExtensions.GenerarXMLAsync` del SDK oficial y con 1.0, que emite.
+
+5. La key se limpia de espacios, saltos y caracteres invisibles (`limpiarKeySimpleApi`) antes de enviarla, en la prueba y al emitir.
+
+**Límite conocido.** Desde fuera no se puede saber qué responde SimpleAPI a una key válida con un contenido inválido; 1.0 sostiene que también es 401 vacío. Por eso el mensaje dice «como ante una key que no reconoce» y la prueba de la key es una llamada aparte. Si «Probar conexión» reconoce la key y `dte/generar` sigue en 401, la causa es el contenido y el motivo solo lo puede dar el soporte de SimpleAPI.
+

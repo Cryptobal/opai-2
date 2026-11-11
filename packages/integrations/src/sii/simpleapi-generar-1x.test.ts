@@ -65,7 +65,7 @@ const payload = {
   cafXml: CAF,
 };
 
-/** 401 vacío con la key reconocida (headers de cupo), como el de las 20:43 del 10-nov-2026. */
+/** 401 vacío con headers de cupo (SimpleAPI los envía siempre; CAR-263), como el de las 20:43 del 10-nov-2026. */
 const respuesta401Vacia = () =>
   new Response(null, {
     status: 401,
@@ -133,7 +133,7 @@ describe("dte/generar igual a OPAI 1.0 (CAR-240)", () => {
     expect(error).toBeInstanceOf(ErrorProveedorSii);
     if (!(error instanceof ErrorProveedorSii)) return;
     expect(error.status).toBe(401);
-    expect(error.motivo).toContain("aceptó la API key pero rechazó el contenido sin decir el motivo");
+    expect(error.motivo).toContain("respondió HTTP 401 sin motivo, como ante una API key que no reconoce");
     expect(error.cuerpo).toBe("vacio");
     expect(error.respuesta).toEqual({ contentType: null, contentLength: "0", cuerpoLargo: 0, detalleLargo: null });
     expect(error.peticion).toEqual({
