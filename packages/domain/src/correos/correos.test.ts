@@ -79,7 +79,7 @@ describe("asociarCorreo", () => {
     const dos = [...cuentas, { id: "00000000-0000-7000-8000-00000000000d", sitioWeb: "cliente.cl" }];
     expect(asociarCorreo(["pedro@cliente.cl"], [], dos)).toEqual({ tipo: "sin_asignar", motivo: "ambiguo" });
   });
-  it("subdominios no calzan (conservador mientras Carlos no decida)", () => {
+  it("subdominios no calzan (decisión de Carlos, 11-nov-2026)", () => {
     expect(asociarCorreo(["pedro@ventas.cliente.cl"], [], cuentas)).toEqual({ tipo: "sin_asignar", motivo: "sin_calce" });
   });
   it("contactos exactos de dos cuentas: sin asignar; de la misma: cuenta sin contacto", () => {

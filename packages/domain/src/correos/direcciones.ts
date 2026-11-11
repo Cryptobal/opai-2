@@ -66,8 +66,8 @@ export const esDominioGenerico = (dominio: string): boolean =>
 
 /**
  * ¿El dominio del correo calza con el del sitio de la cuenta? Solo igualdad exacta (tras quitar «www.»).
- * Subdominios (`ventas.cliente.cl` frente a `cliente.cl`, o al revés) NO calzan: la regla no está
- * decidida (pregunta abierta a Carlos) y lo conservador es dejar el correo «sin asignar».
+ * Subdominios (`ventas.cliente.cl` frente a `cliente.cl`, o al revés) NO calzan: decisión de Carlos
+ * del 11-nov-2026 (criterio conservador, CAR-233); lo que no calza queda «sin asignar».
  */
 export const dominioCalza = (dominioCorreo: string, dominioSitio: string): boolean => dominioCorreo === dominioSitio;
 
