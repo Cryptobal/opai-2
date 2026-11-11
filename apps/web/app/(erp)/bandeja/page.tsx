@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { Bandeja } from "../_componentes/bandeja";
 import { EsqueletoTarjeta } from "../_componentes/esqueletos-inicio";
-import { TareasInicio } from "../_componentes/tareas-inicio";
+import { TareasBandeja } from "../_componentes/tareas-bandeja";
 
 export const metadata = { title: "Bandeja" };
 
@@ -15,7 +15,7 @@ export default function PaginaBandeja() {
         <Bandeja />
         <div className="empty:hidden">
           <Suspense fallback={<EsqueletoTarjeta filas={2} />}>
-            <TareasInicio titulo="Tareas asignadas" max={10} />
+            <TareasBandeja />
           </Suspense>
         </div>
       </div>
