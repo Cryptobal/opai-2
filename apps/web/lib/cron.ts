@@ -69,3 +69,14 @@ export async function encolarCapturaSiiDesdeCron(
   const hoy = hoyEn(ancla.timezone);
   return programarCapturaSii(contextoSistema(ancla.id), hoy);
 }
+
+/**
+ * Hora UTC desde la que se encolan los trabajos diarios (06:00 de Chile): la misma a la que corría el programador
+ * cuando era un cron diario. Las horas siguientes repiten el intento por si esa vuelta falló; la clave única por día
+ * de cada trabajo evita duplicarlo.
+ */
+const HORA_DIARIOS_UTC = 9;
+
+export function tocaTrabajosDiarios(ahora = new Date()): boolean {
+  return ahora.getUTCHours() >= HORA_DIARIOS_UTC;
+}
