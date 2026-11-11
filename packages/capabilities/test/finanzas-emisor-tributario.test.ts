@@ -1,5 +1,5 @@
-// CAR-240 · Sin ACTECO (u otro dato tributario del emisor) SimpleAPI rechaza `dte/generar` con HTTP 401 aunque la key
-// autentique: se bloquea antes de firmar, con lo que falta y dónde completarlo (paridad con el preflight de OPAI 1.0).
+// CAR-240 · Sin ACTECO (u otro dato tributario del emisor) el DTE no cumple el XSD del SII: se bloquea antes de
+// firmar, con lo que falta y dónde completarlo (paridad con el preflight de OPAI 1.0).
 import { describe, expect, it } from "vitest";
 
 import { actecoValido, faltantesEmisorTributario, mensajeFaltantesEmisor } from "../src/finanzas/emisor-tributario";

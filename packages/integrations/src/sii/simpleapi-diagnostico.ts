@@ -1,6 +1,7 @@
 // Diagnóstico seguro de un rechazo de SimpleAPI (CAR-240). Solo formas, largos y nombres: nunca el cuerpo crudo, el
 // base64 o los bytes del .pfx, el XML del CAF, la clave del certificado ni la API key. Va al log únicamente cuando
-// SimpleAPI rechaza, para separar un 401 vacío por contenido (PFX o CAF) de uno por datos del JSON.
+// SimpleAPI rechaza, para ver la forma de lo enviado (PFX, CAF y claves del JSON). Un 401 sin cuerpo no distingue la
+// key del contenido; el del 10-nov-2026 era la key guardada sin guiones (CAR-263, adenda de ADR-088).
 import { diagnosticarCafGuardado, type FormatoCafGuardado } from "./caf-bytes";
 import { RUT_TITULAR_SII } from "./simpleapi-formatos";
 
