@@ -27,9 +27,8 @@ export const RUT_SII = "60803000-K" as const;
  * pegar la key, también en medio: SimpleAPI rechaza esa key con el mismo 401 vacío que a una inválida (CAR-263).
  */
 export const limpiarKeySimpleApi = (apiKey: string): string => apiKey.replace(/[\s\u200B-\u200D\u2060]/g, "");
-export function encabezadoAuthSimpleApi(apiKey: string): string {
-  return `Basic ${Buffer.from(`api:${limpiarKeySimpleApi(apiKey)}`, "utf8").toString("base64")}`;
-}
+export const encabezadoAuthSimpleApi = (apiKey: string): string =>
+  `Basic ${Buffer.from(`api:${limpiarKeySimpleApi(apiKey)}`, "utf8").toString("base64")}`;
 
 export type CredencialesSimpleApiV1 = {
   apiKey: string;
