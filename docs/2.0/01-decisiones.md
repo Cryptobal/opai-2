@@ -1812,6 +1812,22 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
 
+## ADR-096 · Emitir un documento lo envía al SII de inmediato (CAR-270, 11-nov-2026)
+
+**Decidió:** Carlos, 11-nov-2026 («sí» a la propuesta de la sesión de Finanzas, tras la certificación del 11-nov).
+
+**Contexto.** En 2.0 «Emitir» solo asignaba folio y firmaba; transmitir al SII era un segundo paso manual («Enviar al SII»). En la certificación del 11-nov eso confundió: documentos «Firmada, sin enviar», y una NC que anuló una factura que el SII todavía no había recibido. OPAI 1 envía al emitir.
+
+**Decisión.** Al emitir desde la pantalla (factura, nota de crédito, nota de débito y emisión en lote del cierre), el documento se envía al SII apenas termina la emisión. «Enviar al SII» queda como reintento cuando el envío falla.
+
+**Cómo.** El envío va **después** de la emisión y no dentro de ella: la pantalla ejecuta `finanzas.ventas.enviar_sii` cuando `finanzas.ventas.emitir` (o la nota, o el lote) ya quedó guardada. No se envía dentro de la capacidad de emisión porque su escritura corre en una transacción: si algo fallara después de transmitir, el SII tendría un folio que OPAI considera sin usar. Tampoco se envía con un trabajo en segundo plano: el runner tiene 45 s para todas las empresas y un envío cortado a medias no deja saber si el SII lo recibió, y reenviarlo a ciegas termina en un rechazo por documento repetido.
+
+**Consecuencias.**
+- Un envío fallido no deshace la emisión: el documento queda «Firmada, sin enviar al SII» con el aviso de cómo reintentar.
+- Por API y MCP siguen siendo dos pasos (`emitir` y luego `enviar_sii`, ambos con aprobación humana para agentes); la descripción de `finanzas.ventas.emitir` lo dice.
+- Las facturas programadas se generan como borrador; se envían al emitirlas, igual que las demás.
+- Pendiente: un marcador de «envío en curso» por documento permitiría un respaldo automático seguro para lo que quede firmado sin enviar; requiere migración.
+
 ## ADR-097 · Un solo gestor de plantillas y documentos para todos los módulos (CAR-315, 11-nov-2026)
 
 **Decidió:** Carlos (chat de la sesión dueña de Personas y Documentos, 11-nov-2026, 17:56, hora de Chile) · **Registra:** Claude. **Modifica** la decisión 1 del §15 de `briefs/BRIEF-CAR-127-documentos-v4-pantallas-04-08.md` (9-nov-2026: «plantillas laborales aparte de las salidas comerciales»). (ADR-096 está reservado por el PR abierto #511.)

@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Card, Select } from "@opai/ds";
+import { Alerta, Button, Campo, Card, Select } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
+import { enviarAlSiiTrasEmitir } from "../_componentes/enviar-sii-tras-emitir";
 import type { Venta } from "../_componentes/tipos";
 import { CamposNota } from "./campos-nota";
 
@@ -86,7 +87,7 @@ export function EmitirNota({ tipo, cuentaId }: { tipo: "61" | "56"; cuentaId: st
       ? await ejecutar<Venta>("finanzas.ventas.emitir_nota_credito", input, false, "layout", clave)
       : await ejecutar<Venta>("finanzas.ventas.emitir_nota_debito", input, false, "layout", clave);
     if (!r) return;
-    avisar.exito(esNc ? "Nota de crédito emitida" : "Nota de débito emitida");
+    await enviarAlSiiTrasEmitir(r.id, esNc ? "Nota de crédito" : "Nota de débito");
     router.push(`/finanzas/ventas/${r.id}`);
   }
 
