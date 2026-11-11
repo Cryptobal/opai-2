@@ -163,7 +163,7 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     expect(e.motivo).toBe(motivoSinCuerpo(401));
     expect(e.limites).toEqual({});
   });
-  it("sin ACTECO del emisor no llama a SimpleAPI: el DTE saldría sin <Acteco> y lo rechazaría con 401", async () => {
+  it("sin ACTECO del emisor no llama a SimpleAPI: el DTE saldría sin <Acteco>, que el XSD del SII exige", async () => {
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
     const { actecoEmisor: _sin, ...sinActeco } = creds;
