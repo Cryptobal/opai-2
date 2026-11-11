@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 675 pares pantalla→capacidad · 603 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 677 pares pantalla→capacidad · 605 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -347,6 +347,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.actualizar` | `finanzas_plan_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.crear` | `finanzas_plan_crear` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.inicializar` | `finanzas_plan_inicializar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.cobros.manual` | `finanzas_cobros_manual` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.actualizar_borrador` | `finanzas_ventas_actualizar_borrador` | existe |
