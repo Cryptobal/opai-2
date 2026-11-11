@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 692 pares pantalla→capacidad · 619 con herramienta · 73 excepciones justificadas · 0 faltantes.
+**Resumen:** 697 pares pantalla→capacidad · 624 con herramienta · 73 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -582,6 +582,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/empresa` | `core.empresa.update` | `core_empresa_update` | existe |
 | erp | `/configuracion/empresa` | `core.tenant.get` | `core_tenant_get` | existe |
 | erp | `/configuracion/empresa` | `core.tenant.update` | `core_tenant_update` | existe |
+| erp | `/configuracion/importar` | `core.importar.catalogo` | `core_importar_catalogo` | existe |
+| erp | `/configuracion/importar` | `core.importar.ejecutar` | `core_importar_ejecutar` | existe |
+| erp | `/configuracion/importar` | `core.importar.lotes` | `core_importar_lotes` | existe |
+| erp | `/configuracion/importar` | `core.importar.plantilla` | `core_importar_plantilla` | existe |
+| erp | `/configuracion/importar` | `core.importar.revertir` | `core_importar_revertir` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.consumos.resumen` | `core_consumos_resumen` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.list` | `core_integraciones_list` | existe |
