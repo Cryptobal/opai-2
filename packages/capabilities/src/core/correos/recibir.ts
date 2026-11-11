@@ -17,6 +17,9 @@ export const correosRecibir = defineCapability({
     "Registra en el historial del cliente un correo que llegó a la dirección de registro de la empresa (respuesta del cliente o copia oculta del vendedor). Lo asocia por correo exacto del contacto o por dominio del sitio web de la cuenta; si no puede, queda sin asignar. Idempotente por id del correo.",
   permiso: null,
   interna: true,
+  // El contenido del correo nunca llega a la auditoría: quien lee `core.audit.list` no debe ver lo que
+  // el historial y la bandeja «sin asignar» protegen con sus permisos. Quedan el id y el resultado.
+  sensibles: ["remitente", "destinatarios", "asunto", "texto"],
   input: z.object({
     mensajeId: z.string().min(1).max(200),
     remitente: z.string().max(320),

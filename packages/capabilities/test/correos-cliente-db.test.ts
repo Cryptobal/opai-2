@@ -117,6 +117,8 @@ describe("core.correos · historial del cliente contra Postgres real", () => {
     const f = await e.admin.correoCliente.findMany({ where: { tenantId: A.tenantId, mensajeId: "repetido" } });
     expect(f).toHaveLength(1);
     expect(f[0]?.texto).toBe("<script>x</script>");
+    const aud = await e.admin.auditEvent.findFirstOrThrow({ where: { tenantId: A.tenantId, capability: "core.correos.recibir" } });
+    expect(JSON.stringify(aud.payload)).not.toMatch(/script|ana@cliente-alfa/);
   });
 
   it("la bandeja sin asignar es solo de owner y admin por defecto; el historial, de quien ve actividad", async () => {
