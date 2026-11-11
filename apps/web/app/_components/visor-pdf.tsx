@@ -28,45 +28,38 @@ export function descargarPdf(pdfUrl: string, nombre: string) {
   a.click();
 }
 
-/**
- * PDF de una URL `blob:`. En escritorio, iframe; en pantalla táctil, «Abrir PDF» (visor del sistema) y
- * «Descargar PDF», porque Safari de iOS no pinta un `blob:` en un iframe y lo deja en blanco.
- * `onCerrar` agrega el botón «Cerrar» junto a las acciones.
- */
-export function VisorPdf({
-  pdfUrl,
-  titulo,
-  nombreArchivo,
-  alto = "h-[70vh]",
-  onCerrar,
-}: {
+type PropsVisor = {
   pdfUrl: string;
   titulo: string;
   nombreArchivo: string;
   alto?: string;
   onCerrar?: () => void;
-}) {
-  const tactil = useEsTactil();
-  if (tactil) {
-    return (
-      <div className="flex min-w-0 flex-col gap-2">
-        <p className="t-body-sm text-fg-muted">
-          Este dispositivo no muestra el PDF dentro de la página. Ábrelo en el visor o descárgalo.
-        </p>
-        <Button type="button" size="lg" block onClick={() => window.open(pdfUrl, "_blank", "noopener")}>
-          Abrir PDF
+};
+
+/** Pantalla táctil: «Abrir PDF» (visor del sistema) y «Descargar PDF», sin iframe. */
+export function VisorPdfTactil({ pdfUrl, nombreArchivo, onCerrar }: PropsVisor) {
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <p className="t-body-sm text-fg-muted">
+        Este dispositivo no muestra el PDF dentro de la página. Ábrelo en el visor o descárgalo.
+      </p>
+      <Button type="button" size="lg" block onClick={() => window.open(pdfUrl, "_blank", "noopener")}>
+        Abrir PDF
+      </Button>
+      <Button type="button" variant="secondary" size="lg" block onClick={() => descargarPdf(pdfUrl, nombreArchivo)}>
+        Descargar PDF
+      </Button>
+      {onCerrar ? (
+        <Button type="button" variant="ghost" size="lg" block onClick={onCerrar}>
+          Cerrar
         </Button>
-        <Button type="button" variant="secondary" size="lg" block onClick={() => descargarPdf(pdfUrl, nombreArchivo)}>
-          Descargar PDF
-        </Button>
-        {onCerrar ? (
-          <Button type="button" variant="ghost" size="lg" block onClick={onCerrar}>
-            Cerrar
-          </Button>
-        ) : null}
-      </div>
-    );
-  }
+      ) : null}
+    </div>
+  );
+}
+
+/** Escritorio: PDF embebido en un iframe, con «Descargar PDF». */
+export function VisorPdfEscritorio({ pdfUrl, titulo, nombreArchivo, alto = "h-[70vh]", onCerrar }: PropsVisor) {
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <iframe title={titulo} src={pdfUrl} className={`${alto} w-full max-w-full rounded-md border border-border`} />
@@ -82,4 +75,13 @@ export function VisorPdf({
       </div>
     </div>
   );
+}
+
+/**
+ * PDF de una URL `blob:`. En escritorio, iframe; en pantalla táctil, «Abrir PDF» (visor del sistema) y
+ * «Descargar PDF», porque Safari de iOS no pinta un `blob:` en un iframe y lo deja en blanco.
+ * `onCerrar` agrega el botón «Cerrar» junto a las acciones.
+ */
+export function VisorPdf(p: PropsVisor) {
+  return useEsTactil() ? <VisorPdfTactil {...p} /> : <VisorPdfEscritorio {...p} />;
 }

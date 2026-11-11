@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, Dialog } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { VisorPdf } from "@/app/_components/visor-pdf";
 
 /** Vista previa en PDF del borrador guardado: marca «BORRADOR», sin folio ni timbre ni valor tributario. */
 export function EmitirPdfPrevio({ documentoId }: { documentoId: string }) {
@@ -30,7 +31,9 @@ export function EmitirPdfPrevio({ documentoId }: { documentoId: string }) {
         </Button>
       </div>
       <Dialog abierto={url !== null} onCerrar={() => setUrl(null)} titulo="Borrador del documento" tamano="grande">
-        {url ? <iframe src={url} title="Vista previa del borrador en PDF" className="h-[75dvh] w-full rounded-md border border-border" /> : null}
+        {url ? (
+          <VisorPdf pdfUrl={url} titulo="Vista previa del borrador en PDF" nombreArchivo="borrador.pdf" alto="h-[75dvh]" onCerrar={() => setUrl(null)} />
+        ) : null}
       </Dialog>
     </Card>
   );
