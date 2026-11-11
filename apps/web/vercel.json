@@ -3,6 +3,6 @@
   "regions": ["gru1"],
   "crons": [
     { "path": "/api/cron/trabajos", "schedule": "*/5 * * * *" },
-    { "path": "/api/cron/programador", "schedule": "0 9 * * *" }
+    { "path": "/api/cron/programador", "schedule": "0 * * * *" }
   ]
 }
