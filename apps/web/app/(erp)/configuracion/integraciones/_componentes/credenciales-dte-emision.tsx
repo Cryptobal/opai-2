@@ -9,13 +9,13 @@ import {
   avisar,
   Badge,
   Campo,
-  CampoSecreto,
   Input,
   SeccionTarjeta,
 } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { ApiKeySimpleApi } from "./credenciales-dte-apikey";
 import {
   archivoABase64,
   etiquetaVencimiento,
@@ -118,30 +118,7 @@ export function CredencialesDteEmision({ item }: { item: Integracion }) {
           </Campo>
         </div>
       </SeccionTarjeta>
-      {apiKey ? (
-        <SeccionTarjeta titulo="SimpleAPI">
-          <Campo etiqueta={apiKey.etiqueta} htmlFor="dte-api-key">
-            <CampoSecreto
-              id="dte-api-key"
-              aria-label={apiKey.etiqueta}
-              guardado={apiKey.mascara ? apiKey.mascara.slice(-4) : null}
-              pendiente={pendiente}
-              placeholder={apiKey.etiqueta}
-              onGuardar={async (valor) => {
-                const r = await ejecutar("core.integraciones.set_secreto", {
-                  proveedor: item.proveedor,
-                  nombre: "api_key",
-                  valor,
-                });
-                if (r) {
-                  avisar.exito("Credencial guardada cifrada");
-                  router.refresh();
-                } else avisar.error("No se pudo guardar la credencial");
-              }}
-            />
-          </Campo>
-        </SeccionTarjeta>
-      ) : null}
+      {apiKey ? <ApiKeySimpleApi proveedor={item.proveedor} apiKey={apiKey} /> : null}
     </>
   );
 }
