@@ -1,0 +1,49 @@
+// Grupos o equipos de usuarios para autorización (CAR-251). Los nombra CAR-252 como aprobadores
+// junto con usuarios o un perfil; aquí solo viven el grupo y su membresía. Con tenant_id y RLS
+// `tenant_isolation`. No son `core.funciones` (cargos operativos): no se mezclan.
+
+/// Grupo o equipo de trabajo de la empresa. Se archiva (`archivadoEn`), nunca se borra en duro, para
+/// que una política o la auditoría que lo nombró siga resolviendo su nombre. El nombre es único por
+/// empresa entre los vigentes (índice parcial sobre `lower(nombre)` en la migración).
+model GrupoUsuarios {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  nombre      String
+  descripcion String?
+  archivadoEn DateTime? @map("archivado_en") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant   Tenant                @relation(fields: [tenantId], references: [id])
+  miembros GrupoUsuarioMiembro[]
+
+  /// Destino de la FK compuesta de los miembros: el miembro y su grupo son de la misma empresa.
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@map("grupos_usuarios")
+  @@schema("core")
+}
+
+/// Usuario miembro de un grupo. La FK compuesta `(tenant_id, user_id)` hacia `memberships` exige que
+/// sea miembro de la MISMA empresa (no se suma a alguien de otro tenant). Quitar a alguien borra la
+/// fila (queda en `core.audit_events`); si su membresía se elimina, sale del grupo (CASCADE).
+model GrupoUsuarioMiembro {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  grupoId   String   @map("grupo_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant     Tenant        @relation(fields: [tenantId], references: [id])
+  grupo      GrupoUsuarios @relation(fields: [tenantId, grupoId], references: [tenantId, id], onDelete: Cascade)
+  membership Membership    @relation(fields: [tenantId, userId], references: [tenantId, userId], onDelete: Cascade)
+
+  @@unique([grupoId, userId])
+  /// Consulta inversa de CAR-252: grupos de un usuario en la empresa.
+  @@index([tenantId, userId])
+  /// FK compuesta hacia el grupo: miembros por grupo y CASCADE.
+  @@index([tenantId, grupoId])
+  @@map("grupo_usuarios_miembros")
+  @@schema("core")
+}

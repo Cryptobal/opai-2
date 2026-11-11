@@ -225,6 +225,13 @@ export const AJUSTES: Record<string, Ajuste> = {
     dependencias: ["core.memberships"],
     valores: (ctx) => ({ usuario_id: ctx.usuario, novedad_id: "dos-empresas-rls" }),
   },
+  // CAR-251: (tenant_id, grupo_id) → grupos y (tenant_id, user_id) → memberships.
+  "core.grupo_usuarios_miembros": {
+    dependencias: ["core.memberships", "core.grupos_usuarios"],
+    // Columnas de FK compuesta: el catálogo no las ve como referencia; no se regeneran en el control.
+    fijas: ["grupo_id", "user_id"],
+    valores: (ctx) => ({ user_id: ctx.usuario, grupo_id: id(ctx, "core.grupos_usuarios") }),
+  },
   // Nómina (Brief 25): los CHECK de unidad por tipo y de tipo/estado rechazan el texto genérico.
   "nomina.novedades": { valores: () => ({ tipo: "ausencia", cantidad: 1, monto_clp: null }) },
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
