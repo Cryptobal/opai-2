@@ -29,7 +29,7 @@ export class ErrorProveedorSii extends Error {
 }
 
 /**
- * «vacio»: sin cuerpo (SimpleAPI rechaza así un contenido inválido); «suscripcion»: habla de la API key, la
+ * «vacio»: sin cuerpo (así responde SimpleAPI a una key que no reconoce; CAR-263); «suscripcion»: habla de la API key, la
  * suscripción, el token o el cupo (la documentación de SimpleAPI usa 401 también para «falta de suscripción válida o
  * token expirado»); «otro»: cualquier otro texto. Nunca se guarda el texto.
  */

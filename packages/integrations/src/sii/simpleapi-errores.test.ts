@@ -37,9 +37,9 @@ const firmarError = async () => (await adaptadorSimpleApi(creds).firmar(payload)
 afterEach(() => vi.unstubAllGlobals());
 
 
-/** Motivo de un 401 con la key reconocida (x-rate-limit-*) y cuerpo vacío (CAR-240). */
-const MOTIVO_401_VACIO =
-  "aceptó la API key pero rechazó el contenido sin decir el motivo (certificado, CAF o un dato del DTE; si el preflight marca el CAF dañado, vuelva a cargarlo), HTTP 401";
+/** Motivo de un 401 o 403 sin cuerpo: la respuesta de SimpleAPI a una key que no reconoce (CAR-263). */
+const motivoSinCuerpo = (status: number) =>
+  `respondió HTTP ${status} sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE`;
 describe("errores tipados de SimpleAPI (CAR-242)", () => {
   it("HTTP 400 con mensaje JSON: estado fijo para el log y detalle legible solo para la persona", async () => {
     generar(() => new Response(JSON.stringify({ mensaje: "Receptor 12.345.678-5 Juan Perez no autorizado" }), { status: 400 }));
@@ -106,6 +106,9 @@ describe("autenticación y límites de uso (CAR-240)", () => {
   it("el header es Basic api:key con la key recortada, nunca la key cruda", async () => {
     const { encabezadoAuthSimpleApi } = await import("./simpleapi-contrato");
     const h = encabezadoAuthSimpleApi(`  ${CLAVE_API}\n`);
+    // CAR-263: un espacio o un carácter invisible pegado en medio de la key tampoco llega a SimpleAPI.
+    const sucia = `​${CLAVE_API.slice(0, 4)}  ${CLAVE_API.slice(4)}﻿`;
+    expect(encabezadoAuthSimpleApi(sucia)).toBe(h);
     expect(h).toBe(`Basic ${Buffer.from(`api:${CLAVE_API}`, "utf8").toString("base64")}`);
     expect(h).not.toContain(CLAVE_API);
     expect(h).not.toBe(`Basic ${Buffer.from(`${CLAVE_API}:`, "utf8").toString("base64")}`);
@@ -129,32 +132,35 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     });
     expect(JSON.stringify(e.limites)).not.toContain(CLAVE_API);
   });
-  it("401 con x-rate-limit-*: la key autenticó y lo rechazado es el contenido (como 1.0), sin secretos", async () => {
+  it("401 o 403 sin cuerpo: key no reconocida, con o sin x-rate-limit-* (SimpleAPI los envía siempre; CAR-263)", async () => {
+    // Respuesta real de api.simpleapi.cl sin Authorization o con una key inventada (10-nov-2026): 401 vacío con estos headers.
+    const conLimites = { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" };
+    for (const status of [401, 403]) {
+      for (const headers of [conLimites, {}]) {
+        generar(() => new Response("", { status, headers }));
+        const e = await firmarError();
+        expect(e).toMatchObject({ cuerpo: "vacio", motivo: motivoSinCuerpo(status) });
+        expect(e.motivo).not.toMatch(/aceptó la API key|rechazó el contenido/);
+      }
+    }
+  });
+  it("401 con texto del proveedor: estado y detalle saneado, sin adivinar la causa ni mostrar secretos", async () => {
     const headers = { "x-rate-limit-remaining": "39" };
     generar(() => new Response(JSON.stringify({ mensaje: `clave ${CLAVE_PFX}` }), { status: 401, headers }));
     const e = await firmarError();
-    expect(e.motivo).toBe("rechazó el contenido (certificado, CAF o datos), HTTP 401");
-    expect(e.motivoSeguro).toBe("SimpleAPI generar: rechazó el contenido (certificado, CAF o datos), HTTP 401");
+    expect(e.motivo).toBe("rechazó la petición, HTTP 401");
     for (const s of [CLAVE_API, CLAVE_PFX]) expect(`${e.motivoSeguro} ${e.detalle ?? ""}`).not.toContain(s);
   });
-  it("401 o 403 sin x-rate-limit-*: la key no fue reconocida", async () => {
-    for (const status of [401, 403]) {
-      generar(() => new Response("", { status }));
-      expect((await firmarError()).motivo).toBe(`no reconoció la API key, HTTP ${status}`);
-    }
-  });
-  it("400 o 422 con x-rate-limit-*: contenido rechazado; 400 sin ellos queda como estado HTTP", async () => {
+  it("400 o 422 quedan como estado HTTP, con o sin x-rate-limit-*", async () => {
     for (const status of [400, 422]) {
       generar(() => new Response("", { status, headers: { "x-ratelimit-remaining": "10" } }));
-      expect((await firmarError()).motivo).toBe(`rechazó el contenido (certificado, CAF o datos), HTTP ${status}`);
+      expect((await firmarError()).motivo).toBe(`respondió HTTP ${status}`);
     }
-    generar(() => new Response("", { status: 400, headers: { "retry-after": "5" } }));
-    expect((await firmarError()).motivo).toBe("respondió HTTP 400");
   });
-  it("un header x-rate-limit-* con un valor que no pasa el saneo igual cuenta como key reconocida", async () => {
+  it("un header x-rate-limit-* con un valor que no pasa el saneo no llega al error", async () => {
     generar(() => new Response("", { status: 401, headers: { "x-rate-limit-policy": "100;w=60" } }));
     const e = await firmarError();
-    expect(e.motivo).toBe(MOTIVO_401_VACIO);
+    expect(e.motivo).toBe(motivoSinCuerpo(401));
     expect(e.limites).toEqual({});
   });
   it("sin ACTECO del emisor no llama a SimpleAPI: el DTE saldría sin <Acteco> y lo rechazaría con 401", async () => {
@@ -168,10 +174,7 @@ describe("autenticación y límites de uso (CAR-240)", () => {
   it("forma del cuerpo de un 401, sin guardar su texto: vacío, de suscripción u otro", async () => {
     const headers = { "x-rate-limit-remaining": "39" };
     generar(() => new Response("", { status: 401, headers }));
-    // CAR-240: la key autenticó y el cuerpo vino vacío; el motivo lo dice y nunca habla de una key inválida.
-    const vacio = await firmarError();
-    expect(vacio).toMatchObject({ cuerpo: "vacio", motivo: MOTIVO_401_VACIO });
-    expect(vacio.motivo).not.toMatch(/inv[aá]lida|no reconoci/);
+    expect(await firmarError()).toMatchObject({ cuerpo: "vacio", motivo: motivoSinCuerpo(401) });
     generar(() => new Response(JSON.stringify({ Mensaje: "Falta de suscripción válida o token expirado" }), { status: 401, headers }));
     const e = await firmarError();
     expect(e).toMatchObject({
@@ -185,7 +188,7 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     expect((await firmarError()).cuerpo).toBe("otro");
     for (const contenido of ["Certificado vencido", "CAF vencido", "Firma expirada"]) {
       generar(() => new Response(contenido, { status: 401, headers }));
-      expect(await firmarError()).toMatchObject({ cuerpo: "otro", motivo: "rechazó el contenido (certificado, CAF o datos), HTTP 401" });
+      expect(await firmarError()).toMatchObject({ cuerpo: "otro", motivo: "rechazó la petición, HTTP 401" });
     }
     generar(() => new Response("El usuario no tiene acceso a la API de DTE", { status: 401, headers }));
     expect((await firmarError()).cuerpo).toBe("suscripcion");
