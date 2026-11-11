@@ -97,10 +97,21 @@ describe.skipIf(!urlPropietario)("core · importador de cuentas en base real", (
     expect(otra.filas[0]?.accion).toBe("error");
   });
 
-  it("solo quien administra la empresa importa", async () => {
-    for (const rol of ["gerente", "supervisor"] as const) {
-      const r = await x.run(x.t1, "core.importar.ejecutar", { importador: "cuentas", filas: [{ nombre: "X" }] }, { rol, dryRun: true });
-      expect(r.ok ? "ok" : r.error.code).toBe("FORBIDDEN");
-    }
+  it("una cuenta activa en el origen queda activa; «prospecto» nunca baja a un cliente", async () => {
+    const filas = (estado: string) => [{ nombre: "Promovida SpA", rut: "77.111.222-6", estado }];
+    await x.importar(x.t1, "cuentas", { filas: filas("prospecto") });
+    const sube = await x.importar(x.t1, "cuentas", { filas: filas("cliente activo") });
+    expect(sube.filas[0]).toMatchObject({ accion: "actualizar", cambios: ["estado"] });
+    const baja = await x.importar(x.t1, "cuentas", { filas: filas("prospecto"), alExistir: "sobrescribir" });
+    expect(baja.filas[0]?.accion).toBe("sin_cambio");
+    expect((await cuentas(x.t1)).find((c) => c.nombre === "Promovida SpA")?.estado).toBe("cliente_activo");
+  });
+
+  it("importan owner, admin y gerente; supervisor no", async () => {
+    const con = (rol: "gerente" | "supervisor") =>
+      x.run(x.t1, "core.importar.ejecutar", { importador: "cuentas", filas: [{ nombre: "X" }] }, { rol, dryRun: true });
+    expect((await con("gerente")).ok).toBe(true);
+    const sup = await con("supervisor");
+    expect(sup.ok ? "ok" : sup.error.code).toBe("FORBIDDEN");
   });
 });

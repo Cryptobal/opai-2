@@ -1759,7 +1759,7 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 5. **Exportes de OPAI 1.** El adaptador solo lee el JSON del export que se le entrega y usa el sistema de ids `opai1`, el mismo de `comercial.importar_1_0`, para reconocer lo ya traído. Nunca consulta OPAI 1.
 6. **Quién importa.** `core:tenant.manage` (owner y admin por defecto) más el permiso de la entidad; para negocios, el módulo Comercial activo. Revertir un lote es irreversible: a un agente le pide aprobación.
 
-**Pendiente de Carlos.** Ver «Decisiones para Carlos» de CAR-279 en `ESTADO.md`.
+**Adenda (Carlos, chat del proyecto «Opai 2.0», 11-nov-2026 18:00; registra Claude, «Sesión Comercial»).** Cambia la regla 6 y precisa la 2: (a) importa quien tiene `core:importar.manage`: owner, admin y **gerente**; (b) el estado de una cuenta existente sí se completa cuando está en «prospecto» (equivale a «sin dato»): las cuentas activas en el origen quedan activas en OPAI 2; nunca se baja un cliente a prospecto; (c) los negocios ganados o perdidos no exigen fecha de cierre ni motivo; (d) las cuentas importadas no consultan el SII automáticamente; (e) Gard se trae desde OPAI 1 cuanto antes, empezando por Comercial.
 
 ## ADR-092 · `preview-e2e` reemplaza el primer vistazo visual de Carlos (CAR-285, 11-nov-2026)
 
