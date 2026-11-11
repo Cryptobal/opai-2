@@ -4,6 +4,7 @@ export { TecladoPin, type TecladoPinProps } from "./teclado-pin";
 export { BloquePlegable, type BloquePlegableProps } from "./bloque-plegable";
 export { Banda } from "./banda";
 export { BarraProgreso, tonoUso } from "./barra-progreso";
+export { BarrasVerticales, type BarraVertical } from "./barras-verticales";
 export { Button, type ButtonProps, estilosBoton } from "./button";
 export { CampoDireccion, type Direccion } from "./campo-direccion";
 export { CampoSecreto } from "./campo-secreto";

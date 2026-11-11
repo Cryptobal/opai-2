@@ -1,8 +1,5 @@
 // Equivalencia de etapas 1.0 → 2.0 por tenant (ids, sin datos personales). Aprobada por Carlos, 3-nov-2026.
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
+import gard from "./config/equivalencia-etapas.gard.json";
 import type { EtapaOpai1, HistorialEtapaOpai1, NegocioOpai1 } from "./origen";
 
 export type TipoEtapa = "abierta" | "ganada" | "perdida";
@@ -13,17 +10,13 @@ export const ETAPA_ADJUDICADO_2 = "01a1839d-486d-75ba-ae40-321733b40b70";
 
 export type EquivalenciaEtapas = Readonly<Record<string, string>>;
 
-const dirConfig = join(dirname(fileURLToPath(import.meta.url)), "config");
+// Import estático y no lectura de disco: en el despliegue (función serverless) el archivo suelto no
+// viaja con el código y la tabla llegaba vacía, con todos los negocios abiertos como «sin mapeo».
+const TABLAS: Readonly<Record<string, EquivalenciaEtapas>> = { gard };
 
-/** Carga la tabla del tenant; vacía si no hay archivo (simular muestra etapas sin mapear). */
+/** Tabla del tenant; vacía si no tiene (simular muestra etapas sin mapear). */
 export function cargarEquivalenciaEtapas(tenantSlug: string): EquivalenciaEtapas {
-  const ruta = join(dirConfig, `equivalencia-etapas.${tenantSlug}.json`);
-  try {
-    const crudo = JSON.parse(readFileSync(ruta, "utf8")) as Record<string, string>;
-    return crudo;
-  } catch {
-    return {};
-  }
+  return TABLAS[tenantSlug] ?? {};
 }
 
 export type EtapaNegocioResuelta =

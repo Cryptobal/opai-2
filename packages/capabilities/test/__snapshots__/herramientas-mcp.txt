@@ -39,6 +39,7 @@ comercial_contexto_listar
 comercial_contexto_sugerir_seccion
 comercial_informes_cierre
 comercial_informes_perdidos_por_motivo
+comercial_informes_tablero
 comercial_negocios_alertas
 comercial_negocios_archivar
 comercial_negocios_create
