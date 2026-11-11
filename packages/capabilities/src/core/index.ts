@@ -47,6 +47,7 @@ import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesGrupos } from "./grupos";
+import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
 import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
@@ -133,6 +134,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesGrupos,
+  ...capacidadesIndicadoresGestion,
   ...capacidadesDocumentos,
   ...capacidadesFirmas,
   ...capacidadesConfig,
