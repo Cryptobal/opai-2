@@ -8,7 +8,18 @@ import { haceCuanto } from "@/lib/fechas";
 import type { Aviso } from "./campana";
 
 /** Filas de la campana: título, cuerpo y "hace cuánto"; el enlace marca el aviso como leído. */
-export function ListaAvisos({ avisos, portal, onLeida }: { avisos: Aviso[]; portal: string; onLeida?: () => void }) {
+export function ListaAvisos({
+  avisos,
+  portal,
+  onLeida,
+  onNavegar,
+}: {
+  avisos: Aviso[];
+  portal: string;
+  onLeida?: () => void;
+  /** Se llama al pulsar un aviso con enlace (la campana cierra su panel). */
+  onNavegar?: () => void;
+}) {
   return (
     <ul className="divide-y divide-border">
       {avisos.map((a) => {
@@ -33,15 +44,16 @@ export function ListaAvisos({ avisos, portal, onLeida }: { avisos: Aviso[]; port
               <Link
                 href={a.enlace}
                 className="block px-4 py-3 hover:bg-fill dark:hover:bg-bg"
-                onClick={() =>
+                onClick={() => {
+                  onNavegar?.();
                   void ejecutarCapacidad(portal, "core.notificaciones.marcar_leida", {
                     id: a.id,
                   }).then((r) => {
                     if (!r.ok) return;
                     window.dispatchEvent(new Event("opai-bandeja"));
                     onLeida?.();
-                  })
-                }
+                  });
+                }}
               >
                 {cuerpo}
               </Link>
