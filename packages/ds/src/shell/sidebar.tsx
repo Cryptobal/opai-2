@@ -28,6 +28,7 @@ type SidebarProps = {
   empresas?: readonly ItemMenu[] | undefined;
   usuario?: Usuario | undefined;
   menuUsuario?: readonly ItemMenu[] | undefined;
+  avisoNovedades?: boolean | undefined;
   fijados?: readonly ItemFijado[] | undefined;
   errorFijados?: boolean | undefined;
   reintentarFijados?: (() => void) | undefined;
@@ -105,6 +106,7 @@ export function Sidebar(props: SidebarProps) {
         <Pie
           usuario={props.usuario}
           menu={props.menuUsuario}
+          {...(props.avisoNovedades ? { aviso: true } : {})}
         />
       ) : null}
     </nav>

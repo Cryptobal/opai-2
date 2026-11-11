@@ -28,6 +28,8 @@ export type ComunesBarra = {
   empresas?: readonly ItemMenu[];
   /** Campana de notificaciones (isla de la app con `Popover`). */
   campana?: ReactNode;
+  /** Punto rojo en el avatar: novedades sin leer en portales sin Bandeja (CAR-316). */
+  avisoNovedades?: boolean;
   /**
    * Agente interno (ADR-049, D11): su icono va siempre a la izquierda de la campana. Sin agente
    * construido no se pasa y no aparece ningún botón vacío.

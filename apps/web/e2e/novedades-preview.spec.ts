@@ -5,9 +5,10 @@ import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-316: Novedades con indicador de no leídas, texto legible, «Marcar como leída» por novedad y
-// «Marcar todas», y la Bandeja resaltada mientras queden novedades sin leer. Corre en `preview-e2e`
-// con el usuario de la empresa ficticia `qa-e2e` (nunca Gard). Las escrituras (marcar) solo las hace
-// el proyecto de 1280 px: los tres tamaños comparten usuario y correrían en paralelo.
+// «Marcar todas», la Bandeja resaltada con cualquier pendiente y, en los portales sin Bandeja, el punto
+// rojo sobre el avatar (decisiones de Carlos del 11-nov). Corre en `preview-e2e` con el usuario de la
+// empresa ficticia `qa-e2e` (nunca Gard). Las escrituras (marcar) solo las hace el proyecto de 1280 px:
+// los tres tamaños comparten usuario y correrían en paralelo.
 
 const RESUMEN = /^(\d+) novedad(?:es)? sin leer$|^Estás al día/;
 
@@ -49,10 +50,28 @@ test.describe("@preview novedades y bandeja", () => {
     await capturar(page, info, "novedades-menu-cuenta");
     await page.keyboard.press("Escape");
 
+    // Portal sin Bandeja (supervisor), si el usuario lo tiene: el avatar avisa las novedades sin leer.
+    await page.goto("/supervisor/novedades");
+    if (new URL(page.url()).pathname.startsWith("/supervisor/novedades")) {
+      const estado = page.getByText(RESUMEN).or(page.getByText("No pudimos cargar las novedades")).first();
+      await expect(estado).toBeVisible({ timeout: 30_000 });
+      const avatar = page.getByRole("button", { name: /^Menú de usuario/ }).filter({ visible: true }).first();
+      if ((await page.getByText(RESUMEN).count()) > 0 && (await pendientes(page)) > 0)
+        await expect(avatar).toHaveAccessibleName(/hay novedades sin leer/, { timeout: 15_000 });
+      await capturar(page, info, "novedades-avatar-sin-bandeja");
+    }
+
     if (info.project.name !== "desktop") {
       expect(errores).toEqual([]);
       return;
     }
+
+    await page.goto("/bandeja");
+    const titulo = page.getByRole("heading", { name: /^Bandeja · \d+$/ });
+    await expect(titulo).toBeVisible({ timeout: 30_000 });
+    // Con cualquier pendiente, el número de la Bandeja va en píldora roja en la barra lateral.
+    if (Number(/(\d+)$/.exec((await titulo.textContent()) ?? "")?.[1] ?? 0) > 0)
+      await expect(page.locator('nav a[href="/bandeja"] .bg-danger-fg').filter({ visible: true }).first()).toBeVisible({ timeout: 15_000 });
 
     await page.goto("/novedades");
     await expect(page.getByText(RESUMEN).first()).toBeVisible({ timeout: 30_000 });

@@ -22,7 +22,7 @@ import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
 import { padreConfiguracion } from "./padre-configuracion";
 import { useMenuShell } from "./use-menu-shell";
-import { conContadores } from "./nav-contadores";
+import { avisoNovedadesAvatar, conContadores } from "./nav-contadores";
 import { propsPreferenciasShell } from "./shell-props-preferencias";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
@@ -141,6 +141,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         {...(empresas.length ? { empresas } : {})}
         usuario={datos.usuario}
         menuUsuario={menu}
+        // CAR-316 (Carlos, 11-nov): sin Bandeja, las novedades sin leer marcan el avatar.
+        {...(avisoNovedadesAvatar(datos.portal, novedadesNoLeidas) ? { avisoNovedades: true } : {})}
         {...(agente.lanzador ? { agente: agente.lanzador } : {})}
         campana={
           datos.tenant ? (

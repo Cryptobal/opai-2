@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { conContadores } from "@/app/_components/nav-contadores";
+import { avisoNovedadesAvatar, conContadores } from "@/app/_components/nav-contadores";
 
 const nav = [{ href: "/bandeja" }, { href: "/solicitudes" }, { href: "/negocios" }];
 
@@ -30,14 +30,29 @@ describe("Bandeja resaltada con novedades sin leer (CAR-316)", () => {
     });
     expect(conContadores(nav, undefined, 4)[0]).toMatchObject({ contador: 4, resaltado: true });
   });
-  it("con solo avisos o aprobaciones conserva el número discreto (D5), sin globo rojo", () => {
+  it("con solo avisos o aprobaciones también se resalta (decisión de Carlos, 11-nov)", () => {
     expect(conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 }, 0)[0]).toEqual({
       href: "/bandeja",
       contador: 2,
+      alerta: true,
+      resaltado: true,
     });
+  });
+  it("sin nada pendiente vuelve al número discreto en 0, sin globo rojo", () => {
     expect(conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 0 }, 0)[0]).toEqual({
       href: "/bandeja",
       contador: 0,
     });
+  });
+});
+
+describe("punto rojo del avatar en portales sin Bandeja (CAR-316)", () => {
+  it("aparece con novedades sin leer en supervisor, trabajador, terreno, cliente y plataforma", () => {
+    for (const portal of ["supervisor", "trabajador", "terreno", "cliente", "platform"])
+      expect(avisoNovedadesAvatar(portal, 2), portal).toBe(true);
+  });
+  it("no aparece en el ERP (ahí está la Bandeja) ni sin novedades pendientes", () => {
+    expect(avisoNovedadesAvatar("erp", 5)).toBe(false);
+    expect(avisoNovedadesAvatar("supervisor", 0)).toBe(false);
   });
 });
