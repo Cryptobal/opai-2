@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { defineCapability } from "../../define";
-import { reglaDeNegocio } from "../../errores";
+import { prohibido, reglaDeNegocio } from "../../errores";
 import { textoOpcional } from "../maestros/comun";
 import {
   PERMISO_MANAGE,
@@ -69,6 +69,12 @@ export const actividadesCreate = defineCapability({
       throw reglaDeNegocio("Solo las reuniones llevan asistentes, acuerdos y próximo paso.");
     if (esTarea && input.respuestaCliente)
       throw reglaDeNegocio("Una tarea no es una respuesta del cliente.");
+    // La marca pausa o detiene el seguimiento y puede mover la etapa del negocio (CAR-160): exige
+    // un negocio ligado y el mismo permiso que «El cliente respondió» (comercial:negocios.manage).
+    if (input.respuestaCliente && !input.vinculos.some((v) => v.tipo === "negocio"))
+      throw reglaDeNegocio("La respuesta del cliente se registra en un negocio.");
+    if (input.respuestaCliente && !ctx.autorizar("comercial:negocios.manage"))
+      throw prohibido("Registrar una respuesta del cliente requiere gestionar negocios.");
     if (input.resultado && input.tipo !== "llamada" && input.tipo !== "correo")
       throw reglaDeNegocio("Solo las llamadas y los correos llevan resultado.");
     const claves = input.vinculos.map((v) => `${v.tipo}:${v.id}`);
