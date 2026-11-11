@@ -1,5 +1,5 @@
 // Slack F1 (CAR-291, ADR-093): conexión por empresa. Slack siempre simulado (nunca el real ni el de Gard).
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { firmarEstadoOAuth } from "@opai/integrations";
 
@@ -76,16 +76,31 @@ describe("core.slack: conexión", () => {
     expect(llamadas).toEqual([]);
   });
 
-  it("si la empresa ya está en otro espacio, revoca el token nuevo y no cambia nada", async () => {
+  it("si la empresa ya está en otro espacio, rechaza sin revocar ningún token ni cambiar nada", async () => {
     const { ctx } = await conectarSlack();
     respuestas["oauth.v2.access"] = instalacion("T0OTRO22");
     const r = await executeCapability(ctx, "core.slack.conectar", {
       code: "codigo-oauth-2",
       estado: estadoValido(),
     });
-    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-    expect(llamadas.filter((l) => l.metodo === "auth.revoke")).toHaveLength(1);
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE", detalles: { motivo: "otro_espacio" } },
+    });
+    expect(llamadas.filter((l) => l.metodo === "auth.revoke")).toEqual([]);
     expect((await ctx.db.slackInstalacion.findMany({}))[0]).toMatchObject({ teamId: "T0PRUEBA1" });
+  });
+
+  it("si el espacio ya es de otra empresa, rechaza sin revocar: el token puede ser el de esa empresa", async () => {
+    const { ctx } = contextoDePrueba();
+    const duplicado = Object.assign(new Error("Unique constraint failed"), { code: "P2002" });
+    vi.spyOn(ctx.db.slackInstalacion, "upsert").mockRejectedValue(duplicado);
+    const r = await executeCapability(ctx, "core.slack.conectar", {
+      code: "codigo-oauth-1",
+      estado: estadoValido(),
+    });
+    expect(r).toMatchObject({ ok: false, error: { detalles: { motivo: "espacio_ocupado" } } });
+    expect(llamadas.filter((l) => l.metodo === "auth.revoke")).toEqual([]);
   });
 
   it("un error de Slack se muestra en español, sin el cuerpo de Slack", async () => {
@@ -116,14 +131,5 @@ describe("core.slack: conexión", () => {
     respuestas["auth.revoke"] = new Error("red caída");
     const r = await executeCapability(ctx, "core.slack.desconectar", {});
     expect(r).toMatchObject({ ok: true, data: { conectada: false, revocadoEnSlack: false } });
-  });
-
-  it("la desinstalación avisada por Slack solo borra si el espacio coincide", async () => {
-    const { ctx } = await conectarSlack();
-    const otro = await executeCapability(ctx, "core.slack.desinstalada", { teamId: "T0OTRO22" });
-    expect(otro).toMatchObject({ ok: true, data: { borrada: false } });
-    const mismo = await executeCapability(ctx, "core.slack.desinstalada", { teamId: "T0PRUEBA1" });
-    expect(mismo).toMatchObject({ ok: true, data: { borrada: true } });
-    expect(await ctx.db.slackInstalacion.findMany({})).toEqual([]);
   });
 });

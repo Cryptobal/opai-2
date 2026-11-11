@@ -1,16 +1,10 @@
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
-import {
-  appSlackDelEntorno,
-  claveEstadoOAuthDelEntorno,
-  firmarEstadoOAuth,
-  urlAutorizacionSlack,
-  verificarEstadoOAuth,
-} from "@opai/integrations";
+import type { InstalacionSlack } from "@opai/integrations";
 
 import { defineCapability } from "../../define";
-import { prohibido, reglaDeNegocio } from "../../errores";
+import { reglaDeNegocio } from "../../errores";
 import { guardarSecretoTx } from "../../integraciones/secretos";
 import type { Contexto } from "../../types";
 import {
@@ -22,44 +16,10 @@ import {
   slack,
   vistaSlack,
 } from "./comun";
-import { revocarSinFallar, urlVueltaSlack } from "./conexion-comun";
+import { urlVueltaSlack } from "./conexion-comun";
+import { appYClave, exigirEstado } from "./conexion-inicio";
 
-function appYClave() {
-  const app = appSlackDelEntorno();
-  const clave = claveEstadoOAuthDelEntorno();
-  if (!app || !clave) throw reglaDeNegocio("Slack no está disponible en este entorno.");
-  return { app, clave };
-}
-
-export const slackIniciarConexion = defineCapability({
-  id: "core.slack.iniciar_conexion",
-  // OAuth: lo hace una persona en su navegador, nunca una key (ADR-027, ADR-093).
-  soloPersonas: true,
-  descripcion:
-    "Entrega el enlace a Slack para instalar la app «OPAI» en el espacio de la empresa (OAuth). El enlace vale 10 minutos y solo para quien lo pidió.",
-  permiso: PERMISOS_CORE.integracionesManage,
-  input: z.object({}),
-  output: z.object({ url: z.string() }),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx) {
-    const { app, clave } = appYClave();
-    if (!ctx.usuario) throw prohibido("Conectar Slack lo hace una persona con sesión.");
-    const estado = firmarEstadoOAuth(clave, { tenantId: ctx.tenantId, userId: ctx.usuario.id });
-    return {
-      url: urlAutorizacionSlack({
-        clientId: app.clientId,
-        redirectUri: urlVueltaSlack(ctx),
-        estado,
-      }),
-    };
-  },
-});
-
-async function guardarInstalacion(
-  ctx: Contexto,
-  inst: Awaited<ReturnType<ReturnType<typeof slack>["intercambiarCodigo"]>>,
-) {
+async function guardarInstalacion(ctx: Contexto, inst: InstalacionSlack) {
   await ctx.transaccion(async (tx) => {
     const fila = await tx.integracion.upsert({
       where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: PROVEEDOR_SLACK } },
@@ -110,18 +70,12 @@ export const slackConectar = defineCapability({
   output: estadoSlackSchema,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, input, { dryRun }) {
+  // El canje con Slack es una llamada remota: va antes de la transacción de la escritura.
+  async preparar(ctx, input) {
     const { app, clave } = appYClave();
-    const e = verificarEstadoOAuth(clave, input.estado);
-    if (!e || !ctx.usuario || e.t !== ctx.tenantId || e.u !== ctx.usuario.id) {
-      throw prohibido(
-        "El enlace de Slack no corresponde a esta sesión. Vuelve a pulsar «Conectar con Slack».",
-      );
-    }
-    if (dryRun) return vistaSlack(ctx);
-    let inst;
+    exigirEstado(ctx, clave, input.estado);
     try {
-      inst = await slack().intercambiarCodigo({
+      return await slack().intercambiarCodigo({
         clientId: app.clientId,
         clientSecret: app.clientSecret,
         code: input.code,
@@ -130,18 +84,28 @@ export const slackConectar = defineCapability({
     } catch (err) {
       throw errorDeSlack(err);
     }
+  },
+  async handler(ctx, input, { dryRun, preparado }) {
+    const { clave } = appYClave();
+    exigirEstado(ctx, clave, input.estado);
+    if (dryRun) return vistaSlack(ctx);
+    const inst = preparado as InstalacionSlack | undefined;
+    if (!inst)
+      throw reglaDeNegocio("No se pudo completar la conexión con Slack. Vuelve a intentar.");
+    // En los rechazos NO se revoca el token: con la rotación apagada, reinstalar la app en un espacio
+    // devuelve el MISMO token del bot, que puede ser el de otra empresa ya conectada a ese espacio.
     const actual = await instalacionSlack(ctx);
     if (actual && actual.teamId !== inst.teamId) {
-      await revocarSinFallar(inst.token);
       throw reglaDeNegocio(
-        `La empresa ya está conectada a otro espacio de Slack («${actual.teamNombre}»). Desconéctalo primero.`,
-        { motivo: "otro_espacio" },
+        "La empresa ya está conectada a otro espacio de Slack. Desconéctalo primero.",
+        {
+          motivo: "otro_espacio",
+        },
       );
     }
     try {
       await guardarInstalacion(ctx, inst);
     } catch (err) {
-      await revocarSinFallar(inst.token);
       if ((err as { code?: unknown } | null)?.code === "P2002") {
         throw reglaDeNegocio("Ese espacio de Slack ya está conectado a otra empresa de OPAI.", {
           motivo: "espacio_ocupado",

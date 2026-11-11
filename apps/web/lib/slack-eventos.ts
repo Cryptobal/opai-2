@@ -13,13 +13,13 @@ const eventoCallback = z.object({
   event: z.object({
     type: z.string().max(64),
     /** tokens_revoked: qué tokens se revocaron. Solo nos importan los del bot. */
-    tokens: z.object({ bot: z.array(z.string()).optional() }).optional(),
+    tokens: z.object({ bot: z.array(z.string().max(32)).optional() }).optional(),
   }),
 });
 
 export type EventoSlack =
   | { tipo: "verificacion"; challenge: string }
-  | { tipo: "desinstalada"; teamId: string }
+  | { tipo: "desinstalada"; teamId: string; botUserIds?: string[] }
   | { tipo: "ignorado" };
 
 /**
@@ -40,8 +40,10 @@ export function leerEventoSlack(cuerpo: string): EventoSlack {
   if (!e.success) return { tipo: "ignorado" };
   const { type, tokens } = e.data.event;
   if (type === "app_uninstalled") return { tipo: "desinstalada", teamId: e.data.team_id };
-  if (type === "tokens_revoked" && (tokens?.bot?.length ?? 0) > 0) {
-    return { tipo: "desinstalada", teamId: e.data.team_id };
+  const bots = tokens?.bot ?? [];
+  // Solo se borra si Slack revocó el token de un bot; la capacidad compara con el bot de la empresa.
+  if (type === "tokens_revoked" && bots.length > 0) {
+    return { tipo: "desinstalada", teamId: e.data.team_id, botUserIds: bots.slice(0, 50) };
   }
   return { tipo: "ignorado" };
 }

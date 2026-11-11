@@ -42,4 +42,21 @@ describe("core.slack: canales y paridad", () => {
       nombres.filter((n) => /slack_(iniciar|conectar|desconectar|desinstalada)/.test(n)),
     ).toEqual([]);
   });
+
+  it("la desinstalación avisada por Slack solo borra si el espacio coincide", async () => {
+    const { ctx } = await conectarSlack();
+    const otro = await executeCapability(ctx, "core.slack.desinstalada", { teamId: "T0OTRO22" });
+    expect(otro).toMatchObject({ ok: true, data: { borrada: false } });
+    const otroBot = await executeCapability(ctx, "core.slack.desinstalada", {
+      teamId: "T0PRUEBA1",
+      botUserIds: ["U0OTROBOT"],
+    });
+    expect(otroBot).toMatchObject({ ok: true, data: { borrada: false } });
+    const mismo = await executeCapability(ctx, "core.slack.desinstalada", {
+      teamId: "T0PRUEBA1",
+      botUserIds: ["U0BOT1"],
+    });
+    expect(mismo).toMatchObject({ ok: true, data: { borrada: true } });
+    expect(await ctx.db.slackInstalacion.findMany({})).toEqual([]);
+  });
 });

@@ -28,7 +28,8 @@ export const slackDesconectar = defineCapability({
         revocadoEnSlack: true,
       };
     // Si Slack no responde, igual se borra en OPAI: sin token, OPAI no puede enviar nada.
-    const revocadoEnSlack = await revocarSinFallar(await tokenSlack(ctx).catch(() => ""));
+    const token = await tokenSlack(ctx).catch(() => null);
+    const revocadoEnSlack = token ? await revocarSinFallar(token) : false;
     await borrarConexionSlack(ctx, "desconectada");
     return { ...(await vistaSlack(ctx)), revocadoEnSlack };
   },
@@ -45,13 +46,19 @@ export const slackDesinstalada = defineCapability({
   descripcion:
     "Registra que la app de Slack se desinstaló o que su token fue revocado desde Slack: borra el token y la instalación de la empresa, y conserva la configuración.",
   permiso: null,
-  input: z.object({ teamId: z.string().regex(/^T[A-Z0-9]{4,}$/) }),
+  input: z.object({
+    teamId: z.string().regex(/^T[A-Z0-9]{4,}$/),
+    /** tokens_revoked: bots cuyos tokens revocó Slack. Solo se borra si incluye el bot de esta empresa. */
+    botUserIds: z.array(z.string().max(32)).max(50).optional(),
+  }),
   output: z.object({ borrada: z.boolean() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const inst = await instalacionSlack(ctx);
     if (!inst || inst.teamId !== input.teamId) return { borrada: false };
+    // Un aviso atrasado de otra instalación (por ejemplo, tras reconectar) no borra la conexión vigente.
+    if (input.botUserIds && !input.botUserIds.includes(inst.botUserId)) return { borrada: false };
     if (!dryRun) await borrarConexionSlack(ctx, "desinstalada");
     return { borrada: true };
   },

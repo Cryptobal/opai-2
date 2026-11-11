@@ -1,5 +1,9 @@
 import { PERMISOS_CORE } from "@opai/domain";
-import { slackConfigSchema } from "@opai/integrations";
+import {
+  fusionarSlackConfig,
+  slackConfigEfectiva,
+  slackConfigParcialSchema,
+} from "@opai/integrations";
 
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
@@ -8,13 +12,15 @@ import { estadoSlackSchema, filaIntegracionSlack, PROVEEDOR_SLACK, vistaSlack } 
 export const slackConfigurar = defineCapability({
   id: "core.slack.configurar",
   descripcion:
-    "Cambia la configuración de los avisos a Slack de la empresa: canales (general, pánico, resumen), qué anomalías se avisan, margen de atraso en minutos, pánico (canal, mensaje directo al supervisor, escalamiento a un grupo y sus minutos) y resumen por turno. No conecta ni desconecta Slack.",
+    "Cambia la configuración de los avisos a Slack de la empresa: canales (general, pánico, resumen), qué anomalías se avisan, margen de atraso en minutos, pánico (canal, mensaje directo al supervisor, escalamiento a un grupo y sus minutos) y resumen por turno. Solo cambia lo que se manda; lo demás queda como estaba. No conecta ni desconecta Slack.",
   permiso: PERMISOS_CORE.integracionesManage,
-  input: slackConfigSchema,
+  input: slackConfigParcialSchema,
   output: estadoSlackSchema,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, config, { dryRun }) {
+  async handler(ctx, cambio, { dryRun }) {
+    const actual = await filaIntegracionSlack(ctx);
+    const config = fusionarSlackConfig(slackConfigEfectiva(actual?.config), cambio);
     const grupoId = config.panico.escalarAGrupoId;
     if (grupoId) {
       const grupo = await ctx.db.grupoUsuarios.findFirst({
@@ -28,7 +34,6 @@ export const slackConfigurar = defineCapability({
       throw reglaDeNegocio("Para escalar el pánico, elige el grupo de usuarios que lo recibe.");
     }
     if (dryRun) return { ...(await vistaSlack(ctx)), config };
-    const actual = await filaIntegracionSlack(ctx);
     await ctx.transaccion(async (tx) => {
       const datos = {
         config: JSON.parse(JSON.stringify(config)),

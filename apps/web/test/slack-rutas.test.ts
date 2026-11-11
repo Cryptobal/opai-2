@@ -59,7 +59,7 @@ describe("POST /api/integraciones/slack/eventos", () => {
     }));
     vi.doMock("@/lib/registro", () => ({ asegurarRegistro: () => undefined }));
     vi.doMock("@/lib/medidor", () => ({ medidorDiferido: {} }));
-    vi.doMock("@/lib/rate-limit", () => ({ permitir: async () => true }));
+    vi.doMock("@/lib/rate-limit", () => ({ permitir: async () => true, ipDe: () => "1.2.3.4" }));
   });
   const pedir = async (
     cuerpo: string,
@@ -103,6 +103,16 @@ describe("POST /api/integraciones/slack/eventos", () => {
     expect(resolver).toHaveBeenCalledWith("T0PRUEBA1");
     expect(ejecutar).toHaveBeenCalledWith(expect.anything(), "core.slack.desinstalada", {
       teamId: "T0PRUEBA1",
+    });
+  });
+
+  it("la revocación de un token pasa los bots revocados para que solo se borre el de la empresa", async () => {
+    expect((await pedir(callback("tokens_revoked", { tokens: { bot: ["U0BOT1"] } }))).status).toBe(
+      200,
+    );
+    expect(ejecutar).toHaveBeenCalledWith(expect.anything(), "core.slack.desinstalada", {
+      teamId: "T0PRUEBA1",
+      botUserIds: ["U0BOT1"],
     });
   });
 
