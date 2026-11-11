@@ -23,12 +23,12 @@ export function EmitirLineasDetalle({ documentoId, tipoDte, lineas, setLineas }:
   const cambiar = (i: number, c: Partial<LineaForm>) =>
     setLineas((rows) => rows.map((r, j) => (j === i ? { ...r, ...c } : r)));
   return (
-    <Card className="flex flex-col gap-4 p-4">
-      <div className="flex items-center justify-between gap-2">
+    <Card className="flex flex-col gap-4 p-3 sm:p-4">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="t-label text-fg">Detalle</h2>
         {!fijo ? (
-          <Button variant="ghost" size="iconSm" onClick={() => setLineas((l) => [...l, LINEA_NUEVA])}>
-            <Plus className="size-4" aria-hidden /> Línea
+          <Button variant="secondary" onClick={() => setLineas((l) => [...l, LINEA_NUEVA])}>
+            <Plus className="size-4" aria-hidden /> Agregar línea
           </Button>
         ) : null}
       </div>
@@ -55,7 +55,7 @@ export function EmitirLineasDetalle({ documentoId, tipoDte, lineas, setLineas }:
             </div>
           </div>
           {lineas.length > 1 && !fijo ? (
-            <Button variant="ghost" aria-label={`Quitar línea ${i + 1}`} onClick={() => setLineas((rows) => rows.filter((_, j) => j !== i))}>
+            <Button variant="ghost" className="self-end" aria-label={`Quitar línea ${i + 1}`} onClick={() => setLineas((rows) => rows.filter((_, j) => j !== i))}>
               <Trash2 className="size-4" aria-hidden /> Quitar
             </Button>
           ) : null}

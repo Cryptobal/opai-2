@@ -14,7 +14,9 @@ import type { LibroVentas, Venta } from "./tipos";
 
 export type DatosLibro = {
   state: EstadoPantalla;
-  libro: LibroVentas | null;
+  libro: Pick<LibroVentas, "items" | "siguiente"> | null;
+  /** Texto bajo el título que describe lo que se ve (CAR-261, `resumenLista`). */
+  subtitulo: string | null;
   gestiona: boolean;
   filtrado: boolean;
   periodos: { valor: string; etiqueta: string }[];
@@ -23,7 +25,6 @@ export type DatosLibro = {
 /** Columna izquierda del Libro de ventas (CAR-255): pestañas, búsqueda, filtros y filas seleccionables. */
 export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: DatosLibro; seleccionada?: string; params: Parametros }) {
   const items = d.libro?.items ?? [];
-  const r = d.libro?.resumen;
   const emitir = d.gestiona ? (
     <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
       Emitir
@@ -51,10 +52,7 @@ export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: 
             ],
           },
         ]}
-        meta={{
-          izquierda: `${r?.documentos ?? items.length} documentos`,
-          ...(r && r.total > 0 ? { derecha: `Total ${pesos(r.total)}` } : {}),
-        }}
+        meta={{ izquierda: d.subtitulo ?? `${items.length} documentos` }}
         seleccionada={seleccionada}
         vacio={
           d.filtrado

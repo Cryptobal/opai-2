@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Alerta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+import { VisorPdf } from "@/app/_components/visor-pdf";
 
 /**
  * PDF del borrador dentro de «Revisar emisión» (CAR-249): se carga al abrir la vista previa, con la marca «BORRADOR» y sin
@@ -36,7 +37,7 @@ export function EmitirPdfEnVista({ documentoId }: { documentoId: string }) {
     <div className="flex flex-col gap-2">
       <h3 className="t-label text-fg">Así quedará el documento</h3>
       {url ? (
-        <iframe src={url} title="Vista previa del borrador en PDF" className="h-[60dvh] w-full rounded-md border border-border" />
+        <VisorPdf pdfUrl={url} titulo="Vista previa del borrador en PDF" nombreArchivo="borrador.pdf" alto="h-[60dvh]" />
       ) : (
         <p className="text-sm text-fg-muted" role="status">Preparando el PDF…</p>
       )}
