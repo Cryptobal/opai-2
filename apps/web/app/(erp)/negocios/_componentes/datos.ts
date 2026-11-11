@@ -21,6 +21,8 @@ export type NegocioFila = {
   probabilidad: number;
   cierreEstimado: string | null;
   etiquetas?: EtiquetaDeFila[];
+  /** Solo en el tablero: indicador corto del seguimiento (CAR-160). */
+  seguimiento?: { texto: string; tono: "neutro" | "info" | "warning" | "danger" } | null;
 };
 
 export type Historial = {

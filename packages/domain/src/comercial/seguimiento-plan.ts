@@ -19,6 +19,11 @@ export type PasoPlan = {
   titulo: string;
   /** Guion para llamadas o texto base para WhatsApp. */
   guion?: string | undefined;
+  /**
+   * Etapa abierta (id, nunca nombre) a la que pasa el negocio al hacerse el paso (R11, CAR-160). Solo
+   * avanza: si el negocio ya está ahí o más adelante, o no cumple los requisitos de entrada, no se mueve.
+   */
+  etapaDestino?: string | undefined;
 };
 
 export type ConfigPlan = {

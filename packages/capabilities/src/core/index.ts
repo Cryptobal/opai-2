@@ -34,6 +34,7 @@ import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { consumidorSeguimientoAviso } from "../comercial/seguimiento-aviso";
+import { consumidoresPausaSeguimiento } from "../comercial/seguimiento-pausas";
 import { consumidorTareaVencida, trabajoTareasVencidas } from "./crm/actividades-vencidas";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
@@ -147,6 +148,7 @@ export const consumidoresDelNucleo = [
   consumidorSolicitudCreada,
   consumidorTareaVencida,
   consumidorSeguimientoAviso,
+  ...consumidoresPausaSeguimiento,
   consumidorNegocioGanado,
   consumidorCpqGanado, consumidorTurnosEsperados,
   consumidorRevocacionBiometria,

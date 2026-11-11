@@ -7,6 +7,7 @@ import { defineCapability } from "../define";
 import { defineTrabajo } from "../trabajos/registro";
 import type { Contexto } from "../types";
 import { credencialesSimpleApi } from "./adaptador-sii";
+import { ajusteFinanzas } from "./ajuste-finanzas";
 import { consultarMes, esConsultaRcv, type ConsultaRcv } from "./compras-rcv-consulta";
 import { PERMISO_COMPRAS } from "./comun";
 import { importarDocumentosCompra, type ResultadoImportacion } from "./compras-importar-nucleo";
@@ -36,6 +37,13 @@ export async function importarMes(ctx: Contexto, c: ConsultaRcv, dryRun: boolean
     ? await importarDocumentosCompra(ctx, { documentos: c.documentos, crearProveedores: true }, dryRun, "sii_rcv")
     : vacio;
   return { ...r, anio: c.anio, mes: c.mes, recibidos: c.recibidos, omitidos: c.omitidos };
+}
+
+/** El trabajo corre a diario; según el ajuste del tenant consulta hoy, solo los lunes (Chile) o nunca. */
+export function tocaHoy(frecuencia: "diaria" | "semanal" | "manual", ahora = new Date()): boolean {
+  if (frecuencia === "manual") return false;
+  if (frecuencia === "diaria") return true;
+  return new Intl.DateTimeFormat("en-US", { timeZone: "America/Santiago", weekday: "short" }).format(ahora) === "Mon";
 }
 
 const periodo = (i: { anio?: number | undefined; mes?: number | undefined }): [number, number] => {
@@ -77,10 +85,12 @@ export const comprasSincronizarRcv = defineCapability({
 export const trabajoSincronizarRcv = defineTrabajo({
   tipo: "finanzas.compras.sincronizar_rcv",
   descripcion:
-    "Una vez al día trae del RCV del SII las compras del mes (las del mes anterior los tres primeros días) y las agrega al libro de compras sin duplicar. Solo actúa si la empresa tiene Emisión DTE con SimpleAPI configurada.",
+    "Según el ajuste «Traer las compras desde el SII» (diaria por defecto, semanal o manual) trae del RCV del SII las compras del mes (las del mes anterior los tres primeros días) y las agrega al libro de compras sin duplicar. Solo actúa si la empresa tiene Emisión DTE con SimpleAPI configurada.",
   payload: z.object({}).passthrough(),
   periodicidad: "diaria",
   async handler(ctx) {
+    const frecuencia = await ajusteFinanzas(ctx, "compras_sincronizar_rcv");
+    if (!tocaHoy(frecuencia)) return { activo: false, frecuencia };
     if (!(await credencialesSimpleApi(ctx))) return { activo: false };
     const { anio, mes } = mesDelTrabajo();
     const consulta = await consultarMes(ctx, anio, mes);

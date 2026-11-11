@@ -25,6 +25,7 @@ export function borradorInicial(ahora = new Date()): Borrador {
     asistentes: "",
     acuerdos: "",
     resultado: "contesto",
+    respuestaCliente: false,
   };
 }
 
@@ -57,6 +58,7 @@ export function entradaActividad(
         ? { ocurrioEn: cuando }
         : {}),
     ...(tipo === "llamada" ? { resultado: b.resultado } : {}),
+    ...(tipo !== "tarea" && b.respuestaCliente ? { respuestaCliente: true } : {}),
     ...(tipo === "reunion"
       ? {
           asistentes: b.asistentes

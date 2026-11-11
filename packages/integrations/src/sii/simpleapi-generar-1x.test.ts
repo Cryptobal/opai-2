@@ -135,7 +135,7 @@ describe("dte/generar igual a OPAI 1.0 (CAR-240)", () => {
     expect(error.status).toBe(401);
     expect(error.motivo).toContain("respondió HTTP 401 sin motivo, también al repetir con token");
     expect(error.cuerpo).toBe("vacio");
-    expect(error.respuesta).toEqual({ contentType: null, contentLength: "0", cuerpoLargo: 0, detalleLargo: null });
+    expect(error.respuesta).toEqual({ contentType: null, contentLength: "0", cuerpoLargo: 0, detalleLargo: null, clavesJson: null });
     expect(error.peticion).toEqual({
       pfxBytes: PFX.length,
       pfxDer: true,
@@ -162,7 +162,7 @@ describe("dte/generar igual a OPAI 1.0 (CAR-240)", () => {
     if (!(error instanceof ErrorProveedorSii)) throw new Error("se esperaba ErrorProveedorSii");
     // El saneador quita la clave y toda palabra contenida en ella («Clave»): mejor perder fidelidad que un secreto.
     expect(error.detalle).toBe("incorrecta");
-    expect(error.respuesta).toMatchObject({ contentType: "application/json; charset=utf-8", detalleLargo: 10 });
+    expect(error.respuesta).toMatchObject({ contentType: "application/json; charset=utf-8", detalleLargo: 10, clavesJson: ["mensaje"] });
     expect(JSON.stringify(error.respuesta)).not.toContain("incorrecta");
     expect(JSON.stringify(error.respuesta)).not.toContain(CLAVE_PFX);
   });
