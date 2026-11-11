@@ -53,7 +53,10 @@ export const importadorCuentas: Importador<DatosCuenta> = {
   def,
   entidad: "cuenta",
   permiso: PERMISOS_CORE.cuentasManage,
-  actualizables: ["razonSocial", "rut", "giro", "sitioWeb", "calle", "comuna", "ciudad", "region", "emailDte", "notas", "clienteDesde"],
+  actualizables: ["razonSocial", "rut", "giro", "estado", "sitioWeb", "calle", "comuna", "ciudad", "region", "emailDte", "notas", "clienteDesde"],
+  // «Prospecto» es el estado por defecto: una cuenta activa en el origen queda activa aquí (Carlos, 11-nov-2026)
+  // y una planilla que dice «prospecto» nunca baja a un cliente.
+  sinDato: { estado: "prospecto" },
   async planificar(ctx, filas, o) {
     const externos = await idsExternos(ctx, "cuenta", o.sistema, filas.map((f) => texto(f.datos["id_externo"]) ?? ""));
     // Incluye las archivadas: el RUT es único en toda la empresa, también entre ellas.
