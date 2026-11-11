@@ -27,8 +27,9 @@ const credsFicticias = {
   actecoEmisor: 801000,
 };
 const emisor = { razonSocial: "Empresa Ficticia SpA", giro: "Servicios de prueba", calle: "Calle Ficticia 1", comuna: "Comuna Ficticia", ciudad: "Ciudad Ficticia" };
+/** 401 vacío con la sonda de la key sin respuesta (503): el mensaje dice las dos causas (CAR-263b). */
 const MENSAJE_401_VACIO =
-  "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE. El borrador sigue sin emitir y el folio no se usó.";
+  "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo: puede ser la API key o el contenido (certificado, CAF o JSON); «Probar conexión» en Integraciones › Emisión DTE comprueba la key. El borrador sigue sin emitir y el folio no se usó.";
 
 /** CAF sintético con una «ñ» en la razón social: en el archivo es el byte 0xF1, un carácter por byte en el texto. */
 const cafConEne = (folioDesde: number) =>
@@ -95,7 +96,9 @@ describe.skipIf(!urlPropietario)("CAF en bytes ISO-8859-1 hasta SimpleAPI (CAR-2
     const enviados: Buffer[] = [];
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (_url: string, init: { headers: Record<string, string>; body: Uint8Array }) => {
+      vi.fn(async (url: string, init: { headers: Record<string, string>; body?: Uint8Array }) => {
+        // La sonda de la key (GET sin cuerpo) no responde: no hay dato para elegir entre key y contenido (CAR-263b).
+        if (url.endsWith("/Suscripcion/status") || !init.body) return new Response("", { status: 503 });
         const partes = leerMultipart(init.body, String(init.headers["Content-Type"]));
         enviados.push(Buffer.from(partes[2]!.bytes));
         return new Response("", { status: 401, headers: { "x-rate-limit-remaining": "39" } });

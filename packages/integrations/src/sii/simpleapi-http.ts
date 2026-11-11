@@ -8,6 +8,7 @@ import {
 } from "./error-proveedor";
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
 import { diagnosticoRespuestaSii } from "./simpleapi-diagnostico";
+import { motivoRechazoSinCuerpo } from "./simpleapi-rechazo";
 import { cuerpoMultipart, type ParteMultipart } from "./simpleapi-multipart";
 import { bytesDeXml } from "./xml-iso";
 
@@ -51,10 +52,11 @@ export function archivoXml(xmlLatin1: string, nombreArchivo: string): ArchivoMul
 }
 
 /**
- * Motivo de un HTTP no 2xx (CAR-263). Los headers `x-rate-limit-*` NO prueban que la key autenticó: SimpleAPI los envía
- * en todas sus respuestas, también sin `Authorization` o con una key inventada (verificado contra api.simpleapi.cl el
- * 10-nov-2026; la regla contraria venía de `isApiKeyAuthenticated` de 1.0 y dio por buena una key sin comprobarla).
- * Un 401 o 403 sin cuerpo es justamente su respuesta a una key que no reconoce.
+ * Motivo de un HTTP no 2xx (CAR-263, CAR-263b). Los headers `x-rate-limit-*` NO prueban que la key autenticó: SimpleAPI
+ * los envía en todas sus respuestas, también sin `Authorization` o con una key inventada (verificado contra
+ * api.simpleapi.cl el 10-nov-2026). Un 401 o 403 sin cuerpo tampoco prueba lo contrario: SimpleAPI lo usa para una key
+ * que no reconoce y para un contenido que rechaza. Sin la sonda de la key (`discriminarRechazoSinCuerpo`), se dicen
+ * las dos causas.
  */
 function motivoHttp(status: number, cuerpo: FormaCuerpo): string {
   if (status !== 401 && status !== 403) return `respondió HTTP ${status}`;
@@ -62,9 +64,7 @@ function motivoHttp(status: number, cuerpo: FormaCuerpo): string {
   if (cuerpo === "suscripcion") {
     return `indicó que la API key no tiene suscripción vigente para este servicio o que venció, HTTP ${status}`;
   }
-  if (cuerpo === "vacio") {
-    return `respondió HTTP ${status} sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE`;
-  }
+  if (cuerpo === "vacio") return motivoRechazoSinCuerpo(status);
   // Con texto del proveedor, el detalle saneado acompaña al estado; no se adivina la causa.
   return `rechazó la petición, HTTP ${status}`;
 }

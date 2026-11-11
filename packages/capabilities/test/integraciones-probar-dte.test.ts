@@ -6,7 +6,8 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { capacidadesDelNucleo, executeCapability, limpiarRegistro, registrarCapacidades } from "../src";
 import { contextoDePrueba } from "../src/testing";
 
-const KEY = "1111-AAAA-2222-BBBB";
+/** Key ficticia de 20 caracteres (el largo de la key real; el `1111-1111-1111-1111` de la doc es solo un ejemplo). */
+const KEY = "1111-AAAA-2222-BBBBB";
 type Probar = { ok: boolean; mensaje: string };
 
 beforeAll(() => {
@@ -24,8 +25,11 @@ async function conKey(valor: string) {
   expect(r.ok).toBe(true);
   return ctx;
 }
-const responder = (r: () => Response) => {
-  const f = vi.fn(async (_url: unknown, _init?: RequestInit) => r());
+/** Responde según el esquema del header `Authorization`: `basic` («Basic …») o `raw` (la key cruda). */
+const responder = (r: (esquema: "basic" | "raw") => Response) => {
+  const f = vi.fn(async (_url: unknown, init?: RequestInit) =>
+    r(String((init?.headers as Record<string, string>)["Authorization"]).startsWith("Basic ") ? "basic" : "raw"),
+  );
   vi.stubGlobal("fetch", f);
   return f;
 };
@@ -47,13 +51,29 @@ describe("core.integraciones.probar con dte_emision (CAR-263)", () => {
     expect(d.mensaje).not.toContain(KEY);
   });
 
-  it("401 vacío con x-rate-limit-*: la key no está reconocida y la integración queda en error", async () => {
+  it("Basic 401 y key cruda 200: la key de 20 caracteres está reconocida (CAR-263b)", async () => {
     const ctx = await conKey(KEY);
-    responder(() => new Response("", { status: 401, headers: { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" } }));
+    const f = responder((esquema) => (esquema === "basic" ? new Response("", { status: 401 }) : Response.json({ mensaje: "Suscripcion activa" })));
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
     const d = await probar(ctx);
+    expect(f).toHaveBeenCalledTimes(2);
+    expect(d).toMatchObject({ ok: true, mensaje: "SimpleAPI reconoce la API key (Suscripcion activa). Falta cargar el certificado digital y su clave." });
+    // Log categórico con el esquema aceptado; nunca la key ni el header.
+    const log = info.mock.calls.find((c) => c[0] === "[sii] probar_key")?.[1];
+    expect(log).toEqual({ evento: "sii.simpleapi.probar_key", estado: "reconocida", status: 200, esquema: "raw" });
+    expect(JSON.stringify(info.mock.calls)).not.toContain(KEY);
+    info.mockRestore();
+  });
+
+  it("401 vacío con los dos esquemas: la key no está reconocida, sin tratar 19 como el largo correcto", async () => {
+    const ctx = await conKey(KEY);
+    const f = responder(() => new Response("", { status: 401, headers: { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" } }));
+    const d = await probar(ctx);
+    expect(f).toHaveBeenCalledTimes(2);
     expect(d.ok).toBe(false);
-    expect(d.mensaje).toMatch(/^SimpleAPI no reconoce la API key guardada \(HTTP 401\)/);
-    expect(d.mensaje).toContain("tiene 19 caracteres.");
+    expect(d.mensaje).toMatch(/^SimpleAPI no reconoce la API key guardada \(HTTP 401, probada como Basic y como key directa\)/);
+    expect(d.mensaje).toContain("La key guardada tiene 20 caracteres; compárala con la del panel.");
+    expect(d.mensaje).not.toMatch(/19|1111-1111/);
     expect(d.mensaje).not.toContain(KEY);
     const lista = await executeCapability(ctx, "core.integraciones.list", {});
     const fila = (lista.ok ? (lista.data as { proveedor: string; estado: string }[]) : []).find((i) => i.proveedor === "dte_emision");
@@ -64,7 +84,7 @@ describe("core.integraciones.probar con dte_emision (CAR-263)", () => {
     const ctx = await conKey(`"${KEY}"`);
     responder(() => new Response("", { status: 401 }));
     const d = await probar(ctx);
-    expect(d.mensaje).toContain("tiene 21 caracteres y alguno no es letra, número ni guion");
+    expect(d.mensaje).toContain("tiene 22 caracteres y alguno no es letra, número ni guion");
     expect(d.mensaje).not.toContain(KEY);
   });
 

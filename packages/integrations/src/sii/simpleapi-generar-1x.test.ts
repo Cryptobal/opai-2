@@ -76,7 +76,9 @@ function capturar(respuesta: () => Response): { partes: ParteLeida[] }[] {
   const llamadas: { partes: ParteLeida[] }[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (_url: string, init: { headers: Record<string, string>; body: Uint8Array }) => {
+    vi.fn(async (_url: string, init: { headers: Record<string, string>; body?: Uint8Array }) => {
+      // La sonda de la key (GET `Suscripcion/status`, sin cuerpo; CAR-263b) recibe la misma respuesta y no se registra.
+      if (!init.body) return respuesta();
       llamadas.push({ partes: leerMultipart(init.body, String(init.headers["Content-Type"])) });
       return respuesta();
     }),
@@ -133,7 +135,9 @@ describe("dte/generar igual a OPAI 1.0 (CAR-240)", () => {
     expect(error).toBeInstanceOf(ErrorProveedorSii);
     if (!(error instanceof ErrorProveedorSii)) return;
     expect(error.status).toBe(401);
-    expect(error.motivo).toContain("respondió HTTP 401 sin motivo, como ante una API key que no reconoce");
+    // La sonda de la key también responde 401 vacío (Basic y cruda): solo así el motivo habla de la key (CAR-263b).
+    expect(error.motivo).toContain("respondió HTTP 401 sin motivo y tampoco reconoce la API key guardada");
+    expect(error.sondaKey).toEqual({ estado: "no_reconocida" });
     expect(error.cuerpo).toBe("vacio");
     expect(error.respuesta).toEqual({ contentType: null, contentLength: "0", cuerpoLargo: 0, detalleLargo: null });
     expect(error.peticion).toEqual({

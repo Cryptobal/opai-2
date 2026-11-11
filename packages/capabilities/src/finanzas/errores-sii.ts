@@ -42,8 +42,10 @@ export function comoReglaSiProveedorSii(
     // Límites de uso que informó SimpleAPI (x-rate-limit-*, retry-after), saneados. Vienen en toda respuesta, también
     // sin key: sirven para ver un 429, no para saber si la key autenticó (CAR-263).
     limites: error.limites,
-    // Forma del cuerpo sin su texto: «vacio» (en un 401, key no reconocida), «suscripcion» (la key no cubre el servicio) u «otro».
+    // Forma del cuerpo sin su texto: «vacio» (en un 401, key o contenido), «suscripcion» (la key no cubre el servicio) u «otro».
     cuerpo: error.cuerpo,
+    // Ante un 401/403 vacío de generar: qué dijo la sonda de la key (estado y esquema «basic»/«raw»), nunca la key (CAR-263b).
+    sondaKey: error.sondaKey,
     // Forma de la respuesta y de la petición rechazadas (CAR-240): content-type/length, largos, si el PFX es DER, formato
     // del CAF, si Certificado.Rut tiene forma válida y los nombres de IdentificacionDTE. Nunca texto, base64 ni XML.
     respuesta: error.respuesta,

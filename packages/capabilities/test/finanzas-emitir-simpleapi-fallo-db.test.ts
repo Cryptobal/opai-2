@@ -154,7 +154,9 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
     const entradas: Record<string, unknown>[] = [];
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (_url: string, init: { headers: Record<string, string>; body: Uint8Array }) => {
+      vi.fn(async (url: string, init: { headers: Record<string, string>; body?: Uint8Array }) => {
+        // «Probar conexión» reconoce la key (GET Suscripcion/status, sin cuerpo): el 401 vacío es del contenido (CAR-263b).
+        if (url.endsWith("/Suscripcion/status") || !init.body) return Response.json({ mensaje: "Suscripcion activa" });
         entradas.push(JSON.parse(textoInput(leerMultipart(init.body, String(init.headers["Content-Type"])))));
         // Como el rechazo de las 20:43 del 10-nov-2026: sin cuerpo y con los headers de cupo (que SimpleAPI envía siempre; CAR-263).
         return new Response(null, { status: 401, headers: { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" } });
@@ -172,7 +174,10 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
       expect(ui.ok || mcp.ok).toBe(false);
       if (ui.ok || mcp.ok) return;
       expect(ui.error.code).toBe("UNPROCESSABLE");
-      expect(ui.error.message).toContain("SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, como ante una API key que no reconoce");
+      expect(ui.error.message).toContain(
+        "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, pero sí reconoce la API key: rechazó el contenido (certificado, CAF o JSON), no la key",
+      );
+      expect(ui.error.message).not.toMatch(/mal copiada|cópiala/);
       expect(ui.error.message).toContain("El borrador sigue sin emitir y el folio no se usó.");
       expect({ code: mcp.error.code, message: mcp.error.message }).toEqual({ code: ui.error.code, message: ui.error.message });
       // Las dos llamadas mandaron el mismo JSON: sin vencimiento (el borrador sí lo tiene), con FormaPago y el titular.
@@ -190,6 +195,7 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
       expect(rechazos[0]).toMatchObject({
         status: 401,
         cuerpo: "vacio",
+        sondaKey: { estado: "reconocida", esquema: "basic" },
         limites: { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" },
         respuesta: { contentType: null, contentLength: null, cuerpoLargo: 0, detalleLargo: null },
         peticion: {

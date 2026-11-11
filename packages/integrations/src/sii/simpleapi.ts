@@ -30,6 +30,7 @@ import {
 import { detalleSeguroDeRespuesta, ErrorProveedorSii, type PasoProveedorSii } from "./error-proveedor";
 import { viajaIntactoEnLatin1 } from "./simpleapi-multipart";
 import { diagnosticoPeticionSii } from "./simpleapi-diagnostico";
+import { discriminarRechazoSinCuerpo } from "./simpleapi-rechazo";
 import { extraerTed, xmlDesdeBytes } from "./xml-iso";
 
 export type CredencialesSimpleApi = CredencialesSimpleApiV1;
@@ -101,7 +102,8 @@ export function adaptadorSimpleApi(creds: CredencialesSimpleApi | null): Adaptad
       } catch (e) {
         // Solo ante un rechazo: la forma de lo enviado (largos, 0x30, formato del CAF, nombres de claves), sin secretos.
         if (e instanceof ErrorProveedorSii) e.peticion = diagnosticoPeticionSii(entrada, pfx.bytes, caf.bytes);
-        throw e;
+        // Un 401/403 vacío puede ser la key o el contenido: la sonda de la key lo distingue (CAR-263b).
+        throw await discriminarRechazoSinCuerpo(e, creds.apiKey);
       }
     },
     async enviar(xmlFirmado: string, ambiente: AmbienteSii): Promise<EnvioSiiResultado> {

@@ -30,16 +30,20 @@ const payload = {
   lineas: [{ orden: 1, glosa: "Servicio", monto: 1000 }],
   cafXml: "<AUTORIZACION><CAF>caf-secreto-de-prueba</CAF></AUTORIZACION>",
 };
-const generar = (r: () => Response) =>
-  vi.stubGlobal("fetch", vi.fn(async () => r()));
+/** `dte/generar` responde `r`; la sonda de la key (`Suscripcion/status`) responde `sonda` (por defecto 503: sin dato). */
+const generar = (r: () => Response, sonda: (init?: RequestInit) => Response = () => new Response("", { status: 503 })) => {
+  const f = vi.fn(async (url: unknown, init?: RequestInit) => (String(url).endsWith("/Suscripcion/status") ? sonda(init) : r()));
+  vi.stubGlobal("fetch", f);
+  return f;
+};
 const firmarError = async () => (await adaptadorSimpleApi(creds).firmar(payload).catch((e: unknown) => e)) as ErrorProveedorSii;
 
 afterEach(() => vi.unstubAllGlobals());
 
 
-/** Motivo de un 401 o 403 sin cuerpo: la respuesta de SimpleAPI a una key que no reconoce (CAR-263). */
+/** Motivo de un 401 o 403 sin cuerpo cuando la sonda de la key no responde: las dos causas (CAR-263b). */
 const motivoSinCuerpo = (status: number) =>
-  `respondió HTTP ${status} sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE`;
+  `respondió HTTP ${status} sin motivo: puede ser la API key o el contenido (certificado, CAF o JSON); «Probar conexión» en Integraciones › Emisión DTE comprueba la key`;
 describe("errores tipados de SimpleAPI (CAR-242)", () => {
   it("HTTP 400 con mensaje JSON: estado fijo para el log y detalle legible solo para la persona", async () => {
     generar(() => new Response(JSON.stringify({ mensaje: "Receptor 12.345.678-5 Juan Perez no autorizado" }), { status: 400 }));
@@ -132,16 +136,51 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     });
     expect(JSON.stringify(e.limites)).not.toContain(CLAVE_API);
   });
-  it("401 o 403 sin cuerpo: key no reconocida, con o sin x-rate-limit-* (SimpleAPI los envía siempre; CAR-263)", async () => {
+  it("401 o 403 sin cuerpo y sonda sin respuesta: dice las dos causas, con o sin x-rate-limit-* (CAR-263b)", async () => {
     // Respuesta real de api.simpleapi.cl sin Authorization o con una key inventada (10-nov-2026): 401 vacío con estos headers.
     const conLimites = { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" };
     for (const status of [401, 403]) {
       for (const headers of [conLimites, {}]) {
         generar(() => new Response("", { status, headers }));
         const e = await firmarError();
-        expect(e).toMatchObject({ cuerpo: "vacio", motivo: motivoSinCuerpo(status) });
-        expect(e.motivo).not.toMatch(/aceptó la API key|rechazó el contenido/);
+        expect(e).toMatchObject({ cuerpo: "vacio", motivo: motivoSinCuerpo(status), sondaKey: { estado: "sin_respuesta" } });
+        expect(e.motivo).not.toMatch(/aceptó la API key|rechazó el contenido|tampoco reconoce/);
       }
+    }
+  });
+  it("401 vacío de generar con la key reconocida por la sonda (Basic o cruda): es el contenido, no la key (CAR-263b)", async () => {
+    const vacio = () => new Response("", { status: 401, headers: { "x-rate-limit-remaining": "39" } });
+    const basicNo = (init?: RequestInit) =>
+      String((init?.headers as Record<string, string>)["Authorization"]).startsWith("Basic ") ? new Response("", { status: 401 }) : Response.json({ ok: true });
+    for (const [sonda, esquema] of [[() => Response.json({ ok: true }), "basic"], [basicNo, "raw"]] as const) {
+      const f = generar(vacio, sonda);
+      const e = await firmarError();
+      expect(e).toMatchObject({ paso: "generar", status: 401, cuerpo: "vacio", sondaKey: { estado: "reconocida", esquema } });
+      expect(e.motivo).toBe("respondió HTTP 401 sin motivo, pero sí reconoce la API key: rechazó el contenido (certificado, CAF o JSON), no la key");
+      expect(e.motivo).not.toMatch(/cópiala|mal copiada/);
+      // La sonda es un GET sin cuerpo: nunca reenvía el certificado ni el CAF.
+      const sondas = f.mock.calls.filter(([url]) => String(url).endsWith("/Suscripcion/status"));
+      expect(sondas.length).toBeGreaterThan(0);
+      for (const [, init] of sondas) expect([init?.method, init?.body]).toEqual(["GET", undefined]);
+      // El diagnóstico de la petición rechazada se conserva.
+      expect(e.peticion).not.toBeNull();
+    }
+  });
+  it("401 vacío de generar y la sonda tampoco reconoce la key con ningún esquema: ahí sí habla de la key", async () => {
+    generar(() => new Response("", { status: 401 }), () => new Response("", { status: 401 }));
+    const e = await firmarError();
+    expect(e).toMatchObject({ cuerpo: "vacio", sondaKey: { estado: "no_reconocida" } });
+    expect(e.motivo).toBe(
+      "respondió HTTP 401 sin motivo y tampoco reconoce la API key guardada (mal copiada, vencida o sin suscripción a SimpleAPI DTE); cópiala de nuevo en Integraciones › Emisión DTE",
+    );
+    expect(`${e.motivoSeguro} ${JSON.stringify(e.sondaKey)}`).not.toContain(CLAVE_API);
+  });
+  it("un 401 con texto o un 400 no consultan la sonda", async () => {
+    for (const r of [() => new Response("Rut receptor no valido", { status: 401 }), () => new Response("", { status: 400 })]) {
+      const f = generar(r);
+      const e = await firmarError();
+      expect(e.sondaKey).toBeNull();
+      expect(f.mock.calls.some(([url]) => String(url).endsWith("/Suscripcion/status"))).toBe(false);
     }
   });
   it("401 con texto del proveedor: estado y detalle saneado, sin adivinar la causa ni mostrar secretos", async () => {

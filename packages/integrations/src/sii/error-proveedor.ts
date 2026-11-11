@@ -3,6 +3,7 @@
 // control, y nunca el cuerpo completo.
 
 import type { DiagnosticoPeticionSii, DiagnosticoRespuestaSii } from "./simpleapi-diagnostico";
+import type { SondaKeySimpleApi } from "./simpleapi-rechazo";
 
 export type PasoProveedorSii = "generar" | "sobre de envío" | "enviar" | "consultar";
 
@@ -18,6 +19,8 @@ export class ErrorProveedorSii extends Error {
   respuesta: DiagnosticoRespuestaSii | null = null;
   /** Forma de la petición rechazada (largos del PFX y del CAF, nombres de claves), sin secretos (CAR-240). */
   peticion: DiagnosticoPeticionSii | null = null;
+  /** Ante un 401/403 sin cuerpo de `generar`: qué dijo la sonda de la key (CAR-263b), sin la key ni el header. */
+  sondaKey: SondaKeySimpleApi | null = null;
 
   constructor(
     readonly paso: PasoProveedorSii,
@@ -35,9 +38,9 @@ export class ErrorProveedorSii extends Error {
 }
 
 /**
- * «vacio»: sin cuerpo (así responde SimpleAPI a una key que no reconoce; CAR-263); «suscripcion»: habla de la API key, la
- * suscripción, el token o el cupo (la documentación de SimpleAPI usa 401 también para «falta de suscripción válida o
- * token expirado»); «otro»: cualquier otro texto. Nunca se guarda el texto.
+ * «vacio»: sin cuerpo (así responde SimpleAPI a una key que no reconoce y también a un contenido que rechaza; CAR-263b);
+ * «suscripcion»: habla de la API key, la suscripción, el token o el cupo (la documentación de SimpleAPI usa 401 también
+ * para «falta de suscripción válida o token expirado»); «otro»: cualquier otro texto. Nunca se guarda el texto.
  */
 export type FormaCuerpo = "vacio" | "suscripcion" | "otro";
 
