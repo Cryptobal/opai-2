@@ -23,9 +23,9 @@ describe.skipIf(!urlPropietario)("core · importador de cuentas en base real", (
   });
   const cuentas = (t: string) => x.e.admin.cuenta.findMany({ where: { tenantId: t }, orderBy: { nombre: "asc" } });
 
-  it("el catálogo lista los cuatro importadores con sus campos", async () => {
+  it("el catálogo lista los importadores con sus campos", async () => {
     const r = await x.run<{ importadores: { id: string; disponible: boolean; campos: { clave: string; requerido: boolean }[] }[] }>(x.t1, "core.importar.catalogo", {});
-    expect(r.ok && r.data.importadores.map((i) => [i.id, i.disponible])).toEqual([["cuentas", true], ["contactos", true], ["instalaciones", true], ["negocios", true]]);
+    expect(r.ok && r.data.importadores.map((i) => [i.id, i.disponible])).toEqual([["cuentas", true], ["contactos", true], ["instalaciones", true], ["negocios", true], ["personas", true]]);
     const sinComercial = await x.run<{ importadores: { id: string; disponible: boolean }[] }>(x.t1, "core.importar.catalogo", {}, { modulos: [] });
     expect(sinComercial.ok && sinComercial.data.importadores.find((i) => i.id === "negocios")?.disponible).toBe(false);
   });

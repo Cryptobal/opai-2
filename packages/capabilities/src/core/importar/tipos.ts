@@ -49,7 +49,8 @@ export type Importador<D extends Datos = Datos> = {
   actualizables: readonly (keyof D & string)[];
   planificar(ctx: Contexto, filas: readonly FilaNormalizada[], o: OpcionesPlan): Promise<FilaPlan<D>[]>;
   crear(tx: TenantTx, ctx: Contexto, datos: D): Promise<string>;
-  actualizar(tx: TenantTx, id: string, cambios: Partial<D>): Promise<void>;
+  /** `ctx` llega siempre; lo usan los importadores que cifran campos (la cuenta bancaria de Personas). */
+  actualizar(tx: TenantTx, id: string, cambios: Partial<D>, ctx: Contexto): Promise<void>;
   /** Para revertir: estado actual de los registros que todavía existen. */
   actuales(tx: TenantTx, ids: readonly string[]): Promise<({ id: string; updatedAt: Date } & Record<string, unknown>)[]>;
   /** Para revertir: por qué no se puede borrar cada registro (tiene dependientes); sin entrada = se puede. */

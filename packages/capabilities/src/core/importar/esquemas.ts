@@ -5,7 +5,7 @@ import { entradaSchema } from "./entrada";
 import { IDS_IMPORTADORES } from "./registro";
 import { AL_EXISTIR } from "./tipos";
 
-export const importadorId = z.enum(IDS_IMPORTADORES).describe("Qué se importa: cuentas, contactos, instalaciones o negocios.");
+export const importadorId = z.enum(IDS_IMPORTADORES).describe("Qué se importa: cuentas, contactos, instalaciones, negocios o personas.");
 const accion = z.enum(["crear", "actualizar", "sin_cambio", "error"]);
 export const conteosSchema = z.object({ crear: z.number().int(), actualizar: z.number().int(), sin_cambio: z.number().int(), error: z.number().int() });
 
