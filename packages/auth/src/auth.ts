@@ -23,6 +23,7 @@ import {
   resolverIntento,
 } from "./bloqueo-login";
 import {
+  camposSesion,
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
   MFA_BLOQUEO_SEGUNDOS,
@@ -51,10 +52,7 @@ export const auth = betterAuth({
   },
   user: { additionalFields: camposUsuario },
   session: {
-    additionalFields: {
-      mfaVerified: { type: "boolean", defaultValue: false, input: false },
-      oauthTenantId: { type: "string", required: false, input: false }, // OAuth, CAR-247
-    },
+    additionalFields: camposSesion,
     // CAR-152 · D1 (3-nov-2026): evita la lectura de sesión en Neon en cada request y precarga RSC.
     // Una sesión revocada en la base (o una cookie copiada antes del sign-out) puede seguir autorizando
     // hasta `maxAge` s: riesgo aceptado. El sign-out borra token y caché en el navegador que lo hace.
