@@ -223,6 +223,11 @@ core_grupos_quitar_miembro
 core_grupos_update
 core_hechos_terreno_listar
 core_ia_probar
+core_importar_catalogo
+core_importar_ejecutar
+core_importar_lotes
+core_importar_plantilla
+core_importar_revertir
 core_indicadores_uf_utm
 core_inicio_indicadores
 core_inicio_pendientes
@@ -635,6 +640,8 @@ preview_core_grupos_archive
 preview_core_grupos_create
 preview_core_grupos_quitar_miembro
 preview_core_grupos_update
+preview_core_importar_ejecutar
+preview_core_importar_revertir
 preview_core_instalaciones_archive
 preview_core_instalaciones_create
 preview_core_instalaciones_set_estado
