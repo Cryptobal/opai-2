@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { subirTrasEsqueleto } from "@/lib/scroll-tras-esqueleto";
+import { contenedorDeScroll, subirTrasEsqueleto } from "@/lib/scroll-tras-esqueleto";
 
 describe("scroll tras el esqueleto de navegación (CAR-231)", () => {
   it("sube al inicio cuando el esqueleto estuvo visible y la ruta cambió (lista a mitad de página)", () => {
@@ -19,5 +19,13 @@ describe("scroll tras el esqueleto de navegación (CAR-231)", () => {
     const ventana = { scrollTo: vi.fn() };
     expect(subirTrasEsqueleto(ventana, true, "/cotizaciones", "/cotizaciones")).toBe(false);
     expect(ventana.scrollTo).not.toHaveBeenCalled();
+  });
+
+  // CAR-317: en el marco Hilo desplaza el lienzo, no la ventana.
+  it("dentro del marco Hilo sube el lienzo; fuera de él, la ventana", () => {
+    const lienzo = { scrollTo: vi.fn() };
+    const ventana = { scrollTo: vi.fn() };
+    expect(contenedorDeScroll(() => lienzo, ventana)).toBe(lienzo);
+    expect(contenedorDeScroll(() => null, ventana)).toBe(ventana);
   });
 });

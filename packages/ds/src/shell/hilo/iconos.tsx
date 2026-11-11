@@ -13,6 +13,7 @@ const TRAZOS = {
   hilo: "M4 6h16M4 12h16M4 18h10",
   cambio: "M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7",
   buscar: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.9-3.9",
+  selector: "M8 10l4-4 4 4M8 14l4 4 4-4",
 } as const;
 
 export type NombreIconoHilo = keyof typeof TRAZOS;
