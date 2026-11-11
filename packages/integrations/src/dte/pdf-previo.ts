@@ -1,8 +1,8 @@
-// PDF A4 de la proforma y del estado de pago (CAR-221). Son documentos sin valor tributario: llevan un número interno,
+// PDF CARTA de la proforma y del estado de pago (CAR-221). Son documentos sin valor tributario: llevan un número interno,
 // no un folio del SII, y no consumen CAF ni crean deuda fiscal. Mismas medidas y detalle paginado que el DTE.
 import { type PDFPage, PDFDocument, StandardFonts } from "pdf-lib";
 
-import { A4, alDerecha, ALTO, caja, centrado, GRIS, linea, MARGEN, type Recursos, texto, XFIN } from "./pdf-base";
+import { CARTA, alDerecha, ALTO, caja, centrado, GRIS, linea, MARGEN, type Recursos, texto, XFIN } from "./pdf-base";
 import { capacidad, dibujarDetalle, medirFila, paginar } from "./pdf-detalle";
 import { cabeceraContinuacion, numeroDePagina } from "./pdf-pagina";
 import { fechaCorta, fechaLarga, pesos } from "./pdf-texto";
@@ -110,7 +110,7 @@ export async function generarPdfPrevio(input: PdfPrevioInput): Promise<Uint8Arra
   const cabPrimera = 253 + ALTO_BLOQUE - 40;
   const paginas = paginar(filas, capacidad(cabPrimera), capacidad(70));
   paginas.forEach((fp, i) => {
-    const p = doc.addPage(A4);
+    const p = doc.addPage(CARTA);
     const primera = i === 0;
     if (primera) {
       cabecera(p, input, r);
