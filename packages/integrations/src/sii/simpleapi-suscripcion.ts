@@ -29,10 +29,17 @@ export function formaDeKeySimpleApi(apiKey: string): { largo: number; caracteres
 
 /** Pregunta a SimpleAPI por la suscripción de la key. Nunca registra ni devuelve la key. */
 export async function probarKeySimpleApi(apiKey: string): Promise<ResultadoKeySimpleApi> {
-  const res = await fetch(SIMPLEAPI_RUTA_SUSCRIPCION, {
-    method: "GET",
-    headers: { Authorization: encabezadoAuthSimpleApi(apiKey), Accept: "application/json, text/plain" },
-  });
+  let res: Response;
+  try {
+    res = await fetch(SIMPLEAPI_RUTA_SUSCRIPCION, {
+      method: "GET",
+      headers: { Authorization: encabezadoAuthSimpleApi(apiKey), Accept: "application/json, text/plain" },
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch {
+    // Sin conexión o sin respuesta en 15 s: no dice nada de la key.
+    return { estado: "sin_respuesta", status: 0, detalle: null };
+  }
   const detalle = detalleSeguroDeRespuesta(await res.text().catch(() => ""), [apiKey, limpiarKeySimpleApi(apiKey)]);
   if (res.ok) return { estado: "reconocida", status: res.status, detalle };
   if (res.status === 401 || res.status === 403) return { estado: "no_reconocida", status: res.status, detalle };

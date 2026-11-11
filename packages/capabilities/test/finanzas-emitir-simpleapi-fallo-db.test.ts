@@ -150,13 +150,13 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
     expect(await s.e.admin.dteEnvio.count({ where: { documentoId } })).toBe(0);
   });
 
-  it("401 vacío con la key reconocida: el mismo error por la UI y por el MCP, sin vencimiento y con log seguro (CAR-240)", async () => {
+  it("401 vacío: el mismo error por la UI y por el MCP, sin vencimiento y con log seguro (CAR-240)", async () => {
     const entradas: Record<string, unknown>[] = [];
     vi.stubGlobal(
       "fetch",
       vi.fn(async (_url: string, init: { headers: Record<string, string>; body: Uint8Array }) => {
         entradas.push(JSON.parse(textoInput(leerMultipart(init.body, String(init.headers["Content-Type"])))));
-        // Como el rechazo de las 20:43 del 10-nov-2026: sin cuerpo y con los headers de cupo (la key sirvió).
+        // Como el rechazo de las 20:43 del 10-nov-2026: sin cuerpo y con los headers de cupo (que SimpleAPI envía siempre; CAR-263).
         return new Response(null, { status: 401, headers: { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" } });
       }),
     );

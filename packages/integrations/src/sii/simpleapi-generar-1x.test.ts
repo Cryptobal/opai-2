@@ -65,7 +65,7 @@ const payload = {
   cafXml: CAF,
 };
 
-/** 401 vacío con la key reconocida (headers de cupo), como el de las 20:43 del 10-nov-2026. */
+/** 401 vacío con headers de cupo (SimpleAPI los envía siempre; CAR-263), como el de las 20:43 del 10-nov-2026. */
 const respuesta401Vacia = () =>
   new Response(null, {
     status: 401,

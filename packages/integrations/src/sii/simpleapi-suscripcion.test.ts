@@ -59,3 +59,10 @@ describe("formaDeKeySimpleApi", () => {
     }
   });
 });
+
+describe("probarKeySimpleApi sin red (CAR-263)", () => {
+  it("un fallo de red o un tiempo agotado no culpa a la key", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("fetch failed"))));
+    expect(await probarKeySimpleApi(KEY)).toEqual({ estado: "sin_respuesta", status: 0, detalle: null });
+  });
+});

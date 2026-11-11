@@ -1675,5 +1675,7 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 3. La key se comprueba con `GET https://api.simpleapi.cl/api/v1/Suscripcion/status` (publicado en `https://api.simpleapi.cl/swagger`), con el mismo `Basic api:key` del SDK oficial. Es lo que ejecuta «Probar conexión» de Emisión DTE (`core.integraciones.probar`, también por MCP). No emite, no usa folios y no envía el certificado ni el CAF.
 4. Se mantiene el formato de la petición (Basic `api:key`; multipart `input` + `file` + `file`): coincide con `DTEExtensions.GenerarXMLAsync` del SDK oficial y con 1.0, que emite.
 
+5. La key se limpia de espacios, saltos y caracteres invisibles (`limpiarKeySimpleApi`) antes de enviarla, en la prueba y al emitir.
+
 **Límite conocido.** Desde fuera no se puede saber qué responde SimpleAPI a una key válida con un contenido inválido; 1.0 sostiene que también es 401 vacío. Por eso el mensaje dice «como ante una key que no reconoce» y la prueba de la key es una llamada aparte. Si «Probar conexión» reconoce la key y `dte/generar` sigue en 401, la causa es el contenido y el motivo solo lo puede dar el soporte de SimpleAPI.
 

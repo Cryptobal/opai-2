@@ -26,7 +26,7 @@ export const RUT_SII = "60803000-K" as const;
  * usan OPAI 1.0 (que sí emite) y el SDK oficial. Se quitan espacios, saltos y caracteres invisibles que se cuelan al
  * pegar la key, también en medio: SimpleAPI rechaza esa key con el mismo 401 vacío que a una inválida (CAR-263).
  */
-export const limpiarKeySimpleApi = (apiKey: string): string => apiKey.replace(/[\s\u200B-\u200D\u2060]/g, "");
+export const limpiarKeySimpleApi = (apiKey: string): string => apiKey.replace(/[\s\p{Cf}]/gu, "");
 export const encabezadoAuthSimpleApi = (apiKey: string): string =>
   `Basic ${Buffer.from(`api:${limpiarKeySimpleApi(apiKey)}`, "utf8").toString("base64")}`;
 

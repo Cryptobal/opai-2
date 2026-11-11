@@ -1,4 +1,4 @@
-import { formaDeKeySimpleApi, probarKeySimpleApi, validarCertificadoPfx } from "@opai/integrations";
+import { abrirCertificadoPfx, formaDeKeySimpleApi, probarKeySimpleApi } from "@opai/integrations";
 
 import { reglaDeNegocio } from "../errores";
 import { leerSecreto } from "../integraciones/secretos";
@@ -26,7 +26,8 @@ export async function probarEmisionDte(ctx: Contexto): Promise<string> {
 
   const r = await probarKeySimpleApi(apiKey);
   if (r.estado === "sin_respuesta") {
-    throw reglaDeNegocio(`SimpleAPI respondió HTTP ${r.status} al consultar la suscripción; no se pudo comprobar la API key. Reintenta en unos minutos.`);
+    const que = r.status === 0 ? "no respondió" : `respondió HTTP ${r.status}`;
+    throw reglaDeNegocio(`SimpleAPI ${que} al consultar la suscripción; no se pudo comprobar la API key. Reintenta en unos minutos.`);
   }
   if (r.estado === "no_reconocida") {
     const forma = formaDeKeySimpleApi(apiKey);
@@ -42,7 +43,7 @@ export async function probarEmisionDte(ctx: Contexto): Promise<string> {
   if (!pfx || !clave) return `SimpleAPI reconoce la API key${suscripcion}. Falta cargar el certificado digital y su clave.`;
   let vence: string;
   try {
-    vence = validarCertificadoPfx(pfx, clave).meta.venceEn;
+    vence = abrirCertificadoPfx(pfx, clave).meta.venceEn; // misma apertura que la emisión (clave recortada si así abre)
   } catch (e) {
     throw reglaDeNegocio(`SimpleAPI reconoce la API key${suscripcion}, pero el certificado no sirve: ${e instanceof Error ? e.message : "no se pudo abrir."}`);
   }
