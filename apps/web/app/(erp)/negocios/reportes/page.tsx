@@ -31,7 +31,7 @@ function kpis(t: Tablero): Kpi[] {
 }
 
 const sinDatos = (t: Tablero) =>
-  t.enCurso.cantidad === 0 && t.cierre.ganados + t.cierre.perdidos === 0 && t.responsables.length === 0 && !(t.canales ?? []).some((c) => c.solicitudes > 0);
+  t.enCurso.cantidad === 0 && t.cierre.ganados + t.cierre.perdidos === 0 && t.cierreAnterior.ganados + t.cierreAnterior.perdidos === 0 && t.perdidas.motivos.length === 0 && t.responsables.length === 0 && !(t.canales ?? []).some((c) => c.solicitudes > 0);
 
 /** Reportes comerciales (CAR-27, export «ReportesComerciales»): tablero de solo lectura sobre una capacidad. */
 export default function ReportesComerciales({ searchParams }: Props) {
