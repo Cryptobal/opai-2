@@ -1,16 +1,20 @@
 import { purgarIntentosLogin } from "@opai/auth";
 import { programarCapturaSii, programarHorarios, programarPeriodicos } from "@opai/capabilities";
 
-import { autorizarCron, encolarCapturaSiiDesdeCron, horaEn, hoyEn, porTenant } from "@/lib/cron";
+import { autorizarCron, encolarCapturaSiiDesdeCron, horaEn, hoyEn, porTenant, tocaTrabajosDiarios } from "@/lib/cron";
 import { contextoSistema } from "@/lib/medidor";
 import { purgarVentanas } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
-/** Cron diario: encola los trabajos periódicos de cada tenant. No hace el trabajo (ADR-029). */
+/**
+ * Cron de cada hora: encola los trabajos horarios de cada tenant y, desde las 09:00 UTC, los diarios. No hace el
+ * trabajo (ADR-029). Antes corría una vez al día, así que los trabajos «horarios» también corrían una sola vez.
+ */
 export async function GET(req: Request): Promise<Response> {
   const negado = autorizarCron(req);
   if (negado) return negado;
+  const tocaDiarios = tocaTrabajosDiarios();
   let resultados: Record<string, unknown> = {};
   let errorTenants = false;
   try {
@@ -18,7 +22,7 @@ export async function GET(req: Request): Promise<Response> {
       const hoy = hoyEn(t.timezone);
       const hora = horaEn(t.timezone);
       return Promise.all([
-        programarPeriodicos(contextoSistema(t.id), hoy),
+        tocaDiarios ? programarPeriodicos(contextoSistema(t.id), hoy) : Promise.resolve([] as string[]),
         programarHorarios(contextoSistema(t.id), hora),
       ]).then(([diarios, horarios]) => ({ diarios, horarios }));
     });
@@ -45,7 +49,7 @@ export async function GET(req: Request): Promise<Response> {
   }
   let capturaSiiEncolada: boolean | null = null;
   try {
-    capturaSiiEncolada = await encolarCapturaSiiDesdeCron(programarCapturaSii, contextoSistema);
+    if (tocaDiarios) capturaSiiEncolada = await encolarCapturaSiiDesdeCron(programarCapturaSii, contextoSistema);
   } catch {
     console.error("[cron programador] falló la programación de captura SII");
   }
