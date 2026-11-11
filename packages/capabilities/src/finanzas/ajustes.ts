@@ -83,6 +83,18 @@ export const ajustesFinanzas = z.object({
       permiso: "finanzas:flujo.configurar",
       control: "numero",
     }),
+  compras_sincronizar_rcv: z
+    .enum(["diaria", "semanal", "manual"])
+    .default("diaria")
+    .meta({
+      etiqueta: "Traer las compras desde el SII",
+      ayuda:
+        "Cada cuánto se consulta el Registro de Compras del SII: diaria, semanal (los lunes) o solo con el botón «Sincronizar con el SII». Cada consulta usa una de las 30 que SimpleAPI da al mes.",
+      grupo: "Compras",
+      ambito: "tenant",
+      permiso: "finanzas:compras.manage",
+      control: "seleccion",
+    }),
   flujo_cuenta_diferencia_factoring: z
     .enum(["Diferencia factoring", "Gasto financiero"])
     .default("Diferencia factoring")
