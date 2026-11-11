@@ -12,8 +12,8 @@ test.describe("@preview configuración: integración con Slack", () => {
   test("muestra la conexión y guarda la configuración mínima de avisos", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/integraciones/slack");
-    // Con «volver», la barra superior muestra el título como migas (no como encabezado) y en teléfono no
-    // se ve: se comprueba el contenido propio de la pantalla.
+    // Con «volver», la barra superior no muestra un encabezado «Slack» (migas en escritorio, oculta en
+    // teléfono): se comprueba el contenido propio de la pantalla.
     await expect(page.getByText("Conexión", { exact: true }).first()).toBeVisible();
     await expect(
       page.getByText(/Conectar con Slack|todavía no está disponible aquí/).first(),
@@ -23,19 +23,21 @@ test.describe("@preview configuración: integración con Slack", () => {
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "slack-inicio");
 
-    // Cambia el margen, guarda, comprueba y deja el valor por defecto (15) para no ensuciar qa-e2e.
-    const margen = page.getByLabel("Margen de atraso (minutos)");
-    await margen.fill("20");
-    await page.getByRole("button", { name: "Guardar" }).filter({ visible: true }).first().click();
-    await expect(page.getByText("Configuración de Slack guardada")).toBeVisible({
+    // Cambia el margen y guarda. Los tres tamaños corren a la vez sobre la misma empresa de qa-e2e, así que
+    // no se compara el valor tras recargar (lo cubren las pruebas de la capacidad): solo que se guarde.
+    const valor = String(21 + ["telefono", "ipad", "desktop"].indexOf(info.project.name));
+    await page.getByLabel("Margen de atraso (minutos)").fill(valor);
+    await page.getByRole("button", { name: "Guardar" }).click();
+    await expect(page.getByText("Configuración de Slack guardada").first()).toBeVisible({
       timeout: 30_000,
     });
-    await page.reload();
-    await expect(page.getByLabel("Margen de atraso (minutos)")).toHaveValue("20");
+    await expect(page.getByText("Qué se avisa")).toBeVisible();
     await capturar(page, info, "slack-guardado");
+
+    // Deja el valor por defecto (15) para no ensuciar qa-e2e.
     await page.getByLabel("Margen de atraso (minutos)").fill("15");
-    await page.getByRole("button", { name: "Guardar" }).filter({ visible: true }).first().click();
-    await expect(page.getByText("Configuración de Slack guardada")).toBeVisible({
+    await page.getByRole("button", { name: "Guardar" }).click();
+    await expect(page.getByText("Configuración de Slack guardada").first()).toBeVisible({
       timeout: 30_000,
     });
   });
@@ -47,9 +49,11 @@ test.describe("@preview configuración: integración con Slack", () => {
     await expect(
       page.getByText("Cancelaste la instalación en Slack. No se conectó nada."),
     ).toBeVisible();
+    await expect(page.getByText("Qué se avisa")).toBeVisible();
     await capturar(page, info, "slack-error");
     // Un motivo desconocido nunca se muestra tal cual.
     await page.goto("/configuracion/integraciones/slack?slack=error&motivo=texto-inventado");
+    await expect(page.getByText("No se pudo conectar Slack")).toBeVisible();
     await expect(page.getByText("texto-inventado")).toHaveCount(0);
   });
 });

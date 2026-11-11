@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Alerta, avisar } from "@opai/ds";
+import { Alerta, avisar, Button } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -17,7 +17,7 @@ export function FormSlack({ estado, grupos }: { estado: EstadoSlack; grupos: Gru
   const router = useRouter();
   const [config, setConfig] = useState<ConfigSlack>(estado.config);
   const [canales, setCanales] = useState<Canal[] | null>(null);
-  const { ejecutar, error } = useCapacidad("erp");
+  const { ejecutar, error, pendiente } = useCapacidad("erp");
   const lectura = useCapacidad("erp");
   const set = <K extends keyof ConfigSlack>(k: K, v: ConfigSlack[K]) =>
     setConfig((c) => ({ ...c, [k]: v }));
@@ -63,6 +63,12 @@ export function FormSlack({ estado, grupos }: { estado: EstadoSlack; grupos: Gru
         onMargen={(v) => set("margenAtrasoMin", v)}
         onResumen={(v) => set("resumen", { activo: v })}
       />
+      {/* Como el resto de Configuración: «Guardar» al pie del formulario, en todos los tamaños. */}
+      <div className="flex justify-end lg:col-span-2">
+        <Button type="submit" disabled={pendiente}>
+          {pendiente ? "Guardando…" : "Guardar"}
+        </Button>
+      </div>
     </form>
   );
 }

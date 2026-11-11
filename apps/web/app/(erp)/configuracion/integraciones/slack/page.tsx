@@ -1,4 +1,4 @@
-import { Badge, Button } from "@opai/ds";
+import { Badge } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { datosSiHayPermiso, exigirDatos } from "@/lib/carga";
@@ -8,15 +8,9 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { ConexionSlack } from "./_componentes/conexion";
 import { FormSlack } from "./_componentes/form-slack";
 import { ResultadoConexion } from "./_componentes/resultado";
-import { type EstadoSlack, FORM_SLACK, type Grupo } from "./_componentes/tipos";
+import { type EstadoSlack, type Grupo } from "./_componentes/tipos";
 
 export const metadata = { title: "Slack" };
-
-const guardar = (
-  <Button type="submit" form={FORM_SLACK}>
-    Guardar
-  </Button>
-);
 
 async function cargar(searchParams: SearchParams) {
   const [estado, grupos, p] = await Promise.all([
@@ -46,7 +40,6 @@ export default function Slack({ searchParams }: { searchParams: SearchParams }) 
       ruta="/configuracion"
       cargando="detalle"
       volver={{ href: "/configuracion/integraciones", etiqueta: "Integraciones" }}
-      accionesTelefono={guardar}
       cargar={() => cargar(searchParams)}
       opciones={({ estado }) => ({
         titulo: "Slack",
@@ -55,7 +48,6 @@ export default function Slack({ searchParams }: { searchParams: SearchParams }) 
         ) : (
           <Badge>Sin conectar</Badge>
         ),
-        acciones: guardar,
       })}
     >
       {({ estado, grupos, slack, motivo }) => (
