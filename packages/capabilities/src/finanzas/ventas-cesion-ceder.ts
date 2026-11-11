@@ -6,6 +6,7 @@ import { defineCapability } from "../define";
 import { escribirConEvento } from "../core/maestros/comun";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
 import { adaptadorCesionDe } from "./adaptador-cesion";
+import { correoDeudorCesion, exigirCorreoDeudor } from "./ventas-cesion-deudor";
 import { notasCreditoPreviasDe } from "./ventas-nc-comun";
 import { PERMISO_VENTAS, documentoEmitidoIdSchema, rutEmisorDe } from "./ventas-comun";
 import { vistaDeDocumento } from "./ventas-consulta";
@@ -63,6 +64,8 @@ export const ventasCesionCeder = defineCapability({
     if (!cuenta?.rut) throw reglaDeNegocio("El cliente debe tener RUT.");
     const adaptador = await adaptadorCesionDe(ctx);
     if (!adaptador.disponible) throw reglaDeNegocio("Configure la integración de cesión (Octava) antes de ceder.");
+    const emailDeudor = await correoDeudorCesion(ctx, doc, cuenta.emailDte);
+    exigirCorreoDeudor(adaptador.nombre, emailDeudor);
     let cesionId = "";
     await ctx.transaccion(async (tx) => {
       const { count } = await tx.documentoEmitido.updateMany({
@@ -113,7 +116,7 @@ export const ventasCesionCeder = defineCapability({
         ...(input.factorNombre ? { factorNombre: input.factorNombre } : {}),
         ...(input.factorEmail ? { factorEmail: input.factorEmail } : {}),
         ...(input.factorDireccion ? { factorDireccion: input.factorDireccion } : {}),
-        ...(cuenta.emailDte ? { emailDeudor: cuenta.emailDte } : {}),
+        ...(emailDeudor ? { emailDeudor } : {}),
         ...(doc.fechaVencimiento ? { fechaVencimiento: doc.fechaVencimiento.toISOString().slice(0, 10) } : {}),
       });
     } catch (e) {
