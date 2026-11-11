@@ -359,8 +359,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_cliente` | `finanzas_ventas_enviar_cliente` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_sii` | `finanzas_ventas_enviar_sii` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.libro_resumen` | `finanzas_ventas_libro_resumen` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.pdf` | `finanzas_ventas_pdf` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.set` | `core_config_set` | existe |
@@ -615,8 +617,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
-| erp | `/finanzas/ventas/[id]` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
-| erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador_nota_debito` | `finanzas_ventas_crear_borrador_nota_debito` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
