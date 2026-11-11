@@ -40,7 +40,9 @@ test.describe("muestra del marco Hilo", () => {
     await expect(indice).toHaveCount(0);
 
     // En teléfono, cerrar el panel devuelve al hilo; desde 1024 px el hilo nunca dejó de verse.
-    await page.getByRole("button", { name: "Portales", exact: true }).click();
+    // Sin botón «Portales» aparte (CAR-317): el selector es la identidad de la cabecera.
+    await expect(page.getByRole("button", { name: "Portales", exact: true })).toHaveCount(0);
+    await page.getByRole("button", { name: /\. Cambiar de portal o de empresa$/ }).click();
     await expect(page.getByText("Aquí estás").first()).toBeVisible();
     await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
     await captura(page, "hilo-ds-portales", info);

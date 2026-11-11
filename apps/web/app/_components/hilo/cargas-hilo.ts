@@ -56,3 +56,32 @@ export async function cargarFilasHilo(
   const { items } = r.data as { items: Parameters<typeof agendaHilo>[0] };
   return { estado: "listo", items: agendaHilo(items, ahora) };
 }
+
+/**
+ * Un refresco que falla (sin red o error) no borra la lista que ya se veía (CAR-317). Si dice que ya no
+ * hay permiso, se muestra eso.
+ */
+export const conservarSiFalla = <T>(previo: ListaHilo<T>, nuevo: ListaHilo<T>): ListaHilo<T> =>
+  nuevo.estado === "error" && previo.estado === "listo" ? previo : nuevo;
+
+type Segmento = "pendientes" | "actividad" | "agenda";
+type Filas = ListaHilo<FilaHilo>;
+
+/**
+ * Abrir Actividad o Agenda las vuelve a pedir (una consulta por clic, nunca por navegación, ADR-045),
+ * para que una tarea hecha en otra pantalla se vea al volver. Solo cuenta la respuesta del último
+ * pedido de cada segmento: una que llega tarde no pisa a la más nueva.
+ */
+export function refrescoDeSegmentos(
+  cargar: (s: "actividad" | "agenda") => Promise<Filas>,
+  aplicar: (s: "actividad" | "agenda", actualizar: (previa: Filas) => Filas) => void,
+): (s: Segmento) => void {
+  const turno = { actividad: 0, agenda: 0 };
+  return (s) => {
+    if (s === "pendientes") return;
+    const n = ++turno[s];
+    void cargar(s).then((nueva) => {
+      if (n === turno[s]) aplicar(s, (previa) => conservarSiFalla(previa, nueva));
+    });
+  };
+}

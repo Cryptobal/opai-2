@@ -7,7 +7,8 @@ import { capturar, EN_PREVIEW } from "./preview";
 // e2e/__screenshots__/ para compararlas con docs/2.0/design/export-base-hilo/.
 
 // Texto de la barra: con agente invita a pedir; sin agente, busca.
-export const BARRA = /Pide, pregunta o busca una pantalla|Busca una pantalla o un registro/;
+export const BARRA =
+  /Pide, pregunta o busca una pantalla|Pide o busca algo en OPAI|Busca una pantalla o un registro/;
 export const marco = (page: Page) => page.locator('div[data-marco="hilo"]');
 /** Bajo 1024 px se ve una pieza a la vez (hilo o lienzo), sin riel. */
 export const enTelefono = (page: Page) => (page.viewportSize()?.width ?? 0) < 1024;
