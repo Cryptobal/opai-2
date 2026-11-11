@@ -16,15 +16,16 @@ const marca = (previos: unknown, clave: string) =>
 
 async function cuentaPostImport(tx: TenantTx, cuentaId: string, terminadaEn: Date): Promise<boolean> {
   const c = despuesDe(terminadaEn);
-  const [accesos, config, etiquetas, vinculos, contactos, representantes] = await Promise.all([
+  const [accesos, config, etiquetas, vinculos, contactos, representantes, negocios] = await Promise.all([
     tx.accesoCliente.count({ where: { cuentaId, createdAt: c } }),
     tx.configPortalCuenta.count({ where: { cuentaId, createdAt: c } }),
     tx.etiquetaAsignacion.count({ where: { cuentaId, createdAt: c } }),
     tx.actividadVinculo.count({ where: { cuentaId, createdAt: c } }),
     tx.contactoCuenta.count({ where: { cuentaId, createdAt: c } }),
     tx.cuentaRepresentante.count({ where: { cuentaId, createdAt: c } }),
+    tx.negocio.count({ where: { cuentaId, createdAt: c } }),
   ]);
-  return accesos + config + etiquetas + vinculos + contactos + representantes > 0;
+  return accesos + config + etiquetas + vinculos + contactos + representantes + negocios > 0;
 }
 
 async function contactoPostImport(tx: TenantTx, contactoId: string, terminadaEn: Date): Promise<boolean> {
@@ -60,6 +61,19 @@ async function programacionPostImport(tx: TenantTx, programacionId: string, term
   return corridasNuevas + conDocumento > 0;
 }
 
+/** Un negocio con cotizaciones, contactos, actividad o cambios de etapa hechos en 2.0 no se borra. */
+async function negocioConUso(tx: TenantTx, negocioId: string): Promise<boolean> {
+  const [cotizaciones, n] = await Promise.all([
+    tx.cpqCotizacion.count({ where: { negocioId } }),
+    tx.negocio.findFirst({
+      where: { id: negocioId },
+      select: { _count: { select: { instalaciones: true, contactos: true, solicitudes: true, actividadVinculos: true, historial: true, contexto: true } } },
+    }),
+  ]);
+  const c = n?._count;
+  return cotizaciones > 0 || (c ? c.historial > 0 || c.instalaciones + c.contactos + c.solicitudes + c.actividadVinculos + c.contexto > 0 : false);
+}
+
 /** True si borrar o restaurar la fila arrastraría datos añadidos en 2.0 tras la corrida. */
 export async function dependientesPostImport(
   tx: TenantTx,
@@ -77,5 +91,6 @@ export async function dependientesPostImport(
   if (f.entidad === "contacto") return contactoPostImport(tx, f.id20, terminadaEn);
   if (f.entidad === "instalacion") return instalacionPostImport(tx, f.id20, terminadaEn);
   if (f.entidad === "programacion_recurrente") return programacionPostImport(tx, f.id20, terminadaEn);
+  if (f.entidad === "negocio") return negocioConUso(tx, f.id20);
   return false;
 }
