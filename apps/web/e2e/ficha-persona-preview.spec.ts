@@ -60,7 +60,7 @@ test.describe("@preview ficha de persona", () => {
     // Laboral: las secciones muestran su estado (vacío con acción) en vez de quedar en blanco.
     await page.goto(`${ficha}/laboral`);
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
-    const solicitar = page.getByRole("button", { name: /Solicitar cambio|Ver solicitud/ }).first();
+    const solicitar = page.getByRole("link", { name: /Solicitar cambio|Ver solicitud/ }).first();
     await expect(solicitar).toBeVisible();
     await capturar(page, info, "ficha-persona-laboral");
 
