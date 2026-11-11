@@ -22,6 +22,7 @@
     "/(erp)/personas/[id]": 170,
     "/(erp)/personas/[id]/laboral": 171,
     "/(erp)/personas/[id]/documentos": 170,
+    "/(erp)/documentos/plantillas/[id]": 173,
     "/(erp)/cargos/[id]": 168,
     "/(erp)/cuentas/[id]": 171,
     "/(erp)/cuentas/[id]/actividad": 179,

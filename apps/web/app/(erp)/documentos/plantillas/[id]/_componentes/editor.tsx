@@ -1,21 +1,27 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 
 import { envolverSeleccion, insertarEnTexto } from "@opai/domain";
-import { Alerta, Button, DetailScreen, Sheet } from "@opai/ds";
+import { Alerta, Button, DetailScreen, Sheet, Skeleton } from "@opai/ds";
 
 import { fecha } from "@/lib/fechas";
 
 import { AvisoVariables } from "./aviso-variables";
 import { AccionesEditor } from "./acciones-editor";
 import { BarraEditor, type ModoEditor } from "./barra-editor";
-import { PanelFirma } from "./panel-firma";
 import { PanelVariables } from "./panel-variables";
 import { ORIGEN_PLANTILLA, type PlantillaEditor } from "./tipos";
 import { useEditorPlantilla } from "./use-editor";
 import { Visor } from "./visor";
+
+// La firma (Radix RadioGroup, ~11 KB) se carga aparte: no se usa en el teléfono y la ruta queda en
+// 172 KB, con tope propio de 173 KB (ADR-037).
+const PanelFirma = dynamic(() => import("./panel-firma").then((m) => m.PanelFirma), {
+  loading: () => <Skeleton className="h-80 w-full" />,
+});
 
 /**
  * Pantalla 06 · Editor de plantillas (export documentos v4). 375: solo lectura con aviso; 1024: texto
