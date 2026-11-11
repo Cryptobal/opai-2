@@ -1,6 +1,6 @@
 # Export base «Hilo» (prototipo completo)
 
-Diseño de la nueva base de OPAI 2.0: un marco centrado en el agente, igual en escritorio, iPad y iPhone y en todos los portales. Lo hizo Claude como prototipo interactivo en la sesión del proyecto (ADR-076) y **Carlos lo aprobó el 11-nov-2026 a las 11:55 CLT** en el chat del proyecto «Opai 2.0», con la instrucción de que lo construido sea «copia fiel» de este diseño. Decisión: [ADR-090](../../01-decisiones.md). Plan: [`BRIEF-base-hilo.md`](../../briefs/BRIEF-base-hilo.md). Tarea: CAR-274.
+Diseño de la nueva base de OPAI 2.0: un marco centrado en el agente, igual en escritorio, iPad y iPhone y en todos los portales. Lo hizo Claude como prototipo interactivo en la sesión del proyecto (el proceso de ADR-076, que ADR-090 extiende a esta base) y **Carlos lo aprobó el 11-nov-2026 a las 11:55 CLT** en el chat del proyecto «Opai 2.0», con la instrucción de que lo construido sea «copia fiel» de este diseño. Decisión: [ADR-090](../../01-decisiones.md). Plan: [`BRIEF-base-hilo.md`](../../briefs/BRIEF-base-hilo.md). Tarea: CAR-274.
 
 Prototipo en vivo (privado de Carlos): <https://claude.ai/artifact/EaJbdLP8XdLp6HEAHP3T6J>.
 
@@ -33,6 +33,8 @@ Todos los tableros de la aplicación comparten la misma lógica; solo cambia el 
 - **Referencia exacta («copia fiel»):** el marco (hilo, lienzo, barra, cabecera, Índice, portales), la piel (colores, tipografía, radios, filas sin borde, pestañas con subrayado, botones, avisos) y la estructura de cada patrón (lista, ficha con pestañas, planilla, formulario, decisión con «qué cambia»).
 - **No es referencia del contenido de cada módulo:** las filas, columnas y campos son de ejemplo. La pantalla real conserva todos los campos y reglas de su especificación y de su diseño aprobado; solo cambia de piel. Las hojas de crear y editar del prototipo son genéricas.
 - Mapas, cámara y PDF son marcadores de posición.
+- **Textos del prototipo que la decisión dejó atrás:** el título del lienzo dice «(propuesta)» y el tablero «El agente en cada portal» dice que llevar la barra a los demás portales «necesita tu decisión». Carlos lo decidió después (ADR-090 §4); en Plataforma la barra solo busca. La lista «Nunca lo hace un agente solo» es más estricta que la norma vigente: manda ADR-032 (ADR-090 §5).
+- En el prototipo el portal Trabajador aparece como «Guardia», que es el vocabulario de la vertical de seguridad.
 
 ## Datos
 
@@ -44,9 +46,10 @@ Todos los datos son ficticios: empresas, personas, RUT, teléfonos, correos y mo
 
 - `app_logic.js`: datos, portales, vistas y lógica del prototipo.
 - `gen.py`, `gen3.py`, `gen3_cola.py`: plantilla y ensamblado. `cat gen3.py gen3_cola.py > gen_app.py && python3 gen_app.py <carpeta>`.
+- `rastreador.js`: el recorrido automático. El generador deja la lógica de cada tablero en `scratch/`; desde ahí, `node rastreador.js`.
 
 Los `.dc.html` se abren en Claude Design. Como en los otros exports, no se copió `support.js`.
 
 ## Cómo se verificó
 
-Un rastreador recorrió todas las pantallas alcanzables de cada portal y ejecutó cada acción sin errores (unas 1.350 combinaciones de pantalla, pestaña y registro). No hay verificación visual automática del prototipo: la comparación por capturas se hace en cada PR de construcción contra estos tableros.
+Un rastreador recorrió todas las pantallas alcanzables de cada portal y ejecutó cada acción sin errores (unas 1.350 combinaciones de pantalla, pestaña y registro). No hay verificación visual automática del prototipo: la comparación por capturas se hace en cada PR de construcción contra estos tableros (375, 1024 y 1280 px, más 390 y 1440 px).

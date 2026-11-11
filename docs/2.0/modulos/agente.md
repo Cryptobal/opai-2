@@ -6,6 +6,14 @@
 
 > **Licencia.** El módulo vendible `agente` viene **apagado por defecto** en todos los tenants (NÚCLEO-E2, bloque 1). **Hay que activar la licencia para Gard**: es una decisión y una acción de Carlos (Plataforma → Empresas → Gard → Módulos). Este PR no la activa ni la propone activar por código, migración ni semilla.
 
+## Enmienda de ADR-090 (11-nov-2026)
+
+Carlos decidió que el agente esté también fuera del ERP, como la barra del marco «Hilo», en Supervisor, Trabajador, Terreno y Cliente. **Hasta que se construya (etapas H4 y H5 de [`BRIEF-base-hilo.md`](../briefs/BRIEF-base-hilo.md)) el código sigue aplicando este documento tal como está.**
+
+- **Quedan reemplazados, para el marco Hilo:** el portal «ERP» del panel en la tabla de superficies del §3, la frase «el agente solo existe en el portal ERP», la condición (c) de R1, las celdas «no (pregunta 9)» de Cliente y Trabajador en la tabla de permisos y la decisión del 29-oct-2026 sobre la pregunta 9.
+- **No cambian:** R2 (permisos y alcance de la persona; nunca Plataforma ni herramientas que gobiernan agentes, llaves o credenciales), R5 (lo irreversible va siempre a la cola de aprobación; en Hilo esa cola se ve en Pendientes y se conserva lo decidido sobre aprobar fuera de la conversación) y las condiciones (a) y (b) de R1. Sin licencia o sin `agente:usar`, la barra solo busca y navega.
+- **Se amplía en H4:** R9. Además del tipo y el id de la ficha, la pantalla podrá enviar la lista o el tablero y la pestaña; el servidor lo revalida igual.
+
 ## 1. Objetivo
 
 Que cualquier persona autorizada de la empresa pueda **pedirle a OPAI, en lenguaje natural, lo mismo que haría en pantalla** —consultar, preparar y ejecutar cambios— desde el celular, el iPad o el escritorio, **sin perder el contexto de lo que está mirando** y sin que el agente pueda hacer nada que esa persona no podría hacer sola. Toda escritura llega como un **plan legible** que la persona confirma; lo irreversible pasa por la cola de aprobación humana.
@@ -116,7 +124,7 @@ Ningún campo es visible para el cliente ni para el trabajador: el agente solo e
 
 **Acceso**
 
-- **R1.** El agente solo existe para una persona si (a) el tenant tiene **activa la licencia** del módulo `agente`, (b) su rol tiene `agente:usar` y (c) está en el portal ERP. Si falta cualquiera, no se muestra ningún lanzador ni se puede abrir por URL (`?agente=1` se ignora). **Modificada por ADR-090 (Carlos, 11-nov-2026):** la condición (c) deja de limitar al ERP. Con el marco Hilo, la barra del agente está en todos los portales, se enciende por portal y por rol, y actúa con el permiso y el alcance de la persona; la pregunta 9 queda respondida que sí. Se construye en la etapa H4 de [`BRIEF-base-hilo.md`](../briefs/BRIEF-base-hilo.md); hasta entonces el código sigue aplicando la regla original.
+- **R1.** El agente solo existe para una persona si (a) el tenant tiene **activa la licencia** del módulo `agente`, (b) su rol tiene `agente:usar` y (c) está en el portal ERP. Si falta cualquiera, no se muestra ningún lanzador ni se puede abrir por URL (`?agente=1` se ignora). **Modificada por ADR-090 (Carlos, 11-nov-2026):** la condición (c) deja de limitar al ERP; ver la enmienda al inicio de este documento.
 - **R2.** El agente actúa como **«Agente interno vía <persona>»**: con sus permisos efectivos (rol, excepciones y rol personalizado del Brief 07c), su alcance de filas (ADR-022) y solo con los módulos activos del tenant. Nunca accede a Plataforma (ADR-055) ni a herramientas que gobiernan agentes, keys o credenciales (`soloPersonas`).
 
 **Confirmación**

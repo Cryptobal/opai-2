@@ -61,7 +61,7 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 
 ### Base «Hilo» (ADR-090, 11-nov-2026)
 
-Frente transversal aprobado por Carlos: marco centrado en el agente con interruptor, en siete etapas (H1 a H7) descritas en [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md). No compite con Finanzas: no toca sus pantallas hasta cerrar CAR-267 a CAR-269. Tarea madre: CAR-274.
+Frente transversal aprobado por Carlos: marco centrado en el agente con interruptor, en siete etapas (H1 a H7) descritas en [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md). No compite con Finanzas: no toca sus pantallas hasta cerrar las verificaciones reales (CAR-266 a CAR-269). Tarea madre: CAR-274.
 
 ## 4. Qué pausar y qué descartar
 

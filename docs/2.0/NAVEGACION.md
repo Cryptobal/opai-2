@@ -4,7 +4,7 @@
 
 ## Enmienda del marco «Hilo» (ADR-090, 11-nov-2026)
 
-Carlos aprobó un marco nuevo, centrado en el agente, que convive con el de este documento detrás de un interruptor por usuario y por empresa. **Este documento sigue vigente para el marco clásico, que es el valor por defecto.** Con el marco Hilo encendido no hay barra lateral, riel, barra inferior ni «Más»: las mismas entradas, con las mismas reglas de módulo contratado y permiso (§1.6), aparecen en el Índice, y la barra del agente reemplaza al icono de la regla D11. Las áreas, los nombres (§6), la regla de menú frente a pestañas (§1.3) y la declaración en el manifiesto (§7) no cambian. Diseño: [`design/export-base-hilo/`](design/export-base-hilo/README.md). Plan: [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md).
+Carlos aprobó un marco nuevo, centrado en el agente, que convive con el de este documento detrás de un interruptor por usuario y por empresa. **Este documento sigue vigente para el marco clásico, que es el valor por defecto.** Con el marco Hilo encendido no hay barra lateral, riel, barra inferior ni «Más»: las mismas entradas, con las mismas reglas de módulo contratado y permiso (§1.6), aparecen en el Índice, y la barra del agente reemplaza al icono de la regla D11. El portal Trabajador conserva su nombre. Las áreas, los nombres (§6), la regla de menú frente a pestañas (§1.3) y la declaración en el manifiesto (§7) no cambian. Diseño: [`design/export-base-hilo/`](design/export-base-hilo/README.md). Plan: [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md).
 
 ## Enmienda de Configuración v1.1 · PR-A
 
