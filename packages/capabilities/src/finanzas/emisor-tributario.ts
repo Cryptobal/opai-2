@@ -1,6 +1,6 @@
 // Datos tributarios del emisor que el SII exige en el encabezado de una factura, nota de crédito o de débito (CAR-240).
-// Sin ACTECO, SimpleAPI arma un DTE sin <Acteco> (obligatorio en el XSD del SII para 33/34/56/61) y lo rechaza con
-// HTTP 401 aunque la API key autentique. OPAI 1.0, que sí emite, exige estos mismos seis datos antes de llamar
+// Sin ACTECO, SimpleAPI arma un DTE sin <Acteco>, obligatorio en el XSD del SII para 33/34/56/61. (El 401 del
+// 10-nov-2026 no era esto: era la API key sin guiones; CAR-263.) OPAI 1.0 exige estos mismos seis datos antes de llamar
 // (`dte-preflight.ts`, `checkConfig`); aquí se bloquea igual, con un mensaje que dice qué falta y dónde completarlo.
 // Desde CAR-243 los seis datos, ACTECO incluido (el principal de la empresa), viven en Configuración › Empresa.
 import { actecoValido } from "@opai/domain";

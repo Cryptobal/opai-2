@@ -44,7 +44,7 @@ export async function cafGuardadoParaEmitir(
   if (xml === null) return { ok: false, fallo: "danado" };
   const lectura = leerCafXml(xml);
   if (!lectura) return { ok: false, fallo: "ilegible" };
-  // Como `caf_rut_mismatch` de 1.0: un CAF de otro RUT haría que SimpleAPI rechace el contenido con un 401 vacío.
+  // Como `caf_rut_mismatch` de 1.0: un CAF de otro RUT no sirve para timbrar el DTE; se corta antes de llamar a SimpleAPI.
   if (lectura.rutEmisor !== normalizarRut(p.rutEmisor)) return { ok: false, fallo: "rut_distinto" };
   if (lectura.tipoDte !== p.tipoDte || p.folio < lectura.folioDesde || p.folio > lectura.folioHasta) {
     return { ok: false, fallo: "no_corresponde" };
