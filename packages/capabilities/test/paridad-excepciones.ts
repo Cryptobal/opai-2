@@ -30,6 +30,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: credenciales del tenant; nunca salen ni se cambian por API ni MCP (ADR-027).",
   "core.integraciones.set_secreto":
     "Solo personas: secretos cifrados del tenant; nunca salen ni se cambian por API ni MCP (ADR-027).",
+  "core.slack.iniciar_conexion":
+    "Solo personas: conectar Slack es un OAuth que una persona hace en su navegador; una key no instala apps ni maneja tokens (ADR-027, ADR-093).",
+  "core.slack.conectar":
+    "Solo personas: canjea el código del OAuth y guarda el token del bot cifrado; nunca por API ni MCP (ADR-027, ADR-093).",
+  "core.slack.desconectar":
+    "Solo personas: revoca y borra el token del bot de Slack; gobierno de credenciales (ADR-027, ADR-093).",
+  "core.slack.desinstalada":
+    "Interna: solo la ejecuta /api/integraciones/slack/eventos, tras verificar la firma de Slack, cuando la app se desinstala o su token se revoca.",
   "finanzas.folios.cargar_caf":
     "Solo personas: el XML del CAF incluye la llave privada; un agente no lo encola en aprobaciones (CAR-143).",
   "core.integraciones.guardar_certificado_dte":
