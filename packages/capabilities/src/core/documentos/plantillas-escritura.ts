@@ -8,6 +8,7 @@ import { uuidSchema } from "../esquemas";
 import {
   claseSchema,
   contenidoSchema,
+  firmantesSchema,
   nivelSchema,
   nombreSchema,
   plantillaSchema,
@@ -25,6 +26,7 @@ export const documentoPlantillasCreate = defineCapability({
     nombre: nombreSchema,
     clase: claseSchema,
     nivelFirma: nivelSchema,
+    firmantes: firmantesSchema.default("ambos"),
     contenido: contenidoSchema.default(""),
   }),
   output: plantillaSchema,
@@ -44,6 +46,7 @@ export const documentoPlantillasCreate = defineCapability({
       nombre: input.nombre,
       clase: input.clase,
       nivelFirma: input.nivelFirma,
+      firmantes: input.firmantes,
       origen: "creada",
       versionVigente: 1,
       activa: true,
@@ -71,13 +74,14 @@ export const documentoPlantillasCreate = defineCapability({
 export const documentoPlantillasUpdate = defineCapability({
   id: "core.documento_plantillas.update",
   descripcion:
-    "Cambia el nombre o la firma por defecto de una plantilla laboral, o la archiva. El texto no se toca aquí: cada edición del texto crea una versión nueva.",
+    "Cambia el nombre, la firma por defecto o quién firma una plantilla laboral, o la archiva. El texto no se toca aquí: se guarda como borrador y al publicarlo crea una versión nueva.",
   permiso: PERMISOS_CORE.documentosPlantillasManage,
   portales: ["erp"],
   input: z.object({
     id: uuidSchema,
     nombre: nombreSchema.optional(),
     nivelFirma: nivelSchema.optional(),
+    firmantes: firmantesSchema.optional(),
     activa: z.boolean().optional(),
   }),
   output: plantillaSchema,
