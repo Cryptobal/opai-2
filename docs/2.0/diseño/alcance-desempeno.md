@@ -1,6 +1,6 @@
 # Alcance · Desempeño (indicadores y metas por cargo) — para revisar una sola vez
 
-**Estado:** aprobada por Carlos el 11-nov-2026 a las 16:41 (hora de Chile), en el chat del proyecto «Opai 2.0», con las decisiones de la sección 6. El diseño de las pantallas sigue pendiente de su aprobación.
+**Estado:** aprobada por Carlos el 11-nov-2026 a las 16:41 (hora de Chile), en el chat del proyecto «Opai 2.0», con las decisiones de la sección 6. El mockup quedó aprobado como base del diseño de las pantallas a las 17:10.
 **Origen:** pedido de Carlos del 11-nov-2026 en el chat del proyecto «Opai 2.0». Decisión: [ADR-094](../01-decisiones.md). Tarea madre: CAR-303. Mockup interactivo (propuesta de diseño): [`design/export-desempeno/`](../design/export-desempeno/README.md).
 
 No hay extracción de 1.0: OPAI 1.0 no tiene este módulo. Es nuevo.
@@ -78,9 +78,11 @@ Cuatro formas de cálculo, acotadas: contar un hecho en el período, sumar un mo
 2. **La primera versión trae el catálogo y los indicadores propios por empresa.**
 3. **El resultado lo ven la persona y su jefatura.** Hay que poder configurar quién es la jefatura de cada cargo.
 4. **Desempeño se vende como módulo aparte.**
-5. **El mockup sigue siendo propuesta.** Pidió el mockup definitivo, 100 % interactivo, con todo lo anterior; se actualizó el mismo día y espera su aprobación.
+5. **Mockup definitivo, 100 % interactivo, con todo lo anterior:** se actualizó el mismo día y Carlos lo aprobó como base del diseño a las 17:10.
+6. **Dos personas con el mismo cargo de jefatura** (17:10): cada una ve solo a las personas que tiene asignadas; por cargo se puede elegir «todo el equipo».
+7. **El jefe del jefe** (17:10): ve toda su línea hacia abajo.
 
-Pendiente de Carlos: aprobar el diseño; qué pasa cuando dos personas comparten el cargo que es jefatura; si el jefe del jefe también ve.
+Pendiente de Carlos: nada.
 
 ## 7. Defaults que tomo (avísame si alguno no te sirve)
 
@@ -108,4 +110,4 @@ Orden: D1, jefatura por cargo y D2; luego Comercial (el módulo con más datos h
 
 - Si todo hecho relevante guarda hoy persona, cargo y fecha, o hay que completarlo.
 - Cómo se reutiliza o reemplaza `core.inicio.indicadores` (CAR-182), que arma los indicadores de Inicio a mano.
-- Si los usuarios internos de Gard existen como Persona con cargo.
+- **Verificado el 11-nov-2026:** un usuario no está unido a su ficha de Persona (el responsable de un negocio es un usuario; el cargo vive en el vínculo laboral de la Persona). La unión entra en CAR-314; mientras tanto cada indicador declara si se atribuye a un usuario o a una Persona.

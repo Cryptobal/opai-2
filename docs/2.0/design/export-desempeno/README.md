@@ -1,6 +1,6 @@
-# Export «Desempeño» (mockup interactivo, propuesta)
+# Export «Desempeño» (mockup interactivo, base aprobada)
 
-**No es un diseño aprobado.** Es el mockup que Claude armó el 11-nov-2026 en el chat del proyecto «Opai 2.0» para explicar cómo cada empresa configura los indicadores de cada cargo. Carlos aprobó la hoja de alcance ese día (16:41) y dijo que el mockup «sigue siendo propuesta»; esta versión ya incluye lo que pidió: indicadores propios, jefatura por cargo y quién ve qué. Las pantallas se construyen solo con diseño aprobado (CAR-307).
+**Aprobado por Carlos como base del diseño el 11-nov-2026 a las 17:10**, en el chat del proyecto «Opai 2.0» (ADR-094, adenda). Es referencia de estructura y contenido de las pantallas de Desempeño (CAR-307); los datos son de ejemplo. Es el mockup que Claude armó el 11-nov-2026 en el chat del proyecto «Opai 2.0» para explicar cómo cada empresa configura los indicadores de cada cargo. Carlos aprobó la hoja de alcance ese día (16:41) y pidió sumar indicadores propios, jefatura por cargo y quién ve qué; esta versión los incluye.
 
 Alcance: [`diseño/alcance-desempeno.md`](../../diseño/alcance-desempeno.md). Decisión: [ADR-094](../../01-decisiones.md). Tarea madre: CAR-303.
 
