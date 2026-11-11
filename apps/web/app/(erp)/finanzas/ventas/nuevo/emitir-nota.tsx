@@ -127,7 +127,10 @@ export function EmitirNota({ tipo, cuentaId }: { tipo: "61" | "56"; cuentaId: st
           esNc={esNc}
           total={origen.montoTotal}
           codigo={codigo}
-          setCodigo={setCodigo}
+          setCodigo={(v) => {
+            setCodigo(v);
+            setVista(null);
+          }}
           monto={monto}
           setMonto={(v) => {
             setMonto(v);
