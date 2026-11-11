@@ -90,6 +90,8 @@ export async function revertirCorrida(
     async (tx) => {
       const corrida = await tx.importacion.findFirst({ where: { id: importacionId } });
       if (!corrida || corrida.modo !== "aplicar") throw new Error("La corrida no existe o no es una importación aplicada.");
+      // Los lotes del importador de planillas (CAR-279) se revierten con `core.importar.revertir`.
+      if (corrida.versionContrato.startsWith("motor-")) throw new Error("Este lote es del importador de planillas: se revierte desde Importar datos.");
       if (corrida.estado === "revertida") throw new Error("La corrida ya fue revertida.");
       if (corrida.estado !== "completada" || !corrida.terminadaEn)
         throw new Error("Solo se puede revertir una corrida completada.");

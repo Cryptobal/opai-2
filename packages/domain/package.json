@@ -10,7 +10,9 @@
     "./ventas-lineas": "./src/finanzas/ventas-lineas.ts",
     "./terreno-hechos": "./src/terreno-hechos.ts",
     "./acceso-documento": "./src/acceso/documento.ts",
-    "./acteco-catalogo": "./src/acteco-catalogo.ts"
+    "./acteco-catalogo": "./src/acteco-catalogo.ts",
+    "./correos": "./src/correos/index.ts",
+    "./importacion": "./src/importacion/index.ts"
   },
   "scripts": {
     "gen:novedades-embed": "node scripts/embed-novedades-entradas.mjs",

@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
+import type { InputHTMLAttributes, ReactNode, Ref, TextareaHTMLAttributes } from "react";
 
 import { cn } from "../cn";
 
@@ -15,7 +15,11 @@ export function Input({ className, compacto, ...props }: InputProps) {
   return <input className={cn(base, compacto && "md:h-9 md:text-base", className)} {...props} />;
 }
 
-export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+/** `ref` (React 19) para editores que insertan en el cursor (editor de plantillas, CAR-127). */
+export function Textarea({
+  className,
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & { ref?: Ref<HTMLTextAreaElement> }) {
   return <textarea className={cn(base, "h-auto min-h-24 py-2.5", className)} {...props} />;
 }
 

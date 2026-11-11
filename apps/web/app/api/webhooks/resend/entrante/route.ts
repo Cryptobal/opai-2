@@ -1,7 +1,7 @@
 import { crearContexto, executeCapability } from "@opai/capabilities";
-import { resolverTokenSeguimiento } from "@opai/db";
+import { resolverBuzonCorreo, resolverTokenSeguimiento } from "@opai/db";
 
-import { leerEventoEntrante, leerTextoCorreo, tokenDeDestinatarios } from "@/lib/correo-entrante";
+import { type EventoEntrante, destinatariosVisibles, destinoDe, leerEventoEntrante, leerTextoCorreo } from "@/lib/correo-entrante";
 import { verificarFirmaSvix } from "@/lib/firma-svix";
 import { medidorDiferido } from "@/lib/medidor";
 import { soloLecturaDe } from "@/lib/solo-lectura";
@@ -12,11 +12,45 @@ asegurarRegistro();
 
 const MAX_CUERPO = 256 * 1024;
 const descartar = () => new Response(null, { status: 200 });
+const SIN_TEXTO = "(Resend no entregó el contenido del correo.)";
+
+/** Un fallo transitorio pide reintento a Resend; un rechazo de negocio (p. ej. seguimiento borrado) se descarta. */
+const responder = (r: { ok: true } | { ok: false; error: { code: string } }) =>
+  r.ok || r.error.code === "NOT_FOUND" || r.error.code === "FORBIDDEN" ? descartar() : new Response(null, { status: 500 });
+
+async function texto(emailId: string): Promise<string> {
+  const apiKey = process.env["RESEND_API_KEY"];
+  return (apiKey ? await leerTextoCorreo(emailId, apiKey) : null) ?? SIN_TEXTO;
+}
+
+/** CAR-67: respuesta a `s<token>@respuestas.opai.cl` (un seguimiento). Sin cambios de comportamiento. */
+async function alSeguimiento(ev: EventoEntrante, token: string): Promise<Response> {
+  const dueno = await resolverTokenSeguimiento(token);
+  if (!dueno) return descartar();
+  const ctx = crearContexto({ tenantId: dueno.tenantId, actor: { tipo: "system" }, medidor: medidorDiferido, modulosActivos: ["comercial"],
+    modulosSoloLectura: await soloLecturaDe(dueno.tenantId, "comercial") });
+  return responder(await executeCapability(ctx, "comercial.seguimientos.recibir_correo", {
+    seguimientoId: dueno.seguimientoId, mensajeId: ev.emailId, remitente: ev.desde.slice(0, 320),
+    asunto: ev.asunto, texto: await texto(ev.emailId), recibidoEn: ev.recibidoEn,
+  }));
+}
+
+/** CAR-233: correo a la dirección de registro de la empresa `t<token>@respuestas.opai.cl` (reply-to o CCO). */
+async function alBuzon(ev: EventoEntrante, token: string): Promise<Response> {
+  const dueno = await resolverBuzonCorreo(token);
+  if (!dueno) return descartar();
+  const ctx = crearContexto({ tenantId: dueno.tenantId, actor: { tipo: "system" }, medidor: medidorDiferido });
+  return responder(await executeCapability(ctx, "core.correos.recibir", {
+    mensajeId: ev.emailId, remitente: ev.desde.slice(0, 320), destinatarios: destinatariosVisibles(ev),
+    asunto: ev.asunto?.slice(0, 500) ?? null, texto: await texto(ev.emailId), recibidoEn: ev.recibidoEn,
+  }));
+}
 
 /**
- * Receptor del correo entrante de Resend (CAR-67). El webhook es de TODA la cuenta de Resend: lo que
- * no vaya a `<token>@respuestas.opai.cl` se descarta sin guardar ni registrar contenido (200). Sin firma
- * válida responde 401 (falla cerrado). El tenant sale del token, nunca del cuerpo.
+ * Receptor del correo entrante de Resend (CAR-67, extendido en CAR-233). El webhook es de TODA la cuenta
+ * de Resend: lo que no vaya a una dirección de `@respuestas.opai.cl` con token (`s…` de un seguimiento o
+ * `t…` de la empresa) se descarta sin guardar ni registrar contenido (200). Sin firma válida responde
+ * 401 (falla cerrado). El tenant sale del token de la dirección de destino, nunca del cuerpo ni del remitente.
  */
 export async function POST(req: Request): Promise<Response> {
   const secreto = process.env["RESEND_INBOUND_WEBHOOK_SECRET"] ?? "";
@@ -33,19 +67,7 @@ export async function POST(req: Request): Promise<Response> {
   if (!firmada) return new Response(null, { status: 401 });
 
   const ev = leerEventoEntrante(cuerpo);
-  const token = ev ? tokenDeDestinatarios(ev.para) : null;
-  if (!ev || !token) return descartar();
-  const dueno = await resolverTokenSeguimiento(token);
-  if (!dueno) return descartar();
-  const apiKey = process.env["RESEND_API_KEY"];
-  const texto = apiKey ? await leerTextoCorreo(ev.emailId, apiKey) : null;
-
-  const ctx = crearContexto({ tenantId: dueno.tenantId, actor: { tipo: "system" }, medidor: medidorDiferido, modulosActivos: ["comercial"],
-    modulosSoloLectura: await soloLecturaDe(dueno.tenantId, "comercial") });
-  const r = await executeCapability(ctx, "comercial.seguimientos.recibir_correo", {
-    seguimientoId: dueno.seguimientoId, mensajeId: ev.emailId, remitente: ev.desde.slice(0, 320),
-    asunto: ev.asunto, texto: texto ?? "(Resend no entregó el contenido del correo.)", recibidoEn: ev.recibidoEn,
-  });
-  // Un fallo transitorio pide reintento a Resend; un rechazo de negocio (seguimiento borrado) se descarta.
-  return r.ok || r.error.code === "NOT_FOUND" || r.error.code === "FORBIDDEN" ? descartar() : new Response(null, { status: 500 });
+  const destino = ev ? destinoDe(ev) : null;
+  if (!ev || !destino) return descartar();
+  return destino.tipo === "seguimiento" ? alSeguimiento(ev, destino.token) : alBuzon(ev, destino.token);
 }

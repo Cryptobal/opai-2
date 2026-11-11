@@ -57,6 +57,7 @@ const ESPECIALES: Record<string, string> = {
   "cumplimiento.dpa_aceptar": "Aceptar el acuerdo de datos (DPA)",
   "documentos.subir_alcance": "Subir documentos de sus instalaciones",
   "documentos.plantillas.manage": "Gestionar plantillas de documentos",
+  "correos.sin_asignar": "Ver y asociar correos sin asignar",
   usar: "Usar el agente",
   configurar: "Configurar el agente",
 };

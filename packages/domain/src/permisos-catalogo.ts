@@ -96,6 +96,11 @@ export const PERMISOS_CORE = {
   etiquetasRead: "core:etiquetas.read",
   etiquetasManage: "core:etiquetas.manage",
   etiquetasConfig: "core:etiquetas.config",
+  // CAR-233: bandeja «sin asignar» del historial de correos del cliente (verla y asociar a mano). Quién
+  // lo tiene es DECISIÓN CARLOS: por defecto solo owner y admin, porque la bandeja muestra correos que
+  // todavía no pertenecen a ninguna ficha (sin alcance que filtrar). El historial de cada ficha usa
+  // `actividades.read` y el alcance de la ficha.
+  correosSinAsignar: "core:correos.sin_asignar",
 } as const;
 
 export const PERMISOS_PLATAFORMA = {

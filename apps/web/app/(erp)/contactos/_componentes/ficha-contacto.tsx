@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { DetailScreen, type EstadoPantalla, ParesGrid, SeccionTarjeta, Skeleton } from "@opai/ds";
 
 import { PanelActividad } from "@/app/_components/actividad/panel-actividad";
+import { HistorialCorreos } from "@/app/_components/correos/historial-correos";
 import { PrivacidadTitular } from "@/app/_components/cumplimiento/privacidad-titular";
 import { EtiquetasFicha } from "@/app/_components/etiquetas/etiquetas-ficha";
 
@@ -84,6 +85,9 @@ export function FichaContacto(p: {
               />
             </Suspense>
           </SeccionTarjeta>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
+            <HistorialCorreos entidadTipo="contacto" entidadId={c.id} />
+          </Suspense>
           <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <PrivacidadTitular
               titular={{ tipo: "contacto", id: c.id, nombre: `${c.nombres} ${c.apellidos}`.trim() }}

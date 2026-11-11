@@ -111,7 +111,7 @@ export function Cabecera(props: CabeceraProps) {
       {acciones ? (
         <div
           className={cn(
-            "flex min-w-0 items-center gap-2",
+            "flex max-w-full min-w-0 items-center gap-2",
             apilada ? "w-full shrink-0 md:w-auto" : "shrink-0",
             !accionesVisibles && "md:hidden",
           )}

@@ -8,6 +8,8 @@ export type OpcionSegmentada = {
   etiqueta: string;
   href?: string;
   onClick?: () => void;
+  /** Visible pero no elegible (p. ej. «N3 · FEA» apagada). Solo en las opciones de botón. */
+  disabled?: boolean;
 };
 
 type Props = {
@@ -58,7 +60,14 @@ export function Segmentado({
             <span className={pildora}>{o.etiqueta}</span>
           </Link>
         ) : (
-          <button key={o.id} type="button" onClick={o.onClick} aria-pressed={on} className={caja}>
+          <button
+            key={o.id}
+            type="button"
+            onClick={o.onClick}
+            aria-pressed={on}
+            disabled={o.disabled}
+            className={cn(caja, "disabled:cursor-not-allowed disabled:opacity-45")}
+          >
             <span className={pildora}>{o.etiqueta}</span>
           </button>
         );

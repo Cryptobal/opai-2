@@ -516,6 +516,34 @@ model CpqPropuestaCapitulo {
   @@schema("cpq")
 }
 
+/// Plantilla HTML de propuesta importada por la empresa (CAR-138 PR 9): HTML ya saneado, con marcadores del catálogo
+/// de campos, versionado por nombre. Inmutable salvo `estado`. Hoy NO la consume ningún renderer: el PDF sigue siendo `pdf-lib`.
+model CpqPropuestaHtml {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  nombre          String
+  version         Int
+  /// "activa" | "archivada": una sola activa por nombre (índice parcial en la migración).
+  estado          String   @default("activa")
+  htmlSaneado     String   @map("html_saneado")
+  /// SHA-256 (hex) del HTML saneado.
+  hashSha256      String   @map("hash_sha256")
+  /// Versión del catálogo de campos contra la que se validaron los marcadores.
+  catalogoVersion Int      @map("catalogo_version")
+  tokensUsados    String[] @map("tokens_usados")
+  colecciones     String[]
+  /// Avisos del saneado (atributos o estilos que se quitaron).
+  advertencias    Json     @default("[]")
+  creadoPorId     String   @map("creado_por_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, nombre, version])
+  @@index([tenantId, nombre, estado])
+  @@map("propuesta_html")
+  @@schema("cpq")
+}
+
 /// Envío conjunto cotización + propuesta técnica con snapshot congelado (CAR-144).
 model CpqPropuestaEnvio {
   id                    String    @id @default(uuid(7)) @db.Uuid

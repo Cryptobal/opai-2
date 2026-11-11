@@ -58,7 +58,7 @@ export const VERBOS: Record<string, string> = {
   generar_calendario: "Generar calendario", leer: "Leer", deshacer: "Deshacer", registrar: "Registrar",
   sugerir: "Sugerir", sugerir_seccion: "Sugerir sección con IA", agregar: "Agregar", candidatos: "Candidatos", dar_acceso: "Dar acceso al portal", inicializar: "Inicializar",
   importar: "Importar", revertir: "Revertir", sincronizar: "Sincronizar con el banco", sincronizar_rcv: "Sincronizar con el RCV del SII", recibir_web4leads: "Recibir movimientos del banco (Web4Leads)", asignar_centro: "Asignar centro de costo", libro_resumen: "Resumen del libro",
-  vista_previa: "Vista previa", crear_borrador: "Crear borrador", actualizar_borrador: "Editar borrador", descartar_borrador: "Descartar borrador", emitir: "Emitir", emitir_lote: "Emitir en lote", tablero: "Tablero del mes", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
+  vista_previa: "Vista previa", crear_borrador: "Crear borrador", guardar_borrador: "Guardar borrador", actualizar_borrador: "Editar borrador", descartar_borrador: "Descartar borrador", emitir: "Emitir", emitir_lote: "Emitir en lote", tablero: "Tablero del mes", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
   emitir_nota_credito: "Emitir nota de crédito", emitir_nota_debito: "Emitir nota de débito", crear_borrador_nota_debito: "Crear borrador de nota de débito", destinatarios_sugeridos: "Sugerir destinatarios del documento", guardar_destinatarios: "Guardar destinatarios del documento", proyeccion_flujo: "Proyección de flujo", postergar_iva: "Postergar IVA", fijar_fecha_esperada: "Fijar fecha esperada de cobro",
   cesion_simular: "Simular cesión", cesion_ceder: "Ceder", cargar_caf: "Cargar folios (CAF)",
   crear_base: "Crear plan base", iniciar: "Iniciar", controlar: "Pausar, reanudar o cancelar",
@@ -83,4 +83,10 @@ export const VERBOS: Record<string, string> = {
   precio_set: "Fijar precio de lista",
   // Prueba gratis por empresa (CAR-222).
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
+  // Grupos o equipos de usuarios (CAR-251).
+  agregar_miembros: "Agregar miembros", quitar_miembro: "Quitar miembro",
+  // Historial de correos del cliente (CAR-233).
+  sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
+  // Importación de datos desde planillas (CAR-279).
+  plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
 };

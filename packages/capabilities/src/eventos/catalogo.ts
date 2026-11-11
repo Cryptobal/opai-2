@@ -1,6 +1,7 @@
 import { listarModulos, type EventoDeDominio } from "../module";
 import { EVENTOS_COBROS } from "./catalogo-cobros";
 import { EVENTOS_CRM } from "./catalogo-crm";
+import { EVENTOS_GRUPOS } from "./catalogo-grupos";
 import { EVENTOS_TERRENO } from "./catalogo-terreno";
 
 /**
@@ -11,10 +12,7 @@ import { EVENTOS_TERRENO } from "./catalogo-terreno";
 export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.cuenta.creada", descripcion: "Se creó una cuenta (cliente o prospecto)." },
   { id: "core.cuenta.actualizada", descripcion: "Cambiaron los datos de una cuenta." },
-  {
-    id: "core.cuenta.estado_cambiado",
-    descripcion: "Una cuenta pasó a cliente activo, inactivo o prospecto.",
-  },
+  { id: "core.cuenta.estado_cambiado", descripcion: "Una cuenta pasó a cliente activo, inactivo o prospecto." },
   { id: "core.cuenta.archivada", descripcion: "Se archivó una cuenta." },
   { id: "core.contacto.creado", descripcion: "Se agregó un contacto a una cuenta." },
   { id: "core.contacto.actualizado", descripcion: "Cambiaron los datos de un contacto." },
@@ -31,6 +29,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.patron.actualizado", descripcion: "Cambió un patrón de turno (nombre, ciclo o estado)." },
   { id: "core.funcion.creada", descripcion: "Se creó una función de puesto del catálogo." },
   { id: "core.funcion.actualizada", descripcion: "Cambió una función de puesto (nombre o estado)." },
+  ...EVENTOS_GRUPOS,
   { id: "core.persona.creada", descripcion: "Se registró una persona (trabajador)." },
   { id: "core.persona.actualizada", descripcion: "Cambiaron los datos de una persona." },
   { id: "core.persona.bloqueada", descripcion: "Se bloqueó a una persona, con motivo." },

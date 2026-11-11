@@ -35,6 +35,8 @@ model Tenant {
   auditoriaCabeza    AuditoriaCabeza?
   memberships        Membership[]
   roles              Rol[]
+  gruposUsuarios     GrupoUsuarios[]
+  grupoMiembros      GrupoUsuarioMiembro[]
   permisoExcepciones PermisoExcepcion[]
   modules            TenantModule[]
   apiKeys            ApiKey[]

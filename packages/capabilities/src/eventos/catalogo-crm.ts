@@ -45,6 +45,22 @@ export const EVENTOS_CRM: readonly EventoDeDominio[] = [
     descripcion: "Se asignaron etiquetas a negocios, cuentas o contactos.",
   },
   {
+    id: "core.correo_cliente.registrado",
+    descripcion: "Entró un correo a la dirección de registro de la empresa (respuesta o copia oculta); puede quedar sin asignar.",
+  },
+  {
+    id: "core.correo_cliente.asociado",
+    descripcion: "Se asoció a mano un correo del historial a una cuenta, contacto o negocio.",
+  },
+  {
+    id: "core.importacion.aplicada",
+    descripcion: "Se cargó un lote de datos con el importador (cuentas, contactos, instalaciones o negocios).",
+  },
+  {
+    id: "core.importacion.revertida",
+    descripcion: "Se revirtió un lote de importación: se borró lo creado y se restauró lo completado.",
+  },
+  {
     id: "core.etiqueta.quitada",
     descripcion: "Se quitaron etiquetas de negocios, cuentas o contactos.",
   },
