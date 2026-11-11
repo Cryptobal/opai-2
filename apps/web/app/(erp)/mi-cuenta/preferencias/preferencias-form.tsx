@@ -4,6 +4,9 @@ import { Lock } from "lucide-react";
 
 import { Alerta, Badge, RadioGroup, SeccionTarjeta, Switch } from "@opai/ds";
 
+import type { Marco } from "@/lib/marco";
+
+import { DisenoForm } from "./diseno-form";
 import { type Valores, usePreferencias } from "./use-preferencias";
 
 const TEMAS = [
@@ -12,8 +15,8 @@ const TEMAS = [
   { valor: "oscuro", etiqueta: "Oscuro" },
 ];
 
-/** Preferencias propias (35): tema, idioma y avisos personales; cada cambio se guarda solo. */
-export function PreferenciasForm({ inicial }: { inicial: Valores }) {
+/** Preferencias propias (35): tema, diseño, idioma y avisos personales; cada cambio se guarda solo. */
+export function PreferenciasForm({ inicial, marco }: { inicial: Valores; marco: Marco }) {
   const { v, error, guardar } = usePreferencias(inicial);
   // Los controles NUNCA se deshabilitan: ni al cargar (antes se atenuaban ~2 s hasta hidratar, un
   // clic en ese lapso se perdía sin aviso, H4 del QA en vivo del #136) ni durante el guardado (la cola
@@ -32,6 +35,7 @@ export function PreferenciasForm({ inicial }: { inicial: Valores }) {
           onCambiar={(t) => guardar("tema", t, "preferencias_tema")}
         />
       </SeccionTarjeta>
+      <DisenoForm inicial={marco} />
       <SeccionTarjeta titulo="Idioma">
         <div className="flex items-center justify-between gap-3">
           <span className="text-base text-fg">Español de Chile</span>

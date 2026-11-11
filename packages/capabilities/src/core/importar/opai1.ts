@@ -20,6 +20,14 @@ const negocio = z.object({
   id: z.string(), accountId: z.string(), stageId: z.string(), title: z.string(), amount: z.number().nullish(),
   probability: z.number().nullish(), expectedCloseDate: t, ownerId: t,
 });
+// Personas (CAR-282): `OpsPersona` de 1.0 con sus nombres de campo; los datos de pago aceptan las dos
+// formas con que 1.0 los nombra. Lo que no venga queda vacío.
+const persona = z.object({
+  id: z.string(), firstName: z.string(), lastName: t, rut: t, email: t, personalEmail: t, phone: t, phoneMobile: t,
+  birthDate: t, gender: t, nationality: t, addressFormatted: t, address: t, commune: t, region: t,
+  afp: t, regimenPrevisional: t, healthSystem: t, isapreName: t,
+  bankCode: t, bankName: t, accountType: t, bankAccountType: t, accountNumber: t, bankAccountNumber: t,
+});
 const exporte = z.object({
   accounts: z.array(cuenta).default([]),
   contacts: z.array(contacto).default([]),
@@ -27,6 +35,7 @@ const exporte = z.object({
   pipelineStages: z.array(etapa).default([]),
   deals: z.array(negocio).default([]),
   users: z.array(z.object({ id: z.string(), email: z.string() })).default([]),
+  personas: z.array(persona).default([]),
 });
 
 type Fila = Record<string, string | number | boolean | null>;
@@ -44,7 +53,7 @@ const rolesDe = (c: z.infer<typeof contacto>) =>
 /** Filas del export de OPAI 1 para un importador. Lanza `ErrorPlanilla` si el JSON no tiene la forma del export. */
 export function filasDeOpai1(importador: string, json: unknown): Fila[] {
   const r = exporte.safeParse(json);
-  if (!r.success) throw new ErrorPlanilla("El JSON no tiene la forma del export de OPAI 1 (accounts, contacts, installations, deals).");
+  if (!r.success) throw new ErrorPlanilla("El JSON no tiene la forma del export de OPAI 1 (accounts, contacts, installations, deals, personas).");
   const d = r.data;
   const etapas = new Map(d.pipelineStages.map((e) => [e.id, e.name]));
   const correos = new Map(d.users.map((u) => [u.id, u.email]));
@@ -71,7 +80,17 @@ export function filasDeOpai1(importador: string, json: unknown): Fila[] {
                 monto_estimado_mensual: n.amount ?? null, probabilidad: n.probability ?? null,
                 cierre_estimado: dia(n.expectedCloseDate), responsable_email: correos.get(n.ownerId ?? "") ?? null,
               }))
-            : [];
+            : importador === "personas"
+              ? d.personas.filter((p) => p.rut).map((p) => ({
+                  id_externo: p.id, nombres: p.firstName, apellidos: p.lastName ?? null, rut: p.rut ?? null,
+                  email_personal: p.personalEmail ?? null, email_laboral: p.email ?? null, telefono: p.phoneMobile ?? p.phone ?? null,
+                  fecha_nacimiento: dia(p.birthDate), sexo: p.gender ?? null, nacionalidad: p.nationality ?? null,
+                  calle: p.addressFormatted ?? p.address ?? null, comuna: p.commune ?? null, region: p.region ?? null,
+                  afp: p.afp ?? null, regimen: p.regimenPrevisional ?? null, sistema_salud: p.healthSystem?.toLowerCase() ?? null, isapre: p.isapreName ?? null,
+                  banco: p.bankCode ?? p.bankName ?? null, tipo_cuenta: p.accountType ?? p.bankAccountType ?? null,
+                  numero_cuenta: p.accountNumber ?? p.bankAccountNumber ?? null,
+                }))
+              : [];
   if (!filas.length) throw new ErrorPlanilla("El export de OPAI 1 no trae registros para este importador.");
   return filas;
 }

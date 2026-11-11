@@ -2,6 +2,7 @@
 // dentro de `enTransaccion` con rol `opai_app`.
 /* eslint-disable max-lines -- apply transaccional por entidad (CAR-25) */
 import type { TenantTx } from "../../src/transaccion";
+import { aplicarNegocios } from "./aplicar-negocios";
 import type { Decision } from "./comun";
 import { MOTIVO_VINCULO_PERSONA } from "./contactos";
 import type { DatosCuenta } from "./cuentas";
@@ -27,6 +28,7 @@ export type ResultadoAplicacion = {
     contactos: number;
     instalaciones: number;
     programaciones: number;
+    negocios: number;
   };
   omitidas: number;
 };
@@ -478,6 +480,9 @@ export async function aplicarPlanEnTransaccion(
   const contactos = await aplicarContactos(tx, tenantId, plan.contactos, mapas, reg);
   const instalaciones = await aplicarInstalaciones(tx, tenantId, plan.instalaciones, mapas, reg);
   const programaciones = await aplicarProgramaciones(tx, tenantId, plan.programaciones, mapas, reg);
+  const neg = await aplicarNegocios(tx, tenantId, plan.negocios, mapas.cuenta, reg, (id10, id20, metodo) =>
+    anotar(tx, tenantId, reg, "negocio", id10, id20, metodo),
+  );
   const sinEntrar = [
     ...plan.cuentas,
     ...plan.contactos,
@@ -485,10 +490,10 @@ export async function aplicarPlanEnTransaccion(
     ...plan.programaciones,
   ].filter((d) => d.accion === "conflicto" || (d.accion === "omitido" && !d.fusionaCon));
   for (const d of sinEntrar) await reg.omitido(d.entidad, d.idOpai1, d.motivo ?? d.accion);
-  const omitidas = sinEntrar.length;
+  const omitidas = sinEntrar.length + neg.omitidos;
   return {
     mapas,
-    aplicadas: { cuentas, contactos, instalaciones, programaciones },
+    aplicadas: { cuentas, contactos, instalaciones, programaciones, negocios: neg.creados },
     omitidas,
   };
 }
