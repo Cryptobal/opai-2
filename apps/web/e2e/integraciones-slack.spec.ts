@@ -12,7 +12,9 @@ test.describe("@preview configuración: integración con Slack", () => {
   test("muestra la conexión y guarda la configuración mínima de avisos", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/integraciones/slack");
-    await expect(page.getByRole("heading", { name: "Slack", exact: true }).first()).toBeVisible();
+    // Con «volver», la barra superior muestra el título como migas (no como encabezado) y en teléfono no
+    // se ve: se comprueba el contenido propio de la pantalla.
+    await expect(page.getByText("Conexión", { exact: true }).first()).toBeVisible();
     await expect(
       page.getByText(/Conectar con Slack|todavía no está disponible aquí/).first(),
     ).toBeVisible();
@@ -24,7 +26,7 @@ test.describe("@preview configuración: integración con Slack", () => {
     // Cambia el margen, guarda, comprueba y deja el valor por defecto (15) para no ensuciar qa-e2e.
     const margen = page.getByLabel("Margen de atraso (minutos)");
     await margen.fill("20");
-    await page.getByRole("button", { name: "Guardar" }).first().click();
+    await page.getByRole("button", { name: "Guardar" }).filter({ visible: true }).first().click();
     await expect(page.getByText("Configuración de Slack guardada")).toBeVisible({
       timeout: 30_000,
     });
@@ -32,7 +34,7 @@ test.describe("@preview configuración: integración con Slack", () => {
     await expect(page.getByLabel("Margen de atraso (minutos)")).toHaveValue("20");
     await capturar(page, info, "slack-guardado");
     await page.getByLabel("Margen de atraso (minutos)").fill("15");
-    await page.getByRole("button", { name: "Guardar" }).first().click();
+    await page.getByRole("button", { name: "Guardar" }).filter({ visible: true }).first().click();
     await expect(page.getByText("Configuración de Slack guardada")).toBeVisible({
       timeout: 30_000,
     });
