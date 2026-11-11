@@ -6,7 +6,11 @@ import { QUIEN_PORTAL, tituloDeRuta } from "./datos-hilo";
 /** Texto de la barra: con agente invita a pedir; sin agente, busca (ADR-090). */
 export const barraHilo = (agente: boolean) =>
   agente
-    ? ({ agente: true, texto: "Pide, pregunta o busca una pantalla" } as const)
+    ? ({
+        agente: true,
+        texto: "Pide, pregunta o busca una pantalla",
+        textoCorto: "Pide o busca algo en OPAI",
+      } as const)
     : ({ agente: false, texto: "Busca una pantalla o un registro" } as const);
 
 /** Portales con la línea que dice para quién es cada uno. */
