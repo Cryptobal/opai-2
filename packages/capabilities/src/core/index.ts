@@ -44,6 +44,7 @@ import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
 import { consumidorNegocioGanado } from "../comercial/consumidor-ganado";
 import { consumidorCpqGanado } from "../comercial/consumidor-ganado-cpq";
 import { capacidadesCorreos } from "./correos";
+import { capacidadesImportar } from "./importar";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
@@ -131,6 +132,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesMaestros,
   ...capacidadesCrm,
   ...capacidadesCorreos,
+  ...capacidadesImportar,
   ...capacidadesCalendario,
   ...capacidadesRemuneraciones,
   ...capacidadesAnexos,

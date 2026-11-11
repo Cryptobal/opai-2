@@ -1,18 +1,22 @@
 "use client";
 
 import { KeyRound, Smartphone } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Badge, Button, estilosBoton } from "@opai/ds";
-import { formatearFecha } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
 import type { Quitar } from "@/app/_acciones/metodos-acceso";
 
 import { AgregarPasskey } from "./agregar-passkey";
-import { QuitarMetodo } from "./quitar-metodo";
-import { RenombrarPasskey } from "./renombrar-passkey";
 import type { Metodos } from "./tipos";
+
+// Diálogos diferidos: solo se descargan al abrirlos (presupuesto de JS, ADR-037).
+const QuitarMetodo = dynamic(() => import("./quitar-metodo").then((m) => m.QuitarMetodo));
+const RenombrarPasskey = dynamic(() =>
+  import("./renombrar-passkey").then((m) => m.RenombrarPasskey),
+);
 
 type Accion =
   | { tipo: "quitar"; quitar: Quitar; etiqueta: string }
@@ -44,7 +48,7 @@ export function MetodosAcceso({ m }: { m: Metodos }) {
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-base text-fg">{nombre}</span>
                     <span className="text-sm text-fg-muted">
-                      Agregada el {formatearFecha(p.creadaEn)}
+                      Agregada el {p.creadaEnTexto ?? "—"}
                     </span>
                   </div>
                   <Badge tono={p.sincronizada ? "info" : "neutro"}>

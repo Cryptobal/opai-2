@@ -3,6 +3,8 @@ export type PasskeyFila = {
   id: string;
   nombre: string | null;
   creadaEn: string | null;
+  /** Fecha ya formateada en el servidor (evita el barrel de `@opai/domain` en el cliente). */
+  creadaEnTexto?: string;
   sincronizada: boolean;
 };
 

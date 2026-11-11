@@ -1,3 +1,5 @@
+import { formatearFecha } from "@opai/domain";
+
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
@@ -26,7 +28,11 @@ export default function MiCuenta() {
         await requerirIdentidad("/mi-cuenta");
         const r = await ejecutarComoUsuario<Metodos>("erp", "core.metodos_acceso.list");
         if (!r.ok) throw new Error(r.error.message);
-        return r.data;
+        const passkeys = r.data.passkeys.map((p) => ({
+          ...p,
+          creadaEnTexto: formatearFecha(p.creadaEn),
+        }));
+        return { ...r.data, passkeys };
       }}
     >
       {(m) => (

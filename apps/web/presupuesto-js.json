@@ -50,7 +50,7 @@
     "/(erp)/personas/[id]/anexos": 170,
     "/(erp)/personas/[id]/anexos/[anexoId]": 170,
     "/(erp)/personas/[id]/privacidad": 170,
-    "/(erp)/mi-cuenta/preferencias": 178,
+    "/(erp)/mi-cuenta/preferencias": 179,
     "/(erp)/configuracion/integraciones/[proveedor]": 181,
     "/(platform)/platform/tenants/[id]/modulos": 172,
     "/ds": 234,
