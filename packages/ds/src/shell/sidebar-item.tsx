@@ -1,6 +1,7 @@
 import { cn } from "../cn";
 import { Avatar } from "../components/avatar";
 import type { ItemMenu } from "../components/menu";
+import { PILDORA_ROJA } from "./contador";
 import { PinDiferido as BotonFijar } from "./pin-diferido";
 import { esActivo, type LinkComponent, type NavItem, type Usuario } from "./types";
 import { UserMenu } from "./user-menu";
@@ -40,12 +41,11 @@ export function Item({ item, rutaActual, Link, onFijar, fijado }: ItemProps) {
         <span className="truncate">{item.etiqueta}</span>
         {item.contador !== undefined ? (
           <span
-            className={cn(
-              "t-numeric ml-auto text-xs",
+            className={
               item.resaltado && item.contador > 0
-                ? "flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger-fg px-1 leading-none font-semibold text-white dark:bg-danger dark:text-inverse-fg"
-                : "text-fg-subtle",
-            )}
+                ? `${PILDORA_ROJA} ml-auto text-xs`
+                : "t-numeric ml-auto text-xs text-fg-subtle"
+            }
           >
             {item.contador}
           </span>
