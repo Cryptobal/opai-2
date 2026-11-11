@@ -4,27 +4,17 @@ import { Alerta, ParesGrid, SeccionTarjeta } from "@opai/ds";
 import { AccionesEntidad, type AccionEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
+import { identidadActual } from "@/lib/servidor";
 
-type Cuenta = {
-  bancoCodigo: string | null;
-  tipoCuenta: string | null;
-  numeroCuenta: string | null;
-  rutTitular: string | null;
-  /** CAR-244: nombre del catálogo SBIF y señal de dato escrito a mano que hay que corregir. */
-  bancoNombre: string | null;
-  tipoCuentaEtiqueta: string | null;
-  porCorregir: boolean;
-};
-type Pago = {
-  personaId: string;
-  vigente: Cuenta;
-  solicitudPendiente: (Cuenta & { id: string }) | null;
-};
+import { SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
+import { cuentaCorta } from "./estado-ficha";
+import { type CuentaPago, pagoDe } from "./lecturas-ficha";
+
+const TITULO = "Pago y bancos";
 
 /** «BancoEstado · 012»; lo guardado como texto libre se muestra tal cual, marcado para corregir. */
-const banco = (c: Cuenta) =>
-  c.bancoNombre && !c.porCorregir
+export const banco = (c: CuentaPago) =>
+  c.bancoNombre && /^\d{3}$/.test(c.bancoCodigo ?? "")
     ? `${c.bancoNombre} · ${c.bancoCodigo}`
     : c.bancoCodigo
       ? `${c.bancoCodigo} (por corregir)`
@@ -32,17 +22,12 @@ const banco = (c: Cuenta) =>
 
 export async function SeccionPago({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
-  if (!identidad || !puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPagoRead)) return null;
-  const r = await ejecutarComoUsuario<Pago>("erp", "core.personas.pago_ver", { id: personaId });
+  if (!identidad) return null;
+  if (!puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPagoRead))
+    return <SeccionSinAcceso titulo={TITULO} />;
+  const r = await pagoDe(personaId);
   // CAR-124 (estado «error» del diseño): un fallo ya no deja la tarjeta en blanco.
-  if (!r.ok)
-    return (
-      <SeccionTarjeta titulo="Pago y bancos">
-        <Alerta tono="danger" titulo="No pudimos cargar los datos de pago">
-          Recarga la página. Si el problema sigue, avisa a soporte.
-        </Alerta>
-      </SeccionTarjeta>
-    );
+  if (!r.ok) return <SeccionError titulo={TITULO} que="los datos de pago" />;
   const d = r.data;
   const v = d.vigente;
   const sinCuenta = !v.bancoCodigo && !v.tipoCuenta && !v.numeroCuenta && !v.rutTitular;
@@ -80,7 +65,7 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
       : [];
   return (
     <SeccionTarjeta
-      titulo="Pago y bancos"
+      titulo={TITULO}
       {...(puede
         ? {
             accion: (
@@ -94,13 +79,12 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
     >
       {d.solicitudPendiente ? (
         <Alerta tono="warning" titulo="Cambio de cuenta pendiente de RRHH">
-          La solicitud debe ser aprobada o rechazada por alguien distinto de quien la registró.
+          Nueva cuenta: {cuentaCorta(d.solicitudPendiente) ?? "sin datos"}. La aprueba o rechaza
+          alguien distinto de quien la registró.
         </Alerta>
       ) : null}
       {sinCuenta && !d.solicitudPendiente ? (
-        <p className="t-caption mb-3">
-          Sin cuenta registrada.{puede ? " Usa «Solicitar cambio» para agregarla." : ""}
-        </p>
+        <VacioSeccion texto="Sin cuenta registrada." accion={puede ? "Solicitar cambio" : null} />
       ) : null}
       {v.porCorregir ? (
         <Alerta tono="warning" titulo="Banco o tipo de cuenta por corregir">

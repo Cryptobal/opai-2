@@ -2,34 +2,37 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
+import { conDatos, SeccionError, SeccionSinAcceso, VacioSeccion } from "./estado-seccion";
+import { previsionDe } from "./lecturas-ficha";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
+import { identidadActual } from "@/lib/servidor";
 
-type Prevision = {
-  personaId: string;
-  afp: string | null;
-  regimen: string | null;
-  sistemaSalud: string | null;
-  isapreNombre: string | null;
-  planIsapre: string | null;
-  planUf: string | null;
-  cotizacionUfPct: string | null;
-};
+const TITULO = "Previsión";
 
 export async function SeccionPrevision({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
-  if (!identidad || !puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPrevisionRead)) return null;
-  const r = await ejecutarComoUsuario<Prevision>("erp", "core.personas.prevision_ver", {
-    id: personaId,
-  });
-  if (!r.ok) return null;
+  if (!identidad) return null;
+  if (!puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPrevisionRead))
+    return <SeccionSinAcceso titulo={TITULO} />;
+  const r = await previsionDe(personaId);
+  if (!r.ok) return <SeccionError titulo={TITULO} que="la previsión" />;
   const d = r.data;
   const puede = puedeDeIdentidad(identidad)(PERMISOS_CORE.personasPrevisionManage);
+  const vacia = !conDatos(d.afp, d.regimen, d.sistemaSalud, d.isapreNombre, d.planIsapre);
   return (
     <SeccionTarjeta
-      titulo="Previsión"
-      {...(puede ? { accion: <BotonEditarSeccion seccion="prevision" /> } : {})}
+      titulo={TITULO}
+      {...(puede
+        ? {
+            accion: (
+              <BotonEditarSeccion seccion="prevision" {...(vacia ? { etiqueta: "Agregar" } : {})} />
+            ),
+          }
+        : {})}
     >
+      {vacia ? (
+        <VacioSeccion texto="Sin previsión registrada." accion={puede ? "Agregar" : null} />
+      ) : null}
       <ParesGrid
         items={[
           { etiqueta: "AFP", valor: d.afp },
