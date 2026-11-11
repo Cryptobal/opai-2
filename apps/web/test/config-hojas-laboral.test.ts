@@ -39,12 +39,23 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
     expect(faltantes(cfg.pago, v)).toBe(true);
     const ok = {
       bancoCodigo: "012",
-      tipoCuenta: "Vista",
+      tipoCuenta: "vista",
       numeroCuenta: "12345678",
       rutTitular: "",
     };
     expect(faltantes(cfg.pago, ok)).toBe(false);
     expect(cambiosDe(cfg.pago, v, ok)).toEqual({ ...ok, rutTitular: null });
+  });
+
+  it("banco y tipo de cuenta solo aceptan opciones del catálogo SBIF (CAR-244)", () => {
+    const base = { tipoCuenta: "rut", numeroCuenta: "12345678", rutTitular: "" };
+    expect(faltantes(cfg.pago, { ...base, bancoCodigo: "Banco Estado" })).toBe(true);
+    expect(faltantes(cfg.pago, { ...base, bancoCodigo: "999" })).toBe(true);
+    expect(faltantes(cfg.pago, { ...base, bancoCodigo: "012", tipoCuenta: "Cuenta RUT" })).toBe(
+      true,
+    );
+    const banco = cfg.pago.campos.find((c) => c.clave === "bancoCodigo");
+    expect(banco?.opciones?.find((o) => o.valor === "012")?.etiqueta).toBe("BancoEstado · 012");
   });
 
   it("rechaza texto no numérico en los campos enteros", () => {
@@ -78,7 +89,9 @@ describe("hojas de edición de Laboral (CAR-223)", () => {
                 ? "12.5"
                 : f.tipo === "si_no"
                   ? "si"
-                  : "12345678",
+                  : f.tipo === "opcion"
+                    ? (f.opciones?.[0]?.valor ?? "")
+                    : "12345678",
         ]),
       );
       if (seccion === "contacto-laboral")

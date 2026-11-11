@@ -1,5 +1,7 @@
 /** Secciones editables de Laboral: campos y armado del input de cada capacidad (CAR-223). */
-export type TipoCampo = "texto" | "fecha" | "entero" | "decimal" | "si_no";
+import { CAMPOS_BANCO } from "./campos-banco";
+
+export type TipoCampo = "texto" | "fecha" | "entero" | "decimal" | "si_no" | "opcion";
 export type CampoLaboral = {
   clave: string;
   etiqueta: string;
@@ -9,6 +11,10 @@ export type CampoLaboral = {
   /** Rango de un entero. */
   min?: number;
   maxValor?: number;
+  /** Valores permitidos de un campo `opcion` (CAR-244: banco y tipo de cuenta, nunca texto libre). */
+  opciones?: readonly { valor: string; etiqueta: string }[];
+  /** Lista larga: selector con búsqueda (por nombre o código). */
+  buscable?: boolean;
 };
 export type SeccionLaboral =
   "prevision" | "uniforme" | "jornada-dt" | "os10" | "contacto-laboral" | "pago";
@@ -130,8 +136,7 @@ export const SECCIONES_LABORAL: Record<SeccionLaboral, ConfigSeccion> = {
     boton: "Solicitar cambio",
     todos: true,
     campos: [
-      t("bancoCodigo", "Banco", 20, true),
-      t("tipoCuenta", "Tipo de cuenta", 40, true),
+      ...CAMPOS_BANCO,
       t("numeroCuenta", "Número de cuenta", 40, true),
       t("rutTitular", "RUT del titular (opcional)", 20),
     ],

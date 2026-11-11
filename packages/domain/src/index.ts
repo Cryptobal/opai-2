@@ -1,6 +1,7 @@
 export * from "./novedades/catalogo";
 export * from "./bloqueo-login";
 export * from "./catalogos";
+export * from "./bancos";
 export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";
 export * from "./comercial/datos-sii";
@@ -26,7 +27,12 @@ export * from "./rut";
 export * from "./terreno-pin";
 export * from "./telefono";
 export * from "./turnos";
-export { intervaloEsperado, horasEntre, horasEsperadas, type IntervaloEsperado } from "./turnos-instantes";
+export {
+  intervaloEsperado,
+  horasEntre,
+  horasEsperadas,
+  type IntervaloEsperado,
+} from "./turnos-instantes";
 export * from "./jornada-legal";
 export * from "./turnos-esperados";
 export * from "./turnos-jornada-pactada";
