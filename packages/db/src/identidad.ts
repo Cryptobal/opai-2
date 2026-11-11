@@ -27,6 +27,14 @@ const MODELOS_AUTH: ReadonlySet<string> = new Set([
   "Account",
   "Verification",
   "TwoFactor",
+  // OAuth del MCP (CAR-247): clientes, tokens y consentimientos del proveedor de Better Auth.
+  "OauthClient",
+  "OauthResource",
+  "OauthClientResource",
+  "OauthRefreshToken",
+  "OauthAccessToken",
+  "OauthConsent",
+  "OauthClientAssertion",
 ]);
 
 function extender(base: ClienteApp) {

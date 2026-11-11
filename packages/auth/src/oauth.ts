@@ -1,7 +1,7 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { APIError } from "better-auth/api";
 
-import { forUser } from "@opai/db";
+import { clienteAuth, forUser } from "@opai/db";
 
 import {
   ALCANCES_OAUTH,
@@ -32,8 +32,17 @@ async function membresiasOAuth(userId: string): Promise<MembresiaOAuth[]> {
   }));
 }
 
-const empresaDeSesion = (session: Record<string, unknown>) =>
-  typeof session["oauthTenantId"] === "string" ? session["oauthTenantId"] : null;
+/**
+ * Empresa elegida en esta sesión para autorizar apps. Se lee de la base: la lectura rápida de la sesión
+ * (`core.auth_sesion_por_token`) no trae esta columna.
+ */
+async function empresaDeSesion(session: { id: string }): Promise<string | null> {
+  const fila = await clienteAuth().session.findUnique({
+    where: { id: session.id },
+    select: { oauthTenantId: true },
+  });
+  return fila?.oauthTenantId ?? null;
+}
 
 /**
  * Proveedor OAuth del MCP (CAR-247, ADR-098). Apps como Claude se registran solas (DCR), piden entrar
@@ -60,10 +69,13 @@ export const proveedorOAuth = () =>
     postLogin: {
       page: PAGINA_EMPRESA_OAUTH,
       shouldRedirect: async ({ user, session }) =>
-        necesitaElegirEmpresa(await membresiasOAuth(user.id), empresaDeSesion(session)),
+        necesitaElegirEmpresa(await membresiasOAuth(user.id), await empresaDeSesion(session)),
       consentReferenceId: async ({ user, session }) => {
         try {
-          return empresaDelConsentimiento(await membresiasOAuth(user.id), empresaDeSesion(session));
+          return empresaDelConsentimiento(
+            await membresiasOAuth(user.id),
+            await empresaDeSesion(session),
+          );
         } catch {
           throw new APIError("FORBIDDEN", {
             message: "Elige una empresa válida para conectar la app.",

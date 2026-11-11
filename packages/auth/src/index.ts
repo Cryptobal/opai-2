@@ -29,6 +29,13 @@ export {
   VIGENCIA_ENLACE_SEGUNDOS,
   VIGENCIA_RECUPERACION_SEGUNDOS,
 } from "./opciones";
+export {
+  cabeceraDesafioMcp,
+  emisorOAuth,
+  metadatosRecursoMcp,
+  urlMetadatosRecurso,
+} from "./oauth-metadatos";
+export { metadatosServidorOAuth } from "./oauth-metadatos-servidor";
 export { entrarConPin, type ResultadoPin } from "./pin";
 export { correoDeRecuperacion } from "./recuperacion";
 export { getSession, requireSession, sesionDeRequest, sesionVigente, type Sesion } from "./session";

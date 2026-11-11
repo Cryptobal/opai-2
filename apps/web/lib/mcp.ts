@@ -1,5 +1,6 @@
 import { createMcpHandler } from "mcp-handler";
 
+import { cabeceraDesafioMcp } from "@opai/auth";
 import { executeCapability, MANUALES } from "@opai/capabilities";
 import { ejecutarHerramienta, herramientasMcp } from "@opai/capabilities/mcp";
 
@@ -18,13 +19,17 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
   if (!(await permitir(`mcp-ip:${ipDe(req)}`, LIMITES.apiPorIp.maximo))) return demasiadas();
   if (!key) {
     const r = noAutenticado("Falta la API key: usa Authorization: Bearer <key>.");
-    r.headers.set("WWW-Authenticate", 'Bearer realm="opai"');
+    r.headers.set("WWW-Authenticate", cabeceraDesafioMcp());
     return r;
   }
 
   asegurarRegistro();
   const ctx = await contextoDeApiKey(key);
-  if (ctx instanceof Response) return ctx;
+  if (ctx instanceof Response) {
+    // Token o key inválida: el cliente OAuth vuelve a descubrir cómo entrar (RFC 9728 §5.1).
+    if (ctx.status === 401) ctx.headers.set("WWW-Authenticate", cabeceraDesafioMcp());
+    return ctx;
+  }
   // Cupo por key autenticada (apiKeyId), como /api/v1. Nunca por un prefijo de la key: con slugs
   // largos el prefijo es todo público y keys falsas agotarían el cupo de la key real (CAR-44). El
   // sondeo de keys antes de autenticar lo acota el límite por IP de arriba.
