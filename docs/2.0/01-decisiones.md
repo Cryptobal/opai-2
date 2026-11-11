@@ -1797,12 +1797,12 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Prioridad.** Entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones (decisión 6): no se tocan sus archivos ni los del PR de MFA (#499) mientras siga abierto.
 
-**Respuestas de Carlos (11-nov-2026, en la sesión).**
+**Respuestas de Carlos (11-nov-2026, en la sesión; confirmadas a las 17:08).**
 1. **Pánico:** se aprieta en la app de terreno (la del guardia), que es la que está en terreno. El botón nace ahí y emite el evento de pánico que consume F3.
 2. **Espacio Slack de pruebas:** sí. Las apps se registran en él (la de pruebas) y la distribuida aparte, cuando F1 esté desplegado.
 3. **Canales de supervisión:** públicos. Se mantienen los scopes de §8, sin `groups:*`.
 4. **Valores por defecto:** aprobados los del plan (atraso sobre 15 min, ausencia y pánico al canal encendidos; lo demás apagado; escalamiento a los 5 min si se enciende).
-5. **Escalamiento del pánico:** a un grupo de usuarios o a personas, configurable en cada tenant.
+5. **Escalamiento del pánico:** lo recibe **un grupo de usuarios de OPAI** (CAR-251) que cada empresa elige (Carlos lo precisó a las 17:08, aprobando la sugerencia de la sesión).
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
 
