@@ -41,4 +41,6 @@ export const RECURSOS: Record<string, string> = {
   correos: "Correos de clientes",
   // Importación de datos desde planillas (CAR-279).
   importar: "Importación de datos",
+  // Indicadores de gestión de las personas (CAR-305, ADR-094).
+  indicadores_gestion: "Indicadores de gestión",
 };

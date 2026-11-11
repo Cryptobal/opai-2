@@ -78,6 +78,13 @@ export {
   registrarModulos,
 } from "./module";
 export { portalesDe, restriccion, tienePermisoDeCapacidad } from "./autorizacion";
+export {
+  type ConsultaIndicador,
+  defineIndicador,
+  type IndicadorGestion,
+  type MedicionIndicador,
+} from "./indicadores-gestion";
+export { indicadoresDeclarados, indicadoresDelNucleo } from "./core/indicadores-gestion";
 export { dondeCuenta, dondeInstalacion, dondePersona } from "./core/maestros/alcance";
 export {
   type Consumidor,
