@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { FilaHilo, ListaHilo, PendienteHilo, SegmentoHilo } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
-import { cargarFilasHilo, cargarPendientesHilo, type EjecutarHilo } from "./cargas-hilo";
+import { cargarFilasHilo, cargarPendientesHilo, type LecturasHilo } from "./cargas-hilo";
 
 const CARGANDO = { estado: "cargando", items: [] } as const;
 /** Pendientes con más de un minuto se vuelven a pedir al volver a la pestaña. */
@@ -24,8 +24,17 @@ export function useHilo(portal: string) {
   const pedido = useRef({ actividad: false, agenda: false });
   const ultima = useRef(0);
 
-  const ejecutar = useCallback<EjecutarHilo>(
-    (id, input) => ejecutarCapacidad(portal, id, input),
+  // Ids literales en cada llamada: así el gate de paridad sabe qué capacidades usa el hilo.
+  const ejecutar = useMemo<LecturasHilo>(
+    () => ({
+      pendientes: () => ejecutarCapacidad(portal, "core.inicio.pendientes", {}),
+      contadores: () =>
+        ejecutarCapacidad(portal, "core.resumen.contadores", {
+          campos: ["notificacionesNoLeidas"],
+        }),
+      actividad: () => ejecutarCapacidad(portal, "core.actividad.list", { limite: 20 }),
+      agenda: () => ejecutarCapacidad(portal, "core.actividades.tareas", { limite: 50 }),
+    }),
     [portal],
   );
 

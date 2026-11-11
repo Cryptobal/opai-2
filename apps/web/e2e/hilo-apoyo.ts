@@ -14,11 +14,12 @@ export const enTelefono = (page: Page) => (page.viewportSize()?.width ?? 0) < 10
 // En local las capturas van a e2e/__screenshots__/; en `preview-e2e`, al artefacto del run (A2.10).
 export const captura = (page: Page, nombre: string, info: TestInfo) => capturar(page, info, nombre);
 
-// Ruido propio de `next dev`, igual en el marco clásico: el aviso de «uncached data» por la lectura
-// de la sesión en el layout, y los dos avisos que deja una recarga en caliente a mitad de la prueba.
-// Contra un sitio desplegado (vista previa) no se filtra nada: ahí cualquiera de estos es un error.
-const RUIDO_DEV = process.env["BASE_URL"]
-  ? []
+// Ruido que no es de la aplicación. Con `next dev`: el aviso de «uncached data» por la lectura de la
+// sesión en el layout y los dos avisos de una recarga en caliente. En la vista previa de Vercel: su
+// barra de comentarios, que nuestra CSP bloquea, y el service worker, que la protección de Vercel
+// responde con una redirección. Cualquier otro error de consola hace fallar la prueba.
+const RUIDO = process.env["BASE_URL"]
+  ? ["vercel.live", "The script resource is behind a redirect"]
   : [
       "encountered uncached data during prerendering or a navigation",
       "The server could not finish this Suspense boundary",
@@ -28,7 +29,7 @@ const RUIDO_DEV = process.env["BASE_URL"]
 export function erroresDeConsola(page: Page): string[] {
   const errores: string[] = [];
   const anotar = (texto: string) => {
-    if (!RUIDO_DEV.some((r) => texto.includes(r))) errores.push(texto);
+    if (!RUIDO.some((r) => texto.includes(r))) errores.push(texto);
   };
   page.on("console", (m) => {
     if (m.type() === "error") anotar(m.text());

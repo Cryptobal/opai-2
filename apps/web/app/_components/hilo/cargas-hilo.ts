@@ -9,8 +9,14 @@ import {
   pendientesHilo,
 } from "./datos-hilo";
 
-/** Ejecuta una capacidad de lectura del portal (en la app, `ejecutarCapacidad` con el portal fijo). */
-export type EjecutarHilo = (id: string, input: Record<string, unknown>) => Promise<Resultado>;
+/**
+ * Lecturas del hilo. Quien las arma (el gancho `useHilo`) llama a `ejecutarCapacidad` con el id
+ * literal de cada capacidad, como exige el gate de paridad pantalla ↔ MCP.
+ */
+export type LecturasHilo = Record<
+  "pendientes" | "contadores" | "actividad" | "agenda",
+  () => Promise<Resultado>
+>;
 
 const ERROR = { estado: "error", items: [] } as const;
 
@@ -20,11 +26,11 @@ const ERROR = { estado: "error", items: [] } as const;
  * los contadores, los pendientes se muestran igual, sin el aviso.
  */
 export async function cargarPendientesHilo(
-  ejecutar: EjecutarHilo,
+  leer: LecturasHilo,
 ): Promise<ListaHilo<PendienteHilo> | null> {
   const [p, c] = await Promise.all([
-    ejecutar("core.inicio.pendientes", {}).catch(() => null),
-    ejecutar("core.resumen.contadores", { campos: ["notificacionesNoLeidas"] }).catch(() => null),
+    leer.pendientes().catch(() => null),
+    leer.contadores().catch(() => null),
   ]);
   if (!p?.ok) return null;
   const avisos = c?.ok
@@ -35,14 +41,12 @@ export async function cargarPendientesHilo(
 
 /** Actividad o Agenda del hilo. Nunca rechaza: sin red queda en error, con «Reintentar». */
 export async function cargarFilasHilo(
-  ejecutar: EjecutarHilo,
+  leer: LecturasHilo,
   segmento: "actividad" | "agenda",
   ahora: Date,
 ): Promise<ListaHilo<FilaHilo>> {
   const esActividad = segmento === "actividad";
-  const r = await ejecutar(esActividad ? "core.actividad.list" : "core.actividades.tareas", {
-    limite: esActividad ? 20 : 50,
-  }).catch(() => null);
+  const r = await leer[segmento]().catch(() => null);
   if (!r) return ERROR;
   if (!r.ok) return { estado: estadoDeFallo(r.error.code), items: [] };
   if (esActividad) {
