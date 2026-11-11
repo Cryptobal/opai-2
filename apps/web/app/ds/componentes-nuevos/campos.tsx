@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import {
   BarraProgreso,
+  BarrasVerticales,
   CampoDireccion,
   CampoSecreto,
   Campo,
@@ -115,7 +116,17 @@ export function MuestraCampos() {
           <BarraProgreso valor={0.34} etiqueta="Presupuesto al 34 %" />
           <BarraProgreso valor={0.82} tono="warning" etiqueta="Presupuesto al 82 %" />
           <BarraProgreso valor={1} tono="danger" etiqueta="Presupuesto agotado" />
+          <BarraProgreso valor={0.6} tono="neutro" etiqueta="Etapa con el 60 % del valor" />
+          <BarraProgreso valor={0.2} resto={0.5} etiqueta="9 de 42 solicitudes convertidas" />
         </div>
+        <BarrasVerticales
+          etiqueta="Pronóstico por mes"
+          barras={[
+            { etiqueta: "Nov", valor: "$ 38,4 M", fraccion: 1 },
+            { etiqueta: "Dic", valor: "$ 15,2 M", fraccion: 0.4 },
+            { etiqueta: "Ene", valor: "$ 0", fraccion: 0 },
+          ]}
+        />
       </div>
     </div>
   );
