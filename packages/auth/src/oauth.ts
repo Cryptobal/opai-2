@@ -21,7 +21,7 @@ export const PAGINA_CONSENTIMIENTO_OAUTH = "/autorizar";
 export const recursoMcp = (base = process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000") =>
   new URL("/api/mcp", base).toString();
 
-async function membresiasOAuth(userId: string): Promise<MembresiaOAuth[]> {
+export async function membresiasOAuth(userId: string): Promise<MembresiaOAuth[]> {
   const filas = await forUser(userId).membership.findMany({
     select: { tenantId: true, estado: true, tenant: { select: { estado: true } } },
   });
@@ -36,7 +36,7 @@ async function membresiasOAuth(userId: string): Promise<MembresiaOAuth[]> {
  * Empresa elegida en esta sesión para autorizar apps. Se lee de la base: la lectura rápida de la sesión
  * (`core.auth_sesion_por_token`) no trae esta columna.
  */
-async function empresaDeSesion(session: { id: string }): Promise<string | null> {
+export async function empresaDeSesion(session: { id: string }): Promise<string | null> {
   const fila = await clienteAuth().session.findUnique({
     where: { id: session.id },
     select: { oauthTenantId: true },
@@ -65,7 +65,13 @@ export const proveedorOAuth = () =>
     clientRegistrationRequirePKCE: true,
     clientRegistrationDefaultScopes: [...ALCANCES_OAUTH],
     clientRegistrationAllowedScopes: [...ALCANCES_OAUTH],
-    resources: [{ identifier: recursoMcp(), name: "OPAI 2.0 · MCP" }],
+    // Un solo recurso (el MCP) y apps que se registran solas: no hay enlace por app; el token igual
+    // queda atado al recurso que pidió.
+    enforcePerClientResources: false,
+    // `allowedScopes` explícito: Prisma no guarda listas nulas (null = sin restricción en el plugin).
+    resources: [
+      { identifier: recursoMcp(), name: "OPAI 2.0 · MCP", allowedScopes: [...ALCANCES_OAUTH] },
+    ],
     postLogin: {
       page: PAGINA_EMPRESA_OAUTH,
       shouldRedirect: async ({ user, session }) =>

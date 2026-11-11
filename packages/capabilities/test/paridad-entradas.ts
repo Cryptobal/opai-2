@@ -46,6 +46,10 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/_acciones/auth.ts#accionRestablecer":
     "Identidad: restablece la contraseña con el token del correo.",
   "app/_acciones/mfa.ts#accionVerificar": "Identidad: segundo factor de la sesión humana.",
+  "app/_acciones/oauth.ts#accionAutorizarOAuth":
+    "Identidad: la persona autoriza a una app a entrar por OAuth con su cuenta (CAR-247).",
+  "app/_acciones/oauth.ts#accionElegirEmpresaOAuth":
+    "Identidad: la persona elige la empresa con la que entra la app por OAuth (CAR-247).",
   "app/_acciones/mfa.ts#accionIniciarMfa": "Identidad: enrola el segundo factor propio.",
   "app/_acciones/mfa.ts#accionConfirmarMfa":
     "Identidad: confirma el enrolamiento del segundo factor.",

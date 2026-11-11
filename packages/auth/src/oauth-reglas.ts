@@ -55,3 +55,13 @@ export function estadoTokenOAuth(
   if (t.revoked || !t.clienteActivo) return "revocado";
   return t.expiresAt.getTime() > ahora.getTime() ? "vigente" : "vencido";
 }
+
+/** Parámetros que agrega el proveedor al firmar la consulta (firma, vencimiento, sesión). */
+const PARAMETROS_FIRMA = ["sig", "exp", "ba_iat", "ba_pl", "ba_param"];
+
+/** La petición original de la app, sin firma: con ella se reanuda `/oauth2/authorize` tras entrar. */
+export function consultaParaAutorizar(consultaFirmada: string): string {
+  const p = new URLSearchParams(consultaFirmada);
+  for (const k of PARAMETROS_FIRMA) p.delete(k);
+  return p.toString();
+}

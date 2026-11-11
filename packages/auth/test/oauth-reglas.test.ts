@@ -62,3 +62,17 @@ describe("OAuth del MCP · token", () => {
     expect(ALCANCES_OAUTH.some((a) => a.includes("platform"))).toBe(false);
   });
 });
+
+describe("consultaParaAutorizar", () => {
+  it("quita la firma y los parámetros internos y conserva la petición de la app", async () => {
+    const { consultaParaAutorizar } = await import("../src/oauth-reglas");
+    const q =
+      "client_id=c1&redirect_uri=https%3A%2F%2Fclaude.ai%2Fcb&scope=mcp%3Aleer&state=s&code_challenge=x" +
+      "&code_challenge_method=S256&exp=9&ba_iat=1&ba_pl=ses&ba_param=client_id&ba_param=exp&sig=abc";
+    const r = new URLSearchParams(consultaParaAutorizar(q));
+    expect([...r.keys()].sort()).toEqual(
+      ["client_id", "code_challenge", "code_challenge_method", "redirect_uri", "scope", "state"].sort(),
+    );
+    expect(r.get("redirect_uri")).toBe("https://claude.ai/cb");
+  });
+});

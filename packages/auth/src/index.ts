@@ -40,3 +40,12 @@ export { entrarConPin, type ResultadoPin } from "./pin";
 export { correoDeRecuperacion } from "./recuperacion";
 export { getSession, requireSession, sesionDeRequest, sesionVigente, type Sesion } from "./session";
 export { crearUsuarioConPassword } from "./usuarios";
+export {
+  consentirOAuth,
+  consultaOAuthValida,
+  datosConsentimientoOAuth,
+  type DatosConsentimiento,
+  elegirEmpresaOAuth,
+  type PasoOAuth,
+  urlReanudarOAuth,
+} from "./oauth-flujo";
