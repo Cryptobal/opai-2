@@ -1773,6 +1773,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Pendiente de Carlos.** Agregar `preview-e2e` como check obligatorio del ruleset «Proteger main» (hoy lo exige el contrato, no GitHub).
 
+## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:22, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` (sección «Decisiones de Carlos») e `INSTRUCCIONES-proyecto-claude.md`. (ADR-093 y ADR-094 están reservados por los PRs abiertos #505 y #506.)
+
+**Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
+
+**Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
+
 ### ADR-090 · Adenda 1 (11-nov-2026, CAR-278 y CAR-287)
 
 **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (hora de Chile) · **Registra:** Claude («Sesión Hilo»), en el PR de la etapa H1.
@@ -1784,4 +1792,4 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 5. **El marco rige por navegador, como el Tema** (decisión técnica de la sesión). La preferencia se guarda por usuario, pero cada navegador recuerda su marco y no se sincroniza solo entre dispositivos; así una sesión no le cambia el marco a otra abierta por la misma persona.
 6. **Borde de los campos con contraste AA** (decisión técnica de la sesión, desvío declarado). El export dibuja los campos con el borde tenue de las líneas. Se mantiene el borde de control del DS (3:1), porque el contraste AA es regla del repositorio y criterio de aceptación de la piel. Si Carlos prefiere el borde del export, es un cambio de un token.
 7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
-8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: cada vez que un agente necesite una decisión suya, va en el último párrafo de la respuesta, bajo «Decisión tuya», con qué hay que decidir, por qué, el enlace que debe revisar y la sugerencia, en lenguaje simple. Si no hay decisiones, la respuesta termina con «Decisión tuya: ninguna, sigo». Queda en `AGENTS.md` con este PR.
+8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.

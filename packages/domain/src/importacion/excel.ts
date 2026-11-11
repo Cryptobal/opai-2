@@ -35,10 +35,14 @@ export async function leerExcel(contenido: Uint8Array): Promise<TablaCruda> {
   const hoja = libro.worksheets[0];
   if (!hoja) throw new ErrorPlanilla("El archivo Excel no tiene hojas.");
   const filas: string[][] = [];
+  let conDatos = 0;
   // `includeEmpty` conserva el número de fila original; `Array.from` rellena los huecos de las celdas vacías.
   hoja.eachRow({ includeEmpty: true }, (fila) => {
-    if (filas.length > LIMITES_IMPORTACION.filasArchivo + 5) return;
-    filas.push(Array.from((fila.values as unknown[]).slice(1), textoDeCelda));
+    const celdas = Array.from((fila.values as unknown[]).slice(1), textoDeCelda);
+    // Las filas en blanco se guardan vacías (conservan la numeración) pero no cuentan para el tope: una
+    // hoja con muchos blancos no se corta en silencio, y una con demasiados registros se rechaza en `aTabla`.
+    if (celdas.some((c) => c.trim() !== "")) conDatos += 1;
+    if (conDatos <= LIMITES_IMPORTACION.filasArchivo + 2) filas.push(celdas);
   });
   return aTabla(filas);
 }
