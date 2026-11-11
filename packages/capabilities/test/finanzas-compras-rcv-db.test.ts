@@ -110,5 +110,8 @@ describe.skipIf(!urlPropietario)("Finanzas · compras desde el RCV del SII (CAR-
     const r = await trabajoSincronizarRcv.ejecutar(ctx("system"), {});
     expect(r).toMatchObject({ activo: true, nuevos: 1 });
     expect(await e.admin.proveedor.count({ where: { tenantId, rut: "77111222-6" } })).toBe(1);
+    // Sin executeCapability, el trabajo deja su propia auditoría en la misma transacción (ADR-052).
+    const audit = await e.admin.auditEvent.findMany({ where: { tenantId, capability: "finanzas.compras.sincronizar_rcv", actorType: "system" } });
+    expect(audit).toHaveLength(1);
   });
 });

@@ -3,18 +3,13 @@
 // candado de ambiente de CAR-191 rige la emisión y la cesión, no esta consulta (ADR-089).
 import { z } from "zod";
 
-import { consultarRcvCompras, ErrorProveedorSii, type DocumentoRcv } from "@opai/integrations";
-
 import { defineCapability } from "../define";
-import { reglaDeNegocio } from "../errores";
-import { consumoBase } from "../integraciones/consumo-base";
 import { defineTrabajo } from "../trabajos/registro";
 import type { Contexto } from "../types";
 import { credencialesSimpleApi } from "./adaptador-sii";
+import { consultarMes, esConsultaRcv, type ConsultaRcv } from "./compras-rcv-consulta";
 import { PERMISO_COMPRAS } from "./comun";
-import { importarDocumentosCompra, type FilaCompra, type ResultadoImportacion } from "./compras-importar-nucleo";
-
-const TIPOS = new Set([33, 34, 56, 61]);
+import { importarDocumentosCompra, type ResultadoImportacion } from "./compras-importar-nucleo";
 
 /** Año y mes de hoy en Chile (el RCV es mensual y el mes lo define la hora local). */
 export function mesChile(ahora = new Date()): { anio: number; mes: number; dia: number } {
@@ -32,45 +27,21 @@ export function mesDelTrabajo(ahora = new Date()): { anio: number; mes: number }
   return mes === 1 ? { anio: anio - 1, mes: 12 } : { anio, mes: mes - 1 };
 }
 
-const aFila = (d: DocumentoRcv): FilaCompra => ({
-  proveedorRut: d.rutEmisor,
-  ...(d.razonSocial ? { proveedorRazonSocial: d.razonSocial.slice(0, 160) } : {}),
-  tipoDte: d.tipoDte as FilaCompra["tipoDte"],
-  folio: d.folio,
-  fechaEmision: d.fechaEmision,
-  montoNeto: d.montoNeto,
-  montoExento: d.montoExento,
-  montoIva: d.montoIva,
-  montoOtros: Math.max(0, d.montoTotal - d.montoNeto - d.montoExento - d.montoIva),
-  montoTotal: d.montoTotal,
-});
-
 type Sincronizacion = ResultadoImportacion & { anio: number; mes: number; recibidos: number; omitidos: number };
 
-export async function sincronizarRcv(ctx: Contexto, anio: number, mes: number, dryRun: boolean): Promise<Sincronizacion> {
-  const creds = await credencialesSimpleApi(ctx);
-  if (!creds) throw reglaDeNegocio("Falta configurar Emisión DTE (API key de SimpleAPI y certificado) para leer el RCV.");
-  let consulta: Awaited<ReturnType<typeof consultarRcvCompras>>;
-  try {
-    consulta = await consultarRcvCompras(creds, mes, anio);
-  } catch (e) {
-    if (e instanceof ErrorProveedorSii) throw reglaDeNegocio(`SimpleAPI no entregó el RCV de ${mes}/${anio}: ${e.motivo}.`);
-    throw e;
-  } finally {
-    // SimpleAPI cobra la consulta aunque falle: se mide siempre.
-    await ctx.medidor
-      .registrar({ ...consumoBase(ctx, "finanzas"), recurso: "sii.rcv", unidad: "consulta", cantidad: 1, yaIncurrido: true })
-      .catch(() => undefined);
-  }
-  // Solo los tipos que acepta el libro de compras (33, 34, 56, 61); los demás se cuentan como omitidos.
-  const documentos = consulta.documentos.filter((d) => TIPOS.has(d.tipoDte)).map(aFila);
-  const omitidos = consulta.descartados + consulta.documentos.length - documentos.length;
+/** Escribe en el libro de compras lo consultado. Va dentro de la transacción; la consulta va antes (fuera). */
+export async function importarMes(ctx: Contexto, c: ConsultaRcv, dryRun: boolean): Promise<Sincronizacion> {
   const vacio = { nuevos: 0, duplicados: 0, errores: 0, proveedoresCreados: 0, filas: [] };
-  const r = documentos.length
-    ? await importarDocumentosCompra(ctx, { documentos, crearProveedores: true }, dryRun, "sii_rcv")
+  const r = c.documentos.length
+    ? await importarDocumentosCompra(ctx, { documentos: c.documentos, crearProveedores: true }, dryRun, "sii_rcv")
     : vacio;
-  return { ...r, anio, mes, recibidos: consulta.documentos.length, omitidos };
+  return { ...r, anio: c.anio, mes: c.mes, recibidos: c.recibidos, omitidos: c.omitidos };
 }
+
+const periodo = (i: { anio?: number | undefined; mes?: number | undefined }): [number, number] => {
+  const hoy = mesChile();
+  return [i.anio ?? hoy.anio, i.mes ?? hoy.mes];
+};
 
 const salida = z.object({
   anio: z.number().int(),
@@ -95,10 +66,11 @@ export const comprasSincronizarRcv = defineCapability({
   output: salida,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    const hoy = mesChile();
-    const r = await sincronizarRcv(ctx, input.anio ?? hoy.anio, input.mes ?? hoy.mes, dryRun);
-    return salida.parse(r);
+  // La consulta HTTP a SimpleAPI va fuera de la transacción auditada (no la alarga ni la hace caer).
+  preparar: (ctx, input) => consultarMes(ctx, ...periodo(input)),
+  async handler(ctx, input, { dryRun, preparado }) {
+    const consulta = esConsultaRcv(preparado) ? preparado : await consultarMes(ctx, ...periodo(input));
+    return salida.parse(await importarMes(ctx, consulta, dryRun));
   },
 });
 
@@ -111,7 +83,21 @@ export const trabajoSincronizarRcv = defineTrabajo({
   async handler(ctx) {
     if (!(await credencialesSimpleApi(ctx))) return { activo: false };
     const { anio, mes } = mesDelTrabajo();
-    const r = await sincronizarRcv(ctx, anio, mes, false);
+    const consulta = await consultarMes(ctx, anio, mes);
+    // Sin `executeCapability`: la escritura y su auditoría van juntas en una transacción (ADR-052).
+    const r = await ctx.transaccion(async (tx) => {
+      const enTx: Contexto = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
+      const hecho = await importarMes(enTx, consulta, false);
+      if (hecho.nuevos > 0 || hecho.proveedoresCreados > 0)
+        await ctx.auditoria.registrar(tx, {
+          tenantId: ctx.tenantId,
+          capability: "finanzas.compras.sincronizar_rcv",
+          actor: ctx.actor,
+          entityType: "libro_compras",
+          payload: { anio, mes, nuevos: hecho.nuevos, duplicados: hecho.duplicados, proveedoresCreados: hecho.proveedoresCreados },
+        });
+      return hecho;
+    });
     return { activo: true, anio, mes, recibidos: r.recibidos, nuevos: r.nuevos, duplicados: r.duplicados, errores: r.errores };
   },
 });
