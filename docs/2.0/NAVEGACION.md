@@ -2,6 +2,10 @@
 
 **Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct; decisiones de diseño del 26-oct en §10, que quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos) · **Fecha:** 23-oct-2026, actualizado el 26-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado (fuente: «Confirmo que apruebo el diseño 53e9b74b» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz)); se implementa con `briefs/BRIEF-05-navegacion.md`.
 
+## Enmienda del marco «Hilo» (ADR-090, 11-nov-2026)
+
+Carlos aprobó un marco nuevo, centrado en el agente, que convive con el de este documento detrás de un interruptor por usuario y por empresa. **Este documento sigue vigente para el marco clásico, que es el valor por defecto.** Con el marco Hilo encendido no hay barra lateral, riel, barra inferior ni «Más»: las mismas entradas, con las mismas reglas de módulo contratado y permiso (§1.6), aparecen en el Índice, y la barra del agente reemplaza al icono de la regla D11. Las áreas, los nombres (§6), la regla de menú frente a pestañas (§1.3) y la declaración en el manifiesto (§7) no cambian. Diseño: [`design/export-base-hilo/`](design/export-base-hilo/README.md). Plan: [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md).
+
 ## Enmienda de Configuración v1.1 · PR-A
 
 El encargo aprobado por Carlos del 1-nov-2026 (18:59 CLT, fuente: encargo recibido y QA `/workspace/qa/menus-config-1142/`) cambia la presentación del ERP: secciones planas siempre visibles, Bandeja como destino explícito con conteo real, barra móvil Inicio/Pauta/Personas/Bandeja/Más según disponibilidad y permisos, y Más sin duplicados ni cuenta. Las preferencias previas y los fijados se conservan; la preferencia de área ya no sustituye esa barra. Ctrl+K mantiene su lógica. El menú de usuario muestra Mi cuenta y Preferencias, conserva Portal de inicio y ofrece salida neutra; la contraseña vive dentro de Mi cuenta. El ancho de 1024 mantiene sidebar completo.

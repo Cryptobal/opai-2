@@ -116,7 +116,7 @@ Ningún campo es visible para el cliente ni para el trabajador: el agente solo e
 
 **Acceso**
 
-- **R1.** El agente solo existe para una persona si (a) el tenant tiene **activa la licencia** del módulo `agente`, (b) su rol tiene `agente:usar` y (c) está en el portal ERP. Si falta cualquiera, no se muestra ningún lanzador ni se puede abrir por URL (`?agente=1` se ignora).
+- **R1.** El agente solo existe para una persona si (a) el tenant tiene **activa la licencia** del módulo `agente`, (b) su rol tiene `agente:usar` y (c) está en el portal ERP. Si falta cualquiera, no se muestra ningún lanzador ni se puede abrir por URL (`?agente=1` se ignora). **Modificada por ADR-090 (Carlos, 11-nov-2026):** la condición (c) deja de limitar al ERP. Con el marco Hilo, la barra del agente está en todos los portales, se enciende por portal y por rol, y actúa con el permiso y el alcance de la persona; la pregunta 9 queda respondida que sí. Se construye en la etapa H4 de [`BRIEF-base-hilo.md`](../briefs/BRIEF-base-hilo.md); hasta entonces el código sigue aplicando la regla original.
 - **R2.** El agente actúa como **«Agente interno vía <persona>»**: con sus permisos efectivos (rol, excepciones y rol personalizado del Brief 07c), su alcance de filas (ADR-022) y solo con los módulos activos del tenant. Nunca accede a Plataforma (ADR-055) ni a herramientas que gobiernan agentes, keys o credenciales (`soloPersonas`).
 
 **Confirmación**

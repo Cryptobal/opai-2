@@ -59,6 +59,10 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 5. **Operaciones:** portal Terreno con la ejecución de Rondas, supervisión y visitas, turnos extra; retomar #213 (Cargos y Remuneraciones) con un merge de `main`.
 6. **Núcleo:** retomar #168 (restablecer MFA) con un merge de `main`; capacidad pública para `/verificar/[token]`.
 
+### Base «Hilo» (ADR-090, 11-nov-2026)
+
+Frente transversal aprobado por Carlos: marco centrado en el agente con interruptor, en siete etapas (H1 a H7) descritas en [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md). No compite con Finanzas: no toca sus pantallas hasta cerrar CAR-267 a CAR-269. Tarea madre: CAR-274.
+
 ## 4. Qué pausar y qué descartar
 
 **En pausa hasta cerrar la migración de Gard:**
