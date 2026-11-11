@@ -1661,9 +1661,9 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Límites conocidos.** El consentimiento anónimo igual muestra rubro, comuna y fecha «cliente desde», que juntos pueden ayudar a identificarlo: quien registra debe tenerlo presente. Revocar no cambia lo ya enviado (PDF y enlace congelados). La evidencia y la cita son textos cortos (≤300 y ≤400) que pueden mencionar a una persona del cliente; al ser append-only, no los borra la anonimización de contactos (Ley 21.719). Sin pantalla hasta que haya diseño aprobado (se opera por MCP y `/api/v1`).
 
-## ADR-088 · SimpleAPI: un 401 sin cuerpo se trata como key no reconocida; la key se comprueba con `Suscripcion/status` (CAR-263, 10-nov-2026)
+## ADR-088 · SimpleAPI: un 401 sin cuerpo no prueba ni la key ni el contenido; la key se comprueba con `Suscripcion/status` en Basic y cruda (CAR-263, 10-nov-2026; revisado CAR-263b, 11-nov-2026)
 
-**Fecha:** 10-nov-2026 · **Estado:** vigente · **Autor:** sesión del proyecto «OPAI 2.0» (Claude), por encargo de Carlos del 10-nov-2026 22:01 («contrastar 1.0 con 2.0, los PR, Linear y la documentación de SimpleAPI, decir cuál es el error y solucionarlo»).
+**Fecha:** 10-nov-2026, revisado el 11-nov-2026 · **Estado:** vigente con la revisión CAR-263b (reemplaza los puntos 2 y 3) · **Autor:** sesión del proyecto «OPAI 2.0» (Claude), por encargo de Carlos del 10-nov-2026 22:01 («contrastar 1.0 con 2.0, los PR, Linear y la documentación de SimpleAPI, decir cuál es el error y solucionarlo»).
 
 **Contexto.** El 10-nov hubo nueve intentos de emitir la factura 33 de certificación (CAR-240) y todos terminaron en `dte/generar` con HTTP 401, cuerpo vacío y `x-rate-limit-remaining: 39`. Los PR #460, #465, #471, #476 y #477 trabajaron sobre la regla «si vienen `x-rate-limit-*`, la key autenticó y lo rechazado es el contenido», tomada de `isApiKeyAuthenticated` de OPAI 1.0.
 
@@ -1678,4 +1678,11 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 5. La key se limpia de espacios, saltos y caracteres invisibles (`limpiarKeySimpleApi`) antes de enviarla, en la prueba y al emitir.
 
 **Límite conocido.** Desde fuera no se puede saber qué responde SimpleAPI a una key válida con un contenido inválido; 1.0 sostiene que también es 401 vacío. Por eso el mensaje dice «como ante una key que no reconoce» y la prueba de la key es una llamada aparte. Si «Probar conexión» reconoce la key y `dte/generar` sigue en 401, la causa es el contenido y el motivo solo lo puede dar el soporte de SimpleAPI.
+
+**Revisión CAR-263b (11-nov-2026).** Carlos corrigió un error de esta ADR: su API key tiene 20 caracteres, y OPAI 1.0 emite con SimpleAPI. El «19 caracteres» venía del ejemplo `1111-1111-1111-1111` de la documentación, no de una regla. Con esa key, «Probar conexión» respondía 401: la sonda solo probaba `Basic api:key`, mientras la documentación pública de SimpleAPI muestra `Authorization: <apiKey>` cruda; un 401 de esa sonda no probaba que la key fuera inválida. El punto 2 sobrecorrigió en el otro sentido: OPAI 1.0 documenta que SimpleAPI usa el 401 vacío tanto para una key inválida como para un contenido rechazado (certificado, CAF o JSON).
+
+- **2 (reemplazado).** Un 401 o 403 **sin cuerpo** de un POST multipart no se atribuye a la key ni al contenido. En `dte/generar`, el adaptador consulta la sonda (GET, sin certificado, CAF ni folios; `discriminarRechazoSinCuerpo`): si reconoce la key, el motivo es «sí reconoce la API key: rechazó el contenido (certificado, CAF o JSON), no la key»; si no la reconoce con ningún esquema, habla de la key; si la sonda no responde, el motivo nombra las dos causas y envía a «Probar conexión». El resultado de la sonda (estado y esquema, nunca la key ni el header) va al log del rechazo (`sondaKey`).
+- **3 (reemplazado).** `probarKeySimpleApi` prueba `GET /api/v1/Suscripcion/status` (la URL del Swagger, sin cambiarla a la de la home) primero con `Basic base64("api:" + key)` y, si responde 401/403, con la key limpia cruda. Un 2xx en cualquiera es «reconocida» (con el esquema que la aceptó); 401/403 en ambos es «no reconocida»; 5xx, 404, 429 o sin red es «sin respuesta», que nunca culpa a la key. El Bearer de `/api/Auth/token` no se usa.
+- **Largo de la key.** No hay un largo correcto: 19 no es una restricción. El mensaje de «no reconocida» dice el largo que quedó guardado solo como pista para compararla con el panel de SimpleAPI.
+- **Emisión.** Sigue con `Basic api:key` (igual que 1.0 y el SDK oficial). Si la sonda solo acepta la key cruda, el log del rechazo lo muestra (`sondaKey.esquema: "raw"`); cambiar el esquema de la emisión requiere evidencia de que `dte/generar` lo pide.
 
