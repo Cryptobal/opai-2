@@ -53,7 +53,7 @@ describe("pago contra el catálogo SBIF (CAR-244)", () => {
 describe("la migración de datos de CAR-244 usa el mismo catálogo que el dominio", () => {
   const sql = readFileSync(
     new URL(
-      "../../db/prisma/migrations/20261120100000_core_personas_pago_banco_sbif/migration.sql",
+      "../../db/prisma/migrations/20261120120000_core_personas_pago_banco_sbif/migration.sql",
       import.meta.url,
     ),
     "utf8",

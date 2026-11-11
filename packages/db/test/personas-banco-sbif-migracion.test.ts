@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import { urlPropietario } from "./entorno";
 
-const MIGRACION = "20261120100000_core_personas_pago_banco_sbif";
+const MIGRACION = "20261120120000_core_personas_pago_banco_sbif";
 const carpeta = new URL("../prisma/migrations/", import.meta.url);
 const sql = (nombre: string) => readFile(new URL(`${nombre}/migration.sql`, carpeta), "utf8");
 
