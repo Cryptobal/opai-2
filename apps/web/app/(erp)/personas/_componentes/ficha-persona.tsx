@@ -15,7 +15,8 @@ import { accionesPersona } from "./acciones-persona";
 export type TabPersona =
   "resumen" | "laboral" | "sueldo" | "documentos" | "actividad" | "anexos" | "privacidad";
 
-/** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · RUT"; tabs por ruta. */
+/** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · RUT"; tabs por ruta, en el orden del export
+ * ficha-persona v1 (CAR-124): Resumen · Laboral · Sueldo · Anexos · Documentos · Privacidad · Actividad. */
 export function FichaPersona(x: {
   aprobaciones?: PanelSueldo["aprobaciones"];
   state: EstadoPantalla;
@@ -78,15 +79,16 @@ export function FichaPersona(x: {
           { id: "resumen", etiqueta: "Resumen", href: `${base}${q}` },
           { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral${q}` },
           { id: "sueldo", etiqueta: "Sueldo", href: `${base}/sueldo${q}` },
+          { id: "anexos", etiqueta: "Anexos", href: `${base}/anexos${q}` },
           {
             id: "documentos",
             etiqueta: "Documentos",
             contador: p?.documentos ?? 0,
             href: `${base}/documentos${q}`,
           },
-          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad${q}` },
-          { id: "anexos", etiqueta: "Anexos", href: `${base}/anexos${q}` },
+
           { id: "privacidad", etiqueta: "Privacidad", href: `${base}/privacidad${q}` },
+          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad${q}` },
         ]}
       >
         {x.children}
