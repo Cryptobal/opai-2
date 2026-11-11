@@ -11,10 +11,12 @@ import {
 } from "@opai/domain";
 import { Alerta, Campo, RadioGroup, Segmentado } from "@opai/ds";
 
-const AYUDA_NIVEL: Record<NivelPlantilla, string> = {
-  N1: "N1: enlace personal o sesión en OPAI, con aceptación expresa. N3 (FEA) está apagada en Configuración.",
-  N2: "N2: OTP y prueba de vida o carnet con selfie. N3 (FEA) está apagada en Configuración.",
-};
+/** Qué significa cada nivel, en simple (CAR-315): el nivel es la exigencia con que se identifica quien firma. */
+const NIVELES: readonly { id: string; titulo: string; texto: string }[] = [
+  { id: "N1", titulo: "N1 · Simple", texto: "La persona abre su enlace personal o su sesión de OPAI y acepta." },
+  { id: "N2", titulo: "N2 · Con verificación", texto: "Además confirma un código y su identidad (prueba de vida o carnet con selfie)." },
+  { id: "N3", titulo: "N3 · Firma avanzada (FEA)", texto: "Con certificado digital. Todavía no está disponible." },
+];
 
 type Props = {
   clase: ClasePlantilla;
@@ -35,7 +37,10 @@ export function PanelFirma({ clase, nivel, firmantes, onNivel, onFirmantes, solo
   });
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <Campo etiqueta="Nivel de firma por defecto" ayuda={AYUDA_NIVEL[nivel]}>
+      <Campo
+        etiqueta="Cómo se firma (nivel por defecto)"
+        ayuda="Toda plantilla necesita un nivel: es el que usan los documentos que salgan de ella. Los niveles en gris no se permiten para este tipo de documento."
+      >
         <Segmentado
           etiqueta="Nivel de firma"
           activa={nivel}
@@ -46,6 +51,13 @@ export function PanelFirma({ clase, nivel, firmantes, onNivel, onFirmantes, solo
           ]}
         />
       </Campo>
+      <ul className="flex flex-col gap-1.5">
+        {NIVELES.map((n) => (
+          <li key={n.id} className={n.id === nivel ? "t-caption text-fg" : "t-caption text-fg-muted"}>
+            <span className="font-semibold">{n.titulo}.</span> {n.texto}
+          </li>
+        ))}
+      </ul>
       <RadioGroup
         etiqueta="Quién firma"
         valor={firmantes}

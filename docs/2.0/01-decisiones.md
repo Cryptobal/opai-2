@@ -1759,7 +1759,7 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 5. **Exportes de OPAI 1.** El adaptador solo lee el JSON del export que se le entrega y usa el sistema de ids `opai1`, el mismo de `comercial.importar_1_0`, para reconocer lo ya traído. Nunca consulta OPAI 1.
 6. **Quién importa.** `core:tenant.manage` (owner y admin por defecto) más el permiso de la entidad; para negocios, el módulo Comercial activo. Revertir un lote es irreversible: a un agente le pide aprobación.
 
-**Pendiente de Carlos.** Ver «Decisiones para Carlos» de CAR-279 en `ESTADO.md`.
+**Adenda (Carlos, chat del proyecto «Opai 2.0», 11-nov-2026 18:00; registra Claude, «Sesión Comercial»).** Cambia la regla 6 y precisa la 2: (a) importa quien tiene `core:importar.manage`: owner, admin y **gerente**; (b) el estado de una cuenta existente sí se completa cuando está en «prospecto» (equivale a «sin dato»): las cuentas activas en el origen quedan activas en OPAI 2; nunca se baja un cliente a prospecto; (c) los negocios ganados o perdidos no exigen fecha de cierre ni motivo; (d) las cuentas importadas no consultan el SII automáticamente; (e) Gard se trae desde OPAI 1 cuanto antes, empezando por Comercial.
 
 ## ADR-092 · `preview-e2e` reemplaza el primer vistazo visual de Carlos (CAR-285, 11-nov-2026)
 
@@ -1811,3 +1811,17 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
 
 **Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
+
+## ADR-097 · Un solo gestor de plantillas y documentos para todos los módulos (CAR-315, 11-nov-2026)
+
+**Decidió:** Carlos (chat de la sesión dueña de Personas y Documentos, 11-nov-2026, 17:56, hora de Chile) · **Registra:** Claude. **Modifica** la decisión 1 del §15 de `briefs/BRIEF-CAR-127-documentos-v4-pantallas-04-08.md` (9-nov-2026: «plantillas laborales aparte de las salidas comerciales»). (ADR-096 está reservado por el PR abierto #511.)
+
+**Contexto.** El gestor de plantillas de Documentos solo tenía plantillas laborales (contrato, anexo, recepción, carta), con variables de Persona, Vínculo, Instalación, Sueldo y Contrato. Carlos quiso crear un contrato de servicio para usarlo desde Cuentas y no encontró dónde (CAR-315).
+
+**Decisión.** Documentos es **el único lugar para las plantillas de todos los módulos**. Todo módulo tiene documentos y plantillas: Comercial (por ejemplo, contratos de servicio en las cuentas), Operaciones (por ejemplo, protocolos de seguridad y documentos que cada instalación debe cargar y revisar) y Personas (contratos, anexos y finiquitos). El texto de cada plantilla lo escribe la empresa en el editor.
+
+**Consecuencias.**
+- El gestor suma tipos de plantilla por módulo y sus variables (Cuenta, Instalación), y la generación del documento desde la ficha de cada entidad.
+- Los tipos de plantilla y de documento se configuran en Configuración › Módulos › Documentos (pantalla 10 del export `documentos-v4`), todavía sin construir.
+- Las salidas de CPQ (propuesta y cotización en PDF) siguen en CPQ mientras no se decida moverlas: esta decisión habla de plantillas de documentos, no del motor de cotización.
+- Queda fuera de este PR; se planifica en CAR-315 (parte 2) después del selector de plantilla en la ficha de persona (CAR-127 PR 4).
