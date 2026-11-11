@@ -117,7 +117,7 @@ opai_app     | rolbypassrls = false | rolsuper = false
 
 **Fecha:** 22-oct-2026 · **Estado:** vigente
 
-**Decisión.** Los módulos declaran ajustes (esquema en manifest), eventos (catálogo) y adaptadores requeridos. El núcleo renderiza la configuración por ámbito (plataforma → tenant → módulo → usuario), enruta notificaciones según preferencias por rol y usuario (silencio por defecto) y provee adaptadores configurables por tenant (DTE, banco, factoring, mensajería, biometría). Slack es un canal opcional de notificaciones, no un módulo.
+**Decisión.** Los módulos declaran ajustes (esquema en manifest), eventos (catálogo) y adaptadores requeridos. El núcleo renderiza la configuración por ámbito (plataforma → tenant → módulo → usuario), enruta notificaciones según preferencias por rol y usuario (silencio por defecto) y provee adaptadores configurables por tenant (DTE, banco, factoring, mensajería, biometría). Slack es un canal opcional de notificaciones, no un módulo. *(11-nov-2026: Slack pasa a canal de comunicación de terreno con una app «OPAI» propia; ver ADR-093.)*
 
 **Consecuencias.** Elimina la causa del "Frankenstein" de 1.0. Nada queda huérfano al apagar un módulo.
 
@@ -321,6 +321,8 @@ decisiones atribuidas a Carlos.
 
 **Aprobación de Carlos (29-oct-2026, 14:58 CLT, mismo pedido CAR-72).** Carlos aprueba `modulos/rondas.md` completo (pasa de «borrador» a «aprobado», ADR-047): queda disponible para copiar el Design Prompt en Claude Design. Confirma además que la publicación en Play Store (decisión 5 de arriba: app web dentro de la app Terreno) **queda como opción del Brief 14** (Rondas), disponible desde ese brief y sin esperar al empaquetado nativo del Brief 17.
 
+**Nota del 11-nov-2026 (CAR-290, ADR-093).** Slack deja de ser una integración «propia del tenant» con credenciales propias: es una sola app «OPAI» de plataforma (client secret y signing secret en variables de entorno de OPAI) que cada tenant instala con OAuth; el token del bot de cada tenant se guarda cifrado en este almacén.
+
 ---
 
 ## ADR-025 · Tickets transversal y simple; sin chat
@@ -399,7 +401,7 @@ decisiones atribuidas a Carlos.
 | 4 | **Asistencia** con cumplimiento DT completo, reportes DT, fiscalización; inicio de certificación | Marcación en 2.0 |
 | 5 | Finanzas con flujo de caja al centro, banca y conciliación, DTE y factoring, rendiciones, contabilidad e informes; migración del historial financiero | 1.0 a solo lectura |
 | 6 | Nómina (sobre asistencia y estructuras), Licitaciones (sobre CPQ), firma electrónica avanzada | Gard 100 % en 2.0 |
-| Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack, sitio de marketing 2.0, roles personalizados *(26-oct: pasan al Brief 07c)* | — |
+| Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack *(11-nov-2026: sale del backlog, ADR-093)*, sitio de marketing 2.0, roles personalizados *(26-oct: pasan al Brief 07c)* | — |
 
 **Modificación del 25-oct-2026.** Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 19:09–22:10 CLT: primero se cierra el Núcleo y las fases van en orden. Cambia el **orden de trabajo**, no los cortes de Gard. Primero se cierra el Núcleo: Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo, que pasa a la fase 1 y va antes del brief de Puestos). Después se abre **Puestos y guardias (Operaciones I, Brief 11, adelantado desde la fase 3)** (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 12:42 CLT). Después va **Comercial (CRM) y luego CPQ por vertical**, en reglas, diseño y construcción (Decisión de Carlos, 25-oct-2026 23:29 (t267u–t268u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), porque la cotización cuelga del negocio y al ganarlo se ofrecen los puestos y RRHH los confirma (ADR-040, ADR-048 y su respuesta 3 de las 23:10). Además, como requisito, los negocios de Comercial (Briefs 06 y 07) van antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). El resto sigue el orden de fases de esta tabla. Nómina en la fase 6: Carlos, 25-oct-2026 ~21:20, chat con OPAI 2.0, según el registro del bot OPAI 2.0: no tiene clientes que comprarían solo payroll. Como el ROADMAP solo permitía adelantar Nómina si un cliente la compraba sola, Nómina queda en la fase 6. Además, desde las 23:10 Nómina exige Puestos (respuesta 1 de ADR-048), lo que también impide venderla sola. Detalle por módulo y etapa en `PLAN-desarrollo.md`; fases y semanas en `ROADMAP.md`.
 
@@ -1772,3 +1774,27 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 4. Si faltan los secretos, el check falla (falla cerrado). En PRs de forks se omite.
 
 **Pendiente de Carlos.** Agregar `preview-e2e` como check obligatorio del ruleset «Proteger main» (hoy lo exige el contrato, no GitHub).
+
+## ADR-093 · Slack como canal de comunicación de terreno con una sola app «OPAI» (CAR-290, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos (decisiones del 11-nov-2026, 15:20, hora de Chile; delegación a la «Sesión Núcleo» a las 15:32) · **Registra:** Claude («Sesión Núcleo»). **Modifica** ADR-008 (Slack deja de ser solo «un canal opcional de notificaciones»), ADR-027 (Slack pasa de integración «propia del tenant» a una app de OPAI que cada tenant instala) y la fila «Backlog» del plan por fases (Slack sale del backlog). **No modifica** ADR-020 (silencio por defecto), ADR-023 (hechos regulados), ADR-029 (outbox y trabajos) ni ADR-055 (agent-first).
+
+**Contexto.** En 1.0 Slack se saturó: un canal por instalación y un mensaje por marcación. Carlos quiere que la supervisión de terreno use Slack para lo que importa, sin que OPAI dependa de Slack ni que los guardias lo usen. Plan por fases en [`briefs/BRIEF-slack.md`](briefs/BRIEF-slack.md) (CAR-290 a CAR-296).
+
+**Decisión.**
+1. **OPAI es la fuente de verdad.** Slack solo muestra avisos y recibe acciones. Toda acción hecha en Slack se ejecuta en OPAI como una capacidad, como el usuario OPAI vinculado, con sus permisos y su alcance por filas, y queda en la auditoría. Ningún dato vive solo en Slack.
+2. **Una sola app de Slack «OPAI»**, distribuida a todos los tenants y mantenida por OPAI (decisión 1). Cada tenant la instala en su espacio con OAuth v2 desde Configuración › Integraciones; las mejoras de avisos, respuestas y botones llegan a todos a la vez. El manifiesto vive versionado en [`packages/integrations/src/slack/manifiesto/`](../../packages/integrations/src/slack/manifiesto/) con los scopes mínimos (regla 8) y una prueba que lo valida.
+3. **Sin saturar y lo menos invasivo posible** (decisión 2). Todo se configura por tenant: qué se avisa, a qué canal, el margen de atraso, el escalamiento del pánico y si va el resumen. Por defecto se envía lo mínimo; los valores iniciales están en el plan y los confirma Carlos.
+4. **Solo anomalías** (decisión 3). Las marcaciones normales se quedan en OPAI. A Slack van el atraso sobre el margen, la ausencia, el fuera de zona y el sin relevo, con el botón «Tomar»; además, si el tenant lo activa, incidentes, pánico, mensajes de guardias y un resumen por turno y zona que se edita en el mismo mensaje. Los avisos van en **un hilo por instalación y día**, en pocos canales (por zona o por tipo). **Nunca se crea un canal por instalación.**
+5. **Pánico** (decisión 4). Aviso al canal y, si el tenant lo configura, mensaje directo al supervisor zonal y escalamiento a un responsable cuando nadie lo toma en los minutos configurados.
+6. **Los guardias nunca usan Slack** (decisión 5). Hablan con su supervisor o la central desde el módulo nuevo «Comunicación» de la app de terreno; Slack es solo el lado del supervisor. Solo se vinculan usuarios internos.
+7. **No romper nada.** La integración está apagada por defecto: sin Slack conectado, OPAI se comporta exactamente igual. Ningún flujo (marcaciones, rondas, incidentes, pánico, notificaciones) depende de Slack. El envío es asíncrono: el evento de dominio sale por outbox en la transacción del hecho (ADR-029) y un consumidor envía a Slack con reintentos y respetando sus límites; si Slack falla, se registra y OPAI no se ve afectado. Los enganches a módulos de otras sesiones son puntos de extensión mínimos (consumidores de eventos existentes) y cada PR los explica.
+8. **Scopes mínimos del bot:** `chat:write` (publicar, actualizar y avisos efímeros), `im:write` (mensajes directos), `users:read` y `users:read.email` (vincular por correo), `channels:read` (elegir canal), `channels:history` (recibir las respuestas en hilos de canales públicos, evento `message.channels`) y `files:write` (foto del aviso). Eventos: `message.channels`, `app_uninstalled` y `tokens_revoked`. Sin `chat:write.public`: la app solo escribe en los canales a los que el tenant la invita. Sin canales privados ni lectura de mensajes directos por ahora (pregunta abierta). Sin scopes de usuario.
+9. **Secretos.** El client secret y el signing secret de la app viven solo como variables de entorno de la plataforma (`SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_SIGNING_SECRET`; las carga Carlos). El token del bot de cada tenant se guarda cifrado en el almacén de secretos del tenant (ADR-027), nunca se muestra, no sale por API ni MCP y nunca se usa para otro tenant. Al desconectar se revoca (`auth.revoke`) y se borra. La rotación de tokens de Slack queda apagada en F0 porque no se puede desactivar una vez activada; se reevalúa en F1.
+10. **Endpoints** (los crea F1 a F5a, todos en `apps/web/app/api/integraciones/slack/`): `oauth/callback` (OAuth v2), `eventos` (Events API) y `acciones` (interactividad). Eventos y acciones verifican la firma de Slack (signing secret y marca de tiempo de menos de 5 minutos) y deduplican los reintentos.
+11. **Pruebas.** Con mocks de Slack en las unitarias y con la empresa ficticia `qa-e2e` en los e2e (`preview-e2e`, ADR-092). Nunca con el Slack de Gard ni con datos de Gard. Un e2e contra Slack real necesita un espacio de pruebas y una app de pruebas registrada en api.slack.com (manifiesto `opai-pruebas.json`, apuntando a `test.opai.cl`).
+12. **Migraciones de la serie** (delegación de Carlos del 11-nov-2026, 15:32, conforme a ADR-063): solo aditivas. Las aplica la propia «Sesión Núcleo» en Neon (proyecto de OPAI 2.0) con respaldo previo, primero en `dev` y después en `main`; anota el respaldo en el PR y retira `migracion-pendiente`.
+
+**Prioridad.** Entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones (decisión 6): no se tocan sus archivos ni los del PR de MFA (#499) mientras siga abierto.
+
+**Pendiente de Carlos.** Ver «Preguntas para Carlos» en [`briefs/BRIEF-slack.md`](briefs/BRIEF-slack.md): espacio Slack de pruebas y registro de las apps, canales privados, valores por defecto y quién es «responsable» del escalamiento.
