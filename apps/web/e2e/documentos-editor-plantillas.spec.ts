@@ -46,7 +46,7 @@ test("crear, editar con variables, guardar borrador y publicar", async ({ page }
 
   await page.setViewportSize({ width: 1024, height: 768 });
   await page.reload();
-  const ver = page.getByRole("button", { name: "Ver variables" });
+  const ver = page.getByRole("button", { name: "Insertar variable" });
   await hidratado(ver);
   await ver.click();
   await expect(page.getByRole("dialog", { name: "Variables" })).toBeVisible();
