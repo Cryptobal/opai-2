@@ -66,6 +66,12 @@ describe("probarKeySimpleApi (CAR-263b)", () => {
     expect(await probarKeySimpleApi(KEY)).toEqual({ estado: "sin_respuesta", status: 503, detalle: null });
   });
 
+  it("una key con comillas tipográficas no se manda cruda (fetch no admite >0xFF en headers): queda no reconocida", async () => {
+    const f = responder(() => new Response("", { status: 401 }));
+    expect(await probarKeySimpleApi(`\u201C${KEY}\u201D`)).toEqual({ estado: "no_reconocida", status: 401, detalle: null });
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+
   it("el detalle nunca trae la key aunque el proveedor la devuelva, en ninguno de los dos intentos", async () => {
     responder(() => Response.json({ mensaje: `Apikey ${KEY} vencida` }, { status: 401 }));
     const r = await probarKeySimpleApi(KEY);

@@ -66,5 +66,8 @@ async function consultar(apiKey: string, esquema: EsquemaAuthSimpleApi): Promise
 export async function probarKeySimpleApi(apiKey: string): Promise<ResultadoKeySimpleApi> {
   const basic = await consultar(apiKey, "basic");
   if (basic.estado !== "no_reconocida") return basic;
+  // Un carácter sobre 0xFF (comillas tipográficas, raya) no puede ir crudo en un header: `fetch` lo rechaza antes de
+  // enviar y eso se leería como «sin respuesta». Esa key ya no la reconoció Basic y no es una key de SimpleAPI.
+  if ([...limpiarKeySimpleApi(apiKey)].some((c) => (c.codePointAt(0) ?? 0) > 0xff)) return basic;
   return consultar(apiKey, "raw");
 }
