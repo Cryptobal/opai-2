@@ -351,6 +351,13 @@ export const AJUSTES: Record<string, Ajuste> = {
       consultado_en: "2026-11-01T00:00:00Z", vence_en: "2026-12-01T00:00:00Z",
     }),
   },
+  // Historial de correos (CAR-233): CHECK de sentido, origen y asociación; token «t» + 32 hex, único
+  // global (se deriva del id de la empresa para que A y B no choquen).
+  "core.correos_cliente": {
+    dependencias: ["core.cuentas"],
+    valores: (ctx) => ({ sentido: "recibido", origen: "buzon", asociacion: "dominio", cuenta_id: id(ctx, "core.cuentas"), contacto_id: null, negocio_id: null }),
+  },
+  "core.buzones_correo": { fijas: ["token"], valores: (ctx) => ({ token: `t${ctx.tenant.replace(/-/g, "")}` }) },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },
   "core.actividad_vinculos": {
