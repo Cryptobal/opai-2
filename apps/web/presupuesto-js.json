@@ -5,7 +5,7 @@
   "rutas": {
     "/(erp)": 175,
     "/(erp)/tareas": 173,
-    "/(erp)/agente/historial": 174,
+    "/(erp)/agente/historial": 175,
     "/(erp)/finanzas/ventas/programacion/*": 175,
     "/(erp)/finanzas/flujo": 169,
     "/(erp)/finanzas/folios": 169,
