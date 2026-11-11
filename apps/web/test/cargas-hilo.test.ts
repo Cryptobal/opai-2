@@ -5,6 +5,7 @@ import type { Resultado } from "@opai/capabilities";
 import {
   cargarFilasHilo,
   cargarPendientesHilo,
+  conservarSiFalla,
   type LecturasHilo,
 } from "@/app/_components/hilo/cargas-hilo";
 
@@ -50,5 +51,17 @@ describe("cargas del hilo", () => {
   it("los pendientes se muestran aunque fallen los contadores de avisos", async () => {
     const leer = lecturas(caida, { pendientes: bien([]) });
     expect(await cargarPendientesHilo(leer)).toEqual({ estado: "listo", items: [] });
+  });
+
+  // CAR-317: al reabrir Actividad o Agenda se vuelve a pedir; si el refresco falla, queda lo que se veía.
+  it("un refresco fallido conserva la lista que ya se veía", () => {
+    const vista = { estado: "listo", items: [] } as const;
+    expect(conservarSiFalla(vista, { estado: "error", items: [] })).toBe(vista);
+  });
+  it("un refresco bueno reemplaza la lista, y sin lista previa se muestra el error", () => {
+    const nueva = { estado: "listo", items: [] } as const;
+    expect(conservarSiFalla({ estado: "listo", items: [] }, nueva)).toBe(nueva);
+    const error = { estado: "error", items: [] } as const;
+    expect(conservarSiFalla({ estado: "cargando", items: [] }, error)).toBe(error);
   });
 });

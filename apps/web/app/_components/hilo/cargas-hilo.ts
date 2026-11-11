@@ -56,3 +56,7 @@ export async function cargarFilasHilo(
   const { items } = r.data as { items: Parameters<typeof agendaHilo>[0] };
   return { estado: "listo", items: agendaHilo(items, ahora) };
 }
+
+/** Un refresco que no trae lista (falla o sin permiso) no borra la que ya se veía (CAR-317). */
+export const conservarSiFalla = <T>(previo: ListaHilo<T>, nuevo: ListaHilo<T>): ListaHilo<T> =>
+  nuevo.estado !== "listo" && previo.estado === "listo" ? previo : nuevo;

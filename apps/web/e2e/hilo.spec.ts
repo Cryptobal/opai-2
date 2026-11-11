@@ -93,7 +93,7 @@ test.describe("@preview marco Hilo con sesión", () => {
 
     await page.goto("/");
     await contenidoHidratado(page);
-    const portales = page.getByRole("button", { name: "Portales", exact: true });
+    const portales = page.getByRole("button", { name: /\. Cambiar de portal o de empresa$/ });
     await hidratado(portales);
     await portales.click();
     await captura(page, "hilo-erp-portales", info);
