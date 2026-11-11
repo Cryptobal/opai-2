@@ -106,19 +106,25 @@ model DocumentoVinculo {
 /// Carlos, 9-nov-2026). El contenido vive en las versiones; `versionVigente` apunta a la que se usa.
 /// El `tenant_id` no lleva @relation a Tenant: la FK va en el SQL (como `core_firma`).
 model DocumentoPlantilla {
-  id             String   @id @default(uuid(7)) @db.Uuid
-  tenantId       String   @map("tenant_id") @db.Uuid
-  nombre         String
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  nombre                String
   /// Clase de firma (CAR-82): "contrato_trabajo" | "anexo_contrato" | "recepcion_laboral" | "carta_trabajador".
-  clase          String
+  clase                 String
   /// Firma por defecto: "N1" | "N2" (N3·FEA queda deshabilitado, CAR-94). Debe ser válida para la clase.
-  nivelFirma     String   @map("nivel_firma")
+  nivelFirma            String    @map("nivel_firma")
   /// "creada" | "word" | "pdf" (las dos últimas, con el encargo de importación).
-  origen         String   @default("creada")
-  versionVigente Int      @default(1) @map("version_vigente")
-  activa         Boolean  @default(true)
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  origen                String    @default("creada")
+  versionVigente        Int       @default(1) @map("version_vigente")
+  activa                Boolean   @default(true)
+  /// Quién firma: "empleador" | "trabajador" | "ambos" (primero el trabajador). Editor 06.
+  firmantes             String    @default("ambos")
+  /// Borrador del texto aún sin publicar (editor 06); publicar crea la versión siguiente y lo limpia.
+  borradorContenido     String?   @map("borrador_contenido")
+  borradorActualizadoEn DateTime? @map("borrador_actualizado_en") @db.Timestamptz(6)
+  borradorPorNombre     String?   @map("borrador_por_nombre")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   versiones DocumentoPlantillaVersion[]
 

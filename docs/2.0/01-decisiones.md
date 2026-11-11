@@ -1758,3 +1758,17 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 6. **Quién importa.** `core:tenant.manage` (owner y admin por defecto) más el permiso de la entidad; para negocios, el módulo Comercial activo. Revertir un lote es irreversible: a un agente le pide aprobación.
 
 **Pendiente de Carlos.** Ver «Decisiones para Carlos» de CAR-279 en `ESTADO.md`.
+
+## ADR-092 · `preview-e2e` reemplaza el primer vistazo visual de Carlos (CAR-285, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (14:37, hora de Chile) · **Registra:** Claude («Sesión Comercial»). **Modifica** ADR-077 (adenda de revisión visual), `OPERACION-agentes.md` A2.10, `AGENTS.md` y la plantilla del PR.
+
+**Fuente.** «El primer vistazo visual ya no lo hace Carlos, lo reemplazan estas pruebas y sus capturas.» «Un PR se integra solo con el run de preview-e2e en verde y las capturas revisadas por la propia sesión.» «Las pruebas entran siempre como el usuario de qa-e2e. Nunca con Gard ni con datos reales, y sin mostrar ni loguear los secretos.»
+
+**Decisión.**
+1. El workflow `preview-e2e` corre en cada PR los e2e de Playwright marcados `@preview` contra la vista previa de Vercel del commit, a 375, 1024 y 1280 px, y sube las capturas como artefacto.
+2. Entra siempre con el usuario de la empresa ficticia `qa-e2e`. Los secretos (`E2E_EMAIL`, `E2E_PASSWORD`, `E2E_TOTP_SECRET`, `VERCEL_AUTOMATION_BYPASS_SECRET`) viven solo en GitHub Actions. La cabecera de protección de Vercel se envía únicamente al origen de la vista previa. Sin traza ni video.
+3. Un PR con cambio visual se integra solo con ese run en verde sobre el head y las capturas revisadas por la sesión que lo lleva. Carlos conserva el veto y puede pedir cambios.
+4. Si faltan los secretos, el check falla (falla cerrado). En PRs de forks se omite.
+
+**Pendiente de Carlos.** Agregar `preview-e2e` como check obligatorio del ruleset «Proteger main» (hoy lo exige el contrato, no GitHub).

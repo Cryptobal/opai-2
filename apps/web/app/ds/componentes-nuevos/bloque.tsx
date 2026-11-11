@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 
 import { Bloque } from "../bloques";
 import { MuestraActividad } from "./actividad";
+import { MuestraChipVariable } from "./chip-variable";
 import { MuestraDsV2 } from "./ds-v2";
 import { MuestraOverlays } from "./overlays";
 import { MuestraSeleccion } from "./seleccion";
@@ -39,6 +40,9 @@ export function BloqueNuevos({ state }: { state: EstadoPantalla }) {
       </Bloque>
       <Bloque titulo="ChipsEtiquetas · con permiso, solo lectura y vacío">
         <MuestraEtiquetas />
+      </Bloque>
+      <Bloque titulo="ChipVariable · panel, en el texto y variable inexistente">
+        <MuestraChipVariable />
       </Bloque>
     </>
   );
