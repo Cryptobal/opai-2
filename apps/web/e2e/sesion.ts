@@ -1,18 +1,24 @@
 import { createOTP } from "@better-auth/utils/otp";
 import { type Page } from "@playwright/test";
 
+import { pasarProteccionDeVercel } from "./preview";
+
 // Login compartido de los e2e. Desde NÚCLEO-F el owner de e2e tiene segundo factor obligatorio
 // (cuenta de plataforma), así que el login pasa por /mfa; el TOTP se genera aquí con el MISMO secreto
 // crudo que siembra `packages/auth/scripts/seed-e2e-mfa.ts`. No es un secreto real.
 export const E2E_EMAIL = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 export const E2E_PASSWORD = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-const E2E_MFA_SECRET_RAW = "opai-e2e-mfa-secreto-fijo-000000";
+// En `preview-e2e` (CAR-285) el usuario es el de la empresa ficticia `qa-e2e` y su secreto TOTP llega en
+// crudo por `E2E_TOTP_SECRET` (secreto de GitHub Actions; nunca se imprime). En local y en el e2e de CI
+// se usa el secreto fijo sembrado, que no es un secreto real.
+const E2E_MFA_SECRET_RAW = process.env["E2E_TOTP_SECRET"] || "opai-e2e-mfa-secreto-fijo-000000";
 
 /** Código TOTP actual del owner de e2e (segundo factor sembrado con secreto fijo). */
 export const codigoTotp = () => createOTP(E2E_MFA_SECRET_RAW, { digits: 6, period: 30 }).totp();
 
 /** Entra con el owner de e2e: contraseña y, como tiene segundo factor, el código TOTP. */
 export async function entrar(page: Page, email = E2E_EMAIL): Promise<void> {
+  await pasarProteccionDeVercel(page);
   await page.goto("/login");
   await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
