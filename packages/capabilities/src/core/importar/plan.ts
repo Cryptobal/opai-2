@@ -43,8 +43,10 @@ function cambiosDe(imp: Importador, f: FilaPlan<Datos>, alExistir: AlExistir): R
   for (const k of imp.actualizables) {
     const nuevo = f.datos[k];
     const actual = f.existente[k];
-    if (vacio(nuevo) || comparable(nuevo) === comparable(actual)) continue;
-    if (alExistir === "sobrescribir" || vacio(actual)) cambios[k] = nuevo;
+    const neutro = imp.sinDato?.[k];
+    const sinDato = (v: unknown) => vacio(v) || (neutro !== undefined && comparable(v) === comparable(neutro));
+    if (sinDato(nuevo) || comparable(nuevo) === comparable(actual)) continue;
+    if (alExistir === "sobrescribir" || sinDato(actual)) cambios[k] = nuevo;
   }
   return cambios;
 }

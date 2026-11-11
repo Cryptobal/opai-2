@@ -42,7 +42,7 @@ export const ventasEnviarSii = defineCapability({
       throw comoReglaSiProveedorSii(e, (err) =>
         err.incierto
           ? "El resultado es incierto: el SII pudo haberlo recibido. Consulte el estado del envío antes de reenviar."
-          : "El documento sigue firmado y sin track ID; puede reintentar el envío.",
+          : "El documento sigue firmado y sin enviar; puede reintentar el envío.",
       );
     });
     let envioId = "";
