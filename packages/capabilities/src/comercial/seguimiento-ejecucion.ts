@@ -2,6 +2,8 @@
 import { DOMINIO_RESPUESTAS, type ConfigPlan, direccionRespuesta, transicionSeguimiento } from "@opai/domain";
 
 import { refDe } from "../core/crm/comun";
+import { remitenteDe } from "../core/comunicaciones/envio";
+import { registrarSalienteDeNegocio } from "../core/correos/registrar";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { reglaDeNegocio } from "../errores";
@@ -36,7 +38,10 @@ export async function enviarCorreoSeguimiento(ctx: Contexto, s: Seg, asunto: str
   if (!contacto?.email) throw reglaDeNegocio("El contacto del seguimiento no tiene correo.");
   const vendedor = vendedorId ? await ctx.db.user.findUnique({ where: { id: vendedorId }, select: { email: true } }) : null;
   const responderA = [direccionRespuesta(s.token, DOMINIO_RESPUESTAS), ...(vendedor ? [vendedor.email] : [])];
-  await (await correoDe(ctx, "comercial")).enviar({ para: contacto.email, asunto, texto, responderA });
+  const mailer = await correoDe(ctx, "comercial");
+  await mailer.enviar({ para: contacto.email, asunto, texto, responderA });
+  // CAR-233: el saliente queda en el historial del cliente (cuenta, contacto y negocio del seguimiento).
+  await registrarSalienteDeNegocio(ctx, s.negocioId, { origen: "seguimiento", contactoId: s.contactoId, remitente: remitenteDe(mailer), destinatarios: [contacto.email], asunto, texto });
   return contacto.email;
 }
 
