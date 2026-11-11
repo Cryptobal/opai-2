@@ -11,8 +11,8 @@ import { armarPlan, contar, exigirAcceso, reporteDe } from "./plan";
 import { IMPORTADORES, importadorDe } from "./registro";
 import type { Importador } from "./tipos";
 
-/** Importar es administrar la empresa (owner y admin por defecto); además se exige el permiso de cada entidad. */
-export const PERMISO_IMPORTAR = PERMISOS_CORE.tenantManage;
+/** Importar: owner, admin y gerente (decisión de Carlos, 11-nov-2026); además se exige el permiso de cada entidad. */
+export const PERMISO_IMPORTAR = PERMISOS_CORE.importarManage;
 
 function disponible(ctx: Contexto, imp: Importador): boolean {
   try {

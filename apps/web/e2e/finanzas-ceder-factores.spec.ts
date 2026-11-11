@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { expect, type Page, test, type TestInfo } from "@playwright/test";
 
 import { hidratado } from "./hidratacion";
-import { capturar, EN_PREVIEW } from "./preview";
+import { EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // CAR-267 · Factores guardados en la hoja «Ceder factura»: se guarda un factor escrito a mano, queda en la lista y
@@ -106,13 +106,29 @@ test.describe("@preview finanzas: factores para ceder", () => {
     await capturarVisible(page, info, "ceder-factores-hoja");
   });
 
-  test("el catálogo de factores aparece en los ajustes de Finanzas", async ({ page }, info) => {
+  test("el catálogo de factores se edita desde los ajustes de Finanzas", async ({ page }, info) => {
+    const [rut] = FACTORES[info.project.name] ?? FACTORES["telefono"]!;
+    const nombre = `Factor Ajuste ${info.project.name} ${Date.now().toString(36)}`;
     await entrar(page);
     await page.goto("/configuracion/modulo/finanzas?seccion=ajustes");
-    const ajuste = page.getByText("Factores para ceder facturas").first();
-    await expect(ajuste).toBeVisible({ timeout: 60_000 });
+    const campo = page.getByLabel("Factores para ceder facturas");
+    await expect(campo).toBeVisible({ timeout: 60_000 });
+    await hidratado(campo);
+    // Texto que no es JSON: avisa y no ofrece guardar.
+    await campo.fill("[{");
+    await expect(page.getByText("El texto no es JSON válido todavía")).toBeVisible();
+    await campo.fill(JSON.stringify([{ nombre, rut }]));
+    await expect(page.getByText("El texto no es JSON válido todavía")).toHaveCount(0);
+    await page.getByRole("button", { name: /^Guardar/ }).click();
+    await expect(page.getByText("Ajuste guardado").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
-    await ajuste.scrollIntoViewIfNeeded();
-    await capturar(page, info, "ceder-factores-ajuste");
+    await page.reload();
+    // Los proyectos corren en paralelo y cada uno reemplaza el catálogo: tras recargar basta con que el campo muestre
+    // el catálogo guardado (antes aparecía vacío), sea de esta corrida o de otra.
+    await expect(page.getByLabel("Factores para ceder facturas")).toHaveValue(/"rut": "76\.000\./, {
+      timeout: 60_000,
+    });
+    await page.getByLabel("Factores para ceder facturas").scrollIntoViewIfNeeded();
+    await capturarVisible(page, info, "ceder-factores-ajuste");
   });
 });
