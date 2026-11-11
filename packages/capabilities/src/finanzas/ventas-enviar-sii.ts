@@ -13,6 +13,8 @@ import { PERMISO_VENTAS, ambienteDe, documentoEmitidoIdSchema } from "./ventas-c
 import { vistaDeDocumento } from "./ventas-consulta";
 import { ventaSchema } from "./vistas-venta";
 
+const ESTADOS_ENVIABLES = new Set(["enviado", "anulado_nc", "anulado_nd"]);
+
 export const ventasEnviarSii = defineCapability({
   id: "finanzas.ventas.enviar_sii",
   descripcion:
@@ -27,7 +29,10 @@ export const ventasEnviarSii = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");
-    if (doc.estadoDte !== "enviado") throw reglaDeNegocio("Solo se envía al SII un documento en estado enviado.");
+    // Firmado y sin track ID: también si ya lo anuló una NC o ND antes de transmitirlo (CAR-270). El SII
+    // necesita recibir el original para aceptar la nota que lo referencia.
+    if (!ESTADOS_ENVIABLES.has(doc.estadoDte)) throw reglaDeNegocio("Solo se envía al SII un documento firmado.");
+    if (doc.trackIdSii) throw reglaDeNegocio("El documento ya se envió al SII; consulte su estado en vez de reenviarlo.");
     if (doc.folio == null) throw reglaDeNegocio("El documento no tiene folio.");
     const ambiente = await ambienteDe(ctx);
     const adaptador = await adaptadorSiiDe(ctx);

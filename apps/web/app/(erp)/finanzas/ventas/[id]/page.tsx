@@ -72,7 +72,7 @@ export default async function VentaDetallePage({
 
 function Ficha({ state, venta, envios, editar }: { state: EstadoPantalla; venta: Detalle | null; envios: EnvioCliente[]; editar: boolean }) {
   if (state !== "ready" || !venta) return null;
-  const dte = estadoDteVenta(venta.estadoDte);
+  const dte = estadoDteVenta(venta.estadoDte, venta.trackIdSii);
   const cobro = estadoCobroVenta(venta.estadoCobro);
   return (
     <div className="flex flex-col gap-4">

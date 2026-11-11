@@ -30,7 +30,15 @@ const ESTADO_CESION: Record<string, { etiqueta: string; tono: Tono }> = {
 /** Si aparece un estado nuevo sin etiqueta, se muestra neutro y sin el código interno. */
 const DESCONOCIDO = { etiqueta: "Sin clasificar", tono: "neutro" as Tono };
 
-export const estadoDteVenta = (e: string) => ESTADO_DTE[e] ?? DESCONOCIDO;
+const FIRMADA = { etiqueta: "Firmada, sin enviar al SII", tono: "warning" as Tono };
+
+/** Con `trackIdSii` (sin `undefined`), una firmada que aún no llega al SII no se presenta como enviada (CAR-270). */
+export const estadoDteVenta = (e: string, trackIdSii?: string | null) =>
+  e === "enviado" && trackIdSii === null ? FIRMADA : (ESTADO_DTE[e] ?? DESCONOCIDO);
+
+/** Firmada (aunque una NC o ND ya la haya anulado) y sin track ID: falta transmitirla al SII. */
+export const porTransmitir = (v: { estadoDte: string; trackIdSii: string | null }) =>
+  v.trackIdSii === null && (v.estadoDte === "enviado" || v.estadoDte === "anulado_nc" || v.estadoDte === "anulado_nd");
 export const estadoCobroVenta = (e: string) => ESTADO_COBRO[e] ?? DESCONOCIDO;
 export const estadoCesionVenta = (e: string) => ESTADO_CESION[e] ?? DESCONOCIDO;
 

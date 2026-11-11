@@ -13,7 +13,7 @@ import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from
 import type { LibroVentas, Venta } from "./tipos";
 
 function badgeEstado(v: Venta) {
-  const e = estadoDteVenta(v.estadoDte);
+  const e = estadoDteVenta(v.estadoDte, v.trackIdSii);
   return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
 }
 
