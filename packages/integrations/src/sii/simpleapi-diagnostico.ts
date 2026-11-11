@@ -15,6 +15,8 @@ export type DiagnosticoRespuestaSii = {
   cuerpoLargo: number;
   /** Largo del detalle saneado para la persona (`detalleSeguroDeRespuesta`); el texto nunca va al log. */
   detalleLargo: number | null;
+  /** Solo los nombres de las claves de primer nivel de un cuerpo JSON (nunca valores): indican qué forma de error es. */
+  clavesJson: string[] | null;
 };
 
 /** Lo que se puede registrar de la petición de `dte/generar` que SimpleAPI rechazó. */
@@ -44,7 +46,21 @@ export function diagnosticoRespuestaSii(headers: Headers, cuerpo: string, detall
     contentLength: NUMERO.test(largo) ? largo : null,
     cuerpoLargo: cuerpo.length,
     detalleLargo: detalle ? detalle.length : null,
+    clavesJson: clavesDeJson(cuerpo),
   };
+}
+
+const CLAVE = /^[A-Za-z_][A-Za-z0-9_]{0,31}$/;
+
+/** Nombres de las claves de un objeto JSON (máx. 10), sin valores. Las que no parecen identificadores se omiten (CAR-270). */
+function clavesDeJson(cuerpo: string): string[] | null {
+  try {
+    const j = JSON.parse(cuerpo.slice(0, 8 * 1024)) as unknown;
+    if (!j || typeof j !== "object" || Array.isArray(j)) return null;
+    return Object.keys(j).filter((k) => CLAVE.test(k)).slice(0, 10);
+  } catch {
+    return null;
+  }
 }
 
 export function diagnosticoPeticionSii(

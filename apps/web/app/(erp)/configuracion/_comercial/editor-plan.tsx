@@ -28,6 +28,8 @@ export function EditorPlan({ id, plan, etapas, onCerrar }: Props) {
   const [c, setC] = useState<ConfigPlan>(plan.config);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const paso = (i: number, cambio: Partial<PasoConfig>) => setC({ ...c, pasos: c.pasos.map((p, j) => (j === i ? { ...p, ...cambio } : p)) });
+  // Etapa destino del paso (CAR-160): por id; «No cambiar la etapa» la quita del paso.
+  const etapaPaso = (i: number, v: string) => setC({ ...c, pasos: c.pasos.map((p, j) => { if (j !== i) return p; const { etapaDestino: _q, ...resto } = p; return v === NINGUNA ? resto : { ...resto, etapaDestino: v }; }) });
   async function guardar() {
     const r = await ejecutar("comercial.seguimiento_planes.guardar", { ...(id ? { id } : {}), nombre: nombre.trim(), disparador: "cotizacion_enviada", porDefecto, activo, config: c });
     if (!r) return;
@@ -80,6 +82,11 @@ export function EditorPlan({ id, plan, etapas, onCerrar }: Props) {
             <Campo etiqueta="Canal" htmlFor={`paso-c-${i}`}><Select id={`paso-c-${i}`} valor={p.canal} onCambiar={(v) => paso(i, { canal: v as PasoConfig["canal"] })} opciones={CANALES} /></Campo>
             <Campo etiqueta="Quién lo ejecuta" htmlFor={`paso-e-${i}`}><Select id={`paso-e-${i}`} valor={p.ejecutor} onCambiar={(v) => paso(i, { ejecutor: v as PasoConfig["ejecutor"] })} opciones={EJECUTORES} /></Campo>
             <Campo etiqueta="Texto o guion" htmlFor={`paso-g-${i}`}><Textarea id={`paso-g-${i}`} rows={3} maxLength={2000} value={p.guion ?? ""} onChange={(e) => paso(i, { guion: e.target.value })} /></Campo>
+            {etapas.length ? (
+              <Campo etiqueta="Al hacerlo, el negocio pasa a" htmlFor={`paso-et-${i}`} ayuda="Solo avanza: no baja un negocio que ya está ahí o más adelante, ni lo mueve si no cumple los requisitos.">
+                <Select id={`paso-et-${i}`} valor={p.etapaDestino ?? NINGUNA} onCambiar={(v) => etapaPaso(i, v)} opciones={conNinguna} />
+              </Campo>
+            ) : null}
             <Button variant="ghost" onClick={() => setC({ ...c, pasos: c.pasos.filter((_, j) => j !== i) })}>Quitar paso</Button>
           </div>
         ))}

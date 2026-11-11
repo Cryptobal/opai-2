@@ -11,8 +11,9 @@ import type { EtapaTablero } from "./use-mover";
 const CERRADO = { abierto: "Abierto", ganado: "Ganado", perdido: "Perdido" } as const;
 
 /**
- * Tarjeta del tablero (export «Negocios · Tablero»): título (enlace a la ficha), cuenta, valor
- * mensual, cierre y responsable. Abierta: se arrastra y tiene «Mover a…»; cerrada: solo se abre.
+ * Tarjeta del tablero (export «Negocios · Tablero»): título (enlace a la ficha), cuenta, indicador
+ * del seguimiento si corresponde (spec §4, CAR-160), valor mensual, cierre y
+ * responsable. Abierta: se arrastra y tiene «Mover a…»; cerrada: solo se abre.
  */
 export function TarjetaNegocio(p: { n: NegocioFila; etapas: EtapaTablero[] | null }) {
   const { n, etapas } = p;
@@ -38,6 +39,11 @@ export function TarjetaNegocio(p: { n: NegocioFila; etapas: EtapaTablero[] | nul
         ) : null}
       </div>
       <span className="t-body-sm truncate text-fg-muted">{n.cuentaNombre}</span>
+      {abierto && n.seguimiento ? (
+        <Badge tono={n.seguimiento.tono} className="self-start">
+          {n.seguimiento.texto}
+        </Badge>
+      ) : null}
       <div className="flex items-baseline justify-between gap-2">
         <span className="t-numeric font-semibold">
           {monto != null ? pesos(monto) : "Sin monto"}

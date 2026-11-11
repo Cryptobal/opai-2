@@ -8,6 +8,7 @@ import { aFecha, cursorDe, pagina } from "../core/maestros/comun";
 import { noEncontrado } from "../errores";
 import { PERMISO_READ } from "./comun";
 import { tipoDteVentaSchema } from "./ventas-comun";
+import { ordenVentas, ordenVentasSchema } from "./ventas-orden";
 import { vistasDeVentas } from "./ventas-consulta";
 import { ventaSchema } from "./vistas-venta";
 
@@ -25,6 +26,7 @@ export const ventasListar = defineCapability({
     cuentaId: uuidSchema.optional().describe("Solo los documentos de esta cuenta (cliente)."),
     tipoDte: tipoDteVentaSchema.optional().describe("Solo este tipo de documento."),
     soloEmitidos: z.boolean().optional().describe("Excluye los borradores: solo documentos con folio ante el SII."),
+    orden: ordenVentasSchema,
     cursor: uuidSchema.optional(),
     limite: z.number().int().min(1).max(100).default(50),
   }),
@@ -68,7 +70,7 @@ export const ventasListar = defineCapability({
     const filas = await ctx.db.documentoEmitido.findMany({
       where,
       include: { lineas: { orderBy: { orden: "asc" } } },
-      orderBy: [{ fechaEmision: "desc" }, { id: "desc" }],
+      orderBy: ordenVentas(input.orden),
       take: input.limite + 1,
       ...cursorDe(input.cursor),
     });

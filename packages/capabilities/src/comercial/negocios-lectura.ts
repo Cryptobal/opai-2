@@ -9,7 +9,7 @@ import {
   filtroEtiqueta,
 } from "../core/crm/etiquetas-filas";
 import type { Contexto } from "../types";
-import { PERMISO_READ, embudoPorDefecto, negocioSchema, vistaNegocio } from "./comun";
+import { PERMISO_READ, negocioSchema, vistaNegocio } from "./comun";
 
 const filtros = listaSchema.extend({
   cuentaId: z.uuid().optional().describe("Filtra por cuenta (ficha de cuenta)."),
@@ -24,7 +24,7 @@ const filtros = listaSchema.extend({
   etiquetaId: filtroEtiqueta,
 });
 
-const filaLista = negocioSchema.extend({
+export const filaLista = negocioSchema.extend({
   cuentaNombre: z.string(),
   etapaNombre: z.string(),
   responsableNombre: z.string().nullable(),
@@ -34,7 +34,7 @@ const filaListaConEtiquetas = filaLista.extend({ etiquetas: etiquetasFilaSchema 
 type Base = { cuentaId: string; etapaId: string; responsableId: string | null };
 
 /** Nombres de cuenta, etapa y responsable para un conjunto de negocios, en tres consultas. */
-async function enriquecer(ctx: Contexto, negocios: Base[]) {
+export async function enriquecer(ctx: Contexto, negocios: Base[]) {
   const cuentaIds = [...new Set(negocios.map((n) => n.cuentaId))];
   const etapaIds = [...new Set(negocios.map((n) => n.etapaId))];
   const userIds = [...new Set(negocios.flatMap((n) => (n.responsableId ? [n.responsableId] : [])))];
@@ -96,63 +96,15 @@ export const negociosList = defineCapability({
     const p = pagina(filas, input.limite);
     const [extra, etiquetas] = await Promise.all([
       enriquecer(ctx, p.items),
-      etiquetasDeFilas(ctx, "negocio", p.items.map((n) => n.id)),
+      etiquetasDeFilas(
+        ctx,
+        "negocio",
+        p.items.map((n) => n.id),
+      ),
     ]);
     return {
       items: p.items.map((n) => ({ ...vistaNegocio(n), ...extra(n), etiquetas: etiquetas(n.id) })),
       siguiente: p.siguiente,
-    };
-  },
-});
-
-export const negociosEmbudo = defineCapability({
-  auditarLectura: (s) => s.negocios.flatMap((n) => [n.id, n.cuentaId]),
-  id: "comercial.negocios.embudo",
-  descripcion:
-    "Resumen del embudo por defecto para el tablero: sus etapas con tipo, orden y probabilidad, y los negocios no archivados de cada etapa (los 500 más recientes).",
-  permiso: PERMISO_READ,
-  input: z.object({ responsableId: z.uuid().optional() }),
-  output: z.object({
-    etapas: z.array(
-      z.object({
-        id: z.string(),
-        nombre: z.string(),
-        tipo: z.string(),
-        orden: z.number(),
-        probabilidad: z.number(),
-        tono: z.string(),
-      }),
-    ),
-    negocios: z.array(filaLista),
-  }),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx, input) {
-    const embudo = await embudoPorDefecto(ctx);
-    const etapas = await ctx.db.etapa.findMany({
-      where: { embudoId: embudo.id, activa: true },
-      orderBy: { orden: "asc" },
-    });
-    const negocios = await ctx.db.negocio.findMany({
-      where: {
-        embudoId: embudo.id,
-        archivadoEn: null,
-        ...(input.responsableId ? { responsableId: input.responsableId } : {}),
-      },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: 500,
-    });
-    const extra = await enriquecer(ctx, negocios);
-    return {
-      etapas: etapas.map((e) => ({
-        id: e.id,
-        nombre: e.nombre,
-        tipo: e.tipo,
-        orden: e.orden,
-        probabilidad: e.probabilidad,
-        tono: e.tono,
-      })),
-      negocios: negocios.map((n) => ({ ...vistaNegocio(n), ...extra(n) })),
     };
   },
 });

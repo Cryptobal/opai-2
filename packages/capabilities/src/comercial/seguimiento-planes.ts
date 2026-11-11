@@ -9,7 +9,7 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { PERMISO_CONFIG, PERMISO_READ } from "./comun";
 import { configPlanSchema } from "./seguimiento-comun";
-import { etapasInvalidasDelPlan, validarEtapasDelPlan } from "./seguimiento-etapas";
+import { etapasInvalidasDePasos, etapasInvalidasDelPlan, validarEtapasDelPlan } from "./seguimiento-etapas";
 
 const DISPARADORES_V1 = ["cotizacion_enviada", "manual"] as const;
 const planSchema = z.object({
@@ -31,7 +31,7 @@ async function planes(ctx: Contexto): Promise<z.input<typeof planSchema>[]> {
       return {
         id: p.id, nombre: p.nombre, disparador: p.disparador, porDefecto: p.porDefecto, activo: p.activo,
         version: p.versionActual, config, enCurso,
-        etapasInvalidas: (await etapasInvalidasDelPlan(ctx, config)).map((e) => e.mensaje),
+        etapasInvalidas: [...(await etapasInvalidasDelPlan(ctx, config)).map((e) => e.mensaje), ...(await etapasInvalidasDePasos(ctx, config))],
       };
     }),
   );
