@@ -5,7 +5,7 @@ import { esPasoPendiente, type EstadoPaso, transicionPaso } from "@opai/domain";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
 import { PERMISO_MANAGE } from "./comun";
 import { actividadDePaso, enviarCorreoSeguimiento } from "./seguimiento-ejecucion";
 import { configDeVersion, seguimientoPorId, seguimientoVistaSchema } from "./seguimiento-comun";
@@ -57,7 +57,9 @@ export const seguimientosRegistrarPaso = defineCapability({
       const actividadId = input.accion === "hecho"
         ? await actividadDePaso(ctx, tx, { tipo: paso.canal === "llamada" ? "llamada" : paso.canal === "whatsapp" ? "whatsapp" : paso.canal === "correo" ? "correo" : "nota", titulo: `Seguimiento: paso ${paso.orden} hecho`, detalle: input.resultado ?? null, negocioId: s.negocioId })
         : null;
-      await tx.seguimientoPaso.update({ where: { id: paso.id }, data: { ...base, ...(actividadId ? { actividadId } : {}) } });
+      // Condicional: si la tarea se completó en paralelo (Mis tareas), no se registra el paso dos veces.
+      const r = await tx.seguimientoPaso.updateMany({ where: { id: paso.id, estado: paso.estado }, data: { ...base, ...(actividadId ? { actividadId } : {}) } });
+      if (!r.count) throw conflicto("El paso cambió mientras tanto; vuelve a cargarlo.");
       // CAR-160: la tarea del paso se cierra sola (hecha u omitida) y el paso hecho aplica su etapa destino.
       if (input.accion === "hecho") await avisoEtapa(ctx, tx, s.negocioId, await efectosPasoHecho(ctx, tx, { tareaId: paso.actividadId, negocioId: s.negocioId, etapaDestino }));
       // Omitido o pospuesto: la tarea de hoy se cancela; al pospuesto le llega una nueva en su fecha.

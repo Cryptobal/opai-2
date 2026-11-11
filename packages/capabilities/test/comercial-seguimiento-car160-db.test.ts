@@ -1,7 +1,4 @@
-import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
-import { sembrarComercial } from "@opai/db";
 
 import { prepararEntorno, type Entorno } from "../../db/test/entorno";
 import * as mod from "../src";
@@ -10,6 +7,7 @@ import type { EventoPublicado } from "../src/eventos/consumidores";
 import { consumidorRespuestaPorActividad, consumidorRespuestaPorEtapa, consumidorTareaDePaso } from "../src/comercial/seguimiento-pausas";
 import { trabajoVencerPasosSeguimiento } from "../src/comercial/seguimiento-trabajo";
 import { codigo, dato } from "./maestros-ayuda";
+import { empresaCar160 } from "./seguimiento-car160-ayuda";
 
 type Plan = { id: string; porDefecto: boolean; config: Record<string, unknown> & { pasos: Record<string, unknown>[] } };
 type Envio = { pasosCancelados: number; etapaId: string | null; etapasAbiertas: { id: string; nombre: string }[]; seguimiento: { id: string } | null };
@@ -17,27 +15,7 @@ type Envio = { pasosCancelados: number; etapaId: string | null; etapasAbiertas: 
 // CAR-160: brechas del PR 1 del seguimiento contra Postgres real, con dos empresas ficticias.
 describe("comercial · seguimiento CAR-160 (Postgres real)", () => {
   let e: Entorno;
-  const medidor = { registrar: async () => undefined };
-  async function empresa(nombre: string) {
-    const t = await e.admin.tenant.create({ data: { slug: `c160-${randomUUID().slice(0, 8)}`, nombre, vertical: "seguridad" } });
-    await sembrarComercial(e.admin.$extends({}), t.id);
-    const u = await e.admin.user.create({ data: { name: `Vendedora ${nombre}`, email: `v-${randomUUID().slice(0, 8)}@prueba.cl`, emailVerified: true } });
-    await e.admin.membership.create({ data: { tenantId: t.id, userId: u.id, rol: "owner", portales: ["erp"] } });
-    const c = mod.crearContexto({
-      tenantId: t.id, actor: { tipo: "user", id: u.id }, usuario: { id: u.id, nombre: "Vendedora", email: "v@prueba.cl", platformRole: null },
-      rol: "owner", portal: "erp", portalesMembresia: ["erp"], modulosActivos: ["comercial"], medidor,
-    });
-    const cuenta = await dato<{ id: string }>(c, "core.cuentas.create", { nombre });
-    const etapas = await e.admin.etapa.findMany({ where: { tenantId: t.id }, orderBy: { orden: "asc" } });
-    const etapa = (n: string) => etapas.find((x) => x.nombre === n)!;
-    // Negocio en «Propuesta enviada» con monto y cierre: puede avanzar sin requisitos pendientes.
-    const negocio = async () => {
-      const n = await dato<{ id: string }>(c, "comercial.negocios.create", { cuentaId: cuenta.id, titulo: `Negocio ${randomUUID().slice(0, 4)}` });
-      await e.admin.negocio.update({ where: { id: n.id }, data: { etapaId: etapa("Propuesta enviada").id, montoEstimadoMensual: 1_000_000, cierreEstimado: new Date("2026-12-31T00:00:00Z"), responsableId: u.id } });
-      return n.id;
-    };
-    return { tenantId: t.id, userId: u.id, c, etapa, negocio };
-  }
+  const empresa = (nombre: string) => empresaCar160(e, nombre);
   let A: Awaited<ReturnType<typeof empresa>>;
   let B: Awaited<ReturnType<typeof empresa>>;
   const etapaDe = async (id: string) => (await e.admin.negocio.findUniqueOrThrow({ where: { id } })).etapaId;
@@ -48,7 +26,8 @@ describe("comercial · seguimiento CAR-160 (Postgres real)", () => {
     await dato(A.c, "comercial.seguimiento_planes.guardar", { id: p.id, nombre: "Post-cotización", disparador: "cotizacion_enviada", porDefecto: true, activo: true, config });
   }
   async function eventos(tipo: string, tenantId = A.tenantId): Promise<EventoPublicado[]> {
-    return (await e.admin.evento.findMany({ where: { tenantId, tipo }, orderBy: { createdAt: "asc" } })) as unknown as EventoPublicado[];
+    const filas: EventoPublicado[] = await e.admin.evento.findMany({ where: { tenantId, tipo }, orderBy: { createdAt: "asc" } });
+    return filas;
   }
 
   beforeAll(async () => {

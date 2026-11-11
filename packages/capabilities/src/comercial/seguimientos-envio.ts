@@ -20,6 +20,7 @@ const salida = z.object({
   opcion: z.enum(OPCIONES),
   seguimiento: seguimientoVistaSchema.nullable().describe("El seguimiento que queda (nuevo al iniciar; el vigente al solo enviar)."),
   etapaId: z.string().nullable().describe("Etapa en que queda el negocio."),
+  movido: z.boolean().describe("Si el negocio cambió de etapa. Nunca baja: si ya está más adelante, queda donde está."),
   pasosCancelados: z.number().describe("Pasos pendientes del seguimiento anterior que se cancelan."),
   etapasAbiertas: z.array(z.object({ id: z.string(), nombre: z.string(), actual: z.boolean() }))
     .describe("Etapas abiertas del embudo del negocio, en orden, para elegir al mover sin seguimiento."),
@@ -39,7 +40,7 @@ async function contexto(ctx: Contexto, negocioId: string) {
 export const seguimientosDecidirEnvio = defineCapability({
   id: "comercial.seguimientos.decidir_envio",
   descripcion:
-    "Al enviar una cotización, decide el seguimiento del negocio: «iniciar» agenda el plan (reemplaza el vigente), «mover_sin_seguimiento» pasa el negocio a la etapa abierta elegida y cancela los pasos pendientes, y «solo_enviar» no cambia nada. La vista previa dice cuántos pasos se cancelan.",
+    "Al enviar una cotización, decide el seguimiento del negocio: «iniciar» agenda el plan (reemplaza el vigente), «mover_sin_seguimiento» pasa el negocio a la etapa abierta elegida (nunca lo baja) y cancela los pasos pendientes, y «solo_enviar» no cambia nada. La vista previa dice cuántos pasos se cancelan.",
   permiso: PERMISO_MANAGE,
   input: z.object({
     negocioId: uuidSchema,
@@ -55,7 +56,7 @@ export const seguimientosDecidirEnvio = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const { negocio, vivo, pendientes, etapasAbiertas } = await contexto(ctx, input.negocioId);
     if (negocio.estado !== "abierto") throw reglaDeNegocio("El negocio está cerrado: no se decide seguimiento al enviar.");
-    const base = { opcion: input.opcion, etapasAbiertas, etapaId: negocio.etapaId };
+    const base = { opcion: input.opcion, etapasAbiertas, etapaId: negocio.etapaId, movido: false };
     if (input.opcion === "solo_enviar")
       return { ...base, seguimiento: vivo ? await seguimientoPorId(ctx, vivo.id) : null, pasosCancelados: 0 };
     if (input.opcion === "iniciar") {
@@ -70,20 +71,25 @@ export const seguimientosDecidirEnvio = defineCapability({
     const destino = await etapaDe(ctx, input.etapaId);
     if (destino.embudoId !== negocio.embudoId || !destino.activa) throw reglaDeNegocio("La etapa no pertenece al embudo del negocio.");
     if (destino.tipo !== "abierta") throw reglaDeNegocio("Elige una etapa abierta: ganar y perder van en sus propias acciones.");
+    // Nunca baja: el envío de CPQ puede haber movido el negocio («Propuesta enviada») después de que la
+    // hoja calculó las etapas; un destino anterior al actual deja el negocio donde está.
     const actual = await etapaDe(ctx, negocio.etapaId);
-    if (destino.orden > actual.orden) await validarEntrada(ctx, negocio, destino);
-    if (dryRun) return { ...base, etapaId: destino.id, seguimiento: null, pasosCancelados: pendientes };
+    const mover = destino.orden > actual.orden;
+    if (mover) await validarEntrada(ctx, negocio, destino);
+    if (dryRun) return { ...base, etapaId: mover ? destino.id : actual.id, movido: mover, seguimiento: null, pasosCancelados: pendientes };
     const cancelados = await ctx.transaccion(async (tx) => {
       let n = 0;
-      if (vivo) {
-        await tx.seguimiento.update({ where: { id: vivo.id }, data: { estado: "cancelado", motivo: "manual", motivoDetalle: "Cotización enviada y negocio movido sin seguimiento." } });
+      // Condicional: si otro proceso ya lo terminó (ganado, perdido), no se pisa su motivo.
+      const r = vivo
+        ? await tx.seguimiento.updateMany({ where: { id: vivo.id, estado: { in: ["activo", "pausado"] } }, data: { estado: "cancelado", motivo: "manual", motivoDetalle: "Cotización enviada y negocio movido sin seguimiento." } })
+        : { count: 0 };
+      if (vivo && r.count) {
         n = await cancelarPasosPendientes(ctx, tx, vivo.id);
         await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cancelado", entidadTipo: "negocio", entidadId: negocio.id, payload: { seguimientoId: vivo.id } });
       }
-      if (destino.id !== negocio.etapaId)
-        await aplicarEtapa(ctx, tx, negocio, destino, { evento: "comercial.negocio.etapa_cambiada", motivo: "Cotización enviada sin seguimiento" });
+      if (mover) await aplicarEtapa(ctx, tx, negocio, destino, { evento: "comercial.negocio.etapa_cambiada", motivo: "Cotización enviada sin seguimiento" });
       return n;
     });
-    return { ...base, etapaId: destino.id, seguimiento: null, pasosCancelados: cancelados };
+    return { ...base, etapaId: mover ? destino.id : actual.id, movido: mover, seguimiento: null, pasosCancelados: cancelados };
   },
 });

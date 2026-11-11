@@ -36,10 +36,14 @@ export const trabajoVencerPasosSeguimiento = defineTrabajo({
         if (paso.ejecutor === "opai_automatico" && paso.canal === "correo") {
           if (!def?.guion) throw new Error("El paso automático no tiene texto en el plan.");
           const asunto = asuntoSeguimiento(s.cotizacionCodigo);
+          // Reserva el paso antes de enviar: una corrida paralela o un seguimiento ya cancelado no envía.
+          const reserva = await ctx.db.seguimientoPaso.updateMany({ where: { id: paso.id, estado: "programado", seguimiento: { estado: "activo" } }, data: { estado: "por_hacer" } });
+          if (!reserva.count) continue;
           const para = await enviarCorreoSeguimiento(ctx, s, asunto, def.guion, negocio?.responsableId ?? null);
           await ctx.transaccion(async (tx) => {
             const actividadId = await actividadDePaso(ctx, tx, { tipo: "correo", titulo: `Seguimiento: ${asunto}`, detalle: `Enviado a ${para}.`, negocioId: s.negocioId });
-            await tx.seguimientoPaso.update({ where: { id: paso.id }, data: { estado: "hecho", asunto, cuerpo: def.guion!, hechoEn: new Date(), actividadId } });
+            const r = await tx.seguimientoPaso.updateMany({ where: { id: paso.id, estado: "por_hacer" }, data: { estado: "hecho", asunto, cuerpo: def.guion!, hechoEn: new Date(), actividadId } });
+            if (!r.count) return; // cancelado mientras salía el correo: queda el registro, sin mover etapa
             const aviso = await efectosPasoHecho(ctx, tx, { tareaId: null, negocioId: s.negocioId, etapaDestino: def.etapaDestino });
             if (aviso) await actividadDePaso(ctx, tx, { tipo: "nota", titulo: "Seguimiento: etapa sin cambio", detalle: aviso, negocioId: s.negocioId });
           });
@@ -62,7 +66,7 @@ export const trabajoVencerPasosSeguimiento = defineTrabajo({
         activados += 1;
       } catch (e) {
         fallidos += 1;
-        await ctx.db.seguimientoPaso.update({ where: { id: paso.id }, data: { estado: "fallido", error: e instanceof Error ? e.message.slice(0, 300) : "Error desconocido" } });
+        await ctx.db.seguimientoPaso.updateMany({ where: { id: paso.id, estado: { in: ["programado", "por_hacer"] } }, data: { estado: "fallido", error: e instanceof Error ? e.message.slice(0, 300) : "Error desconocido" } });
       }
     }
     const vivos = await ctx.db.seguimiento.findMany({ where: { estado: "activo" }, select: { id: true, negocioId: true, planId: true, planVersion: true }, take: 200 });

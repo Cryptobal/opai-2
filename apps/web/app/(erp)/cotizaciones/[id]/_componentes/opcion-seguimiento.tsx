@@ -92,7 +92,7 @@ export function OpcionSeguimiento(p: { s: ReturnType<typeof useSeguimientoAlEnvi
             onCambiar={setEtapaId}
             placeholder="Elige la etapa"
             invalido={!etapaId}
-            opciones={mover.etapasAbiertas.map((e) => ({ valor: e.id, etiqueta: e.actual ? `${e.nombre} (actual)` : e.nombre }))}
+            opciones={mover.etapasAbiertas.map((e) => ({ valor: e.id, etiqueta: e.nombre }))}
           />
         </div>
       ) : null}
@@ -100,7 +100,7 @@ export function OpcionSeguimiento(p: { s: ReturnType<typeof useSeguimientoAlEnvi
         {opcion === "iniciar"
           ? `${pasos.length} pasos en días hábiles${primero ? ` · el primero el ${fecha(primero)}` : ""}.${cancela ? ` Reemplaza el seguimiento en curso: ${pasosTexto(cancela)}.` : ""}`
           : opcion === "mover_sin_seguimiento"
-            ? `Sin seguimiento automático: el negocio pasa a la etapa que elijas.${cancela ? ` ${pasosTexto(cancela)}.` : ""}`
+            ? `Sin seguimiento automático: el negocio pasa a la etapa que elijas (si ya está más adelante, no baja).${cancela ? ` ${pasosTexto(cancela)}.` : ""}`
             : "Solo se envía: no cambia el seguimiento ni la etapa del negocio."}
       </p>
     </Campo>

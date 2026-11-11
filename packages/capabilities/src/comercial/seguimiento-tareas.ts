@@ -65,7 +65,8 @@ export async function avanzarAEtapa(ctx: Contexto, tx: Tx, negocioId: string, et
   if (!actual || destino.tipo !== "abierta") return "sin_cambio";
   if (destino.embudoId !== negocio.embudoId || destino.orden <= actual.orden) return "sin_cambio";
   try {
-    await validarEntrada(ctx, negocio, destino);
+    // Dentro de la transacción solo `tx` (REGLAS-codigo): la validación lee con la misma conexión.
+    await validarEntrada({ ...ctx, db: tx }, negocio, destino);
   } catch {
     return "requisitos";
   }
