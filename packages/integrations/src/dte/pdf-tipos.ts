@@ -10,6 +10,8 @@ export type PdfReferencia = {
   razonRef?: string;
 };
 
+export type PdfLogo = { bytes: Uint8Array; formato: "png" | "jpg" };
+
 export type PdfParte = {
   razon: string;
   rut: string;
@@ -39,6 +41,8 @@ export type PdfDteInput = {
   borrador?: boolean;
   glosa?: string;
   resolucion?: { numero: number; fecha: string };
+  /** Logo de la empresa (de Configuración › Marca), PNG o JPG; si falta o no se puede leer, el PDF sigue con la razón social. */
+  logo?: PdfLogo;
   /** Oficina del SII del emisor; si falta no se imprime. */
   oficinaSii?: string;
 };
