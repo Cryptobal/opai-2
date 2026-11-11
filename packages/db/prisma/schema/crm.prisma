@@ -151,3 +151,56 @@ model EtiquetaAsignacion {
   @@map("etiqueta_asignaciones")
   @@schema("core")
 }
+
+// CAR-233 · Historial de correos del cliente. Sin @relation a Cuenta, Contacto, Negocio ni Tenant: las FK
+// (SET NULL al borrar la entidad) y el trigger de mismo tenant van en el SQL de la migración.
+
+/// Correo con un cliente: saliente de OPAI (cotización, factura, seguimiento) o entrante por Resend a la
+/// dirección de la empresa (respuesta al reply-to o CCO). Remitente, destinatarios, asunto y texto son
+/// contenido externo. Sin cuenta, contacto ni negocio = bandeja «sin asignar» (índice parcial en el SQL).
+model CorreoCliente {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  /// "enviado" | "recibido"
+  sentido       String
+  /// "cotizacion" | "factura" | "seguimiento" | "buzon" (entró por la dirección de la empresa)
+  origen        String
+  /// Id del correo en el proveedor (entrantes): idempotencia del webhook, única por empresa.
+  mensajeId     String?   @map("mensaje_id")
+  remitente     String
+  destinatarios String[]  @default([])
+  asunto        String?
+  texto         String
+  cuentaId      String?   @map("cuenta_id") @db.Uuid
+  contactoId    String?   @map("contacto_id") @db.Uuid
+  negocioId     String?   @map("negocio_id") @db.Uuid
+  /// Cómo se asoció: "origen" | "contacto" | "dominio" | "manual"; null = nunca se asoció.
+  asociacion    String?
+  /// Ámbito de acceso del hilo: "finanzas" en facturas y en las respuestas a ellas (ADR-016); null = sin restricción.
+  ambito        String?
+  asociadoPorId String?   @map("asociado_por_id") @db.Uuid
+  asociadoEn    DateTime? @map("asociado_en") @db.Timestamptz(6)
+  ocurridoEn    DateTime  @map("ocurrido_en") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, mensajeId])
+  @@index([tenantId, cuentaId, ocurridoEn])
+  @@index([tenantId, contactoId, ocurridoEn])
+  @@index([tenantId, negocioId, ocurridoEn])
+  @@map("correos_cliente")
+  @@schema("core")
+}
+
+/// Dirección estable de la empresa para el registro de correos: `t<token>@respuestas.opai.cl` (reply-to
+/// de los salientes y CCO del vendedor). El token es aleatorio de 128 bits; una por empresa.
+model BuzonCorreo {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @unique @map("tenant_id") @db.Uuid
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("buzones_correo")
+  @@schema("core")
+}
