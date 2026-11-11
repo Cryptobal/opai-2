@@ -1,10 +1,43 @@
 // Fixtures FICTICIOS de la representación impresa (CAR-221). Ningún dato es de un cliente ni de una empresa real:
 // los RUT, nombres y direcciones son inventados. Sirven para las pruebas y para la evidencia reproducible.
+import { crc32, deflateSync } from "node:zlib";
+
 import type { PdfPrevioInput } from "./pdf-previo";
 import type { PdfDteInput } from "./pdf-tipos";
 
 const timbre = (tipo: number, folio: number) =>
   `<TED version="1.0"><DD><RE>76000000-0</RE><TD>${tipo}</TD><F>${folio}</F><FE>2026-11-08</FE><RR>77234567-8</RR><MNT>1309000</MNT></DD></TED>`;
+
+/** Logo de prueba (PNG 120 × 40 generado aquí): un rombo y barras de colores. No es el logo de ninguna empresa. */
+function logoDePrueba(): Uint8Array {
+  const [w, h] = [120, 40];
+  const crudo = Buffer.alloc((w * 3 + 1) * h);
+  for (let fila = 0; fila < h; fila++) {
+    crudo[fila * (w * 3 + 1)] = 0;
+    for (let col = 0; col < w; col++) {
+      const rombo = Math.abs(col - 20) + Math.abs(fila - 20) <= 18;
+      const barra = col >= 48 && col < 112 && fila % 10 < 6;
+      const [r, g, b] = rombo ? [30, 90, 160] : barra ? [20 + (col - 48) * 3, 140, 90] : [255, 255, 255];
+      crudo.set([r, g, b], fila * (w * 3 + 1) + 1 + col * 3);
+    }
+  }
+  const trozo = (tipo: string, datos: Buffer) => {
+    const cuerpo = Buffer.concat([Buffer.from(tipo, "latin1"), datos]);
+    const largo = Buffer.alloc(4);
+    largo.writeUInt32BE(datos.length);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(cuerpo));
+    return Buffer.concat([largo, cuerpo, crc]);
+  };
+  const cabecera = Buffer.alloc(13);
+  cabecera.writeUInt32BE(w, 0);
+  cabecera.writeUInt32BE(h, 4);
+  cabecera.set([8, 2, 0, 0, 0], 8);
+  const firma = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  return new Uint8Array(Buffer.concat([firma, trozo("IHDR", cabecera), trozo("IDAT", deflateSync(crudo)), trozo("IEND", Buffer.alloc(0))]));
+}
+
+export const LOGO_DE_PRUEBA = logoDePrueba();
 
 const base = {
   fechaEmision: "2026-11-08",
@@ -37,11 +70,29 @@ const base = {
 
 export const FIXTURE_FACTURA: PdfDteInput = {
   ...base,
-  lineas: [...base.lineas],
+  logo: { bytes: LOGO_DE_PRUEBA, formato: "png" },
+  lineas: [
+    {
+      descripcion: "Servicio de guardias noviembre 2026\nPeríodo: 1 al 30 de noviembre de 2026\nInstalación Torre Ficticia, turnos de 12 horas",
+      cantidad: "2",
+      precio: 500_000,
+      monto: 1_000_000,
+    },
+    base.lineas[1],
+  ],
   tipoDte: 33,
   folio: 1234,
   referencias: [{ tipoDteRef: 801, folioRef: 4500012345, codigoRef: 0, fechaRef: "2026-11-01", razonRef: "Orden de compra" }],
   timbrePdf417: timbre(33, 1234),
+};
+
+/** Borrador de la misma factura: sin folio ni timbre y con la marca de agua. El receptor no trae ciudad. */
+export const FIXTURE_BORRADOR: PdfDteInput = {
+  ...FIXTURE_FACTURA,
+  folio: null,
+  timbrePdf417: null,
+  borrador: true,
+  receptor: { razon: "Cliente Ficticio Ñandú Ltda.", rut: "77234567-8", giro: "Comercio al por menor", direccion: "Avenida Inventada 456", comuna: "Providencia" },
 };
 
 export const FIXTURE_NC: PdfDteInput = {

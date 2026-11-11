@@ -3,7 +3,7 @@ import { Workflow } from "lucide-react";
 import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
 import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceHoja } from "@/app/_components/maestros/enlace-hoja";
 import { fecha } from "@/lib/fechas";
 
 import { accionesSolicitud, nombreDe } from "./acciones-solicitud";
@@ -40,9 +40,10 @@ export function FichaSolicitud(p: {
             acciones: p.gestiona ? (
               <>
                 {abierta ? (
-                  <EnlaceBoton href={`${base}?convertir=1`} icono={Workflow}>
+                  <EnlaceHoja param="convertir" href={`${base}?convertir=1`}>
+                    <Workflow className="size-4" aria-hidden />
                     Procesar y convertir
-                  </EnlaceBoton>
+                  </EnlaceHoja>
                 ) : null}
                 <AccionesEntidad
                   etiqueta="Más acciones"

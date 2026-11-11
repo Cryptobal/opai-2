@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { textoAprobacionesPendientes } from "@opai/domain";
 import { Alerta, Button, Skeleton } from "@opai/ds";
 import type { Aviso } from "@/app/_components/campana";
 import { ListaAvisos } from "@/app/_components/lista-avisos";
@@ -41,7 +42,7 @@ export function BandejaCorta({
               href="/configuracion/aprobaciones"
               className="flex min-h-11 items-center px-4 text-accent"
             >
-              {aprobaciones} aprobaciones pendientes
+              {textoAprobacionesPendientes(aprobaciones)}
             </Link>
           ) : null}
           {decisiones.map((d) => (

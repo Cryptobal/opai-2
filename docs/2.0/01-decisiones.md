@@ -1621,6 +1621,20 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - No cambia lo demás de este ADR: quién aprueba, que el supervisor no edita el monto, los externos, el estado único por persona y la condición previa de revisión legal y contable escrita, que sigue pendiente.
 - El bloque B (Design Prompt en Claude Design) no tiene OK.
 
+**Adenda (9-nov-2026) · Documentos v4: respuestas de Carlos a las nueve preguntas abiertas de CAR-127.** Carlos aceptó la §15 del brief `BRIEF-CAR-127-documentos-v4-pantallas-04-08.md` tal como estaba escrita; la registra la sesión «Personas · Code»:
+
+- **Dos sistemas.** Las plantillas laborales (contrato, anexo, recepción, carta) y las salidas comerciales son distintas; las comerciales siguen en CPQ.
+- **Contenido:** texto con variables `{persona.rut}` renderizado a PDF, no bloques.
+- **Firma:** N1 y N2 equivalen a la clase de `PoliticaFirma` (CAR-82) y no bajan del mínimo legal de la clase; N3·FEA queda deshabilitado (CAR-94 sin proveedor).
+- **PDF:** el núcleo usa un helper neutral en `packages/*`; no se difiere.
+- **Lote (B3):** corre en cola, con avance por persona. **El tope de personas no tiene número**: no se inventa ni se fija en código hasta que Carlos lo defina.
+- **Permisos:** `core:documentos.plantillas.manage` (owner y admin; denegado al gerente) y lectura sensible de `{sueldo.*}` al generar.
+- **Variables:** solo Persona, Vínculo, Instalación, Sueldo y Contrato (las 12 del diseño); no se agregan más en esta entrega.
+- **Pestaña Plantillas** sin permiso: se oculta.
+- **Importar Word o PDF** (09): deshabilitado, con aviso, hasta su propio encargo.
+- **CAR-58** (texto legal del anexo): no se arranca; el texto lo trae Carlos con el abogado. Las plantillas se crean vacías o con el texto que el usuario escriba; no se siembra texto legal.
+
+
 ## ADR-084 · «Comercial · Proyecto» construye el PR 6 de CAR-138 por orden expresa de Carlos (9-nov-2026)
 
 **Fecha:** 9-nov-2026 19:17 UTC · **Estado:** vigente solo para este PR · **Autor:** Carlos (chat), registrado por la sesión «Comercial · Proyecto».
@@ -1640,3 +1654,15 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Fecha:** 10-nov-2026 · **Estado:** vigente · **Autor:** Carlos, vía el coordinador OPAI 2.0; registrado por la sesión «Sesión Comercial».
 
 **Decisión.** CAR-138 PR 9 permite importar HTML como plantilla de propuesta por empresa, saneado en el servidor con lista blanca (`parse5`), con marcadores validados contra el catálogo de campos y versionado (`cpq.propuesta_html`). Se rechaza, sin guardar, todo lo que ejecute código, use red o recursos remotos, o traiga marcadores fuera del catálogo. **No hay renderer de HTML:** el PDF sigue siendo `pdf-lib` y no consume esta tabla; no se promete Figma, PPT ni PDF desde el HTML. El export `PropuestaCliente.dc.html` de Claude Design no es importable tal cual (formato de componentes propio); no se inventó otro diseño ni un conversor. Conectar la plantilla a un renderer queda para una decisión de arquitectura aparte. Se abre en borrador por orden expresa de Carlos para este PR.
+
+## ADR-087 · Referencias de clientes solo con consentimiento registrado (CAR-138 PR 7, 10-nov-2026)
+
+**Fecha:** 10-nov-2026 · **Estado:** vigente; **quién autoriza queda pendiente de Carlos** · **Autor:** Carlos (encargo vía el coordinador, 10-nov-2026 11:08), registrado por la «Sesión Comercial». (El número ADR-086 lo usa el PR #452, aún abierto.)
+
+**Decisión.** Un cliente aparece como referencia en una propuesta o documento comercial **solo** si hay un consentimiento explícito y registrado, vigente, y la cuenta es «cliente activo» sin archivar; por defecto no aparece. El registro (`core.cuentas_referencias`) es append-only: cada otorgamiento o revocación es una fila nueva y el estado vigente es la última fila de la cuenta (revocar manda sobre un otorgamiento anterior). Otorgar exige fecha, evidencia con detalle y la confirmación explícita de quien registra; guarda qué se puede mostrar. Sin autorización expresa del nombre, el cliente sale anonimizado («Cliente de {rubro} en {comuna}»). Las referencias solo existen para las finalidades «propuesta» y «documento» (nunca contratos ni correos), excluyen la cuenta destinataria y se leen con el permiso y el alcance de cuentas. El catálogo de campos sube a v2. Si una propuesta usa la colección y no hay ninguna autorizada, el envío se detiene en vez de mandar una sección vacía.
+
+**Pendiente (Carlos).** Quién autoriza. Se dejó configurable con el permiso `core:cuentas.referencias.autorizar`: por defecto solo owner y admin; cada empresa lo concede o quita con roles personalizados y excepciones por usuario. Revocar basta con `core:cuentas.manage` (dirección segura). Si Carlos decide otro default (p. ej. gerente comercial), es un cambio de una línea en `permisos-patrones.ts`.
+
+**Agentes.** Otorgar es solo para personas (`soloPersonas`): ninguna API key registra un consentimiento, ni con autonomía «directo», que se salta la aprobación. Los agentes pueden listar y revocar. **Consecuencia:** hasta que exista la pantalla en la ficha de la cuenta (espera diseño aprobado), nadie puede otorgar y ningún cliente aparece como referencia; si Carlos prefiere habilitarlo antes por API, hace falta una regla de aprobación que la autonomía «directo» no pueda saltarse. **Orden:** la última fila de una cuenta es la de mayor `seq` (identity, orden real de inserción), no `created_at` (inicio de la transacción); otorgar y revocar bloquean la fila de la cuenta, así que se serializan.
+
+**Límites conocidos.** El consentimiento anónimo igual muestra rubro, comuna y fecha «cliente desde», que juntos pueden ayudar a identificarlo: quien registra debe tenerlo presente. Revocar no cambia lo ya enviado (PDF y enlace congelados). La evidencia y la cita son textos cortos (≤300 y ≤400) que pueden mencionar a una persona del cliente; al ser append-only, no los borra la anonimización de contactos (Ley 21.719). Sin pantalla hasta que haya diseño aprobado (se opera por MCP y `/api/v1`).

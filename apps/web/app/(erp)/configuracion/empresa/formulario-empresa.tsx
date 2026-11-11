@@ -11,22 +11,26 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { CampoTexto, DatoLectura } from "./campo-texto";
 import {
   CONTACTOS,
+  type Actividades,
   type DatosEmpresa,
   type Perfil,
   type Tenant,
   inicialEmpresa,
 } from "./datos-empresa";
 import { OperacionYContacto } from "./operacion-contacto";
+import { SeccionActeco } from "./seccion-acteco";
+import { useActecos } from "./use-actecos";
 
-type Props = { perfil: Perfil; tenant: Tenant; puedeEditar: boolean };
+type Props = { perfil: Perfil; tenant: Tenant; actividades: Actividades; puedeEditar: boolean };
 
 const rutMalo = (r: string) => (r.trim() && !rutValido(r) ? "RUT inválido" : undefined);
 const correoMalo = (c: string) =>
   c.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.trim()) ? "Correo inválido" : undefined;
 
 /** Datos de la empresa (21): identificación, representante, operación y contacto por área. */
-export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
+export function FormularioEmpresa({ perfil, tenant, actividades, puedeEditar }: Props) {
   const [d, setD] = useState<DatosEmpresa>(() => inicialEmpresa(perfil, tenant));
+  const ac = useActecos(actividades);
   const { ejecutar, error } = useCapacidad("erp");
   const t = d.textos;
   const set = (k: keyof DatosEmpresa["textos"]) => (v: string) =>
@@ -49,6 +53,7 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
       comuna: d.direccion?.comuna ?? null,
       region: d.direccion?.region ?? null,
     });
+    if (ok && ac.cambiado && !(await ejecutar("core.empresa.acteco_set", ac.input))) return;
     if (ok && d.timezone !== tenant.timezone)
       if (!(await ejecutar("core.tenant.update", { timezone: d.timezone }))) return;
     if (ok) avisar.exito("Datos de la empresa guardados");
@@ -110,6 +115,7 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
           )}
         </div>
       </SeccionTarjeta>
+      <SeccionActeco ac={ac} dis={dis} />
       <SeccionTarjeta titulo="Representante legal">
         <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           <CampoTexto

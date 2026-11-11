@@ -24,6 +24,17 @@ export const ETIQUETA_MODULO_NOVEDAD: Readonly<Record<string, string>> = {
   plataforma: "Plataforma",
 };
 
+/**
+ * Orden del catálogo: la fecha más nueva primero; dentro del mismo día, las
+ * destacadas arriba (la fecha no tiene hora, y sin esto el orden dentro del día
+ * dependía del nombre del archivo). Empates restantes: orden estable del embed.
+ */
+export function compararNovedades(a: EntradaNovedad, b: EntradaNovedad): number {
+  if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;
+  if (a.destacada !== b.destacada) return a.destacada ? -1 : 1;
+  return 0;
+}
+
 function cargarCatalogo(): EntradaNovedad[] {
   const entradas = NOVEDADES_MARKDOWN.map((texto) => parsearNovedadMarkdown(texto));
   const ids = new Set<string>();
@@ -31,7 +42,7 @@ function cargarCatalogo(): EntradaNovedad[] {
     if (ids.has(e.id)) throw new Error(`id de novedad duplicado: ${e.id}`);
     ids.add(e.id);
   }
-  return entradas.sort((a, b) => (a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0));
+  return entradas.sort(compararNovedades);
 }
 
 /** Catálogo de novedades integradas en main (archivos en `entradas/`). */

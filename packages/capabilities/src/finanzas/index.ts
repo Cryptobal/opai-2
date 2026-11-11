@@ -19,6 +19,7 @@ import { trabajosCesion } from "./trabajos-cesion";
 import { trabajosDte } from "./trabajos-dte";
 import {
   ventasCrearBorrador,
+  ventasCrearBorradorNotaDebito,
   ventasEmitir,
   ventasEmitirNotaCredito,
   ventasEmitirNotaDebito,
@@ -30,6 +31,9 @@ import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectur
 import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
 import { ventasEnvios } from "./ventas-envios";
+import { foliosSetActivo } from "./folios-activo";
+import { ventasActualizarBorrador } from "./ventas-borrador-actualizar";
+import { ventasDescartarBorrador } from "./ventas-borrador-descartar";
 import { ventasPdf } from "./ventas-pdf";
 import { ventasPdfBorrador } from "./ventas-pdf-borrador";
 import { ventasPreflightEmision } from "./ventas-preflight";
@@ -103,6 +107,9 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasEnviarSii,
   ventasEmitirNotaCredito,
   ventasEmitirNotaDebito,
+  ventasCrearBorradorNotaDebito,
+  ventasActualizarBorrador,
+  ventasDescartarBorrador,
   ventasProyeccionFlujo,
   ventasCesionSimular,
   ventasCesionCeder,
@@ -115,6 +122,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasEnvios,
   foliosListar,
   foliosCargarCaf,
+  foliosSetActivo,
   dteConfigObtener,
   dteConfigActualizar,
 ];

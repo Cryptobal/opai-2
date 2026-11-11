@@ -147,6 +147,7 @@ export function FormularioEmitir({ cuentas, sinRut }: { cuentas: CuentaFila[]; s
         setDialogo={setDialogo}
         previewBorrador={previewBorrador}
         previewEmitir={previewEmitir}
+        documentoId={documentoId}
         guardarBorrador={() => void guardarBorrador()}
         emitir={() => void emitir()}
       />

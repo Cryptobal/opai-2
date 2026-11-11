@@ -3,6 +3,7 @@ import { generarPdfDte } from "@opai/integrations";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { cuentaDe, receptorDteDe, rutEmisorDe } from "./ventas-comun";
+import { logoDeMarca } from "./ventas-pdf-logo";
 
 type DocPdf = {
   id: string;
@@ -61,7 +62,7 @@ export async function pdfDeDocumento(
   if (!borrador && (doc.folio == null || !doc.timbrePdf417)) {
     throw reglaDeNegocio("Solo hay PDF para documentos emitidos y firmados.");
   }
-  const [cuenta, rutEmisor, tenant, perfil, lineas, referencias, cfg] = await Promise.all([
+  const [cuenta, rutEmisor, tenant, perfil, lineas, referencias, cfg, logo] = await Promise.all([
     cuentaDe(ctx, doc.cuentaId),
     rutEmisorDe(ctx),
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
@@ -69,6 +70,7 @@ export async function pdfDeDocumento(
     ctx.db.documentoEmitidoLinea.findMany({ where: { documentoId: doc.id }, orderBy: { orden: "asc" } }),
     ctx.db.documentoEmitidoReferencia.findMany({ where: { documentoId: doc.id }, orderBy: { id: "asc" } }),
     ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } }),
+    logoDeMarca(ctx),
   ]);
   const r = receptorDteDe(cuenta);
   return generarPdfDte({
@@ -88,7 +90,7 @@ export async function pdfDeDocumento(
       descripcion: l.glosa,
       monto: l.monto,
       // Solo lo que el documento guardó: los emitidos antes de CAR-221 no traen cantidad ni precio y no se inventan.
-      ...(l.cantidad ? { cantidad: cantidadTexto(l.cantidad.toString()) } : {}),
+      ...(l.cantidad ? { cantidad: [cantidadTexto(l.cantidad.toString()), l.unidad?.trim()].filter(Boolean).join(" ") } : {}),
       ...(l.precioUnitario !== null ? { precio: l.precioUnitario } : {}),
       ...(l.descuentoPct ? { descuentoPct: l.descuentoPct } : {}),
     })),
@@ -106,6 +108,7 @@ export async function pdfDeDocumento(
     timbrePdf417: borrador ? null : doc.timbrePdf417,
     ...(borrador ? { borrador: true } : {}),
     ...(doc.glosa ? { glosa: doc.glosa } : {}),
+    ...(logo ? { logo } : {}),
     ...(cfg?.oficinaSii ? { oficinaSii: cfg.oficinaSii } : {}),
     ...(cfg?.resolucionSiiNumero != null && cfg.resolucionSiiFecha
       ? { resolucion: { numero: cfg.resolucionSiiNumero, fecha: dia(cfg.resolucionSiiFecha) } }

@@ -106,6 +106,14 @@ describe.skipIf(!urlPropietario)("finanzas.apertura · carga desde 1.0", () => {
     expect((await e.admin.dteFolio.findFirst({ where: { tenantId: tC } }))?.folioActual).toBe(13);
   });
 
+  it("protege también un CAF pausado: al reactivarlo no reusa folios de 1.0 (CAR-240)", async () => {
+    const tD = (await e.admin.tenant.create({ data: { slug: `ap-d-${randomUUID().slice(0, 8)}`, nombre: "ap-d", vertical: "seguridad" } })).id;
+    const pausado = await e.admin.dteFolio.create({ data: { tenantId: tD, tipoDte: 33, folioDesde: 1, folioHasta: 100, folioActual: 1, activo: false } });
+    const r = await mod.executeCapability(ctx(tD), "finanzas.apertura.importar", { fechaCorte: "2026-10-31", entrada: { saldos: [], documentos: [], folios: [{ tipoDte: 33, ultimoFolio: 80 }] } });
+    expect(r).toMatchObject({ ok: true, data: { creados: { folios: 1 } } });
+    expect((await e.admin.dteFolio.findUnique({ where: { id: pausado.id } }))?.folioActual).toBe(81);
+  });
+
   it("la otra empresa no ve ni recibe nada", async () => {
     expect(await e.admin.documentoEmitido.count({ where: { tenantId: tB } })).toBe(0);
     const corrida = await e.admin.importacion.findFirst({ where: { tenantId: tA, versionContrato: "finanzas-apertura@1", estado: "completada" } });

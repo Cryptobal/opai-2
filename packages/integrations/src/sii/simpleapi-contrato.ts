@@ -4,6 +4,7 @@
  * ejemplo de esa documentación; lo que ella no responde queda anotado como «DECISIÓN CARLOS» en el PR.
  */
 
+import { correoReceptor, rutSii, rutTitularSii } from "./simpleapi-formatos";
 import type { AmbienteSii, PayloadEmisionDte } from "./tipos";
 
 /** Host del ejemplo de autenticación de la documentación (`https://api.simpleapi.cl/{endpoint}`). */
@@ -20,9 +21,12 @@ export const SIMPLEAPI_RUTAS = {
 /** RUT del SII como receptor del sobre de envío (ejemplo de la documentación: `RutReceptor: "60803000-K"`). */
 export const RUT_SII = "60803000-K" as const;
 
-/** La API key va tal cual en el encabezado `Authorization` (documentación: «Key: Authorization · Value: ApiKey»). */
+/**
+ * Autenticación Basic con usuario «api» y la API key como contraseña: `Basic base64("api:" + key)` (CAR-240). Es lo que
+ * usan OPAI 1.0 (que sí emite) y nuestra consulta de contribuyentes; mandar la key cruda daba HTTP 401 en /dte/generar.
+ */
 export function encabezadoAuthSimpleApi(apiKey: string): string {
-  return apiKey;
+  return `Basic ${Buffer.from(`api:${apiKey.trim()}`, "utf8").toString("base64")}`;
 }
 
 export type CredencialesSimpleApiV1 = {
@@ -70,34 +74,46 @@ export function jsonInputGenerarDte(
   const lineas = payload.lineas?.length
     ? payload.lineas
     : [{ orden: 0, glosa: payload.glosa ?? "Servicio", monto: payload.montos.total }];
-  const detalles = lineas.map((l) => ({
-    // Línea exenta o no afecta (documentación: IndicadorExento 0 afecto, 1 exento).
-    IndicadorExento: payload.tipoDte === 34 ? 1 : 0,
+  const documentoExento = payload.tipoDte === 34 || (payload.montos.neto === 0 && payload.montos.exento > 0);
+  const detalles = lineas.map((l, i) => ({
+    NumeroLinea: i + 1,
+    // Como OPAI 1.0, que sí emite (CAR-240): la línea afecta no lleva IndicadorExento y la factura exenta (34) tampoco.
+    // Una NC o ND (61/56) sobre una factura exenta sí lo lleva en 1: sus totales vienen sin neto ni IVA y las líneas
+    // deben cuadrar con eso (CAR-234).
+    ...(documentoExento && payload.tipoDte !== 34 ? { IndicadorExento: 1 } : {}),
     Nombre: l.glosa,
     Cantidad: l.cantidad ?? 1,
     Precio: l.precioUnitario ?? l.monto,
     MontoItem: l.monto,
   }));
-  const referencias = (payload.referencias ?? []).map((r) => ({
-    // FchRef es la fecha del documento referenciado, no la de este DTE; sin dato, la de emisión (filas antiguas).
-    FechaDocumentoReferencia: fechaSii(r.fecha ?? payload.fechaEmision),
+  // Nombres JSON de OPAI 1.0 (`FechaDocumentoReferenciaString`, `Numero`): los del modelo C# de SimpleAPI.
+  const referencias = (payload.referencias ?? []).map((r, i) => ({
+    Numero: i + 1,
     TipoDocumento: String(r.tipoDte),
+    FolioReferencia: String(r.folio),
+    // FchRef es la fecha del documento referenciado, no la de este DTE; sin dato, la de emisión (filas antiguas).
+    FechaDocumentoReferenciaString: fechaSii(r.fecha ?? payload.fechaEmision),
     ...(r.codigo != null ? { CodigoReferencia: r.codigo } : {}),
     ...(r.razon ? { RazonReferencia: r.razon } : {}),
-    FolioReferencia: String(r.folio),
   }));
+  const ciudadReceptor = payload.ciudadReceptor ?? payload.comunaReceptor;
+  const correo = correoReceptor(payload.emailReceptor);
   return JSON.stringify({
     Documento: {
+      // ID del nodo Documento (atributo XML): fijo por tipo y folio, para que un reintento genere el mismo documento.
+      Id: `F${payload.folio}T${payload.tipoDte}`,
       Encabezado: {
         IdentificacionDTE: {
           TipoDTE: payload.tipoDte,
           Folio: payload.folio,
-          FechaEmision: fechaSii(payload.fechaEmision),
+          FechaEmisionString: fechaSii(payload.fechaEmision),
+          // Vencimiento con el nombre de la doc oficial de Generar - DTE (`FechaVencimiento`, AAAA-MM-DD). 1.0 no lo
+          // manda y `FechaVencimientoString` (solo en el SDK) no lo usa ningún emisor que funcione (CAR-240).
           ...(payload.fechaVencimiento ? { FechaVencimiento: fechaSii(payload.fechaVencimiento) } : {}),
           FormaPago: FORMA_PAGO_CREDITO,
         },
         Emisor: {
-          Rut: payload.rutEmisor,
+          Rut: rutSii(payload.rutEmisor),
           ...(creds.razonSocialEmisor ? { RazonSocial: creds.razonSocialEmisor } : {}),
           ...(creds.giroEmisor ? { Giro: creds.giroEmisor } : {}),
           // Nombres y forma (lista de ACTECO) tomados del adaptador de OPAI 1.0, que ya emite con SimpleAPI.
@@ -107,25 +123,28 @@ export function jsonInputGenerarDte(
           ...(creds.ciudadEmisor ? { CiudadOrigen: creds.ciudadEmisor } : {}),
         },
         Receptor: {
-          Rut: payload.rutReceptor,
+          Rut: rutSii(payload.rutReceptor),
           RazonSocial: payload.razonSocialReceptor,
           ...(payload.direccionReceptor ? { Direccion: payload.direccionReceptor } : {}),
           ...(payload.comunaReceptor ? { Comuna: payload.comunaReceptor } : {}),
-          ...(payload.ciudadReceptor ? { Ciudad: payload.ciudadReceptor } : {}),
+          // OPAI 1.0 siempre informa la ciudad. Sin ciudad en la cuenta va su comuna real, nunca un valor fijo (Carlos,
+          // 10-nov-2026); sin comuna el preflight ya bloquea.
+          ...(ciudadReceptor ? { Ciudad: ciudadReceptor } : {}),
           ...(payload.giroReceptor ? { Giro: payload.giroReceptor } : {}),
+          ...(correo ? { CorreoRecep: correo } : {}),
         },
+        // Como 1.0: MontoExento siempre; la tasa y el IVA solo en un documento afecto.
         Totales: {
           MontoNeto: payload.montos.neto,
-          ...(payload.montos.exento ? { MontoExento: payload.montos.exento } : {}),
-          TasaIVA: payload.montos.iva > 0 ? 19 : 0,
-          IVA: payload.montos.iva,
+          MontoExento: payload.montos.exento,
+          ...(documentoExento ? {} : { TasaIVA: 19, IVA: payload.montos.iva }),
           MontoTotal: payload.montos.total,
         },
       },
       Detalles: detalles,
-      Referencias: referencias,
+      ...(referencias.length > 0 ? { Referencias: referencias } : {}),
     },
-    Certificado: { Rut: creds.certificadoRut, Password: creds.certificadoClave },
+    Certificado: { Rut: rutTitularSii(creds.certificadoRut), Password: creds.certificadoClave },
   });
 }
 

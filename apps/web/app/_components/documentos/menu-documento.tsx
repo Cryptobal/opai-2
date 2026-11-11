@@ -1,6 +1,7 @@
 "use client";
 
 import { Archive, Download, Eye, MoreHorizontal, PenLine, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { avisar, Menu } from "@opai/ds";
@@ -22,6 +23,7 @@ export async function descargar(id: string) {
 /** Menú por documento (16): Ver, Descargar, Nueva versión y Archivar. */
 export function MenuDocumento({ documento: d }: { documento: Documento }) {
   const { fijar } = useParametros();
+  const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [archivar, setArchivar] = useState(false);
   return (
@@ -75,6 +77,8 @@ export function MenuDocumento({ documento: d }: { documento: Documento }) {
             if (await ejecutar("core.documentos.archive", { id: d.id })) {
               avisar.exito("Documento archivado");
               setArchivar(false);
+              fijar({ ver: null });
+              router.refresh();
             }
           }}
         />

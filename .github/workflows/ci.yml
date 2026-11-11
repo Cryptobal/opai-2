@@ -80,6 +80,9 @@ jobs:
       - name: Detectar solo documentación
         id: solo_docs
         run: .github/scripts/ci-solo-documentacion.sh
+      - name: Aviso de novedad in-app (CAR-260, no bloquea)
+        if: github.event_name == 'pull_request'
+        run: .github/scripts/ci-novedad-visual.sh
       - name: Ampliar swap (runner ~7 GB)
         if: steps.solo_docs.outputs.only_docs != 'true'
         run: |
@@ -151,7 +154,8 @@ jobs:
   test-db:
     name: test:db
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Margen sobre lo que tarda hoy (~19 min en main el 10-nov-2026, antes de omitir `migrate deploy` por archivo).
+    timeout-minutes: 30
     env:
       TURBO_CACHE_DIR: .turbo
     services:

@@ -1,5 +1,5 @@
 import type { AprobacionPlataforma } from "@opai/db";
-import { PERMISOS_PLATAFORMA } from "@opai/domain";
+import { PERMISOS_PLATAFORMA, resumenParaMostrar } from "@opai/domain";
 
 import { auditarEnPlataforma, esDePlataforma, hechoPlataforma } from "../../agentes/plataforma";
 import { tienePermisoDeCapacidad } from "../../autorizacion";
@@ -46,7 +46,12 @@ export async function vistaAprobacionesPlataforma(ctx: Contexto, filas: Aprobaci
         ? ("alto" as const)
         : ("medio" as const),
     capability: a.capability,
-    resumen: a.resumen,
+    resumen: resumenParaMostrar({
+      resumen: a.resumen,
+      capabilityId: a.capability,
+      agente: a.agente,
+      descripcion: obtenerCapacidad(a.capability)?.descripcion ?? null,
+    }),
     input: a.input,
     estado: a.estado as "pendiente",
     venceEn: a.venceEn.toISOString(),

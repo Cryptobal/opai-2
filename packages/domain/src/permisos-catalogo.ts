@@ -13,6 +13,10 @@ export const PERMISOS_CORE = {
   // Brief 02: maestros, documentos y servicios del núcleo.
   cuentasRead: "core:cuentas.read",
   cuentasManage: "core:cuentas.manage",
+  // CAR-138 PR 7: registrar que un cliente consintió ser referencia comercial. Quién lo tiene es una
+  // decisión pendiente de Carlos: por defecto solo owner y admin; cada empresa lo da o quita con roles
+  // personalizados y excepciones por usuario. Revocar es la dirección segura y basta `cuentas.manage`.
+  cuentasReferenciasAutorizar: "core:cuentas.referencias.autorizar",
   instalacionesRead: "core:instalaciones.read",
   instalacionesManage: "core:instalaciones.manage",
   // Puestos (Brief 11): catálogos de patrones de turno y funciones, con lectura, edición y
@@ -48,6 +52,9 @@ export const PERMISOS_CORE = {
   anexosManage: "core:anexos.manage",
   documentosRead: "core:documentos.read",
   documentosManage: "core:documentos.manage",
+  // CAR-127 (decisión de Carlos, 9-nov-2026): ver y editar las plantillas laborales de Documentos.
+  // Solo owner y admin (el gerente lo tiene denegado); sin él la pestaña Plantillas se oculta.
+  documentosPlantillasManage: "core:documentos.plantillas.manage",
   // CAR-182 (decisión de Carlos, 4-nov-2026): subir documentos SOLO vinculados a una instalación a
   // cargo del actor (ADR-022). No gestiona nada más: quien tiene `documentos.manage` conserva todo.
   // La capacidad de subida lo acepta como alternativa y limita el destino y la visibilidad.

@@ -5,11 +5,14 @@ import { produccionTributariaHabilitada } from "@opai/integrations";
 
 import { defineCapability } from "../define";
 import { dia, diaSchema, escribirConEvento, rutSchema } from "../core/maestros/comun";
+import { actividadesEmpresaDe } from "../core/empresa/actividades";
 import { reglaDeNegocio } from "../errores";
+import { actecoDesdeDteConfig, escribirActecoDesdeDteConfig } from "./dte-config-acteco";
 import { PERMISO_READ, PERMISO_VENTAS_CONFIGURE } from "./comun";
 import {
   configDteSchema,
   exigeOwnerHumanoDte,
+  mensajeRechazoDteConfig,
   proveedorCesionSchema,
   proveedorEmisionSchema,
   vistaCfgDte,
@@ -25,7 +28,8 @@ export const dteConfigObtener = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
-    const cfg = await ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } });
+    const where = { tenantId: ctx.tenantId };
+    const [cfg, actividades] = await Promise.all([ctx.db.dteConfig.findUnique({ where }), actividadesEmpresaDe(ctx)]);
     return vistaCfgDte({
       ambiente: cfg?.ambiente ?? "certificacion",
       rutEmisor: cfg?.rutEmisor ?? null,
@@ -33,7 +37,8 @@ export const dteConfigObtener = defineCapability({
       cesionProveedor: cfg?.cesionProveedor ?? null,
       resolucionSiiNumero: cfg?.resolucionSiiNumero ?? null,
       resolucionSiiFecha: cfg?.resolucionSiiFecha ?? null,
-      acteco: cfg?.acteco ?? null,
+      // CAR-243: el ACTECO es el principal de la empresa (Configuración › Empresa), no una columna de esta tabla.
+      acteco: actividades.principal,
       oficinaSii: cfg?.oficinaSii ?? null,
       umbralFoliosPct: cfg?.umbralFoliosPct ?? UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
       avisoCafDias: cfg?.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
@@ -41,6 +46,9 @@ export const dteConfigObtener = defineCapability({
     });
   },
 });
+
+const ACTECO_DTE =
+  "ACTECO principal de la empresa (CAR-243: vive en Configuración › Empresa; para varios códigos usar core.empresa.acteco_set). Un número lo fija como principal; null lo quita si es el único.";
 
 export const dteConfigActualizar = defineCapability({
   id: "finanzas.dte_config.actualizar",
@@ -54,7 +62,7 @@ export const dteConfigActualizar = defineCapability({
     cesionProveedor: proveedorCesionSchema.optional(),
     resolucionSiiNumero: z.number().int().min(0).max(999_999).nullable().optional(),
     resolucionSiiFecha: diaSchema.nullable().optional(),
-    acteco: z.number().int().min(1).max(999_999).nullable().optional().describe("Código de actividad económica del emisor (ACTECO)."),
+    acteco: z.number().int().min(1).max(999_999).nullable().optional().describe(ACTECO_DTE),
     oficinaSii: z.string().trim().min(1).max(60).nullable().optional().describe("Oficina del SII del emisor, como se imprime en el documento."),
     umbralFoliosPct: z.number().int().min(1).max(100).optional(),
     avisoCafDias: z.number().int().min(1).max(365).optional(),
@@ -98,13 +106,14 @@ export const dteConfigActualizar = defineCapability({
       resolucionSiiNumero:
         input.resolucionSiiNumero !== undefined ? input.resolucionSiiNumero : (prev?.resolucionSiiNumero ?? null),
       resolucionSiiFecha: resolucionFechaDb,
-      acteco: input.acteco !== undefined ? input.acteco : (prev?.acteco ?? null),
       oficinaSii: input.oficinaSii !== undefined ? input.oficinaSii : (prev?.oficinaSii ?? null),
       umbralFoliosPct: input.umbralFoliosPct ?? prev?.umbralFoliosPct ?? UMBRAL_FOLIOS_BAJOS_PCT_DEFECTO,
       avisoCafDias: input.avisoCafDias ?? prev?.avisoCafDias ?? AVISO_CAF_DIAS_DEFECTO,
       fechaCorte1_0: fechaCorteDb,
     };
-    if (dryRun) return vistaCfgDte(next);
+    // Valida y arma la vista previa con la lista vigente; la escritura la recalcula bajo bloqueo dentro de la transacción.
+    let acteco = actecoDesdeDteConfig(await actividadesEmpresaDe(ctx), input.acteco);
+    if (dryRun) return vistaCfgDte({ ...next, acteco: acteco.principal });
     if (next.ambiente === "produccion" && !next.rutEmisor) {
       throw reglaDeNegocio("Producción requiere RUT emisor configurado.");
     }
@@ -130,13 +139,18 @@ export const dteConfigActualizar = defineCapability({
             : {}),
         }),
       },
-      (tx) =>
-        tx.dteConfig.upsert({
+      async (tx) => {
+        if (input.acteco !== undefined) acteco = await escribirActecoDesdeDteConfig(tx, ctx.tenantId, input.acteco);
+        return tx.dteConfig.upsert({
           where: { tenantId: ctx.tenantId },
           create: { tenantId: ctx.tenantId, ...next },
           update: next,
-        }),
-    );
-    return vistaCfgDte(cfg);
+        });
+      },
+    ).catch((error: unknown) => {
+      const msg = mensajeRechazoDteConfig(error);
+      throw msg ? reglaDeNegocio(msg) : error;
+    });
+    return vistaCfgDte({ ...cfg, acteco: acteco.principal });
   },
 });

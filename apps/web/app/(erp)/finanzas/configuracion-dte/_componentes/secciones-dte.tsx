@@ -2,11 +2,12 @@ import { Campo, Input, Select, SeccionTarjeta } from "@opai/ds";
 
 import type { ConfigDte } from "./tipos";
 import type { FormDte, SetFormDte } from "./use-form-dte";
+import type { ErroresDte } from "./validar-dte";
 
-type Props = { f: FormDte; set: SetFormDte; esOwner: boolean; pendiente: boolean };
+type Props = { f: FormDte; set: SetFormDte; esOwner: boolean; pendiente: boolean; errores: ErroresDte };
 
 /** Secciones «Emisión al SII» y «Cesión y folios» del formulario de configuración DTE. */
-export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
+export function SeccionesDte({ f, set, esOwner, pendiente, errores }: Props) {
   return (
     <>
       <SeccionTarjeta titulo="Emisión al SII">
@@ -32,6 +33,22 @@ export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
               placeholder="76111222-8"
             />
           </Campo>
+          <Campo
+            etiqueta="ACTECO (actividad económica)"
+            htmlFor="dte-acteco"
+            ayuda="El ACTECO principal de la empresa. Va en cada factura."
+            error={errores.acteco}
+          >
+            <Input
+              id="dte-acteco"
+              inputMode="numeric"
+              aria-invalid={errores.acteco ? true : undefined}
+              value={f.acteco}
+              disabled={pendiente}
+              onChange={(e) => set("acteco", e.target.value)}
+              placeholder="801000"
+            />
+          </Campo>
           <Campo etiqueta="Conector de emisión" htmlFor="dte-emision">
             <Select
               id="dte-emision"
@@ -44,19 +61,26 @@ export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
               ]}
             />
           </Campo>
-          <Campo etiqueta="Resolución SII N°" htmlFor="dte-res-n">
+          <Campo
+            etiqueta="Resolución SII N°"
+            htmlFor="dte-res-n"
+            ayuda="En certificación es 0."
+            error={errores.resolucionNumero}
+          >
             <Input
               id="dte-res-n"
               inputMode="numeric"
+              aria-invalid={errores.resolucionNumero ? true : undefined}
               value={f.resolucionNumero}
               disabled={pendiente}
               onChange={(e) => set("resolucionNumero", e.target.value)}
             />
           </Campo>
-          <Campo etiqueta="Fecha resolución SII" htmlFor="dte-res-f">
+          <Campo etiqueta="Fecha resolución SII" htmlFor="dte-res-f" error={errores.resolucionFecha}>
             <Input
               id="dte-res-f"
               type="date"
+              aria-invalid={errores.resolucionFecha ? true : undefined}
               value={f.resolucionFecha}
               disabled={pendiente}
               onChange={(e) => set("resolucionFecha", e.target.value)}
@@ -78,18 +102,20 @@ export function SeccionesDte({ f, set, esOwner, pendiente }: Props) {
               ]}
             />
           </Campo>
-          <Campo etiqueta="Aviso folios bajos (%)" htmlFor="dte-umbral">
+          <Campo etiqueta="Aviso folios bajos (%)" htmlFor="dte-umbral" error={errores.umbral}>
             <Input
               id="dte-umbral"
+              aria-invalid={errores.umbral ? true : undefined}
               inputMode="numeric"
               value={f.umbral}
               disabled={pendiente}
               onChange={(e) => set("umbral", e.target.value)}
             />
           </Campo>
-          <Campo etiqueta="Aviso vencimiento CAF (días)" htmlFor="dte-caf-dias">
+          <Campo etiqueta="Aviso vencimiento CAF (días)" htmlFor="dte-caf-dias" error={errores.avisoCaf}>
             <Input
               id="dte-caf-dias"
+              aria-invalid={errores.avisoCaf ? true : undefined}
               inputMode="numeric"
               value={f.avisoCaf}
               disabled={pendiente}

@@ -17,7 +17,7 @@ import {
   vistaPreviaCafCargado,
 } from "./folios-caf-logica";
 
-const folioVistaSchema = z.object({
+export const folioVistaSchema = z.object({
   id: z.string(),
   tipoDte: z.number().int(),
   folioDesde: z.number().int(),
@@ -29,6 +29,10 @@ const folioVistaSchema = z.object({
   alerta: z.boolean(),
   cafVenceEn: z.string().nullable(),
   activo: z.boolean(),
+  ambiente: z
+    .enum(["certificacion", "produccion"])
+    .nullable()
+    .describe("Ambiente del CAF según su IDK: certificación o producción; null si no se pudo determinar."),
   lectura: z.string(),
 });
 
@@ -82,7 +86,7 @@ export const foliosCargarCaf = defineCapability({
       .string()
       .min(20)
       .max(500_000)
-      .describe("Contenido XML del CAF emitido por el SII (texto UTF-8)."),
+      .describe("Contenido XML del CAF emitido por el SII, un carácter por byte (ISO-8859-1), tal como viene en el archivo."),
   }),
   output: folioVistaSchema,
   efecto: "escritura",

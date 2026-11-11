@@ -12,17 +12,21 @@ import type { FilaVencimiento } from "./datos";
 type Fila = FilaVencimiento & { dias: number };
 type Grupo = GrupoVencimiento<FilaVencimiento>;
 
-const TIPO_ENTIDAD: Record<string, string> = { cuenta: "Cuenta", instalacion: "Instalación" };
+const RUTA: Record<string, string> = {
+  cuenta: "cuentas",
+  instalacion: "instalaciones",
+  persona: "personas",
+};
 const nombreDe = (d: Fila) => d.titulo ?? d.nombre;
-const rutaDe = (d: Fila) =>
-  d.entidad
-    ? `/${d.entidad.tipo === "cuenta" ? "cuentas" : "instalaciones"}/${d.entidad.id}`
-    : null;
+const rutaDe = (d: Fila) => {
+  const seg = d.entidad ? RUTA[d.entidad.tipo] : undefined;
+  return seg && d.entidad ? `/${seg}/${d.entidad.id}` : null;
+};
 /** Abre la hoja de subir (`?subir=1`) para renovar este documento: reemplaza a la versión vencida. */
 const renovar = (d: Fila) => `?subir=1&reemplaza=${d.id}${d.tipoId ? `&tipo=${d.tipoId}` : ""}`;
 
-function Entidad({ d }: { d: Fila }) {
-  const tipo = TIPO_ENTIDAD[d.entidad?.tipo ?? ""] ?? "—";
+function Entidad({ d, etiquetas }: { d: Fila; etiquetas: Record<string, string> }) {
+  const tipo = etiquetas[d.entidad?.tipo ?? ""] ?? "—";
   const ruta = rutaDe(d);
   const nombre = d.entidad?.nombre ?? tipo;
   return (
@@ -52,14 +56,22 @@ function Accion({ d, puedeSubir }: { d: Fila; puedeSubir: boolean }) {
   ) : null;
 }
 
-function columnas(tono: Grupo["tono"], puedeSubir: boolean): Columna<Fila>[] {
+function columnas(
+  tono: Grupo["tono"],
+  puedeSubir: boolean,
+  etiquetas: Record<string, string>,
+): Columna<Fila>[] {
   return [
     {
       id: "documento",
       etiqueta: "Documento",
       render: (d) => <span className="font-medium">{nombreDe(d)}</span>,
     },
-    { id: "entidad", etiqueta: "Cuenta o instalación", render: (d) => <Entidad d={d} /> },
+    {
+      id: "entidad",
+      etiqueta: "Vinculado a",
+      render: (d) => <Entidad d={d} etiquetas={etiquetas} />,
+    },
     {
       id: "vence",
       etiqueta: "Vence",
@@ -80,7 +92,15 @@ function columnas(tono: Grupo["tono"], puedeSubir: boolean): Columna<Fila>[] {
 }
 
 /** Una banda de la pantalla 04: «Vencidos (2)», «Vencen en 30 días (2)»… con tabla en md+ y tarjetas en teléfono. */
-export function GrupoVencimientos({ grupo, puedeSubir }: { grupo: Grupo; puedeSubir: boolean }) {
+export function GrupoVencimientos({
+  grupo,
+  puedeSubir,
+  etiquetas,
+}: {
+  grupo: Grupo;
+  puedeSubir: boolean;
+  etiquetas: Record<string, string>;
+}) {
   return (
     <section aria-labelledby={`g-${grupo.id}`} className="flex flex-col gap-2">
       <h2 id={`g-${grupo.id}`} className="t-subheading flex items-center gap-2">
@@ -99,7 +119,7 @@ export function GrupoVencimientos({ grupo, puedeSubir }: { grupo: Grupo; puedeSu
             <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="truncate text-base font-medium text-fg">{nombreDe(d)}</span>
               <span className="t-caption truncate">
-                {[d.entidad?.nombre ?? TIPO_ENTIDAD[d.entidad?.tipo ?? ""], fecha(d.venceEn)]
+                {[d.entidad?.nombre ?? etiquetas[d.entidad?.tipo ?? ""], fecha(d.venceEn)]
                   .filter(Boolean)
                   .join(" · ")}
               </span>
@@ -110,7 +130,7 @@ export function GrupoVencimientos({ grupo, puedeSubir }: { grupo: Grupo; puedeSu
             <Accion d={d} puedeSubir={puedeSubir} />
           </>
         )}
-        columnas={columnas(grupo.tono, puedeSubir)}
+        columnas={columnas(grupo.tono, puedeSubir, etiquetas)}
       />
     </section>
   );

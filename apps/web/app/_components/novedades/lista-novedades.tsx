@@ -2,22 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Alerta, Badge, Button, Empty, Enlace, SeccionTarjeta, Skeleton } from "@opai/ds";
+import { Alerta, Button, Empty, Skeleton } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
-type ItemNovedad = {
-  id: string;
-  fecha: string;
-  moduloEtiqueta: string;
-  titulo: string;
-  descripcion: string;
-  ruta: string | null;
-  imagen: string | null;
-  destacada: boolean;
-  car: string | null;
-  leida: boolean;
-};
+import { TarjetaNovedad, type ItemNovedad } from "./tarjeta-novedad";
+import { useMarcarNovedades } from "./use-marcar-novedades";
 
 type Respuesta = {
   items: ItemNovedad[];
@@ -25,15 +15,10 @@ type Respuesta = {
   destacadaPendiente: ItemNovedad | null;
 };
 
-function formatearFecha(iso: string): string {
-  const [y, m, d] = iso.split("-");
-  if (!y || !m || !d) return iso;
-  return `${d}-${m}-${y}`;
-}
-
 export function ListaNovedades({ portal }: { portal: string }) {
   const [datos, setDatos] = useState<Respuesta | null>(null);
   const [error, setError] = useState(false);
+  const [errorMarca, setErrorMarca] = useState(false);
   const [cerrando, setCerrando] = useState(false);
 
   const cargar = useCallback(() => {
@@ -62,10 +47,13 @@ export function ListaNovedades({ portal }: { portal: string }) {
     };
   }, [portal]);
 
-  const marcarTodas = () =>
-    void ejecutarCapacidad(portal, "core.novedades.marcar_todas", {}).then((r) => {
-      if (r.ok) void cargar();
-    });
+  const marcarTodas = useMarcarNovedades(
+    portal,
+    datos,
+    setDatos,
+    setErrorMarca,
+    () => void cargar(),
+  );
 
   const descartarDestacada = (id: string) => {
     setCerrando(true);
@@ -98,6 +86,9 @@ export function ListaNovedades({ portal }: { portal: string }) {
         </Alerta>
       ) : null}
       {error ? <Alerta tono="danger" titulo="No pudimos cargar las novedades" /> : null}
+      {errorMarca ? (
+        <Alerta tono="danger" titulo="No pudimos marcar las novedades como leídas" />
+      ) : null}
       {datos === null ? (
         <Skeleton className="h-40" />
       ) : datos.items.length === 0 ? (
@@ -117,27 +108,7 @@ export function ListaNovedades({ portal }: { portal: string }) {
           <ul className="flex flex-col gap-3">
             {datos.items.map((item) => (
               <li key={item.id}>
-                <SeccionTarjeta
-                  titulo={item.leida ? item.titulo : `Nueva · ${item.titulo}`}
-                  accion={<Badge tono="neutro" punto={false}>{item.moduloEtiqueta}</Badge>}
-                >
-                  <p className="t-caption mb-2 text-fg-muted">
-                    {formatearFecha(item.fecha)}
-                    {item.car ? ` · ${item.car}` : ""}
-                  </p>
-                  <p className="t-body whitespace-pre-wrap text-fg">{item.descripcion}</p>
-                  {item.imagen ? (
-                    <div className="mt-3 max-w-md overflow-hidden rounded-md border border-border">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- URLs opcionales en /public/changelog */}
-                      <img src={item.imagen} alt="" className="aspect-video w-full object-cover" />
-                    </div>
-                  ) : null}
-                  {item.ruta ? (
-                    <div className="mt-3">
-                      <Enlace href={item.ruta}>Ver en OPAI</Enlace>
-                    </div>
-                  ) : null}
-                </SeccionTarjeta>
+                <TarjetaNovedad item={item} />
               </li>
             ))}
           </ul>

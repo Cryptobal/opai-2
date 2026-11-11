@@ -8,6 +8,9 @@ import {
 import type { ContratoCamposEnvio, DestinatarioEnvio } from "../domain/documento/propuesta-tecnica";
 import { textosBiblioteca } from "./pdf-propuesta-biblioteca";
 
+/** Faltante del render cuando el texto repite `referencias` y no hay ninguna autorizada (CAR-138 PR 7). */
+const SIN_REFERENCIAS = "colecciones.referencias";
+
 /**
  * Valida los tokens de la propuesta contra el catálogo único (finalidad «propuesta»), resuelve sus
  * valores con el contexto autorizado del actor y devuelve el contrato a congelar. Sin tokens no hace
@@ -53,11 +56,18 @@ export async function contratoCamposPropuesta(
     finalidad: "propuesta",
     cuentaId: neg.cuentaId,
     contactoId,
+    // Solo se consultan (y se auditan) las referencias si el texto las repite.
+    referencias: v.colecciones.includes("referencias"),
   });
   const contrato = contratoCamposDeEnvio(textos, v.usados, v.colecciones, {
     campos: r.campos,
     colecciones: r.colecciones,
   });
+  if (contrato.faltantes.includes(SIN_REFERENCIAS)) {
+    throw reglaDeNegocio(
+      "La propuesta muestra clientes de referencia, pero ningún cliente activo tiene un consentimiento vigente para serlo. Registra el consentimiento o quita esa sección.",
+    );
+  }
   if (contrato.faltantes.length > 0) {
     throw reglaDeNegocio(
       `Faltan datos para completar la propuesta: ${contrato.faltantes.join(", ")}. Complétalos en el cliente o quita esos campos.`,

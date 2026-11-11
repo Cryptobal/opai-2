@@ -1,10 +1,12 @@
 import { z } from "zod";
 
 import { adaptadorSiiDe } from "./adaptador-sii";
+import { comoReglaSiProveedorSii } from "./errores-sii";
 import { encolarConsultaSiPendiente } from "./trabajos-dte";
 import { xmlParaEnvioSii } from "./ventas-xml";
 
 import { defineCapability } from "../define";
+import { describirDocumento } from "./ventas-aprobacion-texto";
 import { escribirConEvento } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { PERMISO_VENTAS, ambienteDe, documentoEmitidoIdSchema } from "./ventas-comun";
@@ -21,6 +23,7 @@ export const ventasEnviarSii = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
+  describirAprobacion: describirDocumento((d) => `enviar al SII la ${d}`),
   async handler(ctx, input, { dryRun }) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");
@@ -30,7 +33,13 @@ export const ventasEnviarSii = defineCapability({
     const adaptador = await adaptadorSiiDe(ctx);
     const xml = await xmlParaEnvioSii(ctx, doc, adaptador);
     if (dryRun) return vistaDeDocumento(ctx, doc.id);
-    const envio = await adaptador.enviar(xml, ambiente);
+    const envio = await adaptador.enviar(xml, ambiente).catch((e: unknown) => {
+      throw comoReglaSiProveedorSii(e, (err) =>
+        err.incierto
+          ? "El resultado es incierto: el SII pudo haberlo recibido. Consulte el estado del envío antes de reenviar."
+          : "El documento sigue firmado y sin track ID; puede reintentar el envío.",
+      );
+    });
     let envioId = "";
     await escribirConEvento(
       ctx,

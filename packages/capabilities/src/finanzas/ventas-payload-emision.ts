@@ -1,10 +1,11 @@
 import type { PayloadEmisionDte, TipoDteVentaSii } from "@opai/integrations";
-import { descifrar } from "@opai/integrations";
 import type { AmbienteSii } from "@opai/domain";
 
 import { reglaDeNegocio } from "../errores";
-import { dekDe } from "../integraciones/secretos";
 import type { Contexto } from "../types";
+import { cafGuardadoParaEmitir, MENSAJE_FALLO_CAF } from "./caf-guardado";
+import { emisorTributarioDe, mensajeFaltantesEmisor } from "./emisor-tributario";
+import { mensajeFaltantesReceptor } from "./receptor-tributario";
 import { camposReceptorDteEnPayload, type receptorDteDe } from "./ventas-comun";
 
 type DocEmision = {
@@ -27,7 +28,7 @@ type DocEmision = {
   }[];
 };
 
-async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number): Promise<string> {
+async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number, rutEmisor: string): Promise<string> {
   const rangos = await ctx.db.dteFolio.findMany({
     where: { tipoDte, activo: true },
     orderBy: [{ folioDesde: "asc" }],
@@ -36,11 +37,10 @@ async function leerCafXmlDe(ctx: Contexto, tipoDte: number, folio: number): Prom
   if (!rango?.cafSecretoId) {
     throw reglaDeNegocio("No hay CAF activo para este folio; cargue un CAF antes de emitir.");
   }
-  const s = await ctx.db.secreto.findFirst({
-    where: { id: rango.cafSecretoId, tenantId: ctx.tenantId },
-  });
-  if (!s) throw reglaDeNegocio("No se encontró el CAF guardado para este folio.");
-  return descifrar(await dekDe(ctx), { cifrado: s.cifrado, iv: s.iv, tag: s.tag }).toString("utf8");
+  // Bytes ISO-8859-1 del CAF, nunca decodificados como UTF-8 (CAR-240): íntegro, del RUT emisor y del tipo y folio.
+  const caf = await cafGuardadoParaEmitir(ctx, { cafSecretoId: rango.cafSecretoId, rutEmisor, tipoDte, folio });
+  if (!caf.ok) throw reglaDeNegocio(MENSAJE_FALLO_CAF[caf.fallo]);
+  return caf.xml;
 }
 
 /** Arma el payload completo para el adaptador SII (SimpleAPI v1 o simulado). */
@@ -54,6 +54,13 @@ export async function payloadEmisionDteDe(
     incluirCaf: boolean;
   },
 ): Promise<PayloadEmisionDte> {
+  // Con el proveedor real, sin los datos tributarios del emisor (ACTECO incluido) SimpleAPI rechaza el DTE (CAR-240).
+  const faltaEmisor = p.incluirCaf ? mensajeFaltantesEmisor(await emisorTributarioDe(ctx)) : null;
+  if (faltaEmisor) throw reglaDeNegocio(`${faltaEmisor} El documento sigue sin emitir y el folio no se usó.`);
+  // Con el proveedor real (el que lleva CAF) no se emite sin giro, dirección y comuna del receptor (CAR-240): se
+  // corta antes de firmar, así que el borrador sigue sin emitir y el folio no se usa.
+  const falta = p.incluirCaf ? mensajeFaltantesReceptor(p.cuenta) : null;
+  if (falta) throw reglaDeNegocio(`${falta} El documento sigue sin emitir y el folio no se usó.`);
   const tipo = p.doc.tipoDte as TipoDteVentaSii;
   const lineas = p.doc.lineas
     .slice()
@@ -69,7 +76,7 @@ export async function payloadEmisionDteDe(
       ...(p.doc.tipoDte === 61 || p.doc.tipoDte === 56 ? { codigo: r.codigoRef } : {}),
       ...(r.razonRef ? { razon: r.razonRef } : {}),
     })) ?? [];
-  const cafXml = p.incluirCaf ? await leerCafXmlDe(ctx, tipo, p.doc.folio) : undefined;
+  const cafXml = p.incluirCaf ? await leerCafXmlDe(ctx, tipo, p.doc.folio, p.rutEmisor) : undefined;
   return {
     ambiente: p.ambiente,
     tipoDte: tipo,

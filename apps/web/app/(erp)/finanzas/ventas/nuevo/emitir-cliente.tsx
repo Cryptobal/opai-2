@@ -92,7 +92,7 @@ export function EmitirClienteTipo({
             { valor: "33", etiqueta: "33 · Factura afecta" },
             { valor: "34", etiqueta: "34 · Factura exenta" },
             { valor: "61", etiqueta: "61 · Nota de crédito (corrige una factura)" },
-            { valor: "56", etiqueta: "56 · Nota de débito (anula una nota de crédito)" },
+            { valor: "56", etiqueta: "56 · Nota de débito (cargo o anula una nota de crédito)" },
           ]}
         />
       </Campo>

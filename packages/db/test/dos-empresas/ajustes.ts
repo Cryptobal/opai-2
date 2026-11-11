@@ -41,6 +41,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },
+  // Documentos · plantillas laborales (CAR-127): CHECK de clase y de nivel de firma (N1/N2).
+  "core.documento_plantillas": {
+    valores: () => ({ clase: "contrato_trabajo", nivel_firma: "N2" }),
+  },
   // Exactamente una identidad de agente: key o agente interno (CHECK *_identidad_agente).
   "core.aprobaciones": {
     dependencias: ["core.api_keys"],
@@ -327,6 +331,25 @@ export const AJUSTES: Record<string, Ajuste> = {
       cuenta_id: id(ctx, "core.cuentas"),
     }),
     valores: () => ({}),
+  },
+  // Referencias de clientes (CAR-138 PR 7): CHECK de estado, evidencia, vigencia y largos.
+  "core.cuentas_referencias": {
+    dependencias: ["core.cuentas", "core.contactos"],
+    // `seq` es identity GENERATED ALWAYS: la base la asigna y rechaza un valor explícito.
+    omitir: ["seq"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "core.cuentas"), contacto_id: id(ctx, "core.contactos"), estado: "otorgado",
+      otorgado_en: "2026-11-01", vigente_hasta: null, evidencia: "correo", evidencia_detalle: "ficticio",
+      motivo: null, descripcion: null, cita: null, mostrar_nombre: false,
+    }),
+  },
+  // Caché SII (CAR-156): CHECK de estado, formato de RUT, datos según estado y vencimiento posterior.
+  "core.sii_contribuyentes": {
+    fijas: ["rut"],
+    valores: () => ({
+      rut: "11111111-1", estado: "ok", datos: JSON.stringify({ razonSocial: "FICTICIA SPA" }),
+      consultado_en: "2026-11-01T00:00:00Z", vence_en: "2026-12-01T00:00:00Z",
+    }),
   },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },

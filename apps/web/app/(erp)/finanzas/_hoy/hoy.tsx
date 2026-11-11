@@ -20,7 +20,7 @@ function filas(r: ResumenHoy): { titulo: string; filas: Fila[] }[] {
     {
       titulo: "Emitir",
       filas: [
-        { clave: "bor", titulo: "Borradores por emitir", detalle: "Facturas listas para revisar y emitir", grupo: r.emitir.borradores, href: "/finanzas/ventas?estado=borrador", accion: "Ver borradores" },
+        { clave: "bor", titulo: "Borradores por emitir", detalle: "Facturas y notas de débito listas para revisar y emitir", grupo: r.emitir.borradores, href: "/finanzas/ventas?estado=borrador", accion: "Ver borradores" },
         { clave: "prog", titulo: "Programaciones que ya tocan", detalle: "Generan su borrador en la próxima corrida", grupo: r.emitir.programacionesPorGenerar, href: "/finanzas/ventas/programacion", accion: "Ver programaciones" },
       ],
     },

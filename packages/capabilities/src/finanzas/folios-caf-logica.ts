@@ -14,6 +14,7 @@ import { aFecha, hoy } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import { insertarSecretoConIdTx } from "../integraciones/secretos";
 import type { Contexto } from "../types";
+import { bytesCafOError } from "./caf-guardado";
 import { folioVista } from "./ventas-comun";
 import {
   errorDeValidacionCaf,
@@ -50,6 +51,7 @@ export async function validarCafParaTenant(
   rutEmisor: string,
   fechaCorte1_0: Date | null | undefined,
 ) {
+  bytesCafOError(cafXml);
   const hoyIso = hoy();
   const pre = leerCafXml(cafXml);
   const rangosCargados = await ctx.db.dteFolio.findMany({
@@ -122,7 +124,7 @@ export async function persistirCafCargado(
   const folioActual = folioInicial.valor;
   const integracionId = await integracionDteId(tx, ctx.tenantId);
   const nombreSecreto = nombreSecretoCaf(lectura.tipoDte, lectura.idk, lectura.folioDesde, lectura.folioHasta);
-  const { id: secretoId } = await insertarSecretoConIdTx(tx, ctx, integracionId, nombreSecreto, cafXml);
+  const { id: secretoId } = await insertarSecretoConIdTx(tx, ctx, integracionId, nombreSecreto, cafXml, bytesCafOError(cafXml));
   for (const v of rangosCargados) {
     if (v.tipoDte !== lectura.tipoDte) continue;
     if (!v.activo) continue;

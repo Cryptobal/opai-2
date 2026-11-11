@@ -10,7 +10,7 @@ import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "../_componentes/etiquetas-venta";
 import { AccionesVenta } from "../_componentes/acciones-venta";
 import { HistorialEnvios, type EnvioCliente } from "../_componentes/historial-envios";
-import type { Venta } from "../_componentes/tipos";
+import type { LineaBorrador, Venta } from "../_componentes/tipos";
 
 type Detalle = Venta & {
   montoNeto: number;
@@ -20,7 +20,7 @@ type Detalle = Venta & {
   montoPendiente: number;
   cesionProveedor: string | null;
   glosa: string | null;
-  lineas: { glosa: string; monto: number }[];
+  lineas: LineaBorrador[];
   trackIdSii: string | null;
 };
 
@@ -44,8 +44,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 /** Ficha de un documento emitido. */
-export default async function VentaDetallePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function VentaDetallePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ editar?: string }>;
+}) {
   const { id } = await params;
+  const editar = (await searchParams).editar === "1";
   return (
     <PaginaPortal
       portal="erp"
@@ -57,13 +64,13 @@ export default async function VentaDetallePage({ params }: { params: Promise<{ i
     >
       {(d) => {
         if (d.state === "ready" && !d.venta) notFound();
-        return <Ficha state={d.state} venta={d.venta} envios={d.envios} />;
+        return <Ficha state={d.state} venta={d.venta} envios={d.envios} editar={editar} />;
       }}
     </PaginaPortal>
   );
 }
 
-function Ficha({ state, venta, envios }: { state: EstadoPantalla; venta: Detalle | null; envios: EnvioCliente[] }) {
+function Ficha({ state, venta, envios, editar }: { state: EstadoPantalla; venta: Detalle | null; envios: EnvioCliente[]; editar: boolean }) {
   if (state !== "ready" || !venta) return null;
   const dte = estadoDteVenta(venta.estadoDte);
   const cobro = estadoCobroVenta(venta.estadoCobro);
@@ -126,7 +133,7 @@ function Ficha({ state, venta, envios }: { state: EstadoPantalla; venta: Detalle
         ) : null}
         {venta.glosa ? <p className="text-sm text-fg-muted">{venta.glosa}</p> : null}
       </Card>
-      <AccionesVenta venta={venta} montoPendiente={venta.montoPendiente} enviosPrevios={envios.filter((x) => x.estado === "enviado").length} />
+      <AccionesVenta venta={venta} abrirEditar={editar} montoPendiente={venta.montoPendiente} enviosPrevios={envios.filter((x) => x.estado === "enviado").length} />
       <HistorialEnvios envios={envios} />
     </div>
   );

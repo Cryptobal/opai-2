@@ -56,6 +56,7 @@ const ESPECIALES: Record<string, string> = {
   "funciones.desactivar": "Desactivar funciones",
   "cumplimiento.dpa_aceptar": "Aceptar el acuerdo de datos (DPA)",
   "documentos.subir_alcance": "Subir documentos de sus instalaciones",
+  "documentos.plantillas.manage": "Gestionar plantillas de documentos",
   usar: "Usar el agente",
   configurar: "Configurar el agente",
 };

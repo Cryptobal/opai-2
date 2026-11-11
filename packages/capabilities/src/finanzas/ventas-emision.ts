@@ -3,11 +3,14 @@ import { z } from "zod";
 import { adaptadorSiiDe } from "./adaptador-sii";
 
 import { defineCapability } from "../define";
+import { describirDocumento } from "./ventas-aprobacion-texto";
 import { aFecha, escribirConEvento } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
+import { bloquearDocumento } from "./ventas-borrador-editable";
 import { vistaDeDocumento } from "./ventas-consulta";
 import {
   PERMISO_VENTAS,
+  ambienteDe,
   consumirFolio,
   documentoEmitidoIdSchema,
   marcarBorradorEmitido,
@@ -18,6 +21,7 @@ import {
   prepararEmision,
   type EmisionPreparada,
 } from "./ventas-emision-preparar";
+import { exigirOrigenNotaDebito } from "./ventas-nd-cargo";
 import { descartarXmlPreparado } from "./ventas-xml";
 import { ventaSchema } from "./vistas-venta";
 import type { Contexto } from "../types";
@@ -51,9 +55,15 @@ export async function emitirBorrador(
   const adaptador = await adaptadorSiiDe(ctx);
   if (!adaptador.disponible) throw reglaDeNegocio("El adaptador SII no está disponible.");
   if (dryRun) {
+    // La vista previa no firma ni llama al proveedor: muestra el folio que se asignaría, el proveedor y el ambiente.
     const folio = await consumirFolio(ctx, tipo, true);
     const { vistaVenta } = await import("./vistas-venta");
-    return vistaVenta(
+    // La emisión simulada solo usa CAF de certificación (CAR-240), así que ese es su ambiente.
+    const simpleapi = adaptador.nombre === "simpleapi";
+    const emisionPrevista = simpleapi
+      ? { proveedor: "simpleapi" as const, ambiente: await ambienteDe(ctx) }
+      : { proveedor: "simulado" as const, ambiente: "certificacion" as const };
+    const vista = vistaVenta(
       { ...doc, folio, estadoDte: "enviado" },
       cuenta,
       doc.lineas.map((l) => ({
@@ -63,6 +73,7 @@ export async function emitirBorrador(
         monto: l.monto,
       })),
     );
+    return { ...vista, emisionPrevista };
   }
   if (!preparada || preparada.documentoId !== doc.id) {
     throw reglaDeNegocio("El documento no llegó firmado a la emisión; reintente.");
@@ -81,6 +92,22 @@ export async function emitirBorrador(
         payload: () => ({ folio: preparada.folio, tipoDte: doc.tipoDte }),
       },
       async (tx) => {
+        // Bloquea el borrador y comprueba que siga idéntico a lo que se firmó: una edición (CAR-248) que se confirmó
+        // después de la comprobación de arriba no puede quedar con un XML firmado de otro contenido.
+        await bloquearDocumento(tx, ctx.tenantId, doc.id);
+        const actual = await tx.documentoEmitido.findFirst({
+          where: { id: doc.id },
+          include: { lineas: { orderBy: { orden: "asc" } }, referencias: true },
+        });
+        if (!actual || huellaBorrador(actual) !== preparada.huella) {
+          throw reglaDeNegocio("El borrador cambió mientras se firmaba; revíselo y reintente la emisión.");
+        }
+        // ND de cargo: bloquea la factura de origen (como la NC que la anularía) y revalida que siga vigente antes de
+        // reclamar el folio (CAR-234).
+        if (doc.tipoDte === 56 && doc.documentoReferenciaId) {
+          await tx.$queryRaw`SELECT id FROM finanzas.documentos_emitidos WHERE id = ${doc.documentoReferenciaId}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+        }
+        if (doc.tipoDte === 56) await exigirOrigenNotaDebito({ db: tx }, doc);
         const folio = await consumirFolio(ctx, tipo, false, tx);
         if (folio !== preparada.folio) {
           throw reglaDeNegocio(
@@ -113,6 +140,7 @@ export const ventasEmitir = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
+  describirAprobacion: describirDocumento((d, borrador) => `emitir ${borrador ? "el borrador de " : ""}${d}`),
   // La firma (llamada remota) va antes de la transacción de la escritura.
   preparar: (ctx, input) => prepararEmision(ctx, input.documentoId),
   async handler(ctx, input, { dryRun, preparado }) {
