@@ -5,6 +5,7 @@ import {
   credencialDePlataforma,
   definicionIntegracion,
   enmascarar,
+  motivoSecretoInvalido,
   sufijoParaGuardar,
 } from "@opai/integrations";
 import { PERMISOS_CORE } from "@opai/domain";
@@ -118,6 +119,9 @@ export const integracionesSetSecreto = defineCapability({
     if (!def.secretos.some((s) => s.nombre === input.nombre)) {
       throw reglaDeNegocio(`${def.nombre} no usa el secreto "${input.nombre}".`);
     }
+    // Formas que el proveedor rechaza (key de SimpleAPI sin guiones, CAR-240): no se guardan, también en vista previa.
+    const motivo = motivoSecretoInvalido(def.id, input.nombre, input.valor);
+    if (motivo) throw reglaDeNegocio(motivo);
     const mascara = enmascarar(sufijoParaGuardar(input.nombre, input.valor));
     if (dryRun) return { proveedor: def.id, nombre: input.nombre, mascara };
     const fila = await ctx.db.integracion.upsert({
