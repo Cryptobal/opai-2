@@ -41,6 +41,10 @@ const BASE: HiloShellProps = {
 const html = (p: Partial<HiloShellProps> = {}) => renderToStaticMarkup(<HiloShell {...BASE} {...p} />);
 
 describe("vista del marco Hilo", () => {
+  it("el contenido desplazable del lienzo se marca para subirlo tras el esqueleto (CAR-317)", () => {
+    expect(html()).toMatch(/<main data-lienzo[^>]*overflow-y-auto/);
+  });
+
   it("Inicio abre el hilo, una pantalla lo deja al lado o plegado y una planilla lo pliega", () => {
     expect(vistaHilo("/", "/", false)).toBe("inicio");
     expect(vistaHilo("/cuentas/1", "/", false)).toBe("pantalla");
