@@ -83,7 +83,7 @@ Reglas del contrato:
 
 ## PR 9 — importación de HTML saneada y versionada por empresa
 
-**Encargo (10-nov-2026, coordinador OPAI 2.0 por Carlos).** Una sola entrega, desde `main`. No entran el PR 7 ni el editor en pantalla. Migración: **sí, aditiva y propuesta** (`20261117100000_cpq_propuesta_html`; la aplica el bot «OPAI 2.0» con respaldo; el PR lleva `migracion-pendiente`).
+**Encargo (10-nov-2026, coordinador OPAI 2.0 por Carlos).** Una sola entrega, desde `main`. No entran el PR 7 ni el editor en pantalla. Migración: **sí, aditiva y propuesta** (`20261120100000_cpq_propuesta_html`; la aplica el bot «OPAI 2.0» con respaldo; el PR lleva `migracion-pendiente`). *11-nov-2026:* al traer `main` se renombró desde `20261117100000_…`, que compartía fecha con `20261117100000_finanzas_dte_resolucion_cero` (ya aplicada) y quedaba antes de migraciones ya aplicadas (`20261118…`, `20261119…`); el SQL no cambió.
 
 **HTML de partida.** `docs/2.0/diseño/export-cpq/PropuestaCliente.dc.html` (export de Claude Design con tokens del DS v2). En esta sesión no hay un export más nuevo del mismo diseño.
 
@@ -103,7 +103,7 @@ Reglas del contrato:
 
 **Qué sigue haciendo el PDF.** Lo mismo que hoy: `pdf-lib` arma el PDF desde los bloques, el capítulo por instalación y el envío congelado. **Ningún renderer lee `cpq.propuesta_html`**; el HTML importado no se convierte a PDF ni se usa en el envío. No se promete Figma, PPT ni PDF desde este HTML. Conectar una plantilla HTML a un renderer (navegador sin cabeza u otro) es una decisión de arquitectura aparte.
 
-**Pruebas.** Dominio (31), base real (6): versionado, rechazo sin guardar, aislamiento entre empresas, inmutabilidad y permiso.
+**Pruebas.** Dominio (31), base real (6): versionado, rechazo sin guardar, aislamiento entre empresas, inmutabilidad y permiso. Con `main` traído (catálogo v2 de #458, colección `referencias`), la validación sigue leyendo `VERSION_CATALOGO_CAMPOS` del catálogo real: una plantilla nueva queda con `catalogoVersion` 2 y puede usar `{{#cada referencias}}` (finalidad «propuesta»), que se resolverá con el consentimiento vigente cuando exista un renderer.
 
 ## Responsable y archivos del contrato transversal (autorizado por Carlos el 7-nov-2026 21:49)
 
