@@ -41,7 +41,7 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
               </Button>
             ) : null}
             {!avisos.length && !aprobaciones && !error ? (
-              <p className="t-body text-fg-muted">Todo al día. No tienes nada pendiente.</p>
+              <p className="t-body text-fg-muted">Todo al día. No tienes avisos ni aprobaciones pendientes.</p>
             ) : null}
             {avisos.length ? (
               <Button variant="secondary" onClick={() => void marcar()}>

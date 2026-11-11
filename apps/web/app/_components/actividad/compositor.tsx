@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 
-import { Alerta, avisar, Button, CompositorActividad, type TipoCompositor } from "@opai/ds";
+import { Alerta, avisar, Button, CompositorActividad, Switch, type TipoCompositor } from "@opai/ds";
 
 import { useMiembros } from "@/app/(erp)/solicitudes/_componentes/use-miembros";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -43,6 +43,8 @@ export function Compositor({
     if (t === "tarea" && !b.tocoFecha) cambiar({ ...borradorInicial(manana()), texto: b.texto, hora: "09:00" });
   };
   const relacionadas = ficha.relacionadas.filter((r) => !quitadas.includes(`${r.tipo}:${r.id}`));
+  // Solo en un negocio (o ligada a uno) la marca «El cliente respondió» tiene efecto (CAR-160).
+  const conNegocio = ficha.tipo === "negocio" || relacionadas.some((r) => r.tipo === "negocio");
   async function registrar() {
     const vinculos = [{ tipo: ficha.tipo, id: ficha.id }, ...relacionadas.map(({ tipo: t, id: i }) => ({ tipo: t, id: i }))];
     const r = await ejecutar(
@@ -85,6 +87,14 @@ export function Compositor({
       }
     >
       <CamposActividad id={id} tipo={tipo} b={b} cambiar={cambiar} miembros={miembros} />
+      {tipo !== "tarea" && conNegocio ? (
+        <Switch
+          etiqueta="El cliente respondió"
+          descripcion="Pausa el seguimiento del negocio según su plan."
+          activo={b.respuestaCliente}
+          onCambiar={(respuestaCliente) => cambiar({ respuestaCliente })}
+        />
+      ) : null}
     </CompositorActividad>
   );
 }
