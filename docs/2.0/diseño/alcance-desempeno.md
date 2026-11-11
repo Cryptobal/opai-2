@@ -1,7 +1,7 @@
 # Alcance · Desempeño (indicadores y metas por cargo) — para revisar una sola vez
 
-**Estado:** propuesta, pendiente de la aprobación de Carlos. Sin esa aprobación no se construye.
-**Origen:** pedido de Carlos del 11-nov-2026 en el chat del proyecto «Opai 2.0». Decisión: [ADR-094](../01-decisiones.md). Tarea madre: CAR-303. Mockup interactivo (propuesta): [`design/export-desempeno/`](../design/export-desempeno/README.md).
+**Estado:** aprobada por Carlos el 11-nov-2026 a las 16:41 (hora de Chile), en el chat del proyecto «Opai 2.0», con las decisiones de la sección 6. El diseño de las pantallas sigue pendiente de su aprobación.
+**Origen:** pedido de Carlos del 11-nov-2026 en el chat del proyecto «Opai 2.0». Decisión: [ADR-094](../01-decisiones.md). Tarea madre: CAR-303. Mockup interactivo (propuesta de diseño): [`design/export-desempeno/`](../design/export-desempeno/README.md).
 
 No hay extracción de 1.0: OPAI 1.0 no tiene este módulo. Es nuevo.
 
@@ -12,7 +12,9 @@ Cada empresa mide la gestión de sus cargos (vendedor, reclutador, supervisor, j
 | Pieza | Dónde vive | Qué hace |
 |---|---|---|
 | Catálogo de indicadores | Núcleo (servicio, como ajustes y eventos) | Cada módulo publica sus indicadores en su manifiesto. El Núcleo arma el catálogo desde el registro de módulos y calcula por persona y período |
+| Indicadores propios de la empresa | Módulo Desempeño | La empresa arma indicadores que el catálogo no trae, sobre hechos que el sistema ya registra |
 | Scorecard por cargo | Módulo Desempeño | La empresa elige qué indicadores usa cada cargo, con qué meta, qué peso y qué período |
+| Jefatura por cargo | Personas (Cargos) | A quién reporta cada cargo y a qué personas ve esa jefatura |
 | Resultado por persona | Módulo Desempeño | Puntaje de 0 a 120 (100 es cumplir todas las metas), cada indicador contra su meta y la parte hecha por su agente |
 | Agente | Módulo Agente | Responde con los mismos indicadores, propone cambios en el hilo y avisa cuando alguien cae bajo la meta |
 
@@ -20,10 +22,12 @@ Cada empresa mide la gestión de sus cargos (vendedor, reclutador, supervisor, j
 
 | Lo configura la empresa | No lo configura |
 |---|---|
-| Sus cargos (los de Personas › Cargos) | La fórmula de cada indicador: la define el módulo, igual para todas las empresas |
-| Qué indicadores usa cada cargo | Los hechos de origen: son los que el sistema registra, inmutables |
+| Sus cargos (los de Personas › Cargos) | La fórmula de los indicadores del catálogo: la define el módulo, igual para todas las empresas |
+| Qué indicadores usa cada cargo, del catálogo o propios | Los hechos de origen: son los que el sistema registra, inmutables |
 | La meta, el peso y el período de cada indicador | Los períodos ya cerrados: un cambio rige desde el período siguiente |
-| Quién ve los resultados (permisos y alcance por filas) | |
+| La jefatura de cada cargo y a quiénes ve | |
+| Si la persona ve su propio resultado y el ranking del equipo | |
+| Sus indicadores propios: nombre, forma de cálculo, hechos, sentido y meta | |
 
 ## 3. Qué se mide
 
@@ -41,9 +45,19 @@ Catálogo inicial propuesto, por módulo:
 
 Un módulo nuevo suma indicadores declarándolos en su manifiesto, sin tocar el Núcleo ni Desempeño. Un módulo apagado no aporta.
 
+### Indicadores propios de la empresa (CAR-313)
+
+Cuatro formas de cálculo, acotadas: contar un hecho en el período, sumar un monto, medir el tiempo entre dos hechos y porcentaje de un hecho sobre otro. Cada módulo declara qué hechos ofrece; lo no declarado no se puede usar. Antes de publicar se ve siempre la vista previa con datos reales. La definición es configuración versionada de la empresa, evaluada en dominio (ADR-021), nunca código por empresa. Se puede pedir al agente con palabras propias: el agente arma el borrador y una persona lo guarda.
+
+### Quién ve los resultados (CAR-306 y CAR-314)
+
+- La persona ve su propio resultado; su jefatura ve los de su equipo; la gerencia y quien administra el módulo ven a todos.
+- Por cargo se configura: cuál es su jefatura (el cargo al que reporta), si esa jefatura ve a todo el equipo o solo a las personas a su cargo, si la persona ve su resultado y si ve el ranking del equipo.
+- **Hoy el modelo de datos no tiene jefatura** (verificado en `main` el 11-nov-2026): ningún cargo ni persona guarda a quién reporta; solo existe el alcance por instalaciones del supervisor (ADR-022). Se agrega en Personas (CAR-314) y queda disponible para otros módulos.
+- El filtro se aplica en la consulta, nunca en la pantalla.
+
 ## 4. Qué NO entra en la primera versión
 
-- Indicadores propios armados por la empresa (CAR-313, etapa 2).
 - Un constructor de paneles o gráficos a medida: los paneles a medida los arma el agente (o una IA externa por MCP) con los mismos indicadores.
 - Evaluaciones cualitativas, encuestas, objetivos escritos a mano, bonos y su pago por Nómina.
 - Medir lo que ocurre fuera de OPAI: lo que no se registra no existe para el indicador.
@@ -58,13 +72,15 @@ Un módulo nuevo suma indicadores declarándolos en su manifiesto, sin tocar el 
 6. Plantillas sugeridas por vertical, desde la configuración por vertical, nunca fijas en el código.
 7. Medir a personas con datos individuales exige informarlo a los trabajadores (Ley 21.719).
 
-## 6. Decisiones que necesita Carlos
+## 6. Decisiones de Carlos (11-nov-2026, 16:41)
 
-1. Aprobar esta hoja.
-2. ¿La primera versión parte solo con el catálogo (propuesta), o los indicadores propios por empresa entran desde el inicio?
-3. ¿Quién ve el resultado de cada persona: ella misma, su jefatura o solo la gerencia?
-4. ¿Desempeño se vende como módulo aparte (propuesta) o viene incluido?
-5. Período por defecto: mensual (propuesta).
+1. **Hoja aprobada.**
+2. **La primera versión trae el catálogo y los indicadores propios por empresa.**
+3. **El resultado lo ven la persona y su jefatura.** Hay que poder configurar quién es la jefatura de cada cargo.
+4. **Desempeño se vende como módulo aparte.**
+5. **El mockup sigue siendo propuesta.** Pidió el mockup definitivo, 100 % interactivo, con todo lo anterior; se actualizó el mismo día y espera su aprobación.
+
+Pendiente de Carlos: aprobar el diseño; qué pasa cuando dos personas comparten el cargo que es jefatura; si el jefe del jefe también ve.
 
 ## 7. Defaults que tomo (avísame si alguno no te sirve)
 
@@ -83,9 +99,10 @@ Puntaje con tope de 120 por indicador; verde desde 100, amarillo desde 85, rojo 
 | Indicadores de Pauta, Rondas y Tickets | CAR-310 | 06 · Operaciones |
 | Indicadores de Asistencia | CAR-311 | 04 · Asistencia |
 | Agente: propuestas, avisos y respuesta a lo escalado | CAR-312 | 19 · Agente IA |
-| Etapa 2 · indicadores propios por empresa | CAR-313 | 20 · Núcleo |
+| D4 · indicadores propios por empresa | CAR-313 | 20 · Núcleo |
+| Jefatura por cargo y personas a cargo | CAR-314 | 03 · Personas |
 
-Orden: D1 y D2, luego Comercial (el módulo con más datos hoy) y D3 cuando el diseño esté aprobado. Operaciones y Asistencia publican cuando sus datos existan en 2.0.
+Orden: D1, jefatura por cargo y D2; luego Comercial (el módulo con más datos hoy) y D4; D3 cuando el diseño esté aprobado. Operaciones y Asistencia publican cuando sus datos existan en 2.0.
 
 ## 9. Por verificar antes del primer brief
 

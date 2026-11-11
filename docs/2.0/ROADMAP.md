@@ -63,9 +63,9 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 
 Frente transversal aprobado por Carlos: marco centrado en el agente con interruptor, en siete etapas (H1 a H7) descritas en [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md). No compite con Finanzas: no toca sus pantallas hasta cerrar las verificaciones reales (CAR-266 a CAR-269). Tarea madre: CAR-274.
 
-### Desempeño (ADR-094, propuesto el 11-nov-2026)
+### Desempeño (ADR-094, 11-nov-2026)
 
-Indicadores y metas por cargo, configurables por empresa: catálogo de indicadores en el Núcleo, scorecard por cargo y resultado por persona. Hoja de alcance en [`diseño/alcance-desempeno.md`](diseño/alcance-desempeno.md), pendiente de la aprobación de Carlos. No compite con los frentes abiertos: no se construye hasta esa aprobación, y los indicadores de Operaciones y Asistencia entran cuando sus datos existan. Tarea madre: CAR-303.
+Indicadores y metas por cargo, configurables por empresa: catálogo de indicadores en el Núcleo, scorecard por cargo y resultado por persona. Hoja de alcance en [`diseño/alcance-desempeno.md`](diseño/alcance-desempeno.md), aprobada por Carlos el 11-nov-2026; incluye indicadores propios por empresa y jefatura por cargo. Se vende como módulo aparte. No compite con los frentes abiertos: parte por el catálogo en el Núcleo, las pantallas esperan el diseño aprobado, y los indicadores de Operaciones y Asistencia entran cuando sus datos existan. Tarea madre: CAR-303.
 
 ## 4. Qué pausar y qué descartar
 

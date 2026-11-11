@@ -116,13 +116,14 @@ form:focus-within{border-color:var(--agente)}
 </div></sc-if>
 
 <sc-if value="{{vCargo}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:18px">
-<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Ver esta pantalla como</span><div style="display:flex;gap:2px;padding:3px;border-radius:14px;background:var(--fill)"><sc-for list="{{roles}}" as="q" hint-placeholder-count="2"><button onClick="{{q.ir}}" style="flex:1;min-height:38px;padding:4px 10px;border-radius:11px;font-weight:{{q.peso}};background:{{q.bg}};text-align:center">{{q.nombre}}</button></sc-for></div><sc-if value="{{hayNotaRol}}" hint-placeholder-val="{{false}}"><span style="font-size:13px;color:var(--muted)">{{notaRol}}</span></sc-if></div>
+<sc-if value="{{esAdmin}}" hint-placeholder-val="{{true}}"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
 <span style="height:32px;padding:0 12px;border-radius:99px;background:{{pesoBg}};color:{{pesoFg}};font-weight:600;font-size:13px;display:inline-flex;align-items:center;white-space:nowrap">{{pesoTxt}}</span>
 <span style="flex:1"></span>
 <button onClick="{{repartir}}" style="height:44px;padding:0 14px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);white-space:nowrap">Repartir pesos</button>
 <button onClick="{{plantilla}}" style="height:44px;padding:0 14px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);white-space:nowrap">Plantilla de la vertical</button>
 <button onClick="{{irCatalogo}}" style="height:44px;padding:0 18px;border-radius:12px;font-weight:600;background:var(--fg);color:var(--bg);display:inline-flex;align-items:center;gap:8px;white-space:nowrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>Agregar indicador</span></button>
-</div>
+</div></sc-if>
 
 <div style="display:flex;flex-direction:column">
 <span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding-bottom:4px">Qué se mide</span>
@@ -133,7 +134,8 @@ form:focus-within{border-color:var(--agente)}
 <span style="font-size:12px;line-height:16px;color:var(--muted)">{{i.clase}}</span>
 <span style="font-size:12px;line-height:16px;color:var(--muted)">Sale de: {{i.fuente}}</span>
 </div>
-<div style="flex:none;display:flex;flex-direction:column;gap:2px">
+<sc-if value="{{i.lee}}" hint-placeholder-val="{{false}}"><span style="flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600">{{i.resumen}}</span></sc-if>
+<sc-if value="{{i.edita}}" hint-placeholder-val="{{true}}"><div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center"><div style="flex:none;display:flex;flex-direction:column;gap:2px">
 <span style="font-size:11px;line-height:14px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Meta</span>
 <div style="display:flex;align-items:center;gap:4px">
 <button onClick="{{i.metaMenos}}" aria-label="Bajar la meta" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
@@ -150,10 +152,23 @@ form:focus-within{border-color:var(--agente)}
 </div>
 </div>
 <button onClick="{{i.quitar}}" aria-label="Quitar este indicador" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none;align-self:flex-end"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></button>
+</div></sc-if>
 </div>
 </sc-for>
 <sc-if value="{{sinInds}}" hint-placeholder-val="{{false}}"><div style="padding:28px 0;display:flex;flex-direction:column;gap:6px"><span style="font-size:18px;line-height:26px;font-weight:600">Este cargo todavía no mide nada.</span><span style="color:var(--muted)">Agrega indicadores del catálogo o parte de la plantilla de la vertical.</span></div></sc-if>
 </div>
+
+<sc-if value="{{esAdmin}}" hint-placeholder-val="{{true}}"><div style="display:flex;flex-direction:column;gap:14px">
+<span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Quién ve los resultados</span>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:600">Jefatura de este cargo</span><span style="font-size:13px;color:var(--muted)">El cargo que ve y sigue los resultados de este equipo.</span><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{jefes}}" as="f" hint-placeholder-count="4"><button onClick="{{f.ir}}" style="min-height:44px;padding:6px 14px;border-radius:99px;border:1px solid {{f.borde}};background:{{f.bg}};color:{{f.fg}};font-size:13px;font-weight:600">{{f.nombre}}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:600">A quiénes ve la jefatura</span><div style="display:flex;gap:2px;padding:3px;border-radius:14px;background:var(--fill)"><sc-for list="{{alcances}}" as="q" hint-placeholder-count="2"><button onClick="{{q.ir}}" style="flex:1;min-height:38px;padding:4px 10px;border-radius:11px;font-weight:{{q.peso}};background:{{q.bg}};text-align:center">{{q.nombre}}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{toggles}}" as="g" hint-placeholder-count="2">
+<button onClick="{{g.ir}}" role="switch" aria-checked="{{g.on}}" style="display:flex;align-items:center;gap:12px;padding:10px 0;min-height:44px;border-bottom:1px solid var(--line)"><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:600">{{g.nombre}}</span><span style="font-size:13px;color:var(--muted)">{{g.sub}}</span></span><span style="width:48px;height:28px;border-radius:99px;background:{{g.bg}};display:inline-flex;align-items:center;padding:0 3px;box-sizing:border-box;flex:none"><span style="width:22px;height:22px;border-radius:99px;background:var(--surface);margin-left:{{g.ml}}"></span></span></button>
+</sc-for>
+</div>
+<span style="font-size:13px;color:var(--muted)">La gerencia y quien administra el módulo ven a todos. Prueba arriba «Jefatura» y «Persona» para ver qué le aparece a cada uno.</span>
+</div></sc-if>
 
 <div style="display:flex;flex-direction:column">
 <span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding-bottom:4px">Así queda el equipo este mes</span>
@@ -166,11 +181,13 @@ form:focus-within{border-color:var(--agente)}
 <span style="display:inline-flex;color:var(--muted);flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span>
 </button>
 </sc-for>
+<sc-if value="{{sinPersonas}}" hint-placeholder-val="{{false}}"><div style="padding:20px 0;color:var(--muted)">No hay resultados visibles para este rol.</div></sc-if>
 </div>
 <p style="margin:0;font-size:13px;color:var(--muted)">Mueve una meta o un peso y el equipo se recalcula al instante. En el producto el cambio rige desde el período siguiente y queda en la auditoría.</p>
 </div></sc-if>
 
 <sc-if value="{{vCatalogo}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:14px">
+<div style="padding:14px 16px;border-radius:16px;background:var(--fill);display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center"><span style="flex:1 1 220px;min-width:0;display:flex;flex-direction:column"><span style="font-weight:600">¿No está lo que quieres medir?</span><span style="font-size:13px;color:var(--muted)">Arma un indicador propio de tu empresa con los hechos que el sistema ya registra.</span></span><button onClick="{{irPropio}}" style="flex:none;height:44px;padding:0 16px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);white-space:nowrap">Crear indicador propio</button></div>
 <div class="sx" style="display:flex;gap:6px;overflow-x:auto">
 <sc-for list="{{filtros}}" as="f" hint-placeholder-count="5">
 <button onClick="{{f.ir}}" style="flex:none;height:44px;padding:0 14px;border-radius:99px;border:1px solid {{f.borde}};background:{{f.bg}};color:{{f.fg}};font-size:13px;font-weight:600;white-space:nowrap">{{f.nombre}}</button>
@@ -190,6 +207,32 @@ form:focus-within{border-color:var(--agente)}
 </sc-for>
 </div>
 <p style="margin:0;font-size:13px;color:var(--muted)">Cada módulo activo publica aquí sus indicadores. Si apagas un módulo, los suyos salen del catálogo. Si falta uno, pídeselo al agente: lo arma con los hechos que el sistema ya registra.</p>
+</div></sc-if>
+
+<sc-if value="{{vPropio}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:18px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Nombre</span><input value="{{bNombre}}" onChange="{{bNombreCambia}}" placeholder="Ej.: Visitas a clientes al mes" style="height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:16px"></label>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Cómo se calcula</span><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{bOps}}" as="f" hint-placeholder-count="4"><button onClick="{{f.ir}}" style="min-height:44px;padding:6px 14px;border-radius:99px;border:1px solid {{f.borde}};background:{{f.bg}};color:{{f.fg}};font-size:13px;font-weight:600">{{f.nombre}}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Qué hecho mira</span><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{bHechos}}" as="f" hint-placeholder-count="4"><button onClick="{{f.ir}}" style="min-height:44px;padding:6px 14px;border-radius:99px;border:1px solid {{f.borde}};background:{{f.bg}};color:{{f.fg}};font-size:13px;font-weight:600">{{f.nombre}}</button></sc-for></div></div>
+<sc-if value="{{bDos}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">{{bDosTitulo}}</span><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{bHechos2}}" as="f" hint-placeholder-count="4"><button onClick="{{f.ir}}" style="min-height:44px;padding:6px 14px;border-radius:99px;border:1px solid {{f.borde}};background:{{f.bg}};color:{{f.fg}};font-size:13px;font-weight:600">{{f.nombre}}</button></sc-for></div></div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end">
+<div style="flex:1 1 240px;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Sentido</span><div style="display:flex;gap:2px;padding:3px;border-radius:14px;background:var(--fill)"><sc-for list="{{bSentidos}}" as="q" hint-placeholder-count="2"><button onClick="{{q.ir}}" style="flex:1;min-height:38px;padding:4px 10px;border-radius:11px;font-weight:{{q.peso}};background:{{q.bg}};text-align:center">{{q.nombre}}</button></sc-for></div></div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Meta</span><div style="display:flex;align-items:center;gap:4px">
+<button onClick="{{bMetaMenos}}" aria-label="Bajar la meta" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+<span style="min-width:110px;text-align:center;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600">{{bMetaTxt}}</span>
+<button onClick="{{bMetaMas}}" aria-label="Subir la meta" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div></div>
+</div>
+<div style="padding:14px 16px;border-radius:16px;background:var(--agentebg);display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;line-height:16px;font-weight:600;color:var(--agente)">Así se lee</span><span>{{bResumen}}</span></div>
+<div style="display:flex;flex-direction:column">
+<span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding-bottom:4px">Vista previa con los datos de este mes</span>
+<sc-for list="{{bPrev}}" as="p" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)"><span style="flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{p.nombre}}</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;flex:none">{{p.valor}}</span><span style="width:56px;text-align:right;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;color:{{p.fg}};flex:none">{{p.cump}}</span></div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<button onClick="{{bGuardar}}" style="height:44px;padding:0 18px;border-radius:12px;font-weight:600;background:var(--fg);color:var(--bg);white-space:nowrap">{{bGuardarTxt}}</button>
+</div>
+<p style="margin:0;font-size:13px;color:var(--muted)">El indicador queda solo para tu empresa, con su definición guardada y versionada. Antes de publicarlo siempre ves la vista previa con datos reales. También se lo puedes pedir al agente con tus palabras.</p>
 </div></sc-if>
 
 <sc-if value="{{vPersona}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:18px">
@@ -267,16 +310,20 @@ const CAT = [
   { id: 'reclamos', n: 'Reclamos de cliente', mod: 'Tickets', tipo: 'Calidad', u: ' al mes', s: -1, meta: 2, paso: 1, d: 0, que: 'Tickets de reclamo abiertos por sus clientes.', f: 'tickets del portal del cliente' },
   { id: 'escalado', n: 'Tiempo en resolver lo que escaló el agente', mod: 'Agente', tipo: 'Oportunidad', u: ' h', s: -1, meta: 4, paso: 1, d: 1, que: 'Horas que tarda en responder un pendiente del hilo.', f: 'pendientes del hilo y aprobaciones' },
 ];
-const cat = (id) => CAT.find((x) => x.id === id);
+const EXTRA = [];
+const cat = (id) => CAT.find((x) => x.id === id) || EXTRA.find((x) => x.id === id);
+const HECHOS = [['Negocio ganado', 'Comercial'], ['Cotización enviada', 'Comercial'], ['Lead recibido', 'Comercial'], ['Reunión con cliente registrada', 'Comercial'], ['Visita de supervisión hecha', 'Operaciones'], ['Ronda completada', 'Operaciones'], ['Novedad cerrada', 'Operaciones'], ['Turno cubierto', 'Operaciones'], ['Persona contratada', 'Personas'], ['Documento firmado', 'Documentos'], ['Reclamo de cliente', 'Tickets'], ['Pendiente del agente resuelto', 'Agente']];
+const OPS = [{ n: 'Contar', u: ' al mes', meta: 10, paso: 1, d: 0, s: 1 }, { n: 'Sumar un monto', u: ' UF', meta: 100, paso: 10, d: 0, s: 1 }, { n: 'Tiempo entre dos hechos', u: ' h', meta: 24, paso: 1, d: 1, s: -1, dos: 'Hasta qué hecho' }, { n: 'Porcentaje sobre otro hecho', u: ' %', meta: 50, paso: 5, d: 0, s: 1, dos: 'Sobre qué hecho' }];
+const BORR0 = { nombre: '', op: 0, h: 4, h2: 1, s: 1, meta: 10 };
 const EMP = {
-  gard: { nombre: 'Gard Security', vertical: 'Seguridad', mono: 'GS', cargos: [
+  gard: { nombre: 'Gard Security', vertical: 'Seguridad', mono: 'GS', jefes: { vendedor: 'Gerente comercial', reclutador: 'Jefe de personas', supervisor: 'Jefe de operaciones', jefeops: 'Gerente general', guardia: 'Supervisor' }, otros: ['Gerente comercial', 'Jefe de personas', 'Gerente general'], cargos: [
     { id: 'vendedor', n: 'Vendedor', gente: [['Camila Reyes', 'Zona oriente'], ['Tomás Fuentes', 'Zona centro'], ['Daniela Soto', 'Zona norte'], ['Ignacio Vera', 'Grandes cuentas']], base: [['ventas', 40], ['margen', 20], ['conversion', 20], ['resp_lead', 20]] },
     { id: 'reclutador', n: 'Reclutador', gente: [['Paula Mena', 'Región Metropolitana'], ['Rodrigo Salas', 'Regiones'], ['Javiera Pino', 'Región Metropolitana']], base: [['vacante', 60], ['docs', 40]] },
     { id: 'supervisor', n: 'Supervisor', gente: [['Luis Araya', '9 instalaciones'], ['Marcela Rojas', '7 instalaciones'], ['Héctor Bravo', '11 instalaciones'], ['Carolina Díaz', '8 instalaciones'], ['Felipe Núñez', '6 instalaciones']], base: [['visitas', 30], ['descubiertos', 30], ['novedades', 20], ['rondas', 20]] },
     { id: 'jefeops', n: 'Jefe de operaciones', gente: [['Andrea Castro', 'Zona oriente y norte'], ['Mauricio Lagos', 'Zona centro y sur']], base: [['cobertura', 40], ['textra', 20], ['reclamos', 20], ['escalado', 20]] },
     { id: 'guardia', n: 'Guardia', gente: [['Pedro Gallardo', 'Edificio Alba'], ['José Miranda', 'Centro logístico Sur'], ['Rosa Cárcamo', 'Clínica del Parque'], ['Manuel Tapia', 'Edificio Alba'], ['Sergio Olivares', 'Bodega Norte']], base: [['puntualidad', 50], ['rondas', 50]] },
   ] },
-  aseo: { nombre: 'Brillo Aseo', vertical: 'Aseo industrial', mono: 'BA', cargos: [
+  aseo: { nombre: 'Brillo Aseo', vertical: 'Aseo industrial', mono: 'BA', jefes: { ejecutivo: 'Gerente comercial', supaseo: 'Jefa de operaciones', dotacion: 'Gerente general', auxiliar: 'Supervisora de aseo' }, otros: ['Gerente comercial', 'Jefa de operaciones', 'Gerente general'], cargos: [
     { id: 'ejecutivo', n: 'Ejecutivo comercial', gente: [['Valentina Cruz', 'Retail'], ['Matías Ortiz', 'Oficinas'], ['Francisca Leal', 'Salud']], base: [['ventas', 50], ['conversion', 30], ['resp_lead', 20]] },
     { id: 'supaseo', n: 'Supervisora de aseo', gente: [['Gloria Paredes', '14 locales'], ['Nancy Riquelme', '10 locales'], ['Elena Vidal', '12 locales'], ['Marta Carrasco', '9 locales']], base: [['visitas', 40], ['descubiertos', 30], ['textra', 30]] },
     { id: 'dotacion', n: 'Encargada de dotación', gente: [['Lorena Sáez', 'Zona sur'], ['Ximena Farías', 'Zona norte']], base: [['vacante', 40], ['retencion', 40], ['docs', 20]] },
@@ -297,11 +344,12 @@ const num = (v, d) => v.toFixed(d).replace('.', ',').replace(/,0$/, '');
 const tono = (x) => (x >= 100 ? OK : x >= 85 ? WARN : BAD);
 const fondo = (x) => (x >= 100 ? 'var(--okbg)' : x >= 85 ? 'var(--warnbg)' : 'var(--badbg)');
 const base0 = () => { const o = {}; Object.keys(EMP).forEach((e) => { o[e] = {}; EMP[e].cargos.forEach((c) => { o[e][c.id] = c.base.map((b) => ({ id: b[0], peso: b[1], meta: cat(b[0]).meta })); }); }); return o; };
+const vis0 = () => { const o = {}; Object.keys(EMP).forEach((e) => { o[e] = {}; EMP[e].cargos.forEach((c) => { o[e][c.id] = { jefe: EMP[e].jefes[c.id], alcance: 'propios', propia: true, ranking: false }; }); }); return o; };
 
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { tema: null, emp: 'gard', vista: 'cargos', cargo: null, persona: null, periodo: 'mes', filtro: 'Todos', seg: 'pend', panel: 'lienzo', cfg: base0(), pend: JSON.parse(JSON.stringify(PEND0)), log: [], resp: null, texto: '' };
+    this.state = { tema: null, emp: 'gard', vista: 'cargos', cargo: null, persona: null, periodo: 'mes', filtro: 'Todos', seg: 'pend', panel: 'lienzo', rol: 'admin', vis: vis0(), borr: Object.assign({}, BORR0), cfg: base0(), pend: JSON.parse(JSON.stringify(PEND0)), log: [], resp: null, texto: '' };
   }
   valor(nombre, k, periodo) {
     const f = 0.74 + hash(nombre + k.id + periodo) * 0.46;
@@ -350,6 +398,20 @@ class Component extends DCLogic {
     const perSc = this.puntaje(P[0], lista, s.periodo);
     const perDet = lista.map((i) => { const k = cat(i.id), v = this.valor(P[0], k, s.periodo), c = Math.round(this.cump(v, i.meta, k) * 100); return { i, k, v, c }; });
     const ir = (st) => () => this.setState(Object.assign({ resp: null }, st));
+    const V = s.vis[s.emp][C.id], esAdmin = s.rol === 'admin';
+    const setVis = (patch, nota) => () => { const vis = JSON.parse(JSON.stringify(s.vis)); Object.assign(vis[s.emp][C.id], patch); const st = { vis }; this.anotar(st, 'Tú', nota); this.setState(st); };
+    const chip = (on) => ({ bg: on ? 'var(--fg)' : 'var(--surface)', fg: on ? 'var(--bg)' : 'var(--fg)', borde: on ? 'var(--fg)' : 'var(--line)' });
+    const seg = (on) => ({ peso: on ? 600 : 500, bg: on ? 'var(--surface)' : 'transparent' });
+    const yo = C.gente[0][0];
+    let visibles = ranking, notaRol = '';
+    if (s.rol === 'jefe') { if (V.alcance === 'propios') visibles = ranking.filter((r) => C.gente.indexOf(r.g) % 2 === 0); notaRol = 'Como ' + V.jefe + ': ve a ' + (V.alcance === 'propios' ? 'las ' + visibles.length + ' personas a su cargo' : 'todo el equipo') + '. No cambia metas ni pesos.'; }
+    if (s.rol === 'persona') { visibles = !V.propia ? [] : V.ranking ? ranking : ranking.filter((r) => r.g[0] === yo); notaRol = 'Como ' + yo + ': ' + (!V.propia ? 'este cargo no le muestra su resultado.' : V.ranking ? 've su resultado y el ranking del equipo.' : 've solo su propio resultado.'); }
+    const B = s.borr, OP = OPS[B.op];
+    const bK = { id: 'borr' + B.op + '-' + B.h + '-' + B.h2, n: B.nombre.trim() || OP.n + ': ' + HECHOS[B.h][0].toLowerCase(), mod: 'Propio', tipo: 'A medida', u: OP.u, s: B.s, meta: OP.meta, paso: OP.paso, d: OP.d };
+    const bSet = (patch) => () => this.setState({ borr: Object.assign({}, B, patch) });
+    const h1 = '«' + HECHOS[B.h][0] + '»', h2 = '«' + HECHOS[B.h2][0] + '»';
+    const bMetaTxt = (B.s > 0 ? '≥ ' : '≤ ') + num(B.meta, OP.d) + OP.u;
+    const bResumen = [ 'Cuenta cada ' + h1 + ' de la persona en el mes.', 'Suma el monto de cada ' + h1 + ' de la persona en el mes.', 'Mide las horas que pasan entre ' + h1 + ' y ' + h2 + ', en promedio.', 'De cada 100 ' + h2 + ', cuántos terminan en ' + h1 + '.' ][B.op] + ' Meta: ' + bMetaTxt + '. Sale de ' + HECHOS[B.h][1] + (OP.dos && HECHOS[B.h2][1] !== HECHOS[B.h][1] ? ' y ' + HECHOS[B.h2][1] : '') + '.';
     const pend = s.pend[s.emp];
 
     /* sugerencias del agente según la pantalla */
@@ -360,9 +422,10 @@ class Component extends DCLogic {
         ['¿Qué cargos tienen los pesos mal sumados?', () => { const out = E.cargos.filter((c) => conf[c.id].reduce((a, i) => a + i.peso, 0) !== 100).map((c) => c.n + ': suma ' + conf[c.id].reduce((a, i) => a + i.peso, 0) + ' %'); this.responder('¿Qué cargos tienen los pesos mal sumados?', out.length ? out.join('\n') : 'Todos los cargos suman 100 %.'); }],
         ['Abre el cargo con peor promedio', () => { const o = E.cargos.map((c) => ({ c, p: fila(c).prom })).sort((a, b) => a.p - b.p)[0]; this.responder('Abre el cargo con peor promedio', o.c.n + ' tiene el promedio más bajo: ' + o.p + '.', { vista: 'cargo', cargo: o.c.id }); }],
       ];
-    } else if (s.vista === 'cargo' || s.vista === 'catalogo') {
+    } else if (s.vista !== 'persona') {
       ctx = C.n;
       sug = [
+        ['Crea un indicador: visitas a clientes al mes', () => this.responder('Crea un indicador: visitas a clientes al mes', 'Armé el borrador con «Reunión con cliente registrada», contando por mes. Revísalo y guárdalo tú: yo no lo publico solo.', { vista: 'propio', rol: 'admin', borr: { nombre: 'Visitas a clientes al mes', op: 0, h: 3, h2: 1, s: 1, meta: 12 } })],
         ['¿Qué metas son realistas?', () => { const out = lista.map((i) => { const k = cat(i.id); const vs = C.gente.map((g) => this.valor(g[0], k, 'mes')).sort((a, b) => a - b); const m = vs[Math.floor(vs.length / 2)]; return k.n + ': el equipo va en ' + num(m, k.d) + k.u + ' (meta ' + this.metaTxt(i) + ')'; }); this.responder('¿Qué metas son realistas?', out.length ? out.join('\n') : 'Este cargo aún no tiene indicadores.'); }],
         ['Reparte los pesos parejo', () => { const cfg = JSON.parse(JSON.stringify(s.cfg)); this.repartirEn(cfg[s.emp][C.id]); this.responder('Reparte los pesos parejo', 'Listo: los ' + lista.length + ' indicadores quedaron sumando 100 %.', { cfg, vista: 'cargo' }); }],
         ['¿Qué pesa más en el resultado?', () => { const o = lista.slice().sort((a, b) => b.peso - a.peso)[0]; this.responder('¿Qué pesa más en el resultado?', o ? cat(o.id).n + ' pesa ' + o.peso + ' %. Si alguien falla ahí, es lo que más le baja el puntaje.' : 'Este cargo aún no tiene indicadores.'); }],
@@ -374,8 +437,9 @@ class Component extends DCLogic {
         ['Compárala con el equipo', () => { const pos = ranking.findIndex((r) => r.g[0] === P[0]) + 1; const prom = Math.round(ranking.reduce((a, r) => a + r.sc, 0) / ranking.length); this.responder('Compárala con el equipo', 'Va ' + pos + '.º de ' + ranking.length + ' en ' + C.n + ' este mes. El promedio del equipo es ' + prom + '.'); }],
       ];
     }
-    const filtros = ['Todos'].concat(CAT.map((k) => k.mod).filter((m, n, a) => a.indexOf(m) === n));
-    const titulos = { cargos: ['Desempeño', 'Desempeño por cargo', 'Cada empresa decide qué mide en cada cargo. Los números salen solos de lo que ya pasa en los módulos: nadie los digita.'], cargo: ['Desempeño › Cargos', C.n, 'Elige qué se mide, con qué meta y cuánto pesa. ' + C.gente.length + ' personas tienen este cargo.'], catalogo: ['Desempeño › ' + C.n, 'Agregar indicador', 'Catálogo de lo que el sistema ya sabe medir, por módulo.'], persona: ['Desempeño › ' + C.n, P[0], C.n + ' · ' + P[1]] }[s.vista];
+    const CATE = CAT.concat(EXTRA.filter((k) => k.emp === s.emp));
+    const filtros = ['Todos'].concat(CATE.map((k) => k.mod).filter((m, n, a) => a.indexOf(m) === n));
+    const titulos = { cargos: ['Desempeño · módulo aparte', 'Desempeño por cargo', 'Cada empresa decide qué mide en cada cargo. Los números salen solos de lo que ya pasa en los módulos: nadie los digita.'], cargo: ['Desempeño › Cargos', C.n, 'Elige qué se mide, con qué meta y cuánto pesa. ' + C.gente.length + ' personas tienen este cargo.'], catalogo: ['Desempeño › ' + C.n, 'Agregar indicador', 'Catálogo de lo que el sistema ya sabe medir, por módulo.'], propio: ['Desempeño › ' + C.n, 'Indicador propio', 'Para medir algo que el catálogo no trae, sobre hechos que el sistema ya registra.'], persona: ['Desempeño › ' + C.n, P[0], C.n + ' · ' + P[1]] }[s.vista];
 
     return {
       temaClase: oscuro ? 't-oscuro' : 't-claro', movil: MOVIL,
@@ -393,11 +457,26 @@ class Component extends DCLogic {
       irCargos: ir({ vista: 'cargos', panel: 'lienzo' }),
       alternarTema: () => this.setState({ tema: oscuro ? 'claro' : 'oscuro' }),
       hayVolver: s.vista !== 'cargos',
-      volver: ir({ vista: s.vista === 'cargo' ? 'cargos' : 'cargo' }),
+      volver: ir({ vista: s.vista === 'cargo' ? 'cargos' : s.vista === 'propio' ? 'catalogo' : 'cargo' }),
       miga: titulos[0], titulo: titulos[1], sub: titulos[2],
       hayResp: !!s.resp, respPregunta: s.resp ? 'Agente · ' + s.resp.pregunta : '', respTexto: s.resp ? s.resp.texto : '', cerrarResp: () => this.setState({ resp: null }),
-      vCargos: s.vista === 'cargos', vCargo: s.vista === 'cargo', vCatalogo: s.vista === 'catalogo', vPersona: s.vista === 'persona',
-      empresas: Object.keys(EMP).map((id) => ({ nombre: EMP[id].nombre, vertical: EMP[id].vertical, peso: s.emp === id ? 600 : 500, bg: s.emp === id ? 'var(--surface)' : 'transparent', ir: ir({ emp: id, cargo: null, persona: null }) })),
+      vCargos: s.vista === 'cargos', vCargo: s.vista === 'cargo', vCatalogo: s.vista === 'catalogo', vPersona: s.vista === 'persona', vPropio: s.vista === 'propio', esAdmin, hayNotaRol: !!notaRol, notaRol, sinPersonas: visibles.length === 0,
+      roles: [['admin', 'Administrador'], ['jefe', 'Jefatura'], ['persona', 'Persona']].map((r) => Object.assign({ nombre: r[1], ir: () => this.setState({ rol: r[0] }) }, seg(s.rol === r[0]))),
+      jefes: E.otros.concat(E.cargos.filter((c) => c.id !== C.id).map((c) => c.n)).filter((n, i, a) => a.indexOf(n) === i).map((n) => Object.assign({ nombre: n, ir: setVis({ jefe: n }, 'Definiste a ' + n + ' como jefatura de ' + C.n + '.') }, chip(V.jefe === n))),
+      alcances: [['propios', 'Solo a las personas a su cargo'], ['todos', 'A todo el equipo']].map((a) => Object.assign({ nombre: a[1], ir: setVis({ alcance: a[0] }, 'Cambiaste a quiénes ve la jefatura de ' + C.n + '.') }, seg(V.alcance === a[0]))),
+      toggles: [['propia', 'La persona ve su propio resultado', 'Su puntaje y cada indicador contra la meta.'], ['ranking', 'La persona ve el ranking del equipo', 'Los puntajes de sus compañeros de cargo.']].map((g) => ({ nombre: g[1], sub: g[2], on: !!V[g[0]], bg: V[g[0]] ? 'var(--fg)' : 'var(--line)', ml: V[g[0]] ? '20px' : '0px', ir: setVis({ [g[0]]: !V[g[0]] }, 'Cambiaste lo que ve la persona en ' + C.n + '.') })),
+      irPropio: ir({ vista: 'propio', borr: Object.assign({}, BORR0) }),
+      bNombre: B.nombre, bNombreCambia: (e) => this.setState({ borr: Object.assign({}, B, { nombre: e.target.value }) }),
+      bOps: OPS.map((o, n) => Object.assign({ nombre: o.n, ir: bSet({ op: n, meta: o.meta, s: o.s }) }, chip(B.op === n))),
+      bHechos: HECHOS.map((h, n) => Object.assign({ nombre: h[0], ir: bSet({ h: n }) }, chip(B.h === n))),
+      bHechos2: HECHOS.map((h, n) => Object.assign({ nombre: h[0], ir: bSet({ h2: n }) }, chip(B.h2 === n))),
+      bDos: !!OP.dos, bDosTitulo: OP.dos || '',
+      bSentidos: [[1, 'Más es mejor'], [-1, 'Menos es mejor']].map((x) => Object.assign({ nombre: x[1], ir: bSet({ s: x[0] }) }, seg(B.s === x[0]))),
+      bMetaTxt, bMetaMenos: bSet({ meta: Math.max(OP.paso, B.meta - OP.paso) }), bMetaMas: bSet({ meta: Math.min(OP.u === ' %' ? 100 : 100000, B.meta + OP.paso) }),
+      bResumen, bGuardarTxt: 'Guardar y agregar a ' + C.n,
+      bPrev: C.gente.map((g) => { const v = this.valor(g[0], bK, 'mes'), c = Math.round(this.cump(v, B.meta, bK) * 100); return { nombre: g[0], valor: num(v, OP.d) + OP.u, cump: c + ' %', fg: tono(c) }; }),
+      bGuardar: () => { const k = Object.assign({}, bK, { id: 'x' + EXTRA.length, emp: s.emp, que: bResumen, f: HECHOS[B.h][0].toLowerCase() + (OP.dos ? ' y ' + HECHOS[B.h2][0].toLowerCase() : '') }); EXTRA.push(k); const cfg = JSON.parse(JSON.stringify(s.cfg)); cfg[s.emp][C.id].push({ id: k.id, peso: 10, meta: B.meta }); const st = { cfg, vista: 'cargo', resp: null }; this.anotar(st, 'Tú', 'Creaste el indicador propio «' + k.n + '» y lo agregaste a ' + C.n + '.'); this.setState(st); },
+      empresas: Object.keys(EMP).map((id) => ({ nombre: EMP[id].nombre, vertical: EMP[id].vertical, peso: s.emp === id ? 600 : 500, bg: s.emp === id ? 'var(--surface)' : 'transparent', ir: ir({ emp: id, cargo: null, persona: null, rol: 'admin' }) })),
       cargos: E.cargos.map((c) => { const f = fila(c); return { nombre: c.n, detalle: (f.l.length ? f.l.length + (f.l.length === 1 ? ' indicador' : ' indicadores') : 'Sin indicadores') + ' · ' + c.gente.length + ' personas', prom: f.l.length ? f.prom : '—', fg: f.l.length ? tono(f.prom) : 'var(--muted)', abrir: ir({ vista: 'cargo', cargo: c.id }) }; }),
       pesoTxt: pesoTot === 100 ? 'Los pesos suman 100 %' : pesoTot < 100 ? 'Los pesos suman ' + pesoTot + ' %: faltan ' + (100 - pesoTot) : 'Los pesos suman ' + pesoTot + ' %: sobran ' + (pesoTot - 100),
       pesoBg: pesoTot === 100 ? 'var(--okbg)' : 'var(--warnbg)', pesoFg: pesoTot === 100 ? OK : WARN,
@@ -406,10 +485,10 @@ class Component extends DCLogic {
       irCatalogo: ir({ vista: 'catalogo', filtro: 'Todos' }),
       sinInds: lista.length === 0,
       inds: lista.map((i, n) => { const k = cat(i.id); const mov = (campo, delta, min, max) => () => this.editar((l) => { const p = Math.pow(10, 2); l[n][campo] = Math.max(min, Math.min(max, Math.round((l[n][campo] + delta) * p) / p)); }, 'Cambiaste ' + (campo === 'meta' ? 'la meta' : 'el peso') + ' de «' + k.n + '» en ' + C.n + '.');
-        return { nombre: k.n, clase: k.mod + ' · ' + k.tipo, fuente: k.f, metaTxt: this.metaTxt(i), pesoTxt: i.peso + ' %', metaMenos: mov('meta', -k.paso, k.paso, 100000), metaMas: mov('meta', k.paso, k.paso, k.u === ' %' ? 100 : 100000), pesoMenos: mov('peso', -5, 0, 100), pesoMas: mov('peso', 5, 0, 100), quitar: () => this.editar((l) => { l.splice(n, 1); }, 'Quitaste «' + k.n + '» de ' + C.n + '.') }; }),
-      personas: ranking.map((r) => ({ nombre: r.g[0], sub: r.g[1], ini: r.g[0].split(' ').map((w) => w[0]).join(''), score: lista.length ? r.sc : '—', fg: lista.length ? tono(r.sc) : 'var(--muted)', barW: Math.min(100, Math.round(r.sc / 1.2)) + '%', abrir: ir({ vista: 'persona', persona: r.g[0], periodo: 'mes' }) })),
+        return { nombre: k.n, clase: k.mod + ' · ' + k.tipo, fuente: k.f, edita: esAdmin, lee: !esAdmin, resumen: this.metaTxt(i) + ' · ' + i.peso + ' %', metaTxt: this.metaTxt(i), pesoTxt: i.peso + ' %', metaMenos: mov('meta', -k.paso, k.paso, 100000), metaMas: mov('meta', k.paso, k.paso, k.u === ' %' ? 100 : 100000), pesoMenos: mov('peso', -5, 0, 100), pesoMas: mov('peso', 5, 0, 100), quitar: () => this.editar((l) => { l.splice(n, 1); }, 'Quitaste «' + k.n + '» de ' + C.n + '.') }; }),
+      personas: visibles.map((r) => ({ nombre: r.g[0], sub: r.g[1], ini: r.g[0].split(' ').map((w) => w[0]).join(''), score: lista.length ? r.sc : '—', fg: lista.length ? tono(r.sc) : 'var(--muted)', barW: Math.min(100, Math.round(r.sc / 1.2)) + '%', abrir: ir({ vista: 'persona', persona: r.g[0], periodo: 'mes' }) })),
       filtros: filtros.map((f) => ({ nombre: f, bg: s.filtro === f ? 'var(--fg)' : 'var(--surface)', fg: s.filtro === f ? 'var(--bg)' : 'var(--fg)', borde: s.filtro === f ? 'var(--fg)' : 'var(--line)', ir: () => this.setState({ filtro: f }) })),
-      catalogo: CAT.filter((k) => s.filtro === 'Todos' || k.mod === s.filtro).map((k) => { const ya = !!lista.find((i) => i.id === k.id); return { nombre: k.n, clase: k.mod + ' · ' + k.tipo + ' · ' + (k.s > 0 ? 'más es mejor' : 'menos es mejor'), que: k.que, fuente: k.f, btn: ya ? 'Ya se mide' : 'Agregar', bg: ya ? 'transparent' : 'var(--fg)', fg: ya ? 'var(--muted)' : 'var(--bg)', borde: ya ? 'var(--line)' : 'var(--fg)', agregar: ya ? () => {} : () => { const cfg = JSON.parse(JSON.stringify(s.cfg)); cfg[s.emp][C.id].push({ id: k.id, peso: 10, meta: k.meta }); const st = { cfg, vista: 'cargo', resp: null }; this.anotar(st, 'Tú', 'Agregaste «' + k.n + '» a ' + C.n + '.'); this.setState(st); } }; }),
+      catalogo: CATE.filter((k) => s.filtro === 'Todos' || k.mod === s.filtro).map((k) => { const ya = !!lista.find((i) => i.id === k.id); return { nombre: k.n, clase: k.mod + ' · ' + k.tipo + ' · ' + (k.s > 0 ? 'más es mejor' : 'menos es mejor'), que: k.que, fuente: k.f, btn: ya ? 'Ya se mide' : 'Agregar', bg: ya ? 'transparent' : 'var(--fg)', fg: ya ? 'var(--muted)' : 'var(--bg)', borde: ya ? 'var(--line)' : 'var(--fg)', agregar: ya ? () => {} : () => { const cfg = JSON.parse(JSON.stringify(s.cfg)); cfg[s.emp][C.id].push({ id: k.id, peso: 10, meta: k.meta }); const st = { cfg, vista: 'cargo', resp: null }; this.anotar(st, 'Tú', 'Agregaste «' + k.n + '» a ' + C.n + '.'); this.setState(st); } }; }),
       perScore: lista.length ? perSc : '—', perFg: lista.length ? tono(perSc) : 'var(--muted)', perBg: lista.length ? fondo(perSc) : 'var(--fill)',
       perEstado: !lista.length ? 'Sin indicadores' : perSc >= 100 ? 'Cumple sus metas' : perSc >= 85 ? 'Cerca de la meta' : 'Bajo la meta',
       perPuesto: (s.periodo === 'mes' ? 'Noviembre 2026' : 'Trimestre sep–nov 2026') + ' · puntaje de 0 a 120',
