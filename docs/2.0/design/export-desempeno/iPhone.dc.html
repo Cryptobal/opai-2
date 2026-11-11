@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>OPAI 2.0 · Desempeño por cargo · iPhone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+body{margin:0}
+.t-claro{--bg:#FAFAF9;--surface:#FFFFFF;--fill:#F0F0EE;--line:#E3E3E0;--fg:#0D0D0E;--muted:#5A5A60;--agente:#4A3FD8;--agentebg:#EEEDFC;--agentefg:#FFFFFF;--ok:#166534;--okbg:#E6F4EA;--warn:#92400E;--warnbg:#FBF0DC;--bad:#B42318;--badbg:#FBE9E7;--shadow:0 14px 40px -14px rgba(13,13,14,0.28),0 2px 6px rgba(13,13,14,0.05)}
+.t-oscuro{--bg:#0A0A0B;--surface:#141416;--fill:#1D1D20;--line:#29292D;--fg:#F4F4F5;--muted:#A1A1AA;--agente:#A9A4FF;--agentebg:#1D1B3A;--agentefg:#0A0A0B;--ok:#4ADE80;--okbg:#10261A;--warn:#FBBF24;--warnbg:#2A2009;--bad:#F87171;--badbg:#2C1313;--shadow:0 14px 40px -14px rgba(0,0,0,0.8),0 0 0 1px #29292D}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit}
+input{font:inherit;color:inherit;background:none;border:0;outline:0;min-width:0}
+button:focus-visible{outline:2px solid var(--agente);outline-offset:2px}
+form:focus-within{border-color:var(--agente)}
+.sx{scrollbar-width:none}.sx::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<div class="{{temaClase}}" style="width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;display:flex;flex-direction:row;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:20px">
+
+<nav aria-label="Marco" style="width:72px;flex:none;display:{{railDisplay}};flex-direction:column;align-items:center;gap:8px;padding:14px 0;border-right:1px solid var(--line)">
+<span style="min-width:36px;height:36px;padding:0 6px;border-radius:11px;background:var(--fg);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;margin-bottom:8px">{{mono}}</span>
+<button onClick="{{segPend}}" aria-label="Hilo" style="width:56px;height:56px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg><span style="font-size:11px;line-height:14px">Hilo</span><span style="position:absolute;top:4px;right:4px;min-width:18px;height:18px;border-radius:99px;background:var(--agente);color:var(--agentefg);font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',ui-monospace,monospace">{{nPend}}</span></button>
+<button onClick="{{irCargos}}" aria-label="Índice: Desempeño" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg></button>
+<button onClick="{{alternarTema}}" aria-label="Cambiar entre tema claro y oscuro" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none;margin-top:auto"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg></button>
+</nav>
+
+<div style="width:{{hiloW}};flex:{{hiloFlex}};min-width:0;min-height:0;display:{{hiloDisplay}};flex-direction:column;border-right:1px solid var(--line)">
+<div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px {{padH}} 4px {{padH}}">
+<span style="min-width:34px;height:34px;padding:0 6px;border-radius:10px;background:var(--fg);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none">{{mono}}</span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{empNombre}}</span><span style="font-size:12px;line-height:16px;color:var(--muted)">{{empSub}}</span></span>
+<sc-if value="{{movil}}" hint-placeholder-val="{{false}}"><button onClick="{{irLienzo}}" style="flex:none;height:44px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;white-space:nowrap"><span>Ver pantalla</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></sc-if>
+</div>
+<div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:12px {{padH}}">
+<h1 style="margin:0;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-0.02em">Desempeño</h1>
+<p style="margin:0;color:var(--muted);font-size:15px;line-height:22px">{{resumen}}</p>
+</div>
+<div style="flex:none;padding:0 {{padH}} 10px {{padH}}">
+<div style="display:flex;gap:2px;padding:3px;border-radius:14px;background:var(--fill)">
+<sc-for list="{{segmentos}}" as="s" hint-placeholder-count="2">
+<button onClick="{{s.ir}}" style="flex:1;height:38px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:{{s.peso}};background:{{s.bg}}"><span>{{s.nombre}}</span><span style="font-size:12px;font-family:'JetBrains Mono',ui-monospace,monospace;color:var(--muted)">{{s.cuenta}}</span></button>
+</sc-for>
+</div>
+</div>
+<div class="sx" style="flex:1;min-height:0;overflow-y:auto;padding:0 {{padH}} 16px {{padH}}">
+<sc-if value="{{segEsPend}}" hint-placeholder-val="{{true}}"><div style="display:flex;flex-direction:column">
+<sc-for list="{{pendientes}}" as="d" hint-placeholder-count="2">
+<div style="padding:14px 0;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line)">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;line-height:16px;font-weight:600;color:var(--agente)"><span style="width:8px;height:8px;border-radius:99px;background:var(--agente);flex:none"></span><span>Agente</span><span style="font-weight:400;color:var(--muted)">{{d.area}}</span></div>
+<div style="font-size:16px;line-height:22px;font-weight:600">{{d.titulo}}</div>
+<div style="color:var(--muted)">{{d.contexto}}</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px">
+<button onClick="{{d.si}}" style="height:44px;padding:0 18px;border-radius:12px;font-weight:600;background:var(--fg);color:var(--bg);display:inline-flex;align-items:center;white-space:nowrap">Aceptar</button>
+<button onClick="{{d.no}}" style="height:44px;padding:0 16px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;white-space:nowrap">Rechazar</button>
+<button onClick="{{d.ver}}" style="height:44px;padding:0 10px;border-radius:12px;font-weight:500;color:var(--muted);display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><span>Ver el cargo</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{sinPend}}" hint-placeholder-val="{{false}}"><div style="padding:36px 0;display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span style="color:var(--ok);display:inline-flex"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><div style="font-size:18px;line-height:26px;font-weight:600">Nada espera tu decisión.</div><div style="color:var(--muted)">El agente propone cambios cuando los datos lo justifican.</div></div></sc-if>
+</div></sc-if>
+<sc-if value="{{segEsAct}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column">
+<sc-for list="{{actividad}}" as="e" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start">
+<span style="width:56px;flex:none;font-size:12px;line-height:20px;color:var(--muted);font-family:'JetBrains Mono',ui-monospace,monospace">{{e.hora}}</span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;line-height:16px;font-weight:600;color:{{e.fg}}">{{e.quien}}</span><span>{{e.txt}}</span></span>
+</div>
+</sc-for>
+</div></sc-if>
+</div>
+</div>
+
+<div style="flex:1;min-width:0;min-height:0;display:{{lienzoDisplay}};flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:6px;padding:14px {{padX}} 2px {{padX}}">
+<sc-if value="{{movil}}" hint-placeholder-val="{{false}}"><button onClick="{{irHilo}}" aria-label="Abrir el hilo" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex:none;position:relative;margin-left:-10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg><span style="position:absolute;top:2px;right:0;min-width:18px;height:18px;border-radius:99px;background:var(--agente);color:var(--agentefg);font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',ui-monospace,monospace">{{nPend}}</span></button></sc-if>
+<sc-if value="{{hayVolver}}" hint-placeholder-val="{{false}}"><button onClick="{{volver}}" aria-label="Volver" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button></sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;padding-left:6px">
+<span style="font-size:12px;line-height:16px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{miga}}</span>
+<h2 style="margin:0;font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{titulo}}</h2>
+</div>
+<sc-if value="{{movil}}" hint-placeholder-val="{{false}}"><button onClick="{{alternarTema}}" aria-label="Cambiar entre tema claro y oscuro" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg></button></sc-if>
+</div>
+
+<main class="sx" style="flex:1;min-height:0;overflow-y:auto;padding:8px {{padX}} 24px {{padX}}">
+<div style="max-width:860px;display:flex;flex-direction:column;gap:18px">
+<p style="margin:0;color:var(--muted);font-size:15px;line-height:22px">{{sub}}</p>
+
+<sc-if value="{{hayResp}}" hint-placeholder-val="{{false}}"><div style="padding:14px 8px 14px 16px;border-radius:16px;background:var(--agentebg);display:flex;gap:12px;align-items:flex-start">
+<span style="display:inline-flex;color:var(--agente);flex:none;padding-top:2px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"></path></svg></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;line-height:16px;font-weight:600;color:var(--agente)">{{respPregunta}}</span><span style="white-space:pre-line">{{respTexto}}</span></div>
+<button onClick="{{cerrarResp}}" aria-label="Cerrar la respuesta" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none;margin-top:-8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div></sc-if>
+
+<sc-if value="{{vCargos}}" hint-placeholder-val="{{true}}"><div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Empresa de ejemplo</span>
+<div style="display:flex;gap:2px;padding:3px;border-radius:14px;background:var(--fill)">
+<sc-for list="{{empresas}}" as="e" hint-placeholder-count="2">
+<button onClick="{{e.ir}}" style="flex:1;min-height:44px;padding:4px 8px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:{{e.bg}}"><span style="font-weight:{{e.peso}}">{{e.nombre}}</span><span style="font-size:12px;line-height:16px;color:var(--muted)">{{e.vertical}}</span></button>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{cargos}}" as="c" hint-placeholder-count="5">
+<button onClick="{{c.abrir}}" style="display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);min-height:44px">
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;line-height:22px;font-weight:600">{{c.nombre}}</span><span style="font-size:13px;color:var(--muted)">{{c.detalle}}</span></span>
+<span style="flex:none;display:flex;flex-direction:column;align-items:flex-end"><span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;font-size:18px;color:{{c.fg}}">{{c.prom}}</span><span style="font-size:12px;line-height:16px;color:var(--muted)">promedio</span></span>
+<span style="display:inline-flex;color:var(--muted);flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span>
+</button>
+</sc-for>
+</div>
+<p style="margin:0;font-size:13px;color:var(--muted)">Los cargos son los de Personas › Cargos: cada empresa tiene los suyos. El puntaje va de 0 a 120; 100 es cumplir todas las metas.</p>
+</div></sc-if>
+
+<sc-if value="{{vCargo}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<span style="height:32px;padding:0 12px;border-radius:99px;background:{{pesoBg}};color:{{pesoFg}};font-weight:600;font-size:13px;display:inline-flex;align-items:center;white-space:nowrap">{{pesoTxt}}</span>
+<span style="flex:1"></span>
+<button onClick="{{repartir}}" style="height:44px;padding:0 14px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);white-space:nowrap">Repartir pesos</button>
+<button onClick="{{plantilla}}" style="height:44px;padding:0 14px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);white-space:nowrap">Plantilla de la vertical</button>
+<button onClick="{{irCatalogo}}" style="height:44px;padding:0 18px;border-radius:12px;font-weight:600;background:var(--fg);color:var(--bg);display:inline-flex;align-items:center;gap:8px;white-space:nowrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>Agregar indicador</span></button>
+</div>
+
+<div style="display:flex;flex-direction:column">
+<span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding-bottom:4px">Qué se mide</span>
+<sc-for list="{{inds}}" as="i" hint-placeholder-count="4">
+<div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)">
+<div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:16px;line-height:22px;font-weight:600">{{i.nombre}}</span>
+<span style="font-size:12px;line-height:16px;color:var(--muted)">{{i.clase}}</span>
+<span style="font-size:12px;line-height:16px;color:var(--muted)">Sale de: {{i.fuente}}</span>
+</div>
+<div style="flex:none;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:11px;line-height:14px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Meta</span>
+<div style="display:flex;align-items:center;gap:4px">
+<button onClick="{{i.metaMenos}}" aria-label="Bajar la meta" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+<span style="min-width:92px;text-align:center;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600">{{i.metaTxt}}</span>
+<button onClick="{{i.metaMas}}" aria-label="Subir la meta" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</div>
+<div style="flex:none;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:11px;line-height:14px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Peso</span>
+<div style="display:flex;align-items:center;gap:4px">
+<button onClick="{{i.pesoMenos}}" aria-label="Bajar el peso" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+<span style="min-width:52px;text-align:center;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600">{{i.pesoTxt}}</span>
+<button onClick="{{i.pesoMas}}" aria-label="Subir el peso" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</div>
+<button onClick="{{i.quitar}}" aria-label="Quitar este indicador" style="width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none;align-self:flex-end"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></button>
+</div>
+</sc-for>
+<sc-if value="{{sinInds}}" hint-placeholder-val="{{false}}"><div style="padding:28px 0;display:flex;flex-direction:column;gap:6px"><span style="font-size:18px;line-height:26px;font-weight:600">Este cargo todavía no mide nada.</span><span style="color:var(--muted)">Agrega indicadores del catálogo o parte de la plantilla de la vertical.</span></div></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column">
+<span style="font-size:12px;line-height:16px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding-bottom:4px">Así queda el equipo este mes</span>
+<sc-for list="{{personas}}" as="p" hint-placeholder-count="4">
+<button onClick="{{p.abrir}}" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);min-height:44px">
+<span style="width:36px;height:36px;border-radius:99px;background:var(--fill);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex:none">{{p.ini}}</span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{p.nombre}}</span><span style="font-size:12px;line-height:16px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{p.sub}}</span></span>
+<span style="width:{{barBox}};height:6px;border-radius:99px;background:var(--fill);overflow:hidden;display:inline-flex;flex:none"><span style="width:{{p.barW}};background:{{p.fg}};border-radius:99px"></span></span>
+<span style="width:40px;text-align:right;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;font-size:16px;color:{{p.fg}};flex:none">{{p.score}}</span>
+<span style="display:inline-flex;color:var(--muted);flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></span>
+</button>
+</sc-for>
+</div>
+<p style="margin:0;font-size:13px;color:var(--muted)">Mueve una meta o un peso y el equipo se recalcula al instante. En el producto el cambio rige desde el período siguiente y queda en la auditoría.</p>
+</div></sc-if>
+
+<sc-if value="{{vCatalogo}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:14px">
+<div class="sx" style="display:flex;gap:6px;overflow-x:auto">
+<sc-for list="{{filtros}}" as="f" hint-placeholder-count="5">
+<button onClick="{{f.ir}}" style="flex:none;height:44px;padding:0 14px;border-radius:99px;border:1px solid {{f.borde}};background:{{f.bg}};color:{{f.fg}};font-size:13px;font-weight:600;white-space:nowrap">{{f.nombre}}</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{catalogo}}" as="k" hint-placeholder-count="6">
+<div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)">
+<div style="flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:16px;line-height:22px;font-weight:600">{{k.nombre}}</span>
+<span style="font-size:12px;line-height:16px;color:var(--muted)">{{k.clase}}</span>
+<span>{{k.que}}</span>
+<span style="font-size:12px;line-height:16px;color:var(--muted)">Sale de: {{k.fuente}}</span>
+</div>
+<button onClick="{{k.agregar}}" style="flex:none;height:44px;padding:0 16px;border-radius:12px;font-weight:600;border:1px solid {{k.borde}};background:{{k.bg}};color:{{k.fg}};white-space:nowrap">{{k.btn}}</button>
+</div>
+</sc-for>
+</div>
+<p style="margin:0;font-size:13px;color:var(--muted)">Cada módulo activo publica aquí sus indicadores. Si apagas un módulo, los suyos salen del catálogo. Si falta uno, pídeselo al agente: lo arma con los hechos que el sistema ya registra.</p>
+</div></sc-if>
+
+<sc-if value="{{vPersona}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">
+<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;font-size:48px;line-height:52px;color:{{perFg}}">{{perScore}}</span>
+<div style="flex:1 1 160px;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+<span style="height:28px;padding:0 12px;border-radius:99px;background:{{perBg}};color:{{perFg}};font-weight:600;font-size:13px;display:inline-flex;align-items:center">{{perEstado}}</span>
+<span style="font-size:13px;color:var(--muted)">{{perPuesto}}</span>
+</div>
+<div style="display:flex;gap:2px;padding:3px;border-radius:14px;background:var(--fill);flex:none">
+<sc-for list="{{periodos}}" as="q" hint-placeholder-count="2">
+<button onClick="{{q.ir}}" style="height:38px;padding:0 14px;border-radius:11px;font-weight:{{q.peso}};background:{{q.bg}};white-space:nowrap">{{q.nombre}}</button>
+</sc-for>
+</div>
+</div>
+<div style="padding:12px 16px;border-radius:16px;background:var(--fill);display:flex;gap:10px;align-items:flex-start">
+<span style="display:inline-flex;color:var(--agente);flex:none;padding-top:2px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"></path></svg></span>
+<span>{{perAgente}}</span>
+</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{perInds}}" as="r" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:8px;padding:14px 0;border-bottom:1px solid var(--line)">
+<div style="display:flex;align-items:baseline;gap:10px">
+<span style="flex:1;min-width:0;font-size:16px;line-height:22px;font-weight:600">{{r.nombre}}</span>
+<span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;color:{{r.fg}};flex:none">{{r.cump}}</span>
+</div>
+<span style="height:6px;border-radius:99px;background:var(--fill);overflow:hidden;display:flex"><span style="width:{{r.barW}};background:{{r.fg}};border-radius:99px"></span></span>
+<div style="display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--muted)"><span>Resultado <span style="font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;color:var(--fg)">{{r.valor}}</span></span><span>Meta <span style="font-family:'JetBrains Mono',ui-monospace,monospace">{{r.meta}}</span></span><span>Peso <span style="font-family:'JetBrains Mono',ui-monospace,monospace">{{r.peso}}</span></span></div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button onClick="{{irCargoDePersona}}" style="height:44px;padding:0 16px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);white-space:nowrap">Cambiar lo que mide este cargo</button>
+</div>
+</div></sc-if>
+</div>
+</main>
+
+<div style="flex:none;border-top:1px solid var(--line);background:var(--surface)"><div style="max-width:900px;box-sizing:border-box;padding:10px {{padX}} 16px {{padX}};display:flex;flex-direction:column;gap:8px">
+<div class="sx" style="display:flex;gap:6px;overflow-x:auto;align-items:center">
+<span style="flex:none;height:32px;line-height:32px;padding:0 12px;border-radius:99px;background:var(--agentebg);color:var(--agente);font-size:12px;font-weight:600;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis">Sobre: {{ctx}}</span>
+<sc-for list="{{sugerencias}}" as="q" hint-placeholder-count="3">
+<button onClick="{{q.ir}}" style="flex:none;height:44px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-size:13px;white-space:nowrap">{{q.txt}}</button>
+</sc-for>
+</div>
+<form onSubmit="{{alEnviar}}" style="display:flex;align-items:center;gap:4px;height:56px;padding:0 6px 0 16px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)">
+<span style="display:inline-flex;color:var(--agente);flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"></path></svg></span>
+<input value="{{texto}}" onChange="{{alEscribir}}" aria-label="Pide o pregunta algo al agente" placeholder="Pregunta por una persona, un cargo o una meta" style="flex:1;height:44px;padding:0 8px;font-size:16px">
+<button type="submit" aria-label="Enviar" style="width:44px;height:44px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:var(--agente);color:var(--agentefg);flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
+</form>
+</div></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"oscuro":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+const MOVIL = true;
+const OK = 'var(--ok)', WARN = 'var(--warn)', BAD = 'var(--bad)';
+/* Catálogo: cada módulo publica sus indicadores. s: 1 = más es mejor, -1 = menos es mejor. */
+const CAT = [
+  { id: 'ventas', n: 'Ventas cerradas', mod: 'Comercial', tipo: 'Resultado', u: ' UF', s: 1, meta: 600, paso: 50, d: 0, que: 'Monto mensual de los negocios ganados por la persona.', f: 'negocios ganados' },
+  { id: 'margen', n: 'Margen de lo vendido', mod: 'Comercial', tipo: 'Calidad', u: ' %', s: 1, meta: 18, paso: 1, d: 1, que: 'Margen promedio de las cotizaciones que ganó.', f: 'cotizaciones aceptadas (CPQ)' },
+  { id: 'conversion', n: 'Cotizaciones ganadas', mod: 'Comercial', tipo: 'Resultado', u: ' %', s: 1, meta: 25, paso: 5, d: 0, que: 'De cada 100 cotizaciones enviadas, cuántas se ganan.', f: 'cotizaciones enviadas y aceptadas' },
+  { id: 'resp_lead', n: 'Tiempo de respuesta a un lead', mod: 'Comercial', tipo: 'Oportunidad', u: ' h', s: -1, meta: 2, paso: 0.5, d: 1, que: 'Horas entre que entra el lead y el primer contacto.', f: 'lead creado y primer contacto' },
+  { id: 'vacante', n: 'Días para cubrir una vacante', mod: 'Personas', tipo: 'Oportunidad', u: ' días', s: -1, meta: 7, paso: 1, d: 1, que: 'Días entre que se abre el puesto y entra la persona.', f: 'puesto vacante y contrato firmado' },
+  { id: 'retencion', n: 'Retención a 90 días', mod: 'Personas', tipo: 'Calidad', u: ' %', s: 1, meta: 80, paso: 5, d: 0, que: 'De quienes reclutó, cuántos siguen a los 90 días.', f: 'contratos y finiquitos' },
+  { id: 'docs', n: 'Fichas con documentos al día', mod: 'Personas', tipo: 'Calidad', u: ' %', s: 1, meta: 95, paso: 1, d: 0, que: 'Personas a su cargo sin documentos vencidos.', f: 'vencimientos de documentos' },
+  { id: 'cobertura', n: 'Cobertura de pauta', mod: 'Operaciones', tipo: 'Resultado', u: ' %', s: 1, meta: 98, paso: 1, d: 1, que: 'Turnos de la pauta que se cubrieron.', f: 'pauta y asistencia' },
+  { id: 'descubiertos', n: 'Turnos descubiertos', mod: 'Operaciones', tipo: 'Calidad', u: ' al mes', s: -1, meta: 3, paso: 1, d: 0, que: 'Turnos que quedaron sin nadie en sus instalaciones.', f: 'pauta y asistencia' },
+  { id: 'visitas', n: 'Visitas de supervisión cumplidas', mod: 'Operaciones', tipo: 'Resultado', u: ' %', s: 1, meta: 90, paso: 5, d: 0, que: 'Visitas hechas sobre las planificadas.', f: 'visitas de supervisión' },
+  { id: 'rondas', n: 'Rondas completadas', mod: 'Operaciones', tipo: 'Resultado', u: ' %', s: 1, meta: 95, paso: 1, d: 0, que: 'Rondas terminadas con todos sus puntos.', f: 'rondas y puntos de control' },
+  { id: 'novedades', n: 'Novedades cerradas en 24 h', mod: 'Operaciones', tipo: 'Oportunidad', u: ' %', s: 1, meta: 90, paso: 5, d: 0, que: 'Novedades de la bitácora resueltas dentro de un día.', f: 'bitácora digital' },
+  { id: 'textra', n: 'Turnos extra sobre la pauta', mod: 'Operaciones', tipo: 'Calidad', u: ' %', s: -1, meta: 4, paso: 0.5, d: 1, que: 'Qué parte de la pauta se cubrió con turnos extra.', f: 'turnos extra' },
+  { id: 'puntualidad', n: 'Marcas a la hora', mod: 'Asistencia', tipo: 'Calidad', u: ' %', s: 1, meta: 95, paso: 1, d: 0, que: 'Entradas marcadas sin atraso.', f: 'marcas de asistencia' },
+  { id: 'ausentismo', n: 'Ausentismo', mod: 'Asistencia', tipo: 'Calidad', u: ' %', s: -1, meta: 3, paso: 0.5, d: 1, que: 'Días no trabajados sobre los programados.', f: 'marcas de asistencia y licencias' },
+  { id: 'reclamos', n: 'Reclamos de cliente', mod: 'Tickets', tipo: 'Calidad', u: ' al mes', s: -1, meta: 2, paso: 1, d: 0, que: 'Tickets de reclamo abiertos por sus clientes.', f: 'tickets del portal del cliente' },
+  { id: 'escalado', n: 'Tiempo en resolver lo que escaló el agente', mod: 'Agente', tipo: 'Oportunidad', u: ' h', s: -1, meta: 4, paso: 1, d: 1, que: 'Horas que tarda en responder un pendiente del hilo.', f: 'pendientes del hilo y aprobaciones' },
+];
+const cat = (id) => CAT.find((x) => x.id === id);
+const EMP = {
+  gard: { nombre: 'Gard Security', vertical: 'Seguridad', mono: 'GS', cargos: [
+    { id: 'vendedor', n: 'Vendedor', gente: [['Camila Reyes', 'Zona oriente'], ['Tomás Fuentes', 'Zona centro'], ['Daniela Soto', 'Zona norte'], ['Ignacio Vera', 'Grandes cuentas']], base: [['ventas', 40], ['margen', 20], ['conversion', 20], ['resp_lead', 20]] },
+    { id: 'reclutador', n: 'Reclutador', gente: [['Paula Mena', 'Región Metropolitana'], ['Rodrigo Salas', 'Regiones'], ['Javiera Pino', 'Región Metropolitana']], base: [['vacante', 60], ['docs', 40]] },
+    { id: 'supervisor', n: 'Supervisor', gente: [['Luis Araya', '9 instalaciones'], ['Marcela Rojas', '7 instalaciones'], ['Héctor Bravo', '11 instalaciones'], ['Carolina Díaz', '8 instalaciones'], ['Felipe Núñez', '6 instalaciones']], base: [['visitas', 30], ['descubiertos', 30], ['novedades', 20], ['rondas', 20]] },
+    { id: 'jefeops', n: 'Jefe de operaciones', gente: [['Andrea Castro', 'Zona oriente y norte'], ['Mauricio Lagos', 'Zona centro y sur']], base: [['cobertura', 40], ['textra', 20], ['reclamos', 20], ['escalado', 20]] },
+    { id: 'guardia', n: 'Guardia', gente: [['Pedro Gallardo', 'Edificio Alba'], ['José Miranda', 'Centro logístico Sur'], ['Rosa Cárcamo', 'Clínica del Parque'], ['Manuel Tapia', 'Edificio Alba'], ['Sergio Olivares', 'Bodega Norte']], base: [['puntualidad', 50], ['rondas', 50]] },
+  ] },
+  aseo: { nombre: 'Brillo Aseo', vertical: 'Aseo industrial', mono: 'BA', cargos: [
+    { id: 'ejecutivo', n: 'Ejecutivo comercial', gente: [['Valentina Cruz', 'Retail'], ['Matías Ortiz', 'Oficinas'], ['Francisca Leal', 'Salud']], base: [['ventas', 50], ['conversion', 30], ['resp_lead', 20]] },
+    { id: 'supaseo', n: 'Supervisora de aseo', gente: [['Gloria Paredes', '14 locales'], ['Nancy Riquelme', '10 locales'], ['Elena Vidal', '12 locales'], ['Marta Carrasco', '9 locales']], base: [['visitas', 40], ['descubiertos', 30], ['textra', 30]] },
+    { id: 'dotacion', n: 'Encargada de dotación', gente: [['Lorena Sáez', 'Zona sur'], ['Ximena Farías', 'Zona norte']], base: [['vacante', 40], ['retencion', 40], ['docs', 20]] },
+    { id: 'auxiliar', n: 'Auxiliar de aseo', gente: [['Ana Poblete', 'Mall Plaza Sur'], ['Berta Henríquez', 'Torre Andes'], ['Carmen Zúñiga', 'Clínica Oriente'], ['Delia Montes', 'Mall Plaza Sur']], base: [['puntualidad', 60], ['ausentismo', 40]] },
+  ] },
+};
+const PEND0 = {
+  gard: [
+    { id: 'p1', area: 'Personas', cargo: 'reclutador', titulo: 'Sumar «Retención a 90 días» al cargo Reclutador', contexto: 'Hoy el cargo solo premia la rapidez. 3 de las 5 personas que entraron en agosto ya no están.', op: 'add', ind: 'retencion' },
+    { id: 'p2', area: 'Operaciones', cargo: 'supervisor', titulo: 'Bajar la meta de turnos descubiertos de Supervisor de 3 a 2 al mes', contexto: 'La mayoría del equipo cumple la meta actual hace cuatro meses seguidos.', op: 'meta', ind: 'descubiertos', v: 2 },
+  ],
+  aseo: [
+    { id: 'p3', area: 'Tickets', cargo: 'supaseo', titulo: 'Sumar «Reclamos de cliente» a Supervisora de aseo', contexto: 'Los reclamos del portal del cliente subieron en dos locales y hoy ningún cargo los mide.', op: 'add', ind: 'reclamos' },
+  ],
+};
+const hash = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10000) / 10000; };
+const num = (v, d) => v.toFixed(d).replace('.', ',').replace(/,0$/, '');
+const tono = (x) => (x >= 100 ? OK : x >= 85 ? WARN : BAD);
+const fondo = (x) => (x >= 100 ? 'var(--okbg)' : x >= 85 ? 'var(--warnbg)' : 'var(--badbg)');
+const base0 = () => { const o = {}; Object.keys(EMP).forEach((e) => { o[e] = {}; EMP[e].cargos.forEach((c) => { o[e][c.id] = c.base.map((b) => ({ id: b[0], peso: b[1], meta: cat(b[0]).meta })); }); }); return o; };
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tema: null, emp: 'gard', vista: 'cargos', cargo: null, persona: null, periodo: 'mes', filtro: 'Todos', seg: 'pend', panel: 'lienzo', cfg: base0(), pend: JSON.parse(JSON.stringify(PEND0)), log: [], resp: null, texto: '' };
+  }
+  valor(nombre, k, periodo) {
+    const f = 0.74 + hash(nombre + k.id + periodo) * 0.46;
+    let v = k.s > 0 ? k.meta * f : k.meta / f;
+    if (k.u === ' %' && v > 100) v = 100;
+    const p = Math.pow(10, k.d); return Math.round(v * p) / p;
+  }
+  cump(v, meta, k) { let c = k.s > 0 ? v / meta : (v <= 0 ? 1.2 : meta / v); return Math.max(0, Math.min(1.2, c)); }
+  puntaje(nombre, conf, periodo) {
+    let w = 0, t = 0;
+    conf.forEach((i) => { const k = cat(i.id); w += i.peso; t += i.peso * this.cump(this.valor(nombre, k, periodo), i.meta, k); });
+    return w ? Math.round((t / w) * 100) : 0;
+  }
+  metaTxt(i) { const k = cat(i.id); return (k.s > 0 ? '≥ ' : '≤ ') + num(i.meta, k.d) + k.u; }
+  anotar(st, quien, txt) { st.log = [{ hora: 'Ahora', quien, txt }].concat(this.state.log).slice(0, 14); return st; }
+  editar(fn, nota) {
+    const s = this.state, cfg = JSON.parse(JSON.stringify(s.cfg));
+    fn(cfg[s.emp][s.cargo], cfg);
+    const st = { cfg }; if (nota) this.anotar(st, 'Tú', nota); this.setState(st);
+  }
+  repartirEn(lista) { const n = lista.length; if (!n) return; const b = Math.floor(100 / n / 5) * 5 || Math.floor(100 / n); lista.forEach((i) => { i.peso = b; }); lista[0].peso += 100 - b * n; }
+  resolver(d, si) {
+    const s = this.state, pend = JSON.parse(JSON.stringify(s.pend)), cfg = JSON.parse(JSON.stringify(s.cfg));
+    pend[s.emp] = pend[s.emp].filter((x) => x.id !== d.id);
+    const st = { pend };
+    if (si) {
+      const lista = cfg[s.emp][d.cargo];
+      if (d.op === 'add' && !lista.find((x) => x.id === d.ind)) { lista.push({ id: d.ind, peso: 0, meta: cat(d.ind).meta }); this.repartirEn(lista); }
+      if (d.op === 'meta') { const it = lista.find((x) => x.id === d.ind); if (it) it.meta = d.v; }
+      Object.assign(st, { cfg, vista: 'cargo', cargo: d.cargo, panel: 'lienzo', resp: null });
+      this.anotar(st, 'Tú', 'Aceptaste: ' + d.titulo + '.');
+    } else { this.anotar(st, 'Tú', 'Rechazaste: ' + d.titulo + '.'); }
+    this.setState(st);
+  }
+  responder(pregunta, texto, extra) { const st = Object.assign({ resp: { pregunta, texto } }, extra || {}); this.anotar(st, 'Agente', pregunta); this.setState(st); }
+
+  renderVals() {
+    const s = this.state, E = EMP[s.emp], conf = s.cfg[s.emp];
+    const oscuro = s.tema === null ? !!this.props.oscuro : s.tema === 'oscuro';
+    const C = E.cargos.find((c) => c.id === s.cargo) || E.cargos[0];
+    const lista = conf[C.id];
+    const fila = (c) => { const l = conf[c.id]; const ps = c.gente.map((g) => this.puntaje(g[0], l, 'mes')); return { l, ps, prom: l.length ? Math.round(ps.reduce((a, b) => a + b, 0) / ps.length) : 0 }; };
+    const pesoTot = lista.reduce((a, i) => a + i.peso, 0);
+    const ranking = C.gente.map((g) => ({ g, sc: this.puntaje(g[0], lista, 'mes') })).sort((a, b) => b.sc - a.sc);
+    const P = C.gente.find((g) => g[0] === s.persona) || C.gente[0];
+    const perSc = this.puntaje(P[0], lista, s.periodo);
+    const perDet = lista.map((i) => { const k = cat(i.id), v = this.valor(P[0], k, s.periodo), c = Math.round(this.cump(v, i.meta, k) * 100); return { i, k, v, c }; });
+    const ir = (st) => () => this.setState(Object.assign({ resp: null }, st));
+    const pend = s.pend[s.emp];
+
+    /* sugerencias del agente según la pantalla */
+    let ctx = 'Desempeño', sug = [];
+    if (s.vista === 'cargos') {
+      sug = [
+        ['¿Quién está bajo la meta este mes?', () => { const out = []; E.cargos.forEach((c) => { const f = fila(c); if (!f.l.length) return; c.gente.forEach((g, n) => { if (f.ps[n] < 85) out.push(g[0] + ' · ' + c.n + ' · ' + f.ps[n]); }); }); this.responder('¿Quién está bajo la meta este mes?', out.length ? out.join('\n') : 'Nadie está bajo 85 este mes.'); }],
+        ['¿Qué cargos tienen los pesos mal sumados?', () => { const out = E.cargos.filter((c) => conf[c.id].reduce((a, i) => a + i.peso, 0) !== 100).map((c) => c.n + ': suma ' + conf[c.id].reduce((a, i) => a + i.peso, 0) + ' %'); this.responder('¿Qué cargos tienen los pesos mal sumados?', out.length ? out.join('\n') : 'Todos los cargos suman 100 %.'); }],
+        ['Abre el cargo con peor promedio', () => { const o = E.cargos.map((c) => ({ c, p: fila(c).prom })).sort((a, b) => a.p - b.p)[0]; this.responder('Abre el cargo con peor promedio', o.c.n + ' tiene el promedio más bajo: ' + o.p + '.', { vista: 'cargo', cargo: o.c.id }); }],
+      ];
+    } else if (s.vista === 'cargo' || s.vista === 'catalogo') {
+      ctx = C.n;
+      sug = [
+        ['¿Qué metas son realistas?', () => { const out = lista.map((i) => { const k = cat(i.id); const vs = C.gente.map((g) => this.valor(g[0], k, 'mes')).sort((a, b) => a - b); const m = vs[Math.floor(vs.length / 2)]; return k.n + ': el equipo va en ' + num(m, k.d) + k.u + ' (meta ' + this.metaTxt(i) + ')'; }); this.responder('¿Qué metas son realistas?', out.length ? out.join('\n') : 'Este cargo aún no tiene indicadores.'); }],
+        ['Reparte los pesos parejo', () => { const cfg = JSON.parse(JSON.stringify(s.cfg)); this.repartirEn(cfg[s.emp][C.id]); this.responder('Reparte los pesos parejo', 'Listo: los ' + lista.length + ' indicadores quedaron sumando 100 %.', { cfg, vista: 'cargo' }); }],
+        ['¿Qué pesa más en el resultado?', () => { const o = lista.slice().sort((a, b) => b.peso - a.peso)[0]; this.responder('¿Qué pesa más en el resultado?', o ? cat(o.id).n + ' pesa ' + o.peso + ' %. Si alguien falla ahí, es lo que más le baja el puntaje.' : 'Este cargo aún no tiene indicadores.'); }],
+      ];
+    } else {
+      ctx = P[0];
+      sug = [
+        ['¿Qué explica su resultado?', () => { const o = perDet.slice().sort((a, b) => a.c - b.c); this.responder('¿Qué explica su resultado?', o.length ? 'Lo más bajo: ' + o[0].k.n + ' (' + o[0].c + ' % de la meta).\nLo más alto: ' + o[o.length - 1].k.n + ' (' + o[o.length - 1].c + ' %).' : 'Su cargo aún no tiene indicadores.'); }],
+        ['Compárala con el equipo', () => { const pos = ranking.findIndex((r) => r.g[0] === P[0]) + 1; const prom = Math.round(ranking.reduce((a, r) => a + r.sc, 0) / ranking.length); this.responder('Compárala con el equipo', 'Va ' + pos + '.º de ' + ranking.length + ' en ' + C.n + ' este mes. El promedio del equipo es ' + prom + '.'); }],
+      ];
+    }
+    const filtros = ['Todos'].concat(CAT.map((k) => k.mod).filter((m, n, a) => a.indexOf(m) === n));
+    const titulos = { cargos: ['Desempeño', 'Desempeño por cargo', 'Cada empresa decide qué mide en cada cargo. Los números salen solos de lo que ya pasa en los módulos: nadie los digita.'], cargo: ['Desempeño › Cargos', C.n, 'Elige qué se mide, con qué meta y cuánto pesa. ' + C.gente.length + ' personas tienen este cargo.'], catalogo: ['Desempeño › ' + C.n, 'Agregar indicador', 'Catálogo de lo que el sistema ya sabe medir, por módulo.'], persona: ['Desempeño › ' + C.n, P[0], C.n + ' · ' + P[1]] }[s.vista];
+
+    return {
+      temaClase: oscuro ? 't-oscuro' : 't-claro', movil: MOVIL,
+      railDisplay: MOVIL ? 'none' : 'flex',
+      hiloDisplay: MOVIL ? (s.panel === 'hilo' ? 'flex' : 'none') : 'flex', hiloW: MOVIL ? 'auto' : '400px', hiloFlex: MOVIL ? '1' : 'none',
+      lienzoDisplay: MOVIL && s.panel === 'hilo' ? 'none' : 'flex',
+      padH: MOVIL ? '18px' : '26px', padX: MOVIL ? '18px' : '44px', barBox: MOVIL ? '56px' : '160px',
+      mono: E.mono, empNombre: E.nombre, empSub: E.vertical + ' · datos ficticios', nPend: pend.length,
+      resumen: pend.length ? (pend.length === 1 ? 'El agente tiene 1 propuesta que espera tu respuesta.' : 'El agente tiene ' + pend.length + ' propuestas que esperan tu respuesta.') : 'Sin propuestas pendientes.',
+      segmentos: [['pend', 'Pendientes', pend.length], ['act', 'Actividad', s.log.length]].map((x) => ({ nombre: x[1], cuenta: x[2], peso: s.seg === x[0] ? 600 : 500, bg: s.seg === x[0] ? 'var(--surface)' : 'transparent', ir: () => this.setState({ seg: x[0] }) })),
+      segEsPend: s.seg === 'pend', segEsAct: s.seg === 'act', sinPend: pend.length === 0,
+      pendientes: pend.map((d) => ({ area: d.area, titulo: d.titulo, contexto: d.contexto, si: () => this.resolver(d, true), no: () => this.resolver(d, false), ver: ir({ vista: 'cargo', cargo: d.cargo, panel: 'lienzo' }) })),
+      actividad: (s.log.length ? s.log : [{ hora: '09:12', quien: 'Agente', txt: 'Cerró el mes de octubre: 19 scorecards calculados.' }, { hora: 'Ayer', quien: 'Tú', txt: 'Creaste el scorecard del cargo Vendedor desde la plantilla.' }]).map((e) => ({ hora: e.hora, quien: e.quien, txt: e.txt, fg: e.quien === 'Agente' ? 'var(--agente)' : 'var(--fg)' })),
+      segPend: () => this.setState({ seg: 'pend', panel: 'hilo' }), irHilo: () => this.setState({ panel: 'hilo' }), irLienzo: () => this.setState({ panel: 'lienzo' }),
+      irCargos: ir({ vista: 'cargos', panel: 'lienzo' }),
+      alternarTema: () => this.setState({ tema: oscuro ? 'claro' : 'oscuro' }),
+      hayVolver: s.vista !== 'cargos',
+      volver: ir({ vista: s.vista === 'cargo' ? 'cargos' : 'cargo' }),
+      miga: titulos[0], titulo: titulos[1], sub: titulos[2],
+      hayResp: !!s.resp, respPregunta: s.resp ? 'Agente · ' + s.resp.pregunta : '', respTexto: s.resp ? s.resp.texto : '', cerrarResp: () => this.setState({ resp: null }),
+      vCargos: s.vista === 'cargos', vCargo: s.vista === 'cargo', vCatalogo: s.vista === 'catalogo', vPersona: s.vista === 'persona',
+      empresas: Object.keys(EMP).map((id) => ({ nombre: EMP[id].nombre, vertical: EMP[id].vertical, peso: s.emp === id ? 600 : 500, bg: s.emp === id ? 'var(--surface)' : 'transparent', ir: ir({ emp: id, cargo: null, persona: null }) })),
+      cargos: E.cargos.map((c) => { const f = fila(c); return { nombre: c.n, detalle: (f.l.length ? f.l.length + (f.l.length === 1 ? ' indicador' : ' indicadores') : 'Sin indicadores') + ' · ' + c.gente.length + ' personas', prom: f.l.length ? f.prom : '—', fg: f.l.length ? tono(f.prom) : 'var(--muted)', abrir: ir({ vista: 'cargo', cargo: c.id }) }; }),
+      pesoTxt: pesoTot === 100 ? 'Los pesos suman 100 %' : pesoTot < 100 ? 'Los pesos suman ' + pesoTot + ' %: faltan ' + (100 - pesoTot) : 'Los pesos suman ' + pesoTot + ' %: sobran ' + (pesoTot - 100),
+      pesoBg: pesoTot === 100 ? 'var(--okbg)' : 'var(--warnbg)', pesoFg: pesoTot === 100 ? OK : WARN,
+      repartir: () => this.editar((l) => this.repartirEn(l), 'Repartiste parejo los pesos de ' + C.n + '.'),
+      plantilla: () => this.editar((l, cfg) => { cfg[s.emp][C.id] = C.base.map((b) => ({ id: b[0], peso: b[1], meta: cat(b[0]).meta })); }, 'Volviste ' + C.n + ' a la plantilla de la vertical.'),
+      irCatalogo: ir({ vista: 'catalogo', filtro: 'Todos' }),
+      sinInds: lista.length === 0,
+      inds: lista.map((i, n) => { const k = cat(i.id); const mov = (campo, delta, min, max) => () => this.editar((l) => { const p = Math.pow(10, 2); l[n][campo] = Math.max(min, Math.min(max, Math.round((l[n][campo] + delta) * p) / p)); }, 'Cambiaste ' + (campo === 'meta' ? 'la meta' : 'el peso') + ' de «' + k.n + '» en ' + C.n + '.');
+        return { nombre: k.n, clase: k.mod + ' · ' + k.tipo, fuente: k.f, metaTxt: this.metaTxt(i), pesoTxt: i.peso + ' %', metaMenos: mov('meta', -k.paso, k.paso, 100000), metaMas: mov('meta', k.paso, k.paso, k.u === ' %' ? 100 : 100000), pesoMenos: mov('peso', -5, 0, 100), pesoMas: mov('peso', 5, 0, 100), quitar: () => this.editar((l) => { l.splice(n, 1); }, 'Quitaste «' + k.n + '» de ' + C.n + '.') }; }),
+      personas: ranking.map((r) => ({ nombre: r.g[0], sub: r.g[1], ini: r.g[0].split(' ').map((w) => w[0]).join(''), score: lista.length ? r.sc : '—', fg: lista.length ? tono(r.sc) : 'var(--muted)', barW: Math.min(100, Math.round(r.sc / 1.2)) + '%', abrir: ir({ vista: 'persona', persona: r.g[0], periodo: 'mes' }) })),
+      filtros: filtros.map((f) => ({ nombre: f, bg: s.filtro === f ? 'var(--fg)' : 'var(--surface)', fg: s.filtro === f ? 'var(--bg)' : 'var(--fg)', borde: s.filtro === f ? 'var(--fg)' : 'var(--line)', ir: () => this.setState({ filtro: f }) })),
+      catalogo: CAT.filter((k) => s.filtro === 'Todos' || k.mod === s.filtro).map((k) => { const ya = !!lista.find((i) => i.id === k.id); return { nombre: k.n, clase: k.mod + ' · ' + k.tipo + ' · ' + (k.s > 0 ? 'más es mejor' : 'menos es mejor'), que: k.que, fuente: k.f, btn: ya ? 'Ya se mide' : 'Agregar', bg: ya ? 'transparent' : 'var(--fg)', fg: ya ? 'var(--muted)' : 'var(--bg)', borde: ya ? 'var(--line)' : 'var(--fg)', agregar: ya ? () => {} : () => { const cfg = JSON.parse(JSON.stringify(s.cfg)); cfg[s.emp][C.id].push({ id: k.id, peso: 10, meta: k.meta }); const st = { cfg, vista: 'cargo', resp: null }; this.anotar(st, 'Tú', 'Agregaste «' + k.n + '» a ' + C.n + '.'); this.setState(st); } }; }),
+      perScore: lista.length ? perSc : '—', perFg: lista.length ? tono(perSc) : 'var(--muted)', perBg: lista.length ? fondo(perSc) : 'var(--fill)',
+      perEstado: !lista.length ? 'Sin indicadores' : perSc >= 100 ? 'Cumple sus metas' : perSc >= 85 ? 'Cerca de la meta' : 'Bajo la meta',
+      perPuesto: (s.periodo === 'mes' ? 'Noviembre 2026' : 'Trimestre sep–nov 2026') + ' · puntaje de 0 a 120',
+      perAgente: 'Su agente hizo el ' + (38 + Math.round(hash(P[0] + 'ag') * 40)) + ' % de las acciones del período. El resultado se le atribuye igual a la persona: se mide lo que logra, no cuánto teclea.',
+      periodos: [['mes', 'Este mes'], ['tri', 'Trimestre']].map((q) => ({ nombre: q[1], peso: s.periodo === q[0] ? 600 : 500, bg: s.periodo === q[0] ? 'var(--surface)' : 'transparent', ir: () => this.setState({ periodo: q[0] }) })),
+      perInds: perDet.map((r) => ({ nombre: r.k.n, cump: r.c + ' %', fg: tono(r.c), barW: Math.min(100, Math.round(r.c / 1.2)) + '%', valor: num(r.v, r.k.d) + r.k.u, meta: this.metaTxt(r.i), peso: r.i.peso + ' %' })),
+      irCargoDePersona: ir({ vista: 'cargo' }),
+      ctx, sugerencias: sug.map((q) => ({ txt: q[0], ir: q[1] })),
+      texto: s.texto, alEscribir: (e) => this.setState({ texto: e.target.value }),
+      alEnviar: (e) => { e.preventDefault(); const t = s.texto.trim(); if (!t) return; this.responder(t, 'En el producto, el agente responde con estos mismos indicadores, que también se consultan por MCP desde Grokbot o Claude. En este mockup funcionan las sugerencias de arriba.', { texto: '' }); },
+    };
+  }
+}
+</script>
+</body>
+</html>

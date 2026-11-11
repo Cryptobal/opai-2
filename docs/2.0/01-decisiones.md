@@ -1772,3 +1772,27 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 4. Si faltan los secretos, el check falla (falla cerrado). En PRs de forks se omite.
 
 **Pendiente de Carlos.** Agregar `preview-e2e` como check obligatorio del ruleset «Proteger main» (hoy lo exige el contrato, no GitHub).
+
+## ADR-094 · Desempeño: indicadores publicados por los módulos y scorecard por cargo configurable por empresa (CAR-303, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** propuesto; rige cuando Carlos apruebe la hoja de alcance [`diseño/alcance-desempeno.md`](diseño/alcance-desempeno.md) · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» · **Registra:** Claude («Sesión Desempeño»).
+
+**Fuente (11-nov-2026, hora de Chile).** 15:47: Carlos pregunta cómo medir la gestión de cargos internos (vendedor, reclutador, operaciones, supervisor) cuando cada empresa tiene cargos distintos, y cómo hacerlo sin que quede obsoleto por la IA. 16:18: pide confirmar que es configurable por cada empresa y que los indicadores salen de lo que OPAI hace. 16:20: pide los tickets en Linear por módulo y la documentación en Notion y en el repositorio.
+
+**Contexto.** Toda escritura de negocio es una capacidad auditada, con el actor («agente X vía usuario Y»), y emite eventos de dominio (ADR-029, ADR-052). Los hechos para medir ya se registran; falta una forma común de convertirlos en indicadores y de que cada empresa decida qué mide en cada cargo. Hoy solo existe `core.inicio.indicadores` (CAR-182), que arma cuatro indicadores de Inicio a mano.
+
+**Decisión (propuesta).**
+1. **Catálogo de indicadores como servicio del Núcleo.** Cada módulo declara sus indicadores en su manifiesto (nombre, tipo, unidad, sentido, meta sugerida, hechos de origen y cómo se atribuye a una persona), igual que declara ajustes y eventos (ADR-018, ADR-020). El Núcleo arma el catálogo desde el registro de módulos y calcula en dominio puro. Un módulo nuevo suma indicadores sin tocar el Núcleo; uno apagado no aporta.
+2. **Scorecard por cargo, por empresa.** La empresa elige qué indicadores usa cada cargo, con qué meta, qué peso y qué período. No cambia la fórmula. Los cargos son los de Personas › Cargos. Las plantillas salen de la configuración por vertical, nunca del código.
+3. **Se miden resultados, calidad y oportunidad, no cantidad de acciones.** El resultado se atribuye a la persona; la parte hecha por su agente queda a la vista.
+4. **Sin constructor de paneles.** Una pantalla fija de scorecard; los paneles a medida los arma el agente interno o una IA externa por MCP con las mismas capacidades.
+5. **Cambios auditados y sin efecto retroactivo.** Un cambio de meta, peso o indicador rige desde el período siguiente; los períodos cerrados no se recalculan.
+6. **El agente propone, una persona aprueba.** El agente nunca cambia una meta ni un scorecard por su cuenta.
+7. **Una sola Persona.** Todo usuario interno que recibe sueldo es una Persona con cargo; el usuario es solo el acceso (principio 5 del documento de arranque).
+8. **Indicadores propios por empresa**, sobre los hechos registrados, como configuración versionada evaluada en dominio (ADR-021): segunda etapa (CAR-313).
+
+**Qué no cambia.** Capacidades, permisos, RLS, auditoría y hechos regulados (ADR-023): Desempeño solo lee.
+
+**Plan.** Bloques y tareas en la hoja de alcance (CAR-304 a CAR-313, repartidas en el proyecto de Linear de cada módulo).
+
+**Pendiente de Carlos.** (1) Aprobar la hoja de alcance. (2) Catálogo solo, o indicadores propios desde el inicio. (3) Quién ve el resultado de cada persona. (4) Si Desempeño se vende aparte. (5) Aprobar el diseño de las pantallas: el mockup de [`design/export-desempeno/`](design/export-desempeno/README.md) es una propuesta.
