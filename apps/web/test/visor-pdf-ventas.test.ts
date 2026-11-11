@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -6,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { VisorPdfEscritorio, VisorPdfTactil } from "@/app/_components/visor-pdf";
 
 const props = { pdfUrl: "blob:x", titulo: "Vista previa del borrador en PDF", nombreArchivo: "borrador.pdf" };
-const FINANZAS = "app/(erp)/finanzas/ventas/nuevo/";
+const FINANZAS = fileURLToPath(new URL("../app/(erp)/finanzas/ventas/nuevo/", import.meta.url));
 
 describe("vista previa del PDF de Ventas en el teléfono (bug prod)", () => {
   it("modo táctil: botones Abrir y Descargar, sin iframe", () => {
