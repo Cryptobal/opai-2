@@ -61,8 +61,13 @@ const clave = (t: string) =>
     .trim();
 
 const POR_NOMBRE = new Map<string, string>();
+// Misma tabla de alias que la migración de datos de CAR-244: nombre, alias, alias sin «banco (de)» y el código.
 for (const b of BANCOS_SBIF) {
-  for (const n of [b.nombre, ...(b.alias ?? [])]) POR_NOMBRE.set(clave(n), b.codigo);
+  for (const n of [b.nombre, ...(b.alias ?? [])]) {
+    POR_NOMBRE.set(clave(n), b.codigo);
+    POR_NOMBRE.set(clave(n).replace(/^banco (de )?/, ""), b.codigo);
+  }
+  POR_NOMBRE.set(b.codigo, b.codigo);
 }
 
 /** Banco del catálogo por su código SBIF; null si no es un código conocido. */

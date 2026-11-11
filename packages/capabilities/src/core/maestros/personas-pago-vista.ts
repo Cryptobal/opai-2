@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  VALORES_TIPO_CUENTA_BANCARIA,
   bancoPorCodigo,
   codigoSbif,
   etiquetaTipoCuenta,
@@ -9,7 +10,7 @@ import {
 } from "@opai/domain";
 
 import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
-import { noEncontrado } from "../../errores";
+import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { enmascararCuenta, enmascararCuentaEnLectura } from "./personas-ficha-comun";
 
@@ -69,6 +70,17 @@ export function catalogoDe(banco: string | null | undefined, tipo: string | null
     tipoCuentaEtiqueta: etiquetaTipoCuenta(tipoCanon),
     porCorregir: Boolean((banco && !bancoPorCodigo(banco)) || (tipo && tipoCanon !== tipo)),
   };
+}
+
+/** Aprobar exige banco y tipo de cuenta del catálogo (la nómina de pago usa el código SBIF). */
+export function exigirCatalogo(s: { bancoCodigo: string | null; tipoCuenta: string | null }) {
+  if (
+    !bancoPorCodigo(s.bancoCodigo) ||
+    !VALORES_TIPO_CUENTA_BANCARIA.some((t) => t === s.tipoCuenta)
+  )
+    throw reglaDeNegocio(
+      "La solicitud tiene un banco o tipo de cuenta fuera del catálogo: recházala y registra una nueva.",
+    );
 }
 
 export async function vistaPago(ctx: Contexto, personaId: string) {

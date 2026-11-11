@@ -68,10 +68,13 @@ INSERT INTO car244_alias (clave, codigo) VALUES
     ('730', '730'),
     ('743', '743');
 
--- Misma normalización que el dominio: sin tildes, minúsculas, solo letras, números y espacios simples.
+-- Misma normalización que el dominio: sin tildes (también en mayúsculas, que lower() no baja con collation C),
+-- minúsculas, solo letras, números y espacios simples.
 CREATE FUNCTION pg_temp.car244_clave(t text) RETURNS text LANGUAGE sql IMMUTABLE AS $$
   SELECT btrim(regexp_replace(regexp_replace(
-    translate(lower(coalesce(t, '')), 'áàäâéèëêíìïîóòöôúùüûñç', 'aaaaeeeeiiiioooouuuunc'),
+    lower(translate(coalesce(t, ''),
+      'áàäâãåéèëêíìïîóòöôõúùüûñçÁÀÄÂÃÅÉÈËÊÍÌÏÎÓÒÖÔÕÚÙÜÛÑÇ',
+      'aaaaaaeeeeiiiiooooouuuuncAAAAAAEEEEIIIIOOOOOUUUUNC')),
     '[^a-z0-9 ]+', ' ', 'g'), '\s+', ' ', 'g'))
 $$;
 
@@ -120,7 +123,8 @@ BEGIN
      AND (pg_temp.car244_banco(banco_codigo) IS NOT NULL OR pg_temp.car244_tipo(tipo_cuenta) IS NOT NULL);
   GET DIAGNOSTICS v_pend = ROW_COUNT;
 
-  -- Verificación: nada reconocible quedó sin convertir (si RLS hubiera filtrado, esto lo detecta).
+  -- Verificación: nada reconocible quedó sin convertir. (Contra el filtrado silencioso de FORCE RLS protege la
+  -- exigencia de BYPASSRLS de arriba; esta lectura pasaría por el mismo filtro.)
   IF EXISTS (SELECT 1 FROM core.personas_pago
               WHERE (pg_temp.car244_banco(banco_codigo) IS NOT NULL AND pg_temp.car244_banco(banco_codigo) <> banco_codigo)
                  OR (pg_temp.car244_tipo(tipo_cuenta) IS NOT NULL AND pg_temp.car244_tipo(tipo_cuenta) <> tipo_cuenta))

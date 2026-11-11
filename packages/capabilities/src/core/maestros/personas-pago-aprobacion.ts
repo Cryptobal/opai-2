@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { bancoPorCodigo, PERMISOS_CORE, VALORES_TIPO_CUENTA_BANCARIA } from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import {
   cifrarCampoEnTransaccion,
@@ -11,7 +11,7 @@ import { conflicto, prohibido, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaFicha } from "./personas-ficha-comun";
-import { vistaPago } from "./personas-pago-vista";
+import { exigirCatalogo, vistaPago } from "./personas-pago-vista";
 
 const motivoRechazo = z.string().trim().min(5).max(500);
 
@@ -39,14 +39,7 @@ export const personasPagoAprobarCambio = defineCapability({
     if (!ctx.usuario?.id) throw reglaDeNegocio("Se requiere un usuario autenticado.");
     if (s.solicitadoPorId === ctx.usuario.id)
       throw prohibido("No puedes aprobar una solicitud que tú mismo registraste.");
-    // CAR-244: a la cuenta vigente solo entra un banco del catálogo SBIF (lo usa la nómina de pago).
-    if (
-      !bancoPorCodigo(s.bancoCodigo) ||
-      !VALORES_TIPO_CUENTA_BANCARIA.some((t) => t === s.tipoCuenta)
-    )
-      throw reglaDeNegocio(
-        "La solicitud tiene un banco o tipo de cuenta fuera del catálogo: recházala y registra una nueva.",
-      );
+    exigirCatalogo(s); // CAR-244: a la cuenta vigente solo entra un banco del catálogo SBIF.
     if (dryRun) return { personaId: p.id, solicitudId: s.id, estado: "aprobada" as const };
     await escribirConEvento(
       ctx,
