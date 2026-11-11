@@ -46,6 +46,7 @@ async function main(): Promise<void> {
       "SELECT id, migration_name, checksum, finished_at, rolled_back_at FROM public._prisma_migrations",
     );
     for (const r of renombradas(rows, checksums)) {
+      await client.query("BEGIN");
       await client.query(
         `UPDATE public._prisma_migrations SET rolled_back_at = now()
           WHERE migration_name = $1 AND finished_at IS NULL AND rolled_back_at IS NULL`,
@@ -55,6 +56,7 @@ async function main(): Promise<void> {
         "UPDATE public._prisma_migrations SET migration_name = $2 WHERE id = $1 AND migration_name = $3",
         [r.id, r.hacia, r.desde],
       );
+      await client.query("COMMIT");
       console.log(`Renombrada (mismo checksum, ya aplicada): ${r.desde} → ${r.hacia}`);
     }
     const huerfanas = fallidasHuerfanas(rows, enRepo);

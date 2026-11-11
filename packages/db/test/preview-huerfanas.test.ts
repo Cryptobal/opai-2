@@ -61,5 +61,12 @@ describe("destrabe de la rama Neon de preview", () => {
     expect(renombradas([con("20261119100000_vieja", true, "x")], repo)).toEqual([]);
     const ambiguo = new Map([...repo, ["20261123000000_copia", "g"]]);
     expect(renombradas(registros, ambiguo)).toEqual([]);
+    // Ambiguo aunque la otra migración con el mismo SQL ya esté terminada.
+    const conTerminada = new Map([["20261101000000_igual", "g"], ...repo]);
+    const yaAplicada = [...registros, con("20261101000000_igual", true, "g")];
+    expect(renombradas(yaAplicada, conTerminada)).toEqual([]);
+    // Dos registros viejos hacia el mismo destino: no se renombra ninguno.
+    const dos = [...registros, con("20261118000000_core_grupos_usuarios", true, "g")];
+    expect(renombradas(dos, repo)).toEqual([]);
   });
 });
