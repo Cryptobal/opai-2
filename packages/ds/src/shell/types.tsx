@@ -28,6 +28,9 @@ export type NavItem = {
   alerta?: boolean;
   /** Punto de no leído sin número, en vez del contador numérico (D5: Inicio en la barra inferior). */
   punto?: boolean;
+  /** En la barra lateral de desktop el contador va en píldora roja en vez de gris (Bandeja con
+   *  pendientes, CAR-316). Sin esto, el número de la barra lateral es discreto. */
+  resaltado?: boolean;
   /** Área de `NAVEGACION.md` §7 (Brief 05): clave estable del grupo para el acordeón y los fijados;
    *  `grupo` sigue siendo la etiqueta visible. */
   area?: string;
@@ -59,7 +62,13 @@ export type Portal = {
 
 export type Tenant = { nombre: string };
 
-export type Usuario = { nombre: string; email?: string; rol?: string };
+export type Usuario = {
+  nombre: string;
+  email?: string;
+  rol?: string;
+  /** Punto rojo sobre el avatar: novedades sin leer en portales sin Bandeja (CAR-316). */
+  aviso?: boolean;
+};
 
 export type LinkProps = {
   href: string;

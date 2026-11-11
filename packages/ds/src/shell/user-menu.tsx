@@ -2,7 +2,18 @@
 
 import { Avatar } from "../components/avatar";
 import { type ItemMenu, Menu } from "../components/menu";
+import { Punto } from "./contador";
 import type { Usuario } from "./types";
+
+/** Avatar del disparador; con `usuario.aviso`, punto rojo de novedades sin leer (CAR-316). */
+function AvatarAviso({ usuario }: { usuario: Usuario }) {
+  return (
+    <span className="relative inline-flex">
+      <Avatar nombre={usuario.nombre} />
+      <Punto visible={usuario.aviso} peligro />
+    </span>
+  );
+}
 
 type Props = {
   usuario: Usuario;
@@ -34,7 +45,7 @@ export function MenuUsuarioBarra(props: {
 export function UserMenu({ usuario, items, lado, conNombre }: Props) {
   return (
     <Menu
-      etiqueta="Menú de usuario"
+      etiqueta={usuario.aviso ? "Menú de usuario, hay novedades sin leer" : "Menú de usuario"}
       claseContenido="w-[248px]"
       items={items}
       {...(lado ? { lado } : {})}
@@ -53,7 +64,7 @@ export function UserMenu({ usuario, items, lado, conNombre }: Props) {
       disparador={
         conNombre ? (
           <span className="flex min-h-11 w-full items-center gap-2.5 px-2 py-1 text-left">
-            <Avatar nombre={usuario.nombre} />
+            <AvatarAviso usuario={usuario} />
             <span className="min-w-0">
               <span className="block truncate text-base font-medium text-fg">{usuario.nombre}</span>
               {usuario.rol ? (
@@ -62,7 +73,7 @@ export function UserMenu({ usuario, items, lado, conNombre }: Props) {
             </span>
           </span>
         ) : (
-          <Avatar nombre={usuario.nombre} />
+          <AvatarAviso usuario={usuario} />
         )
       }
     />

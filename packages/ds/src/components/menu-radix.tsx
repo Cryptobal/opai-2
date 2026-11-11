@@ -5,7 +5,7 @@ import { DropdownMenu } from "radix-ui";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { cn } from "../cn";
-import { Punto } from "../shell/contador";
+import { PILDORA_ROJA, Punto } from "../shell/contador";
 import { claseDisparadorMenu, claseOverlay, type ItemMenu, LADO } from "./menu";
 
 export type MenuProps = {
@@ -87,6 +87,12 @@ export function MenuRadix(props: MenuProps) {
                     <span className="block text-xs text-fg-muted">{item.descripcion}</span>
                   ) : null}
                 </span>
+                {item.contador ? (
+                  <span className={`${PILDORA_ROJA} flex-none text-xs`}>
+                    <span aria-hidden>{item.contador}</span>
+                    <span className="sr-only">{`${item.contador} sin leer`}</span>
+                  </span>
+                ) : null}
                 {item.marcado ? <Check className="size-4 text-accent" aria-label="actual" /> : null}
               </DropdownMenu.Item>
             </div>

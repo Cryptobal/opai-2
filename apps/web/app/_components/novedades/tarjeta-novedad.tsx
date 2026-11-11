@@ -1,4 +1,6 @@
-import { Badge, Enlace, SeccionTarjeta } from "@opai/ds";
+import { Badge, Button, Enlace, SeccionTarjeta } from "@opai/ds";
+
+import { TextoNovedad } from "./texto-novedad";
 
 export type ItemNovedad = {
   id: string;
@@ -19,30 +21,53 @@ function formatearFecha(iso: string): string {
   return `${d}-${m}-${y}`;
 }
 
-export function TarjetaNovedad({ item }: { item: ItemNovedad }) {
+/**
+ * Una novedad del producto (CAR-316): la no leída lleva la etiqueta «Nueva», el borde de acento y el
+ * botón «Marcar como leída»; el texto se dibuja con su formato, sin asteriscos.
+ */
+export function TarjetaNovedad({
+  item,
+  onMarcar,
+}: {
+  item: ItemNovedad;
+  onMarcar?: (id: string) => void;
+}) {
   return (
     <SeccionTarjeta
-      titulo={item.leida ? item.titulo : `Nueva · ${item.titulo}`}
+      titulo={item.titulo}
+      {...(item.leida ? {} : { className: "border-accent" })}
       accion={
-        <Badge tono="neutro" punto={false}>
-          {item.moduloEtiqueta}
-        </Badge>
+        <>
+          {item.leida ? null : (
+            <Badge tono="danger">
+              Nueva
+            </Badge>
+          )}
+          <Badge tono="neutro" punto={false}>
+            {item.moduloEtiqueta}
+          </Badge>
+        </>
       }
     >
       <p className="t-caption mb-2 text-fg-muted">
         {formatearFecha(item.fecha)}
         {item.car ? ` · ${item.car}` : ""}
       </p>
-      <p className="t-body whitespace-pre-wrap text-fg">{item.descripcion}</p>
+      <TextoNovedad texto={item.descripcion} />
       {item.imagen ? (
         <div className="mt-3 max-w-md overflow-hidden rounded-md border border-border">
           {/* eslint-disable-next-line @next/next/no-img-element -- URLs opcionales en /public/changelog */}
           <img src={item.imagen} alt="" className="aspect-video w-full object-cover" />
         </div>
       ) : null}
-      {item.ruta ? (
-        <div className="mt-3">
-          <Enlace href={item.ruta}>Ver en OPAI</Enlace>
+      {item.ruta || (!item.leida && onMarcar) ? (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {item.ruta ? <Enlace href={item.ruta}>Ver en OPAI</Enlace> : null}
+          {!item.leida && onMarcar ? (
+            <Button variant="ghost" className="h-11 md:h-9" onClick={() => onMarcar(item.id)}>
+              Marcar como leída
+            </Button>
+          ) : null}
         </div>
       ) : null}
     </SeccionTarjeta>
