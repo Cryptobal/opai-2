@@ -1885,3 +1885,15 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 6. **Borde de los campos con contraste AA** (decisión técnica de la sesión, desvío declarado). El export dibuja los campos con el borde tenue de las líneas. Se mantiene el borde de control del DS (3:1), porque el contraste AA es regla del repositorio y criterio de aceptación de la piel. Si Carlos prefiere el borde del export, es un cambio de un token.
 7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
 8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.
+
+## ADR-098 · Entrar a OPAI desde Claude con la cuenta propia: OAuth del MCP adelantado (CAR-247, 11-nov-2026)
+
+**Decide:** Carlos, en el chat del proyecto «Opai 2.0», 11-nov-2026 a las 20:16 (hora de Chile) · **Registra:** Claude («Sesión Hilo»).
+
+**Contexto.** El 10-nov Carlos decidió hacer OAuth para el MCP después de v1.0 (9-dic). El 11-nov pidió adelantar el conector interactivo de Claude (CAR-287), y Claude exige que cada persona entre con su cuenta para agregar un conector propio.
+
+**Decisión.**
+1. Se adelanta CAR-247: OAuth por usuario para `/api/mcp`, antes de v1.0. El token actúa como agente vía la persona (permisos, alcance, empresa y aprobaciones de ADR-032), atado a la empresa que elige después de entrar. Diseño en `briefs/BRIEF-CAR-247-oauth-mcp.md`.
+2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
+
+**Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
