@@ -73,10 +73,13 @@ describe("comercial · seguimiento contra Postgres real", () => {
     const s = await e.admin.seguimiento.findFirstOrThrow({ where: { negocioId: A.negocioId, estado: "activo" } });
     const r = await dato<{ estado: string }>(A.c, "comercial.seguimientos.registrar_respuesta", { id: s.id, detalle: "Llamó pidiendo cambios" });
     expect(r.estado).toBe("pausado");
-    const entrante = { seguimientoId: s.id, mensajeId: "msg-1", remitente: "ana@cliente.cl", asunto: "Re", texto: "Hola", recibidoEn: new Date().toISOString() };
+    const entrante = { seguimientoId: s.id, mensajeId: "msg-1", remitente: "ana@cliente.cl", asunto: "Re: asunto-reservado", texto: "texto-reservado", recibidoEn: new Date().toISOString() };
     expect((await dato<{ registrado: boolean }>(A.c, "comercial.seguimientos.recibir_correo", entrante)).registrado).toBe(true);
     expect((await dato<{ registrado: boolean }>(A.c, "comercial.seguimientos.recibir_correo", entrante)).registrado).toBe(false);
     expect(await e.admin.seguimientoEntrante.count({ where: { seguimientoId: s.id } })).toBe(1);
+    // CAR-297: la auditoría no guarda el contenido del correo del cliente.
+    const aud = await e.admin.auditEvent.findFirstOrThrow({ where: { tenantId: A.tenantId, capability: "comercial.seguimientos.recibir_correo" } });
+    expect(JSON.stringify(aud.payload)).not.toMatch(/ana@cliente|asunto-reservado|texto-reservado/);
   });
 
   it("reanudar vuelve a activo y ganar el negocio termina el seguimiento", async () => {

@@ -78,13 +78,22 @@ jobs:
           # sin las migraciones del PR. Se espera su check `rama-neon` sobre este commit (máximo 15 min).
           for i in $(seq 1 90); do
             estado=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs?check_name=rama-neon" \
-              --jq '[.check_runs[] | .status] | if length == 0 then "sin" elif all(. == "completed") then "listo" else "corriendo" end' 2>/dev/null || echo "sin")
-            if [ "$estado" = "listo" ]; then break; fi
+              --jq '[.check_runs[]] | if length == 0 then "sin" elif any(.status != "completed") then "corriendo" elif all(.conclusion == "success" or .conclusion == "skipped" or .conclusion == "neutral") then "listo" else "fallo" end' 2>/dev/null || echo "sin")
+            if [ "$estado" = "listo" ] || [ "$estado" = "fallo" ]; then break; fi
             # Si a los 3 minutos no apareció, este PR no dispara `preview` (se sigue con la vista previa de Git).
             if [ "$estado" = "sin" ] && [ "$i" -ge 18 ]; then break; fi
             sleep 10
           done
           echo "Estado de rama-neon: $estado"
+          # Sin la base de la vista previa migrada, las pruebas correrían contra un esquema equivocado.
+          if [ "$estado" = "fallo" ]; then
+            echo "::error::El check rama-neon falló: la vista previa no tiene la base de este PR lista."
+            exit 1
+          fi
+          if [ "$estado" = "corriendo" ]; then
+            echo "::error::rama-neon no terminó en 15 minutos."
+            exit 1
+          fi
       - name: Ubicar la vista previa de este commit y esperar a que responda
         if: steps.listo.outputs.ok == 'true'
         id: url

@@ -94,6 +94,9 @@ describe.skipIf(!urlPropietario)("core · importador: entidades hijas, lotes y r
     await x.e.admin.contacto.updateMany({ where: { tenantId: x.t1, email: "luis@delta.cl" }, data: { anonimizadoEn: new Date(), email: null, nombres: "Anonimizado", apellidos: "" } });
     const otraVez = await x.importar(x.t1, "contactos", { opai1: OPAI1 }, true);
     expect(otraVez.filas[0]).toMatchObject({ accion: "error", mensajes: ["Este contacto fue anonimizado y no se puede volver a cargar."] });
+    // Un id de origen ligado a un contacto de otra cuenta no arrastra la fila hacia él.
+    const cruzado = await x.importar(x.t1, "contactos", { opai1: { contacts: [{ id: "con-1", accountId: "acc-2", firstName: "Otro" }] } }, true);
+    expect(cruzado.filas[0]).toMatchObject({ accion: "error" });
     const dos = await x.run(x.t2, "core.importar.revertir", { importacionId: loteCuentas });
     expect(dos.ok ? "ok" : dos.error.code).toBe("NOT_FOUND");
   });
