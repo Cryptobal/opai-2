@@ -46,7 +46,7 @@ export function HojaEnviarCotizacion(p: {
 
   const pedirAprobacion = p.requiereAprobacion && p.estado !== "lista";
   const mutualPendiente = p.requiereMutual && !mutualOk;
-  const bloqueado = !pedirAprobacion && (mutualPendiente || !contacto?.email);
+  const bloqueado = !pedirAprobacion && (mutualPendiente || !contacto?.email || !seguimiento.listo);
 
   async function confirmar() {
     if (pedirAprobacion) {
@@ -122,6 +122,7 @@ export function HojaEnviarCotizacion(p: {
             La cotización queda pendiente; un owner o admin revisa el margen y recién ahí sale el correo.
           </Alerta>
         ) : null}
+        {!pedirAprobacion && !seguimiento.listo ? <p className="t-caption text-center text-fg-muted">Elige la etapa del negocio para enviar.</p> : null}
         {mutualPendiente && !pedirAprobacion ? <p className="t-caption text-center text-fg-muted">Confirma la mutual adicional para enviar.</p> : null}
         {error ? <Alerta tono="danger" titulo={error} /> : null}
       </div>
