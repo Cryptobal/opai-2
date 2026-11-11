@@ -4,7 +4,7 @@ import { cn } from "../cn";
 
 // `hover:` de Tailwind 4 ya va dentro de @media (hover: hover): en táctil el borde no queda pegado.
 const base =
-  "w-full h-11 rounded-md border border-border-control bg-surface px-3 text-md text-fg placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 hover:border-fg-subtle focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45";
+  "w-full h-11 rounded-md border border-border-control bg-surface px-3 marco-hilo:px-3.5 text-md text-fg placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 hover:border-fg-subtle focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45";
 
 export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   /** 36 px y texto de 14: filtros y celdas en md+. En teléfono se mantiene el de 44 px. */

@@ -36,6 +36,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 input{font:inherit;color:inherit;background:none;border:0;outline:0;min-width:0}
 button:focus-visible{outline:2px solid var(--agente);outline-offset:2px}
 form:focus-within{border-color:var(--agente)}
+.campo:focus-within{border-color:var(--agente) !important}
 .sx{scrollbar-width:none}.sx::-webkit-scrollbar{display:none}
 </style>
 </helmet>"""

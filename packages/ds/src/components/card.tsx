@@ -3,7 +3,13 @@ import type { HTMLAttributes } from "react";
 import { cn } from "../cn";
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-lg border border-border bg-surface", className)} {...props} />;
+  // `--fondo`: lo que queda detrás de una cabecera fija (Table) dentro de la tarjeta, en el marco Hilo.
+  return (
+    <div
+      className={cn("rounded-lg border border-border bg-surface [--fondo:var(--ds-surface)]", className)}
+      {...props}
+    />
+  );
 }
 
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
