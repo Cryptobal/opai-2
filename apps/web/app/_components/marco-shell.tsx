@@ -101,15 +101,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
   const bandejaPendiente = enErp && (preferencias?.bandejaPendiente ?? false);
-  const navInferiorResuelto = useMemo(
-    () =>
-      navInferiorBase?.map((n) =>
-        n.href === "/" ? { ...n, punto: true, alerta: bandejaPendiente } : n.href === "/cotizaciones" ? { ...n, corta: "Cotiz." } : n,
-      ),
-    [navInferiorBase, bandejaPendiente],
-  );
   const empresas = empresasShell(datos.empresas, Building2);
-  const { menuUsuario: menu } = useMenuShell(
+  const { menuUsuario: menu, novedadesNoLeidas } = useMenuShell(
     datos,
     enErp,
     router,
@@ -117,6 +110,17 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
       ? () => setInicio(true)
       : undefined,
+  );
+  // CAR-316: la Bandeja suma las novedades sin leer y se resalta (también en la barra inferior).
+  const novedadesBandeja = enErp ? novedadesNoLeidas : 0;
+  const bandejaContador = enErp ? (preferencias?.bandejaContador ?? 0) : 0;
+  const navInferiorResuelto = useMemo(
+    () =>
+      navInferiorBase &&
+      conContadores(navInferiorBase, { bandejaContador, solicitudesNuevas: 0 }, novedadesBandeja).map((n) =>
+        n.href === "/" ? { ...n, punto: true, alerta: bandejaPendiente } : n.href === "/cotizaciones" ? { ...n, corta: "Cotiz." } : n,
+      ),
+    [navInferiorBase, bandejaPendiente, bandejaContador, novedadesBandeja],
   );
   const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
@@ -128,7 +132,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         titulo={tituloEfectivo}
         busquedaCompacta={enConfiguracion}
         {...(padre ? { volver: padre, volverSoloTelefono: true } : {})}
-        nav={conContadores(nav, preferencias)}
+        nav={conContadores(nav, preferencias, novedadesBandeja)}
         {...(navInferiorResuelto ? { navInferior: navInferiorResuelto } : {})}
         portales={datos.portales}
         portalActual={datos.portal}

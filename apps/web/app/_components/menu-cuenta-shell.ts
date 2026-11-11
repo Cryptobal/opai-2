@@ -44,10 +44,8 @@ export function menuCuentaShell(
           {
             id: "novedades",
             etiqueta: "Novedades",
-            punto: novedades.noLeidas > 0,
-            ...(novedades.noLeidas > 0
-              ? { descripcion: `${novedades.noLeidas} sin leer` }
-              : {}),
+            // Número rojo a la derecha de «Novedades» (CAR-316): se ve apenas se abre el menú.
+            ...(novedades.noLeidas > 0 ? { contador: novedades.noLeidas } : {}),
             icono: Sparkles,
             onSelect: () => navegar(novedades.href),
           },

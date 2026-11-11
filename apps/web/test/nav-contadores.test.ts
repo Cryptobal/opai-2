@@ -7,12 +7,33 @@ const nav = [{ href: "/bandeja" }, { href: "/solicitudes" }, { href: "/negocios"
 describe("números del menú (CAR-211)", () => {
   it("Solicitudes lleva el número y la alerta solo si hay nuevas; la Bandeja siempre su número", () => {
     const r = conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 3 });
-    expect(r[0]).toMatchObject({ href: "/bandeja", contador: 0 });
+    expect(r[0]).toEqual({ href: "/bandeja", contador: 0 });
     expect(r[1]).toMatchObject({ href: "/solicitudes", contador: 3, alerta: true });
     expect(r[2]).toEqual({ href: "/negocios" });
   });
   it("sin solicitudes nuevas (o sin módulo, permiso o preferencias) no se muestra número", () => {
     expect(conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 })[1]).toEqual({ href: "/solicitudes" });
     expect(conContadores(nav, undefined)[1]).toEqual({ href: "/solicitudes" });
+  });
+});
+
+describe("Bandeja resaltada con novedades sin leer (CAR-316)", () => {
+  it("suma las novedades sin leer al número de la Bandeja y la resalta", () => {
+    const r = conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 }, 3);
+    expect(r[0]).toEqual({ href: "/bandeja", contador: 5, alerta: true, resaltado: true });
+  });
+  it("solo con novedades pendientes (sin avisos) la Bandeja también se resalta", () => {
+    expect(conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 0 }, 1)[0]).toMatchObject({
+      contador: 1,
+      alerta: true,
+      resaltado: true,
+    });
+    expect(conContadores(nav, undefined, 4)[0]).toMatchObject({ contador: 4, resaltado: true });
+  });
+  it("al quedar todo leído vuelve al número discreto en 0, sin globo rojo", () => {
+    expect(conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 0 }, 0)[0]).toEqual({
+      href: "/bandeja",
+      contador: 0,
+    });
   });
 });
