@@ -155,6 +155,57 @@
   color-scheme: dark;
 }
 
+/* Piel «Hilo» (ADR-090, CAR-278; diseño aprobado en docs/2.0/design/export-base-hilo/): los neutros
+   del marco centrado en el agente, con alcance. Valen dentro del marco (`data-marco="hilo"` en su
+   raíz) y, mientras está montado, en todo el documento: el marco copia el atributo a <html> para que
+   los diálogos y menús, que se pintan en <body>, usen la misma piel. El marco clásico no los ve.
+   Los bloques oscuros repiten cada token del claro para que no se filtre (lo mide tokens.test.ts). */
+[data-marco="hilo"] {
+  --ds-bg: #fafaf9;
+  --ds-fill: #f0f0ee;
+  --ds-border: #e3e3e0;
+  --ds-fg: #0d0d0e;
+  --ds-fg-muted: #5a5a60;
+  --ds-accent: #4a3fd8;
+  --ds-accent-fg: #ffffff;
+  --ds-success-muted: #e6f4ea;
+  --ds-warning-muted: #fbf0dc;
+  --ds-danger-muted: #fbe9e7;
+  --ds-shadow-overlay: 0 14px 40px -14px rgba(13, 13, 14, 0.28), 0 2px 6px rgba(13, 13, 14, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"])[data-marco="hilo"],
+  :root:not([data-theme="light"]) [data-marco="hilo"] {
+    --ds-bg: #0a0a0b;
+    --ds-fill: #1d1d20;
+    --ds-border: #29292d;
+    --ds-fg: #f4f4f5;
+    --ds-fg-muted: #a1a1aa;
+    --ds-accent: #a9a4ff; /* texto oscuro encima 8.6:1 */
+    --ds-accent-fg: #0a0a0b;
+    --ds-success-muted: #10261a;
+    --ds-warning-muted: #2a2009;
+    --ds-danger-muted: #2c1313;
+    --ds-shadow-overlay: 0 14px 40px -14px rgba(0, 0, 0, 0.8), 0 0 0 1px #29292d;
+  }
+}
+
+:root[data-theme="dark"][data-marco="hilo"],
+:root[data-theme="dark"] [data-marco="hilo"] {
+  --ds-bg: #0a0a0b;
+  --ds-fill: #1d1d20;
+  --ds-border: #29292d;
+  --ds-fg: #f4f4f5;
+  --ds-fg-muted: #a1a1aa;
+  --ds-accent: #a9a4ff; /* texto oscuro encima 8.6:1 */
+  --ds-accent-fg: #0a0a0b;
+  --ds-success-muted: #10261a;
+  --ds-warning-muted: #2a2009;
+  --ds-danger-muted: #2c1313;
+  --ds-shadow-overlay: 0 14px 40px -14px rgba(0, 0, 0, 0.8), 0 0 0 1px #29292d;
+}
+
 /* Tailwind v4: utilidades `bg-surface`, `text-fg-muted`, `border-border`, `bg-accent`, `rounded-md`… */
 @theme inline {
   --color-bg: var(--ds-bg);
@@ -216,6 +267,10 @@
   --text-2xl--line-height: 34px;
   --text-3xl: 36px;
   --text-3xl--line-height: 40px;
+
+  /* Marco «Hilo» (ADR-090): ancho desde el cual el hilo cabe abierto junto al lienzo (1400 px). En rem,
+     como los demás puntos de quiebre, para que Tailwind lo ordene entre xl y 2xl. */
+  --breakpoint-hilo: 87.5rem;
 
   --radius-sm: 6px;
   --radius-md: 10px;
