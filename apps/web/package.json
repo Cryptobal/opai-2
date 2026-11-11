@@ -23,7 +23,7 @@
     "@opai/ds": "workspace:*",
     "@opai/integrations": "workspace:*",
     "@opai/modules": "workspace:*",
-    "better-auth": "^1.7.12",
+    "better-auth": "^1.7.21",
     "lucide-react": "^1.61.0",
     "mcp-handler": "^2.3.0",
     "next": "16.4.2",
