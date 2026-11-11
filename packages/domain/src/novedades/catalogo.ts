@@ -6,6 +6,14 @@ import { NOVEDADES_MARKDOWN } from "./entradas/embed";
 import { parsearNovedadMarkdown, type EntradaNovedad } from "./parser";
 
 export { parsearNovedadMarkdown, type EntradaNovedad, type FrontmatterNovedad } from "./parser";
+export {
+  bloquesNovedad,
+  hrefSeguroNovedad,
+  textoPlanoNovedad,
+  trozosNovedad,
+  type BloqueNovedad,
+  type TrozoNovedad,
+} from "./formato";
 
 const dirEntradas = join(dirname(fileURLToPath(import.meta.url)), "entradas");
 
