@@ -100,3 +100,23 @@ Rollback: cada PR se revierte por separado; las migraciones son aditivas.
 ## 16. Reporte de ejecución
 
 Se completa en cada PR.
+
+## 17. PR 3 · 06 Editor de plantillas (plan)
+
+Encargo de Carlos del 11-nov-2026 (01:22, t2112u): el texto legal de Personas (contratos, anexos, finiquitos) se crea en Documentos, en un gestor de plantillas donde Carlos crea los documentos y en cada caso asigna o elige el formato. Este PR es el editor; el selector de plantilla (PR 4) va en otra sesión. Destraba CAR-58 (no se siembra texto legal: lo escribe Carlos en el editor).
+
+**Diferencia con §3 (se reporta):** §3 decía «sin migración». El modelo del PR 2 tiene versiones inmutables y no tiene dónde guardar el **borrador** ni **quién firma**, que el diseño 06 muestra («Guardar borrador», «Borrador de la versión N», «Quién firma»). Guardar cada borrador como versión nueva llenaría el historial de versiones que nunca rigieron. Se agrega una **migración aditiva** de columnas nulas o con defecto en `core.documento_plantillas` (ninguna tabla nueva, sin datos que migrar), con `migracion-pendiente`; la aplica el bot «OPAI 2.0» con respaldo.
+
+**Bloques (un commit por bloque):**
+
+1. Plan (este apartado).
+2. Dominio puro (`@opai/domain`): firmantes (`empleador`, `trabajador`, `ambos`), texto a párrafos y segmentos (variable conocida o desconocida, **negrita** `**…**` y *cursiva* `*…*`), búsqueda de variables y siguiente número de versión. Tests.
+3. Migración aditiva `documento_plantillas_borrador`: `borrador_contenido`, `borrador_actualizado_en`, `borrador_por_nombre` (nulas) y `firmantes` (defecto `ambos`, check).
+4. Capacidades: `core.documento_plantillas.guardar_borrador` (escritura, dryRun) y `core.documento_plantillas.publicar` (irreversible: crea la versión siguiente e inmutable, valida variables y la versión esperada; a un agente le pide aprobación humana); `get` devuelve el borrador y `update` acepta `firmantes`. Tests con contexto falso y contra Postgres. Instantánea MCP e inventario de paridad.
+5. DS: `ChipVariable` (pendiente del README del export) en `@opai/ds` y en `/ds`.
+6. Pantalla `/documentos/plantillas/[id]` según el export 06 (375 solo lectura, 1024 con «Ver variables», 1280 con panel de variables), estados cargando, vacío, error y sin permiso; filas de la lista enlazan al editor y «Nueva plantilla» se habilita (diálogo de nombre, tipo y firma que abre el editor). «Importar Word o PDF» sigue deshabilitado (09).
+7. Novedad in-app, `ESTADO.md` y reporte.
+
+**Archivos:** `packages/domain/src/documento-plantillas*.ts`, `packages/db/prisma/schema/documentos.prisma`, `packages/db/prisma/migrations/<fecha>_documento_plantillas_borrador/`, `packages/capabilities/src/core/documentos/plantillas*.ts`, `packages/capabilities/test/documento-plantillas*.test.ts`, `packages/capabilities/test/__snapshots__/herramientas-mcp.txt`, `docs/2.0/paridad/mcp-inventario.md`, `packages/ds/src/components/chip-variable.tsx` y `/ds`, `apps/web/app/(erp)/documentos/plantillas/**`, `packages/domain/src/novedades/entradas/`, `docs/2.0/ESTADO.md`.
+
+**Fuera de alcance:** selector de plantilla en Personas y generación (PR 4), importar Word o PDF (09), historial de versiones en pantalla, N3·FEA.
