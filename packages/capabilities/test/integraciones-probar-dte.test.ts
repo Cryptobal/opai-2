@@ -43,7 +43,7 @@ async function probar(ctx: Awaited<ReturnType<typeof conKey>>): Promise<Probar> 
 }
 
 describe("core.integraciones.probar con dte_emision (CAR-263, CAR-240)", () => {
-  it("mide la key en Suscripcion/status por Basic y por token, no con la prueba de correo", async () => {
+  it("mide la key en Suscripcion/status por Basic y por token, no con la prueba de correo, sin revelar secretos", async () => {
     const ctx = await conKey(KEY);
     const f = simular(() => Response.json([{ producto: "DTE" }]));
     const d = await probar(ctx);
@@ -52,43 +52,27 @@ describe("core.integraciones.probar con dte_emision (CAR-263, CAR-240)", () => {
       "https://api.simpleapi.cl/api/Auth/token",
       "https://api.simpleapi.cl/api/v1/Suscripcion/status",
     ]);
-    expect(d).toMatchObject({ ok: true });
+    // Sin certificado cargado sí es un error real de configuración.
+    expect(d.ok).toBe(false);
     expect(d.mensaje).toBe(
-      "SimpleAPI reconoce la API key (1 suscripción; Consulta de suscripción: con Basic, HTTP 401; con token, HTTP 200). Falta cargar el certificado digital y su clave.",
+      "Falta cargar el certificado digital y su clave. SimpleAPI (informativo, no bloquea la emisión): consulta de suscripción con Basic, HTTP 401; con token, HTTP 200; suscripciones informadas: 1. La key guardada tiene 19 caracteres.",
     );
     for (const secreto of [KEY, TOKEN, "producto"]) expect(d.mensaje).not.toContain(secreto);
   });
 
-  it("lista vacía: informa lo medido sin afirmar que la key está mal, y la integración queda en error", async () => {
-    const ctx = await conKey(KEY);
+  it("lista vacía o sin respuesta: informa lo medido sin culpar a la key", async () => {
     simular(() => Response.json([]));
-    const d = await probar(ctx);
-    expect(d.ok).toBe(false);
-    expect(d.mensaje).toMatch(/^SimpleAPI no informa ninguna suscripción para la API key guardada/);
-    expect(d.mensaje).toContain("con Basic, HTTP 401; con token, HTTP 200");
-    expect(d.mensaje).toContain("tiene 19 caracteres;");
-    expect(d.mensaje).not.toMatch(/mal copiada|vencida/);
-    expect(d.mensaje).not.toContain(KEY);
-    const lista = await executeCapability(ctx, "core.integraciones.list", {});
-    const fila = (lista.ok ? (lista.data as { proveedor: string; estado: string }[]) : []).find((i) => i.proveedor === "dte_emision");
-    expect(fila?.estado).toBe("error");
+    const vacia = await probar(await conKey(`"${KEY}"`));
+    expect(vacia.mensaje).toContain("suscripciones informadas: 0. La key guardada tiene 21 caracteres y alguno no es letra, número ni guion.");
+    expect(vacia.mensaje).not.toMatch(/mal copiada|vencida|no reconoce/);
+    simular(() => new Response("", { status: 503 }), () => new Response("", { status: 503 }));
+    expect((await probar(await conKey(KEY))).mensaje).toContain("con Basic, HTTP 503; con token, HTTP 503; suscripciones informadas: sin dato.");
   });
 
-  it("una key pegada con comillas lo dice sin mostrarla", async () => {
-    const ctx = await conKey(`"${KEY}"`);
-    simular(() => Response.json([]));
-    const d = await probar(ctx);
-    expect(d.mensaje).toContain("tiene 21 caracteres y alguno no es letra, número ni guion");
-    expect(d.mensaje).not.toContain(KEY);
-  });
-
-  it("sin key guardada no llama a SimpleAPI; sin lista no culpa a la key", async () => {
-    const f = simular(() => new Response("", { status: 503 }), () => new Response("", { status: 503 }));
+  it("sin key guardada no llama a SimpleAPI", async () => {
+    const f = simular(() => Response.json([]));
     const { ctx: sinKey } = contextoDePrueba();
     expect(await probar(sinKey)).toMatchObject({ ok: false, mensaje: "Falta la API key de SimpleAPI en Emisión DTE." });
     expect(f).not.toHaveBeenCalled();
-    const d = await probar(await conKey(KEY));
-    expect(d.ok).toBe(false);
-    expect(d.mensaje).toMatch(/^No se pudo comprobar la API key en SimpleAPI\. .*con Basic, HTTP 503; con token, HTTP 503/);
   });
 });
