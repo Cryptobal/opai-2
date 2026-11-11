@@ -10,7 +10,7 @@ const items = [{ id: "novedades", etiqueta: "Novedades", contador: 2, onSelect: 
 describe("punto de novedades sobre el avatar (CAR-316)", () => {
   it("con novedades sin leer el avatar lleva el punto rojo y lo anuncia", () => {
     const html = renderToStaticMarkup(
-      <MenuUsuarioBarra usuario={usuario} menuUsuario={items} avisoNovedades />,
+      <MenuUsuarioBarra usuario={{ ...usuario, aviso: true }} menuUsuario={items} />,
     );
     expect(html).toContain("bg-danger-fg");
     expect(html).toContain('aria-label="Menú de usuario, hay novedades sin leer"');

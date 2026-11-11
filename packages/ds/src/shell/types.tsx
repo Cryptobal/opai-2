@@ -62,7 +62,13 @@ export type Portal = {
 
 export type Tenant = { nombre: string };
 
-export type Usuario = { nombre: string; email?: string; rol?: string };
+export type Usuario = {
+  nombre: string;
+  email?: string;
+  rol?: string;
+  /** Punto rojo sobre el avatar: novedades sin leer en portales sin Bandeja (CAR-316). */
+  aviso?: boolean;
+};
 
 export type LinkProps = {
   href: string;

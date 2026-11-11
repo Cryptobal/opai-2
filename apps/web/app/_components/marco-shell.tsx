@@ -139,10 +139,9 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         rutaActual={rutaEfectiva}
         {...(datos.tenant ? { tenant: datos.tenant } : {})}
         {...(empresas.length ? { empresas } : {})}
-        usuario={datos.usuario}
-        menuUsuario={menu}
         // CAR-316 (Carlos, 11-nov): sin Bandeja, las novedades sin leer marcan el avatar.
-        {...(avisoNovedadesAvatar(datos.portal, novedadesNoLeidas) ? { avisoNovedades: true } : {})}
+        usuario={{ ...datos.usuario, aviso: avisoNovedadesAvatar(datos.portal, novedadesNoLeidas) }}
+        menuUsuario={menu}
         {...(agente.lanzador ? { agente: agente.lanzador } : {})}
         campana={
           datos.tenant ? (
