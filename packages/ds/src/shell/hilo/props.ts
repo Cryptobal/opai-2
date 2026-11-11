@@ -44,7 +44,7 @@ export type HiloShellProps = {
   empresas: readonly ItemMenu[];
   cuenta: readonly ItemMenu[];
   /** Barra: con agente invita a pedir y va en índigo; sin agente, busca. En H1 siempre abre la búsqueda. */
-  barra: { agente: boolean; texto: string };
+  barra: { agente: boolean; texto: string; textoCorto?: string };
   onBuscar: () => void;
   onTema: () => void;
   /** Estado inicial, para `/ds` y las pruebas de marcado. */
