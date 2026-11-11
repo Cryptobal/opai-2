@@ -8,7 +8,8 @@ import { fecha, pesos } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 
 import { PestanasVentas } from "../../_componentes/pestanas-ventas";
-import { estadoDteVenta } from "./etiquetas-venta";
+import { estadoDteVenta, tituloCorto } from "./etiquetas-venta";
+import { filtrosVentas } from "./filtros-ventas";
 import { conFiltros } from "./filtros-url";
 import type { LibroVentas, Venta } from "./tipos";
 
@@ -40,18 +41,7 @@ export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: 
         titulo="Ventas (DTE)"
         accion={emitir}
         buscar="Buscar folio o cliente"
-        filtros={[
-          { param: "periodo", etiqueta: "Período", opciones: d.periodos },
-          {
-            param: "estado",
-            etiqueta: "Estado",
-            opciones: [
-              { valor: "borrador", etiqueta: "Borradores" },
-              { valor: "aceptado", etiqueta: "Aceptadas" },
-              { valor: "enviado", etiqueta: "Enviadas" },
-            ],
-          },
-        ]}
+        filtros={filtrosVentas(d.periodos)}
         meta={{ izquierda: d.subtitulo ?? `${items.length} documentos` }}
         seleccionada={seleccionada}
         vacio={
@@ -62,8 +52,8 @@ export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: 
         filas={items.map((v) => ({
           id: v.id,
           href: conFiltros(`/finanzas/ventas/${v.id}`, params),
-          titulo: v.cuentaNombre,
-          secundario: `${v.folio ? `Folio ${v.folio}` : "Borrador"} · ${v.tipoDteNombre}`,
+          titulo: tituloCorto(v),
+          secundario: v.cuentaNombre,
           terciario: v.fechaEmision ? fecha(v.fechaEmision) : "Sin fecha de emisión",
           fin: <FinFila venta={v} />,
         }))}
@@ -73,7 +63,7 @@ export function ListaVentasMaestro({ datos: d, seleccionada, params }: { datos: 
 }
 
 function FinFila({ venta: v }: { venta: Venta }) {
-  const e = estadoDteVenta(v.estadoDte);
+  const e = estadoDteVenta(v.estadoDte, v.trackIdSii);
   return (
     <>
       <span className="t-numeric font-medium">{pesos(v.tipoDte === 61 ? -v.montoTotal : v.montoTotal)}</span>

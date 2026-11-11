@@ -3,14 +3,14 @@ import { Badge, Card, type EstadoPantalla } from "@opai/ds";
 import { fecha, pesos, rut } from "@/lib/fechas";
 
 import { AccionesVenta } from "./acciones-venta";
-import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "./etiquetas-venta";
+import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, seCobra, tituloVenta } from "./etiquetas-venta";
 import type { DetalleVenta } from "./ficha-datos";
 import { HistorialEnvios, type EnvioCliente } from "./historial-envios";
 
 /** Contenido de la ficha: datos, acciones (editar, descartar, emitir, enviar…) e historial de envíos. */
 export function FichaVenta({ state, venta, envios, editar }: { state: EstadoPantalla; venta: DetalleVenta | null; envios: EnvioCliente[]; editar: boolean }) {
   if (state !== "ready" || !venta) return null;
-  const dte = estadoDteVenta(venta.estadoDte);
+  const dte = estadoDteVenta(venta.estadoDte, venta.trackIdSii);
   const cobro = estadoCobroVenta(venta.estadoCobro);
   return (
     <div className="flex flex-col gap-4">
@@ -41,12 +41,12 @@ export function FichaVenta({ state, venta, envios, editar }: { state: EstadoPant
           </div>
           <div>
             <dt className="text-fg-muted">Estado de cobro</dt>
-            <dd>{cobro.etiqueta}</dd>
+            <dd>{seCobra(venta) ? cobro.etiqueta : "No se cobra (no es una factura vigente)"}</dd>
           </div>
           <div>
             <dt className="text-fg-muted">Cesión</dt>
             <dd>
-              {venta.cesionEstado ? estadoCesionVenta(venta.cesionEstado).etiqueta : "—"}
+              {venta.cesionEstado && seCobra(venta) ? estadoCesionVenta(venta.cesionEstado).etiqueta : "—"}
               {venta.cesionProveedor ? ` · ${venta.cesionProveedor}` : ""}
             </dd>
           </div>

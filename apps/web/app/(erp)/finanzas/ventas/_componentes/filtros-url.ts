@@ -1,9 +1,9 @@
 import type { Parametros } from "@/lib/parametros";
 
 /** Filtros del Libro que viajan en la URL; abrir una factura y volver a la lista no los pierde (CAR-255). */
-const CLAVES = ["periodo", "estado", "q"] as const;
+const CLAVES = ["periodo", "estado", "tipo", "orden", "q"] as const;
 
-/** Ruta con los filtros vigentes del Libro (`periodo`, `estado`, `q`) y, si se pide, `editar=1`. */
+/** Ruta con los filtros vigentes del Libro (`periodo`, `estado`, `tipo`, `orden`, `q`) y, si se pide, `editar=1`. */
 export function conFiltros(ruta: string, p: Parametros, extra: Record<string, string> = {}): string {
   const q = new URLSearchParams();
   for (const k of CLAVES) {
