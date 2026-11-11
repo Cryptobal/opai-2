@@ -9,6 +9,7 @@ import {
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
 import { diagnosticoRespuestaSii } from "./simpleapi-diagnostico";
 import { cuerpoMultipart, type ParteMultipart } from "./simpleapi-multipart";
+import { esRechazoMudo, tokenSimpleApi } from "./simpleapi-token";
 import { bytesDeXml } from "./xml-iso";
 
 export type { ParteMultipart } from "./simpleapi-multipart";
@@ -17,8 +18,10 @@ export type { ParteMultipart } from "./simpleapi-multipart";
 export type ArchivoMultipart = Extract<ParteMultipart, { bytes: Uint8Array }>;
 
 /**
- * POST multipart con Basic api:key en `Authorization` y el cuerpo armado como en OPAI 1.0 (CAR-240). La llamada nunca
- * corre dentro de una transacción de base.
+ * POST multipart con Basic api:key en `Authorization` y el cuerpo armado como en OPAI 1.0 (CAR-240). Si SimpleAPI lo
+ * rechaza sin decir nada (401 o 403 sin cuerpo), se repite una vez con `Bearer <token>`: por esa vía acepta la petición
+ * o responde con el motivo en texto. El rechazo mudo ocurre antes de procesar nada, así que repetir no duplica un envío.
+ * La llamada nunca corre dentro de una transacción de base.
  */
 export async function postMultipartSimpleApi(
   url: string,
@@ -26,15 +29,16 @@ export async function postMultipartSimpleApi(
   partes: readonly ParteMultipart[],
 ): Promise<Response> {
   const { cuerpo, contentType } = cuerpoMultipart(partes);
-  return fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: encabezadoAuthSimpleApi(apiKey),
-      "Content-Type": contentType,
-      Accept: "application/json, text/xml, text/plain",
-    },
-    body: new Uint8Array(cuerpo),
-  });
+  const enviar = (authorization: string) =>
+    fetch(url, {
+      method: "POST",
+      headers: { Authorization: authorization, "Content-Type": contentType, Accept: "application/json, text/xml, text/plain" },
+      body: new Uint8Array(cuerpo),
+    });
+  const res = await enviar(encabezadoAuthSimpleApi(apiKey));
+  if (!(await esRechazoMudo(res))) return res;
+  const token = await tokenSimpleApi(apiKey);
+  return token ? enviar(`Bearer ${token}`) : res;
 }
 
 /** El certificado .pfx como archivo `file` (sus bytes, desde el base64 guardado). */
@@ -54,7 +58,7 @@ export function archivoXml(xmlLatin1: string, nombreArchivo: string): ArchivoMul
  * Motivo de un HTTP no 2xx (CAR-263). Los headers `x-rate-limit-*` NO prueban que la key autenticó: SimpleAPI los envía
  * en todas sus respuestas, también sin `Authorization` o con una key inventada (verificado contra api.simpleapi.cl el
  * 10-nov-2026; la regla contraria venía de `isApiKeyAuthenticated` de 1.0 y dio por buena una key sin comprobarla).
- * Un 401 o 403 sin cuerpo es justamente su respuesta a una key que no reconoce.
+ * Un 401 o 403 sin cuerpo no dice si falla la key o el contenido; `postMultipartSimpleApi` ya lo repitió con token.
  */
 function motivoHttp(status: number, cuerpo: FormaCuerpo): string {
   if (status !== 401 && status !== 403) return `respondió HTTP ${status}`;
@@ -63,7 +67,7 @@ function motivoHttp(status: number, cuerpo: FormaCuerpo): string {
     return `indicó que la API key no tiene suscripción vigente para este servicio o que venció, HTTP ${status}`;
   }
   if (cuerpo === "vacio") {
-    return `respondió HTTP ${status} sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE`;
+    return `respondió HTTP ${status} sin motivo, también al repetir con token; usa «Probar conexión» en Integraciones › Emisión DTE para ver qué responde a la API key`;
   }
   // Con texto del proveedor, el detalle saneado acompaña al estado; no se adivina la causa.
   return `rechazó la petición, HTTP ${status}`;

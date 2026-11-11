@@ -1679,3 +1679,20 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Límite conocido.** Desde fuera no se puede saber qué responde SimpleAPI a una key válida con un contenido inválido; 1.0 sostiene que también es 401 vacío. Por eso el mensaje dice «como ante una key que no reconoce» y la prueba de la key es una llamada aparte. Si «Probar conexión» reconoce la key y `dte/generar` sigue en 401, la causa es el contenido y el motivo solo lo puede dar el soporte de SimpleAPI.
 
+
+### Adenda a ADR-088 · SimpleAPI con token Bearer cuando rechaza sin motivo (CAR-240, 10-nov-2026, 23:59)
+
+**Autor:** sesión del proyecto «OPAI 2.0» (Claude), tras el reclamo de Carlos del 10-nov-2026 23:56: guardó la key correcta (20 caracteres, termina en 3041) y «Probar conexión» de #480 siguió diciendo «no reconoce la API key».
+
+**Corrección.** #480 afirmaba más de lo medido: `Suscripcion/status` con `Basic api:key` nunca se validó con una key buena, y el indicio «19 caracteres» era falso. El punto 2 de ADR-088 («un 401 sin cuerpo se informa como key no reconocida») queda sin efecto.
+
+**Evidencia nueva** (api.simpleapi.cl, key inventada, sin credenciales de Gard): `POST /api/Auth/token` con `{ "apikey": … }` entrega un JWT para cualquier key. Con `Authorization: Bearer <token>`: `GET /api/v1/Suscripcion/status` responde 200 y `[]`; `POST /api/v1/dte/generar` responde 400 «RUT de emisor incorrecto» (con `Basic` era 401 sin cuerpo); `POST /api/v1/Consulta/validador` responde 401 «API KEY Incorrecta. No es posible continuar». Por la vía Bearer, SimpleAPI dice el motivo.
+
+**Decisión.**
+1. `postMultipartSimpleApi` usa `Basic api:key` (como 1.0) y, solo ante un 401/403 sin cuerpo, repite una vez con `Bearer <token>`. El rechazo mudo ocurre antes de procesar la petición, así que repetir no duplica un envío al SII.
+2. «Probar conexión» informa lo medido: estado HTTP con Basic, estado con token y cuántas suscripciones informa SimpleAPI para la key. Lista vacía se muestra como tal, sin afirmar que la key está mal copiada.
+3. El token lleva la key dentro: es un secreto, no se registra ni se devuelve.
+
+**Dato de Carlos (11-nov-2026, 00:00).** La key guardada en 2.0 (termina en 3041) es exactamente la `SIMPLEAPI_KEY` de OPAI 1, que emitió hasta el 6-nov (folio 1898 aceptado). Con una key que sirve en 1.0, `Suscripcion/status` con Basic dio 401: esa consulta con Basic no sirve para validar la key, y el 401 mudo de `dte/generar` en 2.0 puede venir del contenido.
+
+**Límite conocido.** No se ha observado qué responde SimpleAPI a una key válida por ninguna de las dos vías; se sabrá con la primera prueba en test.opai.cl.
