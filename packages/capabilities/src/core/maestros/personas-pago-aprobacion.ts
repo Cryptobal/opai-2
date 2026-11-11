@@ -11,7 +11,7 @@ import { conflicto, prohibido, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaFicha } from "./personas-ficha-comun";
-import { vistaPago } from "./personas-pago-vista";
+import { exigirCatalogo, vistaPago } from "./personas-pago-vista";
 
 const motivoRechazo = z.string().trim().min(5).max(500);
 
@@ -23,7 +23,11 @@ export const personasPagoAprobarCambio = defineCapability({
     "Aprueba la solicitud pendiente de cambio de cuenta bancaria de una persona. Quien la solicitó no puede aprobarla; la cuenta anterior queda reemplazada y queda auditado.",
   permiso: PERMISOS_CORE.personasPagoAprobar,
   input: z.object({ id: uuidSchema }),
-  output: z.object({ personaId: z.string(), solicitudId: z.string(), estado: z.literal("aprobada") }),
+  output: z.object({
+    personaId: z.string(),
+    solicitudId: z.string(),
+    estado: z.literal("aprobada"),
+  }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
@@ -35,6 +39,7 @@ export const personasPagoAprobarCambio = defineCapability({
     if (!ctx.usuario?.id) throw reglaDeNegocio("Se requiere un usuario autenticado.");
     if (s.solicitadoPorId === ctx.usuario.id)
       throw prohibido("No puedes aprobar una solicitud que tú mismo registraste.");
+    exigirCatalogo(s); // CAR-244: a la cuenta vigente solo entra un banco del catálogo SBIF.
     if (dryRun) return { personaId: p.id, solicitudId: s.id, estado: "aprobada" as const };
     await escribirConEvento(
       ctx,
@@ -104,7 +109,11 @@ export const personasPagoRechazarCambio = defineCapability({
   permiso: PERMISOS_CORE.personasPagoAprobar,
   sensibles: ["motivo"],
   input: z.object({ id: uuidSchema, motivo: motivoRechazo }),
-  output: z.object({ personaId: z.string(), solicitudId: z.string(), estado: z.literal("rechazada") }),
+  output: z.object({
+    personaId: z.string(),
+    solicitudId: z.string(),
+    estado: z.literal("rechazada"),
+  }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
