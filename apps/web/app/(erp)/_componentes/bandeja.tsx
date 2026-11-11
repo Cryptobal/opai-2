@@ -16,7 +16,7 @@ export function Bandeja({
   corta?: boolean;
   onNavegar?: () => void;
 }) {
-  const { avisos, aprobaciones, decisiones, error, noLeidas, cargandoMas, cargar, cargarMas, marcar } =
+  const { avisos, aprobaciones, tareasSeguimiento, decisiones, error, noLeidas, cargandoMas, cargar, cargarMas, marcar } =
     useBandeja();
   if (corta)
     return (
@@ -32,7 +32,7 @@ export function Bandeja({
     );
   return (
     <section id="bandeja" className="scroll-mt-20">
-      <SeccionTarjeta titulo={`Bandeja${avisos ? ` · ${noLeidas + (aprobaciones ?? 0)}` : ""}`}>
+      <SeccionTarjeta titulo={`Bandeja${avisos ? ` · ${noLeidas + (aprobaciones ?? 0) + tareasSeguimiento}` : ""}`}>
         {error ? <Alerta tono="danger" titulo="No pudimos actualizar la Bandeja" /> : null}
         {avisos === null ? (
           <Skeleton className="h-20" />

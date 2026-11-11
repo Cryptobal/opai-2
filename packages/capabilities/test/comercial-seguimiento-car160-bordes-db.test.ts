@@ -47,6 +47,15 @@ describe("comercial · seguimiento CAR-160, bordes (Postgres real)", () => {
     expect(await e.admin.seguimiento.count({ where: { negocioId: n, estado: { in: ["activo", "pausado"] } } })).toBe(0);
   });
 
+  it("el número de la Bandeja suma los pasos de seguimiento por hacer del usuario, sin cruzar de empresa", async () => {
+    const contar = async (c: typeof A.c) => (await dato<{ tareasSeguimiento: number | null }>(c, "core.resumen.contadores", { campos: ["tareasSeguimiento"] })).tareasSeguimiento;
+    const antes = (await contar(A.c)) ?? 0;
+    await conTareas(await A.negocio());
+    expect(await contar(A.c)).toBe(antes + 4);
+    const B = await empresaCar160(e, "Delta 160");
+    expect(await contar(B.c)).toBe(0);
+  });
+
   it("la tarea cancelada a mano omite el paso; completada con el seguimiento pausado, lo deja hecho", async () => {
     const n = await A.negocio();
     const { s, pasos } = await conTareas(n);
