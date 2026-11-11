@@ -21,7 +21,12 @@ model User {
   apiKeys            ApiKey[]
   twoFactor          TwoFactor?
   /// Excepciones de permiso que este usuario fijó (A18/A19); se desligan si se elimina (SET NULL).
-  excepcionesFijadas PermisoExcepcion[] @relation("excepcionesFijadas")
+  excepcionesFijadas PermisoExcepcion[]  @relation("excepcionesFijadas")
+  /// OAuth del MCP (CAR-247): apps que la persona registró o autorizó y sus tokens.
+  oauthClients       OauthClient[]
+  oauthRefreshTokens OauthRefreshToken[]
+  oauthAccessTokens  OauthAccessToken[]
+  oauthConsents      OauthConsent[]
 
   @@map("users")
   @@schema("core")
@@ -79,18 +84,23 @@ model LoginIntento {
 }
 
 model Session {
-  id        String   @id @default(uuid(7)) @db.Uuid
-  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
-  token     String   @unique
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
-  userId    String   @map("user_id") @db.Uuid
+  id            String   @id @default(uuid(7)) @db.Uuid
+  expiresAt     DateTime @map("expires_at") @db.Timestamptz(6)
+  token         String   @unique
+  ipAddress     String?  @map("ip_address")
+  userAgent     String?  @map("user_agent")
+  userId        String   @map("user_id") @db.Uuid
   /// Solo el servidor tras verificar TOTP/respaldo; nunca heredada de otra sesión ni del cliente.
-  mfaVerified Boolean @default(false) @map("mfa_verified")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  mfaVerified   Boolean  @default(false) @map("mfa_verified")
+  /// Empresa elegida para autorizar una app por OAuth (CAR-247). Solo la fija el servidor tras
+  /// validar la membresía activa; el proveedor la toma como `reference_id` del consentimiento.
+  oauthTenantId String?  @map("oauth_tenant_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  oauthRefreshTokens OauthRefreshToken[]
+  oauthAccessTokens  OauthAccessToken[]
 
   @@index([userId])
   @@map("sessions")

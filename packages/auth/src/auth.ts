@@ -10,6 +10,7 @@ import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
 import { marcaMfaSesion } from "./mfa-sesion";
+import { proveedorOAuth } from "./oauth";
 import { sesionPin } from "./sesion-pin";
 import { rastroLoginPausado, rastroRestablecimiento, rastroSeguridad } from "./rastro-seguridad";
 import {
@@ -50,7 +51,10 @@ export const auth = betterAuth({
   },
   user: { additionalFields: camposUsuario },
   session: {
-    additionalFields: { mfaVerified: { type: "boolean", defaultValue: false, input: false } },
+    additionalFields: {
+      mfaVerified: { type: "boolean", defaultValue: false, input: false },
+      oauthTenantId: { type: "string", required: false, input: false }, // OAuth, CAR-247
+    },
     // CAR-152 · D1 (3-nov-2026): evita la lectura de sesión en Neon en cada request y precarga RSC.
     // Una sesión revocada en la base (o una cookie copiada antes del sign-out) puede seguir autorizando
     // hasta `maxAge` s: riesgo aceptado. El sign-out borra token y caché en el navegador que lo hace.
@@ -179,6 +183,8 @@ export const auth = betterAuth({
     }),
     marcaMfaSesion,
     sesionPin,
+    // OAuth del MCP (CAR-247, ADR-098): Claude y otras apps entran con la cuenta de la persona.
+    proveedorOAuth(),
     // Después de twoFactor y de marcaMfaSesion: ve la respuesta final (p. ej. el desafío del MFA).
     rastroSeguridad,
     nextCookies(),
