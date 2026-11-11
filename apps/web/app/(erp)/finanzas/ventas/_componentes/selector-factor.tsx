@@ -28,6 +28,8 @@ export function SelectorFactor({
 }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [lista, setLista] = useState<Factor[]>([]);
+  // Hasta leer el catálogo no se guarda: guardar sobre una lista vacía borraría los factores que ya había.
+  const [cargado, setCargado] = useState(false);
 
   useEffect(() => {
     let cancelar = false;
@@ -35,6 +37,7 @@ export function SelectorFactor({
       if (cancelar) return;
       const valor = r?.find((a) => a.clave === "factores_cesion")?.valor;
       setLista(Array.isArray(valor) ? valor.filter(esFactor) : []);
+      setCargado(r !== null && r !== undefined);
     });
     return () => {
       cancelar = true;
@@ -47,12 +50,16 @@ export function SelectorFactor({
     guardado.nombre !== actual.nombre ||
     (guardado.email ?? "") !== (actual.email ?? "") ||
     (guardado.direccion ?? "") !== (actual.direccion ?? "");
-  const puedeGuardar = actual.nombre.length > 0 && actual.rut.length >= 3 && cambio;
+  const puedeGuardar = cargado && actual.nombre.length > 0 && actual.rut.length >= 3 && cambio;
 
   async function guardar() {
     limpiarError();
     const nueva = [...lista.filter((f) => clave(f.rut) !== clave(actual.rut)), actual];
-    const r = await ejecutar("core.config.set", { modulo: "finanzas", clave: "factores_cesion", valor: nueva });
+    const r = await ejecutar("core.config.set", {
+      modulo: "finanzas",
+      clave: "factores_cesion",
+      valor: nueva,
+    });
     if (!r) return;
     setLista(nueva);
     avisar.exito("Factor guardado");
@@ -70,11 +77,19 @@ export function SelectorFactor({
               const f = lista.find((x) => clave(x.rut) === v);
               if (f) onElegir(f);
             }}
-            opciones={lista.map((f) => ({ valor: clave(f.rut), etiqueta: f.nombre, descripcion: f.rut }))}
+            opciones={lista.map((f) => ({
+              valor: clave(f.rut),
+              etiqueta: f.nombre,
+              descripcion: f.rut,
+            }))}
           />
         </div>
       ) : null}
-      <Button variant="secondary" disabled={pendiente || !puedeGuardar} onClick={() => void guardar()}>
+      <Button
+        variant="secondary"
+        disabled={pendiente || !puedeGuardar}
+        onClick={() => void guardar()}
+      >
         {guardado ? "Actualizar factor" : "Guardar factor"}
       </Button>
       {error ? (
