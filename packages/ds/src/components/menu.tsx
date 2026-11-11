@@ -20,6 +20,8 @@ export type ItemMenu = {
   grupo?: string;
   /** Punto de aviso en el ícono (p. ej. novedades sin leer). */
   punto?: boolean;
+  /** Número de pendientes en una píldora roja a la derecha (p. ej. novedades sin leer, CAR-316). */
+  contador?: number;
   onSelect: () => void;
 };
 
