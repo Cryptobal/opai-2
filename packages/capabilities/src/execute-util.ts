@@ -58,6 +58,7 @@ const SINGULAR: Record<string, string> = {
   solicitudes: "solicitud",
   users: "usuario",
   aprobaciones: "aprobacion",
+  grupos: "grupo",
 };
 
 const idDe = (v: unknown): string | null =>

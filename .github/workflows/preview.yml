@@ -109,6 +109,11 @@ jobs:
           DB_URL: ${{ steps.neon.outputs.db_url }}
         run: |
           pnpm install --frozen-lockfile
+          # La rama de preview se reutiliza entre pushes: una migración renombrada después de
+          # aplicarse deja un registro fallido con el nombre viejo y Prisma rechaza todo (P3009).
+          # Se marca revertido solo si su migración ya no existe en el repo; el script se niega a
+          # correr fuera de una rama preview/pr-N (nunca main ni dev). Un fallo real sigue en rojo.
+          PREVIEW_RAMA="$RAMA" DATABASE_URL_MIGRATE="$DB_URL" pnpm --filter @opai/db preview:huerfanas
           DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
       - name: Contraseña propia de opai_app y DATABASE_URL de la preview
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
