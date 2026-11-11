@@ -23,3 +23,31 @@ export function fallidasHuerfanas(
     (r) => r.finished_at === null && r.rolled_back_at === null && !enRepo.has(r.migration_name),
   );
 }
+
+export type RegistroAplicado = RegistroMigracion & { checksum: string };
+export type Renombre = { id: string; desde: string; hacia: string };
+
+/**
+ * Migraciones renombradas después de aplicarse en la preview: un registro TERMINADO cuyo nombre ya no
+ * está en el repo y cuyo checksum (sha256 del SQL, el mismo de Prisma) es idéntico al de una migración
+ * del repo que la rama no tiene terminada. El SQL ya corrió con el nombre viejo; reaplicarlo con el
+ * nuevo fallaría («ya existe»). Solo se propone un renombre si el checksum calza con UNA sola migración.
+ */
+export function renombradas(
+  registros: readonly RegistroAplicado[],
+  checksumsRepo: ReadonlyMap<string, string>,
+): Renombre[] {
+  const terminadas = new Set(
+    registros.filter((r) => r.finished_at && !r.rolled_back_at).map((r) => r.migration_name),
+  );
+  const salida: Renombre[] = [];
+  for (const r of registros) {
+    if (!r.finished_at || r.rolled_back_at || checksumsRepo.has(r.migration_name)) continue;
+    const destinos = [...checksumsRepo].filter(
+      ([nombre, suma]) => suma === r.checksum && !terminadas.has(nombre),
+    );
+    const destino = destinos.length === 1 ? destinos[0] : undefined;
+    if (destino) salida.push({ id: r.id, desde: r.migration_name, hacia: destino[0] });
+  }
+  return salida;
+}

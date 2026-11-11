@@ -2,7 +2,7 @@
 // solo registros fallidos cuya migración ya no existe en el repo.
 import { describe, expect, it } from "vitest";
 
-import { fallidasHuerfanas, RAMA_PREVIEW } from "../scripts/preview-huerfanas-reglas";
+import { fallidasHuerfanas, RAMA_PREVIEW, renombradas } from "../scripts/preview-huerfanas-reglas";
 
 const fila = (migration_name: string, terminada: boolean, revertida = false) => ({
   id: migration_name,
@@ -31,5 +31,35 @@ describe("destrabe de la rama Neon de preview", () => {
     expect(fallidasHuerfanas(registros, enRepo).map((r) => r.migration_name)).toEqual([
       "20261119110000_core_grupos_usuarios",
     ]);
+  });
+
+  it("renombra el registro aplicado cuyo SQL idéntico cambió de nombre en el repo", () => {
+    const repo = new Map([
+      ["20261119100000_core_empresa_actecos", "a"],
+      ["20261122100000_core_grupos_usuarios", "g"],
+    ]);
+    const con = (nombre: string, terminada: boolean, checksum: string) => ({
+      ...fila(nombre, terminada),
+      checksum,
+    });
+    const registros = [
+      con("20261119100000_core_empresa_actecos", true, "a"),
+      con("20261119100000_core_grupos_usuarios", true, "g"),
+      con("20261122100000_core_grupos_usuarios", false, "g"),
+    ];
+    expect(renombradas(registros, repo)).toEqual([
+      {
+        id: "20261119100000_core_grupos_usuarios",
+        desde: "20261119100000_core_grupos_usuarios",
+        hacia: "20261122100000_core_grupos_usuarios",
+      },
+    ]);
+    // Si la nueva ya terminó, o el checksum no calza o es ambiguo, no se renombra nada.
+    expect(
+      renombradas([...registros, con("20261122100000_core_grupos_usuarios", true, "g")], repo),
+    ).toEqual([]);
+    expect(renombradas([con("20261119100000_vieja", true, "x")], repo)).toEqual([]);
+    const ambiguo = new Map([...repo, ["20261123000000_copia", "g"]]);
+    expect(renombradas(registros, ambiguo)).toEqual([]);
   });
 });
