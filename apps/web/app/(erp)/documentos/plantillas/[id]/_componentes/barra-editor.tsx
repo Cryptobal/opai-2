@@ -13,7 +13,7 @@ type Props = {
   onVariable: () => void;
 };
 
-/** Barra del diseño 06 (md+): Editar · Vista previa, negrita, cursiva y «+ Variable». */
+/** Barra del diseño 06 (md+): Editar · Vista previa, negrita, cursiva e «Insertar variable» (solo donde el panel no se ve). */
 export function BarraEditor({ modo, onModo, onEnfasis, onVariable }: Props) {
   const editando = modo === "editar";
   return (
@@ -48,9 +48,10 @@ export function BarraEditor({ modo, onModo, onEnfasis, onVariable }: Props) {
         <i>I</i>
       </Button>
       <span className="flex-1" />
-      <Button variant="secondary" disabled={!editando} onClick={onVariable}>
+      {/* En pantallas anchas el panel «Variables» ya está a la vista: un solo acceso por tamaño (CAR-315). */}
+      <Button variant="secondary" className="xl:hidden" disabled={!editando} onClick={onVariable}>
         <Plus aria-hidden className="size-4" />
-        Variable
+        Insertar variable
       </Button>
     </div>
   );

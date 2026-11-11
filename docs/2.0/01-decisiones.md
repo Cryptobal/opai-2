@@ -1827,3 +1827,17 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - Por API y MCP siguen siendo dos pasos (`emitir` y luego `enviar_sii`, ambos con aprobación humana para agentes); la descripción de `finanzas.ventas.emitir` lo dice.
 - Las facturas programadas se generan como borrador; se envían al emitirlas, igual que las demás.
 - Pendiente: un marcador de «envío en curso» por documento permitiría un respaldo automático seguro para lo que quede firmado sin enviar; requiere migración.
+
+## ADR-097 · Un solo gestor de plantillas y documentos para todos los módulos (CAR-315, 11-nov-2026)
+
+**Decidió:** Carlos (chat de la sesión dueña de Personas y Documentos, 11-nov-2026, 17:56, hora de Chile) · **Registra:** Claude. **Modifica** la decisión 1 del §15 de `briefs/BRIEF-CAR-127-documentos-v4-pantallas-04-08.md` (9-nov-2026: «plantillas laborales aparte de las salidas comerciales»). (ADR-096 está reservado por el PR abierto #511.)
+
+**Contexto.** El gestor de plantillas de Documentos solo tenía plantillas laborales (contrato, anexo, recepción, carta), con variables de Persona, Vínculo, Instalación, Sueldo y Contrato. Carlos quiso crear un contrato de servicio para usarlo desde Cuentas y no encontró dónde (CAR-315).
+
+**Decisión.** Documentos es **el único lugar para las plantillas de todos los módulos**. Todo módulo tiene documentos y plantillas: Comercial (por ejemplo, contratos de servicio en las cuentas), Operaciones (por ejemplo, protocolos de seguridad y documentos que cada instalación debe cargar y revisar) y Personas (contratos, anexos y finiquitos). El texto de cada plantilla lo escribe la empresa en el editor.
+
+**Consecuencias.**
+- El gestor suma tipos de plantilla por módulo y sus variables (Cuenta, Instalación), y la generación del documento desde la ficha de cada entidad.
+- Los tipos de plantilla y de documento se configuran en Configuración › Módulos › Documentos (pantalla 10 del export `documentos-v4`), todavía sin construir.
+- Las salidas de CPQ (propuesta y cotización en PDF) siguen en CPQ mientras no se decida moverlas: esta decisión habla de plantillas de documentos, no del motor de cotización.
+- Queda fuera de este PR; se planifica en CAR-315 (parte 2) después del selector de plantilla en la ficha de persona (CAR-127 PR 4).
