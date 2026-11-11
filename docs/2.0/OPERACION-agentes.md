@@ -60,6 +60,7 @@ Cuando un PR está **listo para revisión** (constructor terminó, `ESTADO.md` a
 
 - Las aplican **solo OPAI 2.0**, **después** de la revisión final **sin bloqueos** sobre el head y con CI verde, con el procedimiento de A.5 (respaldo, `dev` → `main`, aviso en español, quitar `migracion-pendiente`).
 - Las **sesiones no aplican** migraciones en Neon; piden al bot con `@opai-2.0:` si hace falta.
+- **Excepción acotada (Carlos, 11-nov-2026, ADR-093 §12):** los PR de la serie Slack (CAR-290 a CAR-296) los migra la «Sesión Núcleo» con este mismo procedimiento y el aviso en el PR antes de retirar `migracion-pendiente`. El bot puede hacerlo si llega antes.
 
 ### A2.4 Señales en PR (escalado 24 h)
 

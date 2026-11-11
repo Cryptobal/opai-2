@@ -13,6 +13,7 @@ function generico<D extends Datos>(i: Importador<D>): Importador<Datos> {
     permiso: i.permiso,
     ...(i.modulo ? { modulo: i.modulo } : {}),
     actualizables: i.actualizables,
+    ...(i.sinDato ? { sinDato: i.sinDato } : {}),
     planificar: (ctx, filas, o) => i.planificar(ctx, filas, o),
     crear: (tx, ctx, datos) => i.crear(tx, ctx, datos as D),
     actualizar: (tx, id, cambios) => i.actualizar(tx, id, cambios as Partial<D>),

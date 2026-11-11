@@ -9,14 +9,7 @@ import { identidadActual, contextoServidor } from "@/lib/servidor";
 import { HojaEditarVinculo, HojaVinculo } from "../../_componentes/diferidas";
 import { HistorialVinculos, VinculoVigente } from "../../_componentes/laboral";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
-import { SeccionContactoLaboral } from "../../_componentes/seccion-contacto-laboral";
-import { SeccionJornadaDt } from "../../_componentes/seccion-jornada-dt";
-import { SeccionOs10 } from "../../_componentes/seccion-os10";
-import { SeccionPago } from "../../_componentes/seccion-pago";
-import { SeccionPrevision } from "../../_componentes/seccion-prevision";
-import { SeccionPinTerreno } from "../../_componentes/seccion-pin-terreno";
-import { SeccionRostro } from "../../_componentes/seccion-rostro";
-import { SeccionUniforme } from "../../_componentes/seccion-uniforme";
+import { SeccionesLaboral } from "../../_componentes/secciones-laboral";
 
 export const metadata = { title: "Laboral" };
 export default function Laboral(props: {
@@ -111,16 +104,7 @@ export default function Laboral(props: {
                 cargosRetirados={panel.cargosRetirados}
               />
             </div>
-            <div className="grid gap-4 lg:grid-cols-2">
-              <SeccionPrevision personaId={p.id} />
-              <SeccionPago personaId={p.id} />
-              <SeccionUniforme personaId={p.id} />
-              <SeccionJornadaDt personaId={p.id} />
-              <SeccionOs10 personaId={p.id} />
-              <SeccionPinTerreno personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
-              <SeccionRostro personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
-              <SeccionContactoLaboral personaId={p.id} />
-            </div>
+            <SeccionesLaboral personaId={p.id} nombre={`${p.nombres} ${p.apellidos}`} />
             {gestionar && actual ? (
               <HojaEditarVinculo
                 key={JSON.stringify(actual)}
