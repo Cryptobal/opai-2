@@ -1798,3 +1798,11 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Prioridad.** Entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones (decisión 6): no se tocan sus archivos ni los del PR de MFA (#499) mientras siga abierto.
 
 **Pendiente de Carlos.** Ver «Preguntas para Carlos» en [`briefs/BRIEF-slack.md`](briefs/BRIEF-slack.md): espacio Slack de pruebas y registro de las apps, canales privados, valores por defecto y quién es «responsable» del escalamiento.
+
+## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:22, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` (sección «Decisiones de Carlos») e `INSTRUCCIONES-proyecto-claude.md`. (ADR-093 y ADR-094 están reservados por los PRs abiertos #505 y #506.)
+
+**Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
+
+**Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.

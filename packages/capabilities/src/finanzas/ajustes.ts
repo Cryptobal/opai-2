@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { marcadoresDesconocidos } from "@opai/domain";
 
+import { factoresCesionAjuste } from "./ajustes-factores";
+
 // Ajustes del módulo Finanzas (ADR-018, ADR-021). El centro de configuración del núcleo los dibuja en
 // Configuración › Módulos › Finanzas. Solo owner y admin los ven (Finanzas es bloqueo financiero).
 /** Paso de la secuencia de cobranza: días hábiles después del vencimiento; 0 lo desactiva. */
@@ -129,4 +131,5 @@ export const ajustesFinanzas = z.object({
       permiso: "finanzas:ventas.manage",
       control: "json",
     }),
+  factores_cesion: factoresCesionAjuste,
 });
