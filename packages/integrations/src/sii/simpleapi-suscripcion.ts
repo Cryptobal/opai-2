@@ -1,47 +1,48 @@
-// Prueba real de la API key de SimpleAPI DTE (CAR-263): `GET /api/v1/Suscripcion/status`, publicado en su Swagger
-// (https://api.simpleapi.cl/swagger). No emite, no usa folios y no envía el certificado ni el CAF.
+// Medición de la API key de SimpleAPI DTE contra `GET /api/v1/Suscripcion/status` (Swagger de SimpleAPI), por las dos
+// vías de autenticación (CAR-263, CAR-240). No emite, no usa folios y no envía el certificado ni el CAF.
 //
-// Por qué existe: SimpleAPI responde 401 con cuerpo vacío y encabezados `x-rate-limit-*` a CUALQUIER petición que no
-// autentica (sin `Authorization` o con una key inventada; verificado el 10-nov-2026). Esos encabezados no prueban que
-// la key sea válida, así que un 401 de `dte/generar` no dice si falla la key o el contenido. Esta llamada sí lo dice.
+// Verificado contra api.simpleapi.cl el 10-nov-2026 con una key inventada: con `Basic api:key` responde 401 sin cuerpo;
+// con `Bearer <token>` responde 200 y la lista de suscripciones de la key, vacía (`[]`) para una key que no conoce.
+// Lo que responde a una key válida no se ha podido observar desde fuera: por eso se informa lo medido, sin adivinar.
 
-import { detalleSeguroDeRespuesta } from "./error-proveedor";
 import { encabezadoAuthSimpleApi, limpiarKeySimpleApi, SIMPLEAPI_BASE } from "./simpleapi-contrato";
+import { tokenSimpleApi } from "./simpleapi-token";
 
 export const SIMPLEAPI_RUTA_SUSCRIPCION = `${SIMPLEAPI_BASE}/api/v1/Suscripcion/status` as const;
 
-export type ResultadoKeySimpleApi =
-  /** SimpleAPI aceptó la key (HTTP 2xx). `detalle`: texto externo corto y saneado de su respuesta, si lo hay. */
-  | { estado: "reconocida"; status: number; detalle: string | null }
-  /** HTTP 401 o 403: la respuesta de SimpleAPI a una key que no reconoce, vencida o sin suscripción a este servicio. */
-  | { estado: "no_reconocida"; status: number; detalle: string | null }
-  /** Otro estado (5xx, 404, 429): no dice nada de la key. */
-  | { estado: "sin_respuesta"; status: number; detalle: string | null };
+export type MedicionKeySimpleApi = {
+  /** Estado HTTP con `Basic api:key`; 0 si no hubo respuesta. */
+  basic: number;
+  /** Estado HTTP con `Bearer <token>`; null si SimpleAPI no entregó token; 0 si no hubo respuesta. */
+  bearer: number | null;
+  /** Cuántas suscripciones informó para la key (largo de la lista); null si no vino una lista. Nunca su contenido. */
+  suscripciones: number | null;
+};
 
-/**
- * Pistas de forma de la key tal como se envía (ya sin espacios ni caracteres invisibles), sin revelarla: si queda un
- * carácter que no es letra, número ni guion (comillas, un punto), se coló al pegarla y SimpleAPI la rechaza.
- */
+/** Pistas de forma de la key tal como se envía (sin espacios ni invisibles), sin revelarla. */
 export function formaDeKeySimpleApi(apiKey: string): { largo: number; caracteresExtranos: boolean } {
   const k = limpiarKeySimpleApi(apiKey);
   return { largo: k.length, caracteresExtranos: !/^[A-Za-z0-9-]+$/.test(k) };
 }
 
-/** Pregunta a SimpleAPI por la suscripción de la key. Nunca registra ni devuelve la key. */
-export async function probarKeySimpleApi(apiKey: string): Promise<ResultadoKeySimpleApi> {
-  let res: Response;
+async function consultar(authorization: string): Promise<{ status: number; lista: number | null }> {
   try {
-    res = await fetch(SIMPLEAPI_RUTA_SUSCRIPCION, {
+    const res = await fetch(SIMPLEAPI_RUTA_SUSCRIPCION, {
       method: "GET",
-      headers: { Authorization: encabezadoAuthSimpleApi(apiKey), Accept: "application/json, text/plain" },
+      headers: { Authorization: authorization, Accept: "application/json, text/plain" },
       signal: AbortSignal.timeout(15_000),
     });
+    const json: unknown = res.ok ? await res.json().catch(() => null) : null;
+    return { status: res.status, lista: Array.isArray(json) ? json.length : null };
   } catch {
-    // Sin conexión o sin respuesta en 15 s: no dice nada de la key.
-    return { estado: "sin_respuesta", status: 0, detalle: null };
+    return { status: 0, lista: null };
   }
-  const detalle = detalleSeguroDeRespuesta(await res.text().catch(() => ""), [apiKey, limpiarKeySimpleApi(apiKey)]);
-  if (res.ok) return { estado: "reconocida", status: res.status, detalle };
-  if (res.status === 401 || res.status === 403) return { estado: "no_reconocida", status: res.status, detalle };
-  return { estado: "sin_respuesta", status: res.status, detalle };
+}
+
+/** Mide qué responde SimpleAPI a la key guardada. Nunca registra ni devuelve la key, el token ni la lista. */
+export async function medirKeySimpleApi(apiKey: string): Promise<MedicionKeySimpleApi> {
+  const basic = await consultar(encabezadoAuthSimpleApi(apiKey));
+  const token = await tokenSimpleApi(apiKey);
+  const bearer = token ? await consultar(`Bearer ${token}`) : null;
+  return { basic: basic.status, bearer: bearer?.status ?? null, suscripciones: basic.lista ?? bearer?.lista ?? null };
 }

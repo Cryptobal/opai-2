@@ -39,7 +39,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 /** Motivo de un 401 o 403 sin cuerpo: la respuesta de SimpleAPI a una key que no reconoce (CAR-263). */
 const motivoSinCuerpo = (status: number) =>
-  `respondió HTTP ${status} sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE`;
+  `respondió HTTP ${status} sin motivo, también al repetir con token; usa «Probar conexión» en Integraciones › Emisión DTE para ver qué responde a la API key`;
 describe("errores tipados de SimpleAPI (CAR-242)", () => {
   it("HTTP 400 con mensaje JSON: estado fijo para el log y detalle legible solo para la persona", async () => {
     generar(() => new Response(JSON.stringify({ mensaje: "Receptor 12.345.678-5 Juan Perez no autorizado" }), { status: 400 }));
