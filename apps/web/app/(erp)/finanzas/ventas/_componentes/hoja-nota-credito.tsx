@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 
-import { Alerta, avisar, Button, Campo, Input, Select, Sheet } from "@opai/ds";
+import { Alerta, Button, Campo, Input, Select, Sheet } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
+
+import { enviarAlSiiTrasEmitir } from "./enviar-sii-tras-emitir";
 import { pesos } from "@/lib/fechas";
 
 const CODIGOS = [
@@ -39,9 +41,9 @@ export function HojaNotaCredito({
 
   async function emitir() {
     limpiarError();
-    const r = await ejecutar("finanzas.ventas.emitir_nota_credito", input, false, "layout", `nc-${documentoId}-${intento}`);
+    const r = await ejecutar<{ id: string }>("finanzas.ventas.emitir_nota_credito", input, false, "layout", `nc-${documentoId}-${intento}`);
     if (!r) return;
-    avisar.exito("Nota de crédito emitida");
+    await enviarAlSiiTrasEmitir(ejecutar, r.id, "Nota de crédito");
     onCerrar();
   }
 

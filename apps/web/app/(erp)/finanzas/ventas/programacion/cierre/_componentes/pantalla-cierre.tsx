@@ -13,6 +13,7 @@ import { pesos } from "@/lib/fechas";
 
 import { mesVecino, RUTA_CIERRE } from "./meses";
 import { type AccionFila, FilaCierre } from "./fila-cierre";
+import { enviarLoteAlSii } from "../../../_componentes/enviar-sii-tras-emitir";
 import type { ItemCierre, ResultadoLote, TableroCierre } from "./tipos";
 
 const DialogoLote = dynamic(() => import("./dialogos-cierre").then((m) => ({ default: m.DialogoLote })));
@@ -67,7 +68,7 @@ export function PantallaCierre({ state, periodo, tablero, gestiona }: Props) {
     setLote(null);
     if (r) {
       intento.current = crypto.randomUUID();
-      avisar.exito(`${r.emitidos} documento${r.emitidos === 1 ? "" : "s"} emitido${r.emitidos === 1 ? "" : "s"}`);
+      await enviarLoteAlSii(ejecutar, r.resultados.filter((x) => x.estado === "emitido").map((x) => x.documentoId));
     }
   }
 
