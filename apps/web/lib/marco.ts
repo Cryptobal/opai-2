@@ -19,9 +19,24 @@ export function portalAdmiteHilo(portal: string, acceso: boolean): boolean {
   return portal === "erp" && acceso;
 }
 
+/**
+ * Marco que se monta para un portal, un acceso y el valor de la cookie. Una sola regla para el layout
+ * y para las páginas que cambian con el marco (Inicio, Preferencias): nunca deciden por separado.
+ */
+export function marcoResuelto(portal: string, acceso: boolean, cookie: string | undefined): Marco {
+  return portalAdmiteHilo(portal, acceso) ? marcoDeCookie(cookie) : "clasico";
+}
+
+/** Marco según `document.cookie` (todas las cookies del navegador en una cadena). */
+export function marcoEnCookies(cadena: string): Marco {
+  const par = cadena.split("; ").find((c) => c.startsWith(`${COOKIE_MARCO}=`));
+  return marcoDeCookie(par?.slice(COOKIE_MARCO.length + 1));
+}
+
 /** Texto para `document.cookie`: un año para Hilo; el clásico es la ausencia de la cookie. */
 export function cookieMarco(marco: Marco): string {
-  const seguro = typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
+  const seguro =
+    typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
   return `${COOKIE_MARCO}=${marco === "hilo" ? "hilo" : ""}; Path=/; Max-Age=${marco === "hilo" ? 31_536_000 : 0}; SameSite=Lax${seguro}`;
 }
 

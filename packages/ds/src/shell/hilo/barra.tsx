@@ -30,7 +30,7 @@ export function BarraHilo({ agente, texto, onBuscar, className }: Props) {
       <button
         type="button"
         onClick={onBuscar}
-        className="flex h-14 w-full max-w-[900px] items-center gap-1 rounded-[18px] border border-border bg-surface pr-1.5 pl-4 text-left shadow-overlay outline-none hover:border-fg-muted focus-visible:border-accent"
+        className="flex h-14 w-full max-w-[900px] items-center gap-1 rounded-[18px] border border-border bg-surface pr-1.5 pl-4 text-left shadow-overlay hover:border-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         <IconoHilo
           nombre={agente ? "chispa" : "buscar"}

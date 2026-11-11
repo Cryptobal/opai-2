@@ -43,8 +43,8 @@ No entra (etapas siguientes del plan):
 - `packages/ds/src/shell/hilo/*`: `HiloShell` y sus piezas, con pruebas de marcado.
 - `packages/ds/src/components/{button,input,select,badge,table,card}.tsx`, `patterns/{estado,split-screen}.tsx`: piel con alcance.
 - `packages/capabilities/src/core/config/nucleo.ts`: ajuste `preferencias_marco`.
-- `apps/web/lib/{marco,tema}.ts`, `apps/web/app/_components/{marco-portal.tsx,hilo/*}`, `portal-layout.tsx`, menú de la cuenta, Preferencias e Inicio.
-- `apps/web/app/ds/hilo/*`, `apps/web/e2e/{hilo.spec.ts,hidratacion.ts}`, `apps/web/test/{marco-hilo,datos-hilo,inicio-hilo}.test.ts`.
+- `apps/web/lib/{marco,marco-servidor,tema}.ts`, `apps/web/app/_components/{marco-portal.tsx,hilo/*}`, `portal-layout.tsx`, menú de la cuenta, Preferencias e Inicio.
+- `apps/web/app/ds/hilo/*`, `apps/web/e2e/{hilo.spec.ts,hilo-muestra.spec.ts,hilo-apoyo.ts,hidratacion.ts}`, `apps/web/test/{marco-hilo,datos-hilo,cargas-hilo,inicio-hilo}.test.ts`.
 - `apps/web/presupuesto-js.json`, `docs/2.0/paridad/mcp-inventario.md`, novedad in-app.
 
 ## 6. Modelo de datos y migraciones
@@ -57,7 +57,7 @@ Ninguna nueva. El marco usa `core.inicio.pendientes`, `core.resumen.contadores`,
 
 ## 8. Interfaz y responsive
 
-Referencia exacta: `docs/2.0/design/export-base-hilo/`. Tres tamaños: 375, 1024 y 1280 px (más 390 y 1440 en la verificación local). Toques de 44 px, foco visible, estados cargando, vacío, error y sin permiso en las tres listas del hilo.
+Referencia exacta: `docs/2.0/design/export-base-hilo/`. Tres tamaños: 375, 1024 y 1280 px (más 390 y 1440 en la verificación local). Toques de 44 px y foco visible. Pendientes tiene estados cargando, vacío y error con «Reintentar»; Actividad y Agenda suman el de sin permiso.
 
 ## 9. Seguridad y tenant
 
@@ -86,7 +86,8 @@ Sin superficie nueva. La cookie `opai_marco` solo elige qué marco se pinta y so
 - DS: contraste de los tokens Hilo en claro y oscuro, radio de controles, marcado de `HiloShell` en cada vista y estado.
 - Web: cookie y portal, rutas anchas, tema, atajo del menú, datos del hilo, Inicio sin duplicados.
 - Capacidades: ajuste `preferencias_marco` (defecto, cambio, valor inválido).
-- e2e (`hilo.spec.ts`): muestra `/ds/hilo` (segmentos, Índice, Portales, estados, planilla, piezas con estilos calculados) y, con sesión, elegir Hilo en Preferencias, HTML del servidor con el marco, Inicio sin duplicados, Índice → Cuentas, búsqueda desde la barra, `/pauta` ancha y vuelta al clásico.
+- Web: las cargas del hilo no quedan colgadas sin red (pasan a error) y la regla única que decide el marco.
+- e2e: `hilo-muestra.spec.ts` recorre la muestra `/ds/hilo` (segmentos, Índice, Portales, estados, planilla y piezas con estilos calculados). `hilo.spec.ts`, marcada `@preview`, recorre con sesión: elegir Hilo en Preferencias, HTML del servidor con el marco, Inicio sin duplicados, Índice → Cuentas, búsqueda desde la barra, `/pauta` ancha y vuelta al clásico comprobada en positivo.
 
 ## 13. Validación
 
@@ -103,8 +104,8 @@ Sin superficie nueva. La cookie `opai_marco` solo elige qué marco se pinta y so
 
 ## 15. Riesgos y vuelta atrás
 
-- **Vuelta atrás:** «Volver al diseño clásico» en el menú o en Preferencias. Si hiciera falta para todos, basta con que `portalAdmiteHilo` devuelva `false`.
-- **Peso de JS:** el marco Hilo comparte módulos con el clásico; al separarlo en una descarga aparte, el archivo común del marco se divide y cada ruta de portal sube cerca de 2 KB (ver §16).
+- **Vuelta atrás:** «Volver al diseño clásico» en Portales o en Preferencias. Si hiciera falta para todos, basta con que `portalAdmiteHilo` devuelva `false`: el layout, Inicio y Preferencias deciden con la misma regla (`marcoDeLaPeticion`).
+- **Peso de JS:** el marco Hilo va en una descarga aparte; las rutas de portal suben entre 0,3 y 0,5 KB (ver §16).
 - **Desvíos respecto del diseño:** ver §16.
 
 ## 16. Reporte de ejecución
@@ -134,5 +135,7 @@ Sin superficie nueva. La cookie `opai_marco` solo elige qué marco se pinta y so
 3. La barra abre la búsqueda actual; el contexto de la pantalla, las sugerencias y el micrófono llegan en H4.
 4. Actividad y Agenda usan las lecturas actuales (H3 les da las propias).
 5. Los estados vacíos siguen centrados (el export los alinea a la izquierda).
+
+**Autorrevisión (subagente que no participó).** Sin bloqueos en seguridad, RLS/tenant, permisos, migraciones ni datos. Se corrigió antes de abrir el PR: «Tus accesos» y «Fijar» de la ficha no funcionaban en el marco Hilo (faltaba la isla de preferencias); Inicio y Preferencias leían la cookie sin la regla del layout (ahora hay una sola, y una pestaña que quedó con el marco anterior se recarga al volver a ella); sin red, Actividad y Agenda quedaban cargando para siempre; afirmaciones débiles del e2e (la vuelta al clásico ahora se prueba en positivo y el filtro de ruido de `next dev` no se aplica contra un sitio desplegado); y las capturas con sesión dejaron de versionarse: mostraban el usuario y la empresa de la siembra local, y la evidencia visual es el artefacto de `preview-e2e` con `qa-e2e`. Quedan como observaciones: el nombre de la empresa se corta en la cabecera del hilo a 1024 y 1280 px; el texto de la barra se corta a 375 px; cada cambio de marco o de tema queda en Actividad como «realizó un cambio» (igual que el tema hoy); el marco se recuerda por navegador, no por usuario; y las pestañas del hilo no se recorren con las flechas del teclado.
 
 **Validación.** `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:db`, `pnpm --filter @opai/web build` y `pnpm presupuesto` en verde. e2e del marco: 12 de 12 con `pnpm dev` (375, 1024 y 1280 px) y las pruebas `@preview` contra la compilación de producción. Capturas en `apps/web/e2e/__screenshots__/hilo-*.png`.

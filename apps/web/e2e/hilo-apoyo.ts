@@ -16,11 +16,14 @@ export const captura = (page: Page, nombre: string, info: TestInfo) => capturar(
 
 // Ruido propio de `next dev`, igual en el marco clásico: el aviso de «uncached data» por la lectura
 // de la sesión en el layout, y los dos avisos que deja una recarga en caliente a mitad de la prueba.
-const RUIDO_DEV = [
-  "encountered uncached data during prerendering or a navigation",
-  "The server could not finish this Suspense boundary",
-  "Encountered a script tag while rendering React component",
-];
+// Contra un sitio desplegado (vista previa) no se filtra nada: ahí cualquiera de estos es un error.
+const RUIDO_DEV = process.env["BASE_URL"]
+  ? []
+  : [
+      "encountered uncached data during prerendering or a navigation",
+      "The server could not finish this Suspense boundary",
+      "Encountered a script tag while rendering React component",
+    ];
 
 export function erroresDeConsola(page: Page): string[] {
   const errores: string[] = [];

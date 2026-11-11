@@ -6,13 +6,7 @@ import type { FilaHilo, ListaHilo, PendienteHilo, SegmentoHilo } from "@opai/ds"
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
-import {
-  actividadHilo,
-  agendaHilo,
-  estadoDeFallo,
-  type PendienteInicio,
-  pendientesHilo,
-} from "./datos-hilo";
+import { cargarFilasHilo, cargarPendientesHilo, type EjecutarHilo } from "./cargas-hilo";
 
 const CARGANDO = { estado: "cargando", items: [] } as const;
 /** Pendientes con más de un minuto se vuelven a pedir al volver a la pestaña. */
@@ -30,26 +24,22 @@ export function useHilo(portal: string) {
   const pedido = useRef({ actividad: false, agenda: false });
   const ultima = useRef(0);
 
+  const ejecutar = useCallback<EjecutarHilo>(
+    (id, input) => ejecutarCapacidad(portal, id, input),
+    [portal],
+  );
+
   const cargarPendientes = useCallback(async () => {
     ultima.current = Date.now();
-    const [p, c] = await Promise.all([
-      ejecutarCapacidad(portal, "core.inicio.pendientes", {}),
-      ejecutarCapacidad(portal, "core.resumen.contadores", { campos: ["notificacionesNoLeidas"] }),
-    ]);
-    if (!p.ok) {
-      setPendientes((x) => (x.estado === "listo" ? x : { estado: "error", items: [] }));
-      return;
-    }
-    const avisos = c.ok
-      ? ((c.data as { notificacionesNoLeidas: number | null }).notificacionesNoLeidas ?? 0)
-      : 0;
-    setPendientes({ estado: "listo", items: pendientesHilo(p.data as PendienteInicio[], avisos) });
-  }, [portal]);
+    const lista = await cargarPendientesHilo(ejecutar);
+    setPendientes((x) => lista ?? (x.estado === "listo" ? x : { estado: "error", items: [] }));
+  }, [ejecutar]);
 
   useEffect(() => {
-    const cargar = () => void cargarPendientes().catch(() => undefined);
+    const cargar = () => void cargarPendientes();
     const alVolver = () => {
-      if (document.visibilityState === "visible" && Date.now() - ultima.current > VIGENCIA_MS) cargar();
+      if (document.visibilityState === "visible" && Date.now() - ultima.current > VIGENCIA_MS)
+        cargar();
     };
     void Promise.resolve().then(cargar);
     window.addEventListener("opai-bandeja", cargar);
@@ -61,21 +51,11 @@ export function useHilo(portal: string) {
   }, [cargarPendientes]);
 
   const cargarSegmento = useCallback(
-    async (s: "actividad" | "agenda") => {
-      const fijar = s === "actividad" ? setActividad : setAgenda;
-      const r = await ejecutarCapacidad(
-        portal,
-        s === "actividad" ? "core.actividad.list" : "core.actividades.tareas",
-        { limite: s === "actividad" ? 20 : 50 },
-      );
-      if (!r.ok) return fijar({ estado: estadoDeFallo(r.error.code), items: [] });
-      const { items } = r.data as { items: never[] };
-      fijar({
-        estado: "listo",
-        items: s === "actividad" ? actividadHilo(items, new Date()) : agendaHilo(items, new Date()),
-      });
-    },
-    [portal],
+    async (s: "actividad" | "agenda") =>
+      (s === "actividad" ? setActividad : setAgenda)(
+        await cargarFilasHilo(ejecutar, s, new Date()),
+      ),
+    [ejecutar],
   );
 
   const onSegmento = useCallback(

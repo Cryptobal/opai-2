@@ -1,10 +1,9 @@
-import { cookies } from "next/headers";
 
 import { Cabecera } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { COOKIE_MARCO, marcoDeCookie } from "@/lib/marco";
-import { requerirIdentidad } from "@/lib/servidor";
+import { marcoDeLaPeticion } from "@/lib/marco-servidor";
+import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 import { cargarAjustes } from "@/app/(erp)/configuracion/_centro/ajustes-datos";
 
 import { AreaPrincipalServidor } from "./area-principal-servidor";
@@ -34,7 +33,8 @@ export default function Preferencias() {
           cargarAjustes("core", "Preferencias"),
         ]);
         // El diseño rige por navegador, como el tema: se muestra el que este navegador tiene puesto.
-        const marco = marcoDeCookie((await cookies()).get(COOKIE_MARCO)?.value);
+        const conEmpresa = tieneAccesoAPortal(identidad, "erp") && Boolean(identidad.actual);
+        const marco = await marcoDeLaPeticion("erp", conEmpresa);
         return { nombre: identidad.usuario.nombre, valores: ajustes.valores, marco };
       }}
     >

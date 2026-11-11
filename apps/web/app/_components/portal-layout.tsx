@@ -1,11 +1,11 @@
-import { cookies } from "next/headers";
 import { type ReactNode, Suspense } from "react";
 
 import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
 import { epocaDe } from "@/lib/epoca-sesion";
-import { COOKIE_MARCO, marcoDeCookie, portalAdmiteHilo } from "@/lib/marco";
+import { portalAdmiteHilo } from "@/lib/marco";
+import { marcoDeLaPeticion } from "@/lib/marco-servidor";
 
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
@@ -24,13 +24,13 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   // Marco elegido por la persona (ADR-090): se lee de la cookie de este navegador, sin consultas, así
   // que el servidor ya pinta el marco correcto y no hay parpadeo. Sin acceso a la empresa o fuera del
   // ERP queda el clásico —donde vive el aviso «Sin permisos»— y la cookie ni se lee.
-  const hilo =
-    portalAdmiteHilo(portal, datos.acceso && datos.tenant !== null) &&
-    marcoDeCookie((await cookies()).get(COOKIE_MARCO)?.value) === "hilo";
+  const conEmpresa = datos.acceso && datos.tenant !== null;
+  const hilo = (await marcoDeLaPeticion(portal, conEmpresa)) === "hilo";
   return (
     <MarcoPortal
       key={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}
       hilo={hilo}
+      admite={portalAdmiteHilo(portal, conEmpresa)}
       datos={datos}
     >
       <CargaPortal>{children}</CargaPortal>

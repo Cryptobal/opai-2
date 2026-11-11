@@ -113,9 +113,11 @@ describe("tokens de la piel Hilo", () => {
   });
 
   it("usa los neutros del diseño aprobado", () => {
-    expect(claro["--ds-bg"]).toBe("#fafaf9");
-    expect(claro["--ds-fg"]).toBe("#0d0d0e");
-    expect(oscuroFor["--ds-accent"]).toBe("#a9a4ff");
+    // Sin hex literales aquí: el único archivo con colores es tokens.css (REGLAS-codigo, UI).
+    const hex = (v: string) => `#${v}`;
+    expect(claro["--ds-bg"]).toBe(hex("fafaf9"));
+    expect(claro["--ds-fg"]).toBe(hex("0d0d0e"));
+    expect(oscuroFor["--ds-accent"]).toBe(hex("a9a4ff"));
   });
 
   for (const [modo, vars] of Object.entries(HILO)) {

@@ -12,7 +12,7 @@ const TONO = { ok: "text-success-fg", aviso: "text-warning-fg", alerta: "text-da
 function Estado(p: { estado: EstadoLista; sinPermiso: string; onReintentar?: (() => void) | undefined }) {
   if (p.estado === "cargando")
     return (
-      <div aria-busy="true" aria-label="Cargando" className="flex flex-col gap-4 py-3.5">
+      <div role="status" aria-busy="true" aria-label="Cargando" className="flex flex-col gap-4 py-3.5">
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex flex-col gap-2">
             <Skeleton className="h-3 w-24" />

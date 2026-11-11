@@ -18,6 +18,6 @@ Con **Hilo** desaparecen el menú lateral y la barra inferior. La pantalla queda
 
 Arriba del hilo están **Portales** (para cambiar de portal, de empresa o cerrar sesión), **Inicio** e **Índice**, que muestra todas las pantallas por área. En las planillas, como la Pauta, el hilo se pliega a una columna angosta para dejar todo el ancho.
 
-Dentro del diseño Hilo las pantallas también cambian de estilo: el **botón principal va en negro** (el color índigo queda para lo que propone el agente), los botones y campos tienen las esquinas más redondeadas, las **etiquetas de estado** van sin el punto y las **tablas** se ven sin recuadro, con una línea entre filas. Los campos y los datos de cada pantalla son los mismos.
+Dentro del diseño Hilo las pantallas también cambian de estilo: el **botón principal va en el color del texto** (negro en el tema claro; el índigo queda para lo que propone el agente), los botones y campos tienen las esquinas más redondeadas, las **etiquetas de estado** van sin el punto y las **tablas** se ven sin recuadro, con una línea entre filas. Los campos y los datos de cada pantalla son los mismos.
 
 Cada persona elige su diseño y puede volver al clásico cuando quiera, desde Preferencias o desde **Portales**. Por ahora está disponible solo en el ERP.

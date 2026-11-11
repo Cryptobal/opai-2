@@ -3,12 +3,12 @@
 const BASE = "inline-flex h-11 items-center whitespace-nowrap transition-colors";
 
 /** Acción principal: tinta sobre fondo. */
-export const BTN_TINTA = `${BASE} gap-2 rounded-[12px] bg-fg px-[18px] text-base font-semibold text-bg hover:opacity-90`;
+export const BTN_TINTA = `${BASE} gap-2 rounded-md bg-fg px-[18px] text-base font-semibold text-bg hover:opacity-90`;
 /** Acción secundaria: borde fino sobre la superficie. */
-export const BTN_LINEA = `${BASE} gap-2 rounded-[12px] border border-border bg-surface px-4 text-base font-semibold text-fg hover:bg-fill`;
+export const BTN_LINEA = `${BASE} gap-2 rounded-md border border-border bg-surface px-4 text-base font-semibold text-fg hover:bg-fill`;
 /** Botón de solo icono. */
 export const BTN_ICONO =
-  "inline-flex size-11 flex-none items-center justify-center rounded-[12px] text-fg-muted transition-colors hover:bg-fill hover:text-fg";
+  "inline-flex size-11 flex-none items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-fill hover:text-fg";
 /** Encabezado de sección en versalitas. */
 export const SOBRE = "text-xs font-semibold tracking-[0.06em] text-fg-muted uppercase";
 /** Fila con borde inferior y 44 px de alto mínimo. */

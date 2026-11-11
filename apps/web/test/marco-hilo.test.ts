@@ -67,3 +67,21 @@ describe("atajo de diseño en el menú de usuario", () => {
     expect(menuCuentaShell(true, nada, nada, true).some((i) => i.id === "diseno")).toBe(false);
   });
 });
+
+describe("marco que se monta: una sola regla para el layout y las páginas", () => {
+  it("fuera del ERP o sin acceso es el clásico aunque la cookie diga hilo", async () => {
+    const { marcoResuelto } = await import("@/lib/marco");
+    expect(marcoResuelto("erp", true, "hilo")).toBe("hilo");
+    expect(marcoResuelto("erp", false, "hilo")).toBe("clasico");
+    expect(marcoResuelto("supervisor", true, "hilo")).toBe("clasico");
+    expect(marcoResuelto("erp", true, undefined)).toBe("clasico");
+  });
+
+  it("lee el marco de la cadena de cookies del navegador", async () => {
+    const { marcoEnCookies } = await import("@/lib/marco");
+    expect(marcoEnCookies("tema=oscuro; opai_marco=hilo; otra=1")).toBe("hilo");
+    expect(marcoEnCookies("tema=oscuro; otra=1")).toBe("clasico");
+    expect(marcoEnCookies("no_opai_marco=hilo")).toBe("clasico");
+    expect(marcoEnCookies("")).toBe("clasico");
+  });
+});

@@ -16,20 +16,15 @@ import { iconoShell } from "../icono-shell";
 import { LinkMenu } from "../link-menu";
 import { usePendiente } from "../navegacion-pendiente";
 import { padreConfiguracion } from "../padre-configuracion";
+import { PinFichaContexto } from "../pin-ficha-contexto";
 import { useEpocaSesion } from "../refresco-navegador";
 import type { DatosShell } from "../tipos-shell";
 import { useMenuShell } from "../use-menu-shell";
 import { useRegistrarReciente } from "../use-recientes";
-import {
-  indiceHilo,
-  monogramaHilo,
-  QUIEN_PORTAL,
-  resumenHilo,
-  saludoHilo,
-  subLienzo,
-  tituloDeRuta,
-} from "./datos-hilo";
+import { indiceHilo, monogramaHilo, resumenHilo, saludoHilo, subLienzo } from "./datos-hilo";
 import { alternarTema } from "./marco-cliente";
+import { barraHilo, portalesHilo, tituloLienzo } from "./textos-marco";
+import { useAccesosHilo } from "./use-accesos-hilo";
 import { useHilo } from "./use-hilo";
 
 // Igual que en el marco clásico: nada de esto pesa en el JS inicial (ADR-037).
@@ -72,16 +67,11 @@ export function MarcoHilo({ datos, children }: { datos: DatosShell; children: Re
   // Navegación en curso (ADR-045): el lienzo nombra el destino de inmediato, sin esperar al contenido.
   const pendiente = usePendiente();
   const ruta = pendiente ?? rutaActual;
-  const enConfiguracion = ruta.startsWith("/configuracion");
-  // Mientras la página no fija su cabecera (primer render y hasta que hidrata), el lienzo ya nombra
-  // la entrada del menú de la ruta: el título no aparece tarde.
-  const titulo = enConfiguracion
-    ? "Configuración"
-    : ((pendiente ? datos.nav.find((n) => n.href === pendiente)?.etiqueta : undefined) ??
-      (cabecera.titulo || tituloDeRuta(datos.nav, ruta)));
+  const titulo = tituloLienzo(datos.nav, ruta, pendiente ?? null, cabecera.titulo);
   const padre = padreConfiguracion(rutaActual);
   const volver = padre ?? cabecera.volver;
   useRegistrarReciente(datos.epoca, ruta, pendiente ? "" : cabecera.titulo, true);
+  const accesos = useAccesosHilo(datos, ruta, cabecera.titulo, Boolean(pendiente));
   const Building2 = useMemo(() => iconoShell("Building2", datos.iconos), [datos.iconos]);
   const { menuUsuario } = useMenuShell(
     datos,
@@ -95,69 +85,70 @@ export function MarcoHilo({ datos, children }: { datos: DatosShell; children: Re
   const empresa = datos.tenant?.nombre ?? "OPAI";
   const n = hilo.pendientes.items.length;
   return (
-    <HiloShell
-      monograma={monogramaHilo(empresa)}
-      sujeto={empresa}
-      sujetoSub={`${portal} · ${datos.usuario.nombre}`}
-      saludo={saludoHilo(new Date(), datos.usuario.nombre)}
-      resumen={resumenHilo(hilo.pendientes.estado, n)}
-      rutaActual={ruta}
-      inicioHref="/"
-      ancha={rutaAncha(ruta)}
-      titulo={titulo}
-      sub={subLienzo(datos.nav, ruta, volver)}
-      insignia={cabecera.insignia}
-      volver={volver}
-      volverSoloMovil={padre ? true : cabecera.volverSoloTelefono}
-      acciones={cabecera.acciones}
-      accionesTelefono={cabecera.accionesTelefono}
-      completo={cabecera.completo}
-      pendientes={hilo.pendientes}
-      actividad={hilo.actividad}
-      agenda={hilo.agenda}
-      onSegmento={hilo.onSegmento}
-      onReintentar={hilo.onReintentar}
-      indice={indice}
-      portales={datos.portales.map((p) => {
-        const descripcion = QUIEN_PORTAL[p.id];
-        return descripcion ? { ...p, descripcion } : p;
-      })}
-      portalActual={datos.portal}
-      empresas={empresasShell(datos.empresas, Building2)}
-      cuenta={menuUsuario}
-      barra={
-        datos.agente
-          ? { agente: true, texto: "Pide, pregunta o busca una pantalla" }
-          : { agente: false, texto: "Busca una pantalla o un registro" }
-      }
-      onBuscar={() => setPaleta(true)}
-      onTema={() => alternarTema(datos.portal)}
-      Link={LinkMenu}
-    >
-      <AccesosProveedor
-        enErp
-        preferencias={null}
-        recientes={busqueda.recientes}
-        acciones={datos.acciones}
-        ruta={rutaActual}
-        onNavegar={router.push}
+    <PinFichaContexto.Provider value={accesos.pinMenu}>
+      <HiloShell
+        monograma={monogramaHilo(empresa)}
+        sujeto={empresa}
+        sujetoSub={`${portal} · ${datos.usuario.nombre}`}
+        saludo={saludoHilo(new Date(), datos.usuario.nombre)}
+        resumen={resumenHilo(hilo.pendientes.estado, n)}
+        rutaActual={ruta}
+        inicioHref="/"
+        ancha={rutaAncha(ruta)}
+        titulo={titulo}
+        sub={subLienzo(datos.nav, ruta, volver)}
+        insignia={cabecera.insignia}
+        volver={volver}
+        volverSoloMovil={padre ? true : cabecera.volverSoloTelefono}
+        acciones={
+          <>
+            {cabecera.acciones}
+            {accesos.pinFicha}
+          </>
+        }
+        accionesTelefono={cabecera.accionesTelefono}
+        completo={cabecera.completo}
+        pendientes={hilo.pendientes}
+        actividad={hilo.actividad}
+        agenda={hilo.agenda}
+        onSegmento={hilo.onSegmento}
+        onReintentar={hilo.onReintentar}
+        indice={indice}
+        portales={portalesHilo(datos.portales)}
+        portalActual={datos.portal}
+        empresas={empresasShell(datos.empresas, Building2)}
+        cuenta={menuUsuario}
+        barra={barraHilo(Boolean(datos.agente))}
+        onBuscar={() => setPaleta(true)}
+        onTema={() => alternarTema(datos.portal)}
+        Link={LinkMenu}
       >
-        {children}
-      </AccesosProveedor>
-      {paleta !== null ? (
-        <Paleta
-          abierto={paleta}
-          onCerrar={() => setPaleta(false)}
-          epoca={datos.epoca}
-          acciones={datos.acciones ?? []}
-          nav={datos.nav}
-          agente={Boolean(datos.agente)}
-        />
-      ) : null}
-      {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
-      {inicio ? <PortalInicio portal={datos.portal} onCerrar={() => setInicio(false)} /> : null}
-      {agente.panel}
-      <Avisos />
-    </HiloShell>
+        <AccesosProveedor
+          enErp
+          preferencias={accesos.preferencias}
+          recientes={busqueda.recientes}
+          acciones={datos.acciones}
+          ruta={rutaActual}
+          onNavegar={router.push}
+        >
+          {children}
+        </AccesosProveedor>
+        {paleta !== null ? (
+          <Paleta
+            abierto={paleta}
+            onCerrar={() => setPaleta(false)}
+            epoca={datos.epoca}
+            acciones={datos.acciones ?? []}
+            nav={datos.nav}
+            agente={Boolean(datos.agente)}
+          />
+        ) : null}
+        {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
+        {inicio ? <PortalInicio portal={datos.portal} onCerrar={() => setInicio(false)} /> : null}
+        {agente.panel}
+        {accesos.isla}
+        <Avisos />
+      </HiloShell>
+    </PinFichaContexto.Provider>
   );
 }

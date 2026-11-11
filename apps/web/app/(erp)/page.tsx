@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
-
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { COOKIE_MARCO, marcoDeCookie } from "@/lib/marco";
+import { marcoDeLaPeticion } from "@/lib/marco-servidor";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
-import { requerirIdentidad } from "@/lib/servidor";
+import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
 import { InicioErp } from "./_componentes/inicio";
 
@@ -15,16 +13,14 @@ export default function Inicio({ searchParams }: { searchParams: SearchParams })
       titulo="Inicio"
       ruta="/"
       cargar={async () => {
-        const [p, id, galletas] = await Promise.all([
-          leerParametros(searchParams),
-          requerirIdentidad("/"),
-          cookies(),
-        ]);
+        const [p, id] = await Promise.all([leerParametros(searchParams), requerirIdentidad("/")]);
+        // La misma regla que el layout: Inicio nunca se arma para un marco distinto del que se monta.
+        const conEmpresa = tieneAccesoAPortal(id, "erp") && Boolean(id.actual);
         return {
           actor: p["actor"],
           nombre: id.usuario.nombre,
           empresa: id.actual?.tenant.nombre ?? "",
-          hilo: marcoDeCookie(galletas.get(COOKIE_MARCO)?.value) === "hilo",
+          hilo: (await marcoDeLaPeticion("erp", conEmpresa)) === "hilo",
         };
       }}
     >
