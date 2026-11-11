@@ -37,8 +37,8 @@ export function DisenoForm({ inicial }: { inicial: Marco }) {
       <div className="flex flex-col gap-3">
         <RadioGroup etiqueta="Diseño" valor={marco} opciones={DISENOS} onCambiar={elegir} />
         <p className="t-caption">
-          El diseño Hilo está en construcción: por ahora cambia el marco del ERP y las pantallas son
-          las mismas. Puedes volver al clásico cuando quieras.
+          El diseño Hilo está en construcción: por ahora está solo en el ERP. Las pantallas tienen
+          los mismos campos y datos, con el estilo nuevo. Puedes volver al clásico cuando quieras.
         </p>
       </div>
     </SeccionTarjeta>
