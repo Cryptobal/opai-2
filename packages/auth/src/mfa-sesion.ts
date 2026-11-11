@@ -4,10 +4,52 @@ import { expireCookie } from "better-auth/cookies";
 
 import { clienteAuth } from "@opai/db";
 
+import { twoFactor } from "better-auth/plugins";
+
+import { MFA_BLOQUEO_SEGUNDOS, MFA_LIMITE_INTENTOS } from "./opciones";
 import { limpiarFallosMfaConSesion, reservarIntentoMfaConSesion } from "./mfa-bloqueo-con-sesion";
 
 /** Verificar el código, con sesión ya creada: enrolamiento o login social con MFA pendiente (#68). */
 const RUTAS_VERIFICAR_CON_SESION = ["/two-factor/verify-totp", "/two-factor/verify-backup-code"];
+
+/** Plugin twoFactor (NÚCLEO-F): TOTP de 6 dígitos con bloqueo por cuenta en el login. */
+export const pluginTwoFactor = () =>
+  twoFactor({
+    issuer: "OPAI",
+    totpOptions: { digits: 6, period: 30 },
+    accountLockout: {
+      enabled: true,
+      maxFailedAttempts: MFA_LIMITE_INTENTOS,
+      durationSeconds: MFA_BLOQUEO_SEGUNDOS,
+    },
+  });
+
+/** Rutas que cambian o agregan factores: exigen la sesión verificada si la cuenta ya tiene uno. */
+const RUTAS_CON_FACTOR_COMPLETO = [
+  "/two-factor/enable",
+  "/two-factor/disable",
+  "/two-factor/generate-backup-codes",
+  "/two-factor/view-backup-codes",
+  "/passkey/generate-register-options",
+  "/passkey/verify-registration",
+];
+
+/**
+ * ¿La sesión pertenece a una cuenta con segundo factor (TOTP o passkey) y aún no lo completó? Lee la
+ * base (no la caché de cookie, que puede estar 60 s atrás).
+ */
+export async function segundoFactorPendiente(token: string): Promise<boolean> {
+  const sesion = await clienteAuth().session.findUnique({
+    where: { token },
+    select: {
+      mfaVerified: true,
+      user: { select: { twoFactorEnabled: true, passkeyEnabled: true } },
+    },
+  });
+  if (!sesion) return true;
+  const conFactor = sesion.user.twoFactorEnabled || sesion.user.passkeyEnabled;
+  return conFactor && !sesion.mfaVerified;
+}
 
 /** Se ejecuta también en los endpoints HTTP directos, no solo en las Server Actions. */
 export const marcaMfaSesion = {
@@ -15,20 +57,14 @@ export const marcaMfaSesion = {
   hooks: {
     before: [
       {
-        matcher: (ctx) =>
-          [
-            "/two-factor/enable",
-            "/two-factor/disable",
-            "/two-factor/generate-backup-codes",
-            "/two-factor/view-backup-codes",
-          ].includes(ctx.path ?? ""),
+        // Cambiar o agregar métodos exige haber completado el segundo factor si la cuenta ya tiene uno
+        // (TOTP o passkey, CAR-286): con solo la contraseña de una cuenta protegida no se puede
+        // enrolar otro factor para saltarse el que ya tiene.
+        matcher: (ctx) => RUTAS_CON_FACTOR_COMPLETO.includes(ctx.path ?? ""),
         handler: createAuthMiddleware(async (ctx) => {
           const s = await getSessionFromCtx(ctx);
-          if (!s?.user.twoFactorEnabled) return;
-          const sesion = await clienteAuth().session.findUnique({
-            where: { token: s.session.token },
-          });
-          if (!sesion?.mfaVerified)
+          if (!s?.session) return;
+          if (await segundoFactorPendiente(s.session.token))
             throw new APIError("FORBIDDEN", { message: "Completa el segundo factor." });
         }),
       },

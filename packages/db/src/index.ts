@@ -19,6 +19,17 @@ export {
   ultimosAccesos,
   usuarioEnOtrasEmpresas,
 } from "./identidad";
+export {
+  consumirReautenticacion,
+  desactivarTotp,
+  type MetodosUsuario,
+  metodosDeUsuario,
+  type OrigenCambio,
+  type PasskeyVista,
+  PREFIJO_REAUTENTICACION,
+  quitarPasskey,
+  renombrarPasskey,
+} from "./identidad-metodos";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
 export type {
   DatosCondicionCobro,

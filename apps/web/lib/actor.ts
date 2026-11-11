@@ -16,6 +16,8 @@ export type UsuarioSesion = {
   email: string;
   platformRole?: string | null | undefined;
   twoFactorEnabled?: boolean | null | undefined;
+  /** Tiene al menos una passkey (CAR-286): también es segundo factor. */
+  passkeyEnabled?: boolean | null | undefined;
 };
 
 /** Usuario, membresías y tenant actual de una sesión. Lo comparten la API y las páginas. */
@@ -28,7 +30,7 @@ export type Identidad = {
   modulosSoloLectura?: string[];
   /** Acceso efectivo en el tenant actual (rol personalizado y excepciones, ADR-022). */
   acceso: AccesoFila;
-  /** Segundo factor activo en la cuenta (NÚCLEO-F). Decide el enrolamiento obligatorio. */
+  /** Segundo factor activo en la cuenta: app autenticadora o passkey (NÚCLEO-F, CAR-286). */
   mfaActiva: boolean;
   mfaVerificada?: boolean;
 };
@@ -68,7 +70,7 @@ export async function identidadDe(
     modulosActivos,
     modulosSoloLectura,
     acceso,
-    mfaActiva: user.twoFactorEnabled === true,
+    mfaActiva: user.twoFactorEnabled === true || user.passkeyEnabled === true,
   };
 }
 

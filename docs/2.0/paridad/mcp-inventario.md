@@ -971,6 +971,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
 - `core.invitations.revoke`
+- `core.metodos_acceso.list`
+- `core.metodos_acceso.quitar`
+- `core.metodos_acceso.renombrar_passkey`
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`

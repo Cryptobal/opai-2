@@ -32,6 +32,8 @@ type FilaSesion = {
   u_two_factor_enabled: boolean;
   u_created_at: Date;
   u_updated_at: Date;
+  /** CAR-286. Opcional mientras conviven la función nueva y una base aún sin migrar. */
+  u_passkey_enabled?: boolean;
 };
 
 type FilaUsuario = {
@@ -44,6 +46,7 @@ type FilaUsuario = {
   two_factor_enabled: boolean;
   created_at: Date;
   updated_at: Date;
+  passkey_enabled?: boolean;
 };
 
 /** Valor de una igualdad simple (`{campo: v}` o `{campo: {equals: v}}`) y nada más; si no, null. */
@@ -57,7 +60,8 @@ export function soloIgualdad(where: unknown, campo: string): string | null {
   if (v && typeof v === "object") {
     const o = v as Record<string, unknown>;
     const ks = Object.keys(o);
-    if (ks.length === 1 && ks[0] === "equals" && typeof o["equals"] === "string") return o["equals"];
+    if (ks.length === 1 && ks[0] === "equals" && typeof o["equals"] === "string")
+      return o["equals"];
   }
   return null;
 }
@@ -71,6 +75,7 @@ function usuario(f: FilaSesion) {
     image: f.u_image,
     platformRole: f.u_platform_role,
     twoFactorEnabled: f.u_two_factor_enabled,
+    passkeyEnabled: f.u_passkey_enabled === true,
     createdAt: f.u_created_at,
     updatedAt: f.u_updated_at,
   };
@@ -124,6 +129,7 @@ export async function leerUsuarioPorId(base: ClienteApp, id: string) {
     image: f.image,
     platformRole: f.platform_role,
     twoFactorEnabled: f.two_factor_enabled,
+    passkeyEnabled: f.passkey_enabled === true,
     createdAt: f.created_at,
     updatedAt: f.updated_at,
   };
@@ -147,7 +153,10 @@ export async function lecturaAuthPorFuncion(
   if (model === "Session") {
     const token = soloIgualdad(where, "token");
     if (token !== null) {
-      return { manejada: true, valor: await leerSesionPorToken(base, token, Boolean(select?.user)) };
+      return {
+        manejada: true,
+        valor: await leerSesionPorToken(base, token, Boolean(select?.user)),
+      };
     }
   } else if (model === "User") {
     const id = soloIgualdad(where, "id");
