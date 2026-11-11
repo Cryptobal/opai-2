@@ -21,6 +21,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.consumos.por_agente",
   "core.consumos.por_recurso",
   "core.consumos.resumen",
+  "core.correos.direccion",
   "core.cumplimiento.dpa_texto",
   "core.cumplimiento.rat",
   "core.cumplimiento.retencion_politica",

@@ -100,6 +100,7 @@ export async function commitEnviarCotizacion(ctx: Contexto, pack: PackEnviar) {
       para,
       contactoId: pack.contactoId,
       cuentaId: neg?.cuentaId ?? null,
+      negocioId: pack.negocioId,
       codigo: pack.codigo,
       titulo: texto("titulo"),
       version: pack.versionNumero,

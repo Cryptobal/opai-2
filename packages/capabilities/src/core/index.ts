@@ -34,12 +34,14 @@ import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { consumidorSeguimientoAviso } from "../comercial/seguimiento-aviso";
+import { consumidoresPausaSeguimiento } from "../comercial/seguimiento-pausas";
 import { consumidorTareaVencida, trabajoTareasVencidas } from "./crm/actividades-vencidas";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { consumidorSolicitudCreada } from "../comercial/consumidor-solicitud";
 import { consumidorNegocioGanado } from "../comercial/consumidor-ganado";
 import { consumidorCpqGanado } from "../comercial/consumidor-ganado-cpq";
+import { capacidadesCorreos } from "./correos";
 import { capacidadesCrm } from "./crm";
 import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
@@ -121,6 +123,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   platformIntegracionesEstado,
   ...capacidadesMaestros,
   ...capacidadesCrm,
+  ...capacidadesCorreos,
   ...capacidadesCalendario,
   ...capacidadesRemuneraciones,
   ...capacidadesAnexos,
@@ -147,6 +150,7 @@ export const consumidoresDelNucleo = [
   consumidorSolicitudCreada,
   consumidorTareaVencida,
   consumidorSeguimientoAviso,
+  ...consumidoresPausaSeguimiento,
   consumidorNegocioGanado,
   consumidorCpqGanado, consumidorTurnosEsperados,
   consumidorRevocacionBiometria,

@@ -130,6 +130,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Interna: la ruta pública `/api/t/[slug]/banco/web4leads` la ejecuta tras leer el cuerpo; la capacidad verifica la firma HMAC con el secreto de la empresa (la entrada de agentes es finanzas.bancos.sincronizar).",
   "comercial.seguimientos.recibir_correo":
     "Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el token de la dirección <token>@respuestas.opai.cl (CAR-67).",
+  "core.correos.recibir":
+    "Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el tenant por la dirección de registro t<token>@respuestas.opai.cl (CAR-233).",
   "comercial.canales.rotar_token_formulario":
     "Solo personas: la clave del formulario es equivalente a una credencial de escritura anónima en el sitio del tenant.",
   "asistencia.marcas.registrar":

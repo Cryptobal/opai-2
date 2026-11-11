@@ -7,6 +7,7 @@ import { Alerta, avisar, Button, Dialog } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { porTransmitir } from "./etiquetas-venta";
 import { HojaCeder } from "./hoja-ceder";
 import { HojaCobroManual } from "./hoja-cobro-manual";
 import { HojaNotaCredito } from "./hoja-nota-credito";
@@ -68,7 +69,7 @@ export function AccionesVenta({ venta, enviosPrevios, montoPendiente, abrirEdita
       {error ? <Alerta tono="danger" titulo="No se pudo completar">{error}</Alerta> : null}
       <div className="flex flex-wrap gap-2">
         {emitido ? <Button variant="secondary" disabled={pendiente} onClick={() => void pdf()}>Descargar PDF</Button> : null}
-        {venta.estadoDte === "enviado" ? <Button variant="secondary" disabled={pendiente} onClick={() => void alSii()}>Enviar al SII</Button> : null}
+        {porTransmitir(venta) ? <Button variant="secondary" disabled={pendiente} onClick={() => void alSii()}>Enviar al SII</Button> : null}
         {emitido ? (
           <Button disabled={pendiente} onClick={() => (enviosPrevios > 0 ? setHoja("reenviar") : void alCliente(false))}>
             Enviar al cliente

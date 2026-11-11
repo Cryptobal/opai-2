@@ -64,6 +64,8 @@ export const VERBOS: Record<string, string> = {
   crear_base: "Crear plan base", iniciar: "Iniciar", controlar: "Pausar, reanudar o cancelar",
   registrar_respuesta: "Registrar respuesta del cliente", registrar_paso: "Registrar paso",
   enviar_paso: "Enviar paso", recibir_correo: "Recibir correo del cliente",
+  // Decisión de seguimiento al enviar la cotización (CAR-160).
+  decidir_envio: "Decidir seguimiento al enviar",
   agregar_esquema: "Agregar esquema de cobertura", cargar_predefinidos: "Cargar costos predefinidos", descargar: "Descargar", cumplir: "Cumplir", guardar: "Guardar", saldo_sugerido: "Saldo sugerido", manual: "Manual",
   comentar: "Comentar", reasignar: "Reasignar", simular: "Simular", clonar: "Clonar", calcular: "Calcular", consultar: "Consultar",
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
@@ -83,4 +85,6 @@ export const VERBOS: Record<string, string> = {
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
   // Grupos o equipos de usuarios (CAR-251).
   agregar_miembros: "Agregar miembros", quitar_miembro: "Quitar miembro",
+  // Historial de correos del cliente (CAR-233).
+  sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
 };

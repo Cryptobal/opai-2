@@ -20,6 +20,7 @@ const ESTADO_COBRO: Record<string, { etiqueta: string; tono: Tono }> = {
 };
 
 const ESTADO_CESION: Record<string, { etiqueta: string; tono: Tono }> = {
+  no_cedido: { etiqueta: "Sin ceder", tono: "neutro" },
   simulado: { etiqueta: "Simulada", tono: "neutro" },
   emitido: { etiqueta: "En curso", tono: "info" },
   solicitado: { etiqueta: "Solicitada", tono: "info" },
@@ -30,11 +31,31 @@ const ESTADO_CESION: Record<string, { etiqueta: string; tono: Tono }> = {
 /** Si aparece un estado nuevo sin etiqueta, se muestra neutro y sin el código interno. */
 const DESCONOCIDO = { etiqueta: "Sin clasificar", tono: "neutro" as Tono };
 
-export const estadoDteVenta = (e: string) => ESTADO_DTE[e] ?? DESCONOCIDO;
+const FIRMADA = { etiqueta: "Firmada, sin enviar al SII", tono: "warning" as Tono };
+
+/** Con `trackIdSii` (sin `undefined`), una firmada que aún no llega al SII no se presenta como enviada (CAR-270). */
+export const estadoDteVenta = (e: string, trackIdSii?: string | null) =>
+  e === "enviado" && trackIdSii === null ? FIRMADA : (ESTADO_DTE[e] ?? DESCONOCIDO);
+
+/** Firmada (aunque una NC o ND ya la haya anulado) y sin track ID: falta transmitirla al SII. */
+export const porTransmitir = (v: { estadoDte: string; trackIdSii: string | null }) =>
+  v.trackIdSii === null && (v.estadoDte === "enviado" || v.estadoDte === "anulado_nc" || v.estadoDte === "anulado_nd");
 export const estadoCobroVenta = (e: string) => ESTADO_COBRO[e] ?? DESCONOCIDO;
 export const estadoCesionVenta = (e: string) => ESTADO_CESION[e] ?? DESCONOCIDO;
 
 /** Título corto de un documento: «Factura 33 · Folio 1204» o «Borrador · Factura 33». */
 export function tituloVenta(v: { folio: number | null; tipoDteNombre: string }): string {
   return v.folio ? `${v.tipoDteNombre} · folio ${v.folio}` : `Borrador · ${v.tipoDteNombre}`;
+}
+
+/** Solo una factura vigente (33 o 34) se cobra o se cede; una nota, un borrador o un anulado no (mismas reglas que cobros). */
+export const seCobra = (v: { tipoDte: number; estadoDte: string }) =>
+  (v.tipoDte === 33 || v.tipoDte === 34) && v.estadoDte !== "borrador" && v.estadoDte !== "rechazado" && v.estadoDte !== "anulado_nc";
+
+const TIPO_CORTO: Record<number, string> = { 33: "Factura", 34: "Factura exenta", 56: "Nota de débito", 61: "Nota de crédito" };
+
+/** Nombre corto para la tabla: «Nota de crédito 103» o «Borrador · Factura». */
+export function tituloCorto(v: { folio: number | null; tipoDte: number; tipoDteNombre: string }): string {
+  const tipo = TIPO_CORTO[v.tipoDte] ?? v.tipoDteNombre;
+  return v.folio ? `${tipo} ${v.folio}` : `Borrador · ${tipo}`;
 }

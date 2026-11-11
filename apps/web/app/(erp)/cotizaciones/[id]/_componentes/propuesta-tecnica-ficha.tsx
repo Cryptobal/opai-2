@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { Alerta, Button } from "@opai/ds";
@@ -11,25 +10,14 @@ import { DialogoPdfPropuesta } from "../propuesta-tecnica/_componentes/dialogo-p
 import { PropuestaTecnicaInline, type PropuestaInline } from "./propuesta-tecnica-inline";
 import { urlDePdf } from "./use-vista-previa-pdf";
 
-const EnvioPropuestaCotizacion = dynamic(
-  () => import("./envio-propuesta-cotizacion").then((m) => m.EnvioPropuestaCotizacion),
-  { ssr: false, loading: () => <p className="t-caption text-fg-muted">Cargando envío…</p> },
-);
-
 export function PropuestaTecnicaFicha({
   cotizacionId,
   codigo,
-  cuentaId,
   gestionar,
-  aprobarEnvios,
-  puedeEnviar,
 }: {
   cotizacionId: string;
   codigo: string;
-  cuentaId: string | null;
   gestionar: boolean;
-  aprobarEnvios: boolean;
-  puedeEnviar: boolean;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [propuesta, setPropuesta] = useState<PropuestaInline | null>(null);
@@ -105,14 +93,6 @@ export function PropuestaTecnicaFicha({
           onCerrar={() => setPdf(null)}
         />
       ) : null}
-      <EnvioPropuestaCotizacion
-        cotizacionId={cotizacionId}
-        cuentaId={cuentaId}
-        propuestaId={propuestaId}
-        gestionar={gestionar}
-        aprobarEnvios={aprobarEnvios}
-        puedeEnviar={puedeEnviar}
-      />
     </div>
   );
 }
