@@ -102,23 +102,29 @@ export const documentoPlantillasPublicar = defineCapability({
     };
     if (dryRun)
       return vistaEditor({ ...p, ...limpio, versionVigente: numero }, { ...autor, contenido });
+    const choque = () => conflicto("Otra persona publicó esta plantilla al mismo tiempo.");
     return ctx.transaccion(async (tx) => {
-      const nueva = await tx.documentoPlantillaVersion.create({
-        data: {
-          tenantId: ctx.tenantId,
-          plantillaId: id,
-          numero,
-          contenido,
-          creadoPorId: ctx.usuario?.id ?? null,
-          creadoPorNombre: autor.creadoPorNombre,
-        },
-      });
+      // Dos publicaciones a la vez: la segunda choca con el índice único (plantilla, número).
+      const nueva = await tx.documentoPlantillaVersion
+        .create({
+          data: {
+            tenantId: ctx.tenantId,
+            plantillaId: id,
+            numero,
+            contenido,
+            creadoPorId: ctx.usuario?.id ?? null,
+            creadoPorNombre: autor.creadoPorNombre,
+          },
+        })
+        .catch((e: unknown) => {
+          throw (e as { code?: unknown } | null)?.code === "P2002" ? choque() : e;
+        });
       // Condicionado a la versión leída: dos publicaciones simultáneas no se pisan (la otra revierte).
       const r = await tx.documentoPlantilla.updateMany({
         where: { id, versionVigente: versionEsperada },
         data: { ...limpio, versionVigente: numero },
       });
-      if (r.count !== 1) throw conflicto("Otra persona publicó esta plantilla al mismo tiempo.");
+      if (r.count !== 1) throw choque();
       return vistaEditor({ ...p, ...limpio, versionVigente: numero }, nueva);
     });
   },

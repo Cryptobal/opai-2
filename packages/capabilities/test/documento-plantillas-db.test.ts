@@ -102,6 +102,16 @@ describe("plantillas laborales: tenant, versiones y restricciones", () => {
     await expect(
       db.documentoPlantilla.update({ where: { id }, data: { firmantes: "notario" } }),
     ).rejects.toThrow();
+    // Carrera: otra publicación ya insertó la versión 3; esta choca con el índice único → CONFLICT.
+    await db.documentoPlantillaVersion.create({
+      data: { tenantId: f.tenantId, plantillaId: id, numero: 3, contenido: "otra" },
+    });
+    const carrera = await executeCapability(c, "core.documento_plantillas.publicar", {
+      id,
+      contenido: `${texto} Fin.`,
+      versionEsperada: 2,
+    });
+    expect(carrera).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
     const ajena = await executeCapability(
       ctx(f.otro),
       "core.documento_plantillas.guardar_borrador",
