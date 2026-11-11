@@ -955,6 +955,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.dispositivos.estado`
 - `core.documento_plantillas.create`
 - `core.documento_plantillas.get`
+- `core.documento_plantillas.guardar_borrador`
+- `core.documento_plantillas.publicar`
 - `core.documento_plantillas.update`
 - `core.documentos.desvincular`
 - `core.documentos.vincular`

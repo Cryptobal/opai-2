@@ -5,7 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { claseSchema, plantillaSchema, vista } from "./plantillas-comun";
+import { claseSchema, editorSchema, plantillaSchema, vista, vistaEditor } from "./plantillas-comun";
 
 export const documentoPlantillasList = defineCapability({
   id: "core.documento_plantillas.list",
@@ -41,11 +41,11 @@ export const documentoPlantillasList = defineCapability({
 export const documentoPlantillasGet = defineCapability({
   id: "core.documento_plantillas.get",
   descripcion:
-    "Una plantilla laboral con el texto de su versión vigente y las variables que usa. Solo owner y admin.",
+    "Una plantilla laboral con el texto de su versión vigente, el borrador sin publicar (si hay) y las variables que no existen en el catálogo. Solo owner y admin.",
   permiso: PERMISOS_CORE.documentosPlantillasManage,
   portales: ["erp"],
   input: z.object({ id: uuidSchema }),
-  output: plantillaSchema.extend({ contenido: z.string() }),
+  output: editorSchema,
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, { id }) {
@@ -55,6 +55,6 @@ export const documentoPlantillasGet = defineCapability({
       where: { plantillaId: id, numero: p.versionVigente },
     });
     if (!v) throw noEncontrado("La versión vigente de la plantilla");
-    return { ...vista(p, v), contenido: v.contenido };
+    return vistaEditor(p, v);
   },
 });
