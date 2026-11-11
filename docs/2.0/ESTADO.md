@@ -6,6 +6,8 @@
 
 **Documentación (9-nov-2026, PR [#446](https://github.com/Cryptobal/opai-2/pull/446)):** regla de Notion para agentes (capa legible; fuente de verdad repo + Linear); checklist antes de tomar trabajo; fila CAR y «Registro de cambios» al cerrar; decisiones solo en el Log de Decisiones. Sección [`CONTEXTO-agentes.md`](CONTEXTO-agentes.md) § «Notion: guía checklist y registro»; puntero en `AGENTS.md`.
 
+**Regla de operación (11-nov-2026, ADR-095):** toda respuesta que necesite una decisión de Carlos termina con el párrafo «Decisión tuya» (qué decidir, por qué, link, sugerencia, en lenguaje simple). Ver `AGENTS.md` «Decisiones de Carlos».
+
 ## En curso
 
 | PR | Qué | Estado | Migración |
