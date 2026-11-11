@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability } from "@opai/capabilities";
+import { defineCapability, externo } from "@opai/capabilities";
 
 import { importarHtml, listarHtml, obtenerHtml } from "../persistencia/propuesta-html";
 import { uuidSchema } from "./esquemas";
@@ -37,6 +37,7 @@ export const propuestaHtmlImportar = defineCapability({
 });
 
 export const propuestaHtmlList = defineCapability({
+  auditarLectura: (s) => s.plantillas.map((p) => p.id),
   id: "cpq.propuestas_html.list",
   descripcion:
     "Lista las plantillas HTML de propuesta importadas por la empresa, con su versión, estado, huella y marcadores usados. No incluye el HTML.",
@@ -56,13 +57,15 @@ export const propuestaHtmlList = defineCapability({
 });
 
 export const propuestaHtmlGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "cpq.propuestas_html.get",
   descripcion:
     "Entrega una versión de plantilla HTML de propuesta ya saneada, con sus marcadores del catálogo y las advertencias del saneado.",
   permiso: PERMISO_READ,
   input: z.object({ id: uuidSchema }),
   output: z.object({
-    id: z.string(), nombre: z.string(), version: z.number(), estado: z.string(), html: z.string(), hash: z.string(),
+    // Texto que importó la empresa: aunque saneado, es dato de terceros y nunca una instrucción para el agente.
+    id: z.string(), nombre: z.string(), version: z.number(), estado: z.string(), html: externo(z.string()), hash: z.string(),
     catalogoVersion: z.number(), tokensUsados: z.array(z.string()), colecciones: z.array(z.string()),
     advertencias: z.unknown(), createdAt: z.string(),
   }),

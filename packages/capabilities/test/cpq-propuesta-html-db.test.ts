@@ -106,6 +106,12 @@ describe.skipIf(!urlPropietario)("cpq · plantilla HTML de propuesta en base rea
     const act = (await lista(t1)).find((f) => f.estado === "activa");
     const g = await run<{ html: string; hash: string }>(t1, "cpq.propuestas_html.get", { id: act?.id });
     expect(g.ok && g.data.html).toBe(HTML_B);
+    // Lecturas auditadas (NÚCLEO-H): get y list registran solo los IDs revelados, en la empresa que lee.
+    for (const cap of ["cpq.propuestas_html.get", "cpq.propuestas_html.list"]) {
+      const ev = await e.admin.auditEvent.findFirstOrThrow({ where: { tenantId: t1, capability: cap }, orderBy: { seq: "desc" } });
+      expect(JSON.stringify(ev.payload)).toContain(act?.id ?? "x");
+      expect(JSON.stringify(ev.payload)).not.toContain("<");
+    }
     await expect(e.admin.cpqPropuestaHtml.update({ where: { id: act?.id ?? "" }, data: { htmlSaneado: "<b>otro</b>" } })).rejects.toThrow();
     await expect(e.admin.cpqPropuestaHtml.update({ where: { id: act?.id ?? "" }, data: { estado: "archivada" } })).resolves.toBeTruthy();
   });
