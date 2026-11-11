@@ -135,6 +135,7 @@ export const slackConectar = defineCapability({
       await revocarSinFallar(inst.token);
       throw reglaDeNegocio(
         `La empresa ya está conectada a otro espacio de Slack («${actual.teamNombre}»). Desconéctalo primero.`,
+        { motivo: "otro_espacio" },
       );
     }
     try {
@@ -142,7 +143,9 @@ export const slackConectar = defineCapability({
     } catch (err) {
       await revocarSinFallar(inst.token);
       if ((err as { code?: unknown } | null)?.code === "P2002") {
-        throw reglaDeNegocio("Ese espacio de Slack ya está conectado a otra empresa de OPAI.");
+        throw reglaDeNegocio("Ese espacio de Slack ya está conectado a otra empresa de OPAI.", {
+          motivo: "espacio_ocupado",
+        });
       }
       throw err;
     }

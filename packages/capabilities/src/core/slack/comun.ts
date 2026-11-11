@@ -81,5 +81,8 @@ const MENSAJES: Record<string, string> = {
 /** Error de Slack → mensaje de negocio en español. Nunca el cuerpo de Slack ni el token. */
 export function errorDeSlack(e: unknown): Error {
   if (!(e instanceof ErrorSlack)) return e instanceof Error ? e : new Error(String(e));
-  return reglaDeNegocio(MENSAJES[e.codigo] ?? `Slack rechazó la operación (${e.codigo}).`);
+  // `motivo` es un código corto y seguro: la pantalla lo traduce sin poner texto en la URL.
+  return reglaDeNegocio(MENSAJES[e.codigo] ?? `Slack rechazó la operación (${e.codigo}).`, {
+    motivo: e.codigo,
+  });
 }
