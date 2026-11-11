@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 689 pares pantalla→capacidad · 616 con herramienta · 73 excepciones justificadas · 0 faltantes.
+**Resumen:** 692 pares pantalla→capacidad · 619 con herramienta · 73 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -310,10 +310,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/firmas/_componentes` | `core.firmas.list` | `core_firmas_list` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.cancelar` | `core_firmas_cancelar` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.recordar` | `core_firmas_recordar` | existe |
-| compartido | `app/(erp)/documentos/plantillas/_componentes` | `core.documento_plantillas.create` | `core_documento_plantillas_create` | existe |
-| compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.guardar_borrador` | `core_documento_plantillas_guardar_borrador` | existe |
-| compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.publicar` | `core_documento_plantillas_publicar` | existe |
-| compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.update` | `core_documento_plantillas_update` | existe |
 | compartido | `app/(erp)/documentos/vencimientos/_componentes` | `core.documentos.vencimientos` | `core_documentos_vencimientos` | existe |
 | compartido | `app/(erp)/finanzas/_hoy` | `finanzas.hoy.resumen` | `finanzas_hoy_resumen` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.guardar` | `finanzas_bancos_guardar` | existe |
@@ -608,6 +604,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.confirmar_mutual` | — | excepción |
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.historial` | `core_remuneraciones_historial` | existe |
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.listar` | `core_remuneraciones_listar` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.agregar_miembros` | `core_grupos_agregar_miembros` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.archive` | `core_grupos_archive` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.create` | `core_grupos_create` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.get` | `core_grupos_get` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.list` | `core_grupos_list` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.quitar_miembro` | `core_grupos_quitar_miembro` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.update` | `core_grupos_update` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios/roles` | `core.roles.archive` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.create` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.update` | — | excepción |
@@ -625,7 +629,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
-| erp | `/documentos/plantillas/[id]` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
 | erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
 | erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
@@ -969,6 +972,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
+- `core.documento_plantillas.create`
+- `core.documento_plantillas.get`
+- `core.documento_plantillas.update`
 - `core.documentos.desvincular`
 - `core.documentos.vincular`
 - `core.estructuras.get`

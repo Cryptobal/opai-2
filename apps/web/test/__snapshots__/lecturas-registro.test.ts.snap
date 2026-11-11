@@ -36,6 +36,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.geo.detalle",
   "core.geo.geocodificar",
   "core.geo.mapa",
+  "core.grupos.list",
   "core.ia.probar",
   "core.integraciones.get",
   "core.integraciones.list",

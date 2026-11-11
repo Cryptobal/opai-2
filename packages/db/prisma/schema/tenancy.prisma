@@ -26,6 +26,8 @@ model Membership {
   excepciones PermisoExcepcion[]
   /// Instalaciones a cargo si el rol acota por filas (supervisor, ADR-022 · Brief 07c B3).
   instalacionesACargo SupervisorInstalacion[]
+  /// Grupos o equipos de autorización a los que pertenece (CAR-251).
+  gruposUsuarios      GrupoUsuarioMiembro[]
 
   @@unique([tenantId, userId])
   @@index([userId])
