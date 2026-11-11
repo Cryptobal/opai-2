@@ -133,7 +133,7 @@ export async function emitirBorrador(
 export const ventasEmitir = defineCapability({
   id: "finanzas.ventas.emitir",
   descripcion:
-    "Emite un borrador: asigna folio, firma el XML con el adaptador SII del entorno y deja el documento en estado enviado listo para el SII. Requiere folios CAF y RUT emisor configurados.",
+    "Emite un borrador: asigna folio, firma el XML con el adaptador SII del entorno y deja el documento firmado. No lo transmite: para que llegue al SII hay que ejecutar después finanzas.ventas.enviar_sii (la pantalla lo hace sola al emitir). Requiere folios CAF y RUT emisor configurados.",
   permiso: PERMISO_VENTAS,
   input: z.object({ documentoId: documentoEmitidoIdSchema }),
   output: ventaSchema,

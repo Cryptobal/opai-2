@@ -7,6 +7,7 @@ import { avisar } from "@opai/ds";
 
 import type { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { enviarAlSiiTrasEmitir } from "../_componentes/enviar-sii-tras-emitir";
 import type { Venta } from "../_componentes/tipos";
 import type { ItemPreflight } from "./emitir-util";
 
@@ -54,7 +55,9 @@ export function useEmision(p: {
         avisar.info("La emisión quedó en la cola de aprobaciones de agentes.");
       return;
     }
-    avisar.exito("Documento emitido");
+    // El diálogo se cierra antes de enviar: el documento ya está emitido y no se debe poder emitir de nuevo.
+    setDialogo(null);
+    await enviarAlSiiTrasEmitir(r.id, "Factura");
     router.push(`/finanzas/ventas/${r.id}`);
   }
 
