@@ -12,6 +12,9 @@ import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, seCobra, tituloCor
 import { FiltrosVentas } from "./filtros-ventas";
 import type { LibroVentas, Venta } from "./tipos";
 
+/** La nota de crédito resta: se muestra con signo negativo en la tabla y en la tarjeta. */
+const montoConSigno = (v: Venta) => pesos(v.tipoDte === 61 ? -v.montoTotal : v.montoTotal);
+
 function badgeEstado(v: Venta) {
   const e = estadoDteVenta(v.estadoDte, v.trackIdSii);
   return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
@@ -59,15 +62,16 @@ export function ListaVentas(p: {
           <span className="flex size-10 flex-none items-center justify-center rounded-sm bg-fill text-fg-muted">
             <FileText className="size-4" aria-hidden />
           </span>
-          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="line-clamp-2 break-words font-medium">{v.cuentaNombre}</span>
-            <span className="text-sm text-fg-muted">
-              {v.folio ? `Folio ${v.folio} · ${v.tipoDteNombre}` : v.tipoDteNombre}
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="flex items-baseline justify-between gap-3">
+              <span className="truncate font-medium">{tituloCorto(v)}</span>
+              <span className="t-numeric flex-none font-medium">{montoConSigno(v)}</span>
             </span>
-          </span>
-          <span className="flex flex-none flex-col items-end gap-1">
-            <span className="t-numeric font-medium">{pesos(v.montoTotal)}</span>
-            {badgeEstado(v)}
+            <span className="truncate text-sm text-fg-muted">{v.cuentaNombre}</span>
+            <span className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
+              <span className="t-numeric">{fecha(v.fechaEmision)}</span>
+              {badgeEstado(v)}
+            </span>
           </span>
         </>
       )}
@@ -81,8 +85,8 @@ export function ListaVentas(p: {
           id: "cliente",
           etiqueta: "Cliente",
           render: (v) => (
-            <span className="flex flex-col">
-              <span>{v.cuentaNombre}</span>
+            <span className="flex max-w-[16rem] flex-col lg:max-w-[22rem]">
+              <span className="truncate" title={v.cuentaNombre}>{v.cuentaNombre}</span>
               <span className="t-mono text-xs text-fg-muted">{v.cuentaRut ? rut(v.cuentaRut) : "—"}</span>
             </span>
           ),
@@ -92,7 +96,7 @@ export function ListaVentas(p: {
           id: "total",
           etiqueta: "Total",
           className: "text-right t-numeric",
-          render: (v) => pesos(v.tipoDte === 61 ? -v.montoTotal : v.montoTotal),
+          render: (v) => montoConSigno(v),
         },
         { id: "estado", etiqueta: "Estado SII", render: (v) => badgeEstado(v) },
         {
