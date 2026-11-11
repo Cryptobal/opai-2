@@ -42,6 +42,8 @@ export function QuitarMetodo({
   const [pendiente, setPendiente] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ultimo = restantesAlQuitar(m) === 0;
+  // Plataforma no puede quedar sin segundo factor (el servidor también lo rechaza).
+  const bloqueado = ultimo && m.segundoFactorObligatorio;
   const enCurso = useRef(false);
 
   async function confirmar() {
@@ -78,14 +80,19 @@ export function QuitarMetodo({
           <Button variant="secondary" onClick={onCerrar} disabled={pendiente}>
             Cancelar
           </Button>
-          <Button variant="destructive" cargando={pendiente} onClick={() => void confirmar()}>
+          <Button
+            variant="destructive"
+            cargando={pendiente}
+            disabled={bloqueado}
+            onClick={() => void confirmar()}
+          >
             Quitar
           </Button>
         </>
       }
     >
       <div className="flex flex-col gap-4">
-        {ultimo && m.segundoFactorObligatorio ? (
+        {bloqueado ? (
           <Alerta tono="danger" titulo="Tu cuenta de plataforma requiere un segundo factor">
             Agrega otro método antes de quitar este.
           </Alerta>
