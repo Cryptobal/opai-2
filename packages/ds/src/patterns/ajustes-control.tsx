@@ -4,6 +4,7 @@ import { Input, Textarea } from "../components/input";
 import { InputFecha } from "../components/input-fecha";
 import { Select } from "../components/select";
 import { Switch } from "../components/switch";
+import { ControlJson } from "./ajustes-control-json";
 
 export type CampoAjusteVista = {
   modulo: string;
@@ -86,6 +87,7 @@ export function Control({ campo, valor, onCambiar, id }: PropsCampo & { id: stri
         disabled={deshabilitado}
       />
     );
+  if (tipo === "json") return <ControlJson id={id} valor={valor} disabled={deshabilitado} onCambiar={onCambiar} />;
   if (tipo === "lista")
     return (
       <Textarea
