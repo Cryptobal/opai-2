@@ -70,7 +70,7 @@ test.describe("@preview novedades y bandeja", () => {
       const aviso = page.getByText(/novedad(?:es)? de OPAI sin leer/);
       await expect(aviso).toBeVisible({ timeout: 30_000 });
       await capturar(page, info, "novedades-bandeja-pendientes");
-      await page.getByRole("button", { name: "Marcar todas como leídas" }).first().click();
+      await page.getByRole("button", { name: "Marcar novedades como leídas" }).click();
       await expect(aviso).toHaveCount(0, { timeout: 15_000 });
     }
 

@@ -88,11 +88,9 @@ export function MenuRadix(props: MenuProps) {
                   ) : null}
                 </span>
                 {item.contador ? (
-                  <span
-                    aria-label={`${item.contador} sin leer`}
-                    className="t-numeric flex h-[18px] min-w-[18px] flex-none items-center justify-center rounded-full bg-danger-fg px-1 text-xs leading-none font-semibold text-white dark:bg-danger dark:text-inverse-fg"
-                  >
-                    {item.contador}
+                  <span className="t-numeric flex h-[18px] min-w-[18px] flex-none items-center justify-center rounded-full bg-danger-fg px-1 text-xs leading-none font-semibold text-white dark:bg-danger dark:text-inverse-fg">
+                    <span aria-hidden>{item.contador}</span>
+                    <span className="sr-only">{`${item.contador} sin leer`}</span>
                   </span>
                 ) : null}
                 {item.marcado ? <Check className="size-4 text-accent" aria-label="actual" /> : null}

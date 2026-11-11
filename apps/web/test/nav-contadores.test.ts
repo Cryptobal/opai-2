@@ -30,7 +30,11 @@ describe("Bandeja resaltada con novedades sin leer (CAR-316)", () => {
     });
     expect(conContadores(nav, undefined, 4)[0]).toMatchObject({ contador: 4, resaltado: true });
   });
-  it("al quedar todo leído vuelve al número discreto en 0, sin globo rojo", () => {
+  it("con solo avisos o aprobaciones conserva el número discreto (D5), sin globo rojo", () => {
+    expect(conContadores(nav, { bandejaContador: 2, solicitudesNuevas: 0 }, 0)[0]).toEqual({
+      href: "/bandeja",
+      contador: 2,
+    });
     expect(conContadores(nav, { bandejaContador: 0, solicitudesNuevas: 0 }, 0)[0]).toEqual({
       href: "/bandeja",
       contador: 0,

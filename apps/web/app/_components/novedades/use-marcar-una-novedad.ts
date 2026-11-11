@@ -32,14 +32,20 @@ export function useMarcarUnaNovedad(
     enCurso.current.add(id);
     setErrorMarca(false);
     setDatos(siguiente);
-    void ejecutarCapacidad(portal, "core.novedades.marcar_leidas", { ids: [id] }).then((r) => {
-      enCurso.current.delete(id);
-      if (!r.ok) {
-        setDatos(datos);
-        setErrorMarca(true);
-        return;
-      }
-      window.dispatchEvent(new Event("opai-novedades"));
-    });
+    const volver = () => {
+      setDatos(datos);
+      setErrorMarca(true);
+    };
+    void ejecutarCapacidad(portal, "core.novedades.marcar_leidas", { ids: [id] })
+      .then((r) => {
+        if (!r.ok) {
+          volver();
+          return;
+        }
+        window.dispatchEvent(new Event("opai-novedades"));
+      })
+      // Corte de red o despliegue nuevo: la marca optimista se deshace y se avisa.
+      .catch(volver)
+      .finally(() => enCurso.current.delete(id));
   };
 }

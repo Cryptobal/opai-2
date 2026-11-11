@@ -39,7 +39,7 @@ export function TarjetaNovedad({
       accion={
         <>
           {item.leida ? null : (
-            <Badge tono="danger" aria-label="Novedad sin leer">
+            <Badge tono="danger">
               Nueva
             </Badge>
           )}

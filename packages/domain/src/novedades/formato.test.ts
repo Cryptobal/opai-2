@@ -66,6 +66,17 @@ describe("formato de novedades (CAR-316)", () => {
     expect((b[3] as Extract<BloqueNovedad, { tipo: "lista" }>).ordenada).toBe(true);
   });
 
+  it("un título con muchos espacios no congela la página (sin retroceso exponencial)", () => {
+    const inicio = performance.now();
+    const b = bloquesNovedad(`# a${" ".repeat(20_000)}b`);
+    expect(performance.now() - inicio).toBeLessThan(500);
+    expect(b[0]?.tipo).toBe("titulo");
+    expect(textoPlanoNovedad((bloquesNovedad("## Qué cambia ##")[0] as { trozos: TrozoNovedad[] }).trozos)).toBe(
+      "Qué cambia",
+    );
+    expect(textoPlanoNovedad((bloquesNovedad("# C#")[0] as { trozos: TrozoNovedad[] }).trozos)).toBe("C#");
+  });
+
   it("no habilita HTML: las etiquetas quedan como texto", () => {
     const t = trozosNovedad('<img src=x onerror="alert(1)"> **ok**');
     expect(t[0]).toEqual({ tipo: "texto", texto: '<img src=x onerror="alert(1)"> ' });
@@ -78,6 +89,8 @@ describe("formato de novedades (CAR-316)", () => {
     expect(hrefSeguroNovedad("//malo.com")).toBeNull();
     expect(hrefSeguroNovedad("/\\malo.com")).toBeNull();
     expect(hrefSeguroNovedad("data:text/html,hola")).toBeNull();
+    expect(hrefSeguroNovedad("/\t/malo.com")).toBeNull();
+    expect(hrefSeguroNovedad("/ /malo.com")).toBeNull();
     expect(trozosNovedad("[aquí](javascript:alert)")).toEqual([{ tipo: "texto", texto: "aquí" }]);
     expect(trozosNovedad("[Ventas](/finanzas/ventas)")).toEqual([
       { tipo: "enlace", href: "/finanzas/ventas", trozos: [{ tipo: "texto", texto: "Ventas" }] },

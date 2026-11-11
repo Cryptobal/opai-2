@@ -30,7 +30,7 @@ function Trozos({ trozos }: { trozos: readonly TrozoNovedad[] }) {
         </em>
       );
     return (
-      <Enlace key={i} href={t.href}>
+      <Enlace key={i} href={t.href} className="inline min-h-0">
         <Trozos trozos={t.trozos} />
       </Enlace>
     );

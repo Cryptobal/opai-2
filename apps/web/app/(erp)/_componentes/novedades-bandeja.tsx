@@ -18,14 +18,17 @@ export function NovedadesBandeja({ noLeidas }: { noLeidas: number }) {
   const marcar = () => {
     setMarcando(true);
     setError(false);
-    void ejecutarCapacidad("erp", "core.novedades.marcar_todas", {}).then((r) => {
-      setMarcando(false);
-      if (!r.ok) {
-        setError(true);
-        return;
-      }
-      window.dispatchEvent(new Event("opai-novedades"));
-    });
+    // Un corte de red o un despliegue nuevo rechaza la acción: el botón vuelve y se avisa.
+    void ejecutarCapacidad("erp", "core.novedades.marcar_todas", {})
+      .then((r) => {
+        if (!r.ok) {
+          setError(true);
+          return;
+        }
+        window.dispatchEvent(new Event("opai-novedades"));
+      })
+      .catch(() => setError(true))
+      .finally(() => setMarcando(false));
   };
   return (
     <div
@@ -43,7 +46,7 @@ export function NovedadesBandeja({ noLeidas }: { noLeidas: number }) {
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <Enlace href="/novedades">Ver novedades</Enlace>
         <Button variant="ghost" className="h-11 md:h-9" disabled={marcando} onClick={marcar}>
-          Marcar todas como leídas
+          Marcar novedades como leídas
         </Button>
       </div>
     </div>

@@ -20,6 +20,8 @@ export type BloqueNovedad =
 /** Solo rutas internas (`/algo`, nunca `//host`) o https: nada de `javascript:` ni `data:`. */
 export function hrefSeguroNovedad(href: string): string | null {
   const h = href.trim();
+  // Espacios o caracteres de control en medio: el navegador los quita y `/\t/host` sería `//host`.
+  if ([...h].some((c) => c.trim() === "" || c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127)) return null;
   if (/^\/(?![/\\])/.test(h)) return h;
   if (/^https:\/\/[^\s/\\]/i.test(h)) return h;
   return null;
@@ -77,7 +79,15 @@ export function trozosNovedad(texto: string): TrozoNovedad[] {
 }
 
 const ITEM = /^\s{0,3}(?:([-*+])|(\d{1,3})[.)])\s+(.*)$/;
-const TITULO = /^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$/;
+const TITULO = /^ {0,3}#{1,6}[ \t]/;
+
+/** Texto de un título `## Algo ##` sin el cierre de almohadillas (sin regex con retroceso). */
+function textoTitulo(linea: string, prefijo: number): string {
+  const t = linea.slice(prefijo).trim();
+  let fin = t.length;
+  while (fin > 0 && t[fin - 1] === "#") fin -= 1;
+  return fin === 0 || t[fin - 1] === " " || t[fin - 1] === "\t" ? t.slice(0, fin).trim() : t;
+}
 
 /** Bloques del cuerpo: párrafos separados por línea en blanco, listas y títulos cortos. */
 export function bloquesNovedad(markdown: string): BloqueNovedad[] {
@@ -103,7 +113,7 @@ export function bloquesNovedad(markdown: string): BloqueNovedad[] {
     if (titulo) {
       cerrarParrafo();
       cerrarLista();
-      bloques.push({ tipo: "titulo", trozos: trozosNovedad(titulo[1] ?? "") });
+      bloques.push({ tipo: "titulo", trozos: trozosNovedad(textoTitulo(cruda, titulo[0].length)) });
       continue;
     }
     const item = ITEM.exec(cruda);
