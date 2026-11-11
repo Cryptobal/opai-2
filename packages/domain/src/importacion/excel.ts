@@ -26,16 +26,19 @@ export async function leerExcel(contenido: Uint8Array): Promise<TablaCruda> {
   if (contenido.byteLength > LIMITES_IMPORTACION.bytes) throw new ErrorPlanilla("El archivo supera el tamaño máximo (2 MB).");
   const libro = new ExcelJS.Workbook();
   try {
-    await libro.xlsx.load(contenido as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
+    const copia = new ArrayBuffer(contenido.byteLength);
+    new Uint8Array(copia).set(contenido);
+    await libro.xlsx.load(copia);
   } catch {
     throw new ErrorPlanilla("No se pudo leer el archivo como Excel (.xlsx).");
   }
   const hoja = libro.worksheets[0];
   if (!hoja) throw new ErrorPlanilla("El archivo Excel no tiene hojas.");
   const filas: string[][] = [];
-  hoja.eachRow((fila) => {
+  // `includeEmpty` conserva el número de fila original; `Array.from` rellena los huecos de las celdas vacías.
+  hoja.eachRow({ includeEmpty: true }, (fila) => {
     if (filas.length > LIMITES_IMPORTACION.filasArchivo + 5) return;
-    filas.push((fila.values as unknown[]).slice(1).map(textoDeCelda));
+    filas.push(Array.from((fila.values as unknown[]).slice(1), textoDeCelda));
   });
   return aTabla(filas);
 }

@@ -97,20 +97,18 @@ export const importadorNegocios: Importador<DatosNegocio> = {
     const cambios = { montoEstimadoMensual, cierreEstimado, responsableId };
     await tx.negocio.update({ where: { id }, data: Object.fromEntries(Object.entries(cambios).filter(([, v]) => v !== undefined)) });
   },
-  actual: (tx, id) => tx.negocio.findFirst({ where: { id } }),
-  async bloqueoAlBorrar(tx, id) {
-    const n = await tx.negocio.findFirst({
-      where: { id },
-      select: { _count: { select: { instalaciones: true, contactos: true, solicitudes: true, actividadVinculos: true, historial: true } } },
+  actuales: (tx, ids) => tx.negocio.findMany({ where: { id: { in: [...ids] } } }),
+  async bloqueos(tx, ids) {
+    const filas = await tx.negocio.findMany({
+      where: { id: { in: [...ids] } },
+      select: { id: true, _count: { select: { instalaciones: true, contactos: true, solicitudes: true, actividadVinculos: true, historial: true, contexto: true } } },
     });
-    if (!n) return null;
-    const c = n._count;
-    const cotizaciones = await tx.cpqCotizacion.count({ where: { negocioId: id } });
-    return c.instalaciones + c.contactos + c.solicitudes + c.actividadVinculos + cotizaciones > 0 || c.historial > 1
-      ? "tiene cotizaciones, actividad o cambios de etapa posteriores"
-      : null;
+    const cotizados = await tx.cpqCotizacion.findMany({ where: { negocioId: { in: [...ids] } }, select: { negocioId: true } });
+    const conCotizacion = new Set(cotizados.map((c) => c.negocioId));
+    const con = filas.filter(({ id, _count: c }) => conCotizacion.has(id) || c.historial > 1 || c.instalaciones + c.contactos + c.solicitudes + c.actividadVinculos + c.contexto > 0);
+    return new Map(con.map((n) => [n.id, "tiene cotizaciones, actividad o cambios de etapa posteriores"]));
   },
-  async borrar(tx, id) {
-    await tx.negocio.delete({ where: { id } });
+  async borrar(tx, ids) {
+    await tx.negocio.deleteMany({ where: { id: { in: [...ids] } } });
   },
 };

@@ -56,10 +56,13 @@ export const importadorCuentas: Importador<DatosCuenta> = {
   actualizables: ["razonSocial", "rut", "giro", "sitioWeb", "calle", "comuna", "ciudad", "region", "emailDte", "notas", "clienteDesde"],
   async planificar(ctx, filas, o) {
     const externos = await idsExternos(ctx, "cuenta", o.sistema, filas.map((f) => texto(f.datos["id_externo"]) ?? ""));
-    const cuentas = await ctx.db.cuenta.findMany({ where: { archivadaEn: null } });
+    // Incluye las archivadas: el RUT es único en toda la empresa, también entre ellas.
+    const cuentas = await ctx.db.cuenta.findMany();
     const porId = new Map(cuentas.map((c) => [c.id, c]));
     const porRut = new Map(cuentas.filter((c) => c.rut).map((c) => [c.rut ?? "", c]));
-    const porNombre = new Map(cuentas.map((c) => [norm(c.nombre), c]));
+    const porNombre = new Map<string, typeof cuentas>();
+    for (const c of cuentas.filter((x) => !x.archivadaEn)) porNombre.set(norm(c.nombre), [...(porNombre.get(norm(c.nombre)) ?? []), c]);
+    const rutVisto = new Map<string, number>();
     return filas.map((f): FilaPlan<DatosCuenta> => {
       const datos = datosDe(f);
       const idExterno = texto(f.datos["id_externo"]);
@@ -67,9 +70,17 @@ export const importadorCuentas: Importador<DatosCuenta> = {
       const base = { fila: f.fila, clave, etiqueta: datos.nombre, idExterno, datos };
       const deExterno = idExterno ? porId.get(externos.get(idExterno) ?? "") : undefined;
       const deRut = datos.rut ? porRut.get(datos.rut) : undefined;
-      if (deExterno && deRut && deRut.id !== deExterno.id)
-        return { ...base, accion: "error", mensajes: [`El RUT ya pertenece a otra cuenta (${deRut.nombre}).`] };
-      const deNombre = porNombre.get(norm(datos.nombre));
+      const falla = (m: string): FilaPlan<DatosCuenta> => ({ ...base, clave: `fila:${f.fila}`, accion: "error", mensajes: [m] });
+      if (deExterno && deRut && deRut.id !== deExterno.id) return falla(`El RUT ya pertenece a otra cuenta (${deRut.nombre}).`);
+      if (deExterno?.rut && datos.rut && deExterno.rut !== datos.rut)
+        return falla(`El id de origen ya está ligado a «${deExterno.nombre}», que tiene otro RUT. Revisa la columna del id.`);
+      const repetido = datos.rut ? rutVisto.get(datos.rut) : undefined;
+      if (repetido !== undefined) return falla(`El RUT se repite en la fila ${repetido}. Deja una sola fila por RUT.`);
+      if (datos.rut) rutVisto.set(datos.rut, f.fila);
+      if ((deExterno ?? deRut)?.archivadaEn) return falla("La cuenta existe pero está archivada: restáurala o quítala de la planilla.");
+      const homonimas = porNombre.get(norm(datos.nombre)) ?? [];
+      if (!deExterno && !deRut && !datos.rut && homonimas.length > 1) return falla(`Hay ${homonimas.length} cuentas llamadas «${datos.nombre}»: indica el RUT.`);
+      const deNombre = homonimas[0];
       // Mismo nombre con otro RUT es otra empresa (matriz y filial): no se fusionan solas.
       const porNombreSeguro = deNombre && (!datos.rut || !deNombre.rut) ? deNombre : undefined;
       const existente = deExterno ?? deRut ?? porNombreSeguro;
@@ -84,16 +95,16 @@ export const importadorCuentas: Importador<DatosCuenta> = {
   async actualizar(tx, id, cambios) {
     await tx.cuenta.update({ where: { id }, data: cambios });
   },
-  actual: (tx, id) => tx.cuenta.findFirst({ where: { id } }),
-  async bloqueoAlBorrar(tx, id) {
-    const c = await tx.cuenta.findFirst({
-      where: { id },
-      select: { _count: { select: { contactos: true, instalaciones: true, negocios: true } } },
+  actuales: (tx, ids) => tx.cuenta.findMany({ where: { id: { in: [...ids] } } }),
+  async bloqueos(tx, ids) {
+    const filas = await tx.cuenta.findMany({
+      where: { id: { in: [...ids] } },
+      select: { id: true, _count: { select: { contactos: true, contactoVinculos: true, instalaciones: true, negocios: true, representantes: true, referencias: true, actividadVinculos: true } } },
     });
-    const n = c ? c._count.contactos + c._count.instalaciones + c._count.negocios : 0;
-    return n > 0 ? "tiene contactos, instalaciones o negocios" : null;
+    const con = filas.filter((c) => Object.values(c._count).some((n) => n > 0));
+    return new Map(con.map((c) => [c.id, "tiene contactos, instalaciones, negocios u otros datos asociados"]));
   },
-  async borrar(tx, id) {
-    await tx.cuenta.delete({ where: { id } });
+  async borrar(tx, ids) {
+    await tx.cuenta.deleteMany({ where: { id: { in: [...ids] } } });
   },
 };

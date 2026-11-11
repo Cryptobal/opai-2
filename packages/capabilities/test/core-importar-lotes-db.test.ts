@@ -87,9 +87,13 @@ describe.skipIf(!urlPropietario)("core · importador: entidades hijas, lotes y r
   it("no revierte un lote cuyos registros ya tienen datos asociados o cambiaron después", async () => {
     const vista = await revertir(loteCuentas, true);
     expect(vista).toMatchObject({ revertido: false, aBorrar: 2 });
-    expect(vista.bloqueadas).toEqual([{ registro: "Delta", motivo: "tiene contactos, instalaciones o negocios" }]);
+    expect(vista.bloqueadas).toEqual([{ registro: "Delta", motivo: "tiene contactos, instalaciones, negocios u otros datos asociados" }]);
     expect((await revertir(loteCuentas)).revertido).toBe(false);
     expect(await x.e.admin.cuenta.count({ where: { tenantId: x.t1 } })).toBe(2);
+    // Ley 21.719: un contacto anonimizado no se vuelve a llenar al reimportar el mismo export.
+    await x.e.admin.contacto.updateMany({ where: { tenantId: x.t1, email: "luis@delta.cl" }, data: { anonimizadoEn: new Date(), email: null, nombres: "Anonimizado", apellidos: "" } });
+    const otraVez = await x.importar(x.t1, "contactos", { opai1: OPAI1 }, true);
+    expect(otraVez.filas[0]).toMatchObject({ accion: "error", mensajes: ["Este contacto fue anonimizado y no se puede volver a cargar."] });
     const dos = await x.run(x.t2, "core.importar.revertir", { importacionId: loteCuentas });
     expect(dos.ok ? "ok" : dos.error.code).toBe("NOT_FOUND");
   });

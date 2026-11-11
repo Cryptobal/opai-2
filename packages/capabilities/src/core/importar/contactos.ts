@@ -48,6 +48,7 @@ export const importadorContactos: Importador<DatosContacto> = {
     const contactos = cuentaIds.length ? await ctx.db.contacto.findMany({ where: { cuentaId: { in: cuentaIds }, archivadoEn: null } }) : [];
     const deExternos = externos.size ? await ctx.db.contacto.findMany({ where: { id: { in: [...externos.values()] } } }) : [];
     const porId = new Map([...contactos, ...deExternos].map((c) => [c.id, c]));
+    const conPrincipal = new Set<string>();
     return resueltas.map(({ f, r }): FilaPlan<DatosContacto> => {
       const nombres = texto(f.datos["nombres"]) ?? "";
       const apellidos = texto(f.datos["apellidos"]) ?? "";
@@ -65,8 +66,18 @@ export const importadorContactos: Importador<DatosContacto> = {
       const existente =
         (idExterno ? porId.get(externos.get(idExterno) ?? "") : undefined) ??
         (email ? deLaCuenta.find((c) => c.email?.toLowerCase() === email) : undefined) ??
-        deLaCuenta.find((c) => !email && norm(`${c.nombres} ${c.apellidos}`) === norm(etiqueta));
-      const mensajes = desconocidos.length ? [`Roles no reconocidos, se ignoran: ${desconocidos.join(", ")}.`] : [];
+        deLaCuenta.find((c) => (!email || !c.email) && norm(`${c.nombres} ${c.apellidos}`) === norm(etiqueta));
+      // Ley 21.719: un contacto anonimizado no admite escrituras, tampoco por una importación.
+      if (existente?.anonimizadoEn)
+        return { fila: f.fila, clave: `fila:${f.fila}`, etiqueta, accion: "error", mensajes: ["Este contacto fue anonimizado y no se puede volver a cargar."] };
+      // La importación no le quita el lugar al contacto principal que la cuenta ya tiene.
+      const yaHayPrincipal = deLaCuenta.some((c) => c.esPrincipal) || conPrincipal.has(r.cuenta.id);
+      if (datos.esPrincipal && !existente && yaHayPrincipal) datos.esPrincipal = false;
+      else if (datos.esPrincipal && !existente) conPrincipal.add(r.cuenta.id);
+      const mensajes = [
+        ...(desconocidos.length ? [`Roles no reconocidos, se ignoran: ${desconocidos.join(", ")}.`] : []),
+        ...(f.datos["es_principal"] === true && !existente && !datos.esPrincipal ? ["La cuenta ya tiene contacto principal: este entra sin esa marca."] : []),
+      ];
       return {
         fila: f.fila, clave: `${r.cuenta.id}|${propia}`, etiqueta: `${etiqueta} · ${r.cuenta.nombre}`,
         accion: existente ? "actualizar" : "crear", mensajes, datos, idExterno, ...(existente ? { existente } : {}),
@@ -84,16 +95,16 @@ export const importadorContactos: Importador<DatosContacto> = {
   async actualizar(tx, id, { roles: _roles, cuentaId: _cuenta, ...cambios }) {
     await tx.contacto.update({ where: { id }, data: cambios });
   },
-  actual: (tx, id) => tx.contacto.findFirst({ where: { id } }),
-  async bloqueoAlBorrar(tx, id) {
-    const c = await tx.contacto.findFirst({
-      where: { id },
-      select: { _count: { select: { negocioContactos: true, actividadVinculos: true } } },
+  actuales: (tx, ids) => tx.contacto.findMany({ where: { id: { in: [...ids] } } }),
+  async bloqueos(tx, ids) {
+    const filas = await tx.contacto.findMany({
+      where: { id: { in: [...ids] } },
+      select: { id: true, _count: { select: { negocioContactos: true, actividadVinculos: true, cuentaVinculos: true } } },
     });
-    return c && c._count.negocioContactos + c._count.actividadVinculos > 0 ? "está en negocios o actividades" : null;
+    const con = filas.filter((c) => Object.values(c._count).some((n) => n > 0));
+    return new Map(con.map((c) => [c.id, "está en negocios, actividades o vinculado a otra cuenta"]));
   },
-  async borrar(tx, id) {
-    await tx.contactoCuenta.deleteMany({ where: { contactoId: id } });
-    await tx.contacto.delete({ where: { id } });
+  async borrar(tx, ids) {
+    await tx.contacto.deleteMany({ where: { id: { in: [...ids] } } });
   },
 };

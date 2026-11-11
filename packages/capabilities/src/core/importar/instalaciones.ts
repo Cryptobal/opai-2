@@ -75,16 +75,16 @@ export const importadorInstalaciones: Importador<DatosInstalacion> = {
   async actualizar(tx, id, { cuentaId: _cuenta, ...cambios }) {
     await tx.instalacion.update({ where: { id }, data: cambios });
   },
-  actual: (tx, id) => tx.instalacion.findFirst({ where: { id } }),
-  async bloqueoAlBorrar(tx, id) {
-    const i = await tx.instalacion.findFirst({
-      where: { id },
-      select: { _count: { select: { puestos: true, negocioInstalaciones: true, vinculos: true, estructuras: true } } },
+  actuales: (tx, ids) => tx.instalacion.findMany({ where: { id: { in: [...ids] } } }),
+  async bloqueos(tx, ids) {
+    const filas = await tx.instalacion.findMany({
+      where: { id: { in: [...ids] } },
+      select: { id: true, _count: { select: { puestos: true, negocioInstalaciones: true, vinculos: true, estructuras: true, supervisores: true, actividadVinculos: true } } },
     });
-    const n = i ? i._count.puestos + i._count.negocioInstalaciones + i._count.vinculos + i._count.estructuras : 0;
-    return n > 0 ? "tiene puestos, negocios, personas o estructuras de sueldo" : null;
+    const con = filas.filter((i) => Object.values(i._count).some((n) => n > 0));
+    return new Map(con.map((i) => [i.id, "tiene puestos, negocios, personas, supervisores u otros datos asociados"]));
   },
-  async borrar(tx, id) {
-    await tx.instalacion.delete({ where: { id } });
+  async borrar(tx, ids) {
+    await tx.instalacion.deleteMany({ where: { id: { in: [...ids] } } });
   },
 };

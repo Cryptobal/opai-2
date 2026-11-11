@@ -50,11 +50,11 @@ export type Importador<D extends Datos = Datos> = {
   planificar(ctx: Contexto, filas: readonly FilaNormalizada[], o: OpcionesPlan): Promise<FilaPlan<D>[]>;
   crear(tx: TenantTx, ctx: Contexto, datos: D): Promise<string>;
   actualizar(tx: TenantTx, id: string, cambios: Partial<D>): Promise<void>;
-  /** Para revertir: estado actual del registro (null si ya no existe). */
-  actual(tx: TenantTx, id: string): Promise<({ updatedAt: Date } & Record<string, unknown>) | null>;
-  /** Motivo por el que no se puede borrar al revertir (tiene dependientes), o null. */
-  bloqueoAlBorrar(tx: TenantTx, id: string): Promise<string | null>;
-  borrar(tx: TenantTx, id: string): Promise<void>;
+  /** Para revertir: estado actual de los registros que todavía existen. */
+  actuales(tx: TenantTx, ids: readonly string[]): Promise<({ id: string; updatedAt: Date } & Record<string, unknown>)[]>;
+  /** Para revertir: por qué no se puede borrar cada registro (tiene dependientes); sin entrada = se puede. */
+  bloqueos(tx: TenantTx, ids: readonly string[]): Promise<Map<string, string>>;
+  borrar(tx: TenantTx, ids: readonly string[]): Promise<void>;
 };
 
 export type FilaReporte = {

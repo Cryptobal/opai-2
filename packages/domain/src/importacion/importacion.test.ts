@@ -23,6 +23,7 @@ describe("lectura de planillas", () => {
     expect(t.columnas).toEqual(["Nombre", "Notas"]);
     expect(t.filas).toEqual([["Acme; SpA", "línea 1\nlínea 2"], ["Beta", 'dijo "hola"']]);
     expect(leerCsv("a,b\n1,2").filas).toEqual([["1", "2"]]);
+    expect(t.lineas).toEqual([2, 4]);
   });
 
   it("rechaza planillas vacías, sin filas, con encabezados repetidos o demasiado largas", () => {
@@ -34,7 +35,7 @@ describe("lectura de planillas", () => {
 
   it("un Excel escrito se lee igual, con fechas como aaaa-mm-dd", async () => {
     const bytes = await escribirExcel("Cuentas", ["nombre", "rut"], [["Acme", "76.543.210-3"]]);
-    expect(await leerExcel(bytes)).toEqual({ columnas: ["nombre", "rut"], filas: [["Acme", "76.543.210-3"]] });
+    expect(await leerExcel(bytes)).toMatchObject({ columnas: ["nombre", "rut"], filas: [["Acme", "76.543.210-3"]], lineas: [2] });
     await expect(leerExcel(new Uint8Array([1, 2, 3]))).rejects.toThrow(/Excel/);
   });
 
@@ -46,7 +47,7 @@ describe("lectura de planillas", () => {
   });
 
   it("arma una planilla desde registros estructurados", () => {
-    expect(tablaDeRegistros([{ nombre: "Acme", monto: 10 }, { nombre: "Beta", rut: null }])).toEqual({
+    expect(tablaDeRegistros([{ nombre: "Acme", monto: 10 }, { nombre: "Beta", rut: null }])).toMatchObject({
       columnas: ["nombre", "monto", "rut"],
       filas: [["Acme", "10", ""], ["Beta", "", ""]],
     });
@@ -93,5 +94,7 @@ describe("validación por fila", () => {
     expect(numero("1.200.000,50")).toBe(1200000.5);
     expect(numero("1200")).toBe(1200);
     expect(numero("abc")).toBeNull();
+    expect(numero("-33.417", false)).toBe(-33.417);
+    expect(numero("1.200")).toBe(1200);
   });
 });

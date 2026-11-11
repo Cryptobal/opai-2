@@ -31,12 +31,23 @@ export const entradaSchema = {
 export type Entrada = { archivo?: { nombre: string; contenidoBase64: string } | undefined; filas?: Record<string, string | number | boolean | null>[] | undefined; opai1?: unknown };
 export type EntradaLeida = { tabla: TablaCruda; origen: "csv" | "xlsx" | "filas" | "opai1_json"; sistema: string; archivo: string | null };
 
+/** UTF-8; si no lo es (CSV guardado por Excel en Windows), Windows-1252, para no perder tildes ni eñes. */
+function decodificar(bytes: Uint8Array): string {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return new TextDecoder("windows-1252").decode(bytes);
+  }
+}
+
 /** Convierte la entrada en una planilla. Exactamente una de las tres formas; los errores de lectura son de negocio. */
 export async function leerEntrada(importador: string, e: Entrada): Promise<EntradaLeida> {
   const dadas = [e.archivo, e.filas, e.opai1].filter((x) => x !== undefined && x !== null).length;
   if (dadas !== 1) throw reglaDeNegocio("Entrega una sola fuente: `archivo`, `filas` u `opai1`.");
   try {
     if (e.filas) return { tabla: tablaDeRegistros(e.filas), origen: "filas", sistema: SISTEMA_ARCHIVO, archivo: null };
+    if (e.opai1 !== undefined && e.opai1 !== null && JSON.stringify(e.opai1).length > 8_000_000)
+      throw new ErrorPlanilla("El export de OPAI 1 supera el tamaño máximo (8 MB). Envíalo por partes.");
     if (e.opai1 !== undefined && e.opai1 !== null)
       return { tabla: tablaDeRegistros(filasDeOpai1(importador, e.opai1)), origen: "opai1_json", sistema: "opai1", archivo: null };
     const archivo = e.archivo;
@@ -46,7 +57,7 @@ export async function leerEntrada(importador: string, e: Entrada): Promise<Entra
     const extension = archivo.nombre.toLowerCase().split(".").pop();
     if (extension === "xlsx") return { tabla: await leerExcel(new Uint8Array(bytes)), origen: "xlsx", sistema: SISTEMA_ARCHIVO, archivo: archivo.nombre };
     if (extension === "csv" || extension === "txt")
-      return { tabla: leerCsv(new TextDecoder("utf-8").decode(bytes)), origen: "csv", sistema: SISTEMA_ARCHIVO, archivo: archivo.nombre };
+      return { tabla: leerCsv(decodificar(bytes)), origen: "csv", sistema: SISTEMA_ARCHIVO, archivo: archivo.nombre };
     throw new ErrorPlanilla("Formato no admitido. Usa .csv o .xlsx (un .xls antiguo se guarda primero como .xlsx).");
   } catch (error) {
     if (error instanceof ErrorPlanilla) throw reglaDeNegocio(error.message);

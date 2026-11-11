@@ -30,7 +30,12 @@ export type DefinicionImportador = {
 };
 
 /** Planilla ya leída: encabezados y filas como texto, sin interpretar. */
-export type TablaCruda = { columnas: string[]; filas: string[][] };
+export type TablaCruda = {
+  columnas: string[];
+  filas: string[][];
+  /** Número de fila de cada registro en la planilla original (la 1 es el encabezado), contando las filas en blanco. */
+  lineas?: number[];
+};
 
 /** Encabezado de la planilla → clave del campo, o null para ignorar la columna. */
 export type Mapeo = Record<string, string | null>;

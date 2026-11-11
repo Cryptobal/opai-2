@@ -7,6 +7,8 @@ import type { Contexto } from "../../types";
 import { contar, type Plan } from "./plan";
 import { VERSION_MOTOR, type Conteos, type Datos, type Escalar, type FilaPlan, type Importador } from "./tipos";
 
+const UNA_HORA = 3_600_000;
+
 type Registro = { entidad: string; id10: string; id20: string | null; accion: string; motivo: string | null; previos: Record<string, unknown> | null };
 
 /** Valor previo en JSON: fechas y decimales con marca para restaurarlos con su tipo al revertir. */
@@ -37,8 +39,10 @@ async function corridaDe(tx: TenantTx, ctx: Contexto, imp: Importador, plan: Pla
     });
   const c = await tx.importacion.findFirst({ where: { id: importacionId, versionContrato: VERSION_MOTOR } });
   const mismo = c && (c.conteos as { importador?: unknown } | null)?.importador === imp.def.id && c.sistema === plan.sistema;
-  if (!c || !mismo || c.estado === "revertida")
-    throw reglaDeNegocio("El lote indicado no existe, es de otro importador o ya fue revertido.");
+  // Solo se amplía un lote propio y reciente (las partes de una misma planilla), nunca uno antiguo o ajeno.
+  const propio = c && c.lanzadaPorId === (ctx.usuario?.id ?? null) && Date.now() - c.iniciadaEn.getTime() < UNA_HORA;
+  if (!c || !mismo || !propio || c.estado !== "completada")
+    throw reglaDeNegocio("El lote indicado no existe, no es tuyo, es de otro importador, ya fue revertido o tiene más de una hora.");
   return c;
 }
 
@@ -68,7 +72,7 @@ async function vincularExternos(tx: TenantTx, ctx: Contexto, imp: Importador, pl
   });
   const existentes = new Set(ya.map((y) => y.idExterno));
   const nuevos = pares.filter((p) => !existentes.has(p.idExterno));
-  for (const p of nuevos) p.r.previos = { ...(p.r.previos ?? {}), _vinculoNuevo: true };
+  for (const p of nuevos) p.r.previos = { ...(p.r.previos ?? {}), _idExterno: p.idExterno };
   if (nuevos.length)
     await tx.idExterno.createMany({
       data: nuevos.map((p) => ({ tenantId: ctx.tenantId, sistema: plan.sistema, entidadTipo: imp.entidad, entidadId: p.id20, idExterno: p.idExterno })),
@@ -86,15 +90,17 @@ export async function aplicarPlan(ctx: Contexto, imp: Importador, plan: Plan, im
       const registros: Registro[] = [];
       for (const [i, f] of filas.entries()) {
         const r = await escribirFila(tx, ctx, imp, plan, f);
-        registros.push(previas.has(r.id10) ? { ...r, id10: `${r.id10}#${f.fila}-${i}` } : r);
+        registros.push(previas.has(r.id10) ? { ...r, id10: `${r.id10}#${Date.now()}-${i}` } : r);
       }
       await vincularExternos(tx, ctx, imp, { ...plan, filas }, registros);
+      // Hora del cliente al terminar de escribir: es el límite de «se modificó después» al revertir cada fila.
+      const ahora = new Date();
       await tx.importacionFila.createMany({
-        data: registros.map((r) => ({ tenantId: ctx.tenantId, importacionId: corrida.id, entidad: r.entidad, id10: r.id10, id20: r.id20, accion: r.accion, motivo: r.motivo, ...(r.previos ? { previos: r.previos as object } : {}) })),
+        data: registros.map((r) => ({ createdAt: ahora, tenantId: ctx.tenantId, importacionId: corrida.id, entidad: r.entidad, id10: r.id10, id20: r.id20, accion: r.accion, motivo: r.motivo, ...(r.previos ? { previos: r.previos as object } : {}) })),
       });
       const hechos = contar(filas.map((f, i) => ({ accion: registros[i]?.accion === "sin_cambio" ? ("sin_cambio" as const) : f.accion })));
       const conteos = { ...acumular(corrida.conteos, hechos), importador: imp.def.id, archivo: plan.archivo };
-      await tx.importacion.update({ where: { id: corrida.id }, data: { estado: "completada", conteos, terminadaEn: new Date() } });
+      await tx.importacion.update({ where: { id: corrida.id }, data: { estado: "completada", conteos, terminadaEn: ahora } });
       await ctx.eventos.emitir(tx, {
         tipo: "core.importacion.aplicada",
         entidadTipo: "importacion",

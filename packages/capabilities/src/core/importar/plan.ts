@@ -62,8 +62,9 @@ export async function armarPlan(ctx: Contexto, imp: Importador, p: Peticion): Pr
   };
   const bloqueos = [...m.problemas, ...m.requeridosSinColumna.map((c) => `Falta una columna para «${c}», que es obligatorio.`)];
   if (bloqueos.length) return { ...base, bloqueos, filas: [], cambios: new Map() };
-  const ventana = { columnas: leida.tabla.columnas, filas: leida.tabla.filas.slice(p.desde, hasta) };
-  const normalizadas = normalizarFilas(ventana, imp.def, m.mapeo).map((f) => ({ ...f, fila: f.fila + p.desde }));
+  const lineas = leida.tabla.lineas ?? leida.tabla.filas.map((_, i) => i + 2);
+  const ventana = { columnas: leida.tabla.columnas, filas: leida.tabla.filas.slice(p.desde, hasta), lineas: lineas.slice(p.desde, hasta) };
+  const normalizadas = normalizarFilas(ventana, imp.def, m.mapeo);
   const validas = normalizadas.filter((f) => f.errores.length === 0);
   const planificadas = await imp.planificar(ctx, validas, { alExistir: p.alExistir, sistema: leida.sistema });
   const conError: FilaPlan<Datos>[] = normalizadas

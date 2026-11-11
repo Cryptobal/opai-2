@@ -16,7 +16,7 @@ export const CAMPO_ID_EXTERNO: CampoImportable = {
   clave: "id_externo",
   etiqueta: "Id en el sistema de origen",
   tipo: "texto",
-  sinonimos: ["id", "codigo", "código", "id externo", "external id"],
+  sinonimos: ["id externo", "id origen", "external id", "externalId"],
   ejemplo: "",
   ayuda: "Opcional. Si la planilla trae el id del sistema anterior, reimportar reconoce el mismo registro aunque cambie su nombre.",
   largoMaximo: 120,
@@ -63,6 +63,8 @@ export async function resolverCuentas(ctx: Contexto, filas: readonly FilaNormali
     if (porExt) return { cuenta: porExt };
     const deRut = rut ? porRut.get(rut) : undefined;
     if (deRut) return { cuenta: deRut };
+    // Con RUT indicado no se cae al nombre: colgaría el registro de una cuenta con otro RUT.
+    if (rut) return { error: "No hay una cuenta con ese RUT en OPAI. Importa primero las cuentas." };
     const candidatas = nombre ? (porNombre.get(norm(nombre)) ?? []) : [];
     if (candidatas.length === 1 && candidatas[0]) return { cuenta: candidatas[0] };
     if (candidatas.length > 1) return { error: `Hay ${candidatas.length} cuentas llamadas «${nombre}»: indica el RUT de la cuenta.` };

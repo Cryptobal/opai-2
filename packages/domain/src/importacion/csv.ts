@@ -46,9 +46,11 @@ function registros(texto: string, sep: string): string[][] {
 /** Quita filas vacías, recorta celdas y valida los límites comunes a CSV y Excel. */
 export function aTabla(crudas: readonly (readonly string[])[]): TablaCruda {
   const limpias = crudas
-    .map((f) => f.map((c) => c.replace(/\u00a0/g, " ").trim().slice(0, LIMITES_IMPORTACION.celda)))
-    .filter((f) => f.some((c) => c !== ""));
-  const [encabezado, ...filas] = limpias;
+    .map((f, i) => ({ linea: i + 1, celdas: Array.from(f, (c) => (c ?? "").replace(/\u00a0/g, " ").trim().slice(0, LIMITES_IMPORTACION.celda)) }))
+    .filter((f) => f.celdas.some((c) => c !== ""));
+  const [cabecera, ...resto] = limpias;
+  const encabezado = cabecera?.celdas;
+  const filas = resto.map((r) => r.celdas);
   if (!encabezado) throw new ErrorPlanilla("La planilla está vacía.");
   const columnas = encabezado.map((c, i) => c || `Columna ${i + 1}`);
   if (columnas.length > LIMITES_IMPORTACION.columnas)
@@ -58,7 +60,7 @@ export function aTabla(crudas: readonly (readonly string[])[]): TablaCruda {
   if (filas.length === 0) throw new ErrorPlanilla("La planilla solo tiene el encabezado: no hay filas que importar.");
   if (filas.length > LIMITES_IMPORTACION.filasArchivo)
     throw new ErrorPlanilla(`La planilla tiene ${filas.length} filas; el máximo es ${LIMITES_IMPORTACION.filasArchivo}.`);
-  return { columnas, filas: filas.map((f) => columnas.map((_, i) => f[i] ?? "")) };
+  return { columnas, filas: filas.map((f) => columnas.map((_, i) => f[i] ?? "")), lineas: resto.map((r) => r.linea) };
 }
 
 /** Lee un CSV (separador `;`, `,`, tabulador o `|`, con o sin BOM). La primera fila es el encabezado. */

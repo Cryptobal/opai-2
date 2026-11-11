@@ -22,11 +22,12 @@ export function fechaCivil(texto: string): string | null {
 }
 
 /** Número desde formatos chilenos: «$ 1.200.000», «1200000», «1.200.000,50», «12,5». */
-export function numero(texto: string): number | null {
+export function numero(texto: string, miles = true): number | null {
   let t = texto.replace(/[$\s]|clp|uf/gi, "");
   if (!/^-?[\d.,]+$/.test(t)) return null;
   if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
-  else if (/^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");
+  // Sin coma, «1.200» es mil doscientos solo en campos enteros; en un decimal (una latitud) el punto es decimal.
+  else if (miles && /^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");
   const n = Number(t);
   return Number.isFinite(n) ? n : null;
 }
@@ -49,7 +50,7 @@ function convertir(campo: CampoImportable, crudo: string): Conversion {
     case "entero":
       return ((n) => (n !== null && Number.isInteger(n) ? { valor: n } : mal("Debe ser un número entero.")))(numero(t));
     case "decimal":
-      return ((n) => (n !== null ? { valor: n } : mal("Debe ser un número.")))(numero(t));
+      return ((n) => (n !== null ? { valor: n } : mal("Debe ser un número.")))(numero(t, false));
     case "booleano": {
       const k = claveDeEncabezado(t);
       return VERDADERO.has(k) ? { valor: true } : FALSO.has(k) ? { valor: false } : mal("Usa «sí» o «no».");
@@ -77,6 +78,6 @@ export function normalizarFilas(tabla: TablaCruda, def: DefinicionImportador, ma
       if ("error" in r && r.error) errores.push({ campo: campo.clave, mensaje: `${campo.etiqueta}: ${r.error}` });
       else if (campo.requerido && r.valor === null) errores.push({ campo: campo.clave, mensaje: `${campo.etiqueta}: es obligatorio.` });
     }
-    return { fila: i + 2, datos, errores };
+    return { fila: tabla.lineas?.[i] ?? i + 2, datos, errores };
   });
 }

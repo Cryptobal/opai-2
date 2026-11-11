@@ -36,7 +36,7 @@ describe.skipIf(!urlPropietario)("core · importador de cuentas en base real", (
     expect(s.mapeo).toMatchObject({ Nombre: "nombre", "R.U.T.": "rut", Giro: "giro", Estado: "estado", Comuna: "comuna" });
     expect(s.conteos).toEqual({ crear: 2, actualizar: 0, sin_cambio: 0, error: 2 });
     expect(s.filas.find((f) => f.fila === 3)?.mensajes[0]).toMatch(/RUT inválido/);
-    expect(s.filas.find((f) => f.fila === 5)?.mensajes[0]).toMatch(/Repite el registro de la fila 2/);
+    expect(s.filas.find((f) => f.fila === 5)?.mensajes[0]).toMatch(/El RUT se repite en la fila 2/);
     expect(await cuentas(x.t1)).toHaveLength(0);
     expect(await x.e.admin.importacion.count({ where: { tenantId: x.t1 } })).toBe(0);
   });
@@ -80,12 +80,21 @@ describe.skipIf(!urlPropietario)("core · importador de cuentas en base real", (
   it("cada empresa importa en lo suyo: la otra no ve ni puede referirse a esas cuentas", async () => {
     expect(await cuentas(x.t2)).toHaveLength(0);
     const ajeno = await x.importar(x.t2, "contactos", { filas: [{ cuenta_rut: "76.543.210-3", nombres: "Eva" }] }, true);
-    expect(ajeno.filas[0]).toMatchObject({ accion: "error", mensajes: ["La cuenta no existe en OPAI. Importa primero las cuentas."] });
+    expect(ajeno.filas[0]).toMatchObject({ accion: "error", mensajes: ["No hay una cuenta con ese RUT en OPAI. Importa primero las cuentas."] });
     const propia = await x.importar(x.t2, "cuentas", { filas: [{ nombre: "Acme", rut: "76.543.210-3" }] });
     expect(propia.conteos.crear).toBe(1);
     expect((await x.e.admin.importacion.findMany({ where: { tenantId: x.t2 } })).map((l) => l.id)).toEqual([propia.importacionId]);
     const lotes = await x.run<{ items: { id: string }[] }>(x.t2, "core.importar.lotes", {});
     expect(lotes.ok && lotes.data.items.map((l) => l.id)).toEqual([propia.importacionId]);
+  });
+
+  it("un CSV de Excel en Windows-1252 conserva tildes y eñes, y un id de origen con otro RUT no pisa la cuenta", async () => {
+    const latin1 = { nombre: "win.csv", contenidoBase64: Buffer.from("nombre;comuna\nPe\u00f1a y C\u00eda;\u00d1u\u00f1oa\n", "latin1").toString("base64") };
+    const s = await x.importar(x.t1, "cuentas", { archivo: latin1 }, true);
+    expect(s.filas[0]?.etiqueta).toBe("Peña y Cía");
+    await x.importar(x.t1, "cuentas", { filas: [{ id_externo: "A-1", nombre: "Omega", rut: "77.777.777-7" }] });
+    const otra = await x.importar(x.t1, "cuentas", { filas: [{ id_externo: "A-1", nombre: "Otra empresa", rut: "76.543.210-3" }], alExistir: "sobrescribir" }, true);
+    expect(otra.filas[0]?.accion).toBe("error");
   });
 
   it("solo quien administra la empresa importa", async () => {

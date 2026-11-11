@@ -16,9 +16,9 @@ function generico<D extends Datos>(i: Importador<D>): Importador<Datos> {
     planificar: (ctx, filas, o) => i.planificar(ctx, filas, o),
     crear: (tx, ctx, datos) => i.crear(tx, ctx, datos as D),
     actualizar: (tx, id, cambios) => i.actualizar(tx, id, cambios as Partial<D>),
-    actual: (tx, id) => i.actual(tx, id),
-    bloqueoAlBorrar: (tx, id) => i.bloqueoAlBorrar(tx, id),
-    borrar: (tx, id) => i.borrar(tx, id),
+    actuales: (tx, ids) => i.actuales(tx, ids),
+    bloqueos: (tx, ids) => i.bloqueos(tx, ids),
+    borrar: (tx, ids) => i.borrar(tx, ids),
   };
 }
 
