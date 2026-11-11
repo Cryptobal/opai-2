@@ -60,11 +60,11 @@ describe("core.integraciones.probar con dte_emision (CAR-263)", () => {
     expect(fila?.estado).toBe("error");
   });
 
-  it("una key con un carácter invisible pegado lo dice sin mostrarla", async () => {
-    const ctx = await conKey(`​${KEY}`);
+  it("una key pegada con comillas lo dice sin mostrarla", async () => {
+    const ctx = await conKey(`"${KEY}"`);
     responder(() => new Response("", { status: 401 }));
     const d = await probar(ctx);
-    expect(d.mensaje).toContain("tiene 20 caracteres y alguno no es letra, número ni guion");
+    expect(d.mensaje).toContain("tiene 21 caracteres y alguno no es letra, número ni guion");
     expect(d.mensaje).not.toContain(KEY);
   });
 

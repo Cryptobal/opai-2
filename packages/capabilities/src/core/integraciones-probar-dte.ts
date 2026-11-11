@@ -31,7 +31,7 @@ export async function probarEmisionDte(ctx: Contexto): Promise<string> {
   if (r.estado === "no_reconocida") {
     const forma = formaDeKeySimpleApi(apiKey);
     const pista = forma.caracteresExtranos
-      ? ` La key guardada tiene ${forma.largo} caracteres y alguno no es letra, número ni guion (suele ser un espacio o un carácter invisible al pegarla).`
+      ? ` La key guardada tiene ${forma.largo} caracteres y alguno no es letra, número ni guion (por ejemplo comillas o un punto pegados junto a la key).`
       : ` La key guardada tiene ${forma.largo} caracteres.`;
     throw reglaDeNegocio(
       `SimpleAPI no reconoce la API key guardada (HTTP ${r.status}): está mal copiada, vencida o no tiene suscripción a SimpleAPI DTE.${pista} Cópiala de nuevo desde el panel de SimpleAPI y guárdala aquí.`,

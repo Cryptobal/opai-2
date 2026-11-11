@@ -6,7 +6,7 @@
 // la key sea válida, así que un 401 de `dte/generar` no dice si falla la key o el contenido. Esta llamada sí lo dice.
 
 import { detalleSeguroDeRespuesta } from "./error-proveedor";
-import { encabezadoAuthSimpleApi, SIMPLEAPI_BASE } from "./simpleapi-contrato";
+import { encabezadoAuthSimpleApi, limpiarKeySimpleApi, SIMPLEAPI_BASE } from "./simpleapi-contrato";
 
 export const SIMPLEAPI_RUTA_SUSCRIPCION = `${SIMPLEAPI_BASE}/api/v1/Suscripcion/status` as const;
 
@@ -19,11 +19,11 @@ export type ResultadoKeySimpleApi =
   | { estado: "sin_respuesta"; status: number; detalle: string | null };
 
 /**
- * Pistas de forma de la key, sin revelarla: un carácter que no es letra, número ni guion suele ser un espacio, un salto
- * o un carácter invisible que se coló al pegarla, y SimpleAPI la rechaza igual que a una key inválida.
+ * Pistas de forma de la key tal como se envía (ya sin espacios ni caracteres invisibles), sin revelarla: si queda un
+ * carácter que no es letra, número ni guion (comillas, un punto), se coló al pegarla y SimpleAPI la rechaza.
  */
 export function formaDeKeySimpleApi(apiKey: string): { largo: number; caracteresExtranos: boolean } {
-  const k = apiKey.trim();
+  const k = limpiarKeySimpleApi(apiKey);
   return { largo: k.length, caracteresExtranos: !/^[A-Za-z0-9-]+$/.test(k) };
 }
 
@@ -33,7 +33,7 @@ export async function probarKeySimpleApi(apiKey: string): Promise<ResultadoKeySi
     method: "GET",
     headers: { Authorization: encabezadoAuthSimpleApi(apiKey), Accept: "application/json, text/plain" },
   });
-  const detalle = detalleSeguroDeRespuesta(await res.text().catch(() => ""), [apiKey, apiKey.trim()]);
+  const detalle = detalleSeguroDeRespuesta(await res.text().catch(() => ""), [apiKey, limpiarKeySimpleApi(apiKey)]);
   if (res.ok) return { estado: "reconocida", status: res.status, detalle };
   if (res.status === 401 || res.status === 403) return { estado: "no_reconocida", status: res.status, detalle };
   return { estado: "sin_respuesta", status: res.status, detalle };

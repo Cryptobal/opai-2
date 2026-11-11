@@ -107,7 +107,7 @@ describe("autenticación y límites de uso (CAR-240)", () => {
     const { encabezadoAuthSimpleApi } = await import("./simpleapi-contrato");
     const h = encabezadoAuthSimpleApi(`  ${CLAVE_API}\n`);
     // CAR-263: un espacio o un carácter invisible pegado en medio de la key tampoco llega a SimpleAPI.
-    const sucia = `​${CLAVE_API.slice(0, 4)}  ${CLAVE_API.slice(4)}﻿`;
+    const sucia = `\u200B${CLAVE_API.slice(0, 4)} \u00A0${CLAVE_API.slice(4)}\uFEFF`;
     expect(encabezadoAuthSimpleApi(sucia)).toBe(h);
     expect(h).toBe(`Basic ${Buffer.from(`api:${CLAVE_API}`, "utf8").toString("base64")}`);
     expect(h).not.toContain(CLAVE_API);

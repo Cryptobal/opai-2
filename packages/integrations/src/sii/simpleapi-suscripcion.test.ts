@@ -52,9 +52,9 @@ describe("probarKeySimpleApi (CAR-263)", () => {
 });
 
 describe("formaDeKeySimpleApi", () => {
-  it("cuenta el largo sin espacios de los extremos y avisa de caracteres que no son letras, números ni guiones", () => {
-    expect(formaDeKeySimpleApi(` ${KEY}\n`)).toEqual({ largo: 19, caracteresExtranos: false });
-    for (const rara of [`​${KEY}`, `"${KEY}"`, KEY.replace("-", " "), `${KEY} x`]) {
+  it("cuenta el largo sin espacios ni invisibles y avisa de caracteres que no son letras, números ni guiones", () => {
+    expect(formaDeKeySimpleApi(` \u200B${KEY.slice(0, 4)} ${KEY.slice(4)}\n`)).toEqual({ largo: 19, caracteresExtranos: false });
+    for (const rara of [`"${KEY}"`, KEY.replace("-", "_"), `${KEY}.x`]) {
       expect(formaDeKeySimpleApi(rara).caracteresExtranos).toBe(true);
     }
   });
