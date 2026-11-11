@@ -8,6 +8,7 @@ import { resumenLista } from "./resumen-lista";
 import type { LibroVentas } from "./tipos";
 
 const TIPOS = new Set(["33", "34", "56", "61"]);
+const ORDENES = new Set(["recientes", "antiguas", "mayor_monto", "menor_monto", "tipo"]);
 
 /** Lista del libro de ventas con filtros de URL. */
 export async function cargarVentas(sp: SearchParams) {
@@ -25,6 +26,7 @@ export async function cargarVentas(sp: SearchParams) {
         ...(periodo ? { periodo } : {}),
         ...(p["estado"] ? { estadoDte: p["estado"] } : {}),
         ...(TIPOS.has(String(p["tipo"])) ? { tipoDte: Number(p["tipo"]) } : {}),
+        ...(ORDENES.has(String(p["orden"])) ? { orden: p["orden"] } : {}),
         ...(p["q"] ? { q: p["q"] } : {}),
       },
     ),

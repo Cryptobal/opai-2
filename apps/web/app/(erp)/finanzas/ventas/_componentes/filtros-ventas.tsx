@@ -1,10 +1,22 @@
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 
-/** Filtros del libro de ventas por URL: período, tipo de documento y estado ante el SII. */
+/** Filtros del libro de ventas por URL: orden, período, tipo de documento y estado ante el SII. */
 export function FiltrosVentas({ periodos }: { periodos: { valor: string; etiqueta: string }[] }) {
   return (
     <ChipsFiltro
       filtros={[
+        {
+          param: "orden",
+          etiqueta: "Orden",
+          porDefecto: "recientes",
+          opciones: [
+            { valor: "recientes", etiqueta: "Más recientes" },
+            { valor: "antiguas", etiqueta: "Más antiguas" },
+            { valor: "mayor_monto", etiqueta: "Mayor monto" },
+            { valor: "menor_monto", etiqueta: "Menor monto" },
+            { valor: "tipo", etiqueta: "Tipo de documento" },
+          ],
+        },
         { param: "periodo", etiqueta: "Período", opciones: periodos },
         {
           param: "tipo",

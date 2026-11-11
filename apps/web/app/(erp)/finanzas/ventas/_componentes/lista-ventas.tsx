@@ -5,7 +5,7 @@ import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-import { pesos, rut } from "@/lib/fechas";
+import { fecha, pesos, rut } from "@/lib/fechas";
 
 import { AccionesFilaBorrador } from "./acciones-fila-borrador";
 import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, seCobra, tituloCorto } from "./etiquetas-venta";
@@ -87,7 +87,7 @@ export function ListaVentas(p: {
             </span>
           ),
         },
-        { id: "fecha", etiqueta: "Emisión", render: (v) => v.fechaEmision ?? "—" },
+        { id: "fecha", etiqueta: "Emisión", render: (v) => fecha(v.fechaEmision) },
         {
           id: "total",
           etiqueta: "Total",

@@ -14,3 +14,5 @@ El botón **Enviar al SII** ahora también aparece en una factura o nota de cré
 En el libro de ventas, la columna **Documento** muestra el tipo en corto («Factura 103», «Nota de crédito 103», «Nota de débito 101») y hay un filtro nuevo **Tipo**. El filtro **Estado** suma Rechazadas y Anuladas por nota de crédito.
 
 Las notas de crédito, las notas de débito y las facturas anuladas ya no aparecen «Por cobrar»: solo una factura vigente se cobra o se cede.
+
+Hay un nuevo filtro **Orden**: más recientes (por defecto), más antiguas, mayor o menor monto y tipo de documento. La fecha de emisión se muestra como día-mes-año.
