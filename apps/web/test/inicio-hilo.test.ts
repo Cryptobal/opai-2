@@ -19,9 +19,10 @@ describe("encabezado de Inicio según el marco", () => {
     expect(h).toContain("Crear");
   });
 
-  it("en el marco Hilo no repite el saludo del hilo: quedan la fecha y Crear", () => {
+  it("en el marco Hilo el saludo se oculta solo dentro del marco: quedan la fecha y Crear", () => {
     const h = renderToStaticMarkup(createElement(EncabezadoInicio, { ...base, hilo: true }));
-    expect(h).not.toContain("Camilo");
+    // Sigue en el marcado, oculto por CSS dentro del marco Hilo: en el clásico nunca falta.
+    expect(h).toMatch(/<h2 class="[^"]*marco-hilo:hidden[^"]*">.*Camilo/);
     expect(h).toContain("11-11-2026");
     expect(h).toContain("Crear");
   });
@@ -38,6 +39,9 @@ describe("rejilla de Inicio según el marco", () => {
     const { rejillaInicio } = await import("@/app/(erp)/_componentes/rejilla-inicio");
     const r = rejillaInicio(true);
     expect(r.rejilla).not.toContain("380px");
+    // Lo que requiere decisión se oculta con CSS dentro del marco, no se deja de pintar.
+    expect(r.decision).toContain("marco-hilo:hidden");
+    expect(rejillaInicio(false).decision).not.toContain("marco-hilo:hidden");
     for (const bloque of [r.tareas, r.accesos, r.seguimientos, r.actividad]) {
       expect(bloque).not.toMatch(/col-start|row-start/);
       expect(bloque).toContain("empty:hidden");

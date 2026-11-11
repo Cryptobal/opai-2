@@ -12,11 +12,12 @@ const CLASICO = {
 
 // En el marco Hilo (ADR-090) lo que requiere decisión vive en el hilo y el lienzo es más angosto que
 // la ventana: dos columnas parejas desde 1280 px y colocación automática, para que un bloque que no
-// aparece no deje una columna vacía.
+// aparece no deje una columna vacía. El bloque de decisión se sigue pintando y se oculta con CSS solo
+// dentro del marco Hilo: si el marco montado fuera el clásico, nunca quedan pendientes escondidos.
 const HILO = {
   rejilla: "grid gap-4 xl:grid-cols-2",
   indicadores: `${BLOQUE} xl:col-span-2`,
-  decision: "hidden",
+  decision: `${BLOQUE} marco-hilo:hidden`,
   tareas: BLOQUE,
   accesos: BLOQUE,
   seguimientos: BLOQUE,

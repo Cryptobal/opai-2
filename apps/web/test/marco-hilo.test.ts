@@ -54,14 +54,20 @@ describe("atajo de diseño en el menú de usuario", () => {
     const { menuCuentaShell } = await import("@/app/_components/menu-cuenta-shell");
     const nada = () => undefined;
     const cambiar = vi.fn();
-    const clasico = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, { actual: "clasico", onCambiar: cambiar });
+    const clasico = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
+      actual: "clasico",
+      onCambiar: cambiar,
+    });
     const ids = clasico.map((i) => i.id);
     expect(ids.indexOf("diseno")).toBe(ids.indexOf("pref") + 1);
     const item = clasico.find((i) => i.id === "diseno");
     expect(item?.etiqueta).toBe("Probar el diseño Hilo");
     item?.onSelect();
     expect(cambiar).toHaveBeenCalledWith("hilo");
-    const hilo = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, { actual: "hilo", onCambiar: cambiar });
+    const hilo = menuCuentaShell(true, nada, nada, true, {}, undefined, undefined, {
+      actual: "hilo",
+      onCambiar: cambiar,
+    });
     expect(hilo.find((i) => i.id === "diseno")?.etiqueta).toBe("Volver al diseño clásico");
     expect(menuCuentaShell(false, nada, nada, false).some((i) => i.id === "diseno")).toBe(false);
     expect(menuCuentaShell(true, nada, nada, true).some((i) => i.id === "diseno")).toBe(false);
@@ -75,13 +81,5 @@ describe("marco que se monta: una sola regla para el layout y las páginas", () 
     expect(marcoResuelto("erp", false, "hilo")).toBe("clasico");
     expect(marcoResuelto("supervisor", true, "hilo")).toBe("clasico");
     expect(marcoResuelto("erp", true, undefined)).toBe("clasico");
-  });
-
-  it("lee el marco de la cadena de cookies del navegador", async () => {
-    const { marcoEnCookies } = await import("@/lib/marco");
-    expect(marcoEnCookies("tema=oscuro; opai_marco=hilo; otra=1")).toBe("hilo");
-    expect(marcoEnCookies("tema=oscuro; otra=1")).toBe("clasico");
-    expect(marcoEnCookies("no_opai_marco=hilo")).toBe("clasico");
-    expect(marcoEnCookies("")).toBe("clasico");
   });
 });

@@ -50,14 +50,16 @@ test.describe("@preview marco Hilo con sesión", () => {
     ).toHaveCount(0);
     await expect(page.getByRole("tab", { name: /Pendientes/ })).toBeVisible();
     // El saludo y lo que requiere decisión viven en el hilo: la página de Inicio no los repite.
-    await expect(page.getByText("Requiere tu decisión hoy")).toHaveCount(0);
+    await expect(page.getByText("Requiere tu decisión hoy")).toBeHidden();
     await expect(
       page.getByRole("heading", { name: /^(Buen día|Buenas tardes|Buenas noches), / }),
     ).toHaveCount(1);
-    // El saludo del Inicio clásico («Hola», «Buenos días»…) no se pinta dentro del lienzo, ni oculto.
+    // El saludo del Inicio clásico («Hola», «Buenos días»…) queda oculto dentro del marco Hilo.
     await expect(
-      page.locator("main").getByText(/^(Hola|Buenos días|Buenas tardes|Buenas noches), /),
-    ).toHaveCount(0);
+      page
+        .locator("main h2")
+        .filter({ hasText: /^(Hola|Buenos días|Buenas tardes|Buenas noches), / }),
+    ).toBeHidden();
     await contenidoHidratado(page);
     await captura(page, "hilo-erp-inicio", info);
 

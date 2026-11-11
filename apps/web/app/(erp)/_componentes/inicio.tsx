@@ -40,12 +40,10 @@ export function InicioErp({ nombre, empresa, actor, hilo = false }: Props) {
           </Suspense>
         </div>
         <div className={r.decision}>
-          {/* En el marco Hilo los pendientes están en el hilo: aquí no se repiten ni se vuelven a pedir. */}
-          {hilo ? null : (
-            <Suspense fallback={<EsqueletoTarjeta />}>
-              <DecisionInicio />
-            </Suspense>
-          )}
+          {/* En el marco Hilo los pendientes están en el hilo: el bloque se oculta con CSS (ver rejilla). */}
+          <Suspense fallback={<EsqueletoTarjeta />}>
+            <DecisionInicio />
+          </Suspense>
         </div>
         <div className={r.tareas}>
           <Suspense fallback={<EsqueletoTarjeta />}>

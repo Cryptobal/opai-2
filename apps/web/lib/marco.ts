@@ -27,12 +27,6 @@ export function marcoResuelto(portal: string, acceso: boolean, cookie: string | 
   return portalAdmiteHilo(portal, acceso) ? marcoDeCookie(cookie) : "clasico";
 }
 
-/** Marco según `document.cookie` (todas las cookies del navegador en una cadena). */
-export function marcoEnCookies(cadena: string): Marco {
-  const par = cadena.split("; ").find((c) => c.startsWith(`${COOKIE_MARCO}=`));
-  return marcoDeCookie(par?.slice(COOKIE_MARCO.length + 1));
-}
-
 /** Texto para `document.cookie`: un año para Hilo; el clásico es la ausencia de la cookie. */
 export function cookieMarco(marco: Marco): string {
   const seguro =

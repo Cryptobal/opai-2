@@ -4,7 +4,6 @@ import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
 import { epocaDe } from "@/lib/epoca-sesion";
-import { portalAdmiteHilo } from "@/lib/marco";
 import { marcoDeLaPeticion } from "@/lib/marco-servidor";
 
 import { CargaPortal } from "./carga-portal";
@@ -30,7 +29,6 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
     <MarcoPortal
       key={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}
       hilo={hilo}
-      admite={portalAdmiteHilo(portal, conEmpresa)}
       datos={datos}
     >
       <CargaPortal>{children}</CargaPortal>

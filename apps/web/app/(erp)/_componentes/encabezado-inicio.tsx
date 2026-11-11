@@ -18,21 +18,21 @@ type Props = { nombre: string; empresa: string; ahora: Date; hilo: boolean; crea
 
 /**
  * Encabezado de Inicio: saludo, fecha y «Crear». En el marco Hilo (ADR-090) el saludo ya está en el
- * hilo, a la izquierda, así que aquí quedan solo la fecha y «Crear».
+ * hilo, a la izquierda, así que aquí se ven solo la fecha y «Crear».
  */
 export function EncabezadoInicio({ nombre, empresa, ahora, hilo, crear }: Props) {
   const pila = nombreDePila(nombre);
   return (
     <div className="flex items-end justify-between gap-3">
       <div className="min-w-0">
-        {hilo ? null : (
-          <h2 className="t-title text-fg">
-            <span className="md:hidden">Hola, {pila}</span>
-            <span className="hidden md:inline">
-              {saludo(ahora)}, {pila}
-            </span>
-          </h2>
-        )}
+        {/* Dentro del marco Hilo el saludo ya está en el hilo: aquí se oculta con CSS, por el marco que
+            de verdad está montado, no por lo que el servidor supuso. */}
+        <h2 className={hilo ? "t-title text-fg marco-hilo:hidden" : "t-title text-fg"}>
+          <span className="md:hidden">Hola, {pila}</span>
+          <span className="hidden md:inline">
+            {saludo(ahora)}, {pila}
+          </span>
+        </h2>
         <p className="text-base text-fg-muted">
           {diaLargo(ahora)}
           <span className="hidden md:inline"> · {empresa}</span>
