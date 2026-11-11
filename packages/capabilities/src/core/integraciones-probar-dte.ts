@@ -25,27 +25,22 @@ export async function probarEmisionDte(ctx: Contexto): Promise<string> {
     : [null, null, null];
   if (!apiKey) throw reglaDeNegocio("Falta la API key de SimpleAPI en Emisión DTE.");
 
+  // La medición es informativa: no se ha podido validar con una key que se sepa buena qué responde SimpleAPI, así que
+  // nunca deja la integración en error (el preflight de emisión exige `configurada`; CAR-240).
   const m = await medirKeySimpleApi(apiKey);
   const http = (n: number | null) => (n === null ? "sin token" : n === 0 ? "sin respuesta" : `HTTP ${n}`);
-  const medido = `Consulta de suscripción: con Basic, ${http(m.basic)}; con token, ${http(m.bearer)}`;
-  if (m.suscripciones === null) {
-    throw reglaDeNegocio(`No se pudo comprobar la API key en SimpleAPI. ${medido}. Reintenta en unos minutos.`);
-  }
-  if (m.suscripciones === 0) {
-    const forma = formaDeKeySimpleApi(apiKey);
-    const pista = forma.caracteresExtranos ? " y alguno no es letra, número ni guion" : "";
-    throw reglaDeNegocio(
-      `SimpleAPI no informa ninguna suscripción para la API key guardada (lista vacía, lo mismo que responde a una key que no conoce). ${medido}. La key guardada tiene ${forma.largo} caracteres${pista}; compárala con la del panel de SimpleAPI.`,
-    );
-  }
+  const forma = formaDeKeySimpleApi(apiKey);
+  const rara = forma.caracteresExtranos ? " y alguno no es letra, número ni guion" : "";
+  const medido =
+    `SimpleAPI (informativo, no bloquea la emisión): consulta de suscripción con Basic, ${http(m.basic)}; con token, ${http(m.bearer)}; ` +
+    `suscripciones informadas: ${m.suscripciones ?? "sin dato"}. La key guardada tiene ${forma.largo} caracteres${rara}.`;
 
-  const suscripcion = ` (${m.suscripciones} ${m.suscripciones === 1 ? "suscripción" : "suscripciones"}; ${medido})`;
-  if (!pfx || !clave) return `SimpleAPI reconoce la API key${suscripcion}. Falta cargar el certificado digital y su clave.`;
+  if (!pfx || !clave) throw reglaDeNegocio(`Falta cargar el certificado digital y su clave. ${medido}`);
   let vence: string;
   try {
     vence = abrirCertificadoPfx(pfx, clave).meta.venceEn; // misma apertura que la emisión (clave recortada si así abre)
   } catch (e) {
-    throw reglaDeNegocio(`SimpleAPI reconoce la API key${suscripcion}, pero el certificado no sirve: ${e instanceof Error ? e.message : "no se pudo abrir."}`);
+    throw reglaDeNegocio(`El certificado no sirve: ${e instanceof Error ? e.message : "no se pudo abrir."} ${medido}`);
   }
-  return `SimpleAPI reconoce la API key${suscripcion}. El certificado abre con su clave y vence el ${fechaCl(vence)}.`;
+  return `El certificado abre con su clave y vence el ${fechaCl(vence)}. ${medido}`;
 }
