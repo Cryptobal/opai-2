@@ -34,6 +34,13 @@ test.describe("@preview configuración: integración con Slack", () => {
     await expect(page.getByText("Qué se avisa")).toBeVisible();
     await capturar(page, info, "slack-guardado");
 
+    // En teléfono el aviso sale abajo a la derecha, encima de «Guardar», y se queda mientras el puntero
+    // está sobre él: se aparta el puntero y se espera a que se vaya antes de guardar otra vez.
+    await page.mouse.move(0, 0);
+    await expect(page.getByText("Configuración de Slack guardada")).toHaveCount(0, {
+      timeout: 20_000,
+    });
+
     // Deja el valor por defecto (15) para no ensuciar qa-e2e.
     await page.getByLabel("Margen de atraso (minutos)").fill("15");
     await page.getByRole("button", { name: "Guardar" }).click();
