@@ -1,0 +1,139 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-11T14:10:00Z"
+  },
+  "title": "OPAI 2.0 · Base agéntica «Hilo» (propuesta)",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "ERP · escritorio",
+      "is_interactive": true
+    },
+    "iPad.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1024,
+      "h": 768,
+      "title": "ERP · iPad",
+      "is_interactive": true
+    },
+    "iPhone.dc.html": {
+      "x": 2624,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "ERP · iPhone",
+      "is_interactive": true
+    },
+    "Acceso.dc.html": {
+      "x": 0,
+      "y": -1500,
+      "w": 1440,
+      "h": 900,
+      "title": "Acceso · escritorio",
+      "is_interactive": true
+    },
+    "AccesoMovil.dc.html": {
+      "x": 1520,
+      "y": -1500,
+      "w": 390,
+      "h": 844,
+      "title": "Acceso · iPhone",
+      "is_interactive": true
+    },
+    "Supervisor.dc.html": {
+      "x": 0,
+      "y": 1500,
+      "w": 390,
+      "h": 844,
+      "title": "Supervisor · iPhone",
+      "is_interactive": true
+    },
+    "Terreno.dc.html": {
+      "x": 470,
+      "y": 1500,
+      "w": 1024,
+      "h": 768,
+      "title": "Terreno · tablet de la instalación",
+      "is_interactive": true
+    },
+    "Guardia.dc.html": {
+      "x": 1574,
+      "y": 1500,
+      "w": 390,
+      "h": 844,
+      "title": "Guardia · iPhone",
+      "is_interactive": true
+    },
+    "Cliente.dc.html": {
+      "x": 2044,
+      "y": 1500,
+      "w": 390,
+      "h": 844,
+      "title": "Cliente · iPhone",
+      "is_interactive": true
+    },
+    "ClienteEscritorio.dc.html": {
+      "x": 2514,
+      "y": 1500,
+      "w": 1440,
+      "h": 900,
+      "title": "Cliente · escritorio",
+      "is_interactive": true
+    },
+    "Plataforma.dc.html": {
+      "x": 4034,
+      "y": 1500,
+      "w": 1440,
+      "h": 900,
+      "title": "Plataforma · escritorio",
+      "is_interactive": true
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "iPad.dc.html",
+    "iPhone.dc.html",
+    "Acceso.dc.html",
+    "AccesoMovil.dc.html",
+    "Supervisor.dc.html",
+    "Terreno.dc.html",
+    "Guardia.dc.html",
+    "Cliente.dc.html",
+    "ClienteEscritorio.dc.html",
+    "Plataforma.dc.html"
+  ],
+  "notes": {
+    "acceso": {
+      "x": 0,
+      "y": -1800,
+      "text": "1 · Acceso al sistema",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "titulo": {
+      "x": 0,
+      "y": -300,
+      "text": "2 · ERP · aplicación completa",
+      "kind": "title1",
+      "maxW": 3014
+    },
+    "portales": {
+      "x": 0,
+      "y": 1200,
+      "text": "3 · Portales · cada uno en su dispositivo",
+      "kind": "title1",
+      "maxW": 5474
+    }
+  },
+  "designSystems": []
+}

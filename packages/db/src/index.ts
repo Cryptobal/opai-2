@@ -5,6 +5,7 @@ export { registrarObservadorConsultas } from "./metricas";
 export { leerInbox } from "./inbox";
 export { listarInstalaciones, type FiltroInstalaciones } from "./instalaciones-lista";
 export { forTenant, validarTenantId, type TenantDb } from "./for-tenant";
+export { forTenantUsuario, type TenantUsuarioDb } from "./for-tenant-usuario";
 export { forUser, type UserDb } from "./for-user";
 export { tenantPorSlug, usuarioPorId, tenantsOperables } from "./globales";
 // Identidad (CAR-43): Better Auth con el rol `opai_auth`; el resto, solo operaciones con nombre.
@@ -56,6 +57,7 @@ export {
 export { type ClienteCatalogo, sembrarCatalogo } from "./catalogo-tenant";
 export { type ClienteComercial, sembrarComercial } from "./catalogo-comercial";
 export { resolverTokenSeguimiento } from "./seguimiento-token";
+export { resolverBuzonCorreo } from "./buzon-correo";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";
 export { consumirRateLimit, purgarVentanasRateLimit, type ResultadoRateLimit } from "./rate-limit";
@@ -65,7 +67,12 @@ export {
   HASH_PIN_SIN_PERSONA,
   verificarPin,
 } from "./pin-terreno";
-export { enTransaccion, type OpcionesTransaccion, type TenantTx } from "./transaccion";
+export {
+  enTransaccion,
+  enTransaccionConUsuario,
+  type OpcionesTransaccion,
+  type TenantTx,
+} from "./transaccion";
 export { enTransaccionCapturaSii } from "./transaccion-captura-sii";
 export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
 export type {

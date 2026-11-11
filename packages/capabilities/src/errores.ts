@@ -31,3 +31,17 @@ export class RechazoSensible extends ErrorCapacidad {
   }
 }
 export const rechazoSensible = (mensaje: string) => new RechazoSensible(mensaje);
+
+/**
+ * Error inesperado con un motivo ya saneado para el log de `error_interno` (CAR-242): la persona sigue viendo el
+ * mensaje genérico con la correlación, y el log dice qué paso falló, sin input, secretos ni datos del documento.
+ */
+export class ErrorConMotivo extends Error {
+  readonly motivoSeguro: string;
+
+  constructor(motivoSeguro: string, options?: { cause?: unknown }) {
+    super(motivoSeguro, options);
+    this.name = "ErrorConMotivo";
+    this.motivoSeguro = motivoSeguro;
+  }
+}

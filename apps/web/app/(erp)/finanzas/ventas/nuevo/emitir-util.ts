@@ -1,6 +1,14 @@
 import { validarReferenciaSii } from "@opai/domain";
+import { montoLineaVenta } from "@opai/domain/ventas-lineas";
 
-export type LineaForm = { glosa: string; montoTexto: string };
+import { parseDescuento } from "../programacion/_componentes/tipos";
+
+/** Línea del formulario: `precio` guarda solo dígitos (pesos), `cantidad` y `descuento` el texto tipeado. */
+export type LineaForm = { glosa: string; cantidad: string; precio: string; descuento: string; unidad?: string };
+
+export const LINEA_NUEVA: LineaForm = { glosa: "", cantidad: "1", precio: "", descuento: "0" };
+
+const CANTIDAD_OK = /^\d{1,10}([.,]\d{1,4})?$/;
 
 /** Referencia del catálogo SII en el formulario (801 OC, 802 HES, 803 contrato, 804 resolución, 52 guía). */
 /** Tipos que se pueden emitir desde esta pantalla: facturas (con borrador) y notas (se emiten directo). */
@@ -60,10 +68,21 @@ export function parseMonto(texto: string): number | null {
   return n;
 }
 
+/** Monto neto de la línea (cantidad × precio − descuento, mismo cálculo que el servidor) o null si falta algo. */
+export function montoDeLinea(l: LineaForm): number | null {
+  const precio = parseMonto(l.precio);
+  const descuento = parseDescuento(l.descuento);
+  const cantidad = l.cantidad.trim();
+  if (precio == null || descuento == null || !CANTIDAD_OK.test(cantidad)) return null;
+  const monto = montoLineaVenta({ cantidad, precioUnitario: precio, descuentoPct: descuento });
+  return monto >= 1 && monto <= 2_000_000_000 ? monto : null;
+}
+
 type EntradaBorrador = {
   cuentaId: string;
   tipoDte: "33" | "34";
   plazo: number;
+  fechaEmision: string;
   lineas: LineaForm[];
   glosa: string;
   referencias?: readonly RefForm[];
@@ -76,7 +95,17 @@ export function construirInputBorrador(e: EntradaBorrador) {
     cuentaId: e.cuentaId,
     tipoDte: Number(e.tipoDte) as 33 | 34,
     plazoPagoDias: e.plazo,
-    lineas: e.lineas.map((l) => ({ glosa: l.glosa.trim(), monto: parseMonto(l.montoTexto)! })),
+    fechaEmision: e.fechaEmision,
+    lineas: e.lineas.map((l) => {
+      const descuento = parseDescuento(l.descuento);
+      return {
+        glosa: l.glosa.trim(),
+        monto: montoDeLinea(l)!,
+        cantidad: l.cantidad.trim(),
+        precioUnitario: parseMonto(l.precio)!,
+        ...(descuento ? { descuentoPct: descuento } : {}),
+      };
+    }),
     ...(e.glosa.trim() ? { glosa: e.glosa.trim() } : {}),
     ...(e.referencias?.length
       ? {

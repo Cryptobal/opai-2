@@ -7,7 +7,15 @@ import { fecha } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 
-import { cargarFirmas, ETIQUETA_CLASE, ETIQUETA_ESTADO, filtrosDe, TONO_ESTADO, type Solicitud } from "./_componentes/datos";
+import { PestanasDocumentos } from "../_componentes/pestanas-documentos";
+import {
+  cargarFirmas,
+  ETIQUETA_CLASE,
+  ETIQUETA_ESTADO,
+  filtrosDe,
+  TONO_ESTADO,
+  type Solicitud,
+} from "./_componentes/datos";
 
 export const metadata = { title: "Firmas" };
 type Props = { searchParams: SearchParams };
@@ -41,63 +49,73 @@ export default function Firmas({ searchParams }: Props) {
       {({ r }) => {
         const items = r.ok ? r.data.solicitudes : [];
         return (
-          <ListScreen<Solicitud>
-            state={estadoPantalla(r)}
-            titulo="Firmas"
-            filtros={
-              <ChipsFiltro filtros={[{ param: "estado", etiqueta: "Estado", opciones: OPCIONES_ESTADO }]} />
-            }
-            items={items}
-            clave={(s) => s.id}
-            href={(s) => `/documentos/firmas/${s.id}`}
-            Link={LinkNext}
-            tarjeta={(s) => (
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="flex items-center gap-2">
-                  <span className="truncate text-base font-medium text-fg">
-                    {ETIQUETA_CLASE[s.clase] ?? s.clase}
+          <>
+            <PestanasDocumentos activa="firmas" />
+            <ListScreen<Solicitud>
+              state={estadoPantalla(r)}
+              titulo="Firmas"
+              filtros={
+                <ChipsFiltro
+                  filtros={[{ param: "estado", etiqueta: "Estado", opciones: OPCIONES_ESTADO }]}
+                />
+              }
+              items={items}
+              clave={(s) => s.id}
+              href={(s) => `/documentos/firmas/${s.id}`}
+              Link={LinkNext}
+              tarjeta={(s) => (
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="flex items-center gap-2">
+                    <span className="truncate text-base font-medium text-fg">
+                      {ETIQUETA_CLASE[s.clase] ?? s.clase}
+                    </span>
+                    <Badge tono={TONO_ESTADO[s.estado] ?? "neutro"}>
+                      {ETIQUETA_ESTADO[s.estado] ?? s.estado}
+                    </Badge>
                   </span>
-                  <Badge tono={TONO_ESTADO[s.estado] ?? "neutro"}>
-                    {ETIQUETA_ESTADO[s.estado] ?? s.estado}
-                  </Badge>
+                  <span className="t-caption">
+                    Nivel {s.nivel} · {s.firmantes.filter((f) => f.rol === "firma").length}{" "}
+                    firmante(s) · vence {fecha(s.plazoVence)}
+                  </span>
                 </span>
-                <span className="t-caption">
-                  Nivel {s.nivel} · {s.firmantes.filter((f) => f.rol === "firma").length} firmante(s) ·
-                  vence {fecha(s.plazoVence)}
-                </span>
-              </span>
-            )}
-            columnas={[
-              {
-                id: "clase",
-                etiqueta: "Documento",
-                render: (s) => ETIQUETA_CLASE[s.clase] ?? s.clase,
-              },
-              { id: "nivel", etiqueta: "Nivel", render: (s) => s.nivel },
-              {
-                id: "estado",
-                etiqueta: "Estado",
-                render: (s) => (
-                  <Badge tono={TONO_ESTADO[s.estado] ?? "neutro"}>
-                    {ETIQUETA_ESTADO[s.estado] ?? s.estado}
-                  </Badge>
-                ),
-              },
-              {
-                id: "firmantes",
-                etiqueta: "Firmantes",
-                render: (s) =>
-                  `${s.firmantes.filter((f) => f.estado === "firmado").length}/${s.firmantes.filter((f) => f.rol === "firma").length}`,
-              },
-              { id: "vence", etiqueta: "Vence", render: (s) => fecha(s.plazoVence), className: "t-numeric" },
-            ]}
-            textos={{
-              vacio: {
-                titulo: "Sin solicitudes de firma",
-                descripcion: "Envía un documento a firmar desde su ficha en Documentos.",
-              },
-            }}
-          />
+              )}
+              columnas={[
+                {
+                  id: "clase",
+                  etiqueta: "Documento",
+                  render: (s) => ETIQUETA_CLASE[s.clase] ?? s.clase,
+                },
+                { id: "nivel", etiqueta: "Nivel", render: (s) => s.nivel },
+                {
+                  id: "estado",
+                  etiqueta: "Estado",
+                  render: (s) => (
+                    <Badge tono={TONO_ESTADO[s.estado] ?? "neutro"}>
+                      {ETIQUETA_ESTADO[s.estado] ?? s.estado}
+                    </Badge>
+                  ),
+                },
+                {
+                  id: "firmantes",
+                  etiqueta: "Firmantes",
+                  render: (s) =>
+                    `${s.firmantes.filter((f) => f.estado === "firmado").length}/${s.firmantes.filter((f) => f.rol === "firma").length}`,
+                },
+                {
+                  id: "vence",
+                  etiqueta: "Vence",
+                  render: (s) => fecha(s.plazoVence),
+                  className: "t-numeric",
+                },
+              ]}
+              textos={{
+                vacio: {
+                  titulo: "Sin solicitudes de firma",
+                  descripcion: "Envía un documento a firmar desde su ficha en Documentos.",
+                },
+              }}
+            />
+          </>
         );
       }}
     </PaginaPortal>

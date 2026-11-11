@@ -38,6 +38,15 @@ describe("PDF del DTE", () => {
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
     expect(await paginas(bytes)).toBe(2);
   });
+  it("el borrador va en una sola página, sin folio, timbre ni copia cedible", async () => {
+    const bytes = await generarPdfDte({ ...base, folio: null, timbrePdf417: null, borrador: true });
+    expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
+    expect(await paginas(bytes)).toBe(1);
+  });
+  it("una línea con descuento imprime el PDF sin romperse", async () => {
+    const lineas = [{ descripcion: "Servicio", cantidad: "2", precio: 1_000_000, descuentoPct: 1550, monto: 1_690_000 }];
+    expect(await paginas(await generarPdfDte({ ...base, lineas }))).toBe(2);
+  });
   it("la factura exenta también es cedible", async () => {
     expect(await paginas(await generarPdfDte({ ...base, tipoDte: 34, iva: 0, exento: 1_100_000, total: 1_100_000 }))).toBe(2);
   });
@@ -58,10 +67,9 @@ describe("PDF del DTE", () => {
     const bytes = await generarPdfDte({ ...base, glosa: "Servicio ✓ 日本 con ñ y tildes áéíóú" });
     expect(await paginas(bytes)).toBe(2);
   });
-  it("la hoja es A4 (595,28 × 841,89 pt), no Carta", async () => {
+  it("la hoja es Carta (612 × 792 pt), el tamaño SII de OPAI 1", async () => {
     const { width, height } = (await PDFDocument.load(await generarPdfDte(base))).getPage(0).getSize();
-    expect(width).toBeCloseTo(595.28, 1);
-    expect(height).toBeCloseTo(841.89, 1);
+    expect([width, height]).toEqual([612, 792]);
   });
   it("un detalle largo se reparte en varias páginas y la copia CEDIBLE repite el documento completo", async () => {
     const lineas = Array.from({ length: 45 }, (_, i) => ({
@@ -109,7 +117,7 @@ describe("PDF de proforma y estado de pago", () => {
     expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true);
     const pdf = await PDFDocument.load(a);
     expect(pdf.getPageCount()).toBe(1);
-    expect(pdf.getPage(0).getSize().width).toBeCloseTo(595.28, 1);
+    expect(pdf.getPage(0).getSize().width).toBe(612);
     expect(pdf.getTitle()).toBe("PROFORMA PF-2026-12-000042");
   });
   it("el estado de pago admite las firmas y la aprobación en línea", async () => {

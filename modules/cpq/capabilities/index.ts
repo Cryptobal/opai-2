@@ -54,6 +54,9 @@ import {
   enviosPropuestaSolicitar,
   plantillasPropuestaGet,
   plantillasPropuestaUpdate,
+  propuestaCapitulosGuardar,
+  propuestaCapitulosList,
+  propuestaPromptExportable,
   propuestaTecnicaGet,
   propuestaTecnicaInicializar,
   propuestaTecnicaPreviewPdf,
@@ -65,6 +68,7 @@ import { cotizacionesArchivar, cotizacionesRestaurar } from "./archivar";
 import { compartirCrear, compartirRevocar } from "./compartir";
 import { compartirVer } from "./compartir-ver";
 import { cotizacionesEstadoComercial } from "./estado-comercial";
+import { capacidadesPropuestaHtml } from "./propuesta-html-cap";
 import { puestosConfirmar } from "./puestos-confirmar";
 import { puestosOfrecer } from "./puestos-ofrecer";
 
@@ -131,6 +135,9 @@ export const capacidades: readonly Capacidad[] = [
   propuestaTecnicaUpdate,
   propuestaTecnicaSyncServicio,
   propuestaTecnicaPreviewPdf,
+  propuestaCapitulosList,
+  propuestaCapitulosGuardar,
+  propuestaPromptExportable, ...capacidadesPropuestaHtml,
   enviosPropuestaList,
   enviosPropuestaSolicitar,
   enviosPropuestaAprobar,

@@ -9,9 +9,30 @@ export type Venta = {
   fechaEmision: string | null;
   fechaVencimiento: string | null;
   montoTotal: number;
-  estadoDte: "borrador" | "enviado" | "aceptado" | "rechazado" | "anulado_nc";
+  estadoDte: "borrador" | "enviado" | "aceptado" | "rechazado" | "anulado_nc" | "anulado_nd";
+  /** Track ID del envío al SII; `null` mientras el documento está firmado pero no transmitido (CAR-270). */
+  trackIdSii: string | null;
   estadoCobro: "pendiente" | "pagada_parcial" | "pagada" | "cedida";
   cesionEstado: "emitido" | "cedido" | "no_cedido" | null;
+  /** Solo en la vista previa de emitir: con qué proveedor y en qué ambiente se firmaría (CAR-242). */
+  emisionPrevista?: { proveedor: "simulado" | "simpleapi"; ambiente: "certificacion" | "produccion" };
+};
+
+/** Línea de un borrador tal como la entrega `finanzas.ventas.obtener` (CAR-248: para poder editarla). */
+export type LineaBorrador = {
+  glosa: string;
+  monto: number;
+  cantidad?: string | null;
+  unidad?: string | null;
+  precioUnitario?: number | null;
+  descuentoPct?: number | null;
+};
+
+/** Lo que la ficha sabe de un borrador y la hoja de edición necesita. */
+export type DatosBorrador = {
+  montoIva?: number;
+  glosa?: string | null;
+  lineas?: LineaBorrador[];
 };
 
 export type LibroVentas = {

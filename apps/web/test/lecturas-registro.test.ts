@@ -18,7 +18,9 @@ describe("declaración de auditoría del registro completo", () => {
     ).toMatchSnapshot();
     for (const c of listarCapacidades().filter((c) => c.efecto === "lectura")) {
       if (c.auditarLectura === false)
-        expect(["core.notificaciones.list", "core.inicio.pendientes"]).toContain(c.id);
+        expect(["core.notificaciones.list", "core.inicio.pendientes", "core.novedades.list"]).toContain(
+          c.id,
+        );
     }
   });
 });

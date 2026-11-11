@@ -16,6 +16,7 @@ describe("consumirFolio", () => {
       folioHasta: 105,
       folioActual: 102,
       activo: true,
+      cafAmbiente: "certificacion",
       cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
     };
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
@@ -47,6 +48,7 @@ describe("consumirFolio", () => {
             folioActual: 10,
             folioHasta: 20,
             activo: true,
+            cafAmbiente: "certificacion",
             cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
           },
         ]),
@@ -70,6 +72,7 @@ describe("consumirFolio", () => {
             folioActual: 5,
             folioHasta: 10,
             activo: true,
+            cafAmbiente: "certificacion",
             cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
           },
         ]),
@@ -92,6 +95,7 @@ describe("consumirFolio", () => {
             folioActual: 5,
             folioHasta: 10,
             activo: true,
+            cafAmbiente: "certificacion",
             cafVenceEn: new Date("2020-01-01T00:00:00.000Z"),
           },
         ]),
@@ -115,6 +119,7 @@ describe("consumirFolio", () => {
             folioActual: 10,
             folioHasta: 20,
             activo: true,
+            cafAmbiente: "certificacion",
             cafVenceEn: new Date("2020-01-01T00:00:00.000Z"),
           },
           {
@@ -122,6 +127,7 @@ describe("consumirFolio", () => {
             folioActual: 8000,
             folioHasta: 8010,
             activo: true,
+            cafAmbiente: "certificacion",
             cafVenceEn: new Date("2027-12-31T00:00:00.000Z"),
           },
         ]),
@@ -136,6 +142,22 @@ describe("consumirFolio", () => {
       where: { id: "nuevo", folioActual: 8000, activo: true },
       data: { folioActual: 8001 },
     });
+  });
+
+  it("en simulado no consume un rango de ambiente sin determinar (podría ser de producción; CAR-240)", async () => {
+    const updateMany = vi.fn();
+    const tx = {
+      dteConfig: { findUnique: async () => null },
+      dteFolio: {
+        findMany: vi.fn().mockResolvedValue([
+          { id: "f9", folioDesde: 1, folioActual: 1, folioHasta: 9, activo: true, cafVenceEn: null, cafIdk: null },
+        ]),
+        updateMany,
+      },
+    };
+    const ctx = { transaccion: async <T>(fn: (t: typeof tx) => Promise<T>) => fn(tx) } as unknown as Contexto;
+    await expect(consumirFolio(ctx, 33, false)).rejects.toThrow(/No hay un CAF activo de certificación/);
+    expect(updateMany).not.toHaveBeenCalled();
   });
 });
 

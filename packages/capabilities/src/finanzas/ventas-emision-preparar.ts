@@ -9,8 +9,10 @@ import { hoy } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { adaptadorSiiDe } from "./adaptador-sii";
+import { comoReglaSiProveedorSii } from "./errores-sii";
 import { ambienteDe, cuentaDe, rutEmisorDe } from "./ventas-comun";
 import { foliosPrevistos } from "./ventas-folios-logica";
+import { exigirOrigenNotaDebito } from "./ventas-nd-cargo";
 import { payloadEmisionDteDe } from "./ventas-payload-emision";
 import { guardarXmlFirmadoDte } from "./ventas-xml";
 
@@ -28,6 +30,7 @@ export type EmisionPreparada = {
 type DocHuella = {
   cuentaId: string;
   fechaEmision: Date | null;
+  fechaVencimiento: Date | null;
   glosa: string | null;
   montoNeto: number;
   montoExento: number;
@@ -35,15 +38,17 @@ type DocHuella = {
   montoOtros: number;
   montoTotal: number;
   lineas: readonly { orden: number; glosa: string; monto: number }[];
-  referencias: readonly { tipoDteRef: number; folioRef: number; codigoRef: number; razonRef: string | null }[];
+  referencias: readonly { tipoDteRef: number; folioRef: number; codigoRef: number; razonRef: string | null; fechaRef: Date | null }[];
 };
 
 export function huellaBorrador(d: DocHuella): string {
   const contenido = JSON.stringify([
-    d.cuentaId, d.fechaEmision?.toISOString().slice(0, 10) ?? null, d.glosa,
+    d.cuentaId, d.fechaEmision?.toISOString().slice(0, 10) ?? null, d.fechaVencimiento?.toISOString().slice(0, 10) ?? null, d.glosa,
     d.montoNeto, d.montoExento, d.montoIva, d.montoOtros, d.montoTotal,
     d.lineas.map((l) => [l.orden, l.glosa, l.monto]),
-    d.referencias.map((r) => [r.tipoDteRef, r.folioRef, r.codigoRef, r.razonRef]),
+    d.referencias
+      .map((r) => [r.tipoDteRef, r.folioRef, r.codigoRef, r.razonRef, r.fechaRef?.toISOString().slice(0, 10) ?? null])
+      .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
   ]);
   return createHash("sha256").update(contenido).digest("hex");
 }
@@ -76,7 +81,8 @@ export async function cargarBorradorEmitible(ctx: Contexto, documentoId: string)
   if (!doc) throw noEncontrado("El documento");
   if (doc.estadoDte !== "borrador") throw reglaDeNegocio("Solo se emiten borradores.");
   if (doc.folio != null) throw reglaDeNegocio("El borrador ya tiene folio asignado.");
-  if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
+  if (doc.tipoDte === 56) await exigirOrigenNotaDebito(ctx, doc);
+  else if (doc.tipoDte !== 33 && doc.tipoDte !== 34) throw reglaDeNegocio("Tipo de DTE no emitible desde borrador.");
   await condicionesHeredadas(ctx, doc);
   const cuenta = await cuentaDe(ctx, doc.cuentaId);
   if (!cuenta.rut) throw reglaDeNegocio("El cliente debe tener RUT para emitir el DTE.");
@@ -119,7 +125,11 @@ export async function prepararEmision(ctx: Contexto, documentoId: string, folioA
     },
     incluirCaf: adaptador.nombre !== "simulado",
   });
-  const firmado = await adaptador.firmar(payload);
+  // Un fallo del proveedor llega a la persona como regla de negocio con su motivo (CAR-242). Nada se escribió:
+  // el folio solo se reclama después, dentro de la transacción de `emitirBorrador`.
+  const firmado = await adaptador.firmar(payload).catch((e: unknown) => {
+    throw comoReglaSiProveedorSii(e, "El borrador sigue sin emitir y el folio no se usó.");
+  });
   // Clave única por intento: dos firmas concurrentes del mismo borrador no se pisan el XML (el de un documento
   // ya emitido nunca se sobrescribe); la transacción que gana fija su clave.
   const xmlStorageKey = adaptador.nombre === "simulado" ? null : `dte/${doc.id}/${randomUUID()}.xml`;

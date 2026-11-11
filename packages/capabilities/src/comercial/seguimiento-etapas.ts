@@ -30,8 +30,26 @@ export async function etapasInvalidasDelPlan(ctx: Contexto, config: ConfigPlan):
   return invalidas;
 }
 
+/**
+ * Etapa destino de cada paso (CAR-160, R11): por id, en un embudo activo de esta empresa, activa y
+ * abierta (nunca ganada ni perdida: ganar y perder siguen siendo acciones con sus requisitos).
+ */
+export async function etapasInvalidasDePasos(ctx: Contexto, config: ConfigPlan): Promise<string[]> {
+  const malas: string[] = [];
+  for (const [i, paso] of config.pasos.entries()) {
+    if (!paso.etapaDestino) continue;
+    const etapa = await ctx.db.etapa.findFirst({ where: { id: paso.etapaDestino, tenantId: ctx.tenantId, activa: true }, select: { embudoId: true, tipo: true } });
+    const embudo = etapa ? await ctx.db.embudo.findFirst({ where: { id: etapa.embudoId, tenantId: ctx.tenantId, activo: true }, select: { id: true } }) : null;
+    if (!embudo) malas.push(`Paso ${i + 1}: la etapa destino no existe en el embudo de la empresa o está inactiva.`);
+    else if (etapa?.tipo !== "abierta") malas.push(`Paso ${i + 1}: la etapa destino debe ser abierta; ganar y perder van en sus propias acciones.`);
+  }
+  return malas;
+}
+
 /** Al guardar el plan: cada etapa debe existir en un embudo activo de esta empresa y estar activa. */
 export async function validarEtapasDelPlan(ctx: Contexto, config: ConfigPlan): Promise<void> {
   const [primera] = await etapasInvalidasDelPlan(ctx, config);
   if (primera) throw reglaDeNegocio(primera.mensaje);
+  const [dePaso] = await etapasInvalidasDePasos(ctx, config);
+  if (dePaso) throw reglaDeNegocio(dePaso);
 }

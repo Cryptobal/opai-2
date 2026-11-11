@@ -31,6 +31,13 @@ const OTRA = /apunta a una fila de otra empresa o inexistente/;
 const RECHAZO = new RegExp(
   `${OTRA.source}|no pertenece a la cuenta del negocio|no visible para el tenant actual|no es miembro de la empresa`,
 );
+/** Tablas con política restrictiva `app.user_id` además del tenant. */
+const TABLA_RLS_USUARIO = new Set(["core.novedades_lectura"]);
+const usuarioDe = (s: Siembra, lado: "a" | "b", tabla: string) => {
+  if (!TABLA_RLS_USUARIO.has(tabla)) return undefined;
+  const fila = s.filas[lado].get(tabla);
+  return fila?.["usuario_id"] != null ? String(fila["usuario_id"]) : undefined;
+};
 
 describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con tenant_id", () => {
   let e: Entorno;
@@ -74,12 +81,15 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
     const malas: string[] = [];
     for (const x of tablas()) {
       if (!(await privilegio(admin, ROL, x.nombre, "SELECT"))) continue;
-      const otras = await comoTenant(app, t.a, `SELECT 1 FROM ${x.nombre} WHERE tenant_id <> $1`, [
+      const usr = usuarioDe(s, "a", x.nombre);
+      const otras = await comoTenant(
+        app,
         t.a,
-      ]);
-      const propias = await comoTenant(app, t.a, `SELECT 1 FROM ${x.nombre} WHERE tenant_id = $1`, [
-        t.a,
-      ]);
+        `SELECT 1 FROM ${x.nombre} WHERE tenant_id <> $1`,
+        [t.a],
+        usr,
+      );
+      const propias = await comoTenant(app, t.a, `SELECT 1 FROM ${x.nombre} WHERE tenant_id = $1`, [t.a], usr);
       if (otras.codigo || otras.filas > 0 || propias.filas < 1)
         malas.push(`${x.nombre}: ${JSON.stringify({ otras, propias })}`);
     }
@@ -92,11 +102,13 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
       const cols = await columnasActualizables(admin, ROL, x);
       const col = cols.includes("tenant_id") ? "tenant_id" : cols[0];
       if (!col) continue;
+      const usr = usuarioDe(s, "a", x.nombre);
       const cruzado = await comoTenant(
         app,
         t.a,
         `UPDATE ${x.nombre} SET "${col}" = "${col}" WHERE tenant_id = $1`,
         [t.b],
+        usr,
       );
       if (cruzado.filas !== 0 || (cruzado.codigo && cruzado.codigo !== "42501"))
         malas.push(`${x.nombre} cruzado: ${JSON.stringify(cruzado)}`);
@@ -106,6 +118,7 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
         t.a,
         `UPDATE ${x.nombre} SET tenant_id = $1 WHERE tenant_id = $2`,
         [t.b, t.a],
+        usr,
       );
       if (!mover.codigo) malas.push(`${x.nombre}: una fila de A pasó a B`);
     }
@@ -116,7 +129,7 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
     const malas: string[] = [];
     for (const x of tablas()) {
       if (!(await privilegio(admin, ROL, x.nombre, "DELETE"))) continue;
-      const r = await comoTenant(app, t.a, `DELETE FROM ${x.nombre} WHERE tenant_id = $1`, [t.b]);
+      const r = await comoTenant(app, t.a, `DELETE FROM ${x.nombre} WHERE tenant_id = $1`, [t.b], usuarioDe(s, "a", x.nombre));
       if (r.filas !== 0 || r.codigo) malas.push(`${x.nombre}: ${JSON.stringify(r)}`);
     }
     expect(malas).toEqual([]);
@@ -128,7 +141,7 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
       const filaB = s.filas.b.get(x.nombre);
       if (!filaB) continue;
       const { sql, params } = sqlInsert(x.nombre, copia(x, filaB));
-      const cruzado = await comoTenant(app, t.a, sql, params);
+      const cruzado = await comoTenant(app, t.a, sql, params, usuarioDe(s, "a", x.nombre));
       // 42501 es la política (o falta de privilegio); 23503 solo vale si lo lanza un trigger de
       // misma empresa, que corre antes del WITH CHECK porque la referencia de B no es visible.
       const rechazo =
@@ -136,7 +149,7 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
         (cruzado.codigo === "23503" && RECHAZO.test(cruzado.mensaje ?? ""));
       if (!rechazo) malas.push(`${x.nombre} desde A: ${JSON.stringify(cruzado)}`);
       if (!(await privilegio(admin, ROL, x.nombre, "INSERT"))) continue;
-      const propio = await comoTenant(app, t.b, sql, params);
+      const propio = await comoTenant(app, t.b, sql, params, usuarioDe(s, "b", x.nombre));
       if (propio.codigo && propio.codigo !== UNICO && propio.codigo !== EXCL)
         malas.push(`${x.nombre} control con B: ${propio.mensaje}`);
     }

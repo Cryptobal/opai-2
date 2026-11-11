@@ -12,6 +12,24 @@ type Props = {
   conNombre?: boolean;
 };
 
+/** Avatar + menú en la barra superior (teléfono / iPad). */
+export function MenuUsuarioBarra(props: {
+  usuario?: Usuario;
+  menuUsuario?: readonly ItemMenu[];
+  lado?: "abajo-derecha" | "arriba-izquierda";
+}) {
+  const { usuario, menuUsuario } = props;
+  if (!usuario) return null;
+  if (!menuUsuario) return <Avatar nombre={usuario.nombre} />;
+  return (
+    <UserMenu
+      usuario={usuario}
+      items={menuUsuario}
+      {...(props.lado ? { lado: props.lado } : {})}
+    />
+  );
+}
+
 /** Avatar con menú: nombre y correo, empresas (si hay más de una), perfil y cerrar sesión. */
 export function UserMenu({ usuario, items, lado, conNombre }: Props) {
   return (

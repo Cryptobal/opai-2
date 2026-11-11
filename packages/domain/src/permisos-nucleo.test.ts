@@ -6,6 +6,8 @@ import { PERMISOS_CORE as P, type Rol, ROLES, tienePermiso } from "./permisos";
 const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolean]> = {
   [P.cuentasRead]: [true, true, true, true, true],
   [P.cuentasManage]: [true, true, true, false, false],
+  // CAR-138 PR 7: quién autoriza referencias lo decide Carlos; por defecto solo owner y admin.
+  [P.cuentasReferenciasAutorizar]: [true, true, false, false, false],
   // CRM PR 2a: el supervisor no entra a Comercial; el catálogo de etiquetas es de owner y admin.
   [P.actividadesRead]: [true, true, true, false, true],
   [P.actividadesManage]: [true, true, true, false, false],
@@ -13,6 +15,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.etiquetasRead]: [true, true, true, false, true],
   [P.etiquetasManage]: [true, true, true, false, false],
   [P.etiquetasConfig]: [true, true, false, false, false],
+  // CAR-233: la bandeja «sin asignar» de correos, por defecto solo owner y admin (DECISIÓN CARLOS).
+  [P.correosSinAsignar]: [true, true, false, false, false],
   [P.instalacionesRead]: [true, true, true, true, true],
   // Puestos (Brief 11): el supervisor lee los catálogos pero no los edita ni los desactiva.
   [P.patronesRead]: [true, true, true, true, true],

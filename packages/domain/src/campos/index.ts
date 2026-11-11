@@ -26,3 +26,10 @@ export {
   type FilaCuenta,
   type FilaInstalacion,
 } from "./mapeo-maestros";
+export {
+  nombreReferencia,
+  referenciaVigente,
+  valoresReferencia,
+  type ConsentimientoReferencia,
+  type FilaReferencia,
+} from "./mapeo-referencias";

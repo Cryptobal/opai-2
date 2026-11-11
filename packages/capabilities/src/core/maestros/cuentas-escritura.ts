@@ -8,6 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { definidos, escribirConEvento, opcionalAFecha, otroQue, sinDuplicado } from "./comun";
 import { cuentaDe } from "./cuentas";
+import { prepararSiiAlCrear, SII_AL_CREAR } from "./cuentas-sii-trabajo";
 import { camposCuenta, cuentaSchema, vistaCuenta } from "./cuentas-vista";
 
 const DUPLICADO = "Ya existe una cuenta con ese RUT.";
@@ -21,15 +22,22 @@ export async function rutLibre(ctx: Contexto, rut: string | null | undefined, ex
 export const cuentasCreate = defineCapability({
   id: "core.cuentas.create",
   descripcion:
-    "Crea una cuenta (por defecto como prospecto). El RUT se valida y normaliza; si otra cuenta ya lo tiene, responde CONFLICT con su nombre.",
+    "Crea una cuenta (por defecto como prospecto). El RUT se valida y normaliza; si otra cuenta ya lo tiene, responde CONFLICT con su nombre. Con RUT, deja encolada la consulta al SII (no aplica nada): `sii` dice si ya hay datos del SII para ofrecer con core.cuentas.aplicar_sii.",
   permiso: PERMISOS_CORE.cuentasManage,
   input: z.object(camposCuenta),
-  output: cuentaSchema,
+  output: cuentaSchema.extend({
+    sii: z
+      .enum(SII_AL_CREAR)
+      .describe(
+        "en_cache: ya hay una respuesta del SII guardada para revisar con core.cuentas.consultar_sii; en_cola: se consultarán en segundo plano; no_configurado: falta la integración «Datos del SII por RUT»; sin_rut: la cuenta no trae RUT.",
+      ),
+  }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     await rutLibre(ctx, input.rut);
     const data = definidos({ ...input, escrituraFecha: opcionalAFecha(input.escrituraFecha) });
+    const sii = await prepararSiiAlCrear(ctx, input.rut);
     if (dryRun) {
       const vacio = {
         razonSocial: null,
@@ -46,7 +54,7 @@ export const cuentasCreate = defineCapability({
         escrituraNotaria: null,
         notas: null,
       };
-      return vistaCuenta({
+      const vista = vistaCuenta({
         ...vacio,
         ...data,
         id: "",
@@ -56,17 +64,21 @@ export const cuentasCreate = defineCapability({
         archivadaEn: null,
         createdAt: new Date(),
       });
+      return { ...vista, sii: sii.sii };
     }
     const c = await escribirConEvento(
       ctx,
       { tipo: "core.cuenta.creada", entidadTipo: "cuenta" },
-      (tx) =>
-        sinDuplicado(
+      async (tx) => {
+        const creada = await sinDuplicado(
           tx.cuenta.create({ data: { ...data, estado: "prospecto", tenantId: ctx.tenantId } }),
           DUPLICADO,
-        ),
+        );
+        await sii.encolar(tx);
+        return creada;
+      },
     );
-    return vistaCuenta(c);
+    return { ...vistaCuenta(c), sii: sii.sii };
   },
 });
 

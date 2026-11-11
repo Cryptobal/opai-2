@@ -24,6 +24,8 @@ export type SolicitudCorreoCliente = {
   para: string;
   contactoId: string | null;
   cuentaId: string | null;
+  /** Negocio de la cotización: el correo queda en su historial (CAR-233). */
+  negocioId?: string | null;
   codigo: string;
   titulo: string;
   version: number | null;
@@ -121,7 +123,8 @@ export async function enviarCorreoCliente(ctx: Contexto, s: SolicitudCorreoClien
       const c = s.pdfs.find((x) => x.clave === p.clave)?.contenido;
       return c ? [{ nombre: p.nombre, contenidoBase64: Buffer.from(c).toString("base64"), mime: "application/pdf" }] : [];
     });
-    const enviado = await enviarCorreo(destino(ctx), EVENTO_CORREO_CLIENTE, s.para, datos, { adjuntos });
+    const historial = { origen: "cotizacion" as const, cuentaId: s.cuentaId, contactoId: s.contactoId, negocioId: s.negocioId ?? null };
+    const enviado = await enviarCorreo(destino(ctx), EVENTO_CORREO_CLIENTE, s.para, datos, { adjuntos, historial });
     return { enviado, acceso };
   } catch {
     return { enviado: false, acceso: "no_aplica" as EstadoAccesoContacto };

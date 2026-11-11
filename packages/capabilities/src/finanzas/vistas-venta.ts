@@ -16,6 +16,10 @@ export const lineaSchema = z.object({
   orden: z.number().int(),
   glosa: z.string(),
   monto: z.number().int(),
+  cantidad: z.string().nullish().describe("Cantidad de la línea, si se informó (CAR-248: para editar un borrador)."),
+  unidad: z.string().nullish(),
+  precioUnitario: z.number().int().nullish(),
+  descuentoPct: z.number().int().nullish(),
 });
 
 export const ventaSchema = z.object({
@@ -42,10 +46,15 @@ export const ventaSchema = z.object({
   montoPendiente: z.number().int().describe("Monto − notas de crédito parciales − cobrado; nunca negativo. La nota de débito no suma deuda."),
   cesionEstado: z.enum(ESTADOS_CESION).nullable(),
   cesionProveedor: z.string().nullable(),
+  cesionFactor: z.string().nullable().describe("A quién se cedió (nombre del factor o su RUT); el proveedor es solo el integrador."),
   glosa: z.string().nullable(),
   trackIdSii: z.string().nullable(),
   documentoReferenciaId: z.string().nullable(),
   lineas: z.array(lineaSchema),
+  emisionPrevista: z
+    .object({ proveedor: z.enum(["simulado", "simpleapi"]), ambiente: z.enum(["certificacion", "produccion"]) })
+    .optional()
+    .describe("Solo en la vista previa de emitir: proveedor y ambiente con que se firmaría (CAR-242)."),
 });
 
 type FilaVenta = {
@@ -68,10 +77,20 @@ type FilaVenta = {
   montoNotasCredito?: number;
   cesionEstado?: string | null;
   cesionProveedor?: string | null;
+  cesionFactor?: string | null;
   glosa: string | null;
   trackIdSii: string | null;
   documentoReferenciaId: string | null;
-  lineas?: { id: string; orden: number; glosa: string; monto: number }[];
+  lineas?: {
+    id: string;
+    orden: number;
+    glosa: string;
+    monto: number;
+    cantidad?: { toString(): string } | null;
+    unidad?: string | null;
+    precioUnitario?: number | null;
+    descuentoPct?: number | null;
+  }[];
 };
 
 export function vistaVenta(
@@ -104,6 +123,7 @@ export function vistaVenta(
     montoPendiente: saldoPendiente(d),
     cesionEstado: (d.cesionEstado as (typeof ESTADOS_CESION)[number] | null) ?? null,
     cesionProveedor: d.cesionProveedor ?? null,
+    cesionFactor: d.cesionFactor ?? null,
     glosa: d.glosa,
     trackIdSii: d.trackIdSii,
     documentoReferenciaId: d.documentoReferenciaId,

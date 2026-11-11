@@ -1,8 +1,11 @@
+export * from "./novedades/catalogo";
 export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./comercial/formulario-web";
 export * from "./comercial/seguimiento";
 export * from "./comercial/datos-sii";
+export * from "./comercial/consulta-sii-cache";
+export * from "./acteco";
 export * from "./precios-base";
 export * from "./dinero";
 export * from "./formato";
@@ -27,6 +30,9 @@ export { intervaloEsperado, horasEntre, horasEsperadas, type IntervaloEsperado }
 export * from "./jornada-legal";
 export * from "./turnos-esperados";
 export * from "./turnos-jornada-pactada";
+export * from "./documento-plantillas";
+export * from "./documento-plantillas-texto";
+export * from "./vencimientos-grupos";
 export * from "./vigencia";
 export * from "./calendario";
 export * from "./datos-personales";
@@ -67,3 +73,4 @@ export * from "./acceso";
 export * from "./contexto-comercial";
 export * from "./sugerencia-seccion";
 export * from "./qa-aislado";
+export * from "./aprobaciones/resumen-humano";

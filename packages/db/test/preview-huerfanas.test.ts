@@ -1,0 +1,72 @@
+// Reglas del destrabe de la rama Neon de preview (workflow `preview`): solo ramas preview/pr-N y
+// solo registros fallidos cuya migración ya no existe en el repo.
+import { describe, expect, it } from "vitest";
+
+import { fallidasHuerfanas, RAMA_PREVIEW, renombradas } from "../scripts/preview-huerfanas-reglas";
+
+const fila = (migration_name: string, terminada: boolean, revertida = false) => ({
+  id: migration_name,
+  migration_name,
+  finished_at: terminada ? new Date() : null,
+  rolled_back_at: revertida ? new Date() : null,
+});
+
+describe("destrabe de la rama Neon de preview", () => {
+  it("solo acepta ramas preview/pr-N", () => {
+    expect(RAMA_PREVIEW.test("preview/pr-469")).toBe(true);
+    for (const r of ["main", "dev", "preview/pr-", "preview/pr-1/x", "x/preview/pr-1", ""]) {
+      expect(RAMA_PREVIEW.test(r), r).toBe(false);
+    }
+  });
+
+  it("marca solo las fallidas que ya no están en el repo", () => {
+    const enRepo = new Set(["20261119100000_core_grupos_usuarios", "20261119120000_otra"]);
+    const registros = [
+      fila("20261119100000_core_grupos_usuarios", true),
+      fila("20261119110000_core_grupos_usuarios", false),
+      fila("20261119120000_otra", false),
+      fila("20261101000000_vieja_revertida", false, true),
+      fila("20261101000000_vieja_aplicada", true),
+    ];
+    expect(fallidasHuerfanas(registros, enRepo).map((r) => r.migration_name)).toEqual([
+      "20261119110000_core_grupos_usuarios",
+    ]);
+  });
+
+  it("renombra el registro aplicado cuyo SQL idéntico cambió de nombre en el repo", () => {
+    const repo = new Map([
+      ["20261119100000_core_empresa_actecos", "a"],
+      ["20261122100000_core_grupos_usuarios", "g"],
+    ]);
+    const con = (nombre: string, terminada: boolean, checksum: string) => ({
+      ...fila(nombre, terminada),
+      checksum,
+    });
+    const registros = [
+      con("20261119100000_core_empresa_actecos", true, "a"),
+      con("20261119100000_core_grupos_usuarios", true, "g"),
+      con("20261122100000_core_grupos_usuarios", false, "g"),
+    ];
+    expect(renombradas(registros, repo)).toEqual([
+      {
+        id: "20261119100000_core_grupos_usuarios",
+        desde: "20261119100000_core_grupos_usuarios",
+        hacia: "20261122100000_core_grupos_usuarios",
+      },
+    ]);
+    // Si la nueva ya terminó, o el checksum no calza o es ambiguo, no se renombra nada.
+    expect(
+      renombradas([...registros, con("20261122100000_core_grupos_usuarios", true, "g")], repo),
+    ).toEqual([]);
+    expect(renombradas([con("20261119100000_vieja", true, "x")], repo)).toEqual([]);
+    const ambiguo = new Map([...repo, ["20261123000000_copia", "g"]]);
+    expect(renombradas(registros, ambiguo)).toEqual([]);
+    // Ambiguo aunque la otra migración con el mismo SQL ya esté terminada.
+    const conTerminada = new Map([["20261101000000_igual", "g"], ...repo]);
+    const yaAplicada = [...registros, con("20261101000000_igual", true, "g")];
+    expect(renombradas(yaAplicada, conTerminada)).toEqual([]);
+    // Dos registros viejos hacia el mismo destino: no se renombra ninguno.
+    const dos = [...registros, con("20261118000000_core_grupos_usuarios", true, "g")];
+    expect(renombradas(dos, repo)).toEqual([]);
+  });
+});

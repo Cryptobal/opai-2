@@ -8,6 +8,12 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "core.cuentas_referencias.otorgar": {
+    encargo: "CAR-138",
+    desde: "2026-11-10",
+    motivo:
+      "Registrar el consentimiento de un cliente para ser referencia: su pantalla (ficha de la cuenta) espera diseño aprobado. Mientras tanto nadie puede otorgar, así que ningún cliente aparece como referencia (opt-in).",
+  },
   "finanzas.apertura.importar": {
     encargo: "CAR-168",
     desde: "2026-11-04",

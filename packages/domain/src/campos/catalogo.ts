@@ -4,10 +4,14 @@ import { CAMPOS_EMPRESA } from "./catalogo-empresa";
 import { CAMPOS_INSTALACION } from "./catalogo-lugares";
 import { CAMPOS_COTIZACION, CAMPOS_NEGOCIO } from "./catalogo-negocio";
 import { CAMPOS_PERSONA } from "./catalogo-personas";
+import { CAMPOS_REFERENCIA } from "./catalogo-referencias";
 import type { CampoDef, ColeccionDef, FinalidadCampo } from "./tipos";
 
-/** Sube cuando cambia el contrato de forma incompatible. Lo congelado al enviar guarda esta versión. */
-export const VERSION_CATALOGO_CAMPOS = 1;
+/**
+ * Sube con cada campo nuevo o cambio de clave (los alias antiguos se mantienen). Lo congelado al enviar
+ * guarda esta versión. v2 (CAR-138 PR 7): colección `referencias`.
+ */
+export const VERSION_CATALOGO_CAMPOS = 2;
 
 /** El catálogo único. Documentos, contratos, CPQ y propuestas consumen este contrato; no hay otro local. */
 export const CATALOGO_CAMPOS: readonly CampoDef[] = [
@@ -18,6 +22,7 @@ export const CATALOGO_CAMPOS: readonly CampoDef[] = [
   ...CAMPOS_INSTALACION,
   ...CAMPOS_NEGOCIO,
   ...CAMPOS_COTIZACION,
+  ...CAMPOS_REFERENCIA,
 ];
 
 export const COLECCIONES_CAMPO: readonly ColeccionDef[] = [
@@ -25,6 +30,11 @@ export const COLECCIONES_CAMPO: readonly ColeccionDef[] = [
     clave: "instalaciones",
     entidad: "instalacion",
     descripcion: "Instalaciones de la cuenta incluidas en el documento",
+  },
+  {
+    clave: "referencias",
+    entidad: "referencia",
+    descripcion: "Clientes activos que consintieron ser referencia (nunca la cuenta destinataria)",
   },
 ];
 

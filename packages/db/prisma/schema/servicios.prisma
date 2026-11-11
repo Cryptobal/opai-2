@@ -38,6 +38,10 @@ model PerfilEmpresa {
   logoOscuroId        String?  @map("logo_oscuro_id") @db.Uuid
   isotipoId           String?  @map("isotipo_id") @db.Uuid
   faviconId           String?  @map("favicon_id") @db.Uuid
+  /// CAR-243 · Actividades económicas del SII (ACTECO, CIIU4.CL): varios códigos y uno principal, que va en cada DTE.
+  /// CHECK `perfil_empresa_actecos_chk`: 1..999999, hasta 20, principal si y solo si hay códigos, y dentro de la lista.
+  actecos             Int[]    @default([])
+  actecoPrincipal     Int?     @map("acteco_principal")
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -196,6 +200,25 @@ model NotificacionRegla {
 
   @@unique([tenantId, evento, canal])
   @@map("notificacion_reglas")
+  @@schema("core")
+}
+
+model NovedadLectura {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  usuarioId             String    @map("usuario_id") @db.Uuid
+  /// Identificador estable de la entrada en `packages/domain/src/novedades/entradas/`.
+  novedadId             String    @map("novedad_id")
+  leidaEn               DateTime? @map("leida_en") @db.Timestamptz(6)
+  destacadaDescartadaEn DateTime? @map("destacada_descartada_en") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, usuarioId, novedadId])
+  @@index([tenantId, usuarioId, leidaEn])
+  @@map("novedades_lectura")
   @@schema("core")
 }
 

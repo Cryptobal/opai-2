@@ -3,6 +3,12 @@ import { documentosConfirmarSubida } from "./confirmar";
 import { documentosGet, documentosList } from "./consulta";
 import { documentosExplorar } from "./explorar";
 import { documentosMatriz } from "./matriz";
+import { documentoPlantillasGet, documentoPlantillasList } from "./plantillas";
+import { documentoPlantillasCreate, documentoPlantillasUpdate } from "./plantillas-escritura";
+import {
+  documentoPlantillasGuardarBorrador,
+  documentoPlantillasPublicar,
+} from "./plantillas-editor";
 import { documentosPedirRenovacion } from "./renovacion";
 import { documentosArchive, documentosUpdate, documentosUrlDescarga } from "./gestion";
 import { documentosIniciarSubida } from "./subida";
@@ -30,4 +36,10 @@ export const capacidadesDocumentos: readonly Capacidad[] = [
   documentosVencimientos,
   documentosMatriz,
   documentosPedirRenovacion,
+  documentoPlantillasList,
+  documentoPlantillasGet,
+  documentoPlantillasCreate,
+  documentoPlantillasUpdate,
+  documentoPlantillasGuardarBorrador,
+  documentoPlantillasPublicar,
 ];

@@ -1,15 +1,15 @@
 import {
+  abrirCertificadoPfx,
   adaptadorSimpleApi,
   adaptadorSiiSimulado,
   type AdaptadorSii,
-  validarCertificadoPfx,
   type CredencialesSimpleApi,
 } from "@opai/integrations";
 
 import { leerSecreto } from "../integraciones/secretos";
 import type { Contexto } from "../types";
 
-async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleApi | null> {
+export async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleApi | null> {
   const integ = await ctx.db.integracion.findUnique({
     where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: "dte_emision" } },
   });
@@ -22,33 +22,46 @@ async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleA
     leerSecreto(ctx, integ.id, "certificado_clave"),
   ]);
   if (!apiKey || !certificadoPfx || !certificadoClave) return null;
-  // RUT del titular del certificado (lo exige SimpleAPI en `Certificado.Rut`): sale del propio .pfx, sin puntos.
-  let certificadoRut: string | null;
+  // RUT del titular del certificado (`Certificado.Rut`): sale del propio .pfx como `extractRut` de 1.0, ya sin puntos
+  // y con el DV en mayúscula; nunca el de la empresa. La clave va recortada si así abre el .pfx (CAR-240).
+  let certificado: ReturnType<typeof abrirCertificadoPfx>;
   try {
-    certificadoRut = validarCertificadoPfx(certificadoPfx, certificadoClave).meta.rutTitular;
+    certificado = abrirCertificadoPfx(certificadoPfx, certificadoClave);
   } catch {
     return null;
   }
-  if (!certificadoRut) return null;
+  if (!certificado.meta.rutTitular) return null;
+  return {
+    apiKey,
+    certificadoPfxBase64: certificadoPfx,
+    certificadoClave: certificado.clave,
+    certificadoRut: certificado.meta.rutTitular,
+    rutEmpresa: cfg.rutEmisor.replace(/\./g, "").toUpperCase(),
+    resolucionNumero: cfg.resolucionSiiNumero,
+    resolucionFecha: cfg.resolucionSiiFecha.toISOString().slice(0, 10),
+    ...(await datosEmisorSimpleApi(ctx)),
+  };
+}
+
+/**
+ * Datos del emisor para el encabezado del DTE: los del perfil de la empresa (Configuración › Empresa). El ACTECO es el
+ * principal de la empresa (CAR-243), no el de la configuración DTE. Solo van los que existen; nunca se inventan.
+ */
+export async function datosEmisorSimpleApi(ctx: Contexto): Promise<
+  Partial<Pick<CredencialesSimpleApi, "razonSocialEmisor" | "giroEmisor" | "actecoEmisor" | "direccionEmisor" | "comunaEmisor" | "ciudadEmisor">>
+> {
   const [tenant, perfil] = await Promise.all([
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
     ctx.db.perfilEmpresa.findUnique({
       where: { tenantId: ctx.tenantId },
-      select: { razonSocial: true, giro: true, calle: true, comuna: true, ciudad: true },
+      select: { razonSocial: true, giro: true, calle: true, comuna: true, ciudad: true, actecoPrincipal: true },
     }),
   ]);
   const razonSocial = perfil?.razonSocial?.trim() || tenant?.nombre;
   return {
-    apiKey,
-    certificadoPfxBase64: certificadoPfx,
-    certificadoClave,
-    certificadoRut: certificadoRut.replace(/\./g, "").toUpperCase(),
-    rutEmpresa: cfg.rutEmisor.replace(/\./g, "").toUpperCase(),
-    resolucionNumero: cfg.resolucionSiiNumero,
-    resolucionFecha: cfg.resolucionSiiFecha.toISOString().slice(0, 10),
     ...(razonSocial ? { razonSocialEmisor: razonSocial } : {}),
     ...(perfil?.giro?.trim() ? { giroEmisor: perfil.giro.trim() } : {}),
-    ...(cfg.acteco ? { actecoEmisor: cfg.acteco } : {}),
+    ...(perfil?.actecoPrincipal ? { actecoEmisor: perfil.actecoPrincipal } : {}),
     ...(perfil?.calle?.trim() ? { direccionEmisor: perfil.calle.trim() } : {}),
     ...(perfil?.comuna?.trim() ? { comunaEmisor: perfil.comuna.trim() } : {}),
     ...(perfil?.ciudad?.trim() ? { ciudadEmisor: perfil.ciudad.trim() } : {}),

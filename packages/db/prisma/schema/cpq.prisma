@@ -484,9 +484,63 @@ model CpqPropuestaTecnica {
   cotizacion CpqCotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
   version    CpqVersion    @relation(fields: [versionId], references: [id], onDelete: Cascade)
   envios     CpqPropuestaEnvio[]
+  capitulos  CpqPropuestaCapitulo[]
 
   @@index([tenantId, cotizacionId])
   @@map("propuestas_tecnicas")
+  @@schema("cpq")
+}
+
+/// Texto de una sección del capítulo por instalación de una propuesta técnica (CAR-138 PR 6). Lo derivado del
+/// CPQ (puestos, dotación, dirección) no se guarda aquí: se calcula al generar el PDF.
+model CpqPropuestaCapitulo {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  propuestaId    String   @map("propuesta_id") @db.Uuid
+  /// Instalación del cliente (`core.instalaciones`); debe ser una sección de la versión de la propuesta.
+  instalacionId  String   @map("instalacion_id") @db.Uuid
+  /// Una de las secciones narrativas del capítulo (CHECK en migración).
+  seccionClave   String   @map("seccion_clave")
+  contenido      String
+  /// "manual" | "ia_aceptada": lo sugerido por IA solo entra si una persona lo acepta.
+  origen         String   @default("manual")
+  actualizadoPorId String @map("actualizado_por_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  propuesta CpqPropuestaTecnica @relation(fields: [propuestaId], references: [id], onDelete: Cascade)
+
+  @@unique([propuestaId, instalacionId, seccionClave])
+  @@index([tenantId, propuestaId])
+  @@map("propuesta_capitulos")
+  @@schema("cpq")
+}
+
+/// Plantilla HTML de propuesta importada por la empresa (CAR-138 PR 9): HTML ya saneado, con marcadores del catálogo
+/// de campos, versionado por nombre. Inmutable salvo `estado`. Hoy NO la consume ningún renderer: el PDF sigue siendo `pdf-lib`.
+model CpqPropuestaHtml {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  nombre          String
+  version         Int
+  /// "activa" | "archivada": una sola activa por nombre (índice parcial en la migración).
+  estado          String   @default("activa")
+  htmlSaneado     String   @map("html_saneado")
+  /// SHA-256 (hex) del HTML saneado.
+  hashSha256      String   @map("hash_sha256")
+  /// Versión del catálogo de campos contra la que se validaron los marcadores.
+  catalogoVersion Int      @map("catalogo_version")
+  tokensUsados    String[] @map("tokens_usados")
+  colecciones     String[]
+  /// Avisos del saneado (atributos o estilos que se quitaron).
+  advertencias    Json     @default("[]")
+  creadoPorId     String   @map("creado_por_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, nombre, version])
+  @@index([tenantId, nombre, estado])
+  @@map("propuesta_html")
   @@schema("cpq")
 }
 

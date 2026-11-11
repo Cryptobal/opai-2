@@ -44,3 +44,9 @@ export function renglones(texto: string, max: number): string[] {
   if (actual) out.push(actual);
   return out;
 }
+
+/** «76123456-7» → «76.123.456-7»; si no tiene la forma de un RUT lo devuelve tal cual. */
+export function formatoRut(rut: string): string {
+  const m = /^(\d{1,8})-([0-9Kk])$/.exec(rut.replace(/\./g, "").trim());
+  return m ? `${(m[1] as string).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}-${(m[2] as string).toUpperCase()}` : rut;
+}

@@ -41,6 +41,10 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },
+  // Documentos · plantillas laborales (CAR-127): CHECK de clase y de nivel de firma (N1/N2).
+  "core.documento_plantillas": {
+    valores: () => ({ clase: "contrato_trabajo", nivel_firma: "N2" }),
+  },
   // Exactamente una identidad de agente: key o agente interno (CHECK *_identidad_agente).
   "core.aprobaciones": {
     dependencias: ["core.api_keys"],
@@ -217,6 +221,17 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
+  "core.novedades_lectura": {
+    dependencias: ["core.memberships"],
+    valores: (ctx) => ({ usuario_id: ctx.usuario, novedad_id: "dos-empresas-rls" }),
+  },
+  // CAR-251: (tenant_id, grupo_id) → grupos y (tenant_id, user_id) → memberships.
+  "core.grupo_usuarios_miembros": {
+    dependencias: ["core.memberships", "core.grupos_usuarios"],
+    // Columnas de FK compuesta: el catálogo no las ve como referencia; no se regeneran en el control.
+    fijas: ["grupo_id", "user_id"],
+    valores: (ctx) => ({ user_id: ctx.usuario, grupo_id: id(ctx, "core.grupos_usuarios") }),
+  },
   // Nómina (Brief 25): los CHECK de unidad por tipo y de tipo/estado rechazan el texto genérico.
   "nomina.novedades": { valores: () => ({ tipo: "ausencia", cantidad: 1, monto_clp: null }) },
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
@@ -228,6 +243,13 @@ export const AJUSTES: Record<string, Ajuste> = {
   "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
   "finanzas.flujo_ajustes": { valores: () => ({ desde: "2026-01-05" }) },
   "finanzas.flujo_avisos_emitidos": { valores: () => ({ semana: "2026-01-05", saldo_proyectado: 0 }) },
+  // CAR-138 PR 6 · capítulo por instalación: CHECK de sección y origen.
+  "cpq.propuesta_capitulos": { fijas: ["seccion_clave", "origen"], valores: () => ({ seccion_clave: "alcance", origen: "manual", contenido: "x" }) },
+  // CAR-138 PR 9 · plantilla HTML importada: CHECK de estado, hash y largo; el nombre/versión no se repiten por empresa.
+  "cpq.propuesta_html": {
+    fijas: ["estado", "hash_sha256", "html_saneado", "catalogo_version"],
+    valores: () => ({ estado: "archivada", hash_sha256: "a".repeat(64), html_saneado: "<p>x</p>", catalogo_version: 1, version: 1 }),
+  },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
@@ -317,6 +339,32 @@ export const AJUSTES: Record<string, Ajuste> = {
     }),
     valores: () => ({}),
   },
+  // Referencias de clientes (CAR-138 PR 7): CHECK de estado, evidencia, vigencia y largos.
+  "core.cuentas_referencias": {
+    dependencias: ["core.cuentas", "core.contactos"],
+    // `seq` es identity GENERATED ALWAYS: la base la asigna y rechaza un valor explícito.
+    omitir: ["seq"],
+    valores: (ctx) => ({
+      cuenta_id: id(ctx, "core.cuentas"), contacto_id: id(ctx, "core.contactos"), estado: "otorgado",
+      otorgado_en: "2026-11-01", vigente_hasta: null, evidencia: "correo", evidencia_detalle: "ficticio",
+      motivo: null, descripcion: null, cita: null, mostrar_nombre: false,
+    }),
+  },
+  // Caché SII (CAR-156): CHECK de estado, formato de RUT, datos según estado y vencimiento posterior.
+  "core.sii_contribuyentes": {
+    fijas: ["rut"],
+    valores: () => ({
+      rut: "11111111-1", estado: "ok", datos: JSON.stringify({ razonSocial: "FICTICIA SPA" }),
+      consultado_en: "2026-11-01T00:00:00Z", vence_en: "2026-12-01T00:00:00Z",
+    }),
+  },
+  // Historial de correos (CAR-233): CHECK de sentido, origen y asociación; token «t» + 32 hex, único
+  // global (se deriva del id de la empresa para que A y B no choquen).
+  "core.correos_cliente": {
+    dependencias: ["core.cuentas"],
+    valores: (ctx) => ({ sentido: "recibido", origen: "buzon", asociacion: "dominio", cuenta_id: id(ctx, "core.cuentas"), contacto_id: null, negocio_id: null }),
+  },
+  "core.buzones_correo": { fijas: ["token"], valores: (ctx) => ({ token: `t${ctx.tenant.replace(/-/g, "")}` }) },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },
   "core.actividad_vinculos": {

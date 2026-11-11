@@ -7,7 +7,8 @@ export const VERBOS: Record<string, string> = {
   por_agente: "Por agente", por_recurso: "Por recurso", verificar: "Verificar", hoy: "De hoy", fijar_tipo: "Fijar tipo de jornada", resumen_periodo: "Resumen del período", recalcular: "Recalcular", cerrar: "Cerrar", proponer: "Proponer", responder: "Responder", ver_enlace: "Ver por enlace", responder_enlace: "Responder por enlace", estado: "Estado", iniciar_vida: "Iniciar prueba de vida", consentir: "Dar consentimiento", habilitar: "Habilitar", textos: "Textos vigentes",
   reintentar: "Reintentar", cancelar: "Cancelar", configurar: "Configurar", set_secreto: "Guardar clave",
   guardar_certificado_dte: "Guardar certificado", probar: "Probar", autocompletar: "Autocompletar",
-  detalle: "Detalle", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar",
+  acteco_get: "Ver actividad económica (ACTECO)", acteco_set: "Fijar actividad económica (ACTECO)", acteco_buscar: "Buscar actividad económica del SII",
+  detalle: "Detalle", geocodificar: "Ubicar en el mapa", mapa: "Mapa", archive: "Archivar", otorgar: "Otorgar",
   consultar_sii: "Consultar al SII", facturable: "Ver si está lista para facturar", aplicar_sii: "Aplicar datos del SII",
   set_representantes: "Definir representantes", set_activo: "Activar o desactivar", bloquear: "Bloquear",
   desbloquear: "Desbloquear", vincular_usuario: "Vincular usuario", no_recontratar_ver: "Ver no recontratar",
@@ -40,7 +41,8 @@ export const VERBOS: Record<string, string> = {
   incidente_avanzar: "Avanzar incidente", incidente_notificar: "Notificar incidente",
   incidentes_listar: "Listar incidentes", retencion_politica: "Política de retención",
   titular_anonimizar: "Anonimizar titular", eventos: "Eventos", preview: "Vista previa",
-  enviar_prueba: "Enviar prueba", marcar_leida: "Marcar como leída", marcar_todas: "Marcar todas",
+  enviar_prueba: "Enviar prueba", marcar_leida: "Marcar como leída", marcar_leidas: "Marcar como leídas", marcar_todas: "Marcar todas",
+  descartar_destacada: "Descartar destacada",
   set_autonomia: "Definir autonomía", set_role: "Cambiar rol", borrar: "Borrar", preparar: "Preparar",
   embudo: "Embudo", mover: "Mover", ganar: "Marcar como ganado", perder: "Marcar como perdido",
   reabrir: "Reabrir", restaurar: "Restaurar", correos: "Respuestas del cliente", vincular_instalacion: "Vincular instalación", desvincular_instalacion: "Desvincular instalación",
@@ -55,19 +57,23 @@ export const VERBOS: Record<string, string> = {
   aplicar_cuotas: "Aplicar cuotas", reglas_listar: "Listar reglas", fijar_regla: "Fijar regla",
   generar_calendario: "Generar calendario", leer: "Leer", deshacer: "Deshacer", registrar: "Registrar",
   sugerir: "Sugerir", sugerir_seccion: "Sugerir sección con IA", agregar: "Agregar", candidatos: "Candidatos", dar_acceso: "Dar acceso al portal", inicializar: "Inicializar",
-  importar: "Importar", revertir: "Revertir", sincronizar: "Sincronizar con el banco", recibir_web4leads: "Recibir movimientos del banco (Web4Leads)", asignar_centro: "Asignar centro de costo", libro_resumen: "Resumen del libro",
-  vista_previa: "Vista previa", crear_borrador: "Crear borrador", emitir: "Emitir", emitir_lote: "Emitir en lote", tablero: "Tablero del mes", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
-  emitir_nota_credito: "Emitir nota de crédito", emitir_nota_debito: "Emitir nota de débito", destinatarios_sugeridos: "Sugerir destinatarios del documento", guardar_destinatarios: "Guardar destinatarios del documento", proyeccion_flujo: "Proyección de flujo", postergar_iva: "Postergar IVA", fijar_fecha_esperada: "Fijar fecha esperada de cobro",
+  importar: "Importar", revertir: "Revertir", sincronizar: "Sincronizar con el banco", sincronizar_rcv: "Sincronizar con el RCV del SII", recibir_web4leads: "Recibir movimientos del banco (Web4Leads)", asignar_centro: "Asignar centro de costo", libro_resumen: "Resumen del libro",
+  vista_previa: "Vista previa", crear_borrador: "Crear borrador", guardar_borrador: "Guardar borrador", actualizar_borrador: "Editar borrador", descartar_borrador: "Descartar borrador", emitir: "Emitir", emitir_lote: "Emitir en lote", tablero: "Tablero del mes", enviar_sii: "Enviar al SII", enviar_cliente: "Enviar al cliente", envios: "Envíos al cliente", deudor: "Ficha del deudor", registrar_gestion: "Registrar gestión",
+  emitir_nota_credito: "Emitir nota de crédito", emitir_nota_debito: "Emitir nota de débito", crear_borrador_nota_debito: "Crear borrador de nota de débito", destinatarios_sugeridos: "Sugerir destinatarios del documento", guardar_destinatarios: "Guardar destinatarios del documento", proyeccion_flujo: "Proyección de flujo", postergar_iva: "Postergar IVA", fijar_fecha_esperada: "Fijar fecha esperada de cobro",
   cesion_simular: "Simular cesión", cesion_ceder: "Ceder", cargar_caf: "Cargar folios (CAF)",
   crear_base: "Crear plan base", iniciar: "Iniciar", controlar: "Pausar, reanudar o cancelar",
   registrar_respuesta: "Registrar respuesta del cliente", registrar_paso: "Registrar paso",
   enviar_paso: "Enviar paso", recibir_correo: "Recibir correo del cliente",
+  // Decisión de seguimiento al enviar la cotización (CAR-160).
+  decidir_envio: "Decidir seguimiento al enviar",
   agregar_esquema: "Agregar esquema de cobertura", cargar_predefinidos: "Cargar costos predefinidos", descargar: "Descargar", cumplir: "Cumplir", guardar: "Guardar", saldo_sugerido: "Saldo sugerido", manual: "Manual",
   comentar: "Comentar", reasignar: "Reasignar", simular: "Simular", clonar: "Clonar", calcular: "Calcular", consultar: "Consultar",
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
   preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
+  capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
+  prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
   resultados: "Resultado por mes", uf_utm: "UF y UTM", trasladar: "Trasladar",
   // Cobro por módulo (CAR-188).
@@ -77,4 +83,10 @@ export const VERBOS: Record<string, string> = {
   precio_set: "Fijar precio de lista",
   // Prueba gratis por empresa (CAR-222).
   prueba_gratis_extender: "Extender prueba gratis", pruebas_gratis_list: "Listar pruebas gratis", pruebas: "Ver pruebas gratis",
+  // Grupos o equipos de usuarios (CAR-251).
+  agregar_miembros: "Agregar miembros", quitar_miembro: "Quitar miembro",
+  // Historial de correos del cliente (CAR-233).
+  sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
+  // Importación de datos desde planillas (CAR-279).
+  plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
 };

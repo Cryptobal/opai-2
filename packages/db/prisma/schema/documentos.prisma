@@ -100,3 +100,57 @@ model DocumentoVinculo {
   @@map("documento_vinculos")
   @@schema("core")
 }
+
+/// Plantilla laboral de Documentos (CAR-127, pantalla 05). Texto con variables `{grupo.clave}`
+/// que se renderiza a PDF. Las salidas comerciales viven en CPQ y no entran aquí (decisión de
+/// Carlos, 9-nov-2026). El contenido vive en las versiones; `versionVigente` apunta a la que se usa.
+/// El `tenant_id` no lleva @relation a Tenant: la FK va en el SQL (como `core_firma`).
+model DocumentoPlantilla {
+  id                    String    @id @default(uuid(7)) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  nombre                String
+  /// Clase de firma (CAR-82): "contrato_trabajo" | "anexo_contrato" | "recepcion_laboral" | "carta_trabajador".
+  clase                 String
+  /// Firma por defecto: "N1" | "N2" (N3·FEA queda deshabilitado, CAR-94). Debe ser válida para la clase.
+  nivelFirma            String    @map("nivel_firma")
+  /// "creada" | "word" | "pdf" (las dos últimas, con el encargo de importación).
+  origen                String    @default("creada")
+  versionVigente        Int       @default(1) @map("version_vigente")
+  activa                Boolean   @default(true)
+  /// Quién firma: "empleador" | "trabajador" | "ambos" (primero el trabajador). Editor 06.
+  firmantes             String    @default("ambos")
+  /// Borrador del texto aún sin publicar (editor 06); publicar crea la versión siguiente y lo limpia.
+  borradorContenido     String?   @map("borrador_contenido")
+  borradorActualizadoEn DateTime? @map("borrador_actualizado_en") @db.Timestamptz(6)
+  borradorPorNombre     String?   @map("borrador_por_nombre")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  versiones DocumentoPlantillaVersion[]
+
+  @@unique([tenantId, nombre])
+  @@index([tenantId, clase])
+  @@map("documento_plantillas")
+  @@schema("core")
+}
+
+/// Versión de una plantilla: inmutable una vez creada; editar crea la siguiente (PR del editor).
+model DocumentoPlantillaVersion {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  plantillaId     String   @map("plantilla_id") @db.Uuid
+  numero          Int
+  /// Texto con variables `{persona.rut}`; solo las del catálogo de `@opai/domain`.
+  contenido       String
+  /// Quién la creó: usuario responsable (o null si fue el sistema) y su nombre en ese momento.
+  creadoPorId     String?  @map("creado_por_id") @db.Uuid
+  creadoPorNombre String?  @map("creado_por_nombre")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  plantilla DocumentoPlantilla @relation(fields: [plantillaId], references: [id], onDelete: Restrict)
+
+  @@unique([plantillaId, numero])
+  @@index([tenantId, plantillaId])
+  @@map("documento_plantilla_versiones")
+  @@schema("core")
+}

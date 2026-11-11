@@ -4,9 +4,10 @@ import { CODIGOS_REFERENCIA_SII, validarMontosVenta, validarReferenciaSii, venci
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { aFecha, escribirConEvento, hoy, textoOpcional } from "../core/maestros/comun";
+import { aFecha, escribirConEvento, textoOpcional } from "../core/maestros/comun";
 import { reglaDeNegocio } from "../errores";
 import { PLAZO_PAGO_DEFECTO } from "./comun";
+import { fechaEmisionBorrador, validarMontosDeLineas } from "./ventas-borrador-validar";
 import { vistaDeDocumento } from "./ventas-consulta";
 import {
   PERMISO_VENTAS,
@@ -22,7 +23,7 @@ const tipoBorradorSchema = z.union([z.literal(33), z.literal(34)]);
 
 const diaIso = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha AAAA-MM-DD.");
 
-const referenciaBorradorSchema = z.object({
+export const referenciaBorradorSchema = z.object({
   tipoDteRef: z
     .number()
     .int()
@@ -49,6 +50,9 @@ export const ventasCrearBorrador = defineCapability({
     lineas: z.array(lineaInputSchema).min(1).max(60),
     referencias: z.array(referenciaBorradorSchema).max(10).optional(),
     plazoPagoDias: z.number().int().min(0).max(365).default(PLAZO_PAGO_DEFECTO),
+    fechaEmision: diaIso
+      .optional()
+      .describe("Fecha de emisión AAAA-MM-DD, hoy o anterior. Si falta, se usa la de hoy; se conserva al emitir."),
     glosa: textoOpcional(300),
   }),
   output: ventaSchema,
@@ -61,7 +65,8 @@ export const ventasCrearBorrador = defineCapability({
     const montos = montosDesdeLineas(input.tipoDte, input.lineas);
     const error = validarMontosVenta(input.tipoDte, montos);
     if (error) throw reglaDeNegocio(error);
-    const emision = hoy();
+    const emision = fechaEmisionBorrador(input.fechaEmision);
+    validarMontosDeLineas(input.lineas);
     for (const r of input.referencias ?? []) {
       const errRef = validarReferenciaSii({ codigo: r.tipoDteRef, folio: r.folioRef, fecha: r.fechaRef }, emision);
       if (errRef) throw reglaDeNegocio(errRef);

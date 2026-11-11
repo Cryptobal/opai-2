@@ -9,8 +9,14 @@ import { BandejaCorta } from "./bandeja-corta";
 import { useBandeja } from "./use-bandeja";
 
 /** Una sola Bandeja; el servidor aplica destinatario, permisos efectivos y tenant. */
-export function Bandeja({ corta = false }: { corta?: boolean }) {
-  const { avisos, aprobaciones, decisiones, error, noLeidas, cargandoMas, cargar, cargarMas, marcar } =
+export function Bandeja({
+  corta = false,
+  onNavegar,
+}: {
+  corta?: boolean;
+  onNavegar?: () => void;
+}) {
+  const { avisos, aprobaciones, tareasSeguimiento, decisiones, error, noLeidas, cargandoMas, cargar, cargarMas, marcar } =
     useBandeja();
   if (corta)
     return (
@@ -21,11 +27,12 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
         error={error}
         onMarcar={() => void marcar()}
         onLeida={() => void cargar()}
+        {...(onNavegar ? { onNavegar } : {})}
       />
     );
   return (
     <section id="bandeja" className="scroll-mt-20">
-      <SeccionTarjeta titulo={`Bandeja${avisos ? ` · ${noLeidas + (aprobaciones ?? 0)}` : ""}`}>
+      <SeccionTarjeta titulo={`Bandeja${avisos ? ` · ${noLeidas + (aprobaciones ?? 0) + tareasSeguimiento}` : ""}`}>
         {error ? <Alerta tono="danger" titulo="No pudimos actualizar la Bandeja" /> : null}
         {avisos === null ? (
           <Skeleton className="h-20" />
@@ -41,7 +48,7 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
               </Button>
             ) : null}
             {!avisos.length && !aprobaciones && !error ? (
-              <p className="t-body text-fg-muted">Todo al día. No tienes nada pendiente.</p>
+              <p className="t-body text-fg-muted">Todo al día. No tienes avisos ni aprobaciones pendientes.</p>
             ) : null}
             {avisos.length ? (
               <Button variant="secondary" onClick={() => void marcar()}>

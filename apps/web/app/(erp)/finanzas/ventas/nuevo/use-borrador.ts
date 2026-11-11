@@ -17,6 +17,7 @@ export function useBorrador(p: {
     cuentaId: string | null;
     tipoDte: "33" | "34";
     plazo: number;
+    fechaEmision: string;
     lineas: LineaForm[];
     glosa: string;
     referencias: RefForm[];

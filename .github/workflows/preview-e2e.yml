@@ -1,0 +1,151 @@
+# Pruebas visuales automáticas contra la vista previa de cada PR (CAR-285, decisión de Carlos del 11-nov-2026).
+# Corre los e2e de Playwright marcados `@preview` contra la URL de la vista previa de Vercel del PR, a 375,
+# 1024 y 1280 px, y sube las capturas como artefacto. Reemplaza el primer vistazo visual de Carlos
+# (`OPERACION-agentes.md` A2.10): la sesión que lleva el PR revisa las capturas antes de integrar.
+#
+# Entra siempre como el usuario de la empresa ficticia `qa-e2e`; nunca con Gard ni con datos reales.
+# Secretos (solo existen en GitHub Actions y nunca se imprimen): E2E_EMAIL, E2E_PASSWORD, E2E_TOTP_SECRET,
+# VERCEL_AUTOMATION_BYPASS_SECRET y, para ubicar la vista previa, VERCEL_TOKEN, VERCEL_ORG_ID y VERCEL_PROJECT_ID.
+name: preview-e2e
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-e2e-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview-e2e:
+    name: preview-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      checks: read
+    env:
+      SHA: ${{ github.event.pull_request.head.sha }}
+      ES_FORK: ${{ github.event.pull_request.head.repo.fork }}
+      VERCEL_CLI: vercel@65.3.1
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: ¿Hay secretos?
+        id: listo
+        env:
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          E2E_TOTP_SECRET: ${{ secrets.E2E_TOTP_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ "$ES_FORK" = "true" ]; then
+            echo "PR de fork: sin acceso a secretos, se omiten las pruebas de la vista previa."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          faltan=""
+          for n in E2E_EMAIL E2E_PASSWORD E2E_TOTP_SECRET VERCEL_AUTOMATION_BYPASS_SECRET VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!n}" ]; then faltan="$faltan $n"; fi
+          done
+          if [ -n "$faltan" ]; then
+            # Falla cerrado: sin las pruebas visuales el PR no se integra (solo se nombran los secretos).
+            echo "::error::Faltan secretos para preview-e2e:$faltan"
+            exit 1
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.listo.outputs.ok == 'true'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: pnpm/action-setup@v4
+        if: steps.listo.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.listo.outputs.ok == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Esperar a que el workflow «preview» deje lista la base de la vista previa
+        if: steps.listo.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # `preview` migra la rama Neon del PR y redespliega; hasta que termine, la vista previa puede estar
+          # sin las migraciones del PR. Se espera su check `rama-neon` sobre este commit (máximo 15 min).
+          for i in $(seq 1 90); do
+            estado=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs?check_name=rama-neon" \
+              --jq '[.check_runs[]] | if length == 0 then "sin" elif any(.status != "completed") then "corriendo" elif all(.conclusion == "success" or .conclusion == "skipped" or .conclusion == "neutral") then "listo" else "fallo" end' 2>/dev/null || echo "sin")
+            if [ "$estado" = "listo" ] || [ "$estado" = "fallo" ]; then break; fi
+            # Si a los 3 minutos no apareció, este PR no dispara `preview` (se sigue con la vista previa de Git).
+            if [ "$estado" = "sin" ] && [ "$i" -ge 18 ]; then break; fi
+            sleep 10
+          done
+          echo "Estado de rama-neon: $estado"
+          # Sin la base de la vista previa migrada, las pruebas correrían contra un esquema equivocado.
+          if [ "$estado" = "fallo" ]; then
+            echo "::error::El check rama-neon falló: la vista previa no tiene la base de este PR lista."
+            exit 1
+          fi
+          if [ "$estado" = "corriendo" ]; then
+            echo "::error::rama-neon no terminó en 15 minutos."
+            exit 1
+          fi
+      - name: Ubicar la vista previa de este commit y esperar a que responda
+        if: steps.listo.outputs.ok == 'true'
+        id: url
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          URL=""
+          for i in $(seq 1 60); do
+            # El primero de la lista es el despliegue más nuevo del commit (el redespliegue de `preview`).
+            URL=$(npx --yes "$VERCEL_CLI" ls -m githubCommitSha="$SHA" 2>&1 | grep -oE 'https://[A-Za-z0-9.-]+\.vercel\.app' | head -n1 || true)
+            if [ -n "$URL" ]; then
+              codigo=$(curl -s -o /dev/null -w '%{http_code}' -m 20 -H "x-vercel-protection-bypass: $BYPASS" "$URL/api/health" || echo 000)
+              if [ "$codigo" = "200" ]; then break; fi
+            fi
+            URL=""
+            sleep 15
+          done
+          if [ -z "$URL" ]; then
+            echo "::error::No hay una vista previa de Vercel lista para el commit $SHA."
+            exit 1
+          fi
+          # Debe ser una vista previa de Vercel: nunca test.opai.cl ni la producción de Gard.
+          case "$URL" in
+            https://*.vercel.app) ;;
+            *) echo "::error::La URL encontrada no es una vista previa de Vercel."; exit 1 ;;
+          esac
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Vista previa: $URL"
+      - run: pnpm install --frozen-lockfile
+        if: steps.listo.outputs.ok == 'true'
+      - name: Instalar Chromium de Playwright
+        if: steps.listo.outputs.ok == 'true'
+        run: pnpm --filter @opai/web exec playwright install --with-deps chromium
+      - name: Correr los e2e @preview a 375, 1024 y 1280 px
+        if: steps.listo.outputs.ok == 'true'
+        env:
+          BASE_URL: ${{ steps.url.outputs.url }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          E2E_TOTP_SECRET: ${{ secrets.E2E_TOTP_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          CI: "true"
+        # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
+        run: pnpm --filter @opai/web exec playwright test --grep @preview --workers=2 --reporter=list --output=test-results/playwright
+      - name: Subir las capturas
+        if: ${{ always() && steps.listo.outputs.ok == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-e2e-capturas
+          path: apps/web/test-results/capturas
+          if-no-files-found: warn
+          retention-days: 14

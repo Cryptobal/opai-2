@@ -4,10 +4,10 @@ export const RECURSOS: Record<string, string> = {
   modules: "Módulos", apikeys: "API keys", audit: "Auditoría", usage: "Uso", tenants: "Empresas",
   admins: "Administradores", consumos: "Consumos", bitacora: "Bitácora", auditoria: "Auditoría",
   trabajos: "Trabajos", eventos: "Eventos", integraciones: "Integraciones", geo: "Mapas", ia: "IA",
-  cuentas: "Cuentas", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
+  cuentas: "Cuentas", cuentas_referencias: "Referencias de clientes", contactos: "Contactos", instalaciones: "Instalaciones", puestos: "Puestos",
   patrones: "Patrones de turno", funciones: "Funciones", personas: "Personas", vinculos: "Vínculos",
   contexto: "Contexto comercial", campos: "Campos de documentos", cargos: "Cargos", conversaciones: "Conversaciones", estructuras: "Sueldos", buscar: "Búsqueda", actividades: "Actividades",
-  etiquetas: "Etiquetas", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos",
+  etiquetas: "Etiquetas", calendario: "Calendario", remuneraciones: "Remuneraciones", anexos: "Anexos", documento_plantillas: "Plantillas de documentos",
   actividad: "Actividad", resumen: "Resumen", inicio: "Inicio", permisos: "Permisos", roles: "Roles",
   excepciones: "Excepciones de permisos", supervisores: "Supervisores", documento_tipos: "Tipos de documento",
   documentos: "Documentos", firmas: "Firmas", credenciales_terreno: "PIN de terreno", dispositivos: "Dispositivos de terreno", hechos_terreno: "Hechos de terreno", biometria: "Reconocimiento facial", terreno: "Terreno", personas_terreno: "Personas de terreno", listas: "Listas de acceso", registros: "Registros de acceso", config: "Ajustes", ajustes: "Ajustes",
@@ -32,7 +32,13 @@ export const RECURSOS: Record<string, string> = {
   catalogo_categorias: "Categorías del catálogo", catalogo_items: "Ítems del catálogo", sueldos_referencia: "Sueldos de referencia", costos_categoria: "Costos por categoría", costos_predefinidos: "Costos predefinidos", esquemas_cobertura: "Esquemas de cobertura", portal_cotizaciones: "Cotizaciones del portal del cliente",
   marca_documento: "Marca de documentos", plantillas_documento: "Plantillas de documento",
   biblioteca_bloques: "Biblioteca de bloques", plantillas_propuesta: "Plantillas de propuesta",
-  propuestas_tecnica: "Propuestas técnicas", envios_propuesta: "Envíos de propuesta",
+  propuestas_tecnica: "Propuestas técnicas", propuestas_html: "Plantillas HTML de propuesta", envios_propuesta: "Envíos de propuesta",
   cobranza: "Cobranza", cierre: "Cierre de mes", hoy: "Hoy en Finanzas", apertura: "Apertura desde 1.0",
   informes: "Informes", reportes: "Reportes", turnos_esperados: "Turnos esperados", marcas: "Marcas de asistencia", correcciones: "Correcciones de marcas", dias: "Días de asistencia", jornadas: "Jornadas", contingencias: "Contingencias de marcación", incidentes: "Incidentes técnicos de marcación", rostro: "Rostro para marcar", telefono: "Teléfono personal para marcar",
+  // Grupos o equipos de usuarios (CAR-251).
+  grupos: "Grupos",
+  // Historial de correos del cliente (CAR-233).
+  correos: "Correos de clientes",
+  // Importación de datos desde planillas (CAR-279).
+  importar: "Importación de datos",
 };

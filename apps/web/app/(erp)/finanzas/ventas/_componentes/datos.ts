@@ -4,7 +4,11 @@ import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { periodosRecientes } from "../../compras/_componentes/datos";
+import { resumenLista } from "./resumen-lista";
 import type { LibroVentas } from "./tipos";
+
+const TIPOS = new Set(["33", "34", "56", "61"]);
+const ORDENES = new Set(["recientes", "antiguas", "mayor_monto", "menor_monto", "tipo"]);
 
 /** Lista del libro de ventas con filtros de URL. */
 export async function cargarVentas(sp: SearchParams) {
@@ -21,28 +25,24 @@ export async function cargarVentas(sp: SearchParams) {
         limite: 100,
         ...(periodo ? { periodo } : {}),
         ...(p["estado"] ? { estadoDte: p["estado"] } : {}),
+        ...(TIPOS.has(String(p["tipo"])) ? { tipoDte: Number(p["tipo"]) } : {}),
+        ...(ORDENES.has(String(p["orden"])) ? { orden: p["orden"] } : {}),
         ...(p["q"] ? { q: p["q"] } : {}),
       },
     ),
-    periodo
+    // El libro oficial solo vale cuando la lista no está recortada por estado ni por búsqueda.
+    periodo && !p["estado"] && !p["q"] && !p["tipo"]
       ? ejecutarComoUsuario<LibroVentas["resumen"]>("erp", "finanzas.ventas.libro_resumen", { periodo })
       : Promise.resolve(null),
   ]);
-  const data =
-    libro.ok && resumen?.ok
-      ? { items: libro.data.items, siguiente: libro.data.siguiente, resumen: resumen.data }
-      : libro.ok
-        ? {
-            items: libro.data.items,
-            siguiente: libro.data.siguiente,
-            resumen: { documentos: libro.data.items.length, neto: 0, iva: 0, total: 0 },
-          }
-        : null;
+  const items = libro.ok ? libro.data.items : [];
+  const subtitulo = libro.ok ? resumenLista(items, libro.data.siguiente, resumen?.ok ? resumen.data : null) : null;
   return {
     state: estadoPantalla(libro),
-    libro: data,
+    libro: libro.ok ? { items, siguiente: libro.data.siguiente } : null,
+    subtitulo,
     gestiona,
-    filtrado: Boolean(p["periodo"] || p["estado"] || p["q"]),
+    filtrado: Boolean(p["periodo"] || p["estado"] || p["q"] || p["tipo"]),
     periodos: periodosRecientes(),
   };
 }

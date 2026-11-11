@@ -36,4 +36,25 @@ describe("ListScreen · acción principal", () => {
   it("sin acción no aparece nada", () => {
     expect(pintar({ sinCabecera: true })).not.toContain("Subir CAF");
   });
+
+  it("las acciones de la fila quedan fuera del enlace estirado", () => {
+    const html = renderToStaticMarkup(
+      <ListScreen<Fila>
+        state="ready"
+        titulo="Documentos"
+        items={items}
+        clave={(f) => f.id}
+        href={() => "/documentos?ver=1"}
+        tarjeta={(f) => <span>{f.nombre}</span>}
+        columnas={[{ id: "n", etiqueta: "Nombre", render: (f) => f.nombre }]}
+        acciones={() => <button type="button">Archivar</button>}
+      />,
+    );
+    const movil = html.slice(html.indexOf("<ul"), html.indexOf("</ul>"));
+    const tabla = html.slice(html.indexOf("<table"), html.indexOf("</table>"));
+    for (const parte of [movil, tabla]) {
+      const fueraDelEnlace = parte.replace(/<a\b[^>]*>[\s\S]*?<\/a>/g, "");
+      expect(fueraDelEnlace).toContain("Archivar");
+    }
+  });
 });

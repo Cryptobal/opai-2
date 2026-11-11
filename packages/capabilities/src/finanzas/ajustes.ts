@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { marcadoresDesconocidos } from "@opai/domain";
 
+import { factoresCesionAjuste } from "./ajustes-factores";
+
 // Ajustes del módulo Finanzas (ADR-018, ADR-021). El centro de configuración del núcleo los dibuja en
 // Configuración › Módulos › Finanzas. Solo owner y admin los ven (Finanzas es bloqueo financiero).
 /** Paso de la secuencia de cobranza: días hábiles después del vencimiento; 0 lo desactiva. */
@@ -83,6 +85,18 @@ export const ajustesFinanzas = z.object({
       permiso: "finanzas:flujo.configurar",
       control: "numero",
     }),
+  compras_sincronizar_rcv: z
+    .enum(["diaria", "semanal", "manual"])
+    .default("diaria")
+    .meta({
+      etiqueta: "Traer las compras desde el SII",
+      ayuda:
+        "Cada cuánto se consulta el Registro de Compras del SII: diaria, semanal (los lunes) o solo con el botón «Sincronizar con el SII». Cada consulta usa una de las 30 que SimpleAPI da al mes.",
+      grupo: "Compras",
+      ambito: "tenant",
+      permiso: "finanzas:compras.manage",
+      control: "seleccion",
+    }),
   flujo_cuenta_diferencia_factoring: z
     .enum(["Diferencia factoring", "Gasto financiero"])
     .default("Diferencia factoring")
@@ -117,4 +131,5 @@ export const ajustesFinanzas = z.object({
       permiso: "finanzas:ventas.manage",
       control: "json",
     }),
+  factores_cesion: factoresCesionAjuste,
 });

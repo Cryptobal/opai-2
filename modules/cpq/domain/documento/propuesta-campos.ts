@@ -51,9 +51,9 @@ export function validarTextosPropuesta(textos: readonly string[]): ValidacionTex
 }
 
 /**
- * Arma el contrato a congelar con lo mínimo: solo las claves que el texto usa (y las instalaciones solo si
- * hay una repetición), para no guardar datos del cliente que no salen en el documento. Los faltantes de
- * cualquier texto se informan sin repetir.
+ * Arma el contrato a congelar con lo mínimo: solo las claves que el texto usa (y cada colección solo si
+ * hay una repetición de ella), para no guardar datos de clientes que no salen en el documento. Los
+ * faltantes de cualquier texto se informan sin repetir.
  */
 export function contratoCamposDeEnvio(
   textos: readonly string[],
@@ -79,6 +79,9 @@ export function contratoCamposDeEnvio(
         instalaciones: colecciones.includes("instalaciones")
           ? valores.colecciones.instalaciones.map(solo)
           : [],
+        referencias: colecciones.includes("referencias")
+          ? (valores.colecciones.referencias ?? []).map(solo)
+          : [],
       },
     },
     faltantes: [...faltantes],
@@ -94,7 +97,7 @@ export function snapshotParaLectura(snapshotJson: string): string {
     const raw = JSON.parse(snapshotJson) as { camposContrato?: ContratoCamposEnvio };
     if (!raw.camposContrato) return snapshotJson;
     const { versionCatalogo, finalidad, usados, faltantes } = raw.camposContrato;
-    const valores = { campos: {}, colecciones: { instalaciones: [] } };
+    const valores = { campos: {}, colecciones: { instalaciones: [], referencias: [] } };
     return JSON.stringify({
       ...raw,
       camposContrato: { versionCatalogo, finalidad, usados, valores, faltantes },

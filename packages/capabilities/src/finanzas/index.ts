@@ -4,6 +4,7 @@ import { centrosListar } from "./centros";
 import { comprasAsignarCentro } from "./compras-centro";
 import { comprasRegistrar } from "./compras-escritura";
 import { comprasImportar } from "./compras-importar";
+import { comprasSincronizarRcv, trabajoSincronizarRcv } from "./compras-rcv";
 import { comprasListar } from "./compras-lectura";
 import { dteConfigActualizar, dteConfigObtener } from "./dte-config";
 import { foliosCargarCaf, foliosListar } from "./folios";
@@ -19,6 +20,7 @@ import { trabajosCesion } from "./trabajos-cesion";
 import { trabajosDte } from "./trabajos-dte";
 import {
   ventasCrearBorrador,
+  ventasCrearBorradorNotaDebito,
   ventasEmitir,
   ventasEmitirNotaCredito,
   ventasEmitirNotaDebito,
@@ -30,7 +32,11 @@ import { ventasLibroResumen, ventasListar, ventasObtener } from "./ventas-lectur
 import { ventasDestinatariosSugeridos, ventasGuardarDestinatarios } from "./ventas-destinatarios";
 import { ventasEnviarCliente } from "./ventas-enviar-cliente";
 import { ventasEnvios } from "./ventas-envios";
+import { foliosSetActivo } from "./folios-activo";
+import { ventasActualizarBorrador } from "./ventas-borrador-actualizar";
+import { ventasDescartarBorrador } from "./ventas-borrador-descartar";
 import { ventasPdf } from "./ventas-pdf";
+import { ventasPdfBorrador } from "./ventas-pdf-borrador";
 import { ventasPreflightEmision } from "./ventas-preflight";
 import { ventasProyeccionFlujo } from "./proyeccion-flujo-cap";
 import {
@@ -57,7 +63,7 @@ import { cierreEmitirLote } from "./cierre-emitir-lote";
 export { ajustesFinanzas } from "./ajustes";
 export { calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./cobros";
 
-export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones, trabajoRecordatoriosCobranza];
+export const trabajosFinanzas = [...trabajosDte, ...trabajosCesion, trabajoGenerarProgramaciones, trabajoRecordatoriosCobranza, trabajoSincronizarRcv];
 
 export const capacidadesFinanzas: readonly Capacidad[] = [
   planListar,
@@ -72,6 +78,7 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   comprasListar,
   comprasRegistrar,
   comprasImportar,
+  comprasSincronizarRcv,
   comprasAsignarCentro,
   ventasListar,
   ventasObtener,
@@ -102,17 +109,22 @@ export const capacidadesFinanzas: readonly Capacidad[] = [
   ventasEnviarSii,
   ventasEmitirNotaCredito,
   ventasEmitirNotaDebito,
+  ventasCrearBorradorNotaDebito,
+  ventasActualizarBorrador,
+  ventasDescartarBorrador,
   ventasProyeccionFlujo,
   ventasCesionSimular,
   ventasCesionCeder,
   ventasCesionListar,
   ventasPdf,
+  ventasPdfBorrador,
   ventasDestinatariosSugeridos,
   ventasGuardarDestinatarios,
   ventasEnviarCliente,
   ventasEnvios,
   foliosListar,
   foliosCargarCaf,
+  foliosSetActivo,
   dteConfigObtener,
   dteConfigActualizar,
 ];

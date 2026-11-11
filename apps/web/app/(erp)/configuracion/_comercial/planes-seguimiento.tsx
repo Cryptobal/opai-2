@@ -8,7 +8,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { EditorPlan } from "./editor-plan";
 
-export type PasoConfig = { dias: number; hora?: string; canal: "correo" | "whatsapp" | "llamada" | "interno"; ejecutor: "persona" | "opai_automatico" | "agente"; titulo: string; guion?: string };
+export type PasoConfig = { dias: number; hora?: string; canal: "correo" | "whatsapp" | "llamada" | "interno"; ejecutor: "persona" | "opai_automatico" | "agente"; titulo: string; guion?: string; etapaDestino?: string };
 export type ConfigPlan = {
   conteo: "habiles" | "corridos"; desde: "inicio" | "paso_anterior"; hora: string; ventana: { desde: string; hasta: string };
   alResponder: "pausar" | "detener"; etapaAlResponder?: string | undefined;

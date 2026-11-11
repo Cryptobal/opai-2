@@ -50,11 +50,16 @@ export const solicitudesAccionesAgente = defineCapability({
       orderBy: { createdAt: "desc" },
       take: input.limite,
     });
-    const keyIds = [...new Set(filas.map((f) => (f.actorType === "agent" ? f.actorId : null)).filter(Boolean))] as string[];
+    const keyIds = [
+      ...new Set(filas.map((f) => (f.actorType === "agent" ? f.actorId : null)).filter(Boolean)),
+    ] as string[];
     const userIds = [...new Set(filas.map((f) => f.viaUserId).filter(Boolean))] as string[];
     const [keys, users] = await Promise.all([
       keyIds.length
-        ? ctx.db.apiKey.findMany({ where: { id: { in: keyIds } }, select: { id: true, nombre: true } })
+        ? ctx.db.apiKey.findMany({
+            where: { id: { in: keyIds } },
+            select: { id: true, nombre: true },
+          })
         : [],
       userIds.length
         ? ctx.db.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } })

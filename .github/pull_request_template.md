@@ -41,7 +41,8 @@
 - [ ] Paridad: lo que hace la pantalla existe como capacidad en `/api/v1` y en MCP; las escrituras tienen `dryRun`.
 - [ ] Sin secretos en el código, los tests ni la descripción, y sin datos personales copiados (se enlaza la pantalla).
 - [ ] Autorrevisión con subagente y **revisión final** en comentario del PR (SHA del head + `sin bloqueos` o bloqueos concretos en seguridad, RLS, permisos, migraciones y datos; A2.2).
-- [ ] Con **cambio visual:** Carlos recibió enlace usable, qué cambió y qué revisar; comentario `REVISIÓN VISUAL CARLOS:` si el preview del PR aún no está en `test.opai.cl`; OK visual o delegación explícita antes de integrar (A2.10).
+- [ ] Con **cambio visual:** el PR trae sus pruebas `@preview`, el run **`preview-e2e`** está en verde sobre el head y la sesión revisó las capturas del artefacto a 375, 1024 y 1280 px (A2.10, ADR-092).
+- [ ] **Novedad in-app (regla de Carlos, 10-nov-2026):** con **cambio visual o de diseño** —también si solo está en `test.opai.cl` y aún no va a producción— el PR agrega o actualiza su `.md` en `packages/domain/src/novedades/entradas/`, el texto describe **qué cambia en pantalla** (botones, hojas, menús, textos) y se corrió `pnpm --filter @opai/domain gen:novedades-embed`. Sin cambio visible (CI, refactor, MCP sin pantalla): marcar «no aplica» y decir por qué. El CI avisa si tocas pantallas sin entrada.
 - [ ] Con pantallas: pruebas de ingeniería a 375, 1024 y 1280 px si la sesión las corre; no sustituyen el vistazo de Carlos.
 - [ ] Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`. OPAI 1.0 no se tocó.
 - [ ] PR vinculado a su tarea de Linear (campo «Tarea» arriba); `docs/2.0/ROADMAP.md` actualizado si cambia el plan.

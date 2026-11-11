@@ -47,7 +47,12 @@ export const canalesRotarTokenFormulario = defineCapability({
     const sufi = sufijoToken(token);
     const endpoint = rutaEndpointFormulario(tenant.slug);
     if (dryRun) {
-      return { token: `${token.slice(0, 12)}…`, tokenSufijo: sufi, endpoint, estado: "conectado" as const };
+      return {
+        token: `${token.slice(0, 12)}…`,
+        tokenSufijo: sufi,
+        endpoint,
+        estado: "conectado" as const,
+      };
     }
     const guardado = await ctx.transaccion(async (tx) => {
       const c = await tx.canalSolicitud.upsert({
@@ -126,9 +131,7 @@ export const solicitudesRecibirFormularioWeb = defineCapability({
     if (canal.tokenHash !== hashTokenFormulario(input.token)) {
       throw reglaDeNegocio("Clave del formulario inválida.");
     }
-    if (
-      !origenPermitido(canal.dominioAutorizado, input.origin ?? null, input.referer ?? null)
-    ) {
+    if (!origenPermitido(canal.dominioAutorizado, input.origin ?? null, input.referer ?? null)) {
       throw reglaDeNegocio("El envío no proviene del dominio autorizado.");
     }
     if (!input.email?.trim() && !input.telefono?.trim()) {

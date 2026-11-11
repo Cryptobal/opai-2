@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 664 pares pantalla→capacidad · 592 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 704 pares pantalla→capacidad · 631 con herramienta · 73 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -21,6 +21,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
 | — | `/api/t/[slug]/solicitudes` | `comercial.solicitudes.recibir_formulario_web` | — | excepción |
 | — | `/api/webhooks/resend/entrante` | `comercial.seguimientos.recibir_correo` | — | excepción |
+| — | `/api/webhooks/resend/entrante` | `core.correos.recibir` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.responder_enlace` | — | excepción |
 | — | `/correccion/[slug]/[token]` | `asistencia.correcciones.ver_enlace` | — | excepción |
 | — | `/firmar/[slug]/[token]` | `core.firmas.documento_url` | — | excepción |
@@ -72,6 +73,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/_components` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/_components` | `core.config.set` | `core_config_set` | existe |
+| compartido | `app/_components` | `core.correos.crear_direccion` | `core_correos_crear_direccion` | existe |
+| compartido | `app/_components` | `core.correos.direccion` | `core_correos_direccion` | existe |
+| compartido | `app/_components` | `core.correos.historial` | `core_correos_historial` | existe |
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_registrar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_revocar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimientos_listar` | `core_cumplimiento_consentimientos_listar` | existe |
@@ -99,6 +103,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.notificaciones.list` | `core_notificaciones_list` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_leida` | `core_notificaciones_marcar_leida` | existe |
 | compartido | `app/_components` | `core.notificaciones.marcar_todas` | `core_notificaciones_marcar_todas` | existe |
+| compartido | `app/_components` | `core.novedades.descartar_destacada` | `core_novedades_descartar_destacada` | existe |
+| compartido | `app/_components` | `core.novedades.list` | `core_novedades_list` | existe |
+| compartido | `app/_components` | `core.novedades.marcar_leidas` | `core_novedades_marcar_leidas` | existe |
+| compartido | `app/_components` | `core.novedades.marcar_todas` | `core_novedades_marcar_todas` | existe |
 | compartido | `app/_components` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/_components` | `rendiciones.administrador.consultar` | `rendiciones_administrador_consultar` | existe |
 | compartido | `app/_components` | `rendiciones.bandeja.listar` | `rendiciones_bandeja_listar` | existe |
@@ -243,17 +251,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.vincular` | `core_contactos_vincular` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
-| compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.calcular` | `cpq_cotizaciones_calcular` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.create` | `cpq_cotizaciones_create` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.ficha` | `cpq_cotizaciones_ficha` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.get` | `cpq_cotizaciones_get` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/_componentes` | `cpq.puestos.confirmar` | `cpq_puestos_confirmar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.get` | `comercial_seguimientos_get` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.iniciar` | `comercial_seguimientos_iniciar` | existe |
+| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `comercial.seguimientos.decidir_envio` | `comercial_seguimientos_decidir_envio` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.crear` | `cpq_compartir_crear` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.compartir.revocar` | `cpq_compartir_revocar` | existe |
@@ -269,8 +274,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.rechazar_aprobacion` | — | excepción |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.restaurar` | `cpq_cotizaciones_restaurar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.cotizaciones.solicitar_aprobacion` | `cpq_cotizaciones_solicitar_aprobacion` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.aprobar` | `cpq_envios_propuesta_aprobar` | existe |
-| compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.cancelar` | `cpq_envios_propuesta_cancelar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.envios_propuesta.solicitar` | `cpq_envios_propuesta_solicitar` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.esquemas_cobertura.list` | `cpq_esquemas_cobertura_list` | existe |
 | compartido | `app/(erp)/cotizaciones/[id]/_componentes` | `cpq.lineas.actualizar` | `cpq_lineas_actualizar` | existe |
@@ -307,6 +310,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/firmas/_componentes` | `core.firmas.list` | `core_firmas_list` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.cancelar` | `core_firmas_cancelar` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.recordar` | `core_firmas_recordar` | existe |
+| compartido | `app/(erp)/documentos/plantillas/_componentes` | `core.documento_plantillas.create` | `core_documento_plantillas_create` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.guardar_borrador` | `core_documento_plantillas_guardar_borrador` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.publicar` | `core_documento_plantillas_publicar` | existe |
+| compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.update` | `core_documento_plantillas_update` | existe |
+| compartido | `app/(erp)/documentos/vencimientos/_componentes` | `core.documentos.vencimientos` | `core_documentos_vencimientos` | existe |
 | compartido | `app/(erp)/finanzas/_hoy` | `finanzas.hoy.resumen` | `finanzas_hoy_resumen` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.guardar` | `finanzas_bancos_guardar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
@@ -326,6 +334,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.importar` | `finanzas_compras_importar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.listar` | `finanzas_compras_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.registrar` | `finanzas_compras_registrar` | existe |
+| compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.sincronizar_rcv` | `finanzas_compras_sincronizar_rcv` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
@@ -342,18 +351,25 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.cargar_caf` | — | excepción |
 | compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.listar` | `finanzas_folios_listar` | existe |
+| compartido | `app/(erp)/finanzas/folios/_componentes` | `finanzas.folios.set_activo` | `finanzas_folios_set_activo` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.actualizar` | `finanzas_plan_actualizar` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.crear` | `finanzas_plan_crear` | existe |
 | compartido | `app/(erp)/finanzas/plan-de-cuentas/_componentes` | `finanzas.plan.inicializar` | `finanzas_plan_inicializar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `core.config.get` | `core_config_get` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.cobros.manual` | `finanzas_cobros_manual` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.actualizar_borrador` | `finanzas_ventas_actualizar_borrador` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_ceder` | `finanzas_ventas_cesion_ceder` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.cesion_simular` | `finanzas_ventas_cesion_simular` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.descartar_borrador` | `finanzas_ventas_descartar_borrador` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_cliente` | `finanzas_ventas_enviar_cliente` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.enviar_sii` | `finanzas_ventas_enviar_sii` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.libro_resumen` | `finanzas_ventas_libro_resumen` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
+| compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
 | compartido | `app/(erp)/finanzas/ventas/_componentes` | `finanzas.ventas.pdf` | `finanzas_ventas_pdf` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/finanzas/ventas/programacion/_componentes` | `core.config.set` | `core_config_set` | existe |
@@ -556,14 +572,27 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones` | `core.notificacion_reglas.list` | `core_notificacion_reglas_list` | existe |
+| erp | `/configuracion/correos-clientes` | `core.correos.asociar` | `core_correos_asociar` | existe |
+| erp | `/configuracion/correos-clientes` | `core.correos.direccion` | `core_correos_direccion` | existe |
+| erp | `/configuracion/correos-clientes` | `core.correos.sin_asignar` | `core_correos_sin_asignar` | existe |
+| erp | `/configuracion/correos-clientes` | `core.cuentas.contactos` | `core_cuentas_contactos` | existe |
+| erp | `/configuracion/correos-clientes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | erp | `/configuracion/cumplimiento/retencion` | `core.cumplimiento.retencion_politica` | `core_cumplimiento_retencion_politica` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.create` | `core_documento_tipos_create` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.update` | `core_documento_tipos_update` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_buscar` | `core_empresa_acteco_buscar` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_get` | `core_empresa_acteco_get` | existe |
+| erp | `/configuracion/empresa` | `core.empresa.acteco_set` | `core_empresa_acteco_set` | existe |
 | erp | `/configuracion/empresa` | `core.empresa.get` | `core_empresa_get` | existe |
 | erp | `/configuracion/empresa` | `core.empresa.update` | `core_empresa_update` | existe |
 | erp | `/configuracion/empresa` | `core.tenant.get` | `core_tenant_get` | existe |
 | erp | `/configuracion/empresa` | `core.tenant.update` | `core_tenant_update` | existe |
+| erp | `/configuracion/importar` | `core.importar.catalogo` | `core_importar_catalogo` | existe |
+| erp | `/configuracion/importar` | `core.importar.ejecutar` | `core_importar_ejecutar` | existe |
+| erp | `/configuracion/importar` | `core.importar.lotes` | `core_importar_lotes` | existe |
+| erp | `/configuracion/importar` | `core.importar.plantilla` | `core_importar_plantilla` | existe |
+| erp | `/configuracion/importar` | `core.importar.revertir` | `core_importar_revertir` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.consumos.resumen` | `core_consumos_resumen` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.list` | `core_integraciones_list` | existe |
@@ -586,6 +615,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.confirmar_mutual` | — | excepción |
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.historial` | `core_remuneraciones_historial` | existe |
 | erp | `/configuracion/remuneraciones` | `core.remuneraciones.listar` | `core_remuneraciones_listar` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.agregar_miembros` | `core_grupos_agregar_miembros` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.archive` | `core_grupos_archive` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.create` | `core_grupos_create` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.get` | `core_grupos_get` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.list` | `core_grupos_list` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.quitar_miembro` | `core_grupos_quitar_miembro` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.grupos.update` | `core_grupos_update` | existe |
+| erp | `/configuracion/usuarios/grupos` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios/roles` | `core.roles.archive` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.create` | — | excepción |
 | erp | `/configuracion/usuarios/roles` | `core.roles.update` | — | excepción |
@@ -603,9 +640,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cotizaciones/nueva` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | erp | `/documentos/firmas/[id]` | `core.firmas.estado` | `core_firmas_estado` | existe |
-| erp | `/finanzas/ventas/[id]` | `finanzas.ventas.envios` | `finanzas_ventas_envios` | existe |
-| erp | `/finanzas/ventas/[id]` | `finanzas.ventas.obtener` | `finanzas_ventas_obtener` | existe |
+| erp | `/documentos/plantillas/[id]` | `core.documento_plantillas.get` | `core_documento_plantillas_get` | existe |
+| erp | `/documentos/plantillas` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
+| erp | `/documentos/vencimientos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador` | `finanzas_ventas_crear_borrador` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.crear_borrador_nota_debito` | `finanzas_ventas_crear_borrador_nota_debito` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.destinatarios_sugeridos` | `finanzas_ventas_destinatarios_sugeridos` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir` | `finanzas_ventas_emitir` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.emitir_nota_credito` | `finanzas_ventas_emitir_nota_credito` | existe |
@@ -613,6 +652,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.guardar_destinatarios` | `finanzas_ventas_guardar_destinatarios` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.listar` | `finanzas_ventas_listar` | existe |
 | erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preflight_emision` | `finanzas_ventas_preflight_emision` | existe |
+| erp | `/finanzas/ventas/nuevo` | `finanzas.ventas.preview_pdf` | `finanzas_ventas_preview_pdf` | existe |
 | erp | `/finanzas/ventas/programacion/[id]/editar` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.obtener` | `finanzas_ventas_programacion_obtener` | existe |
 | erp | `/finanzas/ventas/programacion/[id]` | `finanzas.ventas_programacion.vista_previa` | `finanzas_ventas_programacion_vista_previa` | existe |
@@ -725,7 +765,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/terreno/porteria/sitio/route.ts` | Lee quiénes están en sitio para la portería del equipo de terreno emparejado (CAR-78 E4d): cookie de dispositivo, sin sesión; ejecuta core.terreno.en_sitio (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/terreno/rondas/estado/route.ts` | Lee las rondas disponibles y abiertas del equipo de terreno emparejado (CAR-78 E3e): cookie de dispositivo, sin sesión; ejecuta core.terreno.rondas (interna con motivo en EXCEPCIONES_PARIDAD) y no escribe nada. |
 | `app/api/v1/[...capability]/route.ts` | API v1: ejecuta la capacidad de la URL con las mismas reglas que el MCP. |
-| `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (interna). |
+| `app/api/webhooks/resend/entrante/route.ts` | Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas. |
 | `app/correccion/[slug]/[token]/accion.ts#accionResponder` | Asistencia: asistencia.correcciones.responder_enlace (interna con motivo): el enlace personal del correo y el RUT son la credencial; un agente no responde por el trabajador. |
 | `app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace` | Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19). |
 | `app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace` | Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9). |
@@ -764,9 +804,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
 | `core.biometria.enrolar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4). |
 | `core.biometria.verificar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4). |
+| `core.correos.recibir` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el tenant por la dirección de registro t<token>@respuestas.opai.cl (CAR-233). |
 | `core.credenciales_terreno.asignar_pin` | Solo personas: fija una credencial de identificación; un agente no debe poder elegir el PIN de nadie (CAR-78, D-02). |
 | `core.credenciales_terreno.cambiar_pin` | Solo personas: la propia persona cambia su PIN con el actual; es un acto personal que ningún agente hace por ella (CAR-78, D-02). |
 | `core.credenciales_terreno.restablecer` | Solo personas: genera y revela un PIN temporal; un agente no debe poder obtenerlo (CAR-78, D-02). |
+| `core.cuentas_referencias.otorgar` | Solo personas: registrar el consentimiento de un cliente para ser referencia es un acto de una persona; ninguna key lo hace, ni con autonomía «directo» (CAR-138 PR 7, ADR-087). |
 | `core.cumplimiento.consentimiento_registrar` | Solo personas: registrar el consentimiento de un titular es un acto responsable del tenant (Ley 21.719, §16.2). |
 | `core.cumplimiento.consentimiento_revocar` | Solo personas: dejar constancia de la revocación de un consentimiento es un acto responsable (Ley 21.719). |
 | `core.cumplimiento.dpa_aceptar` | Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034). |
@@ -858,6 +900,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.cambiar_pin` | `app/(trabajador)/trabajador/_componentes` | no | reservada a personas |
 | `core.credenciales_terreno.restablecer` | `app/(erp)/personas/_componentes` | no | reservada a personas |
+| `core.cuentas_referencias.otorgar` | sin pantalla todavía · CAR-138 · desde 2026-11-10 | no | reservada a personas |
 | `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.consentimiento_revocar` | `app/_components` | no | reservada a personas |
 | `core.cumplimiento.dpa_aceptar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
@@ -938,9 +981,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.campos.catalogo`
 - `core.campos.valores`
 - `core.consumos.por_recurso`
+- `core.cuentas_referencias.list`
+- `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
 - `core.documentos.desvincular`
-- `core.documentos.vencimientos`
 - `core.documentos.vincular`
 - `core.estructuras.get`
 - `core.etiquetas.delete`
@@ -975,6 +1019,12 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.portal_cotizaciones.descargar`
 - `cpq.portal_cotizaciones.get`
 - `cpq.portal_cotizaciones.list`
+- `cpq.propuestas_html.get`
+- `cpq.propuestas_html.importar`
+- `cpq.propuestas_html.list`
+- `cpq.propuestas_tecnica.capitulo_guardar`
+- `cpq.propuestas_tecnica.capitulos_list`
+- `cpq.propuestas_tecnica.prompt_exportable`
 - `cpq.propuestas_tecnica.update`
 - `cpq.puestos.ofrecer`
 - `cpq.secciones.margen`

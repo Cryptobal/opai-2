@@ -17,6 +17,7 @@ export const pasoPlanSchema = z.object({
   ejecutor: z.enum(EJECUTORES_PASO),
   titulo: z.string().trim().min(1).max(60),
   guion: z.string().max(2000).optional(),
+  etapaDestino: z.uuid().optional().describe("Etapa abierta (id) a la que avanza el negocio al hacerse el paso; nunca ganada ni perdida."),
 });
 export const configPlanSchema = z.object({
   conteo: z.enum(["habiles", "corridos"]),

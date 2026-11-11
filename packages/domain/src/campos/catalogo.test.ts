@@ -14,7 +14,7 @@ import {
 
 describe("catálogo único de campos · integridad", () => {
   it("tiene versión y cada clave (y alias) es única y con forma entidad.campo", () => {
-    expect(VERSION_CATALOGO_CAMPOS).toBe(1);
+    expect(VERSION_CATALOGO_CAMPOS).toBe(2);
     const vistas = new Set<string>();
     for (const c of CATALOGO_CAMPOS) {
       expect(c.clave).toMatch(/^[a-z]+\.[a-z0-9_]+$/);

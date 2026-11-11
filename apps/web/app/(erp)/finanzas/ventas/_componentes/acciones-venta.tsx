@@ -1,15 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 
 import { Alerta, avisar, Button, Dialog } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { HojaCeder } from "./hoja-ceder";
+import { porTransmitir } from "./etiquetas-venta";
 import { HojaCobroManual } from "./hoja-cobro-manual";
 import { HojaNotaCredito } from "./hoja-nota-credito";
-import type { Venta } from "./tipos";
+import type { DatosBorrador, Venta } from "./tipos";
+
+// La hoja de cesión se carga al abrirla: no pesa en la ficha (presupuesto de JS, ADR-037).
+const HojaCeder = dynamic(() => import("./hoja-ceder").then((m) => ({ default: m.HojaCeder })));
+const EmitirBorradorFicha = dynamic(() => import("./emitir-borrador-ficha").then((m) => ({ default: m.EmitirBorradorFicha })));
 
 function descargar(base64: string, nombre: string) {
   const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
@@ -22,7 +27,7 @@ function descargar(base64: string, nombre: string) {
 }
 
 /** Acciones de la ficha: cada una llama a su capacidad; el servidor decide si corresponde. */
-export function AccionesVenta({ venta, enviosPrevios, montoPendiente }: { venta: Venta; enviosPrevios: number; montoPendiente: number }) {
+export function AccionesVenta({ venta, enviosPrevios, montoPendiente, abrirEditar = false }: { venta: Venta & DatosBorrador & { fechaVencimiento?: string | null }; enviosPrevios: number; montoPendiente: number; abrirEditar?: boolean }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const intento = useRef(crypto.randomUUID());
   const [hoja, setHoja] = useState<"nc" | "ceder" | "reenviar" | "cobro" | null>(null);
@@ -57,12 +62,15 @@ export function AccionesVenta({ venta, enviosPrevios, montoPendiente }: { venta:
     else if (r) avisar.error("El correo no salió. Revisa el historial de envíos.");
   }
 
+  // Un borrador (factura o nota de débito de cargo) se revisa y emite desde su ficha (CAR-234).
+  if (venta.estadoDte === "borrador") return <EmitirBorradorFicha venta={venta} abrirEditar={abrirEditar} />;
+
   return (
     <div className="flex flex-col gap-3">
       {error ? <Alerta tono="danger" titulo="No se pudo completar">{error}</Alerta> : null}
       <div className="flex flex-wrap gap-2">
         {emitido ? <Button variant="secondary" disabled={pendiente} onClick={() => void pdf()}>Descargar PDF</Button> : null}
-        {venta.estadoDte === "enviado" ? <Button variant="secondary" disabled={pendiente} onClick={() => void alSii()}>Enviar al SII</Button> : null}
+        {porTransmitir(venta) ? <Button variant="secondary" disabled={pendiente} onClick={() => void alSii()}>Enviar al SII</Button> : null}
         {emitido ? (
           <Button disabled={pendiente} onClick={() => (enviosPrevios > 0 ? setHoja("reenviar") : void alCliente(false))}>
             Enviar al cliente

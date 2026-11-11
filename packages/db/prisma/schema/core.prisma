@@ -35,6 +35,8 @@ model Tenant {
   auditoriaCabeza    AuditoriaCabeza?
   memberships        Membership[]
   roles              Rol[]
+  gruposUsuarios     GrupoUsuarios[]
+  grupoMiembros      GrupoUsuarioMiembro[]
   permisoExcepciones PermisoExcepcion[]
   modules            TenantModule[]
   apiKeys            ApiKey[]
@@ -44,6 +46,8 @@ model Tenant {
   // Brief 02: maestros, documentos y servicios del núcleo.
   cuentas                 Cuenta[]
   cuentasRepresentantes   CuentaRepresentante[]
+  cuentasReferencias      CuentaReferencia[]
+  siiContribuyentes       SiiContribuyente[]
   contactos               Contacto[]
   instalaciones           Instalacion[]
   cargos                  Cargo[]
@@ -64,6 +68,7 @@ model Tenant {
   plantillas              Plantilla[]
   notificacionReglas      NotificacionRegla[]
   notificaciones          Notificacion[]
+  novedadesLectura        NovedadLectura[]
   envios                  Envio[]
   integraciones           Integracion[]
   secretos                Secreto[]

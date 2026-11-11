@@ -101,7 +101,12 @@ export function Sidebar(props: SidebarProps) {
             <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}
       </div>
-      {props.usuario ? <Pie usuario={props.usuario} menu={props.menuUsuario} /> : null}
+      {props.usuario ? (
+        <Pie
+          usuario={props.usuario}
+          menu={props.menuUsuario}
+        />
+      ) : null}
     </nav>
   );
 }

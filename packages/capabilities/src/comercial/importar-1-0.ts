@@ -6,6 +6,7 @@ import { ErrorCapacidad } from "../errores";
 import type { Contexto } from "../types";
 import type { Plan } from "@opai/db/importar-opai1";
 import { ejecutarImportar10, inputImportar10 } from "./importar-1-0-handler";
+import { resumenSiiDelPlan, resumenSiiSchema } from "./importar-1-0-sii";
 
 const reporteSchema = z.object({
   modo: z.literal("simulacion"),
@@ -68,6 +69,8 @@ const resultadoSchema = z.object({
     .nullable(),
   usuariosResueltos: z.number().int(),
   usuariosSinMembresia: z.array(z.string()),
+  /** Consulta al SII en lote (CAR-156): caché al simular, consultas encoladas al aplicar. */
+  sii: resumenSiiSchema.nullable().optional(),
 });
 
 async function fijarCorrelativosCpqDesdePlan(ctx: Contexto, plan: Plan, dryRun: boolean): Promise<number> {
@@ -91,7 +94,7 @@ export const comercialImportar10 = defineCapability({
   id: "comercial.importar_1_0",
   soloPersonas: true,
   descripcion:
-    "Importa un export de OPAI 1.0 (simular, aplicar, conciliar o revertir). Idempotente por ids externos; solo owner o admin.",
+    "Importa un export de OPAI 1.0 (simular, aplicar, conciliar o revertir). Idempotente por ids externos; solo owner o admin. Informa en `sii` cuántas cuentas el SII podría completar (simular lee la caché; aplicar encola las consultas) sin escribir datos del SII en las cuentas.",
   permiso: "comercial:config.manage",
   input: inputImportar10,
   output: resultadoSchema,
@@ -104,6 +107,10 @@ export const comercialImportar10 = defineCapability({
     if (plan && (r.accion === "simular" || r.accion === "conciliar" || (r.accion === "aplicar" && !dryRun))) {
       correlativosCpq = await fijarCorrelativosCpqDesdePlan(ctx, plan, dryRun || r.accion !== "aplicar");
     }
+    const sii =
+      plan && (r.accion === "simular" || r.accion === "aplicar")
+        ? await resumenSiiDelPlan(ctx, plan, { encolar: r.accion === "aplicar" && !r.dryRun })
+        : null;
     const reporte = r.reporte
       ? { ...r.reporte, modulosActivos: [...r.reporte.modulosActivos] }
       : null;
@@ -120,6 +127,7 @@ export const comercialImportar10 = defineCapability({
       aplicadas: aplicadas ?? null,
       usuariosResueltos: r.usuariosResueltos ?? 0,
       usuariosSinMembresia: r.usuariosSinMembresia ?? [],
+      sii,
     };
   },
 });

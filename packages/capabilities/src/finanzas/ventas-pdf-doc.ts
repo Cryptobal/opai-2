@@ -3,6 +3,7 @@ import { generarPdfDte } from "@opai/integrations";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { cuentaDe, receptorDteDe, rutEmisorDe } from "./ventas-comun";
+import { logoDeMarca } from "./ventas-pdf-logo";
 
 type DocPdf = {
   id: string;
@@ -52,11 +53,16 @@ export const cantidadTexto = (t: string) => (t.includes(".") ? t.replace(/\.?0+$
 const dia = (d: Date | null | undefined) => d?.toISOString().slice(0, 10) ?? "";
 
 /** Representación impresa (PDF) de un documento emitido y firmado; la usan la ficha y el envío al cliente. */
-export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8Array> {
-  if (doc.folio == null || !doc.timbrePdf417) {
+export async function pdfDeDocumento(
+  ctx: Contexto,
+  doc: DocPdf,
+  opciones: { borrador?: boolean } = {},
+): Promise<Uint8Array> {
+  const borrador = opciones.borrador === true;
+  if (!borrador && (doc.folio == null || !doc.timbrePdf417)) {
     throw reglaDeNegocio("Solo hay PDF para documentos emitidos y firmados.");
   }
-  const [cuenta, rutEmisor, tenant, perfil, lineas, referencias, cfg] = await Promise.all([
+  const [cuenta, rutEmisor, tenant, perfil, lineas, referencias, cfg, logo] = await Promise.all([
     cuentaDe(ctx, doc.cuentaId),
     rutEmisorDe(ctx),
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
@@ -64,11 +70,12 @@ export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8A
     ctx.db.documentoEmitidoLinea.findMany({ where: { documentoId: doc.id }, orderBy: { orden: "asc" } }),
     ctx.db.documentoEmitidoReferencia.findMany({ where: { documentoId: doc.id }, orderBy: { id: "asc" } }),
     ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } }),
+    logoDeMarca(ctx),
   ]);
   const r = receptorDteDe(cuenta);
   return generarPdfDte({
     tipoDte: doc.tipoDte,
-    folio: doc.folio,
+    folio: borrador ? null : doc.folio,
     fechaEmision: dia(doc.fechaEmision),
     emisor: emisorDePerfil(perfil, tenant?.nombre, rutEmisor),
     receptor: {
@@ -83,8 +90,9 @@ export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8A
       descripcion: l.glosa,
       monto: l.monto,
       // Solo lo que el documento guardó: los emitidos antes de CAR-221 no traen cantidad ni precio y no se inventan.
-      ...(l.cantidad ? { cantidad: cantidadTexto(l.cantidad.toString()) } : {}),
+      ...(l.cantidad ? { cantidad: [cantidadTexto(l.cantidad.toString()), l.unidad?.trim()].filter(Boolean).join(" ") } : {}),
       ...(l.precioUnitario !== null ? { precio: l.precioUnitario } : {}),
+      ...(l.descuentoPct ? { descuentoPct: l.descuentoPct } : {}),
     })),
     referencias: referencias.map((x) => ({
       tipoDteRef: x.tipoDteRef,
@@ -97,8 +105,10 @@ export async function pdfDeDocumento(ctx: Contexto, doc: DocPdf): Promise<Uint8A
     exento: doc.montoExento,
     iva: doc.montoIva,
     total: doc.montoTotal,
-    timbrePdf417: doc.timbrePdf417,
+    timbrePdf417: borrador ? null : doc.timbrePdf417,
+    ...(borrador ? { borrador: true } : {}),
     ...(doc.glosa ? { glosa: doc.glosa } : {}),
+    ...(logo ? { logo } : {}),
     ...(cfg?.oficinaSii ? { oficinaSii: cfg.oficinaSii } : {}),
     ...(cfg?.resolucionSiiNumero != null && cfg.resolucionSiiFecha
       ? { resolucion: { numero: cfg.resolucionSiiNumero, fecha: dia(cfg.resolucionSiiFecha) } }

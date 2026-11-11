@@ -8,10 +8,15 @@ import { documentosEnAlcance } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import { CAPA_DE } from "./entidad";
 import { documentoSchema, ENTIDADES, vistaDocumento } from "./vista";
+import { propietariosDe } from "./explorar-entidades";
 import { filtroDocumentoSensible } from "./sensibles";
 
 export const documentosVencimientos = defineCapability({
-  auditarLectura: (s) => s.map((d) => d.id),
+  auditarLectura: (s) => [
+    ...s.map((d) => d.id),
+    // Nombres de personas revelados: mismo criterio que `core.documentos.explorar`.
+    ...s.flatMap((d) => (d.entidad?.tipo === "persona" && d.entidad.nombre ? [d.entidad.id] : [])),
+  ],
   id: "core.documentos.vencimientos",
   descripcion:
     "Documentos vencidos y por vencer en los próximos N días (por defecto 30), con la entidad a la que pertenecen, filtrables por capa (empresa, cuenta, instalación, persona, puesto).",
@@ -21,7 +26,14 @@ export const documentosVencimientos = defineCapability({
     capa: z.enum(["empresa", "cuenta", "instalacion", "persona", "puesto"]).optional(),
   }),
   output: z.array(
-    documentoSchema.extend({ entidad: z.object({ tipo: z.string(), id: z.string() }).nullable() }),
+    documentoSchema.extend({
+      entidad: z
+        .object({ tipo: z.string(), id: z.string(), nombre: z.string().nullable() })
+        .nullable()
+        .describe(
+          "Propietario del documento; el nombre solo si el actor puede leer ese tipo de entidad.",
+        ),
+    }),
   ),
   efecto: "lectura",
   dryRun: false,
@@ -39,11 +51,9 @@ export const documentosVencimientos = defineCapability({
       orderBy: { venceEn: "asc" },
       take: 1000,
     });
-    const vinculos = await ctx.db.documentoVinculo.findMany({
-      where: { documentoId: { in: docs.map((d) => d.id) }, rol: "propietario" },
-    });
-    const propietario = new Map(
-      vinculos.map((v) => [v.documentoId, { tipo: v.entidadTipo, id: v.entidadId }]),
+    const propietario = await propietariosDe(
+      ctx,
+      docs.map((d) => d.id),
     );
     const tipos = await tiposPorId(
       ctx,

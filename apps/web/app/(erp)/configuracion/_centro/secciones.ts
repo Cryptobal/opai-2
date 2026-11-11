@@ -1,9 +1,11 @@
 import {
   Blocks,
   Building2,
+  FileUp,
   Gauge,
   History,
   KeyRound,
+  Mail,
   MessageSquare,
   Palette,
   Plug,
@@ -64,6 +66,16 @@ export const SECCIONES: readonly Seccion[] = [
     grupo: "empresa",
     permiso: PERMISOS_CORE.comunicacionesManage,
   }),
+  // CAR-233: dirección de registro (CCO) y bandeja de correos de clientes sin asignar.
+  s({
+    id: "correos-clientes",
+    titulo: "Correos de clientes",
+    descripcion: "Dirección de registro para CCO y correos sin asignar",
+    corta: "Dirección para CCO y sin asignar",
+    icono: Mail,
+    grupo: "empresa",
+    permiso: PERMISOS_CORE.correosSinAsignar,
+  }),
   ...SECCIONES_FINANZAS,
   ...SECCIONES_OPERACION,
   s({
@@ -105,6 +117,16 @@ export const SECCIONES: readonly Seccion[] = [
     permiso: PERMISOS_CORE.tenantRead,
   }),
   // Uso y registros
+  // CAR-279: carga de cuentas, contactos, instalaciones y negocios desde una planilla.
+  s({
+    id: "importar",
+    titulo: "Importar datos",
+    descripcion: "Trae clientes, contactos, instalaciones y negocios desde Excel o CSV",
+    corta: "Planillas Excel o CSV",
+    icono: FileUp,
+    grupo: "uso-registros",
+    permiso: PERMISOS_CORE.tenantManage,
+  }),
   s({
     id: "integraciones",
     titulo: "Integraciones",

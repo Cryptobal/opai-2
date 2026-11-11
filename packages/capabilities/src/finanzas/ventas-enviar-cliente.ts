@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-import { agruparDestinatarios, type DestinatarioDoc } from "@opai/domain";
+import { NOMBRE_TIPO_DTE_VENTA, agruparDestinatarios, type DestinatarioDoc, type TipoDteVenta } from "@opai/domain";
 
 import { defineCapability } from "../define";
+import { describirDocumento } from "./ventas-aprobacion-texto";
 import type { Contexto } from "../types";
 import { enviarCorreo } from "../core/comunicaciones";
 import { escribirConEvento } from "../core/maestros/comun";
@@ -13,12 +14,6 @@ import { PERMISO_VENTAS, cuentaDe, documentoEmitidoIdSchema } from "./ventas-com
 import { pdfDeDocumento } from "./ventas-pdf-doc";
 import { xmlParaEnvioSii } from "./ventas-xml";
 
-const TIPOS: Record<number, string> = {
-  33: "Factura electrónica",
-  34: "Factura exenta electrónica",
-  56: "Nota de débito electrónica",
-  61: "Nota de crédito electrónica",
-};
 const clp = (n: number) => `$${new Intl.NumberFormat("es-CL").format(n)}`;
 const dmy = (d: Date | null) =>
   d ? `${String(d.getUTCDate()).padStart(2, "0")}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${d.getUTCFullYear()}` : "—";
@@ -86,6 +81,7 @@ export const ventasEnviarCliente = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   exigeAprobacion: () => true,
+  describirAprobacion: describirDocumento((d) => `enviar por correo al cliente la ${d}`),
   async handler(ctx, input, { dryRun }) {
     const doc = await ctx.db.documentoEmitido.findFirst({ where: { id: input.documentoId } });
     if (!doc) throw noEncontrado("El documento");
@@ -119,7 +115,7 @@ export const ventasEnviarCliente = defineCapability({
       {
         cliente: { nombre: cuenta.nombre },
         documento: {
-          tipo: TIPOS[doc.tipoDte] ?? "Documento tributario electrónico",
+          tipo: NOMBRE_TIPO_DTE_VENTA[doc.tipoDte as TipoDteVenta] ?? "Documento tributario electrónico",
           folio: doc.folio,
           total: clp(doc.montoTotal),
           vencimiento: dmy(doc.fechaVencimiento),
@@ -129,6 +125,8 @@ export const ventasEnviarCliente = defineCapability({
       {
         cc,
         bcc,
+        // CAR-233: queda en el historial de correos de la cuenta, con reply-to a la dirección de registro.
+        historial: { origen: "factura", cuentaId: doc.cuentaId },
         adjuntos: [
           { nombre: `${etiqueta}.pdf`, contenidoBase64: Buffer.from(pdf).toString("base64"), mime: "application/pdf" },
           ...(xml

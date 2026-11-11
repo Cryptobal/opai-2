@@ -15,12 +15,13 @@ const CAMPOS = [
   "aprobacionesPendientes",
   "notificacionesNoLeidas",
   "solicitudesNuevas",
+  "tareasSeguimiento",
 ] as const;
 
 export const resumenContadores = defineCapability({
   id: "core.resumen.contadores",
   descripcion:
-    "Conteos para la navegación: cuentas, instalaciones y personas activas, aprobaciones de agentes pendientes, avisos sin leer del usuario y solicitudes nuevas por revisar. null donde el actor no tiene permiso, el módulo no está activo o no se pidió el conteo.",
+    "Conteos para la navegación: cuentas, instalaciones y personas activas, aprobaciones de agentes pendientes, avisos sin leer del usuario, solicitudes nuevas por revisar y pasos de seguimiento comercial por hacer del usuario (suman al número de la Bandeja). null donde el actor no tiene permiso, el módulo no está activo o no se pidió el conteo.",
   permiso: null,
   input: z.object({
     campos: z
@@ -35,6 +36,7 @@ export const resumenContadores = defineCapability({
     aprobacionesPendientes: n,
     notificacionesNoLeidas: n,
     solicitudesNuevas: n,
+    tareasSeguimiento: n,
   }),
   efecto: "lectura",
   dryRun: false,
@@ -53,6 +55,7 @@ export const resumenContadores = defineCapability({
       aprobacionesPendientes,
       notificacionesNoLeidas,
       solicitudesNuevas,
+      tareasSeguimiento,
     ] = await Promise.all([
         si("cuentas", PERMISOS_CORE.cuentasRead, () =>
           ctx.db.cuenta.count({ where: { archivadaEn: null, AND: [dondeCuenta(ctx)] } }),
@@ -94,6 +97,15 @@ export const resumenContadores = defineCapability({
               ctx.db.solicitud.count({ where: { estado: "nueva" } }),
             )
           : Promise.resolve(null),
+        // Pasos de seguimiento por hacer del usuario, con su tarea creada (CAR-160, decisión de Carlos del
+        // 11-nov-2026): suman al número de la Bandeja, donde aparecen como tareas asignadas.
+        usuario && ctx.modulosActivos.includes("comercial")
+          ? si("tareasSeguimiento", "comercial:negocios.read", () =>
+              ctx.db.seguimientoPaso.count({
+                where: { estado: "por_hacer", asignadoId: usuario, actividadId: { not: null } },
+              }),
+            )
+          : Promise.resolve(null),
       ]);
     return {
       cuentas,
@@ -102,6 +114,7 @@ export const resumenContadores = defineCapability({
       aprobacionesPendientes,
       notificacionesNoLeidas,
       solicitudesNuevas,
+      tareasSeguimiento,
     };
   },
 });

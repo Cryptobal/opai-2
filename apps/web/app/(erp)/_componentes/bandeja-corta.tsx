@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { textoAprobacionesPendientes } from "@opai/domain";
 import { Alerta, Button, Skeleton } from "@opai/ds";
 import type { Aviso } from "@/app/_components/campana";
 import { ListaAvisos } from "@/app/_components/lista-avisos";
@@ -11,6 +12,7 @@ export function BandejaCorta({
   error,
   onMarcar,
   onLeida,
+  onNavegar,
 }: {
   avisos: Aviso[] | null;
   aprobaciones: number | null;
@@ -18,6 +20,8 @@ export function BandejaCorta({
   error: boolean;
   onMarcar: () => void;
   onLeida: () => void;
+  /** Cierra el panel de la campana al navegar (Ver todo, aprobaciones, avisos). */
+  onNavegar?: () => void;
 }) {
   return (
     <div>
@@ -39,21 +43,26 @@ export function BandejaCorta({
           {aprobaciones ? (
             <Link
               href="/configuracion/aprobaciones"
+              {...(onNavegar ? { onClick: onNavegar } : {})}
               className="flex min-h-11 items-center px-4 text-accent"
             >
-              {aprobaciones} aprobaciones pendientes
+              {textoAprobacionesPendientes(aprobaciones)}
             </Link>
           ) : null}
           {decisiones.map((d) => (
             <Link
               key={d.id}
               href={`/configuracion/aprobaciones?id=${d.id}`}
+              {...(onNavegar ? { onClick: onNavegar } : {})}
               className="flex min-h-11 items-center px-4 text-fg"
             >
               {d.resumen}
             </Link>
           ))}
-          <ListaAvisos avisos={avisos.slice(0, 20)} portal="erp" onLeida={onLeida} />
+          <ListaAvisos avisos={avisos.slice(0, 20)} portal="erp"
+            onLeida={onLeida}
+            {...(onNavegar ? { onNavegar } : {})}
+          />
           {!avisos.length && !aprobaciones ? (
             <p className="p-4 t-body text-fg-muted">Todo al día. No tienes nada pendiente.</p>
           ) : null}
@@ -61,6 +70,7 @@ export function BandejaCorta({
       )}
       <Link
         href="/bandeja"
+        {...(onNavegar ? { onClick: onNavegar } : {})}
         className="flex min-h-11 items-center border-t border-border px-4 text-accent"
       >
         Ver todo

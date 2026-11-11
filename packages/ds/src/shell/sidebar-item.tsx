@@ -90,7 +90,12 @@ export function Pie({
   return (
     <div className="flex-none border-t border-border px-3 py-2">
       {menu ? (
-        <UserMenu usuario={usuario} items={menu} lado="arriba-izquierda" conNombre />
+        <UserMenu
+          usuario={usuario}
+          items={menu}
+          lado="arriba-izquierda"
+          conNombre
+        />
       ) : (
         <span className="flex items-center gap-2.5 px-2 py-1">
           <Avatar nombre={usuario.nombre} />

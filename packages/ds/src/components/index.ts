@@ -11,6 +11,7 @@ export { Card, CardContent, CardHeader, CardTitle, KpiTile } from "./card";
 export { Checkbox } from "./checkbox";
 export { type OpcionRadio, RadioGroup } from "./radio-group";
 export { Chip, ChipAgregar, ChipToggle } from "./chip";
+export { ChipVariable } from "./chip-variable";
 export { Combobox, type ComboboxProps } from "./combobox";
 export { type OpcionCombobox, Resaltado } from "./resaltado";
 export { CommandPalette, type GrupoPaleta, type ItemPaleta } from "./command-palette";

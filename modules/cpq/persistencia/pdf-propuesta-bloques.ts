@@ -9,8 +9,9 @@ import {
 } from "../domain/documento/propuesta-tecnica";
 import type { EntradaPdfCotizacion } from "./documento-pdf-tipos";
 import type { MarcaDocumentoVista } from "./marca-documento";
+import type { EntradaIndice } from "../domain/documento/indice-propuesta";
 import { TENUE } from "./pdf/colores";
-import { type Hoja } from "./pdf/hoja";
+import { ANCHO_UTIL, type Hoja, MARGEN } from "./pdf/hoja";
 import { cajaTotales, tabla } from "./pdf/hoja-tabla";
 import { etiquetaSeccion } from "./pdf/membrete";
 
@@ -44,13 +45,16 @@ export function textoSeccion(h: Hoja, titulo: string, texto: string): void {
   }
 }
 
-export function indice(h: Hoja, titulos: readonly string[]): void {
+export function indice(h: Hoja, entradas: readonly EntradaIndice[]): void {
   etiquetaSeccion(h, "Índice");
-  titulos.forEach((t, i) => h.parrafo(`${i + 1}.  ${t}`, { tam: 10 }));
+  for (const e of entradas)
+    h.parrafo(`${e.numero}.  ${e.titulo}`, e.nivel === 1 ? { tam: 10 } : { tam: 9.5, color: TENUE, x: MARGEN.x + 14, ancho: ANCHO_UTIL - 14 });
 }
 
-export function detalleServicio(h: Hoja, servicio: ServicioDesdeCotizacion): void {
-  etiquetaSeccion(h, TITULOS_BLOQUE["detalle_servicio"]!);
+const conNumero = (numero: string | undefined, t: string) => (numero ? `${numero}. ${t}` : t);
+
+export function detalleServicio(h: Hoja, servicio: ServicioDesdeCotizacion, numero?: string): void {
+  etiquetaSeccion(h, conNumero(numero, TITULOS_BLOQUE["detalle_servicio"]!));
   for (const s of servicio.secciones.filter((x) => x.puestos.length)) {
     h.asegurar(60);
     h.espacio(4);
@@ -88,9 +92,10 @@ export function resumenEconomico(
     netoTotalClp: number;
     gastosGeneralesYUtilidadClp?: number | null;
     tasaIvaPct?: number;
+    numero?: string;
   },
 ): void {
-  etiquetaSeccion(h, TITULOS_BLOQUE["resumen_economico"]!);
+  etiquetaSeccion(h, conNumero(d.numero, TITULOS_BLOQUE["resumen_economico"]!));
   const econ = d.secciones.map((s) => ({
     nombre: s.nombre,
     tienePuestos: s.lineas.some((l) => l.tipo === "puesto"),
@@ -134,8 +139,8 @@ export function resumenEconomico(
   ]);
 }
 
-export function contactoEjecutivo(h: Hoja, ejecutivo: string, marca: MarcaDocumentoVista): void {
-  etiquetaSeccion(h, TITULOS_BLOQUE["contacto_ejecutivo"]!);
+export function contactoEjecutivo(h: Hoja, ejecutivo: string, marca: MarcaDocumentoVista, numero?: string): void {
+  etiquetaSeccion(h, conNumero(numero, TITULOS_BLOQUE["contacto_ejecutivo"]!));
   h.parrafo(ejecutivo, { fuente: "semi", tam: 10.5 });
   h.parrafo(marca.nombreComercial ?? marca.razonSocial ?? "", { tam: 9, color: TENUE });
 }

@@ -22,10 +22,9 @@ async function marcarAceptadoSii(
       where: { id: envioId },
       data: { intentos, estado: "aceptado", glosa, proximaConsultaEn: null },
     });
-    await tx.documentoEmitido.update({
-      where: { id: docId },
-      data: { estadoDte: "aceptado", cesionEstado: cesionEstado ?? "no_cedido" },
-    });
+    // Si una NC o ND lo anuló antes de que el SII respondiera, la aceptación no deshace la anulación (CAR-270).
+    await tx.documentoEmitido.update({ where: { id: docId }, data: { cesionEstado: cesionEstado ?? "no_cedido" } });
+    await tx.documentoEmitido.updateMany({ where: { id: docId, estadoDte: "enviado" }, data: { estadoDte: "aceptado" } });
   });
 }
 

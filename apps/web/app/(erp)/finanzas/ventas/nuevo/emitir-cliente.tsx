@@ -4,6 +4,7 @@ import { Campo, Card, Combobox, Input, Select, Textarea } from "@opai/ds";
 
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
+import { EmitirFechaEmision } from "./emitir-fecha";
 import type { TipoEmision } from "./emitir-util";
 
 function filaTributaria(etiqueta: string, valor: string | null | undefined) {
@@ -27,6 +28,9 @@ type Props = {
   setPlazoPagoDias: (v: string) => void;
   glosa: string;
   setGlosa: (v: string) => void;
+  fechaEmision?: string;
+  setFechaEmision?: (v: string) => void;
+  hoyIso?: string;
 };
 
 export function EmitirClienteTipo({
@@ -37,6 +41,9 @@ export function EmitirClienteTipo({
   tipoDte,
   setTipoDte,
   plazoPagoDias,
+  fechaEmision,
+  setFechaEmision,
+  hoyIso,
   setPlazoPagoDias,
   glosa,
   setGlosa,
@@ -85,7 +92,7 @@ export function EmitirClienteTipo({
             { valor: "33", etiqueta: "33 · Factura afecta" },
             { valor: "34", etiqueta: "34 · Factura exenta" },
             { valor: "61", etiqueta: "61 · Nota de crédito (corrige una factura)" },
-            { valor: "56", etiqueta: "56 · Nota de débito (anula una nota de crédito)" },
+            { valor: "56", etiqueta: "56 · Nota de débito (cargo o anula una nota de crédito)" },
           ]}
         />
       </Campo>
@@ -99,6 +106,9 @@ export function EmitirClienteTipo({
             onChange={(e) => setPlazoPagoDias(e.target.value)}
           />
         </Campo>
+      )}
+      {esNota || !hoyIso || fechaEmision === undefined || !setFechaEmision ? null : (
+        <EmitirFechaEmision valor={fechaEmision} onCambiar={setFechaEmision} hoyIso={hoyIso} disabled={Boolean(documentoId)} />
       )}
       {esNota ? null : (
         <Campo etiqueta="Glosa (opcional)" htmlFor="emit-glosa">

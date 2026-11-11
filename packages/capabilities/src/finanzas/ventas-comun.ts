@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import {
   type AmbienteSii,
-  ivaDesdeNeto,
   type MontosDteVenta,
 } from "@opai/domain";
+import { totalesVenta } from "@opai/domain/ventas-lineas";
 import { ambienteTributarioEfectivo } from "@opai/integrations";
 
 import { uuidSchema } from "../core/esquemas";
@@ -28,13 +28,7 @@ export const tipoDteVentaSchema = z
   .describe("Tipo de DTE de venta: 33 factura, 34 exenta, 56 nota de débito, 61 nota de crédito.");
 
 export function montosDesdeLineas(tipo: 33 | 34, lineas: readonly { monto: number }[]): MontosDteVenta {
-  const bruto = lineas.reduce((a, l) => a + l.monto, 0);
-  if (tipo === 33) {
-    const neto = bruto;
-    const iva = ivaDesdeNeto(neto);
-    return { neto, exento: 0, iva, otros: 0, total: neto + iva };
-  }
-  return { neto: 0, exento: bruto, iva: 0, otros: 0, total: bruto };
+  return totalesVenta(tipo, lineas.map((l) => l.monto));
 }
 
 export function montosNotaCredito(

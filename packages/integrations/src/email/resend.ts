@@ -1,4 +1,5 @@
 import type { Correo, Mailer } from "./mailer";
+import { ErrorDeProveedor } from "../error-con-motivo";
 
 /** Adaptador Resend por HTTP (sin SDK): una sola llamada, sin dependencias. */
 export function mailerResend(apiKey: string, remitente: string): Mailer {
@@ -28,7 +29,8 @@ export function mailerResend(apiKey: string, remitente: string): Mailer {
         }),
       });
       if (!res.ok) {
-        throw new Error(`Resend respondió ${res.status} al enviar "${correo.asunto}".`);
+        // Sin el asunto: el motivo va al log y no debe llevar datos del correo.
+        throw new ErrorDeProveedor(`Resend respondió ${res.status} al enviar el correo.`);
       }
     },
   };

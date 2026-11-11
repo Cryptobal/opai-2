@@ -102,6 +102,7 @@ export async function ejecutarEnvioPropuestaAprobado(
         titulo: c.titulo,
         servicio,
         netoTotalClp: calculoPublico.ventaMensual ?? 0,
+        propuestaTecnicaId: row.propuestaTecnicaId,
       });
       const sub = await subirPdfPropuestaAlmacenamiento(ctx, { codigo: `${c.codigo}-propuesta`, pdf: pdfPropBytes });
       propStorageKey = sub.storageKey;
@@ -141,7 +142,7 @@ export async function ejecutarEnvioPropuestaAprobado(
   await enviarCorreosEnvioPropuesta(
     ctx,
     destinatarios,
-    { cuentaId: neg.cuentaId, codigo: c.codigo, titulo: c.titulo, version: pack.version.numero, mensaje: row.mensaje ?? "" },
+    { cuentaId: neg.cuentaId, negocioId: c.negocioId, codigo: c.codigo, titulo: c.titulo, version: pack.version.numero, mensaje: row.mensaje ?? "" },
     pdfs,
   );
   return { documentoCotizacionId, documentoPropuestaId, snapshot: parseSnapshotEnvioPropuesta(snapshotJson) };

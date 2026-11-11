@@ -117,7 +117,7 @@ opai_app     | rolbypassrls = false | rolsuper = false
 
 **Fecha:** 22-oct-2026 · **Estado:** vigente
 
-**Decisión.** Los módulos declaran ajustes (esquema en manifest), eventos (catálogo) y adaptadores requeridos. El núcleo renderiza la configuración por ámbito (plataforma → tenant → módulo → usuario), enruta notificaciones según preferencias por rol y usuario (silencio por defecto) y provee adaptadores configurables por tenant (DTE, banco, factoring, mensajería, biometría). Slack es un canal opcional de notificaciones, no un módulo.
+**Decisión.** Los módulos declaran ajustes (esquema en manifest), eventos (catálogo) y adaptadores requeridos. El núcleo renderiza la configuración por ámbito (plataforma → tenant → módulo → usuario), enruta notificaciones según preferencias por rol y usuario (silencio por defecto) y provee adaptadores configurables por tenant (DTE, banco, factoring, mensajería, biometría). Slack es un canal opcional de notificaciones, no un módulo. *(11-nov-2026: Slack pasa a canal de comunicación de terreno con una app «OPAI» propia; ver ADR-093.)*
 
 **Consecuencias.** Elimina la causa del "Frankenstein" de 1.0. Nada queda huérfano al apagar un módulo.
 
@@ -351,6 +351,8 @@ decisiones atribuidas a Carlos.
 
 **Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste a la pregunta 8 (telefonía) de `modulos/central.md` §14: WhatsApp/telefonía para la Central sigue el mismo patrón de plataforma-o-propia de este ADR, con Twilio como proveedor. Por defecto los avisos salen con la cuenta de Twilio **de plataforma** de OPAI y sus plantillas de WhatsApp ya aprobadas; como opción, cada tenant conecta **su propia cuenta de Twilio** en el catálogo de integraciones. Un tenant con número de WhatsApp propio necesita la aprobación de Meta **por número y por plantilla** antes de poder enviarlas; mientras no la tenga, sigue con el Twilio y las plantillas de OPAI. Detalle en `modulos/central.md` §10.
 
+**Nota del 11-nov-2026 (CAR-290, ADR-093).** Slack deja de ser una integración «propia del tenant» con credenciales propias: es una sola app «OPAI» de plataforma (client secret y signing secret en variables de entorno de OPAI) que cada tenant instala con OAuth; el token del bot de cada tenant se guarda cifrado en este almacén.
+
 ---
 
 ## ADR-028 · Marca del tenant en toda salida y diseño asistido por IA
@@ -399,7 +401,7 @@ decisiones atribuidas a Carlos.
 | 4 | **Asistencia** con cumplimiento DT completo, reportes DT, fiscalización; inicio de certificación | Marcación en 2.0 |
 | 5 | Finanzas con flujo de caja al centro, banca y conciliación, DTE y factoring, rendiciones, contabilidad e informes; migración del historial financiero | 1.0 a solo lectura |
 | 6 | Nómina (sobre asistencia y estructuras), Licitaciones (sobre CPQ), firma electrónica avanzada | Gard 100 % en 2.0 |
-| Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack, sitio de marketing 2.0, roles personalizados *(26-oct: pasan al Brief 07c)* | — |
+| Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack *(11-nov-2026: sale del backlog, ADR-093)*, sitio de marketing 2.0, roles personalizados *(26-oct: pasan al Brief 07c)* | — |
 
 **Modificación del 25-oct-2026.** Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 19:09–22:10 CLT: primero se cierra el Núcleo y las fases van en orden. Cambia el **orden de trabajo**, no los cortes de Gard. Primero se cierra el Núcleo: Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo, que pasa a la fase 1 y va antes del brief de Puestos). Después se abre **Puestos y guardias (Operaciones I, Brief 11, adelantado desde la fase 3)** (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 12:42 CLT). Después va **Comercial (CRM) y luego CPQ por vertical**, en reglas, diseño y construcción (Decisión de Carlos, 25-oct-2026 23:29 (t267u–t268u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), porque la cotización cuelga del negocio y al ganarlo se ofrecen los puestos y RRHH los confirma (ADR-040, ADR-048 y su respuesta 3 de las 23:10). Además, como requisito, los negocios de Comercial (Briefs 06 y 07) van antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). El resto sigue el orden de fases de esta tabla. Nómina en la fase 6: Carlos, 25-oct-2026 ~21:20, chat con OPAI 2.0, según el registro del bot OPAI 2.0: no tiene clientes que comprarían solo payroll. Como el ROADMAP solo permitía adelantar Nómina si un cliente la compraba sola, Nómina queda en la fase 6. Además, desde las 23:10 Nómina exige Puestos (respuesta 1 de ADR-048), lo que también impide venderla sola. Detalle por módulo y etapa en `PLAN-desarrollo.md`; fases y semanas en `ROADMAP.md`.
 
@@ -437,6 +439,8 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 **Consecuencias.** Nada específico de un proveedor de IA entra en los módulos. El alcance de OPAI se achica (no hay chat, correo, agenda ni copiloto) y se vuelve más profundo (hechos, reglas, eventos, aprobaciones). Un tenant puede operar OPAI entero desde su propio agente sin perder control ni trazabilidad.
 
 **Nota del 26-oct-2026 (ADR-049, propuesto en PR #38).** Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07: OPAI sí tendrá un **agente interno** propio, en el celular y en el escritorio, que convive con los agentes externos. No contradice el fondo de este ADR: es un cliente más de las mismas capacidades y del MCP, sin lógica ni herramientas propias, actúa como «agente vía usuario» con los permisos del usuario conectado y pide confirmación antes de escribir y su consumo se mide como cualquier otro (ADR-031). Lo demás sigue igual: sin copilotos por módulo, sin clientes de correo, calendarios ni bases de conocimiento.
+
+**Nota del 11-nov-2026 (CAR-233, historial de correos del cliente; alcance de Carlos del 10-nov-2026 23:51 America/Santiago).** OPAI **sigue sin ser un cliente de correo**: no hay bandeja completa, ni redactar, responder o reenviar desde el sistema. Lo que sí hace desde la v1.0 es **registrar** en el historial de la cuenta, el contacto y el negocio (a) los correos que salen de OPAI (cotización, documento tributario y seguimiento) y (b) los que entran por el receptor de Resend: la respuesta del cliente a la **dirección de registro de la empresa** (`t<token>@respuestas.opai.cl`, reply-to de los salientes junto a la dirección que ya recibía las respuestas) y los correos que el vendedor envía desde su casilla con esa dirección en **CCO**. Asociación (decisión de Carlos): correo exacto del contacto; si no, dominio del `sitioWeb` de la cuenta; dominios genéricos solo por correo exacto; lo demás a una bandeja «sin asignar» que se asocia a mano. El texto es contenido externo (dato, nunca instrucción). Sin OAuth ni lectura de Gmail en la v1.0: eso es CAR-265. Esta nota precisa ADR-032; no lo invierte. En `modulos/comercial.md` §14, pregunta 10 («los correos no se registran solos en la v1») queda enmendada en este sentido.
 
 ---
 
@@ -1601,9 +1605,9 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
   - asigna el reemplazo desde el celular y el turno extra queda por aprobar (compatible con el punto 3 de este ADR).
 - **Turnos pedidos (CAR-100; A11, A12, C16, C17):**
   - solo se cobra al cliente lo que pide fuera de su pauta; los reemplazos por faltas los asume la empresa;
-  - un guardia adicional por un día entra como solicitud que crea un puesto temporal con cobro;
+  - un guardia adicional por un día entra como solicitud que crea un puesto temporal con cobro (**reemplazado por la adenda del 9-nov**, más abajo);
   - la tarifa sale de la línea «guardia adicional» de la cotización vigente en CPQ, y Finanzas factura desde ese registro.
-  - **Conciliación:** el pago al guardia vive en el turno extra; el cobro al cliente vive en el puesto temporal de la solicitud. La línea de CPQ queda por definir en el brief de CAR-100, porque hoy `adicional` es un ítem de catálogo y no una tarifa diaria.
+  - **Conciliación (corregida el 9-nov):** el pago al guardia vive en el turno extra. El cobro al cliente sigue la adenda del 9-nov: no hay un puesto temporal separado. La línea de CPQ queda por definir en el brief de CAR-100, porque hoy `adicional` es un ítem de catálogo y no una tarifa diaria.
 - **Pago por lote (CAR-101; A8, C13–C14):**
   - Finanzas arma y concilia el lote semanal o quincenal de los turnos extra aprobados;
   - Nómina lo informa en el LRE si corresponde;
@@ -1613,3 +1617,197 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
   - sin pagos reales;
   - el código de CAR-96 espera el diseño aprobado **y** esa revisión.
 
+**Adenda (9-nov-2026) · Cobro al cliente del turno extra.** Decisión cerrada de Carlos, textual:
+
+> El turno extra no se cobra, salvo un turno de refuerzo ingresado desde la pauta diaria cuando un guardia no va. El puesto temporal es ese mismo refuerzo. No es un puesto de un día ni un objeto nuevo.
+
+- Reemplaza el «puesto temporal con cobro creado por una solicitud» del 29-oct (A12) y la conciliación que ponía el cobro en un puesto temporal separado.
+- No cambia lo demás de este ADR: quién aprueba, que el supervisor no edita el monto, los externos, el estado único por persona y la condición previa de revisión legal y contable escrita, que sigue pendiente.
+- El bloque B (Design Prompt en Claude Design) no tiene OK.
+
+**Adenda (9-nov-2026) · Documentos v4: respuestas de Carlos a las nueve preguntas abiertas de CAR-127.** Carlos aceptó la §15 del brief `BRIEF-CAR-127-documentos-v4-pantallas-04-08.md` tal como estaba escrita; la registra la sesión «Personas · Code»:
+
+- **Dos sistemas.** Las plantillas laborales (contrato, anexo, recepción, carta) y las salidas comerciales son distintas; las comerciales siguen en CPQ.
+- **Contenido:** texto con variables `{persona.rut}` renderizado a PDF, no bloques.
+- **Firma:** N1 y N2 equivalen a la clase de `PoliticaFirma` (CAR-82) y no bajan del mínimo legal de la clase; N3·FEA queda deshabilitado (CAR-94 sin proveedor).
+- **PDF:** el núcleo usa un helper neutral en `packages/*`; no se difiere.
+- **Lote (B3):** corre en cola, con avance por persona. **El tope de personas no tiene número**: no se inventa ni se fija en código hasta que Carlos lo defina.
+- **Permisos:** `core:documentos.plantillas.manage` (owner y admin; denegado al gerente) y lectura sensible de `{sueldo.*}` al generar.
+- **Variables:** solo Persona, Vínculo, Instalación, Sueldo y Contrato (las 12 del diseño); no se agregan más en esta entrega.
+- **Pestaña Plantillas** sin permiso: se oculta.
+- **Importar Word o PDF** (09): deshabilitado, con aviso, hasta su propio encargo.
+- **CAR-58** (texto legal del anexo): no se arranca; el texto lo trae Carlos con el abogado. Las plantillas se crean vacías o con el texto que el usuario escriba; no se siembra texto legal.
+
+
+## ADR-084 · «Comercial · Proyecto» construye el PR 6 de CAR-138 por orden expresa de Carlos (9-nov-2026)
+
+**Fecha:** 9-nov-2026 19:17 UTC · **Estado:** vigente solo para este PR · **Autor:** Carlos (chat), registrado por la sesión «Comercial · Proyecto».
+
+**Contexto.** Desde el 4-nov-2026 «Comercial · Proyecto» responde, revisa y entrega prompts, y no construye ni integra. El 9-nov-2026 llegó el encargo del PR 6 de CAR-138 (capítulo por instalación, solo servidor y PDF con índice numerado) con las restricciones de superficie del brief.
+
+**Decisión.** Carlos ordenó que esta sesión lo construya («Constrúyelo en esta sesión… Un solo PR»). Excepción acotada a ese PR: **no integra, no hace squash, no aplica migraciones, no cierra CAR-138**, no toca #400, #424 ni #409, no construye el editor en pantalla ni el PR 7, y no prepara Design Prompts. La migración la aplica el coordinador con respaldo; el PR lleva `migracion-pendiente`. Fuera de ese PR, el rol de «Comercial · Proyecto» no cambia.
+
+## ADR-085 · Prompt exportable de la propuesta: destino y forma (9-nov-2026)
+
+**Fecha:** 9-nov-2026 · **Estado:** vigente · **Autor:** Carlos, vía el coordinador OPAI 2.0; registrado por la sesión «Sesión Comercial».
+
+**Decisión.** El prompt exportable (CAR-138, PR 8) se genera en código desde el catálogo de campos y se entrega a Claude Design u otra IA; no se usa ningún producto de Google ni se promete Figma, PPT o PDF. Solo cita claves del catálogo de la finalidad «propuesta» que el actor puede leer. Es una lectura (`cpq.propuestas_tecnica.prompt_exportable`) sin migración. Importar HTML queda para el PR 9. Se abre en borrador por orden expresa de Carlos para este PR; la regla general de AGENTS.md (PR listos para revisión) sigue vigente para los demás.
+
+## ADR-086 · Importación de HTML de propuesta: saneada, por empresa y sin renderer (10-nov-2026)
+
+**Fecha:** 10-nov-2026 · **Estado:** vigente · **Autor:** Carlos, vía el coordinador OPAI 2.0; registrado por la sesión «Sesión Comercial».
+
+**Decisión.** CAR-138 PR 9 permite importar HTML como plantilla de propuesta por empresa, saneado en el servidor con lista blanca (`parse5`), con marcadores validados contra el catálogo de campos y versionado (`cpq.propuesta_html`). Se rechaza, sin guardar, todo lo que ejecute código, use red o recursos remotos, o traiga marcadores fuera del catálogo. **No hay renderer de HTML:** el PDF sigue siendo `pdf-lib` y no consume esta tabla; no se promete Figma, PPT ni PDF desde el HTML. El export `PropuestaCliente.dc.html` de Claude Design no es importable tal cual (formato de componentes propio); no se inventó otro diseño ni un conversor. Conectar la plantilla a un renderer queda para una decisión de arquitectura aparte. Se abre en borrador por orden expresa de Carlos para este PR.
+
+## ADR-087 · Referencias de clientes solo con consentimiento registrado (CAR-138 PR 7, 10-nov-2026)
+
+**Fecha:** 10-nov-2026 · **Estado:** vigente; **quién autoriza queda pendiente de Carlos** · **Autor:** Carlos (encargo vía el coordinador, 10-nov-2026 11:08), registrado por la «Sesión Comercial». (El número ADR-086 lo usa el PR #452, aún abierto.)
+
+**Decisión.** Un cliente aparece como referencia en una propuesta o documento comercial **solo** si hay un consentimiento explícito y registrado, vigente, y la cuenta es «cliente activo» sin archivar; por defecto no aparece. El registro (`core.cuentas_referencias`) es append-only: cada otorgamiento o revocación es una fila nueva y el estado vigente es la última fila de la cuenta (revocar manda sobre un otorgamiento anterior). Otorgar exige fecha, evidencia con detalle y la confirmación explícita de quien registra; guarda qué se puede mostrar. Sin autorización expresa del nombre, el cliente sale anonimizado («Cliente de {rubro} en {comuna}»). Las referencias solo existen para las finalidades «propuesta» y «documento» (nunca contratos ni correos), excluyen la cuenta destinataria y se leen con el permiso y el alcance de cuentas. El catálogo de campos sube a v2. Si una propuesta usa la colección y no hay ninguna autorizada, el envío se detiene en vez de mandar una sección vacía.
+
+**Pendiente (Carlos).** Quién autoriza. Se dejó configurable con el permiso `core:cuentas.referencias.autorizar`: por defecto solo owner y admin; cada empresa lo concede o quita con roles personalizados y excepciones por usuario. Revocar basta con `core:cuentas.manage` (dirección segura). Si Carlos decide otro default (p. ej. gerente comercial), es un cambio de una línea en `permisos-patrones.ts`.
+
+**Agentes.** Otorgar es solo para personas (`soloPersonas`): ninguna API key registra un consentimiento, ni con autonomía «directo», que se salta la aprobación. Los agentes pueden listar y revocar. **Consecuencia:** hasta que exista la pantalla en la ficha de la cuenta (espera diseño aprobado), nadie puede otorgar y ningún cliente aparece como referencia; si Carlos prefiere habilitarlo antes por API, hace falta una regla de aprobación que la autonomía «directo» no pueda saltarse. **Orden:** la última fila de una cuenta es la de mayor `seq` (identity, orden real de inserción), no `created_at` (inicio de la transacción); otorgar y revocar bloquean la fila de la cuenta, así que se serializan.
+
+**Límites conocidos.** El consentimiento anónimo igual muestra rubro, comuna y fecha «cliente desde», que juntos pueden ayudar a identificarlo: quien registra debe tenerlo presente. Revocar no cambia lo ya enviado (PDF y enlace congelados). La evidencia y la cita son textos cortos (≤300 y ≤400) que pueden mencionar a una persona del cliente; al ser append-only, no los borra la anonimización de contactos (Ley 21.719). Sin pantalla hasta que haya diseño aprobado (se opera por MCP y `/api/v1`).
+
+## ADR-088 · SimpleAPI: un 401 sin cuerpo se trata como key no reconocida; la key se comprueba con `Suscripcion/status` (CAR-263, 10-nov-2026)
+
+**Fecha:** 10-nov-2026 · **Estado:** vigente · **Autor:** sesión del proyecto «OPAI 2.0» (Claude), por encargo de Carlos del 10-nov-2026 22:01 («contrastar 1.0 con 2.0, los PR, Linear y la documentación de SimpleAPI, decir cuál es el error y solucionarlo»).
+
+**Contexto.** El 10-nov hubo nueve intentos de emitir la factura 33 de certificación (CAR-240) y todos terminaron en `dte/generar` con HTTP 401, cuerpo vacío y `x-rate-limit-remaining: 39`. Los PR #460, #465, #471, #476 y #477 trabajaron sobre la regla «si vienen `x-rate-limit-*`, la key autenticó y lo rechazado es el contenido», tomada de `isApiKeyAuthenticated` de OPAI 1.0.
+
+**Evidencia.** Llamadas reales a `api.simpleapi.cl` desde esta sesión, sin credenciales de Gard: sin `Authorization`, con `Basic api:` + una key inventada y con la key inventada cruda, `POST /api/v1/dte/generar` responde 401, cuerpo vacío y los mismos `x-rate-limit-limit: 1m` / `x-rate-limit-remaining: 39`. Una ruta inexistente responde 404 con esos mismos encabezados. La regla era falsa: los encabezados salen en toda respuesta.
+
+**Decisión.**
+1. Los encabezados `x-rate-limit-*` no se usan para decidir si la key autenticó. Se siguen registrando en el log solo como límites de uso.
+2. Un 401 o 403 **sin cuerpo** se informa como «la respuesta de SimpleAPI a una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE)» y envía a «Probar conexión». No se afirma que el contenido fue rechazado.
+3. La key se comprueba con `GET https://api.simpleapi.cl/api/v1/Suscripcion/status` (publicado en `https://api.simpleapi.cl/swagger`), con el mismo `Basic api:key` del SDK oficial. Es lo que ejecuta «Probar conexión» de Emisión DTE (`core.integraciones.probar`, también por MCP). No emite, no usa folios y no envía el certificado ni el CAF.
+4. Se mantiene el formato de la petición (Basic `api:key`; multipart `input` + `file` + `file`): coincide con `DTEExtensions.GenerarXMLAsync` del SDK oficial y con 1.0, que emite.
+
+5. La key se limpia de espacios, saltos y caracteres invisibles (`limpiarKeySimpleApi`) antes de enviarla, en la prueba y al emitir.
+
+**Límite conocido.** Desde fuera no se puede saber qué responde SimpleAPI a una key válida con un contenido inválido; 1.0 sostiene que también es 401 vacío. Por eso el mensaje dice «como ante una key que no reconoce» y la prueba de la key es una llamada aparte. Si «Probar conexión» reconoce la key y `dte/generar` sigue en 401, la causa es el contenido y el motivo solo lo puede dar el soporte de SimpleAPI.
+
+
+### Adenda a ADR-088 · SimpleAPI con token Bearer cuando rechaza sin motivo (CAR-240, 10-nov-2026, 23:59)
+
+**Autor:** sesión del proyecto «OPAI 2.0» (Claude), tras el reclamo de Carlos del 10-nov-2026 23:56: guardó la key correcta (20 caracteres, termina en 3041) y «Probar conexión» de #480 siguió diciendo «no reconoce la API key».
+
+**Corrección.** #480 afirmaba más de lo medido: `Suscripcion/status` con `Basic api:key` nunca se validó con una key buena, y el indicio «19 caracteres» era falso. El punto 2 de ADR-088 («un 401 sin cuerpo se informa como key no reconocida») queda sin efecto.
+
+**Evidencia nueva** (api.simpleapi.cl, key inventada, sin credenciales de Gard): `POST /api/Auth/token` con `{ "apikey": … }` entrega un JWT para cualquier key. Con `Authorization: Bearer <token>`: `GET /api/v1/Suscripcion/status` responde 200 y `[]`; `POST /api/v1/dte/generar` responde 400 «RUT de emisor incorrecto» (con `Basic` era 401 sin cuerpo); `POST /api/v1/Consulta/validador` responde 401 «API KEY Incorrecta. No es posible continuar». Por la vía Bearer, SimpleAPI dice el motivo.
+
+**Decisión.**
+1. `postMultipartSimpleApi` usa `Basic api:key` (como 1.0) y, solo ante un 401/403 sin cuerpo, repite una vez con `Bearer <token>`. El rechazo mudo ocurre antes de procesar la petición, así que repetir no duplica un envío al SII.
+2. «Probar conexión» informa lo medido: estado HTTP con Basic, estado con token y cuántas suscripciones informa SimpleAPI para la key. Lista vacía se muestra como tal, sin afirmar que la key está mal copiada.
+3. El token lleva la key dentro: es un secreto, no se registra ni se devuelve.
+
+**Dato de Carlos (11-nov-2026, 00:00).** La key guardada en 2.0 (termina en 3041) es exactamente la `SIMPLEAPI_KEY` de OPAI 1, que emitió hasta el 6-nov (folio 1898 aceptado). Con una key que sirve en 1.0, `Suscripcion/status` con Basic dio 401: esa consulta con Basic no sirve para validar la key, y el 401 mudo de `dte/generar` en 2.0 puede venir del contenido.
+
+**Límite conocido.** No se ha observado qué responde SimpleAPI a una key válida por ninguna de las dos vías; se sabrá con la primera prueba en test.opai.cl.
+
+## ADR-089 · El RCV de compras se lee del SII de producción también fuera de app.opai.cl (CAR-273, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Autor:** sesión del proyecto «OPAI 2.0» (Claude), por encargo de Carlos («continúa con todos los tickets de Linear»).
+
+**Contexto.** CAR-191 fija que, fuera de app.opai.cl, el SII y Octava quedan en certificación. El RCV (Registro de Compras y Ventas) solo existe en el SII de producción: en certificación no hay compras que leer. CAR-272 pide verificar las compras reales de Gard en test.opai.cl, y Carlos ya decidió el 11-nov-2026 que Web4Leads envíe los movimientos bancarios reales a test.opai.cl.
+
+**Decisión.**
+1. `finanzas.compras.sincronizar_rcv` y su trabajo diario consultan el RCV con `Ambiente: 1` en cualquier host. Es una lectura sin efecto tributario: no emite, no cede ni firma nada. El candado de CAR-191 sigue rigiendo la emisión, el envío y la cesión.
+2. El trabajo diario hace una sola consulta: el mes anterior los tres primeros días del mes y el mes en curso el resto. Así no supera las 30 consultas mensuales del plan.
+
+**Pendiente de Carlos.** El cupo de RCV es de la key, y la key es la misma de OPAI 1. Si el cron `finance-rcv-sync` de OPAI 1 sigue activo, entre los dos pasan las 30 consultas al mes. El panel mostraba 0 de 30 usadas el 11-nov, así que hoy 1.0 no consume. Si se acerca al tope: apagar el de 1.0 cuando Compras pase a 2.0, o subir el plan.
+
+## ADR-090 · Base «Hilo»: marco agéntico con interruptor y barra del agente en los portales (CAR-274, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» · **Registra:** Claude («Sesión Hilo»). **Modifica** ADR-046 y `NAVEGACION.md` (el marco), ADR-049 y `modulos/agente.md` (portales del agente: R1 y la decisión del 29-oct sobre la pregunta 9) y ADR-014 y `DISENO.md` (la piel del DS, en la etapa H2). **Extiende** a la base Hilo el proceso de diseño de ADR-076. **No modifica** ADR-032 §3, ADR-033, ADR-045 ni ADR-055 §2.
+
+**Fuente (11-nov-2026, hora de Chile).** 10:56, sobre la propuesta: «me gusta». 11:50: «si que esten en todos los portales». 11:55: «lo apruebo para que lo hagas y poder verlo en produccion […] quiero que este nuevo diseño sea COPIA FIEL a lo que estoy viendo ahora, 100% identica. Mi objetivo y tuyo es que sea un saas 100% agentico, que se pueda conectar a IA externas y que desde ahi se pueda comandar, operar». 11:57: «hoy en dia la IA lo es todo, quiero que opai 2 sea asi». Aquí «producción» es `test.opai.cl`: la producción de Gard sigue prohibida para los agentes (`AGENTS.md`).
+
+**Contexto.** El servidor de OPAI 2.0 ya es agéntico: las consultas y los cambios de negocio son capacidades con vista previa, auditoría, aprobación de lo irreversible y herramienta MCP, con las excepciones declaradas `interna` y `soloPersonas` (ADR-004, ADR-032, ADR-055). La interfaz no: es un ERP con barra lateral, y el agente interno es un panel aparte que solo existe en el ERP. Carlos pidió una base nueva, centrada en el agente, igual en escritorio, iPad y iPhone, que todo lo que se construya después herede.
+
+**Decisión.**
+1. **Marco «Hilo».** Tres piezas: el **hilo** (Pendientes, Actividad y Agenda), el **lienzo** (la pantalla de trabajo) y la **barra** (el agente, que sabe en qué pantalla está la persona). Reemplaza, cuando está encendido, la barra lateral, el riel, la barra inferior, «Más», Inicio, la Bandeja como pantalla, la campana y el panel del agente. El Índice de todas las pantallas del portal queda a un toque y sale del mismo manifiesto de navegación. La Agenda no es un calendario ni se edita (ADR-032): es una lectura de lo que viene según los módulos.
+2. **Una aplicación, dos marcos, un interruptor.** El marco se elige con un ajuste por usuario; al partir, el valor es el marco clásico. Que además exista un valor por defecto por empresa queda por verificar en la etapa H1, porque hoy cada ajuste vive en un solo ámbito. Las páginas, las capacidades, los permisos y los manifiestos son los mismos: todo cambio de un módulo se ve en ambos marcos sin hacerlo dos veces. Solo lo propio del marco se construye en los dos mientras dure la transición. No se mantiene una copia ni una rama paralela de la aplicación. Rige ADR-045: marco persistente, sin romper la caché y dentro del tope de consultas por navegación.
+3. **Copia fiel.** La referencia es `docs/2.0/design/export-base-hilo/`. Son exactos el marco, la piel (colores, tipografía, radios, filas, pestañas, botones, avisos) y la estructura de cada patrón. El contenido de cada pantalla real manda sobre el de ejemplo: no se quitan campos ni reglas para parecerse al prototipo. Cada PR visual trae capturas a 375, 1024 y 1280 px (`AGENTS.md`) y, además, a 390 y 1440 px junto al tablero equivalente, y declara toda diferencia que no pudo igualar.
+4. **La barra del agente va en ERP, Supervisor, Trabajador, Terreno y Cliente.** Es el mismo agente interno de ADR-049: actúa como la persona que le escribe, con sus permisos y su alcance por filas, y deja su nombre en la auditoría. Siguen siendo condición la licencia del módulo `agente` y el permiso `agente:usar`; sin ellos la barra solo busca y navega. Se enciende por portal y por rol. Reemplaza la decisión del 29-oct sobre la pregunta 9 de `modulos/agente.md`. En Trabajador, Terreno y Cliente no hay autonomía que configurar: el límite es el permiso de la persona. Marcas de asistencia, rondas, firmas y registros de acceso son siempre el acto de una persona. **Plataforma no cambia:** el agente interno sigue sin acceder a Plataforma (ADR-055 §2, R2) y ahí la barra solo busca y navega, mientras Carlos no decida otra cosa.
+5. **Agentes y autonomía se gobiernan desde el ERP**, en Configuración › Agentes, por dueños y administradores. Trabajador y Terreno no gestionan agentes. El cliente conserva lo de ADR-033: crea en su portal las llaves de su propia cuenta, dentro de lo que la empresa permite. El nivel por agente (observa, propone, actúa solo) es un atajo sobre la autonomía por capacidad de ADR-032, que no cambia: lo irreversible pide aprobación humana salvo autorización explícita del dueño por capacidad, y para el agente interno rige R5 (siempre a la cola). Lo que un módulo declara sin autonomía (por ejemplo, Central R11) y los hechos regulados no se autorizan.
+6. **Agéntico de punta a punta.** Todo lo que muestra el hilo es una capacidad con herramienta MCP: una IA externa conectada ve los mismos pendientes, la misma actividad y la misma agenda, y puede operar con los mismos permisos, vistas previas y aprobaciones que la pantalla.
+7. **Se sigue vendiendo por módulos.** El Índice, el hilo y la barra se arman desde el registro de módulos: lo no contratado no aparece, el agente no puede usar sus capacidades y sus eventos no llegan al hilo.
+8. **Orden y resguardos.** (a) No se tocan pantallas de Finanzas hasta cerrar las verificaciones reales (CAR-266 a CAR-269). (b) Trabajador y Terreno migran al final, midiendo el funcionamiento sin conexión y el tope vigente de JS de cada ruta. (c) Solo se descarga el marco activo. (d) Rigen sin cambios la revisión visual de Carlos en `preview.opai.cl` (A2.10), la novedad in-app de todo cambio visible y la prohibición de desplegar a la producción de Gard.
+9. **Proceso de diseño.** La base Hilo y sus etapas se diseñan como este prototipo: interactivo, en la sesión, y con su export en el repositorio al aprobarse, igual que ADR-076 para Finanzas.
+10. **El marco clásico se retira.** Cuando Hilo cubra todos los portales, pasa a ser el valor por defecto con el OK de Carlos. Él fija la fecha de retiro al terminar la etapa H5 y la etapa H7 lo ejecuta.
+
+**Qué no cambia.** Las capacidades, los permisos, la RLS, la auditoría, los hechos regulados (ADR-023), el flujo de caja (ADR-073) y el contenido de los diseños aprobados de cada módulo.
+
+**Plan.** Etapas H1 a H7 en [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md).
+
+**Pendiente de Carlos.** (1) Si los agentes de la empresa vienen incluidos con su módulo o se cobran aparte. (2) Inicio según rol: quien decide entra al hilo; quien opera todo el día entra a su pantalla de trabajo con el hilo plegado (propuesta). (3) Adelantar CAR-247, OAuth por usuario para el MCP, hoy «después de v1.0» (propuesta: es lo que deja conectar una IA externa como la persona, sin llaves). (4) Fecha de retiro del marco clásico. (5) Si la barra de Plataforma debe tener agente (hoy ADR-055 lo impide; propuesta: que solo busque). (6) El prototipo muestra que emitir, anular o ceder documentos tributarios y pagar nunca los hace un agente solo; ADR-032 permite que el dueño los autorice por capacidad. Mientras no decida endurecerlo, rige ADR-032.
+
+## ADR-091 · Motor común de importación de datos y reglas del importador (CAR-279, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos pidió el importador (CAR-279 y chat del proyecto «Opai 2.0»); las reglas 2 a 6 son criterio de la sesión y quedan para su revisión · **Registra:** Claude («Sesión Comercial»).
+
+**Contexto.** Carlos pidió que una empresa que llega con datos pueda cargarlos por módulo, y usar lo mismo para traer Gard desde OPAI 1. Ya existían `comercial.importar_1_0` (corrida técnica desde el JSON de 1.0) y las tablas `core.importaciones`, `core.importaciones_filas` y `core.ids_externos`.
+
+**Decisión.**
+1. **Un solo motor, en el Núcleo.** `@opai/domain/importacion` (lectura de CSV y Excel, mapeo, validación) y `packages/capabilities/src/core/importar` (plan, lote, reversión). Reutiliza las tablas existentes con `version_contrato = motor-archivo/v1`, sin migración. Personas y Finanzas agregan su importador implementando `Importador` y registrándolo; no escriben otro motor.
+2. **Al existir el registro, por defecto se completa solo lo vacío.** Reemplazar o no tocar son opciones explícitas de quien importa. El estado de una cuenta, instalación o negocio existente nunca cambia por una importación.
+3. **Cómo se reconoce lo que ya existe.** Cuenta: id de origen, RUT o nombre exacto; el mismo nombre con otro RUT es otra cuenta. Contacto: id de origen, correo dentro de la cuenta o nombre completo. Instalación: nombre dentro de la cuenta. Negocio: id de origen o título dentro de la cuenta.
+4. **Negocios.** Quedan en la etapa que dice la planilla (o en la primera si no existe) sin disparar los efectos de ganar o perder: es carga histórica.
+5. **Exportes de OPAI 1.** El adaptador solo lee el JSON del export que se le entrega y usa el sistema de ids `opai1`, el mismo de `comercial.importar_1_0`, para reconocer lo ya traído. Nunca consulta OPAI 1.
+6. **Quién importa.** `core:tenant.manage` (owner y admin por defecto) más el permiso de la entidad; para negocios, el módulo Comercial activo. Revertir un lote es irreversible: a un agente le pide aprobación.
+
+**Pendiente de Carlos.** Ver «Decisiones para Carlos» de CAR-279 en `ESTADO.md`.
+
+## ADR-092 · `preview-e2e` reemplaza el primer vistazo visual de Carlos (CAR-285, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (14:37, hora de Chile) · **Registra:** Claude («Sesión Comercial»). **Modifica** ADR-077 (adenda de revisión visual), `OPERACION-agentes.md` A2.10, `AGENTS.md` y la plantilla del PR.
+
+**Fuente.** «El primer vistazo visual ya no lo hace Carlos, lo reemplazan estas pruebas y sus capturas.» «Un PR se integra solo con el run de preview-e2e en verde y las capturas revisadas por la propia sesión.» «Las pruebas entran siempre como el usuario de qa-e2e. Nunca con Gard ni con datos reales, y sin mostrar ni loguear los secretos.»
+
+**Decisión.**
+1. El workflow `preview-e2e` corre en cada PR los e2e de Playwright marcados `@preview` contra la vista previa de Vercel del commit, a 375, 1024 y 1280 px, y sube las capturas como artefacto.
+2. Entra siempre con el usuario de la empresa ficticia `qa-e2e`. Los secretos (`E2E_EMAIL`, `E2E_PASSWORD`, `E2E_TOTP_SECRET`, `VERCEL_AUTOMATION_BYPASS_SECRET`) viven solo en GitHub Actions. La cabecera de protección de Vercel se envía únicamente al origen de la vista previa. Sin traza ni video.
+3. Un PR con cambio visual se integra solo con ese run en verde sobre el head y las capturas revisadas por la sesión que lo lleva. Carlos conserva el veto y puede pedir cambios.
+4. Si faltan los secretos, el check falla (falla cerrado). En PRs de forks se omite.
+
+**Pendiente de Carlos.** Agregar `preview-e2e` como check obligatorio del ruleset «Proteger main» (hoy lo exige el contrato, no GitHub).
+
+## ADR-093 · Slack como canal de comunicación de terreno con una sola app «OPAI» (CAR-290, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos (decisiones del 11-nov-2026, 15:20, hora de Chile; delegación a la «Sesión Núcleo» a las 15:32) · **Registra:** Claude («Sesión Núcleo»). **Modifica** ADR-008 (Slack deja de ser solo «un canal opcional de notificaciones»), ADR-027 (Slack pasa de integración «propia del tenant» a una app de OPAI que cada tenant instala) y la fila «Backlog» del plan por fases (Slack sale del backlog). **Excepción acotada a esta serie** (§12): ADR-070, `OPERACION-agentes.md` A2.3 y `AGENTS.md` («Prohibido» y regla 4 de «Veto y migración pendiente») en lo que toca a quién aplica las migraciones de los PR de Slack. **No modifica** ADR-020 (silencio por defecto), ADR-023 (hechos regulados), ADR-029 (outbox y trabajos) ni ADR-055 (agent-first).
+
+**Contexto.** En 1.0 Slack se saturó: un canal por instalación y un mensaje por marcación. Carlos quiere que la supervisión de terreno use Slack para lo que importa, sin que OPAI dependa de Slack ni que los guardias lo usen. Plan por fases en [`briefs/BRIEF-slack.md`](briefs/BRIEF-slack.md) (CAR-290 a CAR-296).
+
+**Decisión.**
+1. **OPAI es la fuente de verdad.** Slack solo muestra avisos y recibe acciones. Toda acción hecha en Slack se ejecuta en OPAI como una capacidad, como el usuario OPAI vinculado, con sus permisos y su alcance por filas, y queda en la auditoría. Ningún dato vive solo en Slack.
+2. **Una sola app de Slack «OPAI»**, distribuida a todos los tenants y mantenida por OPAI (decisión 1). Cada tenant la instala en su espacio con OAuth v2 desde Configuración › Integraciones; las mejoras de avisos, respuestas y botones llegan a todos a la vez. El manifiesto vive versionado en [`packages/integrations/src/slack/manifiesto/`](../../packages/integrations/src/slack/manifiesto/) con los scopes mínimos (regla 8) y una prueba que lo valida.
+3. **Sin saturar y lo menos invasivo posible** (decisión 2). Todo se configura por tenant: qué se avisa, a qué canal, el margen de atraso, el escalamiento del pánico y si va el resumen. Por defecto se envía lo mínimo; los valores iniciales están en el plan y los confirma Carlos.
+4. **Solo anomalías** (decisión 3). Las marcaciones normales se quedan en OPAI. A Slack van el atraso sobre el margen, la ausencia, el fuera de zona y el sin relevo, con el botón «Tomar»; además, si el tenant lo activa, incidentes, pánico, mensajes de guardias y un resumen por turno y zona que se edita en el mismo mensaje. Los avisos van en **un hilo por instalación y día**, en pocos canales (por zona o por tipo). **Nunca se crea un canal por instalación.**
+5. **Pánico** (decisión 4). Aviso al canal y, si el tenant lo configura, mensaje directo al supervisor zonal y escalamiento a un responsable cuando nadie lo toma en los minutos configurados.
+6. **Los guardias nunca usan Slack** (decisión 5). Hablan con su supervisor o la central desde el módulo nuevo «Comunicación» de la app de terreno; Slack es solo el lado del supervisor. Solo se vinculan usuarios internos, y solo miembros completos del mismo espacio (`team_id` de la instalación; sin invitados, externos ni cuentas desactivadas), porque las acciones de Slack se ejecutan como el usuario OPAI vinculado.
+7. **No romper nada.** La integración está apagada por defecto: sin Slack conectado, OPAI se comporta exactamente igual. Ningún flujo (marcaciones, rondas, incidentes, pánico, notificaciones) depende de Slack. El envío es asíncrono: el evento de dominio sale por outbox en la transacción del hecho (ADR-029) y un consumidor envía a Slack con reintentos y respetando sus límites; si Slack falla, se registra y OPAI no se ve afectado. Los enganches a módulos de otras sesiones son puntos de extensión mínimos (consumidores de eventos existentes) y cada PR los explica.
+8. **Scopes mínimos del bot:** `chat:write` (publicar, actualizar y avisos efímeros), `im:write` (mensajes directos), `users:read` y `users:read.email` (vincular por correo), `channels:read` (elegir canal), `channels:history` (recibir las respuestas en hilos de canales públicos, evento `message.channels`) y `files:write` (foto del aviso). `channels:history` entrega todos los mensajes de los canales donde está la app: OPAI descarta sin guardar lo que no sea una respuesta en el hilo de un aviso suyo (Ley 21.719). Eventos: `message.channels`, `app_uninstalled` y `tokens_revoked`. Sin `chat:write.public`: la app solo escribe en los canales a los que el tenant la invita. Sin canales privados ni lectura de mensajes directos por ahora (pregunta abierta). Sin scopes de usuario.
+9. **Secretos.** El client secret y el signing secret de la app viven solo como variables de entorno de la plataforma (`SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_SIGNING_SECRET`; las carga Carlos). El token del bot de cada tenant se guarda cifrado en el almacén de secretos del tenant (ADR-027), nunca se muestra, no sale por API ni MCP y nunca se usa para otro tenant. Al desconectar se revoca (`auth.revoke`) y se borra. La rotación de tokens de Slack queda apagada en F0 porque no se puede desactivar una vez activada; se reevalúa en F1.
+10. **Endpoints** (todos en `apps/web/app/api/integraciones/slack/`): `oauth/callback` (OAuth v2, F1), `eventos` (Events API; F1 la deja mínima, con `url_verification`, `app_uninstalled` y `tokens_revoked`, para que la app se pueda registrar; F5a agrega las respuestas) y `acciones` (interactividad, F4). Eventos y acciones verifican la firma de Slack (signing secret y marca de tiempo de menos de 5 minutos) antes de leer nada y deduplican los reintentos. **De dónde sale el tenant:** es la excepción acotada a la regla «el tenant nunca sale del body», porque Slack no manda otra cosa. Solo después de verificar la firma, el tenant se resuelve por el `team_id` de la instalación (un espacio de Slack queda ligado a un solo tenant; una segunda empresa no puede instalar la app en un espacio ya ligado) y el actor por el vínculo (`team_id`, `user_id`) de F2, nunca por el canal ni por metadatos del mensaje. Lo que llega de otro espacio (Slack Connect, canales compartidos, Enterprise Grid) se ignora.
+11. **Pruebas.** Con mocks de Slack en las unitarias y con la empresa ficticia `qa-e2e` en los e2e (`preview-e2e`, ADR-092). Nunca con el Slack de Gard ni con datos de Gard. Un e2e contra Slack real necesita un espacio de pruebas y una app de pruebas registrada en api.slack.com (manifiesto `opai-pruebas.json`, apuntando a `test.opai.cl`).
+12. **Migraciones de la serie.** Solo aditivas (tablas o columnas nuevas; nada de `DROP` ni `RENAME`). Carlos, en el encargo directo a la «Sesión Núcleo» del 11-nov-2026 (15:32), pidió que esta sesión las aplique en Neon (proyecto de OPAI 2.0) con respaldo previo, primero en `dev` y después en `main`, que anote el respaldo en el PR y que retire `migracion-pendiente`. Es una **excepción acotada a los PR de esta serie** a ADR-070, A2.3 y `AGENTS.md`, que siguen rigiendo para todo lo demás. Se aplica solo después de la revisión final sin bloqueos sobre el head y con CI en verde, con el mismo procedimiento del bot (A.5) y el aviso en el PR antes de retirar la etiqueta. Si el bot «OPAI 2.0» llega antes, la aplica él. Carlos puede revocarla con un veto o una línea en este ADR.
+
+**Prioridad.** Entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones (decisión 6): no se tocan sus archivos ni los del PR de MFA (#499) mientras siga abierto.
+
+**Respuestas de Carlos (11-nov-2026, en la sesión).**
+1. **Pánico:** se aprieta en la app de terreno (la del guardia), que es la que está en terreno. El botón nace ahí y emite el evento de pánico que consume F3.
+2. **Espacio Slack de pruebas:** sí. Las apps se registran en él (la de pruebas) y la distribuida aparte, cuando F1 esté desplegado.
+3. **Canales de supervisión:** públicos. Se mantienen los scopes de §8, sin `groups:*`.
+4. **Valores por defecto:** aprobados los del plan (atraso sobre 15 min, ausencia y pánico al canal encendidos; lo demás apagado; escalamiento a los 5 min si se enciende).
+5. **Escalamiento del pánico:** a un grupo de usuarios o a personas, configurable en cada tenant.
+
+## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (16:22, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). **Modifica** `AGENTS.md` (sección «Decisiones de Carlos») e `INSTRUCCIONES-proyecto-claude.md`. (ADR-093 y ADR-094 están reservados por los PRs abiertos #505 y #506.)
+
+**Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
+
+**Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
