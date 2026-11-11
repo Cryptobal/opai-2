@@ -47,8 +47,8 @@ async function main(): Promise<void> {
   await db.user.update({ where: { id: user.id }, data: { twoFactorEnabled: true } });
   console.log(`${email} quedó con el segundo factor activo (secreto fijo de e2e).`);
 
-  // Usuario obligado SIN segundo factor, para el e2e del enrolamiento forzado: owner de `gard`, con
-  // contraseña (la misma que el owner, para el test) y sin MFA. Al entrar lo mandan a /activar-mfa.
+  // Owner SIN segundo factor (CAR-286: ya no es obligatorio): owner de `gard`, con
+  // contraseña (la misma que el owner, para el test) y sin MFA. Entra solo con contraseña.
   const password = process.env["SEED_OWNER_PASSWORD"];
   const tenant = await db.tenant.findUnique({ where: { slug: "gard" } });
   if (password && tenant) {
@@ -80,7 +80,7 @@ async function main(): Promise<void> {
     });
     await db.user.update({ where: { id: pend.id }, data: { twoFactorEnabled: false } });
     await db.twoFactor.deleteMany({ where: { userId: pend.id } });
-    console.log(`${correoPend} es owner de gard SIN segundo factor (enrolamiento forzado).`);
+    console.log(`${correoPend} es owner de gard SIN segundo factor (entra solo con contraseña).`);
   }
 }
 
