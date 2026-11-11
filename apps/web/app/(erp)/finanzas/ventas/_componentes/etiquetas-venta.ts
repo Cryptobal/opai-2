@@ -46,3 +46,15 @@ export const estadoCesionVenta = (e: string) => ESTADO_CESION[e] ?? DESCONOCIDO;
 export function tituloVenta(v: { folio: number | null; tipoDteNombre: string }): string {
   return v.folio ? `${v.tipoDteNombre} · folio ${v.folio}` : `Borrador · ${v.tipoDteNombre}`;
 }
+
+/** Solo una factura vigente (33 o 34) se cobra o se cede; una nota, un borrador o un anulado no (mismas reglas que cobros). */
+export const seCobra = (v: { tipoDte: number; estadoDte: string }) =>
+  (v.tipoDte === 33 || v.tipoDte === 34) && v.estadoDte !== "borrador" && v.estadoDte !== "rechazado" && v.estadoDte !== "anulado_nc";
+
+const TIPO_CORTO: Record<number, string> = { 33: "Factura", 34: "Factura exenta", 56: "Nota de débito", 61: "Nota de crédito" };
+
+/** Nombre corto para la tabla: «Nota de crédito 103» o «Borrador · Factura». */
+export function tituloCorto(v: { folio: number | null; tipoDte: number; tipoDteNombre: string }): string {
+  const tipo = TIPO_CORTO[v.tipoDte] ?? v.tipoDteNombre;
+  return v.folio ? `${tipo} ${v.folio}` : `Borrador · ${tipo}`;
+}

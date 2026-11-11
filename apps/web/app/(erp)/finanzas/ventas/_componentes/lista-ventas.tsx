@@ -4,12 +4,12 @@ import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { Buscador } from "@/app/_components/maestros/buscador";
-import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos, rut } from "@/lib/fechas";
 
 import { AccionesFilaBorrador } from "./acciones-fila-borrador";
-import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "./etiquetas-venta";
+import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, seCobra, tituloCorto } from "./etiquetas-venta";
+import { FiltrosVentas } from "./filtros-ventas";
 import type { LibroVentas, Venta } from "./tipos";
 
 function badgeEstado(v: Venta) {
@@ -17,7 +17,7 @@ function badgeEstado(v: Venta) {
   return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
 }
 
-/** Libro de ventas (DTE): facturas 33/34, notas de crédito 61. */
+/** Libro de ventas (DTE): facturas 33/34, notas de crédito 61 y de débito 56. */
 export function ListaVentas(p: {
   state: EstadoPantalla;
   libro: Pick<LibroVentas, "items" | "siguiente"> | null;
@@ -31,7 +31,7 @@ export function ListaVentas(p: {
     <ListScreen<Venta>
       state={p.state}
       titulo="Ventas (DTE)"
-      subtitulo={p.subtitulo ?? "Facturas 33 y 34, notas de crédito 61"}
+      subtitulo={p.subtitulo ?? "Facturas, notas de crédito y notas de débito"}
       accionPrincipal={
         p.gestiona ? (
           <EnlaceBoton href="/finanzas/ventas/nuevo" icono={Plus}>
@@ -40,22 +40,7 @@ export function ListaVentas(p: {
         ) : undefined
       }
       buscador={<Buscador placeholder="Buscar folio o cliente" />}
-      filtros={
-        <ChipsFiltro
-          filtros={[
-            { param: "periodo", etiqueta: "Período", opciones: p.periodos },
-            {
-              param: "estado",
-              etiqueta: "Estado",
-              opciones: [
-                { valor: "borrador", etiqueta: "Borradores" },
-                { valor: "aceptado", etiqueta: "Aceptadas" },
-                { valor: "enviado", etiqueta: "Enviadas" },
-              ],
-            },
-          ]}
-        />
-      }
+      filtros={<FiltrosVentas periodos={p.periodos} />}
       items={items}
       clave={(v) => v.id}
       {...(p.gestiona ? { acciones: (v: Venta) => (v.estadoDte === "borrador" ? <AccionesFilaBorrador venta={v} /> : null) } : {})}
@@ -90,7 +75,7 @@ export function ListaVentas(p: {
         {
           id: "doc",
           etiqueta: "Documento",
-          render: (v) => tituloVenta(v),
+          render: (v) => tituloCorto(v),
         },
         {
           id: "cliente",
@@ -114,6 +99,7 @@ export function ListaVentas(p: {
           id: "cobro",
           etiqueta: "Cobro",
           render: (v) => {
+            if (!seCobra(v)) return "—";
             const e = estadoCobroVenta(v.estadoCobro);
             return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
           },
@@ -122,7 +108,7 @@ export function ListaVentas(p: {
           id: "cesion",
           etiqueta: "Cesión",
           render: (v) =>
-            v.cesionEstado ? (
+            v.cesionEstado && seCobra(v) ? (
               <Badge tono={estadoCesionVenta(v.cesionEstado).tono}>
                 {estadoCesionVenta(v.cesionEstado).etiqueta}
               </Badge>

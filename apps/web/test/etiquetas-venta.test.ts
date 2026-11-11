@@ -5,6 +5,8 @@ import {
   estadoCobroVenta,
   estadoDteVenta,
   porTransmitir,
+  seCobra,
+  tituloCorto,
   tituloVenta,
 } from "../app/(erp)/finanzas/ventas/_componentes/etiquetas-venta";
 
@@ -32,5 +34,16 @@ describe("etiquetas de venta (B4)", () => {
   it("el título muestra folio o borrador", () => {
     expect(tituloVenta({ folio: 1204, tipoDteNombre: "Factura 33" })).toBe("Factura 33 · folio 1204");
     expect(tituloVenta({ folio: null, tipoDteNombre: "Factura 33" })).toBe("Borrador · Factura 33");
+  });
+  it("solo una factura vigente se cobra; las notas y los anulados no", () => {
+    expect(seCobra({ tipoDte: 33, estadoDte: "aceptado" })).toBe(true);
+    expect(seCobra({ tipoDte: 33, estadoDte: "anulado_nc" })).toBe(false);
+    expect(seCobra({ tipoDte: 61, estadoDte: "aceptado" })).toBe(false);
+    expect(seCobra({ tipoDte: 56, estadoDte: "enviado" })).toBe(false);
+    expect(seCobra({ tipoDte: 33, estadoDte: "borrador" })).toBe(false);
+  });
+  it("el título corto distingue el tipo de documento", () => {
+    expect(tituloCorto({ folio: 103, tipoDte: 61, tipoDteNombre: "Nota de crédito electrónica" })).toBe("Nota de crédito 103");
+    expect(tituloCorto({ folio: null, tipoDte: 33, tipoDteNombre: "Factura electrónica" })).toBe("Borrador · Factura");
   });
 });

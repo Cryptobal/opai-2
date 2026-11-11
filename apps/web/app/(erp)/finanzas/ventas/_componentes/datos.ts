@@ -7,6 +7,8 @@ import { periodosRecientes } from "../../compras/_componentes/datos";
 import { resumenLista } from "./resumen-lista";
 import type { LibroVentas } from "./tipos";
 
+const TIPOS = new Set(["33", "34", "56", "61"]);
+
 /** Lista del libro de ventas con filtros de URL. */
 export async function cargarVentas(sp: SearchParams) {
   const p = await leerParametros(sp);
@@ -22,11 +24,12 @@ export async function cargarVentas(sp: SearchParams) {
         limite: 100,
         ...(periodo ? { periodo } : {}),
         ...(p["estado"] ? { estadoDte: p["estado"] } : {}),
+        ...(TIPOS.has(String(p["tipo"])) ? { tipoDte: Number(p["tipo"]) } : {}),
         ...(p["q"] ? { q: p["q"] } : {}),
       },
     ),
     // El libro oficial solo vale cuando la lista no está recortada por estado ni por búsqueda.
-    periodo && !p["estado"] && !p["q"]
+    periodo && !p["estado"] && !p["q"] && !p["tipo"]
       ? ejecutarComoUsuario<LibroVentas["resumen"]>("erp", "finanzas.ventas.libro_resumen", { periodo })
       : Promise.resolve(null),
   ]);
@@ -37,7 +40,7 @@ export async function cargarVentas(sp: SearchParams) {
     libro: libro.ok ? { items, siguiente: libro.data.siguiente } : null,
     subtitulo,
     gestiona,
-    filtrado: Boolean(p["periodo"] || p["estado"] || p["q"]),
+    filtrado: Boolean(p["periodo"] || p["estado"] || p["q"] || p["tipo"]),
     periodos: periodosRecientes(),
   };
 }
