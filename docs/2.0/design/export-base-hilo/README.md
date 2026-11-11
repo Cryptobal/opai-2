@@ -53,3 +53,14 @@ Los `.dc.html` se abren en Claude Design. Como en los otros exports, no se copi�
 ## Cómo se verificó
 
 Un rastreador recorrió todas las pantallas alcanzables de cada portal y ejecutó cada acción sin errores (unas 1.350 combinaciones de pantalla, pestaña y registro). No hay verificación visual automática del prototipo: la comparación por capturas se hace en cada PR de construcción contra estos tableros (375, 1024 y 1280 px, más 390 y 1440 px).
+
+## Actualización del 11-nov-2026: las pantallas por dentro (CAR-278)
+
+Carlos pidió ver, antes de construir, cómo quedan por dentro las listas, fichas y formularios. El prototipo suma:
+
+- **Listas** con búsqueda, filtros, conteo, monograma y etiqueta de estado por fila.
+- **Fichas** con estado en la cabecera y acción «Editar».
+- **Formularios** reales («Nueva cuenta», «Editar cuenta», «Nuevo contacto», «Nuevo negocio», «Nueva persona») con validación y vista previa antes de guardar.
+- **Piezas y estados del diseño** (Índice → Configuración): controles, listas y tablas, estados (cargando, vacío, error, sin permiso) y avisos y diálogos.
+
+El rastreador (`fuente/rastreador.js`) recorre 1.405 pantallas y 12.152 acciones del tablero principal sin errores. La piel de las piezas comunes del DS dentro del marco Hilo se construyó con esta referencia (`BRIEF-hilo-h1-marco.md`).
