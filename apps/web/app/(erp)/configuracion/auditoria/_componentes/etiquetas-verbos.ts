@@ -89,4 +89,6 @@ export const VERBOS: Record<string, string> = {
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).
   plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
+  // Slack (CAR-291, ADR-093).
+  canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
 };
