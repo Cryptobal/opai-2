@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 
-import { Alerta, Button } from "@opai/ds";
+import { Alerta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { EmitirPdfPrevio } from "../nuevo/emitir-pdf-previo";
-import { BloqueEmisionGuardada, EmitirDialogos } from "../nuevo/emitir-secciones";
+import { EmitirDialogos } from "../nuevo/emitir-secciones";
 import { useEmision } from "../nuevo/use-emision";
 
-import { DescartarBorrador } from "./descartar-borrador";
+import { BloqueAccionesBorrador } from "./bloque-acciones-borrador";
 import { HojaEditarBorrador } from "./hoja-editar-borrador";
 import type { DatosBorrador, Venta } from "./tipos";
 
@@ -30,16 +30,15 @@ export function EmitirBorradorFicha({ venta, abrirEditar }: { venta: Venta & Dat
       {emision.preflightBloqueante ? (
         <Alerta tono="warning" titulo="Falta algo para emitir">{emision.preflightBloqueante}</Alerta>
       ) : null}
-      <BloqueEmisionGuardada
-        pendiente={pendiente}
+      <BloqueAccionesBorrador
+        documentoId={documentoId}
         etiquetaEmitir={tipoDte === 56 ? "Emitir nota de débito" : "Emitir factura"}
+        etiquetaDescartar={tipoDte === 56 ? "esta nota de débito" : "este borrador"}
+        pendiente={pendiente}
         revisarEmision={() => void emision.revisarEmision()}
         emitir={() => void emision.emitir()}
+        editar={() => setEditando(true)}
       />
-      <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={() => setEditando(true)}>Editar</Button>
-        <DescartarBorrador documentoId={documentoId} etiqueta={tipoDte === 56 ? "esta nota de débito" : "este borrador"} destino="/finanzas/ventas" />
-      </div>
       {editando ? <HojaEditarBorrador venta={venta} onCerrar={() => setEditando(false)} /> : null}
       <EmitirPdfPrevio documentoId={documentoId} />
       <EmitirDialogos
