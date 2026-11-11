@@ -134,6 +134,7 @@ export async function ejecutarImportar10(
       contactos: r.aplicadas.contactos,
       instalaciones: r.aplicadas.instalaciones,
       programaciones: r.aplicadas.programaciones,
+      negocios: r.aplicadas.negocios,
       omitidas: r.omitidas,
       importacionId,
     },
