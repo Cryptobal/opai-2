@@ -5,8 +5,7 @@ import { refDe } from "../core/crm/comun";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { reglaDeNegocio } from "../errores";
-import { aplicarEtapa } from "./transiciones-util";
-import { validarEntrada } from "./validaciones";
+import { avanzarAEtapa, cancelarPasosPendientes } from "./seguimiento-tareas";
 
 type Tx = Parameters<Parameters<Contexto["transaccion"]>[0]>[0];
 type Seg = { id: string; negocioId: string; token: string; contactoId: string | null; estado: string; motivo?: string | null };
@@ -27,6 +26,9 @@ export async function actividadDePaso(
   for (const usuarioId of d.responsables ?? [])
     await tx.actividadResponsable.create({ data: { tenantId: ctx.tenantId, actividadId: a.id, usuarioId } });
   await ctx.eventos.emitir(tx, { tipo: "core.actividad.registrada", entidadTipo: "actividad", entidadId: a.id, payload: { tipo: a.tipo } });
+  // Como cualquier tarea asignada (CAR-160): mismo evento que core.actividades.create.
+  if (d.tipo === "tarea" && d.responsables?.length)
+    await ctx.eventos.emitir(tx, { tipo: "core.actividad.tarea_asignada", entidadTipo: "actividad", entidadId: a.id, payload: { responsables: d.responsables } });
   return a.id;
 }
 
@@ -46,25 +48,8 @@ export async function enviarCorreoSeguimiento(ctx: Contexto, s: Seg, asunto: str
  * plan se borró o se desactivó después de guardarlo, `"etapa_invalida"` (el trabajo sigue; se avisa).
  */
 export async function avanzarPorRespuesta(ctx: Contexto, tx: Tx, negocioId: string, etapaId: string | undefined): Promise<"movido" | "sin_cambio" | "etapa_invalida"> {
-  if (!etapaId) return "sin_cambio";
-  const negocio = await tx.negocio.findUnique({ where: { id: negocioId } });
-  if (!negocio || negocio.estado !== "abierto") return "sin_cambio";
-  const [destino, actual] = await Promise.all([
-    tx.etapa.findUnique({ where: { id: etapaId } }),
-    tx.etapa.findUnique({ where: { id: negocio.etapaId } }),
-  ]);
-  if (!destino || !destino.activa) return "etapa_invalida";
-  const embudoDestino = await tx.embudo.findUnique({ where: { id: destino.embudoId }, select: { activo: true } });
-  if (!embudoDestino?.activo) return "etapa_invalida";
-  if (!actual || destino.tipo !== "abierta") return "sin_cambio";
-  if (destino.embudoId !== negocio.embudoId || destino.orden <= actual.orden) return "sin_cambio";
-  try {
-    await validarEntrada(ctx, negocio, destino);
-  } catch {
-    return "sin_cambio";
-  }
-  await aplicarEtapa(ctx, tx, negocio, destino, { evento: "comercial.negocio.etapa_cambiada", motivo: "El cliente respondió" });
-  return "movido";
+  const r = await avanzarAEtapa(ctx, tx, negocioId, etapaId, "El cliente respondió");
+  return r === "requisitos" ? "sin_cambio" : r;
 }
 
 /**
@@ -95,8 +80,7 @@ export async function aplicarRespuesta(ctx: Contexto, tx: Tx, s: Seg, config: Co
   const actividadId = await actividadDePaso(ctx, tx, { tipo: "nota", titulo: nota.titulo, detalle: detalle || null, negocioId: actual.negocioId });
   if (destino) {
     await tx.seguimiento.update({ where: { id: s.id }, data: { estado: destino, motivo: "cliente_respondio" } });
-    if (destino === "cancelado")
-      await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
+    if (destino === "cancelado") await cancelarPasosPendientes(ctx, tx, s.id);
   }
   if (reservado.count > 0)
     await ctx.eventos.emitir(tx, { tipo: "comercial.seguimiento.cliente_respondio", entidadTipo: "negocio", entidadId: actual.negocioId, payload: { seguimientoId: s.id } });

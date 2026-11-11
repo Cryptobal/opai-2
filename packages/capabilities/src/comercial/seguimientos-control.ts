@@ -8,6 +8,7 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { PERMISO_MANAGE } from "./comun";
 import { aplicarRespuesta } from "./seguimiento-ejecucion";
+import { cancelarPasosPendientes } from "./seguimiento-tareas";
 import { ambitoHabil, configDeVersion, seguimientoPorId, seguimientoVistaSchema, zonaDe } from "./seguimiento-comun";
 
 async function vivo(ctx: Parameters<typeof zonaDe>[0], id: string) {
@@ -39,8 +40,7 @@ export const seguimientosControlar = defineCapability({
     const siguiente = input.accion === "reanudar" ? proximoMomento(ahora, config.hora, config.conteo, await ambitoHabil(ctx, ahora), await zonaDe(ctx)) : null;
     await ctx.transaccion(async (tx) => {
       await tx.seguimiento.update({ where: { id: s.id }, data: { estado: destino, motivo: input.accion === "reanudar" ? null : (input.motivo ?? "manual") } });
-      if (input.accion === "cancelar")
-        await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: { in: ["programado", "por_hacer", "por_preparar"] } }, data: { estado: "cancelado" } });
+      if (input.accion === "cancelar") await cancelarPasosPendientes(ctx, tx, s.id);
       if (siguiente)
         await tx.seguimientoPaso.updateMany({ where: { seguimientoId: s.id, estado: "programado", programadoEn: { lt: siguiente } }, data: { programadoEn: siguiente } });
       await ctx.eventos.emitir(tx, { tipo: `comercial.seguimiento.${destino === "activo" ? "reanudado" : destino}`, entidadTipo: "negocio", entidadId: s.negocioId, payload: { seguimientoId: s.id } });

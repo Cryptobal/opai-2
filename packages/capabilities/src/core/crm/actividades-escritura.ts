@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { defineCapability } from "../../define";
-import { reglaDeNegocio } from "../../errores";
+import { prohibido, reglaDeNegocio } from "../../errores";
 import { textoOpcional } from "../maestros/comun";
 import {
   PERMISO_MANAGE,
@@ -48,6 +48,12 @@ export const actividadesCreate = defineCapability({
       .enum(RESULTADOS_LLAMADA)
       .optional()
       .describe("Solo llamadas y correos: contestó, no contestó o pidió volver a llamar."),
+    respuestaCliente: z
+      .boolean()
+      .default(false)
+      .describe(
+        "El cliente respondió (no aplica a tareas): en un negocio con seguimiento activo lo pausa o lo detiene según su plan.",
+      ),
   }),
   output: actividadSchema,
   efecto: "escritura",
@@ -61,6 +67,14 @@ export const actividadesCreate = defineCapability({
       (input.asistentes.length || input.acuerdos || input.proximoPaso)
     )
       throw reglaDeNegocio("Solo las reuniones llevan asistentes, acuerdos y próximo paso.");
+    if (esTarea && input.respuestaCliente)
+      throw reglaDeNegocio("Una tarea no es una respuesta del cliente.");
+    // La marca pausa o detiene el seguimiento y puede mover la etapa del negocio (CAR-160): exige
+    // un negocio ligado y el mismo permiso que «El cliente respondió» (comercial:negocios.manage).
+    if (input.respuestaCliente && !input.vinculos.some((v) => v.tipo === "negocio"))
+      throw reglaDeNegocio("La respuesta del cliente se registra en un negocio.");
+    if (input.respuestaCliente && !ctx.autorizar("comercial:negocios.manage"))
+      throw prohibido("Registrar una respuesta del cliente requiere gestionar negocios.");
     if (input.resultado && input.tipo !== "llamada" && input.tipo !== "correo")
       throw reglaDeNegocio("Solo las llamadas y los correos llevan resultado.");
     const claves = input.vinculos.map((v) => `${v.tipo}:${v.id}`);
@@ -107,7 +121,8 @@ export const actividadesCreate = defineCapability({
         tipo: "core.actividad.registrada",
         entidadTipo: "actividad",
         entidadId: a.id,
-        payload: { tipo: a.tipo },
+        // CAR-160: la marca explícita «respuesta del cliente» la consume el seguimiento comercial.
+        payload: { tipo: a.tipo, ...(input.respuestaCliente ? { respuestaCliente: true } : {}) },
       });
       if (esTarea)
         await ctx.eventos.emitir(tx, {

@@ -62,6 +62,10 @@ describe("mailer", () => {
     expect(mailer.nombre).toBe("resend");
     await expect(mailer.enviar({ para: "a@b.cl", asunto: "x", texto: "y" })).rejects.toThrow(/422/);
     expect(fetch).toHaveBeenCalledWith("https://api.resend.com/emails", expect.anything());
+    // CAR-160: el motivo seguro llega al log de error_interno, sin asunto ni destinatario.
+    const e = await mailer.enviar({ para: "a@b.cl", asunto: "Cotización secreta", texto: "y" }).catch((x: unknown) => x);
+    expect(e).toMatchObject({ motivoSeguro: "Resend respondió 422 al enviar el correo." });
+    expect(String((e as Error).message)).not.toContain("secreta");
   });
 
   it("Resend recibe los adjuntos en base64 y la copia a los demás contactos", async () => {

@@ -1,4 +1,5 @@
 import { AwsClient } from "aws4fetch";
+import { ErrorDeProveedor } from "../error-con-motivo";
 
 /**
  * Almacenamiento de archivos en Cloudflare R2 (S3-compatible) con URLs firmadas de corta duración
@@ -85,7 +86,7 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
         headers: { "content-type": mime, "x-amz-checksum-sha256": hexABase64(sha256) },
         body: cuerpoSubidaFetch(cuerpo),
       });
-      if (!r.ok) throw new Error(`R2 respondió ${r.status} al subir el archivo.`);
+      if (!r.ok) throw new ErrorDeProveedor(`R2 respondió ${r.status} al subir el archivo.`);
     },
     urlDescarga(clave, nombre, segundos = 300) {
       const url = new URL(`${base}/${codificar(clave)}`);
@@ -100,13 +101,13 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
     async leerTexto(clave) {
       const r = await cliente.fetch(`${base}/${codificar(clave)}`, { method: "GET" });
       if (r.status === 404) return null;
-      if (!r.ok) throw new Error(`R2 respondió ${r.status} al leer el archivo.`);
+      if (!r.ok) throw new ErrorDeProveedor(`R2 respondió ${r.status} al leer el archivo.`);
       return r.text();
     },
     async leerBytes(clave) {
       const r = await cliente.fetch(`${base}/${codificar(clave)}`, { method: "GET" });
       if (r.status === 404) return null;
-      if (!r.ok) throw new Error(`R2 respondió ${r.status} al leer el archivo.`);
+      if (!r.ok) throw new ErrorDeProveedor(`R2 respondió ${r.status} al leer el archivo.`);
       return Buffer.from(await r.arrayBuffer());
     },
     async head(clave) {
@@ -115,7 +116,7 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
         headers: { "x-amz-checksum-mode": "ENABLED" },
       });
       if (r.status === 404) return null;
-      if (!r.ok) throw new Error(`R2 respondió ${r.status} al consultar el archivo.`);
+      if (!r.ok) throw new ErrorDeProveedor(`R2 respondió ${r.status} al consultar el archivo.`);
       const checksum = r.headers.get("x-amz-checksum-sha256");
       return {
         tamano: Number(r.headers.get("content-length") ?? 0),
@@ -125,7 +126,7 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
     },
     async eliminar(clave) {
       const r = await cliente.fetch(`${base}/${codificar(clave)}`, { method: "DELETE" });
-      if (!r.ok && r.status !== 404) throw new Error(`R2 respondió ${r.status} al eliminar.`);
+      if (!r.ok && r.status !== 404) throw new ErrorDeProveedor(`R2 respondió ${r.status} al eliminar.`);
     },
   };
 }

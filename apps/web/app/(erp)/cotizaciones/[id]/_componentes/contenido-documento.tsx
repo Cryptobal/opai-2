@@ -19,7 +19,10 @@ const PropuestaTecnicaFicha = dynamic(
 
 type Ficha = NonNullable<DatosFichaCotizacion["ficha"]>;
 
-/** Bloque 4: documento (una sola vista previa), propuesta técnica a todos los anchos, envío, cierre e historial. */
+/**
+ * Bloque 4: documento (una sola vista previa), propuesta técnica a todos los anchos, cierre e historial. El envío
+ * tiene un solo punto: la hoja «Enviar cotización» de las acciones de la ficha, con el seguimiento (CAR-160).
+ */
 export function ContenidoDocumento(p: {
   d: Ficha;
   datos: DatosFichaCotizacion;
@@ -29,7 +32,6 @@ export function ContenidoDocumento(p: {
 }) {
   const { d, datos } = p;
   const mutual = avisosCpq(p.calculo).filter((a) => a.enlace?.href === RUTA_CONFIRMAR_MUTUAL);
-  const puedeEnviar = Boolean(p.meta?.puedeEnviar ?? d.version.estado === "lista");
   const enviada = d.version.estado === "enviada" || d.version.estado === "aceptada";
   return (
     <div className="space-y-4">
@@ -56,10 +58,7 @@ export function ContenidoDocumento(p: {
       <PropuestaTecnicaFicha
         codigo={d.cotizacion.codigo}
         cotizacionId={d.cotizacion.id}
-        cuentaId={d.cuentaId}
         gestionar={datos.gestionar}
-        aprobarEnvios={datos.aprobarEnvios}
-        puedeEnviar={puedeEnviar}
       />
       <AccionesComerciales
         cotizacionId={d.cotizacion.id}

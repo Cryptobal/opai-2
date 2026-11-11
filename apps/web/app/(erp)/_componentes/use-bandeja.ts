@@ -13,6 +13,8 @@ export function useBandeja() {
   const [error, setError] = useState(false);
   const [noLeidas, setNoLeidas] = useState(0);
   const [cargandoMas, setCargandoMas] = useState(false);
+  // Pasos de seguimiento por hacer: suman al número de la Bandeja (CAR-160). Va al final del estado.
+  const [tareasSeguimiento, setTareasSeguimiento] = useState(0);
   const cargar = useCallback(async () => {
     setError(false);
     try {
@@ -24,7 +26,7 @@ export function useBandeja() {
         ),
         conPlazo(
           ejecutarCapacidad("erp", "core.resumen.contadores", {
-            campos: ["aprobacionesPendientes"],
+            campos: ["aprobacionesPendientes", "tareasSeguimiento"],
           }),
         ),
       ]);
@@ -37,7 +39,9 @@ export function useBandeja() {
         setError(true);
       }
       if (c.ok) {
-        const total = (c.data as { aprobacionesPendientes: number | null }).aprobacionesPendientes;
+        const datos = c.data as { aprobacionesPendientes: number | null; tareasSeguimiento: number | null };
+        const total = datos.aprobacionesPendientes;
+        setTareasSeguimiento(datos.tareasSeguimiento ?? 0);
         setAprobaciones(total);
         // null significa sin permiso: no se solicita la lista para viewer/supervisor.
         if (total !== null && total > 0) {
@@ -102,6 +106,7 @@ export function useBandeja() {
   return {
     avisos,
     aprobaciones,
+    tareasSeguimiento,
     decisiones,
     error,
     noLeidas,
