@@ -8,6 +8,7 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 import { TarjetaNovedad, type ItemNovedad } from "./tarjeta-novedad";
 import { useMarcarNovedades } from "./use-marcar-novedades";
+import { useMarcarUnaNovedad } from "./use-marcar-una-novedad";
 
 type Respuesta = {
   items: ItemNovedad[];
@@ -54,6 +55,8 @@ export function ListaNovedades({ portal }: { portal: string }) {
     setErrorMarca,
     () => void cargar(),
   );
+
+  const marcarUna = useMarcarUnaNovedad(portal, datos, setDatos, setErrorMarca);
 
   const descartarDestacada = (id: string) => {
     setCerrando(true);
@@ -107,7 +110,7 @@ export function ListaNovedades({ portal }: { portal: string }) {
           ) : null}
           <ul className="flex flex-col gap-3">
             {datos.items.map((item) => (
-              <li key={item.id}>
+              <li key={item.id} onClickCapture={() => marcarUna(item.id)}>
                 <TarjetaNovedad item={item} />
               </li>
             ))}
