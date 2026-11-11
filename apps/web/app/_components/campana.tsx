@@ -37,6 +37,8 @@ function CampanaAvisos({
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const [noLeidas, setNoLeidas] = useState<number | null>(null);
   const [error, setError] = useState(false);
+  const [abierto, setAbierto] = useState(false);
+  const cerrar = () => setAbierto(false);
   const [aprobaciones, setAprobaciones] = useState<number | null>(null);
   useEffect(() => {
     let activo = true;
@@ -74,6 +76,7 @@ function CampanaAvisos({
   }
   async function marcarTodas() {
     await ejecutarCapacidad(portal, "core.notificaciones.marcar_todas", {});
+    window.dispatchEvent(new Event("opai-bandeja"));
     setNoLeidas(0);
     setAvisos(
       (l) => l?.map((a) => ({ ...a, leidaEn: a.leidaEn ?? new Date().toISOString() })) ?? null,
@@ -82,7 +85,11 @@ function CampanaAvisos({
   return (
     <Popover
       etiqueta="Notificaciones"
-      onCambiar={(a) => a && portal !== "erp" && void cargar()}
+      abierto={abierto}
+      onCambiar={(a) => {
+        setAbierto(a);
+        if (a && portal !== "erp") void cargar();
+      }}
       disparador={
         <Button
           variant="ghost"
@@ -100,7 +107,7 @@ function CampanaAvisos({
       }
     >
       {portal === "erp" ? (
-        <BandejaCorta corta />
+        <BandejaCorta corta onNavegar={cerrar} />
       ) : (
         <>
           <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
@@ -114,6 +121,7 @@ function CampanaAvisos({
           {aprobaciones ? (
             <Link
               href="/configuracion/aprobaciones"
+              onClick={cerrar}
               className="block border-b border-border px-4 py-3 text-base font-medium text-accent hover:bg-fill"
             >
               {aprobaciones} {aprobaciones === 1 ? "aprobación" : "aprobaciones"} pendiente
@@ -131,7 +139,7 @@ function CampanaAvisos({
             ) : avisos.length === 0 ? (
               <Empty titulo="Sin avisos por ahora" />
             ) : (
-              <ListaAvisos avisos={avisos} portal={portal} />
+              <ListaAvisos avisos={avisos} portal={portal} onNavegar={cerrar} />
             )}
           </div>
         </>
