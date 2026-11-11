@@ -11,6 +11,8 @@ export type DetalleVenta = Venta & {
   montoCobrado: number;
   montoPendiente: number;
   cesionProveedor: string | null;
+  /** A quién se cedió (factor); Octava es solo el integrador y no se muestra. */
+  cesionFactor: string | null;
   glosa: string | null;
   lineas: LineaBorrador[];
   trackIdSii: string | null;
