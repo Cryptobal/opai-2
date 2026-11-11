@@ -1,41 +1,23 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { digitoVerificador } from "@opai/domain";
-
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Ficha de persona (CAR-124, CAR-244) en `preview-e2e`: el Resumen con sus tarjetas de estado y la
 // pestaña Laboral con el banco elegido de la lista SBIF, a 375, 1024 y 1280 px. Entra con el usuario
-// de la empresa ficticia `qa-e2e`; la persona es sintética y se crea en la base de la vista previa.
+// de la empresa ficticia `qa-e2e`; usa la persona ficticia sembrada en esa empresa.
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 const ENLACE_PERSONA = 'a[href^="/personas/"]:not([href*="vencimientos"])';
 
-/** RUT válido y distinto por corrida y por tamaño de pantalla (los tres corren a la vez). */
-function rutSintetico(semilla: number): string {
-  const cuerpo = String(20_000_000 + ((Date.now() + semilla * 7919) % 4_000_000));
-  return `${cuerpo}-${digitoVerificador(cuerpo)}`;
-}
-
-/** Abre la primera persona de la lista; si la empresa de pruebas no tiene ninguna, crea una. */
-async function abrirUnaPersona(page: Page, semilla: number): Promise<void> {
+/** Abre la primera persona de la lista (la empresa de pruebas `qa-e2e` tiene una persona ficticia sembrada). */
+async function abrirUnaPersona(page: Page): Promise<void> {
   await page.goto("/personas");
   await expect(page.getByText("Algo salió mal")).toHaveCount(0);
   const primera = page.locator(ENLACE_PERSONA).filter({ visible: true }).first();
-  if ((await primera.count()) > 0) {
-    await primera.click();
-  } else {
-    await page.locator('a[href="?nueva=1"]').filter({ visible: true }).first().click();
-    const dialogo = page.getByRole("dialog", { name: /persona/i });
-    await dialogo.getByLabel("Nombres").fill("Persona");
-    await dialogo.getByLabel("Apellidos").fill(`Ficticia ${semilla}`);
-    await dialogo.getByLabel("RUT").fill(rutSintetico(semilla));
-    await dialogo.getByLabel("Cargo").click();
-    await page.getByRole("option").first().click();
-    await dialogo.getByRole("button", { name: "Crear persona" }).click();
-  }
+  await expect(primera, "qa-e2e tiene al menos una persona ficticia").toBeVisible();
+  await primera.click();
   await page.waitForURL(/\/personas\/[0-9a-f-]{36}/);
 }
 
@@ -48,7 +30,7 @@ test.describe("@preview ficha de persona", () => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
-    await abrirUnaPersona(page, info.workerIndex + info.project.name.length);
+    await abrirUnaPersona(page);
     const ficha = new URL(page.url()).pathname.match(/^\/personas\/[0-9a-f-]{36}/)?.[0] ?? "";
 
     // Resumen: una tarjeta por sección, cada una con su enlace a Laboral.
