@@ -1,6 +1,7 @@
 import { ETIQUETA_CLASE_PLANTILLA, type ClasePlantilla } from "@opai/domain";
 import { Badge, type Columna, ListScreen, type EstadoPantalla } from "@opai/ds";
 
+import { LinkNext } from "@/app/_components/link-next";
 import { fecha } from "@/lib/fechas";
 
 import { AvisoPlantillas, BotonesPlantillas } from "./acciones";
@@ -74,10 +75,11 @@ export function ListaPlantillas({
       <ListScreen<FilaPlantilla>
         state={state}
         titulo="Plantillas"
-        soloTelefono
         accionPrincipal={<BotonesPlantillas />}
         items={plantillas}
         clave={(p) => p.id}
+        href={(p) => `/documentos/plantillas/${p.id}`}
+        Link={LinkNext}
         columnas={columnas}
         tarjeta={(p) => (
           <>

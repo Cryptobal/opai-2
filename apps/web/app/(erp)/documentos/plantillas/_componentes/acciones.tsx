@@ -1,11 +1,12 @@
-import { Plus, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 
 import { Alerta, Button } from "@opai/ds";
 
+import { NuevaPlantilla } from "./nueva-plantilla";
+
 /**
- * «Importar Word o PDF» y «Nueva plantilla» del diseño 05. Ambos quedan deshabilitados con aviso:
- * importar es el encargo 09 (decisión 9 de Carlos, 9-nov-2026) y crear desde la pantalla llega con el
- * editor (06). Las plantillas ya se pueden crear por la API y el MCP. En el teléfono no se editan.
+ * «Importar Word o PDF» y «Nueva plantilla» del diseño 05. Importar sigue deshabilitado (encargo 09,
+ * decisión 9 de Carlos, 9-nov-2026); «Nueva plantilla» abre el editor (06). En el teléfono no se editan.
  */
 export function BotonesPlantillas() {
   return (
@@ -14,10 +15,7 @@ export function BotonesPlantillas() {
         <Upload aria-hidden className="size-4" />
         Importar Word o PDF
       </Button>
-      <Button disabled>
-        <Plus aria-hidden className="size-4" />
-        Nueva plantilla
-      </Button>
+      <NuevaPlantilla />
     </div>
   );
 }
@@ -25,9 +23,12 @@ export function BotonesPlantillas() {
 export function AvisoPlantillas({ conPlantillas }: { conPlantillas: boolean }) {
   return (
     <div className="mb-3 flex flex-col gap-3">
-      <Alerta tono="info" titulo="Importar Word o PDF llega más adelante">
-        Crear plantillas desde la pantalla llega con el editor. Mientras tanto se crean por la API y
-        el asistente.
+      <Alerta
+        tono="info"
+        titulo="Importar Word o PDF llega más adelante"
+        className="hidden md:flex"
+      >
+        Por ahora crea la plantilla con «Nueva plantilla» y pega o escribe el texto en el editor.
       </Alerta>
       {conPlantillas ? (
         <Alerta tono="info" titulo="Edita en un computador" className="md:hidden">
