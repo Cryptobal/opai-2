@@ -83,7 +83,12 @@ async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readon
   const limites = limitesDeRespuesta(res.headers);
   const forma = formaDeCuerpo(cuerpo);
   // Un 5xx del envío no prueba que el SII no lo haya recibido.
-  const error = new ErrorProveedorSii(paso, motivoHttp(res.status, forma), res.status, detalle, paso === "enviar" && res.status >= 500);
+  // Texto literal de SimpleAPI por la vía Bearer cuando no acepta la key (visto el 11-nov-2026 en test.opai.cl). El
+  // saneo del detalle lo descarta por traer la palabra «key», así que se reconoce aquí, sin copiar el cuerpo.
+  const motivo = /api\s*key\s+incorrecta/i.test(cuerpo)
+    ? `respondió «API KEY Incorrecta» (HTTP ${res.status}): no acepta la API key guardada en Integraciones › Emisión DTE`
+    : motivoHttp(res.status, forma);
+  const error = new ErrorProveedorSii(paso, motivo, res.status, detalle, paso === "enviar" && res.status >= 500);
   error.limites = limites;
   error.cuerpo = forma;
   error.respuesta = diagnosticoRespuestaSii(res.headers, cuerpo, detalle);
