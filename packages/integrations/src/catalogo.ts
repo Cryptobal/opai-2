@@ -16,7 +16,8 @@ export type CategoriaIntegracion =
   | "factoring"
   | "biometria"
   | "slack"
-  | "webhooks";
+  | "webhooks"
+  | "migracion";
 
 export type DefinicionIntegracion = {
   id: string;

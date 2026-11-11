@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import {
   aplicarPorLotes,
@@ -7,37 +7,27 @@ import {
   cerrarCorrida,
   conciliar,
   construirReporte,
-  datosOpai1,
   exigirImportacionAbierta,
   ImportacionCerradaError,
   iniciarCorrida,
   leerEstadoDestinoPorTenantId,
   revertirCorrida,
   validarDatos,
+  type DatosOpai1,
   type Plan,
 } from "@opai/db/importar-opai1";
 
 import { prohibido } from "../errores";
+import type { inputImportar10 } from "./importar-1-0-entrada";
 import type { Contexto } from "../types";
 import { exigirOwnerAdmin, resolverUsuarios } from "./importar-1-0-usuarios";
-
-const accionImport = z.enum(["simular", "aplicar", "conciliar", "revertir"]);
-
-export const inputImportar10 = z.object({
-  accion: accionImport.default("simular"),
-  origen: datosOpai1.optional(),
-  importacionId: z.string().uuid().optional(),
-  permitirReimportacion: z.boolean().default(false),
-  usuarios: z
-    .array(z.object({ origen1Id: z.string().min(1), email: z.string().email() }))
-    .default([]),
-});
 
 export async function ejecutarImportar10(
   ctx: Contexto,
   input: z.infer<typeof inputImportar10>,
   dryRun: boolean,
   idempotencyKey?: string,
+  traido?: DatosOpai1,
 ) {
   void idempotencyKey;
   await exigirOwnerAdmin(ctx);
@@ -60,8 +50,9 @@ export async function ejecutarImportar10(
     };
   }
 
-  if (!input.origen) throw prohibido("Falta origen JSON para simular, aplicar o conciliar.");
-  const datos = validarDatos(input.origen);
+  const origen = input.origen ?? traido;
+  if (!origen) throw prohibido("Falta origen JSON para simular, aplicar o conciliar.");
+  const datos = validarDatos(origen);
   const usuarios = [
     ...datos.users.map((u) => ({ id: u.id, email: u.email })),
     ...input.usuarios.map((u) => ({ id: u.origen1Id, email: u.email })),
@@ -74,7 +65,7 @@ export async function ejecutarImportar10(
     select: { slug: true },
   });
   let plan: Plan = calcularPlan(datos, estado, {
-    modulosActivos: ctx.modulosActivos,
+    modulosActivos: input.soloComercial ? ctx.modulosActivos.filter((m) => m !== "finanzas") : ctx.modulosActivos,
     ...(tenant?.slug ? { tenantSlug: tenant.slug } : {}),
   });
 
@@ -150,3 +141,5 @@ export async function ejecutarImportar10(
     usuariosSinMembresia: sinMembresia,
   };
 }
+
+export { inputImportar10, pideOpai1 } from "./importar-1-0-entrada";

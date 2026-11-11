@@ -4,8 +4,10 @@ import { defineCapability } from "../define";
 import { executeCapability } from "../execute";
 import { ErrorCapacidad } from "../errores";
 import type { Contexto } from "../types";
-import type { Plan } from "@opai/db/importar-opai1";
-import { ejecutarImportar10, inputImportar10 } from "./importar-1-0-handler";
+import type { DatosOpai1, Plan } from "@opai/db/importar-opai1";
+import { ejecutarImportar10, inputImportar10, pideOpai1 } from "./importar-1-0-handler";
+import { leerExportDeOpai1 } from "./importar-1-0-origen";
+import { exigirOwnerAdmin } from "./importar-1-0-usuarios";
 import { resumenSiiDelPlan, resumenSiiSchema } from "./importar-1-0-sii";
 
 const reporteSchema = z.object({
@@ -100,8 +102,15 @@ export const comercialImportar10 = defineCapability({
   output: resultadoSchema,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, input, { dryRun, idempotencyKey }) {
-    const r = await ejecutarImportar10(ctx, input, dryRun, idempotencyKey);
+  // La lectura de OPAI 1 (red, varios segundos) va antes de la transacción de la escritura.
+  async preparar(ctx, input) {
+    if (!pideOpai1(input)) return undefined;
+    await exigirOwnerAdmin(ctx);
+    return leerExportDeOpai1(ctx);
+  },
+  async handler(ctx, input, { dryRun, idempotencyKey, preparado }) {
+    const traido = (preparado as DatosOpai1 | undefined) ?? (pideOpai1(input) ? await leerExportDeOpai1(ctx) : undefined);
+    const r = await ejecutarImportar10(ctx, input, dryRun, idempotencyKey, traido);
     const plan = "plan" in r ? (r.plan as Plan | undefined) : undefined;
     let correlativosCpq = 0;
     if (plan && (r.accion === "simular" || r.accion === "conciliar" || (r.accion === "aplicar" && !dryRun))) {
