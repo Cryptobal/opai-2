@@ -68,6 +68,7 @@ import { cotizacionesArchivar, cotizacionesRestaurar } from "./archivar";
 import { compartirCrear, compartirRevocar } from "./compartir";
 import { compartirVer } from "./compartir-ver";
 import { cotizacionesEstadoComercial } from "./estado-comercial";
+import { capacidadesPropuestaHtml } from "./propuesta-html-cap";
 import { puestosConfirmar } from "./puestos-confirmar";
 import { puestosOfrecer } from "./puestos-ofrecer";
 
@@ -136,7 +137,7 @@ export const capacidades: readonly Capacidad[] = [
   propuestaTecnicaPreviewPdf,
   propuestaCapitulosList,
   propuestaCapitulosGuardar,
-  propuestaPromptExportable,
+  propuestaPromptExportable, ...capacidadesPropuestaHtml,
   enviosPropuestaList,
   enviosPropuestaSolicitar,
   enviosPropuestaAprobar,
