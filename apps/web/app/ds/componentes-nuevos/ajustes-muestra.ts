@@ -35,4 +35,15 @@ export const CAMPOS: CampoAjusteVista[] = [
     editable: true,
     esquema: { type: "boolean" },
   },
+  {
+    modulo: "ops",
+    clave: "contactos",
+    etiqueta: "Contactos de aviso (lista de objetos)",
+    ayuda: "Se edita como texto JSON.",
+    grupo: "General",
+    ambito: "tenant",
+    control: "json",
+    editable: true,
+    esquema: { type: "array" },
+  },
 ];
