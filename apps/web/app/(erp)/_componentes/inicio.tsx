@@ -1,29 +1,16 @@
 import { Suspense } from "react";
 
-import { diaLargo } from "@/lib/fechas";
-import { nombreDePila } from "@/lib/nombre";
-
 import { AccesosInicio } from "./accesos-inicio";
 import { ActividadInicio } from "./actividad-inicio";
 import { CrearInicio } from "./crear-inicio";
 import { DecisionInicio } from "./decision-inicio";
+import { EncabezadoInicio } from "./encabezado-inicio";
 import { EsqueletoIndicadores, EsqueletoTarjeta } from "./esqueletos-inicio";
 import { IndicadoresInicio } from "./indicadores-inicio";
 import { SeguimientosInicio } from "./seguimientos-inicio";
 import { TareasInicio } from "./tareas-inicio";
 
-function saludo(ahora: Date) {
-  const h = Number(
-    new Intl.DateTimeFormat("es-CL", {
-      hour: "numeric",
-      hourCycle: "h23",
-      timeZone: "America/Santiago",
-    }).format(ahora),
-  );
-  return h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
-}
-
-type Props = { nombre: string; empresa: string; actor: string | undefined };
+type Props = { nombre: string; empresa: string; actor: string | undefined; hilo?: boolean };
 
 /**
  * Inicio del ERP (CAR-182, láminas 01 a 07): saludo con «Crear», lo que requiere decisión, tus tareas,
@@ -31,28 +18,19 @@ type Props = { nombre: string; empresa: string; actor: string | undefined };
  * separado (Suspense con su esqueleto) y un bloque sin permiso o sin datos no aparece (`empty:hidden`).
  * Teléfono: una columna en ese orden. 1024: decisión y tareas a la izquierda; accesos y seguimientos a la
  * derecha; actividad al final. 1280: columna lateral de 380 px con accesos y actividad. La Bandeja no
- * se repite aquí: vive en `/bandeja`.
+ * se repite aquí: vive en `/bandeja`. En el marco Hilo (ADR-090) el saludo y lo que requiere decisión
+ * ya están en el hilo, así que no se repiten.
  */
-export function InicioErp({ nombre, empresa, actor }: Props) {
-  const ahora = new Date();
-  const pila = nombreDePila(nombre);
+export function InicioErp({ nombre, empresa, actor, hilo = false }: Props) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="t-title text-fg">
-            <span className="md:hidden">Hola, {pila}</span>
-            <span className="hidden md:inline">
-              {saludo(ahora)}, {pila}
-            </span>
-          </h2>
-          <p className="text-base text-fg-muted">
-            {diaLargo(ahora)}
-            <span className="hidden md:inline"> · {empresa}</span>
-          </p>
-        </div>
-        <CrearInicio />
-      </div>
+      <EncabezadoInicio
+        nombre={nombre}
+        empresa={empresa}
+        ahora={new Date()}
+        hilo={hilo}
+        crear={<CrearInicio />}
+      />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0 empty:hidden max-lg:order-3 lg:col-span-2 lg:row-start-1">
           <Suspense fallback={<EsqueletoIndicadores />}>
@@ -60,9 +38,12 @@ export function InicioErp({ nombre, empresa, actor }: Props) {
           </Suspense>
         </div>
         <div className="min-w-0 empty:hidden max-lg:order-1 lg:col-start-1 lg:row-start-2">
-          <Suspense fallback={<EsqueletoTarjeta />}>
-            <DecisionInicio />
-          </Suspense>
+          {/* En el marco Hilo los pendientes están en el hilo: aquí no se repiten ni se vuelven a pedir. */}
+          {hilo ? null : (
+            <Suspense fallback={<EsqueletoTarjeta />}>
+              <DecisionInicio />
+            </Suspense>
+          )}
         </div>
         <div className="min-w-0 empty:hidden max-lg:order-2 lg:col-start-1 lg:row-start-3">
           <Suspense fallback={<EsqueletoTarjeta />}>

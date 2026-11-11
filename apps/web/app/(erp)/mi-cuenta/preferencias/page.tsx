@@ -1,6 +1,9 @@
+import { cookies } from "next/headers";
+
 import { Cabecera } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { COOKIE_MARCO, marcoDeCookie } from "@/lib/marco";
 import { requerirIdentidad } from "@/lib/servidor";
 import { cargarAjustes } from "@/app/(erp)/configuracion/_centro/ajustes-datos";
 
@@ -30,10 +33,12 @@ export default function Preferencias() {
           requerirIdentidad("/mi-cuenta/preferencias"),
           cargarAjustes("core", "Preferencias"),
         ]);
-        return { nombre: identidad.usuario.nombre, valores: ajustes.valores };
+        // El diseño rige por navegador, como el tema: se muestra el que este navegador tiene puesto.
+        const marco = marcoDeCookie((await cookies()).get(COOKIE_MARCO)?.value);
+        return { nombre: identidad.usuario.nombre, valores: ajustes.valores, marco };
       }}
     >
-      {({ nombre, valores }) => {
+      {({ nombre, valores, marco }) => {
         const de = (k: string) => valores[`core.${k}`]?.valor;
         return (
           <section aria-label="Preferencias" className="flex w-full max-w-[720px] flex-col">
@@ -50,6 +55,7 @@ export default function Preferencias() {
                   silencio: de("preferencias_silencio") === true,
                   resumen: String(de("preferencias_resumen") ?? "nunca"),
                 }}
+                marco={marco}
               />
               <AreaPrincipalServidor />
             </div>
