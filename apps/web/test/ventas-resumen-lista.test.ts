@@ -13,6 +13,7 @@ const venta = (p: Partial<Venta>): Venta => ({
   folio: null,
   fechaEmision: null,
   fechaVencimiento: null,
+  trackIdSii: null,
   montoTotal: 1000,
   estadoDte: "borrador",
   estadoCobro: "pendiente",

@@ -7,7 +7,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { fecha, pesos, rut } from "@/lib/fechas";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
-import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "../_componentes/etiquetas-venta";
+import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, seCobra, tituloVenta } from "../_componentes/etiquetas-venta";
 import { AccionesVenta } from "../_componentes/acciones-venta";
 import { HistorialEnvios, type EnvioCliente } from "../_componentes/historial-envios";
 import type { LineaBorrador, Venta } from "../_componentes/tipos";
@@ -72,7 +72,7 @@ export default async function VentaDetallePage({
 
 function Ficha({ state, venta, envios, editar }: { state: EstadoPantalla; venta: Detalle | null; envios: EnvioCliente[]; editar: boolean }) {
   if (state !== "ready" || !venta) return null;
-  const dte = estadoDteVenta(venta.estadoDte);
+  const dte = estadoDteVenta(venta.estadoDte, venta.trackIdSii);
   const cobro = estadoCobroVenta(venta.estadoCobro);
   return (
     <div className="flex flex-col gap-4">
@@ -102,12 +102,12 @@ function Ficha({ state, venta, envios, editar }: { state: EstadoPantalla; venta:
           </div>
           <div>
             <dt className="text-fg-muted">Estado de cobro</dt>
-            <dd>{cobro.etiqueta}</dd>
+            <dd>{seCobra(venta) ? cobro.etiqueta : "No se cobra (no es una factura vigente)"}</dd>
           </div>
           <div>
             <dt className="text-fg-muted">Cesión</dt>
             <dd>
-              {venta.cesionEstado ? estadoCesionVenta(venta.cesionEstado).etiqueta : "—"}
+              {venta.cesionEstado && seCobra(venta) ? estadoCesionVenta(venta.cesionEstado).etiqueta : "—"}
               {venta.cesionProveedor ? ` · ${venta.cesionProveedor}` : ""}
             </dd>
           </div>
