@@ -378,7 +378,7 @@ El agente se detiene antes de ganar, fusionar o transferir. Se documenta en `doc
    - exportación a CSV.
 
    Recomendación: **esos tres más la exportación**.
-10. **¿Los correos con clientes se registran solos?** Recomendación: **no en la v1**. OPAI no es cliente de correo (ADR-032): una persona o un agente registra el correo como actividad.
+10. **¿Los correos con clientes se registran solos?** Recomendación: **no en la v1**. OPAI no es cliente de correo (ADR-032): una persona o un agente registra el correo como actividad. **Enmendada el 10-nov-2026 por Carlos (CAR-233, nota en ADR-032):** en la v1.0 sí se registran los correos que salen de OPAI y los que entran por Resend a la dirección de registro de la empresa (respuesta al reply-to y CCO del vendedor), con asociación por correo exacto, dominio de `sitioWeb` o bandeja «sin asignar». Sin OAuth ni Gmail (CAR-265) y sin cliente de correo.
 
 11. **¿El gerente puede fusionar cuentas o contactos y transferir instalaciones?** Ningún ADR lo restringe hoy (ADR-016 le da escritura comercial). Recomendación: **sí**, porque son tareas de mantenimiento comercial y quedan en la auditoría. Si prefieres reservarlas a owner y admin, se agrega la denegación al rol.
 

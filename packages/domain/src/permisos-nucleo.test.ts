@@ -15,6 +15,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.etiquetasRead]: [true, true, true, false, true],
   [P.etiquetasManage]: [true, true, true, false, false],
   [P.etiquetasConfig]: [true, true, false, false, false],
+  // CAR-233: la bandeja «sin asignar» de correos, por defecto solo owner y admin (DECISIÓN CARLOS).
+  [P.correosSinAsignar]: [true, true, false, false, false],
   [P.instalacionesRead]: [true, true, true, true, true],
   // Puestos (Brief 11): el supervisor lee los catálogos pero no los edita ni los desactiva.
   [P.patronesRead]: [true, true, true, true, true],
