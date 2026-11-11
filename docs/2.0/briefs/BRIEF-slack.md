@@ -28,9 +28,9 @@ Manifiestos en [`packages/integrations/src/slack/manifiesto/`](../../../packages
 | **F3** | CAR-293 | Consumidores de eventos de terreno → Slack: solo anomalías, un hilo por instalación y día, botón «Tomar», resumen opcional editado con `chat.update`, pánico con escalamiento. Envío asíncrono con reintentos y límites de Slack. | Sí (aditiva) |
 | **F4** | CAR-294 | Endpoint de interactividad con firma verificada y antirrepetición; «Tomar», «Responder», «Cerrar» y «Pedir refuerzo» como capacidades del usuario vinculado; el mensaje se actualiza; efímero para quien no está vinculado o no tiene permiso. | Posible |
 | **F5a** | CAR-295 | Events API: la respuesta del supervisor en el hilo llega al guardia (conversación en OPAI y push en la app de terreno); se ignoran bots, no vinculados y otros espacios; se descarta sin guardar todo mensaje que no sea respuesta en el hilo de un aviso de OPAI; deduplicación. | Sí (aditiva) |
-| **F5b** | CAR-296 | Módulo «Comunicación» en la app de terreno: chat del guardia con su supervisor o la central, con texto, foto y ubicación, cola sin conexión; `@preview` a 375, 1024 y 1280 px. | Posible |
+| **F5b** | CAR-296 | Módulo «Comunicación» en la app de terreno: chat del guardia con su supervisor o la central, con texto, foto y ubicación, cola sin conexión; **botón de pánico** (decisión de Carlos), que funciona igual sin Slack; `@preview` a 375, 1024 y 1280 px. | Posible |
 
-## Configuración por tenant (propuesta de valores por defecto, la confirma Carlos)
+## Configuración por tenant (valores por defecto aprobados por Carlos el 11-nov-2026)
 
 Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar:
 
@@ -43,7 +43,7 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 | Incidentes y mensajes de guardias | Apagado |
 | Pánico al canal | Encendido |
 | Pánico: mensaje directo al supervisor zonal | Apagado |
-| Pánico: escalar a un responsable | Apagado; si se enciende, **5 min** |
+| Pánico: escalar a un grupo de usuarios o a personas (se elige en cada tenant) | Apagado; si se enciende, **5 min** |
 | Resumen por turno y zona | Apagado |
 | Canales | Uno para todo; opcionalmente uno por zona o por tipo. Nunca uno por instalación. |
 
@@ -55,12 +55,12 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 | Ausencia | `asistencia.alerta.sin_marca_inicio` | Consumidor nuevo |
 | Sin relevo | Sin evento propio | Evento nuevo emitido por Asistencia o Pauta en F3 (punto mínimo) |
 | Incidentes | Libro de novedades / Tickets | Consumidor del evento existente, si lo hay, en F3 |
-| Pánico | **No existe en 2.0** | Pregunta para Carlos (abajo) |
+| Pánico | **No existe en 2.0** | Botón en la app de terreno (F5b) que emite un evento de pánico nuevo por outbox; F3 lo consume |
 
-## Preguntas para Carlos
+## Respuestas de Carlos (11-nov-2026)
 
-1. **Espacio de pruebas y apps.** Slack valida la URL de eventos al guardar el manifiesto, así que las apps se registran cuando F1 esté en `test.opai.cl` (y en `app.opai.cl` para la distribuida). Para un e2e contra Slack real hace falta un espacio Slack de pruebas y registrar en api.slack.com la app de pruebas (`opai-pruebas.json`) y la app «OPAI» de producción (`opai.json`), con la distribución pública activada, y cargar `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET` y `SLACK_SIGNING_SECRET` en Vercel. Mientras tanto todo se prueba con mocks.
-2. **Canales privados.** Hoy la app solo lee respuestas en canales públicos. Si los canales de supervisión son privados, hay que sumar `groups:read` y `groups:history`.
-3. **Valores por defecto** de la tabla de arriba.
-4. **Pánico.** En 2.0 todavía no hay botón de pánico ni evento de pánico. ¿Dónde nace: en la app de terreno (por ejemplo dentro de «Comunicación», F5b) o en el módulo Central? Sin eso, F3 deja listo el aviso y el escalamiento, pero nada lo dispara.
-5. **«Responsable» del escalamiento.** ¿Un usuario fijo por tenant, uno por zona o un grupo (CAR-251)?
+1. **Pánico:** se aprieta en la app de terreno (la del guardia). El botón entra con F5b («Comunicación», app de terreno) y emite un evento de pánico por outbox; F3 lo consume (aviso al canal, mensaje directo y escalamiento).
+2. **Espacio Slack de pruebas:** sí. Se registran las apps cuando F1 esté desplegado, porque Slack valida la URL de eventos al guardar el manifiesto. Hasta entonces, mocks.
+3. **Canales de supervisión:** públicos. Sin `groups:*`.
+4. **Valores por defecto:** aprobados los de la tabla.
+5. **Escalamiento del pánico:** a un grupo de usuarios (CAR-251) o a personas, configurable en cada tenant.
