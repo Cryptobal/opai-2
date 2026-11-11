@@ -16,7 +16,7 @@ export function useMenuShell(
   router: AppRouterInstance,
   onPassword: () => void,
   onPortalInicio?: () => void,
-): { menuUsuario: readonly ItemMenu[]; avisoNovedades: boolean } {
+): { menuUsuario: readonly ItemMenu[] } {
   const novedadesNoLeidas = useConteoNovedades(
     datos.portal,
     datos.epoca,
@@ -34,7 +34,7 @@ export function useMenuShell(
           ? { href: rutaNovedades(datos.portal), noLeidas: novedadesNoLeidas }
           : undefined,
     );
-    return { menuUsuario, avisoNovedades: novedadesNoLeidas > 0 };
+    return { menuUsuario };
   }, [
       datos.acceso,
       datos.iconos,

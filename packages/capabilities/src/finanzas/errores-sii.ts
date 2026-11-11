@@ -43,6 +43,10 @@ export function comoReglaSiProveedorSii(
     limites: error.limites,
     // Forma del cuerpo sin su texto: «vacio» (contenido rechazado), «suscripcion» (la key no cubre el servicio) u «otro».
     cuerpo: error.cuerpo,
+    // Forma de la respuesta y de la petición rechazadas (CAR-240): content-type/length, largos, si el PFX es DER, formato
+    // del CAF, si Certificado.Rut tiene forma válida y los nombres de IdentificacionDTE. Nunca texto, base64 ni XML.
+    respuesta: error.respuesta,
+    peticion: error.peticion,
   });
   const despues = typeof consecuencia === "function" ? consecuencia(error) : consecuencia;
   const base = (detalle: string) => `SimpleAPI no pudo ${ACCION[error.paso]}: ${error.motivo}${detalle}. ${despues}`;

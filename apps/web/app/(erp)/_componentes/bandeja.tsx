@@ -9,7 +9,13 @@ import { BandejaCorta } from "./bandeja-corta";
 import { useBandeja } from "./use-bandeja";
 
 /** Una sola Bandeja; el servidor aplica destinatario, permisos efectivos y tenant. */
-export function Bandeja({ corta = false }: { corta?: boolean }) {
+export function Bandeja({
+  corta = false,
+  onNavegar,
+}: {
+  corta?: boolean;
+  onNavegar?: () => void;
+}) {
   const { avisos, aprobaciones, decisiones, error, noLeidas, cargandoMas, cargar, cargarMas, marcar } =
     useBandeja();
   if (corta)
@@ -21,6 +27,7 @@ export function Bandeja({ corta = false }: { corta?: boolean }) {
         error={error}
         onMarcar={() => void marcar()}
         onLeida={() => void cargar()}
+        {...(onNavegar ? { onNavegar } : {})}
       />
     );
   return (

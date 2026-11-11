@@ -1,8 +1,8 @@
 import {
+  abrirCertificadoPfx,
   adaptadorSimpleApi,
   adaptadorSiiSimulado,
   type AdaptadorSii,
-  validarCertificadoPfx,
   type CredencialesSimpleApi,
 } from "@opai/integrations";
 
@@ -22,19 +22,20 @@ async function credencialesSimpleApi(ctx: Contexto): Promise<CredencialesSimpleA
     leerSecreto(ctx, integ.id, "certificado_clave"),
   ]);
   if (!apiKey || !certificadoPfx || !certificadoClave) return null;
-  // RUT del titular del certificado (lo exige SimpleAPI en `Certificado.Rut`): sale del propio .pfx, sin puntos.
-  let certificadoRut: string | null;
+  // RUT del titular del certificado (`Certificado.Rut`): sale del propio .pfx como `extractRut` de 1.0, ya sin puntos
+  // y con el DV en mayúscula; nunca el de la empresa. La clave va recortada si así abre el .pfx (CAR-240).
+  let certificado: ReturnType<typeof abrirCertificadoPfx>;
   try {
-    certificadoRut = validarCertificadoPfx(certificadoPfx, certificadoClave).meta.rutTitular;
+    certificado = abrirCertificadoPfx(certificadoPfx, certificadoClave);
   } catch {
     return null;
   }
-  if (!certificadoRut) return null;
+  if (!certificado.meta.rutTitular) return null;
   return {
     apiKey,
     certificadoPfxBase64: certificadoPfx,
-    certificadoClave,
-    certificadoRut: certificadoRut.replace(/\./g, "").toUpperCase(),
+    certificadoClave: certificado.clave,
+    certificadoRut: certificado.meta.rutTitular,
     rutEmpresa: cfg.rutEmisor.replace(/\./g, "").toUpperCase(),
     resolucionNumero: cfg.resolucionSiiNumero,
     resolucionFecha: cfg.resolucionSiiFecha.toISOString().slice(0, 10),

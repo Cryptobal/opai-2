@@ -4,7 +4,7 @@
  * ejemplo de esa documentación; lo que ella no responde queda anotado como «DECISIÓN CARLOS» en el PR.
  */
 
-import { correoReceptor, rutSii, rutTitularSii } from "./simpleapi-formatos";
+import { certificadoInput, correoReceptor, rutSii, type CredsCertificado } from "./simpleapi-formatos";
 import type { AmbienteSii, PayloadEmisionDte } from "./tipos";
 
 /** Host del ejemplo de autenticación de la documentación (`https://api.simpleapi.cl/{endpoint}`). */
@@ -56,8 +56,8 @@ export const codigoAmbiente = (a: AmbienteSii): 0 | 1 => (a === "produccion" ? 1
 /** Forma de pago: la documentación pide informarla (1 contado, 2 crédito, 3 sin costo); sin dato rige crédito. */
 const FORMA_PAGO_CREDITO = 2;
 
-/** JSON del campo `input` de POST /api/v1/dte/generar (esquema unificado de la documentación). */
-export function jsonInputGenerarDte(
+/** Objeto del campo `input` de POST /api/v1/dte/generar, con las claves de `buildDtePayload` de OPAI 1.0. */
+export function entradaGenerarDte(
   payload: PayloadEmisionDte,
   creds: Pick<
     CredencialesSimpleApiV1,
@@ -70,7 +70,7 @@ export function jsonInputGenerarDte(
     | "comunaEmisor"
     | "ciudadEmisor"
   >,
-): string {
+) {
   const lineas = payload.lineas?.length
     ? payload.lineas
     : [{ orden: 0, glosa: payload.glosa ?? "Servicio", monto: payload.montos.total }];
@@ -98,7 +98,7 @@ export function jsonInputGenerarDte(
   }));
   const ciudadReceptor = payload.ciudadReceptor ?? payload.comunaReceptor;
   const correo = correoReceptor(payload.emailReceptor);
-  return JSON.stringify({
+  return {
     Documento: {
       // ID del nodo Documento (atributo XML): fijo por tipo y folio, para que un reintento genere el mismo documento.
       Id: `F${payload.folio}T${payload.tipoDte}`,
@@ -107,9 +107,8 @@ export function jsonInputGenerarDte(
           TipoDTE: payload.tipoDte,
           Folio: payload.folio,
           FechaEmisionString: fechaSii(payload.fechaEmision),
-          // Vencimiento con el nombre de la doc oficial de Generar - DTE (`FechaVencimiento`, AAAA-MM-DD). 1.0 no lo
-          // manda y `FechaVencimientoString` (solo en el SDK) no lo usa ningún emisor que funcione (CAR-240).
-          ...(payload.fechaVencimiento ? { FechaVencimiento: fechaSii(payload.fechaVencimiento) } : {}),
+          // Sin vencimiento, como 1.0, que no lo manda y sí emite (decisión de Carlos, 10-nov-2026, CAR-240): ni
+          // `FechaVencimiento` ni `FechaVencimientoString`. El vencimiento sigue en OPAI (UI, PDF y cobranza).
           FormaPago: FORMA_PAGO_CREDITO,
         },
         Emisor: {
@@ -144,17 +143,22 @@ export function jsonInputGenerarDte(
       Detalles: detalles,
       ...(referencias.length > 0 ? { Referencias: referencias } : {}),
     },
-    Certificado: { Rut: rutTitularSii(creds.certificadoRut), Password: creds.certificadoClave },
-  });
+    Certificado: certificadoInput(creds),
+  };
+}
+
+/** JSON del campo `input` de POST /api/v1/dte/generar (esquema unificado de la documentación). */
+export function jsonInputGenerarDte(payload: PayloadEmisionDte, creds: Parameters<typeof entradaGenerarDte>[1]): string {
+  return JSON.stringify(entradaGenerarDte(payload, creds));
 }
 
 /** JSON del campo `input` de POST /api/v1/envio/generar (sobre de envío al SII). */
 export function jsonInputSobreEnvio(
   payload: { rutEmisor: string; resolucionNumero: number; resolucionFecha: string },
-  creds: Pick<CredencialesSimpleApiV1, "certificadoRut" | "certificadoClave">,
+  creds: CredsCertificado,
 ): string {
   return JSON.stringify({
-    Certificado: { Password: creds.certificadoClave, Rut: creds.certificadoRut },
+    Certificado: certificadoInput(creds),
     Caratula: {
       RutEmisor: payload.rutEmisor,
       RutReceptor: RUT_SII,
@@ -167,10 +171,10 @@ export function jsonInputSobreEnvio(
 /** JSON del campo `input` de POST /api/v1/envio/enviar. `Tipo`: EnvioDTE = 1, EnvioBoleta = 2. */
 export function jsonInputEnviarSii(
   ambiente: AmbienteSii,
-  creds: Pick<CredencialesSimpleApiV1, "certificadoRut" | "certificadoClave">,
+  creds: CredsCertificado,
 ): string {
   return JSON.stringify({
-    Certificado: { Password: creds.certificadoClave, Rut: creds.certificadoRut },
+    Certificado: certificadoInput(creds),
     Ambiente: codigoAmbiente(ambiente),
     Tipo: 1,
   });
@@ -181,10 +185,10 @@ export function jsonInputConsultaEnvio(
   rutEmpresa: string,
   trackId: string,
   ambiente: AmbienteSii,
-  creds: Pick<CredencialesSimpleApiV1, "certificadoRut" | "certificadoClave">,
+  creds: CredsCertificado,
 ): string {
   return JSON.stringify({
-    Certificado: { Password: creds.certificadoClave, Rut: creds.certificadoRut },
+    Certificado: certificadoInput(creds),
     RutEmpresa: rutEmpresa,
     TrackId: Number(trackId),
     Ambiente: codigoAmbiente(ambiente),
