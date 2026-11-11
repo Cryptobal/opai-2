@@ -32,41 +32,28 @@ export function EditorImportar10() {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [texto, setTexto] = useState("");
   const [vista, setVista] = useState<ResultadoImport | null>(null);
+  const [directa, setDirecta] = useState(false);
 
-  function parseOrigen(): unknown {
-    return JSON.parse(texto) as unknown;
-  }
-
-  async function previsualizar() {
+  /** `origen` pegado o, sin él, leído por el servidor desde OPAI 1 con la llave de Integraciones. */
+  async function correr(dryRun: boolean, directo: boolean) {
     limpiarError();
-    let origen: unknown;
-    try {
-      origen = parseOrigen();
-    } catch {
-      avisar.error("El JSON no es válido.");
-      return;
+    let fuente: Record<string, unknown> = { desdeOpai1: true, soloComercial: true };
+    if (!directo) {
+      try {
+        fuente = { origen: JSON.parse(texto) as unknown };
+      } catch {
+        avisar.error("El JSON no es válido.");
+        return;
+      }
     }
-    const r = await ejecutar<ResultadoImport>(
-      "comercial.importar_1_0",
-      { origen, usuarios: [] },
-      true,
-    );
-    setVista(r);
-  }
-
-  async function aplicar() {
-    let origen: unknown;
-    try {
-      origen = parseOrigen();
-    } catch {
-      avisar.error("El JSON no es válido.");
-      return;
-    }
-    const r = await ejecutar<ResultadoImport>("comercial.importar_1_0", { origen, usuarios: [] }, false);
+    const r = await ejecutar<ResultadoImport>("comercial.importar_1_0", { ...fuente, accion: dryRun ? "simular" : "aplicar", usuarios: [] }, dryRun);
     if (!r) return;
-    avisar.exito(
-      `Importación aplicada: ${r.aplicadas?.cuentas ?? 0} cuentas, ${r.aplicadas?.contactos ?? 0} contactos, ${r.aplicadas?.instalaciones ?? 0} instalaciones.`,
-    );
+    if (!dryRun) {
+      avisar.exito(
+        `Importación aplicada: ${r.aplicadas?.cuentas ?? 0} cuentas, ${r.aplicadas?.contactos ?? 0} contactos, ${r.aplicadas?.instalaciones ?? 0} instalaciones.`,
+      );
+    }
+    setDirecta(directo);
     setVista(r);
   }
 
@@ -77,25 +64,39 @@ export function EditorImportar10() {
       <div>
         <h2 className="t-label text-fg">Importar desde OPAI 1.0</h2>
         <p className="mt-1 text-sm text-fg-muted">
-          Pegue el export JSON de maestros comerciales (cuentas, contactos e instalaciones). Primero use la vista
-          previa; la carga es idempotente por id de origen.
+          Trae los datos comerciales de OPAI 1. Primero simula y revisa el resumen; repetir la carga no duplica
+          registros. También puedes pegar el export JSON a mano.
         </p>
       </div>
       {error ? <Alerta tono="danger" titulo={error} /> : null}
+      <div className="flex flex-col gap-2 rounded-md border border-border p-3">
+        <p className="text-sm text-fg">
+          <strong>Traer directo desde OPAI 1.</strong> Usa la llave de solo lectura guardada en Configuración ›
+          Integraciones › OPAI 1. Trae cuentas, contactos, instalaciones y negocios; no toca Finanzas.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" disabled={pendiente} onClick={() => void correr(true, true)}>
+            Simular desde OPAI 1
+          </Button>
+          <Button disabled={pendiente || !vista || !vista.dryRun || !directa} onClick={() => void correr(false, true)}>
+            Importar desde OPAI 1
+          </Button>
+        </div>
+      </div>
       <Textarea
         value={texto}
         onChange={(e) => {
           setTexto(e.target.value);
           setVista(null);
         }}
-        rows={14}
+        rows={8}
         placeholder='{"accounts":[...],"contacts":[...],"installations":[...]}'
       />
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" disabled={pendiente || !texto.trim()} onClick={() => void previsualizar()}>
+        <Button variant="secondary" disabled={pendiente || !texto.trim()} onClick={() => void correr(true, false)}>
           Vista previa (dry-run)
         </Button>
-        <Button disabled={pendiente || !vista || vista.dryRun !== true} onClick={() => void aplicar()}>
+        <Button disabled={pendiente || !vista || vista.dryRun !== true || directa} onClick={() => void correr(false, false)}>
           Aplicar importación
         </Button>
       </div>

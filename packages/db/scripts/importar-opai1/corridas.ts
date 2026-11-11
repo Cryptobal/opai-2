@@ -68,13 +68,14 @@ export async function cerrarCorrida(
   );
 }
 
-type Lote = Pick<Plan, "cuentas" | "contactos" | "instalaciones" | "programaciones">;
-const CLAVES: (keyof Lote)[] = ["cuentas", "contactos", "instalaciones", "programaciones"];
+type Lote = Pick<Plan, "cuentas" | "contactos" | "instalaciones" | "programaciones" | "negocios">;
+// Los negocios van al final: necesitan las cuentas creadas en lotes anteriores (mapa en memoria).
+const CLAVES: (keyof Lote)[] = ["cuentas", "contactos", "instalaciones", "programaciones", "negocios"];
 
 /** Parte el plan en lotes de a lo más `tam` filas por entidad, respetando el orden de dependencias. */
 export function partirEnLotes(plan: Plan, tam: number = TAMANO_LOTE): Plan[] {
   const lotes: Plan[] = [];
-  const vacio = { cuentas: [], contactos: [], instalaciones: [], programaciones: [] };
+  const vacio = { cuentas: [], contactos: [], instalaciones: [], programaciones: [], negocios: [] };
   for (const clave of CLAVES) {
     const filas = plan[clave];
     for (let i = 0; i < filas.length; i += tam) {
@@ -94,7 +95,7 @@ export async function aplicarPorLotes(
 ): Promise<ResultadoAplicacion> {
   const total: ResultadoAplicacion = {
     mapas,
-    aplicadas: { cuentas: 0, contactos: 0, instalaciones: 0, programaciones: 0 },
+    aplicadas: { cuentas: 0, contactos: 0, instalaciones: 0, programaciones: 0, negocios: 0 },
     omitidas: 0,
   };
   for (const lote of partirEnLotes(plan, tam)) {

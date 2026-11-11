@@ -69,7 +69,7 @@ describe.skipIf(!urlPropietario)("Corridas de importación (CAR-157)", () => {
 
     // La segunda corrida no crea ni cambia nada.
     const segunda = await correr(datos);
-    expect(segunda.r.aplicadas).toEqual({ cuentas: 0, contactos: 0, instalaciones: 0, programaciones: 0 });
+    expect(segunda.r.aplicadas).toEqual({ cuentas: 0, contactos: 0, instalaciones: 0, programaciones: 0, negocios: 0 });
 
     // Revertir la primera corrida con la segunda ya hecha: la segunda no tocó nada, así que se puede.
     const prueba = await revertirCorrida(tenantId, id, true);
