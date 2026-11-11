@@ -13,7 +13,7 @@ const MAX_FILAS = 200;
 export function ResumenConteos({ conteos }: { conteos: Conteos }) {
   const orden: Accion[] = ["crear", "actualizar", "sin_cambio", "error"];
   return (
-    <ul className="grid grid-cols-2 gap-2 md:grid-cols-4">
+    <ul className="grid grid-cols-2 gap-2 xl:grid-cols-4">
       {orden.map((a) => (
         <li key={a} className="flex flex-col gap-1 rounded-lg border border-border bg-surface p-3">
           <span className="t-title tabular-nums">{conteos[a].toLocaleString("es-CL")}</span>
