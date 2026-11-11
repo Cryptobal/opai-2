@@ -94,3 +94,15 @@ describe("formaDeKeySimpleApi", () => {
     }
   });
 });
+
+describe("«API KEY Incorrecta» de SimpleAPI (CAR-240)", () => {
+  it("el texto literal del proveedor llega al motivo, sin copiar el cuerpo ni la key", async () => {
+    const { leerBytesRespuesta } = await import("./simpleapi-http");
+    const res = new Response(JSON.stringify("API KEY Incorrecta. No es posible continuar"), { status: 401 });
+    const e = await leerBytesRespuesta(res, "generar", [KEY]).catch((x: unknown) => x as { motivo: string; status: number });
+    expect(e).toMatchObject({
+      status: 401,
+      motivo: "respondió «API KEY Incorrecta» (HTTP 401): no acepta la API key guardada en Integraciones › Emisión DTE",
+    });
+  });
+});
