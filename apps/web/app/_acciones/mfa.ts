@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 
 import {
   confirmarSegundoFactor,
-  desactivarSegundoFactor,
   iniciarSegundoFactor,
   requireSession,
   verificarCodigoRespaldo,
@@ -12,8 +11,6 @@ import {
 } from "@opai/auth";
 import { destinoSeguro } from "@/app/(auth)/destino";
 import { qrSvg } from "@/lib/qr";
-import { identidadActual } from "@/lib/servidor";
-import { mfaObligatoriaPara, verificarMfaDe } from "@/lib/mfa";
 import { normalizarCodigoRespaldo } from "@/lib/codigo-mfa";
 
 /** Aviso genérico de pausa, igual que el del login (no revela intentos restantes). */
@@ -93,19 +90,5 @@ export async function accionConfirmarMfa(
     return { ok: false, error: "Confirma que guardaste tus códigos de respaldo." };
   const codigo = String(form.get("codigo") ?? "").replace(/\D/g, "");
   const r = await confirmarSegundoFactor(codigo);
-  return r.ok ? { ok: true } : { ok: false, error: r.mensaje };
-}
-
-/** Desactiva el segundo factor; exige la contraseña. */
-export async function accionDesactivarMfa(
-  _previo: ConfirmaMfa | null,
-  form: FormData,
-): Promise<ConfirmaMfa> {
-  await requireSession();
-  const identidad = await identidadActual();
-  if (!identidad || (await mfaObligatoriaPara(identidad)) || (await verificarMfaDe(identidad)))
-    return { ok: false, error: "Tu rol requiere el segundo factor o falta verificar la sesión." };
-  const password = String(form.get("password") ?? "");
-  const r = await desactivarSegundoFactor(password);
   return r.ok ? { ok: true } : { ok: false, error: r.mensaje };
 }

@@ -22,7 +22,7 @@ test.describe("segundo factor", () => {
     await page.goto("/login");
     await page.getByLabel("Correo").fill(E2E_EMAIL);
     await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await page.waitForURL((url) => url.pathname === "/mfa");
     await expect(page.getByRole("heading", { name: "Verifica tu identidad" })).toBeVisible();
     const campo = page.getByLabel("Código del autenticador");
@@ -44,12 +44,14 @@ test.describe("segundo factor", () => {
     await captura(page, "mfa-entrada", p);
   });
 
-  test("un owner sin segundo factor entra solo con contraseña (CAR-286)", async ({ page }, info) => {
+  test("un owner sin segundo factor entra solo con contraseña (CAR-286)", async ({
+    page,
+  }, info) => {
     const p = info.project.name;
     await page.goto("/login");
     await page.getByLabel("Correo").fill(PENDIENTE);
     await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
     // El MFA ya no es obligatorio para owner ni admin: entra sin pasar por /activar-mfa ni /mfa.
     await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/elegir-empresa");
     expect(new URL(page.url()).pathname).not.toBe("/activar-mfa");

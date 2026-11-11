@@ -20,7 +20,7 @@ test("credenciales incorrectas muestran el error en línea", async ({ page }) =>
   await page.goto("/login");
   await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña", { exact: true }).fill("incorrecta-123");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page.getByText("El correo o la contraseña no coinciden")).toBeVisible();
 });
 

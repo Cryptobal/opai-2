@@ -9,6 +9,8 @@ import { accionSalir } from "@/app/_acciones/auth";
 import { LinkNext } from "@/app/_components/link-next";
 import { trasLimpiarCaches } from "@/app/_components/pwa/limpiar-cache";
 
+import { EntrarConPasskey } from "../login/entrar-passkey";
+
 export type Metodo = "totp" | "respaldo";
 
 export function VerificarMetodo({
@@ -96,6 +98,7 @@ export function VerificarMetodo({
           {metodo === "totp" ? "Usar un código de respaldo" : "Usar mi autenticador"}
         </Button>
       </form>
+      <EntrarConPasskey destino={destino} autocompletar={false} texto="Usar una passkey" />
     </AuthCard>
   );
 }

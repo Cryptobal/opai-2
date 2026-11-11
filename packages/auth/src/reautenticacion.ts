@@ -121,3 +121,15 @@ export async function confirmarIdentidad(c: Confirmacion): Promise<boolean> {
   if (ok) await guardar(PREFIJO_REAUTENTICACION + userId, "1");
   return ok;
 }
+
+/**
+ * Purga los desafíos y marcas vencidos de `core.verifications` (CAR-286): el login pide un desafío
+ * de passkey al cargar (autocompletado) y los que nadie usó quedan vencidos. Solo filas vencidas hace
+ * más de una hora; un token vigente (recuperación, invitación) nunca se toca. La llama el cron diario.
+ */
+export async function purgarVerificacionesVencidas(): Promise<number> {
+  const r = await clienteAuth().verification.deleteMany({
+    where: { expiresAt: { lt: new Date(Date.now() - 60 * 60 * 1000) } },
+  });
+  return r.count;
+}

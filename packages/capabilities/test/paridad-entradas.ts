@@ -49,7 +49,20 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/_acciones/mfa.ts#accionIniciarMfa": "Identidad: enrola el segundo factor propio.",
   "app/_acciones/mfa.ts#accionConfirmarMfa":
     "Identidad: confirma el enrolamiento del segundo factor.",
-  "app/_acciones/mfa.ts#accionDesactivarMfa": "Identidad: desactiva el segundo factor propio.",
+  "app/_acciones/passkeys.ts#accionOpcionesNuevaPasskey":
+    "Identidad: ceremonia WebAuthn para registrar una passkey propia (exige el dispositivo).",
+  "app/_acciones/passkeys.ts#accionGuardarPasskey":
+    "Identidad: guarda la passkey propia verificada por el dispositivo (CAR-286).",
+  "app/_acciones/passkeys.ts#accionOpcionesEntrarPasskey":
+    "Identidad: desafío para entrar con passkey (sesión humana).",
+  "app/_acciones/passkeys.ts#accionEntrarConPasskey":
+    "Identidad: login con passkey, solo personas.",
+  "app/_acciones/metodos-acceso.ts#accionRenombrarPasskey":
+    "Invoca core.metodos_acceso.renombrar_passkey (herramienta MCP existente).",
+  "app/_acciones/metodos-acceso.ts#accionOpcionesConfirmarPasskey":
+    "Identidad: desafío WebAuthn para confirmar la identidad antes de quitar un método.",
+  "app/_acciones/metodos-acceso.ts#accionQuitarMetodo":
+    "Confirma la identidad y luego invoca core.metodos_acceso.quitar (herramienta MCP existente).",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion":
     "Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial.",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion":

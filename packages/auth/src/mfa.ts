@@ -141,18 +141,3 @@ export async function verificarCodigoRespaldo(code: string): Promise<ResultadoAc
     return falloDeVerificacion(error);
   }
 }
-
-/** Desactiva el segundo factor; exige la contraseña (lo irreversible queda en la sesión). */
-export async function desactivarSegundoFactor(password: string): Promise<ResultadoAcceso> {
-  try {
-    await auth.api.disableTwoFactor({ body: { password }, headers: await headers() });
-    return { ok: true };
-  } catch (error) {
-    if (codigoDe(error) === "INVALID_PASSWORD") {
-      return fallo("credenciales", "La contraseña no es correcta.");
-    }
-    if (error instanceof APIError)
-      return fallo("error", "No se pudo desactivar el segundo factor.");
-    throw error;
-  }
-}

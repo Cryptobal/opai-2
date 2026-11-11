@@ -1,4 +1,4 @@
-import { purgarIntentosLogin } from "@opai/auth";
+import { purgarIntentosLogin, purgarVerificacionesVencidas } from "@opai/auth";
 import { programarCapturaSii, programarHorarios, programarPeriodicos } from "@opai/capabilities";
 
 import { autorizarCron, encolarCapturaSiiDesdeCron, horaEn, hoyEn, porTenant } from "@/lib/cron";
@@ -36,6 +36,10 @@ export async function GET(req: Request): Promise<Response> {
   } catch {
     console.error("[cron programador] falló la purga de intentos de login");
   }
+  // Desafíos de passkey y marcas vencidos (CAR-286): best-effort, no cambia el `ok` del cron.
+  await purgarVerificacionesVencidas().catch(() =>
+    console.error("[cron programador] falló la purga de verificaciones vencidas"),
+  );
   // Purga de las ventanas de rate limit vencidas (NÚCLEO-B). Global y aislada, como la de login.
   let ventanasRatePurgadas: number | null = null;
   try {
