@@ -1,5 +1,7 @@
 import forge from "node-forge";
 
+import { rutTitularCertificado } from "./simpleapi-formatos";
+
 /** Tope razonable para un .pfx/.p12 de firma (bytes decodificados). */
 export const CERTIFICADO_PFX_MAX_BYTES = 256 * 1024;
 
@@ -16,20 +18,17 @@ export type MetaCertificadoPfx = {
   venceEn: string;
 };
 
+/** RUT del titular como `extractRut` de OPAI 1.0: del serialNumber y, si no lo trae, del CN (CAR-240). */
 function rutDeSubject(cert: forge.pki.Certificate): string | null {
   for (const attr of cert.subject.attributes) {
     const nombre = attr.shortName ?? attr.name;
     if (nombre === "serialNumber" || attr.type === "2.5.4.5") {
-      const v = String(attr.value ?? "").trim();
-      if (v.length >= 3) return v;
+      const rut = rutTitularCertificado(String(attr.value ?? ""));
+      if (rut) return rut;
     }
   }
   const cn = cert.subject.getField("CN")?.value;
-  if (typeof cn === "string") {
-    const m = cn.match(/(\d{1,2}\.?\d{3}\.?\d{3}-[\dkK])$/);
-    if (m?.[1]) return m[1];
-  }
-  return null;
+  return typeof cn === "string" ? rutTitularCertificado(cn) : null;
 }
 
 function titularDeSubject(cert: forge.pki.Certificate): string {
@@ -164,3 +163,4 @@ export function validarCertificadoPfx(
     },
   };
 }
+

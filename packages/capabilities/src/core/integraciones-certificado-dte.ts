@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { definicionIntegracion, validarCertificadoPfx } from "@opai/integrations";
+import { abrirCertificadoPfx, definicionIntegracion } from "@opai/integrations";
 import { enmascararRun, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
@@ -29,9 +29,10 @@ export const integracionesGuardarCertificadoDte = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const def = definicionIntegracion(input.proveedor);
     if (!def?.disponible) throw noEncontrado(`La integración "${input.proveedor}"`);
-    let parsed: ReturnType<typeof validarCertificadoPfx>;
+    // La clave se guarda recortada si así abre el .pfx (CAR-240): un espacio o salto al copiarla no viaja a SimpleAPI.
+    let parsed: ReturnType<typeof abrirCertificadoPfx>;
     try {
-      parsed = validarCertificadoPfx(input.archivoBase64, input.claveCertificado);
+      parsed = abrirCertificadoPfx(input.archivoBase64, input.claveCertificado);
     } catch (e) {
       throw reglaDeNegocio(e instanceof Error ? e.message : "Certificado inválido.");
     }
@@ -74,7 +75,7 @@ export const integracionesGuardarCertificadoDte = defineCapability({
         },
       });
       await guardarSecretoTx(tx, ctx, fila.id, "certificado_pfx", parsed.base64);
-      await guardarSecretoTx(tx, ctx, fila.id, "certificado_clave", input.claveCertificado);
+      await guardarSecretoTx(tx, ctx, fila.id, "certificado_clave", parsed.clave);
       await ctx.eventos.emitir(tx, {
         tipo: "core.integracion.certificado_dte",
         entidadTipo: "integracion",
