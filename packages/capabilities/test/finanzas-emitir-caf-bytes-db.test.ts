@@ -28,7 +28,7 @@ const credsFicticias = {
 };
 const emisor = { razonSocial: "Empresa Ficticia SpA", giro: "Servicios de prueba", calle: "Calle Ficticia 1", comuna: "Comuna Ficticia", ciudad: "Ciudad Ficticia" };
 const MENSAJE_401_VACIO =
-  "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, como ante una API key que no reconoce (mal copiada, vencida o sin suscripción a SimpleAPI DTE); usa «Probar conexión» en Integraciones › Emisión DTE. El borrador sigue sin emitir y el folio no se usó.";
+  "SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, también al repetir con token; usa «Probar conexión» en Integraciones › Emisión DTE para ver qué responde a la API key. El borrador sigue sin emitir y el folio no se usó.";
 
 /** CAF sintético con una «ñ» en la razón social: en el archivo es el byte 0xF1, un carácter por byte en el texto. */
 const cafConEne = (folioDesde: number) =>
