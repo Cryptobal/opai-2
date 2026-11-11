@@ -67,6 +67,10 @@ Frente transversal aprobado por Carlos: marco centrado en el agente con interrup
 
 Prioritario por decisión de Carlos: entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones. Lo lleva la «Sesión Núcleo», un PR por fase y en orden: F0 decisión y app «OPAI» (CAR-290), F1 conexión por tenant (CAR-291), F2 vínculo de usuarios (CAR-292), F3 anomalías de terreno a Slack (CAR-293), F4 botones (CAR-294), F5a respuestas al guardia (CAR-295) y F5b módulo «Comunicación» en la app de terreno (CAR-296). Plan en [`briefs/BRIEF-slack.md`](briefs/BRIEF-slack.md).
 
+### Desempeño (ADR-094, 11-nov-2026)
+
+Indicadores y metas por cargo, configurables por empresa: catálogo de indicadores en el Núcleo, scorecard por cargo y resultado por persona. Hoja de alcance en [`diseño/alcance-desempeno.md`](diseño/alcance-desempeno.md), aprobada por Carlos el 11-nov-2026; incluye indicadores propios por empresa y jefatura por cargo. Se vende como módulo aparte. No compite con los frentes abiertos: parte por el catálogo en el Núcleo, las pantallas esperan el diseño aprobado, y los indicadores de Operaciones y Asistencia entran cuando sus datos existan. Tarea madre: CAR-303.
+
 ## 4. Qué pausar y qué descartar
 
 **En pausa hasta cerrar la migración de Gard:**
