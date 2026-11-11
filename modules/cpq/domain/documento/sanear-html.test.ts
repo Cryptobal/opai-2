@@ -65,6 +65,15 @@ describe("saneador de HTML de propuesta", () => {
     expect(sanearHtml("<div>{{#cada instalaciones}}<p>{{instalacion.nombre}}</p>{{/cada}}</div><!-- {{inventado}} -->").ok).toBe(true);
   });
 
+  it("catálogo v2: acepta la colección de referencias y rechaza campos que no son de propuesta", () => {
+    const r = sanearHtml("<div>{{#cada referencias}}<p>{{referencia.cliente}} · {{referencia.comuna}}</p>{{/cada}}</div>");
+    expect(r.ok).toBe(true);
+    expect(r.tokens.colecciones).toEqual(["referencias"]);
+    expect(r.catalogoVersion).toBe(2);
+    // Un campo de contrato (o personal sin finalidad «propuesta») no se cuela en una plantilla de propuesta.
+    for (const t of ["{{cuenta.escritura_notaria}}", "{{contacto.email}}"]) expect(codigos(`<p>${t}</p>`)).toContain("token");
+  });
+
   it("quita sin rechazar los atributos y estilos no permitidos y lo informa", () => {
     const r = sanearHtml('<div id="a" data-x="1" class="k" style="position: fixed; color: red">{{cuenta.nombre}}</div>');
     expect(r.ok).toBe(true);
