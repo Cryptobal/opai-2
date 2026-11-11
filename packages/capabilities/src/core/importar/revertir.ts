@@ -26,7 +26,7 @@ export async function revertirLote(ctx: Contexto, importacionId: string, dryRun:
     const completadas = filas.filter((f) => f.accion === "completado");
     const tocadas = [...creadas, ...completadas];
     const actuales = new Map((await imp.actuales(tx, tocadas.map((f) => f.id20 ?? ""))).map((a) => [a.id, a]));
-    const conDependientes = await imp.bloqueos(tx, creadas.map((f) => f.id20 ?? ""));
+    const conDependientes = await imp.bloqueos(tx, creadas.map((f) => f.id20 ?? ""), ctx);
     const bloqueadas: Bloqueada[] = [];
     for (const f of tocadas) {
       const actual = actuales.get(f.id20 ?? "");

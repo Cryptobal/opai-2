@@ -5,6 +5,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { cifrarCampoEnTransaccion } from "../cumplimiento/cifrado-campos";
+import { prohibido } from "../../errores";
 import { idsExternos, texto } from "./comun";
 import {
   CAMPOS_FICHA,
@@ -85,8 +86,13 @@ export const importadorPersonas: Importador<DatosPersona> = {
     // Siempre se toca la persona: su `updatedAt` es la marca con que se revisa la reversión.
     await tx.persona.update({ where: { id }, data: { ...datosFicha, updatedAt: new Date() } });
     const prevision = parte(CAMPOS_PREVISION);
-    if (Object.keys(prevision).length) await guardarPrevision(tx, ctx.tenantId, id, prevision);
     const pago = parte(CAMPOS_PAGO);
+    // También al revertir: restaurar la previsión o quitar una cuenta pide el permiso de esa sección.
+    if (Object.keys(prevision).length && !ctx.autorizar(PERMISOS_CORE.personasPrevisionManage))
+      throw prohibido("No tienes permiso para modificar la previsión de las personas de este lote.");
+    if (Object.keys(pago).length && !ctx.autorizar(PERMISOS_CORE.personasPagoManage))
+      throw prohibido("No tienes permiso para modificar las cuentas bancarias de las personas de este lote.");
+    if (Object.keys(prevision).length) await guardarPrevision(tx, ctx.tenantId, id, prevision);
     if (!Object.keys(pago).length) return;
     // Al revertir vuelven los tres campos en null: la cuenta que creó el lote se elimina.
     if (!pago.bancoCodigo || !pago.tipoCuenta || !pago.numeroCuenta) {

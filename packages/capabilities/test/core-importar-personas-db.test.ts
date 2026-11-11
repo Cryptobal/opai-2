@@ -120,4 +120,15 @@ describe.skipIf(!urlPropietario)("core · importador de personas en base real", 
     expect(await x.e.admin.personaPago.count({ where: { tenantId: x.t1 } })).toBe(1);
     expect(await x.e.admin.personaPrevision.count({ where: { tenantId: x.t1, afp: "Modelo" } })).toBe(0);
   });
+
+  it("no revierte una persona a la que después se le cargó OS-10; sin permiso de previsión no se restaura", async () => {
+    const r = await x.importar(x.t1, "personas", { filas: [{ nombres: "Olga", apellidos: "Reyes", rut: "5.555.555-9", afp: "Cuprum" }] });
+    const olga = await x.e.admin.persona.findFirstOrThrow({ where: { tenantId: x.t1, rut: "5555555-9" } });
+    await x.e.admin.personaOs10.create({ data: { tenantId: x.t1, personaId: olga.id, credencial: "OS10-1" } });
+    const rev = await x.run<Reversion>(x.t1, "core.importar.revertir", { importacionId: r.importacionId ?? "" });
+    expect(rev.ok && [rev.data.revertido, rev.data.bloqueadas[0]?.motivo]).toEqual([false, expect.stringMatching(/OS-10/)]);
+    expect(await x.e.admin.personaOs10.count({ where: { personaId: olga.id } })).toBe(1);
+    const gerente = await x.run<Reversion>(x.t1, "core.importar.revertir", { importacionId: r.importacionId ?? "" }, { rol: "gerente" });
+    expect(gerente.ok ? gerente.data.revertido : false).toBe(false);
+  });
 });

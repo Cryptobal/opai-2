@@ -54,7 +54,7 @@ export type Importador<D extends Datos = Datos> = {
   /** Para revertir: estado actual de los registros que todavía existen. */
   actuales(tx: TenantTx, ids: readonly string[]): Promise<({ id: string; updatedAt: Date } & Record<string, unknown>)[]>;
   /** Para revertir: por qué no se puede borrar cada registro (tiene dependientes); sin entrada = se puede. */
-  bloqueos(tx: TenantTx, ids: readonly string[]): Promise<Map<string, string>>;
+  bloqueos(tx: TenantTx, ids: readonly string[], ctx: Contexto): Promise<Map<string, string>>;
   borrar(tx: TenantTx, ids: readonly string[]): Promise<void>;
 };
 
