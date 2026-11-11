@@ -1,4 +1,4 @@
-import { abrirCertificadoPfx, formaDeKeySimpleApi, probarKeySimpleApi } from "@opai/integrations";
+import { abrirCertificadoPfx, formaDeKeySimpleApi, medirKeySimpleApi } from "@opai/integrations";
 
 import { reglaDeNegocio } from "../errores";
 import { leerSecreto } from "../integraciones/secretos";
@@ -7,7 +7,8 @@ import type { Contexto } from "../types";
 const fechaCl = (iso: string) => iso.slice(0, 10).split("-").reverse().join("-");
 
 /**
- * Prueba real de Emisión DTE (CAR-263): pregunta a SimpleAPI si reconoce la API key guardada (`Suscripcion/status`) y
+ * Prueba real de Emisión DTE (CAR-263, CAR-240): mide qué responde SimpleAPI a la API key guardada
+ * (`Suscripcion/status`, con Basic y con token) y
  * abre el certificado .pfx con su clave. No emite, no usa folios y no envía el certificado ni el CAF. Antes esta
  * integración caía en la prueba de correo y «Conexión correcta» no decía nada de SimpleAPI.
  */
@@ -24,28 +25,22 @@ export async function probarEmisionDte(ctx: Contexto): Promise<string> {
     : [null, null, null];
   if (!apiKey) throw reglaDeNegocio("Falta la API key de SimpleAPI en Emisión DTE.");
 
-  const r = await probarKeySimpleApi(apiKey);
-  if (r.estado === "sin_respuesta") {
-    const que = r.status === 0 ? "no respondió" : `respondió HTTP ${r.status}`;
-    throw reglaDeNegocio(`SimpleAPI ${que} al consultar la suscripción; no se pudo comprobar la API key. Reintenta en unos minutos.`);
-  }
-  if (r.estado === "no_reconocida") {
-    const forma = formaDeKeySimpleApi(apiKey);
-    const pista = forma.caracteresExtranos
-      ? ` La key guardada tiene ${forma.largo} caracteres y alguno no es letra, número ni guion (por ejemplo comillas o un punto pegados junto a la key).`
-      : ` La key guardada tiene ${forma.largo} caracteres.`;
-    throw reglaDeNegocio(
-      `SimpleAPI no reconoce la API key guardada (HTTP ${r.status}): está mal copiada, vencida o no tiene suscripción a SimpleAPI DTE.${pista} Cópiala de nuevo desde el panel de SimpleAPI y guárdala aquí.`,
-    );
-  }
+  // La medición es informativa: no se ha podido validar con una key que se sepa buena qué responde SimpleAPI, así que
+  // nunca deja la integración en error (el preflight de emisión exige `configurada`; CAR-240).
+  const m = await medirKeySimpleApi(apiKey);
+  const http = (n: number | null) => (n === null ? "sin token" : n === 0 ? "sin respuesta" : `HTTP ${n}`);
+  const forma = formaDeKeySimpleApi(apiKey);
+  const rara = forma.caracteresExtranos ? " y alguno no es letra, número ni guion" : "";
+  const medido =
+    `SimpleAPI (informativo, no bloquea la emisión): consulta de suscripción con Basic, ${http(m.basic)}; con token, ${http(m.bearer)}; ` +
+    `suscripciones informadas: ${m.suscripciones ?? "sin dato"}. La key guardada tiene ${forma.largo} caracteres${rara}.`;
 
-  const suscripcion = r.detalle ? ` (${r.detalle})` : "";
-  if (!pfx || !clave) return `SimpleAPI reconoce la API key${suscripcion}. Falta cargar el certificado digital y su clave.`;
+  if (!pfx || !clave) throw reglaDeNegocio(`Falta cargar el certificado digital y su clave. ${medido}`);
   let vence: string;
   try {
     vence = abrirCertificadoPfx(pfx, clave).meta.venceEn; // misma apertura que la emisión (clave recortada si así abre)
   } catch (e) {
-    throw reglaDeNegocio(`SimpleAPI reconoce la API key${suscripcion}, pero el certificado no sirve: ${e instanceof Error ? e.message : "no se pudo abrir."}`);
+    throw reglaDeNegocio(`El certificado no sirve: ${e instanceof Error ? e.message : "no se pudo abrir."} ${medido}`);
   }
-  return `SimpleAPI reconoce la API key${suscripcion}. El certificado abre con su clave y vence el ${fechaCl(vence)}.`;
+  return `El certificado abre con su clave y vence el ${fechaCl(vence)}. ${medido}`;
 }

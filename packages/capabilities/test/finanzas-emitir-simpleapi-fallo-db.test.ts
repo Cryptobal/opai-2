@@ -172,7 +172,7 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
       expect(ui.ok || mcp.ok).toBe(false);
       if (ui.ok || mcp.ok) return;
       expect(ui.error.code).toBe("UNPROCESSABLE");
-      expect(ui.error.message).toContain("SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, como ante una API key que no reconoce");
+      expect(ui.error.message).toContain("SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, también al repetir con token");
       expect(ui.error.message).toContain("El borrador sigue sin emitir y el folio no se usó.");
       expect({ code: mcp.error.code, message: mcp.error.message }).toEqual({ code: ui.error.code, message: ui.error.message });
       // Las dos llamadas mandaron el mismo JSON: sin vencimiento (el borrador sí lo tiene), con FormaPago y el titular.

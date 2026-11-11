@@ -7,8 +7,8 @@ car: CAR-263
 permiso: core:integraciones.manage
 ruta: /configuracion/integraciones
 ---
-En **Configuración › Integraciones › Emisión DTE**, el botón **Probar conexión** ahora le pregunta a SimpleAPI si reconoce la API key guardada y revisa que el certificado digital abra con su clave. Antes decía «Conexión correcta» sin consultar a SimpleAPI.
+En **Configuración › Integraciones › Emisión DTE**, el botón **Probar conexión** revisa que el certificado digital abra con su clave y muestra, a modo informativo, lo que respondió SimpleAPI sobre la API key guardada (código de respuesta de cada forma de autenticación y número de suscripciones). No emite documentos ni usa folios.
 
-Si SimpleAPI no reconoce la key, el aviso lo dice y pide copiarla de nuevo desde el panel de SimpleAPI. La prueba no emite documentos ni usa folios.
+Ese dato de SimpleAPI es solo informativo: ya no deja la integración «Con error» ni hace aparecer el aviso «Suba el certificado .pfx» en la factura cuando el certificado está vigente.
 
-Al **emitir**, si SimpleAPI responde sin motivo, el mensaje ya no dice que la key fue aceptada: indica que esa es la respuesta de SimpleAPI a una key que no reconoce y te envía a probarla.
+Al **emitir**, cuando SimpleAPI rechaza sin decir el motivo, OPAI repite la petición con la otra forma de autenticación que SimpleAPI admite. Si SimpleAPI responde «API KEY Incorrecta», el mensaje de error lo dice tal cual.
