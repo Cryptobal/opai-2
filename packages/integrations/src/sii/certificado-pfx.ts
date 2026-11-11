@@ -1,11 +1,14 @@
 import forge from "node-forge";
 
+import { rutTitularCertificado } from "./simpleapi-formatos";
+
 /** Tope razonable para un .pfx/.p12 de firma (bytes decodificados). */
 export const CERTIFICADO_PFX_MAX_BYTES = 256 * 1024;
 
 export const MSG_CERTIFICADO_VENCIDO = "El certificado digital está vencido.";
 export const MSG_CERTIFICADO_NO_VIGENTE = "El certificado digital aún no es vigente.";
 export const MSG_SIN_LLAVE_PRIVADA = "El archivo no contiene una llave privada.";
+export const MSG_CLAVE_NO_COINCIDE = "La clave del certificado no coincide con el archivo.";
 export const MSG_LLAVE_NO_CORRESPONDE = "La llave privada no corresponde al certificado.";
 
 export type MetaCertificadoPfx = {
@@ -16,20 +19,17 @@ export type MetaCertificadoPfx = {
   venceEn: string;
 };
 
+/** RUT del titular como `extractRut` de OPAI 1.0: del serialNumber y, si no lo trae, del CN (CAR-240). */
 function rutDeSubject(cert: forge.pki.Certificate): string | null {
   for (const attr of cert.subject.attributes) {
     const nombre = attr.shortName ?? attr.name;
     if (nombre === "serialNumber" || attr.type === "2.5.4.5") {
-      const v = String(attr.value ?? "").trim();
-      if (v.length >= 3) return v;
+      const rut = rutTitularCertificado(String(attr.value ?? ""));
+      if (rut) return rut;
     }
   }
   const cn = cert.subject.getField("CN")?.value;
-  if (typeof cn === "string") {
-    const m = cn.match(/(\d{1,2}\.?\d{3}\.?\d{3}-[\dkK])$/);
-    if (m?.[1]) return m[1];
-  }
-  return null;
+  return typeof cn === "string" ? rutTitularCertificado(cn) : null;
 }
 
 function titularDeSubject(cert: forge.pki.Certificate): string {
@@ -145,7 +145,7 @@ export function validarCertificadoPfx(
     const asn1 = forge.asn1.fromDer(forge.util.createBuffer(bin.toString("binary")));
     p12 = forge.pkcs12.pkcs12FromAsn1(asn1, false, clave);
   } catch {
-    throw new Error("La clave del certificado no coincide con el archivo.");
+    throw new Error(MSG_CLAVE_NO_COINCIDE);
   }
 
   const privateKey = llavePrivadaDeP12(p12);

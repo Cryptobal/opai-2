@@ -7,10 +7,14 @@ import {
   type PasoProveedorSii,
 } from "./error-proveedor";
 import { encabezadoAuthSimpleApi } from "./simpleapi-contrato";
+import { diagnosticoRespuestaSii } from "./simpleapi-diagnostico";
 import { cuerpoMultipart, type ParteMultipart } from "./simpleapi-multipart";
 import { bytesDeXml } from "./xml-iso";
 
 export type { ParteMultipart } from "./simpleapi-multipart";
+
+/** Una parte de archivo del multipart (sus bytes quedan a mano para el diagnóstico de un rechazo). */
+export type ArchivoMultipart = Extract<ParteMultipart, { bytes: Uint8Array }>;
 
 /**
  * POST multipart con Basic api:key en `Authorization` y el cuerpo armado como en OPAI 1.0 (CAR-240). La llamada nunca
@@ -34,7 +38,7 @@ export async function postMultipartSimpleApi(
 }
 
 /** El certificado .pfx como archivo `file` (sus bytes, desde el base64 guardado). */
-export function archivoPfx(base64: string): ParteMultipart {
+export function archivoPfx(base64: string): ArchivoMultipart {
   return { nombre: "file", bytes: Buffer.from(base64, "base64"), tipo: "application/x-pkcs12", nombreArchivo: "certificado.pfx" };
 }
 
@@ -42,7 +46,7 @@ export function archivoPfx(base64: string): ParteMultipart {
  * Un XML (CAF, DTE o sobre) como archivo `file`, en los mismos bytes ISO-8859-1 que se recibieron (ADR-075), nunca
  * transcodificado a UTF-8: la firma del CAF y del DTE cubre esos bytes.
  */
-export function archivoXml(xmlLatin1: string, nombreArchivo: string): ParteMultipart {
+export function archivoXml(xmlLatin1: string, nombreArchivo: string): ArchivoMultipart {
   return { nombre: "file", bytes: bytesDeXml(xmlLatin1), tipo: "application/xml", nombreArchivo };
 }
 
@@ -78,6 +82,7 @@ async function errorHttp(res: Response, paso: PasoProveedorSii, secretos: readon
   const error = new ErrorProveedorSii(paso, motivoHttp(res.status, forma), res.status, detalle, paso === "enviar" && res.status >= 500);
   error.limites = limites;
   error.cuerpo = forma;
+  error.respuesta = diagnosticoRespuestaSii(res.headers, cuerpo, detalle);
   return error;
 }
 
