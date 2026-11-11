@@ -19,7 +19,7 @@ type Push = (codigo: string, ok: boolean, mensaje: string, bloqueante: boolean) 
 
 /**
  * El CAF del próximo folio, descifrado y leído en sus bytes ISO-8859-1 (CAR-240): íntegro, del RUT emisor y del tipo y
- * folio. Lo que SimpleAPI rechazaría con un 401 vacío se ve aquí, sin mostrar nada del CAF.
+ * folio. Un CAF que no sirve para timbrar se ve aquí, antes de llamar a SimpleAPI, sin mostrar nada del CAF.
  */
 async function chequeoCafGuardado(
   ctx: Contexto,
@@ -76,7 +76,7 @@ export async function itemsPreflightEmision(
 
   await chequeosCredencialesEmision(ctx, proveedor, cfg, push);
 
-  // Sin ACTECO (u otro dato del emisor) SimpleAPI rechaza el DTE con HTTP 401 (CAR-240); bloquea solo con el real.
+  // Sin ACTECO (u otro dato del emisor) el DTE no cumple el XSD del SII (CAR-240); bloquea solo con el real.
   const faltaEmisor = mensajeFaltantesEmisor(await emisorTributarioDe(ctx));
   push("emisor_tributario", !faltaEmisor, faltaEmisor ?? "Datos tributarios del emisor completos.", proveedor !== "simulado" && Boolean(faltaEmisor));
 
