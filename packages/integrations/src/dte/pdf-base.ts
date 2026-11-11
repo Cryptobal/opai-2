@@ -1,14 +1,14 @@
-// Medidas y utilidades de dibujo comunes a los PDF de la facturación (CAR-221). Todo en puntos, hoja A4.
+// Medidas y utilidades de dibujo comunes a los PDF de la facturación (CAR-221, CAR-259). Todo en puntos, hoja Carta (tamaño SII).
 import { type PDFFont, type PDFImage, type PDFPage, rgb } from "pdf-lib";
 
 import { limpio } from "./pdf-texto";
 
-export type Recursos = { normal: PDFFont; negrita: PDFFont; timbre?: PDFImage };
+export type Recursos = { normal: PDFFont; negrita: PDFFont; timbre?: PDFImage; logo?: PDFImage };
 
-/** A4: 210 × 297 mm. */
-export const A4: [number, number] = [595.28, 841.89];
-export const ANCHO = A4[0];
-export const ALTO = A4[1];
+/** Carta (8,5″ × 11″), el tamaño de la representación impresa del SII, igual que en OPAI 1. */
+export const CARTA: [number, number] = [612, 792];
+export const ANCHO = CARTA[0];
+export const ALTO = CARTA[1];
 export const MARGEN = 30;
 export const XFIN = ANCHO - MARGEN;
 

@@ -6,6 +6,7 @@ import {
   catalogoNovedades,
   directorioEntradasNovedades,
   novedadesVisibles,
+  compararNovedades,
   parsearNovedadMarkdown,
 } from "./catalogo";
 import { NOVEDADES_MARKDOWN } from "./entradas/embed";
@@ -51,5 +52,27 @@ Descripción para el usuario.
     expect(sinFinanzas.some((i) => i.modulo === "finanzas")).toBe(false);
     const conFinanzas = novedadesVisibles(catalogoNovedades(), ["finanzas"], () => true, false);
     expect(conFinanzas.some((i) => i.modulo === "finanzas")).toBe(true);
+  });
+
+  it("ordena por fecha y, dentro del mismo día, pone las destacadas arriba", () => {
+    const base = { modulo: "core", titulo: "t", descripcion: "d", ruta: null, car: null, permiso: null, imagen: null };
+    const a = { ...base, id: "a", fecha: "2026-11-10", destacada: false };
+    const b = { ...base, id: "b", fecha: "2026-11-10", destacada: true };
+    const c = { ...base, id: "c", fecha: "2026-11-11", destacada: false };
+    expect([a, b, c].sort(compararNovedades).map((e) => e.id)).toEqual(["c", "b", "a"]);
+  });
+
+  it("CAR-248 (editar y descartar borradores) figura una sola vez y arriba de su día", () => {
+    const items = catalogoNovedades();
+    const ids = items.filter((i) => i.id === "editar-descartar-borradores");
+    expect(ids).toHaveLength(1);
+    const entrada = ids[0];
+    expect(entrada?.permiso).toBe("finanzas:ventas.manage");
+    const delDia = items.filter((i) => i.fecha === entrada?.fecha);
+    expect(delDia[0]?.id).toBe("editar-descartar-borradores");
+    const visibles = novedadesVisibles(items, ["finanzas"], (p) => p === "finanzas:ventas.manage", false);
+    expect(visibles.some((i) => i.id === "editar-descartar-borradores")).toBe(true);
+    const sinPermiso = novedadesVisibles(items, ["finanzas"], () => false, false);
+    expect(sinPermiso.some((i) => i.id === "editar-descartar-borradores")).toBe(false);
   });
 });
