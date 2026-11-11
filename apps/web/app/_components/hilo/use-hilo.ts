@@ -9,7 +9,7 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import {
   cargarFilasHilo,
   cargarPendientesHilo,
-  conservarSiFalla,
+  refrescoDeSegmentos,
   type LecturasHilo,
 } from "./cargas-hilo";
 
@@ -65,17 +65,15 @@ export function useHilo(portal: string) {
   }, [cargarPendientes]);
 
   const cargarSegmento = useCallback(
-    async (s: "actividad" | "agenda") => {
-      const nueva = await cargarFilasHilo(ejecutar, s, new Date());
-      (s === "actividad" ? setActividad : setAgenda)((previa) => conservarSiFalla(previa, nueva));
-    },
+    (s: "actividad" | "agenda") => cargarFilasHilo(ejecutar, s, new Date()),
     [ejecutar],
   );
 
-  const onSegmento = useCallback(
-    (s: SegmentoHilo) => {
-      if (s !== "pendientes") void cargarSegmento(s);
-    },
+  const onSegmento = useMemo(
+    () =>
+      refrescoDeSegmentos(cargarSegmento, (s, actualizar) =>
+        (s === "actividad" ? setActividad : setAgenda)(actualizar),
+      ),
     [cargarSegmento],
   );
 
@@ -87,9 +85,9 @@ export function useHilo(portal: string) {
         return;
       }
       (s === "actividad" ? setActividad : setAgenda)(CARGANDO);
-      void cargarSegmento(s);
+      onSegmento(s);
     },
-    [cargarPendientes, cargarSegmento],
+    [cargarPendientes, onSegmento],
   );
 
   return { pendientes, actividad, agenda, onSegmento, onReintentar };

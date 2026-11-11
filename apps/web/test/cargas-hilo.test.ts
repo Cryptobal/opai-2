@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { Resultado } from "@opai/capabilities";
+import type { FilaHilo, ListaHilo } from "@opai/ds";
 
 import {
   cargarFilasHilo,
   cargarPendientesHilo,
   conservarSiFalla,
+  refrescoDeSegmentos,
   type LecturasHilo,
 } from "@/app/_components/hilo/cargas-hilo";
 
@@ -57,6 +59,43 @@ describe("cargas del hilo", () => {
   it("un refresco fallido conserva la lista que ya se veía", () => {
     const vista = { estado: "listo", items: [] } as const;
     expect(conservarSiFalla(vista, { estado: "error", items: [] })).toBe(vista);
+  });
+  it("si el refresco dice que ya no hay permiso, se muestra eso y no la lista vieja", () => {
+    const sinPermiso = { estado: "sin-permiso", items: [] } as const;
+    expect(conservarSiFalla({ estado: "listo", items: [] }, sinPermiso)).toBe(sinPermiso);
+  });
+  it("cada vez que se abre Agenda se vuelve a pedir, y Pendientes no pide nada", async () => {
+    const pedidos: string[] = [];
+    const abrir = refrescoDeSegmentos(
+      (s) => {
+        pedidos.push(s);
+        return Promise.resolve({ estado: "listo", items: [] });
+      },
+      () => undefined,
+    );
+    abrir("agenda");
+    abrir("pendientes");
+    abrir("agenda");
+    await Promise.resolve();
+    expect(pedidos).toEqual(["agenda", "agenda"]);
+  });
+  it("una respuesta vieja que llega tarde no pisa a la más nueva", async () => {
+    const resolver: Array<(l: ListaHilo<FilaHilo>) => void> = [];
+    const vistas: number[] = [];
+    const abrir = refrescoDeSegmentos(
+      () => new Promise((r) => resolver.push(r)),
+      (_s, actualizar) =>
+        vistas.push(actualizar({ estado: "cargando", items: [] }) === viejo ? 1 : 2),
+    );
+    const viejo = { estado: "listo", items: [] } as const;
+    const nuevo = { estado: "listo", items: [] } as const;
+    abrir("agenda");
+    abrir("agenda");
+    resolver[1]?.(nuevo);
+    await new Promise((r) => setTimeout(r, 0));
+    resolver[0]?.(viejo);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(vistas).toEqual([2]);
   });
   it("un refresco bueno reemplaza la lista, y sin lista previa se muestra el error", () => {
     const nueva = { estado: "listo", items: [] } as const;
