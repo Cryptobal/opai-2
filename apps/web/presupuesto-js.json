@@ -5,7 +5,7 @@
   "rutas": {
     "/(erp)": 175,
     "/(erp)/tareas": 173,
-    "/(erp)/agente/historial": 174,
+    "/(erp)/agente/historial": 175,
     "/(erp)/finanzas/ventas/programacion/*": 175,
     "/(erp)/finanzas/flujo": 169,
     "/(erp)/finanzas/folios": 169,
@@ -50,7 +50,7 @@
     "/(erp)/personas/[id]/anexos": 170,
     "/(erp)/personas/[id]/anexos/[anexoId]": 170,
     "/(erp)/personas/[id]/privacidad": 170,
-    "/(erp)/mi-cuenta/preferencias": 179,
+    "/(erp)/mi-cuenta/preferencias": 180,
     "/(erp)/configuracion/integraciones/[proveedor]": 181,
     "/(platform)/platform/tenants/[id]/modulos": 172,
     "/ds": 234,
