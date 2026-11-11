@@ -13,6 +13,9 @@ import { PaginaConfig } from "../_centro/pagina-config";
 export const metadata = { title: "Correos de clientes" };
 
 // El diálogo de asociar se carga aparte del primer JS (ADR-037).
+const CrearDireccion = dynamic(() =>
+  import("@/app/_components/correos/crear-direccion").then((m) => m.CrearDireccion),
+);
 const AsociarCorreo = dynamic(() => import("./asociar-correo").then((m) => m.AsociarCorreo));
 
 /**
@@ -36,7 +39,10 @@ export default function CorreosClientes() {
       {({ d, b }) => (
         <div className="flex flex-col gap-4">
           <SeccionTarjeta titulo="Dirección de registro">
-            <DireccionRegistro direccion={d.ok ? d.data.direccion : null} puedeCrear />
+            <DireccionRegistro
+              direccion={d.ok ? d.data.direccion : null}
+              crear={<CrearDireccion />}
+            />
           </SeccionTarjeta>
           <SeccionTarjeta titulo="Sin asignar">
             <Estado

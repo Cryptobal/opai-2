@@ -1,10 +1,8 @@
 import dynamic from "next/dynamic";
 
-import { PERMISOS_CORE } from "@opai/domain";
 import { Alerta, SeccionTarjeta } from "@opai/ds";
 
-import { puedeDeIdentidad } from "@/lib/permisos-ui";
-import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { AVISO_EXTERNO, CorreoItem } from "./correo-item";
 import { DireccionRegistro } from "./direccion-registro";
@@ -21,19 +19,15 @@ export async function HistorialCorreos(p: {
   entidadTipo: "cuenta" | "contacto" | "negocio";
   entidadId: string;
 }) {
-  const [r, d, identidad] = await Promise.all([
+  const [r, d] = await Promise.all([
     ejecutarComoUsuario<PaginaCorreos>("erp", "core.correos.historial", {
       entidadTipo: p.entidadTipo,
       entidadId: p.entidadId,
     }),
     ejecutarComoUsuario<{ direccion: string | null }>("erp", "core.correos.direccion", {}),
-    identidadActual(),
   ]);
   // Sin permiso para la ficha o el historial: la sección no aparece (la ficha ya maneja sus propios estados).
   if (!r.ok && (r.error.code === "FORBIDDEN" || r.error.code === "NOT_FOUND")) return null;
-  const puedeCrear = identidad
-    ? puedeDeIdentidad(identidad)(PERMISOS_CORE.actividadesManage)
-    : false;
   const direccion = d.ok ? d.data.direccion : null;
   const items = r.ok ? r.data.items : [];
   return (
@@ -69,7 +63,7 @@ export async function HistorialCorreos(p: {
             ) : null}
           </>
         ) : null}
-        <DireccionRegistro direccion={direccion} puedeCrear={puedeCrear} />
+        <DireccionRegistro direccion={direccion} />
       </div>
     </SeccionTarjeta>
   );
