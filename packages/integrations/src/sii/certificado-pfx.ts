@@ -8,6 +8,7 @@ export const CERTIFICADO_PFX_MAX_BYTES = 256 * 1024;
 export const MSG_CERTIFICADO_VENCIDO = "El certificado digital está vencido.";
 export const MSG_CERTIFICADO_NO_VIGENTE = "El certificado digital aún no es vigente.";
 export const MSG_SIN_LLAVE_PRIVADA = "El archivo no contiene una llave privada.";
+export const MSG_CLAVE_NO_COINCIDE = "La clave del certificado no coincide con el archivo.";
 export const MSG_LLAVE_NO_CORRESPONDE = "La llave privada no corresponde al certificado.";
 
 export type MetaCertificadoPfx = {
@@ -144,7 +145,7 @@ export function validarCertificadoPfx(
     const asn1 = forge.asn1.fromDer(forge.util.createBuffer(bin.toString("binary")));
     p12 = forge.pkcs12.pkcs12FromAsn1(asn1, false, clave);
   } catch {
-    throw new Error("La clave del certificado no coincide con el archivo.");
+    throw new Error(MSG_CLAVE_NO_COINCIDE);
   }
 
   const privateKey = llavePrivadaDeP12(p12);
@@ -163,4 +164,3 @@ export function validarCertificadoPfx(
     },
   };
 }
-

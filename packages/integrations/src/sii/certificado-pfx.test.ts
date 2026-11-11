@@ -42,7 +42,7 @@ function pfxDePrueba(opts?: {
   }
   const certfileArg = opts?.certfile ? `-certfile "${opts.certfile}"` : "";
   execSync(
-    `openssl pkcs12 -export -out "${pfx}" -inkey "${key}" -in "${cert}" ${certfileArg} -passout pass:${clave}`,
+    `openssl pkcs12 -export -out "${pfx}" -inkey "${key}" -in "${cert}" ${certfileArg} -passout "pass:${clave}"`,
     { stdio: "ignore" },
   );
   return { base64: readFileSync(pfx).toString("base64"), clave, dir };
@@ -111,7 +111,7 @@ describe("validarCertificadoPfx", () => {
         { stdio: "ignore" },
       );
       execSync(
-        `openssl pkcs12 -export -out "${pfx}" -in "${cert}" -nokeys -passout pass:${clave}`,
+        `openssl pkcs12 -export -out "${pfx}" -in "${cert}" -nokeys -passout "pass:${clave}"`,
         { stdio: "ignore" },
       );
       const base64 = readFileSync(pfx).toString("base64");
@@ -211,5 +211,16 @@ describe("RUT del titular y clave recortada (CAR-240, como extractRut de OPAI 1.
       expect(abrirCertificadoPfx(base64, ` ${clave}\n`).clave).toBe(clave);
       expect(abrirCertificadoPfx(base64, clave).clave).toBe(clave);
       expect(() => abrirCertificadoPfx(base64, "otra")).toThrow("La clave del certificado no coincide con el archivo.");
+    }));
+
+  it("una clave con espacios a propósito se respeta si solo así abre el archivo", () =>
+    conPfx({ clave: "clave-con-espacio " }, ({ base64 }) => {
+      expect(abrirCertificadoPfx(base64, "clave-con-espacio ").clave).toBe("clave-con-espacio ");
+    }));
+
+  it("con la clave recortada correcta y el certificado vencido, informa el vencimiento (no «clave no coincide»)", () =>
+    conPfx({ days: 1, clave: "clave-demo-123" }, ({ base64 }) => {
+      const despues = new Date(Date.now() + 3 * 86_400_000);
+      expect(() => abrirCertificadoPfx(base64, " clave-demo-123\n", despues)).toThrow(MSG_CERTIFICADO_VENCIDO);
     }));
 });

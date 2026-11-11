@@ -1,4 +1,4 @@
-import { validarCertificadoPfx } from "./certificado-pfx";
+import { MSG_CLAVE_NO_COINCIDE, validarCertificadoPfx } from "./certificado-pfx";
 
 /**
  * Abre el certificado con su clave recortada (CAR-240: un espacio o salto de línea al copiarla no debe viajar a
@@ -14,8 +14,10 @@ export function abrirCertificadoPfx(
   if (recortada && recortada !== clave) {
     try {
       return { ...validarCertificadoPfx(archivoBase64, recortada, ahora), clave: recortada };
-    } catch {
-      // Sigue con la clave tal cual: puede llevar espacios a propósito.
+    } catch (e) {
+      // Solo si la recortada no abre el archivo se prueba la clave tal cual (puede llevar espacios a propósito). Otro
+      // motivo (vencido, sin llave privada) es del certificado y se informa tal cual.
+      if (!(e instanceof Error) || e.message !== MSG_CLAVE_NO_COINCIDE) throw e;
     }
   }
   return { ...validarCertificadoPfx(archivoBase64, clave, ahora), clave };

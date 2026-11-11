@@ -36,6 +36,12 @@ export const integracionesGuardarCertificadoDte = defineCapability({
     } catch (e) {
       throw reglaDeNegocio(e instanceof Error ? e.message : "Certificado inválido.");
     }
+    // Como `extractRut` de 1.0 (CAR-240): sin RUT del titular, SimpleAPI no puede firmar con este certificado.
+    if (!parsed.meta.rutTitular) {
+      throw reglaDeNegocio(
+        "No se pudo leer el RUT del titular del certificado. Usa el certificado de firma electrónica de la persona autorizada ante el SII.",
+      );
+    }
     const certificadoMeta = {
       titular: parsed.meta.titular,
       rutTitular: parsed.meta.rutTitular ? enmascararRun(parsed.meta.rutTitular) : null,
