@@ -7,6 +7,8 @@ import { Alerta, avisar, Button, Campo, Input, Sheet } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { pesos } from "@/lib/fechas";
 
+import { SelectorFactor } from "./selector-factor";
+
 type Simulacion = { anticipo: number; merma: number; saldoFactor: number; netoAlCeder: number };
 
 /** Cesión de la factura a un factor: primero se simula, luego se cede. */
@@ -66,6 +68,21 @@ export function HojaCeder({
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo="No se pudo completar">{error}</Alerta> : null}
+        <SelectorFactor
+          actual={{
+            nombre: factorNombre.trim(),
+            rut: factorRut.trim(),
+            ...(factorEmail.trim() ? { email: factorEmail.trim() } : {}),
+            ...(factorDireccion.trim() ? { direccion: factorDireccion.trim() } : {}),
+          }}
+          onElegir={(f) => {
+            setFactorRut(f.rut);
+            setFactorNombre(f.nombre);
+            setFactorEmail(f.email ?? "");
+            setFactorDireccion(f.direccion ?? "");
+            setSim(null);
+          }}
+        />
         <Campo etiqueta="RUT del factor" htmlFor="ced-rut">
           <Input id="ced-rut" value={factorRut} onChange={(e) => { setFactorRut(e.target.value); setSim(null); }} />
         </Campo>

@@ -62,6 +62,14 @@ Un PR está terminado cuando:
 7. No trae refactorizaciones fuera del alcance. Si el brief contradice el repositorio, conserva el objetivo, adapta y reporta la diferencia.
 8. El PR actualiza `docs/2.0/ESTADO.md` (qué entró, qué quedó pendiente, qué se decidió); sin eso no está listo. Queda vinculado a su tarea de Linear (`Fixes CAR-123`) como referencia, `ROADMAP.md` queda actualizado si cambia el plan, y el PR trae un resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard, qué decide él y qué sigue.
 
+## Decisiones de Carlos («Decisión tuya»)
+
+Regla de Carlos del 11-nov-2026 (ADR-095), para todas las sesiones de Claude del proyecto (Proyecto y Code):
+
+- Toda respuesta a Carlos que necesite una decisión suya termina con un último párrafo titulado **«Decisión tuya»** con: qué hay que decidir y las opciones; por qué importa (qué se frena o qué cambia); el link que debe revisar (PR, vista previa, captura, issue), si existe; la sugerencia de Claude y por qué. Todo en **lenguaje simple, sin tecnicismos**, entendible sin leer el resto de la respuesta.
+- Si hay varias, van numeradas de la más urgente a la menos urgente. Si no hay ninguna, la respuesta termina con «Decisión tuya: ninguna, sigo».
+- Además, la decisión queda como comentario `DECISIÓN CARLOS:` en el PR (mismo contenido) y el trabajo sigue en lo que no dependa de ella.
+
 ## Prohibido
 
 - Secretos en el código, en los commits, en los logs, en los PR o en la memoria de los bots. Las claves las maneja Carlos (Vercel, GitHub o el almacén cifrado del tenant). CI escanea secretos en cada PR.

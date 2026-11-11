@@ -115,7 +115,7 @@ Al terminar de escribir un brief, ejecútalo sin esperar confirmación, salvo qu
    Al integrar, deja en el PR un comentario corto con qué entró y actualiza `ESTADO.md` si no quedó al día.
 9. Lo no bloqueante y los hallazgos de QA bajo demanda llegan como pendientes en `ESTADO.md` o en un issue. Se resuelven en un PR de pendientes; no frenan el bloque siguiente salvo seguridad o datos.
 10. Puedes empezar el brief siguiente sin esperar la integración, apilado sobre la rama del PR anterior si depende de él.
-11. Reporta en cuatro líneas: qué se implementó, el PR y sus commits, las validaciones y su resultado (y si quedó integrado), y lo pendiente o el riesgo material; agrega el resumen ejecutivo para Carlos. Luego propón el siguiente brief según `ROADMAP.md`.
+11. Reporta en cuatro líneas: qué se implementó, el PR y sus commits, las validaciones y su resultado (y si quedó integrado), y lo pendiente o el riesgo material; agrega el resumen ejecutivo para Carlos. Luego propón el siguiente brief según `ROADMAP.md`. Si necesitas una decisión de Carlos, la respuesta termina con el párrafo **«Decisión tuya»** (qué decidir y opciones, por qué, link a revisar, tu sugerencia, en lenguaje simple; varias numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo»), y la misma decisión queda como `DECISIÓN CARLOS:` en el PR (`AGENTS.md`, ADR-095).
 
 ## Apoyo del bot «OPAI 2.0»
 
