@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { juntarAccesos } from "../app/(erp)/_componentes/accesos-armar";
+import { juntarAccesos, ofreceEditar } from "../app/(erp)/_componentes/accesos-armar";
 import { armarIndicadores } from "../app/(erp)/_componentes/indicadores-armar";
 
 const item = (href: string) => ({ href, etiqueta: href });
@@ -26,6 +26,15 @@ describe("Inicio · tus accesos", () => {
   });
   it("sin nada, lista vacía", () => {
     expect(juntarAccesos([], [])).toEqual([]);
+  });
+  it("mientras hidrata no ofrece «Editar», aunque el shell ya haya entregado los fijados", () => {
+    // El HTML del servidor no conoce los fijados: ofrecer «Editar» al hidratar rompe la hidratación.
+    expect(ofreceEditar(false, true, false)).toBe(false);
+  });
+  it("ya en el navegador ofrece «Editar» si hay algo que fijar o desfijar, o si se está editando", () => {
+    expect(ofreceEditar(true, true, false)).toBe(true);
+    expect(ofreceEditar(true, false, true)).toBe(true);
+    expect(ofreceEditar(true, false, false)).toBe(false);
   });
 });
 
