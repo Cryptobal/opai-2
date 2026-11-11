@@ -30,8 +30,9 @@ export type Identidad = {
   modulosSoloLectura?: string[];
   /** Acceso efectivo en el tenant actual (rol personalizado y excepciones, ADR-022). */
   acceso: AccesoFila;
-  /** Segundo factor activo en la cuenta: app autenticadora o passkey (NÚCLEO-F, CAR-286). */
+  /** Segundo factor en la cuenta: app autenticadora o passkey; `totpActiva`, solo la app (CAR-286). */
   mfaActiva: boolean;
+  totpActiva?: boolean;
   mfaVerificada?: boolean;
 };
 
@@ -71,6 +72,7 @@ export async function identidadDe(
     modulosSoloLectura,
     acceso,
     mfaActiva: user.twoFactorEnabled === true || user.passkeyEnabled === true,
+    totpActiva: user.twoFactorEnabled === true,
   };
 }
 

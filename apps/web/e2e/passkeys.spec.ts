@@ -99,13 +99,11 @@ test.describe("passkeys y métodos de acceso (CAR-286)", () => {
     await expect(page.getByText("Tu cuenta tiene un segundo factor")).toBeVisible();
     await capturar(page, "seguridad-con-passkey");
 
-    // 3. Entra con la passkey, sin contraseña.
+    // 3. Entra con la passkey, sin contraseña (por el botón o por el autocompletado condicional).
     await salir(page);
     await page.goto("/login");
     await expect(page.getByRole("button", { name: "Entrar con passkey" })).toBeVisible();
     await capturar(page, "login-con-passkey");
-    // El autenticador virtual responde solo: el autocompletado condicional del correo puede entrar
-    // antes del clic. Cualquiera de los dos caminos es «entrar con passkey sin contraseña».
     await page
       .getByRole("button", { name: "Entrar con passkey" })
       .click({ timeout: 5_000 })
@@ -124,7 +122,9 @@ test.describe("passkeys y métodos de acceso (CAR-286)", () => {
     await page.getByRole("button", { name: "Usar mi passkey" }).click();
     await page.waitForURL((u) => u.pathname !== "/mfa");
 
-    // 5. Renombra y quita confirmando con la contraseña; avisa que queda sin segundo factor.
+    // 5. Con la passkey se puede sumar la app autenticadora; renombra y quita con la contraseña.
+    await page.goto("/activar-mfa?next=/mi-cuenta");
+    await expect(page.getByText("Activa el segundo factor")).toBeVisible();
     await page.goto("/mi-cuenta");
     await abrir(page, "Renombrar", page.getByRole("textbox", { name: "Nombre" }));
     await page.getByRole("textbox", { name: "Nombre" }).fill("iPhone de trabajo");
