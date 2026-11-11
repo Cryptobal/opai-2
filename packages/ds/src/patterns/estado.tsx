@@ -101,7 +101,7 @@ export function Cabecera(props: CabeceraProps) {
           className={cn(
             tituloDetalle ? "t-heading" : "t-title",
             "text-fg",
-            !tituloSiempre && "md:hidden",
+            !tituloSiempre && "md:hidden marco-hilo:hidden",
           )}
         >
           {titulo}

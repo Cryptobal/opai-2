@@ -7,7 +7,7 @@ import { AccesoRapido, Button, type ItemFijado, SeccionTarjeta, Skeleton } from 
 
 import { useAccesos } from "@/app/_components/accesos-contexto";
 
-import { juntarAccesos, MAXIMO_FIJADOS } from "./accesos-armar";
+import { juntarAccesos, MAXIMO_FIJADOS, ofreceEditar } from "./accesos-armar";
 
 const sinSuscripcion = () => () => undefined;
 /** Falso en el servidor y al hidratar, verdadero después: evita el desajuste con lo que solo existe en el navegador. */
@@ -51,7 +51,7 @@ export function AccesosInicio() {
     <SeccionTarjeta
       titulo="Tus accesos"
       accion={
-        editable || editando ? (
+        ofreceEditar(listo, editable, editando) ? (
           <Button variant="ghost" onClick={() => setEditando((v) => !v)}>
             {editando ? "Listo" : "Editar"}
           </Button>

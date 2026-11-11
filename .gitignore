@@ -34,3 +34,6 @@ apps/web/playwright-report/
 respaldo-dividir-dotacion-*.json
 
 respaldo-cobertura-*.json
+
+# Capturas con sesión del marco Hilo: la evidencia es el artefacto de preview-e2e (usuario qa-e2e, A2.10)
+apps/web/e2e/__screenshots__/hilo-erp-*.png

@@ -22,7 +22,7 @@ export type SelectProps = {
 };
 
 export const claseControl =
-  "flex h-11 w-full items-center gap-2 rounded-md border border-border-control bg-surface px-3 text-md text-fg outline-none transition-[border-color,box-shadow] duration-150 hover:border-fg-subtle focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] disabled:pointer-events-none disabled:opacity-45 aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)]";
+  "flex h-11 w-full items-center gap-2 rounded-md border border-border-control bg-surface px-3 marco-hilo:px-3.5 text-md text-fg outline-none transition-[border-color,box-shadow] duration-150 hover:border-fg-subtle focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] disabled:pointer-events-none disabled:opacity-45 aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)]";
 
 const SelectRadix = lazy(() => import("./select-radix").then((m) => ({ default: m.SelectRadix })));
 
