@@ -39,7 +39,16 @@ export function Item({ item, rutaActual, Link, onFijar, fijado }: ItemProps) {
         <item.icono className={cn("size-4", activo && "text-accent")} aria-hidden />
         <span className="truncate">{item.etiqueta}</span>
         {item.contador !== undefined ? (
-          <span className="t-numeric ml-auto text-xs text-fg-subtle">{item.contador}</span>
+          <span
+            className={cn(
+              "t-numeric ml-auto text-xs",
+              item.resaltado && item.contador > 0
+                ? "flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger-fg px-1 leading-none font-semibold text-white dark:bg-danger dark:text-inverse-fg"
+                : "text-fg-subtle",
+            )}
+          >
+            {item.contador}
+          </span>
         ) : null}
       </Link>
       {item.fijable && onFijar ? (

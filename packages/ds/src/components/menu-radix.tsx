@@ -87,6 +87,14 @@ export function MenuRadix(props: MenuProps) {
                     <span className="block text-xs text-fg-muted">{item.descripcion}</span>
                   ) : null}
                 </span>
+                {item.contador ? (
+                  <span
+                    aria-label={`${item.contador} sin leer`}
+                    className="t-numeric flex h-[18px] min-w-[18px] flex-none items-center justify-center rounded-full bg-danger-fg px-1 text-xs leading-none font-semibold text-white dark:bg-danger dark:text-inverse-fg"
+                  >
+                    {item.contador}
+                  </span>
+                ) : null}
                 {item.marcado ? <Check className="size-4 text-accent" aria-label="actual" /> : null}
               </DropdownMenu.Item>
             </div>
