@@ -985,6 +985,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
 - `core.dispositivos.estado`
+- `core.documento_plantillas.rellenar`
 - `core.documentos.desvincular`
 - `core.documentos.vincular`
 - `core.estructuras.get`
