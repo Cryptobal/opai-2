@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 679 pares pantalla→capacidad · 607 con herramienta · 72 excepciones justificadas · 0 faltantes.
+**Resumen:** 680 pares pantalla→capacidad · 608 con herramienta · 72 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -330,6 +330,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.importar` | `finanzas_compras_importar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.listar` | `finanzas_compras_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.registrar` | `finanzas_compras_registrar` | existe |
+| compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.compras.sincronizar_rcv` | `finanzas_compras_sincronizar_rcv` | existe |
 | compartido | `app/(erp)/finanzas/compras/_componentes` | `finanzas.proveedores.listar` | `finanzas_proveedores_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.centros_costo.listar` | `finanzas_centros_costo_listar` | existe |
 | compartido | `app/(erp)/finanzas/compras/proveedores/_componentes` | `finanzas.plan.listar` | `finanzas_plan_listar` | existe |
@@ -1005,7 +1006,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.fijar_fecha_esperada`
-- `finanzas.compras.sincronizar_rcv`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.flujo.postergar_iva`

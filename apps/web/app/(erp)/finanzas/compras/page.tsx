@@ -3,7 +3,8 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { PestanasCompras } from "../_componentes/pestanas-compras";
 import { cargarLibro } from "./_componentes/datos";
-import { HojaCompra, HojaLote, HojaRcv } from "./_componentes/diferidas";
+import { HojaCompra, HojaLote, HojaRcv, HojaSii } from "./_componentes/diferidas";
+import { periodosRecientes } from "./_componentes/datos";
 import { LibroCompras } from "./_componentes/libro-compras";
 
 export const metadata = { title: "Compras" };
@@ -31,6 +32,7 @@ export default function Compras({ searchParams }: { searchParams: SearchParams }
             <>
               <HojaCompra proveedores={d.proveedores} centros={d.centros} puedeCrearProveedores={d.puedeCrearProveedores} />
               <HojaRcv puedeCrearProveedores={d.puedeCrearProveedores} />
+              <HojaSii periodos={periodosRecientes().slice(0, 3)} />
               <HojaLote
                 centros={d.centros}
                 documentos={(d.libro?.items ?? []).filter((c) => !c.centroCostoId)}
