@@ -34,28 +34,48 @@ export const correosRecibir = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const { sentido, contrapartes } = await sentidoYContrapartes(ctx, input);
-    const previo = await ctx.db.correoCliente.findFirst({ where: { mensajeId: input.mensajeId }, select: { id: true } });
+    const previo = await ctx.db.correoCliente.findFirst({
+      where: { mensajeId: input.mensajeId },
+      select: { id: true },
+    });
     if (previo) return { registrado: false, sentido, asociado: false };
     const a = await asociarEntrante(ctx, contrapartes, input.asunto);
     const asociado = a.asociacion !== null;
     if (dryRun) return { registrado: true, sentido, asociado };
-    await ctx.transaccion(async (tx) => {
-      const fila = await tx.correoCliente.create({
-        data: {
-          tenantId: ctx.tenantId, sentido, origen: "buzon", mensajeId: input.mensajeId,
-          remitente: recortar(input.remitente, 320), destinatarios: input.destinatarios.slice(0, 50),
-          asunto: input.asunto, texto: input.texto,
-          cuentaId: a.cuentaId, contactoId: a.contactoId, negocioId: a.negocioId, asociacion: a.asociacion,
-          asociadoEn: asociado ? new Date() : null, ocurridoEn: new Date(input.recibidoEn),
-        },
+    // Dos entregas simultáneas del mismo correo: la única (tenant, mensaje_id) deja pasar una con
+    // ON CONFLICT DO NOTHING; la otra responde «ya registrado» sin error (Resend no reintenta).
+    const fila = await ctx.transaccion(async (tx) => {
+      const [creada] = await tx.correoCliente.createManyAndReturn({
+        skipDuplicates: true,
+        data: [
+          {
+            tenantId: ctx.tenantId,
+            sentido,
+            origen: "buzon",
+            mensajeId: input.mensajeId,
+            remitente: recortar(input.remitente, 320),
+            destinatarios: input.destinatarios.slice(0, 50),
+            asunto: input.asunto,
+            texto: input.texto,
+            cuentaId: a.cuentaId,
+            contactoId: a.contactoId,
+            negocioId: a.negocioId,
+            asociacion: a.asociacion,
+            asociadoEn: asociado ? new Date() : null,
+            ocurridoEn: new Date(input.recibidoEn),
+          },
+        ],
       });
-      await ctx.eventos.emitir(tx, {
-        tipo: "core.correo_cliente.registrado",
-        entidadTipo: "correo_cliente",
-        entidadId: fila.id,
-        payload: { sentido, asociado, cuentaId: a.cuentaId },
-      });
+      if (creada)
+        await ctx.eventos.emitir(tx, {
+          tipo: "core.correo_cliente.registrado",
+          entidadTipo: "correo_cliente",
+          entidadId: creada.id,
+          payload: { sentido, asociado, cuentaId: a.cuentaId },
+        });
+      return creada ?? null;
     });
+    if (!fila) return { registrado: false, sentido, asociado: false };
     return { registrado: true, sentido, asociado };
   },
 });
