@@ -63,7 +63,7 @@ export function CabeceraHilo(p: Props) {
         type="button"
         onClick={p.onTema}
         aria-label="Cambiar entre tema claro y oscuro"
-        className={cn(BTN_ICONO, "hidden lg:inline-flex")}
+        className={cn(BTN_ICONO, "hidden hilo:inline-flex")}
       >
         <IconoHilo nombre="luna" />
       </button>

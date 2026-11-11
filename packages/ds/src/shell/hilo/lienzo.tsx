@@ -67,7 +67,10 @@ export function LienzoHilo(p: Props) {
   return (
     <section
       aria-label={p.panel?.titulo ?? p.titulo}
-      className={cn("min-h-0 min-w-0 flex-col bg-bg lg:bg-surface", p.className)}
+      className={cn(
+        "min-h-0 min-w-0 flex-col bg-bg [--fondo:var(--ds-bg)] lg:bg-surface lg:[--fondo:var(--ds-surface)]",
+        p.className,
+      )}
     >
       <header className={cn("flex min-h-16 flex-none items-center gap-1.5 border-b border-border", PAD_LIENZO)}>
         <Atras {...p} />

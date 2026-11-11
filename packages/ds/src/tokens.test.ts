@@ -107,6 +107,11 @@ describe("tokens de la piel Hilo", () => {
     for (const t of Object.keys(claro)) expect(oscuroFor[t], `${t} en oscuro`).toBeDefined();
   });
 
+  it("los controles llevan radio de 12 px dentro del marco", () => {
+    expect(css).toMatch(/\[data-marco="hilo"\] \{\s*--ds-radius-md:\s*12px;/);
+    expect(css).toContain("--radius-md: var(--ds-radius-md);");
+  });
+
   it("usa los neutros del diseño aprobado", () => {
     expect(claro["--ds-bg"]).toBe("#fafaf9");
     expect(claro["--ds-fg"]).toBe("#0d0d0e");
