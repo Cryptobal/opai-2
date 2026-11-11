@@ -41,7 +41,7 @@ test("elegir una factura abre el detalle y la lista sigue visible (o «Volver» 
   await hidratado(filaDe(page, EMITIDA));
   await filaDe(page, EMITIDA).click();
   await expect(page).toHaveURL(new RegExp(`/finanzas/ventas/${EMITIDA}`));
-  await expect(detalle(page).getByText("Cliente ficticio Ventas E2E").first()).toBeVisible({ timeout: 60_000 });
+  await expect(detalle(page).getByRole("heading", { name: /folio 9255/ })).toBeVisible({ timeout: 60_000 });
   await expect(detalle(page).getByRole("button", { name: "Descargar PDF" })).toBeVisible();
   if (telefono) {
     // Una pantalla a la vez: solo el detalle, y «Volver» regresa al Libro.

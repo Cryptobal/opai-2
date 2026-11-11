@@ -3,7 +3,7 @@ import { Badge, Card, type EstadoPantalla } from "@opai/ds";
 import { fecha, pesos, rut } from "@/lib/fechas";
 
 import { AccionesVenta } from "./acciones-venta";
-import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta } from "./etiquetas-venta";
+import { estadoCesionVenta, estadoCobroVenta, estadoDteVenta, tituloVenta } from "./etiquetas-venta";
 import type { DetalleVenta } from "./ficha-datos";
 import { HistorialEnvios, type EnvioCliente } from "./historial-envios";
 
@@ -17,7 +17,8 @@ export function FichaVenta({ state, venta, envios, editar }: { state: EstadoPant
       <Card className="p-4 flex flex-col gap-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <p className="t-subheading text-fg">{venta.cuentaNombre}</p>
+            <h2 className="t-subheading text-fg">{tituloVenta(venta)}</h2>
+            <p className="text-sm text-fg-muted">{venta.cuentaNombre}</p>
           </div>
           <Badge tono={dte.tono}>{dte.etiqueta}</Badge>
         </div>
