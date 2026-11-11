@@ -3,12 +3,14 @@ import { expect, test } from "@playwright/test";
 import { hidratado } from "./hidratacion";
 import { BARRA, captura, enTelefono, erroresDeConsola, marco } from "./hilo-apoyo";
 import { ocultarIndicadorDev } from "./indicador-dev";
+import { EN_PREVIEW } from "./preview";
 
 // Muestra `/ds/hilo` del marco «Hilo» (ADR-090, CAR-278): estados del marco y piezas por dentro.
 test.beforeEach(async ({ page }) => ocultarIndicadorDev(page));
 
-// La muestra vive en `/ds`, que no existe en una compilación de producción (ni en la vista previa).
-const SIN_MUESTRA = Boolean(process.env["BASE_URL"]);
+// La muestra vive en `/ds`, que no existe en la vista previa (compilación de producción). El job e2e de
+// CI corre `next dev` con BASE_URL en localhost: ahí la muestra sí existe y se prueba.
+const SIN_MUESTRA = EN_PREVIEW;
 
 test.describe("muestra del marco Hilo", () => {
   test.skip(SIN_MUESTRA, "La muestra /ds/hilo solo existe fuera de producción");
