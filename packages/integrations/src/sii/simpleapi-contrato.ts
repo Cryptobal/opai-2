@@ -23,11 +23,12 @@ export const RUT_SII = "60803000-K" as const;
 
 /**
  * Autenticación Basic con usuario «api» y la API key como contraseña: `Basic base64("api:" + key)` (CAR-240). Es lo que
- * usan OPAI 1.0 (que sí emite) y nuestra consulta de contribuyentes; mandar la key cruda daba HTTP 401 en /dte/generar.
+ * usan OPAI 1.0 (que sí emite) y el SDK oficial. Se quitan espacios, saltos y caracteres invisibles que se cuelan al
+ * pegar la key, también en medio: SimpleAPI rechaza esa key con el mismo 401 vacío que a una inválida (CAR-263).
  */
-export function encabezadoAuthSimpleApi(apiKey: string): string {
-  return `Basic ${Buffer.from(`api:${apiKey.trim()}`, "utf8").toString("base64")}`;
-}
+export const limpiarKeySimpleApi = (apiKey: string): string => apiKey.replace(/[\s\p{Cf}]/gu, "");
+export const encabezadoAuthSimpleApi = (apiKey: string): string =>
+  `Basic ${Buffer.from(`api:${limpiarKeySimpleApi(apiKey)}`, "utf8").toString("base64")}`;
 
 export type CredencialesSimpleApiV1 = {
   apiKey: string;

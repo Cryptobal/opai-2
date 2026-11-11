@@ -150,13 +150,13 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
     expect(await s.e.admin.dteEnvio.count({ where: { documentoId } })).toBe(0);
   });
 
-  it("401 vacío con la key reconocida: el mismo error por la UI y por el MCP, sin vencimiento y con log seguro (CAR-240)", async () => {
+  it("401 vacío: el mismo error por la UI y por el MCP, sin vencimiento y con log seguro (CAR-240)", async () => {
     const entradas: Record<string, unknown>[] = [];
     vi.stubGlobal(
       "fetch",
       vi.fn(async (_url: string, init: { headers: Record<string, string>; body: Uint8Array }) => {
         entradas.push(JSON.parse(textoInput(leerMultipart(init.body, String(init.headers["Content-Type"])))));
-        // Como el rechazo de las 20:43 del 10-nov-2026: sin cuerpo y con los headers de cupo (la key sirvió).
+        // Como el rechazo de las 20:43 del 10-nov-2026: sin cuerpo y con los headers de cupo (que SimpleAPI envía siempre; CAR-263).
         return new Response(null, { status: 401, headers: { "x-rate-limit-limit": "1m", "x-rate-limit-remaining": "39" } });
       }),
     );
@@ -172,7 +172,7 @@ describe.skipIf(!urlPropietario)("emitir con SimpleAPI: fallo de firma (CAR-242)
       expect(ui.ok || mcp.ok).toBe(false);
       if (ui.ok || mcp.ok) return;
       expect(ui.error.code).toBe("UNPROCESSABLE");
-      expect(ui.error.message).toContain("SimpleAPI no pudo generar ni firmar el DTE: aceptó la API key pero rechazó el contenido sin decir el motivo");
+      expect(ui.error.message).toContain("SimpleAPI no pudo generar ni firmar el DTE: respondió HTTP 401 sin motivo, como ante una API key que no reconoce");
       expect(ui.error.message).toContain("El borrador sigue sin emitir y el folio no se usó.");
       expect({ code: mcp.error.code, message: mcp.error.message }).toEqual({ code: ui.error.code, message: ui.error.message });
       // Las dos llamadas mandaron el mismo JSON: sin vencimiento (el borrador sí lo tiene), con FormaPago y el titular.
