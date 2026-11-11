@@ -39,17 +39,17 @@ export function VistaDocumento({ vista, fichaHref }: { vista: VistaRelleno; fich
         )}
         <dl className="t-body-sm flex flex-col gap-1 rounded-lg border border-border bg-surface p-4">
           <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Persona</dt>
+            <dt className="text-fg-muted">Persona</dt>
             <dd>{vista.persona.nombre}</dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Plantilla</dt>
+            <dt className="text-fg-muted">Plantilla</dt>
             <dd>
               {vista.plantilla.nombre} · versión {vista.plantilla.version}
             </dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Firma</dt>
+            <dt className="text-fg-muted">Firma</dt>
             <dd>
               {vista.firma.nivel} · {vista.firma.firmantes === "ambos" ? "trabajador y empleador" : vista.firma.firmantes}
             </dd>
