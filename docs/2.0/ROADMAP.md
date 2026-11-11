@@ -63,6 +63,10 @@ Extracción de 1.0 → especificación → aprobación de Carlos → Design Prom
 
 Frente transversal aprobado por Carlos: marco centrado en el agente con interruptor, en siete etapas (H1 a H7) descritas en [`briefs/BRIEF-base-hilo.md`](briefs/BRIEF-base-hilo.md). No compite con Finanzas: no toca sus pantallas hasta cerrar las verificaciones reales (CAR-266 a CAR-269). Tarea madre: CAR-274.
 
+### Slack ↔ OPAI 2 (ADR-093, 11-nov-2026)
+
+Prioritario por decisión de Carlos: entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones. Lo lleva la «Sesión Núcleo», un PR por fase y en orden: F0 decisión y app «OPAI» (CAR-290), F1 conexión por tenant (CAR-291), F2 vínculo de usuarios (CAR-292), F3 anomalías de terreno a Slack (CAR-293), F4 botones (CAR-294), F5a respuestas al guardia (CAR-295) y F5b módulo «Comunicación» en la app de terreno (CAR-296). Plan en [`briefs/BRIEF-slack.md`](briefs/BRIEF-slack.md).
+
 ## 4. Qué pausar y qué descartar
 
 **En pausa hasta cerrar la migración de Gard:**

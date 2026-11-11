@@ -35,7 +35,6 @@ Contrato único para todo bot o agente que trabaje en `Cryptobal/opai-2`: Claude
 - **Gate local** antes de cada commit: `pnpm typecheck && pnpm lint && pnpm test`. También `pnpm test:db` si tocas base, RLS o capacidades con base.
 - **Presupuesto de JS (ADR-037):** `pnpm presupuesto` tras el build. Manda el check obligatorio `build · presupuesto de JS`. Si un PR sube un tope de `apps/web/presupuesto-js.json`, deja la justificación en el PR y se integra igual con las condiciones de «Integración a `main`» (ADR-043 v3 y ADR-054, sin excepciones).
 - **Novedades in-app (changelog):** todo PR con **cambio visible o de diseño** para usuarios (pantalla, menú, configuración, texto relevante en la UI) integra un archivo en `packages/domain/src/novedades/entradas/*.md` con frontmatter y texto para usuarios no técnicos (ver `changelog/README.md`). La regla vale para **todo** cambio visual que se integra a `main`, también si todavía solo está en `test.opai.cl` y no va a producción (regla de Carlos, 10-nov-2026, CAR-260); el cuerpo describe **qué cambia en pantalla** y se corre `pnpm --filter @opai/domain gen:novedades-embed`. Cambios solo internos (CI, refactors, MCP sin pantalla) no llevan entrada. La plantilla del PR trae la casilla y el CI avisa (sin bloquear) si se tocan pantallas sin entrada. La publicación es automática al integrar; el estado leído es por usuario.
-- **Decisiones de Carlos al final (regla de Carlos, 11-nov-2026):** toda respuesta o reporte de una sesión a Carlos termina con un párrafo «Decisión tuya». Si hace falta una decisión suya, ese párrafo explica en lenguaje simple qué hay que decidir, por qué, el link que debe revisar y la sugerencia de la sesión. Si no hay decisiones, termina con «Decisión tuya: ninguna, sigo».
 - **Pantallas:** especificación aprobada (`docs/2.0/modulos/`), luego diseño aprobado en Claude Design, y después código. **Siempre con el Design System de OPAI 2.0**, también en prototipos; nunca el de 1.0. Respetan `docs/2.0/DISENO.md` y `docs/2.0/NAVEGACION.md`. **Revisión visual (ADR-092, `OPERACION-agentes.md` A2.10, decisión de Carlos del 11-nov-2026):** el primer vistazo visual ya no lo hace Carlos. Lo reemplaza el workflow **`preview-e2e`**: e2e de Playwright marcados `@preview` contra la vista previa del PR, a 375, 1024 y 1280 px, con el usuario de la empresa ficticia `qa-e2e` (nunca Gard ni datos reales) y las capturas como artefacto. Todo PR con cambio visual trae sus pruebas `@preview` y se integra solo con ese run en verde y las capturas revisadas por la propia sesión.
 
 ## Tareas (Linear)
@@ -62,6 +61,14 @@ Un PR está terminado cuando:
 6. Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`.
 7. No trae refactorizaciones fuera del alcance. Si el brief contradice el repositorio, conserva el objetivo, adapta y reporta la diferencia.
 8. El PR actualiza `docs/2.0/ESTADO.md` (qué entró, qué quedó pendiente, qué se decidió); sin eso no está listo. Queda vinculado a su tarea de Linear (`Fixes CAR-123`) como referencia, `ROADMAP.md` queda actualizado si cambia el plan, y el PR trae un resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard, qué decide él y qué sigue.
+
+## Decisiones de Carlos («Decisión tuya»)
+
+Regla de Carlos del 11-nov-2026 (ADR-095), para todas las sesiones de Claude del proyecto (Proyecto y Code):
+
+- Toda respuesta a Carlos que necesite una decisión suya termina con un último párrafo titulado **«Decisión tuya»** con: qué hay que decidir y las opciones; por qué importa (qué se frena o qué cambia); el link que debe revisar (PR, vista previa, captura, issue), si existe; la sugerencia de Claude y por qué. Todo en **lenguaje simple, sin tecnicismos**, entendible sin leer el resto de la respuesta.
+- Si hay varias, van numeradas de la más urgente a la menos urgente. Si no hay ninguna, la respuesta termina con «Decisión tuya: ninguna, sigo».
+- Además, la decisión queda como comentario `DECISIÓN CARLOS:` en el PR (mismo contenido) y el trabajo sigue en lo que no dependa de ella.
 
 ## Prohibido
 
