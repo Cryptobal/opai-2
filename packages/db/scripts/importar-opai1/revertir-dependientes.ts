@@ -16,15 +16,16 @@ const marca = (previos: unknown, clave: string) =>
 
 async function cuentaPostImport(tx: TenantTx, cuentaId: string, terminadaEn: Date): Promise<boolean> {
   const c = despuesDe(terminadaEn);
-  const [accesos, config, etiquetas, vinculos, contactos, representantes] = await Promise.all([
+  const [accesos, config, etiquetas, vinculos, contactos, representantes, negocios] = await Promise.all([
     tx.accesoCliente.count({ where: { cuentaId, createdAt: c } }),
     tx.configPortalCuenta.count({ where: { cuentaId, createdAt: c } }),
     tx.etiquetaAsignacion.count({ where: { cuentaId, createdAt: c } }),
     tx.actividadVinculo.count({ where: { cuentaId, createdAt: c } }),
     tx.contactoCuenta.count({ where: { cuentaId, createdAt: c } }),
     tx.cuentaRepresentante.count({ where: { cuentaId, createdAt: c } }),
+    tx.negocio.count({ where: { cuentaId, createdAt: c } }),
   ]);
-  return accesos + config + etiquetas + vinculos + contactos + representantes > 0;
+  return accesos + config + etiquetas + vinculos + contactos + representantes + negocios > 0;
 }
 
 async function contactoPostImport(tx: TenantTx, contactoId: string, terminadaEn: Date): Promise<boolean> {

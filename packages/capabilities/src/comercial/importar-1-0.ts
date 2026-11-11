@@ -25,7 +25,29 @@ async function fijarCorrelativosCpqDesdePlan(ctx: Contexto, plan: Plan, dryRun: 
   return n;
 }
 
-type Preparado = { traido: DatosOpai1 | undefined; resultado?: Awaited<ReturnType<typeof ejecutarImportar10>> };
+type Resultado = Awaited<ReturnType<typeof ejecutarImportar10>>;
+type Sii = Awaited<ReturnType<typeof resumenSiiDelPlan>>;
+type Preparado = {
+  traido: DatosOpai1 | undefined;
+  resultado?: Resultado;
+  correlativosCpq?: number;
+  sii?: Sii | null;
+};
+
+async function complementos(ctx: Contexto, r: Resultado, dryRun: boolean) {
+  const plan = "plan" in r ? (r.plan as Plan | undefined) : undefined;
+  let correlativosCpq = 0;
+  if (plan && (r.accion === "simular" || r.accion === "conciliar" || (r.accion === "aplicar" && !dryRun))) {
+    correlativosCpq = await fijarCorrelativosCpqDesdePlan(ctx, plan, dryRun || r.accion !== "aplicar");
+  }
+  // Decisión de Carlos (11-nov-2026): importar no consulta el SII por su cuenta. Solo se informa
+  // cuántas cuentas podría completar; la consulta se pide a mano en cada cuenta.
+  const sii =
+    plan && (r.accion === "simular" || r.accion === "aplicar")
+      ? await resumenSiiDelPlan(ctx, plan, { encolar: false })
+      : null;
+  return { correlativosCpq, sii };
+}
 
 /** Importa cuentas, contactos, instalaciones y negocios desde OPAI 1.0 con corridas reversibles. */
 export const comercialImportar10 = defineCapability({
@@ -42,12 +64,15 @@ export const comercialImportar10 = defineCapability({
   dryRun: true,
   // Antes de la transacción de la escritura (tope de 15 s): la lectura de OPAI 1 por red y la carga
   // misma, que va por lotes con sus propias transacciones y queda registrada como corrida reversible.
-  // La transacción de la capacidad solo fija correlativos y deja la auditoría.
+  // La transacción de la capacidad solo arma la salida y deja la auditoría.
   async preparar(ctx, input): Promise<Preparado> {
     await exigirOwnerAdmin(ctx);
     const traido = pideOpai1(input) ? await leerExportDeOpai1(ctx) : undefined;
     if (input.accion !== "aplicar") return { traido };
-    return { traido, resultado: await ejecutarImportar10(ctx, input, false, undefined, traido) };
+    // Todo lo que puede fallar va aquí, junto a la carga: al handler solo le queda armar la salida y
+    // dejar la auditoría, para que una corrida real no quede sin su evento por un fallo posterior.
+    const resultado = await ejecutarImportar10(ctx, input, false, undefined, traido);
+    return { traido, resultado, ...(await complementos(ctx, resultado, false)) };
   },
   async handler(ctx, input, { dryRun, idempotencyKey, preparado }) {
     // Antes de leer OPAI 1 también en simulación (ahí `preparar` no corre).
@@ -55,17 +80,10 @@ export const comercialImportar10 = defineCapability({
     const p = preparado as Preparado | undefined;
     const traido = p?.traido ?? (pideOpai1(input) && !p ? await leerExportDeOpai1(ctx) : undefined);
     const r = p?.resultado ?? (await ejecutarImportar10(ctx, input, dryRun, idempotencyKey, traido));
-    const plan = "plan" in r ? (r.plan as Plan | undefined) : undefined;
-    let correlativosCpq = 0;
-    if (plan && (r.accion === "simular" || r.accion === "conciliar" || (r.accion === "aplicar" && !dryRun))) {
-      correlativosCpq = await fijarCorrelativosCpqDesdePlan(ctx, plan, dryRun || r.accion !== "aplicar");
-    }
-    const sii =
-      plan && (r.accion === "simular" || r.accion === "aplicar")
-        ? // Decisión de Carlos (11-nov-2026): importar no consulta el SII por su cuenta. Solo se informa
-          // cuántas cuentas podría completar; la consulta se pide a mano en cada cuenta.
-          await resumenSiiDelPlan(ctx, plan, { encolar: false })
-        : null;
+    const { correlativosCpq, sii } =
+      p?.resultado && p.sii !== undefined && p.correlativosCpq !== undefined
+        ? { correlativosCpq: p.correlativosCpq, sii: p.sii }
+        : await complementos(ctx, r, dryRun);
     const reporte = r.reporte
       ? { ...r.reporte, modulosActivos: [...r.reporte.modulosActivos] }
       : null;
