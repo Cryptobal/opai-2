@@ -9,6 +9,7 @@
     "/(erp)/finanzas/ventas/programacion/*": 175,
     "/(erp)/finanzas/flujo": 169,
     "/(erp)/finanzas/folios": 169,
+    "/(erp)/finanzas/bancos": 169,
     "/(erp)/negocios/[id]/actividad": 181,
     "/(erp)/instalaciones/[id]/actividad": 178,
     "/(auth)/*": 153,
