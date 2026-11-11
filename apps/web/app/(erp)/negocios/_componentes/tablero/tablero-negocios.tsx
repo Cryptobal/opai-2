@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { ChartColumn, Plus } from "lucide-react";
 
 import { Cabecera, Empty, Estado, type EstadoPantalla } from "@opai/ds";
 
@@ -48,6 +48,9 @@ export function TableroNegocios(p: {
         <VistaNegocios activa="tablero" />
         <EnlaceBoton href="/negocios/seguimiento" variante="secondary">
           Pendientes de seguimiento
+        </EnlaceBoton>
+        <EnlaceBoton href="/negocios/reportes" variante="secondary" icono={ChartColumn}>
+          Reportes
         </EnlaceBoton>
         <SelectorEtapa
           etapas={p.etapas.map((e) => ({ id: e.id, nombre: e.nombre, n: de(e.id).length }))}

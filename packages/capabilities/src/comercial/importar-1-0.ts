@@ -1,77 +1,13 @@
-import { z } from "zod";
-
 import { defineCapability } from "../define";
 import { executeCapability } from "../execute";
 import { ErrorCapacidad } from "../errores";
 import type { Contexto } from "../types";
-import type { Plan } from "@opai/db/importar-opai1";
-import { ejecutarImportar10, inputImportar10 } from "./importar-1-0-handler";
-import { resumenSiiDelPlan, resumenSiiSchema } from "./importar-1-0-sii";
-
-const reporteSchema = z.object({
-  modo: z.literal("simulacion"),
-  sistema: z.literal("opai1"),
-  tenant: z.string(),
-  modulosActivos: z.array(z.string()),
-  tributario: z.object({
-    cuentasConsideradas: z.number().int(),
-    listasParaFacturar: z.number().int(),
-    incompletas: z.number().int(),
-    faltantesPorCampo: z.record(z.string(), z.number().int()),
-  }),
-  destinatarios: z
-    .object({
-      entrantes: z.number().int(),
-      asignados: z.number().int(),
-      omitidos: z.number().int(),
-      omitidosPorMotivo: z.record(z.string(), z.number().int()),
-    })
-    .optional(),
-  correlativosCpq: z.array(z.unknown()).optional(),
-  pendientes: z.array(
-    z.object({ entidad: z.string(), filas: z.number().int(), motivo: z.string() }),
-  ),
-  avisos: z.array(z.object({ codigo: z.string(), idsOpai1: z.array(z.string()) })),
-  etapasSinMapear: z.array(z.string()),
-  negociosIncompletos: z.array(z.string()),
-  importacionId: z.string().nullable(),
-  conteos: z.record(z.string(), z.record(z.string(), z.number().int())),
-  detalle: z.array(z.unknown()).optional(),
-  propuestasFusion: z.array(z.unknown()).optional(),
-  etiquetas: z.array(z.unknown()).optional(),
-  omitidas: z.array(z.unknown()).optional(),
-});
-
-const resultadoSchema = z.object({
-  dryRun: z.boolean(),
-  accion: z.enum(["simular", "aplicar", "conciliar", "revertir"]),
-  reporte: reporteSchema.nullable(),
-  conciliacion: z.unknown().nullable().optional(),
-  revertir: z
-    .object({
-      revertidos: z.number().int(),
-      bloqueados: z.array(
-        z.object({ entidad: z.string(), id10: z.string(), motivo: z.string() }),
-      ),
-    })
-    .nullable()
-    .optional(),
-  aplicadas: z
-    .object({
-      cuentas: z.number().int(),
-      contactos: z.number().int(),
-      instalaciones: z.number().int(),
-      programaciones: z.number().int().optional(),
-      correlativosCpq: z.number().int().optional(),
-      omitidas: z.number().int(),
-      importacionId: z.string().uuid().optional(),
-    })
-    .nullable(),
-  usuariosResueltos: z.number().int(),
-  usuariosSinMembresia: z.array(z.string()),
-  /** Consulta al SII en lote (CAR-156): caché al simular, consultas encoladas al aplicar. */
-  sii: resumenSiiSchema.nullable().optional(),
-});
+import type { DatosOpai1, Plan } from "@opai/db/importar-opai1";
+import { ejecutarImportar10, inputImportar10, pideOpai1 } from "./importar-1-0-handler";
+import { leerExportDeOpai1 } from "./importar-1-0-origen";
+import { exigirOwnerAdmin } from "./importar-1-0-usuarios";
+import { resultadoImportar10Schema } from "./importar-1-0-resultado";
+import { resumenSiiDelPlan } from "./importar-1-0-sii";
 
 async function fijarCorrelativosCpqDesdePlan(ctx: Contexto, plan: Plan, dryRun: boolean): Promise<number> {
   let n = 0;
@@ -89,6 +25,30 @@ async function fijarCorrelativosCpqDesdePlan(ctx: Contexto, plan: Plan, dryRun: 
   return n;
 }
 
+type Resultado = Awaited<ReturnType<typeof ejecutarImportar10>>;
+type Sii = Awaited<ReturnType<typeof resumenSiiDelPlan>>;
+type Preparado = {
+  traido: DatosOpai1 | undefined;
+  resultado?: Resultado;
+  correlativosCpq?: number;
+  sii?: Sii | null;
+};
+
+async function complementos(ctx: Contexto, r: Resultado, dryRun: boolean) {
+  const plan = "plan" in r ? (r.plan as Plan | undefined) : undefined;
+  let correlativosCpq = 0;
+  if (plan && (r.accion === "simular" || r.accion === "conciliar" || (r.accion === "aplicar" && !dryRun))) {
+    correlativosCpq = await fijarCorrelativosCpqDesdePlan(ctx, plan, dryRun || r.accion !== "aplicar");
+  }
+  // Decisión de Carlos (11-nov-2026): importar no consulta el SII por su cuenta. Solo se informa
+  // cuántas cuentas podría completar; la consulta se pide a mano en cada cuenta.
+  const sii =
+    plan && (r.accion === "simular" || r.accion === "aplicar")
+      ? await resumenSiiDelPlan(ctx, plan, { encolar: false })
+      : null;
+  return { correlativosCpq, sii };
+}
+
 /** Importa cuentas, contactos, instalaciones y negocios desde OPAI 1.0 con corridas reversibles. */
 export const comercialImportar10 = defineCapability({
   id: "comercial.importar_1_0",
@@ -96,21 +56,34 @@ export const comercialImportar10 = defineCapability({
   descripcion:
     "Importa un export de OPAI 1.0 (simular, aplicar, conciliar o revertir). Idempotente por ids externos; solo owner o admin. Informa en `sii` cuántas cuentas el SII podría completar (simular lee la caché; aplicar encola las consultas) sin escribir datos del SII en las cuentas.",
   permiso: "comercial:config.manage",
+  // El export pegado trae datos personales (contactos, RUT): no se copia a la auditoría.
+  sensibles: ["origen"],
   input: inputImportar10,
-  output: resultadoSchema,
+  output: resultadoImportar10Schema,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, input, { dryRun, idempotencyKey }) {
-    const r = await ejecutarImportar10(ctx, input, dryRun, idempotencyKey);
-    const plan = "plan" in r ? (r.plan as Plan | undefined) : undefined;
-    let correlativosCpq = 0;
-    if (plan && (r.accion === "simular" || r.accion === "conciliar" || (r.accion === "aplicar" && !dryRun))) {
-      correlativosCpq = await fijarCorrelativosCpqDesdePlan(ctx, plan, dryRun || r.accion !== "aplicar");
-    }
-    const sii =
-      plan && (r.accion === "simular" || r.accion === "aplicar")
-        ? await resumenSiiDelPlan(ctx, plan, { encolar: r.accion === "aplicar" && !r.dryRun })
-        : null;
+  // Antes de la transacción de la escritura (tope de 15 s): la lectura de OPAI 1 por red y la carga
+  // misma, que va por lotes con sus propias transacciones y queda registrada como corrida reversible.
+  // La transacción de la capacidad solo arma la salida y deja la auditoría.
+  async preparar(ctx, input): Promise<Preparado> {
+    await exigirOwnerAdmin(ctx);
+    const traido = pideOpai1(input) ? await leerExportDeOpai1(ctx) : undefined;
+    if (input.accion !== "aplicar") return { traido };
+    // Todo lo que puede fallar va aquí, junto a la carga: al handler solo le queda armar la salida y
+    // dejar la auditoría, para que una corrida real no quede sin su evento por un fallo posterior.
+    const resultado = await ejecutarImportar10(ctx, input, false, undefined, traido);
+    return { traido, resultado, ...(await complementos(ctx, resultado, false)) };
+  },
+  async handler(ctx, input, { dryRun, idempotencyKey, preparado }) {
+    // Antes de leer OPAI 1 también en simulación (ahí `preparar` no corre).
+    await exigirOwnerAdmin(ctx);
+    const p = preparado as Preparado | undefined;
+    const traido = p?.traido ?? (pideOpai1(input) && !p ? await leerExportDeOpai1(ctx) : undefined);
+    const r = p?.resultado ?? (await ejecutarImportar10(ctx, input, dryRun, idempotencyKey, traido));
+    const { correlativosCpq, sii } =
+      p?.resultado && p.sii !== undefined && p.correlativosCpq !== undefined
+        ? { correlativosCpq: p.correlativosCpq, sii: p.sii }
+        : await complementos(ctx, r, dryRun);
     const reporte = r.reporte
       ? { ...r.reporte, modulosActivos: [...r.reporte.modulosActivos] }
       : null;

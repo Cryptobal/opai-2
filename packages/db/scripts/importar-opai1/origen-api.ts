@@ -45,18 +45,27 @@ async function fetchPagina(url: string, key: string, cursor: string | null) {
   if (cursor) u.searchParams.set("cursor", cursor);
   const res = await fetch(u, {
     headers: { Authorization: `Bearer ${key}` },
+    // El exportador no redirige: seguir una redirección llevaría la llave a otro destino.
+    redirect: "error",
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Exportador OPAI 1.0 respondió ${res.status}`);
   return paginaExport.parse(await res.json());
 }
 
-export function lectorApiOpai1(baseUrl = process.env.OPAI1_EXPORT_URL): LectorOrigen {
+/**
+ * Lector del exportador de 1.0. Sin `credenciales` usa las variables de entorno del ensayo local; la
+ * capacidad `comercial.importar_1_0` le pasa la llave del almacén cifrado de la empresa.
+ */
+export function lectorApiOpai1(
+  baseUrl = process.env.OPAI1_EXPORT_URL,
+  credenciales?: { key: string },
+): LectorOrigen {
   return {
     descripcion: "opai1",
     async leer() {
       const url = baseUrl?.trim();
-      const key = process.env.OPAI1_EXPORT_KEY?.trim();
+      const key = (credenciales?.key ?? process.env.OPAI1_EXPORT_KEY)?.trim();
       if (!url || !key) {
         throw new Error(
           "Faltan OPAI1_EXPORT_URL y OPAI1_EXPORT_KEY. Usa --origen fixtures:<ruta>.",

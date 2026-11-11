@@ -16,7 +16,7 @@ export type ResultadoReversion = {
 
 type Fila = { entidad: string; id10: string; id20: string | null; accion: string; previos: unknown };
 
-const ORDEN_BORRADO = ["programacion_recurrente", "instalacion", "contacto", "cuenta"] as const;
+const ORDEN_BORRADO = ["negocio", "programacion_recurrente", "instalacion", "contacto", "cuenta"] as const;
 const MODIFICADA = "modificada_despues_de_la_importacion";
 const DEPENDIENTES = "tiene_dependientes_en_2_0";
 
@@ -28,6 +28,7 @@ async function modificadaDespues(tx: TenantTx, f: Fila, hasta: Date): Promise<bo
     : f.entidad === "contacto" ? await tx.contacto.findFirst(donde)
     : f.entidad === "instalacion" ? await tx.instalacion.findFirst(donde)
     : f.entidad === "programacion_recurrente" ? await tx.ventasProgramacion.findFirst(donde)
+    : f.entidad === "negocio" ? await tx.negocio.findFirst(donde)
     : null;
   return r !== null && r.updatedAt.getTime() > hasta.getTime();
 }
@@ -47,7 +48,9 @@ const marca = (previos: unknown, clave: string) =>
 async function borrarCreada(tx: TenantTx, f: Fila): Promise<void> {
   const id = f.id20;
   if (!id) return;
-  if (f.entidad === "programacion_recurrente") {
+  if (f.entidad === "negocio") {
+    await tx.negocio.delete({ where: { id } });
+  } else if (f.entidad === "programacion_recurrente") {
     await tx.ventasProgramacionCorrida.deleteMany({
       where: { programacionId: id, documentoId: null },
     });
