@@ -55,7 +55,9 @@ export function useEmision(p: {
         avisar.info("La emisión quedó en la cola de aprobaciones de agentes.");
       return;
     }
-    await enviarAlSiiTrasEmitir(ejecutar, r.id, "Factura");
+    // El diálogo se cierra antes de enviar: el documento ya está emitido y no se debe poder emitir de nuevo.
+    setDialogo(null);
+    await enviarAlSiiTrasEmitir(r.id, "Factura");
     router.push(`/finanzas/ventas/${r.id}`);
   }
 

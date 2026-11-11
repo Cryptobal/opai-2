@@ -68,7 +68,7 @@ export function PantallaCierre({ state, periodo, tablero, gestiona }: Props) {
     setLote(null);
     if (r) {
       intento.current = crypto.randomUUID();
-      await enviarLoteAlSii(ejecutar, r.resultados.filter((x) => x.estado === "emitido").map((x) => x.documentoId));
+      await enviarLoteAlSii(r.resultados.filter((x) => x.estado === "emitido").map((x) => x.documentoId));
     }
   }
 

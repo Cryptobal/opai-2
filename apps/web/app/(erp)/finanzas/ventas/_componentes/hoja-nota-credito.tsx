@@ -43,8 +43,8 @@ export function HojaNotaCredito({
     limpiarError();
     const r = await ejecutar<{ id: string }>("finanzas.ventas.emitir_nota_credito", input, false, "layout", `nc-${documentoId}-${intento}`);
     if (!r) return;
-    await enviarAlSiiTrasEmitir(ejecutar, r.id, "Nota de crédito");
     onCerrar();
+    await enviarAlSiiTrasEmitir(r.id, "Nota de crédito");
   }
 
   return (

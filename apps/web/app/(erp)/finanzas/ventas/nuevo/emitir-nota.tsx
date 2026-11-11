@@ -87,7 +87,7 @@ export function EmitirNota({ tipo, cuentaId }: { tipo: "61" | "56"; cuentaId: st
       ? await ejecutar<Venta>("finanzas.ventas.emitir_nota_credito", input, false, "layout", clave)
       : await ejecutar<Venta>("finanzas.ventas.emitir_nota_debito", input, false, "layout", clave);
     if (!r) return;
-    await enviarAlSiiTrasEmitir(ejecutar, r.id, esNc ? "Nota de crédito" : "Nota de débito");
+    await enviarAlSiiTrasEmitir(r.id, esNc ? "Nota de crédito" : "Nota de débito");
     router.push(`/finanzas/ventas/${r.id}`);
   }
 
