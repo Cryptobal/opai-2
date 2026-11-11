@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { urlPropietario } from "../../db/test/entorno";
 
+import { cafXmlSintetico } from "./finanzas-caf-fixture";
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
 
 describe.skipIf(!urlPropietario)("Finanzas · ventas DTE (PR 1)", () => {
@@ -41,6 +42,25 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas DTE (PR 1)", () => {
     const pdf = await s.dato<{ mime: string; base64: string }>("finanzas.ventas.pdf", { documentoId: borrador.id });
     expect(pdf.mime).toBe("application/pdf");
     expect(pdf.base64.length).toBeGreaterThan(100);
+  });
+
+  it("una factura anulada por NC antes de transmitirse se puede enviar y la aceptación no deshace la anulación (CAR-270)", async () => {
+    const b = await s.dato<{ id: string }>("finanzas.ventas.crear_borrador", {
+      cuentaId: s.cuentaId,
+      tipoDte: 33,
+      lineas: [{ glosa: "Servicio de guardias", monto: 10_000 }],
+    });
+    const f = await s.dato<{ id: string; montoTotal: number }>("finanzas.ventas.emitir", { documentoId: b.id });
+    await s.dato("finanzas.folios.cargar_caf", { cafXml: cafXmlSintetico({ tipoDte: 61, folioDesde: 9300, folioHasta: 9310 }) });
+    await s.dato("finanzas.ventas.emitir_nota_credito", { documentoReferenciaId: f.id, monto: f.montoTotal, motivo: "Anula", codigoReferencia: 1 });
+    const enviada = await s.dato<{ estadoDte: string; trackIdSii: string | null }>("finanzas.ventas.enviar_sii", { documentoId: f.id });
+    expect(enviada).toMatchObject({ estadoDte: "anulado_nc" });
+    expect(enviada.trackIdSii).toMatch(/^SIM-/);
+    await expect(s.dato("finanzas.ventas.enviar_sii", { documentoId: f.id })).rejects.toThrow(/ya se envió/);
+    const envio = await s.e.admin.dteEnvio.findFirstOrThrow({ where: { documentoId: f.id } });
+    await s.mod.obtenerTrabajo("finanzas.dte.consultar_sii")?.ejecutar(s.ctx(), { envioId: envio.id });
+    expect((await s.e.admin.dteEnvio.findUniqueOrThrow({ where: { id: envio.id } })).estado).toBe("aceptado");
+    expect(await s.dato<{ estadoDte: string }>("finanzas.ventas.obtener", { documentoId: f.id })).toMatchObject({ estadoDte: "anulado_nc" });
   });
 
   it("consumirFolio asigna folios distintos en emisiones sucesivas", async () => {
