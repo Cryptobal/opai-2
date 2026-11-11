@@ -1743,6 +1743,22 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Pendiente de Carlos.** (1) Si los agentes de la empresa vienen incluidos con su módulo o se cobran aparte. (2) Inicio según rol: quien decide entra al hilo; quien opera todo el día entra a su pantalla de trabajo con el hilo plegado (propuesta). (3) Adelantar CAR-247, OAuth por usuario para el MCP, hoy «después de v1.0» (propuesta: es lo que deja conectar una IA externa como la persona, sin llaves). (4) Fecha de retiro del marco clásico. (5) Si la barra de Plataforma debe tener agente (hoy ADR-055 lo impide; propuesta: que solo busque). (6) El prototipo muestra que emitir, anular o ceder documentos tributarios y pagar nunca los hace un agente solo; ADR-032 permite que el dueño los autorice por capacidad. Mientras no decida endurecerlo, rige ADR-032.
 
+## ADR-091 · Motor común de importación de datos y reglas del importador (CAR-279, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos pidió el importador (CAR-279 y chat del proyecto «Opai 2.0»); las reglas 2 a 6 son criterio de la sesión y quedan para su revisión · **Registra:** Claude («Sesión Comercial»).
+
+**Contexto.** Carlos pidió que una empresa que llega con datos pueda cargarlos por módulo, y usar lo mismo para traer Gard desde OPAI 1. Ya existían `comercial.importar_1_0` (corrida técnica desde el JSON de 1.0) y las tablas `core.importaciones`, `core.importaciones_filas` y `core.ids_externos`.
+
+**Decisión.**
+1. **Un solo motor, en el Núcleo.** `@opai/domain/importacion` (lectura de CSV y Excel, mapeo, validación) y `packages/capabilities/src/core/importar` (plan, lote, reversión). Reutiliza las tablas existentes con `version_contrato = motor-archivo/v1`, sin migración. Personas y Finanzas agregan su importador implementando `Importador` y registrándolo; no escriben otro motor.
+2. **Al existir el registro, por defecto se completa solo lo vacío.** Reemplazar o no tocar son opciones explícitas de quien importa. El estado de una cuenta, instalación o negocio existente nunca cambia por una importación.
+3. **Cómo se reconoce lo que ya existe.** Cuenta: id de origen, RUT o nombre exacto; el mismo nombre con otro RUT es otra cuenta. Contacto: id de origen, correo dentro de la cuenta o nombre completo. Instalación: nombre dentro de la cuenta. Negocio: id de origen o título dentro de la cuenta.
+4. **Negocios.** Quedan en la etapa que dice la planilla (o en la primera si no existe) sin disparar los efectos de ganar o perder: es carga histórica.
+5. **Exportes de OPAI 1.** El adaptador solo lee el JSON del export que se le entrega y usa el sistema de ids `opai1`, el mismo de `comercial.importar_1_0`, para reconocer lo ya traído. Nunca consulta OPAI 1.
+6. **Quién importa.** `core:tenant.manage` (owner y admin por defecto) más el permiso de la entidad; para negocios, el módulo Comercial activo. Revertir un lote es irreversible: a un agente le pide aprobación.
+
+**Pendiente de Carlos.** Ver «Decisiones para Carlos» de CAR-279 en `ESTADO.md`.
+
 ## ADR-092 · `preview-e2e` reemplaza el primer vistazo visual de Carlos (CAR-285, 11-nov-2026)
 
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» (14:37, hora de Chile) · **Registra:** Claude («Sesión Comercial»). **Modifica** ADR-077 (adenda de revisión visual), `OPERACION-agentes.md` A2.10, `AGENTS.md` y la plantilla del PR.

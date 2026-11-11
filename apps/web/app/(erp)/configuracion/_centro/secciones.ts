@@ -1,6 +1,7 @@
 import {
   Blocks,
   Building2,
+  FileUp,
   Gauge,
   History,
   KeyRound,
@@ -116,6 +117,16 @@ export const SECCIONES: readonly Seccion[] = [
     permiso: PERMISOS_CORE.tenantRead,
   }),
   // Uso y registros
+  // CAR-279: carga de cuentas, contactos, instalaciones y negocios desde una planilla.
+  s({
+    id: "importar",
+    titulo: "Importar datos",
+    descripcion: "Trae clientes, contactos, instalaciones y negocios desde Excel o CSV",
+    corta: "Planillas Excel o CSV",
+    icono: FileUp,
+    grupo: "uso-registros",
+    permiso: PERMISOS_CORE.tenantManage,
+  }),
   s({
     id: "integraciones",
     titulo: "Integraciones",

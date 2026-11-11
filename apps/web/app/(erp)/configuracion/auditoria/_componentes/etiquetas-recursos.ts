@@ -39,4 +39,6 @@ export const RECURSOS: Record<string, string> = {
   grupos: "Grupos",
   // Historial de correos del cliente (CAR-233).
   correos: "Correos de clientes",
+  // Importación de datos desde planillas (CAR-279).
+  importar: "Importación de datos",
 };
