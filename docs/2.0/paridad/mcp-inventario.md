@@ -1003,6 +1003,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.fijar_fecha_esperada`
+- `finanzas.compras.sincronizar_rcv`
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.flujo.postergar_iva`
