@@ -1,9 +1,32 @@
 import { z } from "zod";
 
+import {
+  VALORES_TIPO_CUENTA_BANCARIA,
+  bancoPorCodigo,
+  codigoSbif,
+  etiquetaTipoCuenta,
+  nombreBanco,
+  tipoCuentaCanonico,
+} from "@opai/domain";
+
 import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
-import { noEncontrado } from "../../errores";
+import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { enmascararCuenta, enmascararCuentaEnLectura } from "./personas-ficha-comun";
+
+/** CAR-244: nombre del catálogo y señal de corrección para bancos o tipos guardados como texto libre. */
+const catalogoSchema = {
+  bancoNombre: z
+    .string()
+    .nullable()
+    .describe("Nombre del banco según el catálogo SBIF; null si no se reconoce."),
+  tipoCuentaEtiqueta: z.string().nullable(),
+  porCorregir: z
+    .boolean()
+    .describe(
+      "El banco o el tipo de cuenta guardado no está en el catálogo: hay que corregirlo a mano.",
+    ),
+};
 
 export const pagoVerSchema = z.object({
   personaId: z.string(),
@@ -12,6 +35,7 @@ export const pagoVerSchema = z.object({
     tipoCuenta: z.string().nullable(),
     numeroCuenta: z.string().nullable(),
     rutTitular: z.string().nullable(),
+    ...catalogoSchema,
   }),
   solicitudPendiente: z
     .object({
@@ -21,6 +45,7 @@ export const pagoVerSchema = z.object({
       tipoCuenta: z.string().nullable(),
       numeroCuenta: z.string().nullable(),
       rutTitular: z.string().nullable(),
+      ...catalogoSchema,
       solicitadoPorId: z.string(),
       motivoRechazo: z.string().nullable(),
       createdAt: z.string(),
@@ -37,6 +62,27 @@ async function descifrarNumero(
   return cifradoDeCampos(ctx).descifrar(tabla, "numero_cuenta", guardado);
 }
 
+/** Lectura contra el catálogo; lo escrito a mano antes del selector se reconoce si se puede, pero queda por corregir. */
+export function catalogoDe(banco: string | null | undefined, tipo: string | null | undefined) {
+  const tipoCanon = tipoCuentaCanonico(tipo);
+  return {
+    bancoNombre: nombreBanco(codigoSbif(banco)),
+    tipoCuentaEtiqueta: etiquetaTipoCuenta(tipoCanon),
+    porCorregir: Boolean((banco && !bancoPorCodigo(banco)) || (tipo && tipoCanon !== tipo)),
+  };
+}
+
+/** Aprobar exige banco y tipo de cuenta del catálogo (la nómina de pago usa el código SBIF). */
+export function exigirCatalogo(s: { bancoCodigo: string | null; tipoCuenta: string | null }) {
+  if (
+    !bancoPorCodigo(s.bancoCodigo) ||
+    !VALORES_TIPO_CUENTA_BANCARIA.some((t) => t === s.tipoCuenta)
+  )
+    throw reglaDeNegocio(
+      "La solicitud tiene un banco o tipo de cuenta fuera del catálogo: recházala y registra una nueva.",
+    );
+}
+
 export async function vistaPago(ctx: Contexto, personaId: string) {
   const enmascarar = enmascararCuentaEnLectura(ctx);
   const vigente = await ctx.db.personaPago.findUnique({ where: { personaId } });
@@ -45,7 +91,10 @@ export async function vistaPago(ctx: Contexto, personaId: string) {
     orderBy: { createdAt: "desc" },
   });
   const numero = vigente?.numeroCuenta
-    ? enmascararCuenta(await descifrarNumero(ctx, "personas_pago", vigente.numeroCuenta), enmascarar)
+    ? enmascararCuenta(
+        await descifrarNumero(ctx, "personas_pago", vigente.numeroCuenta),
+        enmascarar,
+      )
     : null;
   const pendNum = pendiente?.numeroCuenta
     ? enmascararCuenta(
@@ -60,6 +109,7 @@ export async function vistaPago(ctx: Contexto, personaId: string) {
       tipoCuenta: vigente?.tipoCuenta ?? null,
       numeroCuenta: numero,
       rutTitular: vigente?.rutTitular ?? null,
+      ...catalogoDe(vigente?.bancoCodigo, vigente?.tipoCuenta),
     },
     solicitudPendiente: pendiente
       ? {
@@ -69,6 +119,7 @@ export async function vistaPago(ctx: Contexto, personaId: string) {
           tipoCuenta: pendiente.tipoCuenta,
           numeroCuenta: pendNum,
           rutTitular: pendiente.rutTitular,
+          ...catalogoDe(pendiente.bancoCodigo, pendiente.tipoCuenta),
           solicitadoPorId: pendiente.solicitadoPorId,
           motivoRechazo: pendiente.motivoRechazo ?? null,
           createdAt: pendiente.createdAt.toISOString(),

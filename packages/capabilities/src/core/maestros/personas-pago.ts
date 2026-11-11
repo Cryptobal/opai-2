@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { CODIGOS_BANCO, PERMISOS_CORE, VALORES_TIPO_CUENTA_BANCARIA } from "@opai/domain";
 
 import { cifrarCampoEnTransaccion } from "../cumplimiento/cifrado-campos";
 import { defineCapability } from "../../define";
@@ -28,8 +28,13 @@ export const personasPagoVer = defineCapability({
 
 const cambioInput = z.object({
   id: uuidSchema,
-  bancoCodigo: z.string().trim().min(1).max(20),
-  tipoCuenta: z.string().trim().min(1).max(40),
+  // CAR-244: código SBIF/CMF del catálogo (el que va en las nóminas de pago), nunca el nombre libre.
+  bancoCodigo: z
+    .enum(CODIGOS_BANCO)
+    .describe("Código SBIF de 3 dígitos del banco, p. ej. 012 (BancoEstado) o 037 (Santander)."),
+  tipoCuenta: z
+    .enum(VALORES_TIPO_CUENTA_BANCARIA)
+    .describe("Tipo de cuenta: corriente, vista, rut o ahorro."),
   numeroCuenta: z.string().trim().min(4).max(40),
   rutTitular: rutSchema.nullable().optional(),
 });
@@ -82,7 +87,10 @@ export const personasPagoSolicitarCambio = defineCapability({
   },
 });
 
-export async function solicitudPendienteDe(ctx: Parameters<typeof personaFicha>[0], personaId: string) {
+export async function solicitudPendienteDe(
+  ctx: Parameters<typeof personaFicha>[0],
+  personaId: string,
+) {
   try {
     return await solicitudPendiente(ctx, personaId);
   } catch {
