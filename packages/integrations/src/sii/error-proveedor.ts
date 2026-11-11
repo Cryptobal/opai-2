@@ -2,6 +2,8 @@
 // proveedor (solo para la persona, ya saneado): sin secretos, sin el XML ni el CAF, sin comillas ni caracteres de
 // control, y nunca el cuerpo completo.
 
+import type { DiagnosticoPeticionSii, DiagnosticoRespuestaSii } from "./simpleapi-diagnostico";
+
 export type PasoProveedorSii = "generar" | "sobre de envío" | "enviar" | "consultar";
 
 export class ErrorProveedorSii extends Error {
@@ -12,6 +14,10 @@ export class ErrorProveedorSii extends Error {
   limites: Readonly<Record<string, string>> = {};
   /** Forma del cuerpo de una respuesta no 2xx, sin su texto (CAR-240): distingue un 401 vacío de uno con motivo. */
   cuerpo: FormaCuerpo | null = null;
+  /** Forma de la respuesta rechazada (tipo, largos), sin su texto (CAR-240). */
+  respuesta: DiagnosticoRespuestaSii | null = null;
+  /** Forma de la petición rechazada (largos del PFX y del CAF, nombres de claves), sin secretos (CAR-240). */
+  peticion: DiagnosticoPeticionSii | null = null;
 
   constructor(
     readonly paso: PasoProveedorSii,

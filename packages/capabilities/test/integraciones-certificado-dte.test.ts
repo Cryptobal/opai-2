@@ -13,7 +13,7 @@ import {
 } from "../src";
 import { contextoDePrueba } from "../src/testing";
 
-function pfxDePrueba(): { base64: string; clave: string } {
+function pfxDePrueba(subject = "/CN=Tenant Demo/serialNumber=98765432-1/C=CL"): { base64: string; clave: string } {
   const dir = mkdtempSync(join(tmpdir(), "opai-cap-pfx-"));
   try {
     const key = join(dir, "key.pem");
@@ -21,7 +21,7 @@ function pfxDePrueba(): { base64: string; clave: string } {
     const pfx = join(dir, "test.pfx");
     const clave = "clave-cap-1234";
     execSync(
-      `openssl req -x509 -newkey rsa:2048 -keyout "${key}" -out "${cert}" -days 30 -nodes -subj "/CN=Tenant Demo/serialNumber=98765432-1/C=CL"`,
+      `openssl req -x509 -newkey rsa:2048 -keyout "${key}" -out "${cert}" -days 30 -nodes -subj "${subject}"`,
       { stdio: "ignore" },
     );
     execSync(
@@ -104,5 +104,29 @@ describe("core.integraciones.guardar_certificado_dte (CAR-149)", () => {
     });
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
     expect(r.ok === false && r.error.message).toMatch(/clave del certificado/i);
+  });
+
+  it("acepta la clave con espacios o salto de línea al final, recortada (CAR-240)", async () => {
+    const { base64, clave } = pfxDePrueba();
+    const { ctx } = contextoDePrueba();
+    const r = await executeCapability(ctx, "core.integraciones.guardar_certificado_dte", {
+      proveedor: "dte_emision",
+      archivoBase64: base64,
+      claveCertificado: ` ${clave}\n`,
+    }, { dryRun: true });
+    expect(r.ok ? null : r.error).toBeNull();
+  });
+
+  it("rechaza un certificado sin RUT del titular, como extractRut de 1.0 (CAR-240)", async () => {
+    const { base64, clave } = pfxDePrueba("/CN=Sin Rut/serialNumber=ABC-123/C=CL");
+    const { ctx, tabla } = contextoDePrueba();
+    const r = await executeCapability(ctx, "core.integraciones.guardar_certificado_dte", {
+      proveedor: "dte_emision",
+      archivoBase64: base64,
+      claveCertificado: clave,
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(r.ok === false && r.error.message).toMatch(/RUT del titular/);
+    expect(tabla("secreto")).toHaveLength(0);
   });
 });
