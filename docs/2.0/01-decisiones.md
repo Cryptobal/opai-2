@@ -1698,3 +1698,15 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Dato de Carlos (11-nov-2026, 00:00).** La key guardada en 2.0 (termina en 3041) es exactamente la `SIMPLEAPI_KEY` de OPAI 1, que emitió hasta el 6-nov (folio 1898 aceptado). Con una key que sirve en 1.0, `Suscripcion/status` con Basic dio 401: esa consulta con Basic no sirve para validar la key, y el 401 mudo de `dte/generar` en 2.0 puede venir del contenido.
 
 **Límite conocido.** No se ha observado qué responde SimpleAPI a una key válida por ninguna de las dos vías; se sabrá con la primera prueba en test.opai.cl.
+
+## ADR-089 · El RCV de compras se lee del SII de producción también fuera de app.opai.cl (CAR-273, 11-nov-2026)
+
+**Fecha:** 11-nov-2026 · **Estado:** vigente · **Autor:** sesión del proyecto «OPAI 2.0» (Claude), por encargo de Carlos («continúa con todos los tickets de Linear»).
+
+**Contexto.** CAR-191 fija que, fuera de app.opai.cl, el SII y Octava quedan en certificación. El RCV (Registro de Compras y Ventas) solo existe en el SII de producción: en certificación no hay compras que leer. CAR-272 pide verificar las compras reales de Gard en test.opai.cl, y Carlos ya decidió el 11-nov-2026 que Web4Leads envíe los movimientos bancarios reales a test.opai.cl.
+
+**Decisión.**
+1. `finanzas.compras.sincronizar_rcv` y su trabajo diario consultan el RCV con `Ambiente: 1` en cualquier host. Es una lectura sin efecto tributario: no emite, no cede ni firma nada. El candado de CAR-191 sigue rigiendo la emisión, el envío y la cesión.
+2. El trabajo diario hace una sola consulta: el mes anterior los tres primeros días del mes y el mes en curso el resto. Así no supera las 30 consultas mensuales del plan.
+
+**Pendiente de Carlos.** El cupo de RCV es de la key, y la key es la misma de OPAI 1. Si el cron `finance-rcv-sync` de OPAI 1 sigue activo, entre los dos pasan las 30 consultas al mes. El panel mostraba 0 de 30 usadas el 11-nov, así que hoy 1.0 no consume. Si se acerca al tope: apagar el de 1.0 cuando Compras pase a 2.0, o subir el plan.

@@ -4,6 +4,7 @@ export * from "./simpleapi";
 export * from "./error-proveedor";
 export * from "./simpleapi-suscripcion";
 export * from "./simpleapi-token";
+export * from "./simpleapi-rcv";
 export * from "./xml-iso";
 export * from "./caf-bytes";
 export * from "./certificado-pfx";
