@@ -26,3 +26,21 @@ describe("encabezado de Inicio según el marco", () => {
     expect(h).toContain("Crear");
   });
 });
+
+describe("rejilla de Inicio según el marco", () => {
+  it("en el marco clásico conserva la columna lateral de 380 px", async () => {
+    const { rejillaInicio } = await import("@/app/(erp)/_componentes/rejilla-inicio");
+    expect(rejillaInicio(false).rejilla).toContain("xl:grid-cols-[minmax(0,1fr)_380px]");
+    expect(rejillaInicio(false).decision).toContain("lg:col-start-1");
+  });
+
+  it("en el marco Hilo no deja una columna vacía: sin decisión y con colocación automática", async () => {
+    const { rejillaInicio } = await import("@/app/(erp)/_componentes/rejilla-inicio");
+    const r = rejillaInicio(true);
+    expect(r.rejilla).not.toContain("380px");
+    for (const bloque of [r.tareas, r.accesos, r.seguimientos, r.actividad]) {
+      expect(bloque).not.toMatch(/col-start|row-start/);
+      expect(bloque).toContain("empty:hidden");
+    }
+  });
+});

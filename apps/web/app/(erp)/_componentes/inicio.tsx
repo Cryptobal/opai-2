@@ -7,6 +7,7 @@ import { DecisionInicio } from "./decision-inicio";
 import { EncabezadoInicio } from "./encabezado-inicio";
 import { EsqueletoIndicadores, EsqueletoTarjeta } from "./esqueletos-inicio";
 import { IndicadoresInicio } from "./indicadores-inicio";
+import { rejillaInicio } from "./rejilla-inicio";
 import { SeguimientosInicio } from "./seguimientos-inicio";
 import { TareasInicio } from "./tareas-inicio";
 
@@ -22,6 +23,7 @@ type Props = { nombre: string; empresa: string; actor: string | undefined; hilo?
  * ya están en el hilo, así que no se repiten.
  */
 export function InicioErp({ nombre, empresa, actor, hilo = false }: Props) {
+  const r = rejillaInicio(hilo);
   return (
     <div className="flex flex-col gap-4">
       <EncabezadoInicio
@@ -31,13 +33,13 @@ export function InicioErp({ nombre, empresa, actor, hilo = false }: Props) {
         hilo={hilo}
         crear={<CrearInicio />}
       />
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="min-w-0 empty:hidden max-lg:order-3 lg:col-span-2 lg:row-start-1">
+      <div className={r.rejilla}>
+        <div className={r.indicadores}>
           <Suspense fallback={<EsqueletoIndicadores />}>
             <IndicadoresInicio />
           </Suspense>
         </div>
-        <div className="min-w-0 empty:hidden max-lg:order-1 lg:col-start-1 lg:row-start-2">
+        <div className={r.decision}>
           {/* En el marco Hilo los pendientes están en el hilo: aquí no se repiten ni se vuelven a pedir. */}
           {hilo ? null : (
             <Suspense fallback={<EsqueletoTarjeta />}>
@@ -45,20 +47,20 @@ export function InicioErp({ nombre, empresa, actor, hilo = false }: Props) {
             </Suspense>
           )}
         </div>
-        <div className="min-w-0 empty:hidden max-lg:order-2 lg:col-start-1 lg:row-start-3">
+        <div className={r.tareas}>
           <Suspense fallback={<EsqueletoTarjeta />}>
             <TareasInicio />
           </Suspense>
         </div>
-        <div className="min-w-0 empty:hidden max-lg:order-5 lg:col-start-2 lg:row-start-2">
+        <div className={r.accesos}>
           <AccesosInicio />
         </div>
-        <div className="min-w-0 empty:hidden max-lg:order-4 lg:col-start-2 lg:row-start-3 xl:col-start-1 xl:row-start-4">
+        <div className={r.seguimientos}>
           <Suspense fallback={<EsqueletoTarjeta filas={2} />}>
             <SeguimientosInicio />
           </Suspense>
         </div>
-        <div className="min-w-0 empty:hidden max-lg:order-6 lg:col-span-2 lg:row-start-4 xl:col-span-1 xl:col-start-2 xl:row-span-2 xl:row-start-3">
+        <div className={r.actividad}>
           <Suspense fallback={<EsqueletoTarjeta filas={4} />}>
             <ActividadInicio actor={actor} />
           </Suspense>
