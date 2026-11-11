@@ -6,22 +6,29 @@ import { BotonEditarSeccion, HojaEditarSeccion } from "./editar-seccion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
+type Cuenta = {
+  bancoCodigo: string | null;
+  tipoCuenta: string | null;
+  numeroCuenta: string | null;
+  rutTitular: string | null;
+  /** CAR-244: nombre del catálogo SBIF y señal de dato escrito a mano que hay que corregir. */
+  bancoNombre: string | null;
+  tipoCuentaEtiqueta: string | null;
+  porCorregir: boolean;
+};
 type Pago = {
   personaId: string;
-  vigente: {
-    bancoCodigo: string | null;
-    tipoCuenta: string | null;
-    numeroCuenta: string | null;
-    rutTitular: string | null;
-  };
-  solicitudPendiente: {
-    id: string;
-    bancoCodigo: string | null;
-    tipoCuenta: string | null;
-    numeroCuenta: string | null;
-    rutTitular: string | null;
-  } | null;
+  vigente: Cuenta;
+  solicitudPendiente: (Cuenta & { id: string }) | null;
 };
+
+/** «BancoEstado · 012»; lo guardado como texto libre se muestra tal cual, marcado para corregir. */
+const banco = (c: Cuenta) =>
+  c.bancoNombre && !c.porCorregir
+    ? `${c.bancoNombre} · ${c.bancoCodigo}`
+    : c.bancoCodigo
+      ? `${c.bancoCodigo} (por corregir)`
+      : null;
 
 export async function SeccionPago({ personaId }: { personaId: string }) {
   const identidad = await identidadActual();
@@ -95,12 +102,18 @@ export async function SeccionPago({ personaId }: { personaId: string }) {
           Sin cuenta registrada.{puede ? " Usa «Solicitar cambio» para agregarla." : ""}
         </p>
       ) : null}
+      {v.porCorregir ? (
+        <Alerta tono="warning" titulo="Banco o tipo de cuenta por corregir">
+          Se escribió a mano y no está en el catálogo SBIF, así que no sirve para la nómina de pago.
+          {puede ? " Usa «Solicitar cambio» y elígelo de la lista." : ""}
+        </Alerta>
+      ) : null}
       <ParesGrid
         items={[
-          { etiqueta: "Banco", valor: d.vigente.bancoCodigo },
-          { etiqueta: "Tipo de cuenta", valor: d.vigente.tipoCuenta },
-          { etiqueta: "Número de cuenta", valor: d.vigente.numeroCuenta, mono: true },
-          { etiqueta: "RUT titular", valor: d.vigente.rutTitular, mono: true },
+          { etiqueta: "Banco", valor: banco(v) },
+          { etiqueta: "Tipo de cuenta", valor: v.tipoCuentaEtiqueta ?? v.tipoCuenta },
+          { etiqueta: "Número de cuenta", valor: v.numeroCuenta, mono: true },
+          { etiqueta: "RUT titular", valor: v.rutTitular, mono: true },
         ]}
       />
       {acciones.length ? (

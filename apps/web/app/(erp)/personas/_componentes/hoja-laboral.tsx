@@ -1,6 +1,16 @@
 "use client";
 import { useState } from "react";
-import { Alerta, avisar, Button, Campo, Input, InputFecha, Select, Sheet } from "@opai/ds";
+import {
+  Alerta,
+  avisar,
+  Button,
+  Campo,
+  Combobox,
+  Input,
+  InputFecha,
+  Select,
+  Sheet,
+} from "@opai/ds";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { type CampoLaboral, SECCIONES_LABORAL, type SeccionLaboral } from "./config-hojas-laboral";
@@ -28,7 +38,24 @@ function Entrada({
   const error = valor ? errorDeCampo(c, valor) : null;
   return (
     <Campo etiqueta={c.etiqueta} htmlFor={id} {...(error ? { error } : {})}>
-      {c.tipo === "fecha" ? (
+      {c.tipo === "opcion" && c.buscable ? (
+        <Combobox
+          id={id}
+          opciones={c.opciones ?? []}
+          valor={valor || null}
+          onCambiar={(vs) => onCambiar(vs[0] ?? "")}
+          placeholder="Elegir…"
+          buscarPlaceholder="Buscar por nombre o código"
+        />
+      ) : c.tipo === "opcion" ? (
+        <Select
+          id={id}
+          valor={valor || undefined}
+          onCambiar={onCambiar}
+          placeholder="Elegir…"
+          opciones={c.opciones ?? []}
+        />
+      ) : c.tipo === "fecha" ? (
         <InputFecha id={id} valor={valor} onCambiar={onCambiar} />
       ) : c.tipo === "si_no" ? (
         <Select

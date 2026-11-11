@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { bancoPorCodigo, PERMISOS_CORE, VALORES_TIPO_CUENTA_BANCARIA } from "@opai/domain";
 
 import {
   cifrarCampoEnTransaccion,
@@ -23,7 +23,11 @@ export const personasPagoAprobarCambio = defineCapability({
     "Aprueba la solicitud pendiente de cambio de cuenta bancaria de una persona. Quien la solicitó no puede aprobarla; la cuenta anterior queda reemplazada y queda auditado.",
   permiso: PERMISOS_CORE.personasPagoAprobar,
   input: z.object({ id: uuidSchema }),
-  output: z.object({ personaId: z.string(), solicitudId: z.string(), estado: z.literal("aprobada") }),
+  output: z.object({
+    personaId: z.string(),
+    solicitudId: z.string(),
+    estado: z.literal("aprobada"),
+  }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
@@ -35,6 +39,14 @@ export const personasPagoAprobarCambio = defineCapability({
     if (!ctx.usuario?.id) throw reglaDeNegocio("Se requiere un usuario autenticado.");
     if (s.solicitadoPorId === ctx.usuario.id)
       throw prohibido("No puedes aprobar una solicitud que tú mismo registraste.");
+    // CAR-244: a la cuenta vigente solo entra un banco del catálogo SBIF (lo usa la nómina de pago).
+    if (
+      !bancoPorCodigo(s.bancoCodigo) ||
+      !VALORES_TIPO_CUENTA_BANCARIA.some((t) => t === s.tipoCuenta)
+    )
+      throw reglaDeNegocio(
+        "La solicitud tiene un banco o tipo de cuenta fuera del catálogo: recházala y registra una nueva.",
+      );
     if (dryRun) return { personaId: p.id, solicitudId: s.id, estado: "aprobada" as const };
     await escribirConEvento(
       ctx,
@@ -104,7 +116,11 @@ export const personasPagoRechazarCambio = defineCapability({
   permiso: PERMISOS_CORE.personasPagoAprobar,
   sensibles: ["motivo"],
   input: z.object({ id: uuidSchema, motivo: motivoRechazo }),
-  output: z.object({ personaId: z.string(), solicitudId: z.string(), estado: z.literal("rechazada") }),
+  output: z.object({
+    personaId: z.string(),
+    solicitudId: z.string(),
+    estado: z.literal("rechazada"),
+  }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
