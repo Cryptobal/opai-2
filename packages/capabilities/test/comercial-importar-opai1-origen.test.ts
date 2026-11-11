@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import type { DatosOpai1 } from "@opai/db/importar-opai1";
+import { type DatosOpai1, validarDatos } from "@opai/db/importar-opai1";
 
 import { capacidadesDelNucleo, executeCapability, limpiarRegistro, registrarCapacidades } from "../src";
 import { leerExportDeOpai1 } from "../src/comercial/importar-1-0-origen";
@@ -11,7 +11,7 @@ import { contextoDePrueba } from "../src/testing";
 // CAR-279: la llave de solo lectura de OPAI 1 vive en la integración «opai1» de la empresa y no sale de ahí.
 const LLAVE = "opai_mcp_llaveFicticia1234";
 const URL_OK = "https://203.0.113.10/api/export/opai2/v1";
-const VACIO = { accounts: [] } as unknown as DatosOpai1;
+const VACIO: DatosOpai1 = validarDatos({});
 
 beforeAll(() => {
   process.env["OPAI_SECRETS_KEY"] = randomBytes(32).toString("base64");

@@ -98,6 +98,8 @@ export const comercialImportar10 = defineCapability({
   descripcion:
     "Importa un export de OPAI 1.0 (simular, aplicar, conciliar o revertir). Idempotente por ids externos; solo owner o admin. Informa en `sii` cuántas cuentas el SII podría completar (simular lee la caché; aplicar encola las consultas) sin escribir datos del SII en las cuentas.",
   permiso: "comercial:config.manage",
+  // El export pegado trae datos personales (contactos, RUT): no se copia a la auditoría.
+  sensibles: ["origen"],
   input: inputImportar10,
   output: resultadoSchema,
   efecto: "escritura",
@@ -109,6 +111,8 @@ export const comercialImportar10 = defineCapability({
     return leerExportDeOpai1(ctx);
   },
   async handler(ctx, input, { dryRun, idempotencyKey, preparado }) {
+    // Antes de leer OPAI 1 también en simulación (ahí `preparar` no corre).
+    await exigirOwnerAdmin(ctx);
     const traido = (preparado as DatosOpai1 | undefined) ?? (pideOpai1(input) ? await leerExportDeOpai1(ctx) : undefined);
     const r = await ejecutarImportar10(ctx, input, dryRun, idempotencyKey, traido);
     const plan = "plan" in r ? (r.plan as Plan | undefined) : undefined;
