@@ -47,8 +47,8 @@ export function SplitScreen(props: Props) {
           : props.incrustado
             ? "overflow-hidden rounded-lg border border-border md:h-[440px]"
             : uno
-              ? "lg:-mx-6 lg:-mt-5 lg:-mb-8 lg:h-[calc(100dvh-60px)] xl:-mx-8"
-              : "md:-mx-6 md:-mt-5 md:-mb-8 md:h-[calc(100dvh-60px)] xl:-mx-8",
+              ? "lg:-mx-[var(--lienzo-x,1.5rem)] lg:-mt-[var(--lienzo-t,1.25rem)] lg:-mb-[var(--lienzo-b,2rem)] lg:h-[calc(100dvh-var(--lienzo-resto,60px))] xl:-mx-[var(--lienzo-x,2rem)]"
+              : "md:-mx-[var(--lienzo-x,1.5rem)] md:-mt-[var(--lienzo-t,1.25rem)] md:-mb-[var(--lienzo-b,2rem)] md:h-[calc(100dvh-var(--lienzo-resto,60px))] xl:-mx-[var(--lienzo-x,2rem)]",
       )}
     >
       <section

@@ -9,17 +9,21 @@ const estilos = cva(
     "whitespace-nowrap transition-colors duration-150 outline-none",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
     "disabled:pointer-events-none disabled:opacity-45",
+    // Marco Hilo (ADR-090): 600, como el diseño.
+    "marco-hilo:font-semibold",
   ],
   {
     variants: {
       variant: {
-        primary: "bg-accent text-accent-fg hover:brightness-95 active:brightness-90",
+        // En el marco Hilo la acción de una persona va en tinta: el índigo queda para el agente.
+        primary:
+          "bg-accent text-accent-fg hover:brightness-95 active:brightness-90 marco-hilo:bg-fg marco-hilo:text-bg",
         secondary: "border-border-control bg-surface text-fg hover:bg-fill",
         ghost: "text-fg hover:bg-fill",
         destructive: "bg-destructive-bg text-destructive-fg hover:brightness-95",
       },
       size: {
-        md: "h-11 px-4 text-base md:h-10",
+        md: "h-11 px-4 text-base md:h-10 marco-hilo:px-[18px] marco-hilo:md:h-11",
         lg: "h-12 px-5 text-md",
         icon: "size-11",
         iconSm: "size-11 md:size-10",

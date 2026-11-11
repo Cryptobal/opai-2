@@ -5,16 +5,24 @@ type Props = {
   valor: number;
   /** Nombre accesible ("Presupuesto usado"). */
   etiqueta: string;
-  /** Color de estado: acento normal, advertencia (≥ 80 %), peligro (≥ 100 %). */
-  tono?: "accent" | "warning" | "danger";
+  /** Color de estado: acento normal, advertencia (≥ 80 %), peligro (≥ 100 %); `neutro` para comparar cantidades. */
+  tono?: "accent" | "warning" | "danger" | "neutro";
+  /** Segundo tramo gris a continuación del avance (fracción 0–1): el resto de un total comparable. */
+  resto?: number;
   className?: string;
 };
 
-const TONO = { accent: "bg-accent", warning: "bg-warning-fg", danger: "bg-danger-fg" } as const;
+const TONO = {
+  accent: "bg-accent",
+  warning: "bg-warning-fg",
+  danger: "bg-danger-fg",
+  neutro: "bg-fg",
+} as const;
 
 /** Barra de progreso de 6 px (presupuesto de una key, consumo del mes): riel `fill`, avance de color. */
-export function BarraProgreso({ valor, etiqueta, tono = "accent", className }: Props) {
+export function BarraProgreso({ valor, etiqueta, tono = "accent", resto, className }: Props) {
   const pct = Math.round(Math.min(1, Math.max(0, valor)) * 100);
+  const pctResto = Math.min(100 - pct, Math.round(Math.max(0, resto ?? 0) * 100));
   return (
     <div
       role="progressbar"
@@ -22,15 +30,19 @@ export function BarraProgreso({ valor, etiqueta, tono = "accent", className }: P
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={pct}
-      className={cn("h-1.5 w-full overflow-hidden rounded-full bg-fill", className)}
+      className={cn("flex h-1.5 w-full overflow-hidden rounded-full bg-fill", className)}
     >
       <div
         className={cn(
-          "h-full rounded-full transition-[width] duration-200 motion-reduce:transition-none",
+          "h-full transition-[width] duration-200 motion-reduce:transition-none",
+          pctResto ? "rounded-l-full" : "rounded-full",
           TONO[tono],
         )}
         style={{ width: `${pct}%` }}
       />
+      {pctResto ? (
+        <div className="h-full rounded-r-full bg-border-strong" style={{ width: `${pctResto}%` }} />
+      ) : null}
     </div>
   );
 }

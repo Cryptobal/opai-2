@@ -26,7 +26,7 @@ export async function revertirLote(ctx: Contexto, importacionId: string, dryRun:
     const completadas = filas.filter((f) => f.accion === "completado");
     const tocadas = [...creadas, ...completadas];
     const actuales = new Map((await imp.actuales(tx, tocadas.map((f) => f.id20 ?? ""))).map((a) => [a.id, a]));
-    const conDependientes = await imp.bloqueos(tx, creadas.map((f) => f.id20 ?? ""));
+    const conDependientes = await imp.bloqueos(tx, creadas.map((f) => f.id20 ?? ""), ctx);
     const bloqueadas: Bloqueada[] = [];
     for (const f of tocadas) {
       const actual = actuales.get(f.id20 ?? "");
@@ -41,7 +41,7 @@ export async function revertirLote(ctx: Contexto, importacionId: string, dryRun:
     for (const f of completadas) {
       const previos = Object.entries(previosDe(f.previos)).filter(([k]) => !k.startsWith("_"));
       if (previos.length && actuales.has(f.id20 ?? ""))
-        await imp.actualizar(tx, f.id20 ?? "", Object.fromEntries(previos.map(([k, v]) => [k, deJson(v)])));
+        await imp.actualizar(tx, f.id20 ?? "", Object.fromEntries(previos.map(([k, v]) => [k, deJson(v)])), ctx);
     }
     // Solo los vínculos que creó este lote, por su id de origen (no todos los del registro).
     const externos = filas.map((f) => previosDe(f.previos)["_idExterno"]).filter((x): x is string => typeof x === "string");

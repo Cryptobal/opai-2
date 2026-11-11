@@ -54,7 +54,7 @@ async function escribirFila(tx: TenantTx, ctx: Contexto, imp: Importador, plan: 
   if (!existente) throw reglaDeNegocio("El plan cambió mientras se importaba. Vuelve a simular.");
   const cambios = plan.cambios.get(f.fila) ?? {};
   if (f.accion === "sin_cambio" || Object.keys(cambios).length === 0) return { ...base, id20: existente.id, accion: "sin_cambio" };
-  await imp.actualizar(tx, existente.id, cambios as Partial<Datos>);
+  await imp.actualizar(tx, existente.id, cambios as Partial<Datos>, ctx);
   const previos = Object.fromEntries(Object.keys(cambios).map((k) => [k, aJson(existente[k])]));
   return { ...base, id20: existente.id, accion: "completado", previos };
 }
