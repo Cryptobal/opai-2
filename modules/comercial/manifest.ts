@@ -1,5 +1,6 @@
 import {
   ajustesComercial,
+  buscadoresComercial,
   capacidadesComercial,
   defineModule,
   indicadoresComercial,
@@ -129,6 +130,7 @@ export const manifest = defineModule({
     },
   ],
   capacidades: capacidadesComercial,
+  buscadores: buscadoresComercial,
   // Indicadores de gestión para el catálogo del núcleo (CAR-308, ADR-094).
   indicadores: indicadoresComercial,
 });
