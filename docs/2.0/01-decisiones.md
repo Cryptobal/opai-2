@@ -1835,6 +1835,10 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Hallazgo (verificado en `main` el 11-nov-2026).** Un usuario del sistema no está unido a su ficha de Persona: el responsable de un negocio es un usuario (`comercial.negocios.responsable_id`) y el cargo vive en el vínculo laboral de una Persona, sin relación entre ambos. La unión usuario–Persona entra en CAR-314, como aplicación del punto 7. Mientras no exista, cada indicador declara si se atribuye a un usuario o a una Persona.
 
+**Corrección del hallazgo (11-nov-2026, 21:10, Sesión Desempeño, CAR-314).** El hallazgo anterior estaba mal: la unión entre un usuario y su ficha de Persona **ya existe** en `main` (`core.personas.usuario_id`, 1 a 1 por empresa, índice único `personas_tenant_usuario_key` y capacidad `core.personas.vincular_usuario`). Lo cierto es más acotado: Comercial atribuye los negocios a un usuario y hoy nada obliga a que ese usuario tenga su Persona vinculada. CAR-314 no crea la unión, la usa (`personaDelUsuario`), y agrega la jefatura por cargo (`core.cargos.set_jefatura`, `core.personas.asignar_jefe`, `core.personas.a_cargo`). Los indicadores siguen declarando `sujeto` usuario o Persona; el scorecard (CAR-306) cruza ambos por esa unión.
+
+**Adenda (11-nov-2026, 22:28, Carlos confirma las dos reglas de jefatura de CAR-314, PR #528).** (a) Una persona que no tiene jefe asignado no queda invisible: la ve el nivel de arriba (un vendedor sin jefe asignado lo ve el gerente, no los jefes de venta). (b) Ser jefatura **no** amplía el alcance por filas de ADR-022: un supervisor ve, de su equipo, solo a las personas de sus instalaciones a cargo. Ambas quedan como se construyeron.
+
 **Pendiente de Carlos.** Nada.
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
@@ -1907,6 +1911,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
 
 **Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
+
+### Adenda 1 a ADR-098 · Tope de gasto de las apps conectadas (Carlos, 12-nov-2026, 07:28)
+
+Respuesta de Carlos («Opción 1») a la `DECISIÓN CARLOS:` del PR #535: las apps conectadas por OAuth (Claude u otras) **comparten el presupuesto mensual del agente de la empresa** (ajuste `agente.presupuestoMensualMicro`, el mismo del agente interno). No hay un tope por cada app. El medidor cobra su consumo en el mismo registro del agente interno (`agente-interno`); al agotarse, tanto el agente interno como las apps reciben `BUDGET_EXCEEDED` hasta el mes siguiente o hasta que suba el tope. Código: `esAgenteSinKey` en `packages/db/src/presupuesto.ts`.
+
+### Adenda a ADR-095 · «Ninguna, sigo» significa seguir (Carlos, 11-nov-2026, 22:56)
+
+Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con el trabajo en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una revisión a sí misma cada pocos minutos y avanza mientras tanto con lo que no dependa de eso. Los avisos automáticos de GitHub no se responden uno por uno. Solo se detiene por una decisión real o porque no queda trabajo posible, y dice por qué. Regla escrita en `AGENTS.md` («Decisiones de Carlos»).
 
 ## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
 

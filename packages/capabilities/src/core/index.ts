@@ -51,6 +51,7 @@ import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesGrupos } from "./grupos";
 import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
+import { capacidadesJefatura } from "./jefatura";
 import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
@@ -69,6 +70,7 @@ import { usersList, usersRemove, usersUpdate } from "./users";
 import { usersRestablecerMfa } from "./users-mfa";
 import { seguridadMetodos, seguridadPasskeysRenombrar } from "./seguridad/metodos";
 import { seguridadMetodosQuitar } from "./seguridad/quitar";
+import { appsConectadasDesconectar, appsConectadasList } from "./seguridad/apps";
 import { capacidadesTurnos, consumidorTurnosEsperados, trabajoExtenderTurnos } from "./turnos";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
@@ -87,6 +89,8 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   seguridadMetodos,
   seguridadPasskeysRenombrar,
   seguridadMetodosQuitar,
+  appsConectadasList,
+  appsConectadasDesconectar,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,
@@ -144,6 +148,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesGrupos,
   ...capacidadesSlack,
   ...capacidadesIndicadoresGestion,
+  ...capacidadesJefatura,
   ...capacidadesDocumentos,
   ...capacidadesFirmas,
   ...capacidadesConfig,
