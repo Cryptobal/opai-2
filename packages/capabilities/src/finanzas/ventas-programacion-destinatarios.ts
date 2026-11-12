@@ -19,7 +19,7 @@ export async function copiarDestinatarios(
   });
   const ids = filas.map((f) => f.contactoId).filter((x): x is string => x !== null);
   const contactos = ids.length
-    ? await tx.contacto.findMany({ where: { id: { in: ids } }, select: { id: true, email: true } })
+    ? await tx.contacto.findMany({ where: { id: { in: ids }, estado: "activo", archivadoEn: null, anonimizadoEn: null }, select: { id: true, email: true } })
     : [];
   const emailDe = new Map(contactos.map((c) => [c.id, c.email]));
   const vistos = new Set<string>();

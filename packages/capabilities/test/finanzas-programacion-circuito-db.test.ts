@@ -132,6 +132,21 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     }
   });
 
+  it("un contacto archivado después de programar no recibe el borrador", async () => {
+    const c3 = (
+      await s.e.admin.contacto.create({
+        data: { tenantId: s.tenantId, cuentaId: s.cuentaId, nombres: "Leo", apellidos: "Ficticio", email: "ex@cliente-ficticio.test", roles: ["facturacion"] },
+      })
+    ).id;
+    const p = await s.dato<{ id: string }>("finanzas.ventas_programacion.crear", base({ destinatarioIds: [c1, c3] }));
+    await s.e.admin.contacto.update({ where: { id: c3 }, data: { archivadoEn: new Date() } });
+    await s.dato("finanzas.ventas_programacion.cambiar_estado", { programacionId: p.id, activa: true });
+    const g = await s.dato<Gen>("finanzas.ventas_programacion.generar", { programacionId: p.id });
+    const doc = g.resultados.find((r) => r.estado === "generado")!.documentoId!;
+    const guardados = await s.e.admin.documentoEmitidoDestinatario.findMany({ where: { documentoId: doc }, orderBy: { orden: "asc" } });
+    expect(guardados.map((x) => x.email)).toEqual(["pagos@cliente-ficticio.test"]);
+  });
+
   it("se sigue hasta la factura emitida y el cobro en caja", async () => {
     const { id, res } = await generar({ autoEnvioProforma: true, destinatarioIds: [c1] });
     const traza = async () => (await s.dato<Det>("finanzas.ventas_programacion.obtener", { programacionId: id })).corridas.find((c) => c.documentoId === res!.documentoId)!.traza!;
