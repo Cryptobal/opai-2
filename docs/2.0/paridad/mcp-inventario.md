@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 754 pares pantalla→capacidad · 676 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 756 pares pantalla→capacidad · 678 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -111,6 +111,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.firmas.enviar` | `core_firmas_enviar` | existe |
 | compartido | `app/_components` | `core.geo.autocompletar` | `core_geo_autocompletar` | existe |
 | compartido | `app/_components` | `core.geo.detalle` | `core_geo_detalle` | existe |
+| compartido | `app/_components` | `core.hilo.actividad` | `core_hilo_actividad` | existe |
+| compartido | `app/_components` | `core.hilo.agenda` | `core_hilo_agenda` | existe |
 | compartido | `app/_components` | `core.inicio.pendientes` | `core_inicio_pendientes` | existe |
 | compartido | `app/_components` | `core.marca.get` | `core_marca_get` | existe |
 | compartido | `app/_components` | `core.me` | `core_me` | existe |
