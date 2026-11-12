@@ -42,6 +42,10 @@ test.describe("@preview desempeño", () => {
       await expect(page.getByText("Algo salió mal")).toHaveCount(0);
       await capturar(page, info, "desempeno-persona");
     }
+    await page.goto("/desempeno/indicadores");
+    await expect(page.getByRole("link", { name: "Indicadores propios" })).toBeVisible();
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "desempeno-indicadores");
     expect(errores).toEqual([]);
   });
 });
