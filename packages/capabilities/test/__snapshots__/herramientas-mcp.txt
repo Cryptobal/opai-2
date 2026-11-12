@@ -45,6 +45,7 @@ comercial_negocios_archivar
 comercial_negocios_create
 comercial_negocios_desvincular_instalacion
 comercial_negocios_embudo
+comercial_negocios_exportar
 comercial_negocios_ganar
 comercial_negocios_get
 comercial_negocios_list
