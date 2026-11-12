@@ -20,9 +20,11 @@ Cargar el historial de facturas (33, 34), notas de crédito (61) y notas de déb
 - El receptor se busca entre las cuentas (RUT, id externo o nombre exacto). Sin cuenta, la fila no se carga: hay que importar primero las cuentas.
 - Neto + exento + IVA debe sumar el total. Sin desglose, se calcula desde el total (exenta: todo exento; afecta: 19 %).
 - Lo ya cobrado en el origen queda como base del saldo en la fila del lote (`previos.cobradoApertura`), igual que la apertura: así no se pierde cuando después se concilian cobros.
+- **Sin monto cobrado, una factura histórica se asume cobrada entera** (aviso en la simulación). Si no, un historial tomado del RCV del SII, que no trae pagos, metería años de facturas pagadas como deuda vencida en el flujo de caja y en la cobranza. Lo que todavía se debe se indica con el monto (0 = nada cobrado). Para Gard, las facturas por cobrar ya entraron con la apertura de 1.0 (CAR-168) y quedan sin cambios.
+- Montos sin negativos, la exenta sin IVA y la afecta con neto. Un folio dentro de un rango de CAF sin usar es error: esa emisión futura chocaría con el índice único.
 - Los documentos importados quedan fuera de los recordatorios de cobranza y de «Hoy en Finanzas» (deuda histórica).
 - Una nota que indica tipo y folio de su documento queda vinculada (también si ese documento viene antes en la misma planilla). Sin referencia, queda sin vínculo y se avisa.
-- Un folio dentro de un rango de CAF todavía sin usar se avisa: esa emisión futura fallaría.
+- Una nota cuyo documento corregido no está en OPAI ni antes en la planilla, o es de otro cliente, se carga con aviso.
 - Revertir el lote borra los documentos creados, salvo los que ya tienen cobros conciliados, cesiones, envíos, gestiones de cobranza, notas emitidas en OPAI o fecha de cobro esperada.
 
 ## 5. Archivos

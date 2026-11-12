@@ -47,7 +47,7 @@ export const DEF_DOCUMENTOS_VENTA: DefinicionImportador = {
     { clave: "monto_iva", etiqueta: "IVA", tipo: "entero", sinonimos: ["monto iva", "iva recuperable"], ejemplo: "190000" },
     { clave: "monto_total", etiqueta: "Monto total", tipo: "entero", requerido: true, sinonimos: ["total", "monto total"], ejemplo: "1190000" },
     { clave: "monto_cobrado", etiqueta: "Monto ya cobrado", tipo: "entero", sinonimos: ["cobrado", "pagado", "monto pagado"], ejemplo: "1190000",
-      ayuda: "Lo que el cliente ya pagó. Vacío: nada. Solo cuenta en facturas." },
+      ayuda: "Lo que el cliente ya pagó. Vacío: se asume cobrada entera (historial). Escribe 0 si todavía se debe. Solo cuenta en facturas." },
     { clave: "estado_dte", etiqueta: "Estado ante el SII", tipo: "opcion", sinonimos: ["estado"], ejemplo: "aceptado",
       opciones: { aceptado: ["aceptada", "emitida", "vigente"], anulado_nc: ["anulada", "anulado", "anulada por nota de credito"], rechazado: ["rechazada"] } },
     { clave: "cedida", etiqueta: "Cedida en factoring", tipo: "booleano", sinonimos: ["cesion", "factoring"], ejemplo: "no" },
@@ -74,7 +74,11 @@ export function datosDocumento(f: FilaNormalizada, cuentaId: string) {
   const i = conDesglose ? (iva ?? 0) : total - n - e;
   const cedida = f.datos["cedida"] === true;
   const esFactura = TIPOS_FACTURA.has(tipoDte);
-  const cobrado = esFactura && !cedida ? Math.max(0, Math.min(entero(f.datos["monto_cobrado"]) ?? 0, total)) : 0;
+  const cobradoDato = entero(f.datos["monto_cobrado"]);
+  // Historial sin dato de pago: se asume cobrado. Si no, años de facturas pagadas entrarían como deuda vencida
+  // al flujo de caja y a la cobranza. Lo que todavía se debe se indica con el monto (0 = nada cobrado).
+  const supuestaCobrada = esFactura && !cedida && cobradoDato === null;
+  const cobrado = esFactura && !cedida ? Math.max(0, Math.min(cobradoDato ?? total, total)) : 0;
   const datos: Omit<DatosDocumentoVenta, "estadoCobro"> = {
     cuentaId, tipoDte, folio: entero(f.datos["folio"]) ?? 0,
     fechaEmision: fecha(f.datos["fecha_emision"]) ?? new Date(0), fechaVencimiento: fecha(f.datos["fecha_vencimiento"]),
@@ -86,5 +90,6 @@ export function datosDocumento(f: FilaNormalizada, cuentaId: string) {
     codigoReferencia: texto(f.datos["codigo_referencia"]) ? Number(texto(f.datos["codigo_referencia"])) : null,
   };
   const estadoCobro = cedida ? "cedida" : cobrado <= 0 ? "pendiente" : cobrado + 1 >= total ? "pagada" : "pagada_parcial";
-  return { datos: { ...datos, estadoCobro } satisfies DatosDocumentoVenta, conDesglose };
+  const montosValidos = [n, e, i, total].every((m) => m >= 0) && !(tipoDte === 34 && i !== 0) && !(tipoDte === 33 && n <= 0 && e <= 0);
+  return { datos: { ...datos, estadoCobro } satisfies DatosDocumentoVenta, conDesglose, supuestaCobrada, montosValidos };
 }

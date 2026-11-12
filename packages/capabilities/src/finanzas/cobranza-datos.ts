@@ -55,7 +55,7 @@ export async function documentosCobrables(ctx: Contexto, cuentaId?: string): Pro
 export async function idsDeApertura(ctx: Contexto, docs: { id: string }[]): Promise<Set<string>> {
   if (!docs.length) return new Set();
   const filas = await ctx.db.importacionFila.findMany({
-    where: { id20: { in: docs.map((d) => d.id) }, OR: ORIGEN_HISTORICO },
+    where: { id20: { in: docs.map((d) => d.id) }, accion: "creado", OR: ORIGEN_HISTORICO },
     select: { id20: true },
   });
   return new Set(filas.flatMap((f) => (f.id20 ? [f.id20] : [])));

@@ -16,6 +16,7 @@ const VENTAS = [
   "61,9101,77.777.777-7,06-10-2026,0,10000,1900,11900,,9002,33,corrige montos",
   "33,9003,11.111.111-1,07-10-2026,0,1000,190,1190,,,,",
   "33,9002,77.777.777-7,05-10-2026,0,200000,38000,238000,,,,",
+  "33,9004,77.777.777-7,08-10-2026,0,50000,9500,59500,,,,",
 ].join("\n");
 
 describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR-283)", () => {
@@ -41,16 +42,18 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
   it("simula, importa sin SII ni folios y reimportar no duplica", async () => {
     await x.importar(x.t1, "cuentas", { archivo: x.csv(CUENTAS) });
     const sim = await ventas(true);
-    expect(sim.conteos).toMatchObject({ crear: 3, error: 2 });
+    expect(sim.conteos).toMatchObject({ crear: 4, error: 2 });
+    expect(sim.filas.find((f) => f.fila === 7)?.mensajes.join(" ")).toMatch(/se asume cobrada/);
     expect(sim.filas.find((f) => f.fila === 5)?.mensajes.join(" ")).toMatch(/cuenta|RUT/i);
     expect(sim.filas.find((f) => f.fila === 6)?.mensajes.join(" ")).toMatch(/fila 3/);
 
     const r = await ventas();
-    expect(r.conteos).toMatchObject({ crear: 3 });
+    expect(r.conteos).toMatchObject({ crear: 4 });
     const docs = await x.e.admin.documentoEmitido.findMany({ where: { tenantId: x.t1 }, orderBy: { folio: "asc" } });
     expect(docs.map((d) => [d.tipoDte, d.folio, d.estadoDte, d.estadoCobro])).toEqual([
       [33, 9001, "aceptado", "pagada"],
       [33, 9002, "aceptado", "pagada_parcial"],
+      [33, 9004, "aceptado", "pagada"],
       [61, 9101, "aceptado", "pendiente"],
     ]);
     expect(docs.every((d) => d.trackIdSii === null && d.xmlStorageKey === null)).toBe(true);
@@ -60,8 +63,8 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     expect(await x.e.admin.dteEnvio.count({ where: { tenantId: x.t1 } })).toBe(0);
 
     const otra = await ventas();
-    expect(otra.conteos).toMatchObject({ crear: 0, sin_cambio: 3 });
-    expect(await x.e.admin.documentoEmitido.count({ where: { tenantId: x.t1 } })).toBe(3);
+    expect(otra.conteos).toMatchObject({ crear: 0, sin_cambio: 4 });
+    expect(await x.e.admin.documentoEmitido.count({ where: { tenantId: x.t1 } })).toBe(4);
     expect(await x.e.admin.documentoEmitido.count({ where: { tenantId: x.t2 } })).toBe(0);
   });
 
@@ -71,8 +74,20 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     const fila = await x.e.admin.importacionFila.findFirst({ where: { id20: f2.id, accion: "creado", OR: ORIGEN_HISTORICO } });
     expect(fila?.previos).toEqual({ cobradoApertura: 38_000 });
     expect(f2.montoCobrado).toBe(38_000);
-    // Misma consulta que usa la cobranza (`idsDeApertura`) para dejar fuera la deuda histórica.
-    expect(await x.e.admin.importacionFila.count({ where: { id20: f2.id, OR: ORIGEN_HISTORICO } })).toBe(1);
+    // Misma consulta que usa la cobranza (`idsDeApertura`): cuenta la fila que creó el documento.
+    expect(await x.e.admin.importacionFila.count({ where: { id20: f2.id, accion: "creado", OR: ORIGEN_HISTORICO } })).toBe(1);
+  });
+
+  it("una factura emitida en OPAI que vuelve en una planilla no sale de la cobranza", async () => {
+    const cuenta = await x.e.admin.cuenta.findFirstOrThrow({ where: { tenantId: x.t1, nombre: "Delta" } });
+    const nativa = await x.e.admin.documentoEmitido.create({
+      data: { tenantId: x.t1, cuentaId: cuenta.id, tipoDte: 33, folio: 9005, fechaEmision: new Date("2026-10-09"), montoNeto: 100, montoIva: 19, montoTotal: 119, estadoDte: "aceptado" },
+    });
+    const csv = "Tipo Doc,Folio,Rut cliente,Fecha Docto,Monto Neto,Monto IVA,Monto total\n33,9005,77.777.777-7,09-10-2026,100,19,119\n33,9006,77.777.777-7,10-10-2026,100,19,119\n";
+    const r = await x.run<Salida>(x.t1, "core.importar.ejecutar", { importador: "documentos_venta", archivo: x.csv(csv) }, { modulos });
+    expect(r.ok && r.data.conteos).toMatchObject({ crear: 1, sin_cambio: 1 });
+    expect(await x.e.admin.importacionFila.count({ where: { id20: nativa.id, OR: ORIGEN_HISTORICO } })).toBe(1);
+    expect(await x.e.admin.importacionFila.count({ where: { id20: nativa.id, accion: "creado", OR: ORIGEN_HISTORICO } })).toBe(0);
   });
 
   it("revertir el lote borra los documentos creados", async () => {
@@ -82,6 +97,8 @@ describe.skipIf(!urlPropietario)("core · importador de documentos de venta (CAR
     });
     const r = await x.run<{ revertido: boolean }>(x.t1, "core.importar.revertir", { importacionId: lote.id }, { modulos });
     expect(r.ok && r.data.revertido).toBe(true);
-    expect(await x.e.admin.documentoEmitido.count({ where: { tenantId: x.t1 } })).toBe(0);
+    const folios = (await x.e.admin.documentoEmitido.findMany({ where: { tenantId: x.t1 }, select: { folio: true } })).map((d) => d.folio);
+    // Quedan solo la factura emitida en OPAI y la del otro lote.
+    expect(folios.sort()).toEqual([9005, 9006]);
   });
 });

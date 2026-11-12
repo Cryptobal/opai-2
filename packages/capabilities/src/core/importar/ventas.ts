@@ -18,14 +18,18 @@ export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
     const cuentaDe = await resolverCuentas(ctx, filas, o.sistema);
     const folios = filas.map((f) => Number(f.datos["folio"] ?? 0)).filter((n) => Number.isInteger(n) && n > 0);
     const [existentes, cafs] = await Promise.all([
-      ctx.db.documentoEmitido.findMany({ where: { folio: { in: [...new Set(folios)] } }, select: { id: true, tipoDte: true, folio: true } }),
+      ctx.db.documentoEmitido.findMany({
+        where: { folio: { in: [...new Set([...folios, ...filas.map((f) => Number(f.datos["ref_folio"] ?? 0))])] } },
+        select: { id: true, tipoDte: true, folio: true, cuentaId: true },
+      }),
       ctx.db.dteFolio.findMany({ select: { tipoDte: true, folioHasta: true, folioActual: true } }),
     ]);
     const enOpai = new Map(existentes.map((d) => [clave(d.tipoDte, d.folio ?? 0), d]));
     const vistos = new Map<string, number>();
+    const cuentaDeVisto = new Map<string, string>();
     return filas.map((f): FilaPlan<DatosDocumentoVenta> => {
       const r = cuentaDe(f);
-      const { datos, conDesglose } = datosDocumento(f, "error" in r ? "" : r.cuenta.id);
+      const { datos, conDesglose, supuestaCobrada, montosValidos } = datosDocumento(f, "error" in r ? "" : r.cuenta.id);
       const k = clave(datos.tipoDte, datos.folio);
       const etiqueta = `${datos.tipoDte} · folio ${datos.folio}`;
       const base = { fila: f.fila, clave: k, etiqueta, idExterno: null, datos };
@@ -40,13 +44,21 @@ export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
       if (datos.montoTotal <= 0) return falla("El monto total debe ser mayor que cero.");
       if (datos.montoNeto + datos.montoExento + datos.montoIva !== datos.montoTotal)
         return falla("Neto + exento + IVA no suma el monto total.");
+      if (!montosValidos) return falla("Montos inválidos: sin negativos, la factura exenta sin IVA y la afecta con neto.");
+      // Un folio histórico dentro de un rango todavía sin usar haría fallar esa emisión futura (índice único).
+      if (cafs.some((c) => c.tipoDte === datos.tipoDte && datos.folio >= c.folioActual && datos.folio <= c.folioHasta))
+        return falla("El folio está dentro de un rango de folios de OPAI todavía sin usar: revisa los folios antes de importar.");
+      cuentaDeVisto.set(k, datos.cuentaId);
       const avisos: string[] = [];
       if (!conDesglose) avisos.push("Sin neto ni IVA: se calcularon desde el total.");
-      if (TIPOS_NOTA.has(datos.tipoDte) && (!datos.refTipoDte || !datos.refFolio))
-        avisos.push("La nota no indica qué documento corrige: queda sin vínculo.");
-      // Un folio histórico dentro de un rango todavía sin usar haría fallar esa emisión futura: se avisa.
-      if (cafs.some((c) => c.tipoDte === datos.tipoDte && datos.folio >= c.folioActual && datos.folio <= c.folioHasta))
-        avisos.push("Este folio está dentro de un rango de folios de OPAI todavía sin usar.");
+      if (supuestaCobrada) avisos.push("Sin monto cobrado: se asume cobrada entera. Escribe 0 si todavía se debe.");
+      if (TIPOS_NOTA.has(datos.tipoDte)) {
+        const kRef = datos.refTipoDte && datos.refFolio ? clave(datos.refTipoDte, datos.refFolio) : null;
+        const cuentaRef = kRef ? (enOpai.get(kRef)?.cuentaId ?? cuentaDeVisto.get(kRef)) : undefined;
+        if (!kRef) avisos.push("La nota no indica qué documento corrige: queda sin vínculo.");
+        else if (cuentaRef === undefined) avisos.push("El documento que corrige no está en OPAI ni antes en la planilla: queda sin vínculo.");
+        else if (cuentaRef !== datos.cuentaId) avisos.push("El documento que corrige es de otro cliente: revisa la referencia.");
+      }
       return { ...base, accion: "crear", mensajes: avisos };
     });
   },
