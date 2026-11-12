@@ -501,3 +501,13 @@
     @apply gap-x-6 gap-y-0 border-b border-border;
   }
 }
+
+/* Marco Hilo: la fila seleccionada (lista de una vista dividida, lista lateral de Configuración) no usa
+   el índigo, que es solo del agente (DISENO-hilo.md R3; CAR-369). Fondo `fill` y barra en tinta. Vive en
+   CSS sobre las clases que ya pone `claseFila`, para no sumar JS (ADR-037). */
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent {
+  background-color: var(--ds-fill);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent::before {
+  background-color: var(--ds-fg);
+}
