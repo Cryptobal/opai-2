@@ -511,3 +511,9 @@
 :is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent::before {
   background-color: var(--ds-fg);
 }
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .text-accent {
+  color: var(--ds-fg);
+}
+:is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .bg-surface.text-accent {
+  box-shadow: inset 0 0 0 1px var(--ds-fg);
+}
