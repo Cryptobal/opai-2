@@ -1,16 +1,16 @@
 import { z } from "zod";
 
-import { NOMBRE_TIPO_DTE_VENTA, agruparDestinatarios, type DestinatarioDoc, type TipoDteVenta } from "@opai/domain";
+import { NOMBRE_TIPO_DTE_VENTA, type TipoDteVenta } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { describirDocumento } from "./ventas-aprobacion-texto";
-import type { Contexto } from "../types";
 import { enviarCorreo } from "../core/comunicaciones";
 import { escribirConEvento } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { correoDe } from "../integraciones/adaptadores";
 import { adaptadorSiiDe } from "./adaptador-sii";
 import { PERMISO_VENTAS, cuentaDe, documentoEmitidoIdSchema } from "./ventas-comun";
+import { correosDe, destinosDeDocumento } from "./ventas-destinos";
 import { pdfDeDocumento } from "./ventas-pdf-doc";
 import { xmlParaEnvioSii } from "./ventas-xml";
 
@@ -18,51 +18,11 @@ const clp = (n: number) => `$${new Intl.NumberFormat("es-CL").format(n)}`;
 const dmy = (d: Date | null) =>
   d ? `${String(d.getUTCDate()).padStart(2, "0")}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${d.getUTCFullYear()}` : "—";
 
-type Destinos = { para: string; cc: string[]; bcc: string[] };
-
-/**
- * Destinatarios del envío: los guardados en el documento (PARA, CC y BCC) o, si no hay lista, los contactos
- * de facturación activos del cliente (el principal primero como destinatario y los demás en copia).
- */
-async function destinatariosDeEnvio(ctx: Contexto, doc: { id: string; cuentaId: string }): Promise<Destinos> {
-  const guardados = await ctx.db.documentoEmitidoDestinatario.findMany({
-    where: { documentoId: doc.id },
-    orderBy: { orden: "asc" },
-  });
-  if (guardados.length > 0) {
-    return agruparDestinatarios(
-      guardados.map((g): DestinatarioDoc => ({
-        tipo: g.tipo as DestinatarioDoc["tipo"],
-        email: g.email,
-        origen: g.origen as DestinatarioDoc["origen"],
-      })),
-    );
-  }
-  const contactos = await ctx.db.contacto.findMany({
-    where: {
-      cuentaId: doc.cuentaId,
-      estado: "activo",
-      archivadoEn: null,
-      anonimizadoEn: null,
-      email: { not: null },
-      roles: { has: "facturacion" },
-    },
-    orderBy: [{ esPrincipal: "desc" }, { createdAt: "asc" }],
-  });
-  const correos = [...new Set(contactos.map((c) => (c.email ?? "").trim().toLowerCase()).filter(Boolean))];
-  const [para, ...cc] = correos;
-  if (!para) {
-    throw reglaDeNegocio(
-      "El cliente no tiene contactos con rol facturación y correo. Agrégalos en la ficha del cliente o guarda los destinatarios del documento.",
-    );
-  }
-  return { para, cc, bcc: [] };
-}
-
 const salidaSchema = z.object({
   documentoId: z.string(),
-  para: z.string().describe("Destinatario principal: el PARA guardado en el documento o, sin lista guardada, el primer contacto de facturación."),
-  cc: z.array(z.string()).describe("Destinatarios en copia."),
+  para: z.string().describe("Primer destinatario principal (PARA)."),
+  paraAdicionales: z.array(z.string()).describe("Los demás destinatarios principales: reciben igual que el primero."),
+  cc: z.array(z.string()).describe("Destinatarios en copia; incluye siempre la casilla DTE del cliente."),
   bcc: z.array(z.string()).describe("Destinatarios en copia oculta (solo si se guardaron en el documento)."),
   adjuntos: z.array(z.enum(["pdf", "xml"])),
   estado: z.enum(["enviado", "fallido", "vista_previa"]),
@@ -71,7 +31,7 @@ const salidaSchema = z.object({
 export const ventasEnviarCliente = defineCapability({
   id: "finanzas.ventas.enviar_cliente",
   descripcion:
-    "Envía por correo el PDF y el XML de un documento emitido a los destinatarios guardados en el documento (PARA, CC y BCC) o, si no hay lista guardada, a los contactos del cliente con rol facturación (el primero como destinatario, los demás en copia), con la plantilla de Comunicaciones. Deja el registro del envío en la ficha. Si ya se envió, pide confirmar el reenvío.",
+    "Envía por correo el PDF y el XML de un documento emitido a los destinatarios guardados en el documento (PARA, CC y BCC) o, si no hay lista guardada, a todos los contactos del cliente con rol facturación como destinatarios principales; la casilla DTE del cliente va siempre en copia. Usa la plantilla de Comunicaciones. Deja el registro del envío en la ficha. Si ya se envió, pide confirmar el reenvío.",
   permiso: PERMISO_VENTAS,
   input: z.object({
     documentoId: documentoEmitidoIdSchema,
@@ -88,8 +48,15 @@ export const ventasEnviarCliente = defineCapability({
     if (doc.folio == null || !doc.timbrePdf417 || !["enviado", "aceptado"].includes(doc.estadoDte)) {
       throw reglaDeNegocio("Solo se envía al cliente un documento emitido y firmado.");
     }
-    const { para, cc, bcc } = await destinatariosDeEnvio(ctx, doc);
-    const correos = [para, ...cc, ...bcc];
+    const cuenta = await cuentaDe(ctx, doc.cuentaId);
+    const destinos = await destinosDeDocumento(ctx, doc, cuenta.emailDte);
+    if (!destinos) {
+      throw reglaDeNegocio(
+        "El cliente no tiene contactos con rol facturación ni casilla DTE. Agrégalos en la ficha del cliente o guarda los destinatarios del documento.",
+      );
+    }
+    const { para, paraAdicionales, cc, bcc } = destinos;
+    const correos = correosDe(destinos);
     const previo = await ctx.db.documentoEmitidoEnvio.findFirst({
       where: { documentoId: doc.id, estado: "enviado" },
       orderBy: { createdAt: "desc" },
@@ -101,11 +68,10 @@ export const ventasEnviarCliente = defineCapability({
     const adaptador = await adaptadorSiiDe(ctx);
     const conXml = adaptador.nombre !== "simulado";
     const adjuntos: ("pdf" | "xml")[] = conXml ? ["pdf", "xml"] : ["pdf"];
-    if (dryRun) return { documentoId: doc.id, para, cc, bcc, adjuntos, estado: "vista_previa" as const };
+    if (dryRun) return { documentoId: doc.id, para, paraAdicionales, cc, bcc, adjuntos, estado: "vista_previa" as const };
 
     const xml = conXml ? await xmlParaEnvioSii(ctx, doc, adaptador) : null;
     const pdf = await pdfDeDocumento(ctx, doc);
-    const cuenta = await cuentaDe(ctx, doc.cuentaId);
     const tenant = await ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } });
     const etiqueta = `${doc.tipoDte === 61 ? "nota-credito" : "factura"}-${doc.folio}`;
     const salio = await enviarCorreo(
@@ -123,6 +89,7 @@ export const ventasEnviarCliente = defineCapability({
         empresa: { nombre: tenant?.nombre ?? "" },
       },
       {
+        paraAdicionales,
         cc,
         bcc,
         // CAR-233: queda en el historial de correos de la cuenta, con reply-to a la dirección de registro.
@@ -156,6 +123,6 @@ export const ventasEnviarCliente = defineCapability({
           },
         }),
     );
-    return { documentoId: doc.id, para, cc, bcc, adjuntos: [...adjuntos], estado };
+    return { documentoId: doc.id, para, paraAdicionales, cc, bcc, adjuntos: [...adjuntos], estado };
   },
 });

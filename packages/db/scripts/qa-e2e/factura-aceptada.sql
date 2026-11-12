@@ -12,6 +12,10 @@ SELECT '00000000-0000-7000-8000-000000267001'::uuid, t.id, 'Cliente ficticio QA 
 FROM core.tenants t WHERE t.slug = 'qa-e2e'
 ON CONFLICT (id) DO NOTHING;
 
+-- CAR-320: RUT ficticio y cliente activo para que aparezca al facturar (e2e `@preview` de destinatarios). Idempotente.
+UPDATE core.cuentas SET rut = COALESCE(rut, '76999002-K'), estado = 'cliente_activo', updated_at = now()
+WHERE id = '00000000-0000-7000-8000-000000267001'::uuid;
+
 INSERT INTO finanzas.documentos_emitidos
   (id, tenant_id, cuenta_id, tipo_dte, folio, fecha_emision, monto_neto, monto_iva, monto_total, estado_dte, glosa, updated_at)
 SELECT '00000000-0000-7000-8000-000000267002'::uuid, t.id, '00000000-0000-7000-8000-000000267001'::uuid, 33, 990001,

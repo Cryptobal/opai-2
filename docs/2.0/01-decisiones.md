@@ -1904,3 +1904,19 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - Hasta entonces OPAI 2 emite solo en certificación; el CAF 33 2064–2068 (producción) sigue pausado.
 - No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
 - La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).
+
+## ADR-100 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 06:54, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** La programación de facturas primero genera un borrador que no se manda a nadie. Si tiene activada la proforma o el estado de pago, esos documentos se mandan a los destinatarios de la cuenta. Cuando el cliente aprueba (un OK por correo), se emite la factura y va a los mismos destinatarios. Hasta hoy, OPAI 2 mandaba a un solo destinatario principal y el resto en copia. OPAI 1 admite 10 PARA y 10 CC. El importador de facturas históricas (CAR-283) dejó abierta qué hacer con una factura que no trae el monto cobrado.
+
+**Decisión.**
+1. **Todos los destinatarios reciben por igual.** Los contactos de facturación asignados (los de la programación o, si no hay, los de la cuenta) van todos como destinatarios principales (PARA), hasta 10. El resto va en copia. Lo mismo vale para la proforma, el estado de pago y la factura con su XML.
+2. **La casilla DTE del cliente va siempre en copia.** Es la casilla que recibe el XML y el DTE. Se agrega en copia aunque no esté en la lista guardada. Si el cliente no tiene ningún contacto de facturación, va como PARA.
+3. **Facturas importadas: todas cobradas.** Toda factura importada sin monto cobrado se da por cobrada entera, porque así están las de Gard. Si alguna no lo está, Carlos lo avisa y se corrige a mano.
+
+**Consecuencias.**
+- La migración `20261130100000_finanzas_destinatarios_varios_para` quita el índice que permitía un solo PARA por documento. El tope de 10 lo valida el dominio (`MAX_PARA`).
+- El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
+- La regla por defecto del importador (#542) queda confirmada.

@@ -1,8 +1,12 @@
 // Destinatarios de un borrador generado por una programación (CAR-221). Cada borrador conserva su propia
 // lista: se copia al generarlo, y cambiar la programación después no altera los borradores ya generados.
 import type { TenantTx } from "@opai/db";
+import { MAX_PARA, correoNormalizado, esCorreoValido } from "@opai/domain";
 
-/** Copia la lista de la programación al documento: el primero es PARA y el resto va en copia (CC). */
+/**
+ * Copia la lista de la programación al documento (ADR-100): todos reciben por igual como PARA (hasta 10; el resto
+ * en copia) y la casilla DTE del cliente, que recibe el XML, se agrega en copia.
+ */
 export async function copiarDestinatarios(
   tx: TenantTx,
   tenantId: string,
@@ -29,10 +33,16 @@ export async function copiarDestinatarios(
       tenantId,
       documentoId,
       orden: data.length,
-      tipo: data.length === 0 ? "PARA" : "CC",
+      tipo: data.length < MAX_PARA ? "PARA" : "CC",
       email,
       origen: f.contactoId ? "contacto_facturacion" : "manual",
     });
+  }
+  const doc = await tx.documentoEmitido.findFirst({ where: { id: documentoId }, select: { cuentaId: true } });
+  const cuenta = doc ? await tx.cuenta.findFirst({ where: { id: doc.cuentaId }, select: { emailDte: true } }) : null;
+  const casilla = cuenta?.emailDte && esCorreoValido(cuenta.emailDte) ? correoNormalizado(cuenta.emailDte) : null;
+  if (casilla && !vistos.has(casilla)) {
+    data.push({ tenantId, documentoId, orden: data.length, tipo: data.length ? "CC" : "PARA", email: casilla, origen: "casilla_dte" });
   }
   if (data.length) await tx.documentoEmitidoDestinatario.createMany({ data });
   return data.length;

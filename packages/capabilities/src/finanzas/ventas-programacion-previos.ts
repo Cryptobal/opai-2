@@ -10,6 +10,7 @@ import { enviarCorreo } from "../core/comunicaciones";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { cuentaDe } from "./ventas-comun";
+import { correosDe, destinosDeDocumento } from "./ventas-destinos";
 import { pdfDePrevio } from "./ventas-pdf-previo";
 
 export type TipoPrevio = "proforma" | "estado_pago";
@@ -32,19 +33,14 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
     ...(flags.autoEnvioEstadoPago ? (["estado_pago"] as const) : []),
   ];
   if (!tipos.length) return [];
-  const guardados = await ctx.db.documentoEmitidoDestinatario.findMany({
-    where: { documentoId: b.documentoId },
-    orderBy: { orden: "asc" },
-  });
   const [cuenta, tenant] = await Promise.all([
     cuentaDe(ctx, b.cuentaId),
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
   ]);
-  const para = guardados.find((g) => g.tipo === "PARA")?.email ?? null;
-  const resto = guardados.filter((g) => g.email !== para);
-  const cc = resto.filter((g) => g.tipo === "CC").map((g) => g.email);
-  const bcc = resto.filter((g) => g.tipo === "BCC").map((g) => g.email);
-  const correos = para ? [para, ...cc, ...bcc] : [];
+  // Los mismos destinatarios que recibirán la factura (ADR-100): todos los PARA, y la casilla DTE en copia.
+  const destinos = await destinosDeDocumento(ctx, { id: b.documentoId, cuentaId: b.cuentaId }, cuenta.emailDte);
+  const para = destinos?.para ?? null;
+  const correos = destinos ? correosDe(destinos) : [];
   const { mes, anio } = mesYAnio(b.fechaFactura);
   const salida: ResultadoPrevio[] = [];
   for (const tipo of tipos) {
@@ -67,7 +63,7 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
             documento: { total: clp(b.montoTotal), fecha_factura: dmy(b.fechaFactura) },
             empresa: { nombre: tenant?.nombre ?? "" },
           },
-          { cc, bcc, adjuntos: [{ nombre: pdf.nombre, contenidoBase64: Buffer.from(pdf.bytes).toString("base64"), mime: "application/pdf" }] },
+          { paraAdicionales: destinos?.paraAdicionales ?? [], cc: destinos?.cc ?? [], bcc: destinos?.bcc ?? [], adjuntos: [{ nombre: pdf.nombre, contenidoBase64: Buffer.from(pdf.bytes).toString("base64"), mime: "application/pdf" }] },
         )
       : false;
     const estado = salio ? ("enviado" as const) : ("fallido" as const);
