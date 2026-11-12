@@ -1,3 +1,4 @@
+import { filtroAprobacionesVisibles } from "../aprobaciones-reglas/comun";
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
@@ -67,14 +68,21 @@ export const resumenContadores = defineCapability({
           ctx.db.persona.count({ where: { archivadaEn: null, AND: [dondePersona(ctx)] } }),
         ),
         si("aprobacionesPendientes", null, async () => {
-          const puedeAgente = ctx.autorizar(PERMISOS_CORE.aprobacionesManage);
+          // CAR-252: los aprobadores de una regla también cuentan las solicitudes de sus reglas.
+          const visibles = await filtroAprobacionesVisibles(ctx);
+          const puedeAgente = !visibles || visibles.reglaId.in.length > 0;
           const puedeMargen = ctx.autorizar("cpq:aprobar");
           const puedeEnvio = ctx.autorizar("cpq:envios.aprobar");
           if (!puedeAgente && !puedeMargen && !puedeEnvio) return null;
           const [agente, margen, envio] = await Promise.all([
             puedeAgente
               ? ctx.db.aprobacion.count({
-                  where: { estado: "pendiente", venceEn: { gt: new Date() }, ...SIN_PLATAFORMA },
+                  where: {
+                    estado: "pendiente",
+                    venceEn: { gt: new Date() },
+                    ...SIN_PLATAFORMA,
+                    ...(visibles ?? {}),
+                  },
                 })
               : Promise.resolve(0),
             puedeMargen

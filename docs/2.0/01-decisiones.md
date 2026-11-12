@@ -2007,3 +2007,25 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+
+## ADR-106 · Reglas de aprobación por empresa, versión 1 (CAR-252, 12-nov-2026)
+
+**Fecha:** 12-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat de la Sesión Núcleo (17:45, hora de Chile) · **Registra:** Claude («Sesión Núcleo»).
+
+**Contexto.** Hasta hoy solo los agentes pasaban por la cola de aprobaciones (ADR-032), y aprobaba cualquiera con `core:aprobaciones.manage` (dueños y administradores). Carlos pidió poder elegir, por empresa, qué acciones necesitan aprobación y quién las aprueba (CAR-252), y que valga también para las personas (CAR-253).
+
+**Decisión (versión 1 simple, como lo hacen las herramientas de gastos y facturación).**
+
+1. **Una regla = acción + monto mínimo opcional + quién aprueba.** Acciones de la versión 1: `emitir_dte` (emitir al SII una factura, nota de crédito, nota de débito o el lote del cierre) y `enviar_cotizacion` (enviar una propuesta de CPQ). Quién aprueba: un rol (base o propio de la empresa) o un grupo (CAR-251), nunca los dos a la vez.
+2. **Vale igual para personas y agentes.** Si una regla aplica, la acción queda en la cola de aprobaciones (`core.aprobaciones`, con `regla_id`) aunque la pida una persona desde la pantalla o un agente con autonomía «directo». Sin reglas, todo sigue como antes.
+3. **Basta una aprobación.** Con varias reglas para la misma acción, aplica la de monto mínimo más alto que se cumpla. Si el monto no se puede calcular, aplica cualquier regla de la acción (ante la duda, se pide).
+4. **Dueños y administradores aprueban todo, siempre** (también lo propio, para no trabar a una empresa chica). Los aprobadores de una regla ven y resuelven solo las solicitudes de sus reglas, y nunca la propia.
+5. **Quien aprueba también necesita el permiso de la acción**, porque la acción se ejecuta a su nombre (como hasta hoy). La ejecución que resulta de aprobar no vuelve a pedir aprobación.
+6. **Configurar reglas es solo para personas** (`soloPersonas`): un agente no puede cambiar la regla que lo frena. La lista de reglas sí está en el MCP.
+7. **Fuera de la versión 1:** varias aprobaciones («N de M»), el reemplazo por vacaciones, otras condiciones y unir las aprobaciones propias de CPQ, Rendiciones y tickets (CAR-253).
+
+**Consecuencias.**
+
+- La pantalla Configuración › Aprobaciones › Reglas espera su diseño en Claude Design (`docs/2.0/design/DESIGN-PROMPT-reglas-aprobacion.md`). Como crear reglas es solo para personas, hasta que llegue la pantalla ninguna empresa tiene reglas y todo funciona como antes.
+- Los aprobadores sin `core:aprobaciones.manage` ven sus solicitudes en la Bandeja y por el MCP, pero la pantalla de la cola requiere ese permiso hasta que llegue el diseño.
+- En la versión 1, el envío de propuestas de CPQ no calcula el monto: una regla de «enviar cotización» aplica a todos los envíos. CPQ conserva su propia aprobación de envíos hasta CAR-253.

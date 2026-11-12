@@ -1,3 +1,4 @@
+import { filtroAprobacionesVisibles } from "../aprobaciones-reglas/comun";
 import { z } from "zod";
 
 import { tituloVencimientos, PERMISOS_CORE } from "@opai/domain";
@@ -37,9 +38,11 @@ export const inicioPendientes = defineCapability({
       ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
       const items: z.input<typeof pendienteSchema>[] = [];
       const ahora = new Date();
-      if (ctx.autorizar(PERMISOS_CORE.aprobacionesManage)) {
+      // CAR-252: dueños y administradores, todas; los aprobadores de una regla, las de sus reglas.
+      const visibles = await filtroAprobacionesVisibles(ctx);
+      if (!visibles || visibles.reglaId.in.length) {
         const ap = await ctx.db.aprobacion.findMany({
-          where: { estado: "pendiente", venceEn: { gt: ahora }, ...SIN_PLATAFORMA },
+          where: { estado: "pendiente", venceEn: { gt: ahora }, ...SIN_PLATAFORMA, ...(visibles ?? {}) },
           orderBy: { venceEn: "asc" },
           select: { capability: true, venceEn: true },
         });

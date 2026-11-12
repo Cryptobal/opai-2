@@ -8,6 +8,18 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "core.aprobaciones.reglas_guardar": {
+    encargo: "CAR-252",
+    desde: "2026-11-12",
+    motivo:
+      "Crear o cambiar reglas de aprobación: la pantalla Configuración › Aprobaciones › Reglas espera su diseño en Claude Design (decisión de Carlos del 12-nov). Sin reglas, todo sigue como antes.",
+  },
+  "core.aprobaciones.reglas_desactivar": {
+    encargo: "CAR-252",
+    desde: "2026-11-12",
+    motivo:
+      "Desactivar una regla de aprobación: llega con la misma pantalla de reglas (diseño pendiente). Mientras no haya pantalla nadie crea reglas, así que no hay nada que desactivar.",
+  },
   "comercial.importar_1_0": {
     encargo: "CAR-325",
     desde: "2026-11-12",

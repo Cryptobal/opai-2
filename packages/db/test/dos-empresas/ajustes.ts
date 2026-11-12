@@ -21,6 +21,10 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Reglas de aprobación (CAR-252): CHECK de un solo aprobador (rol o grupo) y monto no negativo.
+  "core.reglas_aprobacion": {
+    valores: () => ({ accion: "emitir_dte", aprobador_rol: "gerente", aprobador_grupo_id: null, monto_minimo: null }),
+  },
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],

@@ -863,6 +863,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.apps_conectadas.desconectar` | Solo personas: desconectar una app conectada por OAuth gobierna agentes; se hace en Mi cuenta (CAR-247). Listar sí va por MCP. |
 | `core.aprobaciones.aprobar` | Solo personas: lo irreversible lo aprueba un humano (ADR-032). |
 | `core.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible es humana (ADR-032). |
+| `core.aprobaciones.reglas_desactivar` | Solo personas: desactivar una regla quita una aprobación de lo irreversible; lo decide un humano (ADR-032, CAR-252). |
+| `core.aprobaciones.reglas_guardar` | Solo personas: decide quién aprueba lo irreversible; un agente no puede cambiar la regla que lo frena (ADR-032, CAR-252). |
 | `core.biometria.enrolar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP; el estado se consulta con core.biometria.estado y el borrado con core.biometria.borrar (CAR-78 B4). |
 | `core.biometria.verificar` | Solo personas: la muestra es una imagen del rostro y no pasa por agentes ni por el MCP (CAR-78 B4). |
 | `core.correos.recibir` | Interna: la ruta pública `/api/webhooks/resend/entrante` la ejecuta tras verificar la firma Svix y resolver el tenant por la dirección de registro t<token>@respuestas.opai.cl (CAR-233). |
@@ -962,6 +964,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apps_conectadas.desconectar` | `app/_acciones` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `core.aprobaciones.reglas_desactivar` | sin pantalla todavía · CAR-252 · desde 2026-11-12 | no | reservada a personas |
+| `core.aprobaciones.reglas_guardar` | sin pantalla todavía · CAR-252 · desde 2026-11-12 | no | reservada a personas |
 | `core.biometria.enrolar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.biometria.verificar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
 | `core.credenciales_terreno.asignar_pin` | `app/(erp)/personas/_componentes` | no | reservada a personas |
@@ -1047,6 +1051,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.actividades.delete`
 - `core.anexos.generar`
 - `core.aprobaciones.get`
+- `core.aprobaciones.reglas_list`
 - `core.audit.list`
 - `core.bitacora.verificar`
 - `core.campos.catalogo`

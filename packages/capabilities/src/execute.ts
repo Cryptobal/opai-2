@@ -1,6 +1,6 @@
 import { ocultarSensibles } from "./idempotencia-sensibles";
 import { auditarRechazoSensible } from "./execute-rechazo";
-import { controlAgente } from "./agentes/control";
+import { controlAprobacion } from "./agentes/reglas";
 import { denegar, falla } from "./autorizacion";
 import { conAuditoriaAlFinal } from "./execute-auditoria-final";
 import { ejecutarLecturaAuditada } from "./execute-lectura";
@@ -41,7 +41,7 @@ async function correr(
   let modo: ModoEjecucion = opciones.idempotencyKey
     ? { dryRun, idempotencyKey: opciones.idempotencyKey }
     : { dryRun };
-  const bloqueo = await controlAgente(ctx, c, entrada.data, opciones);
+  const bloqueo = await controlAprobacion(ctx, c, entrada.data, opciones);
   if (bloqueo) return { resultado: bloqueo, entrada: entrada.data };
   // Plataforma no reserva idempotencia: la reserva guardaría su input y su salida (correos, datos
   // de otra empresa) en la empresa de la key durante 24 h (CAR-36).

@@ -1,12 +1,11 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
-
 import { defineCapability } from "../../define";
-import { conflicto } from "../../errores";
+import { conflicto, prohibido } from "../../errores";
 import { executeCapability } from "../../execute";
 import { defineTrabajo } from "../../trabajos/registro";
 import { uuidSchema } from "../esquemas";
+import { puedeResolverSolicitud } from "../aprobaciones-reglas/comun";
 import { pendiente } from "./aprobaciones-pendiente";
 
 export const aprobacionesAprobar = defineCapability({
@@ -14,14 +13,17 @@ export const aprobacionesAprobar = defineCapability({
   // Solo personas: lo irreversible lo aprueba un humano (ADR-032); un agente no aprueba lo que otro pidió ni lo propio.
   soloPersonas: true,
   descripcion:
-    "IRREVERSIBLE: aprueba la acción pedida por un agente y la ejecuta en el acto como la persona que aprueba (con sus permisos). Solo personas, nunca API keys.",
-  permiso: PERMISOS_CORE.aprobacionesManage,
+    "IRREVERSIBLE: aprueba la acción pedida por un agente o por una regla de la empresa y la ejecuta en el acto como la persona que aprueba (con sus permisos). Solo personas, nunca API keys.",
+  // CAR-252: aprueban dueños y administradores (`core:aprobaciones.manage`) y, de una solicitud que pidió
+  // una regla, sus aprobadores; lo verifica el handler (`puedeResolverSolicitud`).
+  permiso: null,
   input: z.object({ id: uuidSchema }),
   output: z.object({ estado: z.string(), resultado: z.unknown() }),
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const { a } = await pendiente(ctx, input.id, true, "empresa");
+    if (!(await puedeResolverSolicitud(ctx, a))) throw prohibido("No puedes resolver esta aprobación.");
     if (dryRun)
       return {
         estado: "pendiente",
@@ -57,14 +59,16 @@ export const aprobacionesRechazar = defineCapability({
   // Solo personas: la decisión sobre lo irreversible es humana (ADR-032); un agente no resuelve aprobaciones.
   soloPersonas: true,
   descripcion:
-    "Rechaza la acción pedida por un agente, con motivo. No se ejecuta nada y el agente lo ve al consultar la aprobación.",
-  permiso: PERMISOS_CORE.aprobacionesManage,
+    "Rechaza la acción pedida por un agente o por una regla de la empresa, con motivo. No se ejecuta nada y quien la pidió lo ve al consultarla.",
+  // CAR-252: mismo criterio que aprobar (dueños y administradores, o aprobadores de la regla).
+  permiso: null,
   input: z.object({ id: uuidSchema, motivo: z.string().trim().min(3).max(500) }),
   output: z.object({ estado: z.string() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const { a } = await pendiente(ctx, input.id, false, "empresa");
+    if (!(await puedeResolverSolicitud(ctx, a))) throw prohibido("No puedes resolver esta aprobación.");
     if (dryRun) return { estado: "pendiente" };
     await ctx.transaccion(async (tx) => {
       await tx.aprobacion.update({

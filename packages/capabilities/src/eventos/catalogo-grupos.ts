@@ -8,3 +8,9 @@ export const EVENTOS_GRUPOS: readonly EventoDeDominio[] = [
   { id: "core.grupo.miembros_agregados", descripcion: "Se agregaron usuarios a un grupo." },
   { id: "core.grupo.miembro_quitado", descripcion: "Se quitó a un usuario de un grupo." },
 ];
+
+/** Reglas de aprobación por empresa (CAR-252, ADR-106). Payload vacío; la entidad es la regla. */
+export const EVENTOS_REGLAS_APROBACION: readonly EventoDeDominio[] = [
+  { id: "core.regla_aprobacion.guardada", descripcion: "Se creó o cambió una regla de aprobación de la empresa." },
+  { id: "core.regla_aprobacion.desactivada", descripcion: "Se desactivó una regla de aprobación de la empresa." },
+];

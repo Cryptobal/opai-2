@@ -1,0 +1,29 @@
+// Reglas de aprobación por empresa (CAR-252, ADR-106). Una regla dice qué acción necesita aprobación,
+// desde qué monto y quién la aprueba (un rol o un grupo de CAR-251). Con tenant_id y RLS
+// `tenant_isolation`. Se desactivan (`activa = false`), nunca se borran: una solicitud que la nombró
+// sigue sabiendo quién podía aprobarla.
+
+/// Regla de aprobación de la empresa. `accion` es una de ACCIONES_APROBABLES de @opai/domain.
+/// Exactamente uno de `aprobadorRol` o `aprobadorGrupoId` (CHECK en la migración).
+model ReglaAprobacion {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  accion           String
+  /// CLP enteros. null: toda la acción, sin importar el monto.
+  montoMinimo      BigInt?  @map("monto_minimo")
+  aprobadorRol     String?  @map("aprobador_rol")
+  aprobadorGrupoId String?  @map("aprobador_grupo_id") @db.Uuid
+  activa           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  // El grupo se valida con una FK compuesta (tenant_id, aprobador_grupo_id) solo en SQL: Prisma no
+  // admite una relación opcional sobre un campo obligatorio (tenant_id) y uno opcional.
+
+  @@unique([tenantId, id])
+  @@index([tenantId, accion])
+  @@index([tenantId, aprobadorGrupoId])
+  @@map("reglas_aprobacion")
+  @@schema("core")
+}
