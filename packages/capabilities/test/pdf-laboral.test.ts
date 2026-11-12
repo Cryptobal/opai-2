@@ -18,4 +18,13 @@ describe("PDF de documento laboral", () => {
     const { paginas } = await generarPdfLaboral({ titulo: "Largo", marca: { nombre: "X" }, parrafos: largo });
     expect(paginas).toBeGreaterThan(2);
   });
+  it("incrusta el logo PNG y sigue si el logo está dañado", async () => {
+    const png = Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==", "base64"));
+    const base = { titulo: "Carta", marca, parrafos: [[{ texto: "Hola", negrita: false, cursiva: false }]] };
+    const con = await generarPdfLaboral({ ...base, logo: { bytes: png, formato: "png" } });
+    const sin = await generarPdfLaboral(base);
+    expect(con.bytes.byteLength).toBeGreaterThan(sin.bytes.byteLength);
+    const roto = await generarPdfLaboral({ ...base, logo: { bytes: new Uint8Array([1, 2, 3]), formato: "png" } });
+    expect(Buffer.from(roto.bytes).subarray(0, 5).toString()).toBe("%PDF-");
+  });
 });

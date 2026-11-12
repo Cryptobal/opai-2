@@ -6,8 +6,10 @@ import { CANALES_SOLICITUD, ESTADOS_SOLICITUD, claveDuplicado } from "./solicitu
 import {
   PERMISO_SOLICITUDES_READ,
   idSolicitud,
+  horasPrimeraRespuesta,
   solicitudDe,
   solicitudSchema,
+  vistaConPlazo,
   vistaSolicitud,
 } from "./solicitudes-comun";
 import { nombresDeResponsables, solicitudConResponsableSchema } from "./solicitudes-responsables";
@@ -58,9 +60,11 @@ export const solicitudesList = defineCapability({
       ctx,
       items.map((x) => x.responsableId),
     );
+    const horas = await horasPrimeraRespuesta(ctx);
+    const ahora = new Date();
     return {
       items: items.map((x) => ({
-        ...vistaSolicitud(x),
+        ...vistaConPlazo(x, horas, ahora),
         responsableNombre: x.responsableId ? (nombres.get(x.responsableId) ?? null) : null,
       })),
       siguiente,
@@ -98,9 +102,10 @@ export const solicitudesGet = defineCapability({
         })
       : [];
     const nombres = await nombresDeResponsables(ctx, [s.responsableId]);
+    const horas = await horasPrimeraRespuesta(ctx);
     return {
       solicitud: {
-        ...vistaSolicitud(s),
+        ...vistaConPlazo(s, horas, new Date()),
         responsableNombre: s.responsableId ? (nombres.get(s.responsableId) ?? null) : null,
       },
       posiblesDuplicadas: posibles.map(vistaSolicitud),

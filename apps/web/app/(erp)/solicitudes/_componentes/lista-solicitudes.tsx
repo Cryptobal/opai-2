@@ -9,7 +9,7 @@ import { haceCuanto } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 
 import type { SolicitudDato } from "./datos";
-import { CANAL, ESTADO, quienRevisa } from "./etiquetas";
+import { CANAL, ESTADO, PLAZO, quienRevisa } from "./etiquetas";
 
 export const accionRegistrar = (
   <EnlaceBoton href="/solicitudes?nueva=1" icono={Plus}>
@@ -82,9 +82,16 @@ export function ListaSolicitudes(p: {
             .join(" · "),
           terciario: s.duplicadaDeId ? <span>Duplicada de otra solicitud</span> : undefined,
           fin: (
-            <Badge tono={ESTADO[s.estado].tono} punto={false}>
-              {ESTADO[s.estado].etiqueta}
-            </Badge>
+            <span className="flex flex-col items-end gap-1">
+              <Badge tono={ESTADO[s.estado].tono} punto={false}>
+                {ESTADO[s.estado].etiqueta}
+              </Badge>
+              {s.plazo && PLAZO[s.plazo.estado] ? (
+                <Badge tono={PLAZO[s.plazo.estado]?.tono ?? "neutro"} punto={false}>
+                  {PLAZO[s.plazo.estado]?.etiqueta}
+                </Badge>
+              ) : null}
+            </span>
           ),
         };
       })}
