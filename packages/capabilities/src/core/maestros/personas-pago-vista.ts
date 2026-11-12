@@ -1,18 +1,12 @@
 import { z } from "zod";
 
-import {
-  VALORES_TIPO_CUENTA_BANCARIA,
-  bancoPorCodigo,
-  codigoSbif,
-  etiquetaTipoCuenta,
-  nombreBanco,
-  tipoCuentaCanonico,
-} from "@opai/domain";
-
 import { cifradoDeCampos } from "../cumplimiento/cifrado-campos";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
+import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { enmascararCuenta, enmascararCuentaEnLectura } from "./personas-ficha-comun";
+import { catalogoDe } from "./personas-pago-catalogo";
+
+export { catalogoDe, exigirCatalogo } from "./personas-pago-catalogo";
 
 /** CAR-244: nombre del catálogo y señal de corrección para bancos o tipos guardados como texto libre. */
 const catalogoSchema = {
@@ -28,15 +22,21 @@ const catalogoSchema = {
     ),
 };
 
+const cuentaSchema = z.object({
+  bancoCodigo: z.string().nullable(),
+  tipoCuenta: z.string().nullable(),
+  numeroCuenta: z.string().nullable(),
+  rutTitular: z.string().nullable(),
+  titularNombre: z.string().nullable(),
+  ...catalogoSchema,
+});
+
 export const pagoVerSchema = z.object({
   personaId: z.string(),
-  vigente: z.object({
-    bancoCodigo: z.string().nullable(),
-    tipoCuenta: z.string().nullable(),
-    numeroCuenta: z.string().nullable(),
-    rutTitular: z.string().nullable(),
-    ...catalogoSchema,
-  }),
+  vigente: cuentaSchema.describe("La cuenta por defecto: la que usa la nómina de pago."),
+  cuentas: z
+    .array(cuentaSchema.extend({ id: z.string(), porDefecto: z.boolean() }))
+    .describe("Todas las cuentas de la persona; la por defecto va primero (CAR-275)."),
   solicitudPendiente: z
     .object({
       id: z.string(),
@@ -45,6 +45,10 @@ export const pagoVerSchema = z.object({
       tipoCuenta: z.string().nullable(),
       numeroCuenta: z.string().nullable(),
       rutTitular: z.string().nullable(),
+      titularNombre: z.string().nullable(),
+      tipo: z.enum(["reemplazar", "agregar", "marcar_defecto", "quitar"]),
+      cuentaId: z.string().nullable(),
+      porDefecto: z.boolean(),
       ...catalogoSchema,
       solicitadoPorId: z.string(),
       motivoRechazo: z.string().nullable(),
@@ -62,40 +66,33 @@ async function descifrarNumero(
   return cifradoDeCampos(ctx).descifrar(tabla, "numero_cuenta", guardado);
 }
 
-/** Lectura contra el catálogo; lo escrito a mano antes del selector se reconoce si se puede, pero queda por corregir. */
-export function catalogoDe(banco: string | null | undefined, tipo: string | null | undefined) {
-  const tipoCanon = tipoCuentaCanonico(tipo);
-  return {
-    bancoNombre: nombreBanco(codigoSbif(banco)),
-    tipoCuentaEtiqueta: etiquetaTipoCuenta(tipoCanon),
-    porCorregir: Boolean((banco && !bancoPorCodigo(banco)) || (tipo && tipoCanon !== tipo)),
-  };
-}
-
-/** Aprobar exige banco y tipo de cuenta del catálogo (la nómina de pago usa el código SBIF). */
-export function exigirCatalogo(s: { bancoCodigo: string | null; tipoCuenta: string | null }) {
-  if (
-    !bancoPorCodigo(s.bancoCodigo) ||
-    !VALORES_TIPO_CUENTA_BANCARIA.some((t) => t === s.tipoCuenta)
-  )
-    throw reglaDeNegocio(
-      "La solicitud tiene un banco o tipo de cuenta fuera del catálogo: recházala y registra una nueva.",
-    );
-}
-
 export async function vistaPago(ctx: Contexto, personaId: string) {
   const enmascarar = enmascararCuentaEnLectura(ctx);
-  const vigente = await ctx.db.personaPago.findUnique({ where: { personaId } });
+  const filas = await ctx.db.personaPago.findMany({
+    where: { personaId },
+    orderBy: [{ porDefecto: "desc" }, { createdAt: "asc" }],
+  });
   const pendiente = await ctx.db.personaPagoSolicitud.findFirst({
     where: { personaId, estado: "pendiente" },
     orderBy: { createdAt: "desc" },
   });
-  const numero = vigente?.numeroCuenta
-    ? enmascararCuenta(
-        await descifrarNumero(ctx, "personas_pago", vigente.numeroCuenta),
-        enmascarar,
-      )
-    : null;
+  const cuentas = [];
+  for (const f of filas) {
+    const numero = f.numeroCuenta
+      ? enmascararCuenta(await descifrarNumero(ctx, "personas_pago", f.numeroCuenta), enmascarar)
+      : null;
+    cuentas.push({
+      id: f.id,
+      porDefecto: f.porDefecto,
+      bancoCodigo: f.bancoCodigo,
+      tipoCuenta: f.tipoCuenta,
+      numeroCuenta: numero,
+      rutTitular: f.rutTitular,
+      titularNombre: f.titularNombre,
+      ...catalogoDe(f.bancoCodigo, f.tipoCuenta),
+    });
+  }
+  const vigente = cuentas.find((c) => c.porDefecto);
   const pendNum = pendiente?.numeroCuenta
     ? enmascararCuenta(
         await descifrarNumero(ctx, "personas_pago_solicitudes", pendiente.numeroCuenta),
@@ -107,18 +104,24 @@ export async function vistaPago(ctx: Contexto, personaId: string) {
     vigente: {
       bancoCodigo: vigente?.bancoCodigo ?? null,
       tipoCuenta: vigente?.tipoCuenta ?? null,
-      numeroCuenta: numero,
+      numeroCuenta: vigente?.numeroCuenta ?? null,
       rutTitular: vigente?.rutTitular ?? null,
+      titularNombre: vigente?.titularNombre ?? null,
       ...catalogoDe(vigente?.bancoCodigo, vigente?.tipoCuenta),
     },
+    cuentas,
     solicitudPendiente: pendiente
       ? {
           id: pendiente.id,
           estado: pendiente.estado,
+          tipo: pendiente.tipo as "reemplazar" | "agregar" | "marcar_defecto" | "quitar",
+          cuentaId: pendiente.cuentaId,
+          porDefecto: pendiente.porDefecto,
           bancoCodigo: pendiente.bancoCodigo,
           tipoCuenta: pendiente.tipoCuenta,
           numeroCuenta: pendNum,
           rutTitular: pendiente.rutTitular,
+          titularNombre: pendiente.titularNombre,
           ...catalogoDe(pendiente.bancoCodigo, pendiente.tipoCuenta),
           solicitadoPorId: pendiente.solicitadoPorId,
           motivoRechazo: pendiente.motivoRechazo ?? null,

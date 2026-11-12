@@ -29,7 +29,7 @@ export const importadorPersonas: Importador<DatosPersona> = {
   actualizables: [...CAMPOS_FICHA, ...CAMPOS_PREVISION, ...CAMPOS_PAGO],
   async planificar(ctx, filas, o) {
     const externos = await idsExternos(ctx, "persona", o.sistema, filas.map((f) => texto(f.datos["id_externo"]) ?? ""));
-    const personas = await ctx.db.persona.findMany({ include: { prevision: true, pago: true } });
+    const personas = await ctx.db.persona.findMany({ include: { prevision: true, pagos: { where: { porDefecto: true } } } });
     const porId = new Map(personas.map((p) => [p.id, p]));
     const porRut = new Map(personas.map((p) => [p.rut, p]));
     const puedePrevision = ctx.autorizar(PERMISOS_CORE.personasPrevisionManage);
@@ -55,7 +55,7 @@ export const importadorPersonas: Importador<DatosPersona> = {
       const base = { fila: f.fila, clave: `rut:${leidos.rut}`, etiqueta, idExterno };
       if (!existente) return { ...base, accion: "crear", mensajes: [], datos: leidos };
       // Con cuenta registrada, la importación no la toca aunque se pida sobrescribir.
-      const conCuenta = !!existente.pago && tiene(leidos, CAMPOS_PAGO);
+      const conCuenta = existente.pagos.length > 0 && tiene(leidos, CAMPOS_PAGO);
       return {
         ...base,
         accion: "actualizar",
@@ -96,7 +96,7 @@ export const importadorPersonas: Importador<DatosPersona> = {
     if (!Object.keys(pago).length) return;
     // Al revertir vuelven los tres campos en null: la cuenta que creó el lote se elimina.
     if (!pago.bancoCodigo || !pago.tipoCuenta || !pago.numeroCuenta) {
-      await tx.personaPago.deleteMany({ where: { personaId: id } });
+      await tx.personaPago.deleteMany({ where: { personaId: id, porDefecto: true } });
       return;
     }
     const cifrado = await cifrarCampoEnTransaccion(ctx, tx, "personas_pago", "numero_cuenta", pago.numeroCuenta);
