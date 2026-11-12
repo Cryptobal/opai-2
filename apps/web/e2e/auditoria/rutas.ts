@@ -57,7 +57,8 @@ export function rutasAuditables(): Ruta[] {
     const patron = `/${partes.filter((p) => !/^\(.+\)$/.test(p)).join("/")}`;
     if (FUERA.some((re) => re.test(patron))) continue;
     let portal: Portal | undefined = grupo ? PORTAL_DE_GRUPO[grupo] : undefined;
-    if (!portal) portal = patron.startsWith("/recuperar") || patron === "/login" ? "publico" : undefined;
+    if (!portal)
+      portal = patron.startsWith("/recuperar") || patron === "/login" ? "publico" : undefined;
     if (!portal) continue;
     const segmentos = patron.split("/").filter(Boolean);
     const sinPortal = ["cliente", "trabajador", "terreno"].includes(segmentos[0] ?? "")
@@ -75,8 +76,7 @@ export function rutasAuditables(): Ruta[] {
 
 /** Nombre de archivo estable para una ruta: `/cuentas/[id]/contactos` → `cuentas__id__contactos`. */
 export function slug(patron: string): string {
-  return (patron.replace(/^\//, "").replace(/[[\]]/g, "_").replace(/\//g, "__") || "inicio").replace(
-    /_+$/,
-    "",
-  );
+  return (
+    patron.replace(/^\//, "").replace(/[[\]]/g, "_").replace(/\//g, "__") || "inicio"
+  ).replace(/_+$/, "");
 }

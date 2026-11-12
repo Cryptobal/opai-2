@@ -1,6 +1,7 @@
 import { type Browser, test } from "@playwright/test";
 
-import { guardarInforme, recorrer } from "./auditoria/recorrer";
+import { emparejarTerreno, entrarTrabajador } from "./auditoria/identidades";
+import { type Fila, guardarInforme, recorrer } from "./auditoria/recorrer";
 import { type Portal, rutasAuditables } from "./auditoria/rutas";
 import { pasarProteccionDeVercel } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
@@ -18,6 +19,22 @@ const ANCHOS = [
 ] as const;
 
 const rutas = rutasAuditables();
+
+/** Fila del informe que anota por qué no se pudo crear la identidad de prueba de un portal. */
+const identidad = (portal: Portal, ancho: string, nota: string): Fila => ({
+  patron: "(identidad de prueba)",
+  portal,
+  modulo: "inicio",
+  dinamica: false,
+  ancho,
+  url: null,
+  final: null,
+  estado: null,
+  captura: null,
+  nota,
+  errores: [],
+  medicion: null,
+});
 const DE_PORTAL: Portal[] = ["cliente", "guardia", "terreno", "publico"];
 
 async function contexto(browser: Browser, ancho: (typeof ANCHOS)[number], hilo: boolean) {
@@ -39,7 +56,10 @@ async function contexto(browser: Browser, ancho: (typeof ANCHOS)[number], hilo: 
 
 test.describe("@auditoria diseño Hilo", () => {
   test.describe.configure({ mode: "parallel" });
-  test.skip(!process.env["AUDITORIA_DISENO"], "Solo en el workflow auditoria-diseno (AUDITORIA_DISENO=1)");
+  test.skip(
+    !process.env["AUDITORIA_DISENO"],
+    "Solo en el workflow auditoria-diseno (AUDITORIA_DISENO=1)",
+  );
 
   ANCHOS.forEach((ancho, i) => {
     test(`ERP a ${ancho.nombre} px`, async ({ browser }, info) => {
@@ -73,6 +93,49 @@ test.describe("@auditoria diseño Hilo", () => {
       guardarInforme(`portales-${ancho.nombre}`, filas);
       await ctx.close();
     });
+  });
+
+  // Guardia (trabajador) y Terreno con identidades creadas en la vista previa por el dueño de qa-e2e.
+  test("Guardia y Terreno con identidades de prueba", async ({ browser }, info) => {
+    test.skip(info.project.name !== "desktop" || !E2E_PASSWORD, "Una sola corrida, con sesión");
+    test.setTimeout(40 * 60_000);
+    const erp = await contexto(browser, ANCHOS[0], false);
+    await erp.page.waitForTimeout(64_000);
+    await entrar(erp.page);
+    for (const ancho of ANCHOS) {
+      const terreno = await contexto(browser, ancho, false);
+      const notaT = await emparejarTerreno(erp.page, terreno.page).catch((e) =>
+        String(e).slice(0, 120),
+      );
+      const filasT = await recorrer(
+        terreno.page,
+        rutas.filter((r) => r.portal === "terreno" && r.patron !== "/terreno/emparejar"),
+        ancho.nombre,
+        ancho.telefono,
+      );
+      guardarInforme(
+        `terreno-${ancho.nombre}`,
+        notaT ? [identidad("terreno", ancho.nombre, notaT), ...filasT] : filasT,
+      );
+      await terreno.ctx.close();
+
+      const guardia = await contexto(browser, ancho, false);
+      const notaG = await entrarTrabajador(erp.page, guardia.page).catch((e) =>
+        String(e).slice(0, 120),
+      );
+      const filasG = await recorrer(
+        guardia.page,
+        rutas.filter((r) => r.portal === "guardia" && r.patron !== "/trabajador/login"),
+        ancho.nombre,
+        ancho.telefono,
+      );
+      guardarInforme(
+        `guardia-${ancho.nombre}`,
+        notaG ? [identidad("guardia", ancho.nombre, notaG), ...filasG] : filasG,
+      );
+      await guardia.ctx.close();
+    }
+    await erp.ctx.close();
   });
 
   // Portal Cliente con el contacto prospecto de `qa-e2e`, si existen sus secretos (CAR-300).

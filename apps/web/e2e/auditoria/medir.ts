@@ -29,7 +29,9 @@ export async function medir(page: Page, telefono: boolean): Promise<Omit<Medicio
       };
       const fueraDeDialogo = (el: Element) => !el.closest('[role="dialog"],[role="alertdialog"]');
       const nombre = (el: Element) =>
-        (el.getAttribute("aria-label") ?? (el as HTMLElement).innerText ?? "").trim().replace(/\s+/g, " ");
+        (el.getAttribute("aria-label") ?? (el as HTMLElement).innerText ?? "")
+          .trim()
+          .replace(/\s+/g, " ");
       const raiz = document.querySelector("main") ?? document.body;
 
       const primarios = [...document.querySelectorAll(".ds-primario")]
@@ -45,10 +47,19 @@ export async function medir(page: Page, telefono: boolean): Promise<Omit<Medicio
       const repetidos = [...cuenta].filter(([, c]) => c > 1).map(([n, c]) => `${n} ×${c}`);
 
       const pequenos = telefono
-        ? [...raiz.querySelectorAll("button, input, select, textarea, [role='tab'], [role='button']")]
+        ? [
+            ...raiz.querySelectorAll(
+              "button, input, select, textarea, [role='tab'], [role='button']",
+            ),
+          ]
             .filter((el) => visible(el) && el.getBoundingClientRect().height < 43.5)
-            .filter((el) => !(el instanceof HTMLInputElement && ["checkbox", "radio"].includes(el.type)))
-            .map((el) => `${nombre(el) || el.tagName.toLowerCase()} (${Math.round(el.getBoundingClientRect().height)} px)`)
+            .filter(
+              (el) => !(el instanceof HTMLInputElement && ["checkbox", "radio"].includes(el.type)),
+            )
+            .map(
+              (el) =>
+                `${nombre(el) || el.tagName.toLowerCase()} (${Math.round(el.getBoundingClientRect().height)} px)`,
+            )
             .slice(0, 12)
         : [];
 
