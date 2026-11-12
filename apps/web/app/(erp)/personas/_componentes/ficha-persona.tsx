@@ -56,7 +56,7 @@ export function FichaPersona(x: {
               ),
               subtitulo: (
                 <>
-                  {[p.vinculoVigente?.cargo ?? "Sin vínculo vigente", p.vinculoVigente?.instalacion].filter(Boolean).join(" · ")} ·{" "}
+                  {[p.vinculoVigente?.cargo ?? "Sin vínculo vigente", (p.vinculoVigente as { instalacion?: string | null } | null)?.instalacion].filter(Boolean).join(" · ")} ·{" "}
                   <span className="t-mono">{rut(p.rut)}</span>
                 </>
               ),

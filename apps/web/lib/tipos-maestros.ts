@@ -107,7 +107,6 @@ export type VinculoResumen = {
   tipo: string;
   inicio: string;
   termino: string | null;
-  instalacion?: string | null | undefined;
 };
 export type Persona = {
   id: string;
