@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 714 pares pantalla→capacidad · 640 con herramienta · 74 excepciones justificadas · 0 faltantes.
+**Resumen:** 718 pares pantalla→capacidad · 644 con herramienta · 74 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -33,6 +33,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
+| cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
+| cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
@@ -136,6 +139,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.rechazar` | `rendiciones_rendiciones_rechazar` | existe |
 | compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
+| compartido | `app/(cliente)/cliente/cotizaciones/_componentes` | `cpq.portal_cotizaciones.descargar` | `cpq_portal_cotizaciones_descargar` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
@@ -1036,9 +1040,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
-- `cpq.portal_cotizaciones.descargar`
-- `cpq.portal_cotizaciones.get`
-- `cpq.portal_cotizaciones.list`
 - `cpq.propuestas_html.get`
 - `cpq.propuestas_html.importar`
 - `cpq.propuestas_html.list`
@@ -1072,7 +1073,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
-- `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.reasignar`

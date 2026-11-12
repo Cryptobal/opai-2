@@ -21,6 +21,8 @@ function mesActual(timezone: string, ahora: Date): string {
 const perfilSchema = z.object({
   cuentaId: z.string(),
   cuentaNombre: z.string(),
+  /** «limitado»: prospecto que solo ve su propuesta (CAR-300); «completo»: el portal entero. */
+  alcance: z.enum(["completo", "limitado"]),
   /** true si el contacto ve solo algunas de las instalaciones de su cuenta. */
   limitado: z.boolean(),
   instalaciones: z.array(z.object({ id: z.string(), nombre: z.string(), direccion: z.string().nullable() })),
@@ -33,7 +35,7 @@ const perfilSchema = z.object({
 export const miAcceso = defineCapability({
   id: "portal_cliente.mi_acceso",
   descripcion:
-    "Muestra a un contacto del cliente su cuenta, las instalaciones que puede ver y lo que su empresa de seguridad dejó visible en el portal. Sin un acceso activo responde que no tiene perfil.",
+    "Muestra a un contacto del cliente su cuenta, las instalaciones que puede ver y lo que su empresa de seguridad dejó visible en el portal. Un prospecto entra con alcance limitado y solo ve su propuesta. Sin un acceso activo responde que no tiene perfil.",
   permiso: "portal_cliente:read",
   input: z.object({}),
   output: perfilSchema,
@@ -41,12 +43,13 @@ export const miAcceso = defineCapability({
   dryRun: false,
   portales: ["cliente"],
   async handler(ctx) {
-    const a = await accesoDelActor(ctx);
+    const a = await accesoDelActor(ctx, { permitirLimitado: true });
     const { config } = await configDeCuenta(ctx, a.cuentaId);
     const total = await ctx.db.instalacion.count({ where: { cuentaId: a.cuentaId, estado: "activa", archivadaEn: null } });
     return {
       cuentaId: a.cuentaId,
       cuentaNombre: a.cuentaNombre,
+      alcance: a.alcance,
       limitado: !a.todasInstalaciones && a.instalacionIds.length < total,
       instalaciones: a.instalaciones.map((i) => ({
         id: i.id,

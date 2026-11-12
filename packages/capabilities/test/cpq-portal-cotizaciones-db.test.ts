@@ -184,4 +184,11 @@ describe.skipIf(!urlPropietario)("cpq · cotizaciones en el Portal Cliente en ba
     await e.admin.accesoCliente.update({ where: { id: pz.acceso }, data: { estado: "activo" } });
     await e.admin.cuenta.update({ where: { id: cuentaZ }, data: { estado: "prospecto" } });
   });
+
+  it("mi_acceso deja entrar al prospecto y le informa su alcance «limitado» (CAR-300)", async () => {
+    const r = await comoContacto<{ limitado: boolean; alcance: string }>(t.a, prospecto, "portal_cliente.mi_acceso", {});
+    expect(r.ok && r.data.alcance).toBe("limitado");
+    const c = await comoContacto<{ alcance: string }>(t.a, contacto, "portal_cliente.mi_acceso", {});
+    expect(c.ok && c.data.alcance).toBe("completo");
+  });
 });
