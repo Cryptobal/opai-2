@@ -121,7 +121,7 @@ export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./c
 export { camposExternos, externo } from "./externo";
 export { biometriaDe, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
-export { comoAgenteInterno } from "./agentes/interno";
+export { comoAgenteInterno, comoAppOAuth } from "./agentes/interno";
 export {
   iaElegidaDelAgente,
   modelosDelAgente,

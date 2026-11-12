@@ -122,6 +122,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|manifest.webmanifest|sw.js|sw-cola.js|sw-cola-bd.js|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
+    "/((?!api|\\.well-known|manifest.webmanifest|sw.js|sw-cola.js|sw-cola-bd.js|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };

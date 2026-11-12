@@ -48,6 +48,10 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/_acciones/auth.ts#accionRestablecer":
     "Identidad: restablece la contraseña con el token del correo.",
   "app/_acciones/mfa.ts#accionVerificar": "Identidad: segundo factor de la sesión humana.",
+  "app/_acciones/oauth.ts#accionAutorizarOAuth":
+    "Identidad: la persona autoriza a una app a entrar por OAuth con su cuenta (CAR-247).",
+  "app/_acciones/oauth.ts#accionElegirEmpresaOAuth":
+    "Identidad: la persona elige la empresa con la que entra la app por OAuth (CAR-247).",
   "app/_acciones/mfa.ts#accionIniciarMfa": "Identidad: enrola el segundo factor propio.",
   "app/_acciones/mfa.ts#accionConfirmarMfa":
     "Identidad: confirma el enrolamiento del segundo factor.",
@@ -111,6 +115,14 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas.",
   // Infraestructura: sin datos de negocio.
   "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
+  "app/.well-known/oauth-protected-resource/route.ts":
+    "Metadatos públicos del recurso protegido /api/mcp (RFC 9728, CAR-247): identidad, sin datos de negocio.",
+  "app/.well-known/oauth-protected-resource/api/mcp/route.ts":
+    "Los mismos metadatos en la ruta del recurso /api/mcp (RFC 9728, CAR-247).",
+  "app/.well-known/oauth-authorization-server/route.ts":
+    "Metadatos del servidor de autorización de Better Auth (RFC 8414, CAR-247): identidad.",
+  "app/.well-known/oauth-authorization-server/api/auth/route.ts":
+    "Los mismos metadatos en la ruta del emisor /api/auth (RFC 8414, CAR-247).",
   "app/api/cron/programador/route.ts":
     "Cron (CRON_SECRET): encola trabajos; no es una acción de pantalla (ADR-029).",
   "app/api/cron/trabajos/route.ts": "Cron (CRON_SECRET): ejecuta la cola de trabajos (ADR-029).",
