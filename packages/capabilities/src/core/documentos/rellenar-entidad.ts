@@ -38,6 +38,8 @@ export const documentoPlantillasRellenarEntidad = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
+  // Revela datos de la cuenta o la instalación: se audita su ID, sin el texto ni los valores.
+  auditarLectura: (s) => [s.entidad.id],
   async handler(ctx, input) {
     const { entidad, plantilla, version, relleno, faltantes } = await calcularRellenoEntidad(ctx, input);
     return {
