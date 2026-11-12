@@ -8,6 +8,7 @@ Un archivo por capa o módulo. En cada uno: qué hace hoy (con rutas de código)
 
 - Se revisó **modelo de datos, capacidades, permisos y rutas** leyendo el código. No se ejecutó la aplicación ni se recorrieron pantallas: el aspecto y la usabilidad los audita la Sesión Diseño (PR #584, `auditoria-diseno/`).
 - Lo que no se pudo confirmar en el código queda marcado **«por verificar»** y no cuenta como brecha hasta confirmarlo.
+- Un revisor independiente contrastó cada afirmación con el código antes de cerrar: confirmó 8 de las 10 brechas altas tal cual, precisó P-3 y corrigió la evidencia de N-2; dos puntos que estaban «por verificar» resultaron ya resueltos en el producto (vencimientos de documentos y tablero del día de asistencia) y se retiraron.
 - No repite la [auditoría de salud del Núcleo](../auditoria-nucleo-2026-11-06.md) (seguridad, RLS, paridad). Aquí la pregunta es otra: ¿se parece a como lo resuelven los mejores?
 
 ## Gravedad
@@ -24,11 +25,11 @@ Un archivo por capa o módulo. En cada uno: qué hace hoy (con rutas de código)
 | Capa o módulo | Archivo | Críticas | Altas | Medias | Recomendación |
 |---|---|---|---|---|---|
 | Permisos y roles | [permisos.md](permisos.md) | 0 | 3 | 3 | Ajustar |
-| Núcleo (multi-tenant, API, MCP, IA) | [nucleo.md](nucleo.md) | 0 | 2 | 5 | Ajustar |
+| Núcleo (multi-tenant, API, MCP, IA) | [nucleo.md](nucleo.md) | 0 | 2 | 4 | Ajustar |
 | Comercial (CRM y CPQ) | [comercial.md](comercial.md) | 0 | 0 | 4 | Mantener |
 | Finanzas | [finanzas.md](finanzas.md) | 0 | 1 | 2 | Mantener y completar |
-| Personas | [personas.md](personas.md) | 0 | 1 | 3 | Ajustar |
-| Operaciones | [operaciones.md](operaciones.md) | 0 | 1 | 2 | Ajustar |
+| Personas | [personas.md](personas.md) | 0 | 1 | 2 | Ajustar |
+| Operaciones | [operaciones.md](operaciones.md) | 0 | 1 | 1 | Ajustar |
 | Terreno | [terreno.md](terreno.md) | 0 | 0 | 2 | Mantener |
 | Portales | [portales.md](portales.md) | 0 | 2 | 1 | Completar |
 
@@ -42,12 +43,12 @@ Un archivo por capa o módulo. En cada uno: qué hace hoy (con rutas de código)
 | P-2 | Permisos | Un miembro tiene un solo rol y los grupos no reciben roles | [CAR-359](https://linear.app/carlos-irigoyen/issue/CAR-359) |
 | P-3 | Permisos | Llaves de agente con alcance `*` y herencia completa por defecto | [CAR-351](https://linear.app/carlos-irigoyen/issue/CAR-351) |
 | N-1 | Núcleo | No hay eventos salientes (webhooks) para la empresa | [CAR-352](https://linear.app/carlos-irigoyen/issue/CAR-352) |
-| N-2 | Núcleo | Las listas paginan de dos formas distintas | [CAR-353](https://linear.app/carlos-irigoyen/issue/CAR-353) |
+| N-2 | Núcleo | Las listas no comparten un contrato: unas paginan, otras devuelven todo o cortan | [CAR-353](https://linear.app/carlos-irigoyen/issue/CAR-353) |
 | F-1 | Finanzas | No hay libro contable de partida doble ni candado de mes | [CAR-354](https://linear.app/carlos-irigoyen/issue/CAR-354) |
 | H-1 | Personas | El ingreso y la salida de una persona no son un proceso con pasos | [CAR-355](https://linear.app/carlos-irigoyen/issue/CAR-355) |
 | O-1 | Operaciones | La pauta no tiene «borrador» y «publicada», ni avisa al trabajador | [CAR-356](https://linear.app/carlos-irigoyen/issue/CAR-356) |
 | R-1 | Portales | El trabajador no ve sus turnos, documentos ni puede pedir cambios | [CAR-357](https://linear.app/carlos-irigoyen/issue/CAR-357) |
-| R-2 | Portales | El cliente solo ve cotizaciones | [CAR-358](https://linear.app/carlos-irigoyen/issue/CAR-358) |
+| R-2 | Portales | El cliente solo ve cotizaciones; las secciones de su servicio están vacías | [CAR-358](https://linear.app/carlos-irigoyen/issue/CAR-358) |
 
 ## Decisiones de producto o negocio para Carlos
 

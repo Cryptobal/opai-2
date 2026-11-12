@@ -4,7 +4,7 @@
 
 ## Qué hace hoy
 
-- **Rutas propias de terreno**: inicio, marcar, portería, rondas, novedades y cola (`apps/web/app/(terreno)/`).
+- **Rutas propias de terreno**: inicio, marcar, portería, rondas y cola (`apps/web/app/(terreno)/`); el reporte de una novedad operativa se hace desde el inicio. La ruta «novedades» es la de novedades del producto.
 - **Dispositivo emparejado y credencial de terreno** (`Dispositivo`, `CodigoEmparejamiento`, `CredencialTerreno`, `packages/db/prisma/schema/terreno.prisma`).
 - **Cola sin conexión** en el teléfono y envío por lote al volver (`apps/web/lib/terreno/cola.ts`, `apps/web/app/api/terreno/lote/`), con hechos idempotentes (`HechoTerreno`).
 - **Marcación con rostro o PIN** y enrolamiento con consentimiento (`EnrolamientoBiometrico`, `asistencia.rostro.*`).
@@ -20,8 +20,8 @@ Connecteam: marcación con geocerca, formularios y listas de control con foto y 
 
 | # | Brecha | Evidencia | Gravedad | Recomendación |
 |---|---|---|---|---|
-| T-1 | **Formularios y listas de control a medida.** Las rondas tienen plantillas de puntos; no se encontró un formulario genérico que la empresa arme (entrega de turno, revisión de equipo) con foto y firma. | `PlantillaRonda`, `PlantillaPunto`; por verificar | Media, por verificar | Ajustar cuando entre la segunda vertical (aseo, mantenimiento) |
-| T-2 | **«Mi día» del trabajador en terreno.** La app parte de la acción (marcar, ronda); no se confirmó una vista de lo que le toca hoy. | `apps/web/app/(terreno)/terreno/`; por verificar en pantalla | Media, por verificar | Va junto con R-1 de Portales |
+| T-1 | **Formularios y listas de control a medida.** Las rondas tienen plantillas de puntos; no hay un formulario genérico que la empresa arme (entrega de turno, revisión de equipo) con foto y firma. | `schema/rondas.prisma`, `tickets.prisma`, `terreno.prisma` | Media | Ajustar cuando entre la segunda vertical (aseo, mantenimiento) |
+| T-2 | **«Mi día» del trabajador en terreno.** La app parte de la acción (marcar, ronda); el inicio no muestra el turno ni la pauta del día. | `apps/web/app/(terreno)/terreno/page.tsx` | Media | Va junto con R-1 de Portales |
 
 ## Qué se mantiene tal cual
 

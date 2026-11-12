@@ -27,7 +27,7 @@ HubSpot y Salesforce: objetos asociados, embudos con reglas por etapa, propiedad
 | C-1 | **Propiedades a medida.** Los campos de cuenta, contacto y negocio salen de un catálogo en código (`packages/domain/src/campos/catalogo-*.ts`); una empresa no puede agregar un campo propio. | `core.campos.catalogo`, `core.campos.valores` | Media | Ajustar: campos definidos por empresa sobre el mismo catálogo |
 | C-2 | **Vistas guardadas.** Los filtros viven en la dirección de la página; no se encontró guardar una vista ni compartirla. | Sin capacidades `*.vistas.*` | Media | Ajustar: patrón del Núcleo para todas las listas, no solo Comercial |
 | C-3 | **Fusión de duplicados.** Se detectan solicitudes duplicadas, pero no se encontró fusionar dos cuentas o dos contactos. | `comercial.solicitudes.buscar_duplicadas`; sin capacidades de fusión | Media | Ajustar: fusión con vista previa y reversión |
-| C-4 | **Varios embudos.** El modelo admite más de uno (`Embudo.porDefecto`), pero las capacidades de configuración solo manejan etapas. | `comercial.config.*`; por verificar en pantalla | Media, por verificar | Ajustar cuando entre la segunda vertical |
+| C-4 | **Un solo embudo.** El modelo admite más de uno (`Embudo.porDefecto`), pero el segundo solo se puede crear por siembra: las capacidades `comercial.config.*` manejan las etapas del embudo por defecto. | `packages/capabilities/src/comercial/`, `packages/db/src/catalogo-comercial.ts` | Media | Ajustar cuando entre la segunda vertical |
 
 ## Qué se mantiene tal cual
 
