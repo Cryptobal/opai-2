@@ -1,10 +1,10 @@
+import type { ReactNode } from "react";
+
 import { cn } from "../cn";
 import { Menu as IconoMenu } from "lucide-react";
 import type { ItemMenu } from "../components/menu";
 import type { ItemFijado } from "./fijados";
 import { MenuMas } from "./menu-mas";
-import { BotonFijarMenu, type PlegableRiel } from "./nuevo/botones-menu";
-export type { PlegableRiel } from "./nuevo/botones-menu";
 import { Contador } from "./contador";
 import type { NavProps } from "./nav";
 import { PortalSwitcher } from "./portal-switcher";
@@ -46,9 +46,7 @@ function ItemRiel({
           <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
           {sinContador ? null : <Contador n={item.alerta ? item.contador : undefined} />}
         </span>
-        <span lang="es" className="w-full hyphens-auto wrap-normal text-center">
-          {item.corta ?? item.etiqueta}
-        </span>
+        <span lang="es" className="w-full hyphens-auto wrap-normal text-center">{item.corta ?? item.etiqueta}</span>
       </Link>
     </li>
   );
@@ -66,9 +64,8 @@ export type RailProps = NavProps & {
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
   onNavegar?: (href: string) => void;
-  /** Diseño nuevo (ADR-109): con el menú plegado el riel también se ve en escritorio, se asoma el
-   *  menú completo al pasar el mouse y arriba hay un botón para dejarlo fijo. */
-  plegable?: PlegableRiel | undefined;
+  /** Diseño nuevo (ADR-109): «Dejar el menú fijo» arriba del riel con el menú plegado. */
+  boton?: ReactNode;
 };
 
 /**
@@ -84,31 +81,15 @@ export function Rail({
   portalActual,
   tenant,
   empresas,
-  fijados,
-  errorFijados,
-  reintentarFijados,
-  onDesfijar,
-  onNavegar,
-  plegable,
+  fijados, errorFijados, reintentarFijados, onDesfijar, onNavegar, boton,
 }: RailProps) {
   return (
     <nav
       aria-label="Principal"
-      onPointerEnter={
-        plegable ? (e) => e.pointerType === "mouse" && plegable.onAsomar() : undefined
-      }
-      aria-hidden={plegable?.tapado ? true : undefined}
-      inert={plegable?.tapado ? true : undefined}
-      className={cn(
-        "sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex",
-        !plegable?.plegado && "lg:hidden",
-      )}
+      data-shell="riel"
+      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex lg:hidden"
     >
-      {plegable?.plegado ? (
-        <span className="mb-2">
-          <BotonFijarMenu onFijar={plegable.onFijar} />
-        </span>
-      ) : null}
+      {boton ? <span className="mb-2">{boton}</span> : null}
       <PortalSwitcher
         portales={portales}
         portalActual={portalActual}
@@ -125,26 +106,7 @@ export function Rail({
           ))}
       </ul>
       <ul className="mt-auto flex w-full flex-col gap-1">
-        {fijados ? (
-          <li className="w-16">
-            <MenuMas
-              items={items}
-              extras={[]}
-              rutaActual={rutaActual}
-              fijados={fijados}
-              {...(errorFijados ? { errorFijados } : {})}
-              {...(reintentarFijados ? { reintentarFijados } : {})}
-              {...(onDesfijar ? { onDesfijar } : {})}
-              {...(onNavegar ? { onNavegar } : {})}
-              disparador={
-                <span className="flex flex-col items-center text-[11px]">
-                  <IconoMenu className="size-5" />
-                  Más
-                </span>
-              }
-            />
-          </li>
-        ) : null}
+        {fijados ? <li className="w-16"><MenuMas items={items} extras={[]} rutaActual={rutaActual} fijados={fijados} {...(errorFijados ? { errorFijados } : {})} {...(reintentarFijados ? { reintentarFijados } : {})} {...(onDesfijar ? { onDesfijar } : {})} {...(onNavegar ? { onNavegar } : {})} disparador={<span className="flex flex-col items-center text-[11px]"><IconoMenu className="size-5" />Más</span>} /></li> : null}
         {items
           .filter((i) => i.pie)
           .map((item) => (

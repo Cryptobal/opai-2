@@ -1,13 +1,9 @@
 "use client";
 
-import { PanelLeftClose } from "lucide-react";
-import { lazy, Suspense } from "react";
-
-import { cn } from "../cn";
+import { lazy, type ReactNode, Suspense } from "react";
 
 import type { ItemMenu } from "../components/menu";
 import type { ItemFijado } from "./fijados";
-import { BotonFijarMenu } from "./nuevo/botones-menu";
 import { PortalSwitcher } from "./portal-switcher";
 import { GrupoNav } from "./sidebar-grupos";
 import { agrupar, Item, Pie } from "./sidebar-item";
@@ -39,24 +35,13 @@ type SidebarProps = {
   onDesfijar?: ((href: string) => void) | undefined;
   areaAbierta?: string | null | undefined;
   onAreaAbierta?: ((area: string) => void) | undefined;
-  /** Diseño nuevo (ADR-109): menú plegable que se asoma sobre la página. */
-  plegable?: PlegableSidebar | undefined;
-};
-
-export type PlegableSidebar = {
-  /** Plegado: no se ve; con `asomado`, flota sobre la página hasta que el mouse sale. */
-  plegado: boolean;
-  asomado: boolean;
-  onPlegar: () => void;
-  onEsconder: () => void;
-  /** En el menú asomado: lo deja fijo (el botón del riel queda tapado por el menú). */
-  onFijar: () => void;
+  /** Diseño nuevo (ADR-109): botón de la cabecera para ocultar el menú o dejarlo fijo. */
+  boton?: ReactNode;
 };
 
 /** Desktop: acordeón D1 en ERP; secciones planas si no hay `onAreaAbierta`. */
 export function Sidebar(props: SidebarProps) {
   const { items, rutaActual, Link = LinkPorDefecto } = props;
-  const p = props.plegable;
   const grupos = agrupar(items.filter((i) => !i.pie));
   const abierto = props.areaAbierta ?? null;
   const fijadosHrefs = new Set((props.fijados ?? []).map((f) => f.href));
@@ -67,32 +52,13 @@ export function Sidebar(props: SidebarProps) {
   return (
     <nav
       aria-label="Principal"
-      onMouseLeave={p?.asomado ? p.onEsconder : undefined}
-      className={cn(
-        "top-0 h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface",
-        !p && "sticky hidden lg:flex",
-        p && !p.asomado && (p.plegado ? "hidden" : "sticky hidden lg:flex"),
-        p?.asomado && "fixed inset-y-0 left-0 z-40 flex shadow-overlay",
-      )}
+      data-shell="sidebar"
+      className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface lg:flex"
     >
       <div className="flex flex-none flex-col gap-3 px-3 pt-3.5 pb-1">
         <span className="flex items-center justify-between px-2">
           <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
-          {p && !p.plegado ? (
-            <button
-              type="button"
-              onClick={p.onPlegar}
-              aria-label="Ocultar el menú"
-              title="Ocultar el menú"
-              className="-mr-1 hidden size-9 items-center lg:flex justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus"
-            >
-              <PanelLeftClose className="size-[18px]" aria-hidden />
-            </button>
-          ) : p?.asomado ? (
-            <BotonFijarMenu onFijar={p.onFijar} />
-          ) : (
-            <span className="t-caption">2.0</span>
-          )}
+          {props.boton ?? <span className="t-caption">2.0</span>}
         </span>
         <PortalSwitcher
           portales={props.portales}
@@ -138,7 +104,12 @@ export function Sidebar(props: SidebarProps) {
             <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}
       </div>
-      {props.usuario ? <Pie usuario={props.usuario} menu={props.menuUsuario} /> : null}
+      {props.usuario ? (
+        <Pie
+          usuario={props.usuario}
+          menu={props.menuUsuario}
+        />
+      ) : null}
     </nav>
   );
 }
