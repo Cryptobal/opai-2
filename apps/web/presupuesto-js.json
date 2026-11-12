@@ -78,7 +78,7 @@
     "/(supervisor)/supervisor/rendiciones/nueva/kilometraje": 184,
     "/(supervisor)/supervisor/rendiciones/[id]/corregir": 194,
     "/(erp)/rendiciones/lotes": 174,
-    "/(erp)/rendiciones/lotes/[id]": 174,
+    "/(erp)/rendiciones/lotes/[id]": 175,
     "/(erp)/rendiciones/nueva/compra": 187,
     "/(erp)/rendiciones/nueva/kilometraje": 184,
     "/(erp)/rendiciones/[id]/corregir": 194,
