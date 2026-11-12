@@ -134,11 +134,8 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
   });
 
   it("un contacto archivado después de programar no recibe el borrador", async () => {
-    const c3 = (
-      await s.e.admin.contacto.create({
-        data: { tenantId: s.tenantId, cuentaId: s.cuentaId, nombres: "Leo", apellidos: "Ficticio", email: "ex@cliente-ficticio.test", roles: ["facturacion"] },
-      })
-    ).id;
+    const datos = { tenantId: s.tenantId, cuentaId: s.cuentaId, nombres: "Leo", apellidos: "Ficticio", roles: ["facturacion"] };
+    const c3 = (await s.e.admin.contacto.create({ data: { ...datos, email: "ex@cliente-ficticio.test" } })).id;
     const p = await s.dato<{ id: string }>("finanzas.ventas_programacion.crear", base({ destinatarioIds: [c1, c3] }));
     await s.e.admin.contacto.update({ where: { id: c3 }, data: { archivadoEn: new Date() } });
     await s.dato("finanzas.ventas_programacion.cambiar_estado", { programacionId: p.id, activa: true });
