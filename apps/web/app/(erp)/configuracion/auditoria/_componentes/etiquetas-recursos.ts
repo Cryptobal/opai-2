@@ -45,4 +45,6 @@ export const RECURSOS: Record<string, string> = {
   importar: "Importación de datos",
   // Indicadores de gestión de las personas (CAR-305, ADR-094).
   indicadores_gestion: "Indicadores de gestión",
+  // Hilo del marco «Hilo»: actividad y agenda (CAR-331).
+  hilo: "Hilo",
 };

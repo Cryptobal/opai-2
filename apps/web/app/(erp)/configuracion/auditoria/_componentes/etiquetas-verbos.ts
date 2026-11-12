@@ -94,4 +94,6 @@ export const VERBOS: Record<string, string> = {
   // Indicadores de gestión (CAR-305).
   medir: "Medir",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
+  // Hilo (CAR-331).
+  actividad: "Ver actividad", agenda: "Ver agenda",
 };
