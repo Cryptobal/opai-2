@@ -1,4 +1,4 @@
-import { Button, Campo, Combobox, Input, Switch } from "@opai/ds";
+import { Alerta, Button, Campo, Combobox, Input, Switch } from "@opai/ds";
 
 import type { Destinos, EleccionFila, SugerenciaRegla } from "./destinos";
 
@@ -8,12 +8,16 @@ import type { Destinos, EleccionFila, SugerenciaRegla } from "./destinos";
  */
 export function PanelFilaFlujo({
   esAbono,
+  sinDestinos,
+  onReintentar,
   destinos,
   reglas,
   eleccion,
   onEleccion,
 }: {
   esAbono: boolean;
+  sinDestinos: boolean;
+  onReintentar: () => void;
   destinos: Destinos | null;
   reglas: SugerenciaRegla[];
   eleccion: EleccionFila;
@@ -22,6 +26,22 @@ export function PanelFilaFlujo({
   const seccion = esAbono ? "ingreso" : "egreso";
   const filas = (destinos?.filas ?? []).filter((f) => f.seccion === seccion);
   const set = (p: Partial<EleccionFila>) => onEleccion({ ...eleccion, ...p });
+  if (sinDestinos) {
+    return (
+      <Alerta tono="danger" titulo="No pudimos cargar las filas del flujo">
+        <Button variant="secondary" onClick={onReintentar}>
+          Reintentar
+        </Button>
+      </Alerta>
+    );
+  }
+  if (destinos && filas.length === 0) {
+    return (
+      <Alerta tono="info" titulo={`No hay filas de ${esAbono ? "ingresos" : "egresos"} en el flujo de caja`}>
+        Créalas en Finanzas › Flujo de caja y vuelve a reconocer este movimiento.
+      </Alerta>
+    );
+  }
   return (
     <div className="flex flex-col gap-4">
       {reglas.length ? (

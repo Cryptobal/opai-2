@@ -15,6 +15,7 @@ export function useReconocerFila(ejecutar: Ejecutar, abierta: boolean, glosa: st
   const [modo, setModo] = useState<ModoReconocer>("documentos");
   const [reglas, setReglas] = useState<SugerenciaRegla[]>([]);
   const [destinos, setDestinos] = useState<Destinos | null>(null);
+  const [sinDestinos, setSinDestinos] = useState(false);
   const [eleccion, setEleccion] = useState<EleccionFila>(() => eleccionInicial(glosa));
 
   const alSugerir = useCallback((r: SugerenciaRegla[], hayDocumentos: boolean) => {
@@ -27,17 +28,20 @@ export function useReconocerFila(ejecutar: Ejecutar, abierta: boolean, glosa: st
   }, []);
 
   useEffect(() => {
-    if (!abierta || modo !== "fila" || destinos) return;
+    if (!abierta || modo !== "fila" || destinos || sinDestinos) return;
     let cancel = false;
     void ejecutar<Destinos>("finanzas.bancos.destinos", {}).then((d) => {
-      if (!cancel && d) setDestinos(d);
+      if (cancel) return;
+      if (d) setDestinos(d);
+      else setSinDestinos(true);
     });
     return () => {
       cancel = true;
     };
-  }, [abierta, modo, destinos, ejecutar]);
+  }, [abierta, modo, destinos, sinDestinos, ejecutar]);
 
   const listo =
     !!eleccion.filaId && (!eleccion.crearRegla || (eleccion.nombreRegla.trim().length >= 2 && !!eleccion.glosaContiene.trim()));
-  return { modo, setModo, reglas, destinos, eleccion, setEleccion, alSugerir, listo };
+  const reintentar = () => setSinDestinos(false);
+  return { modo, setModo, reglas, destinos, sinDestinos, reintentar, eleccion, setEleccion, alSugerir, listo };
 }

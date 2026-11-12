@@ -25,6 +25,14 @@ export async function aplicarSincronizacion(
   p: { cuentaId: string; nuevos: MovimientoNuevo[]; duplicados: number; sospechosos: number; saldoBanco: number | null; saldoBancoEn: Date | null },
 ): Promise<number> {
   return ctx.transaccion(async (tx) => {
+    // Ids externos que ya existían antes de este lote: una entrega repetida no vuelve a evaluar reglas sobre ellos.
+    const previos = p.nuevos.length
+      ? await tx.movimientoBancario.findMany({
+          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno) } },
+          select: { idExterno: true },
+        })
+      : [];
+    const yaEstaban = new Set(previos.map((m) => m.idExterno));
     const { count } = p.nuevos.length
       ? await tx.movimientoBancario.createMany({
           skipDuplicates: true,
@@ -46,7 +54,7 @@ export async function aplicarSincronizacion(
     // Reglas del banco (ADR-074) sobre lo recién llegado: por id externo, dentro de la misma transacción.
     const llegados = count
       ? await tx.movimientoBancario.findMany({
-          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno) } },
+          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno).filter((x) => !yaEstaban.has(x)) } },
           select: { id: true },
         })
       : [];

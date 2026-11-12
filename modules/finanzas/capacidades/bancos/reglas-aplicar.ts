@@ -17,14 +17,23 @@ async function reglasConFila(tx: TenantTx): Promise<(ReglaConDestino & { seccion
     select: { id: true, seccion: true },
   });
   const seccion = new Map(destinos.map((f) => [f.id, f.seccion]));
+  // La cuenta contable pudo desactivarse después de guardar la regla: en ese caso se concilia solo a la fila.
+  const cuentaIds = filas.flatMap((r) => (r.cuentaContableId ? [r.cuentaContableId] : []));
+  const vigentes = new Set(
+    cuentaIds.length
+      ? (await tx.cuentaContable.findMany({ where: { id: { in: cuentaIds }, activa: true, aceptaAsientos: true }, select: { id: true } })).map((c) => c.id)
+      : [],
+  );
   return filas.flatMap((r) => {
     const e = reglaEvaluable(r);
     const s = r.flujoFilaId ? seccion.get(r.flujoFilaId) : undefined;
-    return e && s ? [{ ...e, seccion: s }] : [];
+    return e && s ? [{ ...e, seccion: s, cuentaContableId: e.cuentaContableId && vigentes.has(e.cuentaContableId) ? e.cuentaContableId : null }] : [];
   });
 }
 
 /**
+ * Solo evalúa movimientos «pendiente»: los «sugeridos» ya esperan a una persona. Una conciliación deshecha
+ * vuelve a «pendiente» y, si una regla exacta calza, la próxima evaluación la concilia de nuevo.
  * Evalúa las reglas sobre movimientos pendientes (ADR-074): con monto exacto y referencia igual concilia
  * contra la fila de la regla y deja la regla en la explicación; con cualquier otro calce lo marca
  * «sugerido» para que una persona confirme. Nunca toca movimientos por autorizar, conciliados ni ignorados.

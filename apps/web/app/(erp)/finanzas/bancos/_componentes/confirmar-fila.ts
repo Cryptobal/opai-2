@@ -30,8 +30,9 @@ export async function confirmarContraFila(ejecutar: Ejecutar, mov: MovimientoBan
   if (!(await ejecutar("finanzas.conciliaciones.confirmar", conciliar, true))) return null;
   if (regla && !(await ejecutar("finanzas.reglas_banco.guardar", regla, true))) return null;
   if (!(await ejecutar("finanzas.conciliaciones.confirmar", conciliar))) return null;
+  // La conciliación ya quedó: si la regla falla, se informa sin dejar la hoja abierta como si nada hubiera pasado.
   if (regla && !(await ejecutar("finanzas.reglas_banco.guardar", regla))) {
-    return null;
+    return "Movimiento conciliado, pero la regla no se creó. Créala desde la pestaña Reglas.";
   }
   return regla ? `Movimiento conciliado y regla «${regla.nombre}» creada` : "Movimiento conciliado";
 }

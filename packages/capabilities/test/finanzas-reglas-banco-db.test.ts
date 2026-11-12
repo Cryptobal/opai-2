@@ -143,10 +143,24 @@ describe.skipIf(omitirSuiteDb())("Finanzas · reglas del banco (db)", () => {
     expect((await listar()).find((m) => m.glosa.startsWith("Abono"))!.estado).toBe("sugerido");
   });
 
+  it("no toca remuneraciones por autorizar ni clasifica abonos con una regla «ambos» a una fila de egresos", async () => {
+    await regla({ nombre: "Todo ficticio", definicion: { alcance: "ambos", condiciones: [{ campo: "glosa", operador: "contiene", valor: "zeta ficticio" }] } });
+    const r = await importar("fecha,monto,glosa,referencia\n06/11/2026,-5000,PAGO REMUNERACION zeta ficticio,R1\n06/11/2026,7000,Abono zeta ficticio,R2\n06/11/2026,-3000,Cargo zeta ficticio,R3\n");
+    expect(r.reglas).toEqual({ conciliados: 0, sugeridos: 1 });
+    const movs = await listar();
+    expect(movs.find((m) => m.glosa.startsWith("PAGO REMUNERACION"))!.estado).toBe("por_autorizar");
+    expect(movs.find((m) => m.glosa.startsWith("Abono zeta"))!.estado).toBe("pendiente");
+    expect(movs.find((m) => m.glosa.startsWith("Cargo zeta"))!.estado).toBe("sugerido");
+  });
+
   it("probar cuenta lo que calzaría sin cambiar nada", async () => {
     const r = await dato<{ total: number; sinConciliar: number }>("finanzas.reglas_banco.probar", {
-      definicion: { alcance: "cargos", condiciones: [{ campo: "glosa", operador: "contiene", valor: "ficticio" }] },
+      definicion: { alcance: "cargos", condiciones: [{ campo: "glosa", operador: "empieza", valor: "compra" }] },
     });
     expect(r).toMatchObject({ total: 2, sinConciliar: 0 });
+    const zeta = await dato<{ total: number }>("finanzas.reglas_banco.probar", {
+      definicion: { alcance: "cargos", condiciones: [{ campo: "glosa", operador: "contiene", valor: "zeta" }] },
+    });
+    expect(zeta.total).toBe(2);
   });
 });

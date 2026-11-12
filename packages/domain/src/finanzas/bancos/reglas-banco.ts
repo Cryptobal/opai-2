@@ -137,7 +137,7 @@ export function definicionDesdeJson(json: unknown): DefinicionRegla | null {
   for (const c of o.condiciones as Record<string, unknown>[]) {
     const campo = c?.["campo"] as CampoRegla;
     const operador = c?.["operador"] as OperadorRegla;
-    if (!(campo in OPERADORES_POR_CAMPO) || !OPERADORES_POR_CAMPO[campo].includes(operador)) return null;
+    if (!Object.hasOwn(OPERADORES_POR_CAMPO, campo) || !OPERADORES_POR_CAMPO[campo].includes(operador)) return null;
     if (typeof c["valor"] !== "string") return null;
     const hasta = typeof c["hasta"] === "number" ? c["hasta"] : undefined;
     condiciones.push({ campo, operador, valor: c["valor"], ...(hasta != null ? { hasta } : {}) });

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
-import { avisar, Badge, Button, Empty, Estado, type EstadoPantalla } from "@opai/ds";
+import { Alerta, avisar, Badge, Button, Empty, Estado, type EstadoPantalla } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
@@ -24,14 +24,19 @@ type Props = {
 /** Reglas del banco (CAR-328): se aplica la primera que calce, de mayor a menor prioridad (ADR-074). */
 export function PantallaReglas({ state, reglas, destinos, cuentas, gestiona }: Props) {
   const [editando, setEditando] = useState<BorradorRegla | null>(null);
-  const { ejecutar, pendiente } = useCapacidad("erp");
+  const { ejecutar, pendiente, error } = useCapacidad("erp");
 
   async function aplicar() {
     let conciliados = 0;
     let sugeridos = 0;
-    for (const c of cuentas) {
-      const r = await ejecutar<{ conciliados: number; sugeridos: number }>("finanzas.reglas_banco.aplicar", { cuentaId: c.id });
-      if (!r) return;
+    for (const [i, c] of cuentas.entries()) {
+      const input = { cuentaId: c.id };
+      const ok = await ejecutar("finanzas.reglas_banco.aplicar", input, true);
+      const r = ok ? await ejecutar<{ conciliados: number; sugeridos: number }>("finanzas.reglas_banco.aplicar", input) : null;
+      if (!r) {
+        if (i > 0) avisar.error(`Se aplicó en ${i} de ${cuentas.length} cuentas; revisa el error y vuelve a intentar.`);
+        return;
+      }
       conciliados += r.conciliados;
       sugeridos += r.sugeridos;
     }
@@ -41,6 +46,7 @@ export function PantallaReglas({ state, reglas, destinos, cuentas, gestiona }: P
   return (
     <Estado state={state} variante="lista" textos={{ error: { titulo: "No pudimos cargar las reglas" } }}>
       <div className="flex flex-col gap-4">
+        {error ? <Alerta tono="danger" titulo={error} /> : null}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="t-body-sm text-fg-muted">
             Se aplica la primera regla que calce, de mayor a menor prioridad. Concilian solas solo con monto y

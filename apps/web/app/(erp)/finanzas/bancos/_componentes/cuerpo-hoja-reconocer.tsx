@@ -53,6 +53,8 @@ export function CuerpoHojaReconocer({
       ) : fila.modo === "fila" ? (
         <PanelFilaFlujo
           esAbono={movimiento.monto > 0}
+          sinDestinos={fila.sinDestinos}
+          onReintentar={fila.reintentar}
           destinos={fila.destinos}
           reglas={fila.reglas}
           eleccion={fila.eleccion}

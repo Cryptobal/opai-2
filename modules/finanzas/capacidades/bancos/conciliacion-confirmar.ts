@@ -56,9 +56,12 @@ export const bancosConciliacionConfirmar = defineCapability({
     if (input.enlaces.some((e) => e.tipo !== "flujo_fila" && e.cuentaContableId)) {
       throw reglaDeNegocio("La cuenta contable solo se elige al conciliar contra una fila del flujo.");
     }
-    for (const e of aFila) {
-      await validarDestino(ctx.db, { flujoFilaId: e.id, cuentaContableId: e.cuentaContableId, signo: montoDe(mov.monto) });
-    }
+    const validarFilas = async (db: Parameters<typeof validarDestino>[0]) => {
+      for (const e of aFila) {
+        await validarDestino(db, { flujoFilaId: e.id, cuentaContableId: e.cuentaContableId, signo: montoDe(mov.monto) });
+      }
+    };
+    await validarFilas(ctx.db);
     const total = input.enlaces.reduce((s, e) => s + e.monto, 0);
     if (Math.abs(total) !== Math.abs(montoDe(mov.monto))) {
       throw reglaDeNegocio("La suma de enlaces debe coincidir con el monto del movimiento.");
@@ -73,6 +76,8 @@ export const bancosConciliacionConfirmar = defineCapability({
         data: { estado: "conciliado" },
       });
       if (reserva.count !== 1) throw conflicto("El movimiento ya está conciliado.");
+      // Se vuelve a validar dentro de la transacción: la fila o la cuenta pudieron archivarse entre medio.
+      await validarFilas(tx);
 
       const docsSync = new Set<string>();
       const ordenados = [...input.enlaces].sort((a, b) => `${a.tipo}:${a.id}`.localeCompare(`${b.tipo}:${b.id}`));
