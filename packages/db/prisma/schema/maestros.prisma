@@ -365,6 +365,8 @@ model VinculoLaboral {
   motivoTermino String?   @map("motivo_termino")
   /// "vigente" | "terminado". Un solo vigente por persona (índice parcial en la migración).
   estado        String    @default("vigente")
+  /// Usuario que reclutó a la persona (CAR-309). Lo llena quien registra el ingreso; se puede cambiar.
+  reclutadoPorId String?  @map("reclutado_por") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -375,6 +377,7 @@ model VinculoLaboral {
 
   @@index([tenantId, personaId])
   @@index([tenantId, instalacionId, estado], map: "vinculos_tenant_instalacion_idx")
+  @@index([tenantId, reclutadoPorId], map: "vinculos_tenant_reclutado_idx")
   @@map("vinculos_laborales")
   @@schema("core")
 }
