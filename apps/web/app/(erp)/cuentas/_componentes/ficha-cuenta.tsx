@@ -7,6 +7,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_CUENTA, estadoDe } from "@/app/_components/maestros/estados";
 import { fecha, rut } from "@/lib/fechas";
+import { conFiltros, type Parametros } from "@/lib/parametros";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
 const SIGUIENTES: Record<string, string[]> = {
@@ -53,11 +54,14 @@ export function FichaCuenta(p: {
   tab: TabCuenta;
   /** Pestaña aportada por Comercial (ADR-041.5): solo con el módulo activo y permiso. */
   negocios?: boolean;
+  /** Filtros de la lista: las pestañas los conservan para que la lista de la izquierda no vuelva a «todos». */
+  filtros?: Parametros;
   children: ReactNode;
 }) {
   const c = p.cuenta;
   const e = c ? estadoDe(ESTADO_CUENTA, c.estado) : null;
   const base = `/cuentas/${c?.id ?? ""}`;
+  const ir = (ruta: string) => conFiltros(ruta, p.filtros);
   return (
     <>
       {c ? <BandaAprobacion entidad={{ tipo: "cuenta", id: c.id }} /> : null}
@@ -103,28 +107,28 @@ export function FichaCuenta(p: {
         tabActiva={p.tab}
         Link={LinkNext}
         tabs={[
-          { id: "resumen", etiqueta: "Resumen", href: base },
+          { id: "resumen", etiqueta: "Resumen", href: ir(base) },
           {
             id: "contactos",
             etiqueta: "Contactos",
-            href: `${base}/contactos`,
+            href: ir(`${base}/contactos`),
           },
           {
             id: "instalaciones",
             etiqueta: "Instalaciones",
             contador: c?.instalaciones.length ?? 0,
-            href: `${base}/instalaciones`,
+            href: ir(`${base}/instalaciones`),
           },
           ...(p.negocios
-            ? [{ id: "negocios", etiqueta: "Negocios", href: `${base}/negocios` }]
+            ? [{ id: "negocios", etiqueta: "Negocios", href: ir(`${base}/negocios`) }]
             : []),
           {
             id: "documentos",
             etiqueta: "Documentos",
             contador: c?.documentos ?? 0,
-            href: `${base}/documentos`,
+            href: ir(`${base}/documentos`),
           },
-          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
+          { id: "actividad", etiqueta: "Actividad", href: ir(`${base}/actividad`) },
         ]}
       >
         {p.children}

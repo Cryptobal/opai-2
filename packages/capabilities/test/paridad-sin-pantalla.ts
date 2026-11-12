@@ -8,6 +8,12 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "comercial.importar_1_0": {
+    encargo: "CAR-325",
+    desde: "2026-11-12",
+    motivo:
+      "Traer clientes, contactos e instalaciones desde 1.0: la carga se hizo una vez para Gard y se quitó el botón de Configuración › Módulos › Comercial. La capacidad queda para repetir la carga si hace falta; su pantalla vuelve junto con la importación de cotizaciones (CAR-326).",
+  },
   "core.cuentas_referencias.otorgar": {
     encargo: "CAR-138",
     desde: "2026-11-10",
