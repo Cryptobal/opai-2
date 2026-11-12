@@ -1052,6 +1052,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
+- `desempeno.hechos.list`
+- `desempeno.propios.archivar`
+- `desempeno.propios.guardar`
+- `desempeno.propios.list`
 - `desempeno.resultados.ver_cargo`
 - `desempeno.resultados.ver_persona`
 - `desempeno.scorecards.get`

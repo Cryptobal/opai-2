@@ -1,7 +1,8 @@
 import { logroDeMeta, puntajeDe, rangoDelPeriodo } from "@opai/domain";
 
 import type { Contexto } from "../types";
-import { indicadoresDeLaEmpresa, type VistaScorecard } from "./comun";
+import type { VistaScorecard } from "./comun";
+import { indicadoresPara } from "./propios-indicadores";
 
 export type DetalleIndicador = {
   indicador: string;
@@ -47,7 +48,8 @@ export async function resultadosDe(
   periodo: string,
   zona: string,
 ): Promise<Map<string, ResultadoPersona>> {
-  const catalogo = indicadoresDeLaEmpresa(ctx);
+  // Con los archivados: un indicador propio que estuvo en el scorecard de ese mes se sigue midiendo.
+  const catalogo = await indicadoresPara(ctx, periodo, { conArchivados: true });
   const medicion = contextoDeMedicion(ctx);
   const rango = rangoDelPeriodo(periodo, zona);
   const ahora = new Date();

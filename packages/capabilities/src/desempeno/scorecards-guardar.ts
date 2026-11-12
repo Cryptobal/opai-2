@@ -4,8 +4,8 @@ import { z } from "zod";
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
+import { indicadoresPara } from "./propios-indicadores";
 import {
-  indicadoresDeLaEmpresa,
   mesesDe,
   PERMISOS_DESEMPENO,
   scorecardSchema,
@@ -63,7 +63,9 @@ export const scorecardsGuardar = defineCapability({
     });
     if (!cargo) throw noEncontrado("El cargo");
     if (!cargo.activo) throw reglaDeNegocio(`El cargo "${cargo.nombre}" está inactivo.`);
-    const catalogo = indicadoresDeLaEmpresa(ctx);
+    const meses = await mesesDe(ctx);
+    // Catálogo más los indicadores propios publicados que rigen a más tardar el mes siguiente.
+    const catalogo = await indicadoresPara(ctx, meses.siguiente);
     const errores = input.publicar
       ? erroresParaPublicar(input.indicadores)
       : erroresDeScorecard(input.indicadores);
@@ -76,7 +78,7 @@ export const scorecardsGuardar = defineCapability({
     }
     if (errores.length > 0) throw reglaDeNegocio(errores.join(" "), { errores });
 
-    const [meses, versiones] = await Promise.all([mesesDe(ctx), versionesDe(ctx, input.cargoId)]);
+    const versiones = await versionesDe(ctx, input.cargoId);
     const publicadas = versiones.filter((v) => v.estado === "publicado").map((v) => v.vigenteDesde);
     const vigenteDesde = vigenciaDelCambio(publicadas, meses.actual, meses.siguiente);
     const destino = versiones.find((v) => v.vigenteDesde === vigenteDesde);

@@ -51,3 +51,48 @@ model DesempenoScorecardIndicador {
   @@map("scorecard_indicadores")
   @@schema("desempeno")
 }
+
+/// Indicador propio de la empresa (CAR-313): lo arma sobre hechos que los módulos declaran. La
+/// definición, el sentido y la meta viven en sus versiones; esta fila guarda lo que no cambia el cálculo.
+model DesempenoIndicadorPropio {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  nombre       String
+  descripcion  String?
+  archivadoEn  DateTime? @map("archivado_en") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  versiones DesempenoIndicadorPropioVersion[]
+
+  @@unique([tenantId, id])
+  @@map("indicadores_propios")
+  @@schema("desempeno")
+}
+
+/// Versión de la definición de un indicador propio. Rige desde `vigenteDesde` (mes "aaaa-mm"), igual
+/// que el scorecard: cambiar la definición no altera un mes ya medido.
+model DesempenoIndicadorPropioVersion {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  indicadorId  String    @map("indicador_id") @db.Uuid
+  vigenteDesde String    @map("vigente_desde")
+  /// "borrador" | "publicado".
+  estado       String    @default("borrador")
+  /// Forma de cálculo y hechos (configuración versionada, ADR-021). La valida y evalúa el dominio.
+  definicion   Json
+  /// Unidad del resultado, derivada de la definición al guardar.
+  unidad       String
+  /// "mayor" | "menor": si más es mejor o menos es mejor. Va en la versión porque cambia el logro.
+  sentido      String
+  metaSugerida Decimal   @map("meta_sugerida") @db.Decimal(18, 4)
+  publicadoEn  DateTime? @map("publicado_en") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  indicador DesempenoIndicadorPropio @relation(fields: [tenantId, indicadorId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, indicadorId, vigenteDesde])
+  @@map("indicador_propio_versiones")
+  @@schema("desempeno")
+}
