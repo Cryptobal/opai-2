@@ -5,6 +5,9 @@ import { esParteFinanzas, MODULO_FINANZAS, PARTES_FINANZAS } from "@opai/domain"
 import { defineTrabajo } from "../../trabajos/registro";
 import { aFecha } from "../maestros/comun";
 
+/** Días antes del último día de la prueba gratis en que se avisa a la empresa (Carlos, 12-nov-2026). */
+export const DIAS_AVISO_GRATIS = 2;
+
 /**
  * Cada día cierra las pruebas gratis vencidas de la empresa (CAR-222): el módulo queda en solo
  * lectura (se ve y se lee, nada se borra). No toca un módulo que Plataforma ya empezó a cobrar o que
@@ -17,6 +20,24 @@ export const trabajoPruebasGratis = defineTrabajo({
   periodicidad: "diaria",
   async handler(ctx, { dia }) {
     const tenantId = ctx.tenantId;
+    // Aviso a la empresa dos días antes del último día (ADR-071, adenda 7.3). Sale solo el día exacto:
+    // el trabajo corre una vez por día, igual que el aviso de las pruebas de Plataforma.
+    const enDosDias = new Date(aFecha(dia).getTime() + DIAS_AVISO_GRATIS * 86_400_000);
+    const porVencer = await ctx.db.pruebaGratis.findMany({
+      where: { tenantId, cerradaEn: null, hasta: enDosDias },
+    });
+    for (const p of porVencer)
+      await ctx.transaccion((tx) =>
+        ctx.eventos.emitir(tx, {
+          tipo: "core.prueba_gratis.por_vencer",
+          entidadTipo: "modulo",
+          payload: {
+            moduloId: p.moduloId,
+            hasta: enDosDias.toISOString(),
+            dias: DIAS_AVISO_GRATIS,
+          },
+        }),
+      );
     const vencidas = await ctx.db.pruebaGratis.findMany({
       where: { tenantId, cerradaEn: null, hasta: { lt: aFecha(dia) } },
     });
@@ -56,6 +77,6 @@ export const trabajoPruebasGratis = defineTrabajo({
       });
       if (cerrada) cerradas.push(p.moduloId);
     }
-    return { cerradas };
+    return { cerradas, avisadas: porVencer.map((p) => p.moduloId) };
   },
 });

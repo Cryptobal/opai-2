@@ -2,6 +2,7 @@ export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "
 export { trabajoPruebasGratis } from "./core/pruebas-gratis";
 export {
   consumidorAvisoPrueba,
+  consumidorAvisoPruebaEmpresa,
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
