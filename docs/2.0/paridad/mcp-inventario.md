@@ -1105,8 +1105,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.secciones.margen`
 - `cpq.versiones.crear`
 - `cpq.versiones.margen`
-- `desempeno.periodos.cerrar`
-- `desempeno.periodos.list`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
