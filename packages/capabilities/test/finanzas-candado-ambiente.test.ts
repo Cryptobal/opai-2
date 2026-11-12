@@ -34,12 +34,14 @@ describe("Candado de ambiente tributario (CAR-191)", () => {
   it("ambienteDe: «produccion» guardado y sin habilitar rinde certificación", async () => {
     vi.stubEnv("BETTER_AUTH_URL", "https://test.opai.cl");
     vi.stubEnv("OPAI_PRODUCCION_TRIBUTARIA", "habilitada");
+    vi.stubEnv("VERCEL_ENV", "production");
     expect(await ambienteDe(ctxProduccionGuardada())).toBe("certificacion");
   });
 
   it("ambienteDe: con app.opai.cl y la variable, respeta producción", async () => {
     vi.stubEnv("BETTER_AUTH_URL", "https://app.opai.cl");
     vi.stubEnv("OPAI_PRODUCCION_TRIBUTARIA", "habilitada");
+    vi.stubEnv("VERCEL_ENV", "production");
     expect(await ambienteDe(ctxProduccionGuardada())).toBe("produccion");
   });
 
@@ -58,6 +60,7 @@ describe("Candado de ambiente tributario (CAR-191)", () => {
     vi.stubEnv("CESION_ADAPTADOR", "");
     vi.stubEnv("BETTER_AUTH_URL", "https://app.opai.cl");
     vi.stubEnv("OPAI_PRODUCCION_TRIBUTARIA", "habilitada");
+    vi.stubEnv("VERCEL_ENV", "production");
     octava.mockReturnValue({ proveedor: "octava" });
     await adaptadorCesionDe(ctxProduccionGuardada());
     expect(octava).toHaveBeenCalledWith(expect.objectContaining({ ambiente: "produccion" }));

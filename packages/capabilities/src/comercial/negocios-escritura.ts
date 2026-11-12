@@ -13,6 +13,7 @@ import {
   tipoVinculoSchema,
   vistaNegocio,
 } from "./comun";
+import { idAutor } from "../autor";
 
 export const camposNegocio = {
   titulo: z
@@ -119,7 +120,7 @@ export const negociosCreate = defineCapability({
           negocioId: n.id,
           aEtapaId: primera.id,
           actorTipo: ctx.actor.tipo,
-          actorId: ctx.actor.id ?? null,
+          actorId: idAutor(ctx.actor),
         },
       });
       await ctx.eventos.emitir(tx, {

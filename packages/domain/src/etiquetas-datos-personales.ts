@@ -84,6 +84,7 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   password: "contraseña (hash)",
   access_token: "token de acceso",
   refresh_token: "token de refresco",
+  token: "token de acceso (hash)",
   id_token: "token de identidad",
   // envios
   destinatario: "destinatario de la notificación",

@@ -26,3 +26,8 @@ export function etiquetaOrigen(c: Pick<CorreoVista, "origen" | "sentido">): stri
     ? "Enviado desde una casilla con CCO a OPAI"
     : "Respuesta recibida en OPAI";
 }
+
+/** Un correo del historial se puede asociar a un negocio si está archivado en la cuenta, sin negocio y sin origen propio. */
+export function sePuedeAsociar(c: CorreoVista, entidadTipo: "cuenta" | "contacto" | "negocio", permiso: boolean): boolean {
+  return permiso && entidadTipo !== "negocio" && c.fuente === "historial" && c.asociacion !== "origen" && c.negocioId === null && c.cuentaId !== null;
+}

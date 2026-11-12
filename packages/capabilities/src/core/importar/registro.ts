@@ -5,6 +5,7 @@ import { importadorCuentas } from "./cuentas";
 import { importadorInstalaciones } from "./instalaciones";
 import { importadorNegocios } from "./negocios";
 import { importadorPersonas } from "./personas";
+import { importadorDocumentosVenta } from "./ventas";
 import type { Datos, Importador } from "./tipos";
 
 /** Vista sin el tipo de datos propio de cada importador, para tratarlos a todos igual en el motor. */
@@ -36,9 +37,10 @@ export const IMPORTADORES: readonly Importador<Datos>[] = [
   generico(importadorNegocios),
   generico(importadorPersonas),
   generico(importadorContratos),
+  generico(importadorDocumentosVenta),
 ];
 
-export const IDS_IMPORTADORES = ["cuentas", "contactos", "instalaciones", "negocios", "personas", "contratos"] as const;
+export const IDS_IMPORTADORES = ["cuentas", "contactos", "instalaciones", "negocios", "personas", "contratos", "documentos_venta"] as const;
 
 export function importadorDe(id: string): Importador<Datos> {
   const i = IMPORTADORES.find((x) => x.def.id === id);
