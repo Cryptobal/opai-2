@@ -42,7 +42,7 @@ describe("token OAuth del MCP", () => {
   it("con solo mcp:leer deja todo en lectura", async () => {
     const ctx = await contexto(token({ alcances: ["mcp:leer"] }));
     if (ctx instanceof Response) throw new Error("No autenticado");
-    expect(ctx.modulosSoloLectura).toEqual(expect.arrayContaining(ctx.modulosActivos));
+    expect(ctx.modulosSoloLectura).toEqual(expect.arrayContaining([...ctx.modulosActivos]));
   });
 
   it("rechaza token inválido y empresa sin membresía, suspendida o inactiva (sin caer a otra)", async () => {
