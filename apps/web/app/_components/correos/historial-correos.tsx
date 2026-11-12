@@ -9,7 +9,7 @@ import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 import { AVISO_EXTERNO, CorreoItem } from "./correo-item";
 import { DireccionRegistro } from "./direccion-registro";
-import type { PaginaCorreos } from "./tipos";
+import { type PaginaCorreos, sePuedeAsociar } from "./tipos";
 
 // Lo interactivo se carga aparte del primer JS de la ficha (ADR-037), como el compositor de actividad.
 const MasCorreos = dynamic(() => import("./mas-correos").then((m) => m.MasCorreos));
@@ -62,7 +62,7 @@ export async function HistorialCorreos(p: {
                   key={c.id}
                   c={c}
                   accion={
-                    puedeAsociar && p.entidadTipo !== "negocio" && c.fuente === "historial" && c.asociacion !== "origen" && c.negocioId === null && c.cuentaId ? (
+                    sePuedeAsociar(c, p.entidadTipo, puedeAsociar) && c.cuentaId ? (
                       <AsociarNegocio correoId={c.id} cuentaId={c.cuentaId} contactoId={c.contactoId} />
                     ) : null
                   }
@@ -73,6 +73,7 @@ export async function HistorialCorreos(p: {
               <MasCorreos
                 entidadTipo={p.entidadTipo}
                 entidadId={p.entidadId}
+                puedeAsociar={puedeAsociar}
                 cursor={r.data.siguiente}
               />
             ) : null}
