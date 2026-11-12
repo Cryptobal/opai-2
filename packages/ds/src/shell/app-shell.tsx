@@ -2,8 +2,9 @@ import type { ReactNode } from "react";
 
 import { cn } from "../cn";
 import { BottomNav } from "./nav";
-import { Rail } from "./rail";
-import { Sidebar } from "./sidebar";
+import { type PlegableRiel, Rail } from "./rail";
+import { type PlegableSidebar, Sidebar } from "./sidebar";
+import { ShellNuevo } from "./nuevo/shell-nuevo";
 import type { ItemFijado } from "./fijados";
 import { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
 import type { BusquedaMasRender, NavItem } from "./types";
@@ -40,7 +41,11 @@ export type AppShellProps = ComunesBarra & {
   onAreaAbierta?: (area: string) => void;
   children: ReactNode;
   className?: string;
+  /** Diseño nuevo (ADR-109, CAR-335 D2): piel nueva y menú plegable que se asoma. */
+  nuevo?: boolean;
 };
+
+export type Plegables = { sidebar: PlegableSidebar; riel: PlegableRiel };
 
 /**
  * Shell de OPAI 2.0 (ADR-007, ADR-050; export ShellPhone, ShellTablet y ShellDesktop): barra superior
@@ -48,8 +53,21 @@ export type AppShellProps = ComunesBarra & {
  * barra lateral con el usuario al pie en desktop. Configuración, fija al pie.
  */
 export function AppShell(props: AppShellProps) {
+  return props.nuevo ? <ShellNuevo {...props} /> : <AppShellBase {...props} />;
+}
+
+/** Cuerpo del shell; el diseño nuevo le pasa el estado del menú plegable. */
+export function AppShellBase(props: AppShellProps & { plegables?: Plegables }) {
   const { titulo, nav, rutaActual, acciones, insignia, children, className, Link } = props;
-  const { accionesTelefono, onNavegar, completo, navInferior, ...barra } = props;
+  const {
+    accionesTelefono,
+    onNavegar,
+    completo,
+    navInferior,
+    nuevo: _n,
+    plegables: _p,
+    ...barra
+  } = props;
   return (
     <div className="flex min-h-dvh bg-bg text-fg">
       <Rail
@@ -65,6 +83,7 @@ export function AppShell(props: AppShellProps) {
         {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
         {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
         {...(onNavegar ? { onNavegar } : {})}
+        {...(props.plegables ? { plegable: props.plegables.riel } : {})}
       />
       <Sidebar
         items={nav}
@@ -82,6 +101,7 @@ export function AppShell(props: AppShellProps) {
         {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
         {...(props.areaAbierta !== undefined ? { areaAbierta: props.areaAbierta } : {})}
         {...(props.onAreaAbierta ? { onAreaAbierta: props.onAreaAbierta } : {})}
+        {...(props.plegables ? { plegable: props.plegables.sidebar } : {})}
         Link={Link}
       />
       <div className="flex min-w-0 flex-1 flex-col">

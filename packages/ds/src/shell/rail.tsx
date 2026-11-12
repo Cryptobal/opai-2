@@ -1,5 +1,5 @@
 import { cn } from "../cn";
-import { Menu as IconoMenu } from "lucide-react";
+import { Menu as IconoMenu, PanelLeftOpen } from "lucide-react";
 import type { ItemMenu } from "../components/menu";
 import type { ItemFijado } from "./fijados";
 import { MenuMas } from "./menu-mas";
@@ -44,7 +44,9 @@ function ItemRiel({
           <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
           {sinContador ? null : <Contador n={item.alerta ? item.contador : undefined} />}
         </span>
-        <span lang="es" className="w-full hyphens-auto wrap-normal text-center">{item.corta ?? item.etiqueta}</span>
+        <span lang="es" className="w-full hyphens-auto wrap-normal text-center">
+          {item.corta ?? item.etiqueta}
+        </span>
       </Link>
     </li>
   );
@@ -62,7 +64,12 @@ export type RailProps = NavProps & {
   reintentarFijados?: () => void;
   onDesfijar?: (href: string) => void;
   onNavegar?: (href: string) => void;
+  /** Diseño nuevo (ADR-109): con el menú plegado el riel también se ve en escritorio, se asoma el
+   *  menú completo al pasar el mouse y arriba hay un botón para dejarlo fijo. */
+  plegable?: PlegableRiel | undefined;
 };
+
+export type PlegableRiel = { plegado: boolean; onAsomar: () => void; onFijar: () => void };
 
 /**
  * iPad vertical (ShellTablet, 768–1023 px, D9 del Brief 05): riel de 80 px con el selector de
@@ -77,13 +84,35 @@ export function Rail({
   portalActual,
   tenant,
   empresas,
-  fijados, errorFijados, reintentarFijados, onDesfijar, onNavegar,
+  fijados,
+  errorFijados,
+  reintentarFijados,
+  onDesfijar,
+  onNavegar,
+  plegable,
 }: RailProps) {
   return (
     <nav
       aria-label="Principal"
-      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex lg:hidden"
+      onPointerEnter={
+        plegable ? (e) => e.pointerType === "mouse" && plegable.onAsomar() : undefined
+      }
+      className={cn(
+        "sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex",
+        !plegable?.plegado && "lg:hidden",
+      )}
     >
+      {plegable?.plegado ? (
+        <button
+          type="button"
+          onClick={plegable.onFijar}
+          aria-label="Dejar el menú fijo"
+          title="Dejar el menú fijo"
+          className="mb-2 hidden size-9 items-center justify-center rounded-md text-fg-muted hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus lg:flex"
+        >
+          <PanelLeftOpen className="size-[18px]" aria-hidden />
+        </button>
+      ) : null}
       <PortalSwitcher
         portales={portales}
         portalActual={portalActual}
@@ -100,7 +129,26 @@ export function Rail({
           ))}
       </ul>
       <ul className="mt-auto flex w-full flex-col gap-1">
-        {fijados ? <li className="w-16"><MenuMas items={items} extras={[]} rutaActual={rutaActual} fijados={fijados} {...(errorFijados ? { errorFijados } : {})} {...(reintentarFijados ? { reintentarFijados } : {})} {...(onDesfijar ? { onDesfijar } : {})} {...(onNavegar ? { onNavegar } : {})} disparador={<span className="flex flex-col items-center text-[11px]"><IconoMenu className="size-5" />Más</span>} /></li> : null}
+        {fijados ? (
+          <li className="w-16">
+            <MenuMas
+              items={items}
+              extras={[]}
+              rutaActual={rutaActual}
+              fijados={fijados}
+              {...(errorFijados ? { errorFijados } : {})}
+              {...(reintentarFijados ? { reintentarFijados } : {})}
+              {...(onDesfijar ? { onDesfijar } : {})}
+              {...(onNavegar ? { onNavegar } : {})}
+              disparador={
+                <span className="flex flex-col items-center text-[11px]">
+                  <IconoMenu className="size-5" />
+                  Más
+                </span>
+              }
+            />
+          </li>
+        ) : null}
         {items
           .filter((i) => i.pie)
           .map((item) => (

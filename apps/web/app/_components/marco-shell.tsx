@@ -22,6 +22,7 @@ import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
 import { padreConfiguracion } from "./padre-configuracion";
 import { useMenuShell } from "./use-menu-shell";
+import { useAcentoEmpresa } from "./acento-empresa";
 import { avisoNovedadesAvatar, conContadores } from "./nav-contadores";
 import { propsPreferenciasShell } from "./shell-props-preferencias";
 
@@ -43,7 +44,16 @@ const PortalInicio = dynamic(() => import("./portal-inicio").then((m) => m.Porta
  * se reemplaza el contenido. El título y las acciones de la página llegan por el almacén de cabecera
  * (`cabecera-contexto`), que la página fija al renderizarse.
  */
-export function MarcoShell({ datos, children }: { datos: DatosShell; children: ReactNode }) {
+export function MarcoShell({
+  datos,
+  nuevo = false,
+  children,
+}: {
+  datos: DatosShell;
+  /** Diseño nuevo (ADR-109): mismo shell, con su piel y el menú plegable. */
+  nuevo?: boolean;
+  children: ReactNode;
+}) {
   const rutaActual = usePathname();
   const router = useRouter();
   const cabecera = useCabecera();
@@ -55,6 +65,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
   if (!enErp && preferencias !== null) setPreferencias(null);
   const agente = useAgenteShell(Boolean(datos.agente), datos.portal);
+  useAcentoEmpresa(nuevo && enErp, datos.portal, datos.epoca);
   useEpocaSesion(datos.epoca);
   useEffect(() => {
     if (!enErp) return;
@@ -97,7 +108,11 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     [datos.navInferior, datos.iconos],
   );
   const navInferiorBase = navInferiorPreferido ?? navInferiorDefecto;
-  const { boton: pinFicha, menu: pinMenu } = pinDeFicha(enErp && Boolean(esFicha), fichaFijada, onFijarFicha);
+  const { boton: pinFicha, menu: pinMenu } = pinDeFicha(
+    enErp && Boolean(esFicha),
+    fichaFijada,
+    onFijarFicha,
+  );
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
   const bandejaPendiente = enErp && (preferencias?.bandejaPendiente ?? false);
@@ -107,9 +122,12 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     enErp,
     router,
     () => setPassword(true),
-    datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
+    datos.acceso &&
+      datos.tenant &&
+      ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
       ? () => setInicio(true)
       : undefined,
+    nuevo ? "nuevo" : "clasico",
   );
   // CAR-316: la Bandeja suma las novedades sin leer y se resalta (también en la barra inferior).
   const novedadesBandeja = enErp ? novedadesNoLeidas : 0;
@@ -117,12 +135,25 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const navInferiorResuelto = useMemo(
     () =>
       navInferiorBase &&
-      conContadores(navInferiorBase, { bandejaContador, solicitudesNuevas: 0 }, novedadesBandeja).map((n) =>
-        n.href === "/" ? { ...n, punto: true, alerta: bandejaPendiente } : n.href === "/cotizaciones" ? { ...n, corta: "Cotiz." } : n,
+      conContadores(
+        navInferiorBase,
+        { bandejaContador, solicitudesNuevas: 0 },
+        novedadesBandeja,
+      ).map((n) =>
+        n.href === "/"
+          ? { ...n, punto: true, alerta: bandejaPendiente }
+          : n.href === "/cotizaciones"
+            ? { ...n, corta: "Cotiz." }
+            : n,
       ),
     [navInferiorBase, bandejaPendiente, bandejaContador, novedadesBandeja],
   );
-  const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
+  const conPin = (accion: ReactNode) => (
+    <>
+      {accion}
+      {pinFicha}
+    </>
+  );
   return (
     <PinFichaContexto.Provider value={pinMenu}>
       <AppShell
@@ -152,8 +183,18 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         {...(enErp && preferencias ? propsPreferenciasShell(preferencias) : {})}
         onNavegar={(href) => router.push(href)}
         Link={LinkMenu}
+        {...(nuevo ? { nuevo: true } : {})}
       >
-        <AccesosProveedor enErp={enErp} preferencias={preferencias} recientes={busqueda.recientes} acciones={datos.acciones} ruta={rutaActual} onNavegar={router.push}>{children}</AccesosProveedor>
+        <AccesosProveedor
+          enErp={enErp}
+          preferencias={preferencias}
+          recientes={busqueda.recientes}
+          acciones={datos.acciones}
+          ruta={rutaActual}
+          onNavegar={router.push}
+        >
+          {children}
+        </AccesosProveedor>
         {enErp ? (
           <Preferencias
             datos={datos}
