@@ -44,4 +44,4 @@ Cada regla dice qué pide Hilo y quién la verifica. «Trinquete» quiere decir:
 - **Media:** incoherente con Hilo.
 - **Baja:** pulido.
 
-Lo repetido en varias pantallas va en un solo issue transversal. Lo que vive dentro de un módulo se asigna a la sesión dueña del módulo; lo transversal (DS, marco, navegación, tipografía, botones, textos) lo corrige la Sesión Diseño.
+Lo repetido en varias pantallas va en un solo issue transversal. Primera corrida: [auditoria-diseno/2026-11-12](auditoria-diseno/2026-11-12/README.md). Lo que vive dentro de un módulo se asigna a la sesión dueña del módulo; lo transversal (DS, marco, navegación, tipografía, botones, textos) lo corrige la Sesión Diseño.
