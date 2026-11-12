@@ -54,7 +54,8 @@ test.describe("@preview desempeño", () => {
     const cerrar = page.getByRole("button", { name: /^Cerrar / }).first();
     if (await cerrar.count()) {
       await cerrar.click();
-      await expect(page.getByText(/no se puede reabrir/)).toBeVisible();
+      await expect(page.getByText(/Se guarda el resultado de \d|quedará cerrado vacío/)).toBeVisible();
+      await page.waitForTimeout(300);
       await capturar(page, info, "desempeno-cierres-confirmar");
       await page.getByRole("button", { name: "Cancelar" }).click();
     }

@@ -17,7 +17,8 @@ Que quien administra los scorecards vea los meses cerrados y pueda cerrar el mes
 - Pestaña «Meses cerrados» (`/desempeno/cierres`): lista de meses cerrados (mes, fecha de cierre, a mano o automático, personas) y botón «Cerrar <mes>» para el mes anterior si sigue abierto, con confirmación (no se puede reabrir).
 - `desempeno.periodos.list` devuelve `{ cerrados, porCerrar }`: `porCerrar` es el mes anterior si no está cerrado.
 - `desempeno.periodos.cerrar` rechaza (FORBIDDEN) a quien tiene alcance acotado: cerrar es de toda la empresa.
-- Archivar en uso nombra los cargos («Vendedor», …).
+- Archivar en uso nombra los cargos («Vendedor», …), y archivar también rechaza el alcance acotado.
+- La confirmación simula el cierre (`dryRun`) y dice cuántas personas y cargos quedan fijos, o que el mes queda vacío.
 - Indicadores propios y meses cerrados: los botones de escritura se ocultan con alcance acotado.
 
 Fuera: cerrar meses más antiguos desde la pantalla (lo hace el cierre automático o el MCP), elegir el mes, cierre por otro período que no sea mensual.

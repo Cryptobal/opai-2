@@ -62,14 +62,14 @@ export default function MesesCerrados() {
             columnas={[
               { id: "mes", etiqueta: "Mes", render: (m) => mesCorto(m.periodo) },
               { id: "cerrado", etiqueta: "Cerrado el", render: (m) => fechaCorta(m.cerradoEn) },
-              { id: "origen", etiqueta: "Cómo", render: (m) => <Origen m={m} /> },
+              { id: "origen", etiqueta: "Forma", render: (m) => <Origen m={m} /> },
               { id: "personas", etiqueta: "Personas", render: (m) => m.personas },
             ]}
             textos={{
               vacio: {
                 titulo: "Ningún mes cerrado todavía",
                 descripcion:
-                  "Cada mes se cierra solo el día de cierre configurado (por defecto el 5). Al cerrarlo, su resultado queda fijo.",
+                  "Cada mes se cierra solo a comienzos del mes siguiente, el día que fija tu empresa en Configuración. Al cerrarlo, su resultado queda fijo.",
               },
             }}
           />

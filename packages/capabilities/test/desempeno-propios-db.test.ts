@@ -228,6 +228,17 @@ describe.skipIf(!urlPropietario)("desempeño · indicadores propios en base real
     expect(await codigo(ctx(a), "desempeno.propios.archivar", { id: propio })).toBe("UNPROCESSABLE");
     // El rechazo nombra los cargos que lo usan, para saber de dónde sacarlo.
     await expect(dato(ctx(a), "desempeno.propios.archivar", { id: propio })).rejects.toThrow(/«Vendedor»/);
+    // Archivar es de toda la empresa: con alcance acotado se rechaza aunque se tenga el permiso.
+    const acotado = mod.crearContexto({
+      tenantId: a,
+      rol: "owner",
+      actor: { tipo: "user", id: ana },
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      modulosActivos: ["comercial", "desempeno"],
+      alcance: { instalaciones: [] },
+    });
+    expect(await codigo(acotado, "desempeno.propios.archivar", { id: propio })).toBe("FORBIDDEN");
     // Un borrador que invierte el sentido no toca el indicador publicado ni el resultado del mes.
     const invertido = { ...ventasConCotizacion, id: propio, nombre: "Otro nombre", sentido: "menor" };
     const pendiente = await dato<Guardado>(ctx(a), GUARDAR, invertido);

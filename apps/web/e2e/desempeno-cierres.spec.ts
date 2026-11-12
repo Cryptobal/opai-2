@@ -27,10 +27,13 @@ test.describe("desempeño: meses cerrados", () => {
       const mes = ((await cerrar.textContent()) ?? "").replace(/^Cerrar /, "").trim();
       await cerrar.click();
       const dialogo = page.getByRole("alertdialog").or(page.getByRole("dialog"));
-      await expect(dialogo.getByText("no se puede reabrir")).toBeVisible();
+      await expect(dialogo.getByText(/no se puede reabrir/)).toBeVisible();
+      // Espera la simulación (cuántas personas quedan fijas) y el fin de la animación de entrada.
+      await expect(dialogo.getByText(/Se guarda el resultado de \d|quedará cerrado vacío/)).toBeVisible();
+      await page.waitForTimeout(300);
       await capturar(page, info, "desempeno-cierres-confirmar");
       await dialogo.getByRole("button", { name: `Cerrar ${mes}` }).click();
-      await expect(page.getByText(`${mes} quedó cerrado`)).toBeVisible();
+      await expect(page.getByText(`Listo: ${mes} quedó cerrado`)).toBeVisible();
       await expect(page.getByRole("button", { name: /^Cerrar / })).toHaveCount(0);
       await expect(page.getByText(mes).filter({ visible: true }).first()).toBeVisible();
     } else {

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { mesesDe, PERMISOS_DESEMPENO } from "./comun";
 import { PREFIJO_PROPIO } from "./propios-comun";
 
@@ -18,6 +18,8 @@ export const propiosArchivar = defineCapability({
   // Archivar no tiene vuelta atrás: a un agente siempre le pide aprobación humana.
   exigeAprobacion: () => true,
   async handler(ctx, input, { dryRun }) {
+    // El indicador es de toda la empresa: con un alcance acotado no corresponde archivarlo.
+    if (ctx.alcance !== null) throw prohibido("Con tu alcance no puedes archivar indicadores de la empresa.");
     const actual = await ctx.db.desempenoIndicadorPropio.findFirst({ where: { id: input.id } });
     if (!actual) throw noEncontrado("El indicador propio");
     const { actual: mes } = await mesesDe(ctx);

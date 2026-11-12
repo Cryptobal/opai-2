@@ -39,7 +39,8 @@ export const periodosList = defineCapability({
         cerradoEn: f.createdAt.toISOString(),
         personas: f.personas,
       })),
-      porCerrar: filas.some((f) => f.periodo === anterior) ? null : anterior,
+      // Solo quien puede cerrar (alcance completo) recibe el mes por cerrar.
+      porCerrar: ctx.alcance !== null || filas.some((f) => f.periodo === anterior) ? null : anterior,
     };
   },
 });
