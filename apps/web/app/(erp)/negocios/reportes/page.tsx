@@ -8,6 +8,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarReportes, PERIODOS, rutaReportes, type Periodo, type Tablero } from "./datos";
 import { PorResponsable } from "./por-responsable";
+import { PrimeraRespuesta } from "./primera-respuesta";
 import { Canales, Embudo, GanadosPerdidos, Pronostico } from "./secciones";
 
 export const metadata = { title: "Reportes comerciales" };
@@ -80,6 +81,7 @@ export default function ReportesComerciales({ searchParams }: Props) {
                   <Embudo t={t} />
                   <GanadosPerdidos t={t} />
                   {t.canales ? <Canales canales={t.canales} /> : null}
+                  {t.primeraRespuesta ? <PrimeraRespuesta r={t.primeraRespuesta} /> : null}
                   <Pronostico t={t} />
                   <PorResponsable t={t} periodo={d.periodo} responsableId={d.responsableId} />
                 </>

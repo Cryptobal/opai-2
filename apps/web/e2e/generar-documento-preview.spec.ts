@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Generar documento (CAR-127, PR 4a): desde la pestaña Documentos de una persona se abre la vista previa;
-// con plantillas elige la primera y se ve el documento, sin ellas se ve el estado vacío. Solo lee.
+// Generar documento (CAR-127, PR 4a y 4b): desde la pestaña Documentos de una persona se abre la vista previa;
+// con plantillas elige la primera y se ve el documento, sin ellas se ve el estado vacío. Solo lee: comprueba que el botón «Generar PDF» exista, sin crear documentos.
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(120_000);
 
@@ -31,6 +31,7 @@ test.describe("@preview personas: generar documento", () => {
     await page.getByLabel("Plantilla").click();
     await page.getByRole("option").first().click();
     await expect(page.locator("article.bg-paper")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: "Generar PDF" })).toBeVisible();
     await capturar(page, info, "generar-documento-vista");
   });
 });

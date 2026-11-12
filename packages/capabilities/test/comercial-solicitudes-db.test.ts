@@ -6,6 +6,7 @@ import { sembrarComercial } from "@opai/db";
 import { prepararEntorno, type Entorno } from "../../db/test/entorno";
 import * as mod from "../src";
 import { capacidadesComercial } from "../src/comercial";
+import { registrarModuloComercial } from "./comercial-modulo";
 import { codigo, dato } from "./maestros-ayuda";
 
 // Leads PR 1: solicitudes contra Postgres real (RLS sin BYPASSRLS): aislamiento entre empresas,
@@ -31,6 +32,7 @@ describe("comercial · solicitudes contra Postgres real", () => {
     e = await prepararEntorno();
     mod.limpiarRegistro();
     mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...capacidadesComercial]);
+    registrarModuloComercial();
     const nuevo = (slug: string) =>
       e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "seguridad" } });
     a = (await nuevo(`sol-a-${sufijo}`)).id;
@@ -204,6 +206,29 @@ describe("comercial · solicitudes contra Postgres real", () => {
     const fila = await e.admin.solicitud.findUniqueOrThrow({ where: { id: s.id } });
     expect(fila.responsableId).toBe(u.id);
     expect(await e.admin.canalSolicitud.count({ where: { tenantId: b } })).toBe(0);
+  });
+
+  it("primera respuesta: se marca una sola vez y la bandeja muestra el plazo si la empresa lo fijó", async () => {
+    const s = await crear(a);
+    const lista = () => dato<{ items: { id: string; plazo?: { estado: string } }[] }>(ctx(a), "comercial.solicitudes.list", {});
+    // Apagado por defecto: no hay plazo en la vista.
+    expect((await lista()).items.find((x) => x.id === s.id)?.plazo).toBeUndefined();
+    await dato(ctx(a), "core.config.set", { modulo: "comercial", clave: "solicitudes_primera_respuesta_horas", valor: 4 });
+    expect((await lista()).items.find((x) => x.id === s.id)?.plazo?.estado).toBe("dentro");
+    const antes = await e.admin.solicitud.findUniqueOrThrow({ where: { id: s.id } });
+    expect(antes.primeraRespuestaEn).toBeNull();
+    await dato(ctx(a), "comercial.solicitudes.derivar", { id: s.id });
+    const primera = (await e.admin.solicitud.findUniqueOrThrow({ where: { id: s.id } })).primeraRespuestaEn;
+    expect(primera).not.toBeNull();
+    // Descartar y reabrir después no cambia la hora de la primera respuesta.
+    await dato(ctx(a), "comercial.solicitudes.descartar", { id: s.id, motivo: "No es cliente" });
+    const despues = (await e.admin.solicitud.findUniqueOrThrow({ where: { id: s.id } })).primeraRespuestaEn;
+    expect(despues?.getTime()).toBe(primera?.getTime());
+    expect((await lista()).items.find((x) => x.id === s.id)?.plazo?.estado).toBe("a_tiempo");
+    // Otra empresa no ve el ajuste ni el plazo de esta.
+    const otra = await crear(b);
+    const deB = await dato<{ items: { id: string; plazo?: unknown }[] }>(ctx(b), "comercial.solicitudes.list", {});
+    expect(deB.items.find((x) => x.id === otra.id)?.plazo).toBeUndefined();
   });
 
   it("el aviso de la solicitud queda leído para todos al derivar, descartar, duplicar o convertir", async () => {

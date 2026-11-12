@@ -3,21 +3,14 @@
 import { z } from "zod";
 
 import {
-  documentoUsaVariablesSensibles,
-  etiquetaDeVariable,
-  fechaDeDocumento,
   PERMISOS_CORE,
-  rellenarPlantilla,
-  variablesDeDocumento,
 } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { diaSchema, hoy } from "../maestros/comun";
-import { personaDe } from "../maestros/personas-vista";
+import { diaSchema } from "../maestros/comun";
 import { claseSchema, firmantesSchema, nivelSchema } from "./plantillas-comun";
-import { valoresDePersona } from "./rellenar-valores";
+import { calcularRelleno } from "./rellenar-calculo";
 
 const segmento = z.object({
   texto: z.string(),
@@ -50,23 +43,7 @@ export const documentoPlantillasRellenar = defineCapability({
   // Revela datos personales: se audita el ID de la persona, sin el texto ni los valores.
   auditarLectura: (s) => [s.persona.id],
   async handler(ctx, input) {
-    const persona = await personaDe(ctx, input.personaId);
-    const plantilla = await ctx.db.documentoPlantilla.findUnique({ where: { id: input.plantillaId } });
-    if (!plantilla) throw noEncontrado("La plantilla");
-    if (!plantilla.activa) throw reglaDeNegocio("La plantilla está desactivada.");
-    const version = await ctx.db.documentoPlantillaVersion.findFirst({
-      where: { plantillaId: plantilla.id, numero: plantilla.versionVigente },
-    });
-    if (!version) throw noEncontrado("La versión vigente de la plantilla");
-    const fecha = input.fecha ?? hoy();
-    const claves = variablesDeDocumento(version.contenido);
-    const { valores, motivos } = await valoresDePersona(ctx, persona, fecha, claves, documentoUsaVariablesSensibles(version.contenido));
-    const relleno = rellenarPlantilla(version.contenido, { ...valores, "contrato.fecha": fechaDeDocumento(fecha) });
-    const faltantes = relleno.faltantes.map((clave) => ({
-      clave,
-      etiqueta: etiquetaDeVariable(clave),
-      motivo: motivos[clave] ?? "Falta el dato en la ficha.",
-    }));
+    const { persona, plantilla, version, relleno, faltantes } = await calcularRelleno(ctx, input);
     return {
       plantilla: { id: plantilla.id, nombre: plantilla.nombre, clase: plantilla.clase as z.infer<typeof claseSchema>, version: version.numero },
       persona: { id: persona.id, nombre: `${persona.nombres} ${persona.apellidos}` },

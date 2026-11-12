@@ -13,6 +13,8 @@ import {
   puede,
 } from "./solicitudes-dominio";
 import { reglaDeNegocio } from "../errores";
+import { ajuste } from "../core/config/valores";
+import { plazoPrimeraRespuesta, plazoSchema } from "./solicitudes-plazo";
 
 export const PERMISO_SOLICITUDES_READ = "comercial:solicitudes.read";
 export const PERMISO_SOLICITUDES_MANAGE = "comercial:solicitudes.manage";
@@ -52,6 +54,9 @@ export const solicitudSchema = z.object({
   cuentaId: z.string().nullable(),
   contactoId: z.string().nullable(),
   creadaEn: z.string(),
+  primeraRespuestaEn: z.string().nullable().optional(),
+  /** Solo en la bandeja y la ficha, y solo si la empresa fijó un tiempo objetivo. */
+  plazo: plazoSchema.optional(),
 });
 
 type Fila = {
@@ -81,7 +86,15 @@ type Fila = {
   cuentaId: string | null;
   contactoId: string | null;
   createdAt: Date;
+  primeraRespuestaEn?: Date | null;
 };
+
+/** Suma el plazo de primera respuesta a la vista; sin tiempo objetivo (0) no agrega nada. */
+export function vistaConPlazo(s: Fila, horas: number, ahora: Date): z.input<typeof solicitudSchema> {
+  const v = vistaSolicitud(s);
+  if (!(horas > 0)) return v;
+  return { ...v, plazo: plazoPrimeraRespuesta({ ...s, primeraRespuestaEn: s.primeraRespuestaEn ?? null }, horas, ahora) };
+}
 
 export function vistaSolicitud(s: Fila): z.input<typeof solicitudSchema> {
   return {
@@ -111,6 +124,7 @@ export function vistaSolicitud(s: Fila): z.input<typeof solicitudSchema> {
     cuentaId: s.cuentaId,
     contactoId: s.contactoId,
     creadaEn: s.createdAt.toISOString(),
+    primeraRespuestaEn: iso(s.primeraRespuestaEn ?? null),
   };
 }
 
@@ -127,4 +141,15 @@ export async function solicitudDe(ctx: Contexto, id: string) {
 export function exigirPuede(estado: string, accion: AccionSolicitud) {
   if (!puede(estado as EstadoSolicitud, accion))
     throw reglaDeNegocio(motivoRechazo(estado as EstadoSolicitud, accion));
+}
+
+/** Tiempo objetivo de primera respuesta de la empresa, en horas; 0 si está apagado. */
+export async function horasPrimeraRespuesta(ctx: Contexto): Promise<number> {
+  try {
+    const v = await ajuste<number>(ctx, "comercial", "solicitudes_primera_respuesta_horas");
+    return typeof v === "number" ? v : 0;
+  } catch {
+    // Sin el módulo registrado (p. ej. un entorno parcial) la bandeja sigue funcionando sin plazo.
+    return 0;
+  }
 }

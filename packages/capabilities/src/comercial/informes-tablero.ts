@@ -6,7 +6,8 @@ import { embudoDe, perdidasDe, porResponsable, pronosticoDe, resumenCierre, type
 import { canalesDe } from "./informes-tablero-canales";
 import { entradaTablero, salidaTablero } from "./informes-tablero-esquema";
 import { haceMeses, mesesDesde, rangosDe } from "./informes-tablero-periodo";
-import { PERMISO_SOLICITUDES_READ } from "./solicitudes-comun";
+import { PERMISO_SOLICITUDES_READ, horasPrimeraRespuesta } from "./solicitudes-comun";
+import { resumenPrimeraRespuesta } from "./solicitudes-plazo";
 import { CANALES_SOLICITUD } from "./solicitudes-dominio";
 
 const dia = (d: Date) => d.toISOString().slice(0, 10);
@@ -19,7 +20,7 @@ const TOPE = 20_000;
 export const informesTablero = defineCapability({
   id: "comercial.informes.tablero",
   descripcion:
-    "Tablero de reportes comerciales del mes, trimestre o año en curso, comparado con el período anterior: valor en curso, ganados y perdidos, conversión, ciclo promedio, embudo por etapa con días promedio y avance, motivos de pérdida y competidores de los últimos 12 meses, solicitudes por canal y su conversión a negocio, pronóstico ponderado por mes de cierre y tabla por responsable.",
+    "Tablero de reportes comerciales del mes, trimestre o año en curso, comparado con el período anterior: valor en curso, ganados y perdidos, conversión, ciclo promedio, embudo por etapa con días promedio y avance, motivos de pérdida y competidores de los últimos 12 meses, solicitudes por canal y su conversión a negocio, cumplimiento del tiempo de primera respuesta a solicitudes (si la empresa lo fijó), pronóstico ponderado por mes de cierre y tabla por responsable.",
   permiso: PERMISO_READ,
   input: entradaTablero,
   output: salidaTablero,
@@ -56,7 +57,7 @@ export const informesTablero = defineCapability({
       leeSolicitudes
         ? ctx.db.solicitud.findMany({
             where: { createdAt: { gte: aFecha(r.desde) }, duplicadaDeId: null, ...mio },
-            select: { canal: true, negocio: { select: { ...montos, estado: true } } },
+            select: { canal: true, estado: true, createdAt: true, primeraRespuestaEn: true, negocio: { select: { ...montos, estado: true } } },
             take: TOPE,
           })
         : Promise.resolve(null),
@@ -74,6 +75,7 @@ export const informesTablero = defineCapability({
       select: { id: true, name: true },
     });
     const perdidas = perdidasDe(cerrados, desde12);
+    const horasObjetivo = solicitudes ? await horasPrimeraRespuesta(ctx) : 0;
     const nombreEtapa = new Map(etapas.map((e) => [e.id, e.nombre]));
     return {
       periodo: input.periodo,
@@ -91,6 +93,7 @@ export const informesTablero = defineCapability({
         competidores: perdidas.competidores,
       },
       canales: solicitudes ? canalesDe(solicitudes, CANALES_SOLICITUD) : null,
+      primeraRespuesta: solicitudes ? resumenPrimeraRespuesta(solicitudes, horasObjetivo, new Date()) : null,
       pronostico: pronosticoDe(vivos, mesesDesde(fecha, 4)),
       responsables: tabla.map((t) => ({ ...t, nombre: usuarios.find((u) => u.id === t.responsableId)?.name ?? "Sin responsable" })),
     };
