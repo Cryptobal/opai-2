@@ -119,6 +119,22 @@ describe("trabajos", () => {
     expect(await ejecutarTrabajos(ctx, cola)).toMatchObject({ hechos: 1 });
   });
 
+  it("un trabajo con tiempo propio termina aunque pase el límite general (CAR-273)", async () => {
+    const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    registrarTrabajos([
+      defineTrabajo({ tipo: "core.prueba.lenta", descripcion: "prueba", payload: z.object({}).passthrough(), tiempoMaximoMs: 200, handler: async () => espera(80) }),
+      defineTrabajo({ tipo: "core.prueba.corta", descripcion: "prueba", payload: z.object({}).passthrough(), handler: async () => espera(80) }),
+    ]);
+    const { ctx, tabla } = contextoDePrueba();
+    await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.prueba.lenta" }));
+    await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.prueba.corta" }));
+    const r = await ejecutarTrabajos(ctx, colaDe(tabla), { timeoutMs: 40, hasta: Date.now() + 1_000 });
+    expect(r).toMatchObject({ hechos: 1, fallidos: 1 });
+    const porTipo = Object.fromEntries(tabla("trabajo").map((t) => [t["tipo"], t]));
+    expect(porTipo["core.prueba.lenta"]).toMatchObject({ estado: "hecho" });
+    expect(porTipo["core.prueba.corta"]).toMatchObject({ ultimoError: "Excedió 0.04 s." });
+  });
+
   it("un tipo desconocido falla sin reintento", async () => {
     const { ctx, tabla } = contextoDePrueba();
     await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.no.existe" }));

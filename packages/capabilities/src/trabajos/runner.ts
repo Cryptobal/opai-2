@@ -64,9 +64,11 @@ export async function ejecutarTrabajos(
       const def = obtenerTrabajo(t.tipo);
       try {
         if (!def) throw new Error(`Tipo de trabajo desconocido: "${t.tipo}".`);
+        // Un trabajo que pide más tiempo (consultas al SII) lo recibe, sin pasarse de lo que le queda a la vuelta.
+        const limite = Math.max(timeoutMs, Math.min(def.tiempoMaximoMs ?? timeoutMs, hasta - Date.now()));
         await cola.completar(
           t.id,
-          await conTimeout((signal) => def.ejecutar(ctx, t.payload, signal), timeoutMs),
+          await conTimeout((signal) => def.ejecutar(ctx, t.payload, signal), limite),
         );
         hechos += 1;
       } catch (e) {
