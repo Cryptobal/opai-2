@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
 import { documentosMatriz } from "../documentos/matriz";
 import { SIN_PLATAFORMA } from "../../agentes/plataforma";
+import { definicionVisible } from "../../integraciones/resolver";
 import { pendientesAnexos } from "./pendientes-anexos";
 import { pendientesSolicitudes } from "./pendientes-solicitudes";
 
@@ -112,7 +113,9 @@ export const inicioPendientes = defineCapability({
           where: { estado: "error" },
           select: { proveedor: true },
         });
-        for (const i of conError)
+        // Una integración restringida que la empresa no tiene habilitada no existe para ella (CAR-321).
+        const visibles = await Promise.all(conError.map((i) => definicionVisible(ctx, i.proveedor)));
+        for (const i of conError.filter((_, n) => visibles[n]))
           items.push({
             tipo: "integraciones",
             titulo: `${i.proveedor} con error`,

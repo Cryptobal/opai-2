@@ -14,6 +14,14 @@ export function consultaLista(p: Parametros) {
   return `?${q.toString()}`;
 }
 
+/** Descarga del Excel con la búsqueda, el estado, la etapa y la etiqueta de la pantalla (CAR-27). */
+export function urlExportarNegocios(p: Parametros) {
+  const q = new URLSearchParams();
+  for (const k of ["q", "estado", "etapa", "etiqueta"]) if (p[k]) q.set(k, p[k]);
+  const c = q.toString();
+  return c ? `/api/negocios/export?${c}` : "/api/negocios/export";
+}
+
 /** Ficha abierta desde una tarjeta del tablero: recuerda su columna (`?tablero=<etapaId>`). */
 export const fichaDesdeTablero = (negocioId: string, etapaId: string) =>
   `/negocios/${negocioId}?tablero=${etapaId}`;

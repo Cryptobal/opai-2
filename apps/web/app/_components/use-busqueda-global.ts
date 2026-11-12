@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, MapPin, Settings, Sparkles } from "lucide-react";
+import { Building2, FileText, Handshake, Inbox, MapPin, Settings, Sparkles } from "lucide-react";
 import { useCallback, useMemo } from "react";
 
 import type { GrupoPaleta, ItemPaleta } from "@opai/ds";
@@ -20,8 +20,11 @@ const grupoAgente = (hay: boolean, q: string): GrupoPaleta[] =>
   hay
     ? [{ titulo: "Agente", items: [{ id: ASK + q, etiqueta: q ? `Preguntar a OPAI: «${q}»` : "Preguntar a OPAI", icono: Sparkles, href: "#" }] }]
     : [];
+const iconoGrupo = (g: string) => (g === "negocios" ? Handshake : g === "cotizaciones" ? FileText : Inbox);
 type Resultado = { id: string; titulo: string; detalle: string | null; href: string };
-type Busqueda = Record<"cuentas" | "instalaciones" | "personas" | "contactos", Resultado[]>;
+type Busqueda = Record<"cuentas" | "instalaciones" | "personas" | "contactos", Resultado[]> & {
+  otros?: { grupo: string; titulo: string; items: Resultado[] }[];
+};
 type Ajuste = { modulo: string; clave: string; etiqueta: string; grupo: string | null };
 
 type Opciones = {
@@ -119,6 +122,10 @@ export function useBusquedaGlobal({ abierto, epoca, acciones, nav, agente, route
             href: x.href,
           })),
         },
+        ...(d?.otros ?? []).map((g) => ({
+          titulo: g.titulo,
+          items: g.items.map((x) => ({ id: x.id, etiqueta: x.titulo, ...(x.detalle ? { detalle: x.detalle } : {}), icono: iconoGrupo(g.grupo), href: x.href })),
+        })),
         {
           titulo: "Ajustes",
           items: (a.ok ? (a.data as Ajuste[]) : []).slice(0, 5).map((x) => ({

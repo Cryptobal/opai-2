@@ -9,7 +9,11 @@ import type { Marco } from "@/lib/marco";
 
 const DISENOS = [
   { valor: "clasico", etiqueta: "Clásico", descripcion: "Menú lateral y barra superior" },
-  { valor: "hilo", etiqueta: "Hilo", descripcion: "Tus pendientes, la pantalla de trabajo y la búsqueda al pie" },
+  {
+    valor: "hilo",
+    etiqueta: "Hilo",
+    descripcion: "Tus pendientes, la pantalla de trabajo y la búsqueda al pie",
+  },
 ];
 
 /**

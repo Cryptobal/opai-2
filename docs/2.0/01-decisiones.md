@@ -1439,6 +1439,8 @@ identidad de servicio en main.
 
 **Decisión.** Las reglas de conciliación se mantienen y se hacen funcionar. Bancos tiene una pestaña para crearlas, editarlas, activarlas y desactivarlas. Se evalúan al importar la cartola (archivo o Web4Leads): concilian solas solo cuando el monto y la referencia calzan exacto; en cualquier otro caso dejan una sugerencia que una persona confirma. Toda creación o cambio de regla es una capacidad con vista previa y MCP; la conciliación automática queda en la auditoría con la regla que la produjo.
 
+**Adenda del 12-nov-2026 (CAR-328, pedido de Carlos del 12-nov; registrada por la sesión de Finanzas).** Implementación: toda regla clasifica a una **fila del flujo** (obligatoria) y, opcional, a una **cuenta contable** de movimiento, con alcance abonos, cargos o ambos; la fila debe ser de la sección que corresponde al signo. Se aplica la primera regla que calce por prioridad (mayor primero). Concilia sola solo con modo «todas», monto exacto y referencia igual; lo demás queda «sugerido» y «Reconocer» ofrece la regla para confirmar con un clic. «Reconocer» permite además conciliar a mano contra una fila del flujo con su cuenta contable y crear la regla en el mismo paso. «Aplicar a lo pendiente» vuelve a evaluar los movimientos sin reconocer. Las reglas sugeridas por patrón (diseño «Reglas sugeridas», variante B) quedan fuera hasta que Carlos las apruebe.
+
 ---
 
 ## ADR-075 · El XML firmado de un DTE se maneja en ISO-8859-1, como bytes que no se transcodifican
@@ -1723,6 +1725,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 ## ADR-090 · Base «Hilo»: marco agéntico con interruptor y barra del agente en los portales (CAR-274, 11-nov-2026)
 
+> **Reemplazado como diseño de destino por ADR-109 (12-nov-2026).** Lo construido con Hilo sigue funcionando hasta que su pantalla pase al diseño nuevo.
+
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» · **Registra:** Claude («Sesión Hilo»). **Modifica** ADR-046 y `NAVEGACION.md` (el marco), ADR-049 y `modulos/agente.md` (portales del agente: R1 y la decisión del 29-oct sobre la pregunta 9) y ADR-014 y `DISENO.md` (la piel del DS, en la etapa H2). **Extiende** a la base Hilo el proceso de diseño de ADR-076. **No modifica** ADR-032 §3, ADR-033, ADR-045 ni ADR-055 §2.
 
 **Fuente (11-nov-2026, hora de Chile).** 10:56, sobre la propuesta: «me gusta». 11:50: «si que esten en todos los portales». 11:55: «lo apruebo para que lo hagas y poder verlo en produccion […] quiero que este nuevo diseño sea COPIA FIEL a lo que estoy viendo ahora, 100% identica. Mi objetivo y tuyo es que sea un saas 100% agentico, que se pueda conectar a IA externas y que desde ahi se pueda comandar, operar». 11:57: «hoy en dia la IA lo es todo, quiero que opai 2 sea asi». Aquí «producción» es `test.opai.cl`: la producción de Gard sigue prohibida para los agentes (`AGENTS.md`).
@@ -1799,12 +1803,12 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Prioridad.** Entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones (decisión 6): no se tocan sus archivos ni los del PR de MFA (#499) mientras siga abierto.
 
-**Respuestas de Carlos (11-nov-2026, en la sesión).**
+**Respuestas de Carlos (11-nov-2026, en la sesión; confirmadas a las 17:08).**
 1. **Pánico:** se aprieta en la app de terreno (la del guardia), que es la que está en terreno. El botón nace ahí y emite el evento de pánico que consume F3.
 2. **Espacio Slack de pruebas:** sí. Las apps se registran en él (la de pruebas) y la distribuida aparte, cuando F1 esté desplegado.
 3. **Canales de supervisión:** públicos. Se mantienen los scopes de §8, sin `groups:*`.
 4. **Valores por defecto:** aprobados los del plan (atraso sobre 15 min, ausencia y pánico al canal encendidos; lo demás apagado; escalamiento a los 5 min si se enciende).
-5. **Escalamiento del pánico:** a un grupo de usuarios o a personas, configurable en cada tenant.
+5. **Escalamiento del pánico:** lo recibe **un grupo de usuarios de OPAI** (CAR-251) que cada empresa elige (Carlos lo precisó a las 17:08, aprobando la sugerencia de la sesión).
 
 ## ADR-094 · Desempeño: indicadores publicados por los módulos y scorecard por cargo configurable por empresa (CAR-303, 11-nov-2026)
 
@@ -1905,3 +1909,133 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 6. **Borde de los campos con contraste AA** (decisión técnica de la sesión, desvío declarado). El export dibuja los campos con el borde tenue de las líneas. Se mantiene el borde de control del DS (3:1), porque el contraste AA es regla del repositorio y criterio de aceptación de la piel. Si Carlos prefiere el borde del export, es un cambio de un token.
 7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
 8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.
+
+### ADR-097 · Adenda 1 (12-nov-2026, CAR-315 parte 2)
+
+**Decide:** Carlos («CAR 315 parte 2, hazlo ahora», 12-nov-2026, 07:26, hora de Chile) · **Registra:** Claude («Sesión Personas y Documentos»), en el PR de CAR-315 parte 2.
+
+1. **Dos clases nuevas de plantilla: `contrato_servicio` (ámbito cuenta) y `acta` (ámbito instalación)**, reutilizando las clases de firma que ya existían. Cada clase tiene un **ámbito** (persona, cuenta o instalación) que decide qué variables valen: persona = persona, vínculo, instalación, sueldo, contrato; cuenta = cuenta, contrato; instalación = instalación, cuenta, contrato. El servidor rechaza al guardar una variable fuera del ámbito y el panel del editor solo ofrece las del ámbito.
+2. **Generación sobre la entidad:** `core.documento_plantillas.rellenar_entidad` y `generar_entidad` (vista previa, dryRun, PDF con la marca del tenant, vínculo «propietario» a la cuenta o instalación). Las capacidades de persona rechazan plantillas de otro ámbito y al revés. Pantalla «Generar documento» en la pestaña Documentos de la cuenta y de la instalación.
+3. **Sigue pendiente:** Configuración › Módulos › Documentos (tipos configurables por tenant) y el editor con más formato, ambos con diseño.
+
+## ADR-098 · Entrar a OPAI desde Claude con la cuenta propia: OAuth del MCP adelantado (CAR-247, 11-nov-2026)
+
+**Decide:** Carlos, en el chat del proyecto «Opai 2.0», 11-nov-2026 a las 20:16 (hora de Chile) · **Registra:** Claude («Sesión Hilo»).
+
+**Contexto.** El 10-nov Carlos decidió hacer OAuth para el MCP después de v1.0 (9-dic). El 11-nov pidió adelantar el conector interactivo de Claude (CAR-287), y Claude exige que cada persona entre con su cuenta para agregar un conector propio.
+
+**Decisión.**
+1. Se adelanta CAR-247: OAuth por usuario para `/api/mcp`, antes de v1.0. El token actúa como agente vía la persona (permisos, alcance, empresa y aprobaciones de ADR-032), atado a la empresa que elige después de entrar. Diseño en `briefs/BRIEF-CAR-247-oauth-mcp.md`.
+2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
+
+**Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
+
+### Adenda 1 a ADR-098 · Tope de gasto de las apps conectadas (Carlos, 12-nov-2026, 07:28)
+
+Respuesta de Carlos («Opción 1») a la `DECISIÓN CARLOS:` del PR #535: las apps conectadas por OAuth (Claude u otras) **comparten el presupuesto mensual del agente de la empresa** (ajuste `agente.presupuestoMensualMicro`, el mismo del agente interno). No hay un tope por cada app. El medidor cobra su consumo en el mismo registro del agente interno (`agente-interno`); al agotarse, tanto el agente interno como las apps reciben `BUDGET_EXCEEDED` hasta el mes siguiente o hasta que suba el tope. Código: `esAgenteSinKey` en `packages/db/src/presupuesto.ts`.
+
+### Adenda a ADR-095 · «Ninguna, sigo» significa seguir (Carlos, 11-nov-2026, 22:56)
+
+Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con el trabajo en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una revisión a sí misma cada pocos minutos y avanza mientras tanto con lo que no dependa de eso. Los avisos automáticos de GitHub no se responden uno por uno. Solo se detiene por una decisión real o porque no queda trabajo posible, y dice por qué. Regla escrita en `AGENTS.md` («Decisiones de Carlos»).
+
+## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)
+
+**Contexto.** Mientras OPAI 1 y OPAI 2 emitan facturas a la vez, los dos usan folios de la misma serie sin saber del otro, y el SII rechazaría o dejaría mal emitido un folio repetido. Carlos pidió no pasar a producción todavía y fijó qué tiene que funcionar antes.
+
+**Decisión.** La facturación de Gard pasa a producción en OPAI 2 (CAR-271) cuando funcionen en OPAI 2 estas cuatro cosas:
+1. **Movimientos del banco de Gard llegando a OPAI 2.** Por ahora OPAI 1 reenvía a OPAI 2 lo que recibe de Web4Leads (CAR-284; Carlos autorizó el cambio mínimo en OPAI 1, integrado en `Cryptobal/opai#1370`).
+2. **Flujo de caja funcionando con datos reales** (CAR-268, CAR-269).
+3. **Programación de facturas y envío de proforma funcionando** (CAR-320).
+4. **Todas las facturas, notas de crédito y notas de débito emitidas en OPAI 1 migradas a OPAI 2** (CAR-283).
+
+**Consecuencias.**
+- Hasta entonces OPAI 2 emite solo en certificación; el CAF 33 2064–2068 (producción) sigue pausado.
+- No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
+- La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).
+
+## ADR-100 · Varias cuentas bancarias por persona; el anticipo vive solo en Nómina (CAR-275, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026, opción A).** Una persona puede tener varias cuentas bancarias; una sola es «por defecto» y es la que lee la nómina de pago (Rendiciones). El **anticipo** no se modela en la ficha: vive únicamente en Nómina, sin cambios.
+
+**Cómo.** `core.personas_pago` pasa de 1:1 a 1:N (índice único parcial `WHERE por_defecto`, a lo más una por defecto por persona) y suma `titular_nombre`. Las solicitudes (`personas_pago_solicitudes`) suman `tipo` (`reemplazar`, `agregar`, `marcar_defecto`, `quitar`), `cuenta_id`, `titular_nombre` y `por_defecto`. Se reutiliza `core.personas.pago_solicitar_cambio` con esos campos opcionales: sin capacidades nuevas, la aprobación sigue siendo de otra persona (`pago_aprobar_cambio`, solo personas). No se puede quitar la cuenta por defecto. El número de cuenta sigue cifrado por campo. La migración es aditiva y reversible (reversión en su cabecera) y marca la cuenta actual de cada persona como por defecto con verificación de filas.
+
+**Fuera de alcance.** Que la persona valide sus cuentas desde el Portal Trabajador (B1): Carlos no lo decidió.
+
+## ADR-101 · Las personas de OPAI 1 llegan por Excel, sin tocar el exportador de 1.0 (CAR-282, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026).** La importación de personas desde OPAI 1 se hace **vía Excel**: se exporta la lista de guardias y personas desde OPAI 1 a una planilla y se carga en Configuración › Importar datos con el motor común. No se amplía el exportador de OPAI 1 (no se toca 1.0).
+
+**Cómo se usa.** 1) Importar **Personas** (ficha, previsión y cuenta bancaria; se reconocen por RUT, reimportar no duplica; la simulación muestra los errores fila por fila). 2) Importar **Contratos vigentes** (cargo, instalación, tipo, inicio, horas y distribución) con las personas e instalaciones ya creadas. Ambos importadores reconocen los nombres de columna de 1.0 (`firstName`, `lastName`, `hiredAt`, `contractType`…) y se revierten por lote. La cuenta bancaria importada queda como cuenta por defecto (ADR-100).
+
+**Fuera de alcance.** Anexos y finiquitos (CAR-58) y el adaptador JSON de contratos (el export de 1.0 no trae `OpsGuardia`).
+
+## Adenda ADR-099 · Gard queda habilitada para «OPAI 1 (traer datos)» (CAR-279, 12-nov-2026, pedido de Carlos)
+
+**Decisión.** Para traer los datos de Gard desde OPAI 1, la empresa Gard se agrega a `core.integraciones_habilitadas` (clave «opai1») con una migración de datos aditiva, aplicada por el bot «OPAI 2.0» con respaldo (dev y luego main). La migración no pisa otras empresas, no hace nada si la base no tiene la empresa «gard» y se puede repetir sin efecto.
+
+**Por qué.** El ajuste es de plataforma y no aparece en Plataforma › Ajustes, así que no se podía habilitar por pantalla. Arreglar esa pantalla queda para la sesión Proyecto (CAR-321).
+
+**Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.
+
+## ADR-103 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 06:54, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** La programación de facturas primero genera un borrador que no se manda a nadie. Si tiene activada la proforma o el estado de pago, esos documentos se mandan a los destinatarios de la cuenta. Cuando el cliente aprueba (un OK por correo), se emite la factura y va a los mismos destinatarios. Hasta hoy, OPAI 2 mandaba a un solo destinatario principal y el resto en copia. OPAI 1 admite 10 PARA y 10 CC. El importador de facturas históricas (CAR-283) dejó abierta qué hacer con una factura que no trae el monto cobrado.
+
+**Decisión.**
+1. **Todos los destinatarios reciben por igual.** Los contactos de facturación asignados (los de la programación o, si no hay, los de la cuenta) van todos como destinatarios principales (PARA), hasta 10. El resto va en copia. Lo mismo vale para la proforma, el estado de pago y la factura con su XML.
+2. **La casilla DTE del cliente va siempre en copia.** Es la casilla que recibe el XML y el DTE. Se agrega en copia aunque no esté en la lista guardada. Si el cliente no tiene ningún contacto de facturación, va como PARA.
+3. **Facturas importadas: todas cobradas.** Toda factura importada sin monto cobrado se da por cobrada entera, porque así están las de Gard. Si alguna no lo está, Carlos lo avisa y se corrige a mano.
+
+**Consecuencias.**
+- La migración `20261130100000_finanzas_destinatarios_varios_para` quita el índice que permitía un solo PARA por documento. El tope de 10 lo valida el dominio (`MAX_PARA`).
+- El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
+- La regla por defecto del importador (#542) queda confirmada.
+- Este ADR se numeró primero como ADR-100, número que en `main` tomó antes CAR-275; el comentario de la migración `20261130100000` conserva «ADR-100» porque ya está aplicada y su checksum no puede cambiar.
+- El recordatorio de cobro de una factura vencida usa los mismos destinatarios que la factura (`destinosDeDocumento`): así el cliente recibe la cobranza en las mismas casillas que la factura, con la casilla DTE en copia.
+
+## ADR-102 · Hilo es el sistema de diseño predeterminado para todo diseño nuevo (CAR-324, 12-nov-2026)
+
+> **Reemplazado por ADR-109 (12-nov-2026):** el sistema predeterminado es el diseño nuevo.
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 10:57, hora de Chile) · **Registra:** Claude. (ADR-098 a ADR-101 están reservados por PRs abiertos.)
+
+**Decisión.** Todo diseño nuevo de OPAI 2.0 (Design Prompts, pantallas y piezas) se hace en Claude Design con el sistema «OPAI 2.0 Design System · Hilo». «OPAI 2.0 V2» y los sistemas anteriores quedan solo como referencia de lo ya construido; no se diseñan pantallas nuevas con ellos.
+
+**Por qué.** Hilo es la base visual que se está construyendo (ADR-090). Diseñar con un solo sistema evita mezclar dos estilos y que una pantalla aprobada en V2 tenga que rehacerse.
+
+**Consecuencias.** `DISENO.md` §3b lo deja como regla. El sistema en Claude Design se mantiene al día con `packages/ds`: si cambia la piel Hilo, se actualiza en el mismo PR o en el siguiente. Las pantallas ya construidas con la base clásica no se rediseñan por esta regla; se pasan a Hilo cuando su módulo entre en un bloque de Hilo (H3 y siguientes).
+
+## ADR-104 · Las sesiones de Claude no dependen del bot «OPAI 2.0» (12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 11:26 y 11:40, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** El bot «OPAI 2.0» (Grok) dejó de responder la noche del 11-nov y varios PR quedaron esperando que aplicara su migración (#527, #528, #537, #558).
+
+**Decisión.** Ni esta sesión ni ninguna otra sesión de Claude depende del bot «OPAI 2.0». Cada sesión aplica la migración de su propio PR con el procedimiento de siempre (respaldo de `dev` y `main`, `dev` antes que `main`, `lock_timeout` corto, verificación y aviso en el PR) y quita `migracion-pendiente`. Reemplaza en esto a ADR-054 y ADR-070.
+
+**Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
+
+## ADR-109 · Diseño nuevo de OPAI 2.0: reemplaza a Hilo (CAR-335, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 18:27, hora de Chile) · **Registra:** Claude. (ADR-105 a ADR-108 están reservados por PRs abiertos.)
+
+**Decisión.** El diseño oficial de OPAI 2.0 pasa a ser el prototipo `docs/2.0/design/export-diseno-nuevo/` («cambio total», en palabras de Carlos). Reemplaza al marco Hilo (ADR-090) y a la regla de diseñar todo con Hilo (ADR-102). En resumen: blanco y negro con líneas finas y un solo color de acento, que es **el color de cada empresa**; menú lateral con íconos y acordeón, que se puede cerrar y se asoma al pasar el mouse; el agente como sección propia y dentro de cada ficha; buscador único; listas y fichas idénticas en todos los módulos; y el teléfono y el iPad al mismo nivel que el escritorio. El detalle está en el README del export.
+
+**Por qué.** Carlos probó dos propuestas de color sobre Hilo y ninguna lo convenció («hay algo que no me cierra»). Pidió partir de referentes reconocidos (Vercel, Linear) y rehacer la propuesta completa. Tras cinco rondas sobre el prototipo lo aprobó como diseño oficial.
+
+**Consecuencias.**
+- Todo diseño nuevo se hace con este sistema. Hilo y «OPAI 2.0 V2» quedan solo como referencia de lo ya construido.
+- No se empiezan bloques nuevos de Hilo. Los PR de Hilo ya abiertos (H3, reglas y auditoría) se integran o se cierran según decida su sesión; lo que construyan sigue funcionando hasta que su pantalla pase al diseño nuevo.
+- **También reemplaza a ADR-105** («Hilo es la fuente única de diseño, con reglas verificables», PR #584 abierto): sus reglas y su auditoría se adaptan al diseño nuevo o el PR se cierra; lo decide su sesión con este ADR a la vista.
+- **Qué más modifica.** `NAVEGACION.md` §3 y D11: vuelve el menú lateral, el agente es una sección del menú y la barra inferior del teléfono es Inicio, Agente, Menú y Yo. `DISENO.md` §1: las fuentes pasan a Geist y Geist Mono. ADR-090 punto 2: mientras se construye hay una tercera piel. Esos archivos se actualizan en el bloque que construye cada cosa (D1 las fuentes, D2 la navegación), no antes, para que sigan describiendo lo que está en `main`.
+- **Plataforma** usa el mismo marco, pero sin la sección Agente: el agente interno no entra a Plataforma (ADR-090 punto 4 y ADR-055).
+- CAR-336 a CAR-340 siguen abiertas: son mejoras de comportamiento (detalle a la derecha, botón de alta en todas las listas, vistas que se actualizan al tiro, actividad con más contexto, estados vacíos). El diseño nuevo ya contempla 336, 337 y 340; se construyen dentro de D4 con este diseño, no sobre Hilo.
+- La etapa H4 de Hilo (barra del agente) no se construye; su objetivo lo cubren D2 (Agente como sección) y D5 (agente en la ficha).
+- La construcción va por bloques, en `briefs/BRIEF-CAR-335-diseno-nuevo.md`: primero el sistema de diseño (tokens, fuentes, color por empresa y piezas), después el marco e Inicio, y luego módulo por módulo. Mientras tanto la aplicación sigue como está: ningún bloque deja pantallas a medio cambiar.
+- El color por empresa usa el perfil de marca del núcleo (ADR-028); no se agregan colores fijos de Gard.
+- `DISENO.md` §3c lo deja como regla.
+

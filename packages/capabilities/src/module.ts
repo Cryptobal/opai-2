@@ -1,3 +1,4 @@
+import { type Buscador, limpiarBuscadores, registrarBuscadores } from "./core/maestros/buscadores";
 import { esAreaNav, type DatoPersonalDeclarado } from "@opai/domain";
 import type { z } from "zod";
 
@@ -62,6 +63,8 @@ export type ModuleManifest = {
   indicadores?: readonly IndicadorGestion[];
   /** Hechos que ofrece para que la empresa arme indicadores propios (CAR-313). */
   hechos?: readonly HechoGestion[];
+  /** Lo que aporta a la búsqueda global ⌘K / `core.buscar` (CAR-301). El núcleo lo ejecuta según el permiso. */
+  buscadores?: readonly Buscador[];
 };
 
 /** Declara un módulo validando que ids, permisos y capacidades le pertenezcan. */
@@ -159,6 +162,7 @@ export function obtenerModulo(id: string): ModuleManifest | undefined {
 /** Solo para tests y para reconstruir el registro. */
 export function limpiarModulos(): void {
   manifests.clear();
+  limpiarBuscadores();
 }
 
 /** Registra módulos verificando dependencias y registrando sus capacidades. */
@@ -171,6 +175,7 @@ export function registrarModulos(modulos: readonly ModuleManifest[]): void {
       }
     }
     registrarCapacidades(modulo.capacidades);
+    registrarBuscadores(modulo.buscadores ?? []);
     manifests.set(modulo.id, modulo);
   }
 }
