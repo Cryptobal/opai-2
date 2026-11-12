@@ -2,6 +2,7 @@ import { type DocumentoCobranza, diaEnZona, ESTADOS_DTE_COBRABLES, TIPOS_DTE_COB
 
 import type { Contexto } from "../types";
 import { notasCreditoPorDocumento } from "./cobros";
+import { ORIGEN_HISTORICO } from "./cobros-origen";
 import { ambitoHabil, zonaDe } from "../comercial/seguimiento-comun";
 import { ajuste } from "../core/config/valores";
 
@@ -48,13 +49,13 @@ export async function documentosCobrables(ctx: Contexto, cuentaId?: string): Pro
 }
 
 /**
- * Ids de las facturas que vienen de la apertura desde 1.0 (decisión de Carlos, CAR-168): 1.0 no mandaba nada solo
- * y el cliente no debe recibir correos por deuda histórica. Quedan fuera de los recordatorios y de «Hoy en Finanzas».
+ * Ids de las facturas que vienen de la apertura desde 1.0 (decisión de Carlos, CAR-168) o del importador de documentos
+ * de venta (CAR-283): el cliente no debe recibir correos por deuda histórica. Quedan fuera de los recordatorios y de «Hoy en Finanzas».
  */
 export async function idsDeApertura(ctx: Contexto, docs: { id: string }[]): Promise<Set<string>> {
   if (!docs.length) return new Set();
   const filas = await ctx.db.importacionFila.findMany({
-    where: { entidad: "documento_cobrar", id20: { in: docs.map((d) => d.id) }, importacion: { versionContrato: "finanzas-apertura@1" } },
+    where: { id20: { in: docs.map((d) => d.id) }, OR: ORIGEN_HISTORICO },
     select: { id20: true },
   });
   return new Set(filas.flatMap((f) => (f.id20 ? [f.id20] : [])));
