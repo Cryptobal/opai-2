@@ -10,3 +10,4 @@ export * from "./limites-cartola";
 export * from "./celda-excel";
 export * from "./web4leads";
 export * from "./reglas-banco";
+export * from "./santander-columnas";
