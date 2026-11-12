@@ -7,6 +7,7 @@ export * from "./email";
 export * from "./firma";
 export * from "./biometria";
 export * from "./sii";
+export * from "./slack";
 export * from "./cesion";
 export * from "./dte/pdf";
 export * from "./geo/google";

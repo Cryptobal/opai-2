@@ -66,7 +66,7 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
   { id: 4, actividad: "Notificaciones y avisos operativos", categoriaPrincipal: "Contacto", baseLicitud: "interes_legitimo", tablas: ["envios"] },
   { id: 5, actividad: "Intentos de ingreso", categoriaPrincipal: "Identificación", baseLicitud: "interes_legitimo", tablas: ["sessions", "login_intentos"] },
   { id: 6, actividad: "Documentos de personas", categoriaPrincipal: "Laboral", baseLicitud: "obligacion_legal", tablas: ["documentos"] },
-  { id: 7, actividad: "Cuentas de usuario de la plataforma", categoriaPrincipal: "Identificación", baseLicitud: "contrato", tablas: ["users", "accounts", "invitations"] },
+  { id: 7, actividad: "Cuentas de usuario de la plataforma", categoriaPrincipal: "Identificación", baseLicitud: "contrato", tablas: ["users", "accounts", "invitations", "oauth_access_tokens", "oauth_refresh_tokens"] },
   { id: 8, actividad: "Datos de la empresa y su representante legal", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["perfil_empresa"] },
   { id: 9, actividad: "Trazabilidad y cumplimiento", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["audit_events", "auditoria_global", "dpa_aceptaciones", "retencion_ejecuciones"] },
   { id: 10, actividad: "Consentimientos de fines accesorios", categoriaPrincipal: "Identificación", baseLicitud: "consentimiento", tablas: ["consentimientos"] },

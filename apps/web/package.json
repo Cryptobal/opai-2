@@ -24,7 +24,7 @@
     "@opai/integrations": "workspace:*",
     "@opai/modules": "workspace:*",
     "@simplewebauthn/browser": "13.3.0",
-    "better-auth": "^1.7.12",
+    "better-auth": "^1.7.21",
     "lucide-react": "^1.61.0",
     "mcp-handler": "^2.3.0",
     "next": "16.4.2",
@@ -34,7 +34,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@better-auth/utils": "0.5.0",
+    "@better-auth/utils": "0.5.1",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4.3.3",
     "@types/node": "^22.20.5",

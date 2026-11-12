@@ -69,7 +69,8 @@ export const solicitudesCreate = defineCapability({
       responsableId,
       registradaPorTipo: esAgente ? "agente" : "usuario",
       registradaPorId: ctx.usuario?.id ?? null,
-      registradaPorApiKeyId: esAgente ? ctx.actor.id : null,
+      // Solo agentes con key: el agente interno y las apps OAuth no tienen (CAR-247).
+      registradaPorApiKeyId: ctx.actor.tipo === "agent" && !ctx.actor.interno ? ctx.actor.id : null,
       camposPropuestosAgente: esAgente ? fusionarCamposPropuestos([], parcial) : [],
     });
     if (dryRun) {

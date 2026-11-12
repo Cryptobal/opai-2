@@ -64,7 +64,7 @@ describe.skipIf(!urlPropietario)("core.buscar: agentes, permiso, alcance y audit
       expect(await mod.executeCapability(ctx, "core.buscar", { q: "Lectura" })).toEqual({
         ok: true,
         dryRun: false,
-        data: { cuentas: [], instalaciones: [], personas: [], contactos: [] },
+        data: { cuentas: [], instalaciones: [], personas: [], contactos: [], otros: [] },
       });
       expect((await ultimoEvento()).payload).toEqual({ ids: [] });
     }

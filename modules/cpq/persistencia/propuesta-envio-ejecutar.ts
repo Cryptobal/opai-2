@@ -142,7 +142,7 @@ export async function ejecutarEnvioPropuestaAprobado(
   await enviarCorreosEnvioPropuesta(
     ctx,
     destinatarios,
-    { cuentaId: neg.cuentaId, negocioId: c.negocioId, codigo: c.codigo, titulo: c.titulo, version: pack.version.numero, mensaje: row.mensaje ?? "" },
+    { cuentaId: neg.cuentaId, negocioId: c.negocioId, cotizacionId: c.id, codigo: c.codigo, titulo: c.titulo, version: pack.version.numero, mensaje: row.mensaje ?? "" },
     pdfs,
   );
   return { documentoCotizacionId, documentoPropuestaId, snapshot: parseSnapshotEnvioPropuesta(snapshotJson) };

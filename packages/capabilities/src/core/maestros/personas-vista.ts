@@ -11,7 +11,7 @@ export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
 
 export const vinculoResumenSchema = vinculoSchema
   .omit({ personaId: true, estado: true, motivoTermino: true, updatedAt: true })
-  .extend({ cargo: z.string() });
+  .extend({ cargo: z.string(), instalacion: z.string().nullable().optional().describe("Nombre de la instalación del contrato (la cabecera de la ficha); solo en la ficha.") });
 
 export const personaSchema = z.object({
   id: z.string(),
@@ -133,6 +133,7 @@ export async function personaDe(ctx: Contexto, id: string) {
 export function vinculoVista(
   v: Omit<FilaVinculo, "personaId" | "inicio"> & {
     cargo?: { nombre: string } | null;
+    instalacion?: { nombre: string } | null;
     inicio: Date | null;
   },
 ): z.input<typeof vinculoResumenSchema> {
@@ -141,6 +142,7 @@ export function vinculoVista(
     id: v.id,
     cargoId: v.cargoId,
     cargo: v.cargo?.nombre ?? "",
+    ...(v.instalacion ? { instalacion: v.instalacion.nombre } : {}),
     tipo: v.tipo,
     inicio: dia(v.inicio) ?? "",
     termino: dia(v.termino),
