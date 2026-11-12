@@ -1946,3 +1946,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Por qué.** Hilo es la base visual que se está construyendo (ADR-090). Diseñar con un solo sistema evita mezclar dos estilos y que una pantalla aprobada en V2 tenga que rehacerse.
 
 **Consecuencias.** `DISENO.md` §3b lo deja como regla. El sistema en Claude Design se mantiene al día con `packages/ds`: si cambia la piel Hilo, se actualiza en el mismo PR o en el siguiente. Las pantallas ya construidas con la base clásica no se rediseñan por esta regla; se pasan a Hilo cuando su módulo entre en un bloque de Hilo (H3 y siguientes).
+
+## ADR-104 · Las sesiones de Claude no dependen del bot «OPAI 2.0» (12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 11:26 y 11:40, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** El bot «OPAI 2.0» (Grok) dejó de responder la noche del 11-nov y varios PR quedaron esperando que aplicara su migración (#527, #528, #537, #558).
+
+**Decisión.** Ni esta sesión ni ninguna otra sesión de Claude depende del bot «OPAI 2.0». Cada sesión aplica la migración de su propio PR con el procedimiento de siempre (respaldo de `dev` y `main`, `dev` antes que `main`, `lock_timeout` corto, verificación y aviso en el PR) y quita `migracion-pendiente`. Reemplaza en esto a ADR-054 y ADR-070.
+
+**Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
+

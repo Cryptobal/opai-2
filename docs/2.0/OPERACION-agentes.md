@@ -58,9 +58,9 @@ Cuando un PR está **listo para revisión** (constructor terminó, `ESTADO.md` a
 
 ### A2.3 Migraciones
 
-- Las aplican **solo OPAI 2.0**, **después** de la revisión final **sin bloqueos** sobre el head y con CI verde, con el procedimiento de A.5 (respaldo, `dev` → `main`, aviso en español, quitar `migracion-pendiente`).
-- Las **sesiones no aplican** migraciones en Neon; piden al bot con `@opai-2.0:` si hace falta.
-- **Excepción acotada (Carlos, 11-nov-2026, ADR-093 §12):** los PR de la serie Slack (CAR-290 a CAR-296) los migra la «Sesión Núcleo» con este mismo procedimiento y el aviso en el PR antes de retirar `migracion-pendiente`. El bot puede hacerlo si llega antes.
+- **Desde ADR-104 (Carlos, 12-nov-2026):** ninguna sesión de Claude depende del bot «OPAI 2.0» (Grok). Cada migración la aplica **la sesión que construyó el PR**, **después** de la revisión final **sin bloqueos** sobre el head y con CI verde, con el procedimiento de A.5: ramas Neon de respaldo de `dev` y `main`, aplicar en `dev` y luego en `main` en una transacción con `lock_timeout` corto junto con su fila en `_prisma_migrations` (checksum sha256 del archivo), verificar en ambas, dejar el aviso en el PR y quitar `migracion-pendiente`.
+- Si el PR necesita datos ficticios de `qa-e2e` para `preview-e2e`, la misma sesión los carga en `main` y en la rama `preview/pr-<n>`.
+- El bot «OPAI 2.0» puede seguir vigilando, pero no se le pide nada ni se lo espera.
 
 ### A2.4 Señales en PR (escalado 24 h)
 
