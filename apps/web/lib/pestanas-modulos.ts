@@ -17,6 +17,12 @@ export async function puedeGestionarNegocios(): Promise<boolean> {
   return identidad ? puedeDeIdentidad(identidad)("comercial:negocios.manage") : false;
 }
 
+/** ¿Puede exportar los negocios a Excel? Oculta el botón a quien no tiene el permiso (ADR-022). */
+export async function puedeExportarNegocios(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("comercial:negocios.exportar") : false;
+}
+
 /**
  * Pestaña «Rondas» de la ficha de instalación (Brief 14): solo si Rondas está activo para la empresa
  * y el usuario puede leer rondas. Sin pestañas deshabilitadas (ADR-041.5).

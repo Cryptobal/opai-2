@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 723 pares pantalla→capacidad · 645 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 722 pares pantalla→capacidad · 644 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -18,6 +18,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
 | — | `/api/integraciones/slack/eventos` | `core.slack.desinstalada` | — | excepción |
 | — | `/api/integraciones/slack/oauth/callback` | `core.slack.conectar` | — | excepción |
+| — | `/api/negocios/export` | `comercial.negocios.exportar` | `comercial_negocios_exportar` | existe |
 | — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
 | — | `/api/rendiciones/lotes/[id]/nomina` | `rendiciones.lotes.nomina_descargar` | — | excepción |
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
@@ -77,7 +78,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/_components` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/_components` | `core.config.set` | `core_config_set` | existe |
-| compartido | `app/_components` | `core.correos.asociar` | `core_correos_asociar` | existe |
 | compartido | `app/_components` | `core.correos.crear_direccion` | `core_correos_crear_direccion` | existe |
 | compartido | `app/_components` | `core.correos.direccion` | `core_correos_direccion` | existe |
 | compartido | `app/_components` | `core.correos.historial` | `core_correos_historial` | existe |
@@ -584,7 +584,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones` | `core.notificacion_reglas.list` | `core_notificacion_reglas_list` | existe |
-| erp | `/configuracion/correos-clientes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.asociar` | `core_correos_asociar` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.direccion` | `core_correos_direccion` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.sin_asignar` | `core_correos_sin_asignar` | existe |
@@ -783,6 +782,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/marca/[slug]/[asset]/route.ts` | URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP. |
 | `app/api/mcp/[[...transport]]/route.ts` | Servidor MCP (Authorization: Bearer). |
 | `app/api/mcp/k/[key]/[[...transport]]/route.ts` | Servidor MCP con la key en la URL: deprecado (410 Gone salvo MCP_KEY_EN_URL_HASTA). |
+| `app/api/negocios/export/route.ts` | Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27). |
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
 | `app/api/rendiciones/lotes/[id]/nomina/route.ts` | Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208). |
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
