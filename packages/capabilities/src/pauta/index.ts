@@ -8,6 +8,7 @@ import { excepcionesAnular } from "./excepciones-anular";
 import { excepcionesCrear } from "./excepciones-crear";
 import { exportarPauta } from "./exportar";
 import { historialListar } from "./historial";
+import { informeInstalaciones } from "./informe-instalaciones";
 import { mesLeer } from "./lectura-mes";
 import { ppcListar, resumenLeer } from "./lectura-resumen";
 import { marcaManual } from "./marca-manual";
@@ -21,10 +22,12 @@ import { titularTrasladar } from "./titular-trasladar";
 
 export { ajustesPauta } from "./ajustes";
 export { indicadoresPauta } from "./indicadores-gestion";
+export { ausenteSinJustificar, diasConTurno, type DiaConTurno, SIGLAS_NEUTRAS, toleranciaAtrasoS } from "./dias-con-turno";
 export const capacidadesPauta: readonly Capacidad[] = [
   mesLeer,
   resumenLeer,
   ppcListar,
+  informeInstalaciones,
   historialListar,
   seriesFijar,
   titularAsignar,

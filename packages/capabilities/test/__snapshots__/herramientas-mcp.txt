@@ -522,6 +522,7 @@ pauta_excepciones_anular
 pauta_excepciones_crear
 pauta_exportar
 pauta_historial_listar
+pauta_informes_instalaciones
 pauta_marca_registrar
 pauta_mes_leer
 pauta_ppc_listar
