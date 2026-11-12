@@ -13,7 +13,7 @@ import { uuidSchema } from "../esquemas";
 export const platformAuditoriaList = defineCapability({
   id: "platform.auditoria.list",
   descripcion:
-    "Plataforma: auditoría de las acciones de plataforma (crear empresas, roles, módulos, aprobaciones de agentes), la más reciente primero, filtrable por empresa y capacidad.",
+    "Plataforma: auditoría de las acciones de plataforma (crear empresas, roles, módulos, aprobaciones de agentes), la más reciente primero, filtrable por empresa, capacidad y fechas, con el antes y el después de cada cambio.",
   permiso: PERMISOS_PLATAFORMA.tenantsRead,
   sinTenant: true,
   input: z.object({
@@ -21,6 +21,8 @@ export const platformAuditoriaList = defineCapability({
     capability: z.string().max(120).optional().describe('Prefijo: "platform.tenants".'),
     limite: z.number().int().min(1).max(100).default(50),
     antesDeSeq: z.number().int().min(1).optional().describe("Cursor: `seq` del último leído."),
+    desde: z.iso.date().optional().describe("Desde este día (UTC), inclusive."),
+    hasta: z.iso.date().optional().describe("Hasta este día (UTC), inclusive."),
   }),
   output: z.object({
     eventos: z.array(
@@ -35,6 +37,9 @@ export const platformAuditoriaList = defineCapability({
         entityType: z.string().nullable(),
         entityId: z.string().nullable(),
         payload: z.unknown(),
+        /** Antes y después de un cambio global (CAR-41), si la capacidad los declara. */
+        antes: z.unknown(),
+        despues: z.unknown(),
         creadoEn: z.string(),
         hash: z.string(),
       }),
@@ -48,6 +53,10 @@ export const platformAuditoriaList = defineCapability({
       ...(input.tenantId ? { tenantObjetivoId: input.tenantId } : {}),
       ...(input.capability ? { capability: input.capability } : {}),
       ...(input.antesDeSeq ? { antesDeSeq: input.antesDeSeq } : {}),
+      ...(input.desde ? { desde: new Date(`${input.desde}T00:00:00Z`) } : {}),
+      ...(input.hasta
+        ? { hasta: new Date(Date.parse(`${input.hasta}T00:00:00Z`) + 86_400_000) }
+        : {}),
       limite: input.limite,
     });
     return {
@@ -62,6 +71,8 @@ export const platformAuditoriaList = defineCapability({
         entityType: f.entityType,
         entityId: f.entityId,
         payload: f.payload,
+        antes: f.antes ?? null,
+        despues: f.despues ?? null,
         creadoEn: f.createdAt.toISOString(),
         hash: f.hash,
       })),

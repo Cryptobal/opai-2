@@ -62,7 +62,12 @@ import { ping } from "./ping";
 import { capacidadesTenantsEscritura } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
 import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
-import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
+import { platformTenantsGet } from "./platform-tenants";
+import {
+  platformInvitacionesReenviar,
+  platformInvitacionesRevocar,
+  platformTenantsMiembros,
+} from "./plataforma/miembros";
 import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from "./plataforma";
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
@@ -101,12 +106,14 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usageSummary,
   platformTenantsList,
   platformTenantsGet,
+  platformTenantsMiembros,
+  platformInvitacionesRevocar,
+  platformInvitacionesReenviar,
   ...capacidadesTenantsEscritura,
   platformTenantsUpdate,
   platformTenantsSetEstado,
   platformModulesSet,
   platformAdminsInvite,
-  platformUsageSummary,
   // Brief 02 · servicios del núcleo
   consumosResumen,
   consumosPorAgente,

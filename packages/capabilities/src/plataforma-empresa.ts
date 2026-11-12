@@ -1,4 +1,4 @@
-import { operacionesEmpresa, sembrarCatalogo, type TenantDb } from "@opai/db";
+import { operacionesEmpresa, operacionesMiembros, sembrarCatalogo, type TenantDb } from "@opai/db";
 
 import { crearInvitacion, type DatosInvitacion } from "./core/invitar";
 import { sembrarModulo } from "./core/siembras-modulo";
@@ -13,6 +13,8 @@ import type { Servicios } from "./types";
 export function empresaDePlataforma(db: TenantDb, tenantId: string) {
   return {
     ...operacionesEmpresa(db, tenantId),
+    // Miembros e invitaciones (CAR-323).
+    ...operacionesMiembros(db),
     sembrarCatalogo: (vertical: string) => sembrarCatalogo(db, tenantId, vertical),
     sembrarModulo: (moduloId: string) => sembrarModulo(moduloId, db, tenantId),
     invitar: (
