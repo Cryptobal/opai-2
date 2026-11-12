@@ -46,9 +46,11 @@ export function menuCuentaShell(
       ? [
           {
             id: "diseno",
-            etiqueta: diseno.actual === "hilo" ? "Volver al diseño clásico" : "Probar el diseño Hilo",
+            // Desde Hilo o el nuevo (ADR-109) se vuelve al clásico; desde el clásico se prueba el nuevo.
+            etiqueta:
+              diseno.actual === "clasico" ? "Probar el diseño nuevo" : "Volver al diseño clásico",
             icono: Sparkles,
-            onSelect: () => diseno.onCambiar(diseno.actual === "hilo" ? "clasico" : "hilo"),
+            onSelect: () => diseno.onCambiar(diseno.actual === "clasico" ? "nuevo" : "clasico"),
           },
         ]
       : []),
