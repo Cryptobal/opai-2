@@ -14,6 +14,8 @@ test.describe("@preview fila seleccionada sin índigo en Hilo", () => {
     page,
     context,
   }, info) => {
+    // En el teléfono la lista lateral no acompaña al detalle (se ve una u otro): no hay fila elegida.
+    test.skip(info.project.name === "telefono", "Sin lista lateral en el teléfono");
     test.setTimeout(150_000);
     await context.addCookies([{ name: "opai_marco", value: "hilo", url: BASE }]);
     await entrar(page);
