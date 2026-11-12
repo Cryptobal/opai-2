@@ -1912,3 +1912,11 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Cómo.** `core.personas_pago` pasa de 1:1 a 1:N (índice único parcial `WHERE por_defecto`, a lo más una por defecto por persona) y suma `titular_nombre`. Las solicitudes (`personas_pago_solicitudes`) suman `tipo` (`reemplazar`, `agregar`, `marcar_defecto`, `quitar`), `cuenta_id`, `titular_nombre` y `por_defecto`. Se reutiliza `core.personas.pago_solicitar_cambio` con esos campos opcionales: sin capacidades nuevas, la aprobación sigue siendo de otra persona (`pago_aprobar_cambio`, solo personas). No se puede quitar la cuenta por defecto. El número de cuenta sigue cifrado por campo. La migración es aditiva y reversible (reversión en su cabecera) y marca la cuenta actual de cada persona como por defecto con verificación de filas.
 
 **Fuera de alcance.** Que la persona valide sus cuentas desde el Portal Trabajador (B1): Carlos no lo decidió.
+
+## ADR-101 · Las personas de OPAI 1 llegan por Excel, sin tocar el exportador de 1.0 (CAR-282, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026).** La importación de personas desde OPAI 1 se hace **vía Excel**: se exporta la lista de guardias y personas desde OPAI 1 a una planilla y se carga en Configuración › Importar datos con el motor común. No se amplía el exportador de OPAI 1 (no se toca 1.0).
+
+**Cómo se usa.** 1) Importar **Personas** (ficha, previsión y cuenta bancaria; se reconocen por RUT, reimportar no duplica; la simulación muestra los errores fila por fila). 2) Importar **Contratos vigentes** (cargo, instalación, tipo, inicio, horas y distribución) con las personas e instalaciones ya creadas. Ambos importadores reconocen los nombres de columna de 1.0 (`firstName`, `lastName`, `hiredAt`, `contractType`…) y se revierten por lote. La cuenta bancaria importada queda como cuenta por defecto (ADR-100).
+
+**Fuera de alcance.** Anexos y finiquitos (CAR-58) y el adaptador JSON de contratos (el export de 1.0 no trae `OpsGuardia`).
