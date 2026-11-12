@@ -6,13 +6,10 @@ export {
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
 export { ajustesComercial, capacidadesComercial } from "./comercial";
-<<<<<<< HEAD
 export { hechosComercial } from "./comercial/hechos-gestion";
 export { defineHecho, type HechoGestion } from "./hechos-gestion";
 export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/hechos";
-=======
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
->>>>>>> brief/car-306-scorecard-cargo
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
