@@ -604,10 +604,14 @@ model ConciliacionBanco {
   propuesta     Boolean  @default(false)
   confirmada    Boolean  @default(false)
   explicacion   Json?
+  /// Cuenta contable elegida al conciliar contra una fila del flujo (CAR-328); null en documentos.
+  cuentaContableId String? @map("cuenta_contable_id") @db.Uuid
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   createdById   String?  @map("created_by_id") @db.Uuid
 
   movimiento MovimientoBancario @relation(fields: [movimientoId], references: [id], onDelete: Restrict)
+
+  @@index([cuentaContableId])
 
   @@index([tenantId, movimientoId, activa])
   @@index([tenantId, tipoEnlace, enlaceId])
@@ -624,10 +628,15 @@ model ReglaConciliacion {
   modo        String   @default("todas")
   condiciones Json
   activa      Boolean  @default(true)
+  /// Destino (CAR-328): fila del flujo y, opcional, cuenta contable. Sin fila la regla no clasifica.
+  flujoFilaId      String?  @map("flujo_fila_id") @db.Uuid
+  cuentaContableId String?  @map("cuenta_contable_id") @db.Uuid
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([tenantId, activa, prioridad])
+  @@index([flujoFilaId])
+  @@index([cuentaContableId])
   @@map("reglas_conciliacion")
   @@schema("finanzas")
 }

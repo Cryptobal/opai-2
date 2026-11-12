@@ -1,22 +1,15 @@
 import { z } from "zod";
 
-import { defineCapability } from "@opai/capabilities";
+import { defineCapability, noEncontrado } from "@opai/capabilities";
 import type { Prisma } from "@opai/db";
 
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_VER } from "./permisos";
-
-const reglaSchema = z.object({
-  id: z.string(),
-  nombre: z.string(),
-  prioridad: z.number().int(),
-  modo: z.enum(["todas", "alguna"]),
-  condiciones: z.record(z.string(), z.unknown()),
-  activa: z.boolean(),
-});
+import { definicionReglaSchema, nombresDestino, reglaASalida, reglaSchema, validarDestino } from "./reglas-esquemas";
 
 export const bancosReglasListar = defineCapability({
   id: "finanzas.reglas_banco.listar",
-  descripcion: "Lista las reglas de conciliación bancaria del tenant ordenadas por prioridad.",
+  descripcion:
+    "Lista las reglas de conciliación del banco en orden de prioridad, con sus condiciones y la fila del flujo y cuenta contable a las que clasifican.",
   permiso: PERMISO_BANCOS_VER,
   input: z.object({}),
   output: z.object({ items: z.array(reglaSchema) }),
@@ -24,63 +17,69 @@ export const bancosReglasListar = defineCapability({
   dryRun: false,
   auditarLectura: (s) => s.items.map((i) => i.id),
   async handler(ctx) {
-    const items = await ctx.db.reglaConciliacion.findMany({ orderBy: [{ prioridad: "desc" }, { nombre: "asc" }] });
-    return {
-      items: items.map((r) => ({
-        id: r.id,
-        nombre: r.nombre,
-        prioridad: r.prioridad,
-        modo: r.modo as "todas" | "alguna",
-        condiciones: r.condiciones as Record<string, unknown>,
-        activa: r.activa,
-      })),
-    };
+    const filas = await ctx.db.reglaConciliacion.findMany({ orderBy: [{ prioridad: "desc" }, { nombre: "asc" }] });
+    const n = await nombresDestino(
+      ctx,
+      filas.flatMap((r) => (r.flujoFilaId ? [r.flujoFilaId] : [])),
+      filas.flatMap((r) => (r.cuentaContableId ? [r.cuentaContableId] : [])),
+    );
+    return { items: filas.map((r) => reglaASalida(r, n)) };
   },
+});
+
+const guardarInput = z.object({
+  id: z.uuid().optional(),
+  nombre: z.string().trim().min(2).max(120),
+  prioridad: z.number().int().min(0).max(1000).default(0),
+  modo: z.enum(["todas", "alguna"]).default("todas"),
+  definicion: definicionReglaSchema,
+  flujoFilaId: z.uuid(),
+  cuentaContableId: z.uuid().nullish(),
+  activa: z.boolean().default(true),
 });
 
 export const bancosReglasGuardar = defineCapability({
   id: "finanzas.reglas_banco.guardar",
-  descripcion: "Crea o actualiza una regla de conciliación bancaria con condiciones por RUT, glosa, monto o referencia.",
+  descripcion:
+    "Crea o actualiza una regla de conciliación del banco: condiciones por RUT, glosa, monto o referencia, y la fila del flujo (y opcional la cuenta contable) a la que clasifica.",
   permiso: PERMISO_BANCOS_GESTIONAR,
-  input: z.object({
-    id: z.uuid().optional(),
-    nombre: z.string().trim().min(2).max(120),
-    prioridad: z.number().int().min(0).max(1000).default(0),
-    modo: z.enum(["todas", "alguna"]).default("todas"),
-    condiciones: z.record(z.string(), z.unknown()),
-    activa: z.boolean().default(true),
-  }),
+  input: guardarInput,
   output: reglaSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    if (dryRun) {
-      return {
-        id: input.id ?? "00000000-0000-0000-0000-000000000002",
-        nombre: input.nombre,
-        prioridad: input.prioridad,
-        modo: input.modo,
-        condiciones: input.condiciones,
-        activa: input.activa,
-      };
+    if (input.id) {
+      const previa = await ctx.db.reglaConciliacion.findFirst({ where: { id: input.id }, select: { id: true } });
+      if (!previa) throw noEncontrado("La regla");
     }
+    await validarDestino(ctx.db, {
+      flujoFilaId: input.flujoFilaId,
+      cuentaContableId: input.cuentaContableId,
+      alcance: input.definicion.alcance,
+    });
     const data = {
       nombre: input.nombre,
       prioridad: input.prioridad,
       modo: input.modo,
-      condiciones: input.condiciones as Prisma.InputJsonValue,
+      condiciones: input.definicion as Prisma.InputJsonValue,
       activa: input.activa,
+      flujoFilaId: input.flujoFilaId,
+      cuentaContableId: input.cuentaContableId ?? null,
     };
-    const row = input.id
-      ? await ctx.db.reglaConciliacion.update({ where: { id: input.id }, data })
-      : await ctx.db.reglaConciliacion.create({ data: { ...data, tenantId: ctx.tenantId } });
-    return {
-      id: row.id,
-      nombre: row.nombre,
-      prioridad: row.prioridad,
-      modo: row.modo as "todas" | "alguna",
-      condiciones: row.condiciones as Record<string, unknown>,
-      activa: row.activa,
-    };
+    const n = await nombresDestino(ctx, [input.flujoFilaId], input.cuentaContableId ? [input.cuentaContableId] : []);
+    if (dryRun) return reglaASalida({ id: input.id ?? "00000000-0000-0000-0000-000000000002", ...data }, n);
+    const row = await ctx.transaccion(async (tx) => {
+      const r = input.id
+        ? await tx.reglaConciliacion.update({ where: { id: input.id }, data })
+        : await tx.reglaConciliacion.create({ data: { ...data, tenantId: ctx.tenantId } });
+      await ctx.eventos.emitir(tx, {
+        tipo: "finanzas.banco.regla_guardada",
+        entidadTipo: "reglaConciliacion",
+        entidadId: r.id,
+        payload: { activa: r.activa },
+      });
+      return r;
+    });
+    return reglaASalida(row, n);
   },
 });

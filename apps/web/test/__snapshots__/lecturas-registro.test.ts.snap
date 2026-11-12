@@ -72,6 +72,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "cpq.propuestas_tecnica.prompt_exportable",
   "cpq.sueldos_referencia.list",
   "finanzas.ajustes.obtener",
+  "finanzas.bancos.destinos",
   "finanzas.centros_costo.listar",
   "finanzas.derivadas.listar",
   "finanzas.dte_config.obtener",

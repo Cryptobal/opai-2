@@ -7,6 +7,7 @@ import type { Prisma } from "@opai/db";
 import { sincronizarAvisosEnTx } from "../aviso";
 import { PERMISO_BANCOS_GESTIONAR, PERMISO_BANCOS_AUTORIZAR } from "./permisos";
 import { montoDe } from "./esquemas";
+import { validarDestino } from "./reglas-esquemas";
 import { exigirEnlacesDistintos, exigirTopeDocumento } from "./topes-conciliacion";
 import { movimientoDe } from "./util";
 
@@ -23,12 +24,14 @@ const enlaceSchema = z.object({
   tipo: z.enum(["documento_emitido", "documento_recibido", "flujo_fila"]),
   id: z.uuid(),
   monto: z.number().int().positive(),
+  /** Solo con «flujo_fila»: cuenta contable de movimiento a la que se imputa (CAR-328). */
+  cuentaContableId: z.uuid().nullish(),
 });
 
 export const bancosConciliacionConfirmar = defineCapability({
   id: "finanzas.conciliaciones.confirmar",
   descripcion:
-    "Confirma la conciliación de un movimiento con uno o más DTE o una fila del flujo; actualiza cobro en ventas.",
+    "Confirma la conciliación de un movimiento con uno o más DTE, o con una fila del flujo y su cuenta contable; actualiza el cobro en ventas.",
   permiso: PERMISO_BANCOS_GESTIONAR,
   input: z.object({
     movimientoId: z.uuid(),
@@ -46,6 +49,16 @@ export const bancosConciliacionConfirmar = defineCapability({
       if (!puede) throw reglaDeNegocio("El movimiento requiere autorización.");
     }
     exigirEnlacesDistintos(input.enlaces);
+    const aFila = input.enlaces.filter((e) => e.tipo === "flujo_fila");
+    if (aFila.length && input.enlaces.length > 1) {
+      throw reglaDeNegocio("Un movimiento se concilia contra una fila del flujo o contra documentos, no ambos.");
+    }
+    if (input.enlaces.some((e) => e.tipo !== "flujo_fila" && e.cuentaContableId)) {
+      throw reglaDeNegocio("La cuenta contable solo se elige al conciliar contra una fila del flujo.");
+    }
+    for (const e of aFila) {
+      await validarDestino(ctx.db, { flujoFilaId: e.id, cuentaContableId: e.cuentaContableId, signo: montoDe(mov.monto) });
+    }
     const total = input.enlaces.reduce((s, e) => s + e.monto, 0);
     if (Math.abs(total) !== Math.abs(montoDe(mov.monto))) {
       throw reglaDeNegocio("La suma de enlaces debe coincidir con el monto del movimiento.");
@@ -83,6 +96,7 @@ export const bancosConciliacionConfirmar = defineCapability({
             movimientoId: mov.id,
             tipoEnlace: e.tipo,
             enlaceId: e.id,
+            cuentaContableId: e.tipo === "flujo_fila" ? (e.cuentaContableId ?? null) : null,
             monto: BigInt(e.monto),
             activa: true,
             propuesta: false,
@@ -104,49 +118,5 @@ export const bancosConciliacionConfirmar = defineCapability({
       await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
     });
     return { conciliado: true, estadoCobro };
-  },
-});
-
-export const bancosConciliacionDeshacer = defineCapability({
-  id: "finanzas.conciliaciones.deshacer",
-  descripcion: "Deshace la conciliación activa de un movimiento bancario y lo deja pendiente o sugerido.",
-  permiso: PERMISO_BANCOS_GESTIONAR,
-  input: z.object({ movimientoId: z.uuid(), motivo: z.string().trim().min(3).max(500) }),
-  output: z.object({ deshecho: z.boolean() }),
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    await movimientoDe(ctx, input.movimientoId);
-    if (dryRun) return { deshecho: true };
-    await ctx.transaccion(async (tx) => {
-      const movActual = await tx.movimientoBancario.findFirst({ where: { id: input.movimientoId } });
-      if (!movActual) throw reglaDeNegocio("El movimiento no existe.");
-      const activas = await tx.conciliacionBanco.findMany({
-        where: { movimientoId: input.movimientoId, activa: true, confirmada: true },
-      });
-      const docsSync = new Set(
-        activas.filter((c) => c.tipoEnlace === "documento_emitido").map((c) => c.enlaceId),
-      );
-      await tx.conciliacionBanco.updateMany({
-        where: { movimientoId: input.movimientoId, activa: true },
-        data: { activa: false },
-      });
-      for (const docId of docsSync) {
-        await sincronizarCobroDocumento(tx, docId);
-      }
-      const nuevoEstado = movActual.origen === "manual" ? "ignorado" : "pendiente";
-      await tx.movimientoBancario.update({
-        where: { id: input.movimientoId },
-        data: { estado: nuevoEstado },
-      });
-      await ctx.eventos.emitir(tx, {
-        tipo: "finanzas.banco.conciliacion_deshecha",
-        entidadTipo: "movimientoBancario",
-        entidadId: input.movimientoId,
-        payload: { motivo: input.motivo },
-      });
-      await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
-    });
-    return { deshecho: true };
   },
 });

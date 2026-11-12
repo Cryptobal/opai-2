@@ -127,6 +127,7 @@ export const manifest = defineModule({
     { id: "finanzas.banco.movimientos_sincronizados", descripcion: "El banco en línea (Web4Leads) entregó movimientos." },
     { id: "finanzas.banco.conciliacion_confirmada", descripcion: "Se confirmó una conciliación bancaria." },
     { id: "finanzas.banco.conciliacion_deshecha", descripcion: "Se deshizo una conciliación bancaria." },
+    { id: "finanzas.banco.regla_guardada", descripcion: "Se creó o cambió una regla de conciliación del banco." },
     { id: "finanzas.banco.cobro_manual", descripcion: "Se registró un cobro manual sin movimiento bancario." },
     { id: "finanzas.banco.saldo_bajo_avisado", descripcion: "La suma de las cuentas activas quedó bajo el umbral único de saldo bajo (campana in-app)." },
     { id: "finanzas.venta.borrador_creado", descripcion: "Se creó un borrador de factura o nota en el libro de ventas." },

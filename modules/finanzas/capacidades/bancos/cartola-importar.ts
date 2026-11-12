@@ -48,6 +48,8 @@ export const bancosCartolaImportar = defineCapability({
     rechazados: z.number().int(),
     saldoFinal: z.number().int().nullable(),
     filas: z.array(filaPreviewSchema),
+    /** Movimientos que las reglas del banco conciliaron solas o dejaron sugeridos (no en vista previa). */
+    reglas: z.object({ conciliados: z.number().int(), sugeridos: z.number().int() }).optional(),
   }),
   efecto: "escritura",
   dryRun: true,
@@ -140,7 +142,7 @@ export const bancosCartolaImportar = defineCapability({
 
     if (dryRun) return resumen;
 
-    await aplicarImportacionCartola(ctx, {
+    const { reglas } = await aplicarImportacionCartola(ctx, {
       cuenta,
       formato: input.formato,
       ...(input.nombreArchivo !== undefined ? { nombreArchivo: input.nombreArchivo } : {}),
@@ -153,6 +155,6 @@ export const bancosCartolaImportar = defineCapability({
       fechaHasta,
     });
 
-    return resumen;
+    return { ...resumen, reglas };
   },
 });

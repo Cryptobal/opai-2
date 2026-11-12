@@ -2,6 +2,7 @@ import type { Contexto } from "@opai/capabilities";
 import { esRemuneracion } from "@opai/domain";
 
 import { sincronizarAvisoSaldoBajo } from "./aviso-banco";
+import { aplicarReglasBanco } from "./reglas-aplicar";
 import { aFecha } from "./util";
 
 export type MovimientoNuevo = {
@@ -42,6 +43,16 @@ export async function aplicarSincronizacion(
           })),
         })
       : { count: 0 };
+    // Reglas del banco (ADR-074) sobre lo recién llegado: por id externo, dentro de la misma transacción.
+    const llegados = count
+      ? await tx.movimientoBancario.findMany({
+          where: { cuentaId: p.cuentaId, idExterno: { in: p.nuevos.map((m) => m.idExterno) } },
+          select: { id: true },
+        })
+      : [];
+    const reglas = llegados.length
+      ? await aplicarReglasBanco(ctx, tx, { movimientoIds: llegados.map((m) => m.id) })
+      : { conciliados: 0, sugeridos: 0 };
     // Una entrega repetida (sin movimientos nuevos) no pisa un saldo que ya se tenía: podría ser más antiguo.
     const previo = await tx.cuentaBancaria.findUnique({ where: { id: p.cuentaId }, select: { saldoBanco: true } });
     const saldo = p.saldoBanco != null && (count > 0 || previo?.saldoBanco == null) ? p.saldoBanco : null;
@@ -57,7 +68,7 @@ export async function aplicarSincronizacion(
       tipo: "finanzas.banco.movimientos_sincronizados",
       entidadTipo: "cuentaBancaria",
       entidadId: p.cuentaId,
-      payload: { nuevos: count, duplicados: p.duplicados, sospechosos: p.sospechosos },
+      payload: { nuevos: count, duplicados: p.duplicados, sospechosos: p.sospechosos, ...reglas },
     });
     return count;
   });

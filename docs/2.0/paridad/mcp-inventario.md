@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 729 pares pantalla→capacidad · 652 con herramienta · 77 excepciones justificadas · 0 faltantes.
+**Resumen:** 737 pares pantalla→capacidad · 660 con herramienta · 77 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -333,6 +333,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/plantillas/[id]/_componentes` | `core.documento_plantillas.update` | `core_documento_plantillas_update` | existe |
 | compartido | `app/(erp)/documentos/vencimientos/_componentes` | `core.documentos.vencimientos` | `core_documentos_vencimientos` | existe |
 | compartido | `app/(erp)/finanzas/_hoy` | `finanzas.hoy.resumen` | `finanzas_hoy_resumen` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.guardar` | `finanzas_bancos_guardar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.cartolas.importar` | `finanzas_cartolas_importar` | existe |
@@ -340,7 +341,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.deshacer` | `finanzas_conciliaciones_deshacer` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.conciliaciones.sugerir` | `finanzas_conciliaciones_sugerir` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.movimientos_bancarios.listar` | `finanzas_movimientos_bancarios_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.reglas_banco.guardar` | `finanzas_reglas_banco_guardar` | existe |
 | compartido | `app/(erp)/finanzas/bancos/_componentes` | `finanzas.ventas.buscar` | `finanzas_ventas_buscar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.destinos` | `finanzas_bancos_destinos` | existe |
+| compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.bancos.listar` | `finanzas_bancos_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.aplicar` | `finanzas_reglas_banco_aplicar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.guardar` | `finanzas_reglas_banco_guardar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.listar` | `finanzas_reglas_banco_listar` | existe |
+| compartido | `app/(erp)/finanzas/bancos/reglas/_componentes` | `finanzas.reglas_banco.probar` | `finanzas_reglas_banco_probar` | existe |
 | compartido | `app/(erp)/finanzas/cobranza/_componentes` | `finanzas.cobranza.deudor` | `finanzas_cobranza_deudor` | existe |
 | compartido | `app/(erp)/finanzas/cobranza/_componentes` | `finanzas.cobranza.pausar` | `finanzas_cobranza_pausar` | existe |
 | compartido | `app/(erp)/finanzas/cobranza/_componentes` | `finanzas.cobranza.recordar` | `finanzas_cobranza_recordar` | existe |
@@ -1086,8 +1094,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.derivadas.listar`
 - `finanzas.filas.actualizar`
 - `finanzas.flujo.postergar_iva`
-- `finanzas.reglas_banco.guardar`
-- `finanzas.reglas_banco.listar`
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
