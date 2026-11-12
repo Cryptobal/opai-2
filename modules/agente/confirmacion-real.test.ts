@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { USAR } from "./herramientas-demanda";
 
 import {
   capacidadesDelNucleo,
@@ -35,7 +36,15 @@ async function prepararArchivo() {
   const plan = await prepararTurno(ctx, "Archiva la cuenta", {
     conversar: async () =>
       respuesta(
-        n++ ? [] : [{ id: "archivar", nombre: "core_cuentas_archive", argumentos: { id } }],
+        n++
+          ? []
+          : [
+              {
+                id: "archivar",
+                nombre: USAR,
+                argumentos: { nombre: "core_cuentas_archive", argumentos: { id } },
+              },
+            ],
       ),
   });
   expect(plan.pasos).toHaveLength(1);
