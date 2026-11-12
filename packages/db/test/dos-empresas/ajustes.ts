@@ -21,6 +21,16 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
+  "desempeno.scorecards": {
+    dependencias: ["core.cargos"],
+    fijas: ["vigente_desde"],
+    valores: (ctx) => ({ cargo_id: id(ctx, "core.cargos"), vigente_desde: "2026-11", estado: "publicado" }),
+  },
+  "desempeno.scorecard_indicadores": {
+    dependencias: ["desempeno.scorecards"],
+    valores: (ctx) => ({ scorecard_id: id(ctx, "desempeno.scorecards"), meta: 10, peso: 100 }),
+  },
   // Comercial · seguimiento (CAR-67): CHECK de disparador, canal y ejecutor.
   "comercial.seguimiento_planes": { valores: () => ({ nombre: "Plan de prueba", disparador: "manual" }) },
   "comercial.seguimiento_plan_versiones": {
