@@ -1,19 +1,14 @@
-import { esPeriodoMensual, versionVigente } from "@opai/domain";
+import { versionVigente } from "@opai/domain";
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { resultadosDe } from "./calculo";
-import { mesesDe, PERMISOS_DESEMPENO, versionesDe } from "./comun";
+import { mesesDe, periodo, PERMISOS_DESEMPENO, versionesDe } from "./comun";
 import { visibilidadDe, visiblesEntre } from "./visibilidad";
 
 const MAX = 200;
-const periodo = z
-  .string()
-  .refine(esPeriodoMensual, "Usa aaaa-mm.")
-  .optional()
-  .describe("Mes consultado (aaaa-mm). Por defecto, el mes en curso de la empresa.");
 const puntaje = z
   .number()
   .nullable()
@@ -31,6 +26,8 @@ export const resultadosPersona = defineCapability({
   }),
   output: z.object({
     personaId: z.string(),
+    nombres: z.string(),
+    apellidos: z.string(),
     cargoId: z.string().nullable(),
     periodo: z.string(),
     vigenteDesde: z.string().nullable().describe("null = su cargo no tiene scorecard ese mes."),
@@ -61,7 +58,7 @@ export const resultadosPersona = defineCapability({
     }
     const persona = await ctx.db.persona.findFirst({
       where: { id: personaId, anonimizadaEn: null },
-      select: { id: true, usuarioId: true },
+      select: { id: true, usuarioId: true, nombres: true, apellidos: true },
     });
     const esPropia = personaId === vis.propia;
     // Fuera de lo que puede ver responde igual que una persona inexistente.
@@ -76,7 +73,8 @@ export const resultadosPersona = defineCapability({
       }),
     ]);
     const mes = input.periodo ?? meses.actual;
-    const base = { personaId, cargoId: vinculo?.cargoId ?? null, periodo: mes };
+    const { nombres, apellidos } = persona;
+    const base = { personaId, nombres, apellidos, cargoId: vinculo?.cargoId ?? null, periodo: mes };
     const sinScorecard = { ...base, vigenteDesde: null, puntaje: null, cobertura: 0, indicadores: [] };
     if (!vinculo) return sinScorecard;
     const scorecard = versionVigente(await versionesDe(ctx, vinculo.cargoId), mes);

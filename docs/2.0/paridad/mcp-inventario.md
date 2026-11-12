@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 713 pares pantalla→capacidad · 639 con herramienta · 74 excepciones justificadas · 0 faltantes.
+**Resumen:** 722 pares pantalla→capacidad · 648 con herramienta · 74 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -309,6 +309,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_representantes` | `core_cuentas_set_representantes` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.update` | `core_cuentas_update` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `cpq.cotizaciones.list` | `cpq_cotizaciones_list` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `core.indicadores_gestion.catalogo` | `core_indicadores_gestion_catalogo` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `desempeno.propios.list` | `desempeno_propios_list` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `desempeno.resultados.ver_cargo` | `desempeno_resultados_ver_cargo` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `desempeno.resultados.ver_persona` | `desempeno_resultados_ver_persona` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `desempeno.scorecards.get` | `desempeno_scorecards_get` | existe |
+| compartido | `app/(erp)/desempeno/_componentes` | `desempeno.scorecards.list` | `desempeno_scorecards_list` | existe |
+| compartido | `app/(erp)/desempeno/cargos/[id]/_componentes` | `core.cargos.set_jefatura` | `core_cargos_set_jefatura` | existe |
+| compartido | `app/(erp)/desempeno/cargos/[id]/_componentes` | `desempeno.scorecards.guardar` | `desempeno_scorecards_guardar` | existe |
 | compartido | `app/(erp)/documentos/_componentes` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | compartido | `app/(erp)/documentos/_componentes` | `core.documentos.explorar` | `core_documentos_explorar` | existe |
 | compartido | `app/(erp)/documentos/firmas/_componentes` | `core.firmas.list` | `core_firmas_list` | existe |
@@ -997,7 +1006,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
-- `core.cargos.set_jefatura`
 - `core.consumos.por_recurso`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
@@ -1015,7 +1023,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.hechos_terreno.listar`
 - `core.ia.probar`
 - `core.indicadores.uf_utm`
-- `core.indicadores_gestion.catalogo`
 - `core.indicadores_gestion.medir`
 - `core.invitations.revoke`
 - `core.patrones.get`
@@ -1055,12 +1062,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `desempeno.hechos.list`
 - `desempeno.propios.archivar`
 - `desempeno.propios.guardar`
-- `desempeno.propios.list`
-- `desempeno.resultados.ver_cargo`
-- `desempeno.resultados.ver_persona`
-- `desempeno.scorecards.get`
-- `desempeno.scorecards.guardar`
-- `desempeno.scorecards.list`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
 - `finanzas.cesiones.listar`
