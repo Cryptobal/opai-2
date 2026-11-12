@@ -21,6 +21,7 @@ test.describe("@preview ingreso según el portal", () => {
     await expect(page.getByText("Próximamente")).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Portal cliente" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Entrar como trabajador" })).toBeVisible();
+    await expect(page.getByText("ERP, Plataforma, Supervisor y Cliente")).toBeVisible();
     await capturar(page, info, "ingreso-login");
   });
 });
