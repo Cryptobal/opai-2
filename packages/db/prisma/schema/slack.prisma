@@ -1,0 +1,23 @@
+// Slack ↔ OPAI 2 (ADR-093, CAR-291). Instalación de la app «OPAI» en el espacio de Slack de cada
+// empresa. El token del bot NO vive aquí: va cifrado en `core.secretos` (proveedor «slack», ADR-027).
+// La configuración no secreta (canales, avisos, pánico) vive en `core.integraciones.config`.
+
+/// Espacio de Slack ligado a la empresa. Una empresa tiene a lo más una instalación y un espacio
+/// queda ligado a una sola empresa (`teamId` único global; ADR-093 §10). La resuelve, sin tenant, la
+/// función `core.slack_instalacion_resolver` (SECURITY DEFINER) tras verificar la firma de Slack.
+model SlackInstalacion {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @unique @map("tenant_id") @db.Uuid
+  teamId       String   @unique @map("team_id")
+  teamNombre   String   @map("team_nombre")
+  botUserId    String   @map("bot_user_id")
+  appId        String   @map("app_id")
+  instaladoPor String?  @map("instalado_por") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("slack_instalaciones")
+  @@schema("core")
+}

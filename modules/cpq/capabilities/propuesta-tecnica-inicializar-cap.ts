@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineCapability, noEncontrado } from "@opai/capabilities";
+import { defineCapability, noEncontrado, idAutor } from "@opai/capabilities";
 
 import { type BasePlantilla } from "../domain/documento/bloques";
 import {
@@ -38,7 +38,7 @@ export const propuestaTecnicaInicializar = defineCapability({
       existente ??
       (dryRun
         ? null
-        : await obtenerOCrearPropuestaTecnica(ctx, c.id, pack.version.id, ctx.actor.id ?? c.creadoPorId));
+        : await obtenerOCrearPropuestaTecnica(ctx, c.id, pack.version.id, idAutor(ctx.actor) ?? c.creadoPorId));
     if (!prop) {
       const plantillaCot = await plantillaActivaCotizacionLectura(ctx);
       const plantillaProp = vistaPlantillaPropuesta(await plantillaActivaPropuesta(ctx));

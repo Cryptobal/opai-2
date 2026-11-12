@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 
-import { variablesDocumentoDesconocidas } from "@opai/domain";
+import { variablesFueraDeClase } from "@opai/domain";
 import { avisar } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
@@ -25,7 +25,7 @@ export function useEditorPlantilla(inicial: PlantillaEditor) {
   const [pendiente, iniciar] = useTransition();
 
   const archivada = !p.activa;
-  const desconocidas = variablesDocumentoDesconocidas(texto);
+  const desconocidas = variablesFueraDeClase(texto, inicial.clase);
   const firmaCambiada = nivel !== p.nivelFirma || firmantes !== p.firmantes;
   const hayCambios = !archivada && (texto !== guardado || firmaCambiada);
   const puedePublicar =

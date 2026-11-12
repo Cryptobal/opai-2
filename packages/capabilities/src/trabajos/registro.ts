@@ -8,14 +8,20 @@ export type DefinicionTrabajo<P> = {
   payload: z.ZodType<P>;
   /** "diaria": el programador lo encola una vez al día por tenant. "horaria": una vez por hora. */
   periodicidad?: "diaria" | "horaria";
+  /** Tiempo máximo propio (ms), si necesita más que el general de 20 s; tope `TIEMPO_MAXIMO_TRABAJO_MS`. */
+  tiempoMaximoMs?: number;
   handler(ctx: Contexto, payload: P, signal: AbortSignal): Promise<unknown>;
 };
+
+/** Lo más que puede durar un trabajo: la función de Vercel dura 60 s y el runner reclama durante 45 s. */
+export const TIEMPO_MAXIMO_TRABAJO_MS = 40_000;
 
 /** Trabajo registrado: el payload se valida con su esquema antes de ejecutar. */
 export type Trabajo = {
   tipo: string;
   descripcion: string;
   periodicidad?: "diaria" | "horaria";
+  tiempoMaximoMs?: number;
   ejecutar(ctx: Contexto, payload: unknown, signal?: AbortSignal): Promise<unknown>;
 };
 
@@ -31,6 +37,7 @@ export function defineTrabajo<P>(def: DefinicionTrabajo<P>): Trabajo {
     tipo: def.tipo,
     descripcion: def.descripcion,
     ...(def.periodicidad ? { periodicidad: def.periodicidad } : {}),
+    ...(def.tiempoMaximoMs ? { tiempoMaximoMs: Math.min(def.tiempoMaximoMs, TIEMPO_MAXIMO_TRABAJO_MS) } : {}),
     ejecutar: (ctx, payload, signal = new AbortController().signal) =>
       def.handler(ctx, def.payload.parse(payload ?? {}), signal),
   };

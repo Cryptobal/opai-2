@@ -11,12 +11,13 @@ type PersonaConDatos = {
   id: string;
   updatedAt: Date;
   prevision: (Prevision & { updatedAt: Date }) | null;
-  pago: { bancoCodigo: string | null; tipoCuenta: string | null; numeroCuenta: string | null; updatedAt: Date } | null;
+  pagos: { bancoCodigo: string | null; tipoCuenta: string | null; numeroCuenta: string | null; updatedAt: Date }[];
 } & Record<string, unknown>;
 
 /** Persona con su previsión y su cuenta como un solo registro plano, con las claves del importador. */
 export function aplanar(p: PersonaConDatos): { id: string; updatedAt: Date } & Record<string, unknown> {
-  const { prevision, pago, ...persona } = p;
+  const { prevision, pagos, ...persona } = p;
+  const pago = pagos[0];
   const fechas = [p.updatedAt, prevision?.updatedAt, pago?.updatedAt].filter((f): f is Date => !!f);
   return {
     ...persona,
@@ -42,11 +43,11 @@ export async function guardarPrevision(tx: TenantTx, tenantId: string, personaId
 
 /** `numeroCuenta` llega ya cifrado. Solo crea: la importación nunca reemplaza una cuenta existente. */
 export async function guardarPago(tx: TenantTx, tenantId: string, personaId: string, datos: Pago) {
-  await tx.personaPago.create({ data: { tenantId, personaId, ...datos } });
+  await tx.personaPago.create({ data: { tenantId, personaId, ...datos, porDefecto: true } });
 }
 
 export async function actualesPersonas(tx: TenantTx, ids: readonly string[]) {
-  const filas = await tx.persona.findMany({ where: { id: { in: [...ids] } }, include: { prevision: true, pago: true } });
+  const filas = await tx.persona.findMany({ where: { id: { in: [...ids] } }, include: { prevision: true, pagos: { where: { porDefecto: true } } } });
   return filas.map(aplanar);
 }
 
@@ -62,7 +63,7 @@ export async function bloqueosPersonas(tx: TenantTx, ids: readonly string[], ctx
       id: true,
       usuarioId: true,
       prevision: { select: { id: true } },
-      pago: { select: { id: true } },
+      pagos: { select: { id: true } },
       uniforme: { select: { id: true } },
       jornadaDt: { select: { id: true } },
       os10: { select: { id: true } },
@@ -77,7 +78,7 @@ export async function bloqueosPersonas(tx: TenantTx, ids: readonly string[], ctx
     const conDatos = p.usuarioId || p.uniforme || p.jornadaDt || p.os10 || p.contactoLaboral || Object.values(p._count).some((n) => n > 0);
     if (conDatos) bloqueos.set(p.id, "ya tiene vínculo, sueldo, anexos, tallas, jornada, OS-10, contacto de emergencia, solicitudes de pago o un usuario");
     else if (p.prevision && !puedePrevision) bloqueos.set(p.id, "tiene previsión y no tienes permiso para gestionarla");
-    else if (p.pago && !puedePago) bloqueos.set(p.id, "tiene cuenta bancaria y no tienes permiso para gestionarla");
+    else if (p.pagos.length > 0 && !puedePago) bloqueos.set(p.id, "tiene cuenta bancaria y no tienes permiso para gestionarla");
   }
   return bloqueos;
 }

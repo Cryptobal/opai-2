@@ -2,20 +2,18 @@
 // con los datos de la persona, arma el PDF con la marca de la empresa y lo deja en Documentos de la ficha.
 import { z } from "zod";
 
-import { createHash } from "node:crypto";
-
-import { claveDocumento, nombreSeguro, PERMISOS_CORE } from "@opai/domain";
+import { nombreSeguro, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { marcaDe } from "../comunicaciones/resolver";
 import { logoDeMarca } from "../../finanzas/ventas-pdf-logo";
 import { uuidSchema } from "../esquemas";
-import { diaSchema, hoy } from "../maestros/comun";
-import { documentoSchema, vistaDocumento } from "./vista";
+import { diaSchema } from "../maestros/comun";
+import { guardarPdfGenerado } from "./guardar-generado";
+import { documentoSchema } from "./vista";
 import { generarPdfLaboral } from "./pdf-laboral";
 import { calcularRelleno } from "./rellenar-calculo";
-import { uuid7 } from "./uuid7";
 
 export const documentoPlantillasGenerar = defineCapability({
   id: "core.documento_plantillas.generar",
@@ -45,41 +43,14 @@ export const documentoPlantillasGenerar = defineCapability({
     const { bytes, paginas } = await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo: await logoDeMarca(ctx) });
     const nombre = nombreSeguro(`${plantilla.nombre}-${persona.rut}.pdf`);
     if (dryRun) return { documento: null, nombre, paginas };
-    const id = uuid7();
-    const huella = createHash("sha256").update(bytes).digest("hex");
-    const storageKey = claveDocumento(ctx.tenantId, id, 1, nombre);
-    await ctx.servicios.almacenamiento.subir(storageKey, Buffer.from(bytes), "application/pdf", huella);
-    const doc = await ctx.transaccion(async (tx) => {
-      const creado = await tx.documento.create({
-        data: {
-          id,
-          tenantId: ctx.tenantId,
-          nombre,
-          titulo: `${plantilla.nombre} · ${persona.nombres} ${persona.apellidos}`.trim(),
-          mime: "application/pdf",
-          tamano: bytes.byteLength,
-          storageKey,
-          sha256: huella,
-          estado: "disponible",
-          origen: "generado",
-          moduloOrigen: "core",
-          creadoPorTipo: ctx.actor.tipo,
-          creadoPorId: ctx.actor.id ?? null,
-          viaUserId: ctx.actor.viaUserId ?? null,
-          confirmadoEn: new Date(),
-        },
-      });
-      await tx.documentoVinculo.create({
-        data: { tenantId: ctx.tenantId, documentoId: id, entidadTipo: "persona", entidadId: persona.id, rol: "propietario" },
-      });
-      const hecho = await ctx.bitacora.registrar(tx, {
-        tipo: "core.documento.registrado",
-        entidadTipo: "documento",
-        entidadId: id,
-        payload: { sha256: huella, tamano: creado.tamano, mime: creado.mime, origen: "generado", plantillaId: plantilla.id, plantillaVersion: version.numero },
-      });
-      return tx.documento.update({ where: { id }, data: { bitacoraSeq: hecho.seq } });
+    const documento = await guardarPdfGenerado(ctx, {
+      bytes,
+      nombre,
+      titulo: `${plantilla.nombre} · ${persona.nombres} ${persona.apellidos}`.trim(),
+      plantilla,
+      version,
+      propietario: { tipo: "persona", id: persona.id },
     });
-    return { documento: vistaDocumento(doc, null, hoy()), nombre, paginas };
+    return { documento, nombre, paginas };
   },
 });

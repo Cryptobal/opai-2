@@ -3,26 +3,21 @@ import { expect, test } from "@playwright/test";
 import { capturar } from "./preview";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-const RUTA_IMPORTAR = "/configuracion/modulo/comercial?seccion=importar-1-0";
-
-// CAR-279: conectar OPAI 1 en Integraciones y traer los datos comerciales sin pegar un archivo.
-// Corre también en `preview-e2e` con el usuario de `qa-e2e`; no guarda llaves ni importa nada.
-test.describe("@preview comercial: traer desde OPAI 1", () => {
+// CAR-279 y CAR-321: la integración «OPAI 1 (traer datos)» solo existe para las empresas que Plataforma
+// habilita. La empresa de prueba (`qa-e2e` en `preview-e2e`) no lo está: no ve la tarjeta, su página dice que no existe.
+// No guarda llaves ni importa nada.
+test.describe("@preview comercial: traer desde OPAI 1 solo en empresas habilitadas", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
-  test("la integración pide dirección y llave, y sin conectar explica qué falta", async ({ page }, info) => {
+  test("una empresa no habilitada no ve la integración ni el botón de traer directo", async ({ page }, info) => {
     await entrar(page);
-    await page.goto("/configuracion/integraciones/opai1");
-    await expect(page.getByText("Llave de solo lectura de OPAI 1").first()).toBeVisible();
-    await expect(page.getByText(/Dirección del exportador/).first()).toBeVisible();
-    await capturar(page, info, "opai1-integracion");
+    await page.goto("/configuracion/integraciones");
+    await expect(page.getByText("Banco (Web4Leads)").first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("OPAI 1 (traer datos)")).toHaveCount(0);
+    await capturar(page, info, "opai1-integraciones-oculta");
 
-    await page.goto(RUTA_IMPORTAR);
-    const simular = page.getByRole("button", { name: "Simular desde OPAI 1" });
-    await expect(simular).toBeVisible();
-    await expect(page.getByRole("button", { name: "Importar desde OPAI 1" })).toBeDisabled();
-    await simular.click();
-    await expect(page.getByText(/Falta conectar OPAI 1/).first()).toBeVisible({ timeout: 30_000 });
-    await capturar(page, info, "opai1-importar");
+    await page.goto("/configuracion/integraciones/opai1");
+    await expect(page.getByText("No encontramos lo que buscas").first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText("Llave de solo lectura de OPAI 1")).toHaveCount(0);
   });
 });

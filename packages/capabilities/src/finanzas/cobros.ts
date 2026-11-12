@@ -2,6 +2,7 @@ import { ESTADOS_NC_QUE_RESTAN, saldoPendiente, TIPO_DTE_NOTA_CREDITO } from "@o
 import type { TenantTx } from "@opai/db";
 
 import { reglaDeNegocio } from "../errores";
+import { ORIGEN_HISTORICO } from "./cobros-origen";
 
 /** Estados de cobro del libro de ventas (única función que escribe `estado_cobro`). */
 export type EstadoCobro = "pendiente" | "pagada_parcial" | "pagada";
@@ -41,10 +42,13 @@ export async function notasCreditoPorDocumento(db: LectorNc, ids: string[]): Pro
 
 type LectorPendiente = Pick<TenantTx, "documentoEmitido" | "conciliacionBanco" | "importacionFila">;
 
-/** Lo ya cobrado en 1.0 (apertura, BRIEF-30): no tiene conciliación, se suma como base. */
+/**
+ * Lo ya cobrado en 1.0 (apertura, BRIEF-30) o en el sistema de origen de un documento importado (CAR-283): no
+ * tiene conciliación, se suma como base.
+ */
 async function cobradoAperturaDe(tx: Pick<TenantTx, "importacionFila">, documentoId: string): Promise<number> {
   const apertura = await tx.importacionFila.findFirst({
-    where: { entidad: "documento_cobrar", id20: documentoId, accion: "creado", importacion: { versionContrato: "finanzas-apertura@1", estado: "completada" } },
+    where: { id20: documentoId, accion: "creado", OR: ORIGEN_HISTORICO },
     select: { previos: true },
   });
   return Number((apertura?.previos as { cobradoApertura?: number } | null)?.cobradoApertura ?? 0);

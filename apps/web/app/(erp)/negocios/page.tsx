@@ -4,12 +4,13 @@ import { SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
-import { puedeGestionarNegocios } from "@/lib/pestanas-modulos";
+import { puedeExportarNegocios, puedeGestionarNegocios } from "@/lib/pestanas-modulos";
 
 import { cargarEmbudo, cargarEtapas, cargarNegocios, filtrosDe } from "./_componentes/datos";
 import { cargarHojas } from "./_componentes/hojas/datos-hojas";
 import { HojasNegocio } from "./_componentes/hojas/hojas-negocio";
 import { ListaNegocios } from "./_componentes/lista-negocios";
+import { urlExportarNegocios } from "./_componentes/rutas";
 import { accionNuevo, TableroNegocios } from "./_componentes/tablero/tablero-negocios";
 
 export const metadata = { title: "Negocios" };
@@ -30,22 +31,29 @@ export default function Negocios({ searchParams }: Props) {
       cargar={async () => {
         const p = await filtrosDe(searchParams);
         const lista = p["vista"] === "lista";
-        const [tablero, filas, etapas, gestiona] = await Promise.all([
+        const [tablero, filas, etapas, gestiona, exporta] = await Promise.all([
           lista ? null : cargarEmbudo(),
           lista ? cargarNegocios(p) : null,
           lista ? cargarEtapas() : [],
           puedeGestionarNegocios(),
+          puedeExportarNegocios(),
         ]);
         // Sin comercial:negocios.manage no se cargan ni montan hojas (aunque la URL traiga ?nuevo=1).
         const hojas = gestiona ? await cargarHojas(p) : null;
-        return { p, tablero, filas, etapas, hojas, gestiona };
+        return { p, tablero, filas, etapas, hojas, gestiona, exporta };
       }}
       opciones={(d) => (d.gestiona ? { acciones: accionNuevo } : {})}
     >
       {(d) => (
         <>
           {d.tablero ? (
-            <TableroNegocios {...d.tablero} gestiona={d.gestiona} etapa={d.p["etapa"]} />
+            <TableroNegocios
+              {...d.tablero}
+              gestiona={d.gestiona}
+              etapa={d.p["etapa"]}
+              // En el tablero `?etapa=` solo elige la columna visible: el Excel lleva todas las etapas.
+              {...(d.exporta ? { exportar: urlExportarNegocios({ ...d.p, etapa: undefined }) } : {})}
+            />
           ) : (
             <SplitScreen
               telefono="lista"
@@ -60,6 +68,7 @@ export default function Negocios({ searchParams }: Props) {
                   etapas={d.etapas}
                   etiquetas={d.filas?.etiquetas ?? []}
                   {...(d.gestiona ? { nuevo: accionNuevo } : {})}
+                  puedeExportar={d.exporta}
                 />
               }
             />

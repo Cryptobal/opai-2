@@ -47,6 +47,19 @@ export function emisorDePerfil(perfil: Perfil, nombreTenant: string | undefined,
   };
 }
 
+/** Receptor impreso desde la cuenta: el mismo en el DTE, la proforma y el estado de pago. */
+export function receptorPdf(cuenta: Parameters<typeof receptorDteDe>[0] & { rut?: string | null }) {
+  const r = receptorDteDe(cuenta);
+  return {
+    razon: r.razonSocialReceptor,
+    rut: cuenta.rut ?? "66000000-0",
+    ...(r.giroReceptor ? { giro: r.giroReceptor } : {}),
+    ...(r.direccionReceptor ? { direccion: r.direccionReceptor } : {}),
+    ...(r.comunaReceptor ? { comuna: r.comunaReceptor } : {}),
+    ...(r.ciudadReceptor ? { ciudad: r.ciudadReceptor } : {}),
+  };
+}
+
 /** «2.0000» → «2», «0.5000» → «0.5», «10» → «10». */
 export const cantidadTexto = (t: string) => (t.includes(".") ? t.replace(/\.?0+$/, "") : t);
 
@@ -72,20 +85,12 @@ export async function pdfDeDocumento(
     ctx.db.dteConfig.findUnique({ where: { tenantId: ctx.tenantId } }),
     logoDeMarca(ctx),
   ]);
-  const r = receptorDteDe(cuenta);
   return generarPdfDte({
     tipoDte: doc.tipoDte,
     folio: borrador ? null : doc.folio,
     fechaEmision: dia(doc.fechaEmision),
     emisor: emisorDePerfil(perfil, tenant?.nombre, rutEmisor),
-    receptor: {
-      razon: r.razonSocialReceptor,
-      rut: cuenta.rut ?? "66000000-0",
-      ...(r.giroReceptor ? { giro: r.giroReceptor } : {}),
-      ...(r.direccionReceptor ? { direccion: r.direccionReceptor } : {}),
-      ...(r.comunaReceptor ? { comuna: r.comunaReceptor } : {}),
-      ...(r.ciudadReceptor ? { ciudad: r.ciudadReceptor } : {}),
-    },
+    receptor: receptorPdf(cuenta),
     lineas: lineas.map((l) => ({
       descripcion: l.glosa,
       monto: l.monto,

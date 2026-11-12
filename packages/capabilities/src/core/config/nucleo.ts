@@ -3,6 +3,7 @@ import { z } from "zod";
 import { TAMANO_MAXIMO_DOCUMENTO } from "@opai/domain";
 
 import { defineAjustes } from "./registro";
+import { ajustesIntegracionesHabilitadas } from "./integraciones-habilitadas";
 import { ajustesNavegacion } from "./navegacion";
 
 const correoOpcional = z.union([z.literal(""), z.email()]);
@@ -119,6 +120,7 @@ export const AJUSTES_NUCLEO = defineAjustes(
     // inferior, por usuario y empresa (cambiar de empresa cambia estas tres, §9). Sin migración
     // (ADR-038): van en `core.ajuste`, igual que `preferencias_*`.
     ...ajustesNavegacion,
+    ...ajustesIntegracionesHabilitadas,
     ia_modelos: z
       .object({ economica: modelo, estandar: modelo, potente: modelo })
       .default({

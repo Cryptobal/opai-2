@@ -30,6 +30,7 @@ export {
   quitarPasskey,
   renombrarPasskey,
 } from "./identidad-metodos";
+export { type AppConectada, appsConectadas, desconectarApp } from "./identidad-oauth";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
 export type {
   DatosCondicionCobro,
@@ -69,6 +70,7 @@ export { type ClienteCatalogo, sembrarCatalogo } from "./catalogo-tenant";
 export { type ClienteComercial, sembrarComercial } from "./catalogo-comercial";
 export { resolverTokenSeguimiento } from "./seguimiento-token";
 export { resolverBuzonCorreo } from "./buzon-correo";
+export { resolverInstalacionSlack } from "./slack-instalacion";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";
 export { consumirRateLimit, purgarVentanasRateLimit, type ResultadoRateLimit } from "./rate-limit";
@@ -85,7 +87,7 @@ export {
   type TenantTx,
 } from "./transaccion";
 export { enTransaccionCapturaSii } from "./transaccion-captura-sii";
-export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
+export { consumirPresupuesto, esAgenteSinKey, periodoDeMes } from "./presupuesto";
 export type {
   ApiKey,
   AprobacionPlataforma,

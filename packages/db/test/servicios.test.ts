@@ -60,6 +60,11 @@ describe.skipIf(!urlPropietario)("servicios del núcleo en base real", () => {
     expect(otra[0]?.intentos).toBe(2);
     await cola.completar(primero.id, { ok: true });
     expect((await t.trabajo.findUnique({ where: { id: primero.id } }))?.estado).toBe("hecho");
+    // Devolver un trabajo que no alcanzó a empezar lo deja pendiente sin gastarle el intento (CAR-273).
+    const segundo = ids.find((id) => id !== primero.id) ?? "";
+    await cola.devolver(segundo);
+    const devuelto = await t.trabajo.findUnique({ where: { id: segundo } });
+    expect(devuelto).toMatchObject({ estado: "pendiente", intentos: 0, bloqueadoHasta: null });
   });
 
   it("consolida consumos por día, recurso, módulo y key de forma idempotente", async () => {

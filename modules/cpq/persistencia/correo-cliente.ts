@@ -1,6 +1,7 @@
 import {
   asegurarAccesoContacto,
   enviarCorreo,
+  registrarPropuestaEnviada,
   previsualizarCorreo,
   type Contexto,
   type EstadoAccesoContacto,
@@ -26,6 +27,8 @@ export type SolicitudCorreoCliente = {
   cuentaId: string | null;
   /** Negocio de la cotización: el correo queda en su historial (CAR-233). */
   negocioId?: string | null;
+  /** Cotización enviada: si el contacto es un prospecto, queda como su propuesta vigente en el portal (CAR-300). */
+  cotizacionId?: string | null;
   codigo: string;
   titulo: string;
   version: number | null;
@@ -115,6 +118,13 @@ const destino = (ctx: Contexto) => ({
   urlBase: ctx.servicios.urlBase,
 });
 
+/** Deja la cotización como la propuesta vigente del prospecto; un fallo del portal nunca frena el envío. */
+async function propuestaVigente(ctx: Contexto, s: SolicitudCorreoCliente, acceso: EstadoAccesoContacto) {
+  if (!s.cotizacionId || !s.cuentaId || !s.contactoId) return;
+  if (acceso !== "vinculado" && acceso !== "ya_tiene_acceso") return;
+  await registrarPropuestaEnviada(ctx, { cuentaId: s.cuentaId, contactoId: s.contactoId, cotizacionId: s.cotizacionId, vigenteHasta: null }).catch(() => undefined);
+}
+
 /** Crea o invita el acceso del contacto y le envía la cotización con sus PDF. Nunca lanza. */
 export async function enviarCorreoCliente(ctx: Contexto, s: SolicitudCorreoCliente) {
   try {
@@ -125,6 +135,7 @@ export async function enviarCorreoCliente(ctx: Contexto, s: SolicitudCorreoClien
     });
     const historial = { origen: "cotizacion" as const, cuentaId: s.cuentaId, contactoId: s.contactoId, negocioId: s.negocioId ?? null };
     const enviado = await enviarCorreo(destino(ctx), EVENTO_CORREO_CLIENTE, s.para, datos, { adjuntos, historial });
+    await propuestaVigente(ctx, s, acceso);
     return { enviado, acceso };
   } catch {
     return { enviado: false, acceso: "no_aplica" as EstadoAccesoContacto };

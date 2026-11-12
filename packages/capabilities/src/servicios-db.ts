@@ -4,6 +4,7 @@ import {
   registrarConsumoSesion,
   agregarABitacora,
   consumirPresupuesto,
+  esAgenteSinKey,
   enTransaccion,
   forTenant,
   preciosHasta,
@@ -65,8 +66,8 @@ async function registrarConsumo({ sinCosto, yaIncurrido, ...c }: ConsumoNuevo) {
     return registrarConsumoSesion(c, sinCosto);
   const unitario = sinCosto ? 0 : await precioDe(c.recurso);
   const costoTotal = unitario * c.cantidad;
-  const interno =
-    c.actorTipo === "agent" && !c.apiKeyId && c.actorId?.startsWith("agente-interno:");
+  // Agente interno y apps OAuth comparten el presupuesto del agente de la empresa (ADR-098).
+  const interno = c.actorTipo === "agent" && !c.apiKeyId && esAgenteSinKey(c.actorId);
   return enTransaccion(c.tenantId, async (tx) => {
     if (
       (c.apiKeyId || interno) &&

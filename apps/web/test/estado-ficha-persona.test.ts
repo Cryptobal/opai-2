@@ -18,6 +18,7 @@ const cuenta = {
   tipoCuenta: "rut",
   numeroCuenta: "****4821",
   rutTitular: "11111111-1",
+  titularNombre: null,
   bancoNombre: "BancoEstado",
   tipoCuentaEtiqueta: "Cuenta RUT",
   porCorregir: false,
