@@ -18,7 +18,7 @@ export function EditorCondiciones({
   return (
     <div className="flex flex-col gap-3">
       {condiciones.map((c, i) => (
-        <div key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_44px] gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)_44px]">
+        <div key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_44px] gap-2">
           <Select
             aria-label={`Campo de la condición ${i + 1}`}
             valor={c.campo}
@@ -34,7 +34,7 @@ export function EditorCondiciones({
             opciones={OPERADORES[c.campo]}
             onCambiar={(v) => set(i, { operador: v as CondicionEditable["operador"] })}
           />
-          <div className="col-span-3 row-start-2 flex gap-2 sm:col-span-1 sm:row-start-auto">
+          <div className="col-span-3 row-start-2 flex gap-2">
             {c.campo === "monto" ? (
               <>
                 <InputMonto

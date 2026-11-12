@@ -34,6 +34,7 @@ test.describe("@preview finanzas: bancos, fila del flujo y reglas", () => {
     await expect(modo).toBeVisible({ timeout: 30_000 });
     await modo.click();
     await expect(hoja.getByText("Fila de egresos del flujo")).toBeVisible();
+    await expect(hoja.getByText("Elige la fila")).toBeVisible({ timeout: 30_000 });
     await expect(hoja.getByText("Cuenta contable (opcional)")).toBeVisible();
     await expect(hoja.getByText("Crear una regla con este movimiento")).toBeVisible();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);

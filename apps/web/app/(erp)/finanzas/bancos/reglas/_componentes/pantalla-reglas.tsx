@@ -78,7 +78,7 @@ export function PantallaReglas({ state, reglas, destinos, cuentas, gestiona }: P
             {reglas.map((r) => (
               <li key={r.id} className="rowcard flex flex-wrap items-center gap-2 p-3">
                 <span className="t-mono t-caption w-8 text-fg-muted">{r.prioridad}</span>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 grow basis-[calc(100%-3rem)] sm:basis-0">
                   <p className="t-body-sm font-medium break-words">{r.nombre}</p>
                   <p className="t-caption text-fg-muted">
                     {r.definicion ? ETIQUETA_ALCANCE[r.definicion.alcance] : "Formato anterior: edítala para que funcione"}
