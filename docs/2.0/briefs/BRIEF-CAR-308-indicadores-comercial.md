@@ -35,7 +35,7 @@ Reglas tomadas (las dos que la tarea dejaba «por definir»):
 - **Monto:** el mismo de los informes de cierre: valor de la cotización vigente y, si no hay, el estimado.
 - **Solicitudes a tiempo:** misma regla que el tablero de Comercial (primera respuesta contra el tiempo objetivo de la empresa, en horas hábiles; sin duplicadas). Si la empresa no configuró tiempo objetivo, no hay medición. Las solicitudes anteriores a CAR-299 no tienen el dato y quedan fuera.
 - **Embudos:** los indicadores de negocios suman todos los embudos, igual que el informe de cierre; el tablero mira solo el embudo por defecto, así que en una empresa con más de un embudo los números pueden diferir de esa pantalla.
-- **No quedan congelados:** reasignar el responsable o reabrir un negocio cambia el valor de un mes ya medido, hasta que exista el cierre de período (CAR-312).
+- **No quedan congelados:** reasignar el responsable o reabrir un negocio cambia el valor de un mes ya medido, hasta que exista el cierre de período (CAR-322).
 
 Todos se atribuyen al **usuario**; el scorecard los cruza con la Persona por la ficha vinculada.
 
