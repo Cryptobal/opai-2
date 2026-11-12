@@ -100,7 +100,7 @@ Sin pantallas. El diseño aprobado (`docs/2.0/design/export-desempeno/`) se cons
 ## 15. Riesgos y rollback
 
 - Riesgo bajo: sin migración y sin pantallas; revertir el PR deja todo como estaba.
-- Rendimiento: el indicador de tareas hace 2 consultas por medición (tareas del período y sus responsables, por lotes de 5.000), 3 si el actor no puede ver negocios, más la zona horaria de la empresa. Con muchas tareas por mes conviene agregar en base de datos; queda anotado para CAR-312 (cierre de período).
+- Rendimiento: el indicador de tareas hace 2 consultas por medición (tareas del período y sus responsables, por lotes de 5.000), 3 si el actor no puede ver negocios, más la zona horaria de la empresa. Con muchas tareas por mes conviene agregar en base de datos; queda anotado para CAR-322 (cierre de período).
 - Deuda conocida: el sujeto `usuario` no tiene cargo hasta CAR-314.
 
 ## 16. Reporte de ejecución

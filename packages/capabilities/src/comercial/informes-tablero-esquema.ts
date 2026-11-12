@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { externo } from "../externo";
 import { CANALES_SOLICITUD } from "./solicitudes-dominio";
+import { resumenPlazoSchema } from "./solicitudes-plazo";
 
 const clp = z.number().int().describe("CLP enteros, valor mensual.");
 const pct = z.number().int().nullable().describe("Entero 0–100; null si no hay datos para calcularlo.");
@@ -57,6 +58,9 @@ export const salidaTablero = z.object({
     )
     .nullable()
     .describe("Solicitudes recibidas en el período, por canal. null si el actor no puede leer solicitudes."),
+  primeraRespuesta: resumenPlazoSchema
+    .nullable()
+    .describe("Primera respuesta a solicitudes del período. null si la empresa no fijó tiempo objetivo o el actor no lee solicitudes."),
   pronostico: z.object({
     totalPonderadoClp: clp.describe("Suma de monto mensual por probabilidad de todos los abiertos."),
     meses: z.array(z.object({ mes: z.string().describe("aaaa-mm"), montoMensualClp: clp, ponderadoClp: clp })),

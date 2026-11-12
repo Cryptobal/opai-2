@@ -3,8 +3,10 @@
 // Formato (decisión 2 de Carlos, 9-nov-2026: texto con variables): párrafos separados por una línea en
 // blanco, `**negrita**`, `*cursiva*` y variables `{grupo.clave}` del catálogo.
 
+import { ambitoDeClase, gruposDeAmbito } from "./documento-plantillas-ambito";
 import {
   VARIABLES_PLANTILLA,
+  type ClasePlantilla,
   type GrupoVariable,
   type VariablePlantilla,
 } from "./documento-plantillas";
@@ -23,6 +25,7 @@ export const ETIQUETA_GRUPO_VARIABLE: Readonly<Record<GrupoVariable, string>> = 
   persona: "Persona",
   vinculo: "Vínculo",
   instalacion: "Instalación",
+  cuenta: "Cuenta",
   sueldo: "Sueldo",
   contrato: "Contrato",
 };
@@ -74,6 +77,7 @@ const normal = (s: string) =>
 /** Variables del catálogo agrupadas para el panel, filtradas por clave o etiqueta (sin tildes). */
 export function gruposDeVariables(
   busqueda = "",
+  clase?: ClasePlantilla,
 ): { grupo: GrupoVariable; titulo: string; variables: VariablePlantilla[] }[] {
   const q = normal(busqueda);
   const grupos = Object.keys(ETIQUETA_GRUPO_VARIABLE) as GrupoVariable[];
@@ -84,6 +88,7 @@ export function gruposDeVariables(
       variables: VARIABLES_PLANTILLA.filter(
         (v) =>
           v.grupo === grupo &&
+          (!clase || gruposDeAmbito(ambitoDeClase(clase)).includes(grupo)) &&
           (!q || normal(v.clave).includes(q) || normal(v.etiqueta).includes(q)),
       ),
     }))

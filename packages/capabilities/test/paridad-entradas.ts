@@ -24,6 +24,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente.",
   "app/api/pauta/export/route.ts":
     "Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar.",
+  "app/api/negocios/export/route.ts":
+    "Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27).",
   "app/api/rendiciones/lotes/[id]/nomina/route.ts":
     "Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208).",
   "app/api/marca/[slug]/[asset]/route.ts":
@@ -107,6 +109,10 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Formulario web público: ejecuta comercial.solicitudes.recibir_formulario_web con la clave Bearer del canal (Brief 07 PR 2).",
   "app/api/t/[slug]/banco/web4leads/route.ts":
     "Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna).",
+  "app/api/integraciones/slack/oauth/callback/route.ts":
+    "Vuelta del OAuth de Slack (CAR-291, ADR-093): con sesión, ejecuta core.slack.conectar (solo personas) como quien vuelve; el state la liga a esa persona y a su empresa.",
+  "app/api/integraciones/slack/eventos/route.ts":
+    "Events API de Slack (CAR-291, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.slack.desinstalada (interna). Sin datos de negocio por ahora (las respuestas en hilos llegan en F5a).",
   "app/api/webhooks/resend/entrante/route.ts":
     "Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas.",
   // Infraestructura: sin datos de negocio.

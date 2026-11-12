@@ -95,6 +95,13 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
     supervisor: false,
     viewer: false,
   },
+  "comercial:negocios.exportar": {
+    owner: true,
+    admin: true,
+    gerente: true,
+    supervisor: false,
+    viewer: false,
+  },
   // Embudo y catálogos: solo owner y admin (BRIEF-07, comercial.md §7).
   "comercial:config.manage": {
     owner: true,

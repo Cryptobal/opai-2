@@ -4,9 +4,10 @@ import { estadoDeTipo } from "./dominio";
 import type { Plan } from "./solicitudes-convertir-plan";
 import { resolverAvisosSolicitud } from "./solicitudes-avisos";
 import { partirNombre } from "./solicitudes-dominio";
+import { idAutor } from "../autor";
 
 export type AplicarConversion = {
-  solicitud: { id: string; comuna: string | null };
+  solicitud: { id: string; comuna: string | null; primeraRespuestaEn?: Date | null };
   datos: {
     nombre: string | null;
     empresa: string | null;
@@ -90,7 +91,7 @@ export async function aplicarConversion(ctx: Contexto, a: AplicarConversion) {
         negocioId: negocio.id,
         aEtapaId: a.etapa.id,
         actorTipo: ctx.actor.tipo,
-        actorId: ctx.actor.id ?? null,
+        actorId: idAutor(ctx.actor),
       },
     });
     if (contactoId) {
@@ -110,6 +111,7 @@ export async function aplicarConversion(ctx: Contexto, a: AplicarConversion) {
         ...a.datos,
         estado: "convertida",
         convertidaEn: a.ahora,
+        ...(a.solicitud.primeraRespuestaEn ? {} : { primeraRespuestaEn: a.ahora }),
         negocioId: negocio.id,
         cuentaId,
         contactoId,

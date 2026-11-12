@@ -1,13 +1,14 @@
 // PDF del DTE (factura 33/34, notas 56/61) en Carta, con el diseño de OPAI 1: logo, recuadro SII, receptor en dos columnas,
 // detalle con descripción, totales y monto en palabras, timbre PDF417 gráfico y copia CEDIBLE (CAR-221, CAR-259).
-import { PDFDocument, type PDFImage, StandardFonts } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 
 import { CARTA } from "./pdf-base";
 import { medirFila, paginar } from "./pdf-detalle";
 import { dibujarPagina, geometriaPrimera } from "./pdf-pagina";
 import { timbrePng } from "./pdf-timbre";
 import { RESERVA_TOTALES, ZONA_INFERIOR } from "./pdf-totales";
-import { llevaCedible, type PdfDteInput, type PdfLogo } from "./pdf-tipos";
+import { incrustarLogo } from "./pdf-logo";
+import { llevaCedible, type PdfDteInput } from "./pdf-tipos";
 
 export type { PdfDteInput, PdfLinea, PdfLogo, PdfParte, PdfReferencia } from "./pdf-tipos";
 export { generarPdfPrevio } from "./pdf-previo";
@@ -16,16 +17,6 @@ export { montoEnPalabras } from "./pdf-palabras";
 
 /** Alto útil bajo la tabla de una página intermedia: hasta el pie de página. */
 const LIMITE_PAGINA = CARTA[1] - 60;
-
-/** El logo nunca rompe el documento: si no se puede leer, el PDF sigue con la razón social en texto. */
-async function incrustarLogo(doc: PDFDocument, logo: PdfLogo | undefined): Promise<PDFImage | undefined> {
-  if (!logo) return undefined;
-  try {
-    return logo.formato === "png" ? await doc.embedPng(logo.bytes) : await doc.embedJpg(logo.bytes);
-  } catch {
-    return undefined;
-  }
-}
 
 /** Genera los bytes del PDF: el original (una o más páginas) y, si el tipo se puede ceder, la copia CEDIBLE completa. */
 export async function generarPdfDte(input: PdfDteInput): Promise<Uint8Array> {

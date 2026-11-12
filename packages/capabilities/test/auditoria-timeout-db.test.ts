@@ -44,6 +44,7 @@ describe.skipIf(!urlPropietario)("cancelación de auditoría desde el runner", (
       .mockResolvedValue([]),
     completar: vi.fn(),
     fallar: vi.fn(),
+    devolver: vi.fn(),
   });
   function barrera() {
     let resolver!: () => void;

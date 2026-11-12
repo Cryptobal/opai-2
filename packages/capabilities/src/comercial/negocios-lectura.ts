@@ -11,7 +11,7 @@ import {
 import type { Contexto } from "../types";
 import { PERMISO_READ, negocioSchema, vistaNegocio } from "./comun";
 
-const filtros = listaSchema.extend({
+export const filtros = listaSchema.extend({
   cuentaId: z.uuid().optional().describe("Filtra por cuenta (ficha de cuenta)."),
   instalacionId: z
     .uuid()
@@ -57,6 +57,29 @@ export async function enriquecer(ctx: Contexto, negocios: Base[]) {
   });
 }
 
+type FiltrosNegocio = z.infer<typeof filtros>;
+
+/** Condiciones de búsqueda de negocios compartidas por la lista y la exportación. */
+export async function dondeNegocios(ctx: Contexto, input: FiltrosNegocio) {
+  // Filtro por instalación vinculada: resuelve los negocios de esa instalación (ficha de instalación).
+  const porInstalacion = input.instalacionId
+    ? (
+        await ctx.db.negocioInstalacion.findMany({ where: { instalacionId: input.instalacionId } })
+      ).map((v) => v.negocioId)
+    : null;
+  return {
+    ...(input.incluirArchivadas ? {} : { archivadoEn: null }),
+    ...(input.cuentaId ? { cuentaId: input.cuentaId } : {}),
+    ...(porInstalacion ? { id: { in: porInstalacion } } : {}),
+    ...(input.etapaId ? { etapaId: input.etapaId } : {}),
+    ...(input.responsableId ? { responsableId: input.responsableId } : {}),
+    ...(input.origenId ? { origenId: input.origenId } : {}),
+    ...(input.estado ? { estado: input.estado } : {}),
+    ...(input.q ? { titulo: { contains: input.q, mode: "insensitive" as const } } : {}),
+    ...conEtiqueta(input.etiquetaId),
+  };
+}
+
 export const negociosList = defineCapability({
   auditarLectura: (s) => s.items.flatMap((n) => [n.id, n.cuentaId]),
   id: "comercial.negocios.list",
@@ -68,27 +91,9 @@ export const negociosList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const q = input.q;
-    // Filtro por instalación vinculada: resuelve los negocios de esa instalación (ficha de instalación).
-    const porInstalacion = input.instalacionId
-      ? (
-          await ctx.db.negocioInstalacion.findMany({
-            where: { instalacionId: input.instalacionId },
-          })
-        ).map((v) => v.negocioId)
-      : null;
+    const where = await dondeNegocios(ctx, input);
     const filas = await ctx.db.negocio.findMany({
-      where: {
-        ...(input.incluirArchivadas ? {} : { archivadoEn: null }),
-        ...(input.cuentaId ? { cuentaId: input.cuentaId } : {}),
-        ...(porInstalacion ? { id: { in: porInstalacion } } : {}),
-        ...(input.etapaId ? { etapaId: input.etapaId } : {}),
-        ...(input.responsableId ? { responsableId: input.responsableId } : {}),
-        ...(input.origenId ? { origenId: input.origenId } : {}),
-        ...(input.estado ? { estado: input.estado } : {}),
-        ...(q ? { titulo: { contains: q, mode: "insensitive" } } : {}),
-        ...conEtiqueta(input.etiquetaId),
-      },
+      where,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: input.limite + 1,
       ...cursorDe(input.cursor),
