@@ -78,8 +78,7 @@ jobs:
             estado=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs?check_name=rama-neon" \
               --jq '[.check_runs[]] | if length == 0 then "sin" elif any(.status != "completed") then "corriendo" elif all(.conclusion == "success" or .conclusion == "skipped" or .conclusion == "neutral") then "listo" else "fallo" end' 2>/dev/null || echo "sin")
             if [ "$estado" = "listo" ] || [ "$estado" = "fallo" ]; then break; fi
-            # Si a los 3 minutos no apareció, este PR no dispara `preview` (se sigue con la vista previa de Git).
-            if [ "$estado" = "sin" ] && [ "$i" -ge 18 ]; then break; fi
+            # Sin corte temprano: con la cola de Actions llena, `preview` puede tardar en empezar.
             sleep 10
           done
           echo "Estado de rama-neon: $estado"
