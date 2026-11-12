@@ -6,6 +6,7 @@ import { diaEnZona, sumarDias } from "@opai/domain";
 
 import { defineIndicador, type IndicadorGestion, type MedicionIndicador } from "../indicadores-gestion";
 import type { Contexto } from "../types";
+import { indicadoresCobertura } from "./indicadores-cobertura";
 
 const aDia = (d: Date) => d.toISOString().slice(0, 10);
 const aFecha = (dia: string) => new Date(`${dia}T00:00:00Z`);
@@ -127,4 +128,4 @@ export const indicadorDiasCubrirVacante = defineIndicador({
   },
 });
 
-export const indicadoresPauta: readonly IndicadorGestion[] = [indicadorDiasCubrirVacante];
+export const indicadoresPauta: readonly IndicadorGestion[] = [indicadorDiasCubrirVacante, ...indicadoresCobertura];
