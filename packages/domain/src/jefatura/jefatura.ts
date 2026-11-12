@@ -88,14 +88,13 @@ function jefesDe(
 }
 
 /**
- * Personas a cargo de `jefeId`: las directas y, hacia abajo, las de cada una de ellas (el jefe del
- * jefe ve toda su línea). No incluye al propio jefe. Tolera ciclos en los datos.
+ * A quién reporta cada persona, con la misma regla que `jefesDe` (directos o, si nadie la tiene, los
+ * del primer nivel que ve por equipo completo): jefe → personas que le reportan. Nadie queda fuera.
  */
-export function personasACargo(
-  jefeId: string,
+export function reportesPorJefe(
   personas: readonly PersonaJefatura[],
   cargos: readonly CargoJefatura[],
-): Set<string> {
+): Map<string, string[]> {
   const porCargo = new Map(cargos.map((c) => [c.id, c]));
   const delCargo = new Map<string, PersonaJefatura[]>();
   for (const p of personas) delCargo.set(p.cargoId, [...(delCargo.get(p.cargoId) ?? []), p]);
@@ -105,6 +104,19 @@ export function personasACargo(
       reportanA.set(jefe.id, [...(reportanA.get(jefe.id) ?? []), p.id]);
     }
   }
+  return reportanA;
+}
+
+/**
+ * Personas a cargo de `jefeId`: las directas y, hacia abajo, las de cada una de ellas (el jefe del
+ * jefe ve toda su línea). No incluye al propio jefe. Tolera ciclos en los datos.
+ */
+export function personasACargo(
+  jefeId: string,
+  personas: readonly PersonaJefatura[],
+  cargos: readonly CargoJefatura[],
+): Set<string> {
+  const reportanA = reportesPorJefe(personas, cargos);
   const aCargo = new Set<string>();
   const cola = [jefeId];
   while (cola.length > 0) {

@@ -21,7 +21,7 @@ export async function cargosConJefatura(ctx: Contexto): Promise<CargoJefatura[]>
 }
 
 /** Cargos que cuelgan de `cargoId` hacia abajo, sin incluirlo. */
-export function cargosBajo(cargos: readonly CargoJefatura[], cargoId: string): Set<string> {
+function cargosBajo(cargos: readonly CargoJefatura[], cargoId: string): Set<string> {
   const bajo = new Set<string>();
   const cola = [cargoId];
   while (cola.length > 0) {

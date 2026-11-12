@@ -15,8 +15,8 @@ Que Personas publique sus indicadores en el catálogo del núcleo para usarlos e
 
 ## 3 Alcance
 
-- Indicador del núcleo `core.personas_documentos_al_dia` («Fichas con documentos al día»): de las personas a cargo **directo** de una jefatura, porcentaje sin ningún documento vencido al cierre del mes (en el mes en curso, a hoy). Un documento archivado o reemplazado por una versión nueva no cuenta. Se atribuye a la Persona jefa; meta sugerida 95 %.
-- Helper `directasPorJefatura(ctx)`: las personas a cargo directo de cada jefatura en 3 consultas, sin importar cuántas jefaturas haya.
+- Indicador del núcleo `core.personas_documentos_al_dia` («Fichas con documentos al día»): de las personas que **reportan** a una jefatura (directas o, si nadie tiene a la persona asignada, la jefatura del nivel de arriba, para que nadie quede sin medir), porcentaje sin ningún documento vencido al cierre del mes (en el mes en curso, a hoy). Cuenta solo el documento propio de la ficha y confirmado (`disponible`); uno pendiente, archivado, reemplazado o solo referenciado no cuenta. «Al cierre» = vence antes del día 1 del mes siguiente (vence el último día del mes → vencido). Se atribuye a la Persona jefa; meta sugerida 95 %.
+- Regla pura `reportesPorJefe` en `@opai/domain` (la misma de `personasACargo`) y helper `directasPorJefatura(ctx)` que la aplica a toda la empresa en 3 consultas.
 
 Fuera (esperan decisión de Carlos): «Días para cubrir una vacante» y «Retención a 90 días».
 
@@ -24,11 +24,11 @@ Fuera (esperan decisión de Carlos): «Días para cubrir una vacante» y «Reten
 
 El indicador vive en `packages/capabilities/src/core/indicadores-gestion/` (Personas es parte del núcleo) y se suma a `indicadoresDelNucleo`. Lo mide `core.indicadores_gestion.medir` y lo usa Desempeño sin cambios.
 
-**Criterio propio (reportado):** se mide sobre la gente **directa**, no toda la línea: así a un gerente no se le carga lo que gestiona cada supervisor, que tiene su propio indicador.
+**Criterio propio (reportado):** se mide sobre quienes le reportan, no toda la línea: así a un gerente no se le carga lo que gestiona cada supervisor, que tiene su propio indicador; pero quien no tiene jefe asignado sube al nivel de arriba (misma regla de CAR-314).
 
 ## 5 Archivos
 
-`core/indicadores-gestion/{documentos-al-dia.ts,comun.ts}`, `core/jefatura/{empresa.ts,datos.ts}`, tests `indicadores-personas-db.test.ts` e `indicadores-gestion.test.ts`.
+`core/indicadores-gestion/{documentos-al-dia.ts,comun.ts}`, `core/jefatura/{empresa.ts,datos.ts}`, `packages/domain/src/jefatura/jefatura.ts`, tests `indicadores-personas-db.test.ts` e `indicadores-gestion.test.ts`.
 
 ## 6 Modelo de datos y migraciones
 
@@ -59,7 +59,7 @@ Todo por `ctx.db` (RLS). Solo ids y porcentajes; no expone documentos ni nombres
 
 ## 12 Tests
 
-`indicadores-personas-db` (vencido cuenta, reemplazado no, por mes, aislamiento entre empresas) y catálogo actualizado.
+`indicadores-personas-db` (vencido cuenta; reemplazado, pendiente, archivado y referencia no; borde del último día; persona sin jefe asignado que sube de nivel; por mes; aislamiento entre empresas) y catálogo actualizado.
 
 ## 13 Validación
 

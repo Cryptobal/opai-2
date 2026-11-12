@@ -1,12 +1,14 @@
-import { esJefeDirecto, type CargoJefatura, type PersonaJefatura } from "@opai/domain";
+import { reportesPorJefe, type CargoJefatura, type PersonaJefatura } from "@opai/domain";
 
 import type { Contexto } from "../../types";
-import { cargosBajo, cargosConJefatura, instalacionesPorUsuario } from "./datos";
+import { cargosConJefatura, instalacionesPorUsuario } from "./datos";
 
 /**
- * Personas a cargo directo de cada jefatura de la empresa (ADR-094), leídas una sola vez: 3 consultas
- * sin importar cuántas jefaturas haya. Solo cuentan los vínculos vigentes de personas activas, igual
- * que `equipoDe`. Las jefaturas sin nadie a cargo no aparecen.
+ * Personas que reportan a cada jefatura de la empresa (ADR-094), leídas una sola vez: 3 consultas sin
+ * importar cuántas jefaturas haya. Directas o, si nadie tiene a la persona (sin jefe asignado, o en una
+ * instalación que nadie tiene a cargo), los jefes del nivel de arriba: nadie queda sin medir. Solo
+ * cuentan vínculos vigentes de personas activas; a diferencia de `equipoDe`, un jefe inactivo tampoco
+ * cuenta (su gente sube de nivel). Las jefaturas sin nadie no aparecen.
  */
 export async function directasPorJefatura(ctx: Contexto): Promise<Map<string, Set<string>>> {
   const cargos = await cargosConJefatura(ctx);
@@ -30,12 +32,5 @@ export async function directasPorJefatura(ctx: Contexto): Promise<Map<string, Se
     instalacionId: v.instalacionId,
     instalacionesACargo: v.persona.usuarioId ? (aCargo.get(v.persona.usuarioId) ?? []) : [],
   }));
-  const porCargo = new Map(cargos.map((c) => [c.id, c]));
-  const out = new Map<string, Set<string>>();
-  for (const jefe of personas) {
-    if (cargosBajo(cargos, jefe.cargoId).size === 0) continue;
-    const directas = personas.filter((p) => p.id !== jefe.id && esJefeDirecto(jefe, p, porCargo));
-    if (directas.length > 0) out.set(jefe.id, new Set(directas.map((p) => p.id)));
-  }
-  return out;
+  return new Map([...reportesPorJefe(personas, cargos)].map(([jefe, ids]) => [jefe, new Set(ids)]));
 }
