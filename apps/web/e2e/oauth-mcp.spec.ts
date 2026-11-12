@@ -17,7 +17,7 @@ async function hastaAutorizar(page: Page, url: string): Promise<void> {
     await page.getByLabel("Correo").fill(E2E_EMAIL);
     await expect(page.getByLabel("Correo")).toHaveValue(E2E_EMAIL);
     await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await page.waitForURL((u) => u.pathname !== "/login");
   }
   if (new URL(page.url()).pathname === "/mfa") {
