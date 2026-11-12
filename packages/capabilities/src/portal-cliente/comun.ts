@@ -102,7 +102,6 @@ export async function accesoDelActor(
     include: { instalaciones: { select: { instalacionId: true } } },
   });
   if (!fila || fila.estado !== "activo") throw negado();
-  if (fila.alcance === "limitado" && !opciones.permitirLimitado) throw negado();
   const cuenta = await ctx.db.cuenta.findFirst({
     where: { id: fila.cuentaId },
     select: { id: true, nombre: true, estado: true },
@@ -110,6 +109,10 @@ export async function accesoDelActor(
   // Cuenta inactiva = portal suspendido (CAR-217). No se toca la fila de acceso: al reactivar la
   // cuenta, los contactos recuperan el acceso solos.
   if (!cuenta || cuenta.estado === ESTADO_CUENTA_INACTIVA) throw negado();
+  // «Limitado» solo mientras la cuenta es prospecto: al ganarla (cliente activo) el acceso activo pasa a completo
+  // sin tocar la fila (se deriva al leer); uno suspendido o revocado ya quedó fuera arriba (CAR-300).
+  const alcance = fila.alcance === "limitado" && cuenta.estado === "prospecto" ? "limitado" : "completo";
+  if (alcance === "limitado" && !opciones.permitirLimitado) throw negado();
   const instalaciones = await instalacionesDeCuenta(ctx, cuenta.id);
   const base: AccesoBase = {
     estado: fila.estado,
@@ -131,7 +134,7 @@ export async function accesoDelActor(
     membershipId: m.id,
     cuentaId: cuenta.id,
     cuentaNombre: cuenta.nombre,
-    alcance: fila.alcance === "limitado" ? "limitado" : "completo",
+    alcance,
     todasInstalaciones: fila.todasInstalaciones,
     instalacionIds: ids,
     instalaciones: instalaciones.filter((i) => ids.includes(i.id)),
