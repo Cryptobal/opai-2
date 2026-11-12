@@ -46,7 +46,9 @@ export default function IndicadoresPropios() {
           identidadActual(),
         ]);
         const edita = identidad
-          ? puedeDeIdentidad(identidad)("desempeno:scorecards.manage")
+          ? // Con alcance acotado (supervisor) el permiso no basta: estas acciones son de toda la empresa.
+            puedeDeIdentidad(identidad)("desempeno:scorecards.manage") &&
+            identidad.acceso.instalaciones === null
           : false;
         return { r, hechos: hechos.ok ? hechos.data.filter((h) => h.puedeUsar) : [], edita };
       }}

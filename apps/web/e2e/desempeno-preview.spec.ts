@@ -46,6 +46,18 @@ test.describe("@preview desempeño", () => {
     await expect(page.getByRole("link", { name: "Indicadores propios" })).toBeVisible();
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "desempeno-indicadores");
+    // Meses cerrados: solo se mira (cerrar no se deshace); si está el botón, se abre y se cancela.
+    await page.goto("/desempeno/cierres");
+    await expect(page.getByRole("link", { name: "Meses cerrados" })).toBeVisible();
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+    await capturar(page, info, "desempeno-cierres");
+    const cerrar = page.getByRole("button", { name: /^Cerrar / }).first();
+    if (await cerrar.count()) {
+      await cerrar.click();
+      await expect(page.getByText(/no se puede reabrir/)).toBeVisible();
+      await capturar(page, info, "desempeno-cierres-confirmar");
+      await page.getByRole("button", { name: "Cancelar" }).click();
+    }
     expect(errores).toEqual([]);
   });
 });
