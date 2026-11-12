@@ -24,7 +24,7 @@ Stripe Billing: la factura como máquina de estados, recurrencia con borrador re
 |---|---|---|---|---|
 | F-1 | **No hay libro contable ni candado de mes.** Existe el plan de cuentas (`CuentaContable.aceptaAsientos`), pero ningún modelo de asiento: los documentos no generan partida doble y no hay cierre contable de período. El único cierre es el semanal del flujo de caja. | `schema/finanzas.prisma` (comentario «asientos (PR 2)»); proyecto Linear «15 · Informes» en backlog | Alta | Decisión de producto primero (ver README): contabilidad propia o entrega ordenada al contador. Si es propia: asientos generados por cada documento y candado de período |
 | F-2 | **El estado de pago de las compras no existe aún.** El modelo lo deja para la conciliación bancaria. | Comentario en `DocumentoRecibido` | Media | Completar con la conciliación de egresos (CAR-328 va en esa línea) |
-| F-3 | **Estados del documento de venta como texto libre.** El estado es una columna de texto con los valores en un comentario; conviene confirmar que las transiciones están en un solo lugar del dominio y con prueba. | `schema/finanzas.prisma`; por verificar en `packages/domain/src/finanzas/` | Media, por verificar | Si no lo está: máquina de estados declarada y probada |
+| F-3 | **Las transiciones del documento de venta no están en un solo lugar.** Existe `puedeTransicionDte`, pero solo lo usa un trabajo y no tiene prueba; emisión, notas de crédito, cesión y folios escriben el estado directo. | `packages/domain/src/finanzas/ventas.ts`; `packages/capabilities/src/finanzas/ventas-emision.ts`, `ventas-nc-escritura.ts`, `ventas-cesion-ceder.ts` | Media | Ajustar: toda escritura de estado pasa por la regla del dominio, con prueba de las transiciones |
 
 ## En qué se aparta a propósito
 
