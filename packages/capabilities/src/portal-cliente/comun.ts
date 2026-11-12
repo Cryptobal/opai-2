@@ -71,6 +71,8 @@ export type AccesoResuelto = {
   membershipId: string;
   cuentaId: string;
   cuentaNombre: string;
+  /** «limitado» = prospecto que solo ve su propuesta (CAR-300); «completo» = el portal entero. */
+  alcance: "completo" | "limitado";
   todasInstalaciones: boolean;
   /** Instalaciones que ve (ya filtradas: activas, sin archivar, de su cuenta). */
   instalacionIds: string[];
@@ -81,9 +83,13 @@ export type AccesoResuelto = {
  * Resuelve el acceso del actor al portal (FAIL-CLOSED, ADR-022): solo una persona con membresía de
  * contacto de cliente (rol viewer con «cliente» como único portal) y un acceso `activo` entra. Todo
  * lo demás (key sin usuario, membresía interna, sin fila, suspendido, revocado, cuenta inactiva) es FORBIDDEN con el
- * mismo mensaje, sin revelar cuál fue la causa.
+ * mismo mensaje, sin revelar cuál fue la causa. Un acceso de alcance «limitado» (prospecto) NO pasa por
+ * aquí salvo que la capacidad lo permita expresamente (`permitirLimitado`): así no abre el portal completo.
  */
-export async function accesoDelActor(ctx: Contexto): Promise<AccesoResuelto> {
+export async function accesoDelActor(
+  ctx: Contexto,
+  opciones: { permitirLimitado?: boolean } = {},
+): Promise<AccesoResuelto> {
   const negado = () => prohibido("Tu usuario no tiene un perfil de contacto activo en el Portal Cliente.");
   if (ctx.actor.tipo !== "user" || !ctx.usuario) throw negado();
   const m = await ctx.db.membership.findUnique({
@@ -96,6 +102,7 @@ export async function accesoDelActor(ctx: Contexto): Promise<AccesoResuelto> {
     include: { instalaciones: { select: { instalacionId: true } } },
   });
   if (!fila || fila.estado !== "activo") throw negado();
+  if (fila.alcance === "limitado" && !opciones.permitirLimitado) throw negado();
   const cuenta = await ctx.db.cuenta.findFirst({
     where: { id: fila.cuentaId },
     select: { id: true, nombre: true, estado: true },
@@ -124,6 +131,7 @@ export async function accesoDelActor(ctx: Contexto): Promise<AccesoResuelto> {
     membershipId: m.id,
     cuentaId: cuenta.id,
     cuentaNombre: cuenta.nombre,
+    alcance: fila.alcance === "limitado" ? "limitado" : "completo",
     todasInstalaciones: fila.todasInstalaciones,
     instalacionIds: ids,
     instalaciones: instalaciones.filter((i) => ids.includes(i.id)),
