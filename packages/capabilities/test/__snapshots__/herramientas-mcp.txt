@@ -230,6 +230,8 @@ core_importar_ejecutar
 core_importar_lotes
 core_importar_plantilla
 core_importar_revertir
+core_indicadores_gestion_catalogo
+core_indicadores_gestion_medir
 core_indicadores_uf_utm
 core_inicio_indicadores
 core_inicio_pendientes

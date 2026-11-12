@@ -44,6 +44,7 @@ export * from "./vigencia";
 export * from "./calendario";
 export * from "./datos-personales";
 export * from "./cumplimiento";
+export * from "./indicadores-gestion";
 export * from "./incidentes";
 export * from "./documento-subida";
 export * from "./firma";

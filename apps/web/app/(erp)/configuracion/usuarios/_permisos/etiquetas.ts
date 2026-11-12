@@ -24,6 +24,7 @@ const MODULOS: Record<string, string> = {
 
 const RECURSOS: Record<string, string> = {
   tenant: "Empresa",
+  indicadores_gestion: "Indicadores de gestión",
   users: "Usuarios",
   owners: "Owners",
   apikeys: "Agentes y API keys",
