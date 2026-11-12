@@ -44,7 +44,13 @@ export const propiosArchivar = defineCapability({
         .map((v) => v.cargoId),
     );
     if (cargos.size > 0) {
-      throw reglaDeNegocio(`Está en el scorecard publicado de ${cargos.size} cargo(s): sácalo de ahí primero.`);
+      const nombres = await ctx.db.cargo.findMany({
+        where: { id: { in: [...cargos] } },
+        select: { nombre: true },
+        orderBy: { nombre: "asc" },
+      });
+      const lista = nombres.map((c) => `«${c.nombre}»`).join(", ");
+      throw reglaDeNegocio(`Está en el scorecard publicado de ${lista}: sácalo de ahí primero.`);
     }
     if (dryRun || actual.archivadoEn) return { id: actual.id, archivado: true };
     await ctx.transaccion(async (tx) => {

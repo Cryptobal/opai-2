@@ -226,6 +226,8 @@ describe.skipIf(!urlPropietario)("desempeño · indicadores propios en base real
     expect(r.puntaje).toBe(100);
     expect(r.indicadores[0]).toMatchObject({ nombre: "Ventas con cotización", valor: 1_000_000 });
     expect(await codigo(ctx(a), "desempeno.propios.archivar", { id: propio })).toBe("UNPROCESSABLE");
+    // El rechazo nombra los cargos que lo usan, para saber de dónde sacarlo.
+    await expect(dato(ctx(a), "desempeno.propios.archivar", { id: propio })).rejects.toThrow(/«Vendedor»/);
     // Un borrador que invierte el sentido no toca el indicador publicado ni el resultado del mes.
     const invertido = { ...ventasConCotizacion, id: propio, nombre: "Otro nombre", sentido: "menor" };
     const pendiente = await dato<Guardado>(ctx(a), GUARDAR, invertido);

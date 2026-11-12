@@ -111,6 +111,17 @@ describe.skipIf(!urlPropietario)("desempeño: cierre de período contra Postgres
     expect(previa).toEqual({ periodo: "2026-11", personas: 2, cargos: 1 });
     expect(await e.admin.desempenoPeriodoCerrado.count({ where: { tenantId: a } })).toBe(0);
     expect(await codigo(ctx(a), CERRAR, { periodo: "2026-12" })).toBe("UNPROCESSABLE");
+    // Cerrar es de toda la empresa: un supervisor con alcance acotado no puede, aunque tenga el permiso.
+    const acotado = mod.crearContexto({
+      tenantId: a,
+      rol: "owner",
+      actor: { tipo: "user", id: usuario.gema ?? "" },
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      modulosActivos: ["desempeno"],
+      alcance: { instalaciones: [] },
+    });
+    expect(await codigo(acotado, CERRAR, { periodo: "2026-11" })).toBe("FORBIDDEN");
   });
 
   it("al cerrar guarda el resultado de cada persona y queda en la auditoría", async () => {
@@ -178,7 +189,11 @@ describe.skipIf(!urlPropietario)("desempeño: cierre de período contra Postgres
     expect(await trabajo?.ejecutar(sistema, { dia: "2026-12-06" })).toEqual({ cerrado: null });
     expect(await e.admin.auditEvent.count({ where: { tenantId: b, capability: CERRAR } })).toBe(1);
     // La otra empresa no ve los meses cerrados de A.
-    const lista = await dato<{ periodo: string; origen: string }[]>(ctx(b), "desempeno.periodos.list", {});
-    expect(lista).toEqual([expect.objectContaining({ periodo: "2026-11", origen: "automatico" })]);
+    const lista = await dato<{ cerrados: { periodo: string; origen: string }[] }>(
+      ctx(b),
+      "desempeno.periodos.list",
+      {},
+    );
+    expect(lista.cerrados).toEqual([expect.objectContaining({ periodo: "2026-11", origen: "automatico" })]);
   });
 });
