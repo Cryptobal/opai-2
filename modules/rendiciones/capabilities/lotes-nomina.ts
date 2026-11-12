@@ -35,11 +35,12 @@ export async function armarNomina(ctx: Contexto, items: readonly ItemLote[], glo
   for (const i of items) porPersona.set(i.personaId, (porPersona.get(i.personaId) ?? 0) + i.montoClp);
   const filas: FilaNomina[] = [];
   for (const [personaId, montoClp] of porPersona) {
-    const p = await ctx.db.persona.findFirst({ where: { id: personaId }, select: { nombres: true, apellidos: true, emailPersonal: true, pago: { select: { bancoCodigo: true, rutTitular: true, updatedAt: true } } } });
+    const p = await ctx.db.persona.findFirst({ where: { id: personaId }, select: { nombres: true, apellidos: true, emailPersonal: true, pagos: { where: { porDefecto: true }, select: { bancoCodigo: true, rutTitular: true, updatedAt: true } } } });
+    const pago = p?.pagos[0];
     const versiones = items.filter((i) => i.personaId === personaId).map((i) => i.cuentaVersion.getTime());
-    if (!p?.pago?.bancoCodigo || !p.pago.rutTitular) throw reglaDeNegocio("Una persona del lote ya no tiene datos bancarios en su ficha.");
-    if (versiones.some((v) => v !== p.pago!.updatedAt.getTime())) throw conflicto("Una cuenta cambió en la ficha después de armar el lote: anúlalo y arma otro.");
-    filas.push({ cuentaDestino: await numeroDeCuenta(ctx, personaId), codigoBanco: codigoSbif(p.pago.bancoCodigo) ?? "", rut: p.pago.rutTitular, nombre: `${p.nombres} ${p.apellidos}`, montoClp, correo: p.emailPersonal ?? null });
+    if (!p || !pago?.bancoCodigo || !pago.rutTitular) throw reglaDeNegocio("Una persona del lote ya no tiene datos bancarios en su ficha.");
+    if (versiones.some((v) => v !== pago.updatedAt.getTime())) throw conflicto("Una cuenta cambió en la ficha después de armar el lote: anúlalo y arma otro.");
+    filas.push({ cuentaDestino: await numeroDeCuenta(ctx, personaId), codigoBanco: codigoSbif(pago.bancoCodigo) ?? "", rut: pago.rutTitular, nombre: `${p.nombres} ${p.apellidos}`, montoClp, correo: p.emailPersonal ?? null });
   }
   const unicas = agruparPorBeneficiario(filas);
   const errores = validarFilasNomina(unicas, { cuentaOrigen, glosa });

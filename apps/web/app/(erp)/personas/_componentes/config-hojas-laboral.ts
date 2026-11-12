@@ -1,5 +1,6 @@
 /** Secciones editables de Laboral: campos y armado del input de cada capacidad (CAR-223). */
 import { CAMPOS_BANCO } from "./campos-banco";
+import { HOJA_PAGO_AGREGAR } from "./config-hoja-pago-agregar";
 
 export type TipoCampo = "texto" | "fecha" | "entero" | "decimal" | "si_no" | "opcion";
 export type CampoLaboral = {
@@ -17,7 +18,7 @@ export type CampoLaboral = {
   buscable?: boolean;
 };
 export type SeccionLaboral =
-  "prevision" | "uniforme" | "jornada-dt" | "os10" | "contacto-laboral" | "pago";
+  "prevision" | "uniforme" | "jornada-dt" | "os10" | "contacto-laboral" | "pago" | "pago-agregar";
 export type ConfigSeccion = {
   param: string;
   titulo: string;
@@ -142,4 +143,5 @@ export const SECCIONES_LABORAL: Record<SeccionLaboral, ConfigSeccion> = {
     ],
     armar: (id, c) => ({ id, ...c }),
   },
+  "pago-agregar": HOJA_PAGO_AGREGAR,
 };

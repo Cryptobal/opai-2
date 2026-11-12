@@ -1904,3 +1904,11 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - Hasta entonces OPAI 2 emite solo en certificación; el CAF 33 2064–2068 (producción) sigue pausado.
 - No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
 - La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).
+
+## ADR-100 · Varias cuentas bancarias por persona; el anticipo vive solo en Nómina (CAR-275, 12-nov-2026)
+
+**Decisión (Carlos, 12-nov-2026, opción A).** Una persona puede tener varias cuentas bancarias; una sola es «por defecto» y es la que lee la nómina de pago (Rendiciones). El **anticipo** no se modela en la ficha: vive únicamente en Nómina, sin cambios.
+
+**Cómo.** `core.personas_pago` pasa de 1:1 a 1:N (índice único parcial `WHERE por_defecto`, a lo más una por defecto por persona) y suma `titular_nombre`. Las solicitudes (`personas_pago_solicitudes`) suman `tipo` (`reemplazar`, `agregar`, `marcar_defecto`, `quitar`), `cuenta_id`, `titular_nombre` y `por_defecto`. Se reutiliza `core.personas.pago_solicitar_cambio` con esos campos opcionales: sin capacidades nuevas, la aprobación sigue siendo de otra persona (`pago_aprobar_cambio`, solo personas). No se puede quitar la cuenta por defecto. El número de cuenta sigue cifrado por campo. La migración es aditiva y reversible (reversión en su cabecera) y marca la cuenta actual de cada persona como por defecto con verificación de filas.
+
+**Fuera de alcance.** Que la persona valide sus cuentas desde el Portal Trabajador (B1): Carlos no lo decidió.
