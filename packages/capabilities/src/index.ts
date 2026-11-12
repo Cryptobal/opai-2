@@ -5,7 +5,8 @@ export {
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
-export { ajustesComercial, capacidadesComercial } from "./comercial";
+export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
+export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
