@@ -51,6 +51,8 @@ export const manifest = defineModule({
     { id: "desempeno.propio.publicado", descripcion: "Se publicó un indicador propio de la empresa." },
     { id: "desempeno.propio.archivado", descripcion: "Se archivó un indicador propio de la empresa." },
     { id: "desempeno.periodo.cerrado", descripcion: "Se cerró un mes: su resultado quedó guardado y ya no cambia." },
+    { id: "desempeno.resultado.bajo_meta", descripcion: "Al cerrar el mes, una persona quedó bajo la meta de su cargo." },
+    { id: "desempeno.equipo.bajo_meta", descripcion: "Al cerrar el mes, personas a cargo de una jefatura quedaron bajo la meta." },
   ],
   capacidades: capacidadesDesempeno,
 });

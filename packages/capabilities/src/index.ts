@@ -15,12 +15,7 @@ export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas, indicadoresRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta, indicadoresPauta } from "./pauta";
-export {
-  ajustesDesempeno,
-  capacidadesDesempeno,
-  PERMISOS_DESEMPENO,
-  trabajosDesempeno,
-} from "./desempeno";
+export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";

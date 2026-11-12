@@ -16,4 +16,13 @@ export const ajustesDesempeno = z.object({
     permiso: PERMISOS_DESEMPENO.scorecardsManage,
     control: "numero",
   }),
+  aviso_bajo_meta: z.boolean().default(false).meta({
+    etiqueta: "Avisar a quien quedó bajo la meta",
+    ayuda:
+      "Al cerrar el mes, OPAI avisa en la campana a cada persona que quedó bajo la meta (si su cargo le muestra su resultado) y a su jefatura directa. El aviso no lleva el puntaje.",
+    grupo: "Avisos",
+    ambito: "tenant",
+    permiso: PERMISOS_DESEMPENO.scorecardsManage,
+    control: "switch",
+  }),
 });

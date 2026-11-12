@@ -7,6 +7,7 @@ import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { resultadosDe } from "./calculo";
 import { estaCerrado, personaCerrada } from "./cierre-lectura";
 import { mesesDe, periodo, PERMISOS_DESEMPENO, versionesDe } from "./comun";
+import { parteAgente, parteAgenteSchema } from "./parte-agente";
 import { visibilidadDe, visiblesEntre } from "./visibilidad";
 
 export const MAX_PERSONAS = 200;
@@ -19,7 +20,7 @@ export const cobertura = z.number().describe("Peso del scorecard que sí tuvo he
 export const resultadosPersona = defineCapability({
   id: "desempeno.resultados.ver_persona",
   descripcion:
-    "Resultado de gestión de una persona en un mes: su puntaje (0 a 120, 100 es cumplir todas las metas) y el detalle por indicador con meta, valor y logro, según el scorecard de su cargo. Sin indicar a quién, responde por quien consulta. Cada uno ve el suyo y el de las personas a su cargo; gerencia ve a todos.",
+    "Resultado de gestión de una persona en un mes: su puntaje (0 a 120, 100 es cumplir todas las metas) y el detalle por indicador con meta, valor y logro, según el scorecard de su cargo, y qué parte de sus acciones hizo su agente (el resultado se atribuye igual a la persona). Sin indicar a quién, responde por quien consulta. Cada uno ve el suyo y el de las personas a su cargo; gerencia ve a todos.",
   permiso: PERMISOS_DESEMPENO.resultadosVer,
   input: z.object({
     personaId: uuidSchema.optional().describe("Por defecto, la Persona de quien consulta."),
@@ -35,6 +36,7 @@ export const resultadosPersona = defineCapability({
     cerrado: z.boolean().describe("true = mes cerrado: el resultado es el que quedó guardado y no cambia."),
     puntaje,
     cobertura,
+    parteAgente: parteAgenteSchema,
     indicadores: z.array(
       z.object({
         indicador: z.string(),
@@ -76,8 +78,19 @@ export const resultadosPersona = defineCapability({
     ]);
     const mes = input.periodo ?? meses.actual;
     const { nombres, apellidos } = persona;
-    const cerrado = await estaCerrado(ctx, mes);
-    const base = { personaId, nombres, apellidos, cargoId: vinculo?.cargoId ?? null, periodo: mes, cerrado };
+    const [cerrado, agente] = await Promise.all([
+      estaCerrado(ctx, mes),
+      parteAgente(ctx, persona.usuarioId, mes, meses.zona),
+    ]);
+    const base = {
+      personaId,
+      nombres,
+      apellidos,
+      cargoId: vinculo?.cargoId ?? null,
+      periodo: mes,
+      cerrado,
+      parteAgente: agente,
+    };
     const sinScorecard = { ...base, vigenteDesde: null, puntaje: null, cobertura: 0, indicadores: [] };
     if (cerrado) {
       // Mes cerrado: lo guardado, con el cargo y el scorecard que tenía ese mes.

@@ -43,6 +43,8 @@ export type ResultadoPersona = {
   vigenteDesde: string | null;
   puntaje: number | null;
   cobertura: number;
+  /** Parte de sus acciones del mes hecha por su agente (CAR-312); null sin usuario en OPAI. */
+  parteAgente: { acciones: number; porAgente: number; porcentaje: number } | null;
   indicadores: {
     indicador: string;
     nombre: string;
