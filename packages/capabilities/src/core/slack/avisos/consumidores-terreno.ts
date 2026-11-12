@@ -27,6 +27,7 @@ export const consumidorSlackIncidentes = defineConsumidor({
         createdAt: { gte: new Date(ev.createdAt.getTime() - 2 * MIN) },
       },
       select: { id: true, resumen: true, detalle: true },
+      orderBy: { createdAt: "asc" },
       take: 20,
     });
     const inst = await ctx.db.instalacion.findUnique({
@@ -66,7 +67,7 @@ export const consumidorSlackPanico = defineConsumidor({
   eventos: ["core.terreno.panico"],
   async handler(ctx, ev) {
     const p = panicoSchema.safeParse(ev.payload);
-    if (!p.success) return;
+    if (!p.success || !(await configSiConectada(ctx))) return;
     const [persona, inst] = await Promise.all([
       p.data.personaId
         ? ctx.db.persona.findUnique({

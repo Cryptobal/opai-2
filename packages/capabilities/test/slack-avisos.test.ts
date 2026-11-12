@@ -222,13 +222,25 @@ describe("Slack F3: pánico", () => {
   it("va al canal y por mensaje directo al supervisor a cargo, si la empresa lo activa", async () => {
     const ctx = await conectadoConCanal({ panico: { mensajeDirectoSupervisor: true } });
     await despachar(ctx, panico());
+    // El mensaje directo no depende del canal: aunque la app no esté en el canal, llega igual.
+    respuestas["chat.postMessage"] = (c: URLSearchParams) =>
+      c.get("channel") === CANAL.id
+        ? { ok: false, error: "not_in_channel" }
+        : { ok: true, ts: "1.000200" };
     await correrTrabajos(ctx, "core.slack.aviso_enviar");
+    await correrTrabajos(ctx, "core.slack.panico_directo");
     const dm = llamadas.filter((l) => l.metodo === "conversations.open");
     expect(dm).toHaveLength(1);
     expect(await ctx.db.slackAviso.findFirst({})).toMatchObject({
       tipo: "panico",
-      envio: "enviado",
+      envio: "fallido",
     });
+  });
+
+  it("una marca sincronizada tarde sin conexión no se avisa como atraso", async () => {
+    const ctx = await conectadoConCanal();
+    await despachar(ctx, marca(120, { origen: "offline_queue" }));
+    expect(await ctx.db.slackAviso.count({})).toBe(0);
   });
 
   it("escala al grupo si nadie lo toma; si ya lo tomaron, no", async () => {

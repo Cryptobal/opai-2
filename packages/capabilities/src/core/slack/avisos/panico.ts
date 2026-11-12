@@ -9,7 +9,7 @@ import type { Contexto } from "../../../types";
 import { tokenSlack } from "../comun";
 import { slackUsuarios } from "../vinculo";
 import { slackMensajes } from "./cliente";
-import { configSiConectada, TIPO_ESCALAR_PANICO } from "./registrar";
+import { configSiConectada, TIPO_DIRECTO_PANICO, TIPO_ESCALAR_PANICO } from "./registrar";
 import { urlOpai } from "./bloques";
 
 type AvisoPanico = {
@@ -19,6 +19,16 @@ type AvisoPanico = {
   enlace: string | null;
   instalacionId: string | null;
 };
+
+/** Solo personas con membresía activa en la empresa. */
+async function activos(ctx: Contexto, userIds: string[]) {
+  if (!userIds.length) return [];
+  const m = await ctx.db.membership.findMany({
+    where: { userId: { in: userIds }, estado: "activa" },
+    select: { userId: true },
+  });
+  return m.map((x) => x.userId);
+}
 
 /** Ids de Slack de los usuarios vinculados entre `userIds`. */
 async function vinculados(ctx: Contexto, userIds: string[]) {
@@ -30,11 +40,15 @@ async function vinculados(ctx: Contexto, userIds: string[]) {
   return filas.flatMap((f) => (f.slackUserId ? [f.slackUserId] : []));
 }
 
-/** Manda el mismo aviso por mensaje directo a cada destinatario. Devuelve cuántos salieron. */
+/**
+ * Manda el mismo aviso por mensaje directo a cada destinatario y devuelve cuántos salieron. Si no salió
+ * ninguno y hubo errores, lanza para que el runner reintente.
+ */
 async function directos(ctx: Contexto, a: AvisoPanico, slackIds: string[], prefijo = "") {
   if (!slackIds.length) return 0;
   const token = await tokenSlack(ctx);
   let enviados = 0;
+  let fallidos = 0;
   for (const id of slackIds) {
     try {
       await slackUsuarios().mensajeDirecto(token, id, {
@@ -45,8 +59,11 @@ async function directos(ctx: Contexto, a: AvisoPanico, slackIds: string[], prefi
       enviados += 1;
     } catch {
       // Un supervisor sin mensaje directo no frena a los demás.
+      fallidos += 1;
     }
   }
+  if (!enviados && fallidos)
+    throw new Error("Slack no entregó ningún mensaje directo del pánico; se reintenta.");
   return enviados;
 }
 
@@ -102,5 +119,19 @@ export const trabajoEscalarPanicoSlack = defineTrabajo({
       }
     }
     return { escalado: n };
+  },
+});
+
+export const trabajoDirectoPanicoSlack = defineTrabajo({
+  tipo: TIPO_DIRECTO_PANICO,
+  descripcion:
+    "Manda el pánico por mensaje directo a los supervisores a cargo de la instalación, sin esperar al aviso en el canal.",
+  payload: z.object({ avisoId: z.uuid() }),
+  async handler(ctx, { avisoId }) {
+    const a = await ctx.db.slackAviso.findUnique({ where: { id: avisoId } });
+    if (!a) return { omitido: "sin_aviso" };
+    const c = await configSiConectada(ctx);
+    if (!c?.panico.mensajeDirectoSupervisor) return { omitido: "apagado" };
+    return { directos: await mensajesDirectosPanico(ctx, a) };
   },
 });

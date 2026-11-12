@@ -19,6 +19,7 @@ export type TipoAviso = (typeof TIPOS_AVISO)[number];
 
 export const TIPO_ENVIAR_AVISO = "core.slack.aviso_enviar";
 export const TIPO_ESCALAR_PANICO = "core.slack.panico_escalar";
+export const TIPO_DIRECTO_PANICO = "core.slack.panico_directo";
 
 export type AvisoNuevo = {
   tipo: TipoAviso;
@@ -48,7 +49,11 @@ export function avisoActivo(c: SlackConfig, tipo: TipoAviso): boolean {
     case "mensaje_guardia":
       return c.avisos.mensajesGuardias;
     case "panico":
-      return c.panico.alCanal || c.panico.mensajeDirectoSupervisor || c.panico.escalar;
+      return (
+        Boolean(c.panico.alCanal && (c.canales.panico ?? c.canales.general)) ||
+        c.panico.mensajeDirectoSupervisor ||
+        Boolean(c.panico.escalar && c.panico.escalarAGrupoId)
+      );
   }
 }
 
@@ -100,12 +105,21 @@ export async function registrarAvisoSlack(ctx: Contexto, a: AvisoNuevo): Promise
       select: { id: true },
     });
     if (!fila) return null;
-    await ctx.trabajos.encolar(tx, {
-      tipo: TIPO_ENVIAR_AVISO,
-      payload: { avisoId: fila.id },
-      claveUnica: `slack-aviso:${fila.id}`,
-      maxIntentos: 5,
-    });
+    if (canal)
+      await ctx.trabajos.encolar(tx, {
+        tipo: TIPO_ENVIAR_AVISO,
+        payload: { avisoId: fila.id },
+        claveUnica: `slack-aviso:${fila.id}`,
+        maxIntentos: 5,
+      });
+    // El mensaje directo del pánico no depende del canal: va en su propio trabajo (revisión de F3).
+    if (a.tipo === "panico" && c.panico.mensajeDirectoSupervisor)
+      await ctx.trabajos.encolar(tx, {
+        tipo: TIPO_DIRECTO_PANICO,
+        payload: { avisoId: fila.id },
+        claveUnica: `slack-panico-directo:${fila.id}`,
+        maxIntentos: 4,
+      });
     if (a.tipo === "panico" && c.panico.escalar && c.panico.escalarAGrupoId)
       await ctx.trabajos.encolar(tx, {
         tipo: TIPO_ESCALAR_PANICO,

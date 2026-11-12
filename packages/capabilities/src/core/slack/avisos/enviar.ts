@@ -10,7 +10,6 @@ import type { Contexto } from "../../../types";
 import { tokenSlack } from "../comun";
 import { bloquesAviso, textoPadreHilo } from "./bloques";
 import { slackMensajes } from "./cliente";
-import { mensajesDirectosPanico } from "./panico";
 import { configSiConectada, TIPO_ENVIAR_AVISO, type TipoAviso } from "./registrar";
 
 /** Errores que no se arreglan reintentando: se registran y el aviso queda «fallido». */
@@ -113,11 +112,7 @@ export const trabajoEnviarAvisoSlack = defineTrabajo({
         where: { id: a.id },
         data: { envio: "enviado", ts, hiloTs, error: null },
       });
-      const directos =
-        a.tipo === "panico" && c.panico.mensajeDirectoSupervisor
-          ? await mensajesDirectosPanico(ctx, a)
-          : 0;
-      return { enviado: true, directos };
+      return { enviado: true };
     } catch (e) {
       const codigo = e instanceof ErrorSlack ? e.codigo : "error_desconocido";
       if (ERRORES_DEFINITIVOS.has(codigo)) return fallar(ctx, a.id, codigo);

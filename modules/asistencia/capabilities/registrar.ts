@@ -104,7 +104,7 @@ export const marcasRegistrar = defineCapability({
         // turnoInicio, horaServidor y distanciaM (aditivos, CAR-293): Slack calcula atraso y fuera de zona sin leer la marca.
         payload: { marcaId: fila.id, personaId: persona.id, tipo: registro.tipo, instalacionId: instalacion.id, gpsEstado: registro.gpsEstado,
           turnoInicio: registro.turnoInicio?.toISOString() ?? null, horaServidor: registro.horaServidor.toISOString(),
-          distanciaM: registro.distanciaM == null ? null : Number(registro.distanciaM) },
+          distanciaM: registro.distanciaM == null ? null : Number(registro.distanciaM), origen: registro.origen },
       });
       return { marca: vistaDeMarca(fila), repetida: false };
     });

@@ -35,6 +35,7 @@ const marcaSchema = z.object({
   turnoInicio: z.iso.datetime().nullable().optional(),
   horaServidor: z.iso.datetime().optional(),
   distanciaM: z.number().nullable().optional(),
+  origen: z.string().optional(),
 });
 
 /** Atraso sobre el margen de la empresa y marca fuera de zona (`asistencia.marca.registrada`). */
@@ -49,8 +50,9 @@ export const consumidorSlackMarcas = defineConsumidor({
     const c = await configSiConectada(ctx);
     if (!c) return;
     const m = p.data;
+    // Una marca que llega tarde por estar sin conexión no es un atraso real: no se avisa (revisión de F3).
     const atrasoMin =
-      m.tipo === "entrada" && m.turnoInicio && m.horaServidor
+      m.tipo === "entrada" && m.origen !== "offline_queue" && m.turnoInicio && m.horaServidor
         ? Math.floor((Date.parse(m.horaServidor) - Date.parse(m.turnoInicio)) / MIN)
         : null;
     const atraso = c.avisos.atraso && atrasoMin !== null && atrasoMin >= c.margenAtrasoMin;
@@ -100,7 +102,7 @@ export const consumidorSlackAusencia = defineConsumidor({
   eventos: ["asistencia.alerta.sin_marca_inicio"],
   async handler(ctx, ev) {
     const p = ausenciaSchema.safeParse(ev.payload);
-    if (!p.success) return;
+    if (!p.success || !(await configSiConectada(ctx))?.avisos.ausencia) return;
     const persona = await nombrePersona(ctx, p.data.personaId);
     const t = p.data.turno;
     await registrarAvisoSlack(ctx, {

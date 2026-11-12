@@ -40,22 +40,25 @@ export function urlOpai(enlace: string | null, base: string): string | null {
 }
 
 /** Bloques del aviso: título, detalle, estado y botones «Tomar» (si sigue abierto) y «Ver en OPAI». */
+/** Texto escapado y recortado bajo el tope de 3000 caracteres de un bloque de Slack. */
+const seguro = (t: string) => escaparSlack(t).slice(0, 2900);
+
 export function bloquesAviso(a: AvisoParaSlack, base: string): BloqueSlack[] {
   const bloques: BloqueSlack[] = [
     {
       type: "section",
-      text: { type: "mrkdwn", text: `${ICONO[a.tipo]} *${escaparSlack(a.titulo)}*` },
+      text: { type: "mrkdwn", text: `${ICONO[a.tipo]} *${seguro(a.titulo)}*` },
     },
   ];
   if (a.detalle)
     bloques.push({
       type: "context",
-      elements: [{ type: "mrkdwn", text: escaparSlack(a.detalle) }],
+      elements: [{ type: "mrkdwn", text: seguro(a.detalle) }],
     });
   if (a.estadoTexto)
     bloques.push({
       type: "context",
-      elements: [{ type: "mrkdwn", text: escaparSlack(a.estadoTexto) }],
+      elements: [{ type: "mrkdwn", text: seguro(a.estadoTexto) }],
     });
   const botones: Extract<BloqueSlack, { type: "actions" }>["elements"] = [];
   if (a.gestion === "abierto")

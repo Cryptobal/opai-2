@@ -2,9 +2,13 @@
 import { consumidorSlackAusencia, consumidorSlackMarcas } from "./consumidores";
 import { consumidorSlackIncidentes, consumidorSlackPanico } from "./consumidores-terreno";
 import { trabajoEnviarAvisoSlack } from "./enviar";
-import { trabajoEscalarPanicoSlack } from "./panico";
+import { trabajoDirectoPanicoSlack, trabajoEscalarPanicoSlack } from "./panico";
 
-export const trabajosAvisosSlack = [trabajoEnviarAvisoSlack, trabajoEscalarPanicoSlack];
+export const trabajosAvisosSlack = [
+  trabajoEnviarAvisoSlack,
+  trabajoDirectoPanicoSlack,
+  trabajoEscalarPanicoSlack,
+];
 export const consumidoresAvisosSlack = [
   consumidorSlackMarcas,
   consumidorSlackAusencia,
