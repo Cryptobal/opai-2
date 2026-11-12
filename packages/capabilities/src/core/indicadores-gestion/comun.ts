@@ -2,10 +2,14 @@ import { enScope } from "../../autorizacion";
 import { moduloDeIndicador, type IndicadorGestion } from "../../indicadores-gestion";
 import { listarModulos } from "../../module";
 import type { Contexto } from "../../types";
+import { indicadorDocumentosAlDia } from "./documentos-al-dia";
 import { indicadorTareasATiempo } from "./tareas-a-tiempo";
 
 /** Indicadores que publica el propio núcleo. Los de los módulos vienen en su manifiesto. */
-export const indicadoresDelNucleo: readonly IndicadorGestion[] = [indicadorTareasATiempo];
+export const indicadoresDelNucleo: readonly IndicadorGestion[] = [
+  indicadorTareasATiempo,
+  indicadorDocumentosAlDia,
+];
 
 /** Todos los indicadores declarados: núcleo más los manifiestos registrados. */
 export function indicadoresDeclarados(): readonly IndicadorGestion[] {

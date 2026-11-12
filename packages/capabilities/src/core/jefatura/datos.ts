@@ -21,7 +21,7 @@ export async function cargosConJefatura(ctx: Contexto): Promise<CargoJefatura[]>
 }
 
 /** Cargos que cuelgan de `cargoId` hacia abajo, sin incluirlo. */
-function cargosBajo(cargos: readonly CargoJefatura[], cargoId: string): Set<string> {
+export function cargosBajo(cargos: readonly CargoJefatura[], cargoId: string): Set<string> {
   const bajo = new Set<string>();
   const cola = [cargoId];
   while (cola.length > 0) {
@@ -36,7 +36,7 @@ function cargosBajo(cargos: readonly CargoJefatura[], cargoId: string): Set<stri
 }
 
 /** Instalaciones a cargo (ADR-022) de cada usuario, por su membresía en la empresa. */
-async function instalacionesPorUsuario(
+export async function instalacionesPorUsuario(
   ctx: Contexto,
   usuarios: readonly string[],
 ): Promise<Map<string, string[]>> {
