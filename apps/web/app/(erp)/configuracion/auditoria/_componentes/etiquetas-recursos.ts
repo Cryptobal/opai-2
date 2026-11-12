@@ -24,7 +24,7 @@ export const RECURSOS: Record<string, string> = {
   alertas: "Alertas", exportar: "Exportación", accesos: "Accesos", mi_acceso: "Mi acceso",
   centros_costo: "Centros de costo", proveedores: "Proveedores", compras: "Compras", ventas: "Ventas", ventas_programacion: "Ventas recurrentes",
   cesiones: "Cesiones", folios: "Folios", dte_config: "Configuración de facturación",
-  planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura",
+  planilla: "Planilla", filas: "Filas", celdas: "Celdas", cierres: "Cierres", flujo: "Flujo de caja", cuadratura: "Cuadratura", recurrentes: "Gastos recurrentes",
   derivadas: "Cálculos derivados", bancos: "Bancos", movimientos_bancarios: "Movimientos bancarios",
   cartolas: "Cartolas", conciliaciones: "Conciliaciones", cobros: "Cobros", reglas_banco: "Reglas del banco",
   tipos: "Tipos", tickets: "Tickets", motor: "Motor", cotizaciones: "Cotizaciones", compartir: "Compartir cotización", lineas: "Líneas",

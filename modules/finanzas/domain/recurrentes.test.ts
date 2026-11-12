@@ -55,11 +55,42 @@ describe("estadoOcurrencias", () => {
     expect(r[0]).toMatchObject({ estado: "proyectada", pendiente: 150_000 });
     expect(r[1]).toMatchObject({ estado: "parcial", pendiente: 50_000, cargoId: "c2" });
   });
+  it("en una fila compartida prefiere el cargo de monto exacto aunque otro esté más cerca", () => {
+    const r = estadoOcurrencias(["2026-10-05"], 80_000, [
+      { id: "otro", fecha: "2026-10-05", monto: 150_000 },
+      { id: "justo", fecha: "2026-10-09", monto: 80_000 },
+    ], { diasAntes: 5, diasDespues: 10 });
+    expect(r[0]).toMatchObject({ estado: "pagada", cargoId: "justo" });
+  });
   it("dos cargos del mismo día y monto pagan dos ocurrencias distintas, no una dos veces", () => {
     const r = estadoOcurrencias(["2026-10-05", "2026-10-12"], 80_000, [
       { id: "a", fecha: "2026-10-08", monto: 80_000 },
       { id: "b", fecha: "2026-10-08", monto: 80_000 },
     ], { diasAntes: 7, diasDespues: 7 });
     expect(r.map((o) => o.cargoId)).toEqual(["a", "b"]);
+  });
+});
+
+describe("cuotasDelFlujo", async () => {
+  const { cuotasDelFlujo } = await import("./recurrentes-semana");
+  const lunes = "2026-11-09";
+  const cargo = (id: string) => ({ c1: "2026-11-03", c2: "2026-11-10" } as Record<string, string>)[id];
+  it("lo pagado antes del lunes ya está en la apertura: no se proyecta", () => {
+    expect(cuotasDelFlujo([{ fecha: "2026-11-05", estado: "pagada", pendiente: 0, cargoId: "c1" }], 100, cargo, lunes)).toEqual([]);
+  });
+  it("lo pagado esta semana sí suma a la semana en curso", () => {
+    expect(cuotasDelFlujo([{ fecha: "2026-11-05", estado: "pagada", pendiente: 0, cargoId: "c2" }], 100, cargo, lunes)).toEqual([
+      { fecha: "2026-11-05", semana: lunes, monto: 100, estado: "pagada" },
+    ]);
+  });
+  it("una cuota vencida e impaga pasa a la semana en curso; una futura queda en su semana", () => {
+    const r = cuotasDelFlujo([
+      { fecha: "2026-11-04", estado: "proyectada", pendiente: 100, cargoId: null },
+      { fecha: "2026-11-25", estado: "parcial", pendiente: 40, cargoId: "c1" },
+    ], 100, cargo, lunes);
+    expect(r).toEqual([
+      { fecha: "2026-11-04", semana: lunes, monto: 100, estado: "proyectada" },
+      { fecha: "2026-11-25", semana: "2026-11-23", monto: 40, estado: "parcial" },
+    ]);
   });
 });

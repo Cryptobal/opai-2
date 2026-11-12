@@ -63,8 +63,8 @@ export type EstadoOcurrencia = {
 
 /**
  * Cruza las ocurrencias con los cargos conciliados a la fila del recurrente: un cargo dentro de la ventana de una
- * ocurrencia (días antes y después de su fecha) la paga, total o parcialmente. Cada cargo se usa una sola vez y se
- * asigna al más cercano en fecha; dos cargos idénticos pagan dos ocurrencias distintas. Así no se cuenta dos veces
+ * ocurrencia (días antes y después de su fecha) la paga, total o parcialmente. Cada cargo se usa una sola vez; se
+ * prefiere el de monto exacto y, entre esos, el más cercano en fecha (varios recurrentes pueden compartir fila); dos cargos idénticos pagan dos ocurrencias distintas. Así no se cuenta dos veces
  * lo proyectado y lo real, sin dar nada por cumplido a mano.
  */
 export function estadoOcurrencias(
@@ -79,7 +79,7 @@ export function estadoOcurrencias(
     const candidatos = cargos
       .filter((c) => !usados.has(c.id))
       .filter((c) => aMs(c.fecha) >= t - ventana.diasAntes * DIA_MS && aMs(c.fecha) <= t + ventana.diasDespues * DIA_MS)
-      .sort((x, y) => Math.abs(aMs(x.fecha) - t) - Math.abs(aMs(y.fecha) - t) || x.id.localeCompare(y.id));
+      .sort((x, y) => Number(Math.abs(x.monto) !== monto) - Number(Math.abs(y.monto) !== monto) || Math.abs(aMs(x.fecha) - t) - Math.abs(aMs(y.fecha) - t) || x.id.localeCompare(y.id));
     const cargo = candidatos[0];
     if (!cargo) return { fecha, estado: "proyectada", pendiente: monto, cargoId: null };
     usados.add(cargo.id);
