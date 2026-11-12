@@ -2008,9 +2008,9 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
 
-## ADR-105 · La vara: OPAI 2.0 sigue a los mejores SaaS de cada capa (CAR-348, 12-nov-2026)
+## ADR-106 · La vara: OPAI 2.0 sigue a los mejores SaaS de cada capa (CAR-348, 12-nov-2026)
 
-**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 17:58, hora de Chile) · **Registra:** Claude («Sesión Estándares»).
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 17:58, hora de Chile) · **Registra:** Claude («Sesión Estándares»).  (ADR-105 lo usa el PR #584, abierto antes.)
 
 **Contexto.** OPAI 2.0 lo construyen varias sesiones en paralelo. Cada una resuelve bien su módulo, pero sin una referencia común cada módulo inventa su forma de dar permisos, de listar, de aprobar o de mostrar un error. Carlos pidió que todo siga el estándar de los mejores SaaS y que no se reinvente la rueda.
 

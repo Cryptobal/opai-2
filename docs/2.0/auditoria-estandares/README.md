@@ -1,6 +1,6 @@
 # Auditoría de estándares — OPAI 2.0 contra la vara
 
-**Fecha:** 12-nov-2026 · **Base:** `main` en `e83d177` · **Vara:** [`REFERENTES-saas.md`](../REFERENTES-saas.md) (ADR-105) · **Autora:** Sesión Estándares (CAR-348)
+**Fecha:** 12-nov-2026 · **Base:** `main` en `e83d177` · **Vara:** [`REFERENTES-saas.md`](../REFERENTES-saas.md) (ADR-106) · **Autora:** Sesión Estándares (CAR-348)
 
 Un archivo por capa o módulo. En cada uno: qué hace hoy (con rutas de código), qué hace el referente, la brecha, la gravedad y la recomendación (mantener, ajustar o rehacer).
 
