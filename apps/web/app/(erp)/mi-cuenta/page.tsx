@@ -43,15 +43,17 @@ export default function MiCuenta() {
           ejecutarComoUsuario<AppsSalida>("erp", "core.apps_conectadas.list"),
         ]);
         if (!r.ok) throw new Error(r.error.message);
-        if (!a.ok) throw new Error(a.error.message);
-        // Apps conectadas por OAuth (CAR-247), con fechas formateadas aquí y no en el cliente.
-        const apps: AppConectadaVista[] = a.data.apps.map((x) => ({
-          clientId: x.clientId,
-          nombre: x.nombre,
-          puedeEscribir: x.puedeEscribir,
-          conectadaEnTexto: formatearFecha(x.conectadaEn) ?? "—",
-          ultimoUsoTexto: x.ultimoUso ? (formatearFecha(x.ultimoUso) ?? null) : null,
-        }));
+        // Apps conectadas por OAuth (CAR-247), con fechas formateadas aquí y no en el cliente. Si su
+        // lectura falla, solo esa sección muestra el aviso; el resto de Seguridad sigue disponible.
+        const apps: AppConectadaVista[] | null = !a.ok
+          ? null
+          : a.data.apps.map((x) => ({
+              clientId: x.clientId,
+              nombre: x.nombre,
+              puedeEscribir: x.puedeEscribir,
+              conectadaEnTexto: formatearFecha(x.conectadaEn) ?? "—",
+              ultimoUsoTexto: x.ultimoUso ? formatearFecha(x.ultimoUso) : null,
+            }));
         const passkeys = r.data.passkeys.map((p) => ({
           ...p,
           creadaEnTexto: formatearFecha(p.creadaEn),

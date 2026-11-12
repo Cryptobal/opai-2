@@ -70,7 +70,23 @@ describe.skipIf(!urlPropietario)("purga del OAuth del MCP (CAR-247)", () => {
     const vencido = await acceso(-2 * DIA);
     const revocado = await acceso(3_600_000, new Date(Date.now() - 2 * DIA));
     const recienRevocado = await acceso(3_600_000, new Date());
+    const rotada = await e.admin.oauthRefreshToken.create({
+      data: {
+        token: `r-${randomUUID()}`,
+        clientId: usada,
+        userId,
+        referenceId: randomUUID(),
+        resources: [],
+        requestedUserInfoClaims: [],
+        scopes: [],
+        expiresAt: new Date(Date.now() + 20 * DIA),
+        createdAt: new Date(Date.now() - 5 * DIA),
+        revoked: new Date(Date.now() - 4 * DIA),
+      },
+    });
     await purgarOAuth();
+    // Rotada hace 4 días y sin vencer: se conserva para detectar un reuso (robo de la renovación).
+    expect(await e.admin.oauthRefreshToken.count({ where: { id: rotada.id } })).toBe(1);
     const quedan = await e.admin.oauthAccessToken.findMany({
       where: { id: { in: [vigente.id, vencido.id, revocado.id, recienRevocado.id] } },
       select: { id: true },

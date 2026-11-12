@@ -24,8 +24,14 @@ export function DesconectarApp({
 
   async function desconectar() {
     setPendiente(true);
-    const r = await accionDesconectarApp(app.clientId);
-    setPendiente(false);
+    let r: Awaited<ReturnType<typeof accionDesconectarApp>>;
+    try {
+      r = await accionDesconectarApp(app.clientId);
+    } catch {
+      r = { ok: false, error: "No hubo conexión. Vuelve a intentarlo." };
+    } finally {
+      setPendiente(false);
+    }
     if (!r.ok) return setError(r.error);
     onCerrar();
     router.refresh();

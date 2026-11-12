@@ -107,15 +107,16 @@ describe.skipIf(!urlPropietario)("apps conectadas por OAuth (CAR-247)", () => {
   it("desconectar revoca y borra solo lo de esta persona en esta empresa, con rastro", async () => {
     const mio = await token(userId, tenantId, "refresh");
     const otraEmp = await token(userId, otraEmpresa, "acceso");
+    const renovOtra = await token(userId, otraEmpresa, "refresh");
     const ajeno = await token(otro, tenantId, "acceso");
     const r = await tx.enTransaccion(tenantId, async (t) => [
       await m.desconectarApp(t, userId, tenantId, app, o()),
       await m.desconectarApp(t, userId, tenantId, app, o()),
     ]);
     expect(r).toEqual([true, false]);
-    expect(
-      (await e.admin.oauthRefreshToken.findUniqueOrThrow({ where: { id: mio.id } })).revoked,
-    ).not.toBeNull();
+    expect(await e.admin.oauthRefreshToken.count({ where: { id: mio.id } })).toBe(0);
+    const otra = await e.admin.oauthRefreshToken.findUniqueOrThrow({ where: { id: renovOtra.id } });
+    expect(otra.revoked).toBeNull();
     const intactos = await e.admin.oauthAccessToken.findMany({
       where: { id: { in: [otraEmp.id, ajeno.id] } },
     });

@@ -12,7 +12,7 @@ import type { AppConectadaVista } from "./tipos";
 const DesconectarApp = dynamic(() => import("./desconectar-app").then((m) => m.DesconectarApp));
 
 /** Mi cuenta › Apps conectadas (CAR-247): apps como Claude que entran con mi cuenta en esta empresa. */
-export function AppsConectadas({ apps }: { apps: AppConectadaVista[] }) {
+export function AppsConectadas({ apps }: { apps: AppConectadaVista[] | null }) {
   const [elegida, setElegida] = useState<AppConectadaVista | null>(null);
   return (
     <section aria-labelledby="t-apps" className="flex flex-col gap-3">
@@ -24,7 +24,11 @@ export function AppsConectadas({ apps }: { apps: AppConectadaVista[] }) {
           Apps como Claude que entran a esta empresa con tu cuenta y tus permisos.
         </p>
       </div>
-      {apps.length > 0 ? (
+      {apps === null ? (
+        <p className="rounded-lg border border-border bg-surface p-3 text-sm text-fg-muted">
+          No pudimos cargar tus apps conectadas. Vuelve a intentarlo en un momento.
+        </p>
+      ) : apps.length > 0 ? (
         <ul className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface">
           {apps.map((a) => (
             <li key={a.clientId} className="flex flex-wrap items-center gap-3 p-3">
@@ -40,7 +44,11 @@ export function AppsConectadas({ apps }: { apps: AppConectadaVista[] }) {
               <Badge tono={a.puedeEscribir ? "warning" : "neutro"}>
                 {a.puedeEscribir ? "Ve y hace cambios" : "Solo ve"}
               </Badge>
-              <Button variant="ghost" onClick={() => setElegida(a)}>
+              <Button
+                variant="ghost"
+                aria-label={`Desconectar ${a.nombre ?? "app sin nombre"}`}
+                onClick={() => setElegida(a)}
+              >
                 Desconectar
               </Button>
             </li>

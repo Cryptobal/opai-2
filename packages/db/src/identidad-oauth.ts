@@ -21,7 +21,11 @@ export async function appsConectadas(userId: string, tenantId: string): Promise<
   exigirSinLockAuditoria("Leer las apps conectadas");
   return clienteAuth().$transaction(async (tx) => {
     const consentimientos = await tx.oauthConsent.findMany({
-      where: { userId, referenceId: tenantId, client: { disabled: { not: true } } },
+      where: {
+        userId,
+        referenceId: tenantId,
+        client: { OR: [{ disabled: false }, { disabled: null }] },
+      },
       select: {
         clientId: true,
         scopes: true,
@@ -48,7 +52,7 @@ export async function appsConectadas(userId: string, tenantId: string): Promise<
 }
 
 /**
- * Desconecta una app de la persona en una empresa: revoca sus accesos y renovaciones y borra el
+ * Desconecta una app de la persona en una empresa: revoca sus accesos, borra sus renovaciones y el
  * consentimiento, en la transacción del llamador. Devuelve false si no había nada que desconectar.
  */
 export async function desconectarApp(
@@ -64,10 +68,12 @@ export async function desconectarApp(
         UPDATE core.oauth_access_tokens SET revoked = now()
          WHERE client_id = ${clientId} AND user_id = ${userId}::uuid
            AND reference_id = ${tenantId} AND revoked IS NULL`) +
+      // Las renovaciones se borran (no se marcan): una renovación marcada que la app vuelva a usar
+      // haría que el proveedor corte la familia completa de la app, también en otras empresas.
       (await tx.$executeRaw`
-        UPDATE core.oauth_refresh_tokens SET revoked = now()
+        DELETE FROM core.oauth_refresh_tokens
          WHERE client_id = ${clientId} AND user_id = ${userId}::uuid
-           AND reference_id = ${tenantId} AND revoked IS NULL`);
+           AND reference_id = ${tenantId}`);
     const consentimientos = await tx.$executeRaw`
       DELETE FROM core.oauth_consents
        WHERE client_id = ${clientId} AND user_id = ${userId}::uuid AND reference_id = ${tenantId}`;

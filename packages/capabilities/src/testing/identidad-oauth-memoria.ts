@@ -36,14 +36,17 @@ export function appsOAuthEnMemoria(tabla: (n: string) => Fila[]): AppsOAuth {
     },
     async desconectarApp(_tx, userId, tenantId, clientId, o) {
       let n = 0;
-      for (const t of [
-        ...de("oauthAccessToken", userId, tenantId, clientId),
-        ...de("oauthRefreshToken", userId, tenantId, clientId),
-      ])
+      for (const t of de("oauthAccessToken", userId, tenantId, clientId))
         if (t["revoked"] == null) {
           t["revoked"] = new Date();
           n++;
         }
+      const renovaciones = tabla("oauthRefreshToken");
+      const siguen = renovaciones.filter(
+        (r) => !de("oauthRefreshToken", userId, tenantId, clientId).includes(r),
+      );
+      n += renovaciones.length - siguen.length;
+      renovaciones.splice(0, renovaciones.length, ...siguen);
       const consentimientos = tabla("oauthConsent");
       const quedan = consentimientos.filter(
         (c) => !de("oauthConsent", userId, tenantId, clientId).includes(c),
