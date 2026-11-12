@@ -26,7 +26,7 @@ No entra: pantallas (CAR-307); que el resultado de Desempeño se filtre por jefa
 
 ## 5. Archivos
 
-Nuevos: `packages/domain/src/jefatura/*`, `packages/capabilities/src/core/jefatura/*`, `packages/capabilities/test/jefatura-db.test.ts`, `packages/db/prisma/migrations/20261123100000_core_jefatura_cargo/migration.sql`.
+Nuevos: `packages/domain/src/jefatura/*`, `packages/capabilities/src/core/jefatura/*`, `packages/capabilities/test/jefatura-db.test.ts`, `packages/db/prisma/migrations/20261125100000_core_jefatura_cargo/migration.sql`.
 
 Tocados: `core/cumplimiento/retencion-anonimizar.ts` (limpia la jefatura), `packages/db/prisma/schema/maestros.prisma`, `core/maestros/cargos-vista.ts` (la ficha del cargo muestra su jefatura), `core/index.ts`, `src/index.ts`, `domain/src/index.ts`, instantáneas de paridad y etiquetas de auditoría.
 
