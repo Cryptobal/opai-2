@@ -6,8 +6,9 @@ import { pasarProteccionDeVercel } from "./preview";
 import { entrar } from "./sesion";
 
 // Revisión de diseño de un PR (CAR-334, fase 3): captura las pantallas que toca el PR (RUTAS, una por
-// línea) en la vista previa o en `main` (ETIQUETA), a 1440 y 390 px, en el marco Hilo, con `qa-e2e`.
-// La usa el workflow `revision-diseno`; Claude compara las dos carpetas contra DISENO-hilo.md.
+// línea) en la vista previa o en `main` (ETIQUETA), a 1440 y 390 px, en el marco que fije `MARCO` (por omisión, el
+// predeterminado), con `qa-e2e`.
+// La usa el workflow `revision-diseno`; Claude compara las dos carpetas contra el diseño nuevo (ADR-109).
 
 const lista = (process.env["RUTAS"] ?? "")
   .split("\n")
@@ -34,13 +35,15 @@ test("@revision capturas del PR", async ({ browser }, info) => {
       locale: "es-CL",
       timezoneId: "America/Santiago",
     });
-    await ctx.addCookies([
-      {
-        name: "opai_marco",
-        value: "hilo",
-        url: process.env["BASE_URL"] ?? "http://localhost:3000",
-      },
-    ]);
+    const marco = process.env["MARCO"];
+    if (marco)
+      await ctx.addCookies([
+        {
+          name: "opai_marco",
+          value: marco,
+          url: process.env["BASE_URL"] ?? "http://localhost:3000",
+        },
+      ]);
     const page = await ctx.newPage();
     await pasarProteccionDeVercel(page);
     if (i > 0) await page.waitForTimeout(32_000);

@@ -10,8 +10,8 @@ import { E2E_PASSWORD, entrar } from "./sesion";
 // rutas de ERP, Cliente, Guardia y Terreno a 1440 y 390 px, con la empresa ficticia `qa-e2e` (nunca
 // Gard ni datos reales), y deja una captura y una medición por pantalla. El ERP se recorre en el
 // marco Hilo (cookie `opai_marco`); los otros portales aún no lo tienen (H5) y se ven en el clásico.
-// Solo escribe datos de prueba en la rama de Neon de la vista previa (un PIN y un equipo emparejado de
-// qa-e2e; el workflow se niega a correr sin esa rama). Solo corre con `--grep @auditoria` (workflow `auditoria-diseno`), nunca en
+// Solo escribe datos de prueba en la rama de Neon de la vista previa (la cuenta, instalación y persona de
+// `auditoria-datos.spec.ts`, un PIN y un equipo emparejado de qa-e2e; el workflow se niega a correr sin esa rama). Solo corre con `--grep @auditoria` (workflow `auditoria-diseno`), nunca en
 // `preview-e2e`: tarda decenas de minutos.
 
 const ANCHOS = [

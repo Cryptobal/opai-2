@@ -1,5 +1,7 @@
 # DISENO-hilo — reglas verificables de la piel Hilo
 
+> **Desde el 12-nov-2026 (ADR-109) la referencia visual es el diseño nuevo** (`docs/2.0/design/export-diseno-nuevo/`, plan en `briefs/BRIEF-CAR-335-diseno-nuevo.md`), no Hilo. Las reglas de las secciones 2 en adelante (un primario por vista, acciones, estados, formatos chilenos, escala, accesibilidad) y la auditoría siguen vigentes y se miden contra el diseño nuevo. La sección 1 (tokens Hilo) solo cuida la piel Hilo mientras exista (hasta D6). Ver la adenda de ADR-105.
+
 **Fuente única:** «OPAI 2.0 Design System · Hilo» en Claude Design (<https://claude.ai/artifact/NySPx8Tq4LRChyYVadAnFa>, privado de Carlos) y su copia en el repo: el prototipo aprobado `docs/2.0/design/export-base-hilo/` y `packages/ds` ([ADR-102](01-decisiones.md), [ADR-105](01-decisiones.md)). V1, V2 y el «OPAI Design System» antiguo quedan solo como referencia de lo ya construido. Este archivo complementa `DISENO.md` (§3b) y no lo reemplaza: aquí están las reglas que se comprueban solas, y quién las comprueba.
 
 ## 1. Tokens

@@ -134,6 +134,22 @@ jobs:
       - name: Instalar Chromium de Playwright
         if: steps.listo.outputs.ok == 'true'
         run: pnpm --filter @opai/web exec playwright install --with-deps chromium
+      - name: Preparar datos ficticios de qa-e2e (CAR-372)
+        if: steps.listo.outputs.ok == 'true'
+        # Si falla, la auditoría corre igual y anota qué fichas no pudo abrir.
+        continue-on-error: true
+        env:
+          BASE_URL: ${{ steps.url.outputs.url }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          E2E_TOTP_SECRET: ${{ secrets.E2E_TOTP_SECRET }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          CI: "true"
+          # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
+          E2E_PROSPECTO_EMAIL: ${{ secrets.E2E_PROSPECTO_EMAIL }}
+          E2E_PROSPECTO_PASSWORD: ${{ secrets.E2E_PROSPECTO_PASSWORD }}
+          AUDITORIA_DISENO: "1"
+        run: pnpm --filter @opai/web exec playwright test e2e/auditoria-datos.spec.ts --grep @datos-auditoria --project=desktop --workers=1 --retries=0 --reporter=list --output=test-results/playwright
       - name: Correr la auditoría a 1440 y 390 px
         if: steps.listo.outputs.ok == 'true'
         env:
@@ -143,7 +159,7 @@ jobs:
           E2E_TOTP_SECRET: ${{ secrets.E2E_TOTP_SECRET }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
           CI: "true"
-        # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
+          # Sin traza ni video: guardarían el formulario de acceso. Solo las capturas que cada prueba pide.
           E2E_PROSPECTO_EMAIL: ${{ secrets.E2E_PROSPECTO_EMAIL }}
           E2E_PROSPECTO_PASSWORD: ${{ secrets.E2E_PROSPECTO_PASSWORD }}
           AUDITORIA_DISENO: "1"
