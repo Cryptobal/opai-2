@@ -15,7 +15,13 @@ export function borradorDe(d: DefinicionPropio | undefined): Borrador {
   if (d.forma === "contar") return { ...base, forma: d.forma, hechoA: d.hecho };
   if (d.forma === "sumar") return { ...base, forma: d.forma, hechoA: d.hecho, monto: d.monto };
   if (d.forma === "tiempo") {
-    return { ...base, forma: d.forma, hechoA: d.desde.hecho, hechoB: d.hasta.hecho, unidad: d.unidad };
+    return {
+      ...base,
+      forma: d.forma,
+      hechoA: d.desde.hecho,
+      hechoB: d.hasta.hecho,
+      unidad: d.unidad,
+    };
   }
   return { ...base, forma: d.forma, hechoA: d.parte.hecho, hechoB: d.total.hecho };
 }
@@ -28,17 +34,27 @@ function usos(d: DefinicionPropio | undefined): UsoHecho[] {
 }
 
 /** Arma la definición; un hecho que no cambió conserva los filtros que traía (se arman por MCP). */
-export function definicionDe(b: Borrador, original: DefinicionPropio | undefined): DefinicionPropio | null {
-  const previos = usos(original);
+export function definicionDe(
+  b: Borrador,
+  original: DefinicionPropio | undefined,
+): DefinicionPropio | null {
+  // Los filtros (se arman por MCP) solo se conservan si no cambió la forma ni el hecho de esa posición.
+  const previos = original?.forma === b.forma ? usos(original) : [];
   const uso = (hecho: string, n: number): UsoHecho => {
     const filtros = previos[n]?.hecho === hecho ? previos[n]?.filtros : undefined;
     return filtros ? { hecho, filtros } : { hecho };
   };
   if (!b.hechoA) return null;
   if (b.forma === "contar") return { forma: "contar", ...uso(b.hechoA, 0) };
-  if (b.forma === "sumar") return b.monto ? { forma: "sumar", monto: b.monto, ...uso(b.hechoA, 0) } : null;
+  if (b.forma === "sumar")
+    return b.monto ? { forma: "sumar", monto: b.monto, ...uso(b.hechoA, 0) } : null;
   if (!b.hechoB) return null;
   return b.forma === "tiempo"
     ? { forma: "tiempo", desde: uso(b.hechoA, 0), hasta: uso(b.hechoB, 1), unidad: b.unidad }
     : { forma: "porcentaje", parte: uso(b.hechoA, 0), total: uso(b.hechoB, 1) };
+}
+
+/** true si la definición guardada trae filtros, que la pantalla no muestra ni edita. */
+export function tieneFiltros(d: DefinicionPropio | undefined): boolean {
+  return usos(d).some((u) => u.filtros && Object.keys(u.filtros).length > 0);
 }

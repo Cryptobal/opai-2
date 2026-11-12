@@ -13,10 +13,21 @@ import { EditarPropio } from "./_componentes/editar-propio";
 export const metadata = { title: "Indicadores propios" };
 
 function Estado({ p }: { p: Propio }) {
-  return p.estado === "publicado" ? (
-    <Badge tono="success">Publicado, rige desde {mesCorto(p.vigenteDesde)}</Badge>
-  ) : (
-    <Badge tono="warning">Borrador</Badge>
+  const pendiente = p.pendiente;
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      {p.estado === "publicado" ? (
+        <Badge tono="success">Publicado, rige desde {mesCorto(p.vigenteDesde)}</Badge>
+      ) : (
+        <Badge tono="warning">Borrador</Badge>
+      )}
+      {pendiente ? (
+        <Badge tono="warning">
+          {pendiente.estado === "publicado" ? "Cambio desde" : "Borrador para"}{" "}
+          {mesCorto(pendiente.vigenteDesde)}
+        </Badge>
+      ) : null}
+    </span>
   );
 }
 
@@ -34,7 +45,9 @@ export default function IndicadoresPropios() {
           cargarHechos(),
           identidadActual(),
         ]);
-        const edita = identidad ? puedeDeIdentidad(identidad)("desempeno:scorecards.manage") : false;
+        const edita = identidad
+          ? puedeDeIdentidad(identidad)("desempeno:scorecards.manage")
+          : false;
         return { r, hechos: hechos.ok ? hechos.data.filter((h) => h.puedeUsar) : [], edita };
       }}
     >
@@ -46,20 +59,31 @@ export default function IndicadoresPropios() {
           accionPrincipal={edita ? <EditarPropio propio={null} hechos={hechos} /> : undefined}
           items={r.ok ? r.data : []}
           clave={(p) => p.id}
-          {...(edita ? { acciones: (p: Propio) => <EditarPropio propio={p} hechos={hechos} /> } : {})}
+          {...(edita
+            ? { acciones: (p: Propio) => <EditarPropio propio={p} hechos={hechos} /> }
+            : {})}
           tarjeta={(p) => (
             <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="truncate text-base font-medium text-fg">{p.nombre}</span>
               <span className="t-caption">
-                {ETIQUETA_FORMA[p.definicion.forma]} · Meta sugerida {conUnidad(p.metaSugerida, p.unidad)}
+                {ETIQUETA_FORMA[p.definicion.forma]} · Meta sugerida{" "}
+                {conUnidad(p.metaSugerida, p.unidad)}
               </span>
               <Estado p={p} />
             </span>
           )}
           columnas={[
             { id: "nombre", etiqueta: "Indicador", render: (p) => p.nombre },
-            { id: "forma", etiqueta: "Cómo se calcula", render: (p) => ETIQUETA_FORMA[p.definicion.forma] },
-            { id: "meta", etiqueta: "Meta sugerida", render: (p) => conUnidad(p.metaSugerida, p.unidad) },
+            {
+              id: "forma",
+              etiqueta: "Cómo se calcula",
+              render: (p) => ETIQUETA_FORMA[p.definicion.forma],
+            },
+            {
+              id: "meta",
+              etiqueta: "Meta sugerida",
+              render: (p) => conUnidad(p.metaSugerida, p.unidad),
+            },
             { id: "estado", etiqueta: "Estado", render: (p) => <Estado p={p} /> },
           ]}
           textos={{

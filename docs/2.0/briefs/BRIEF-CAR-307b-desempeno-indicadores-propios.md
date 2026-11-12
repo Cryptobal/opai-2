@@ -25,7 +25,12 @@ Página de servidor con `ListScreen`; la hoja es cliente y se descarga al abrirl
 Sin migración.
 
 ## 7. Capacidades
-Sin cambios: la pantalla usa las de CAR-313.
+La pantalla usa las de CAR-313, con tres ajustes tras la revisión:
+- `desempeno.propios.list` devuelve además `pendiente`: el cambio guardado que rige más adelante (borrador o ya publicado). La lista lo muestra y el editor parte de él, para no pisarlo sin aviso.
+- Los mensajes de `erroresDePropio` usan «» y el de permiso ya no muestra el código del permiso: así llegan a la pantalla en vez del mensaje genérico.
+- El rechazo de un borrador cuando ya hay un cambio publicado nombra el mes en palabras.
+
+«Probar con los datos de este mes» llama a `guardar` con `publicar: true` y `dryRun`: no guarda nada y no choca con la regla del borrador.
 
 ## 8. Interfaz y responsive
 Solo `@opai/ds`. Tabla en escritorio, tarjetas en teléfono; hoja lateral o inferior. Estados de carga, vacío, error y sin permiso. Consultas por navegación (ADR-045): 2 (indicadores propios y hechos).

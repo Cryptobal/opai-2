@@ -77,6 +77,15 @@ export type Propio = {
   estado: "borrador" | "publicado";
   archivado: boolean;
   definicion: DefinicionPropio;
+  /** Cambio guardado que rige más adelante (borrador o publicado); el editor parte de él. */
+  pendiente: {
+    vigenteDesde: string;
+    estado: "borrador" | "publicado";
+    sentido: "mayor" | "menor";
+    metaSugerida: number;
+    unidad: string;
+    definicion: DefinicionPropio;
+  } | null;
 };
 
 export type Hecho = {
@@ -84,6 +93,7 @@ export type Hecho = {
   modulo: string;
   nombre: string;
   descripcion: string;
+  sujeto: string;
   entidad: string;
   montos: { id: string; unidad: string }[];
   puedeUsar: boolean;

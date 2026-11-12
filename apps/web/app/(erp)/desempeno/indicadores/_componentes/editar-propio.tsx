@@ -19,7 +19,7 @@ export function EditarPropio({ propio, hechos }: Props) {
     <>
       <Button
         variant={propio ? "secondary" : "primary"}
-        disabled={hechos.length === 0}
+        disabled={!propio && hechos.length === 0}
         aria-label={propio ? `Editar ${propio.nombre}` : undefined}
         onClick={() => {
           setApertura((n) => n + 1);

@@ -21,17 +21,26 @@ test.describe("desempeño: scorecard y jefatura de un cargo", () => {
       .locator('a[href^="/desempeno/cargos/"]')
       .filter({ hasText: "Guardia", visible: true })
       .first();
-    const hay = await guardia.waitFor({ timeout: 10_000 }).then(() => true, () => false);
+    const hay = await guardia.waitFor({ timeout: 10_000 }).then(
+      () => true,
+      () => false,
+    );
     test.skip(!hay, "La empresa no tiene Desempeño activo o le falta el cargo");
     await guardia.click();
     await page.waitForURL(/\/desempeno\/cargos\/[0-9a-f-]{36}/);
 
-    await page.getByRole("button", { name: /Editar scorecard|Definir scorecard/ }).first().click();
+    await page
+      .getByRole("button", { name: /Editar scorecard|Definir scorecard/ })
+      .first()
+      .click();
     const hoja = page.getByRole("dialog");
     await expect(hoja.getByText(/Los pesos suman/)).toBeVisible();
     // Deja un solo indicador con peso 100, venga como venga el cargo de corridas anteriores.
     while ((await hoja.getByRole("button", { name: /^Quitar / }).count()) > 1) {
-      await hoja.getByRole("button", { name: /^Quitar / }).last().click();
+      await hoja
+        .getByRole("button", { name: /^Quitar / })
+        .last()
+        .click();
     }
     if (!(await hoja.getByLabel("Peso (%)").count())) {
       await hoja.locator("#sc-agregar").click();
@@ -54,19 +63,24 @@ test.describe("desempeño: scorecard y jefatura de un cargo", () => {
     await capturar(page, info, "desempeno-cargo-publicado");
   });
 
-  test("arma un indicador propio, lo prueba con datos reales y lo publica", async ({ page }, info) => {
+  test("arma un indicador propio, lo prueba con datos reales y lo publica", async ({
+    page,
+  }, info) => {
     test.skip(info.project.name !== "desktop", "Escribe datos: corre una vez");
     await entrar(page);
     await page.goto("/desempeno/indicadores");
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     const nuevo = page.getByRole("button", { name: "Nuevo indicador" });
-    const hay = await nuevo.waitFor({ timeout: 10_000 }).then(() => true, () => false);
+    const hay = await nuevo.waitFor({ timeout: 10_000 }).then(
+      () => true,
+      () => false,
+    );
     test.skip(!hay, "La empresa no tiene Desempeño activo o quien entra no lo administra");
     await nuevo.click();
     const hoja = page.getByRole("dialog");
     const nombre = `Negocios ganados ${Date.now()}`;
     await hoja.getByLabel("Nombre").fill(nombre);
-    await hoja.locator("#ip-hecho-a").click();
+    await hoja.getByLabel("Qué se cuenta").click();
     await page.getByRole("option").first().click();
     await hoja.getByLabel("Meta sugerida").fill("5");
     await hoja.getByRole("button", { name: "Probar con los datos de este mes" }).click();
@@ -76,5 +90,18 @@ test.describe("desempeño: scorecard y jefatura de un cargo", () => {
     await expect(page.getByText("Indicador publicado")).toBeVisible();
     await expect(hoja).toHaveCount(0);
     await expect(page.getByText(nombre).filter({ visible: true }).first()).toBeVisible();
+
+    // Lo archiva para no acumular indicadores de prueba; archivar pide confirmación.
+    await page
+      .getByRole("button", { name: `Editar ${nombre}` })
+      .filter({ visible: true })
+      .click();
+    await page.getByRole("button", { name: "Archivar este indicador" }).click();
+    await page
+      .getByRole("alertdialog")
+      .or(page.getByRole("dialog").last())
+      .getByRole("button", { name: "Archivar", exact: true })
+      .click();
+    await expect(page.getByText("Indicador archivado")).toBeVisible();
   });
 });

@@ -10,6 +10,10 @@ import { mesesDe, PERMISOS_DESEMPENO } from "./comun";
 import { aDominio, definicionSchema, erroresPara, PREFIJO_PROPIO, propioSchema } from "./propios-comun";
 import { previaSchema, vistaPreviaDe } from "./propios-previa";
 
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+/** "2026-12" → "diciembre 2026". */
+const mesLegible = (p: string) => `${MESES[Number(p.slice(5, 7)) - 1] ?? p.slice(5, 7)} ${p.slice(0, 4)}`;
+
 const DUPLICADO = "Ya existe un indicador propio con ese nombre.";
 const entrada = z.object({
   id: uuidSchema.optional().describe("Indicador a cambiar. Sin enviar, crea uno nuevo."),
@@ -65,7 +69,7 @@ export const propiosGuardar = defineCapability({
     const vigenteDesde = vigencia(publicadas);
     if (!input.publicar && publicadas.some((v) => v.vigenteDesde === vigenteDesde)) {
       throw reglaDeNegocio(
-        `Ya hay una versión publicada que rige desde ${vigenteDesde}. Para cambiarla, publica el cambio.`,
+        `Ya hay un cambio publicado que rige desde ${mesLegible(vigenteDesde)}. Para cambiarlo, publica de nuevo.`,
       );
     }
     const vistaPrevia = await vistaPreviaDe(ctx, definicion, meses);
@@ -81,6 +85,7 @@ export const propiosGuardar = defineCapability({
         vigenteDesde,
         archivado: false,
         definicion: input.definicion,
+        pendiente: null,
       },
       vistaPrevia,
     });
