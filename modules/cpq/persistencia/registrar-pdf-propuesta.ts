@@ -3,7 +3,7 @@ import type { TenantTx } from "@opai/db";
 import { claveDocumento } from "@opai/domain";
 import { createHash } from "node:crypto";
 
-import { uuid7, idAutor } from "@opai/capabilities";
+import { uuid7 } from "@opai/capabilities";
 
 export type PdfPropuestaSubido = {
   id: string;
@@ -59,7 +59,7 @@ export async function registrarPdfPropuestaMetadatos(
       origen: "generado",
       moduloOrigen: "cpq",
       creadoPorTipo: ctx.actor.tipo,
-      creadoPorId: idAutor(ctx.actor),
+      creadoPorId: ctx.actor.id ?? null,
       viaUserId: ctx.actor.tipo === "agent" ? ctx.actor.viaUserId : null,
       confirmadoEn: new Date(),
     },

@@ -16,7 +16,6 @@ import { documentoSchema, vistaDocumento } from "./vista";
 import { generarPdfLaboral } from "./pdf-laboral";
 import { calcularRelleno } from "./rellenar-calculo";
 import { uuid7 } from "./uuid7";
-import { idAutor } from "../../autor";
 
 export const documentoPlantillasGenerar = defineCapability({
   id: "core.documento_plantillas.generar",
@@ -65,7 +64,7 @@ export const documentoPlantillasGenerar = defineCapability({
           origen: "generado",
           moduloOrigen: "core",
           creadoPorTipo: ctx.actor.tipo,
-          creadoPorId: idAutor(ctx.actor),
+          creadoPorId: ctx.actor.id ?? null,
           viaUserId: ctx.actor.viaUserId ?? null,
           confirmadoEn: new Date(),
         },

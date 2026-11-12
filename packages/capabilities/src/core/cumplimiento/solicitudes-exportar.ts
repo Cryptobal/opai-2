@@ -17,7 +17,6 @@ import { cargarTitular, type TitularVista } from "./comunes";
 import { armarExportacion } from "./exportacion-datos";
 import { dondeSolicitud, enContextoArco } from "./solicitudes-alcance";
 import { autorizarSolicitudRepetida } from "./solicitudes-repeticion";
-import { idAutor } from "../../autor";
 
 /**
  * Sube el JSON y lo deja como documento del Núcleo (origen generado), con bitácora y vínculo a su
@@ -50,7 +49,7 @@ async function materializar(
         origen: "generado",
         moduloOrigen: "core",
         creadoPorTipo: ctx.actor.tipo,
-        creadoPorId: idAutor(ctx.actor),
+        creadoPorId: ctx.actor.id ?? null,
         viaUserId: ctx.actor.viaUserId ?? null,
         confirmadoEn: new Date(),
       },

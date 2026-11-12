@@ -61,6 +61,28 @@ describe.skipIf(!urlPropietario)("autor de escrituras de agentes sin key en base
         fechaFuente: "2026-11-10",
       });
       expect(contexto).toMatchObject({ ok: true });
+      const nota = await e.admin.negocioContexto.findFirstOrThrow({ where: { negocioId } });
+      expect(nota.creadoPorId).toBe(usuario);
+      const motivo = await e.admin.motivoPerdida.findFirstOrThrow({
+        where: { tenantId, exigeDetalle: false },
+      });
+      const perder = await mod.executeCapability(ctx(actorId), "comercial.negocios.perder", {
+        id: negocioId,
+        motivoPerdidaId: motivo.id,
+      });
+      if (!perder.ok) throw new Error(JSON.stringify(perder.error));
+      expect(
+        await e.admin.historialEtapa.count({ where: { negocioId, actorId: usuario } }),
+      ).toBe(2);
+      const sol = await mod.executeCapability(ctx(actorId), "comercial.solicitudes.create", {
+        textoOriginal: "Necesitamos guardias.",
+        email: `${randomUUID()}@example.com`,
+      });
+      expect(sol).toMatchObject({ ok: true, data: { canal: "agente" } });
+      const fila = await e.admin.solicitud.findUniqueOrThrow({
+        where: { id: (sol as { data: { id: string } }).data.id },
+      });
+      expect(fila).toMatchObject({ registradaPorApiKeyId: null, registradaPorId: null });
       const auditoria = await e.admin.auditEvent.findFirstOrThrow({
         where: { tenantId, capability: "comercial.negocios.create" },
         orderBy: { seq: "desc" },

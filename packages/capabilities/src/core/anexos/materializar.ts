@@ -12,7 +12,6 @@ import { filasParaDocumento } from "./documento";
 import { renderizarAnexoHtml } from "./plantilla";
 import { pdfDeAnexo, plantillaAnexoPublicada } from "./plantilla-laboral";
 import type { FilaAnexo } from "./vista";
-import { idAutor } from "../../autor";
 
 /** Documento final del anexo en `core.documentos` (R15, ADR-039): plantilla base + marca del
  *  tenant, subido a R2 con su huella SHA-256 y registrado en la bitácora encadenada. */
@@ -65,7 +64,7 @@ export async function materializarDocumento(ctx: Contexto, tx: TenantTx, anexo: 
       origen: "generado",
       moduloOrigen: "core",
       creadoPorTipo: ctx.actor.tipo,
-      creadoPorId: idAutor(ctx.actor),
+      creadoPorId: ctx.actor.id ?? null,
       viaUserId: ctx.actor.tipo === "agent" ? ctx.actor.viaUserId : null,
       confirmadoEn: new Date(),
     },
