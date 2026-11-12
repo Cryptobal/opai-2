@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-import { Empty, Estado, KpiTile } from "@opai/ds";
+import { cn, Empty, Estado, GRILLA_KPI_HILO, KpiTile } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
 
@@ -23,7 +23,7 @@ const AlertasPauta = dynamic(() => import("./alertas-pauta").then((m) => ({ defa
 
 function Resumen({ r }: { r: ResumenCobertura }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+    <div className={cn("grid grid-cols-2 gap-3 md:grid-cols-3", GRILLA_KPI_HILO)}>
       <KpiTile etiqueta="Cobertura del mes" valor={pct(r.cobertura)} />
       <KpiTile etiqueta="Turnos sin cubrir" valor={String(r.ppc)} />
       <div className="col-span-2 md:col-span-1">
