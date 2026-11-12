@@ -17,6 +17,12 @@
   --ds-n-900: #18181b;
   --ds-n-950: #0b0b0c;
 
+  /* Tipografía por piel (ADR-109): la piel nueva usa Geist y Geist Mono */
+  --ds-font-sans:
+    "Inter Variable", "Inter", ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ds-font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
   /* Semánticos — modo claro */
   --ds-bg: #fafafa;
   --ds-surface: #ffffff;
@@ -223,6 +229,124 @@
   --ds-radius-md: 12px;
 }
 
+/* Piel «diseño nuevo» (ADR-109, CAR-335 D1; diseño aprobado en docs/2.0/design/export-diseno-nuevo/):
+   blanco y negro con líneas finas y un solo acento, que es el color de la empresa. Con alcance, como
+   Hilo: vale dentro de `data-marco="nuevo"` (y en <html> cuando el marco copia el atributo). Mientras se
+   construye nadie la ve (BRIEF-CAR-335 §3). Los fondos coinciden con FONDOS_ACENTO de
+   @opai/domain/marca-acento, que ajusta el color de cada empresa sobre ellos (lo mide tokens.test.ts). */
+[data-marco="nuevo"] {
+  --ds-bg: #ffffff;
+  --ds-surface: #ffffff;
+  --ds-surface-raised: #ffffff;
+  --ds-fill: #f2f2f2;
+  --ds-border: #eaeaea;
+  --ds-border-strong: #d4d4d4;
+  --ds-border-control: #8f8f8f;
+  --ds-fg: #171717;
+  --ds-fg-muted: #666666;
+  --ds-fg-subtle: #6b6b6b;
+  --ds-inverse-bg: #171717;
+  --ds-inverse-fg: #ffffff;
+  --ds-accent: #0062d1; /* acento por defecto; el de la empresa lo reemplaza (acentoDeMarca) */
+  --ds-accent-fg: #ffffff;
+  --ds-accent-muted: #e9f2fd;
+  --ds-focus: #0062d1;
+  --ds-success: #0e7a38;
+  --ds-success-fg: #0e7a38;
+  --ds-success-muted: #e8f6ec;
+  --ds-warning: #b26b00;
+  --ds-warning-fg: #8a5300;
+  --ds-warning-muted: #fff5e0;
+  --ds-danger: #c62828;
+  --ds-danger-fg: #c62828;
+  --ds-danger-muted: #fdecec;
+  --ds-destructive-bg: #c62828;
+  --ds-destructive-fg: #ffffff;
+  --ds-shimmer: rgba(255, 255, 255, 0.55);
+  --ds-shadow-overlay: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.12);
+  --ds-scrim: rgba(0, 0, 0, 0.25);
+  --ds-radius-md: 8px;
+  --ds-font-sans:
+    "Geist Variable", "Geist", ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ds-font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* `--font-*` se resuelven en :root; aquí se vuelven a resolver para que `t-mono` y el resto las sigan */
+  --font-sans: var(--ds-font-sans);
+  --font-mono: var(--ds-font-mono);
+  font-family: var(--ds-font-sans);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"])[data-marco="nuevo"],
+  :root:not([data-theme="light"]) [data-marco="nuevo"] {
+    --ds-bg: #000000;
+    --ds-surface: #0a0a0a;
+    --ds-surface-raised: #111111;
+    --ds-fill: #1f1f1f;
+    --ds-border: #262626;
+    --ds-border-strong: #333333;
+    --ds-border-control: #6f6f6f;
+    --ds-fg: #ededed;
+    --ds-fg-muted: #a1a1a1;
+    --ds-fg-subtle: #8f8f8f;
+    --ds-inverse-bg: #ededed;
+    --ds-inverse-fg: #000000;
+    --ds-accent: #52a8ff;
+    --ds-accent-fg: #000000;
+    --ds-accent-muted: #0d2338;
+    --ds-focus: #52a8ff;
+    --ds-success: #5fd38a;
+    --ds-success-fg: #5fd38a;
+    --ds-success-muted: #0f2617;
+    --ds-warning: #f5b455;
+    --ds-warning-fg: #f5b455;
+    --ds-warning-muted: #2a1f0a;
+    --ds-danger: #ff6b66;
+    --ds-danger-fg: #ff6b66;
+    --ds-danger-muted: #2a1212;
+    --ds-destructive-bg: #ff6b66;
+    --ds-destructive-fg: #000000;
+    --ds-shimmer: rgba(255, 255, 255, 0.05);
+    --ds-shadow-overlay: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 16px 40px rgba(0, 0, 0, 0.7);
+    --ds-scrim: rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"][data-marco="nuevo"],
+:root[data-theme="dark"] [data-marco="nuevo"] {
+  --ds-bg: #000000;
+  --ds-surface: #0a0a0a;
+  --ds-surface-raised: #111111;
+  --ds-fill: #1f1f1f;
+  --ds-border: #262626;
+  --ds-border-strong: #333333;
+  --ds-border-control: #6f6f6f;
+  --ds-fg: #ededed;
+  --ds-fg-muted: #a1a1a1;
+  --ds-fg-subtle: #8f8f8f;
+  --ds-inverse-bg: #ededed;
+  --ds-inverse-fg: #000000;
+  --ds-accent: #52a8ff;
+  --ds-accent-fg: #000000;
+  --ds-accent-muted: #0d2338;
+  --ds-focus: #52a8ff;
+  --ds-success: #5fd38a;
+  --ds-success-fg: #5fd38a;
+  --ds-success-muted: #0f2617;
+  --ds-warning: #f5b455;
+  --ds-warning-fg: #f5b455;
+  --ds-warning-muted: #2a1f0a;
+  --ds-danger: #ff6b66;
+  --ds-danger-fg: #ff6b66;
+  --ds-danger-muted: #2a1212;
+  --ds-destructive-bg: #ff6b66;
+  --ds-destructive-fg: #000000;
+  --ds-shimmer: rgba(255, 255, 255, 0.05);
+  --ds-shadow-overlay: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 16px 40px rgba(0, 0, 0, 0.7);
+  --ds-scrim: rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
 /* Tailwind v4: utilidades `bg-surface`, `text-fg-muted`, `border-border`, `bg-accent`, `rounded-md`… */
 @theme inline {
   --color-bg: var(--ds-bg);
@@ -261,11 +385,9 @@
   --color-paper-rule: var(--ds-paper-rule);
   --color-paper-rule-subtle: var(--ds-paper-rule-subtle);
 
-  /* Tipografía: Inter (texto) y JetBrains Mono (RUT, folios, montos en planillas) */
-  --font-sans:
-    "Inter Variable", "Inter", ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono:
-    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* Tipografía: Inter y JetBrains Mono; Geist y Geist Mono en la piel nueva (--ds-font-* en :root) */
+  --font-sans: var(--ds-font-sans);
+  --font-mono: var(--ds-font-mono);
 
   /* Escala: tamaño / interlínea */
   --text-xs: 12px;
