@@ -14,12 +14,16 @@ test.describe("@preview buscador general", () => {
     const errores: string[] = [];
     page.on("pageerror", (e) => errores.push(e.name));
     await entrar(page);
+    // La paleta escucha el teclado solo cuando la página ya hidrató: se espera el menú del usuario.
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
     await page.keyboard.press("Control+k");
+    const campo = page.getByPlaceholder(/^Buscar /);
+    await expect(campo).toBeVisible({ timeout: 15_000 });
+    await campo.fill("co", { timeout: 10_000 });
     const paleta = page.getByRole("dialog");
-    await expect(paleta).toBeVisible();
-    await paleta.getByRole("combobox").or(paleta.getByRole("searchbox")).or(paleta.locator("input")).first().fill("co");
-    // Espera a que termine de buscar: aparece algún grupo o el aviso de sin resultados.
-    await expect(paleta.getByText(/Acciones|Ir a|Cuentas|Negocios|Cotizaciones|Solicitudes|Sin resultados/).first()).toBeVisible({ timeout: 30_000 });
+    // Espera a que termine de buscar: aparece algún grupo.
+    await expect(paleta.getByText(/^(Acciones|Ir a|Cuentas|Instalaciones|Personas|Contactos|Negocios|Cotizaciones|Solicitudes|Ajustes)$/).first()).toBeVisible({ timeout: 20_000 });
     for (const grupo of ["Negocios", "Cotizaciones", "Solicitudes"]) {
       if (await paleta.getByText(grupo, { exact: true }).count()) await expect(paleta.getByText(grupo, { exact: true })).toBeVisible();
     }
