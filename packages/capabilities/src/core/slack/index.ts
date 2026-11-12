@@ -5,6 +5,7 @@ import { slackConectar } from "./conexion";
 import { slackIniciarConexion } from "./conexion-inicio";
 import { slackCanales, slackEstado } from "./consultas";
 import { slackConfigurar } from "./configurar";
+import { consumidoresAvisosSlack, trabajosAvisosSlack } from "./avisos";
 import { slackDesconectar, slackDesinstalada } from "./desconexion";
 import { trabajoMensajeDirectoSlack } from "./mensaje-directo";
 import { slackUsuariosList, slackVincularUsuarios } from "./usuarios";
@@ -29,5 +30,13 @@ export const capacidadesSlack = [
 ] as const;
 
 /** Trabajos de Slack F2 (CAR-292): vínculo de personas y mensajes directos. */
-export const trabajosSlack = [trabajoVincularUsuariosSlack, trabajoMensajeDirectoSlack];
-export const consumidoresSlack = [consumidorSlackConectada, consumidorSlackMiembroNuevo];
+export const trabajosSlack = [
+  trabajoVincularUsuariosSlack,
+  trabajoMensajeDirectoSlack,
+  ...trabajosAvisosSlack,
+];
+export const consumidoresSlack = [
+  consumidorSlackConectada,
+  consumidorSlackMiembroNuevo,
+  ...consumidoresAvisosSlack,
+];

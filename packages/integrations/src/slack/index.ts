@@ -2,6 +2,7 @@
 // vive cifrado en el almacén del tenant (ADR-027). Sin SDK: HTTP directo (ADR-031).
 export * from "./api";
 export * from "./api-usuarios";
+export * from "./api-mensajes";
 export * from "./app";
 export * from "./config";
 export * from "./estado-oauth";
