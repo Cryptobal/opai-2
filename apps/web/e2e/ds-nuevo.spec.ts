@@ -38,3 +38,38 @@ test.describe("muestra del sistema nuevo", () => {
     expect(errores).toEqual([]);
   });
 });
+
+test.describe("muestra del marco nuevo", () => {
+  test.skip(EN_PREVIEW, "La muestra /ds/nuevo/marco solo existe fuera de producción");
+
+  test("el menú se oculta, se asoma al pasar el mouse y se vuelve a fijar", async ({
+    page,
+  }, info) => {
+    const errores = erroresDeConsola(page);
+    await page.goto("/ds/nuevo/marco");
+    await expect(page.locator('div[data-marco="nuevo"]')).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("data-marco", "nuevo");
+    await capturar(page, info, "ds-nuevo-marco");
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      await page.getByRole("button", { name: "Ocultar el menú" }).click();
+      const fijar = page.getByRole("button", { name: "Dejar el menú fijo" });
+      await expect(fijar).toBeVisible();
+      await page.getByRole("navigation", { name: "Principal" }).filter({ has: fijar }).hover();
+      const completo = page
+        .getByRole("navigation", { name: "Principal" })
+        .filter({ hasText: "Cotizaciones" })
+        .first();
+      await expect(completo).toBeVisible();
+      await capturar(page, info, "ds-nuevo-marco-asomado");
+      await page.mouse.move(900, 500);
+      // El riel también tiene sus enlaces: lo que se esconde es el menú completo, con la marca OPAI.
+      await expect(page.getByText("OPAI", { exact: true })).toBeHidden();
+      await fijar.click();
+      await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
+      // El navegador recuerda la elección: vuelve fijo tras recargar.
+      await page.reload();
+      await expect(page.getByRole("button", { name: "Ocultar el menú" })).toBeVisible();
+    }
+    expect(errores).toEqual([]);
+  });
+});
