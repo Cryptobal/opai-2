@@ -19,6 +19,9 @@ import { estadoTras, type AccionSolicitud } from "./solicitudes-dominio";
 /** Acciones que sacan a la solicitud de «nueva»: su aviso deja de estar pendiente. */
 const AVISO_RESUELTO = new Set<AccionSolicitud>(["derivar", "descartar", "marcar_duplicada"]);
 
+/** Atender la solicitud por primera vez: reabrir no cuenta, ya fue atendida. */
+const ES_RESPUESTA = new Set<AccionSolicitud>(["derivar", "descartar", "marcar_duplicada"]);
+
 type Fila = Awaited<ReturnType<typeof solicitudDe>>;
 
 /**
@@ -35,7 +38,11 @@ async function transicion(
 ) {
   const s = await solicitudDe(ctx, id);
   exigirPuede(s.estado, accion);
-  const data = { ...cambios(s), estado: estadoTras(accion, s.estado as never) };
+  const data = {
+    ...cambios(s),
+    estado: estadoTras(accion, s.estado as never),
+    ...(ES_RESPUESTA.has(accion) && !s.primeraRespuestaEn ? { primeraRespuestaEn: new Date() } : {}),
+  };
   if (dryRun) return vistaSolicitud({ ...s, ...data } as Fila);
   const nueva = await ctx.transaccion(async (tx) => {
     const n = await tx.solicitud.update({ where: { id }, data });
