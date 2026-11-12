@@ -96,3 +96,53 @@ model DesempenoIndicadorPropioVersion {
   @@map("indicador_propio_versiones")
   @@schema("desempeno")
 }
+
+/// Mes cerrado (CAR-322): su resultado quedó guardado y ya no se recalcula. No se reabre.
+model DesempenoPeriodoCerrado {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  /// "aaaa-mm" en la zona de la empresa.
+  periodo    String
+  /// "manual" (lo cerró una persona) | "automatico" (trabajo diario).
+  origen     String
+  /// Usuario que lo cerró; null si lo cerró el trabajo diario.
+  cerradoPor String?  @map("cerrado_por") @db.Uuid
+  /// Cuántas personas quedaron con resultado guardado.
+  personas   Int
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  resultados DesempenoResultadoCerrado[]
+
+  @@unique([tenantId, periodo])
+  @@map("periodos_cerrados")
+  @@schema("desempeno")
+}
+
+/// Resultado de una persona en un mes cerrado, con el cargo, la jefatura y la versión del scorecard
+/// de ese mes. Inmutable: solo se borra al anonimizar a la persona.
+model DesempenoResultadoCerrado {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  periodo       String
+  personaId     String   @map("persona_id") @db.Uuid
+  cargoId       String   @map("cargo_id") @db.Uuid
+  jefePersonaId String?  @map("jefe_persona_id") @db.Uuid
+  scorecardId   String   @map("scorecard_id") @db.Uuid
+  vigenteDesde  String   @map("vigente_desde")
+  /// 0 a 120; null si no hubo datos en ningún indicador.
+  puntaje       Decimal? @db.Decimal(7, 2)
+  /// Porcentaje del scorecard (por peso) que tuvo datos.
+  cobertura     Decimal  @db.Decimal(5, 2)
+  /// Detalle por indicador tal como quedó al cerrar (nombre, unidad, meta, peso, valor, logro).
+  indicadores   Json
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  periodoCerrado DesempenoPeriodoCerrado @relation(fields: [tenantId, periodo], references: [tenantId, periodo], onDelete: Cascade)
+
+  @@unique([tenantId, periodo, personaId])
+  @@index([tenantId, periodo, cargoId])
+  @@map("resultados_cerrados")
+  @@schema("desempeno")
+}
