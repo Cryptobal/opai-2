@@ -61,11 +61,11 @@ export async function bloquearVinculo(ctx: Contexto, id: string) {
   );
 }
 
-/** «Reclutado por» (CAR-309): un usuario con membresía activa en la empresa, nunca uno ajeno. */
+/** «Reclutado por» (CAR-309): un usuario con membresía activa en el ERP de la empresa, nunca uno ajeno. */
 export async function validarReclutador(ctx: Contexto, usuarioId: string | null | undefined) {
   if (!usuarioId) return;
   const m = await ctx.db.membership.findFirst({
-    where: { userId: usuarioId, estado: "activa" },
+    where: { tenantId: ctx.tenantId, userId: usuarioId, estado: "activa", portales: { has: "erp" } },
     select: { id: true },
   });
   if (!m) throw reglaDeNegocio("Quien reclutó debe ser un usuario de la empresa.");

@@ -80,6 +80,8 @@ export async function planificarTraslado(ctx: Contexto, i: Entrada, tx: TenantTx
     const creado = await crearVinculo(ctx, tx, i.personaId, {
       cargoId: v0.cargoId, instalacionId: destino.instalacionId, puestoId: destino.id, horasSemanales: horas!, distribucion: distribucion!,
       tipo: v0.tipo as "indefinido" | "plazo_fijo" | "por_obra" | "honorarios", inicio: i.desde, ...(v0.termino ? { termino: fechaIso(v0.termino) } : {}),
+      // Un traslado no es un ingreso: conserva a quien reclutó a la persona (CAR-309).
+      reclutadoPorId: v0.reclutadoPorId ?? null,
     });
     // El cambio de instalación sí cambia las condiciones: borrador de anexo para RR. HH. (consumidor de anexos).
     await ctx.eventos.emitir(tx, { tipo: "core.vinculo.actualizado", entidadTipo: "vinculo", entidadId: creado.id, payload: { personaId: i.personaId, antes: vistaVinculo(v0), despues: vistaVinculo(creado), campos: ["instalacionId"] } });

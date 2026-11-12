@@ -37,15 +37,30 @@ export const indicadorRetencion90 = defineIndicador({
           lt: aFecha(sumarDias(hasta, -DIAS_RETENCION)),
         },
       },
-      select: { reclutadoPorId: true, inicio: true, termino: true, estado: true },
+      select: { personaId: true, reclutadoPorId: true, inicio: true, termino: true, estado: true },
     });
+    // Un traslado termina un contrato y abre otro al día siguiente: no es una salida ni un ingreso.
+    const historia = vinculos.length
+      ? await ctx.db.vinculoLaboral.findMany({
+          where: { personaId: { in: [...new Set(vinculos.map((v) => v.personaId))] } },
+          select: { personaId: true, inicio: true, termino: true },
+        })
+      : [];
+    const pegado = (antes: Date | null, despues: Date) =>
+      antes !== null && aDia(despues) <= sumarDias(aDia(antes), 1);
+    type Fila = { personaId: string; inicio: Date; termino: Date | null };
+    const continua = (v: Fila) =>
+      historia.some((x) => x.personaId === v.personaId && x.inicio > v.inicio && pegado(v.termino, x.inicio));
+    const esTraslado = (v: Fila) =>
+      historia.some((x) => x.personaId === v.personaId && x.inicio < v.inicio && pegado(x.termino, v.inicio));
     const cuenta = new Map<string, { total: number; siguen: number }>();
     for (const v of vinculos) {
-      if (!v.reclutadoPorId) continue;
+      if (!v.reclutadoPorId || esTraslado(v)) continue;
       const dia90 = sumarDias(aDia(v.inicio), DIAS_RETENCION);
       // Aún no se cumplen los 90 días: no cuenta ni a favor ni en contra.
       if (dia90 > hoy) continue;
-      const salio = v.estado === "terminado" && v.termino !== null && aDia(v.termino) < dia90;
+      const salio =
+        v.estado === "terminado" && v.termino !== null && aDia(v.termino) < dia90 && !continua(v);
       const c = cuenta.get(v.reclutadoPorId) ?? { total: 0, siguen: 0 };
       c.total += 1;
       if (!salio) c.siguen += 1;

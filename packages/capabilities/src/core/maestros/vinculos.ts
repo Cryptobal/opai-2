@@ -2,6 +2,7 @@ export { vinculosTerminar } from "./vinculos-terminar";
 import {
   bloquearVinculo,
   exigirEdicionVinculo,
+  reclutadorPorDefecto,
   validarDestino,
   validarReclutador,
 } from "./vinculos-validacion";
@@ -72,8 +73,11 @@ export const vinculosCreate = defineCapability({
       );
     await cargoParaVinculo(ctx, v.cargoId);
     if (dryRun) {
+      // La vista previa muestra y valida el mismo «Reclutado por» que dejaría la escritura.
+      if (v.reclutadoPorId) await validarReclutador(ctx, v.reclutadoPorId);
       return vistaVinculo({
         ...v,
+        reclutadoPorId: v.reclutadoPorId === undefined ? reclutadorPorDefecto(ctx) : v.reclutadoPorId,
         id: "",
         personaId,
         inicio: aFecha(v.inicio),
@@ -94,7 +98,7 @@ export const vinculosCreate = defineCapability({
 export const vinculosUpdate = defineCapability({
   id: "core.vinculos.update",
   descripcion:
-    "Corrige un vínculo vigente, su instalación, puesto, jornada pactada y quién reclutó a la persona. Para terminarlo, usa core.vinculos.terminar.",
+    "Corrige un vínculo vigente, su instalación, puesto, jornada pactada y quién reclutó a la persona (esto último también en un vínculo terminado). Para terminarlo, usa core.vinculos.terminar.",
   permiso: PERMISOS_CORE.vinculosManage,
   input: z.object({
     id: uuidSchema,
@@ -110,12 +114,16 @@ export const vinculosUpdate = defineCapability({
     const actual = await vinculoDe(ctx, id);
     if (versionEsperada && actual.updatedAt.toISOString() !== versionEsperada)
       throw conflicto("El vínculo cambió. Vuelve a abrirlo y revisa el cambio.");
-    await validarDestino(ctx, { ...actual, ...cambios });
+    // Corregir solo «Reclutado por» vale también en un vínculo terminado: la retención los mide.
+    const campos = Object.keys(cambios).filter((k) => cambios[k as keyof typeof cambios] !== undefined);
+    const soloReclutador = campos.length === 1 && campos[0] === "reclutadoPorId";
+    if (!soloReclutador) await validarDestino(ctx, { ...actual, ...cambios });
     const termino =
       cambios.termino === undefined ? actual.termino : opcionalAFecha(cambios.termino);
     if (termino && termino < (cambios.inicio ? aFecha(cambios.inicio) : actual.inicio))
       throw reglaDeNegocio("El término es anterior al inicio.");
-    if (actual.estado !== "vigente") throw reglaDeNegocio("Solo se corrige un vínculo vigente.");
+    if (actual.estado !== "vigente" && !soloReclutador)
+      throw reglaDeNegocio("Solo se corrige un vínculo vigente (de uno terminado, solo quién reclutó).");
     if (cambios.cargoId) await cargoParaVinculo(ctx, cambios.cargoId);
     await validarReclutador(ctx, cambios.reclutadoPorId);
     const data = definidos({

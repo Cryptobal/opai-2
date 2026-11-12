@@ -94,7 +94,7 @@ describe.skipIf(!urlPropietario)("indicadores de reclutamiento contra Postgres r
 
   it("«Reclutado por» queda con quien registra el ingreso, se puede cambiar y no acepta un usuario ajeno", async () => {
     const p = await persona("Ivo");
-    const v = await dato<{ id: string; reclutadoPorId: string | null }>(ctx(a), "core.vinculos.create", {
+    const alta = {
       personaId: p,
       cargoId: cargo,
       instalacionId: inst,
@@ -102,7 +102,14 @@ describe.skipIf(!urlPropietario)("indicadores de reclutamiento contra Postgres r
       distribucion: "Lunes a viernes",
       tipo: "indefinido",
       inicio: "2026-06-01",
-    });
+    };
+    // La vista previa muestra el mismo reclutador que dejaría la escritura.
+    const previa = await dato<{ reclutadoPorId: string | null }>(ctx(a), "core.vinculos.create", alta, { dryRun: true });
+    expect(previa.reclutadoPorId).toBe(rita);
+    expect(await codigo(ctx(a), "core.vinculos.create", { ...alta, reclutadoPorId: raul }, { dryRun: true })).toBe(
+      "UNPROCESSABLE",
+    );
+    const v = await dato<{ id: string; reclutadoPorId: string | null }>(ctx(a), "core.vinculos.create", alta);
     expect(v.reclutadoPorId).toBe(rita);
     expect(await codigo(ctx(a), "core.vinculos.update", { id: v.id, reclutadoPorId: raul })).toBe("UNPROCESSABLE");
     const sin = await dato<{ reclutadoPorId: string | null }>(ctx(a), "core.vinculos.update", {
@@ -110,6 +117,21 @@ describe.skipIf(!urlPropietario)("indicadores de reclutamiento contra Postgres r
       reclutadoPorId: null,
     });
     expect(sin.reclutadoPorId).toBeNull();
+    // El cambio queda en la auditoría.
+    expect(
+      await e.admin.auditEvent.count({ where: { tenantId: a, capability: "core.vinculos.update" } }),
+    ).toBeGreaterThanOrEqual(1);
+    // De un contrato terminado se puede corregir solo quién reclutó.
+    await e.admin.vinculoLaboral.update({
+      where: { id: v.id },
+      data: { estado: "terminado", termino: new Date("2026-06-30") },
+    });
+    const corregido = await dato<{ reclutadoPorId: string | null }>(ctx(a), "core.vinculos.update", {
+      id: v.id,
+      reclutadoPorId: rita,
+    });
+    expect(corregido.reclutadoPorId).toBe(rita);
+    expect(await codigo(ctx(a), "core.vinculos.update", { id: v.id, horasSemanales: 40 })).toBe("UNPROCESSABLE");
   });
 
   it("retención a 90 días: cuenta en el mes en que se cumplen y solo con reclutador", async () => {
@@ -121,8 +143,14 @@ describe.skipIf(!urlPropietario)("indicadores de reclutamiento contra Postgres r
       termino: new Date("2026-09-01"),
     });
     await vinculo(await persona("Ciro"), "2026-07-15");
+    // Fito se trasladó en agosto (termina un contrato y empieza otro al día siguiente): sigue, y el
+    // contrato nuevo no es otro ingreso.
+    const fito = await persona("Fito");
+    await vinculo(fito, "2026-07-05", { reclutadoPorId: rita, estado: "terminado", termino: new Date("2026-08-01") });
+    await vinculo(fito, "2026-08-02", { reclutadoPorId: rita });
     const oct = await dato<Salida>(ctx(a), MEDIR, { indicador: "core.personas_retencion_90", periodo: "2026-10" });
-    expect(oct.mediciones).toEqual([expect.objectContaining({ sujetoId: rita, valor: 50 })]);
+    // Ana sigue, Beto salió, Fito sigue: 2 de 3.
+    expect(oct.mediciones).toEqual([expect.objectContaining({ sujetoId: rita, valor: 66.7 })]);
     const enB = await dato<Salida>(ctx(b, raul), MEDIR, { indicador: "core.personas_retencion_90", periodo: "2026-10" });
     expect(enB.mediciones).toEqual([]);
   });
@@ -151,5 +179,34 @@ describe.skipIf(!urlPropietario)("indicadores de reclutamiento contra Postgres r
     expect(oct.mediciones).toEqual([expect.objectContaining({ sujetoId: rita, valor: 17 })]);
     const sep = await dato<Salida>(ctx(a), MEDIR, { indicador: "pauta.dias_cubrir_vacante", periodo: "2026-09" });
     expect(sep.mediciones).toEqual([]);
+  });
+
+  it("una vacante también se abre cuando el titular deja la empresa, aunque nadie fije la serie vacía", async () => {
+    const otro = (
+      await e.admin.puesto.create({
+        data: { tenantId: a, instalacionId: inst, cargoId: cargo, nombre: "Ronda", diasTrabajo: 4, diasDescanso: 4, horaInicio: "20:00", horaFin: "08:00" },
+      })
+    ).id;
+    const gus = await persona("Gus");
+    await vinculo(gus, "2026-01-01", { estado: "terminado", termino: new Date("2026-11-03") });
+    const hilda = await persona("Hilda");
+    await vinculo(hilda, "2026-11-08", { reclutadoPorId: rita });
+    const serie = (desde: string, titular: string, hasta?: string) =>
+      e.admin.seriePauta.create({
+        data: {
+          tenantId: a,
+          puestoId: otro,
+          patronId: patron,
+          inicioCiclo: new Date("2026-09-01"),
+          titularPersonaId: titular,
+          vigenteDesde: new Date(desde),
+          ...(hasta ? { vigenteHasta: new Date(hasta) } : {}),
+        },
+      });
+    await serie("2026-09-01", gus, "2026-11-08");
+    await serie("2026-11-09", hilda);
+    const nov = await dato<Salida>(ctx(a), MEDIR, { indicador: "pauta.dias_cubrir_vacante", periodo: "2026-11" });
+    // Gus se fue el 3; desde el 4 hasta que Hilda lo toma el 9: 5 días.
+    expect(nov.mediciones).toEqual([expect.objectContaining({ sujetoId: rita, valor: 5 })]);
   });
 });
