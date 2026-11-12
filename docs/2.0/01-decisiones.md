@@ -1887,3 +1887,20 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 6. **Borde de los campos con contraste AA** (decisión técnica de la sesión, desvío declarado). El export dibuja los campos con el borde tenue de las líneas. Se mantiene el borde de control del DS (3:1), porque el contraste AA es regla del repositorio y criterio de aceptación de la piel. Si Carlos prefiere el borde del export, es un cambio de un token.
 7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
 8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.
+
+## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)
+
+**Contexto.** Mientras OPAI 1 y OPAI 2 emitan facturas a la vez, los dos usan folios de la misma serie sin saber del otro, y el SII rechazaría o dejaría mal emitido un folio repetido. Carlos pidió no pasar a producción todavía y fijó qué tiene que funcionar antes.
+
+**Decisión.** La facturación de Gard pasa a producción en OPAI 2 (CAR-271) cuando funcionen en OPAI 2 estas cuatro cosas:
+1. **Movimientos del banco de Gard llegando a OPAI 2.** Por ahora OPAI 1 reenvía a OPAI 2 lo que recibe de Web4Leads (CAR-284; Carlos autorizó el cambio mínimo en OPAI 1, integrado en `Cryptobal/opai#1370`).
+2. **Flujo de caja funcionando con datos reales** (CAR-268, CAR-269).
+3. **Programación de facturas y envío de proforma funcionando** (CAR-320).
+4. **Todas las facturas, notas de crédito y notas de débito emitidas en OPAI 1 migradas a OPAI 2** (CAR-283).
+
+**Consecuencias.**
+- Hasta entonces OPAI 2 emite solo en certificación; el CAF 33 2064–2068 (producción) sigue pausado.
+- No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
+- La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).

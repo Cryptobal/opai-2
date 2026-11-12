@@ -132,7 +132,7 @@ export const personasGet = defineCapability({
       include: {
         vinculos: {
           where: { estado: "vigente" },
-          include: { cargo: { select: { nombre: true } } },
+          include: { cargo: { select: { nombre: true } }, instalacion: { select: { nombre: true } } },
           take: 1,
         },
       },

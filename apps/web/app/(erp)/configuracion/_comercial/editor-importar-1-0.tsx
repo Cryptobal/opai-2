@@ -28,7 +28,7 @@ type ResultadoImport = {
   sii?: ResumenSiiImport | null;
 };
 
-export function EditorImportar10() {
+export function EditorImportar10({ conOpai1 }: { conOpai1: boolean }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
   const [texto, setTexto] = useState("");
   const [vista, setVista] = useState<ResultadoImport | null>(null);
@@ -65,24 +65,26 @@ export function EditorImportar10() {
         <h2 className="t-label text-fg">Importar desde OPAI 1.0</h2>
         <p className="mt-1 text-sm text-fg-muted">
           Trae los datos comerciales de OPAI 1. Primero simula y revisa el resumen; repetir la carga no duplica
-          registros. También puedes pegar el export JSON a mano.
+          registros. {conOpai1 ? "También puedes pegar el export JSON a mano." : "Pega aquí el export JSON de OPAI 1."}
         </p>
       </div>
       {error ? <Alerta tono="danger" titulo={error} /> : null}
-      <div className="flex flex-col gap-2 rounded-md border border-border p-3">
-        <p className="text-sm text-fg">
-          <strong>Traer directo desde OPAI 1.</strong> Usa la llave de solo lectura guardada en Configuración ›
-          Integraciones › OPAI 1. Trae cuentas, contactos, instalaciones y negocios; no toca Finanzas.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" disabled={pendiente} onClick={() => void correr(true, true)}>
-            Simular desde OPAI 1
-          </Button>
-          <Button disabled={pendiente || !vista || !vista.dryRun || !directa} onClick={() => void correr(false, true)}>
-            Importar desde OPAI 1
-          </Button>
+      {conOpai1 ? (
+        <div className="flex flex-col gap-2 rounded-md border border-border p-3">
+          <p className="text-sm text-fg">
+            <strong>Traer directo desde OPAI 1.</strong> Usa la llave de solo lectura guardada en Configuración ›
+            Integraciones › OPAI 1. Trae cuentas, contactos, instalaciones y negocios; no toca Finanzas.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" disabled={pendiente} onClick={() => void correr(true, true)}>
+              Simular desde OPAI 1
+            </Button>
+            <Button disabled={pendiente || !vista || !vista.dryRun || !directa} onClick={() => void correr(false, true)}>
+              Importar desde OPAI 1
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : null}
       <Textarea
         value={texto}
         onChange={(e) => {
