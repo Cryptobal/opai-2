@@ -56,6 +56,17 @@ export const propioSchema = z.object({
   estado: z.enum(["borrador", "publicado"]),
   archivado: z.boolean(),
   definicion: definicionSchema,
+  pendiente: z
+    .object({
+      vigenteDesde: z.string(),
+      estado: z.enum(["borrador", "publicado"]),
+      sentido: z.enum(SENTIDOS_INDICADOR),
+      metaSugerida: z.number(),
+      unidad: z.string(),
+      definicion: definicionSchema,
+    })
+    .nullable()
+    .describe("Cambio guardado que rige más adelante (borrador o ya publicado); null si no hay."),
 });
 export type VistaPropio = z.infer<typeof propioSchema>;
 
@@ -90,7 +101,7 @@ export function erroresPara(ctx: Contexto, def: DefinicionPropio, exigirPermiso:
   for (const u of hechosDe(def)) {
     const hecho = hechos.get(u.hecho);
     if (hecho && !puedeUsarHecho(ctx, hecho)) {
-      errores.push(`Para usar "${hecho.nombre}" falta el permiso ${hecho.permiso}.`);
+      errores.push(`No tienes acceso al módulo de «${hecho.nombre}»: elige otro hecho.`);
     }
   }
   return errores;
