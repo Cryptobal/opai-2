@@ -4,7 +4,7 @@
 
 Todo OPAI 2.0 (diseño, lógica, permisos, Núcleo y módulos) sigue el patrón de los mejores SaaS de cada capa y no reinventa la rueda. Este archivo dice, capa por capa, a quién se copia, qué patrón concreto se copia y cómo se comprueba que se cumple. Si un módulo ya construido se aparta sin motivo, se ajusta o se rehace.
 
-Lo que **no** cambia con este documento: el aspecto lo decide el sistema visual oficial vigente (Hilo según ADR-102; el diseño nuevo si se integra la propuesta ADR-109, PR #597); las reglas duras del repositorio (`AGENTS.md`, `REGLAS-codigo.md`) siguen mandando; la normativa chilena (DT, SII, Ley 21.719) manda sobre cualquier referente.
+Lo que **no** cambia con este documento: el aspecto lo decide el sistema visual oficial vigente (desde el 12-nov-2026, el diseño nuevo de ADR-109, que reemplaza a Hilo); las reglas duras del repositorio (`AGENTS.md`, `REGLAS-codigo.md`) siguen mandando; la normativa chilena (DT, SII, Ley 21.719) manda sobre cualquier referente.
 
 ## Cómo se usa
 
@@ -192,7 +192,7 @@ En Chile, la marcación y la jornada siguen la normativa de la Dirección del Tr
 
 ## 8. UX y navegación — Linear · Notion, con el sistema visual oficial
 
-El sistema visual oficial vigente decide cómo se ve (hoy Hilo, ADR-102; el diseño nuevo de ADR-109 toma justamente a Vercel y Linear como referentes). Linear y Notion deciden cómo se comporta.
+El sistema visual oficial vigente decide cómo se ve (el diseño nuevo de ADR-109, que toma justamente a Vercel y Linear como referentes). Linear y Notion deciden cómo se comporta.
 
 **Patrón que se copia**
 
