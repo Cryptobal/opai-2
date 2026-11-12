@@ -7,6 +7,8 @@ type Props = {
   agente: boolean;
   /** Texto de la caja: «Pide, pregunta o busca una pantalla» o «Busca una pantalla o un registro». */
   texto: string;
+  /** Texto para teléfono (bajo 640 px), donde el largo se corta. */
+  textoCorto?: string;
   onBuscar: () => void;
   className?: string;
 };
@@ -17,7 +19,7 @@ type Props = {
  * preguntarle—; el contexto de la pantalla y las sugerencias llegan en H4. Siempre al pie: del lienzo
  * desde 1024 px y de toda la pantalla en teléfono.
  */
-export function BarraHilo({ agente, texto, onBuscar, className }: Props) {
+export function BarraHilo({ agente, texto, textoCorto, onBuscar, className }: Props) {
   return (
     <div
       data-barra={agente ? "agente" : "busqueda"}
@@ -36,7 +38,18 @@ export function BarraHilo({ agente, texto, onBuscar, className }: Props) {
           nombre={agente ? "chispa" : "buscar"}
           className={cn("flex-none", agente ? "text-accent" : "text-fg-muted")}
         />
-        <span className="min-w-0 flex-1 truncate px-2 text-md text-fg-muted">{texto}</span>
+        {textoCorto ? (
+          <>
+            <span className="min-w-0 flex-1 truncate px-2 text-md text-fg-muted sm:hidden">
+              {textoCorto}
+            </span>
+            <span className="hidden min-w-0 flex-1 truncate px-2 text-md text-fg-muted sm:block">
+              {texto}
+            </span>
+          </>
+        ) : (
+          <span className="min-w-0 flex-1 truncate px-2 text-md text-fg-muted">{texto}</span>
+        )}
         <span
           aria-hidden
           className={cn(

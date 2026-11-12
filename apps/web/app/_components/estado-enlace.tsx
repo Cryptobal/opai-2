@@ -4,7 +4,11 @@ import { useLinkStatus } from "next/link";
 import { useEffect } from "react";
 
 import { ESPERA_ESQUELETO_MS } from "@/lib/cache-navegador";
-import { subirTrasEsqueleto } from "@/lib/scroll-tras-esqueleto";
+import {
+  contenedorDeScroll,
+  SELECTOR_LIENZO,
+  subirTrasEsqueleto,
+} from "@/lib/scroll-tras-esqueleto";
 
 import { fijarPendiente, limpiarPendiente } from "./navegacion-pendiente";
 
@@ -17,7 +21,13 @@ let pendientes = 0;
  * retraso para que el CSS cambie el contenido por el esqueleto (solo en los enlaces del menú, donde
  * cambia toda la página; en filas y pestañas la ficha ya pone su propio esqueleto, sin tocar la lista).
  */
-export function EstadoEnlace({ href, conEsqueleto = false }: { href: string; conEsqueleto?: boolean }) {
+export function EstadoEnlace({
+  href,
+  conEsqueleto = false,
+}: {
+  href: string;
+  conEsqueleto?: boolean;
+}) {
   const { pending } = useLinkStatus();
   useEffect(() => {
     if (!pending) return;
@@ -36,8 +46,13 @@ export function EstadoEnlace({ href, conEsqueleto = false }: { href: string; con
       if (t) clearTimeout(t);
       limpiarPendiente(href);
       if (marcado && --pendientes === 0) raiz.removeAttribute("data-navegando");
-      // CAR-231: Next no sube el scroll si decidió con el esqueleto a la vista; se sube aquí.
-      subirTrasEsqueleto(window, marcado, inicio, location.pathname + location.search);
+      // CAR-231: Next no sube el scroll si decidió con el esqueleto a la vista; se sube aquí (en el
+      // marco Hilo, el lienzo: CAR-317).
+      const destino = contenedorDeScroll(
+        () => document.querySelector<HTMLElement>(SELECTOR_LIENZO),
+        window,
+      );
+      subirTrasEsqueleto(destino, marcado, inicio, location.pathname + location.search);
     };
   }, [pending, href, conEsqueleto]);
   return null;

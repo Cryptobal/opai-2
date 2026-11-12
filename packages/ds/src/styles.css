@@ -155,6 +155,18 @@
   font-size: 11px;
   line-height: 14px;
 }
+/* Cabecera del hilo (CAR-317): nombre de la empresa y monograma. */
+@utility t-hilo-sujeto {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility t-hilo-monograma {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 700;
+}
 
 /* Skeleton con brillo (modo claro y oscuro) */
 @utility ds-shimmer {

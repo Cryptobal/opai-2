@@ -15,11 +15,14 @@ export type Visibilidad = {
   negocios: boolean;
 };
 
+/** ¿El actor puede ver lo ligado a un negocio? Exige Comercial activo, en scope y su permiso. */
+export const veNegocios = (ctx: Contexto): boolean =>
+  enScope(ctx, "comercial") &&
+  ctx.modulosActivos.includes("comercial") &&
+  ctx.autorizar(PERMISO_NEGOCIOS);
+
 export async function visibilidad(ctx: Contexto): Promise<Visibilidad> {
-  const negocios =
-    enScope(ctx, "comercial") &&
-    ctx.modulosActivos.includes("comercial") &&
-    ctx.autorizar(PERMISO_NEGOCIOS);
+  const negocios = veNegocios(ctx);
   if (!ctx.alcance) return { entidades: null, negocios };
   const [cuentas, contactos] = await Promise.all([
     ctx.db.cuenta.findMany({ where: dondeCuenta(ctx), select: { id: true } }),

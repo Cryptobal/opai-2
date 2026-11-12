@@ -1,6 +1,7 @@
 import { esAreaNav, type DatoPersonalDeclarado } from "@opai/domain";
 import type { z } from "zod";
 
+import { validarIndicadoresDelModulo, type IndicadorGestion } from "./indicadores-gestion";
 import { registrarCapacidades } from "./registry";
 import type { Capacidad } from "./types";
 
@@ -56,6 +57,8 @@ export type ModuleManifest = {
   capacidades: readonly Capacidad[];
   /** Inventario de datos personales (RAT, Ley 21.719). `defineDatosPersonales(id, [...])`. */
   datosPersonales?: readonly DatoPersonalDeclarado[];
+  /** Indicadores de gestión que publica (ADR-094). El núcleo arma el catálogo desde aquí. */
+  indicadores?: readonly IndicadorGestion[];
 };
 
 /** Declara un módulo validando que ids, permisos y capacidades le pertenezcan. */
@@ -119,6 +122,11 @@ export function defineModule(manifest: ModuleManifest): ModuleManifest {
         `La acción "${accion.etiqueta}" debe declarar su capacidad y el mismo permiso.`,
       );
   }
+  validarIndicadoresDelModulo(
+    id,
+    manifest.indicadores ?? [],
+    manifest.permisos.map((p) => p.id),
+  );
   for (const dato of manifest.datosPersonales ?? []) {
     if (dato.modulo !== id) {
       throw new Error(

@@ -6,7 +6,12 @@ import type { FilaHilo, ListaHilo, PendienteHilo, SegmentoHilo } from "@opai/ds"
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
-import { cargarFilasHilo, cargarPendientesHilo, type LecturasHilo } from "./cargas-hilo";
+import {
+  cargarFilasHilo,
+  cargarPendientesHilo,
+  refrescoDeSegmentos,
+  type LecturasHilo,
+} from "./cargas-hilo";
 
 const CARGANDO = { estado: "cargando", items: [] } as const;
 /** Pendientes con más de un minuto se vuelven a pedir al volver a la pestaña. */
@@ -15,13 +20,13 @@ const VIGENCIA_MS = 60_000;
 /**
  * Datos del hilo. Los pendientes se piden una vez después de pintar —no por navegación (ADR-045)— y
  * otra vez cuando la Bandeja avisa un cambio o la pestaña vuelve a verse con datos viejos. Actividad y
- * Agenda se piden recién cuando se abre su segmento. Si un refresco falla, se conserva lo que había.
+ * Agenda se piden cada vez que se abre su segmento (no por navegación): así una tarea hecha en otra
+ * pantalla se ve al volver (CAR-317). Si un refresco falla, se conserva lo que había.
  */
 export function useHilo(portal: string) {
   const [pendientes, setPendientes] = useState<ListaHilo<PendienteHilo>>(CARGANDO);
   const [actividad, setActividad] = useState<ListaHilo<FilaHilo>>(CARGANDO);
   const [agenda, setAgenda] = useState<ListaHilo<FilaHilo>>(CARGANDO);
-  const pedido = useRef({ actividad: false, agenda: false });
   const ultima = useRef(0);
 
   // Ids literales en cada llamada: así el gate de paridad sabe qué capacidades usa el hilo.
@@ -60,19 +65,15 @@ export function useHilo(portal: string) {
   }, [cargarPendientes]);
 
   const cargarSegmento = useCallback(
-    async (s: "actividad" | "agenda") =>
-      (s === "actividad" ? setActividad : setAgenda)(
-        await cargarFilasHilo(ejecutar, s, new Date()),
-      ),
+    (s: "actividad" | "agenda") => cargarFilasHilo(ejecutar, s, new Date()),
     [ejecutar],
   );
 
-  const onSegmento = useCallback(
-    (s: SegmentoHilo) => {
-      if (s === "pendientes" || pedido.current[s]) return;
-      pedido.current[s] = true;
-      void cargarSegmento(s);
-    },
+  const onSegmento = useMemo(
+    () =>
+      refrescoDeSegmentos(cargarSegmento, (s, actualizar) =>
+        (s === "actividad" ? setActividad : setAgenda)(actualizar),
+      ),
     [cargarSegmento],
   );
 
@@ -84,9 +85,9 @@ export function useHilo(portal: string) {
         return;
       }
       (s === "actividad" ? setActividad : setAgenda)(CARGANDO);
-      void cargarSegmento(s);
+      onSegmento(s);
     },
-    [cargarPendientes, cargarSegmento],
+    [cargarPendientes, onSegmento],
   );
 
   return { pendientes, actividad, agenda, onSegmento, onReintentar };
