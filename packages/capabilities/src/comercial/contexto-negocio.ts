@@ -7,6 +7,7 @@ import { reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { PERMISO_MANAGE, PERMISO_READ, negocioDe } from "./comun";
 import { contextoSchema, fecha, vista } from "./contexto-negocio-comun";
+import { idAutor } from "../autor";
 
 export const contextoListar = defineCapability({
   // Notas de lo que se sabe del cliente: se audita cada entrada mostrada, sin copiar su contenido.
@@ -64,8 +65,8 @@ export const contextoAgregar = defineCapability({
       fechaFuente: new Date(`${input.fechaFuente}T00:00:00.000Z`),
       estado,
       creadoPorTipo: ctx.actor.tipo,
-      creadoPorId: ctx.actor.id ?? null,
-      confirmadoPorId: estado === "confirmado" ? (ctx.actor.id ?? null) : null,
+      creadoPorId: idAutor(ctx.actor),
+      confirmadoPorId: estado === "confirmado" ? idAutor(ctx.actor) : null,
       confirmadoEn: estado === "confirmado" ? new Date() : null,
     };
     if (dryRun) return vista({ id: "", ...datos, confirmadoEn: datos.confirmadoEn });

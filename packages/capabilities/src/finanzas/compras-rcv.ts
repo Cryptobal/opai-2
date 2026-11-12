@@ -88,6 +88,8 @@ export const trabajoSincronizarRcv = defineTrabajo({
     "Según el ajuste «Traer las compras desde el SII» (diaria por defecto, semanal o manual) trae del RCV del SII las compras del mes (las del mes anterior los tres primeros días) y las agrega al libro de compras sin duplicar. Solo actúa si la empresa tiene Emisión DTE con SimpleAPI configurada.",
   payload: z.object({}).passthrough(),
   periodicidad: "diaria",
+  // La consulta del mes al SII (SimpleAPI) más el alta en el libro no caben en los 20 s generales (CAR-273).
+  tiempoMaximoMs: 40_000,
   async handler(ctx) {
     const frecuencia = await ajusteFinanzas(ctx, "compras_sincronizar_rcv");
     if (!tocaHoy(frecuencia)) return { activo: false, frecuencia };

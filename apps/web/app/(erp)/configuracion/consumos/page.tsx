@@ -1,4 +1,4 @@
-import { Estado, KpiTile } from "@opai/ds";
+import { cn, Estado, GRILLA_KPI_HILO, KpiTile } from "@opai/ds";
 
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
@@ -39,7 +39,7 @@ export default function Consumos({ searchParams }: { searchParams: SearchParams 
         return (
           <Estado state={state} variante="detalle">
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <div className={cn("grid grid-cols-2 gap-3 lg:grid-cols-4", GRILLA_KPI_HILO)}>
                 {tile("Inteligencia artificial", usd(a.iaUsd), "iaUsd")}
                 {tile("Correos", num(a.correos), "correos")}
                 {tile("Geolocalización", num(a.geo), "geo")}

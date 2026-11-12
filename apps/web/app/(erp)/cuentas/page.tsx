@@ -23,7 +23,7 @@ export default function Cuentas({ searchParams }: Props) {
       completo
       cargar={async () => {
         const p = await filtrosDe(searchParams);
-        return { ...(await cargarCuentas(p)), q: p.q };
+        return { ...(await cargarCuentas(p)), p };
       }}
     >
       {(l) => (
@@ -33,7 +33,7 @@ export default function Cuentas({ searchParams }: Props) {
             unPanelHastaLg
             etiquetaLista="Lista de cuentas"
             vacio={{ texto: "Elige una cuenta", icono: Building2 }}
-            lista={<ListaCuentas state={l.state} items={l.items} q={l.q} etiquetas={l.etiquetas} />}
+            lista={<ListaCuentas state={l.state} items={l.items} filtros={l.p} etiquetas={l.etiquetas} />}
           />
           <HojaCuenta />
         </>

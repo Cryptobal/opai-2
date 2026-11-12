@@ -30,6 +30,8 @@ export type DefinicionIntegracion = {
   config: z.ZodType;
   /** false = aparece como "Próximamente". */
   disponible: boolean;
+  /** true = solo la ven las empresas que Plataforma habilita (`core.integraciones_habilitadas`, CAR-321). */
+  soloHabilitadas?: boolean;
   /** Variable de entorno con la credencial de plataforma (solo servidor). */
   envPlataforma?: string;
 };

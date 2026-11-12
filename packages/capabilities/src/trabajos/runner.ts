@@ -14,6 +14,8 @@ export interface ColaTrabajos {
   reclamar(limite: number): Promise<TrabajoReclamado[]>;
   completar(id: string, resultado: unknown): Promise<void>;
   fallar(id: string, error: string, reintentarEn: Date | null): Promise<void>;
+  /** Devuelve a la cola un trabajo reclamado que no alcanzó a empezar, sin gastarle el intento. */
+  devolver(id: string): Promise<void>;
 }
 
 /** Espera exponencial: 2, 4, 8, 16… minutos. */
@@ -53,6 +55,8 @@ export async function ejecutarTrabajos(
   cola: ColaTrabajos,
   { lote = 5, hasta = Date.now() + 45_000, timeoutMs = 20_000 }: OpcionesRunner = {},
 ) {
+  // Lo que dura la vuelta completa (con un margen para reclamar): un trabajo que pide más corre con eso.
+  const presupuesto = (hasta - Date.now()) * 0.95;
   let reclamados = 0;
   let hechos = 0;
   let fallidos = 0;
@@ -62,11 +66,25 @@ export async function ejecutarTrabajos(
     reclamados += tomados.length;
     for (const t of tomados) {
       const def = obtenerTrabajo(t.tipo);
+      // Un trabajo recibe lo que pide (consultas al SII, 40 s) sin pasarse de lo que le queda a la vuelta. Si ya
+      // no le alcanza lo que pide, vuelve a la cola sin gastar el intento y corre primero en la vuelta siguiente:
+      // así no falla por falta de tiempo ni la función se pasa de su duración con trabajo reclamado a medias.
+      const pide = def?.tiempoMaximoMs ?? timeoutMs;
+      const limite = Math.min(pide, hasta - Date.now());
+      if (def && limite < Math.min(pide, presupuesto)) {
+        try {
+          await cola.devolver(t.id);
+          reclamados -= 1;
+        } catch {
+          // Si no se pudo devolver, queda reclamado y vuelve solo al vencer su bloqueo; la vuelta sigue.
+        }
+        continue;
+      }
       try {
         if (!def) throw new Error(`Tipo de trabajo desconocido: "${t.tipo}".`);
         await cola.completar(
           t.id,
-          await conTimeout((signal) => def.ejecutar(ctx, t.payload, signal), timeoutMs),
+          await conTimeout((signal) => def.ejecutar(ctx, t.payload, signal), limite),
         );
         hechos += 1;
       } catch (e) {

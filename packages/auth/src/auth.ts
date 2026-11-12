@@ -9,6 +9,7 @@ import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
 import { marcaMfaSesion, pluginTwoFactor } from "./mfa-sesion";
+import { proveedorOAuth } from "./oauth";
 import { marcaPasskey, pluginPasskey, RUTAS_PASSKEY_DESACTIVADAS } from "./passkey-plugin";
 import { sesionPin } from "./sesion-pin";
 import { rastroLoginPausado, rastroRestablecimiento, rastroSeguridad } from "./rastro-seguridad";
@@ -22,6 +23,7 @@ import {
   resolverIntento,
 } from "./bloqueo-login";
 import {
+  camposSesion,
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
   origenesConfiables,
@@ -49,7 +51,7 @@ export const auth = betterAuth({
   },
   user: { additionalFields: camposUsuario },
   session: {
-    additionalFields: { mfaVerified: { type: "boolean", defaultValue: false, input: false } },
+    additionalFields: camposSesion,
     // CAR-152 · D1 (3-nov-2026): evita la lectura de sesión en Neon en cada request y precarga RSC.
     // Una sesión revocada en la base (o una cookie copiada antes del sign-out) puede seguir autorizando
     // hasta `maxAge` s: riesgo aceptado. El sign-out borra token y caché en el navegador que lo hace.
@@ -177,6 +179,7 @@ export const auth = betterAuth({
     pluginPasskey(env),
     marcaPasskey,
     sesionPin,
+    proveedorOAuth(), // OAuth del MCP (CAR-247, ADR-098): apps como Claude entran como la persona.
     // Después de twoFactor y de marcaMfaSesion: ve la respuesta final (p. ej. el desafío del MFA).
     rastroSeguridad,
     nextCookies(),
