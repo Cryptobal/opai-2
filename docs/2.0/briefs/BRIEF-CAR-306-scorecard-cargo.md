@@ -18,7 +18,7 @@ Entra: módulo `desempeno` (vendible aparte), tablas del scorecard con versiones
 
 No entra, y por qué:
 - **Plantillas sugeridas por vertical.** Hoy el catálogo tiene un solo indicador; una plantilla de un indicador no aporta. Entran cuando Comercial, Personas y Operaciones publiquen los suyos (CAR-308 a 310), desde la configuración por vertical.
-- **Cierre de período** (congelar el resultado del mes): CAR-312. Mientras tanto el resultado de un mes pasado se recalcula con los hechos actuales, pero siempre con el scorecard que regía ese mes.
+- **Cierre de período** (congelar el resultado del mes): CAR-322. Mientras tanto el resultado de un mes pasado se recalcula con los hechos actuales, pero siempre con el scorecard que regía ese mes.
 - **Ranking visible para la persona.** El ajuste `personaVeRanking` se guarda, pero la vista de ranking para la propia persona llega con las pantallas (CAR-307).
 - **Indicadores propios por empresa:** CAR-313. **Pantallas:** CAR-307.
 - **Aviso a los trabajadores** sobre la medición con datos individuales (Ley 21.719): es un texto y un flujo de pantalla; se define con CAR-307 antes de encender el módulo en una empresa real.
@@ -78,8 +78,8 @@ Sin pantallas. Todo se opera por MCP o API hasta CAR-307.
 - Publicar con pesos que no suman 100, con un indicador que no es del catálogo de la empresa, o con meta de porcentaje sobre 100: rechazado con el motivo.
 - Guardar dos veces en el mismo mes antes de que rija: reemplaza la versión pendiente; solo queda un borrador por cargo. Un borrador no puede pisar una versión ya publicada que aún no rige: hay que publicar el cambio.
 - Dos guardados simultáneos: el segundo revalida el mes de vigencia dentro de la transacción y, si cambió, responde conflicto.
-- **Solo período mensual.** ADR-094 habla de configurar el período; esta versión mide por mes. Otros períodos se evalúan con el cierre (CAR-312).
-- **Meses pasados usan el cargo y la jefatura de hoy**, no los que la persona tenía ese mes. Se corrige con el cierre de período (CAR-312).
+- **Solo período mensual.** ADR-094 habla de configurar el período; esta versión mide por mes. Otros períodos se evalúan con el cierre (CAR-322).
+- **Meses pasados usan el cargo y la jefatura de hoy**, no los que la persona tenía ese mes. Se corrige con el cierre de período (CAR-322).
 - Indicador cuyo módulo se apagó después: aparece como no disponible y no entra en el puntaje.
 - Persona sin usuario vinculado: sin dato en los indicadores atribuidos al usuario (no cero).
 - Persona sin vínculo vigente o cargo sin scorecard ese mes: resultado vacío, sin error.
@@ -112,7 +112,7 @@ Gate completo local y CI. Sin cambio visual. Migración por el bot «OPAI 2.0»,
 
 - Migración aditiva en un schema nuevo: revertir es borrar el schema (sección «Reversión»).
 - El módulo nace apagado para toda empresa: nada cambia hasta activarlo.
-- `ver_cargo` hace una medición por indicador para la página de 200 personas; con muchos indicadores y cargos grandes conviene el cierre de período (CAR-312).
+- `ver_cargo` hace una medición por indicador para la página de 200 personas; con muchos indicadores y cargos grandes conviene el cierre de período (CAR-322).
 - Mientras no exista el cierre, corregir un hecho de un mes pasado cambia el resultado de ese mes.
 
 ## 16. Reporte de ejecución
