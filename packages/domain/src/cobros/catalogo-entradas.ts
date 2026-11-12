@@ -118,6 +118,13 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
     "usuario_licencia",
   ),
   modulo("cpq", "CPQ", "Cotizaciones y propuestas.", "por_unidad", "usuario_licencia"),
+  modulo(
+    "desempeno",
+    "Desempeño",
+    "Scorecard por cargo y resultado por persona (ADR-094, se vende aparte).",
+    "por_unidad",
+    "usuario_licencia",
+  ),
   {
     id: MODULO_FINANZAS,
     nombre: "Finanzas",
