@@ -83,7 +83,7 @@ describe.skipIf(!urlPropietario)("cpq · cotizaciones en el Portal Cliente en ba
     e = await prepararEntorno();
     mod = await import("../src");
     mod.limpiarRegistro();
-    mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesComercial, ...capacidadesCpq]);
+    mod.registrarCapacidades([...mod.capacidadesDelNucleo, ...mod.capacidadesComercial, ...mod.capacidadesPortalCliente, ...capacidadesCpq]);
     registrarModuloComercial();
     const crear = (n: string) => e.admin.tenant.create({ data: { slug: `pc-${n}-${sufijo}`, nombre: n, vertical: "seguridad" } });
     t = { a: (await crear("a")).id, b: (await crear("b")).id };
@@ -158,5 +158,30 @@ describe.skipIf(!urlPropietario)("cpq · cotizaciones en el Portal Cliente en ba
     const l = await comoContacto<{ items: unknown[] }>(t.a, prospecto, "cpq.portal_cotizaciones.list", {});
     expect(l.ok && l.data.items).toEqual([]);
     expect((await comoContacto(t.a, prospecto, "portal_cliente.resumen.leer", {})).ok).toBe(false);
+  });
+
+  it("archivar la cotización o el negocio oculta la propuesta al prospecto y restaurar la devuelve", async () => {
+    await e.admin.accesoPropuesta.updateMany({ where: { accesoId: pz.acceso, cotizacionId: pz.vigente }, data: { estado: "vigente" } });
+    const lista = async () => {
+      const l = await comoContacto<{ items: { cotizacionId: string }[] }>(t.a, prospecto, "cpq.portal_cotizaciones.list", {});
+      return l.ok ? l.data.items.map((i) => i.cotizacionId) : null;
+    };
+    expect(await lista()).toEqual([pz.vigente]);
+    await e.admin.cpqCotizacion.update({ where: { id: pz.vigente }, data: { archivadaEn: new Date() } });
+    expect(await lista()).toEqual([]);
+    expect((await comoContacto(t.a, prospecto, "cpq.portal_cotizaciones.descargar", { cotizacionId: pz.vigente, tipo: "propuesta" })).ok).toBe(false);
+    await e.admin.cpqCotizacion.update({ where: { id: pz.vigente }, data: { archivadaEn: null } });
+    expect(await lista()).toEqual([pz.vigente]);
+  });
+
+  it("al ganar la cuenta (cliente activo) el acceso limitado abre el portal completo; si estaba suspendido, sigue cerrado (CAR-300)", async () => {
+    const cuentaZ = (await e.admin.accesoCliente.findUniqueOrThrow({ where: { id: pz.acceso } })).cuentaId;
+    expect((await comoContacto(t.a, prospecto, "portal_cliente.resumen.leer", {})).ok).toBe(false);
+    await e.admin.cuenta.update({ where: { id: cuentaZ }, data: { estado: "cliente_activo" } });
+    expect((await comoContacto(t.a, prospecto, "portal_cliente.resumen.leer", {})).ok).toBe(true);
+    await e.admin.accesoCliente.update({ where: { id: pz.acceso }, data: { estado: "suspendido" } });
+    expect((await comoContacto(t.a, prospecto, "portal_cliente.resumen.leer", {})).ok).toBe(false);
+    await e.admin.accesoCliente.update({ where: { id: pz.acceso }, data: { estado: "activo" } });
+    await e.admin.cuenta.update({ where: { id: cuentaZ }, data: { estado: "prospecto" } });
   });
 });

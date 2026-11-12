@@ -5,7 +5,7 @@ import { accesoDelActor, defineCapability, noEncontrado, type Contexto } from "@
 import { totalesDocumento } from "../domain/documento/totales";
 import { tasaIvaVentaTenant } from "../persistencia/tasa-iva-tenant";
 import { uuidSchema } from "./esquemas";
-import { soloVigentes } from "./portal-cotizaciones-alcance";
+import { cotizacionesVisibles } from "./portal-cotizaciones-alcance";
 
 /**
  * Sin permiso de módulo (`permiso: null`): el acceso lo decide `accesoDelActor` (FAIL-CLOSED, ADR-022), que solo
@@ -35,16 +35,9 @@ const itemSchema = z.object({
  * pantalla. Solo versiones ya enviadas o aceptadas, nunca borradores; sin costos, márgenes ni parámetros.
  */
 async function enviadasDeMiCuenta(ctx: Contexto, cotizacionId?: string) {
-  // Un prospecto (acceso «limitado», CAR-300) también entra, pero solo a las cotizaciones de su propuesta vigente.
+  // Un prospecto (acceso «limitado», CAR-300) también entra, pero solo a su propuesta vigente.
   const { cuentaId, alcance, accesoId } = await accesoDelActor(ctx, { permitirLimitado: true });
-  const negocios = await ctx.db.negocio.findMany({ where: { cuentaId }, select: { id: true } });
-  const cots = await ctx.db.cpqCotizacion.findMany({
-    where: {
-      negocioId: { in: negocios.map((n) => n.id) },
-      ...(cotizacionId ? { id: cotizacionId } : {}), ...(await soloVigentes(ctx, alcance, accesoId)),
-    },
-    select: { id: true, codigo: true, titulo: true },
-  });
+  const cots = await cotizacionesVisibles(ctx, { cuentaId, alcance, accesoId, cotizacionId });
   const versiones = await ctx.db.cpqVersion.findMany({
     where: { cotizacionId: { in: cots.map((c) => c.id) }, estado: { in: ESTADOS_ENVIADOS }, enviadaEn: { not: null } },
     orderBy: [{ numero: "desc" }],
