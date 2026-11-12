@@ -2,14 +2,13 @@ import { z } from "zod";
 
 import {
   credencialDePlataforma,
-  definicionIntegracion,
   enmascarar,
   secretoOcultaSufijo,
 } from "@opai/integrations";
 
 import { noEncontrado } from "../errores";
 import { externo } from "../externo";
-import { estadoIntegracion, integracionDe } from "../integraciones/resolver";
+import { definicionVisible, estadoIntegracion, integracionDe } from "../integraciones/resolver";
 import type { Contexto } from "../types";
 import { iso } from "./comun";
 
@@ -33,7 +32,7 @@ export const integracionSchema = z.object({
 });
 
 export async function vistaIntegracion(ctx: Contexto, proveedor: string) {
-  const def = definicionIntegracion(proveedor);
+  const def = await definicionVisible(ctx, proveedor);
   if (!def) throw noEncontrado(`La integración "${proveedor}"`);
   const fila = await integracionDe(ctx, proveedor);
   const secretos = fila ? await ctx.db.secreto.findMany({ where: { integracionId: fila.id } }) : [];

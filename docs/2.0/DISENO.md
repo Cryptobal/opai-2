@@ -71,6 +71,25 @@ Toda pantalla compone un patrón del DS. Los patrones reciben `state` y resuelve
 | Sin permisos | `Forbidden` | Explica que no tiene acceso; nunca muestra datos parciales |
 | No encontrado (404) | `NoEncontrado` (`apps/web/app/_components/no-encontrado.tsx`, usado por el `not-found.tsx` de cada ruta con `[id]`) | Dentro del shell, con «Ir al inicio». Un id inválido o de otro tenant da 404, nunca un error |
 
+## 3b. Piel del marco Hilo (ADR-090)
+
+Con el marco Hilo activo (preferencia «Diseño» en Mi cuenta), las mismas piezas y patrones toman la piel del diseño aprobado `docs/2.0/design/export-base-hilo/`. El marco clásico no cambia. La piel vive en el DS, con alcance: tokens bajo `[data-marco="hilo"]` (`tokens.css`), la variante de Tailwind `marco-hilo:` y, para estados, indicadores y esqueleto, utilidades `ds-*` en `styles.css` (así no pesan en el JS compartido, ADR-037). Ningún módulo la reimplementa; una pantalla que arma su propia grilla de indicadores le suma `GRILLA_KPI_HILO`.
+
+| Pieza | En el marco Hilo |
+|---|---|
+| Neutros y tema | Fondo `#FAFAF9`, línea `#E3E3E0`, tinta `#0D0D0E` y su versión oscura. Los controles tienen radio de 12 px (`--ds-radius-md`) |
+| Botón principal | En tinta (fondo `fg`, texto `bg`), semibold y de 44 px de alto |
+| Etiquetas de estado | Píldora sin punto, 11/14 semibold |
+| Tablas y listas | Filas sin tarjeta, separadas por una línea; cabecera en mayúsculas pequeñas |
+| Pestañas de ficha | Subrayado de 2 px en la pestaña activa |
+| Indicadores (`KpiTile`, `DashboardScreen`) | Sin tarjeta. Una línea encima de cada indicador, etiqueta 13/18, valor de hasta 26 px y nota 12/16 en su tono. En el tablero, las filas van sin espacio vertical y cierran con una línea (el «Pulso» del diseño) |
+| Estados (`Empty`, `ErrorState`, `Forbidden`, `SinConexion`) | Alineados a la izquierda, sin borde punteado. Ícono de 44 px con radio 14 y fondo de su tono (vacío y sin conexión en gris, error en rojo, sin permiso en ámbar), título 18/26 y debajo la acción que pase la pantalla (por lo general, un botón secundario) |
+| Cargando (`Loading`) | Filas de 61 px separadas por una línea, con monograma de 36 px en las listas y dos líneas de texto (también en planillas y formularios, que en el clásico tienen otra altura); el tablero, indicadores bajo una línea |
+
+Muestra sin sesión: `/ds/hilo` (con `?vista=piezas` para las piezas, los indicadores y los estados).
+
+**Sistema de diseño en Claude Design:** «OPAI 2.0 Design System · Hilo» (<https://claude.ai/artifact/NySPx8Tq4LRChyYVadAnFa>, privado de Carlos). Lo armó Claude el 12-nov-2026 desde `packages/ds` y el prototipo `export-base-hilo`, con tokens en claro y oscuro, fuentes, la guía del marco y 13 piezas con vista previa estática: marco, barra, decisión, botón, campo, etiqueta, pestañas, lista, tabla, indicadores, estados, aviso y diálogo. **Es el sistema predeterminado para todo diseño nuevo (ADR-102, decisión de Carlos del 12-nov-2026):** todo Design Prompt y toda pantalla nueva se diseñan con Hilo en Claude Design. «OPAI 2.0 V2» y los anteriores quedan solo como referencia de lo ya construido, sin diseños nuevos. Si cambia la piel en `packages/ds`, se actualiza también este sistema.
+
 ## 4. Celular primero
 
 - Diseñar y verificar a **375 px** (celular) y **1024 px** (iPad) antes que a 1280 px (escritorio). Escritorio es el mismo diseño con más espacio.

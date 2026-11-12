@@ -75,6 +75,8 @@ export async function asegurarAccesoContacto(
       ctx,
       { membershipId: m.id, cuentaId: cuenta.id, contactoId: contacto.id, todasInstalaciones: false, instalacionIds: [] },
       dryRun,
+      // Un prospecto solo ve su propuesta; al ganarse la cuenta el acceso pasa a completo (CAR-300).
+      cuenta.estado === "prospecto" ? "limitado" : "completo",
     );
     return { estado: "vinculado" };
   }

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE, variablesDocumentoDesconocidas } from "@opai/domain";
+import { PERMISOS_CORE, variablesFueraDeClase, type ClasePlantilla } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
@@ -86,9 +86,9 @@ export const documentoPlantillasPublicar = defineCapability({
         `Mientras editabas se publicó la versión ${p.versionVigente}. Recarga la plantilla y vuelve a aplicar tus cambios.`,
       );
     if (!contenido.trim()) throw reglaDeNegocio("La plantilla está en blanco: escribe el texto.");
-    const desconocidas = variablesDocumentoDesconocidas(contenido);
+    const desconocidas = variablesFueraDeClase(contenido, p.clase as ClasePlantilla);
     if (desconocidas.length > 0)
-      throw reglaDeNegocio(`Variables que no existen: ${desconocidas.join(", ")}.`, {
+      throw reglaDeNegocio(`Variables que no existen o no valen para este tipo de plantilla: ${desconocidas.join(", ")}.`, {
         desconocidas,
       });
     if (contenido === v.contenido)

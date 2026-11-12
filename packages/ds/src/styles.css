@@ -364,3 +364,140 @@
     transparent
   );
 }
+
+/* Piel Hilo de estados, esqueleto e indicadores (H2, CAR-324; diseño en
+   docs/2.0/design/export-base-hilo/). Vive en CSS y no en clases `marco-hilo:` para no pesar en el
+   JS compartido de todas las rutas (ADR-037). `:is()` da al marco Hilo más especificidad que las
+   utilidades del clásico. */
+@utility ds-estado {
+  @apply flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center;
+  &:is([data-marco="hilo"] *) {
+    @apply max-w-[560px] items-start gap-2 rounded-none border-0 px-0 py-5 text-left;
+  }
+}
+@utility ds-estado-icono {
+  @apply flex size-12 items-center justify-center rounded-full bg-bg text-fg-muted;
+  /* `:where` deja el tamaño en 24 px sin ganarle al que pase una pantalla en su ícono. */
+  & :where(svg) {
+    @apply size-6;
+  }
+  &:is([data-marco="hilo"] *) {
+    @apply size-11 rounded-[14px] bg-fill;
+  }
+  &:is([data-marco="hilo"] *) svg {
+    @apply size-[22px];
+  }
+}
+@utility ds-estado-icono-danger {
+  &:is([data-marco="hilo"] *):is([data-marco="hilo"] *) {
+    @apply bg-danger-muted text-danger-fg;
+  }
+}
+@utility ds-estado-icono-warning {
+  &:is([data-marco="hilo"] *):is([data-marco="hilo"] *) {
+    @apply bg-warning-muted text-warning-fg;
+  }
+}
+@utility ds-estado-titulo {
+  @apply text-md font-medium text-fg;
+  &:is([data-marco="hilo"] *) {
+    @apply text-lg leading-[26px] font-semibold;
+  }
+}
+@utility ds-estado-texto {
+  @apply max-w-sm text-base text-fg-muted;
+  &:is([data-marco="hilo"] *) {
+    @apply max-w-none;
+  }
+}
+/* Esqueleto: en el marco Hilo, los mismos bloques del clásico se pintan como filas sin tarjeta,
+   separadas por una línea, con monograma de 36 px (listas) y dos líneas de texto. Sin elementos
+   extra en el DOM. */
+@utility ds-esq {
+  &:is([data-marco="hilo"] *) {
+    @apply gap-0 border-t border-border;
+  }
+  /* El tablero ya trae la línea encima de cada indicador: sin la del contenedor no queda doble. */
+  &:is([data-marco="hilo"] *):has(> .ds-grilla-kpi) {
+    @apply border-t-0;
+  }
+}
+@utility ds-esq-fila {
+  &:is([data-marco="hilo"] *) {
+    @apply relative h-[61px] rounded-none border-b border-border bg-transparent;
+  }
+  /* El esqueleto del diseño es quieto: el `::after` deja el brillo de `ds-shimmer` y pinta la
+     segunda línea. */
+  &:is([data-marco="hilo"] *)::before,
+  &:is([data-marco="hilo"] *)::after {
+    @apply absolute inset-auto h-3 animate-none rounded-[6px] content-[''];
+    transform: none;
+    background: var(--ds-fill);
+  }
+  &:is([data-marco="hilo"] *)::before {
+    @apply top-[18px] left-0 w-[46%];
+  }
+  &:is([data-marco="hilo"] *)::after {
+    @apply top-[36px] left-0 h-2.5 w-[30%];
+  }
+  &:is([data-marco="hilo"] *):nth-child(3n + 2)::before {
+    @apply w-[38%];
+  }
+  &:is([data-marco="hilo"] *):nth-child(3n + 2)::after {
+    @apply w-[52%];
+  }
+}
+@utility ds-esq-mono {
+  &:is([data-marco="hilo"] *) {
+    @apply pl-12;
+    background: linear-gradient(var(--ds-fill), var(--ds-fill)) left 12px / 36px 36px no-repeat;
+  }
+  &:is([data-marco="hilo"] *)::before,
+  &:is([data-marco="hilo"] *)::after {
+    @apply left-12;
+  }
+}
+@utility ds-esq-kpi {
+  &:is([data-marco="hilo"] *) {
+    @apply relative h-[84px] rounded-none border-t border-border bg-transparent;
+  }
+  &:is([data-marco="hilo"] *)::before,
+  &:is([data-marco="hilo"] *)::after {
+    @apply absolute inset-auto left-0 animate-none rounded-[6px] content-[''];
+    transform: none;
+    background: var(--ds-fill);
+  }
+  &:is([data-marco="hilo"] *)::before {
+    @apply top-4 h-3 w-1/2;
+  }
+  &:is([data-marco="hilo"] *)::after {
+    @apply top-9 h-6 w-3/4;
+  }
+}
+/* Indicador sin tarjeta, con una línea encima, como el «Pulso» del diseño. */
+@utility ds-kpi {
+  &:is([data-marco="hilo"] *) {
+    @apply gap-1 rounded-none border-0 border-t bg-transparent px-0 py-3.5;
+  }
+}
+@utility ds-kpi-etiqueta {
+  &:is([data-marco="hilo"] *) {
+    @apply font-normal;
+  }
+}
+@utility ds-kpi-valor {
+  &:is([data-marco="hilo"] *) {
+    @apply text-[length:clamp(14px,13cqi,26px)] leading-[30px] tracking-[-0.02em];
+  }
+}
+@utility ds-kpi-nota {
+  &:is([data-marco="hilo"] *) {
+    @apply leading-4 font-medium;
+  }
+}
+/* Grilla de indicadores: sin espacio vertical entre filas, 24 px entre columnas y línea al pie. */
+@utility ds-grilla-kpi {
+  &:is([data-marco="hilo"] *) {
+    @apply gap-x-6 gap-y-0 border-b border-border;
+  }
+}

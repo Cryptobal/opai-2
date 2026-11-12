@@ -80,3 +80,22 @@ export const camposVinculo = {
       "Usuario de la empresa que reclutó a la persona. Al crear, si no se envía, queda quien registra el ingreso.",
     ),
 };
+
+export const vinculoResumenSchema = vinculoSchema
+  .omit({
+    personaId: true,
+    estado: true,
+    motivoTermino: true,
+    updatedAt: true,
+    reclutadoPorId: true,
+  })
+  .extend({
+    cargo: z.string(),
+    instalacion: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        "Nombre de la instalación del contrato (la cabecera de la ficha); solo en la ficha.",
+      ),
+  });
