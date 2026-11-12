@@ -377,7 +377,8 @@
 }
 @utility ds-estado-icono {
   @apply flex size-12 items-center justify-center rounded-full bg-bg text-fg-muted;
-  & svg {
+  /* `:where` deja el tamaño en 24 px sin ganarle al que pase una pantalla en su ícono. */
+  & :where(svg) {
     @apply size-6;
   }
   &:is([data-marco="hilo"] *) {
@@ -415,6 +416,10 @@
 @utility ds-esq {
   &:is([data-marco="hilo"] *) {
     @apply gap-0 border-t border-border;
+  }
+  /* El tablero ya trae la línea encima de cada indicador: sin la del contenedor no queda doble. */
+  &:is([data-marco="hilo"] *):has(> .ds-grilla-kpi) {
+    @apply border-t-0;
   }
 }
 @utility ds-esq-fila {
@@ -454,7 +459,7 @@
 }
 @utility ds-esq-kpi {
   &:is([data-marco="hilo"] *) {
-    @apply relative h-[84px] rounded-none border-b border-border bg-transparent;
+    @apply relative h-[84px] rounded-none border-t border-border bg-transparent;
   }
   &:is([data-marco="hilo"] *)::before,
   &:is([data-marco="hilo"] *)::after {

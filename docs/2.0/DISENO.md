@@ -83,8 +83,8 @@ Con el marco Hilo activo (preferencia «Diseño» en Mi cuenta), las mismas piez
 | Tablas y listas | Filas sin tarjeta, separadas por una línea; cabecera en mayúsculas pequeñas |
 | Pestañas de ficha | Subrayado de 2 px en la pestaña activa |
 | Indicadores (`KpiTile`, `DashboardScreen`) | Sin tarjeta. Una línea encima de cada indicador, etiqueta 13/18, valor de hasta 26 px y nota 12/16 en su tono. En el tablero, las filas van sin espacio vertical y cierran con una línea (el «Pulso» del diseño) |
-| Estados (`Empty`, `ErrorState`, `Forbidden`, `SinConexion`) | Alineados a la izquierda, sin borde punteado. Ícono de 44 px con radio 14 y fondo de su tono (vacío y sin conexión en gris, error en rojo, sin permiso en ámbar), título 18/26 y la acción como botón de línea |
-| Cargando (`Loading`) | Filas separadas por una línea, con monograma de 36 px en las listas y dos líneas de texto; el tablero, indicadores bajo una línea |
+| Estados (`Empty`, `ErrorState`, `Forbidden`, `SinConexion`) | Alineados a la izquierda, sin borde punteado. Ícono de 44 px con radio 14 y fondo de su tono (vacío y sin conexión en gris, error en rojo, sin permiso en ámbar), título 18/26 y debajo la acción que pase la pantalla (por lo general, un botón secundario) |
+| Cargando (`Loading`) | Filas de 61 px separadas por una línea, con monograma de 36 px en las listas y dos líneas de texto (también en planillas y formularios, que en el clásico tienen otra altura); el tablero, indicadores bajo una línea |
 
 Muestra sin sesión: `/ds/hilo` (con `?vista=piezas` para las piezas, los indicadores y los estados).
 

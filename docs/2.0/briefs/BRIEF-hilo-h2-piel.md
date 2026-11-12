@@ -106,5 +106,7 @@ Los tres bloques del plan. Diferencias:
 - **Avisos dentro de pantalla:** quedan fuera (ver §3).
 - **Tamaño del valor:** escala con el ancho del indicador en vez de los tamaños fijos por dispositivo del prototipo, para que los montos largos quepan.
 - **Piel en CSS:** para no subir el JS compartido (ver §4). Medido con `pnpm presupuesto` sobre la compilación local: todas las rutas dentro de su tope; la más justa, `platform/tenants/[id]/cobro`, queda en 170,0 KB, igual que en `main`.
+- **Altura del esqueleto:** en el marco Hilo todos los esqueletos que no son de tablero se ven como filas de 61 px con dos líneas, también en planillas y formularios (el diseño tiene una sola forma de esqueleto).
+- **Margen de la acción:** queda 4 px sobre la acción en vez de 6 px.
 - **Monograma del esqueleto:** queda con esquinas rectas (el diseño usa radio de 10 px). Se dibuja solo con CSS para no agregar elementos al DOM.
 - **`mapa-esqueleto.test.ts`:** la prueba del mapa sin coordenadas buscaba `border-dashed` para reconocer el estado vacío del DS; ahora busca `ds-estado`. Se mantiene la intención: es el estado vacío del DS y no una caja gris.
