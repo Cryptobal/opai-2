@@ -3,6 +3,7 @@
 import { PDFDocument, type PDFFont, type PDFPage, rgb, StandardFonts } from "pdf-lib";
 
 export type SegmentoPdf = { texto: string; negrita: boolean; cursiva: boolean };
+export type LogoPdf = { bytes: Uint8Array; formato: "png" | "jpg" };
 export type MarcaPdf = { nombre: string; pieLegal?: string | null | undefined; colorPrimario?: string | null | undefined };
 
 const ANCHO = 612;
@@ -28,6 +29,7 @@ export async function generarPdfLaboral(opts: {
   titulo: string;
   marca: MarcaPdf;
   parrafos: readonly (readonly SegmentoPdf[])[];
+  logo?: LogoPdf | null | undefined;
 }): Promise<{ bytes: Uint8Array; paginas: number }> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(opts.titulo);
@@ -39,11 +41,21 @@ export async function generarPdfLaboral(opts: {
     bi: await pdf.embedFont(StandardFonts.HelveticaBoldOblique),
   };
   const acento = color(opts.marca.colorPrimario);
+  const logo = opts.logo
+    ? await (opts.logo.formato === "png" ? pdf.embedPng(opts.logo.bytes) : pdf.embedJpg(opts.logo.bytes)).catch(() => null)
+    : null;
   const paginas: PDFPage[] = [];
   const nueva = () => {
     const p = pdf.addPage([ANCHO, ALTO]);
     paginas.push(p);
-    p.drawText(seguro(opts.marca.nombre), { x: MARGEN, y: ALTO - 40, size: 10, font: f.b, color: acento });
+    let x = MARGEN;
+    if (logo) {
+      const alto = Math.min(26, logo.height);
+      const ancho = Math.min((logo.width / logo.height) * alto, 110);
+      p.drawImage(logo, { x, y: ALTO - 44, width: ancho, height: (ancho * logo.height) / logo.width });
+      x += ancho + 10;
+    }
+    p.drawText(seguro(opts.marca.nombre), { x, y: ALTO - 40, size: 10, font: f.b, color: acento });
     p.drawLine({ start: { x: MARGEN, y: ALTO - 46 }, end: { x: ANCHO - MARGEN, y: ALTO - 46 }, thickness: 0.8, color: acento });
     return p;
   };
