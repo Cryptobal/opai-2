@@ -12,7 +12,12 @@ import { type Ruta, slug } from "./rutas";
 // una medición por pantalla (CAR-334). Las rutas con `[id]` se resuelven abriendo la lista más
 // cercana y tomando el primer enlace que calce; si no hay, se anota «sin registro».
 
-export const CARPETA = EN_PREVIEW ? "test-results/capturas/auditoria" : "e2e/__screenshots__/auditoria";
+export const CARPETA = EN_PREVIEW
+  ? "test-results/capturas/auditoria"
+  : "e2e/__screenshots__/auditoria";
+export const CARPETA_REVISION = EN_PREVIEW
+  ? "test-results/capturas/revision"
+  : "e2e/__screenshots__/revision";
 
 export type Fila = Ruta & {
   ancho: string;
@@ -25,7 +30,11 @@ export type Fila = Ruta & {
   medicion: Medicion | null;
 };
 
-const RUIDO = ["vercel.live", "The script resource is behind a redirect", "Download the React DevTools"];
+const RUIDO = [
+  "vercel.live",
+  "The script resource is behind a redirect",
+  "Download the React DevTools",
+];
 
 async function asentar(page: Page) {
   await page.waitForLoadState("networkidle", { timeout: 12_000 }).catch(() => undefined);
@@ -52,7 +61,10 @@ async function resolver(page: Page, ruta: Ruta, todas: Ruta[], cache: Map<string
       const hermanos = new Set(
         todas
           .map((r) => r.patron.split("/").filter(Boolean))
-          .filter((p) => p.length > i && `/${p.slice(0, i).join("/")}` === `/${segs.slice(0, i).join("/")}`)
+          .filter(
+            (p) =>
+              p.length > i && `/${p.slice(0, i).join("/")}` === `/${segs.slice(0, i).join("/")}`,
+          )
           .map((p) => p[i]!)
           .filter((p) => !p.startsWith("[")),
       );
@@ -62,7 +74,9 @@ async function resolver(page: Page, ruta: Ruta, todas: Ruta[], cache: Map<string
         if (!todas.some((r) => r.patron === `/${segs.slice(0, j).join("/")}`)) continue;
         await page.goto(base, { waitUntil: "domcontentloaded" }).catch(() => null);
         await asentar(page);
-        const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href") ?? ""));
+        const hrefs = await page.$$eval("a[href]", (as) =>
+          as.map((a) => a.getAttribute("href") ?? ""),
+        );
         const re = new RegExp(`^${prefijo.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/([^/?#]+)`);
         hallado = hrefs.map((h) => re.exec(h)?.[1]).find((s) => s && !hermanos.has(s)) ?? null;
       }
@@ -75,31 +89,52 @@ async function resolver(page: Page, ruta: Ruta, todas: Ruta[], cache: Map<string
   return `/${concreto.join("/")}`;
 }
 
-export async function recorrer(page: Page, rutas: Ruta[], ancho: string, telefono: boolean) {
+export async function recorrer(
+  page: Page,
+  rutas: Ruta[],
+  ancho: string,
+  telefono: boolean,
+  carpeta = CARPETA,
+  todas: Ruta[] = rutas,
+) {
   const filas: Fila[] = [];
   const cache = new Map<string, string | null>();
   let errores: string[] = [];
   page.on("console", (m) => {
-    if (m.type() === "error" && !RUIDO.some((r) => m.text().includes(r))) errores.push(m.text().slice(0, 200));
+    if (m.type() === "error" && !RUIDO.some((r) => m.text().includes(r)))
+      errores.push(m.text().slice(0, 200));
   });
   page.on("pageerror", (e) => errores.push(String(e).slice(0, 200)));
   for (const ruta of rutas) {
-    const fila: Fila = { ...ruta, ancho, url: null, final: null, estado: null, captura: null, nota: null, errores: [], medicion: null };
+    const fila: Fila = {
+      ...ruta,
+      ancho,
+      url: null,
+      final: null,
+      estado: null,
+      captura: null,
+      nota: null,
+      errores: [],
+      medicion: null,
+    };
     filas.push(fila);
     try {
-      fila.url = ruta.dinamica ? await resolver(page, ruta, rutas, cache) : ruta.patron;
+      fila.url = ruta.dinamica ? await resolver(page, ruta, todas, cache) : ruta.patron;
       if (!fila.url) {
         fila.nota = "sin registro para abrir";
         continue;
       }
       errores = [];
-      const respuesta = await page.goto(fila.url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+      const respuesta = await page.goto(fila.url, {
+        waitUntil: "domcontentloaded",
+        timeout: 45_000,
+      });
       await asentar(page);
       fila.estado = respuesta?.status() ?? null;
       fila.final = new URL(page.url()).pathname;
       if (fila.final !== fila.url) fila.nota = `redirigió a ${fila.final}`;
       fila.captura = `${ruta.portal}/${slug(ruta.patron)}-${ancho}.png`;
-      const archivo = join(CARPETA, fila.captura);
+      const archivo = join(carpeta, fila.captura);
       mkdirSync(dirname(archivo), { recursive: true });
       await page.screenshot({ path: archivo, fullPage: true, animations: "disabled" });
       fila.medicion = { ...(await medir(page, telefono)), axe: await axe(page) };
@@ -111,7 +146,7 @@ export async function recorrer(page: Page, rutas: Ruta[], ancho: string, telefon
   return filas;
 }
 
-export function guardarInforme(nombre: string, filas: Fila[]) {
-  mkdirSync(CARPETA, { recursive: true });
-  writeFileSync(join(CARPETA, `informe-${nombre}.json`), `${JSON.stringify(filas, null, 1)}\n`);
+export function guardarInforme(nombre: string, filas: Fila[], carpeta = CARPETA) {
+  mkdirSync(carpeta, { recursive: true });
+  writeFileSync(join(carpeta, `informe-${nombre}.json`), `${JSON.stringify(filas, null, 1)}\n`);
 }

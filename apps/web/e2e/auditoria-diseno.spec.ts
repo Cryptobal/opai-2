@@ -39,7 +39,10 @@ async function contexto(browser: Browser, ancho: (typeof ANCHOS)[number], hilo: 
 
 test.describe("@auditoria diseño Hilo", () => {
   test.describe.configure({ mode: "parallel" });
-  test.skip(!process.env["AUDITORIA_DISENO"], "Solo en el workflow auditoria-diseno (AUDITORIA_DISENO=1)");
+  test.skip(
+    !process.env["AUDITORIA_DISENO"],
+    "Solo en el workflow auditoria-diseno (AUDITORIA_DISENO=1)",
+  );
 
   ANCHOS.forEach((ancho, i) => {
     test(`ERP a ${ancho.nombre} px`, async ({ browser }, info) => {
