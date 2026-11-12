@@ -3,7 +3,7 @@
 // la Pauta; nunca las marcas ni su bitácora, y no tocan el reporte para la DT. Se atribuyen a la persona
 // del día y cuentan solo turnos ya terminados.
 import { diaEnZona, porcentajeDe } from "@opai/domain";
-import { defineIndicador, type IndicadorGestion, type MedicionIndicador } from "@opai/capabilities";
+import { ajuste, defineIndicador, type IndicadorGestion, type MedicionIndicador } from "@opai/capabilities";
 
 const aFecha = (dia: string) => new Date(`${dia}T00:00:00Z`);
 
@@ -85,7 +85,7 @@ export const indicadoresAsistencia: readonly IndicadorGestion[] = [
     id: "asistencia.marcas_a_la_hora",
     nombre: "Marcas a la hora",
     descripcion:
-      "De los días del mes en que marcó entrada, qué porcentaje la marcó sin atraso respecto del inicio de su turno.",
+      "De los días del mes en que marcó entrada, qué porcentaje la marcó a la hora: dentro de la tolerancia de atraso de la empresa (15 minutos por defecto) desde el inicio de su turno.",
     tipo: "oportunidad",
     unidad: "porcentaje",
     sentido: "mayor",
@@ -94,11 +94,15 @@ export const indicadoresAsistencia: readonly IndicadorGestion[] = [
     origen: "consolidado diario de asistencia: hora de entrada y atraso",
     permiso: "asistencia:ver",
     async medir(ctx, consulta) {
-      const dias = await diasDelMes(ctx, consulta);
+      const [dias, tolerancia] = await Promise.all([
+        diasDelMes(ctx, consulta),
+        ajuste<number>(ctx, "asistencia", "tolerancia_atraso_min"),
+      ]);
+      const toleranciaS = (tolerancia ?? 15) * 60;
       return porPersona(
         dias.filter((d) => d.conEntrada && d.estado !== "ausente"),
         (d) => d.personaId,
-        (d) => [d.atraso === 0 ? 1 : 0, 1],
+        (d) => [d.atraso <= toleranciaS ? 1 : 0, 1],
       );
     },
   }),

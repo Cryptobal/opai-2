@@ -13,9 +13,9 @@ Que Asistencia publique sus indicadores en el catálogo del núcleo para los sco
 
 ## 3 Alcance
 
-- `asistencia.marcas_a_la_hora` («Marcas a la hora», oportunidad, %, más es mejor, meta 95, por Persona): de los días con entrada del mes, % sin atraso (al segundo, como «Asistencia de hoy»).
+- `asistencia.marcas_a_la_hora` («Marcas a la hora», oportunidad, %, más es mejor, meta 95, por Persona): de los días con entrada del mes, % dentro de la tolerancia de atraso de la empresa (ajuste nuevo `asistencia.tolerancia_atraso_min`, 15 minutos por defecto, decisión de Carlos).
 - `asistencia.ausentismo` («Ausentismo», resultado, %, menos es mejor, meta 3, por Persona): de los días con turno del mes, % no trabajado sin justificación.
-- **Regla de licencias (la define este brief, como pedía CAR-311):** no cuentan ni a favor ni en contra las siglas L.M. (licencia médica), AT (accidente del trabajo), PREN. y POSTN (pre y postnatal), VAC (vacaciones), P.G.R. y P.S.G.R. (permisos) y A.J. (ausencia justificada): esos días salen del cálculo. Cuentan en contra la ausencia injustificada (A.I.) y el día con turno sin ninguna marca (S.A. o sin sigla).
+- **Regla de licencias (confirmada por Carlos el 12-nov-2026):** no cuentan ni a favor ni en contra las siglas L.M. (licencia médica), AT (accidente del trabajo), PREN. y POSTN (pre y postnatal), VAC (vacaciones), P.G.R. y P.S.G.R. (permisos) y A.J. (ausencia justificada): esos días salen del cálculo. Cuentan en contra la ausencia injustificada (A.I.) y el día con turno sin ninguna marca (S.A. o sin sigla).
 
 ## 4 Arquitectura
 
@@ -63,7 +63,7 @@ Con Asistencia activo, el catálogo lista «Marcas a la hora» y «Ausentismo»,
 
 ## 15 Riesgos y rollback
 
-Bajo, sin migración. Si Carlos quiere otra regla para las siglas, se cambia la lista `SIGLAS_NEUTRAS`.
+Bajo, sin migración. **Pendiente (decisión de Carlos, adenda CAR-311 d):** que los permisos y licencias se ingresen en la ficha del guardia y se vean en la pauta mensual y diaria; y el informe de Operaciones por instalación (adenda c), en un PR propio.
 
 ## 16 Reporte de ejecución
 

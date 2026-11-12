@@ -109,8 +109,9 @@ describe.skipIf(!urlPropietario)("indicadores de Asistencia contra Postgres real
     // el 9 una ausencia registrada en la Pauta (sin día consolidado); el 10 marcó fuera de turno.
     await dia(a, "ines", "2026-10-01", "presente", { entrada, sigla: "J.O." });
     await dia(a, "ines", "2026-10-02", "presente", { entrada, sigla: "J.O." });
-    await dia(a, "ines", "2026-10-03", "presente", { entrada, sigla: "J.O.", segundosAtraso: 300 });
-    await dia(a, "ines", "2026-10-04", "incompleto", { entrada, sigla: "J.O." });
+    // El 3 llegó 20 minutos tarde (fuera de la tolerancia de 15); el 4, 10 minutos (dentro).
+    await dia(a, "ines", "2026-10-03", "presente", { entrada, sigla: "J.O.", segundosAtraso: 1200 });
+    await dia(a, "ines", "2026-10-04", "incompleto", { entrada, sigla: "J.O.", segundosAtraso: 600 });
     await dia(a, "ines", "2026-10-05", "ausente", { sigla: "S.A." });
     await dia(a, "ines", "2026-10-06", "ausente", { sigla: "S.A." }, "anulado");
     await dia(a, "ines", "2026-10-07", "ausente", { sigla: "VAC" });
@@ -139,7 +140,7 @@ describe.skipIf(!urlPropietario)("indicadores de Asistencia contra Postgres real
     const medir = (indicador: string) => dato<Salida>(ctx(a), MEDIR, { indicador, periodo: "2026-10" });
     const de = (r: Salida, k: string) => r.mediciones.find((m) => m.sujetoId === persona[k])?.valor;
     const hora = await medir("asistencia.marcas_a_la_hora");
-    // La marca fuera de turno del 10 no cuenta: 3 de 4 a la hora.
+    // Tolerancia de 15 minutos por defecto; la marca fuera de turno del 10 no cuenta: 3 de 4 a la hora.
     expect([de(hora, "ines"), de(hora, "jose")]).toEqual([75, 100]);
     const ausentismo = await medir("asistencia.ausentismo");
     // Inés: en contra el 5, el 8 y el 9 sobre 7 días con turno (la licencia del 6 y las vacaciones del 7 no cuentan).

@@ -97,4 +97,13 @@ export const ajustesAsistencia = z.object({
     permiso: PERMISO,
     control: "texto",
   }),
+  tolerancia_atraso_min: z.number().int().min(0).max(120).default(15).meta({
+    etiqueta: "Tolerancia de atraso para Desempeño (minutos)",
+    ayuda:
+      "Solo para el indicador «Marcas a la hora» de Desempeño: una entrada dentro de estos minutos desde el inicio del turno cuenta como a la hora. No cambia el atraso que se registra ni el reporte para la DT. Por defecto 15 minutos (decisión de Carlos del 12-nov-2026).",
+    grupo: "Desempeño",
+    ambito: "tenant",
+    permiso: PERMISO,
+    control: "numero",
+  }),
 });
