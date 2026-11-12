@@ -94,4 +94,5 @@ Autenticación: subir Better Auth puede cambiar comportamientos del login (se co
 
 - **Qué entró:** `core.apps_conectadas.list` (también por MCP) y `core.apps_conectadas.desconectar` (solo personas, vista previa, rastro `seguridad.oauth.desconexion`), sobre operaciones con nombre de `@opai/db` (`appsConectadas`, `desconectarApp`) con el rol `opai_auth`. Mi cuenta › Apps conectadas con «Desconectar» y confirmación. Purga diaria `purgarOAuth` en el cron programador: accesos y renovaciones vencidos o revocados hace más de un día, y apps registradas hace más de 30 días sin consentimiento ni accesos.
 - **Validación:** test de base (solo lo de la persona y la empresa; desconectar no toca otra empresa ni a otra persona; rastro), test de purga, tests de capacidades (sin tokens en la salida, vista previa, agentes no desconectan) y e2e `@preview`: tras desconectar en Mi cuenta, el token de la app recibe 401.
-- **No entró:** tope de gasto por app conectada (decisión de Carlos) y prueba con Claude real en `test.opai.cl` (después de integrar #527).
+- **Tope de gasto (decisión de Carlos del 12-nov, adenda 1 a ADR-098):** las apps conectadas comparten el presupuesto mensual del agente de la empresa (`esAgenteSinKey`); tests `presupuesto-interno-db` y `presupuesto-oauth-db`.
+- **No entró:** prueba con Claude real en `test.opai.cl` (después de integrar #527).

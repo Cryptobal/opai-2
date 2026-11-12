@@ -86,7 +86,7 @@ export {
   type TenantTx,
 } from "./transaccion";
 export { enTransaccionCapturaSii } from "./transaccion-captura-sii";
-export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
+export { consumirPresupuesto, esAgenteSinKey, periodoDeMes } from "./presupuesto";
 export type {
   ApiKey,
   AprobacionPlataforma,

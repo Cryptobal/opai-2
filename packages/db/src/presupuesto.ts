@@ -1,5 +1,15 @@
 import type { TenantTx } from "./transaccion";
 
+/**
+ * Agentes sin API key que comparten el presupuesto mensual del agente interno de la empresa: el
+ * agente interno (`agente-interno:<usuario>`) y las apps conectadas por OAuth (`oauth:<cliente>`,
+ * decisión de Carlos del 12-nov-2026, ADR-098).
+ */
+const PREFIJOS_SIN_KEY = ["agente-interno:", "oauth:"] as const;
+
+export const esAgenteSinKey = (actorId: string | null | undefined) =>
+  !!actorId && PREFIJOS_SIN_KEY.some((p) => actorId.startsWith(p));
+
 export const periodoDeMes = (fecha: Date) =>
   new Date(Date.UTC(fecha.getUTCFullYear(), fecha.getUTCMonth(), 1));
 
@@ -53,7 +63,12 @@ export async function consumirPresupuesto(
   const previo = await tx.consumo.aggregate({
     where: {
       apiKeyId,
-      ...(!apiKeyId ? { actorTipo: "agent", actorId: { startsWith: "agente-interno:" } } : {}),
+      ...(!apiKeyId
+        ? {
+            actorTipo: "agent",
+            OR: PREFIJOS_SIN_KEY.map((p) => ({ actorId: { startsWith: p } })),
+          }
+        : {}),
       createdAt: { gte: periodo },
     },
     _sum: { costoTotalMicro: true },
