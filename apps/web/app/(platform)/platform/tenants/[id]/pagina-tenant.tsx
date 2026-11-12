@@ -19,7 +19,8 @@ export type TabTenant =
   | "consumos"
   | "trabajos"
   | "agentes"
-  | "integraciones";
+  | "integraciones"
+  | "auditoria";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -71,7 +72,15 @@ export function PaginaTenant({ params, searchParams, tab, children }: Props) {
                       </span>
                     </>
                   ),
-                  acciones: <AccionesTenant id={t.id} nombre={t.nombre} estado={t.estado} />,
+                  acciones: (
+                    <AccionesTenant
+                      id={t.id}
+                      nombre={t.nombre}
+                      estado={t.estado}
+                      vertical={t.vertical}
+                      timezone={t.timezone}
+                    />
+                  ),
                 }
               : {})}
             tabActiva={tab}
@@ -102,6 +111,7 @@ export function PaginaTenant({ params, searchParams, tab, children }: Props) {
               },
               { id: "agentes", etiqueta: "Agentes", contador: activas, href: `${base}/agentes` },
               { id: "integraciones", etiqueta: "Integraciones", href: `${base}/integraciones` },
+              { id: "auditoria", etiqueta: "Auditoría", href: `${base}/auditoria` },
             ]}
           >
             {contenido}

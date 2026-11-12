@@ -40,6 +40,7 @@ import {
   SlidersHorizontal,
   UserCheck,
   Users,
+  History,
   UserRound,
 } from "lucide-react";
 
@@ -85,6 +86,7 @@ const ICONOS: Record<string, LucideIcon> = {
   SlidersHorizontal,
   UserCheck,
   Users,
+  History,
   UserRound,
 };
 
