@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 728 pares pantalla→capacidad · 650 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 731 pares pantalla→capacidad · 653 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -89,6 +89,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.cumplimiento.consentimiento_revocar` | — | excepción |
 | compartido | `app/_components` | `core.cumplimiento.consentimientos_listar` | `core_cumplimiento_consentimientos_listar` | existe |
 | compartido | `app/_components` | `core.cumplimiento.solicitud_crear` | — | excepción |
+| compartido | `app/_components` | `core.documento_plantillas.generar_entidad` | `core_documento_plantillas_generar_entidad` | existe |
+| compartido | `app/_components` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
+| compartido | `app/_components` | `core.documento_plantillas.rellenar_entidad` | `core_documento_plantillas_rellenar_entidad` | existe |
 | compartido | `app/_components` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | compartido | `app/_components` | `core.documentos.archive` | `core_documentos_archive` | existe |
 | compartido | `app/_components` | `core.documentos.confirmar_subida` | `core_documentos_confirmar_subida` | existe |
