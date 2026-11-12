@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 import { defineCapability } from "../../define";
 import { noEncontrado, prohibido } from "../../errores";
 import { uuidSchema } from "../esquemas";

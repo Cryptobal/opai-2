@@ -1,8 +1,8 @@
-import { filtroAprobacionesVisibles } from "../aprobaciones-reglas/comun";
 import { z } from "zod";
 
 import { tituloVencimientos, PERMISOS_CORE } from "@opai/domain";
 
+import { filtroAprobacionesVisibles } from "../aprobaciones-reglas/comun";
 import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
 import { documentosMatriz } from "../documentos/matriz";

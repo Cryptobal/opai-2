@@ -1,8 +1,8 @@
-import { filtroAprobacionesVisibles } from "../aprobaciones-reglas/comun";
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { filtroAprobacionesVisibles } from "../aprobaciones-reglas/comun";
 import { defineCapability } from "../../define";
 import { dondeCuenta, dondeInstalacion, dondePersona } from "../maestros/alcance";
 import { SIN_PLATAFORMA } from "../../agentes/plataforma";

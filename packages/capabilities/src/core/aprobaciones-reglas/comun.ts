@@ -38,9 +38,11 @@ export async function filtroAprobacionesVisibles(
   ctx: Contexto,
 ): Promise<{ reglaId: { in: string[] } } | null> {
   if (apruebaTodo(ctx)) return null;
+  // Una sola consulta cuando la empresa no tiene reglas (el caso común): nadie más ve nada.
+  const reglas = ctx.alcance || ctx.actor.tipo !== "user" ? [] : await ctx.db.reglaAprobacion.findMany({});
+  if (!reglas.length) return { reglaId: { in: [] } };
   const p = await personaAprobadora(ctx);
   if (!p) return { reglaId: { in: [] } };
-  const reglas = await ctx.db.reglaAprobacion.findMany({});
   return { reglaId: { in: reglas.map(reglaDeFila).filter((r) => esAprobador(r, p)).map((r) => r.id) } };
 }
 
@@ -50,6 +52,8 @@ export async function puedeResolverSolicitud(
   a: { reglaId: string | null; viaUserId: string },
 ): Promise<boolean> {
   const todo = apruebaTodo(ctx);
+  // Un rol con alcance por filas no resuelve por regla (igual que no ve la lista).
+  if (!todo && ctx.alcance) return false;
   const esSolicitante = ctx.actor.tipo === "user" && ctx.actor.id === a.viaUserId;
   if (todo || !a.reglaId) return puedeResolver({ apruebaTodo: todo, esAprobador: false, esSolicitante });
   const [fila, p] = await Promise.all([

@@ -1,5 +1,5 @@
 /**
- * Reglas de aprobación por empresa (CAR-252, ADR-106, decisión de Carlos del 12-nov-2026).
+ * Reglas de aprobación por empresa (CAR-252, ADR-107, decisión de Carlos del 12-nov-2026).
  * Versión 1: una regla es «acción + monto mínimo opcional + quién aprueba (rol o grupo)». Vale para
  * personas y agentes; basta una aprobación; dueños y administradores aprueban todo, siempre.
  */

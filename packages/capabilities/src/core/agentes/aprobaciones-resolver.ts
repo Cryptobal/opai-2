@@ -5,8 +5,28 @@ import { conflicto, prohibido } from "../../errores";
 import { executeCapability } from "../../execute";
 import { defineTrabajo } from "../../trabajos/registro";
 import { uuidSchema } from "../esquemas";
+import { reglaQueAplica } from "../../agentes/reglas";
+import { obtenerCapacidad } from "../../registry";
+import type { Contexto } from "../../types";
 import { puedeResolverSolicitud } from "../aprobaciones-reglas/comun";
 import { pendiente } from "./aprobaciones-pendiente";
+
+/**
+ * La regla se vuelve a evaluar al aprobar (CAR-252): si el monto o las reglas cambiaron desde que se
+ * pidió (por ejemplo, alguien editó el borrador), quien aprueba debe poder resolver la regla vigente.
+ */
+async function exigeReglaVigente(
+  ctx: Contexto,
+  a: { capability: string; input: unknown; reglaId: string | null; viaUserId: string },
+) {
+  const c = obtenerCapacidad(a.capability);
+  const vigente = c ? await reglaQueAplica(ctx, c, c.input.parse(a.input)) : null;
+  if (!vigente || vigente === a.reglaId) return;
+  if (!(await puedeResolverSolicitud(ctx, { reglaId: vigente, viaUserId: a.viaUserId })))
+    throw conflicto(
+      "El monto o las reglas cambiaron desde que se pidió: debe aprobarla quien aprueba la regla vigente.",
+    );
+}
 
 export const aprobacionesAprobar = defineCapability({
   id: "core.aprobaciones.aprobar",
@@ -24,6 +44,7 @@ export const aprobacionesAprobar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const { a } = await pendiente(ctx, input.id, true, "empresa");
     if (!(await puedeResolverSolicitud(ctx, a))) throw prohibido("No puedes resolver esta aprobación.");
+    await exigeReglaVigente(ctx, a);
     if (dryRun)
       return {
         estado: "pendiente",

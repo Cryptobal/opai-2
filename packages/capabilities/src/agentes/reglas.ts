@@ -5,7 +5,7 @@ import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "../types
 import { aprobacion, controlAgente } from "./control";
 
 /** La regla de la empresa que exige aprobar esta ejecución (CAR-252), o null. */
-async function reglaQueAplica(ctx: Contexto, c: Capacidad, entrada: unknown): Promise<string | null> {
+export async function reglaQueAplica(ctx: Contexto, c: Capacidad, entrada: unknown): Promise<string | null> {
   if (!c.aprobable || !ctx.conTenant) return null;
   const filas = await ctx.db.reglaAprobacion.findMany({
     where: { accion: c.aprobable.accion, activa: true },

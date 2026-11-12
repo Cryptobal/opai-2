@@ -1,4 +1,4 @@
--- Núcleo · CAR-252 (ADR-106): reglas de aprobación por empresa. Migración aditiva: una tabla nueva,
+-- Núcleo · CAR-252 (ADR-107): reglas de aprobación por empresa. Migración aditiva: una tabla nueva,
 -- sin datos, y una columna nullable en core.aprobaciones. Tabla con tenant_id: RLS + FORCE + política
 -- tenant_isolation (docs/2.0/REGLAS-codigo.md). El grupo aprobador se valida del MISMO tenant con una
 -- FK compuesta hacia grupos_usuarios (tenant_id, id); con aprobador_grupo_id null no se comprueba.
@@ -47,6 +47,10 @@ REVOKE DELETE ON "core"."reglas_aprobacion" FROM opai_app;
 -- La solicitud recuerda qué regla la pidió (null: la pidió la autonomía del agente, como hasta hoy).
 ALTER TABLE "core"."aprobaciones" ADD COLUMN "regla_id" UUID;
 CREATE INDEX "aprobaciones_tenant_id_regla_id_idx" ON "core"."aprobaciones"("tenant_id", "regla_id");
+-- La regla nombrada es de la MISMA empresa (FK compuesta; con regla_id null no se comprueba).
+ALTER TABLE "core"."aprobaciones" ADD CONSTRAINT "aprobaciones_tenant_id_regla_id_fkey"
+  FOREIGN KEY ("tenant_id", "regla_id") REFERENCES "core"."reglas_aprobacion"("tenant_id", "id")
+  ON DELETE RESTRICT ON UPDATE CASCADE;
 
 COMMIT;
 

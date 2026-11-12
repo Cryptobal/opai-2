@@ -1,4 +1,4 @@
-# Design Prompt · Configuración › Aprobaciones › Reglas (CAR-252, ADR-106)
+# Design Prompt · Configuración › Aprobaciones › Reglas (CAR-252, ADR-107)
 
 Diseña, con el Design System de OPAI 2.0 (nunca el de 1.0), la pestaña **Reglas** dentro de **Configuración › Aprobaciones**. Hoy esa sección tiene la cola de aprobaciones; se suma la pestaña. Mobile first (375 y 1024 px), también a 1280 px.
 
