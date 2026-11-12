@@ -1,3 +1,4 @@
+import { MODOS_JEFATURA, type ModoJefatura } from "@opai/domain";
 import { z } from "zod";
 
 import { conflicto, noEncontrado } from "../../errores";
@@ -14,6 +15,15 @@ export const cargoSchema = z.object({
     .describe("Si es true, los montos solo los ve quien tiene permiso sensible."),
   activo: z.boolean(),
   orden: z.number(),
+  jefaturaCargoId: z
+    .string()
+    .nullable()
+    .describe("Cargo al que reporta (su jefatura). null = no reporta a nadie."),
+  jefaturaVe: z
+    .enum(MODOS_JEFATURA)
+    .describe(
+      "A quiénes de este cargo ve cada jefe: asignadas (solo las suyas), equipo (todas) o instalaciones (las de sus instalaciones a cargo).",
+    ),
   personasVigentes: z.number(),
   puestosActivos: z.number(),
 });
@@ -26,7 +36,14 @@ type FilaCargo = {
   sueldoSensible?: boolean | null;
   activo?: boolean | null;
   orden?: number | null;
+  jefaturaCargoId?: string | null;
+  jefaturaVe?: string | null;
 };
+const esModo = (v: unknown): v is ModoJefatura => MODOS_JEFATURA.some((m) => m === v);
+/** Modo de jefatura guardado; ante un valor desconocido, el más restrictivo. */
+export const modoJefatura = (v: string | null | undefined): ModoJefatura =>
+  esModo(v) ? v : "asignadas";
+
 export const vista = (c: FilaCargo, conteos = { personasVigentes: 0, puestosActivos: 0 }) => ({
   id: c.id,
   nombre: c.nombre,
@@ -35,6 +52,8 @@ export const vista = (c: FilaCargo, conteos = { personasVigentes: 0, puestosActi
   sueldoSensible: c.sueldoSensible ?? false,
   activo: c.activo ?? true,
   orden: c.orden ?? 0,
+  jefaturaCargoId: c.jefaturaCargoId ?? null,
+  jefaturaVe: modoJefatura(c.jefaturaVe),
   ...conteos,
 });
 

@@ -93,4 +93,5 @@ export const VERBOS: Record<string, string> = {
   canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
   // Indicadores de gestión (CAR-305).
   medir: "Medir",
+  set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
 };
