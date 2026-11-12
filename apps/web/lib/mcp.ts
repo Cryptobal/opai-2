@@ -1,17 +1,18 @@
 import { createMcpHandler } from "mcp-handler";
 
 import { cabeceraDesafioMcp } from "@opai/auth";
-import { executeCapability, MANUALES } from "@opai/capabilities";
+import { executeCapability, MANUALES, slugDeApiKey } from "@opai/capabilities";
 import { ejecutarHerramienta, herramientasMcp } from "@opai/capabilities/mcp";
 
 import pkg from "../package.json" with { type: "json" };
 import { contextoDeApiKey } from "./api-key";
+import { contextoDeTokenOAuth } from "./oauth-mcp";
 import { ipDe, LIMITES, permitir } from "./rate-limit";
 import { asegurarRegistro } from "./registro";
 import { demasiadas, noAutenticado } from "./respuestas";
 
 /**
- * Servidor MCP de OPAI 2.0 (Streamable HTTP, sin estado). Autentica la API key, deriva las
+ * Servidor MCP de OPAI 2.0 (Streamable HTTP, sin estado). Autentica la API key o el token OAuth, deriva las
  * herramientas del registro de capacidades visibles para esa key y ejecuta cada llamada como
  * "agente vía usuario". Nunca registra la key ni la URL en logs.
  */
@@ -24,7 +25,8 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
   }
 
   asegurarRegistro();
-  const ctx = await contextoDeApiKey(key);
+  // Una API key lleva el slug de su empresa; lo demás es un token OAuth de una app (CAR-247).
+  const ctx = slugDeApiKey(key) ? await contextoDeApiKey(key) : await contextoDeTokenOAuth(key);
   if (ctx instanceof Response) {
     // Token o key inválida: el cliente OAuth vuelve a descubrir cómo entrar (RFC 9728 §5.1).
     if (ctx.status === 401) ctx.headers.set("WWW-Authenticate", cabeceraDesafioMcp());

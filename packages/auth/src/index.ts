@@ -49,3 +49,4 @@ export {
   type PasoOAuth,
   urlReanudarOAuth,
 } from "./oauth-flujo";
+export { type TokenOAuth, tokenOAuthVigente } from "./oauth-token";

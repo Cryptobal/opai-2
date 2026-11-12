@@ -5,7 +5,8 @@ export async function nombres(ctx: Contexto, usuarios: string[], keys: string[])
   const [m, k] = await Promise.all([
     ctx.db.membership.findMany({ where: { userId: { in: usuarios } }, include: { user: true } }),
     ctx.db.apiKey.findMany({
-      where: { id: { in: keys.filter((id) => !id.startsWith("agente-interno:")) } },
+      // Solo ids de key: el agente interno y las apps OAuth (CAR-247) no tienen key.
+      where: { id: { in: keys.filter((id) => !id.includes(":")) } },
       select: { id: true, nombre: true, principalTipo: true },
     }),
   ]);
@@ -13,6 +14,7 @@ export async function nombres(ctx: Contexto, usuarios: string[], keys: string[])
     ...keys
       .filter((id) => id.startsWith("agente-interno:"))
       .map((id) => [id, "Agente interno"] as const),
+    ...keys.filter((id) => id.startsWith("oauth:")).map((id) => [id, "App conectada"] as const),
     ...m.map((x) => [x.userId, x.user.name] as const),
     // Un agente de servicio se distingue en la auditoría: "agente <nombre> (servicio)" (t457u).
     ...k.map(

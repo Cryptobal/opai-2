@@ -123,6 +123,42 @@ test.describe("@preview OAuth del MCP", () => {
     const cuerpo = (await token.json()) as { access_token?: string; refresh_token?: string };
     expect(cuerpo.access_token).toBeTruthy();
     expect(cuerpo.refresh_token).toBeTruthy();
+
+    // Con el token, la app usa el MCP como la persona; sin token válido, se le indica cómo entrar.
+    const mcp = (bearer: string, cuerpoRpc: object = { method: "tools/list", params: {} }) =>
+      request.post("/api/mcp", {
+        headers: {
+          ...cabeceras(),
+          authorization: `Bearer ${bearer}`,
+          accept: "application/json, text/event-stream",
+        },
+        data: { jsonrpc: "2.0", id: 1, ...cuerpoRpc },
+      });
+    const lista = await mcp(cuerpo.access_token ?? "");
+    expect(lista.status()).toBe(200);
+    expect(await lista.text()).toContain("core_me");
+    const yo = await mcp(cuerpo.access_token ?? "", {
+      method: "tools/call",
+      params: { name: "core_me", arguments: {} },
+    });
+    const textoYo = await yo.text();
+    expect(textoYo).toContain("oauth:");
+    expect(textoYo).not.toContain('"isError":true');
+    const malo = await mcp("token-que-no-existe");
+    expect(malo.status()).toBe(401);
+    expect(malo.headers()["www-authenticate"]).toContain("resource_metadata=");
+
+    // El refresh rota: la app sigue conectada sin volver a pedir la contraseña.
+    const renovado = await request.post("/api/auth/oauth2/token", {
+      headers: cabeceras(),
+      form: {
+        grant_type: "refresh_token",
+        refresh_token: cuerpo.refresh_token ?? "",
+        client_id: clientId,
+        resource,
+      },
+    });
+    expect(renovado.status(), await renovado.text()).toBe(200);
     expect(errores).toEqual([]);
   });
 });
