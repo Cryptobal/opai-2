@@ -1899,3 +1899,7 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
 
 **Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
+
+### Adenda a ADR-095 · «Ninguna, sigo» significa seguir (Carlos, 11-nov-2026, 22:56)
+
+Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con el trabajo en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una revisión a sí misma cada pocos minutos y avanza mientras tanto con lo que no dependa de eso. Los avisos automáticos de GitHub no se responden uno por uno. Solo se detiene por una decisión real o porque no queda trabajo posible, y dice por qué. Regla escrita en `AGENTS.md` («Decisiones de Carlos»).
