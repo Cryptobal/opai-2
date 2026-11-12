@@ -1,4 +1,4 @@
-import { type Browser, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 // Identidades de prueba para los portales Guardia y Terreno en la auditoría (CAR-334). Las crea el
 // dueño de `qa-e2e` desde el ERP de la vista previa (su rama de Neon, que se descarta con el PR): un
@@ -69,12 +69,4 @@ export async function entrarTrabajador(erp: Page, trabajador: Page): Promise<str
   return final.startsWith("/trabajador/login") || final === "/trabajador/cambiar-pin"
     ? `no entró con RUT y PIN (${final})`
     : null;
-}
-
-export async function nuevaPagina(
-  browser: Browser,
-  opciones: Parameters<Browser["newContext"]>[0],
-) {
-  const ctx = await browser.newContext(opciones);
-  return { ctx, page: await ctx.newPage() };
 }

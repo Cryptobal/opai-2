@@ -18,7 +18,7 @@ concurrency:
 jobs:
   auditoria-diseno:
     name: auditoria-diseno
-    if: contains(github.event.pull_request.labels.*.name, 'auditoria-diseno')
+    if: (github.event.action == 'labeled' && github.event.label.name == 'auditoria-diseno') || (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'auditoria-diseno'))
     runs-on: ubuntu-latest
     timeout-minutes: 100
     permissions:
@@ -86,6 +86,12 @@ jobs:
           # Sin la base de la vista previa migrada, las pruebas correrían contra un esquema equivocado.
           if [ "$estado" = "fallo" ]; then
             echo "::error::El check rama-neon falló: la vista previa no tiene la base de este PR lista."
+            exit 1
+          fi
+          # La auditoría escribe datos de prueba (PIN y emparejamiento en qa-e2e): sin la rama de Neon del
+          # PR confirmada no sigue, para no escribir en una base compartida.
+          if [ "$estado" = "sin" ]; then
+            echo "::error::No apareció el check rama-neon: la auditoría solo corre sobre la rama de Neon del PR."
             exit 1
           fi
           if [ "$estado" = "corriendo" ]; then
