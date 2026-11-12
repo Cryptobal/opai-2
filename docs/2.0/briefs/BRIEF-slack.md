@@ -23,7 +23,7 @@ Manifiestos en [`packages/integrations/src/slack/manifiesto/`](../../../packages
 | Fase | Tarea | Alcance | Migración |
 |---|---|---|---|
 | **F0** | CAR-290 | ADR-093, este plan y los manifiestos con su prueba. Solo documentación y configuración. | No |
-| **F1** | CAR-291 | OAuth v2 «Conectar con Slack» (solo owner o admin) en Configuración › Integraciones; token cifrado con `team_id` y nombre del espacio; «Desconectar» con `auth.revoke`; ruta `eventos` mínima (firma, `url_verification`, `app_uninstalled`, `tokens_revoked`) para poder registrar la app; un espacio ligado a un solo tenant; configuración por tenant; auditoría; capacidades y MCP para leer estado y configuración y cambiar la configuración. | Sí (aditiva) |
+| **F1** | CAR-291 (PR #512) | OAuth v2 «Conectar con Slack» (solo owner o admin) en Configuración › Integraciones; token cifrado con `team_id` y nombre del espacio; «Desconectar» con `auth.revoke`; ruta `eventos` mínima (firma, `url_verification`, `app_uninstalled`, `tokens_revoked`) para poder registrar la app; un espacio ligado a un solo tenant; configuración por tenant; auditoría; capacidades y MCP para leer estado y configuración y cambiar la configuración. | Sí (aditiva) |
 | **F2** | CAR-292 | Vínculo usuario OPAI ↔ usuario Slack con `users.lookupByEmail` (al conectar, al dar de alta un usuario y con un trabajo diario para los pendientes); vista de vinculados y sin vincular; mensajes directos para avisos personales. Solo usuarios internos y miembros completos del mismo `team_id` (sin invitados, externos ni desactivados). | Sí (aditiva) |
 | **F3** | CAR-293 | Consumidores de eventos de terreno → Slack: solo anomalías, un hilo por instalación y día, botón «Tomar», resumen opcional editado con `chat.update`, pánico con escalamiento. Envío asíncrono con reintentos y límites de Slack. | Sí (aditiva) |
 | **F4** | CAR-294 | Endpoint de interactividad con firma verificada y antirrepetición; «Tomar», «Responder», «Cerrar» y «Pedir refuerzo» como capacidades del usuario vinculado; el mensaje se actualiza; efímero para quien no está vinculado o no tiene permiso. | Posible |
@@ -43,7 +43,7 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 | Incidentes y mensajes de guardias | Apagado |
 | Pánico al canal | Encendido |
 | Pánico: mensaje directo al supervisor zonal | Apagado |
-| Pánico: escalar a un grupo de usuarios o a personas (se elige en cada tenant) | Apagado; si se enciende, **5 min** |
+| Pánico: escalar a un grupo de usuarios de OPAI (lo elige cada empresa) | Apagado; si se enciende, **5 min** |
 | Resumen por turno y zona | Apagado |
 | Canales | Uno para todo; opcionalmente uno por zona o por tipo. Nunca uno por instalación. |
 
@@ -63,4 +63,4 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 2. **Espacio Slack de pruebas:** sí. Se registran las apps cuando F1 esté desplegado, porque Slack valida la URL de eventos al guardar el manifiesto. Hasta entonces, mocks.
 3. **Canales de supervisión:** públicos. Sin `groups:*`.
 4. **Valores por defecto:** aprobados los de la tabla.
-5. **Escalamiento del pánico:** a un grupo de usuarios (CAR-251) o a personas, configurable en cada tenant.
+5. **Escalamiento del pánico:** a **un grupo de usuarios de OPAI** (CAR-251) que elige cada empresa (precisado a las 17:08).

@@ -59,6 +59,11 @@ export const integracionesConfigurar = defineCapability({
     const def = await definicionVisible(ctx, input.proveedor);
     if (!def) throw noEncontrado(`La integración "${input.proveedor}"`);
     if (!def.disponible) throw reglaDeNegocio(`${def.nombre} estará disponible próximamente.`);
+    // Slack se conecta por OAuth y se configura con core.slack.* (ADR-093): aquí no.
+    if (def.id === "slack")
+      throw reglaDeNegocio(
+        "Slack se conecta y configura en Configuración › Integraciones › Slack.",
+      );
     if (!def.modalidades.includes(input.modalidad)) {
       throw reglaDeNegocio(`${def.nombre} no admite la modalidad "${input.modalidad}".`);
     }

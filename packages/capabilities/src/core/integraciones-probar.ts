@@ -28,6 +28,9 @@ export const integracionesProbar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const def = await definicionVisible(ctx, input.proveedor);
     if (!def?.disponible) throw noEncontrado(`La integración "${input.proveedor}"`);
+    // Slack no tiene prueba genérica: su estado lo da la conexión (core.slack.estado, ADR-093).
+    if (def.id === "slack")
+      throw reglaDeNegocio("El estado de Slack se ve en Configuración › Integraciones › Slack.");
     if (dryRun)
       return { ok: true, mensaje: "Vista previa: no se llamó al proveedor.", latenciaMs: 0 };
     const inicio = Date.now();

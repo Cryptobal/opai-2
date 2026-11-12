@@ -365,6 +365,11 @@ export const AJUSTES: Record<string, Ajuste> = {
     valores: (ctx) => ({ sentido: "recibido", origen: "buzon", asociacion: "dominio", cuenta_id: id(ctx, "core.cuentas"), contacto_id: null, negocio_id: null }),
   },
   "core.buzones_correo": { fijas: ["token"], valores: (ctx) => ({ token: `t${ctx.tenant.replace(/-/g, "")}` }) },
+  // Slack (CAR-291): team_id con formato de Slack (CHECK) y único global; se deriva del id de la empresa.
+  "core.slack_instalaciones": {
+    fijas: ["team_id"],
+    valores: (ctx) => ({ team_id: `T${ctx.tenant.replace(/-/g, "").toUpperCase()}` }),
+  },
   // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
   "core.actividades": { valores: () => ({ tipo: "nota" }) },
   "core.actividad_vinculos": {
