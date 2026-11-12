@@ -36,7 +36,7 @@ function cargosBajo(cargos: readonly CargoJefatura[], cargoId: string): Set<stri
 }
 
 /** Instalaciones a cargo (ADR-022) de cada usuario, por su membresía en la empresa. */
-async function instalacionesPorUsuario(
+export async function instalacionesPorUsuario(
   ctx: Contexto,
   usuarios: readonly string[],
 ): Promise<Map<string, string[]>> {
