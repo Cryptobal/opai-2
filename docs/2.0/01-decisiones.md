@@ -2005,3 +2005,14 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 **Consecuencias.** `AGENTS.md` («Prohibido», «Integración a `main`» y la regla de la etiqueta) y `OPERACION-agentes.md` A2.3 quedan al día. Los PR #527, #528 y #537 los migra la sesión que los construyó, sin esperar al bot.
 
+
+## ADR-105 · Hilo es la fuente única de diseño, con reglas verificables (CAR-334, 12-nov-2026)
+
+**Decidió:** Carlos (encargo a la «Sesión Diseño», 12-nov-2026, 16:20, hora de Chile: «La referencia única es el "OPAI 2.0 Design System · Hilo" de Claude Design. V1, V2 y el "OPAI Design System" antiguo quedan obsoletos») · **Registra:** Claude («Sesión Diseño»). **Extiende** ADR-102 (Hilo para todo diseño nuevo) a la revisión de lo ya construido; **no cambia** ADR-090 (el interruptor de marco y las etapas H1–H7 siguen como están).
+
+**Decisión.**
+1. La única referencia de diseño de OPAI 2.0 es el sistema «OPAI 2.0 Design System · Hilo» de Claude Design, con su copia en el repo (`docs/2.0/design/export-base-hilo/`, `packages/ds`). V1, V2 y el «OPAI Design System» antiguo quedan obsoletos: no se usan para diseñar ni para juzgar una pantalla.
+2. Hilo se aplica como reglas verificables (`docs/2.0/DISENO-hilo.md`): los tokens en `packages/ds/src/hilo/tokens-hilo.ts` con una prueba que los compara con `tokens.css`, y las reglas de uso (un primario por vista, ubicación de acciones, estados, formatos chilenos, textos) como trinquete en `pnpm test` y como mediciones de la auditoría visual.
+3. La «Sesión Diseño» es dueña de Diseño y experiencia: audita los cuatro portales, corrige lo transversal (DS, marco, navegación, tipografía, botones, textos) y asigna lo de cada módulo a su sesión. No cambia decisiones de producto ni flujos de negocio; si Hilo y una pantalla aprobada se contradicen, pregunta a Carlos.
+
+**Consecuencias.** Un PR que cambie la piel en `tokens.css` sin cambiar `tokens-hilo.ts` (o al revés) falla. Un archivo no puede sumar formatos propios, tamaños fuera de escala, botones genéricos ni estilos en línea respecto de `apps/web/test/reglas-diseno/base.json`. El marco clásico sigue hasta H7; la auditoría se hace en el marco Hilo.
