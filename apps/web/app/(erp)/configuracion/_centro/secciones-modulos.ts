@@ -13,7 +13,6 @@ import { SeccionPlanCuentas } from "@/app/(erp)/configuracion/_finanzas/seccion-
 import { SeccionCatalogoCpq } from "@/app/(erp)/configuracion/_cpq/seccion-catalogo";
 import { SeccionMarcaPlantillasCpq } from "@/app/(erp)/configuracion/_cpq/seccion-marca-plantillas";
 import { SeccionSeguimiento } from "@/app/(erp)/configuracion/_comercial/seccion-seguimiento";
-import { SeccionImportar10 } from "@/app/(erp)/configuracion/_comercial/seccion-importar-1-0";
 
 /**
  * Pestaña que un módulo aporta a su página de Configuración → Módulos → <módulo> (ADR-018): el
@@ -34,12 +33,6 @@ export type SeccionModulo = {
  */
 export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
   comercial: [
-    {
-      id: "importar-1-0",
-      etiqueta: "Importar 1.0",
-      permiso: "comercial:config.manage",
-      Contenido: SeccionImportar10,
-    },
     {
       id: "embudo",
       etiqueta: "Embudo",
