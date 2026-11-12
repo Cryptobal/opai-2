@@ -54,7 +54,10 @@ export function AtencionTenant({ problemas, keys: keysAlerta, faltaRut, pruebas 
                 <span className="t-mono">{p.tipo}</span>
                 {p.ultimoError ? ` · ${p.ultimoError}` : ""}
               </span>
-              <EnlaceBoton href={`/platform/trabajos?ver=${p.tenantId}:${p.id}`} variante="ghost">
+              <EnlaceBoton
+                href={`/platform/trabajos?empresa=${p.tenantId}&estado=problemas&ver=${p.tenantId}:${p.id}`}
+                variante="ghost"
+              >
                 Abrir
               </EnlaceBoton>
             </li>

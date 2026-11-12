@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Input, SeccionTarjeta } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { type Cambio, cambiosPendientes, FUERA_DE_LIMITES } from "./cambios";
 import { ModelosIaCard } from "./modelos-ia";
 import { TablaPrecios } from "./tabla-precios";
 import { type Ajuste, aMicro, aUsd, esModelosIa, type ModelosIa, type Precio } from "./tipos";
 
-type Props = { precios: Precio[]; ajustes: Ajuste[] };
+const ConfirmarAjustes = lazy(() => import("./confirmar-ajustes"));
 
-/** Ajustes de plataforma (50): precios, modelos de IA por clase y límites; un solo "Guardar". */
-export function AjustesPlataforma({ precios, ajustes }: Props) {
+type Props = { precios: Precio[]; ajustes: Ajuste[]; empresas: number };
+
+/**
+ * Ajustes de plataforma (50): precios, modelos de IA por clase y límites; un solo «Guardar». Todo o
+ * nada (CAR-323, §2.7): primero se validan todos los cambios en vista previa y se confirma cuántas
+ * empresas afectan; si alguno falla, no se escribe ninguno.
+ */
+export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("platform");
   const [txtPrecios, setTxtPrecios] = useState(() =>
     Object.fromEntries(precios.map((p) => [p.recurso, aUsd(p.costoUnitarioMicro)])),
@@ -22,7 +29,10 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
   const [modelos, setModelos] = useState<ModelosIa | null>(
     esModelosIa(modelosIni) ? modelosIni : null,
   );
-  const numericos = ajustes.filter((a) => typeof a.valor === "number");
+  const numericos = ajustes.filter(
+    (a) => typeof a.valor === "number" && !FUERA_DE_LIMITES.has(a.clave),
+  );
+  const [porConfirmar, setPorConfirmar] = useState<Cambio[] | null>(null);
   const [nums, setNums] = useState(() =>
     Object.fromEntries(numericos.map((a) => [a.clave, String(a.valor)])),
   );
@@ -31,40 +41,23 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
   );
   const numMalo = numericos.some((a) => !Number.isInteger(Number(nums[a.clave])));
 
-  async function guardar() {
-    let cambios = 0;
-    for (const p of precios) {
-      const micro = aMicro(txtPrecios[p.recurso] ?? "");
-      if (micro === null || micro === p.costoUnitarioMicro) continue;
-      if (
-        !(await ejecutar("platform.precios.set", {
-          recurso: p.recurso,
-          unidad: p.unidad,
-          costoUnitarioMicro: micro,
-        }))
-      )
-        return;
-      cambios++;
-    }
-    if (modelos && JSON.stringify(modelos) !== JSON.stringify(modelosIni)) {
-      if (
-        !(await ejecutar("platform.ajustes.set", {
-          modulo: "core",
-          clave: "ia_modelos",
-          valor: modelos,
-        }))
-      )
-        return;
-      cambios++;
-    }
-    for (const a of numericos) {
-      const n = Number(nums[a.clave]);
-      if (n === a.valor) continue;
-      if (!(await ejecutar("platform.ajustes.set", { modulo: a.modulo, clave: a.clave, valor: n })))
-        return;
-      cambios++;
-    }
-    avisar.exito(cambios ? "Ajustes guardados" : "Sin cambios");
+  // Ids literales (gate de paridad): un cambio es un precio o un ajuste de plataforma.
+  const correr = (c: Cambio, dryRun = false) =>
+    c.id === "platform.precios.set"
+      ? ejecutar("platform.precios.set", c.input, dryRun)
+      : ejecutar("platform.ajustes.set", c.input, dryRun);
+
+  async function revisar() {
+    const cambios = cambiosPendientes(precios, txtPrecios, modelos, modelosIni, numericos, nums);
+    if (!cambios.length) return avisar.exito("Sin cambios");
+    for (const c of cambios) if ((await correr(c, true)) === null) return;
+    setPorConfirmar(cambios);
+  }
+
+  async function guardar(cambios: Cambio[]) {
+    setPorConfirmar(null);
+    for (const c of cambios) if ((await correr(c)) === null) return;
+    avisar.exito("Ajustes guardados");
   }
 
   return (
@@ -73,7 +66,7 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
         <span className="t-caption">Afecta a todas las empresas</span>
         <Button
           disabled={pendiente || invalidos.size > 0 || numMalo}
-          onClick={() => void guardar()}
+          onClick={() => void revisar()}
         >
           {pendiente ? "Guardando…" : "Guardar"}
         </Button>
@@ -91,6 +84,7 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
         </div>
         <SeccionTarjeta titulo="Límites">
           <div className="flex flex-col gap-4">
+            <p className="t-caption">El ingreso mínimo se edita en Valores legales.</p>
             {numericos.map((a) => (
               <Campo
                 key={a.clave}
@@ -112,6 +106,17 @@ export function AjustesPlataforma({ precios, ajustes }: Props) {
           </div>
         </SeccionTarjeta>
       </div>
+      {porConfirmar ? (
+        <Suspense fallback={null}>
+          <ConfirmarAjustes
+            cambios={porConfirmar.length}
+            empresas={empresas}
+            pendiente={pendiente}
+            onCancelar={() => setPorConfirmar(null)}
+            onGuardar={() => void guardar(porConfirmar)}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

@@ -112,6 +112,7 @@
     "/(supervisor)/supervisor/rendiciones/devueltas": 165,
     "/(supervisor)/supervisor/rendiciones/enviadas": 165,
     "/(supervisor)/supervisor/rendiciones/pagadas": 165,
-    "/(supervisor)/supervisor/rendiciones/rechazadas": 165
+    "/(supervisor)/supervisor/rendiciones/rechazadas": 165,
+    "/(platform)/platform/ajustes": 170
   }
 }

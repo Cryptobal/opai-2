@@ -1,4 +1,4 @@
-import { Empty, Table, Td, Th, Tr } from "@opai/ds";
+import { Empty, ErrorState, Forbidden, Table, Td, Th, Tr } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
@@ -28,11 +28,19 @@ export default function Consumos() {
         };
       }}
     >
-      {({ filas }) => (
+      {({ state, filas }) => (
         <div className="flex flex-col gap-3">
           <h2 className="t-title text-fg md:hidden">Consumos</h2>
           <p className="t-caption">Últimos 30 días, con los precios vigentes de Ajustes.</p>
-          {filas.length ? (
+          {/* Si la carga falla se dice, nunca «Sin empresas» (hoja §2.6). */}
+          {state === "forbidden" ? (
+            <Forbidden />
+          ) : state === "error" ? (
+            <ErrorState
+              titulo="No pudimos cargar los consumos"
+              descripcion="Intenta de nuevo en unos minutos."
+            />
+          ) : filas.length ? (
             <Table>
               <thead>
                 <tr>
