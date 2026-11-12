@@ -71,18 +71,18 @@ export function EditorImportar10({ conOpai1 }: { conOpai1: boolean }) {
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       {conOpai1 ? (
         <div className="flex flex-col gap-2 rounded-md border border-border p-3">
-        <p className="text-sm text-fg">
-          <strong>Traer directo desde OPAI 1.</strong> Usa la llave de solo lectura guardada en Configuración ›
-          Integraciones › OPAI 1. Trae cuentas, contactos, instalaciones y negocios; no toca Finanzas.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" disabled={pendiente} onClick={() => void correr(true, true)}>
-            Simular desde OPAI 1
-          </Button>
-          <Button disabled={pendiente || !vista || !vista.dryRun || !directa} onClick={() => void correr(false, true)}>
-            Importar desde OPAI 1
-          </Button>
-        </div>
+          <p className="text-sm text-fg">
+            <strong>Traer directo desde OPAI 1.</strong> Usa la llave de solo lectura guardada en Configuración ›
+            Integraciones › OPAI 1. Trae cuentas, contactos, instalaciones y negocios; no toca Finanzas.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" disabled={pendiente} onClick={() => void correr(true, true)}>
+              Simular desde OPAI 1
+            </Button>
+            <Button disabled={pendiente || !vista || !vista.dryRun || !directa} onClick={() => void correr(false, true)}>
+              Importar desde OPAI 1
+            </Button>
+          </div>
         </div>
       ) : null}
       <Textarea

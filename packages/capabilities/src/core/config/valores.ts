@@ -3,6 +3,7 @@ import type { TenantTx } from "@opai/db";
 
 import type { Contexto } from "../../types";
 import { listarAjustes } from "./catalogo";
+import { AJUSTES_OCULTOS_A_EMPRESAS } from "./integraciones-habilitadas";
 import { type CampoAjuste, valorPorDefecto } from "./registro";
 
 export type Origen = "defecto" | "plataforma" | "tenant" | "usuario";
@@ -12,7 +13,9 @@ const k = (modulo: string, clave: string) => `${modulo}.${clave}`;
 
 /** Campos que el actor puede ver: todos con core:config.read; si no, solo los de su usuario. */
 export function camposVisibles(ctx: Contexto, modulo?: string): CampoAjuste[] {
-  const todos = listarAjustes().filter((c) => !modulo || c.modulo === modulo);
+  const todos = listarAjustes().filter(
+    (c) => (!modulo || c.modulo === modulo) && !AJUSTES_OCULTOS_A_EMPRESAS.has(k(c.modulo, c.clave)),
+  );
   return ctx.autorizar(PERMISOS_CORE.configRead)
     ? todos
     : todos.filter((c) => c.meta.ambito === "usuario");

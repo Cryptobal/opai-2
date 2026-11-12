@@ -17,3 +17,9 @@ export const ajustesIntegracionesHabilitadas = {
       control: "json",
     }),
 };
+
+/**
+ * Ajustes de plataforma que una empresa nunca ve (ni por pantalla, API o MCP): su valor nombra a otras empresas.
+ * Se siguen leyendo por dentro con `ajuste()`.
+ */
+export const AJUSTES_OCULTOS_A_EMPRESAS: ReadonlySet<string> = new Set(["core.integraciones_habilitadas"]);

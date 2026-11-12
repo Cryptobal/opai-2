@@ -41,6 +41,26 @@ describe("integraciones restringidas (CAR-321)", () => {
     await expect(leerExportDeOpai1(ctx, async () => ({}) as never)).rejects.toThrow(/no está habilitado/);
   });
 
+  it("configurar y probar tampoco existen para una empresa no habilitada", async () => {
+    const { ctx } = contextoDePrueba();
+    const conf = await executeCapability(ctx, "core.integraciones.configurar", { proveedor: "opai1", modalidad: "propia" });
+    expect(conf).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    const probar = await executeCapability(ctx, "core.integraciones.probar", { proveedor: "opai1" });
+    expect(probar).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  it("ninguna empresa ve en sus ajustes qué otras están habilitadas", async () => {
+    const { ctx } = contextoDePrueba();
+    const otra = "00000000-0000-7000-8000-000000000999";
+    await habilitar(ctx, [ctx.tenantId, otra]);
+    const get = await executeCapability(ctx, "core.config.get", { modulo: "core" });
+    expect(get.ok).toBe(true);
+    expect(JSON.stringify(get)).not.toContain(otra);
+    expect(JSON.stringify(get)).not.toContain("integraciones_habilitadas");
+    const set = await executeCapability(ctx, "core.config.set", { modulo: "core", clave: "integraciones_habilitadas", valor: {} });
+    expect(set.ok).toBe(false);
+  });
+
   it("habilitar otra empresa no la habilita para esta", async () => {
     const { ctx } = contextoDePrueba();
     await habilitar(ctx, ["00000000-0000-7000-8000-000000000999"]);
