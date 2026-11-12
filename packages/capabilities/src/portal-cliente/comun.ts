@@ -43,7 +43,7 @@ export const configSchema = z.object({
 export async function cuentaDe(ctx: Contexto, id: string) {
   const c = await ctx.db.cuenta.findFirst({
     where: { id },
-    select: { id: true, nombre: true, archivadaEn: true },
+    select: { id: true, nombre: true, archivadaEn: true, estado: true },
   });
   if (!c) throw noEncontrado("La cuenta");
   return c;
