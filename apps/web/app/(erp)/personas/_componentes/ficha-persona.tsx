@@ -15,7 +15,7 @@ import { accionesPersona } from "./acciones-persona";
 export type TabPersona =
   "resumen" | "laboral" | "sueldo" | "documentos" | "actividad" | "anexos" | "privacidad";
 
-/** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · RUT"; tabs por ruta, en el orden del export
+/** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · instalación · RUT"; tabs por ruta, en el orden del export
  * ficha-persona v1 (CAR-124): Resumen · Laboral · Sueldo · Anexos · Documentos · Privacidad · Actividad. */
 export function FichaPersona(x: {
   aprobaciones?: PanelSueldo["aprobaciones"];
@@ -56,7 +56,7 @@ export function FichaPersona(x: {
               ),
               subtitulo: (
                 <>
-                  {p.vinculoVigente?.cargo ?? "Sin vínculo vigente"} ·{" "}
+                  {[p.vinculoVigente?.cargo ?? "Sin vínculo vigente", (p.vinculoVigente as { instalacion?: string | null } | null)?.instalacion].filter(Boolean).join(" · ")} ·{" "}
                   <span className="t-mono">{rut(p.rut)}</span>
                 </>
               ),

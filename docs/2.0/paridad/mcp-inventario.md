@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 713 pares pantalla→capacidad · 639 con herramienta · 74 excepciones justificadas · 0 faltantes.
+**Resumen:** 714 pares pantalla→capacidad · 640 con herramienta · 74 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -165,6 +165,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
+| compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
