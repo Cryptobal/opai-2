@@ -259,6 +259,9 @@
   --ds-font-sans:
     "Geist Variable", "Geist", ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
   --ds-font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* `--font-*` se resuelven en :root; aquí se vuelven a resolver para que `t-mono` y el resto las sigan */
+  --font-sans: var(--ds-font-sans);
+  --font-mono: var(--ds-font-mono);
   font-family: var(--ds-font-sans);
 }
 

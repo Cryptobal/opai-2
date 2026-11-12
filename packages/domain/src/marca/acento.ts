@@ -18,7 +18,7 @@ export type Modo = "dia" | "noche";
 
 /**
  * Fondos sobre los que se lee el acento, de más claro a más oscuro: fondo, menú lateral y relleno de la
- * piel `[data-marco="nuevo"]`. `packages/ds/src/tokens.test.ts` comprueba que sigan iguales a tokens.css.
+ * piel `[data-marco="nuevo"]` (el menú lateral, #fafafa de día, tendrá su token en D2). `acento.test.ts` comprueba que fondo y relleno sigan iguales a tokens.css.
  */
 export const FONDOS_ACENTO: Record<Modo, readonly string[]> = {
   dia: ["#ffffff", "#fafafa", "#f2f2f2"],
@@ -89,9 +89,21 @@ function deHsl([h, s, l]: Rgb): Rgb {
   return [canal(h + 1 / 3) * 255, canal(h) * 255, canal(h - 1 / 3) * 255];
 }
 
+function mezclar(color: string, fondo: string, peso: number): string {
+  const [ar, ag, ab] = aRgb(color);
+  const [br, bg, bb] = aRgb(fondo);
+  const m = (x: number, y: number): number => x * peso + y * (1 - peso);
+  return aHex([m(ar, br), m(ag, bg), m(ab, bb)]);
+}
+
+const suave = (acento: string, modo: Modo): string =>
+  mezclar(acento, FONDOS_ACENTO[modo][0] ?? TEXTO[modo], MEZCLA_SUAVE[modo]);
+
+/** Se lee sobre los fondos, con su texto encima y sobre su propio fondo suave (etiquetas de acento). */
 const cumple = (color: string, modo: Modo): boolean =>
   FONDOS_ACENTO[modo].every((fondo) => contraste(color, fondo) >= MINIMO) &&
-  contraste(color, TEXTO[modo]) >= MINIMO;
+  contraste(color, TEXTO[modo]) >= MINIMO &&
+  contraste(color, suave(color, modo)) >= MINIMO;
 
 function ajustar(hex: string, modo: Modo): string {
   if (cumple(hex, modo)) return hex;
@@ -104,20 +116,9 @@ function ajustar(hex: string, modo: Modo): string {
   return modo === "dia" ? "#000000" : "#ffffff";
 }
 
-function mezclar(color: string, fondo: string, peso: number): string {
-  const [ar, ag, ab] = aRgb(color);
-  const [br, bg, bb] = aRgb(fondo);
-  const m = (x: number, y: number): number => x * peso + y * (1 - peso);
-  return aHex([m(ar, br), m(ag, bg), m(ab, bb)]);
-}
-
 function tono(hex: string, modo: Modo): TonoAcento {
   const acento = ajustar(hex, modo);
-  return {
-    acento,
-    texto: TEXTO[modo],
-    suave: mezclar(acento, FONDOS_ACENTO[modo][0] ?? TEXTO[modo], MEZCLA_SUAVE[modo]),
-  };
+  return { acento, texto: TEXTO[modo], suave: suave(acento, modo) };
 }
 
 /** Tonos de día y de noche del color de la empresa, o null si no hay un hexadecimal válido. */

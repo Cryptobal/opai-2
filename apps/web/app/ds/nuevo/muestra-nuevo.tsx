@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 
 import { Button, Campo, Input } from "@opai/ds";
 import { acentoDeMarca, type Modo } from "@opai/domain/marca-acento";
@@ -41,11 +41,17 @@ const Titulo = ({ children }: { children: string }) => (
 export function MuestraNuevo() {
   const [color, setColor] = useState<string>(EJEMPLOS[0][1]);
   const [modo, setModo] = useState<Modo>("dia");
-  const cambiarModo = () => {
-    const siguiente: Modo = modo === "dia" ? "noche" : "dia";
-    document.documentElement.dataset["theme"] = siguiente === "dia" ? "light" : "dark";
-    setModo(siguiente);
-  };
+  // La muestra fija el tema de <html> según su modo y lo devuelve como estaba al salir.
+  useEffect(() => {
+    const raiz = document.documentElement;
+    const antes = raiz.dataset["theme"];
+    raiz.dataset["theme"] = modo === "dia" ? "light" : "dark";
+    return () => {
+      if (antes === undefined) delete raiz.dataset["theme"];
+      else raiz.dataset["theme"] = antes;
+    };
+  }, [modo]);
+  const cambiarModo = () => setModo(modo === "dia" ? "noche" : "dia");
   const tonos = acentoDeMarca(color);
   return (
     <div

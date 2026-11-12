@@ -15,6 +15,7 @@ const MUESTRAS = [
   "#7f7f7f",
   "#1e3a8a",
   "#ff6a00",
+  "#ff2244",
 ];
 
 describe("acentoDeMarca", () => {
@@ -33,6 +34,7 @@ describe("acentoDeMarca", () => {
         for (const fondo of FONDOS_ACENTO[modo])
           expect(contraste(t.acento, fondo)).toBeGreaterThanOrEqual(4.5);
         expect(contraste(t.acento, t.texto)).toBeGreaterThanOrEqual(4.5);
+        expect(contraste(t.acento, t.suave)).toBeGreaterThanOrEqual(4.5);
         expect(contraste(t.suave, FONDOS_ACENTO[modo][0] ?? "")).toBeLessThan(1.3);
         expect(t.acento).toMatch(/^#[0-9a-f]{6}$/);
       }
@@ -57,6 +59,23 @@ describe("acentoDeMarca", () => {
     expect(a.dia.texto).toBe("#ffffff");
     expect(a.noche.texto).toBe("#000000");
   });
+});
+
+it("cualquier color cumple los cuatro contrastes de día y de noche", () => {
+  for (let n = 0; n < 4096; n++) {
+    const hex = `#${[n >> 8, (n >> 4) & 15, n & 15].map((c) => (c * 17).toString(16).padStart(2, "0")).join("")}`;
+    const a = acentoDeMarca(hex);
+    for (const modo of ["dia", "noche"] as const) {
+      const t = a?.[modo];
+      if (!t) throw new Error(hex);
+      const peor = Math.min(
+        ...FONDOS_ACENTO[modo].map((f) => contraste(t.acento, f)),
+        contraste(t.acento, t.texto),
+        contraste(t.acento, t.suave),
+      );
+      expect(peor, hex).toBeGreaterThanOrEqual(4.5);
+    }
+  }
 });
 
 describe("FONDOS_ACENTO sigue a tokens.css", () => {

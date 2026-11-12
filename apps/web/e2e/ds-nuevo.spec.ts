@@ -24,11 +24,11 @@ test.describe("muestra del sistema nuevo", () => {
 
     // Un amarillo no se lee sobre blanco: de día se oscurece y el botón principal lo usa.
     await page.getByRole("button", { name: "Amarillo" }).click();
-    await expect(page.getByTestId("tonos-acento")).toHaveText("Día #826c00 · Noche #ffd400");
+    await expect(page.getByTestId("tonos-acento")).toHaveText("Día #7f6a00 · Noche #ffd400");
     await page.mouse.move(0, 0);
     await expect(page.getByRole("button", { name: "Amarillo" })).toHaveCSS(
       "background-color",
-      "rgb(130, 108, 0)",
+      "rgb(127, 106, 0)",
     );
 
     await page.getByRole("button", { name: "Ver de noche" }).click();
