@@ -69,4 +69,3 @@ Orden: `#585` → `#572` → `#577` → `#587`.
 - Confirmar con cada sesión dueña el orden de su cadena (esta propuesta sale de los archivos y las bases de los PR, no de hablar con las sesiones).
 - Renombrar las migraciones de #561 y #568 si todavía no están aplicadas en Neon.
 - Poner en Linear las relaciones «blocked by» que reflejen estas cadenas.
-- Decidir si se agrega un check de CI que avise cuando dos PR abiertos editan el mismo `.prisma`.

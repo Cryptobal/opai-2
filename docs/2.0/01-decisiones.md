@@ -2023,4 +2023,4 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 5. **Dueños por módulo** en una tabla de `OPERACION-agentes.md` (A2.5.5). No se usa `CODEOWNERS` de GitHub porque todas las sesiones operan con la misma cuenta.
 6. **Dependencias en Linear.** Antes de tomar un ticket se revisan sus «blocked by»; el orden entre módulos vive en las relaciones de Linear.
 
-**Consecuencias.** El orden propuesto para los PR abiertos al 12-nov está en `docs/2.0/estado/orden-integracion-2026-11-12.md`. Queda pendiente decidir si un check de CI debe avisar cuando dos PR abiertos editan el mismo `.prisma` (hoy la regla depende de que la sesión revise).
+**Consecuencias.** El orden propuesto para los PR abiertos al 12-nov está en `docs/2.0/estado/orden-integracion-2026-11-12.md`. Carlos aprobó el 12-nov (18:28) un aviso automático: el workflow `choque-prisma.yml` avisa, sin bloquear, cuando dos PR abiertos editan el mismo `.prisma` sin estar apilados.

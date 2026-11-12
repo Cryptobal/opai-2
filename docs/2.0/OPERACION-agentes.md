@@ -112,6 +112,7 @@ gh pr view <n> --json files --jq '.files[].path'
 ```
 
 - Si otro PR abierto **ya edita el mismo `.prisma`** o trae una migración sobre las mismas tablas: la sesión **apila sobre ese PR** o **espera a que se integre**, y lo dice en la primera línea de la descripción de su PR: «apilado sobre #N» o «espera #N».
+- **Aviso automático:** el workflow `choque de tablas (aviso)` (`.github/workflows/choque-prisma.yml`, pedido por Carlos el 12-nov) revisa cada PR y avisa si edita un `.prisma` que otro PR abierto también edita sin estar apilados. Solo avisa; no bloquea el merge.
 - **Archivos generados** (`embed.ts`, `mcp-inventario.md`, instantáneas MCP): no se resuelven a mano. Al traer `main` con merge, se toma la versión de `main` y se **regeneran** (`pnpm --filter @opai/domain gen:novedades-embed`; `vitest run test/paridad -u` en `packages/capabilities`).
 - **Registros centrales**: cada módulo agrega su línea en su bloque y en orden alfabético, para que dos líneas nuevas no caigan en el mismo lugar.
 - **ADR**: antes de numerar, la sesión mira el último número en `main` **y en los PR abiertos**, y toma el siguiente libre. El número se dice en la descripción del PR.
