@@ -84,7 +84,11 @@ export function HojaEditarTenant(props: { tenantId: string; actual: Datos; onCer
             onChange={(e) => set("nombre", e.target.value)}
           />
         </Campo>
-        <Campo etiqueta="Rubro" htmlFor="emp-vertical">
+        <Campo
+          etiqueta="Rubro"
+          htmlFor="emp-vertical"
+          ayuda="Cambiar el rubro no vuelve a cargar el catálogo de cargos y funciones de la empresa."
+        >
           <Select
             id="emp-vertical"
             aria-label="Rubro"

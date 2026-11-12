@@ -233,6 +233,21 @@ describe("auditoría global de las escrituras de plataforma (CAR-41)", () => {
     });
   });
 
+  it("reenviar una invitación revoca la anterior y crea otra con el mismo rol y portales (CAR-323)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ usuario: owner, semilla: semilla() });
+    const r = await executeCapability(ctx, "platform.invitaciones.reenviar", {
+      tenantId: t,
+      invitacionId: INV_REENVIAR,
+    });
+    expect(r).toMatchObject({ ok: true, data: { email: "reenviar@gard.cl", rol: "admin" } });
+    const filas = tabla("invitation").filter((i) => i["email"] === "reenviar@gard.cl");
+    expect(filas.find((i) => i["id"] === INV_REENVIAR)?.["revocadaEn"]).toBeInstanceOf(Date);
+    const nueva = filas.find((i) => i["id"] !== INV_REENVIAR);
+    expect(nueva).toMatchObject({ rol: "admin", portales: ["erp"] });
+    expect(nueva?.["revocadaEn"] ?? null).toBeNull();
+    expect(nueva?.["tokenHash"]).not.toBe(INV_REENVIAR);
+  });
+
   it("precios.set rechaza un recurso que el medidor no conoce (CAR-323)", async () => {
     const { ctx, tabla } = contextoDePrueba({ usuario: owner, semilla: semilla() });
     const r = await executeCapability(ctx, "platform.precios.set", {

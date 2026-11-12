@@ -48,6 +48,8 @@ export const platformAuditoriaList = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
+  // Filtrada por empresa, la lectura queda en la auditoría global con esa empresa objetivo (CAR-323).
+  tenantObjetivo: (input) => input.tenantId ?? undefined,
   async handler(ctx, input) {
     const filas = await requierePlataforma(ctx).globales.listarAuditoriaPlataforma({
       ...(input.tenantId ? { tenantObjetivoId: input.tenantId } : {}),

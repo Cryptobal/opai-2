@@ -19,7 +19,7 @@ const ACCIONES = [
   { valor: "platform.cobros", etiqueta: "Cobro" },
 ];
 const DIAS = [
-  { valor: "1", etiqueta: "Último día" },
+  { valor: "1", etiqueta: "Desde ayer" },
   { valor: "7", etiqueta: "Últimos 7 días" },
   { valor: "30", etiqueta: "Últimos 30 días" },
 ];
