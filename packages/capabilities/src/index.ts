@@ -85,6 +85,7 @@ export {
   type MedicionIndicador,
 } from "./indicadores-gestion";
 export { indicadoresDeclarados, indicadoresDelNucleo } from "./core/indicadores-gestion";
+export { equipoDe, personaDelUsuario, type Equipo } from "./core/jefatura";
 export { dondeCuenta, dondeInstalacion, dondePersona } from "./core/maestros/alcance";
 export {
   type Consumidor,

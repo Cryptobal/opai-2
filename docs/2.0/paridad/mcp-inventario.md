@@ -983,6 +983,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
+- `core.cargos.set_jefatura`
 - `core.consumos.por_recurso`
 - `core.cuentas_referencias.list`
 - `core.cuentas_referencias.revocar`
@@ -1004,6 +1005,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.indicadores_gestion.medir`
 - `core.invitations.revoke`
 - `core.patrones.get`
+- `core.personas.asignar_jefe`
+- `core.personas.list_a_cargo`
 - `core.ping`
 - `core.puestos.get`
 - `core.turnos_esperados.listar`

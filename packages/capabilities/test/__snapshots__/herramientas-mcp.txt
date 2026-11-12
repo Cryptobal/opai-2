@@ -108,6 +108,7 @@ core_cargos_get
 core_cargos_list
 core_cargos_montos_por_instalacion
 core_cargos_set_activo
+core_cargos_set_jefatura
 core_cargos_update
 core_comunicaciones_eventos
 core_config_buscar
@@ -269,6 +270,7 @@ core_patrones_set_activo
 core_patrones_update
 core_permisos_catalogo
 core_personas_archive
+core_personas_asignar_jefe
 core_personas_bloquear
 core_personas_create
 core_personas_desbloquear
@@ -276,6 +278,7 @@ core_personas_get
 core_personas_laboral_actualizar
 core_personas_laboral_ver
 core_personas_list
+core_personas_list_a_cargo
 core_personas_marcar_no_recontratar
 core_personas_no_recontratar_ver
 core_personas_pago_solicitar_cambio
@@ -589,6 +592,7 @@ preview_core_calendario_archivar
 preview_core_calendario_crear_feriado
 preview_core_cargos_create
 preview_core_cargos_set_activo
+preview_core_cargos_set_jefatura
 preview_core_cargos_update
 preview_core_config_set
 preview_core_contactos_archive
@@ -665,6 +669,7 @@ preview_core_patrones_create
 preview_core_patrones_set_activo
 preview_core_patrones_update
 preview_core_personas_archive
+preview_core_personas_asignar_jefe
 preview_core_personas_bloquear
 preview_core_personas_create
 preview_core_personas_desbloquear
