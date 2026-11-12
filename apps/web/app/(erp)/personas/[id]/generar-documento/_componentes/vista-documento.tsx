@@ -2,13 +2,14 @@ import Link from "next/link";
 
 import { Alerta, cn } from "@opai/ds";
 
+import { BotonGenerar } from "./boton-generar";
 import type { VistaRelleno } from "./tipos";
 
 /**
  * Vista previa del documento con los datos de la persona (diseño 07). Lo que falta se muestra como
  * variable en ámbar dentro del texto y, aparte, con su motivo; mientras falte algo no se puede generar.
  */
-export function VistaDocumento({ vista, fichaHref }: { vista: VistaRelleno; fichaHref: string }) {
+export function VistaDocumento({ vista, fichaHref, documentosHref }: { vista: VistaRelleno; fichaHref: string; documentosHref: string }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex min-w-0 flex-col gap-4">
@@ -34,9 +35,10 @@ export function VistaDocumento({ vista, fichaHref }: { vista: VistaRelleno; fich
           </Alerta>
         ) : (
           <Alerta tono="success" titulo="Documento completo">
-            Todos los datos están en la ficha. La generación del PDF y el envío a firma llegan en el siguiente paso.
+            Todos los datos están en la ficha. Puedes generar el PDF; el envío a firma llega en el siguiente paso.
           </Alerta>
         )}
+        <BotonGenerar plantillaId={vista.plantilla.id} personaId={vista.persona.id} documentosHref={documentosHref} puedeGenerar={vista.puedeGenerar} />
         <dl className="t-body-sm flex flex-col gap-1 rounded-lg border border-border bg-surface p-4">
           <div className="flex justify-between gap-3">
             <dt className="text-fg-muted">Persona</dt>

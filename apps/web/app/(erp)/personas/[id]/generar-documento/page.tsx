@@ -16,7 +16,7 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
 /**
  * 07 · Generar documento (CAR-127, PR 4a): elige una plantilla laboral y ve el documento con los datos de
- * la persona, con lo que falta señalado. La generación del PDF y la firma llegan en el PR 4b. Solo owner
+ * la persona, con lo que falta señalado. Genera el PDF (PR 4b); la firma llega después. Solo owner
  * y admin (`documentos.plantillas.manage`); el permiso, el alcance y la lectura sensible del sueldo los
  * verifica la capacidad `core.documento_plantillas.rellenar`.
  */
@@ -67,7 +67,7 @@ export default function GenerarDocumentoPagina({ params, searchParams }: Props) 
               />
             </div>
             {vista?.ok ? (
-              <VistaDocumento vista={vista.data} fichaHref={`/personas/${id}`} />
+              <VistaDocumento vista={vista.data} fichaHref={`/personas/${id}`} documentosHref={`/personas/${id}/documentos`} />
             ) : vista ? (
               <ErrorState titulo="No pudimos preparar el documento" descripcion={vista.error.message} />
             ) : (

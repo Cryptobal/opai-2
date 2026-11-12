@@ -130,3 +130,15 @@ Encargo de Carlos del 11-nov-2026 (01:22, t2112u): el texto legal de Personas (c
 **Sin migración. No guarda nada.** Lo faltante nunca se inventa: queda como `{clave}` marcado.
 
 **Pendiente (4b):** PDF con marca del tenant, guardado en Documentos vinculado a la persona, firma detrás de flag, lote B3 (tope sin definir).
+
+## PR 4b · Generar el PDF
+
+**Objetivo.** Desde la vista previa (4a), generar el PDF del documento laboral con la marca de la empresa y dejarlo en los Documentos de la persona. Sin migración: se usan `core.documentos` y `core.documento_vinculos` existentes.
+
+**Qué entra.** Capacidad `core.documento_plantillas.generar` (escritura, `dryRun`, permiso `documentos.plantillas.manage`, portal erp, MCP): rellena la versión vigente con los datos de la persona (cálculo compartido `rellenar-calculo.ts`), rechaza si falta algún dato, arma el PDF carta (`pdf-laboral.ts`, pdf-lib, fuentes estándar, encabezado con nombre y color de la empresa, pie con datos legales y paginación), lo sube a R2 desde el servidor, crea el documento (`origen: generado`, vinculado como propietario a la persona) y registra el hecho en la bitácora encadenada, todo con huella SHA-256. La vista previa (`dryRun`) arma el PDF sin guardar. Botón «Generar PDF» en la pantalla, apagado mientras falten datos.
+
+**Decisiones.** El logo no se incrusta todavía (la marca entrega una URL; incrustar imágenes remotas en el servidor exige una ruta de lectura del almacén). El documento no lleva tipo de documento: las clases de plantilla aún no mapean a tipos. Si la plantilla usa sueldo, el PDF contiene el sueldo; solo owner y admin generan y ven estos documentos.
+
+**Pruebas.** `documento-plantillas-generar-db.test.ts` (faltantes, vista previa sin guardar, PDF real con huella y bitácora, permisos y aislamiento) y `pdf-laboral.test.ts` (tildes, caracteres fuera de WinAnsi, salto de página). `@preview`: el botón existe.
+
+**Pendiente.** Firma (flag apagado), lote B3 (tope sin definir) y tipo de documento por clase.
