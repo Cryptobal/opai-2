@@ -400,6 +400,8 @@ cpq_versiones_crear
 cpq_versiones_margen
 cpq_versiones_parametros
 desempeno_hechos_list
+desempeno_periodos_cerrar
+desempeno_periodos_list
 desempeno_propios_archivar
 desempeno_propios_guardar
 desempeno_propios_list
@@ -754,6 +756,7 @@ preview_cpq_sueldos_referencia_fijar
 preview_cpq_versiones_crear
 preview_cpq_versiones_margen
 preview_cpq_versiones_parametros
+preview_desempeno_periodos_cerrar
 preview_desempeno_propios_archivar
 preview_desempeno_propios_guardar
 preview_desempeno_scorecards_guardar

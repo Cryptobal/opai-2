@@ -69,6 +69,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "cpq.propuestas_tecnica.prompt_exportable",
   "cpq.sueldos_referencia.list",
   "desempeno.hechos.list",
+  "desempeno.periodos.list",
   "desempeno.propios.list",
   "desempeno.scorecards.get",
   "desempeno.scorecards.list",

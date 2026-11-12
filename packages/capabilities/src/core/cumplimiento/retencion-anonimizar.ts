@@ -71,6 +71,8 @@ export async function anonimizarPersona(
     },
   });
   if (count !== 1) return false;
+  // Su resultado guardado de meses cerrados de Desempeño (CAR-322) es un dato de la persona: se borra.
+  await tx.desempenoResultadoCerrado.deleteMany({ where: { personaId: id } });
   // Ni queda como jefe de nadie: quienes la tenían de jefe quedan sin asignar.
   await tx.persona.updateMany({ where: { jefePersonaId: id }, data: { jefePersonaId: null } });
   // Los ids de otros sistemas llevan de vuelta a la identidad: se sueltan.

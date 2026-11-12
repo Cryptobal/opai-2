@@ -1,6 +1,10 @@
-import { z } from "zod";
 
-import { capacidadesDesempeno, defineModule, PERMISOS_DESEMPENO } from "@opai/capabilities";
+import {
+  ajustesDesempeno,
+  capacidadesDesempeno,
+  defineModule,
+  PERMISOS_DESEMPENO,
+} from "@opai/capabilities";
 
 /**
  * Manifest del módulo Desempeño (ADR-094, CAR-306). Se vende aparte. Mide la gestión de cada cargo
@@ -40,13 +44,14 @@ export const manifest = defineModule({
       permiso: PERMISOS_DESEMPENO.scorecardsRead,
     },
   ],
-  configuracion: z.object({}),
+  configuracion: ajustesDesempeno,
   eventos: [
     { id: "desempeno.scorecard.guardado", descripcion: "Se guardó un borrador del scorecard de un cargo." },
     { id: "desempeno.scorecard.publicado", descripcion: "Se publicó el scorecard de un cargo." },
     { id: "desempeno.propio.guardado", descripcion: "Se guardó un borrador de un indicador propio." },
     { id: "desempeno.propio.publicado", descripcion: "Se publicó un indicador propio de la empresa." },
     { id: "desempeno.propio.archivado", descripcion: "Se archivó un indicador propio de la empresa." },
+    { id: "desempeno.periodo.cerrado", descripcion: "Se cerró un mes: su resultado quedó guardado y ya no cambia." },
   ],
   capacidades: capacidadesDesempeno,
 });

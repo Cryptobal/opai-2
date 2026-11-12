@@ -15,6 +15,7 @@ import {
   trabajoCobrosPruebas,
   trabajoPruebasGratis,
   trabajosComercial,
+  trabajosDesempeno,
   trabajosDelNucleo,
   trabajosFinanzas,
 } from "@opai/capabilities";
@@ -39,6 +40,7 @@ export function asegurarRegistro(): void {
     ...trabajosDelNucleo,
     ...trabajosFinanzas,
     ...trabajosComercial,
+    ...trabajosDesempeno,
     ...trabajosAgente,
     ...trabajosAsistencia,
     ...trabajosCpq,
