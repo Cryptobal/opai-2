@@ -64,3 +64,17 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 3. **Canales de supervisión:** públicos. Sin `groups:*`.
 4. **Valores por defecto:** aprobados los de la tabla.
 5. **Escalamiento del pánico:** a **un grupo de usuarios de OPAI** (CAR-251) que elige cada empresa (precisado a las 17:08).
+
+## F2 en detalle (CAR-292, «Sesión Núcleo», 12-nov-2026)
+
+**Objetivo:** cada usuario interno de OPAI queda ligado a su usuario de Slack por su correo, sin configuración manual, y sus avisos personales le llegan también por mensaje directo.
+
+- **Vínculo:** tabla `core.slack_usuarios` (migración aditiva `20261205100000_core_slack_usuarios`, RLS + FORCE). La llave foránea compuesta `(tenant_id, user_id)` → `core.memberships` impide un vínculo con alguien que no es de la empresa (nunca entre empresas). Un usuario de Slack se liga a lo más a una persona por empresa.
+- **Quién se vincula:** solo membresías activas con portal `erp` o `supervisor` (usuarios internos). Trabajador, terreno y cliente nunca (decisión 5: los guardias usan solo la app de terreno). En Slack solo cuentan miembros completos del mismo espacio: se descartan invitados (`is_restricted`, `is_ultra_restricted`), bots, desactivados y usuarios de otro `team_id`.
+- **Cuándo:** al conectar Slack (consumidor del evento `core.integracion.actualizada` con `accion: "conectada"`), al aceptar una invitación (evento nuevo `core.membresia.creada`, emitido en la misma transacción) y una vez al día para los que siguen sin vincular (trabajo diario `core.slack.vincular_usuarios`). Al desconectar o desinstalar, los vínculos se borran con la conexión.
+- **Un correo que no está en Slack** no rompe nada: queda «sin vincular» con su motivo, y se reintenta al día siguiente.
+- **Capacidades (pantalla, API y MCP):** `core.slack.usuarios` (lectura: vinculados y sin vincular) y `core.slack.vincular_usuarios` (escritura con vista previa: vuelve a buscar ahora).
+- **Mensajes directos:** cuando un aviso en la app (regla de Comunicaciones, canal «En la app») llega a un usuario vinculado, se encola un mensaje directo con el mismo título, texto y enlace. Ajuste nuevo `mensajesDirectos.activo` (encendido al conectar; se apaga en la misma pantalla). El envío queda en `core.envios` (canal `slack_dm`). Si Slack falla, se reintenta con límite; nunca se pierde ni se bloquea el aviso en la app. F3 usa el mismo envío para el pánico al supervisor zonal y el escalamiento.
+- **Pantalla:** Configuración › Integraciones › Slack suma la sección «Personas vinculadas» (lista con estado y «Buscar de nuevo») y el interruptor de mensajes directos.
+
+**Archivos:** `packages/db` (esquema, migración, prueba RLS), `packages/integrations/src/slack` (API `users.lookupByEmail`, `conversations.open`, `chat.postMessage`; ajuste), `packages/capabilities/src/core/slack/*` (vínculo, consumidores, trabajos, mensaje directo), `core/aceptar.ts` (evento), `core/comunicaciones/consumidor.ts` (encolar el mensaje directo), `apps/web/.../integraciones/slack` (sección nueva), e2e `@preview`, novedad in-app y `ESTADO.md`.
