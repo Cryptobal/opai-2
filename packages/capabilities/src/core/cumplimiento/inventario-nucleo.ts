@@ -6,22 +6,9 @@ import { defineDatosPersonales } from "@opai/domain";
 export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   {
     tabla: "personas",
-    finalidad:
-      "Gestión del personal: identificación, contacto y domicilio de las personas trabajadoras.",
+    finalidad: "Gestión del personal: identificación, contacto y domicilio de las personas trabajadoras.",
     categorias: ["identificacion", "contacto", "laboral"],
-    campos: [
-      "nombres",
-      "apellidos",
-      "rut",
-      "email_personal",
-      "email_laboral",
-      "telefono",
-      "fecha_nacimiento",
-      "calle",
-      "comuna",
-      "region",
-      "direccion_formateada",
-    ],
+    campos: ["nombres", "apellidos", "rut", "email_personal", "email_laboral", "telefono", "fecha_nacimiento", "calle", "comuna", "region", "direccion_formateada"],
     baseLicitud: "relacion_laboral",
     reguladoNoBorrable: true,
     destinatarios: ["Cloudflare R2 (documentos de la persona)"],
@@ -44,8 +31,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "cuentas",
-    finalidad:
-      "Datos de la cuenta cliente; cuando es persona natural, su nombre y RUT son personales.",
+    finalidad: "Datos de la cuenta cliente; cuando es persona natural, su nombre y RUT son personales.",
     categorias: ["identificacion"],
     campos: ["nombre", "rut", "giro", "calle", "comuna", "ciudad", "email_dte"],
     baseLicitud: "contrato",
@@ -74,8 +60,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "sessions",
-    finalidad:
-      "Sesiones de acceso: IP y agente del navegador para la seguridad y la trazabilidad del ingreso.",
+    finalidad: "Sesiones de acceso: IP y agente del navegador para la seguridad y la trazabilidad del ingreso.",
     categorias: ["identificacion"],
     campos: ["ip_address", "user_agent"],
     baseLicitud: "interes_legitimo",
@@ -83,40 +68,21 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "accounts",
-    finalidad:
-      "Credenciales de acceso del usuario: contraseña con hash y tokens del proveedor de identidad.",
+    finalidad: "Credenciales de acceso del usuario: contraseña con hash y tokens del proveedor de identidad.",
     categorias: ["credenciales"],
     campos: ["password", "access_token", "refresh_token", "id_token"],
     baseLicitud: "contrato",
   },
   {
-    tabla: "oauth_access_tokens",
-    finalidad:
-      "Accesos de apps conectadas por OAuth (CAR-247): hash del token, persona y empresa autorizadas.",
-    categorias: ["credenciales"],
-    campos: ["token", "user_id"],
-    baseLicitud: "contrato",
-  },
-  {
-    tabla: "oauth_refresh_tokens",
-    finalidad:
-      "Renovación de los accesos de apps conectadas por OAuth (CAR-247): hash del token y persona.",
-    categorias: ["credenciales"],
-    campos: ["token", "user_id"],
-    baseLicitud: "contrato",
-  },
-  {
     tabla: "login_intentos",
-    finalidad:
-      "Intentos de inicio de sesión para proteger el acceso (límite de intentos, bloqueo): hash del correo probado, usuario, IP y agente del navegador.",
+    finalidad: "Intentos de inicio de sesión para proteger el acceso (límite de intentos, bloqueo): hash del correo probado, usuario, IP y agente del navegador.",
     categorias: ["identificacion"],
     campos: ["correo_hash", "user_id", "ip", "user_agent"],
     baseLicitud: "interes_legitimo",
   },
   {
     tabla: "envios",
-    finalidad:
-      "Bitácora de envíos de notificaciones: el destinatario (correo o teléfono) de cada envío.",
+    finalidad: "Bitácora de envíos de notificaciones: el destinatario (correo o teléfono) de cada envío.",
     categorias: ["contacto"],
     campos: ["destinatario"],
     baseLicitud: "interes_legitimo",
@@ -131,8 +97,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "dpa_aceptaciones",
-    finalidad:
-      "Prueba de aceptación del acuerdo de tratamiento de datos (DPA): quién aceptó cada versión, cuándo y el hash del texto aceptado.",
+    finalidad: "Prueba de aceptación del acuerdo de tratamiento de datos (DPA): quién aceptó cada versión, cuándo y el hash del texto aceptado.",
     categorias: ["identificacion", "contacto"],
     campos: ["aceptado_por_id", "aceptado_por"],
     baseLicitud: "obligacion_legal",
@@ -140,8 +105,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "audit_events",
-    finalidad:
-      "Auditoría append-only: qué usuario o agente ejecutó cada capacidad con efecto, para trazabilidad y seguridad (puede contener datos personales en el payload).",
+    finalidad: "Auditoría append-only: qué usuario o agente ejecutó cada capacidad con efecto, para trazabilidad y seguridad (puede contener datos personales en el payload).",
     categorias: ["identificacion"],
     campos: ["actor_id", "via_user_id"],
     baseLicitud: "obligacion_legal",
@@ -149,43 +113,23 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "documentos",
-    finalidad:
-      "Documentos de personas, cuentas e instalaciones (contratos, certificados, cédulas): metadatos, nombre del archivo y quién lo subió.",
+    finalidad: "Documentos de personas, cuentas e instalaciones (contratos, certificados, cédulas): metadatos, nombre del archivo y quién lo subió.",
     categorias: ["identificacion", "laboral"],
     campos: ["nombre", "titulo", "creado_por_id", "via_user_id"],
     baseLicitud: "obligacion_legal",
     // Lectura con IA por el adaptador del Núcleo (ADR-031); a confirmar por legal (§4.4).
-    destinatarios: [
-      "Cloudflare R2 (archivo del documento)",
-      "Proveedor de IA (lectura de documentos) — a confirmar por legal",
-    ],
+    destinatarios: ["Cloudflare R2 (archivo del documento)", "Proveedor de IA (lectura de documentos) — a confirmar por legal"],
   },
   {
     tabla: "perfil_empresa",
-    finalidad:
-      "Representante legal y delegado de protección de datos (DPO) del tenant, y correos de contacto.",
+    finalidad: "Representante legal y delegado de protección de datos (DPO) del tenant, y correos de contacto.",
     categorias: ["identificacion", "contacto"],
-    campos: [
-      "rut",
-      "representante_nombre",
-      "representante_rut",
-      "representante_email",
-      "correo_comercial",
-      "correo_operaciones",
-      "correo_finanzas",
-      "correo_contacto",
-      "telefono",
-      "whatsapp",
-      "dpo_nombre",
-      "dpo_correo",
-      "dpo_telefono",
-    ],
+    campos: ["rut", "representante_nombre", "representante_rut", "representante_email", "correo_comercial", "correo_operaciones", "correo_finanzas", "correo_contacto", "telefono", "whatsapp", "dpo_nombre", "dpo_correo", "dpo_telefono"],
     baseLicitud: "obligacion_legal",
   },
   {
     tabla: "consentimientos",
-    finalidad:
-      "Consentimientos del titular para fines accesorios (p. ej. comunicaciones comerciales): a quién, para qué fin y si está otorgado o revocado.",
+    finalidad: "Consentimientos del titular para fines accesorios (p. ej. comunicaciones comerciales): a quién, para qué fin y si está otorgado o revocado.",
     categorias: ["identificacion"],
     campos: ["titular_id", "registrado_por"],
     baseLicitud: "consentimiento",
@@ -193,8 +137,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "solicitudes_arco",
-    finalidad:
-      "Solicitudes del titular (ARCO+): quién pide acceso, rectificación, cancelación, oposición, portabilidad o bloqueo, con su plazo, responsable y evidencia.",
+    finalidad: "Solicitudes del titular (ARCO+): quién pide acceso, rectificación, cancelación, oposición, portabilidad o bloqueo, con su plazo, responsable y evidencia.",
     categorias: ["identificacion", "contacto"],
     campos: ["titular_id", "titular_email", "titular_nombre", "responsable_id"],
     baseLicitud: "obligacion_legal",
@@ -202,8 +145,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   },
   {
     tabla: "incidentes",
-    finalidad:
-      "Registro de incidentes de seguridad y avisos de brecha (Ley 21.719): alcance, categorías de datos afectados y destinatario del aviso (Agencia y titulares). Sin datos personales en claro.",
+    finalidad: "Registro de incidentes de seguridad y avisos de brecha (Ley 21.719): alcance, categorías de datos afectados y destinatario del aviso (Agencia y titulares). Sin datos personales en claro.",
     categorias: ["contacto"],
     campos: ["destinatario", "registrado_por"],
     baseLicitud: "obligacion_legal",
