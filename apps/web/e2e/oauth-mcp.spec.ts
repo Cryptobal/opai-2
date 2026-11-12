@@ -1,7 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { cabeceras, canjear, pedirAutorizacion, permitir } from "./oauth-apoyo";
-import { capturar } from "./preview";
+import { capturar, pasarProteccionDeVercel } from "./preview";
 import { codigoTotp, E2E_EMAIL, E2E_PASSWORD as password } from "./sesion";
 
 // Entrar a OPAI desde una app como Claude con la cuenta propia (CAR-247, ADR-098): la app se registra
@@ -9,6 +9,8 @@ import { codigoTotp, E2E_EMAIL, E2E_PASSWORD as password } from "./sesion";
 
 /** Sigue el flujo en pantalla hasta el consentimiento, pasando por login, MFA y empresa si aparecen. */
 async function hastaAutorizar(page: Page, url: string): Promise<void> {
+  // En la vista previa, el navegador también necesita pasar la protección de Vercel.
+  await pasarProteccionDeVercel(page);
   await page.goto(url);
   await page.waitForURL((u) => ["/login", "/elegir-empresa", "/autorizar"].includes(u.pathname));
   if (new URL(page.url()).pathname === "/login") {
