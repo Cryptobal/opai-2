@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 728 pares pantalla→capacidad · 650 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 730 pares pantalla→capacidad · 652 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -255,6 +255,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.configurar` | `core_slack_configurar` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.desconectar` | — | excepción |
 | compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.iniciar_conexion` | — | excepción |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.vincular_usuarios` | `core_slack_vincular_usuarios` | existe |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.permisos.catalogo` | `core_permisos_catalogo` | existe |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.roles.list` | `core_roles_list` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `comercial.contactos.list` | `comercial_contactos_list` | existe |
@@ -616,6 +617,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.list` | `core_integraciones_list` | existe |
 | erp | `/configuracion/integraciones/slack` | `core.grupos.list` | `core_grupos_list` | existe |
 | erp | `/configuracion/integraciones/slack` | `core.slack.estado` | `core_slack_estado` | existe |
+| erp | `/configuracion/integraciones/slack` | `core.slack.usuarios` | `core_slack_usuarios` | existe |
 | erp | `/configuracion/integraciones` | `core.integraciones.list` | `core_integraciones_list` | existe |
 | erp | `/configuracion/marca` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/marca` | `core.marca.get` | `core_marca_get` | existe |

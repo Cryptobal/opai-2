@@ -23,7 +23,7 @@ import {
   integracionesSetSecreto,
 } from "./integraciones";
 import { integracionesGuardarCertificadoDte } from "./integraciones-certificado-dte";
-import { capacidadesSlack } from "./slack";
+import { capacidadesSlack, consumidoresSlack, trabajosSlack } from "./slack";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
 import {
@@ -169,6 +169,7 @@ export const consumidoresDelNucleo = [
   consumidorCpqGanado,
   consumidorTurnosEsperados,
   consumidorRevocacionBiometria,
+  ...consumidoresSlack,
 ];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
@@ -183,4 +184,5 @@ export const trabajosDelNucleo = [
   trabajoCapturaPrevisional,
   trabajoTareasVencidas,
   trabajoExtenderTurnos,
+  ...trabajosSlack,
 ];

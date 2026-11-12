@@ -19,10 +19,16 @@ export class ErrorSlack extends Error {
   }
 }
 
+/** Código de error de Slack reducido a algo corto y seguro. */
 const codigoSeguro = (x: unknown) =>
   typeof x === "string" && /^[a-z_]{1,64}$/.test(x) ? x : "error_desconocido";
 
-async function llamar(f: FetchSlack, metodo: string, cuerpo: URLSearchParams, token?: string) {
+export async function llamar(
+  f: FetchSlack,
+  metodo: string,
+  cuerpo: URLSearchParams,
+  token?: string,
+) {
   let res: Response;
   try {
     res = await f(BASE + metodo, {

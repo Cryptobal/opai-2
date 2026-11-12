@@ -8,3 +8,11 @@ export const EVENTOS_GRUPOS: readonly EventoDeDominio[] = [
   { id: "core.grupo.miembros_agregados", descripcion: "Se agregaron usuarios a un grupo." },
   { id: "core.grupo.miembro_quitado", descripcion: "Se quitó a un usuario de un grupo." },
 ];
+
+/** Membresías (CAR-292): alguien entró a la empresa. Lo escucha Slack F2 para buscarlo. Payload: usuarioId. */
+export const EVENTOS_MEMBRESIA: readonly EventoDeDominio[] = [
+  {
+    id: "core.membresia.creada",
+    descripcion: "Una persona entró a la empresa (aceptó su invitación).",
+  },
+];

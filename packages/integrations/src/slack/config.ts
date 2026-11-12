@@ -38,6 +38,8 @@ const panico = z
   })
   .strict();
 const resumen = z.object({ activo: z.boolean() }).strict();
+/** Avisos personales (los de la app de OPAI) también por mensaje directo a quien está vinculado (CAR-292). */
+const mensajesDirectos = z.object({ activo: z.boolean() }).strict();
 const margen = z.number().int().min(1).max(240);
 
 /**
@@ -45,7 +47,7 @@ const margen = z.number().int().min(1).max(240);
  * configuración no secreta: vive en `core.integraciones.config`.
  */
 export const slackConfigSchema = z
-  .object({ canales, avisos, margenAtrasoMin: margen, panico, resumen })
+  .object({ canales, avisos, margenAtrasoMin: margen, panico, resumen, mensajesDirectos })
   .strict();
 export type SlackConfig = z.infer<typeof slackConfigSchema>;
 
@@ -57,6 +59,7 @@ export const slackConfigParcialSchema = z
     margenAtrasoMin: margen.optional(),
     panico: panico.partial().optional(),
     resumen: resumen.partial().optional(),
+    mensajesDirectos: mensajesDirectos.partial().optional(),
   })
   .strict();
 export type SlackConfigParcial = z.infer<typeof slackConfigParcialSchema>;
@@ -84,6 +87,9 @@ export const SLACK_CONFIG_DEFECTO: SlackConfig = {
     escalarAGrupoId: null,
   },
   resumen: { activo: false },
+  // Encendido: solo actúa con Slack conectado, sobre avisos que la empresa ya activó en Comunicaciones
+  // y para personas vinculadas. Se apaga en Configuración › Integraciones › Slack.
+  mensajesDirectos: { activo: true },
 };
 
 /** Aplica un cambio parcial sobre una configuración completa. */
@@ -94,6 +100,7 @@ export function fusionarSlackConfig(base: SlackConfig, cambio: SlackConfigParcia
     margenAtrasoMin: cambio.margenAtrasoMin ?? base.margenAtrasoMin,
     panico: { ...base.panico, ...cambio.panico },
     resumen: { ...base.resumen, ...cambio.resumen },
+    mensajesDirectos: { ...base.mensajesDirectos, ...cambio.mensajesDirectos },
   });
 }
 

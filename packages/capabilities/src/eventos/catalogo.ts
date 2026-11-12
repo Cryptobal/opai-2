@@ -1,7 +1,7 @@
 import { listarModulos, type EventoDeDominio } from "../module";
 import { EVENTOS_COBROS } from "./catalogo-cobros";
 import { EVENTOS_CRM } from "./catalogo-crm";
-import { EVENTOS_GRUPOS } from "./catalogo-grupos";
+import { EVENTOS_GRUPOS, EVENTOS_MEMBRESIA } from "./catalogo-grupos";
 import { EVENTOS_TERRENO } from "./catalogo-terreno";
 
 /**
@@ -30,6 +30,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.funcion.creada", descripcion: "Se creó una función de puesto del catálogo." },
   { id: "core.funcion.actualizada", descripcion: "Cambió una función de puesto (nombre o estado)." },
   ...EVENTOS_GRUPOS,
+  ...EVENTOS_MEMBRESIA,
   { id: "core.persona.creada", descripcion: "Se registró una persona (trabajador)." },
   { id: "core.persona.actualizada", descripcion: "Cambiaron los datos de una persona." },
   { id: "core.persona.bloqueada", descripcion: "Se bloqueó a una persona, con motivo." },

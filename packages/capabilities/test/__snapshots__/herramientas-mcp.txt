@@ -307,6 +307,8 @@ core_roles_list
 core_slack_canales
 core_slack_configurar
 core_slack_estado
+core_slack_usuarios
+core_slack_vincular_usuarios
 core_supervisores_asignar
 core_supervisores_de_instalacion
 core_supervisores_list
@@ -691,6 +693,7 @@ preview_core_puestos_create
 preview_core_puestos_set_estado
 preview_core_puestos_update
 preview_core_slack_configurar
+preview_core_slack_vincular_usuarios
 preview_core_supervisores_asignar
 preview_core_supervisores_quitar
 preview_core_tenant_update

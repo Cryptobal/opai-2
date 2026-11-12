@@ -83,16 +83,27 @@ export const invitationsAccept = defineCapability({
     });
     if (ya) throw conflicto("Ya perteneces a esta empresa.");
     if (dryRun) return { tenantId: i.tenantId, membershipId: null, rol: i.rol };
-    const m = await ctx.db.membership.create({
-      data: {
-        tenantId: i.tenantId,
-        userId: ctx.usuario.id,
-        rol: i.rol,
-        portales: i.portales,
-        portalInicio: i.portalInicio ?? null,
-      },
+    const usuarioId = ctx.usuario.id;
+    // Una transacción: membresía, invitación aceptada y el evento (para Slack F2, CAR-292).
+    const m = await ctx.transaccion(async (tx) => {
+      const nueva = await tx.membership.create({
+        data: {
+          tenantId: i.tenantId,
+          userId: usuarioId,
+          rol: i.rol,
+          portales: i.portales,
+          portalInicio: i.portalInicio ?? null,
+        },
+      });
+      await tx.invitation.update({ where: { id: i.id }, data: { acceptedAt: new Date() } });
+      await ctx.eventos.emitir(tx, {
+        tipo: "core.membresia.creada",
+        entidadTipo: "membership",
+        entidadId: nueva.id,
+        payload: { usuarioId },
+      });
+      return nueva;
     });
-    await ctx.db.invitation.update({ where: { id: i.id }, data: { acceptedAt: new Date() } });
     return { tenantId: i.tenantId, membershipId: m.id, rol: m.rol };
   },
 });

@@ -18,7 +18,7 @@ export async function revocarSinFallar(token: string): Promise<boolean> {
 }
 
 /**
- * Borra la conexión de la empresa: token cifrado, instalación y estado. La configuración (canales,
+ * Borra la conexión de la empresa: token cifrado, instalación, vínculos de personas y estado. La configuración (canales,
  * avisos) se conserva para que una reconexión la recupere. Una transacción, con evento por outbox.
  */
 export async function borrarConexionSlack(ctx: Contexto, motivo: "desconectada" | "desinstalada") {
@@ -36,6 +36,8 @@ export async function borrarConexionSlack(ctx: Contexto, motivo: "desconectada" 
       });
     }
     await tx.slackInstalacion.deleteMany({ where: { tenantId: ctx.tenantId } });
+    // Los vínculos de personas son del espacio desconectado: se borran con él (CAR-292).
+    await tx.slackUsuario.deleteMany({ where: { tenantId: ctx.tenantId } });
     await ctx.eventos.emitir(tx, {
       tipo: "core.integracion.actualizada",
       entidadTipo: "integracion",
