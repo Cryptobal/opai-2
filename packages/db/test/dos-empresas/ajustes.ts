@@ -24,11 +24,13 @@ export const AJUSTES: Record<string, Ajuste> = {
   // Desempeño (CAR-306): CHECK del mes de vigencia y FK compuestas por empresa.
   "desempeno.scorecards": {
     dependencias: ["core.cargos"],
-    fijas: ["vigente_desde"],
+    // FK compuesta (tenant_id, cargo_id): el catálogo no la ve como referencia; no se regenera.
+    fijas: ["vigente_desde", "cargo_id"],
     valores: (ctx) => ({ cargo_id: id(ctx, "core.cargos"), vigente_desde: "2026-11", estado: "publicado" }),
   },
   "desempeno.scorecard_indicadores": {
     dependencias: ["desempeno.scorecards"],
+    fijas: ["scorecard_id"],
     valores: (ctx) => ({ scorecard_id: id(ctx, "desempeno.scorecards"), meta: 10, peso: 100 }),
   },
   // Comercial · seguimiento (CAR-67): CHECK de disparador, canal y ejecutor.
