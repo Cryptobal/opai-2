@@ -1,4 +1,4 @@
-import { ChartColumn, Plus } from "lucide-react";
+import { ChartColumn, Download, Plus } from "lucide-react";
 
 import { Cabecera, Empty, Estado, type EstadoPantalla } from "@opai/ds";
 
@@ -30,6 +30,8 @@ export function TableroNegocios(p: {
   negocios: NegocioFila[];
   /** Con `comercial:negocios.manage`: «Nuevo negocio», arrastre y «Mover a…». */
   gestiona: boolean;
+  /** Con `comercial:negocios.exportar`: «Exportar a Excel» (descarga con los filtros de la URL). */
+  exportar?: string | undefined;
   /** Etapa elegida (`?etapa=`): el teléfono vuelve a esa columna al cargar. */
   etapa?: string | undefined;
 }) {
@@ -52,6 +54,11 @@ export function TableroNegocios(p: {
         <EnlaceBoton href="/negocios/reportes" variante="secondary" icono={ChartColumn}>
           Reportes
         </EnlaceBoton>
+        {p.exportar ? (
+          <EnlaceBoton href={p.exportar} variante="secondary" icono={Download}>
+            Exportar a Excel
+          </EnlaceBoton>
+        ) : null}
         <SelectorEtapa
           etapas={p.etapas.map((e) => ({ id: e.id, nombre: e.nombre, n: de(e.id).length }))}
           inicial={p.etapa}
