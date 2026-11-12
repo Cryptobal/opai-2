@@ -15,6 +15,7 @@ import {
   validarPolitica,
   type VistaPolitica,
 } from "./comun";
+import { idAutor } from "../../autor";
 
 type FilaPolitica = {
   clase: string;
@@ -85,7 +86,7 @@ export const firmasPoliticaSet = defineCapability({
       orden: input.orden,
       plazoDias: input.plazoDias,
       recordar: input.recordar,
-      actualizadoPorId: ctx.actor.id ?? null,
+      actualizadoPorId: idAutor(ctx.actor),
     };
     await ctx.transaccion((tx) =>
       tx.politicaFirma.upsert({

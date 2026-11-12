@@ -11,6 +11,7 @@ import { PERMISO_MANAGE, negocioDe } from "./comun";
 import { ambitoHabil, configDeVersion, type SeguimientoVista, seguimientoPorId, seguimientoVistaSchema, zonaDe } from "./seguimiento-comun";
 import { cancelarPasosPendientes } from "./seguimiento-tareas";
 import type { Contexto } from "../types";
+import { idAutor } from "../autor";
 
 export const inicioSchema = z.object({
   negocioId: uuidSchema,
@@ -65,7 +66,7 @@ export async function iniciarSeguimiento(ctx: Contexto, input: EntradaInicio, dr
       data: {
         tenantId: ctx.tenantId, negocioId: negocio.id, planId: plan.id, planVersion: plan.versionActual, ancla,
         cotizacionId: input.cotizacionId ?? null, cotizacionCodigo: input.cotizacionCodigo ?? null,
-        contactoId, token: generarTokenRespuesta(), creadoPorId: ctx.actor.id ?? null,
+        contactoId, token: generarTokenRespuesta(), creadoPorId: idAutor(ctx.actor),
       },
     });
     await tx.seguimientoPaso.createMany({

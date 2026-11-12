@@ -161,5 +161,11 @@ export function navegacionPortal(
       mas,
     ];
   }
+  if (portal === "cliente" && modulosActivos.includes("cpq") && modulosActivos.includes("portal_cliente")) {
+    return [
+      { href, etiqueta: "Inicio", icono: "Home", exacta: true },
+      { href: `${href}/cotizaciones`, etiqueta: "Cotizaciones", icono: "FileText" },
+    ];
+  }
   return [{ href, etiqueta: "Inicio", icono: "Home" }];
 }

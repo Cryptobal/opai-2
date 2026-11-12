@@ -23,6 +23,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: registrar el consentimiento de un cliente para ser referencia es un acto de una persona; ninguna key lo hace, ni con autonomía «directo» (CAR-138 PR 7, ADR-087).",
   "core.metodos_acceso.quitar":
     "Solo personas: quitar un segundo factor gobierna credenciales propias y exige confirmar la identidad en pantalla (CAR-286); listar y renombrar sí van por MCP.",
+  "core.apps_conectadas.desconectar":
+    "Solo personas: desconectar una app conectada por OAuth gobierna agentes; se hace en Mi cuenta (CAR-247). Listar sí va por MCP.",
   "core.apikeys.create": "Solo personas: una key no se crea keys ni ve secretos (ADR-032).",
   "core.apikeys.revoke": "Solo personas: gobierno de keys y credenciales (ADR-032).",
   "core.apikeys.update":
@@ -32,6 +34,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: credenciales del tenant; nunca salen ni se cambian por API ni MCP (ADR-027).",
   "core.integraciones.set_secreto":
     "Solo personas: secretos cifrados del tenant; nunca salen ni se cambian por API ni MCP (ADR-027).",
+  "core.slack.iniciar_conexion":
+    "Solo personas: conectar Slack es un OAuth que una persona hace en su navegador; una key no instala apps ni maneja tokens (ADR-027, ADR-093).",
+  "core.slack.conectar":
+    "Solo personas: canjea el código del OAuth y guarda el token del bot cifrado; nunca por API ni MCP (ADR-027, ADR-093).",
+  "core.slack.desconectar":
+    "Solo personas: revoca y borra el token del bot de Slack; gobierno de credenciales (ADR-027, ADR-093).",
+  "core.slack.desinstalada":
+    "Interna: solo la ejecuta /api/integraciones/slack/eventos, tras verificar la firma de Slack, cuando la app se desinstala o su token se revoca.",
   "finanzas.folios.cargar_caf":
     "Solo personas: el XML del CAF incluye la llave privada; un agente no lo encola en aprobaciones (CAR-143).",
   "core.integraciones.guardar_certificado_dte":

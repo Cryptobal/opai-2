@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { tituloPagina } from "@/app/_components/portales";
 import { exigirDatos } from "@/lib/carga";
@@ -22,9 +24,13 @@ export default function Pagina({ searchParams }: { searchParams: SearchParams })
       cargando="lista"
       cargar={async () => {
         const { mes } = await leerParametros(searchParams);
-        return exigirDatos(
-          await ejecutarComoUsuario<ResumenMes>("cliente", "portal_cliente.resumen.leer", mes ? { mes } : {}),
-        );
+        const r = await ejecutarComoUsuario<ResumenMes>("cliente", "portal_cliente.resumen.leer", mes ? { mes } : {});
+        // Un prospecto (acceso «limitado», CAR-300) no tiene Resumen: entra directo a sus Cotizaciones.
+        if (!r.ok && r.error.code === "FORBIDDEN") {
+          const yo = await ejecutarComoUsuario<{ alcance: string }>("cliente", "portal_cliente.mi_acceso", {});
+          if (yo.ok && yo.data.alcance === "limitado") redirect("/cliente/cotizaciones");
+        }
+        return exigirDatos(r);
       }}
     >
       {(r) => <ResumenDelMes r={r} />}

@@ -7,7 +7,7 @@ import {
   NIVELES_PLANTILLA,
   VARIABLES_PLANTILLA,
   nivelPlantillaValido,
-  variablesDocumentoDesconocidas,
+  variablesFueraDeClase,
   type ClasePlantilla,
   type FirmantesPlantilla,
   type NivelPlantilla,
@@ -117,6 +117,6 @@ export function vistaEditor(
     ...vista(p, v),
     contenido: v.contenido,
     borrador,
-    desconocidas: variablesDocumentoDesconocidas(borrador?.contenido ?? v.contenido),
+    desconocidas: variablesFueraDeClase(borrador?.contenido ?? v.contenido, p.clase as ClasePlantilla),
   };
 }

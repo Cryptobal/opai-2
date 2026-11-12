@@ -12,7 +12,7 @@ function ctx(partial: Pick<Contexto, "actor" | "rol">): Contexto {
   } as unknown as Contexto;
 }
 
-const HABILITADA = { OPAI_PRODUCCION_TRIBUTARIA: "habilitada", BETTER_AUTH_URL: "https://app.opai.cl" };
+const HABILITADA = { OPAI_PRODUCCION_TRIBUTARIA: "habilitada", BETTER_AUTH_URL: "https://app.opai.cl", VERCEL_ENV: "production" };
 
 describe("Finanzas · dte_config (CAR-140, C3)", () => {
   beforeEach(() => {
@@ -53,6 +53,7 @@ describe("Finanzas · dte_config · candado de ambiente (CAR-191)", () => {
   it("rechaza pasar a producción fuera de app.opai.cl, también en vista previa", async () => {
     vi.stubEnv("BETTER_AUTH_URL", "https://test.opai.cl");
     vi.stubEnv("OPAI_PRODUCCION_TRIBUTARIA", "habilitada");
+    vi.stubEnv("VERCEL_ENV", "production");
     for (const dryRun of [true, false]) {
       await expect(dteConfigActualizar.handler(owner(), input, { dryRun })).rejects.toThrow(
         "La producción del SII solo está disponible en app.opai.cl",
