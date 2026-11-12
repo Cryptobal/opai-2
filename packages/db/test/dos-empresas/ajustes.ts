@@ -370,6 +370,14 @@ export const AJUSTES: Record<string, Ajuste> = {
     fijas: ["team_id"],
     valores: (ctx) => ({ team_id: `T${ctx.tenant.replace(/-/g, "").toUpperCase()}` }),
   },
+  // Slack F3 (CAR-293): ts con formato de Slack y tipo/envío/gestión dentro de su lista (CHECK).
+  "core.slack_hilos": {
+    dependencias: ["core.instalaciones"],
+    valores: (ctx) => ({ instalacion_id: id(ctx, "core.instalaciones"), ts: "1700000000.000100" }),
+  },
+  "core.slack_avisos": {
+    valores: () => ({ tipo: "atraso", envio: "pendiente", gestion: "abierto", instalacion_id: null, persona_id: null }),
+  },
   // Slack F2 (CAR-292): (tenant_id, user_id) → memberships; «vinculado» exige un id de Slack (CHECK).
   "core.slack_usuarios": {
     dependencias: ["core.memberships"],
