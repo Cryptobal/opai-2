@@ -88,6 +88,8 @@ Con el marco Hilo activo (preferencia «Diseño» en Mi cuenta), las mismas piez
 
 Muestra sin sesión: `/ds/hilo` (con `?vista=piezas` para las piezas, los indicadores y los estados).
 
+**Sistema de diseño en Claude Design:** «OPAI 2.0 Design System · Hilo» (<https://claude.ai/artifact/NySPx8Tq4LRChyYVadAnFa>, privado de Carlos). Lo armó Claude el 12-nov-2026 desde `packages/ds` y el prototipo `export-base-hilo`, con tokens en claro y oscuro, fuentes, la guía del marco y 13 piezas con vista previa estática: marco, barra, decisión, botón, campo, etiqueta, pestañas, lista, tabla, indicadores, estados, aviso y diálogo. Los Design Prompts de pantallas dentro del marco Hilo lo usan en vez del V2. Si cambia la piel en `packages/ds`, se actualiza también este sistema.
+
 ## 4. Celular primero
 
 - Diseñar y verificar a **375 px** (celular) y **1024 px** (iPad) antes que a 1280 px (escritorio). Escritorio es el mismo diseño con más espacio.
