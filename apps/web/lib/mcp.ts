@@ -6,6 +6,7 @@ import { ejecutarHerramienta, herramientasMcp } from "@opai/capabilities/mcp";
 
 import pkg from "../package.json" with { type: "json" };
 import { contextoDeApiKey } from "./api-key";
+import { metaDeVista, registrarVistas } from "./mcp-vistas";
 import { contextoDeTokenOAuth } from "./oauth-mcp";
 import { ipDe, LIMITES, permitir } from "./rate-limit";
 import { asegurarRegistro } from "./registro";
@@ -66,10 +67,18 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
           ],
         }),
       );
+      // Vistas MCP App (CAR-287): Claude dibuja la herramienta dentro de la conversación.
+      registrarVistas(server, new URL(req.url).origin);
       for (const h of herramientas) {
+        const _meta = metaDeVista(h.nombre);
         server.registerTool(
           h.nombre,
-          { title: h.capacidad.id, description: h.descripcion, inputSchema: h.input },
+          {
+            title: h.capacidad.id,
+            description: h.descripcion,
+            inputSchema: h.input,
+            ...(_meta ? { _meta } : {}),
+          },
           async (args) => {
             const resultado = await ejecutarHerramienta(ctx, h, args);
             return {
