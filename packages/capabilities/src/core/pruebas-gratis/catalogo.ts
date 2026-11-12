@@ -57,13 +57,15 @@ export const modulesPruebas = defineCapability({
   dryRun: false,
   async handler(ctx) {
     const tenantId = ctx.tenantId;
-    const [perfil, modulos, pruebas, condiciones, ajustes] = await Promise.all([
-      ctx.db.perfilEmpresa.findFirst({ where: { tenantId } }),
-      ctx.db.tenantModule.findMany({ where: { tenantId } }),
-      ctx.db.pruebaGratis.findMany({ where: { tenantId } }),
-      ctx.db.cobroCondicion.findMany({ where: { tenantId } }),
-      ctx.db.ajustePlataforma.findMany({ where: { modulo: MODULO_AJUSTE_CATALOGO } }),
-    ]);
+    // En secuencia, no en paralelo: cada consulta de `forTenant` abre su transacción y cinco a la vez
+    // agotaban las conexiones del pool en la vista de Módulos (CAR-323, bloque C).
+    const perfil = await ctx.db.perfilEmpresa.findFirst({ where: { tenantId } });
+    const modulos = await ctx.db.tenantModule.findMany({ where: { tenantId } });
+    const pruebas = await ctx.db.pruebaGratis.findMany({ where: { tenantId } });
+    const condiciones = await ctx.db.cobroCondicion.findMany({ where: { tenantId } });
+    const ajustes = await ctx.db.ajustePlataforma.findMany({
+      where: { modulo: MODULO_AJUSTE_CATALOGO },
+    });
     const estados = new Map(modulos.map((m) => [m.moduloId, m.estado]));
     const probadas = new Map(pruebas.map((p) => [p.moduloId, dia(p.hasta) ?? hoy()]));
     const conPrecio = partesConPrecio([...probadas.keys(), ...condiciones.map((c) => c.moduloId)]);

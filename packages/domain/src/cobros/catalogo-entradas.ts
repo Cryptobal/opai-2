@@ -97,6 +97,13 @@ export const ENTRADAS_CATALOGO: readonly EntradaCatalogo[] = [
   ),
   modulo("rondas", "Rondas", "Recorridos y control de rondas.", "por_unidad", "instalacion_activa"),
   modulo(
+    "acceso",
+    "Control de acceso",
+    "Registro de visitas, vehículos y listas de acceso por instalación.",
+    "por_unidad",
+    "instalacion_activa",
+  ),
+  modulo(
     "rendiciones",
     "Rendiciones",
     "Rendición de gastos (los aprobadores no se cobran).",
