@@ -148,8 +148,9 @@ export async function horasPrimeraRespuesta(ctx: Contexto): Promise<number> {
   try {
     const v = await ajuste<number>(ctx, "comercial", "solicitudes_primera_respuesta_horas");
     return typeof v === "number" ? v : 0;
-  } catch {
-    // Sin el módulo registrado (p. ej. un entorno parcial) la bandeja sigue funcionando sin plazo.
-    return 0;
+  } catch (e) {
+    // Solo el módulo sin registrar (un entorno parcial) apaga el plazo; una falla real de la base sube.
+    if (e instanceof Error && e.message.startsWith("Ajuste no declarado")) return 0;
+    throw e;
   }
 }
