@@ -51,6 +51,7 @@ import { capacidadesMaestros, trabajosMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesGrupos } from "./grupos";
 import { capacidadesIndicadoresGestion } from "./indicadores-gestion";
+import { capacidadesJefatura } from "./jefatura";
 import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
@@ -147,6 +148,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesGrupos,
   ...capacidadesSlack,
   ...capacidadesIndicadoresGestion,
+  ...capacidadesJefatura,
   ...capacidadesDocumentos,
   ...capacidadesFirmas,
   ...capacidadesConfig,
