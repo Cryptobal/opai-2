@@ -35,7 +35,7 @@ export function AccionesDeudor(p: {
     setRecordar(null);
     // Si no hubo respuesta (red/timeout) se conserva la clave: el reintento no duplica el correo.
     if (r) intento.current = crypto.randomUUID();
-    if (r?.estado === "enviado") avisar.exito(`Recordatorio enviado a ${[r.para, ...r.paraAdicionales].join(", ")}`);
+    if (r?.estado === "enviado") avisar.exito(`Recordatorio enviado a ${r.para}${r.paraAdicionales.length ? ` y ${r.paraAdicionales.length} más` : ""}`);
     else if (r) avisar.error("El correo no salió. Revisa el historial de gestiones.");
   }
 

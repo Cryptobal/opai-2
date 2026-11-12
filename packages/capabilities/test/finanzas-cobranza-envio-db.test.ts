@@ -141,6 +141,25 @@ describe.skipIf(!urlPropietario)("Finanzas · cobranza · recordatorios (db)", (
     expect(r.cobrar.recordatoriosQueTocan.cantidad).toBe(1);
   });
 
+  it("la lista guardada del documento manda: las copias ocultas siguen ocultas", async () => {
+    const d = await s.e.admin.documentoEmitido.create({
+      data: {
+        tenantId: s.tenantId, cuentaId: s.cuentaId, tipoDte: 33, folio: 9204, estadoDte: "aceptado", timbrePdf417: "<TED>prueba</TED>",
+        fechaEmision: diasAtras(60), fechaVencimiento: diasAtras(30), montoNeto: 50_000, montoTotal: 50_000,
+      },
+    });
+    await s.e.admin.documentoEmitidoDestinatario.createMany({
+      data: [
+        { tenantId: s.tenantId, documentoId: d.id, orden: 0, tipo: "PARA", email: "jefa@cliente.cl", origen: "manual" },
+        { tenantId: s.tenantId, documentoId: d.id, orden: 1, tipo: "BCC", email: "oculto@cliente.cl", origen: "manual" },
+      ],
+    });
+    const antes = enviados.length;
+    const r = await s.dato<Envio>("finanzas.cobranza.recordar", { documentoId: d.id });
+    expect(r).toMatchObject({ estado: "enviado", para: "jefa@cliente.cl", paraAdicionales: [], cc: ["dte@cliente.cl"] });
+    expect(enviados[antes]).toMatchObject({ para: "jefa@cliente.cl", cc: ["dte@cliente.cl"], bcc: ["oculto@cliente.cl"] });
+  });
+
   it("otra empresa no puede recordar ni pausar este documento", async () => {
     for (const [id, input] of [
       ["finanzas.cobranza.recordar", { documentoId: docId }],

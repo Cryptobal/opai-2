@@ -41,10 +41,16 @@ export async function enviarRecordatorio(
   }
   // Mismos destinatarios que la factura (ADR-100): todos los contactos como PARA y la casilla DTE en copia.
   const cuenta = await cuentaDe(ctx, doc.cuentaId);
-  const destinos = await destinosDeDocumento(ctx, doc, cuenta.emailDte);
+  const encontrados = await destinosDeDocumento(ctx, doc, cuenta.emailDte);
+  // La casilla DTE sola no es de cobranza: sin contactos ni lista guardada, el recordatorio se omite como antes.
+  const casilla = (cuenta.emailDte ?? "").trim().toLowerCase();
+  const soloCasilla = !!encontrados && encontrados.paraAdicionales.length === 0 && encontrados.para === casilla;
+  const destinos = soloCasilla ? null : encontrados;
   const para = destinos?.para ?? null;
   const paraAdicionales = destinos?.paraAdicionales ?? [];
-  const cc = destinos ? [...destinos.cc, ...destinos.bcc] : [];
+  const cc = destinos?.cc ?? [];
+  // Las copias ocultas guardadas en el documento siguen ocultas.
+  const bcc = destinos?.bcc ?? [];
   const registrar = (resultado: "enviado" | "fallido" | "omitido", detalle: string | null) =>
     escribirConEvento(
       ctx,
@@ -88,7 +94,7 @@ export async function enviarRecordatorio(
       },
       empresa: { nombre: tenant?.nombre ?? "" },
     },
-    { paraAdicionales, cc, adjuntos: [{ nombre: `factura-${doc.folio}.pdf`, contenidoBase64: Buffer.from(pdf).toString("base64"), mime: "application/pdf" }] },
+    { paraAdicionales, cc, bcc, adjuntos: [{ nombre: `factura-${doc.folio}.pdf`, contenidoBase64: Buffer.from(pdf).toString("base64"), mime: "application/pdf" }] },
   );
   await registrar(salio ? "enviado" : "fallido", salio ? null : "El correo no salió. Revisa Configuración → Comunicaciones.");
   return { documentoId: doc.id, estado: salio ? "enviado" : "fallido", para, paraAdicionales, cc };
