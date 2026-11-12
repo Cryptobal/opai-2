@@ -2,7 +2,7 @@ import { PDFDocument } from "pdf-lib";
 import { describe, expect, it } from "vitest";
 
 import { generarPdfDte, generarPdfPrevio, type PdfDteInput, type PdfPrevioInput } from "./pdf";
-import { FIXTURE_FACTURA, FIXTURE_NC } from "./pdf-fixtures";
+import { FIXTURE_FACTURA, FIXTURE_NC, LOGO_DE_PRUEBA } from "./pdf-fixtures";
 
 const base: PdfDteInput = {
   tipoDte: 33,
@@ -126,6 +126,14 @@ describe("PDF de proforma y estado de pago", () => {
     const aprobado = await generarPdfPrevio({ ...ep, firmas: { aprobadoPor: { nombre: "Ana Rojas", fecha: "2026-11-29" } } });
     expect(await paginas(pendiente)).toBe(1);
     expect(Buffer.from(pendiente).equals(Buffer.from(aprobado))).toBe(false);
+  });
+  it("lleva el logo de la marca de la empresa y, si no se puede leer, sigue sin él (ADR-028)", async () => {
+    const sin = await generarPdfPrevio(previo);
+    const con = await generarPdfPrevio({ ...previo, logo: { bytes: LOGO_DE_PRUEBA, formato: "png" } });
+    expect(Buffer.from(con).toString("latin1")).toContain("/Image");
+    expect(Buffer.from(sin).toString("latin1")).not.toContain("/Image");
+    const roto = await generarPdfPrevio({ ...previo, logo: { bytes: new Uint8Array([1, 2, 3]), formato: "png" } });
+    expect(Buffer.from(roto).equals(Buffer.from(sin))).toBe(true);
   });
   it("un detalle largo también pagina y no rompe con caracteres fuera de Latin-1", async () => {
     const lineas = Array.from({ length: 40 }, (_, i) => ({ descripcion: `Línea ${i + 1} ✓ 日本 ñandú`, monto: 1_000 }));
