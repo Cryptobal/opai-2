@@ -93,12 +93,27 @@ describe("cartola Santander: solo el bloque de detalle (CAR-341)", () => {
     ]);
   });
 
+  it("una glosa «Total…» o «Resumen…» con monto y fecha es un movimiento, no un título", () => {
+    const r = parsearFilasSantander([
+      ["Detalle movimientos"],
+      ["MONTO", "DESCRIPCIÓN MOVIMIENTO", "FECHA", "CARGO/ABONO"],
+      [1000, "TOTAL PAGO FICTICIO", "01/09/2025", "A"],
+      [null, null, null, null],
+      ["2.500,00", "Resumen de pago ficticio", "02/09/2025", "C"],
+      ["Resumen comisiones"],
+      ["COM.MANTENCION PLAN", -37.203],
+    ]);
+    expect(r.filas.map((f) => f.monto)).toEqual([1000, -2500]);
+    expect(r.rechazadas).toEqual([]);
+  });
+
   it("títulos de sección y montos del bloque de saldos", () => {
     expect(esFinDeDetalle(["Resumen comisiones"])).toBe(true);
     expect(esFinDeDetalle(["Saldos diarios", "Saldos diarios"])).toBe(true);
     expect(esFinDeDetalle([1000, "Abono", "01/09/2025"])).toBe(false);
-    expect([enteroPesos("1.234.567"), enteroPesos("−37.203"), enteroPesos(12.5), enteroPesos("abc")]).toEqual([
-      1234567, -37203, null, null,
+    expect(esFinDeDetalle([null, "Total ficticio", "01/09/2025"])).toBe(false);
+    expect([enteroPesos("1.234.567"), enteroPesos("−37.203"), enteroPesos(12.5), enteroPesos("abc"), enteroPesos("1.234.567,00")]).toEqual([
+      1234567, -37203, null, null, 1234567,
     ]);
   });
 });

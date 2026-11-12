@@ -33,7 +33,8 @@ export function montoDetalle(v: CeldaCartola | undefined): { ok: true; monto: nu
     }
     return v === 0 ? { ok: false, motivo: "Monto en cero: no es un movimiento." } : { ok: true, monto: v };
   }
-  const t = v.replace(/[−–]/g, "-").replace(/\$/g, "").replace(/\s/g, "");
+  // «1.234,00» de algunas exportaciones: los centavos en cero no cambian el monto.
+  const t = v.replace(/[−–]/g, "-").replace(/\$/g, "").replace(/\s/g, "").replace(/,0+$/, "");
   if (!/^-?\d{1,3}(\.\d{3})*$|^-?\d+$/.test(t)) {
     return { ok: false, motivo: `El monto ${mostrar(v)} no es un entero de pesos (ej.: 1.234.567).` };
   }

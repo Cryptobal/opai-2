@@ -33,8 +33,17 @@ export const bancosCartolasListar = defineCapability({
       where: { cuentaId: input.cuentaId },
       orderBy: { createdAt: "desc" },
       take: input.limite,
-      include: { movimientos: { select: { estado: true } } },
     });
+    // Conteos en la base (no se traen los movimientos): por cartola y estado.
+    const grupos = cartolas.length
+      ? await ctx.db.movimientoBancario.groupBy({
+          by: ["cartolaId", "estado"],
+          where: { cartolaId: { in: cartolas.map((c) => c.id) } },
+          _count: { _all: true },
+        })
+      : [];
+    const contar = (id: string, estado?: string) =>
+      grupos.filter((g) => g.cartolaId === id && (!estado || g.estado === estado)).reduce((a, g) => a + g._count._all, 0);
     return {
       items: cartolas.map((c) => ({
         id: c.id,
@@ -42,8 +51,8 @@ export const bancosCartolasListar = defineCapability({
         formato: c.formato,
         fechaDesde: c.fechaDesde ? aIso(c.fechaDesde) : null,
         fechaHasta: c.fechaHasta ? aIso(c.fechaHasta) : null,
-        movimientos: c.movimientos.length,
-        conciliados: c.movimientos.filter((m) => m.estado === "conciliado").length,
+        movimientos: contar(c.id),
+        conciliados: contar(c.id, "conciliado"),
         creadaEn: c.createdAt.toISOString(),
       })),
     };
@@ -62,7 +71,7 @@ async function contarImportacion(db: Pick<TenantTx, "movimientoBancario">, carto
 export const bancosCartolasDeshacer = defineCapability({
   id: "finanzas.cartolas.deshacer",
   descripcion:
-    "Deshace una cartola importada: borra los movimientos que dejó esa importación y la importación misma, para volver a cargarla corregida. No procede si alguno de sus movimientos ya está conciliado.",
+    "Deshace una cartola importada: borra los movimientos que dejó esa importación y la importación misma, para volver a cargarla corregida. No procede si alguno de sus movimientos ya está conciliado. Un movimiento que otra carga se saltó por repetido también se va: vuelve al reimportar la cartola.",
   permiso: PERMISO_BANCOS_GESTIONAR,
   input: z.object({ cartolaId: z.uuid(), motivo: z.string().trim().min(3).max(500) }),
   output: z.object({
@@ -82,7 +91,7 @@ export const bancosCartolasDeshacer = defineCapability({
     if (dryRun) return { ...base, conciliados: previa.conciliados, deshecha: false };
     if (previa.conciliados > 0) throw bloqueo(previa.conciliados);
 
-    await ctx.transaccion(async (tx) => {
+    await enTransaccionSinCarrera(() => ctx.transaccion(async (tx) => {
       // Se vuelve a contar dentro de la transacción: una conciliación confirmada entre la vista previa y ahora bloquea.
       const actual = await contarImportacion(tx, cartola.id);
       if (actual.conciliados > 0) throw bloqueo(actual.conciliados);
@@ -97,10 +106,20 @@ export const bancosCartolasDeshacer = defineCapability({
         payload: { movimientos: actual.ids.length, cuentaId: cartola.cuentaId, motivo: input.motivo },
       });
       await sincronizarAvisosEnTx(ctx, tx, { dryRun: false });
-    });
+    }));
     return { ...base, conciliados: 0, deshecha: true };
   },
 });
+
+/** Una conciliación confirmada entre el conteo y el borrado choca con la FK (P2003): se informa como bloqueo. */
+async function enTransaccionSinCarrera(f: () => Promise<void>): Promise<void> {
+  try {
+    await f();
+  } catch (e) {
+    if ((e as { code?: unknown } | null)?.code === "P2003") throw bloqueo(1);
+    throw e;
+  }
+}
 
 function bloqueo(n: number) {
   return reglaDeNegocio(

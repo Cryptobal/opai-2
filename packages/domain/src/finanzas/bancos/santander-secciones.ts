@@ -25,6 +25,8 @@ export function indiceTituloDetalle(rows: readonly (readonly CeldaCartola[])[]):
  * o cualquier título de sección (celdas combinadas que repiten el mismo texto sin números).
  */
 export function esFinDeDetalle(row: readonly CeldaCartola[]): boolean {
+  // Una fila con números o fechas es un movimiento (aunque su glosa diga «Total…»), nunca un título.
+  if (row.some((c) => typeof c === "number" || /\d{1,2}\/\d{1,2}\/\d{4}/.test(textoCelda(c)))) return false;
   const celdas = celdasConTexto(row);
   const primera = celdas[0];
   if (!primera) return false;
@@ -36,7 +38,7 @@ export function esFinDeDetalle(row: readonly CeldaCartola[]): boolean {
 export function enteroPesos(v: CeldaCartola | undefined): number | null {
   if (v == null || v === "") return null;
   if (typeof v === "number") return Number.isInteger(v) ? v : null;
-  const t = v.replace(/[−–]/g, "-").replace(/\$/g, "").replace(/\s/g, "").replace(/\./g, "");
+  const t = v.replace(/[−–]/g, "-").replace(/\$/g, "").replace(/\s/g, "").replace(/,0+$/, "").replace(/\./g, "");
   if (!/^-?\d+$/.test(t)) return null;
   return Number(t);
 }
