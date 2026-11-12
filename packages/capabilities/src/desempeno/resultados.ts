@@ -5,15 +5,16 @@ import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { resultadosDe } from "./calculo";
+import { estaCerrado, personaCerrada } from "./cierre-lectura";
 import { mesesDe, periodo, PERMISOS_DESEMPENO, versionesDe } from "./comun";
 import { visibilidadDe, visiblesEntre } from "./visibilidad";
 
-const MAX = 200;
-const puntaje = z
+export const MAX_PERSONAS = 200;
+export const puntaje = z
   .number()
   .nullable()
   .describe("0 a 120; 100 = todas las metas cumplidas. null = sin hechos que medir todavía.");
-const cobertura = z.number().describe("Peso del scorecard que sí tuvo hechos este mes (0 a 100).");
+export const cobertura = z.number().describe("Peso del scorecard que sí tuvo hechos este mes (0 a 100).");
 
 export const resultadosPersona = defineCapability({
   id: "desempeno.resultados.ver_persona",
@@ -31,6 +32,7 @@ export const resultadosPersona = defineCapability({
     cargoId: z.string().nullable(),
     periodo: z.string(),
     vigenteDesde: z.string().nullable().describe("null = su cargo no tiene scorecard ese mes."),
+    cerrado: z.boolean().describe("true = mes cerrado: el resultado es el que quedó guardado y no cambia."),
     puntaje,
     cobertura,
     indicadores: z.array(
@@ -74,8 +76,19 @@ export const resultadosPersona = defineCapability({
     ]);
     const mes = input.periodo ?? meses.actual;
     const { nombres, apellidos } = persona;
-    const base = { personaId, nombres, apellidos, cargoId: vinculo?.cargoId ?? null, periodo: mes };
+    const cerrado = await estaCerrado(ctx, mes);
+    const base = { personaId, nombres, apellidos, cargoId: vinculo?.cargoId ?? null, periodo: mes, cerrado };
     const sinScorecard = { ...base, vigenteDesde: null, puntaje: null, cobertura: 0, indicadores: [] };
+    if (cerrado) {
+      // Mes cerrado: lo guardado, con el cargo y el scorecard que tenía ese mes.
+      const g = await personaCerrada(ctx, personaId, mes);
+      if (!g) return { ...sinScorecard, cargoId: null };
+      if (esPropia && !vis.todos && !g.personaVeResultado) {
+        throw prohibido("Tu empresa no muestra el resultado propio para este cargo.");
+      }
+      const { personaVeResultado: _ve, scorecardId: _s, ...guardado } = g;
+      return { ...base, ...guardado };
+    }
     if (!vinculo) return sinScorecard;
     const scorecard = versionVigente(await versionesDe(ctx, vinculo.cargoId), mes);
     if (!scorecard) return sinScorecard;
@@ -84,71 +97,5 @@ export const resultadosPersona = defineCapability({
     }
     const r = (await resultadosDe(ctx, scorecard, [persona], mes, meses.zona)).get(personaId);
     return { ...base, vigenteDesde: scorecard.vigenteDesde, ...(r ?? sinScorecard) };
-  },
-});
-
-export const resultadosCargo = defineCapability({
-  id: "desempeno.resultados.ver_cargo",
-  descripcion:
-    "Resultado de gestión de las personas de un cargo en un mes: el puntaje de cada una (0 a 120) según el scorecard del cargo. Cada jefatura ve solo a las personas a su cargo; gerencia ve a todas. Entrega hasta 200 personas por respuesta; si hay más, `siguiente` dice desde dónde seguir.",
-  permiso: PERMISOS_DESEMPENO.resultadosVer,
-  input: z.object({
-    cargoId: uuidSchema,
-    periodo,
-    despuesDe: uuidSchema.optional().describe("Para seguir: el valor `siguiente` anterior."),
-  }),
-  output: z.object({
-    cargoId: z.string(),
-    periodo: z.string(),
-    vigenteDesde: z.string().nullable().describe("null = el cargo no tiene scorecard ese mes."),
-    personas: z.array(
-      z.object({ personaId: z.string(), nombres: z.string(), apellidos: z.string(), puntaje, cobertura }),
-    ),
-    siguiente: z.string().nullable(),
-  }),
-  efecto: "lectura",
-  dryRun: false,
-  auditarLectura: (salida) => salida.personas.map((p) => p.personaId),
-  async handler(ctx, input) {
-    const cargo = await ctx.db.cargo.findUnique({ where: { id: input.cargoId }, select: { id: true } });
-    if (!cargo) throw noEncontrado("El cargo");
-    const [meses, vis, vinculos] = await Promise.all([
-      mesesDe(ctx),
-      visibilidadDe(ctx),
-      ctx.db.vinculoLaboral.findMany({
-        where: { cargoId: input.cargoId, estado: "vigente", persona: { estado: "activa" } },
-        select: { personaId: true },
-      }),
-    ]);
-    const mes = input.periodo ?? meses.actual;
-    const scorecard = versionVigente(await versionesDe(ctx, input.cargoId), mes);
-    const base = { cargoId: input.cargoId, periodo: mes, vigenteDesde: scorecard?.vigenteDesde ?? null };
-    if (!scorecard) return { ...base, personas: [], siguiente: null };
-    const delCargo = vinculos.map((v) => v.personaId);
-    const visibles = await visiblesEntre(ctx, vis, delCargo);
-    // Quien consulta también aparece si es de este cargo y puede ver su propio resultado.
-    if (vis.propia && delCargo.includes(vis.propia) && (vis.todos || scorecard.personaVeResultado)) {
-      visibles.add(vis.propia);
-    }
-    const orden = [...visibles].filter((id) => !input.despuesDe || id > input.despuesDe).sort();
-    const pagina = orden.slice(0, MAX);
-    const personas = await ctx.db.persona.findMany({
-      where: { id: { in: pagina } },
-      select: { id: true, nombres: true, apellidos: true, usuarioId: true },
-    });
-    const resultados = await resultadosDe(ctx, scorecard, personas, mes, meses.zona);
-    return {
-      ...base,
-      personas: personas
-        .map((p) => ({
-          personaId: p.id,
-          nombres: p.nombres,
-          apellidos: p.apellidos,
-          puntaje: resultados.get(p.id)?.puntaje ?? null,
-          cobertura: resultados.get(p.id)?.cobertura ?? 0,
-        }))
-        .sort((a, b) => (a.personaId < b.personaId ? -1 : 1)),
-      siguiente: orden.length > MAX ? (pagina.at(-1) ?? null) : null,
-    };
   },
 });

@@ -44,6 +44,25 @@ export const AJUSTES: Record<string, Ajuste> = {
       meta_sugerida: 10,
     }),
   },
+  // Desempeño (CAR-322): CHECK del mes y del origen; FK compuestas a persona, cargo, scorecard y mes.
+  "desempeno.periodos_cerrados": {
+    fijas: ["periodo"],
+    valores: () => ({ periodo: "2026-10", origen: "manual", personas: 1 }),
+  },
+  "desempeno.resultados_cerrados": {
+    dependencias: ["desempeno.periodos_cerrados", "core.personas", "core.cargos", "desempeno.scorecards"],
+    fijas: ["periodo", "persona_id", "cargo_id", "scorecard_id"],
+    valores: (ctx) => ({
+      periodo: "2026-10",
+      persona_id: id(ctx, "core.personas"),
+      cargo_id: id(ctx, "core.cargos"),
+      scorecard_id: id(ctx, "desempeno.scorecards"),
+      vigente_desde: "2026-10",
+      puntaje: 80,
+      cobertura: 100,
+      indicadores: "[]",
+    }),
+  },
   "desempeno.scorecard_indicadores": {
     dependencias: ["desempeno.scorecards"],
     fijas: ["scorecard_id"],
