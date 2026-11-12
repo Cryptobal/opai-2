@@ -5,6 +5,7 @@ import { documentoUsaVariablesSensibles, etiquetaDeVariable, fechaDeDocumento, r
 
 import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
+import { logoDeMarca } from "../../finanzas/ventas-pdf-logo";
 import { generarPdfLaboral } from "../documentos/pdf-laboral";
 import { valoresDePersona } from "../documentos/rellenar-valores";
 import { marcaDe } from "../comunicaciones/resolver";
@@ -50,5 +51,5 @@ export async function pdfDeAnexo(
   if (relleno.faltantes.length)
     throw reglaDeNegocio(`Faltan datos para generar el anexo: ${relleno.faltantes.map(etiquetaDeVariable).join(", ")}.`);
   const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
-  return (await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos })).bytes;
+  return (await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo: await logoDeMarca(ctx) })).bytes;
 }
