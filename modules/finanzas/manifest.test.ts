@@ -35,9 +35,9 @@ describe("manifest de Finanzas (Compras + Flujo + Ventas DTE)", () => {
     expect(manifest.configuracion).toBe(ajustesFinanzas);
   });
 
-  it("tiene 91 capacidades con ids únicos", () => {
+  it("tiene 92 capacidades con ids únicos", () => {
     const ids = manifest.capacidades.map((c) => c.id);
-    expect(ids).toHaveLength(91);
-    expect(new Set(ids).size).toBe(91);
+    expect(ids).toHaveLength(92);
+    expect(new Set(ids).size).toBe(92);
   });
 });
