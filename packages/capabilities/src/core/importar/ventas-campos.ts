@@ -49,7 +49,7 @@ export const DEF_DOCUMENTOS_VENTA: DefinicionImportador = {
     { clave: "monto_cobrado", etiqueta: "Monto ya cobrado", tipo: "entero", sinonimos: ["cobrado", "pagado", "monto pagado"], ejemplo: "1190000",
       ayuda: "Lo que el cliente ya pagó. Vacío: se asume cobrada entera (historial). Escribe 0 si todavía se debe. Solo cuenta en facturas." },
     { clave: "estado_dte", etiqueta: "Estado ante el SII", tipo: "opcion", sinonimos: ["estado"], ejemplo: "aceptado",
-      opciones: { aceptado: ["aceptada", "emitida", "vigente"], anulado_nc: ["anulada", "anulado", "anulada por nota de credito"], rechazado: ["rechazada"] } },
+      opciones: { aceptado: ["aceptada", "emitida", "vigente"], anulado_nc: ["anulada", "anulado", "anulada por nota de credito"], anulado_nd: ["anulada por nota de debito"], rechazado: ["rechazada"] } },
     { clave: "cedida", etiqueta: "Cedida en factoring", tipo: "booleano", sinonimos: ["cesion", "factoring"], ejemplo: "no" },
     { clave: "factor", etiqueta: "Factoring que la recibió", tipo: "texto", sinonimos: ["cesionario", "factor"], ejemplo: "", largoMaximo: 120 },
     { clave: "glosa", etiqueta: "Glosa", tipo: "texto", sinonimos: ["descripcion", "detalle"], ejemplo: "Servicio de seguridad octubre", largoMaximo: 500 },

@@ -7,6 +7,39 @@ import { DEF_DOCUMENTOS_VENTA, type DatosDocumentoVenta, datosDocumento, TIPOS_N
 
 const clave = (tipo: number, folio: number) => `${tipo}-${folio}`;
 
+/**
+ * Una nota de débito que anula (código 1) una nota de crédito la deja «anulada por ND», como al emitirla en OPAI: si no,
+ * la NC seguiría restando del saldo de su factura. Solo se marca la NC que viene en la misma planilla sin estado propio;
+ * una NC que ya está en OPAI no se toca (el lote debe poder revertirse) y se avisa.
+ */
+function anularNcPorNd(
+  planes: FilaPlan<DatosDocumentoVenta>[],
+  filas: readonly { fila: number; datos: Record<string, unknown> }[],
+  enOpai: Map<string, unknown>,
+) {
+  const sinEstado = new Set(filas.filter((f) => f.datos["estado_dte"] == null).map((f) => f.fila));
+  const ncs = new Map(planes.filter((p) => p.accion === "crear" && p.datos?.tipoDte === 61).map((p) => [p.clave, p]));
+  for (const nd of planes) {
+    const d = nd.datos;
+    if (nd.accion !== "crear" || d?.tipoDte !== 56 || d.codigoReferencia !== 1 || d.refTipoDte !== 61 || !d.refFolio) continue;
+    // Una ND rechazada por el SII no anula nada (igual que al emitir en OPAI).
+    if (d.estadoDte !== "aceptado" && d.estadoDte !== "enviado") continue;
+    const k = clave(61, d.refFolio);
+    const nc = ncs.get(k);
+    if (!nc) {
+      if (enOpai.has(k)) nd.mensajes.push("La nota de crédito que anula ya está en OPAI: su estado no se cambia.");
+      continue;
+    }
+    // Solo si la NC va antes (así la ND queda vinculada a ella) y es del mismo cliente; si no, se avisa y no se anula.
+    if (nc.fila > nd.fila || nc.datos?.cuentaId !== d.cuentaId)
+      nd.mensajes.push("No se anuló la nota de crédito: ponla antes de esta fila y revisa que sea del mismo cliente.");
+    else if (nc.datos && sinEstado.has(nc.fila)) {
+      nc.datos.estadoDte = "anulado_nd";
+      nc.mensajes.push(`Queda anulada por la nota de débito de la fila ${nd.fila}.`);
+    }
+  }
+}
+
 export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
   def: DEF_DOCUMENTOS_VENTA,
   entidad: "documento_venta",
@@ -27,7 +60,7 @@ export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
     const enOpai = new Map(existentes.map((d) => [clave(d.tipoDte, d.folio ?? 0), d]));
     const vistos = new Map<string, number>();
     const cuentaDeVisto = new Map<string, string>();
-    return filas.map((f): FilaPlan<DatosDocumentoVenta> => {
+    const planes = filas.map((f): FilaPlan<DatosDocumentoVenta> => {
       const r = cuentaDe(f);
       const { datos, conDesglose, supuestaCobrada, montosValidos } = datosDocumento(f, "error" in r ? "" : r.cuenta.id);
       const k = clave(datos.tipoDte, datos.folio);
@@ -61,6 +94,8 @@ export const importadorDocumentosVenta: Importador<DatosDocumentoVenta> = {
       }
       return { ...base, accion: "crear", mensajes: avisos };
     });
+    anularNcPorNd(planes, filas, enOpai);
+    return planes;
   },
   async crear(tx, ctx, d) {
     const ref =
