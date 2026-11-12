@@ -5,6 +5,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 
 import { cargarScorecards, type FilaScorecard } from "./_componentes/datos";
+import { PestanasDesempeno } from "./_componentes/pestanas";
 import { mesCorto } from "./_componentes/tipos";
 
 export const metadata = { title: "Desempeño" };
@@ -36,6 +37,7 @@ export default function Desempeno() {
         <ListScreen<FilaScorecard>
           state={estadoPantalla(r)}
           titulo="Desempeño"
+          filtros={<PestanasDesempeno activa="cargos" />}
           items={r.ok ? r.data : []}
           clave={(f) => f.cargoId}
           href={(f) => `/desempeno/cargos/${f.cargoId}`}

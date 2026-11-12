@@ -3,7 +3,14 @@ import type { BadgeProps } from "@opai/ds";
 
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import type { CargoJefatura, DefinicionIndicador, IndicadorOpcion, Scorecard } from "./tipos";
+import type {
+  CargoJefatura,
+  DefinicionIndicador,
+  Hecho,
+  IndicadorOpcion,
+  Propio,
+  Scorecard,
+} from "./tipos";
 
 export type FilaScorecard = {
   cargoId: string;
@@ -48,15 +55,6 @@ export type ResultadoPersona = {
   }[];
 };
 
-type Propio = {
-  indicador: string;
-  nombre: string;
-  descripcion: string | null;
-  unidad: string;
-  metaSugerida: number;
-  estado: "borrador" | "publicado";
-};
-
 export const cargarScorecards = () =>
   ejecutarComoUsuario<FilaScorecard[]>("erp", "desempeno.scorecards.list", {});
 
@@ -79,6 +77,11 @@ export const cargarResultadoPersona = (personaId: string) =>
 export const cargarCargos = () =>
   ejecutarComoUsuario<CargoJefatura[]>("erp", "core.cargos.list", {});
 
+export const cargarPropios = () =>
+  ejecutarComoUsuario<Propio[]>("erp", "desempeno.propios.list", {});
+
+export const cargarHechos = () => ejecutarComoUsuario<Hecho[]>("erp", "desempeno.hechos.list", {});
+
 /** Indicadores que se pueden poner en un scorecard: el catálogo más los propios ya publicados. */
 export async function cargarOpciones(): Promise<IndicadorOpcion[]> {
   const [catalogo, propios] = await Promise.all([
@@ -87,7 +90,7 @@ export async function cargarOpciones(): Promise<IndicadorOpcion[]> {
       "core.indicadores_gestion.catalogo",
       {},
     ),
-    ejecutarComoUsuario<Propio[]>("erp", "desempeno.propios.list", {}),
+    cargarPropios(),
   ]);
   const delCatalogo = (catalogo.ok ? catalogo.data : []).map((i) => ({
     id: i.id,

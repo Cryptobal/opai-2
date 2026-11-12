@@ -56,3 +56,50 @@ export function conUnidad(valor: number, unidad: string | null): string {
   if (unidad === "dias") return `${n} días`;
   return n;
 }
+
+export type UsoHecho = { hecho: string; filtros?: Record<string, string[]> };
+
+export type DefinicionPropio =
+  | ({ forma: "contar" } & UsoHecho)
+  | ({ forma: "sumar"; monto: string } & UsoHecho)
+  | { forma: "tiempo"; desde: UsoHecho; hasta: UsoHecho; unidad: "horas" | "dias" }
+  | { forma: "porcentaje"; parte: UsoHecho; total: UsoHecho };
+
+export type Propio = {
+  id: string;
+  indicador: string;
+  nombre: string;
+  descripcion: string | null;
+  sentido: "mayor" | "menor";
+  metaSugerida: number;
+  unidad: string;
+  vigenteDesde: string;
+  estado: "borrador" | "publicado";
+  archivado: boolean;
+  definicion: DefinicionPropio;
+};
+
+export type Hecho = {
+  id: string;
+  modulo: string;
+  nombre: string;
+  descripcion: string;
+  entidad: string;
+  montos: { id: string; unidad: string }[];
+  puedeUsar: boolean;
+};
+
+export type VistaPrevia = {
+  periodo: string;
+  sujetos: number;
+  minimo: number | null;
+  maximo: number | null;
+  promedio: number | null;
+};
+
+export const ETIQUETA_FORMA: Record<DefinicionPropio["forma"], string> = {
+  contar: "Cuenta cuántas veces pasa",
+  sumar: "Suma un monto",
+  tiempo: "Tiempo entre dos hechos",
+  porcentaje: "Porcentaje de un hecho sobre otro",
+};
