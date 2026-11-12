@@ -34,7 +34,7 @@ No entra: pedir el indicador al agente «con palabras propias» (el agente ya pu
 
 ## 5. Archivos
 
-Nuevos: `packages/domain/src/desempeno/propios.ts` y su test; `packages/capabilities/src/hechos-gestion.ts`; `core/indicadores-gestion/hechos.ts`; `comercial/hechos-gestion.ts`; `desempeno/propios-{comun,lectura,guardar,archivar,indicadores}.ts`; migración `20261128100000_desempeno_indicadores_propios`; `packages/capabilities/test/desempeno-propios-db.test.ts`.
+Nuevos: `packages/domain/src/desempeno/propios.ts` y su test; `packages/capabilities/src/hechos-gestion.ts`; `core/indicadores-gestion/hechos.ts`; `comercial/hechos-gestion.ts`; `desempeno/propios-{comun,lectura,guardar,archivar,indicadores}.ts`; migración `20261202100000_desempeno_indicadores_propios`; `packages/capabilities/test/desempeno-propios-db.test.ts`.
 
 Tocados: `module.ts` (`hechos` en el manifiesto), `desempeno/{calculo,scorecards-guardar,index}.ts`, manifiestos de Desempeño y Comercial, `desempeno.prisma`, siembra de dos empresas, instantáneas y etiquetas.
 
