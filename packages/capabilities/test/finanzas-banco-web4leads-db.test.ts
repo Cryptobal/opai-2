@@ -117,6 +117,34 @@ describe.skipIf(omitirSuiteDb())("Finanzas · banco Web4Leads (db)", () => {
     expect(await e.admin.movimientoBancario.count({ where: { cuentaId: cuentaA } })).toBe(antes + 2);
   });
 
+  it("CAR-345: el saldo de la cuenta llega solo, sin movimientos, y solo uno más reciente reemplaza al vigente", async () => {
+    const t = (await e.admin.tenant.create({ data: { slug: `w4s-${randomUUID().slice(0, 8)}`, nombre: "W4L S", vertical: "seguridad" } })).id;
+    await run(t, "core.integraciones.configurar", { proveedor: "web4leads", modalidad: "propia" });
+    await run(t, "core.integraciones.set_secreto", { proveedor: "web4leads", nombre: "api_key", valor: SECRETO });
+    const id = (await cuenta(t, "94541158")).data.id;
+    const saldo = async () => e.admin.cuentaBancaria.findUniqueOrThrow({ where: { id } });
+    const soloSaldo = (current: number, asOf: string) => payload([], { accountBalance: { current, asOf } });
+
+    // Con movimientos y saldo: queda el saldo informado.
+    await recibir(t, payload([mov("s1", 10_000, 2_010_000)], { accountBalance: { current: 2_010_000, asOf: "2026-11-12T12:00:00-03:00" } }));
+    // Solo el saldo, más reciente, sin movimientos nuevos: reemplaza al vigente (antes se ignoraba).
+    const r = await recibir(t, soloSaldo(1_750_000, "2026-11-12T17:30:00-03:00"));
+    expect(r.ok && (r.data as { nuevos: number }).nuevos).toBe(0);
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    expect((await saldo()).saldoBancoEn?.toISOString()).toBe("2026-11-12T20:30:00.000Z");
+    // Un saldo más antiguo que llega tarde no pisa el vigente.
+    await recibir(t, soloSaldo(9_999_999, "2026-11-12T15:00:00-03:00"));
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    // Ni aunque traiga un movimiento nuevo: manda la fecha del saldo informado.
+    await recibir(t, payload([mov("s2", -5_000, null)], { accountBalance: { current: 8_888_888, asOf: "2026-11-12T16:00:00-03:00" } }));
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    // El mismo saldo con la misma hora (reenvío) se acepta sin cambios.
+    await recibir(t, soloSaldo(1_750_000, "2026-11-12T17:30:00-03:00"));
+    expect((await saldo()).saldoBanco).toBe(1_750_000n);
+    // La otra empresa con el mismo número de cuenta no se toca.
+    expect((await e.admin.cuentaBancaria.findUniqueOrThrow({ where: { id: cuentaB } })).saldoBanco).toBeNull();
+  });
+
   it("misma operación que ya vino por cartola (misma huella y saldo) se descarta", async () => {
     await e.admin.movimientoBancario.create({
       data: {
