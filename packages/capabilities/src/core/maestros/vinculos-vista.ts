@@ -17,6 +17,10 @@ export const vinculoSchema = z.object({
   termino: z.string().nullable(),
   motivoTermino: z.string().nullable(),
   estado: z.string(),
+  reclutadoPorId: z
+    .string()
+    .nullable()
+    .describe("Usuario que reclutó a la persona (null si no se registró)."),
   updatedAt: z.string().nullable(),
 });
 
@@ -33,6 +37,7 @@ export type FilaVinculo = {
   termino?: Date | null;
   motivoTermino?: string | null | undefined;
   estado?: string | null | undefined;
+  reclutadoPorId?: string | null | undefined;
   updatedAt?: Date | null;
 };
 
@@ -49,6 +54,7 @@ export const vistaVinculo = (v: FilaVinculo) => ({
   termino: dia(v.termino),
   motivoTermino: v.motivoTermino ?? null,
   estado: v.estado ?? "vigente",
+  reclutadoPorId: v.reclutadoPorId ?? null,
   updatedAt: v.updatedAt?.toISOString() ?? null,
 });
 
@@ -65,5 +71,12 @@ export const camposVinculo = {
     .optional()
     .describe(
       "Término pactado (plazo fijo u obra). El término efectivo va por core.vinculos.terminar.",
+    ),
+  reclutadoPorId: z
+    .uuid()
+    .nullable()
+    .optional()
+    .describe(
+      "Usuario de la empresa que reclutó a la persona. Al crear, si no se envía, queda quien registra el ingreso.",
     ),
 };

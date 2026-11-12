@@ -10,7 +10,7 @@ import { dia, diaSchema, rutSchema, telefonoSchema, textoOpcional } from "./comu
 export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
 
 export const vinculoResumenSchema = vinculoSchema
-  .omit({ personaId: true, estado: true, motivoTermino: true, updatedAt: true })
+  .omit({ personaId: true, estado: true, motivoTermino: true, updatedAt: true, reclutadoPorId: true })
   .extend({ cargo: z.string() });
 
 export const personaSchema = z.object({

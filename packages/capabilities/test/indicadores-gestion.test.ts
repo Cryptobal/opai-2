@@ -75,6 +75,7 @@ describe(CATALOGO, () => {
     expect(lista.map((i) => i.id)).toEqual([
       "core.tareas_a_tiempo",
       "core.personas_documentos_al_dia",
+      "core.personas_retencion_90",
       "pruebas.visitas_hechas",
     ]);
     expect(lista.every((i) => i.puedeMedir)).toBe(true);
@@ -86,11 +87,13 @@ describe(CATALOGO, () => {
     expect((await dato<{ id: string }[]>(apagado, CATALOGO, {})).map((i) => i.id)).toEqual([
       "core.tareas_a_tiempo",
       "core.personas_documentos_al_dia",
+      "core.personas_retencion_90",
     ]);
     const sinScope = contextoDePrueba({ modulosActivos: ["pruebas"], scopes: ["core"] }).ctx;
     expect((await dato<{ id: string }[]>(sinScope, CATALOGO, {})).map((i) => i.id)).toEqual([
       "core.tareas_a_tiempo",
       "core.personas_documentos_al_dia",
+      "core.personas_retencion_90",
     ]);
   });
   it("marca lo que el actor no puede medir y niega el catálogo a viewer y supervisor", async () => {

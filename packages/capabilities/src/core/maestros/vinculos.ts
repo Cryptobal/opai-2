@@ -1,5 +1,10 @@
 export { vinculosTerminar } from "./vinculos-terminar";
-import { bloquearVinculo, exigirEdicionVinculo, validarDestino } from "./vinculos-validacion";
+import {
+  bloquearVinculo,
+  exigirEdicionVinculo,
+  validarDestino,
+  validarReclutador,
+} from "./vinculos-validacion";
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
@@ -89,7 +94,7 @@ export const vinculosCreate = defineCapability({
 export const vinculosUpdate = defineCapability({
   id: "core.vinculos.update",
   descripcion:
-    "Corrige un vínculo vigente, su instalación, puesto y jornada pactada. Para terminarlo, usa core.vinculos.terminar.",
+    "Corrige un vínculo vigente, su instalación, puesto, jornada pactada y quién reclutó a la persona. Para terminarlo, usa core.vinculos.terminar.",
   permiso: PERMISOS_CORE.vinculosManage,
   input: z.object({
     id: uuidSchema,
@@ -112,6 +117,7 @@ export const vinculosUpdate = defineCapability({
       throw reglaDeNegocio("El término es anterior al inicio.");
     if (actual.estado !== "vigente") throw reglaDeNegocio("Solo se corrige un vínculo vigente.");
     if (cambios.cargoId) await cargoParaVinculo(ctx, cambios.cargoId);
+    await validarReclutador(ctx, cambios.reclutadoPorId);
     const data = definidos({
       ...cambios,
       inicio: opcionalAFecha(cambios.inicio) ?? undefined,

@@ -1,10 +1,10 @@
-# BRIEF CAR-309 · Personas: indicadores de desempeño (primera parte)
+# BRIEF CAR-309 · Personas: indicadores de desempeño
 
 ADR-094. Hoja de alcance `docs/2.0/diseño/alcance-desempeno.md` (Personas: días para cubrir una vacante, retención a 90 días, fichas con documentos al día). Apilado sobre CAR-322b (#566).
 
 ## 1 Objetivo
 
-Que Personas publique sus indicadores en el catálogo del núcleo para usarlos en los scorecards de Desempeño. Esta primera parte entrega «Fichas con documentos al día»; los otros dos esperan dos reglas de Carlos (ver §10).
+Que Personas publique sus indicadores en el catálogo del núcleo para usarlos en los scorecards de Desempeño. Entrega los tres indicadores de la hoja de alcance. Las reglas de reclutador y vacante las decidió Carlos el 12-nov-2026 (adenda CAR-309 de ADR-094).
 
 ## 2 Estado actual (verificado)
 
@@ -18,7 +18,11 @@ Que Personas publique sus indicadores en el catálogo del núcleo para usarlos e
 - Indicador del núcleo `core.personas_documentos_al_dia` («Fichas con documentos al día»): de las personas que **reportan** a una jefatura (directas o, si nadie tiene a la persona asignada, la jefatura del nivel de arriba, para que nadie quede sin medir), porcentaje sin ningún documento vencido al cierre del mes (en el mes en curso, a hoy). Cuenta solo el documento propio de la ficha y confirmado (`disponible`); uno pendiente, archivado, reemplazado o solo referenciado no cuenta. «Al cierre» = vence antes del día 1 del mes siguiente (vence el último día del mes → vencido). Se atribuye a la Persona jefa; meta sugerida 95 %.
 - Regla pura `reportesPorJefe` en `@opai/domain` (la misma de `personasACargo`) y helper `directasPorJefatura(ctx)` que la aplica a toda la empresa en 3 consultas.
 
-Fuera (esperan decisión de Carlos): «Días para cubrir una vacante» y «Retención a 90 días».
+- **«Reclutado por»** en el vínculo laboral (`reclutado_por`): `core.vinculos.create` lo llena con quien registra el ingreso (si es una persona; una key de servicio o el sistema lo dejan vacío) y `core.vinculos.update` lo cambia; un reclutador enviado a mano tiene que ser usuario con membresía activa. El cambio queda en el evento `core.vinculo.actualizado` (antes/después) y en la auditoría.
+- Indicador `core.personas_retencion_90` («Retención a 90 días», resultado, %, meta 80, por usuario, permiso `core:vinculos.read`): de los vínculos con reclutador cuyo día 90 cae en el mes y ya llegó, % que no terminó antes de ese día.
+- Indicador `pauta.dias_cubrir_vacante` («Días para cubrir una vacante», oportunidad, días, menos es mejor, meta 7, por usuario, permiso `pauta:read`), publicado por el módulo Pauta: por cada serie con titular que empieza a regir en el mes, si la anterior era sin titular, días desde la primera serie sin titular de esa racha; se atribuye al reclutador del contrato con que la persona tomó el puesto; promedio por reclutador.
+
+Fuera: mostrar y editar «Reclutado por» en la ficha (hoy por API y MCP; la pantalla va con su diseño), vacantes todavía abiertas al cierre (no suman hasta que se cubren).
 
 ## 4 Arquitectura
 
@@ -32,11 +36,11 @@ El indicador vive en `packages/capabilities/src/core/indicadores-gestion/` (Pers
 
 ## 6 Modelo de datos y migraciones
 
-Ninguna.
+`20261210100000_core_vinculo_reclutado_por`: columna nullable `core.vinculos_laborales.reclutado_por` (uuid, sin FK, como `creada_por` de la pauta) e índice por tenant. Aditiva; los vínculos existentes quedan sin reclutador.
 
 ## 7 Capacidades
 
-Ninguna nueva: el indicador aparece en `core.indicadores_gestion.catalogo` y se mide con `.medir` (pantalla, API y MCP). Permiso: `core:documentos.read`.
+`core.vinculos.create`/`.update`/`.list` suman `reclutadoPorId`. Ninguna nueva: los indicadores aparecen en `core.indicadores_gestion.catalogo` y se mide con `.medir` (pantalla, API y MCP). Permiso: `core:documentos.read`.
 
 ## 8 Interfaz
 
@@ -50,16 +54,17 @@ Todo por `ctx.db` (RLS). Solo ids y porcentajes; no expone documentos ni nombres
 
 - Jefatura sin nadie a cargo directo → no aparece (sin dato, no cero).
 - Mes pasado: se mide con la jefatura de hoy y las versiones de hoy; el cierre del mes (CAR-322) lo deja fijo.
-- **Por decidir (Carlos):** (1) cómo se registra quién reclutó a cada persona (sugerido: campo «Reclutado por» que se llena solo con quien registra el ingreso); (2) cuándo se abre y cierra una vacante (sugerido: un puesto de la pauta que queda sin persona, hasta que alguien lo toma).
+- Retención: un vínculo sin reclutador no cuenta; el día 90 aún no llegado no cuenta ni a favor ni en contra; salir el mismo día 90 cuenta como que siguió.
+- Vacante: un cambio de titular directo (A → B, sin serie vacía) no es vacante; un puesto que nace sin titular abre vacante desde su primera serie; si la persona que lo tomó no tiene reclutador, la vacante no se atribuye.
 
 ## 11 Plan por bloques
 
-1. Helper de jefatura de la empresa e indicador, con tests.
-2. Brief y ESTADO.
+1. Helper de jefatura de la empresa e indicador de documentos, con tests.
+2. «Reclutado por» (migración y capacidades), retención a 90 días y días para cubrir una vacante, con tests; brief, adenda y ESTADO.
 
 ## 12 Tests
 
-`indicadores-personas-db` (vencido cuenta; reemplazado, pendiente, archivado y referencia no; borde del último día; persona sin jefe asignado que sube de nivel; por mes; aislamiento entre empresas) y catálogo actualizado.
+`indicadores-reclutamiento-db` («Reclutado por» por defecto, cambio y rechazo de un usuario ajeno; retención por mes y aislamiento; vacante de 17 días) e `indicadores-personas-db` (vencido cuenta; reemplazado, pendiente, archivado y referencia no; borde del último día; persona sin jefe asignado que sube de nivel; por mes; aislamiento entre empresas) y catálogo actualizado.
 
 ## 13 Validación
 
@@ -72,7 +77,7 @@ Gate local; `tools/list` sin cambios (no hay capacidades nuevas).
 
 ## 15 Riesgos y rollback
 
-Bajo, sin migración. La jefatura se calcula en memoria con todos los vínculos vigentes (mismo riesgo de volumen anotado en CAR-322).
+Bajo: una columna nullable. La jefatura se calcula en memoria con todos los vínculos vigentes (mismo riesgo de volumen anotado en CAR-322).
 
 ## 16 Reporte de ejecución
 

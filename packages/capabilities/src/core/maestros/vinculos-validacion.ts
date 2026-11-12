@@ -60,3 +60,20 @@ export async function bloquearVinculo(ctx: Contexto, id: string) {
   `,
   );
 }
+
+/** «Reclutado por» (CAR-309): un usuario con membresía activa en la empresa, nunca uno ajeno. */
+export async function validarReclutador(ctx: Contexto, usuarioId: string | null | undefined) {
+  if (!usuarioId) return;
+  const m = await ctx.db.membership.findFirst({
+    where: { userId: usuarioId, estado: "activa" },
+    select: { id: true },
+  });
+  if (!m) throw reglaDeNegocio("Quien reclutó debe ser un usuario de la empresa.");
+}
+
+/**
+ * Quien registra el ingreso: lo que queda como «Reclutado por» por defecto. Si es un agente con la key
+ * de un usuario, ese usuario; una key de servicio o el sistema no son personas: queda sin reclutador.
+ */
+export const reclutadorPorDefecto = (ctx: Contexto): string | null =>
+  ctx.actor.tipo === "system" || ctx.principal?.tipo === "servicio" ? null : (ctx.usuario?.id ?? null);
