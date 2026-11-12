@@ -112,6 +112,8 @@ export async function equipoDe(ctx: Contexto, jefeId: string): Promise<Equipo> {
 
 /** Ficha de Persona del usuario que consulta (vínculo 1 a 1 de `core.personas.vincular_usuario`). */
 export async function personaDelUsuario(ctx: Contexto): Promise<string | null> {
+  // Una key de servicio no es su responsable: no hereda su ficha ni su equipo.
+  if (ctx.principal?.tipo === "servicio") return null;
   const usuarioId = ctx.usuario?.id;
   if (!usuarioId) return null;
   const p = await ctx.db.persona.findFirst({

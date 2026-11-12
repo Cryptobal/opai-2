@@ -90,6 +90,6 @@ export const VERBOS: Record<string, string> = {
   // Importación de datos desde planillas (CAR-279).
   plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
   // Indicadores de gestión (CAR-305).
-  medir: "Medir",
+  medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",
 };

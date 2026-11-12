@@ -17,6 +17,7 @@
     "@opai/mod-asistencia": "workspace:*",
     "@opai/mod-comercial": "workspace:*",
     "@opai/mod-cpq": "workspace:*",
+    "@opai/mod-desempeno": "workspace:*",
     "@opai/mod-finanzas": "workspace:*",
     "@opai/mod-nomina": "workspace:*",
     "@opai/mod-pauta": "workspace:*",

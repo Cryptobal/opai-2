@@ -11,6 +11,7 @@ export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta } from "./pauta";
+export { capacidadesDesempeno, PERMISOS_DESEMPENO } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
