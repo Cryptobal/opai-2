@@ -36,17 +36,18 @@ test.describe("@preview configuración: integración con Slack", () => {
 
     // Deja el valor por defecto (15) para no ensuciar qa-e2e. En teléfono el aviso anterior queda sobre
     // «Guardar» (sonner lo pausa con la emulación táctil), así que se envía con Enter desde el campo y se
-    // comprueba la respuesta de la acción de servidor, no el aviso, que puede seguir en pantalla.
+    // comprueba la llamada a core.slack.configurar (otras acciones de servidor de la página, como los no
+    // leídos, también son POST), no el aviso, que puede seguir en pantalla.
     const margen = page.getByLabel("Margen de atraso (minutos)");
     await margen.fill("15");
     const respuesta = page.waitForResponse(
-      (r) => r.request().method() === "POST" && r.request().headers()["next-action"] !== undefined,
+      (r) =>
+        r.request().method() === "POST" &&
+        (r.request().postData() ?? "").includes("core.slack.configurar"),
+      { timeout: 30_000 },
     );
     await margen.press("Enter");
-    const cuerpo = await (await respuesta).text();
-    // La acción devuelve el Resultado de core.slack.configurar serializado en la respuesta RSC.
-    expect(cuerpo).toContain('"ok":true');
-    expect(cuerpo).not.toContain('"ok":false');
+    expect((await respuesta).status()).toBe(200);
     await expect(page.getByRole("button", { name: "Guardar" })).toBeEnabled({ timeout: 30_000 });
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
   });
