@@ -17,6 +17,10 @@ export async function contextoDeVinculado(
   if (!user) return null;
   const id = await identidadDe(user, tenantId);
   if (!id.actual || id.actual.tenantId !== tenantId) return null;
+  // Slack no es un portal: el clic corre en el portal interno de la membresía (ERP o, si no tiene,
+  // supervisor). Sin ninguno de los dos no hay acción (F2 solo vincula a esas personas).
+  const portal = (["erp", "supervisor"] as const).find((p) => id.actual?.portales.includes(p));
+  if (!portal) return null;
   return crearContexto({
     tenantId,
     actor: { tipo: "user", id: user.id },
@@ -25,7 +29,7 @@ export async function contextoDeVinculado(
     permisosRol: id.acceso.permisosRol,
     excepciones: id.acceso.excepciones,
     alcance: alcanceDe(id.acceso.instalaciones),
-    portal: null,
+    portal,
     portalesMembresia: id.actual.portales,
     modulosActivos: id.modulosActivos,
     modulosSoloLectura: id.modulosSoloLectura ?? [],

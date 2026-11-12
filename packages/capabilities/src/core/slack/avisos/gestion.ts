@@ -7,83 +7,19 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../../define";
-import { noEncontrado, reglaDeNegocio } from "../../../errores";
-import type { Contexto } from "../../../types";
-import { iso } from "../../comun";
-import { TIPO_ACTUALIZAR_AVISO, TIPO_REFUERZO_AVISO } from "./registrar";
-
-const vistaSchema = z.object({
-  id: z.string(),
-  tipo: z.string(),
-  titulo: z.string(),
-  gestion: z.enum(["abierto", "tomado", "cerrado"]),
-  tomadoPor: z.string().nullable(),
-  tomadoEn: z.string().nullable(),
-  cerradoEn: z.string().nullable(),
-});
-
-type Fila = NonNullable<Awaited<ReturnType<Contexto["db"]["slackAviso"]["findUnique"]>>>;
-const vista = (a: Fila) => ({
-  id: a.id,
-  tipo: a.tipo,
-  titulo: a.titulo,
-  gestion: a.gestion as "abierto" | "tomado" | "cerrado",
-  tomadoPor: a.tomadoPor,
-  tomadoEn: iso(a.tomadoEn),
-  cerradoEn: iso(a.cerradoEn),
-});
-
-/** Aviso dentro del alcance del actor: un supervisor solo ve los de sus instalaciones (ADR-022). */
-async function avisoEnAlcance(ctx: Contexto, id: string) {
-  const a = await ctx.db.slackAviso.findUnique({ where: { id } });
-  const fuera =
-    a && ctx.alcance && (!a.instalacionId || !ctx.alcance.instalaciones.includes(a.instalacionId));
-  if (!a || fuera) throw noEncontrado("El aviso");
-  return a;
-}
+import { reglaDeNegocio } from "../../../errores";
+import { avisoEnAlcance, cambiar, vista, vistaSchema } from "./gestion-comun";
+import { TIPO_REFUERZO_AVISO } from "./registrar";
 
 const entrada = z.object({ avisoId: z.uuid() });
 const base = {
   permiso: PERMISOS_CORE.avisosTerrenoGestionar,
+  portales: ["erp", "supervisor"] as ("erp" | "supervisor")[], // Botones de Slack de ERP y supervisores.
   input: entrada,
   output: vistaSchema,
   efecto: "escritura" as const,
   dryRun: true,
 };
-
-/** Cambia la gestión en una transacción, con evento y la actualización del mensaje de Slack en cola. */
-async function cambiar(
-  ctx: Contexto,
-  a: Fila,
-  data: Record<string, unknown>,
-  evento: string,
-  extra?: string,
-) {
-  return ctx.transaccion(async (tx) => {
-    const nuevo = await tx.slackAviso.update({ where: { id: a.id }, data });
-    await ctx.eventos.emitir(tx, {
-      tipo: evento,
-      entidadTipo: "aviso_terreno",
-      entidadId: a.id,
-      payload: { avisoId: a.id },
-    });
-    if (a.ts)
-      await ctx.trabajos.encolar(tx, {
-        tipo: TIPO_ACTUALIZAR_AVISO,
-        payload: { avisoId: a.id },
-        claveUnica: `slack-aviso-actualizar:${a.id}:${evento}`,
-        maxIntentos: 5,
-      });
-    if (extra)
-      await ctx.trabajos.encolar(tx, {
-        tipo: extra,
-        payload: { avisoId: a.id, porUserId: ctx.usuario?.id ?? null },
-        claveUnica: `${extra}:${a.id}:${Date.now()}`,
-        maxIntentos: 4,
-      });
-    return vista(nuevo);
-  });
-}
 
 export const avisosTerrenoTomar = defineCapability({
   ...base,
@@ -102,8 +38,17 @@ export const avisosTerrenoTomar = defineCapability({
     return cambiar(
       ctx,
       a,
-      { gestion: "tomado", tomadoPor: yo, tomadoEn: new Date() },
-      "core.aviso_terreno.tomado",
+      {
+        data: { gestion: "tomado", tomadoPor: yo, tomadoEn: new Date() },
+        desde: ["abierto"],
+        evento: "core.aviso_terreno.tomado",
+      },
+      (f) => {
+        if (f.gestion === "tomado" && f.tomadoPor === yo) return vista(f);
+        throw reglaDeNegocio(
+          f.gestion === "cerrado" ? "El aviso ya está cerrado." : "Otra persona ya tomó este aviso.",
+        );
+      },
     );
   },
 });
@@ -122,12 +67,16 @@ export const avisosTerrenoCerrar = defineCapability({
       ctx,
       a,
       {
-        gestion: "cerrado",
-        cerradoPor: yo,
-        cerradoEn: new Date(),
-        ...(a.tomadoPor ? {} : { tomadoPor: yo, tomadoEn: new Date() }),
+        data: {
+          gestion: "cerrado",
+          cerradoPor: yo,
+          cerradoEn: new Date(),
+          ...(a.tomadoPor ? {} : { tomadoPor: yo, tomadoEn: new Date() }),
+        },
+        desde: ["abierto", "tomado"],
+        evento: "core.aviso_terreno.cerrado",
       },
-      "core.aviso_terreno.cerrado",
+      vista,
     );
   },
 });
@@ -141,6 +90,18 @@ export const avisosTerrenoPedirRefuerzo = defineCapability({
     const a = await avisoEnAlcance(ctx, input.avisoId);
     if (a.gestion === "cerrado") throw reglaDeNegocio("El aviso ya está cerrado.");
     if (dryRun) return vista(a);
-    return cambiar(ctx, a, {}, "core.aviso_terreno.refuerzo_pedido", TIPO_REFUERZO_AVISO);
+    return cambiar(
+      ctx,
+      a,
+      {
+        data: { updatedAt: new Date() },
+        desde: ["abierto", "tomado"],
+        evento: "core.aviso_terreno.refuerzo_pedido",
+        extra: TIPO_REFUERZO_AVISO,
+      },
+      () => {
+        throw reglaDeNegocio("El aviso ya está cerrado.");
+      },
+    );
   },
 });

@@ -11,6 +11,7 @@ export const avisosTerrenoList = defineCapability({
   descripcion:
     "Lista los avisos de terreno de las últimas 48 horas (atrasos, ausencias, incidentes, pánico) con su estado en OPAI: abierto, tomado o cerrado. Un supervisor ve solo los de sus instalaciones.",
   permiso: PERMISOS_CORE.avisosTerrenoGestionar,
+  portales: ["erp", "supervisor"], // El supervisor es el destinatario principal de los avisos (F4).
   // Lectura de avisos que nombran a personas (NÚCLEO-H): se auditan los ids revelados.
   auditarLectura: (s) => s.map((a) => a.id),
   input: z.object({ gestion: z.enum(["abierto", "tomado", "cerrado"]).optional() }),
