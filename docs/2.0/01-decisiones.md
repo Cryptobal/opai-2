@@ -1725,6 +1725,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 ## ADR-090 · Base «Hilo»: marco agéntico con interruptor y barra del agente en los portales (CAR-274, 11-nov-2026)
 
+> **Reemplazado como diseño de destino por ADR-109 (12-nov-2026).** Lo construido con Hilo sigue funcionando hasta que su pantalla pase al diseño nuevo.
+
 **Fecha:** 11-nov-2026 · **Estado:** vigente · **Decide:** Carlos, en el chat del proyecto «Opai 2.0» · **Registra:** Claude («Sesión Hilo»). **Modifica** ADR-046 y `NAVEGACION.md` (el marco), ADR-049 y `modulos/agente.md` (portales del agente: R1 y la decisión del 29-oct sobre la pregunta 9) y ADR-014 y `DISENO.md` (la piel del DS, en la etapa H2). **Extiende** a la base Hilo el proceso de diseño de ADR-076. **No modifica** ADR-032 §3, ADR-033, ADR-045 ni ADR-055 §2.
 
 **Fuente (11-nov-2026, hora de Chile).** 10:56, sobre la propuesta: «me gusta». 11:50: «si que esten en todos los portales». 11:55: «lo apruebo para que lo hagas y poder verlo en produccion […] quiero que este nuevo diseño sea COPIA FIEL a lo que estoy viendo ahora, 100% identica. Mi objetivo y tuyo es que sea un saas 100% agentico, que se pueda conectar a IA externas y que desde ahi se pueda comandar, operar». 11:57: «hoy en dia la IA lo es todo, quiero que opai 2 sea asi». Aquí «producción» es `test.opai.cl`: la producción de Gard sigue prohibida para los agentes (`AGENTS.md`).
@@ -1844,6 +1846,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Adenda (11-nov-2026, CAR-306, Sesión Desempeño): scorecard y resultado.** (a) El scorecard de un cargo se guarda por versiones con mes de vigencia: el primero rige desde el mes en curso y cada cambio desde el mes siguiente; un mes ya medido no cambia de reglas. (b) El puntaje va de 0 a 120 y un indicador sin hechos no cuenta como cero: queda fuera y se informa la cobertura. (c) El resultado de una persona no depende de quién lo mira: los indicadores se miden sin los permisos ni el alcance del consultante, y a quién puede ver cada uno lo decide antes la capacidad (permiso de ver a todos, o lo propio y las personas a cargo por jefatura, siempre dentro del alcance por filas). (d) Quedan para después las plantillas por vertical (hasta tener más indicadores), el cierre de período (CAR-322) y el aviso a los trabajadores de la Ley 21.719 (con las pantallas, antes de encender el módulo en una empresa real).
 
 **Adenda (12-nov-2026, CAR-313, Sesión Desempeño): indicadores propios.** (a) Un módulo ofrece **hechos** en su manifiesto (qué ocurrió, a quién se atribuye, montos sumables y atributos para filtrar); lo que no declara no se puede usar. (b) La empresa combina hechos con cuatro formas acotadas (contar, sumar, tiempo entre dos hechos de la misma entidad, porcentaje); la definición es configuración versionada por mes y se evalúa en dominio puro (ADR-021). (c) Para armar un indicador hace falta el permiso del módulo dueño de cada hecho. (d) La vista previa con datos reales va en cada guardado y es agregada: con menos de tres sujetos solo dice cuántos son. El sentido y la meta viven en la versión, así un borrador no altera un indicador publicado. (e) Un indicador propio se archiva, no se borra, y no se puede archivar mientras esté en un scorecard publicado.
+
+**Adenda (12-nov-2026, CAR-322, Sesión Desempeño): cierre de período.** (a) Al **cerrar un mes** se guarda el resultado de cada persona (puntaje, cobertura y detalle por indicador) con el cargo, la jefatura y la versión del scorecard de ese mes; desde ahí el mes no se recalcula aunque cambien los hechos, el responsable de un negocio o el cargo de la persona. (b) **Un mes cerrado no se reabre** y solo se cierra un mes ya terminado; cerrar es irreversible y a un agente siempre le pide aprobación humana. (c) Si nadie lo cierra, **OPAI cierra solo el mes anterior** el día de cierre de la empresa (ajuste «Día de cierre del mes», por defecto el **5**), para dejar unos días a hechos atrasados. (d) Entra quien tuvo un vínculo laboral que tocó el mes; si cambió de cargo dentro del mes, cuenta el último cargo. (e) Quién ve a quién en un mes cerrado se decide con la jefatura de hoy; se guarda el jefe asignado a la persona al momento de cerrar, como referencia. (g) El cierre automático queda en la auditoría igual que el manual, y lee los módulos activos de la empresa para medir con los mismos indicadores que ve una persona. (f) Al anonimizar a una persona se borra su resultado guardado (Ley 21.719). **Confirmado por Carlos el 12-nov-2026 (08:27, hora de Chile):** el día de cierre es configurable por empresa, con el 5 por defecto, y un mes cerrado no se puede reabrir.
 
 **Pendiente de Carlos.** Nada.
 
@@ -1989,6 +1993,8 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 
 ## ADR-102 · Hilo es el sistema de diseño predeterminado para todo diseño nuevo (CAR-324, 12-nov-2026)
 
+> **Reemplazado por ADR-109 (12-nov-2026):** el sistema predeterminado es el diseño nuevo.
+
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 10:57, hora de Chile) · **Registra:** Claude. (ADR-098 a ADR-101 están reservados por PRs abiertos.)
 
 **Decisión.** Todo diseño nuevo de OPAI 2.0 (Design Prompts, pantallas y piezas) se hace en Claude Design con el sistema «OPAI 2.0 Design System · Hilo». «OPAI 2.0 V2» y los sistemas anteriores quedan solo como referencia de lo ya construido; no se diseñan pantallas nuevas con ellos.
@@ -2031,3 +2037,24 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 - Los aprobadores sin `core:aprobaciones.manage` ven sus solicitudes en la Bandeja y por el MCP, pero la pantalla de la cola requiere ese permiso hasta que llegue el diseño.
 - **Pendiente antes de construir la pantalla de reglas** (hallazgos de la autorrevisión, no bloqueantes mientras nadie pueda crear reglas): que la aprobación de una emisión pedida por una persona también envíe el documento al SII (hoy lo hace la pantalla de quien emite); que los aprobadores sin `core:aprobaciones.manage` tengan dónde resolver; avisos a los aprobadores de la regla; que editar una regla no cambie el aprobador de las solicitudes ya pendientes; y evitar dos reglas activas iguales.
 - En la versión 1, el envío de propuestas de CPQ no calcula el monto: una regla de «enviar cotización» aplica a todos los envíos. CPQ conserva su propia aprobación de envíos hasta CAR-253.
+
+## ADR-109 · Diseño nuevo de OPAI 2.0: reemplaza a Hilo (CAR-335, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 18:27, hora de Chile) · **Registra:** Claude. (ADR-105 a ADR-108 están reservados por PRs abiertos.)
+
+**Decisión.** El diseño oficial de OPAI 2.0 pasa a ser el prototipo `docs/2.0/design/export-diseno-nuevo/` («cambio total», en palabras de Carlos). Reemplaza al marco Hilo (ADR-090) y a la regla de diseñar todo con Hilo (ADR-102). En resumen: blanco y negro con líneas finas y un solo color de acento, que es **el color de cada empresa**; menú lateral con íconos y acordeón, que se puede cerrar y se asoma al pasar el mouse; el agente como sección propia y dentro de cada ficha; buscador único; listas y fichas idénticas en todos los módulos; y el teléfono y el iPad al mismo nivel que el escritorio. El detalle está en el README del export.
+
+**Por qué.** Carlos probó dos propuestas de color sobre Hilo y ninguna lo convenció («hay algo que no me cierra»). Pidió partir de referentes reconocidos (Vercel, Linear) y rehacer la propuesta completa. Tras cinco rondas sobre el prototipo lo aprobó como diseño oficial.
+
+**Consecuencias.**
+- Todo diseño nuevo se hace con este sistema. Hilo y «OPAI 2.0 V2» quedan solo como referencia de lo ya construido.
+- No se empiezan bloques nuevos de Hilo. Los PR de Hilo ya abiertos (H3, reglas y auditoría) se integran o se cierran según decida su sesión; lo que construyan sigue funcionando hasta que su pantalla pase al diseño nuevo.
+- **También reemplaza a ADR-105** («Hilo es la fuente única de diseño, con reglas verificables», PR #584 abierto): sus reglas y su auditoría se adaptan al diseño nuevo o el PR se cierra; lo decide su sesión con este ADR a la vista.
+- **Qué más modifica.** `NAVEGACION.md` §3 y D11: vuelve el menú lateral, el agente es una sección del menú y la barra inferior del teléfono es Inicio, Agente, Menú y Yo. `DISENO.md` §1: las fuentes pasan a Geist y Geist Mono. ADR-090 punto 2: mientras se construye hay una tercera piel. Esos archivos se actualizan en el bloque que construye cada cosa (D1 las fuentes, D2 la navegación), no antes, para que sigan describiendo lo que está en `main`.
+- **Plataforma** usa el mismo marco, pero sin la sección Agente: el agente interno no entra a Plataforma (ADR-090 punto 4 y ADR-055).
+- CAR-336 a CAR-340 siguen abiertas: son mejoras de comportamiento (detalle a la derecha, botón de alta en todas las listas, vistas que se actualizan al tiro, actividad con más contexto, estados vacíos). El diseño nuevo ya contempla 336, 337 y 340; se construyen dentro de D4 con este diseño, no sobre Hilo.
+- La etapa H4 de Hilo (barra del agente) no se construye; su objetivo lo cubren D2 (Agente como sección) y D5 (agente en la ficha).
+- La construcción va por bloques, en `briefs/BRIEF-CAR-335-diseno-nuevo.md`: primero el sistema de diseño (tokens, fuentes, color por empresa y piezas), después el marco e Inicio, y luego módulo por módulo. Mientras tanto la aplicación sigue como está: ningún bloque deja pantallas a medio cambiar.
+- El color por empresa usa el perfil de marca del núcleo (ADR-028); no se agregan colores fijos de Gard.
+- `DISENO.md` §3c lo deja como regla.
+
