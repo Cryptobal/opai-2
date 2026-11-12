@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ambienteTributarioEfectivo, produccionTributariaHabilitada } from "./entorno";
 
-const OK = { OPAI_PRODUCCION_TRIBUTARIA: "habilitada", BETTER_AUTH_URL: "https://app.opai.cl" };
+const OK = { OPAI_PRODUCCION_TRIBUTARIA: "habilitada", BETTER_AUTH_URL: "https://app.opai.cl", VERCEL_ENV: "production" };
 
 describe("produccionTributariaHabilitada", () => {
   it("falla cerrado con la variable ausente", () => {
@@ -15,10 +15,14 @@ describe("produccionTributariaHabilitada", () => {
     expect(produccionTributariaHabilitada({ ...OK, BETTER_AUTH_URL: "no es una url" })).toBe(false);
     expect(produccionTributariaHabilitada({ OPAI_PRODUCCION_TRIBUTARIA: "habilitada" })).toBe(false);
   });
+  it("falla fuera del despliegue de producción de Vercel (vista previa o local) (CAR-271)", () => {
+    expect(produccionTributariaHabilitada({ ...OK, VERCEL_ENV: "preview" })).toBe(false);
+    expect(produccionTributariaHabilitada({ ...OK, VERCEL_ENV: undefined })).toBe(false);
+  });
   it("falla con un valor distinto de «habilitada»", () => {
     expect(produccionTributariaHabilitada({ ...OK, OPAI_PRODUCCION_TRIBUTARIA: "true" })).toBe(false);
   });
-  it("habilita solo con variable y host app.opai.cl", () => {
+  it("habilita solo con variable, producción de Vercel y host app.opai.cl", () => {
     expect(produccionTributariaHabilitada(OK)).toBe(true);
   });
 });
