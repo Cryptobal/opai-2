@@ -182,6 +182,36 @@ describe("aprobaciones de plataforma fuera de la empresa (CAR-36)", () => {
     expect(tabla("aprobacion")[0]).toMatchObject({ estado: "pendiente" });
   });
 
+  it("support no aprueba ni rechaza una acción de plataforma que no puede ejecutar (CAR-323)", async () => {
+    const pide = contextoDePrueba({ ...agente, semilla: semillaEscenario() });
+    const r = await executeCapability(pide.ctx, "platform.users.set_role", pedido);
+    const id = r.ok ? "" : String(r.error.aprobacionId);
+    const support = { ...owner, platformRole: "support" as const };
+    const { ctx } = contextoDePrueba({
+      usuario: support,
+      semilla: { ...semillaEscenario(), aprobacionPlataforma: pide.tabla("aprobacionPlataforma") },
+    });
+    for (const [cap, input] of [
+      ["platform.aprobaciones.rechazar", { id, motivo: "no corresponde" }],
+      ["platform.aprobaciones.aprobar", { id }],
+    ] as const)
+      expect(await executeCapability(ctx, cap, input)).toMatchObject({
+        ok: false,
+        error: { code: "FORBIDDEN" },
+      });
+    // Un owner sí puede rechazarla.
+    const o = contextoDePrueba({
+      usuario: owner,
+      semilla: { ...semillaEscenario(), aprobacionPlataforma: pide.tabla("aprobacionPlataforma") },
+    });
+    expect(
+      await executeCapability(o.ctx, "platform.aprobaciones.rechazar", {
+        id,
+        motivo: "no corresponde",
+      }),
+    ).toMatchObject({ ok: true });
+  });
+
   it("la auditoría de empresa no muestra lo platform.* ajeno; la de plataforma, solo con platformRole", async () => {
     const { ctx, tabla } = con({ usuario: owner });
     expect(await executeCapability(ctx, "platform.users.set_role", pedido)).toMatchObject({
