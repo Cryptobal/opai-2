@@ -24,7 +24,7 @@ export const importadorContratos: Importador<DatosContrato> = {
     const hoy = new Date(`${hoyTexto}T00:00:00.000Z`);
     const leidas = filas.map((f) => ({ f, l: leerContrato(f) }));
     const ruts = [...new Set(leidas.map((x) => x.l.rut))];
-    const personas = await ctx.db.persona.findMany({ where: { rut: { in: ruts } }, select: { id: true, rut: true, archivadaEn: true, anonimizadaEn: true } });
+    const personas = await ctx.db.persona.findMany({ where: { rut: { in: ruts } }, select: { id: true, rut: true, estado: true, archivadaEn: true, anonimizadaEn: true } });
     const porRut = new Map(personas.map((p) => [p.rut, p]));
     const cargos = await ctx.db.cargo.findMany({ where: { activo: true }, select: { id: true, nombre: true } });
     const instalaciones = await ctx.db.instalacion.findMany({ where: { archivadaEn: null }, select: { id: true, nombre: true, cuenta: { select: { nombre: true, rut: true } } } });
@@ -49,6 +49,18 @@ export const importadorContratos: Importador<DatosContrato> = {
       const mismo = propios.find((v) => dia(v.inicio) === dia(l.inicio));
       if (mismo) {
         const cambia = mismo.cargoId !== cargo.id || mismo.instalacionId !== instalacion.id;
+        const sera = estadoDe(l.termino, hoy);
+        // Terminar un contrato es irreversible (core.vinculos.terminar pide aprobación a un agente): no se hace por aquí.
+        if (mismo.estado === "vigente" && sera === "terminado")
+          return { ...base, clave: `fila:${f.fila}`, accion: "error", mensajes: ["Terminar un contrato no se hace desde la importación: usa «Terminar contrato» en la ficha."] };
+        // Un contrato terminado que pasaría a vigente no puede convivir con otro vigente de la persona.
+        if (mismo.estado !== "vigente" && sera === "vigente") {
+          const otro = propios.find((v) => v.id !== mismo.id && v.estado === "vigente");
+          if (otro) return { ...base, clave: `fila:${f.fila}`, accion: "error", mensajes: [`La persona ya tiene un contrato vigente (desde ${dia(otro.inicio)}): no puede haber dos.`] };
+          const repetida = vigentesEnArchivo.get(persona.id);
+          if (repetida !== undefined) return { ...base, clave: `fila:${f.fila}`, accion: "error", mensajes: [`La persona ya tiene otro contrato vigente en la fila ${repetida}: solo puede haber uno.`] };
+          vigentesEnArchivo.set(persona.id, f.fila);
+        }
         return {
           ...base, accion: "actualizar", datos, existente: mismo,
           mensajes: cambia ? ["El cargo o la instalación de un contrato ya cargado no se cambian desde la importación: usa un anexo."] : [],
@@ -67,7 +79,10 @@ export const importadorContratos: Importador<DatosContrato> = {
   async crear(tx, ctx, d) {
     exigirEdicionVinculo(ctx);
     const hoy = new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);
-    const v = await tx.vinculoLaboral.create({ data: { ...d, tenantId: ctx.tenantId, estado: estadoDe(d.termino, hoy) }, select: { id: true } });
+    const estado = estadoDe(d.termino, hoy);
+    const v = await tx.vinculoLaboral.create({ data: { ...d, tenantId: ctx.tenantId, estado }, select: { id: true } });
+    // Igual que el alta manual: una persona inactiva con un contrato vigente nuevo vuelve a estar activa.
+    if (estado === "vigente") await tx.persona.updateMany({ where: { id: d.personaId, estado: { not: "activa" }, archivadaEn: null }, data: { estado: "activa" } });
     await ctx.eventos.emitir(tx, {
       tipo: "core.vinculo.creado", entidadTipo: "vinculo", entidadId: v.id,
       payload: { personaId: d.personaId, cargoId: d.cargoId, tipo: d.tipo, inicio: dia(d.inicio) },
