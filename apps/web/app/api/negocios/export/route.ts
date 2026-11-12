@@ -18,7 +18,7 @@ export async function GET(req: Request): Promise<Response> {
   const texto = q.get("q");
   if (estado && !ESTADOS.includes(estado)) return fallo(400, "Estado inválido.");
   if ((etapa && !esUuid(etapa)) || (etiqueta && !esUuid(etiqueta))) return fallo(400, "Filtro inválido.");
-  const r = await ejecutarComoUsuario<{ nombre: string; mime: string; base64: string }>(
+  const r = await ejecutarComoUsuario<{ nombre: string; mime: string; base64: string; truncado: boolean }>(
     "erp",
     "comercial.negocios.exportar",
     {
@@ -37,6 +37,7 @@ export async function GET(req: Request): Promise<Response> {
       "content-type": r.data.mime,
       "content-disposition": `attachment; filename="${r.data.nombre.replace(/"/g, "")}"`,
       "cache-control": "no-store",
+      ...(r.data.truncado ? { "x-truncado": "1" } : {}),
       "x-content-type-options": "nosniff",
     },
   });
