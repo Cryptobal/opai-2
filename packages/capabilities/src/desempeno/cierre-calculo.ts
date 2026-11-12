@@ -37,7 +37,8 @@ export async function calcularCierre(ctx: Contexto, periodo: string, zona: strin
       persona: { anonimizadaEn: null },
     },
     select: { personaId: true, cargoId: true, inicio: true },
-    orderBy: { inicio: "asc" },
+    // Desempate estable si dos vínculos empiezan el mismo día (cambio de cargo ese día).
+    orderBy: [{ inicio: "asc" }, { createdAt: "asc" }, { id: "asc" }],
   });
   // El último vínculo que tocó el mes manda: se recorre en orden y se sobrescribe.
   const cargoDe = new Map<string, string>();

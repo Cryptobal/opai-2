@@ -1,4 +1,3 @@
-
 import {
   ajustesDesempeno,
   capacidadesDesempeno,

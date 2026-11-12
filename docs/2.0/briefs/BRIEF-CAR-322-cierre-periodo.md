@@ -43,7 +43,7 @@ Mes en curso o futuro (rechazo); mes ya cerrado (conflicto, también en carrera)
 1. Migración, capacidades, trabajo, pruebas y documentación (un commit).
 
 ## 12. Tests
-`desempeno-cierre-db.test.ts`: vista previa sin escribir, rechazo del mes en curso, cierre con auditoría, conflicto al repetir, mes cerrado que no cambia con hechos ni cambio de cargo, cierre automático por día y aislamiento entre empresas. Más paridad, RLS e integridad de FK.
+`desempeno-cierre-db.test.ts`: vista previa sin escribir, rechazo del mes en curso, cierre con auditoría, conflicto al repetir, mes cerrado que no cambia con hechos ni cambio de cargo, cierre automático que lee los módulos de la base, espera al día de cierre y queda auditado; visibilidad en un mes cerrado (persona propia, otra persona y otra empresa); borrado al anonimizar. Más paridad, RLS e integridad de FK.
 
 ## 13. Validación
 Gate local completo y pruebas de base.
@@ -55,7 +55,7 @@ Gate local completo y pruebas de base.
 - Una empresa no ve ni cierra los meses de otra.
 
 ## 15. Riesgos y rollback
-La migración es aditiva; revertir el código deja las tablas sin uso. Riesgo: medir un mes con muchos cargos y personas en memoria puede tardar (pendiente de medir en base).
+La migración es aditiva; revertir el código deja las tablas sin uso. Riesgo: el cálculo corre en memoria dentro de la transacción del cierre (tope de 15 s al cerrar a mano y 20 s en el trabajo); con muchos cargos y personas puede no alcanzar. El arreglo es medir en base (pendiente).
 
 ## 16. Reporte de ejecución
 Ver el PR.

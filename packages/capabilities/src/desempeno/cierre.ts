@@ -1,10 +1,11 @@
 import { esPeriodoMensual } from "@opai/domain";
 import { z } from "zod";
 
-import { ajuste } from "../core/config";
+import { valoresEfectivos } from "../core/config";
+import { campoAjuste } from "../core/config/catalogo";
 import { sinDuplicado } from "../core/maestros/comun";
 import { defineCapability } from "../define";
-import { conflicto, reglaDeNegocio } from "../errores";
+import { conflicto, ErrorCapacidad, reglaDeNegocio } from "../errores";
 import { defineTrabajo } from "../trabajos/registro";
 import type { Contexto } from "../types";
 import { DIA_CIERRE_DEFECTO } from "./ajustes";
@@ -48,6 +49,17 @@ export async function cerrarPeriodo(
     if (filas.length > 0) {
       await tx.desempenoResultadoCerrado.createMany({
         data: filas.map((f) => filaParaGuardar(ctx.tenantId, periodo, f)),
+      });
+    }
+    // Cerrado por el trabajo diario no pasa por executeCapability: se audita aquí, en la misma
+    // transacción (ADR-052). El cierre a mano lo audita executeCapability.
+    if (origen === "automatico") {
+      await ctx.auditoria.registrar(tx, {
+        tenantId: ctx.tenantId,
+        capability: "desempeno.periodos.cerrar",
+        actor: ctx.actor,
+        entityType: "periodo_desempeno",
+        payload: { ...salida, origen },
       });
     }
     await ctx.eventos.emitir(tx, {
@@ -103,12 +115,16 @@ export const periodosList = defineCapability({
   },
 });
 
+/** Estados de un módulo contratado que cuentan como activo (igual que `apps/web/lib/fuentes.ts`). */
+const ACTIVOS = ["activo", "trial", "solo_lectura"];
+
+/** Día de cierre de la empresa; si el ajuste no está declarado (registro sin cargar), el de fábrica. */
 async function diaDeCierre(ctx: Contexto): Promise<number> {
-  try {
-    return (await ajuste<number>(ctx, "desempeno", "dia_cierre")) ?? DIA_CIERRE_DEFECTO;
-  } catch {
-    return DIA_CIERRE_DEFECTO;
-  }
+  const campo = campoAjuste("desempeno", "dia_cierre");
+  if (!campo) return DIA_CIERRE_DEFECTO;
+  // Un error al leer se propaga: el trabajo reintenta en vez de cerrar en un día equivocado.
+  const v = await valoresEfectivos(ctx, [campo]);
+  return (v.get("desempeno.dia_cierre")?.valor as number | undefined) ?? DIA_CIERRE_DEFECTO;
 }
 
 export const trabajoCierreAutomatico = defineTrabajo({
@@ -118,11 +134,26 @@ export const trabajoCierreAutomatico = defineTrabajo({
   payload: z.object({ dia: z.string() }),
   periodicidad: "diaria",
   async handler(ctx, { dia }) {
-    if (!ctx.modulosActivos.includes("desempeno")) return { cerrado: null };
-    if (Number(dia.slice(8, 10)) < (await diaDeCierre(ctx))) return { cerrado: null };
+    // El contexto de sistema del cron no trae los módulos de la empresa: se leen de la base, porque
+    // el resultado guardado depende de qué indicadores están disponibles.
+    const modulos = await ctx.db.tenantModule.findMany({
+      where: { estado: { in: ACTIVOS } },
+      select: { moduloId: true, estado: true },
+    });
+    const desempeno = modulos.find((m) => m.moduloId === "desempeno");
+    // Cerrar es una escritura: con el módulo apagado o en solo lectura no se cierra.
+    if (!desempeno || desempeno.estado === "solo_lectura") return { cerrado: null };
+    const conModulos: Contexto = { ...ctx, modulosActivos: modulos.map((m) => m.moduloId) };
+    if (Number(dia.slice(8, 10)) < (await diaDeCierre(conModulos))) return { cerrado: null };
     const periodo = mesAnterior(dia.slice(0, 7));
-    if (await estaCerrado(ctx, periodo)) return { cerrado: null };
-    const r = await cerrarPeriodo(ctx, periodo, "automatico", false);
-    return { cerrado: r.periodo, personas: r.personas };
+    if (await estaCerrado(conModulos, periodo)) return { cerrado: null };
+    try {
+      const r = await cerrarPeriodo(conModulos, periodo, "automatico", false);
+      return { cerrado: r.periodo, personas: r.personas };
+    } catch (e) {
+      // Una persona lo cerró a mano en paralelo: no hay nada que hacer.
+      if (e instanceof ErrorCapacidad && e.code === "CONFLICT") return { cerrado: null };
+      throw e;
+    }
   },
 });

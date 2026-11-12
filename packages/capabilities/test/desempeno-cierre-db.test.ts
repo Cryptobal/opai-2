@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import { prepararEntorno, type Entorno, urlPropietario } from "../../db/test/entorno";
 import * as mod from "../src";
+import { anonimizarPersona } from "../src/core/cumplimiento/retencion-anonimizar";
 import { codigo, dato } from "./maestros-ayuda";
 
 // Cierre de período de Desempeño (CAR-322) contra Postgres real, con RLS sin BYPASSRLS: al cerrar un
@@ -21,15 +22,15 @@ describe.skipIf(!urlPropietario)("desempeño: cierre de período contra Postgres
   type Resumen = { periodo: string; personas: number; cargos: number };
   type Resultado = { puntaje: number | null; cerrado: boolean; cargoId: string | null };
 
-  const ctx = (tenantId: string) =>
+  const ctx = (tenantId: string, quien = "gema", rol: "owner" | "viewer" = "owner", modulos = ["desempeno"]) =>
     mod.crearContexto({
       tenantId,
-      rol: "owner",
-      actor: { tipo: "user", id: usuario.gema ?? "" },
-      usuario: { id: usuario.gema ?? "", nombre: "gema", email: `gema-${sufijo}@prueba.cl`, platformRole: null },
+      rol,
+      actor: { tipo: "user", id: usuario[quien] ?? "" },
+      usuario: { id: usuario[quien] ?? "", nombre: quien, email: `${quien}-${sufijo}@prueba.cl`, platformRole: null },
       portal: "erp",
       portalesMembresia: ["erp"],
-      modulosActivos: ["desempeno"],
+      modulosActivos: modulos,
     });
 
   const tarea = async (quien: string, vence: string, hecha: string) => {
@@ -140,12 +141,42 @@ describe.skipIf(!urlPropietario)("desempeño: cierre de período contra Postgres
     expect(new Map(equipo.personas.map((p) => [p.personaId, p.puntaje])).get(persona.victor ?? "")).toBe(100);
   });
 
-  it("el cierre automático espera al día de cierre y cada empresa cierra lo suyo", async () => {
+  it("en un mes cerrado se respeta quién ve a quién, también entre empresas", async () => {
+    // Otra empresa no lee a una persona de A ni siquiera conociendo su id.
+    expect(await codigo(ctx(b), PERSONA, { personaId: persona.vera, periodo: "2026-11" })).toBe("NOT_FOUND");
+    // La persona ve el suyo solo si el scorecard de ese mes lo permite.
+    const vera = ctx(a, "vera", "viewer");
+    expect((await dato<Resultado>(vera, PERSONA, { periodo: "2026-11" })).puntaje).toBe(50);
+    await e.admin.desempenoScorecard.updateMany({ where: { tenantId: a }, data: { personaVeResultado: false } });
+    expect(await codigo(vera, PERSONA, { periodo: "2026-11" })).toBe("FORBIDDEN");
+    expect(await codigo(vera, PERSONA, { personaId: persona.victor, periodo: "2026-11" })).toBe("NOT_FOUND");
+    await e.admin.desempenoScorecard.updateMany({ where: { tenantId: a }, data: { personaVeResultado: true } });
+  });
+
+  it("al anonimizar a una persona se borra su resultado guardado", async () => {
+    const victor = persona.victor ?? "";
+    // Elegible: su relación laboral terminó antes del corte.
+    await e.admin.vinculoLaboral.updateMany({
+      where: { personaId: victor },
+      data: { estado: "terminado", termino: new Date("2026-11-30") },
+    });
+    const hecho = await ctx(a).transaccion((tx) => anonimizarPersona(tx, victor, new Date(), new Date("2026-12-01")));
+    expect(hecho).toBe(true);
+    expect(await e.admin.desempenoResultadoCerrado.count({ where: { personaId: victor } })).toBe(0);
+    expect(await e.admin.desempenoResultadoCerrado.count({ where: { personaId: persona.vera ?? "" } })).toBe(1);
+  });
+
+  it("el cierre automático lee los módulos de la empresa, espera al día de cierre y queda auditado", async () => {
     const trabajo = mod.trabajosDesempeno[0];
     expect(trabajo).toBeDefined();
-    expect(await trabajo?.ejecutar(ctx(b), { dia: "2026-12-04" })).toEqual({ cerrado: null });
-    expect(await trabajo?.ejecutar(ctx(b), { dia: "2026-12-05" })).toEqual({ cerrado: "2026-11", personas: 0 });
-    expect(await e.admin.desempenoPeriodoCerrado.count({ where: { tenantId: b } })).toBe(1);
+    // El contexto del cron no trae módulos: el trabajo los lee de la base.
+    const sistema = ctx(b, "gema", "owner", []);
+    expect(await trabajo?.ejecutar(sistema, { dia: "2026-12-05" })).toEqual({ cerrado: null });
+    await e.admin.tenantModule.create({ data: { tenantId: b, moduloId: "desempeno" } });
+    expect(await trabajo?.ejecutar(sistema, { dia: "2026-12-04" })).toEqual({ cerrado: null });
+    expect(await trabajo?.ejecutar(sistema, { dia: "2026-12-05" })).toEqual({ cerrado: "2026-11", personas: 0 });
+    expect(await trabajo?.ejecutar(sistema, { dia: "2026-12-06" })).toEqual({ cerrado: null });
+    expect(await e.admin.auditEvent.count({ where: { tenantId: b, capability: CERRAR } })).toBe(1);
     // La otra empresa no ve los meses cerrados de A.
     const lista = await dato<{ periodo: string; origen: string }[]>(ctx(b), "desempeno.periodos.list", {});
     expect(lista).toEqual([expect.objectContaining({ periodo: "2026-11", origen: "automatico" })]);
