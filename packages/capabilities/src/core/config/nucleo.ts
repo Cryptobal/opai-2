@@ -96,9 +96,11 @@ export const AJUSTES_NUCLEO = defineAjustes(
     // Marco de la aplicación (ADR-090, CAR-278): cada persona elige entre el clásico y el Hilo. Sin
     // migración (ADR-038): va en `core.ajuste`, igual que el tema. El navegador lo recuerda en una
     // cookie para que el servidor pinte el marco elegido sin parpadeo (`apps/web/lib/marco.ts`).
-    preferencias_marco: z.enum(["clasico", "hilo"]).default("clasico").meta({
+    // «nuevo» (ADR-109, CAR-335 D2): el diseño nuevo, en vista previa hasta que se active para todos.
+    preferencias_marco: z.enum(["clasico", "hilo", "nuevo"]).default("clasico").meta({
       etiqueta: "Diseño",
-      ayuda: "Clásico: menú lateral. Hilo: pendientes, pantalla de trabajo y barra de búsqueda.",
+      ayuda:
+        "Clásico: menú lateral. Hilo: pendientes, pantalla de trabajo y barra de búsqueda. Nuevo: el diseño que viene, en vista previa.",
       grupo: "Preferencias",
       ambito: "usuario",
       control: "seleccion",
