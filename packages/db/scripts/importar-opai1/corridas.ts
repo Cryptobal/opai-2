@@ -68,14 +68,14 @@ export async function cerrarCorrida(
   );
 }
 
-type Lote = Pick<Plan, "cuentas" | "contactos" | "instalaciones" | "programaciones" | "negocios">;
+type Lote = Pick<Plan, "cuentas" | "contactos" | "instalaciones" | "programaciones" | "negocios" | "cotizaciones">;
 // Los negocios van al final: necesitan las cuentas creadas en lotes anteriores (mapa en memoria).
-const CLAVES: (keyof Lote)[] = ["cuentas", "contactos", "instalaciones", "programaciones", "negocios"];
+const CLAVES: (keyof Lote)[] = ["cuentas", "contactos", "instalaciones", "programaciones", "negocios", "cotizaciones"];
 
 /** Parte el plan en lotes de a lo más `tam` filas por entidad, respetando el orden de dependencias. */
 export function partirEnLotes(plan: Plan, tam: number = TAMANO_LOTE): Plan[] {
   const lotes: Plan[] = [];
-  const vacio = { cuentas: [], contactos: [], instalaciones: [], programaciones: [], negocios: [] };
+  const vacio = { cuentas: [], contactos: [], instalaciones: [], programaciones: [], negocios: [], cotizaciones: [] };
   for (const clave of CLAVES) {
     const filas = plan[clave];
     for (let i = 0; i < filas.length; i += tam) {
@@ -92,17 +92,18 @@ export async function aplicarPorLotes(
   plan: Plan,
   tam: number = TAMANO_LOTE,
   mapas: MapasImportacion = mapasVacios(),
+  creadoPorId: string | null = null,
 ): Promise<ResultadoAplicacion> {
   const total: ResultadoAplicacion = {
     mapas,
-    aplicadas: { cuentas: 0, contactos: 0, instalaciones: 0, programaciones: 0, negocios: 0 },
+    aplicadas: { cuentas: 0, contactos: 0, instalaciones: 0, programaciones: 0, negocios: 0, cotizaciones: 0 },
     omitidas: 0,
   };
   for (const lote of partirEnLotes(plan, tam)) {
     const r = await enTransaccion(
       tenantId,
       (tx) =>
-        aplicarPlanEnTransaccion(tx, tenantId, lote, registroEnCorrida(tx, tenantId, importacionId), mapas),
+        aplicarPlanEnTransaccion(tx, tenantId, lote, registroEnCorrida(tx, tenantId, importacionId), mapas, creadoPorId),
       { timeoutMs: 120_000 },
     );
     for (const k of Object.keys(total.aplicadas) as (keyof typeof total.aplicadas)[])

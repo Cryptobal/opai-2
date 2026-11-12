@@ -86,16 +86,6 @@ export const programacionRecurrenteOpai1 = z.object({
   updatedAt: fecha,
 });
 
-/** Cotización CPQ de 1.0 (correlativo R54; el export incluye borradores sin `validUntil`). */
-export const cotizacionOpai1 = z.object({
-  id: z.string().min(1),
-  code: z.string().min(1),
-  validUntil: z.string().nullish(),
-  status: texto,
-  dealId: texto,
-  accountId: texto,
-  createdAt: fecha,
-});
+export { cotizacionOpai1, type CotizacionOpai1 } from "./origen-cotizaciones";
 
 export type ProgramacionRecurrenteOpai1 = z.infer<typeof programacionRecurrenteOpai1>;
-export type CotizacionOpai1 = z.infer<typeof cotizacionOpai1>;
