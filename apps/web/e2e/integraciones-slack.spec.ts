@@ -34,19 +34,21 @@ test.describe("@preview configuración: integración con Slack", () => {
     await expect(page.getByText("Qué se avisa")).toBeVisible();
     await capturar(page, info, "slack-guardado");
 
-    // En teléfono el aviso sale abajo a la derecha, encima de «Guardar», y se queda mientras el puntero
-    // está sobre él: se aparta el puntero y se espera a que se vaya antes de guardar otra vez.
-    await page.mouse.move(0, 0);
-    await expect(page.getByText("Configuración de Slack guardada")).toHaveCount(0, {
-      timeout: 20_000,
-    });
-
-    // Deja el valor por defecto (15) para no ensuciar qa-e2e.
-    await page.getByLabel("Margen de atraso (minutos)").fill("15");
-    await page.getByRole("button", { name: "Guardar" }).click();
-    await expect(page.getByText("Configuración de Slack guardada").first()).toBeVisible({
-      timeout: 30_000,
-    });
+    // Deja el valor por defecto (15) para no ensuciar qa-e2e. En teléfono el aviso anterior queda sobre
+    // «Guardar» (sonner lo pausa con la emulación táctil), así que se envía con Enter desde el campo y se
+    // comprueba la respuesta de la acción de servidor, no el aviso, que puede seguir en pantalla.
+    const margen = page.getByLabel("Margen de atraso (minutos)");
+    await margen.fill("15");
+    const respuesta = page.waitForResponse(
+      (r) => r.request().method() === "POST" && r.request().headers()["next-action"] !== undefined,
+    );
+    await margen.press("Enter");
+    const cuerpo = await (await respuesta).text();
+    // La acción devuelve el Resultado de core.slack.configurar serializado en la respuesta RSC.
+    expect(cuerpo).toContain('"ok":true');
+    expect(cuerpo).not.toContain('"ok":false');
+    await expect(page.getByRole("button", { name: "Guardar" })).toBeEnabled({ timeout: 30_000 });
+    await expect(page.getByText("Algo salió mal")).toHaveCount(0);
   });
 
   test("explica en palabras simples por qué no se conectó", async ({ page }, info) => {
