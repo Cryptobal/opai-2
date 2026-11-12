@@ -20,6 +20,7 @@ import { titularesListar } from "./titulares-listar";
 import { titularTrasladar } from "./titular-trasladar";
 
 export { ajustesPauta } from "./ajustes";
+export { indicadoresPauta } from "./indicadores-gestion";
 export const capacidadesPauta: readonly Capacidad[] = [
   mesLeer,
   resumenLeer,

@@ -14,6 +14,7 @@ import { puntosActualizar, puntosArchivar, puntosCrear } from "./puntos-escritur
 import { puntosListar } from "./puntos-lectura";
 
 export { ajustesRondas } from "./ajustes";
+export { indicadoresRondas } from "./indicadores-gestion";
 
 export const capacidadesRondas: readonly Capacidad[] = [
   puntosListar,

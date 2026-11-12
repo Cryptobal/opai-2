@@ -12,11 +12,9 @@ export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/he
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
-export { ajustesRondas, capacidadesRondas } from "./rondas";
+export { ajustesRondas, capacidadesRondas, indicadoresRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
-export { ajustesPauta, capacidadesPauta } from "./pauta";
-export { indicadoresPauta } from "./pauta/indicadores-gestion";
-export { indicadoresRondas } from "./rondas/indicadores-gestion";
+export { ajustesPauta, capacidadesPauta, indicadoresPauta } from "./pauta";
 export {
   ajustesDesempeno,
   capacidadesDesempeno,
