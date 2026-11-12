@@ -65,3 +65,14 @@ export function puedeResolver(p: {
   if (p.apruebaTodo) return true;
   return p.esAprobador && !p.esSolicitante;
 }
+
+/**
+ * Marca de una capacidad que las reglas de aprobación pueden frenar (CAR-252). `siguientes` son los pasos
+ * que la pantalla de quien pidió habría hecho sola tras el éxito (CAR-253): al aprobar una solicitud pedida
+ * por una regla se ejecutan como quien aprueba, y si uno falla lo aprobado no se deshace.
+ */
+export type Aprobable<Ctx, Entrada, Salida> = {
+  accion: AccionAprobable;
+  monto?: (ctx: Ctx, input: Entrada) => Promise<number | null>;
+  siguientes?: (salida: Salida) => readonly { capability: string; input: unknown }[];
+};

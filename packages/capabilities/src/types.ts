@@ -1,4 +1,4 @@
-import type { AccionAprobable, EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
+import type { Aprobable, EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, HechoPlataforma, TenantTx, VerificacionAuditoria } from "@opai/db";
 
 import type { EmpresaPlataforma } from "./plataforma-empresa";
@@ -231,7 +231,7 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   exigeAprobacion?: (input: z.output<I>) => boolean;
   describirAprobacion?: (ctx: Contexto, input: z.output<I>) => Promise<string | null>; // CAR-250: acción en texto humano, sin el agente
   /** CAR-252: acción que las reglas de aprobación de la empresa pueden exigir, con su monto en CLP. */
-  aprobable?: { accion: AccionAprobable; monto?: (ctx: Contexto, input: z.output<I>) => Promise<number | null> };
+  aprobable?: Aprobable<Contexto, z.output<I>, z.output<O>>;
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
   portales?: readonly string[];
   /**
