@@ -72,7 +72,14 @@ export const usersRestablecerMfa = defineCapability({
     }
     const u = await ctx.db.user.findUnique({
       where: { id: objetivo.userId },
-      select: { id: true, name: true, email: true, platformRole: true, twoFactorEnabled: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        platformRole: true,
+        twoFactorEnabled: true,
+        passkeyEnabled: true,
+      },
     });
     if (!u) throw noEncontrado("El usuario");
     if (u.platformRole) {
@@ -85,7 +92,8 @@ export const usersRestablecerMfa = defineCapability({
         "Tiene acceso a otras empresas en OPAI: pídele a Plataforma que lo restablezca.",
       );
     }
-    if (!u.twoFactorEnabled) throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
+    if (!u.twoFactorEnabled && !u.passkeyEnabled)
+      throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
     if (dryRun) return { userId: u.id, nombre: u.name, email: u.email, sesionesCerradas: 0 };
     return restablecerYAvisar(ctx, u, "Un owner de tu empresa");
   },

@@ -84,6 +84,9 @@ async function aceptarComo(slug: string, token: string, usuario: Usuario): Promi
 export async function aceptarInvitacion(slug: string, token: string): Promise<string> {
   const sesion = await getSession();
   if (!sesion) return "Inicia sesión para aceptar.";
+  // Sesión que aún espera el segundo factor (Google o contraseña con passkey, CAR-286): no acepta.
+  const conFactor = sesion.user.twoFactorEnabled === true || sesion.user.passkeyEnabled === true;
+  if (conFactor && sesion.session.mfaVerified !== true) return "Completa el segundo factor.";
   if (!(await invitacionPermitida(token))) return "Demasiados intentos. Inténtalo más tarde.";
   return aceptarComo(slug, token, sesion.user);
 }

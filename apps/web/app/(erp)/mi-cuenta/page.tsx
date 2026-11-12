@@ -1,18 +1,20 @@
-import { ShieldCheck } from "lucide-react";
+import { formatearFecha } from "@opai/domain";
 
-import { Alerta, estilosBoton } from "@opai/ds";
-
-import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { mfaObligatoriaPara } from "@/lib/mfa";
-import { requerirIdentidad } from "@/lib/servidor";
+import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { PasswordCuenta } from "./cambiar-password";
-import { DesactivarMfa } from "./desactivar-mfa";
+import { EstadoSeguridad } from "./_seguridad/estado-seguridad";
+import { MetodosAcceso } from "./_seguridad/metodos-acceso";
+import type { Metodos } from "./_seguridad/tipos";
 
 export const metadata = { title: "Mi cuenta" };
 
-/** Mi cuenta (NÚCLEO-F): estado y gestión del segundo factor (activar, desactivar con contraseña). */
+/**
+ * Mi cuenta › Seguridad (NÚCLEO-F, CAR-286): contraseña, passkeys y app autenticadora. Cada método es
+ * opcional (salvo plataforma); los datos salen de `core.metodos_acceso.list`, la misma herramienta del
+ * MCP, sin secretos.
+ */
 export default function MiCuenta() {
   return (
     <PaginaPortal
@@ -20,54 +22,33 @@ export default function MiCuenta() {
       titulo="Mi cuenta"
       ruta="/mi-cuenta"
       cargando="formulario"
-      // Sin sesión va al login; si leer la política falla, el error.tsx del ERP (CAR-50) y no un
-      // «Protege tu cuenta» engañoso.
+      // Sin sesión va al login; si la lectura falla, el error.tsx del ERP (CAR-50) y no un aviso
+      // engañoso sobre el segundo factor.
       cargar={async () => {
-        const id = await requerirIdentidad("/mi-cuenta");
-        return { activa: id.mfaActiva, obligatoria: await mfaObligatoriaPara(id) };
+        await requerirIdentidad("/mi-cuenta");
+        const r = await ejecutarComoUsuario<Metodos>("erp", "core.metodos_acceso.list");
+        if (!r.ok) throw new Error(r.error.message);
+        const passkeys = r.data.passkeys.map((p) => ({
+          ...p,
+          creadaEnTexto: formatearFecha(p.creadaEn),
+        }));
+        return { ...r.data, passkeys };
       }}
     >
-      {({ activa, obligatoria }) => (
-        <div className="flex max-w-xl flex-col gap-4">
-          <PasswordCuenta />
-          <section className="flex flex-col gap-3">
-            <h2 className="t-heading text-fg">Segundo factor</h2>
-            {activa ? (
-              <>
-                <Alerta
-                  tono="success"
-                  icono={ShieldCheck}
-                  titulo="Tu cuenta está protegida con un segundo factor"
-                >
-                  Al entrar te pediremos un código de tu app de autenticación.
-                </Alerta>
-                {obligatoria ? (
-                  <p className="text-sm text-fg-muted">Tu rol requiere el segundo factor.</p>
-                ) : (
-                  <DesactivarMfa />
-                )}
-              </>
-            ) : (
-              <>
-                <Alerta
-                  tono={obligatoria ? "warning" : "info"}
-                  titulo={
-                    obligatoria
-                      ? "Tu rol requiere activar el segundo factor"
-                      : "Protege tu cuenta con un segundo factor"
-                  }
-                >
-                  Agrega un código de un solo uso de tu app de autenticación, además de la
-                  contraseña.
-                </Alerta>
-                <LinkNext
-                  href="/activar-mfa?next=/mi-cuenta"
-                  className={estilosBoton({ variant: "primary" })}
-                >
-                  Activar segundo factor
-                </LinkNext>
-              </>
-            )}
+      {(m) => (
+        <div className="flex max-w-xl flex-col gap-6">
+          <section aria-labelledby="t-seguridad" className="flex flex-col gap-4">
+            <h2 id="t-seguridad" className="t-heading text-fg">
+              Seguridad
+            </h2>
+            <EstadoSeguridad m={m} />
+            <div className="flex flex-col gap-1">
+              <h3 className="t-label text-fg">Contraseña</h3>
+              <div>
+                <PasswordCuenta />
+              </div>
+            </div>
+            <MetodosAcceso m={m} />
           </section>
         </div>
       )}

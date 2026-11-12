@@ -9,6 +9,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { useEpocaSesion } from "@/app/_components/refresco-navegador";
 
 import { PiePortales } from "../pie-portales";
+import { EntrarConPasskey } from "./entrar-passkey";
 
 export type { EstadoLogin };
 
@@ -66,7 +67,7 @@ export function FormularioLogin({ destino, google, inicial, cargando: forzado, e
             name="email"
             type="email"
             inputMode="email"
-            autoComplete="username"
+            autoComplete="username webauthn"
             placeholder="nombre@empresa.cl"
             required
             disabled={cargando}
@@ -101,15 +102,14 @@ export function FormularioLogin({ destino, google, inicial, cargando: forzado, e
           {OLVIDO}
         </LinkNext>
       </form>
+      <Separador />
+      <EntrarConPasskey destino={destino} deshabilitado={cargando} />
       {google ? (
-        <>
-          <Separador />
-          <form action={google_}>
-            <Button type="submit" variant="secondary" size="lg" block disabled={cargando}>
-              Continuar con Google
-            </Button>
-          </form>
-        </>
+        <form action={google_}>
+          <Button type="submit" variant="secondary" size="lg" block disabled={cargando}>
+            Continuar con Google
+          </Button>
+        </form>
       ) : null}
     </AuthCard>
   );

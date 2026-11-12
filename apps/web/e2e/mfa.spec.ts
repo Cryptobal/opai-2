@@ -2,9 +2,9 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { codigoTotp, E2E_EMAIL, E2E_PASSWORD } from "./sesion";
 
-// Segundo factor (NÚCLEO-F): login con TOTP (generado en el test) y enrolamiento forzado para un rol
-// obligado sin segundo factor. A 375, 1024 y 1280. El owner de e2e tiene MFA con un secreto fijo
-// sembrado por seed:e2e-mfa; el usuario `mfa-pendiente-e2e` es owner obligado SIN segundo factor.
+// Segundo factor (NÚCLEO-F): login con TOTP (generado en el test) y entrada directa de un owner
+// sin segundo factor (CAR-286: ya no es obligatorio). A 375, 1024 y 1280. El usuario plataforma de e2e
+// tiene MFA con un secreto fijo sembrado por seed:e2e-mfa; `mfa-pendiente-e2e` es owner SIN segundo factor.
 const PENDIENTE = "mfa-pendiente-e2e@opai.cl";
 
 async function captura(page: Page, nombre: string, proyecto: string) {
@@ -22,7 +22,7 @@ test.describe("segundo factor", () => {
     await page.goto("/login");
     await page.getByLabel("Correo").fill(E2E_EMAIL);
     await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await page.waitForURL((url) => url.pathname === "/mfa");
     await expect(page.getByRole("heading", { name: "Verifica tu identidad" })).toBeVisible();
     const campo = page.getByLabel("Código del autenticador");
@@ -44,21 +44,17 @@ test.describe("segundo factor", () => {
     await captura(page, "mfa-entrada", p);
   });
 
-  test("un rol obligado sin segundo factor va a enrolarse antes de entrar", async ({ page }, info) => {
+  test("un owner sin segundo factor entra solo con contraseña (CAR-286)", async ({
+    page,
+  }, info) => {
     const p = info.project.name;
     await page.goto("/login");
     await page.getByLabel("Correo").fill(PENDIENTE);
     await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
-    // No accede al ERP: la política lo manda a enrolar el segundo factor.
-    await page.waitForURL((url) => url.pathname === "/activar-mfa");
-    await expect(page.getByRole("heading", { name: "Activa el segundo factor" })).toBeVisible();
-    // Paso 1: confirma la contraseña y aparecen el QR, la clave manual y los códigos de respaldo.
-    await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
-    await page.getByRole("button", { name: "Continuar" }).click();
-    await expect(page.getByRole("heading", { name: "Escanea el código" })).toBeVisible();
-    await expect(page.getByRole("img", { name: /Código QR/ })).toBeVisible();
-    await expect(page.locator("[data-mfa-secret]")).toBeVisible();
-    await captura(page, "mfa-enrolar", p);
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
+    // El MFA ya no es obligatorio para owner ni admin: entra sin pasar por /activar-mfa ni /mfa.
+    await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/elegir-empresa");
+    expect(new URL(page.url()).pathname).not.toBe("/activar-mfa");
+    await captura(page, "mfa-owner-sin-segundo-factor", p);
   });
 });

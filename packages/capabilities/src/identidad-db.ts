@@ -2,6 +2,11 @@
 // `opai_auth` para las tablas de credenciales.
 import {
   borrarUsuario,
+  consumirReautenticacion,
+  desactivarTotp,
+  metodosDeUsuario,
+  quitarPasskey,
+  renombrarPasskey,
   restablecerSegundoFactor,
   ultimosAccesos,
   usuarioEnOtrasEmpresas,
@@ -14,4 +19,9 @@ export const identidadEnDb: Identidad = {
   enOtrasEmpresas: usuarioEnOtrasEmpresas,
   restablecerSegundoFactor,
   borrarUsuario,
+  metodosDe: metodosDeUsuario,
+  renombrarPasskey,
+  quitarPasskey,
+  desactivarTotp,
+  consumirReautenticacion,
 };

@@ -23,6 +23,7 @@
     "@opai/ds": "workspace:*",
     "@opai/integrations": "workspace:*",
     "@opai/modules": "workspace:*",
+    "@simplewebauthn/browser": "13.3.0",
     "better-auth": "^1.7.12",
     "lucide-react": "^1.61.0",
     "mcp-handler": "^2.3.0",

@@ -12,6 +12,8 @@ model User {
   platformRole     String?  @map("platform_role")
   /// Segundo factor activo (NÚCLEO-F). Lo fija el plugin twoFactor de Better Auth tras verificar.
   twoFactorEnabled Boolean  @default(false) @map("two_factor_enabled")
+  /// Tiene al menos una passkey (CAR-286). Derivada: la mantiene un trigger sobre `core.passkeys`.
+  passkeyEnabled   Boolean  @default(false) @map("passkey_enabled")
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -20,6 +22,7 @@ model User {
   memberships        Membership[]
   apiKeys            ApiKey[]
   twoFactor          TwoFactor?
+  passkeys           Passkey[]
   /// Excepciones de permiso que este usuario fijó (A18/A19); se desligan si se elimina (SET NULL).
   excepcionesFijadas PermisoExcepcion[] @relation("excepcionesFijadas")
 
@@ -45,6 +48,29 @@ model TwoFactor {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("two_factor")
+  @@schema("core")
+}
+
+// Passkeys (WebAuthn) del plugin passkey de Better Auth (CAR-286): entrar sin contraseña y segundo
+// factor. Identidad como `two_factor`: sin tenant_id ni RLS; solo la toca `opai_auth` (CAR-43). Guarda
+// la clave PÚBLICA de la credencial (no hay secreto), el contador de firmas y los transportes.
+model Passkey {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  name         String?
+  publicKey    String    @map("public_key")
+  userId       String    @map("user_id") @db.Uuid
+  credentialID String    @unique @map("credential_id")
+  counter      Int
+  deviceType   String    @map("device_type")
+  backedUp     Boolean   @map("backed_up")
+  transports   String?
+  aaguid       String?
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("passkeys")
   @@schema("core")
 }
 
