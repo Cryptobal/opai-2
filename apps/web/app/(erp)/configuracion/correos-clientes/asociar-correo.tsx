@@ -7,8 +7,8 @@ import { avisar, Button, Campo, Combobox, Dialog, Select } from "@opai/ds";
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-type Opcion = { valor: string; etiqueta: string };
-type Contacto = { contactoId: string; nombres: string; apellidos: string; email: string | null };
+import { type Opcion, opcionesDeCuenta } from "./opciones-cuenta";
+
 const SIN_CONTACTO = "_ninguno";
 
 /** Asocia a mano un correo «sin asignar» a una cuenta y, si se quiere, a un contacto (`core.correos.asociar`). */
@@ -19,6 +19,8 @@ export function AsociarCorreo(p: { correoId: string; asunto: string | null }) {
   const [contactoId, setContactoId] = useState(SIN_CONTACTO);
   const [cuentas, setCuentas] = useState<Opcion[]>([]);
   const [contactos, setContactos] = useState<Opcion[]>([]);
+  const [negocioId, setNegocioId] = useState(SIN_CONTACTO);
+  const [negocios, setNegocios] = useState<Opcion[]>([]);
   const buscar = useCallback(async (q: string) => {
     const r = await ejecutarCapacidad("erp", "core.cuentas.list", {
       q: q.trim() || undefined,
@@ -39,28 +41,24 @@ export function AsociarCorreo(p: { correoId: string; asunto: string | null }) {
   async function elegirCuenta(id: string) {
     setCuentaId(id);
     setContactoId(SIN_CONTACTO);
+    setNegocioId(SIN_CONTACTO);
     setContactos([]);
+    setNegocios([]);
     if (!id) return;
-    const r = await ejecutarCapacidad("erp", "core.cuentas.contactos", { cuentaId: id }).catch(
-      () => null,
-    );
-    if (r?.ok)
-      setContactos(
-        (r.data as Contacto[]).map((c) => ({
-          valor: c.contactoId,
-          etiqueta: `${c.nombres} ${c.apellidos}`.trim() + (c.email ? ` · ${c.email}` : ""),
-        })),
-      );
+    const o = await opcionesDeCuenta(id);
+    setContactos(o.contactos);
+    setNegocios(o.negocios);
   }
   async function asociar() {
     const input = {
       correoId: p.correoId,
       cuentaId,
       ...(contactoId !== SIN_CONTACTO ? { contactoId } : {}),
+      ...(negocioId !== SIN_CONTACTO ? { negocioId } : {}),
     };
     if (await ejecutar("core.correos.asociar", input)) {
       setAbierto(false);
-      avisar.exito("Correo asociado: ya aparece en la ficha");
+      avisar.exito(negocioId !== SIN_CONTACTO ? "Correo asociado: ya aparece en la cuenta y en el negocio" : "Correo asociado: ya aparece en la ficha");
     }
   }
   const cerrar = () => {
@@ -114,6 +112,15 @@ export function AsociarCorreo(p: { correoId: string; asunto: string | null }) {
               valor={contactoId}
               onCambiar={setContactoId}
               opciones={[{ valor: SIN_CONTACTO, etiqueta: "Solo la cuenta" }, ...contactos]}
+              disabled={pendiente || !cuentaId}
+            />
+          </Campo>
+          <Campo etiqueta="Negocio (opcional)" htmlFor={`asociar-negocio-${p.correoId}`}>
+            <Select
+              id={`asociar-negocio-${p.correoId}`}
+              valor={negocioId}
+              onCambiar={setNegocioId}
+              opciones={[{ valor: SIN_CONTACTO, etiqueta: "Sin negocio" }, ...negocios]}
               disabled={pendiente || !cuentaId}
             />
           </Campo>

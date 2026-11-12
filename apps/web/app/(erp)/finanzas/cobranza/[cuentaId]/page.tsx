@@ -47,7 +47,7 @@ function Ficha({ state, ficha, gestiona }: { state: EstadoPantalla; ficha: Ficha
         {ficha.facturas.length === 0 ? (
           <p className="text-sm text-fg-muted">Este cliente no tiene facturas vencidas.</p>
         ) : (
-          <AccionesDeudor facturas={ficha.facturas} contactos={ficha.contactos} gestiona={gestiona} />
+          <AccionesDeudor facturas={ficha.facturas} gestiona={gestiona} />
         )}
       </Card>
       <Card className="p-4 flex flex-col gap-2">

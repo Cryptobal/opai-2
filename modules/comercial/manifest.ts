@@ -1,5 +1,6 @@
 import {
   ajustesComercial,
+  buscadoresComercial,
   capacidadesComercial,
   defineModule,
   indicadoresComercial,
@@ -20,6 +21,10 @@ export const manifest = defineModule({
     {
       id: "comercial:negocios.manage",
       descripcion: "Crear, editar, mover, ganar y perder negocios",
+    },
+    {
+      id: "comercial:negocios.exportar",
+      descripcion: "Exportar los negocios a Excel",
     },
     {
       id: "comercial:config.manage",
@@ -129,6 +134,7 @@ export const manifest = defineModule({
     },
   ],
   capacidades: capacidadesComercial,
+  buscadores: buscadoresComercial,
   // Indicadores de gestión para el catálogo del núcleo (CAR-308, ADR-094).
   indicadores: indicadoresComercial,
 });

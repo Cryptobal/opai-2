@@ -7,6 +7,7 @@ import { noEncontrado, prohibido } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { PERMISO_MANAGE, negocioDe } from "./comun";
 import { contextoSchema, vista } from "./contexto-negocio-comun";
+import { idAutor } from "../autor";
 
 export const contextoConfirmar = defineCapability({
   id: "comercial.contexto.confirmar",
@@ -32,7 +33,7 @@ export const contextoConfirmar = defineCapability({
     return ctx.transaccion(async (tx) => {
       const nueva = await tx.negocioContexto.update({
         where: { id: fila.id },
-        data: { estado: "confirmado", confirmadoEn: ahora, confirmadoPorId: ctx.actor.id ?? null },
+        data: { estado: "confirmado", confirmadoEn: ahora, confirmadoPorId: idAutor(ctx.actor) },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "comercial.negocio.actualizado",

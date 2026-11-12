@@ -46,6 +46,8 @@ export async function enviarCorreo(
   para: string,
   datos: Record<string, unknown>,
   extra: {
+    /** Más destinatarios principales (ADR-103). */
+    paraAdicionales?: readonly string[];
     cc?: readonly string[];
     bcc?: readonly string[];
     adjuntos?: readonly AdjuntoCorreo[];
@@ -77,6 +79,7 @@ export async function enviarCorreo(
       asunto: r.asunto,
       texto: r.texto,
       html: r.html,
+      ...(extra.paraAdicionales?.length ? { paraAdicionales: extra.paraAdicionales } : {}),
       ...(extra.cc?.length ? { cc: extra.cc } : {}),
       ...(extra.bcc?.length ? { bcc: extra.bcc } : {}),
       ...(extra.adjuntos?.length ? { adjuntos: extra.adjuntos } : {}),
@@ -88,7 +91,7 @@ export async function enviarCorreo(
       // del mismo tenant que trae quien envía): el catch cubre fallas fuera de Postgres. Un error de la
       // base dentro de la transacción del envío la abortaría igual (pendiente: savepoint, ver ESTADO).
       await registrarSaliente(d.db, d.tenantId, {
-        ...extra.historial, remitente: remitenteDe(d.correo), destinatarios: [para, ...(extra.cc ?? [])],
+        ...extra.historial, remitente: remitenteDe(d.correo), destinatarios: [para, ...(extra.paraAdicionales ?? []), ...(extra.cc ?? [])],
         asunto: r.asunto, texto: r.texto,
       }).catch(() => console.warn("[correos] no se registró el saliente en el historial"));
     }
