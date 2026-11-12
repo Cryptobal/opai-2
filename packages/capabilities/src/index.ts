@@ -6,6 +6,7 @@ export {
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
 export { ajustesComercial, capacidadesComercial } from "./comercial";
+export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
