@@ -1888,6 +1888,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 7. **Verificación visual por pruebas automáticas** (14:37, CAR-285, [ADR-092](#adr-092--preview-e2e-reemplaza-el-primer-vistazo-visual-de-carlos-car-285-11-nov-2026)). El primer vistazo visual pasa a `preview-e2e`: pruebas `@preview` de Playwright sobre la vista previa de cada PR, con capturas revisadas por la propia sesión. La regla ya está en `main` (A2.10) y este PR la sigue: la prueba del marco con sesión va marcada `@preview` y no depende de datos sembrados.
 8. **«Decisión tuya»** (16:27). Regla nueva de Carlos para todos los agentes: toda respuesta termina con «Decisión tuya» (qué hay que decidir, por qué, el enlace y la sugerencia, o «ninguna, sigo»). La registró otra sesión como ADR-095 y ya está en `AGENTS.md`; este PR la sigue y no la duplica.
 
+### ADR-097 · Adenda 1 (12-nov-2026, CAR-315 parte 2)
+
+**Decide:** Carlos («CAR 315 parte 2, hazlo ahora», 12-nov-2026, 07:26, hora de Chile) · **Registra:** Claude («Sesión Personas y Documentos»), en el PR de CAR-315 parte 2.
+
+1. **Dos clases nuevas de plantilla: `contrato_servicio` (ámbito cuenta) y `acta` (ámbito instalación)**, reutilizando las clases de firma que ya existían. Cada clase tiene un **ámbito** (persona, cuenta o instalación) que decide qué variables valen: persona = persona, vínculo, instalación, sueldo, contrato; cuenta = cuenta, contrato; instalación = instalación, cuenta, contrato. El servidor rechaza al guardar una variable fuera del ámbito y el panel del editor solo ofrece las del ámbito.
+2. **Generación sobre la entidad:** `core.documento_plantillas.rellenar_entidad` y `generar_entidad` (vista previa, dryRun, PDF con la marca del tenant, vínculo «propietario» a la cuenta o instalación). Las capacidades de persona rechazan plantillas de otro ámbito y al revés. Pantalla «Generar documento» en la pestaña Documentos de la cuenta y de la instalación.
+3. **Sigue pendiente:** Configuración › Módulos › Documentos (tipos configurables por tenant) y el editor con más formato, ambos con diseño.
+
 ## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)
