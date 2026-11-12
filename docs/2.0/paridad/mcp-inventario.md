@@ -1111,6 +1111,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.versiones.margen`
 - `finanzas.bancos.saldo_sugerido`
 - `finanzas.bancos.sincronizar`
+- `finanzas.cartolas.deshacer`
+- `finanzas.cartolas.listar`
 - `finanzas.cesiones.listar`
 - `finanzas.cobros.fijar_fecha_esperada`
 - `finanzas.cuadratura.obtener`
