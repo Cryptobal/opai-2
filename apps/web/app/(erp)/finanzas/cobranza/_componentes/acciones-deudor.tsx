@@ -8,12 +8,13 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fecha, pesos } from "@/lib/fechas";
 
 import { TRAMO } from "./etiquetas";
-import type { FacturaVencida, FichaDeudor } from "./tipos";
+import type { FacturaVencida } from "./tipos";
+
+type Envio = { estado: string; para: string | null; paraAdicionales: string[]; cc: string[] };
 
 /** Facturas vencidas con sus acciones: recordar por correo (con vista previa), pausar y anotar. */
 export function AccionesDeudor(p: {
   facturas: FacturaVencida[];
-  contactos: FichaDeudor["contactos"];
   gestiona: boolean;
 }) {
   const { ejecutar, pendiente, error, limpiarError } = useCapacidad("erp");
@@ -21,11 +22,19 @@ export function AccionesDeudor(p: {
   const [recordar, setRecordar] = useState<FacturaVencida | null>(null);
   const [nota, setNota] = useState<FacturaVencida | null>(null);
   const [texto, setTexto] = useState("");
-  const para = p.contactos.find((c) => c.email)?.email ?? null;
+  // A quién saldría de verdad: la vista previa del servidor (lista guardada de la factura o contactos, casilla DTE en copia).
+  const [destinos, setDestinos] = useState<Envio | null>(null);
+
+  async function abrirRecordar(f: FacturaVencida) {
+    setDestinos(null);
+    setRecordar(f);
+    const v = await ejecutar<Envio>("finanzas.cobranza.recordar", { documentoId: f.documentoId }, true, "layout");
+    setDestinos(v ?? { estado: "omitido", para: null, paraAdicionales: [], cc: [] });
+  }
 
   async function enviar(f: FacturaVencida) {
     limpiarError();
-    const r = await ejecutar<{ estado: string; para: string | null }>(
+    const r = await ejecutar<Envio>(
       "finanzas.cobranza.recordar",
       { documentoId: f.documentoId },
       false,
@@ -35,7 +44,7 @@ export function AccionesDeudor(p: {
     setRecordar(null);
     // Si no hubo respuesta (red/timeout) se conserva la clave: el reintento no duplica el correo.
     if (r) intento.current = crypto.randomUUID();
-    if (r?.estado === "enviado") avisar.exito(`Recordatorio enviado a ${r.para}`);
+    if (r?.estado === "enviado") avisar.exito(`Recordatorio enviado a ${r.para}${r.paraAdicionales.length ? ` y ${r.paraAdicionales.length} más` : ""}`);
     else if (r) avisar.error("El correo no salió. Revisa el historial de gestiones.");
   }
 
@@ -75,7 +84,7 @@ export function AccionesDeudor(p: {
             </div>
             {p.gestiona ? (
               <div className="flex flex-wrap gap-2">
-                <Button disabled={pendiente} onClick={() => setRecordar(f)}>Enviar recordatorio</Button>
+                <Button disabled={pendiente} onClick={() => void abrirRecordar(f)}>Enviar recordatorio</Button>
                 <Button variant="secondary" disabled={pendiente} onClick={() => void pausar(f)}>
                   {f.pausada ? "Reanudar" : "Pausar"}
                 </Button>
@@ -87,10 +96,13 @@ export function AccionesDeudor(p: {
       </ul>
       {recordar ? (
         <Dialog abierto titulo={`Recordatorio · folio ${recordar.folio ?? ""}`} onCerrar={() => setRecordar(null)}>
-          {para ? (
+          {!destinos ? (
+            <p className="text-sm text-fg-muted">Revisando a quién se enviará…</p>
+          ) : destinos.para ? (
             <p className="text-sm">
-              Se enviará por correo a <strong>{para}</strong> (con copia a los demás contactos de facturación) la factura
-              folio {recordar.folio} por {pesos(recordar.saldo)}, vencida el {fecha(recordar.vencimiento)}, con el PDF adjunto.
+              Se enviará por correo a <strong>{[destinos.para, ...destinos.paraAdicionales].join(", ")}</strong>
+              {destinos.cc.length ? <> con copia a {destinos.cc.join(", ")}</> : null} la factura folio {recordar.folio} por{" "}
+              {pesos(recordar.saldo)}, vencida el {fecha(recordar.vencimiento)}, con el PDF adjunto.
             </p>
           ) : (
             <Alerta tono="warning" titulo="Sin contactos de facturación">
@@ -99,7 +111,7 @@ export function AccionesDeudor(p: {
           )}
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setRecordar(null)}>Cancelar</Button>
-            <Button disabled={pendiente || !para} onClick={() => void enviar(recordar)}>Enviar correo</Button>
+            <Button disabled={pendiente || !destinos?.para} onClick={() => void enviar(recordar)}>Enviar correo</Button>
           </div>
         </Dialog>
       ) : null}

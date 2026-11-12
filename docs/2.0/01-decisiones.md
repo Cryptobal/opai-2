@@ -1937,6 +1937,24 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.
 
+## ADR-103 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 06:54, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
+
+**Contexto.** La programación de facturas primero genera un borrador que no se manda a nadie. Si tiene activada la proforma o el estado de pago, esos documentos se mandan a los destinatarios de la cuenta. Cuando el cliente aprueba (un OK por correo), se emite la factura y va a los mismos destinatarios. Hasta hoy, OPAI 2 mandaba a un solo destinatario principal y el resto en copia. OPAI 1 admite 10 PARA y 10 CC. El importador de facturas históricas (CAR-283) dejó abierta qué hacer con una factura que no trae el monto cobrado.
+
+**Decisión.**
+1. **Todos los destinatarios reciben por igual.** Los contactos de facturación asignados (los de la programación o, si no hay, los de la cuenta) van todos como destinatarios principales (PARA), hasta 10. El resto va en copia. Lo mismo vale para la proforma, el estado de pago y la factura con su XML.
+2. **La casilla DTE del cliente va siempre en copia.** Es la casilla que recibe el XML y el DTE. Se agrega en copia aunque no esté en la lista guardada. Si el cliente no tiene ningún contacto de facturación, va como PARA.
+3. **Facturas importadas: todas cobradas.** Toda factura importada sin monto cobrado se da por cobrada entera, porque así están las de Gard. Si alguna no lo está, Carlos lo avisa y se corrige a mano.
+
+**Consecuencias.**
+- La migración `20261130100000_finanzas_destinatarios_varios_para` quita el índice que permitía un solo PARA por documento. El tope de 10 lo valida el dominio (`MAX_PARA`).
+- El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
+- La regla por defecto del importador (#542) queda confirmada.
+- Este ADR se numeró primero como ADR-100, número que en `main` tomó antes CAR-275; el comentario de la migración `20261130100000` conserva «ADR-100» porque ya está aplicada y su checksum no puede cambiar.
+- El recordatorio de cobro de una factura vencida usa los mismos destinatarios que la factura (`destinosDeDocumento`): así el cliente recibe la cobranza en las mismas casillas que la factura, con la casilla DTE en copia.
+
 ## ADR-102 · Hilo es el sistema de diseño predeterminado para todo diseño nuevo (CAR-324, 12-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 10:57, hora de Chile) · **Registra:** Claude. (ADR-098 a ADR-101 están reservados por PRs abiertos.)
