@@ -2,12 +2,16 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { enScope } from "../../autorizacion";
 import { defineCapability } from "../../define";
+import { externo } from "../../externo";
 import { listarBuscadores, resultadoBusquedaSchema } from "./buscadores";
 import { dondeContacto, dondeCuenta, dondeInstalacion, dondePersona } from "./alcance";
 
 const MAX = 5;
 const resultado = resultadoBusquedaSchema;
+/** Los aportes de módulos pueden traer texto de terceros (solicitudes): título y detalle van marcados como externos. */
+const resultadoExterno = z.object({ ...resultado.shape, titulo: externo(z.string()), detalle: externo(z.string()).nullable() });
 
 const contiene = (q: string) => ({ contains: q, mode: "insensitive" as const });
 
@@ -24,7 +28,7 @@ export const buscar = defineCapability({
     personas: z.array(resultado),
     contactos: z.array(resultado),
     /** Aportes de los módulos (CAR-301): un grupo por buscador, solo los que el actor puede ver. */
-    otros: z.array(z.object({ grupo: z.string(), titulo: z.string(), items: z.array(resultado) })),
+    otros: z.array(z.object({ grupo: z.string(), titulo: z.string(), items: z.array(resultadoExterno) })),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -32,7 +36,7 @@ export const buscar = defineCapability({
     const puede = (p: string) => ctx.autorizar(p);
     const rut = q.replace(/[.\s]/g, "").toUpperCase();
     const vacio = Promise.resolve([]);
-    const aportes = listarBuscadores().filter((b) => puede(b.permiso));
+    const aportes = listarBuscadores().filter((b) => ctx.modulosActivos.includes(b.modulo) && enScope(ctx, b.modulo) && puede(b.permiso));
     const [cuentas, instalaciones, personas, contactos, otros] = await Promise.all([
       puede(PERMISOS_CORE.cuentasRead)
         ? ctx.db.cuenta.findMany({

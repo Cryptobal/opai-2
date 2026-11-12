@@ -16,6 +16,8 @@ export type ResultadoBusqueda = z.infer<typeof resultadoBusquedaSchema>;
  * ejecuta si el actor tiene `permiso`, y el aporte aplica el alcance de filas en su propia consulta.
  */
 export type Buscador = {
+  /** Módulo dueño del aporte: solo se ejecuta si está activo para el tenant y en el scope de la key. */
+  modulo: string;
   /** Clave estable del grupo (`negocios`, `cotizaciones`…). */
   grupo: string;
   /** Título del grupo en la paleta. */

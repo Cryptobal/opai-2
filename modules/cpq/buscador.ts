@@ -5,6 +5,7 @@ import { PERMISO_READ } from "./capabilities/permisos";
 /** Aporte de CPQ a la búsqueda global (CAR-301): cotizaciones por código o título, sin archivadas. */
 export const buscadoresCpq: readonly Buscador[] = [
   {
+    modulo: "cpq",
     grupo: "cotizaciones",
     titulo: "Cotizaciones",
     permiso: PERMISO_READ,

@@ -11,8 +11,8 @@ import type * as Mod from "../src";
 describe.skipIf(!urlPropietario)("core.buscar · aportes de Comercial (CAR-301)", () => {
   let e: Entorno, mod: typeof Mod;
   const medidor = { registrar: async () => undefined };
-  const ctx = (tenantId: string) =>
-    mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol: "owner", modulosActivos: ["comercial"], medidor });
+  const ctx = (tenantId: string, extra: { modulosActivos?: string[]; scopes?: string[] } = {}) =>
+    mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol: "owner", modulosActivos: ["comercial", "cpq"], medidor, ...extra });
   async function dato<T>(tenantId: string, id: string, input: unknown) {
     const r = await mod.executeCapability(ctx(tenantId), id, input, {});
     if (!r.ok) throw new Error(`${id}: ${JSON.stringify(r.error)}`);
@@ -83,5 +83,16 @@ describe.skipIf(!urlPropietario)("core.buscar · aportes de Comercial (CAR-301)"
     const porCodigo = await mod.executeCapability(ctx(a.tenantId), "core.buscar", { q: "COT-9001" }, {});
     expect(JSON.stringify(porCodigo)).toContain(viva.id);
     expect(JSON.stringify(r)).not.toContain(ajena.id);
+  });
+
+  it("no ejecuta aportes de módulos inactivos ni fuera del scope de la key", async () => {
+    const a = await empresa("Fenix");
+    const grupos = async (extra: { modulosActivos?: string[]; scopes?: string[] }) => {
+      const r = await mod.executeCapability(ctx(a.tenantId, extra), "core.buscar", { q: "Zafiro" }, {});
+      return r.ok ? (r.data as { otros: { grupo: string }[] }).otros.map((g) => g.grupo) : ["error"];
+    };
+    expect(await grupos({ modulosActivos: ["comercial"] })).not.toContain("cotizaciones");
+    expect(await grupos({ modulosActivos: [] })).toEqual([]);
+    expect(await grupos({ scopes: ["core"] })).toEqual([]);
   });
 });

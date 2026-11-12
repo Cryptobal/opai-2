@@ -8,6 +8,7 @@ const contiene = (q: string) => ({ contains: q, mode: "insensitive" as const });
 /** Aporte de Comercial a la búsqueda global (CAR-301): negocios y solicitudes. */
 export const buscadoresComercial: readonly Buscador[] = [
   {
+    modulo: "comercial",
     grupo: "negocios",
     titulo: "Negocios",
     permiso: PERMISO_READ,
@@ -21,6 +22,7 @@ export const buscadoresComercial: readonly Buscador[] = [
     },
   },
   {
+    modulo: "comercial",
     grupo: "solicitudes",
     titulo: "Solicitudes",
     permiso: PERMISO_SOLICITUDES_READ,
