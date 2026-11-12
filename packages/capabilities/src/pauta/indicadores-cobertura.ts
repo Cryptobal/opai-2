@@ -1,7 +1,7 @@
 // Indicadores de Pauta por instalación (ADR-094, adenda CAR-310): cobertura, turnos descubiertos y
 // turnos extra del mes. Se cargan a quien responde por la instalación: el supervisor que la tiene a
 // cargo y el jefe de zona por las de los supervisores que le reportan (decisión de Carlos, 12-nov-2026).
-import { porcentajeDe, resumirCobertura } from "@opai/domain";
+import { esPeriodoMensual, porcentajeDe, resumirCobertura } from "@opai/domain";
 
 import { instalacionesPorResponsable } from "../core/jefatura/empresa";
 import {
@@ -25,15 +25,16 @@ async function cifrasPorResponsable(ctx: Contexto, { rango, sujetos }: ConsultaI
     ctx.db.instalacion.findMany({ where: { id: { in: ids }, archivadaEn: null }, select: { id: true, region: true } }),
     ctx.db.puesto.findMany({ where: { estado: "activo", instalacionId: { in: ids } }, select: { id: true, instalacionId: true } }),
   ]);
+  if (!esPeriodoMensual(rango.periodo)) return new Map<string, Cifras>();
   const [anio, mes] = rango.periodo.split("-").map(Number) as [number, number];
   const m = await cargarMes(ctx, puestos, instalaciones, anio, mes);
   const porInstalacion = new Map<string, Cifras>();
   for (const i of instalaciones) {
     const celdas = puestos.filter((p) => p.instalacionId === i.id).flatMap((p) => m.celdas.get(p.id) ?? []);
     const r = resumirCobertura(celdas);
-    const extra = celdas.filter(
-      (c) => c.estado === "cubierto" && (c.variante === "refuerzo" || c.variante === "refuerzo_extra"),
-    ).length;
+    // Refuerzos de la pauta. Un reemplazo pagado como turno extra (CAR-96) todavía no queda en la
+    // celda del mes: cuando exista, se suma aquí.
+    const extra = celdas.filter((c) => c.estado === "cubierto" && c.variante === "refuerzo").length;
     porInstalacion.set(i.id, { programados: r.programados, cubiertos: r.cubiertos, ppc: r.ppc, extra });
   }
   const out = new Map<string, Cifras>();
@@ -69,7 +70,7 @@ export const indicadoresCobertura: readonly IndicadorGestion[] = [
     id: "pauta.cobertura",
     nombre: "Cobertura de pauta",
     descripcion:
-      "En las instalaciones por las que responde (a cargo como supervisor o de los supervisores que le reportan), qué porcentaje de los turnos programados del mes quedó cubierto.",
+      "En las instalaciones por las que responde (a cargo como supervisor o de los supervisores que le reportan), qué porcentaje de los turnos programados del mes quedó cubierto, con la misma cuenta que el resumen de la pauta (los refuerzos cuentan como turnos cubiertos).",
     tipo: "resultado",
     unidad: "porcentaje",
     sentido: "mayor",
@@ -93,11 +94,11 @@ export const indicadoresCobertura: readonly IndicadorGestion[] = [
     id: "pauta.turnos_extra",
     nombre: "Turnos extra sobre la pauta",
     descripcion:
-      "Turnos de refuerzo cubiertos en el mes, como porcentaje de los turnos programados, en las instalaciones por las que responde.",
+      "Turnos de refuerzo cubiertos en el mes, como porcentaje de los turnos de la pauta base (sin contar los mismos refuerzos), en las instalaciones por las que responde.",
     tipo: "calidad",
     unidad: "porcentaje",
     sentido: "menor",
     metaSugerida: 5,
-    medir: medirCon((c) => porcentajeDe(c.extra, c.programados)),
+    medir: medirCon((c) => porcentajeDe(c.extra, c.programados - c.extra)),
   }),
 ];

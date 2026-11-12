@@ -71,10 +71,20 @@ export async function instalacionesPorResponsable(ctx: Contexto): Promise<Map<st
   }
   const j = await jefaturaEmpresa(ctx);
   if (!j) return out;
-  const supervisores = new Map(out);
+  // Copia profunda: lo que suma un jefe no debe verse como «propio» si ese jefe reporta a otro.
+  const supervisores = new Map([...out].map(([k, v]) => [k, new Set(v)]));
+  // El jefe de zona también necesita membresía activa en la empresa.
+  const activos = new Set(
+    (
+      await ctx.db.membership.findMany({
+        where: { userId: { in: [...new Set(j.usuarioDe.values())] }, estado: "activa" },
+        select: { userId: true },
+      })
+    ).map((m) => m.userId),
+  );
   for (const [jefe, reportan] of j.reportes) {
     const usuarioJefe = j.usuarioDe.get(jefe);
-    if (!usuarioJefe) continue;
+    if (!usuarioJefe || !activos.has(usuarioJefe)) continue;
     for (const persona of reportan) {
       const u = j.usuarioDe.get(persona);
       const suyas = u ? supervisores.get(u) : undefined;

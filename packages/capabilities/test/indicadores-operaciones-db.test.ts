@@ -16,6 +16,7 @@ describe.skipIf(!urlPropietario)("indicadores de Operaciones contra Postgres rea
   let usuaria = "";
   let sara = "";
   let zoe = "";
+  let gina = "";
   const sufijo = randomUUID().slice(0, 8);
   const MEDIR = "core.indicadores_gestion.medir";
   type Salida = { mediciones: { sujetoId: string; valor: number | null }[] };
@@ -132,12 +133,18 @@ describe.skipIf(!urlPropietario)("indicadores de Operaciones contra Postgres rea
       (await e.admin.user.create({ data: { name: nombre, email: `${nombre}-${sufijo}@prueba.cl`, emailVerified: true } })).id;
     sara = await usuario("sara");
     zoe = await usuario("zoe");
-    const jefaZona = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Jefe de zona" } })).id;
+    gina = await usuario("gina");
+    // Tres niveles: Gerente ← Jefe de zona (que además supervisa la bodega) ← Supervisor.
+    const gerente = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Gerente" } })).id;
+    const jefaZona = (
+      await e.admin.cargo.create({ data: { tenantId: a, nombre: "Jefe de zona", jefaturaCargoId: gerente, jefaturaVe: "equipo" } })
+    ).id;
     const supervisor = (
       await e.admin.cargo.create({ data: { tenantId: a, nombre: "Supervisor", jefaturaCargoId: jefaZona, jefaturaVe: "equipo" } })
     ).id;
     const guardia = (await e.admin.cargo.create({ data: { tenantId: a, nombre: "Guardia" } })).id;
     for (const [nombre, userId, cargoId] of [
+      ["gina", gina, gerente],
       ["zoe", zoe, jefaZona],
       ["sara", sara, supervisor],
       ["gino-titular", null, guardia],
@@ -179,9 +186,41 @@ describe.skipIf(!urlPropietario)("indicadores de Operaciones contra Postgres rea
         vigenteDesde: new Date("2026-10-01"),
       },
     });
-    // Un día de ausencia sin reemplazo: queda como puesto por cubrir.
+    // Un día de ausencia sin reemplazo (puesto por cubrir) y un refuerzo en un día libre (turno extra).
     await e.admin.excepcionPauta.create({
       data: { tenantId: a, puestoId, fecha: new Date("2026-10-02"), tipo: "ausencia", motivo: "Enfermo", personaId: persona["gino-titular"] ?? null },
+    });
+    await e.admin.excepcionPauta.create({
+      data: { tenantId: a, puestoId, fecha: new Date("2026-10-05"), tipo: "refuerzo", motivo: "Evento", personaId: persona["gino-titular"] ?? null },
+    });
+    // Zoe también supervisa la bodega, con su pauta completa.
+    const bodega = (await e.admin.instalacion.create({ data: { tenantId: a, cuentaId, nombre: "Bodega" } })).id;
+    const mZoe = await e.admin.membership.findFirstOrThrow({ where: { tenantId: a, userId: zoe } });
+    await e.admin.supervisorInstalacion.create({ data: { tenantId: a, membershipId: mZoe.id, instalacionId: bodega } });
+    const puestoBodega = (
+      await e.admin.puesto.create({
+        data: { tenantId: a, instalacionId: bodega, cargoId: guardia, nombre: "Acceso", diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00" },
+      })
+    ).id;
+    await e.admin.seriePauta.create({
+      data: { tenantId: a, puestoId: puestoBodega, patronId: patron, inicioCiclo: new Date("2026-10-01"), titularPersonaId: persona["gino-titular"] ?? null, vigenteDesde: new Date("2026-10-01") },
+    });
+    // En la empresa B, Sara también supervisa una planta propia: no debe mezclarse con A.
+    await e.admin.membership.create({ data: { tenantId: b, userId: sara, rol: "supervisor", portales: ["erp"] } });
+    const mSaraB = await e.admin.membership.findFirstOrThrow({ where: { tenantId: b, userId: sara } });
+    const cuentaB = (await e.admin.cuenta.create({ data: { tenantId: b, nombre: "Cliente B" } })).id;
+    const plantaB = (await e.admin.instalacion.create({ data: { tenantId: b, cuentaId: cuentaB, nombre: "Planta B" } })).id;
+    await e.admin.supervisorInstalacion.create({ data: { tenantId: b, membershipId: mSaraB.id, instalacionId: plantaB } });
+    const cargoB = (await e.admin.cargo.create({ data: { tenantId: b, nombre: "Guardia" } })).id;
+    const patronB = (await e.admin.patronTurno.create({ data: { tenantId: b, nombre: "4x4", diasTrabajo: 4, diasDescanso: 4 } })).id;
+    const puestoB = (
+      await e.admin.puesto.create({
+        data: { tenantId: b, instalacionId: plantaB, cargoId: cargoB, nombre: "Portería B", diasTrabajo: 4, diasDescanso: 4, horaInicio: "08:00", horaFin: "20:00" },
+      })
+    ).id;
+    // Serie sin titular: en B todo octubre queda por cubrir.
+    await e.admin.seriePauta.create({
+      data: { tenantId: b, puestoId: puestoB, patronId: patronB, inicioCiclo: new Date("2026-10-01"), titularPersonaId: null, vigenteDesde: new Date("2026-10-01") },
     });
   });
   afterAll(async () => {
@@ -202,10 +241,16 @@ describe.skipIf(!urlPropietario)("indicadores de Operaciones contra Postgres rea
     const de = (r: Salida, u: string) => r.mediciones.find((m) => m.sujetoId === u)?.valor;
     const cobertura = await medir("pauta.cobertura");
     const descubiertos = await medir("pauta.turnos_descubiertos");
-    // 4x4 desde el 1 de octubre: 16 turnos; uno quedó sin cubrir.
-    expect([de(cobertura, sara), de(cobertura, zoe)]).toEqual([93.8, 93.8]);
-    expect([de(descubiertos, sara), de(descubiertos, zoe)]).toEqual([1, 1]);
+    const extra = await medir("pauta.turnos_extra");
+    // Planta: 4x4 desde el 1 de octubre, 16 turnos + 1 refuerzo = 17; uno quedó sin cubrir (16/17).
+    expect(de(cobertura, sara)).toBe(94.1);
+    expect([de(descubiertos, sara), de(extra, sara)]).toEqual([1, 6.3]);
+    // Zoe: su bodega (16/16) más la planta de Sara (16/17): 32/33.
+    expect([de(cobertura, zoe), de(descubiertos, zoe)]).toEqual([97, 1]);
+    // Gina (gerente): solo la bodega de Zoe, no la planta de Sara (dos niveles abajo).
+    expect([de(cobertura, gina), de(descubiertos, gina)]).toEqual([100, 0]);
+    // En B, Sara solo responde por la planta de B (sin titular: 0 %); A no se mezcla.
     const enB = await dato<Salida>(ctx(b), MEDIR, { indicador: "pauta.cobertura", periodo: "2026-10" });
-    expect(enB.mediciones).toEqual([]);
+    expect(enB.mediciones).toEqual([expect.objectContaining({ sujetoId: sara, valor: 0 })]);
   });
 });
