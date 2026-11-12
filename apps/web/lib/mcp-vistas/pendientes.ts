@@ -33,13 +33,33 @@ function pintar(resultado) {
     const b = document.createElement("button");
     b.type = "button";
     b.textContent = (p.accion || "Abrir") + " en OPAI";
-    b.addEventListener("click", () => pedir("ui/open-link", { url: new URL(p.href, BASE).toString() }));
+    b.setAttribute("aria-label", (p.accion || "Abrir") + " en OPAI: " + p.titulo);
+    b.addEventListener("click", () => abrir(p.href));
     li.append(texto, b);
     lista.append(li);
   }
   informarTamano();
 }
+/** Solo abre rutas de OPAI: nunca otro sitio ni esquemas como javascript:. */
+function abrir(href) {
+  let url;
+  try {
+    url = new URL(href, BASE);
+  } catch {
+    url = null;
+  }
+  if (!url || url.origin !== new URL(BASE).origin) {
+    estado.textContent = "No pudimos abrir ese pendiente.";
+    return;
+  }
+  pedir("ui/open-link", { url: url.toString() }).catch(() => {
+    estado.textContent = "No pudimos abrir OPAI. Ábrelo desde el navegador.";
+  });
+}
 oyentes["ui/notifications/tool-result"] = pintar;
+oyentes["ui/notifications/tool-cancelled"] = () => {
+  estado.textContent = "Se canceló la consulta. Usa Actualizar para intentarlo de nuevo.";
+};
 document.getElementById("actualizar").addEventListener("click", async () => {
   estado.textContent = "Actualizando…";
   try {
@@ -48,7 +68,9 @@ document.getElementById("actualizar").addEventListener("click", async () => {
     estado.textContent = "No pudimos actualizar. Vuelve a intentarlo.";
   }
 });
-iniciar();
+iniciar(() => {
+  estado.textContent = "No pudimos conectar con Claude. Vuelve a abrir la vista.";
+});
 `;
 
 /** HTML autocontenido de la vista; `base` es la dirección de OPAI para abrir cada pendiente. */

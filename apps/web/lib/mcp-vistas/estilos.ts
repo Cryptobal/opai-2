@@ -28,7 +28,7 @@ li .titulo { font-weight: var(--font-weight-semibold, 600); }
 li[data-tono="danger"] { border-color: var(--color-border-danger, GrayText); }
 li[data-tono="warning"] { border-color: var(--color-border-warning, GrayText); }
 button {
-  font: inherit; min-height: 36px; padding: 0 14px; cursor: pointer;
+  font: inherit; min-height: 44px; padding: 0 14px; cursor: pointer;
   border-radius: var(--border-radius-md, 8px);
   border: var(--border-width-regular, 1px) solid var(--color-border-primary, GrayText);
   background: var(--color-background-secondary, ButtonFace);

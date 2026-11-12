@@ -16,8 +16,11 @@ type Servidor = {
 export const VISTAS: Record<string, string> = { core_inicio_pendientes: URI_PENDIENTES };
 
 /** `_meta` de una herramienta con vista, o undefined. */
-export const metaDeVista = (herramienta: string) =>
-  VISTAS[herramienta] ? { ui: { resourceUri: VISTAS[herramienta] } } : undefined;
+export const metaDeVista = (herramienta: string) => {
+  const uri = VISTAS[herramienta];
+  // Clave nueva y la plana anterior, como el helper oficial, para clientes más antiguos.
+  return uri ? { ui: { resourceUri: uri }, "ui/resourceUri": uri } : undefined;
+};
 
 /** Publica las vistas como recursos `ui://`. Solo HTML propio y autocontenido, sin datos. */
 export function registrarVistas(server: Servidor, base: string): void {
