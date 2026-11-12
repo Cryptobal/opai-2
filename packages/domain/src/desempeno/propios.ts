@@ -64,21 +64,21 @@ export function erroresDePropio(
   for (const uso of usados) {
     const hecho = hechos.get(uso.hecho);
     if (!hecho) {
-      errores.push(`"${uso.hecho}" no es un hecho disponible para la empresa.`);
+      errores.push(`«${uso.hecho}» no es un hecho disponible para la empresa.`);
       continue;
     }
     for (const [atributo, valores] of Object.entries(uso.filtros ?? {})) {
       const declarado = hecho.atributos.find((a) => a.id === atributo);
-      if (!declarado) errores.push(`"${uso.hecho}" no se puede filtrar por "${atributo}".`);
+      if (!declarado) errores.push(`«${uso.hecho}» no se puede filtrar por «${atributo}».`);
       else if (valores.length === 0 || valores.some((v) => !declarado.valores.includes(v))) {
-        errores.push(`El filtro "${atributo}" de "${uso.hecho}" tiene un valor que no existe.`);
+        errores.push(`El filtro «${atributo}» de «${uso.hecho}» tiene un valor que no existe.`);
       }
     }
   }
   if (errores.length > 0) return errores;
   const [a, b] = usados.map((u) => hechos.get(u.hecho));
   if (def.forma === "sumar" && unidadDePropio(def, hechos) === null) {
-    errores.push(`"${def.hecho}" no tiene el monto "${def.monto}".`);
+    errores.push(`«${def.hecho}» no tiene el monto «${def.monto}».`);
   }
   if (a && b && a.sujeto !== b.sujeto) {
     errores.push("Los dos hechos se atribuyen a sujetos distintos (usuario y Persona): no se pueden combinar.");

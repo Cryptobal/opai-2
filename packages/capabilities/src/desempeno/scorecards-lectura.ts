@@ -1,16 +1,18 @@
-import { esPeriodoMensual, versionVigente } from "@opai/domain";
+import { versionVigente } from "@opai/domain";
 import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
-import { mesesDe, PERMISOS_DESEMPENO, scorecardSchema, versionesDe, vistaScorecard } from "./comun";
+import { mesesDe, periodo, PERMISOS_DESEMPENO, scorecardSchema, versionesDe, vistaScorecard } from "./comun";
+import { indicadoresPara } from "./propios-indicadores";
 
-const periodo = z
-  .string()
-  .refine(esPeriodoMensual, "Usa aaaa-mm.")
-  .optional()
-  .describe("Mes consultado (aaaa-mm). Por defecto, el mes en curso de la empresa.");
+const definicionSchema = z.object({
+  indicador: z.string(),
+  nombre: z.string(),
+  descripcion: z.string(),
+  unidad: z.string(),
+});
 
 export const scorecardsGet = defineCapability({
   id: "desempeno.scorecards.get",
@@ -20,14 +22,20 @@ export const scorecardsGet = defineCapability({
   input: z.object({ cargoId: uuidSchema, periodo }),
   output: z.object({
     cargoId: z.string(),
+    cargo: z.string().describe("Nombre del cargo."),
     periodo: z.string(),
     vigente: scorecardSchema.nullable().describe("null = el cargo no tiene scorecard en ese mes."),
     pendiente: scorecardSchema.nullable(),
+    definiciones: z.array(definicionSchema).describe("Nombre, qué mide y unidad de cada indicador de la versión vigente."),
+    definicionesPendiente: z.array(definicionSchema).describe("Lo mismo para la versión pendiente, en su mes."),
   }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const cargo = await ctx.db.cargo.findUnique({ where: { id: input.cargoId }, select: { id: true } });
+    const cargo = await ctx.db.cargo.findUnique({
+      where: { id: input.cargoId },
+      select: { nombre: true },
+    });
     if (!cargo) throw noEncontrado("El cargo");
     const { actual } = await mesesDe(ctx);
     const mes = input.periodo ?? actual;
@@ -38,7 +46,29 @@ export const scorecardsGet = defineCapability({
       versiones
         .filter((v) => v.id !== vigente?.id && (v.estado === "borrador" || v.vigenteDesde > actual))
         .sort((a, b) => (a.vigenteDesde < b.vigenteDesde ? 1 : -1))[0] ?? null;
-    return { cargoId: input.cargoId, periodo: mes, vigente, pendiente };
+    // Cada versión se describe con los indicadores del mes en que rige: un indicador propio puede
+    // cambiar de unidad entre versiones y la meta guardada está en la unidad de su mes.
+    const mesPendiente = pendiente && pendiente.vigenteDesde > actual ? pendiente.vigenteDesde : actual;
+    const [delVigente, delPendiente] = await Promise.all([
+      vigente ? indicadoresPara(ctx, mes, { conArchivados: true }) : null,
+      pendiente ? indicadoresPara(ctx, mesPendiente, { conArchivados: true }) : null,
+    ]);
+    const describir = (v: typeof vigente, catalogo: typeof delVigente) =>
+      (v?.indicadores ?? []).flatMap(({ indicador }) => {
+        const d = catalogo?.get(indicador);
+        return d ? [{ indicador, nombre: d.nombre, descripcion: d.descripcion, unidad: d.unidad }] : [];
+      });
+    const definiciones = describir(vigente, delVigente);
+    const definicionesPendiente = describir(pendiente, delPendiente);
+    return {
+      cargoId: input.cargoId,
+      cargo: cargo.nombre,
+      periodo: mes,
+      vigente,
+      pendiente,
+      definiciones,
+      definicionesPendiente,
+    };
   },
 });
 
