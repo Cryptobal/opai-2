@@ -97,4 +97,25 @@ describe.skipIf(!urlPropietario)("core · importador de contratos en base real",
     expect(await vinculos(x.t1)).toHaveLength(3);
     expect(lote).not.toBe("");
   });
+  it("sobrescribir no termina un contrato vigente ni deja dos vigentes (hallazgos de revisión)", async () => {
+    // Un contrato vigente no se termina desde la importación: terminar es irreversible.
+    const terminar = await x.importar(x.t1, "contratos", {
+      filas: [{ ...base, persona_rut: "11.111.111-1", inicio: "01-03-2024", horas_semanales: 40, termino: "01-01-2025" }], alExistir: "sobrescribir",
+    }, true);
+    expect(terminar.conteos.error).toBe(1);
+    expect(terminar.filas[0]?.mensajes[0]).toMatch(/Terminar un contrato/);
+    // Un contrato terminado no pasa a vigente si la persona ya tiene otro vigente.
+    const dos = await x.importar(x.t1, "contratos", {
+      filas: [{ ...base, persona_rut: "22.222.222-2", inicio: "01-03-2020", tipo: "plazo fijo", termino: "31-12-2099" }], alExistir: "sobrescribir",
+    }, true);
+    expect(dos.conteos.error).toBe(1);
+    expect(dos.filas[0]?.mensajes[0]).toMatch(/ya tiene un contrato vigente/);
+  });
+
+  it("un contrato vigente nuevo reactiva a la persona inactiva, como el alta manual", async () => {
+    await x.e.admin.persona.updateMany({ where: { tenantId: x.t1, rut: "44444444-4" }, data: { estado: "inactiva" } });
+    await x.importar(x.t1, "contratos", { filas: [{ ...base, persona_rut: "44.444.444-4", inicio: "01-03-2024" }] });
+    const p = await x.e.admin.persona.findFirst({ where: { tenantId: x.t1, rut: "44444444-4" } });
+    expect(p?.estado).toBe("activa");
+  });
 });

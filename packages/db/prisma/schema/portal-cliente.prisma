@@ -21,6 +21,8 @@ model AccesoCliente {
   contactoId         String?  @map("contacto_id") @db.Uuid
   /// "activo" | "suspendido" (reversible) | "revocado" (cierre definitivo del vínculo).
   estado             String   @default("activo")
+  /// "completo" (defecto: el portal entero) | "limitado" (prospecto: solo la propuesta recién enviada, CAR-300).
+  alcance            String   @default("completo")
   todasInstalaciones Boolean  @default(false) @map("todas_instalaciones")
   /// Usuario que concedió el acceso (trazabilidad; la auditoría detallada vive en core.audit_events).
   creadoPor          String?  @map("creado_por") @db.Uuid
@@ -28,6 +30,7 @@ model AccesoCliente {
   updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   instalaciones AccesoInstalacion[]
+  propuestas    AccesoPropuesta[]
 
   @@unique([tenantId, membershipId])
   @@index([tenantId, cuentaId])
@@ -76,5 +79,28 @@ model ConfigPortalCuenta {
 
   @@unique([tenantId, cuentaId])
   @@map("config_cuentas")
+  @@schema("portal_cliente")
+}
+
+/// Propuesta enviada a un acceso limitado (CAR-300): historial de lo que el prospecto puede ver. La
+/// vigente es la última enviada; las anteriores quedan como `reemplazada`. `archivada` pausa el acceso
+/// sin tocar el estado manual de `accesos` (un acceso suspendido o revocado a mano nunca se reactiva).
+model AccesoPropuesta {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  accesoId      String    @map("acceso_id") @db.Uuid
+  cotizacionId  String    @map("cotizacion_id") @db.Uuid
+  enviadaEn     DateTime  @map("enviada_en") @db.Timestamptz(6)
+  vigenteHasta  DateTime? @map("vigente_hasta") @db.Timestamptz(6)
+  /// "vigente" | "reemplazada" | "archivada".
+  estado        String    @default("vigente")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  acceso AccesoCliente @relation(fields: [accesoId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, accesoId, estado])
+  @@index([tenantId, cotizacionId])
+  @@map("acceso_propuestas")
   @@schema("portal_cliente")
 }

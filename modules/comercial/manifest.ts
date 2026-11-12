@@ -1,4 +1,9 @@
-import { ajustesComercial, capacidadesComercial, defineModule } from "@opai/capabilities";
+import {
+  ajustesComercial,
+  capacidadesComercial,
+  defineModule,
+  indicadoresComercial,
+} from "@opai/capabilities";
 
 /**
  * Manifest del módulo Comercial (ADR-003, Brief 07 · PR 1). El núcleo deriva navegación, permisos,
@@ -124,4 +129,6 @@ export const manifest = defineModule({
     },
   ],
   capacidades: capacidadesComercial,
+  // Indicadores de gestión para el catálogo del núcleo (CAR-308, ADR-094).
+  indicadores: indicadoresComercial,
 });

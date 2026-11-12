@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 710 pares pantalla→capacidad · 636 con herramienta · 74 excepciones justificadas · 0 faltantes.
+**Resumen:** 713 pares pantalla→capacidad · 639 con herramienta · 74 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -498,6 +498,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
+| compartido | `app/(erp)/personas/[id]/generar-documento/_componentes` | `core.documento_plantillas.generar` | `core_documento_plantillas_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
@@ -673,6 +674,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/mi-cuenta/preferencias` | `core.config.set` | `core_config_set` | existe |
 | erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/negocios/reportes` | `comercial.informes.tablero` | `comercial_informes_tablero` | existe |
+| erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
+| erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
