@@ -8,7 +8,7 @@ export { BarrasVerticales, type BarraVertical } from "./barras-verticales";
 export { Button, type ButtonProps, estilosBoton } from "./button";
 export { CampoDireccion, type Direccion } from "./campo-direccion";
 export { CampoSecreto } from "./campo-secreto";
-export { Card, CardContent, CardHeader, CardTitle, KpiTile } from "./card";
+export { Card, CardContent, CardHeader, CardTitle, GRILLA_KPI_HILO, KpiTile } from "./card";
 export { Checkbox } from "./checkbox";
 export { type OpcionRadio, RadioGroup } from "./radio-group";
 export { Chip, ChipAgregar, ChipToggle } from "./chip";
