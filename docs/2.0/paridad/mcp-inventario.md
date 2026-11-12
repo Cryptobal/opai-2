@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 728 pares pantalla→capacidad · 650 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 739 pares pantalla→capacidad · 661 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -550,6 +550,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(platform)/platform/catalogo/_componentes` | `platform.catalogo.precio_set` | `platform_catalogo_precio_set` | existe |
 | compartido | `app/(platform)/platform/facturacion/_componentes` | `platform.cobros.cargos_generar` | `platform_cobros_cargos_generar` | existe |
 | compartido | `app/(platform)/platform/indicadores/_componentes` | `platform.indicadores.resolver` | — | excepción |
+| compartido | `app/(platform)/platform/usuarios/_componentes` | `platform.users.set_role` | `platform_users_set_role` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.documentos.list` | `core_documentos_list` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
@@ -698,10 +699,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/remuneraciones/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
 | platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
+| platform | `/platform/auditoria` | `platform.auditoria.list` | `platform_auditoria_list` | existe |
+| platform | `/platform/auditoria` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/catalogo` | `platform.catalogo.list` | `platform_catalogo_list` | existe |
 | platform | `/platform/consumos` | `platform.consumos.summary` | `platform_consumos_summary` | existe |
 | platform | `/platform/facturacion` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/indicadores` | `platform.indicadores.propuestas` | `platform_indicadores_propuestas` | existe |
+| platform | `/platform/tenants/[id]/auditoria` | `platform.auditoria.estado` | `platform_auditoria_estado` | existe |
+| platform | `/platform/tenants/[id]/auditoria` | `platform.auditoria.list` | `platform_auditoria_list` | existe |
+| platform | `/platform/tenants/[id]/auditoria` | `platform.bitacora.estado` | `platform_bitacora_estado` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.catalogo.list` | `platform_catalogo_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargo_anular` | `platform_cobros_cargo_anular` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.cargos_list` | `platform_cobros_cargos_list` | existe |
@@ -711,18 +717,23 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.pruebas_gratis_list` | `platform_cobros_pruebas_gratis_list` | existe |
 | platform | `/platform/tenants/[id]/cobro` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
 | platform | `/platform/tenants/[id]/integraciones` | `platform.integraciones.estado` | `platform_integraciones_estado` | existe |
+| platform | `/platform/tenants/[id]/usuarios` | `platform.tenants.miembros` | `platform_tenants_miembros` | existe |
 | platform | `/platform/tenants/[id]` | `platform.admins.invite` | `platform_admins_invite` | existe |
 | platform | `/platform/tenants/[id]` | `platform.cobros.resumen` | `platform_cobros_resumen` | existe |
+| platform | `/platform/tenants/[id]` | `platform.invitaciones.reenviar` | `platform_invitaciones_reenviar` | existe |
+| platform | `/platform/tenants/[id]` | `platform.invitaciones.revocar` | `platform_invitaciones_revocar` | existe |
 | platform | `/platform/tenants/[id]` | `platform.modules.set` | `platform_modules_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.get` | `platform_tenants_get` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.panel` | `platform_tenants_panel` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_get` | `platform_tenants_perfil_get` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.perfil_set` | `platform_tenants_perfil_set` | existe |
 | platform | `/platform/tenants/[id]` | `platform.tenants.set_estado` | `platform_tenants_set_estado` | existe |
+| platform | `/platform/tenants/[id]` | `platform.tenants.update` | `platform_tenants_update` | existe |
 | platform | `/platform/tenants/[id]` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
 | platform | `/platform/tenants/nuevo` | `platform.tenants.create` | `platform_tenants_create` | existe |
 | platform | `/platform/trabajos` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | platform | `/platform/trabajos` | `platform.trabajos.list` | `platform_trabajos_list` | existe |
+| platform | `/platform/usuarios` | `platform.users.list` | `platform_users_list` | existe |
 | platform | `/platform` | `platform.tenants.list` | `platform_tenants_list` | existe |
 | servidor | `lib/cuentas-paginadas.ts` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | servidor | `lib/existe-ruta.ts` | `core.apikeys.get` | `core_apikeys_get` | existe |
@@ -1084,16 +1095,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `finanzas.reportes.resultados`
 - `finanzas.ventas.proyeccion_flujo`
 - `nomina.novedades.cargar`
-- `platform.auditoria.estado`
-- `platform.auditoria.list`
-- `platform.bitacora.estado`
 - `platform.eventos.list`
-- `platform.tenants.update`
 - `platform.trabajos.cancelar`
 - `platform.trabajos.reintentar`
-- `platform.usage.summary`
-- `platform.users.list`
-- `platform.users.set_role`
 - `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.reasignar`

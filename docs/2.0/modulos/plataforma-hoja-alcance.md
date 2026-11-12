@@ -28,7 +28,7 @@ Base sólida: toda escritura `platform.*` se audita en `core.auditoria_global`, 
 6. **Consumos global:** si la carga falla muestra «Sin empresas» en vez del error.
 7. **Ajustes:** «Guardar» aplica precios y ajustes uno tras otro (si falla a la mitad queda a medias), sin vista previa aunque afecta a todas las empresas; «Ingreso mínimo» aparece en Límites y además en Valores legales.
 8. **Ciclo de vida:** «prueba» no vence (ni la empresa ni el módulo) y funciona igual que «activo»; `set_estado` permite cualquier transición sin motivo ni antes/después; adoptar una empresa existente le siembra el catálogo de la vertical pedida aunque la suya sea otra; cambiar la vertical no vuelve a sembrar. No existe archivar ni borrar empresa (solo suspender).
-9. **Seguridad (no bloquea hoy, se corrige en el PR de arreglos):** `platform.modules.set` es «escritura», así que un agente con key de plataforma puede **suspender módulos pagados sin aprobación humana**; `platform.aprobaciones.rechazar` lo puede usar el rol `support` (solo lectura); `platform.tenants.get` no registra la empresa objetivo en su auditoría de lectura; `platform.precios.set` acepta recursos inexistentes (su consumo se valora en 0) y el precio nuevo tarda hasta 10 minutos en aplicarse por la caché.
+9. **Seguridad** *(resuelto en CAR-323 PR 1, salvo `modules.set`, ya irreversible desde CAR-188)*: `platform.modules.set` es «escritura», así que un agente con key de plataforma puede **suspender módulos pagados sin aprobación humana**; `platform.aprobaciones.rechazar` lo puede usar el rol `support` (solo lectura); `platform.tenants.get` no registra la empresa objetivo en su auditoría de lectura; `platform.precios.set` acepta recursos inexistentes (su consumo se valora en 0) y el precio nuevo tarda hasta 10 minutos en aplicarse por la caché.
 10. **Diseño:** las páginas globales (Trabajos, Valores legales, Consumos, Ajustes, Nueva empresa) no muestran título en la barra superior; ids técnicos a la vista (`ia.economica.entrada`, `core.auditoria.verificar`, «0.1.0»); valores legales como JSON crudo. Las capturas a 375 px quedan para el PR B (Playwright local).
 
 ## 3. Qué falta
@@ -45,9 +45,9 @@ Base sólida: toda escritura `platform.*` se audita en `core.auditoria_global`, 
 
 | Se puede en… | …pero no en | Qué |
 |---|---|---|
-| MCP | pantalla | `platform.tenants.update`, `.users.list`, `.users.set_role`, `.auditoria.list`, `.auditoria.estado`, `.bitacora.estado`, `.eventos.list` |
+| MCP | pantalla | `platform.tenants.update`, `.users.list`, `.users.set_role`, `.auditoria.list`, `.auditoria.estado`, `.bitacora.estado` *(con pantalla desde CAR-323)*; `.eventos.list` (sigue solo por MCP) |
 | Pantalla | MCP | Aprobar/rechazar valores legales y aprobaciones de plataforma, borrar usuario y restablecer MFA: **reservado a personas a propósito** (ADR-032) |
-| Ninguno | — | `platform.usage.summary` quedó obsoleta (la reemplaza `consumos.summary`): se retira |
+| Ninguno | — | `platform.usage.summary` quedó obsoleta (la reemplaza `consumos.summary`): **retirada en CAR-323** |
 
 Paridad pantalla → MCP en verde (0 faltantes); la brecha es al revés: hay capacidades sin pantalla.
 
