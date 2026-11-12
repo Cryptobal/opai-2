@@ -1,4 +1,4 @@
-// CAR-291 (Slack F1, ADR-093), migración 20261124100000: la instalación de Slack queda aislada por
+// CAR-291 (Slack F1, ADR-093), migración 20261129100000: la instalación de Slack queda aislada por
 // empresa (RLS), un espacio de Slack se liga a una sola empresa y el resolver SECURITY DEFINER solo
 // devuelve el tenant de un team_id exacto.
 import { randomUUID } from "node:crypto";

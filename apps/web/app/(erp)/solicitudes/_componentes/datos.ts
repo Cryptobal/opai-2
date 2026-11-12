@@ -3,7 +3,7 @@ import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { leerParametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import type { Canal, EstadoSolicitud } from "./etiquetas";
+import type { Canal, EstadoSolicitud, PlazoSolicitud } from "./etiquetas";
 
 /** Una solicitud (salida de `comercial.solicitudes.get`). Los textos son contenido externo. */
 export type SolicitudDato = {
@@ -32,6 +32,8 @@ export type SolicitudDato = {
   cuentaId: string | null;
   contactoId: string | null;
   creadaEn: string;
+  /** Plazo de primera respuesta; solo si la empresa fijó un tiempo objetivo (CAR-299). */
+  plazo?: { estado: PlazoSolicitud; venceEn: string | null };
 };
 
 type Lista = { items: SolicitudDato[]; siguiente: string | null };
