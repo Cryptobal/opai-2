@@ -211,8 +211,7 @@ describe.skipIf(!urlPropietario)("jefatura por cargo contra Postgres real", () =
   });
 
   it("desde otra empresa no se ve nada, y con alcance por filas solo el equipo propio", async () => {
-    const desdeB = await dato<Equipo>(ctx(b), A_CARGO, { personaId: persona.julia });
-    expect(desdeB.personas).toEqual([]);
+    expect(await codigo(ctx(b), A_CARGO, { personaId: persona.julia })).toBe("NOT_FOUND");
     const acotado = ctx(a, { alcance: { instalaciones: [] } });
     expect(await codigo(acotado, A_CARGO, { personaId: persona.julia })).toBe("FORBIDDEN");
     // La jefatura no amplía el alcance: sin instalaciones a cargo no ve a nadie, aunque sea jefa.

@@ -67,7 +67,8 @@ Sin pantallas. Se configura hoy por MCP o API; la pantalla «Quién ve los resul
 - Persona inactiva: no aparece en el equipo ni hace de jefe; su gente sube al nivel de arriba.
 - Dos llamadas simultáneas que cruzan jefaturas (A→B y B→A) podrían cerrar un ciclo: la regla lo tolera sin colgarse y se corrige con otra llamada.
 - Ciclo en los datos (no debería existir): la regla no se cuelga.
-- Usuario sin ficha de Persona vinculada: `a_cargo` responde vacío con `jefePersonaId: null`.
+- Usuario sin ficha de Persona vinculada: `list_a_cargo` responde vacío con `jefePersonaId: null`.
+- Preguntar por una persona de otra empresa o inexistente: `NOT_FOUND`, sin repetir su id (lo exige la prueba de aislamiento de todas las lecturas).
 
 ## 11. Plan por bloques
 

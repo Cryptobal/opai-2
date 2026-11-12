@@ -2,7 +2,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { z } from "zod";
 
 import { defineCapability } from "../../define";
-import { prohibido } from "../../errores";
+import { noEncontrado, prohibido } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { dondePersona } from "../maestros/alcance";
 import { equipoDe, personaDelUsuario } from "./datos";
@@ -45,6 +45,11 @@ export const personasACargoList = defineCapability({
       throw prohibido("Con tu alcance solo puedes ver a las personas a tu cargo.");
     }
     if (!jefeId) return { jefePersonaId: null, personas: [], siguiente: null };
+    // Una persona de otra empresa (o inexistente) no existe para quien consulta: ni se repite su id.
+    if (input.personaId) {
+      const existe = await ctx.db.persona.findFirst({ where: { id: jefeId }, select: { id: true } });
+      if (!existe) throw noEncontrado("La persona");
+    }
     const equipo = await equipoDe(ctx, jefeId);
     // La jefatura nunca amplía el alcance por filas (ADR-022): quien está acotado a sus
     // instalaciones ve, de su equipo, solo a quienes ya puede ver como persona.
