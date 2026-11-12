@@ -4,7 +4,6 @@ import { cn } from "../cn";
 import { BottomNav } from "./nav";
 import { type PlegableRiel, Rail } from "./rail";
 import { type PlegableSidebar, Sidebar } from "./sidebar";
-import { ShellNuevo } from "./nuevo/shell-nuevo";
 import type { ItemFijado } from "./fijados";
 import { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
 import type { BusquedaMasRender, NavItem } from "./types";
@@ -41,8 +40,8 @@ export type AppShellProps = ComunesBarra & {
   onAreaAbierta?: (area: string) => void;
   children: ReactNode;
   className?: string;
-  /** Diseño nuevo (ADR-109, CAR-335 D2): piel nueva y menú plegable que se asoma. */
-  nuevo?: boolean;
+  /** Menú plegable del diseño nuevo (ADR-109): lo pasa `ShellNuevo`, que va en su propio trozo de JS. */
+  plegables?: Plegables;
 };
 
 export type Plegables = { sidebar: PlegableSidebar; riel: PlegableRiel };
@@ -53,21 +52,8 @@ export type Plegables = { sidebar: PlegableSidebar; riel: PlegableRiel };
  * barra lateral con el usuario al pie en desktop. Configuración, fija al pie.
  */
 export function AppShell(props: AppShellProps) {
-  return props.nuevo ? <ShellNuevo {...props} /> : <AppShellBase {...props} />;
-}
-
-/** Cuerpo del shell; el diseño nuevo le pasa el estado del menú plegable. */
-export function AppShellBase(props: AppShellProps & { plegables?: Plegables }) {
   const { titulo, nav, rutaActual, acciones, insignia, children, className, Link } = props;
-  const {
-    accionesTelefono,
-    onNavegar,
-    completo,
-    navInferior,
-    nuevo: _n,
-    plegables: _p,
-    ...barra
-  } = props;
+  const { accionesTelefono, onNavegar, completo, navInferior, plegables: _p, ...barra } = props;
   return (
     <div className="flex min-h-dvh bg-bg text-fg">
       <Rail

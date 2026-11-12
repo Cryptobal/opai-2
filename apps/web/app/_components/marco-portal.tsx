@@ -11,6 +11,7 @@ import type { Marco } from "@/lib/marco";
 // desde un componente de cliente porque `next/dynamic` en el layout de servidor rompe la validación
 // del render instantáneo de Cache Components.
 const MarcoHilo = dynamic(() => import("./hilo/marco-hilo").then((m) => m.MarcoHilo));
+const MarcoNuevo = dynamic(() => import("./marco-nuevo").then((m) => m.MarcoNuevo));
 
 type Props = { marco: Marco; datos: DatosShell; children: ReactNode };
 
@@ -20,9 +21,6 @@ type Props = { marco: Marco; datos: DatosShell; children: ReactNode };
  */
 export function MarcoPortal({ marco, datos, children }: Props) {
   if (marco === "hilo") return <MarcoHilo datos={datos}>{children}</MarcoHilo>;
-  return (
-    <MarcoShell datos={datos} nuevo={marco === "nuevo"}>
-      {children}
-    </MarcoShell>
-  );
+  if (marco === "nuevo") return <MarcoNuevo datos={datos}>{children}</MarcoNuevo>;
+  return <MarcoShell datos={datos}>{children}</MarcoShell>;
 }

@@ -15,7 +15,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { AppShell, type LinkComponent, type NavItem } from "@opai/ds";
+import { type LinkComponent, type NavItem } from "@opai/ds";
+import { ShellNuevo } from "@opai/ds/shell-nuevo";
 
 const LinkNext: LinkComponent = ({ href, className, children, ...rest }) => (
   <Link href={href} className={className} {...rest}>
@@ -78,8 +79,7 @@ export function MuestraMarco() {
   const ruta = usePathname();
   const [area, setArea] = useState<string | null>("comercial");
   return (
-    <AppShell
-      nuevo
+    <ShellNuevo
       titulo="Inicio"
       nav={NAV}
       rutaActual={ruta}
@@ -96,6 +96,6 @@ export function MuestraMarco() {
         <h1 className="text-2xl font-semibold tracking-tight">Buenas tardes, Camila</h1>
         <p className="text-fg-muted">Contenido de ejemplo dentro del marco nuevo.</p>
       </div>
-    </AppShell>
+    </ShellNuevo>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { type AppShellProps, AppShellBase } from "../app-shell";
+import { AppShell, type AppShellProps } from "../app-shell";
 
 const CLAVE_PLEGADO = "opai_menu_plegado";
 /** Ancho del menú lateral completo (`Sidebar`, 248 px) más un margen para no cerrarlo en el borde. */
@@ -28,7 +28,8 @@ function guardarPlegado(plegado: boolean) {
  * Shell del diseño nuevo (ADR-109, CAR-335 D2; diseño en docs/2.0/design/export-diseno-nuevo/): el
  * mismo shell que el clásico, con la piel `data-marco="nuevo"` y el menú lateral plegable. Plegado, se
  * ve el riel de íconos; al pasar el mouse se asoma el menú completo sobre la página y se vuelve a
- * esconder al salir o al elegir. Este navegador recuerda si el menú queda plegado.
+ * esconder al salir o al elegir. Este navegador recuerda si el menú queda plegado. Se importa aparte
+ * (`@opai/ds/shell-nuevo`) para que quien usa el clásico no lo descargue (ADR-037).
  */
 export function ShellNuevo(props: AppShellProps) {
   const [plegado, setPlegado] = useState(false);
@@ -61,7 +62,7 @@ export function ShellNuevo(props: AppShellProps) {
   };
   return (
     <div data-marco="nuevo">
-      <AppShellBase
+      <AppShell
         {...props}
         plegables={{
           sidebar: {
