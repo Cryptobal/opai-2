@@ -31,7 +31,7 @@ describe("mapa estático: estado de carga", () => {
     const h = html({ lat: null, lng: null, fuente: urlMapaOpai });
     expect(h).toContain("Sin ubicación");
     expect(h).toContain('role="status"');
-    expect(h).toContain("border-dashed");
+    expect(h).toContain("ds-estado");
     expect(h).toContain("lucide-map-pin");
     expect(h).not.toContain("bg-fill");
     expect(h).not.toContain("/api/geo/mapa?");
