@@ -1,7 +1,7 @@
 // A quién sale el correo de un documento de venta: factura, nota, proforma o estado de pago (ADR-100, regla de
 // Carlos del 12-nov-2026). Todos los contactos de facturación reciben por igual como destinatarios principales y la
 // casilla DTE del cliente, que recibe el XML, va siempre en copia aunque no esté en la lista guardada.
-import { MAX_PARA, agruparDestinatarios, correoNormalizado, esCorreoValido, type DestinatarioDoc } from "@opai/domain";
+import { MAX_DESTINATARIOS, MAX_PARA, agruparDestinatarios, correoNormalizado, esCorreoValido, type DestinatarioDoc } from "@opai/domain";
 
 import type { Contexto } from "../types";
 
@@ -41,10 +41,11 @@ export async function destinosDeDocumento(
       orderBy: [{ esPrincipal: "desc" }, { createdAt: "asc" }],
     });
     const correos = [...new Set(contactos.map((c) => correoNormalizado(c.email ?? "")).filter(Boolean))];
-    lista = correos.map((email, i) => ({ tipo: i < MAX_PARA ? "PARA" : "CC", email, origen: "contacto_facturacion" }));
+    lista = correos.slice(0, MAX_DESTINATARIOS).map((email, i) => ({ tipo: i < MAX_PARA ? "PARA" : "CC", email, origen: "contacto_facturacion" }));
   }
   const casilla = emailDte && esCorreoValido(emailDte) ? correoNormalizado(emailDte) : null;
   if (casilla && !lista.some((d) => correoNormalizado(d.email) === casilla)) {
+    if (lista.length >= MAX_DESTINATARIOS) lista = lista.slice(0, MAX_DESTINATARIOS - 1);
     lista.push({ tipo: lista.some((d) => d.tipo === "PARA") ? "CC" : "PARA", email: casilla, origen: "casilla_dte" });
   }
   if (!lista.some((d) => d.tipo === "PARA")) return null;

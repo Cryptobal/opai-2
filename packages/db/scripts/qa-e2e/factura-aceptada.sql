@@ -14,7 +14,8 @@ ON CONFLICT (id) DO NOTHING;
 
 -- CAR-320: RUT ficticio y cliente activo para que aparezca al facturar (e2e `@preview` de destinatarios). Idempotente.
 UPDATE core.cuentas SET rut = COALESCE(rut, '76999002-K'), estado = 'cliente_activo', updated_at = now()
-WHERE id = '00000000-0000-7000-8000-000000267001'::uuid;
+WHERE id = '00000000-0000-7000-8000-000000267001'::uuid
+  AND tenant_id = (SELECT id FROM core.tenants WHERE slug = 'qa-e2e');
 
 INSERT INTO finanzas.documentos_emitidos
   (id, tenant_id, cuenta_id, tipo_dte, folio, fecha_emision, monto_neto, monto_iva, monto_total, estado_dte, glosa, updated_at)
