@@ -14,6 +14,8 @@ export interface ColaTrabajos {
   reclamar(limite: number): Promise<TrabajoReclamado[]>;
   completar(id: string, resultado: unknown): Promise<void>;
   fallar(id: string, error: string, reintentarEn: Date | null): Promise<void>;
+  /** Devuelve a la cola un trabajo reclamado que no alcanzó a empezar, sin gastarle el intento. */
+  devolver(id: string): Promise<void>;
 }
 
 /** Espera exponencial: 2, 4, 8, 16… minutos. */
@@ -62,10 +64,18 @@ export async function ejecutarTrabajos(
     reclamados += tomados.length;
     for (const t of tomados) {
       const def = obtenerTrabajo(t.tipo);
+      // Un trabajo recibe lo que pide (consultas al SII, 40 s) sin pasarse de lo que le queda a la vuelta. Si ni
+      // siquiera le queda el tiempo general, vuelve a la cola sin gastar el intento: así la función no se pasa
+      // de su duración máxima con trabajo reclamado a medias.
+      const pide = def?.tiempoMaximoMs ?? timeoutMs;
+      const limite = Math.min(pide, hasta - Date.now());
+      if (def && limite < Math.min(pide, timeoutMs)) {
+        await cola.devolver(t.id);
+        reclamados -= 1;
+        continue;
+      }
       try {
         if (!def) throw new Error(`Tipo de trabajo desconocido: "${t.tipo}".`);
-        // Un trabajo que pide más tiempo (consultas al SII) lo recibe, sin pasarse de lo que le queda a la vuelta.
-        const limite = Math.max(timeoutMs, Math.min(def.tiempoMaximoMs ?? timeoutMs, hasta - Date.now()));
         await cola.completar(
           t.id,
           await conTimeout((signal) => def.ejecutar(ctx, t.payload, signal), limite),

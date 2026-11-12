@@ -48,6 +48,13 @@ export function colaDeTrabajos(tenantId: string) {
         },
       });
     },
+    /** Un trabajo reclamado que no alcanzó a empezar vuelve a pendiente sin gastar el intento. */
+    async devolver(id: string): Promise<void> {
+      await forTenant(tenantId).trabajo.update({
+        where: { id },
+        data: { estado: "pendiente", bloqueadoHasta: null, intentos: { decrement: 1 } },
+      });
+    },
     async fallar(id: string, error: string, reintentarEn: Date | null): Promise<void> {
       await forTenant(tenantId).trabajo.update({
         where: { id },

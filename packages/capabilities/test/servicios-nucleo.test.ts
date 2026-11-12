@@ -46,6 +46,10 @@ function colaDe(tabla: (n: string) => Record<string, unknown>[]) {
         programadoPara: reintentarEn ?? new Date(),
       });
     },
+    async devolver(id: string) {
+      const t = tabla("trabajo").find((x) => x["id"] === id) ?? {};
+      Object.assign(t, { estado: "pendiente", intentos: (t["intentos"] as number) - 1 });
+    },
   };
 }
 
@@ -133,6 +137,27 @@ describe("trabajos", () => {
     const porTipo = Object.fromEntries(tabla("trabajo").map((t) => [t["tipo"], t]));
     expect(porTipo["core.prueba.lenta"]).toMatchObject({ estado: "hecho" });
     expect(porTipo["core.prueba.corta"]).toMatchObject({ ultimoError: "Excedió 0.04 s." });
+  });
+
+  it("un trabajo que ya no alcanza a empezar vuelve a la cola sin gastar el intento (CAR-273)", async () => {
+    registrarTrabajos([
+      defineTrabajo({ tipo: "core.prueba.tarde", descripcion: "prueba", payload: z.object({}).passthrough(), tiempoMaximoMs: 30_000, handler: async () => ({ ok: true }) }),
+    ]);
+    const { ctx, tabla } = contextoDePrueba();
+    await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.prueba.tarde" }));
+    // Quedan 25 s de vuelta: alcanza el tiempo general (20 s), así que corre con lo que queda.
+    expect(await ejecutarTrabajos(ctx, colaDe(tabla), { timeoutMs: 20_000, hasta: Date.now() + 25_000 })).toMatchObject({ hechos: 1 });
+    await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.prueba.tarde", claveUnica: "otro" }));
+    // Un lote que se reclamó con tiempo pero llega a este trabajo cuando ya no queda: vuelve sin gastar el intento.
+    const cola = colaDe(tabla);
+    const reclamar = cola.reclamar.bind(cola);
+    cola.reclamar = async (n: number) => {
+      const r = await reclamar(n);
+      await new Promise((ok) => setTimeout(ok, 30));
+      return r;
+    };
+    expect(await ejecutarTrabajos(ctx, cola, { timeoutMs: 20, hasta: Date.now() + 40 })).toMatchObject({ reclamados: 0, hechos: 0, fallidos: 0 });
+    expect(tabla("trabajo").find((t) => t["claveUnica"] === "otro")).toMatchObject({ estado: "pendiente", intentos: 0 });
   });
 
   it("un tipo desconocido falla sin reintento", async () => {
