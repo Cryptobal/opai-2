@@ -30,6 +30,7 @@ describe("ambiente del CAF vs ambiente de emisión (CAR-196)", () => {
   });
   it("con producción habilitada en app.opai.cl solo sirve el CAF de producción", () => {
     vi.stubEnv("OPAI_PRODUCCION_TRIBUTARIA", "habilitada");
+    vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("BETTER_AUTH_URL", "https://app.opai.cl");
     const cfg = { ambiente: "produccion", emisionProveedor: "simpleapi" };
     expect(() => exigirCafDelAmbiente(cfg, rango("300"))).not.toThrow();
