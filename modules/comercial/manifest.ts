@@ -23,6 +23,10 @@ export const manifest = defineModule({
       descripcion: "Crear, editar, mover, ganar y perder negocios",
     },
     {
+      id: "comercial:negocios.exportar",
+      descripcion: "Exportar los negocios a Excel",
+    },
+    {
       id: "comercial:config.manage",
       descripcion: "Configurar el embudo y los catálogos del módulo",
     },
