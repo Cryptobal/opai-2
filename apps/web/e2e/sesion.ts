@@ -22,7 +22,7 @@ export async function entrar(page: Page, email = E2E_EMAIL): Promise<void> {
   await page.goto("/login");
   await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await page.waitForURL((url) =>
     ["/mfa", "/", "/platform", "/elegir-empresa", "/supervisor"].includes(url.pathname),
   );

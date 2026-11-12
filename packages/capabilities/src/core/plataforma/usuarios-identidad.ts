@@ -19,7 +19,14 @@ async function usuarioPorCorreo(ctx: Contexto, email: string) {
   requierePlataforma(ctx);
   const u = await ctx.db.user.findUnique({
     where: { email: email.trim().toLowerCase() },
-    select: { id: true, name: true, email: true, platformRole: true, twoFactorEnabled: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      platformRole: true,
+      twoFactorEnabled: true,
+      passkeyEnabled: true,
+    },
   });
   if (!u) throw reglaDeNegocio(NO_ENCONTRADO);
   if (u.id === usuarioResponsable(ctx))
@@ -41,7 +48,8 @@ export const platformUsuariosRestablecerMfa = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const u = await usuarioPorCorreo(ctx, input.email);
-    if (!u.twoFactorEnabled) throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
+    if (!u.twoFactorEnabled && !u.passkeyEnabled)
+      throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
     if (dryRun) return { userId: u.id, nombre: u.name, email: u.email, sesionesCerradas: 0 };
     return restablecerYAvisar(ctx, u, "Plataforma OPAI");
   },

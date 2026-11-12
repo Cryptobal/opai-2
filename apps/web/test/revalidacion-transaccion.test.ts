@@ -49,7 +49,7 @@ it("sin lectura exterior autenticada no consulta la DB", async () => {
   expect(sesion).not.toHaveBeenCalled();
 });
 
-it("usa exclusivamente tx para sesión, permisos y ajuste MFA; conserva la huella", async () => {
+it("usa exclusivamente tx para sesión y permisos; conserva la huella", async () => {
   const { ctx, inicial, leer } = fixture();
   const hash = await ctx.revalidarAccesoSolicitud!();
   expect(await ctx.revalidarAccesoEnTransaccion!(ctx.db)).toBe(hash);
@@ -58,8 +58,8 @@ it("usa exclusivamente tx para sesión, permisos y ajuste MFA; conserva la huell
   expect(sesion.mock.calls[0]!.slice(1)).toEqual(["sesion-confiable", inicial.usuario.id]);
   expect(acceso.mock.calls[0]![2]).toBe(ctx.db);
   expect(acceso.mock.calls[0]!.slice(0, 2)).toEqual([inicial.actual!.tenantId, inicial.usuario.id]);
-  expect(ajuste.mock.calls[0]![0]).toBe(ctx);
-  expect(ajuste.mock.calls[0]![3]).toBe(ctx.db);
+  // CAR-286: la empresa ya no exige MFA, así que no se lee ningún ajuste dentro de la transacción.
+  expect(ajuste).not.toHaveBeenCalled();
 });
 
 it.each(["revocada", "mfa", "plataforma"])("rechaza sesión %s dentro de tx", async (caso) => {
@@ -112,7 +112,7 @@ it("revalida permisos y propagación de errores sin recurrir al lector exterior"
   expect(leer).toHaveBeenCalledTimes(1);
 });
 
-it("lee una nueva exigencia MFA dentro de tx aunque la huella no haya cambiado", async () => {
+it("un ajuste de empresa ya no impone MFA dentro de tx (CAR-286)", async () => {
   const { ctx, inicial } = fixture();
   inicial.mfaActiva = false;
   inicial.mfaVerificada = false;
@@ -124,7 +124,5 @@ it("lee una nueva exigencia MFA dentro de tx aunque la huella no haya cambiado",
   await ctx.revalidarAccesoSolicitud!();
   sesion.mockResolvedValue({ mfaActiva: false, mfaVerificada: false, platformRole: null });
   ajuste.mockResolvedValue(true);
-  await expect(ctx.revalidarAccesoEnTransaccion!(ctx.db)).rejects.toMatchObject({
-    code: "FORBIDDEN",
-  });
+  await expect(ctx.revalidarAccesoEnTransaccion!(ctx.db)).resolves.toBeDefined();
 });

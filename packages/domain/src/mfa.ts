@@ -1,10 +1,12 @@
-/** Política pura compartida por páginas, API, acciones y emisión de credenciales. */
-export function mfaEsObligatoria(
-  platformRole: unknown,
-  rol: unknown,
-  exigirOtros = false,
-): boolean {
-  return Boolean(platformRole) || rol === "owner" || rol === "admin" || exigirOtros;
+/**
+ * Política pura compartida por páginas, API, acciones y emisión de credenciales.
+ *
+ * Decisión de Carlos (11-nov-2026, CAR-286, cambia el ADR-002 / NÚCLEO-F): el segundo factor es
+ * responsabilidad de cada usuario y deja de ser obligatorio para owner, admin y la empresa. Solo las
+ * cuentas con rol de plataforma lo siguen exigiendo (pregunta abierta para Carlos en ESTADO.md).
+ */
+export function mfaEsObligatoria(platformRole: unknown): boolean {
+  return Boolean(platformRole);
 }
 
 export type EstadoMfa = { activa: boolean; verificada: boolean; obligatoria: boolean };
