@@ -5,6 +5,7 @@ import type { DefinicionImportador } from "@opai/domain/importacion";
 import { estadoDeTipo } from "../../comercial/dominio";
 import { CAMPOS_CUENTA, CAMPO_ID_EXTERNO, entero, fecha, idsExternos, norm, resolverCuentas, texto } from "./comun";
 import type { FilaPlan, Importador } from "./tipos";
+import { idAutor } from "../../autor";
 
 export type DatosNegocio = {
   cuentaId: string; titulo: string; embudoId: string; etapaId: string; estado: string; probabilidad: number;
@@ -89,7 +90,7 @@ export const importadorNegocios: Importador<DatosNegocio> = {
   async crear(tx, ctx, datos) {
     const n = await tx.negocio.create({ data: { ...datos, tenantId: ctx.tenantId }, select: { id: true } });
     await tx.historialEtapa.create({
-      data: { tenantId: ctx.tenantId, negocioId: n.id, aEtapaId: datos.etapaId, actorTipo: ctx.actor.tipo, actorId: ctx.actor.id ?? null, motivo: "Importación" },
+      data: { tenantId: ctx.tenantId, negocioId: n.id, aEtapaId: datos.etapaId, actorTipo: ctx.actor.tipo, actorId: idAutor(ctx.actor), motivo: "Importación" },
     });
     return n.id;
   },

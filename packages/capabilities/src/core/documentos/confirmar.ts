@@ -11,6 +11,7 @@ import { uuidSchema } from "../esquemas";
 import { hoy } from "../maestros/comun";
 import { subidaAcotada } from "./subida-acotada";
 import { documentoSchema, vistaDocumento } from "./vista";
+import { idAutor } from "../../autor";
 
 export const documentosConfirmarSubida = defineCapability({
   id: "core.documentos.confirmar_subida",
@@ -34,7 +35,7 @@ export const documentosConfirmarSubida = defineCapability({
       },
     });
     if (!d) throw noEncontrado("El documento");
-    if (subidaAcotada(ctx) && (!d.creadoPorId || d.creadoPorId !== ctx.actor.id))
+    if (subidaAcotada(ctx) && (!d.creadoPorId || d.creadoPorId !== idAutor(ctx.actor)))
       throw noEncontrado("El documento");
     if (d.estado !== "pendiente") throw reglaDeNegocio("El documento ya fue confirmado.");
     const tipo = d.tipoId

@@ -20,6 +20,7 @@ import { documentoAReemplazar, tipoParaEntidad, verificarEntidad } from "./entid
 import { exigirDestinoAcotado, subidaAcotada, VISIBILIDAD_ACOTADA } from "./subida-acotada";
 import { uuid7 } from "./uuid7";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
+import { idAutor } from "../../autor";
 
 const VIGENCIA_SUBIDA_S = 600;
 
@@ -112,7 +113,7 @@ export const documentosIniciarSubida = defineCapability({
       venceEn: input.venceEn ? aFecha(input.venceEn) : null,
       visibleEn: acotada ? [...VISIBILIDAD_ACOTADA] : (tipo?.visiblePortalDefault ?? []),
       creadoPorTipo: ctx.actor.tipo,
-      creadoPorId: ctx.actor.id ?? null,
+      creadoPorId: idAutor(ctx.actor),
       viaUserId: ctx.actor.viaUserId ?? null,
       moduloOrigen: "core",
     };

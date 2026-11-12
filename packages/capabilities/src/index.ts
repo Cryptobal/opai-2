@@ -52,6 +52,7 @@ export {
   SIN_TENANT,
   medidorEnDb,
 } from "./contexto";
+export { idAutor } from "./autor";
 export { defineCapability } from "./define";
 export { conflicto, ErrorCapacidad, noEncontrado, prohibido, reglaDeNegocio } from "./errores";
 export { aplicarEtapa } from "./comercial/transiciones-util";

@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { crearBorrador } from "./comun";
 import { validarSnapshots } from "./validar-snapshots";
 import { anexoSchema, MOTIVOS_ANEXO, vistaAnexo } from "./vista";
+import { idAutor } from "../../autor";
 
 const snapshotLibre = z
   .record(z.string(), z.unknown())
@@ -39,7 +40,7 @@ export const anexosGenerar = defineCapability({
         snapshotAntes: input.snapshotAntes,
         snapshotDespues: input.snapshotDespues,
         generadoPorTipo: ctx.actor.tipo === "agent" ? "agente" : "usuario",
-        generadoPorId: ctx.actor.id ?? null,
+        generadoPorId: idAutor(ctx.actor),
         estado: "borrador",
         aprobadoPorId: null,
         aprobadoEn: null,
@@ -58,7 +59,7 @@ export const anexosGenerar = defineCapability({
         snapshotAntes: input.snapshotAntes,
         snapshotDespues: input.snapshotDespues,
         generadoPorTipo: ctx.actor.tipo === "agent" ? "agente" : "usuario",
-        generadoPorId: ctx.actor.id ?? null,
+        generadoPorId: idAutor(ctx.actor),
         origenEventoId: null,
       }),
     );
