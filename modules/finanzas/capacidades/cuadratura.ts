@@ -28,7 +28,7 @@ const mesesEntre = (desde: string, hasta: string) => {
 
 /** Cuadratura mensual del saldo de cada cuenta contra su cartola (CAR-343). Solo lectura. */
 export const cuadraturaMensualObtener = defineCapability({
-  id: "finanzas.cuadratura.mensual",
+  id: "finanzas.cuadratura.obtener",
   descripcion:
     "Entrega, por cuenta bancaria y por mes, el saldo inicial, los abonos, los cargos, el saldo final y la cantidad de movimientos, calculados desde el último saldo conocido del banco y la cartola cargada. Sirve para comparar al peso con la cartola del banco y detectar meses con movimientos faltantes o sobrantes.",
   permiso: PERMISO_VER,

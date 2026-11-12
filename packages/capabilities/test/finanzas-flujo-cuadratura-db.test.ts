@@ -103,6 +103,22 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo antiguo llevado a hoy y cuadrat
     expect(s.get(mas(lunes, -28))).toMatchObject({ egresos: 300_000, saldoInicial: 18_000_000 });
   });
 
+  it("un abono de esta semana, posterior al saldo conocido, suma a la semana y el saldo de hoy cuadra", async () => {
+    // Revisión de CAR-343: antes los abonos de la semana se cortaban en la fecha del saldo y este se perdía.
+    if (hoy === lunes) return; // el lunes no hay día de esta semana anterior a hoy
+    const abono = await e.admin.movimientoBancario.create({
+      data: { tenantId, cuentaId, fecha: fecha(lunes), monto: 1_234_567n, glosa: "Abono de esta semana", claveDedupe: `qa|abono|${randomUUID()}`, estado: "pendiente", origen: "cartola" },
+    });
+    try {
+      const p = await ok<Planilla>("finanzas.planilla.obtener", { desde: lunes, semanas: 1 });
+      expect(p.semanas[0]?.saldoInicial).toBe(23_100_000);
+      expect(p.semanas[0]?.ingresos).toBeGreaterThanOrEqual(1_234_567);
+      expect(p.saldoBanco.saldoHoy).toBe(22_700_000 + 1_234_567);
+    } finally {
+      await e.admin.movimientoBancario.delete({ where: { id: abono.id } });
+    }
+  });
+
   it("la planilla informa el saldo conocido, desde cuándo y el saldo calculado a hoy", async () => {
     const p = await ok<Planilla>("finanzas.planilla.obtener", {});
     expect(p.saldoBanco).toMatchObject({ fuente: "banco", saldo: ANCLA, saldoDesde: fAncla, saldoHoy: 22_700_000 });
@@ -110,7 +126,7 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo antiguo llevado a hoy y cuadrat
 
   it("la cuadratura mensual cuadra al peso en cada corte, antes y después del saldo conocido", async () => {
     const desde = mas(fAncla, -3).slice(0, 7);
-    const c = await ok<Cuadratura>("finanzas.cuadratura.mensual", { desde, hasta: hoy.slice(0, 7) });
+    const c = await ok<Cuadratura>("finanzas.cuadratura.obtener", { desde, hasta: hoy.slice(0, 7) });
     const cuenta = c.cuentas.find((x) => x.cuentaId === cuentaId);
     expect(cuenta?.ancla).toEqual({ saldo: ANCLA, fecha: fAncla });
     const meses = cuenta?.meses ?? [];
@@ -127,11 +143,11 @@ describe.skipIf(omitirSuiteDb())("flujo · saldo antiguo llevado a hoy y cuadrat
 
   it("una cuenta sin saldo conocido se informa sin meses, y otra empresa no ve nada", async () => {
     const mes = hoy.slice(0, 7);
-    const c = await ok<Cuadratura>("finanzas.cuadratura.mensual", { desde: mes, hasta: mes });
+    const c = await ok<Cuadratura>("finanzas.cuadratura.obtener", { desde: mes, hasta: mes });
     expect(c.cuentas.find((x) => x.banco === "Banco sin saldo")).toMatchObject({ ancla: null, meses: [] });
-    const ajeno = await ok<Cuadratura>("finanzas.cuadratura.mensual", { desde: mes, hasta: mes }, otroTenant);
+    const ajeno = await ok<Cuadratura>("finanzas.cuadratura.obtener", { desde: mes, hasta: mes }, otroTenant);
     expect(ajeno.cuentas).toEqual([]);
-    const r = await mod.executeCapability(ctx(), "finanzas.cuadratura.mensual", { desde: "2026-05", hasta: "2026-01" });
+    const r = await mod.executeCapability(ctx(), "finanzas.cuadratura.obtener", { desde: "2026-05", hasta: "2026-01" });
     expect(r.ok).toBe(false);
   });
 });
