@@ -65,6 +65,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Invoca core.metodos_acceso.renombrar_passkey (herramienta MCP existente).",
   "app/_acciones/metodos-acceso.ts#accionOpcionesConfirmarPasskey":
     "Identidad: desafío WebAuthn para confirmar la identidad antes de quitar un método.",
+  "app/_acciones/apps-conectadas.ts#accionDesconectarApp":
+    "Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247).",
   "app/_acciones/metodos-acceso.ts#accionQuitarMetodo":
     "Confirma la identidad y luego invoca core.metodos_acceso.quitar (herramienta MCP existente).",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion":

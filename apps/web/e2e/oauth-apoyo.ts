@@ -13,7 +13,14 @@ export const cabeceras = (): Record<string, string> => {
   return EN_PREVIEW && secreto ? { "x-vercel-protection-bypass": secreto } : {};
 };
 
-export type Pedido = { url: string; clientId: string; verificador: string; resource: string };
+export type Pedido = {
+  url: string;
+  clientId: string;
+  verificador: string;
+  resource: string;
+  /** Nombre único por corrida: en Mi cuenta se distingue de las apps de corridas anteriores. */
+  nombre: string;
+};
 
 /** Registra una app nueva (DCR) y arma su pedido de autorización con PKCE. */
 export async function pedirAutorizacion(request: APIRequestContext): Promise<Pedido> {
@@ -21,10 +28,11 @@ export async function pedirAutorizacion(request: APIRequestContext): Promise<Ped
     headers: cabeceras(),
   });
   const { resource } = (await meta.json()) as { resource: string };
+  const nombre = `App de prueba ${randomBytes(3).toString("hex")}`;
   const r = await request.post("/api/auth/oauth2/register", {
     headers: cabeceras(),
     data: {
-      client_name: "App de prueba",
+      client_name: nombre,
       redirect_uris: [CALLBACK],
       token_endpoint_auth_method: "none",
       grant_types: ["authorization_code", "refresh_token"],
@@ -44,7 +52,13 @@ export async function pedirAutorizacion(request: APIRequestContext): Promise<Ped
     code_challenge_method: "S256",
     resource,
   });
-  return { url: `/api/auth/oauth2/authorize?${q.toString()}`, clientId, verificador, resource };
+  return {
+    url: `/api/auth/oauth2/authorize?${q.toString()}`,
+    clientId,
+    verificador,
+    resource,
+    nombre,
+  };
 }
 
 /** Pulsa «Permitir» y devuelve el código con que la app vuelve a su callback. */

@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 710 pares pantalla→capacidad · 636 con herramienta · 74 excepciones justificadas · 0 faltantes.
+**Resumen:** 712 pares pantalla→capacidad · 637 con herramienta · 75 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -34,6 +34,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
+| compartido | `app/_acciones` | `core.apps_conectadas.desconectar` | — | excepción |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.list` | `core_cuentas_list` | existe |
@@ -671,6 +672,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/nueva` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | erp | `/instalaciones/nueva` | `core.puestos.create` | `core_puestos_create` | existe |
 | erp | `/mi-cuenta/preferencias` | `core.config.set` | `core_config_set` | existe |
+| erp | `/mi-cuenta` | `core.apps_conectadas.list` | `core_apps_conectadas_list` | existe |
 | erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/negocios/reportes` | `comercial.informes.tablero` | `comercial_informes_tablero` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
@@ -728,6 +730,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 
 | Entrada | Cómo llega a una capacidad o por qué no aplica |
 | --- | --- |
+| `app/_acciones/apps-conectadas.ts#accionDesconectarApp` | Invoca core.apps_conectadas.desconectar, solo personas: desconectar una app OAuth gobierna agentes (CAR-247). |
 | `app/_acciones/auth.ts#accionCambiarPassword` | Identidad: cambia la contraseña propia; un agente nunca toca credenciales (ADR-032). |
 | `app/_acciones/auth.ts#accionEntrar` | Identidad: login con contraseña (Better Auth), solo personas. |
 | `app/_acciones/auth.ts#accionGoogle` | Identidad: login con Google, solo personas. |
@@ -913,7 +916,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apikeys.revoke` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.apikeys.set_autonomia` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
-| `core.apps_conectadas.desconectar` | — | no | reservada a personas |
+| `core.apps_conectadas.desconectar` | `app/_acciones` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.biometria.enrolar` | sin pantalla todavía · CAR-78 · desde 2026-11-10 | no | reservada a personas |
@@ -997,7 +1000,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `comercial.solicitudes.enriquecer`
 - `core.actividades.delete`
 - `core.anexos.generar`
-- `core.apps_conectadas.list`
 - `core.aprobaciones.get`
 - `core.audit.list`
 - `core.bitacora.verificar`

@@ -5,13 +5,25 @@ import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { PasswordCuenta } from "./cambiar-password";
 import { EstadoSeguridad } from "./_seguridad/estado-seguridad";
+import { AppsConectadas } from "./_seguridad/apps-conectadas";
 import { MetodosAcceso } from "./_seguridad/metodos-acceso";
-import type { Metodos } from "./_seguridad/tipos";
+import type { AppConectadaVista, Metodos } from "./_seguridad/tipos";
+
+type AppsSalida = {
+  apps: {
+    clientId: string;
+    nombre: string | null;
+    puedeEscribir: boolean;
+    conectadaEn: string;
+    ultimoUso: string | null;
+  }[];
+};
 
 export const metadata = { title: "Mi cuenta" };
 
 /**
- * Mi cuenta › Seguridad (NÚCLEO-F, CAR-286): contraseña, passkeys y app autenticadora. Cada método es
+ * Mi cuenta › Seguridad (NÚCLEO-F, CAR-286): contraseña, passkeys, app autenticadora y apps
+ * conectadas por OAuth (CAR-247). Cada método es
  * opcional (salvo plataforma); los datos salen de `core.metodos_acceso.list`, la misma herramienta del
  * MCP, sin secretos.
  */
@@ -26,13 +38,25 @@ export default function MiCuenta() {
       // engañoso sobre el segundo factor.
       cargar={async () => {
         await requerirIdentidad("/mi-cuenta");
-        const r = await ejecutarComoUsuario<Metodos>("erp", "core.metodos_acceso.list");
+        const [r, a] = await Promise.all([
+          ejecutarComoUsuario<Metodos>("erp", "core.metodos_acceso.list"),
+          ejecutarComoUsuario<AppsSalida>("erp", "core.apps_conectadas.list"),
+        ]);
         if (!r.ok) throw new Error(r.error.message);
+        if (!a.ok) throw new Error(a.error.message);
+        // Apps conectadas por OAuth (CAR-247), con fechas formateadas aquí y no en el cliente.
+        const apps: AppConectadaVista[] = a.data.apps.map((x) => ({
+          clientId: x.clientId,
+          nombre: x.nombre,
+          puedeEscribir: x.puedeEscribir,
+          conectadaEnTexto: formatearFecha(x.conectadaEn) ?? "—",
+          ultimoUsoTexto: x.ultimoUso ? (formatearFecha(x.ultimoUso) ?? null) : null,
+        }));
         const passkeys = r.data.passkeys.map((p) => ({
           ...p,
           creadaEnTexto: formatearFecha(p.creadaEn),
         }));
-        return { ...r.data, passkeys };
+        return { ...r.data, passkeys, apps };
       }}
     >
       {(m) => (
@@ -49,6 +73,7 @@ export default function MiCuenta() {
               </div>
             </div>
             <MetodosAcceso m={m} />
+            <AppsConectadas apps={m.apps} />
           </section>
         </div>
       )}
