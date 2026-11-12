@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import {
   credencialDePlataforma,
-  definicionIntegracion,
   type ProveedorIaId,
 } from "@opai/integrations";
 import { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "@opai/domain";
@@ -11,6 +10,7 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { externo } from "../externo";
 import { correoDe, iaDe } from "../integraciones/adaptadores";
+import { definicionVisible } from "../integraciones/resolver";
 import { probarEmisionDte } from "./integraciones-probar-dte";
 import { probarGeo } from "./integraciones-probar-geo";
 import { probarOctava } from "./integraciones-probar-octava";
@@ -26,8 +26,11 @@ export const integracionesProbar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const def = definicionIntegracion(input.proveedor);
+    const def = await definicionVisible(ctx, input.proveedor);
     if (!def?.disponible) throw noEncontrado(`La integración "${input.proveedor}"`);
+    // Slack no tiene prueba genérica: su estado lo da la conexión (core.slack.estado, ADR-093).
+    if (def.id === "slack")
+      throw reglaDeNegocio("El estado de Slack se ve en Configuración › Integraciones › Slack.");
     if (dryRun)
       return { ok: true, mensaje: "Vista previa: no se llamó al proveedor.", latenciaMs: 0 };
     const inicio = Date.now();

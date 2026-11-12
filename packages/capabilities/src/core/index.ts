@@ -23,6 +23,7 @@ import {
   integracionesSetSecreto,
 } from "./integraciones";
 import { integracionesGuardarCertificadoDte } from "./integraciones-certificado-dte";
+import { capacidadesSlack } from "./slack";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesCalendario } from "./calendario";
 import {
@@ -142,6 +143,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesGrupos,
+  ...capacidadesSlack,
   ...capacidadesIndicadoresGestion,
   ...capacidadesJefatura,
   ...capacidadesDocumentos,

@@ -5,7 +5,8 @@ export {
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
-export { ajustesComercial, capacidadesComercial } from "./comercial";
+export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
+export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
 export { indicadoresComercial } from "./comercial/indicadores-gestion";
 export { consumidorSeguimientoCierre, trabajosComercial } from "./comercial/seguimiento-trabajo";
 export { capacidadesAcceso } from "./acceso";
@@ -15,6 +16,7 @@ export { ajustesPauta, capacidadesPauta } from "./pauta";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
+export { registrarPropuestaEnviada, type ResultadoPropuesta } from "./portal-cliente/propuesta-vigente";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";

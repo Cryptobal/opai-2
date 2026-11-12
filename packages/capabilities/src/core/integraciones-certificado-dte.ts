@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-import { abrirCertificadoPfx, definicionIntegracion } from "@opai/integrations";
+import { abrirCertificadoPfx } from "@opai/integrations";
 import { enmascararRun, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
+import { definicionVisible } from "../integraciones/resolver";
 import { guardarSecretoTx } from "../integraciones/secretos";
 import { integracionSchema, vistaIntegracion } from "./integraciones-vista";
 
@@ -27,7 +28,7 @@ export const integracionesGuardarCertificadoDte = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const def = definicionIntegracion(input.proveedor);
+    const def = await definicionVisible(ctx, input.proveedor);
     if (!def?.disponible) throw noEncontrado(`La integración "${input.proveedor}"`);
     // La clave se guarda recortada si así abre el .pfx (CAR-240): un espacio o salto al copiarla no viaja a SimpleAPI.
     let parsed: ReturnType<typeof abrirCertificadoPfx>;

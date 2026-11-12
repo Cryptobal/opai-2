@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 713 pares pantalla→capacidad · 639 con herramienta · 74 excepciones justificadas · 0 faltantes.
+**Resumen:** 722 pares pantalla→capacidad · 644 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -16,6 +16,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/agente` | `agente.plan.confirmar` | — | excepción |
 | — | `/api/agente` | `agente.turno.preparar` | — | excepción |
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
+| — | `/api/integraciones/slack/eventos` | `core.slack.desinstalada` | — | excepción |
+| — | `/api/integraciones/slack/oauth/callback` | `core.slack.conectar` | — | excepción |
+| — | `/api/negocios/export` | `comercial.negocios.exportar` | `comercial_negocios_exportar` | existe |
 | — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
 | — | `/api/rendiciones/lotes/[id]/nomina` | `rendiciones.lotes.nomina_descargar` | — | excepción |
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
@@ -165,6 +168,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
+| compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
@@ -243,6 +247,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.guardar_certificado_dte` | — | excepción |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.probar` | `core_integraciones_probar` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.set_secreto` | — | excepción |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.configurar` | `core_slack_configurar` | existe |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.desconectar` | — | excepción |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.iniciar_conexion` | — | excepción |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.permisos.catalogo` | `core_permisos_catalogo` | existe |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.roles.list` | `core_roles_list` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `comercial.contactos.list` | `comercial_contactos_list` | existe |
@@ -601,6 +608,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/integraciones/[proveedor]` | `core.consumos.resumen` | `core_consumos_resumen` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.list` | `core_integraciones_list` | existe |
+| erp | `/configuracion/integraciones/slack` | `core.grupos.list` | `core_grupos_list` | existe |
+| erp | `/configuracion/integraciones/slack` | `core.slack.estado` | `core_slack_estado` | existe |
 | erp | `/configuracion/integraciones` | `core.integraciones.list` | `core_integraciones_list` | existe |
 | erp | `/configuracion/marca` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/marca` | `core.marca.get` | `core_marca_get` | existe |
@@ -768,9 +777,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/existe/route.ts` | Infraestructura del proxy (404 real con Cache Components) usando las mismas capacidades .get que la página. |
 | `app/api/geo/mapa/route.ts` | Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente. |
 | `app/api/health/route.ts` | Salud del despliegue, sin datos. |
+| `app/api/integraciones/slack/eventos/route.ts` | Events API de Slack (CAR-291, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.slack.desinstalada (interna). Sin datos de negocio por ahora (las respuestas en hilos llegan en F5a). |
+| `app/api/integraciones/slack/oauth/callback/route.ts` | Vuelta del OAuth de Slack (CAR-291, ADR-093): con sesión, ejecuta core.slack.conectar (solo personas) como quien vuelve; el state la liga a esa persona y a su empresa. |
 | `app/api/marca/[slug]/[asset]/route.ts` | URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP. |
 | `app/api/mcp/[[...transport]]/route.ts` | Servidor MCP (Authorization: Bearer). |
 | `app/api/mcp/k/[key]/[[...transport]]/route.ts` | Servidor MCP con la key en la URL: deprecado (410 Gone salvo MCP_KEY_EN_URL_HASTA). |
+| `app/api/negocios/export/route.ts` | Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27). |
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
 | `app/api/rendiciones/lotes/[id]/nomina/route.ts` | Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208). |
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
@@ -862,6 +874,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.assign` | Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034). |
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
+| `core.slack.conectar` | Solo personas: canjea el código del OAuth y guarda el token del bot cifrado; nunca por API ni MCP (ADR-027, ADR-093). |
+| `core.slack.desconectar` | Solo personas: revoca y borra el token del bot de Slack; gobierno de credenciales (ADR-027, ADR-093). |
+| `core.slack.desinstalada` | Interna: solo la ejecuta /api/integraciones/slack/eventos, tras verificar la firma de Slack, cuando la app se desinstala o su token se revoca. |
+| `core.slack.iniciar_conexion` | Solo personas: conectar Slack es un OAuth que una persona hace en su navegador; una key no instala apps ni maneja tokens (ADR-027, ADR-093). |
 | `core.terreno.contexto` | Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2). |
 | `core.terreno.en_sitio` | Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d). |
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
@@ -947,6 +963,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.assign` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
+| `core.slack.conectar` | `/api/integraciones/slack/oauth/callback` | no | reservada a personas |
+| `core.slack.desconectar` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
+| `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
 | `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
@@ -1023,6 +1042,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.personas.list_a_cargo`
 - `core.ping`
 - `core.puestos.get`
+- `core.slack.canales`
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
