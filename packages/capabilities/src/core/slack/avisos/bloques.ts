@@ -5,6 +5,9 @@ import { type BloqueSlack, escaparSlack } from "@opai/integrations";
 import type { TipoAviso } from "./registrar";
 
 export const ACCION_TOMAR = "opai.aviso.tomar";
+export const ACCION_CERRAR = "opai.aviso.cerrar";
+export const ACCION_REFUERZO = "opai.aviso.refuerzo";
+export const ACCION_RESPONDER = "opai.aviso.responder";
 export const ACCION_VER = "opai.aviso.ver";
 
 const ICONO: Record<TipoAviso, string> = {
@@ -61,14 +64,22 @@ export function bloquesAviso(a: AvisoParaSlack, base: string): BloqueSlack[] {
       elements: [{ type: "mrkdwn", text: seguro(a.estadoTexto) }],
     });
   const botones: Extract<BloqueSlack, { type: "actions" }>["elements"] = [];
+  const boton = (action_id: string, text: string, style?: "primary" | "danger") => ({
+    type: "button" as const,
+    action_id,
+    text: { type: "plain_text" as const, text },
+    value: a.id,
+    ...(style ? { style } : {}),
+  });
+  // Botones según la gestión en OPAI (F4): abierto → Tomar; tomado → Cerrar y Pedir refuerzo.
   if (a.gestion === "abierto")
-    botones.push({
-      type: "button",
-      action_id: ACCION_TOMAR,
-      text: { type: "plain_text", text: "Tomar" },
-      value: a.id,
-      style: a.tipo === "panico" ? "danger" : "primary",
-    });
+    botones.push(boton(ACCION_TOMAR, "Tomar", a.tipo === "panico" ? "danger" : "primary"));
+  if (a.gestion === "tomado")
+    botones.push(
+      boton(ACCION_CERRAR, "Cerrar", "primary"),
+      boton(ACCION_REFUERZO, "Pedir refuerzo"),
+    );
+  if (a.gestion !== "cerrado") botones.push(boton(ACCION_RESPONDER, "Responder"));
   const url = urlOpai(a.enlace, base);
   if (url)
     botones.push({

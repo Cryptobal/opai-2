@@ -107,6 +107,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Vuelta del OAuth de Slack (CAR-291, ADR-093): con sesión, ejecuta core.slack.conectar (solo personas) como quien vuelve; el state la liga a esa persona y a su empresa.",
   "app/api/integraciones/slack/eventos/route.ts":
     "Events API de Slack (CAR-291, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.slack.desinstalada (interna). Sin datos de negocio por ahora (las respuestas en hilos llegan en F5a).",
+  "app/api/integraciones/slack/acciones/route.ts":
+    "Interactividad de Slack (CAR-294, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.avisos_terreno.tomar, .cerrar y .pedir_refuerzo como la persona vinculada (F2), y core.slack.vinculado_de y core.slack.efimero (internas).",
   "app/api/webhooks/resend/entrante/route.ts":
     "Receptor del correo entrante de Resend (CAR-67, CAR-233): firma Svix y token de la dirección <token>@respuestas.opai.cl; ejecuta comercial.seguimientos.recibir_correo (s<token>) o core.correos.recibir (t<token>, dirección de la empresa), ambas internas.",
   // Infraestructura: sin datos de negocio.

@@ -2,6 +2,12 @@ import type { EventoDeDominio } from "../module";
 
 /** Eventos de Terreno que emite el núcleo (CAR-78). */
 export const EVENTOS_TERRENO: readonly EventoDeDominio[] = [
+  { id: "core.aviso_terreno.tomado", descripcion: "Alguien tomó un aviso de terreno (CAR-294)." },
+  { id: "core.aviso_terreno.cerrado", descripcion: "Se cerró un aviso de terreno (CAR-294)." },
+  {
+    id: "core.aviso_terreno.refuerzo_pedido",
+    descripcion: "Se pidió refuerzo para un aviso de terreno (CAR-294).",
+  },
   {
     id: "core.terreno.panico",
     descripcion:

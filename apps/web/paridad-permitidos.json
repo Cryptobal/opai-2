@@ -52,6 +52,10 @@
     {
       "archivo": "app/api/integraciones/slack/eventos/route.ts",
       "motivo": "Events API de Slack (CAR-291, ADR-093): ocurre sin sesión; verifica la firma de Slack y resuelve la empresa por el team_id con una función SECURITY DEFINER (resolverInstalacionSlack) antes de ejecutar la capacidad interna."
+    },
+    {
+      "archivo": "app/api/integraciones/slack/acciones/route.ts",
+      "motivo": "Interactividad de Slack (CAR-294, ADR-093): ocurre sin sesión; verifica la firma de Slack y resuelve la empresa por el team_id con una función SECURITY DEFINER (resolverInstalacionSlack); el actor sale del vínculo de F2."
     }
   ],
   "internasPermitidas": [
@@ -94,6 +98,10 @@
     {
       "archivo": "app/api/integraciones/slack/eventos/route.ts",
       "motivo": "core.slack.desinstalada es interna por diseño: solo este receptor la ejecuta, con la firma de Slack como credencial, cuando la app se desinstala o su token se revoca."
+    },
+    {
+      "archivo": "app/api/integraciones/slack/acciones/route.ts",
+      "motivo": "core.slack.vinculado_de y core.slack.efimero son internas por diseño: solo este receptor las ejecuta, con la firma de Slack como credencial, para resolver quién apretó un botón y avisarle si no se hizo nada."
     }
   ],
   "infraestructuraLibConDb": [
@@ -120,6 +128,10 @@
     {
       "archivo": "lib/metricas-navegacion.ts",
       "motivo": "Instrumentación de rendimiento (ADR-045): registra en @opai/db el observador que cuenta las consultas a Neon por request; no es una pantalla."
+    },
+    {
+      "archivo": "lib/slack-acciones.ts",
+      "motivo": "Interactividad de Slack (CAR-294): arma el contexto de la persona vinculada (usuarioPorId, identidad mínima) para ejecutar el botón como ella, con sus permisos y alcance; no es una pantalla."
     },
     {
       "archivo": "lib/dispositivo.ts",

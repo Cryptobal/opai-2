@@ -5,7 +5,8 @@ import { slackConectar } from "./conexion";
 import { slackIniciarConexion } from "./conexion-inicio";
 import { slackCanales, slackEstado } from "./consultas";
 import { slackConfigurar } from "./configurar";
-import { consumidoresAvisosSlack, trabajosAvisosSlack } from "./avisos";
+import { slackEfimero, slackVinculadoDe } from "./acciones";
+import { capacidadesAvisosTerreno, consumidoresAvisosSlack, trabajosAvisosSlack } from "./avisos";
 import { slackDesconectar, slackDesinstalada } from "./desconexion";
 import { trabajoMensajeDirectoSlack } from "./mensaje-directo";
 import { slackUsuariosList, slackVincularUsuarios } from "./usuarios";
@@ -27,6 +28,9 @@ export const capacidadesSlack = [
   slackDesinstalada,
   slackUsuariosList,
   slackVincularUsuarios,
+  slackVinculadoDe,
+  slackEfimero,
+  ...capacidadesAvisosTerreno,
 ] as const;
 
 /** Trabajos de Slack F2 (CAR-292): vínculo de personas y mensajes directos. */

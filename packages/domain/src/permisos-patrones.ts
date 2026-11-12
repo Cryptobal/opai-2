@@ -93,6 +93,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.firmasRead,
       PERMISOS_CORE.configRead,
       PERMISOS_CORE.calendarioRead,
+      PERMISOS_CORE.avisosTerrenoGestionar,
     ],
     denegar: [...FINANCIERO, "comercial:*", "cpq:*", "tickets:tipos.manage"],
   },

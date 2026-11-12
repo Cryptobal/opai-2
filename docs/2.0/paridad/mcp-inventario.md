@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 730 pares pantalla→capacidad · 652 con herramienta · 78 excepciones justificadas · 0 faltantes.
+**Resumen:** 732 pares pantalla→capacidad · 652 con herramienta · 80 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -16,6 +16,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/agente` | `agente.plan.confirmar` | — | excepción |
 | — | `/api/agente` | `agente.turno.preparar` | — | excepción |
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
+| — | `/api/integraciones/slack/acciones` | `core.slack.efimero` | — | excepción |
+| — | `/api/integraciones/slack/acciones` | `core.slack.vinculado_de` | — | excepción |
 | — | `/api/integraciones/slack/eventos` | `core.slack.desinstalada` | — | excepción |
 | — | `/api/integraciones/slack/oauth/callback` | `core.slack.conectar` | — | excepción |
 | — | `/api/negocios/export` | `comercial.negocios.exportar` | `comercial_negocios_exportar` | existe |
@@ -785,6 +787,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/existe/route.ts` | Infraestructura del proxy (404 real con Cache Components) usando las mismas capacidades .get que la página. |
 | `app/api/geo/mapa/route.ts` | Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente. |
 | `app/api/health/route.ts` | Salud del despliegue, sin datos. |
+| `app/api/integraciones/slack/acciones/route.ts` | Interactividad de Slack (CAR-294, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.avisos_terreno.tomar, .cerrar y .pedir_refuerzo como la persona vinculada (F2), y core.slack.vinculado_de y core.slack.efimero (internas). |
 | `app/api/integraciones/slack/eventos/route.ts` | Events API de Slack (CAR-291, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.slack.desinstalada (interna). Sin datos de negocio por ahora (las respuestas en hilos llegan en F5a). |
 | `app/api/integraciones/slack/oauth/callback/route.ts` | Vuelta del OAuth de Slack (CAR-291, ADR-093): con sesión, ejecuta core.slack.conectar (solo personas) como quien vuelve; el state la liga a esa persona y a su empresa. |
 | `app/api/marca/[slug]/[asset]/route.ts` | URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP. |
@@ -885,7 +888,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.slack.conectar` | Solo personas: canjea el código del OAuth y guarda el token del bot cifrado; nunca por API ni MCP (ADR-027, ADR-093). |
 | `core.slack.desconectar` | Solo personas: revoca y borra el token del bot de Slack; gobierno de credenciales (ADR-027, ADR-093). |
 | `core.slack.desinstalada` | Interna: solo la ejecuta /api/integraciones/slack/eventos, tras verificar la firma de Slack, cuando la app se desinstala o su token se revoca. |
+| `core.slack.efimero` | Interna: solo la ejecuta /api/integraciones/slack/acciones para avisar a quien apretó un botón por qué no se hizo nada (CAR-294). |
 | `core.slack.iniciar_conexion` | Solo personas: conectar Slack es un OAuth que una persona hace en su navegador; una key no instala apps ni maneja tokens (ADR-027, ADR-093). |
+| `core.slack.vinculado_de` | Interna: solo la ejecuta /api/integraciones/slack/acciones, tras verificar la firma de Slack, para saber qué persona de OPAI apretó un botón (CAR-294). |
 | `core.terreno.contexto` | Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2). |
 | `core.terreno.en_sitio` | Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d). |
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
@@ -1021,6 +1026,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.anexos.generar`
 - `core.aprobaciones.get`
 - `core.audit.list`
+- `core.avisos_terreno.cerrar`
+- `core.avisos_terreno.list`
+- `core.avisos_terreno.pedir_refuerzo`
+- `core.avisos_terreno.tomar`
 - `core.bitacora.verificar`
 - `core.campos.catalogo`
 - `core.campos.valores`
