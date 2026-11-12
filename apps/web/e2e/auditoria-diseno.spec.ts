@@ -19,6 +19,7 @@ const ANCHOS = [
 ] as const;
 
 const rutas = rutasAuditables();
+const PARTES = 4;
 
 /** Fila del informe que anota por qué no se pudo crear la identidad de prueba de un portal. */
 const identidad = (portal: Portal, ancho: string, nota: string): Fila => ({
@@ -62,23 +63,30 @@ test.describe("@auditoria diseño Hilo", () => {
   );
 
   ANCHOS.forEach((ancho, i) => {
-    test(`ERP a ${ancho.nombre} px`, async ({ browser }, info) => {
-      test.skip(info.project.name !== "desktop", "una sola corrida: el ancho lo fija la prueba");
-      test.skip(!E2E_PASSWORD, "Falta E2E_PASSWORD");
-      test.setTimeout(70 * 60_000);
-      const { ctx, page } = await contexto(browser, ancho, true);
-      // Dos sesiones a la vez con el mismo código TOTP: la segunda espera el siguiente período.
-      if (i > 0) await page.waitForTimeout(32_000);
-      await entrar(page);
-      const filas = await recorrer(
-        page,
-        rutas.filter((r) => r.portal === "erp"),
-        ancho.nombre,
-        ancho.telefono,
-      );
-      guardarInforme(`erp-${ancho.nombre}`, filas);
-      await ctx.close();
-    });
+    for (let parte = 0; parte < PARTES; parte++) {
+      test(`ERP a ${ancho.nombre} px, parte ${parte + 1} de ${PARTES}`, async ({
+        browser,
+      }, info) => {
+        test.skip(info.project.name !== "desktop", "una sola corrida: el ancho lo fija la prueba");
+        test.skip(!E2E_PASSWORD, "Falta E2E_PASSWORD");
+        test.setTimeout(60 * 60_000);
+        const { ctx, page } = await contexto(browser, ancho, true);
+        // Varias sesiones con el mismo código TOTP: cada una espera su propio período de 30 s.
+        await page.waitForTimeout((i * PARTES + parte) * 32_000);
+        await entrar(page);
+        const erp = rutas.filter((r) => r.portal === "erp");
+        const filas = await recorrer(
+          page,
+          erp.filter((_, n) => n % PARTES === parte),
+          ancho.nombre,
+          ancho.telefono,
+          undefined,
+          erp,
+        );
+        guardarInforme(`erp-${ancho.nombre}-${parte + 1}`, filas);
+        await ctx.close();
+      });
+    }
 
     test(`portales sin sesión a ${ancho.nombre} px`, async ({ browser }, info) => {
       test.skip(info.project.name !== "desktop", "una sola corrida: el ancho lo fija la prueba");
