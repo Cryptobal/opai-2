@@ -97,3 +97,22 @@ Todo apagado hasta que el tenant conecte Slack **y** elija un canal. Al conectar
 - **Sin relevo:** no hay un evento que lo detecte; lo debe emitir Asistencia o Pauta (punto mínimo pendiente).
 - **Foto del aviso:** se deja fuera hasta definir qué foto (la de la marca es biométrica, Ley 21.719).
 - **Mensajes de guardias:** llegan con F5b.
+
+## F4 en detalle (CAR-294, «Sesión Núcleo», 12-nov-2026)
+
+- **Ruta** `POST /api/integraciones/slack/acciones`:
+  - Verifica la firma y la marca de tiempo (menos de 5 minutos) antes de leer nada.
+  - La empresa sale del `team_id` (función `SECURITY DEFINER`). El actor sale del vínculo de F2 (`core.slack.vinculado_de`, interna): un usuario de Slack vinculado y con membresía activa.
+  - Lo que llega de otro espacio se ignora.
+- **Botones → capacidades**, ejecutadas como la persona vinculada (`lib/slack-acciones.ts`), con sus permisos y su alcance por instalación (ADR-022), y auditadas:
+  - «Tomar» → `core.avisos_terreno.tomar`.
+  - «Cerrar» → `core.avisos_terreno.cerrar`.
+  - «Pedir refuerzo» → `core.avisos_terreno.pedir_refuerzo`.
+  - «Responder» solo explica que se responde en el hilo; las respuestas llegan al guardia con F5a.
+  - También `core.avisos_terreno.list`, para el MCP.
+- **Permiso nuevo:** `core:avisos_terreno.gestionar`. Lo tienen owner, admin y gerente (por `*`) y también el supervisor.
+- **Antirrepetición:** clave de idempotencia por clic (`slack:<team>:<usuario>:<action_ts>`). Un reintento de Slack devuelve el mismo resultado sin repetir la acción. Además, las transiciones son idempotentes: tomar dos veces lo mismo no cambia nada.
+- **Si no puede actuar** (sin vínculo, sin permiso o fuera de su alcance), la persona recibe un aviso efímero (`core.slack.efimero`, interna) y no se ejecuta nada.
+- **Mensaje de Slack:** después de cada cambio, en cola (`core.slack.aviso_actualizar`), con `chat.update`. Muestra «Tomado por X a las HH:MM» o «Cerrado por…» y los botones que siguen: abierto → Tomar y Responder; tomado → Cerrar, Pedir refuerzo y Responder; cerrado → solo «Ver en OPAI».
+- **Pedir refuerzo** se anota en el hilo y avisa por mensaje directo al grupo de escalamiento de la empresa (`core.slack.aviso_refuerzo`).
+- Sin migración: usa las columnas de gestión de F3.
