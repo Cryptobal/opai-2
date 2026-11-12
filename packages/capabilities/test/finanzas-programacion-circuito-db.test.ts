@@ -10,6 +10,7 @@ import { sumarDiasIso } from "@opai/domain";
 import type { Correo } from "@opai/integrations";
 
 import { capacidades as capacidadesBancos } from "../../../modules/finanzas/capacidades";
+import { ufDelPrevio } from "../src/finanzas/ventas-pdf-previo-uf";
 import { urlPropietario } from "../../db/test/entorno";
 
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
@@ -145,6 +146,15 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     const doc = g.resultados.find((r) => r.estado === "generado")!.documentoId!;
     const guardados = await s.e.admin.documentoEmitidoDestinatario.findMany({ where: { documentoId: doc }, orderBy: { orden: "asc" } });
     expect(guardados.map((x) => x.email)).toEqual(["pagos@cliente-ficticio.test"]);
+  });
+
+  it("la proforma de una programación en UF dice con qué UF se valorizó, y que es estimada sin la oficial", async () => {
+    const { res } = await generar({});
+    const doc = res!.documentoId!;
+    expect(await ufDelPrevio(s.ctx(), doc, hoy)).toBeNull(); // en pesos: sin UF
+    await s.e.admin.ventasProgramacionCorrida.updateMany({ where: { documentoId: doc }, data: { ufCentavos: 3_812_345n } });
+    expect(await ufDelPrevio(s.ctx(), doc, hoy)).toMatchObject({ valor: "38.123,45", estimada: true });
+    expect(await ufDelPrevio(s.ctx(s.tenantB), doc, hoy)).toBeNull(); // otra empresa no la ve
   });
 
   it("se sigue hasta la factura emitida y el cobro en caja", async () => {
