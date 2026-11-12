@@ -9,6 +9,7 @@ import { membresiasUsables } from "@/lib/tenant-actual";
 import { consultaDe } from "../oauth-consulta";
 import { alcancesVisibles } from "./alcances";
 import { Consentimiento } from "./consentimiento";
+import { exigirSegundoFactor } from "./mfa-previo";
 import { AutorizacionVencida } from "./vencido";
 
 export const metadata = { title: "Autorizar app" };
@@ -17,7 +18,9 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 async function Contenido({ searchParams }: Props) {
   const consulta = consultaDe(await searchParams);
-  const identidad = await requerirIdentidad(`/autorizar?${consulta}`);
+  const ruta = `/autorizar?${consulta}`;
+  const identidad = await requerirIdentidad(ruta);
+  await exigirSegundoFactor(identidad, ruta);
   const datos = await datosConsentimientoOAuth(consulta);
   const empresa = membresiasUsables(identidad.membresias).find(
     (m) => m.tenantId === datos?.empresaId,

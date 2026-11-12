@@ -6,6 +6,7 @@ import { Loading } from "@opai/ds";
 import { requerirIdentidad } from "@/lib/servidor";
 
 import { consultaDe, RUTA_CONTINUAR_OAUTH } from "../../oauth-consulta";
+import { exigirSegundoFactor } from "../mfa-previo";
 import { AutorizacionVencida } from "../vencido";
 import { Reanudar } from "./reanudar";
 
@@ -15,7 +16,8 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 async function Contenido({ searchParams }: Props) {
   const consulta = consultaDe(await searchParams);
-  await requerirIdentidad(`${RUTA_CONTINUAR_OAUTH}?${consulta}`);
+  const ruta = `${RUTA_CONTINUAR_OAUTH}?${consulta}`;
+  await exigirSegundoFactor(await requerirIdentidad(ruta), ruta);
   const url = await urlReanudarOAuth(consulta);
   return url ? <Reanudar url={url} /> : <AutorizacionVencida />;
 }
