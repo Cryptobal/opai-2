@@ -153,6 +153,18 @@ describe.skipIf(!urlPropietario)("cpq · cotizaciones en el Portal Cliente en ba
     expect(d.ok && d.data.documentoId).toBe(pz.docProp);
   });
 
+  it("una propuesta con vigencia vencida deja de verse aunque su estado siga «vigente» (CAR-300)", async () => {
+    const donde = { accesoId: pz.acceso, cotizacionId: pz.vigente };
+    await e.admin.accesoPropuesta.updateMany({ where: donde, data: { vigenteHasta: new Date(Date.now() - 60_000) } });
+    const l = await comoContacto<{ items: unknown[] }>(t.a, prospecto, "cpq.portal_cotizaciones.list", {});
+    expect(l.ok && l.data.items).toEqual([]);
+    expect((await comoContacto(t.a, prospecto, "cpq.portal_cotizaciones.get", { cotizacionId: pz.vigente })).ok).toBe(false);
+    await e.admin.accesoPropuesta.updateMany({ where: donde, data: { vigenteHasta: new Date(Date.now() + 86_400_000) } });
+    const v = await comoContacto<{ items: unknown[] }>(t.a, prospecto, "cpq.portal_cotizaciones.list", {});
+    expect(v.ok && v.data.items).toHaveLength(1);
+    await e.admin.accesoPropuesta.updateMany({ where: donde, data: { vigenteHasta: null } });
+  });
+
   it("al archivar la propuesta vigente, el prospecto deja de verla y el acceso limitado sigue sin abrir el portal completo", async () => {
     await e.admin.accesoPropuesta.updateMany({ where: { accesoId: pz.acceso, cotizacionId: pz.vigente }, data: { estado: "archivada" } });
     const l = await comoContacto<{ items: unknown[] }>(t.a, prospecto, "cpq.portal_cotizaciones.list", {});
