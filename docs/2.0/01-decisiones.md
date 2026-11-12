@@ -1839,6 +1839,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Adenda (11-nov-2026, 22:28, Carlos confirma las dos reglas de jefatura de CAR-314, PR #528).** (a) Una persona que no tiene jefe asignado no queda invisible: la ve el nivel de arriba (un vendedor sin jefe asignado lo ve el gerente, no los jefes de venta). (b) Ser jefatura **no** amplía el alcance por filas de ADR-022: un supervisor ve, de su equipo, solo a las personas de sus instalaciones a cargo. Ambas quedan como se construyeron.
 
+**Adenda (11-nov-2026, CAR-306, Sesión Desempeño): scorecard y resultado.** (a) El scorecard de un cargo se guarda por versiones con mes de vigencia: el primero rige desde el mes en curso y cada cambio desde el mes siguiente; un mes ya medido no cambia de reglas. (b) El puntaje va de 0 a 120 y un indicador sin hechos no cuenta como cero: queda fuera y se informa la cobertura. (c) El resultado de una persona no depende de quién lo mira: los indicadores se miden sin los permisos ni el alcance del consultante, y a quién puede ver cada uno lo decide antes la capacidad (permiso de ver a todos, o lo propio y las personas a cargo por jefatura, siempre dentro del alcance por filas). (d) Quedan para después las plantillas por vertical (hasta tener más indicadores), el cierre de período (CAR-312) y el aviso a los trabajadores de la Ley 21.719 (con las pantallas, antes de encender el módulo en una empresa real).
+
 **Pendiente de Carlos.** Nada.
 
 ## ADR-095 · Las decisiones de Carlos van al final de cada respuesta, en «Decisión tuya» (11-nov-2026)
@@ -1848,6 +1850,8 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 **Contexto.** Carlos trabaja desde el teléfono con varias sesiones en paralelo y tenía que buscar hacia arriba en cada respuesta qué le tocaba decidir, lo que frenaba el desarrollo.
 
 **Decisión.** Toda respuesta que necesite una decisión de Carlos termina con un último párrafo «Decisión tuya»: qué decidir y las opciones, por qué importa, el link a revisar, la sugerencia de Claude y por qué, en lenguaje simple y sin tecnicismos. Varias decisiones van numeradas por urgencia; si no hay, «Decisión tuya: ninguna, sigo». La decisión también queda como comentario `DECISIÓN CARLOS:` en el PR, y la sesión sigue con lo que no dependa de ella.
+
+**Adenda a ADR-095 (11-nov-2026, 22:56, Carlos, para la Sesión Desempeño por el resto de esa sesión).** Si no hay una decisión de Carlos pendiente, la sesión no se detiene: «Decisión tuya: ninguna, sigo» significa seguir en el mismo turno. Si depende de algo externo (CI, el bot «OPAI 2.0», una migración, una revisión), programa una comprobación cada 5 minutos y mientras avanza con lo que no dependa de eso; al destrabarse completa lo pendiente (integrar, verificar en test.opai.cl). No responde uno por uno los avisos automáticos de GitHub: los lee y arregla lo suyo. Solo se detiene con una decisión real de Carlos o si no queda trabajo posible, y dice por qué. Copia en el proyecto de Claude: `claude/regla-no-detenerse.md`.
 
 ## ADR-096 · Emitir un documento lo envía al SII de inmediato (CAR-270, 11-nov-2026)
 
