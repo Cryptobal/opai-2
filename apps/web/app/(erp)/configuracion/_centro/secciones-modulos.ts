@@ -12,6 +12,7 @@ import { SeccionFlujoCaja } from "@/app/(erp)/configuracion/_finanzas/seccion-fl
 import { SeccionPlanCuentas } from "@/app/(erp)/configuracion/_finanzas/seccion-plan-cuentas";
 import { SeccionCatalogoCpq } from "@/app/(erp)/configuracion/_cpq/seccion-catalogo";
 import { SeccionMarcaPlantillasCpq } from "@/app/(erp)/configuracion/_cpq/seccion-marca-plantillas";
+import { SeccionImportarCotizaciones } from "@/app/(erp)/configuracion/_comercial/seccion-importar-cotizaciones";
 import { SeccionSeguimiento } from "@/app/(erp)/configuracion/_comercial/seccion-seguimiento";
 
 /**
@@ -33,6 +34,12 @@ export type SeccionModulo = {
  */
 export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>> = {
   comercial: [
+    {
+      id: "importar-cotizaciones",
+      etiqueta: "Importar cotizaciones",
+      permiso: "comercial:config.manage",
+      Contenido: SeccionImportarCotizaciones,
+    },
     {
       id: "embudo",
       etiqueta: "Embudo",
