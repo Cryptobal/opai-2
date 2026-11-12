@@ -20,6 +20,12 @@ test.describe("@preview configuración: integración con Slack", () => {
     ).toBeVisible();
     await expect(page.getByText("Qué se avisa")).toBeVisible();
     await expect(page.getByRole("switch", { name: /^Atraso/ })).toBeVisible();
+    // CAR-292: interruptor de los avisos personales por mensaje directo (encendido por defecto).
+    await expect(
+      page.getByRole("switch", { name: /^Avisos personales por mensaje directo/ }),
+    ).toBeVisible();
+    // Sin Slack conectado (la vista previa no tiene la app), la lista de personas no aparece.
+    await expect(page.getByText("Personas en Slack")).toHaveCount(0);
     await expect(page.getByText("Algo salió mal")).toHaveCount(0);
     await capturar(page, info, "slack-inicio");
 

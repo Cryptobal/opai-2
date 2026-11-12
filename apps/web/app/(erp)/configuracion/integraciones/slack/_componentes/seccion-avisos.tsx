@@ -43,9 +43,11 @@ export function SeccionAvisos(props: {
   avisos: Avisos;
   margen: number;
   resumen: boolean;
+  mensajesDirectos: boolean;
   onAvisos: (v: Avisos) => void;
   onMargen: (v: number) => void;
   onResumen: (v: boolean) => void;
+  onMensajesDirectos: (v: boolean) => void;
 }) {
   const { avisos, margen, resumen } = props;
   return (
@@ -83,6 +85,12 @@ export function SeccionAvisos(props: {
           descripcion="Un solo mensaje por turno que se actualiza solo, en vez de uno nuevo cada vez."
           activo={resumen}
           onCambiar={props.onResumen}
+        />
+        <Switch
+          etiqueta="Avisos personales por mensaje directo"
+          descripcion="Los avisos de OPAI que recibe cada persona en la app también le llegan por mensaje directo en Slack, si está vinculada."
+          activo={props.mensajesDirectos}
+          onCambiar={props.onMensajesDirectos}
         />
       </div>
     </SeccionTarjeta>

@@ -59,9 +59,11 @@ export function FormSlack({ estado, grupos }: { estado: EstadoSlack; grupos: Gru
         avisos={config.avisos}
         margen={config.margenAtrasoMin}
         resumen={config.resumen.activo}
+        mensajesDirectos={config.mensajesDirectos.activo}
         onAvisos={(v) => set("avisos", v)}
         onMargen={(v) => set("margenAtrasoMin", v)}
         onResumen={(v) => set("resumen", { activo: v })}
+        onMensajesDirectos={(v) => set("mensajesDirectos", { activo: v })}
       />
       {/* Como el resto de Configuración: «Guardar» al pie del formulario, en todos los tamaños. */}
       <div className="flex justify-end lg:col-span-2">
