@@ -1,0 +1,53 @@
+// Módulo Desempeño (CAR-306, ADR-094): scorecard por cargo. Schema propio `desempeno`.
+// Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. El
+// tenant_id y el cargo NO llevan @relation al núcleo (no se toca maestros.prisma): las FK a
+// core.tenants y a core.cargos (compuesta por empresa) van en el SQL de la migración.
+
+/// Una versión del scorecard de un cargo. Rige desde `vigenteDesde` (mes "aaaa-mm") hasta que otra
+/// versión publicada la reemplace. Un cambio nunca altera un mes ya medido: crea una versión que rige
+/// desde el mes siguiente.
+model DesempenoScorecard {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  cargoId            String    @map("cargo_id") @db.Uuid
+  /// Primer mes en que rige, "aaaa-mm" en la zona de la empresa.
+  vigenteDesde       String    @map("vigente_desde")
+  /// "borrador" | "publicado". Solo las publicadas cuentan para el resultado.
+  estado             String    @default("borrador")
+  /// La persona ve su propio resultado.
+  personaVeResultado Boolean   @default(true) @map("persona_ve_resultado")
+  /// La persona ve su posición en el equipo.
+  personaVeRanking   Boolean   @default(false) @map("persona_ve_ranking")
+  publicadoEn        DateTime? @map("publicado_en") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  indicadores DesempenoScorecardIndicador[]
+
+  @@unique([tenantId, cargoId, vigenteDesde])
+  @@unique([tenantId, id])
+  @@map("scorecards")
+  @@schema("desempeno")
+}
+
+/// Indicador del catálogo del núcleo dentro de una versión del scorecard, con su meta y su peso.
+model DesempenoScorecardIndicador {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  scorecardId String   @map("scorecard_id") @db.Uuid
+  /// Id del indicador en el catálogo (`<modulo>.<nombre>`).
+  indicador   String
+  meta        Decimal  @db.Decimal(18, 4)
+  /// Peso en puntos porcentuales (1 a 100). Para publicar, los pesos suman 100.
+  peso        Int
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  scorecard DesempenoScorecard @relation(fields: [tenantId, scorecardId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([scorecardId, indicador])
+  @@index([tenantId, scorecardId])
+  @@map("scorecard_indicadores")
+  @@schema("desempeno")
+}
