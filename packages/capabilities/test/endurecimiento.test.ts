@@ -135,6 +135,7 @@ describe("runner de trabajos", () => {
       },
       completar: async () => undefined,
       fallar: async (_id: string, _e: string, r: Date | null) => void fallos.push(r),
+      devolver: async () => undefined,
     };
     const r = await ejecutarTrabajos(ctx, cola, { timeoutMs: 20, hasta: Date.now() + 1000 });
     expect(r).toMatchObject({ reclamados: 1, fallidos: 1 });

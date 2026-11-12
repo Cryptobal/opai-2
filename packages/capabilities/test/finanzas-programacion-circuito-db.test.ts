@@ -70,6 +70,13 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     expect(ep?.asunto).toMatch(/^Estado de pago - .+ - [A-Za-zé]+ - \d{4}$/);
     expect(proforma?.para).toBe("pagos@cliente-ficticio.test");
     expect(proforma?.cc).toEqual(["contabilidad@cliente-ficticio.test"]);
+    // CAR-320: cada correo lleva su PDF con número interno (sin folio del SII), el mismo para ambos tipos del período.
+    const [pdfPf, pdfEp] = [proforma?.adjuntos?.[0], ep?.adjuntos?.[0]];
+    expect(pdfPf).toMatchObject({ mime: "application/pdf", nombre: expect.stringMatching(/^Proforma PF-\d{4}-\d{2}-\d{4}\.pdf$/) });
+    expect(pdfEp?.mime).toBe("application/pdf");
+    expect(pdfEp?.nombre).toMatch(/^Estado de pago EP-\d{4}-\d{2}-\d{4}\.pdf$/);
+    expect(pdfPf?.nombre.slice(12, -4)).toBe(pdfEp?.nombre.slice(18, -4));
+    expect(Buffer.from(pdfPf?.contenidoBase64 ?? "", "base64").subarray(0, 5).toString()).toBe("%PDF-");
     const envios = await s.e.admin.documentoEmitidoEnvio.findMany({ where: { documentoId: doc.id }, orderBy: { createdAt: "asc" } });
     expect(envios.map((e) => [e.adjuntos[0], e.estado])).toEqual([["proforma", "enviado"], ["estado_pago", "enviado"]]);
     const seg = await s.e.admin.ventasCierreSeguimiento.findUniqueOrThrow({ where: { documentoId: doc.id } });
