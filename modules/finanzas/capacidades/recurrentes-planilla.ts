@@ -5,7 +5,7 @@ import type { TenantTx } from "@opai/db";
 import type { z } from "zod";
 
 import type { CeldaFlujo } from "../domain";
-import { estadoOcurrencias, ocurrenciasDe, type CargoFila, type Frecuencia } from "../domain/recurrentes";
+import { estadosPorFila, ocurrenciasDe, type CargoFila, type EstadoOcurrencia, type Frecuencia } from "../domain/recurrentes";
 import { cuotasDelFlujo } from "../domain/recurrentes-semana";
 import { aNumeroSeguro, type celdaSchema } from "./esquemas";
 import { aFecha, aIso } from "./util";
@@ -48,19 +48,23 @@ export async function celdasRecurrentes(
     },
     select: { movimientoId: true, enlaceId: true, monto: true, movimiento: { select: { fecha: true } } },
   });
-  const fechaDe = new Map(conc.map((c) => [c.movimientoId, aIso(c.movimiento.fecha)] as const));
-  const usados = new Set<string>();
+  const cargoDe = new Map(conc.map((c) => [c.movimientoId, { fecha: aIso(c.movimiento.fecha), monto: Math.abs(aNumeroSeguro(c.monto)) }] as const));
+  const cuotas = new Map(
+    recurrentes.map((r) => {
+      const regla = { frecuencia: r.frecuencia as Frecuencia, diaDelMes: r.diaDelMes, inicio: aIso(r.inicio), fin: r.fin ? aIso(r.fin) : null, repeticiones: r.repeticiones };
+      return [r.id, { id: r.id, fechas: ocurrenciasDe(regla, desde, hasta), monto: aNumeroSeguro(r.monto), ventana: { diasAntes: r.ventanaAntes, diasDespues: r.ventanaDespues } }] as const;
+    }),
+  );
+  const estados = new Map<string, EstadoOcurrencia[]>();
+  for (const filaId of new Set(recurrentes.map((r) => r.filaId))) {
+    const cargos: CargoFila[] = conc.filter((c) => c.enlaceId === filaId).map((c) => ({ id: c.movimientoId, ...(cargoDe.get(c.movimientoId) as { fecha: string; monto: number }) }));
+    const reglas = recurrentes.filter((r) => r.filaId === filaId).map((r) => cuotas.get(r.id)).filter((x) => x !== undefined);
+    for (const [id, e] of estadosPorFila(reglas, cargos)) estados.set(id, e);
+  }
   const dominio: CeldaFlujo[] = [];
   const vista: z.infer<typeof celdaSchema>[] = [];
   for (const r of recurrentes) {
-    const regla = { frecuencia: r.frecuencia as Frecuencia, diaDelMes: r.diaDelMes, inicio: aIso(r.inicio), fin: r.fin ? aIso(r.fin) : null, repeticiones: r.repeticiones };
-    const monto = aNumeroSeguro(r.monto);
-    const cargos: CargoFila[] = conc
-      .filter((c) => c.enlaceId === r.filaId && !usados.has(c.movimientoId))
-      .map((c) => ({ id: c.movimientoId, fecha: aIso(c.movimiento.fecha), monto: Math.abs(aNumeroSeguro(c.monto)) }));
-    const estados = estadoOcurrencias(ocurrenciasDe(regla, desde, hasta), monto, cargos, { diasAntes: r.ventanaAntes, diasDespues: r.ventanaDespues });
-    for (const e of estados) if (e.cargoId) usados.add(e.cargoId);
-    for (const c of cuotasDelFlujo(estados, monto, (id) => fechaDe.get(id), lunes)) {
+    for (const c of cuotasDelFlujo(estados.get(r.id) ?? [], aNumeroSeguro(r.monto), (id) => cargoDe.get(id), lunes)) {
       if (!futuras.includes(c.semana)) continue;
       dominio.push({ filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto });
       vista.push({ id: idEstable(`recurrente:${r.id}:${c.fecha}`), filaId: r.filaId, semana: c.semana, capa: "comprometido", monto: c.monto, nota: `${r.concepto} · cuota del ${c.fecha} · ${ETIQUETA[c.estado]}` });

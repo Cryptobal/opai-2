@@ -6,20 +6,21 @@ export type CuotaFlujo = { fecha: string; semana: string; monto: number; estado:
 
 /**
  * La apertura de la semana en curso es el saldo al cierre del domingo (CAR-343): un cargo anterior al lunes ya está
- * en ella, uno de esta semana no. Por eso cada cuota aporta lo que falta pagar más lo pagado con un cargo de esta
- * semana o posterior. Una cuota vencida e impaga pasa a la semana en curso; las de semanas futuras quedan en la suya.
+ * en ella, uno de esta semana no. Por eso cada cuota aporta lo que falta pagar más el cargo completo con que se pagó
+ * esta semana o después. Una cuota vencida e impaga pasa a la semana en curso; las de semanas futuras quedan en la suya.
  */
 export function cuotasDelFlujo(
   estados: readonly EstadoOcurrencia[],
   monto: number,
-  fechaCargo: (id: string) => string | undefined,
+  cargoDe: (id: string) => { fecha: string; monto: number } | undefined,
   lunesActual: string,
 ): CuotaFlujo[] {
   const out: CuotaFlujo[] = [];
   for (const e of estados) {
-    const pagado = monto - e.pendiente;
-    const fc = e.cargoId ? fechaCargo(e.cargoId) : undefined;
-    const pagadoEnSemana = fc && fc >= lunesActual ? pagado : 0;
+    const cargo = e.cargoId ? cargoDe(e.cargoId) : undefined;
+    const fc = cargo?.fecha;
+    // Un cargo de esta semana no está en la apertura: suma entero, aunque sea mayor que la cuota.
+    const pagadoEnSemana = cargo && cargo.fecha >= lunesActual ? Math.abs(cargo.monto) : 0;
     const aporte = e.pendiente + pagadoEnSemana;
     if (aporte <= 0) continue;
     const semana = lunesDe(e.fecha) < lunesActual || (fc && fc >= lunesActual && lunesDe(fc) === lunesActual) ? lunesActual : lunesDe(e.fecha);

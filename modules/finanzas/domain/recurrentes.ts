@@ -87,3 +87,30 @@ export function estadoOcurrencias(
     return { fecha, estado: pendiente === 0 ? "pagada" : "parcial", pendiente, cargoId: cargo.id };
   });
 }
+
+export type ReglaConCuotas = { id: string; fechas: readonly string[]; monto: number; ventana: { diasAntes: number; diasDespues: number } };
+
+/**
+ * Reparte los cargos de una fila entre todos sus recurrentes (CAR-349, autorrevisión). Primero cada recurrente toma
+ * solo cargos de su monto exacto; recién después, las cuotas que siguen sin pagar toman cargos de otro monto. Así un
+ * recurrente no se queda con el cargo que era de otro de la misma fila. Cada cargo se usa una sola vez.
+ */
+export function estadosPorFila(reglas: readonly ReglaConCuotas[], cargos: readonly CargoFila[]): Map<string, EstadoOcurrencia[]> {
+  const usados = new Set<string>();
+  const libres = (filtro: (c: CargoFila) => boolean) => cargos.filter((c) => !usados.has(c.id) && filtro(c));
+  const out = new Map<string, EstadoOcurrencia[]>();
+  for (const r of reglas) {
+    const est = estadoOcurrencias(r.fechas, r.monto, libres((c) => Math.abs(c.monto) === r.monto), r.ventana);
+    for (const e of est) if (e.cargoId) usados.add(e.cargoId);
+    out.set(r.id, est);
+  }
+  for (const r of reglas) {
+    const est = out.get(r.id) ?? [];
+    const impagas = est.filter((e) => e.estado === "proyectada").map((e) => e.fecha);
+    if (!impagas.length) continue;
+    const segundo = new Map(estadoOcurrencias(impagas, r.monto, libres(() => true), r.ventana).map((e) => [e.fecha, e] as const));
+    for (const e of segundo.values()) if (e.cargoId) usados.add(e.cargoId);
+    out.set(r.id, est.map((e) => segundo.get(e.fecha) ?? e));
+  }
+  return out;
+}

@@ -44,6 +44,14 @@ Que los gastos fijos de la empresa (arriendo, honorarios, cuotas de impuestos, p
 - `packages/db` completo (100 suites, 416 pruebas).
 - Flujo, banco y paridad en verde.
 
+## 14. Autorrevisión (subagente independiente)
+
+Sin bloqueos en seguridad, RLS, permisos, migración ni datos. Se corrigieron dos hallazgos, cada uno con su prueba:
+- Varios recurrentes en la misma fila: un recurrente podía quedarse con el cargo de otro. Ahora todos toman primero los cargos de su monto exacto y después los demás (`estadosPorFila`).
+- Un cargo de esta semana mayor que la cuota se recortaba al monto de la cuota. Ahora suma completo, porque la apertura no lo incluye.
+
+Queda como límite conocido: un pago que llega fuera de la ventana no se reconoce. La cuota sigue vencida y se cuenta además del cargo, que ya está en el saldo. La ventana se puede ampliar por recurrente.
+
 ## 15. Riesgos y rollback
 
 - Si una fila tiene a la vez celdas de plan a mano y un recurrente, se suman las dos. La pantalla de recurrentes debe avisarlo; queda para el bloque de pantalla.
