@@ -5,7 +5,8 @@ export {
   trabajoCobrosMesAnterior,
   trabajoCobrosPruebas,
 } from "./core/plataforma/cobros";
-export { ajustesComercial, capacidadesComercial } from "./comercial";
+export { ajustesComercial, buscadoresComercial, capacidadesComercial } from "./comercial";
+export { type Buscador, listarBuscadores, registrarBuscadores, type ResultadoBusqueda } from "./core/maestros/buscadores";
 export { hechosComercial } from "./comercial/hechos-gestion";
 export { defineHecho, type HechoGestion } from "./hechos-gestion";
 export { hechosDeclarados, hechosDelNucleo } from "./core/indicadores-gestion/hechos";
@@ -19,6 +20,7 @@ export { ajustesDesempeno, capacidadesDesempeno, consumidoresDesempeno, PERMISOS
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
 export { asegurarAccesoContacto, type EstadoAccesoContacto, type ResultadoAccesoContacto } from "./portal-cliente/acceso-contacto";
+export { registrarPropuestaEnviada, type ResultadoPropuesta } from "./portal-cliente/propuesta-vigente";
 export { ajustesFinanzas, trabajosFinanzas, capacidadesFinanzas } from "./finanzas";
 export { notasCreditoPorDocumento, pendienteFacturaEmitida, calcularEstadoCobro, registrarCobroDocumento, sincronizarCobroDocumento, validarDocumentoCobroBanco, validarDocumentoCompraBanco, documentoEmitidoConciliable } from "./finanzas/cobros";
 export { ajusteFinanzas } from "./finanzas/ajuste-finanzas";
@@ -54,6 +56,7 @@ export {
   SIN_TENANT,
   medidorEnDb,
 } from "./contexto";
+export { idAutor } from "./autor";
 export { defineCapability } from "./define";
 export { conflicto, ErrorCapacidad, noEncontrado, prohibido, reglaDeNegocio } from "./errores";
 export { aplicarEtapa } from "./comercial/transiciones-util";
@@ -123,7 +126,7 @@ export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./c
 export { camposExternos, externo } from "./externo";
 export { biometriaDe, correoDe, distanciaDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
-export { comoAgenteInterno } from "./agentes/interno";
+export { comoAgenteInterno, comoAppOAuth } from "./agentes/interno";
 export {
   iaElegidaDelAgente,
   modelosDelAgente,
