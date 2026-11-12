@@ -107,6 +107,8 @@ export type VinculoResumen = {
   tipo: string;
   inicio: string;
   termino: string | null;
+  /** Nombre de la instalación del contrato; solo viene en la ficha (`core.personas.get`). */
+  instalacion?: string | null | undefined;
 };
 export type Persona = {
   id: string;
