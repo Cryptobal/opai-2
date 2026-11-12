@@ -7,9 +7,9 @@ import { herramientasDelAgente } from "./herramientas";
 import {
   CARGAR,
   GUIA,
-  cargarHerramientas,
   esquemasADemanda,
   indiceDelAgente,
+  resolverLlamada,
 } from "./herramientas-demanda";
 
 export type Paso = {
@@ -73,7 +73,7 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     try {
       r = await ia.conversar({
         mensajes,
-        herramientas: esquemasADemanda(ctx, cargadas),
+        herramientas: esquemasADemanda(),
         maxTokens: Math.min(2_000, MAX_TOKENS - plan.tokens),
       });
       await finalizar?.({ ok: true, duracionMs: Date.now() - inicio });
@@ -95,28 +95,25 @@ export async function prepararTurno(ctx: Contexto, texto: string, ia: Conversado
     if (!r.llamadas.length) return plan;
     for (const llamada of r.llamadas) {
       await revalidarAccesoDelTurno(ctx);
-      if (++llamadas > MAX_PASOS) throw prohibido("Se alcanzó el límite de pasos del turno.");
-      const h = herramientasDelAgente(ctx).find((h) => h.nombre === llamada.nombre);
-      let resultado: Resultado = {
-        ok: false,
-        error: { code: "FORBIDDEN", message: "Sin permiso." },
-      };
-      if (llamada.nombre === CARGAR) {
-        resultado = cargarHerramientas(ctx, cargadas, llamada.argumentos);
-      } else if (h) {
-        const escritura = h.capacidad.efecto !== "lectura";
-        resultado = await executeCapability(ctx, h.capacidad.id, llamada.argumentos, {
+      // Cargar esquemas no ejecuta nada: no gasta el límite de pasos del turno.
+      if (llamada.nombre !== CARGAR && ++llamadas > MAX_PASOS)
+        throw prohibido("Se alcanzó el límite de pasos del turno.");
+      const paso = resolverLlamada(ctx, cargadas, llamada.nombre, llamada.argumentos);
+      let resultado: Resultado;
+      if ("h" in paso) {
+        const escritura = paso.h.capacidad.efecto !== "lectura";
+        resultado = await executeCapability(ctx, paso.h.capacidad.id, paso.argumentos, {
           dryRun: escritura,
         });
         if (escritura && resultado.ok) {
           plan.pasos.push({
-            capacidad: h.capacidad.id,
-            argumentos: llamada.argumentos,
+            capacidad: paso.h.capacidad.id,
+            argumentos: paso.argumentos,
             clave: randomUUID(),
             vistaPrevia: resultado,
           });
         }
-      }
+      } else resultado = paso;
       mensajes.push({
         rol: "herramienta",
         id: llamada.id,

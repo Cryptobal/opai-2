@@ -1,4 +1,4 @@
-import { beforeEach, expect, it } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import {
   comoAgenteInterno,
   defineCapability,
@@ -6,6 +6,7 @@ import {
   registrarCapacidades,
 } from "@opai/capabilities";
 import { contextoDePrueba } from "@opai/capabilities/testing";
+import { proveedorIa } from "@opai/integrations";
 import type {
   LlamadaHerramienta,
   RespuestaConversacion,
@@ -14,9 +15,10 @@ import type {
 import { z } from "zod";
 
 import { prepararTurno } from "./bucle";
-import { CARGAR, indiceDelAgente } from "./herramientas-demanda";
+import { CARGAR, USAR, indiceDelAgente } from "./herramientas-demanda";
 
 beforeEach(() => limpiarRegistro());
+afterEach(() => vi.unstubAllGlobals());
 
 function contexto(cuantas: number) {
   registrarCapacidades(
@@ -49,17 +51,18 @@ const respuesta = (texto: string, llamadas: LlamadaHerramienta[] = []) =>
     proveedor: "ia_anthropic",
   }) satisfies RespuestaConversacion;
 
-it("no envía los esquemas de todo el registro: parte solo con la herramienta de carga", async () => {
+it("no envía los esquemas del registro: siempre las mismas dos herramientas", async () => {
   const ctx = contexto(40);
   const vistos: string[][] = [];
   const plan = await prepararTurno(ctx, "hola", {
     conversar: async (s: SolicitudConversacion) => {
       vistos.push((s.herramientas ?? []).map((h) => h.nombre));
+      expect(JSON.stringify(s.herramientas)).not.toContain("core_prueba_lee7");
       return respuesta("listo");
     },
   });
   expect(plan.texto).toBe("listo");
-  expect(vistos).toEqual([[CARGAR]]);
+  expect(vistos).toEqual([[CARGAR, USAR]]);
 });
 
 it("el índice nombra todas las herramientas sin sus esquemas", () => {
@@ -70,28 +73,70 @@ it("el índice nombra todas las herramientas sin sus esquemas", () => {
   expect(indice).not.toContain("filtro");
 });
 
-it("carga a demanda: lo pedido queda disponible en la llamada siguiente y se puede usar", async () => {
+it("carga el esquema pedido y después ejecuta la herramienta real", async () => {
   const ctx = contexto(5);
-  const vistos: string[][] = [];
   const resultados: string[] = [];
+  let n = 0;
   const guion = [
     respuesta("", [
       { id: "1", nombre: CARGAR, argumentos: { nombres: ["core_prueba_lee3", "no_existe"] } },
     ]),
-    respuesta("", [{ id: "2", nombre: "core_prueba_lee3", argumentos: {} }]),
+    respuesta("", [
+      { id: "2", nombre: USAR, argumentos: { nombre: "core_prueba_lee3", argumentos: {} } },
+    ]),
     respuesta("El dato es 3."),
   ];
-
   const plan = await prepararTurno(ctx, "dame el dato 3", {
     conversar: async (s: SolicitudConversacion) => {
-      vistos.push((s.herramientas ?? []).map((h) => h.nombre));
+      resultados.length = 0;
       for (const m of s.mensajes) if (m.rol === "herramienta") resultados.push(m.resultado);
-      return guion[vistos.length - 1]!;
+      return guion[n++]!;
     },
   });
-  expect(vistos[0]).toEqual([CARGAR]);
-  expect(vistos[1]).toEqual([CARGAR, "core_prueba_lee3"]);
-  expect(resultados.join(" ")).toContain("no_existe");
-  expect(resultados.join(" ")).toContain("dato 3");
+  expect(resultados[0]).toContain("filtro");
+  expect(resultados[0]).toContain('"desconocidas":["no_existe"]');
+  expect(resultados[1]).toContain("dato 3");
   expect(plan.texto).toBe("El dato es 3.");
+});
+
+it("con el adaptador real de Anthropic, cargar y usar no rompe la continuidad", async () => {
+  const ctx = contexto(4);
+  const cuerpos: string[] = [];
+  const uso = { input_tokens: 10, output_tokens: 4 };
+  const guion = [
+    {
+      content: [
+        { type: "tool_use", id: "t1", name: CARGAR, input: { nombres: ["core_prueba_lee2"] } },
+      ],
+      usage: uso,
+      stop_reason: "tool_use",
+    },
+    {
+      content: [
+        {
+          type: "tool_use",
+          id: "t2",
+          name: USAR,
+          input: { nombre: "core_prueba_lee2", argumentos: {} },
+        },
+      ],
+      usage: uso,
+      stop_reason: "tool_use",
+    },
+    { content: [{ type: "text", text: "El dato es 2." }], usage: uso, stop_reason: "end_turn" },
+  ];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_u: string, init: RequestInit) => {
+      cuerpos.push(String(init.body));
+      return Response.json(guion[cuerpos.length - 1]);
+    }),
+  );
+  const proveedor = proveedorIa("ia_anthropic", "clave-ficticia");
+  const plan = await prepararTurno(ctx, "dame el dato 2", {
+    conversar: (s) => proveedor.conversar("modelo-simulado", s),
+  });
+  expect(plan.texto).toBe("El dato es 2.");
+  expect(cuerpos).toHaveLength(3);
+  expect(cuerpos[2]).toContain("dato 2");
 });
