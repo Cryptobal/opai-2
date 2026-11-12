@@ -1905,6 +1905,14 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
 - La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).
 
+## Adenda ADR-099 · Gard queda habilitada para «OPAI 1 (traer datos)» (CAR-279, 12-nov-2026, pedido de Carlos)
+
+**Decisión.** Para traer los datos de Gard desde OPAI 1, la empresa Gard se agrega a `core.integraciones_habilitadas` (clave «opai1») con una migración de datos aditiva, aplicada por el bot «OPAI 2.0» con respaldo (dev y luego main). La migración no pisa otras empresas, no hace nada si la base no tiene la empresa «gard» y se puede repetir sin efecto.
+
+**Por qué.** El ajuste es de plataforma y no aparece en Plataforma › Ajustes, así que no se podía habilitar por pantalla. Arreglar esa pantalla queda para la sesión Proyecto (CAR-321).
+
+**Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.
+
 ## ADR-100 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 06:54, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
