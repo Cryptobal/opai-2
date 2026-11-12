@@ -44,6 +44,18 @@ export async function importarDocumentosCompra(
   if (crearaProveedores && ctx.actor.tipo !== "system" && !ctx.autorizar(PERMISO_PROVEEDORES))
     throw prohibido("No tienes permiso para crear proveedores nuevos durante la importación.");
   const plazo = await plazoPagoDefecto(ctx);
+  // Documentos ya en el libro de estos proveedores, en una sola consulta (antes era una por fila y el trabajo
+  // diario del RCV se pasaba de tiempo).
+  const folios = [...new Set(input.documentos.map((d) => d.folio))];
+  const yaEnLibro = new Set(
+    (proveedores.size
+      ? await ctx.db.documentoRecibido.findMany({
+          where: { proveedorId: { in: [...proveedores.values()].map((p) => p.id) }, folio: { in: folios } },
+          select: { proveedorId: true, tipoDte: true, folio: true },
+        })
+      : []
+    ).map((r) => `${r.proveedorId}|${r.tipoDte}|${r.folio}`),
+  );
   const filas: z.infer<typeof resultadoFila>[] = [];
   const vistos = new Set<string>();
   let proveedoresCreados = 0;
@@ -74,13 +86,7 @@ export async function importarDocumentosCompra(
       proveedores.set(rut, proveedor);
     }
     const clave = `${proveedor.id}|${d.tipoDte}|${d.folio}`;
-    const existe =
-      vistos.has(clave) ||
-      (!proveedor.id.startsWith("nuevo:") &&
-        !!(await ctx.db.documentoRecibido.findFirst({
-          where: { proveedorId: proveedor.id, tipoDte: d.tipoDte, folio: d.folio },
-          select: { id: true },
-        })));
+    const existe = vistos.has(clave) || yaEnLibro.has(clave);
     vistos.add(clave);
     if (existe) {
       filas.push({ indice, estado: "duplicado", mensaje: "Ya estaba en el libro." });

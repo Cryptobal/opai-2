@@ -24,7 +24,7 @@ export const VERBOS: Record<string, string> = {
   crear_feriado: "Crear feriado", actualizar: "Actualizar", archivar: "Archivar", renombrar: "Renombrar", historial: "Historial",
   estado_comercial: "Estado comercial", revocar: "Revocar", ver: "Ver", ofrecer: "Ofrecer",
   confirmar: "Confirmar", confirmar_mutual: "Confirmar de común acuerdo", generar: "Generar",
-  aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
+  aplicar: "Aplicar", destinos: "Ver destinos", aprobar: "Aprobar", devolver: "Devolver", rechazar: "Rechazar", contadores: "Contadores", pendientes: "Pendientes", indicadores: "Indicadores",
   catalogo: "Catálogo", valores: "Valores", assign: "Asignar", de_instalacion: "De la instalación", iniciar_subida: "Iniciar subida",
   confirmar_subida: "Confirmar subida", url_descarga: "Descargar", candidatas: "Candidatas a lote", cuentas_origen: "Cuentas de origen", generar_nomina: "Generar nómina", nomina_descargar: "Descargar nómina", vencimientos: "Vencimientos", explorar: "Explorar",
   matriz: "Matriz", pedir_renovacion: "Pedir renovación", politica_get: "Ver política",
@@ -71,7 +71,7 @@ export const VERBOS: Record<string, string> = {
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
-  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", sync_servicio: "Sincronizar servicio",
+  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", rellenar_entidad: "Rellenar con datos de la entidad", generar_entidad: "Generar documento de la entidad", sync_servicio: "Sincronizar servicio",
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
   prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
@@ -89,6 +89,8 @@ export const VERBOS: Record<string, string> = {
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).
   plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
+  // Slack (CAR-291, ADR-093).
+  canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
   // Indicadores de gestión (CAR-305).
   medir: "Medir", ver_persona: "Ver por persona", ver_cargo: "Ver por cargo",
   set_jefatura: "Definir jefatura", asignar_jefe: "Asignar jefe", list_a_cargo: "Listar personas a cargo",

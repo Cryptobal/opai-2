@@ -4,7 +4,7 @@ import { exigirDestinoPublico } from "@opai/integrations";
 import { type DatosOpai1, lectorApiOpai1 } from "@opai/db/importar-opai1";
 
 import { reglaDeNegocio } from "../errores";
-import { integracionDe } from "../integraciones/resolver";
+import { definicionVisible, integracionDe } from "../integraciones/resolver";
 import { leerSecreto } from "../integraciones/secretos";
 import type { Contexto } from "../types";
 
@@ -15,6 +15,7 @@ export async function leerExportDeOpai1(
   ctx: Contexto,
   leer: (url: string, key: string) => Promise<DatosOpai1> = (url, key) => lectorApiOpai1(url, { key }).leer(),
 ): Promise<DatosOpai1> {
+  if (!(await definicionVisible(ctx, "opai1"))) throw reglaDeNegocio("Traer datos desde OPAI 1 no está habilitado para esta empresa.");
   const fila = await integracionDe(ctx, "opai1");
   if (!fila) throw reglaDeNegocio(FALTA);
   const [url, key] = await Promise.all([leerSecreto(ctx, fila.id, "url"), leerSecreto(ctx, fila.id, "api_key")]);
