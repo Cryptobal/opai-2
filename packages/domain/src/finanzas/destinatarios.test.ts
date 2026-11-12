@@ -9,7 +9,7 @@ describe("destinatarios de un DTE de venta (CAR-221 · A3b)", () => {
     expect(esCorreoValido(" Pagos@Cliente.CL ")).toBe(true);
     for (const malo of ["", "sin-arroba", "a@b", "a b@c.cl", "a@b.cl,c@d.cl", "a@@b.cl"]) expect(esCorreoValido(malo)).toBe(false);
   });
-  it("exige entre 1 y 10 PARA, sin repetidos y con tope de 20 (ADR-100)", () => {
+  it("exige entre 1 y 10 PARA, sin repetidos y con tope de 20 (ADR-103)", () => {
     expect(validarDestinatarios([])).toMatch(/al menos un destinatario/);
     expect(validarDestinatarios([d("CC", "a@x.cl")])).toMatch(/Falta el destinatario principal/);
     expect(validarDestinatarios([d("PARA", "a@x.cl"), d("PARA", "b@x.cl")])).toBeNull();
@@ -29,7 +29,7 @@ describe("destinatarios de un DTE de venta (CAR-221 · A3b)", () => {
       bcc: ["c@x.cl"],
     });
   });
-  it("sugiere los contactos de facturación como PARA y la casilla DTE en copia, sin repetir ni inventar (ADR-100)", () => {
+  it("sugiere los contactos de facturación como PARA y la casilla DTE en copia, sin repetir ni inventar (ADR-103)", () => {
     const s = destinatariosSugeridos({
       emailDte: "DTE@cliente.cl",
       contactosFacturacion: [{ email: "pagos@cliente.cl" }, { email: "dte@cliente.cl" }, { email: null }, { email: "roto" }, { email: "jefe@cliente.cl" }],

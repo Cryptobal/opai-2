@@ -46,7 +46,7 @@ describe.skipIf(!urlPropietario)("Finanzas · ventas · envío al cliente (db)",
     expect(r.ok).toBe(false);
   });
 
-  it("envía a todos los contactos de facturación como destinatarios principales, sin el comercial (ADR-100)", async () => {
+  it("envía a todos los contactos de facturación como destinatarios principales, sin el comercial (ADR-103)", async () => {
     await s.dato("finanzas.ventas.emitir", { documentoId: docId });
     const vista = await s.dato<Envio>("finanzas.ventas.enviar_cliente", { documentoId: docId }, { dryRun: true });
     expect(vista.estado).toBe("vista_previa");

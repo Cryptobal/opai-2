@@ -4,7 +4,7 @@ import { hidratado } from "./hidratacion";
 import { EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
-// CAR-320 · ADR-100: el diálogo del recordatorio de cobro muestra a quién saldría de verdad (vista previa del servidor:
+// CAR-320 · ADR-103: el diálogo del recordatorio de cobro muestra a quién saldría de verdad (vista previa del servidor:
 // todos los contactos de facturación como PARA y la casilla DTE en copia). Abre el diálogo y cancela; no envía nada.
 // Usa la factura vencida ficticia de `packages/db/scripts/qa-e2e/factura-aceptada.sql`, solo en `preview-e2e`.
 test.setTimeout(120_000);

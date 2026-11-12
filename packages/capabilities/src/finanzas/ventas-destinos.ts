@@ -1,4 +1,4 @@
-// A quién sale el correo de un documento de venta: factura, nota, proforma o estado de pago (ADR-100, regla de
+// A quién sale el correo de un documento de venta: factura, nota, proforma o estado de pago (ADR-103, regla de
 // Carlos del 12-nov-2026). Todos los contactos de facturación reciben por igual como destinatarios principales y la
 // casilla DTE del cliente, que recibe el XML, va siempre en copia aunque no esté en la lista guardada.
 import { MAX_DESTINATARIOS, MAX_PARA, agruparDestinatarios, correoNormalizado, esCorreoValido, type DestinatarioDoc } from "@opai/domain";

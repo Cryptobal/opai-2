@@ -1937,7 +1937,7 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.
 
-## ADR-100 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
+## ADR-103 · A quién llegan las facturas y cómo se dan las importadas (CAR-320 y CAR-283, 12-nov-2026)
 
 **Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 06:54, hora de Chile) · **Registra:** Claude («Sesión Proyecto»).
 
@@ -1952,6 +1952,7 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - La migración `20261130100000_finanzas_destinatarios_varios_para` quita el índice que permitía un solo PARA por documento. El tope de 10 lo valida el dominio (`MAX_PARA`).
 - El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
 - La regla por defecto del importador (#542) queda confirmada.
+- Este ADR se numeró primero como ADR-100, número que en `main` tomó antes CAR-275; el comentario de la migración `20261130100000` conserva «ADR-100» porque ya está aplicada y su checksum no puede cambiar.
 - El recordatorio de cobro de una factura vencida usa los mismos destinatarios que la factura (`destinosDeDocumento`): así el cliente recibe la cobranza en las mismas casillas que la factura, con la casilla DTE en copia.
 
 ## ADR-102 · Hilo es el sistema de diseño predeterminado para todo diseño nuevo (CAR-324, 12-nov-2026)

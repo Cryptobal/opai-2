@@ -69,7 +69,7 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     const [proforma, ep] = [mios.find((c) => c.asunto.startsWith("Proforma")), mios.find((c) => c.asunto.startsWith("Estado de pago"))];
     expect(proforma?.asunto).toMatch(/^Proforma - .+ - [A-Za-zé]+ - \d{4}$/);
     expect(ep?.asunto).toMatch(/^Estado de pago - .+ - [A-Za-zé]+ - \d{4}$/);
-    // ADR-100: todos los destinatarios de la programación reciben por igual como PARA.
+    // ADR-103: todos los destinatarios de la programación reciben por igual como PARA.
     expect(proforma?.para).toBe("pagos@cliente-ficticio.test");
     expect(proforma?.paraAdicionales).toEqual(["contabilidad@cliente-ficticio.test"]);
     // CAR-320: cada correo lleva su PDF con número interno (sin folio del SII), el mismo para ambos tipos del período.
@@ -117,7 +117,7 @@ describe.skipIf(!urlPropietario)("programación · circuito proforma / estado de
     expect(guardados.map((g) => [g.tipo, g.email])).toEqual([["PARA", "pagos@cliente-ficticio.test"], ["PARA", "contabilidad@cliente-ficticio.test"]]);
   });
 
-  it("la casilla DTE del cliente queda en copia del borrador y recibe la proforma (ADR-100)", async () => {
+  it("la casilla DTE del cliente queda en copia del borrador y recibe la proforma (ADR-103)", async () => {
     await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { emailDte: "DTE@cliente-ficticio.test" } });
     try {
       const { res } = await generar({ autoEnvioProforma: true, destinatarioIds: [c1, c2] });

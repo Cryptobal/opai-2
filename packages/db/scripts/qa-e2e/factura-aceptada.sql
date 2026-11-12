@@ -30,7 +30,7 @@ SELECT '00000000-0000-7000-8000-000000267003'::uuid, t.id, '00000000-0000-7000-8
 FROM core.tenants t WHERE t.slug = 'qa-e2e'
 ON CONFLICT (id) DO NOTHING;
 
--- CAR-320 (ADR-100): contacto de facturación ficticio y una factura vencida para ver a quién sale el recordatorio de
+-- CAR-320 (ADR-103): contacto de facturación ficticio y una factura vencida para ver a quién sale el recordatorio de
 -- cobro (e2e `@preview` de cobranza). Correo en dominio reservado `.test`; idempotente; solo `qa-e2e`.
 INSERT INTO core.contactos (id, tenant_id, cuenta_id, nombres, apellidos, email, es_principal, roles, updated_at)
 SELECT '00000000-0000-7000-8000-000000320001'::uuid, t.id, '00000000-0000-7000-8000-000000267001'::uuid,

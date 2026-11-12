@@ -4,7 +4,7 @@ import type { TenantTx } from "@opai/db";
 import { MAX_DESTINATARIOS, MAX_PARA, correoNormalizado, esCorreoValido } from "@opai/domain";
 
 /**
- * Copia la lista de la programación al documento (ADR-100): todos reciben por igual como PARA (hasta 10; el resto
+ * Copia la lista de la programación al documento (ADR-103): todos reciben por igual como PARA (hasta 10; el resto
  * en copia) y la casilla DTE del cliente, que recibe el XML, se agrega en copia.
  */
 export async function copiarDestinatarios(

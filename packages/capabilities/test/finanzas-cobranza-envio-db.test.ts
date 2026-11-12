@@ -57,7 +57,7 @@ describe.skipIf(!urlPropietario)("Finanzas · cobranza · recordatorios (db)", (
     expect(enviados).toHaveLength(0);
   });
 
-  it("recuerda a todos los contactos de facturación como PARA y deja la gestión (ADR-100)", async () => {
+  it("recuerda a todos los contactos de facturación como PARA y deja la gestión (ADR-103)", async () => {
     await contacto("pagos@cliente.cl", ["facturacion"], true);
     await contacto("conta@cliente.cl", ["facturacion"]);
     await contacto("gerente@cliente.cl", ["comercial"]);

@@ -48,7 +48,7 @@ describe.skipIf(!urlPropietario)("Finanzas · destinatarios del documento (db)",
     await s?.e.cerrar();
   });
 
-  it("sugiere los contactos activos de facturación como PARA y la casilla DTE en copia (ADR-100)", async () => {
+  it("sugiere los contactos activos de facturación como PARA y la casilla DTE en copia (ADR-103)", async () => {
     await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { emailDte: "DTE@Cliente.cl" } });
     const r = await s.dato<Sugerencia>("finanzas.ventas.destinatarios_sugeridos", { cuentaId: s.cuentaId });
     expect(r.sugeridos).toEqual([
@@ -116,7 +116,7 @@ describe.skipIf(!urlPropietario)("Finanzas · destinatarios del documento (db)",
     expect(envio.destinatarios).toEqual(["dte@cliente.cl", "pagos@cliente.cl", "respaldo@gard.test"]);
   });
 
-  it("varios PARA reciben por igual y la casilla DTE se agrega en copia aunque no esté guardada (ADR-100)", async () => {
+  it("varios PARA reciben por igual y la casilla DTE se agrega en copia aunque no esté guardada (ADR-103)", async () => {
     await s.dato("finanzas.ventas.guardar_destinatarios", {
       documentoId: emitidoId,
       destinatarios: [

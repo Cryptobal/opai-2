@@ -37,7 +37,7 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
     cuentaDe(ctx, b.cuentaId),
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
   ]);
-  // Los mismos destinatarios que recibirán la factura (ADR-100): todos los PARA, y la casilla DTE en copia.
+  // Los mismos destinatarios que recibirán la factura (ADR-103): todos los PARA, y la casilla DTE en copia.
   const destinos = await destinosDeDocumento(ctx, { id: b.documentoId, cuentaId: b.cuentaId }, cuenta.emailDte);
   const para = destinos?.para ?? null;
   const correos = destinos ? correosDe(destinos) : [];

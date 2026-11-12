@@ -1,5 +1,5 @@
 // Destinatarios del correo de un DTE de venta (CAR-221 · A3b). Lógica pura.
-// Regla de Carlos (12-nov-2026, ADR-100): todos los contactos de facturación reciben el documento por igual
+// Regla de Carlos (12-nov-2026, ADR-103): todos los contactos de facturación reciben el documento por igual
 // como destinatarios principales (hasta 10 PARA, como en OPAI 1) y la casilla DTE del cliente, que recibe el XML,
 // va siempre en copia. Hasta 20 correos en total.
 

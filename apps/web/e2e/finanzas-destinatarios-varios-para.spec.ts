@@ -6,7 +6,7 @@ import { hidratado } from "./hidratacion";
 import { EN_PREVIEW } from "./preview";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
-// CAR-320 · ADR-100: al emitir, los destinatarios del correo admiten varios PARA (todos los contactos de facturación
+// CAR-320 · ADR-103: al emitir, los destinatarios del correo admiten varios PARA (todos los contactos de facturación
 // reciben por igual) y la casilla DTE va en copia. Guarda un borrador ficticio para ver el editor; no emite nada.
 // En local usa el cliente de `seed-ventas-e2e.ts`; en `preview-e2e`, el de la empresa ficticia `qa-e2e`.
 test.setTimeout(180_000);

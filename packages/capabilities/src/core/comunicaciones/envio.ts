@@ -46,7 +46,7 @@ export async function enviarCorreo(
   para: string,
   datos: Record<string, unknown>,
   extra: {
-    /** Más destinatarios principales (ADR-100). */
+    /** Más destinatarios principales (ADR-103). */
     paraAdicionales?: readonly string[];
     cc?: readonly string[];
     bcc?: readonly string[];

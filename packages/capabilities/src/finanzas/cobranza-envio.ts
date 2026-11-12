@@ -39,7 +39,7 @@ export async function enviarRecordatorio(
   if (!estaVencida(doc, p.hoy, p.plazoDefectoDias)) {
     throw reglaDeNegocio("El documento no está vencido o ya no tiene saldo: no hay nada que recordar.");
   }
-  // Mismos destinatarios que la factura (ADR-100): todos los contactos como PARA y la casilla DTE en copia.
+  // Mismos destinatarios que la factura (ADR-103): todos los contactos como PARA y la casilla DTE en copia.
   const cuenta = await cuentaDe(ctx, doc.cuentaId);
   const encontrados = await destinosDeDocumento(ctx, doc, cuenta.emailDte);
   // La casilla DTE sola no es de cobranza: sin contactos ni lista guardada, el recordatorio se omite como antes.
