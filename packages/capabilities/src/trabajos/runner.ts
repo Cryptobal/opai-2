@@ -55,6 +55,8 @@ export async function ejecutarTrabajos(
   cola: ColaTrabajos,
   { lote = 5, hasta = Date.now() + 45_000, timeoutMs = 20_000 }: OpcionesRunner = {},
 ) {
+  // Lo que dura la vuelta completa (con un margen para reclamar): un trabajo que pide más corre con eso.
+  const presupuesto = (hasta - Date.now()) * 0.95;
   let reclamados = 0;
   let hechos = 0;
   let fallidos = 0;
@@ -64,14 +66,18 @@ export async function ejecutarTrabajos(
     reclamados += tomados.length;
     for (const t of tomados) {
       const def = obtenerTrabajo(t.tipo);
-      // Un trabajo recibe lo que pide (consultas al SII, 40 s) sin pasarse de lo que le queda a la vuelta. Si ni
-      // siquiera le queda el tiempo general, vuelve a la cola sin gastar el intento: así la función no se pasa
-      // de su duración máxima con trabajo reclamado a medias.
+      // Un trabajo recibe lo que pide (consultas al SII, 40 s) sin pasarse de lo que le queda a la vuelta. Si ya
+      // no le alcanza lo que pide, vuelve a la cola sin gastar el intento y corre primero en la vuelta siguiente:
+      // así no falla por falta de tiempo ni la función se pasa de su duración con trabajo reclamado a medias.
       const pide = def?.tiempoMaximoMs ?? timeoutMs;
       const limite = Math.min(pide, hasta - Date.now());
-      if (def && limite < Math.min(pide, timeoutMs)) {
-        await cola.devolver(t.id);
-        reclamados -= 1;
+      if (def && limite < Math.min(pide, presupuesto)) {
+        try {
+          await cola.devolver(t.id);
+          reclamados -= 1;
+        } catch {
+          // Si no se pudo devolver, queda reclamado y vuelve solo al vencer su bloqueo; la vuelta sigue.
+        }
         continue;
       }
       try {

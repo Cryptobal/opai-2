@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   capacidadesDelNucleo,
@@ -145,7 +145,7 @@ describe("trabajos", () => {
     ]);
     const { ctx, tabla } = contextoDePrueba();
     await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.prueba.tarde" }));
-    // Quedan 25 s de vuelta: alcanza el tiempo general (20 s), así que corre con lo que queda.
+    // Pide 30 s y la vuelta entera dura 25 s: no hay vuelta que le alcance, así que corre con lo que queda.
     expect(await ejecutarTrabajos(ctx, colaDe(tabla), { timeoutMs: 20_000, hasta: Date.now() + 25_000 })).toMatchObject({ hechos: 1 });
     await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.prueba.tarde", claveUnica: "otro" }));
     // Un lote que se reclamó con tiempo pero llega a este trabajo cuando ya no queda: vuelve sin gastar el intento.
@@ -158,6 +158,30 @@ describe("trabajos", () => {
     };
     expect(await ejecutarTrabajos(ctx, cola, { timeoutMs: 20, hasta: Date.now() + 40 })).toMatchObject({ reclamados: 0, hechos: 0, fallidos: 0 });
     expect(tabla("trabajo").find((t) => t["claveUnica"] === "otro")).toMatchObject({ estado: "pendiente", intentos: 0 });
+  });
+
+  it("un trabajo largo no empieza con menos tiempo del que pide si una vuelta entera le alcanzaría (CAR-273)", async () => {
+    registrarTrabajos([
+      defineTrabajo({ tipo: "core.prueba.sii", descripcion: "prueba", payload: z.object({}).passthrough(), tiempoMaximoMs: 40_000, handler: async () => ({ ok: true }) }),
+    ]);
+    const { ctx, tabla } = contextoDePrueba();
+    await ctx.transaccion((tx) => ctx.trabajos.encolar(tx, { tipo: "core.prueba.sii" }));
+    const real = Date.now.bind(Date);
+    let adelanto = 0;
+    const reloj = vi.spyOn(Date, "now").mockImplementation(() => real() + adelanto);
+    try {
+      const cola = colaDe(tabla);
+      const reclamar = cola.reclamar.bind(cola);
+      cola.reclamar = async (n: number) => {
+        const r = await reclamar(n);
+        adelanto = 23_000; // Lo anterior del lote se comió 23 s: quedan 22, más que el general (20) pero menos que 40.
+        return r;
+      };
+      expect(await ejecutarTrabajos(ctx, cola, { timeoutMs: 20_000, hasta: real() + 45_000 })).toMatchObject({ reclamados: 0, hechos: 0 });
+    } finally {
+      reloj.mockRestore();
+    }
+    expect(tabla("trabajo")[0]).toMatchObject({ estado: "pendiente", intentos: 0 });
   });
 
   it("un tipo desconocido falla sin reintento", async () => {
