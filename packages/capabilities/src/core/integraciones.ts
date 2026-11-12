@@ -3,7 +3,6 @@ import { z } from "zod";
 import {
   CATALOGO_INTEGRACIONES,
   credencialDePlataforma,
-  definicionIntegracion,
   enmascarar,
   motivoSecretoInvalido,
   sufijoParaGuardar,
@@ -12,6 +11,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
+import { definicionVisible, integracionesVisibles } from "../integraciones/resolver";
 import { guardarSecreto } from "../integraciones/secretos";
 import { integracionSchema, vistaIntegracion } from "./integraciones-vista";
 
@@ -24,7 +24,8 @@ export const integracionesList = defineCapability({
   output: z.array(integracionSchema),
   efecto: "lectura",
   dryRun: false,
-  handler: (ctx) => Promise.all(CATALOGO_INTEGRACIONES.map((d) => vistaIntegracion(ctx, d.id))),
+  handler: async (ctx) =>
+    Promise.all((await integracionesVisibles(ctx, CATALOGO_INTEGRACIONES)).map((d) => vistaIntegracion(ctx, d.id))),
 });
 
 export const integracionesGet = defineCapability({
@@ -55,7 +56,7 @@ export const integracionesConfigurar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const def = definicionIntegracion(input.proveedor);
+    const def = await definicionVisible(ctx, input.proveedor);
     if (!def) throw noEncontrado(`La integración "${input.proveedor}"`);
     if (!def.disponible) throw reglaDeNegocio(`${def.nombre} estará disponible próximamente.`);
     // Slack se conecta por OAuth y se configura con core.slack.* (ADR-093): aquí no.
@@ -119,7 +120,7 @@ export const integracionesSetSecreto = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const def = definicionIntegracion(input.proveedor);
+    const def = await definicionVisible(ctx, input.proveedor);
     if (!def?.disponible) throw noEncontrado(`La integración "${input.proveedor}"`);
     if (!def.secretos.some((s) => s.nombre === input.nombre)) {
       throw reglaDeNegocio(`${def.nombre} no usa el secreto "${input.nombre}".`);

@@ -9,6 +9,7 @@ import { claveDocumento, nombreSeguro, PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { marcaDe } from "../comunicaciones/resolver";
+import { logoDeMarca } from "../../finanzas/ventas-pdf-logo";
 import { uuidSchema } from "../esquemas";
 import { diaSchema, hoy } from "../maestros/comun";
 import { documentoSchema, vistaDocumento } from "./vista";
@@ -41,7 +42,7 @@ export const documentoPlantillasGenerar = defineCapability({
     if (!dryRun && !ctx.servicios.almacenamiento.disponible)
       throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
     const marca = await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase);
-    const { bytes, paginas } = await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos });
+    const { bytes, paginas } = await generarPdfLaboral({ titulo: plantilla.nombre, marca, parrafos: relleno.parrafos, logo: await logoDeMarca(ctx) });
     const nombre = nombreSeguro(`${plantilla.nombre}-${persona.rut}.pdf`);
     if (dryRun) return { documento: null, nombre, paginas };
     const id = uuid7();

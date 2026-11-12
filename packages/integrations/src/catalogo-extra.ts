@@ -65,6 +65,8 @@ export const INTEGRACIONES_EXTRA: readonly DefinicionIntegracion[] = [
     ],
     config: sinConfig,
     disponible: true,
+    // Solo para migrar desde OPAI 1: la ven únicamente las empresas habilitadas por Plataforma (CAR-321).
+    soloHabilitadas: true,
   },
   {
     // Movimientos del banco en línea: Web4Leads (que se conecta a Fintoc) empuja un webhook firmado por
