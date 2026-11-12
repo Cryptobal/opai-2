@@ -6,8 +6,8 @@ import { capacidadesDesempeno, defineModule, PERMISOS_DESEMPENO } from "@opai/ca
  * Manifest del módulo Desempeño (ADR-094, CAR-306). Se vende aparte. Mide la gestión de cada cargo
  * con indicadores del catálogo del núcleo: scorecard por cargo (indicadores, meta y peso) y resultado
  * por persona. Las capacidades viven en packages/capabilities/src/desempeno y el dominio puro en
- * packages/domain/src/desempeno. Sin pantallas todavía: llegan con CAR-307 (diseño aprobado en
- * docs/2.0/design/export-desempeno/); hasta entonces no declara navegación.
+ * packages/domain/src/desempeno. Pantallas en apps/web/app/(erp)/desempeno (CAR-307, diseño aprobado
+ * en docs/2.0/design/export-desempeno/).
  */
 export const manifest = defineModule({
   id: "desempeno",
@@ -29,7 +29,17 @@ export const manifest = defineModule({
       descripcion: "Ver el resultado de todas las personas de la empresa",
     },
   ],
-  navegacion: [],
+  navegacion: [
+    {
+      portal: "erp",
+      area: "personas",
+      href: "/desempeno",
+      etiqueta: "Desempeño",
+      icono: "Gauge",
+      orden: 40,
+      permiso: PERMISOS_DESEMPENO.scorecardsRead,
+    },
+  ],
   configuracion: z.object({}),
   eventos: [
     { id: "desempeno.scorecard.guardado", descripcion: "Se guardó un borrador del scorecard de un cargo." },

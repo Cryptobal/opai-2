@@ -63,6 +63,21 @@ export async function propiosDe(ctx: Contexto, periodo: string): Promise<VistaPr
       [...f.versiones].sort((a, b) => (a.vigenteDesde < b.vigenteDesde ? 1 : -1))[0];
     const definicion = version ? definicionDe(version.definicion) : null;
     if (!version || !definicion) return [];
+    const despues = f.versiones
+      .filter((v) => v.vigenteDesde > version.vigenteDesde)
+      .sort((x, y) => (x.vigenteDesde < y.vigenteDesde ? 1 : -1))[0];
+    const defDespues = despues ? definicionDe(despues.definicion) : null;
+    const pendiente =
+      despues && defDespues
+        ? {
+            vigenteDesde: despues.vigenteDesde,
+            estado: despues.estado === "publicado" ? ("publicado" as const) : ("borrador" as const),
+            sentido: despues.sentido === "menor" ? ("menor" as const) : ("mayor" as const),
+            metaSugerida: Number(despues.metaSugerida),
+            unidad: despues.unidad,
+            definicion: defDespues,
+          }
+        : null;
     return [
       {
         id: f.id,
@@ -76,6 +91,7 @@ export async function propiosDe(ctx: Contexto, periodo: string): Promise<VistaPr
         estado: version.estado === "publicado" ? "publicado" : "borrador",
         archivado: f.archivadoEn !== null,
         definicion,
+        pendiente,
       },
     ];
   });
