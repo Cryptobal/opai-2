@@ -1929,3 +1929,13 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 - El correo admite varios PARA (`paraAdicionales` en el adaptador). El destino de todos los envíos de venta se arma en un solo lugar: `finanzas/ventas-destinos.ts`.
 - La regla por defecto del importador (#542) queda confirmada.
 - El recordatorio de cobro de una factura vencida usa los mismos destinatarios que la factura (`destinosDeDocumento`): así el cliente recibe la cobranza en las mismas casillas que la factura, con la casilla DTE en copia.
+
+## ADR-102 · Hilo es el sistema de diseño predeterminado para todo diseño nuevo (CAR-324, 12-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 12-nov-2026, 10:57, hora de Chile) · **Registra:** Claude. (ADR-098 a ADR-101 están reservados por PRs abiertos.)
+
+**Decisión.** Todo diseño nuevo de OPAI 2.0 (Design Prompts, pantallas y piezas) se hace en Claude Design con el sistema «OPAI 2.0 Design System · Hilo». «OPAI 2.0 V2» y los sistemas anteriores quedan solo como referencia de lo ya construido; no se diseñan pantallas nuevas con ellos.
+
+**Por qué.** Hilo es la base visual que se está construyendo (ADR-090). Diseñar con un solo sistema evita mezclar dos estilos y que una pantalla aprobada en V2 tenga que rehacerse.
+
+**Consecuencias.** `DISENO.md` §3b lo deja como regla. El sistema en Claude Design se mantiene al día con `packages/ds`: si cambia la piel Hilo, se actualiza en el mismo PR o en el siguiente. Las pantallas ya construidas con la base clásica no se rediseñan por esta regla; se pasan a Hilo cuando su módulo entre en un bloque de Hilo (H3 y siguientes).
