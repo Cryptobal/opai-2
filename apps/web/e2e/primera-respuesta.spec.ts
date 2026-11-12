@@ -12,7 +12,7 @@ test.describe("@preview comercial: primera respuesta a solicitudes", () => {
   test("el ajuste aparece en Comercial › Ajustes y la bandeja carga sin error", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/modulo/comercial?seccion=ajustes");
-    await expect(page.getByText("Tiempo objetivo de primera respuesta (horas)").first()).toBeVisible();
+    await expect(page.getByText("Tiempo objetivo de primera respuesta (horas hábiles)").first()).toBeVisible();
     await sinDesborde(page);
     await capturar(page, info, "primera-respuesta-ajuste");
 
