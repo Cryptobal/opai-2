@@ -517,3 +517,23 @@
 :is([data-marco="hilo"] *).bg-accent-muted.before\:bg-accent .bg-surface.text-accent {
   box-shadow: inset 0 0 0 1px var(--ds-fg);
 }
+/* Menú plegable del diseño nuevo (ADR-109, CAR-335 D2): `ShellNuevo` pone `data-menu` y estas reglas
+   deciden qué se ve, sin JS en el shell compartido (ADR-037). Plegado: en escritorio queda el riel de
+   íconos. Asomado: el menú completo flota sobre la página, en iPad y en escritorio. */
+@media (min-width: 64rem) {
+  [data-menu="plegado"] nav[data-shell="riel"],
+  [data-menu="asomado"] nav[data-shell="riel"] {
+    display: flex;
+  }
+  [data-menu="plegado"] nav[data-shell="sidebar"] {
+    display: none;
+  }
+}
+[data-menu="asomado"] nav[data-shell="sidebar"] {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  box-shadow: var(--ds-shadow-overlay);
+}
