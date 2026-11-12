@@ -20,6 +20,14 @@ export const ESTADO: Record<
   descartada: { etiqueta: "Descartada", tono: "neutro" },
 };
 
+export type PlazoSolicitud = "sin_plazo" | "dentro" | "fuera" | "a_tiempo" | "tarde" | "sin_dato";
+
+/** Marca de primera respuesta (CAR-299). Solo se muestra la que importa: pendiente dentro o fuera de plazo. */
+export const PLAZO: Partial<Record<PlazoSolicitud, { etiqueta: string; tono: "warning" | "danger" | "neutro" }>> = {
+  dentro: { etiqueta: "En plazo", tono: "neutro" },
+  fuera: { etiqueta: "Fuera de plazo", tono: "danger" },
+};
+
 /** Quién revisa una solicitud «en revisión» (CAR-211); null en los demás estados. */
 export function quienRevisa(s: { estado: string; responsableNombre?: string | null }): string | null {
   if (s.estado !== "en_revision") return null;

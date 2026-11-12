@@ -1799,12 +1799,12 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 
 **Prioridad.** Entra antes de cerrar Comercial, Personas y Finanzas, sin cortar ni pisar a esas sesiones (decisión 6): no se tocan sus archivos ni los del PR de MFA (#499) mientras siga abierto.
 
-**Respuestas de Carlos (11-nov-2026, en la sesión).**
+**Respuestas de Carlos (11-nov-2026, en la sesión; confirmadas a las 17:08).**
 1. **Pánico:** se aprieta en la app de terreno (la del guardia), que es la que está en terreno. El botón nace ahí y emite el evento de pánico que consume F3.
 2. **Espacio Slack de pruebas:** sí. Las apps se registran en él (la de pruebas) y la distribuida aparte, cuando F1 esté desplegado.
 3. **Canales de supervisión:** públicos. Se mantienen los scopes de §8, sin `groups:*`.
 4. **Valores por defecto:** aprobados los del plan (atraso sobre 15 min, ausencia y pánico al canal encendidos; lo demás apagado; escalamiento a los 5 min si se enciende).
-5. **Escalamiento del pánico:** a un grupo de usuarios o a personas, configurable en cada tenant.
+5. **Escalamiento del pánico:** lo recibe **un grupo de usuarios de OPAI** (CAR-251) que cada empresa elige (Carlos lo precisó a las 17:08, aprobando la sugerencia de la sesión).
 
 ## ADR-094 · Desempeño: indicadores publicados por los módulos y scorecard por cargo configurable por empresa (CAR-303, 11-nov-2026)
 
@@ -1899,3 +1899,28 @@ Se deciden antes de la sesión Face ID. El contrato del adaptador de biometría 
 2. Dentro del marco Hilo, los campos mantienen el **borde marcado** actual (respuesta de Carlos «algo marcado» a la `DECISIÓN CARLOS:` del PR #509). La maqueta lo dibujaba más suave; manda el repositorio.
 
 **Consecuencias.** Modifica la decisión del 10-nov registrada en CAR-247. Las vistas de OPAI dentro de Claude (CAR-287) se construyen sobre esta entrada. Las API keys siguen vigentes para agentes propios y Grok Bot.
+
+## ADR-099 · Condiciones para pasar la facturación de Gard a producción en OPAI 2 (CAR-271, 11-nov-2026)
+
+**Decidió:** Carlos (chat del proyecto «Opai 2.0», 11-nov-2026, 22:03, hora de Chile) · **Registra:** Claude («Sesión Proyecto»). (ADR-098 está reservado por el PR abierto #527.)
+
+**Contexto.** Mientras OPAI 1 y OPAI 2 emitan facturas a la vez, los dos usan folios de la misma serie sin saber del otro, y el SII rechazaría o dejaría mal emitido un folio repetido. Carlos pidió no pasar a producción todavía y fijó qué tiene que funcionar antes.
+
+**Decisión.** La facturación de Gard pasa a producción en OPAI 2 (CAR-271) cuando funcionen en OPAI 2 estas cuatro cosas:
+1. **Movimientos del banco de Gard llegando a OPAI 2.** Por ahora OPAI 1 reenvía a OPAI 2 lo que recibe de Web4Leads (CAR-284; Carlos autorizó el cambio mínimo en OPAI 1, integrado en `Cryptobal/opai#1370`).
+2. **Flujo de caja funcionando con datos reales** (CAR-268, CAR-269).
+3. **Programación de facturas y envío de proforma funcionando** (CAR-320).
+4. **Todas las facturas, notas de crédito y notas de débito emitidas en OPAI 1 migradas a OPAI 2** (CAR-283).
+
+**Consecuencias.**
+- Hasta entonces OPAI 2 emite solo en certificación; el CAF 33 2064–2068 (producción) sigue pausado.
+- No se piden folios nuevos de certificación por ahora (Carlos, 11-nov): la secuencia de CAR-270 queda pendiente.
+- La integración «OPAI 1 (traer datos)» queda solo para las empresas que Plataforma habilita y se retira al terminar la migración (CAR-321).
+
+## Adenda ADR-099 · Gard queda habilitada para «OPAI 1 (traer datos)» (CAR-279, 12-nov-2026, pedido de Carlos)
+
+**Decisión.** Para traer los datos de Gard desde OPAI 1, la empresa Gard se agrega a `core.integraciones_habilitadas` (clave «opai1») con una migración de datos aditiva, aplicada por el bot «OPAI 2.0» con respaldo (dev y luego main). La migración no pisa otras empresas, no hace nada si la base no tiene la empresa «gard» y se puede repetir sin efecto.
+
+**Por qué.** El ajuste es de plataforma y no aparece en Plataforma › Ajustes, así que no se podía habilitar por pantalla. Arreglar esa pantalla queda para la sesión Proyecto (CAR-321).
+
+**Después.** Carlos pega la dirección del exportador y la llave de solo lectura en Configuración › Integraciones › OPAI 1 (nunca en el chat, ADR-027). Al terminar la migración de Gard se retira la integración y se quita a Gard de la lista.

@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 710 pares pantalla→capacidad · 636 con herramienta · 74 excepciones justificadas · 0 faltantes.
+**Resumen:** 728 pares pantalla→capacidad · 650 con herramienta · 78 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -16,6 +16,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | — | `/api/agente` | `agente.plan.confirmar` | — | excepción |
 | — | `/api/agente` | `agente.turno.preparar` | — | excepción |
 | — | `/api/geo/mapa` | `core.geo.mapa` | — | excepción |
+| — | `/api/integraciones/slack/eventos` | `core.slack.desinstalada` | — | excepción |
+| — | `/api/integraciones/slack/oauth/callback` | `core.slack.conectar` | — | excepción |
+| — | `/api/negocios/export` | `comercial.negocios.exportar` | `comercial_negocios_exportar` | existe |
 | — | `/api/pauta/export` | `pauta.exportar` | `pauta_exportar` | existe |
 | — | `/api/rendiciones/lotes/[id]/nomina` | `rendiciones.lotes.nomina_descargar` | — | excepción |
 | — | `/api/t/[slug]/banco/web4leads` | `finanzas.bancos.recibir_web4leads` | — | excepción |
@@ -33,6 +36,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente/cotizaciones/[id]` | `cpq.portal_cotizaciones.get` | `cpq_portal_cotizaciones_get` | existe |
+| cliente | `/cliente/cotizaciones` | `cpq.portal_cotizaciones.list` | `cpq_portal_cotizaciones_list` | existe |
+| cliente | `/cliente` | `portal_cliente.mi_acceso` | `portal_cliente_mi_acceso` | existe |
 | cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
@@ -75,6 +81,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/_components` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/_components` | `core.config.set` | `core_config_set` | existe |
+| compartido | `app/_components` | `core.correos.asociar` | `core_correos_asociar` | existe |
 | compartido | `app/_components` | `core.correos.crear_direccion` | `core_correos_crear_direccion` | existe |
 | compartido | `app/_components` | `core.correos.direccion` | `core_correos_direccion` | existe |
 | compartido | `app/_components` | `core.correos.historial` | `core_correos_historial` | existe |
@@ -136,6 +143,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `rendiciones.rendiciones.obtener` | `rendiciones_rendiciones_obtener` | existe |
 | compartido | `app/_components` | `rendiciones.rendiciones.rechazar` | `rendiciones_rendiciones_rechazar` | existe |
 | compartido | `app/_components` | `rendiciones.respaldos.url_descarga` | `rendiciones_respaldos_url_descarga` | existe |
+| compartido | `app/(cliente)/cliente/cotizaciones/_componentes` | `cpq.portal_cotizaciones.descargar` | `cpq_portal_cotizaciones_descargar` | existe |
 | compartido | `app/(erp)/_componentes` | `comercial.seguimientos.list` | `comercial_seguimientos_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/_componentes` | `core.actividades.tareas` | `core_actividades_tareas` | existe |
@@ -165,6 +173,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.crear_base` | `comercial_seguimiento_planes_crear_base` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.guardar` | `comercial_seguimiento_planes_guardar` | existe |
 | compartido | `app/(erp)/configuracion/_comercial` | `comercial.seguimiento_planes.list` | `comercial_seguimiento_planes_list` | existe |
+| compartido | `app/(erp)/configuracion/_comercial` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `core.patrones.list` | `core_patrones_list` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.create` | `cpq_catalogo_categorias_create` | existe |
 | compartido | `app/(erp)/configuracion/_cpq` | `cpq.catalogo_categorias.desactivar` | `cpq_catalogo_categorias_desactivar` | existe |
@@ -243,6 +252,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.guardar_certificado_dte` | — | excepción |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.probar` | `core_integraciones_probar` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.set_secreto` | — | excepción |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.configurar` | `core_slack_configurar` | existe |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.desconectar` | — | excepción |
+| compartido | `app/(erp)/configuracion/integraciones/slack/_componentes` | `core.slack.iniciar_conexion` | — | excepción |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.permisos.catalogo` | `core_permisos_catalogo` | existe |
 | compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.roles.list` | `core_roles_list` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `comercial.contactos.list` | `comercial_contactos_list` | existe |
@@ -498,6 +510,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
+| compartido | `app/(erp)/personas/[id]/generar-documento/_componentes` | `core.documento_plantillas.generar` | `core_documento_plantillas_generar` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `core.personas.list` | `core_personas_list` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
 | compartido | `app/(erp)/remuneraciones/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
@@ -576,6 +589,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones` | `core.notificacion_reglas.list` | `core_notificacion_reglas_list` | existe |
+| erp | `/configuracion/correos-clientes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.asociar` | `core_correos_asociar` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.direccion` | `core_correos_direccion` | existe |
 | erp | `/configuracion/correos-clientes` | `core.correos.sin_asignar` | `core_correos_sin_asignar` | existe |
@@ -600,6 +614,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/integraciones/[proveedor]` | `core.consumos.resumen` | `core_consumos_resumen` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.get` | `core_integraciones_get` | existe |
 | erp | `/configuracion/integraciones/[proveedor]` | `core.integraciones.list` | `core_integraciones_list` | existe |
+| erp | `/configuracion/integraciones/slack` | `core.grupos.list` | `core_grupos_list` | existe |
+| erp | `/configuracion/integraciones/slack` | `core.slack.estado` | `core_slack_estado` | existe |
 | erp | `/configuracion/integraciones` | `core.integraciones.list` | `core_integraciones_list` | existe |
 | erp | `/configuracion/marca` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/marca` | `core.marca.get` | `core_marca_get` | existe |
@@ -673,6 +689,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/mi-cuenta/preferencias` | `core.config.set` | `core_config_set` | existe |
 | erp | `/mi-cuenta` | `core.metodos_acceso.list` | `core_metodos_acceso_list` | existe |
 | erp | `/negocios/reportes` | `comercial.informes.tablero` | `comercial_informes_tablero` | existe |
+| erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.list` | `core_documento_plantillas_list` | existe |
+| erp | `/personas/[id]/generar-documento` | `core.documento_plantillas.rellenar` | `core_documento_plantillas_rellenar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | erp | `/remuneraciones/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
 | erp | `/remuneraciones/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
@@ -771,9 +789,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/api/existe/route.ts` | Infraestructura del proxy (404 real con Cache Components) usando las mismas capacidades .get que la página. |
 | `app/api/geo/mapa/route.ts` | Proxy de imagen de core.geo.mapa (interna con motivo en EXCEPCIONES_PARIDAD): una imagen no sirve a un agente. |
 | `app/api/health/route.ts` | Salud del despliegue, sin datos. |
+| `app/api/integraciones/slack/eventos/route.ts` | Events API de Slack (CAR-291, ADR-093): firma de Slack y team_id resuelto con SECURITY DEFINER; ejecuta core.slack.desinstalada (interna). Sin datos de negocio por ahora (las respuestas en hilos llegan en F5a). |
+| `app/api/integraciones/slack/oauth/callback/route.ts` | Vuelta del OAuth de Slack (CAR-291, ADR-093): con sesión, ejecuta core.slack.conectar (solo personas) como quien vuelve; el state la liga a esa persona y a su empresa. |
 | `app/api/marca/[slug]/[asset]/route.ts` | URL pública de logos de la marca (ADR-028) para correos y PDF; la marca se lee y cambia con core.marca.get/update por MCP. |
 | `app/api/mcp/[[...transport]]/route.ts` | Servidor MCP (Authorization: Bearer). |
 | `app/api/mcp/k/[key]/[[...transport]]/route.ts` | Servidor MCP con la key en la URL: deprecado (410 Gone salvo MCP_KEY_EN_URL_HASTA). |
+| `app/api/negocios/export/route.ts` | Descarga de comercial.negocios.exportar (Excel) con sesión; mismo permiso y datos que la herramienta MCP comercial_negocios_exportar (CAR-27). |
 | `app/api/pauta/export/route.ts` | Descarga de pauta.exportar (CSV/PDF) con sesión; mismo permiso y datos que la herramienta MCP pauta_exportar. |
 | `app/api/rendiciones/lotes/[id]/nomina/route.ts` | Descarga de rendiciones.lotes.nomina_descargar (soloPersonas con motivo en EXCEPCIONES_PARIDAD): el Excel lleva cuentas bancarias; el resto del lote se opera por MCP (CAR-208). |
 | `app/api/t/[slug]/banco/web4leads/route.ts` | Receptor de movimientos bancarios de Web4Leads: firma HMAC por empresa; ejecuta finanzas.bancos.recibir_web4leads (interna). |
@@ -865,6 +886,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.assign` | Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034). |
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
+| `core.slack.conectar` | Solo personas: canjea el código del OAuth y guarda el token del bot cifrado; nunca por API ni MCP (ADR-027, ADR-093). |
+| `core.slack.desconectar` | Solo personas: revoca y borra el token del bot de Slack; gobierno de credenciales (ADR-027, ADR-093). |
+| `core.slack.desinstalada` | Interna: solo la ejecuta /api/integraciones/slack/eventos, tras verificar la firma de Slack, cuando la app se desinstala o su token se revoca. |
+| `core.slack.iniciar_conexion` | Solo personas: conectar Slack es un OAuth que una persona hace en su navegador; una key no instala apps ni maneja tokens (ADR-027, ADR-093). |
 | `core.terreno.contexto` | Interna: arma el inicio por instalación y turno del equipo emparejado sin sesión (su cookie de dispositivo es la credencial); un agente consulta turnos con core.turnos.* y la instalación con core.instalaciones.get (CAR-78 E2). |
 | `core.terreno.en_sitio` | Interna: la portería del equipo emparejado lee quiénes siguen dentro sin sesión (su cookie de dispositivo es la credencial); un agente usa acceso.registros.listar con su alcance (CAR-78 E4d). |
 | `core.terreno.rondas` | Interna: «Mis rondas» del equipo emparejado lee sin sesión las rondas que puede iniciar y las que dejó abiertas (su cookie de dispositivo es la credencial); un agente usa rondas.plantillas.listar y rondas.puntos.listar con su alcance (CAR-78 E3e). |
@@ -950,6 +975,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.assign` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
+| `core.slack.conectar` | `/api/integraciones/slack/oauth/callback` | no | reservada a personas |
+| `core.slack.desconectar` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
+| `core.slack.iniciar_conexion` | `app/(erp)/configuracion/integraciones/slack/_componentes` | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 | `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
 | `cpq.cotizaciones.aprobar` | `app/(erp)/cotizaciones/[id]/_componentes`, `/configuracion/aprobaciones` | no | reservada a personas |
@@ -1023,6 +1051,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`
+- `core.slack.canales`
 - `core.turnos_esperados.listar`
 - `core.turnos_esperados.regenerar`
 - `core.usage.summary`
@@ -1038,9 +1067,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `cpq.lineas.quitar`
 - `cpq.lineas.reordenar`
 - `cpq.motor.simular`
-- `cpq.portal_cotizaciones.descargar`
-- `cpq.portal_cotizaciones.get`
-- `cpq.portal_cotizaciones.list`
 - `cpq.propuestas_html.get`
 - `cpq.propuestas_html.importar`
 - `cpq.propuestas_html.list`
@@ -1074,7 +1100,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
-- `portal_cliente.mi_acceso`
 - `portal_trabajador.arco.listar`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.reasignar`

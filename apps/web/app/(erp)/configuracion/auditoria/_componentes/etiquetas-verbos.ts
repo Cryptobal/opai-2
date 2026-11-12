@@ -71,7 +71,7 @@ export const VERBOS: Record<string, string> = {
   ficha: "Ficha", explicar: "Explicar", solicitar_aprobacion: "Pedir aprobación", marcar_lista: "Marcar como lista",
   retirar_aprobacion: "Retirar aprobación", rechazar_aprobacion: "Rechazar aprobación", contar: "Contar",
   preview_pdf: "Vista previa del PDF", reordenar: "Reordenar", margen: "Margen", desactivar: "Desactivar",
-  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", sync_servicio: "Sincronizar servicio",
+  preflight_emision: "Chequeo previo de emisión", publicar: "Publicar", rellenar: "Rellenar con datos", sync_servicio: "Sincronizar servicio",
   capitulos_list: "Ver capítulos por instalación", capitulo_guardar: "Guardar capítulo de instalación",
   prompt_exportable: "Ver prompt exportable de la propuesta",
   alertas: "Alertas", cierre: "Cierre comercial", perdidos_por_motivo: "Perdidos por motivo",
@@ -89,6 +89,8 @@ export const VERBOS: Record<string, string> = {
   sin_asignar: "Ver sin asignar", asociar: "Asociar", direccion: "Ver dirección de registro", crear_direccion: "Crear dirección de registro",
   // Importación de datos desde planillas (CAR-279).
   plantilla: "Descargar plantilla", ejecutar: "Importar planilla", lotes: "Ver cargas anteriores",
+  // Slack (CAR-291, ADR-093).
+  canales: "Ver canales", iniciar_conexion: "Iniciar conexión", conectar: "Conectar", desconectar: "Desconectar", desinstalada: "Registrar desinstalación",
   // Indicadores de gestión (CAR-305).
   medir: "Medir",
 };

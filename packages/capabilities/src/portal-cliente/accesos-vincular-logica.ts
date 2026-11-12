@@ -25,6 +25,8 @@ export async function vincularAcceso(
   ctx: Contexto,
   input: z.output<typeof vincularInputSchema>,
   dryRun: boolean,
+  /** «limitado» para el contacto de una cuenta prospecto (CAR-300): solo ve su propuesta vigente. */
+  alcance: "completo" | "limitado" = "completo",
 ): Promise<AccesoVista> {
   const cuenta = await cuentaDe(ctx, input.cuentaId);
   if (cuenta.archivadaEn) throw reglaDeNegocio("La cuenta está archivada.");
@@ -78,6 +80,7 @@ export async function vincularAcceso(
         cuentaId: cuenta.id,
         contactoId: input.contactoId ?? null,
         estado: "activo",
+        alcance,
         todasInstalaciones: input.todasInstalaciones,
         creadoPor: ctx.usuario?.id ?? null,
       };

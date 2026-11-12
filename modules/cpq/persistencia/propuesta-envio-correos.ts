@@ -7,7 +7,7 @@ import { enviarCorreoCliente, type PdfParaCorreo } from "./correo-cliente";
 export async function enviarCorreosEnvioPropuesta(
   ctx: Contexto,
   destinatarios: readonly DestinatarioEnvio[],
-  datos: { cuentaId: string; negocioId?: string | null; codigo: string; titulo: string; version: number | null; mensaje: string },
+  datos: { cuentaId: string; negocioId?: string | null; cotizacionId?: string | null; codigo: string; titulo: string; version: number | null; mensaje: string },
   pdfs: readonly PdfParaCorreo[],
 ) {
   if (ctx.actor.tipo === "agent") return;
@@ -17,6 +17,7 @@ export async function enviarCorreosEnvioPropuesta(
       contactoId: d.contactoId ?? null,
       cuentaId: datos.cuentaId,
       negocioId: datos.negocioId ?? null,
+      cotizacionId: datos.cotizacionId ?? null,
       codigo: datos.codigo,
       titulo: datos.titulo,
       version: datos.version,
