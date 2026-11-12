@@ -13,7 +13,7 @@ import { type Ajuste, aMicro, aUsd, esModelosIa, type ModelosIa, type Precio } f
 
 const ConfirmarAjustes = lazy(() => import("./confirmar-ajustes"));
 
-type Props = { precios: Precio[]; ajustes: Ajuste[]; empresas: number };
+type Props = { precios: Precio[]; ajustes: Ajuste[]; empresas: number | null };
 
 /**
  * Ajustes de plataforma (50): precios, modelos de IA por clase y límites; un solo «Guardar». Todo o
@@ -33,6 +33,7 @@ export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
     (a) => typeof a.valor === "number" && !FUERA_DE_LIMITES.has(a.clave),
   );
   const [porConfirmar, setPorConfirmar] = useState<Cambio[] | null>(null);
+  const [revisando, setRevisando] = useState(false);
   const [nums, setNums] = useState(() =>
     Object.fromEntries(numericos.map((a) => [a.clave, String(a.valor)])),
   );
@@ -50,8 +51,13 @@ export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
   async function revisar() {
     const cambios = cambiosPendientes(precios, txtPrecios, modelos, modelosIni, numericos, nums);
     if (!cambios.length) return avisar.exito("Sin cambios");
-    for (const c of cambios) if ((await correr(c, true)) === null) return;
-    setPorConfirmar(cambios);
+    setRevisando(true);
+    try {
+      for (const c of cambios) if ((await correr(c, true)) === null) return;
+      setPorConfirmar(cambios);
+    } finally {
+      setRevisando(false);
+    }
   }
 
   async function guardar(cambios: Cambio[]) {
@@ -68,7 +74,7 @@ export function AjustesPlataforma({ precios, ajustes, empresas }: Props) {
           disabled={pendiente || invalidos.size > 0 || numMalo}
           onClick={() => void revisar()}
         >
-          {pendiente ? "Guardando…" : "Guardar"}
+          {revisando ? "Revisando…" : pendiente ? "Guardando…" : "Guardar"}
         </Button>
       </div>
       {error ? <Alerta tono="danger" titulo={error} /> : null}

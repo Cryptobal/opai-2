@@ -25,12 +25,13 @@ export default function Ajustes() {
         const [p, a, t] = await Promise.all([
           ejecutarComoUsuario<Precio[]>("platform", "platform.precios.list", {}),
           ejecutarComoUsuario<Ajuste[]>("platform", "platform.ajustes.get", {}),
-          ejecutarComoUsuario<unknown[]>("platform", "platform.tenants.list"),
+          ejecutarComoUsuario<{ estado: string }[]>("platform", "platform.tenants.list"),
         ]);
         return {
           precios: exigirDatos(p),
           ajustes: exigirDatos(a),
-          empresas: exigirDatos(t).length,
+          // Solo para el texto de confirmación: si la lista falla, la pantalla igual carga.
+          empresas: t.ok ? t.data.filter((e) => e.estado !== "suspendido").length : null,
         };
       }}
     >

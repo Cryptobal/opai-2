@@ -4,7 +4,7 @@ import { Button, Dialog } from "@opai/ds";
 
 type Props = {
   cambios: number;
-  empresas: number;
+  empresas: number | null;
   pendiente: boolean;
   onCancelar: () => void;
   onGuardar: () => void;
@@ -23,7 +23,7 @@ export default function ConfirmarAjustes({
       abierto
       onCerrar={onCancelar}
       titulo="¿Guardar los ajustes?"
-      descripcion={`${cambios} ${cambios === 1 ? "cambio" : "cambios"} · afecta a ${empresas} ${empresas === 1 ? "empresa" : "empresas"} desde hoy.`}
+      descripcion={`${cambios} ${cambios === 1 ? "cambio" : "cambios"} · ${empresas === null ? "afecta a todas las empresas" : `afecta a ${empresas} ${empresas === 1 ? "empresa activa" : "empresas activas"}`} desde hoy.`}
       acciones={
         <>
           <Button variant="secondary" onClick={onCancelar}>
