@@ -1,4 +1,4 @@
-import { ajustesPauta, capacidadesPauta, defineModule } from "@opai/capabilities";
+import { ajustesPauta, capacidadesPauta, defineModule, indicadoresPauta } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Pauta (Operaciones, Brief 11b · PR 1). El núcleo deriva navegación, permisos,
@@ -38,4 +38,6 @@ export const manifest = defineModule({
     { id: "pauta.excepcion.anulada", descripcion: "Se anularon excepciones de la pauta de un puesto." },
   ],
   capacidades: capacidadesPauta,
+  // Indicador de gestión para el catálogo del núcleo (ADR-094, adenda CAR-309).
+  indicadores: indicadoresPauta,
 });
