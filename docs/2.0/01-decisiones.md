@@ -2023,7 +2023,7 @@ Sin una decisión de Carlos pendiente, la sesión no se detiene: continúa con e
 **Decisión.**
 1. [`REFERENTES-saas.md`](REFERENTES-saas.md) es la vara oficial. Para cada capa nombra el referente, el patrón concreto que se copia y cómo se mide: permisos (GitHub, Google Workspace, Rippling), multi-tenant (Linear, Slack, Stripe), API y MCP (Stripe), Comercial (HubSpot, Salesforce, Pipedrive), Finanzas (Stripe Billing, Xero, QuickBooks), Personas (Rippling, Deel, BambooHR), terreno (Connecteam, Deputy, ServiceTitan), UX (Linear, Notion) e IA (la IA propone y una persona aprueba, con registro).
 2. Vale para todo: diseño, lógica, permisos, Núcleo y módulos. Si un módulo ya construido se aparta sin motivo, se ajusta o se rehace; rehacer un módulo lo decide Carlos con la auditoría a la vista.
-3. El aspecto lo decide el sistema visual oficial vigente (Hilo según ADR-102 al escribir esto; si se integra ADR-109, el diseño nuevo). Los referentes de UX fijan el comportamiento, no el aspecto.
+3. El aspecto lo decide el sistema visual oficial vigente: el diseño nuevo de ADR-109, que reemplazó a Hilo el mismo 12-nov-2026. Los referentes de UX fijan el comportamiento, no el aspecto.
 4. Apartarse del referente exige una razón escrita: ley chilena (DT, SII, Ley 21.719), una regla de negocio de Carlos, agent-first (ADR-034) o costo desproporcionado.
 5. Un referente se cambia con una adenda a este ADR.
 
