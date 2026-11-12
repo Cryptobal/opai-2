@@ -16,6 +16,7 @@ export { capacidadesAcceso } from "./acceso";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajustesNomina, capacidadesNomina } from "./nomina";
 export { ajustesPauta, capacidadesPauta } from "./pauta";
+export { indicadoresPauta } from "./pauta/indicadores-gestion";
 export { ajustesDesempeno, capacidadesDesempeno, PERMISOS_DESEMPENO, trabajosDesempeno } from "./desempeno";
 export { ajustesPortalCliente, capacidadesPortalCliente } from "./portal-cliente";
 export { accesoDelActor } from "./portal-cliente/comun";
