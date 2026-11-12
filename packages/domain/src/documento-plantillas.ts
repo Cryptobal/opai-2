@@ -11,6 +11,9 @@ export const CLASES_PLANTILLA = [
   "anexo_contrato",
   "recepcion_laboral",
   "carta_trabajador",
+  // CAR-315 parte 2: plantillas de otros módulos (cuentas e instalaciones). Ver `ambitoDeClase`.
+  "contrato_servicio",
+  "acta",
 ] as const satisfies readonly ClaseFirma[];
 export type ClasePlantilla = (typeof CLASES_PLANTILLA)[number];
 
@@ -20,6 +23,8 @@ export const ETIQUETA_CLASE_PLANTILLA: Readonly<Record<ClasePlantilla, string>> 
   anexo_contrato: "Anexo",
   recepcion_laboral: "Recepción",
   carta_trabajador: "Carta",
+  contrato_servicio: "Contrato de servicio",
+  acta: "Acta",
 };
 
 /** Nivel de firma por defecto de una plantilla: N1 o N2 (N3·FEA queda deshabilitado, CAR-94). */
@@ -34,7 +39,7 @@ export type OrigenPlantilla = (typeof ORIGENES_PLANTILLA)[number];
 export const nivelPlantillaValido = (clase: ClasePlantilla, nivel: NivelPlantilla): boolean =>
   nivelValido(clase, nivel);
 
-export type GrupoVariable = "persona" | "vinculo" | "instalacion" | "sueldo" | "contrato";
+export type GrupoVariable = "persona" | "vinculo" | "instalacion" | "cuenta" | "sueldo" | "contrato";
 
 export type VariablePlantilla = {
   /** Token tal como se escribe en el texto, sin llaves: `persona.rut`. */
@@ -63,9 +68,16 @@ export const VARIABLES_PLANTILLA: readonly VariablePlantilla[] = [
   v("vinculo", "jornada", "Jornada"),
   v("instalacion", "nombre", "Nombre de la instalación"),
   v("instalacion", "direccion", "Dirección de la instalación"),
+  v("cuenta", "nombre", "Nombre de la cuenta"),
+  v("cuenta", "razon_social", "Razón social"),
+  v("cuenta", "rut", "RUT de la cuenta"),
+  v("cuenta", "direccion", "Dirección de la cuenta"),
+  v("cuenta", "giro", "Giro"),
   v("sueldo", "base", "Sueldo base", true),
   v("sueldo", "gratificacion", "Gratificación", true),
   v("contrato", "fecha", "Fecha del contrato"),
+  v("contrato", "motivo_cambio", "Motivo del cambio (anexos)"),
+  v("contrato", "cambios", "Detalle de los cambios (anexos)"),
 ];
 
 const CLAVES = new Set(VARIABLES_PLANTILLA.map((x) => x.clave));

@@ -46,33 +46,33 @@ export function LotesImportacion({ lotes, nombres }: { lotes: Lote[]; nombres: R
       <Table>
         <thead>
           <tr>
-            <Th>Fecha</Th>
-            <Th>Qué se importó</Th>
+            <Th>Carga</Th>
             <Th>Resultado</Th>
             <Th>Estado</Th>
-            <Th aria-label="Acciones" />
           </tr>
         </thead>
         <tbody>
           {lotes.map((l) => (
             <Tr key={l.id}>
-              <Td className="tabular-nums">{fecha(l.iniciadaEn)}</Td>
+              {/* Tres columnas para que la tabla quepa en iPad sin cortarse a la derecha. */}
               <Td className="whitespace-normal">
                 <span className="font-medium">{nombres[l.importador] ?? l.importador}</span>
-                <span className="t-caption block">{[l.archivo ?? (l.origen === "opai1_json" ? "Export de OPAI 1" : "Filas enviadas por un agente"), l.lanzadaPor].filter(Boolean).join(" · ")}</span>
+                <span className="t-caption block">
+                  {[fecha(l.iniciadaEn), l.archivo ?? (l.origen === "opai1_json" ? "Export de OPAI 1" : "Filas enviadas por un agente"), l.lanzadaPor].filter(Boolean).join(" · ")}
+                </span>
               </Td>
-              <Td className="min-w-52 whitespace-normal">
+              <Td className="whitespace-normal tabular-nums">
                 {l.conteos.crear} creados · {l.conteos.actualizar} completados · {l.conteos.error} con error
               </Td>
               <Td>
-                <Badge tono={ESTADO[l.estado].tono}>{ESTADO[l.estado].texto}</Badge>
-              </Td>
-              <Td>
-                {l.estado === "completada" ? (
-                  <Button variant="ghost" disabled={pendiente} onClick={() => void abrir(l)}>
-                    Revertir
-                  </Button>
-                ) : null}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge tono={ESTADO[l.estado].tono}>{ESTADO[l.estado].texto}</Badge>
+                  {l.estado === "completada" ? (
+                    <Button variant="ghost" disabled={pendiente} onClick={() => void abrir(l)}>
+                      Revertir
+                    </Button>
+                  ) : null}
+                </div>
               </Td>
             </Tr>
           ))}

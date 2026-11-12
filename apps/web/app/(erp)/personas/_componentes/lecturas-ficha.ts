@@ -57,6 +57,7 @@ export type CuentaPago = {
   tipoCuenta: string | null;
   numeroCuenta: string | null;
   rutTitular: string | null;
+  titularNombre: string | null;
   /** CAR-244: nombre del catálogo SBIF y señal de dato escrito a mano que hay que corregir. */
   bancoNombre: string | null;
   tipoCuentaEtiqueta: string | null;
@@ -65,7 +66,11 @@ export type CuentaPago = {
 export type Pago = {
   personaId: string;
   vigente: CuentaPago;
-  solicitudPendiente: (CuentaPago & { id: string }) | null;
+  /** CAR-275: todas las cuentas; la por defecto va primero. */
+  cuentas: (CuentaPago & { id: string; porDefecto: boolean })[];
+  solicitudPendiente:
+    | (CuentaPago & { id: string; tipo: "reemplazar" | "agregar" | "marcar_defecto" | "quitar" })
+    | null;
 };
 
 export const laboralDe = cache((id: string) =>

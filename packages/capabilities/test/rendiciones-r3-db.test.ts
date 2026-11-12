@@ -65,7 +65,7 @@ describe.skipIf(omitirSuiteDb())("Rendiciones · R3 (db)", () => {
     const c = ctx(u.paga, "gerente", t.a);
     for (const [uid, rut, cuenta] of [[u.rinde, "11111111-1", "000111222333"], [u.rinde2, "22222222-2", "000444555666"]] as const) {
       const p = await e.admin.persona.create({ data: { tenantId: t.a, nombres: "Persona", apellidos: uid.slice(0, 4), rut, usuarioId: uid } as never });
-      await e.admin.personaPago.create({ data: { tenantId: t.a, personaId: p.id, bancoCodigo: "037", tipoCuenta: "corriente", numeroCuenta: await mod.cifradoDeCampos(c).cifrar("personas_pago", "numero_cuenta", cuenta), rutTitular: rut } });
+      await e.admin.personaPago.create({ data: { tenantId: t.a, personaId: p.id, porDefecto: true, bancoCodigo: "037", tipoCuenta: "corriente", numeroCuenta: await mod.cifradoDeCampos(c).cifrar("personas_pago", "numero_cuenta", cuenta), rutTitular: rut } });
     }
     await e.admin.persona.create({ data: { tenantId: t.a, nombres: "Sara", apellidos: "SinCuenta", rut: "33333333-3", usuarioId: u.sinCuenta } as never });
     rend["r1"] = await nuevaAprobada(u.rinde, "gerente", u.aprueba, 12_500, "F-1");

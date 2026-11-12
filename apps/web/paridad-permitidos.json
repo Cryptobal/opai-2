@@ -48,6 +48,10 @@
     {
       "archivo": "app/_acciones/dispositivos.ts",
       "motivo": "Terreno › Emparejar ocurre antes de existir sesión o empresa: canjea el código de 6 caracteres por el token del dispositivo con la operación con nombre emparejarDispositivo (función SECURITY DEFINER); tope por origen con fallo cerrado (CAR-78 B2)."
+    },
+    {
+      "archivo": "app/api/integraciones/slack/eventos/route.ts",
+      "motivo": "Events API de Slack (CAR-291, ADR-093): ocurre sin sesión; verifica la firma de Slack y resuelve la empresa por el team_id con una función SECURITY DEFINER (resolverInstalacionSlack) antes de ejecutar la capacidad interna."
     }
   ],
   "internasPermitidas": [
@@ -86,6 +90,10 @@
     {
       "archivo": "app/correccion/[slug]/[token]/ver.ts",
       "motivo": "Ejecuta asistencia.correcciones.ver_enlace y responder_enlace (internas) para la página pública donde el trabajador acepta u objeta una corrección."
+    },
+    {
+      "archivo": "app/api/integraciones/slack/eventos/route.ts",
+      "motivo": "core.slack.desinstalada es interna por diseño: solo este receptor la ejecuta, con la firma de Slack como credencial, cuando la app se desinstala o su token se revoca."
     }
   ],
   "infraestructuraLibConDb": [

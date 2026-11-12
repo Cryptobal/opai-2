@@ -1,6 +1,7 @@
 // Proforma y estado de pago de una programación, antes de la factura (CAR-221). El día de generación se crea
 // el borrador y se manda lo que la programación tenga activado. No son documentos tributarios: no llevan folio
-// ni deuda fiscal. Cada envío queda en el historial del borrador y la proforma marca el cierre como «enviada».
+// ni deuda fiscal: salen con su PDF y un número interno (CAR-320). Cada envío queda en el historial del borrador y la
+// proforma marca el cierre como «enviada».
 import { mesYAnio } from "@opai/domain";
 
 import { hoy } from "../core/maestros/comun";
@@ -9,6 +10,8 @@ import { enviarCorreo } from "../core/comunicaciones";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { cuentaDe } from "./ventas-comun";
+import { correosDe, destinosDeDocumento } from "./ventas-destinos";
+import { pdfDePrevio } from "./ventas-pdf-previo";
 
 export type TipoPrevio = "proforma" | "estado_pago";
 export type ResultadoPrevio = { tipo: TipoPrevio; estado: "enviado" | "fallido"; destinatarios: string[] };
@@ -30,23 +33,26 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
     ...(flags.autoEnvioEstadoPago ? (["estado_pago"] as const) : []),
   ];
   if (!tipos.length) return [];
-  const guardados = await ctx.db.documentoEmitidoDestinatario.findMany({
-    where: { documentoId: b.documentoId },
-    orderBy: { orden: "asc" },
-  });
   const [cuenta, tenant] = await Promise.all([
     cuentaDe(ctx, b.cuentaId),
     ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
   ]);
-  const para = guardados.find((g) => g.tipo === "PARA")?.email ?? null;
-  const resto = guardados.filter((g) => g.email !== para);
-  const cc = resto.filter((g) => g.tipo === "CC").map((g) => g.email);
-  const bcc = resto.filter((g) => g.tipo === "BCC").map((g) => g.email);
-  const correos = para ? [para, ...cc, ...bcc] : [];
+  // Los mismos destinatarios que recibirán la factura (ADR-103): todos los PARA, y la casilla DTE en copia.
+  const destinos = await destinosDeDocumento(ctx, { id: b.documentoId, cuentaId: b.cuentaId }, cuenta.emailDte);
+  const para = destinos?.para ?? null;
+  const correos = destinos ? correosDe(destinos) : [];
   const { mes, anio } = mesYAnio(b.fechaFactura);
   const salida: ResultadoPrevio[] = [];
   for (const tipo of tipos) {
-    const salio = para
+    // El PDF (número interno, sin folio) va adjunto; si no se puede armar, el envío queda fallido y se reintenta.
+    const pdf = para
+      ? await pdfDePrevio(ctx, tipo, b).catch((e: unknown) => {
+          // Solo la categoría del error: nunca datos del cliente ni del documento.
+          console.error(`[FINANZAS] PDF de ${tipo} no se pudo armar: ${e instanceof Error ? e.name : "desconocido"}`);
+          return null;
+        })
+      : null;
+    const salio = para && pdf
       ? await enviarCorreo(
           { db: ctx.db, tenantId: ctx.tenantId, correo: await correoDe(ctx), urlBase: ctx.servicios.urlBase },
           EVENTO[tipo],
@@ -57,11 +63,17 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
             documento: { total: clp(b.montoTotal), fecha_factura: dmy(b.fechaFactura) },
             empresa: { nombre: tenant?.nombre ?? "" },
           },
-          { cc, bcc },
+          { paraAdicionales: destinos?.paraAdicionales ?? [], cc: destinos?.cc ?? [], bcc: destinos?.bcc ?? [], adjuntos: [{ nombre: pdf.nombre, contenidoBase64: Buffer.from(pdf.bytes).toString("base64"), mime: "application/pdf" }] },
         )
       : false;
     const estado = salio ? ("enviado" as const) : ("fallido" as const);
-    const error = salio ? null : para ? "El correo no salió. Revisa Configuración → Comunicaciones." : "El borrador no tiene destinatarios.";
+    const error = salio
+      ? null
+      : !para
+        ? "El borrador no tiene destinatarios."
+        : !pdf
+          ? "No se pudo armar el PDF del documento."
+          : "El correo no salió. Revisa Configuración → Comunicaciones.";
     await ctx.transaccion(async (tx) => {
       await tx.documentoEmitidoEnvio.create({
         data: { tenantId: ctx.tenantId, documentoId: b.documentoId, destinatarios: correos, adjuntos: [tipo], estado, error },

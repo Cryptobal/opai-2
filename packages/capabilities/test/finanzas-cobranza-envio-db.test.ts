@@ -11,7 +11,7 @@ import { trabajoRecordatoriosCobranza } from "../src/finanzas/cobranza-trabajo";
 import { registrarModuloFinanzas } from "./finanzas-modulo";
 import { prepararVentasDb, type VentasDbSuite } from "./finanzas-ventas-db-helpers";
 
-type Envio = { estado: string; para: string | null; cc: string[] };
+type Envio = { estado: string; para: string | null; paraAdicionales: string[]; cc: string[] };
 type Job = { activo: boolean; enviados: number; omitidos: number; fallidos: number };
 
 const diasAtras = (n: number): Date => {
@@ -57,15 +57,17 @@ describe.skipIf(!urlPropietario)("Finanzas · cobranza · recordatorios (db)", (
     expect(enviados).toHaveLength(0);
   });
 
-  it("recuerda al contacto principal con copia al resto y deja la gestión", async () => {
+  it("recuerda a todos los contactos de facturación como PARA y deja la gestión (ADR-103)", async () => {
     await contacto("pagos@cliente.cl", ["facturacion"], true);
     await contacto("conta@cliente.cl", ["facturacion"]);
     await contacto("gerente@cliente.cl", ["comercial"]);
+    await s.e.admin.cuenta.update({ where: { id: s.cuentaId }, data: { emailDte: "dte@cliente.cl" } });
     const vista = await s.dato<Envio>("finanzas.cobranza.recordar", { documentoId: docId }, { dryRun: true });
-    expect(vista).toMatchObject({ estado: "vista_previa", para: "pagos@cliente.cl", cc: ["conta@cliente.cl"] });
+    expect(vista).toMatchObject({ estado: "vista_previa", para: "pagos@cliente.cl", paraAdicionales: ["conta@cliente.cl"], cc: ["dte@cliente.cl"] });
     const r = await s.dato<Envio>("finanzas.cobranza.recordar", { documentoId: docId });
-    expect(r).toMatchObject({ estado: "enviado", para: "pagos@cliente.cl", cc: ["conta@cliente.cl"] });
+    expect(r).toMatchObject({ estado: "enviado", para: "pagos@cliente.cl", paraAdicionales: ["conta@cliente.cl"], cc: ["dte@cliente.cl"] });
     expect(enviados).toHaveLength(1);
+    expect(enviados[0]).toMatchObject({ para: "pagos@cliente.cl", paraAdicionales: ["conta@cliente.cl"], cc: ["dte@cliente.cl"] });
     const gestiones = await s.e.admin.cobranzaGestion.findMany({ where: { documentoId: docId } });
     expect(gestiones).toMatchObject([{ canal: "correo", origen: "manual", resultado: "enviado", paso: null }]);
   });
@@ -137,6 +139,25 @@ describe.skipIf(!urlPropietario)("Finanzas · cobranza · recordatorios (db)", (
     // pausada y la importada de 1.0 queda fuera por decisión de Carlos.
     expect(r.cobrar.vencidas.cantidad).toBe(3);
     expect(r.cobrar.recordatoriosQueTocan.cantidad).toBe(1);
+  });
+
+  it("la lista guardada del documento manda: las copias ocultas siguen ocultas", async () => {
+    const d = await s.e.admin.documentoEmitido.create({
+      data: {
+        tenantId: s.tenantId, cuentaId: s.cuentaId, tipoDte: 33, folio: 9204, estadoDte: "aceptado", timbrePdf417: "<TED>prueba</TED>",
+        fechaEmision: diasAtras(60), fechaVencimiento: diasAtras(30), montoNeto: 50_000, montoTotal: 50_000,
+      },
+    });
+    await s.e.admin.documentoEmitidoDestinatario.createMany({
+      data: [
+        { tenantId: s.tenantId, documentoId: d.id, orden: 0, tipo: "PARA", email: "jefa@cliente.cl", origen: "manual" },
+        { tenantId: s.tenantId, documentoId: d.id, orden: 1, tipo: "BCC", email: "oculto@cliente.cl", origen: "manual" },
+      ],
+    });
+    const antes = enviados.length;
+    const r = await s.dato<Envio>("finanzas.cobranza.recordar", { documentoId: d.id });
+    expect(r).toMatchObject({ estado: "enviado", para: "jefa@cliente.cl", paraAdicionales: [], cc: ["dte@cliente.cl"] });
+    expect(enviados[antes]).toMatchObject({ para: "jefa@cliente.cl", cc: ["dte@cliente.cl"], bcc: ["oculto@cliente.cl"] });
   });
 
   it("otra empresa no puede recordar ni pausar este documento", async () => {

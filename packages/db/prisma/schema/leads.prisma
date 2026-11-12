@@ -41,6 +41,9 @@ model Solicitud {
   motivoDescarte    String?   @map("motivo_descarte")
   descartadaEn      DateTime? @map("descartada_en") @db.Timestamptz(6)
   convertidaEn      DateTime? @map("convertida_en") @db.Timestamptz(6)
+  /// Primera vez que alguien la atendió (derivar, descartar, marcar duplicada o convertir). Nula si aún
+  /// no se atiende o si es anterior a esta columna (CAR-299).
+  primeraRespuestaEn DateTime? @map("primera_respuesta_en") @db.Timestamptz(6)
   /// Si es duplicada, la solicitud original a la que se enlaza.
   duplicadaDeId     String?   @map("duplicada_de_id") @db.Uuid
   negocioId         String?   @map("negocio_id") @db.Uuid

@@ -14,16 +14,13 @@ export function SinConexion(props: Props) {
   return (
     <div
       role="status"
-      className={cn(
-        "flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center",
-        props.className,
-      )}
+      className={cn("ds-estado", props.className)}
     >
-      <div className="flex size-12 items-center justify-center rounded-full bg-bg text-fg-muted">
-        <WifiOff className="size-6" />
+      <div className="ds-estado-icono">
+        <WifiOff />
       </div>
-      <p className="text-md font-medium text-fg">{props.titulo ?? "Sin conexión"}</p>
-      <p className="max-w-sm text-base text-fg-muted">
+      <p className="ds-estado-titulo">{props.titulo ?? "Sin conexión"}</p>
+      <p className="ds-estado-texto">
         {props.descripcion ??
           "No hay red en este momento. Revisa tu conexión; el contenido vuelve al reconectar."}
       </p>

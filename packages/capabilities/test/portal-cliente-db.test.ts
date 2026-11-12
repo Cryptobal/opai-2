@@ -196,6 +196,22 @@ describe.skipIf(!urlPropietario)("Portal Cliente · acceso y alcance en base rea
     ).rejects.toThrow(/no pertenece a la cuenta/);
   });
 
+  it("un acceso de alcance «limitado» (prospecto) no abre el portal completo y volver a «completo» lo restaura (CAR-300)", async () => {
+    const ctx = () => ctxCliente(tA, usuarios.todas, "todas");
+    expect((await ejecutar(ctx(), "portal_cliente.resumen.leer", {})).ok).toBe(true);
+    await e.admin.$executeRawUnsafe(`UPDATE "portal_cliente"."accesos" SET "alcance" = 'limitado' WHERE "id" = '${acceso.todas}'::uuid`);
+    try {
+      const r = await ejecutar(ctx(), "portal_cliente.resumen.leer", {});
+      expect(r.ok).toBe(false);
+    } finally {
+      await e.admin.$executeRawUnsafe(`UPDATE "portal_cliente"."accesos" SET "alcance" = 'completo' WHERE "id" = '${acceso.todas}'::uuid`);
+    }
+    expect((await ejecutar(ctx(), "portal_cliente.resumen.leer", {})).ok).toBe(true);
+    await expect(
+      e.admin.$executeRawUnsafe(`UPDATE "portal_cliente"."accesos" SET "alcance" = 'otro' WHERE "id" = '${acceso.todas}'::uuid`),
+    ).rejects.toThrow();
+  });
+
   it("sin acceso, con acceso de otra empresa o con membresía interna no ve nada (fail-closed)", async () => {
     for (const [tenant, user, nombre] of [
       [tA, usuarios.sinAcceso, "sinAcceso"],

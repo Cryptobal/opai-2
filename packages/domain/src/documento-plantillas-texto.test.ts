@@ -59,6 +59,7 @@ describe("texto de plantillas laborales", () => {
       "Persona",
       "Vínculo",
       "Instalación",
+      "Cuenta",
       "Sueldo",
       "Contrato",
     ]);
@@ -66,7 +67,10 @@ describe("texto de plantillas laborales", () => {
     expect(r.flatMap((g) => g.variables.map((v) => v.clave))).toEqual([
       "persona.direccion",
       "instalacion.direccion",
+      "cuenta.direccion",
     ]);
+    expect(gruposDeVariables("", "contrato_servicio").map((g) => g.grupo)).toEqual(["cuenta", "contrato"]);
+    expect(gruposDeVariables("", "acta").map((g) => g.grupo)).toEqual(["instalacion", "cuenta", "contrato"]);
     expect(gruposDeVariables("vinculo")[0]?.grupo).toBe("vinculo");
     expect(gruposDeVariables("zzz")).toEqual([]);
   });

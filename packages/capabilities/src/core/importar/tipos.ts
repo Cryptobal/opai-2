@@ -50,7 +50,8 @@ export type Importador<D extends Datos = Datos> = {
   /** Valor que equivale a «sin dato» en un campo (estado `prospecto`): se completa como si estuviera vacío y nunca pisa a otro. */
   sinDato?: Partial<Record<keyof D & string, Escalar>>;
   planificar(ctx: Contexto, filas: readonly FilaNormalizada[], o: OpcionesPlan): Promise<FilaPlan<D>[]>;
-  crear(tx: TenantTx, ctx: Contexto, datos: D): Promise<string>;
+  /** Devuelve el id creado, o el id más datos propios que quedan en `previos` de la fila del lote (lo cobrado en el origen). */
+  crear(tx: TenantTx, ctx: Contexto, datos: D): Promise<string | { id: string; previos: Record<string, unknown> }>;
   /** `ctx` llega siempre; lo usan los importadores que cifran campos (la cuenta bancaria de Personas). */
   actualizar(tx: TenantTx, id: string, cambios: Partial<D>, ctx: Contexto): Promise<void>;
   /** Para revertir: estado actual de los registros que todavía existen. */
