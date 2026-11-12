@@ -1,6 +1,7 @@
 // Proforma y estado de pago de una programación, antes de la factura (CAR-221). El día de generación se crea
 // el borrador y se manda lo que la programación tenga activado. No son documentos tributarios: no llevan folio
-// ni deuda fiscal. Cada envío queda en el historial del borrador y la proforma marca el cierre como «enviada».
+// ni deuda fiscal: salen con su PDF y un número interno (CAR-320). Cada envío queda en el historial del borrador y la
+// proforma marca el cierre como «enviada».
 import { mesYAnio } from "@opai/domain";
 
 import { hoy } from "../core/maestros/comun";
@@ -9,6 +10,7 @@ import { enviarCorreo } from "../core/comunicaciones";
 import { correoDe } from "../integraciones/adaptadores";
 import type { Contexto } from "../types";
 import { cuentaDe } from "./ventas-comun";
+import { pdfDePrevio } from "./ventas-pdf-previo";
 
 export type TipoPrevio = "proforma" | "estado_pago";
 export type ResultadoPrevio = { tipo: TipoPrevio; estado: "enviado" | "fallido"; destinatarios: string[] };
@@ -46,7 +48,9 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
   const { mes, anio } = mesYAnio(b.fechaFactura);
   const salida: ResultadoPrevio[] = [];
   for (const tipo of tipos) {
-    const salio = para
+    // El PDF (número interno, sin folio) va adjunto; si no se puede armar, el envío queda fallido y se reintenta.
+    const pdf = para ? await pdfDePrevio(ctx, tipo, b).catch(() => null) : null;
+    const salio = para && pdf
       ? await enviarCorreo(
           { db: ctx.db, tenantId: ctx.tenantId, correo: await correoDe(ctx), urlBase: ctx.servicios.urlBase },
           EVENTO[tipo],
@@ -57,11 +61,17 @@ export async function enviarPrevios(ctx: Contexto, flags: Flags, b: Borrador): P
             documento: { total: clp(b.montoTotal), fecha_factura: dmy(b.fechaFactura) },
             empresa: { nombre: tenant?.nombre ?? "" },
           },
-          { cc, bcc },
+          { cc, bcc, adjuntos: [{ nombre: pdf.nombre, contenidoBase64: Buffer.from(pdf.bytes).toString("base64"), mime: "application/pdf" }] },
         )
       : false;
     const estado = salio ? ("enviado" as const) : ("fallido" as const);
-    const error = salio ? null : para ? "El correo no salió. Revisa Configuración → Comunicaciones." : "El borrador no tiene destinatarios.";
+    const error = salio
+      ? null
+      : !para
+        ? "El borrador no tiene destinatarios."
+        : !pdf
+          ? "No se pudo armar el PDF del documento."
+          : "El correo no salió. Revisa Configuración → Comunicaciones.";
     await ctx.transaccion(async (tx) => {
       await tx.documentoEmitidoEnvio.create({
         data: { tenantId: ctx.tenantId, documentoId: b.documentoId, destinatarios: correos, adjuntos: [tipo], estado, error },
