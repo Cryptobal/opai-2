@@ -59,4 +59,21 @@ describe("core.slack: canales y paridad", () => {
     expect(mismo).toMatchObject({ ok: true, data: { borrada: true } });
     expect(await ctx.db.slackInstalacion.findMany({})).toEqual([]);
   });
+
+  it("una desinstalación atrasada (reintento de Slack) anterior a la conexión vigente no la borra", async () => {
+    const { ctx } = await conectarSlack();
+    const antes = new Date(Date.now() - 60 * 60_000).toISOString();
+    const atrasada = await executeCapability(ctx, "core.slack.desinstalada", {
+      teamId: "T0PRUEBA1",
+      ocurridoEn: antes,
+    });
+    expect(atrasada).toMatchObject({ ok: true, data: { borrada: false } });
+    expect(await ctx.db.slackInstalacion.findMany({})).toHaveLength(1);
+    const despues = new Date(Date.now() + 60_000).toISOString();
+    const vigente = await executeCapability(ctx, "core.slack.desinstalada", {
+      teamId: "T0PRUEBA1",
+      ocurridoEn: despues,
+    });
+    expect(vigente).toMatchObject({ ok: true, data: { borrada: true } });
+  });
 });

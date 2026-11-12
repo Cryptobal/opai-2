@@ -10,6 +10,8 @@ const verificacion = z.object({
 const eventoCallback = z.object({
   type: z.literal("event_callback"),
   team_id: z.string().regex(/^T[A-Z0-9]{4,}$/),
+  /** Segundos Unix en que ocurrió el evento; Slack lo conserva en sus reintentos. */
+  event_time: z.number().int().positive().optional(),
   event: z.object({
     type: z.string().max(64),
     /** tokens_revoked: qué tokens se revocaron. Solo nos importan los del bot. */
@@ -19,7 +21,7 @@ const eventoCallback = z.object({
 
 export type EventoSlack =
   | { tipo: "verificacion"; challenge: string }
-  | { tipo: "desinstalada"; teamId: string; botUserIds?: string[] }
+  | { tipo: "desinstalada"; teamId: string; botUserIds?: string[]; ocurridoEn?: string }
   | { tipo: "ignorado" };
 
 /**
@@ -39,12 +41,17 @@ export function leerEventoSlack(cuerpo: string): EventoSlack {
   const e = eventoCallback.safeParse(json);
   if (!e.success) return { tipo: "ignorado" };
   const { type, tokens } = e.data.event;
-  if (type === "app_uninstalled") return { tipo: "desinstalada", teamId: e.data.team_id };
+  // Hora del evento: un aviso atrasado (reintento de Slack) anterior a la conexión vigente no la borra.
+  const t = e.data.event_time;
+  const base = {
+    tipo: "desinstalada" as const,
+    teamId: e.data.team_id,
+    ...(t ? { ocurridoEn: new Date(t * 1000).toISOString() } : {}),
+  };
+  if (type === "app_uninstalled") return base;
   const bots = tokens?.bot ?? [];
   // Solo se borra si Slack revocó el token de un bot; la capacidad compara con el bot de la empresa.
-  if (type === "tokens_revoked" && bots.length > 0) {
-    return { tipo: "desinstalada", teamId: e.data.team_id, botUserIds: bots.slice(0, 50) };
-  }
+  if (type === "tokens_revoked" && bots.length > 0) return { ...base, botUserIds: bots.slice(0, 50) };
   return { tipo: "ignorado" };
 }
 

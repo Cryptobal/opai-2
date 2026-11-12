@@ -47,6 +47,7 @@ export async function POST(req: Request): Promise<Response> {
   const r = await executeCapability(ctx, "core.slack.desinstalada", {
     teamId: ev.teamId,
     ...(ev.botUserIds ? { botUserIds: ev.botUserIds } : {}),
+    ...(ev.ocurridoEn ? { ocurridoEn: ev.ocurridoEn } : {}),
   });
   // Un fallo transitorio pide a Slack que reintente; borrar dos veces no hace daño.
   return r.ok ? listo() : new Response(null, { status: 500 });

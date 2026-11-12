@@ -27,6 +27,16 @@ describe("leerEventoSlack y motivoDeError", () => {
     expect(leerEventoSlack(callback("tokens_revoked", { tokens: { oauth: ["U1"] } }))).toEqual({
       tipo: "ignorado",
     });
+    expect(
+      leerEventoSlack(
+        JSON.stringify({
+          type: "event_callback",
+          team_id: "T0PRUEBA1",
+          event_time: 1_700_000_000,
+          event: { type: "app_uninstalled" },
+        }),
+      ),
+    ).toEqual({ tipo: "desinstalada", teamId: "T0PRUEBA1", ocurridoEn: "2023-11-14T22:13:20.000Z" });
     expect(leerEventoSlack(callback("message", { text: "hola" }))).toEqual({ tipo: "ignorado" });
     expect(leerEventoSlack("no es json")).toEqual({ tipo: "ignorado" });
   });

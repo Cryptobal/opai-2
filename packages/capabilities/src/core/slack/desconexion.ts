@@ -40,6 +40,9 @@ export const slackDesconectar = defineCapability({
  * y resolver la empresa por el team_id (ADR-093 §10), cuando Slack avisa que la app se desinstaló o su
  * token se revocó. Borra la conexión local; no llama a Slack.
  */
+/** `event_time` de Slack tiene precisión de segundos: se compara contra el segundo de la conexión. */
+const segundo = (d: Date) => Math.floor(d.getTime() / 1000) * 1000;
+
 export const slackDesinstalada = defineCapability({
   id: "core.slack.desinstalada",
   interna: true,
@@ -50,6 +53,8 @@ export const slackDesinstalada = defineCapability({
     teamId: z.string().regex(/^T[A-Z0-9]{4,}$/),
     /** tokens_revoked: bots cuyos tokens revocó Slack. Solo se borra si incluye el bot de esta empresa. */
     botUserIds: z.array(z.string().max(32)).max(50).optional(),
+    /** Hora del evento en Slack (`event_time`). Si es anterior a la conexión vigente, no se borra. */
+    ocurridoEn: z.iso.datetime({ offset: true }).optional(),
   }),
   output: z.object({ borrada: z.boolean() }),
   efecto: "escritura",
@@ -59,6 +64,10 @@ export const slackDesinstalada = defineCapability({
     if (!inst || inst.teamId !== input.teamId) return { borrada: false };
     // Un aviso atrasado de otra instalación (por ejemplo, tras reconectar) no borra la conexión vigente.
     if (input.botUserIds && !input.botUserIds.includes(inst.botUserId)) return { borrada: false };
+    // Slack reintenta un evento hasta por una hora: una desinstalación anterior a la última conexión
+    // (la empresa ya reconectó el mismo espacio) no borra la instalación ni el token nuevos.
+    if (input.ocurridoEn && new Date(input.ocurridoEn).getTime() < segundo(inst.updatedAt))
+      return { borrada: false };
     if (!dryRun) await borrarConexionSlack(ctx, "desinstalada");
     return { borrada: true };
   },
